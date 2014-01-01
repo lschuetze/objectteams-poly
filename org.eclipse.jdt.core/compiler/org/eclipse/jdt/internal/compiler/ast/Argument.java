@@ -16,6 +16,7 @@
  *     Stephan Herrmann - Contributions for
  *								bug 186342 - [compiler][null] Using annotations for null checking
  *								bug 365519 - editorial cleanup after bug 186342 and bug 365387
+ *								Bug 417295 - [1.8[[null] Massage type annotated null analysis to gel well with deep encoded type bindings.
  *        Andy Clement (GoPivotal, Inc) aclement@gopivotal.com - Contributions for
  *                          Bug 409246 - [1.8][compiler] Type annotations on catch parameters not handled properly
  *******************************************************************************/
@@ -93,7 +94,12 @@ public class Argument extends LocalDeclaration {
 				}
 			}
 		}
-		resolveAnnotations(scope, this.annotations, this.binding, true);
+		if ((this.binding.tagBits & TagBits.AnnotationResolved) == 0) {
+			resolveAnnotations(scope, this.annotations, this.binding, true);
+			Annotation.isTypeUseCompatible(this.type, scope, this.annotations);
+			if (scope.compilerOptions().sourceLevel >= ClassFileConstants.JDK1_8)
+				scope.validateNullAnnotation(this.binding.tagBits, this.type, this.annotations);
+		}
 		this.binding.declaration = this;
 		return this.binding.type; // might have been updated during resolveAnnotations (for typeAnnotations)
 	}
@@ -235,49 +241,7 @@ public class Argument extends LocalDeclaration {
 			this.binding = new CatchParameterBinding(this, exceptionType, this.modifiers, false); // argument decl, but local var  (where isArgument = false)
 		}
 		resolveAnnotations(scope, this.annotations, this.binding, true);
-
-		// Type annotations may need attaching to the type references
-		// Example of code this block handles: } catch(@A Exception e) {
-		if (this.annotations != null) {
-			for (int i = 0, max = this.annotations.length; i < max; i++) {
-				Annotation annotation = this.annotations[i];
-				if ((annotation.resolvedType.tagBits & (TagBits.AnnotationForTypeParameter | TagBits.AnnotationForTypeUse)) != 0) {
-					// Copy it to the type reference.
-					if (this.type instanceof UnionTypeReference) {
-						// Only need to consider the first element of the union type reference
-						TypeReference firstTypeReference = ((UnionTypeReference) this.type).typeReferences[0];
-						Annotation[][] annotationsOnFirstReference = firstTypeReference.annotations;
-						if (annotationsOnFirstReference == null) {
-							firstTypeReference.annotations = annotationsOnFirstReference = new Annotation[firstTypeReference.getAnnotatableLevels()][];
-						} 
-						if (annotationsOnFirstReference[0] == null) {
-							firstTypeReference.annotations[0] = new Annotation[] { annotation };
-						} else {
-							int len = annotationsOnFirstReference.length;
-							Annotation[] newAnnotations = new Annotation[len + 1];
-							System.arraycopy(annotationsOnFirstReference[0], 0, newAnnotations, 0, len);
-							newAnnotations[len] = annotation;
-							firstTypeReference.annotations[0] = newAnnotations;
-						}
-						firstTypeReference.bits |= ASTNode.HasTypeAnnotations;
-					} else {
-						if (this.type.annotations == null) {
-							this.type.annotations = new Annotation[this.type.getAnnotatableLevels()][];
-						}
-						if (this.type.annotations[0] == null) {
-							this.type.annotations[0] = new Annotation[] { annotation };
-						} else {
-							int len = this.type.annotations[0].length;
-							Annotation[] newAnnotations = new Annotation[len + 1];
-							System.arraycopy(this.type.annotations[0], 0, newAnnotations, 0, len);
-							newAnnotations[len] = annotation;
-							this.type.annotations[0] = newAnnotations;
-						}
-						this.type.bits |= ASTNode.HasTypeAnnotations;
-					}
-				}
-			}
-		}
+		Annotation.isTypeUseCompatible(this.type, scope, this.annotations);
 
 		scope.addLocalVariable(this.binding);
 		this.binding.setConstant(Constant.NotAConstant);

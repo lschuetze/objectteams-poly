@@ -71,14 +71,6 @@ public class ParameterizedTypeBinding extends ReferenceBinding implements Substi
 	public ParameterizedTypeBinding(ReferenceBinding type, TypeBinding[] arguments,  ReferenceBinding enclosingType, LookupEnvironment environment){
 		this.environment = environment;
 		this.enclosingType = enclosingType; // never unresolved, never lazy per construction
-//		if (enclosingType != null && enclosingType.isGenericType()) {
-//			RuntimeException e = new RuntimeException("PARAM TYPE with GENERIC ENCLOSING");
-//			e.printStackTrace();
-//			throw e;
-//		}
-//		if (!(type instanceof UnresolvedReferenceBinding) && type.typeVariables() == Binding.NO_TYPE_VARIABLES) {
-//			System.out.println();
-//		}
 		initialize(type, arguments);
 		if (type instanceof UnresolvedReferenceBinding)
 			((UnresolvedReferenceBinding) type).addWrapper(this, environment);
@@ -178,7 +170,7 @@ public class ParameterizedTypeBinding extends ReferenceBinding implements Substi
 				capturedArguments[i] = argument;
 			}
 		}
-		ParameterizedTypeBinding capturedParameterizedType = this.environment.createParameterizedType(this.type, capturedArguments, enclosingType());
+		ParameterizedTypeBinding capturedParameterizedType = this.environment.createParameterizedType(this.type, capturedArguments, enclosingType(), this.typeAnnotations);
 		for (int i = 0; i < length; i++) {
 			TypeBinding argument = capturedArguments[i];
 			if (argument.isCapture()) {
@@ -372,11 +364,8 @@ public class ParameterizedTypeBinding extends ReferenceBinding implements Substi
 		return this.type.constantPoolName(); // erasure
 	}
 	
-	public TypeBinding clone(TypeBinding outerType, TypeBinding[] typeArguments) {
-		ParameterizedTypeBinding copy = new ParameterizedTypeBinding(this.type, typeArguments, (ReferenceBinding) outerType, this.environment);
-		if (this.hasTypeAnnotations())
-			copy.setTypeAnnotations(this.getTypeAnnotations(), this.environment.globalOptions.isAnnotationBasedNullAnalysisEnabled);
-		return copy;
+	public TypeBinding clone(TypeBinding outerType) {
+		return new ParameterizedTypeBinding(this.type, this.arguments, (ReferenceBinding) outerType, this.environment);
 	}
 
 	public ParameterizedMethodBinding createParameterizedMethod(MethodBinding originalMethod) {
@@ -851,7 +840,7 @@ public class ParameterizedTypeBinding extends ReferenceBinding implements Substi
 
 	    	case Binding.PARAMETERIZED_TYPE :
 	            ParameterizedTypeBinding otherParamType = (ParameterizedTypeBinding) otherType;
-	            if (this.type != otherParamType.type)
+	            if (TypeBinding.notEquals(this.type, otherParamType.type)) 
 	                return false;
 	            if (!isStatic()) { // static member types do not compare their enclosing
 	            	ReferenceBinding enclosing = enclosingType();
@@ -859,7 +848,7 @@ public class ParameterizedTypeBinding extends ReferenceBinding implements Substi
 	            		ReferenceBinding otherEnclosing = otherParamType.enclosingType();
 	            		if (otherEnclosing == null) return false;
 	            		if ((otherEnclosing.tagBits & TagBits.HasDirectWildcard) == 0) {
-							if (enclosing != otherEnclosing) return false;
+							if (TypeBinding.notEquals(enclosing, otherEnclosing)) return false;
 	            		} else {
 	            			if (!enclosing.isEquivalentTo(otherParamType.enclosingType())) return false;
 	            		}
@@ -874,9 +863,6 @@ public class ParameterizedTypeBinding extends ReferenceBinding implements Substi
 	            for (int i = 0; i < length; i++) {
 	            	if (!this.arguments[i].isTypeArgumentContainedBy(otherArguments[i]))
 	            		return false;
-	            	// Stephan : is this intentional ?? 
-//	            	if ((this.arguments[i].tagBits & TagBits.AnnotationNullMASK) != (otherArguments[i].tagBits & TagBits.AnnotationNullMASK))
-//	            		return false;
 	            }
 	            return true;
 

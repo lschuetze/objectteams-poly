@@ -39,7 +39,7 @@
  *								Bug 415043 - [1.8][null] Follow-up re null type annotations after bug 392099
  *								Bug 405569 - Resource leak check false positive when using DbUtils.closeQuietly
  *								Bug 411964 - [1.8][null] leverage null type annotation in foreach statement
- *								Bug 405569 - Resource leak check false positive when using DbUtils.closeQuietly
+ *								Bug 417295 - [1.8[[null] Massage type annotated null analysis to gel well with deep encoded type bindings.
  *     Jesper S Moller - Contributions for
  *								Bug 378674 - "The method can be declared as static" is wrong
  *        Andy Clement (GoPivotal, Inc) aclement@gopivotal.com - Contributions for
@@ -214,7 +214,7 @@ public FlowInfo analyseCode(BlockScope currentScope, FlowContext flowContext, Fl
 
 	if (nonStatic) {
 		this.receiver.checkNPE(currentScope, flowContext, flowInfo);
-		}
+	}
 
 	if (this.arguments != null) {
 		int length = this.arguments.length;
@@ -235,7 +235,7 @@ public FlowInfo analyseCode(BlockScope currentScope, FlowContext flowContext, Fl
 					flowInfo = analyseNullAssertion(currentScope, argument, flowContext, flowInfo, true);
 					break;
 				default:
-				flowInfo = argument.analyseCode(currentScope, flowContext, flowInfo).unconditionalInits();
+					flowInfo = argument.analyseCode(currentScope, flowContext, flowInfo).unconditionalInits();
 			}
 			if (analyseResources) {
 				// if argument is an AutoCloseable insert info that it *may* be closed (by the target method, i.e.)
@@ -243,13 +243,6 @@ public FlowInfo analyseCode(BlockScope currentScope, FlowContext flowContext, Fl
 			}
 		}
 		analyseArguments(currentScope, flowContext, flowInfo, this.binding, this.arguments);
-	}
-	if (compilerOptions.isAnnotationBasedNullAnalysisEnabled && compilerOptions.sourceLevel >= ClassFileConstants.JDK1_8) {
-		if (this.binding instanceof ParameterizedGenericMethodBinding && this.typeArguments != null) {
-			TypeVariableBinding[] typeVariables = this.binding.original().typeVariables();
-			for (int i = 0; i < this.typeArguments.length; i++)
-				this.typeArguments[i].checkNullConstraints(currentScope, typeVariables, i);
-		}
 	}
 	ReferenceBinding[] thrownExceptions;
 	if ((thrownExceptions = this.binding.thrownExceptions) != Binding.NO_EXCEPTIONS) {
@@ -1114,12 +1107,21 @@ public TypeBinding resolveType(BlockScope scope) {
 		return null;
 	}
 
-	if (compilerOptions.isAnnotationBasedNullAnalysisEnabled && (this.binding.tagBits & TagBits.IsNullnessKnown) == 0) {
-		// not interested in reporting problems against this.binding:
+	if (compilerOptions.isAnnotationBasedNullAnalysisEnabled) {
+		if ((this.binding.tagBits & TagBits.IsNullnessKnown) == 0) {
+			// not interested in reporting problems against this.binding:
 //{ObjectTeams: added 2nd arg:
-		new ImplicitNullAnnotationVerifier(compilerOptions.inheritNullAnnotations, scope.environment())
+			new ImplicitNullAnnotationVerifier(compilerOptions.inheritNullAnnotations, scope.environment())
 // SH}
-				.checkImplicitNullAnnotations(this.binding, null/*srcMethod*/, false, scope);
+					.checkImplicitNullAnnotations(this.binding, null/*srcMethod*/, false, scope);
+		}
+		if (compilerOptions.sourceLevel >= ClassFileConstants.JDK1_8) {
+			if (this.binding instanceof ParameterizedGenericMethodBinding && this.typeArguments != null) {
+				TypeVariableBinding[] typeVariables = this.binding.original().typeVariables();
+				for (int i = 0; i < this.typeArguments.length; i++)
+					this.typeArguments[i].checkNullConstraints(scope, typeVariables, i);
+			}
+		}
 	}
 	
 	if (((this.bits & ASTNode.InsideExpressionStatement) != 0)

@@ -273,13 +273,13 @@ public class ASTConverter18Test extends ConverterTestSetup {
 		ITypeBinding binding = type.resolveBinding();
 		assertNotNull("No binding", binding);
 		assertEquals("Wrong qualified name", "test0004.Outer<java.lang.Integer>.Inner<java.lang.Double>[]", binding.getQualifiedName());
-		Type componentType = type.getComponentType();
-		binding = componentType.resolveBinding();
+		Type elementType = type.getElementType();
+		binding = elementType.resolveBinding();
 		assertNotNull("No binding", binding);
 		assertEquals("Wrong qualified name",
 				"test0004.Outer<java.lang.Integer>.Inner<java.lang.Double>", binding.getQualifiedName());
-		assertTrue("Not parameterized", componentType.isParameterizedType());
-		ParameterizedType parameterizedType = (ParameterizedType) componentType;
+		assertTrue("Not parameterized", elementType.isParameterizedType());
+		ParameterizedType parameterizedType = (ParameterizedType) elementType;
 		Type type2 = parameterizedType.getType();
 		assertTrue("Not qualified", type2.isQualifiedType());
 		QualifiedType qualifiedType = (QualifiedType) type2;
@@ -1139,13 +1139,12 @@ public class ASTConverter18Test extends ConverterTestSetup {
 		Type type = creation.getType();
 		assertEquals("Incorrect type", true, type.isArrayType());
 		checkSourceRange(type, "@Marker2 int @Marker @Marker2 [2] @Marker2 @Marker3 [bar()] @Marker3 @Marker []", contents.toCharArray());
-		assertEquals("Incorrect annotations", "@Marker3 @Marker ", convertAnnotationsList(((ArrayType) type).annotations()));
-		type = ((ArrayType) type).getComponentType();
-		assertEquals("Incorrect type", true, type.isArrayType());
-		assertEquals("Incorrect annotations", "@Marker2 @Marker3 ", convertAnnotationsList(((ArrayType) type).annotations()));
-		type = ((ArrayType) type).getComponentType();
-		assertEquals("Incorrect type", true, type.isArrayType());
-		assertEquals("Incorrect annotations", "@Marker @Marker2 ", convertAnnotationsList(((ArrayType) type).annotations()));
+		ExtraDimension extraDimension = ((ArrayType) type).getDimensionAt(0);
+		assertEquals("Incorrect annotations", "@Marker3 @Marker ", convertAnnotationsList(extraDimension.annotations()));
+		extraDimension = ((ArrayType) type).getDimensionAt(1);
+		assertEquals("Incorrect annotations", "@Marker2 @Marker3 ", convertAnnotationsList(extraDimension.annotations()));
+		extraDimension = ((ArrayType) type).getDimensionAt(2);
+		assertEquals("Incorrect annotations", "@Marker @Marker2 ", convertAnnotationsList(extraDimension.annotations()));
 		List dimensions = creation.dimensions();
 		assertEquals("Incorrect expressions", 2, dimensions.size());
 		assertEquals("Incorrect expressions", "2", dimensions.get(0).toString());
@@ -1159,13 +1158,12 @@ public class ASTConverter18Test extends ConverterTestSetup {
 		
 		type = creation.getType();
 		assertEquals("Incorrect type", true, type.isArrayType());
-		assertEquals("Incorrect annotations", "@Marker2 @Marker3 ", convertAnnotationsList(((ArrayType) type).annotations()));
-		type = ((ArrayType) type).getComponentType();
-		assertEquals("Incorrect type", true, type.isArrayType());
-		assertEquals("Incorrect annotations", "@Marker @Marker2 ", convertAnnotationsList(((ArrayType) type).annotations()));
-		type = ((ArrayType) type).getComponentType();
-		assertEquals("Incorrect type", true, type.isArrayType());
-		assertEquals("Incorrect annotations", "@Marker3 @Marker ", convertAnnotationsList(((ArrayType) type).annotations()));
+		extraDimension = ((ArrayType) type).getDimensionAt(0);
+		assertEquals("Incorrect annotations", "@Marker2 @Marker3 ", convertAnnotationsList(extraDimension.annotations()));
+		extraDimension = ((ArrayType) type).getDimensionAt(1);
+		assertEquals("Incorrect annotations", "@Marker @Marker2 ", convertAnnotationsList(extraDimension.annotations()));
+		extraDimension = ((ArrayType) type).getDimensionAt(2);
+		assertEquals("Incorrect annotations", "@Marker3 @Marker ", convertAnnotationsList(extraDimension.annotations()));
 		dimensions = creation.dimensions();
 		assertEquals("Incorrect expressions", 2, dimensions.size());
 		assertEquals("Incorrect expressions", "2", dimensions.get(0).toString());
@@ -1236,12 +1234,6 @@ public class ASTConverter18Test extends ConverterTestSetup {
 		VariableDeclarationFragment fragment = (VariableDeclarationFragment) list.get(0);
 		ArrayCreation creation = (ArrayCreation) fragment.getInitializer();
 		Type type = creation.getType();
-		assertEquals("Incorrect type", true, type.isArrayType());
-		assertEquals("Type should be malformed", ASTNode.MALFORMED, (type.getFlags() & ASTNode.MALFORMED));
-		type = ((ArrayType) type).getComponentType();
-		assertEquals("Incorrect type", true, type.isArrayType());
-		assertEquals("Type should be malformed", ASTNode.MALFORMED, (type.getFlags() & ASTNode.MALFORMED));
-		type = ((ArrayType) type).getComponentType();
 		assertEquals("Incorrect type", true, type.isArrayType());
 		assertEquals("Type should be malformed", ASTNode.MALFORMED, (type.getFlags() & ASTNode.MALFORMED));
 	}
@@ -1614,14 +1606,14 @@ public class ASTConverter18Test extends ConverterTestSetup {
 		Expression expression = fragment.getInitializer();
 		assertTrue(expression instanceof LambdaExpression);
 		LambdaExpression lambdaExpression = (LambdaExpression)expression;
-		assertEquals("(int[] ia) -> {\n  return ia.clone();\n}\n", lambdaExpression.toString());
+		assertEquals("(int [] ia) -> {\n  return ia.clone();\n}\n", lambdaExpression.toString());
 		IMethodBinding binding = lambdaExpression.resolveMethodBinding();
 		assertEquals("private static java.lang.Object lambda$0(int[]) ", binding.toString());
 		assertTrue(lambdaExpression.parameters().size() == 1);
 		VariableDeclaration variableDeclaration = (VariableDeclaration) lambdaExpression.parameters().get(0);
 		assertTrue(variableDeclaration instanceof SingleVariableDeclaration);
 		SingleVariableDeclaration singleVariableDeclaration = (SingleVariableDeclaration)variableDeclaration;
-		assertEquals("int[] ia", singleVariableDeclaration.toString());		
+		assertEquals("int [] ia", singleVariableDeclaration.toString());		
 	}
 
 	/**
@@ -2193,6 +2185,11 @@ public class ASTConverter18Test extends ConverterTestSetup {
 		ITypeBinding binding = qualifiedType.resolveBinding();
 		assertNotNull("No binding", binding);
 		assertEquals("Wrong qualified name", "test404489.bug.X.Y", binding.getQualifiedName());
+		SimpleType simpleType = (SimpleType) qualifiedType.getQualifier();
+		assertEquals("incorrect type", "@A X", simpleType.toString());
+		binding = simpleType.resolveBinding();
+		assertNotNull("No binding", binding);
+		assertEquals("Wrong qualified name", "test404489.bug.X", binding.getQualifiedName());
 		List annotations = qualifiedType.annotations();
 		assertTrue(annotations.size() == 1);
 		MarkerAnnotation marker	= (MarkerAnnotation) annotations.get(0);
@@ -2212,11 +2209,11 @@ public class ASTConverter18Test extends ConverterTestSetup {
 		assertNotNull("No binding", binding);
 		assertEquals("Wrong qualified name", "test404489.bug.B", binding.getQualifiedName());
 		assertTrue(qualifiedType.getQualifier().isSimpleType());
-		SimpleType simpleType = (SimpleType) qualifiedType.getQualifier();
+		simpleType = (SimpleType) qualifiedType.getQualifier();
 		assertEquals("incorrect type", "@A X", simpleType.toString());
 		binding = simpleType.resolveBinding();
 		assertNotNull("No binding", binding);
-		assertEquals("Wrong qualified name", "test404489.bug.X.Y", binding.getQualifiedName());
+		assertEquals("Wrong qualified name", "test404489.bug.X", binding.getQualifiedName());
 	}
 
 	// https://bugs.eclipse.org/bugs/show_bug.cgi?id=404489
@@ -2648,5 +2645,631 @@ public class ASTConverter18Test extends ConverterTestSetup {
 		typeBinding = type.resolveBinding();
 		assertFalse("A Functional interface", typeBinding.isFunctionalInterface());
 	}
+	/**
+	 * https://bugs.eclipse.org/bugs/show_bug.cgi?id=417017
+	 * 
+	 * @throws JavaModelException
+	 */
+	public void test417017a() throws JavaModelException {
+		this.workingCopy = getWorkingCopy("/Converter18/src/test417017/X.java",
+				true/* resolve */);
+		String contents = "package test417017;"
+				+ "interface I {\n"
+				+ "	int foo(int x);\n"
+				+ "}\n" 
+				+ "public class X {\n"
+				+ " void fun(int a) {\n"
+				+"  	I i1 = x1-> x1;\n"
+				+"  	I i2 = xxx-> {\n"
+				+"  		i1.foo(a);\n"
+				+"  		return xxx;\n"
+				+"  	};\n"
+				+"  }\n"
+				+"}\n";
+		CompilationUnit cu = (CompilationUnit) buildAST(contents, this.workingCopy);
+		TypeDeclaration typedeclaration = (TypeDeclaration) getASTNode(cu, 1);
+		MethodDeclaration methodDeclaration = typedeclaration.getMethods()[0];
+		VariableDeclarationFragment vdf= (VariableDeclarationFragment) ((VariableDeclarationStatement) methodDeclaration.getBody().statements().get(1)).fragments().get(0);
+		LambdaExpression lambda= (LambdaExpression) vdf.getInitializer();
+		List parameters = lambda.parameters();
+		assertTrue("Incorrect Number of parameters", parameters.size() == 1);
+		ITypeBinding[] parameterTypes= lambda.resolveMethodBinding().getParameterTypes();
+		assertTrue("Incorrect Number of parameter type", parameterTypes.length == 1);
+		assertEquals("Incorrect parameter type", "int", parameterTypes[0].toString());
+	}
+	/**
+	 * https://bugs.eclipse.org/bugs/show_bug.cgi?id=417017
+	 * 
+	 * @throws JavaModelException
+	 */
+	public void test417017b() throws JavaModelException {
+		this.workingCopy = getWorkingCopy("/Converter18/src/test417017/X.java",
+				true/* resolve */);
+		String contents = "package test417017;" +
+				"interface I1 {\n" +
+				"	int foo(int a);\n" +
+				"}\n" +
+				"\n" +
+				"interface I2 {\n" +
+				"	public default int foo() {\n" +
+				"		I1 i1 = (a) -> {\n" +
+				"			return a;\n" +
+				"		};\n" +
+				"		//return 0;\n" + // Error on purpose
+				"	}\n" +
+				"}\n" ;
+		CompilationUnit cu = (CompilationUnit) buildAST(contents, this.workingCopy, false);
+		TypeDeclaration typedeclaration = (TypeDeclaration) getASTNode(cu, 1);
+		MethodDeclaration methodDeclaration = typedeclaration.getMethods()[0];
+		VariableDeclarationFragment vdf= (VariableDeclarationFragment) ((VariableDeclarationStatement) methodDeclaration.getBody().statements().get(0)).fragments().get(0);
+		LambdaExpression lambda= (LambdaExpression) vdf.getInitializer();
+		List parameters = lambda.parameters();
+		assertTrue("Incorrect Number of parameters", parameters.size() == 1);
+		ITypeBinding[] parameterTypes= lambda.resolveMethodBinding().getParameterTypes();
+		assertTrue("Incorrect Number of parameter type", parameterTypes.length == 1);
+		assertEquals("Incorrect parameter type", "int", parameterTypes[0].toString());
+	}
+	/**
+	 * https://bugs.eclipse.org/bugs/show_bug.cgi?id=417017
+	 * 
+	 * @throws JavaModelException
+	 */
+	public void test417017c() throws JavaModelException {
+		this.workingCopy = getWorkingCopy("/Converter18/src/test417017/X.java",
+				true/* resolve */);
+		String contents = "package test417017;" +
+				"interface I1 {\n" +
+				"	int foo(int a);\n" +
+				"}\n" +
+				"\n" +
+				"interface I2 {\n" +
+				"	public default int foo() {\n" +
+				"		I1 i1 = (float a) -> {\n" +
+				"			return a;\n" +
+				"		};\n" +
+				"		//return 0;\n" + // Error on purpose
+				"	}\n" +
+				"}\n" ;
+		CompilationUnit cu = (CompilationUnit) buildAST(contents, this.workingCopy, false);
+		TypeDeclaration typedeclaration = (TypeDeclaration) getASTNode(cu, 1);
+		MethodDeclaration methodDeclaration = typedeclaration.getMethods()[0];
+		VariableDeclarationFragment vdf= (VariableDeclarationFragment) ((VariableDeclarationStatement) methodDeclaration.getBody().statements().get(0)).fragments().get(0);
+		LambdaExpression lambda= (LambdaExpression) vdf.getInitializer();
+		List parameters = lambda.parameters();
+		assertTrue("Incorrect Number of parameters", parameters.size() == 1);
+		ITypeBinding[] parameterTypes= lambda.resolveMethodBinding().getParameterTypes();
+		assertTrue("Incorrect Number of parameter type", parameterTypes.length == 1);
+		assertEquals("Incorrect parameter type", "float", parameterTypes[0].toString());
+	}
+	/**
+	 * https://bugs.eclipse.org/bugs/show_bug.cgi?id=417017
+	 * 
+	 * @throws JavaModelException
+	 */
+	public void test417017d() throws JavaModelException {
+		this.workingCopy = getWorkingCopy("/Converter18/src/test399794/X.java",
+				true/* resolve */);
+		String contents = "package test399794;" +
+				"interface I {\n" +
+				"	void foo(X x);\n" +
+				"}\n" +
+				"public class X {\n" +
+				"	void foo(X x) {\n" +
+				"	}\n" +
+				"	I i = this::foo;\n" +
+				"}\n";
+			
+		CompilationUnit cu = (CompilationUnit) buildAST(contents, this.workingCopy);
+		TypeDeclaration typeDeclaration = (TypeDeclaration) getASTNode(cu, 1);
+		FieldDeclaration field = typeDeclaration.getFields()[0];
+		
+		VariableDeclarationFragment fragment = (VariableDeclarationFragment) field.fragments().get(0);
+		Expression expression = fragment.getInitializer();
+		ExpressionMethodReference methodReference = (ExpressionMethodReference) expression;
+		IMethodBinding methodBinding = methodReference.resolveMethodBinding();
+		assertNotNull(methodBinding);
+		ITypeBinding [] parameterTypes = methodBinding.getParameterTypes();
+		assertTrue("Incorrect Number of parameter type", parameterTypes.length == 1);
+		assertEquals("Incorrect parameter type", "X", parameterTypes[0].getName());
+	}
 
+	/**
+	 * https://bugs.eclipse.org/bugs/show_bug.cgi?id=417017
+	 * 
+	 * @throws JavaModelException
+	 */
+	public void test417017e() throws JavaModelException {
+		this.workingCopy = getWorkingCopy("/Converter18/src/test399794/X.java",
+				true/* resolve */);
+		String contents = "package test399794;" +
+				"interface I {\n" +
+				"	int [] foo(int x);\n" +
+				"}\n" +
+				"public class X {\n" +
+				"	I i = int []::new;\n" +
+				"}\n";
+			
+		CompilationUnit cu = (CompilationUnit) buildAST(contents, this.workingCopy);
+		TypeDeclaration typeDeclaration = (TypeDeclaration) getASTNode(cu, 1);
+		FieldDeclaration field = typeDeclaration.getFields()[0];
+
+		VariableDeclarationFragment fragment = (VariableDeclarationFragment) field.fragments().get(0);
+		Expression expression = fragment.getInitializer();
+		CreationReference creationReference = (CreationReference) expression;
+		IMethodBinding methodBinding = creationReference.resolveMethodBinding();
+		assertNotNull(methodBinding);
+		assertEquals("Wrong name", "lambda$0", methodBinding.getName());
+		ITypeBinding [] parameterTypes = methodBinding.getParameterTypes();
+		assertTrue("Incorrect Number of parameter type", parameterTypes.length == 1);
+		assertEquals("Incorrect parameter type", "int", parameterTypes[0].getName());
+	}
+
+	/**
+	 * https://bugs.eclipse.org/bugs/show_bug.cgi?id=417017
+	 * 
+	 * @throws JavaModelException
+	 */
+	public void test417017f() throws JavaModelException {
+		this.workingCopy = getWorkingCopy("/Converter18/src/test399794/X.java",
+				true/* resolve */);
+		String contents = "package test399794;" +
+				"interface I {\n" +
+				"	void foo(X x);\n" +
+				"}\n" +
+				"public class X {\n" +
+				"	private void foo(X x) {\n" +
+				"	}\n" +
+				"	class Y {\n" +
+				"		I i = X.this::foo;\n" +
+				"	}\n" +
+				"}\n";
+
+		CompilationUnit cu = (CompilationUnit) buildAST(contents, this.workingCopy);
+		TypeDeclaration typeDeclaration = (TypeDeclaration) getASTNode(cu, 1);
+		typeDeclaration = typeDeclaration.getTypes()[0];
+		FieldDeclaration field = typeDeclaration.getFields()[0];
+
+		VariableDeclarationFragment fragment = (VariableDeclarationFragment) field.fragments().get(0);
+		Expression expression = fragment.getInitializer();
+		ExpressionMethodReference reference = (ExpressionMethodReference) expression;
+		IMethodBinding methodBinding = reference.resolveMethodBinding();
+		assertNotNull(methodBinding);
+		assertEquals("Wrong name", "foo", methodBinding.getName());
+		ITypeBinding [] parameterTypes = methodBinding.getParameterTypes();
+		assertTrue("Incorrect Number of parameter type", parameterTypes.length == 1);
+		assertEquals("Incorrect parameter type", "X", parameterTypes[0].getName());
+	}
+	// https://bugs.eclipse.org/bugs/show_bug.cgi?id=413942
+	// also refer https://bugs.eclipse.org/bugs/show_bug.cgi?id=413569
+	public void testBug413942() throws JavaModelException {
+		String contents =
+		"public class X extends @NonNull(int[].class) Object {\n" +
+		"    Object field = new ArrayList< @NonEmpty(0) int @NonNull(value1 = 1) [] @NonEmpty(1) [ ]>() ;\n" +
+		"    @Annot int @Annot1 [] a1 @Annot2 @Annot3 @NonNull (value = int[].class, value1 = 0)[/* [] */ ] @Annot3 @Annot2 [] @Annot4 [];\n" +
+		"    int[] xxx[];\n" +
+		"    int [][] ii = new int[2][3];" +
+		"    ArrayList<int[]> [][] yyy; // source ranges already broken in AST.JLS4\n" +
+		"    ArrayList<int[][]> [][][][] zzz;\n" +
+		"    ArrayList<Float> [][][] zzz2;\n" +
+		"    Object a = new ArrayList< @TakeType(int[][].class) int @TakeType(float.class) [] @TakeType(double.class) []>() ;\n" +
+		"    Object b = new @NonNull(value1 = Math.PI) ArrayList< >() ; \n" +
+		"    Object c = new ArrayList<@NonNull(value1= Math.PI ) Object[]>() ;\n" +
+		"\n" +
+		"    int foo(@TakeType(int[].class)int i ) @TakeType(int[].class) [] {\n" +
+		"        int[] arr =  new int[2];\n" +
+		"        for (String tab @TakeType(int[].class) [] = null;; ++i) { break; }\n" +
+		"        for (@Deprecated String tab@TakeType(int[].class) [][]  = null;; ++i) {}\n" +
+		"    }\n" +
+		"    int bar(int [] /*@TakeType(int[].class)*/ [] a ) {\n" +
+		"    	return 0;\n" +
+		"    }\n" +
+		"public int var1(int @TakeType(int[].class)... args) { return 0;}\n" +
+		"public int var2(int @Annot ... args) { return 0;}\n" +
+		"}\n" +
+		"\n" +
+		"@Target(ElementType.TYPE_USE)\n" +
+		"@Retention(RetentionPolicy.RUNTIME)\n" +
+		"@Documented\n" +
+		"@interface NonNull {\n" +
+		"	Class value() default int.class;\n" +
+		"	double value1() default 0;\n" +
+		"}\n" +
+		"\n" +
+		"@Target(ElementType.TYPE_USE)\n" +
+		"@Retention(RetentionPolicy.RUNTIME)\n" +
+		"@Documented\n" +
+		"@interface NonEmpty {\n" +
+		"	int value() default 0;\n" +
+		"}\n" +
+		"\n" +
+		"@Target(ElementType.TYPE_USE)\n" +
+		"@Retention(RetentionPolicy.RUNTIME)\n" +
+		"@Documented\n" +
+		"@interface TakeType {\n" +
+		"	Class value() default int[].class;\n" +
+		"}\n" +
+		"\n" +
+		"@Target(ElementType.TYPE_USE)\n" +
+		"@Retention(RetentionPolicy.RUNTIME)\n" +
+		"@Documented\n" +
+		"@interface Annot {}\n" +
+		"\n" +
+		"@Target(ElementType.TYPE_USE)\n" +
+		"@Retention(RetentionPolicy.RUNTIME)\n" +
+		"@Documented\n" +
+		"@interface Annot1 {}\n" +
+		"\n" +
+		"@Target(ElementType.TYPE_USE)\n" +
+		"@Retention(RetentionPolicy.RUNTIME)\n" +
+		"@Documented\n" +
+		"@interface Annot2 {}\n" +
+		"\n" +
+		"@Target(ElementType.TYPE_USE)\n" +
+		"@Retention(RetentionPolicy.RUNTIME)\n" +
+		"@Documented\n" +
+		"@interface Annot3 {}\n" +
+		"\n" +
+		"@Target(ElementType.TYPE_USE)\n" +
+		"@Retention(RetentionPolicy.RUNTIME)\n" +
+		"@Documented\n" +
+		"@interface Annot4 {}\n" +
+		"\n";
+		this.workingCopy = getWorkingCopy("/Converter18/src/X.java", true);
+		ASTNode node = buildAST(contents, this.workingCopy, false);
+		assertEquals("Not a compilation unit", ASTNode.COMPILATION_UNIT, node.getNodeType());
+		CompilationUnit unit = (CompilationUnit) node;
+		
+		TypeDeclaration type =  (TypeDeclaration) unit.types().get(0);
+		SimpleType simpleType =  (SimpleType) type.getSuperclassType();
+		checkSourceRange(simpleType, "@NonNull(int[].class) Object", contents);
+		SingleMemberAnnotation singleMemberAnnotation = (SingleMemberAnnotation) simpleType.annotations().get(0);
+		checkSourceRange(singleMemberAnnotation, "@NonNull(int[].class)", contents);
+		TypeLiteral typeLiteral = (TypeLiteral) singleMemberAnnotation.getValue();
+		checkSourceRange(typeLiteral, "int[].class", contents);
+		ArrayType arrayType = (ArrayType) typeLiteral.getType();
+		checkSourceRange(arrayType, "int[]", contents);
+		
+		int count = 0;
+		FieldDeclaration field = (FieldDeclaration) type.bodyDeclarations().get(count++);
+		checkSourceRange(field, "Object field = new ArrayList< @NonEmpty(0) int @NonNull(value1 = 1) [] @NonEmpty(1) [ ]>() ;", contents);
+		VariableDeclarationFragment fragment = (VariableDeclarationFragment) field.fragments().get(0);
+		ClassInstanceCreation instance = (ClassInstanceCreation) fragment.getInitializer();
+		ParameterizedType parameterizedType = (ParameterizedType) instance.getType();
+		arrayType = (ArrayType) parameterizedType.typeArguments().get(0);
+		checkSourceRange(arrayType, "@NonEmpty(0) int @NonNull(value1 = 1) [] @NonEmpty(1) [ ]", contents);
+		PrimitiveType primitiveType = (PrimitiveType) arrayType.getElementType();
+		checkSourceRange(primitiveType, "@NonEmpty(0) int", contents);
+		ExtraDimension extraDimension = arrayType.getDimensionAt(1);
+		checkSourceRange(extraDimension, "@NonNull(value1 = 1) []", contents);
+		extraDimension = arrayType.getDimensionAt(0);
+		checkSourceRange(extraDimension, "@NonEmpty(1) [ ]", contents);
+		
+		field = (FieldDeclaration) type.bodyDeclarations().get(count++);
+		checkSourceRange(field, "@Annot int @Annot1 [] a1 @Annot2 @Annot3 @NonNull (value = int[].class, value1 = 0)[/* [] */ ] @Annot3 @Annot2 [] @Annot4 [];", contents);
+		arrayType = (ArrayType) field.getType();
+		checkSourceRange(arrayType, "int @Annot1 []", contents);
+		fragment = (VariableDeclarationFragment) field.fragments().get(0);
+		extraDimension = (ExtraDimension) fragment.extraDimensions().get(0);
+		checkSourceRange(extraDimension, "@Annot2 @Annot3 @NonNull (value = int[].class, value1 = 0)[/* [] */ ]", contents);
+		extraDimension = (ExtraDimension) fragment.extraDimensions().get(1);
+		checkSourceRange(extraDimension, "@Annot3 @Annot2 []", contents);
+		
+		field = (FieldDeclaration) type.bodyDeclarations().get(count++);
+		checkSourceRange(field, "int[] xxx[];", contents);
+		assertTrue(field.getType().isArrayType());
+		arrayType = (ArrayType) field.getType();
+		checkSourceRange(arrayType, "int[]", contents);
+		
+		field = (FieldDeclaration) type.bodyDeclarations().get(count++);
+		checkSourceRange(field, "int [][] ii = new int[2][3];", contents);
+		arrayType = (ArrayType) field.getType();
+		checkSourceRange(arrayType, "int [][]", contents);
+		fragment = (VariableDeclarationFragment) field.fragments().get(0);
+		ArrayCreation arrayCreation = (ArrayCreation) fragment.getInitializer();
+		arrayType = arrayCreation.getType();
+		assertTrue(arrayType.getElementType().isPrimitiveType());
+		assertTrue(arrayType.getDimensions() == 2);
+		
+		field = (FieldDeclaration) type.bodyDeclarations().get(count++);
+		checkSourceRange(field, "ArrayList<int[]> [][] yyy;", contents);
+		arrayType = (ArrayType) field.getType();
+		checkSourceRange(arrayType, "ArrayList<int[]> [][]", contents);
+
+		field = (FieldDeclaration) type.bodyDeclarations().get(count++);
+		checkSourceRange(field, "ArrayList<int[][]> [][][][] zzz;", contents);
+		arrayType = (ArrayType) field.getType();
+		assertTrue(arrayType.getElementType().isParameterizedType());
+		assertTrue(arrayType.getDimensions() == 4);
+		
+		field = (FieldDeclaration) type.bodyDeclarations().get(count++);
+		checkSourceRange(field, "ArrayList<Float> [][][] zzz2;", contents);
+		arrayType = (ArrayType) field.getType();
+		assertTrue(arrayType.getElementType().isParameterizedType());
+		assertTrue(arrayType.getDimensions() == 3);
+		
+		field = (FieldDeclaration) type.bodyDeclarations().get(count++);
+		checkSourceRange(field, "Object a = new ArrayList< @TakeType(int[][].class) int @TakeType(float.class) [] @TakeType(double.class) []>() ;", contents);
+		fragment = (VariableDeclarationFragment) field.fragments().get(0);
+		ClassInstanceCreation classInstanceCreation = (ClassInstanceCreation) fragment.getInitializer();
+		parameterizedType = (ParameterizedType) classInstanceCreation.getType();
+		arrayType = (ArrayType) parameterizedType.typeArguments().get(0);
+		checkSourceRange(arrayType, "@TakeType(int[][].class) int @TakeType(float.class) [] @TakeType(double.class) []", contents);
+		checkSourceRange(arrayType.getElementType(), "@TakeType(int[][].class) int", contents);
+		assertTrue(arrayType.getElementType().isPrimitiveType());
+		extraDimension = arrayType.getDimensionAt(1);
+		checkSourceRange(extraDimension, "@TakeType(float.class) []", contents);
+		extraDimension = arrayType.getDimensionAt(0);
+		Annotation annotation = (Annotation) extraDimension.annotations().get(0);
+		assertTrue(annotation.isSingleMemberAnnotation());
+		singleMemberAnnotation = (SingleMemberAnnotation) annotation;
+		typeLiteral = (TypeLiteral) singleMemberAnnotation.getValue();
+		checkSourceRange(typeLiteral, "double.class", contents);
+		
+		field = (FieldDeclaration) type.bodyDeclarations().get(count++);
+		checkSourceRange(field, "Object b = new @NonNull(value1 = Math.PI) ArrayList< >() ;", contents);
+		fragment = (VariableDeclarationFragment) field.fragments().get(0);
+		classInstanceCreation = (ClassInstanceCreation) fragment.getInitializer();
+		parameterizedType = (ParameterizedType) classInstanceCreation.getType();
+		checkSourceRange(parameterizedType.getType(), "@NonNull(value1 = Math.PI) ArrayList", contents);
+		
+		field = (FieldDeclaration) type.bodyDeclarations().get(count++);
+		checkSourceRange(field, "Object c = new ArrayList<@NonNull(value1= Math.PI ) Object[]>() ;", contents);
+		fragment = (VariableDeclarationFragment) field.fragments().get(0);
+		classInstanceCreation = (ClassInstanceCreation) fragment.getInitializer();
+		parameterizedType = (ParameterizedType) classInstanceCreation.getType();
+		arrayType = (ArrayType) parameterizedType.typeArguments().get(0);
+		assertTrue(arrayType.getDimensions() == 1);
+		
+		MethodDeclaration method = (MethodDeclaration) type.bodyDeclarations().get(count++);
+		extraDimension = (ExtraDimension) method.extraDimensions().get(0);
+		checkSourceRange(extraDimension, "@TakeType(int[].class) []", contents);
+		singleMemberAnnotation = (SingleMemberAnnotation) extraDimension.annotations().get(0);
+		typeLiteral = (TypeLiteral) singleMemberAnnotation.getValue();
+		arrayType = (ArrayType) typeLiteral.getType();
+		assertTrue(arrayType.getElementType().isPrimitiveType());
+		assertTrue(arrayType.getDimensions() == 1);
+		SingleVariableDeclaration singleVariableDeclaration = (SingleVariableDeclaration) method.parameters().get(0);
+		singleMemberAnnotation = (SingleMemberAnnotation) singleVariableDeclaration.modifiers().get(0);
+		checkSourceRange(singleMemberAnnotation, "@TakeType(int[].class)", contents);
+		typeLiteral = (TypeLiteral) singleMemberAnnotation.getValue();
+		arrayType = (ArrayType) typeLiteral.getType();
+		assertTrue(arrayType.getElementType().isPrimitiveType());
+		assertTrue(arrayType.getDimensions() == 1);
+		ForStatement forStatement = (ForStatement) method.getBody().statements().get(1);
+		VariableDeclarationExpression variableDeclarationExpression = (VariableDeclarationExpression) forStatement.initializers().get(0);
+		fragment = (VariableDeclarationFragment) variableDeclarationExpression.fragments().get(0);
+		extraDimension = (ExtraDimension) fragment.extraDimensions().get(0);
+		checkSourceRange(extraDimension, "@TakeType(int[].class) []", contents);
+		forStatement = (ForStatement) method.getBody().statements().get(1);
+		variableDeclarationExpression = (VariableDeclarationExpression) forStatement.initializers().get(0);
+		fragment = (VariableDeclarationFragment) variableDeclarationExpression.fragments().get(0);
+		extraDimension = (ExtraDimension) fragment.extraDimensions().get(0);
+		checkSourceRange(extraDimension, "@TakeType(int[].class) []", contents);
+		
+		method = (MethodDeclaration) type.bodyDeclarations().get(count++);
+		singleVariableDeclaration = (SingleVariableDeclaration) method.parameters().get(0);
+		// test case active only after bug 417660 is fixed (uncomment)
+		checkSourceRange(singleVariableDeclaration, "int [] /*@TakeType(int[].class)*/ [] a", contents);
+		
+		method = (MethodDeclaration) type.bodyDeclarations().get(count++);
+		singleVariableDeclaration = (SingleVariableDeclaration) method.parameters().get(0);
+		checkSourceRange(singleVariableDeclaration, "int @TakeType(int[].class)... args", contents);
+		singleMemberAnnotation = (SingleMemberAnnotation) singleVariableDeclaration.varargsAnnotations().get(0);
+		typeLiteral = (TypeLiteral) singleMemberAnnotation.getValue();
+		arrayType = (ArrayType) typeLiteral.getType();
+		assertTrue(arrayType.getElementType().isPrimitiveType());
+		assertTrue(arrayType.getDimensions() == 1);
+		
+		method = (MethodDeclaration) type.bodyDeclarations().get(count++);
+		singleVariableDeclaration = (SingleVariableDeclaration) method.parameters().get(0);
+		checkSourceRange(singleVariableDeclaration, "int @Annot ... args", contents);
+		assertTrue(singleVariableDeclaration.varargsAnnotations().size() == 1);
+
+	}
+	// 	https://bugs.eclipse.org/bugs/show_bug.cgi?id=409586
+	public void testBug409586() throws JavaModelException {
+		String contents = 
+				"@java.lang.annotation.Target (java.lang.annotation.ElementType.TYPE_USE)\n" +
+				"@interface Marker {\n" +
+				" 	String value() default \"\";\n" +
+				"}\n" +
+				"@java.lang.annotation.Target (java.lang.annotation.ElementType.TYPE_USE)\n" +
+				"@interface Marker2 {\n" +
+				" 	String value() default \"22\";\n" +
+				"}\n" +
+				"public class X {\n" +
+				"	public @Marker(\"1\") String foo(int @Marker @Marker2 [] args) {\n" +
+				"      return null;\n" +
+				"	}\n" +
+				"	public @Marker(\"3\") String bar() {\n" +
+				"      return null;\n" +
+				"	}\n" +
+				"   public String @Marker(\"i0\") @Marker2 [] [] @Marker(\"i1\") [] str = null;\n" +
+				"   public @Marker String str2 = null;\n" +
+				"   public @Marker String str3 = null;\n" +
+				"   public String str4 = null;\n" +
+				"}";
+
+		this.workingCopy = getWorkingCopy("/Converter18/src/X.java", true);
+		ASTNode node = buildAST(contents, this.workingCopy);
+		assertEquals("Not a compilation unit", ASTNode.COMPILATION_UNIT, node.getNodeType());
+		CompilationUnit compilationUnit = (CompilationUnit) node;
+		assertProblemsSize(compilationUnit, 0);
+		node = getASTNode(compilationUnit, 2, 0);
+		assertTrue("Not a method declaration", node.getNodeType() == ASTNode.METHOD_DECLARATION);
+		MethodDeclaration methodDeclaration = (MethodDeclaration) node;
+		IMethodBinding mBinding = methodDeclaration.resolveBinding();
+		assertNotNull("Should not be null", mBinding);
+		ITypeBinding tBinding1 = mBinding.getReturnType();
+		assertNotNull("Should not be null", tBinding1);
+		
+		List params = methodDeclaration.parameters();
+		assertEquals("Incorrect params", 1, params.size());
+		SingleVariableDeclaration param = (SingleVariableDeclaration) params.get(0);
+		ArrayType type = (ArrayType) param.getType();
+		ITypeBinding tBinding = type.resolveBinding();
+		assertNotNull("Should not be null", tBinding);
+		IAnnotationBinding[] annots = tBinding.getTypeAnnotations();
+		assertEquals("Incorrect type annotations", 2, annots.length);
+		assertEquals("Incorrect annotation", "@Marker()", annots[0].toString());
+		assertEquals("Incorrect annotation", "@Marker2()", annots[1].toString());
+		
+		node = getASTNode(compilationUnit, 2, 1);
+		assertTrue("Not a method declaration", node.getNodeType() == ASTNode.METHOD_DECLARATION);
+		methodDeclaration = (MethodDeclaration) node;
+		mBinding = methodDeclaration.resolveBinding();
+		assertNotNull("Should not be null", mBinding);
+		ITypeBinding tBinding2 = mBinding.getReturnType();
+		assertNotNull("Should not be null", tBinding1);
+		assertNotSame("Type bindings should not be same", tBinding1, tBinding2);
+		annots = tBinding1.getTypeAnnotations();
+		assertEquals("Incorrect type annotations", 1, annots.length);
+		IAnnotationBinding annot = annots[0];
+		assertEquals("Incorrect annotation", "@Marker(value = 1)", annot.toString());
+		annots = tBinding2.getTypeAnnotations();
+		assertEquals("Incorrect type annotations", 1, annots.length);
+		annot = annots[0];
+		assertEquals("Incorrect annotation", "@Marker(value = 3)", annot.toString());
+
+		node = getASTNode(compilationUnit, 2, 2);
+		assertTrue("Not a field declaration", node.getNodeType() == ASTNode.FIELD_DECLARATION);
+		FieldDeclaration field = (FieldDeclaration) node;
+		List fragments = field.fragments();
+		assertEquals("Incorrect no of fragments", 1, fragments.size());
+		VariableDeclarationFragment fragment = (VariableDeclarationFragment) fragments.get(0);
+		IVariableBinding variable = fragment.resolveBinding();
+		assertNotNull("Should not be null", variable);
+		ITypeBinding tBinding3 = variable.getType();
+		assertNotNull("Should not be null", tBinding3);
+		annots = tBinding3.getTypeAnnotations();
+
+		assertEquals("Incorrect type annotations", 2, annots.length);
+		assertEquals("Incorrect annotation", "@Marker(value = i0)", annots[0].toString());
+		assertEquals("Incorrect annotation", "@Marker2()", annots[1].toString());
+		tBinding3 = tBinding3.getComponentType();
+		annots = tBinding3.getTypeAnnotations();
+		assertEquals("Incorrect type annotations", 0, annots.length);
+		tBinding3 = tBinding3.getComponentType();
+		annots = tBinding3.getTypeAnnotations();
+		assertEquals("Incorrect type annotations", 1, annots.length);
+		assertEquals("Incorrect annotation", "@Marker(value = i1)", annots[0].toString());
+		
+		node = getASTNode(compilationUnit, 2, 3);
+		assertTrue("Not a field declaration", node.getNodeType() == ASTNode.FIELD_DECLARATION);
+		field = (FieldDeclaration) node;
+		fragments = field.fragments();
+		assertEquals("Incorrect no of fragments", 1, fragments.size());
+		fragment = (VariableDeclarationFragment) fragments.get(0);
+		variable = fragment.resolveBinding();
+		assertNotNull("Should not be null", variable);
+		tBinding1 = variable.getType();
+		
+		node = getASTNode(compilationUnit, 2, 4);
+		assertTrue("Not a field declaration", node.getNodeType() == ASTNode.FIELD_DECLARATION);
+		field = (FieldDeclaration) node;
+		fragments = field.fragments();
+		assertEquals("Incorrect no of fragments", 1, fragments.size());
+		fragment = (VariableDeclarationFragment) fragments.get(0);
+		variable = fragment.resolveBinding();
+		assertNotNull("Should not be null", variable);
+		tBinding2 = variable.getType();
+		assertSame("Type bindings should be same", tBinding1, tBinding2);
+		assertTrue("Unannotated bindings should be same", tBinding1.isEqualTo(tBinding2));
+		
+		node = getASTNode(compilationUnit, 2, 5);
+		assertTrue("Not a field declaration", node.getNodeType() == ASTNode.FIELD_DECLARATION);
+		field = (FieldDeclaration) node;
+		fragments = field.fragments();
+		assertEquals("Incorrect no of fragments", 1, fragments.size());
+		fragment = (VariableDeclarationFragment) fragments.get(0);
+		variable = fragment.resolveBinding();
+		assertNotNull("Should not be null", variable);
+		tBinding2 = variable.getType();
+		assertNotSame("Type bindings should not be same", tBinding1, tBinding2);
+		assertTrue("Unannotated bindings should be same", tBinding1.isEqualTo(tBinding2));
+	}
+	
+	public void testExtendedDimensions() throws JavaModelException {
+		String contents = 
+				"@java.lang.annotation.Target (java.lang.annotation.ElementType.TYPE_USE)\n" +
+				"@interface Marker {\n" +
+				" 	String value() default \"\";\n" +
+				"}\n" +
+				"@java.lang.annotation.Target (java.lang.annotation.ElementType.TYPE_USE)\n" +
+				"@interface Marker2 {\n" +
+				" 	String value() default \"22\";\n" +
+				"}\n" +
+				"@java.lang.annotation.Target (java.lang.annotation.ElementType.TYPE_USE)\n" +
+				"@interface Marker3 {\n" +
+				" 	String value() default \"22\";\n" +
+				"}\n" +
+				"public class X {\n" +
+				"	public @Marker(\"1\") String @Marker(\"2\") [] foo(int @Marker @Marker2 [] args @Marker3 []) @Marker3(\"3\") [] {\n" +
+				"      return null;\n" +
+				"	}\n" +
+				"   public String @Marker(\"i0\") @Marker2 [] [] @Marker(\"i1\") [] str @Marker(\"Extended\") [] = null;\n" +
+				"}\n";
+
+		this.workingCopy = getWorkingCopy("/Converter18/src/X.java", true);
+		ASTNode node = buildAST(contents, this.workingCopy);
+		assertEquals("Not a compilation unit", ASTNode.COMPILATION_UNIT, node.getNodeType());
+		CompilationUnit compilationUnit = (CompilationUnit) node;
+		assertProblemsSize(compilationUnit, 0);
+		node = getASTNode(compilationUnit, 3, 0);
+		assertTrue("Not a method declaration", node.getNodeType() == ASTNode.METHOD_DECLARATION);
+		MethodDeclaration methodDeclaration = (MethodDeclaration) node;
+		Type returnType = methodDeclaration.getReturnType2();
+		ITypeBinding tBinding1 = returnType.resolveBinding();
+		assertEquals("Unexpected type", tBinding1.toString(), "@Marker{ value = (String)\"1\"} String @Marker{ value = (String)\"2\"} []");
+		assertEquals("Unexpected type", methodDeclaration.resolveBinding().getReturnType().toString(), "@Marker{ value = (String)\"1\"} String @Marker3{ value = (String)\"3\"} [] @Marker{ value = (String)\"2\"} []");
+		
+		List params = methodDeclaration.parameters();
+		assertEquals("Incorrect params", 1, params.size());
+		SingleVariableDeclaration param = (SingleVariableDeclaration) params.get(0);
+		ArrayType type = (ArrayType) param.getType();
+		ITypeBinding tBinding = type.resolveBinding();
+		assertEquals("Unexpected type", tBinding.toString(), "int @Marker @Marker2 []");
+		assertEquals("Unexpected type", param.resolveBinding().getType().toString(), "int @Marker3 [] @Marker @Marker2 []");
+
+		// public String @Marker(\"i0\") @Marker2 [] [] @Marker(\"i1\") [] str @Marker(\"Extended\") [] = null;
+		node = getASTNode(compilationUnit, 3, 1);
+		assertTrue("Not a field declaration", node.getNodeType() == ASTNode.FIELD_DECLARATION);
+		FieldDeclaration field = (FieldDeclaration) node;
+		List fragments = field.fragments();
+		assertEquals("Incorrect no of fragments", 1, fragments.size());
+		VariableDeclarationFragment fragment = (VariableDeclarationFragment) fragments.get(0);
+		assertEquals("Unexpected type", fragment.resolveBinding().getType().toString(), "String @Marker{ value = (String)\"Extended\"} [] @Marker{ value = (String)\"i0\"} @Marker2 [] [] @Marker{ value = (String)\"i1\"} []");
+		assertEquals("Unexpected type", field.getType().toString(), "String @Marker(\"i0\") @Marker2 [] [] @Marker(\"i1\") []");
+	}
+	// https://bugs.eclipse.org/bugs/show_bug.cgi?id=417669
+	public void testBug417669() throws JavaModelException {
+		String contents = 
+				"@java.lang.annotation.Target (java.lang.annotation.ElementType.TYPE_USE)\n" +
+				"@interface Marker {}\n" +
+				"public class X {\n" +
+				"	public static void main(String [] args) {\n" +
+				"      W<String> w = (@Marker W<String>) null;\n" +
+				"	}\n" +
+				"}\n" +
+				"class W<T> {}";
+
+		this.workingCopy = getWorkingCopy("/Converter18/src/X.java", true);
+		ASTNode node = buildAST(contents, this.workingCopy);
+		assertEquals("Not a compilation unit", ASTNode.COMPILATION_UNIT, node.getNodeType());
+		CompilationUnit compilationUnit = (CompilationUnit) node;
+		assertProblemsSize(compilationUnit, 0);
+		node = getASTNode(compilationUnit, 1, 0);
+		assertTrue("Not a method declaration", node.getNodeType() == ASTNode.METHOD_DECLARATION);
+		MethodDeclaration method = (MethodDeclaration) node;
+		assertEquals("Method should not be malformed", 0, (method.getFlags() & ASTNode.MALFORMED));
+		
+		List statements = method.getBody().statements();
+		VariableDeclarationStatement statement = (VariableDeclarationStatement) statements.get(0);
+		VariableDeclarationFragment fragment = (VariableDeclarationFragment) statement.fragments().get(0);
+		CastExpression cast = (CastExpression) fragment.getInitializer();
+		ParameterizedType castType = (ParameterizedType) cast.getType();
+		Type type = castType.getType();
+		checkSourceRange(castType, "@Marker W<String>", contents);
+		checkSourceRange(type, "@Marker W", contents);
+	}
 }

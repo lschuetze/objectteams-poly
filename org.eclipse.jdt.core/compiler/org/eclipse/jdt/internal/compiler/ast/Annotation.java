@@ -21,11 +21,15 @@
  *								Bug 415043 - [1.8][null] Follow-up re null type annotations after bug 392099
  *								Bug 392238 - [1.8][compiler][null] Detect semantically invalid null type annotations
  *								Bug 415850 - [1.8] Ensure RunJDTCoreTests can cope with null annotations enabled
+ *								Bug 417295 - [1.8[[null] Massage type annotated null analysis to gel well with deep encoded type bindings.
  *        Andy Clement (GoPivotal, Inc) aclement@gopivotal.com - Contributions for
  *                          Bug 383624 - [1.8][compiler] Revive code generation support for type annotations (from Olivier's work)
  *                          Bug 409517 - [1.8][compiler] Type annotation problems on more elaborate array references
  *                          Bug 415397 - [1.8][compiler] Type Annotations on wildcard type argument dropped
  *                          Bug 414384 - [1.8] type annotation on abbreviated inner class is not marked as inner type
+ *      Jesper S Moller <jesper@selskabet.org> -  Contributions for
+ *                          Bug 412153 - [1.8][compiler] Check validity of annotations which may be repeatable
+#							Bug 412151 - [1.8][compiler] Check repeating annotation's collection type
  *******************************************************************************/
 package org.eclipse.jdt.internal.compiler.ast;
 
@@ -53,453 +57,145 @@ public abstract class Annotation extends Expression {
 	 * Return the location for the corresponding annotation inside the type reference, <code>null</code> if none.
 	 */
 	public static int[] getLocations(
-			final TypeReference reference,
-			final Annotation[] primaryAnnotation,
-			final Annotation annotation,
-			final Annotation[][] annotationsOnDimensionsOnExpression,
-			final int dimensions) {
+			final Expression reference,
+			final Annotation annotation) {
 	
 		class LocationCollector extends ASTVisitor {
 			Stack typePathEntries;
-			Annotation currentAnnotation;
-			boolean search = true;
+			Annotation searchedAnnotation;
+			boolean continueSearch = true;
 			
 			public LocationCollector(Annotation currentAnnotation) {
 				this.typePathEntries = new Stack();
-				this.currentAnnotation = currentAnnotation;
+				this.searchedAnnotation = currentAnnotation;
+			}
+			
+			private int[] computeNestingDepth(TypeReference typeReference) {
+				TypeBinding type = typeReference.resolvedType == null ? null : typeReference.resolvedType.leafComponentType(); 
+				int[] nestingDepths = new int[typeReference.getAnnotatableLevels()];
+				if (type != null && type.isNestedType()) {
+					int depth = 0;
+					TypeBinding currentType = type;
+					while (currentType != null) {
+						depth += (currentType.isStatic()) ? 0 : 1;
+						currentType = currentType.enclosingType();
+					}
+					// Work backwards computing whether a INNER_TYPE entry is required for each level
+					int counter = nestingDepths.length - 1;
+					while (type != null && counter >= 0) {
+						nestingDepths[counter--] = depth;
+						depth -= type.isStatic() ? 0 : 1;
+						type = type.enclosingType();
+					}
+				}
+				return nestingDepths;
+			}
+			
+
+			private void inspectAnnotations(Annotation [] annotations) {
+				for (int i = 0, length = annotations == null ? 0 : annotations.length; this.continueSearch && i < length; i++) {
+					if (annotations[i] == this.searchedAnnotation)
+						this.continueSearch = false;
+				}
+			}
+
+			private void inspectArrayDimensions(Annotation [][] annotationsOnDimensions, int dimensions) {
+				for (int i = 0; this.continueSearch && i < dimensions; i++) {
+					Annotation[] annotations = annotationsOnDimensions == null ? null : annotationsOnDimensions[i];
+					inspectAnnotations(annotations);
+					if (!this.continueSearch) return;
+					this.typePathEntries.push(TYPE_PATH_ELEMENT_ARRAY);
+				}
+			}
+			
+			private void inspectTypeArguments(TypeReference[] typeReferences) {
+				for (int i = 0, length = typeReferences == null ? 0 : typeReferences.length; this.continueSearch && i < length; i++) {
+					int size = this.typePathEntries.size();
+					this.typePathEntries.add(new int[]{3,i});
+					typeReferences[i].traverse(this, (BlockScope) null);
+					if (!this.continueSearch) return;
+					this.typePathEntries.setSize(size);
+				}
+			}
+			
+			public boolean visit(TypeReference typeReference, BlockScope scope) {
+				if (this.continueSearch) {
+					inspectArrayDimensions(typeReference.getAnnotationsOnDimensions(), typeReference.dimensions());
+					if (this.continueSearch) {
+						int[] nestingDepths = computeNestingDepth(typeReference);
+						Annotation[][] annotations = typeReference.annotations;
+						TypeReference [][] typeArguments = typeReference.getTypeArguments();
+						int levels = typeReference.getAnnotatableLevels();
+						int size = this.typePathEntries.size();
+						for (int i = levels - 1; this.continueSearch && i >= 0; i--) {  // traverse outwards, see comment below about type annotations from SE7 locations.
+							this.typePathEntries.setSize(size);
+							for (int j = 0, depth = nestingDepths[i]; j < depth; j++)
+								this.typePathEntries.add(TYPE_PATH_INNER_TYPE);
+							if (annotations != null)
+								inspectAnnotations(annotations[i]);
+							if (this.continueSearch && typeArguments != null) {
+								inspectTypeArguments(typeArguments[i]);
+							}
+						}
+					}
+				}
+				return false; // if annotation is not found in the type reference, it must be one from SE7 location, typePathEntries captures the proper path entries for them. 
+			}	
+			public boolean visit(SingleTypeReference typeReference, BlockScope scope) {
+				return visit((TypeReference) typeReference, scope);
+			}
+			
+			public boolean visit(ArrayTypeReference typeReference, BlockScope scope) {
+				return visit((TypeReference) typeReference, scope);
 			}
 			
 			public boolean visit(ParameterizedSingleTypeReference typeReference, BlockScope scope) {
-				if (!this.search) return false;
-								
-				Annotation[][] annotationsOnDimensions = typeReference.annotationsOnDimensions;
-				if (annotationsOnDimensions != null) {
-					for (int i = 0, max = annotationsOnDimensions.length; i < max; i++) {
-						Annotation[] annotations = annotationsOnDimensions[i];
-						if (annotations != null) {
-							for (int j = 0, max2 = annotations.length; j < max2; j++) {
-								Annotation current = annotations[j];
-								if (current == this.currentAnnotation) {
-									// found it, push any relevant type path entries
-									for (int k = 0; k < i; k++) {
-										this.typePathEntries.push(TYPE_PATH_ELEMENT_ARRAY);
-									}
-									this.search = false;
-									return false;
-								}
-							}
-						}
-						
-					}
-				}
-				
-				// Example cases handled here: @B(1) List<String>[]
-				Annotation[][] annotations = typeReference.annotations;
-				if (annotations == null) {
-					annotations = new Annotation[][] { primaryAnnotation };
-				}
-				int annotationsLevels = annotations.length;
-				for (int i = 0; i < annotationsLevels; i++) {
-					Annotation [] current = annotations[i];
-					int annotationsLength = current == null ? 0 : current.length;
-					for (int j = 0; j < annotationsLength; j++) {
-						if (current[j] == this.currentAnnotation) {
-							this.search = false;
-							// Found it, insert any necessary type path elements
-							for (int k = 0; k < typeReference.dimensions; k++) {
-								this.typePathEntries.push(TYPE_PATH_ELEMENT_ARRAY);
-							}
-							return false;
-						}
-					}
-				}
-				
-				// If a type argument is annotated it is necessary jump past the array elements
-				if (typeReference.dimensions != 0) {
-					for (int k = 0, maxk = typeReference.dimensions; k < maxk; k++) {
-						this.typePathEntries.push(TYPE_PATH_ELEMENT_ARRAY);
-					}
-				}
-				TypeReference[] typeReferences = typeReference.typeArguments;
-				for (int i = 0, max = typeReferences.length; i < max; i++) {
-					this.typePathEntries.add(new int[]{3,i});
-					typeReferences[i].traverse(this, scope);
-					if (!this.search) {
-						return false;
-					} else {
-						this.typePathEntries.pop();
-					}
-				}
-				if (typeReference.dimensions != 0) {
-					for (int k = 0, maxk = typeReference.dimensions; k < maxk; k++) {
-						this.typePathEntries.pop();
-					}					
-				}
-				return true;
+				return visit((TypeReference) typeReference, scope);
 			}
 
-			public boolean visit(SingleTypeReference typeReference, BlockScope scope) {
-				if (!this.search) return false;
-
-				// Example case handled by this block: X[][] x = new @A X @B [] @C[]{ { null }, { null } };
-				if (dimensions != 0 && annotationsOnDimensionsOnExpression != null) {
-					for (int i = 0, max = annotationsOnDimensionsOnExpression.length; i < max; i++) {
-						Annotation[] annotations = annotationsOnDimensionsOnExpression[i];
-						if (annotations != null) {
-							for (int j = 0, max2 = annotations.length; j < max2; j++) {
-								Annotation current = annotations[j];
-								if (current == this.currentAnnotation) {
-									this.search = false;
-									// Found it, insert relevant type path elements
-									for (int k = 0, maxk = i; k < maxk; k++) {
-										this.typePathEntries.push(TYPE_PATH_ELEMENT_ARRAY);
-									}
-									return false;
-								}
-							}
-						}
-					}
-				}
-				
-				if (dimensions != 0) {
-					for (int k = 0; k < dimensions; k++) {
-						this.typePathEntries.push(TYPE_PATH_ELEMENT_ARRAY);
-					}
-				}
-				Annotation[][] annotations = typeReference.annotations;
-				if (annotations == null) {
-					annotations = new Annotation[][] { primaryAnnotation };
-				}
-				int annotationsLevels = annotations.length;
-				for (int i = 0; i < annotationsLevels; i++) {
-					Annotation [] current = annotations[i];
-					int annotationsLength = current == null ? 0 : current.length;
-					for (int j = 0; j < annotationsLength; j++) {
-						if (current[j] == this.currentAnnotation) {
-							// Found
-							this.search = false;
-							int depth = getInnerDepth(typeReference.resolvedType);
-							if (depth != 0) {
-								for (int k = 0; k<depth; k++) {
-									this.typePathEntries.add(TYPE_PATH_INNER_TYPE);
-								}
-							}
-							return false;
-						}
-					}
-				}
-				if (dimensions != 0) {
-					for (int k = 0; k < dimensions; k++) {
-						this.typePathEntries.pop();
+			public boolean visit(QualifiedTypeReference typeReference, BlockScope scope) {
+				return visit((TypeReference) typeReference, scope);
+			}
+			
+			public boolean visit(ArrayQualifiedTypeReference typeReference, BlockScope scope) {
+				return visit((TypeReference) typeReference, scope);
+			}
+			
+			public boolean visit(ParameterizedQualifiedTypeReference typeReference, BlockScope scope) {
+				return visit((TypeReference) typeReference, scope);
+			}
+			
+			public boolean visit(Wildcard typeReference, BlockScope scope) {
+				visit((TypeReference) typeReference, scope);
+				if (this.continueSearch) {
+					TypeReference bound = typeReference.bound;
+					if (bound != null) {
+						int size = this.typePathEntries.size();
+						this.typePathEntries.push(TYPE_PATH_ANNOTATION_ON_WILDCARD_BOUND);
+						bound.traverse(this, scope);
+						if (this.continueSearch)
+							this.typePathEntries.setSize(size);
 					}
 				}
 				return false;
 			}
 
-			public boolean visit(ArrayTypeReference typeReference, BlockScope scope) {
-				if (!this.search) return false;
-				
-				Annotation[][] annotationsOnDimensions = typeReference.annotationsOnDimensions;
-				if (annotationsOnDimensions != null) {
-					for (int i = 0, max = annotationsOnDimensions.length; i < max; i++) {
-						Annotation[] annotations = annotationsOnDimensions[i];
-						if (annotations != null) {
-							for (int j = 0, max2 = annotations.length; j < max2; j++) {
-								Annotation current = annotations[j];
-								if (current == this.currentAnnotation) {
-									for (int k = 0; k < i; k++) {
-										this.typePathEntries.push(TYPE_PATH_ELEMENT_ARRAY);
-									}
-									this.search = false;
-									return false;
-								}
-							}
-						}
+			public boolean visit(ArrayAllocationExpression allocationExpression, BlockScope scope) {
+				if (this.continueSearch) {
+					inspectArrayDimensions(allocationExpression.getAnnotationsOnDimensions(), allocationExpression.dimensions.length);
+					if (this.continueSearch) {
+						allocationExpression.type.traverse(this, scope);
+					}
+					if (this.continueSearch) throw new IllegalStateException();
+				}
+				return false;
+			}
 						
-					}
-				}
-				Annotation[][] annotations = typeReference.annotations;
-				if (annotations == null) {
-					annotations = new Annotation[][] { primaryAnnotation };
-				}
-				int annotationsLevels = annotations.length;
-				for (int i = 0; i < annotationsLevels; i++) {
-					Annotation [] current = annotations[i];
-					int annotationsLength = current == null ? 0 : current.length;
-					for (int j = 0; j < annotationsLength; j++) {
-						if (current[j] == this.currentAnnotation) {
-							for (int k = 0, maxk=typeReference.dimensions; k < maxk; k++) {
-								this.typePathEntries.push(TYPE_PATH_ELEMENT_ARRAY);
-							}
-							this.search = false;
-							return false;
-						}
-					}
-				}
-				return true;
-			}
-			
-			public boolean visit(ArrayQualifiedTypeReference typeReference, BlockScope scope) {
-				if (!this.search) return false;
-				Annotation[][] annotationsOnDimensions = typeReference.annotationsOnDimensions;
-				if (annotationsOnDimensions != null) {
-					for (int i = 0, max = annotationsOnDimensions.length; i < max; i++) {
-						Annotation[] annotations = annotationsOnDimensions[i];
-						if (annotations != null) {
-							for (int j = 0, max2 = annotations.length; j < max2; j++) {
-								Annotation current = annotations[j];
-								if (current == this.currentAnnotation) {
-									this.search = false;
-									// Found it, insert relevant type path elements
-									for (int k = 0, maxk = i; k < maxk; k++) {
-										this.typePathEntries.push(TYPE_PATH_ELEMENT_ARRAY);
-									}
-									return false;
-								}
-							}
-						}
-					}
-				}
-
-				if (primaryAnnotation != null) {
-					for (int i = 0, max = primaryAnnotation.length; i < max; i++) {
-						if (primaryAnnotation[i] == this.currentAnnotation) {
-							this.search = false;
-							for (int k = 0, maxk = typeReference.dimensions; k < maxk; k++) {
-								this.typePathEntries.push(TYPE_PATH_ELEMENT_ARRAY);
-							}
-							return false;
-						}
-					}
-				}
-
-				Annotation[][] annotations = typeReference.annotations;
-				if (annotations != null) {
-					int annotationsLevels = annotations.length;
-					for (int i = 0; i < annotationsLevels; i++) {
-						Annotation [] current = annotations[i];
-						int annotationsLength = current == null ? 0 : current.length;
-						for (int j = 0; j < annotationsLength; j++) {
-							if (current[j] == this.currentAnnotation) {
-								this.search = false;
-								for (int k = 0, maxk = typeReference.dimensions; k < maxk; k++) {
-									this.typePathEntries.push(TYPE_PATH_ELEMENT_ARRAY);
-								}
-								// depth allows for references like: one.two.three.@B Foo[]
-								// the inner_type elements to the type path depend on the types not the package qualifiers
-								int depth = getInnerDepth(typeReference.resolvedType);
-								if (depth != 0) {
-									for (int k = 0; k < depth; k++) {
-										this.typePathEntries.push(TYPE_PATH_INNER_TYPE);
-									}
-								}
-								return false;
-							}
-						}
-					}
-				}
-				return true;
-			}
-			
-			public boolean visit(ParameterizedQualifiedTypeReference typeReference, BlockScope scope) {
-				if (!this.search) return false;
-				
-				// Example case handled by this block: java.util.List<String>[]@A[]
-				Annotation[][] annotationsOnDimensions = typeReference.annotationsOnDimensions;
-				if (annotationsOnDimensions != null) {
-					for (int i = 0, max = annotationsOnDimensions.length; i < max; i++) {
-						Annotation[] annotations = annotationsOnDimensions[i];
-						if (annotations != null) {
-							for (int j = 0, max2 = annotations.length; j < max2; j++) {
-								Annotation current = annotations[j];
-								if (current == this.currentAnnotation) {
-									this.search = false;
-									// Found it, insert relevant type path elements
-									for (int k = 0, maxk = i; k < maxk; k++) {
-										this.typePathEntries.push(TYPE_PATH_ELEMENT_ARRAY);
-									}
-									return false;
-								}
-							}
-						}
-					}
-				}
-
-				boolean[] needsInnerEntryInfo = computeInnerEntryInfo(typeReference);
-
-				// Example cases handled by this block:
-				// java.util.@A List<String>[][], com.demo.@A Outer.@B Inner<String>, java.util.Map.@A Entry<String,String>
-				Annotation[][] annotations = typeReference.annotations;
-				if (annotations == null) {
-					annotations = new Annotation[][] { primaryAnnotation };
-				}
-				int annotationsLevels = annotations.length;
-				for (int i = 0; i < annotationsLevels; i++) {
-					Annotation [] current = annotations[i];
-					int annotationsLength = current == null ? 0 : current.length;
-					for (int j = 0; j < annotationsLength; j++) {
-						if (current[j] == this.currentAnnotation) {
-							this.search = false;
-							// Found, insert any relevant type path elements
-							for (int k = 0, maxk = typeReference.dimensions; k < maxk; k++) {
-								this.typePathEntries.push(TYPE_PATH_ELEMENT_ARRAY);
-							}
-							// Found, insert any relevant type path elements
-							if (needsInnerEntryInfo != null) {
-								for (int k = 0; k <= i; k++) {
-									if (needsInnerEntryInfo[k]) {
-										this.typePathEntries.push(TYPE_PATH_INNER_TYPE);
-									}
-								}
-							}
-							return false;
-						}
-					}
-				}
-				
-				// Example cases handled by this block:
-				// java.util.List<@A String>
-				if (typeReference.dimensions != 0) {
-					for (int k = 0, maxk = typeReference.dimensions; k < maxk; k++) {
-						this.typePathEntries.push(TYPE_PATH_ELEMENT_ARRAY);
-					}
-				}
-				int toPop = 0;
-				for (int i = 0, max = typeReference.typeArguments.length; i < max; i++) {
-					TypeReference[] typeArgumentsForComponent = typeReference.typeArguments[i];
-					if (needsInnerEntryInfo != null && needsInnerEntryInfo[i]) { 
-						this.typePathEntries.push(TYPE_PATH_INNER_TYPE);
-						toPop++;
-					}
-					if (typeArgumentsForComponent != null) {
-						for (int j = 0, max2 = typeArgumentsForComponent.length; j < max2; j++) {
-							this.typePathEntries.push(new int[]{3,j});
-							typeArgumentsForComponent[j].traverse(this,scope);
-							if (!this.search) return false;
-							this.typePathEntries.pop();
-						}
-					}
-				}
-				toPop += typeReference.dimensions;
-				for (int k = 0, maxk = toPop; k < maxk; k++) {
-					this.typePathEntries.pop();
-				}
-				return true;
-			}
-			
-			public boolean visit(Wildcard typeReference, BlockScope scope) {
-				if (!this.search) return false;
-				
-				// This block handles List<@Foo ? extends Serializable>
-				Annotation[][] annotations = typeReference.annotations;
-				if (annotations == null) {
-					annotations = new Annotation[][] { primaryAnnotation };
-				}
-				int annotationsLevels = annotations.length;
-				for (int i = 0; i < annotationsLevels; i++) {
-					Annotation [] current = annotations[i];
-					int annotationsLength = current == null ? 0 : current.length;
-					for (int j = 0; j < annotationsLength; j++) {
-						if (current[j] == this.currentAnnotation) {
-							this.search = false;
-							return false;
-						}
-					}
-				}
-
-				TypeReference bound = typeReference.bound;
-				this.typePathEntries.push(TYPE_PATH_ANNOTATION_ON_WILDCARD_BOUND);
-				bound.traverse(this, scope);
-				if (!this.search) {
-					return false;
-				}
-				this.typePathEntries.pop();
-				return true;
-			}
-			
-			private boolean[] computeInnerEntryInfo(QualifiedTypeReference typeReference) {
-				ReferenceBinding resolvedType = (ReferenceBinding) 
-						(typeReference.resolvedType instanceof ArrayBinding ? typeReference.resolvedType.leafComponentType() : typeReference.resolvedType);
-				boolean[] needsInnerEntryInfo = null;
-				if (resolvedType != null && resolvedType.isNestedType()) {
-					// Work backwards computing whether a INNER_TYPE entry is required for each level
-					needsInnerEntryInfo = new boolean[typeReference.tokens.length];
-					int counter = needsInnerEntryInfo.length - 1;
-					ReferenceBinding type = resolvedType;//resolvedType.enclosingType();
-					while (type != null && counter > 0) {
-						needsInnerEntryInfo[counter--] = !type.isStatic();
-						type = type.enclosingType();
-					}
-				}
-				return needsInnerEntryInfo;
-			}
-			
-			private int getInnerDepth(TypeBinding resolvedType) {
-				ReferenceBinding type = null;
-				if (resolvedType instanceof ReferenceBinding) {
-					type = (ReferenceBinding)resolvedType;
-				} else if (resolvedType instanceof ArrayBinding) {
-					TypeBinding leafComponentType = ((ArrayBinding)resolvedType).leafComponentType;
-					if (leafComponentType instanceof ReferenceBinding) {
-						type = (ReferenceBinding)leafComponentType;
-					}
-				}
-				int depth = 0;
-				while (type != null) {
-					depth += (type.isStatic())?0:1;
-					type = type.enclosingType();
-				}
-				return depth;
-			}
-			
-			public boolean visit(QualifiedTypeReference typeReference, BlockScope scope) {
-				if (!this.search) return false;
-				boolean[] needsInnerEntryInfo = computeInnerEntryInfo(typeReference);
-				
-				if (dimensions != 0) {
-					for (int k = 0; k < dimensions; k++) {
-						this.typePathEntries.push(TYPE_PATH_ELEMENT_ARRAY);
-					}
-				}
-				
-				// Example cases handled by this block:
-				// java.util.@A List, com.demo.@A Outer.@B Inner, java.util.Map.@A Entry
-				Annotation[][] annotations = typeReference.annotations;
-				if (annotations == null) {
-					annotations = new Annotation[][] { primaryAnnotation };
-				}
-				int annotationsLevels = annotations.length;
-				for (int i = 0; i < annotationsLevels; i++) {
-					Annotation [] current = annotations[i];
-					int annotationsLength = current == null ? 0 : current.length;
-					for (int j = 0; j < annotationsLength; j++) {
-						if (current[j] == this.currentAnnotation) {
-							this.search = false;
-							// Found, insert any relevant type path elements
-							if (needsInnerEntryInfo != null) {
-								for (int k = 0; k <= i; k++) {
-									if (needsInnerEntryInfo[k]) {
-										this.typePathEntries.push(TYPE_PATH_INNER_TYPE);
-									}
-								}
-							}
-							return false;
-						}
-					}
-				}
-				if (dimensions != 0) {
-					for (int k = 0; k < dimensions; k++) {
-						this.typePathEntries.pop();
-					}
-				}
-				return true;
-			}
-			
 			public String toString() {
 				StringBuffer buffer = new StringBuffer();
 				buffer
 					.append("search location for ") //$NON-NLS-1$
-					.append(this.currentAnnotation)
+					.append(this.searchedAnnotation)
 					.append("\ncurrent type_path entries : "); //$NON-NLS-1$
 				for (int i = 0, maxi = this.typePathEntries.size(); i < maxi; i++) {
 					int[] typePathEntry = (int[]) this.typePathEntries.get(i);
@@ -711,6 +407,155 @@ public abstract class Annotation extends Expression {
 		return tagBits;
 	}
 
+	static String getRetentionName(long tagBits) {
+		if ((tagBits & TagBits.AnnotationRuntimeRetention) == TagBits.AnnotationRuntimeRetention) {
+			// TagBits.AnnotationRuntimeRetention combines both TagBits.AnnotationClassRetention & TagBits.AnnotationSourceRetention
+			return new String(UPPER_RUNTIME);
+		} else if ((tagBits & TagBits.AnnotationSourceRetention) != 0) {
+			return new String(UPPER_SOURCE);
+		} else {
+			return new String(TypeConstants.UPPER_CLASS);
+		}
+	}
+
+	private static long getAnnotationRetention(ReferenceBinding binding) {
+		long retention = binding.getAnnotationTagBits() & TagBits.AnnotationRetentionMASK;
+		// Retention defaults to CLASS
+		return retention != 0 ? retention : TagBits.AnnotationClassRetention;
+	}
+	
+	public void checkRepeatableAnnotation(ASTNode valueAttribute, Scope scope, Object containingBinding) {
+		if (! (this.recipient instanceof ReferenceBinding && containingBinding instanceof ReferenceBinding)) return; // Has deeper problems...
+		ReferenceBinding containing = (ReferenceBinding)containingBinding;
+		ReferenceBinding repeatableAnnotation = (ReferenceBinding) this.recipient;
+		repeatableAnnotation.setContainingAnnotation(containing);
+
+		checkContainingAnnotation(valueAttribute, scope, containing, repeatableAnnotation);
+	}
+
+	public static void checkContainingAnnotation(ASTNode markerNode, Scope scope, ReferenceBinding container, ReferenceBinding repeatableAnnotation) {
+		MethodBinding[] annotationMethods = container.methods();
+		boolean sawValue = false;
+		for (int i = 0, length = annotationMethods.length; i < length; ++i) {
+			MethodBinding method = annotationMethods[i];
+			if (CharOperation.equals(method.selector, TypeConstants.VALUE)) {
+				sawValue = true;
+				if (method.returnType.isArrayType() && method.returnType.dimensions() == 1) {
+					ArrayBinding array = (ArrayBinding) method.returnType;
+					if (TypeBinding.equalsEquals(array.elementsType(), repeatableAnnotation)) continue;
+				}
+				scope.problemReporter().containingAnnotationHasWrongValueType(markerNode, container, repeatableAnnotation, method.returnType);
+			} else {
+				// Not the value() - must have default (or else isn't suitable as container
+				if ((method.modifiers & ClassFileConstants.AccAnnotationDefault) == 0) {
+					scope.problemReporter().containingAnnotationHasNonDefaultMembers(markerNode, container, method.selector);
+				}
+			}
+		}
+		if (!sawValue) {
+			scope.problemReporter().containingAnnotationMustHaveValue(markerNode, container);
+		}
+		
+		checkContainingAnnotationRetention(markerNode, scope, container, repeatableAnnotation);
+		if (markerNode instanceof Annotation)
+			checkContainingAnnotationTarget((Annotation) markerNode, (BlockScope) scope, (TypeBinding) container, repeatableAnnotation);
+		else
+			checkContainingAnnotationTarget(markerNode, scope, container, repeatableAnnotation);
+		checkContaintAnnotationDocumented(markerNode, scope, container, repeatableAnnotation);
+		checkContaintAnnotationInherited(markerNode, scope, container, repeatableAnnotation);
+	}
+
+	// This is for error reporting for bad targets at the repeated annotation use site (as opposed to repeatable annotation type declaration site) - Leads to better message.
+	public static void checkContainingAnnotationTarget(Annotation annotation, BlockScope scope, TypeBinding containerAnnotationType, TypeBinding annotationType) {
+		// check (meta)target compatibility
+		if (!annotationType.isValidBinding()) {
+			// no need to check annotation usage if missing
+			return;
+		}
+		if (! isAnnotationTargetAllowed(annotation, scope, containerAnnotationType, annotation.recipient.kind())) {
+			scope.problemReporter().disallowedTargetForContainerAnnotation(annotation, containerAnnotationType);
+		}
+	}
+	
+	// This is for error reporting for bad targets at annotation type declaration site (as opposed to the repeat site)
+	private static void checkContainingAnnotationTarget(ASTNode markerNode, Scope scope, ReferenceBinding container, ReferenceBinding repeatableAnnotation) {
+		long tagBits = repeatableAnnotation.getAnnotationTagBits();
+		if ((tagBits & TagBits.AnnotationTargetMASK) != 0) { 
+			long containingTagBits = container.getAnnotationTagBits();
+			if ((containingTagBits & TagBits.AnnotationTargetMASK) == 0) {
+				scope.problemReporter().repeatableAnnotationHasTargets(markerNode, repeatableAnnotation, container);
+			} else {
+				final long targets = tagBits & TagBits.AnnotationTargetMASK;
+				final long containingTargets = containingTagBits & TagBits.AnnotationTargetMASK;
+				
+				if ((containingTargets & ~targets) != 0) {
+					class MissingTargetBuilder {
+						StringBuffer targetBuffer = new StringBuffer();
+						void check(long targetMask, char[] targetName) {
+							if ((containingTargets & targetMask & ~targets) != 0) {
+								add(targetName);
+							}
+						}
+						void checkAnnotationType(char[] targetName) {
+							if ((containingTargets & TagBits.AnnotationForAnnotationType) != 0 &&
+									((targets & (TagBits.AnnotationForAnnotationType | TagBits.AnnotationForType))) == 0) {
+								add(targetName);
+							}
+						}
+						private void add(char[] targetName) {
+							if (this.targetBuffer.length() != 0) {
+								this.targetBuffer.append(", "); //$NON-NLS-1$
+							}
+							this.targetBuffer.append(targetName);
+						}
+						public String toString() {
+							return this.targetBuffer.toString();
+						}
+						public boolean hasError() {
+							return this.targetBuffer.length() != 0;
+						}
+					}
+					MissingTargetBuilder builder = new MissingTargetBuilder();
+
+					builder.check(TagBits.AnnotationForType, TypeConstants.TYPE);
+					builder.check(TagBits.AnnotationForField, TypeConstants.UPPER_FIELD);
+					builder.check(TagBits.AnnotationForMethod, TypeConstants.UPPER_METHOD);
+					builder.check(TagBits.AnnotationForParameter, TypeConstants.UPPER_PARAMETER);
+					builder.check(TagBits.AnnotationForConstructor, TypeConstants.UPPER_CONSTRUCTOR);
+					builder.check(TagBits.AnnotationForLocalVariable, TypeConstants.UPPER_LOCAL_VARIABLE);
+					builder.checkAnnotationType(TypeConstants.UPPER_ANNOTATION_TYPE);
+					builder.check(TagBits.AnnotationForPackage, TypeConstants.UPPER_PACKAGE);
+					builder.check(TagBits.AnnotationForTypeParameter, TypeConstants.TYPE_PARAMETER_TARGET);
+					builder.check(TagBits.AnnotationForTypeUse, TypeConstants.TYPE_USE_TARGET);
+					if (builder.hasError()) {
+						scope.problemReporter().repeatableAnnotationTargetMismatch(markerNode, repeatableAnnotation, container, builder.toString());
+					}
+				}
+			}
+		}
+	}
+
+	private static void checkContaintAnnotationDocumented(ASTNode markerNode, Scope scope, ReferenceBinding containing, ReferenceBinding repeatableAnnotation) {
+		if ((repeatableAnnotation.getAnnotationTagBits() & TagBits.AnnotationDocumented) != 0 && (containing.getAnnotationTagBits() & TagBits.AnnotationDocumented) == 0) {
+			scope.problemReporter().repeatableAnnotationIsDocumented(markerNode, repeatableAnnotation, containing);
+		}
+	}
+
+	private static void checkContaintAnnotationInherited(ASTNode markerNode, Scope scope, ReferenceBinding containing, ReferenceBinding repeatableAnnotation) {
+		if ((repeatableAnnotation.getAnnotationTagBits() & TagBits.AnnotationInherited) != 0 && (containing.getAnnotationTagBits() & TagBits.AnnotationInherited) == 0) {
+			scope.problemReporter().repeatableAnnotationIsInherited(markerNode, repeatableAnnotation, containing);
+		}
+	}
+
+	private static void checkContainingAnnotationRetention(ASTNode markerNode, Scope scope, ReferenceBinding container, ReferenceBinding repeatableAnnotation) {
+		long annotationBits = getAnnotationRetention(repeatableAnnotation);
+		long containerBits = getAnnotationRetention(container); 
+		// Due to clever layout of the bits, we can compare the absolute value directly
+		if (containerBits < annotationBits) {
+			scope.problemReporter().containingAnnotationHasShorterRetention(markerNode, repeatableAnnotation, getRetentionName(annotationBits), container, getRetentionName(containerBits));
+		}
+	}
+	
 	public AnnotationBinding getCompilerAnnotation() {
 		return this.compilerAnnotation;
 	}
@@ -1012,159 +857,149 @@ public abstract class Annotation extends Expression {
 						break;
 					case Binding.LOCAL :
 						LocalVariableBinding variable = (LocalVariableBinding) this.recipient;
-						if (scope.compilerOptions().sourceLevel < ClassFileConstants.JDK1_8) {
-							variable.tagBits |= tagBits;
-							if ((variable.tagBits & TagBits.AnnotationNullMASK) == TagBits.AnnotationNullMASK) {
-								scope.problemReporter().contradictoryNullAnnotations(this);
-								variable.tagBits &= ~TagBits.AnnotationNullMASK; // avoid secondary problems
-							}
-						} else if (variable.type != null) {
-							// bits not relating to null analysis go into the variable:
-							variable.tagBits |= tagBits & ~TagBits.AnnotationNullMASK;
-							// null bits go into the type:
-							long nullTagBits = tagBits & TagBits.AnnotationNullMASK;
-							if (nullTagBits != 0) {
-								if (variable.type.isBaseType()) {
-									scope.problemReporter().illegalAnnotationForBaseType(this, variable.type);
-								} else if (variable.declaration.type instanceof QualifiedTypeReference) {
-									scope.problemReporter().nullAnnotationUnsupportedLocation(this);
-								} else if (nullTagBits != (variable.type.tagBits & TagBits.AnnotationNullMASK)) {
-									if (((variable.type.tagBits & TagBits.AnnotationNullMASK) | nullTagBits ) == TagBits.AnnotationNullMASK) {
-										scope.problemReporter().contradictoryNullAnnotations(this);
-										variable.type = variable.type.unannotated();
-									}
-								}
-							}
+						variable.tagBits |= tagBits;
+						if ((variable.tagBits & TagBits.AnnotationNullMASK) == TagBits.AnnotationNullMASK) {
+							scope.problemReporter().contradictoryNullAnnotations(this);
+							variable.tagBits &= ~TagBits.AnnotationNullMASK; // avoid secondary problems
 						}
 						if ((tagBits & TagBits.AnnotationSuppressWarnings) != 0) {
-							 LocalDeclaration localDeclaration = variable.declaration;
+							LocalDeclaration localDeclaration = variable.declaration;
 							recordSuppressWarnings(scope, localDeclaration.declarationSourceStart, localDeclaration.declarationSourceEnd, scope.compilerOptions().suppressWarnings);
 						}
 						break;
 				}
 			}
-			// check (meta)target compatibility
-			checkTargetCompatibility: {
-				if (!annotationType.isValidBinding()) {
-					// no need to check annotation usage if missing
-					break checkTargetCompatibility;
-				}
-
-				long metaTagBits = annotationType.getAnnotationTagBits(); // could be forward reference
-				if ((metaTagBits & TagBits.AnnotationTargetMASK) == 0) {
-					// does not specify any target restriction - all locations supported in Java 7 and before are possible
-					if (kind == Binding.TYPE_PARAMETER || kind == Binding.TYPE_USE) {
-						scope.problemReporter().explitAnnotationTargetRequired(this);
-					}
-					break checkTargetCompatibility;
-				}
-
-				// https://bugs.eclipse.org/bugs/show_bug.cgi?id=391201
-				if ((metaTagBits & TagBits.SE7AnnotationTargetMASK) == 0
-						&& (metaTagBits & (TagBits.AnnotationForTypeUse | TagBits.AnnotationForTypeParameter)) != 0) {
-					if (scope.compilerOptions().sourceLevel < ClassFileConstants.JDK1_8) {
-						switch (kind) {
-							case Binding.PACKAGE :
-							case Binding.TYPE :
-							case Binding.GENERIC_TYPE :
-							case Binding.METHOD :
-							case Binding.FIELD :
-							case Binding.LOCAL :
-								scope.problemReporter().invalidUsageOfTypeAnnotations(this);
-						}
-					}
-				}
-				switch (kind) {
-					case Binding.PACKAGE :
-						if ((metaTagBits & TagBits.AnnotationForPackage) != 0)
-							break checkTargetCompatibility;
-						break;
-					case Binding.TYPE_USE :
-						if ((metaTagBits & TagBits.AnnotationForTypeUse) != 0) {
-							// jsr 308
-							break checkTargetCompatibility;
-						}
-						break;
-					case Binding.TYPE :
-					case Binding.GENERIC_TYPE :
-						if (((ReferenceBinding)this.recipient).isAnnotationType()) {
-							if ((metaTagBits & (TagBits.AnnotationForAnnotationType | TagBits.AnnotationForType)) != 0)
-							break checkTargetCompatibility;
-						} else if ((metaTagBits & (TagBits.AnnotationForType | TagBits.AnnotationForTypeUse)) != 0) {
-							break checkTargetCompatibility;
-						} else if ((metaTagBits & TagBits.AnnotationForPackage) != 0) {
-							if (CharOperation.equals(((ReferenceBinding)this.recipient).sourceName, TypeConstants.PACKAGE_INFO_NAME))
-								break checkTargetCompatibility;
-						}
-//{ObjectTeams: allow @Override for roles:
-						if (   (((ReferenceBinding)this.recipient).isRole())
-							&& (tagBits & TagBits.AnnotationOverride) != 0)
-							break checkTargetCompatibility;
-// SH}
-						break;
-					case Binding.METHOD :
-						MethodBinding methodBinding = (MethodBinding) this.recipient;
-						if (methodBinding.isConstructor()) {
-							if ((metaTagBits & (TagBits.AnnotationForConstructor | TagBits.AnnotationForTypeUse)) != 0)
-								break checkTargetCompatibility;
-						} else if ((metaTagBits & TagBits.AnnotationForMethod) != 0) {
-							break checkTargetCompatibility;
-						} else if ((metaTagBits & TagBits.AnnotationForTypeUse) != 0) {
-							SourceTypeBinding sourceType = (SourceTypeBinding) methodBinding.declaringClass;
-							MethodDeclaration methodDecl = (MethodDeclaration) sourceType.scope.referenceContext.declarationOf(methodBinding);
-							if (isTypeUseCompatible(methodDecl.returnType, scope)) {
-								break checkTargetCompatibility;
-							}
-						}
-						break;
-//{ObjectTeams: method mappings
-					// TODO(SH): should annotations for method mappings be controlled separately?
-					case Binding.BINDING :
-						if ((metaTagBits & TagBits.AnnotationForMethod) != 0)
-							break checkTargetCompatibility;
-						break;
-// SH}
-					case Binding.FIELD :
-						if ((metaTagBits & TagBits.AnnotationForField) != 0) {
-							break checkTargetCompatibility;
-						} else if ((metaTagBits & TagBits.AnnotationForTypeUse) != 0) {
-							FieldBinding sourceField = (FieldBinding) this.recipient;
-							SourceTypeBinding sourceType = (SourceTypeBinding) sourceField.declaringClass;
-							FieldDeclaration fieldDeclaration = sourceType.scope.referenceContext.declarationOf(sourceField);
-							if (isTypeUseCompatible(fieldDeclaration.type, scope)) {
-								break checkTargetCompatibility;
-							}
-						}
-						break;
-					case Binding.LOCAL :
-						LocalVariableBinding localVariableBinding = (LocalVariableBinding)this.recipient;
-						if ((localVariableBinding.tagBits & TagBits.IsArgument) != 0) {
-							if ((metaTagBits & TagBits.AnnotationForParameter) != 0) {
-								break checkTargetCompatibility;
-							} else if ((metaTagBits & TagBits.AnnotationForTypeUse) != 0) {
-								if (isTypeUseCompatible(localVariableBinding.declaration.type, scope)) {
-									break checkTargetCompatibility;
-								}
-							}
-						} else if ((annotationType.tagBits & TagBits.AnnotationForLocalVariable) != 0) {
-							break checkTargetCompatibility;
-						} else if ((metaTagBits & TagBits.AnnotationForTypeUse) != 0) {
-							if (isTypeUseCompatible(localVariableBinding.declaration.type, scope)) {
-								break checkTargetCompatibility;
-							}
-						}
-						break;
-					case Binding.TYPE_PARAMETER : // jsr308
-						// https://bugs.eclipse.org/bugs/show_bug.cgi?id=391196
-						if ((metaTagBits & (TagBits.AnnotationForTypeParameter | TagBits.AnnotationForTypeUse)) != 0) {
-							break checkTargetCompatibility;
-						}
-					}
-				scope.problemReporter().disallowedTargetForAnnotation(this);
-			}
+			checkAnnotationTarget(this, scope, annotationType, kind);
 		}
 		return this.resolvedType;
 	}
+
+	static boolean isAnnotationTargetAllowed(Annotation annotation, BlockScope scope, TypeBinding annotationType, int kind) {
+		long metaTagBits = annotationType.getAnnotationTagBits(); // could be forward reference
+		if ((metaTagBits & TagBits.AnnotationTargetMASK) == 0) {
+			// does not specify any target restriction - all locations supported in Java 7 and before are possible
+			if (kind == Binding.TYPE_PARAMETER || kind == Binding.TYPE_USE) {
+				scope.problemReporter().explitAnnotationTargetRequired(annotation);
+			}
+			return true;
+		}
+
+		// https://bugs.eclipse.org/bugs/show_bug.cgi?id=391201
+		if ((metaTagBits & TagBits.SE7AnnotationTargetMASK) == 0
+				&& (metaTagBits & (TagBits.AnnotationForTypeUse | TagBits.AnnotationForTypeParameter)) != 0) {
+			if (scope.compilerOptions().sourceLevel < ClassFileConstants.JDK1_8) {
+				switch (kind) {
+					case Binding.PACKAGE :
+					case Binding.TYPE :
+					case Binding.GENERIC_TYPE :
+					case Binding.METHOD :
+					case Binding.FIELD :
+					case Binding.LOCAL :
+						scope.problemReporter().invalidUsageOfTypeAnnotations(annotation);
+				}
+			}
+		}
+		switch (kind) {
+			case Binding.PACKAGE :
+				if ((metaTagBits & TagBits.AnnotationForPackage) != 0)
+					return true;
+				break;
+			case Binding.TYPE_USE :
+				if ((metaTagBits & TagBits.AnnotationForTypeUse) != 0) {
+					// jsr 308
+					return true;
+				}
+				break;
+			case Binding.TYPE :
+			case Binding.GENERIC_TYPE :
+				if (((ReferenceBinding)annotation.recipient).isAnnotationType()) {
+					if ((metaTagBits & (TagBits.AnnotationForAnnotationType | TagBits.AnnotationForType)) != 0)
+					return true;
+				} else if ((metaTagBits & (TagBits.AnnotationForType | TagBits.AnnotationForTypeUse)) != 0) {
+					return true;
+				} else if ((metaTagBits & TagBits.AnnotationForPackage) != 0) {
+					if (CharOperation.equals(((ReferenceBinding) annotation.recipient).sourceName, TypeConstants.PACKAGE_INFO_NAME))
+						return true;
+				}
+//{ObjectTeams: allow @Override for roles:
+				if (   (((ReferenceBinding)annotation.recipient).isRole())
+					&& (annotation.resolvedType.id == TypeIds.T_JavaLangObject))
+					return true;
+//SH}
+				break;
+//{ObjectTeams: method mappings
+			// TODO(SH): should annotations for method mappings be controlled separately?
+			case Binding.BINDING :
+				if ((metaTagBits & TagBits.AnnotationForMethod) != 0)
+					return true;
+				break;
+//SH}
+			case Binding.METHOD :
+				MethodBinding methodBinding = (MethodBinding) annotation.recipient;
+				if (methodBinding.isConstructor()) {
+					if ((metaTagBits & (TagBits.AnnotationForConstructor | TagBits.AnnotationForTypeUse)) != 0)
+						return true;
+				} else if ((metaTagBits & TagBits.AnnotationForMethod) != 0) {
+					return true;
+				} else if ((metaTagBits & TagBits.AnnotationForTypeUse) != 0) {
+					SourceTypeBinding sourceType = (SourceTypeBinding) methodBinding.declaringClass;
+					MethodDeclaration methodDecl = (MethodDeclaration) sourceType.scope.referenceContext.declarationOf(methodBinding);
+					if (isTypeUseCompatible(methodDecl.returnType, scope)) {
+						return true;
+					}
+				}
+				break;
+			case Binding.FIELD :
+				if ((metaTagBits & TagBits.AnnotationForField) != 0) {
+					return true;
+				} else if ((metaTagBits & TagBits.AnnotationForTypeUse) != 0) {
+					FieldBinding sourceField = (FieldBinding) annotation.recipient;
+					SourceTypeBinding sourceType = (SourceTypeBinding) sourceField.declaringClass;
+					FieldDeclaration fieldDeclaration = sourceType.scope.referenceContext.declarationOf(sourceField);
+					if (isTypeUseCompatible(fieldDeclaration.type, scope)) {
+						return true;
+					}
+				}
+				break;
+			case Binding.LOCAL :
+				LocalVariableBinding localVariableBinding = (LocalVariableBinding) annotation.recipient;
+				if ((localVariableBinding.tagBits & TagBits.IsArgument) != 0) {
+					if ((metaTagBits & TagBits.AnnotationForParameter) != 0) {
+						return true;
+					} else if ((metaTagBits & TagBits.AnnotationForTypeUse) != 0) {
+						if (isTypeUseCompatible(localVariableBinding.declaration.type, scope)) {
+							return true;
+						}
+					}
+				} else if ((annotationType.tagBits & TagBits.AnnotationForLocalVariable) != 0) {
+					return true;
+				} else if ((metaTagBits & TagBits.AnnotationForTypeUse) != 0) {
+					if (isTypeUseCompatible(localVariableBinding.declaration.type, scope)) {
+						return true;
+					}
+				}
+				break;
+			case Binding.TYPE_PARAMETER : // jsr308
+				// https://bugs.eclipse.org/bugs/show_bug.cgi?id=391196
+				if ((metaTagBits & (TagBits.AnnotationForTypeParameter | TagBits.AnnotationForTypeUse)) != 0) {
+					return true;
+				}
+		}
+		return false;
+	}
+
+	static void checkAnnotationTarget(Annotation annotation, BlockScope scope, ReferenceBinding annotationType, int kind) {
+		// check (meta)target compatibility
+		if (!annotationType.isValidBinding()) {
+			// no need to check annotation usage if missing
+			return;
+		}
+		if (! isAnnotationTargetAllowed(annotation, scope, annotationType, kind)) {
+			scope.problemReporter().disallowedTargetForAnnotation(annotation);
+		}
+	}
+
+	// Check and answer if an attempt to annotate a package is being made. Error should be reported by caller.
 	public static boolean isTypeUseCompatible(TypeReference reference, Scope scope) {
 		if (reference != null && !(reference instanceof SingleTypeReference)) {
 			Binding binding = scope.getPackage(reference.getTypeName());
@@ -1174,6 +1009,34 @@ public abstract class Annotation extends Expression {
 			}
 		}
 		return true;
+	}
+	
+	// Complain if an attempt to annotate the enclosing type of a static member type is being made.
+	public static void isTypeUseCompatible(TypeReference reference, Scope scope, Annotation[] annotations) {
+		if (annotations == null || reference == null || reference.getAnnotatableLevels() == 1)
+			return;
+		if (scope.environment().globalOptions.sourceLevel < ClassFileConstants.JDK1_8)
+			return;
+
+		TypeBinding resolvedType = reference.resolvedType == null ? null : reference.resolvedType.leafComponentType();
+		if (resolvedType == null || !resolvedType.isNestedType())
+			return;
+
+		nextAnnotation:
+			for (int i = 0, annotationsLength = annotations.length; i < annotationsLength; i++) {
+				Annotation annotation = annotations[i];
+				long metaTagBits = annotation.resolvedType.getAnnotationTagBits();
+				if ((metaTagBits & TagBits.AnnotationForTypeUse) != 0 && (metaTagBits & TagBits.SE7AnnotationTargetMASK) == 0) {
+					ReferenceBinding currentType = (ReferenceBinding) resolvedType;
+					while (currentType.isNestedType()) {
+						if (currentType.isStatic()) {
+							QualifiedTypeReference.rejectAnnotationsOnStaticMemberQualififer(scope, currentType, new Annotation [] { annotation });
+							continue nextAnnotation;
+						}
+						currentType = currentType.enclosingType();
+					}
+				}
+			}
 	}
 
 	public abstract void traverse(ASTVisitor visitor, BlockScope scope);

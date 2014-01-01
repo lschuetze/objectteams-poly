@@ -29,6 +29,7 @@
  *        Andy Clement - Contributions for
  *                          Bug 383624 - [1.8][compiler] Revive code generation support for type annotations (from Olivier's work)
  *                          Bug 409250 - [1.8][compiler] Various loose ends in 308 code generation
+ *                          Bug 415821 - [1.8][compiler] CLASS_EXTENDS target type annotation missing for anonymous classes
  *******************************************************************************/
 package org.eclipse.jdt.internal.compiler.parser;
 
@@ -50,9 +51,9 @@ import org.eclipse.jdt.internal.compiler.codegen.ConstantPool;
 import org.eclipse.jdt.internal.compiler.env.ICompilationUnit;
 import org.eclipse.jdt.internal.compiler.impl.CompilerOptions;
 import org.eclipse.jdt.internal.compiler.impl.ReferenceContext;
+import org.eclipse.jdt.internal.compiler.lookup.Binding;
 import org.eclipse.jdt.internal.compiler.lookup.BlockScope;
 import org.eclipse.jdt.internal.compiler.lookup.ClassScope;
-import org.eclipse.jdt.internal.compiler.lookup.Binding;
 import org.eclipse.jdt.internal.compiler.lookup.ExtraCompilerModifiers;
 import org.eclipse.jdt.internal.compiler.lookup.MethodScope;
 import org.eclipse.jdt.internal.compiler.lookup.TypeConstants;
@@ -968,6 +969,7 @@ private int stateStackLengthStack[] = new int[0];
 private boolean parsingJava8Plus;
 protected int unstackedAct = ERROR_ACTION;
 private boolean haltOnSyntaxError = false;
+private boolean tolerateDefaultClassMethods = false;
 
 
 //{ObjectTeams: context info while parsing separate role files:
@@ -3126,7 +3128,7 @@ protected void consumeCatchFormalParameter() {
 	}
 // SH}
 	if (extendedDimensions > 0) {
-		type = type.copyDims(type.dimensions() + extendedDimensions);
+		type = augmentTypeWithAdditionalDimensions(type, extendedDimensions, null, false);
 		type.sourceEnd = this.endPosition;
 		// https://bugs.eclipse.org/bugs/show_bug.cgi?id=391092
 		if (type instanceof UnionTypeReference) {
@@ -4230,6 +4232,7 @@ protected void consumeEnterAnonymousClassBody(boolean qualified) {
 	TypeDeclaration anonymousType = new TypeDeclaration(this.compilationUnit.compilationResult);
 	anonymousType.name = CharOperation.NO_CHAR;
 	anonymousType.bits |= (ASTNode.IsAnonymousType|ASTNode.IsLocalType);
+	anonymousType.bits |= (typeReference.bits & ASTNode.HasTypeAnnotations);
 	QualifiedAllocationExpression alloc = new QualifiedAllocationExpression(anonymousType);
 	markEnclosingMemberWithLocalType();
 	pushOnAstStack(anonymousType);
@@ -4302,9 +4305,9 @@ protected void consumeEnterVariable() {
 
 	char[] identifierName = this.identifierStack[this.identifierPtr];
 	long namePosition = this.identifierPositionStack[this.identifierPtr];
-	int extendedDimension = this.intStack[this.intPtr--];
+	int extendedDimensions = this.intStack[this.intPtr--];
 	// pop any annotations on extended dimensions now, so they don't pollute the base dimensions.
-	Annotation [][] annotationsOnExtendedDimensions = extendedDimension == 0 ? null : getAnnotationsOnDimensions(extendedDimension);
+	Annotation [][] annotationsOnExtendedDimensions = extendedDimensions == 0 ? null : getAnnotationsOnDimensions(extendedDimensions);
 	AbstractVariableDeclaration declaration;
 	// create the ast node
 	boolean isLocalDeclaration = this.nestedMethod[this.nestedType] != 0;
@@ -4322,7 +4325,6 @@ protected void consumeEnterVariable() {
 	this.identifierLengthPtr--;
 	TypeReference type;
 	int variableIndex = this.variablesCounter[this.nestedType];
-	int typeDim = 0;
 	if (variableIndex == 0) {
 		// first variable of the declaration (FieldDeclaration or LocalDeclaration)
 		if (isLocalDeclaration) {
@@ -4338,14 +4340,14 @@ protected void consumeEnterVariable() {
 					0,
 					length);
 			}
-			type = getTypeReference(typeDim = this.intStack[this.intPtr--]); // type dimension
+			type = getTypeReference(this.intStack[this.intPtr--]); // type dimension
 			if (declaration.declarationSourceStart == -1) {
 				// this is true if there is no modifiers for the local variable declaration
 				declaration.declarationSourceStart = type.sourceStart;
 			}
 			pushOnAstStack(type);
 		} else {
-			type = getTypeReference(typeDim = this.intStack[this.intPtr--]); // type dimension
+			type = getTypeReference(this.intStack[this.intPtr--]); // type dimension
 			pushOnAstStack(type);
 			declaration.declarationSourceStart = this.intStack[this.intPtr--];
 			declaration.modifiers = this.intStack[this.intPtr--];
@@ -4366,7 +4368,6 @@ protected void consumeEnterVariable() {
 		this.javadoc = null;
 	} else {
 		type = (TypeReference) this.astStack[this.astPtr - variableIndex];
-		typeDim = type.dimensions();
 		AbstractVariableDeclaration previousVariable =
 			(AbstractVariableDeclaration) this.astStack[this.astPtr];
 		declaration.declarationSourceStart = previousVariable.declarationSourceStart;
@@ -4378,19 +4379,9 @@ protected void consumeEnterVariable() {
 		}
 	}
 
-	if (extendedDimension == 0) {
-		declaration.type = type;
-		declaration.bits |= (type.bits & ASTNode.HasTypeAnnotations);
-	} else {
-		int dimension = typeDim + extendedDimension;
-		Annotation [][] annotationsOnAllDimensions = null;
-		Annotation[][] annotationsOnDimensions = type.getAnnotationsOnDimensions();
-		if (annotationsOnDimensions != null || annotationsOnExtendedDimensions != null) {
-			annotationsOnAllDimensions = getMergedAnnotationsOnDimensions(typeDim, annotationsOnDimensions, extendedDimension, annotationsOnExtendedDimensions); 
-//			declaration.bits |= (type.bits & ASTNode.HasTypeAnnotations);
-		}
-		declaration.type = copyDims(type, dimension, annotationsOnAllDimensions);
-	}
+	declaration.type = extendedDimensions == 0 ? type : augmentTypeWithAdditionalDimensions(type, extendedDimensions, annotationsOnExtendedDimensions, false);
+	declaration.bits |= (type.bits & ASTNode.HasTypeAnnotations);
+	
 	this.variablesCounter[this.nestedType]++;
 	pushOnAstStack(declaration);
 	// recovery
@@ -4415,27 +4406,6 @@ protected void consumeEnterVariable() {
 		}
 		this.lastIgnoredToken = -1;
 	}
-}
-protected Annotation[][] getMergedAnnotationsOnDimensions(int dims, Annotation[][] annotationsOnDimensions,
-		int extendedDims, Annotation[][] annotationsOnExtendedDimensions) {
-
-	if (annotationsOnDimensions == null && annotationsOnExtendedDimensions == null)
-		return null;
-
-	Annotation [][] mergedAnnotations = new Annotation[dims + extendedDims][];
-	
-	if (annotationsOnDimensions != null) {
-		for (int i = 0; i < dims; i++) {
-			mergedAnnotations[i] = annotationsOnDimensions[i];
-		} 
-	}
-	if (annotationsOnExtendedDimensions != null) {
-		for (int i = dims, j = 0; i < dims + extendedDims; i++, j++) {
-			mergedAnnotations[i] = annotationsOnExtendedDimensions[j];
-		}
-	}
-
-	return mergedAnnotations;
 }
 protected void consumeEnumBodyNoConstants() {
 	// nothing to do
@@ -5179,7 +5149,7 @@ protected void consumeFormalParameter(boolean isVarArgs) {
 		roleRef = getTypeReference(roleFirstDimensions);
 		int roleDimensions = roleFirstDimensions + extendedDimensions + (isVarArgs?1:0);
 		if (roleDimensions > roleFirstDimensions)
-			roleRef = roleRef.copyDims(roleDimensions); // annotsOnDIms?
+			roleRef = roleRef.augmentTypeWithAdditionalDimensions(roleDimensions, null, false); // annotsOnDIms?
 		// done role side, the following balances the pushs from consumeBeginLiftingType():
 		this.genericsIdentifiersLengthPtr--;
 		this.genericsLengthPtr--;
@@ -5194,19 +5164,13 @@ protected void consumeFormalParameter(boolean isVarArgs) {
 		type = ltr;
 	}
 // SH}
-	final int typeDimensions = firstDimensions + extendedDimensions + (isVarArgs ? 1 : 0);
-
-	if (typeDimensions != firstDimensions) {
-		// jsr308 type annotations management
-		Annotation [][] annotationsOnFirstDimensions = firstDimensions == 0 ? null : type.getAnnotationsOnDimensions();
-		Annotation [][] annotationsOnAllDimensions = annotationsOnFirstDimensions;
-		if (annotationsOnExtendedDimensions != null) {
-			annotationsOnAllDimensions = getMergedAnnotationsOnDimensions(firstDimensions, annotationsOnFirstDimensions, extendedDimensions, annotationsOnExtendedDimensions);
+	if (isVarArgs || extendedDimensions != 0) {
+		if (isVarArgs) {
+			type = augmentTypeWithAdditionalDimensions(type, 1, varArgsAnnotations != null ? new Annotation[][] { varArgsAnnotations } : null, true);	
+		} 
+		if (extendedDimensions != 0) {
+			type = augmentTypeWithAdditionalDimensions(type, extendedDimensions, annotationsOnExtendedDimensions, false);
 		}
-		if (varArgsAnnotations != null) {
-			annotationsOnAllDimensions = getMergedAnnotationsOnDimensions(firstDimensions + extendedDimensions, annotationsOnAllDimensions, 1, new Annotation[][]{varArgsAnnotations});
-		}
-		type = copyDims(type, typeDimensions, annotationsOnAllDimensions);
 		type.sourceEnd = type.isParameterizedTypeReference() ? this.endStatementPosition : this.endPosition;
 	}
 	if (isVarArgs) {
@@ -5855,7 +5819,7 @@ protected void consumeMethodBody() {
 	// MethodBody ::= NestedMethod '{' BlockStatementsopt '}'
 	this.nestedMethod[this.nestedType] --;
 }
-protected void consumeMethodDeclaration(boolean isNotAbstract) {
+protected void consumeMethodDeclaration(boolean isNotAbstract, boolean isDefaultMethod) {
 	// MethodDeclaration ::= MethodHeader MethodBody
 	// AbstractMethodDeclaration ::= MethodHeader ';'
 
@@ -5914,6 +5878,9 @@ protected void consumeMethodDeclaration(boolean isNotAbstract) {
 	// a trailing comment behind the end of the method
 	md.bodyEnd = this.endPosition;
 	md.declarationSourceEnd = flushCommentsDefinedPriorTo(this.endStatementPosition);
+	if (isDefaultMethod && !this.tolerateDefaultClassMethods) {
+		problemReporter().defaultModifierIllegallySpecified(md.bodyStart, this.endPosition);
+	}
 }
 protected void consumeMethodHeader() {
 	// MethodHeader ::= MethodHeaderName MethodHeaderParameters MethodHeaderExtendedDims ThrowsClauseopt
@@ -5983,21 +5950,13 @@ protected void consumeMethodHeaderExtendedDims() {
 	// MethodHeaderExtendedDims ::= Dimsopt
 	// now we update the returnType of the method
 	MethodDeclaration md = (MethodDeclaration) this.astStack[this.astPtr];
-	int extendedDims = this.intStack[this.intPtr--];
+	int extendedDimensions = this.intStack[this.intPtr--];
 	if(md.isAnnotationMethod()) {
-		((AnnotationMethodDeclaration)md).extendedDimensions = extendedDims;
+		((AnnotationMethodDeclaration)md).extendedDimensions = extendedDimensions;
 	}
-	if (extendedDims != 0) {
-		TypeReference returnType = md.returnType;
+	if (extendedDimensions != 0) {
 		md.sourceEnd = this.endPosition;
-		int dims = returnType.dimensions() + extendedDims;
-		Annotation [][] annotationsOnDimensions = returnType.getAnnotationsOnDimensions();
-		Annotation [][] annotationsOnExtendedDimensions = getAnnotationsOnDimensions(extendedDims);
-		Annotation [][] annotationsOnAllDimensions = null;
-		if (annotationsOnDimensions != null || annotationsOnExtendedDimensions != null) {
-			annotationsOnAllDimensions = getMergedAnnotationsOnDimensions(returnType.dimensions(), annotationsOnDimensions, extendedDims, annotationsOnExtendedDimensions);
-		}
-		md.returnType = copyDims(returnType, dims, annotationsOnAllDimensions);
+		md.returnType = augmentTypeWithAdditionalDimensions(md.returnType, extendedDimensions, getAnnotationsOnDimensions(extendedDimensions), false);
 		if (this.currentToken == TokenNameLBRACE){
 			md.bodyStart = this.endPosition + 1;
 		}
@@ -6654,6 +6613,7 @@ protected void consumeTypeAnnotation() {
 		Annotation annotation = this.typeAnnotationStack[this.typeAnnotationPtr];
 		problemReporter().invalidUsageOfTypeAnnotations(annotation);
 	}
+	this.dimensions = this.intStack[this.intPtr--]; // https://bugs.eclipse.org/bugs/show_bug.cgi?id=417660
 }
 protected void consumeOneMoreTypeAnnotation() {
 	// TypeAnnotations ::= TypeAnnotations TypeAnnotation
@@ -7338,7 +7298,7 @@ private void rejectIllegalTypeAnnotations(TypeReference typeReference) {
 			problemReporter().misplacedTypeAnnotations(misplacedAnnotations[0], misplacedAnnotations[misplacedAnnotations.length - 1]);
 		}
 	}
-	annotations = typeReference.getAnnotationsOnDimensions();
+	annotations = typeReference.getAnnotationsOnDimensions(true);
 	for (int i = 0, length = annotations == null ? 0 : annotations.length; i < length; i++) {
 		misplacedAnnotations = annotations[i];
 		if (misplacedAnnotations != null) {
@@ -7932,12 +7892,12 @@ protected void consumeRule(int act) {
  
     case 230 : if (DEBUG) { System.out.println("MethodDeclaration ::= MethodHeader MethodBody"); }  //$NON-NLS-1$
 		    // set to true to consume a method with a body
- consumeMethodDeclaration(true);  
+ consumeMethodDeclaration(true, false);  
 			break;
  
     case 231 : if (DEBUG) { System.out.println("AbstractMethodDeclaration ::= MethodHeader SEMICOLON"); }  //$NON-NLS-1$
 		    // set to false to consume a method without body
- consumeMethodDeclaration(false);  
+ consumeMethodDeclaration(false, false);  
 			break;
  
     case 232 : if (DEBUG) { System.out.println("MethodHeader ::= MethodHeaderName FormalParameterListopt"); }  //$NON-NLS-1$
@@ -11200,6 +11160,9 @@ protected void consumeToken(int type) {
 			this.lParenPos = this.scanner.startPosition;
 			break;
 		case TokenNameAT308:
+			pushOnIntStack(this.dimensions); // https://bugs.eclipse.org/bugs/show_bug.cgi?id=417660: Stack the dimensions, they get unstacked in consumeTypeAnnotation.
+			this.dimensions = 0;
+			//$FALL-THROUGH$
 		case TokenNameAT :
 //{ObjectTeams: 3rd variant of '@':
 		case TokenNameATOT:
@@ -11296,44 +11259,6 @@ private boolean doingOrgObjectteamsInternalType() {
 	       && CharOperation.equals(this.compilationUnit.currentPackage.tokens, IOTConstants.ORG_OBJECTTEAMS);
 }
 // SH}
-protected void consumeTypeArgument() {
-	pushOnGenericsStack(getTypeReference(this.intStack[this.intPtr--]));
-}
-protected void consumeTypeArgumentList() {
-	concatGenericsLists();
-}
-protected void consumeTypeArgumentList1() {
-	concatGenericsLists();
-}
-protected void consumeTypeArgumentList2() {
-	concatGenericsLists();
-}
-protected void consumeTypeArgumentList3() {
-	concatGenericsLists();
-}
-protected void consumeTypeArgumentReferenceType1() {
-	concatGenericsLists();
-	pushOnGenericsStack(getTypeReference(0));
-	this.intPtr--; // pop '<' position.
-}
-protected void consumeTypeArgumentReferenceType2() {
-	concatGenericsLists();
-	pushOnGenericsStack(getTypeReference(0));
-	this.intPtr--;
-}
-protected void consumeTypeArguments() {
-	concatGenericsLists();
-	this.intPtr--;
-
-	if(!this.statementRecoveryActivated &&
-			this.options.sourceLevel < ClassFileConstants.JDK1_5 &&
-			this.lastErrorEndPositionBeforeRecovery < this.scanner.currentPosition) {
-		int length = this.genericsLengthStack[this.genericsLengthPtr];
-		problemReporter().invalidUsageOfTypeArguments(
-			(TypeReference)this.genericsStack[this.genericsPtr - length + 1],
-			(TypeReference)this.genericsStack[this.genericsPtr]);
-	}
-}
 //{ObjectTeams: new syntax for dependent types.
 protected void consumeTypeAnchor(boolean haveBase) {
 	// TentativeTypeAnchor ::= '@OT' UnannotatableName
@@ -11529,6 +11454,44 @@ protected void consumeBoundsOfAnchoredTypeParameter() {
 	parameter.bounds = new TypeReference[] { bound };
 }
 // SH}
+protected void consumeTypeArgument() {
+	pushOnGenericsStack(getTypeReference(this.intStack[this.intPtr--]));
+}
+protected void consumeTypeArgumentList() {
+	concatGenericsLists();
+}
+protected void consumeTypeArgumentList1() {
+	concatGenericsLists();
+}
+protected void consumeTypeArgumentList2() {
+	concatGenericsLists();
+}
+protected void consumeTypeArgumentList3() {
+	concatGenericsLists();
+}
+protected void consumeTypeArgumentReferenceType1() {
+	concatGenericsLists();
+	pushOnGenericsStack(getTypeReference(0));
+	this.intPtr--; // pop '<' position.
+}
+protected void consumeTypeArgumentReferenceType2() {
+	concatGenericsLists();
+	pushOnGenericsStack(getTypeReference(0));
+	this.intPtr--;
+}
+protected void consumeTypeArguments() {
+	concatGenericsLists();
+	this.intPtr--;
+
+	if(!this.statementRecoveryActivated &&
+			this.options.sourceLevel < ClassFileConstants.JDK1_5 &&
+			this.lastErrorEndPositionBeforeRecovery < this.scanner.currentPosition) {
+		int length = this.genericsLengthStack[this.genericsLengthPtr];
+		problemReporter().invalidUsageOfTypeArguments(
+			(TypeReference)this.genericsStack[this.genericsPtr - length + 1],
+			(TypeReference)this.genericsStack[this.genericsPtr]);
+	}
+}
 protected void consumeTypeDeclarations() {
 	// TypeDeclarations ::= TypeDeclarations TypeDeclaration
 	concatNodeLists();
@@ -12006,12 +11969,8 @@ public MethodDeclaration convertToMethodDeclaration(ConstructorDeclaration c, Co
 	return m;
 }
 
-protected TypeReference copyDims(TypeReference typeRef, int dim) {
-	return typeRef.copyDims(dim);
-}
-
-protected TypeReference copyDims(TypeReference typeRef, int dim, Annotation[][]annotationsOnDimensions) {
-	return typeRef.copyDims(dim, annotationsOnDimensions);
+protected TypeReference augmentTypeWithAdditionalDimensions(TypeReference typeReference, int additionalDimensions, Annotation[][] additionalAnnotations, boolean isVarargs) {
+	return typeReference.augmentTypeWithAdditionalDimensions(additionalDimensions, additionalAnnotations, isVarargs);
 }
 
 protected FieldDeclaration createFieldDeclaration(char[] fieldDeclarationName, int sourceStart, int sourceEnd) {
@@ -14150,6 +14109,7 @@ public void parse(AbstractMethodMappingDeclaration mapping, CompilationUnitDecla
 // SH}
 public ASTNode[] parseClassBodyDeclarations(char[] source, int offset, int length, CompilationUnitDeclaration unit) {
 	boolean oldDiet = this.diet;
+	boolean oldTolerateDefaultClassMethods = this.tolerateDefaultClassMethods;
 	/* automaton initialization */
 	initialize();
 	goForClassBodyDeclarations();
@@ -14176,11 +14136,13 @@ public ASTNode[] parseClassBodyDeclarations(char[] source, int offset, int lengt
 	/* run automaton */
 	try {
 		this.diet = true;
+		this.tolerateDefaultClassMethods = this.parsingJava8Plus;
 		parse();
 	} catch (AbortCompilation ex) {
 		this.lastAct = ERROR_ACTION;
 	} finally {
 		this.diet = oldDiet;
+		this.tolerateDefaultClassMethods = oldTolerateDefaultClassMethods;
 	}
 
 	ASTNode[] result = null;

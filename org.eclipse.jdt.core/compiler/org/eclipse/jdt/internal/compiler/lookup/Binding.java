@@ -109,6 +109,8 @@ public abstract class Binding {
 	/**
 	 * Compute the tagbits for standard annotations. For source types, these could require
 	 * lazily resolving corresponding annotation nodes, in case of forward references.
+	 * For type use bindings, this method still returns the tagbits corresponding to the type 
+	 * declaration binding.
 	 * @see org.eclipse.jdt.internal.compiler.lookup.SourceTypeBinding#getAnnotationTagBits()
 	 */
 	public long getAnnotationTagBits() {
@@ -124,6 +126,10 @@ public abstract class Binding {
 		// empty block
 	}
 
+	public boolean isAnnotationType() {
+		return false;
+	}
+	
 	/* API
 	* Answer true if the receiver is not a problem binding
 	*/

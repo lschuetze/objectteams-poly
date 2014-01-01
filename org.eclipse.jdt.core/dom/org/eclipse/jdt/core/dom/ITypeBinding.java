@@ -17,7 +17,6 @@
 
 package org.eclipse.jdt.core.dom;
 
-
 /**
  * <h4>OTDT changes:</h4>
  * <dl>
@@ -101,7 +100,7 @@ public interface ITypeBinding extends IBinding {
 	 * @since 3.1
 	 */
 	public ITypeBinding getBound();
-
+	
 	/**
 	 * Returns the generic type associated with this wildcard type, if it has one.
 	 * Returns <code>null</code> if this is not a wildcard type.
@@ -122,7 +121,7 @@ public interface ITypeBinding extends IBinding {
 	 * @since 3.5
 	 */
 	public int getRank();
-
+	
 	/**
 	 * Returns the binding representing the component type of this array type,
 	 * or <code>null</code> if this is not an array type binding. The component
@@ -277,6 +276,17 @@ public interface ITypeBinding extends IBinding {
 	 *   not an array type
 	 */
 	public ITypeBinding getElementType();
+
+	/**
+	 * Returns the binding representing the enclosing type of this type,
+	 * or <code>null</code> if the receiver is an array type binding or a top level
+	 * type or a primitive type.
+	 *
+	 * @return the enclosing type binding, or <code>null</code> if this is
+	 *   an array type, or a primitive type or a top level type.
+	 * @since 3.9 BETA_JAVA8
+	 */
+	public ITypeBinding getEnclosingType();
 
 	/**
 	 * Returns the erasure of this type binding.
@@ -1043,6 +1053,24 @@ public interface ITypeBinding extends IBinding {
 	 */
 	public boolean isWildcardType();
 
+	/**
+	 * Returns the annotations that this type reference is annotated with. Since JLS8, 
+	 * multiple instances of type bindings may be created if they are annotated with 
+	 * different type use annotations.
+	 * <p>
+	 * For example, the following two type references would produce two distinct type 
+	 * bindings for java.lang.String.
+	 * <ul>
+	 * <li>java.lang.@Marker1 String</li>
+	 * <li>java.lang.@Marker2 String</li>
+	 * </ul>
+	 * </p>
+	 * @return type annotations specified on this type reference, or an empty array if
+	 * no type use annotations are found.
+	 * @since 3.9 BETA_JAVA8
+	 */
+	public IAnnotationBinding[] getTypeAnnotations();
+	
 //{ObjectTeams:	new queries
 	/**
 	 * Returns whether this type binding represents a dependent type.

@@ -90,6 +90,7 @@ public LocalTypeBinding(LocalTypeBinding prototype) {
 * all its dependents so as to update them (see updateInnerEmulationDependents()).
 */
 public void addInnerEmulationDependent(BlockScope dependentScope, boolean wasEnclosingInstanceSupplied) {
+	if (this != this.prototype) throw new IllegalStateException();
 	int index;
 	if (this.dependents == null) {
 		index = 0;
@@ -128,10 +129,9 @@ public ReferenceBinding anonymousOriginalSuperType() {
 }
 
 protected void checkRedundantNullnessDefaultRecurse(ASTNode location, Annotation[] annotations, long annotationTagBits) {
-	if (this != this.prototype) {
-		this.prototype.checkRedundantNullnessDefaultRecurse(location, annotations, annotationTagBits);
-		return;
-	}
+	
+	if (this != this.prototype) throw new IllegalStateException();
+	
 	long outerDefault = this.enclosingMethod != null ? this.enclosingMethod.tagBits & ((TagBits.AnnotationNonNullByDefault|TagBits.AnnotationNullUnspecifiedByDefault)) : 0;
 	if (outerDefault != 0) {
 		if (outerDefault == annotationTagBits) {
@@ -175,7 +175,7 @@ public char[] constantPoolName() /* java/lang/Object */ {
 	if (this.constantPoolName != null)
 		return this.constantPoolName;
 	if (this != this.prototype)
-		this.prototype.constantPoolName();
+		return this.constantPoolName = this.prototype.constantPoolName();
 	if (this.constantPoolName == null && this.scope != null) {
 		// https://bugs.eclipse.org/bugs/show_bug.cgi?id=322154, we do have some
 		// cases where the left hand does not know what the right is doing.
@@ -184,11 +184,9 @@ public char[] constantPoolName() /* java/lang/Object */ {
 	return this.constantPoolName;	
 }
 
-public TypeBinding clone(TypeBinding outerType, TypeBinding[] typeArguments) {
+public TypeBinding clone(TypeBinding outerType) {
 	LocalTypeBinding copy = new LocalTypeBinding(this);
-	if (outerType == null) {
-		outerType = enclosingType();
-	}
+	copy.enclosingType = (SourceTypeBinding) outerType;
 	return copy;
 }
 
@@ -264,9 +262,10 @@ public char[] shortReadableName() /*Object*/ {
 	return shortReadableName;
 }
 
-//Record that the type is a local member type
+// Record that the type is a local member type
 public void setAsMemberType() {
 	if (this != this.prototype) {
+		this.tagBits |= TagBits.MemberTypeMask;
 		((LocalTypeBinding) this.prototype).setAsMemberType();
 		return;
 	}
@@ -275,6 +274,7 @@ public void setAsMemberType() {
 
 public void setConstantPoolName(char[] computedConstantPoolName) /* java/lang/Object */ {
 	if (this != this.prototype) {
+		this.constantPoolName = computedConstantPoolName;
 		((LocalTypeBinding) this.prototype).setConstantPoolName(computedConstantPoolName);
 		return;
 	}
@@ -332,10 +332,7 @@ public String toString() {
 * to be propagated to all dependent source types.
 */
 public void updateInnerEmulationDependents() {
-	if (this != this.prototype) {
-		((LocalTypeBinding) this.prototype).updateInnerEmulationDependents();
-		return;
-	}
+	if (this != this.prototype) throw new IllegalStateException();
 	if (this.dependents != null) {
 		for (int i = 0; i < this.dependents.length; i++) {
 			InnerEmulationDependency dependency = this.dependents[i];

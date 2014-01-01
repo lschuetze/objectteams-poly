@@ -27,7 +27,6 @@ public class UnresolvedReferenceBinding extends ReferenceBinding {
 ReferenceBinding resolvedType;
 TypeBinding[] wrappers;
 UnresolvedReferenceBinding prototype;
-TypeBinding enclosingType;
 
 //{ObjectTeams: make visible to subclass:
 protected
@@ -48,11 +47,10 @@ public UnresolvedReferenceBinding(UnresolvedReferenceBinding prototype) {
 	this.prototype = prototype.prototype;
 }
 
-public TypeBinding clone(TypeBinding outerType, TypeBinding[] someTypeArguments) {
-	if (this.resolvedType != null)
+public TypeBinding clone(TypeBinding outerType) {
+	if (this.resolvedType != null || this.depth() > 0)
 		throw new IllegalStateException();
 	UnresolvedReferenceBinding copy = new UnresolvedReferenceBinding(this);
-	copy.enclosingType = outerType;
 	this.addWrapper(copy, null);
 	return copy;
 }
@@ -72,6 +70,9 @@ void addWrapper(TypeBinding wrapper, LookupEnvironment environment) {
 		this.wrappers[length] = wrapper;
 	}
 }
+public boolean isUnresolvedType() {
+	return true;
+}
 public String debugName() {
 	return toString();
 }
@@ -84,6 +85,11 @@ public boolean hasTypeBit(int bit) {
 	// shouldn't happen since we are not called before analyseCode(), but play safe:
 	return false;
 }
+
+public TypeBinding prototype() {
+	return this.prototype;
+}
+
 //{ObjectTeams: changed to public (was default-vis)
 public ReferenceBinding resolve(LookupEnvironment environment, boolean convertGenericToRawType) {
 // SH}
@@ -130,8 +136,7 @@ void setResolvedType(ReferenceBinding targetType, LookupEnvironment environment)
 
 public void swapUnresolved(UnresolvedReferenceBinding unresolvedType, ReferenceBinding unannotatedType, LookupEnvironment environment) {
 	if (this.resolvedType != null) return;
-	ReferenceBinding annotatedType = (ReferenceBinding) unannotatedType.clone(this.enclosingType != null ? this.enclosingType : unannotatedType.enclosingType(), null);
-	
+	ReferenceBinding annotatedType = (ReferenceBinding) unannotatedType.clone(null);
 	this.resolvedType = annotatedType;
 	annotatedType.setTypeAnnotations(getTypeAnnotations(), environment.globalOptions.isAnnotationBasedNullAnalysisEnabled);
 	annotatedType.id = unannotatedType.id = this.id;
@@ -140,6 +145,7 @@ public void swapUnresolved(UnresolvedReferenceBinding unresolvedType, ReferenceB
 			this.wrappers[i].swapUnresolved(this, annotatedType, environment);
 	environment.updateCaches(this, annotatedType);
 }
+
 public String toString() {
 	if (this.hasTypeAnnotations())
 		return super.annotatedDebugName() + "(unresolved)"; //$NON-NLS-1$

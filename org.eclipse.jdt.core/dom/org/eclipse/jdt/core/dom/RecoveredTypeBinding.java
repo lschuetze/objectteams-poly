@@ -197,6 +197,14 @@ class RecoveredTypeBinding implements ITypeBinding {
 		}
 		return null;
 	}
+	
+	/* (non-Javadoc)
+	 * @see org.eclipse.jdt.core.dom.ITypeBinding#getEnclosingType()
+	 */
+	
+	public ITypeBinding getEnclosingType() {
+		return null;
+	}
 
 	/* (non-Javadoc)
 	 * @see org.eclipse.jdt.core.dom.ITypeBinding#getErasure()
@@ -763,6 +771,10 @@ class RecoveredTypeBinding implements ITypeBinding {
 				}
 		}
 		return null; // should not happen
+	}
+
+	public IAnnotationBinding[] getTypeAnnotations() {
+		return AnnotationBinding.NoAnnotations;
 	}
 //{ObjectTeams: new lookup-functions
 	public org.eclipse.jdt.internal.compiler.lookup.TypeBinding getResolvedBinding() {

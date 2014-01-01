@@ -491,13 +491,13 @@ public abstract class Scope {
 					substitutedEnclosing = (ReferenceBinding) substitute(substitution, originalEnclosing);
 					if (isMemberTypeOfRaw(originalType, substitutedEnclosing))
 						return originalParameterizedType.environment.createRawType(
-								originalParameterizedType.genericType(), substitutedEnclosing);
+								originalParameterizedType.genericType(), substitutedEnclosing, originalType.getTypeAnnotations());
 				}
 				TypeBinding[] originalArguments = originalParameterizedType.arguments;
 				TypeBinding[] substitutedArguments = originalArguments;
 				if (originalArguments != null) {
 					if (substitution.isRawSubstitution()) {
-						return originalParameterizedType.environment.createRawType(originalParameterizedType.genericType(), substitutedEnclosing);
+						return originalParameterizedType.environment.createRawType(originalParameterizedType.genericType(), substitutedEnclosing, originalType.getTypeAnnotations());
 					}
 					substitutedArguments = substitute(substitution, originalArguments);
 				}
@@ -510,16 +510,16 @@ public abstract class Scope {
 					}
 // SH}
 					return originalParameterizedType.environment.createParameterizedType(
-							originalParameterizedType.genericType(), substitutedArguments, substitutedEnclosing);
+							originalParameterizedType.genericType(), substitutedArguments, substitutedEnclosing, originalType.getTypeAnnotations());
 				}
 				break;
 
 			case Binding.ARRAY_TYPE:
 				ArrayBinding originalArrayType = (ArrayBinding) originalType;
 				TypeBinding originalLeafComponentType = originalArrayType.leafComponentType;
-				TypeBinding substitute = substitute(substitution, originalLeafComponentType); // substitute could itself be array type
+				TypeBinding substitute = substitute(substitution, originalLeafComponentType); // substitute could itself be array type, TODO(Srikanth): need a test case.
 				if (substitute != originalLeafComponentType) {
-					return originalArrayType.environment.createArrayType(substitute.leafComponentType(), substitute.dimensions() + originalType.dimensions());
+					return originalArrayType.environment.createArrayType(substitute.leafComponentType(), substitute.dimensions() + originalType.dimensions(), originalType.getTypeAnnotations());
 				}
 				break;
 
@@ -550,7 +550,7 @@ public abstract class Scope {
 			    				}
 			    			}
 			        	}
-		        		return wildcard.environment.createWildcard(wildcard.genericType, wildcard.rank, substitutedBound, substitutedOtherBounds, wildcard.boundKind);
+		        		return wildcard.environment.createWildcard(wildcard.genericType, wildcard.rank, substitutedBound, substitutedOtherBounds, wildcard.boundKind, wildcard.getTypeAnnotations());
 			        }
 		        }
 				break;
@@ -563,14 +563,14 @@ public abstract class Scope {
 				if (originalEnclosing != null) {
 					substitutedEnclosing = (ReferenceBinding) substitute(substitution, originalEnclosing);
 					if (isMemberTypeOfRaw(originalType, substitutedEnclosing))
-						return substitution.environment().createRawType(originalReferenceType, substitutedEnclosing);
+						return substitution.environment().createRawType(originalReferenceType, substitutedEnclosing, originalType.getTypeAnnotations());
 				}
 
 			    // treat as if parameterized with its type variables (non generic type gets 'null' arguments)
 				if (substitutedEnclosing != originalEnclosing) {
 					return substitution.isRawSubstitution()
-						? substitution.environment().createRawType(originalReferenceType, substitutedEnclosing)
-						:  substitution.environment().createParameterizedType(originalReferenceType, null, substitutedEnclosing);
+						? substitution.environment().createRawType(originalReferenceType, substitutedEnclosing, originalType.getTypeAnnotations())
+						:  substitution.environment().createParameterizedType(originalReferenceType, null, substitutedEnclosing, originalType.getTypeAnnotations());
 				}
 				break;
 			case Binding.GENERIC_TYPE:
@@ -580,16 +580,16 @@ public abstract class Scope {
 				if (originalEnclosing != null) {
 					substitutedEnclosing = (ReferenceBinding) substitute(substitution, originalEnclosing);
 					if (isMemberTypeOfRaw(originalType, substitutedEnclosing))
-						return substitution.environment().createRawType(originalReferenceType, substitutedEnclosing);
+						return substitution.environment().createRawType(originalReferenceType, substitutedEnclosing, originalType.getTypeAnnotations());
 				}
 
 				if (substitution.isRawSubstitution()) {
-					return substitution.environment().createRawType(originalReferenceType, substitutedEnclosing);
+					return substitution.environment().createRawType(originalReferenceType, substitutedEnclosing, originalType.getTypeAnnotations());
 				}
 			    // treat as if parameterized with its type variables (non generic type gets 'null' arguments)
 				originalArguments = originalReferenceType.typeVariables();
 				substitutedArguments = substitute(substitution, originalArguments);
-				return substitution.environment().createParameterizedType(originalReferenceType, substitutedArguments, substitutedEnclosing);
+				return substitution.environment().createParameterizedType(originalReferenceType, substitutedArguments, substitutedEnclosing, originalType.getTypeAnnotations());
 		}
 		return originalType;
 	}
@@ -798,10 +798,10 @@ public abstract class Scope {
 			TypeVariableBinding typeVariable = typeParameter.binding;
 			if (typeVariable == null) return false;
 
-			typeVariable.superclass = getJavaLangObject();
-			typeVariable.superInterfaces = Binding.NO_SUPERINTERFACES;
+			typeVariable.setSuperClass(getJavaLangObject());
+			typeVariable.setSuperInterfaces(Binding.NO_SUPERINTERFACES);
 			// set firstBound to the binding of the first explicit bound in parameter declaration
-			typeVariable.firstBound = null; // first bound used to compute erasure
+			typeVariable.setFirstBound(null); // first bound used to compute erasure
 		}
 		nextVariable: for (int i = 0; i < paramLength; i++) {
 			TypeParameter typeParameter = typeParameters[i];
@@ -883,12 +883,12 @@ public abstract class Scope {
 					} else
 // SH}
 					if (!superType.isInterface()) {
-						typeVariable.superclass = superRefType;
+						typeVariable.setSuperClass(superRefType);
 					} else {
-						typeVariable.superInterfaces = new ReferenceBinding[] {superRefType};
+						typeVariable.setSuperInterfaces(new ReferenceBinding[] {superRefType});
 					}
 					typeVariable.tagBits |= superType.tagBits & TagBits.ContainsNestedTypeReferences;
-					typeVariable.firstBound = superRefType; // first bound used to compute erasure
+					typeVariable.setFirstBound(superRefType); // first bound used to compute erasure
 				}
 			}
 			TypeReference[] boundRefs = typeParameter.bounds;
@@ -946,7 +946,7 @@ public abstract class Scope {
 							}
 						}
 						int size = typeVariable.superInterfaces.length;
-						System.arraycopy(typeVariable.superInterfaces, 0, typeVariable.superInterfaces = new ReferenceBinding[size + 1], 0, size);
+						System.arraycopy(typeVariable.superInterfaces, 0, typeVariable.setSuperInterfaces(new ReferenceBinding[size + 1]), 0, size);
 						typeVariable.superInterfaces[size] = superRefType;
 					}
 				}
@@ -961,8 +961,12 @@ public abstract class Scope {
 	}
 
 	public ArrayBinding createArrayType(TypeBinding type, int dimension) {
+		return createArrayType(type, dimension, Binding.NO_ANNOTATIONS);
+	}
+
+	public ArrayBinding createArrayType(TypeBinding type, int dimension, AnnotationBinding[] annotations) {
 		if (type.isValidBinding())
-			return environment().createArrayType(type, dimension);
+			return environment().createArrayType(type, dimension, annotations);
 		// do not cache obvious invalid types
 		return new ArrayBinding(type, dimension, environment());
 	}
@@ -4921,25 +4925,27 @@ public abstract class Scope {
 					TypeBinding substitutedSuperclass = Scope.substitute(substitution, originalVariable.superclass);
 					ReferenceBinding[] substitutedInterfaces = Scope.substitute(substitution, originalVariable.superInterfaces);
 					if (originalVariable.firstBound != null) {
-						substitutedVariable.firstBound = originalVariable.firstBound == originalVariable.superclass
+						TypeBinding firstBound;
+						firstBound = originalVariable.firstBound == originalVariable.superclass
 								? substitutedSuperclass // could be array type or interface
 										: substitutedInterfaces[0];
+						substitutedVariable.setFirstBound(firstBound);
 					}
 					switch (substitutedSuperclass.kind()) {
 						case Binding.ARRAY_TYPE :
-							substitutedVariable.superclass = environment.getResolvedType(TypeConstants.JAVA_LANG_OBJECT, null);
-							substitutedVariable.superInterfaces = substitutedInterfaces;
+							substitutedVariable.setSuperClass(environment.getResolvedType(TypeConstants.JAVA_LANG_OBJECT, null));
+							substitutedVariable.setSuperInterfaces(substitutedInterfaces);
 							break;
 						default:
 							if (substitutedSuperclass.isInterface()) {
-								substitutedVariable.superclass = environment.getResolvedType(TypeConstants.JAVA_LANG_OBJECT, null);
+								substitutedVariable.setSuperClass(environment.getResolvedType(TypeConstants.JAVA_LANG_OBJECT, null));
 								int interfaceCount = substitutedInterfaces.length;
 								System.arraycopy(substitutedInterfaces, 0, substitutedInterfaces = new ReferenceBinding[interfaceCount+1], 1, interfaceCount);
 								substitutedInterfaces[0] = (ReferenceBinding) substitutedSuperclass;
-								substitutedVariable.superInterfaces = substitutedInterfaces;
+								substitutedVariable.setSuperInterfaces(substitutedInterfaces);
 							} else {
-								substitutedVariable.superclass = (ReferenceBinding) substitutedSuperclass; // typeVar was extending other typeVar which got substituted with interface
-								substitutedVariable.superInterfaces = substitutedInterfaces;
+								substitutedVariable.setSuperClass((ReferenceBinding) substitutedSuperclass); // typeVar was extending other typeVar which got substituted with interface
+								substitutedVariable.setSuperInterfaces(substitutedInterfaces);
 							}
 					}
 				}

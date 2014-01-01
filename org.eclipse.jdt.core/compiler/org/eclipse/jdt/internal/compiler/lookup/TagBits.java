@@ -96,14 +96,16 @@ public interface TagBits {
 	long PassedBoundCheck = ASTNode.Bit23;
 
 	// set for parameterized type NOT of the form X<?,?>
-	long IsBoundParameterizedType = ASTNode.Bit24;
+	long IsBoundParameterizedType = ASTNode.Bit24; // PTB only.
+	
+	long HasAnnotatedVariants = ASTNode.Bit24; // TVB, STB
 
 	// used by BinaryTypeBinding
 	long HasUnresolvedTypeVariables = ASTNode.Bit25;
 	long HasUnresolvedSuperclass = ASTNode.Bit26;
 	long HasUnresolvedSuperinterfaces = ASTNode.Bit27;
 	long HasUnresolvedEnclosingType = ASTNode.Bit28;
-	long HasUnresolvedMemberTypes = ASTNode.Bit29;
+	long HasUnresolvedMemberTypes = ASTNode.Bit29;  // Also in use at STB.
 
 	long HasTypeVariable = ASTNode.Bit30; // set either for type variables (direct) or parameterized types indirectly referencing type variables
 	long HasDirectWildcard = ASTNode.Bit31; // set for parameterized types directly referencing wildcards

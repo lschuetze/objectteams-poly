@@ -20,6 +20,7 @@
  *								Bug 415291 - [1.8][null] differentiate type incompatibilities due to null annotations
  *								Bug 415850 - [1.8] Ensure RunJDTCoreTests can cope with null annotations enabled
  *								Bug 416176 - [1.8][compiler][null] null type annotations cause grief on type variables
+ *								Bug 417295 - [1.8[[null] Massage type annotated null analysis to gel well with deep encoded type bindings.
  *******************************************************************************/
 package org.eclipse.jdt.internal.compiler.lookup;
 
@@ -306,8 +307,7 @@ public char[] nullAnnotatedReadableName(CompilerOptions options, boolean shortNa
 			brackets[i] = new char[]{'[', ']'}; 
 		}
 	}
-	char[] leafTypeName = shortNames ? this.leafComponentType.shortReadableName() : this.leafComponentType.readableName();
-	return CharOperation.concat(leafTypeName, 
+	return CharOperation.concat(this.leafComponentType.nullAnnotatedReadableName(options, shortNames), 
 								 CharOperation.concatWith(brackets, ' '),
 								 ' ');
 }
@@ -343,9 +343,10 @@ public char[] readableName() /* java.lang.Object[] */ {
 }
 
 public void setTypeAnnotations(AnnotationBinding[] annotations, boolean evalNullAnnotations) {
-	
+	this.tagBits |= TagBits.HasTypeAnnotations;
+	if (annotations == null || annotations.length == 0)
+		return;
 	this.typeAnnotations = annotations;
-	this.tagBits |= TagBits.HasTypeAnnotations | TagBits.HasTypeAnnotations;
 	
 	if (evalNullAnnotations) {
 		long nullTagBits = 0;
@@ -412,7 +413,7 @@ public TypeBinding maybeWrapRoleType(ASTNode typedNode, TypeArgumentUpdater upda
 }
 // SH}
 public String toString() {
-	return this.leafComponentType != null ? this.hasTypeAnnotations() ? annotatedDebugName() : debugName() : "NULL TYPE ARRAY"; //$NON-NLS-1$
+	return this.leafComponentType != null ? debugName() : "NULL TYPE ARRAY"; //$NON-NLS-1$
 }
 public TypeBinding unannotated() {
 	return this.hasTypeAnnotations() ? this.environment.getUnannotatedType(this) : this;

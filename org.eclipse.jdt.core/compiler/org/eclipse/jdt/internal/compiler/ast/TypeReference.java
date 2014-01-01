@@ -19,6 +19,7 @@
  *								bug 392384 - [1.8][compiler][null] Restore nullness info from type annotations in class files
  *								Bug 415043 - [1.8][null] Follow-up re null type annotations after bug 392099
  *								Bug 415850 - [1.8] Ensure RunJDTCoreTests can cope with null annotations enabled
+ *								Bug 417295 - [1.8[[null] Massage type annotated null analysis to gel well with deep encoded type bindings.
  *        Andy Clement (GoPivotal, Inc) aclement@gopivotal.com - Contributions for
  *                          Bug 383624 - [1.8][compiler] Revive code generation support for type annotations (from Olivier's work)
  *                          Bug 409236 - [1.8][compiler] Type annotations on intersection cast types dropped by code generator
@@ -65,9 +66,8 @@ public abstract class TypeReference extends Expression {
 	public static final TypeReference[] NO_TYPE_ARGUMENTS = new TypeReference[0];
 static class AnnotationCollector extends ASTVisitor {
 	List annotationContexts;
-	TypeReference typeReference;
+	Expression typeReference;
 	int targetType;
-	Annotation[] primaryAnnotations;
 	int info = 0;
 	int info2 = 0;
 	LocalVariableBinding localVariable;
@@ -83,7 +83,6 @@ static class AnnotationCollector extends ASTVisitor {
 		this.annotationContexts = annotationContexts;
 		this.typeReference = typeParameter.type;
 		this.targetType = targetType;
-		this.primaryAnnotations = typeParameter.annotations;
 		this.info = typeParameterIndex;
 	}
 
@@ -95,7 +94,6 @@ static class AnnotationCollector extends ASTVisitor {
 		this.annotationContexts = annotationContexts;
 		this.typeReference = localDeclaration.type;
 		this.targetType = targetType;
-		this.primaryAnnotations = localDeclaration.annotations;
 		this.localVariable = localVariable;
 	}
 
@@ -107,38 +105,9 @@ static class AnnotationCollector extends ASTVisitor {
 		this.annotationContexts = annotationContexts;
 		this.typeReference = localDeclaration.type;
 		this.targetType = targetType;
-		this.primaryAnnotations = localDeclaration.annotations;
 		this.info = parameterIndex;
 	}
 
-	public AnnotationCollector(
-			MethodDeclaration methodDeclaration,
-			int targetType,
-			List annotationContexts) {
-		this.annotationContexts = annotationContexts;
-		this.typeReference = methodDeclaration.returnType;
-		this.targetType = targetType;
-		this.primaryAnnotations = methodDeclaration.annotations;
-	}
-
-	public AnnotationCollector(
-			ConstructorDeclaration constructorDeclaration,
-			int targetType,
-			List annotationContexts) {
-		this.annotationContexts = annotationContexts;
-		this.targetType = targetType;
-		this.primaryAnnotations = constructorDeclaration.annotations;
-	}
-
-	public AnnotationCollector(
-			FieldDeclaration fieldDeclaration,
-			int targetType,
-			List annotationContexts) {
-		this.annotationContexts = annotationContexts;
-		this.typeReference = fieldDeclaration.type;
-		this.targetType = targetType;
-		this.primaryAnnotations = fieldDeclaration.annotations;
-	}
 	public AnnotationCollector(
 			TypeReference typeReference,
 			int targetType,
@@ -148,7 +117,7 @@ static class AnnotationCollector extends ASTVisitor {
 		this.targetType = targetType;
 	}
 	public AnnotationCollector(
-			TypeReference typeReference,
+			Expression typeReference,
 			int targetType,
 			int info,
 			List annotationContexts) {
@@ -192,9 +161,9 @@ static class AnnotationCollector extends ASTVisitor {
 	private boolean internalVisit(Annotation annotation) {
 		AnnotationContext annotationContext = null;
 		if (annotation.isRuntimeTypeInvisible()) {
-			annotationContext = new AnnotationContext(annotation, this.typeReference, this.targetType, this.primaryAnnotations, AnnotationContext.INVISIBLE, this.annotationsOnDimensions, this.dimensions);
+			annotationContext = new AnnotationContext(annotation, this.typeReference, this.targetType, AnnotationContext.INVISIBLE);
 		} else if (annotation.isRuntimeTypeVisible()) {
-			annotationContext = new AnnotationContext(annotation, this.typeReference, this.targetType, this.primaryAnnotations, AnnotationContext.VISIBLE, this.annotationsOnDimensions, this.dimensions);
+			annotationContext = new AnnotationContext(annotation, this.typeReference, this.targetType, AnnotationContext.VISIBLE);
 		}
 		if (annotationContext != null) {
 			annotationContext.wildcard = this.currentWildcard;
@@ -375,17 +344,46 @@ public FlowInfo analyseCode(BlockScope currentScope, FlowContext flowContext, Fl
 public void checkBounds(Scope scope) {
 	// only parameterized type references have bounds
 }
-public abstract TypeReference copyDims(int dim);
-public abstract TypeReference copyDims(int dim, Annotation[][] annotationsOnDimensions);
+public abstract TypeReference augmentTypeWithAdditionalDimensions(int additionalDimensions, Annotation[][] additionalAnnotations, boolean isVarargs);
+
+protected Annotation[][] getMergedAnnotationsOnDimensions(int additionalDimensions, Annotation[][] additionalAnnotations) {
+	/* Note, we actually concatenate the additional annotations after base annotations, in bindings, they should appear before base annotations.
+	   Given @English int @Nullable [] x @NonNull []; the type x is a @NonNull arrays of of @Nullable arrays of @English Strings, not the other
+	   way about. Changing this in the compiler AST representation will cause too many ripples, so we leave it as is. On the bindings, the type
+	   will reflect rotated (i.e will reflect correctly). See AnnotatableTypeSystem.flattenedAnnotations
+	*/
+	Annotation[][] annotationsOnDimensions = this.getAnnotationsOnDimensions(true);
+	int dimensions = this.dimensions();
+	
+	if (annotationsOnDimensions == null && additionalAnnotations == null)
+		return null;
+
+	final int totalDimensions = dimensions + additionalDimensions;
+	Annotation [][] mergedAnnotations = new Annotation[totalDimensions][];
+	if (annotationsOnDimensions != null) {
+		for (int i = 0; i < dimensions; i++) {
+			mergedAnnotations[i] = annotationsOnDimensions[i];
+		} 
+	}
+	if (additionalAnnotations != null) {
+		for (int i = dimensions, j = 0; i < totalDimensions; i++, j++) {
+			mergedAnnotations[i] = additionalAnnotations[j];
+		}
+	}
+	return mergedAnnotations;
+}
+
 public int dimensions() {
 	return 0;
 }
+
 //{ObjectTeams: synthetic AST can use TypeReference as receiver for static method:
 @Override
 public void generateCode(BlockScope currentScope, CodeStream codeStream, boolean valueRequired) {
 	// nop
 }
 // SH}
+
 public AnnotationContext[] getAllAnnotationContexts(int targetType) {
 	List allAnnotationContexts = new ArrayList();
 	AnnotationCollector collector = new AnnotationCollector(this, targetType, allAnnotationContexts);
@@ -400,6 +398,14 @@ public AnnotationContext[] getAllAnnotationContexts(int targetType) {
  */
 public void getAllAnnotationContexts(int targetType, int info, List allAnnotationContexts) {
 	AnnotationCollector collector = new AnnotationCollector(this, targetType, info, allAnnotationContexts);
+	this.traverse(collector, (BlockScope) null);
+}
+public void getAllAnnotationContexts(int targetType, int info, List allAnnotationContexts, Annotation [] se7Annotations) {
+	AnnotationCollector collector = new AnnotationCollector(this, targetType, info, allAnnotationContexts);
+	for (int i = 0, length = se7Annotations == null ? 0 : se7Annotations.length; i < length; i++) {
+		Annotation annotation = se7Annotations[i];
+		annotation.traverse(collector, (BlockScope) null);
+	}
 	this.traverse(collector, (BlockScope) null);
 }
 /**
@@ -428,6 +434,22 @@ public void getAllAnnotationContexts(int targetType, List allAnnotationContexts)
 	this.traverse(collector, (BlockScope) null);
 }
 public Annotation[][] getAnnotationsOnDimensions() {
+	return getAnnotationsOnDimensions(false);
+}
+
+public TypeReference [][] getTypeArguments() {
+	return null;
+}
+/**
+ * @param useSourceOrder if true annotations on dimensions are returned in source order, otherwise they are returned per
+ * how they ought to be interpreted by a type system, or external persistence view. For example, given the following:
+ * int @Nullable [] f @NonNull [] ==> f is really a @NonNull array of @Nullable arrays of ints. This is the type system
+ * view since extended dimensions bind more readily than type components that precede the identifier. This is how it ought
+ * to be encoded in bindings and how it ought to be persisted in class files. However for DOM/AST construction, we need the
+ * dimensions in source order, so we provide a way for the clients to ask what they want. 
+ * 
+ */
+public Annotation[][] getAnnotationsOnDimensions(boolean useSourceOrder) {
 	return null;
 }
 
@@ -628,6 +650,12 @@ public boolean isDeclaredLifting() {
 public boolean isWildcard() {
 	return false;
 }
+public boolean isUnionType() {
+	return false;
+}
+public boolean isVarargs() {
+	return (this.bits & ASTNode.IsVarArgs) != 0;
+}
 public boolean isParameterizedTypeReference() {
 	return false;
 }
@@ -759,7 +787,7 @@ protected void checkNullConstraints(Scope scope, TypeReference[] typeArguments) 
 protected void checkNullConstraints(Scope scope, TypeBinding[] variables, int rank) {
 	if (variables != null && variables.length > rank) {
 		if (variables[rank].hasNullTypeAnnotations()) {
-			if ((this.resolvedType.tagBits & TagBits.AnnotationNullMASK) != (variables[rank].tagBits & TagBits.AnnotationNullMASK)) {
+			if (NullAnnotationMatching.validNullTagBits(this.resolvedType.tagBits) != NullAnnotationMatching.validNullTagBits(variables[rank].tagBits)) {
 				scope.problemReporter().nullityMismatchTypeArgument(variables[rank], this.resolvedType, this);
 			}
     	}

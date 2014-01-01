@@ -22,17 +22,23 @@
  *								bug 374605 - Unreasonable warning for enum-based switch statements
  *								bug 384870 - [compiler] @Deprecated annotation not detected if preceded by other annotation
  *								bug 393719 - [compiler] inconsistent warnings on iteration variables
- *								Bug 392099 - [1.8][compiler][null] Apply null annotation on types for null analysis 
+ *								Bug 392099 - [1.8][compiler][null] Apply null annotation on types for null analysis
+ *								Bug 417295 - [1.8[[null] Massage type annotated null analysis to gel well with deep encoded type bindings.
  *     Jesper S Moller - Contributions for
  *								bug 382721 - [1.8][compiler] Effectively final variables needs special treatment
+ *								bug 412153 - [1.8][compiler] Check validity of annotations which may be repeatable
+ *								bug 412153 - [1.8][compiler] Check validity of annotations which may be repeatable
  *******************************************************************************/
 package org.eclipse.jdt.internal.compiler.ast;
 
+import java.util.HashMap;
+import java.util.Map;
+
 import org.eclipse.jdt.core.compiler.CharOperation;
+import org.eclipse.jdt.internal.compiler.ASTVisitor;
 import org.eclipse.jdt.internal.compiler.classfmt.ClassFileConstants;
 import org.eclipse.jdt.internal.compiler.env.AccessRestriction;
 import org.eclipse.jdt.internal.compiler.lookup.*;
-import org.eclipse.jdt.internal.compiler.ASTVisitor;
 import org.eclipse.objectteams.otdt.internal.core.compiler.lookup.CallinCalloutBinding;
 
 /**
@@ -780,8 +786,16 @@ public abstract class ASTNode implements TypeConstants, TypeIds {
 			Annotation annotation = sourceAnnotations[i];
 			final Binding annotationRecipient = annotation.recipient;
 			if (annotationRecipient != null && recipient != null) {
-				// only local and field can share annnotations
+				// only local and field can share annnotations and their types.
 				switch (recipient.kind()) {
+					case Binding.TYPE_USE:
+						if (annotations != null) {
+							// need to fill the instances array
+							for (int j = 0; j < length; j++) {
+								annotations[j] = sourceAnnotations[j].getCompilerAnnotation();
+							}
+						}
+						break;
 					case Binding.FIELD :
 						FieldBinding field = (FieldBinding) recipient;
 						field.tagBits = ((FieldBinding) annotationRecipient).tagBits;
@@ -828,6 +842,11 @@ public abstract class ASTNode implements TypeConstants, TypeIds {
 							}
 						}
 						break;
+					default:
+						if (annotations != null) {
+							annotations[i] = annotation.getCompilerAnnotation();
+						}
+						break;
 				}
 				return annotations;
 			} else {
@@ -841,30 +860,66 @@ public abstract class ASTNode implements TypeConstants, TypeIds {
 		}
 
 		if (copySE8AnnotationsToType)
-			copySE8AnnotationsToType(scope, recipient, annotations);
+			copySE8AnnotationsToType(scope, recipient, sourceAnnotations);
+
+		if (annotations != null && length > 0 && recipient != null && recipient.isAnnotationType()) {
+			// See if this is meta-annotated as repeatable and if so validate constraints.
+			for (int i = 0; i < length; i++) {
+				Annotation annotation = sourceAnnotations[i];
+				MemberValuePair[] valuePairs = annotation.memberValuePairs();
+				ReferenceBinding annotationType = annotations[i] != null ? annotations[i].getAnnotationType() : null;
+				if (annotationType != null && annotationType.id == TypeIds.T_JavaLangAnnotationRepeatable && valuePairs != null && valuePairs.length > 0) {
+					annotation.checkRepeatableAnnotation(valuePairs[0], scope, valuePairs[0].compilerElementPair.value);
+				}
+			}
+		}
 		
 		// check duplicate annotations
 		if (annotations != null && length > 1) {
 			AnnotationBinding[] distinctAnnotations = annotations; // only copy after 1st duplicate is detected
+			Map implicitContainerAnnotations = null;
 			for (int i = 0; i < length; i++) {
 				AnnotationBinding annotation = distinctAnnotations[i];
 				if (annotation == null) continue;
-				TypeBinding annotationType = annotation.getAnnotationType();
+				ReferenceBinding annotationType = annotation.getAnnotationType();
 				boolean foundDuplicate = false;
 				for (int j = i+1; j < length; j++) {
 					AnnotationBinding otherAnnotation = distinctAnnotations[j];
 					if (otherAnnotation == null) continue;
 					if (otherAnnotation.getAnnotationType() == annotationType) {
-						foundDuplicate = true;
-						if (distinctAnnotations == annotations) {
-							System.arraycopy(distinctAnnotations, 0, distinctAnnotations = new AnnotationBinding[length], 0, length);
+						if (annotationType.isRepeatableAnnotation()) {
+							ReferenceBinding resolvedContainer = annotationType.resolveContainerAnnotation();
+							if (resolvedContainer != null) {
+								// Since this is a repeated annotation, we need to check if the container is also used - so store it
+								// in a map of (container's ReferenceBinding -> the repeated source Annotation)
+								if (implicitContainerAnnotations == null) implicitContainerAnnotations = new HashMap(3);
+								implicitContainerAnnotations.put(resolvedContainer, sourceAnnotations[i]);
+								// Validate the repeated *use* of a repeatable annotation.
+								Annotation.checkContainingAnnotation(sourceAnnotations[i], scope, resolvedContainer, annotationType);
+							}
+						} else {
+							foundDuplicate = true;
+							if (distinctAnnotations == annotations) {
+								System.arraycopy(distinctAnnotations, 0, distinctAnnotations = new AnnotationBinding[length], 0, length);
+							}
+							distinctAnnotations[j] = null; // report it only once
+							scope.problemReporter().duplicateAnnotation(sourceAnnotations[j], scope.compilerOptions().sourceLevel);
 						}
-						distinctAnnotations[j] = null; // report it only once
-						scope.problemReporter().duplicateAnnotation(sourceAnnotations[j]);
 					}
 				}
 				if (foundDuplicate) {
-					scope.problemReporter().duplicateAnnotation(sourceAnnotations[i]);
+					scope.problemReporter().duplicateAnnotation(sourceAnnotations[i], scope.compilerOptions().sourceLevel);
+				}
+			}
+			// Check for presence of repeating annotation together with the containing annotation
+			if (implicitContainerAnnotations != null) {
+				for (int i = 0; i < length; i++) {
+					if (distinctAnnotations[i] == null) continue;
+					Annotation annotation = sourceAnnotations[i];
+					ReferenceBinding annotationType = distinctAnnotations[i].getAnnotationType();
+					if (implicitContainerAnnotations.containsKey(annotationType)) {
+						scope.problemReporter().repeatedAnnotationWithContainer((Annotation) implicitContainerAnnotations.get(annotationType), annotation);
+					}
 				}
 			}
 		}
@@ -895,20 +950,31 @@ public abstract class ASTNode implements TypeConstants, TypeIds {
 	/** When SE8 annotations feature in SE7 locations, they get attributed to the declared entity. Copy these to the type of the declared entity (field, local, argument etc.)
 	    We leave in the annotation in the declared entity's binding as of now, i.e we do a copy not a transfer.
 	*/
-	public static void copySE8AnnotationsToType(BlockScope scope, Binding recipient, AnnotationBinding[] annotations) {
+	public static void copySE8AnnotationsToType(BlockScope scope, Binding recipient, Annotation[] annotations) {
 		if (annotations != null && recipient.kind() != Binding.TYPE_USE) {
 			AnnotationBinding [] se8Annotations = null;
 			int se8count = 0;
+			long se8nullBits = 0;
+			Annotation se8NullAnnotation = null;
 			for (int i = 0, length = annotations.length; i < length; i++) {
-				final ReferenceBinding annotationType = annotations[i].getAnnotationType();
+				AnnotationBinding annotation = annotations[i].getCompilerAnnotation();
+				if (annotation == null) continue;
+				final ReferenceBinding annotationType = annotation.getAnnotationType();
 				long metaTagBits = annotationType.getAnnotationTagBits();
 				if ((metaTagBits & TagBits.AnnotationForTypeUse) != 0) {
 					if (se8Annotations == null) {
-						se8Annotations = new AnnotationBinding[] { annotations[i] };
+						se8Annotations = new AnnotationBinding[] { annotation };
 						se8count = 1;
 					} else {
 						System.arraycopy(se8Annotations, 0, se8Annotations = new AnnotationBinding[se8count + 1], 0, se8count);
-						se8Annotations[se8count++] = annotations[i];
+						se8Annotations[se8count++] = annotation;
+					}
+					if (annotationType.id == TypeIds.T_ConfiguredAnnotationNonNull) {
+						se8nullBits = TagBits.AnnotationNonNull;
+						se8NullAnnotation = annotations[i];
+					} else if (annotationType.id == TypeIds.T_ConfiguredAnnotationNullable) {
+						se8nullBits = TagBits.AnnotationNullable;
+						se8NullAnnotation = annotations[i];
 					}
 				}
 			}
@@ -916,14 +982,11 @@ public abstract class ASTNode implements TypeConstants, TypeIds {
 				switch (recipient.kind()) {
 					case Binding.LOCAL:
 						LocalVariableBinding local = (LocalVariableBinding) recipient;
-						if (Annotation.isTypeUseCompatible(local.declaration.type, scope)) { // discard hybrid annotations on package qualified types.
+						TypeReference typeRef = local.declaration.type;
+						if (Annotation.isTypeUseCompatible(typeRef, scope)) { // discard hybrid annotations on package qualified types.
 							local.declaration.bits |= HasTypeAnnotations;
-							final TypeBinding localType = local.type;
-							TypeBinding oldLeafType = localType.leafComponentType();
-							AnnotationBinding [][] goodies = new AnnotationBinding[local.declaration.type.getAnnotatableLevels()][];
-							goodies[0] = se8Annotations;  // @T X.Y.Z local; ==> @T should annotate X
-							TypeBinding newLeafType = scope.environment().createAnnotatedType(oldLeafType, goodies);
-							local.type = localType.isArrayType() ? scope.environment().createArrayType(newLeafType, localType.dimensions(), localType.getTypeAnnotations()) : newLeafType;
+							typeRef.bits |= HasTypeAnnotations;
+							local.type = mergeAnnotationsIntoType(scope, se8Annotations, se8nullBits, se8NullAnnotation, typeRef, local.type);
 						}
 						break;
 					case Binding.FIELD:
@@ -931,12 +994,9 @@ public abstract class ASTNode implements TypeConstants, TypeIds {
 						SourceTypeBinding sourceType = (SourceTypeBinding) field.declaringClass;
 						FieldDeclaration fieldDeclaration = sourceType.scope.referenceContext.declarationOf(field);
 						if (Annotation.isTypeUseCompatible(fieldDeclaration.type, scope)) { // discard hybrid annotations on package qualified types.
-							TypeBinding fieldType = field.type;
-							TypeBinding oldLeafType = fieldType.leafComponentType();
-							AnnotationBinding [][] goodies = new AnnotationBinding[fieldDeclaration.type.getAnnotatableLevels()][];
-							goodies[0] = se8Annotations; // @T X.Y.Z field; ==> @T should annotate X
-							TypeBinding newLeafType = scope.environment().createAnnotatedType(oldLeafType, goodies);
-							field.type = fieldType.isArrayType() ? scope.environment().createArrayType(newLeafType, fieldType.dimensions(), fieldType.getTypeAnnotations()) : newLeafType;
+							fieldDeclaration.bits |= HasTypeAnnotations;
+							fieldDeclaration.type.bits |= HasTypeAnnotations;
+							field.type = mergeAnnotationsIntoType(scope, se8Annotations, se8nullBits, se8NullAnnotation, fieldDeclaration.type, field.type);
 						}
 						break;
 					case Binding.METHOD:
@@ -945,18 +1005,39 @@ public abstract class ASTNode implements TypeConstants, TypeIds {
 							sourceType = (SourceTypeBinding) method.declaringClass;
 							MethodDeclaration methodDecl = (MethodDeclaration) sourceType.scope.referenceContext.declarationOf(method);
 							if (Annotation.isTypeUseCompatible(methodDecl.returnType, scope)) {
-								final TypeBinding returnType = method.returnType;
-								TypeBinding oldLeafType = returnType.leafComponentType();
-								AnnotationBinding [][] goodies = new AnnotationBinding[methodDecl.returnType.getAnnotatableLevels()][];
-								goodies[0] = se8Annotations;
-								TypeBinding newLeafType = scope.environment().createAnnotatedType(oldLeafType, goodies);
-								method.returnType = returnType.isArrayType() ? scope.environment().createArrayType(newLeafType, returnType.dimensions(), returnType.getTypeAnnotations()) : newLeafType;
+								methodDecl.bits |= HasTypeAnnotations;
+								methodDecl.returnType.bits |= HasTypeAnnotations;
+								method.returnType = mergeAnnotationsIntoType(scope, se8Annotations, se8nullBits, se8NullAnnotation, methodDecl.returnType, method.returnType);
 							}
 						}
 						break;
 				}
 			}
 		}
+	}
+
+	private static TypeBinding mergeAnnotationsIntoType(BlockScope scope, AnnotationBinding[] se8Annotations, long se8nullBits, Annotation se8NullAnnotation,
+			TypeReference typeRef, TypeBinding existingType) 
+	{
+		if (existingType == null || !existingType.isValidBinding()) return existingType;
+		TypeReference unionRef = typeRef.isUnionType() ? ((UnionTypeReference) typeRef).typeReferences[0] : null;
+		
+		long prevNullBits = existingType.tagBits & TagBits.AnnotationNullMASK;
+		if (se8nullBits != 0 && prevNullBits != se8nullBits && ((prevNullBits | se8nullBits) == TagBits.AnnotationNullMASK)) {
+			scope.problemReporter().contradictoryNullAnnotations(se8NullAnnotation);
+		}
+		TypeBinding oldLeafType = (unionRef == null) ? existingType.leafComponentType() : unionRef.resolvedType;
+		AnnotationBinding [][] goodies = new AnnotationBinding[typeRef.getAnnotatableLevels()][];
+		goodies[0] = se8Annotations;  // @T X.Y.Z local; ==> @T should annotate X
+		TypeBinding newLeafType = scope.environment().createAnnotatedType(oldLeafType, goodies);
+
+		if (unionRef == null) {
+			typeRef.resolvedType = existingType.isArrayType() ? scope.environment().createArrayType(newLeafType, existingType.dimensions(), existingType.getTypeAnnotations()) : newLeafType;
+		} else {
+			unionRef.resolvedType = newLeafType;
+			unionRef.bits |= HasTypeAnnotations;
+		}
+		return typeRef.resolvedType;
 	}
 
 /**

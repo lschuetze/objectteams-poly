@@ -3427,4 +3427,660 @@ public class NegativeTypeAnnotationTest extends AbstractRegressionTest {
 				"p.q cannot be resolved to a type\n" + 
 				"----------\n");
 	}
+	// https://bugs.eclipse.org/bugs/show_bug.cgi?id=417076, Eclipse compiler rejects multiple annotations for varargs.
+	public void test417076() {
+		this.runNegativeTest(
+				new String[] {
+					"X.java",
+					"import java.lang.annotation.ElementType;\n" +
+					"import java.lang.annotation.Target;\n" +
+					"@Target(ElementType.TYPE_USE)\n" +
+					"@interface A {\n" +
+					"}\n" +
+					"@Target(ElementType.TYPE_USE)\n" +
+					"@interface B {\n" +
+					"}\n" +
+					"@Target(ElementType.TYPE_USE)\n" +
+					"@interface C {\n" +
+					"}\n" +
+					"public class X {\n" +
+					"	public @A String foo(int @B @C @D ... args) {\n" +
+					"	      return null;\n" +
+					"	}\n" +
+					"}\n"
+				},
+				"----------\n" + 
+				"1. ERROR in X.java (at line 13)\n" + 
+				"	public @A String foo(int @B @C @D ... args) {\n" + 
+				"	                                ^\n" + 
+				"D cannot be resolved to a type\n" + 
+				"----------\n");
+	}
+	// https://bugs.eclipse.org/bugs/show_bug.cgi?id=417076, Eclipse compiler rejects multiple annotations for varargs.
+	public void test417076b() {
+		this.runNegativeTest(
+				new String[] {
+					"X.java",
+					"import java.lang.annotation.ElementType;\n" +
+					"import java.lang.annotation.Target;\n" +
+					"@Target(ElementType.TYPE_USE)\n" +
+					"@interface A {\n" +
+					"}\n" +
+					"@Target(ElementType.TYPE_USE)\n" +
+					"@interface B {\n" +
+					"}\n" +
+					"@Target(ElementType.TYPE_USE)\n" +
+					"@interface C {\n" +
+					"}\n" +
+					"public class X {\n" +
+					"	public @A String foo(int @B @C @A ... args) {\n" +
+					"	      return null;\n" +
+					"	}\n" +
+					"	public @A String goo(int @B @C @A ... args) {\n" +
+					"	}\n" +
+					"}\n"
+				},
+				"----------\n" + 
+				"1. ERROR in X.java (at line 16)\n" + 
+				"	public @A String goo(int @B @C @A ... args) {\n" + 
+				"	                 ^^^^^^^^^^^^^^^^^^^^^^^^^^\n" + 
+				"This method must return a result of type String\n" + 
+				"----------\n");
+	}
+	// [1.8][compiler] Illegal type annotations not rejected (https://bugs.eclipse.org/bugs/show_bug.cgi?id=415308)
+	// This is the basic test case which demonstrated the issue for a local variable.
+	// We correctly identified the problem in function bar but failed to do so for foo.
+	public void test415308a() {
+		this.runNegativeTest(
+				new String[] {
+					"X.java",
+					"import java.lang.annotation.ElementType;\n" +
+					"import java.lang.annotation.Target;\n" +
+					"\n" +
+					"@Target(ElementType.TYPE_USE)\n" +
+					"@interface Illegal {\n" +
+					"}\n" +
+					"class Y {\n" +
+					"	static class Z {\n" +
+					"		Z() {}\n" +
+					"	}\n" +
+					"}\n" +
+					"class X {\n" +
+					"	Y.Z foo() {\n" +
+					"		@Illegal Y.Z z = null;\n" +
+					"		return z;\n" +
+					"	}\n" +
+					"	Y.Z bar() {\n" +
+					"		Y.Z z = (@Illegal Y.Z)null;\n" +
+					"		return z;\n" +
+					"	}\n" +
+					"}\n"
+				},
+				"----------\n" +
+				"1. ERROR in X.java (at line 14)\n" +
+				"	@Illegal Y.Z z = null;\n" +
+				"	^^^^^^^^\n" +
+				"Type annotations are not allowed on type names used to access static members\n" +
+				"----------\n" +
+				"2. ERROR in X.java (at line 18)\n" +
+				"	Y.Z z = (@Illegal Y.Z)null;\n" +
+				"	         ^^^^^^^^\n" +
+				"Type annotations are not allowed on type names used to access static members\n" +
+				"----------\n");
+	}
+	// [1.8][compiler] Illegal type annotations not rejected (https://bugs.eclipse.org/bugs/show_bug.cgi?id=415308)
+	// This test case is similar to test415308a. SimpleTypes on which annotations are applied are modified to array
+	// types.
+	public void test415308a2() {
+		this.runNegativeTest(
+				new String[] {
+						"X.java",
+						"import java.lang.annotation.ElementType;\n" +
+						"import java.lang.annotation.Target;\n" +
+						"\n" +
+						"@Target(ElementType.TYPE_USE)\n" +
+						"@interface Illegal {\n" +
+						"}\n" +
+						"class Y {\n" +
+						"	static class Z {\n" +
+						"		Z() {}\n" +
+						"	}\n" +
+						"}\n" +
+						"class X {\n" +
+						"	Y.Z[] foo() {\n" +
+						"		@Illegal Y.Z[] z = null;\n" +
+						"		return z;\n" +
+						"	}\n" +
+						"	Y.Z[] bar() {\n" +
+						"		Y.Z[] z = (@Illegal Y.Z[])null;\n" +
+						"		return z;\n" +
+						"	}\n" +
+						"}\n"
+				},
+				"----------\n" +
+				"1. ERROR in X.java (at line 14)\n" +
+				"	@Illegal Y.Z[] z = null;\n" +
+				"	^^^^^^^^\n" +
+				"Type annotations are not allowed on type names used to access static members\n" +
+				"----------\n" +
+				"2. ERROR in X.java (at line 18)\n" +
+				"	Y.Z[] z = (@Illegal Y.Z[])null;\n" +
+				"	           ^^^^^^^^\n" +
+				"Type annotations are not allowed on type names used to access static members\n" +
+				"----------\n");
+	}
+	// [1.8][compiler] Illegal type annotations not rejected (https://bugs.eclipse.org/bugs/show_bug.cgi?id=415308)
+	// Testing type use annotations on nested types.
+	// We check all the qualifiers as we look for a static type. This test checks if we are able to
+	// go beyond 1 level as part of the loop.
+	public void test415308b() {
+		this.runNegativeTest(
+				new String[] {
+						"X.java",
+						"import java.lang.annotation.ElementType;\n" +
+						"import java.lang.annotation.Target;\n" +
+						"\n" +
+						"@Target(ElementType.TYPE_USE)\n" +
+						"@interface Illegal {\n" +
+						"}\n" +
+						"class Y {\n" +
+						"	static class YY {\n" +
+						"		class Z {\n" +
+						"			Z() {}\n" +
+						"		}\n" +
+						"	}\n" +
+						"}\n" +
+						"class X {\n" +
+						"	Y.YY.Z foo() {\n" +
+						"		@Illegal Y.YY.Z z = null;\n" +
+						"		return z;\n" +
+						"	}\n" +
+						"	Y.YY.Z foo2() {\n" +
+						"		Y.@Illegal YY.Z z = null;\n" +
+						"		return z;\n" +
+						"	}\n" +
+						"	Y.YY.Z foo3() {\n" +
+						"		Y.YY.@Illegal Z z = null;\n" +
+						"		return z;\n" +
+						"	}\n" +
+						"}\n"
+				},
+				"----------\n" +
+				"1. ERROR in X.java (at line 16)\n" +
+				"	@Illegal Y.YY.Z z = null;\n" +
+				"	^^^^^^^^\n" +
+				"Type annotations are not allowed on type names used to access static members\n" +
+				"----------\n");
+	}
+	// [1.8][compiler] Illegal type annotations not rejected (https://bugs.eclipse.org/bugs/show_bug.cgi?id=415308)
+	// This test case is similar to test415308a. SimpleTypes on which annotations are applied are modified to array
+	// types.
+	public void test415308b2() {
+		this.runNegativeTest(
+				new String[] {
+						"X.java",
+						"import java.lang.annotation.ElementType;\n" +
+						"import java.lang.annotation.Target;\n" +
+						"\n" +
+						"@Target(ElementType.TYPE_USE)\n" +
+						"@interface Illegal {\n" +
+						"}\n" +
+						"class Y {\n" +
+						"	static class YY {\n" +
+						"		class Z {\n" +
+						"			Z() {}\n" +
+						"		}\n" +
+						"	}\n" +
+						"}\n" +
+						"class X {\n" +
+						"	Y.YY.Z[] foo() {\n" +
+						"		@Illegal Y.YY.Z[] z = null;\n" +
+						"		return z;\n" +
+						"	}\n" +
+						"	Y.YY.Z[] foo2() {\n" +
+						"		Y.@Illegal YY.Z[] z = null;\n" +
+						"		return z;\n" +
+						"	}\n" +
+						"	Y.YY.Z[] foo3() {\n" +
+						"		Y.YY.@Illegal Z[] z = null;\n" +
+						"		return z;\n" +
+						"	}\n" +
+						"}\n"
+				},
+				"----------\n" +
+				"1. ERROR in X.java (at line 16)\n" +
+				"	@Illegal Y.YY.Z[] z = null;\n" +
+				"	^^^^^^^^\n" +
+				"Type annotations are not allowed on type names used to access static members\n" +
+				"----------\n");
+	}
+	// [1.8][compiler] Illegal type annotations not rejected (https://bugs.eclipse.org/bugs/show_bug.cgi?id=415308)
+	// The test case is to validate that we report errors for only type annotations and nothing else in case of
+	// of parameter types.
+	public void test415308c() {
+		this.runNegativeTest(
+				new String[] {
+						"X.java",
+						"import java.lang.annotation.ElementType;\n" +
+						"import java.lang.annotation.Target;\n" +
+						"\n" +
+						"@Target(ElementType.TYPE_USE)\n" +
+						"@interface IllegalTypeUse {\n" +
+						"}\n" +
+						"@Target({ElementType.TYPE_USE, ElementType.PARAMETER})\n" +
+						"@interface LegalTypeUseParam {\n" +
+						"}\n" +
+						"@Target(ElementType.PARAMETER)\n" +
+						"@interface LegalParam {\n" +
+						"}\n" +
+						"class Y {\n" +
+						"	static class Z {\n" +
+						"		Z() {}\n" +
+						"	}\n" +
+						"}\n" +
+						"class X {\n" +
+						"	Y.Z foo(@LegalParam Y.Z z) { //Legal\n" +
+						"		return z;\n" +
+						"	}\n" +
+						"	Y.Z foo2(@LegalTypeUseParam Y.Z z) { //Legal\n" +
+						"		return z;\n" +
+						"	}\n" +
+						"	Y.Z foo3(@IllegalTypeUse @LegalParam Y.Z z) { //Illegal\n" +
+						"		return z;\n" +
+						"	}\n" +
+						"}\n"
+				},
+				"----------\n" +
+				"1. ERROR in X.java (at line 25)\n" +
+				"	Y.Z foo3(@IllegalTypeUse @LegalParam Y.Z z) { //Illegal\n" +
+				"	         ^^^^^^^^^^^^^^^\n" +
+				"Type annotations are not allowed on type names used to access static members\n" +
+				"----------\n");
+	}
+	//[1.8][compiler] Illegal type annotations not rejected (https://bugs.eclipse.org/bugs/show_bug.cgi?id=415308)
+	//The test case is to validate type use annotation for class fields.
+	public void test415308d() {
+		this.runNegativeTest(
+				new String[] {
+						"X.java",
+						"import java.lang.annotation.ElementType;\n" +
+						"import java.lang.annotation.Target;\n" +
+						"\n" +
+						"@Target(ElementType.TYPE_USE)\n" +
+						"@interface Illegal {\n" +
+						"}\n" +
+						"class Y {\n" +
+						"	static class Z {\n" +
+						"		Z() {}\n" +
+						"	}\n" +
+						"}\n" +
+						"class X {\n" +
+						"   @Illegal \n" +
+						"	Y.Z z;\n" +
+						"}\n"
+				},
+				"----------\n" +
+				"1. ERROR in X.java (at line 13)\n" +
+				"	@Illegal \n" +
+				"	^^^^^^^^\n" +
+				"Type annotations are not allowed on type names used to access static members\n" +
+				"----------\n");
+	}
+	//[1.8][compiler] Illegal type annotations not rejected (https://bugs.eclipse.org/bugs/show_bug.cgi?id=415308)
+	//The test case checks for annotations which are not exclusively TYPE_USE. We should not report a error.
+	public void test415308d2() {
+		this.runNegativeTest(
+				new String[] {
+						"X.java",
+						"import java.lang.annotation.ElementType;\n" +
+						"import java.lang.annotation.Target;\n" +
+						"\n" +
+						"@Target({ElementType.TYPE_USE, ElementType.FIELD})\n" +
+						"@interface Legal {\n" +
+						"}\n" +
+						"class Y {\n" +
+						"	static class Z {\n" +
+						"		Z() {}\n" +
+						"	}\n" +
+						"}\n" +
+						"class X {\n" +
+						"   @Legal \n" +
+						"	Y.Z z;\n" +
+						"}\n"
+				},
+				"");
+	}
+	//[1.8][compiler] Illegal type annotations not rejected (https://bugs.eclipse.org/bugs/show_bug.cgi?id=415308)
+	//The test case is to validate type use annotation for class fields.
+	//We check all the qualifiers as we look for a static type. This test checks if we are able to
+	//go beyond 1 level as part of the loop.
+	public void test415308e() {
+		this.runNegativeTest(
+				new String[] {
+						"X.java",
+						"import java.lang.annotation.ElementType;\n" +
+						"import java.lang.annotation.Target;\n" +
+						"\n" +
+						"@Target(ElementType.TYPE_USE)\n" +
+						"@interface Illegal {\n" +
+						"}\n" +
+						"@Target(ElementType.TYPE_USE)\n" +
+						"@interface Illegal2 {\n" +
+						"}\n" +
+						"@Target(ElementType.FIELD)\n" +
+						"@interface Legal {\n" +
+						"}\n" +
+						"class Y {\n" +
+						"	static class YY {\n" +
+						"		class Z {\n" +
+						"			Z() {}\n" +
+						"		}\n" +
+						"	}\n" +
+						"}\n" +
+						"class X {\n" +
+						"   @Legal @Illegal @Illegal2\n" +
+						"	Y.YY.Z z;\n" +
+						"}\n"
+				},
+				"----------\n" +
+				"1. ERROR in X.java (at line 21)\n" +
+				"	@Legal @Illegal @Illegal2\n" +
+				"	       ^^^^^^^^\n" +
+				"Type annotations are not allowed on type names used to access static members\n" +
+				"----------\n" +
+				"2. ERROR in X.java (at line 21)\n" +
+				"	@Legal @Illegal @Illegal2\n" +
+				"	                ^^^^^^^^^\n" +
+				"Type annotations are not allowed on type names used to access static members\n" +
+				"----------\n");
+	}
+	// [1.8][compiler] Illegal type annotations not rejected (https://bugs.eclipse.org/bugs/show_bug.cgi?id=415308)
+	// The test case is to validate type use annotations on return types for methods.
+	public void test415308f() {
+		this.runNegativeTest(
+				new String[] {
+						"X.java",
+						"import java.lang.annotation.ElementType;\n" +
+						"import java.lang.annotation.Target;\n" +
+						"\n" +
+						"@Target(ElementType.TYPE_USE)\n" +
+						"@interface Illegal {\n" +
+						"}\n" +
+						"class Y {\n" +
+						"	static class Z {\n" +
+						"		Z() {}\n" +
+						"	}\n" +
+						"}\n" +
+						"class X {\n" +
+						"   public @Illegal Y.Z foo() { return null;}\n" +
+						"}\n"
+				},
+				"----------\n" +
+				"1. ERROR in X.java (at line 13)\n" +
+				"	public @Illegal Y.Z foo() { return null;}\n" +
+				"	       ^^^^^^^^\n" +
+				"Type annotations are not allowed on type names used to access static members\n" +
+				"----------\n");
+	}
+	// [1.8][compiler] Illegal type annotations not rejected (https://bugs.eclipse.org/bugs/show_bug.cgi?id=415308)
+	// The test case is a array version of test415308f.
+	public void test415308f2() {
+		this.runNegativeTest(
+				new String[] {
+						"X.java",
+						"import java.lang.annotation.ElementType;\n" +
+						"import java.lang.annotation.Target;\n" +
+						"\n" +
+						"@Target(ElementType.TYPE_USE)\n" +
+						"@interface Illegal {\n" +
+						"}\n" +
+						"class Y {\n" +
+						"	static class Z {\n" +
+						"		Z() {}\n" +
+						"	}\n" +
+						"}\n" +
+						"class X {\n" +
+						"   public @Illegal Y.Z[] foo() { return null;}\n" +
+						"}\n"
+				},
+				"----------\n" +
+				"1. ERROR in X.java (at line 13)\n" +
+				"	public @Illegal Y.Z[] foo() { return null;}\n" +
+				"	       ^^^^^^^^\n" +
+				"Type annotations are not allowed on type names used to access static members\n" +
+				"----------\n");
+	}
+	// [1.8][compiler] Illegal type annotations not rejected (https://bugs.eclipse.org/bugs/show_bug.cgi?id=415308)
+	// The test case is used to test enums with type annotations.
+	public void test415308g() {
+		this.runNegativeTest(
+				new String[] {
+					"X.java",
+					"import java.lang.annotation.ElementType;\n" +
+					"import java.lang.annotation.Target;\n" +
+					"\n" +
+					"@Target(ElementType.TYPE_USE)\n" +
+					"@interface Illegal {\n" +
+					"}\n" +
+					"class Y {\n" +
+					"	enum A { B }\n" +
+					"}\n" +
+					"class X {\n" +
+					"	@Illegal Y.A foo(@Illegal Y.A a) {\n" +
+					"		return a;\n" +
+					"	}\n" +
+					"}\n"
+				},
+				"----------\n" +
+				"1. ERROR in X.java (at line 11)\n" +
+				"	@Illegal Y.A foo(@Illegal Y.A a) {\n" +
+				"	^^^^^^^^\n" +
+				"Type annotations are not allowed on type names used to access static members\n" +
+				"----------\n" +
+				"2. ERROR in X.java (at line 11)\n" +
+				"	@Illegal Y.A foo(@Illegal Y.A a) {\n" +
+				"	                 ^^^^^^^^\n" +
+				"Type annotations are not allowed on type names used to access static members\n" +
+				"----------\n");
+	}
+	// https://bugs.eclipse.org/bugs/show_bug.cgi?id=418041, NPE during AST creation.
+	public void test418041() {
+		this.runNegativeTest(
+				new String[] {
+					"X.java",
+					"import java.lang.annotation.ElementType;\n" +
+					"import java.lang.annotation.Target;\n" +
+					"import java.util.List;\n" +
+					"@Target(ElementType.TYPE_USE)\n" +
+					"@interface Readonly {\n" +
+					"}\n" +
+					"class UnmodifiableList<T> implements\n" +
+					"@Readonly List<@Readonly T> { }\n"
+				},
+				"----------\n" + 
+				"1. ERROR in X.java (at line 7)\n" + 
+				"	class UnmodifiableList<T> implements\n" + 
+				"	      ^^^^^^^^^^^^^^^^\n" + 
+				"The type UnmodifiableList<T> must implement the inherited abstract method List<T>.addAll(int, Collection<? extends T>)\n" + 
+				"----------\n" + 
+				"2. ERROR in X.java (at line 7)\n" + 
+				"	class UnmodifiableList<T> implements\n" + 
+				"	      ^^^^^^^^^^^^^^^^\n" + 
+				"The type UnmodifiableList<T> must implement the inherited abstract method List<T>.addAll(Collection<? extends T>)\n" + 
+				"----------\n" + 
+				"3. ERROR in X.java (at line 7)\n" + 
+				"	class UnmodifiableList<T> implements\n" + 
+				"	      ^^^^^^^^^^^^^^^^\n" + 
+				"The type UnmodifiableList<T> must implement the inherited abstract method List<T>.lastIndexOf(Object)\n" + 
+				"----------\n" + 
+				"4. ERROR in X.java (at line 7)\n" + 
+				"	class UnmodifiableList<T> implements\n" + 
+				"	      ^^^^^^^^^^^^^^^^\n" + 
+				"The type UnmodifiableList<T> must implement the inherited abstract method List<T>.subList(int, int)\n" + 
+				"----------\n" + 
+				"5. ERROR in X.java (at line 7)\n" + 
+				"	class UnmodifiableList<T> implements\n" + 
+				"	      ^^^^^^^^^^^^^^^^\n" + 
+				"The type UnmodifiableList<T> must implement the inherited abstract method List<T>.contains(Object)\n" + 
+				"----------\n" + 
+				"6. ERROR in X.java (at line 7)\n" + 
+				"	class UnmodifiableList<T> implements\n" + 
+				"	      ^^^^^^^^^^^^^^^^\n" + 
+				"The type UnmodifiableList<T> must implement the inherited abstract method List<T>.get(int)\n" + 
+				"----------\n" + 
+				"7. ERROR in X.java (at line 7)\n" + 
+				"	class UnmodifiableList<T> implements\n" + 
+				"	      ^^^^^^^^^^^^^^^^\n" + 
+				"The type UnmodifiableList<T> must implement the inherited abstract method List<T>.retainAll(Collection<?>)\n" + 
+				"----------\n" + 
+				"8. ERROR in X.java (at line 7)\n" + 
+				"	class UnmodifiableList<T> implements\n" + 
+				"	      ^^^^^^^^^^^^^^^^\n" + 
+				"The type UnmodifiableList<T> must implement the inherited abstract method List<T>.clear()\n" + 
+				"----------\n" + 
+				"9. ERROR in X.java (at line 7)\n" + 
+				"	class UnmodifiableList<T> implements\n" + 
+				"	      ^^^^^^^^^^^^^^^^\n" + 
+				"The type UnmodifiableList<T> must implement the inherited abstract method List<T>.indexOf(Object)\n" + 
+				"----------\n" + 
+				"10. ERROR in X.java (at line 7)\n" + 
+				"	class UnmodifiableList<T> implements\n" + 
+				"	      ^^^^^^^^^^^^^^^^\n" + 
+				"The type UnmodifiableList<T> must implement the inherited abstract method List<T>.toArray(T[])\n" + 
+				"----------\n" + 
+				"11. ERROR in X.java (at line 7)\n" + 
+				"	class UnmodifiableList<T> implements\n" + 
+				"	      ^^^^^^^^^^^^^^^^\n" + 
+				"The type UnmodifiableList<T> must implement the inherited abstract method List<T>.toArray()\n" + 
+				"----------\n" + 
+				"12. ERROR in X.java (at line 7)\n" + 
+				"	class UnmodifiableList<T> implements\n" + 
+				"	      ^^^^^^^^^^^^^^^^\n" + 
+				"The type UnmodifiableList<T> must implement the inherited abstract method List<T>.isEmpty()\n" + 
+				"----------\n" + 
+				"13. ERROR in X.java (at line 7)\n" + 
+				"	class UnmodifiableList<T> implements\n" + 
+				"	      ^^^^^^^^^^^^^^^^\n" + 
+				"The type UnmodifiableList<T> must implement the inherited abstract method List<T>.listIterator(int)\n" + 
+				"----------\n" + 
+				"14. ERROR in X.java (at line 7)\n" + 
+				"	class UnmodifiableList<T> implements\n" + 
+				"	      ^^^^^^^^^^^^^^^^\n" + 
+				"The type UnmodifiableList<T> must implement the inherited abstract method List<T>.listIterator()\n" + 
+				"----------\n" + 
+				"15. ERROR in X.java (at line 7)\n" + 
+				"	class UnmodifiableList<T> implements\n" + 
+				"	      ^^^^^^^^^^^^^^^^\n" + 
+				"The type UnmodifiableList<T> must implement the inherited abstract method List<T>.add(int, T)\n" + 
+				"----------\n" + 
+				"16. ERROR in X.java (at line 7)\n" + 
+				"	class UnmodifiableList<T> implements\n" + 
+				"	      ^^^^^^^^^^^^^^^^\n" + 
+				"The type UnmodifiableList<T> must implement the inherited abstract method List<T>.add(T)\n" + 
+				"----------\n" + 
+				"17. ERROR in X.java (at line 7)\n" + 
+				"	class UnmodifiableList<T> implements\n" + 
+				"	      ^^^^^^^^^^^^^^^^\n" + 
+				"The type UnmodifiableList<T> must implement the inherited abstract method List<T>.set(int, T)\n" + 
+				"----------\n" + 
+				"18. ERROR in X.java (at line 7)\n" + 
+				"	class UnmodifiableList<T> implements\n" + 
+				"	      ^^^^^^^^^^^^^^^^\n" + 
+				"The type UnmodifiableList<T> must implement the inherited abstract method List<T>.size()\n" + 
+				"----------\n" + 
+				"19. ERROR in X.java (at line 7)\n" + 
+				"	class UnmodifiableList<T> implements\n" + 
+				"	      ^^^^^^^^^^^^^^^^\n" + 
+				"The type UnmodifiableList<T> must implement the inherited abstract method List<T>.containsAll(Collection<?>)\n" + 
+				"----------\n" + 
+				"20. ERROR in X.java (at line 7)\n" + 
+				"	class UnmodifiableList<T> implements\n" + 
+				"	      ^^^^^^^^^^^^^^^^\n" + 
+				"The type UnmodifiableList<T> must implement the inherited abstract method List<T>.remove(int)\n" + 
+				"----------\n" + 
+				"21. ERROR in X.java (at line 7)\n" + 
+				"	class UnmodifiableList<T> implements\n" + 
+				"	      ^^^^^^^^^^^^^^^^\n" + 
+				"The type UnmodifiableList<T> must implement the inherited abstract method List<T>.remove(Object)\n" + 
+				"----------\n" + 
+				"22. ERROR in X.java (at line 7)\n" + 
+				"	class UnmodifiableList<T> implements\n" + 
+				"	      ^^^^^^^^^^^^^^^^\n" + 
+				"The type UnmodifiableList<T> must implement the inherited abstract method List<T>.removeAll(Collection<?>)\n" + 
+				"----------\n" + 
+				"23. ERROR in X.java (at line 7)\n" + 
+				"	class UnmodifiableList<T> implements\n" + 
+				"	      ^^^^^^^^^^^^^^^^\n" + 
+				"The type UnmodifiableList<T> must implement the inherited abstract method List<T>.iterator()\n" + 
+				"----------\n");
+	}
+	// https://bugs.eclipse.org/bugs/show_bug.cgi?id=418041, NPE during AST creation.
+	public void test418041a() {
+		this.runNegativeTest(
+				new String[] {
+					"X.java",
+					"public class X <@Marker T extends @Marker Y<@Marker ?>, @Marker Q extends @Marker Integer> {\n" +
+					"}\n" +
+					"@java.lang.annotation.Target (java.lang.annotation.ElementType.TYPE_USE)\n" +
+					"@interface Marker {}\n"
+				},
+				"----------\n" + 
+				"1. ERROR in X.java (at line 1)\n" + 
+				"	public class X <@Marker T extends @Marker Y<@Marker ?>, @Marker Q extends @Marker Integer> {\n" + 
+				"	                                  ^^^^^^^^^\n" + 
+				"Y cannot be resolved to a type\n" + 
+				"----------\n" + 
+				"2. WARNING in X.java (at line 1)\n" + 
+				"	public class X <@Marker T extends @Marker Y<@Marker ?>, @Marker Q extends @Marker Integer> {\n" + 
+				"	                                                                          ^^^^^^^^^^^^^^^\n" + 
+				"The type parameter Q should not be bounded by the final type Integer. Final types cannot be further extended\n" + 
+				"----------\n");
+	}
+	public void testWildcardCapture() {
+		runNegativeTest(
+			new String[] {
+				"X.java",
+				"import java.lang.annotation.ElementType;\n" +
+				"import java.lang.annotation.Target;\n" +
+				"import java.util.List;\n" +
+				"@Target(ElementType.TYPE_USE)\n" +
+				"@interface NonNull {\n" +
+				"}\n" +
+				"@Target(ElementType.TYPE_USE)\n" +
+				"@interface Nullable {\n" +
+				"}\n" +
+				"@Target(ElementType.TYPE_USE)\n" +
+				"@interface T {\n" +
+				"}\n" +
+				"public class X {\n" +
+				"	public static void main(String[] args) {\n" +
+				"		List<@Nullable ? extends X> lx1 = null;\n" +
+				"		List<@NonNull ? extends X> lx2 = null;\n" +
+				"		lx1 = lx2;\n" +
+				"		lx1.add(lx2.get(0));\n" +
+				"		lx1.add(lx1.get(0));\n" +
+				"       getAdd(lx1, lx2);\n" +
+				"	}\n" +
+				"	static <@NonNull P>  void getAdd(List<P> p1, List<P> p2) {\n" +
+				"		p1.add(p2.get(0));\n" +
+				"	}\n" +
+				"}\n"
+			}, 
+			"----------\n" + 
+			"1. ERROR in X.java (at line 18)\n" + 
+			"	lx1.add(lx2.get(0));\n" + 
+			"	    ^^^\n" + 
+			"The method add(capture#3-of ? extends X) in the type List<capture#3-of ? extends X> is not applicable for the arguments (capture#4-of ? extends X)\n" + 
+			"----------\n" + 
+			"2. ERROR in X.java (at line 19)\n" + 
+			"	lx1.add(lx1.get(0));\n" + 
+			"	    ^^^\n" + 
+			"The method add(capture#5-of ? extends X) in the type List<capture#5-of ? extends X> is not applicable for the arguments (capture#6-of ? extends X)\n" + 
+			"----------\n" + 
+			"3. ERROR in X.java (at line 20)\n" + 
+			"	getAdd(lx1, lx2);\n" + 
+			"	^^^^^^\n" + 
+			"The method getAdd(List<P>, List<P>) in the type X is not applicable for the arguments (List<capture#7-of ? extends X>, List<capture#8-of ? extends X>)\n" + 
+			"----------\n");		
+	}	
 }

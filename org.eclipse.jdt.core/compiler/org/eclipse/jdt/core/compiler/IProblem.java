@@ -181,14 +181,6 @@
  *									DuplicateInheritedDefaultMethods
  *									SuperAccessCannotBypassDirectSuper
  *									SuperCallCannotBypassOverride
- *									IllegalModifierForInterfaceDefaultMethod
- *									InheritedDefaultMethodConflictsWithOtherInherited
- *									ConflictingNullAnnotations
- *									ConflictingInheritedNullAnnotations
- *									UnsafeElementTypeConversion
- *									ArrayReferencePotentialNullReference
- *									DereferencingNullableExpression
- *									NullityMismatchingTypeAnnotation
  *									ConflictingNullAnnotations
  *									ConflictingInheritedNullAnnotations
  *									UnsafeElementTypeConversion
@@ -206,7 +198,18 @@
  *									TargetTypeNotAFunctionalInterface
  *									OuterLocalMustBeEffectivelyFinal
  *									IllegalModifiersForPackage
- *******************************************************************************/
+ *									DuplicateAnnotationNotMarkedRepeatable
+ *									DisallowedTargetForContainerAnnotation
+ *									RepeatedAnnotationWithContainerAnnotation
+ *									ContainingAnnotationMustHaveValue
+ *									ContainingAnnotationHasNonDefaultMembers
+ *									ContainingAnnotationHasWrongValueType
+ *								 	ContainingAnnotationHasShorterRetention
+ *									RepeatableAnnotationHasTargets
+ *									RepeatableAnnotationTargetMismatch
+ *									RepeatableAnnotationIsDocumented
+ *									RepeatableAnnotationIsInherited
+*******************************************************************************/
 package org.eclipse.jdt.core.compiler;
 
 import org.eclipse.jdt.internal.compiler.lookup.ProblemReasons;
@@ -1621,6 +1624,41 @@ void setSourceStart(int sourceStart);
 	int MultipleFunctionalInterfaces = TypeRelated + 895;
 	/** @since 3.9 BETA_JAVA8 */
 	int StaticInterfaceMethodNotBelow18 = Internal + Syntax + 896;
+	/** @since 3.9 BETA_JAVA8 */
+	int DuplicateAnnotationNotMarkedRepeatable = TypeRelated + 897;
+	/** @since 3.9 BETA_JAVA8 */
+	int DisallowedTargetForContainerAnnotation = TypeRelated + 898;
+	/** @since 3.9 BETA_JAVA8 */
+	int RepeatedAnnotationWithContainerAnnotation = TypeRelated + 899;
+	
+	/**
+	 * External problems -- These are problems defined by other plugins
+	 */
+
+	/** @since 3.2 */
+	int ExternalProblemNotFixable = 900;
+
+	// indicates an externally defined problem that has a quick-assist processor
+	// associated with it
+	/** @since 3.2 */
+	int ExternalProblemFixable = 901;
+	
+	/** @since 3.9 BETA_JAVA8 */
+	int ContainingAnnotationHasWrongValueType = TypeRelated + 902;
+	/** @since 3.9 BETA_JAVA8 */
+	int ContainingAnnotationMustHaveValue = TypeRelated + 903;
+	/** @since 3.9 BETA_JAVA8 */
+	int ContainingAnnotationHasNonDefaultMembers = TypeRelated + 904;
+	/** @since 3.9 BETA_JAVA8 */
+	int ContainingAnnotationHasShorterRetention = TypeRelated + 905;
+	/** @since 3.9 BETA_JAVA8 */
+	int RepeatableAnnotationHasTargets = TypeRelated + 906;
+	/** @since 3.9 BETA_JAVA8 */
+	int RepeatableAnnotationTargetMismatch = TypeRelated + 907;
+	/** @since 3.9 BETA_JAVA8 */
+	int RepeatableAnnotationIsDocumented = TypeRelated + 908;
+	/** @since 3.9 BETA_JAVA8 */
+	int RepeatableAnnotationIsInherited = TypeRelated + 909;
 	
 	/**
 	 * Errors/warnings from annotation based null analysis
@@ -1752,18 +1790,8 @@ void setSourceStart(int sourceStart);
 	int IllegalModifierCombinationForInterfaceMethod = MethodRelated + 1056;
 	/** @since 3.9 BETA_JAVA8 */
 	int IllegalStrictfpForAbstractInterfaceMethod = MethodRelated + 1057;
-
-	/**
-	 * External problems -- These are problems defined by other plugins
-	 */
-
-	/** @since 3.2 */
-	int ExternalProblemNotFixable = 900;
-
-	// indicates an externally defined problem that has a quick-assist processor
-	// associated with it
-	/** @since 3.2 */
-	int ExternalProblemFixable = 901;
+	/** @since 3.9 BETA_JAVA8 */
+	int IllegalDefaultModifierSpecification = MethodRelated + 1058;
 
 //{ObjectTeams:
 	int OTJ_RELATED = 1000000;

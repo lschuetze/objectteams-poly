@@ -217,7 +217,7 @@ public class ASTStructuralPropertyTest extends org.eclipse.jdt.core.tests.junit.
 				break;
 			case AST.JLS8 :
 				assertEquals("Wrong number of visited node classes", 84, nodeClasses.size());
-				assertEquals("Wrong number of visited properties", 105, visitedProperties.size());
+				assertEquals("Wrong number of visited properties", 106, visitedProperties.size());
 //{ObjectTeams: 2 new simple properties in TypeDeclaration: TEAM_PROPERTY and ROLE_PROPERTY:
 //				1 new property   in ImportDeclaration: BASE_PROPERTY
 /* orig:				

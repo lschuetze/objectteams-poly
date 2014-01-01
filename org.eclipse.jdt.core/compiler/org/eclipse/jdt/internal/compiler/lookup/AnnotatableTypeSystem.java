@@ -14,6 +14,7 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.compiler.lookup;
 
+import org.eclipse.jdt.core.compiler.CharOperation;
 import org.eclipse.jdt.internal.compiler.util.Util;
 import org.eclipse.jdt.internal.compiler.util.SimpleLookupTable;
 import org.eclipse.objectteams.otdt.internal.core.compiler.lookup.DependentTypeBinding;
@@ -31,7 +32,7 @@ import org.eclipse.objectteams.otdt.internal.core.compiler.lookup.RoleTypeBindin
  	
    We do not keep track of unannotated types here, that is done by UTS whose handle we maintain.
 */
-public class AnnotatableTypeSystem {
+public class AnnotatableTypeSystem extends TypeSystem {
 
 	LookupEnvironment environment;
 	UnannotatedTypeSystem unannotatedTypeSystem;
@@ -48,44 +49,96 @@ public class AnnotatableTypeSystem {
 		return this.unannotatedTypeSystem.getUnannotatedType(type);
 	}
 	
+	// Given a type, return all its variously annotated versions.
+	public TypeBinding[] getAnnotatedTypes(TypeBinding type) {
+		
+		TypeBinding keyType = getUnannotatedType(type);
+		TypeBinding[] cachedInfo = (TypeBinding[]) this.annotatedTypes.get(keyType);
+		if (cachedInfo == null)
+			return Binding.NO_TYPES;
+		
+		final int length = cachedInfo.length;
+		TypeBinding [] annotatedVersions = new TypeBinding[length];
+		int versions = 0;
+		for (int i = 0; i < length; i++) {
+			final TypeBinding cachedType = cachedInfo[i];
+			if (cachedType == null)
+				break;
+			if (cachedType.id == type.id)
+				annotatedVersions[versions++] = cachedType;
+		}
+		
+		if (versions == 0)
+			return Binding.NO_TYPES;
+		
+		if (versions != length)
+			System.arraycopy(annotatedVersions, 0, annotatedVersions = new TypeBinding[versions], 0, versions);
+			
+		return annotatedVersions;
+	}
+	
+	public ArrayBinding getArrayType(TypeBinding leaftType, int dimensions) {
+		return getArrayType(leaftType, dimensions, Binding.NO_ANNOTATIONS);
+	}
+
 	/* This method replaces the version that used to sit in LE. The parameter `annotations' is a flattened sequence of annotations, 
 	   where each dimension's annotations end with a sentinel null.
 	*/
-	public ArrayBinding getArrayType(TypeBinding leafType, int dimensions, AnnotationBinding [] annotations) {
+	public ArrayBinding getArrayType(TypeBinding leafComponentType, int dimensions, AnnotationBinding [] annotations) {
 		
-		if (!haveTypeAnnotations(leafType, annotations))
-			return this.unannotatedTypeSystem.getArrayType(leafType, dimensions);
+		if (!haveTypeAnnotations(leafComponentType, annotations))
+			return this.unannotatedTypeSystem.getArrayType(leafComponentType, dimensions);
 		
-		TypeBinding[] cachedInfo = (TypeBinding[]) this.annotatedTypes.get(leafType);
+		//  Leaf component type can be an annotated type.
+		TypeBinding keyType = getUnannotatedType(leafComponentType);
+		TypeBinding[] cachedInfo = (TypeBinding[]) this.annotatedTypes.get(keyType);  // unannotated key promotes better instance sharing.
 		int index = 0;
 		if (cachedInfo != null) {
 			for (int max = cachedInfo.length; index < max; index++) {
 				TypeBinding cachedType = cachedInfo[index];
 				if (cachedType == null) break;
+				if (cachedType.leafComponentType() != leafComponentType) continue;
 				if (cachedType.isArrayType() && cachedType.dimensions() == dimensions && Util.effectivelyEqual(cachedType.getTypeAnnotations(), annotations)) 
 					return (ArrayBinding) cachedType;
 			}
 		} else {
-			this.annotatedTypes.put(leafType, cachedInfo = new TypeBinding[4]);
+			this.annotatedTypes.put(keyType, cachedInfo = new TypeBinding[4]);
 		}
 		
 		int length = cachedInfo.length;
 		if (index == length) {
 			System.arraycopy(cachedInfo, 0, cachedInfo = new TypeBinding[length * 2], 0, length);
-			this.annotatedTypes.put(leafType, cachedInfo);
+			this.annotatedTypes.put(keyType, cachedInfo);
 		}
 		// Add the newcomer, ensuring its identity is the same as the naked version of it.
-		ArrayBinding unannotatedArrayType = this.unannotatedTypeSystem.getArrayType(leafType, dimensions);
-		TypeBinding arrayBinding = new ArrayBinding(leafType, dimensions, this.environment);
+		ArrayBinding unannotatedArrayType = this.unannotatedTypeSystem.getArrayType(leafComponentType, dimensions);
+		TypeBinding arrayBinding = new ArrayBinding(leafComponentType, dimensions, this.environment);
 		arrayBinding.id = unannotatedArrayType.id;
 		arrayBinding.setTypeAnnotations(annotations, this.environment.globalOptions.isAnnotationBasedNullAnalysisEnabled);
 		return (ArrayBinding) (cachedInfo[index] = arrayBinding);
 	}
-
-	public ParameterizedTypeBinding getParameterizedType(ReferenceBinding genericType, TypeBinding[] typeArguments, ReferenceBinding enclosingType, AnnotationBinding [] annotations) {
-//{ObjectTeams: more arguments for role types:
-		return getParameterizedType(genericType, typeArguments, null, -1, enclosingType,  annotations); 
+	
+	public ReferenceBinding getMemberType(ReferenceBinding memberType, ReferenceBinding enclosingType) {
+		if (!haveTypeAnnotations(memberType, enclosingType))
+			return this.unannotatedTypeSystem.getMemberType(memberType, enclosingType);
+		return (ReferenceBinding) getAnnotatedType(memberType, enclosingType, memberType.typeArguments(), memberType.getTypeAnnotations());
 	}
+	
+//{ObjectTeams: 2 args added for role types:
+/* orig:
+	public ParameterizedTypeBinding getParameterizedType(ReferenceBinding genericType, TypeBinding[] typeArguments, ReferenceBinding enclosingType) {
+		return getParameterizedType(genericType, typeArguments, enclosingType, Binding.NO_ANNOTATIONS);
+  :giro */
+	public ParameterizedTypeBinding getParameterizedType(ReferenceBinding genericType, TypeBinding[] typeArguments,
+			ITeamAnchor teamAnchor, int valueParamPosition, ReferenceBinding enclosingType) {
+		return getParameterizedType(genericType, typeArguments, teamAnchor, valueParamPosition, enclosingType, Binding.NO_ANNOTATIONS);
+// SH}
+	}
+
+//{ObjectTeams: more arguments for role types:
+/* orig:
+	public ParameterizedTypeBinding getParameterizedType(ReferenceBinding genericType, TypeBinding[] typeArguments, ReferenceBinding enclosingType, AnnotationBinding [] annotations) {
+  :giro */
 	public ParameterizedTypeBinding getParameterizedType(ReferenceBinding genericType, TypeBinding[] typeArguments,
 			ITeamAnchor teamAnchor, int valueParamPosition, ReferenceBinding enclosingType, AnnotationBinding [] annotations) {
 		if (teamAnchor == null && genericType instanceof DependentTypeBinding)
@@ -98,20 +151,9 @@ public class AnnotatableTypeSystem {
 			return this.unannotatedTypeSystem.getParameterizedType(genericType, typeArguments, teamAnchor, valueParamPosition, enclosingType);
 // SH}
 		
-		/* When restoring annotations from class files, we encounter a situation where the generic type comes in attributed with the annotations that should
-		   really belong to the parameterized type that is being created just now. e.g @T List<String> => comes in as (@T List)<String>. The question really 
-		   is List being parameterized by String and then the resultant type is annotated or is "@T List" being parameterized with String ? We don't care one
-		   way or other except that we would want a uniform treatment. As a stop gap, we "repair" the situation here, so it is consistent with treatment of 
-		   type references in source code. Probably need similar treatment for raw types and wildcards ?
-		*/
-		AnnotationBinding [] misplacedAnnotations = genericType.getTypeAnnotations();
-		if (misplacedAnnotations != null && misplacedAnnotations != Binding.NO_ANNOTATIONS) {
-			if (annotations != null && annotations != Binding.NO_ANNOTATIONS)
-				throw new IllegalStateException(); // cannot cut both ways.
-			annotations = misplacedAnnotations;
-			genericType = (ReferenceBinding) this.unannotatedTypeSystem.getUnannotatedType(genericType);
-		}
-			
+		if (genericType.hasTypeAnnotations())
+			throw new IllegalStateException();
+		
 		int index = 0;
 		TypeBinding[] cachedInfo = (TypeBinding[]) this.annotatedTypes.get(genericType);
 		if (cachedInfo != null) {
@@ -165,10 +207,17 @@ public class AnnotatableTypeSystem {
 		return (ParameterizedTypeBinding) (cachedInfo[index] = parameterizedType);
 	}
 	
+	public RawTypeBinding getRawType(ReferenceBinding genericType, ReferenceBinding enclosingType) {
+		return getRawType(genericType, enclosingType, Binding.NO_ANNOTATIONS);
+	}
+	
 	public RawTypeBinding getRawType(ReferenceBinding genericType, ReferenceBinding enclosingType, AnnotationBinding [] annotations) {
 		
 		if (!haveTypeAnnotations(genericType, enclosingType, null, annotations))
 			return this.unannotatedTypeSystem.getRawType(genericType, enclosingType);
+		
+		if (genericType.hasTypeAnnotations())
+			throw new IllegalStateException();
 		
 		TypeBinding[] cachedInfo = (TypeBinding[]) this.annotatedTypes.get(genericType);
 		int index = 0;
@@ -197,6 +246,10 @@ public class AnnotatableTypeSystem {
 		return (RawTypeBinding) (cachedInfo[index] = rawType);
 	}
 		
+	public WildcardBinding getWildcard(ReferenceBinding genericType, int rank, TypeBinding bound, TypeBinding[] otherBounds, int boundKind) {
+		return getWildcard(genericType, rank, bound, otherBounds, boundKind, Binding.NO_ANNOTATIONS);
+	}
+
 	public WildcardBinding getWildcard(ReferenceBinding genericType, int rank, TypeBinding bound, TypeBinding[] otherBounds, int boundKind, AnnotationBinding [] annotations) {
 		
 		if (!haveTypeAnnotations(genericType, bound, otherBounds, annotations))
@@ -205,7 +258,10 @@ public class AnnotatableTypeSystem {
 		if (genericType == null) // pseudo wildcard denoting composite bounds for lub computation
 			genericType = ReferenceBinding.LUB_GENERIC;
 
-		TypeBinding[] cachedInfo = (TypeBinding[]) this.annotatedTypes.get(genericType);
+		if (genericType.hasTypeAnnotations())
+			throw new IllegalStateException();
+		
+		TypeBinding[] cachedInfo = (TypeBinding[]) this.annotatedTypes.get(genericType);  // promotes better instance sharing.
 		int index = 0;
 		if (cachedInfo != null) {
 			for (int max = cachedInfo.length; index < max; index++) {
@@ -236,9 +292,10 @@ public class AnnotatableTypeSystem {
 		return (WildcardBinding) (cachedInfo[index] = wildcard);
 	}
 
-	// Private subroutine for getAnnotatedType(TypeBinding type, AnnotationBinding[][] annotations)
+	// Private subroutine for public APIs.
 	private TypeBinding getAnnotatedType(TypeBinding type, TypeBinding enclosingType, TypeBinding [] typeArguments, AnnotationBinding[] annotations) {
-		TypeBinding[] cachedInfo = (TypeBinding[]) this.annotatedTypes.get(type);
+		TypeBinding keyType = getUnannotatedType(type);
+		TypeBinding[] cachedInfo = (TypeBinding[]) this.annotatedTypes.get(keyType);
 		int i = 0;
 		if (cachedInfo != null) {
 			for (int length = cachedInfo.length; i < length; i++) {
@@ -251,20 +308,20 @@ public class AnnotatableTypeSystem {
 				}
 			}
 		} else {
-			this.annotatedTypes.put(type, cachedInfo = new TypeBinding[4]);
+			this.annotatedTypes.put(keyType, cachedInfo = new TypeBinding[4]);
 		}
 		int length = cachedInfo.length;
 		if (i == length) {
 			System.arraycopy(cachedInfo, 0, cachedInfo = new TypeBinding[length * 2], 0, length);
-			this.annotatedTypes.put(type, cachedInfo);
+			this.annotatedTypes.put(keyType, cachedInfo);
 		}
 		/* Add the new comer, retaining the same type binding id as the naked type. To materialize the new comer we can't use new since this is a general
-		   purpose method designed to deal type bindings of all types. "Clone" the incoming type, specializing for any enclosing type and type arguments
-		   that may themselves be possibly be annotated. This is so the binding for @Outer Outer.Inner != Outer.@Inner Inner != @Outer Outer.@Inner Inner.
-		   Likewise so the bindings for @Readonly List<@NonNull String> != @Readonly List<@Nullable String> != @Readonly List<@Interned String> 
+		   purpose method designed to deal type bindings of all types. "Clone" the incoming type, specializing for any enclosing type that may itself be 
+		   possibly be annotated. This is so the binding for @Outer Outer.Inner != Outer.@Inner Inner != @Outer Outer.@Inner Inner. Likewise so the bindings 
+		   for @Readonly List<@NonNull String> != @Readonly List<@Nullable String> != @Readonly List<@Interned String> 
 		*/
 		TypeBinding unannotatedType = this.unannotatedTypeSystem.getUnannotatedType(type);
-		TypeBinding annotatedType = type.clone(enclosingType, typeArguments);
+		TypeBinding annotatedType = type.clone(enclosingType);
 		annotatedType.id = unannotatedType.id;
 		annotatedType.setTypeAnnotations(annotations, this.environment.globalOptions.isAnnotationBasedNullAnalysisEnabled);
 		return cachedInfo[i] = annotatedType;
@@ -298,6 +355,10 @@ public class AnnotatableTypeSystem {
 				   java.lang.@T X.@T Y.@T Z
 				   in all these cases the incoming type binding is for Z, but annotations are for different levels. Align their layout for proper attribution.
 				 */
+				
+				if (type.isUnresolvedType() && CharOperation.indexOf('$', type.sourceName()) > 0)
+				    type = BinaryTypeBinding.resolveType(type, this.environment, true); // must resolve member types before asking for enclosingType
+				
 				int levels = type.depth() + 1;
 				TypeBinding [] types = new TypeBinding[levels];
 				types[--levels] = type;
@@ -317,16 +378,21 @@ public class AnnotatableTypeSystem {
 					return type;
 				// types[j] is the first component being annotated. Its annotations are annotations[i]
 				for (enclosingType = j == 0 ? null : types[j - 1]; i < levels; i++, j++) {
-					annotatedType = getAnnotatedType(types[j], enclosingType, types[j].typeArguments(), annotations[i]);
+					final TypeBinding currentType = types[j];
+					// while handling annotations from SE7 locations, take care not to drop existing annotations.
+					AnnotationBinding [] currentAnnotations = annotations[i] != null && annotations[i].length > 0 ? annotations[i] : currentType.getTypeAnnotations();
+					annotatedType = getAnnotatedType(currentType, enclosingType, currentType.typeArguments(), currentAnnotations);
 					enclosingType = annotatedType;
 				}
 				break;
+			default:
+				throw new IllegalStateException();
 		}
 		return annotatedType;
 	}
 
-	public AnnotationBinding getAnnotationType(ReferenceBinding annotationType) {
-		return this.unannotatedTypeSystem.getAnnotationType(annotationType); // deflect, annotation type uses cannot be type annotated.
+	public AnnotationBinding getAnnotationType(ReferenceBinding annotationType, boolean requireResolved) {
+		return this.unannotatedTypeSystem.getAnnotationType(annotationType, requireResolved); // deflect, annotation type uses cannot be type annotated.
 	}
 
 	private boolean haveTypeAnnotations(TypeBinding baseType, TypeBinding someType, TypeBinding[] someTypes, AnnotationBinding[] annotations) {
@@ -345,6 +411,10 @@ public class AnnotatableTypeSystem {
 
 	private boolean haveTypeAnnotations(TypeBinding leafType, AnnotationBinding[] annotations) {
 		return haveTypeAnnotations(leafType, null, null, annotations);
+	}
+	
+	private boolean haveTypeAnnotations(TypeBinding memberType, TypeBinding enclosingType) {
+		return haveTypeAnnotations(memberType, enclosingType, null, null);
 	}
 
 	/* Utility method to "flatten" annotations. For multidimensional arrays, we encode the annotations into a flat array 
@@ -395,5 +465,9 @@ public class AnnotatableTypeSystem {
 			}
 		}
 		this.unannotatedTypeSystem.updateCaches(unresolvedType.prototype, unresolvedType.prototype.resolvedType);
+	}
+	
+	public boolean isAnnotatedTypeSystem() {
+		return true;
 	}
 }

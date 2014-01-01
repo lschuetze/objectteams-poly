@@ -20,6 +20,7 @@
  *								bug 392384 - [1.8][compiler][null] Restore nullness info from type annotations in class files
  *								Bug 392099 - [1.8][compiler][null] Apply null annotation on types for null analysis
  *								Bug 415291 - [1.8][null] differentiate type incompatibilities due to null annotations
+ *								Bug 417295 - [1.8[[null] Massage type annotated null analysis to gel well with deep encoded type bindings.
  *      Jesper S Moller <jesper@selskabet.org> -  Contributions for
  *								bug 382701 - [1.8][compiler] Implement semantic analysis of Lambda expressions & Reference expression
  *******************************************************************************/
@@ -105,7 +106,6 @@ public TypeBinding() {
 public TypeBinding(TypeBinding prototype) {  // faithfully copy all instance state - clone operation should specialize/override suitably.
 	this.id = prototype.id;
 	this.tagBits = prototype.tagBits;
-	this.typeAnnotations = prototype.typeAnnotations;
 }
 
 /**
@@ -221,7 +221,7 @@ public void collectSubstitutes(Scope scope, TypeBinding actualType, InferenceCon
     make sense for every type in the hierarchy, in which case they are silently ignored. A type may
     choose to retain a copy of the prototype for reference. 
 */
-public TypeBinding clone(TypeBinding enclosingType, TypeBinding[] typeArguments) {
+public TypeBinding clone(TypeBinding enclosingType) {
 	throw new IllegalStateException("TypeBinding#clone() should have been overridden"); //$NON-NLS-1$
 }
 
@@ -247,7 +247,7 @@ public int depth() {
 	return 0;
 }
 
-/* Answer the receiver's enclosing type... null if the receiver is a top level type.
+/* Answer the receiver's enclosing type... null if the receiver is a top level type or is an array or a non reference type.
  */
 public ReferenceBinding enclosingType() {
 	return null;
@@ -516,10 +516,6 @@ protected
 // SH}
 void initializeForStaticImports() {
 	// only applicable to source types
-}
-
-public boolean isAnnotationType() {
-	return false;
 }
 
 public final boolean isAnonymousType() {
@@ -1084,6 +1080,13 @@ public boolean isReifiable() {
 }
 
 /**
+ * Answer true if the receiver is a static member type (or toplevel)
+ */
+public boolean isStatic() {
+	return false;
+}
+
+/**
  * Returns true if a given type may be thrown
  */
 public boolean isThrowable() {
@@ -1093,13 +1096,13 @@ public boolean isThrowable() {
 public boolean isTypeArgumentContainedBy(TypeBinding otherType) {
 //{ObjectTeams: only slightly weaker form of identity:
 /* orig:
-	if (this == otherType)
+	if (TypeBinding.equalsEquals(this, otherType))
   :giro */
 	if (RoleTypeBinding.eq(this, otherType))
 // SH}
 		return true;
 	switch (otherType.kind()) {
-	// handle captured wildcards.
+		// handle captured wildcards.
 		case Binding.TYPE_PARAMETER: {
 			// https://bugs.eclipse.org/bugs/show_bug.cgi?id=347426
 			if (!isParameterizedType() || !otherType.isCapture()) {
@@ -1168,7 +1171,7 @@ public boolean isTypeArgumentContainedBy(TypeBinding otherType) {
 			TypeBinding otherBound = otherWildcard.bound;
 			switch (otherWildcard.boundKind) {
 				case Wildcard.EXTENDS:
-					if (otherBound == this)
+					if (TypeBinding.equalsEquals(otherBound, this))
 						return true; // ? extends T  <=  ? extends ? extends T
 					if (upperBound == null)
 						return false;
@@ -1403,13 +1406,13 @@ public abstract char[] qualifiedSourceName();
 /**
  * @return the JSR 308 annotations for this type.
  */
-public AnnotationBinding[] getTypeAnnotations() {
+final public AnnotationBinding[] getTypeAnnotations() {
 	return this.typeAnnotations;
 }
 
 public void setTypeAnnotations(AnnotationBinding[] annotations, boolean evalNullAnnotations) {
 	this.tagBits |= TagBits.HasTypeAnnotations;
-	if (annotations == null || annotations == Binding.NO_ANNOTATIONS)
+	if (annotations == null || annotations.length == 0)
 		return;
 	this.typeAnnotations = annotations;
 	if (evalNullAnnotations) {
@@ -1426,6 +1429,7 @@ public void setTypeAnnotations(AnnotationBinding[] annotations, boolean evalNull
 				}
 			}
 		}
+		// we do accept contradictory tagBits here, to support detecting contradictions caused by type substitution
 	}
 }
 
@@ -1510,6 +1514,17 @@ public static boolean notEquals(TypeBinding that, TypeBinding other) {
 	if (that.id != TypeIds.NoId && that.id == other.id)
 		return false;
 	return true;
+}
+/** Return the primordial type from which the receiver was cloned. Not all types track a prototype, only {@link SourceTypeBinding},
+ * {@link BinaryTypeBinding} and {@link UnresolvedReferenceBinding} do so as of now. In fact some types e.g {@link ParameterizedTypeBinding}
+ * should not do so. Deflecting a query to a prototype would lead to wrong results in the case of {@link ParameterizedTypeBinding}
+ */
+public TypeBinding prototype() {
+	return null;
+}
+
+public boolean isUnresolvedType() {
+	return false;
 }
 
 }

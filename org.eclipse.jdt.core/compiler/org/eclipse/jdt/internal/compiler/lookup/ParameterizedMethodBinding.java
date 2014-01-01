@@ -17,9 +17,11 @@
  *								bug 392099 - [1.8][compiler][null] Apply null annotation on types for null analysis
  *								bug 392384 - [1.8][compiler][null] Restore nullness info from type annotations in class files
  *								Bug 415043 - [1.8][null] Follow-up re null type annotations after bug 392099
+ *								Bug 417295 - [1.8[[null] Massage type annotated null analysis to gel well with deep encoded type bindings.
  *******************************************************************************/
 package org.eclipse.jdt.internal.compiler.lookup;
 
+import org.eclipse.jdt.internal.compiler.ast.NullAnnotationMatching;
 import org.eclipse.jdt.internal.compiler.ast.Wildcard;
 import org.eclipse.objectteams.otdt.internal.core.compiler.lookup.ITeamAnchor;
 import org.eclipse.objectteams.otdt.internal.core.compiler.model.RoleModel;
@@ -106,25 +108,27 @@ public class ParameterizedMethodBinding extends MethodBinding {
 				TypeBinding substitutedSuperclass = Scope.substitute(substitution, originalVariable.superclass);
 				ReferenceBinding[] substitutedInterfaces = Scope.substitute(substitution, originalVariable.superInterfaces);
 				if (originalVariable.firstBound != null) {
-					substitutedVariable.firstBound = originalVariable.firstBound == originalVariable.superclass
+					TypeBinding firstBound;
+					firstBound = originalVariable.firstBound == originalVariable.superclass
 						? substitutedSuperclass // could be array type or interface
 						: substitutedInterfaces[0];
+					substitutedVariable.setFirstBound(firstBound);
 				}
 				switch (substitutedSuperclass.kind()) {
 					case Binding.ARRAY_TYPE :
-						substitutedVariable.superclass = parameterizedDeclaringClass.environment.getResolvedType(TypeConstants.JAVA_LANG_OBJECT, null);
-						substitutedVariable.superInterfaces = substitutedInterfaces;
+						substitutedVariable.setSuperClass(parameterizedDeclaringClass.environment.getResolvedType(TypeConstants.JAVA_LANG_OBJECT, null));
+						substitutedVariable.setSuperInterfaces(substitutedInterfaces);
 						break;
 					default:
 						if (substitutedSuperclass.isInterface()) {
-							substitutedVariable.superclass = parameterizedDeclaringClass.environment.getResolvedType(TypeConstants.JAVA_LANG_OBJECT, null);
+							substitutedVariable.setSuperClass(parameterizedDeclaringClass.environment.getResolvedType(TypeConstants.JAVA_LANG_OBJECT, null));
 							int interfaceCount = substitutedInterfaces.length;
 							System.arraycopy(substitutedInterfaces, 0, substitutedInterfaces = new ReferenceBinding[interfaceCount+1], 1, interfaceCount);
 							substitutedInterfaces[0] = (ReferenceBinding) substitutedSuperclass;
-							substitutedVariable.superInterfaces = substitutedInterfaces;
+							substitutedVariable.setSuperInterfaces(substitutedInterfaces);
 						} else {
-							substitutedVariable.superclass = (ReferenceBinding) substitutedSuperclass; // typeVar was extending other typeVar which got substituted with interface
-							substitutedVariable.superInterfaces = substitutedInterfaces;
+							substitutedVariable.setSuperClass((ReferenceBinding) substitutedSuperclass); // typeVar was extending other typeVar which got substituted with interface
+							substitutedVariable.setSuperInterfaces(substitutedInterfaces);
 						}
 				}
 			}
@@ -138,14 +142,14 @@ public class ParameterizedMethodBinding extends MethodBinding {
 
 			// after substitution transfer nullness information from type annotations:
 			if (parameterizedDeclaringClass.environment.globalOptions.isAnnotationBasedNullAnalysisEnabled) {
-				long returnNullBits = this.returnType.tagBits & TagBits.AnnotationNullMASK;
+				long returnNullBits = NullAnnotationMatching.validNullTagBits(this.returnType.tagBits);
 				if (returnNullBits != 0L) {
 					this.tagBits &= ~TagBits.AnnotationNullMASK;
 					this.tagBits |= returnNullBits;
 				}
 				int parametersLen = this.parameters.length;
 				for (int i=0; i<parametersLen; i++) {
-					long paramTagBits = this.parameters[i].tagBits & TagBits.AnnotationNullMASK;
+					long paramTagBits = NullAnnotationMatching.validNullTagBits(this.parameters[i].tagBits);
 					if (paramTagBits != 0) {
 						if (this.parameterNonNullness == null)
 							this.parameterNonNullness = new Boolean[parametersLen];
@@ -246,25 +250,27 @@ public class ParameterizedMethodBinding extends MethodBinding {
 				TypeBinding substitutedSuperclass = Scope.substitute(substitution, originalVariable.superclass);
 				ReferenceBinding[] substitutedInterfaces = Scope.substitute(substitution, originalVariable.superInterfaces);
 				if (originalVariable.firstBound != null) {
-					substitutedVariable.firstBound = originalVariable.firstBound == originalVariable.superclass
+					TypeBinding firstBound;
+					firstBound = originalVariable.firstBound == originalVariable.superclass
 						? substitutedSuperclass // could be array type or interface
 						: substitutedInterfaces[0];
+					substitutedVariable.setFirstBound(firstBound);
 				}
 				switch (substitutedSuperclass.kind()) {
 					case Binding.ARRAY_TYPE :
-						substitutedVariable.superclass = environment.getResolvedType(TypeConstants.JAVA_LANG_OBJECT, null);
-						substitutedVariable.superInterfaces = substitutedInterfaces;
+						substitutedVariable.setSuperClass(environment.getResolvedType(TypeConstants.JAVA_LANG_OBJECT, null));
+						substitutedVariable.setSuperInterfaces(substitutedInterfaces);
 						break;
 					default:
 						if (substitutedSuperclass.isInterface()) {
-							substitutedVariable.superclass = environment.getResolvedType(TypeConstants.JAVA_LANG_OBJECT, null);
+							substitutedVariable.setSuperClass(environment.getResolvedType(TypeConstants.JAVA_LANG_OBJECT, null));
 							int interfaceCount = substitutedInterfaces.length;
 							System.arraycopy(substitutedInterfaces, 0, substitutedInterfaces = new ReferenceBinding[interfaceCount+1], 1, interfaceCount);
 							substitutedInterfaces[0] = (ReferenceBinding) substitutedSuperclass;
-							substitutedVariable.superInterfaces = substitutedInterfaces;
+							substitutedVariable.setSuperInterfaces(substitutedInterfaces);
 						} else {
-							substitutedVariable.superclass = (ReferenceBinding) substitutedSuperclass; // typeVar was extending other typeVar which got substituted with interface
-							substitutedVariable.superInterfaces = substitutedInterfaces;
+							substitutedVariable.setSuperClass((ReferenceBinding) substitutedSuperclass); // typeVar was extending other typeVar which got substituted with interface
+							substitutedVariable.setSuperInterfaces(substitutedInterfaces);
 						}
 				}
 			}

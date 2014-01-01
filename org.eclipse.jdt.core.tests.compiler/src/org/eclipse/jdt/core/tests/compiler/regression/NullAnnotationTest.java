@@ -36,7 +36,7 @@ public NullAnnotationTest(String name) {
 // Static initializer to specify tests subset using TESTS_* static variables
 // All specified tests which do not belong to the class are skipped...
 static {
-//		TESTS_NAMES = new String[] { "test_nonnull_var_in_constrol_structure_1" };
+//		TESTS_NAMES = new String[] { "testBug412076" };
 //		TESTS_NUMBERS = new int[] { 561 };
 //		TESTS_RANGE = new int[] { 1, 2049 };
 }
@@ -111,6 +111,16 @@ String nonNullArrayOf(String string) {
 			: "Object @NonNull[]";
 }
 
+
+String targetTypeUseIfAvailable() {
+	return this.complianceLevel >= ClassFileConstants.JDK1_8
+				? "@Target(ElementType.TYPE_USE)\n"
+				: "";
+}
+
+/**
+ * @deprecated
+ */
 protected void setUp() throws Exception {
 	super.setUp();
 	if (this.complianceLevel >= ClassFileConstants.JDK1_8)
@@ -535,7 +545,10 @@ public void test_nonnull_parameter_015() {
 			"        if (o != null)\n" +
 			"              System.out.print(o.toString());\n" +
 			"    }\n" +
-			"    void foo2(int i, @NonNull Object ... o) {\n" +
+			((this.complianceLevel < ClassFileConstants.JDK1_8)
+			? "    void foo2(int i, @NonNull Object ... o) {\n"
+			: "    void foo2(int i, Object @NonNull ... o) {\n"
+			) +
 			"        if (o.length > 0 && o[0] != null)\n" +
 			"              System.out.print(o[0].toString());\n" +
 			"    }\n" +
@@ -1939,17 +1952,19 @@ public void test_annotation_import_005() {
 			"package org.foo;\n" +
 			"import java.lang.annotation.*;\n" +
 			"@Retention(RetentionPolicy.CLASS)\n" +
+			targetTypeUseIfAvailable() +
 			"public @interface MayBeNull {}\n",
 
 			"org/foo/MustNotBeNull.java",
 			"package org.foo;\n" +
 			"import java.lang.annotation.*;\n" +
 			"@Retention(RetentionPolicy.CLASS)\n" +
+			targetTypeUseIfAvailable() +
 			"public @interface MustNotBeNull {}\n",
 
 			"Lib.java",
 			"public class Lib {\n" +
-			"    Object getObject() { return new Object(); }\n" +
+			"    public Object getObject() { return new Object(); }\n" +
 			"}\n",
 			"X.java",
 			"import org.foo.*;\n" +
@@ -6154,81 +6169,6 @@ public void test_conditional_expression_1() {
 		"----------\n");
 }
 
-// missing type in constructor declaration must not cause NPE in QAE#resolveType(..)
-public void testBug415850_a() {
-	this.runNegativeTest(
-			new String[] {
-				"X.java", //-----------------------------------------------------------------------
-				"public class X {\n" +
-				"	void foo(X1 x1) {\n" +
-				"		Object o = new X1(x1){};\n" +
-				"	}\n" +
-				"}\n",
-				"X1.java", //-----------------------------------------------------------------------
-				"public class X1 {\n" +
-				"	public X1(Zork z) {}\n" +
-				"}\n"
-			},
-			"----------\n" +
-			"1. ERROR in X.java (at line 3)\n" +
-			"	Object o = new X1(x1){};\n" +
-			"	               ^^^^^^\n" +
-			"The constructor X1(Zork) refers to the missing type Zork\n" +
-			"----------\n" +
-			"----------\n" +
-			"1. ERROR in X1.java (at line 2)\n" +
-			"	public X1(Zork z) {}\n" +
-			"	          ^^^^\n" +
-			"Zork cannot be resolved to a type\n" +
-			"----------\n");
-}
-
-// avoid NPE in BinaryTypeBinding.getField(..) due to recursive dependency enum->package-info->annotation->enum 
-public void testBug415850_b() {
-	runConformTestWithLibs(
-		new String[] {
-			"p/package-info.java",
-			"@p.Annot(state=p.MyEnum.BROKEN)\n" + 
-			"package p;",
-			"p/Annot.java",
-			"package p;\n" + 
-			"@Annot(state=MyEnum.KO)\n" + 
-			"public @interface Annot {\n" + 
-			"	MyEnum state() default MyEnum.KO;\n" + 
-			"}",
-			"p/MyEnum.java",
-			"package p;\n" + 
-			"@Annot(state=MyEnum.KO)\n" + 
-			"public enum MyEnum {\n" + 
-			"	WORKS, OK, KO, BROKEN, ;\n" + 
-			"}",
-			"test180/Test.java",
-			"package test180;\n" +
-			"import p.MyEnum;\n" + 
-			"import p.Annot;\n" + 
-			"@Annot(state=MyEnum.OK)\n" + 
-			"public class Test {}",
-		},
-		getCompilerOptions(),
-		""
-	);
-	Map options = getCompilerOptions();
-	options.put(CompilerOptions.OPTION_Process_Annotations, CompilerOptions.ENABLED);
-	runConformTestWithLibs(
-		new String[] {
-			"X.java",
-			"import test180.Test;\n" +
-			"public class X {\n" + 
-			"	public static void main(String[] args) {\n" + 
-			"		System.out.println(Test.class);\n" + 
-			"	}\n" + 
-			"}"
-		},
-		options,
-		"",
-		"class test180.Test");
-}
-
 // Bug 403086 - [compiler][null] include the effect of 'assert' in syntactic null analysis for fields
 public void testBug403086_1() {
 	Map customOptions = getCompilerOptions();
@@ -6321,5 +6261,189 @@ public void testBug412076() {
 		},
 		options,
 		"");	
+}
+
+public void testBug413460() {
+	runConformTestWithLibs(
+		new String[] {
+			"Class2.java",
+			"\n" + 
+			"@org.eclipse.jdt.annotation.NonNullByDefault\n" + 
+			"public class Class2 {\n" + 
+			"	public class Class3 {\n" + 
+			"		public Class3(String nonNullArg) {\n" + 
+			"			assert nonNullArg != null;\n" + 
+			"		}\n" + 
+			"	}\n" + 
+			"\n" + 
+			"	public Class2(String nonNullArg) {\n" + 
+			"		assert nonNullArg != null;\n" + 
+			"	}\n" + 
+			"\n" + 
+			"	public static Class2 create(String nonNullArg) {\n" + 
+			"		return new Class2(nonNullArg);\n" + 
+			"	}\n" + 
+			"}\n"
+		}, 
+		getCompilerOptions(), 
+		"");
+	runNegativeTestWithLibs(false,
+		new String[] {
+			"Class1.java",
+			"public class Class1 {\n" + 
+			"	public static Class2 works() {\n" + 
+			"		return Class2.create(null);\n" + 
+			"	}\n" + 
+			"\n" + 
+			"	public static Class2 bug() {\n" + 
+			"		return new Class2(null);\n" + 
+			"	}\n" + 
+			"\n" + 
+			"	public static Class2.Class3 qualifiedbug() {\n" + 
+			"		return new Class2(\"\").new Class3(null);\n" + 
+			"	}\n" + 
+			"}\n"
+		},
+		getCompilerOptions(),
+		"----------\n" +
+		"1. ERROR in Class1.java (at line 3)\n" + 
+		"	return Class2.create(null);\n" + 
+		"	                     ^^^^\n" + 
+		"Null type mismatch: required \'@NonNull String\' but the provided value is null\n" + 
+		"----------\n" +
+		"2. ERROR in Class1.java (at line 7)\n" + 
+		"	return new Class2(null);\n" + 
+		"	                  ^^^^\n" + 
+		"Null type mismatch: required \'@NonNull String\' but the provided value is null\n" + 
+		"----------\n" +
+		"3. ERROR in Class1.java (at line 11)\n" + 
+		"	return new Class2(\"\").new Class3(null);\n" + 
+		"	                                 ^^^^\n" + 
+		"Null type mismatch: required \'@NonNull String\' but the provided value is null\n" + 
+		"----------\n");
+}
+
+// missing type in constructor declaration must not cause NPE in QAE#resolveType(..)
+public void testBug415850_a() {
+	this.runNegativeTest(
+			new String[] {
+				"X.java", //-----------------------------------------------------------------------
+				"public class X {\n" +
+				"	void foo(X1 x1) {\n" +
+				"		Object o = new X1(x1){};\n" +
+				"	}\n" +
+				"}\n",
+				"X1.java", //-----------------------------------------------------------------------
+				"public class X1 {\n" +
+				"	public X1(Zork z) {}\n" +
+				"}\n"
+			},
+			"----------\n" +
+			"1. ERROR in X.java (at line 3)\n" +
+			"	Object o = new X1(x1){};\n" +
+			"	               ^^^^^^\n" +
+			"The constructor X1(Zork) refers to the missing type Zork\n" +
+			"----------\n" +
+			"----------\n" +
+			"1. ERROR in X1.java (at line 2)\n" +
+			"	public X1(Zork z) {}\n" +
+			"	          ^^^^\n" +
+			"Zork cannot be resolved to a type\n" +
+			"----------\n");
+}
+
+// avoid NPE in BinaryTypeBinding.getField(..) due to recursive dependency enum->package-info->annotation->enum 
+public void testBug415850_b() {
+	runConformTestWithLibs(
+		new String[] {
+			"p/package-info.java",
+			"@p.Annot(state=p.MyEnum.BROKEN)\n" + 
+			"package p;",
+			"p/Annot.java",
+			"package p;\n" + 
+			"@Annot(state=MyEnum.KO)\n" + 
+			"public @interface Annot {\n" + 
+			"	MyEnum state() default MyEnum.KO;\n" + 
+			"}",
+			"p/MyEnum.java",
+			"package p;\n" + 
+			"@Annot(state=MyEnum.KO)\n" + 
+			"public enum MyEnum {\n" + 
+			"	WORKS, OK, KO, BROKEN, ;\n" + 
+			"}",
+			"test180/Test.java",
+			"package test180;\n" +
+			"import p.MyEnum;\n" + 
+			"import p.Annot;\n" + 
+			"@Annot(state=MyEnum.OK)\n" + 
+			"public class Test {}",
+		},
+		getCompilerOptions(),
+		""
+	);
+	Map options = getCompilerOptions();
+	options.put(CompilerOptions.OPTION_Process_Annotations, CompilerOptions.ENABLED);
+	runConformTestWithLibs(
+		new String[] {
+			"X.java",
+			"import test180.Test;\n" +
+			"public class X {\n" + 
+			"	public static void main(String[] args) {\n" + 
+			"		System.out.println(Test.class);\n" + 
+			"	}\n" + 
+			"}"
+		},
+		options,
+		"",
+		"class test180.Test");
+}
+public void testBug417295_5() {
+	runNegativeTestWithLibs(
+		new String[] {
+			"AllAreNonNull.java",
+			"@org.eclipse.jdt.annotation.NonNullByDefault\n" +
+			"public class AllAreNonNull {\n" + 
+			"	String s3 = \"\";\n" + 
+			"	void test() {\n" + 
+			"		this.s3 = null;\n" + 
+			"	}\n" + 
+			"}\n"
+		},
+		"----------\n" + 
+		"1. ERROR in AllAreNonNull.java (at line 5)\n" + 
+		"	this.s3 = null;\n" + 
+		"	          ^^^^\n" + 
+		"Null type mismatch: required \'@NonNull String\' but the provided value is null\n" + 
+		"----------\n");
+}
+public void testBug417295_7() {
+	runConformTestWithLibs(
+			new String[] {
+				"p1/AllAreNonNull.java",
+				"package p1;\n" +
+				"@org.eclipse.jdt.annotation.NonNullByDefault\n" +
+				"public class AllAreNonNull {\n" + 
+				"	public String s3 = \"\";\n" + 
+				"}\n"
+			},
+			getCompilerOptions(),
+			"");
+	runNegativeTestWithLibs(
+		false,
+		new String[] {
+			"Client.java",
+			"public class Client {\n" + 
+			"	void test(p1.AllAreNonNull aann) {\n" + 
+			"		aann.s3 = null;\n" + 
+			"	}\n" + 
+			"}\n"
+		},
+		getCompilerOptions(),
+		"----------\n" + 
+		"1. ERROR in Client.java (at line 3)\n" + 
+		"	aann.s3 = null;\n" + 
+		"	          ^^^^\n" + 
+		"Null type mismatch: required \'@NonNull String\' but the provided value is null\n" + 
+		"----------\n");
 }
 }

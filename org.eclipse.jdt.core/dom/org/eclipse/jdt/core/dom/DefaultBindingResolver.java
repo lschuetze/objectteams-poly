@@ -29,10 +29,10 @@ import org.eclipse.jdt.internal.compiler.ast.ArrayAllocationExpression;
 import org.eclipse.jdt.internal.compiler.ast.CompilationUnitDeclaration;
 import org.eclipse.jdt.internal.compiler.ast.ExplicitConstructorCall;
 import org.eclipse.jdt.internal.compiler.ast.FieldReference;
-import org.eclipse.jdt.internal.compiler.ast.JavadocImplicitTypeReference;
 import org.eclipse.jdt.internal.compiler.ast.ImportReference;
 import org.eclipse.jdt.internal.compiler.ast.JavadocAllocationExpression;
 import org.eclipse.jdt.internal.compiler.ast.JavadocFieldReference;
+import org.eclipse.jdt.internal.compiler.ast.JavadocImplicitTypeReference;
 import org.eclipse.jdt.internal.compiler.ast.JavadocMessageSend;
 import org.eclipse.jdt.internal.compiler.ast.JavadocQualifiedTypeReference;
 import org.eclipse.jdt.internal.compiler.ast.JavadocSingleNameReference;
@@ -926,7 +926,7 @@ class DefaultBindingResolver extends BindingResolver {
 		Object oldNode = this.newAstToOldAst.get(lambda);
 		if (oldNode instanceof org.eclipse.jdt.internal.compiler.ast.LambdaExpression) {
 			org.eclipse.jdt.internal.compiler.ast.LambdaExpression lambdaExpression = (org.eclipse.jdt.internal.compiler.ast.LambdaExpression) oldNode;
-			IMethodBinding methodBinding = getMethodBinding(lambdaExpression.binding);
+			IMethodBinding methodBinding = getMethodBinding(lambdaExpression.getMethodBinding());
 			if (methodBinding == null) {
 				return null;
 			}
@@ -977,7 +977,7 @@ class DefaultBindingResolver extends BindingResolver {
 		Object oldNode = this.newAstToOldAst.get(methodReference);
 		if (oldNode instanceof org.eclipse.jdt.internal.compiler.ast.ReferenceExpression) {
 			org.eclipse.jdt.internal.compiler.ast.ReferenceExpression referenceExpression = (org.eclipse.jdt.internal.compiler.ast.ReferenceExpression) oldNode;
-			IMethodBinding methodBinding = getMethodBinding(referenceExpression.binding);
+			IMethodBinding methodBinding = getMethodBinding(referenceExpression.getMethodBinding());
 			if (methodBinding == null) {
 				return null;
 			}
@@ -1315,7 +1315,7 @@ class DefaultBindingResolver extends BindingResolver {
 			return method.getReturnType();
 		} else if (node instanceof org.eclipse.jdt.internal.compiler.ast.ReferenceExpression) {
 			org.eclipse.jdt.internal.compiler.ast.ReferenceExpression referenceExpression = (org.eclipse.jdt.internal.compiler.ast.ReferenceExpression) node;
-			IMethodBinding method = getMethodBinding(referenceExpression.binding);
+			IMethodBinding method = getMethodBinding(referenceExpression.getMethodBinding());
 			if (method == null) return null;
 			return method.getReturnType();
 //{ObjectTeams: Resolve bindings for OT-specific elements
@@ -1607,7 +1607,7 @@ class DefaultBindingResolver extends BindingResolver {
 			return getMethodBinding(memberValuePair.binding);
 		} else if (node instanceof org.eclipse.jdt.internal.compiler.ast.ReferenceExpression) {
 			org.eclipse.jdt.internal.compiler.ast.ReferenceExpression referenceExpression = (org.eclipse.jdt.internal.compiler.ast.ReferenceExpression) node;
-			return getMethodBinding(referenceExpression.binding);
+			return getMethodBinding(referenceExpression.getMethodBinding());
 		}
 //{ObjectTeams: Resolve bindings for OT-specific elements
 		else if (node instanceof MethodSpec)
@@ -1800,7 +1800,11 @@ class DefaultBindingResolver extends BindingResolver {
 					}
 					ArrayType arrayType = (ArrayType) type;
 					ArrayBinding arrayBinding = (ArrayBinding) typeBinding;
-					return getTypeBinding(this.scope.createArrayType(arrayBinding.leafComponentType, arrayType.getDimensions()));
+					int dimensions = arrayType.getDimensions();
+					boolean isVarargs = typeReference.isVarargs();
+					if (dimensions == arrayBinding.dimensions)
+						return getTypeBinding(arrayBinding); // reuse.
+					return getTypeBinding(this.scope.createArrayType(arrayBinding.leafComponentType, dimensions, getTypeAnnotations(dimensions, arrayBinding, isVarargs)));
 				}
 				if (typeBinding.isArrayType()) {
 					// 'typeBinding' can still be an array type because 'node' may be "larger" than 'type' (see comment of newAstToOldAst).
@@ -1826,7 +1830,9 @@ class DefaultBindingResolver extends BindingResolver {
 					binding = typeBinding;
 				}
 			} else if (node instanceof TypeReference) {
-				if (type instanceof QualifiedType) {
+				if (type instanceof SimpleType && node instanceof QualifiedTypeReference) {
+					return resolveTypeBindingForName(((SimpleType)type).getName());
+				} else if (type instanceof QualifiedType) {
 					return resolveTypeBindingForName(((QualifiedType)type).getName());
 				} else if (type instanceof PackageQualifiedType){
 					return resolveTypeBindingForName(((PackageQualifiedType)type).getName());
@@ -1847,7 +1853,11 @@ class DefaultBindingResolver extends BindingResolver {
 						return null;
 					}
 					ArrayBinding arrayBinding = (ArrayBinding) binding;
-					return getTypeBinding(this.scope.createArrayType(arrayBinding.leafComponentType, arrayType.getDimensions()));
+					int dimensions = arrayType.getDimensions();
+					boolean isVarargs = node instanceof TypeReference && ((TypeReference) node).isVarargs();
+					if (dimensions == arrayBinding.dimensions)
+						return getTypeBinding(arrayBinding); // reuse
+					return getTypeBinding(this.scope.createArrayType(arrayBinding.leafComponentType, dimensions, getTypeAnnotations(dimensions, arrayBinding, isVarargs)));
 				} else if (binding.isArrayType()) {
 					// 'binding' can still be an array type because 'node' may be "larger" than 'type' (see comment of newAstToOldAst).
 					ArrayBinding arrayBinding = (ArrayBinding) binding;
@@ -1864,6 +1874,27 @@ class DefaultBindingResolver extends BindingResolver {
 			}
 		}
 		return null;
+	}
+
+	private org.eclipse.jdt.internal.compiler.lookup.AnnotationBinding[] getTypeAnnotations(int dimensions, ArrayBinding arrayBinding, boolean isVarargs) {
+		org.eclipse.jdt.internal.compiler.lookup.AnnotationBinding [] oldies = arrayBinding.getTypeAnnotations();
+		org.eclipse.jdt.internal.compiler.lookup.AnnotationBinding[] newbies = Binding.NO_ANNOTATIONS;
+		// Skip past extended dimensions encoded ahead of base dimensions. Dimension for variable argument array comes after the base dimensions.
+		int extendedDimensions = arrayBinding.dimensions - dimensions - (isVarargs ? 1 : 0);
+		int i, length;
+		for (i = 0, length = oldies == null ? 0 : oldies.length; i < length && extendedDimensions > 0 ; i++) {
+			if (oldies[i] == null)
+				extendedDimensions--;
+		}
+		int cells = 0;
+		for (int j = i; j < length && dimensions > 0 ; j++) {
+			if (oldies[j] == null)
+				dimensions--;
+			cells ++;
+		}
+		if (cells > 0)
+			System.arraycopy(oldies, i, newbies = new org.eclipse.jdt.internal.compiler.lookup.AnnotationBinding[cells], 0, cells);
+		return newbies;
 	}
 
 	/*

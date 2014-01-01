@@ -54,6 +54,7 @@ public MemberTypeBinding(MemberTypeBinding prototype) {
 }
 
 void checkSyntheticArgsAndFields() {
+	if (this != this.prototype) throw new IllegalStateException();
 //{ObjectTeams: role ifcs require synth args too
 /* orig:
 	if (isStatic()) return;
@@ -89,10 +90,9 @@ public char[] constantPoolName() /* java/lang/Object */ {
 	return this.constantPoolName = CharOperation.concat(enclosingType().constantPoolName(), this.sourceName, '$');
 }
 
-public TypeBinding clone(TypeBinding outerType, TypeBinding[] typeArguments) {
+public TypeBinding clone(TypeBinding outerType) {
 	MemberTypeBinding copy = new MemberTypeBinding(this);
-	if (outerType != null)
-		copy.enclosingType = (SourceTypeBinding) outerType;
+	copy.enclosingType = (SourceTypeBinding) outerType;
 	return copy;
 }
 

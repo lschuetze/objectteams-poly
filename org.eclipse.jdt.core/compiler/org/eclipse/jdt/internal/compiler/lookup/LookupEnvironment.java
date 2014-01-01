@@ -27,6 +27,7 @@
  *								Bug 415043 - [1.8][null] Follow-up re null type annotations after bug 392099
  *								Bug 416183 - [1.8][compiler][null] Overload resolution fails with null annotations
  *								Bug 416307 - [1.8][compiler][null] subclass with type parameter substitution confuses null checking
+ *								Bug 417295 - [1.8[[null] Massage type annotated null analysis to gel well with deep encoded type bindings.
  *******************************************************************************/
 package org.eclipse.jdt.internal.compiler.lookup;
 
@@ -114,7 +115,7 @@ public class LookupEnvironment implements ProblemReasons, TypeConstants {
 	private int lastCompletedUnitIndex = -1;
 	private int lastUnitIndex = -1;
 
-	private AnnotatableTypeSystem typeSystem;
+	private TypeSystem typeSystem;
 	
 	public INameEnvironment nameEnvironment;
 	public CompilerOptions globalOptions;
@@ -151,6 +152,9 @@ public class LookupEnvironment implements ProblemReasons, TypeConstants {
 	PackageBinding nonnullAnnotationPackage;			// the package supposed to contain the NonNull annotation type
 	PackageBinding nonnullByDefaultAnnotationPackage;	// the package supposed to contain the NonNullByDefault annotation type
 
+	AnnotationBinding nonNullAnnotation;
+	AnnotationBinding nullableAnnotation;
+
 	final static int BUILD_FIELDS_AND_METHODS = 4;
 	final static int BUILD_TYPE_HIERARCHY = 1;
 	final static int CHECK_AND_SET_IMPORTS = 2;
@@ -186,7 +190,12 @@ public LookupEnvironment(ITypeRequestor typeRequestor, CompilerOptions globalOpt
 	this.accessRestrictions = new HashMap(3);
 	this.classFilePool = ClassFilePool.newInstance();
 	this.typesBeingConnected = new HashSet();
-	this.typeSystem = new AnnotatableTypeSystem(this);
+	boolean stillTesting = true;
+	if (this.globalOptions.sourceLevel >= ClassFileConstants.JDK1_8 && (stillTesting || this.globalOptions.storeAnnotations)) {
+		this.typeSystem = new AnnotatableTypeSystem(this);
+	} else {
+		this.typeSystem = new UnannotatedTypeSystem(this);
+	}
 }
 
 /**
@@ -431,7 +440,7 @@ public int internalCompleteTypeBindings(CompilationUnitDeclaration parsedUnit) {
 //{ObjectTeams: one more step:
 		if (todo >= ROLES_LINKED)
 			RoleSplitter.linkRoles(this.unitBeingCompleted = parsedUnit);
-
+// SH}
 		this.unitBeingCompleted = null;
 	}
 //{ObjectTeams: report actual step achieved:
@@ -848,22 +857,32 @@ public TypeBinding convertUnresolvedBinaryToRawType(TypeBinding type) {
 	}
 	return type;
 }
-/*
- *  Used to guarantee annotation identity: we do that only for marker annotations. We don't have the machinery for the general case as of now.
- */
+/* Used to guarantee annotation identity: we do that only for marker annotations and others with all default values.
+   We don't have the machinery for the general case as of now.
+*/
 public AnnotationBinding createAnnotation(ReferenceBinding annotationType, ElementValuePair[] pairs) {
 	if (pairs.length != 0) {
 		AnnotationBinding.setMethodBindings(annotationType, pairs);
 		return new AnnotationBinding(annotationType, pairs);
 	}
-	return this.typeSystem.getAnnotationType(annotationType);
+	return this.typeSystem.getAnnotationType(annotationType, true);
+}
+
+/* Used to guarantee annotation identity: we do that only for marker annotations and others with all default values.
+   We don't have the machinery for the general case as of now.
+*/
+public AnnotationBinding createUnresolvedAnnotation(ReferenceBinding annotationType, ElementValuePair[] pairs) {
+	if (pairs.length != 0) {
+		return new UnresolvedAnnotationBinding(annotationType, pairs, this);
+	}
+	return this.typeSystem.getAnnotationType(annotationType, false);
 }
 
 /*
  *  Used to guarantee array type identity.
  */
 public ArrayBinding createArrayType(TypeBinding leafComponentType, int dimensionCount) {
-	return this.typeSystem.getArrayType(leafComponentType, dimensionCount, Binding.NO_ANNOTATIONS);
+	return this.typeSystem.getArrayType(leafComponentType, dimensionCount);
 }
 
 public ArrayBinding createArrayType(TypeBinding leafComponentType, int dimensionCount, AnnotationBinding [] annotations) {
@@ -880,13 +899,13 @@ public TypeBinding createIntersectionCastType(ReferenceBinding[] intersectingTyp
 
 	if (count < length) {
 		if ((intersectionCastTypeBindings = this.uniqueIntersectionCastTypeBindings[count]) == null)
-			this.uniqueIntersectionCastTypeBindings[count] = intersectionCastTypeBindings = new IntersectionCastTypeBinding[10];
+			this.uniqueIntersectionCastTypeBindings[count] = intersectionCastTypeBindings = new IntersectionCastTypeBinding[4];
 	} else {
 		System.arraycopy(
 			this.uniqueIntersectionCastTypeBindings, 0,
 			this.uniqueIntersectionCastTypeBindings = new IntersectionCastTypeBinding[count + 1][], 0,
 			length);
-		this.uniqueIntersectionCastTypeBindings[count] = intersectionCastTypeBindings = new IntersectionCastTypeBinding[10];
+		this.uniqueIntersectionCastTypeBindings[count] = intersectionCastTypeBindings = new IntersectionCastTypeBinding[4];
 	}
 
 	int index = -1;
@@ -898,7 +917,7 @@ public TypeBinding createIntersectionCastType(ReferenceBinding[] intersectingTyp
 		ReferenceBinding [] priorIntersectingTypes = priorBinding.intersectingTypes;
 		for (int i = 0; i < count; i++) {
 			if (intersectingTypes[i] != priorIntersectingTypes[i])
-					continue next;
+				continue next;
 		}	
 		return priorBinding;
 	}
@@ -920,16 +939,12 @@ public BinaryTypeBinding createBinaryTypeFrom(IBinaryType binaryType, PackageBin
 
 	// resolve any array bindings which reference the unresolvedType
 	ReferenceBinding cachedType = packageBinding.getType0(binaryBinding.compoundName[binaryBinding.compoundName.length - 1]);
-	if (cachedType != null) { // update reference to unresolved binding after having read classfile (knows whether generic for raw conversion)
-		if (cachedType instanceof UnresolvedReferenceBinding) {
-			((UnresolvedReferenceBinding) cachedType).setResolvedType(binaryBinding, this);
-		} else {
-			if (cachedType.isBinaryBinding()) // sanity check... at this point the cache should ONLY contain unresolved types
-				return (BinaryTypeBinding) cachedType;
-			// it is possible with a large number of source files (exceeding AbstractImageBuilder.MAX_AT_ONCE) that a member type can be in the cache as an UnresolvedType,
-			// but because its enclosingType is resolved while its created (call to BinaryTypeBinding constructor), its replaced with a source type
-			return null;
-		}
+	if (cachedType != null && !cachedType.isUnresolvedType()) {
+		if (cachedType.isBinaryBinding()) // sanity check... at this point the cache should ONLY contain unresolved types
+			return (BinaryTypeBinding) cachedType;
+		// it is possible with a large number of source files (exceeding AbstractImageBuilder.MAX_AT_ONCE) that a member type can be in the cache as an UnresolvedType,
+		// but because its enclosingType is resolved while its created (call to BinaryTypeBinding constructor), its replaced with a source type
+		return null;
 	}
 	packageBinding.addType(binaryBinding);
 	setAccessRestriction(binaryBinding, accessRestriction);
@@ -1127,6 +1142,11 @@ public PolymorphicMethodBinding createPolymorphicMethod(MethodBinding originalPo
 	cachedInfo[index] = polymorphicMethod;
 	return polymorphicMethod;
 }
+
+public boolean usesAnnotatedTypeSystem() {
+	return this.typeSystem.isAnnotatedTypeSystem();
+}
+
 public MethodBinding updatePolymorphicMethodReturnType(PolymorphicMethodBinding binding, TypeBinding typeBinding) {
 	// update the return type to be the given return type, but reuse existing binding if one can match
 	String key = new String(binding.selector);
@@ -1179,9 +1199,15 @@ public ParameterizedMethodBinding createGetClassMethod(TypeBinding receiverType,
 	}
 	return retVal;
 }
-
+public ReferenceBinding createMemberType(ReferenceBinding memberType, ReferenceBinding enclosingType) {
+	return this.typeSystem.getMemberType(memberType, enclosingType);
+}
 public ParameterizedTypeBinding createParameterizedType(ReferenceBinding genericType, TypeBinding[] typeArguments, ReferenceBinding enclosingType) {
-	return this.typeSystem.getParameterizedType(genericType, typeArguments, enclosingType, Binding.NO_ANNOTATIONS);
+	return this.typeSystem.getParameterizedType(genericType, typeArguments, null, -1, enclosingType);
+}
+
+public ParameterizedTypeBinding createParameterizedType(ReferenceBinding genericType, TypeBinding[] typeArguments, ReferenceBinding enclosingType, AnnotationBinding [] annotations) {
+	return this.typeSystem.getParameterizedType(genericType, typeArguments, null, -1, enclosingType, annotations);
 }
 
 //{ObjectTeams: for anchored role types:
@@ -1218,11 +1244,19 @@ public TypeBinding createAnnotatedType(TypeBinding type, AnnotationBinding[] new
 }
 
 public RawTypeBinding createRawType(ReferenceBinding genericType, ReferenceBinding enclosingType) {
-	return this.typeSystem.getRawType(genericType, enclosingType, Binding.NO_ANNOTATIONS);
+	return this.typeSystem.getRawType(genericType, enclosingType);
+}
+
+public RawTypeBinding createRawType(ReferenceBinding genericType, ReferenceBinding enclosingType, AnnotationBinding [] annotations) {
+	return this.typeSystem.getRawType(genericType, enclosingType, annotations);
 }
 
 public WildcardBinding createWildcard(ReferenceBinding genericType, int rank, TypeBinding bound, TypeBinding[] otherBounds, int boundKind) {
-	return this.typeSystem.getWildcard(genericType, rank, bound, otherBounds, boundKind, Binding.NO_ANNOTATIONS);
+	return this.typeSystem.getWildcard(genericType, rank, bound, otherBounds, boundKind);
+}
+
+public WildcardBinding createWildcard(ReferenceBinding genericType, int rank, TypeBinding bound, TypeBinding[] otherBounds, int boundKind, AnnotationBinding [] annotations) {
+	return this.typeSystem.getWildcard(genericType, rank, bound, otherBounds, boundKind, annotations);
 }
 
 /**
@@ -1255,8 +1289,10 @@ public ReferenceBinding getCachedType(char[][] compoundName) {
 }
 
 public AnnotationBinding getNullableAnnotation() {
+	if (this.nullableAnnotation != null)
+		return this.nullableAnnotation;
 	ReferenceBinding nullable = getResolvedType(this.globalOptions.nullableAnnotationName, null);
-	return new AnnotationBinding(nullable, Binding.NO_ELEMENT_VALUE_PAIRS);
+	return this.nullableAnnotation = this.typeSystem.getAnnotationType(nullable, true);
 }
 
 public char[][] getNullableAnnotationName() {
@@ -1264,8 +1300,18 @@ public char[][] getNullableAnnotationName() {
 }
 
 public AnnotationBinding getNonNullAnnotation() {
+	if (this.nonNullAnnotation != null) 
+		return this.nonNullAnnotation;
 	ReferenceBinding nonNull = getResolvedType(this.globalOptions.nonNullAnnotationName, null);
-	return new AnnotationBinding(nonNull, Binding.NO_ELEMENT_VALUE_PAIRS);
+	return this.nonNullAnnotation = this.typeSystem.getAnnotationType(nonNull, true);
+}
+
+public AnnotationBinding[] nullAnnotationsFromTagBits(long nullTagBits) {
+	if (nullTagBits == TagBits.AnnotationNonNull)
+		return new AnnotationBinding[] { getNonNullAnnotation() };
+	else if (nullTagBits == TagBits.AnnotationNullable)
+		return new AnnotationBinding[] { getNullableAnnotation() };
+	return null;
 }
 
 public char[][] getNonNullAnnotationName() {
@@ -1521,7 +1567,7 @@ TypeBinding getTypeFromSignature(char[] signature, int start, int end, boolean i
 		start++;
 		dimension++;
 	}
-	// null annotations on dimensions?
+	// annotations on dimensions?
 	AnnotationBinding [][] annotationsOnDimensions = null;
 	if (dimension > 0 && walker != TypeAnnotationWalker.EMPTY_ANNOTATION_WALKER) {
 		for (int i = 0; i < dimension; i++) {
@@ -1577,16 +1623,27 @@ TypeBinding getTypeFromSignature(char[] signature, int start, int end, boolean i
 		binding = getTypeFromConstantPoolName(signature, start + 1, end, isParameterized, missingTypeNames); // skip leading 'L' or 'T'
 	}
 	
-	int depth = binding.depth();
-	while (depth > 0 && walker != TypeAnnotationWalker.EMPTY_ANNOTATION_WALKER) { // we are dropping annotations on enclosing types.
-		walker = walker.toNextNestedType();
-		depth--;
+	if (isParameterized) {
+		if (dimension != 0)
+			throw new IllegalStateException();
+		return binding;
 	}
-	AnnotationBinding [][] annotations = new AnnotationBinding[depth + 1][];
-	annotations[depth] = BinaryTypeBinding.createAnnotations(walker.getAnnotationsAtCursor(), this, missingTypeNames);
 	
-	if (annotations[depth] != null && annotations[depth] != Binding.NO_ANNOTATIONS)
-		binding = createAnnotatedType(binding, annotations);
+	if (walker != TypeAnnotationWalker.EMPTY_ANNOTATION_WALKER) {
+		final int depth = binding.depth();
+		AnnotationBinding [][] annotations = null;
+		for (int i = 0; i <= depth; i++) {
+			AnnotationBinding[] annots = BinaryTypeBinding.createAnnotations(walker.getAnnotationsAtCursor(), this, missingTypeNames);
+			if (annots != null && annots.length > 0) {
+				if (annotations == null)
+					annotations = new AnnotationBinding[depth + 1][];
+				annotations[i] = annots;
+			}
+			walker = walker.toNextNestedType();
+		}
+		if (annotations != null)
+			binding = createAnnotatedType(binding, annotations);
+	}
 	
 	if (dimension != 0)
 		binding =  this.typeSystem.getArrayType(binding, dimension, AnnotatableTypeSystem.flattenedAnnotations(annotationsOnDimensions));
@@ -1622,12 +1679,25 @@ public TypeBinding getTypeFromTypeSignature(SignatureWrapper wrapper, TypeVariab
 		wrapper.start++;
 		dimension++;
 	}
+	// annotations on dimensions?
+	AnnotationBinding [][] annotationsOnDimensions = null;
+	if (dimension > 0 && walker != TypeAnnotationWalker.EMPTY_ANNOTATION_WALKER) {
+		for (int i = 0; i < dimension; i++) {
+			AnnotationBinding [] annotations = BinaryTypeBinding.createAnnotations(walker.getAnnotationsAtCursor(), this, missingTypeNames);
+			if (annotations != Binding.NO_ANNOTATIONS) { 
+				if (annotationsOnDimensions == null)
+					annotationsOnDimensions = new AnnotationBinding[dimension][];
+					annotationsOnDimensions[i] = annotations;
+			}
+			walker = walker.toNextArrayDimension();
+		}
+	}
 	if (wrapper.signature[wrapper.start] == 'T') {
 	    int varStart = wrapper.start + 1;
 	    int varEnd = wrapper.computeEnd();
 		for (int i = staticVariables.length; --i >= 0;)
 			if (CharOperation.equals(staticVariables[i].sourceName, wrapper.signature, varStart, varEnd))
-				return typeFromTypeVariable(staticVariables[i], dimension, walker, missingTypeNames);
+				return getTypeFromTypeVariable(staticVariables[i], dimension, annotationsOnDimensions, walker, missingTypeNames);
 	    ReferenceBinding initialType = enclosingType;
 		do {
 			TypeVariableBinding[] enclosingTypeVariables;
@@ -1638,7 +1708,7 @@ public TypeBinding getTypeFromTypeSignature(SignatureWrapper wrapper, TypeVariab
 			}
 			for (int i = enclosingTypeVariables.length; --i >= 0;)
 				if (CharOperation.equals(enclosingTypeVariables[i].sourceName, wrapper.signature, varStart, varEnd))
-					return typeFromTypeVariable(enclosingTypeVariables[i], dimension, walker, missingTypeNames);
+					return getTypeFromTypeVariable(enclosingTypeVariables[i], dimension, annotationsOnDimensions, walker, missingTypeNames);
 		} while ((enclosingType = enclosingType.enclosingType()) != null);
 		this.problemReporter.undefinedTypeVariableSignature(CharOperation.subarray(wrapper.signature, varStart, varEnd), initialType);
 		return null; // cannot reach this, since previous problem will abort compilation
@@ -1647,7 +1717,7 @@ public TypeBinding getTypeFromTypeSignature(SignatureWrapper wrapper, TypeVariab
 	TypeBinding type = getTypeFromSignature(wrapper.signature, wrapper.start, wrapper.computeEnd(), isParameterized = (wrapper.end == wrapper.bracket), enclosingType, missingTypeNames, walker);
 
 	if (!isParameterized)
-		return dimension == 0 ? type : createArrayType(type, dimension);
+		return dimension == 0 ? type : createArrayType(type, dimension, AnnotatableTypeSystem.flattenedAnnotations(annotationsOnDimensions));
 
 	// type must be a ReferenceBinding at this point, cannot be a BaseTypeBinding or ArrayTypeBinding
 	ReferenceBinding actualType = (ReferenceBinding) type;
@@ -1658,8 +1728,9 @@ public TypeBinding getTypeFromTypeSignature(SignatureWrapper wrapper, TypeVariab
 	if (actualEnclosing != null) { // convert needed if read some static member type
 		actualEnclosing = (ReferenceBinding) convertToRawType(actualEnclosing, false /*do not force conversion of enclosing types*/);
 	}
+	AnnotationBinding [] annotations = BinaryTypeBinding.createAnnotations(walker.getAnnotationsAtCursor(), this, missingTypeNames);
 	TypeBinding[] typeArguments = getTypeArgumentsFromSignature(wrapper, staticVariables, enclosingType, actualType, missingTypeNames, walker);
-	ParameterizedTypeBinding parameterizedType = createParameterizedType(actualType, typeArguments, actualEnclosing);
+	ParameterizedTypeBinding parameterizedType = createParameterizedType(actualType, typeArguments, actualEnclosing, annotations);
 
 	while (wrapper.signature[wrapper.start] == '.') {
 		wrapper.start++; // skip '.'
@@ -1670,37 +1741,25 @@ public TypeBinding getTypeFromTypeSignature(SignatureWrapper wrapper, TypeVariab
 		// need to protect against the member type being null when the signature is invalid
 		if (memberType == null)
 			this.problemReporter.corruptedSignature(parameterizedType, wrapper.signature, memberStart); // aborts
+		walker = walker.toNextNestedType();
+		annotations = BinaryTypeBinding.createAnnotations(walker.getAnnotationsAtCursor(), this, missingTypeNames);
 		if (wrapper.signature[wrapper.start] == '<') {
 			wrapper.start++; // skip '<'
 			typeArguments = getTypeArgumentsFromSignature(wrapper, staticVariables, enclosingType, memberType, missingTypeNames, walker);
 		} else {
 			typeArguments = null;
 		}
-		parameterizedType = createParameterizedType(memberType, typeArguments, parameterizedType);
+		parameterizedType = createParameterizedType(memberType, typeArguments, parameterizedType, annotations);
 	}
 	wrapper.start++; // skip ';'
-	return dimension == 0 ? (TypeBinding) parameterizedType : createArrayType(parameterizedType, dimension);
+	return dimension == 0 ? (TypeBinding) parameterizedType : createArrayType(parameterizedType, dimension, AnnotatableTypeSystem.flattenedAnnotations(annotationsOnDimensions));
 }
 
-private TypeBinding typeFromTypeVariable(TypeVariableBinding typeVariableBinding, int dimension, TypeAnnotationWalker walker, char [][][] missingTypeNames) {
-	AnnotationBinding [] annotations;
-	AnnotationBinding [][] annotationsOnDimensions = null;
-	if (walker != TypeAnnotationWalker.EMPTY_ANNOTATION_WALKER) {
-		for (int i = 0; i < dimension; i++) {
-			annotations = BinaryTypeBinding.createAnnotations(walker.getAnnotationsAtCursor(), this, missingTypeNames);
-			if (annotations != Binding.NO_ANNOTATIONS) { 
-				if (annotationsOnDimensions == null)
-					annotationsOnDimensions = new AnnotationBinding[dimension][];
-				annotationsOnDimensions[i] = annotations;
-			}
-			walker = walker.toNextArrayDimension();
-		}
-	}
-	
-	annotations = BinaryTypeBinding.createAnnotations(walker.getAnnotationsAtCursor(), this, missingTypeNames);
+private TypeBinding getTypeFromTypeVariable(TypeVariableBinding typeVariableBinding, int dimension, AnnotationBinding [][] annotationsOnDimensions, TypeAnnotationWalker walker, char [][][] missingTypeNames) {
+	AnnotationBinding [] annotations = BinaryTypeBinding.createAnnotations(walker.getAnnotationsAtCursor(), this, missingTypeNames);
 	if (annotations != null && annotations != Binding.NO_ANNOTATIONS)
 		typeVariableBinding = (TypeVariableBinding) createAnnotatedType(typeVariableBinding, new AnnotationBinding [][] { annotations });
-	
+
 	if (dimension == 0) {
 		return typeVariableBinding;
 	}
@@ -1856,5 +1915,10 @@ public void addResolutionListener(IQualifiedTypeResolutionListener resolutionLis
 
 public TypeBinding getUnannotatedType(TypeBinding typeBinding) {
 	return this.typeSystem.getUnannotatedType(typeBinding);
+}
+
+// Given a type, return all its variously annotated versions.
+public TypeBinding[] getAnnotatedTypes(TypeBinding type) {
+	return this.typeSystem.getAnnotatedTypes(type);
 }
 }

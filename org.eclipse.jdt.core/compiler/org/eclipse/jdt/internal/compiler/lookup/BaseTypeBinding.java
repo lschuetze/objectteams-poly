@@ -13,6 +13,7 @@
  *     IBM Corporation - initial API and implementation
  *     Stephan Herrmann - Contribution for
  *								bug 395002 - Self bound generic class doesn't resolve bounds properly for wildcards for certain parametrisation.
+ *								Bug 417295 - [1.8[[null] Massage type annotated null analysis to gel well with deep encoded type bindings.
  *******************************************************************************/
 package org.eclipse.jdt.internal.compiler.lookup;
 
@@ -134,12 +135,6 @@ public final class BaseTypeBinding extends TypeBinding {
 		this.simpleName = name;
 		this.constantPoolName = constantPoolName;
 	}
-	
-	BaseTypeBinding(BaseTypeBinding prototype) {
-		super(prototype);
-		this.simpleName = prototype.simpleName;
-		this.constantPoolName = prototype.constantPoolName;
-	}
 
 	/**
 	 * int -> I
@@ -155,8 +150,8 @@ public final class BaseTypeBinding extends TypeBinding {
 		return this.constantPoolName;
 	}
 
-	public TypeBinding clone(TypeBinding enclosingType, TypeBinding[] typeArguments) {
-		return new BaseTypeBinding(this);
+	public TypeBinding clone(TypeBinding enclosingType) {
+		return new BaseTypeBinding(this.id, this.simpleName, this.constantPoolName);
 	}
 	
 	public PackageBinding getPackage() {
@@ -177,7 +172,13 @@ public final class BaseTypeBinding extends TypeBinding {
 		return this == TypeBinding.NULL && !right.isBaseType();
 	}
 	
+	public void setTypeAnnotations(AnnotationBinding[] annotations, boolean evalNullAnnotations) {
+		super.setTypeAnnotations(annotations, false); // never set nullTagBits on base types
+	}
+
 	public TypeBinding unannotated() {
+		if (!this.hasTypeAnnotations())
+			return this;
 		switch (this.id) {
 			case TypeIds.T_boolean:
 				return TypeBinding.BOOLEAN;

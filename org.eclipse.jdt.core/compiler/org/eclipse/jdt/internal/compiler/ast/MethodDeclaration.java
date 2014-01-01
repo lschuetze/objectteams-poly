@@ -239,7 +239,7 @@ public class MethodDeclaration extends AbstractMethodDeclaration {
 // SH}
 
 	public void getAllAnnotationContexts(int targetType, List allAnnotationContexts) {
-		AnnotationCollector collector = new AnnotationCollector(this, targetType, allAnnotationContexts);
+		AnnotationCollector collector = new AnnotationCollector(this.returnType, targetType, allAnnotationContexts);
 		for (int i = 0, max = this.annotations.length; i < max; i++) {
 			Annotation annotation = this.annotations[i];
 			annotation.traverse(collector, (BlockScope) null);

@@ -23,7 +23,8 @@
  *								bug 400761 - [compiler][null] null may be return as boolean without a diagnostic
  *								bug 402993 - [null] Follow up of bug 401088: Missing warning about redundant null check
  *								bug 403147 - [compiler][null] FUP of bug 400761: consolidate interaction between unboxing, NPE, and deferred checking
- *								Bug 392099 - [1.8][compiler][null] Apply null annotation on types for null analysis 
+ *								Bug 392099 - [1.8][compiler][null] Apply null annotation on types for null analysis
+ *								Bug 417295 - [1.8[[null] Massage type annotated null analysis to gel well with deep encoded type bindings.
  *******************************************************************************/
 package org.eclipse.jdt.internal.compiler.ast;
 
@@ -398,7 +399,7 @@ public final boolean checkCastTypesCompatibility(
 	boolean use17specifics = scope.compilerOptions().sourceLevel >= ClassFileConstants.JDK1_7;
 	if (castType.isBaseType()) {
 		if (expressionType.isBaseType()) {
-			if (expressionType == castType) {
+			if (TypeBinding.equalsEquals(expressionType, castType)) {
 				if (expression != null) {
 					this.constant = expression.constant; //use the same constant
 				}
@@ -453,7 +454,7 @@ public final boolean checkCastTypesCompatibility(
 			return false;
 
 		case Binding.ARRAY_TYPE :
-			if (castType == expressionType) {
+			if (TypeBinding.equalsEquals(castType, expressionType)) {
 				tagAsUnnecessaryCast(scope, castType);
 				return true; // identity conversion
 			}

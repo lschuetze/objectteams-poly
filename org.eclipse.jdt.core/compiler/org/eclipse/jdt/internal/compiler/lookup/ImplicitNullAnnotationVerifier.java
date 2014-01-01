@@ -23,6 +23,7 @@ import org.eclipse.jdt.internal.compiler.ast.ASTNode;
 import org.eclipse.jdt.internal.compiler.ast.AbstractMethodDeclaration;
 import org.eclipse.jdt.internal.compiler.ast.Argument;
 import org.eclipse.jdt.internal.compiler.ast.MethodDeclaration;
+import org.eclipse.jdt.internal.compiler.ast.NullAnnotationMatching;
 import org.eclipse.jdt.internal.compiler.classfmt.ClassFileConstants;
 import org.eclipse.jdt.internal.compiler.impl.CompilerOptions;
 import org.eclipse.objectteams.otdt.internal.core.compiler.lookup.RoleTypeBinding;
@@ -52,9 +53,10 @@ public class ImplicitNullAnnotationVerifier {
 	// can be 'this', but is never a MethodVerifier (to avoid infinite recursion).
 	ImplicitNullAnnotationVerifier buddyImplicitNullAnnotationsVerifier;
 	private boolean inheritNullAnnotations;
+
+//{ObjectTeams: added field and 2nd ctor arg:
 	private LookupEnvironment environment;
 
-//{ObjectTeams: added 2nd arg:
 	public ImplicitNullAnnotationVerifier(boolean inheritNullAnnotations, LookupEnvironment environment) {
 		this.environment = environment;
 // SH}
@@ -137,9 +139,8 @@ public class ImplicitNullAnnotationVerifier {
 							currentMethod.tagBits |= tagBits;
 						} else {
 							if (!currentMethod.returnType.isBaseType()) {
-								// TODO(Stephan: Synthesize AnnotationBinding[] and call LE#createAnnotatedType(TB, AB[]);
-								// currentMethod.returnType = scope.environment()
-								//		.createAnnotatedType(currentMethod.returnType, tagBits);
+								LookupEnvironment env = scope.environment();
+								currentMethod.returnType = env.createAnnotatedType(currentMethod.returnType, env.nullAnnotationsFromTagBits(tagBits));
 							}
 						}
 					}
@@ -401,8 +402,7 @@ public class ImplicitNullAnnotationVerifier {
 			method.tagBits |= nullnessBits;
 		} else {
 			if (!method.returnType.isBaseType()) {
-				// TODO(Stephan: Synthesize AnnotationBinding[] and call LE#createAnnotatedType(TB, AB[]);
-				//	method.returnType = environment.createAnnotatedType(method.returnType, nullnessBits);
+				method.returnType = environment.createAnnotatedType(method.returnType, environment.nullAnnotationsFromTagBits(nullnessBits));
 			}
 		}
 	}
@@ -411,7 +411,7 @@ public class ImplicitNullAnnotationVerifier {
 		if (useTypeAnnotations) {
 			TypeBinding parameter = method.parameters[i];
 			if (parameter != null) {
-				long nullBits = parameter.tagBits & TagBits.AnnotationNullMASK;
+				long nullBits = NullAnnotationMatching.validNullTagBits(parameter.tagBits);
 				if (nullBits != 0L)
 					return Boolean.valueOf(nullBits == TagBits.AnnotationNonNull);
 			}
@@ -425,7 +425,7 @@ public class ImplicitNullAnnotationVerifier {
 		if (useTypeAnnotations) {
 			if (method.returnType == null)
 				return 0L;
-			return method.returnType.tagBits & TagBits.AnnotationNullMASK;
+			return NullAnnotationMatching.validNullTagBits(method.returnType.tagBits);
 		}
 		return method.tagBits & TagBits.AnnotationNullMASK;
 	}
@@ -458,9 +458,8 @@ public class ImplicitNullAnnotationVerifier {
 		}
 	}
 	void recordArgNonNullness18(MethodBinding method, int paramIdx, Argument currentArgument, Boolean nonNullNess, LookupEnvironment env) {
-		// TODO(Stephan: Synthesize AnnotationBinding[] and call LE#createAnnotatedType(TB, AB[]);
-		//		method.parameters[paramIdx] = env.createAnnotatedType(method.parameters[paramIdx],
-		//										nonNullNess.booleanValue() ? TagBits.AnnotationNonNull : TagBits.AnnotationNullable);
+		AnnotationBinding annotationBinding = nonNullNess.booleanValue() ? env.getNonNullAnnotation() : env.getNullableAnnotation();
+		method.parameters[paramIdx] = env.createAnnotatedType(method.parameters[paramIdx], new AnnotationBinding[]{ annotationBinding});
 		if (currentArgument != null) {
 			currentArgument.binding.type = method.parameters[paramIdx];
 		}

@@ -103,8 +103,9 @@ public class LiftingTypeReference extends TypeReference {
 	}
 
 	@Override
-	public TypeReference copyDims(int dim, Annotation[][] annotationsOnDimensions) {
-		this.baseReference = this.baseReference.copyDims(dim, annotationsOnDimensions);
+	public TypeReference augmentTypeWithAdditionalDimensions(int additionalDimensions, Annotation[][] additionalAnnotations, boolean isVarargs)
+	{
+		this.baseReference = this.baseReference.augmentTypeWithAdditionalDimensions(additionalDimensions, additionalAnnotations, isVarargs);
 		// FIXME check consistency
 		return this;
 	}

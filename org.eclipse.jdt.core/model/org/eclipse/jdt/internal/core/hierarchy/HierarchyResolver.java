@@ -1,10 +1,13 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2012 IBM Corporation and others.
+ * Copyright (c) 2000, 2013 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
- * $Id: HierarchyResolver.java 23404 2010-02-03 14:10:22Z stephan $
+ * 
+ * This is an implementation of an early-draft specification developed under the Java
+ * Community Process (JCP) and is made available for testing and evaluation purposes
+ * only. The code is not compatible with any specification of the JCP.
  *
  * Contributors:
  *     IBM Corporation - initial API and implementation
@@ -367,7 +370,7 @@ private void fixSupertypeBindings() {
 				QualifiedAllocationExpression allocationExpression = localTypeBinding.scope.referenceContext.allocation;
 				TypeReference type;
 				if (allocationExpression != null && (type = allocationExpression.type) != null && type.resolvedType != null) {
-					localTypeBinding.superclass = (ReferenceBinding) type.resolvedType;
+					localTypeBinding.setSuperClass((ReferenceBinding) type.resolvedType);
 					continue;
 				}
 			}
@@ -382,7 +385,7 @@ private void fixSupertypeBindings() {
 				if (superclass instanceof ReferenceBinding) {
 					// ensure we are not creating a cycle (see https://bugs.eclipse.org/bugs/show_bug.cgi?id=215681 )
 					if (!(subTypeOfType((ReferenceBinding) superclass, typeBinding))) {
-						((SourceTypeBinding) typeBinding).superclass = (ReferenceBinding) superclass;
+						((SourceTypeBinding) typeBinding).setSuperClass((ReferenceBinding) superclass);
 					}
 				}
 
@@ -406,7 +409,7 @@ private void fixSupertypeBindings() {
 					}
 					if (index < length)
 						System.arraycopy(interfaceBindings, 0, interfaceBindings = new ReferenceBinding[index], 0 , index);
-					((SourceTypeBinding) typeBinding).superInterfaces = interfaceBindings;
+					((SourceTypeBinding) typeBinding).setSuperInterfaces(interfaceBindings);
 				}
 			}
 		} else if (typeBinding instanceof BinaryTypeBinding) {

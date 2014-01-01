@@ -104,12 +104,7 @@ public class TypeAnchorReference extends TypeReference implements InvocationSite
 	}
 
 	@Override
-	public TypeReference copyDims(int dim) {
-		throw new InternalCompilerError("Method not applicable");
-	}
-
-	@Override
-	public TypeReference copyDims(int dim, Annotation[][] annotationsOnDimensions) {
+	public TypeReference augmentTypeWithAdditionalDimensions(int additionalDimensions, Annotation[][] additionalAnnotations, boolean isVarargs) {
 		throw new InternalCompilerError("Method not applicable");
 	}
 

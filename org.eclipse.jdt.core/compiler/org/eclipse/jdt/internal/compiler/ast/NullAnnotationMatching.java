@@ -106,8 +106,8 @@ public class NullAnnotationMatching {
 						severity = 1; // required is annotated, provided not, need unchecked conversion
 					} else {
 						for (int i=0; i<=dims; i++) {
-							long requiredBits = requiredDimsTagBits[i] & TagBits.AnnotationNullMASK;
-							long providedBits = providedDimsTagBits[i] & TagBits.AnnotationNullMASK;
+							long requiredBits = validNullTagBits(requiredDimsTagBits[i]);
+							long providedBits = validNullTagBits(providedDimsTagBits[i]);
 							if (i > 0)
 								nullStatus = -1; // don't use beyond the outermost dimension
 							severity = Math.max(severity, computeNullProblemSeverity(requiredBits, providedBits, nullStatus));
@@ -121,11 +121,11 @@ public class NullAnnotationMatching {
 				}
 			}
 		} else if (requiredType.hasNullTypeAnnotations() || providedType.hasNullTypeAnnotations()) {
-			long requiredBits = requiredType.tagBits & TagBits.AnnotationNullMASK;
+			long requiredBits = validNullTagBits(requiredType.tagBits);
 			if (requiredBits != TagBits.AnnotationNullable // nullable lhs accepts everything, ...
 					|| nullStatus == -1) // only at detail/recursion even nullable must be matched exactly
 			{
-				long providedBits = providedType.tagBits & TagBits.AnnotationNullMASK;
+				long providedBits = validNullTagBits(providedType.tagBits);
 				severity = computeNullProblemSeverity(requiredBits, providedBits, nullStatus);
 			}
 			if (severity < 2) {
@@ -144,8 +144,12 @@ public class NullAnnotationMatching {
 						}
 					}
 				} else 	if (requiredType instanceof WildcardBinding) {
-					NullAnnotationMatching status = analyse(((WildcardBinding) requiredType).bound, providedType, nullStatus);
-					severity = Math.max(severity, status.severity);
+					WildcardBinding wildcardBinding = (WildcardBinding) requiredType;
+					if (wildcardBinding.bound != null) {
+						NullAnnotationMatching status = analyse(wildcardBinding.bound, providedType, nullStatus);
+						severity = Math.max(severity, status.severity);
+					}
+					// TODO(stephan): what about otherBounds? Do we accept "? extends @NonNull I1 & @Nullable I2" in the first place??
 				}
 				TypeBinding requiredEnclosing = requiredType.enclosingType();
 				TypeBinding providedEnclosing = providedType.enclosingType();
@@ -160,14 +164,40 @@ public class NullAnnotationMatching {
 		return new NullAnnotationMatching(severity, superTypeHint);
 	}
 
+	public static long validNullTagBits(long bits) {
+		bits &= TagBits.AnnotationNullMASK;
+		return bits == TagBits.AnnotationNullMASK ? 0 : bits;
+	}
+	
+	/** Provided that both types are {@link TypeBinding#equalsEquals}, return the one that is more likely to show null at runtime. */
+	public static TypeBinding moreDangerousType(TypeBinding one, TypeBinding two) {
+		if (one == null) return null;
+		long oneNullBits = validNullTagBits(one.tagBits);
+		long twoNullBits = validNullTagBits(two.tagBits);
+		if (oneNullBits != twoNullBits) {
+			if (oneNullBits == TagBits.AnnotationNullable)
+				return one;			// nullable is dangerous
+			if (twoNullBits == TagBits.AnnotationNullable)
+				return two;			// nullable is dangerous
+			// below this point we have unknown vs. nonnull, which is which?
+			if (oneNullBits == 0)
+				return one;			// unknown is more dangerous than nonnull
+			return two;				// unknown is more dangerous than nonnull
+		} else if (one != two) {
+			if (analyse(one, two, -1).isAnyMismatch())
+				return two;			// two doesn't snugly fit into one, so it must be more dangerous
+		}
+		return one;
+	}
+
 	private static int computeNullProblemSeverity(long requiredBits, long providedBits, int nullStatus) {
 		if (requiredBits != 0 && requiredBits != providedBits) {
+			if (requiredBits == TagBits.AnnotationNonNull && nullStatus == FlowInfo.NON_NULL) {
+				return 0; // OK by flow analysis
+			}
 			if (providedBits != 0) {
 				return 2; // mismatching annotations
 			} else {
-				if (requiredBits == TagBits.AnnotationNonNull && nullStatus == FlowInfo.NON_NULL) {
-					return 0; // OK by flow analysis
-				}
 				return 1; // need unchecked conversion regarding type detail
 			}
 		}
