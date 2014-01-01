@@ -64,7 +64,16 @@ public class UnannotatedTypeSystem {
 			if (type.hasTypeAnnotations() && nakedType == null)
 				throw new IllegalStateException();
 			if (nakedType != null)
+//{ObjectTeams: keep role information
+			// FIXME(SH): mix role info into naked of annotated type
+			{
+				if (!type.hasTypeAnnotations() && DependentTypeBinding.isDependentType(type))
+					return type; 
+// orig:
 				return nakedType;
+// :giro
+			}
+// SH}
 			this.types[type.id] = new TypeBinding[4];  // well known type, assigned id elsewhere.
 		}
 	
