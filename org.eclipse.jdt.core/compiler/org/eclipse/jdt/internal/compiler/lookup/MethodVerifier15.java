@@ -18,7 +18,6 @@
  *								bug 365519 - editorial cleanup after bug 186342 and bug 365387
  *								bug 388281 - [compiler][null] inheritance of null annotations as an option
  *								bug 388795 - [compiler] detection of name clash depends on order of super interfaces
- *								bug 395002 - Self bound generic class doesn't resolve bounds properly for wildcards for certain parametrisation.
  *								bug 388739 - [1.8][compiler] consider default methods when detecting whether a class needs to be declared abstract
  *								bug 390883 - [1.8][compiler] Unable to override default method
  *								bug 395002 - Self bound generic class doesn't resolve bounds properly for wildcards for certain parametrisation.
@@ -28,6 +27,7 @@
  *								bug 391376 - [1.8] check interaction of default methods with bridge methods and generics
  *								bug 395681 - [compiler] Improve simulation of javac6 behavior from bug 317719 after fixing bug 388795
  *								bug 409473 - [compiler] JDT cannot compile against JRE 1.8
+ *								Bug 410325 - [1.7][compiler] Generified method override different between javac and eclipse compiler
  *******************************************************************************/
 package org.eclipse.jdt.internal.compiler.lookup;
 
@@ -299,7 +299,9 @@ void checkInheritedMethods(MethodBinding[] methods, int length, boolean[] isOver
 			// (b) that is override-equivalent with the two methods.
 			if (methods[i].isDefaultMethod()
 					&& abstractSuperClassMethod != null												// condition (a)
+//{ObjectTeams: added argument 3:
 					&& areParametersEqual(abstractSuperClassMethod, methods[i], this.environment) 	// condition (b)...
+// SH}
 					&& concreteMethod == null) {
 				// skip, class method trumps this default method (concreteMethod remains null)
 				playingTrump = true;
@@ -699,7 +701,7 @@ boolean isSkippableOrOverridden(MethodBinding specific, MethodBinding general, b
 	} else if (specificIsInterface == generalIsInterface) { 
 		if (isParameterSubsignature(specific, general)) {
 			skip[idx] = true;
-			isOverridden[idx] = specific.declaringClass.isCompatibleWith(general.declaringClass);
+			isOverridden[idx] |= specific.declaringClass.isCompatibleWith(general.declaringClass);
 			return true;
 		}
 	}

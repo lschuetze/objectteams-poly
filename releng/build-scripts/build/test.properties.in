@@ -9,8 +9,8 @@ org.eclipse.test.performance=org.eclipse.test.performance_3.7.0.@SDK_QUALIFIER@
 # ----
 
 # tests referenced without version qualifier:
-org.eclipse.jdt.core.tests.compiler=org.eclipse.jdt.core.tests.compiler_3.8.3
-org.eclipse.jdt.core.tests.model=org.eclipse.jdt.core.tests.model_3.8.2
+org.eclipse.jdt.core.tests.compiler=org.eclipse.jdt.core.tests.compiler_3.9.2
+org.eclipse.jdt.core.tests.model=org.eclipse.jdt.core.tests.model_3.9.2
 
 org.eclipse.objectteams.otdt.tests=org.eclipse.objectteams.otdt.tests_2.0.0
 org.eclipse.objectteams.otdt.ui.tests=org.eclipse.objectteams.otdt.ui.tests_2.0.0

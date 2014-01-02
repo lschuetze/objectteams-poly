@@ -22,6 +22,7 @@
  *								bug 345305 - [compiler][null] Compiler misidentifies a case of "variable can only be null"
  *								bug 388996 - [compiler][resource] Incorrect 'potential resource leak'
  *								bug 395977 - [compiler][resource] Resource leak warning behavior possibly incorrect for anonymous inner class
+ *								Bug 416267 - NPE in QualifiedAllocationExpression.resolveType
  *        Andy Clement - Contributions for
  *                          Bug 383624 - [1.8][compiler] Revive code generation support for type annotations (from Olivier's work)
  *								bug 403147 - [compiler][null] FUP of bug 400761: consolidate interaction between unboxing, NPE, and deferred checking
@@ -358,6 +359,9 @@ public static abstract class AbstractQualifiedAllocationExpression extends Alloc
 			final CompilerOptions compilerOptions = scope.compilerOptions();
 			if (compilerOptions.isAnnotationBasedNullAnalysisEnabled && (this.binding.tagBits & TagBits.IsNullnessKnown) == 0) {
 //{ObjectTeams: added 2nd arg:
+/* orig:
+				new ImplicitNullAnnotationVerifier(compilerOptions.inheritNullAnnotations)
+  :giro */
 				new ImplicitNullAnnotationVerifier(compilerOptions.inheritNullAnnotations, scope.environment())
 // SH}
 						.checkImplicitNullAnnotations(this.binding, null/*srcMethod*/, false, scope);

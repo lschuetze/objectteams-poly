@@ -163,8 +163,9 @@ void checkAbstractMethod(MethodBinding abstractMethod) {
 //{ObjectTeams: try to infer a callout:
 			if (this.type.isRole()) {
 				CalloutImplementor coi = new CalloutImplementor(this.type.roleModel);
-				if (coi.generateInferredCallout(typeDeclaration, abstractMethod)) {
-					typeDeclaration.scope.problemReporter().addingInferredCalloutForInherited(typeDeclaration, abstractMethod);
+				MethodDeclaration callout = coi.generateInferredCallout(typeDeclaration, abstractMethod);
+				if (callout != null) {
+					typeDeclaration.scope.problemReporter().addingInferredCalloutForInherited(typeDeclaration, abstractMethod, callout);
 					return;
 				}
 			}
@@ -862,6 +863,7 @@ protected boolean canOverridingMethodDifferInErasure(MethodBinding overridingMet
 	return false;   // the case for <= 1.4  (cannot differ)
 }
 void computeMethods() {
+
 	MethodBinding[] methods = this.type.methods();
 	int size = methods.length;
 	this.currentMethods = new HashtableOfObject(size == 0 ? 1 : size); // maps method selectors to an array of methods... must search to match paramaters & return type

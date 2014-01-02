@@ -34,7 +34,7 @@ public class CalloutMethodBinding extends AbstractOTJLDTest {
 	// Static initializer to specify tests subset using TESTS_* static variables
 	// All specified tests which does not belong to the class are skipped...
 	static {
-//		TESTS_NAMES = new String[] { "test3113_calloutToStatic"};
+//		TESTS_NAMES = new String[] { "test3117_inferredCallout14"};
 //		TESTS_NUMBERS = new int[] { 1459 };
 //		TESTS_RANGE = new int[] { 1097, -1 };
 	}
@@ -2988,6 +2988,254 @@ public class CalloutMethodBinding extends AbstractOTJLDTest {
             "OK",
             null/*classLibraries*/,
             true/*shouldFlushOutputDirectory*/,
+            null/*vmArguments*/,
+            customOptions,
+            null/*no custom requestor*/);
+    }
+
+    // Bug 416776 - [compiler] callout inference from interface fails during incremental build
+    public void test3117_inferredCallout13() {
+       Map customOptions = getCompilerOptions();
+       customOptions.put(CompilerOptions.OPTION_ReportInferredCallout, CompilerOptions.WARNING);
+       
+       runConformTest(
+            new String[] {
+		"b/IBase.java",
+			    "\n" +
+			    "package b;\n" + 
+			    "\n" + 
+			    "public interface IBase {\n" + 
+			    "\n" + 
+			    "	void setS(String s);\n" + 
+			    "\n" +
+			    "	void setL(java.util.List<String> l);\n" + 
+			    "}\n",
+		"b/BaseClass.java",
+			    "package b;\n" + 
+			    "\n" + 
+			    "public class BaseClass implements IBase {\n" + 
+			    "\n" + 
+			    "	String s;\n" + 
+			    "	java.util.List<String> l;\n" + 
+			    "\n" + 
+			    "	public void setS(String s) {\n" + 
+			    "		this.s = s;\n" + 
+			    "	}\n" + 
+			    "\n" + 
+			    "	public void setL(java.util.List<String> l) {\n" + 
+			    "		this.l = l;\n" + 
+			    "	}\n" + 
+			    "}\n" + 
+			    "\n"
+            },
+            "",
+            null/*classLibraries*/,
+            true/*shouldFlushOutputDirectory*/,
+            null/*vmArguments*/,
+            customOptions,
+            null/*no custom requestor*/);
+       runConformTest(
+               new String[] {
+		"t/Team3117ic13.java",
+			    "package t;\n" + 
+			    "\n" + 
+			    "import b.IBase;\n" + 
+			    "\n" + 
+			    "import base b.BaseClass;\n" + 
+			    "\n" + 
+			    "/**\n" + 
+			    " * @author stephan\n" + 
+			    " *\n" + 
+			    " */\n" + 
+			    "public team class Team3117ic13 {\n" + 
+			    "\n" + 
+			    "	@SuppressWarnings(\"inferredcallout\")\n" + 
+			    "	protected class Role1 implements IBase playedBy BaseClass {\n" + 
+			    "		String extra;\n" + 
+			    "	}\n" + 
+			    "}\n"
+            },
+            "",
+            null/*classLibraries*/,
+            false/*shouldFlushOutputDirectory*/,
+            null/*vmArguments*/,
+            customOptions,
+            null/*no custom requestor*/);
+    }
+
+    // Bug 416938 - [compiler] inferred callouts are not consistently available in a tsub role
+    // ensure subteam doesn't have to repeat callout inference (expect no warning!)
+    public void test3117_inferredCallout14() {
+       Map customOptions = getCompilerOptions();
+       customOptions.put(CompilerOptions.OPTION_ReportInferredCallout, CompilerOptions.WARNING);
+       
+       runConformTest(
+            new String[] {
+		"b/IBase.java",
+			    "\n" +
+			    "package b;\n" + 
+			    "\n" + 
+			    "public interface IBase {\n" + 
+			    "\n" + 
+			    "	void setS(String s);\n" + 
+			    "\n" +
+			    "	void setL(java.util.List<String> l);\n" + 
+			    "}\n",
+		"b/BaseClass.java",
+			    "package b;\n" + 
+			    "\n" + 
+			    "public class BaseClass implements IBase {\n" + 
+			    "\n" + 
+			    "	String s;\n" + 
+			    "	java.util.List<String> l;\n" + 
+			    "\n" + 
+			    "	public void setS(String s) {\n" + 
+			    "		this.s = s;\n" + 
+			    "	}\n" + 
+			    "\n" + 
+			    "	public void setL(java.util.List<String> l) {\n" + 
+			    "		this.l = l;\n" + 
+			    "	}\n" + 
+			    "}\n" + 
+			    "\n"
+            },
+            "",
+            null/*classLibraries*/,
+            true/*shouldFlushOutputDirectory*/,
+            null/*vmArguments*/,
+            customOptions,
+            null/*no custom requestor*/);
+       runNegativeTest(
+               new String[] {
+		"t/Team3117ic14_2.java",
+			    "package t;\n" + 
+			    "\n" + 
+			    "import b.IBase;\n" + 
+			    "\n" + 
+			    "public team class Team3117ic14_2 extends Team3117ic14_1 {\n" + 
+			    "   @Override\n" + 
+			    "	protected class Role1 {\n" +
+			    "       @Override public String toString() { return \"R\"; }\n" + 
+			    "		Zork extra2;\n" + 
+			    "	}\n" + 
+			    "}\n",
+		"t/Team3117ic14_1.java",
+			    "package t;\n" + 
+			    "\n" + 
+			    "import b.IBase;\n" + 
+			    "\n" + 
+			    "import base b.BaseClass;\n" + 
+			    "\n" + 
+			    "public team class Team3117ic14_1 {\n" + 
+			    "\n" + 
+			    "	@SuppressWarnings(\"inferredcallout\")\n" + 
+			    "	protected class Role1 implements IBase playedBy BaseClass {\n" +
+			    "		String extra;\n" + 
+			    "	}\n" + 
+			    "}\n",
+            },
+            "----------\n" + 
+            "1. ERROR in t\\Team3117ic14_2.java (at line 9)\n" + 
+            "	Zork extra2;\n" + 
+            "	^^^^\n" + 
+            "Zork cannot be resolved to a type\n" + 
+            "----------\n",
+            null,//libs
+            false,//flush
+            customOptions);
+    }
+
+    // Bug 416938 - [compiler] inferred callouts are not consistently available in a tsub role
+    // ensure subteam doesn't have to repeat callout inference (expect no warning!)
+    // positive variant with execution
+    public void test3117_inferredCallout14b() {
+       Map customOptions = getCompilerOptions();
+       customOptions.put(CompilerOptions.OPTION_ReportInferredCallout, CompilerOptions.WARNING);
+       
+       runConformTest(
+            new String[] {
+		"b/IBase.java",
+			    "\n" +
+			    "package b;\n" + 
+			    "\n" + 
+			    "public interface IBase {\n" + 
+			    "\n" + 
+			    "	void setS(String s);\n" + 
+			    "\n" +
+			    "	void setL(java.util.List<String> l);\n" + 
+			    "}\n",
+		"b/BaseClass.java",
+			    "package b;\n" + 
+			    "\n" + 
+			    "public class BaseClass implements IBase {\n" + 
+			    "\n" + 
+			    "	String s = \"OK\";\n" + 
+			    "	java.util.List<String> l;\n" + 
+			    "\n" + 
+			    "	public void setS(String s) {\n" + 
+			    "		this.s = s;\n" + 
+			    "	}\n" + 
+			    "\n" + 
+			    "	public void setL(java.util.List<String> l) {\n" + 
+			    "		this.l = l;\n" + 
+			    "	}\n" +
+			    "	public void print() {\n" +
+			    "		System.out.print(s);\n" +
+			    "		System.out.print(l.size());\n" +
+			    "	}\n" + 
+			    "}\n" + 
+			    "\n"
+            },
+            "",
+            null/*classLibraries*/,
+            true/*shouldFlushOutputDirectory*/,
+            null/*vmArguments*/,
+            customOptions,
+            null/*no custom requestor*/);
+       runConformTest(
+               new String[] {
+        "T3117ic14bMain.java",
+        		"public class T3117ic14bMain{\n" +
+        		"	public static void main(String[] args) {\n" +
+        		"		b.BaseClass b = new b.BaseClass();\n" +
+        		"		new t.Team3117ic14_2().test(b);\n" +
+        		"		b.print();\n" +
+        		"	}\n" +
+        		"}\n",
+		"t/Team3117ic14_2.java",
+			    "package t;\n" + 
+			    "\n" + 
+			    "import base b.BaseClass;\n" + 
+			    "\n" + 
+			    "public team class Team3117ic14_2 extends Team3117ic14_1 {\n" + 
+			    "   @Override\n" + 
+			    "	protected class Role1 {\n" +
+			    "       @Override public String toString() { return \"R\"; }\n" + 
+			    "	}\n" +
+			    "	public void test(BaseClass as Role1 r) {\n" +
+			    "		r.setS(\"NOK\");\n" +
+			    "		r.setL(new java.util.ArrayList<String>());\n" +
+			    "	}\n" + 
+			    "}\n",
+		"t/Team3117ic14_1.java",
+			    "package t;\n" + 
+			    "\n" + 
+			    "import b.IBase;\n" + 
+			    "\n" + 
+			    "import base b.BaseClass;\n" + 
+			    "\n" + 
+			    "public team class Team3117ic14_1 {\n" + 
+			    "\n" + 
+			    "	@SuppressWarnings(\"inferredcallout\")\n" + 
+			    "	protected class Role1 implements IBase playedBy BaseClass {\n" +
+			    "		public void setS(String s){}\n" + 
+			    "		String extra;\n" + 
+			    "	}\n" + 
+			    "}\n",
+            },
+            "OK0",
+            null/*classLibraries*/,
+            false/*shouldFlushOutputDirectory*/,
             null/*vmArguments*/,
             customOptions,
             null/*no custom requestor*/);

@@ -1,0 +1,9 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: %pluginName
+Bundle-SymbolicName: org.eclipse.objectteams.otequinox.bug253244workaround
+Bundle-Version: 1.0.0.qualifier
+Bundle-Vendor: %providerName
+ExtensionBundle-Activator: org.eclipse.objectteams.otequinox.bug253244workaround.Activator
+Fragment-Host: org.eclipse.osgi;bundle-version="[3.10.0,4.0.0)"
+Bundle-RequiredExecutionEnvironment: JavaSE-1.7

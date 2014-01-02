@@ -33,6 +33,7 @@ import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
 import org.eclipse.objectteams.internal.osgi.weaving.Util.ProfileKind;
 import org.eclipse.objectteams.otequinox.ActivationKind;
+import org.eclipse.objectteams.otre.jplis.ObjectTeamsTransformer;
 import org.objectteams.Team;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.hooks.weaving.WovenClass;
@@ -69,6 +70,8 @@ public class AspectBinding {
 
 		ActivationKind activation;
 		boolean hasScannedBases;
+		boolean hasScannedRoles;
+
 		boolean isActivated;
 
 		boolean importsAdded;
@@ -290,8 +293,15 @@ public class AspectBinding {
 		if (Util.PROFILE) time= System.nanoTime();
 		ClassScanner scanner = new ClassScanner();
 		for (@SuppressWarnings("null")@NonNull TeamBinding team : getAllTeamBindings()) {
-			if (team.hasScannedBases) continue; // not a surprise for members of equivalentSet
+			if (team.hasScannedBases) { // not a surprise for members of equivalentSet or classes already processed by weave()
+				if (!team.hasScannedRoles) { // weave() only scans bases, not roles!
+					team.hasScannedRoles = true;
+					scanner.readMemberTypeAttributes(bundle, team.teamName, new ObjectTeamsTransformer());
+				}
+				continue;
+			}
 			team.hasScannedBases = true;
+			team.hasScannedRoles = true;
 			try {
 				String teamName = scanner.readOTAttributes(bundle, team.teamName);
 				Collection<String> baseClassNames = scanner.getCollectedBaseClassNames();

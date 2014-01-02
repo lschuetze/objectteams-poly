@@ -36,6 +36,8 @@
  *								Bug 417295 - [1.8[[null] Massage type annotated null analysis to gel well with deep encoded type bindings.
  *      Jesper S Moller <jesper@selskabet.org> -  Contributions for
  *								Bug 412153 - [1.8][compiler] Check validity of annotations which may be repeatable
+ *     Till Brychcy - Contributions for
+ *     							bug 415269 - NonNullByDefault is not always inherited to nested classes
  *******************************************************************************/
 package org.eclipse.jdt.internal.compiler.lookup;
 
@@ -1853,11 +1855,10 @@ void initializeForStaticImports() {
 	this.scope.buildMethods();
 }
 
-private void initializeNullDefault() {
+private int getNullDefault() {
 	
 	if (this != this.prototype) {
-		this.prototype.initializeNullDefault();
-		return;
+		return this.prototype.getNullDefault();
 	}
 	// ensure nullness defaults are initialized at all enclosing levels:
 	switch (this.nullnessDefaultInitialized) {
@@ -1868,6 +1869,7 @@ private void initializeNullDefault() {
 		getPackage().isViewedAsDeprecated(); // initialize annotations
 		this.nullnessDefaultInitialized = 2;
 	}
+	return this.defaultNullness;
 }
 
 /**
@@ -2287,7 +2289,6 @@ public FieldBinding resolveTypeFor(FieldBinding field) {
 					// enum constants neither have a type declaration nor can they be null
 					field.tagBits |= TagBits.AnnotationNonNull;
 				} else {
-					initializeNullDefault();
 					if (hasNonNullDefault()) {
 						field.fillInDefaultNonNullness(fieldDecl, initializationScope);
 					}
@@ -2700,7 +2701,7 @@ private void createArgumentBindings(MethodBinding method, CompilerOptions compil
 	
 	if (this != this.prototype) throw new IllegalStateException();
 	
-	initializeNullDefault();
+	getNullDefault(); // ensure initialized
 	AbstractMethodDeclaration methodDecl = method.sourceMethod();
 	if (methodDecl != null) {
 		// while creating argument bindings we also collect explicit null annotations:
@@ -2782,7 +2783,7 @@ protected boolean checkRedundantNullnessDefaultOne(ASTNode location, Annotation[
 	
 	if (this != this.prototype) throw new IllegalStateException();
 	
-	int thisDefault = this.defaultNullness;
+	int thisDefault = getNullDefault();
 	if (thisDefault == NONNULL_BY_DEFAULT) {
 		if ((annotationTagBits & TagBits.AnnotationNonNullByDefault) != 0) {
 			this.scope.problemReporter().nullDefaultAnnotationIsRedundant(location, annotations, this);
@@ -2815,7 +2816,7 @@ boolean hasNonNullDefault() {
 			case Scope.CLASS_SCOPE:
 				currentType = ((ClassScope)currentScope).referenceContext.binding;
 				if (currentType != null) {
-					int foundDefaultNullness = currentType.defaultNullness;
+					int foundDefaultNullness = currentType.getNullDefault();
 					if (foundDefaultNullness != NO_NULL_DEFAULT) {
 						return foundDefaultNullness == NONNULL_BY_DEFAULT;
 					}
@@ -3403,8 +3404,12 @@ void verifyMethods(MethodVerifier verifier) {
 // SH}
 	verifier.verify(this);
 
+//{ObjectTeams: going from general to specific is safer (memberTypes have been sorted during connect):
+/* orig:
 	for (int i = this.memberTypes.length; --i >= 0;)
-//{ObjectTeams: roles can be binary contained in source type:
+  :giro */
+	for (int i = 0; i < this.memberTypes.length; i++)
+	  // roles can be binary contained in source type:
 	  if (!this.memberTypes[i].isBinaryBinding())
 // SH}
 		 ((SourceTypeBinding) this.memberTypes[i]).verifyMethods(verifier);
