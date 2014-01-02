@@ -1156,31 +1156,32 @@ public final class AST {
 
 	/**
 	 * Creates and returns a new unparented array type node with the given
-	 * component type, which may be another array type for levels less than JLS8.
-	 * For JLS8 and above this type has to be an annotatable type.
+	 * element type, which cannot be an array type for API levels JLS8 and later.
+	 * <p>
+	 * For JLS4 and before, the given component type may be another array type.
 	 *
-	 * @param type the component type (possibly another array type) for level less than JLS8, 
-	 * a <code>AnnotatableType</code>  for JLS8 and above
+	 * @param elementType element type for API level JLS8 and later, or the
+	 * component type (possibly another array type) for levels less than JLS8
 	 * @return a new unparented array type node
 	 * @exception IllegalArgumentException if:
 	 * <ul>
 	 * <li>the node belongs to a different AST</li>
 	 * <li>the node already has a parent</li>
-	 * <li> level is greater than or equal to JLS8 and type not an array type</li>
+	 * <li>API level is JLS8 or later and type is an array type</li>
 	 * </ul>
 	 */
-	public ArrayType newArrayType(Type type) {
+	public ArrayType newArrayType(Type elementType) {
 		ArrayType result;
 		if (this.apiLevel < AST.JLS8) {
 			result = new ArrayType(this);
-			setArrayComponentType(result, type);
+			setArrayComponentType(result, elementType);
 			return result;
 		}
-		if (type.isArrayType()) {
+		if (elementType.isArrayType()) {
 			throw new IllegalArgumentException();
 		}
 		result = new ArrayType(this);
-		result.setElementType(type);
+		result.setElementType(elementType);
 		return result;
 	}
 
@@ -1188,11 +1189,11 @@ public final class AST {
 	 * Creates and returns a new unparented array type node with the given
 	 * element type and number of (additional) dimensions.
 	 * <p>
-	 * Note that if the element type passed in is an array type, the
+	 * For JLS4 and before, the element type passed in can be an array type, but in that case, the
 	 * element type of the result will not be the same as what was passed in.
 	 * </p>
 	 *
-	 * @param elementType the element type (can be an array type for JLS8. For level JLS8 and above this should be an <code>AnnotatableType</code>)
+	 * @param elementType the element type (cannot be an array type for JLS8 and later)
 	 * @param dimensions the number of dimensions, a positive number
 	 * @return a new unparented array type node
 	 * @exception IllegalArgumentException if:
@@ -1202,7 +1203,7 @@ public final class AST {
 	 * <li>the element type is null</li>
 	 * <li>the number of dimensions is lower than 1</li>
 	 * <li>the number of dimensions is greater than 1000</li>
-	 * <li>for levels from JLS8 and later, if the element type is not an array type </li>
+	 * <li>for levels from JLS8 and later, if the element type is an array type </li>
 	 * </ul>
 	 */
 	public ArrayType newArrayType(Type elementType, int dimensions) {
@@ -1230,7 +1231,7 @@ public final class AST {
 		result.setElementType(elementType);
 		// index starting from 1 since there is a dimension already available by default.
 		for (int i = 1; i < dimensions; ++i) {
-			result.dimensions().add(new ExtraDimension(this));
+			result.dimensions().add(new Dimension(this));
 		}
 		return result;
 
@@ -1595,10 +1596,10 @@ public final class AST {
 	}
 
 	/**
-	 * Creates and returns a new unparented annotatable extra dimension node
+	 * Creates and returns a new unparented annotatable dimension node
 	 * (Supported only in JLS8 level).
 	 *
-	 * @return a new unparented annotatable extra dimension node
+	 * @return a new unparented annotatable dimension node
 	 * @exception IllegalArgumentException if:
 	 * <ul>
 	 * <li>the node belongs to a different AST</li>
@@ -1608,8 +1609,8 @@ public final class AST {
 	 *            in a JLS2, JLS3 or JLS4 AST
 	 * @since 3.9 BETA_JAVA8
 	 */
-	public ExtraDimension newExtraDimension() {
-		ExtraDimension result = new ExtraDimension(this);
+	public Dimension newDimension() {
+		Dimension result = new Dimension(this);
 		return result;
 	}
 

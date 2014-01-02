@@ -62,6 +62,9 @@ public class RunAllJava8Tests extends TestCase {
 				ASTConverter18Test.class,
 				ASTRewritingTest.class,
 				TypeBindingTests308.class,
+/*{ObjectTeams: not included:
+				Java8ElementsTests.class,
+// SH}*/
 		};
 	}
 

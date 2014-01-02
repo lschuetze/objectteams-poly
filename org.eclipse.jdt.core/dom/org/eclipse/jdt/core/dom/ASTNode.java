@@ -837,12 +837,12 @@ public abstract class ASTNode {
 
 	/**
 	 * Node type constant indicating a node of type
-	 * <code>ExtraDimension</code>.
+	 * <code>Dimension</code>.
 	 *
-	 * @see ExtraDimension
+	 * @see Dimension
 	 * @since 3.9 BETA_JAVA8
 	 */
-	public static final int EXTRA_DIMENSION = 85;
+	public static final int DIMENSION = 85;
 
 	/**
 	 * Node type constant indicating a node of type
@@ -1053,8 +1053,8 @@ public abstract class ASTNode {
 				return ContinueStatement.class;
 			case CREATION_REFERENCE :
 				return CreationReference.class;
-			case UNION_TYPE :
-				return UnionType.class;
+			case DIMENSION:
+				return Dimension.class;
 			case DO_STATEMENT :
 				return DoStatement.class;
 			case EMPTY_STATEMENT :
@@ -1069,8 +1069,6 @@ public abstract class ASTNode {
 				return ExpressionMethodReference.class;
 			case EXPRESSION_STATEMENT :
 				return ExpressionStatement.class;
-			case EXTRA_DIMENSION:
-				return ExtraDimension.class;
 			case FIELD_ACCESS :
 				return FieldAccess.class;
 			case FIELD_DECLARATION :
@@ -1183,6 +1181,8 @@ public abstract class ASTNode {
 				return TypeLiteral.class;
 			case TYPE_PARAMETER :
 				return TypeParameter.class;
+			case UNION_TYPE :
+				return UnionType.class;
 			case VARIABLE_DECLARATION_EXPRESSION :
 				return VariableDeclarationExpression.class;
 			case VARIABLE_DECLARATION_FRAGMENT :
@@ -1361,11 +1361,15 @@ public abstract class ASTNode {
 	private StructuralPropertyDescriptor location = null;
 
 	/** Internal convenience constant indicating that there is definite risk of cycles.
+	 * @see ChildPropertyDescriptor#cycleRisk()
+	 * @see ChildListPropertyDescriptor#cycleRisk()
 	 * @since 3.0
 	 */
 	static final boolean CYCLE_RISK = true;
 
 	/** Internal convenience constant indicating that there is no risk of cycles.
+	 * @see ChildPropertyDescriptor#cycleRisk()
+	 * @see ChildListPropertyDescriptor#cycleRisk()
 	 * @since 3.0
 	 */
 	static final boolean NO_CYCLE_RISK = false;

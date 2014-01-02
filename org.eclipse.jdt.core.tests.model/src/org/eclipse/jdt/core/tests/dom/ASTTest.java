@@ -3225,7 +3225,7 @@ public class ASTTest extends org.eclipse.jdt.core.tests.junit.extension.TestCase
 		if (this.ast.apiLevel() < AST.JLS8) {
 			x.setExtraDimensions(1);
 		} else {
-			x.extraDimensions().add(this.ast.newExtraDimension());
+			x.extraDimensions().add(this.ast.newDimension());
 		}
 		assertTrue(this.ast.modificationCount() > previousCount);
 		assertTrue(x.getExtraDimensions() == 1);
@@ -3336,9 +3336,9 @@ public class ASTTest extends org.eclipse.jdt.core.tests.junit.extension.TestCase
 
 		if (this.ast.apiLevel() >= AST.JLS8) {
 			genericPropertyListTest(x, x.extraDimensions(),
-					new Property("ExtraDimensions", true, ExtraDimension.class) { //$NON-NLS-1$
+					new Property("ExtraDimensions", true, Dimension.class) { //$NON-NLS-1$
 						public ASTNode sample(AST targetAst, boolean parented) {
-							ExtraDimension result = targetAst.newExtraDimension();
+							Dimension result = targetAst.newDimension();
 							if (parented) {
 								targetAst.newMethodDeclaration().extraDimensions().add(result);
 							}
@@ -3395,7 +3395,7 @@ public class ASTTest extends org.eclipse.jdt.core.tests.junit.extension.TestCase
 		if (this.ast.apiLevel() < AST.JLS8) {
 			setExtraDimensions(x, 1);
 		} else {
-			x.extraDimensions().add(this.ast.newExtraDimension());
+			x.extraDimensions().add(this.ast.newDimension());
 		}
 		assertTrue(this.ast.modificationCount() > previousCount);
 		assertTrue(x.getExtraDimensions() == 1);
@@ -3437,9 +3437,9 @@ public class ASTTest extends org.eclipse.jdt.core.tests.junit.extension.TestCase
 
 		if (this.ast.apiLevel() >= AST.JLS8) {
 			genericPropertyListTest(x, x.extraDimensions(),
-					new Property("ExtraDimensions", true, ExtraDimension.class) { //$NON-NLS-1$
+					new Property("ExtraDimensions", true, Dimension.class) { //$NON-NLS-1$
 						public ASTNode sample(AST targetAst, boolean parented) {
-							ExtraDimension result = targetAst.newExtraDimension();
+							Dimension result = targetAst.newDimension();
 							if (parented) {
 								targetAst.newMethodDeclaration().extraDimensions().add(result);
 							}
@@ -3557,7 +3557,7 @@ public class ASTTest extends org.eclipse.jdt.core.tests.junit.extension.TestCase
 		if (this.ast.apiLevel() < AST.JLS8) {
 			x.setExtraDimensions(1);
 		} else {
-			x.extraDimensions().add(this.ast.newExtraDimension());
+			x.extraDimensions().add(this.ast.newDimension());
 		}
 		assertTrue(this.ast.modificationCount() > previousCount);
 		assertTrue(x.getExtraDimensions() == 1);
@@ -3643,9 +3643,9 @@ public class ASTTest extends org.eclipse.jdt.core.tests.junit.extension.TestCase
 
 		if (this.ast.apiLevel() >= AST.JLS8) {
 			genericPropertyListTest(x, x.extraDimensions(),
-					new Property("ExtraDimensions", true, ExtraDimension.class) { //$NON-NLS-1$
+					new Property("ExtraDimensions", true, Dimension.class) { //$NON-NLS-1$
 						public ASTNode sample(AST targetAst, boolean parented) {
-							ExtraDimension result = targetAst.newExtraDimension();
+							Dimension result = targetAst.newDimension();
 							if (parented) {
 								targetAst.newMethodDeclaration().extraDimensions().add(result);
 							}
@@ -8837,7 +8837,7 @@ public class ASTTest extends org.eclipse.jdt.core.tests.junit.extension.TestCase
 			ASTNode.ANNOTATION_TYPE_MEMBER_DECLARATION,
 			ASTNode.MODIFIER,
 			ASTNode.UNION_TYPE,
-			ASTNode.EXTRA_DIMENSION,
+			ASTNode.DIMENSION,
 			ASTNode.LAMBDA_EXPRESSION,
 			ASTNode.INTERSECTION_TYPE,
 			ASTNode.PACKAGE_QUALIFIED_TYPE,

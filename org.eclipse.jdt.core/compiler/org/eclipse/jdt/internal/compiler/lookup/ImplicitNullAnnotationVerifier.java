@@ -53,23 +53,21 @@ public class ImplicitNullAnnotationVerifier {
 	// can be 'this', but is never a MethodVerifier (to avoid infinite recursion).
 	ImplicitNullAnnotationVerifier buddyImplicitNullAnnotationsVerifier;
 	private boolean inheritNullAnnotations;
+	protected LookupEnvironment environment;
 
-//{ObjectTeams: added field and 2nd ctor arg:
-	private LookupEnvironment environment;
 
-	public ImplicitNullAnnotationVerifier(boolean inheritNullAnnotations, LookupEnvironment environment) {
-		this.environment = environment;
-// SH}
+	public ImplicitNullAnnotationVerifier(LookupEnvironment environment, boolean inheritNullAnnotations) {
 		this.buddyImplicitNullAnnotationsVerifier = this;
 		this.inheritNullAnnotations = inheritNullAnnotations;
+		this.environment = environment;
 	}
 
 	// for sub-classes:
-//{ObjectTeams: added 2nd arg:
-	ImplicitNullAnnotationVerifier(CompilerOptions options, LookupEnvironment environment) {
-		this.buddyImplicitNullAnnotationsVerifier = new ImplicitNullAnnotationVerifier(options.inheritNullAnnotations, environment);
-// SH}
+	ImplicitNullAnnotationVerifier(LookupEnvironment environment) {
+		CompilerOptions options = environment.globalOptions;
+		this.buddyImplicitNullAnnotationsVerifier = new ImplicitNullAnnotationVerifier(environment, options.inheritNullAnnotations);
 		this.inheritNullAnnotations = options.inheritNullAnnotations;
+		this.environment = environment;
 	}
 
 	/**
@@ -206,9 +204,7 @@ public class ImplicitNullAnnotationVerifier {
 			MethodBinding currentMethod = ifcMethods[i];
 			if (currentMethod.isStatic())
 				continue;
-//{ObjectTeams: added 3. argument:
-			if (areParametersEqual(original, currentMethod, this.environment)) {
-// SH}
+			if (MethodVerifier.doesMethodOverride(original, currentMethod, this.environment)) {
 				result.add(currentMethod);
 				return; // at most one method is overridden from any supertype
 			}
@@ -247,8 +243,7 @@ public class ImplicitNullAnnotationVerifier {
 			// TODO (stephan): even here we may need to report problems? How to discriminate?
 			this.buddyImplicitNullAnnotationsVerifier.checkImplicitNullAnnotations(inheritedMethod, null, false, scope);
 		}
-		LookupEnvironment environment = scope.environment();
-		boolean useTypeAnnotations = environment.globalOptions.sourceLevel >= ClassFileConstants.JDK1_8;
+		boolean useTypeAnnotations = this.environment.globalOptions.sourceLevel >= ClassFileConstants.JDK1_8;
 		long inheritedNullnessBits = getReturnTypeNullnessTagBits(inheritedMethod, useTypeAnnotations);
 		long currentNullnessBits = getReturnTypeNullnessTagBits(currentMethod, useTypeAnnotations);
 		
@@ -273,14 +268,14 @@ public class ImplicitNullAnnotationVerifier {
 									inheritedMethod, Boolean.valueOf(inheritedNullnessBits == TagBits.AnnotationNonNull), inheritedNonNullnessInfos[0]);
 						} else {
 							// no need to defer, record this info now:
-							applyReturnNullBits(currentMethod, inheritedNullnessBits, environment);
+							applyReturnNullBits(currentMethod, inheritedNullnessBits);
 						}	
 						break returnType; // compatible by construction, skip complain phase below
 					}
 				}
 				if (hasNonNullDefault) { // conflict with inheritance already checked
 					currentNullnessBits = TagBits.AnnotationNonNull;
-					applyReturnNullBits(currentMethod, currentNullnessBits, environment);
+					applyReturnNullBits(currentMethod, currentNullnessBits);
 				}
 			}
 			if (shouldComplain) {
@@ -289,7 +284,7 @@ public class ImplicitNullAnnotationVerifier {
 				{
 					if (srcMethod != null) {
 						scope.problemReporter().illegalReturnRedefinition(srcMethod, inheritedMethod,
-																	environment.getNonNullAnnotationName());
+																	this.environment.getNonNullAnnotationName());
 					} else {
 						scope.problemReporter().cannotImplementIncompatibleNullness(currentMethod, inheritedMethod);
 						return;
@@ -341,7 +336,7 @@ public class ImplicitNullAnnotationVerifier {
 							if (!useTypeAnnotations)
 								recordArgNonNullness(currentMethod, length, i, currentArgument, inheritedNonNullNess);
 							else
-								recordArgNonNullness18(currentMethod, i, currentArgument, inheritedNonNullNess, environment);
+								recordArgNonNullness18(currentMethod, i, currentArgument, inheritedNonNullNess, this.environment);
 						}
 						continue; // compatible by construction, skip complain phase below
 					}
@@ -351,15 +346,15 @@ public class ImplicitNullAnnotationVerifier {
 					if (!useTypeAnnotations)
 						recordArgNonNullness(currentMethod, length, i, currentArgument, Boolean.TRUE);
 					else
-						recordArgNonNullness18(currentMethod, i, currentArgument, Boolean.TRUE, environment);
+						recordArgNonNullness18(currentMethod, i, currentArgument, Boolean.TRUE, this.environment);
 				}
 			}
 			if (shouldComplain) {
 				char[][] annotationName;
 				if (inheritedNonNullNess == Boolean.TRUE) {
-					annotationName = environment.getNonNullAnnotationName();
+					annotationName = this.environment.getNonNullAnnotationName();
 				} else {
-					annotationName = environment.getNullableAnnotationName();
+					annotationName = this.environment.getNullableAnnotationName();
 				}
 				if (inheritedNonNullNess != Boolean.TRUE		// super parameter is not restricted to @NonNull
 						&& currentNonNullNess == Boolean.TRUE)	// current parameter is restricted to @NonNull 
@@ -369,7 +364,7 @@ public class ImplicitNullAnnotationVerifier {
 						scope.problemReporter().illegalRedefinitionToNonNullParameter(
 								currentArgument,
 								inheritedMethod.declaringClass,
-								(inheritedNonNullNess == null) ? null : environment.getNullableAnnotationName());
+								(inheritedNonNullNess == null) ? null : this.environment.getNullableAnnotationName());
 					} else {
 						scope.problemReporter().cannotImplementIncompatibleNullness(currentMethod, inheritedMethod);
 					}
@@ -397,12 +392,12 @@ public class ImplicitNullAnnotationVerifier {
 		}
 	}
 
-	void applyReturnNullBits(MethodBinding method, long nullnessBits, LookupEnvironment environment) {
-		if (environment.globalOptions.sourceLevel < ClassFileConstants.JDK1_8) {
+	void applyReturnNullBits(MethodBinding method, long nullnessBits) {
+		if (this.environment.globalOptions.sourceLevel < ClassFileConstants.JDK1_8) {
 			method.tagBits |= nullnessBits;
 		} else {
 			if (!method.returnType.isBaseType()) {
-				method.returnType = environment.createAnnotatedType(method.returnType, environment.nullAnnotationsFromTagBits(nullnessBits));
+				method.returnType = this.environment.createAnnotatedType(method.returnType, this.environment.nullAnnotationsFromTagBits(nullnessBits));
 			}
 		}
 	}

@@ -50,7 +50,6 @@ public class WeakenedTypeBinding extends DependentTypeBinding {
 		if (this.type instanceof WeakenedTypeBinding)
 			this.type = ((WeakenedTypeBinding)this.type).type;
 		initializeDependentType(declaredType._teamAnchor, declaredType._valueParamPosition);
-		this.id = weakenedType.id;
 	}
 
 	/** Factory method. */

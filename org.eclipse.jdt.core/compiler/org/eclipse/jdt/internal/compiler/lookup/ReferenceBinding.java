@@ -1770,13 +1770,6 @@ public final boolean isPublic() {
 }
 
 /**
- * Answer true if the receiver is an annotation which may be repeatable. Overridden as appropriate.
- */
-public boolean isRepeatableAnnotation() {
-	return false;
-}
-
-/**
  * Answer true if the receiver is a static member type (or toplevel)
  */
 public final boolean isStatic() {
@@ -1940,10 +1933,6 @@ public char[] readableName() /*java.lang.Object,  p.X<T> */ {
 	return readableName;
 }
 
-public ReferenceBinding resolveContainerAnnotation() {
-	return null;
-}
-
 protected void appendNullAnnotation(StringBuffer nameBuffer, CompilerOptions options) {
 	if (options.isAnnotationBasedNullAnalysisEnabled) {
 		// restore applied null annotation from tagBits:
@@ -1973,7 +1962,10 @@ AnnotationBinding[] retrieveAnnotations(Binding binding) {
 public void setAnnotations(AnnotationBinding[] annotations) {
 	storeAnnotations(this, annotations);
 }
-public void setContainingAnnotation(ReferenceBinding value) {
+public void setContainerAnnotationType(ReferenceBinding value) {
+	// Leave this to subclasses
+}
+public void tagAsHavingDefectiveContainerType() {
 	// Leave this to subclasses
 }
 

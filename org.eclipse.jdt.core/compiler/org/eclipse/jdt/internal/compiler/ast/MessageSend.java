@@ -1110,9 +1110,7 @@ public TypeBinding resolveType(BlockScope scope) {
 	if (compilerOptions.isAnnotationBasedNullAnalysisEnabled) {
 		if ((this.binding.tagBits & TagBits.IsNullnessKnown) == 0) {
 			// not interested in reporting problems against this.binding:
-//{ObjectTeams: added 2nd arg:
-			new ImplicitNullAnnotationVerifier(compilerOptions.inheritNullAnnotations, scope.environment())
-// SH}
+			new ImplicitNullAnnotationVerifier(scope.environment(), compilerOptions.inheritNullAnnotations)
 					.checkImplicitNullAnnotations(this.binding, null/*srcMethod*/, false, scope);
 		}
 		if (compilerOptions.sourceLevel >= ClassFileConstants.JDK1_8) {

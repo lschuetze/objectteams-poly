@@ -18,7 +18,6 @@
  *								bug 402237 - [1.8][compiler] investigate differences between compilers re MethodVerifyTest
  *								bug 395681 - [compiler] Improve simulation of javac6 behavior from bug 317719 after fixing bug 388795
  *								bug 409473 - [compiler] JDT cannot compile against JRE 1.8
- *								Bug 410325 - [1.7][compiler] Generified method override different between javac and eclipse compiler
  *	   Andy Clement - Contribution for
  *								bug 406928 - computation of inherited methods seems damaged (affecting @Overrides)
  *******************************************************************************/

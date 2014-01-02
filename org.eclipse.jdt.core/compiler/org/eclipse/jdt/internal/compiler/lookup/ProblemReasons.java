@@ -39,11 +39,12 @@ public interface ProblemReasons {
 	final int IntersectionHasMultipleFunctionalInterfaces = 19;
 	final int NonStaticOrAlienTypeReceiver = 20;
 	final int AttemptToBypassDirectSuper = 21; // super access within default method
+	final int DefectiveContainerAnnotationType = 22;
 //{ObjectTeams;
-    final int NoTeamContext = 22;
-    final int AnchorNotFinal = 23;
-    final int AnchorNotATeam = 24;
-    final int AnchorNotFound = 25;
+    final int NoTeamContext = 23;
+    final int AnchorNotFinal = 24;
+    final int AnchorNotATeam = 25;
+    final int AnchorNotFound = 26;
     final int ProblemAlreadyReported = 27;
 // SH}
 }

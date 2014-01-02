@@ -92,11 +92,9 @@ abstract public class TypeBinding extends Binding {
 	public final static BaseTypeBinding BOOLEAN = new BaseTypeBinding(
 			TypeIds.T_boolean, TypeConstants.BOOLEAN, new char[] { 'Z' });
 
-	public final static BaseTypeBinding NULL = new BaseTypeBinding(
-			TypeIds.T_null, TypeConstants.NULL, new char[] { 'N' }); //N stands for null even if it is never internally used
+	public final static NullTypeBinding NULL = new NullTypeBinding();
 
-	public final static BaseTypeBinding VOID = new BaseTypeBinding(
-			TypeIds.T_void, TypeConstants.VOID, new char[] { 'V' });
+	public final static VoidTypeBinding VOID = new VoidTypeBinding();
 
 
 public TypeBinding() {
@@ -172,6 +170,10 @@ int boundKind() {
 
 int rank() {
 	return -1; // overridden in WildcardBinding
+}
+
+public ReferenceBinding containerAnnotationType() {
+	return null;
 }
 
 /* Answer true if the receiver can be instantiated
@@ -670,17 +672,7 @@ public boolean isRole() {
 public final boolean isParameterizedType() {
 	return kind() == Binding.PARAMETERIZED_TYPE;
 }
-/**
- * Returns true for those ParameterizedTypeBindings, which represent an annotated type
- * yet without any type parameters (neither locally nor in any enclosing type).
- */
-public boolean isAnnotatedTypeWithoutArguments() {
-	return false;
-}
 
-public int hashCode() {
-	return this.id != TypeIds.NoId ? this.id : super.hashCode();
-}
 /**
  * Does this type or any of its details (array dimensions, type arguments)
  * have a null type annotation?
@@ -1037,6 +1029,13 @@ private boolean isProvablyDistinctTypeArgument(TypeBinding otherArgument, final 
 			return true; // ground types should have been the same
 		}
 	}
+}
+
+/**
+ * Answer true if the receiver is an annotation which may be repeatable. Overridden as appropriate.
+ */
+public boolean isRepeatableAnnotationType() {
+	return false;
 }
 
 public final boolean isRawType() {

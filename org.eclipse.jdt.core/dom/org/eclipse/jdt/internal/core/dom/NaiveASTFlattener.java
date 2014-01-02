@@ -379,7 +379,7 @@ public class NaiveASTFlattener extends ASTVisitor {
 			node.getElementType().accept(this);
 			List dimensions = node.dimensions();
 			for (int i = 0; i < dimensions.size() ; i++) {
-				ExtraDimension aDimension = (ExtraDimension) dimensions.get(i);
+				Dimension aDimension = (Dimension) dimensions.get(i);
 				aDimension.accept(this);
 			}
 		}
@@ -620,6 +620,13 @@ public class NaiveASTFlattener extends ASTVisitor {
 		return false;
 	}
 
+	public boolean visit(Dimension node) {
+		this.buffer.append(" ");//$NON-NLS-1$
+		visitAnnotationsList(node.annotations());
+		this.buffer.append("[]"); //$NON-NLS-1$
+		return false;
+	}
+
 	/*
 	 * @see ASTVisitor#visit(DoStatement)
 	 */
@@ -750,13 +757,6 @@ public class NaiveASTFlattener extends ASTVisitor {
 		printIndent();
 		node.getExpression().accept(this);
 		this.buffer.append(";\n");//$NON-NLS-1$
-		return false;
-	}
-
-	public boolean visit(ExtraDimension node) {
-		this.buffer.append(" ");//$NON-NLS-1$
-		visitAnnotationsList(node.annotations());
-		this.buffer.append("[]"); //$NON-NLS-1$
 		return false;
 	}
 
@@ -1085,7 +1085,7 @@ public class NaiveASTFlattener extends ASTVisitor {
 		if (node.getAST().apiLevel() >= AST.JLS8) {
 			List dimensions = node.extraDimensions();
 			for (int i = 0; i < size; i++) {
-				visit((ExtraDimension) dimensions.get(i));
+				visit((Dimension) dimensions.get(i));
 			}
 		} else {
 			for (int i = 0; i < size; i++) {
@@ -1441,7 +1441,7 @@ public class NaiveASTFlattener extends ASTVisitor {
 		if (node.getAST().apiLevel() >= AST.JLS8) {
 			List dimensions = node.extraDimensions();
 			for (int i = 0; i < size; i++) {
-				visit((ExtraDimension) dimensions.get(i));
+				visit((Dimension) dimensions.get(i));
 			}
 		} else {
 			for (int i = 0; i < size; i++) {
@@ -1902,7 +1902,7 @@ public class NaiveASTFlattener extends ASTVisitor {
 		if (node.getAST().apiLevel() >= AST.JLS8) {
 			List dimensions = node.extraDimensions();
 			for (int i = 0; i < size; i++) {
-				visit((ExtraDimension) dimensions.get(i));
+				visit((Dimension) dimensions.get(i));
 			}
 		} else {
 			for (int i = 0; i < size; i++) {

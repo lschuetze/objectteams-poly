@@ -561,12 +561,7 @@ public TypeBinding resolveType(BlockScope scope) {
  	}
 	final CompilerOptions compilerOptions = scope.compilerOptions();
 	if (compilerOptions.isAnnotationBasedNullAnalysisEnabled && (this.binding.tagBits & TagBits.IsNullnessKnown) == 0) {
-//{ObjectTeams: added 2nd arg:
-/* orig:
-		new ImplicitNullAnnotationVerifier(compilerOptions.inheritNullAnnotations)
-  :giro */
-		new ImplicitNullAnnotationVerifier(compilerOptions.inheritNullAnnotations, scope.environment())
-// SH}
+		new ImplicitNullAnnotationVerifier(scope.environment(), compilerOptions.inheritNullAnnotations)
 				.checkImplicitNullAnnotations(this.binding, null/*srcMethod*/, false, scope);
 	}
 //{ObjectTeams: may need to wrap the resolved type

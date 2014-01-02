@@ -19,7 +19,7 @@ package org.eclipse.jdt.internal.compiler.lookup;
 
 import org.eclipse.jdt.internal.compiler.lookup.TypeIds;
 
-public final class BaseTypeBinding extends TypeBinding {
+public class BaseTypeBinding extends TypeBinding {
 
 	public static final int[] CONVERSIONS;
 	public static final int IDENTITY = 1;
