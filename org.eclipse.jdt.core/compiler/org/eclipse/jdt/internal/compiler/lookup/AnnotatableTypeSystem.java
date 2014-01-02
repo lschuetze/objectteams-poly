@@ -168,6 +168,8 @@ public class AnnotatableTypeSystem extends TypeSystem {
   :giro */
 				if (!(cachedType instanceof ParameterizedTypeBinding)) // roles might answer 'false' to isParameterized(), still they are valid candidates, here
 					continue;
+				if (cachedType.isRawType() && typeArguments != null)
+					continue;
 				// also match team anchor if given:
 				if (!this.unannotatedTypeSystem.isRoleTypeMatch(teamAnchor, valueParamPosition, cachedType))
 					continue;
