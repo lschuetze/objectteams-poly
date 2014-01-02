@@ -120,6 +120,8 @@ public class UnannotatedTypeSystem extends TypeSystem {
   :giro */
 	public ParameterizedTypeBinding getParameterizedType(ReferenceBinding genericType, TypeBinding[] typeArguments,
 												ITeamAnchor teamAnchor, int valueParamPosition, ReferenceBinding enclosingType) {
+		if (teamAnchor == null && genericType instanceof DependentTypeBinding)
+			teamAnchor = ((DependentTypeBinding) genericType)._teamAnchor;
 // SH}
 		ReferenceBinding unannotatedGenericType = (ReferenceBinding) getUnannotatedType(genericType);
 		int typeArgumentsLength = typeArguments == null ? 0: typeArguments.length;
