@@ -34,17 +34,20 @@ import org.eclipse.jdt.internal.compiler.ast.SingleTypeReference;
 import org.eclipse.jdt.internal.compiler.ast.Statement;
 import org.eclipse.jdt.internal.compiler.ast.TypeDeclaration;
 import org.eclipse.jdt.internal.compiler.ast.TypeReference;
+import org.eclipse.jdt.internal.compiler.ast.Wildcard;
 import org.eclipse.jdt.internal.compiler.classfmt.ClassFileConstants;
 import org.eclipse.jdt.internal.compiler.codegen.CodeStream;
 import org.eclipse.jdt.internal.compiler.flow.FlowContext;
 import org.eclipse.jdt.internal.compiler.flow.FlowInfo;
 import org.eclipse.jdt.internal.compiler.impl.Constant;
+import org.eclipse.jdt.internal.compiler.lookup.Binding;
 import org.eclipse.jdt.internal.compiler.lookup.BlockScope;
 import org.eclipse.jdt.internal.compiler.lookup.ExtraCompilerModifiers;
 import org.eclipse.jdt.internal.compiler.lookup.MethodBinding;
 import org.eclipse.jdt.internal.compiler.lookup.ReferenceBinding;
 import org.eclipse.jdt.internal.compiler.lookup.TypeBinding;
 import org.eclipse.jdt.internal.compiler.lookup.TypeConstants;
+import org.eclipse.jdt.internal.compiler.lookup.TypeVariableBinding;
 import org.eclipse.objectteams.otdt.core.exceptions.InternalCompilerError;
 import org.eclipse.objectteams.otdt.internal.core.compiler.lookup.RoleTypeBinding;
 import org.eclipse.objectteams.otdt.internal.core.compiler.model.RoleModel;
@@ -201,7 +204,20 @@ public class RoleClassLiteralAccess extends ClassLiteralAccess {
 			gen = new AstGenerator(roleDecl.scope.compilerOptions().sourceLevel, roleDecl.sourceStart, roleDecl.sourceEnd);
 		else
 			gen = new AstGenerator(teamDecl.scope.compilerOptions().sourceLevel, teamDecl.sourceStart, teamDecl.sourceEnd);
-		TypeReference[] typeArguments = new TypeReference[] {gen.singleTypeReference(roleBinding.sourceName())};
+
+		// return type reference is either "Class<Role>" or "Class<Role<?,?...>>"
+		TypeVariableBinding[] typeVariables = roleBinding.typeVariables();
+		TypeReference roleTypeRef;
+		if (typeVariables != Binding.NO_TYPE_VARIABLES) {
+			Wildcard[] wildcards = new Wildcard[typeVariables.length];
+			for (int i = 0; i < typeVariables.length; i++)
+				wildcards[i] = gen.wildcard(Wildcard.UNBOUND);
+			roleTypeRef = gen.parameterizedSingleTypeReference(roleBinding.sourceName(), wildcards, 0);
+		} else {
+			roleTypeRef = gen.singleTypeReference(roleBinding.sourceName());
+		}
+		TypeReference[] typeArguments = new TypeReference[] {roleTypeRef};
+
 		MethodDeclaration method = gen.method(teamDecl.compilationResult,
 				(teamBinding.isRole())
 					? ClassFileConstants.AccPublic // advertized via ifc, must be public
