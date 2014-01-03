@@ -823,6 +823,13 @@ public class ParameterizedTypeBinding extends ReferenceBinding implements Substi
 		return null;
 	}
 // SH}
+	
+	/**
+	 *  Returns true if parameterized type AND not of the form List<?>
+	 */
+	public boolean isBoundParameterizedType() {
+		return (this.tagBits & TagBits.IsBoundParameterizedType) != 0;
+	}
 
 	public boolean isEquivalentTo(TypeBinding otherType) {
 		if (equalsEquals(this, otherType))

@@ -9,10 +9,6 @@
  * Community Process (JCP) and is made available for testing and evaluation purposes
  * only. The code is not compatible with any specification of the JCP.
  *
- * This is an implementation of an early-draft specification developed under the Java
- * Community Process (JCP) and is made available for testing and evaluation purposes
- * only. The code is not compatible with any specification of the JCP.
- * 
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *     Fraunhofer FIRST - extended API and implementation
@@ -20,6 +16,7 @@
  *     Stephan Herrmann - Contribution for
  *								bug 400710 - [1.8][compiler] synthetic access to default method generates wrong code
  *								bug 391376 - [1.8] check interaction of default methods with bridge methods and generics
+ *								bug 421543 - [1.8][compiler] Compiler fails to recognize default method being turned into abstract by subtytpe
  *     Jesper S Moller - Contributions for
  *							Bug 405066 - [1.8][compiler][codegen] Implement code generation infrastructure for JSR335        
  *        Andy Clement (GoPivotal, Inc) aclement@gopivotal.com - Contributions for
@@ -703,19 +700,13 @@ public void checkcast(TypeBinding typeBinding) {
 }
 
 public void checkcast(TypeReference typeReference, TypeBinding typeBinding) {
-	/* We use a slightly sub-optimal generation for intersection casts by resorting to a runtime cast for every intersecting type, but in
-	   reality this should not matter. In its intended use form such as (I & Serializable) () -> {}, no cast is emitted at all
-	*/
-	TypeBinding [] types = typeBinding instanceof IntersectionCastTypeBinding ? typeBinding.getIntersectingTypes() : new TypeBinding [] { typeBinding };
-	for (int i = 0, max = types.length; i < max; i++) {
-		this.countLabels = 0;
-		if (this.classFileOffset + 2 >= this.bCodeStream.length) {
-			resizeByteArray();
-		}
-		this.position++;
-		this.bCodeStream[this.classFileOffset++] = Opcodes.OPC_checkcast;
-		writeUnsignedShort(this.constantPool.literalIndexForType(types[i]));
+	this.countLabels = 0;
+	if (this.classFileOffset + 2 >= this.bCodeStream.length) {
+		resizeByteArray();
 	}
+	this.position++;
+	this.bCodeStream[this.classFileOffset++] = Opcodes.OPC_checkcast;
+	writeUnsignedShort(this.constantPool.literalIndexForType(typeBinding));
 }
 
 public void d2f() {
@@ -4087,6 +4078,14 @@ public void instance_of(TypeReference typeReference, TypeBinding typeBinding) {
 }
 
 protected void invoke(byte opcode, int receiverAndArgsSize, int returnTypeSize, char[] declaringClass, char[] selector, char[] signature) {
+	invoke18(opcode, receiverAndArgsSize, returnTypeSize, declaringClass, opcode == Opcodes.OPC_invokeinterface, selector, signature);
+}
+
+// Starting with 1.8 we can no longer deduce isInterface from opcode, invokespecial can be used for default methods, too.
+// Hence adding explicit parameter 'isInterface', which is needed only for non-ctor invokespecial invocations
+// (i.e., other clients may still call the shorter overload).
+private void invoke18(byte opcode, int receiverAndArgsSize, int returnTypeSize, char[] declaringClass,
+		boolean isInterface, char[] selector, char[] signature) {	
 	this.countLabels = 0;
 	if (opcode == Opcodes.OPC_invokeinterface) {
 		// invokeinterface
@@ -4107,7 +4106,7 @@ protected void invoke(byte opcode, int receiverAndArgsSize, int returnTypeSize, 
 		}
 		this.position++;
 		this.bCodeStream[this.classFileOffset++] = opcode;
-		writeUnsignedShort(this.constantPool.literalIndexForMethod(declaringClass, selector, signature, false));
+		writeUnsignedShort(this.constantPool.literalIndexForMethod(declaringClass, selector, signature, isInterface));
 	}
 	this.stackDepth += returnTypeSize - receiverAndArgsSize;
 	if (this.stackDepth > this.stackMax) {
@@ -4224,16 +4223,17 @@ public void invoke(byte opcode, MethodBinding methodBinding, TypeBinding declari
 			returnTypeSize = 1;
 			break;
 	}
-	invoke(
+	invoke18(
 			opcode, 
 			receiverAndArgsSize, 
 			returnTypeSize, 
 			declaringClass.constantPoolName(), 
+			declaringClass.isInterface(),
 			methodBinding.selector, 
 			methodBinding.signature(this.classFile));
 //{ObjectTeams: if signature is weakened to conform to tsuper erasure, we need a cast to make the result compatible to the expected type
 	if ((methodBinding.tagBits & TagBits.IsCopyOfParameterized) != 0 &&
-		methodBinding.returnType.erasure() != methodBinding.copyInheritanceSrc.original().returnType.erasure())
+		TypeBinding.notEquals(methodBinding.returnType.erasure(), methodBinding.copyInheritanceSrc.original().returnType.erasure()))
 		checkcast(methodBinding.returnType.erasure());
 // SH}
 }

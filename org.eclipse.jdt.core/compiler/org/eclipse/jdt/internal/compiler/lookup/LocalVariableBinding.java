@@ -73,7 +73,6 @@ public class LocalVariableBinding extends VariableBinding {
 
 		this(declaration.name, type, modifiers, isArgument);
 		this.declaration = declaration;
-		this.tagBits |= TagBits.IsEffectivelyFinal;
 	}
 	
 	// argument

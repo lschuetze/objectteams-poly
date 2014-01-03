@@ -970,6 +970,7 @@ private boolean parsingJava8Plus;
 protected int unstackedAct = ERROR_ACTION;
 private boolean haltOnSyntaxError = false;
 private boolean tolerateDefaultClassMethods = false;
+private boolean processingLambdaParameterList = false;
 
 
 //{ObjectTeams: context info while parsing separate role files:
@@ -9976,9 +9977,12 @@ protected void consumeLambdaExpression() {
 			length);
 	}
 	for (int i = 0; i < length; i++) {
-		if (arguments[i].isReceiver()) {
-			problemReporter().illegalThis(arguments[i]);
+		final Argument argument = arguments[i];
+		if (argument.isReceiver()) {
+			problemReporter().illegalThis(argument);
 		}
+		if (argument.name.length == 1 && argument.name[0] == '_')
+			problemReporter().illegalUseOfUnderscoreAsAnIdentifier(argument.sourceStart, argument.sourceEnd, true); // true == lambdaParameter
 	}
 	LambdaExpression lexp = new LambdaExpression(this.compilationUnit.compilationResult, arguments, body);
 	this.intPtr--;  // ')' position, discard for now.
@@ -10864,6 +10868,16 @@ protected void consumeToken(int type) {
 //	}
 	//System.out.println(this.scanner.toStringAction(type));
 	switch (type) {
+		case TokenNameBeginLambda:
+			this.processingLambdaParameterList = true;
+			break;
+		case TokenNameARROW:
+			this.processingLambdaParameterList = false;
+//{ObjectTeams: for alias TokenNameBINDOUT :
+			pushOnIntStack(type);
+			pushOnIntStack(this.scanner.startPosition); // for bindingTokenStart
+// SH}
+			break;
 		case TokenNameIdentifier :
 			pushIdentifier();
 			if (this.scanner.useAssertAsAnIndentifier  &&
@@ -10913,7 +10927,6 @@ protected void consumeToken(int type) {
 			pushOnIntStack(this.scanner.startPosition);
 			break;
 		case TokenNameCALLOUT_OVERRIDE :
-		case TokenNameBINDOUT :
 		case TokenNameBINDIN:
 			pushOnIntStack(type);
 			pushOnIntStack(this.scanner.startPosition); // for bindingTokenStart
@@ -14474,8 +14487,8 @@ protected void pushIdentifier(char [] identifier, long position) {
 			stackLength);
 	}
 	this.identifierLengthStack[this.identifierLengthPtr] = 1;
-	if (this.parsingJava8Plus && identifier.length == 1 && identifier[0] == '_') {
-		problemReporter().illegalUseOfUnderscoreAsAnIdentifier((int) (position >>> 32), (int) position);
+	if (this.parsingJava8Plus && identifier.length == 1 && identifier[0] == '_' && !this.processingLambdaParameterList) {
+		problemReporter().illegalUseOfUnderscoreAsAnIdentifier((int) (position >>> 32), (int) position, false /* not a lambda parameter */);
 	}
 }
 protected void pushIdentifier() {
