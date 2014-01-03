@@ -214,7 +214,7 @@ public static void checkNeedForEnclosingInstanceCast(BlockScope scope, Expressio
 	TypeBinding castedExpressionType = ((CastExpression)enclosingInstance).expression.resolvedType;
 	if (castedExpressionType == null) return; // cannot do better
 	// obvious identity cast
-	if (castedExpressionType == enclosingInstanceType) {
+	if (TypeBinding.equalsEquals(castedExpressionType, enclosingInstanceType)) {
 		scope.problemReporter().unnecessaryCast((CastExpression)enclosingInstance);
 	} else if (castedExpressionType == TypeBinding.NULL){
 		return; // tolerate null enclosing instance cast
@@ -222,7 +222,7 @@ public static void checkNeedForEnclosingInstanceCast(BlockScope scope, Expressio
 		TypeBinding alternateEnclosingInstanceType = castedExpressionType;
 		if (castedExpressionType.isBaseType() || castedExpressionType.isArrayType()) return; // error case
 //{ObjectTeams: don't use beautified name.
-		if (memberType == scope.getMemberType(memberType.internalName(), (ReferenceBinding) alternateEnclosingInstanceType)) {
+		if (TypeBinding.equalsEquals(memberType, scope.getMemberType(memberType.internalName(), (ReferenceBinding) alternateEnclosingInstanceType))) {
 // SH}
 			scope.problemReporter().unnecessaryCast((CastExpression)enclosingInstance);
 		}
@@ -270,7 +270,7 @@ public static void checkNeedForArgumentCasts(BlockScope scope, Expression receiv
 			TypeBinding castedExpressionType = ((CastExpression)argument).expression.resolvedType;
 			if (castedExpressionType == null) return; // cannot do better
 			// obvious identity cast
-			if (castedExpressionType == argumentTypes[i]) {
+			if (TypeBinding.equalsEquals(castedExpressionType, argumentTypes[i])) {
 				scope.problemReporter().unnecessaryCast((CastExpression)argument);
 			} else if (castedExpressionType == TypeBinding.NULL){
 				continue; // tolerate null argument cast
@@ -401,7 +401,7 @@ private static void checkAlternateBinding(BlockScope scope, Expression receiver,
 				}
 			}
 			for (int i = 0; i < argumentLength; i++) {
-				if (originalArgumentTypes[i] != alternateArgumentTypes[i]
+				if (TypeBinding.notEquals(originalArgumentTypes[i], alternateArgumentTypes[i])
                        /*&& !originalArgumentTypes[i].needsUncheckedConversion(alternateArgumentTypes[i])*/) {
 					scope.problemReporter().unnecessaryCast((CastExpression)arguments[i]);
 				}
@@ -469,7 +469,7 @@ public boolean checkUnsafeCast(Scope scope, TypeBinding castType, TypeBinding ex
 									alternateArguments[i] = scope.getJavaLangObject();
 									LookupEnvironment environment = scope.environment();
 									ParameterizedTypeBinding alternateCastType = environment.createParameterizedType((ReferenceBinding)castType.erasure(), alternateArguments, castType.enclosingType());
-									if (alternateCastType.findSuperTypeOriginatingFrom(expressionType) == match) {
+									if (TypeBinding.equalsEquals(alternateCastType.findSuperTypeOriginatingFrom(expressionType), match)) {
 										this.bits |= ASTNode.UnsafeCast;
 										break;
 									}
@@ -515,7 +515,7 @@ public boolean checkUnsafeCast(Scope scope, TypeBinding castType, TypeBinding ex
 //			}
 //			break;
 	}
-	if (!isNarrowing && match == this.resolvedType.leafComponentType()) { // do not tag as unnecessary when recursing through upper bounds
+	if (!isNarrowing && TypeBinding.equalsEquals(match, this.resolvedType.leafComponentType())) { // do not tag as unnecessary when recursing through upper bounds
 		tagAsUnnecessaryCast(scope, castType);
 	}
 	return true;
@@ -547,7 +547,7 @@ public void generateCode(BlockScope currentScope, CodeStream codeStream, boolean
 		return;
 	}
 	this.expression.generateCode(currentScope, codeStream, valueRequired || needRuntimeCheckcast);
-	if (annotatedCast || (needRuntimeCheckcast && this.expression.postConversionType(currentScope) != this.resolvedType.erasure())) { // no need to issue a checkcast if already done as genericCast
+	if (annotatedCast || (needRuntimeCheckcast && TypeBinding.notEquals(this.expression.postConversionType(currentScope), this.resolvedType.erasure()))) { // no need to issue a checkcast if already done as genericCast
 		codeStream.checkcast(this.type, this.resolvedType);
 	}
 	if (valueRequired) {
@@ -666,7 +666,7 @@ public TypeBinding resolveType(BlockScope scope) {
 		MethodBinding methodBinding = messageSend.binding;
 		if (methodBinding != null && methodBinding.isPolymorphic()) {
 			messageSend.binding = scope.environment().updatePolymorphicMethodReturnType((PolymorphicMethodBinding) methodBinding, castType);
-			if (expressionType != castType) {
+			if (TypeBinding.notEquals(expressionType, castType)) {
 				expressionType = castType;
 				this.bits |= ASTNode.DisableUnnecessaryCastCheck;
 			}
@@ -761,7 +761,7 @@ private boolean isIndirectlyUsed() {
 					&& ((ParameterizedGenericMethodBinding)method).inferredReturnType) {
 			if (this.expectedType == null)
 				return true;
-			if (this.resolvedType != this.expectedType)
+			if (TypeBinding.notEquals(this.resolvedType, this.expectedType))
 				return true;
 		}
 	}

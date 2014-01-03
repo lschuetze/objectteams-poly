@@ -283,7 +283,7 @@ private void addDefaultAbstractMethods() {
 						nextInterface : for (int a = 0; a < itsLength; a++) {
 							ReferenceBinding next = itsInterfaces[a];
 							for (int b = 0; b < nextPosition; b++)
-								if (next == interfacesToVisit[b]) continue nextInterface;
+								if (TypeBinding.equalsEquals(next, interfacesToVisit[b])) continue nextInterface;
 							interfacesToVisit[nextPosition++] = next;
 						}
 					}
@@ -992,7 +992,7 @@ public SyntheticMethodBinding addSyntheticBridgeMethod(MethodBinding inheritedMe
 			if (synthetic instanceof MethodBinding) {
 				MethodBinding method = (MethodBinding) synthetic;
 				if (CharOperation.equals(inheritedMethodToBridge.selector, method.selector)
-					&& inheritedMethodToBridge.returnType.erasure() == method.returnType.erasure()
+					&& TypeBinding.equalsEquals(inheritedMethodToBridge.returnType.erasure(), method.returnType.erasure())
 					&& inheritedMethodToBridge.areParameterErasuresEqual(method)) {
 						return null;
 				}
@@ -1039,7 +1039,7 @@ public SyntheticMethodBinding addSyntheticBridgeMethod(MethodBinding inheritedMe
 			if (synthetic instanceof MethodBinding) {
 				MethodBinding method = (MethodBinding) synthetic;
 				if (CharOperation.equals(inheritedMethodToBridge.selector, method.selector)
-					&& inheritedMethodToBridge.returnType.erasure() == method.returnType.erasure()
+					&& TypeBinding.equalsEquals(inheritedMethodToBridge.returnType.erasure(), method.returnType.erasure())
 					&& inheritedMethodToBridge.areParameterErasuresEqual(method)) {
 						return null;
 				}
@@ -1341,7 +1341,7 @@ public MethodBinding getExactConstructor(TypeBinding[] argumentTypes) {
 					for (int iarg = 0; iarg < argCount; iarg++)
 //{ObjectTeams: weaker form of equality:
 	/* orig:
-						if (toMatch[iarg] != argumentTypes[iarg])
+						if (TypeBinding.notEquals(toMatch[iarg], argumentTypes[iarg]))
 	  :giro*/
 						if (!AnchorMapping.areTypesEqual(toMatch[iarg], argumentTypes[iarg], method))
 // SH}
@@ -1369,7 +1369,7 @@ public MethodBinding getExactConstructor(TypeBinding[] argumentTypes) {
 				if (method.parameters.length == argCount) {
 					TypeBinding[] toMatch = method.parameters;
 					for (int iarg = 0; iarg < argCount; iarg++)
-						if (toMatch[iarg] != argumentTypes[iarg])
+						if (TypeBinding.notEquals(toMatch[iarg], argumentTypes[iarg]))
 							continue nextMethod;
 					return method;
 				}
@@ -1400,7 +1400,7 @@ public MethodBinding getExactMethod(char[] selector, TypeBinding[] argumentTypes
 					for (int iarg = 0; iarg < argCount; iarg++)
 //{ObjectTeams: weaker form of equality:
 /* orig:
-						if (toMatch[iarg] != argumentTypes[iarg])
+						if (TypeBinding.notEquals(toMatch[iarg], argumentTypes[iarg]))
   :giro*/
 						if (!AnchorMapping.areTypesEqual(toMatch[iarg], argumentTypes[iarg], method))
 // SH}
@@ -1451,7 +1451,7 @@ public MethodBinding getExactMethod(char[] selector, TypeBinding[] argumentTypes
 					for (int iarg = 0; iarg < argCount; iarg++)
 //{ObjectTeams: weaker form of equality:
 /* orig:
-						if (toMatch[iarg] != argumentTypes[iarg])
+						if (TypeBinding.notEquals(toMatch[iarg], argumentTypes[iarg]))
   :giro*/
 						if (!AnchorMapping.areTypesEqual(toMatch[iarg], argumentTypes[iarg], method))
 // SH}
@@ -1894,7 +1894,7 @@ public boolean isEquivalentTo(TypeBinding otherType) {
 			if ((otherType.tagBits & TagBits.HasDirectWildcard) == 0 && (!isMemberType() || !otherType.isMemberType()))
 				return false; // should have been identical
 			ParameterizedTypeBinding otherParamType = (ParameterizedTypeBinding) otherType;
-			if (this != otherParamType.genericType())
+			if (TypeBinding.notEquals(this, otherParamType.genericType()))
 				return false;
 			if (!isStatic()) { // static member types do not compare their enclosing
             	ReferenceBinding enclosing = enclosingType();
@@ -1902,7 +1902,7 @@ public boolean isEquivalentTo(TypeBinding otherType) {
             		ReferenceBinding otherEnclosing = otherParamType.enclosingType();
             		if (otherEnclosing == null) return false;
             		if ((otherEnclosing.tagBits & TagBits.HasDirectWildcard) == 0) {
-						if (enclosing != otherEnclosing) return false;
+						if (TypeBinding.notEquals(enclosing, otherEnclosing)) return false;
             		} else {
             			if (!enclosing.isEquivalentTo(otherParamType.enclosingType())) return false;
             		}
@@ -1919,7 +1919,7 @@ public boolean isEquivalentTo(TypeBinding otherType) {
 			return true;
 
 		case Binding.RAW_TYPE :
-	        return otherType.erasure() == this;
+	        return TypeBinding.equalsEquals(otherType.erasure(), this);
 	}
 	return false;
 }
@@ -2052,7 +2052,7 @@ public MethodBinding[] methods() {
 						// Only in 1.6, we have to make sure even return types are different
 						// https://bugs.eclipse.org/bugs/show_bug.cgi?id=317719
 						if (compliance16 && method.returnType != null && method2.returnType != null) {
-							if (method.returnType.erasure() != method2.returnType.erasure()) {
+							if (TypeBinding.notEquals(method.returnType.erasure(), method2.returnType.erasure())) {
 								// check to see if the erasure of either method is equal to the other
 								// if not, then change severity to WARNING
 								TypeBinding[] params1 = method.parameters;
@@ -2079,17 +2079,17 @@ public MethodBinding[] methods() {
 									int index = pLength;
 									// is erasure of signature of m2 same as signature of m1?
 									for (; --index >= 0;) {
-										if (params1[index] != params2[index].erasure()) {
+										if (TypeBinding.notEquals(params1[index], params2[index].erasure())) {
 											// If one of them is a raw type
 											if (params1[index] instanceof RawTypeBinding) {
-												if (params2[index].erasure() != ((RawTypeBinding)params1[index]).actualType()) {
+												if (TypeBinding.notEquals(params2[index].erasure(), ((RawTypeBinding)params1[index]).actualType())) {
 													break;
 												}
 											} else  {
 												break;
 											}
 										}
-										if (params1[index] == params2[index]) {
+										if (TypeBinding.equalsEquals(params1[index], params2[index])) {
 											TypeBinding type = params1[index].leafComponentType();
 											if (type instanceof SourceTypeBinding && type.typeVariables() != Binding.NO_TYPE_VARIABLES) {
 												index = pLength; // handle comparing identical source types like X<T>... its erasure is itself BUT we need to answer false
@@ -2100,10 +2100,10 @@ public MethodBinding[] methods() {
 									if (index >= 0 && index < pLength) {
 										// is erasure of signature of m1 same as signature of m2?
 										for (index = pLength; --index >= 0;)
-											if (params1[index].erasure() != params2[index]) {
+											if (TypeBinding.notEquals(params1[index].erasure(), params2[index])) {
 												// If one of them is a raw type
 												if (params2[index] instanceof RawTypeBinding) {
-													if (params1[index].erasure() != ((RawTypeBinding)params2[index]).actualType()) {
+													if (TypeBinding.notEquals(params1[index].erasure(), ((RawTypeBinding)params2[index]).actualType())) {
 														break;
 													}
 												} else  {

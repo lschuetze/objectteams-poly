@@ -293,7 +293,7 @@ public class AnchorMapping {
     * @param currentMethod  a candidate for the current method call
     */
    public static boolean areTypesEqual(TypeBinding t1, TypeBinding t2, MethodBinding currentMethod) {
-   		if (t1 == t2)
+   		if (TypeBinding.equalsEquals(t1, t2))
    			return true;
    		if (   t1 instanceof RoleTypeBinding
    			&& t2 instanceof RoleTypeBinding)

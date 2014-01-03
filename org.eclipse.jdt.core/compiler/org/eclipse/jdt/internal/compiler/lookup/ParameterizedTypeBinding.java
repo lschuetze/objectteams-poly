@@ -345,7 +345,7 @@ public class ParameterizedTypeBinding extends ReferenceBinding implements Substi
 		    sig.append('>');
 		}
 		sig.append(';');
-		if (captureSourceType != null && captureSourceType != this.type) {
+		if (captureSourceType != null && TypeBinding.notEquals(captureSourceType, this.type)) {
 			// contains a capture binding
 			sig.insert(0, "&"); //$NON-NLS-1$
 			sig.insert(0, captureSourceType.computeUniqueKey(false/*not a leaf*/));
@@ -539,7 +539,7 @@ public class ParameterizedTypeBinding extends ReferenceBinding implements Substi
 					if (method.parameters.length == argCount) {
 						TypeBinding[] toMatch = method.parameters;
 						for (int iarg = 0; iarg < argCount; iarg++)
-							if (toMatch[iarg] != argumentTypes[iarg])
+							if (TypeBinding.notEquals(toMatch[iarg], argumentTypes[iarg]))
 								continue nextMethod;
 						if (match != null) return null; // collision case
 						match = method;
@@ -553,7 +553,7 @@ public class ParameterizedTypeBinding extends ReferenceBinding implements Substi
 				TypeBinding[] toMatch = method.parameters;
 				if (toMatch.length == argCount) {
 					for (int p = 0; p < argCount; p++)
-						if (toMatch[p] != argumentTypes[p])
+						if (TypeBinding.notEquals(toMatch[p], argumentTypes[p]))
 							continue nextMethod;
 						if (match != null) return null; // collision case
 						match = method;
@@ -581,7 +581,7 @@ public class ParameterizedTypeBinding extends ReferenceBinding implements Substi
 					if (method.parameters.length == argCount) {
 						TypeBinding[] toMatch = method.parameters;
 						for (int iarg = 0; iarg < argCount; iarg++)
-							if (toMatch[iarg] != argumentTypes[iarg])
+							if (TypeBinding.notEquals(toMatch[iarg], argumentTypes[iarg]))
 								continue nextMethod;
 						if (match != null) return null; // collision case
 						match = method;
@@ -596,7 +596,7 @@ public class ParameterizedTypeBinding extends ReferenceBinding implements Substi
 				TypeBinding[] toMatch = method.parameters;
 				if (toMatch.length == argCount) {
 					for (int p = 0; p < argCount; p++)
-						if (toMatch[p] != argumentTypes[p])
+						if (TypeBinding.notEquals(toMatch[p], argumentTypes[p]))
 							continue nextMethod;
 						if (match != null) return null; // collision case
 						match = method;
@@ -864,7 +864,7 @@ public class ParameterizedTypeBinding extends ReferenceBinding implements Substi
 	            return true;
 
 	    	case Binding.RAW_TYPE :
-	            return erasure() == otherType.erasure();
+	            return TypeBinding.equalsEquals(erasure(), otherType.erasure());
 	    }
 	    /* With the hybrid 1.4/1.5+ projects modes, while establishing type equivalence, we need to
 	       be prepared for a type such as Map appearing in one of three forms: As (a) a ParameterizedTypeBinding 
@@ -873,7 +873,7 @@ public class ParameterizedTypeBinding extends ReferenceBinding implements Substi
 	       on whether the underlying type was "seen to be" a generic type in the particular build environment or
 	       not. See https://bugs.eclipse.org/bugs/show_bug.cgi?id=328827 
 	     */
-	    if (erasure() == otherType) {
+	    if (TypeBinding.equalsEquals(erasure(), otherType)) {
 	    	return true;
 	    }
 	    return false;

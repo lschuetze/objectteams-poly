@@ -1056,7 +1056,7 @@ class TypeBinding implements ITypeBinding {
 			org.eclipse.jdt.internal.compiler.lookup.TypeBinding firstClassOrArrayBound = typeVariableBinding.firstBound;
 			int boundsLength = 0;
 			if (firstClassOrArrayBound != null) {
-				if (firstClassOrArrayBound == varSuperclass) {
+				if (org.eclipse.jdt.internal.compiler.lookup.TypeBinding.equalsEquals(firstClassOrArrayBound, varSuperclass)) {
 					boundsLength++;
 				} else if (firstClassOrArrayBound.isArrayType()) { // capture of ? extends/super arrayType
 					boundsLength++;
@@ -1277,7 +1277,7 @@ class TypeBinding implements ITypeBinding {
 			return false;
 		}
 		org.eclipse.jdt.internal.compiler.lookup.TypeBinding otherBinding = ((TypeBinding) other).binding;
-		if (otherBinding.unannotated() == this.binding.unannotated()) {
+		if (org.eclipse.jdt.internal.compiler.lookup.TypeBinding.equalsEquals(otherBinding.unannotated(), this.binding.unannotated())) {
 			return true;
 		}
 		// check return type

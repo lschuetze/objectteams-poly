@@ -323,7 +323,7 @@ public FlowInfo analyseCode(BlockScope currentScope, FlowContext flowContext, Fl
 //{ObjectTeams: wrap rhs type:
 					initializationType = RoleTypeCreator.maybeWrapUnqualifiedRoleType(initializationType, scope, this.initialization);
 // SH}
-					if (variableType != initializationType) // must call before computeConversion() and typeMismatchError()
+					if (TypeBinding.notEquals(variableType, initializationType)) // must call before computeConversion() and typeMismatchError()
 						scope.compilationUnitScope().recordTypeConversion(variableType, initializationType);
 					if (this.initialization.isConstantValueOfTypeAssignableToType(initializationType, variableType)
 						|| initializationType.isCompatibleWith(variableType, scope)) {

@@ -51,7 +51,7 @@ public NestedTypeBinding(NestedTypeBinding prototype) {
 */
 public SyntheticArgumentBinding addSyntheticArgument(LocalVariableBinding actualOuterLocalVariable) {
 	
-	if (this != this.prototype) throw new IllegalStateException();
+	if (!isPrototype()) throw new IllegalStateException();
 	
 	SyntheticArgumentBinding synthLocal = null;
 
@@ -83,7 +83,7 @@ public SyntheticArgumentBinding addSyntheticArgument(LocalVariableBinding actual
 * Answer the new argument or the existing argument if one already existed.
 */
 public SyntheticArgumentBinding addSyntheticArgument(ReferenceBinding targetEnclosingType) {
-	if (this != this.prototype) throw new IllegalStateException();
+	if (!isPrototype()) throw new IllegalStateException();
 	SyntheticArgumentBinding synthLocal = null;
 	if (this.enclosingInstances == null) {
 		synthLocal = new SyntheticArgumentBinding(targetEnclosingType);
@@ -91,7 +91,7 @@ public SyntheticArgumentBinding addSyntheticArgument(ReferenceBinding targetEncl
 	} else {
 		int size = this.enclosingInstances.length;
 		int newArgIndex = size;
-		if (enclosingType() == targetEnclosingType)
+		if (TypeBinding.equalsEquals(enclosingType(), targetEnclosingType))
 			newArgIndex = 0;
 		SyntheticArgumentBinding[] newInstances = new SyntheticArgumentBinding[size + 1];
 		System.arraycopy(this.enclosingInstances, 0, newInstances, newArgIndex == 0 ? 1 : 0, size);
@@ -108,7 +108,7 @@ public SyntheticArgumentBinding addSyntheticArgument(ReferenceBinding targetEncl
 * Answer the new argument or the existing argument if one already existed.
 */
 public SyntheticArgumentBinding addSyntheticArgumentAndField(LocalVariableBinding actualOuterLocalVariable) {
-	if (this != this.prototype) throw new IllegalStateException();
+	if (!isPrototype()) throw new IllegalStateException();
 	SyntheticArgumentBinding synthLocal = addSyntheticArgument(actualOuterLocalVariable);
 	if (synthLocal == null) return null;
 
@@ -121,7 +121,7 @@ public SyntheticArgumentBinding addSyntheticArgumentAndField(LocalVariableBindin
 * Answer the new argument or the existing argument if one already existed.
 */
 public SyntheticArgumentBinding addSyntheticArgumentAndField(ReferenceBinding targetEnclosingType) {
-	if (this != this.prototype) throw new IllegalStateException();
+	if (!isPrototype()) throw new IllegalStateException();
 	SyntheticArgumentBinding synthLocal = addSyntheticArgument(targetEnclosingType);
 	if (synthLocal == null) return null;
 
@@ -131,7 +131,7 @@ public SyntheticArgumentBinding addSyntheticArgumentAndField(ReferenceBinding ta
 }
 
 protected void checkRedundantNullnessDefaultRecurse(ASTNode location, Annotation[] annotations, long annotationTagBits) {
-	if (this != this.prototype) throw new IllegalStateException();
+	if (!isPrototype()) throw new IllegalStateException();
 	ReferenceBinding currentType = this.enclosingType;
 	do {
 		if (!((SourceTypeBinding)currentType).checkRedundantNullnessDefaultOne(location, annotations, annotationTagBits)) {
@@ -152,7 +152,7 @@ public ReferenceBinding enclosingType() {
  * @return the enclosingInstancesSlotSize
  */
 public int getEnclosingInstancesSlotSize() {
-	if (this != this.prototype) throw new IllegalStateException();
+	if (!isPrototype()) throw new IllegalStateException();
 	return this.enclosingInstances == null ? 0 : this.enclosingInstances.length;
 }
 
@@ -160,7 +160,7 @@ public int getEnclosingInstancesSlotSize() {
  * @return the outerLocalVariablesSlotSize
  */
 public int getOuterLocalVariablesSlotSize() {
-	if (this != this.prototype) throw new IllegalStateException();
+	if (!isPrototype()) throw new IllegalStateException();
 	if (this.outerLocalVariablesSlotSize < 0) {
 		this.outerLocalVariablesSlotSize = 0;
 		int outerLocalsCount = this.outerLocalVariables == null ? 0 : this.outerLocalVariables.length;
@@ -183,7 +183,7 @@ public int getOuterLocalVariablesSlotSize() {
 /* Answer the synthetic argument for <actualOuterLocalVariable> or null if one does not exist.
 */
 public SyntheticArgumentBinding getSyntheticArgument(LocalVariableBinding actualOuterLocalVariable) {
-	if (this != this.prototype) throw new IllegalStateException();
+	if (!isPrototype()) throw new IllegalStateException();
 	if (this.outerLocalVariables == null) return null;		// is null if no outer local variables are known
 	for (int i = this.outerLocalVariables.length; --i >= 0;)
 		if (this.outerLocalVariables[i].actualOuterLocalVariable == actualOuterLocalVariable)
@@ -195,7 +195,7 @@ public SyntheticArgumentBinding getSyntheticArgument(LocalVariableBinding actual
 */
 public SyntheticArgumentBinding getSyntheticArgument(ReferenceBinding targetEnclosingType, boolean onlyExactMatch, boolean scopeIsConstructorCall) {
 	
-	if (this != this.prototype) throw new IllegalStateException();
+	if (!isPrototype()) throw new IllegalStateException();
 	
 	if (this.enclosingInstances == null) return null;		// is null if no enclosing instances are known
 	
@@ -212,13 +212,13 @@ public SyntheticArgumentBinding getSyntheticArgument(ReferenceBinding targetEncl
 	//   }
 	// }
 	if (scopeIsConstructorCall && this.enclosingInstances.length > 0)
-		if (this.enclosingInstances[0].type == targetEnclosingType) 
+		if (TypeBinding.equalsEquals(this.enclosingInstances[0].type, targetEnclosingType)) 
 			if (this.enclosingInstances[0].actualOuterLocalVariable == null)
 				return this.enclosingInstances[0];
 	
 	// then check other possibility
 	for (int i = this.enclosingInstances.length; --i >= 0;)
-		if (this.enclosingInstances[i].type == targetEnclosingType)
+		if (TypeBinding.equalsEquals(this.enclosingInstances[i].type, targetEnclosingType))
 			if (this.enclosingInstances[i].actualOuterLocalVariable == null)
 				return this.enclosingInstances[i];
 
@@ -235,12 +235,12 @@ public SyntheticArgumentBinding getSyntheticArgument(ReferenceBinding targetEncl
 }
 
 public SyntheticArgumentBinding[] syntheticEnclosingInstances() {
-	if (this != this.prototype) throw new IllegalStateException();
+	if (!isPrototype()) throw new IllegalStateException();
 	return this.enclosingInstances;		// is null if no enclosing instances are required
 }
 
 public ReferenceBinding[] syntheticEnclosingInstanceTypes() {
-	if (this != this.prototype) throw new IllegalStateException();
+	if (!isPrototype()) throw new IllegalStateException();
 	if (this.enclosingTypes == UNINITIALIZED_REFERENCE_TYPES) {
 //{ObjectTeams: enclosing instances of local types are set during analyzeCode:
 		if (this.isLocalType())
@@ -260,7 +260,7 @@ public ReferenceBinding[] syntheticEnclosingInstanceTypes() {
 }
 
 public SyntheticArgumentBinding[] syntheticOuterLocalVariables() {
-	if (this != this.prototype) throw new IllegalStateException();
+	if (!isPrototype()) throw new IllegalStateException();
 	return this.outerLocalVariables;		// is null if no outer locals are required
 }
 

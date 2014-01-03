@@ -1249,7 +1249,7 @@ private MethodBinding findMethod(char[] methodDescriptor, char[][][] missingType
 			for (int j = 0; j < currentMethodParameterLength; j++) {
 //{ObjectTeams: weaker form of equality:
 /* orig:
-				if (parameters[j] != parameters2[j] && parameters[j].erasure() != parameters2[j].erasure()) {
+				if (TypeBinding.notEquals(parameters[j], parameters2[j]) && TypeBinding.notEquals(parameters[j].erasure(), parameters2[j].erasure())) {
   :giro */
 				if (   !AnchorMapping.areTypesEqual(parameters[j], parameters2[j], currentMethod) 
 					&& !AnchorMapping.areTypesEqual(parameters[j].erasure(), parameters2[j].erasure(), currentMethod)) {
@@ -1296,7 +1296,7 @@ public MethodBinding getExactConstructor(TypeBinding[] argumentTypes) {
 				for (int iarg = 0; iarg < argCount; iarg++)
 //{ObjectTeams: weaker form of equality:
 /* orig:
-					if (toMatch[iarg] != argumentTypes[iarg])
+					if (TypeBinding.notEquals(toMatch[iarg], argumentTypes[iarg]))
   :giro */
 					if (!AnchorMapping.areTypesEqual(toMatch[iarg], argumentTypes[iarg], method))
 // SH}
@@ -1338,7 +1338,7 @@ public MethodBinding getExactMethod(char[] selector, TypeBinding[] argumentTypes
 				for (int iarg = 0; iarg < argCount; iarg++)
 //{ObjectTeams: weaker form of equality:
 /* orig:
-					if (toMatch[iarg] != argumentTypes[iarg])
+					if (TypeBinding.notEquals(toMatch[iarg], argumentTypes[iarg]))
   :giro */
 					if (!AnchorMapping.areTypesEqual(toMatch[iarg], argumentTypes[iarg], method))
 // SH}

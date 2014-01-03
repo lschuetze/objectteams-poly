@@ -1345,7 +1345,7 @@ public class ClassScope extends Scope {
 
 			TypeReference[] boundRefs = typeParameter.bounds;
 			if (boundRefs != null) {
-				boolean checkSuperclass = typeVariable.firstBound == typeVariable.superclass;
+				boolean checkSuperclass = TypeBinding.equalsEquals(typeVariable.firstBound, typeVariable.superclass);
 				for (int j = 0, boundLength = boundRefs.length; j < boundLength; j++) {
 					TypeReference typeRef = boundRefs[j];
 					TypeBinding superType = typeRef.resolvedType;
@@ -1397,7 +1397,7 @@ public class ClassScope extends Scope {
 					nextInterface : for (int a = 0; a < itsLength; a++) {
 						ReferenceBinding next = itsInterfaces[a];
 						for (int b = 0; b < nextPosition; b++)
-							if (next == interfacesToVisit[b]) continue nextInterface;
+							if (TypeBinding.equalsEquals(next, interfacesToVisit[b])) continue nextInterface;
 						interfacesToVisit[nextPosition++] = next;
 					}
 				}
@@ -1422,7 +1422,7 @@ public class ClassScope extends Scope {
 						nextInterface : for (int a = 0; a < itsLength; a++) {
 							ReferenceBinding next = itsInterfaces[a];
 							for (int b = 0; b < nextPosition; b++)
-								if (next == interfacesToVisit[b]) continue nextInterface;
+								if (TypeBinding.equalsEquals(next, interfacesToVisit[b])) continue nextInterface;
 							interfacesToVisit[nextPosition++] = next;
 						}
 					}
@@ -2068,7 +2068,7 @@ public class ClassScope extends Scope {
 			// check for simple interface collisions
 			// Check for a duplicate interface once the name is resolved, otherwise we may be confused (i.e. a.b.I and c.d.I)
 			for (int j = 0; j < i; j++) {
-				if (interfaceBindings[j] == superInterface) {
+				if (TypeBinding.equalsEquals(interfaceBindings[j], superInterface)) {
 					problemReporter().duplicateSuperinterface(sourceType, superInterfaceRef, superInterface);
 					sourceType.tagBits |= TagBits.HierarchyHasProblems;
 					noProblems = false;
@@ -2251,7 +2251,7 @@ public class ClassScope extends Scope {
 			superType = ((RawTypeBinding) superType).genericType();
 		// by this point the superType must be a binary or source type
 
-		if (sourceType == superType) {
+		if (TypeBinding.equalsEquals(sourceType, superType)) {
 			problemReporter().hierarchyCircularity(sourceType, superType, reference);
 			sourceType.tagBits |= TagBits.HierarchyHasProblems;
 			return true;
@@ -2260,7 +2260,7 @@ public class ClassScope extends Scope {
 		if (superType.isMemberType()) {
 			ReferenceBinding current = superType.enclosingType();
 			do {
-				if (current.isHierarchyBeingActivelyConnected() && current == sourceType) {
+				if (current.isHierarchyBeingActivelyConnected() && TypeBinding.equalsEquals(current, sourceType)) {
 					problemReporter().hierarchyCircularity(sourceType, current, reference);
 					sourceType.tagBits |= TagBits.HierarchyHasProblems;
 					current.tagBits |= TagBits.HierarchyHasProblems;
@@ -2276,7 +2276,7 @@ public class ClassScope extends Scope {
 			boolean hasCycle = false;
 			ReferenceBinding parentType = superType.superclass();
 			if (parentType != null) {
-				if (sourceType == parentType) {
+				if (TypeBinding.equalsEquals(sourceType, parentType)) {
 					problemReporter().hierarchyCircularity(sourceType, superType, reference);
 					sourceType.tagBits |= TagBits.HierarchyHasProblems;
 					superType.tagBits |= TagBits.HierarchyHasProblems;
@@ -2295,7 +2295,7 @@ public class ClassScope extends Scope {
 			if (itsInterfaces != null && itsInterfaces != Binding.NO_SUPERINTERFACES) {
 				for (int i = 0, length = itsInterfaces.length; i < length; i++) {
 					ReferenceBinding anInterface = itsInterfaces[i];
-					if (sourceType == anInterface) {
+					if (TypeBinding.equalsEquals(sourceType, anInterface)) {
 						problemReporter().hierarchyCircularity(sourceType, superType, reference);
 						sourceType.tagBits |= TagBits.HierarchyHasProblems;
 						superType.tagBits |= TagBits.HierarchyHasProblems;
