@@ -35,7 +35,6 @@ import org.eclipse.jdt.internal.compiler.lookup.MethodScope;
 import org.eclipse.jdt.internal.compiler.lookup.PackageBinding;
 import org.eclipse.jdt.internal.compiler.lookup.ParameterizedFieldBinding;
 import org.eclipse.jdt.internal.compiler.lookup.ProblemReasons;
-import org.eclipse.jdt.internal.compiler.lookup.RawTypeBinding;
 import org.eclipse.jdt.internal.compiler.lookup.ReferenceBinding;
 import org.eclipse.jdt.internal.compiler.lookup.Scope;
 import org.eclipse.jdt.internal.compiler.lookup.SourceTypeBinding;
@@ -309,8 +308,6 @@ public class RoleTypeBinding extends DependentTypeBinding
      */
     public static boolean eq(TypeBinding left, TypeBinding right) {
     	if (left == right) return true;
-    	if (right.isRawType() && left.erasure().isEquivalentTo(((RawTypeBinding)right).type))
-    		return true;
 		DependentTypeBinding leftDep= null;
 		DependentTypeBinding rightDep= null;
 		// nesting occurs for WeakenedTypeBinding(RoleTypeBinding), e.g.
