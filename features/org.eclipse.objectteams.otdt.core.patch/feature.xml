@@ -69,4 +69,11 @@ Project Leader:
          version="3.9.1.v_OTDT_r230_qualifier"
          unpack="false"/>
 
+   <plugin
+         id="org.eclipse.jdt.ui"
+         download-size="0"
+         install-size="0"
+         version="3.9.1.qualifier"
+         unpack="false"/>
+
 </feature>
