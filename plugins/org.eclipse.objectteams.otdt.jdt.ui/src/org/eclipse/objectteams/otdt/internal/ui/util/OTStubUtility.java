@@ -59,11 +59,11 @@ public team class OTStubUtility {
 
 		protected List createParameters(IJavaProject project, ImportRewrite imports,
 				ImportRewriteContext context, AST ast, IMethodBinding binding,
-				MethodDeclaration decl)
+				String[] paramNames, MethodDeclaration decl)
 		->
 		List createParameters(IJavaProject project, ImportRewrite imports,
 				ImportRewriteContext context, AST ast, IMethodBinding binding,
-				MethodDeclaration decl);	
+				String[] paramNames, MethodDeclaration decl);	
 	}
 	
 	static OTStubUtility getDefault() {
@@ -75,7 +75,7 @@ public team class OTStubUtility {
 			ImportRewriteContext context, AST ast, IMethodBinding binding,
 			MethodDeclaration decl)
 	{
-		return StubUtility2.createParameters(project, imports, context, ast, binding, decl);
+		return StubUtility2.createParameters(project, imports, context, ast, binding, null/*use suggested argument names*/, decl);
 	}
 	
 	/** This method is inspired by createImplementationStub(..), but much leaner. */
