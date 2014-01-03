@@ -162,6 +162,8 @@ public class Lowering implements IOTConstants {
                 if (classRef != null) {
                 	// field access needs cast to the role-class.
                 	// FIXME(SH): use synthetic role field accessor instead!
+                	classRef.constant = Constant.NotAConstant;
+                	classRef.resolvedType = roleClass;
                 	CastExpression unloweredExpr;
                     unloweredExpr = new CastExpression(unloweredExpression, classRef, CastExpression.NEED_CLASS);
                     unloweredExpr.constant     = Constant.NotAConstant;
