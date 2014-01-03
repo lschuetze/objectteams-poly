@@ -25,12 +25,6 @@ public class ArrayQualifiedTypeReference extends QualifiedTypeReference {
 	private Annotation[][] annotationsOnDimensions;  // jsr308 style type annotations on dimensions
 	public int extendedDimensions;
 
-//{ObjectTeams: mark generated reference:
-	public ArrayQualifiedTypeReference(char[][] sources , int dim, long[] poss, boolean isGenerated) {
-		this(sources, dim, poss);
-		this.isGenerated = isGenerated;
-	}
-// SH}
 	public ArrayQualifiedTypeReference(char[][] sources , int dim, long[] poss) {
 
 		super( sources , poss);

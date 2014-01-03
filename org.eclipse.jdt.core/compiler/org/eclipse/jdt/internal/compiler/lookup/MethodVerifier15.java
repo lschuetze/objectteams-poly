@@ -28,6 +28,7 @@
  *								bug 395681 - [compiler] Improve simulation of javac6 behavior from bug 317719 after fixing bug 388795
  *								bug 409473 - [compiler] JDT cannot compile against JRE 1.8
  *								Bug 420080 - [1.8] Overridden Default method is reported as duplicated
+ *								Bug 418235 - [compiler][null] Unreported nullness error when using generic
  *******************************************************************************/
 package org.eclipse.jdt.internal.compiler.lookup;
 

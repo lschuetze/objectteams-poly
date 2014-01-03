@@ -14221,4 +14221,32 @@ public void disallowedTargetForContainerAnnotation(Annotation annotation, TypeBi
 		annotation.sourceStart,
 		annotation.sourceEnd);
 }
+public void uninternedIdentityComparison(EqualExpression expr, TypeBinding lhs, TypeBinding rhs) {
+	
+	char [] lhsName = lhs.sourceName();
+	char [] rhsName = rhs.sourceName();
+	
+	if (CharOperation.equals(lhsName, "VoidTypeBinding".toCharArray())  //$NON-NLS-1$
+			|| CharOperation.equals(lhsName, "NullTypeBinding".toCharArray())  //$NON-NLS-1$
+			|| CharOperation.equals(lhsName, "ProblemReferenceBinding".toCharArray())) //$NON-NLS-1$
+		return;
+	
+	if (CharOperation.equals(rhsName, "VoidTypeBinding".toCharArray())  //$NON-NLS-1$
+			|| CharOperation.equals(rhsName, "NullTypeBinding".toCharArray())  //$NON-NLS-1$
+			|| CharOperation.equals(rhsName, "ProblemReferenceBinding".toCharArray())) //$NON-NLS-1$
+		return;
+	
+	this.handle(
+			IProblem.UninternedIdentityComparison,
+			new String[] {
+					new String(lhs.readableName()),
+					new String(rhs.readableName())
+			},
+			new String[] {
+					new String(lhs.shortReadableName()),
+					new String(rhs.shortReadableName())
+			},
+			expr.sourceStart,
+			expr.sourceEnd);
+}
 }

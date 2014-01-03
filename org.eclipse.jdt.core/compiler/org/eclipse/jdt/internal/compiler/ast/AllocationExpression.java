@@ -23,11 +23,10 @@
  *							bug 370639 - [compiler][resource] restore the default for resource leak warnings
  *							bug 345305 - [compiler][null] Compiler misidentifies a case of "variable can only be null"
  *							bug 388996 - [compiler][resource] Incorrect 'potential resource leak'
- *        Andy Clement - Contributions for
- *                          Bug 383624 - [1.8][compiler] Revive code generation support for type annotations (from Olivier's work)
  *							bug 403147 - [compiler][null] FUP of bug 400761: consolidate interaction between unboxing, NPE, and deferred checking
  *							Bug 392238 - [1.8][compiler][null] Detect semantically invalid null type annotations
  *							Bug 417295 - [1.8[[null] Massage type annotated null analysis to gel well with deep encoded type bindings.
+ *							Bug 418235 - [compiler][null] Unreported nullness error when using generic
  *     Jesper S Moller <jesper@selskabet.org> - Contributions for
  *							bug 378674 - "The method can be declared as static" is wrong
  *     Andy Clement (GoPivotal, Inc) aclement@gopivotal.com - Contributions for

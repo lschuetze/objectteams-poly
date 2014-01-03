@@ -587,4 +587,13 @@ public class ImplicitNullAnnotationVerifier {
 	    return false;
 	}
 // SH}
+
+//{ObjectTeams: is method the static implementation of a role ifc's abstract static?
+	private boolean staticRoleMethodImpl(MethodBinding method, MethodBinding inheritedMethod)
+	{
+	    if (inheritedMethod.declaringClass.isSynthInterface())
+	        return method.isStatic() && inheritedMethod.isStatic();
+	    return false;
+	}
+// SH}
 }

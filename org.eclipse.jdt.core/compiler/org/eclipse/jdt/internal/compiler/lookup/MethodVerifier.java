@@ -25,6 +25,7 @@
  *								bug 406928 - computation of inherited methods seems damaged (affecting @Overrides)
  *								bug 409473 - [compiler] JDT cannot compile against JRE 1.8
  *								Bug 420080 - [1.8] Overridden Default method is reported as duplicated
+ *								Bug 418235 - [compiler][null] Unreported nullness error when using generic
  *******************************************************************************/
 package org.eclipse.jdt.internal.compiler.lookup;
 
@@ -78,7 +79,7 @@ public abstract class MethodVerifier extends ImplicitNullAnnotationVerifier {
 	SourceTypeBinding type;
 	HashtableOfObject inheritedMethods;
 	HashtableOfObject currentMethods;
-/*
+	/*
 Binding creation is responsible for reporting all problems with types:
 	- all modifier problems (duplicates & multiple visibility modifiers + incompatible combinations - abstract/final)
 		- plus invalid modifiers given the context (the verifier did not do this before)

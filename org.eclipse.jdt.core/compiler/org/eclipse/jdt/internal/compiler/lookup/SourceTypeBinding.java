@@ -34,6 +34,7 @@
  *								Bug 415850 - [1.8] Ensure RunJDTCoreTests can cope with null annotations enabled
  *								Bug 416172 - [1.8][compiler][null] null type annotation not evaluated on method return type
  *								Bug 417295 - [1.8[[null] Massage type annotated null analysis to gel well with deep encoded type bindings.
+ *								Bug 418235 - [compiler][null] Unreported nullness error when using generic
  *      Jesper S Moller <jesper@selskabet.org> -  Contributions for
  *								Bug 412153 - [1.8][compiler] Check validity of annotations which may be repeatable
  *     Till Brychcy - Contributions for
@@ -2724,7 +2725,8 @@ private void createArgumentBindings(MethodBinding method, CompilerOptions compil
 			methodDecl.createArgumentBindings();
 		// add implicit annotations (inherited(?) & default):
 		if (compilerOptions.isAnnotationBasedNullAnalysisEnabled) {
-			new ImplicitNullAnnotationVerifier(this.scope.environment()).checkImplicitNullAnnotations(method, methodDecl, true, this.scope);
+			new ImplicitNullAnnotationVerifier(this.scope.environment(), compilerOptions.inheritNullAnnotations)
+					.checkImplicitNullAnnotations(method, methodDecl, true, this.scope);
 		}
 	}
 }

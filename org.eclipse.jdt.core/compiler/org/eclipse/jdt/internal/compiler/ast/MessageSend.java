@@ -40,6 +40,7 @@
  *								Bug 405569 - Resource leak check false positive when using DbUtils.closeQuietly
  *								Bug 411964 - [1.8][null] leverage null type annotation in foreach statement
  *								Bug 417295 - [1.8[[null] Massage type annotated null analysis to gel well with deep encoded type bindings.
+ *								Bug 418235 - [compiler][null] Unreported nullness error when using generic
  *     Jesper S Moller - Contributions for
  *								Bug 378674 - "The method can be declared as static" is wrong
  *        Andy Clement (GoPivotal, Inc) aclement@gopivotal.com - Contributions for
