@@ -194,9 +194,8 @@ public abstract class ASTNode implements TypeConstants, TypeIds {
 
 	public static final int HasBeenTransformed = Bit3; // by TransformStatementsVisitor while enhancing signatures (MessageSend / AbstractMethodDeclaration)
 
-	public static final int IsGenerated = Bit21; // currently: supertype references, AllocationExpression in a creationMethod
 	public boolean isGenerated() {
-		return (this.bits & IsGenerated) != 0;
+		return false; // subclasses to override
 	}
 // SH}
 
@@ -610,7 +609,7 @@ public abstract class ASTNode implements TypeConstants, TypeIds {
 	}
 	
 	private boolean isGeneratedBaseTypeReference() {
-		if ((this.bits & IsGenerated) == 0)
+		if (!isGenerated())
 			return false;
 		if (!(this instanceof Expression))
 			return false;

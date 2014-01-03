@@ -19,7 +19,6 @@ import java.util.ArrayList;
 import java.util.HashSet;
 
 import org.eclipse.jdt.core.compiler.CharOperation;
-import org.eclipse.jdt.internal.compiler.ast.ASTNode;
 import org.eclipse.jdt.internal.compiler.ast.TypeDeclaration;
 import org.eclipse.jdt.internal.compiler.ast.TypeReference;
 import org.eclipse.jdt.internal.compiler.ast.Expression.DecapsulationState;
@@ -168,7 +167,7 @@ public class TypeLevel {
 				// create a special type reference that uses the original scope for resolving:
 				destRoleDecl.baseclass= new AstGenerator(pos).alienScopeTypeReference(srcDecl.baseclass, srcDecl.scope.parent);
 				destRoleDecl.baseclass.setBaseclassDecapsulation(DecapsulationState.REPORTED);
-				destRoleDecl.baseclass.bits |= ASTNode.IsGenerated;
+				destRoleDecl.baseclass.isGenerated = true;
 			}
 		}
 	}

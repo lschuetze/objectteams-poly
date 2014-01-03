@@ -280,7 +280,12 @@ public void tagReportedBaseclassDecapsulation() {
 	setBaseclassDecapsulation(DecapsulationState.REPORTED);
 }
 public int deprecationProblemId = IProblem.UsingDeprecatedType;
-// SH}
+
+public boolean isGenerated;
+public boolean isGenerated() {
+	return this.isGenerated;
+}
+//SH}
 
 /*
  * Answer a base type reference (can be an array of base type).

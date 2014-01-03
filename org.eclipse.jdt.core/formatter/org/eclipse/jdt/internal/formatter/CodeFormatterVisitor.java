@@ -2066,7 +2066,7 @@ public class CodeFormatterVisitor extends ASTVisitor {
 								}
 							}
 //   OT:
-						  previousIsHidden = ((arguments[i].bits & ASTNode.IsGenerated) != 0);
+						  previousIsHidden = arguments[i].isGenerated();
 						  if (!previousIsHidden)
 // SH}
 							arguments[i].traverse(this, scope);

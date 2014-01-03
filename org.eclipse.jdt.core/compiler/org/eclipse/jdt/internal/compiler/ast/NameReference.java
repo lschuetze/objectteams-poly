@@ -63,6 +63,12 @@ public abstract class NameReference extends Reference implements InvocationSite 
 		}
 		return false;
 	}
+
+	public boolean isGenerated;
+	@Override
+	public boolean isGenerated() {
+		return this.isGenerated;
+	}
 // SH}
 
 

@@ -23,7 +23,6 @@ package org.eclipse.objectteams.otdt.internal.core.compiler.util;
 import java.util.Arrays;
 
 import org.eclipse.jdt.core.compiler.CharOperation;
-import org.eclipse.jdt.internal.compiler.ast.ASTNode;
 import org.eclipse.jdt.internal.compiler.ast.AbstractMethodDeclaration;
 import org.eclipse.jdt.internal.compiler.ast.Argument;
 import org.eclipse.jdt.internal.compiler.ast.ArrayQualifiedTypeReference;
@@ -114,7 +113,7 @@ public class AstClone
 	                qualifiedResult = gen.qualifiedArrayTypeReference(typeName, dims);
 	            else
 	                qualifiedResult = gen.qualifiedTypeReference(typeName);
-	            qualifiedResult.bits |= (qualifiedTypeReference.bits & ASTNode.IsGenerated);
+	            qualifiedResult.isGenerated = qualifiedTypeReference.isGenerated;
 	            result = qualifiedResult;
             }
         }
@@ -213,7 +212,8 @@ public class AstClone
         }
         if (result != null) {
         	result.setBaseclassDecapsulation(typeReference.getBaseclassDecapsulation());
-        	result.bits = typeReference.bits | ASTNode.IsGenerated;
+        	result.bits = typeReference.bits;
+        	result.isGenerated = true;
         	return result;
         }
         throw new InternalCompilerError("Unexpected kind of type reference: " + typeReference.getClass().getName()); //$NON-NLS-1$

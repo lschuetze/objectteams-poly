@@ -29,6 +29,14 @@ import org.eclipse.jdt.internal.compiler.lookup.*;
 
 public class EqualExpression extends BinaryExpression {
 
+//{ObjectTeams:
+	public boolean isGenerated;
+	@Override
+	public boolean isGenerated() {
+		return this.isGenerated;
+	}
+//SH}
+
 	public EqualExpression(Expression left, Expression right,int operator) {
 		super(left,right,operator);
 	}
@@ -190,7 +198,7 @@ public class EqualExpression extends BinaryExpression {
 			// TODO (maxime) check, reintroduced copy
 		}
 //{ObjectTeams: no warnings/errors for generated (null-)checks:
-	  if ((this.bits & IsGenerated) == 0)
+	  if (!this.isGenerated)
 // SH}
 		checkNullComparison(currentScope, flowContext, result, result.initsWhenTrue(), result.initsWhenFalse());
 		return result;

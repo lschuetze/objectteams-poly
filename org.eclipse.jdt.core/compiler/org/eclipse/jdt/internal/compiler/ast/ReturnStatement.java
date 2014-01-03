@@ -57,6 +57,14 @@ public class ReturnStatement extends Statement implements ExpressionContext {
 	public LocalVariableBinding saveValueVariable;
 	public int initStateIndex = -1;
 	private boolean implicitReturn;
+//{ObjectTeams:
+	public boolean isGenerated;
+	@Override
+	public boolean isGenerated() {
+		return this.isGenerated;
+	}
+//SH}
+
 
 public ReturnStatement(Expression expression, int sourceStart, int sourceEnd) {
 	this(expression, sourceStart, sourceEnd, false);

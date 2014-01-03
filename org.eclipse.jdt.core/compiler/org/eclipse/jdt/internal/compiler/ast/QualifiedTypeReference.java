@@ -197,7 +197,7 @@ public class QualifiedTypeReference extends TypeReference {
 				reportDeprecatedType(this.resolvedType, scope, i);
 			}
 //{ObjectTeams: statically qualified use of role?
-			if (i > 0 && (this.bits & ASTNode.IsGenerated) == 0 && shouldAnalyzeRoleReference()) { // generated (and copied) methods are allowed to use MyTeam.R
+			if (i > 0 && !this.isGenerated && shouldAnalyzeRoleReference()) { // generated (and copied) methods are allowed to use MyTeam.R
 				if (isIllegalQualifiedUseOfProtectedRole(scope)) {
 					// already reported
 				} else {

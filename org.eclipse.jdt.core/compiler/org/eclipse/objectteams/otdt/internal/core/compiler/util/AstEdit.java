@@ -506,11 +506,11 @@ public class AstEdit {
 	    	TypeReference[] args =new TypeReference[len];
 	    	for (int i = 0; i < len; i++) {
 				args[i] = gen.singleTypeReference(roleClassDecl.typeParameters[i].name);
-				args[i].bits |= ASTNode.IsGenerated;
+				args[i].isGenerated = true;
 			}
 	    	implementsRef = new ParameterizedSingleTypeReference(interfaceName, args, 0, pos);
 	    }
-	    implementsRef.bits |= ASTNode.IsGenerated;
+	    implementsRef.isGenerated = true;
 	    addImplementsReference(roleClassDecl, implementsRef);
 	}
 

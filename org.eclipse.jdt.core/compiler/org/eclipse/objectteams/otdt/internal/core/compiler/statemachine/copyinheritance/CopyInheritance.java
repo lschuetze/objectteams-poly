@@ -1604,7 +1604,7 @@ public class CopyInheritance implements IOTConstants, ClassFileConstants, ExtraC
 		    	}
 				returnExpr = gen.allocation(createRoleTypeRef(typeName, typeVars, gen),
 		        							expressions);
-		        returnExpr.bits |= ASTNode.IsGenerated;
+		        ((AllocationExpression)returnExpr).isGenerated = true;
 		    } else {
 		        returnExpr = gen.nullLiteral();
 		    }

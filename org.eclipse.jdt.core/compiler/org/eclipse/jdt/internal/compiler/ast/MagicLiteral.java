@@ -12,6 +12,10 @@ package org.eclipse.jdt.internal.compiler.ast;
 
 public abstract class  MagicLiteral extends Literal {
 
+//{ObjectTeams:
+	public boolean isGenerated;
+//SH}
+
 	public MagicLiteral(int start , int end) {
 
 		super(start,end);

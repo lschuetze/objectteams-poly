@@ -17,7 +17,6 @@
 package org.eclipse.objectteams.otdt.internal.core.compiler.util;
 
 import org.eclipse.jdt.internal.compiler.CompilationResult.CheckPoint;
-import org.eclipse.jdt.internal.compiler.ast.ASTNode;
 import org.eclipse.jdt.internal.compiler.ast.ArrayQualifiedTypeReference;
 import org.eclipse.jdt.internal.compiler.ast.ArrayTypeReference;
 import org.eclipse.jdt.internal.compiler.ast.ParameterizedSingleTypeReference;
@@ -165,7 +164,7 @@ public interface IAlienScopeTypeReference {
 		public AlienScopeQualifiedTypeReference(char[][] sources, long[] poss, Scope alienScope) {
 			super(sources, poss);
 			this.alienScope = alienScope;
-			this.bits |= ASTNode.IsGenerated; // allow qualified reference to role
+			this.isGenerated = true; // allow qualified reference to role
 		}
 		public Scope getAlienScope() { return this.alienScope; }
 		@Override
@@ -205,7 +204,7 @@ public interface IAlienScopeTypeReference {
 		public AlienScopeArrayQualifiedTypeReference(char[][] sources, long[] poss, int dim, Scope alienScope) {
 			super(sources, dim, poss);
 			this.alienScope = alienScope;
-			this.bits |= ASTNode.IsGenerated; // allow qualified reference to role
+			this.isGenerated = true; // allow qualified reference to role
 		}
 		public Scope getAlienScope() { return this.alienScope; }
 		@Override

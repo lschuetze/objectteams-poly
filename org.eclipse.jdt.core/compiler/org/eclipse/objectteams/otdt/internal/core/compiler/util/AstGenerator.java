@@ -140,7 +140,7 @@ public class AstGenerator extends AstFactory {
 
 	public SingleNameReference singleNameReference(char[] name) {
 		SingleNameReference ref = new SingleNameReference(name, this.pos);
-		ref.bits |= ASTNode.IsGenerated;
+		ref.isGenerated = true;
 		return ref;
 	}
 	public QualifiedNameReference qualifiedNameReference(char[][] tokens) {
@@ -270,14 +270,14 @@ public class AstGenerator extends AstFactory {
 		return result;
 	}
 	public Expression nullCheck(Expression value) {
-		Expression result = new EqualExpression(
+		EqualExpression result = new EqualExpression(
 				value,
 				nullLiteral(),
 				OperatorIds.EQUAL_EQUAL);
 		result.sourceStart = this.sourceStart;
 		result.sourceEnd = this.sourceEnd;
 		result.constant = Constant.NotAConstant;
-		result.bits |= ASTNode.IsGenerated;
+		result.isGenerated = true;
 		return result;
 	}
 	public IntLiteral intLiteral(int val) {
@@ -285,10 +285,10 @@ public class AstGenerator extends AstFactory {
 		return result;
 	}
 	public Literal booleanLiteral(boolean val) {
-		Literal result = val
+		MagicLiteral result = val
 			? new TrueLiteral(this.sourceStart, this.sourceEnd)
 			: new FalseLiteral(this.sourceStart, this.sourceEnd);
-		result.bits |= ASTNode.IsGenerated;
+		result.isGenerated = true;
 		return result;
 	}
 	public StringLiteral stringLiteral(char[] cs) {
@@ -306,7 +306,8 @@ public class AstGenerator extends AstFactory {
 		long[] poss = new long[compoundName.length];
 		Arrays.fill(poss, this.pos);
 		QualifiedTypeReference reference = new QualifiedTypeReference(compoundName, poss);
-		reference.bits |= ASTNode.IsGenerated | ASTNode.IgnoreRawTypeCheck;
+		reference.bits |= ASTNode.IgnoreRawTypeCheck;
+		reference.isGenerated = true;
 		return reference;
 	}
 
@@ -314,7 +315,8 @@ public class AstGenerator extends AstFactory {
 		long[] poss = new long[compoundName.length];
 		Arrays.fill(poss, this.pos);
 		ArrayQualifiedTypeReference reference = new ArrayQualifiedTypeReference(compoundName, dims, poss);
-		reference.bits |= ASTNode.IsGenerated | ASTNode.IgnoreRawTypeCheck;
+		reference.bits |= ASTNode.IgnoreRawTypeCheck;
+		reference.isGenerated = true;
 		return reference;
 	}
 
@@ -374,7 +376,8 @@ public class AstGenerator extends AstFactory {
             elementType = ab.leafComponentType;
         }
         TypeReference typeReference = createArrayTypeReference(elementType, dims, makeGeneric);
-        typeReference.bits |= ASTNode.IsGenerated | ASTNode.IgnoreRawTypeCheck;
+        typeReference.bits |= ASTNode.IgnoreRawTypeCheck;
+        typeReference.isGenerated = true;
         typeReference.deprecationProblemId = 0;
         if (!type.isValidBinding())
         	typeReference.bits |= ASTNode.IsGeneratedWithProblem;
@@ -423,7 +426,8 @@ public class AstGenerator extends AstFactory {
     {
     	TypeReference typeReference = createArrayTypeReference(elementType, dims, true);
     	typeReference.deprecationProblemId = 0;
-    	typeReference.bits |= ASTNode.IsGenerated | ASTNode.IgnoreRawTypeCheck;
+    	typeReference.bits |= ASTNode.IgnoreRawTypeCheck;
+    	typeReference.isGenerated = true;
 		return typeReference;
     }
 
@@ -957,7 +961,7 @@ public class AstGenerator extends AstFactory {
 	public ReturnStatement returnStatement(Expression expression, boolean synthetic) {
 		ReturnStatement returnStatement = new ReturnStatement(expression, this.sourceStart, this.sourceEnd);
 		if (synthetic)
-			returnStatement.bits |= ASTNode.IsGenerated;
+			returnStatement.isGenerated = true;
 		return returnStatement;
 	}
 	public IfStatement ifStatement(Expression condition, Statement thenStatement) {

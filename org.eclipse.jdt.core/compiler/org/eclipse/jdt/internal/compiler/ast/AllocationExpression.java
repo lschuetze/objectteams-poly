@@ -94,6 +94,11 @@ public class AllocationExpression extends Expression implements InvocationSite {
 //{ObjectTeams: alternate AST in case the creation needs to be redirected through a creator call:
 	private MessageSend roleCreatorCall = null;
 	private NameReference valueParam; 						// if allocation type has value parameter: synthesized argument for ctor call
+	public boolean isGenerated;
+	@Override
+	public boolean isGenerated() {
+		return this.isGenerated;
+	}
 // SH}
 
 public FlowInfo analyseCode(BlockScope currentScope, FlowContext flowContext, FlowInfo flowInfo) {
