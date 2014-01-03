@@ -144,7 +144,7 @@ public class AnchorMapping {
        for (int i=start; i<parameters.length; i++)
        {
     	   TypeBinding newParameter = instantiateParameter(scope, parameters[i], i, currentMethod, isMethodEnhanced);
-    	   if (newParameter != null && newParameter != parameters[i]) {
+    	   if (newParameter != null && TypeBinding.notEquals(newParameter, parameters[i])) {
     		   if (newParams == null) {
     		       newParams = new TypeBinding[parameters.length];
     		       System.arraycopy(parameters, 0, newParams, 0, parameters.length);

@@ -563,6 +563,7 @@ public final class CompletionEngine
 	boolean assistNodeIsString = false;	// https://bugs.eclipse.org/bugs/show_bug.cgi?id=343476
 	
 	long targetedElement;
+	
 //{ObjectTeams:
 	private AbstractMethodMappingDeclaration currentMethodMapping;
 	private char seperator= 0; // char that should be inserted before the completion
@@ -3342,6 +3343,7 @@ public final class CompletionEngine
 				scope,
 				insideTypeAnnotation,
 				singleNameReference.isInsideAnnotationAttribute);
+			
 //{ObjectTeams: following analyses don't apply to base/tsuper calls:
 			if (isBaseAccess(singleNameReference) || isTSuperAccess(singleNameReference))
 				return;
@@ -5027,6 +5029,7 @@ public final class CompletionEngine
 		if (missingElements != null) {
 			relevance += computeRelevanceForMissingElements(missingElementsHaveProblems);
 		}
+		
 //{ObjectTeams: other parts of completion prefer role interfaces, but here we need to go back to the role class:
 		if (currentType.isSynthInterface()) {
 			currentType = currentType.roleModel.getClassPartBinding();
@@ -5793,6 +5796,7 @@ public final class CompletionEngine
 			InvocationSite invocationSite,
 			boolean isQualified,
 			int relevance) {
+		
 //{ObjectTeams: other parts of completion prefer role interfaces, but here we need to go back to the role class:
 		if (currentType.isSynthInterface()) {
 			currentType = currentType.roleModel.getClassPartBinding();
@@ -6479,7 +6483,7 @@ public final class CompletionEngine
 			}
 
 //{ObjectTeams: additional check if method spec type already known:
-		    if (expectedType != null && expectedType != field.type) continue next;
+		    if (expectedType != null && TypeBinding.notEquals(expectedType, field.type)) continue next;
 // SH}
 			boolean prefixRequired = false;
 
@@ -8743,7 +8747,7 @@ public final class CompletionEngine
 						if (MethodModel.isAbstract(otherMethod)) {
 							curKind = CompletionProposal.OT_CALLOUT_DECLARATION;
 						} else {
-							if(   otherMethod.declaringClass == receiverType
+							if(   TypeBinding.equalsEquals(otherMethod.declaringClass, receiverType)
 							   && otherMethod.copyInheritanceSrc == null)
 								curKind = CompletionProposal.OT_CALLIN_DECLARATION; // no overriding of local methods, only callin allowed
 							else
@@ -8917,7 +8921,7 @@ public final class CompletionEngine
 				&& !method.canBeSeenBy(receiverType, invocationSite, scope)) continue next;
 
 //{ObjectTeams: additional check if method spec type already known:
-		    if (expectedType != null && expectedType != method.returnType) continue next;
+		    if (expectedType != null && TypeBinding.notEquals(expectedType, method.returnType)) continue next;
 // SH}
 			if(superCall && method.isAbstract()) {
 				methodsFound.add(new Object[]{method, receiverType});
@@ -9008,7 +9012,7 @@ public final class CompletionEngine
 //{ObjectTeams: some types don't have a super type
 		  if (superTypeWithSameErasure != null)
 // SH}
-			if (method.declaringClass != superTypeWithSameErasure) {
+			if (TypeBinding.notEquals(method.declaringClass, superTypeWithSameErasure)) {
 				MethodBinding[] otherMethods = superTypeWithSameErasure.getMethods(method.selector);
 				for (int i = 0; i < otherMethods.length; i++) {
 					if(otherMethods[i].original() == method.original()) {

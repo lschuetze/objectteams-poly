@@ -1798,12 +1798,12 @@ public class Dependencies implements ITranslationStates {
 			boolean missing = false;
 			MethodBinding equals = roleBinding.getExactMethod(TypeConstants.EQUALS, 
 															  new TypeBinding[] {scope.getJavaLangObject()}, scope.compilationUnitScope());
-			if (equals == null || !equals.isValidBinding() || equals.declaringClass != roleBinding) {
+			if (equals == null || !equals.isValidBinding() || TypeBinding.notEquals(equals.declaringClass, roleBinding)) {
 				missing = true;
 			} else {
 				MethodBinding hashCode = roleBinding.getExactMethod(TypeConstants.HASHCODE, 
 						  										  	Binding.NO_PARAMETERS, scope.compilationUnitScope());
-				if (hashCode == null || !hashCode.isValidBinding() || hashCode.declaringClass != roleBinding)
+				if (hashCode == null || !hashCode.isValidBinding() || TypeBinding.notEquals(hashCode.declaringClass, roleBinding))
 					missing = true;
 			}
 			if (missing) {

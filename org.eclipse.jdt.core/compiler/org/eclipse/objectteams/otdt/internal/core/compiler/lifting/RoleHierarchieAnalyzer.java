@@ -30,6 +30,7 @@ import java.util.Set;
 
 import org.eclipse.jdt.internal.compiler.ast.TypeDeclaration;
 import org.eclipse.jdt.internal.compiler.lookup.ReferenceBinding;
+import org.eclipse.jdt.internal.compiler.lookup.TypeBinding;
 import org.eclipse.jdt.internal.compiler.problem.ProblemReporter;
 import org.eclipse.objectteams.otdt.core.compiler.Pair;
 import org.eclipse.objectteams.otdt.internal.core.compiler.model.RoleModel;
@@ -143,7 +144,7 @@ public class RoleHierarchieAnalyzer
             RoleModel child = children[idx].getTreeObject();
             if (child.hasBaseclassProblem())
                 continue;
-            if(child.getBaseTypeBinding() == parentBaseType)
+            if (TypeBinding.equalsEquals(child.getBaseTypeBinding(), parentBaseType))
             	return false; // not relevant, child can be used for lifting
         }
     	// if the role has no children with the same "playedBy"
@@ -177,7 +178,7 @@ public class RoleHierarchieAnalyzer
         	ReferenceBinding otherBase = otherRole.getBaseTypeBinding();
 
         	// check whether both roles are bound to the same base
-        	if (baseBinding == otherBase)
+        	if (TypeBinding.equalsEquals(baseBinding, otherBase))
         	{
         		ambiguitySet.add(otherRole);
         	}

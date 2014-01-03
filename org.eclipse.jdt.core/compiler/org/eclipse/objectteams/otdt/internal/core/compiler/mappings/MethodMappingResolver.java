@@ -31,6 +31,7 @@ import org.eclipse.jdt.internal.compiler.lookup.Binding;
 import org.eclipse.jdt.internal.compiler.lookup.ClassScope;
 import org.eclipse.jdt.internal.compiler.lookup.MethodBinding;
 import org.eclipse.jdt.internal.compiler.lookup.ProblemReasons;
+import org.eclipse.jdt.internal.compiler.lookup.TypeBinding;
 import org.eclipse.objectteams.otdt.internal.core.compiler.ast.AbstractMethodMappingDeclaration;
 import org.eclipse.objectteams.otdt.internal.core.compiler.ast.CallinMappingDeclaration;
 import org.eclipse.objectteams.otdt.internal.core.compiler.ast.CalloutMappingDeclaration;
@@ -214,7 +215,7 @@ public class MethodMappingResolver
 			for (Iterator<CalloutMappingDeclaration> iter = methodSpecs.iterator(); iter.hasNext();)
 			{
 				CalloutMappingDeclaration mapping = iter.next();
-				if (mapping.binding._declaringRoleClass == this._role.getBinding())
+				if (TypeBinding.equalsEquals(mapping.binding._declaringRoleClass, this._role.getBinding()))
 				{
 					mapping.scope.problemReporter().duplicateCalloutBinding(
 						this._role.getAst(), mapping.roleMethodSpec);

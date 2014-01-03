@@ -101,7 +101,7 @@ public class ParameterizedTypeBinding extends ReferenceBinding implements Substi
 	@Override
 	public ReferenceBinding getRealClass() {
 		ReferenceBinding realClass = super.getRealClass();
-		if (realClass == this)
+		if (TypeBinding.equalsEquals(realClass, this))
 			return this; // no further wrapping if this _is_ the class part
 		return this.environment.createParameterizedType(realClass, this.arguments, this.enclosingType()); 
 	}
@@ -1518,7 +1518,7 @@ public class ParameterizedTypeBinding extends ReferenceBinding implements Substi
 			if (arg.isRawType()) {
 				ReferenceBinding originalType = ((RawTypeBinding)arg).type;
 				TypeBinding updated = updater.updateArg(originalType);
-				if (updated != originalType)
+				if (updated != originalType) //$IDENTITY-COMPARISON$
 					newArguments[i] = this.environment.convertToRawType(updated, false);
 				else
 					newArguments[i] = arg;
@@ -1537,7 +1537,7 @@ public class ParameterizedTypeBinding extends ReferenceBinding implements Substi
 								   ProblemReasons.NotFound);
 				continue; // not a good modification
 			}
-			modified |= (newArguments[i] != arg);
+			modified |= (newArguments[i] != arg); //$IDENTITY-COMPARISON$
 		}
 		if (!modified)
 			return this;

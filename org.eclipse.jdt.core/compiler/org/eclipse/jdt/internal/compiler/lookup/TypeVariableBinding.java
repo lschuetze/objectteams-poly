@@ -224,7 +224,7 @@ public class TypeVariableBinding extends ReferenceBinding {
 			ReferenceBinding[] roletypes = ((ReferenceBinding)substitutedRoleType).roleModel.getBoundDescendants();
 			for (ReferenceBinding  aRoletype : roletypes) {
 				ReferenceBinding basetype = aRoletype.baseclass(); // non-null by definition of getBoundDescendants()
-				if (basetype == argumentType || argumentType.isCompatibleWith(basetype)) {
+				if (TypeBinding.equalsEquals(basetype, argumentType) || argumentType.isCompatibleWith(basetype)) {
 					return TypeConstants.OK;
 				}
 			}

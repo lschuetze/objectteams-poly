@@ -97,7 +97,7 @@ public class SyntheticBaseCallSurrogate extends SyntheticOTMethodBinding
 
 	/** Is the callin method bound in the given role class? */
 	public static boolean isCallinMethodBoundIn(MethodBinding callinMethod, ReferenceBinding roleClass) {
-		if (callinMethod.declaringClass != roleClass) {
+		if (TypeBinding.notEquals(callinMethod.declaringClass, roleClass)) {
 			callinMethod = roleClass.getExactMethod(callinMethod.selector, callinMethod.parameters, null);
 			if (callinMethod == null)
 				return false;
@@ -219,7 +219,7 @@ public class SyntheticBaseCallSurrogate extends SyntheticOTMethodBinding
 
 	/** For role types ignore weakening and anchors. */
 	static boolean areTypesEqual(TypeBinding one, TypeBinding two) {
-		if (one == two) return true;
+		if (TypeBinding.equalsEquals(one, two)) return true;
 		ReferenceBinding enclosingOne = one.enclosingType();
 		if (enclosingOne == null) return false;
 		ReferenceBinding enclosingTwo = two.enclosingType();

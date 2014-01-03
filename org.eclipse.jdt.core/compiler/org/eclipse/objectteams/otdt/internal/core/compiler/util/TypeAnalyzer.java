@@ -111,7 +111,7 @@ public class TypeAnalyzer  {
         for (int i = 0; i < params.length; i++) {
             TypeBinding param = params[i];
             TypeBinding superTypeBind = superMeth.parameters[i];
-            if (param == superTypeBind) continue;
+            if (TypeBinding.equalsEquals(param, superTypeBind)) continue;
             if (areTypesMatchable(param, subTeam, superTypeBind, superTeam, matchKind))
             {
                 needAdjustment = true;
@@ -131,7 +131,7 @@ public class TypeAnalyzer  {
      */
     public static boolean isSameRole(ReferenceBinding r1, ReferenceBinding r2)
     {
-        if (r1 == r2)
+        if (TypeBinding.equalsEquals(r1, r2))
             return true;
         if (r1 == null || r2 == null)
         	return false;
@@ -139,7 +139,7 @@ public class TypeAnalyzer  {
             return false;
         ReferenceBinding t1 = r1.enclosingType();
         ReferenceBinding t2 = r2.enclosingType();
-        if (t1 == t2 || t1 == null || t2 == null)
+        if (TypeBinding.equalsEquals(t1, t2) || t1 == null || t2 == null)
             return false; // not two different teams: no other chance..
         if (! (t1.isCompatibleWith(t2) || t2.isCompatibleWith(t1)))
             return false; // not sub/super teams.
@@ -159,7 +159,7 @@ public class TypeAnalyzer  {
      */
     public static boolean isSameType(ReferenceBinding site, TypeBinding t1, TypeBinding t2)
     {
-        if (t1 == t2) return true;
+        if (TypeBinding.equalsEquals(t1, t2)) return true;
         if (t1 == null || t2 == null) 
         	return false;
         if (t1.isArrayType()) {
@@ -176,15 +176,15 @@ public class TypeAnalyzer  {
         }
 
         if (t1.isBaseType())
-            return t1 == t2;
+            return TypeBinding.equalsEquals(t1, t2);
         if (t2.isBaseType())
             return false;
         ReferenceBinding r1 = (ReferenceBinding)t1;
         ReferenceBinding r2 = (ReferenceBinding)t2;
         if (r1.isDirectRole() && r2.isDirectRole()) {
         	r2 = (ReferenceBinding)TeamModel.strengthenRoleType(site, r2);
-            return r1.roleModel.getInterfacePartBinding() ==
-                   r2.roleModel.getInterfacePartBinding();
+            return TypeBinding.equalsEquals(r1.roleModel.getInterfacePartBinding(),
+            								 r2.roleModel.getInterfacePartBinding());
         }
         return false;
     }
@@ -262,12 +262,12 @@ public class TypeAnalyzer  {
 				tsuperType  = tsuperType.erasure();
             }
             if (currentType.isTypeVariable() && tsuperType.isTypeVariable())
-            	return currentType == tsuperType;
+            	return TypeBinding.equalsEquals(currentType, tsuperType);
 
             char[][] tname1 = compoundNameOfReferenceType((ReferenceBinding)tsuperType, true, true);
             char[][] tname2 = compoundNameOfReferenceType((ReferenceBinding)currentType, true, true);
             if (CharOperation.equals(tname1, tname2)) { 
-            	if (tsuperType != currentType && tsuperType.isValidBinding()) // don't complain about different missing types
+            	if (TypeBinding.notEquals(tsuperType, currentType) && tsuperType.isValidBinding()) // don't complain about different missing types
                 	throw new InternalCompilerError("different bindings for the same type??"+currentType+':'+tsuperType); //$NON-NLS-1$
             	return true;
             }
@@ -281,7 +281,7 @@ public class TypeAnalyzer  {
                     return false;
             }
         } else if (currentType instanceof BaseTypeBinding) {
-            if (currentType != tsuperType)
+            if (TypeBinding.notEquals(currentType, tsuperType))
                 return false;
         } else {
             throw new InternalCompilerError("matching of unexpected type kind: "+currentType); //$NON-NLS-1$
@@ -311,7 +311,7 @@ public class TypeAnalyzer  {
         while (tb instanceof MemberTypeBinding) {
             tb = ((MemberTypeBinding)tb).enclosingType;
             if (tb.isTeam()) {
-            	if (tb == teamBinding)
+            	if (TypeBinding.equalsEquals(tb, teamBinding))
             		return qname;
             	else if (teamBinding.isCompatibleWith(tb))
             		return qname;
@@ -458,9 +458,9 @@ public class TypeAnalyzer  {
         binding = binding.erasure();
         origBinding = origBinding.erasure();
         if (binding instanceof RoleTypeBinding)
-        	if (origBinding == ((RoleTypeBinding)binding).getRealType())
+        	if (TypeBinding.equalsEquals(origBinding, ((RoleTypeBinding)binding).getRealType()))
         		return origRef;
-        if (origBinding == binding)
+        if (TypeBinding.equalsEquals(origBinding, binding))
             return origRef;
         AstGenerator gen = new AstGenerator(origRef.sourceStart, origRef.sourceEnd);
         return gen.typeReference(binding);
@@ -606,7 +606,7 @@ public class TypeAnalyzer  {
 			if (existingMethod.parameters.length != template.parameters.length)
 				continue;
 			for (int j = 0; j < template.parameters.length; j++) {
-				if (existingMethod.parameters[j].erasure() != template.parameters[j].erasure())
+				if (TypeBinding.notEquals(existingMethod.parameters[j].erasure(), template.parameters[j].erasure()))
 					continue methods;
 			}
 			return existingMethod;
@@ -691,7 +691,7 @@ public class TypeAnalyzer  {
 		if (teamOne.isRole() && teamTwo.isRole()) {
 			ReferenceBinding outerOne = teamOne.enclosingType();
 			ReferenceBinding outerTwo = teamTwo.enclosingType();
-			if (outerOne != outerTwo) {
+			if (TypeBinding.notEquals(outerOne, outerTwo)) {
 				// raise nested teams to same level.
 				if (outerOne.isCompatibleWith(outerTwo)) {
 					teamTwo = (ReferenceBinding)TeamModel.strengthenRoleType(outerOne, teamTwo);
@@ -816,7 +816,7 @@ public class TypeAnalyzer  {
 	public static boolean sameOrContained(ReferenceBinding binding, ReferenceBinding targetEnclosingType)
 	{
 		while (binding != null) {
-			if (binding == targetEnclosingType)
+			if (TypeBinding.equalsEquals(binding, targetEnclosingType))
 				return true;
 			binding = binding.enclosingType();
 		}

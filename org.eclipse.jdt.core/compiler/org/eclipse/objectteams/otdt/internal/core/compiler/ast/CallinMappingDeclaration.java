@@ -249,7 +249,7 @@ public class CallinMappingDeclaration extends AbstractMethodMappingDeclaration
 				MethodBinding baseMethod = this.baseMethodSpecs[i].resolvedMethod;
 				if (baseMethod != null) {
 					if (baseMethod.isFinal()) {
-						if (baseMethod.declaringClass != baseClass) {
+						if (TypeBinding.notEquals(baseMethod.declaringClass, baseClass)) {
 							this.scope.problemReporter().bindingToInheritedFinal(this.baseMethodSpecs[i], baseMethod, baseClass);
 							this.binding.tagBits |= TagBits.HasMappingIncompatibility;
 						}
@@ -331,7 +331,7 @@ public class CallinMappingDeclaration extends AbstractMethodMappingDeclaration
 						if (roleSideType.isRole()) {
 							ReferenceBinding roleRef = (ReferenceBinding)roleSideType;
 							roleRef = (ReferenceBinding)TeamModel.strengthenRoleType(this.scope.enclosingReceiverType(), roleRef);
-							if (roleRef.baseclass() == baseLeaf) {
+							if (TypeBinding.equalsEquals(roleRef.baseclass(), baseLeaf)) {
 								if (dimensions > 0) {
 									if (roleRef instanceof DependentTypeBinding)
 										roleToLiftTo = ((DependentTypeBinding)roleRef).getArrayType(dimensions);
@@ -600,7 +600,7 @@ public class CallinMappingDeclaration extends AbstractMethodMappingDeclaration
 	}
 	
 	private boolean typeUsesTypeVariable(TypeBinding type, TypeBinding variable) {
-		if (type.leafComponentType() == variable)
+		if (TypeBinding.equalsEquals(type.leafComponentType(), variable))
 			return true;
 		for (TypeVariableBinding t : type.typeVariables())
 			if (typeUsesTypeVariable(t, variable))

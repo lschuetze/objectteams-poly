@@ -289,7 +289,7 @@ public class ConstantPoolObjectReader extends ClassFileStruct implements ClassFi
 		do {
 			fb = findFieldBinding(class_rb, name, type);
 			if (fb != null) {
- 				if (actualReceiver != class_rb)
+ 				if (TypeBinding.notEquals(actualReceiver, class_rb))
 					// return sourceType.getUpdatedFieldBinding(fb, actualReceiver);
  					// no sourceType available so directly create the updated binding:
  					return new FieldBinding(fb, actualReceiver);
@@ -315,7 +315,7 @@ public class ConstantPoolObjectReader extends ClassFileStruct implements ClassFi
 		char[] type = nameandtype[1];
 		MethodBinding mb = findMethodBinding(class_rb, name, type);
 		assert(mb != null);
-		if (mb.declaringClass != class_rb) {
+		if (TypeBinding.notEquals(mb.declaringClass, class_rb)) {
 			mb = new MethodBinding(mb, class_rb);
 		}
 		return mb;

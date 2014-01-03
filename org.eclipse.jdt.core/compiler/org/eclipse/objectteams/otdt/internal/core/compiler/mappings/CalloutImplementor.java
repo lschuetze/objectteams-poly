@@ -200,7 +200,7 @@ public class CalloutImplementor extends MethodMappingImplementor
         }
 
     	MethodDeclaration roleMethodDeclaration = null;
-    	if (roleMethodBinding.declaringClass == calloutScope.enclosingSourceType())
+    	if (TypeBinding.equalsEquals(roleMethodBinding.declaringClass, calloutScope.enclosingSourceType()))
     		roleMethodDeclaration = (MethodDeclaration)roleMethodBinding.sourceMethod();
 
         // have a binding but no declaration for method? -> requires creation of declaration
@@ -364,7 +364,7 @@ public class CalloutImplementor extends MethodMappingImplementor
     	if (roleClass != null) {
     		superRole = roleClass.superclass();
 	    	if (   superRole != null									   // have a super class
-	    		&& superRole.enclosingType() != roleClass.enclosingType()) // not a role from current team
+	    		&& TypeBinding.notEquals(superRole.enclosingType(), roleClass.enclosingType())) // not a role from current team
 	    	{
 	    		MethodBinding superMethod = TypeAnalyzer.findMethod(
 	    				calloutBindingDeclaration.scope, superRole, templateBinding.selector, templateBinding.parameters);
@@ -955,7 +955,7 @@ public class CalloutImplementor extends MethodMappingImplementor
 		if (DependentTypeBinding.isDependentType(baseBinding)) {
 			ITeamAnchor anchor = ((DependentTypeBinding)baseBinding).getAnchor();
 			if (anchor.isTeamContainingRole(givenLeaf)) {
-				if (anchor.getResolvedType() != givenLeaf.enclosingType())
+				if (TypeBinding.notEquals(anchor.getResolvedType(), givenLeaf.enclosingType()))
 					givenLeaf = (ReferenceBinding) TeamModel.strengthenRoleType((ReferenceBinding) anchor.getResolvedType(), givenLeaf);
 				return anchor.getDependentTypeBinding(givenLeaf, -1, arguments, dimensions);
 			}
@@ -1118,7 +1118,7 @@ public class CalloutImplementor extends MethodMappingImplementor
 		if (kind == InferenceKind.SELFCALL) {
 			// adjust parameters from base method:
 			for (int i = 0; i < roleParams.length; i++) {
-				if (roleParams[i] != candidate.parameters[i]) {
+				if (TypeBinding.notEquals(roleParams[i], candidate.parameters[i])) {
 					Config.requireTypeAdjustment(); // reset
 					if (   roleParams[i].isCompatibleWith(candidate.parameters[i])
 						&& !Config.getLoweringRequired())

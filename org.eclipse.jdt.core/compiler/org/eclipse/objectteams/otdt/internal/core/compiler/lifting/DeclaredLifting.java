@@ -237,7 +237,7 @@ public class DeclaredLifting implements IOTConstants {
 			{
 				Expression receiverTeam = ThisReference.implicitThis();
 				ReferenceBinding teamBinding = roleRef.enclosingType();
-				if (teamBinding != scope.enclosingSourceType())
+				if (TypeBinding.notEquals(teamBinding, scope.enclosingSourceType()))
 					receiverTeam = gen.qualifiedThisReference(teamBinding);
 				if (roleRef.baseclass() == null) {
 					// static adjustment (OTJLD 2.3.2(a)):
@@ -405,7 +405,7 @@ public class DeclaredLifting implements IOTConstants {
 			return false;
 		type = type.erasure();
 		if (type instanceof MemberTypeBinding)
-			return ((MemberTypeBinding)type).enclosingType() == enclosingTeam.erasure();
+			return TypeBinding.equalsEquals(((MemberTypeBinding)type).enclosingType(), enclosingTeam.erasure());
 		return false;
 	}
 	

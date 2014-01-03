@@ -677,7 +677,7 @@ public class ClassScope extends Scope {
 				TypeDeclaration[] memberTypes = this.parent.referenceType().memberTypes;
 				for (int i = 0; i < memberTypes.length; i++) {
 					if (   CharOperation.equals(memberTypes[i].name, this.referenceContext.name)
-						&& memberTypes[i].binding != sourceType)
+						&& TypeBinding.notEquals(memberTypes[i].binding, sourceType))
 					{
 						// mark the existing type (first in list of member types),
 						// because ReferenceBinding.getMemberType() prefers elements
@@ -1727,7 +1727,7 @@ public class ClassScope extends Scope {
 	        // detect cycle wrt. containment:
 	        ReferenceBinding currentType = sourceType;
 	        while (currentType != null && baseclass != null) {
-	        	if (currentType == baseclass) {
+	        	if (TypeBinding.equalsEquals(currentType, baseclass)) {
 	        		problemReporter().playedByEnclosing(sourceType, this.referenceContext.baseclass, baseclass);
 	        		sourceType.roleModel._playedByEnclosing = true;
 	        		break;
@@ -1739,7 +1739,7 @@ public class ClassScope extends Scope {
 	        if (baseclass != null) {
 	        	ReferenceBinding currentClass = baseclass;
 	        	while (currentClass != null) {
-	        		if (currentClass == sourceType) {
+	        		if (TypeBinding.equalsEquals(currentClass, sourceType)) {
 	        			problemReporter().baseclassIsMember(sourceType, baseclassRef, baseclass);
 	        			baseclass = null;
 	        			break;
@@ -1760,8 +1760,8 @@ public class ClassScope extends Scope {
 						// unused: TypeReference roleClassRef = TypeAnalyzer.getRoleClassReference(baseclassRef);
 						// TODO (SH): replace with general lookup of common enclosing team?
 						//            (cf. RoleTypeBinding.findCommonEnclosingTeam())
-						if (  baseclass.enclosingType() == sourceType.enclosingType()
-						   || baseclass.enclosingType() == sourceType.enclosingType().superclass())
+						if (  TypeBinding.equalsEquals(baseclass.enclosingType(), sourceType.enclosingType())
+						   || TypeBinding.equalsEquals(baseclass.enclosingType(), sourceType.enclosingType().superclass()))
 						{
 							problemReporter().baseclassIsRoleOfTheSameTeam(sourceType, this.referenceContext.baseclass, baseclass);
 							sourceType.baseclass = null;
@@ -1857,7 +1857,7 @@ public class ClassScope extends Scope {
 		if (roleTypeVariables.length != baseTypeArguments.length)
 			return false;
 		for (int i = 0; i < roleTypeVariables.length; i++) {
-			if (roleTypeVariables[i] != baseTypeArguments[i])
+			if (TypeBinding.notEquals(roleTypeVariables[i], baseTypeArguments[i]))
 				return false;
 		}
 		return true;
@@ -1887,13 +1887,13 @@ public class ClassScope extends Scope {
 		}
 		for (ReferenceBinding tsuperRole: roleDecl.getRoleModel().getTSuperRoleBindings()) {
 			ReferenceBinding tsuperBase = tsuperRole.baseclass();
-			if (   tsuperBase != null && tsuperBase != baseclass) {
+			if (   tsuperBase != null && TypeBinding.notEquals(tsuperBase, baseclass)) {
 				ITeamAnchor tsuperAnchor = null;
 				if (RoleTypeBinding.isRoleWithExplicitAnchor(tsuperBase)) {
 					tsuperAnchor = ((RoleTypeBinding)tsuperBase)._teamAnchor;
 					tsuperBase = tsuperBase.getRealType();
 				}
-				if (   !(baseclass == tsuperBase || TSuperHelper.isTSubOf(baseclass, tsuperBase))
+				if (   !(TypeBinding.equalsEquals(baseclass, tsuperBase) || TSuperHelper.isTSubOf(baseclass, tsuperBase))
 					|| !TSuperHelper.isEquivalentField(baseAnchor, tsuperAnchor)) 
 				{
 					problemReporter().overridesPlayedBy(ClassScope.this.referenceContext, tsuperBase);

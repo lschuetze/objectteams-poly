@@ -950,7 +950,7 @@ public void generateCode(ClassFile enclosingClassFile) {
 			ReferenceBinding current = this.binding.enclosingType().enclosingType();
 			enclosingSuperClassFile = enclosingClassFile.enclosingClassFile;
 			while (current != null) {
-				if (current == currentSuper)
+				if (TypeBinding.equalsEquals(current, currentSuper))
 					break superLoop;
 				current = current.enclosingType();
 				enclosingSuperClassFile = enclosingSuperClassFile.enclosingClassFile;

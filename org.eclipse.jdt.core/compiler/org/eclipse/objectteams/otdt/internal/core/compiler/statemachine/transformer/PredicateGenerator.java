@@ -338,7 +338,7 @@ public class PredicateGenerator extends SwitchOnBaseTypeGenerator
 	private Expression baseReference(char[] baseVarName, ReferenceBinding roleType, AstGenerator gen) {
 		Expression result= gen.singleNameReference(baseVarName);
 		if (roleType != null) {
-			if (   (roleType.baseclass() != this._currentRole.baseclass())
+			if (   TypeBinding.notEquals(roleType.baseclass(), this._currentRole.baseclass())
 				|| CallinImplementorDyn.DYNAMIC_WEAVING) // under OTREDyn base is passed as IBoundBase => always need to cast.
 			{
 				result= gen.castExpression(result, gen.baseTypeReference(roleType.baseclass()), CastExpression.RAW);
@@ -692,7 +692,7 @@ public class PredicateGenerator extends SwitchOnBaseTypeGenerator
 		if (staticScope && receiverType.isRole()) {
 			return gen.qualifiedNameReference(receiverType);
 		} else {
-			if (receiverType == site)
+			if (TypeBinding.equalsEquals(receiverType, site))
 				return gen.thisReference();
 			else
 				return gen.qualifiedThisReference(receiverType);

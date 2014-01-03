@@ -31,6 +31,7 @@ import org.eclipse.jdt.internal.compiler.lookup.Binding;
 import org.eclipse.jdt.internal.compiler.lookup.MethodBinding;
 import org.eclipse.jdt.internal.compiler.lookup.ReferenceBinding;
 import org.eclipse.jdt.internal.compiler.lookup.Scope;
+import org.eclipse.jdt.internal.compiler.lookup.TypeBinding;
 import org.eclipse.objectteams.otdt.internal.core.compiler.model.TeamModel;
 
 /**
@@ -159,7 +160,7 @@ public class PrecedenceBinding extends Binding {
 	{
 		ReferenceBinding role1 = ci1._declaringRoleClass;
 		ReferenceBinding role2 = ci2._declaringRoleClass;
-		if (role1 == role2)
+		if (TypeBinding.equalsEquals(role1, role2))
 			return false; // same role = cannot discriminate
 
 		ReferenceBinding base1 = role1.baseclass();
@@ -167,7 +168,7 @@ public class PrecedenceBinding extends Binding {
 		if (base1 == null || base2 == null)
 			return false; // this is insane, but let's be careful ;-)
 
-		if (bm1.isStatic() && base1 != base2)
+		if (bm1.isStatic() && TypeBinding.notEquals(base1, base2))
 			return true; // static methods are ordered by base inheritance.
 
 		// incommensurable base classes after playedBy?
@@ -319,9 +320,9 @@ public class PrecedenceBinding extends Binding {
 			} else {
 				ReferenceBinding roleType = (ReferenceBinding)element;
 				roleType = roleType.roleModel.getClassPartBinding();
-				if (roleType == callin1._declaringRoleClass)
+				if (TypeBinding.equalsEquals(roleType, callin1._declaringRoleClass))
 					numFound++;
-				if (roleType == callin2._declaringRoleClass)
+				if (TypeBinding.equalsEquals(roleType, callin2._declaringRoleClass))
 					numFound++;
 			}
 

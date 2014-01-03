@@ -53,6 +53,7 @@ import org.eclipse.jdt.internal.compiler.lookup.Scope;
 import org.eclipse.jdt.internal.compiler.lookup.SourceTypeBinding;
 import org.eclipse.jdt.internal.compiler.lookup.SyntheticMethodBinding;
 import org.eclipse.jdt.internal.compiler.lookup.TagBits;
+import org.eclipse.jdt.internal.compiler.lookup.TypeBinding;
 import org.eclipse.jdt.internal.compiler.lookup.TypeVariableBinding;
 import org.eclipse.objectteams.otdt.core.compiler.IOTConstants;
 import org.eclipse.objectteams.otdt.core.exceptions.InternalCompilerError;
@@ -312,7 +313,7 @@ public class RoleModel extends TypeModel
 	/** Is ifc the synthetic interface part of clazz? */
 	public static boolean isSynthIfcOfClass(ReferenceBinding ifc, ReferenceBinding clazz) {
 		if (ifc.isSynthInterface() && ifc.roleModel != null)
-			if (ifc.roleModel.getClassPartBinding() == clazz)
+			if (TypeBinding.equalsEquals(ifc.roleModel.getClassPartBinding(), clazz))
 				return true;
 		return false;
 	}
@@ -680,7 +681,7 @@ public class RoleModel extends TypeModel
 		Dependencies.ensureRoleState(this, ITranslationStates.STATE_LENV_CONNECT_TYPE_HIERARCHY);
 		for (int i = 0; i < this.numTSuperRoles; i++) {
 			ReferenceBinding other = this._tsuperRoleBindings[i].isInterface() ? otherIfc : otherClass;
-			if (this._tsuperRoleBindings[i] == other)
+			if (TypeBinding.equalsEquals(this._tsuperRoleBindings[i], other))
 				return true;
 			if (this._tsuperRoleBindings[i].roleModel.hasTSuperRole(other))
 				return true;
@@ -906,7 +907,7 @@ public class RoleModel extends TypeModel
         if (superInterfaces != null)
         {
             for (int i=0; i<superInterfaces.length; i++) {
-                if (superInterfaces[i] == this._binding)
+                if (TypeBinding.equalsEquals(superInterfaces[i], this._binding))
                     return true;
             }
         }
@@ -1015,9 +1016,9 @@ public class RoleModel extends TypeModel
     public boolean equals(RoleModel other) {
     	if (other == null) return false;
     	if (this._interfaceBinding != null && other._interfaceBinding != null)
-    		return this._interfaceBinding == other._interfaceBinding;
+    		return TypeBinding.equalsEquals(this._interfaceBinding, other._interfaceBinding);
     	if (this._classBinding != null && other._classBinding != null)
-    		return this._classBinding == other._classBinding;
+    		return TypeBinding.equalsEquals(this._classBinding, other._classBinding);
     	return this._ast == other._ast;
     }
     /**
@@ -1061,7 +1062,7 @@ public class RoleModel extends TypeModel
 			// binding names contain more information:
 			ifcName = this._interfaceBinding.readableName();
 			className = this._classBinding.readableName();
-			if (this._interfaceBinding.enclosingType() != this._classBinding.enclosingType())
+			if (TypeBinding.notEquals(this._interfaceBinding.enclosingType(), this._classBinding.enclosingType()))
 				hasError = true;
 		}
 		if (hasError) {
@@ -1089,7 +1090,7 @@ public class RoleModel extends TypeModel
         }
         boolean tsuperAlreadyPresent = false;
         for (int i = 0; i < this.numTSuperRoles; i++) {
-			if (this._tsuperRoleBindings[i] == tsuperRole) {
+			if (TypeBinding.equalsEquals(this._tsuperRoleBindings[i], tsuperRole)) {
 				tsuperAlreadyPresent = true;
 				break;
 			}
@@ -1287,13 +1288,13 @@ public class RoleModel extends TypeModel
 		ReferenceBinding enclosingTeam = sourceType.enclosingType();
 		if (enclosingTeam == null || !enclosingTeam.isTeam())
 			return false;
-		if (enclosingTeam == baseclass.enclosingType())
+		if (TypeBinding.equalsEquals(enclosingTeam, baseclass.enclosingType()))
 			return false;
 		while (true) {
 			enclosingTeam = enclosingTeam.enclosingType();
 			if (enclosingTeam == null || !enclosingTeam.isTeam())
 				return false;
-			if (enclosingTeam == baseclass.enclosingType())
+			if (TypeBinding.equalsEquals(enclosingTeam, baseclass.enclosingType()))
 				return true;
 		}
 	}
@@ -1425,6 +1426,6 @@ public class RoleModel extends TypeModel
 		if (   !(declaring1 instanceof ReferenceBinding)
 			|| !(declaring2 instanceof ReferenceBinding))
 			return false;
-		return ((ReferenceBinding)declaring1).getRealType() == ((ReferenceBinding)declaring2).getRealType();
+		return TypeBinding.equalsEquals(((ReferenceBinding)declaring1).getRealType(), ((ReferenceBinding)declaring2).getRealType());
 	}
 }

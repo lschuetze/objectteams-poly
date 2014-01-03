@@ -751,7 +751,7 @@ void checkCallinModifierConflict(MethodBinding currentMethod, MethodBinding inhe
 			//            This is prevented by CallinImplementor.makeWrapperName().
 			//            If mapping-overriding requires differently check there and here.
 			if (   currentMethod.declaringClass.isRole()
-				&& inheritedMethod.declaringClass != role.getInterfacePartBinding())
+				&& TypeBinding.notEquals(inheritedMethod.declaringClass, role.getInterfacePartBinding()))
 			{
 				// set the OVERRIDING flag for callin methods:
 				AbstractMethodDeclaration methodDecl = currentMethod.sourceMethod();

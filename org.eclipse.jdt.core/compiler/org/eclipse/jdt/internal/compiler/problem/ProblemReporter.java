@@ -3823,7 +3823,7 @@ public void invalidConstructor(Statement statement, MethodBinding targetConstruc
 //{ObjectTeams: more specific message?
 		  if (shownConstructor.declaringClass.isRole()) {
 			if (   statement instanceof TSuperMessageSend
-				&& ((ReferenceBinding)((TSuperMessageSend)statement).actualReceiverType).getRealType() != shownConstructor.declaringClass.getRealType())
+				&& TypeBinding.notEquals(((ReferenceBinding)((TSuperMessageSend)statement).actualReceiverType).getRealType(), shownConstructor.declaringClass.getRealType()))
 				id = IProblem.IndirectTSuperInvisible;
 			else if (statement instanceof MessageSend && !((MessageSend)statement).receiver.isThis())
 				id= IProblem.ExternalizedCallToNonPublicConstructor;
@@ -4490,7 +4490,7 @@ public void invalidMethod(MessageSend messageSend, MethodBinding method) {
 			if (method.declaringClass.isRole()) {
 				TypeBinding receiverType= messageSend.actualReceiverType;
 				if (   messageSend instanceof TSuperMessageSend
-					&& ((ReferenceBinding)receiverType).getRealType() != method.declaringClass.getRealType())
+					&& TypeBinding.notEquals(((ReferenceBinding)receiverType).getRealType(), method.declaringClass.getRealType()))
 					id = IProblem.IndirectTSuperInvisible;
 				else if (receiverType != null && RoleTypeBinding.isRoleWithExplicitAnchor(receiverType))
 					id= IProblem.ExternalizedCallToNonPublicMethod;
@@ -12215,7 +12215,7 @@ public void conflictingCallinAndRegular(MethodBinding inheritedMethod, MethodBin
 		start = typeDeclaration.sourceStart;
 		end = typeDeclaration.sourceEnd;
 		if (   typeDeclaration.getRoleModel() != null
-			&& typeDeclaration.getRoleModel().getInterfacePartBinding() == inheritedMethod.declaringClass)
+			&& TypeBinding.equalsEquals(typeDeclaration.getRoleModel().getInterfacePartBinding(), inheritedMethod.declaringClass))
 			return; // don't report against our own interface part
 	}
 	this.handle(

@@ -105,7 +105,7 @@ public abstract class PotentialTranslationExpression extends Expression  impleme
 		            // TODO (SH) is conversion of arrays of base type allowed?
 	            	TypeBinding resultType = this.resolvedType; // default
 		            if (this.resolvedType.isBaseType()) {
-		                if (rawType != this.expectedType) {
+		                if (TypeBinding.notEquals(rawType, this.expectedType)) {
 		                    this.rawExpression = this.expression;
 		                    this.rawExpression.computeConversion(scope, rawType, rawType); // null conversion.
 

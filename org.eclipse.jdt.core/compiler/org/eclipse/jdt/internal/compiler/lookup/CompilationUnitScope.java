@@ -394,7 +394,7 @@ protected boolean isDecapsulationSuppressedAtRole(ReferenceBinding importedType,
 protected boolean isDecapsulationSuppressedAtRole(ReferenceBinding currentType, ReferenceBinding importedType, IrritantSet[] foundIrritants) {
 	if (currentType == null) return false;
 	for (ReferenceBinding member : currentType.memberTypes()) {
-		if (member.baseclass() == importedType) {
+		if (TypeBinding.equalsEquals(member.baseclass(), importedType)) {
 			TypeDeclaration roleAst = member.roleModel.getAst();
 			if (roleAst != null)
 				return this.referenceContext.isWarningSuppressedAt(IProblem.Decapsulation, roleAst.sourceStart, roleAst.sourceEnd, foundIrritants);
@@ -537,7 +537,7 @@ public void registerLocalType(char[] tsuperConstantPoolName, TypeDeclaration loc
 
 	ReferenceBinding foundType = this.constantPoolNameUsage.get(tsuperConstantPoolName);
 	if (foundType != null)
-		assert foundType == localType.binding;
+		assert TypeBinding.equalsEquals(foundType, localType.binding);
 	else
 		this.constantPoolNameUsage.put(tsuperConstantPoolName, localType.binding);
 }

@@ -643,7 +643,7 @@ public class ExplicitConstructorCall extends Statement implements InvocationSite
                 // record chainTSuperMarkArgPos if needed
                 if (   scope.enclosingSourceType().isRole()
                 	&& !TSuperHelper.isTSuper(this.binding)
-                	&& this.binding.declaringClass == scope.enclosingSourceType())
+                	&& TypeBinding.equalsEquals(this.binding.declaringClass, scope.enclosingSourceType()))
             	{
                 	MethodBinding enclosingMethod = methodDeclaration.binding;
                 	if (enclosingMethod != null)

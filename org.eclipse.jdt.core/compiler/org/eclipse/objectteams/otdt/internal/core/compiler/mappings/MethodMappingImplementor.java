@@ -197,7 +197,7 @@ public abstract class MethodMappingImplementor {
 				boolean changed= false;
 				for (int i= 0; i < l; i++) {
 					TypeBinding tb= substituteVariables(args[i], variables);
-					if (tb != args[i]) {
+					if (TypeBinding.notEquals(tb, args[i])) {
 						args[i] = tb;
 						changed= true;
 					}

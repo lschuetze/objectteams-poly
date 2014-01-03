@@ -130,7 +130,7 @@ public class WeakenedTypeBinding extends DependentTypeBinding {
 	}
 
 	public boolean isSignificantlyWeakened() {
-		return this.weakenedType != this.type.getRealType();
+		return TypeBinding.notEquals(this.weakenedType, this.type.getRealType());
 	}
 	
 	/**
@@ -146,10 +146,10 @@ public class WeakenedTypeBinding extends DependentTypeBinding {
 	}
 
 	public static boolean requireWeakening(DependentTypeBinding strongType, ReferenceBinding weakType) {
-		if (strongType == weakType)
+		if (TypeBinding.equalsEquals(strongType, weakType))
 			return false;
 		if (strongType instanceof WeakenedTypeBinding)
-			return ((WeakenedTypeBinding)strongType).weakenedType == weakType;
+			return TypeBinding.equalsEquals(((WeakenedTypeBinding)strongType).weakenedType, weakType);
 		return false;
 	}
 

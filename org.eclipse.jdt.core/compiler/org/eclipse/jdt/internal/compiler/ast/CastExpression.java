@@ -417,7 +417,7 @@ public boolean checkUnsafeCast(Scope scope, TypeBinding castType, TypeBinding ex
 		castType = ((WeakenedTypeBinding)castType).getStrongType();
 // SH}
 	if (TypeBinding.equalsEquals(match, castType)) {
-		if (!isNarrowing && match == this.resolvedType.leafComponentType()) { // do not tag as unnecessary when recursing through upper bounds
+		if (!isNarrowing && TypeBinding.equalsEquals(match, this.resolvedType.leafComponentType())) { // do not tag as unnecessary when recursing through upper bounds
 			tagAsUnnecessaryCast(scope, castType);
 		}
 		return true;
@@ -681,7 +681,7 @@ public TypeBinding resolveType(BlockScope scope) {
 		// use stronger anchor if statement was generated:
 		if (   RoleTypeBinding.isRoleWithoutExplicitAnchor(castType)
 			&& RoleTypeBinding.isRoleWithExplicitAnchor(expressionType)
-			&& ((ReferenceBinding)castType).getRealType() == ((ReferenceBinding)expressionType).getRealType())
+			&& TypeBinding.equalsEquals(((ReferenceBinding)castType).getRealType(), ((ReferenceBinding)expressionType).getRealType()))
 		{
 			this.resolvedType = castType = expressionType;
 		}
@@ -737,7 +737,7 @@ private boolean shouldUnwrapExpressionType(TypeBinding expressionType) {
 		return false; // never unwrap null nor non-RTB
 	if (this.requireRoleClass)
 		return true; // wrapping would falsely pretend compatibility
-	if (this.resolvedType == expressionType)
+	if (TypeBinding.equalsEquals(this.resolvedType, expressionType))
 		return false; // identical types, keep it.
 	return !((DependentTypeBinding)expressionType).hasExplicitAnchor(); // unwrap tthis.R but not anchor.R
 }

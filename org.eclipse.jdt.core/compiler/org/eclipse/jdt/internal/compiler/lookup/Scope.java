@@ -1572,7 +1572,7 @@ public abstract class Scope {
 	private ReferenceBinding transferTypeArguments(ReferenceBinding receiverType, ReferenceBinding enclosingType, ReferenceBinding other) {
 		ReferenceBinding currentIfcType = receiverType.getRealType();
 		while (enclosingType != null) {
-			if (enclosingType.getRealType() == currentIfcType) {
+			if (TypeBinding.equalsEquals(enclosingType.getRealType(), currentIfcType)) {
 				return receiverType.transferTypeArguments(receiverType.getRealClass());
 			}
 			enclosingType = enclosingType.enclosingType();
@@ -2374,7 +2374,7 @@ public abstract class Scope {
 //{ObjectTeams: role class has a visible field? (perhaps inherited from regular super class?)
 			if (receiverType.isRole()) {
 				ReferenceBinding roleClass = ((ReferenceBinding)receiverType).getRealClass();
-				if (roleClass != receiverType) {
+				if (TypeBinding.notEquals(roleClass, receiverType)) {
 					// try again with role class:
 					field = findField(roleClass, fieldName, invocationSite, true /*resolve*/);
 					if (field != null && field.isValidBinding()) {
@@ -2741,7 +2741,7 @@ public abstract class Scope {
 	public final boolean isOrgObjectteamsTeam(TypeBinding tb) {
 		// if org.objectteams.Team is not resolvable, don't report
 		// an error, otherwise we can't compile plain-java programs
-		return tb != null && tb == environment().getType(IOTConstants.ORG_OBJECTTEAMS_TEAM);
+		return TypeBinding.equalsEquals(tb, environment().getType(IOTConstants.ORG_OBJECTTEAMS_TEAM));
 	}
 	public final ReferenceBinding getOrgObjectteamsITeamMigratable() {
 		CompilationUnitScope unitScope = compilationUnitScope();

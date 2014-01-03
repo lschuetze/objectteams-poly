@@ -147,7 +147,7 @@ public class RoleMigrationImplementor
 				haveReportedError = true;
 			} else {
 				ReferenceBinding anchorType = (ReferenceBinding) anchorBinding.getResolvedType();
-				if (anchorType.getRealClass() != roleType.enclosingType()) {
+				if (TypeBinding.notEquals(anchorType.getRealClass(), roleType.enclosingType())) {
 					scope.problemReporter().migrateToWrongTeam(sendArgument, anchorType, roleType);
 					haveReportedError = true;
 				}

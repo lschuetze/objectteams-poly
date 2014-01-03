@@ -6669,7 +6669,7 @@ public class ClassFile implements TypeConstants, TypeIds {
 	/** Make a best effort at determining whether this is the ClassFile for type. */
 	public boolean isForType(ReferenceBinding type) {
 		if (this.generatingModel == null)
-			return this.referenceBinding == type;
+			return TypeBinding.equalsEquals(this.referenceBinding, type);
 		if (this.generatingModel == type.roleModel)
 			return true;
 		if (this.generatingModel == type._teamModel)

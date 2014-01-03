@@ -282,7 +282,7 @@ public class RoleTypeCreator implements TagBits {
 	        	if (dimensions > 0)
 	        		throw new InternalCompilerError("array not yet supported in this position"); //$NON-NLS-1$
 				ReferenceBinding strongType = weakenedReturn.getStrongType();
-				if (strongType.getRealType() != weakenedReturn.weakenedType) {
+				if (TypeBinding.notEquals(strongType.getRealType(), weakenedReturn.weakenedType)) {
 					if (send.expectedType == null || !weakenedReturn.weakenedType.isCompatibleWith(send.expectedType))
 						send.valueCast = strongType;
 				}
@@ -1643,7 +1643,7 @@ public class RoleTypeCreator implements TagBits {
 				   typeArguments[j] = deepSubstitute(givenTypeArgument, environment, substitution);
 				   if (typeArguments[j] == null)
 					   typeArguments[j] = givenTypeArgument;
-				   else if (typeArguments[j] != givenTypeArgument)
+				   else if (typeArguments[j] != givenTypeArgument) //$IDENTITY-COMPARISON$
 					   hasInstantiated = true;
 			   }
 			   if (hasInstantiated)
@@ -1655,7 +1655,7 @@ public class RoleTypeCreator implements TagBits {
 
        if (DependentTypeBinding.isDependentType(type)) {
     	   TypeBinding substituted = substitution.substitute((DependentTypeBinding) type, typeArguments, dimensions); 
-           if (substituted != type) // includes substituted == null
+           if (substituted != type) // includes substituted == null //$IDENTITY-COMPARISON$
         	   return substituted;
        }
        if (hasInstantiated) {

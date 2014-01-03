@@ -446,7 +446,7 @@ public TypeBinding genericCast(TypeBinding targetType) {
 //{ObjectTeams: don't cast if lowering is needed instead:
 	TypeBinding erasure= erasure();
 	if (   erasure.isRole()
-		&& targetErasure == ((ReferenceBinding)erasure).baseclass())
+		&& TypeBinding.equalsEquals(targetErasure, ((ReferenceBinding)erasure).baseclass()))
 		return null;
 // SH}
 	return targetErasure;
@@ -869,7 +869,7 @@ boolean distinctRealTypes(TypeBinding one, TypeBinding two) {
 	if (one instanceof ReferenceBinding && two instanceof ReferenceBinding)
 		if (DependentTypeBinding.isDependentType(one) || DependentTypeBinding.isDependentType(two))
 			return notEquals(((ReferenceBinding)one).getRealType(), ((ReferenceBinding)two).getRealType());
-	return one != two;
+	return TypeBinding.notEquals(one, two);
 }
 // SH}
 

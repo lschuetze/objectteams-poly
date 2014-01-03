@@ -116,11 +116,11 @@ public class TypeLevel {
 	    ReferenceBinding[] superinterfaces = destRole.superInterfaces();
 	    for (int i=0; i<superinterfaces.length; i++) {
 	    	// TODO(SH): enclosingType could be a tsuper of superTeam.
-	        if (superinterfaces[i].enclosingType() == superTeam) {
+	        if (TypeBinding.equalsEquals(superinterfaces[i].enclosingType(), superTeam)) {
 	    		ReferenceBinding teamType  = destRole.enclosingType();
 	            ReferenceBinding superinterface =
 	                    teamType.getMemberType(superinterfaces[i].internalName());
-	            if (superinterface != destRole) // not for the tsuper link.
+	            if (TypeBinding.notEquals(superinterface, destRole)) // not for the tsuper link.
 	            {
 	                obligations.add(new SupertypeObligation(superinterface, superinterfaces[i], null, null));
 	                superinterfaces[i] = superinterfaces[i].transferTypeArguments(superinterface);
@@ -154,7 +154,7 @@ public class TypeLevel {
 		        	destRole.baseclass = checkAdjustImplicitlyRefinedBase(srcRole.baseclass, destRoleDecl, destRole);
 		            destRoleDecl.scope.compilationUnitScope().recordSuperTypeReference(destRole.baseclass);
 		            if (   destRole.baseclass.isValidBinding()
-		            	&& srcRole.baseclass != destRole.baseclass) // only if actually redefining baseclass
+		            	&& TypeBinding.notEquals(srcRole.baseclass, destRole.baseclass)) // only if actually redefining baseclass
 		            	StandardElementGenerator.checkCreateBaseField(destRoleDecl, destRole.baseclass, false);
 		        }
 		    }
@@ -292,7 +292,7 @@ public class TypeLevel {
 	    int len = 0;
 	    if (superInterfaces != null) {
 		    for (int i=0; i<superInterfaces.length; i++)
-		    	if (superInterfaces[i] == superrole)
+		    	if (TypeBinding.equalsEquals(superInterfaces[i], superrole))
 		    		return; // superinterface already present.
 		    len = superInterfaces.length;
 		    newSuperInterfaces = new ReferenceBinding[len+1];
@@ -403,7 +403,7 @@ public class TypeLevel {
 			inheritedSuperclass = strengthenSuper(destTeam, inheritedSuperclass);
 		    if (newSuperclass == null) {
 		    	newSuperclass = inheritedSuperclass;
-		    } else if (newSuperclass != inheritedSuperclass) {
+		    } else if (TypeBinding.notEquals(newSuperclass, inheritedSuperclass)) {
 	    		// is the old superclass actually a tsuper version of the new superclass?
 	    		if (   newSuperclass.roleModel == null
 	    			|| !newSuperclass.roleModel.hasTSuperRole(inheritedSuperclass))
@@ -419,7 +419,7 @@ public class TypeLevel {
 		    }
 		}
 	    if (newSuperclass != null) {
-	    	if (newSuperclass == destRoleDecl.binding) {
+	    	if (TypeBinding.equalsEquals(newSuperclass, destRoleDecl.binding)) {
 	    		// a role extends its implicit super role: circularity!
 	    		// error is already reported on behalf of the interface part (real circularity)
 	    	} else {
@@ -447,7 +447,7 @@ public class TypeLevel {
 		if (destTeam.isRole()) {
 			ReferenceBinding[] tsuperTeams = destTeam.roleModel.getTSuperRoleBindings();
 			for (int i = tsuperTeams.length-1; i >= 0; i--) { // check highest prio first (which comes last in the array)
-				if (tsuperTeams[i] == superRole.enclosingType())
+				if (TypeBinding.equalsEquals(tsuperTeams[i], superRole.enclosingType()))
 					return destTeam.getMemberType(superRole.internalName());
 				if (TeamModel.isTeamContainingRole(tsuperTeams[i], superRole)) {
 					ReferenceBinding strongEnclosing = destTeam.getMemberType(superRole.enclosingType().internalName());

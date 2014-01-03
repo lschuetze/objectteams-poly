@@ -147,7 +147,7 @@ public ReferenceBinding baseclass() {
         		ReferenceBinding classPart = getRealClass();
         		if (classPart != null && classPart.baseclass != null)
         			this.baseclass = classPart.baseclass;
-        		if (this.baseclass != NoBaseclass && this.baseclass != ProblemBaseClass)
+        		if (this.baseclass != NoBaseclass && this.baseclass != ProblemBaseClass) //$IDENTITY-COMPARISON$
         			return this.baseclass;
         	}
             if (!Dependencies.ensureRoleState(this.roleModel, ITranslationStates.STATE_LENV_DONE_FIELDS_AND_METHODS))
@@ -181,7 +181,7 @@ public ReferenceBinding baseclass() {
 }
 // do not perform any lookup/analysis but filter out NobBaseclass/ProblemBaseClass
 public ReferenceBinding rawBaseclass() {
-    return ((this.baseclass == NoBaseclass) || (this.baseclass == ProblemBaseClass))
+    return ((this.baseclass == NoBaseclass) || (this.baseclass == ProblemBaseClass)) //$IDENTITY-COMPARISON$
     ? null: this.baseclass;
 }
 private String hasBaseclassCircularity() {
@@ -207,7 +207,7 @@ private String internalHasBaseclassCircularity(
 		HashSet<ReferenceBinding> visitedTypes,
 		ReferenceBinding type)
 {
-	if (type == null || type == NoBaseclass || type == ProblemBaseClass)
+	if (type == null || type == NoBaseclass || type == ProblemBaseClass) //$IDENTITY-COMPARISON$
 		return null;
 	// completing a cycle that started from the focus role?
 	if (visitedTypes.contains(type))
@@ -258,13 +258,13 @@ public void checkRefineBaseFromSuperInterfaces()
 	                            sStart, sEnd,
 	                            this.baseclass,
 	                            superIfc.baseclass); // raw field access!
-	            if (this.baseclass == ProblemBaseClass)
+	            if (this.baseclass == ProblemBaseClass) //$IDENTITY-COMPARISON$
 	            	RoleModel.setTagBit(this, RoleModel.BaseclassHasProblems);
 	            // detect situation of OTJLD 2.4.3:
 	            if (   this.superclass != null
 	            	&& this.superclass.isRole()
 	            	&& rawBaseclass() != null
-	            	&& this.baseclass == this.superclass.baseclass)
+	            	&& TypeBinding.equalsEquals(this.baseclass, this.superclass.baseclass))
 	            	this.superclass.roleModel._supercededBy = this;
 	        }
 	    }
@@ -277,9 +277,9 @@ private ReferenceBinding checkRefineBase(
         ReferenceBinding current,
         ReferenceBinding next)
 {
-    if (next    == null || next    == NoBaseclass) return current;
-    if (current == null || current == NoBaseclass) return next;
-    if (current == ProblemBaseClass || next == ProblemBaseClass) return ProblemBaseClass;
+    if (next    == null || next    == NoBaseclass) return current; //$IDENTITY-COMPARISON$
+    if (current == null || current == NoBaseclass) return next; //$IDENTITY-COMPARISON$
+    if (current == ProblemBaseClass || next == ProblemBaseClass) return ProblemBaseClass; //$IDENTITY-COMPARISON$
     if (current.isCompatibleWith(next)) return current;
     if (next.isCompatibleWith(current)) return next;
     if (current.isRole() && current.roleModel.hasTSuperRole(next.getRealType())) return current;

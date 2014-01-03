@@ -1037,7 +1037,7 @@ protected int resolveLevelAsSubtype(char[] simplePattern, char[] qualifiedPatter
 						if (argumentTypes.length == parameters.length) {
 							boolean found = true;
 							for (int j=0,l=parameters.length; j<l; j++) {
-								if (parameters[j].erasure() != argumentTypes[j].erasure()) {
+								if (TypeBinding.notEquals(parameters[j].erasure(), argumentTypes[j].erasure())) {
 									found = false;
 									break;
 								}

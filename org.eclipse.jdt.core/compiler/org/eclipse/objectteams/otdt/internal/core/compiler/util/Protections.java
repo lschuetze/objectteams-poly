@@ -209,7 +209,7 @@ public class Protections implements ClassFileConstants, ExtraCompilerModifiers {
             PackageBinding   requiredPackage)
     {
         if (startType.fPackage != requiredPackage) return false;
-        if (startType == requiredType) return true;
+        if (TypeBinding.equalsEquals(startType, requiredType)) return true;
         ReferenceBinding[] superIfcs = startType.superInterfaces();
         if (superIfcs == null) return false;
         for (int i=0; i<superIfcs.length; i++) {
@@ -237,7 +237,7 @@ public class Protections implements ClassFileConstants, ExtraCompilerModifiers {
         if (binding.isTeam()) {
         	ReferenceBinding enclosing = binding.enclosingType();
         	while (enclosing != null) {
-        		if (enclosing == other) {
+        		if (TypeBinding.equalsEquals(enclosing, other)) {
         			scope.problemReporter().teamExtendingEnclosing(clazz, other);
         			return false;
         		}
@@ -287,7 +287,7 @@ public class Protections implements ClassFileConstants, ExtraCompilerModifiers {
 			//    AND the receiverType is the invocationType or its subclass
 			//    OR the method is a static method accessed directly through a type
 			//    OR previous assertions are true for one of the enclosing type
-			if (invocationType == declaringClass) return true;
+			if (TypeBinding.equalsEquals(invocationType, declaringClass)) return true;
 
 			// instead of package investigate the enclosing team.
 
@@ -317,7 +317,7 @@ public class Protections implements ClassFileConstants, ExtraCompilerModifiers {
 						if (depth > 0) invocationSite.setDepth(depth);
 						return true; // see 1FMEPDL - return invocationSite.isTypeAccess();
 					}
-					if (currentType == receiverType || currentType.isSuperclassOf((ReferenceBinding)receiverType)){
+					if (TypeBinding.equalsEquals(currentType, receiverType) || currentType.isSuperclassOf((ReferenceBinding)receiverType)){
 						if (depth > 0) invocationSite.setDepth(depth);
 						return true;
 					}
@@ -335,7 +335,7 @@ public class Protections implements ClassFileConstants, ExtraCompilerModifiers {
 		// not vice versa:
 		ReferenceBinding currentInvocationType = invocationType;
 		while(currentInvocationType != null) {
-			if (currentInvocationType == declaringClass)
+			if (TypeBinding.equalsEquals(currentInvocationType, declaringClass))
 				return true;
 			currentInvocationType = currentInvocationType.enclosingType();
 		}
@@ -359,7 +359,7 @@ public class Protections implements ClassFileConstants, ExtraCompilerModifiers {
 										:((ReferenceBinding)receiverType).getRealClass().erasure());
 		PackageBinding declaringPackage = declaringClass.fPackage;
 		do {
-			if (invocationType == currentType) return true;
+			if (TypeBinding.equalsEquals(invocationType, currentType)) return true;
 			if (   !currentType.isRole()						// when leaving team contexts ...
 				&& declaringPackage != currentType.fPackage)    // ... compare the packages instead.
 				return false;

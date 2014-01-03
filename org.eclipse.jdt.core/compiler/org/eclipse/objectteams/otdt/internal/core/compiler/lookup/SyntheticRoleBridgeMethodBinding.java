@@ -106,7 +106,7 @@ public class SyntheticRoleBridgeMethodBinding extends SyntheticOTMethodBinding {
 		    TypeBinding parameter = targetParameters[targetIdx++];
 		    TypeBinding argument = arguments[argIdx++];
 			codeStream.load(argument, resolvedPosition);
-			if (argument != parameter)
+			if (TypeBinding.notEquals(argument, parameter))
 				codeStream.checkcast(parameter);
 			switch(parameter.id) {
 				case TypeIds.T_long :

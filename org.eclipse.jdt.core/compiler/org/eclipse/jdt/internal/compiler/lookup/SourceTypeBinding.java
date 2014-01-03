@@ -438,9 +438,9 @@ public void addSyntheticArgForValParam(TypeValueParameter param) {
 		int size = this.valueParameters.length;
 		int newArgIndex = size;
 		for (int i = size; --i >= 0;) {
-			if (this.valueParameters[i].type == parameterType)
+			if (TypeBinding.equalsEquals(this.valueParameters[i].type, parameterType))
 				return; // already exists
-			if (enclosingType() == parameterType)
+			if (TypeBinding.equalsEquals(enclosingType(), parameterType))
 				newArgIndex = 0;
 		}
 		SyntheticArgumentBinding[] newInstances = new SyntheticArgumentBinding[size + 1];
@@ -466,7 +466,7 @@ final public void computeValueParameterSlotSizes() {
 		if (slotSize + 1 > 0xFF) { // no more than 255 words of arguments
 			this.scope.problemReporter().noMoreAvailableSpaceForArgument(argument, this.scope.referenceType());
 		}
-		if ((argument.type == TypeBinding.LONG) || (argument.type == TypeBinding.DOUBLE)){
+		if (TypeBinding.equalsEquals(argument.type, TypeBinding.LONG) || TypeBinding.equalsEquals(argument.type, TypeBinding.DOUBLE)){
 			slotSize += 2;
 		} else {
 			slotSize ++;
@@ -655,14 +655,14 @@ public SyntheticMethodBinding addSyntheticMethod(FieldBinding targetField, boole
 //{ObjectTeams: role field?
 	ReferenceBinding enclosingTeam = null;
 	if (   externalizedReceiver                 // must use role field accessor!
-		|| targetField.declaringClass != this)  // if declaringClass==this: use regular accessor
+		|| TypeBinding.notEquals(targetField.declaringClass, this))  // if declaringClass==this: use regular accessor
 	{
 		enclosingTeam = SyntheticRoleFieldAccess.getTeamOfRoleField(targetField);
 	}
 	if (enclosingTeam != null) {
 		if (externalizedReceiver
-			? (this != enclosingTeam)                // be strict for externalized access
-			: !this.isCompatibleWith(enclosingTeam)) // within instance scope compatibility suffices
+			? TypeBinding.notEquals(this, enclosingTeam)	// be strict for externalized access
+			: !this.isCompatibleWith(enclosingTeam))		// within instance scope compatibility suffices
 		{
 			// found a team but its not the current team.
 			// indirection: synth method to be fetched from another team:
@@ -1093,7 +1093,7 @@ public char[] computeUniqueKey(boolean isLeaf) {
 	if (isRole()) {
 		if (isClass()) {
 			ReferenceBinding realType = getRealType();
-			if (realType != null && realType != this)
+			if (realType != null && TypeBinding.notEquals(realType, this))
 				return realType.computeUniqueKey(isLeaf);
 		}
 		// role file is also a main type
@@ -1634,7 +1634,7 @@ public ReferenceBinding getMemberType(char[] name) {
 	ReferenceBinding result = super.getMemberType(name);
 	if (result != null) {
 		// is it a member in a different file?
-		if (   result.enclosingType() == this
+		if (   TypeBinding.equalsEquals(result.enclosingType(), this)
 			&& isTeam()
 			&& !CharOperation.equals(result.getFileName(), this.fileName)
 			&& !RoleFileCache.isRoFiCache(result)) // don't record the cache itself
@@ -3137,7 +3137,7 @@ public void resolveGeneratedMethod(AbstractMethodDeclaration methodDeclaration, 
 	    	methodDeclaration.selector, resolvedMethod.parameters,
 	    	this.scope.compilationUnitScope());
 	    if (   (methodBinding == null)
-	        || (methodBinding.declaringClass != this))
+	        || TypeBinding.notEquals(methodBinding.declaringClass, this))
 	    {
     		this.scope.addGeneratedMethod(methodDeclaration.binding);
 	    }
@@ -3157,7 +3157,7 @@ public void resolveGeneratedMethod(AbstractMethodDeclaration methodDeclaration, 
 	    {
 	    	// manually detect overriding, if we're past the MethodVerifier:
 	    	if (StateHelper.hasState(this, ITranslationStates.STATE_METHODS_VERIFIED))
-	    		if (methodBinding != null && methodBinding.isValidBinding() && methodBinding.declaringClass != this)
+	    		if (methodBinding != null && methodBinding.isValidBinding() && TypeBinding.notEquals(methodBinding.declaringClass, this))
 	    			methodDeclaration.binding.modifiers |= methodBinding.declaringClass.isInterface() 
 									    					? ExtraCompilerModifiers.AccImplementing 
 									    					: ExtraCompilerModifiers.AccOverriding;

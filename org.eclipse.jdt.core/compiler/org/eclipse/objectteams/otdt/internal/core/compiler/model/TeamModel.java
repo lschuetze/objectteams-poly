@@ -451,7 +451,7 @@ public class TeamModel extends TypeModel {
 	    if (roleType.isParameterizedType())
 	    	roleType = ((ParameterizedTypeBinding)roleType).genericType();
     	ReferenceBinding roleOuter = (ReferenceBinding) roleType.enclosingType().erasure();
-    	if (roleOuter == teamCandidate)
+    	if (TypeBinding.equalsEquals(roleOuter, teamCandidate))
     		return 1; // shortcut
 	    if (teamCandidate.isRole()) {
 	    	ReferenceBinding outerTeam = teamCandidate.enclosingType();
@@ -556,12 +556,12 @@ public class TeamModel extends TypeModel {
 		int dimensions = roleType.dimensions();
 		ReferenceBinding roleRefType = (ReferenceBinding)roleType.leafComponentType();
 		ReferenceBinding roleEnclosing = roleRefType.enclosingType();
-		if (roleEnclosing.isRole() && roleEnclosing.erasure() != site.erasure()) {
+		if (roleEnclosing.isRole() && TypeBinding.notEquals(roleEnclosing.erasure(), site.erasure())) {
 			// first strengthen enclosing team if it is nested:
 			ReferenceBinding strengthenedEnclosing = null;
-			if (roleEnclosing.erasure().enclosingType() != enclosingTeam.erasure().enclosingType())
+			if (TypeBinding.notEquals(roleEnclosing.erasure().enclosingType(), enclosingTeam.erasure().enclosingType()))
 				strengthenedEnclosing = (ReferenceBinding)strengthenRoleType(site, roleEnclosing);
-			if (strengthenedEnclosing != null && strengthenedEnclosing.erasure() != site.erasure()) {
+			if (strengthenedEnclosing != null && TypeBinding.notEquals(strengthenedEnclosing.erasure(), site.erasure())) {
 				// we indeed found a better site, so start over:
 				return strengthenRoleType(strengthenedEnclosing, roleType);
 			}
@@ -626,7 +626,7 @@ public class TeamModel extends TypeModel {
 	 */
 	public static ReferenceBinding strengthenEnclosing(ReferenceBinding site, ReferenceBinding targetEnclosing) {
 		ReferenceBinding currentEnclosing = site;
-		while (targetEnclosing != currentEnclosing) {
+		while (TypeBinding.notEquals(targetEnclosing, currentEnclosing)) {
 			if (currentEnclosing.isCompatibleWith(targetEnclosing)) {
 				return currentEnclosing;
 			}
@@ -751,7 +751,7 @@ public class TeamModel extends TypeModel {
 			ReferenceBinding currentRoleIfc = currentRole.getInterfacePartBinding();
 			ReferenceBinding currentBase = currentRole.getBaseTypeBinding();
 
-			if (mostGeneralFound == currentRoleIfc)
+			if (TypeBinding.equalsEquals(mostGeneralFound, currentRoleIfc))
 				continue; // already seen (happens because class/ifc part show the same role)
 
 			if (   currentBase != null
@@ -914,7 +914,7 @@ public class TeamModel extends TypeModel {
 // SH}
 	public boolean isAmbiguousLifting(ReferenceBinding staticRole, ReferenceBinding baseBinding) {
 		for (Pair<ReferenceBinding, ReferenceBinding> pair : this.ambigousLifting) {
-			if (pair.first == baseBinding && pair.second == staticRole)
+			if (TypeBinding.equalsEquals(pair.first, baseBinding) && TypeBinding.equalsEquals(pair.second, staticRole))
 				return true;
 		}
 		return false;

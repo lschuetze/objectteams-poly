@@ -124,7 +124,7 @@ public class BytecodeTransformer
 				method= method.copyInheritanceSrc;
 				if (method == null || method.model == null) continue; // shouldn't happen anyway
 				TeamModel methodSrcTeam = srcModel;
-				if (method.declaringClass != srcModel.getBinding()) {
+				if (TypeBinding.notEquals(method.declaringClass, srcModel.getBinding())) {
 					// copied from implicit super team - find the source:
 					if (!method.declaringClass.isTeam())
 						continue;

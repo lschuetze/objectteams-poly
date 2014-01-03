@@ -163,7 +163,7 @@ public class BaseAllocationExpression extends Assignment {
 					receiver= this.enclosingInstance;
 				}
 				else {
-					if (baseclass.enclosingType() == enclType.enclosingType())
+					if (TypeBinding.equalsEquals(baseclass.enclosingType(), enclType.enclosingType()))
 						receiver = gen.thisReference(); // creating a role of the same team as base instance??
 					else
 						receiver = gen.qualifiedThisReference(gen.typeReference(baseclass.enclosingType()));

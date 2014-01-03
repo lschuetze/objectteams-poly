@@ -460,7 +460,7 @@ public abstract class AbstractMethodMappingDeclaration
 	public boolean checkVisibility (MethodSpec spec, ReferenceBinding baseType)
 	{
 		if (spec.isPrivate()) {
-			if (baseType.getRealClass() != spec.getDeclaringClass()) {
+			if (TypeBinding.notEquals(baseType.getRealClass(), spec.getDeclaringClass())) {
 				this.scope.problemReporter().mappingToInvisiblePrivate(spec, baseType, isCallin());
 				return false; // don't report decapsulation if this error is detected.
 			}

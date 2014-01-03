@@ -220,9 +220,9 @@ public class RoleTypeBinding extends DependentTypeBinding
         this.roleModel        = this._declaredRoleType.roleModel;
         this._teamModel       = this._declaredRoleType.getTeamModel();
 
-        assert this._staticallyKnownTeam.getRealClass() == roleType.enclosingType(): "weakening not using WeakenedTypeBinding"; //$NON-NLS-1$
+        assert TypeBinding.equalsEquals(this._staticallyKnownTeam.getRealClass(), roleType.enclosingType()): "weakening not using WeakenedTypeBinding"; //$NON-NLS-1$
         // some adjustments after all fields are known:
-        if (this._staticallyKnownTeam != roleType.enclosingType())
+        if (TypeBinding.notEquals(this._staticallyKnownTeam, roleType.enclosingType()))
             this._staticallyKnownRoleType = this._staticallyKnownTeam.getMemberType(roleType.sourceName);
         if (this._staticallyKnownRoleClass != null)
             this.modifiers = this._staticallyKnownRoleClass.modifiers;
@@ -277,22 +277,22 @@ public class RoleTypeBinding extends DependentTypeBinding
     	}
     	if (right == null) return false;
 
-    	if (left.erasure() == right.erasure())
+    	if (TypeBinding.equalsEquals(left.erasure(), right.erasure()))
     		return true;
 
     	if (left instanceof RoleTypeBinding) {
     		RoleTypeBinding leftRole = (RoleTypeBinding)left;
     		if (right instanceof RoleTypeBinding)
-    			return left.getRealType() == ((RoleTypeBinding)right).getRealType();
-    		if (leftRole.getRealType() == right)
+    			return TypeBinding.equalsEquals(left.getRealType(), ((RoleTypeBinding)right).getRealType());
+    		if (TypeBinding.equalsEquals(leftRole.getRealType(), right))
     			return true;
-    		if (leftRole.getRealClass() == right)
+    		if (TypeBinding.equalsEquals(leftRole.getRealClass(), right))
     			return true;
     	} else if (right instanceof RoleTypeBinding) {
     		RoleTypeBinding rightRole = (RoleTypeBinding)right;
-    		if (rightRole.getRealType() == left)
+    		if (TypeBinding.equalsEquals(rightRole.getRealType(), left))
     			return true;
-    		if (rightRole.getRealClass() == left)
+    		if (TypeBinding.equalsEquals(rightRole.getRealClass(), left))
     			return true;
     	}
     	return false;
@@ -307,7 +307,7 @@ public class RoleTypeBinding extends DependentTypeBinding
      * @return whether or not left and right are regarded as equal as defined above.
      */
     public static boolean eq(TypeBinding left, TypeBinding right) {
-    	if (left == right) return true;
+    	if (TypeBinding.equalsEquals(left, right)) return true;
 		DependentTypeBinding leftDep= null;
 		DependentTypeBinding rightDep= null;
 		// nesting occurs for WeakenedTypeBinding(RoleTypeBinding), e.g.
@@ -386,7 +386,7 @@ public class RoleTypeBinding extends DependentTypeBinding
 		for (int j = 0; j < parameters.length; j++) {
 			TypeBinding leafType = parameters[j].leafComponentType();
 			if (   isRoleWithoutExplicitAnchor(leafType)
-				&& ((ReferenceBinding)leafType).enclosingType() == declaringClass)
+				&& TypeBinding.equalsEquals(((ReferenceBinding)leafType).enclosingType(), declaringClass))
 				return true;
 		}
 		return false;
@@ -433,7 +433,7 @@ public class RoleTypeBinding extends DependentTypeBinding
 	 * Is type `other' a sibling role of current?
 	 */
 	public boolean isSiblingRole(SourceTypeBinding other) {
-		return enclosingType() == other.enclosingType();
+		return TypeBinding.equalsEquals(enclosingType(), other.enclosingType());
 	}
 
 	/**
@@ -444,8 +444,8 @@ public class RoleTypeBinding extends DependentTypeBinding
 	 */
 	public boolean isSameType(RoleTypeBinding role, ITeamAnchor anchor) {
 		return
-			   role._staticallyKnownRoleType == this._staticallyKnownRoleType
-		    && role._staticallyKnownTeam     == this._staticallyKnownTeam
+				TypeBinding.equalsEquals(role._staticallyKnownRoleType, this._staticallyKnownRoleType)
+		    && TypeBinding.equalsEquals(role._staticallyKnownTeam, this._staticallyKnownTeam)
 			&& this._teamAnchor.hasSameBestNameAs(anchor);
 	}
 

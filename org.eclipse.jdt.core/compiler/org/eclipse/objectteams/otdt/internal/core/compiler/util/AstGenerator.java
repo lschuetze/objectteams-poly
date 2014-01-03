@@ -590,7 +590,7 @@ public class AstGenerator extends AstFactory {
 
     private ReferenceBinding strengthenEnclosing(ReferenceBinding currentType, ReferenceBinding strongEnclosing) {
     	while (strongEnclosing != null) {
-			if (strongEnclosing == currentType || strongEnclosing.superclass() == currentType)
+			if (TypeBinding.equalsEquals(strongEnclosing, currentType) || TypeBinding.equalsEquals(strongEnclosing.superclass(), currentType))
 				return strongEnclosing;
 			ReferenceBinding currentOuter = currentType.enclosingType();
 			if (currentOuter != null) {

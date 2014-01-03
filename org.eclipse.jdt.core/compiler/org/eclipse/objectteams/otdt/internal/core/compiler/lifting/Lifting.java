@@ -499,7 +499,7 @@ public class Lifting extends SwitchOnBaseTypeGenerator
 			return false;
 		if (binding.parameters.length != 1)
 			return false;
-		return binding.parameters[0] == binding.declaringClass.baseclass();
+		return TypeBinding.equalsEquals(binding.parameters[0], binding.declaringClass.baseclass());
 	}
 
     public static boolean isLiftToConstructor(

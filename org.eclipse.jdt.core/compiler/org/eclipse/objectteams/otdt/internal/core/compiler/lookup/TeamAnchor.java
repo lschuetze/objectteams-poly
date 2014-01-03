@@ -341,7 +341,7 @@ public abstract class TeamAnchor extends Binding implements ITeamAnchor {
 			if (!CharOperation.equals(f1.name, f2.name))
 				return false;
 
-			return FieldModel.getActualDeclaringClass(f1) == FieldModel.getActualDeclaringClass(f2);
+			return TypeBinding.equalsEquals(FieldModel.getActualDeclaringClass(f1), FieldModel.getActualDeclaringClass(f2));
 		}
 		return false;
 	}
@@ -499,7 +499,7 @@ public abstract class TeamAnchor extends Binding implements ITeamAnchor {
 		return this.type != null && (this.type instanceof ReferenceBinding) && this.type.isValidBinding();
 	}
 	public boolean hasSameTypeAs(ITeamAnchor other) {
-		return leafType() == ((TeamAnchor)other).leafType();
+		return TypeBinding.equalsEquals(leafType(), ((TeamAnchor)other).leafType());
 	}
 	public TeamModel getTeamModelOfType() {
 		return leafType().getTeamModel();
@@ -559,7 +559,7 @@ public abstract class TeamAnchor extends Binding implements ITeamAnchor {
 		return (RoleTypeBinding)getRoleTypeBinding(roleType, 0);
 	}
 	public RoleModel getStrengthenedRole (ReferenceBinding role) {
-        if (role.roleModel.getTeamModel().getBinding() != leafType())
+        if (TypeBinding.notEquals(role.roleModel.getTeamModel().getBinding(), leafType()))
         	return (leafType()).getMemberType(role.internalName()).roleModel;
         return role.roleModel;
 	}
@@ -731,13 +731,13 @@ public abstract class TeamAnchor extends Binding implements ITeamAnchor {
 		}
     	ReferenceBinding roleEnclosing = roleBinding.enclosingType();
     	if (   roleEnclosing != null
-    		&& roleEnclosing.erasure() != leafType().getRealClass()) // i.e.: teams differ
+    		&& TypeBinding.notEquals(roleEnclosing.erasure(), leafType().getRealClass())) // i.e.: teams differ
     	{
     		//assert TeamModel.areCompatibleEnclosings(this.leafType(), roleEnclosing);
     		// team of roleBinding is less specific than this anchor => requesting a weakened type
     		ReferenceBinding strengthenedRole =
     				(ReferenceBinding)TeamModel.strengthenRoleType(leafType(), roleBinding);
-    		if (strengthenedRole != roleBinding) {// avoid infinite recursion if strengthening made no difference
+    		if (TypeBinding.notEquals(strengthenedRole, roleBinding)) {// avoid infinite recursion if strengthening made no difference
     			DependentTypeBinding strongRoleType = (DependentTypeBinding)getRoleTypeBinding(strengthenedRole, arguments, 0);
     			if (strongRoleType != null)
     				return WeakenedTypeBinding.makeWeakenedTypeBinding(strongRoleType, roleBinding, dimensions);

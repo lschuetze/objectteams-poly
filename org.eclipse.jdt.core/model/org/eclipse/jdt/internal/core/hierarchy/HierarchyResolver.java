@@ -36,7 +36,6 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 
-
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.IPath;
@@ -693,7 +692,7 @@ private void reportHierarchy(IType focus, TypeDeclaration focusLocalType, Refere
 //{ObjectTeams: helper for reporting tsuper types
 private IType getHandle(ReferenceBinding typeBinding) {
 	for (int t = this.typeIndex; t >= 0; t--) {
-		if (this.typeBindings[t] == typeBinding) {
+		if (TypeBinding.equalsEquals(this.typeBindings[t], typeBinding)) {
 			 return this.builder.getHandle(this.typeModels[t], typeBinding);
 		}
 	}

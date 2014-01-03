@@ -217,7 +217,7 @@ public class StandardElementGenerator {
 		while (teamBinding != null) {
 			MethodBinding[] methods = teamBinding.getMethods(methodName);
 			if (methods != null && methods.length == 1) {
-				if (methods[0].declaringClass == teamModel.getBinding() || searchSuper)
+				if (TypeBinding.equalsEquals(methods[0].declaringClass, teamModel.getBinding()) || searchSuper)
 					return methods[0];
 				// go ahead and generate a new method, but use superMethod for weakening after generating:
 				superMethod = methods[0];
@@ -554,7 +554,7 @@ public class StandardElementGenerator {
 			ReferenceBinding superRole, ReferenceBinding roleClass,
 			ReferenceBinding baseTypeBinding)
 	{
-		if (superRole.baseclass == baseTypeBinding)
+		if (TypeBinding.equalsEquals(superRole.baseclass, baseTypeBinding))
 			return; // not strengthening
 		ReferenceBinding nextSuper= superRole.superclass();
 		while (nextSuper.isRole() && nextSuper.roleModel.isBound()) {
@@ -687,10 +687,10 @@ public class StandardElementGenerator {
 				roleType.binding.superclass(),
 				methodName,
 				Binding.NO_PARAMETERS);
-		if (existingMethod != null && existingMethod.isValidBinding()) {     // valid method exists
-			if (existingMethod.isAbstract() == roleType.isInterface())       // abstractness is correct
-				if (   existingMethod.declaringClass == roleType.binding     // declared here
-					|| existingMethod.returnType.isCompatibleWith(baseType)) // inherited but compatible
+		if (existingMethod != null && existingMethod.isValidBinding()) {     					// valid method exists
+			if (existingMethod.isAbstract() == roleType.isInterface())       					// abstractness is correct
+				if (   TypeBinding.equalsEquals(existingMethod.declaringClass, roleType.binding)// declared here
+					|| existingMethod.returnType.isCompatibleWith(baseType)) 					// inherited but compatible
 					return existingMethod;
 		}
 

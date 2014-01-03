@@ -50,6 +50,7 @@ import org.eclipse.jdt.internal.compiler.lookup.ProblemMethodBinding;
 import org.eclipse.jdt.internal.compiler.lookup.ProblemReasons;
 import org.eclipse.jdt.internal.compiler.lookup.ReferenceBinding;
 import org.eclipse.jdt.internal.compiler.lookup.TagBits;
+import org.eclipse.jdt.internal.compiler.lookup.TypeBinding;
 import org.eclipse.objectteams.otdt.core.compiler.IOTConstants;
 import org.eclipse.objectteams.otdt.internal.core.compiler.control.ITranslationStates;
 import org.eclipse.objectteams.otdt.internal.core.compiler.model.MethodModel;
@@ -323,7 +324,7 @@ public class RoleSplitter
         }
         ReferenceBinding[] tsupers = roleClass.getRoleModel().getTSuperRoleBindings();
         for (ReferenceBinding tsuperRole : tsupers)
-			if (tsuperRole.superclass() == superClass)
+			if (TypeBinding.equalsEquals(tsuperRole.superclass(), superClass))
 				return; // already included via tsuper.
 
         // workaround for mixed binary/source roles (cause for this situation unknown):
@@ -341,7 +342,7 @@ public class RoleSplitter
 
         while (
             superClass != null &&
-            superClass != javaLangObject)
+    		TypeBinding.notEquals(superClass, javaLangObject))
         {
             MethodBinding[] methods = superClass.methods();
             methodLoop: for (int i=0; i<methods.length; i++) {

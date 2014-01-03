@@ -527,8 +527,8 @@ public final boolean canBeSeenBy(TypeBinding receiverType, InvocationSite invoca
     // short-cut for generated methods (here: callin wrappers)
 	if (scope.methodScope() != null && scope.methodScope().isCallinWrapper())
 		if (   !isPrivate()
-			|| receiverType == this.declaringClass
-			|| receiverClass == this.declaringClass)
+			|| TypeBinding.equalsEquals(receiverType, this.declaringClass)
+			|| TypeBinding.equalsEquals(receiverClass, this.declaringClass))
 		{
 			return true;
 		}

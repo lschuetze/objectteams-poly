@@ -125,7 +125,7 @@ private ReferenceBinding selectTSuper(ReferenceBinding qualifyingType, Reference
 private boolean contains(ReferenceBinding outer, ReferenceBinding inner) {
 	ReferenceBinding current = inner.enclosingType();
 	while (current != null) {
-		if (current == outer)
+		if (TypeBinding.equalsEquals(current, outer))
 			return true;
 		current = current.enclosingType();
 	}

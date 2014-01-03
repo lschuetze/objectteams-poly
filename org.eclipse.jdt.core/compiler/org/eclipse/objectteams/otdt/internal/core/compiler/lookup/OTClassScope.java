@@ -174,7 +174,7 @@ public class OTClassScope extends ClassScope {
 		if (this.roleUnitImportScope != null) {
 			TypeBinding foundInImports = this.roleUnitImportScope.getType(compoundName, typeNameLength);
 			if (foundInImports.isValidBinding()) {
-				if (foundHere.isValidBinding() && foundInImports != foundHere) {
+				if (foundHere.isValidBinding() && TypeBinding.notEquals(foundInImports, foundHere)) {
 					return problemTypeBinding(compoundName, foundHere, ProblemReasons.Ambiguous);
 				} else
 					return foundInImports;
@@ -229,7 +229,7 @@ public class OTClassScope extends ClassScope {
 			if (foundInImports.isValidBinding()) {
 				if (   foundHere != null
 					&& foundHere.isValidBinding()
-					&& foundInImports != foundHere)
+					&& TypeBinding.notEquals(foundInImports, foundHere))
 					return problemTypeBinding(token, foundHere, ProblemReasons.Ambiguous);
 				else
 					return foundInImports;
@@ -255,7 +255,7 @@ public class OTClassScope extends ClassScope {
 				ReferenceBinding currentClass = site;
 				while (currentClass != null) {
 					// OK to compare references: containment only managed in class parts.
-					if (site == foundEnclosing) {
+					if (TypeBinding.equalsEquals(site, foundEnclosing)) {
 						VariableBinding tthis = site.getTeamModel().getTThis();
 						return tthis.getRoleTypeBinding(foundHereRef, /*dimensions*/0);
 					}

@@ -277,7 +277,7 @@ public class TSuperHelper {
 		}
 		if (!CharOperation.equals(class1.sourceName(), other.sourceName()))
 			return false;
-		return class1.enclosingType().superclass().erasure() == other.enclosingType().erasure()
+		return TypeBinding.equalsEquals(class1.enclosingType().superclass().erasure(), other.enclosingType().erasure())
 			|| isTSubOf(class1.enclosingType(), other.enclosingType());
 	}
 

@@ -1382,7 +1382,7 @@ class TypeBinding implements ITypeBinding {
 		org.eclipse.jdt.internal.compiler.lookup.TypeBinding otherBinding = (other instanceof RecoveredTypeBinding)
 				? ((RecoveredTypeBinding)other).getResolvedBinding()
 				: ((TypeBinding)other).binding;
-		return roleModel.getInterfacePartBinding() == otherBinding;
+		return org.eclipse.jdt.internal.compiler.lookup.TypeBinding.equalsEquals(roleModel.getInterfacePartBinding(), otherBinding);
 	}
 	public boolean isSynthRoleIfc() {
 		if (this.binding == null || !this.binding.isRole())

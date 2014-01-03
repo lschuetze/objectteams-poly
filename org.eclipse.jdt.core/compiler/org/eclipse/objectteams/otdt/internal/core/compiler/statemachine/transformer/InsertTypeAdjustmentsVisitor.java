@@ -303,7 +303,7 @@ public class InsertTypeAdjustmentsVisitor extends ASTVisitor {
 					// FIXME(SH): this is still needed for casting role(ifc) to non-role super
 					// (cf.  1.4.4-otjld-cast-to-superclass-1/3)
 					Config.setCastRequired(null);
-					if (   requiredClass == SourceTypeBinding.MultipleCasts
+					if (   requiredClass == SourceTypeBinding.MultipleCasts //$IDENTITY-COMPARISON$
 						|| !expectedType.isCompatibleWith(requiredClass)
 						|| Config.getCastRequired() != null) // checking request by previous condition
 					{
@@ -327,7 +327,7 @@ public class InsertTypeAdjustmentsVisitor extends ASTVisitor {
 	            			ReferenceBinding resolvedLeafType = (ReferenceBinding) expr.resolvedType.leafComponentType();
 	            			ReferenceBinding resolvedTeam = resolvedLeafType.enclosingType();
 	            			ReferenceBinding currentType = scope.enclosingReceiverType();
-	            			while (currentType != null && currentType != resolvedTeam)
+	            			while (currentType != null && TypeBinding.notEquals(currentType, resolvedTeam))
 	            				currentType = currentType.enclosingType();
 	            			if (currentType == null || RoleTypeBinding.isRoleWithExplicitAnchor(resolvedLeafType)) {
 	            				// resolved type is not a role of an enclosing team

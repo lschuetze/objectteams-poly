@@ -303,17 +303,17 @@ public class CaptureBinding extends TypeVariableBinding {
 		boolean hasWrapped = false;
 		
     	TypeBinding wrappedBound = RoleTypeCreator.maybeWrapQualifiedRoleType(scope, anchorExpr, this.firstBound, typedNode);
-    	if (wrappedBound != this.firstBound)
+    	if (TypeBinding.notEquals(wrappedBound, this.firstBound))
         	hasWrapped = true;
         
     	TypeBinding newSuper = RoleTypeCreator.maybeWrapQualifiedRoleType(scope, anchorExpr, this.superclass, typedNode);
-        if (newSuper != this.superclass)
+        if (TypeBinding.notEquals(newSuper, this.superclass))
 			hasWrapped = true;
         
         ReferenceBinding[] newSuperIfcs = new ReferenceBinding[this.superInterfaces.length]; 
     	for (int i=0; i<this.superInterfaces.length; i++) {
             newSuperIfcs[i] = (ReferenceBinding) RoleTypeCreator.maybeWrapQualifiedRoleType(scope, anchorExpr, this.superInterfaces[i], typedNode);
-            if (newSuperIfcs[i] != this.superInterfaces[i]) 
+            if (TypeBinding.notEquals(newSuperIfcs[i], this.superInterfaces[i]))
             	hasWrapped = true;
     	}
     	if (hasWrapped) {

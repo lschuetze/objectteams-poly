@@ -287,7 +287,7 @@ public class CalloutMappingDeclaration extends AbstractMethodMappingDeclaration
 			if (roleHasImplementation)
 			{
 				if (isCalloutMethod(roleMethod)) {
-					if (   roleMethod.declaringClass != this.scope.enclosingSourceType()
+					if (   TypeBinding.notEquals(roleMethod.declaringClass, this.scope.enclosingSourceType())
 						|| roleMethod.copyInheritanceSrc != null)  // "local" callouts (not copied) are treated in
 					{											   // MethodMappingResolver.checkForDuplicateMethodMappings()
 						this.scope.problemReporter().regularCalloutOverridesCallout(this, roleMethod);

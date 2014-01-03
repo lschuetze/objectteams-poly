@@ -135,7 +135,7 @@ public void analyseCode(ClassScope classScope, InitializationFlowContext initial
     {
     	// force called constructor to be analyzed:
     	MethodBinding selfCall = this.constructorCall.binding;
-    	if (selfCall.declaringClass == this.binding.declaringClass)
+    	if (TypeBinding.equalsEquals(selfCall.declaringClass, this.binding.declaringClass))
     		((ConstructorDeclaration)selfCall.sourceMethod()).analyseCode(classScope, initializerFlowContext, flowInfo.copy(), flowInfo.reachMode());
 
         boolean calledHere = MethodModel.callsBaseCtor(this.binding);
@@ -143,7 +143,7 @@ public void analyseCode(ClassScope classScope, InitializationFlowContext initial
 		if (calledIndirectly) {
 			ReferenceBinding requiredBase = roleType.baseclass();
 			ReferenceBinding createdBase = selfCall.declaringClass.baseclass();
-			if (requiredBase != createdBase)
+			if (TypeBinding.notEquals(requiredBase, createdBase))
 				this.scope.problemReporter().
 					callsCtorWithMismatchingBaseCtor(this.constructorCall,
 													 selfCall.declaringClass,

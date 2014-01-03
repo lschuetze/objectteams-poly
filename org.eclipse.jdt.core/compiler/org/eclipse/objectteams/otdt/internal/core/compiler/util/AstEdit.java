@@ -412,7 +412,7 @@ public class AstEdit {
 			superInterfaces= new ReferenceBinding[1];
 		} else {
 			for (ReferenceBinding superIfc : superInterfaces)
-				if (superIfc == resolvedSuper)
+				if (TypeBinding.equalsEquals(superIfc, resolvedSuper))
 					return; // already present
 
 			length= superInterfaces.length;

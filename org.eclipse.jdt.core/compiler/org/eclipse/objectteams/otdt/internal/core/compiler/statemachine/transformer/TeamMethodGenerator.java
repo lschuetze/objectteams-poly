@@ -463,7 +463,7 @@ public class TeamMethodGenerator {
 			case ClassTag:
 				clazz = src_cpo.getClassObject();
 			}
-			if (clazz != this.srcType)
+			if (TypeBinding.notEquals(clazz, this.srcType))
 				return src_cpo; // only map references to o.o.Team
 			
 			// perform the mapping:
@@ -494,7 +494,7 @@ public class TeamMethodGenerator {
 		private FieldBinding mapField(FieldBinding fieldRef) {
 			for (FieldBinding dstBinding : this.dstType.fields())
 				if (   CharOperation.equals(dstBinding.name, fieldRef.name)
-					&& dstBinding.type == fieldRef.type)
+					&& TypeBinding.equalsEquals(dstBinding.type, fieldRef.type))
 					return dstBinding;
 			return fieldRef;
 		}

@@ -6449,7 +6449,7 @@ class ASTConverter {
 		if (enclosing.memberTypes == null)
 			return null;
 		for (org.eclipse.jdt.internal.compiler.ast.TypeDeclaration memberType : enclosing.memberTypes)
-			if (memberType.binding == superIfcBinding)
+			if (TypeBinding.equalsEquals(memberType.binding, superIfcBinding))
 				return memberType.superInterfaces;
 
 		return null;

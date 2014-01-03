@@ -218,13 +218,13 @@ public class CallinImplementorDyn extends MethodMappingImplementor {
 
 			// arg might have been weakened:
 			if (   expectedType.isRole()
-				&& expectedType.enclosingType() != roleType.enclosingType())
+				&& TypeBinding.notEquals(expectedType.enclosingType(), roleType.enclosingType()))
 						expectedType = TeamModel.strengthenRoleType(roleType, expectedType);
 
 			AstGenerator gen = new AstGenerator(mappedArgExpr.sourceStart, mappedArgExpr.sourceEnd);
 			Expression receiver = null;
 			if (   RoleTypeBinding.isRoleWithoutExplicitAnchor(expectedType)
-				&& roleType.getRealClass() == ((ReferenceBinding)expectedType).enclosingType())
+				&& TypeBinding.equalsEquals(roleType.getRealClass(), ((ReferenceBinding)expectedType).enclosingType()))
 			{
 				// expectedType is a role of the current role(=team),
 				// use the role as the receiver for the lift call:
@@ -508,7 +508,7 @@ public class CallinImplementorDyn extends MethodMappingImplementor {
 							if (roleParam.isTypeVariable()) {
 								TypeVariableBinding tvb = (TypeVariableBinding) roleParam;
 								if (tvb.declaringElement instanceof MethodBinding) {
-									if (((MethodBinding)tvb.declaringElement).declaringClass == roleType)
+									if (TypeBinding.equalsEquals(((MethodBinding)tvb.declaringElement).declaringClass, roleType))
 										// don't use type variable of target method, see test4140_callinReplaceCompatibility10s()
 										roleParam = roleParam.erasure();
 								}
@@ -591,7 +591,7 @@ public class CallinImplementorDyn extends MethodMappingImplementor {
 				        	blockStatements.add(rolePredicateCheck);
 	
 						// -- assemble the method call:																//    local$n.roleMethod((ArgType0)args[0], .. (ArgTypeN)args[n]);
-						boolean lhsResolvesToTeamMethod = callinDecl.getRoleMethod().declaringClass == roleType.enclosingType(); // TODO(SH): more levels
+						boolean lhsResolvesToTeamMethod = TypeBinding.equalsEquals(callinDecl.getRoleMethod().declaringClass, roleType.enclosingType()); // TODO(SH): more levels
 						MessageSend roleMethodCall = (callinDecl.getRoleMethod().isPrivate() && !lhsResolvesToTeamMethod) 
 							? new PrivateRoleMethodCall(receiver, callinDecl.roleMethodSpec.selector, callArgs, false/*c-t-f*/, 
 													    callinDecl.scope, roleType, callinDecl.getRoleMethod(), gen)
@@ -842,7 +842,7 @@ public class CallinImplementorDyn extends MethodMappingImplementor {
 						 // FIXME(SH): per basemethod:
 						TypeBinding baseSideParameter = mapping.baseMethodSpecs[0].resolvedParameters()[poss[i]-1];
 						Expression roleSideArgument = gen.arrayReference(gen.singleNameReference(BASE_CALL_ARGS), i);//   ... baseCallArguments[i] ...
-						if (roleSideParameter != baseSideParameter)
+						if (TypeBinding.notEquals(roleSideParameter, baseSideParameter))
 							roleSideArgument = gen.resolvedCastExpression(roleSideArgument, roleSideParameter, CastExpression.RAW);
 						if (   roleSideParameter.isRole() 
 							&& ((ReferenceBinding)roleSideParameter).baseclass().isCompatibleWith(baseSideParameter))

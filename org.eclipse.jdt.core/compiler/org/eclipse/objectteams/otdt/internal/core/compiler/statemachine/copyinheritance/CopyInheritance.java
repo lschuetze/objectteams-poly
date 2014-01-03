@@ -1107,7 +1107,7 @@ public class CopyInheritance implements IOTConstants, ClassFileConstants, ExtraC
 			    {
 		        	// if baseclass is implicitely redefined use the strong type:
 		        	ReferenceBinding newBase= targetRoleDecl.binding.baseclass();
-		        	if (newBase != method.parameters[0])
+		        	if (TypeBinding.notEquals(newBase, method.parameters[0]))
 		        		newMethodDecl.arguments[0].type= gen.baseclassReference(newBase);
 			    }
 		    }
@@ -1468,7 +1468,7 @@ public class CopyInheritance implements IOTConstants, ClassFileConstants, ExtraC
 		    TypeBinding[] srcParams = constructorBinding.parameters;
 		    if (srcParams != null) {
 		        newArguments = AstConverter.createArgumentsFromParameters(srcParams, gen);
-		        if (srcParams.length == 1 && srcParams[0] == roleModel.getInterfacePartBinding()) {     // single argument of type of this role itself?
+		        if (srcParams.length == 1 && TypeBinding.equalsEquals(srcParams[0], roleModel.getInterfacePartBinding())) {     // single argument of type of this role itself?
 		        	if (constructorBinding.isPrivate() || constructorBinding.isDefault())
 		        		roleModel.getAst().scope.problemReporter().roleConstructorHiddenByLiftingConstructor(constructor);
 		        }
@@ -1998,7 +1998,7 @@ public class CopyInheritance implements IOTConstants, ClassFileConstants, ExtraC
         // workaround for mixed binary/source roles (cause for this situation unknown):
         if (roleIfcDecl == null)
         	return;
-        if (roleIfcDecl.binding.erasure() != superRole.erasure()) // no need to treat our ifc-part
+        if (TypeBinding.notEquals(roleIfcDecl.binding.erasure(), superRole.erasure())) // no need to treat our ifc-part
         {
 	        Dependencies.ensureBindingState(superRole, STATE_TYPES_ADJUSTED);
 	        MethodBinding[] superMethods = superRole.methods();
@@ -2144,7 +2144,7 @@ public class CopyInheritance implements IOTConstants, ClassFileConstants, ExtraC
 
 
         // true weakening (with weakened type binding) avoids bridge methods
-        if (method.binding.returnType != template.returnType && DependentTypeBinding.isDependentType(method.binding.returnType))
+        if (TypeBinding.notEquals(method.binding.returnType, template.returnType) && DependentTypeBinding.isDependentType(method.binding.returnType))
         	method.binding.returnType = WeakenedTypeBinding.makeWeakenedTypeBinding((DependentTypeBinding)method.binding.returnType.leafComponentType(),
         																	   	    (ReferenceBinding) template.returnType.leafComponentType(),
         																	   	    template.returnType.dimensions());

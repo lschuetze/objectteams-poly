@@ -1388,7 +1388,7 @@ private TypeBinding checkStrengthenReturnType(TypeBinding returnType, Scope scop
 		if (this.receiver.isSuper())
 			site = scope.enclosingSourceType();
 		strengthenedReturnType = (ReferenceBinding)TeamModel.strengthenRoleType(site, currentType);
-		if (strengthenedReturnType == currentType)
+		if (TypeBinding.equalsEquals(strengthenedReturnType, currentType))
 			return returnType; //unchanged
 		
 		// if strengthenRoleType actually worked it returned a dependent type

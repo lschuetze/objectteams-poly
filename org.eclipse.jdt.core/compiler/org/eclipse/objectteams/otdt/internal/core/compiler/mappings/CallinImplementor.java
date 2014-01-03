@@ -639,7 +639,7 @@ public class CallinImplementor extends MethodMappingImplementor
 					ReferenceBinding returnEnclosing = returnLeaf.enclosingType(); // the team type containing the returned role
 					ReferenceBinding currentType = roleModel.getBinding();
 					while ((currentType = currentType.enclosingType()) != null)	   // traverse all types accessible as this$<n>
-						if (currentType == returnEnclosing)
+						if (TypeBinding.equalsEquals(currentType, returnEnclosing))
 							break findEnclosingTeam; // successful
 					// not found, which means this$<n> is not a suitable receiver for array lowering, must use 'receiver' instead:
 					roleMessageSendExpression = new PotentialLowerExpression(roleMessageSend, wrapperReturnType, receiver);
@@ -1053,13 +1053,13 @@ public class CallinImplementor extends MethodMappingImplementor
 
 			// arg might have been weakened:
 			if (   expectedType.isRole()
-				&& expectedType.enclosingType() != roleType.enclosingType())
+				&& TypeBinding.notEquals(expectedType.enclosingType(), roleType.enclosingType()))
 						expectedType = TeamModel.strengthenRoleType(roleType, expectedType);
 
 			AstGenerator gen = new AstGenerator(mappedArgExpr.sourceStart, mappedArgExpr.sourceEnd);
 			Expression receiver = null;
 			if (   RoleTypeBinding.isRoleWithoutExplicitAnchor(expectedType)
-				&& roleType.getRealClass() == ((ReferenceBinding)expectedType).enclosingType())
+				&& TypeBinding.equalsEquals(roleType.getRealClass(), ((ReferenceBinding)expectedType).enclosingType()))
 			{
 				// expectedType is a role of the current role(=team),
 				// use the role as the receiver for the lift call:
