@@ -105,16 +105,16 @@ public class Scanner implements TerminalTokens {
 	public boolean _precedenceSeen = false;
 
     // after a '.' even 'team' can be an identifier:
-    private int _dotSeen = 0; // 0: no, 1: previos, 2: this token
+    protected int _dotSeen = 0; // 0: no, 1: previos, 2: this token
 
     public boolean _insideParameterMapping = false;
     enum LookaheadState { INIT, ONE_TOKEN, ID_SEEN, TWO_TOKENS, ID_CONSUMED }
     /** 
      * A little state machine for lookahead of up-to 2 tokens.
      * This is used to disambiguate whether a '->' inside parameter mappings is
-     * an ARRAW (lambda) or a SYNTHBINDOUT (parameter mapping role-to-base) 
+     * an ARROW (lambda) or a SYNTHBINDOUT (parameter mapping role-to-base) 
      */
-    class BindoutLookahead {
+    protected class BindoutLookahead {
     	
     	LookaheadState state = LookaheadState.INIT;
     	int[] tokens = new int[2];
@@ -175,7 +175,7 @@ public class Scanner implements TerminalTokens {
 			return this.tokens[i];
 		}
     }
-    BindoutLookahead _bindoutLookahead = null;
+    protected BindoutLookahead _bindoutLookahead = null;
 
     public void resetOTFlags() {
     	this._isOTSource = this.parseOTJonly;

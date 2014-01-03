@@ -242,6 +242,9 @@ protected int getNextToken0() throws InvalidInputException {
 							return TokenNameDOT;
 						}
 					} else {
+//{ObjectTeams: record the one '.':
+						this._dotSeen = 2; // now
+// SH}
 						this.currentPosition = temp;
 						return TokenNameDOT;
 					}
@@ -267,8 +270,13 @@ protected int getNextToken0() throws InvalidInputException {
 							return TokenNameARROW;
   :giro */
 						if (getNextChar('>')) {
-							if (this._isOTSource)
-								this._calloutSeen = true;
+							if (this._isOTSource) {
+								this._calloutSeen = true; // TODO distinguish from ARROW?
+								if (this._insideParameterMapping) {
+									this._bindoutLookahead = new BindoutLookahead();
+									return this._bindoutLookahead.getNextToken();
+								}
+							}
 							return TokenNameARROW;
 						}
 // Markus Witte}
