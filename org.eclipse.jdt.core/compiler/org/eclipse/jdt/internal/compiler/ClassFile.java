@@ -241,36 +241,34 @@ public class ClassFile implements TypeConstants, TypeIds {
 		System.arraycopy(problems, 0, problemsCopy, 0, problemsLength);
 
 		AbstractMethodDeclaration[] methodDecls = typeDeclaration.methods;
+		boolean abstractMethodsOnly = false;
 		if (methodDecls != null) {
 			if (typeBinding.isInterface()) {
-				// we cannot create problem methods for an interface. So we have to generate a clinit
-				// which should contain all the problem
+				if (typeBinding.scope.compilerOptions().sourceLevel < ClassFileConstants.JDK1_8)
+					abstractMethodsOnly = true;
+				// We generate a clinit which contains all the problems, since we may not be able to generate problem methods (< 1.8) and problem constructors (all levels).
 				classFile.addProblemClinit(problemsCopy);
-				for (int i = 0, length = methodDecls.length; i < length; i++) {
-					AbstractMethodDeclaration methodDecl = methodDecls[i];
-					MethodBinding method = methodDecl.binding;
-					if (method == null || method.isConstructor()) continue;
+			}
+			for (int i = 0, length = methodDecls.length; i < length; i++) {
+				AbstractMethodDeclaration methodDecl = methodDecls[i];
+				MethodBinding method = methodDecl.binding;
+				if (method == null) continue;
 //{ObjectTeams: may still need to keep abstract flag:
-					boolean isAbstractRoleModel = method.isStatic() && method.declaringClass.isRole();
+				boolean isAbstractRoleModel = method.isStatic() && method.declaringClass.isRole();
 // orig:
+				if (abstractMethodsOnly) {
 					method.modifiers = ClassFileConstants.AccPublic | ClassFileConstants.AccAbstract;
-// :giro//
-					if (isAbstractRoleModel) method.modifiers |= ClassFileConstants.AccStatic;
-// SH}
-					classFile.addAbstractMethod(methodDecl, method);
 				}
-			} else {
-				for (int i = 0, length = methodDecls.length; i < length; i++) {
-					AbstractMethodDeclaration methodDecl = methodDecls[i];
-					MethodBinding method = methodDecl.binding;
-					if (method == null) continue;
-					if (method.isConstructor()) {
-						classFile.addProblemConstructor(methodDecl, method, problemsCopy);
-					} else if (method.isAbstract()) {
-						classFile.addAbstractMethod(methodDecl, method);
-					} else {
-						classFile.addProblemMethod(methodDecl, method, problemsCopy);
-					}
+// :giro
+				if (isAbstractRoleModel) method.modifiers |= ClassFileConstants.AccStatic;
+// SH}
+				if (method.isConstructor()) {
+					if (typeBinding.isInterface()) continue;
+					classFile.addProblemConstructor(methodDecl, method, problemsCopy);
+				} else if (method.isAbstract()) {
+					classFile.addAbstractMethod(methodDecl, method);
+				} else {
+					classFile.addProblemMethod(methodDecl, method, problemsCopy);
 				}
 			}
 			// add abstract methods
@@ -429,7 +427,7 @@ public class ClassFile implements TypeConstants, TypeIds {
 					if (typeDeclaration.isPackageInfo())
 						targetMask = TagBits.AnnotationForPackage;
 					else if (this.referenceBinding.isAnnotationType())
-						targetMask = TagBits.AnnotationForAnnotationType;
+						targetMask = TagBits.AnnotationForType | TagBits.AnnotationForAnnotationType;
 					else
 						targetMask = TagBits.AnnotationForType | TagBits.AnnotationForTypeUse;
 					attributesNumber += generateRuntimeAnnotations(annotations, targetMask); 
@@ -766,6 +764,10 @@ public class ClassFile implements TypeConstants, TypeIds {
 		AbstractMethodDeclaration method,
 		MethodBinding methodBinding,
 		CategorizedProblem[] problems) {
+		
+		if (methodBinding.declaringClass.isInterface()) {
+			method.abort(ProblemSeverities.AbortType, null);
+		}
 
 		// always clear the strictfp/native/abstract bit for a problem method
 		generateMethodInfoHeader(methodBinding, methodBinding.modifiers & ~(ClassFileConstants.AccStrictfp | ClassFileConstants.AccNative | ClassFileConstants.AccAbstract));
@@ -1091,9 +1093,6 @@ public class ClassFile implements TypeConstants, TypeIds {
 				.compilationResult
 				.getLineSeparatorPositions());
 		// update the number of attributes
-		if ((this.produceAttributes & ClassFileConstants.ATTR_METHOD_PARAMETERS) != 0) {
-			attributeNumber += generateMethodParameters(methodBinding);
-		}
 		this.contents[methodAttributeOffset++] = (byte) (attributeNumber >> 8);
 		this.contents[methodAttributeOffset] = (byte) attributeNumber;
 	}
@@ -1153,6 +1152,9 @@ public class ClassFile implements TypeConstants, TypeIds {
 				.compilationResult
 				.getLineSeparatorPositions());
 		// update the number of attributes
+		if ((this.produceAttributes & ClassFileConstants.ATTR_METHOD_PARAMETERS) != 0) {
+			attributeNumber += generateMethodParameters(methodBinding);
+		}
 		this.contents[methodAttributeOffset++] = (byte) (attributeNumber >> 8);
 		this.contents[methodAttributeOffset] = (byte) attributeNumber;
 	}
@@ -2204,7 +2206,7 @@ public class ClassFile implements TypeConstants, TypeIds {
 					}
 				}
 				Annotation[] annotations = methodDeclaration.annotations;
-				if (annotations != null) {
+				if (annotations != null && !methodDeclaration.isClinit() && (methodDeclaration.isConstructor() || binding.returnType.id != T_void)) {
 					methodDeclaration.getAllAnnotationContexts(AnnotationTargetTypeConstants.METHOD_RETURN, allTypeAnnotationContexts);
 				}
 				if (!methodDeclaration.isConstructor() && !methodDeclaration.isClinit() && binding.returnType.id != T_void) {

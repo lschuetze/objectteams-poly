@@ -1,10 +1,13 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2011 IBM Corporation and others.
+ * Copyright (c) 2000, 2013 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
- * $Id: MethodBinding.java 23404 2010-02-03 14:10:22Z stephan $
+ *
+ * This is an implementation of an early-draft specification developed under the Java
+ * Community Process (JCP) and is made available for testing and evaluation purposes
+ * only. The code is not compatible with any specification of the JCP.
  *
  * Contributors:
  *     IBM Corporation - initial API and implementation
@@ -39,7 +42,7 @@ class MethodBinding implements IMethodBinding {
 		Modifier.OT_CALLIN |
 // SH}
 		Modifier.ABSTRACT | Modifier.STATIC | Modifier.FINAL | Modifier.SYNCHRONIZED | Modifier.NATIVE |
-		Modifier.STRICTFP;
+		Modifier.STRICTFP | Modifier.DEFAULT;
 	private static final ITypeBinding[] NO_TYPE_BINDINGS = new ITypeBinding[0];
 	private org.eclipse.jdt.internal.compiler.lookup.MethodBinding binding;
 	private BindingResolver resolver;
@@ -217,6 +220,12 @@ class MethodBinding implements IMethodBinding {
 		}
 	}
 
+	/**
+	 * @see IMethodBinding#getDeclaredReceiverType()
+	 */
+	public ITypeBinding getDeclaredReceiverType() {
+		return this.resolver.getTypeBinding(this.binding.receiver);
+	}
 	/**
 	 * @see IMethodBinding#getReturnType()
 	 */

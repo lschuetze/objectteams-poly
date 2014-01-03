@@ -75,6 +75,14 @@ public class LocalVariableBinding extends VariableBinding {
 		this.declaration = declaration;
 		this.tagBits |= TagBits.IsEffectivelyFinal;
 	}
+	
+	// argument
+	public LocalVariableBinding(LocalDeclaration declaration, TypeBinding type, int modifiers, MethodScope declaringScope) {
+
+		this(declaration, type, modifiers, true);
+		this.declaringScope = declaringScope;
+	}
+
 //{ObjectTeams: support anchor paths:
 	protected TeamAnchor getClone() {
 		return new LocalVariableBinding(this.name, this.type, this.modifiers, (this.tagBits & TagBits.IsArgument) > 0);
@@ -175,21 +183,15 @@ public class LocalVariableBinding extends VariableBinding {
 		if (sourceType == null)
 			return Binding.NO_ANNOTATIONS;
 
-		AnnotationBinding[] annotations = sourceType.retrieveAnnotations(this);
 		if ((this.tagBits & TagBits.AnnotationResolved) == 0) {
 			if (((this.tagBits & TagBits.IsArgument) != 0) && this.declaration != null) {
 				Annotation[] annotationNodes = this.declaration.annotations;
 				if (annotationNodes != null) {
-					int length = annotationNodes.length;
-					ASTNode.resolveAnnotations(this.declaringScope, annotationNodes, this);
-					annotations = new AnnotationBinding[length];
-					for (int i = 0; i < length; i++)
-						annotations[i] = new AnnotationBinding(annotationNodes[i]);
-					setAnnotations(annotations, this.declaringScope);
+					ASTNode.resolveAnnotations(this.declaringScope, annotationNodes, this, true);
 				}
 			}
 		}
-		return annotations;
+		return sourceType.retrieveAnnotations(this);
 	}
 
 	private void getScopeKey(BlockScope scope, StringBuffer buffer) {

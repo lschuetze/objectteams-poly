@@ -194,6 +194,9 @@ public SourceTypeBinding(char[][] compoundName, PackageBinding fPackage, ClassSc
 	this.methods = Binding.UNINITIALIZED_METHODS;
 	this.prototype = this;
 	computeId();
+	if (this.isAnnotationType()) { // for forward references, see https://bugs.eclipse.org/bugs/show_bug.cgi?id=419331
+		this.superInterfaces = new ReferenceBinding [] { scope.getJavaLangAnnotationAnnotation() };
+	}
 }
 
 public SourceTypeBinding(SourceTypeBinding prototype) {
@@ -2287,8 +2290,8 @@ public FieldBinding resolveTypeFor(FieldBinding field) {
 			}
 
 			if (sourceLevel >= ClassFileConstants.JDK1_8) {
-				AnnotationBinding [] annotations = field.getAnnotations();
-				if (annotations != null && annotations != Binding.NO_ANNOTATIONS) {
+				Annotation [] annotations = fieldDecl.annotations;
+				if (annotations != null && annotations.length != 0) {
 					ASTNode.copySE8AnnotationsToType(initializationScope, field, fieldDecl.annotations);
 				}
 				Annotation.isTypeUseCompatible(fieldDecl.type, this.scope, fieldDecl.annotations);
@@ -2539,7 +2542,7 @@ public MethodBinding resolveTypesFor(MethodBinding method, boolean fromSynthetic
 				arg.binding.type = parameterType; // only add this missing info
 			  else
 // SH}
-				arg.binding = new LocalVariableBinding(arg, parameterType, arg.modifiers, true /*isArgument*/);
+				arg.binding = new LocalVariableBinding(arg, parameterType, arg.modifiers, methodDecl.scope);
 			}
 		}
 		// only assign parameters if no problems are found
@@ -2617,13 +2620,13 @@ public MethodBinding resolveTypesFor(MethodBinding method, boolean fromSynthetic
 					method.tagBits |= TagBits.HasMissingType;
 				}
 				method.returnType = methodType;
-				if (sourceLevel >= ClassFileConstants.JDK1_8) {
-					AnnotationBinding [] annotations = method.getAnnotations();
-					if (annotations != null && annotations != Binding.NO_ANNOTATIONS) {
+				if (sourceLevel >= ClassFileConstants.JDK1_8 && !method.isVoidMethod()) {
+					Annotation [] annotations = methodDecl.annotations;
+					if (annotations != null && annotations.length != 0) {
 						ASTNode.copySE8AnnotationsToType(methodDecl.scope, method, methodDecl.annotations);
 					}
+					Annotation.isTypeUseCompatible(returnType, this.scope, methodDecl.annotations);
 				}
-				Annotation.isTypeUseCompatible(returnType, this.scope, methodDecl.annotations);
 				TypeBinding leafType = methodType.leafComponentType();
 				if (leafType instanceof ReferenceBinding && (((ReferenceBinding) leafType).modifiers & ExtraCompilerModifiers.AccGenericSignature) != 0)
 					method.modifiers |= ExtraCompilerModifiers.AccGenericSignature;
@@ -2669,8 +2672,9 @@ public MethodBinding resolveTypesFor(MethodBinding method, boolean fromSynthetic
 				}
 			}
 		}
-		createArgumentBindings(method, compilerOptions); // need annotations resolved already at this point
 	}
+	if (compilerOptions.isAnnotationBasedNullAnalysisEnabled || compilerOptions.processAnnotations)
+		createArgumentBindings(method, compilerOptions); // need annotations resolved already at this point
 	if (foundReturnTypeProblem)
 		return method; // but its still unresolved with a null return type & is still connected to its method declaration
 
@@ -2711,8 +2715,8 @@ private static void rejectTypeAnnotatedVoidMethod(AbstractMethodDeclaration meth
 private void createArgumentBindings(MethodBinding method, CompilerOptions compilerOptions) {
 	
 	if (!isPrototype()) throw new IllegalStateException();
-	
-	getNullDefault(); // ensure initialized
+	if (compilerOptions.isAnnotationBasedNullAnalysisEnabled)
+		getNullDefault(); // ensure initialized
 	AbstractMethodDeclaration methodDecl = method.sourceMethod();
 	if (methodDecl != null) {
 		// while creating argument bindings we also collect explicit null annotations:
@@ -2865,6 +2869,7 @@ public void setContainerAnnotationType(ReferenceBinding value) {
 }
 
 public void tagAsHavingDefectiveContainerType() {
+	if (!isPrototype()) throw new IllegalStateException();
 	if (this.containerAnnotationType != null && this.containerAnnotationType.isValidBinding())
 		this.containerAnnotationType = new ProblemReferenceBinding(this.containerAnnotationType.compoundName, this.containerAnnotationType, ProblemReasons.DefectiveContainerAnnotationType);
 }

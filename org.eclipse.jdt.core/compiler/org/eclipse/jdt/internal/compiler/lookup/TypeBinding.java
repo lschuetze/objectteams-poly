@@ -1496,7 +1496,7 @@ public ReferenceBinding[] getIntersectingTypes() {
 }
 
 public static boolean equalsEquals(TypeBinding that, TypeBinding other) {
-	if (that == other)
+	if (that == other) //$IDENTITY-COMPARISON$
 		return true;
 	if (that == null || other == null)
 		return false;
@@ -1506,7 +1506,7 @@ public static boolean equalsEquals(TypeBinding that, TypeBinding other) {
 }
 
 public static boolean notEquals(TypeBinding that, TypeBinding other) {
-	if (that == other)
+	if (that == other) //$IDENTITY-COMPARISON$
 		return false;
 	if (that == null || other == null)
 		return true;

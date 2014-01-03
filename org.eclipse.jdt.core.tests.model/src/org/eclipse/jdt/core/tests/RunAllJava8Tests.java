@@ -49,6 +49,9 @@ public class RunAllJava8Tests extends TestCase {
 			FormatterJSR335Tests.class,
 			FormatterJSR308Tests.class,
 			JavaSearchBugs8Tests.class,
+/*{ObjectTeams: not included:
+			org.eclipse.jdt.compiler.apt.tests.AllTests.class,
+// SH}*/
 		};
 	}
 	

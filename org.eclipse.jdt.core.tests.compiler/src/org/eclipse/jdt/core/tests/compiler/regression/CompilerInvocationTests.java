@@ -40,6 +40,7 @@
  *								bug 382721 - [1.8][compiler] Effectively final variables needs special treatment
  *								bug 384567 - [1.5][compiler] Compiler accepts illegal modifiers on package declaration
  *								bug 412153 - [1.8][compiler] Check validity of annotations which may be repeatable
+ *								bug 419209 - [1.8] Repeating container annotations should be rejected in the presence of annotation it contains
  *******************************************************************************/
 package org.eclipse.jdt.core.tests.compiler.regression;
 
@@ -926,6 +927,7 @@ public void _test011_problem_categories() {
 		expectedProblemAttributes.put("RepeatableAnnotationTypeIsDocumented", new ProblemAttributes(CategorizedProblem.CAT_TYPE));
 		expectedProblemAttributes.put("RepeatableAnnotationTypeIsInherited", new ProblemAttributes(CategorizedProblem.CAT_TYPE));
 		expectedProblemAttributes.put("RepeatableAnnotationTypeTargetMismatch", new ProblemAttributes(CategorizedProblem.CAT_TYPE));
+		expectedProblemAttributes.put("RepeatableAnnotationWithRepeatingContainerAnnotation", new ProblemAttributes(CategorizedProblem.CAT_TYPE));
 		expectedProblemAttributes.put("RepeatedAnnotationWithContainerAnnotation", new ProblemAttributes(CategorizedProblem.CAT_TYPE));
 		expectedProblemAttributes.put("ResourceHasToImplementAutoCloseable", new ProblemAttributes(CategorizedProblem.CAT_TYPE));
 		expectedProblemAttributes.put("ReturnTypeAmbiguous", DEPRECATED);
@@ -963,6 +965,7 @@ public void _test011_problem_categories() {
 		expectedProblemAttributes.put("Task", new ProblemAttributes(CategorizedProblem.CAT_INTERNAL));
 		expectedProblemAttributes.put("ThisInStaticContext", new ProblemAttributes(CategorizedProblem.CAT_INTERNAL));
 		expectedProblemAttributes.put("ThisSuperDuringConstructorInvocation", new ProblemAttributes(CategorizedProblem.CAT_MEMBER));
+		expectedProblemAttributes.put("ToleratedMisplacedTypeAnnotations", new ProblemAttributes(CategorizedProblem.CAT_SYNTAX));
 		expectedProblemAttributes.put("TooManyArgumentSlots", new ProblemAttributes(CategorizedProblem.CAT_INTERNAL));
 		expectedProblemAttributes.put("TooManyArrayDimensions", new ProblemAttributes(CategorizedProblem.CAT_INTERNAL));
 		expectedProblemAttributes.put("TooManyBytesForStringConstant", new ProblemAttributes(CategorizedProblem.CAT_INTERNAL));
@@ -1811,6 +1814,7 @@ public void test012_compiler_problems_tuning() {
 		expectedProblemAttributes.put("RepeatableAnnotationTypeIsDocumented", SKIP);
 		expectedProblemAttributes.put("RepeatableAnnotationTypeIsInherited", SKIP);
 		expectedProblemAttributes.put("RepeatableAnnotationTypeTargetMismatch", SKIP);
+		expectedProblemAttributes.put("RepeatableAnnotationWithRepeatingContainerAnnotation", SKIP);
 		expectedProblemAttributes.put("RepeatedAnnotationWithContainerAnnotation", SKIP);
 		expectedProblemAttributes.put("RequiredNonNullButProvidedNull", new ProblemAttributes(JavaCore.COMPILER_PB_NULL_SPECIFICATION_VIOLATION));
 		expectedProblemAttributes.put("RequiredNonNullButProvidedPotentialNull", new ProblemAttributes(JavaCore.COMPILER_PB_NULL_ANNOTATION_INFERENCE_CONFLICT));
@@ -1852,6 +1856,7 @@ public void test012_compiler_problems_tuning() {
 		expectedProblemAttributes.put("Task", SKIP);
 		expectedProblemAttributes.put("ThisInStaticContext", SKIP);
 		expectedProblemAttributes.put("ThisSuperDuringConstructorInvocation", SKIP);
+		expectedProblemAttributes.put("ToleratedMisplacedTypeAnnotations", SKIP);
 		expectedProblemAttributes.put("TooManyArgumentSlots", SKIP);
 		expectedProblemAttributes.put("TooManyArrayDimensions", SKIP);
 		expectedProblemAttributes.put("TooManyBytesForStringConstant", SKIP);

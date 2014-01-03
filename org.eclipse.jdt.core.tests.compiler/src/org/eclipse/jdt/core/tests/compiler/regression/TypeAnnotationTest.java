@@ -6052,12 +6052,7 @@ public class TypeAnnotationTest extends AbstractRegressionTest {
 				"    Class<? extends Annotation> value();\n" +
 				"}\n",
 			},
-			"----------\n" + 
-			"1. ERROR in T.java (at line 5)\n" + 
-			"	@R(TC.class)\n" + 
-			"	   ^^^^^^^^\n" + 
-			"Type mismatch: cannot convert from Class<TC> to Class<? extends Annotation>\n" + 
-			"----------\n");
+			"");
 	}
 	public void testHybridTargets() throws Exception {
 		this.runConformTest(
@@ -6128,6 +6123,174 @@ public class TypeAnnotationTest extends AbstractRegressionTest {
 				"    )\n" + 
 				"}";
 		checkDisassembledClassFile(OUTPUT_DIR + File.separator + "X.class", "X", expectedOutput, ClassFileBytesDisassembler.SYSTEM);
+	}
+	public void testHybridTargets2() throws Exception {
+		this.runConformTest(
+			new String[] {
+				"X.java",
+				"import java.lang.annotation.Target;\n" +
+				"import java.lang.annotation.ElementType;\n" +
+				"@Target({ ElementType.TYPE_USE, ElementType.METHOD })\n" +
+				"@interface SillyAnnotation {  }\n" +
+				"public class X {\n" +
+				"   @SillyAnnotation\n" +
+				"   X(@SillyAnnotation int x) {\n" +
+				"   }\n" +
+				"	@SillyAnnotation\n" +
+				"	void foo(@SillyAnnotation int x) {\n" +
+				"	}\n" +
+				"	@SillyAnnotation\n" +
+				"	String goo(@SillyAnnotation int x) {\n" +
+				"		return null;\n" +
+				"	}\n" +
+				"	@SillyAnnotation\n" +
+				"	X field;\n" +
+				"}\n"
+			},
+			"");
+		String expectedOutput =
+				"  // Field descriptor #6 LX;\n" + 
+				"  X field;\n" + 
+				"    RuntimeInvisibleTypeAnnotations: \n" + 
+				"      #8 @SillyAnnotation(\n" + 
+				"        target type = 0x13 FIELD\n" + 
+				"      )\n" + 
+				"  \n" + 
+				"  // Method descriptor #10 (I)V\n" + 
+				"  // Stack: 1, Locals: 2\n" + 
+				"  X(int x);\n" + 
+				"    0  aload_0 [this]\n" + 
+				"    1  invokespecial java.lang.Object() [12]\n" + 
+				"    4  return\n" + 
+				"      Line numbers:\n" + 
+				"        [pc: 0, line: 7]\n" + 
+				"        [pc: 4, line: 8]\n" + 
+				"      Local variable table:\n" + 
+				"        [pc: 0, pc: 5] local: this index: 0 type: X\n" + 
+				"        [pc: 0, pc: 5] local: x index: 1 type: int\n" + 
+				"    RuntimeInvisibleTypeAnnotations: \n" + 
+				"      #8 @SillyAnnotation(\n" + 
+				"        target type = 0x16 METHOD_FORMAL_PARAMETER\n" + 
+				"        method parameter index = 0\n" + 
+				"      )\n" + 
+				"      #8 @SillyAnnotation(\n" + 
+				"        target type = 0x14 METHOD_RETURN\n" + 
+				"      )\n" + 
+				"  \n" + 
+				"  // Method descriptor #10 (I)V\n" + 
+				"  // Stack: 0, Locals: 2\n" + 
+				"  void foo(int x);\n" + 
+				"    0  return\n" + 
+				"      Line numbers:\n" + 
+				"        [pc: 0, line: 11]\n" + 
+				"      Local variable table:\n" + 
+				"        [pc: 0, pc: 1] local: this index: 0 type: X\n" + 
+				"        [pc: 0, pc: 1] local: x index: 1 type: int\n" + 
+				"    RuntimeInvisibleAnnotations: \n" + 
+				"      #8 @SillyAnnotation(\n" + 
+				"      )\n" + 
+				"    RuntimeInvisibleTypeAnnotations: \n" + 
+				"      #8 @SillyAnnotation(\n" + 
+				"        target type = 0x16 METHOD_FORMAL_PARAMETER\n" + 
+				"        method parameter index = 0\n" + 
+				"      )\n" + 
+				"  \n" + 
+				"  // Method descriptor #23 (I)Ljava/lang/String;\n" + 
+				"  // Stack: 1, Locals: 2\n" + 
+				"  java.lang.String goo(int x);\n" + 
+				"    0  aconst_null\n" + 
+				"    1  areturn\n" + 
+				"      Line numbers:\n" + 
+				"        [pc: 0, line: 14]\n" + 
+				"      Local variable table:\n" + 
+				"        [pc: 0, pc: 2] local: this index: 0 type: X\n" + 
+				"        [pc: 0, pc: 2] local: x index: 1 type: int\n" + 
+				"    RuntimeInvisibleAnnotations: \n" + 
+				"      #8 @SillyAnnotation(\n" + 
+				"      )\n" + 
+				"    RuntimeInvisibleTypeAnnotations: \n" + 
+				"      #8 @SillyAnnotation(\n" + 
+				"        target type = 0x16 METHOD_FORMAL_PARAMETER\n" + 
+				"        method parameter index = 0\n" + 
+				"      )\n" + 
+				"      #8 @SillyAnnotation(\n" + 
+				"        target type = 0x14 METHOD_RETURN\n" + 
+				"      )\n" + 
+				"}";
+		checkDisassembledClassFile(OUTPUT_DIR + File.separator + "X.class", "X", expectedOutput, ClassFileBytesDisassembler.SYSTEM);
+	}
+	public void testDeprecated() throws Exception {
+		this.runConformTest(
+			new String[] {
+				"X.java",
+				"import java.lang.annotation.ElementType;\n" +
+				"import java.lang.annotation.Target;\n" +
+				"@Deprecated\n" +		
+				"@Target(ElementType.TYPE_USE)\n" +
+				"@interface X {\n" +
+				"	int value() default 0;\n" +
+				"}\n"
+			},
+			"");
+		String expectedOutput =
+				"// Compiled from X.java (version 1.8 : 52.0, no super bit, deprecated)\n" + 
+				"abstract @interface X extends java.lang.annotation.Annotation {\n" + 
+				"  Constant pool:\n" + 
+				"    constant #1 class: #2 X\n" + 
+				"    constant #2 utf8: \"X\"\n" + 
+				"    constant #3 class: #4 java/lang/Object\n" + 
+				"    constant #4 utf8: \"java/lang/Object\"\n" + 
+				"    constant #5 class: #6 java/lang/annotation/Annotation\n" + 
+				"    constant #6 utf8: \"java/lang/annotation/Annotation\"\n" + 
+				"    constant #7 utf8: \"value\"\n" + 
+				"    constant #8 utf8: \"()I\"\n" + 
+				"    constant #9 utf8: \"AnnotationDefault\"\n" + 
+				"    constant #10 integer: 0\n" + 
+				"    constant #11 utf8: \"SourceFile\"\n" + 
+				"    constant #12 utf8: \"X.java\"\n" + 
+				"    constant #13 utf8: \"Deprecated\"\n" + 
+				"    constant #14 utf8: \"RuntimeVisibleAnnotations\"\n" + 
+				"    constant #15 utf8: \"Ljava/lang/Deprecated;\"\n" + 
+				"    constant #16 utf8: \"Ljava/lang/annotation/Target;\"\n" + 
+				"    constant #17 utf8: \"Ljava/lang/annotation/ElementType;\"\n" + 
+				"    constant #18 utf8: \"TYPE_USE\"\n" + 
+				"  \n" + 
+				"  // Method descriptor #8 ()I\n" + 
+				"  public abstract int value();\n" + 
+				"    Annotation Default: \n" + 
+				"      (int) 0 (constant type)\n" + 
+				"\n" + 
+				"  RuntimeVisibleAnnotations: \n" + 
+				"    #15 @java.lang.Deprecated(\n" + 
+				"    )\n" + 
+				"    #16 @java.lang.annotation.Target(\n" + 
+				"      #7 value=[\n" + 
+				"        java.lang.annotation.ElementType.TYPE_USE(enum type #17.#18)\n" + 
+				"        ]\n" + 
+				"    )\n" + 
+				"}";
+		checkDisassembledClassFile(OUTPUT_DIR + File.separator + "X.class", "X", expectedOutput, ClassFileBytesDisassembler.SYSTEM);
 	}	
+	// https://bugs.eclipse.org/bugs/show_bug.cgi?id=421148, [1.8][compiler] Verify error with annotated casts and unused locals. 
+	public void test421148() {
+		
+		Map customOptions = getCompilerOptions();
+		customOptions.put(CompilerOptions.OPTION_PreserveUnusedLocal, CompilerOptions.OPTIMIZE_OUT);
+		runConformTest(
+			new String[] {
+				"X.java",
+				"import java.lang.annotation.ElementType;\n" +
+				"import java.lang.annotation.Target;\n" +
+				"@Target(ElementType.TYPE_USE) @interface T {}\n" +
+				"public class X {\n" +
+				"	public static void main(String argv[]) {\n" +
+				"		Object o = (@T Object) new Object();    \n" +
+				"       System.out.println(\"OK\");\n" +
+				"	}\n" +
+				"}\n"
+			}, 
+			"OK",
+			customOptions);		
+	}		
 }
 

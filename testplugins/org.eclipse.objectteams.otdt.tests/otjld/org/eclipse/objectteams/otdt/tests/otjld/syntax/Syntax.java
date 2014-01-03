@@ -558,8 +558,8 @@ public class Syntax extends AbstractOTJLDTest {
     		"----------\n" + 
     		"2. ERROR in Team861pis1.java (at line 7)\n" + 
     		"	this -> other;\n" + 
-    		"	^^^^^^^^^^^^^^\n" + 
-    		"Syntax error on tokens, delete these tokens\n" + 
+    		"	             ^\n" + 
+    		"Syntax error on token \";\", , expected\n" + 
     		"----------\n");
     }
 

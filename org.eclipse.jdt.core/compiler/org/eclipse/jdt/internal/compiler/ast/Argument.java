@@ -77,7 +77,7 @@ public class Argument extends LocalDeclaration {
 	public TypeBinding createBinding(MethodScope scope, TypeBinding typeBinding) {
 		if (this.binding == null) {
 			// for default constructors and fake implementation of abstract methods 
-			this.binding = new LocalVariableBinding(this, typeBinding, this.modifiers, true /*isArgument*/);
+			this.binding = new LocalVariableBinding(this, typeBinding, this.modifiers, scope);
 //{ObjectTeams: NPE occurred in Java5.testA119_nestedValueParameter8() ff.
 /* orig:
 //	    When we are called from RoleTypeCreator.resolveTypeAnchoredToArgument(AbstractMethodDeclaration, int)
@@ -96,9 +96,10 @@ public class Argument extends LocalDeclaration {
 		}
 		if ((this.binding.tagBits & TagBits.AnnotationResolved) == 0) {
 			resolveAnnotations(scope, this.annotations, this.binding, true);
-			Annotation.isTypeUseCompatible(this.type, scope, this.annotations);
-			if (scope.compilerOptions().sourceLevel >= ClassFileConstants.JDK1_8)
+			if (scope.compilerOptions().sourceLevel >= ClassFileConstants.JDK1_8) {
+				Annotation.isTypeUseCompatible(this.type, scope, this.annotations);
 				scope.validateNullAnnotation(this.binding.tagBits, this.type, this.annotations);
+			}
 		}
 		this.binding.declaration = this;
 		return this.binding.type; // might have been updated during resolveAnnotations (for typeAnnotations)

@@ -497,12 +497,10 @@ public final boolean canBeSeenBy(TypeBinding receiverType, InvocationSite invoca
   if (!this.declaringClass.isSynthInterface())	
 // SH}
 	if (this.declaringClass.isInterface() && isStatic()) {
-		// Static interface methods can be explicitly invoked only through the type reference of the declaring interface or implicitly in the interface itself.
+		// Static interface methods can be explicitly invoked only through the type reference of the declaring interface or implicitly in the interface itself or via static import.
 		if (scope.compilerOptions().sourceLevel < ClassFileConstants.JDK1_8)
 			return false;
-		if (invocationSite.isTypeAccess() && TypeBinding.equalsEquals(receiverType, this.declaringClass))
-			return true;
-		if (invocationSite.receiverIsImplicitThis() && TypeBinding.equalsEquals(invocationType, this.declaringClass))
+		if ((invocationSite.isTypeAccess() || invocationSite.receiverIsImplicitThis()) && TypeBinding.equalsEquals(receiverType, this.declaringClass))
 			return true;
 		return false;
 	}
@@ -1033,9 +1031,9 @@ public void resetSignature() {
 public final int getAccessFlags() {
 //{ObjectTeams: also allow callin flag
 /* orig:
-	return this.modifiers & ExtraCompilerModifiers.AccJustFlag;
+	return this.modifiers & (ExtraCompilerModifiers.AccJustFlag | ExtraCompilerModifiers.AccDefaultMethod);
   :giro */
-	return this.modifiers & (ExtraCompilerModifiers.AccJustFlag | ExtraCompilerModifiers.AccCallin);
+	return this.modifiers & (ExtraCompilerModifiers.AccJustFlag | ExtraCompilerModifiers.AccDefaultMethod | ExtraCompilerModifiers.AccCallin);
 // SH}
 }
 
@@ -1836,5 +1834,8 @@ public boolean redeclaresPublicObjectMethod(Scope scope) {
 			return true;
 	}
 	return false;
+}
+public boolean isVoidMethod() {
+	return this.returnType == TypeBinding.VOID;
 }
 }

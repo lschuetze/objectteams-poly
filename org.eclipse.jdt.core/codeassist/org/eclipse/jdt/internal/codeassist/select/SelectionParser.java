@@ -242,7 +242,6 @@ protected void classInstanceCreation(boolean hasClassBody) {
 		char [] oldIdent = assistIdentifier();
 		setAssistIdentifier(null);
 		alloc.type = getTypeReference(0);
-		rejectIllegalLeadingTypeAnnotations(alloc.type);
 		checkForDiamond(alloc.type);
 
 		setAssistIdentifier(oldIdent);
@@ -409,7 +408,6 @@ protected void consumeClassInstanceCreationExpressionQualifiedWithTypeArguments(
 		char [] oldIdent = assistIdentifier();
 		setAssistIdentifier(null);
 		alloc.type = getTypeReference(0);
-		rejectIllegalLeadingTypeAnnotations(alloc.type);
 		checkForDiamond(alloc.type);
 
 		setAssistIdentifier(oldIdent);

@@ -1768,7 +1768,7 @@ public void test047() {
 				"1. ERROR in X.java (at line 10)\n" + 
 				"	System.out.println(var); // Error: var is not effectively final\n" + 
 				"	                   ^^^\n" + 
-				"Variable var is required to be final or effectively final\n" + 
+				"Local variable var defined in an enclosing scope must be final or effectively final\n" + 
 				"----------\n"
 				);
 }
@@ -1795,7 +1795,7 @@ public void test048() {
 				"1. ERROR in X.java (at line 8)\n" + 
 				"	System.out.println(var); // Error: var is not effectively final\n" + 
 				"	                   ^^^\n" + 
-				"Variable var is required to be final or effectively final\n" + 
+				"Local variable var defined in an enclosing scope must be final or effectively final\n" + 
 				"----------\n");
 }
 // https://bugs.eclipse.org/bugs/show_bug.cgi?id=382721, [1.8][compiler] Effectively final variables needs special treatment
@@ -1891,7 +1891,7 @@ public void test052() {
 				"1. ERROR in X.java (at line 10)\n" + 
 				"	System.out.println(s2); // Error: var is not effectively final\n" + 
 				"	                   ^^\n" + 
-				"Variable s2 is required to be final or effectively final\n" + 
+				"Local variable s2 defined in an enclosing scope must be final or effectively final\n" + 
 				"----------\n");
 }
 // https://bugs.eclipse.org/bugs/show_bug.cgi?id=382721, [1.8][compiler] Effectively final variables needs special treatment
@@ -1946,7 +1946,7 @@ public void test054() {
 				"1. ERROR in X.java (at line 14)\n" + 
 				"	args = null;\n" + 
 				"	^^^^\n" + 
-				"Variable args is required to be final or effectively final\n" + 
+				"Local variable args defined in an enclosing scope must be final or effectively final\n" + 
 				"----------\n");
 }
 // https://bugs.eclipse.org/bugs/show_bug.cgi?id=382721, [1.8][compiler] Effectively final variables needs special treatment
@@ -2018,7 +2018,7 @@ public void test057() {
 				"1. ERROR in X.java (at line 7)\n" + 
 				"	x = 10;\n" + 
 				"	^\n" + 
-				"Variable x is required to be final or effectively final\n" + 
+				"Local variable x defined in an enclosing scope must be final or effectively final\n" + 
 				"----------\n");
 }
 // https://bugs.eclipse.org/bugs/show_bug.cgi?id=382721, [1.8][compiler] Effectively final variables needs special treatment
@@ -2042,7 +2042,7 @@ public void test058() {
 				"1. ERROR in X.java (at line 7)\n" + 
 				"	{ x = 10; }\n" + 
 				"	  ^\n" + 
-				"Variable x is required to be final or effectively final\n" + 
+				"Local variable x defined in an enclosing scope must be final or effectively final\n" + 
 				"----------\n");
 }
 // https://bugs.eclipse.org/bugs/show_bug.cgi?id=382721, [1.8][compiler] Effectively final variables needs special treatment
@@ -2116,7 +2116,7 @@ public void test061() {
 				"1. ERROR in X.java (at line 13)\n" + 
 				"	args = null;\n" + 
 				"	^^^^\n" + 
-				"Variable args is required to be final or effectively final\n" + 
+				"Local variable args defined in an enclosing scope must be final or effectively final\n" + 
 				"----------\n");
 }
 // https://bugs.eclipse.org/bugs/show_bug.cgi?id=382721, [1.8][compiler] Effectively final variables needs special treatment
@@ -2233,7 +2233,7 @@ public void test065() {
 				"1. ERROR in X.java (at line 8)\n" + 
 				"	System.out.println(x++);\n" + 
 				"	                   ^\n" + 
-				"Variable x is required to be final or effectively final\n" + 
+				"Local variable x defined in an enclosing scope must be final or effectively final\n" + 
 				"----------\n");
 }
 // https://bugs.eclipse.org/bugs/show_bug.cgi?id=382721, [1.8][compiler] Effectively final variables needs special treatment
@@ -2301,7 +2301,7 @@ public void test067() {
 				"2. ERROR in X.java (at line 11)\n" + 
 				"	x.p = i++;\n" + 
 				"	      ^\n" + 
-				"Variable i is required to be final or effectively final\n" + 
+				"Local variable i defined in an enclosing scope must be final or effectively final\n" + 
 				"----------\n");
 }
 // https://bugs.eclipse.org/bugs/show_bug.cgi?id=382721, [1.8][compiler] Effectively final variables needs special treatment
@@ -2334,7 +2334,7 @@ public void test068() {
 				"2. ERROR in X.java (at line 11)\n" + 
 				"	x.p = i;\n" + 
 				"	^\n" + 
-				"Variable x is required to be final or effectively final\n" + 
+				"Local variable x defined in an enclosing scope must be final or effectively final\n" + 
 				"----------\n");
 }
 // https://bugs.eclipse.org/bugs/show_bug.cgi?id=382727, [1.8][compiler] Lambda expression parameters and locals cannot shadow variables from context
@@ -6898,7 +6898,7 @@ public void test409544() {
 		"1. ERROR in Sample.java (at line 6)\n" +
 		"	j=10;\n" +
 		"	^\n" +
-		"Variable j is required to be final or effectively final\n" +
+		"Local variable j defined in an enclosing scope must be final or effectively final\n" +
 		"----------\n",
 		null /* no extra class libraries */,
 		true /* flush output directory */,
@@ -6936,7 +6936,7 @@ public void test409544b() {
 		"2. ERROR in X.java (at line 11)\n" + 
 		"	j = 10;\n" + 
 		"	^\n" + 
-		"Variable j is required to be final or effectively final\n" + 
+		"Local variable j defined in an enclosing scope must be final or effectively final\n" + 
 		"----------\n",
 		null /* no extra class libraries */,
 		true /* flush output directory */,
@@ -7033,7 +7033,7 @@ public void test404657_final() {
 			"1. ERROR in X.java (at line 8)\n" + 
 			"	executeLater(() -> System.out.println(n)); // Error: n is not effectively final\n" + 
 			"	                                      ^\n" + 
-			"Variable n is required to be final or effectively final\n" + 
+			"Local variable n defined in an enclosing scope must be final or effectively final\n" + 
 			"----------\n"
 		);
 }
@@ -7060,7 +7060,101 @@ public void test404657_loop() {
 			"1. ERROR in X.java (at line 8)\n" + 
 			"	executeLater(() -> System.out.println(n)); // Error: n is not effectively final\n" + 
 			"	                                      ^\n" + 
-			"Variable n is required to be final or effectively final\n" + 
+			"Local variable n defined in an enclosing scope must be final or effectively final\n" + 
+			"----------\n"
+		);
+}
+// https://bugs.eclipse.org/bugs/show_bug.cgi?id=420580, [1.8][compiler] ReferenceExpression drops explicit type arguments
+public void testExplicitTypeArgument() {
+		this.runNegativeTest(
+			new String[] {
+					"X.java", 
+					"interface I {\n" +
+					"	void sam(X t, Integer s);\n" +
+					"}\n" +
+					"public class X {\n" +
+					"	<T> void function(T t) {}\n" +
+					"	public static void main(String [] args) {\n" +
+					"		I i = X::<String>function;\n" +
+					"		i = X::function;\n" +
+					"		i = X::<Integer>function;\n" +
+					"	}\n" +
+					"}\n" + 
+					""
+			},
+			"----------\n" + 
+			"1. ERROR in X.java (at line 7)\n" + 
+			"	I i = X::<String>function;\n" + 
+			"	      ^^^^^^^^^^^^^^^^^^^\n" + 
+			"The type X does not define function(X, Integer) that is applicable here\n" + 
+			"----------\n"
+		);
+}
+// https://bugs.eclipse.org/bugs/show_bug.cgi?id=420582,  [1.8][compiler] Compiler should allow creation of generic array creation with unbounded wildcard type arguments
+public void testGenericArrayCreation() {
+		this.runNegativeTest(
+			new String[] {
+					"X.java", 
+					"interface I {\n" +
+					"	X<?, ?, ?>[] makeArray(int i);\n" +
+					"}\n" +
+					"public class X<T, U, V> {\n" +
+					"	public static void main(String [] args) {\n" +
+					"		I i = X<?, ?, ?>[]::new; // OK.\n" +
+					"		i = X<String, Integer, ?>[]::new; // ! OK\n" +
+					"		X<?, ?, ?> [] a = new X<?, ?, ?>[10]; // OK\n" +
+					"		a = new X<String, Integer, ?>[10]; // ! OK\n" +
+					"		System.out.println(i.makeArray(1024).length);\n" +
+					"	}\n" +
+					"}\n" + 
+					""
+			},
+			"----------\n" + 
+			"1. ERROR in X.java (at line 7)\n" + 
+			"	i = X<String, Integer, ?>[]::new; // ! OK\n" + 
+			"	    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n" + 
+			"Cannot create a generic array of X<String,Integer,?>\n" + 
+			"----------\n" + 
+			"2. ERROR in X.java (at line 9)\n" + 
+			"	a = new X<String, Integer, ?>[10]; // ! OK\n" + 
+			"	    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n" + 
+			"Cannot create a generic array of X<String,Integer,?>\n" + 
+			"----------\n"
+		);
+}
+
+// https://bugs.eclipse.org/bugs/show_bug.cgi?id=420598, [1.8][compiler] Incorrect error about intersection cast type not being a functional interface. 
+public void testIntersectionCast() {
+		this.runNegativeTest(
+			new String[] {
+					"X.java", 
+					"import java.io.Serializable;\n" +
+					"interface I {\n" +
+					"	void foo();\n" +
+					"}\n" +
+					"interface J extends I {\n" +
+					"	void foo();\n" +
+					"}\n" +
+					"interface K {\n" +
+					"}\n" +
+					"interface L {\n" +
+					"	void foo();\n" +
+					"}\n" +
+					"public class X {\n" +
+					"	public static void main(String[] args) {\n" +
+					"		I i = (I & Serializable) () -> {};\n" +
+					"		i = (I & J & K) () -> {};\n" +
+					"		i = (J & I & K) () -> {};  \n" +
+					"		i = (J & I & K & L) () -> {};  \n" +
+					"	}\n" +
+					"}\n" + 
+					""
+			},
+			"----------\n" + 
+			"1. ERROR in X.java (at line 18)\n" + 
+			"	i = (J & I & K & L) () -> {};  \n" + 
+			"	                    ^^^^^^^^\n" + 
+			"The target type of this expression is not a functional interface: more than one of the intersecting interfaces are functional\n" + 
 			"----------\n"
 		);
 }

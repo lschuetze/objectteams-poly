@@ -93,17 +93,17 @@ public TypeBinding prototype() {
 //{ObjectTeams: changed to public (was default-vis)
 public ReferenceBinding resolve(LookupEnvironment environment, boolean convertGenericToRawType) {
 // SH}
-	if (this != this.prototype) {
+	if (this != this.prototype) { //$IDENTITY-COMPARISON$
 		this.prototype.resolve(environment, convertGenericToRawType);
 		return this.resolvedType;
 	}
     ReferenceBinding targetType = this.resolvedType;
 	if (targetType == null) {
 		targetType = this.fPackage.getType0(this.compoundName[this.compoundName.length - 1]);
-		if (targetType == this) {
+		if (targetType == this) { //$IDENTITY-COMPARISON$
 			targetType = environment.askForType(this.compoundName);
 		}
-		if (targetType == null || targetType == this) { // could not resolve any better, error was already reported against it
+		if (targetType == null || targetType == this) { // could not resolve any better, error was already reported against it //$IDENTITY-COMPARISON$
 			// report the missing class file first - only if not resolving a previously missing type
 			if ((this.tagBits & TagBits.HasMissingType) == 0 && !environment.mayTolerateMissingType) {
 				environment.problemReporter.isClassPathCorrect(
@@ -122,7 +122,7 @@ public ReferenceBinding resolve(LookupEnvironment environment, boolean convertGe
 	return targetType;
 }
 void setResolvedType(ReferenceBinding targetType, LookupEnvironment environment) {
-	if (this.resolvedType == targetType) return; // already resolved
+	if (this.resolvedType == targetType) return; // already resolved //$IDENTITY-COMPARISON$
 
 	// targetType may be a source or binary type
 	this.resolvedType = targetType;

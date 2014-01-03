@@ -73,7 +73,7 @@ public class AnnotatableTypeSystem extends TypeSystem {
 		for (int i = 0, length = derivedTypes.length; i < length; i++) {
 			TypeBinding derivedType = derivedTypes[i];
 			if (derivedType == null) break;
-			if (!derivedType.isArrayType() || derivedType.dimensions() != dimensions || derivedType.leafComponentType() != leafType)
+			if (!derivedType.isArrayType() || derivedType.dimensions() != dimensions || derivedType.leafComponentType() != leafType) //$IDENTITY-COMPARISON$
 				continue;
 			if (Util.effectivelyEqual(derivedType.getTypeAnnotations(), annotations)) 
 				return (ArrayBinding) derivedType;
@@ -123,12 +123,12 @@ public class AnnotatableTypeSystem extends TypeSystem {
 				break;
 //{ObjectTeams: parameterized and/or anchored?
 /* orig:
-			if (!derivedType.isParameterizedType() || derivedType.actualType() != genericType)
+			if (!derivedType.isParameterizedType() || derivedType.actualType() != genericType) //$IDENTITY-COMPARISON$
 				continue;
   :giro */
 			if (!(derivedType instanceof ParameterizedTypeBinding)) // roles might answer 'false' to isParameterized(), still they are valid candidates, here
 				continue;
-			if (derivedType.actualType() != genericType)
+			if (derivedType.actualType() != genericType) //$IDENTITY-COMPARISON$
 				continue;
 			if (derivedType.isRawType() && typeArguments != null)
 				continue;
@@ -136,7 +136,7 @@ public class AnnotatableTypeSystem extends TypeSystem {
 			if (!isRoleTypeMatch(teamAnchor, valueParamPosition, derivedType))
 				continue;
 //SH}
-			if (derivedType.enclosingType() != enclosingType || !Util.effectivelyEqual(derivedType.typeArguments(), typeArguments))
+			if (derivedType.enclosingType() != enclosingType || !Util.effectivelyEqual(derivedType.typeArguments(), typeArguments)) //$IDENTITY-COMPARISON$
 				continue;
 			if (Util.effectivelyEqual(annotations, derivedType.getTypeAnnotations()))
 				return (ParameterizedTypeBinding) derivedType;
@@ -194,7 +194,7 @@ public class AnnotatableTypeSystem extends TypeSystem {
 			TypeBinding derivedType = derivedTypes[i];
 			if (derivedType == null)
 				break;
-			if (!derivedType.isRawType() || derivedType.actualType() != genericType || derivedType.enclosingType() != enclosingType)
+			if (!derivedType.isRawType() || derivedType.actualType() != genericType || derivedType.enclosingType() != enclosingType) //$IDENTITY-COMPARISON$
 				continue;
 			if (Util.effectivelyEqual(derivedType.getTypeAnnotations(), annotations))
 				return (RawTypeBinding) derivedType;
@@ -231,9 +231,9 @@ public class AnnotatableTypeSystem extends TypeSystem {
 			TypeBinding derivedType = derivedTypes[i];
 			if (derivedType == null) 
 				break;
-			if (!derivedType.isWildcard() || derivedType.actualType() != genericType || derivedType.rank() != rank)
+			if (!derivedType.isWildcard() || derivedType.actualType() != genericType || derivedType.rank() != rank) //$IDENTITY-COMPARISON$
 				continue;
-			if (derivedType.boundKind() != boundKind || derivedType.bound() != bound || !Util.effectivelyEqual(derivedType.additionalBounds(), otherBounds))
+			if (derivedType.boundKind() != boundKind || derivedType.bound() != bound || !Util.effectivelyEqual(derivedType.additionalBounds(), otherBounds)) //$IDENTITY-COMPARISON$
 				continue;
 			if (Util.effectivelyEqual(derivedType.getTypeAnnotations(), annotations))
 				return (WildcardBinding) derivedType;
@@ -333,26 +333,26 @@ public class AnnotatableTypeSystem extends TypeSystem {
 			TypeBinding derivedType = derivedTypes[i];
 			if (derivedType == null) break;
 			
-			if (derivedType.enclosingType() != enclosingType || !Util.effectivelyEqual(derivedType.typeArguments(), type.typeArguments()))
+			if (derivedType.enclosingType() != enclosingType || !Util.effectivelyEqual(derivedType.typeArguments(), type.typeArguments())) //$IDENTITY-COMPARISON$
 				continue;
 			
 			switch(type.kind()) {
 				case Binding.ARRAY_TYPE:
-					if (!derivedType.isArrayType() || derivedType.dimensions() != type.dimensions() || derivedType.leafComponentType() != type.leafComponentType())
+					if (!derivedType.isArrayType() || derivedType.dimensions() != type.dimensions() || derivedType.leafComponentType() != type.leafComponentType()) //$IDENTITY-COMPARISON$
 						continue;
 					break;
 				case Binding.PARAMETERIZED_TYPE:
-					if (!derivedType.isParameterizedType() || derivedType.actualType() != type.actualType())
+					if (!derivedType.isParameterizedType() || derivedType.actualType() != type.actualType()) //$IDENTITY-COMPARISON$
 						continue;
 					break;
 				case Binding.RAW_TYPE:
-					if (!derivedType.isRawType() || derivedType.actualType() != type.actualType())
+					if (!derivedType.isRawType() || derivedType.actualType() != type.actualType()) //$IDENTITY-COMPARISON$
 						continue;
 					break;
 				case Binding.WILDCARD_TYPE:
-					if (!derivedType.isWildcard() || derivedType.actualType() != type.actualType() || derivedType.rank() != type.rank() || derivedType.boundKind() != type.boundKind())
+					if (!derivedType.isWildcard() || derivedType.actualType() != type.actualType() || derivedType.rank() != type.rank() || derivedType.boundKind() != type.boundKind()) //$IDENTITY-COMPARISON$
 						continue;
-					if (derivedType.bound() != type.bound() || !Util.effectivelyEqual(derivedType.additionalBounds(), type.additionalBounds()))
+					if (derivedType.bound() != type.bound() || !Util.effectivelyEqual(derivedType.additionalBounds(), type.additionalBounds())) //$IDENTITY-COMPARISON$
 						continue;
 					break;
 				default:
@@ -361,6 +361,8 @@ public class AnnotatableTypeSystem extends TypeSystem {
 						case Binding.PARAMETERIZED_TYPE:
 						case Binding.RAW_TYPE:
 						case Binding.WILDCARD_TYPE:
+						case Binding.INTERSECTION_CAST_TYPE:
+						case Binding.INTERSECTION_TYPE:
 							continue;
 					}
 					break;

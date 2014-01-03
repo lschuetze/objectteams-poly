@@ -227,6 +227,19 @@ static Object convertMemberValue(Object binaryValue, LookupEnvironment env, char
 public TypeBinding clone(TypeBinding outerType) {
 	BinaryTypeBinding copy = new BinaryTypeBinding(this);
 	copy.enclosingType = (ReferenceBinding) outerType;
+	
+	/* BinaryTypeBinding construction is not "atomic" and is split between the constructor and cachePartsFrom and between the two
+	   stages of construction, clone can kick in when LookupEnvironment.createBinaryTypeFrom calls PackageBinding.addType. This
+	   can result in some URB's being resolved, which could trigger the clone call, leaving the clone with semi-initialized prototype.
+	   Fortunately, the protocol for this type demands all clients to use public access methods, where we can deflect the call to the
+	   prototype. enclosingType() and memberTypes() should not delegate, so ...
+	*/
+	if (copy.enclosingType != null) 
+		copy.tagBits |= TagBits.HasUnresolvedEnclosingType;
+	else 
+		copy.tagBits &= ~TagBits.HasUnresolvedEnclosingType;
+	
+	copy.tagBits |= TagBits.HasUnresolvedMemberTypes;
 	return copy;
 }
 
@@ -367,8 +380,6 @@ public BinaryTypeBinding(PackageBinding packageBinding, IBinaryType binaryType, 
 public FieldBinding[] availableFields() {
 	
 	if (!isPrototype()) {
-		if ((this.tagBits & TagBits.AreFieldsComplete) != 0)
-			return this.fields;
 		return this.prototype.availableFields();
 	}
 	
@@ -429,8 +440,6 @@ private TypeVariableBinding[] addMethodTypeVariables(TypeVariableBinding[] metho
 public MethodBinding[] availableMethods() {
 	
 	if (!isPrototype()) {
-		if ((this.tagBits & TagBits.AreMethodsComplete) != 0)
-			return this.methods;
 		return this.prototype.availableMethods();
 	}
 
@@ -567,7 +576,7 @@ void cachePartsFrom(IBinaryType binaryType, boolean needFieldsAndMethods) {
 			char[] superclassName = binaryType.getSuperclassName();
 			if (superclassName != null) {
 				// attempt to find the superclass if it exists in the cache (otherwise - resolve it when requested)
-				this.superclass = this.environment.getTypeFromConstantPoolName(superclassName, 0, -1, false, missingTypeNames);
+				this.superclass = this.environment.getTypeFromConstantPoolName(superclassName, 0, -1, false, missingTypeNames, walker.toSupertype((short) -1));
 				this.tagBits |= TagBits.HasUnresolvedSuperclass;
 			}
 // :giro
@@ -580,9 +589,9 @@ void cachePartsFrom(IBinaryType binaryType, boolean needFieldsAndMethods) {
 				int size = interfaceNames.length;
 				if (size > 0) {
 					this.superInterfaces = new ReferenceBinding[size];
-					for (int i = 0; i < size; i++)
+					for (short i = 0; i < size; i++)
 						// attempt to find each superinterface if it exists in the cache (otherwise - resolve it when requested)
-						this.superInterfaces[i] = this.environment.getTypeFromConstantPoolName(interfaceNames[i], 0, -1, false, missingTypeNames);
+						this.superInterfaces[i] = this.environment.getTypeFromConstantPoolName(interfaceNames[i], 0, -1, false, missingTypeNames, walker.toSupertype(i));
 					this.tagBits |= TagBits.HasUnresolvedSuperinterfaces;
 				}
 			}
@@ -869,7 +878,7 @@ private MethodBinding createMethod(IBinaryMethod method, long sourceLevel, char[
 			if (size > 0) {
 				exceptions = new ReferenceBinding[size];
 				for (int i = 0; i < size; i++)
-					exceptions[i] = this.environment.getTypeFromConstantPoolName(exceptionTypes[i], 0, -1, false, missingTypeNames);
+					exceptions[i] = this.environment.getTypeFromConstantPoolName(exceptionTypes[i], 0, -1, false, missingTypeNames, walker.toThrows(i));
 			}
 		}
 
@@ -900,9 +909,6 @@ private MethodBinding createMethod(IBinaryMethod method, long sourceLevel, char[
 			wrapper.start++; // skip '>'
 		}
 
-// 		Note(stephan): currently the compiler is not interested in retrieving receiver annotations, here is how we would do it:
-//		IBinaryAnnotation[] receiverAnnotations = walker.toReceiver().getAnnotationsAtCursor();
-		
 		if (wrapper.signature[wrapper.start] == Util.C_PARAM_START) {
 			wrapper.start++; // skip '('
 			if (wrapper.signature[wrapper.start] == Util.C_PARAM_END) {
@@ -945,7 +951,7 @@ private MethodBinding createMethod(IBinaryMethod method, long sourceLevel, char[
 				if (size > 0) {
 					exceptions = new ReferenceBinding[size];
 					for (int i = 0; i < size; i++)
-						exceptions[i] = this.environment.getTypeFromConstantPoolName(exceptionTypes[i], 0, -1, false, missingTypeNames);
+						exceptions[i] = this.environment.getTypeFromConstantPoolName(exceptionTypes[i], 0, -1, false, missingTypeNames, walker.toThrows(i));
 				}
 			}
 		}
@@ -961,12 +967,23 @@ private MethodBinding createMethod(IBinaryMethod method, long sourceLevel, char[
 // SH}
 		? new MethodBinding(methodModifiers, parameters, exceptions, this)
 		: new MethodBinding(methodModifiers, method.getSelector(), returnType, parameters, exceptions, this);
-	if (this.environment.globalOptions.storeAnnotations)
+		
+	IBinaryAnnotation[] receiverAnnotations = walker.toReceiver().getAnnotationsAtCursor();
+	if (receiverAnnotations != null && receiverAnnotations.length > 0) {
+		result.receiver = this.environment.createAnnotatedType(this, createAnnotations(receiverAnnotations, this.environment, missingTypeNames));
+	}
+
+	if (this.environment.globalOptions.storeAnnotations) {
+		IBinaryAnnotation[] annotations = method.getAnnotations();
+	    if (annotations == null || annotations.length == 0)
+	    	if (method.isConstructor())
+	    		annotations = walker.toMethodReturn().getAnnotationsAtCursor(); // FIXME: When both exist, order could become an issue.
 		result.setAnnotations(
-			createAnnotations(method.getAnnotations(), this.environment, missingTypeNames),
+			createAnnotations(annotations, this.environment, missingTypeNames),
 			paramAnnotations,
 			isAnnotationType() ? convertMemberValue(method.getDefaultValue(), this.environment, missingTypeNames) : null,
 			this.environment);
+	}
 
 	if (argumentNames != null) result.parameterNames = argumentNames;
 	
@@ -1177,11 +1194,7 @@ public ReferenceBinding enclosingType() {  // should not delegate to prototype.
 public FieldBinding[] fields() {
 	
 	if (!isPrototype()) {
-		if ((this.tagBits & TagBits.AreFieldsComplete) != 0)
-			return this.fields;
-		this.fields = this.prototype.fields();
-		this.tagBits |= TagBits.AreFieldsComplete;
-		return this.fields;
+		return this.fields = this.prototype.fields();
 	}
 
 	if ((this.tagBits & TagBits.AreFieldsComplete) != 0)
@@ -1534,6 +1547,8 @@ public MethodBinding[] getMethods(char[] selector, int suggestedParameterLength)
 	return Binding.NO_METHODS;
 }
 public boolean hasMemberTypes() {
+	if (!isPrototype())
+		return this.prototype.hasMemberTypes();
     return this.memberTypes.length > 0;
 }
 // NOTE: member types of binary types are resolved when needed
@@ -1684,11 +1699,7 @@ public ReferenceBinding[] memberTypes() {
 public MethodBinding[] methods() {
 	
 	if (!isPrototype()) {
-		if ((this.tagBits & TagBits.AreMethodsComplete) != 0)
-			return this.methods;
-		this.methods = this.prototype.methods();
-		this.tagBits |= TagBits.AreMethodsComplete;
-		return this.methods;
+		return this.methods = this.prototype.methods();
 	}
 	
 	if ((this.tagBits & TagBits.AreMethodsComplete) != 0)
@@ -1822,6 +1833,7 @@ public void setContainerAnnotationType(ReferenceBinding value) {
 }
 
 public void tagAsHavingDefectiveContainerType() {
+	if (!isPrototype()) throw new IllegalStateException();
 	if (this.containerAnnotationType != null && this.containerAnnotationType.isValidBinding())
 		this.containerAnnotationType = new ProblemReferenceBinding(this.containerAnnotationType.compoundName, this.containerAnnotationType, ProblemReasons.DefectiveContainerAnnotationType);
 }
@@ -2065,11 +2077,7 @@ private void scanTypeForContainerAnnotation(IBinaryType binaryType, char[][][] m
 public ReferenceBinding superclass() {
 	
 	if (!isPrototype()) {
-		if ((this.tagBits & TagBits.HasUnresolvedSuperclass) == 0)
-			return this.superclass;
-		this.superclass = this.prototype.superclass();
-		this.tagBits &= ~TagBits.HasUnresolvedSuperclass;
-		return this.superclass;
+		return this.superclass = this.prototype.superclass();
 	}
 	
 	if ((this.tagBits & TagBits.HasUnresolvedSuperclass) == 0)
@@ -2117,11 +2125,7 @@ public void resetSuperclass(ReferenceBinding superClass) {
 public ReferenceBinding[] superInterfaces() {
 	
 	if (!isPrototype()) {
-		if ((this.tagBits & TagBits.HasUnresolvedSuperinterfaces) == 0)
-			return this.superInterfaces;
-		this.superInterfaces = this.prototype.superInterfaces();
-		this.tagBits &= ~TagBits.HasUnresolvedSuperinterfaces;
-		return this.superInterfaces;
+		return this.superInterfaces = this.prototype.superInterfaces();
 	}
 	if ((this.tagBits & TagBits.HasUnresolvedSuperinterfaces) == 0)
 		return this.superInterfaces;
@@ -2149,11 +2153,7 @@ public ReferenceBinding[] superInterfaces() {
 public TypeVariableBinding[] typeVariables() {
 	
 	if (!isPrototype()) {
-		if ((this.tagBits & TagBits.HasUnresolvedTypeVariables) == 0)
-			return this.typeVariables;
-		this.typeVariables = this.prototype.typeVariables();
-		this.tagBits &= ~TagBits.HasUnresolvedTypeVariables;
-		return this.typeVariables;
+		return this.typeVariables = this.prototype.typeVariables();
 	}
  	if ((this.tagBits & TagBits.HasUnresolvedTypeVariables) == 0)
 		return this.typeVariables;

@@ -1298,7 +1298,7 @@ public class ParameterizedTypeBinding extends ReferenceBinding implements Substi
 
 	public void swapUnresolved(UnresolvedReferenceBinding unresolvedType, ReferenceBinding resolvedType, LookupEnvironment env) {
 		boolean update = false;
-		if (this.type == unresolvedType) {
+		if (this.type == unresolvedType) { //$IDENTITY-COMPARISON$
 			this.type = resolvedType; // cannot be raw since being parameterized below
 			update = true;
 			ReferenceBinding enclosing = resolvedType.enclosingType();
@@ -1308,7 +1308,7 @@ public class ParameterizedTypeBinding extends ReferenceBinding implements Substi
 		}
 		if (this.arguments != null) {
 			for (int i = 0, l = this.arguments.length; i < l; i++) {
-				if (this.arguments[i] == unresolvedType) {
+				if (this.arguments[i] == unresolvedType) { //$IDENTITY-COMPARISON$
 					this.arguments[i] = env.convertUnresolvedBinaryToRawType(resolvedType);
 					update = true;
 				}
