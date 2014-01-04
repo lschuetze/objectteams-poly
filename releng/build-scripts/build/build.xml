@@ -56,7 +56,7 @@
 
 		<!--run the pde-build for the specified ${builder} (OT-Compiler or OTDT-Build) -->
 		<ant antfile="build.xml" dir="${baseLocation}/${run.eclipseScriptDir}" />
-		
+
 	</target>
 	
 	<target name="create.label.properties" unless="label.properties.exists">
@@ -85,6 +85,14 @@
 			</echo>
 
 			<available file="${buildDirectory}/label.properties" property="label.properties.exists" />
+
+			<!-- ======== Insert SDK build qualifier and current qualifier into our configuration file: ======== -->
+			<copy file="${OTScriptDir}/test.properties.in" tofile="${OTScriptDir}/test.properties">
+				<filterset>
+					<filter token="SDK_QUALIFIER" value="${eclipse.sdk.qualifier}"/>
+					<filter token="QUALIFIER" value="${timestamp}"/>
+				</filterset>
+			</copy>
 		</target>
 
 </project>

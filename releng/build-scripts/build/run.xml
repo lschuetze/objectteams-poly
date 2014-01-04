@@ -69,11 +69,7 @@ directory for tempory files during testing:
 				<filter token="SDK_QUALIFIER" value="${eclipse.sdk.qualifier}"/>
 			</filterset>
 		</copy>
-		<copy file="${OTScriptDir}/test.properties.in" tofile="${OTScriptDir}/test.properties">
-			<filterset>
-				<filter token="SDK_QUALIFIER" value="${eclipse.sdk.qualifier}"/>
-			</filterset>
-		</copy>
+		<!-- Note: test.properites.in is now processed in build.xml:create.label.properties -->
 
 		<!-- versions of test plugins: -->
 		<loadproperties srcfile="${_toplevelDir}/test.properties" />
@@ -244,6 +240,7 @@ directory for tempory files during testing:
 	            <arg value="-Dtest.eclipseDir=${test.eclipseDir}"/>
 	            <arg value="-DmapVersionTag=${mapVersionTag}"/>
 		    	<arg value="-Dmap.file.path=${map.file.path}"/>
+				<arg value="-Declipse.sdk.qualifier=${eclipse.sdk.qualifier}"/>
 	            <arg value="-Declipse-app.tgz=${eclipse-app.tgz}"/>
 	            <arg value="-Declipse.tests.zip=${eclipse.tests.zip}"/>
 	            <!--arg value="-verbose" /-->
@@ -321,6 +318,7 @@ directory for tempory files during testing:
 				<arg value="-Dtest.eclipseDir=${test.eclipseDir}"/>
 				<arg value="-Dmap.file.path=${map.file.path}"/>
 				<arg value="-DmapVersionTag=${mapVersionTag}"/>
+				<arg value="-Declipse.sdk.qualifier=${eclipse.sdk.qualifier}"/>
 				<arg value="-Ddo.run.tests=${do.run.tests}"/>
 				<arg value="-Ddo.build.all=${do.build.all}"/>
 				<arg value="-Declipse-app.tgz=${eclipse-app.tgz}"/>
