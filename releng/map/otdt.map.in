@@ -46,7 +46,7 @@ plugin@org.apache.bcel,5.2.0=p2IU,id=org.apache.bcel,version=5.2.0.v201005080400
 !========== JDT/UI BETA_JAVA8: ==========!
 plugin@org.eclipse.jdt.ui=GIT,tag=branches/BETA_JAVA8,repo=git://git.eclipse.org/gitroot/jdt/eclipse.jdt.ui.git,path=org.eclipse.jdt.ui
 plugin@org.eclipse.jdt.ui.tests=GIT,tag=branches/BETA_JAVA8,repo=git://git.eclipse.org/gitroot/jdt/eclipse.jdt.ui.git,path=org.eclipse.jdt.ui.tests
-plugin@org.eclipse.jdt.ui.tests.refactoring=branches/BETA_JAVA8,repo=git://git.eclipse.org/gitroot/jdt/eclipse.jdt.ui.git,path=org.eclipse.jdt.ui.tests.refactoring
+plugin@org.eclipse.jdt.ui.tests.refactoring=GIT,tag=branches/BETA_JAVA8,repo=git://git.eclipse.org/gitroot/jdt/eclipse.jdt.ui.git,path=org.eclipse.jdt.ui.tests.refactoring
 
 !***************  OTDT Test CONTRIBUTION  ******************************************************** 
 
