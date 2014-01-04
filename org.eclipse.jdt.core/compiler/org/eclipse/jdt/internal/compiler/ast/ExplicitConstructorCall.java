@@ -20,6 +20,7 @@
  *								bug 370639 - [compiler][resource] restore the default for resource leak warnings
  *								bug 388996 - [compiler][resource] Incorrect 'potential resource leak'
  *								bug 403147 - [compiler][null] FUP of bug 400761: consolidate interaction between unboxing, NPE, and deferred checking
+ *								Bug 400874 - [1.8][compiler] Inference infrastructure should evolve to meet JLS8 18.x (Part G of JSR335 spec)
  *        Andy Clement (GoPivotal, Inc) aclement@gopivotal.com - Contributions for
  *                          Bug 409245 - [1.8][compiler] Type annotations dropped when call is routed through a synthetic bridge method
  *******************************************************************************/
@@ -94,9 +95,8 @@ import org.eclipse.objectteams.otdt.internal.core.compiler.util.TSuperHelper;
  * 		+ adjustCode(), replaceChainArg():
  * 			recognized the characteristic byte code sequence produced before, and patch it.
  *
- * @version $Id: ExplicitConstructorCall.java 23405 2010-02-03 17:02:18Z stephan $
  */
-public class ExplicitConstructorCall extends Statement implements InvocationSite, ExpressionContext {
+public class ExplicitConstructorCall extends Statement implements Invocation, ExpressionContext {
 
 	public Expression[] arguments;
 	public Expression qualification;
@@ -124,6 +124,8 @@ public class ExplicitConstructorCall extends Statement implements InvocationSite
 
 	// TODO Remove once DOMParser is activated
 	public int typeArgumentsSourceStart;
+	private InferenceContext18 inferenceContext;
+	private int inferenceKind;
 
 	public ExplicitConstructorCall(int accessMode) {
 		this.accessMode = accessMode;
@@ -443,8 +445,9 @@ public class ExplicitConstructorCall extends Statement implements InvocationSite
 				}
 			}
 			// resolve type arguments (for generic constructor call)
+			long sourceLevel = scope.compilerOptions().sourceLevel;
 			if (this.typeArguments != null) {
-				boolean argHasError = scope.compilerOptions().sourceLevel < ClassFileConstants.JDK1_5;
+				boolean argHasError = sourceLevel < ClassFileConstants.JDK1_5;
 				int length = this.typeArguments.length;
 				this.genericTypeArguments = new TypeBinding[length];
 				for (int i = 0; i < length; i++) {
@@ -473,7 +476,6 @@ public class ExplicitConstructorCall extends Statement implements InvocationSite
 				boolean argHasError = false; // typeChecks all arguments
 				int length = this.arguments.length;
 				argumentTypes = new TypeBinding[length];
-				TypeBinding argumentType;
 				for (int i = 0; i < length; i++) {
 					Expression argument = this.arguments[i];
 					if (argument instanceof CastExpression) {
@@ -481,10 +483,10 @@ public class ExplicitConstructorCall extends Statement implements InvocationSite
 						argsContainCast = true;
 					}
 					argument.setExpressionContext(INVOCATION_CONTEXT);
-					if ((argumentType = argumentTypes[i] = argument.resolveType(scope)) == null) {
+					if ((argumentTypes[i] = argument.resolveType(scope)) == null) {
 						argHasError = true;
 					}
-					if (argumentType != null && argumentType.kind() == Binding.POLY_TYPE)
+					if (sourceLevel >= ClassFileConstants.JDK1_8 && argument.isPolyExpression())
 						polyExpressionSeen = true;
 				}
 				if (argHasError) {
@@ -523,9 +525,6 @@ public class ExplicitConstructorCall extends Statement implements InvocationSite
 				return;
 			}
 //{ObjectTeams: type wrapping for arguments and error handling for tsuper calls.
-/* @original:
-			if ((this.binding = scope.getConstructor(receiverType, argumentTypes, this)).isValidBinding()) {
-*/
 			// ensure that types in signatures of teams and roles are wrapped:
 			if (receiverType.isTeam() || receiverType.isRole())
 	            Dependencies.ensureBindingState(receiverType, ITranslationStates.STATE_TYPES_ADJUSTED);
@@ -566,9 +565,7 @@ public class ExplicitConstructorCall extends Statement implements InvocationSite
                 anchorMapping = AnchorMapping.setupNewMapping(
 	                    receiver, this.arguments, scope);
     // orig:
-    			this.binding = scope.getConstructor(receiverType, argumentTypes, this);
-    			if (polyExpressionSeen)
-    				resolvePolyExpressionArguments(scope, this.binding, this.arguments, argumentTypes);
+			this.binding = findConstructorBinding(scope, this, receiverType, argumentTypes, polyExpressionSeen);
 	// giro:
 
 				// check different reasons for changing the accessMode
@@ -849,5 +846,38 @@ public class ExplicitConstructorCall extends Statement implements InvocationSite
 			}
 		}
 		visitor.endVisit(this, scope);
+	}
+
+	// -- interface Invocation: --
+	public MethodBinding binding() {
+		return this.binding;
+	}
+	public Expression[] arguments() {
+		return this.arguments;
+	}
+	public InferenceContext18 inferenceContext() {
+		return this.inferenceContext;
+	}
+	public int inferenceKind() {
+		return (this.inferenceKind & InferenceContext18.INFERENCE_KIND_MASK);
+	}
+	public void setInferenceKind(int checkKind) {
+		this.inferenceKind = checkKind;
+	}
+	public void markInferenceFinished() {
+		this.inferenceKind |= InferenceContext18.CHECK_FINISHED;
+	}
+	public boolean hasInferenceFinished() {
+		return this.inferenceKind == 0 // only relevant if inference has been started
+				|| (this.inferenceKind & InferenceContext18.CHECK_FINISHED) != 0;
+	}
+	public TypeBinding updateBindings(MethodBinding updatedBinding) {
+		this.binding = updatedBinding;
+		return TypeBinding.VOID; // not an expression
+	}
+
+	// -- interface InvocationSite: --
+	public InferenceContext18 freshInferenceContext(Scope scope) {
+		return this.inferenceContext = new InferenceContext18(scope, this.arguments, this);
 	}
 }

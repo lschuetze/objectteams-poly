@@ -40,6 +40,7 @@ import org.eclipse.jdt.internal.compiler.lookup.Binding;
 import org.eclipse.jdt.internal.compiler.lookup.BlockScope;
 import org.eclipse.jdt.internal.compiler.lookup.ClassScope;
 import org.eclipse.jdt.internal.compiler.lookup.FieldBinding;
+import org.eclipse.jdt.internal.compiler.lookup.InferenceContext18;
 import org.eclipse.jdt.internal.compiler.lookup.InvocationSite;
 import org.eclipse.jdt.internal.compiler.lookup.MethodScope;
 import org.eclipse.jdt.internal.compiler.lookup.ParameterizedTypeBinding;
@@ -607,5 +608,9 @@ public class TypeAnchorReference extends TypeReference implements InvocationSite
 
 	public void setFieldIndex(int depth) {
 		// ignored
+	}
+	
+	public InferenceContext18 freshInferenceContext(Scope scope) {
+		throw new InternalCompilerError("Method not applicable"); //$NON-NLS-1$
 	}
 }

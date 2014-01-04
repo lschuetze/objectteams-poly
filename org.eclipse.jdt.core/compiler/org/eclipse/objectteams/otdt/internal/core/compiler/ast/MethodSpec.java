@@ -29,6 +29,7 @@ import org.eclipse.jdt.internal.compiler.CompilationResult.CheckPoint;
 import org.eclipse.jdt.internal.compiler.ast.ASTNode;
 import org.eclipse.jdt.internal.compiler.ast.AbstractMethodDeclaration;
 import org.eclipse.jdt.internal.compiler.ast.Argument;
+import org.eclipse.jdt.internal.compiler.ast.ExpressionContext;
 import org.eclipse.jdt.internal.compiler.ast.FieldReference;
 import org.eclipse.jdt.internal.compiler.ast.MethodDeclaration;
 import org.eclipse.jdt.internal.compiler.ast.SingleTypeReference;
@@ -41,6 +42,7 @@ import org.eclipse.jdt.internal.compiler.impl.ReferenceContext;
 import org.eclipse.jdt.internal.compiler.lookup.Binding;
 import org.eclipse.jdt.internal.compiler.lookup.BlockScope;
 import org.eclipse.jdt.internal.compiler.lookup.ExtraCompilerModifiers;
+import org.eclipse.jdt.internal.compiler.lookup.InferenceContext18;
 import org.eclipse.jdt.internal.compiler.lookup.InvocationSite;
 import org.eclipse.jdt.internal.compiler.lookup.MethodBinding;
 import org.eclipse.jdt.internal.compiler.lookup.ParameterizedGenericMethodBinding;
@@ -774,10 +776,18 @@ public class MethodSpec extends ASTNode implements InvocationSite
 	 * Used for generic method resolving, however, we implement InvocationSite only for visibility checking,
 	 * not for type checking.
 	 */
-	public TypeBinding expectedType() {
+	public TypeBinding invocationTargetType() {
 		return null;
 	}
-
+	
+	public InferenceContext18 freshInferenceContext(Scope scope) {
+		throw new InternalCompilerError("Method not applicable"); //$NON-NLS-1$
+	}
+	
+	public ExpressionContext getExpressionContext() {
+		throw new InternalCompilerError("Method not applicable"); //$NON-NLS-1$
+	}
+	
 	public void createAccessAttribute(RoleModel roleModel) {
 		roleModel.addInaccessibleBaseMethod(this.resolvedMethod);		
 	}

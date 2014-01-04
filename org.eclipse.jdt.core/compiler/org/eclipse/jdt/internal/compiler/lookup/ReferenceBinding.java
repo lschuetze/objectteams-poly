@@ -29,6 +29,8 @@
  *								Bug 415291 - [1.8][null] differentiate type incompatibilities due to null annotations
  *								Bug 415043 - [1.8][null] Follow-up re null type annotations after bug 392099
  *								Bug 416176 - [1.8][compiler][null] null type annotations cause grief on type variables
+ *								Bug 400874 - [1.8][compiler] Inference infrastructure should evolve to meet JLS8 18.x (Part G of JSR335 spec)
+ *								Bug 423504 - [1.8] Implement "18.5.3 Functional Interface Parameterization Inference"
  *      Jesper S Moller - Contributions for
  *								bug 382701 - [1.8][compiler] Implement semantic analysis of Lambda expressions & Reference expression
  *								bug 412153 - [1.8][compiler] Check validity of annotations which may be repeatable
@@ -1496,6 +1498,14 @@ public final boolean isBinaryBinding() {
 public boolean isClass() {
 	return (this.modifiers & (ClassFileConstants.AccInterface | ClassFileConstants.AccAnnotation | ClassFileConstants.AccEnum)) == 0;
 }
+
+public boolean isProperType(boolean admitCapture18) {
+	ReferenceBinding outer = enclosingType();
+	if (outer != null && !outer.isProperType(admitCapture18))
+		return false;
+	return super.isProperType(admitCapture18);
+}
+
 //{ObjectTeams: more queries in preparition of RoleTypeBinding:
 /**
  * Overridden in RoleTypeBinding.
@@ -1735,7 +1745,7 @@ public boolean isInterface() {
 
 public boolean isFunctionalInterface(Scope scope) {
 	MethodBinding method;
-	return isInterface() && (method = getSingleAbstractMethod(scope)) != null && method.isValidBinding();
+	return isInterface() && (method = getSingleAbstractMethod(scope, true)) != null && method.isValidBinding();
 }
 
 /**
@@ -2298,7 +2308,7 @@ private MethodBinding [] getInterfaceAbstractContracts(Scope scope) throws Inval
 	}
 	return contracts;
 }
-public MethodBinding getSingleAbstractMethod(Scope scope) {
+public MethodBinding getSingleAbstractMethod(Scope scope, boolean replaceWildcards) {
 	
 	if (this.singleAbstractMethod != null) {
 		return this.singleAbstractMethod;

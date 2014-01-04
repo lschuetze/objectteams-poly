@@ -22,7 +22,6 @@ package org.eclipse.objectteams.otdt.internal.codeassist;
 
 import org.eclipse.jdt.internal.codeassist.select.SelectionNodeFound;
 import org.eclipse.jdt.internal.compiler.lookup.BlockScope;
-import org.eclipse.jdt.internal.compiler.lookup.MethodBinding;
 import org.eclipse.jdt.internal.compiler.lookup.TypeBinding;
 import org.eclipse.objectteams.otdt.internal.core.compiler.ast.TSuperMessageSend;
 
@@ -32,7 +31,8 @@ import org.eclipse.objectteams.otdt.internal.core.compiler.ast.TSuperMessageSend
 public class SelectionOnTSuperMessageSend extends TSuperMessageSend
 {
     @Override
-    protected MethodBinding findMethod(BlockScope scope, TypeBinding[] argumentTypes) {
-    	throw new SelectionNodeFound(super.findMethod(scope, argumentTypes));
+    protected void findMethodBinding(BlockScope scope, TypeBinding[] argumentTypes, boolean polyExpressionSeen) {
+    	super.findMethodBinding(scope, argumentTypes, polyExpressionSeen);
+    	throw new SelectionNodeFound(this.binding);
     }
 }

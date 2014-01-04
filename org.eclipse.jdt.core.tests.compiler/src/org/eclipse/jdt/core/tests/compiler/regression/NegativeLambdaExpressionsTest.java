@@ -19,6 +19,8 @@
  *     Stephan Herrmann - Contribution for
  *							bug 404649 - [1.8][compiler] detect illegal reference to indirect or redundant super via I.super.m() syntax
  *							bug 404728 - [1.8]NPE on QualifiedSuperReference error
+ *							Bug 400874 - [1.8][compiler] Inference infrastructure should evolve to meet JLS8 18.x (Part G of JSR335 spec)
+ *							Bug 423504 - [1.8] Implement "18.5.3 Functional Interface Parameterization Inference"
  *******************************************************************************/
 package org.eclipse.jdt.core.tests.compiler.regression;
 
@@ -3646,7 +3648,7 @@ public void test400556e() {
 			"1. ERROR in X.java (at line 3)\n" + 
 			"	I<?, ?, ?> i = (String p) -> { return null; };\n" + 
 			"	                ^^^^^^\n" + 
-			"Lambda expression\'s parameter p is expected to be of type List<? extends List<ParameterType>>[]\n" + 
+			"Lambda expression\'s parameter p is expected to be of type List<? extends List<?>>[]\n" + 
 			"----------\n");
 }
 // https://bugs.eclipse.org/bugs/show_bug.cgi?id=400556, [1.8][compiler] Visibility checks are missing for lambda/reference expressions
@@ -3687,7 +3689,7 @@ public void test400556f() {
 			"1. ERROR in X.java (at line 3)\n" + 
 			"	I<? extends p.ParameterType, ? extends p.ExceptionType, ? extends p.ReturnType> i = (String p) -> { return null; };\n" + 
 			"	                                                                                     ^^^^^^\n" + 
-			"Lambda expression\'s parameter p is expected to be of type List<? extends List<ParameterType>>[]\n" + 
+			"Lambda expression\'s parameter p is expected to be of type List<? extends List<? extends ParameterType>>[]\n" + 
 			"----------\n");
 }
 // https://bugs.eclipse.org/bugs/show_bug.cgi?id=400556, [1.8][compiler] Visibility checks are missing for lambda/reference expressions
@@ -3849,7 +3851,7 @@ public void test400556i() {
 			"2. ERROR in X.java (at line 6)\n" + 
 			"	I<? super P, ? super T, ? super R> i = (String p) -> { return null; };\n" + 
 			"	                                        ^^^^^^\n" + 
-			"Lambda expression\'s parameter p is expected to be of type List<? extends List<P>>[]\n" + 
+			"Lambda expression\'s parameter p is expected to be of type List<? extends List<? super P>>[]\n" + 
 			"----------\n");
 }
 // https://bugs.eclipse.org/bugs/show_bug.cgi?id=400556, [1.8][compiler] Visibility checks are missing for lambda/reference expressions
@@ -3903,8 +3905,8 @@ public void test400556j() {
 			"----------\n" + 
 			"2. ERROR in X.java (at line 6)\n" + 
 			"	I<?, ?, ?> i = (String p) -> { return null; };\n" + 
-			"	               ^^^^^^^^^^^^^\n" + 
-			"The target type of this expression is not a well formed parameterized type due to bound(s) mismatch\n" + 
+			"	                ^^^^^^\n" + 
+			"Lambda expression\'s parameter p is expected to be of type List<? extends List<?>>[]\n" + 
 			"----------\n");
 }
 // https://bugs.eclipse.org/bugs/show_bug.cgi?id=400556, [1.8][compiler] Visibility checks are missing for lambda/reference expressions
@@ -5147,14 +5149,36 @@ this.runNegativeTest(
 				"----------\n" + 
 				"3. ERROR in X.java (at line 7)\n" + 
 				"	new X().foo(()->{});\n" + 
-				"	        ^^^\n" + 
-				"The method foo(I<T>) in the type X is not applicable for the arguments (() -> {\n" + 
-				"})\n" + 
-				"----------\n" + 
-				"4. ERROR in X.java (at line 7)\n" + 
-				"	new X().foo(()->{});\n" + 
 				"	            ^^^^\n" + 
 				"The target type of this expression is not a well formed parameterized type due to bound(s) mismatch\n" + 
+				"----------\n");
+}
+//https://bugs.eclipse.org/bugs/show_bug.cgi?id=401610, [1.8][compiler] Allow lambda/reference expressions in non-overloaded method invocation contexts
+// demonstrate that the bound problem is the only real issue in test401610e()
+public void test401610ee() {
+this.runNegativeTest(
+		new String[] {
+				"X.java",
+				"interface I<T extends String> {\n" +
+				"	void foo();\n" +
+				"}\n" +
+				"public class X {\n" +
+				"	<T extends String> T foo(I<T> it) { return null; }\n" +
+				"	public static void main(String[] args) {\n" +
+				"		new X().foo(()->{});\n" +
+				"	}\n" +
+				"}\n",
+				},
+				"----------\n" + 
+				"1. WARNING in X.java (at line 1)\n" + 
+				"	interface I<T extends String> {\n" + 
+				"	                      ^^^^^^\n" + 
+				"The type parameter T should not be bounded by the final type String. Final types cannot be further extended\n" + 
+				"----------\n" + 
+				"2. WARNING in X.java (at line 5)\n" + 
+				"	<T extends String> T foo(I<T> it) { return null; }\n" + 
+				"	           ^^^^^^\n" + 
+				"The type parameter T should not be bounded by the final type String. Final types cannot be further extended\n" + 
 				"----------\n");
 }
 // https://bugs.eclipse.org/bugs/show_bug.cgi?id=401610, [1.8][compiler] Allow lambda/reference expressions in non-overloaded method invocation contexts
@@ -5722,11 +5746,13 @@ public void test401939a() {
 				"----------\n" + 
 				"2. ERROR in X.java (at line 8)\n" + 
 				"	foo(()->{ if (1 == 2) throw new RuntimeException(); });\n" + 
-				"	^^^\n" + 
-				"The method foo(I) in the type X is not applicable for the arguments (() -> {\n" + 
-				"  if ((1 == 2))\n" + 
-				"      throw new RuntimeException();\n" + 
-				"})\n" + 
+				"	    ^^^^\n" + 
+				"This method must return a result of type int\n" + 
+				"----------\n" + 
+				"3. WARNING in X.java (at line 8)\n" + 
+				"	foo(()->{ if (1 == 2) throw new RuntimeException(); });\n" + 
+				"	                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n" + 
+				"Dead code\n" + 
 				"----------\n");
 }
 // https://bugs.eclipse.org/bugs/show_bug.cgi?id=401939, [1.8][compiler] Incorrect shape analysis leads to method resolution failure .
@@ -6837,11 +6863,6 @@ public void test412453() {
 		},
 		"----------\n" + 
 		"1. ERROR in X.java (at line 13)\n" + 
-		"	final Optional<Integer> min = empty.minBy((a, b) -> a - b);\n" + 
-		"	                                    ^^^^^\n" + 
-		"The method minBy(Function<Integer,C>) in the type Y<Integer> is not applicable for the arguments ((<no type> a, <no type> b) -> (a - b))\n" + 
-		"----------\n" + 
-		"2. ERROR in X.java (at line 13)\n" + 
 		"	final Optional<Integer> min = empty.minBy((a, b) -> a - b);\n" + 
 		"	                                          ^^^^^^^^^^^^^^^\n" + 
 		"Lambda expression\'s signature does not match the signature of the functional interface method\n" + 

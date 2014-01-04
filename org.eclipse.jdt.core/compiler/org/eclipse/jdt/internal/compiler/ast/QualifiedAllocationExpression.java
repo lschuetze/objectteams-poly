@@ -30,6 +30,7 @@
  *								Bug 392238 - [1.8][compiler][null] Detect semantically invalid null type annotations
  *								Bug 417295 - [1.8[[null] Massage type annotated null analysis to gel well with deep encoded type bindings.
  *								Bug 416267 - NPE in QualifiedAllocationExpression.resolveType
+ *								Bug 400874 - [1.8][compiler] Inference infrastructure should evolve to meet JLS8 18.x (Part G of JSR335 spec)
  *								Bug 418235 - [compiler][null] Unreported nullness error when using generic
  *     Jesper S Moller <jesper@selskabet.org> - Contributions for
  *								bug 378674 - "The method can be declared as static" is wrong
@@ -450,10 +451,11 @@ public static abstract class AbstractQualifiedAllocationExpression extends Alloc
 		}
 
 		// resolve type arguments (for generic constructor call)
+		long sourceLevel = scope.compilerOptions().sourceLevel;
 		final boolean isDiamond = this.type != null && (this.type.bits & ASTNode.IsDiamond) != 0;
 		if (this.typeArguments != null) {
 			int length = this.typeArguments.length;
-			boolean argHasError = scope.compilerOptions().sourceLevel < ClassFileConstants.JDK1_5;
+			boolean argHasError = sourceLevel < ClassFileConstants.JDK1_5;
 			this.genericTypeArguments = new TypeBinding[length];
 			for (int i = 0; i < length; i++) {
 				TypeReference typeReference = this.typeArguments[i];
@@ -484,7 +486,6 @@ public static abstract class AbstractQualifiedAllocationExpression extends Alloc
 		if (this.arguments != null) {
 			int length = this.arguments.length;
 			argumentTypes = new TypeBinding[length];
-			TypeBinding argumentType;
 			for (int i = 0; i < length; i++) {
 				Expression argument = this.arguments[i];
 				if (argument instanceof CastExpression) {
@@ -492,10 +493,10 @@ public static abstract class AbstractQualifiedAllocationExpression extends Alloc
 					argsContainCast = true;
 				}
 				argument.setExpressionContext(INVOCATION_CONTEXT);
-				if ((argumentType = argumentTypes[i] = argument.resolveType(scope)) == null){
+				if ((argumentTypes[i] = argument.resolveType(scope)) == null){
 					hasError = true;
 				}
-				if (argumentType != null && argumentType.kind() == Binding.POLY_TYPE)
+				if (sourceLevel >= ClassFileConstants.JDK1_8 && argument.isPolyExpression())
 					polyExpressionSeen = true;
 			}
 		}
@@ -573,14 +574,12 @@ public static abstract class AbstractQualifiedAllocationExpression extends Alloc
                     null, this.arguments, scope);
           try {
    	// orig:
-  			this.binding = scope.getConstructor(allocationType, argumentTypes, this);
+			this.binding = findConstructorBinding(scope, this, allocationType, argumentTypes, polyExpressionSeen);
     // :giro
           } finally {
                 AnchorMapping.removeCurrentMapping(anchorMapping);
           }
 // SH}
-			if (polyExpressionSeen)
-				resolvePolyExpressionArguments(scope, this.binding, this.arguments, argumentTypes);
 
 			if (this.binding.isValidBinding()) {	
 				if (isMethodUseDeprecated(this.binding, scope, true)) {
@@ -663,9 +662,7 @@ public static abstract class AbstractQualifiedAllocationExpression extends Alloc
 		if ((this.resolvedType.tagBits & TagBits.HierarchyHasProblems) != 0) {
 			return null; // stop secondary errors
 		}
-		MethodBinding inheritedBinding = scope.getConstructor(anonymousSuperclass, argumentTypes, this);
-		if (polyExpressionSeen)
-			resolvePolyExpressionArguments(scope, inheritedBinding, this.arguments, argumentTypes);
+		MethodBinding inheritedBinding = findConstructorBinding(scope, this, anonymousSuperclass, argumentTypes, polyExpressionSeen);
 			
 		if (!inheritedBinding.isValidBinding()) {
 			if (inheritedBinding.declaringClass == null) {

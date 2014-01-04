@@ -17,6 +17,8 @@
  *        Andy Clement (GoPivotal, Inc) aclement@gopivotal.com - Contributions for
  *                          Bug 409245 - [1.8][compiler] Type annotations dropped when call is routed through a synthetic bridge method
  *                          Bug 409250 - [1.8][compiler] Various loose ends in 308 code generation
+ *        Stephan Herrmann - Contribution for
+ *							Bug 400874 - [1.8][compiler] Inference infrastructure should evolve to meet JLS8 18.x (Part G of JSR335 spec)
  *******************************************************************************/
 package org.eclipse.jdt.internal.eval;
 
@@ -266,10 +268,9 @@ public TypeBinding resolveType(BlockScope scope) {
   try  {
 	anchorMapping = beforeMethodLookup(argumentTypes, scope);
 //jwl}
-	this.binding =
-		this.receiver.isImplicitThis()
-			? scope.getImplicitMethod(this.selector, argumentTypes, this)
-			: scope.getMethod(this.actualReceiverType, this.selector, argumentTypes, this);
+
+	findMethodBinding(scope, argumentTypes, polyExpressionSeen);
+
 //{ObjectTeams:
   } finally {
 	afterMethodLookup(scope, anchorMapping, argumentTypes, this.binding.returnType);  
@@ -277,10 +278,7 @@ public TypeBinding resolveType(BlockScope scope) {
 	   	AnchorMapping.removeCurrentMapping(anchorMapping);
   }
 //jwl}
-	
-	if (polyExpressionSeen)
-		resolvePolyExpressionArguments(scope, this.binding, this.arguments, argumentTypes);
-	
+
 	if (!this.binding.isValidBinding()) {
 		if (this.binding instanceof ProblemMethodBinding
 			&& ((ProblemMethodBinding) this.binding).problemId() == ProblemReasons.NotVisible) {
