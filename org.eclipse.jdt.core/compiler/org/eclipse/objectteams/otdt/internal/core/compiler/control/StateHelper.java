@@ -27,6 +27,7 @@ import org.eclipse.jdt.internal.compiler.lookup.ClassScope;
 import org.eclipse.jdt.internal.compiler.lookup.LocalTypeBinding;
 import org.eclipse.jdt.internal.compiler.lookup.ReferenceBinding;
 import org.eclipse.jdt.internal.compiler.lookup.SourceTypeBinding;
+import org.eclipse.jdt.internal.compiler.lookup.TypeBinding;
 import org.eclipse.objectteams.otdt.internal.core.compiler.model.RoleModel;
 import org.eclipse.objectteams.otdt.internal.core.compiler.model.TypeModel;
 
@@ -240,7 +241,7 @@ public class StateHelper
 			return false; // most treatment not needed for binary types
 		SourceTypeBinding sourceType = (SourceTypeBinding) type;
 		
-		if (sourceType.outermostEnclosingType().erasure() == requestingSite.outermostEnclosingType().erasure() 
+		if (TypeBinding.equalsEquals(sourceType.outermostEnclosingType().erasure(), requestingSite.outermostEnclosingType().erasure()) 
 				|| CharOperation.equals(type.getFileName(), requestingSite.getFileName()))
 			return false; // could infinitely recurse to the same inclosing of kind
 			

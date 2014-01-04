@@ -22,6 +22,7 @@ import java.util.Comparator;
 import org.eclipse.jdt.internal.compiler.ast.TypeDeclaration;
 import org.eclipse.jdt.internal.compiler.lookup.ReferenceBinding;
 import org.eclipse.jdt.internal.compiler.lookup.SourceTypeBinding;
+import org.eclipse.jdt.internal.compiler.lookup.TypeBinding;
 import org.eclipse.jdt.internal.compiler.lookup.TypeIds;
 import org.eclipse.objectteams.otdt.core.exceptions.InternalCompilerError;
 import org.eclipse.objectteams.otdt.internal.core.compiler.model.RoleModel;
@@ -80,12 +81,12 @@ public class Sorting {
 	{
 		if (   superclass != null // inspecting super of Confined?
 			&& superclass.id != TypeIds.T_JavaLangObject
-			&& superclass.enclosingType() == enclosing) // is super within scope?
+			&& TypeBinding.equalsEquals(superclass.enclosingType(), enclosing)) // is super within scope?
 		{
 			// search superclass within input:
 			int j = 0;
 			for(j=0; j<input.length; j++)
-				if (input[j] == superclass)
+				if (TypeBinding.equalsEquals(input[j], superclass))
 					break;
 			if (j < input.length)
 				// depth first traversal:
@@ -110,7 +111,7 @@ public class Sorting {
 			public int compare(RoleModel o1, RoleModel o2) {
 				ReferenceBinding b1 = o1.getBaseTypeBinding();
 				ReferenceBinding b2 = o2.getBaseTypeBinding();
-				if (b1 == b2)
+				if (TypeBinding.equalsEquals(b1, b2))
 					return 0;
 				if (b1 != null && b1.id != TypeIds.T_JavaLangObject) {
 					if (b2 == null || b2.id == TypeIds.T_JavaLangObject)
@@ -161,7 +162,7 @@ public class Sorting {
 		{
 			boolean inScope = false;
 			for (RoleModel rm : input)
-				if (rm != null && rm.getBinding() == superclass) {
+				if (rm != null && TypeBinding.equalsEquals(rm.getBinding(), superclass)) {
 					inScope = true;
 					break;
 				}
@@ -170,7 +171,7 @@ public class Sorting {
 				// search superclass within input:
 				int j = 0;
 				for(j=0; j<input.length; j++)
-					if (input[j] != null && input[j].getBinding() == superclass)
+					if (input[j] != null && TypeBinding.equalsEquals(input[j].getBinding(), superclass))
 						break;
 				if (j < input.length)
 					// depth first traversal:
@@ -194,7 +195,7 @@ public class Sorting {
 				continue; // no AST: phantom or reused rofi
 			// find corresponding AST
 			for (int j=0; j<unsorted.length; j++) {
-				if (unsorted[j].binding == current) {
+				if (TypeBinding.equalsEquals(unsorted[j].binding, current)) {
 					newMembers[l++] = unsorted[j];
 					continue allMembers;
 				}

@@ -70,7 +70,7 @@ public class WildcardBinding extends ReferenceBinding {
 //{ObjectTeams: role wrapping?
 	public TypeBinding maybeWrapQualifiedRoleType(Scope scope, Expression anchorExpr, ASTNode typedNode) {
     	TypeBinding wrappedBound = RoleTypeCreator.maybeWrapQualifiedRoleType(scope, anchorExpr, this.bound, typedNode);
-    	if (wrappedBound == this.bound)
+    	if (wrappedBound == this.bound) //$IDENTITY-COMPARISON$
     		return this;
     	// TODO: wrap otherBounds?
     	return new WildcardBinding(this.genericType, this.rank, wrappedBound, this.otherBounds, this.boundKind, this.environment);
@@ -81,7 +81,7 @@ public class WildcardBinding extends ReferenceBinding {
 		boolean haveChange = false;
 		if (this.bound instanceof ReferenceBinding) {
 			newBound = updater.updateArg((ReferenceBinding) this.bound);
-			haveChange = newBound != this.bound;
+			haveChange = newBound != this.bound; //$IDENTITY-COMPARISON$
 		}
 		TypeBinding[] newOtherBounds = null;
 		if (this.otherBounds != null) {
@@ -89,7 +89,7 @@ public class WildcardBinding extends ReferenceBinding {
 			for (int i = 0; i < this.otherBounds.length; i++) {
 				if (this.otherBounds[i] instanceof ReferenceBinding) {
 					newOtherBounds[i] = updater.updateArg((ReferenceBinding) this.otherBounds[i]);
-					haveChange |= newOtherBounds[i] != this.otherBounds[i];
+					haveChange |= newOtherBounds[i] != this.otherBounds[i]; //$IDENTITY-COMPARISON$
 				} else {
 					newOtherBounds[i] = this.otherBounds[i];
 				}

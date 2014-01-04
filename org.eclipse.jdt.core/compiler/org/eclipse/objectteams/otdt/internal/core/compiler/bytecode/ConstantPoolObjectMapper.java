@@ -200,9 +200,9 @@ public class ConstantPoolObjectMapper implements ClassFileConstants{
 					ReferenceBinding currentDstTeam = dstTeam;
 					while (   currentSrcTeam != null
 						   && currentDstTeam != null) {
-						if(refTeamBinding == currentSrcTeam)	{
+						if(TypeBinding.equalsEquals(refTeamBinding, currentSrcTeam)) {
 							// mapping the enclosing team which is nested in an outer team?
-							if (refTypeBinding == refTeamBinding && refTypeBinding.isRole())
+							if (TypeBinding.equalsEquals(refTypeBinding, refTeamBinding) && refTypeBinding.isRole())
 								newBinding = currentDstTeam;
 							else
 								newBinding = searchRoleClass(refTypeBinding, currentDstTeam);
@@ -211,7 +211,7 @@ public class ConstantPoolObjectMapper implements ClassFileConstants{
 						// try dependent refinement of base classes:
 						ReferenceBinding srcBase = currentSrcTeam.baseclass();
 						if (srcBase != null && (srcBase.isTeam() || srcBase.isRole())) {
-							if (srcBase == refTypeBinding)
+							if (TypeBinding.equalsEquals(srcBase, refTypeBinding))
 								newBinding = currentDstTeam.baseclass();
 							else
 								newBinding = searchRoleClass(refTypeBinding, currentDstTeam.baseclass());
@@ -267,10 +267,10 @@ public class ConstantPoolObjectMapper implements ClassFileConstants{
 				if(refTeamBinding!=null){
 					ReferenceBinding srcTeamBinding = getTeam(srcMethod);
 					if(srcTeamBinding!=null){
-						if(refTeamBinding==srcTeamBinding){
+						if(TypeBinding.equalsEquals(refTeamBinding, srcTeamBinding)) {
 							FieldBinding newBinding=searchRoleField(refFieldBinding, dstTeam);
 							if (   newBinding != null
-								&& newBinding.declaringClass != dstTeam
+								&& TypeBinding.notEquals(newBinding.declaringClass, dstTeam)
 								&& !TeamModel.isTeamContainingRole(dstTeam, newBinding.declaringClass))
 							{
 								// field is declared neither in dstTeam nor one of its roles.
@@ -278,7 +278,7 @@ public class ConstantPoolObjectMapper implements ClassFileConstants{
 								ReferenceBinding updatedClass =
 									(ReferenceBinding)mapClass(srcMethod, newBinding.declaringClass, dstTeam);
 								// update field binding to new declaring class?
-								if (newBinding.declaringClass != updatedClass)
+								if (TypeBinding.notEquals(newBinding.declaringClass, updatedClass))
 									newBinding = new FieldBinding(newBinding, updatedClass);
 							}
 							return newBinding;
@@ -369,7 +369,7 @@ public class ConstantPoolObjectMapper implements ClassFileConstants{
 						MethodBinding newBinding=searchRoleMethodInTeam(dstTeam, refMethodBinding, addMarkerArgAllowed);
 						if (newBinding == null) {
 							// indirect tsuper may not be copied to this class:
-							if (srcTeamBinding != refTeamBinding)
+							if (TypeBinding.notEquals(srcTeamBinding, refTeamBinding))
 								return refMethodBinding;
 							// is the method (inherited from a non role and) adjusted by getUpdatedMethodBinding?
 							if (!hasMethod(refMethodBinding.declaringClass, refMethodBinding))
@@ -394,7 +394,7 @@ public class ConstantPoolObjectMapper implements ClassFileConstants{
 		if (!CharOperation.equals(refMethodBinding.declaringClass.compoundName, IOTConstants.ORG_OBJECTTEAMS_TEAM_OTCONFINED))
 			return false;
 		// is it the superclass of the current src class?
-		if (refMethodBinding.declaringClass == srcMethod.declaringClass.superclass())
+		if (TypeBinding.equalsEquals(refMethodBinding.declaringClass, srcMethod.declaringClass.superclass()))
 			return true;
 		// current src class may have no super class which is OK if it is Team.__OT__Confined
 		return
@@ -470,7 +470,7 @@ public class ConstantPoolObjectMapper implements ClassFileConstants{
 				if (methods[i].parameters.length != refMethod.parameters.length)
 					continue;
 				for (int j = 0; j < methods[i].parameters.length; j++) {
-					if (methods[i].parameters[j] != refMethod.parameters[j]) // non-variant
+					if (TypeBinding.notEquals(methods[i].parameters[j], refMethod.parameters[j])) // non-variant
 						continue;
 				}
 				return methods[i];
@@ -546,7 +546,7 @@ public class ConstantPoolObjectMapper implements ClassFileConstants{
 		ReferenceBinding rightEnclosing = right.enclosingType();
 		if (leftEnclosing == null || rightEnclosing == null)
 			return false;
-		if (leftEnclosing == rightEnclosing)
+		if (TypeBinding.equalsEquals(leftEnclosing, rightEnclosing))
 			return true;
 		return haveCommonEnclosingType(leftEnclosing, rightEnclosing);
 	}
@@ -578,7 +578,7 @@ public class ConstantPoolObjectMapper implements ClassFileConstants{
 			for (MethodBinding other: otherMethods) {
 				if (other != candidate && other.parameters.length == candidate.parameters.length) {
 					for(int i=0; i<other.parameters.length; i++)
-						if (other.parameters[i] != candidate.parameters[i])
+						if (TypeBinding.notEquals(other.parameters[i], candidate.parameters[i]))
 							continue methods;
 					if (other == toLookFor)
 						return currentRank;

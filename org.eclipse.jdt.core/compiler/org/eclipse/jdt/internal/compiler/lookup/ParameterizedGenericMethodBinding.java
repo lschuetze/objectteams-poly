@@ -616,7 +616,7 @@ public class ParameterizedGenericMethodBinding extends ParameterizedMethodBindin
 	 */
 	public TypeVariableBinding reverseSubstitute(TypeVariableBinding specificVariable) {
 		int length = this.typeArguments.length;
-		if (specificVariable.rank < length && this.typeArguments[specificVariable.rank] == specificVariable)
+		if (specificVariable.rank < length && TypeBinding.equalsEquals(this.typeArguments[specificVariable.rank], specificVariable))
 			return this.originalMethod.typeVariables[specificVariable.rank];
 		return specificVariable;
 	}

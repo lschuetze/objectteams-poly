@@ -65,6 +65,7 @@ import org.eclipse.jdt.internal.compiler.impl.IrritantSet;
 import org.eclipse.jdt.internal.compiler.impl.ReferenceContext;
 import org.eclipse.jdt.internal.compiler.lookup.ReferenceBinding;
 import org.eclipse.jdt.internal.compiler.lookup.SourceTypeBinding;
+import org.eclipse.jdt.internal.compiler.lookup.TypeBinding;
 import org.eclipse.jdt.internal.compiler.lookup.TypeConstants;
 import org.eclipse.jdt.internal.compiler.parser.RecoveryScannerData;
 import org.eclipse.jdt.internal.compiler.problem.DefaultProblem;
@@ -589,7 +590,7 @@ public String toString(){
 public ClassFile findClassFile(ReferenceBinding typeBinding) {
 	for (Object cfObj : this.compiledTypes.values()) {
 		ClassFile classFile = (ClassFile) cfObj;
-		if (classFile.referenceBinding == typeBinding)
+		if (TypeBinding.equalsEquals(classFile.referenceBinding, typeBinding))
 			return classFile;
 	}
 	return null;
