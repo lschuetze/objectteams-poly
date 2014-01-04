@@ -378,7 +378,8 @@ public TypeBinding resolveType(BlockScope scope) {
 // SH}
 			this.resolvedType = this.type.resolveType(scope, true /* check bounds*/);
 			if (isDiamond && this.typeExpected == null && this.expressionContext == INVOCATION_CONTEXT && compilerOptions.sourceLevel >= ClassFileConstants.JDK1_8) {
-				return this.resolvedType = new PolyTypeBinding(this);
+				if (this.resolvedType != null && this.resolvedType.isValidBinding())
+					return new PolyTypeBinding(this);
 			}
 		}
 	} else {
@@ -508,8 +509,9 @@ public TypeBinding resolveType(BlockScope scope) {
 	  Dependencies.ensureBindingState(allocationType, ITranslationStates.STATE_LENV_DONE_FIELDS_AND_METHODS);
 // SH}
 	this.binding = scope.getConstructor(allocationType, argumentTypes, this);
-	if (polyExpressionSeen && polyExpressionsHaveErrors(scope, this.binding, this.arguments, argumentTypes))
-		return null;
+	if (polyExpressionSeen) 
+		resolvePolyExpressionArguments(scope, this.binding, this.arguments, argumentTypes);
+	
 	if (!this.binding.isValidBinding()) {
 //{ObjectTeams: baseclass decapsulation?
 	  boolean baseclassDecapsulationAllowed =
@@ -765,7 +767,7 @@ public void setExpressionContext(ExpressionContext context) {
 }
 
 public boolean isCompatibleWith(TypeBinding left, Scope scope) {
-	return this.type.resolvedType != null && this.type.resolvedType.actualType().isCompatibleWith(left.actualType());
+	return this.type.resolvedType != null && left.actualType() != null && this.type.resolvedType.actualType().isCompatibleWith(left.actualType());
 }
 
 public boolean isPolyExpression() {

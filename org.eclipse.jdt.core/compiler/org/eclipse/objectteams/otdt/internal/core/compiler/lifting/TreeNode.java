@@ -23,6 +23,7 @@ package org.eclipse.objectteams.otdt.internal.core.compiler.lifting;
 import java.util.Vector;
 
 import org.eclipse.jdt.internal.compiler.lookup.ReferenceBinding;
+import org.eclipse.jdt.internal.compiler.lookup.TypeBinding;
 import org.eclipse.objectteams.otdt.internal.core.compiler.model.RoleModel;
 
 
@@ -249,28 +250,18 @@ public class TreeNode
 
     public TreeNode find(ReferenceBinding binding)
     {
-        if (getTreeObject().getBinding() == binding)
-        {
-
+        if (TypeBinding.equalsEquals(getTreeObject().getBinding(), binding)) {
             return this;
-        }
-        else
-        {
-            if (hasChildren())
-            {
-                for (int i = 0; i < this.children.length; i++)
-                {
+        } else {
+            if (hasChildren()) {
+                for (int i = 0; i < this.children.length; i++) {
                     TreeNode childNode = this.children[i];
                     TreeNode node = childNode.find(binding);
                     if (node != null)
-                    {
-
-                        return node;
-                    }
+						return node;
                 }
             }
         }
-
         return null;
     }
 }

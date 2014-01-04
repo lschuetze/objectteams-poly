@@ -227,6 +227,7 @@ Goal ::= '%' Expression
 Goal ::= '%' ArrayInitializer
 -- completion parser
 Goal ::= '~' BlockStatementsopt
+Goal ::= '{' BlockStatementopt
 -- source type converter
 Goal ::= '||' MemberValue
 -- syntax diagnosis
@@ -1442,10 +1443,19 @@ OpenBlock ::= $empty
 /.$putCase consumeOpenBlock() ; $break ./
 /:$readableName OpenBlock:/
 
-BlockStatements -> BlockStatement
+BlockStatements ::= BlockStatement
+/.$putCase consumeBlockStatement() ; $break ./
+/:$readableName BlockStatements:/
 BlockStatements ::= BlockStatements BlockStatement
 /.$putCase consumeBlockStatements() ; $break ./
 /:$readableName BlockStatements:/
+
+-- Production name hardcoded in parser. Must be ::= and not -> 
+BlockStatementopt ::= BlockStatementopt0
+/:$readableName BlockStatementopt:/
+BlockStatementopt0 -> $empty
+BlockStatementopt0 -> BlockStatement
+/:$readableName BlockStatementopt0:/
 
 BlockStatement -> LocalVariableDeclarationStatement
 BlockStatement -> Statement
@@ -1879,14 +1889,18 @@ LambdaExpression ::= LambdaParameters '->' LambdaBody
 /:$readableName LambdaExpression:/
 /:$compliance 1.8:/
 
-LambdaParameters ::= Identifier
+NestedLambda ::= $empty
+/.$putCase consumeNestedLambda(); $break ./
+/:$readableName NestedLambda:/
+
+LambdaParameters ::= Identifier NestedLambda
 /.$putCase consumeTypeElidedLambdaParameter(false); $break ./
 /:$readableName TypeElidedFormalParameter:/
 /:$compliance 1.8:/
 
 -- to make the grammar LALR(1), the scanner transforms the input string to
 -- contain synthetic tokens to signal start of lambda parameter list.
-LambdaParameters -> BeginLambda LambdaParameterList
+LambdaParameters -> BeginLambda NestedLambda LambdaParameterList
 /:$readableName LambdaParameters:/
 /:$compliance 1.8:/
 
@@ -1914,8 +1928,7 @@ TypeElidedFormalParameter ::= Modifiersopt Identifier
 
 -- A lambda body of the form x is really '{' return x; '}'
 LambdaBody -> ElidedLeftBraceAndReturn Expression ElidedSemicolonAndRightBrace
-LambdaBody ::= NestedType NestedMethod  '{' BlockStatementsopt '}'
-/.$putCase consumeBlock(); $break ./
+LambdaBody -> Block
 /:$readableName LambdaBody:/
 /:$compliance 1.8:/
 

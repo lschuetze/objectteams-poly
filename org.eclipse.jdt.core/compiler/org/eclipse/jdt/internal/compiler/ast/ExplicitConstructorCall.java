@@ -567,8 +567,8 @@ public class ExplicitConstructorCall extends Statement implements InvocationSite
 	                    receiver, this.arguments, scope);
     // orig:
     			this.binding = scope.getConstructor(receiverType, argumentTypes, this);
-    			if (polyExpressionSeen && polyExpressionsHaveErrors(scope, this.binding, this.arguments, argumentTypes))
-    				return;
+    			if (polyExpressionSeen)
+    				resolvePolyExpressionArguments(scope, this.binding, this.arguments, argumentTypes);
 	// giro:
 
 				// check different reasons for changing the accessMode

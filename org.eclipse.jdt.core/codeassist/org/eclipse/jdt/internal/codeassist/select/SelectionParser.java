@@ -111,8 +111,10 @@ protected void attachOrphanCompletionNode(){
 		if (orphan instanceof Expression) {
 			buildMoreCompletionContext((Expression)orphan);
 		} else {
-			Statement statement = (Statement) orphan;
-			this.currentElement = this.currentElement.add(statement, 0);
+			if (lastIndexOfElement(K_LAMBDA_EXPRESSION_DELIMITER) < 0) { // lambdas are recovered up to the containing expression statement and will carry along the assist node anyways.
+				Statement statement = (Statement) orphan;
+				this.currentElement = this.currentElement.add(statement, 0);
+			}
 		}
 		this.currentToken = 0; // given we are not on an eof, we do not want side effects caused by looked-ahead token
 	}
@@ -172,12 +174,15 @@ private void buildMoreCompletionContext(Expression expression) {
 				break nextElement;
 		}
 	}
-	if(parentNode != null) {
-		this.currentElement = this.currentElement.add((Statement)parentNode, 0);
-	} else {
-		this.currentElement = this.currentElement.add((Statement)wrapWithExplicitConstructorCallIfNeeded(expression), 0);
-		if(this.lastCheckPoint < expression.sourceEnd) {
-			this.lastCheckPoint = expression.sourceEnd + 1;
+	// Do not add assist node/parent into the recovery system if we are inside a lambda. The lambda will be fully recovered including the containing statement and added.
+	if (lastIndexOfElement(K_LAMBDA_EXPRESSION_DELIMITER) < 0) {
+		if(parentNode != null) {
+			this.currentElement = this.currentElement.add((Statement)parentNode, 0);
+		} else {
+			this.currentElement = this.currentElement.add((Statement)wrapWithExplicitConstructorCallIfNeeded(expression), 0);
+			if(this.lastCheckPoint < expression.sourceEnd) {
+				this.lastCheckPoint = expression.sourceEnd + 1;
+			}
 		}
 	}
 }
@@ -587,7 +592,7 @@ protected void consumeExitVariableWithInitialization() {
 	int end =  variable.initialization.sourceEnd;
 	if ((this.selectionStart < start) &&  (this.selectionEnd < start) ||
 			(this.selectionStart > end) && (this.selectionEnd > end)) {
-		variable.initialization = null;
+			variable.initialization = null;
 	}
 
 }
@@ -1217,6 +1222,9 @@ protected void consumeTypeImportOnDemandDeclarationName() {
 		this.restartRecovery = true; // used to avoid branching back into the regular automaton
 	}
 }
+protected CommitRollbackParser createSnapShotParser() {
+	return new SelectionParser(this.problemReporter);
+}
 public ImportReference createAssistImportReference(char[][] tokens, long[] positions, int mod){
 	return new SelectionOnImportReference(tokens, positions, mod);
 }
@@ -1437,6 +1445,15 @@ public void initializeScanner(){
 	this.scanner.setOTFlags(this.options);
 // SH}
 }
+public ReferenceExpression newReferenceExpression() {
+	char[] selector = this.identifierStack[this.identifierPtr];
+	if (selector != assistIdentifier()){
+		return super.newReferenceExpression();
+	}
+	ReferenceExpression referenceExpression = new SelectionOnReferenceExpressionName();
+	this.assistNode = referenceExpression;
+	return referenceExpression;
+}
 protected MessageSend newMessageSend() {
 	// '(' ArgumentListopt ')'
 	// the arguments are on the expression stack
@@ -1532,6 +1549,7 @@ public CompilationUnitDeclaration parse(ICompilationUnit sourceUnit, Compilation
 	selectionScanner.selectionEnd = end;
 	return super.parse(sourceUnit, compilationResult, -1, -1/*parse without reseting the scanner*/);
 }
+
 /*
  * Reset context so as to resume to regular parse loop
  * If unable to reset for resuming, answers false.
@@ -1539,23 +1557,29 @@ public CompilationUnitDeclaration parse(ICompilationUnit sourceUnit, Compilation
  * Move checkpoint location, reset internal stacks and
  * decide which grammar goal is activated.
  */
-protected boolean resumeAfterRecovery() {
+protected int resumeAfterRecovery() {
 
 	/* if reached assist node inside method body, but still inside nested type,
 		should continue in diet mode until the end of the method body */
 	if (this.assistNode != null
 		&& !(this.referenceContext instanceof CompilationUnitDeclaration)){
 		this.currentElement.preserveEnclosingBlocks();
+		if (requireExtendedRecovery()) {
+			if (this.unstackedAct != ERROR_ACTION) {
+				return RESUME;
+			}
+			return super.resumeAfterRecovery();
+		}
 		if (this.currentElement.enclosingType() == null) {
-			if(!(this.currentElement instanceof RecoveredType)) {
+			if (!(this.currentElement instanceof RecoveredType)) {
 				resetStacks();
-				return false;
+				return HALT;
 			}
 
-			RecoveredType recoveredType = (RecoveredType)this.currentElement;
-			if(recoveredType.typeDeclaration != null && recoveredType.typeDeclaration.allocation == this.assistNode){
+			RecoveredType recoveredType = (RecoveredType) this.currentElement;
+			if (recoveredType.typeDeclaration != null && recoveredType.typeDeclaration.allocation == this.assistNode) {
 				resetStacks();
-				return false;
+				return HALT;
 			}
 		}
 	}
@@ -1591,6 +1615,26 @@ protected void updateRecoveryState() {
 		got activated once.
 	*/
 	recoveryTokenCheck();
+}
+protected Argument typeElidedArgument() {
+	char[] selector = this.identifierStack[this.identifierPtr];
+	if (selector != assistIdentifier()){
+		return super.typeElidedArgument();
+	}	
+	this.identifierLengthPtr--;
+	char[] identifierName = this.identifierStack[this.identifierPtr];
+	long namePositions = this.identifierPositionStack[this.identifierPtr--];
+
+	Argument argument =
+		new SelectionOnArgumentName(
+			identifierName,
+			namePositions,
+			null, // elided type
+			ClassFileConstants.AccDefault,
+			true);
+	argument.declarationSourceStart = (int) (namePositions >>> 32);
+	this.assistNode = argument;
+	return argument;
 }
 //{ObjectTeams
 

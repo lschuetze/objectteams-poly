@@ -1133,7 +1133,7 @@ public Constant optimizedBooleanConstant() {
 	return this.constant;
 }
 
-public boolean isPertinentToApplicability() {
+public boolean isPertinentToApplicability(TypeBinding targetType) {
 	return true;
 }
 
@@ -1336,6 +1336,10 @@ public boolean sIsMoreSpecific(TypeBinding s, TypeBinding t) {
 
 public void tagAsEllipsisArgument() {
 	// don't care. Subclasses that are poly expressions in specific contexts should listen in and make note.
+}
+
+public boolean isExactMethodReference() {
+	return false;
 }
 
 /* Answer if the receiver is a poly expression in the prevailing context. Caveat emptor: Some constructs (notably method calls)

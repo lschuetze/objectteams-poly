@@ -34,7 +34,7 @@ public class RecoveredField extends RecoveredElement {
 
 	public RecoveredAnnotation[] annotations;
 	public int annotationCount;
-
+	
 	public int modifiers;
 	public int modifiersStart;
 

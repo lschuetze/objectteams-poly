@@ -461,7 +461,7 @@ public FlowInfo analyseCode(BlockScope currentScope, FlowContext flowContext,
 			
 			if (this.originalValueIfTrueType.kind() == Binding.POLY_TYPE || this.originalValueIfFalseType.kind() == Binding.POLY_TYPE) {
 				this.isPolyExpression = true;
-				return this.resolvedType = new PolyTypeBinding(this);
+				return new PolyTypeBinding(this);
 			}
 		} else {
 			if (this.originalValueIfTrueType.kind() == Binding.POLY_TYPE)
@@ -649,8 +649,8 @@ public FlowInfo analyseCode(BlockScope currentScope, FlowContext flowContext,
 		this.expressionContext = context;
 	}
 	
-	public boolean isPertinentToApplicability() {
-		return this.valueIfTrue.isPertinentToApplicability() && this.valueIfFalse.isPertinentToApplicability();
+	public boolean isPertinentToApplicability(TypeBinding targetType) {
+		return this.valueIfTrue.isPertinentToApplicability(targetType) && this.valueIfFalse.isPertinentToApplicability(targetType);
 	}
 	
 	public boolean isPolyExpression() throws UnsupportedOperationException {

@@ -931,7 +931,7 @@ public abstract class Annotation extends Expression {
 			case Binding.TYPE :
 			case Binding.GENERIC_TYPE :
 				if (((ReferenceBinding)annotation.recipient).isAnnotationType()) {
-					if ((metaTagBits & (TagBits.AnnotationForAnnotationType | TagBits.AnnotationForType)) != 0)
+					if ((metaTagBits & (TagBits.AnnotationForAnnotationType | TagBits.AnnotationForType | TagBits.AnnotationForTypeUse)) != 0)
 					return true;
 				} else if ((metaTagBits & (TagBits.AnnotationForType | TagBits.AnnotationForTypeUse)) != 0) {
 					return true;

@@ -934,6 +934,7 @@ public void _test011_problem_categories() {
 		expectedProblemAttributes.put("ReturnTypeCannotBeVoidArray", DEPRECATED);
 		expectedProblemAttributes.put("ReturnTypeInheritedNameHidesEnclosingName", DEPRECATED);
 		expectedProblemAttributes.put("ReturnTypeInternalNameProvided", DEPRECATED);
+		expectedProblemAttributes.put("ReturnTypeMismatch", new ProblemAttributes(CategorizedProblem.CAT_TYPE));
 		expectedProblemAttributes.put("ReturnTypeNotFound", DEPRECATED);
 		expectedProblemAttributes.put("ReturnTypeNotVisible", DEPRECATED);
 		expectedProblemAttributes.put("SafeVarargsOnFixedArityMethod", new ProblemAttributes(CategorizedProblem.CAT_MEMBER));
@@ -1826,6 +1827,7 @@ public void test012_compiler_problems_tuning() {
 		expectedProblemAttributes.put("ReturnTypeCannotBeVoidArray", SKIP);
 		expectedProblemAttributes.put("ReturnTypeInheritedNameHidesEnclosingName", SKIP);
 		expectedProblemAttributes.put("ReturnTypeInternalNameProvided", SKIP);
+		expectedProblemAttributes.put("ReturnTypeMismatch", SKIP);
 		expectedProblemAttributes.put("ReturnTypeNotFound", SKIP);
 		expectedProblemAttributes.put("ReturnTypeNotVisible", SKIP);
 		expectedProblemAttributes.put("SafeVarargsOnFixedArityMethod", SKIP);

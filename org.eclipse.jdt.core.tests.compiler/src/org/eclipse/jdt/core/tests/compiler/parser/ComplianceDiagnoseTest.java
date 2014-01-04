@@ -1983,60 +1983,71 @@ public void test0042() {
 	};
 
 	String expected13ProblemLog =
-		"----------\n" +
-		"1. ERROR in X.java (at line 7)\n" +
-		"	public void run() {\n" +
-		"		}\n" +
-		"	};\n" +
-		"}\n" +
-		"	       ^^^^^^^^^^^^^^^^^^^^^^\n" +
-		"Syntax error on tokens, delete these tokens\n" +
-		"----------\n";
+			"----------\n" + 
+			"1. ERROR in X.java (at line 1)\n" + 
+			"	void ___eval() {\n" + 
+			"	^^^^^^^^^^^^^^\n" + 
+			"Syntax error on tokens, delete these tokens\n" + 
+			"----------\n" + 
+			"2. ERROR in X.java (at line 2)\n" + 
+			"	new Runnable() {\n" + 
+			"		int ___run() throws Throwable {\n" + 
+			"			return blah;\n" + 
+			"		}\n" + 
+			"		private String blarg;\n" + 
+			"		public void run() {\n" + 
+			"		}\n" + 
+			"	};\n" + 
+			"}\n" + 
+			"	^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n" + 
+			"Syntax error on tokens, delete these tokens\n" + 
+			"----------\n";
 	String expected14ProblemLog =
 		expected13ProblemLog;
 
 	String expected15ProblemLog =
-		"----------\n" +
-		"1. ERROR in X.java (at line 1)\n" +
-		"	void ___eval() {\n" +
-		"	^^^^\n" +
-		"Syntax error on token \"void\", @ expected\n" +
-		"----------\n" +
-		"2. ERROR in X.java (at line 1)\n" +
-		"	void ___eval() {\n" +
-		"	             ^\n" +
-		"Syntax error on token \")\", delete this token\n" +
-		"----------\n" +
-		"3. ERROR in X.java (at line 9)\n" +
-		"	};\n" +
-		"	^\n" +
-		"Syntax error on token \"}\", { expected\n" +
-		"----------\n" +
-		"4. ERROR in X.java (at line 23)\n" +
-		"	}\n" +
-		"	^\n" +
-		"Syntax error, insert \"}\" to complete ClassBody\n" +
-		"----------\n" +
-		"5. ERROR in X.java (at line 23)\n" +
-		"	}\n" +
-		"	^\n" +
-		"Syntax error, insert \"}\" to complete MemberValue\n" +
-		"----------\n" +
-		"6. ERROR in X.java (at line 23)\n" +
-		"	}\n" +
-		"	^\n" +
-		"Syntax error, insert \")\" to complete Modifiers\n" +
-		"----------\n" +
-		"7. ERROR in X.java (at line 23)\n" +
-		"	}\n" +
-		"	^\n" +
-		"Syntax error, insert \"enum Identifier\" to complete EnumHeader\n" +
-		"----------\n" +
-		"8. ERROR in X.java (at line 23)\n" +
-		"	}\n" +
-		"	^\n" +
-		"Syntax error, insert \"EnumBody\" to complete CompilationUnit\n" +
-		"----------\n";
+			"----------\n" + 
+			"1. ERROR in X.java (at line 1)\n" + 
+			"	void ___eval() {\n" + 
+			"	^^^^\n" + 
+			"Syntax error on token \"void\", @ expected\n" + 
+			"----------\n" + 
+			"2. ERROR in X.java (at line 1)\n" + 
+			"	void ___eval() {\n" + 
+			"	             ^\n" + 
+			"Syntax error on token \")\", delete this token\n" + 
+			"----------\n" + 
+			"3. ERROR in X.java (at line 9)\n" + 
+			"	};\n" + 
+			"}\n" + 
+			"	^^^^\n" + 
+			"Syntax error on tokens, delete these tokens\n" + 
+			"----------\n" + 
+			"4. ERROR in X.java (at line 23)\n" + 
+			"	}\n" + 
+			"	^\n" + 
+			"Syntax error, insert \"}\" to complete ClassBody\n" + 
+			"----------\n" + 
+			"5. ERROR in X.java (at line 23)\n" + 
+			"	}\n" + 
+			"	^\n" + 
+			"Syntax error, insert \"}\" to complete MemberValue\n" + 
+			"----------\n" + 
+			"6. ERROR in X.java (at line 23)\n" + 
+			"	}\n" + 
+			"	^\n" + 
+			"Syntax error, insert \")\" to complete Modifiers\n" + 
+			"----------\n" + 
+			"7. ERROR in X.java (at line 23)\n" + 
+			"	}\n" + 
+			"	^\n" + 
+			"Syntax error, insert \"enum Identifier\" to complete EnumHeader\n" + 
+			"----------\n" + 
+			"8. ERROR in X.java (at line 23)\n" + 
+			"	}\n" + 
+			"	^\n" + 
+			"Syntax error, insert \"EnumBody\" to complete CompilationUnit\n" + 
+			"----------\n";
 
 	runComplianceParserTest(
 		testFiles,
@@ -2882,7 +2893,7 @@ public void test0062() {
 			"----------\n" + 
 			"1. ERROR in X.java (at line 5)\n" + 
 			"	I i = p -> 10 + 20 + 30;\n" + 
-			"	      ^^^^^^^^^^^^^^^^^\n" + 
+			"	      ^^^^^^^^^^^^^^^^^\n" +
 			"Lambda expressions are allowed only at source level 1.8 or above\n" + 
 			"----------\n";
 
@@ -2928,7 +2939,7 @@ public void test0063() {
 			"----------\n" + 
 			"3. ERROR in X.java (at line 6)\n" + 
 			"	I i2 = (p) -> 10;\n" + 
-			"	       ^^^^^^^^^\n" + 
+			"	       ^^^^^^^^^\n" +
 			"Lambda expressions are allowed only at source level 1.8 or above\n" + 
 			"----------\n";
 
@@ -3066,12 +3077,12 @@ public void testBug399773() {
 			"----------\n" + 
 			"4. ERROR in X.java (at line 10)\n" + 
 			"	Object p = (I & J) () -> {};\n" + 
-			"	                   ^^^^^^^^\n" + 
+			"	                   ^^^^^\n" +
 			"Lambda expressions are allowed only at source level 1.8 or above\n" + 
 			"----------\n" + 
 			"5. ERROR in X.java (at line 10)\n" + 
 			"	Object p = (I & J) () -> {};\n" + 
-			"	                   ^^^^^^^^\n" + 
+			"	                   ^^^^^\n" +
 			"The target type of this expression must be a functional interface\n" + 
 			"----------\n";
 
@@ -3370,5 +3381,27 @@ public void test406846() {
 			expectedProblemLog,
 			expectedProblemLog
 	);
+}
+// https://bugs.eclipse.org/bugs/show_bug.cgi?id=401850: [1.8][compiler] Compiler fails to type poly allocation expressions in method invocation contexts
+public void test401850() {
+	
+	if (this.complianceLevel < ClassFileConstants.JDK1_7)
+		return;
+	this.runConformTest(
+			new String[] {
+				"X.java",
+				"public class X<T> {\n" +
+				"   static void foo(Object o) {\n" +
+				"	   System.out.println(\"foo(Object)\");\n" +
+				"   }\n" +
+				"   static void foo(X<String> o) {\n" +
+				"	   System.out.println(\"foo(X<String>)\");\n" +
+				"   }\n" +
+				"   public static void main(String[] args) { \n" +
+				"      foo(new X<>()); \n" +
+				"   } \n" +
+				"}\n",
+			},
+			this.complianceLevel == ClassFileConstants.JDK1_7 ? "foo(Object)" : "foo(X<String>)");
 }
 }

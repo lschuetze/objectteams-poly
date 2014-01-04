@@ -26,6 +26,7 @@ import java.util.List;
 import java.util.Vector;
 
 import org.eclipse.jdt.internal.compiler.lookup.ReferenceBinding;
+import org.eclipse.jdt.internal.compiler.lookup.TypeBinding;
 import org.eclipse.objectteams.otdt.core.compiler.ISMAPConstants;
 
 /** This class provides linenumbers which are greater than maximal linenumber of given type.
@@ -98,7 +99,7 @@ public class LineNumberProvider
     	List <LineInfo>lineInfos = this._sourceToLineInfos.get(copySrc);
 
     	int outputStartLine;
-    	if (copySrc != this._referenceBinding && inputStartLine < ISMAPConstants.STEP_INTO_LINENUMBER)
+    	if (TypeBinding.notEquals(copySrc, this._referenceBinding) && inputStartLine < ISMAPConstants.STEP_INTO_LINENUMBER)
     		// map "foreign" lines to numbers above the current file's max:
     		return getRemappedLineNumber(copySrc, lineInfos, inputStartLine, repeatCount);
 

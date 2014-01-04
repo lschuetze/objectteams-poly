@@ -605,6 +605,7 @@ public final class SelectionEngine extends Engine implements ISearchRequestor {
 				switch (token) {
 					case TerminalTokens.TokenNamethis:
 					case TerminalTokens.TokenNamesuper:
+					case TerminalTokens.TokenNamenew:
 					case TerminalTokens.TokenNameIdentifier:
 //{ObjectTeams
 					case TerminalTokens.TokenNamebase:
@@ -638,6 +639,7 @@ public final class SelectionEngine extends Engine implements ISearchRequestor {
 				switch (token) {
 					case TerminalTokens.TokenNamethis :
 					case TerminalTokens.TokenNamesuper :
+					case TerminalTokens.TokenNamenew :
 					case TerminalTokens.TokenNameIdentifier :
 //{ObjectTeams
 					case TerminalTokens.TokenNamebase :
@@ -654,6 +656,7 @@ public final class SelectionEngine extends Engine implements ISearchRequestor {
 						}
 						expectingIdentifier = false;
 						break;
+					case TerminalTokens.TokenNameCOLON_COLON:	
 					case TerminalTokens.TokenNameDOT :
 						if (expectingIdentifier)
 							return false;

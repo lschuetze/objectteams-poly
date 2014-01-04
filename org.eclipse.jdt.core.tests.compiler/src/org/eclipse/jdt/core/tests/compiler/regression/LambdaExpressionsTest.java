@@ -1799,6 +1799,88 @@ public void test421712() {
 		"Lambda instantiated");		
 }
 
+
+//https://bugs.eclipse.org/bugs/show_bug.cgi?id=422515, [1.8][compiler] "Missing code implementation in the compiler" when lambda body accesses array variable
+public void test422515() {
+	this.runConformTest(
+			new String[] {
+					"X.java", 
+					"public class X {\n" +
+					"    public static void main(String[] args) throws InterruptedException {\n" +
+					"        final int[] result = { 0 };\n" +
+					"        Thread t = new Thread(() -> result[0] = 42);\n" +
+					"        t.start();\n" +
+					"        t.join();\n" +
+					"        System.out.println(result[0]);\n" +
+					"    }\n" +
+					"}\n"
+			},
+			"42"
+		);
+}
+
+// https://bugs.eclipse.org/bugs/show_bug.cgi?id=422515, [1.8][compiler] "Missing code implementation in the compiler" when lambda body accesses array variable
+public void test422515a() {
+	this.runConformTest(
+			new String[] {
+					"X.java", 
+					"public class X {\n" +
+					"    public static void main(String[] args) throws InterruptedException {\n" +
+					"        final int[] result= { 0 };\n" +
+					"        final int x = args.length + 42;\n" +
+					"        Thread t = new Thread(() -> {\n" +
+					"            result[0]= x;\n" +
+					"        });\n" +
+					"        t.start();\n" +
+					"        t.join();\n" +
+					"        System.out.println(result[0]);\n" +
+					"    }\n" +
+					"}\n"
+			},
+			"42"
+		);
+}
+
+// https://bugs.eclipse.org/bugs/show_bug.cgi?id=422800, [1.8][compiler] "Missing code implementation in the compiler" 2
+public void test422800() {
+	this.runConformTest(
+			new String[] {
+					"X.java", 
+					"public class X {\n" +
+					"    private String fField; // must be here; can be used or unused\n" +
+					"    public void foo(Integer arg) {\n" +
+					"        new Thread(() -> {\n" +
+					"            arg.intValue();\n" +
+					"        });\n" +
+					"    }\n" +
+					"    public static void main(String [] args) {\n" +
+					"	     System.out.println(\"OK\");\n" +
+					"    }\n" +
+					"}\n"
+			},
+			"OK"
+		);
+}
+
+// https://bugs.eclipse.org/bugs/show_bug.cgi?id=421927, [1.8][compiler] Bad diagnostic: Unnecessary cast from I to I for lambdas.
+public void test421927() {
+	this.runConformTest(
+			new String[] {
+					"X.java", 
+					"interface I { \n" +
+					"	int foo();\n" +
+					"}\n" +
+					"public class X {\n" +
+					"    static I i  = (I & java.io.Serializable) () -> 42;\n" +
+					"    public static void main(String args[]) {\n" +
+					"        System.out.println(i.foo());\n" +
+					"    }\n" +
+					"}\n"
+			},
+			"42");
+}
+
+
 public static Class testClass() {
 	return LambdaExpressionsTest.class;
 }

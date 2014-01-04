@@ -278,8 +278,8 @@ public TypeBinding resolveType(BlockScope scope) {
   }
 //jwl}
 	
-	if (polyExpressionSeen && polyExpressionsHaveErrors(scope, this.binding, this.arguments, argumentTypes))
-		return null;
+	if (polyExpressionSeen)
+		resolvePolyExpressionArguments(scope, this.binding, this.arguments, argumentTypes);
 	
 	if (!this.binding.isValidBinding()) {
 		if (this.binding instanceof ProblemMethodBinding

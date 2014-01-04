@@ -4,8 +4,11 @@
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
- * $Id: Block.java 23404 2010-02-03 14:10:22Z stephan $
  *
+ * This is an implementation of an early-draft specification developed under the Java
+ * Community Process (JCP) and is made available for testing and evaluation purposes
+ * only. The code is not compatible with any specification of the JCP.
+ * 
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *     Fraunhofer FIRST - extended API and implementation
@@ -40,7 +43,12 @@ public class Block extends Statement {
 	public int explicitDeclarations;
 	// the number of explicit declaration , used to create scope
 	public BlockScope scope;
+	public boolean lambdaBody;
 
+public Block(int explicitDeclarations, boolean lambdaBody) {
+	this.explicitDeclarations = explicitDeclarations;
+	this.lambdaBody = lambdaBody;
+}
 public Block(int explicitDeclarations) {
 	this.explicitDeclarations = explicitDeclarations;
 }

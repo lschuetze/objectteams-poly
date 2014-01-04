@@ -111,6 +111,8 @@ public class CompilationUnitDeclaration extends ASTNode implements ProblemSeveri
 	private int stringLiteralsPtr;
 	private HashSetOfInt stringLiteralsStart;
 
+	public boolean[] validIdentityComparisonLines;
+
 	IrritantSet[] suppressWarningIrritants;  // irritant for suppressed warnings
 	Annotation[] suppressWarningAnnotations;
 	long[] suppressWarningScopePositions; // (start << 32) + end
@@ -808,6 +810,10 @@ void reportNLSProblems() {
 
 public void tagAsHavingErrors() {
 	this.ignoreFurtherInvestigation = true;
+}
+
+public void tagAsHavingIgnoredMandatoryErrors(int problemId) {
+	// Nothing to do for this context;
 }
 
 //{ObjectTeams: and let us remove it again:

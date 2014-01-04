@@ -4022,7 +4022,7 @@ public class NegativeTypeAnnotationTest extends AbstractRegressionTest {
 				"----------\n" + 
 				"1. ERROR in X.java (at line 1)\n" + 
 				"	public class X <@Marker T extends @Marker Y<@Marker ?>, @Marker Q extends @Marker Integer> {\n" + 
-				"	                                  ^^^^^^^^^\n" + 
+				"	                                          ^\n" +
 				"Y cannot be resolved to a type\n" + 
 				"----------\n" + 
 				"2. WARNING in X.java (at line 1)\n" + 
@@ -4193,4 +4193,118 @@ public class NegativeTypeAnnotationTest extends AbstractRegressionTest {
 			"NonNull cannot be resolved to a type\n" + 
 			"----------\n");		
 	}	
+	// https://bugs.eclipse.org/bugs/show_bug.cgi?id=391521, [1.8][compiler] Error highlighting is not accurate for type references with type annotations
+	public void test391521() {
+		runNegativeTest(
+			new String[] {
+				"X.java",
+				"class Y {}\n" +
+				"public class X {\n" +
+				"    Y y1 = (@Marker Z) null;\n" +
+				"    Y y2 = new @Marker Z();\n" +
+				"    Y[] y3 = (@Marker Z[]) null;\n" +
+				"    Y[] y4 = new @Marker Z[0];\n" +
+				"    Y[] y5 = (@Marker Y.Z) null;\n" +
+				"    Y[] y6 = new @Marker Y.  Z();\n" +
+				"    Y[] y7 = (@Marker Y.Z[]) null;\n" +
+				"    Y[] y8 = new @Marker Y[0].  Z;\n" +
+				"    Y[] y9 = new @Marker Y.  Z[0];\n" +
+				"}\n" +
+				"@java.lang.annotation.Target (java.lang.annotation.ElementType.TYPE_USE)\n" +
+				"@interface Marker{}\n" +
+				"\n"
+			},
+			"----------\n" +
+			"1. ERROR in X.java (at line 3)\n" +
+			"	Y y1 = (@Marker Z) null;\n" +
+			"	       ^^^^^^^^^^^^^^^^\n" +
+			"Z cannot be resolved to a type\n" +
+			"----------\n" +
+			"2. ERROR in X.java (at line 3)\n" +
+			"	Y y1 = (@Marker Z) null;\n" +
+			"	                ^\n" +
+			"Z cannot be resolved to a type\n" +
+			"----------\n" +
+			"3. ERROR in X.java (at line 4)\n" +
+			"	Y y2 = new @Marker Z();\n" +
+			"	                   ^\n" +
+			"Z cannot be resolved to a type\n" +
+			"----------\n" +
+			"4. ERROR in X.java (at line 5)\n" +
+			"	Y[] y3 = (@Marker Z[]) null;\n" +
+			"	         ^^^^^^^^^^^^^^^^^^\n" +
+			"Z cannot be resolved to a type\n" +
+			"----------\n" +
+			"5. ERROR in X.java (at line 5)\n" +
+			"	Y[] y3 = (@Marker Z[]) null;\n" +
+			"	                  ^\n" +
+			"Z cannot be resolved to a type\n" +
+			"----------\n" +
+			"6. ERROR in X.java (at line 6)\n" +
+			"	Y[] y4 = new @Marker Z[0];\n" +
+			"	                     ^\n" +
+			"Z cannot be resolved to a type\n" +
+			"----------\n" +
+			"7. ERROR in X.java (at line 7)\n" +
+			"	Y[] y5 = (@Marker Y.Z) null;\n" +
+			"	                  ^^^\n" +
+			"Y.Z cannot be resolved to a type\n" +
+			"----------\n" +
+			"8. ERROR in X.java (at line 8)\n" +
+			"	Y[] y6 = new @Marker Y.  Z();\n" +
+			"	                     ^^^^^\n" +
+			"Y.Z cannot be resolved to a type\n" +
+			"----------\n" +
+			"9. ERROR in X.java (at line 9)\n" +
+			"	Y[] y7 = (@Marker Y.Z[]) null;\n" +
+			"	                  ^^^\n" +
+			"Y.Z cannot be resolved to a type\n" +
+			"----------\n" +
+			"10. ERROR in X.java (at line 10)\n" +
+			"	Y[] y8 = new @Marker Y[0].  Z;\n" +
+			"	                            ^\n" +
+			"Z cannot be resolved or is not a field\n" +
+			"----------\n" +
+			"11. ERROR in X.java (at line 11)\n" +
+			"	Y[] y9 = new @Marker Y.  Z[0];\n" +
+			"	                     ^^^^^\n" +
+			"Y.Z cannot be resolved to a type\n" +
+			"----------\n");
+	}
+	// https://bugs.eclipse.org/bugs/show_bug.cgi?id=414038, [1.8][compiler] CCE in resolveAnnotations
+	public void test414038() {
+		runNegativeTest(
+			new String[] {
+					"X.java", 
+					"import java.lang.annotation.*;\n" +
+					"@Target(ElementType.TYPE_USE)\n" +
+					"@interface NonNull { int[].class value() default 0;}\n" +
+					"public class X extends @NonNull() Object {    \n" +
+					"    public static int i = 0; \n" +
+					"}\n"
+			},
+			"----------\n" + 
+			"1. ERROR in X.java (at line 3)\n" + 
+			"	@interface NonNull { int[].class value() default 0;}\n" + 
+			"	                          ^^^^^^\n" + 
+			"Syntax error on tokens, delete these tokens\n" + 
+			"----------\n",
+			true);
+	}
+	// https://bugs.eclipse.org/bugs/show_bug.cgi?id=421791,  [1.8][compiler] TYPE_USE annotations should be allowed on annotation type declarations
+	public void test421791() {
+		runNegativeTest(
+				new String[] {
+						"X.java",
+						"import java.lang.annotation.ElementType;\n" +
+						"import java.lang.annotation.Target;\n" +
+						"@Target(ElementType.TYPE_USE)\n" +
+						"@interface T {}\n" +
+						"@T\n" +
+						"@interface T2 {}\n" +
+						"public class X {}\n"
+				},
+				"",
+				true);
+	}
 }

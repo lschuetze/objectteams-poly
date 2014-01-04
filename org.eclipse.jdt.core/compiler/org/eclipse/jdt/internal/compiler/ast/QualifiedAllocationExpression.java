@@ -579,8 +579,9 @@ public static abstract class AbstractQualifiedAllocationExpression extends Alloc
                 AnchorMapping.removeCurrentMapping(anchorMapping);
           }
 // SH}
-			if (polyExpressionSeen && polyExpressionsHaveErrors(scope, this.binding, this.arguments, argumentTypes))
-				return null;
+			if (polyExpressionSeen)
+				resolvePolyExpressionArguments(scope, this.binding, this.arguments, argumentTypes);
+
 			if (this.binding.isValidBinding()) {	
 				if (isMethodUseDeprecated(this.binding, scope, true)) {
 					scope.problemReporter().deprecatedMethod(this.binding, this);
@@ -663,8 +664,9 @@ public static abstract class AbstractQualifiedAllocationExpression extends Alloc
 			return null; // stop secondary errors
 		}
 		MethodBinding inheritedBinding = scope.getConstructor(anonymousSuperclass, argumentTypes, this);
-		if (polyExpressionSeen && polyExpressionsHaveErrors(scope, inheritedBinding, this.arguments, argumentTypes))
-			return null;
+		if (polyExpressionSeen)
+			resolvePolyExpressionArguments(scope, inheritedBinding, this.arguments, argumentTypes);
+			
 		if (!inheritedBinding.isValidBinding()) {
 			if (inheritedBinding.declaringClass == null) {
 				inheritedBinding.declaringClass = anonymousSuperclass;
