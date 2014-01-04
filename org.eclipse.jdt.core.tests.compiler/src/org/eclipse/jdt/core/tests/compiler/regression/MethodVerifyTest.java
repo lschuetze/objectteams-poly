@@ -11,13 +11,14 @@
  *
  * Contributors:
  *     IBM Corporation - initial API and implementation
- *     Stephan Herrmann - Contributions for
+ *     Stephan Herrmann - Contribution for
  *								bug 388800 - [1.8] adjust tests to 1.8 JRE
  *								bug 388795 - [compiler] detection of name clash depends on order of super interfaces
  *								bug 388739 - [1.8][compiler] consider default methods when detecting whether a class needs to be declared abstract
  *								bug 402237 - [1.8][compiler] investigate differences between compilers re MethodVerifyTest
  *								bug 395681 - [compiler] Improve simulation of javac6 behavior from bug 317719 after fixing bug 388795
  *								bug 409473 - [compiler] JDT cannot compile against JRE 1.8
+ *								Bug 410325 - [1.7][compiler] Generified method override different between javac and eclipse compiler
  *	   Andy Clement - Contribution for
  *								bug 406928 - computation of inherited methods seems damaged (affecting @Overrides)
  *******************************************************************************/
