@@ -142,7 +142,8 @@ public class TypeModel extends ModelElement {
         {
         	if (   this._binding.kind() == Binding.TYPE_PARAMETER
         		|| this._binding.kind() == Binding.WILDCARD_TYPE
-        		|| this._binding.kind() == Binding.INTERSECTION_TYPE)
+        		|| this._binding.kind() == Binding.INTERSECTION_TYPE
+        		|| this._binding.kind() == Binding.INTERSECTION_CAST_TYPE)
         		return new TypeModel[0]; // has no members
             //binary type
         	assert this._binding.isBinaryBinding();
