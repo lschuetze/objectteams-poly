@@ -93,6 +93,9 @@
 					<filter token="QUALIFIER" value="${timestamp}"/>
 				</filterset>
 			</copy>
+
+			<!-- versions of test plugins: -->
+			<loadproperties srcfile="${OTScriptDir}/test.properties" />
 		</target>
 
 </project>
