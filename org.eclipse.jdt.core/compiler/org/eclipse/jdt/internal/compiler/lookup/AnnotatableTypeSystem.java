@@ -183,6 +183,13 @@ public class AnnotatableTypeSystem extends TypeSystem {
 // SH}
 	}
 
+//{ObjectTeams:
+	public ParameterizedTypeBinding getParameterizedType(ReferenceBinding genericType, TypeBinding[] typeArguments,
+			ITeamAnchor teamAnchor, int valueParamPosition, ReferenceBinding enclosingType) {
+		return getParameterizedType(genericType, typeArguments, teamAnchor, valueParamPosition, enclosingType, Binding.NO_ANNOTATIONS);
+	}
+// SH}
+
 	public RawTypeBinding getRawType(ReferenceBinding genericType, ReferenceBinding enclosingType, AnnotationBinding [] annotations) {
 		
 		if (genericType.hasTypeAnnotations())

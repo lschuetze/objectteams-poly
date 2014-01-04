@@ -550,6 +550,9 @@ public class RoleTypeCreator implements TagBits {
 	        			ReferenceBinding type = rawUnresolved.resolve(environment, convertGenericToRawType);
 	        			return (ReferenceBinding) maybeWrapUnqualifiedRoleType(scope, site, type, typedNode, originalReporter);
 	        		}
+	        		@Override public boolean hasTypeAnnotations() 			{ return rawUnresolved.hasTypeAnnotations(); }
+	        		@Override public boolean hasNullTypeAnnotations() 		{ return rawUnresolved.hasNullTypeAnnotations(); }
+	        		@Override public AnnotationBinding[] getAnnotations() 	{ return rawUnresolved.getAnnotations(); }
 	        	};
 	        }
 	        if (typeToWrap instanceof IntersectionCastTypeBinding) { // FIXME (recurse?)
