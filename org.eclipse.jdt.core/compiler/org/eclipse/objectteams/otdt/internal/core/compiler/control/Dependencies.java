@@ -473,6 +473,9 @@ public class Dependencies implements ITranslationStates {
         boolean processed = false;
         if (type instanceof ProblemReferenceBinding)
         	return false;
+        TypeBinding proto = type.prototype();
+        if (proto instanceof ReferenceBinding)
+        	type = (ReferenceBinding) proto;
         if (type.isRole())
         {
         	// this includes the case of "team as role"
