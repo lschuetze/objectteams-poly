@@ -385,6 +385,28 @@ public TypeBinding resolveType(BlockScope scope) {
 	} else {
 		this.resolvedType = this.type.resolvedType;
 	}
+
+	if (this.type != null) {
+		checkIllegalNullAnnotation(scope, this.resolvedType);
+		checkParameterizedAllocation: {
+			if (this.type instanceof ParameterizedQualifiedTypeReference) { // disallow new X<String>.Y<Integer>()
+				ReferenceBinding currentType = (ReferenceBinding)this.resolvedType;
+				if (currentType == null) return currentType;
+				do {
+					// isStatic() is answering true for toplevel types
+					if ((currentType.modifiers & ClassFileConstants.AccStatic) != 0) break checkParameterizedAllocation;
+					if (currentType.isRawType()) break checkParameterizedAllocation;
+				} while ((currentType = currentType.enclosingType())!= null);
+				ParameterizedQualifiedTypeReference qRef = (ParameterizedQualifiedTypeReference) this.type;
+				for (int i = qRef.typeArguments.length - 2; i >= 0; i--) {
+					if (qRef.typeArguments[i] != null) {
+						scope.problemReporter().illegalQualifiedParameterizedTypeAllocation(this.type, this.resolvedType);
+						break;
+					}
+				}
+			}
+		}
+	}
 	// will check for null after args are resolved
 
 //{ObjectTeams: replace role allocations:
