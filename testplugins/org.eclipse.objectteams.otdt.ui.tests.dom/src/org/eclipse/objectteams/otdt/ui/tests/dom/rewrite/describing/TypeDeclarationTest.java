@@ -41,18 +41,18 @@ import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
 import org.eclipse.jdt.core.dom.rewrite.ListRewrite;
 
 public class TypeDeclarationTest extends AstRewritingDescribingTest {
-	private static final Class THIS = TypeDeclarationTest.class;
 
 	public TypeDeclarationTest(String name) {
 		super(name);
 	}
-	
-	public static Test allTests() {
-		return new Suite(THIS);
+
+	public TypeDeclarationTest(String name, int apilevel) {
+		super(name, apilevel);
 	}
-	
+
+	@SuppressWarnings("deprecation")
 	public static Test suite() {
-		return allTests();
+		return createSuite(TypeDeclarationTest.class, AST.JLS3);
 	}
 	
 	

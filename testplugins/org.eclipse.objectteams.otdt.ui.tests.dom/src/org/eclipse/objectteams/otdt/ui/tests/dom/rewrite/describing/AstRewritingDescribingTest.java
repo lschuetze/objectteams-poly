@@ -36,6 +36,10 @@ public class AstRewritingDescribingTest
 		super(name);
 	}
 	
+	public AstRewritingDescribingTest(String name, int apilevel) {
+		super(name, apilevel);
+	}
+
 	@Override
 	protected void setUp() throws Exception {
 		super.setUp();

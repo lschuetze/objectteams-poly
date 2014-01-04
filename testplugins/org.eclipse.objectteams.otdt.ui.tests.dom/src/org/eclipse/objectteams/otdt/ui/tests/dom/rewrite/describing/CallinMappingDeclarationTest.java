@@ -28,19 +28,19 @@ import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
 import org.eclipse.jdt.core.dom.rewrite.ListRewrite;
 
 public class CallinMappingDeclarationTest extends AstRewritingDescribingTest {
-	private static final Class THIS = CallinMappingDeclarationTest.class;
-	
+
 	public CallinMappingDeclarationTest(String name) {
 		super(name);
 	}
-	
-	public static Test allTests() {
-		return new Suite(THIS);
+
+	public CallinMappingDeclarationTest(String name, int apilevel) {
+		super(name, apilevel);
 	}
-	
+
+	@SuppressWarnings("deprecation")
 	public static Test suite() {
 		if (true) {
-			return allTests();
+			return createSuite(CallinMappingDeclarationTest.class, AST.JLS3);
 		}
 		TestSuite suite= new Suite("one test");
 		suite.addTest(new CallinMappingDeclarationTest("test0009")); // FIXME? Used?
