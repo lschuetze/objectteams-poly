@@ -59,6 +59,9 @@ import org.apache.bcel.classfile.ConstantUtf8;
 @SuppressWarnings("serial")
 public class ConstantPool extends org.apache.bcel.classfile.ConstantPool {
     
+	static Constant DONT_CARE_CONSTANT = new ConstantInteger(13);
+	static Constant DONT_CARE_CONSTANT_WIDE = new ConstantLong(42);
+
 	ConstantPool(DataInputStream file) throws IOException {
 		super(readConstants(file));
     }
@@ -99,22 +102,35 @@ public class ConstantPool extends org.apache.bcel.classfile.ConstantPool {
 		case Constants.CONSTANT_InterfaceMethodref:
 			return new ConstantInterfaceMethodref(file.readUnsignedShort(), file.readUnsignedShort());
 		case Constants.CONSTANT_String:
-			return new ConstantString(file.readUnsignedShort());
+			file.readUnsignedShort(); break;
 		case Constants.CONSTANT_Integer:
-			return new ConstantInteger(file.readInt());
+			file.readInt(); break;
 		case Constants.CONSTANT_Float:
-			return new ConstantFloat(file.readFloat());
+			file.readFloat(); break;
 		case Constants.CONSTANT_Long:
-			return new ConstantLong(file.readLong());
+			file.readLong(); return DONT_CARE_CONSTANT_WIDE;
 		case Constants.CONSTANT_Double:
-			return new ConstantDouble(file.readDouble());
+			file.readDouble(); return DONT_CARE_CONSTANT_WIDE;
 		case Constants.CONSTANT_NameAndType:
 			return new ConstantNameAndType(file.readUnsignedShort(), file.readUnsignedShort());
 		case Constants.CONSTANT_Utf8:
 			return new ConstantUtf8(file.readUTF());
+		// new in 1.7:
+		case 15: // CONSTANT_MethodHandle
+			file.readByte(); 			// reference_kind
+			file.readUnsignedShort();	// reference_index
+			break;
+		case 16: // CONSTANT_MethodType
+			file.readUnsignedShort();	// descriptor_index
+			break;
+		case 18: // CONSTANT_InvokeDynamic
+			file.readUnsignedShort();	// bootstrap_method_attr_index
+			file.readUnsignedShort();	// name_and_type_index;
+			break;
 		default:
 			throw new ClassFormatException(
 					"Invalid byte tag in constant pool: " + b);
 		}
+		return DONT_CARE_CONSTANT;
 	}
 }
