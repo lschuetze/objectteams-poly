@@ -15465,6 +15465,10 @@ public boolean automatonWillShift(int token, int lastAction) {
 			lastAction -= ERROR_ACTION;    /* shift-reduce on loop entry from above, reduce on loop back */
 			do { /* reduce */
 				stackTop -= rhs[lastAction] - 1;
+//{ObjectTeams: protect against underrun, see org.eclipse.objectteams.otdt.ui.tests.dom.converter.DOMRegressionTests.testBug316666()
+				if (stackTop == -1)
+					return false;
+// SH}
 				if (stackTop < highWaterMark) {
 					stackTopState = this.stack[highWaterMark = stackTop];
 				} // else stackTopState is upto date already.
