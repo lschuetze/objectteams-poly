@@ -570,7 +570,10 @@ public class SyntheticMethodBinding extends MethodBinding {
 	public void initializeMethodAccessor(MethodBinding accessedMethod, boolean isSuperAccess, ReferenceBinding receiverType) {
 
 		this.targetMethod = accessedMethod;
-		this.modifiers = ClassFileConstants.AccDefault | ClassFileConstants.AccStatic | ClassFileConstants.AccSynthetic;
+		if (isSuperAccess && receiverType.isInterface() && !accessedMethod.isStatic())
+			this.modifiers = ClassFileConstants.AccPrivate | ClassFileConstants.AccSynthetic;
+		else
+			this.modifiers = ClassFileConstants.AccDefault | ClassFileConstants.AccStatic | ClassFileConstants.AccSynthetic;
 //{ObjectTeams: different visibility for team accessors:
 		if (receiverType.isTeam())
 			this.modifiers |= ClassFileConstants.AccPublic;
@@ -593,7 +596,7 @@ public class SyntheticMethodBinding extends MethodBinding {
 			System.arraycopy(accessedMethod.parameters, 0, this.parameters, 2, accessedMethod.parameters.length);
 		} else 
 // SH}
-		if (accessedMethod.isStatic()) {
+		if (accessedMethod.isStatic() || (isSuperAccess && receiverType.isInterface())) {
 			this.parameters = accessedMethod.parameters;
 		} else {
 			this.parameters = new TypeBinding[accessedMethod.parameters.length + 1];

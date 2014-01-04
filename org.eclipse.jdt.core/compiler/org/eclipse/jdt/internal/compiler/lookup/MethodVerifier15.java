@@ -29,6 +29,7 @@
  *								bug 409473 - [compiler] JDT cannot compile against JRE 1.8
  *								Bug 420080 - [1.8] Overridden Default method is reported as duplicated
  *								Bug 418235 - [compiler][null] Unreported nullness error when using generic
+ *								Bug 404690 - [1.8][compiler] revisit bridge generation after VM bug is fixed
  *******************************************************************************/
 package org.eclipse.jdt.internal.compiler.lookup;
 
@@ -529,7 +530,7 @@ void checkMethods() {
 			int length = inherited.length;
 			for (int i = 0; i < length; i++) {
 				MethodBinding inheritedMethod = inherited[i];
-				if (inheritedMethod.isPublic() && !inheritedMethod.declaringClass.isPublic())
+				if (inheritedMethod.isPublic() && (!inheritedMethod.declaringClass.isInterface() && !inheritedMethod.declaringClass.isPublic()))
 					this.type.addSyntheticBridgeMethod(inheritedMethod.original());
 			}
 		}
@@ -623,7 +624,7 @@ void checkMethods() {
 			
 			if (matchMethod == null && current != null && this.type.isPublic()) { // current == null case handled already.
 				MethodBinding inheritedMethod = inherited[i];
-				if (inheritedMethod.isPublic() && !inheritedMethod.declaringClass.isPublic()) {
+				if (inheritedMethod.isPublic() && (!inheritedMethod.declaringClass.isInterface() && !inheritedMethod.declaringClass.isPublic())) {
 					this.type.addSyntheticBridgeMethod(inheritedMethod.original());
 				}
 			}

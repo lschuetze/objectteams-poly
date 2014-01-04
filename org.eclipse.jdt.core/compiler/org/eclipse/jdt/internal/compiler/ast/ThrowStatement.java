@@ -27,7 +27,6 @@ import org.eclipse.jdt.internal.compiler.codegen.CodeStream;
 import org.eclipse.jdt.internal.compiler.flow.FlowContext;
 import org.eclipse.jdt.internal.compiler.flow.FlowInfo;
 import org.eclipse.jdt.internal.compiler.lookup.BlockScope;
-import org.eclipse.jdt.internal.compiler.lookup.MethodScope;
 import org.eclipse.jdt.internal.compiler.lookup.ReferenceBinding;
 import org.eclipse.jdt.internal.compiler.lookup.TypeBinding;
 import org.eclipse.jdt.internal.compiler.lookup.TypeIds;
@@ -83,11 +82,6 @@ public StringBuffer printStatement(int indent, StringBuffer output) {
 
 public void resolve(BlockScope scope) {
 	this.exceptionType = this.exception.resolveType(scope);
-	MethodScope methodScope = scope.methodScope();
-	LambdaExpression lambda = methodScope.referenceContext instanceof LambdaExpression ? (LambdaExpression) methodScope.referenceContext : null;
-	if (lambda != null) {
-		lambda.throwsException(this.exceptionType);
-	}
 	if (this.exceptionType != null && this.exceptionType.isValidBinding()) {
 //{ObjectTeams: lowering roles of exceptions:
 		if (this.exceptionType.isRole()) {

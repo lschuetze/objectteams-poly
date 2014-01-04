@@ -406,7 +406,7 @@ public void swapUnresolved(UnresolvedReferenceBinding unresolvedType, ReferenceB
 public TypeBinding maybeWrapRoleType(ASTNode typedNode, TypeArgumentUpdater updater) {
 	if (!this.leafComponentType.isBaseType()) {
 		TypeBinding updated = this.leafComponentType.maybeWrapRoleType(typedNode, updater);
-		if (updated != this.leafComponentType)
+		if (updated != this.leafComponentType) //$IDENTITY-COMPARISON$
 			return this.environment.createArrayType(updated, this.dimensions);
 	}
 	return this;

@@ -77,7 +77,7 @@ public abstract class Binding {
 	public static final CallinCalloutBinding[] NO_CALLIN_CALLOUT_BINDINGS = new CallinCalloutBinding[0];
 	public static final SyntheticArgumentBinding[] NO_SYNTH_ARGUMENTS = new SyntheticArgumentBinding[0];
 //Markus Witte}
-
+	
 	public static final FieldBinding[] UNINITIALIZED_FIELDS = new FieldBinding[0];
 	public static final MethodBinding[] UNINITIALIZED_METHODS = new MethodBinding[0];
 	public static final ReferenceBinding[] UNINITIALIZED_REFERENCE_TYPES = new ReferenceBinding[0];

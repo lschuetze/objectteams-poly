@@ -2081,10 +2081,6 @@ public void tagAsHavingErrors() {
 	this.ignoreFurtherInvestigation = true;
 }
 
-public void tagAsHavingIgnoredMandatoryErrors(int problemId) {
-	// Nothing to do for this context;
-}
-
 //{ObjectTeams: untag class and interface part:
 public void resetErrorFlag() {
 	if (isRole() && this.roleModel != null)
