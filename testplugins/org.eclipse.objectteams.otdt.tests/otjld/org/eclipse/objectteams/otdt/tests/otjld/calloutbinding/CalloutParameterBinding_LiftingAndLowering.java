@@ -405,10 +405,11 @@ public class CalloutParameterBinding_LiftingAndLowering extends AbstractOTJLDTes
 	    		"	                  ^\n" + 
 	    		"Syntax error, insert \"EnumBody\" to complete ClassBodyDeclarations\n" + 
 	    		"----------\n" + 
-	    		"12. ERROR in Team321ciwmp6.java (at line 14)\n" + 
-	    		"	};\n" + 
-	    		"	^\n" + 
-	    		"Syntax error on token \"}\", { expected\n" + 
+	    		"12. ERROR in Team321ciwmp6.java (at line 15)\n" + 
+	    		"	}\n" + 
+	    		"}\n" + 
+	    		"	^^^\n" + 
+	    		"Syntax error on tokens, delete these tokens\n" + 
 	    		"----------\n"
     		:
         		"2. ERROR in Team321ciwmp6.java (at line 5)\n" + 
@@ -473,8 +474,9 @@ public class CalloutParameterBinding_LiftingAndLowering extends AbstractOTJLDTes
         		"	                  ^\n" + 
         		"Syntax error, insert \"EnumBody\" to complete ClassBodyDeclarations\n" + 
         		"----------\n" + 
-        		"14. ERROR in Team321ciwmp6.java (at line 14)\n" + 
-        		"	};\n" + 
+        		"14. ERROR in Team321ciwmp6.java (at line 15)\n" + 
+        		"	}\n" + 
+        		"}\n" + 
         		"	^^^\n" + 
         		"Syntax error on tokens, delete these tokens\n" + 
         		"----------\n"
