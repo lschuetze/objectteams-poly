@@ -260,6 +260,9 @@ public void test008() throws JavaModelException {
 	assertResults(
 			"[POTENTIAL_METHOD_DECLARATION]{, LX;, ()V, , null, 14}\n" +
 			"abstract[KEYWORD]{abstract, null, null, abstract, null, 24}\n" +
+//{ObjectTeams:
+			"callin[KEYWORD]{callin, null, null, callin, null, 24}\n" +
+// SH}
 			"class[KEYWORD]{class, null, null, class, null, 24}\n" +
 			"enum[KEYWORD]{enum, null, null, enum, null, 24}\n" +
 			"final[KEYWORD]{final, null, null, final, null, 24}\n" +
@@ -271,6 +274,9 @@ public void test008() throws JavaModelException {
 			"static[KEYWORD]{static, null, null, static, null, 24}\n" +
 			"strictfp[KEYWORD]{strictfp, null, null, strictfp, null, 24}\n" +
 			"synchronized[KEYWORD]{synchronized, null, null, synchronized, null, 24}\n" +
+//{ObjectTeams:
+			"team[KEYWORD]{team, null, null, team, null, 24}\n" +
+// SH}
 			"transient[KEYWORD]{transient, null, null, transient, null, 24}\n" +
 			"volatile[KEYWORD]{volatile, null, null, volatile, null, 24}\n" +
 			"I[TYPE_REF]{I, , LI;, null, null, 27}\n" +
@@ -308,6 +314,9 @@ public void test009() throws JavaModelException {
 	assertResults(
 			"[POTENTIAL_METHOD_DECLARATION]{, LX;, ()V, , null, 14}\n" +
 			"abstract[KEYWORD]{abstract, null, null, abstract, null, 24}\n" +
+//{ObjectTeams:
+			"callin[KEYWORD]{callin, null, null, callin, null, 24}\n" +
+// SH}
 			"class[KEYWORD]{class, null, null, class, null, 24}\n" +
 			"enum[KEYWORD]{enum, null, null, enum, null, 24}\n" +
 			"final[KEYWORD]{final, null, null, final, null, 24}\n" +
@@ -319,6 +328,9 @@ public void test009() throws JavaModelException {
 			"static[KEYWORD]{static, null, null, static, null, 24}\n" +
 			"strictfp[KEYWORD]{strictfp, null, null, strictfp, null, 24}\n" +
 			"synchronized[KEYWORD]{synchronized, null, null, synchronized, null, 24}\n" +
+//{ObjectTeams:
+			"team[KEYWORD]{team, null, null, team, null, 24}\n" +
+// SH}
 			"transient[KEYWORD]{transient, null, null, transient, null, 24}\n" +
 			"volatile[KEYWORD]{volatile, null, null, volatile, null, 24}\n" +
 			"I[TYPE_REF]{I, , LI;, null, null, 27}\n" +

@@ -475,8 +475,8 @@ public class CalloutParameterBinding_LiftingAndLowering extends AbstractOTJLDTes
         		"----------\n" + 
         		"14. ERROR in Team321ciwmp6.java (at line 14)\n" + 
         		"	};\n" + 
-        		"	^\n" + 
-        		"Syntax error on token \"}\", { expected\n" + 
+        		"	^^^\n" + 
+        		"Syntax error on tokens, delete these tokens\n" + 
         		"----------\n"
     		));
     }

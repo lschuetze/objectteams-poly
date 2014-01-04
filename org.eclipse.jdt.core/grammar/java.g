@@ -1884,10 +1884,17 @@ IdentifierOrNew ::= 'new'
 /:$readableName IdentifierOrNew:/
 /:$compliance 1.8:/
 
-LambdaExpression ::= LambdaParameters '->' LambdaBody
+--{ObjectTeams: replace invocation from consumeToken()
+-- orig: LambdaExpression ::= LambdaParameters '->' LambdaBody
+LambdaExpression ::= LambdaParameters '->' EnterLambda LambdaBody
+-- orig:
 /.$putCase consumeLambdaExpression(); $break ./
 /:$readableName LambdaExpression:/
 /:$compliance 1.8:/
+-- OT:
+EnterLambda ::= $empty
+/.$putCase consumeLambdaHeader(); $break ./
+-- SH}
 
 NestedLambda ::= $empty
 /.$putCase consumeNestedLambda(); $break ./
