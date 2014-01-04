@@ -185,6 +185,7 @@ public class MessageSend extends Expression implements Invocation {
 	private boolean isDecapsulation = false;
 	// special case: the role method call in a method pushed out to the enclosing team needs special resolving
 	public boolean isPushedOutRoleMethodCall = false;
+	public boolean isGenerated = false;
 // SH}
 
 public FlowInfo analyseCode(BlockScope currentScope, FlowContext flowContext, FlowInfo flowInfo) {
@@ -838,6 +839,9 @@ public TypeBinding resolveType(BlockScope scope) {
 		argumentTypes = new TypeBinding[length];
 		for (int i = 0; i < length; i++){
 			Expression argument = this.arguments[i];
+//{ObjectTeams: keep pre-resolved binding inside generated code:
+		  if (!this.isGenerated)
+// SH}
 			if (this.arguments[i].resolvedType != null) 
 				this.arguments[i].unresolve(); // some cleanup before second attempt
 			if (argument instanceof CastExpression) {
@@ -845,10 +849,17 @@ public TypeBinding resolveType(BlockScope scope) {
 				argsContainCast = true;
 			}
 			argument.setExpressionContext(INVOCATION_CONTEXT);
-//{ObjectTeams: FIXME: stale: arguments might already be resolved, see e.g. CastExpression.createRoleCheck SH}
+//{ObjectTeams: arguments might already be resolved, see e.g. CastExpression.createRoleCheck
+		  if (argument.resolvedType != null) {
+			argumentTypes[i] = argument.resolvedType;
+		  } else {
+// orig:
 			if ((argumentTypes[i] = argument.resolveType(scope)) == null){
 				argHasError = true;
 			}
+// :giro
+		  }
+// SH}
 			if (sourceLevel >= ClassFileConstants.JDK1_8 && argument.isPolyExpression())
 				polyExpressionSeen = true;
 		}

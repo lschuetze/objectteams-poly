@@ -749,6 +749,7 @@ public class AstGenerator extends AstFactory {
 
 	public MessageSend messageSend(Expression receiver, char[] selector, Expression[] parameters) {
 		MessageSend messageSend = new MessageSend();
+		messageSend.isGenerated = true;
 		messageSend.sourceStart = this.sourceStart;
 		messageSend.sourceEnd   = this.sourceEnd;
 		messageSend.statementEnd = this.sourceEnd;
@@ -790,6 +791,7 @@ public class AstGenerator extends AstFactory {
 				return this.resolvedType;
 			}
 		};
+		messageSend.isGenerated = true;
 		messageSend.sourceStart = this.sourceStart;
 		messageSend.sourceEnd   = this.sourceEnd;
 		messageSend.statementEnd = this.sourceEnd;
@@ -809,6 +811,7 @@ public class AstGenerator extends AstFactory {
 				return this.resolvedType = resolvedReturn;
 			}
 		};
+		messageSend.isGenerated = true;
 		messageSend.sourceStart = this.sourceStart;
 		messageSend.sourceEnd   = this.sourceEnd;
 		messageSend.statementEnd = this.sourceEnd;
@@ -836,6 +839,7 @@ public class AstGenerator extends AstFactory {
 				return this.resolvedType = resolvedReturn;
 			}
 		};
+		messageSend.isGenerated = true;
 		messageSend.sourceStart = this.sourceStart;
 		messageSend.sourceEnd   = this.sourceEnd;
 		messageSend.statementEnd = this.sourceEnd;
