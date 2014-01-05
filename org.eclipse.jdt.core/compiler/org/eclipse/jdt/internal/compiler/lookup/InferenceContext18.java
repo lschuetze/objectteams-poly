@@ -446,7 +446,12 @@ public class InferenceContext18 {
 				methodToCheck = finalMethod;
 		}
 		
-		MethodBinding problemMethod = methodToCheck.boundCheck18(this.scope, argumentTypes);
+//{ObjectTeams: 2nd arg added:
+/* orig:
+		MethodBinding problemMethod = methodToCheck.boundCheck18(this.scope, argumentTypes); 
+  :giro */
+		MethodBinding problemMethod = methodToCheck.boundCheck18(this.scope, invocation, argumentTypes);
+// SH}
 		if (problemMethod != null)
 			return problemMethod;
 

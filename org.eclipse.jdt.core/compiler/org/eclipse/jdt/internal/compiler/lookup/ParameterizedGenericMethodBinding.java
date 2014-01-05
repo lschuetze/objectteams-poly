@@ -185,7 +185,12 @@ public class ParameterizedGenericMethodBinding extends ParameterizedMethodBindin
 							}
 							if (invocationTypeInferred) {
 								infCtx18.rebindInnerPolies(result, methodSubstitute.parameters);
+//{ObjectTeams: 2nd arg added:
+/* orig:
 								return methodSubstitute.boundCheck18(scope, arguments);
+  :giro */
+								return methodSubstitute.boundCheck18(scope, invocationSite, arguments);
+// SH}
 							} else {
 								if (invocationSite instanceof Invocation)
 									((Invocation) invocationSite).registerInferenceContext(methodSubstitute, infCtx18); // keep context so we can finish later
@@ -289,7 +294,12 @@ public class ParameterizedGenericMethodBinding extends ParameterizedMethodBindin
 		return methodSubstitute;
 	}
 
+//{ObjectTeams: second arg added:
+/*orig:
 	MethodBinding boundCheck18(Scope scope, TypeBinding[] arguments) {
+  :giro */
+	MethodBinding boundCheck18(Scope scope, InvocationSite invocationSite, TypeBinding[] arguments) {
+// SH}
 		Substitution substitution = this;
 		ParameterizedGenericMethodBinding methodSubstitute = this;
 		TypeVariableBinding[] originalTypeVariables = this.originalMethod.typeVariables;
@@ -308,7 +318,18 @@ public class ParameterizedGenericMethodBinding extends ParameterizedMethodBindin
 		    	substituteForChecks = Scope.substitute(new LingeringTypeVariableEliminator(originalTypeVariables, null, scope), substitute); // while using this for bounds check
 		    }
 		    
+//{ObjectTeams: methods with generic declared lifting need to be checked in knowledge of the actual receiver type:
+		    ReferenceBinding actualReceiverRefType = null;
+		    if (invocationSite instanceof MessageSend) {
+		    	TypeBinding actualReceiverType = ((MessageSend)invocationSite).actualReceiverType;
+		    	if (actualReceiverType instanceof ReferenceBinding)
+		    		actualReceiverRefType = (ReferenceBinding) actualReceiverType;
+		    }
+			switch (typeVariable.boundCheck(substitution, substituteForChecks, actualReceiverRefType, scope)) {
+/* orig:
 			switch (typeVariable.boundCheck(substitution, substituteForChecks, scope)) {
+  :giro */
+// SH}
 				case TypeConstants.MISMATCH :
 			        // incompatible due to bound check
 					int argLength = arguments.length;
