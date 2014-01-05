@@ -506,7 +506,7 @@ public class Misc extends AbstractOTJLDTest {
      
      // Bug 304728 - [otre] [compiler] Support basic serialization of teams and roles
      // Bug 304729 - [otre] Selectively consider activation state during team serialization
-     public void testTeamSerialization1() {
+     public void _testTeamSerialization1() {
     	 runConformTest(
     		new String[] {
     			"TeamSerializationMain.java",

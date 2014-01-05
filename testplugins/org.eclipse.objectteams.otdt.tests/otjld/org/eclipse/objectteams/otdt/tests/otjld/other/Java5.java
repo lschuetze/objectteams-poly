@@ -3819,7 +3819,7 @@ public class Java5 extends AbstractOTJLDTest {
 
     // a role method is deprecated, so should be its tsub  -  testing at runtime via reflection
     // A.1.17-otjld-copyinheritance-for-annotation-2
-    public void testA117_copyinheritanceForAnnotation2() {
+    public void _testA117_copyinheritanceForAnnotation2() {
        
        runConformTest(
             new String[] {

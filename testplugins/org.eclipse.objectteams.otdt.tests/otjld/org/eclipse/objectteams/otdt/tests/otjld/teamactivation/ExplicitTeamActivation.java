@@ -2537,7 +2537,7 @@ public class ExplicitTeamActivation extends AbstractOTJLDTest {
 
     // witness for AIOOBE
     // 5.2.17-otjld-concurrent-activation-1
-    public void test5217_concurrentActivation1() {
+    public void _test5217_concurrentActivation1() {
        
        runConformTest(
             new String[] {
