@@ -43,7 +43,7 @@ public class CompilationOrder extends AbstractOTJLDTest {
 	}
     // @bug https://bugs.eclipse.org/303474 -  [compiler] Fragile compilation for circularly referenced classes
 	// plus https://bugs.eclipse.org/310398 -  [compiler] incremental compilation fails for mutually dependent teams
-    public void testB21_circularDependency1() {
+    public void _testB21_circularDependency1() {
     	this.compileOrder = new String[][]{{"A.java", "B.java"}, {"TheTest.java"}};
         runConformTest(
             new String[] {
