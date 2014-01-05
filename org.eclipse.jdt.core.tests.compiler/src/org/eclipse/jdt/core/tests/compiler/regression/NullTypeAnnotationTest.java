@@ -3316,4 +3316,46 @@ public class NullTypeAnnotationTest extends AbstractNullAnnotationTest {
 			true,
 			getCompilerOptions());		
 	}
+
+	// should not try to analyze arguments of a polymorphic method call
+	public void testBug424725() {
+		runConformTest(
+			new String[] {
+				"AnnotatedRecordMapper.java",
+				"import java.lang.invoke.MethodHandle;\n" + 
+				"\n" + 
+				"public final class AnnotatedRecordMapper<T> {\n" + 
+				"  private MethodHandle afterLoadStore;\n" + 
+				"\n" + 
+				"  public void invokeAfterLoadStore(Object object, Object database) {\n" + 
+				"    if(afterLoadStore != null) {\n" + 
+				"      try {\n" + 
+				"        afterLoadStore.invoke(object, database);\n" + 
+				"      }\n" + 
+				"      catch(Throwable e) {\n" + 
+				"        throw new RuntimeException(e);\n" + 
+				"      }\n" + 
+				"    }\n" + 
+				"  }\n" + 
+				"}"
+			});
+	}
+
+	public void testBug424727() {
+		runNegativeTestWithLibs(
+			new String[] {
+				"X.java",
+				"@org.eclipse.jdt.annotation.NonNull public class X {\n" +
+				"	static X singleton = new X();\n" +
+				"}\n"
+			},
+			getCompilerOptions(),
+			"----------\n" + 
+			"1. ERROR in X.java (at line 1)\n" + 
+			"	@org.eclipse.jdt.annotation.NonNull public class X {\n" + 
+			"	^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n" + 
+			"The nullness annotation \'NonNull\' is not applicable at this location\n" + 
+			"----------\n");
+		// note: to be updated with https://bugs.eclipse.org/415918
+	}
 }

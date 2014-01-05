@@ -266,6 +266,31 @@ public void _testBug420525() {
 		});
 }
 
+// see https://bugs.eclipse.org/bugs/show_bug.cgi?id=420525#c7
+public void testBug420525a() {
+	runNegativeTest(
+		new String[] {
+			"Main.java",
+			"interface I<T> {\n" + 
+			"    T bold(T t);\n" + 
+			"}\n" + 
+			"\n" + 
+			"class Main {  \n" + 
+			"    public String foo(String x) { return \"<b>\" + x + \"</b>\"; }\n" + 
+			"    String bar() {\n" + 
+			"        I<? extends String> i = this::foo;\n" + 
+			"        return i.bold(\"1\");\n" + 
+			"    }  \n" + 
+			"}\n"
+		},
+		"----------\n" + 
+		"1. ERROR in Main.java (at line 9)\n" + 
+		"	return i.bold(\"1\");\n" + 
+		"	         ^^^^\n" + 
+		"The method bold(capture#1-of ? extends String) in the type I<capture#1-of ? extends String> is not applicable for the arguments (String)\n" + 
+		"----------\n");
+}
+
 public void testBug424415() {
 	runConformTest(
 		new String[] {
@@ -286,6 +311,31 @@ public void testBug424415() {
 			"	} \n" + 
 			"\n" + 
 			"    void test() {\n" + 
+			"        foo(goo(ArrayList<String>::new));\n" + 
+			"    }\n" + 
+			"}\n"
+		});
+}
+
+public void testBug424631() {
+	runConformTest(
+		new String[] {
+			"X.java",
+			"import java.util.ArrayList;\n" + 
+			"import java.util.Collection;\n" + 
+			"\n" + 
+			"interface Functional<T> {\n" + 
+			"   T apply();\n" + 
+			"}\n" + 
+			"\n" + 
+			"class X {\n" + 
+			"    void foo(Collection<String> o) { }\n" + 
+			"\n" + 
+			"	<Q extends Collection<?>> Q goo(Functional<Q> s) {\n" + 
+			"		return null;\n" + 
+			"	} \n" + 
+			"\n" + 
+			"    void test() { \n" + 
 			"        foo(goo(ArrayList<String>::new));\n" + 
 			"    }\n" + 
 			"}\n"
@@ -362,5 +412,29 @@ public void _testBug424075() {
 			"    }\n" +
 			"}\n"
 		});
+}
+
+public void testBug424637() {
+	runNegativeTest(
+		new String[] {
+			"X.java",
+			"import java.io.IOException;\n" + 
+			"import java.nio.file.Files;\n" + 
+			"import java.nio.file.Path;\n" + 
+			"import java.util.function.Function;\n" + 
+			"import java.util.stream.Stream;\n" + 
+			"\n" + 
+			"public class X {\n" + 
+			"  public static void method() {\n" + 
+			"    Function<Path, Stream<Path>> method = Files::walk;\n" + 
+			"  }\n" + 
+			"}"
+		},
+		"----------\n" + 
+		"1. ERROR in X.java (at line 9)\n" + 
+		"	Function<Path, Stream<Path>> method = Files::walk;\n" + 
+		"	                                      ^^^^^^^^^^^\n" + 
+		"Unhandled exception type IOException\n" + 
+		"----------\n");
 }
 }

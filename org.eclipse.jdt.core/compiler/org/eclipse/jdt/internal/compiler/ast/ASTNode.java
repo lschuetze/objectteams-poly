@@ -25,6 +25,7 @@
  *								Bug 392099 - [1.8][compiler][null] Apply null annotation on types for null analysis
  *								Bug 417295 - [1.8[[null] Massage type annotated null analysis to gel well with deep encoded type bindings.
  *								Bug 400874 - [1.8][compiler] Inference infrastructure should evolve to meet JLS8 18.x (Part G of JSR335 spec)
+ *								Bug 424742 - [1.8] NPE in LambdaExpression.isCompatibleWith
  *     Jesper S Moller - Contributions for
  *								bug 382721 - [1.8][compiler] Effectively final variables needs special treatment
  *								bug 412153 - [1.8][compiler] Check validity of annotations which may be repeatable
@@ -723,7 +724,9 @@ public abstract class ASTNode implements TypeConstants, TypeIds {
 			for (int i = 0, length = arguments == null ? 0 : arguments.length; i < length; i++) {
 				Expression argument = arguments[i];
 				TypeBinding updatedArgumentType = null;
-				TypeBinding parameterType = InferenceContext18.getParameter(parameters, i, variableArity); 
+				TypeBinding parameterType = InferenceContext18.getParameter(parameters, i, variableArity);
+				if (parameterType == null && problemReason != ProblemReasons.NoError)
+					continue; // not much we can do without a target type, assume it only happens after some resolve error
 
 				if (argument instanceof LambdaExpression && ((LambdaExpression) argument).hasErrors())
 					continue; // don't update if inner poly has errors
@@ -736,13 +739,7 @@ public abstract class ASTNode implements TypeConstants, TypeIds {
 						InferenceContext18 innerContext = innerInvocation.getInferenceContext(parameterizedMethod);
 						if (innerContext != null && !innerContext.hasFinished) {							
 							argument.setExpectedType(parameterType);
-							TypeBinding[] innerArgumentTypes = null;
-							if (innerArguments != null) {
-								innerArgumentTypes = new TypeBinding[innerArguments.length];
-								for (int j = 0; j < innerArguments.length; j++)
-									innerArgumentTypes[i] = innerArguments[i].resolvedType;
-							}
-							MethodBinding improvedBinding = innerContext.inferInvocationType(innerInvocation, innerArgumentTypes, parameterizedMethod);
+							MethodBinding improvedBinding = innerContext.inferInvocationType(innerInvocation, parameterizedMethod);
 							innerInvocation.updateBindings(improvedBinding);
 						}
 						continue; // otherwise these have been dealt with during inner method lookup
