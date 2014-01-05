@@ -14632,9 +14632,10 @@ protected void pushOnTypeAnnotationStack(Annotation annotation) {
 			stackLength);
 	}
 //{ObjectTeams: at the sentinal situation we merge this new annotation into the previous list:
-  if (atSentinel)
+  if (atSentinel) {
 	this.typeAnnotationLengthStack[this.typeAnnotationLengthPtr-1]++;
-  else
+	this.typeAnnotationLengthStack[this.typeAnnotationLengthPtr] = 0; // clear any previous data to start an empty list
+  } else
 // SH}
 	this.typeAnnotationLengthStack[this.typeAnnotationLengthPtr] = 1;
 }

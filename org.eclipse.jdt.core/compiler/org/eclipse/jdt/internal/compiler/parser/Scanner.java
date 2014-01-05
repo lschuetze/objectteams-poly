@@ -5421,6 +5421,8 @@ protected final boolean atTypeAnnotation() { // Did the '@' we saw just now hera
 }
 //{ObjectTeams: one more variant of '@' to check: 
 protected final boolean atTypeAnchor() { // Did the '@' we saw just now herald a type anchor ?
+	// Note: if we proceed with ATOT while actually a normal type annotation is present,
+	// the erroneous TypeAnchorReference is deconstructed again in Parser.convertTypeAnchor()!
 	return this.activeParser.atConflictScenario(TokenNameATOT);
 }
 // SH}
