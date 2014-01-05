@@ -312,32 +312,39 @@ public class CaptureBinding extends TypeVariableBinding {
 //{ObjectTeams: wrapping of role types in various fields of this capture:
 	public TypeBinding maybeWrapQualifiedRoleType(Scope scope, Expression anchorExpr, ASTNode typedNode, TypeBinding originalBinding) {
 		boolean hasWrapped = false;
-		
-    	TypeBinding wrappedBound = RoleTypeCreator.maybeWrapQualifiedRoleType(scope, anchorExpr, this.firstBound, typedNode);
-    	if (TypeBinding.notEquals(wrappedBound, this.firstBound))
-        	hasWrapped = true;
-        
-    	TypeBinding newSuper = RoleTypeCreator.maybeWrapQualifiedRoleType(scope, anchorExpr, this.superclass, typedNode);
-        if (TypeBinding.notEquals(newSuper, this.superclass))
-			hasWrapped = true;
-        
-        ReferenceBinding[] newSuperIfcs = new ReferenceBinding[this.superInterfaces.length]; 
-    	for (int i=0; i<this.superInterfaces.length; i++) {
-            newSuperIfcs[i] = (ReferenceBinding) RoleTypeCreator.maybeWrapQualifiedRoleType(scope, anchorExpr, this.superInterfaces[i], typedNode);
-            if (TypeBinding.notEquals(newSuperIfcs[i], this.superInterfaces[i]))
-            	hasWrapped = true;
-    	}
-    	if (hasWrapped) {
-    		CaptureBinding newCapture = new CaptureBinding(this.wildcard, this.sourceType, this.position, scope.compilationUnitScope().nextCaptureID());
-    		newCapture.firstBound = wrappedBound;
-    		newCapture.superclass = (ReferenceBinding)newSuper;
-    		newCapture.superInterfaces = newSuperIfcs;
-    		int dimensions = originalBinding.dimensions();
-    		if (dimensions > 0)
-				return this.environment.createArrayType(newCapture, dimensions);
-    		return newCapture;
-    	}
-    	return originalBinding; // may be an ArrayBinding with this as leafComponentType
+		if (this.inRecursiveFunction)
+			return originalBinding;
+
+		this.inRecursiveFunction = true;
+		try {
+	    	TypeBinding wrappedBound = RoleTypeCreator.maybeWrapQualifiedRoleType(scope, anchorExpr, this.firstBound, typedNode);
+	    	if (TypeBinding.notEquals(wrappedBound, this.firstBound))
+	        	hasWrapped = true;
+	        
+	    	TypeBinding newSuper = RoleTypeCreator.maybeWrapQualifiedRoleType(scope, anchorExpr, this.superclass, typedNode);
+	        if (TypeBinding.notEquals(newSuper, this.superclass))
+				hasWrapped = true;
+	        
+	        ReferenceBinding[] newSuperIfcs = new ReferenceBinding[this.superInterfaces.length]; 
+	    	for (int i=0; i<this.superInterfaces.length; i++) {
+	            newSuperIfcs[i] = (ReferenceBinding) RoleTypeCreator.maybeWrapQualifiedRoleType(scope, anchorExpr, this.superInterfaces[i], typedNode);
+	            if (TypeBinding.notEquals(newSuperIfcs[i], this.superInterfaces[i]))
+	            	hasWrapped = true;
+	    	}
+	    	if (hasWrapped) {
+	    		CaptureBinding newCapture = new CaptureBinding(this.wildcard, this.sourceType, this.position, scope.compilationUnitScope().nextCaptureID());
+	    		newCapture.firstBound = wrappedBound;
+	    		newCapture.superclass = (ReferenceBinding)newSuper;
+	    		newCapture.superInterfaces = newSuperIfcs;
+	    		int dimensions = originalBinding.dimensions();
+	    		if (dimensions > 0)
+					return this.environment.createArrayType(newCapture, dimensions);
+	    		return newCapture;
+	    	}
+	    	return originalBinding; // may be an ArrayBinding with this as leafComponentType
+		} finally {
+			this.inRecursiveFunction = false;
+		}
 	}
 // SH}
 }
