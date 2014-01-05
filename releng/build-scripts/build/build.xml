@@ -29,37 +29,38 @@
 	<loadproperties srcfile="${OTScriptDir}/buildVersions.properties" />
 	<loadproperties srcfile="${builder}/build.properties" />
 
-	<target name="main">
-		<!--Default values for required properties-->
-		<property name="buildDirectory" value="${build.root.dir}/src" />
-		<echo message="BUILDDIR: ${buildDirectory}" />
-		<delete failonerror="true" dir="${buildDirectory}" />
-		<antcall target="create.label.properties" />
-		<property file="${buildDirectory}/label.properties" />
+    <target name="main">
+            <!--Default values for required properties-->
+            <property name="buildDirectory" value="${build.root.dir}/src" />
+            <echo message="BUILDDIR: ${buildDirectory}" />
+            <delete failonerror="true" dir="${buildDirectory}" />
+            <antcall target="create.label.properties" />
+            <property file="${buildDirectory}/label.properties" />
 
-		<!--fetch the HEAD stream of all projects if build type specified as N-->
-		<condition property="fetchTag" value="HEAD">
-			<equals arg1="${buildType}" arg2="N" />
-		</condition>
-		<property name="fetchTag" value="" />
+            <!--fetch the HEAD stream of all projects if build type specified as N-->
+            <condition property="fetchTag" value="HEAD">
+                    <equals arg1="${buildType}" arg2="N" />
+            </condition>
+            <property name="fetchTag" value="" />
 
-		<!--set the compiler and compiler arguments-->
-		<!--the default compiler is set to the one used by eclipse rel. eng. -->
-		<loadproperties srcfile="${OTScriptDir}/compiler.${component.short}.properties" />
-		<echo message="javacSource=${javacSource}" />
-		
-		<!--this property required as of Eclipse 3.0 stream builds > 20031126 -->
-		<property name="buildingOSGi" value="true" />
-		
-        <!--let ecotj be generated into a "safe" location: -->
-        <property name="postingDirectory" value="${build.root.dir}/../ecj" />
+            <!--set the compiler and compiler arguments-->
+            <!--the default compiler is set to the one used by eclipse rel. eng. -->
+            <loadproperties srcfile="${OTScriptDir}/compiler.${component.short}.properties" />
+            <echo message="javacSource=${javacSource}" />
 
-		<!--run the pde-build for the specified ${builder} (OT-Compiler or OTDT-Build) -->
-		<ant antfile="build.xml" dir="${baseLocation}/${run.eclipseScriptDir}" />
+            <!--this property required as of Eclipse 3.0 stream builds > 20031126 -->
+            <property name="buildingOSGi" value="true" />
 
-	</target>
+   			<!--let ecotj be generated into a "safe" location: -->
+    		<property name="postingDirectory" value="${build.root.dir}/../ecj" />
+
+            <!--run the pde-build for the specified ${builder} (OT-Compiler or OTDT-Build) -->
+            <ant antfile="build.xml" dir="${baseLocation}/${run.eclipseScriptDir}" />
+
+    </target>
 	
-	<target name="create.label.properties" unless="label.properties.exists">
+
+    <target name="create.label.properties" unless="label.properties.exists">
 			<mkdir dir="${buildDirectory}" />
 			<tstamp/>
 			<property name="date" value="${DSTAMP}" />
@@ -85,17 +86,6 @@
 			</echo>
 
 			<available file="${buildDirectory}/label.properties" property="label.properties.exists" />
-
-			<!-- ======== Insert SDK build qualifier and current qualifier into our configuration file: ======== -->
-			<copy file="${OTScriptDir}/test.properties.in" tofile="${OTScriptDir}/test.properties">
-				<filterset>
-					<filter token="SDK_QUALIFIER" value="${eclipse.sdk.qualifier}"/>
-					<filter token="QUALIFIER" value="${timestamp}"/>
-				</filterset>
-			</copy>
-
-			<!-- versions of test plugins: -->
-			<loadproperties srcfile="${OTScriptDir}/test.properties" />
 		</target>
 
 </project>

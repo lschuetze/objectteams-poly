@@ -16,6 +16,7 @@
 
 	<!--properties file containing the build information-->
 	<property file="src/label.properties" />
+	<property file="src/finalPluginsVersions.properties" />
 
 	<target name="readFlags">
 		<condition property="really.build.all">
@@ -70,19 +71,19 @@
 
 	<target name="otdt_tests" description="Runs the org.eclipse.objectteams.otdt.tests test.xml">
 		<antcall target="runtests">
-			<param name="testPlugin" value="${org.eclipse.objectteams.otdt.tests}" />
+			<param name="testPlugin" value="org.eclipse.objectteams.otdt.tests_${org.eclipse.objectteams.otdt.tests}" />
 		</antcall>
 	</target>
 	
 	<target name="jdtcore_compiler_tests" description="Runs the org.eclipse.jdt.core.tests.compiler test.xml">
 		<antcall target="runtests">
-			<param name="testPlugin" value="${org.eclipse.jdt.core.tests.compiler}" />
+			<param name="testPlugin" value="org.eclipse.jdt.core.tests.compiler_${org.eclipse.jdt.core.tests.compiler}" />
 		</antcall>
 	</target>
 
 	<target name="jdtcore_model_tests" description="Runs the org.eclipse.jdt.core.tests.model test.xml">
 		<antcall target="runtests">
-			<param name="testPlugin" value="${org.eclipse.jdt.core.tests.model}" />
+			<param name="testPlugin" value="org.eclipse.jdt.core.tests.model_${org.eclipse.jdt.core.tests.model}" />
 		</antcall>
 	</target>	
 	
@@ -90,26 +91,26 @@
 		<property name="library-file"
 		            value="${test.root.dir}/library.xml"/>
 		<antcall target="runtests">
-			<param name="testPlugin" value="${org.eclipse.jdt.core.tests.builder}" />
+			<param name="testPlugin" value="org.eclipse.jdt.core.tests.builder_${org.eclipse.jdt.core.tests.builder}" />
 		</antcall>
 	</target>
 	
 
 	<target name="otdt_ui_tests" description="Runs the org.eclipse.objectteams.otdt.ui.tests test.xml">
 		<antcall target="runtests">
-			<param name="testPlugin" value="${org.eclipse.objectteams.otdt.ui.tests}" />
+			<param name="testPlugin" value="org.eclipse.objectteams.otdt.ui.tests_${org.eclipse.objectteams.otdt.ui.tests}" />
 		</antcall>
 	</target>
 
 	<target name="otdt_dom_tests" description="Runs the org.eclipse.objectteams.otdt.ui.tests.dom test.xml">
 		<antcall target="runtests">
-			<param name="testPlugin" value="${org.eclipse.objectteams.otdt.ui.tests.dom}" />
+			<param name="testPlugin" value="org.eclipse.objectteams.otdt.ui.tests.dom_${org.eclipse.objectteams.otdt.ui.tests.dom}" />
 		</antcall>
 	</target>
 
 	<target name="otdt_ref_tests" description="Runs the org.eclipse.objectteams.otdt.ui.tests.refactoring test.xml">
 		<antcall target="runtests">
-			<param name="testPlugin" value="${org.eclipse.objectteams.otdt.ui.tests.refactoring}" />
+			<param name="testPlugin" value="org.eclipse.objectteams.otdt.ui.tests.refactoring_${org.eclipse.objectteams.otdt.ui.tests.refactoring}" />
 		</antcall>
 	</target>
 
@@ -117,7 +118,7 @@
 		<property name="library-file"
 		            value="${test.root.dir}/library.xml"/>
 		<antcall target="runtests">
-			<param name="testPlugin" value="${org.eclipse.jdt.ui.tests}" />
+			<param name="testPlugin" value="org.eclipse.jdt.ui.tests_${org.eclipse.jdt.ui.tests}" />
 		</antcall>
 	</target>
 	
@@ -125,7 +126,7 @@
 		<property name="library-file"
 		            value="${test.root.dir}/library.xml"/>
 		<antcall target="runtests">
-			<param name="testPlugin" value="${org.eclipse.jdt.ui.tests.refactoring}" />
+			<param name="testPlugin" value="org.eclipse.jdt.ui.tests.refactoring_${org.eclipse.jdt.ui.tests.refactoring}" />
 		</antcall>
 	</target>
 
@@ -133,19 +134,19 @@
 		<property name="library-file"
 		            value="${test.root.dir}/library.xml"/>
 		<antcall target="runtests">
-			<param name="testPlugin" value="${org.eclipse.jdt.debug.tests}" />
+			<param name="testPlugin" value="org.eclipse.jdt.debug.tests_${org.eclipse.jdt.debug.tests}" />
 		</antcall>
 	</target>
 
 	<target name="otdt_debug_tests" description="Runs the org.eclipse.objectteams.otdt.debug.tests test.xml">
 		<antcall target="runtests">
-			<param name="testPlugin" value="${org.eclipse.objectteams.otdt.debug.tests}" />
+			<param name="testPlugin" value="org.eclipse.objectteams.otdt.debug.tests_${org.eclipse.objectteams.otdt.debug.tests}" />
 		</antcall>
 	</target>
 
 	<target name="otdt_builder_tests" description="Runs the org.eclipse.objectteams.otdt.test.builder test.xml">
 		<antcall target="runtests">
-			<param name="testPlugin" value="${org.eclipse.objectteams.otdt.test.builder}" />
+			<param name="testPlugin" value="org.eclipse.objectteams.otdt.test.builder_${org.eclipse.objectteams.otdt.test.builder}" />
 		</antcall>
 	</target>
 
