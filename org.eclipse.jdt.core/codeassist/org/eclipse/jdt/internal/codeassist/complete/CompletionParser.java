@@ -4398,6 +4398,10 @@ protected void consumeToken(int token) {
 		}
 	}
 }
+protected void consumeInvocationExpression() { // on error, a message send's error reductions will take the expression path rather than the statement path since that is a dead end.
+	super.consumeInvocationExpression();
+	triggerRecoveryUponLambdaClosure(this.expressionStack[this.expressionPtr], false);
+}
 protected void consumeIdentifierOrNew(boolean newForm) {
 	this.inReferenceExpression = false;
 	super.consumeIdentifierOrNew(newForm);

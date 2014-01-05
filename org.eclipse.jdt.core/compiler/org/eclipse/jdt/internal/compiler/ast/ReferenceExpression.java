@@ -99,6 +99,12 @@ public class ReferenceExpression extends FunctionalExpression implements Invocat
 		} else if (this.syntheticAccessor != null) {
 			if (this.lhs.isSuper() || isMethodReference())
 				this.binding = this.syntheticAccessor;
+		} else { // cf. MessageSend.generateCode()
+			if (this.binding != null && isMethodReference()) {
+				TypeBinding declaringClass = CodeStream.getConstantPoolDeclaringClass(currentScope, this.binding, this.lhs.resolvedType, false);
+				if (declaringClass instanceof ReferenceBinding)
+					this.binding.declaringClass = (ReferenceBinding) declaringClass;
+			}
 		}
 		
 		int pc = codeStream.position;
@@ -544,14 +550,6 @@ public class ReferenceExpression extends FunctionalExpression implements Invocat
 	}
 	
 	public boolean isPertinentToApplicability(TypeBinding targetType, MethodBinding candidateMethod) {
-		if (targetType == null) // assumed to signal another primary error
-			return true;
-
-		final MethodBinding sam = targetType.getSingleAbstractMethod(this.enclosingScope, true); // cached/cheap call.
-		
-		if (sam == null || !sam.isValidBinding())
-			return true;
-		
 		return this.isExactMethodReference();
 	}
 	
@@ -570,7 +568,7 @@ public class ReferenceExpression extends FunctionalExpression implements Invocat
 	}
 
 	public boolean isTypeAccess() {
-		return false;
+		return !this.haveReceiver;
 	}
 
 	public void setActualReceiverType(ReferenceBinding receiverType) {

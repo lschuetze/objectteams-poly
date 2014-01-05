@@ -1486,6 +1486,9 @@ protected void consumeAdditionalBoundList() {
 protected void consumeAdditionalBoundList1() {
 	concatGenericsLists();
 }
+protected boolean isIndirectlyInsideLambdaExpression() {
+	return false;
+}
 protected void consumeAllocationHeader() {
 	// ClassInstanceCreationExpression ::= 'new' ClassType '(' ArgumentListopt ')' ClassBodyopt
 
@@ -1510,7 +1513,8 @@ protected void consumeAllocationHeader() {
 		this.lastCheckPoint = anonymousType.bodyStart = this.scanner.currentPosition;
 		this.currentElement = this.currentElement.add(anonymousType, 0);
 		this.lastIgnoredToken = -1;
-		this.currentToken = 0; // opening brace already taken into account
+		if (!isIndirectlyInsideLambdaExpression())
+			this.currentToken = 0; // opening brace already taken into account
 		return;
 	}
 	this.lastCheckPoint = this.scanner.startPosition; // force to restart at this exact position
@@ -4276,7 +4280,8 @@ protected void consumeEnterAnonymousClassBody(boolean qualified) {
 		this.lastCheckPoint = anonymousType.bodyStart;
 		this.currentElement = this.currentElement.add(anonymousType, 0);
 		if (!(this.currentElement instanceof RecoveredAnnotation)) {
-			this.currentToken = 0; // opening brace already taken into account
+			if (!isIndirectlyInsideLambdaExpression())
+				this.currentToken = 0; // opening brace already taken into account
 		} else {
 			this.ignoreNextOpeningBrace = true;
 			this.currentElement.bracketBalance++;
@@ -4477,7 +4482,8 @@ protected void consumeEnumConstantHeader() {
 	  	this.currentElement = this.currentElement.add(anonymousType, 0);
       	this.lastCheckPoint = anonymousType.bodyStart;
         this.lastIgnoredToken = -1;
-        this.currentToken = 0; // opening brace already taken into account
+        if (!isIndirectlyInsideLambdaExpression())
+        	this.currentToken = 0; // opening brace already taken into account
 	  } else {
 	  	  if(this.currentToken == TokenNameSEMICOLON) {
 		  	RecoveredType currentType = currentRecoveryType();
@@ -13542,13 +13548,13 @@ try {
 			if (!this.hasReportedError) {
 				this.hasError = true;
 			}
-			this.kurrentToken = this.currentToken;
+			int previousToken = this.currentToken;
 			switch (resumeOnSyntaxError()) {
 				case HALT:
 					act = ERROR_ACTION;
 					break ProcessTerminals;
 				case RESTART:
-					if (act == ERROR_ACTION && this.kurrentToken != 0) this.lastErrorEndPosition = errorPos;
+					if (act == ERROR_ACTION && previousToken != 0) this.lastErrorEndPosition = errorPos;
 					act = START_STATE;
 					this.stateStackTop = -1;
 					this.currentToken = getFirstToken();
@@ -13558,9 +13564,8 @@ try {
 						act = this.stack[this.stateStackTop--];
 						continue ProcessTerminals;
 					} else {
-						this.currentToken = this.kurrentToken; // Gets trashed all over the place.
+						// FALL THROUGH.	
 					}
-					// FALL THROUGH.
 			}
 		}
 		if (act <= NUM_RULES) {

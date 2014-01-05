@@ -299,6 +299,9 @@ protected void notifySourceElementRequestor(AbstractMethodDeclaration methodDecl
 	boolean [] baseclassFlags = null;
 // SH}
 	ParameterInfo[] parameterInfos = null; 
+	ISourceElementRequestor.MethodInfo methodInfo = new ISourceElementRequestor.MethodInfo();
+	methodInfo.typeAnnotated = ((methodDeclaration.bits & ASTNode.HasTypeAnnotations) != 0);
+
 	if (arguments != null) {
 		Object[][] argumentInfos = getArgumentInfos(arguments);
 		parameterInfos = (ParameterInfo[]) argumentInfos[0];
@@ -327,7 +330,6 @@ protected void notifySourceElementRequestor(AbstractMethodDeclaration methodDecl
 			if (hasDeprecatedAnnotation(methodDeclaration.annotations))
 				currentModifiers |= ClassFileConstants.AccDeprecated;
 
-			ISourceElementRequestor.MethodInfo methodInfo = new ISourceElementRequestor.MethodInfo();
 			methodInfo.isConstructor = true;
 			methodInfo.declarationStart = methodDeclaration.declarationSourceStart;
 			methodInfo.modifiers = currentModifiers;
@@ -395,7 +397,6 @@ protected void notifySourceElementRequestor(AbstractMethodDeclaration methodDecl
 		TypeReference returnType = methodDeclaration instanceof MethodDeclaration
 			? ((MethodDeclaration) methodDeclaration).returnType
 			: null;
-		ISourceElementRequestor.MethodInfo methodInfo = new ISourceElementRequestor.MethodInfo();
 		methodInfo.isAnnotation = methodDeclaration instanceof AnnotationMethodDeclaration;
 		methodInfo.declarationStart = methodDeclaration.declarationSourceStart;
 		methodInfo.modifiers = currentModifiers;
@@ -778,6 +779,7 @@ protected void notifySourceElementRequestor(FieldDeclaration fieldDeclaration, T
 					typeName = CharOperation.concatWith(fieldDeclaration.type.getParameterizedTypeName(), '.');
 				}
 				ISourceElementRequestor.FieldInfo fieldInfo = new ISourceElementRequestor.FieldInfo();
+				fieldInfo.typeAnnotated = ((fieldDeclaration.bits & ASTNode.HasTypeAnnotations) != 0);
 				fieldInfo.declarationStart = fieldDeclaration.declarationSourceStart;
 				fieldInfo.name = fieldDeclaration.name;
 				fieldInfo.modifiers = deprecated ? (currentModifiers & ExtraCompilerModifiers.AccJustFlag) | ClassFileConstants.AccDeprecated : currentModifiers & ExtraCompilerModifiers.AccJustFlag;
@@ -887,6 +889,8 @@ protected void notifySourceElementRequestor(TypeDeclaration typeDeclaration, boo
 //ak}
 		int kind = TypeDeclaration.kind(typeDeclaration.modifiers);
 		char[] implicitSuperclassName = TypeConstants.CharArray_JAVA_LANG_OBJECT;
+		ISourceElementRequestor.TypeInfo typeInfo = new ISourceElementRequestor.TypeInfo();
+		typeInfo.typeAnnotated = ((typeDeclaration.bits & ASTNode.HasTypeAnnotations) != 0);
 		if (isInRange) {
 			int currentModifiers = typeDeclaration.modifiers;
 
@@ -901,7 +905,6 @@ protected void notifySourceElementRequestor(TypeDeclaration typeDeclaration, boo
 			} else {
 				superclassName = getSuperclassName(typeDeclaration);
 			}
-			ISourceElementRequestor.TypeInfo typeInfo = new ISourceElementRequestor.TypeInfo();
 			if (typeDeclaration.allocation == null) {
 				typeInfo.declarationStart = typeDeclaration.declarationSourceStart;
 			} else if (isEnumInit) {

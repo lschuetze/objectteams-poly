@@ -7716,6 +7716,198 @@ public void test421927a() {
 			"----------\n",
 			true);
 }
+// https://bugs.eclipse.org/bugs/show_bug.cgi?id=423429, [1.8][compiler] NPE in LambdaExpression.analyzeCode
+public void test423429() {
+	this.runNegativeTest(
+			new String[] {
+					"X.java", 
+					"interface I {\n" + 
+					"	J foo(String x, String y);\n" +
+					"}\n" +
+					"interface J {\n" +
+					"	K foo(String x, String y);\n" +
+					"}\n" +
+					"interface K {\n" +
+					"	int foo(String x, int y);\n" +
+					"}\n" +
+					"public class X {\n" +
+					"	static void goo(K i) {}\n" +
+					"	public static void main(String[] args) {\n" +
+					"		goo ((first, second) -> {\n" +
+					"			return (xyz, pqr) -> first.length();\n" +
+					"		});\n" +
+					"	}\n" +
+					"}\n"
+			},
+			"----------\n" + 
+			"1. ERROR in X.java (at line 14)\n" + 
+			"	return (xyz, pqr) -> first.length();\n" + 
+			"	       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n" + 
+			"The target type of this expression must be a functional interface\n" + 
+			"----------\n");
+}
+// https://bugs.eclipse.org/bugs/show_bug.cgi?id=423129,  [1.8][compiler] Hook up lambda expressions into statement recovery 
+public void test423129() {
+	this.runNegativeTest(
+			new String[] {
+					"X.java", 
+					"interface I {\n" +
+					"	String foo(Integer x);\n" +
+					"}\n" +
+					"public class X {\n" +
+					"	static void goo(String s) {\n" +
+					"	}\n" +
+					"	static void goo(I i) {\n" +
+					"	}\n" +
+					"	public static void main(String[] args) {\n" +
+					"		goo((xyz) -> {\n" +
+					"			System.out.println(xyz);\n" +
+					"			return xyz.\n" +
+					"		});\n" +
+					"	}\n" +
+					"}\n"
+			},
+			"----------\n" + 
+			"1. ERROR in X.java (at line 11)\n" + 
+			"	System.out.println(xyz);\n" + 
+			"	                   ^^^\n" + 
+			"xyz cannot be resolved to a variable\n" + 
+			"----------\n" + 
+			"2. ERROR in X.java (at line 12)\n" + 
+			"	return xyz.\n" + 
+			"	          ^\n" + 
+			"Syntax error, insert \"new ClassType ( )\" to complete ClassInstanceCreationExpression\n" + 
+			"----------\n" + 
+			"3. ERROR in X.java (at line 12)\n" + 
+			"	return xyz.\n" + 
+			"	          ^\n" + 
+			"Syntax error, insert \";\" to complete ReturnStatement\n" + 
+			"----------\n",
+			true);
+}
+// https://bugs.eclipse.org/bugs/show_bug.cgi?id=423129,  [1.8][compiler] Hook up lambda expressions into statement recovery 
+public void test423129b() {
+	this.runNegativeTest(
+			new String[] {
+					"X.java", 
+					"import java.util.ArrayList;\n" +
+					"import java.util.Arrays;\n" +
+					"import java.util.Collections;\n" +
+					"import java.util.Comparator;\n" +
+					"public class X {\n" +
+					"   int compareTo(X x) { return 0; }\n" +
+					"	void foo() {\n" +
+					"		Collections.sort(new ArrayList<X>(Arrays.asList(new X(), new X(), new X())),\n" +
+					"				(X o1, X o2) -> o1.compareTo(o2)); //[2]\n" +
+					"	}\n" +
+					"	}\n" +
+					"}\n"
+			},
+			"----------\n" + 
+			"1. ERROR in X.java (at line 8)\n" + 
+			"	Collections.sort(new ArrayList<X>(Arrays.asList(new X(), new X(), new X())),\n" + 
+			"	            ^^^^\n" + 
+			"The method sort(List<T>, Comparator<? super T>) in the type Collections is not applicable for the arguments (ArrayList<X>, Comparator<X>)\n" + 
+			"----------\n" + 
+			"2. ERROR in X.java (at line 12)\n" + 
+			"	}\n" + 
+			"	^\n" + 
+			"Syntax error on token \"}\", delete this token\n" + 
+			"----------\n",
+			true);
+}
+// https://bugs.eclipse.org/bugs/show_bug.cgi?id=424400, [1.8] Interfaces in the same hierarchy are allowed in an intersection cast with different type argument
+public void test424400() {
+	this.runNegativeTest(
+			new String[] {
+					"X.java", 
+					"public class X<T> implements MyComparable<T>{\n" +
+					"    public static void main(String argv[]) {\n" +
+					"    	int result = ((Comparable<Integer> & MyComparable) new X()).compareTo(1);\n" +
+					"    }\n" +
+					"    public int compareTo(T o) {\n" +
+					"		return 0;\n" +
+					"	}\n" +
+					"}\n" +
+					"interface MyComparable<T> extends Comparable<T> {}\n"
+			},
+			"----------\n" + 
+			"1. ERROR in X.java (at line 3)\n" + 
+			"	int result = ((Comparable<Integer> & MyComparable) new X()).compareTo(1);\n" + 
+			"	               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n" + 
+			"The interface Comparable cannot be implemented more than once with different arguments: Comparable and Comparable<Integer>\n" + 
+			"----------\n" + 
+			"2. WARNING in X.java (at line 3)\n" + 
+			"	int result = ((Comparable<Integer> & MyComparable) new X()).compareTo(1);\n" + 
+			"	                                     ^^^^^^^^^^^^\n" + 
+			"MyComparable is a raw type. References to generic type MyComparable<T> should be parameterized\n" + 
+			"----------\n" + 
+			"3. WARNING in X.java (at line 3)\n" + 
+			"	int result = ((Comparable<Integer> & MyComparable) new X()).compareTo(1);\n" + 
+			"	                                                       ^\n" + 
+			"X is a raw type. References to generic type X<T> should be parameterized\n" + 
+			"----------\n");
+}
+// https://bugs.eclipse.org/bugs/show_bug.cgi?id=424400, [1.8] Interfaces in the same hierarchy are allowed in an intersection cast with different type argument
+public void _test424400() {
+	this.runNegativeTest(
+			new String[] {
+					"X.java", 
+					"public class X<T> implements MyComparable<T> {\n" +
+					"    public static void main(String argv[]) {\n" +
+					"    	int result = ((Comparable<Integer> & MyComparable) new X()).compareTo(1);\n" +
+					"    }\n" +
+					"    public int compareTo(T o) {\n" +
+					"	return 0;\n" +
+					"    }\n" +
+					"}\n" +
+					"interface MyComparable<T> {\n" +
+					"     public int compareTo(T value);\n" +
+					"}\n"
+			},
+			"----------\n" + 
+			"1. ERROR in X.java (at line 3)\n" + 
+			"	int result = ((Comparable<Integer> & MyComparable) new X()).compareTo(1);\n" + 
+			"	               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n" + 
+			"The interface Comparable cannot be implemented more than once with different arguments: Comparable and Comparable<Integer>\n" + 
+			"----------\n" + 
+			"2. WARNING in X.java (at line 3)\n" + 
+			"	int result = ((Comparable<Integer> & MyComparable) new X()).compareTo(1);\n" + 
+			"	                                     ^^^^^^^^^^^^\n" + 
+			"MyComparable is a raw type. References to generic type MyComparable<T> should be parameterized\n" + 
+			"----------\n" + 
+			"3. WARNING in X.java (at line 3)\n" + 
+			"	int result = ((Comparable<Integer> & MyComparable) new X()).compareTo(1);\n" + 
+			"	                                                       ^\n" + 
+			"X is a raw type. References to generic type X<T> should be parameterized\n" + 
+			"----------\n");
+}
+// https://bugs.eclipse.org/bugs/show_bug.cgi?id=424444, [1.8] VerifyError when constructor reference used with array
+public void test424444() throws Exception {
+	this.runNegativeTest(
+		new String[] {
+				"X.java",
+				"interface Functional<T> {\n" +
+				"    T foo(int size);\n" +
+				"}\n" +
+				"public class X  {\n" +
+				"    public static void main(String argv[]) {\n" +
+				"    	int [] a = goo(10);\n" +
+				"    	Functional<Integer []> contr = int[]::new;\n" +
+				"        System.out.println(\"Done\");\n" +
+				"    }\n" +
+				"    static int [] goo(int x) {\n" +
+				"    	return new int [x];\n" +
+				"    }\n" +
+				"}\n",
+		},
+		"----------\n" + 
+		"1. ERROR in X.java (at line 7)\n" + 
+		"	Functional<Integer []> contr = int[]::new;\n" + 
+		"	                               ^^^^^^^^^^\n" + 
+		"Constructed array int[] cannot be assigned to Integer[] as required in the interface descriptor  \n" + 
+		"----------\n");
+}
 public static Class testClass() {
 	return NegativeLambdaExpressionsTest.class;
 }

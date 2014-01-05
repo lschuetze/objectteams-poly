@@ -3610,7 +3610,7 @@ public abstract class Scope {
 // SH}
 	}
 
-	protected boolean hasErasedCandidatesCollisions(TypeBinding one, TypeBinding two, Map invocations, ReferenceBinding type, ASTNode typeRef) {
+	public boolean hasErasedCandidatesCollisions(TypeBinding one, TypeBinding two, Map invocations, ReferenceBinding type, ASTNode typeRef) {
 		invocations.clear();
 		TypeBinding[] mecs = minimalErasedCandidates(new TypeBinding[] {one, two}, invocations);
 		if (mecs != null) {

@@ -319,7 +319,7 @@ public RecoveredElement buildInitialRecoveryState(){
 			this.lastCheckPoint = importRef.declarationSourceEnd + 1;
 		}
 	}
-	if (this.currentToken == TokenNameRBRACE) {
+	if (this.currentToken == TokenNameRBRACE && !isIndirectlyInsideLambdaExpression()) {
 		this.currentToken = 0; // closing brace has already been taken care of
 	}
 
@@ -467,10 +467,6 @@ protected boolean triggerRecoveryUponLambdaClosure(Statement statement, boolean 
 public boolean isAssistParser() {
 //SH}
 	return true;
-}
-protected void consumeInvocationExpression() { // on error, a message send's error reductions will take the expression path rather than the statement path since that is a dead end.
-	super.consumeInvocationExpression();
-	triggerRecoveryUponLambdaClosure(this.expressionStack[this.expressionPtr], false);
 }
 protected void consumeBlockStatement() {
 	super.consumeBlockStatement();

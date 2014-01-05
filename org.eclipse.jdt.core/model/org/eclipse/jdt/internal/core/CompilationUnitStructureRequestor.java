@@ -1,10 +1,13 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2012 IBM Corporation and others.
+ * Copyright (c) 2000, 2013 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
- * $Id: CompilationUnitStructureRequestor.java 23401 2010-02-02 23:56:05Z stephan $
+ *
+ * This is an implementation of an early-draft specification developed under the Java
+ * Community Process (JCP) and is made available for testing and evaluation purposes
+ * only. The code is not compatible with any specification of the JCP.
  *
  * Contributors:
  *     IBM Corporation - initial API and implementation
@@ -476,6 +479,9 @@ private SourceMethodElementInfo createMethodInfo(MethodInfo methodInfo, SourceMe
 		info.arguments = acceptMethodParameters(sourceArguments, handle, methodInfo);
 // SH}
 	}
+	if (methodInfo.typeAnnotated) {
+		this.unitInfo.annotationNumber = CompilationUnitElementInfo.ANNOTATION_THRESHOLD_FOR_DIET_PARSE;
+	}
 	return info;
 }
 private LocalVariable[] acceptMethodParameters(Argument[] arguments, JavaElement methodHandle, MethodInfo methodInfo) {
@@ -598,6 +604,9 @@ private SourceTypeElementInfo createTypeInfo(TypeInfo typeInfo, SourceType handl
 		}
 		
 	}
+	if (typeInfo.typeAnnotated) {
+		this.unitInfo.annotationNumber = CompilationUnitElementInfo.ANNOTATION_THRESHOLD_FOR_DIET_PARSE;
+	}
 	return info;
 }
 protected void acceptTypeParameter(TypeParameterInfo typeParameterInfo, JavaElementInfo parentInfo) {
@@ -710,6 +719,9 @@ public void exitField(int initializationStart, int declarationEnd, int declarati
 				info.initializationSource = initializer;
 			}
 		}
+	}
+	if (fieldInfo.typeAnnotated) {
+		this.unitInfo.annotationNumber = CompilationUnitElementInfo.ANNOTATION_THRESHOLD_FOR_DIET_PARSE;
 	}
 }
 /**

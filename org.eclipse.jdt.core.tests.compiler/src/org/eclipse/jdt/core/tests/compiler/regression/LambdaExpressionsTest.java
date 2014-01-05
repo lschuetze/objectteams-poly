@@ -2086,6 +2086,73 @@ public void testBug419048_3() {
 			"}\n"
 		});
 }
+// https://bugs.eclipse.org/bugs/show_bug.cgi?id=424226,  [1.8] Cannot use static method from an interface in static method reference
+public void test424226() {
+	runConformTest(
+		new String[] {
+			"X.java",
+			"public class X {\n" +
+			"	public void fun1() {\n" +
+			"		FI fi = I::staticMethod; \n" +
+			"	}\n" +
+			"   public static void main(String [] args) {\n" +
+			"       System.out.println(\"OK\");\n" +
+			"   }\n" +
+			"}\n" +
+			"@FunctionalInterface\n" +
+			"interface FI {\n" +
+			"	void foo();	\n" +
+			"}\n" +
+			"interface I {\n" +
+			"	static FI staticMethod() {\n" +
+			"		return null;\n" +
+			"	}\n" +
+			"}\n"
+		}, "OK");
+}
+// https://bugs.eclipse.org/bugs/show_bug.cgi?id=423684, [1.8][compiler] IllegalAccessError using functional consumer calling inherited method
+public void test423684() {
+	runConformTest(
+		new String[] {
+			"Test.java",
+			"import java.util.Arrays;\n" +
+			"import java.util.List;\n" +
+			"import mypackage.MyPublicClass;\n" +
+			"public class Test {\n" +
+			"    public static void main(String[] args) {\n" +
+			"        doesWork();\n" +
+			"        doesNotWork();\n" +
+			"    }\n" +
+			"    public static void doesNotWork() {\n" +
+			"        MyPublicClass victim = new MyPublicClass();\n" +
+			"        List<String> items = Arrays.asList(\"first\", \"second\", \"third\");\n" +
+			"        items.forEach(victim::doSomething); //illegal access error here\n" +
+			"    }\n" +
+			"    public static void doesWork() {\n" +
+			"        MyPublicClass victim = new MyPublicClass();\n" +
+			"        List<String> items = Arrays.asList(\"first\", \"second\", \"third\");\n" +
+			"        for (String item : items) {\n" +
+			"            victim.doSomething(item);\n" +
+			"        }\n" +
+			"    }\n" +
+			"}\n",
+			"mypackage/MyPublicClass.java",	
+			"package mypackage;\n" +
+			"class MyPackagePrivateBaseClass {\n" +
+			"    public void doSomething(String input) {\n" +
+			"        System.out.println(input);\n" +
+			"    }\n" +
+			"}\n" +
+			"public class MyPublicClass extends MyPackagePrivateBaseClass {\n" +
+			"}\n"
+		}, 
+		"first\n" + 
+		"second\n" + 
+		"third\n" + 
+		"first\n" + 
+		"second\n" + 
+		"third");
+}
 public static Class testClass() {
 	return LambdaExpressionsTest.class;
 }

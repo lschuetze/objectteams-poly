@@ -14,6 +14,7 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.compiler.lookup;
 
+import org.eclipse.jdt.core.compiler.CharOperation;
 import org.eclipse.jdt.internal.compiler.util.SimpleLookupTable;
 import org.eclipse.jdt.internal.compiler.util.Util;
 import org.eclipse.objectteams.otdt.internal.core.compiler.lookup.DependentTypeBinding;
@@ -75,6 +76,8 @@ public class TypeSystem {
 
 	// Given a type, answer its unannotated aka naked prototype. This is also a convenient way to "register" a type with TypeSystem and have it id stamped.
 	public final TypeBinding getUnannotatedType(TypeBinding type) {
+		if (type.isUnresolvedType() && CharOperation.indexOf('$', type.sourceName()) > 0)
+			type = BinaryTypeBinding.resolveType(type, this.environment, true); // to ensure unique id assignment (when enclosing type is parameterized, inner type is also) 
 		if (type.id == TypeIds.NoId) {
 			if (type.hasTypeAnnotations())
 				throw new IllegalStateException();
