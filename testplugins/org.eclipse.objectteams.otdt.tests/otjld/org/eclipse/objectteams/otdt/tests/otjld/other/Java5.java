@@ -3860,7 +3860,7 @@ public class Java5 extends AbstractOTJLDTest {
 
     // a role method has a custom annotation, so should its tsub  -  testing at runtime via reflection
     // A.1.17-otjld-copyinheritance-for-annotation-3
-    public void testA117_copyinheritanceForAnnotation3() {
+    public void _testA117_copyinheritanceForAnnotation3() {
        
        runConformTest(
             new String[] {
