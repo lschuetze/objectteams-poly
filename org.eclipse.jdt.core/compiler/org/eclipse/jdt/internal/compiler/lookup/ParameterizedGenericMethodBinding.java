@@ -121,6 +121,14 @@ public class ParameterizedGenericMethodBinding extends ParameterizedMethodBindin
 						}
 						TypeBinding[] solutions = infCtx18.getSolutions(typeVariables, invocationSite, result);
 						if (solutions != null) {
+//{ObjectTeams: validate matching team anchors:
+							for (int i = 0; i < solutions.length; i++) {
+								if (DependentTypeBinding.isDependentType(solutions[i])
+										&& typeVariables[i].anchors != null
+										&& !AnchorMapping.isLegalInstantiation(typeVariables[i], (DependentTypeBinding) solutions[i]))
+									return null; // illegal due to mismatching team anchors
+							}
+// SH}
 							
 							methodSubstitute = scope.environment().createParameterizedGenericMethod(originalMethod, solutions);
 							

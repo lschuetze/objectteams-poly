@@ -304,6 +304,25 @@ public class AnchorMapping {
    		}
    		return false;
    }
+   
+   /** Is 'instantiation' a legal instantiation for 'typeVariable' in terms of team anchors? */
+   public static boolean isLegalInstantiation(TypeVariableBinding typeVariable, DependentTypeBinding instantiation) {
+  		AnchorMapping currentMapping = currentMappings.get();
+  		if (currentMapping != null)
+  			return currentMapping.internalIsLegalInstantiation(typeVariable, instantiation);
+		return false;	   
+   }
+   private boolean internalIsLegalInstantiation(TypeVariableBinding typeVariable, DependentTypeBinding instantiation) {
+	   ITeamAnchor[] anchors = typeVariable.anchors;
+	   if (anchors == null) return true; // not constrained
+	   if (!(anchors[0] instanceof LocalVariableBinding)) return true; // TODO anchored to what?
+	   int position = ((LocalVariableBinding)anchors[0]).resolvedPosition;
+	   Statement argument = this._arguments[position];
+	   ITeamAnchor[] anchorPath = TeamAnchor.getBestNameFromStat(argument);
+	   if (anchorPath != null)
+		   return instantiation.getAnchor().hasSameBestNameAs(anchorPath, null);
+	   return false;
+   }
 
    private boolean areTypeEqual(RoleTypeBinding role1, RoleTypeBinding role2, MethodBinding currentMethod) 
    {

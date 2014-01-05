@@ -56,6 +56,9 @@ public interface ITeamAnchor {
 	 */
 	boolean hasSameBestNameAs(ITeamAnchor other);
 
+	/** Variant if path of other is directly known. */
+	boolean hasSameBestNameAs(ITeamAnchor[] anchorPath, ITeamAnchor other);
+
 	/**
 	 * Get this anchor's "best name", ie., the 'minimal' path.
 	 * @return a flat ('.'-seperated) representation of this variable's best name.

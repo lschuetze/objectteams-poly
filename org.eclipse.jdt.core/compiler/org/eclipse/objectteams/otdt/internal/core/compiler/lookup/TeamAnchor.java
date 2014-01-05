@@ -208,7 +208,7 @@ public abstract class TeamAnchor extends Binding implements ITeamAnchor {
 		this.bestNamePath = other.getBestNamePath();
 	}
 
-	private ITeamAnchor[] getBestNameFromStat(Statement stat) {
+	public static ITeamAnchor[] getBestNameFromStat(Statement stat) {
 		if (stat instanceof Argument) {
 			return ((Argument)stat).binding.bestNamePath;
 		}
@@ -304,8 +304,12 @@ public abstract class TeamAnchor extends Binding implements ITeamAnchor {
 	 */
 	public boolean hasSameBestNameAs(ITeamAnchor other) {
 		if (other == this) return true;
-		ITeamAnchor[] thisBestName  = getBestNamePath();
 		ITeamAnchor[] otherBestName = other.getBestNamePath();
+		return hasSameBestNameAs(otherBestName, other);
+	}
+	/** Variant if path of other is directly known. */
+	public boolean hasSameBestNameAs(ITeamAnchor[] otherBestName, ITeamAnchor other) {
+		ITeamAnchor[] thisBestName  = getBestNamePath();
 
 		// perhaps one anchor directly refers to the other:
 		if (thisBestName.length == 1 && thisBestName[0] == other)
