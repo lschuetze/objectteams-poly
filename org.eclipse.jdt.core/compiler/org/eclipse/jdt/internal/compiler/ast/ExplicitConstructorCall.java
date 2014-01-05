@@ -32,6 +32,7 @@ import org.eclipse.jdt.internal.compiler.classfmt.ClassFileConstants;
 import org.eclipse.jdt.internal.compiler.codegen.*;
 import org.eclipse.jdt.internal.compiler.flow.*;
 import org.eclipse.jdt.internal.compiler.lookup.*;
+import org.eclipse.jdt.internal.compiler.util.SimpleLookupTable;
 import org.eclipse.objectteams.otdt.core.compiler.IOTConstants;
 import org.eclipse.objectteams.otdt.internal.core.compiler.ast.TsuperReference;
 import org.eclipse.objectteams.otdt.internal.core.compiler.bytecode.BytecodeTransformer;
@@ -124,8 +125,9 @@ public class ExplicitConstructorCall extends Statement implements Invocation, Ex
 
 	// TODO Remove once DOMParser is activated
 	public int typeArgumentsSourceStart;
-	private InferenceContext18 inferenceContext;
-	private int inferenceKind;
+
+	 // hold on to this context from invocation applicability inference until invocation type inference (per method candidate):
+	private SimpleLookupTable/*<PGMB,InferenceContext18>*/ inferenceContexts;
 
 	public ExplicitConstructorCall(int accessMode) {
 		this.accessMode = accessMode;
@@ -855,29 +857,32 @@ public class ExplicitConstructorCall extends Statement implements Invocation, Ex
 	public Expression[] arguments() {
 		return this.arguments;
 	}
-	public InferenceContext18 inferenceContext() {
-		return this.inferenceContext;
-	}
-	public int inferenceKind() {
-		return (this.inferenceKind & InferenceContext18.INFERENCE_KIND_MASK);
-	}
-	public void setInferenceKind(int checkKind) {
-		this.inferenceKind = checkKind;
-	}
-	public void markInferenceFinished() {
-		this.inferenceKind |= InferenceContext18.CHECK_FINISHED;
-	}
-	public boolean hasInferenceFinished() {
-		return this.inferenceKind == 0 // only relevant if inference has been started
-				|| (this.inferenceKind & InferenceContext18.CHECK_FINISHED) != 0;
-	}
-	public TypeBinding updateBindings(MethodBinding updatedBinding) {
+	public boolean updateBindings(MethodBinding updatedBinding) {
+		if (this.binding == updatedBinding)
+			return false;
+		if (this.inferenceContexts != null) {
+			InferenceContext18 ctx = (InferenceContext18)this.inferenceContexts.removeKey(this.binding);
+			if (ctx != null && updatedBinding instanceof ParameterizedGenericMethodBinding) {
+				this.inferenceContexts.put(updatedBinding, ctx);
+				ctx.hasFinished = true;
+			}
+		}
 		this.binding = updatedBinding;
-		return TypeBinding.VOID; // not an expression
+		return true;
+	}
+	public void registerInferenceContext(ParameterizedGenericMethodBinding method, InferenceContext18 infCtx18) {
+		if (this.inferenceContexts == null)
+			this.inferenceContexts = new SimpleLookupTable();
+		this.inferenceContexts.put(method, infCtx18);
+	}
+	public InferenceContext18 getInferenceContext(ParameterizedGenericMethodBinding method) {
+		if (this.inferenceContexts == null)
+			return null;
+		return (InferenceContext18) this.inferenceContexts.get(method);
 	}
 
 	// -- interface InvocationSite: --
 	public InferenceContext18 freshInferenceContext(Scope scope) {
-		return this.inferenceContext = new InferenceContext18(scope, this.arguments, this);
+		return new InferenceContext18(scope, this.arguments, this);
 	}
 }

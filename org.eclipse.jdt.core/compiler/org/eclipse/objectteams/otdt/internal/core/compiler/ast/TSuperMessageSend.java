@@ -138,7 +138,7 @@ public class TSuperMessageSend extends MessageSend {
 	    	if (!this.binding.isValidBinding() && ((ProblemMethodBinding)this.binding).declaringClass == null)
 	    		this.binding.declaringClass = (ReferenceBinding) tsuperRole;
 	    	if (polyExpressionSeen)
-	    		resolvePolyExpressionArguments(this, scope, this.binding, argumentTypes);
+	    		resolvePolyExpressionArguments(this, this.binding, argumentTypes);
 	    	return;
 	    }
 	    // no qualification => search all tsupers by priority:
@@ -153,7 +153,7 @@ public class TSuperMessageSend extends MessageSend {
 	    		}
 	    		this.binding = candidate;
 		    	if (polyExpressionSeen)
-		    		resolvePolyExpressionArguments(this, scope, this.binding, argumentTypes);
+		    		resolvePolyExpressionArguments(this, this.binding, argumentTypes);
 	    		return;
 	    	}
 	    	if (bestMatch == null || 

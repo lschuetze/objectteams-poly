@@ -48,6 +48,7 @@ import org.eclipse.jdt.internal.compiler.impl.Constant;
 import org.eclipse.jdt.internal.compiler.lookup.*;
 import org.eclipse.jdt.internal.compiler.problem.ProblemReporter;
 import org.eclipse.jdt.internal.compiler.problem.ProblemSeverities;
+import org.eclipse.jdt.internal.compiler.util.SimpleLookupTable;
 import org.eclipse.objectteams.otdt.internal.core.compiler.control.Dependencies;
 import org.eclipse.objectteams.otdt.internal.core.compiler.control.ITranslationStates;
 import org.eclipse.objectteams.otdt.internal.core.compiler.control.StateMemento;
@@ -91,8 +92,9 @@ public class AllocationExpression extends Expression implements Invocation {
 
 	public FakedTrackingVariable closeTracker;	// when allocation a Closeable store a pre-liminary tracking variable here
 	private ExpressionContext expressionContext = VANILLA_CONTEXT;
-	private int inferenceKind;
-	private InferenceContext18 inferenceContext;
+
+	 // hold on to this context from invocation applicability inference until invocation type inference (per method candidate):
+	private SimpleLookupTable/*<PGMB,IC18>*/ inferenceContexts;
 
 //{ObjectTeams: alternate AST in case the creation needs to be redirected through a creator call:
 	private MessageSend roleCreatorCall = null;
@@ -533,7 +535,6 @@ public TypeBinding resolveType(BlockScope scope) {
 		// in this preliminary mode use the raw receiver type for constructor lookup, to avoid spurious type errors
 		receiverType = (ReferenceBinding) receiverType.original();
 		receiverType = scope.environment().createRawType(receiverType, receiverType.enclosingType());
-		this.inferenceKind = 1; // inference needed!
  	}
 //{ObjectTeams: may need to instantiate parameters of constructor
     AnchorMapping anchorMapping = AnchorMapping.setupNewMapping(null, this.arguments, scope);
@@ -621,6 +622,8 @@ public TypeBinding resolveType(BlockScope scope) {
 		this.valueParam.resolve(scope);
 	}
 //orig:
+	if (diamondNeedsDeferring)
+		return new PolyTypeBinding(this);
 	return allocationType;
 //:giro
   } finally {
@@ -681,7 +684,6 @@ public void checkTypeArgumentRedundancy(ParameterizedTypeBinding allocationType,
 	}
 	TypeBinding [] inferredTypes;
 	int previousBits = this.type.bits;
-	int previousInferenceKind = this.inferenceKind;
 	try {
 		// checking for redundant type parameters must fake a diamond, 
 		// so we infer the same results as we would get with a diamond in source code:
@@ -690,7 +692,6 @@ public void checkTypeArgumentRedundancy(ParameterizedTypeBinding allocationType,
 	} finally {
 		// reset effects of inference
 		this.type.bits = previousBits;
-		this.inferenceKind = previousInferenceKind;
 	}
 	if (inferredTypes == null) {
 		return;
@@ -845,31 +846,37 @@ public MethodBinding binding() {
 public Expression[] arguments() {
 	return this.arguments;
 }
-public int inferenceKind() {
-	return (this.inferenceKind & InferenceContext18.INFERENCE_KIND_MASK);
-}
-public void setInferenceKind(int checkKind) {
-	this.inferenceKind = checkKind;
-}
-public void markInferenceFinished() {
-	this.inferenceKind |= InferenceContext18.CHECK_FINISHED;
-}
-public boolean hasInferenceFinished() {
-	return this.inferenceKind == 0 // only relevant if inference has been started
-			|| (this.inferenceKind & InferenceContext18.CHECK_FINISHED) != 0;
-}
-public TypeBinding updateBindings(MethodBinding updatedBinding) {
+
+public boolean updateBindings(MethodBinding updatedBinding) {
+	if (this.binding == updatedBinding)
+		return false;
+	if (this.inferenceContexts != null) {
+		InferenceContext18 ctx = (InferenceContext18)this.inferenceContexts.removeKey(this.binding);
+		if (ctx != null && updatedBinding instanceof ParameterizedGenericMethodBinding) {
+			this.inferenceContexts.put(updatedBinding, ctx);
+			ctx.hasFinished = true;
+		}
+	}
 	this.binding = updatedBinding;
-	return this.resolvedType = updatedBinding.declaringClass;
+	this.resolvedType = updatedBinding.declaringClass;
+	return true;
 }
-public InferenceContext18 inferenceContext() {
-	return this.inferenceContext;
+public void registerInferenceContext(ParameterizedGenericMethodBinding method, InferenceContext18 infCtx18) {
+	if (this.inferenceContexts == null)
+		this.inferenceContexts = new SimpleLookupTable();
+	this.inferenceContexts.put(method, infCtx18);
 }
+public InferenceContext18 getInferenceContext(ParameterizedGenericMethodBinding method) {
+	if (this.inferenceContexts == null)
+		return null;
+	return (InferenceContext18) this.inferenceContexts.get(method);
+}
+
 //-- interface InvocationSite: --
 public ExpressionContext getExpressionContext() {
 	return this.expressionContext;
 }
 public InferenceContext18 freshInferenceContext(Scope scope) {
-	return this.inferenceContext = new InferenceContext18(scope, this.arguments, this);
+	return new InferenceContext18(scope, this.arguments, this);
 }
 }
