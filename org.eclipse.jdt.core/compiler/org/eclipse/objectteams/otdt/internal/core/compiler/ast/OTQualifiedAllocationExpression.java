@@ -112,13 +112,14 @@ public abstract class OTQualifiedAllocationExpression extends AbstractQualifiedA
 	 */
 	public TypeBinding resolveType(BlockScope scope)
 	{
+	    if (this.anonymousType == null && this.creatorCall == null && this.enclosingInstance == null) // special case during code assist
+            return super.resolveType(scope);
+
 	    this.constant = Constant.NotAConstant;
 
 	    CompilationResult compilationResult = scope.referenceContext().compilationResult();
 		CheckPoint cp = compilationResult.getCheckPoint(scope.referenceContext());
 	    if (this.anonymousType == null && this.creatorCall == null) { // no double processing
-	        if (this.enclosingInstance == null) // special case during code assist
-	            return super.resolveType(scope);
 
         	if (this.enclosingInstance instanceof CastExpression)
 				this.enclosingInstance.bits |= DisableUnnecessaryCastCheck; // will check later on (within super.resolveType())
