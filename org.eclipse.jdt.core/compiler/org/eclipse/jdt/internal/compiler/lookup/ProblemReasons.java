@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2013 IBM Corporation and others.
+ * Copyright (c) 2000, 2014 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -46,11 +46,12 @@ public interface ProblemReasons {
 	final int AttemptToBypassDirectSuper = 21; // super access within default method
 	final int DefectiveContainerAnnotationType = 22;
 	final int ParameterizedMethodExpectedTypeProblem = 23;
+	final int ApplicableMethodOverriddenByInapplicable = 24;
 //{ObjectTeams;
-    final int NoTeamContext = 24;
-    final int AnchorNotFinal = 25;
-    final int AnchorNotATeam = 26;
-    final int AnchorNotFound = 27;
-    final int ProblemAlreadyReported = 28;
+    final int NoTeamContext = 25;
+    final int AnchorNotFinal = 26;
+    final int AnchorNotATeam = 27;
+    final int AnchorNotFound = 28;
+    final int ProblemAlreadyReported = 29;
 // SH}
 }

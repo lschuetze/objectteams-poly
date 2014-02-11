@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2013 IBM Corporation and others.
+ * Copyright (c) 2000, 2014 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -21,6 +21,12 @@
  *								bug 388996 - [compiler][resource] Incorrect 'potential resource leak'
  *								bug 403147 - [compiler][null] FUP of bug 400761: consolidate interaction between unboxing, NPE, and deferred checking
  *								Bug 400874 - [1.8][compiler] Inference infrastructure should evolve to meet JLS8 18.x (Part G of JSR335 spec)
+ *								Bug 424710 - [1.8][compiler] CCE in SingleNameReference.localVariableBinding
+ *								Bug 425152 - [1.8] [compiler] Lambda Expression not resolved but flow analyzed leading to NPE.
+ *								Bug 424205 - [1.8] Cannot infer type for diamond type with lambda on method invocation
+ *								Bug 424415 - [1.8][compiler] Eventual resolution of ReferenceExpression is not seen to be happening.
+ *								Bug 426366 - [1.8][compiler] Type inference doesn't handle multiple candidate target types in outer overload context
+ *								Bug 426290 - [1.8][compiler] Inference + overloading => wrong method resolution ?
  *        Andy Clement (GoPivotal, Inc) aclement@gopivotal.com - Contributions for
  *                          Bug 409245 - [1.8][compiler] Type annotations dropped when call is routed through a synthetic bridge method
  *******************************************************************************/
@@ -128,6 +134,7 @@ public class ExplicitConstructorCall extends Statement implements Invocation, Ex
 
 	 // hold on to this context from invocation applicability inference until invocation type inference (per method candidate):
 	private SimpleLookupTable/*<PGMB,InferenceContext18>*/ inferenceContexts;
+	private InnerInferenceHelper innerInferenceHelper;
 
 	public ExplicitConstructorCall(int accessMode) {
 		this.accessMode = accessMode;
@@ -473,7 +480,6 @@ public class ExplicitConstructorCall extends Statement implements Invocation, Ex
 			// arguments buffering for the method lookup
 			TypeBinding[] argumentTypes = Binding.NO_PARAMETERS;
 			boolean argsContainCast = false;
-			boolean polyExpressionSeen = false;
 			if (this.arguments != null) {
 				boolean argHasError = false; // typeChecks all arguments
 				int length = this.arguments.length;
@@ -488,8 +494,10 @@ public class ExplicitConstructorCall extends Statement implements Invocation, Ex
 					if ((argumentTypes[i] = argument.resolveType(scope)) == null) {
 						argHasError = true;
 					}
-					if (sourceLevel >= ClassFileConstants.JDK1_8 && argument.isPolyExpression())
-						polyExpressionSeen = true;
+					if (sourceLevel >= ClassFileConstants.JDK1_8 && argument.isPolyExpression()) {
+						if (this.innerInferenceHelper == null)
+							this.innerInferenceHelper = new InnerInferenceHelper();
+					}
 				}
 				if (argHasError) {
 					if (receiverType == null) {
@@ -567,7 +575,7 @@ public class ExplicitConstructorCall extends Statement implements Invocation, Ex
                 anchorMapping = AnchorMapping.setupNewMapping(
 	                    receiver, this.arguments, scope);
     // orig:
-			this.binding = findConstructorBinding(scope, this, receiverType, argumentTypes, polyExpressionSeen);
+			this.binding = findConstructorBinding(scope, this, receiverType, argumentTypes);
 	// giro:
 
 				// check different reasons for changing the accessMode
@@ -851,24 +859,24 @@ public class ExplicitConstructorCall extends Statement implements Invocation, Ex
 	}
 
 	// -- interface Invocation: --
-	public MethodBinding binding() {
+	public MethodBinding binding(TypeBinding targetType) {
 		return this.binding;
 	}
 	public Expression[] arguments() {
 		return this.arguments;
 	}
-	public boolean updateBindings(MethodBinding updatedBinding) {
-		if (this.binding == updatedBinding)
-			return false;
+	public boolean updateBindings(MethodBinding updatedBinding, TypeBinding targetType) {
+		boolean hasUpdate = this.binding != updatedBinding;
 		if (this.inferenceContexts != null) {
 			InferenceContext18 ctx = (InferenceContext18)this.inferenceContexts.removeKey(this.binding);
 			if (ctx != null && updatedBinding instanceof ParameterizedGenericMethodBinding) {
 				this.inferenceContexts.put(updatedBinding, ctx);
-				ctx.hasFinished = true;
+				// solution may have come from an outer inference, mark now that this (inner) is done (but not deep inners):
+				hasUpdate |= ctx.registerSolution(targetType, updatedBinding);
 			}
 		}
 		this.binding = updatedBinding;
-		return true;
+		return hasUpdate;
 	}
 	public void registerInferenceContext(ParameterizedGenericMethodBinding method, InferenceContext18 infCtx18) {
 		if (this.inferenceContexts == null)
@@ -879,6 +887,19 @@ public class ExplicitConstructorCall extends Statement implements Invocation, Ex
 		if (this.inferenceContexts == null)
 			return null;
 		return (InferenceContext18) this.inferenceContexts.get(method);
+	}
+	public boolean usesInference() {
+		return (this.binding instanceof ParameterizedGenericMethodBinding) 
+				&& getInferenceContext((ParameterizedGenericMethodBinding) this.binding) != null;
+	}
+	public boolean innersNeedUpdate() {
+		return this.innerInferenceHelper != null;
+	}
+	public void innerUpdateDone() {
+		this.innerInferenceHelper = null;
+	}
+	public InnerInferenceHelper innerInferenceHelper() {
+		return this.innerInferenceHelper;
 	}
 
 	// -- interface InvocationSite: --

@@ -31,8 +31,8 @@ import org.eclipse.objectteams.otdt.internal.core.compiler.ast.TSuperMessageSend
 public class SelectionOnTSuperMessageSend extends TSuperMessageSend
 {
     @Override
-    protected void findMethodBinding(BlockScope scope, TypeBinding[] argumentTypes, boolean polyExpressionSeen) {
-    	super.findMethodBinding(scope, argumentTypes, polyExpressionSeen);
+    protected void findMethodBinding(BlockScope scope, TypeBinding[] argumentTypes) {
+    	super.findMethodBinding(scope, argumentTypes);
     	throw new SelectionNodeFound(this.binding);
     }
 }

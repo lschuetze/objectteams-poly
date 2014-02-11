@@ -174,8 +174,8 @@
  *									NonNullSpecdFieldComparisonYieldsFalse
  *									NonNullExpressionComparisonYieldsFalse
  *									RedundantNullCheckOnNonNullExpression
- *									ReferenceExpressionParameterMismatchPromisedNullable
- *									ReferenceExpressionParameterRequiredNonnullUnchecked
+ *									ReferenceExpressionParameterNullityMismatch
+ *									ReferenceExpressionParameterNullityUnchecked
  *									ReferenceExpressionReturnNullRedef
  *									ReferenceExpressionReturnNullRedefUnchecked
  *									DuplicateInheritedDefaultMethods
@@ -1553,6 +1553,9 @@ void setSourceStart(int sourceStart);
 	int VarargsElementTypeNotVisible = MethodRelated + 807;
 	/** @since 3.8 */
 	int VarargsElementTypeNotVisibleForConstructor = ConstructorRelated + 808;
+	/** @since 3.9 BETA_JAVA8 */
+	int ApplicableMethodOverriddenByInapplicable = MethodRelated + 809;
+
 	/**
 	 * Javadoc Generic
 	 */
@@ -1753,9 +1756,9 @@ void setSourceStart(int sourceStart);
 	/** @since 3.9 BETA_JAVA8 */
 	int NullityUncheckedTypeAnnotationDetailSuperHint = Internal + 956;
 	/** @since 3.9 BETA_JAVA8 */
-	int ReferenceExpressionParameterMismatchPromisedNullable = MethodRelated + 957;
+	int ReferenceExpressionParameterNullityMismatch = MethodRelated + 957;
 	/** @since 3.9 BETA_JAVA8 */
-	int ReferenceExpressionParameterRequiredNonnullUnchecked = MethodRelated + 958;
+	int ReferenceExpressionParameterNullityUnchecked = MethodRelated + 958;
 	/** @since 3.9 BETA_JAVA8 */
 	int ReferenceExpressionReturnNullRedef = MethodRelated + 959;
 	/** @since 3.9 BETA_JAVA8 */
@@ -1778,6 +1781,9 @@ void setSourceStart(int sourceStart);
 	int IllegalModifiersForElidedType = Internal + 1001;
 	/** @since 3.9 BETA_JAVA8 */
 	int IllegalModifiers = Internal + 1002;
+
+	/** @since 3.9 BETA_JAVA8 */
+	int IllegalTypeArgumentsInRawConstructorReference = TypeRelated + 1003;
 
 	// default methods:
 	/** @since 3.9 BETA_JAVA8 */

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2013 GK Software AG.
+ * Copyright (c) 2013, 2014 GK Software AG.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -61,7 +61,7 @@ class ConstraintTypeFormula extends ConstraintFormula {
 			}
 			if (this.right.isBaseType() && this.right != TypeBinding.NULL) {
 				TypeBinding tPrime = inferenceContext.environment.computeBoxingType(this.right);
-				return new ConstraintTypeFormula(this.left, tPrime, COMPATIBLE, this.isSoft);
+				return new ConstraintTypeFormula(this.left, tPrime, SAME, this.isSoft);
 			}
 			switch (this.right.kind()) {
 			case Binding.ARRAY_TYPE:
@@ -72,8 +72,10 @@ class ConstraintTypeFormula extends ConstraintFormula {
 				{																
 					//															  this.right = G<T1,T2,...> or G<T1,T2,...>[]k
 					TypeBinding gs = this.left.findSuperTypeOriginatingFrom(this.right);	// G<S1,S2,...> or G<S1,S2,...>[]k
-					if (gs != null && gs.leafComponentType().isRawType())
+					if (gs != null && gs.leafComponentType().isRawType()) {
+						inferenceContext.recordUncheckedConversion(this);
 						return TRUE;
+					}
 					break;
 				}
 			}
@@ -86,7 +88,7 @@ class ConstraintTypeFormula extends ConstraintFormula {
 			return reduceSubType(inferenceContext.scope, this.right, this.left);
 		case SAME:
 			// 18.2.4:
-			return reduceTypeEquality();
+			return reduceTypeEquality(inferenceContext.object);
 		case TYPE_ARGUMENT_CONTAINED:
 			// 18.2.3:
 			if (this.right.kind() != Binding.WILDCARD_TYPE) { // "If T is a type" ... all alternatives require "wildcard"
@@ -97,17 +99,22 @@ class ConstraintTypeFormula extends ConstraintFormula {
 				}
 			} else {
 				WildcardBinding t = (WildcardBinding) this.right;
-				if (t.boundKind == Wildcard.UNBOUND || t.bound.id == TypeIds.T_JavaLangObject)
+				if (t.boundKind == Wildcard.UNBOUND)
 					return TRUE;
 				if (t.boundKind == Wildcard.EXTENDS) {
 					if (this.left.kind() != Binding.WILDCARD_TYPE) {
 						return new ConstraintTypeFormula(this.left, t.bound, SUBTYPE, this.isSoft);
 					} else {
 						WildcardBinding s = (WildcardBinding) this.left;
-						if (s.boundKind == Wildcard.EXTENDS) {
-							return new ConstraintTypeFormula(s.bound, t.bound, SUBTYPE, this.isSoft);
-						} else {
-							return FALSE;
+						switch (s.boundKind) {
+							case Wildcard.UNBOUND:
+								return new ConstraintTypeFormula(inferenceContext.object, t.bound, SUBTYPE, this.isSoft);
+							case Wildcard.EXTENDS: 
+								return new ConstraintTypeFormula(s.bound, t.bound, SUBTYPE, this.isSoft);
+							case Wildcard.SUPER: 
+								return new ConstraintTypeFormula(inferenceContext.object, t.bound, SAME, this.isSoft);
+							default:
+								throw new IllegalArgumentException("Unexpected boundKind "+s.boundKind);  //$NON-NLS-1$
 						}
 					}
 				} else { // SUPER 
@@ -127,14 +134,19 @@ class ConstraintTypeFormula extends ConstraintFormula {
 		}
 	}
 
-	private Object reduceTypeEquality() {
+	private Object reduceTypeEquality(TypeBinding object) {
 		// 18.2.4
 		if (this.left.kind() == Binding.WILDCARD_TYPE) {
 			if (this.right.kind() == Binding.WILDCARD_TYPE) {
+				// left and right are wildcards ("type arguments")
 				WildcardBinding leftWC = (WildcardBinding)this.left;
 				WildcardBinding rightWC = (WildcardBinding)this.right;
-				if (leftWC.bound == null && rightWC.bound == null)
+				if (leftWC.boundKind == Wildcard.UNBOUND && rightWC.boundKind == Wildcard.UNBOUND)
 					return TRUE;
+				if (leftWC.boundKind == Wildcard.UNBOUND && rightWC.boundKind == Wildcard.EXTENDS)
+					return new ConstraintTypeFormula(object, rightWC.bound, SAME, this.isSoft);
+				if (leftWC.boundKind == Wildcard.EXTENDS && rightWC.boundKind == Wildcard.UNBOUND)
+					return new ConstraintTypeFormula(leftWC.bound, object, SAME, this.isSoft);
 				if ((leftWC.boundKind == Wildcard.EXTENDS && rightWC.boundKind == Wildcard.EXTENDS)
 					||(leftWC.boundKind == Wildcard.SUPER && rightWC.boundKind == Wildcard.SUPER))
 				{
@@ -155,7 +167,10 @@ class ConstraintTypeFormula extends ConstraintFormula {
 				if (this.right instanceof InferenceVariable) {
 					return new TypeBound((InferenceVariable) this.right, this.left, SAME, this.isSoft);
 				}
-				if (TypeBinding.equalsEquals(this.left.original(), this.right.original())) {
+				if ((this.left.isClass() || this.left.isInterface()) 
+						&& (this.right.isClass() || this.right.isInterface())
+						&& TypeBinding.equalsEquals(this.left.erasure(), this.right.erasure())) 
+				{
 					TypeBinding[] leftParams = this.left.typeArguments();
 					TypeBinding[] rightParams = this.right.typeArguments();
 					if (leftParams == null || rightParams == null)
@@ -173,9 +188,6 @@ class ConstraintTypeFormula extends ConstraintFormula {
 					// checking dimensions already now is an optimization over reducing one dim at a time
 					return new ConstraintTypeFormula(this.left.leafComponentType(), this.right.leafComponentType(), SAME, this.isSoft);
 				}
-				if (this.left.kind() == Binding.INTERSECTION_TYPE && this.right.kind() == Binding.INTERSECTION_TYPE) {
-					InferenceContext18.missingImplementation("Intersection type equality NYI"); //$NON-NLS-1$
-				}
 			}
 		}
 		return FALSE;
@@ -188,30 +200,20 @@ class ConstraintTypeFormula extends ConstraintFormula {
 				return TRUE;
 			return FALSE;
 		}
+		if (subCandidate.id == TypeIds.T_null)
+			return TRUE;
 		if (subCandidate instanceof InferenceVariable)
 			return new TypeBound((InferenceVariable)subCandidate, superCandidate, SUBTYPE, this.isSoft);
 		if (superCandidate instanceof InferenceVariable)
 			return new TypeBound((InferenceVariable)superCandidate, subCandidate, SUPERTYPE, this.isSoft); // normalize to have variable on LHS
-		if (subCandidate.id == TypeIds.T_null)
-			return TRUE;
 		switch (superCandidate.kind()) {
 			case Binding.GENERIC_TYPE:
 			case Binding.TYPE:
-			case Binding.RAW_TYPE: // TODO: check special handling of raw types?
+			case Binding.RAW_TYPE:
 				{
-					ReferenceBinding c = (ReferenceBinding) superCandidate;
 					if (subCandidate instanceof ReferenceBinding) {
-						ReferenceBinding s = (ReferenceBinding) subCandidate;
-						if (TypeBinding.equalsEquals(s.original(), c))
+						if (hasSuperType((ReferenceBinding) subCandidate, (ReferenceBinding) superCandidate))
 							return TRUE;
-						if (TypeBinding.equalsEquals(s.superclass(), c))
-							return TRUE;
-						ReferenceBinding[] superInterfaces = s.superInterfaces();
-						if (superInterfaces != null) {
-							for (int i=0, l=superInterfaces.length; i<l; i++)
-								if (TypeBinding.equalsEquals(superInterfaces[i], c))
-									return TRUE;
-						}
 					}
 					return FALSE;
 				}
@@ -222,8 +224,6 @@ class ConstraintTypeFormula extends ConstraintFormula {
 						if (!addConstraintsFromTypeParamters(subCandidate, (ParameterizedTypeBinding) superCandidate, constraints))
 							return FALSE;
 						// travel to enclosing types to check if they have type parameters, too:
-						// (Note: this is not explicit in the spec but has been confirmed on the EG list, see:
-						//  http://mail.openjdk.java.net/pipermail/lambda-spec-experts/2013-December/000449.html ).
 						superCandidate = superCandidate.enclosingType();
 						subCandidate = subCandidate.enclosingType();
 					}
@@ -286,6 +286,22 @@ class ConstraintTypeFormula extends ConstraintFormula {
 			return FALSE;
 		throw new IllegalStateException("Unexpected RHS "+superCandidate); //$NON-NLS-1$
 	}
+	
+	private boolean hasSuperType(ReferenceBinding sub, ReferenceBinding superType) {
+		if (TypeBinding.equalsEquals(sub, superType))
+			return true;
+		if (sub.id == TypeIds.T_JavaLangObject)
+			return false;
+		if (hasSuperType(sub.superclass(), superType))
+			return true;
+		ReferenceBinding[] superInterfaces = sub.superInterfaces();
+		if (superInterfaces != null) {
+			for (int i=0, l=superInterfaces.length; i<l; i++)
+				if (hasSuperType(superInterfaces[i], superType))
+					return true;
+		}
+		return false;
+	}
 
 	boolean addConstraintsFromTypeParamters(TypeBinding subCandidate, ParameterizedTypeBinding ca, List constraints) {
 		TypeBinding[] ai = ca.arguments;								// C<A1,A2,...>
@@ -295,7 +311,7 @@ class ConstraintTypeFormula extends ConstraintFormula {
 		if (cb == null)
 			return false; // nothing here means we failed 
 		TypeBinding[] bi = ((ParameterizedTypeBinding) cb).arguments;
-		if (cb.isRawType() || bi.length == 0)
+		if (cb.isRawType() || bi == null || bi.length == 0)
 			return (this.isSoft && InferenceContext18.SIMULATE_BUG_JDK_8026527) ? true : false; // FALSE would conform to the spec 
 		for (int i = 0; i < ai.length; i++)
 			constraints.add(new ConstraintTypeFormula(bi[i], ai[i], TYPE_ARGUMENT_CONTAINED, this.isSoft));

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2013 IBM Corporation and others.
+ * Copyright (c) 2000, 2014 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -17,7 +17,7 @@ package org.eclipse.jdt.core.dom;
 
 
 /**
- * Abstract base class of all type AST node types. A type node represents a
+ * Abstract base class of all type reference AST node types. A type node represents a
  * reference to a primitive type (including void), to an array type, or to a
  * simple named type (or type variable), to a qualified type, to a
  * parameterized type, to a union type, to an intersection type, or to a wildcard type. Note that not all of these
@@ -32,7 +32,7 @@ package org.eclipse.jdt.core.dom;
  *       PrimitiveType
  *       SimpleType
  *       QualifiedType
- *       PackageQualifiedType
+ *       NameQualifiedType
  *       WildcardType
  *    ArrayType
  *    ParameterizedType
@@ -55,7 +55,7 @@ package org.eclipse.jdt.core.dom;
  *    { Annotation } TypeName
  * {@link QualifiedType}:
  *    Type <b>.</b> {Annotation} SimpleName
- * {@link PackageQualifiedType}:
+ * {@link NameQualifiedType}:
  *    Name <b>.</b> { Annotation } SimpleName
  * {@link WildcardType}:
  *    { Annotation } <b>?</b> [ ( <b>extends</b> | <b>super</b>) Type ]
@@ -118,15 +118,15 @@ public abstract class Type extends ASTNode {
 	}
 
 	/**
-	 * Returns whether this type is a package qualified type
-	 * ({@link PackageQualifiedType}).
+	 * Returns whether this type is a name qualified type
+	 * ({@link NameQualifiedType}).
 	 *
-	 * @return <code>true</code> if this is a package qualified type, and
+	 * @return <code>true</code> if this is a name qualified type, and
 	 *    <code>false</code> otherwise
 	 * @since 3.9 BETA_JAVA8
 	 */
-	public final boolean isPackageQualifiedType() {
-		return (this instanceof PackageQualifiedType);
+	public final boolean isNameQualifiedType() {
+		return (this instanceof NameQualifiedType);
 	}
 
 	/**

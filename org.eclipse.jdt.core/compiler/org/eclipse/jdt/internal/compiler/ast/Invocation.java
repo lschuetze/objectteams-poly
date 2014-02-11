@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2013 GK Software AG.
+ * Copyright (c) 2013, 2014 GK Software AG.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -18,6 +18,7 @@ import org.eclipse.jdt.internal.compiler.lookup.InferenceContext18;
 import org.eclipse.jdt.internal.compiler.lookup.InvocationSite;
 import org.eclipse.jdt.internal.compiler.lookup.MethodBinding;
 import org.eclipse.jdt.internal.compiler.lookup.ParameterizedGenericMethodBinding;
+import org.eclipse.jdt.internal.compiler.lookup.TypeBinding;
 
 /**
  * Abstraction for invocation AST nodes that can trigger 
@@ -30,7 +31,11 @@ public interface Invocation extends InvocationSite {
 
 	Expression[] arguments();
 
-	MethodBinding binding();
+	/**
+	 * Answer the resolved method binding of this invocation.
+	 * If a target type is given, the invocation gets a chance to do repeated method lookup.
+	 */
+	MethodBinding binding(TypeBinding targetType);
 
 	/**
 	 * Register the given inference context, which produced the given method as its intermediate result.
@@ -49,10 +54,34 @@ public interface Invocation extends InvocationSite {
 	InferenceContext18 getInferenceContext(ParameterizedGenericMethodBinding method);
 
 	/**
+	 * Answer true if this invocation has determined its binding using inference.
+	 */
+	boolean usesInference();
+	
+	/**
 	 * Where the AST node may hold references to the results of Invocation Applicability Inference,
 	 * this method allows to update those references to the result of Invocation Type Inference.
 	 * Note that potentially more than just the method binding is updated.
+	 * @param updatedBinding the final method binding after full inference
+	 * @param targetType the target type used during Invocation Type Inference
 	 * @return true if an update has happened
 	 */
-	boolean updateBindings(MethodBinding updatedBinding);
+	boolean updateBindings(MethodBinding updatedBinding, TypeBinding targetType);
+	
+	/**
+	 * Answer whether the current invocation has inner expressions that still need updating after inference.
+	 */
+	boolean innersNeedUpdate();
+
+	/**
+	 * Mark that updating (the need for which is signaled via {@link #innersNeedUpdate()}) has been done.
+	 */
+	void innerUpdateDone();
+
+	/**
+	 * If this invocation has any poly expressions as arguments, this method answers an inference helper 
+	 * that mediates during overload resolution, even if no actual inference happens for this invocation.
+	 */
+	InnerInferenceHelper innerInferenceHelper();
+	
 }

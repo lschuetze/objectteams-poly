@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2013 IBM Corporation and others.
+ * Copyright (c) 2000, 2014 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -31,7 +31,7 @@
  *								Bug 417295 - [1.8[[null] Massage type annotated null analysis to gel well with deep encoded type bindings.
  *								Bug 416267 - NPE in QualifiedAllocationExpression.resolveType
  *								Bug 400874 - [1.8][compiler] Inference infrastructure should evolve to meet JLS8 18.x (Part G of JSR335 spec)
- *								Bug 418235 - [compiler][null] Unreported nullness error when using generic
+ *								Bug 424415 - [1.8][compiler] Eventual resolution of ReferenceExpression is not seen to be happening.
  *     Jesper S Moller <jesper@selskabet.org> - Contributions for
  *								bug 378674 - "The method can be declared as static" is wrong
  *     Andy Clement (GoPivotal, Inc) aclement@gopivotal.com - Contributions for
@@ -482,7 +482,6 @@ public static abstract class AbstractQualifiedAllocationExpression extends Alloc
 
 		// will check for null after args are resolved
 		TypeBinding[] argumentTypes = Binding.NO_PARAMETERS;
-		boolean polyExpressionSeen = false;
 		if (this.arguments != null) {
 			int length = this.arguments.length;
 			argumentTypes = new TypeBinding[length];
@@ -496,8 +495,10 @@ public static abstract class AbstractQualifiedAllocationExpression extends Alloc
 				if ((argumentTypes[i] = argument.resolveType(scope)) == null){
 					hasError = true;
 				}
-				if (sourceLevel >= ClassFileConstants.JDK1_8 && argument.isPolyExpression())
-					polyExpressionSeen = true;
+				if (sourceLevel >= ClassFileConstants.JDK1_8 && argument.isPolyExpression()) {
+					if (this.innerInferenceHelper == null)
+						this.innerInferenceHelper = new InnerInferenceHelper();
+				}
 			}
 		}
 
@@ -574,7 +575,7 @@ public static abstract class AbstractQualifiedAllocationExpression extends Alloc
                     null, this.arguments, scope);
           try {
    	// orig:
-			this.binding = findConstructorBinding(scope, this, allocationType, argumentTypes, polyExpressionSeen);
+			this.binding = findConstructorBinding(scope, this, allocationType, argumentTypes);
     // :giro
           } finally {
                 AnchorMapping.removeCurrentMapping(anchorMapping);
@@ -662,7 +663,7 @@ public static abstract class AbstractQualifiedAllocationExpression extends Alloc
 		if ((this.resolvedType.tagBits & TagBits.HierarchyHasProblems) != 0) {
 			return null; // stop secondary errors
 		}
-		MethodBinding inheritedBinding = findConstructorBinding(scope, this, anonymousSuperclass, argumentTypes, polyExpressionSeen);
+		MethodBinding inheritedBinding = findConstructorBinding(scope, this, anonymousSuperclass, argumentTypes);
 			
 		if (!inheritedBinding.isValidBinding()) {
 			if (inheritedBinding.declaringClass == null) {

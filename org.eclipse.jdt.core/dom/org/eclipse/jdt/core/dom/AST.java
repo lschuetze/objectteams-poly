@@ -2166,6 +2166,29 @@ public final class AST {
 	}
 
 	/**
+	 * Creates and returns a new unparented name qualified type node with
+	 * the given qualifier and name.
+	 *
+	 * @param qualifier the name qualifier name node
+	 * @param name the simple name being qualified
+	 * @return a new unparented qualified type node
+	 * @exception IllegalArgumentException if:
+	 * <ul>
+	 * <li>the node belongs to a different AST</li>
+	 * <li>the node already has a parent</li>
+	 * </ul>
+	 * @exception UnsupportedOperationException if this operation is used in
+	 * a JLS2, JLS3 and JLS4 AST
+	 * @since 3.9 BETA_JAVA8
+	 */
+	public NameQualifiedType newNameQualifiedType(Name qualifier, SimpleName name) {
+		NameQualifiedType result = new NameQualifiedType(this);
+		result.setQualifier(qualifier);
+		result.setName(name);
+		return result;
+	}
+
+	/**
 	 * Creates and returns a new unparented normal annotation node with
 	 * an unspecified type name and an empty list of member value
 	 * pairs.
@@ -2226,29 +2249,6 @@ public final class AST {
 	 */
 	public PackageDeclaration newPackageDeclaration() {
 		PackageDeclaration result = new PackageDeclaration(this);
-		return result;
-	}
-
-	/**
-	 * Creates and returns a new unparented package qualified type node with
-	 * the given qualifier and name.
-	 *
-	 * @param qualifier the package qualifier type node
-	 * @param name the simple name being qualified
-	 * @return a new unparented qualified type node
-	 * @exception IllegalArgumentException if:
-	 * <ul>
-	 * <li>the node belongs to a different AST</li>
-	 * <li>the node already has a parent</li>
-	 * </ul>
-	 * @exception UnsupportedOperationException if this operation is used in
-	 * a JLS2, JLS3 and JLS4 AST
-	 * @since 3.9 BETA_JAVA8
-	 */
-	public PackageQualifiedType newPackageQualifiedType(Name qualifier, SimpleName name) {
-		PackageQualifiedType result = new PackageQualifiedType(this);
-		result.setQualifier(qualifier);
-		result.setName(name);
 		return result;
 	}
 

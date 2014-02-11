@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2013 IBM Corporation and others.
+ * Copyright (c) 2000, 2014 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -40,9 +40,14 @@
  *								Bug 405569 - Resource leak check false positive when using DbUtils.closeQuietly
  *								Bug 411964 - [1.8][null] leverage null type annotation in foreach statement
  *								Bug 417295 - [1.8[[null] Massage type annotated null analysis to gel well with deep encoded type bindings.
- *								Bug 418235 - [compiler][null] Unreported nullness error when using generic
  *								Bug 400874 - [1.8][compiler] Inference infrastructure should evolve to meet JLS8 18.x (Part G of JSR335 spec)
  *								Bug 423504 - [1.8] Implement "18.5.3 Functional Interface Parameterization Inference"
+ *								Bug 424710 - [1.8][compiler] CCE in SingleNameReference.localVariableBinding
+ *								Bug 425152 - [1.8] [compiler] Lambda Expression not resolved but flow analyzed leading to NPE.
+ *								Bug 424205 - [1.8] Cannot infer type for diamond type with lambda on method invocation
+ *								Bug 424415 - [1.8][compiler] Eventual resolution of ReferenceExpression is not seen to be happening.
+ *								Bug 426366 - [1.8][compiler] Type inference doesn't handle multiple candidate target types in outer overload context
+ *								Bug 426290 - [1.8][compiler] Inference + overloading => wrong method resolution ?
  *     Jesper S Moller - Contributions for
  *								Bug 378674 - "The method can be declared as static" is wrong
  *        Andy Clement (GoPivotal, Inc) aclement@gopivotal.com - Contributions for
@@ -182,6 +187,7 @@ public class MessageSend extends Expression implements Invocation {
 
 	 // hold on to this context from invocation applicability inference until invocation type inference (per method candidate):
 	private SimpleLookupTable/*<PGMB,InferenceContext18>*/ inferenceContexts;
+	protected InnerInferenceHelper innerInferenceHelper;
 
 //{ObjectTeams:
 	private boolean isDecapsulation = false;
@@ -834,7 +840,6 @@ public TypeBinding resolveType(BlockScope scope) {
 	}
 	// will check for null after args are resolved
 	TypeBinding[] argumentTypes = Binding.NO_PARAMETERS;
-	boolean polyExpressionSeen = false;
 	if (this.arguments != null) {
 		boolean argHasError = false; // typeChecks all arguments
 		int length = this.arguments.length;
@@ -862,8 +867,13 @@ public TypeBinding resolveType(BlockScope scope) {
 // :giro
 		  }
 // SH}
-			if (sourceLevel >= ClassFileConstants.JDK1_8 && argument.isPolyExpression())
-				polyExpressionSeen = true;
+			if (sourceLevel >= ClassFileConstants.JDK1_8) {
+				if (argument.isPolyExpression()
+					|| (argument instanceof Invocation && ((Invocation)argument).usesInference())) {
+					if (this.innerInferenceHelper == null)
+						this.innerInferenceHelper = new InnerInferenceHelper();
+				}
+			}
 		}
 		if (argHasError) {
 			if (this.actualReceiverType instanceof ReferenceBinding) {
@@ -947,7 +957,7 @@ public TypeBinding resolveType(BlockScope scope) {
 		this.selector=IOTConstants._OT_GETBASE;
 // orig:
 
-	findMethodBinding(scope, argumentTypes, polyExpressionSeen);
+	findMethodBinding(scope, argumentTypes);
 
 // :giro
 	if (this.binding == null)
@@ -1267,16 +1277,14 @@ public TypeBinding resolveType(BlockScope scope) {
 }
 /**
  * Find the method binding; 
- * if polyExpressionSeen allow for two attempts where the first round may stop
+ * if this.innersNeedUpdate allow for two attempts where the first round may stop
  * after applicability checking (18.5.1) to include more information into the final
  * invocation type inference (18.5.2).
  */
-protected void findMethodBinding(BlockScope scope, TypeBinding[] argumentTypes, boolean polyExpressionSeen) {
+protected void findMethodBinding(BlockScope scope, TypeBinding[] argumentTypes) {
 	this.binding = this.receiver.isImplicitThis()
 			? scope.getImplicitMethod(this.selector, argumentTypes, this)
 			: scope.getMethod(this.actualReceiverType, this.selector, argumentTypes, this);
-	
-	if (polyExpressionSeen)
 		resolvePolyExpressionArguments(this, this.binding, argumentTypes);
 }
 
@@ -1534,7 +1542,7 @@ public boolean receiverIsImplicitThis() {
 	return this.receiver.isImplicitThis();
 }
 // -- interface Invocation: --
-public MethodBinding binding() {
+public MethodBinding binding(TypeBinding targetType) {
 	return this.binding;
 }
 public Expression[] arguments() {
@@ -1553,19 +1561,32 @@ public InferenceContext18 getInferenceContext(ParameterizedGenericMethodBinding 
 		return null;
 	return (InferenceContext18) this.inferenceContexts.get(method);
 }
-public boolean updateBindings(MethodBinding updatedBinding) {
-	if (this.binding == updatedBinding)
-		return false;
+public boolean usesInference() {
+	return (this.binding instanceof ParameterizedGenericMethodBinding) 
+			&& getInferenceContext((ParameterizedGenericMethodBinding) this.binding) != null;
+}
+public boolean updateBindings(MethodBinding updatedBinding, TypeBinding targetType) {
+	boolean hasUpdate = this.binding != updatedBinding;
 	if (this.inferenceContexts != null) {
 		InferenceContext18 ctx = (InferenceContext18)this.inferenceContexts.removeKey(this.binding);
 		if (ctx != null && updatedBinding instanceof ParameterizedGenericMethodBinding) {
 			this.inferenceContexts.put(updatedBinding, ctx);
-			ctx.hasFinished=true;
+			// solution may have come from an outer inference, mark now that this (inner) is done (but not deep inners):
+			hasUpdate |= ctx.registerSolution(targetType, updatedBinding);
 		}
 	}
 	this.binding = updatedBinding;
 	this.resolvedType = updatedBinding.returnType;
-	return true;
+	return hasUpdate;
+}
+public boolean innersNeedUpdate() {
+	return this.innerInferenceHelper != null;
+}
+public void innerUpdateDone() {
+	this.innerInferenceHelper = null;
+}
+public InnerInferenceHelper innerInferenceHelper() {
+	return this.innerInferenceHelper;
 }
 // -- Interface InvocationSite: --
 public InferenceContext18 freshInferenceContext(Scope scope) {

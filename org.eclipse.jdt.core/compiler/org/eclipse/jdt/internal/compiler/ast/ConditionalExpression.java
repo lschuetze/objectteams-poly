@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2013 IBM Corporation and others.
+ * Copyright (c) 2000, 2014 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -24,6 +24,7 @@
  *							Bug 415043 - [1.8][null] Follow-up re null type annotations after bug 392099
  *							Bug 417295 - [1.8[[null] Massage type annotated null analysis to gel well with deep encoded type bindings.
  *							Bug 400874 - [1.8][compiler] Inference infrastructure should evolve to meet JLS8 18.x (Part G of JSR335 spec)
+ *							Bug 426078 - [1.8] VerifyError when conditional expression passed as an argument
  *******************************************************************************/
 package org.eclipse.jdt.internal.compiler.ast;
 
@@ -53,7 +54,7 @@ public class ConditionalExpression extends OperatorExpression {
 	private boolean isPolyExpression = false;
 	private TypeBinding originalValueIfTrueType;
 	private TypeBinding originalValueIfFalseType;
-
+	private Scope polyExpressionScope;
 	public ConditionalExpression(
 		Expression condition,
 		Expression valueIfTrue,
@@ -462,6 +463,7 @@ public FlowInfo analyseCode(BlockScope currentScope, FlowContext flowContext,
 			
 			if (this.originalValueIfTrueType.kind() == Binding.POLY_TYPE || this.originalValueIfFalseType.kind() == Binding.POLY_TYPE) {
 				this.isPolyExpression = true;
+				this.polyExpressionScope = scope;
 				return new PolyTypeBinding(this);
 			}
 		} else {
@@ -608,6 +610,19 @@ public FlowInfo analyseCode(BlockScope currentScope, FlowContext flowContext,
 				return null;
 			}
 		}
+		if (use18specifics && isPolyExpression()) {
+			if (this.expectedType == null) {
+				this.polyExpressionScope = scope;
+				return new PolyTypeBinding(this);
+			}
+			if (valueIfTrueType != null && !valueIfTrueType.isCompatibleWith(this.expectedType, scope)) {
+				scope.problemReporter().typeMismatchError(valueIfTrueType, this.expectedType, this.valueIfTrue, null);
+			}
+			if (valueIfFalseType != null && !valueIfFalseType.isCompatibleWith(this.expectedType, scope)) {
+				scope.problemReporter().typeMismatchError(valueIfFalseType, this.expectedType, this.valueIfFalse, null);
+			}
+			return this.resolvedType = this.expectedType;
+		}
 		if (use15specifics) {
 			// >= 1.5 : LUB(operand types) must exist
 			TypeBinding commonType = null;
@@ -649,13 +664,25 @@ public FlowInfo analyseCode(BlockScope currentScope, FlowContext flowContext,
 	public void setExpressionContext(ExpressionContext context) {
 		this.expressionContext = context;
 	}
+
+	public ExpressionContext getExpressionContext() {
+		return this.expressionContext;
+	}
 	
 	public TypeBinding checkAgainstFinalTargetType(TypeBinding targetType) {
 		// in 1.8 if treated as a poly expression:
-		this.valueIfTrue.checkAgainstFinalTargetType(targetType);
-		this.valueIfFalse.checkAgainstFinalTargetType(targetType);
-		this.resolvedType = targetType;
-		return targetType;
+		if (isPolyExpression()) {
+			TypeBinding valueIfTrueType = this.valueIfTrue.checkAgainstFinalTargetType(targetType);
+			TypeBinding valueIfFalseType = this.valueIfFalse.checkAgainstFinalTargetType(targetType);
+			if (valueIfTrueType != null && !valueIfTrueType.isCompatibleWith(targetType, this.polyExpressionScope)) {
+				this.polyExpressionScope.problemReporter().typeMismatchError(valueIfTrueType, targetType, this.valueIfTrue, null);
+			}
+			if (valueIfFalseType != null && !valueIfFalseType.isCompatibleWith(targetType, this.polyExpressionScope)) {
+				this.polyExpressionScope.problemReporter().typeMismatchError(valueIfFalseType, targetType, this.valueIfFalse, null);
+			}
+			this.resolvedType = targetType;
+		}
+		return this.resolvedType;
 	}
 	
 	public boolean isPertinentToApplicability(TypeBinding targetType, MethodBinding method) {
@@ -667,7 +694,7 @@ public FlowInfo analyseCode(BlockScope currentScope, FlowContext flowContext,
 		if (this.expressionContext != ASSIGNMENT_CONTEXT && this.expressionContext != INVOCATION_CONTEXT)
 			return false;
 		
-		if (this.isPolyExpression) // TODO(stephan): is this still used/needed?
+		if (this.isPolyExpression)
 			return true;
 
 		// "... unless both operands produce primitives (or boxed primitives)":

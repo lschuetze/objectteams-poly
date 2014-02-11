@@ -487,7 +487,7 @@ public class TypeVariableBinding extends ReferenceBinding {
 	TypeBound[] getTypeBounds(InferenceVariable variable, InferenceContext18 context) {
 		int n = boundsCount();
         if (n == 0)
-        	return Binding.NO_TYPE_BOUNDS;
+        	return Binding.NO_TYPE_BOUNDS; // OT: qualified reference for visibility reasons
         TypeBound[] bounds = new TypeBound[n];
         bounds[0] = TypeBound.createBoundOrDependency(context, this.firstBound, variable);
         int ifcOffset = TypeBinding.equalsEquals(this.firstBound, this.superclass) ? -1 : 0;
@@ -589,7 +589,10 @@ public class TypeVariableBinding extends ReferenceBinding {
 		}
 	}
 
-	protected TypeBinding substituteInferenceVariable(InferenceVariable var, TypeBinding substituteType) {
+//{ObjectTeams: cross the OT package, make protected:
+	protected
+// SH}
+	TypeBinding substituteInferenceVariable(InferenceVariable var, TypeBinding substituteType) {
 		if (this.inRecursiveFunction) return this;
 		this.inRecursiveFunction = true;
 		try {
@@ -682,7 +685,10 @@ public class TypeVariableBinding extends ReferenceBinding {
 		}
 	}
 
-	protected void collectInferenceVariables(Set variables) {
+//{ObjectTeams: cross the OT package, make protected:
+	protected
+// SH}
+	void collectInferenceVariables(Set variables) {
 		if (this.inRecursiveFunction)
 			return; // nothing seen
 		this.inRecursiveFunction = true;

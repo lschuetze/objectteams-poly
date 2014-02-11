@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2013 IBM Corporation and others.
+ * Copyright (c) 2000, 2014 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -20,6 +20,8 @@
  *								Bug 413958 - Function override returning inherited Generic Type
  *								Bug 415734 - Eclipse gives compilation error calling method with an inferred generic return type
  *								Bug 400874 - [1.8][compiler] Inference infrastructure should evolve to meet JLS8 18.x (Part G of JSR335 spec)
+ *								Bug 423496 - [1.8] Implement new incorporation rule once it becomes available
+ *								Bug 426590 - [1.8][compiler] Compiler error with tenary operator
  *******************************************************************************/
 package org.eclipse.jdt.core.tests.compiler.regression;
 
@@ -40,7 +42,6 @@ public class GenericsRegressionTest extends AbstractComparableTest {
 	// Static initializer to specify tests subset using TESTS_* static variables
 	// All specified tests which does not belong to the class are skipped...
 	static {
-//		TESTS_NAMES = new String[] { "testBug415734" };
 //		TESTS_NAMES = new String[] { "testBug413958" };
 //		TESTS_NUMBERS = new int[] { 1465 };
 //		TESTS_RANGE = new int[] { 1097, -1 };
@@ -2526,7 +2527,7 @@ public void test347426c() {
 			"");
 }
 // https://bugs.eclipse.org/bugs/show_bug.cgi?id=283353
-public void test283353() {
+public void _test283353() {
 	this.runConformTest(
 			new String[] {
 				"X.java",
@@ -3199,9 +3200,9 @@ public void testBug413958_1() {
 		});
 }
 // https://bugs.eclipse.org/413958 - Function override returning inherited Generic Type
-// variation showing different inference with / without a method parameter
+// Passing since https://bugs.eclipse.org/423496
 public void testBug413958_2() {
-	runNegativeTest(
+	String[] sourceFiles =
 		new String[] {
 			"TestA.java",
 			"public class TestA { }\n",
@@ -3269,16 +3270,20 @@ public void testBug413958_2() {
 			"        final WritableWrapper<TestA2,TestB> v5 = v1.icopy2(new TestA2());\n" +
 			"    }\n" +
 			"}\n"
-		},
-		"----------\n" +
-		"1. ERROR in TestGenerics.java (at line 6)\n" +
-		"	final WritableWrapper<TestA2,TestB> v4 = v1.icopy();\n" +
-		"	                                         ^^^^^^^^^^\n" +
-		"Type mismatch: cannot convert from ReadOnlyWrapper<TestA,TestB> to WritableWrapper<TestA2,TestB>\n" +
-		"----------\n");
+		};
+	if (this.complianceLevel < ClassFileConstants.JDK1_8)
+		runNegativeTest(
+			sourceFiles,
+			"----------\n" +
+			"1. ERROR in TestGenerics.java (at line 6)\n" +
+			"	final WritableWrapper<TestA2,TestB> v4 = v1.icopy();\n" +
+			"	                                         ^^^^^^^^^^\n" +
+			"Type mismatch: cannot convert from ReadOnlyWrapper<TestA,TestB> to WritableWrapper<TestA2,TestB>\n" +
+			"----------\n");
+	else
+		runConformTest(sourceFiles);
 }
-// Disabled due to spec bug, see https://bugs.eclipse.org/423496
-public void _testBug415734() {
+public void testBug415734() {
 	String compileSrc =
 			"import java.util.ArrayList;\n" +
 			"import java.util.List;\n" +
@@ -3313,4 +3318,534 @@ public void _testBug415734() {
 			});
 	}
 }
+// https://bugs.eclipse.org/bugs/show_bug.cgi?id=426534, [1.8][compiler] Accessibility of vararg element type not checked for generic methods.
+public void test426534() {
+	runNegativeTest(
+		new String[] {
+			"p/B.java",
+			"package p;\n" +
+			"class A {\n" +
+			"}\n" +
+			"public class B extends A {\n" +
+			"    public <T extends A> void foo(T ... o) { }\n" +
+			"}\n",
+			
+			"X.java",
+			"import p.*;\n" +
+			"public class X  {\n" +
+			"    public static void main(String argv[]) {\n" +
+			"        new B().foo(null, null);\n" +
+			"    }\n" +
+			"}\n"
+		},
+		this.complianceLevel < ClassFileConstants.JDK1_7 ? 
+				"----------\n" + 
+				"1. ERROR in X.java (at line 4)\n" + 
+				"	new B().foo(null, null);\n" + 
+				"	        ^^^\n" + 
+				"The method foo(T...) of type B is not applicable as the formal varargs element type T is not accessible here\n" + 
+				"----------\n" : 
+					"----------\n" + 
+					"1. WARNING in p\\B.java (at line 5)\n" + 
+					"	public <T extends A> void foo(T ... o) { }\n" + 
+					"	                                    ^\n" + 
+					"Type safety: Potential heap pollution via varargs parameter o\n" + 
+					"----------\n" + 
+					"----------\n" + 
+					"1. ERROR in X.java (at line 4)\n" + 
+					"	new B().foo(null, null);\n" + 
+					"	        ^^^\n" + 
+					"The method foo(T...) of type B is not applicable as the formal varargs element type T is not accessible here\n" + 
+					"----------\n");
 }
+// https://bugs.eclipse.org/bugs/show_bug.cgi?id=426589, [1.8][compiler] Compiler error with generic method/constructor invocation as vargs argument
+public void test426589() {
+		runNegativeTest(
+			new String[] {
+				"X.java",
+				"public class X {\n" +
+				"	void take(String... strings) {\n" +
+				"	}\n" +
+				"	void test() {\n" +
+				"		take(getString());\n" +
+				"	}\n" +
+				"	private <T> String getString() {\n" +
+				"		return \"hi\";\n" +
+				"	}\n" +
+				"}\n"
+			}, 
+			"");
+}
+public void testBug426590() {
+	runConformTest(
+		new String[] {
+			"A.java",
+			"public class A {\n" + 
+			"		\n" + 
+			"	}\n" + 
+			"	\n" + 
+			"	class B extends A {\n" + 
+			"		\n" + 
+			"	}\n" + 
+			"	\n" + 
+			"	class C extends B {\n" + 
+			"		\n" + 
+			"	}\n" + 
+			"	\n" + 
+			"	class D {\n" + 
+			"		D(A a) {\n" + 
+			"			\n" + 
+			"		}\n" + 
+			"		\n" + 
+			"		D(boolean b) {\n" + 
+			"			this(b ? new B() : new C());\n" + 
+			"		}\n" + 
+			"	}\n"
+		});
+}
+public void testBug426590b() {
+	runConformTest(
+		new String[] {
+			"A.java",
+			"public class A {\n" + 
+			"		\n" + 
+			"	}\n" + 
+			"	\n" + 
+			"	class B extends A {\n" + 
+			"		\n" + 
+			"	}\n" + 
+			"	\n" + 
+			"	class C extends B {\n" + 
+			"		\n" + 
+			"	}\n" + 
+			"	\n" + 
+			"	class D {\n" + 
+			"		void bla(boolean b) {\n" + 
+			"			test(b ? new B() : new C());\n" + 
+			"		}\n" + 
+			"		\n" + 
+			"		void test(A a) {\n" + 
+			"			\n" + 
+			"		}\n" + 
+			"	}\n"
+		});
+}
+// https://bugs.eclipse.org/bugs/show_bug.cgi?id=426633, [1.8][compiler] Compiler generates code that invokes inapplicable method.
+public void test426633() {
+	runNegativeTest(
+		new String[] {
+			"X.java",
+			"interface I {\n" +
+			"	<T> void foo (T... p);\n" +
+			"}\n" +
+			"abstract class A implements I {\n" +
+			"	public void foo(Object [] p) {}\n" +
+			"}\n" +
+			"public class X extends A {\n" +
+			"	public static void main(String[] args) {\n" +
+			"		A a = new X();\n" +
+			"		a.foo(\"hello\", \"world\");\n" +
+			"	}\n" +
+			"}\n"
+
+		},
+		this.complianceLevel >= ClassFileConstants.JDK1_8 ? 
+			"----------\n" + 
+			"1. WARNING in X.java (at line 2)\n" + 
+			"	<T> void foo (T... p);\n" + 
+			"	                   ^\n" + 
+			"Type safety: Potential heap pollution via varargs parameter p\n" + 
+			"----------\n" + 
+			"2. WARNING in X.java (at line 5)\n" + 
+			"	public void foo(Object [] p) {}\n" + 
+			"	            ^^^^^^^^^^^^^^^^\n" + 
+			"Varargs methods should only override or be overridden by other varargs methods unlike A.foo(Object[]) and I.foo(Object...)\n" + 
+			"----------\n" + 
+			"3. ERROR in X.java (at line 10)\n" + 
+			"	a.foo(\"hello\", \"world\");\n" + 
+			"	  ^^^\n" + 
+			"The method foo(Object[]) in the type A is not applicable for the arguments (String, String)\n" + 
+			"----------\n" : 
+				this.complianceLevel >= ClassFileConstants.JDK1_7 ?
+					"----------\n" + 
+					"1. WARNING in X.java (at line 2)\n" + 
+					"	<T> void foo (T... p);\n" + 
+					"	                   ^\n" + 
+					"Type safety: Potential heap pollution via varargs parameter p\n" + 
+					"----------\n" + 
+					"2. WARNING in X.java (at line 5)\n" + 
+					"	public void foo(Object [] p) {}\n" + 
+					"	            ^^^^^^^^^^^^^^^^\n" + 
+					"Varargs methods should only override or be overridden by other varargs methods unlike A.foo(Object[]) and I.foo(Object...)\n" + 
+					"----------\n" : 
+						"----------\n" + 
+						"1. WARNING in X.java (at line 5)\n" + 
+						"	public void foo(Object [] p) {}\n" + 
+						"	            ^^^^^^^^^^^^^^^^\n" + 
+						"Varargs methods should only override or be overridden by other varargs methods unlike A.foo(Object[]) and I.foo(Object...)\n" + 
+						"----------\n");
+}
+// https://bugs.eclipse.org/bugs/show_bug.cgi?id=426633, [1.8][compiler] Compiler generates code that invokes inapplicable method.
+public void test426633a() {
+	runNegativeTest(
+		new String[] {
+			"X.java",
+			"interface I {\n" +
+					"	 <T> void foo (T... p);\n" +
+					"}\n" +
+					"abstract class A  {\n" +
+					"	public void foo(Object [] p) {\n" +
+					"		System.out.println(\"A.foo\");\n" +
+					"	}\n" +
+					"}\n" +
+					"abstract class B extends A implements I {\n" +
+					"}\n" +
+					"public class X extends B implements I {\n" +
+					"	public static void main(String[] args) {\n" +
+					"		B b = new X();\n" +
+					"		b.foo(\"hello\", \"world\");\n" +
+					"	}\n" +
+					"}\n"
+		},
+		this.complianceLevel >= ClassFileConstants.JDK1_8 ? 
+				"----------\n" + 
+				"1. WARNING in X.java (at line 2)\n" + 
+				"	<T> void foo (T... p);\n" + 
+				"	                   ^\n" + 
+				"Type safety: Potential heap pollution via varargs parameter p\n" + 
+				"----------\n" + 
+				"2. WARNING in X.java (at line 9)\n" + 
+				"	abstract class B extends A implements I {\n" + 
+				"	               ^\n" + 
+				"Varargs methods should only override or be overridden by other varargs methods unlike A.foo(Object[]) and I.foo(Object...)\n" + 
+				"----------\n" + 
+				"3. WARNING in X.java (at line 11)\n" + 
+				"	public class X extends B implements I {\n" + 
+				"	             ^\n" + 
+				"Varargs methods should only override or be overridden by other varargs methods unlike A.foo(Object[]) and I.foo(Object...)\n" + 
+				"----------\n" + 
+				"4. ERROR in X.java (at line 14)\n" + 
+				"	b.foo(\"hello\", \"world\");\n" + 
+				"	  ^^^\n" + 
+				"The method foo(T...) of type I cannot be invoked as it is overridden by an inapplicable method\n" + 
+				"----------\n" : 
+				this.complianceLevel >= ClassFileConstants.JDK1_7 ?
+						"----------\n" + 
+						"1. WARNING in X.java (at line 2)\n" + 
+						"	<T> void foo (T... p);\n" + 
+						"	                   ^\n" + 
+						"Type safety: Potential heap pollution via varargs parameter p\n" + 
+						"----------\n" + 
+						"2. WARNING in X.java (at line 9)\n" + 
+						"	abstract class B extends A implements I {\n" + 
+						"	               ^\n" + 
+						"Varargs methods should only override or be overridden by other varargs methods unlike A.foo(Object[]) and I.foo(Object...)\n" + 
+						"----------\n" + 
+						"3. WARNING in X.java (at line 11)\n" + 
+						"	public class X extends B implements I {\n" + 
+						"	             ^\n" + 
+						"Varargs methods should only override or be overridden by other varargs methods unlike A.foo(Object[]) and I.foo(Object...)\n" + 
+						"----------\n" : 
+							"----------\n" + 
+							"1. WARNING in X.java (at line 9)\n" + 
+							"	abstract class B extends A implements I {\n" + 
+							"	               ^\n" + 
+							"Varargs methods should only override or be overridden by other varargs methods unlike A.foo(Object[]) and I.foo(Object...)\n" + 
+							"----------\n" + 
+							"2. WARNING in X.java (at line 11)\n" + 
+							"	public class X extends B implements I {\n" + 
+							"	             ^\n" + 
+							"Varargs methods should only override or be overridden by other varargs methods unlike A.foo(Object[]) and I.foo(Object...)\n" + 
+							"----------\n");
+}
+// https://bugs.eclipse.org/bugs/show_bug.cgi?id=426633, [1.8][compiler] Compiler generates code that invokes inapplicable method.
+public void test426633b() {
+	runNegativeTest(
+		new String[] {
+			"X.java",
+			"interface I {\n" +
+			"	 <T> void foo (T... p);\n" +
+			"}\n" +
+			"abstract class A  {\n" +
+			"	public abstract void foo(Object [] p);\n" +
+			"}\n" +
+			"abstract class B extends A implements I {\n" +
+			"}\n" +
+			"public abstract class X extends B implements I {\n" +
+			"	public static void main(B b) {\n" +
+			"		b.foo(\"hello\", \"world\");\n" +
+			"	}\n" +
+			"}\n"
+		},
+		this.complianceLevel >= ClassFileConstants.JDK1_7 ?
+				"----------\n" + 
+				"1. WARNING in X.java (at line 2)\n" + 
+				"	<T> void foo (T... p);\n" + 
+				"	                   ^\n" + 
+				"Type safety: Potential heap pollution via varargs parameter p\n" + 
+				"----------\n" : "");
+}
+// https://bugs.eclipse.org/bugs/show_bug.cgi?id=426633, [1.8][compiler] Compiler generates code that invokes inapplicable method.
+public void test426633c() {
+	if (this.complianceLevel < ClassFileConstants.JDK1_8)
+		return;
+	runNegativeTest(
+		new String[] {
+			"X.java",
+			"interface I {\n" +
+			"	 default <T> void foo (T... p) {}\n" +
+			"}\n" +
+			"abstract class A  {\n" +
+			"	public abstract void foo(Object [] p);\n" +
+			"}\n" +
+			"abstract class B extends A implements I {\n" +
+			"}\n" +
+			"public abstract class X extends B implements I {\n" +
+			"	public static void main(B b) {\n" +
+			"		b.foo(\"hello\", \"world\");\n" +
+			"	}\n" +
+			"}\n"
+		},
+		"----------\n" + 
+		"1. WARNING in X.java (at line 2)\n" + 
+		"	default <T> void foo (T... p) {}\n" + 
+		"	                           ^\n" + 
+		"Type safety: Potential heap pollution via varargs parameter p\n" + 
+		"----------\n");
+}
+// https://bugs.eclipse.org/bugs/show_bug.cgi?id=426633, [1.8][compiler] Compiler generates code that invokes inapplicable method.
+public void test426633d() {
+	if (this.complianceLevel < ClassFileConstants.JDK1_8)
+		return;
+	runNegativeTest(
+		new String[] {
+			"X.java",
+			"interface I {\n" +
+			"	 default <T> void foo (T... p) {}\n" +
+			"}\n" +
+			"abstract class A  {\n" +
+			"	public void foo(Object [] p) {}\n" +
+			"}\n" +
+			"abstract class B extends A implements I {\n" +
+			"}\n" +
+			"public abstract class X extends B implements I {\n" +
+			"	public static void main(B b) {\n" +
+			"		b.foo(\"hello\", \"world\");\n" +
+			"	}\n" +
+			"}\n"
+		},
+		"----------\n" + 
+		"1. WARNING in X.java (at line 2)\n" + 
+		"	default <T> void foo (T... p) {}\n" + 
+		"	                           ^\n" + 
+		"Type safety: Potential heap pollution via varargs parameter p\n" + 
+		"----------\n" + 
+		"2. WARNING in X.java (at line 7)\n" + 
+		"	abstract class B extends A implements I {\n" + 
+		"	               ^\n" + 
+		"Varargs methods should only override or be overridden by other varargs methods unlike A.foo(Object[]) and I.foo(Object...)\n" + 
+		"----------\n" + 
+		"3. WARNING in X.java (at line 9)\n" + 
+		"	public abstract class X extends B implements I {\n" + 
+		"	                      ^\n" + 
+		"Varargs methods should only override or be overridden by other varargs methods unlike A.foo(Object[]) and I.foo(Object...)\n" + 
+		"----------\n" + 
+		"4. ERROR in X.java (at line 11)\n" + 
+		"	b.foo(\"hello\", \"world\");\n" + 
+		"	  ^^^\n" + 
+		"The method foo(T...) of type I cannot be invoked as it is overridden by an inapplicable method\n" + 
+		"----------\n");
+}
+// https://bugs.eclipse.org/bugs/show_bug.cgi?id=426633, [1.8][compiler] Compiler generates code that invokes inapplicable method.
+public void test426633e() {
+	if (this.complianceLevel < ClassFileConstants.JDK1_8)
+		return;
+	runNegativeTest(
+		new String[] {
+			"X.java",
+			"interface I {\n" +
+			"	 default <T> void foo (T... p) {}\n" +
+			"}\n" +
+			"abstract class A  {\n" +
+			"	public void foo(String [] p) {}\n" +
+			"}\n" +
+			"abstract class B extends A implements I {\n" +
+			"}\n" +
+			"public abstract class X extends B implements I {\n" +
+			"	public static void main(B b) {\n" +
+			"		b.foo(\"hello\", \"world\");\n" +
+			"	}\n" +
+			"}\n"
+		},
+		"----------\n" + 
+		"1. WARNING in X.java (at line 2)\n" + 
+		"	default <T> void foo (T... p) {}\n" + 
+		"	                           ^\n" + 
+		"Type safety: Potential heap pollution via varargs parameter p\n" + 
+		"----------\n");
+}
+// https://bugs.eclipse.org/bugs/show_bug.cgi?id=426678, [1.8][compiler] Another issue with vararg type element accessibility
+public void test426678() {
+	runNegativeTest(
+		new String[] {
+			"X.java",
+			"import p.*;\n" +
+			"public class X  {\n" +
+			"    public static void main(String argv[]) {\n" +
+			"        new B().foo(null, null);\n" +
+			"    }\n" +
+			"}\n",
+				
+			"p/B.java",
+			"package p;\n" +
+			"class A {\n" +
+			"}\n" +
+			"public class B extends A {\n" +
+			"    public <T extends A> void foo(T ... o) { System.out.println(\"PGMB\"); }\n" +
+			"    public void foo(Object... o) { System.out.println(\"MB\"); }\n" +
+			"}\n",
+		},
+		this.complianceLevel < ClassFileConstants.JDK1_7 ? 
+				"----------\n" + 
+				"1. ERROR in X.java (at line 4)\n" + 
+				"	new B().foo(null, null);\n" + 
+				"	        ^^^\n" + 
+				"The method foo(T...) of type B is not applicable as the formal varargs element type T is not accessible here\n" + 
+				"----------\n" :
+					"----------\n" + 
+					"1. ERROR in X.java (at line 4)\n" + 
+					"	new B().foo(null, null);\n" + 
+					"	        ^^^\n" + 
+					"The method foo(T...) of type B is not applicable as the formal varargs element type T is not accessible here\n" + 
+					"----------\n" + 
+					"----------\n" + 
+					"1. WARNING in p\\B.java (at line 5)\n" + 
+					"	public <T extends A> void foo(T ... o) { System.out.println(\"PGMB\"); }\n" + 
+					"	                                    ^\n" + 
+					"Type safety: Potential heap pollution via varargs parameter o\n" + 
+					"----------\n");
+}
+// https://bugs.eclipse.org/bugs/show_bug.cgi?id=426678, [1.8][compiler] Another issue with vararg type element accessibility
+public void test426678a() {
+	runConformTest(
+		new String[] {
+			"X.java",
+			"import p.*;\n" +
+			"public class X  {\n" +
+			"    public static void main(String argv[]) {\n" +
+			"        new B().foo(null, null);\n" +
+			"    }\n" +
+			"}\n",
+			"p/A.java",
+			"package p;\n" +
+			"public class A {\n" +
+			"}\n",
+			"p/B.java",
+			"package p;\n" +
+			"public class B extends A {\n" +
+			"    public <T extends A> void foo(T ... o) { System.out.println(\"PGMB\"); }\n" +
+			"    public void foo(Object... o) { System.out.println(\"MB\"); }\n" +
+			"}\n",
+		},
+		"PGMB");
+}
+// https://bugs.eclipse.org/bugs/show_bug.cgi?id=425719, [1.8][compiler] Bogus ambiguous call error from compiler.
+public void test425719() {
+	String interfaceMethod = this.complianceLevel < ClassFileConstants.JDK1_8 ?
+			"   <T> void foo(List<T> list);\n" :
+				"   default <T> void foo(List<T> list) {\n" +
+				"	   System.out.println(\"interface method\");\n" +
+				"   }\n";
+			
+	runConformTest(
+		new String[] {
+			"X.java",
+			"import java.util.List;\n" +
+			"import java.util.ArrayList;\n" +
+			"interface I {\n" +
+			 interfaceMethod +
+			"}\n" +
+			"class Base {\n" +
+			"    public <T> void foo(List<T> list) {\n" +
+			"        System.out.println(\"class method\");\n" +
+			"   }\n" +
+			"}\n" +
+			"public class X extends Base implements I {\n" +
+			"	 public static void main(String argv[]) {\n" +
+			"	    	new X().foo(new ArrayList<String>());\n" +
+			"	    }\n" +
+			"}\n",
+		},
+		"class method");
+}
+// https://bugs.eclipse.org/bugs/show_bug.cgi?id=425719, [1.8][compiler] Bogus ambiguous call error from compiler.
+public void test425719a() {
+	String interfaceMethod = this.complianceLevel < ClassFileConstants.JDK1_8 ?
+				"   <T> void foo(List<T> list);\n\n\n" :
+				"   default <T> void foo(List<T> list) {\n" +
+				"	   System.out.println(\"interface method\");\n" +
+				"   }\n";
+			
+	runNegativeTest(
+		new String[] {
+			"X.java",
+			"import java.util.List;\n" +
+			"import java.util.ArrayList;\n" +
+			"interface I {\n" +
+			 interfaceMethod +
+			"}\n" +
+			"abstract class Base {\n" +
+			"    public abstract <T> void foo(List<T> list);\n" +
+			"}\n" +
+			"public abstract class X extends Base implements I {\n" +
+			"	 public static void main(String argv[]) {\n" +
+			"           X x = new Y();\n" +
+			"	    	x.foo(new ArrayList<String>());\n" +
+			"	    }\n" +
+			"}\n" +
+			"class Y extends X {}\n",
+		},
+		"----------\n" + 
+		"1. ERROR in X.java (at line 17)\n" + 
+		"	class Y extends X {}\n" + 
+		"	      ^\n" + 
+		"The type Y must implement the inherited abstract method Base.foo(List<T>)\n" + 
+		"----------\n");
+}
+// https://bugs.eclipse.org/bugs/show_bug.cgi?id=425719, [1.8][compiler] Bogus ambiguous call error from compiler.
+public void test425719b() {
+	if (this.complianceLevel < ClassFileConstants.JDK1_8)
+		return;
+	String interfaceMethod = this.complianceLevel < ClassFileConstants.JDK1_8 ?
+				"   <T> void foo(List<T> list);\n\n\n" :
+				"   default <T> void foo(List<T> list) {\n" +
+				"	   System.out.println(\"interface method\");\n" +
+				"   }\n";
+			
+	runConformTest(
+		new String[] {
+			"X.java",
+			"import java.util.List;\n" +
+			"import java.util.ArrayList;\n" +
+			"interface I {\n" +
+			 interfaceMethod +
+			"}\n" +
+			"abstract class Base {\n" +
+			"    public abstract <T> void foo(List<T> list);\n" +
+			"}\n" +
+			"public abstract class X extends Base implements I {\n" +
+			"	 public static void main(String argv[]) {\n" +
+			"           X x = new Y();\n" +
+			"	    	x.foo(new ArrayList<String>());\n" +
+			"	    }\n" +
+			"}\n" +
+			"class Y extends X {\n" +
+			"    public <T> void foo(List<T> list) {\n" +
+			"        System.out.println(\"Y.foo\");\n" +
+			"    }\n" +
+			"}\n",
+		},
+		"Y.foo");
+}
+}
+

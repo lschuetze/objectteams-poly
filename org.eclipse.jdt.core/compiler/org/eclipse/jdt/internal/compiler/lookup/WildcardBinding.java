@@ -191,6 +191,7 @@ public class WildcardBinding extends ReferenceBinding {
 		if (actualType.isCapture()) {
 			CaptureBinding capture = (CaptureBinding) actualType;
 			actualType = capture.wildcard;
+			// this method should only be called in 1.7- inference, hence we don't expect to see CaptureBinding18 here.
 		}
 
 		switch (constraint) {
@@ -603,7 +604,10 @@ public class WildcardBinding extends ReferenceBinding {
 		}
 	}
 
-	protected TypeBinding substituteInferenceVariable(InferenceVariable var, TypeBinding substituteType) {
+//{ObjectTeams: cross the OT package, make protected:
+	protected
+// SH}
+	TypeBinding substituteInferenceVariable(InferenceVariable var, TypeBinding substituteType) {
 		boolean haveSubstitution = false;
 		TypeBinding currentBound = this.bound;
 		if (currentBound != null) {

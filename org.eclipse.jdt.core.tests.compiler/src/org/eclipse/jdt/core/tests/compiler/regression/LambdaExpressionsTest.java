@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2013 IBM Corporation and others.
+ * Copyright (c) 2011, 2014 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -1032,33 +1032,6 @@ public void test039() {
 					"           System.out.println(e.getMessage());\n" +
 					"       }\n" +
 					"	}\n" +
-					"}\n",
-				},
-				"X cannot be cast to I");
-}
-// https://bugs.eclipse.org/bugs/show_bug.cgi?id=406744, [1.8][compiler][codegen] LambdaConversionException seen when method reference targets a varargs method
-public void _test040() {
-	this.runConformTest(
-			new String[] {
-					"X.java",
-					"interface I {\n" +
-					"    void foo(Integer a1, Integer a2, String a3);\n" +
-					"}\n" +
-					"class Y {\n" +
-					"    static void m(Number a1, Object... rest) { \n" +
-					"        System.out.println(a1);\n" +
-					"        print(rest);\n" +
-					"    }\n" +
-					"    static void print (Object [] o) {\n" +
-					"        for (int i = 0; i < o.length; i++)\n" +
-					"            System.out.println(o[i]);\n" +
-					"    }\n" +
-					"}\n" +
-					"public class X {\n" +
-					"    public static void main(String [] args) {\n" +
-					"        I i = Y::m;\n" +
-					"        i.foo(10, 20, \"10, 20\");\n" +
-					"    }\n" +
 					"}\n",
 				},
 				"X cannot be cast to I");
@@ -2186,6 +2159,392 @@ public void testBug424742() {
 		"Return type for the method is missing\n" + 
 		"----------\n");
 }
+// https://bugs.eclipse.org/bugs/show_bug.cgi?id=424589, [1.8][compiler] NPE in TypeSystem.getUnannotatedType
+public void test424589() {
+	runNegativeTest(
+		new String[] {
+			"X.java",
+			"import java.util.List;\n" +
+			"import java.util.Collection;\n" +
+			"import java.util.function.Supplier;\n" +
+			"import java.util.Set;\n" +
+			"public class X {\n" +
+			"    public static <T, Y extends Collection<T>>\n" +
+			"        Y foo(Supplier<Y> y) {\n" +
+			"            return null;\n" +
+			"    }  \n" +
+			"    public static void main(String[] args) {\n" +
+			"        Set<Z> x = foo(Set::new);\n" +
+			"    }\n" +
+			"}\n"
+		},
+		"----------\n" + 
+		"1. ERROR in X.java (at line 11)\n" + 
+		"	Set<Z> x = foo(Set::new);\n" + 
+		"	    ^\n" + 
+		"Z cannot be resolved to a type\n" + 
+		"----------\n" + 
+		"2. ERROR in X.java (at line 11)\n" + 
+		"	Set<Z> x = foo(Set::new);\n" + 
+		"	           ^^^^^^^^^^^^^\n" + 
+		"Type mismatch: cannot convert from Collection<Object> to Set<Z>\n" + 
+		"----------\n" + 
+		"3. ERROR in X.java (at line 11)\n" + 
+		"	Set<Z> x = foo(Set::new);\n" + 
+		"	               ^^^\n" + 
+		"Cannot instantiate the type Set\n" + 
+		"----------\n");
+}
+// https://bugs.eclipse.org/bugs/show_bug.cgi?id=425152, [1.8] [compiler] NPE in LambdaExpression.analyzeCode
+public void test425152() {
+	runConformTest(
+		new String[] {
+			"Main.java",
+			"interface Base { \n" +
+			"	Base get(int x);\n" +
+			"}\n" +
+			"class Main {\n" +
+			"    <T> Base foo(Base b) { \n" +
+			"        return null; \n" +
+			"     }\n" +
+			"    void bar(Base b) { }\n" +
+			"    void testCase() {\n" +
+			"        bar(foo((int p)->null));\n" +
+			"     }\n" +
+			"}\n"
+		});
+}
+// https://bugs.eclipse.org/bugs/show_bug.cgi?id=425512, [1.8][compiler] Arrays should be allowed in intersection casts
+public void test425512() throws Exception {
+	this.runNegativeTest(
+		new String[] {
+				"X.java",
+				"import java.io.Serializable;\n" +
+				"public class X  {\n" +
+				"    public static void main(String argv[]) {\n" +
+				"    	int [] a = (int [] & Cloneable & Serializable) new int[5];\n" +
+				"       System.out.println(a.length);\n" +
+				"    }\n" +
+				"}\n",
+		},
+		"----------\n" + 
+		"1. ERROR in X.java (at line 4)\n" + 
+		"	int [] a = (int [] & Cloneable & Serializable) new int[5];\n" + 
+		"	            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n" + 
+		"Arrays are not allowed in intersection cast operator\n" + 
+		"----------\n");
+}
+// https://bugs.eclipse.org/bugs/show_bug.cgi?id=424628, [1.8][compiler] Multiple method references to inherited method throws LambdaConversionException
+public void test424628() throws Exception {
+	this.runConformTest(
+		new String[] {
+				"X.java",
+				"public class X {\n" +
+				"    public static interface Consumer<T> {\n" +
+				"        void accept(T t);\n" +
+				"    }\n" +
+				"    \n" +
+				"    public static class Base {\n" +
+				"        public void method () { System.out.println(123); }\n" +
+				"    }\n" +
+				"    public static class Foo extends Base {}\n" +
+				"    public static class Bar extends Base {}\n" +
+				"\n" +
+				"    public static void main (String[] args) {\n" +
+				"        Consumer<Foo> foo = Foo::method;\n" +
+				"        Consumer<Bar> bar = Bar::method;\n" +
+				"        foo.accept(new Foo());\n" +
+		        "        bar.accept(new Bar());\n" +
+				"    }\n" +
+				"}\n",
+		},
+		"123\n123");
+}
+// https://bugs.eclipse.org/bugs/show_bug.cgi?id=425712, [1.8][compiler] Valid program rejected by the compiler. 
+public void test425712() throws Exception {
+	this.runConformTest(
+		new String[] {
+				"X.java",
+				"public class X {\n" +
+				"    {\n" +
+				"        bar( () -> (char) 0); // [1]\n" +
+				"    }\n" +
+				"    void bar(FB fb) { }\n" +
+				"    public static void main(String[] args) {\n" +
+				"		System.out.println(\"OK\");\n" +
+				"	}\n" +
+				"}\n" +
+				"interface FB {\n" +
+				"	byte foo();\n" +
+				"}\n",
+		},
+		"OK");
+}
+// https://bugs.eclipse.org/bugs/show_bug.cgi?id=426074, [1.8][compiler] 18.5.2 Functional interface parameterization inference problem with intersection types. 
+public void test426074() throws Exception {
+	this.runConformTest(
+		new String[] {
+				"X.java",
+				"interface Functional<T> {\n" +
+				"    void foo(T t);\n" +
+				"}\n" +
+				"interface I { }\n" +
+				"public class X {\n" +
+				"	public static void main(String[] args) {\n" +
+				"    	Functional<? extends X> f = (Functional<? extends X> & I) (X c) -> {\n" +
+				"    		System.out.println(\"main\");\n" +
+				"    	};\n" +
+				"    	f.foo(null);\n" +
+				"    }\n" +
+				"}\n",
+		},
+		"main");
+}
+// https://bugs.eclipse.org/bugs/show_bug.cgi?id=426411, [1.8][compiler] NoSuchMethodError at runtime due to emission order of casts in intersection casts 
+public void test426411() throws Exception {
+	this.runConformTest(
+		new String[] {
+				"X.java",
+				"import java.io.Serializable;\n" +
+				"public class X {\n" +
+				"	public static void main(String argv[]) throws Exception {\n" +
+				"		((Serializable & AutoCloseable) (() -> {})).close();\n" +
+				"	}\n" +
+				"}\n",
+		},
+		"");
+}
+// https://bugs.eclipse.org/bugs/show_bug.cgi?id=426411, [1.8][compiler] NoSuchMethodError at runtime due to emission order of casts in intersection casts 
+public void test426411b() throws Exception {
+	this.runConformTest(
+		new String[] {
+				"X.java",
+				"import java.io.Serializable;\n" +
+				"interface AnotherAutoCloseable extends AutoCloseable {}\n" +
+				"public class X {\n" +
+				"	public static void main(String argv[]) throws Exception {\n" +
+				"		((Serializable & AnotherAutoCloseable) (() -> {})).close();\n" +
+				"	}\n" +
+				"}\n",
+		},
+		"");
+}
+// https://bugs.eclipse.org/bugs/show_bug.cgi?id=426411, [1.8][compiler] NoSuchMethodError at runtime due to emission order of casts in intersection casts 
+public void test426411c() throws Exception {
+	this.runConformTest(
+		new String[] {
+				"X.java",
+				"import java.io.Serializable;\n" +
+				"public class X {\n" +
+				"	public static void main(String argv[]) throws Exception {\n" +
+				"		((AutoCloseable & Serializable) (() -> {})).close();\n" +
+				"	}\n" +
+				"}\n",
+		},
+		"");
+}
+// https://bugs.eclipse.org/bugs/show_bug.cgi?id=426411, [1.8][compiler] NoSuchMethodError at runtime due to emission order of casts in intersection casts 
+public void test426411d() throws Exception {
+	this.runConformTest(
+		new String[] {
+				"X.java",
+				"import java.io.Serializable;\n" +
+				"interface AnotherAutoCloseable extends AutoCloseable {}\n" +
+				"public class X {\n" +
+				"	public static void main(String argv[]) throws Exception {\n" +
+				"		((AnotherAutoCloseable & Serializable) (() -> {})).close();\n" +
+				"	}\n" +
+				"}\n",
+		},
+		"");
+}
+// https://bugs.eclipse.org/bugs/show_bug.cgi?id=426411, [1.8][compiler] NoSuchMethodError at runtime due to emission order of casts in intersection casts 
+public void test426411e() throws Exception {
+	this.runConformTest(
+		new String[] {
+				"X.java",
+				"import java.io.Serializable;\n" +
+				"interface I {}\n" +
+				"interface J extends I {\n" +
+				"   static final int xyz = 99;\n" +
+				"}\n" +
+				"public class X {\n" +
+				"	public static void main(String argv[]) throws Exception {\n" +
+				"		J j = new J() {};\n" +
+				"		System.out.println(((I & J) j).xyz);\n" +
+				"	}\n" +
+				"}\n",
+		},
+		"99");
+}
+// https://bugs.eclipse.org/bugs/show_bug.cgi?id=426411, [1.8][compiler] NoSuchMethodError at runtime due to emission order of casts in intersection casts 
+public void test426411f() throws Exception {
+	this.runConformTest(
+		new String[] {
+				"X.java",
+				"import java.io.Serializable;\n" +
+				"interface I {}\n" +
+				"interface J extends I {\n" +
+				"   final int xyz = 99;\n" +
+				"}\n" +
+				"public class X {\n" +
+				"	public static void main(String argv[]) throws Exception {\n" +
+				"		J j = new J() {};\n" +
+				"		System.out.println(((I & J) j).xyz);\n" +
+				"	}\n" +
+				"}\n",
+		},
+		"99");
+}
+// https://bugs.eclipse.org/bugs/show_bug.cgi?id=426086, [1.8] LambdaConversionException when method reference to an inherited method is invoked from sub class 
+public void test426086() throws Exception {
+	this.runConformTest(
+		new String[] {
+				"X.java",
+				"interface Functional {\n" +
+				"    Long square(Integer a);\n" +
+				"}\n" +
+				"public class X {\n" +
+				"    static class Base {\n" +
+				"    	 private Long square(Integer a) {\n" +
+				"             return Long.valueOf(a*a);\n" +
+				"         } \n" +
+				"    }\n" +
+				"    static class SubClass extends Base {\n" +
+				"        public Long callSquare(Integer i) {\n" +
+				"            Functional fi = SubClass.super::square;\n" +
+				"            return fi.square(i);\n" +
+				"        }\n" +
+				"    }\n" +
+				"    public static void main(String argv[]) throws Exception {\n" +
+				"    	System.out.println(new SubClass().callSquare(-3));\n" +
+				"    }\n" +
+				"}\n",
+		},
+		"9");
+}
+// https://bugs.eclipse.org/bugs/show_bug.cgi?id=426086, [1.8] LambdaConversionException when method reference to an inherited method is invoked from sub class 
+public void test426086a() throws Exception {
+	this.runConformTest(
+		new String[] {
+				"X.java",
+				"interface Functional {\n" +
+				"    Long square(Integer a);\n" +
+				"}\n" +
+				"public class X {\n" +
+				"    static class Base {\n" +
+				"    	 private Long square(Integer a) {\n" +
+				"             return Long.valueOf(a*a);\n" +
+				"         } \n" +
+				"    }\n" +
+				"    static class SubClass extends Base {\n" +
+				"        public Long callSquare(Integer i) {\n" +
+				"            Functional fi = super::square;\n" +
+				"            return fi.square(i);\n" +
+				"        }\n" +
+				"    }\n" +
+				"    public static void main(String argv[]) throws Exception {\n" +
+				"    	System.out.println(new SubClass().callSquare(-3));\n" +
+				"    }\n" +
+				"}\n",
+		},
+		"9");
+}
+// Bug 406744 - [1.8][compiler][codegen] LambdaConversionException seen when method reference targets a varargs method.
+// https://bugs.eclipse.org/bugs/show_bug.cgi?id=406744
+public void _test406744a() {
+	this.runConformTest(
+			new String[] {
+				"X.java",
+				"interface I {\n" +
+				"	void foo(Integer a1, Integer a2, String a3);\n" +
+				"}\n" +
+				"class Y {\n" +
+				"	static void m(Number a1, Object... rest) {\n" + 
+				"		System.out.println(a1);\n" +
+				"		print(rest);\n" +
+				"	}\n" +
+				"	static void print (Object [] o) {\n" +
+				"		for (int i = 0; i < o.length; i++)\n" +
+				"			System.out.println(o[i]);\n" +
+				"	}\n" +
+				"}\n" +
+				"public class X {\n" +
+				"	public static void main(String [] args) {\n" +
+				"		I i = Y::m;\n" +
+				"		i.foo(10, 20, \"10, 20\");\n" +
+				"	}\n" +
+				"}\n",
+			},
+			"10\n" +
+			"20\n" +
+			"10, 20"
+			);
+}
+public void _test406744b() {
+	this.runConformTest(
+			new String[] {
+				"X.java",
+				"interface I {\n" +
+				"	int foo(Integer a1, Integer a2, String a3);\n" +
+				"}\n" +
+				"class Y {\n" +
+				"	static int m(Number a1, Object... rest) {\n" + 
+				"		System.out.println(a1);\n" +
+				"		print(rest);\n" +
+				"		return 1;\n" +
+				"	}\n" +
+				"	static void print (Object [] o) {\n" +
+				"		for (int i = 0; i < o.length; i++)\n" +
+				"			System.out.println(o[i]);\n" +
+				"	}\n" +
+				"}\n" +
+				"public class X {\n" +
+				"	public static void main(String [] args) {\n" +
+				"		I i = Y::m;\n" +
+				"		i.foo(10, 20, \"10, 20\");\n" +
+				"	}\n" +
+				"}\n",
+			},
+			"10\n" +
+			"20\n" +
+			"10, 20"
+			);
+}
+public void _test406744c() {
+	this.runConformTest(
+			new String[] {
+				"X.java",
+				"interface I {\n" +
+				"	void foo(Integer a1, Integer a2, String a3);\n" +
+				"}\n" +
+				"class Y {\n" +
+				"	 Y(Number a1, Object... rest) {\n" + 
+				"		System.out.println(a1);\n" +
+				"		print(rest);\n" +
+				"	}\n" +
+				"	static void m(Number a1, Object... rest) {\n" + 
+				"		System.out.println(a1);\n" +
+				"		print(rest);\n" +
+				"	}\n" +
+				"	static void print (Object [] o) {\n" +
+				"		for (int i = 0; i < o.length; i++)\n" +
+				"			System.out.println(o[i]);\n" +
+				"	}\n" +
+				"}\n" +
+				"public class X {\n" +
+				"	public static void main(String [] args) {\n" +
+				"		I i = Y::new;\n" +
+				"		i.foo(10, 20, \"10, 20\");\n" +
+				"	}\n" +
+				"}\n",
+			},
+			"10\n" +
+			"20\n" +
+			"10, 20"
+			);
+}
+
 public static Class testClass() {
 	return LambdaExpressionsTest.class;
 }

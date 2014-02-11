@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2013 IBM Corporation and others.
+ * Copyright (c) 2011, 2014 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -21,12 +21,16 @@
  *							bug 404728 - [1.8]NPE on QualifiedSuperReference error
  *							Bug 400874 - [1.8][compiler] Inference infrastructure should evolve to meet JLS8 18.x (Part G of JSR335 spec)
  *							Bug 423504 - [1.8] Implement "18.5.3 Functional Interface Parameterization Inference"
+ *							Bug 425156 - [1.8] Lambda as an argument is flagged with incompatible error
+ *							Bug 426563 - [1.8] AIOOBE when method with error invoked with lambda expression as argument
  *******************************************************************************/
 package org.eclipse.jdt.core.tests.compiler.regression;
 
 import java.io.IOException;
 import java.util.Map;
 
+import org.eclipse.jdt.core.tests.junit.extension.TestCase;
+import org.eclipse.jdt.internal.compiler.classfmt.ClassFileConstants;
 import org.eclipse.jdt.internal.compiler.impl.CompilerOptions;
 
 import junit.framework.Test;
@@ -42,6 +46,13 @@ public NegativeLambdaExpressionsTest(String name) {
 }
 public static Test suite() {
 	return buildMinimalComplianceTestSuite(testClass(), F_1_8);
+}
+
+public static Test setUpTest(Test test) throws Exception {
+	TestCase.setUpTest(test);
+	RegressionTestSetup suite = new RegressionTestSetup(ClassFileConstants.JDK1_8);
+	suite.addTest(test);
+	return suite;
 }
 
 protected Map getCompilerOptions() {
@@ -72,7 +83,7 @@ public void test001() {
 			"1. ERROR in X.java (at line 7)\n" + 
 			"	I i = () -> {\n" + 
 			"	      ^^^^^\n" + 
-			"Lambda expression\'s signature does not match the signature of the functional interface method\n" + 
+			"Lambda expression\'s signature does not match the signature of the functional interface method foo(int, int)\n" + 
 			"----------\n" + 
 			"2. ERROR in X.java (at line 10)\n" + 
 			"	i++;\n" + 
@@ -536,12 +547,12 @@ public void test015() {
 				"2. ERROR in X.java (at line 10)\n" + 
 				"	I i4 = (int x, String y) -> {};\n" + 
 				"	       ^^^^^^^^^^^^^^^^^^^^\n" + 
-				"Lambda expression\'s signature does not match the signature of the functional interface method\n" + 
+				"Lambda expression\'s signature does not match the signature of the functional interface method run(int)\n" + 
 				"----------\n" + 
 				"3. ERROR in X.java (at line 12)\n" + 
 				"	J j1 = () -> {};\n" + 
 				"	       ^^^^^\n" + 
-				"Lambda expression\'s signature does not match the signature of the functional interface method\n" + 
+				"Lambda expression\'s signature does not match the signature of the functional interface method run(int, String)\n" + 
 				"----------\n" + 
 				"4. ERROR in X.java (at line 14)\n" + 
 				"	J j3 = (String x, int s) -> {};\n" + 
@@ -556,7 +567,7 @@ public void test015() {
 				"6. ERROR in X.java (at line 16)\n" + 
 				"	J j5 = x ->  {};\n" + 
 				"	       ^^^^\n" + 
-				"Lambda expression\'s signature does not match the signature of the functional interface method\n" + 
+				"Lambda expression\'s signature does not match the signature of the functional interface method run(int, String)\n" + 
 				"----------\n" + 
 				"7. WARNING in X.java (at line 17)\n" + 
 				"	K k1 = (Collection l) -> {};\n" + 
@@ -5052,7 +5063,7 @@ this.runNegativeTest(
 				"2. ERROR in X.java (at line 20)\n" + 
 				"	new X().foo((s)->{});\n" + 
 				"	            ^^^^^\n" + 
-				"Lambda expression\'s signature does not match the signature of the functional interface method\n" + 
+				"Lambda expression\'s signature does not match the signature of the functional interface method foo()\n" + 
 				"----------\n");
 }
 // https://bugs.eclipse.org/bugs/show_bug.cgi?id=401610, [1.8][compiler] Allow lambda/reference expressions in non-overloaded method invocation contexts
@@ -5100,10 +5111,15 @@ this.runNegativeTest(
 				"----------\n" + 
 				"3. ERROR in X.java (at line 16)\n" + 
 				"	new X().foo(()-> 10);\n" + 
+				"	        ^^^\n" + 
+				"The method foo(I) in the type X is not applicable for the arguments (() -> 10)\n" + 
+				"----------\n" + 
+				"4. ERROR in X.java (at line 16)\n" + 
+				"	new X().foo(()-> 10);\n" + 
 				"	                 ^^\n" + 
 				"Void methods cannot return a value\n" + 
 				"----------\n" + 
-				"4. ERROR in X.java (at line 18)\n" + 
+				"5. ERROR in X.java (at line 18)\n" + 
 				"	new X().foo((s)->{ return;});\n" + 
 				"	                   ^^^^^^^\n" + 
 				"This method must return a result of type String\n" + 
@@ -6501,20 +6517,35 @@ public void test406614() {
 			"----------\n" + 
 			"1. ERROR in X.java (at line 9)\n" + 
 			"	this(() -> this.f);\n" + 
+			"	^^^^^^^^^^^^^^^^^^^\n" + 
+			"The constructor X(() -> this.f) is undefined\n" + 
+			"----------\n" + 
+			"2. ERROR in X.java (at line 9)\n" + 
+			"	this(() -> this.f);\n" + 
 			"	           ^^^^\n" + 
 			"Cannot refer to \'this\' nor \'super\' while explicitly invoking a constructor\n" + 
 			"----------\n" + 
-			"2. ERROR in X.java (at line 12)\n" + 
+			"3. ERROR in X.java (at line 12)\n" + 
+			"	this(() -> this.g());\n" + 
+			"	^^^^^^^^^^^^^^^^^^^^^\n" + 
+			"The constructor X(() -> this.g()) is undefined\n" + 
+			"----------\n" + 
+			"4. ERROR in X.java (at line 12)\n" + 
 			"	this(() -> this.g());\n" + 
 			"	           ^^^^\n" + 
 			"Cannot refer to \'this\' nor \'super\' while explicitly invoking a constructor\n" + 
 			"----------\n" + 
-			"3. ERROR in X.java (at line 15)\n" + 
+			"5. ERROR in X.java (at line 15)\n" + 
+			"	this(() -> f);\n" + 
+			"	^^^^^^^^^^^^^^\n" + 
+			"The constructor X(() -> f) is undefined\n" + 
+			"----------\n" + 
+			"6. ERROR in X.java (at line 15)\n" + 
 			"	this(() -> f);\n" + 
 			"	           ^\n" + 
 			"Cannot refer to an instance field f while explicitly invoking a constructor\n" + 
 			"----------\n" + 
-			"4. ERROR in X.java (at line 18)\n" + 
+			"7. ERROR in X.java (at line 18)\n" + 
 			"	this(() -> g());\n" + 
 			"	           ^\n" + 
 			"Cannot refer to an instance method while explicitly invoking a constructor\n" + 
@@ -6863,7 +6894,7 @@ public void test412453() {
 		"1. ERROR in X.java (at line 13)\n" + 
 		"	final Optional<Integer> min = empty.minBy((a, b) -> a - b);\n" + 
 		"	                                          ^^^^^^^^^^^^^^^\n" + 
-		"Lambda expression\'s signature does not match the signature of the functional interface method\n" + 
+		"Lambda expression\'s signature does not match the signature of the functional interface method apply(Integer)\n" + 
 		"----------\n",
 		null /* no extra class libraries */,
 		true /* flush output directory */,
@@ -7004,13 +7035,19 @@ public void test412650() {
 				"	static Integer getInt() { return 0; }\n" +
 				"}\n"
 		},
-		"----------\n" + 
+		"----------\n" +
+		// this is reported because the lambda has errors and thus is not marked as valueCompatible:
 		"1. ERROR in X.java (at line 7)\n" + 
+		"	foo(() -> foo(X::getInt));\n" + 
+		"	^^^\n" + 
+		"The method foo(I) in the type X is not applicable for the arguments (() -> foo(X::getInt))\n" + 
+		"----------\n" + 
+		"2. ERROR in X.java (at line 7)\n" + 
 		"	foo(() -> foo(X::getInt));\n" + 
 		"	          ^^^\n" + 
 		"The method foo(I) in the type X is not applicable for the arguments (X::getInt)\n" + 
 		"----------\n" + 
-		"2. ERROR in X.java (at line 7)\n" + 
+		"3. ERROR in X.java (at line 7)\n" + 
 		"	foo(() -> foo(X::getInt));\n" + 
 		"	              ^^^^^^^^^\n" + 
 		"The type of getInt() from the type X is Integer, this is incompatible with the descriptor\'s return type: String\n" + 
@@ -7809,6 +7846,25 @@ public void test423129b() {
 			"----------\n",
 			true);
 }
+// modified the previous example to craft a result requiring constant narrowing (13 -> byte)
+public void test423129c() {
+	this.runConformTest(
+			new String[] {
+					"X.java", 
+					"import java.util.ArrayList;\n" +
+					"import java.util.List;\n" +
+					"import java.util.Arrays;\n" +
+					"class MySorter { static <T> void sort(List<T> l, MyComparator<T> comp) { } }\n" + 
+					"interface MyComparator<T> { byte compare(T t1, T t2); }\n" +
+					"public class X {\n" +
+					"   int compareTo(X x) { return 0; }\n" +
+					"	void foo() {\n" +
+					"		MySorter.sort(new ArrayList<X>(Arrays.asList(new X(), new X(), new X())),\n" +
+					"				(X o1, X o2) -> 13);\n" +
+					"	}\n" +
+					"}\n"
+			});
+}
 // https://bugs.eclipse.org/bugs/show_bug.cgi?id=424400, [1.8] Interfaces in the same hierarchy are allowed in an intersection cast with different type argument
 public void test424400() {
 	this.runNegativeTest(
@@ -7899,6 +7955,393 @@ public void test424444() throws Exception {
 		"	Functional<Integer []> contr = int[]::new;\n" + 
 		"	                               ^^^^^^^^^^\n" + 
 		"Constructed array int[] cannot be assigned to Integer[] as required in the interface descriptor  \n" + 
+		"----------\n");
+}
+// https://bugs.eclipse.org/bugs/show_bug.cgi?id=425512, [1.8][compiler] Arrays should be allowed in intersection casts
+public void test425512() throws Exception {
+	this.runNegativeTest(
+		new String[] {
+				"X.java",
+				"interface IJK {\n" +
+				"    void foo(int size);\n" +
+				"}\n" +
+				"public class X  {\n" +
+				"    public static void main(String argv[]) {\n" +
+				"    	int [] a = (int [] & IJK) null;\n" +
+				"    }\n" +
+				"}\n",
+		},
+		"----------\n" + 
+		"1. ERROR in X.java (at line 6)\n" + 
+		"	int [] a = (int [] & IJK) null;\n" + 
+		"	            ^^^^^^\n" + 
+		"Arrays are not allowed in intersection cast operator\n" + 
+		"----------\n");
+}
+// https://bugs.eclipse.org/bugs/show_bug.cgi?id=425512, [1.8][compiler] Arrays should be allowed in intersection casts
+public void test425512a() throws Exception {
+	this.runNegativeTest(
+		new String[] {
+				"X.java",
+				"import java.io.Serializable;\n" +
+				"interface IJK {\n" +
+				"    void foo(int size);\n" +
+				"}\n" +
+				"public class X  {\n" +
+				"    public static void main(String argv[]) {\n" +
+				"    	int [] a = (int [] & Serializable & IJK) null;\n" +
+				"    }\n" +
+				"}\n",
+		},
+		"----------\n" + 
+		"1. ERROR in X.java (at line 7)\n" + 
+		"	int [] a = (int [] & Serializable & IJK) null;\n" + 
+		"	            ^^^^^^\n" + 
+		"Arrays are not allowed in intersection cast operator\n" + 
+		"----------\n");
+}
+// https://bugs.eclipse.org/bugs/show_bug.cgi?id=425512, [1.8][compiler] Arrays should be allowed in intersection casts
+public void test425512b() throws Exception {
+	this.runNegativeTest(
+		new String[] {
+				"X.java",
+				"import java.io.Serializable;\n" +
+				"interface IJK {\n" +
+				"    void foo(int size);\n" +
+				"}\n" +
+				"public class X  {\n" +
+				"    public static void main(String argv[]) {\n" +
+				"    	int [] a = (int [] & IJK & Serializable) null;\n" +
+				"    }\n" +
+				"}\n",
+		},
+		"----------\n" + 
+		"1. ERROR in X.java (at line 7)\n" + 
+		"	int [] a = (int [] & IJK & Serializable) null;\n" + 
+		"	            ^^^^^^\n" + 
+		"Arrays are not allowed in intersection cast operator\n" + 
+		"----------\n");
+}
+// https://bugs.eclipse.org/bugs/show_bug.cgi?id=425512, [1.8][compiler] Arrays should be allowed in intersection casts
+public void test425512c() throws Exception {
+	this.runNegativeTest(
+		new String[] {
+				"X.java",
+				"import java.io.Serializable;\n" +
+				"interface IJK {\n" +
+				"    void foo(int size);\n" +
+				"}\n" +
+				"public class X  {\n" +
+				"    public static void main(String argv[]) {\n" +
+				"    	int [] a = (IJK & Serializable & int []) null;\n" +
+				"    }\n" +
+				"}\n",
+		},
+		"----------\n" + 
+		"1. ERROR in X.java (at line 7)\n" + 
+		"	int [] a = (IJK & Serializable & int []) null;\n" + 
+		"	                                 ^^^^^^\n" + 
+		"The type int[] is not an interface; it cannot be specified as a bounded parameter\n" + 
+		"----------\n");
+}
+// https://bugs.eclipse.org/bugs/show_bug.cgi?id=425512, [1.8][compiler] Arrays should be allowed in intersection casts
+public void test425512cd() throws Exception {
+	this.runNegativeTest(
+		new String[] {
+				"X.java",
+				"import java.io.Serializable;\n" +
+				"interface I {\n" +
+				"    void foo(int size);\n" +
+				"}\n" +
+				"public class X  {\n" +
+				"    public static void main(String argv[]) {\n" +
+				"    	I i = (int [] & I) (i) -> {};\n" +
+				"    }\n" +
+				"}\n",
+		},
+		"----------\n" + 
+		"1. ERROR in X.java (at line 7)\n" + 
+		"	I i = (int [] & I) (i) -> {};\n" + 
+		"	       ^^^^^^^^^^^^^^^^^^^^\n" + 
+		"Arrays are not allowed in intersection cast operator\n" + 
+		"----------\n" + 
+		"2. ERROR in X.java (at line 7)\n" + 
+		"	I i = (int [] & I) (i) -> {};\n" + 
+		"	                   ^^^^^^\n" + 
+		"The target type of this expression must be a functional interface\n" + 
+		"----------\n");
+}
+// https://bugs.eclipse.org/bugs/show_bug.cgi?id=425512, [1.8][compiler] Arrays should be allowed in intersection casts
+public void test425512ce() throws Exception {
+	this.runNegativeTest(
+		new String[] {
+				"X.java",
+				"import java.io.Serializable;\n" +
+				"interface I {\n" +
+				"    void foo(int size);\n" +
+				"}\n" +
+				"public class X  {\n" +
+				"    public static void main(String argv[]) {\n" +
+				"    	I i = (int [] & Serializable) (i) -> {};\n" +
+				"    }\n" +
+				"}\n",
+		},
+		"----------\n" + 
+		"1. ERROR in X.java (at line 7)\n" + 
+		"	I i = (int [] & Serializable) (i) -> {};\n" + 
+		"	       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n" + 
+		"Arrays are not allowed in intersection cast operator\n" + 
+		"----------\n" + 
+		"2. ERROR in X.java (at line 7)\n" + 
+		"	I i = (int [] & Serializable) (i) -> {};\n" + 
+		"	                              ^^^^^^\n" + 
+		"The target type of this expression must be a functional interface\n" + 
+		"----------\n");
+}
+// https://bugs.eclipse.org/bugs/show_bug.cgi?id=425621, [1.8][compiler] Missing error for raw type in constructor reference with explicit type arguments
+public void test425621() throws Exception {
+	this.runNegativeTest(
+		new String[] {
+				"X.java",
+				"class Y<T> {\n" +
+				"    Y() {}\n" +
+				"}    \n" +
+				"interface I {\n" +
+				"    Y<Y> foo();\n" +
+				"}\n" +
+				"public class X  {\n" +
+				"    I i = Y::<X>new;\n" +
+				"}\n",
+		},
+		"----------\n" + 
+		"1. WARNING in X.java (at line 5)\n" + 
+		"	Y<Y> foo();\n" + 
+		"	  ^\n" + 
+		"Y is a raw type. References to generic type Y<T> should be parameterized\n" + 
+		"----------\n" + 
+		"2. ERROR in X.java (at line 8)\n" + 
+		"	I i = Y::<X>new;\n" + 
+		"	          ^\n" + 
+		"Explicit type arguments cannot be specified in raw constructor reference expression\n" + 
+		"----------\n");
+}
+// https://bugs.eclipse.org/bugs/show_bug.cgi?id=423803, [1.8][compiler] No error shown for ambiguous reference to the method
+public void test423803() throws Exception {
+	this.runNegativeTest(
+		new String[] {
+				"X.java",
+				"class C2 implements C2_Sup {\n" +
+				"    public static final FI fi = x -> x++;\n" +
+				"    public static final FL fl = x -> x++;\n" +
+				"    {\n" +
+				"        bar(x -> x++); // [1]\n" +
+				"        bar(fl); \n" +
+				"    }\n" +
+				"    void bar(FI fi) { }\n" +
+				"}\n" +
+				"interface C2_Sup {	\n" +
+				"	default void bar(FL fl) { }\n" +
+				"}\n" +
+				"@FunctionalInterface\n" +
+				"interface FI {\n" +
+				"	int foo(int x);\n" +
+				"}\n" +
+				"@FunctionalInterface\n" +
+				"interface FL {\n" +
+				"    long foo(long x);\n" +
+				"}\n",
+		},
+		"----------\n" + 
+		"1. ERROR in X.java (at line 5)\n" + 
+		"	bar(x -> x++); // [1]\n" + 
+		"	^^^\n" + 
+		"The method bar(FI) is ambiguous for the type C2\n" + 
+		"----------\n" + 
+		"2. WARNING in X.java (at line 8)\n" + 
+		"	void bar(FI fi) { }\n" + 
+		"	            ^^\n" + 
+		"The parameter fi is hiding a field from type C2\n" + 
+		"----------\n");
+}
+// https://bugs.eclipse.org/bugs/show_bug.cgi?id=423803, [1.8][compiler] No error shown for ambiguous reference to the method
+public void test423803b() throws Exception {
+	this.runNegativeTest(
+		new String[] {
+				"X.java",
+				"public class X implements K {\n" +
+				"    {\n" +
+				"        bar(x -> x++); // [1]\n" +
+				"    }\n" +
+				"    void bar(I fi) { }\n" +
+				"}\n" +
+				"interface K {	\n" +
+				"	default void bar(J fl) { }\n" +
+				"}\n" +
+				"interface I {\n" +
+				"	int foo(int x);\n" +
+				"}\n" +
+				"interface J {\n" +
+				"    long foo(long x);\n" +
+				"}\n",
+		},
+		"----------\n" + 
+		"1. ERROR in X.java (at line 3)\n" + 
+		"	bar(x -> x++); // [1]\n" + 
+		"	^^^\n" + 
+		"The method bar(I) is ambiguous for the type X\n" + 
+		"----------\n");
+}
+// https://bugs.eclipse.org/bugs/show_bug.cgi?id=425712, [1.8][compiler] Valid program rejected by the compiler. 
+public void test425712() throws Exception {
+	this.runNegativeTest(
+		new String[] {
+				"X.java",
+				"class C2 {\n" +
+				"    {\n" +
+				"        bar( () -> (char) 0); // [1]\n" +
+				"    }\n" +
+				"    void bar(FC fc) { }\n" +
+				"    void bar(FB fb) { }\n" +
+				"}\n" +
+				"interface FB {\n" +
+				"	byte foo();\n" +
+				"}\n" +
+				"interface FC {\n" +
+				"    char foo();\n" +
+				"}\n",
+		},
+		"----------\n" + 
+		"1. ERROR in X.java (at line 3)\n" + 
+		"	bar( () -> (char) 0); // [1]\n" + 
+		"	^^^\n" + 
+		"The method bar(FC) is ambiguous for the type C2\n" + 
+		"----------\n");
+}
+// https://bugs.eclipse.org/bugs/show_bug.cgi?id=421926, [1.8][compiler] Compiler tolerates illegal forward reference from lambda in initializer 
+public void test421926() throws Exception {
+	this.runNegativeTest(
+		new String[] {
+				"X.java",
+				"interface I {\n" +
+				"	I run(int s1);\n" +
+				"}\n" +
+				"class X {	\n" +
+				"   public static final int f = f;\n" +
+				"	public static final I fi = x -> fi;\n" +
+				"	public static final I fj = x -> fk;\n" +
+				"	public static final I fk = x -> fj;\n" +
+				"}\n",
+		},
+		"----------\n" + 
+		"1. ERROR in X.java (at line 5)\n" + 
+		"	public static final int f = f;\n" + 
+		"	                            ^\n" + 
+		"Cannot reference a field before it is defined\n" + 
+		"----------\n" + 
+		"2. ERROR in X.java (at line 6)\n" + 
+		"	public static final I fi = x -> fi;\n" + 
+		"	                                ^^\n" + 
+		"Cannot reference a field before it is defined\n" + 
+		"----------\n" + 
+		"3. ERROR in X.java (at line 7)\n" + 
+		"	public static final I fj = x -> fk;\n" + 
+		"	                                ^^\n" + 
+		"Cannot reference a field before it is defined\n" + 
+		"----------\n");
+}
+// https://bugs.eclipse.org/bugs/show_bug.cgi?id=421926, [1.8][compiler] Compiler tolerates illegal forward reference from lambda in initializer 
+public void test421926b() throws Exception {
+	this.runNegativeTest(
+		new String[] {
+				"X.java",
+				"interface I { \n" +
+				"	int run(int s1, int s2); \n" +
+				"}\n" +
+				"public class X {\n" +
+				"    static int f = ((I) (int x5, int x2) -> x1).run(10,  20);\n" +
+				"    static int x1 = 2;\n" +
+				"}\n",
+		},
+		"----------\n" + 
+		"1. ERROR in X.java (at line 5)\n" + 
+		"	static int f = ((I) (int x5, int x2) -> x1).run(10,  20);\n" + 
+		"	                                        ^^\n" + 
+		"Cannot reference a field before it is defined\n" + 
+		"----------\n");
+}
+// https://bugs.eclipse.org/bugs/show_bug.cgi?id=421926, [1.8][compiler] Compiler tolerates illegal forward reference from lambda in initializer 
+public void test421926c() throws Exception {
+	this.runNegativeTest(
+		new String[] {
+				"X.java",
+				"interface I { \n" +
+				"	int run(int s1, int s2); \n" +
+				"}\n" +
+				"public class X {\n" +
+				"    int f = ((I) (int x5, int x2) -> x1).run(10,  20);\n" +
+				"    static int x1 = 2;\n" +
+				"}\n",
+		},
+		"");
+}
+// https://bugs.eclipse.org/bugs/show_bug.cgi?id=426206, [1.8][compiler] Compiler tolerates illegal code.
+public void test426206() throws Exception {
+	this.runNegativeTest(
+		new String[] {
+				"X.java",
+				"import java.util.Comparator;\n" +
+				"public class X  {\n" +
+				"    public static void main(String argv[]) {\n" +
+				"        Comparator<? extends String> c = true ? (Integer i, Integer j) -> { return 0; } : (Long i, Long j) -> { return 1; };\n" +
+				"    }\n" +
+				"}\n",
+		},
+		"----------\n" + 
+		"1. ERROR in X.java (at line 4)\n" + 
+		"	Comparator<? extends String> c = true ? (Integer i, Integer j) -> { return 0; } : (Long i, Long j) -> { return 1; };\n" + 
+		"	                                        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n" + 
+		"Type mismatch: cannot convert from Comparator<Integer> to Comparator<? extends String>\n" + 
+		"----------\n" + 
+		"2. ERROR in X.java (at line 4)\n" + 
+		"	Comparator<? extends String> c = true ? (Integer i, Integer j) -> { return 0; } : (Long i, Long j) -> { return 1; };\n" + 
+		"	                                                                                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n" + 
+		"Type mismatch: cannot convert from Comparator<Long> to Comparator<? extends String>\n" + 
+		"----------\n");
+}
+public void testBug426563() {
+	runNegativeTest(
+		new String[] {
+			"X.java",
+			"interface I<U, V extends J<U>> { \n" + 
+			"    void foo(U u, V v); \n" + 
+			"}\n" + 
+			"\n" + 
+			"interface J<T> {}\n" + 
+			"\n" + 
+			"public class X  {\n" + 
+			"\n" + 
+			"    public void bar(FI<?, ?> fi) {}\n" + 
+			"\n" + 
+			"    public static void main(String args[]) {\n" + 
+			"      new X().bar((p, q) -> {}); \n" + 
+			"    }\n" + 
+			"}\n"
+		},
+		"----------\n" + 
+		"1. ERROR in X.java (at line 9)\n" + 
+		"	public void bar(FI<?, ?> fi) {}\n" + 
+		"	                ^^\n" + 
+		"FI cannot be resolved to a type\n" + 
+		"----------\n" + 
+		"2. ERROR in X.java (at line 12)\n" + 
+		"	new X().bar((p, q) -> {}); \n" + 
+		"	        ^^^\n" + 
+		"The method bar(FI<?,?>) from the type X refers to the missing type FI\n" + 
+		"----------\n" + 
+		"3. ERROR in X.java (at line 12)\n" + 
+		"	new X().bar((p, q) -> {}); \n" + 
+		"	            ^^^^^^^^^\n" + 
+		"The target type of this expression must be a functional interface\n" + 
 		"----------\n");
 }
 public static Class testClass() {

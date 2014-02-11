@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2013 IBM Corporation and others.
+ * Copyright (c) 2000, 2014 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -23,9 +23,9 @@ import org.eclipse.jdt.core.IJavaElement;
 /**
  * A binding represents a named entity in the Java language. The world of
  * bindings provides an integrated picture of the structure of the program as
- * seen from the compiler's point of view. This interface declare protocol
+ * seen from the compiler's point of view. This interface declares protocols
  * common to the various different kinds of named entities in the Java language:
- * packages, types, fields, methods, constructors, and local variables.
+ * packages, types, fields, methods, constructors, local variables, and annotations.
  *
  * @see IPackageBinding
  * @see ITypeBinding
@@ -106,7 +106,7 @@ public interface IBinding {
 //mkr}
 
 	/**
-	 * Return the resolved annotations associated with this binding.
+	 * Returns the resolved declaration annotations associated with this binding.
 	 * <ul>
 	 * <li>Package bindings - these are annotations on a package declaration.
 	 * </li>
@@ -121,9 +121,14 @@ public interface IBinding {
 	 * <li>Annotation bindings - an empty array is always returned</li>
 	 * <li>Member value pair bindings - an empty array is always returned</li>
 	 * </ul>
+	 * <p>
+	 * <b>Note:</b> This method only returns declaration annotations.
+	 * <em>Type annotations</em> in the sense of JLS8 9.7.4 are <em>not</em> returned.
+	 * Type annotations can be retrieved via {@link ITypeBinding#getTypeAnnotations()}. 
+	 * </p>
 	 *
-	 * @return the list of resolved annotations, or the empty list if there are no
-	 * annotations associated with the object
+	 * @return the list of resolved declaration annotations, or the empty list if there are no
+	 *    declaration annotations associated with the entity represented by this binding
 	 * @since 3.2
 	 */
 	public IAnnotationBinding[] getAnnotations();
@@ -243,8 +248,8 @@ public interface IBinding {
 	/**
 	 * Returns the key for this binding.
 	 * <p>
-	 * Within a connected cluster of bindings (for example, all bindings
-	 * reachable from a given AST), each binding will have a distinct keys.
+	 * Within a connected cluster of bindings (produced by the same call to an
+	 * {@code ASTParser#create*(*)} method)), each binding has a distinct key.
 	 * The keys are generated in a manner that is predictable and as
 	 * stable as possible. This last property makes these keys useful for
 	 * comparing bindings between disconnected clusters of bindings (for example,
@@ -272,7 +277,7 @@ public interface IBinding {
 	 *   declaring block relative to its parent, the key of its method</li>
 	 * <li>local types - the name of the type, the index of the declaring
 	 *   block relative to its parent, the key of its method</li>
-	 * <li>anonymous types - the occurence count of the anonymous
+	 * <li>anonymous types - the occurrence count of the anonymous
 	 *   type relative to its declaring type, the key of its declaring type</li>
 	 * <li>enum types - treated like classes</li>
 	 * <li>annotation types - treated like interfaces</li>
@@ -296,8 +301,13 @@ public interface IBinding {
 	 * the annotation type</li>
 	 * </ul>
 	 * </p>
+	 * <p>
+	 * The key for a type binding does not contain {@link ITypeBinding#getTypeAnnotations() type annotations},
+	 * so type bindings with different type annotations may have the same key (iff they denote the same un-annotated type).
+	 * By construction, this also applies to method bindings if their declaring types contain type annotations.
+	 * </p>
 	 * <p>Note that the key for member value pair bindings is
-	 * not yet implemented. This returns <code>null</code> for this kind of bindings.<br>
+	 * not yet implemented. This method returns <code>null</code> for that kind of bindings.<br>
 	 * Recovered bindings have a unique key.
 	 * </p>
 	 *
@@ -308,23 +318,40 @@ public interface IBinding {
 	/**
 	 * There is no special definition of equality for bindings; equality is
 	 * simply object identity.  Within the context of a single cluster of
-	 * bindings, each binding is represented by a distinct object. However,
+	 * bindings (produced by the same call to an {@code ASTParser#create*(*)} method),
+	 * each binding is represented by a separate object. However,
 	 * between different clusters of bindings, the binding objects may or may
 	 * not be different; in these cases, the client should compare bindings
-	 * using {@link #isEqualTo(IBinding)}, which checks their keys.
+	 * using {@link #isEqualTo(IBinding)}, which is functionally equivalent to
+	 * checking their keys for equality.
+	 * <p>
+	 * Since JLS8, type bindings can contain {@link ITypeBinding#getTypeAnnotations() type annotations}.
+	 * Note that type bindings that denote the same un-annotated type have the same {@link #getKey() key},
+	 * but they are not identical if they contain different type annotations.
+	 * Type bindings that contain the same type annotations may or may not be identical.
+	 * </p>
 	 *
 	 * @param obj {@inheritDoc}
 	 * @return {@inheritDoc}
+	 * @see ITypeBinding#getTypeDeclaration()
 	 */
 	public boolean equals(Object obj);
 
 	/**
 	 * Returns whether this binding has the same key as that of the given
-	 * binding. Within the context of a single cluster of bindings, each
+	 * binding. Within the context of a single cluster of bindings
+	 * (produced by the same call to an {@code ASTParser#create*(*)} method), each
 	 * binding is represented by a distinct object. However, between
 	 * different clusters of bindings, the binding objects may or may
 	 * not be different objects; in these cases, the binding keys
 	 * are used where available.
+	 * 
+	 * <p>
+	 * Note that type bindings that only differ in their {@link ITypeBinding#getTypeAnnotations() type annotations}
+	 * have the same {@link IBinding#getKey() key}, and hence this method returns
+	 * <code>true</code> for such type bindings. By construction of the key, this also applies
+	 * to method bindings if their declaring types contain type annotations.
+	 * </p>
 	 *
 	 * @param binding the other binding, or <code>null</code>
 	 * @return <code>true</code> if the given binding is the identical

@@ -2241,5 +2241,117 @@ public class InterfaceMethodsTest extends AbstractComparableTest {
 			}, 
 			"Hello from I.foo:1522756");
 	}	
-
+	
+	// https://bugs.eclipse.org/bugs/show_bug.cgi?id=422731, [1.8] Ambiguous method not reported on overridden default method 
+	public void test422731() throws Exception {
+		this.runNegativeTest(
+			new String[] {
+					"X.java",
+					"public class X extends Base implements I {\n" +
+					"	public static void main(String[] args) {\n" +
+					"		X x = new X();\n" +
+					"		x.foo((short)5, (short)10);\n" +
+					"		x.bar((short)5, (short)10);\n" +
+					"	}\n" +
+					"	public void foo(short s, int i) {} // No error, but should have been\n" +
+					"	public void bar(short s, int i) {} // Correctly reported\n" +
+					"\n" +
+					"}\n" +
+					"interface I {\n" +
+					"	public default void foo(int i, short s) {}\n" +
+					"}\n" +
+					"class Base {\n" +
+					"	public void bar(int i, short s) {}\n" +
+					"}\n",
+			},
+			"----------\n" + 
+			"1. ERROR in X.java (at line 4)\n" + 
+			"	x.foo((short)5, (short)10);\n" + 
+			"	  ^^^\n" + 
+			"The method foo(short, int) is ambiguous for the type X\n" + 
+			"----------\n" + 
+			"2. ERROR in X.java (at line 5)\n" + 
+			"	x.bar((short)5, (short)10);\n" + 
+			"	  ^^^\n" + 
+			"The method bar(short, int) is ambiguous for the type X\n" + 
+			"----------\n");
+	}
+	// https://bugs.eclipse.org/bugs/show_bug.cgi?id=425719, [1.8][compiler] Bogus ambiguous call error from compiler
+	public void test425719() throws Exception {
+		this.runConformTest(
+			new String[] {
+					"X.java",
+					"interface I {\n" +
+					"   default void foo(Object obj) {\n" +
+					"	   System.out.println(\"interface method\");\n" +
+					"   }\n" +
+					"}\n" +
+					"class Base {\n" +
+					"    public void foo(Object obj) {\n" +
+					"        System.out.println(\"class method\");\n" +
+					"   }\n" +
+					"}\n" +
+					"public class X extends Base implements I {\n" +
+					"	 public static void main(String argv[]) {\n" +
+					"	    	new X().foo(null);\n" +
+					"	    }\n" +
+					"}\n",
+			},
+			"class method");
+	}
+	// https://bugs.eclipse.org/bugs/show_bug.cgi?id=425718, [1.8] default method changes access privilege of protected overridden method from Object 
+	public void test425718() throws Exception {
+		this.runNegativeTest(
+			new String[] {
+					"X.java",
+					"interface I {\n" +
+					"   default Object clone() { return null; };\n" +
+					"}\n" +
+					"public class X  {\n" +
+					"    public void foo() {\n" +
+					"        I x = new I(){};\n" +
+					"        System.out.println(x.clone());\n" +
+					"    }\n" +
+					"}\n",
+			},
+			"----------\n" + 
+			"1. ERROR in X.java (at line 6)\n" + 
+			"	I x = new I(){};\n" + 
+			"	          ^^^\n" + 
+			"The inherited method Object.clone() cannot hide the public abstract method in I\n" + 
+			"----------\n" + 
+			"2. ERROR in X.java (at line 6)\n" + 
+			"	I x = new I(){};\n" + 
+			"	          ^^^\n" + 
+			"Exception CloneNotSupportedException in throws clause of Object.clone() is not compatible with I.clone()\n" + 
+			"----------\n");
+	}
+	// https://bugs.eclipse.org/bugs/show_bug.cgi?id=426318, [1.8][compiler] Bogus name clash error in the presence of default methods and varargs
+	public void test426318() throws Exception {
+		this.runNegativeTest(
+			new String[] {
+					"X.java",
+					"abstract class Y { \n" +
+					"    public abstract void foo(Object[] x);\n" +
+					"    public abstract void goo(Object[] x);\n" +
+					"}\n" +
+					"interface I {\n" +
+					"   default public <T> void foo(T... x) {};\n" +
+					"   public abstract <T> void goo(T ... x);\n" +
+					"}\n" +
+					"public abstract class X extends Y implements I { \n" +
+					"}\n",
+			},
+			"----------\n" + 
+			"1. WARNING in X.java (at line 6)\n" + 
+			"	default public <T> void foo(T... x) {};\n" + 
+			"	                                 ^\n" + 
+			"Type safety: Potential heap pollution via varargs parameter x\n" + 
+			"----------\n" + 
+			"2. WARNING in X.java (at line 7)\n" + 
+			"	public abstract <T> void goo(T ... x);\n" + 
+			"	                                   ^\n" + 
+			"Type safety: Potential heap pollution via varargs parameter x\n" + 
+			"----------\n");
+	}
 }

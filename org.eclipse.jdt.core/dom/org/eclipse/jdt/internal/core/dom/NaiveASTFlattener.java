@@ -1212,6 +1212,18 @@ public class NaiveASTFlattener extends ASTVisitor {
 	}
 
 	/*
+	 * @see ASTVisitor#visit(NameQualifiedType)
+	 * @since 3.9 BETA_JAVA8
+	 */
+	public boolean visit(NameQualifiedType node) {
+		node.getQualifier().accept(this);
+		this.buffer.append('.');
+		visitTypeAnnotations(node);
+		node.getName().accept(this);
+		return false;
+	}
+
+	/*
 	 * @see ASTVisitor#visit(NormalAnnotation)
 	 * @since 3.1
 	 */
@@ -1269,18 +1281,6 @@ public class NaiveASTFlattener extends ASTVisitor {
 		this.buffer.append("package ");//$NON-NLS-1$
 		node.getName().accept(this);
 		this.buffer.append(";\n");//$NON-NLS-1$
-		return false;
-	}
-
-	/*
-	 * @see ASTVisitor#visit(PackageQualifiedType)
-	 * @since 3.9 BETA_JAVA8
-	 */
-	public boolean visit(PackageQualifiedType node) {
-		node.getQualifier().accept(this);
-		this.buffer.append('.');
-		visitTypeAnnotations(node);
-		node.getName().accept(this);
 		return false;
 	}
 

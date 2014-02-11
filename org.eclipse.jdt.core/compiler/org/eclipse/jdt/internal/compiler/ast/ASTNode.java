@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2013 IBM Corporation and others.
+ * Copyright (c) 2000, 2014 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -26,6 +26,10 @@
  *								Bug 417295 - [1.8[[null] Massage type annotated null analysis to gel well with deep encoded type bindings.
  *								Bug 400874 - [1.8][compiler] Inference infrastructure should evolve to meet JLS8 18.x (Part G of JSR335 spec)
  *								Bug 424742 - [1.8] NPE in LambdaExpression.isCompatibleWith
+ *								Bug 424710 - [1.8][compiler] CCE in SingleNameReference.localVariableBinding
+ *								Bug 424205 - [1.8] Cannot infer type for diamond type with lambda on method invocation
+ *								Bug 424415 - [1.8][compiler] Eventual resolution of ReferenceExpression is not seen to be happening.
+ *								Bug 426366 - [1.8][compiler] Type inference doesn't handle multiple candidate target types in outer overload context
  *     Jesper S Moller - Contributions for
  *								bug 382721 - [1.8][compiler] Effectively final variables needs special treatment
  *								bug 412153 - [1.8][compiler] Check validity of annotations which may be repeatable
@@ -696,6 +700,8 @@ public abstract class ASTNode implements TypeConstants, TypeIds {
 	 * 	the method lookup.
 	 */
 	public static void resolvePolyExpressionArguments(Invocation invocation, MethodBinding methodBinding, TypeBinding[] argumentTypes) {
+		if (!invocation.innersNeedUpdate())
+			return;
 		int problemReason = 0;
 		MethodBinding candidateMethod;
 		if (methodBinding.isValidBinding()) {
@@ -712,10 +718,17 @@ public abstract class ASTNode implements TypeConstants, TypeIds {
 			if (candidateMethod instanceof ParameterizedGenericMethodBinding) {
 				infCtx = invocation.getInferenceContext((ParameterizedGenericMethodBinding) candidateMethod);
 				if (infCtx != null) {
-					if (!infCtx.hasFinished)
-						return; // not yet ready for pushing type information down to arguments
+					if (infCtx.stepCompleted != InferenceContext18.TYPE_INFERRED) {
+						// only work in the exact state of TYPE_INFERRED
+						// - below we're not yet ready
+						// - above we're already done-done
+						return;
+					}
 					variableArity &= infCtx.isVarArgs(); // TODO: if no infCtx is available, do we have to re-check if this is a varargs invocation?
 				}
+			} else if (invocation instanceof AllocationExpression) {
+				if (((AllocationExpression)invocation).suspendedResolutionState != null)
+					return; // not yet ready
 			}
 			
 			final TypeBinding[] parameters = candidateMethod.parameters;
@@ -733,22 +746,32 @@ public abstract class ASTNode implements TypeConstants, TypeIds {
 
 				if (argument instanceof Invocation) {
 					Invocation innerInvocation = (Invocation)argument;
-					MethodBinding binding = innerInvocation.binding();
+					MethodBinding binding = innerInvocation.binding(parameterType);
 					if (binding instanceof ParameterizedGenericMethodBinding) {
 						ParameterizedGenericMethodBinding parameterizedMethod = (ParameterizedGenericMethodBinding) binding;
 						InferenceContext18 innerContext = innerInvocation.getInferenceContext(parameterizedMethod);
-						if (innerContext != null && !innerContext.hasFinished) {							
-							argument.setExpectedType(parameterType);
-							MethodBinding improvedBinding = innerContext.inferInvocationType(innerInvocation, parameterizedMethod);
-							innerInvocation.updateBindings(improvedBinding);
+						if (innerContext != null) {
+							if (!innerContext.hasResultFor(parameterType)) {
+								argument.setExpectedType(parameterType);
+								MethodBinding improvedBinding = innerContext.inferInvocationType(innerInvocation, parameterizedMethod);
+								if (innerInvocation.updateBindings(improvedBinding, parameterType)) {
+									resolvePolyExpressionArguments(innerInvocation, improvedBinding);
+								}
+								// TODO need to report invalidMethod if !improvedBinding.isValidBinding() ?
+							} else if (innerContext.stepCompleted < InferenceContext18.BINDINGS_UPDATED) {
+								innerContext.rebindInnerPolies(parameterizedMethod, innerInvocation);
+							}
 						}
 						continue; // otherwise these have been dealt with during inner method lookup
 					}
 				}
 
 				if (argument.isPolyExpression()) {
-					// poly expressions in an invocation context need to be resolved now:
-					updatedArgumentType = argument.checkAgainstFinalTargetType(parameterType);
+					// poly expressions in an invocation context may need to be resolved now:
+					if (infCtx != null && infCtx.stepCompleted == InferenceContext18.BINDINGS_UPDATED)
+						updatedArgumentType = argument.resolvedType; // in this case argument was already resolved via InferenceContext18.acceptPendingPolyArguments()
+					else
+						updatedArgumentType = argument.checkAgainstFinalTargetType(parameterType);
 
 					if (problemReason == ProblemReasons.NoError // preserve errors
 							&& updatedArgumentType != null					// do we have a relevant update? ...
@@ -761,6 +784,18 @@ public abstract class ASTNode implements TypeConstants, TypeIds {
 				}
 			}
 		}
+		invocation.innerUpdateDone();
+	}
+
+	public static void resolvePolyExpressionArguments(Invocation invocation, MethodBinding methodBinding) {
+		TypeBinding[] argumentTypes = null;
+		Expression[] innerArguments = invocation.arguments();
+		if (innerArguments != null) {
+			argumentTypes = new TypeBinding[innerArguments.length];
+			for (int i = 0; i < innerArguments.length; i++)
+				argumentTypes[i] = innerArguments[i].resolvedType;
+		}
+		resolvePolyExpressionArguments(invocation, methodBinding, argumentTypes);
 	}
 
 	public static void resolveAnnotations(BlockScope scope, Annotation[] sourceAnnotations, Binding recipient) {
@@ -1059,7 +1094,7 @@ public abstract class ASTNode implements TypeConstants, TypeIds {
 				case Binding.LOCAL:
 					LocalVariableBinding local = (LocalVariableBinding) recipient;
 					TypeReference typeRef = local.declaration.type;
-					if (Annotation.isTypeUseCompatible(typeRef, scope)) { // discard hybrid annotations on package qualified types.
+					if (Annotation.isTypeUseCompatible(typeRef, scope)) { // discard hybrid annotations on name qualified types.
 						local.declaration.bits |= HasTypeAnnotations;
 						typeRef.bits |= HasTypeAnnotations;
 						local.type = mergeAnnotationsIntoType(scope, se8Annotations, se8nullBits, se8NullAnnotation, typeRef, local.type);
@@ -1069,7 +1104,7 @@ public abstract class ASTNode implements TypeConstants, TypeIds {
 					FieldBinding field = (FieldBinding) recipient;
 					SourceTypeBinding sourceType = (SourceTypeBinding) field.declaringClass;
 					FieldDeclaration fieldDeclaration = sourceType.scope.referenceContext.declarationOf(field);
-					if (Annotation.isTypeUseCompatible(fieldDeclaration.type, scope)) { // discard hybrid annotations on package qualified types.
+					if (Annotation.isTypeUseCompatible(fieldDeclaration.type, scope)) { // discard hybrid annotations on name qualified types.
 						fieldDeclaration.bits |= HasTypeAnnotations;
 						fieldDeclaration.type.bits |= HasTypeAnnotations;
 						field.type = mergeAnnotationsIntoType(scope, se8Annotations, se8nullBits, se8NullAnnotation, fieldDeclaration.type, field.type);

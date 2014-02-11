@@ -99,7 +99,7 @@ public class TSuperMessageSend extends MessageSend {
 	}
 
 	@Override
-	protected void findMethodBinding(BlockScope scope, TypeBinding[] argumentTypes, boolean polyExpressionSeen) {
+	protected void findMethodBinding(BlockScope scope, TypeBinding[] argumentTypes) {
 		
 		// check: is a tsuper call legal in the current context?
 		
@@ -137,8 +137,7 @@ public class TSuperMessageSend extends MessageSend {
 	    	this.binding = scope.getMethod(tsuperRole, this.selector, argumentTypes, this);
 	    	if (!this.binding.isValidBinding() && ((ProblemMethodBinding)this.binding).declaringClass == null)
 	    		this.binding.declaringClass = (ReferenceBinding) tsuperRole;
-	    	if (polyExpressionSeen)
-	    		resolvePolyExpressionArguments(this, this.binding, argumentTypes);
+    		resolvePolyExpressionArguments(this, this.binding, argumentTypes);
 	    	return;
 	    }
 	    // no qualification => search all tsupers by priority:
@@ -152,8 +151,7 @@ public class TSuperMessageSend extends MessageSend {
 	    			return;
 	    		}
 	    		this.binding = candidate;
-		    	if (polyExpressionSeen)
-		    		resolvePolyExpressionArguments(this, this.binding, argumentTypes);
+	    		resolvePolyExpressionArguments(this, this.binding, argumentTypes);
 	    		return;
 	    	}
 	    	if (bestMatch == null || 

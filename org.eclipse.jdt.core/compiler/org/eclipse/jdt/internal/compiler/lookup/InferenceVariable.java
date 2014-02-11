@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2013 GK Software AG.
+ * Copyright (c) 2013, 2014 GK Software AG.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -57,14 +57,24 @@ public class InferenceVariable extends TypeVariableBinding {
 		return false;
 	}
 
-	protected TypeBinding substituteInferenceVariable(InferenceVariable var, TypeBinding substituteType) {
+//{ObjectTeams: cross the OT package, make protected:
+	protected
+// SH}
+	TypeBinding substituteInferenceVariable(InferenceVariable var, TypeBinding substituteType) {
 		if (this == var) //$IDENTITY-COMPARISON$ InferenceVariable
 			return substituteType;
 		return this;
 	}
 
-	protected void collectInferenceVariables(Set variables) {
+//{ObjectTeams: cross the OT package, make protected:
+	protected
+// SH}
+	void collectInferenceVariables(Set variables) {
 		variables.add(this);
+	}
+
+	public ReferenceBinding[] superInterfaces() {
+		return Binding.NO_SUPERINTERFACES;
 	}
 
 	public char[] qualifiedSourceName() {

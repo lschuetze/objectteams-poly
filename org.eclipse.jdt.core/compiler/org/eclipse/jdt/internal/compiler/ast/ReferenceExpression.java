@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2013 IBM Corporation and others.
+ * Copyright (c) 2000, 2014 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -22,6 +22,9 @@
  *							Bug 415850 - [1.8] Ensure RunJDTCoreTests can cope with null annotations enabled
  *							Bug 400874 - [1.8][compiler] Inference infrastructure should evolve to meet JLS8 18.x (Part G of JSR335 spec)
  *							Bug 423504 - [1.8] Implement "18.5.3 Functional Interface Parameterization Inference"
+ *							Bug 424637 - [1.8][compiler][null] AIOOB in ReferenceExpression.resolveType with a method reference to Files::walk
+ *							Bug 424415 - [1.8][compiler] Eventual resolution of ReferenceExpression is not seen to be happening.
+ *							Bug 424403 - [1.8][compiler] Generic method call with method reference argument fails to resolve properly.
  *        Andy Clement (GoPivotal, Inc) aclement@gopivotal.com - Contribution for
  *                          Bug 383624 - [1.8][compiler] Revive code generation support for type annotations (from Olivier's work)
  *******************************************************************************/
@@ -99,11 +102,13 @@ public class ReferenceExpression extends FunctionalExpression implements Invocat
 		} else if (this.syntheticAccessor != null) {
 			if (this.lhs.isSuper() || isMethodReference())
 				this.binding = this.syntheticAccessor;
-		} else { // cf. MessageSend.generateCode()
+		} else { // cf. MessageSend.generateCode()'s call to CodeStream.getConstantPoolDeclaringClass. We have extracted the relevant portions sans side effect here. 
 			if (this.binding != null && isMethodReference()) {
-				TypeBinding declaringClass = CodeStream.getConstantPoolDeclaringClass(currentScope, this.binding, this.lhs.resolvedType, false);
-				if (declaringClass instanceof ReferenceBinding)
-					this.binding.declaringClass = (ReferenceBinding) declaringClass;
+				if (TypeBinding.notEquals(this.binding.declaringClass, this.lhs.resolvedType.erasure())) {
+					if (!this.binding.declaringClass.canBeSeenBy(currentScope)) {
+						this.binding = new MethodBinding(this.binding, (ReferenceBinding) this.lhs.resolvedType.erasure());
+					}
+				}
 			}
 		}
 		
@@ -113,7 +118,7 @@ public class ReferenceExpression extends FunctionalExpression implements Invocat
 		buffer.append('(');
 		if (this.haveReceiver) {
 			this.lhs.generateCode(currentScope, codeStream, true);
-			if (this.lhs.isSuper()) {
+			if (this.lhs.isSuper() && !this.actualMethodBinding.isPrivate()) {
 				if (this.lhs instanceof QualifiedSuperReference) {
 					QualifiedSuperReference qualifiedSuperReference = (QualifiedSuperReference) this.lhs;
 					TypeReference qualification = qualifiedSuperReference.qualification;
@@ -263,6 +268,10 @@ public class ReferenceExpression extends FunctionalExpression implements Invocat
     			}
     			if (this.typeArgumentsHaveErrors)
     				return this.resolvedType = null;
+    			if (isConstructorReference() && lhsType.isRawType()) {
+    				scope.problemReporter().rawConstructorReferenceNotWithExplicitTypeArguments(this.typeArguments);
+    				return this.resolvedType = null;
+    			}
     		}
     	} else {
     		if (this.typeArgumentsHaveErrors)
@@ -463,22 +472,25 @@ public class ReferenceExpression extends FunctionalExpression implements Invocat
         	scope.problemReporter().unhandledException(methodExceptions[i], this);
         }
         if (scope.compilerOptions().isAnnotationBasedNullAnalysisEnabled) {
-        	int len = this.binding.parameters.length;
+        	int len;
+        	int expectedlen = this.binding.parameters.length;
+        	int providedLen = this.descriptor.parameters.length;
+        	boolean isVarArgs = false;
+        	if (this.binding.isVarargs()) {
+        		isVarArgs = (providedLen == expectedlen)
+					? !this.descriptor.parameters[expectedlen-1].isCompatibleWith(this.binding.parameters[expectedlen-1])
+					: true;
+        		len = providedLen; // binding parameters will be padded from InferenceContext18.getParameter()
+        	} else {
+        		len = Math.min(expectedlen, providedLen);
+        	}
     		for (int i = 0; i < len; i++) {
-    			long declared = this.descriptor.parameters[i+paramOffset].tagBits & TagBits.AnnotationNullMASK;
-    			long implemented = this.binding.parameters[i].tagBits & TagBits.AnnotationNullMASK;
-    			if (declared == TagBits.AnnotationNullable) { // promise to accept null
-    				if (implemented != TagBits.AnnotationNullable) {
-    					char[][] requiredAnnot = implemented == 0L ? null : scope.environment().getNonNullAnnotationName();
-    					scope.problemReporter().parameterLackingNullableAnnotation(this, this.descriptor, i, paramOffset, 
-    							scope.environment().getNullableAnnotationName(),
-    							requiredAnnot, this.binding.parameters[i]);
-    				}
-    			} else if (declared == 0L) {
-    				if (implemented == TagBits.AnnotationNonNull) {
-    					scope.problemReporter().parameterRequiresNonnull(this, this.descriptor, i+paramOffset,
-    							scope.environment().getNonNullAnnotationName(), this.binding.parameters[i]);
-    				}
+    			TypeBinding descriptorParameter = this.descriptor.parameters[i+paramOffset];
+    			TypeBinding bindingParameter = InferenceContext18.getParameter(this.binding.parameters, i, isVarArgs);
+    			NullAnnotationMatching annotationStatus = NullAnnotationMatching.analyse(bindingParameter, descriptorParameter, FlowInfo.UNKNOWN);
+    			if (annotationStatus.isAnyMismatch()) {
+    				// immediate reporting:
+    				scope.problemReporter().referenceExpressionArgumentNullityMismatch(this, bindingParameter, descriptorParameter, this.descriptor, i, annotationStatus);
     			}
     		}
         	if ((this.descriptor.returnType.tagBits & TagBits.AnnotationNonNull) != 0) {
@@ -544,6 +556,7 @@ public class ReferenceExpression extends FunctionalExpression implements Invocat
 		ExpressionContext previousContext = this.expressionContext;
 		MethodBinding previousBinding = this.binding;
 		MethodBinding previousDescriptor = this.descriptor;
+		TypeBinding previousResolvedType = this.resolvedType;
 		try {
 			setExpressionContext(INVOCATION_CONTEXT);
 			setExpectedType(targetType);
@@ -555,6 +568,7 @@ public class ReferenceExpression extends FunctionalExpression implements Invocat
 			// remove *any relevant* traces of this 'inofficial' resolving:
 			this.binding = previousBinding;
 			this.descriptor = previousDescriptor;
+			this.resolvedType = previousResolvedType;
 			setExpressionContext(previousContext);
 			this.expectedType = null; // don't call setExpectedType(null), would NPE
 		}
@@ -572,8 +586,11 @@ public class ReferenceExpression extends FunctionalExpression implements Invocat
 		return !CharOperation.equals(this.selector,  ConstantPool.Init);
 	}
 	
-	public boolean isPertinentToApplicability(TypeBinding targetType, MethodBinding candidateMethod) {
-		return this.isExactMethodReference();
+	public boolean isPertinentToApplicability(TypeBinding targetType, MethodBinding method) {
+		if (!this.isExactMethodReference()) {
+			return false;
+		}
+		return super.isPertinentToApplicability(targetType, method);
 	}
 	
 	public TypeBinding[] genericTypeArguments() {
@@ -585,7 +602,7 @@ public class ReferenceExpression extends FunctionalExpression implements Invocat
 	}
 
 	public boolean isSuperAccess() {
-		return false;
+		return this.lhs.isSuper();
 	}
 
 	public boolean isTypeAccess() {

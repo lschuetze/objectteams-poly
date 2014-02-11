@@ -5,6 +5,10 @@
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
  *
+ * This is an implementation of an early-draft specification developed under the Java
+ * Community Process (JCP) and is made available for testing and evaluation purposes
+ * only. The code is not compatible with any specification of the JCP.
+ * 
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
@@ -183,6 +187,10 @@ class DefaultASTVisitor extends ASTVisitor {
 	public void endVisit(Modifier node) {
 		endVisitNode(node);
 	}
+	public void endVisit(NameQualifiedType node) {
+		endVisitNode(node);
+	}
+
 	public void endVisit(NormalAnnotation node) {
 		endVisitNode(node);
 	}
@@ -193,9 +201,6 @@ class DefaultASTVisitor extends ASTVisitor {
 		endVisitNode(node);
 	}
 	public void endVisit(PackageDeclaration node) {
-		endVisitNode(node);
-	}
-	public void endVisit(PackageQualifiedType node) {
 		endVisitNode(node);
 	}
 	public void endVisit(ParameterizedType node) {
@@ -470,6 +475,10 @@ class DefaultASTVisitor extends ASTVisitor {
 	public boolean visit(MethodRefParameter node) {
 		return visitNode(node);
 	}
+	public boolean visit(NameQualifiedType node) {
+		return visitNode(node);
+	}
+
 	public boolean visit(NormalAnnotation node) {
 		return visitNode(node);
 	}
@@ -480,9 +489,6 @@ class DefaultASTVisitor extends ASTVisitor {
 		return visitNode(node);
 	}
 	public boolean visit(PackageDeclaration node) {
-		return visitNode(node);
-	}
-	public boolean visit(PackageQualifiedType node) {
 		return visitNode(node);
 	}
 	public boolean visit(ParameterizedType node) {

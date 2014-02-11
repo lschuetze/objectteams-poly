@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2013 IBM Corporation and others.
+ * Copyright (c) 2000, 2014 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -328,6 +328,10 @@ public static final TypeReference baseTypeReference(int baseType, int dim, Annot
 	}
 }
 
+public static final TypeReference baseTypeReference(int baseType, int dim) {
+	return baseTypeReference(baseType, dim, null);
+}
+
 // JSR308 type annotations...
 public Annotation[][] annotations = null;
 
@@ -371,6 +375,18 @@ protected Annotation[][] getMergedAnnotationsOnDimensions(int additionalDimensio
 }
 
 public int dimensions() {
+	return 0;
+}
+
+/**
+ * This method is used to return the array dimension declared after the
+ * name of a local or a field declaration.
+ * For example:
+ *    int i, j[] = null, k[][] = {{}};
+ *    It should return 0 for i, 1 for j and 2 for k.
+ * @return int the extra dimension found
+ */
+public int extraDimensions() {
 	return 0;
 }
 

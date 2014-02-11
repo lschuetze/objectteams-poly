@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2013 IBM Corporation and others.
+ * Copyright (c) 2000, 2014 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -19,6 +19,7 @@
  *                          Bug 409250 - [1.8][compiler] Various loose ends in 308 code generation
  *        Stephan Herrmann - Contribution for
  *							Bug 400874 - [1.8][compiler] Inference infrastructure should evolve to meet JLS8 18.x (Part G of JSR335 spec)
+ *							Bug 424415 - [1.8][compiler] Eventual resolution of ReferenceExpression is not seen to be happening.
  *******************************************************************************/
 package org.eclipse.jdt.internal.eval;
 
@@ -26,6 +27,7 @@ import org.eclipse.jdt.core.compiler.CharOperation;
 import org.eclipse.jdt.internal.compiler.ast.ASTNode;
 import org.eclipse.jdt.internal.compiler.ast.CastExpression;
 import org.eclipse.jdt.internal.compiler.ast.Expression;
+import org.eclipse.jdt.internal.compiler.ast.InnerInferenceHelper;
 import org.eclipse.jdt.internal.compiler.ast.MessageSend;
 import org.eclipse.jdt.internal.compiler.ast.NameReference;
 import org.eclipse.jdt.internal.compiler.classfmt.ClassFileConstants;
@@ -228,7 +230,6 @@ public TypeBinding resolveType(BlockScope scope) {
 	}
 	// will check for null after args are resolved
 	TypeBinding[] argumentTypes = Binding.NO_PARAMETERS;
-	boolean polyExpressionSeen = false;
 	if (this.arguments != null) {
 		boolean argHasError = false; // typeChecks all arguments
 		int length = this.arguments.length;
@@ -243,8 +244,10 @@ public TypeBinding resolveType(BlockScope scope) {
 			argument.setExpressionContext(INVOCATION_CONTEXT);
 			if ((argumentType = argumentTypes[i] = this.arguments[i].resolveType(scope)) == null)
 				argHasError = true;
-			if (argumentType != null && argumentType.kind() == Binding.POLY_TYPE)
-				polyExpressionSeen = true;
+			if (argumentType != null && argumentType.kind() == Binding.POLY_TYPE) {
+				if (this.innerInferenceHelper == null)
+					this.innerInferenceHelper = new InnerInferenceHelper();
+			}
 		}
 		if (argHasError) {
 			if(this.actualReceiverType instanceof ReferenceBinding) {
@@ -269,7 +272,7 @@ public TypeBinding resolveType(BlockScope scope) {
 	anchorMapping = beforeMethodLookup(argumentTypes, scope);
 //jwl}
 
-	findMethodBinding(scope, argumentTypes, polyExpressionSeen);
+	findMethodBinding(scope, argumentTypes);
 
 //{ObjectTeams:
   } finally {

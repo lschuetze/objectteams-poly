@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2013 IBM Corporation and others.
+ * Copyright (c) 2012, 2014 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -21,8 +21,20 @@
  *							Bug 392238 - [1.8][compiler][null] Detect semantically invalid null type annotations
  *							Bug 400874 - [1.8][compiler] Inference infrastructure should evolve to meet JLS8 18.x (Part G of JSR335 spec)
  *							Bug 423504 - [1.8] Implement "18.5.3 Functional Interface Parameterization Inference"
+ *							Bug 425142 - [1.8][compiler] NPE in ConstraintTypeFormula.reduceSubType
+ *							Bug 425153 - [1.8] Having wildcard allows incompatible types in a lambda expression
+ *							Bug 424205 - [1.8] Cannot infer type for diamond type with lambda on method invocation
+ *							Bug 425798 - [1.8][compiler] Another NPE in ConstraintTypeFormula.reduceSubType
+ *							Bug 425156 - [1.8] Lambda as an argument is flagged with incompatible error
+ *							Bug 424403 - [1.8][compiler] Generic method call with method reference argument fails to resolve properly.
+ *							Bug 426563 - [1.8] AIOOBE when method with error invoked with lambda expression as argument
+ *     Andy Clement (GoPivotal, Inc) aclement@gopivotal.com - Contributions for
+ *                          Bug 405104 - [1.8][compiler][codegen] Implement support for serializeable lambdas
  *******************************************************************************/
 package org.eclipse.jdt.internal.compiler.ast;
+
+import java.util.LinkedHashSet;
+import java.util.Set;
 
 import org.eclipse.jdt.core.compiler.CategorizedProblem;
 import org.eclipse.jdt.core.compiler.CharOperation;
@@ -46,6 +58,7 @@ import org.eclipse.jdt.internal.compiler.lookup.BlockScope;
 import org.eclipse.jdt.internal.compiler.lookup.ClassScope;
 import org.eclipse.jdt.internal.compiler.lookup.ExtraCompilerModifiers;
 import org.eclipse.jdt.internal.compiler.lookup.InferenceContext18;
+import org.eclipse.jdt.internal.compiler.lookup.IntersectionCastTypeBinding;
 import org.eclipse.jdt.internal.compiler.lookup.LocalVariableBinding;
 import org.eclipse.jdt.internal.compiler.lookup.LookupEnvironment;
 import org.eclipse.jdt.internal.compiler.lookup.MethodBinding;
@@ -63,7 +76,6 @@ import org.eclipse.jdt.internal.compiler.lookup.TagBits;
 import org.eclipse.jdt.internal.compiler.lookup.TypeBinding;
 import org.eclipse.jdt.internal.compiler.lookup.TypeConstants;
 import org.eclipse.jdt.internal.compiler.lookup.TypeIds;
-import org.eclipse.jdt.internal.compiler.lookup.TypeVariableBinding;
 import org.eclipse.jdt.internal.compiler.lookup.VariableBinding;
 import org.eclipse.jdt.internal.compiler.parser.Parser;
 import org.eclipse.jdt.internal.compiler.problem.AbortCompilation;
@@ -83,9 +95,10 @@ public class LambdaExpression extends FunctionalExpression implements ReferenceC
 	boolean valueCompatible = false;
 	private boolean shapeAnalysisComplete = false;
 	boolean returnsValue;
+	public boolean isSerializable;
 	boolean returnsVoid;
 	private LambdaExpression original = this;
-	private SyntheticArgumentBinding[] outerLocalVariables = NO_SYNTHETIC_ARGUMENTS;
+	public SyntheticArgumentBinding[] outerLocalVariables = NO_SYNTHETIC_ARGUMENTS;
 	private int outerLocalVariablesSlotSize = 0;
 	public boolean shouldCaptureInstance = false;
 	private boolean assistNode = false;
@@ -159,7 +172,11 @@ public class LambdaExpression extends FunctionalExpression implements ReferenceC
 			codeStream.generateOuterAccess(path, this, capturedOuterLocal, currentScope);
 		}
 		signature.append(')');
-		signature.append(this.expectedType.signature());
+		if (this.expectedType instanceof IntersectionCastTypeBinding) {
+			signature.append(((IntersectionCastTypeBinding)this.expectedType).getSAMType(currentScope).signature());
+		} else {
+			signature.append(this.expectedType.signature());
+		}
 		int invokeDynamicNumber = codeStream.classFile.recordBootstrapMethod(this);
 		codeStream.invokeDynamic(invokeDynamicNumber, (this.shouldCaptureInstance ? 1 : 0) + this.outerLocalVariablesSlotSize, 1, this.descriptor.selector, signature.toString().toCharArray());
 		if (!valueRequired)
@@ -192,7 +209,7 @@ public class LambdaExpression extends FunctionalExpression implements ReferenceC
 		} 
 		
 		MethodScope methodScope = blockScope.methodScope();
-		this.scope = new MethodScope(blockScope, this, methodScope.isStatic);
+		this.scope = new MethodScope(blockScope, this, methodScope.isStatic, methodScope.lastVisibleFieldID);
 		this.scope.isConstructorCall = methodScope.isConstructorCall;
 
 		super.resolveType(blockScope); // compute & capture interface function descriptor in singleAbstractMethod.
@@ -268,23 +285,22 @@ public class LambdaExpression extends FunctionalExpression implements ReferenceC
 			}
 		}
 		if (!argumentsTypeElided && !buggyArguments) {
-			ParameterizedTypeBinding withWildCards = InferenceContext18.parameterizedWithWildcard(this.expectedType);
-			if (withWildCards != null) {
-				// invoke 18.5.3 Functional Interface Parameterization Inference
-				InferenceContext18 ctx = new InferenceContext18(methodScope);
-				TypeBinding[] q = ctx.createBoundsForFunctionalInterfaceParameterizationInference(withWildCards);
-				if (q.length != this.arguments.length) {
-					// fail  TODO: can this still happen here?
+			ReferenceBinding groundType = null;
+			ReferenceBinding expectedSAMType = null;
+			if (this.expectedType instanceof IntersectionCastTypeBinding)
+				expectedSAMType = (ReferenceBinding) ((IntersectionCastTypeBinding) this.expectedType).getSAMType(blockScope); 
+			else if (this.expectedType instanceof ReferenceBinding)
+				expectedSAMType = (ReferenceBinding) this.expectedType;
+			if (expectedSAMType != null)
+				groundType = findGroundTargetType(blockScope, expectedSAMType, argumentsTypeElided);
+			if (groundType != null) {
+				this.descriptor = groundType.getSingleAbstractMethod(blockScope, true);
+				if (!this.descriptor.isValidBinding()) {
+					reportSamProblem(blockScope, this.descriptor);
 				} else {
-					if (ctx.reduceWithEqualityConstraints(this.argumentTypes, q)) {
-						TypeBinding[] a = withWildCards.arguments;
-						TypeBinding[] aprime = ctx.getFunctionInterfaceArgumentSolutions(a);
-						// TODO If F<A'1, ..., A'm> is a well-formed type, ...
-						ReferenceBinding genericType = withWildCards.genericType();
-						this.resolvedType = blockScope.environment().createParameterizedType(genericType, aprime, genericType.enclosingType());
-						this.descriptor = this.resolvedType.getSingleAbstractMethod(blockScope, false);
-					}
+					this.resolvedType = groundType;
 				}
+				// TODO: in which cases do we have to assign this.resolvedType & this.descriptor (with problem bindings) to prevent NPE downstream??
 			}
 		}
 		for (int i = 0; i < length; i++) {
@@ -366,7 +382,50 @@ public class LambdaExpression extends FunctionalExpression implements ReferenceC
 		} else {
 			this.body.resolve(this.scope);
 		}
+		if (this.expectedType instanceof IntersectionCastTypeBinding) {
+			ReferenceBinding[] intersectingTypes =  ((IntersectionCastTypeBinding)this.expectedType).intersectingTypes;
+			for (int t = 0, max = intersectingTypes.length; t < max; t++) {
+				if (intersectingTypes[t].findSuperTypeOriginatingFrom(TypeIds.T_JavaIoSerializable, false /*Serializable is not a class*/) != null) {
+					this.isSerializable = true;
+					break;
+				}
+			}
+		} else if (this.expectedType != null && 
+				   this.expectedType.findSuperTypeOriginatingFrom(TypeIds.T_JavaIoSerializable, false /*Serializable is not a class*/) != null) {
+			this.isSerializable = true;
+		}
 		return this.resolvedType;
+	}
+
+	private ReferenceBinding findGroundTargetType(BlockScope blockScope, ReferenceBinding targetType, boolean argumentTypesElided) {
+		if (!targetType.isValidBinding())
+			return null;
+		ParameterizedTypeBinding withWildCards = InferenceContext18.parameterizedWithWildcard(targetType);
+		if (withWildCards != null) {
+			ReferenceBinding genericType = withWildCards.genericType();
+			if (!argumentTypesElided) {
+				// invoke 18.5.3 Functional Interface Parameterization Inference
+				InferenceContext18 ctx = new InferenceContext18(blockScope);
+				TypeBinding[] q = ctx.createBoundsForFunctionalInterfaceParameterizationInference(withWildCards);
+				if (q == null || q.length != this.arguments.length) {
+					// fail  TODO: can this still happen here?
+				} else {
+					if (ctx.reduceWithEqualityConstraints(this.argumentTypes, q)) {
+						TypeBinding[] a = withWildCards.arguments; // a is not-null by construction of parameterizedWithWildcard()
+						TypeBinding[] aprime = ctx.getFunctionInterfaceArgumentSolutions(a);
+						// TODO If F<A'1, ..., A'm> is a well-formed type, ...
+						return blockScope.environment().createParameterizedType(genericType, aprime, genericType.enclosingType());
+					}
+				}
+			} else {
+				// non-wildcard parameterization (9.8) of the target type
+				TypeBinding[] types = withWildCards.getNonWildcardParameterization();
+				if (types == null)
+					return null;
+				return blockScope.environment().createParameterizedType(genericType, types, genericType.enclosingType());
+			}
+		}
+		return targetType;
 	}
 
 	public boolean argumentsTypeElided() {
@@ -495,16 +554,8 @@ public class LambdaExpression extends FunctionalExpression implements ReferenceC
 		if (argumentsTypeElided())
 			return false;
 		
-		if (targetType instanceof TypeVariableBinding) {
-			if (method != null) { // when called from type inference
-				if (((TypeVariableBinding)targetType).declaringElement == method)
-					return false;
-			} else { // for internal calls
-				TypeVariableBinding typeVariable = (TypeVariableBinding) targetType;
-				if (typeVariable.declaringElement instanceof MethodBinding)
-					return false;
-			}
-		}
+		if (!super.isPertinentToApplicability(targetType, method))
+			return false;
 		
 		if (this.body instanceof Expression) {
 			if (!((Expression) this.body).isPertinentToApplicability(targetType, method))
@@ -624,15 +675,10 @@ public class LambdaExpression extends FunctionalExpression implements ReferenceC
 	}
 	
 	public boolean isCompatibleWith(final TypeBinding left, final Scope someScope) {
-		
-		final MethodBinding sam = left.getSingleAbstractMethod(this.enclosingScope, true);
-		
-		if (sam == null || !sam.isValidBinding())
+		if (!(left instanceof ReferenceBinding))
 			return false;
-		if (sam.parameters.length != this.arguments.length)
-			return false;
-		
-		if (!this.shapeAnalysisComplete) {
+
+		shapeAnalysis: if (!this.shapeAnalysisComplete) {
 			IErrorHandlingPolicy oldPolicy = this.enclosingScope.problemReporter().switchErrorHandlingPolicy(silentErrorHandlingPolicy);
 			final CompilerOptions compilerOptions = this.enclosingScope.compilerOptions();
 			boolean analyzeNPE = compilerOptions.isAnnotationBasedNullAnalysisEnabled;
@@ -642,13 +688,14 @@ public class LambdaExpression extends FunctionalExpression implements ReferenceC
 				if (copy == null) {
 					if (this.assistNode) {
 						analyzeShape(); // not on terra firma here !
-						if (sam.returnType.id == TypeIds.T_void) {
-							if (!this.voidCompatible)
-								return false;
-						} else {
-							if (!this.valueCompatible)
-								return false;
-						}
+// FIXME: we don't yet have the same, should we compute it here & now?
+//						if (sam.returnType.id == TypeIds.T_void) {
+//							if (!this.voidCompatible)
+//								return false;
+//						} else {
+//							if (!this.valueCompatible)
+//								return false;
+//						}
 					}
 					return !isPertinentToApplicability(left, null);
 				}
@@ -673,8 +720,10 @@ public class LambdaExpression extends FunctionalExpression implements ReferenceC
 				// Do not proceed with data/control flow analysis if resolve encountered errors.
 				if (type == null || !type.isValidBinding() || this.hasIgnoredMandatoryErrors || enclosingScopesHaveErrors()) {
 					if (!isPertinentToApplicability(left, null))
-						return true;
-					return this.arguments.length == 0; // error not because of the target type imposition, but is inherent. Just say compatible since errors in body aren't to influence applicability.
+						break shapeAnalysis;
+					if (this.arguments.length != 0) // error not because of the target type imposition, but is inherent. Just say compatible since errors in body aren't to influence applicability.
+						return false;
+					break shapeAnalysis;
 				}
 				
 				// value compatibility of block lambda's is the only open question.
@@ -688,6 +737,21 @@ public class LambdaExpression extends FunctionalExpression implements ReferenceC
 				this.enclosingScope.problemReporter().switchErrorHandlingPolicy(oldPolicy);
 			}
 		}
+
+		ReferenceBinding expectedSAMType = null;
+		if (left instanceof IntersectionCastTypeBinding)
+			expectedSAMType = (ReferenceBinding) ((IntersectionCastTypeBinding) left).getSAMType(this.enclosingScope); 
+		else if (left instanceof ReferenceBinding)
+			expectedSAMType = (ReferenceBinding) left;
+		ReferenceBinding groundTargetType = expectedSAMType != null ? findGroundTargetType(this.enclosingScope, expectedSAMType, argumentsTypeElided()) : null;
+		if (groundTargetType == null)
+			return false;
+		
+		MethodBinding sam = groundTargetType.getSingleAbstractMethod(this.enclosingScope, true);
+		if (sam == null || !sam.isValidBinding())
+			return false;
+		if (sam.parameters.length != this.arguments.length)
+			return false;
 
 		if (!isPertinentToApplicability(left, null))  // This check should happen after return type check below, but for buggy javac compatibility we have left it in.
 			return true;
@@ -706,8 +770,9 @@ public class LambdaExpression extends FunctionalExpression implements ReferenceC
 					return false;
 			} else {
 				if (this.enclosingScope.parameterCompatibilityLevel(returnExpressions[i].resolvedType, sam.returnType) == Scope.NOT_COMPATIBLE) {
-					if (sam.returnType.id != TypeIds.T_void || this.body instanceof Block)
-						return false;
+					if (!returnExpressions[i].isConstantValueOfTypeAssignableToType(returnExpressions[i].resolvedType, sam.returnType))
+						if (sam.returnType.id != TypeIds.T_void || this.body instanceof Block)
+							return false;
 				}
 			}
 		}
@@ -730,7 +795,7 @@ public class LambdaExpression extends FunctionalExpression implements ReferenceC
 	 */
 	public LambdaExpression getResolvedCopyForInferenceTargeting(TypeBinding targetType) {
 		// note: this is essentially a simplified extract from isCompatibleWith(TypeBinding,Scope).
-		if (this.shapeAnalysisComplete)
+		if (this.shapeAnalysisComplete && this.binding != null)
 			return this;
 		// TODO: caching
 		IErrorHandlingPolicy oldPolicy = this.enclosingScope.problemReporter().switchErrorHandlingPolicy(silentErrorHandlingPolicy);
@@ -1098,5 +1163,30 @@ public class LambdaExpression extends FunctionalExpression implements ReferenceC
 
 	public int diagnosticsSourceEnd() {
 		return this.body instanceof Block ? this.arrowPosition : this.sourceEnd;
+	}
+
+	public TypeBinding[] getMarkerInterfaces() {
+		if (this.expectedType instanceof IntersectionCastTypeBinding) {
+			Set markerBindings = new LinkedHashSet();
+			TypeBinding[] intersectionTypes = ((IntersectionCastTypeBinding)this.expectedType).intersectingTypes;
+			for (int i = 0,max = intersectionTypes.length; i < max; i++) {
+				TypeBinding typeBinding = intersectionTypes[i];
+				MethodBinding methodBinding = typeBinding.getSingleAbstractMethod(this.scope, false);
+				// Why doesn't getSingleAbstractMethod do as the javadoc says, and return null
+				// when it is not a SAM type
+				if (!(methodBinding instanceof ProblemMethodBinding && ((ProblemMethodBinding)methodBinding).problemId()==ProblemReasons.NoSuchSingleAbstractMethod)) {
+					continue;
+				}
+				if (typeBinding.id == TypeIds.T_JavaIoSerializable) {
+					// Serializable is captured as a bitflag
+					continue;
+				}
+				markerBindings.add(typeBinding);
+			}
+			if (markerBindings.size() > 0) {
+				return (TypeBinding[])markerBindings.toArray(new TypeBinding[markerBindings.size()]);
+			}
+		}
+		return null;
 	}
 }
