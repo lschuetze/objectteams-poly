@@ -783,8 +783,8 @@ private void createFields(IBinaryField[] iFields, long sourceLevel, char[][][] m
 					this.fields[i].setAnnotations(createAnnotations(binaryField.getAnnotations(), this.environment, missingTypeNames));
 				}
 			}
-		}
-	}
+				}
+			}
 }
 //{ObjectTeams: some fields are indeed value parameters:
 private SyntheticArgumentBinding[] valueParameters = NO_SYNTH_ARGUMENTS;

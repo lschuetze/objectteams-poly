@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2013 IBM Corporation and others.
+ * Copyright (c) 2000, 2014 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -9,6 +9,8 @@
  *     IBM Corporation - initial API and implementation
  *     Fraunhofer FIRST - extended API and implementation
  *     Technical University Berlin - extended API and implementation
+ *     Stephan Herrmann - Contribution for
+ *								Bug 377883 - NPE on open Call Hierarchy
  *******************************************************************************/
 package org.eclipse.jdt.internal.core.search.matching;
 
@@ -276,7 +278,7 @@ private static HashMap workingCopiesThatCanSeeFocus(org.eclipse.jdt.core.ICompil
 	for (int i=0, length = copies.length; i<length; i++) {
 		org.eclipse.jdt.core.ICompilationUnit workingCopy = copies[i];
 		IPath projectOrJar = MatchLocator.getProjectOrJar(workingCopy).getPath();
-		if (pattern.focus == null || IndexSelector.canSeeFocus(pattern, projectOrJar)) {
+		if (pattern.focus == null || IndexSelector.canSeeFocus(pattern, projectOrJar) != IndexSelector.PROJECT_CAN_NOT_SEE_FOCUS) {
 			result.put(
 				workingCopy.getPath().toString(),
 				new WorkingCopyDocument(workingCopy, participant)
@@ -1132,8 +1134,10 @@ protected boolean hasAlreadyDefinedType(CompilationUnitDeclaration parsedUnit) {
 public void initialize(JavaProject project, int possibleMatchSize) throws JavaModelException {
 	// clean up name environment only if there are several possible match as it is reused
 	// when only one possible match (bug 58581)
-	if (this.nameEnvironment != null && possibleMatchSize != 1)
+	if (this.nameEnvironment != null && possibleMatchSize != 1) {
 		this.nameEnvironment.cleanup();
+		this.unitScope = null; // don't leak a reference to the cleaned-up name environment
+	}
 
 	SearchableEnvironment searchableEnvironment = project.newSearchableNameEnvironment(this.workingCopies);
 
@@ -1465,6 +1469,7 @@ public void locateMatches(SearchDocument[] searchDocuments) throws CoreException
 			this.progressMonitor.done();
 		if (this.nameEnvironment != null)
 			this.nameEnvironment.cleanup();
+		this.unitScope = null;
 		manager.flushZipFiles(this);
 		this.bindings = null;
 	}

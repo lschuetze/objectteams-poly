@@ -867,6 +867,7 @@ public abstract class JavaElement extends PlatformObject implements IJavaElement
 			}
 		}
 	}
+
 	/*
 	 * We don't use getContentEncoding() on the URL connection, because it might leave open streams behind.
 	 * See https://bugs.eclipse.org/bugs/show_bug.cgi?id=117890
