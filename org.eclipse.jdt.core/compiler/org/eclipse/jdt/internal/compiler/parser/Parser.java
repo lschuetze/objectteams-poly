@@ -2373,7 +2373,9 @@ protected void consumeCallinBindingLeft(boolean hasSignature) {
 	callinBinding.declarationSourceStart = callinBinding.roleMethodSpec.declarationSourceStart;
 	callinBinding.sourceStart            = callinBinding.roleMethodSpec.sourceStart;
 	callinBinding.sourceEnd              = callinBinding.roleMethodSpec.sourceEnd;
-	callinBinding.bindingTokenStart  	 = this.intStack[this.intPtr--];
+	int bindingKind 					 = this.intStack[this.intPtr--];
+	callinBinding.bindingTokenStart  	 = this.intStack[this.intPtr];
+	this.intStack[this.intPtr] = bindingKind; // keep it for checkIllegalModifierInCallinMapping()
 	callinBinding.modifierEnd = callinBinding.bindingTokenStart+1; // assume just '<-' until we find the actual callin modifier (might be missing)
 	// not setting callinBinding.declarationSourceEnd means: this mapping is not yet finished.
 	if (hasSignature) { // parsed as a MethodDeclaration it may include the javadoc.
@@ -2685,8 +2687,10 @@ protected void consumeCalloutBindingLeft(boolean hasSignature) {
 	}
 
 	// CalloutKind
-	calloutBinding.bindingTokenStart = this.intStack[this.intPtr--]; 
 	calloutBinding.calloutKind       = this.intStack[this.intPtr--];
+	calloutBinding.bindingTokenStart = this.intStack[this.intPtr--]; 
+	if (calloutBinding.calloutKind == TokenNameBINDOUT) // as apposed to '=>'
+		this.intPtr--; // from Scanner.currentPosition for LE.arrowPosition
 	calloutBinding.modifierEnd = calloutBinding.bindingTokenStart+1; // assume just '->' or '=>', until we find actual callout modifiers (get/set)
 
 	// MethodSpec
@@ -9995,10 +9999,13 @@ protected void consumeNestedLambda() {
 protected void consumeLambdaHeader() {
 	// LambdaHeader ::= LambdaParameters '->'  Synthetic/fake production with a synthetic non-terminal. Body not seen yet.
 	
-//{ObjectTeams: two unused ints from consumeToken() (for TokenNameSYNTHBINDOUT):
+//{ObjectTeams: two unused ints from consumeToken() (for TokenNameARROW, for use as TokenNameBINDOUT):
 	this.intPtr-=2;
-// SH}
+	int arrowPosition = this.intStack[this.intPtr--] - 1; // saved during consumeToken()
+	/*
 	int arrowPosition = this.scanner.currentPosition - 1;
+	 */
+// SH}
 	
 	Argument [] arguments = null;
 	int length = this.astLengthStack[this.astLengthPtr--];
@@ -10943,8 +10950,9 @@ protected void consumeToken(int type) {
 	switch (type) {
 		case TokenNameARROW:
 //{ObjectTeams: for alias TokenNameBINDOUT
-			pushOnIntStack(type);
+			pushOnIntStack(this.scanner.currentPosition); // for LE.arrowPosition
 			pushOnIntStack(this.scanner.startPosition); // for bindingTokenStart
+			pushOnIntStack(type);
 /* orig: (now called from rule EnterLambda):
 			consumeLambdaHeader();
   :giro */
@@ -11000,8 +11008,8 @@ protected void consumeToken(int type) {
 			break;
 		case TokenNameCALLOUT_OVERRIDE :
 		case TokenNameBINDIN:
-			pushOnIntStack(type);
 			pushOnIntStack(this.scanner.startPosition); // for bindingTokenStart
+			pushOnIntStack(type);
 			break;
 		case TokenNamereadonly:
 			checkAndSetModifiers(ExtraCompilerModifiers.AccReadonly);
