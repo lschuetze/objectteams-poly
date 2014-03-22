@@ -6931,9 +6931,9 @@ protected void consumeParameterMappingIn() {
 
 	char[] ident = getIdentifier();
 	long pos = this.identifierPositionStack[this.identifierPtr--];
-	this.intPtr--; // start pos of '->' token (unused)
 	int bindingKind = this.intStack[this.intPtr--];
 	assert(bindingKind == TerminalTokens.TokenNameBINDIN);
+	this.intPtr--; // start pos of '->' token (unused)
 
 	pushOnAstStack(new ParameterMapping(bindingKind, expression, new SingleNameReference(ident, pos)));
 }
