@@ -847,14 +847,25 @@ public abstract class Scope {
 				boolean isVarArgs[] = new boolean[1]; // emulate an in-out parameter for compatibilityLevel18FromInner(..)
 				isVarArgs[0] = method.isVarargs() && argLen != method.parameters.length; // if same lengths, isVarArgs can still be updated below
 				int level = COMPATIBLE;
+//{ObjectTeams: integrate anchor mapping
+				TypeBinding[] parameters = AnchorMapping.instantiateParameters(this, method.parameters, method);
+// SH}
 				for (int i = 0; i < argLen; i++) {
+//{ObjectTeams: new arg:
+/* orig:
 					int nextLevel = compatibilityLevel18FromInner(method, innerInferenceHelper, invocationArguments[i], argLen, i, isVarArgs);
+  :giro */
+					int nextLevel = compatibilityLevel18FromInner(method, parameters, innerInferenceHelper, invocationArguments[i], argLen, i, isVarArgs);
+// SH}
 					if (nextLevel == NOT_COMPATIBLE)
 						return nextLevel;
 					if (nextLevel == -2)
 						break jdk18checks;
 					level = Math.max(level,  nextLevel);
 				}
+//{ObjectTeams:
+				AnchorMapping.storeInstantiatedParameters(method, parameters);
+// SH}
 				return level; // neither NOT_COMPATIBLE nor unknown(-2) seen
 			}
 		}
@@ -862,14 +873,28 @@ public abstract class Scope {
 		return parameterCompatibilityLevel(method, arguments, tiebreakingVarargsMethods);
 	}
 
+//{ObjectTeams: new arg:
+/* orig:
 	private int compatibilityLevel18FromInner(MethodBinding method, InnerInferenceHelper innerInferenceHelper, Expression invocArg, int argLen, int i, boolean[] isVarArgs)
+  :giro */
+	private int compatibilityLevel18FromInner(MethodBinding method, TypeBinding[] parameters, InnerInferenceHelper innerInferenceHelper, Expression invocArg, int argLen, int i, boolean[] isVarArgs)
+// SH}
 	{
 		int compatible = isVarArgs[0] ? VARARGS_COMPATIBLE : COMPATIBLE;
 		TypeBinding resolvedType = invocArg.resolvedType;
+//{ObjectTeams: parameters have been extracted to arg:
+/* orig:
 		TypeBinding targetType = InferenceContext18.getParameter(method.parameters, i, isVarArgs[0]);
+  :giro */
+		TypeBinding targetType = InferenceContext18.getParameter(parameters, i, isVarArgs[0]);
+// orig:
 		if (!isVarArgs[0] && shouldTryVarargs(method, resolvedType, targetType)) {
 			isVarArgs[0] = true;
+/*
 			targetType = InferenceContext18.getParameter(method.parameters, i, true);
+  :giro */
+			targetType = InferenceContext18.getParameter(parameters, i, true);
+// SH}
 		}
 		if (targetType == null)
 			return NOT_COMPATIBLE; // mismatching number of args or other severe problem inside method binding
@@ -920,10 +945,19 @@ public abstract class Scope {
 		} else if (invocArg.isPolyExpression()) {
 			if (invocArg instanceof ConditionalExpression) {
 				ConditionalExpression ce = (ConditionalExpression) invocArg;
+//{ObjectTeams: new arg:
+/* orig:
 				int level = compatibilityLevel18FromInner(method, innerInferenceHelper, ce.valueIfTrue, argLen, compatible, isVarArgs);
+  :giro */
+				int level = compatibilityLevel18FromInner(method, parameters, innerInferenceHelper, ce.valueIfTrue, argLen, compatible, isVarArgs);
+// orig:
 				if (level == NOT_COMPATIBLE)
 					return NOT_COMPATIBLE;
+/*
 				int level2 = compatibilityLevel18FromInner(method, innerInferenceHelper, ce.valueIfFalse, argLen, compatible, isVarArgs);
+  :giro */
+				int level2 = compatibilityLevel18FromInner(method, parameters, innerInferenceHelper, ce.valueIfFalse, argLen, compatible, isVarArgs);
+// SH}
 				if (level2 == NOT_COMPATIBLE)
 					return NOT_COMPATIBLE;
 				return Math.max(level, level2);
@@ -933,7 +967,12 @@ public abstract class Scope {
 				return COMPATIBLE;
 			if (!isVarArgs[0] && method.isVarargs()) { // can't use shouldTryVarargs without a resolvedType, so just try it:
 				isVarArgs[0] = true;
+//{ObjectTeams: parameters have been extracted to new arg:
+/* orig:
 				targetType = InferenceContext18.getParameter(method.parameters, i, true);
+  :giro */
+				targetType = InferenceContext18.getParameter(parameters, i, true);
+// SH}
 				if (targetType != null && invocArg.isCompatibleWith(targetType, this))
 					return VARARGS_COMPATIBLE;
 			}
