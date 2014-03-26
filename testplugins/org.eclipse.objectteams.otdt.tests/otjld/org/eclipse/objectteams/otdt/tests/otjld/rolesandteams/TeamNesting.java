@@ -1096,7 +1096,7 @@ public class TeamNesting extends AbstractOTJLDTest {
 			    "    }\n" +
 			    "    protected team class Mid2 extends Mid1 {\n" +
 			    "        protected class R {\n" +
-			    "            void test() {\n" +
+			    "            protected void test() {\n" +
 			    "                Team1114tin2_2.tsuper.test();\n" +
 			    "            }\n" +
 			    "        }\n" +
