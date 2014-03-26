@@ -45,7 +45,7 @@ plugin@org.eclipse.objectteams.otdt.samples,2.2.0=GIT,repo=git://git.eclipse.org
 plugin@org.apache.bcel,5.2.0=p2IU,id=org.apache.bcel,version=5.2.0.v201005080400,repository=http://download.eclipse.org/tools/orbit/downloads/drops/R20120526062928/repository
 
 !========== JDT/UI BETA_JAVA8: ==========!
-plugin@org.eclipse.jdt.ui=GIT,tag=branches/BETA_JAVA8,repo=git://git.eclipse.org/gitroot/jdt/eclipse.jdt.ui.git,path=org.eclipse.jdt.ui
+plugin@org.eclipse.jdt.ui=GIT,tag=2fab5320e2730641a86f78cb0f3b5254f0c40aa5,repo=git://git.eclipse.org/gitroot/jdt/eclipse.jdt.ui.git,path=org.eclipse.jdt.ui
 plugin@org.eclipse.jdt.ui.tests=GIT,tag=branches/BETA_JAVA8,repo=git://git.eclipse.org/gitroot/jdt/eclipse.jdt.ui.git,path=org.eclipse.jdt.ui.tests
 plugin@org.eclipse.jdt.ui.tests.refactoring=GIT,tag=branches/BETA_JAVA8,repo=git://git.eclipse.org/gitroot/jdt/eclipse.jdt.ui.git,path=org.eclipse.jdt.ui.tests.refactoring
 
