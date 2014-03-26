@@ -46,6 +46,7 @@ import org.osgi.framework.hooks.weaving.WovenClassListener;
 import org.osgi.framework.namespace.PackageNamespace;
 import org.osgi.framework.wiring.BundleWiring;
 import org.osgi.resource.Wire;
+import org.osgi.service.packageadmin.PackageAdmin;
 
 
 /**
@@ -110,7 +111,7 @@ public class OTWeavingHook implements WeavingHook, WovenClassListener {
 	 * Callback during AspectBindingRegistry#loadAspectBindings():
 	 * Set-up a trip wire to fire when the mentioned base bundle is loaded.
 	 */
-	void setBaseTripWire(@SuppressWarnings("deprecation") @Nullable org.osgi.service.packageadmin.PackageAdmin packageAdmin, @NonNull String baseBundleId, BaseBundle baseBundle) 
+	void setBaseTripWire(@SuppressWarnings("deprecation") @Nullable PackageAdmin packageAdmin, @NonNull String baseBundleId, BaseBundle baseBundle) 
 	{
 		if (!baseTripWires.containsKey(baseBundleId))
 			baseTripWires.put(baseBundleId, new BaseBundleLoadTrigger(baseBundleId, baseBundle, aspectBindingRegistry, packageAdmin));

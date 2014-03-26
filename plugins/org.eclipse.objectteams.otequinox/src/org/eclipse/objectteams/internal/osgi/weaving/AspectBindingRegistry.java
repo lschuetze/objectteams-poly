@@ -45,6 +45,7 @@ import org.eclipse.objectteams.internal.osgi.weaving.AspectBinding.BaseBundle;
 import org.eclipse.objectteams.internal.osgi.weaving.AspectBinding.TeamBinding;
 import org.eclipse.objectteams.otequinox.Constants;
 import org.osgi.framework.Bundle;
+import org.osgi.service.packageadmin.PackageAdmin;
 
 /**
  * An instance of this class holds the information loaded from extensions
@@ -78,7 +79,7 @@ public class AspectBindingRegistry {
 	/* Load extensions for org.eclipse.objectteams.otequinox.aspectBindings and check aspect permissions. */
 	public void loadAspectBindings(
 			IExtensionRegistry extensionRegistry,
-			@SuppressWarnings("deprecation") @Nullable org.osgi.service.packageadmin.PackageAdmin packageAdmin,
+			@SuppressWarnings("deprecation") @Nullable PackageAdmin packageAdmin,
 			OTWeavingHook hook) 
 	{
 		IConfigurationElement[] aspectBindingConfigs = extensionRegistry
@@ -166,7 +167,7 @@ public class AspectBindingRegistry {
 	
 	@SuppressWarnings("deprecation") // multiple uses of deprecated but still recommended class PackageAdmin
 	private boolean checkRequiredFragments(String aspectBundleId, String baseBundleId, IConfigurationElement[] fragments, 
-			@Nullable org.osgi.service.packageadmin.PackageAdmin packageAdmin) 
+			@Nullable PackageAdmin packageAdmin) 
 	{
 		// checking only, no real action needed.
 		boolean hasError = false;

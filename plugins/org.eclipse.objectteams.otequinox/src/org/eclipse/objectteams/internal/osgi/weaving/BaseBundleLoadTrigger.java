@@ -27,6 +27,7 @@ import org.eclipse.jdt.annotation.Nullable;
 import org.eclipse.objectteams.internal.osgi.weaving.AspectBinding.BaseBundle;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.hooks.weaving.WovenClass;
+import org.osgi.service.packageadmin.PackageAdmin;
 
 /**
  * Each instance of this class represents the fact that a given base bundle has aspect bindings,
@@ -37,7 +38,7 @@ public class BaseBundleLoadTrigger {
 
 	private AspectBindingRegistry aspectBindingRegistry;
 	@SuppressWarnings("deprecation")
-	private @Nullable org.osgi.service.packageadmin.PackageAdmin admin;
+	private @Nullable PackageAdmin admin;
 
 	private String baseBundleName;	
 	@Nullable private BaseBundle baseBundle; // null when representing an aspectBundle with SELF-adapting teams
@@ -45,7 +46,7 @@ public class BaseBundleLoadTrigger {
 	private List<AspectBinding> aspectBindings = new ArrayList<>();
 
 	public BaseBundleLoadTrigger(String bundleSymbolicName, @Nullable BaseBundle baseBundle, AspectBindingRegistry aspectBindingRegistry, 
-			@SuppressWarnings("deprecation") @Nullable org.osgi.service.packageadmin.PackageAdmin admin) 
+			@SuppressWarnings("deprecation") @Nullable PackageAdmin admin) 
 	{
 		this.baseBundleName = bundleSymbolicName;
 		this.baseBundle = baseBundle;
