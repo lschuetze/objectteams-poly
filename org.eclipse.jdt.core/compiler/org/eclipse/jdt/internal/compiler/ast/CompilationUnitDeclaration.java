@@ -63,9 +63,8 @@ import org.eclipse.objectteams.otdt.internal.core.compiler.control.StateMemento;
  * DECOUPLE FROM COMPILER:
  * What: store index into Compiler.unitsToProcess
  * What: Let resolve only be called by Dependencies.
- *
- * @version $Id: CompilationUnitDeclaration.java 23404 2010-02-03 14:10:22Z stephan $
  */
+@SuppressWarnings({ "rawtypes", "unchecked" })
 public class CompilationUnitDeclaration extends ASTNode implements ProblemSeverities, ReferenceContext {
 
 	private static final Comparator STRING_LITERAL_COMPARATOR = new Comparator() {

@@ -90,6 +90,7 @@ null is NOT a valid value for a non-public field... it just means the field is n
  * Note: now sourceName and sourceName() have different semantics.
  *
  */
+@SuppressWarnings({"rawtypes", "unchecked"})
 //{ObjectTeams: changed superclass in order to separate out OT features:
 abstract public class ReferenceBinding extends AbstractOTReferenceBinding {
 	protected ReferenceBinding _this() { return this; } // used in AbstractOTReferenceBinding to refer to 'this'
@@ -1015,6 +1016,12 @@ public void computeId() {
 						this.id = TypeIds.T_ComGoogleCommonBasePreconditions;
 					return;
 			}
+			break;
+		case 6:
+			if (!CharOperation.equals(TypeConstants.JDT, this.compoundName[2]) || !CharOperation.equals(TypeConstants.ITYPEBINDING, this.compoundName[5]))
+				return;
+			if (CharOperation.equals(TypeConstants.ORG_ECLIPSE_JDT_CORE_DOM_ITYPEBINDING, this.compoundName))
+				this.typeBits |= TypeIds.BitUninternedType;
 			break;
 		case 7 :
 			if (!CharOperation.equals(TypeConstants.JDT, this.compoundName[2]) || !CharOperation.equals(TypeConstants.TYPEBINDING, this.compoundName[6]))

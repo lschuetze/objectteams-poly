@@ -51,6 +51,7 @@ import org.eclipse.objectteams.otdt.internal.core.compiler.ast.LiftingTypeRefere
  *
  * Any (parsing) problem encountered is also provided.
  */
+@SuppressWarnings({"rawtypes", "unchecked"})
 public class SourceElementParser extends CommentRecorderParser {
 
 	ISourceElementRequestor requestor;

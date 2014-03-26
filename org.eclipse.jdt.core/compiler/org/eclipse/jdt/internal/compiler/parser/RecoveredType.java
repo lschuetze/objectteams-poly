@@ -45,6 +45,7 @@ import org.eclipse.objectteams.otdt.internal.core.compiler.ast.AbstractMethodMap
  * Internal type structure for parsing recovery
  */
 
+@SuppressWarnings({"rawtypes", "unchecked"})
 public class RecoveredType extends RecoveredStatement implements TerminalTokens {
 	public static final int MAX_TYPE_DEPTH = 256;
 	

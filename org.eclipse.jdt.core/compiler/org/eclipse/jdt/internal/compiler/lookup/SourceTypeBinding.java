@@ -121,7 +121,7 @@ import org.eclipse.objectteams.otdt.internal.core.compiler.util.TypeAnalyzer;
  * What: Some more small changes...
  *
  */
-@SuppressWarnings("unchecked")
+@SuppressWarnings({ "rawtypes", "unchecked" })
 public class SourceTypeBinding extends ReferenceBinding {
 	public ReferenceBinding superclass;                    // MUST NOT be modified directly, use setter !
 	public ReferenceBinding[] superInterfaces;             // MUST NOT be modified directly, use setter !

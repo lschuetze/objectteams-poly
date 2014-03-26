@@ -99,10 +99,8 @@ import org.eclipse.objectteams.otdt.internal.core.compiler.util.TypeAnalyzer;
  *
  * What: Changed RoleLocalTypes() to public.
  * Why:  ConstantPoolObjectReader needs to resolve types given their signature.
- *
- * @version $Id: LookupEnvironment.java 23405 2010-02-03 17:02:18Z stephan $
  */
-@SuppressWarnings("unchecked")
+@SuppressWarnings({"rawtypes", "unchecked"})
 public class LookupEnvironment implements ProblemReasons, TypeConstants {
 
 	/**

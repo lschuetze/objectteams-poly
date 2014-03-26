@@ -59,6 +59,7 @@ import org.eclipse.objectteams.otdt.internal.core.MethodMapping;
  * Implementation of <code>ISelectionRequestor</code> to assist with
  * code resolve in a compilation unit. Translates names to elements.
  */
+@SuppressWarnings({"rawtypes", "unchecked"})
 public class SelectionRequestor implements ISelectionRequestor {
 	/*
 	 * The name lookup facility used to resolve packages

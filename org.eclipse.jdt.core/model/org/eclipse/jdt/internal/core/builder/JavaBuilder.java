@@ -27,6 +27,7 @@ import org.eclipse.objectteams.otdt.core.exceptions.InternalCompilerError;
 import java.io.*;
 import java.util.*;
 
+@SuppressWarnings({"rawtypes", "unchecked"})
 public class JavaBuilder extends IncrementalProjectBuilder {
 
 IProject currentProject;

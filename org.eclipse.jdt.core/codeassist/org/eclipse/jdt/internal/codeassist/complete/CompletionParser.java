@@ -53,6 +53,7 @@ import org.eclipse.objectteams.otdt.internal.core.compiler.ast.MethodSpec;
 import org.eclipse.objectteams.otdt.internal.core.compiler.ast.TsuperReference;
 import org.eclipse.objectteams.otdt.internal.core.compiler.model.RoleModel;
 
+@SuppressWarnings("rawtypes")
 public class CompletionParser extends AssistParser {
 	// OWNER
 	protected static final int COMPLETION_PARSER = 1024;
@@ -5068,8 +5069,8 @@ public void initialize() {
 	this.labelPtr = -1;
 	initializeForBlockStatements();
 }
-public void initialize(boolean initializeNLS) {
-	super.initialize(initializeNLS);
+public void initialize(boolean parsingCompilationUnit) {
+	super.initialize(parsingCompilationUnit);
 	this.labelPtr = -1;
 	initializeForBlockStatements();
 }

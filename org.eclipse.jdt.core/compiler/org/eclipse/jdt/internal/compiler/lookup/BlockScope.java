@@ -58,9 +58,8 @@ import org.eclipse.objectteams.otdt.internal.core.compiler.util.TypeAnalyzer;
  * What: Record referenced teams in getBinding(..)
  *
  * What: Manipulate flow control for _OT$base field to transitively track assignment.
- *
- * @version $Id: BlockScope.java 23404 2010-02-03 14:10:22Z stephan $
  */
+@SuppressWarnings({"rawtypes", "unchecked"})
 public class BlockScope extends Scope {
 
 	// Local variable management

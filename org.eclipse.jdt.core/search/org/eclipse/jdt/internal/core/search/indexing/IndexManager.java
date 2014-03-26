@@ -38,6 +38,7 @@ import org.eclipse.jdt.internal.core.search.processing.JobManager;
 import org.eclipse.jdt.internal.core.util.Messages;
 import org.eclipse.jdt.internal.core.util.Util;
 
+@SuppressWarnings({"rawtypes", "unchecked"})
 public class IndexManager extends JobManager implements IIndexConstants {
 
 	// key = containerPath, value = indexLocation path
@@ -1002,6 +1003,7 @@ private void readIndexMap() {
 			if (savedSignature.equals(new String(names[0]))) {
 				for (int i = 1, l = names.length-1 ; i < l ; i+=2) {
 					IndexLocation indexPath = IndexLocation.createIndexLocation(new URL(new String(names[i])));
+					if (indexPath == null) continue;
 					this.indexLocations.put(new Path(new String(names[i+1])), indexPath );
 					this.indexStates.put(indexPath, REUSE_STATE);
 				}

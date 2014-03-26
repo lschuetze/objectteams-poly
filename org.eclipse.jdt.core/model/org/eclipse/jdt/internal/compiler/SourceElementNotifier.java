@@ -68,6 +68,7 @@ import org.eclipse.objectteams.otdt.internal.core.compiler.ast.LiftingTypeRefere
 import org.eclipse.objectteams.otdt.internal.core.compiler.ast.MethodSpec;
 import org.eclipse.objectteams.otdt.internal.core.compiler.statemachine.transformer.MethodSignatureEnhancer;
 
+@SuppressWarnings({"rawtypes", "unchecked"})
 public class SourceElementNotifier {
 	/**
 	 * An ast visitor that visits local type declarations.

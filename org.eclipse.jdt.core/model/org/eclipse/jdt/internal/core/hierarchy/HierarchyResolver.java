@@ -78,6 +78,7 @@ import org.eclipse.objectteams.otdt.core.compiler.IOTConstants;
 import org.eclipse.objectteams.otdt.internal.core.compiler.control.Dependencies;
 import org.eclipse.objectteams.otdt.internal.core.compiler.control.ITranslationStates;
 
+@SuppressWarnings({"rawtypes", "unchecked"})
 public class HierarchyResolver implements ITypeRequestor {
 
 	private ReferenceBinding focusType;

@@ -38,6 +38,7 @@ import org.eclipse.objectteams.otdt.core.IOTType;
 /**
  * @see ITypeHierarchy
  */
+@SuppressWarnings({ "rawtypes", "unchecked" })
 public class TypeHierarchy implements ITypeHierarchy, IElementChangedListener {
 
 	public static boolean DEBUG = false;

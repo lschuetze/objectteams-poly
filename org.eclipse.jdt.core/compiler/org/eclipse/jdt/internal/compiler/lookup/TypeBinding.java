@@ -57,6 +57,7 @@ import org.eclipse.objectteams.otdt.internal.core.compiler.util.RoleTypeCreator.
  *
  * null is NOT a valid value for a non-public field... it just means the field is not initialized.
  */
+@SuppressWarnings("rawtypes")
 abstract public class TypeBinding extends Binding {
 
 	public int id = TypeIds.NoId;

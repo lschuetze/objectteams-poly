@@ -33,6 +33,7 @@ import java.util.List;
  * @since 3.1
  * @noinstantiate This class is not intended to be instantiated by clients.
  */
+@SuppressWarnings("rawtypes")
 public class WildcardType extends AnnotatableType {
 
 	/**

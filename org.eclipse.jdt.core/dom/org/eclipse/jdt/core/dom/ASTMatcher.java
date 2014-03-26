@@ -49,7 +49,7 @@ import java.util.List;
  * @see org.eclipse.jdt.core.dom.ASTNode#subtreeMatch(ASTMatcher, Object)
  * @since 2.0
  */
-@SuppressWarnings("unchecked")
+@SuppressWarnings("rawtypes")
 public class ASTMatcher {
 
 	/**

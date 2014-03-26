@@ -3231,6 +3231,17 @@ private void parseTags() {
 			}
 			pos = CharOperation.indexOf(TAG_PREFIX, s, true, end, sourceEnd);
 		}
+	} 
+	
+	if (this.checkUninternedIdentityComparison &&
+			(pos = CharOperation.indexOf(IDENTITY_COMPARISON_TAG, s, true, sourceStart, sourceEnd)) != -1) {
+		if (this.validIdentityComparisonLines == null) {
+			this.validIdentityComparisonLines = new boolean[0];
+		}
+		int currentLine = currentLinePtr + 1;
+		int length = this.validIdentityComparisonLines.length;
+		System.arraycopy(this.validIdentityComparisonLines, 0, this.validIdentityComparisonLines = new boolean[currentLine + 1], 0, length);
+		this.validIdentityComparisonLines[currentLine] = true;
 	}
 	
 	if (this.checkUninternedIdentityComparison &&

@@ -139,6 +139,7 @@ import org.eclipse.objectteams.otdt.internal.core.compiler.statemachine.transfor
  * What: Account for role files when traversing type declarations
  * Where: purgeMethodStatements()
  */
+@SuppressWarnings({"rawtypes", "unchecked"})
 public class MatchLocator implements ITypeRequestor {
 
 public static final int MAX_AT_ONCE;

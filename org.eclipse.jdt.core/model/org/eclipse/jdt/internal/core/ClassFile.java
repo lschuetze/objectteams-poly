@@ -43,6 +43,7 @@ import org.eclipse.objectteams.otdt.core.OTModelManager;
  * @see IClassFile
  */
 
+@SuppressWarnings({"rawtypes"})
 public class ClassFile extends Openable implements IClassFile, SuffixConstants {
 
 	protected String name;

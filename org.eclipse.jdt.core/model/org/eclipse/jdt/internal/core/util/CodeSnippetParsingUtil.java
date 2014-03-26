@@ -38,6 +38,7 @@ import org.eclipse.jdt.internal.compiler.problem.ProblemReporter;
  *
  * Utility class to parse different code snippets
  */
+@SuppressWarnings("rawtypes")
 public class CodeSnippetParsingUtil {
 
 	public RecordedParsingInformation recordedParsingInformation;

@@ -92,9 +92,8 @@ import org.eclipse.objectteams.otdt.internal.core.compiler.util.TSuperHelper;
  * + AbstractMethodDeclaration.generateCode(ClassFile)
  *   if roleCreatorRequiringRuntimeCheck is set:
  *   -> call Lifting.createDuplicateRoleCheck to create the byte code sequence
- *
- * @version $Id: MethodBinding.java 23404 2010-02-03 14:10:22Z stephan $
  */
+@SuppressWarnings("rawtypes")
 //{ObjectTeams: added IProtectable
 /* orig:
 public class MethodBinding extends Binding {

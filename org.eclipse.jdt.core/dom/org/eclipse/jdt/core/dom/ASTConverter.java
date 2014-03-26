@@ -95,6 +95,7 @@ import org.eclipse.objectteams.otdt.internal.core.compiler.statemachine.transfor
 /**
  * Internal class for converting internal compiler ASTs into public ASTs.
  */
+@SuppressWarnings({ "rawtypes", "unchecked" })
 class ASTConverter {
 
 	protected AST ast;

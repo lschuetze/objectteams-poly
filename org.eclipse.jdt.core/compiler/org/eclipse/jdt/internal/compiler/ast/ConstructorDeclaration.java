@@ -77,9 +77,8 @@ import org.eclipse.objectteams.otdt.internal.core.compiler.util.TypeAnalyzer;
  * Why:  specializing an unbound role to a bound role renders existing new-expressions illegal.
  *
  * What: write OT-specific byte code attributes.
- *
- * @version $Id: ConstructorDeclaration.java 23404 2010-02-03 14:10:22Z stephan $
  */
+@SuppressWarnings({"rawtypes", "unchecked"})
 public class ConstructorDeclaration extends AbstractMethodDeclaration {
 
 	public ExplicitConstructorCall constructorCall;

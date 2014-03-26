@@ -41,6 +41,7 @@ import org.eclipse.objectteams.otdt.internal.core.compiler.lookup.RoleTypeBindin
  * <hr>
  * This class represents the recovered binding for a type
  */
+@SuppressWarnings("rawtypes")
 class RecoveredTypeBinding implements ITypeBinding {
 
 	private VariableDeclaration variableDeclaration;
@@ -141,6 +142,7 @@ class RecoveredTypeBinding implements ITypeBinding {
 
 	/* (non-Javadoc)
 	 * @see org.eclipse.jdt.core.dom.ITypeBinding#getDeclaredModifiers()
+	 * @deprecated Use ITypeBinding#getModifiers() instead
 	 */
 	public int getDeclaredModifiers() {
 		return 0;

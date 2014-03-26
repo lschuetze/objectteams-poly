@@ -140,9 +140,8 @@ import org.eclipse.objectteams.otdt.internal.core.compiler.util.TypeAnalyzer;
  * What: if findSupertype() failed, consider dropping __OT__
  * Why:  RoleSplitter might have been over-eager.
  * How:  need to roll back: remove problem binding, remove IProblem.
- *
- * @version $Id: ClassScope.java 23405 2010-02-03 17:02:18Z stephan $
  */
+@SuppressWarnings({"rawtypes"})
 public class ClassScope extends Scope {
 
 	public TypeDeclaration referenceContext;
@@ -945,15 +944,17 @@ public class ClassScope extends Scope {
 			// checks for member types before local types to catch local members
 			if (enclosingType.isInterface())
 				modifiers |= ClassFileConstants.AccPublic;
+//{ObjectTeams: check for role / team modifiers
+			modifiers = Protections.checkRoleModifiers(modifiers, this.referenceContext, this);
+// SH}
 			if (sourceType.isEnum()) {
 				if (!enclosingType.isStatic())
 					problemReporter().nonStaticContextForEnumMemberType(sourceType);
 				else
 					modifiers |= ClassFileConstants.AccStatic;
+			} else if (sourceType.isInterface()) {
+				modifiers |= ClassFileConstants.AccStatic; // 8.5.1
 			}
-//{ObjectTeams: check for role / team modifiers
-            modifiers = Protections.checkRoleModifiers(modifiers, this.referenceContext, this);
-// SH}
 		} else if (sourceType.isLocalType()) {
 			if (sourceType.isEnum()) {
 				problemReporter().illegalLocalTypeDeclaration(this.referenceContext);
@@ -1209,7 +1210,7 @@ public class ClassScope extends Scope {
 			} else if (!enclosingType.isStatic()) {
 //{ObjectTeams: member-interfaces are always (implicitly) static,
 			  // role interfaces need to be members (at any level of nesting)!
-			  if (!enclosingType.isTeam())
+			  if (!sourceType.isRole())
 // SH}
 				// error the enclosing type of a static field must be static or a top-level type
 				problemReporter().illegalStaticModifierForMemberType(sourceType);

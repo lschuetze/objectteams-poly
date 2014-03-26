@@ -109,9 +109,8 @@ import org.eclipse.objectteams.otdt.internal.core.compiler.util.TypeAnalyzer;
  *		   getOrgObjectteamsTeam(), isOrgObjectteamsTeam()
  *       + referenceType()      // search inside->out
  *         inGeneratedMethod() 	// within generated methods some checks are relaxed
- *
- * @version $Id: Scope.java 23405 2010-02-03 17:02:18Z stephan $
  */
+@SuppressWarnings({ "rawtypes", "unchecked" })
 public abstract class Scope {
 
 	/* Scope kinds */

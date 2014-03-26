@@ -100,7 +100,7 @@ import org.eclipse.text.edits.TextEdit;
  * @since 2.0
  * @noinstantiate This class is not intended to be instantiated by clients.
  */
-@SuppressWarnings({"unchecked","rawtypes"})
+@SuppressWarnings({ "rawtypes", "unchecked" })
 public final class AST {
 	/**
 	 * new Class[] {AST.class}

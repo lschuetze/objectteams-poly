@@ -82,6 +82,7 @@ import org.eclipse.objectteams.otdt.internal.core.compiler.model.RoleModel;
  * attempt. If this was the desired behavior, a call to the CompletionEngine should be
  * performed instead.
  */
+@SuppressWarnings({"rawtypes", "unchecked"})
 public final class SelectionEngine extends Engine implements ISearchRequestor {
 	
 	private static class SelectionTypeNameMatchRequestorWrapper extends TypeNameMatchRequestorWrapper {

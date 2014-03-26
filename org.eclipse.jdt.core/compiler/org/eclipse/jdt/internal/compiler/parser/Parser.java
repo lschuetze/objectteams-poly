@@ -85,6 +85,7 @@ import org.eclipse.objectteams.otdt.internal.core.compiler.util.TypeAnalyzer;
  *       All consume methods show as a comment the grammar rule(s) invoking this method.
  *
  */
+@SuppressWarnings({"rawtypes", "unchecked"})
 public class Parser extends CommitRollbackParser implements ConflictedParser, OperatorIds, TypeIds {
 	
 	protected static final int THIS_CALL = ExplicitConstructorCall.This;

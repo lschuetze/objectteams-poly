@@ -49,6 +49,7 @@ import org.eclipse.objectteams.otdt.internal.core.compiler.util.AstGenerator;
  * Internal method structure for parsing recovery
  */
 
+@SuppressWarnings("rawtypes")
 public class RecoveredMethod extends RecoveredElement implements TerminalTokens {
 
 	public AbstractMethodDeclaration methodDeclaration;

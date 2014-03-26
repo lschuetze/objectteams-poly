@@ -80,6 +80,7 @@ import org.eclipse.objectteams.otdt.internal.core.compiler.control.ITranslationS
  * <dt>What:<dd> setup and use Dependencies for calling into the compiler.
  * </dl>
  */
+@SuppressWarnings({ "rawtypes", "unchecked" })
 class CompilationUnitResolver extends Compiler {
 	public static final int RESOLVE_BINDING = 0x1;
 	public static final int PARTIAL = 0x2;

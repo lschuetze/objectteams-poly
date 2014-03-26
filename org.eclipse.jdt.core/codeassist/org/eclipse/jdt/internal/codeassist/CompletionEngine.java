@@ -102,6 +102,7 @@ import org.eclipse.objectteams.otdt.internal.core.compiler.util.TypeAnalyzer;
  * It contains two public APIs used to call CodeAssist on a given source with
  * a given environment, assisting position and storage (and possibly options).
  */
+@SuppressWarnings({ "rawtypes", "unchecked" })
 public final class CompletionEngine
 	extends Engine
 	implements ISearchRequestor, TypeConstants , TerminalTokens , RelevanceConstants, SuffixConstants {
