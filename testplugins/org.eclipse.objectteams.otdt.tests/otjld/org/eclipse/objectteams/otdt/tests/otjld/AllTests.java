@@ -16,6 +16,15 @@
  **********************************************************************/
 package org.eclipse.objectteams.otdt.tests.otjld;
 
+import java.util.ArrayList;
+import java.util.List;
+
+import junit.framework.Test;
+import junit.framework.TestSuite;
+
+import org.eclipse.jdt.core.tests.compiler.regression.RegressionTestSetup;
+import org.eclipse.jdt.core.tests.junit.extension.TestCase;
+import org.eclipse.jdt.core.tests.util.AbstractCompilerTest;
 import org.eclipse.objectteams.otdt.tests.otjld.api.Reflection;
 import org.eclipse.objectteams.otdt.tests.otjld.callinbinding.BaseCalls;
 import org.eclipse.objectteams.otdt.tests.otjld.callinbinding.CallinMethodBinding;
@@ -60,9 +69,6 @@ import org.eclipse.objectteams.otdt.tests.otjld.syntax.Syntax;
 import org.eclipse.objectteams.otdt.tests.otjld.teamactivation.ExplicitTeamActivation;
 import org.eclipse.objectteams.otdt.tests.otjld.teamactivation.ImplicitTeamActivation;
 
-import junit.framework.Test;
-import junit.framework.TestSuite;
-
 /**
  * @author stephan
  */
@@ -71,75 +77,89 @@ public class AllTests {
 	public static Test suite() {
 		TestSuite suite = new TestSuite("All OTJLD Tests");
 		
+		List<Class<? extends TestCase>> testClasses = new ArrayList<Class<? extends TestCase>>();
+
 		// 1. rolesandteams
-		/*1.1*/suite.addTest(RoleObjectContainment.suite());
-		/*1.1.10-*/suite.addTest(TeamNesting.suite());
-		/*1.2*/suite.addTest(InheritanceHierarchyOfTeams.suite());
-		/*1.3*/suite.addTest(AcquisitionAndInheritanceOfRoleClasses.suite());
-		/*1.4*/suite.addTest(RegularRoleInheritance.suite());
-		/*1.5*/suite.addTest(FileStructure.suite());
-		/*1.6*/suite.addTest(ExternalizedRoles.suite());
+		/*1.1*/testClasses.add(RoleObjectContainment.testClass());
+		/*1.1.10-*/testClasses.add(TeamNesting.testClass());
+		/*1.2*/testClasses.add(InheritanceHierarchyOfTeams.testClass());
+		/*1.3*/testClasses.add(AcquisitionAndInheritanceOfRoleClasses.testClass());
+		/*1.4*/testClasses.add(RegularRoleInheritance.testClass());
+		/*1.5*/testClasses.add(FileStructure.testClass());
+		/*1.6*/testClasses.add(ExternalizedRoles.testClass());
 		
-		/*6.2*/suite.addTest(OldExternalizedRoles.suite());
+		/*6.2*/testClasses.add(OldExternalizedRoles.testClass());
 		
-		/*1.7*/suite.addTest(Confinement.suite());
-		/*1.8*/suite.addTest(RelevantRole.suite());
-		/*1.9*/suite.addTest(ValueParameters.suite());
+		/*1.7*/testClasses.add(Confinement.testClass());
+		/*1.8*/testClasses.add(RelevantRole.testClass());
+		/*1.9*/testClasses.add(ValueParameters.testClass());
 		
-		/*0.c*/suite.addTest(ImplicitInheritance.suite());
-		/*6.3*/suite.addTest(Covariance.suite());
+		/*0.c*/testClasses.add(ImplicitInheritance.testClass());
+		/*6.3*/testClasses.add(Covariance.testClass());
 		
 		// 2. roleplaying
-		/*2.1*/suite.addTest(PlayedByRelation.suite());
-		/*2.2*/suite.addTest(LiftingAndLowering.suite());
-		/*2.3*/suite.addTest(ExplicitRoleCreation.suite());
-		/*2.4*/suite.addTest(BaseClassVisibility.suite());
-		/*2.5*/suite.addTest(GC.suite());
-		
-		/*7.3*/suite.addTest(AllBindingAmbiguitiesTests.suite());
+		/*2.1*/testClasses.add(PlayedByRelation.testClass());
+		/*2.2*/testClasses.add(LiftingAndLowering.testClass());
+		/*2.3*/testClasses.add(ExplicitRoleCreation.testClass());
+		/*2.4*/testClasses.add(BaseClassVisibility.testClass());
+		/*2.5*/testClasses.add(GC.testClass());
 		
 		// 3. calloutbinding
-		/*3.1*/suite.addTest(CalloutMethodBinding.suite()); // includes a few from 7.2.1
-		/*3.2*/suite.addTest(CalloutParameterBinding_LiftingAndLowering.suite());
-		/*3.3*/suite.addTest(CalloutToField.suite());
+		/*3.1*/testClasses.add(CalloutMethodBinding.testClass()); // includes a few from 7.2.1
+		/*3.2*/testClasses.add(CalloutParameterBinding_LiftingAndLowering.testClass());
+		/*3.3*/testClasses.add(CalloutToField.testClass());
 		
-		/*7.4*/suite.addTest(OverridingAccessRestrictions.suite());
+		/*7.4*/testClasses.add(OverridingAccessRestrictions.testClass());
 		
 		// 4. callinbinding
-		/*4.1*/suite.addTest(CallinMethodBinding.suite()); // includes a few from 7.2.[45]
-		/*4.3*/suite.addTest(CallinParameterMapping_LiftingAndLowering.suite());
-		/*4.4*/suite.addTest(CallinWithTranslation.suite());
-		/*4.5*/suite.addTest(BaseCalls.suite());
+		/*4.1*/testClasses.add(CallinMethodBinding.testClass()); // includes a few from 7.2.[45]
+		/*4.3*/testClasses.add(CallinParameterMapping_LiftingAndLowering.testClass());
+		/*4.4*/testClasses.add(CallinWithTranslation.testClass());
+		/*4.5*/testClasses.add(BaseCalls.testClass());
 		
 		// 5. teamactivation
-		/*5.2*/suite.addTest(ExplicitTeamActivation.suite());
-		/*5.3*/suite.addTest(ImplicitTeamActivation.suite());
+		/*5.2*/testClasses.add(ExplicitTeamActivation.testClass());
+		/*5.3*/testClasses.add(ImplicitTeamActivation.testClass());
 		
 		// 6.[14] liftlower
-		/*6.1*/suite.addTest(DeclaredLifting.suite());
-		/*6.4*/suite.addTest(AllSmartLiftingTests.suite());
+		/*6.1*/testClasses.add(DeclaredLifting.testClass());
+		//6.4: see below
 		
+		// 7. see below
+
 		// 8. syntax
-		/*8.1*/suite.addTest(Syntax.suite());
+		/*8.1*/testClasses.add(Syntax.testClass());
 		
 		// api:
-		/*9.2*/suite.addTest(Reflection.suite());
+		/*9.2*/testClasses.add(Reflection.testClass());
 		
 		// other:
-		/*0.a*/suite.addTest(AccessModifiers.suite());
-		/*7.1*/suite.addTest(Modifiers.suite());
-		/*7.5*/suite.addTest(Exceptions.suite());
-		/*A.1*/suite.addTest(Java5.suite());
-		/*A.2*/suite.addTest(Java7.suite());
-		/*0.m*/suite.addTest(Misc.suite());
+		/*0.a*/testClasses.add(AccessModifiers.testClass());
+		/*7.1*/testClasses.add(Modifiers.testClass());
+		/*7.5*/testClasses.add(Exceptions.testClass());
+		/*A.1*/testClasses.add(Java5.testClass());
+		/*A.2*/testClasses.add(Java7.testClass());
+		/*0.m*/testClasses.add(Misc.testClass());
 		
 		// regression:
-		/*B.1*/suite.addTest(ReportedBugs.suite());
-		/*B.2*/suite.addTest(CompilationOrder.suite());
-		/*X.2*/suite.addTest(DevelopmentExamples.suite());
+		/*B.1*/testClasses.add(ReportedBugs.testClass());
+		/*B.2*/testClasses.add(CompilationOrder.testClass());
+		/*X.2*/testClasses.add(DevelopmentExamples.testClass());
 		
-		suite.addTest(ComplexStructures.suite());
+		testClasses.add(ComplexStructures.testClass());
 		
+		// Reset forgotten subsets tests
+		TestCase.TESTS_PREFIX = null;
+		TestCase.TESTS_NAMES = null;
+		TestCase.TESTS_NUMBERS= null;
+		TestCase.TESTS_RANGE = null;
+		TestCase.RUN_ONLY_ID = null;
+		
+		suite = (TestSuite) AbstractCompilerTest.buildAllCompliancesTestSuite(AllTests.class, RegressionTestSetup.class, testClasses);
+
+		/*7.3*/suite.addTest(AllBindingAmbiguitiesTests.suite());
+		/*6.4*/suite.addTest(AllSmartLiftingTests.suite());
+
 		return suite;
 	}
 }

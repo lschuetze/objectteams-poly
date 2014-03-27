@@ -1,13 +1,12 @@
 /**********************************************************************
  * This file is part of "Object Teams Development Tooling"-Software
  * 
- * Copyright 2010 Stephan Herrmann
+ * Copyright 2010, 2014 Stephan Herrmann
  * 
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
- * $Id: AllTests.java 23529 2010-02-18 23:06:04Z stephan $
  * 
  * Please visit http://www.eclipse.org/objectteams for updates and contact.
  * 
@@ -17,10 +16,16 @@
 package org.eclipse.objectteams.otdt.tests.otjld.roleplaying;
 
 import static org.eclipse.jdt.core.tests.util.AbstractCompilerTest.F_1_6;
-import org.eclipse.objectteams.otdt.tests.otjld.AbstractOTJLDTest;
+
+import java.util.ArrayList;
+import java.util.List;
 
 import junit.framework.Test;
-import junit.framework.TestSuite;
+
+import org.eclipse.jdt.core.tests.compiler.regression.RegressionTestSetup;
+import org.eclipse.jdt.core.tests.junit.extension.TestCase;
+import org.eclipse.jdt.core.tests.util.AbstractCompilerTest;
+import org.eclipse.objectteams.otdt.tests.otjld.AbstractOTJLDTest;
 
 /**
  * @author stephan
@@ -28,23 +33,32 @@ import junit.framework.TestSuite;
 public class AllBindingAmbiguitiesTests {
 
 	public static Test suite() {
-		TestSuite suite = new TestSuite("All Binding Ambiguities Tests");
-		suite.addTest(buildSuite(BindingAmbiguitiesM.testClass()));
+	
+		List<Class<? extends TestCase>> testClasses = new ArrayList<Class<? extends TestCase>>();
 
-		suite.addTest(buildSuite(BindingAmbiguities1.testClass()));
-		suite.addTest(buildSuite(BindingAmbiguities2.testClass()));
-		suite.addTest(buildSuite(BindingAmbiguities3.testClass()));
-		suite.addTest(buildSuite(BindingAmbiguities4.testClass()));
-		suite.addTest(buildSuite(BindingAmbiguities5.testClass()));
-		suite.addTest(buildSuite(BindingAmbiguities6.testClass()));
-		suite.addTest(buildSuite(BindingAmbiguities7.testClass()));
-		suite.addTest(buildSuite(BindingAmbiguities8.testClass()));
-		suite.addTest(buildSuite(BindingAmbiguities9.testClass()));
-		suite.addTest(buildSuite(BindingAmbiguities10.testClass()));
-		suite.addTest(buildSuite(BindingAmbiguities11.testClass()));
-		suite.addTest(buildSuite(BindingAmbiguities12.testClass()));
+		testClasses.add(BindingAmbiguitiesM.testClass());
 
-		return suite;
+		testClasses.add(BindingAmbiguities1.testClass());
+		testClasses.add(BindingAmbiguities2.testClass());
+		testClasses.add(BindingAmbiguities3.testClass());
+		testClasses.add(BindingAmbiguities4.testClass());
+		testClasses.add(BindingAmbiguities5.testClass());
+		testClasses.add(BindingAmbiguities6.testClass());
+		testClasses.add(BindingAmbiguities7.testClass());
+		testClasses.add(BindingAmbiguities8.testClass());
+		testClasses.add(BindingAmbiguities9.testClass());
+		testClasses.add(BindingAmbiguities10.testClass());
+		testClasses.add(BindingAmbiguities11.testClass());
+		testClasses.add(BindingAmbiguities12.testClass());
+
+		// Reset forgotten subsets tests
+		TestCase.TESTS_PREFIX = null;
+		TestCase.TESTS_NAMES = null;
+		TestCase.TESTS_NUMBERS= null;
+		TestCase.TESTS_RANGE = null;
+		TestCase.RUN_ONLY_ID = null;
+		
+		return AbstractCompilerTest.buildAllCompliancesTestSuite(AllBindingAmbiguitiesTests.class, RegressionTestSetup.class, testClasses);
 	}
 
 	static Test buildSuite(Class testClass) {

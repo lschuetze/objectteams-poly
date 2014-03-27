@@ -1,13 +1,12 @@
 /**********************************************************************
  * This file is part of "Object Teams Development Tooling"-Software
  * 
- * Copyright 2010 Stephan Herrmann
+ * Copyright 2010, 2014 Stephan Herrmann
  * 
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
- * $Id: AllTests.java 23529 2010-02-18 23:06:04Z stephan $
  * 
  * Please visit http://www.eclipse.org/objectteams for updates and contact.
  * 
@@ -17,10 +16,16 @@
 package org.eclipse.objectteams.otdt.tests.otjld.liftlower;
 
 import static org.eclipse.jdt.core.tests.util.AbstractCompilerTest.F_1_6;
-import org.eclipse.objectteams.otdt.tests.otjld.AbstractOTJLDTest;
+
+import java.util.ArrayList;
+import java.util.List;
 
 import junit.framework.Test;
-import junit.framework.TestSuite;
+
+import org.eclipse.jdt.core.tests.compiler.regression.RegressionTestSetup;
+import org.eclipse.jdt.core.tests.junit.extension.TestCase;
+import org.eclipse.jdt.core.tests.util.AbstractCompilerTest;
+import org.eclipse.objectteams.otdt.tests.otjld.AbstractOTJLDTest;
 
 /**
  * @author stephan
@@ -28,39 +33,48 @@ import junit.framework.TestSuite;
 public class AllSmartLiftingTests {
 
 	public static Test suite() {
-		TestSuite suite = new TestSuite("All Smart Lifting Tests");
-		suite.addTest(buildSuite(SmartLifting1.testClass()));
-		suite.addTest(buildSuite(SmartLifting2.testClass()));
-		suite.addTest(buildSuite(SmartLifting3.testClass()));
-		suite.addTest(buildSuite(SmartLifting4.testClass()));
-		suite.addTest(buildSuite(SmartLifting5.testClass()));
-		suite.addTest(buildSuite(SmartLifting6.testClass()));
-		suite.addTest(buildSuite(SmartLifting7.testClass()));
-		suite.addTest(buildSuite(SmartLifting8.testClass()));
-		suite.addTest(buildSuite(SmartLifting9.testClass()));
-		suite.addTest(buildSuite(SmartLifting10.testClass()));
-		suite.addTest(buildSuite(SmartLifting11.testClass()));
-		suite.addTest(buildSuite(SmartLifting12.testClass()));
-		suite.addTest(buildSuite(SmartLifting13.testClass()));
-		suite.addTest(buildSuite(SmartLifting14.testClass()));
-		suite.addTest(buildSuite(SmartLifting15.testClass()));
-		suite.addTest(buildSuite(SmartLifting16.testClass()));
-		suite.addTest(buildSuite(SmartLifting17.testClass()));
-		suite.addTest(buildSuite(SmartLifting18.testClass()));
-		suite.addTest(buildSuite(SmartLifting19.testClass()));
-		suite.addTest(buildSuite(SmartLifting20.testClass()));
-		suite.addTest(buildSuite(SmartLifting21.testClass()));
-		suite.addTest(buildSuite(SmartLifting22.testClass()));
-		suite.addTest(buildSuite(SmartLifting23.testClass()));
-		suite.addTest(buildSuite(SmartLifting24.testClass()));
-		suite.addTest(buildSuite(SmartLifting25.testClass()));
-		suite.addTest(buildSuite(SmartLifting26.testClass()));
-		suite.addTest(buildSuite(SmartLifting27.testClass()));
-		suite.addTest(buildSuite(SmartLifting28.testClass()));
-		suite.addTest(buildSuite(SmartLifting29.testClass()));
-		suite.addTest(buildSuite(SmartLifting30.testClass()));
+		List<Class<? extends TestCase>> testClasses = new ArrayList<Class<? extends TestCase>>();
 
-		return suite;
+		testClasses.add(SmartLifting1.testClass());
+		testClasses.add(SmartLifting2.testClass());
+		testClasses.add(SmartLifting3.testClass());
+		testClasses.add(SmartLifting4.testClass());
+		testClasses.add(SmartLifting5.testClass());
+		testClasses.add(SmartLifting6.testClass());
+		testClasses.add(SmartLifting7.testClass());
+		testClasses.add(SmartLifting8.testClass());
+		testClasses.add(SmartLifting9.testClass());
+		testClasses.add(SmartLifting10.testClass());
+		testClasses.add(SmartLifting11.testClass());
+		testClasses.add(SmartLifting12.testClass());
+		testClasses.add(SmartLifting13.testClass());
+		testClasses.add(SmartLifting14.testClass());
+		testClasses.add(SmartLifting15.testClass());
+		testClasses.add(SmartLifting16.testClass());
+		testClasses.add(SmartLifting17.testClass());
+		testClasses.add(SmartLifting18.testClass());
+		testClasses.add(SmartLifting19.testClass());
+		testClasses.add(SmartLifting20.testClass());
+		testClasses.add(SmartLifting21.testClass());
+		testClasses.add(SmartLifting22.testClass());
+		testClasses.add(SmartLifting23.testClass());
+		testClasses.add(SmartLifting24.testClass());
+		testClasses.add(SmartLifting25.testClass());
+		testClasses.add(SmartLifting26.testClass());
+		testClasses.add(SmartLifting27.testClass());
+		testClasses.add(SmartLifting28.testClass());
+		testClasses.add(SmartLifting29.testClass());
+		testClasses.add(SmartLifting30.testClass());
+
+
+		// Reset forgotten subsets tests
+		TestCase.TESTS_PREFIX = null;
+		TestCase.TESTS_NAMES = null;
+		TestCase.TESTS_NUMBERS= null;
+		TestCase.TESTS_RANGE = null;
+		TestCase.RUN_ONLY_ID = null;
+		
+		return AbstractCompilerTest.buildAllCompliancesTestSuite(AllSmartLiftingTests.class, RegressionTestSetup.class, testClasses);
 	}
 
 	static Test buildSuite(Class testClass) {

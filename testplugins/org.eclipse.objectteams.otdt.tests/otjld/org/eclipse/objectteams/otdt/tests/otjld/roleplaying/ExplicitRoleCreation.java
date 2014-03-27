@@ -19,6 +19,7 @@ package org.eclipse.objectteams.otdt.tests.otjld.roleplaying;
 
 import junit.framework.Test;
 
+import org.eclipse.jdt.core.tests.junit.extension.TestCase;
 import org.eclipse.objectteams.otdt.tests.otjld.AbstractOTJLDTest;
 
 public class ExplicitRoleCreation extends AbstractOTJLDTest {
@@ -39,7 +40,7 @@ public class ExplicitRoleCreation extends AbstractOTJLDTest {
 		return buildComparableTestSuite(testClass());
 	}
 
-	public static Class testClass() {
+	public static Class<? extends TestCase> testClass() {
 		return ExplicitRoleCreation.class;
 	}
 
