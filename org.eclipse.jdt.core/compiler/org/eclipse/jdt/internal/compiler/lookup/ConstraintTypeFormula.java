@@ -55,11 +55,11 @@ class ConstraintTypeFormula extends ConstraintFormula {
 					return TRUE;
 				return FALSE;
 			}
-			if (this.left.isBaseType() && this.left != TypeBinding.NULL) {
+			if (this.left.isPrimitiveType()) {
 				TypeBinding sPrime = inferenceContext.environment.computeBoxingType(this.left);
 				return new ConstraintTypeFormula(sPrime, this.right, COMPATIBLE, this.isSoft);
 			}
-			if (this.right.isBaseType() && this.right != TypeBinding.NULL) {
+			if (this.right.isPrimitiveType()) {
 				TypeBinding tPrime = inferenceContext.environment.computeBoxingType(this.right);
 				return new ConstraintTypeFormula(this.left, tPrime, SAME, this.isSoft);
 			}
@@ -202,6 +202,8 @@ class ConstraintTypeFormula extends ConstraintFormula {
 		}
 		if (subCandidate.id == TypeIds.T_null)
 			return TRUE;
+		if (superCandidate.id == TypeIds.T_null)
+			return FALSE;
 		if (subCandidate instanceof InferenceVariable)
 			return new TypeBound((InferenceVariable)subCandidate, superCandidate, SUBTYPE, this.isSoft);
 		if (superCandidate instanceof InferenceVariable)
@@ -211,15 +213,13 @@ class ConstraintTypeFormula extends ConstraintFormula {
 			case Binding.TYPE:
 			case Binding.RAW_TYPE:
 				{
-					if (subCandidate instanceof ReferenceBinding) {
-						if (hasSuperType((ReferenceBinding) subCandidate, (ReferenceBinding) superCandidate))
-							return TRUE;
-					}
+					if (subCandidate.isSubtypeOf(superCandidate))
+						return TRUE;
 					return FALSE;
 				}
 			case Binding.PARAMETERIZED_TYPE:
 				{
-					List constraints = new ArrayList();
+					List<ConstraintFormula> constraints = new ArrayList<ConstraintFormula>();
 					while (superCandidate instanceof ParameterizedTypeBinding && subCandidate != null)  {
 						if (!addConstraintsFromTypeParamters(subCandidate, (ParameterizedTypeBinding) superCandidate, constraints))
 							return FALSE;
@@ -241,25 +241,25 @@ class ConstraintTypeFormula extends ConstraintFormula {
 				case Binding.INTERSECTION_TYPE:
 					{
 						WildcardBinding intersection = (WildcardBinding) subCandidate;
-						int numArrayBounds = 0;
-						if (intersection.bound.isArrayType()) numArrayBounds++;
-						for (int i = 0; i < intersection.otherBounds.length; i++) {
-							if (intersection.otherBounds[i].isArrayType()) numArrayBounds++;
-						}
-						if (numArrayBounds == 0)
-							return FALSE;
-						InferenceContext18.missingImplementation("Cannot filter most specific array type"); //$NON-NLS-1$
-						// FIXME assign sPrime
+						sPrimeArray = findMostSpecificSuperArray(intersection.bound, intersection.otherBounds, intersection);
 						break;
 					}
 				case Binding.ARRAY_TYPE:
 					sPrimeArray = (ArrayBinding) subCandidate;
 					break;
+				case Binding.TYPE_PARAMETER:
+					{
+						TypeVariableBinding subTVB = (TypeVariableBinding)subCandidate;
+						sPrimeArray = findMostSpecificSuperArray(subTVB.firstBound, subTVB.otherUpperBounds(), subTVB);
+						break;
+					}
 				default:					
 					return FALSE;
 				}
+				if (sPrimeArray == null)
+					return FALSE;
 				TypeBinding sPrime = sPrimeArray.elementsType();
-				if (!tPrime.isBaseType() && !sPrime.isBaseType()) {
+				if (!tPrime.isPrimitiveType() && !sPrime.isPrimitiveType()) {
 					return new ConstraintTypeFormula(sPrime, tPrime, SUBTYPE, this.isSoft);
 				}
 				return TypeBinding.equalsEquals(tPrime, sPrime) ? TRUE : FALSE; // same primitive type?
@@ -282,34 +282,39 @@ class ConstraintTypeFormula extends ConstraintFormula {
 			case Binding.INTERSECTION_TYPE:
 				InferenceContext18.missingImplementation("NYI"); //$NON-NLS-1$
 		}
-		if (superCandidate.id == TypeIds.T_null)
-			return FALSE;
 		throw new IllegalStateException("Unexpected RHS "+superCandidate); //$NON-NLS-1$
 	}
 	
-	private boolean hasSuperType(ReferenceBinding sub, ReferenceBinding superType) {
-		if (TypeBinding.equalsEquals(sub, superType))
-			return true;
-		if (sub.id == TypeIds.T_JavaLangObject)
-			return false;
-		if (hasSuperType(sub.superclass(), superType))
-			return true;
-		ReferenceBinding[] superInterfaces = sub.superInterfaces();
-		if (superInterfaces != null) {
-			for (int i=0, l=superInterfaces.length; i<l; i++)
-				if (hasSuperType(superInterfaces[i], superType))
-					return true;
+	private ArrayBinding findMostSpecificSuperArray(TypeBinding firstBound, TypeBinding[] otherUpperBounds, TypeBinding theType) {
+		int numArrayBounds = 0;
+		ArrayBinding result = null;
+		if (firstBound != null && firstBound.isArrayType()) {
+			result = (ArrayBinding) firstBound;
+			numArrayBounds++;
 		}
-		return false;
+		for (int i = 0; i < otherUpperBounds.length; i++) {
+			if (otherUpperBounds[i].isArrayType()) {
+				result = (ArrayBinding) otherUpperBounds[i];
+				numArrayBounds++;
+			}
+		}
+		if (numArrayBounds == 0)
+			return null;
+		if (numArrayBounds == 1)
+			return result;
+		InferenceContext18.missingImplementation("Extracting array from intersection is not defined"); //$NON-NLS-1$
+		return null;
 	}
 
-	boolean addConstraintsFromTypeParamters(TypeBinding subCandidate, ParameterizedTypeBinding ca, List constraints) {
+	boolean addConstraintsFromTypeParamters(TypeBinding subCandidate, ParameterizedTypeBinding ca, List<ConstraintFormula> constraints) {
 		TypeBinding[] ai = ca.arguments;								// C<A1,A2,...>
 		if (ai == null)
 			return true; // no arguments here means nothing to check
 		TypeBinding cb = subCandidate.findSuperTypeOriginatingFrom(ca);	// C<B1,B2,...>
 		if (cb == null)
 			return false; // nothing here means we failed 
+		if (TypeBinding.equalsEquals(ca, cb)) // incl C#RAW vs C#RAW
+			return true;
 		TypeBinding[] bi = ((ParameterizedTypeBinding) cb).arguments;
 		if (cb.isRawType() || bi == null || bi.length == 0)
 			return (this.isSoft && InferenceContext18.SIMULATE_BUG_JDK_8026527) ? true : false; // FALSE would conform to the spec 

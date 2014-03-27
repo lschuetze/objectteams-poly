@@ -24,6 +24,11 @@
  *								Bug 400874 - [1.8][compiler] Inference infrastructure should evolve to meet JLS8 18.x (Part G of JSR335 spec)
  *								Bug 423504 - [1.8] Implement "18.5.3 Functional Interface Parameterization Inference"
  *								Bug 424712 - [1.8][compiler] NPE in TypeBinding.isProvablyDistinctTypeArgument
+ *								Bug 426792 - [1.8][inference][impl] generify new type inference engine
+ *								Bug 426764 - [1.8] Presence of conditional expression as method argument confuses compiler
+ *								Bug 423505 - [1.8] Implement "18.5.4 More Specific Method Inference"
+ *								Bug 427626 - [1.8] StackOverflow while typing new ArrayList<String>().toArray( and asking for code completion
+ *								Bug 428019 - [1.8][compiler] Type inference failure with nested generic invocation.
  *      Jesper S Moller <jesper@selskabet.org> -  Contributions for
  *								bug 382701 - [1.8][compiler] Implement semantic analysis of Lambda expressions & Reference expression
  *******************************************************************************/
@@ -191,6 +196,13 @@ public boolean canBeInstantiated() {
  * Perform capture conversion on a given type (only effective on parameterized type with wildcards)
  */
 public TypeBinding capture(Scope scope, int position) {
+	return this;
+}
+
+/**
+ * Perform capture "deconversion" on a given type
+ */
+public TypeBinding uncapture(Scope scope) {
 	return this;
 }
 
@@ -541,10 +553,16 @@ public final boolean isBaseType() {
 	return (this.tagBits & TagBits.IsBaseType) != 0;
 }
 
+/* Answer true if the receiver is a base type other than void or null
+ */
+public final boolean isPrimitiveType() {
+	return (this.tagBits & TagBits.IsBaseType) != 0 && this.id != TypeIds.T_void && this.id != TypeIds.T_null;
+}
+
 /* Answer true if the receiver is a primitive type or a boxed primitive type
  */
 public final boolean isPrimitiveOrBoxedPrimitiveType() {
-	if ((this.tagBits & TagBits.IsBaseType) != 0)
+	if (isPrimitiveType())
 		return true;
 	switch (this.id) {
 		case TypeIds.T_JavaLangBoolean :
@@ -1422,9 +1440,9 @@ public TypeBinding original() {
 		case Binding.PARAMETERIZED_TYPE :
 		case Binding.RAW_TYPE :
 		case Binding.ARRAY_TYPE :
-			return erasure();
+			return erasure().unannotated();
 		default :
-			return this;
+			return this.unannotated();
 	}
 }
 
@@ -1599,7 +1617,7 @@ public boolean mentionsAny(TypeBinding[] parameters, int idx) {
 //{ObjectTeams: cross the OT package, make protected:
 protected
 // SH}
-void collectInferenceVariables(Set variables) {
+void collectInferenceVariables(Set<InferenceVariable> variables) {
 	// nop
 }
 /** Answer an additional bit characterizing this type, like {@link TypeIds#BitAutoCloseable}. */
@@ -1607,8 +1625,12 @@ public boolean hasTypeBit(int bit) {
 	return false;
 }
 
-public boolean sIsMoreSpecific(TypeBinding s, TypeBinding t) {
-	throw new UnsupportedOperationException("abstract virtual method called"); //$NON-NLS-1$
+public boolean sIsMoreSpecific(TypeBinding s, TypeBinding t, Scope scope) {
+	return s.isCompatibleWith(t, scope) && !s.needsUncheckedConversion(t);
+}
+
+public boolean isSubtypeOf(TypeBinding right) {
+	return isCompatibleWith(right);
 }
 
 public MethodBinding[] getMethods(char[] selector) {

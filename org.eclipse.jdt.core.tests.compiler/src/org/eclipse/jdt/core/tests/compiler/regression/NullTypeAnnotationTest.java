@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2012, 2013 GK Software AG and others.
+ * Copyright (c) 2012, 2014 GK Software AG and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -1592,7 +1592,7 @@ public class NullTypeAnnotationTest extends AbstractNullAnnotationTest {
 				"Null type mismatch: required \'ArrayList<String> @NonNull[]\' but the provided value is null\n" + 
 				"----------\n");
 	}
-	
+
 	public void testConditional1() {
 		runNegativeTestWithLibs(
 			new String[] {
@@ -1614,17 +1614,17 @@ public class NullTypeAnnotationTest extends AbstractNullAnnotationTest {
 			"----------\n" + 
 			"1. WARNING in X.java (at line 6)\n" + 
 			"	return f == 0 ? good : dubious;\n" + 
-			"	       ^^^^^^^^^^^^^^^^^^^^^^^\n" + 
+			"	                       ^^^^^^^\n" + 
 			"Null type safety (type annotations): The expression of type \'List<String>\' needs unchecked conversion to conform to \'List<@NonNull String>\'\n" + 
 			"----------\n" + 
 			"2. WARNING in X.java (at line 8)\n" + 
 			"	return f == 2 ? dubious : good;\n" + 
-			"	       ^^^^^^^^^^^^^^^^^^^^^^^\n" + 
+			"	                ^^^^^^^\n" + 
 			"Null type safety (type annotations): The expression of type \'List<String>\' needs unchecked conversion to conform to \'List<@NonNull String>\'\n" + 
 			"----------\n");
 	}
 
-	public void _testConditional2() {
+	public void testConditional2() {
 		runNegativeTestWithLibs(
 			new String[] {
 				"X.java",
@@ -1645,12 +1645,41 @@ public class NullTypeAnnotationTest extends AbstractNullAnnotationTest {
 			"----------\n" + 
 			"1. WARNING in X.java (at line 6)\n" + 
 			"	return f == 0 ? good : dubious;\n" + 
-			"	       ^^^^^^^^^^^^^^^^^^^^^^^\n" + 
-			"Null type safety (type annotations): The expression of type \'List<String>\' needs unchecked conversion to conform to \'List<@NonNull String>\'\n" + 
+			"	                       ^^^^^^^\n" + 
+			"Null type safety (type annotations): The expression of type \'ArrayList<String>\' needs unchecked conversion to conform to \'List<@NonNull String>\'\n" + 
 			"----------\n" + 
 			"2. WARNING in X.java (at line 8)\n" + 
 			"	return f == 2 ? dubious : good;\n" + 
-			"	       ^^^^^^^^^^^^^^^^^^^^^^^\n" + 
+			"	                ^^^^^^^\n" + 
+			"Null type safety (type annotations): The expression of type \'ArrayList<String>\' needs unchecked conversion to conform to \'List<@NonNull String>\'\n" + 
+			"----------\n");
+	}
+
+	// conditional in argument position
+	public void testConditional3() {
+		runNegativeTestWithLibs(
+			new String[] {
+				"X.java",
+				"import org.eclipse.jdt.annotation.*;\n"
+				+ "import java.util.*;\n"
+				+ "public class X {\n"
+				+ "	void foo(List<@NonNull String> good, List<String> dubious, int f) {\n"
+				+ "		consume(f == 0 ? good : dubious);\n"
+				+ "		consume(f == 2 ? dubious : good);\n"
+				+ "		consume(f == 4 ? good : good);\n"
+				+ "	}\n" +
+				"	void consume(List<@NonNull String> strings) {}\n"
+				+ "}\n"
+			},
+			"----------\n" + 
+			"1. WARNING in X.java (at line 5)\n" + 
+			"	consume(f == 0 ? good : dubious);\n" + 
+			"	                        ^^^^^^^\n" + 
+			"Null type safety (type annotations): The expression of type \'List<String>\' needs unchecked conversion to conform to \'List<@NonNull String>\'\n" + 
+			"----------\n" + 
+			"2. WARNING in X.java (at line 6)\n" + 
+			"	consume(f == 2 ? dubious : good);\n" + 
+			"	                 ^^^^^^^\n" + 
 			"Null type safety (type annotations): The expression of type \'List<String>\' needs unchecked conversion to conform to \'List<@NonNull String>\'\n" + 
 			"----------\n");
 	}
@@ -3427,8 +3456,7 @@ public void testBug424637a() {
 		"----------\n");
 }
 
-// DISABLED, currently throws java.lang.BootstrapMethodError at runtime:
-public void _testBug424637_comment3() {
+public void testBug424637_comment3() {
 	runConformTest(
 		new String[] {
 			"VarArgsMethodReferenceTest.java",

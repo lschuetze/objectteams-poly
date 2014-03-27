@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2013 IBM Corporation and others.
+ * Copyright (c) 2000, 2014 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -3095,12 +3095,28 @@ public class ASTRewritingMethodDeclTest extends ASTRewritingTest {
 
 			rewrite.replace((ASTNode) decl.modifiers().get(0), markerAnnotation, null);
 		}
+		{
+			SingleVariableDeclaration decl= ast.newSingleVariableDeclaration();
+			
+			MarkerAnnotation markerAnnotation= ast.newMarkerAnnotation();
+			markerAnnotation.setTypeName(ast.newSimpleName("X"));
+			decl.modifiers().add(markerAnnotation);
+			
+			Type type= ast.newPrimitiveType(PrimitiveType.INT);
+			decl.setType(type);
+			
+			decl.setName(ast.newSimpleName("e"));
+			
+			ListRewrite listRewrite= rewrite.getListRewrite(methodDecl, MethodDeclaration.PARAMETERS_PROPERTY);
+			listRewrite.insertLast(decl, null);
+		}
+		
 		String preview= evaluateRewrite(cu, rewrite);
 
 		buf= new StringBuffer();
 		buf.append("package test1;\n");
 		buf.append("class E {\n");
-		buf.append("    public void foo(@X @A int a, @B2 int b, @X int c, @X int d) {\n");
+		buf.append("    public void foo(@X @A int a, @B2 int b, @X int c, @X int d, @X int e) {\n");
 		buf.append("    }\n");
 		buf.append("}\n");
 		assertEqualString(preview, buf.toString());
@@ -3112,7 +3128,7 @@ public class ASTRewritingMethodDeclTest extends ASTRewritingTest {
 		buf= new StringBuffer();
 		buf.append("package test1;\n");
 		buf.append("class E {\n");
-		buf.append("    public void foo(@X\n    @A int a, @B2 int b, @X\n    int c, @X int d) {\n");
+		buf.append("    public void foo(@X\n    @A int a, @B2 int b, @X\n    int c, @X int d, @X\n    int e) {\n");
 		buf.append("    }\n");
 		buf.append("}\n");
 		assertEqualString(preview, buf.toString());
@@ -3741,5 +3757,144 @@ public class ASTRewritingMethodDeclTest extends ASTRewritingTest {
 
 		assertEqualString(preview, buf.toString());
 	}
+	public void testBug427622a_since_8() throws Exception {
+		IPackageFragment pack1= this.sourceFolder.createPackageFragment("test1", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("import java.lang.annotation.*;\n");
+		buf.append("public abstract class E {\n");
+		buf.append("    public void test(){}\n");
+		buf.append("    class MyException extends Throwable {\n");
+		buf.append("     private static final long serialVersionUID=-3045365361549263819L;");
+		buf.append("    }\n");
+		buf.append("}\n");
+		buf.append("@Target (Element.TYPE_USE);\n");
+		buf.append("@interface Marker {}\n");
+		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+
+		CompilationUnit astRoot= createAST(cu);
+		ASTRewrite rewrite= ASTRewrite.create(astRoot.getAST());
+		AST ast= astRoot.getAST();
+		TypeDeclaration type= findTypeDeclaration(astRoot, "E");
+
+		{ // add an annotated simpletype as throws annotation
+			MethodDeclaration methodDecl = findMethodDeclaration(type, "test");
+			SimpleType newThrownException = (SimpleType) createNewExceptionType(ast, "MyException");
+			MarkerAnnotation annot = ast.newMarkerAnnotation();
+			annot.setTypeName(ast.newSimpleName("Marker"));
+			ListRewrite listRewrite = rewrite.getListRewrite(newThrownException, SimpleType.ANNOTATIONS_PROPERTY);
+			listRewrite.insertFirst(annot, null);
+			listRewrite = rewrite.getListRewrite(methodDecl, MethodDeclaration.THROWN_EXCEPTION_TYPES_PROPERTY);
+			listRewrite.insertFirst(newThrownException, null);
+		}
+
+		String preview= evaluateRewrite(cu, rewrite);
+
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("import java.lang.annotation.*;\n");
+		buf.append("public abstract class E {\n");
+		buf.append("    public void test() throws @Marker MyException{}\n");
+		buf.append("    class MyException extends Throwable {\n");
+		buf.append("     private static final long serialVersionUID=-3045365361549263819L;");
+		buf.append("    }\n");
+		buf.append("}\n");
+		buf.append("@Target (Element.TYPE_USE);\n");
+		buf.append("@interface Marker {}\n");
+
+		assertEqualString(preview, buf.toString());
+	}
 	
+	public void testBug427622b_since_8() throws Exception {
+		IPackageFragment pack1= this.sourceFolder.createPackageFragment("test1", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("import java.lang.annotation.*;\n");
+		buf.append("public abstract class E {\n");
+		buf.append("    public void test() throws MyException{}\n");
+		buf.append("    class MyException extends Throwable {\n");
+		buf.append("     private static final long serialVersionUID=-3045365361549263819L;");
+		buf.append("    }\n");
+		buf.append("}\n");
+		buf.append("@Target (Element.TYPE_USE);\n");
+		buf.append("@interface Marker {}\n");
+		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+
+		CompilationUnit astRoot= createAST(cu);
+		ASTRewrite rewrite= ASTRewrite.create(astRoot.getAST());
+		AST ast= astRoot.getAST();
+		TypeDeclaration type= findTypeDeclaration(astRoot, "E");
+
+		{ // add an annotation to the simpletype
+			MethodDeclaration methodDecl = findMethodDeclaration(type, "test");
+			SimpleType newThrownException = (SimpleType) methodDecl.thrownExceptionTypes().get(0);
+			MarkerAnnotation annot = ast.newMarkerAnnotation();
+			annot.setTypeName(ast.newSimpleName("Marker"));
+			ListRewrite listRewrite = rewrite.getListRewrite(newThrownException, SimpleType.ANNOTATIONS_PROPERTY);
+			listRewrite.insertFirst(annot, null);
+		}
+
+		String preview= evaluateRewrite(cu, rewrite);
+
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("import java.lang.annotation.*;\n");
+		buf.append("public abstract class E {\n");
+		buf.append("    public void test() throws @Marker MyException{}\n");
+		buf.append("    class MyException extends Throwable {\n");
+		buf.append("     private static final long serialVersionUID=-3045365361549263819L;");
+		buf.append("    }\n");
+		buf.append("}\n");
+		buf.append("@Target (Element.TYPE_USE);\n");
+		buf.append("@interface Marker {}\n");
+
+		assertEqualString(preview, buf.toString());
+	}
+	public void testBug427622c_since_8() throws Exception {
+		IPackageFragment pack1= this.sourceFolder.createPackageFragment("test1", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("import java.lang.annotation.*;\n");
+		buf.append("public abstract class E {\n");
+		buf.append("    public void test(){}\n");
+		buf.append("    class MyException extends Throwable {\n");
+		buf.append("     private static final long serialVersionUID=-3045365361549263819L;");
+		buf.append("    }\n");
+		buf.append("}\n");
+		buf.append("@Target (Element.TYPE_USE);\n");
+		buf.append("@interface Marker {}\n");
+		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+
+		CompilationUnit astRoot= createAST(cu);
+		ASTRewrite rewrite= ASTRewrite.create(astRoot.getAST());
+		AST ast= astRoot.getAST();
+		TypeDeclaration type= findTypeDeclaration(astRoot, "E");
+
+		{ // add an annotated simpletype as throws annotation
+			MethodDeclaration methodDecl = findMethodDeclaration(type, "test");
+			ListRewrite listRewrite = rewrite.getListRewrite(methodDecl, MethodDeclaration.THROWN_EXCEPTION_TYPES_PROPERTY);
+			SimpleType newThrownException = (SimpleType) createNewExceptionType(ast, "MyException");
+			listRewrite.insertFirst(newThrownException, null);
+			MarkerAnnotation annot = ast.newMarkerAnnotation();
+			annot.setTypeName(ast.newSimpleName("Marker"));
+			listRewrite = rewrite.getListRewrite(newThrownException, SimpleType.ANNOTATIONS_PROPERTY);
+			listRewrite.insertFirst(annot, null);
+		}
+
+		String preview= evaluateRewrite(cu, rewrite);
+
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("import java.lang.annotation.*;\n");
+		buf.append("public abstract class E {\n");
+		buf.append("    public void test() throws @Marker MyException{}\n");
+		buf.append("    class MyException extends Throwable {\n");
+		buf.append("     private static final long serialVersionUID=-3045365361549263819L;");
+		buf.append("    }\n");
+		buf.append("}\n");
+		buf.append("@Target (Element.TYPE_USE);\n");
+		buf.append("@interface Marker {}\n");
+
+		assertEqualString(preview, buf.toString());
+	}
 }

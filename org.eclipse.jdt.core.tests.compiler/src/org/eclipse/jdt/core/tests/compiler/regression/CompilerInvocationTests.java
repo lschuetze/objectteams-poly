@@ -51,6 +51,8 @@ import java.util.Comparator;
 import java.util.HashMap;
 import java.util.Map;
 
+import junit.framework.Test;
+
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.compiler.CategorizedProblem;
 import org.eclipse.jdt.core.compiler.IProblem;
@@ -62,8 +64,6 @@ import org.eclipse.jdt.internal.compiler.problem.DefaultProblemFactory;
 import org.eclipse.jdt.internal.compiler.problem.ProblemReporter;
 import org.eclipse.jdt.internal.compiler.problem.ProblemSeverities;
 import org.eclipse.objectteams.otdt.core.ext.OTDTPlugin;
-
-import junit.framework.Test;
 
 /**
  * This class is meant to gather test cases related to the invocation of the
@@ -816,6 +816,7 @@ public void _test011_problem_categories() {
 		expectedProblemAttributes.put("NoImplicitStringConversionForCharArrayExpression", new ProblemAttributes(CategorizedProblem.CAT_POTENTIAL_PROGRAMMING_PROBLEM));
 		expectedProblemAttributes.put("NoMessageSendOnArrayType", new ProblemAttributes(CategorizedProblem.CAT_MEMBER));
 		expectedProblemAttributes.put("NoMessageSendOnBaseType", new ProblemAttributes(CategorizedProblem.CAT_MEMBER));
+		expectedProblemAttributes.put("NoSuperInInterfaceContext", new ProblemAttributes(CategorizedProblem.CAT_SYNTAX));
 		expectedProblemAttributes.put("NonBlankFinalLocalAssignment", new ProblemAttributes(CategorizedProblem.CAT_INTERNAL));
 		expectedProblemAttributes.put("NonConstantExpression", new ProblemAttributes(CategorizedProblem.CAT_INTERNAL));
 		expectedProblemAttributes.put("NonExternalizedStringLiteral", new ProblemAttributes(CategorizedProblem.CAT_NLS));
@@ -1712,6 +1713,7 @@ public void test012_compiler_problems_tuning() {
 		expectedProblemAttributes.put("NoImplicitStringConversionForCharArrayExpression", new ProblemAttributes(JavaCore.COMPILER_PB_CHAR_ARRAY_IN_STRING_CONCATENATION));
 		expectedProblemAttributes.put("NoMessageSendOnArrayType", SKIP);
 		expectedProblemAttributes.put("NoMessageSendOnBaseType", SKIP);
+		expectedProblemAttributes.put("NoSuperInInterfaceContext", SKIP);
 		expectedProblemAttributes.put("NonBlankFinalLocalAssignment", SKIP);
 		expectedProblemAttributes.put("NonConstantExpression", SKIP);
 		expectedProblemAttributes.put("NonExternalizedStringLiteral", new ProblemAttributes(JavaCore.COMPILER_PB_NON_NLS_STRING_LITERAL));

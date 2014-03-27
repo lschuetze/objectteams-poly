@@ -27,10 +27,14 @@
  *								Bug 424415 - [1.8][compiler] Eventual resolution of ReferenceExpression is not seen to be happening.
  *								Bug 426366 - [1.8][compiler] Type inference doesn't handle multiple candidate target types in outer overload context
  *								Bug 426290 - [1.8][compiler] Inference + overloading => wrong method resolution ?
+ *								Bug 427483 - [Java 8] Variables in lambdas sometimes can't be resolved
+ *								Bug 427438 - [1.8][compiler] NPE at org.eclipse.jdt.internal.compiler.ast.ConditionalExpression.generateCode(ConditionalExpression.java:280)
  *        Andy Clement (GoPivotal, Inc) aclement@gopivotal.com - Contributions for
  *                          Bug 409245 - [1.8][compiler] Type annotations dropped when call is routed through a synthetic bridge method
  *******************************************************************************/
 package org.eclipse.jdt.internal.compiler.ast;
+
+import static org.eclipse.jdt.internal.compiler.ast.ExpressionContext.INVOCATION_CONTEXT;
 
 import org.eclipse.jdt.core.compiler.CharOperation;
 import org.eclipse.jdt.internal.compiler.ASTVisitor;
@@ -103,7 +107,7 @@ import org.eclipse.objectteams.otdt.internal.core.compiler.util.TSuperHelper;
  * 			recognized the characteristic byte code sequence produced before, and patch it.
  *
  */
-public class ExplicitConstructorCall extends Statement implements Invocation, ExpressionContext {
+public class ExplicitConstructorCall extends Statement implements Invocation {
 
 	public Expression[] arguments;
 	public Expression qualification;
@@ -883,7 +887,7 @@ public class ExplicitConstructorCall extends Statement implements Invocation, Ex
 			this.inferenceContexts = new SimpleLookupTable();
 		this.inferenceContexts.put(method, infCtx18);
 	}
-	public InferenceContext18 getInferenceContext(ParameterizedGenericMethodBinding method) {
+	public InferenceContext18 getInferenceContext(ParameterizedMethodBinding method) {
 		if (this.inferenceContexts == null)
 			return null;
 		return (InferenceContext18) this.inferenceContexts.get(method);

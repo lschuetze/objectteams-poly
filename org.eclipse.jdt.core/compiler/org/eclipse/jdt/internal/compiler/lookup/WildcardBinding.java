@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2005, 2013 IBM Corporation and others.
+ * Copyright (c) 2005, 2014 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -19,10 +19,14 @@
  *								Bug 417295 - [1.8[[null] Massage type annotated null analysis to gel well with deep encoded type bindings.
  *								Bug 400874 - [1.8][compiler] Inference infrastructure should evolve to meet JLS8 18.x (Part G of JSR335 spec)
  *								Bug 423504 - [1.8] Implement "18.5.3 Functional Interface Parameterization Inference"
+ *								Bug 426676 - [1.8][compiler] Wrong generic method type inferred from lambda expression
+ *								Bug 427411 - [1.8][generics] JDT reports type mismatch when using method that returns generic type
+ *								Bug 428019 - [1.8][compiler] Type inference failure with nested generic invocation.
  *******************************************************************************/
 package org.eclipse.jdt.internal.compiler.lookup;
 
 import java.util.List;
+import java.util.Set;
 
 import org.eclipse.jdt.core.compiler.CharOperation;
 import org.eclipse.jdt.internal.compiler.ast.ASTNode;
@@ -547,12 +551,13 @@ public class WildcardBinding extends ReferenceBinding {
 			this.fPackage = someGenericType.getPackage();
 		}
 		if (someBound != null) {
-			this.tagBits |= someBound.tagBits & (TagBits.HasTypeVariable | TagBits.HasMissingType | TagBits.ContainsNestedTypeReferences | TagBits.HasNullTypeAnnotation);
+			this.tagBits |= someBound.tagBits & (TagBits.HasTypeVariable | TagBits.HasMissingType | TagBits.ContainsNestedTypeReferences | 
+					TagBits.HasNullTypeAnnotation | TagBits.HasCapturedWildcard);
 		}
 		if (someOtherBounds != null) {
 			for (int i = 0, max = someOtherBounds.length; i < max; i++) {
 				TypeBinding someOtherBound = someOtherBounds[i];
-				this.tagBits |= someOtherBound.tagBits & (TagBits.ContainsNestedTypeReferences | TagBits.HasNullTypeAnnotation);
+				this.tagBits |= someOtherBound.tagBits & (TagBits.ContainsNestedTypeReferences | TagBits.HasNullTypeAnnotation | TagBits.HasCapturedWildcard);
 			}
 		}
 	}
@@ -576,6 +581,23 @@ public class WildcardBinding extends ReferenceBinding {
      */
     public boolean isIntersectionType() {
     	return this.otherBounds != null;
+    }
+
+    @Override
+    public ReferenceBinding[] getIntersectingTypes() {
+    	if (isIntersectionType()) {
+    		ReferenceBinding[] allBounds = new ReferenceBinding[this.otherBounds.length+1];
+    		try {
+    			allBounds[0] = (ReferenceBinding) this.bound;
+    			System.arraycopy(this.otherBounds, 0, allBounds, 1, this.otherBounds.length);
+    		} catch (ClassCastException cce) {
+    			return null;
+    		} catch (ArrayStoreException ase) {
+    			return null;
+    		}
+    		return allBounds;
+    	}
+    	return null;
     }
 
 	public boolean isHierarchyConnected() {
@@ -633,14 +655,7 @@ public class WildcardBinding extends ReferenceBinding {
 		}
 		haveSubstitution |= currentOtherBounds != null;
 		if (haveSubstitution) {
-			WildcardBinding newWild = new WildcardBinding(this.genericType, 
-					this.rank,
-					currentBound,
-					currentOtherBounds,
-					this.boundKind,
-					this.environment);
-			newWild.tagBits = this.tagBits;
-			return newWild;
+			return this.environment.createWildcard(this.genericType, this.rank, currentBound, currentOtherBounds, this.boundKind);
 		}
 		return this;
 	}
@@ -724,17 +739,17 @@ public class WildcardBinding extends ReferenceBinding {
 			case Wildcard.EXTENDS :
 				TypeBinding resolveType = BinaryTypeBinding.resolveType(this.bound, this.environment, true /* raw conversion */);
 				this.bound = resolveType;
-				this.tagBits |= resolveType.tagBits & TagBits.ContainsNestedTypeReferences;
+				this.tagBits |= resolveType.tagBits & TagBits.ContainsNestedTypeReferences | TagBits.HasCapturedWildcard;
 				for (int i = 0, length = this.otherBounds == null ? 0 : this.otherBounds.length; i < length; i++) {
 					resolveType = BinaryTypeBinding.resolveType(this.otherBounds[i], this.environment, true /* raw conversion */);
 					this.otherBounds[i]= resolveType;
-					this.tagBits |= resolveType.tagBits & TagBits.ContainsNestedTypeReferences;
+					this.tagBits |= resolveType.tagBits & TagBits.ContainsNestedTypeReferences | TagBits.HasCapturedWildcard;
 				}
 				break;
 			case Wildcard.SUPER :
 				resolveType = BinaryTypeBinding.resolveType(this.bound, this.environment, true /* raw conversion */);
 				this.bound = resolveType;
-				this.tagBits |= resolveType.tagBits & TagBits.ContainsNestedTypeReferences;
+				this.tagBits |= resolveType.tagBits & TagBits.ContainsNestedTypeReferences | TagBits.HasCapturedWildcard;
 				break;
 			case Wildcard.UNBOUND :
 		}
@@ -904,5 +919,41 @@ public class WildcardBinding extends ReferenceBinding {
 
 	public TypeBinding unannotated() {
 		return this.hasTypeAnnotations() ? this.environment.getUnannotatedType(this) : this;
+	}
+	@Override
+	public TypeBinding uncapture(Scope scope) {
+		if ((this.tagBits & TagBits.HasCapturedWildcard) == 0)
+			return this;
+		TypeBinding freeBound = this.bound != null ? this.bound.uncapture(scope) : null;
+		int length = 0;
+		TypeBinding [] freeOtherBounds = this.otherBounds == null ? null : new TypeBinding[length = this.otherBounds.length];
+		for (int i = 0; i < length; i++) {
+			freeOtherBounds[i] = this.otherBounds[i] == null ? null : this.otherBounds[i].uncapture(scope);
+		}
+		return scope.environment().createWildcard(this.genericType, this.rank, freeBound, freeOtherBounds, this.boundKind, getTypeAnnotations());
+	}
+	@Override
+//{ObjectTeams:
+	protected
+// SH}
+	void collectInferenceVariables(Set<InferenceVariable> variables) {
+		if (this.bound != null)
+			this.bound.collectInferenceVariables(variables);
+		if (this.otherBounds != null)
+			for (int i = 0, length = this.otherBounds.length; i < length; i++)
+				this.otherBounds[i].collectInferenceVariables(variables);
+	}
+	@Override
+	public boolean mentionsAny(TypeBinding[] parameters, int idx) {
+		if (super.mentionsAny(parameters, idx))
+			return true;
+		if (this.bound != null && 	this.bound.mentionsAny(parameters, -1))
+			return true;
+		if (this.otherBounds != null) {
+			for (int i = 0, length = this.otherBounds.length; i < length; i++)
+				if (this.otherBounds[i].mentionsAny(parameters, -1))
+					return true;
+		}
+		return false;
 	}
 }

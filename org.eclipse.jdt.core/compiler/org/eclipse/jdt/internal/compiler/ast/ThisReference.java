@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2013 IBM Corporation and others.
+ * Copyright (c) 2000, 2014 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -70,6 +70,12 @@ public class ThisReference extends Reference {
 		if (methodScope.isStatic) {
 			methodScope.problemReporter().errorThisSuperInStatic(this);
 			return false;
+		} else if (this.isUnqualifiedSuper()) {
+			TypeDeclaration type = methodScope.referenceType();
+			if (type != null && TypeDeclaration.kind(type.modifiers) == TypeDeclaration.INTERFACE_DECL) {
+				methodScope.problemReporter().errorNoSuperInInterface(this);
+				return false;
+			}
 		}
 		if (receiverType != null)
 			scope.tagAsAccessingEnclosingInstanceStateOf(receiverType, false /* type variable access */);
@@ -139,6 +145,13 @@ public class ThisReference extends Reference {
 		ReferenceBinding enclosingReceiverType = scope.enclosingReceiverType();
 		if (!isImplicitThis() &&!checkAccess(scope, enclosingReceiverType)) {
 			return null;
+		}
+		this.resolvedType = enclosingReceiverType;
+		MethodScope methodScope = scope.namedMethodScope();
+		if (methodScope != null) {
+			MethodBinding method = methodScope.referenceMethodBinding();
+			if (method != null && method.receiver != null && TypeBinding.equalsEquals(method.receiver, this.resolvedType))
+				this.resolvedType = method.receiver;
 		}
 //{ObjectTeams: only implicit this returned directly:
 	  if (isImplicitThis())

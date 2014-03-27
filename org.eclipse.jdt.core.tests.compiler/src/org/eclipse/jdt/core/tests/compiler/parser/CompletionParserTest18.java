@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2013 IBM Corporation and others.
+ * Copyright (c) 2013, 2014 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -177,9 +177,7 @@ public void test0004() {
 	int cursorLocation = string.lastIndexOf(completeBehind) + completeBehind.length() - 1;
 
 	String expectedCompletionNodeToString = "<CompleteOnName:x>";
-	String expectedParentNodeToString = "static Foo f = (<no type> x5, <no type> x6) -> {\n" +
-										"  <CompleteOnName:x>;\n" +
-										"};";
+	String expectedParentNodeToString = "<NONE>";
 	String completionIdentifier = "x";
 	String expectedReplacedSource = "x";
 	String expectedUnitDisplayString =
@@ -934,6 +932,267 @@ public void test425084b() {
 					"    return () -> {\n" + 
 					"  <CompleteOnName:try>;\n" + 
 					"};\n" + 
+					"  }\n" + 
+					"}\n";
+
+			checkMethodParse(
+				string.toCharArray(),
+				cursorLocation,
+				expectedCompletionNodeToString,
+				expectedParentNodeToString,
+				expectedUnitDisplayString,
+				completionIdentifier,
+				expectedReplacedSource,
+				"diet ast");
+}
+// https://bugs.eclipse.org/bugs/show_bug.cgi?id=427255, [1.8][code assist] Hang due to infinite loop in Parser.automatonWillShift
+public void test427255() {
+	String string = 
+			"public class X {\n" +
+			"  public final String targetApplication;\n" +
+			"  public final String arguments;\n" +
+			"  public final String appUserModelID;\n" +
+			"  public X() {}\n" +
+			"}\n";
+
+			String completeBehind = "X";
+			int cursorLocation = string.lastIndexOf(completeBehind) + completeBehind.length() - 1;
+
+			String expectedCompletionNodeToString = "<CompleteOnType:X>";
+			String expectedParentNodeToString = "<NONE>";
+			String completionIdentifier = "X";
+			String expectedReplacedSource = "X";
+			String expectedUnitDisplayString =
+					"public class X {\n" + 
+					"  public final String targetApplication;\n" + 
+					"  public final String arguments;\n" + 
+					"  public final String appUserModelID;\n" + 
+					"  <CompleteOnType:X>;\n" + 
+					"  {\n" + 
+					"  }\n" + 
+					"  public X() {\n" + 
+					"  }\n" + 
+					"}\n";
+
+			checkMethodParse(
+				string.toCharArray(),
+				cursorLocation,
+				expectedCompletionNodeToString,
+				expectedParentNodeToString,
+				expectedUnitDisplayString,
+				completionIdentifier,
+				expectedReplacedSource,
+				"diet ast");
+}
+// https://bugs.eclipse.org/bugs/show_bug.cgi?id=427322, [1.8][code assist] Eclipse hangs upon completion just past lambda
+public void test427322() {
+	String string = 
+			"public class X {\n" +
+			"	interface I {\n" +
+			"		int foo();\n" +
+			"	}\n" +
+			"	public static void main(String[] args) {\n" +
+			"		I i = () -> 1, i.;\n" +
+			"	}\n" +
+			"}\n";
+
+			String completeBehind = "i.";
+			int cursorLocation = string.lastIndexOf(completeBehind) + completeBehind.length() - 1;
+
+			String expectedCompletionNodeToString = "<CompleteOnName:>";
+			String expectedParentNodeToString = "<NONE>";
+			String completionIdentifier = "";
+			String expectedReplacedSource = "";
+			String expectedUnitDisplayString =
+					"public class X {\n" + 
+					"  interface I {\n" + 
+					"    int foo();\n" + 
+					"  }\n" + 
+					"  public X() {\n" + 
+					"  }\n" + 
+					"  public static void main(String[] args) {\n" + 
+					"    I i;\n" + 
+					"    I i;\n" + 
+					"    <CompleteOnName:>;\n" + 
+					"  }\n" + 
+					"}\n";
+
+			checkMethodParse(
+				string.toCharArray(),
+				cursorLocation,
+				expectedCompletionNodeToString,
+				expectedParentNodeToString,
+				expectedUnitDisplayString,
+				completionIdentifier,
+				expectedReplacedSource,
+				"diet ast");
+}
+// https://bugs.eclipse.org/bugs/show_bug.cgi?id=427322, [1.8][code assist] Eclipse hangs upon completion just past lambda
+public void test427322a() {
+	String string = 
+			"public class X {\n" +
+			"	interface I {\n" +
+			"		int foo();\n" +
+			"	}\n" +
+			"	public static void main(String[] args) {\n" +
+			"		I i = 1, i.;\n" +
+			"	}\n" +
+			"}\n";
+
+			String completeBehind = "i.";
+			int cursorLocation = string.lastIndexOf(completeBehind) + completeBehind.length() - 1;
+
+			String expectedCompletionNodeToString = "<CompleteOnName:>";
+			String expectedParentNodeToString = "<NONE>";
+			String completionIdentifier = "";
+			String expectedReplacedSource = "";
+			String expectedUnitDisplayString =
+					"public class X {\n" + 
+					"  interface I {\n" + 
+					"    int foo();\n" + 
+					"  }\n" + 
+					"  public X() {\n" + 
+					"  }\n" + 
+					"  public static void main(String[] args) {\n" + 
+					"    I i;\n" + 
+					"    I i;\n" + 
+					"    <CompleteOnName:>;\n" + 
+					"  }\n" + 
+					"}\n";
+
+			checkMethodParse(
+				string.toCharArray(),
+				cursorLocation,
+				expectedCompletionNodeToString,
+				expectedParentNodeToString,
+				expectedUnitDisplayString,
+				completionIdentifier,
+				expectedReplacedSource,
+				"diet ast");
+}
+// https://bugs.eclipse.org/bugs/show_bug.cgi?id=427463, [1.8][content assist] No completions available in throw statement within lambda body
+public void test427463() {
+	String string = 
+			"interface FI1 {\n" +
+			"	int foo(int x) throws Exception;\n" +
+			"}\n" +
+			"class Test {\n" +
+			"	FI1 fi1= (int x) -> {\n" +
+			"		throw new Ex\n" +
+			"	};\n" +
+			"	private void test() throws Exception {\n" +
+			"		throw new Ex\n" +
+			"	}\n" +
+			"}\n";
+
+			String completeBehind = "new Ex";
+			int cursorLocation = string.indexOf(completeBehind) + completeBehind.length() - 1;
+
+			String expectedCompletionNodeToString = "<CompleteOnException:Ex>";
+			String expectedParentNodeToString = "throw new <CompleteOnException:Ex>();";
+			String completionIdentifier = "Ex";
+			String expectedReplacedSource = "Ex";
+			String expectedUnitDisplayString =
+					"interface FI1 {\n" + 
+					"  int foo(int x) throws Exception;\n" + 
+					"}\n" + 
+					"class Test {\n" + 
+					"  FI1 fi1 = (int x) ->   {\n" + 
+					"    <CompleteOnException:Ex>;\n" + 
+					"  };\n" + 
+					"  Test() {\n" + 
+					"  }\n" + 
+					"}\n";
+
+			checkMethodParse(
+				string.toCharArray(),
+				cursorLocation,
+				expectedCompletionNodeToString,
+				expectedParentNodeToString,
+				expectedUnitDisplayString,
+				completionIdentifier,
+				expectedReplacedSource,
+				"diet ast");
+}
+// https://bugs.eclipse.org/bugs/show_bug.cgi?id=427117, [1.8][code assist] code assist after lambda as a parameter does not work
+public void test427117() {
+	String string = 
+			"import java.util.ArrayList;\n" +
+			"import java.util.List;\n" +
+			"public class X {\n" +
+			"	public static void main(String[] args) {\n" +
+			"		bar();\n" +
+			"	}\n" +
+			"	public static void bar() {\n" +
+			"		List<Integer> list = new ArrayList<Integer>();\n" +
+			"		list.forEach(s -> System.out.println(s));\n" +
+			"		list.\n" +
+			"	}\n" +
+			"}\n";
+
+			String completeBehind = "list.";
+			int cursorLocation = string.lastIndexOf(completeBehind) + completeBehind.length() - 1;
+
+			String expectedCompletionNodeToString = "<CompleteOnName:list.>";
+			String expectedParentNodeToString = "<NONE>";
+			String completionIdentifier = "";
+			String expectedReplacedSource = "list.";
+			String expectedUnitDisplayString =
+					"import java.util.ArrayList;\n" + 
+					"import java.util.List;\n" + 
+					"public class X {\n" + 
+					"  public X() {\n" + 
+					"  }\n" + 
+					"  public static void main(String[] args) {\n" + 
+					"  }\n" + 
+					"  public static void bar() {\n" + 
+					"    List<Integer> list;\n" + 
+					"    <CompleteOnName:list.>;\n" + 
+					"  }\n" + 
+					"}\n";
+
+			checkMethodParse(
+				string.toCharArray(),
+				cursorLocation,
+				expectedCompletionNodeToString,
+				expectedParentNodeToString,
+				expectedUnitDisplayString,
+				completionIdentifier,
+				expectedReplacedSource,
+				"diet ast");
+}
+// https://bugs.eclipse.org/bugs/show_bug.cgi?id=427532, [1.8][code assist] Completion engine does not like intersection casts
+public void test427532() {
+	String string = 
+			"import java.io.Serializable;\n" +
+			"interface I {\n" +
+			"	void foo();\n" +
+			"}\n" +
+			"public class X {\n" +
+			"	public static void main(String[] args) {\n" +
+			"		I i = (I & Serializable) () -> {};\n" +
+			"		syso\n" +
+			"	}\n" +
+			"}\n";
+
+			String completeBehind = "syso";
+			int cursorLocation = string.lastIndexOf(completeBehind) + completeBehind.length() - 1;
+
+			String expectedCompletionNodeToString = "<CompleteOnName:syso>";
+			String expectedParentNodeToString = "<NONE>";
+			String completionIdentifier = "syso";
+			String expectedReplacedSource = "syso";
+			String expectedUnitDisplayString =
+					"import java.io.Serializable;\n" + 
+					"interface I {\n" + 
+					"  void foo();\n" + 
+					"}\n" + 
+					"public class X {\n" + 
+					"  public X() {\n" + 
+					"  }\n" + 
+					"  public static void main(String[] args) {\n" + 
+					"    I i;\n" + 
+					"    <CompleteOnName:syso>;\n" + 
 					"  }\n" + 
 					"}\n";
 

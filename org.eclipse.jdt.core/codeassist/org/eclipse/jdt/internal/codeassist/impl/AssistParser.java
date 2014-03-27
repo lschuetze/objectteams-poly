@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2013 IBM Corporation and others.
+ * Copyright (c) 2000, 2014 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -21,8 +21,29 @@ package org.eclipse.jdt.internal.codeassist.impl;
  *
  */
 
-import org.eclipse.jdt.internal.codeassist.complete.CompletionOnKeyword2;
-import org.eclipse.jdt.internal.compiler.ast.*;
+import org.eclipse.jdt.internal.compiler.ast.ASTNode;
+import org.eclipse.jdt.internal.compiler.ast.AbstractMethodDeclaration;
+import org.eclipse.jdt.internal.compiler.ast.AbstractVariableDeclaration;
+import org.eclipse.jdt.internal.compiler.ast.Annotation;
+import org.eclipse.jdt.internal.compiler.ast.Block;
+import org.eclipse.jdt.internal.compiler.ast.CompilationUnitDeclaration;
+import org.eclipse.jdt.internal.compiler.ast.ConstructorDeclaration;
+import org.eclipse.jdt.internal.compiler.ast.ExplicitConstructorCall;
+import org.eclipse.jdt.internal.compiler.ast.Expression;
+import org.eclipse.jdt.internal.compiler.ast.FieldDeclaration;
+import org.eclipse.jdt.internal.compiler.ast.ForeachStatement;
+import org.eclipse.jdt.internal.compiler.ast.ImportReference;
+import org.eclipse.jdt.internal.compiler.ast.Initializer;
+import org.eclipse.jdt.internal.compiler.ast.LambdaExpression;
+import org.eclipse.jdt.internal.compiler.ast.LocalDeclaration;
+import org.eclipse.jdt.internal.compiler.ast.MessageSend;
+import org.eclipse.jdt.internal.compiler.ast.MethodDeclaration;
+import org.eclipse.jdt.internal.compiler.ast.NameReference;
+import org.eclipse.jdt.internal.compiler.ast.SingleNameReference;
+import org.eclipse.jdt.internal.compiler.ast.Statement;
+import org.eclipse.jdt.internal.compiler.ast.SuperReference;
+import org.eclipse.jdt.internal.compiler.ast.TypeDeclaration;
+import org.eclipse.jdt.internal.compiler.ast.TypeReference;
 import org.eclipse.jdt.internal.compiler.classfmt.ClassFileConstants;
 import org.eclipse.jdt.internal.compiler.lookup.Binding;
 import org.eclipse.jdt.internal.compiler.lookup.ExtraCompilerModifiers;
@@ -590,17 +611,19 @@ protected void consumeOpenBlock() {
 	this.blockStarts[this.realBlockPtr] = this.scanner.startPosition;
 	if (requireExtendedRecovery()) {
 		// This is an epsilon production: We are in the state with kernel item: Block ::= .OpenBlock LBRACE BlockStatementsopt RBRACE
-		stackLength = this.stack.length;
-		if (++this.stateStackTop >= stackLength - 1) {   // Need two slots.
-			System.arraycopy(
-				this.stack, 0,
-				this.stack = new int[stackLength + StackIncrement], 0,
-				stackLength);
+		if (this.currentToken == TokenNameLBRACE && this.unstackedAct > NUM_RULES) { // wait for chain reductions to finish before commit.
+			stackLength = this.stack.length;
+			if (++this.stateStackTop >= stackLength - 1) {   // Need two slots.
+				System.arraycopy(
+						this.stack, 0,
+						this.stack = new int[stackLength + StackIncrement], 0,
+						stackLength);
+			}
+			this.stack[this.stateStackTop++] = this.unstackedAct; // transition to Block ::= OpenBlock  .LBRACE BlockStatementsopt RBRACE
+			this.stack[this.stateStackTop] = tAction(this.unstackedAct, this.currentToken); // transition to Block ::= OpenBlock LBRACE  .BlockStatementsopt RBRACE 
+			commit();
+			this.stateStackTop -= 2;
 		}
-		this.stack[this.stateStackTop++] = this.unstackedAct; // transition to Block ::= OpenBlock  .LBRACE BlockStatementsopt RBRACE
-		this.stack[this.stateStackTop] = tAction(this.unstackedAct, this.currentToken); // transition to Block ::= OpenBlock LBRACE  .BlockStatementsopt RBRACE 
-		commit();
-		this.stateStackTop -= 2;
 	}
 }
 protected void consumeOpenFakeBlock() {
@@ -1123,6 +1146,7 @@ protected TypeReference getTypeReference(int dim) {
 }
 protected TypeReference getTypeReference(int dim, boolean liftingTypeAllowed) {
 // orig:
+
 	int index;
 
 	/* no need to take action if not inside completed identifiers */
@@ -1773,20 +1797,40 @@ public void parseBlockStatements(AbstractMethodMappingDeclaration mapping, Compi
 	mapping.analyzeParameterMappings(this);
 }
 // SH}
-protected void popElement(int kind){
-	if(this.elementPtr < 0 || this.elementKindStack[this.elementPtr] != kind) return;
 
-	this.previousKind = this.elementKindStack[this.elementPtr];
-	this.previousInfo = this.elementInfoStack[this.elementPtr];
-	this.previousObjectInfo = this.elementObjectInfoStack[this.elementPtr];
-
-	this.elementObjectInfoStack[this.elementPtr] = null;
-
-	switch (kind) {
-		default :
-			this.elementPtr--;
-			break;
+//the name is a misnomer, we allow "pop"s not just at the TOS. Lambda wants to be sticky till fully reduced, however we do want other elements poppped at the right point, so ... 
+protected void popElement(int kind) {
+	
+	if (this.elementPtr < 0)
+		return;
+	
+	int stackPointer = this.elementPtr;
+	
+	if (this.elementKindStack[stackPointer] == K_LAMBDA_EXPRESSION_DELIMITER) {
+		if (kind == K_FIELD_INITIALIZER_DELIMITER) // wait until lambda is reduced.
+			return;
 	}
+	
+	if (kind != K_LAMBDA_EXPRESSION_DELIMITER) {
+		while (this.elementKindStack[stackPointer] == K_LAMBDA_EXPRESSION_DELIMITER) {
+			stackPointer --;
+		}
+	}
+	if (stackPointer < 0 || this.elementKindStack[stackPointer] != kind)
+		return;
+	
+	this.previousKind = this.elementKindStack[stackPointer];
+	this.previousInfo = this.elementInfoStack[stackPointer];
+	this.previousObjectInfo = this.elementObjectInfoStack[stackPointer];
+
+	final int length = this.elementPtr - stackPointer;
+	if (length > 0) {
+		System.arraycopy(this.elementKindStack, stackPointer + 1, this.elementKindStack, stackPointer, length);
+		System.arraycopy(this.elementInfoStack, stackPointer + 1, this.elementInfoStack, stackPointer, length);
+		System.arraycopy(this.elementObjectInfoStack, stackPointer + 1, this.elementObjectInfoStack, stackPointer, length);
+	}
+	this.elementObjectInfoStack[this.elementPtr] = null;
+	this.elementPtr--;
 }
 protected void popUntilElement(int kind){
 	if(this.elementPtr < 0) return;
@@ -1845,8 +1889,6 @@ protected void prepareForHeaders() {
 }
 
 public boolean requireExtendedRecovery() {
-	if (this.assistNode instanceof TypeReference || this.assistNode instanceof CompletionOnKeyword2)
-		return false;
 	return lastIndexOfElement(K_LAMBDA_EXPRESSION_DELIMITER) >= 0;
 }
 

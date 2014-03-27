@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2013 IBM Corporation and others.
+ * Copyright (c) 2000, 2014 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -31,6 +31,8 @@
  *								Bug 416176 - [1.8][compiler][null] null type annotations cause grief on type variables
  *								Bug 400874 - [1.8][compiler] Inference infrastructure should evolve to meet JLS8 18.x (Part G of JSR335 spec)
  *								Bug 423504 - [1.8] Implement "18.5.3 Functional Interface Parameterization Inference"
+ *								Bug 426792 - [1.8][inference][impl] generify new type inference engine
+ *								Bug 428019 - [1.8][compiler] Type inference failure with nested generic invocation.
  *      Jesper S Moller - Contributions for
  *								bug 382701 - [1.8][compiler] Implement semantic analysis of Lambda expressions & Reference expression
  *								bug 412153 - [1.8][compiler] Check validity of annotations which may be repeatable
@@ -126,17 +128,17 @@ abstract public class ReferenceBinding extends AbstractOTReferenceBinding {
 		public boolean hasTypeBit(int bit) { return false; }
 	};
 
-	private static final Comparator FIELD_COMPARATOR = new Comparator() {
-		public int compare(Object o1, Object o2) {
-			char[] n1 = ((FieldBinding) o1).name;
-			char[] n2 = ((FieldBinding) o2).name;
+	private static final Comparator<FieldBinding> FIELD_COMPARATOR = new Comparator<FieldBinding>() {
+		public int compare(FieldBinding o1, FieldBinding o2) {
+			char[] n1 = o1.name;
+			char[] n2 = o2.name;
 			return ReferenceBinding.compare(n1, n2, n1.length, n2.length);
 		}
 	};
-	private static final Comparator METHOD_COMPARATOR = new Comparator() {
-		public int compare(Object o1, Object o2) {
-			MethodBinding m1 = (MethodBinding) o1;
-			MethodBinding m2 = (MethodBinding) o2;
+	private static final Comparator<MethodBinding> METHOD_COMPARATOR = new Comparator<MethodBinding>() {
+		public int compare(MethodBinding o1, MethodBinding o2) {
+			MethodBinding m1 = o1;
+			MethodBinding m2 = o2;
 			char[] s1 = m1.selector;
 			char[] s2 = m2.selector;
 			int c = ReferenceBinding.compare(s1, s2, s1.length, s2.length);
@@ -1699,6 +1701,54 @@ public boolean isCompatibleViaLowering(ReferenceBinding other) {
 }
 // SH}
 
+public boolean isSubtypeOf(TypeBinding other) {
+	if (isSubTypeOfRTL(other))
+		return true;
+	// TODO: if this has wildcards, perform capture before the next call:
+	TypeBinding candidate = findSuperTypeOriginatingFrom(other);
+	if (candidate == null)
+		return false;
+	if (TypeBinding.equalsEquals(candidate, other))
+		return true;
+	
+	// T<Ai...> <: T#RAW:
+	if (other.isRawType() && TypeBinding.equalsEquals(candidate.erasure(), other.erasure()))
+		return true;
+	
+	TypeBinding[] sis = other.typeArguments();
+	TypeBinding[] tis = candidate.typeArguments();
+	if (tis == null || sis == null)
+		return false;
+	if (sis.length != tis.length)
+		return false;
+	for (int i = 0; i < sis.length; i++) {
+		if (!tis[i].isTypeArgumentContainedBy(sis[i]))
+			return false;
+	}
+	return true;
+}
+
+protected boolean isSubTypeOfRTL(TypeBinding other) {
+	if (TypeBinding.equalsEquals(this, other))
+		return true;
+	if (other instanceof CaptureBinding) {
+		// for this one kind we must first unwrap the rhs:
+		TypeBinding lower = ((CaptureBinding) other).lowerBound;
+		return (lower != null && isSubtypeOf(lower));
+	}
+	if (other instanceof ReferenceBinding) {
+		TypeBinding[] intersecting = ((ReferenceBinding) other).getIntersectingTypes();
+		if (intersecting != null) {
+			for (int i = 0; i < intersecting.length; i++) {
+				if (!isSubtypeOf(intersecting[i]))
+					return false;
+			}
+			return true;
+		}
+	}
+	return false;
+}
+
 /**
  * Answer true if the receiver has default visibility
  */
@@ -2265,28 +2315,13 @@ private MethodBinding [] getInterfaceAbstractContracts(Scope scope) throws Inval
 	MethodBinding [] contracts = new MethodBinding[0];
 	int contractsCount = 0;
 	int contractsLength = 0;
+	
+	// -- the following are used for early termination.
 	MethodBinding aContract = null;
 	int contractParameterLength = 0;
 	char [] contractSelector = null;
+	// ---
 	
-	for (int i = 0, length = methods == null ? 0 : methods.length; i < length; i++) {
-		final MethodBinding method = methods[i];
-		if (!method.isAbstract() || method.redeclaresPublicObjectMethod(scope)) continue; // skips statics, defaults, public object methods ...
-		final boolean validBinding = method.isValidBinding();
-		if (aContract == null && validBinding) {
-			aContract = method;
-			contractParameterLength = aContract.parameters.length;
-			contractSelector = aContract.selector;
-		} else {
-			if (!validBinding || method.parameters.length != contractParameterLength || !CharOperation.equals(contractSelector, method.selector)) {
-				throw new InvalidInputException("Not a functional interface"); //$NON-NLS-1$
-			}
-		}
-		if (contractsCount == contractsLength) {
-			System.arraycopy(contracts, 0, contracts = new MethodBinding[contractsLength += 16], 0, contractsCount);
-		}
-		contracts[contractsCount++] = method;
-	}
 	ReferenceBinding [] superInterfaces = superInterfaces();
 	for (int i = 0, length = superInterfaces.length; i < length; i++) {
 		MethodBinding [] superInterfaceContracts = superInterfaces[i].getInterfaceAbstractContracts(scope);
@@ -2309,6 +2344,42 @@ private MethodBinding [] getInterfaceAbstractContracts(Scope scope) throws Inval
 			System.arraycopy(superInterfaceContracts, 0, contracts, contractsCount,	superInterfaceContractsLength);
 			contractsCount += superInterfaceContractsLength;
 		}
+	}
+	for (int i = 0, length = methods == null ? 0 : methods.length; i < length; i++) {
+		final MethodBinding method = methods[i];
+		if (method.isStatic() || method.redeclaresPublicObjectMethod(scope)) continue;
+		if (method.isDefaultMethod()) {
+			for (int j = 0; j < contractsCount; j++) {
+				if (contracts[j] == null)
+					continue;
+				if (MethodVerifier.doesMethodOverride(method, contracts[j], scope.environment())) {
+					if (aContract == contracts[j]) {
+						aContract = null;
+						contractParameterLength = 0;
+						contractSelector = null;
+					}
+					contractsCount--;
+					// abstract method from super type rendered default by present interface ==> contracts[j] = null;
+					if (j < contractsCount)
+						System.arraycopy(contracts, j+1, contracts, j, contractsCount - j);
+				}
+			}
+			continue; // skip default method itself
+		}
+		final boolean validBinding = method.isValidBinding();
+		if (aContract == null && validBinding) {
+			aContract = method;
+			contractParameterLength = aContract.parameters.length;
+			contractSelector = aContract.selector;
+		} else {
+			if (!validBinding || method.parameters.length != contractParameterLength || !CharOperation.equals(contractSelector, method.selector)) {
+				throw new InvalidInputException("Not a functional interface"); //$NON-NLS-1$
+			}
+		}
+		if (contractsCount == contractsLength) {
+			System.arraycopy(contracts, 0, contracts = new MethodBinding[contractsLength += 16], 0, contractsCount);
+		}
+		contracts[contractsCount++] = method;
 	}
 	if (contractsCount < contractsLength) {
 		System.arraycopy(contracts, 0, contracts = new MethodBinding[contractsCount], 0, contractsCount);

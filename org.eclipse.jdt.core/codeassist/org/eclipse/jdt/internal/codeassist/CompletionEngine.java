@@ -712,7 +712,7 @@ public final class CompletionEngine
 		this.lookupEnvironment =
 			new LookupEnvironment(this, this.compilerOptions, this.problemReporter, nameEnvironment);
 		this.parser =
-			new CompletionParser(this.problemReporter, this.requestor.isExtendedContextRequired());
+			new CompletionParser(this.problemReporter, this.requestor.isExtendedContextRequired(), monitor);
 		this.owner = owner;
 		this.monitor = monitor;
 	}
@@ -2601,8 +2601,10 @@ public final class CompletionEngine
 	private void completionOnMarkerAnnotationName(ASTNode astNode, Binding qualifiedBinding, Scope scope) {
 		CompletionOnMarkerAnnotationName annot = (CompletionOnMarkerAnnotationName) astNode;
 
-		CompletionOnAnnotationOfType fakeType = (CompletionOnAnnotationOfType)scope.parent.referenceContext();
-		if (fakeType.annotations[0] == annot) {
+		// When completion is inside lambda body, the fake type cannot be attached to the lambda.
+		ReferenceContext referenceContext = scope.parent.referenceContext();
+		CompletionOnAnnotationOfType fakeType = (CompletionOnAnnotationOfType) (referenceContext instanceof CompletionOnAnnotationOfType ? referenceContext : null);
+		if (fakeType != null && fakeType.annotations[0] == annot) {
 			// When the completion is inside a method body the annotation cannot be accuratly attached to the correct node by completion recovery.
 			// So 'targetedElement' is not computed in this case.
 			if (scope.parent.parent == null || !(scope.parent.parent instanceof MethodScope)) {
@@ -2619,7 +2621,7 @@ public final class CompletionEngine
 
 			if (scope.parent.parent != null &&
 					!(scope.parent.parent instanceof MethodScope) &&
-					!fakeType.isParameter) {
+					fakeType != null && !fakeType.isParameter) {
 
 				if (this.completionToken.length <= Keywords.INTERFACE.length
 					&& CharOperation.prefixEquals(this.completionToken, Keywords.INTERFACE, false /* ignore case */
@@ -4454,9 +4456,9 @@ public final class CompletionEngine
 		if (annotatedElement instanceof TypeDeclaration) {
 			TypeDeclaration annotatedTypeDeclaration = (TypeDeclaration) annotatedElement;
 			if (TypeDeclaration.kind(annotatedTypeDeclaration.modifiers) == TypeDeclaration.ANNOTATION_TYPE_DECL) {
-				return TagBits.AnnotationForAnnotationType | TagBits.AnnotationForType;
+				return TagBits.AnnotationForAnnotationType | TagBits.AnnotationForType | TagBits.AnnotationForTypeUse;
 			}
-			return TagBits.AnnotationForType;
+			return TagBits.AnnotationForType | TagBits.AnnotationForTypeUse;
 		} else if (annotatedElement instanceof FieldDeclaration) {
 			if (fakeNode.isParameter) {
 				return TagBits.AnnotationForParameter;
@@ -12813,18 +12815,18 @@ public final class CompletionEngine
 			if(target != 0 && (target & TagBits.AnnotationForPackage) == 0) {
 				return false;
 			}
-		} else if ((this.targetedElement & TagBits.AnnotationForType) != 0) {
+		} else if ((this.targetedElement & (TagBits.AnnotationForType | TagBits.AnnotationForTypeUse)) != 0) {
 			if (scope.parent != null &&
 					scope.parent.parent != null &&
 					scope.parent.referenceContext() instanceof CompletionOnAnnotationOfType &&
 					scope.parent.parent instanceof CompilationUnitScope) {
 				long target = typeBinding.getAnnotationTagBits() & TagBits.AnnotationTargetMASK;
 				if ((this.targetedElement & TagBits.AnnotationForAnnotationType) != 0) {
-					if(target != 0 && (target &(TagBits.AnnotationForType | TagBits.AnnotationForAnnotationType)) == 0) {
+					if(target != 0 && (target &(TagBits.AnnotationForType | TagBits.AnnotationForAnnotationType | TagBits.AnnotationForTypeUse)) == 0) {
 						return false;
 					}
 				} else {
-					if(target != 0 && (target &(TagBits.AnnotationForType)) == 0) {
+					if (target != 0 && (target & (TagBits.AnnotationForType | TagBits.AnnotationForTypeUse)) == 0) {
 						return false;
 					}
 				}

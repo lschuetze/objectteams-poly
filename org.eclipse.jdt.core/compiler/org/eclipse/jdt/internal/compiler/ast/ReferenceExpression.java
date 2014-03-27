@@ -25,11 +25,15 @@
  *							Bug 424637 - [1.8][compiler][null] AIOOB in ReferenceExpression.resolveType with a method reference to Files::walk
  *							Bug 424415 - [1.8][compiler] Eventual resolution of ReferenceExpression is not seen to be happening.
  *							Bug 424403 - [1.8][compiler] Generic method call with method reference argument fails to resolve properly.
+ *							Bug 427196 - [1.8][compiler] Compiler error for method reference to overloaded method
+ *							Bug 427438 - [1.8][compiler] NPE at org.eclipse.jdt.internal.compiler.ast.ConditionalExpression.generateCode(ConditionalExpression.java:280)
  *        Andy Clement (GoPivotal, Inc) aclement@gopivotal.com - Contribution for
  *                          Bug 383624 - [1.8][compiler] Revive code generation support for type annotations (from Olivier's work)
  *******************************************************************************/
 
 package org.eclipse.jdt.internal.compiler.ast;
+
+import static org.eclipse.jdt.internal.compiler.ast.ExpressionContext.INVOCATION_CONTEXT;
 
 import org.eclipse.jdt.core.compiler.CharOperation;
 import org.eclipse.jdt.internal.compiler.ASTVisitor;
@@ -38,8 +42,10 @@ import org.eclipse.jdt.internal.compiler.IErrorHandlingPolicy;
 import org.eclipse.jdt.internal.compiler.classfmt.ClassFileConstants;
 import org.eclipse.jdt.internal.compiler.codegen.CodeStream;
 import org.eclipse.jdt.internal.compiler.codegen.ConstantPool;
+import org.eclipse.jdt.internal.compiler.flow.ExceptionHandlingFlowContext;
 import org.eclipse.jdt.internal.compiler.flow.FlowContext;
 import org.eclipse.jdt.internal.compiler.flow.FlowInfo;
+import org.eclipse.jdt.internal.compiler.flow.UnconditionalFlowInfo;
 import org.eclipse.jdt.internal.compiler.impl.CompilerOptions;
 import org.eclipse.jdt.internal.compiler.impl.Constant;
 import org.eclipse.jdt.internal.compiler.lookup.ArrayBinding;
@@ -48,8 +54,6 @@ import org.eclipse.jdt.internal.compiler.lookup.BlockScope;
 import org.eclipse.jdt.internal.compiler.lookup.InferenceContext18;
 import org.eclipse.jdt.internal.compiler.lookup.InvocationSite;
 import org.eclipse.jdt.internal.compiler.lookup.MethodBinding;
-import org.eclipse.jdt.internal.compiler.lookup.NestedTypeBinding;
-import org.eclipse.jdt.internal.compiler.lookup.ParameterizedTypeBinding;
 import org.eclipse.jdt.internal.compiler.lookup.PolyTypeBinding;
 import org.eclipse.jdt.internal.compiler.lookup.ProblemReasons;
 import org.eclipse.jdt.internal.compiler.lookup.ReferenceBinding;
@@ -60,6 +64,7 @@ import org.eclipse.jdt.internal.compiler.lookup.TagBits;
 import org.eclipse.jdt.internal.compiler.lookup.TypeBinding;
 import org.eclipse.jdt.internal.compiler.lookup.TypeConstants;
 import org.eclipse.jdt.internal.compiler.lookup.TypeIds;
+import org.eclipse.jdt.internal.compiler.parser.Parser;
 import org.eclipse.jdt.internal.compiler.problem.ProblemSeverities;
 
 public class ReferenceExpression extends FunctionalExpression implements InvocationSite {
@@ -76,6 +81,7 @@ public class ReferenceExpression extends FunctionalExpression implements Invocat
 	MethodBinding syntheticAccessor;	// synthetic accessor for inner-emulation
 	private int depth;
 	private MethodBinding exactMethodBinding; // != null ==> exact method reference.
+	private boolean receiverPrecedesParameters = false;
 	
 	public ReferenceExpression() {
 		super();
@@ -90,8 +96,71 @@ public class ReferenceExpression extends FunctionalExpression implements Invocat
 		this.sourceEnd = sourceEndPosition;
 	}
  
+	public void generateImplicitLambda(BlockScope currentScope, CodeStream codeStream, boolean valueRequired) {
+		
+		final Parser parser = new Parser(this.enclosingScope.problemReporter(), false);
+		final char[] source = this.compilationResult.getCompilationUnit().getContents();
+		ReferenceExpression copy =  (ReferenceExpression) parser.parseExpression(source, this.sourceStart, this.sourceEnd - this.sourceStart + 1, 
+										this.enclosingScope.referenceCompilationUnit(), false /* record line separators */);
+		
+		int argc = this.descriptor.parameters.length;
+		
+		LambdaExpression implicitLambda = new LambdaExpression(this.compilationResult, false);
+		Argument [] arguments = new Argument[argc];
+		for (int i = 0; i < argc; i++)
+			arguments[i] = new Argument(("arg" + i).toCharArray(), 0, null, 0, true); //$NON-NLS-1$
+		implicitLambda.setArguments(arguments);
+		implicitLambda.setExpressionContext(this.expressionContext);
+		implicitLambda.setExpectedType(this.expectedType);
+		
+		int parameterShift = this.receiverPrecedesParameters ? 1 : 0;
+		Expression [] argv = new SingleNameReference[argc - parameterShift];
+		for (int i = 0, length = argv.length; i < length; i++) {
+			String name = "arg" + (i + parameterShift); //$NON-NLS-1$
+			argv[i] = new SingleNameReference(name.toCharArray(), 0);
+		}
+		if (isMethodReference()) {
+			MessageSend message = new MessageSend();
+			message.selector = this.selector;
+			message.receiver = this.receiverPrecedesParameters ? new SingleNameReference("arg0".toCharArray(), 0) : copy.lhs; //$NON-NLS-1$
+			message.typeArguments = copy.typeArguments;
+			message.arguments = argv;
+			implicitLambda.setBody(message);
+		} else {
+			AllocationExpression allocation = new AllocationExpression();
+			if (this.lhs instanceof TypeReference) {
+				allocation.type = (TypeReference) this.lhs;
+			} else if (this.lhs instanceof SingleNameReference) {
+				allocation.type = new SingleTypeReference(((SingleNameReference) this.lhs).token, 0);
+			} else if (this.lhs instanceof QualifiedNameReference) {
+				allocation.type = new QualifiedTypeReference(((QualifiedNameReference) this.lhs).tokens, new long [((QualifiedNameReference) this.lhs).tokens.length]);
+			} else {
+				throw new IllegalStateException("Unexpected node type"); //$NON-NLS-1$
+			}
+			allocation.typeArguments = copy.typeArguments;
+			allocation.arguments = argv;
+			implicitLambda.setBody(allocation);
+		}
+		
+		// Process the lambda, taking care not to double report diagnostics. Don't expect any from resolve, Any from code generation should surface, but not those from flow analysis.
+		implicitLambda.resolve(currentScope);
+		IErrorHandlingPolicy oldPolicy = currentScope.problemReporter().switchErrorHandlingPolicy(silentErrorHandlingPolicy);
+		try {
+			implicitLambda.analyseCode(currentScope, 
+					new ExceptionHandlingFlowContext(null, this, Binding.NO_EXCEPTIONS, null, currentScope, FlowInfo.DEAD_END), 
+					UnconditionalFlowInfo.fakeInitializedFlowInfo(currentScope.outerMostMethodScope().analysisIndex, currentScope.referenceType().maxFieldCount));
+		} finally {
+			currentScope.problemReporter().switchErrorHandlingPolicy(oldPolicy);
+		}
+		implicitLambda.generateCode(currentScope, codeStream, valueRequired);
+	}	
+	
 	public void generateCode(BlockScope currentScope, CodeStream codeStream, boolean valueRequired) {
 		this.actualMethodBinding = this.binding; // grab before synthetics come into play.
+		if (this.binding.isVarargs()) {
+			generateImplicitLambda(currentScope, codeStream, valueRequired);
+			return;
+		}
 		SourceTypeBinding sourceType = currentScope.enclosingSourceType();
 		if (this.receiverType.isArrayType()) {
 			if (isConstructorReference()) {
@@ -138,12 +207,7 @@ public class ReferenceExpression extends FunctionalExpression implements Invocat
 			if (this.isConstructorReference()) {
 				ReferenceBinding[] enclosingInstances = Binding.UNINITIALIZED_REFERENCE_TYPES;
 				if (this.receiverType.isNestedType()) {
-					NestedTypeBinding nestedType = null;
-					if (this.receiverType instanceof ParameterizedTypeBinding) {
-						nestedType = (NestedTypeBinding)((ParameterizedTypeBinding) this.receiverType).genericType();
-					} else {
-						nestedType = (NestedTypeBinding) this.receiverType;
-					}
+					ReferenceBinding nestedType = (ReferenceBinding) this.receiverType;
 					if ((enclosingInstances = nestedType.syntheticEnclosingInstanceTypes()) != null) {
 						int length = enclosingInstances.length;
 						argumentsSize = length;
@@ -159,7 +223,7 @@ public class ReferenceExpression extends FunctionalExpression implements Invocat
 					}
 					// Reject types that capture outer local arguments, these cannot be manufactured by the metafactory.
 					if (nestedType.syntheticOuterLocalVariables() != null) {
-						currentScope.problemReporter().noSuchEnclosingInstance(nestedType.enclosingType, this, false);
+						currentScope.problemReporter().noSuchEnclosingInstance(nestedType.enclosingType(), this, false);
 						return;
 					}
 				}
@@ -186,6 +250,9 @@ public class ReferenceExpression extends FunctionalExpression implements Invocat
 			return;
 		
 		MethodBinding codegenBinding = this.binding.original();
+		if (codegenBinding.isVarargs())
+			return; // completely managed by transforming into implicit lambda expression.
+		
 		SourceTypeBinding enclosingSourceType = currentScope.enclosingSourceType();
 		
 		if (this.isConstructorReference()) {
@@ -266,7 +333,7 @@ public class ReferenceExpression extends FunctionalExpression implements Invocat
     					scope.problemReporter().illegalUsageOfWildcard(typeReference);
     				}
     			}
-    			if (this.typeArgumentsHaveErrors)
+    			if (this.typeArgumentsHaveErrors || lhsType == null)
     				return this.resolvedType = null;
     			if (isConstructorReference() && lhsType.isRawType()) {
     				scope.problemReporter().rawConstructorReferenceNotWithExplicitTypeArguments(this.typeArguments);
@@ -274,9 +341,9 @@ public class ReferenceExpression extends FunctionalExpression implements Invocat
     			}
     		}
     	} else {
-    		if (this.typeArgumentsHaveErrors)
-				return this.resolvedType = null;
     		lhsType = this.lhs.resolvedType;
+    		if (this.typeArgumentsHaveErrors || lhsType == null)
+				return this.resolvedType = null;
     	}
 
     	if (this.expectedType == null && this.expressionContext == INVOCATION_CONTEXT) {
@@ -379,7 +446,7 @@ public class ReferenceExpression extends FunctionalExpression implements Invocat
     	}
 
         MethodBinding anotherMethod = null;
-        int paramOffset = 0;
+        this.receiverPrecedesParameters = false;
         if (!this.haveReceiver && isMethodReference && parametersLength > 0) {
         	final TypeBinding potentialReceiver = descriptorParameters[0];
         	if (potentialReceiver.isCompatibleWith(this.receiverType, scope)) {
@@ -418,7 +485,7 @@ public class ReferenceExpression extends FunctionalExpression implements Invocat
         	}
         } else if (anotherMethod != null && anotherMethod.isValidBinding()) {
         	this.binding = anotherMethod;
-        	paramOffset = 1; // 0 is receiver, real parameters start at 1
+        	this.receiverPrecedesParameters = true; // 0 is receiver, real parameters start at 1
         	this.bits &= ~ASTNode.DepthMASK;
         	if (anotherMethodDepth > 0) {
         		this.bits |= (anotherMethodDepth & 0xFF) << ASTNode.DepthSHIFT;
@@ -475,6 +542,8 @@ public class ReferenceExpression extends FunctionalExpression implements Invocat
         	int len;
         	int expectedlen = this.binding.parameters.length;
         	int providedLen = this.descriptor.parameters.length;
+        	if (this.receiverPrecedesParameters)
+        		providedLen--; // one parameter is 'consumed' as the receiver
         	boolean isVarArgs = false;
         	if (this.binding.isVarargs()) {
         		isVarArgs = (providedLen == expectedlen)
@@ -485,7 +554,7 @@ public class ReferenceExpression extends FunctionalExpression implements Invocat
         		len = Math.min(expectedlen, providedLen);
         	}
     		for (int i = 0; i < len; i++) {
-    			TypeBinding descriptorParameter = this.descriptor.parameters[i+paramOffset];
+    			TypeBinding descriptorParameter = this.descriptor.parameters[i + (this.receiverPrecedesParameters ? 1 : 0)];
     			TypeBinding bindingParameter = InferenceContext18.getParameter(this.binding.parameters, i, isVarArgs);
     			NullAnnotationMatching annotationStatus = NullAnnotationMatching.analyse(bindingParameter, descriptorParameter, FlowInfo.UNKNOWN);
     			if (annotationStatus.isAnyMismatch()) {
@@ -657,8 +726,25 @@ public class ReferenceExpression extends FunctionalExpression implements Invocat
 		visitor.endVisit(this, blockScope);
 	}
 
+	public Expression[] createPseudoExpressions(TypeBinding[] p) {
+		if (this.descriptor == null)
+			return null;
+		// from 15.28.1: 
+		// ... the reference is treated as if it were an invocation with argument expressions of types P1..Pn
+		// ... the reference is treated as if it were an invocation with argument expressions of types P2..Pn
+		// (the different sets of types are passed from our resolveType to scope.getMethod(..), see someMethod, anotherMethod)
+		Expression[] expressions = new Expression[p.length];
+		long pos = (((long)this.sourceStart)<<32)+this.sourceEnd;
+		for (int i = 0; i < p.length; i++) {
+			expressions[i] = new SingleNameReference(("fakeArg"+i).toCharArray(), pos); //$NON-NLS-1$
+			expressions[i].resolvedType = p[i];
+		}
+		return expressions;
+	}
+
 	public boolean isCompatibleWith(TypeBinding left, Scope scope) {
 		// 15.28.2
+		left = left.uncapture(this.enclosingScope);
 		final MethodBinding sam = left.getSingleAbstractMethod(this.enclosingScope, true);
 		if (sam == null || !sam.isValidBinding())
 			return false;
@@ -677,12 +763,12 @@ public class ReferenceExpression extends FunctionalExpression implements Invocat
 		return isCompatible;
 	}
 	
-	public boolean sIsMoreSpecific(TypeBinding s, TypeBinding t) {
+	public boolean sIsMoreSpecific(TypeBinding s, TypeBinding t, Scope scope) {
 		
-		if (TypeBinding.equalsEquals(s, t))
+		if (super.sIsMoreSpecific(s, t, scope))
 			return true;
 		
-		if (this.exactMethodBinding == null)
+		if (this.exactMethodBinding == null || t.findSuperTypeOriginatingFrom(s) != null)
 			return false;
 		
 		s = s.capture(this.enclosingScope, this.sourceEnd);
@@ -703,7 +789,7 @@ public class ReferenceExpression extends FunctionalExpression implements Invocat
 			return false;
 		
 		// r1 <: r2
-		if (r1.isCompatibleWith(r2))
+		if (r1.isCompatibleWith(r2, scope))
 			return true;
 		
 		return r1.isBaseType() != r2.isBaseType() && r1.isBaseType() == this.exactMethodBinding.returnType.isBaseType();
@@ -713,5 +799,9 @@ public class ReferenceExpression extends FunctionalExpression implements Invocat
 		if (this.actualMethodBinding == null)  // array new/clone, no real binding.
 			this.actualMethodBinding = this.binding;
 		return this.actualMethodBinding;
+	}
+
+	public boolean isArrayConstructorReference() {
+		return isConstructorReference() && this.lhs.resolvedType != null && this.lhs.resolvedType.isArrayType();
 	}
 }

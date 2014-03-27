@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2013 IBM Corporation and others.
+ * Copyright (c) 2013, 2014 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -40,17 +40,22 @@ import org.eclipse.jdt.core.dom.Expression;
 import org.eclipse.jdt.core.dom.ExpressionStatement;
 import org.eclipse.jdt.core.dom.FieldDeclaration;
 import org.eclipse.jdt.core.dom.IAnnotationBinding;
+import org.eclipse.jdt.core.dom.IMethodBinding;
 import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.IVariableBinding;
 import org.eclipse.jdt.core.dom.IfStatement;
 import org.eclipse.jdt.core.dom.InstanceofExpression;
 import org.eclipse.jdt.core.dom.MarkerAnnotation;
 import org.eclipse.jdt.core.dom.MethodDeclaration;
+import org.eclipse.jdt.core.dom.MethodInvocation;
 import org.eclipse.jdt.core.dom.ParameterizedType;
 import org.eclipse.jdt.core.dom.ParenthesizedExpression;
 import org.eclipse.jdt.core.dom.PrefixExpression;
 import org.eclipse.jdt.core.dom.QualifiedType;
+import org.eclipse.jdt.core.dom.ReturnStatement;
+import org.eclipse.jdt.core.dom.SimpleName;
 import org.eclipse.jdt.core.dom.SingleVariableDeclaration;
+import org.eclipse.jdt.core.dom.ThisExpression;
 import org.eclipse.jdt.core.dom.TryStatement;
 import org.eclipse.jdt.core.dom.Type;
 import org.eclipse.jdt.core.dom.TypeDeclaration;
@@ -1152,7 +1157,7 @@ public class TypeBindingTests308 extends ConverterTestSetup {
 			Assignment assignment = (Assignment) stmt.getExpression();
 			Expression left = assignment.getLeftHandSide();
 			ITypeBinding type = left.resolveTypeBinding();
-			assertEquals("Wrong type", "@Marker{ value = (String)\"Outer\"} Outer.@Marker{ value = (String)\"Middle\"} Middle.@Marker{ value = (String)\"Inner\"} Inner", type.toString());		
+			assertEquals("Wrong type", "@Marker((String)\"Outer\") Outer.@Marker((String)\"Middle\") Middle.@Marker((String)\"Inner\") Inner", type.toString());		
 		} finally {
 			removeLibrary(javaProject, jarName, srcName);
 		}
@@ -1205,7 +1210,7 @@ public class TypeBindingTests308 extends ConverterTestSetup {
 			Assignment assignment = (Assignment) stmt.getExpression();
 			Expression left = assignment.getLeftHandSide();
 			ITypeBinding type = left.resolveTypeBinding();
-			assertEquals("Wrong type", "@Marker{ value = (String)\"Outer\"} Outer.@Marker{ value = (String)\"Middle\"} Middle.@Marker{ value = (String)\"Inner\"} Inner @Marker{ value = (String)\"Extended []\"} [] @Marker{ value = (String)\"Prefix []\"} []", type.toString());		
+			assertEquals("Wrong type", "@Marker((String)\"Outer\") Outer.@Marker((String)\"Middle\") Middle.@Marker((String)\"Inner\") Inner @Marker((String)\"Extended []\") [] @Marker((String)\"Prefix []\") []", type.toString());		
 		} finally {
 			removeLibrary(javaProject, jarName, srcName);
 		}
@@ -1256,7 +1261,7 @@ public class TypeBindingTests308 extends ConverterTestSetup {
 			Assignment assignment = (Assignment) stmt.getExpression();
 			Expression left = assignment.getLeftHandSide();
 			ITypeBinding type = left.resolveTypeBinding();
-			assertEquals("Wrong type", "@T{ value = (int)1} Outer<@T{ value = (int)2} String>.@T{ value = (int)3} Inner<@T{ value = (int)4} Integer> @T{ value = (int)6} [] @T{ value = (int)5} []", type.toString());		
+			assertEquals("Wrong type", "@T((int)1) Outer<@T((int)2) String>.@T((int)3) Inner<@T((int)4) Integer> @T((int)6) [] @T((int)5) []", type.toString());		
 		} finally {
 			removeLibrary(javaProject, jarName, srcName);
 		}
@@ -1308,7 +1313,7 @@ public class TypeBindingTests308 extends ConverterTestSetup {
 			Assignment assignment = (Assignment) stmt.getExpression();
 			Expression left = assignment.getLeftHandSide();
 			ITypeBinding type = left.resolveTypeBinding();
-			assertEquals("Wrong type", "@T{ value = (int)1} String @T{ value = (int)3} [] @T{ value = (int)2} []", type.toString());		
+			assertEquals("Wrong type", "@T((int)1) String @T((int)3) [] @T((int)2) []", type.toString());		
 		} finally {
 			removeLibrary(javaProject, jarName, srcName);
 		}
@@ -1359,7 +1364,7 @@ public class TypeBindingTests308 extends ConverterTestSetup {
 			Assignment assignment = (Assignment) stmt.getExpression();
 			Expression left = assignment.getLeftHandSide();
 			ITypeBinding type = left.resolveTypeBinding();
-			assertEquals("Wrong type", "@T{ value = (int)1} Outer<@T{ value = (int)2} ? extends @T{ value = (int)3} String>.@T{ value = (int)4} Inner<@T{ value = (int)5} ? super @T{ value = (int)6} Integer> @T{ value = (int)8} [] @T{ value = (int)7} []", type.toString());		
+			assertEquals("Wrong type", "@T((int)1) Outer<@T((int)2) ? extends @T((int)3) String>.@T((int)4) Inner<@T((int)5) ? super @T((int)6) Integer> @T((int)8) [] @T((int)7) []", type.toString());		
 		} finally {
 			removeLibrary(javaProject, jarName, srcName);
 		}
@@ -1410,7 +1415,7 @@ public class TypeBindingTests308 extends ConverterTestSetup {
 			Assignment assignment = (Assignment) stmt.getExpression();
 			Expression left = assignment.getLeftHandSide();
 			ITypeBinding type = left.resolveTypeBinding();
-			assertEquals("Wrong type", "@T{ value = (int)1} Outer#RAW.@T{ value = (int)2} Inner#RAW @T{ value = (int)4} [] @T{ value = (int)3} []", type.toString());		
+			assertEquals("Wrong type", "@T((int)1) Outer#RAW.@T((int)2) Inner#RAW @T((int)4) [] @T((int)3) []", type.toString());		
 		} finally {
 			removeLibrary(javaProject, jarName, srcName);
 		}
@@ -1507,7 +1512,7 @@ public class TypeBindingTests308 extends ConverterTestSetup {
 			ITypeBinding [] memberTypes = binding.getDeclaredTypes();
 			assertEquals("Incorrect no of types", 1, memberTypes.length);
 			assertEquals("Incorrect no of types", "@T Outer.Inner", memberTypes[0].toString());
-			assertEquals("Incorrect no of types", "@T Outer", memberTypes[0].getEnclosingType().toString());
+			assertEquals("Incorrect no of types", "@T Outer", memberTypes[0].getDeclaringClass().toString());
 		} finally {
 			removeLibrary(javaProject, jarName, srcName);
 		}
@@ -1634,7 +1639,7 @@ public class TypeBindingTests308 extends ConverterTestSetup {
 		assertEquals("Incorrect no of fields", 1, fields.length);
 		FieldDeclaration field = fields[0];
 		ITypeBinding binding = field.getType().resolveBinding();
-		assertEquals("Wrong Type", "@T X", (binding = binding.getEnclosingType()).toString());
+		assertEquals("Wrong Type", "@T X", (binding = binding.getDeclaringClass()).toString());
 		assertEquals("Wrong Type", "@T X.Y", (binding = binding.getDeclaredTypes()[0]).toString());
 	}
 	public void testAnnotatedTypeIdentity() throws CoreException, IOException {
@@ -2022,8 +2027,7 @@ public class TypeBindingTests308 extends ConverterTestSetup {
 			assertEquals("Annotation mismatch", "@T(value = 28)", annotations[0].toString());
 			
 			annotations = typeDecl.getMethods()[1].resolveBinding().getAnnotations();
-			assertTrue("Should be 1", annotations.length == 1);
-			assertEquals("Annotation mismatch", "@T(value = 29)", annotations[0].toString());
+			assertTrue("Should be 0", annotations.length == 0);
 			
 			annotations = typeDecl.getTypes()[0].resolveBinding().getAnnotations();
 			assertTrue("Should be 1", annotations.length == 1);
@@ -2065,8 +2069,7 @@ public class TypeBindingTests308 extends ConverterTestSetup {
 			assertEquals("Annotation mismatch", "@T(value = 8)", annotations[0].toString());
 			
 			annotations = typeBinding.getSuperclass().getDeclaredMethods()[0].getAnnotations();
-			assertTrue("Should be 1", annotations.length == 1);
-			assertEquals("Annotation mismatch", "@T(value = 9)", annotations[0].toString());
+			assertTrue("Should be 0", annotations.length == 0);
 			
 			annotations = typeBinding.getSuperclass().getDeclaredTypes()[0].getAnnotations();
 			assertTrue("Should be 1", annotations.length == 1);
@@ -2153,5 +2156,254 @@ public class TypeBindingTests308 extends ConverterTestSetup {
 		this.workingCopy = getWorkingCopy("/Converter18/src/X.java", true);
 		ASTNode node = buildAST(contents, this.workingCopy, false, true);
 		assertEquals("AST mismatch", expected, node.toString());
+	}
+	// https://bugs.eclipse.org/bugs/show_bug.cgi?id=427337
+	public void testBug427337() throws CoreException, IOException {
+		String contents = 
+				"public class X implements I {\n" +
+				"}\n";
+
+		createFile("/Converter18/src/NonNull.java", 
+				"import java.lang.annotation.ElementType;\n" +
+				"import java.lang.annotation.Target;\n" +
+				"@Target(ElementType.TYPE_USE)\n" +
+				"@interface NonNull {}");
+		createFile("/Converter18/src/I.java",
+				"import java.util.List;\n" +
+				"interface I { \n" +
+				"	String bar2(@NonNull String s, @NonNull List<@NonNull String> l2);\n" +
+				"}");
+
+		this.workingCopy = getWorkingCopy("/Converter18/src/X.java", true);
+		ASTNode node = buildAST(contents, this.workingCopy, false, true);
+		assertEquals("Not a compilation unit", ASTNode.COMPILATION_UNIT, node.getNodeType());
+		TypeDeclaration type = (TypeDeclaration) ((CompilationUnit) node).types().get(0);
+		ITypeBinding binding = type.resolveBinding();
+		ITypeBinding superInterface = binding.getInterfaces()[0];
+		IMethodBinding method = superInterface.getDeclaredMethods()[0];
+		binding = method.getParameterTypes()[0];
+		assertEquals("Incorrect type binding", "@NonNull String", binding.toString());
+		binding = method.getParameterTypes()[1];
+		assertEquals("Incorrect type binding", "@NonNull List<@NonNull String>", binding.toString());
+	}
+	// https://bugs.eclipse.org/bugs/show_bug.cgi?id=426515
+	public void testBug426515() throws CoreException {
+		try {
+			String contents =
+					"public class X {\n" +
+					"	void foo() {\n" +
+					"		Outer.getInner();\n" +
+					"	}\n" +
+					"}\n";
+
+			createFile("/Converter18/src/A.java",
+					"import java.lang.annotation.ElementType;\n" +
+					"import java.lang.annotation.Target;\n" +
+					"@Target(ElementType.TYPE_USE)\n" +
+					"@interface A { int value() default 0; \n }");
+			createFile("/Converter18/src/Outer.java",
+					"class Outer<T> { \n" +
+					"	public class Inner<I> {}\n" +
+					"	public static @A(1) Outer<java.lang.@A(2) String>.@A(3) Inner<java.lang.@A(4) Object> getInner() { \n" +
+					"		return null;\n" +
+					"	}\n" +
+					"}");
+
+			this.workingCopy = getWorkingCopy("/Converter18/src/X.java", true);
+			ASTNode node = buildAST(contents, this.workingCopy, false, true);
+			assertEquals("Not a compilation unit", ASTNode.COMPILATION_UNIT, node.getNodeType());
+			TypeDeclaration type = (TypeDeclaration) ((CompilationUnit) node).types().get(0);
+			MethodDeclaration method = type.getMethods()[0];
+			ExpressionStatement statement = (ExpressionStatement) method.getBody().statements().get(0);
+			MethodInvocation methodCal = (MethodInvocation) statement.getExpression();
+			ITypeBinding binding = methodCal.resolveTypeBinding();
+			assertEquals("Incorrect type binding", "@A((int)1) Outer<@A((int)2) String>.@A((int)3) Inner<@A((int)4) Object>", binding.toString());
+		} finally {
+			deleteFile("/Converter18/src/A.java");
+			deleteFile("/Converter18/src/Outer.java");
+		}
+	}
+	// https://bugs.eclipse.org/bugs/show_bug.cgi?id=425599, [1.8][compiler] ISE when trying to compile qualified and annotated class instance creation 
+	public void test425599() throws CoreException, IOException {
+		String contents = 
+				"import java.lang.annotation.ElementType;\n" +
+				"import java.lang.annotation.Target;\n" +
+				"public class X {\n" +
+				"    Object ax = new @A(1) Outer().new @A(2) Middle<@A(3) String>();\n" +
+				"}\n" +
+				"@Target(ElementType.TYPE_USE) @interface A { int value(); }\n" +
+				"class Outer {\n" +
+				"    class Middle<E> {}\n" +
+				"}\n";
+		
+		this.workingCopy = getWorkingCopy("/Converter18/src/X.java", true);
+		ASTNode node = buildAST(contents, this.workingCopy);
+		assertEquals("Not a compilation unit", ASTNode.COMPILATION_UNIT, node.getNodeType());
+		CompilationUnit compilationUnit = (CompilationUnit) node;
+		assertProblemsSize(compilationUnit, 0);
+		List types = compilationUnit.types();
+		assertEquals("Incorrect no of types", 3, types.size());
+		TypeDeclaration typeDecl = (TypeDeclaration) types.get(0);
+		FieldDeclaration[] fields = typeDecl.getFields();
+		assertEquals("Incorrect no of methods", 1, fields.length);
+		FieldDeclaration field = fields[0];
+		assertEquals("Object ax=new @A(1) Outer().new @A(2) Middle<@A(3) String>();\n", field.toString());
+	}
+	// https://bugs.eclipse.org/bugs/show_bug.cgi?id=425216, Bug 425216 - [1.8][dom ast] Binding for 'this' should have type annotations when receiver is annotated
+	public void test425216() throws CoreException, IOException {
+		String contents = 
+				"import static java.lang.annotation.ElementType.TYPE_USE;\n" +
+				"import java.lang.annotation.Target;\n" +
+				"@Target(TYPE_USE)\n" +
+				"@interface NonNull {}\n" +
+				"public class X {\n" +
+				"   X foo(@NonNull X this) {\n" +
+				"	   return this;\n" +
+				"   }\n" +
+				"}\n";
+		
+		this.workingCopy = getWorkingCopy("/Converter18/src/X.java", true);
+		ASTNode node = buildAST(contents, this.workingCopy);
+		assertEquals("Not a compilation unit", ASTNode.COMPILATION_UNIT, node.getNodeType());
+		CompilationUnit compilationUnit = (CompilationUnit) node;
+		assertProblemsSize(compilationUnit, 0);
+		List types = compilationUnit.types();
+		assertEquals("Incorrect no of types", 2, types.size());
+		TypeDeclaration typeDecl = (TypeDeclaration) types.get(1);
+		MethodDeclaration[] methods = typeDecl.getMethods();
+		assertEquals("Incorrect no of methods", 1, methods.length);
+		MethodDeclaration method = methods[0];
+		ReturnStatement statement = (ReturnStatement) method.getBody().statements().get(0);
+		ThisExpression expression = (ThisExpression) statement.getExpression();
+		ITypeBinding type = expression.resolveTypeBinding();
+		assertEquals("@NonNull X", type.toString());
+	}
+	// https://bugs.eclipse.org/bugs/show_bug.cgi?id=425216, Bug 425216 - [1.8][dom ast] Binding for 'this' should have type annotations when receiver is annotated
+	public void test425216a() throws CoreException, IOException {
+		String contents = 
+				"import java.lang.annotation.*;\n" +
+				"@Target(ElementType.TYPE_USE)\n" +
+				"@interface A {\n" +
+				"    int value() default 0;\n" +
+				"}\n" +
+				"public class Outer {\n" +
+				"    class Middle {\n" +
+				"    	class Inner {\n" +
+				"    		public @A(1) Inner(@A(2) Outer.@A(3) Middle Middle.this) {\n" +
+				"    			Outer r1 = Outer.this;\n" +
+				"    			Outer.Middle middle = Outer.Middle.this;\n" +
+				"    			Inner i = this;\n" +
+				"    		}\n" +
+				"    	}\n" +
+				"    }\n" +
+				"}\n";
+		
+		this.workingCopy = getWorkingCopy("/Converter18/src/Outer.java", true);
+		ASTNode node = buildAST(contents, this.workingCopy);
+		assertEquals("Not a compilation unit", ASTNode.COMPILATION_UNIT, node.getNodeType());
+		CompilationUnit compilationUnit = (CompilationUnit) node;
+		assertProblemsSize(compilationUnit, 0);
+		List types = compilationUnit.types();
+		assertEquals("Incorrect no of types", 2, types.size());
+		TypeDeclaration typeDecl = (TypeDeclaration) types.get(1);
+		MethodDeclaration method= typeDecl.getTypes()[0].getTypes()[0].getMethods()[0];
+		ITypeBinding receiverType = method.getReceiverType().resolveBinding();
+		assertEquals("@A((int)2) Outer.@A((int)3) Middle", receiverType.toString());
+		ITypeBinding declaringClass = receiverType.getDeclaringClass();
+		assertEquals("@A((int)2) Outer", declaringClass.toString());
+		final List statements = method.getBody().statements();
+		VariableDeclarationStatement statement = ((VariableDeclarationStatement) statements.get(0));
+		VariableDeclarationFragment fragment = (VariableDeclarationFragment) statement.fragments().get(0);
+		ITypeBinding type = fragment.getInitializer().resolveTypeBinding();
+		assertEquals("@A((int)2) Outer", type.toString());
+		statement = ((VariableDeclarationStatement) statements.get(1));
+		fragment = (VariableDeclarationFragment) statement.fragments().get(0);
+		type = fragment.getInitializer().resolveTypeBinding();
+		assertEquals("@A((int)2) Outer.@A((int)3) Middle", type.toString());
+		assertEquals("@A((int)2) Outer", type.getDeclaringClass().toString());
+		statement = ((VariableDeclarationStatement) statements.get(2));
+		fragment = (VariableDeclarationFragment) statement.fragments().get(0);
+		type = fragment.getInitializer().resolveTypeBinding();
+		assertTrue(type.getTypeAnnotations().length == 0);
+		assertTrue(type.getName().equals("Inner"));
+	}
+	// https://bugs.eclipse.org/bugs/show_bug.cgi?id=425216, Bug 425216 - [1.8][dom ast] Binding for 'this' should have type annotations when receiver is annotated
+	public void test425216b() throws CoreException, IOException {
+		String contents = 
+				"import java.lang.annotation.*;\n" +
+				"@Target(ElementType.TYPE_USE)\n" +
+				"@interface A {\n" +
+				"    int value() default 0;\n" +
+				"}\n" +
+				"public class Outer {\n" +
+				"    class Middle {\n" +
+				"    	class Inner {\n" +
+				"    		public @A(1) Inner(@A(2) Outer.@A(3) Middle Middle.this) {\n" +
+				"    		}\n" +
+				"    	}\n" +
+				"    }\n" +
+				"}\n";
+		
+		this.workingCopy = getWorkingCopy("/Converter18/src/Outer.java", true);
+		ASTNode node = buildAST(contents, this.workingCopy);
+		assertEquals("Not a compilation unit", ASTNode.COMPILATION_UNIT, node.getNodeType());
+		CompilationUnit compilationUnit = (CompilationUnit) node;
+		assertProblemsSize(compilationUnit, 0);
+		List types = compilationUnit.types();
+		assertEquals("Incorrect no of types", 2, types.size());
+		TypeDeclaration typeDecl = (TypeDeclaration) types.get(1);
+		MethodDeclaration method= typeDecl.getTypes()[0].getTypes()[0].getMethods()[0];
+		SimpleName receiverQualifier = method.getReceiverQualifier();
+		ITypeBinding type = receiverQualifier.resolveTypeBinding();
+		assertEquals("@A((int)2) Outer.@A((int)3) Middle", type.toString());
+	}
+	// https://bugs.eclipse.org/bugs/show_bug.cgi?id=427320
+	public void testBug427320() throws Exception {
+		try {
+			String contents = 
+					"public class X {\n" +
+					"	@A @B @C X() {}\n" +
+					"	@A @B @C String foo() {\nreturn null;\n}\n" +
+					"}\n" +
+					"@java.lang.annotation.Target ({java.lang.annotation.ElementType.CONSTRUCTOR, "
+													+ "java.lang.annotation.ElementType.METHOD, java.lang.annotation.ElementType.TYPE_USE})\n" +
+					"@interface A {}\n" +
+					"@java.lang.annotation.Target ({java.lang.annotation.ElementType.CONSTRUCTOR, "
+													+ "java.lang.annotation.ElementType.METHOD})\n" +
+					"@interface B {}\n" +
+					"@java.lang.annotation.Target (java.lang.annotation.ElementType.TYPE_USE)\n" +
+					"@interface C {}\n";
+		
+		this.workingCopy = getWorkingCopy("/Converter18/src/X.java", true/*resolve*/);
+		ASTNode node = buildAST(contents, this.workingCopy, false);
+		assertEquals("Not a compilation unit", ASTNode.COMPILATION_UNIT, node.getNodeType());
+		CompilationUnit compilationUnit = (CompilationUnit) node;
+		assertProblemsSize(compilationUnit, 0);
+		List types = compilationUnit.types();
+		TypeDeclaration typeDecl = (TypeDeclaration) types.get(0);
+		MethodDeclaration method = typeDecl.getMethods()[0];
+		assertTrue("Should be a constructor", method.isConstructor());
+		IMethodBinding methodBinding = method.resolveBinding();
+		IAnnotationBinding[] annots = methodBinding.getAnnotations();
+		assertEquals("Incorrect no of annotations", 2, annots.length);
+		assertEquals("Incorrect annotations attached","@A()", annots[0].toString());
+		assertEquals("Incorrect annotations attached","@B()", annots[1].toString());
+		ITypeBinding binding = methodBinding.getReturnType();
+		annots = binding.getTypeAnnotations();
+		assertEquals("Incorrect no of annotations", 0, annots.length);
+		
+		method = typeDecl.getMethods()[1];
+		methodBinding = method.resolveBinding();
+		annots = methodBinding.getAnnotations();
+		assertEquals("Incorrect no of annotations", 2, annots.length);
+		assertEquals("Incorrect annotations attached","@A()", annots[0].toString());
+		assertEquals("Incorrect annotations attached","@B()", annots[1].toString());
+		binding = methodBinding.getReturnType();
+		annots = binding.getTypeAnnotations();
+		assertEquals("Incorrect no of annotations", 2, annots.length);
+		assertEquals("Incorrect annotations attached","@A @C String", binding.toString());
+		} finally {
+			deleteFile("/Converter18/src/X.java");
+		}
 	}
 }

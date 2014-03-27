@@ -34,6 +34,10 @@
  *							Bug 424415 - [1.8][compiler] Eventual resolution of ReferenceExpression is not seen to be happening.
  *							Bug 426366 - [1.8][compiler] Type inference doesn't handle multiple candidate target types in outer overload context
  *							Bug 426290 - [1.8][compiler] Inference + overloading => wrong method resolution ?
+ *							Bug 426764 - [1.8] Presence of conditional expression as method argument confuses compiler
+ *							Bug 424930 - [1.8][compiler] Regression: "Cannot infer type arguments" error from compiler.
+ *							Bug 427483 - [Java 8] Variables in lambdas sometimes can't be resolved
+ *							Bug 427438 - [1.8][compiler] NPE at org.eclipse.jdt.internal.compiler.ast.ConditionalExpression.generateCode(ConditionalExpression.java:280)
  *     Jesper S Moller <jesper@selskabet.org> - Contributions for
  *							bug 378674 - "The method can be declared as static" is wrong
  *     Andy Clement (GoPivotal, Inc) aclement@gopivotal.com - Contributions for
@@ -43,6 +47,8 @@
  *     						bug 413460 - NonNullByDefault is not inherited to Constructors when accessed via Class File
  *******************************************************************************/
 package org.eclipse.jdt.internal.compiler.ast;
+
+import static org.eclipse.jdt.internal.compiler.ast.ExpressionContext.*;
 
 import org.eclipse.jdt.core.compiler.IProblem;
 import org.eclipse.jdt.internal.compiler.ASTVisitor;
@@ -100,7 +106,7 @@ public class AllocationExpression extends Expression implements Invocation {
 	private ExpressionContext expressionContext = VANILLA_CONTEXT;
 
 	 // hold on to this context from invocation applicability inference until invocation type inference (per method candidate):
-	private SimpleLookupTable/*<PGMB,IC18>*/ inferenceContexts;
+	private SimpleLookupTable/*<PMB,IC18>*/ inferenceContexts;
 	protected InnerInferenceHelper innerInferenceHelper;
 
 	/** Record to keep state between different parts of resolution. */
@@ -498,6 +504,8 @@ public TypeBinding resolveType(BlockScope scope) {
 				argsContainCast = true;
 			}
 			argument.setExpressionContext(INVOCATION_CONTEXT);
+			if (this.arguments[i].resolvedType != null) 
+				this.arguments[i].unresolve(); // some cleanup before second attempt
 			if ((argumentTypes[i] = argument.resolveType(scope)) == null) {
 				argHasError = true;
 			}
@@ -884,10 +892,6 @@ public void setExpressionContext(ExpressionContext context) {
 	this.expressionContext = context;
 }
 
-public boolean isCompatibleWith(TypeBinding left, Scope scope) {
-	return this.type.resolvedType != null && left.actualType() != null && this.type.resolvedType.actualType().isCompatibleWith(left.actualType());
-}
-
 public boolean isPolyExpression() {
 	return isPolyExpression(this.binding);
 }
@@ -945,12 +949,18 @@ public void registerInferenceContext(ParameterizedGenericMethodBinding method, I
 	if (this.inferenceContexts == null)
 		this.inferenceContexts = new SimpleLookupTable();
 	this.inferenceContexts.put(method, infCtx18);
+	MethodBinding original = method.original();
+	if (original instanceof SyntheticFactoryMethodBinding) {
+		SyntheticFactoryMethodBinding synthOriginal = (SyntheticFactoryMethodBinding)original;
+		ParameterizedMethodBinding parameterizedCtor = synthOriginal.applyTypeArgumentsOnConstructor(method.typeArguments);
+		this.inferenceContexts.put(parameterizedCtor, infCtx18);
+	}
 }
 public boolean usesInference() {
 	return (this.binding instanceof ParameterizedGenericMethodBinding) 
 			&& getInferenceContext((ParameterizedGenericMethodBinding) this.binding) != null;
 }
-public InferenceContext18 getInferenceContext(ParameterizedGenericMethodBinding method) {
+public InferenceContext18 getInferenceContext(ParameterizedMethodBinding method) {
 	if (this.inferenceContexts == null)
 		return null;
 	return (InferenceContext18) this.inferenceContexts.get(method);

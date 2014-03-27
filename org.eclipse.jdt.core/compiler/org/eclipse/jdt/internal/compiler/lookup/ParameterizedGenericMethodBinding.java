@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2013 IBM Corporation and others.
+ * Copyright (c) 2000, 2014 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -19,11 +19,12 @@
  *								bug 413958 - Function override returning inherited Generic Type
  *								Bug 400874 - [1.8][compiler] Inference infrastructure should evolve to meet JLS8 18.x (Part G of JSR335 spec)
  *								Bug 424710 - [1.8][compiler] CCE in SingleNameReference.localVariableBinding
+ *								Bug 423505 - [1.8] Implement "18.5.4 More Specific Method Inference"
+ *								Bug 427438 - [1.8][compiler] NPE at org.eclipse.jdt.internal.compiler.ast.ConditionalExpression.generateCode(ConditionalExpression.java:280)
  *******************************************************************************/
 package org.eclipse.jdt.internal.compiler.lookup;
 
 import org.eclipse.jdt.internal.compiler.ast.Expression;
-import org.eclipse.jdt.internal.compiler.ast.ExpressionContext;
 import org.eclipse.jdt.internal.compiler.ast.Invocation;
 import org.eclipse.jdt.internal.compiler.ast.MessageSend;
 import org.eclipse.jdt.internal.compiler.ast.Wildcard;
@@ -151,7 +152,7 @@ public class ParameterizedGenericMethodBinding extends ParameterizedMethodBindin
 						boolean hasReturnProblem = false;
 						boolean invocationTypeInferred = false;
 					if ((inferenceLevel & Scope.INVOCATION_TYPE) != 0 // requested?
-							&& (expectedType != null || invocationSite.getExpressionContext() == ExpressionContext.VANILLA_CONTEXT)) { // possible?
+							&& (expectedType != null || !invocationSite.getExpressionContext().definesTargetType())) { // possible?
 
 						// ---- 18.5.2 (Invocation type): ----
 						result = infCtx18.inferInvocationType(result, expectedType, invocationSite, originalMethod);
@@ -837,5 +838,12 @@ public class ParameterizedGenericMethodBinding extends ParameterizedMethodBindin
 		if (this.tiebreakMethod == null)
 			this.tiebreakMethod = this.originalMethod.asRawMethod(this.environment);
 		return this.tiebreakMethod;
+	}
+
+	@Override
+	public MethodBinding genericMethod() {
+		if (this.isRaw) // mostSpecificMethodBinding() would need inference, but that doesn't work well for raw methods
+			return this; // -> prefer traditional comparison using the substituted method
+		return this.originalMethod;
 	}
 }

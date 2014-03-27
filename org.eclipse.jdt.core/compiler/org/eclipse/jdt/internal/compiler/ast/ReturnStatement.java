@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2013 IBM Corporation and others.
+ * Copyright (c) 2000, 2014 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -33,10 +33,13 @@
  *								Bug 415043 - [1.8][null] Follow-up re null type annotations after bug 392099
  *								Bug 416307 - [1.8][compiler][null] subclass with type parameter substitution confuses null checking
  *								Bug 417758 - [1.8][null] Null safety compromise during array creation.
+ *								Bug 427438 - [1.8][compiler] NPE at org.eclipse.jdt.internal.compiler.ast.ConditionalExpression.generateCode(ConditionalExpression.java:280)
  *     Jesper S Moller - Contributions for
  *								bug 382701 - [1.8][compiler] Implement semantic analysis of Lambda expressions & Reference expression
  *******************************************************************************/
 package org.eclipse.jdt.internal.compiler.ast;
+
+import static org.eclipse.jdt.internal.compiler.ast.ExpressionContext.ASSIGNMENT_CONTEXT;
 
 import org.eclipse.jdt.internal.compiler.ASTVisitor;
 import org.eclipse.jdt.internal.compiler.classfmt.ClassFileConstants;
@@ -50,7 +53,7 @@ import org.eclipse.objectteams.otdt.internal.core.compiler.model.MethodModel;
  * OTDT changes:
  * What: compensate generalization of callin return
  */
-public class ReturnStatement extends Statement implements ExpressionContext {
+public class ReturnStatement extends Statement {
 
 	public Expression expression;
 	public SubRoutineStatement[] subroutines;

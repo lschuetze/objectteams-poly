@@ -33,6 +33,15 @@
  *								Bug 426290 - [1.8][compiler] Inference + overloading => wrong method resolution ?
  *								Bug 426589 - [1.8][compiler] Compiler error with generic method/constructor invocation as vargs argument
  *								Bug 426590 - [1.8][compiler] Compiler error with tenary operator
+ *								Bug 426764 - [1.8] Presence of conditional expression as method argument confuses compiler
+ *								Bug 426998 - [1.8][compiler] method(java.lang.Class, java.lang.String) not applicable for the arguments (java.lang.Class, java.lang.String)
+ *								Bug 423505 - [1.8] Implement "18.5.4 More Specific Method Inference"
+ *								Bug 427196 - [1.8][compiler] Compiler error for method reference to overloaded method
+ *								Bug 427483 - [Java 8] Variables in lambdas sometimes can't be resolved
+ *								Bug 427728 - [1.8] Type Inference rejects calls requiring boxing/unboxing
+ *								Bug 427218 - [1.8][compiler] Verify error varargs + inference
+ *								Bug 426836 - [1.8] special handling for return type in references to method getClass()?
+ *								Bug 427628 - [1.8] regression : The method * is ambiguous for the type *
  *     Jesper S Moller - Contributions for
  *								Bug 378674 - "The method can be declared as static" is wrong
  *  							Bug 405066 - [1.8][compiler][codegen] Implement code generation infrastructure for JSR335
@@ -692,7 +701,7 @@ public abstract class Scope {
 	 * Boxing primitive
 	 */
 	public TypeBinding boxing(TypeBinding type) {
-		if (type.isBaseType())
+		if (type.isBaseType() || type.kind() == Binding.POLY_TYPE)
 			return environment().computeBoxingType(type);
 		return type;
 	}
@@ -898,10 +907,12 @@ public abstract class Scope {
 		}
 		if (targetType == null)
 			return NOT_COMPATIBLE; // mismatching number of args or other severe problem inside method binding
+		int level = -2; // don't know
 		if (invocArg instanceof Invocation && resolvedType != null) {
 			Invocation innerPoly = (Invocation) invocArg;
-			if (resolvedType.isCompatibleWith(targetType, this)) {
-				return compatible;
+			level = parameterCompatibilityLevel(resolvedType, targetType);
+			if (level != NOT_COMPATIBLE) {
+				return Math.max(compatible, level);
 			} else {
 				MethodBinding innerBinding = innerPoly.binding(null); // 1. try without update
 				if (innerBinding instanceof ParameterizedGenericMethodBinding) {
@@ -916,9 +927,13 @@ public abstract class Scope {
 								if (innerInferenceHelper != null)
 									innerInferenceHelper.registerInnerResult(method, invocArg.resolvedType, argLen, i);
 							}
-							if (solution.returnType != null && solution.returnType.isCompatibleWith(targetType, this))
-								return compatible;
+							if (solution.returnType != null) {
+								level = parameterCompatibilityLevel(solution.returnType, targetType);
+								if (level != NOT_COMPATIBLE)
+									return Math.max(compatible, level);
+							}
 						}
+						invocArg.setExpectedType(null);
 						return NOT_COMPATIBLE;
 					} else if (innerPoly instanceof AllocationExpression) {
 						// not detected as compatible, because its a diamond whose type hasn't yet been inferred?
@@ -935,10 +950,14 @@ public abstract class Scope {
 					}
 				} else if (innerPoly instanceof AllocationExpression) {
 					MethodBinding updatedMethod = innerPoly.binding(targetType); // 2. try with updating
-					if (updatedMethod != innerBinding && updatedMethod != null && updatedMethod.isValidBinding()) {
+					if (updatedMethod != innerBinding && updatedMethod != null) {
+						if (updatedMethod.isValidBinding()) {
 						if (updatedMethod.declaringClass.isCompatibleWith(targetType))
 							return compatible;
 						return NOT_COMPATIBLE;
+						} else if (updatedMethod.problemId() == ProblemReasons.Ambiguous) {
+							level = -2; // neither good nor bad, answer "unknown"
+						}
 					}
 				}
 			}
@@ -947,20 +966,20 @@ public abstract class Scope {
 				ConditionalExpression ce = (ConditionalExpression) invocArg;
 //{ObjectTeams: new arg:
 /* orig:
-				int level = compatibilityLevel18FromInner(method, innerInferenceHelper, ce.valueIfTrue, argLen, compatible, isVarArgs);
+				int level1 = compatibilityLevel18FromInner(method, innerInferenceHelper, ce.valueIfTrue, argLen, i, isVarArgs);
   :giro */
-				int level = compatibilityLevel18FromInner(method, parameters, innerInferenceHelper, ce.valueIfTrue, argLen, compatible, isVarArgs);
+				int level1 = compatibilityLevel18FromInner(method, parameters, innerInferenceHelper, ce.valueIfTrue, argLen, i, isVarArgs);
 // orig:
-				if (level == NOT_COMPATIBLE)
+				if (level1 == NOT_COMPATIBLE)
 					return NOT_COMPATIBLE;
 /*
-				int level2 = compatibilityLevel18FromInner(method, innerInferenceHelper, ce.valueIfFalse, argLen, compatible, isVarArgs);
+				int level2 = compatibilityLevel18FromInner(method, innerInferenceHelper, ce.valueIfFalse, argLen, i, isVarArgs);
   :giro */
-				int level2 = compatibilityLevel18FromInner(method, parameters, innerInferenceHelper, ce.valueIfFalse, argLen, compatible, isVarArgs);
+				int level2 = compatibilityLevel18FromInner(method, parameters, innerInferenceHelper, ce.valueIfFalse, argLen, i, isVarArgs);
 // SH}
 				if (level2 == NOT_COMPATIBLE)
 					return NOT_COMPATIBLE;
-				return Math.max(level, level2);
+				return Math.max(level1, level2);
 			}
 			// LE or RE:
 			if (invocArg.isCompatibleWith(targetType, this))
@@ -981,7 +1000,7 @@ public abstract class Scope {
 			// need to handle "normal" expressions too, since mixed poly/standalone argument lists must be fully analyzed.
 			return parameterCompatibilityLevel(resolvedType, targetType);
 		}
-		return -2; // don't know
+		return level;
 	}
 
 	private boolean shouldTryVarargs(MethodBinding method, TypeBinding resolvedType, TypeBinding targetType) {
@@ -2589,6 +2608,12 @@ public abstract class Scope {
 			if (CharOperation.equals(selector, TypeConstants.GETCLASS))
 				return environment().createGetClassMethod(receiverType, exactMethod, this);
 		}
+		if (exactMethod.declaringClass.id == TypeIds.T_JavaLangObject
+				&& CharOperation.equals(selector, TypeConstants.GETCLASS)
+			    && exactMethod.returnType.isParameterizedType())
+		{
+			return environment().createGetClassMethod(receiverType, exactMethod, this);
+		}
 		return exactMethod;
 	}
 
@@ -3986,7 +4011,7 @@ public abstract class Scope {
 
 		// check if autoboxed type is compatible
 		TypeBinding convertedType = environment.computeBoxingType(expressionType);
-		return TypeBinding.equalsEquals(convertedType, targetType) || convertedType.isCompatibleWith(targetType);
+		return TypeBinding.equalsEquals(convertedType, targetType) || convertedType.isCompatibleWith(targetType, this);
 	}
 
 	/* Answer true if the scope is nested inside a given field declaration.
@@ -4750,44 +4775,8 @@ public abstract class Scope {
 	protected final MethodBinding mostSpecificMethodBinding(MethodBinding[] visible, int visibleSize, TypeBinding[] argumentTypes, final InvocationSite invocationSite, ReferenceBinding receiverType) {
 
 		boolean isJdk18 = compilerOptions().sourceLevel >= ClassFileConstants.JDK1_8;
-		if (isJdk18) {
-			// Apply one level of filtering per poly expression more specific rules.
-			MethodBinding[] moreSpecific = new MethodBinding[visibleSize];
-			int count = 0;
-			for (int i = 0, length = argumentTypes.length; i < length; i++) {
-				TypeBinding argumentType = argumentTypes[i];
-				if (argumentType.kind() != Binding.POLY_TYPE)
-					continue;
 				
-				for (int j = 0; j < visibleSize; j++) {
-					final TypeBinding[] mbjParameters = visible[j].parameters;
-					final int mbjParametersLength = mbjParameters.length;
-					TypeBinding s = i < mbjParametersLength ? mbjParameters[i] : mbjParameters[mbjParametersLength - 1];
-					boolean sIsMoreSpecific = true;
-					for (int k = 0; k < visibleSize; k++) {
-						if (j == k) continue;
-						final TypeBinding[] mbkParameters = visible[k].parameters;
-						final int mbkParametersLength = mbkParameters.length;
-						TypeBinding t = i < mbkParametersLength ? mbkParameters[i] : mbkParameters[mbkParametersLength - 1];
-						if (TypeBinding.equalsEquals(s, t))
-							continue;
-						if (!argumentType.sIsMoreSpecific(s,t)) { 
-							sIsMoreSpecific = false;
-							break;
-						}
-					}
-					if (sIsMoreSpecific)
-						moreSpecific[count++] = visible[j];
-				}
-			}
-			if (count != 0) {
-				visible = moreSpecific;
-				visibleSize = count;
-			}
-		}
-	
-		// JLS7 implementation  
-		
+		// common part for all compliance levels:
 		int[] compatibilityLevels = new int[visibleSize];
 //{ObjectTeams: also record whether translation is required:
 		boolean[] useTranslation = new boolean[visibleSize];
@@ -4807,8 +4796,73 @@ public abstract class Scope {
 		}
 	  } finally {
 		  Config.removeOrRestore(oldConfig, this);
-	  }
 // SH}
+	  	}
+		MethodBinding[] moreSpecific = new MethodBinding[visibleSize];
+
+		if (isJdk18) {
+			// 15.12.2.5 Choosing the Most Specific Method
+			int count = 0;
+				
+			nextJ: for (int j = 0; j < visibleSize; j++) {
+				MethodBinding mbj = visible[j].genericMethod();
+				final TypeBinding[] mbjParameters = mbj.parameters;	
+				int levelj = compatibilityLevels[j];
+				nextK: for (int k = 0; k < visibleSize; k++) {
+					if (j == k) continue;
+					// TODO do we want to check existing inference contexts whether they can tell us better about the used inferenceKind?
+					int levelk = compatibilityLevels[k];
+					if (levelj > -1 && levelk > -1 && levelj != levelk) {
+						if (levelj < levelk)
+							continue nextK; // j is more specific than this k
+						else
+							continue nextJ; // j cannot be more specific
+					}
+					MethodBinding mbk = visible[k].genericMethod();
+					final TypeBinding[] mbkParameters = mbk.parameters;
+					// TODO: should the following line also find diamond-typeVariables?
+					if (((invocationSite instanceof Invocation) || (invocationSite instanceof ReferenceExpression))
+							&& mbk.typeVariables() != Binding.NO_TYPE_VARIABLES) 
+					{
+						// 18.5.4 More Specific Method Inference
+						Expression[] expressions = null;
+						if (invocationSite instanceof Invocation) {
+							expressions = ((Invocation)invocationSite).arguments();
+						} else {
+							expressions = ((ReferenceExpression)invocationSite).createPseudoExpressions(argumentTypes);
+						}
+						InferenceContext18 ic18 = new InferenceContext18(this, expressions, null);
+						if (!ic18.isMoreSpecificThan(mbj, mbk, levelj == VARARGS_COMPATIBLE, levelk == VARARGS_COMPATIBLE)) {
+							continue nextJ;
+						}
+					} else {
+						for (int i = 0, length = argumentTypes.length; i < length; i++) {
+							TypeBinding argumentType = argumentTypes[i];
+							TypeBinding s = InferenceContext18.getParameter(mbjParameters, i, levelj == VARARGS_COMPATIBLE); 
+							TypeBinding t = InferenceContext18.getParameter(mbkParameters, i, levelk == VARARGS_COMPATIBLE); 
+							if (TypeBinding.equalsEquals(s, t))
+								continue;
+							if (!argumentType.sIsMoreSpecific(s,t, this)) {
+								continue nextJ;
+							}
+						}
+					}
+				}
+				moreSpecific[count++] = visible[j];
+			}
+			if (count == 0) {
+				return new ProblemMethodBinding(visible[0], visible[0].selector, visible[0].parameters, ProblemReasons.Ambiguous);
+			} else if (count == 1) {
+				MethodBinding candidate = inferInvocationType(invocationSite, moreSpecific[0], argumentTypes);
+				compilationUnitScope().recordTypeReferences(candidate.thrownExceptions);
+				return candidate;
+			} else {
+				visibleSize = count;
+				// we proceed with pre 1.8 code below, which checks for overriding
+			}
+		} else {
+
+			// JLS7 implementation  
 
 		InvocationSite tieBreakInvocationSite = new InvocationSite() {
 			public TypeBinding[] genericTypeArguments() { return null; } // ignore genericTypeArgs
@@ -4824,7 +4878,6 @@ public abstract class Scope {
 			public InferenceContext18 freshInferenceContext(Scope scope) { return null; /* no inference when ignoring genericTypeArgs */ }
 			public ExpressionContext getExpressionContext() { return ExpressionContext.VANILLA_CONTEXT; }
 		};
-		MethodBinding[] moreSpecific = new MethodBinding[visibleSize];
 		int count = 0;
 		for (int level = 0, max = VARARGS_COMPATIBLE; level <= max; level++) {
 			nextVisible : for (int i = 0; i < visibleSize; i++) {
@@ -4888,6 +4941,7 @@ public abstract class Scope {
 			}
 		} else if (count == 0) {
 			return new ProblemMethodBinding(visible[0], visible[0].selector, visible[0].parameters, ProblemReasons.Ambiguous);
+		}
 		}
 
 		// found several methods that are mutually acceptable -> must be equal
@@ -5005,7 +5059,6 @@ public abstract class Scope {
 			}
 		}
 
-		// if all moreSpecific methods are equal then see if duplicates exist because of substitution
 		return new ProblemMethodBinding(visible[0], visible[0].selector, visible[0].parameters, ProblemReasons.Ambiguous);
 	}
 
@@ -5165,7 +5218,7 @@ public abstract class Scope {
 		if (arg.isCompatibleWith(param, this))
 			return COMPATIBLE;
 		
-		if (arg.isBaseType() != param.isBaseType()) {
+		if (arg.kind() == Binding.POLY_TYPE || (arg.isBaseType() != param.isBaseType())) {
 			TypeBinding convertedType = environment().computeBoxingType(arg);
 			if (TypeBinding.equalsEquals(convertedType, param) || convertedType.isCompatibleWith(param, this))
 				return AUTOBOX_COMPATIBLE;
@@ -5175,6 +5228,8 @@ public abstract class Scope {
 	
 	private int parameterCompatibilityLevel(TypeBinding arg, TypeBinding param, LookupEnvironment env, boolean tieBreakingVarargsMethods) {
 		// only called if env.options.sourceLevel >= ClassFileConstants.JDK1_5
+		if (arg == null || param == null)
+			return NOT_COMPATIBLE;
 		if (arg.isCompatibleWith(param, this))
 			return COMPATIBLE;
 		if (tieBreakingVarargsMethods && (this.compilerOptions().complianceLevel >= ClassFileConstants.JDK1_7 || !CompilerOptions.tolerateIllegalAmbiguousVarargsInvocation)) {
@@ -5186,9 +5241,9 @@ public abstract class Scope {
 			*/
 			return NOT_COMPATIBLE;
 		}
-		if (arg.isBaseType() != param.isBaseType()) {
+		if (arg.kind() == Binding.POLY_TYPE || (arg.isBaseType() != param.isBaseType())) {
 			TypeBinding convertedType = env.computeBoxingType(arg);
-			if (TypeBinding.equalsEquals(convertedType, param) || convertedType.isCompatibleWith(param))
+			if (TypeBinding.equalsEquals(convertedType, param) || convertedType.isCompatibleWith(param, this))
 				return AUTOBOX_COMPATIBLE;
 		}
 		return NOT_COMPATIBLE;
@@ -5339,8 +5394,7 @@ public abstract class Scope {
 			TypeVariableBinding[] methodTypeVariables = method.typeVariables();
 			int methodTypeVariablesArity = methodTypeVariables.length;
 	        
-			MethodBinding staticFactory = new MethodBinding(method.modifiers | ClassFileConstants.AccStatic, TypeConstants.SYNTHETIC_STATIC_FACTORY,
-																		null, null, null, method.declaringClass);
+			MethodBinding staticFactory = new SyntheticFactoryMethodBinding(method, this.environment());
 			staticFactory.typeVariables = new TypeVariableBinding[classTypeVariablesArity + methodTypeVariablesArity];
 			final SimpleLookupTable map = new SimpleLookupTable(classTypeVariablesArity + methodTypeVariablesArity);
 			// Rename each type variable T of the type to T'
@@ -5378,7 +5432,7 @@ public abstract class Scope {
 					}
 					public TypeBinding substitute(TypeVariableBinding typeVariable) {
 						TypeBinding retVal = (TypeBinding) map.get(typeVariable);
-						return typeVariable.hasTypeAnnotations() ? environment().createAnnotatedType(retVal, typeVariable.getTypeAnnotations()) : retVal;
+						return retVal == null ? typeVariable : typeVariable.hasTypeAnnotations() ? environment().createAnnotatedType(retVal, typeVariable.getTypeAnnotations()) : retVal;
 					}
 //{ObjectTeams:
 					public ITeamAnchor substituteAnchor(ITeamAnchor anchor, int rank) {

@@ -28,10 +28,14 @@
  *							Bug 425156 - [1.8] Lambda as an argument is flagged with incompatible error
  *							Bug 424403 - [1.8][compiler] Generic method call with method reference argument fails to resolve properly.
  *							Bug 426563 - [1.8] AIOOBE when method with error invoked with lambda expression as argument
+ *							Bug 420525 - [1.8] [compiler] Incorrect error "The type Integer does not define sum(Object, Object) that is applicable here"
+ *							Bug 427438 - [1.8][compiler] NPE at org.eclipse.jdt.internal.compiler.ast.ConditionalExpression.generateCode(ConditionalExpression.java:280)
  *     Andy Clement (GoPivotal, Inc) aclement@gopivotal.com - Contributions for
  *                          Bug 405104 - [1.8][compiler][codegen] Implement support for serializeable lambdas
  *******************************************************************************/
 package org.eclipse.jdt.internal.compiler.ast;
+
+import static org.eclipse.jdt.internal.compiler.ast.ExpressionContext.INVOCATION_CONTEXT;
 
 import java.util.LinkedHashSet;
 import java.util.Set;
@@ -200,6 +204,9 @@ public class LambdaExpression extends FunctionalExpression implements ReferenceC
 	 * @see org.eclipse.jdt.internal.compiler.ast.AbstractMethodDeclaration.resolve(ClassScope)
 	 */
 	public TypeBinding resolveType(BlockScope blockScope) {
+		
+		if (this.resolvedType != null)
+			return this.resolvedType;
 		
 		this.constant = Constant.NotAConstant;
 		this.enclosingScope = blockScope;
@@ -674,10 +681,11 @@ public class LambdaExpression extends FunctionalExpression implements ReferenceC
 		this.shapeAnalysisComplete = true;
 	}
 	
-	public boolean isCompatibleWith(final TypeBinding left, final Scope someScope) {
+	public boolean isCompatibleWith(TypeBinding left, final Scope someScope) {
 		if (!(left instanceof ReferenceBinding))
 			return false;
 
+		left = left.uncapture(this.enclosingScope);
 		shapeAnalysis: if (!this.shapeAnalysisComplete) {
 			IErrorHandlingPolicy oldPolicy = this.enclosingScope.problemReporter().switchErrorHandlingPolicy(silentErrorHandlingPolicy);
 			final CompilerOptions compilerOptions = this.enclosingScope.compilerOptions();
@@ -797,6 +805,8 @@ public class LambdaExpression extends FunctionalExpression implements ReferenceC
 		// note: this is essentially a simplified extract from isCompatibleWith(TypeBinding,Scope).
 		if (this.shapeAnalysisComplete && this.binding != null)
 			return this;
+		
+		targetType = targetType.uncapture(this.enclosingScope);
 		// TODO: caching
 		IErrorHandlingPolicy oldPolicy = this.enclosingScope.problemReporter().switchErrorHandlingPolicy(silentErrorHandlingPolicy);
 		final CompilerOptions compilerOptions = this.enclosingScope.compilerOptions();
@@ -835,6 +845,8 @@ public class LambdaExpression extends FunctionalExpression implements ReferenceC
 			}
 			
 			copy.shapeAnalysisComplete = true;
+			copy.resultExpressions = this.resultExpressions;
+			this.resultExpressions = NO_EXPRESSIONS;
 		} finally {
 			compilerOptions.isAnnotationBasedNullAnalysisEnabled = analyzeNPE;
 			this.hasIgnoredMandatoryErrors = false;
@@ -843,11 +855,11 @@ public class LambdaExpression extends FunctionalExpression implements ReferenceC
 		return copy;
 	}
 
-	public boolean sIsMoreSpecific(TypeBinding s, TypeBinding t) {
+	public boolean sIsMoreSpecific(TypeBinding s, TypeBinding t, Scope skope) {
 		
 		// 15.12.2.5 
 		
-		if (TypeBinding.equalsEquals(s,  t))
+		if (super.sIsMoreSpecific(s, t, skope))
 			return true;
 		
 		if (argumentsTypeElided() || t.findSuperTypeOriginatingFrom(s) != null)
@@ -870,7 +882,7 @@ public class LambdaExpression extends FunctionalExpression implements ReferenceC
 			return false;
 		
 		// r1 <: r2
-		if (r1.isCompatibleWith(r2))
+		if (r1.isCompatibleWith(r2, skope))
 			return true;
 		
 		Expression [] returnExpressions = this.resultExpressions;
@@ -897,7 +909,7 @@ public class LambdaExpression extends FunctionalExpression implements ReferenceC
 		if (r1.isFunctionalInterface(this.enclosingScope) && r2.isFunctionalInterface(this.enclosingScope)) {
 			for (i = 0; i < returnExpressionsLength; i++) {
 				Expression resultExpression = returnExpressions[i];
-				if (!resultExpression.sIsMoreSpecific(r1, r2))
+				if (!resultExpression.sIsMoreSpecific(r1, r2, skope))
 					break;
 			}
 			if (i == returnExpressionsLength)

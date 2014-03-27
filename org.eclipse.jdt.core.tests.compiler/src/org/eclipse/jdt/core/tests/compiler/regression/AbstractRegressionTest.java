@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2013 IBM Corporation and others.
+ * Copyright (c) 2000, 2014 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -20,6 +20,7 @@
  *								Bug 412203 - [compiler] Internal compiler error: java.lang.IllegalArgumentException: info cannot be null
  *								Bug 422051 - [1.8][compiler][tests] cleanup excuses (JavacHasABug) in InterfaceMethodTests
  *								Bug 400874 - [1.8][compiler] Inference infrastructure should evolve to meet JLS8 18.x (Part G of JSR335 spec)
+ *								Bug 425721 - [1.8][compiler] Nondeterministic results in GenericsRegressionTest_1_8.testBug424195a
  *     Jesper S Moller - Contributions for bug 378674 - "The method can be declared as static" is wrong
  *******************************************************************************/
 package org.eclipse.jdt.core.tests.compiler.regression;
@@ -339,7 +340,7 @@ static class JavacCompiler {
 			}
 		}
 		if (version == JavaCore.VERSION_1_8) {
-			if ("1.8.0-ea".equals(rawVersion)) {
+			if ("1.8.0-ea".equals(rawVersion) || ("1.8.0".equals(rawVersion))) {
 				return 0000;
 			}
 		}
@@ -462,6 +463,9 @@ protected static class JavacTestOptions {
 	}
 	String getCompilerOptions() {
 		return this.compilerOptions;
+	}
+	public void setCompilerOptions(String options) {
+		this.compilerOptions = options;
 	}
 	boolean skip(JavacCompiler compiler) {
 		return false;
@@ -733,9 +737,6 @@ protected static class JavacTestOptions {
 				new JavacHasABug(
 					MismatchType.EclipseErrorsJavacNone,
 					ClassFileConstants.JDK1_7, 0 /* 1.7.0 b03 */) : null,
-			JavacBug6294779 = RUN_JAVAC ? // http://bugs.sun.com/bugdatabase/view_bug.do?bug_id=6294779
-				new JavacHasABug(
-					MismatchType.JavacErrorsEclipseNone) : null,
 			JavacBug6302954 = RUN_JAVAC ? // http://bugs.sun.com/bugdatabase/view_bug.do?bug_id=6302954 & https://bugs.eclipse.org/bugs/show_bug.cgi?id=98379
 				new JavacHasABug(
 					MismatchType.JavacErrorsEclipseNone,
@@ -1064,15 +1065,18 @@ protected static class JavacTestOptions {
 	 * Fail if exception is non null.
 	 */
 	protected void checkCompilerLog(String[] testFiles, Requestor requestor,
-			String platformIndependantExpectedLog, Throwable exception) {
+			String[] alternatePlatformIndependantExpectedLogs, Throwable exception) {
 		String computedProblemLog = Util.convertToIndependantLineDelimiter(requestor.problemLog.toString());
-		if (!platformIndependantExpectedLog.equals(computedProblemLog)) {
-			logTestTitle();
-			System.out.println(Util.displayString(computedProblemLog, INDENT, SHIFT));
-			logTestFiles(false, testFiles);
+		int i;
+		for (i = 0; i < alternatePlatformIndependantExpectedLogs.length; i++) {
+			if (alternatePlatformIndependantExpectedLogs[i].equals(computedProblemLog))
+				return; // OK
 		}
+		logTestTitle();
+		System.out.println(Util.displayString(computedProblemLog, INDENT, SHIFT));
+		logTestFiles(false, testFiles);
 		if (exception == null) {
-			assertEquals("Invalid problem log ", platformIndependantExpectedLog, computedProblemLog);
+			assertEquals("Invalid problem log ", alternatePlatformIndependantExpectedLogs[i-1], computedProblemLog);
 		}
     }
 
@@ -1386,6 +1390,7 @@ protected static class JavacTestOptions {
 			// compiler results
 			false /* expecting no compiler errors */,
 			null /* do not check compiler log */,
+			null /* no alternate compiler logs */,
 			// runtime options
 			false /* do not force execution */,
 			null /* no vm arguments */,
@@ -1476,6 +1481,7 @@ protected static class JavacTestOptions {
 				false,
 				null,
 				false,
+				null,
 				null,
 				false,
 				null,
@@ -1855,6 +1861,13 @@ protected void runJavac(
 	// WORK reorder parameters
 	if (options == JavacTestOptions.SKIP) {
 		return;
+	}
+	if (options == null) {
+		options = JavacTestOptions.DEFAULT;
+	}
+	String newOptions = options.getCompilerOptions();
+	if (newOptions.indexOf(" -d ") < 0) {
+		options.setCompilerOptions(newOptions.concat(" -d ."));
 	}
 	String testName = testName();
 	Iterator compilers = javacCompilers.iterator();
@@ -2284,6 +2297,46 @@ protected void runNegativeTest(String[] testFiles, String expectedCompilerLog, b
 					JavacTestOptions.SKIP :
 					JavacTestOptions.DEFAULT /* javac test options */);
 	}
+	protected void runNegativeTest(
+			String[] testFiles,
+			String expectedCompilerLog,
+			String[] classLibraries,
+			boolean shouldFlushOutputDirectory,
+			Map customOptions,
+			boolean generateOutput,
+			boolean showCategory,
+			boolean showWarningToken,
+			boolean skipJavac,
+			JavacTestOptions javacOptions,
+			boolean performStatementsRecovery) {
+			runTest(
+		 		// test directory preparation
+				shouldFlushOutputDirectory /* should flush output directory */,
+				testFiles /* test files */,
+				// compiler options
+				classLibraries /* class libraries */,
+				customOptions /* custom options */,
+				performStatementsRecovery /* perform statements recovery */,
+				new Requestor( /* custom requestor */
+						generateOutput,
+						null /* no custom requestor */,
+						showCategory,
+						showWarningToken),
+				// compiler results
+				expectedCompilerLog == null || /* expecting compiler errors */
+					expectedCompilerLog.indexOf("ERROR") != -1,
+				expectedCompilerLog /* expected compiler log */,
+				// runtime options
+				false /* do not force execution */,
+				null /* no vm arguments */,
+				// runtime results
+				null /* do not check output string */,
+				null /* do not check error string */,
+				// javac options
+				skipJavac ?
+						JavacTestOptions.SKIP :
+						 javacOptions/* javac test options */);
+		}
 	protected void runTest(
 			String[] testFiles,
 			boolean expectingCompilerErrors,
@@ -2389,12 +2442,37 @@ protected void runNegativeTest(String[] testFiles, String expectedCompilerLog, b
 			customRequestor,
 			expectingCompilerErrors,
 			expectedCompilerLog,
+			null, // alternate compile errors
 			forceExecution,
 			vmArguments,
 			expectedOutputString,
 			expectedErrorString,
 			null,
 			javacTestOptions);
+	}
+	/** Call this if the compiler randomly produces different error logs. */
+	protected void runNegativeTestMultiResult(String[] testFiles, Map options, String[] alternateCompilerErrorLogs) {
+		runTest(
+			false,
+			testFiles,
+			new String[] {},
+			null,
+			options,
+			false,
+			new Requestor( /* custom requestor */
+					false,
+					null /* no custom requestor */,
+					false,
+					false),
+			true,
+			null,
+			alternateCompilerErrorLogs,
+			false,
+			null,
+			null,
+			null,
+			null,
+			JavacTestOptions.DEFAULT);
 	}
 // This is a worker method to support regression tests. To ease policy changes,
 // it should not be called directly, but through the runConformTest and
@@ -2481,6 +2559,7 @@ protected void runNegativeTest(String[] testFiles, String expectedCompilerLog, b
 			// compiler results
 			boolean expectingCompilerErrors,
 			String expectedCompilerLog,
+			String[] alternateCompilerLogs,
 			// runtime options
 			boolean forceExecution,
 			String[] vmArguments,
@@ -2548,9 +2627,16 @@ protected void runNegativeTest(String[] testFiles, String expectedCompilerLog, b
 			throw e;
 		} finally {
 			nameEnvironment.cleanup();
+			String[] alternatePlatformIndepentLogs = null;
 			if (expectedCompilerLog != null) {
-				checkCompilerLog(testFiles, requestor,
-						Util.convertToIndependantLineDelimiter(expectedCompilerLog), exception);
+				alternatePlatformIndepentLogs = new String[] {Util.convertToIndependantLineDelimiter(expectedCompilerLog)};
+			} else if (alternateCompilerLogs != null) {
+				alternatePlatformIndepentLogs = new String[alternateCompilerLogs.length];
+				for (int i = 0; i < alternateCompilerLogs.length; i++)
+					alternatePlatformIndepentLogs[i] = Util.convertToIndependantLineDelimiter(alternateCompilerLogs[i]);
+			}
+			if (alternatePlatformIndepentLogs != null) {
+				checkCompilerLog(testFiles, requestor, alternatePlatformIndepentLogs, exception);
 			}
 			if (exception == null) {
 				if (expectingCompilerErrors) {

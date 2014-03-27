@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2013 IBM Corporation and others.
+ * Copyright (c) 2000, 2014 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -69,6 +69,7 @@ import org.eclipse.jdt.internal.compiler.lookup.Scope;
 import org.eclipse.jdt.internal.compiler.lookup.TagBits;
 import org.eclipse.jdt.internal.compiler.lookup.TypeConstants;
 import org.eclipse.jdt.internal.compiler.lookup.TypeIds;
+import org.eclipse.jdt.internal.compiler.lookup.VoidTypeBinding;
 import org.eclipse.jdt.internal.compiler.problem.AbortCompilation;
 import org.eclipse.jdt.internal.core.util.Util;
 import org.eclipse.objectteams.otdt.core.compiler.IOTConstants;
@@ -1273,6 +1274,9 @@ class DefaultBindingResolver extends BindingResolver {
 		} else if (node instanceof QualifiedSuperReference) {
 			QualifiedSuperReference qualifiedSuperReference = (QualifiedSuperReference) node;
 			return this.getTypeBinding(qualifiedSuperReference.qualification.resolvedType);
+		} else if (node instanceof Receiver) {
+			org.eclipse.jdt.internal.compiler.lookup.TypeBinding receiver = ((Receiver) node).type.resolvedType;
+			return this.getTypeBinding(receiver);
 		} else if (node instanceof LocalDeclaration) {
 			IVariableBinding variable = this.getVariableBinding(((LocalDeclaration)node).binding);
 			if (variable == null) return null;
@@ -2142,43 +2146,46 @@ class DefaultBindingResolver extends BindingResolver {
 			leafComponentType = typeBinding.getElementType();
 			actualDimensions += typeBinding.getDimensions();
 		}
- 		org.eclipse.jdt.internal.compiler.lookup.TypeBinding leafTypeBinding = null;
- 		if (leafComponentType.isPrimitive()) {
- 	 		String name = leafComponentType.getBinaryName();
-			switch(name.charAt(0)) {
-				case 'I' :
-					leafTypeBinding = org.eclipse.jdt.internal.compiler.lookup.TypeBinding.INT;
-					break;
-				case 'B' :
-					leafTypeBinding = org.eclipse.jdt.internal.compiler.lookup.TypeBinding.BYTE;
-					break;
-				case 'Z' :
-					leafTypeBinding = org.eclipse.jdt.internal.compiler.lookup.TypeBinding.BOOLEAN;
-					break;
-				case 'C' :
-					leafTypeBinding = org.eclipse.jdt.internal.compiler.lookup.TypeBinding.CHAR;
-					break;
-				case 'J' :
-					leafTypeBinding = org.eclipse.jdt.internal.compiler.lookup.TypeBinding.LONG;
-					break;
-				case 'S' :
-					leafTypeBinding = org.eclipse.jdt.internal.compiler.lookup.TypeBinding.SHORT;
-					break;
-				case 'D' :
-					leafTypeBinding = org.eclipse.jdt.internal.compiler.lookup.TypeBinding.DOUBLE;
-					break;
-				case 'F' :
-					leafTypeBinding = org.eclipse.jdt.internal.compiler.lookup.TypeBinding.FLOAT;
-					break;
-				case 'V' :
+		if (!(leafComponentType instanceof TypeBinding)) return null;
+		org.eclipse.jdt.internal.compiler.lookup.TypeBinding leafTypeBinding = 
+											((TypeBinding) leafComponentType).binding;
+		if (leafTypeBinding instanceof VoidTypeBinding) {
 					throw new IllegalArgumentException();
 			}
+		if (typeBinding.isArray()) {
+			return this.getTypeBinding(lookupEnvironment().createArrayType(
+											leafTypeBinding,
+											actualDimensions,
+											insertAnnotations((((TypeBinding) typeBinding).binding).getTypeAnnotations(), dimensions)));
  		} else {
- 			if (!(leafComponentType instanceof TypeBinding)) return null;
- 			leafTypeBinding = ((TypeBinding) leafComponentType).binding;
+			return this.getTypeBinding(lookupEnvironment().createArrayType(
+											leafTypeBinding,
+											actualDimensions));
  		}
-		return this.getTypeBinding(lookupEnvironment().createArrayType(leafTypeBinding, actualDimensions));
 	}
+	
+	private org.eclipse.jdt.internal.compiler.lookup.AnnotationBinding[] insertAnnotations(
+							org.eclipse.jdt.internal.compiler.lookup.AnnotationBinding[] annots, int dimensions) {
+		if (dimensions == 0 || annots == null || annots.length == 0) {
+			return annots;
+		}
+		int index = 0;
+		if (dimensions < 0) {
+			for (int i = 0; i < annots.length; i++) {
+				index++;
+				if (annots[i] == null) {
+					if(++dimensions == 0) break;
+				}
+			}
+			if (dimensions < 0) dimensions = 0; // Just means there were no annotations
+		}
+		org.eclipse.jdt.internal.compiler.lookup.AnnotationBinding[] newAnnots = 
+				new org.eclipse.jdt.internal.compiler.lookup.AnnotationBinding[annots.length - index + dimensions];
+
+		System.arraycopy(annots, index, newAnnots, dimensions, annots.length - index);
+		return newAnnots;
+	}
+
 	//{ObjectTeams: Binding for callin/callout mappings
     @Override
     synchronized IMethodMappingBinding getMethodMappingBinding(org.eclipse.objectteams.otdt.internal.core.compiler.lookup.CallinCalloutBinding callbinding)

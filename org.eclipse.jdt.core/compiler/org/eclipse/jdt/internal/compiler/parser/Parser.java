@@ -2983,20 +2983,16 @@ protected void consumeCastExpressionLL1WithBounds() {
 	//CastExpression ::= '(' Name AdditionalBoundsList ')' UnaryExpressionNotPlusMinus
 	Expression cast;
 	Expression exp;
-	
-	int additionalBoundsLength = this.genericsLengthStack[this.genericsLengthPtr--];
-	TypeReference[] bounds = new TypeReference[additionalBoundsLength + 1];
-	this.genericsPtr -= additionalBoundsLength;
-	System.arraycopy(this.genericsStack, this.genericsPtr + 1, bounds, 1, additionalBoundsLength);
-
-	pushOnGenericsLengthStack(0); // handle type arguments
-	pushOnGenericsIdentifiersLengthStack(this.identifierLengthStack[this.identifierLengthPtr]);
-	bounds[0] = getTypeReference(0);
- 
+	int length;
+	exp = this.expressionStack[this.expressionPtr--];
+	this.expressionLengthPtr --;
+	TypeReference[] bounds = new TypeReference[length = this.expressionLengthStack[this.expressionLengthPtr]];
+	System.arraycopy(this.expressionStack, this.expressionPtr -= (length - 1), bounds, 0, length);
 	this.expressionStack[this.expressionPtr] =
 		cast = new CastExpression(
-			exp=this.expressionStack[this.expressionPtr] ,
+			exp,
 			createIntersectionCastTypeReference(bounds));
+	this.expressionLengthStack[this.expressionLengthPtr] = 1;
 	updateSourcePosition(cast);
 	cast.sourceEnd=exp.sourceEnd;
 }
@@ -5328,6 +5324,20 @@ protected void consumeInsideCastExpressionLL1() {
 }
 protected void consumeInsideCastExpressionLL1WithBounds() {
 	// InsideCastExpressionLL1WithBounds ::= $empty
+	int additionalBoundsLength = this.genericsLengthStack[this.genericsLengthPtr--];
+	TypeReference[] bounds = new TypeReference[additionalBoundsLength + 1];
+	this.genericsPtr -= additionalBoundsLength;
+	System.arraycopy(this.genericsStack, this.genericsPtr + 1, bounds, 1, additionalBoundsLength);
+
+	pushOnGenericsLengthStack(0); // handle type arguments
+	pushOnGenericsIdentifiersLengthStack(this.identifierLengthStack[this.identifierLengthPtr]);
+	bounds[0] = getTypeReference(0);
+ 
+	for (int i = 0; i <= additionalBoundsLength; i++) {
+		pushOnExpressionStack(bounds[i]);
+		if (i > 0)
+			this.expressionLengthStack[--this.expressionLengthPtr]++;
+	}
 }
 protected void consumeInsideCastExpressionWithQualifiedGenerics() {
 	// InsideCastExpressionWithQualifiedGenerics ::= $empty
@@ -5975,6 +5985,7 @@ protected void consumeMethodHeaderExtendedDims() {
 	if (extendedDimensions != 0) {
 		md.sourceEnd = this.endPosition;
 		md.returnType = augmentTypeWithAdditionalDimensions(md.returnType, extendedDimensions, getAnnotationsOnDimensions(extendedDimensions), false);
+		md.bits |= (md.returnType.bits & ASTNode.HasTypeAnnotations);
 		if (this.currentToken == TokenNameLBRACE){
 			md.bodyStart = this.endPosition + 1;
 		}
@@ -6006,6 +6017,7 @@ protected void consumeMethodHeaderName(boolean isAnnotationMethod) {
 	this.identifierLengthPtr--;
 	//type
 	md.returnType = getTypeReference(this.intStack[this.intPtr--]);
+	md.bits |= (md.returnType.bits & ASTNode.HasTypeAnnotations);
 	//modifiers
 	md.declarationSourceStart = this.intStack[this.intPtr--];
 //{ObjectTeams: fix omission in JDT (see https://bugs.eclipse.org/bugs/show_bug.cgi?id=169855):
@@ -10959,6 +10971,9 @@ protected void consumeToken(int type) {
   :giro */
 // SH}
 			break;
+		case TokenNameBeginLambda:
+			flushCommentsDefinedPriorTo(this.scanner.currentPosition);
+			break;
 		case TokenNameIdentifier :
 			pushIdentifier();
 			if (this.scanner.useAssertAsAnIndentifier  &&
@@ -15479,9 +15494,13 @@ public boolean automatonWillShift(int token, int lastAction) {
 	int stackTopState = this.stack[stackTop]; // single cell non write through "alternate stack" - the automaton's stack pointer either stays fixed during this manoeuvre or monotonically decreases.
 	int highWaterMark = stackTop;
 	// A rotated version of the automaton - cf. parse()'s for(;;)
+	if (lastAction <= NUM_RULES) { // in recovery mode, we could take a detour to here, with a pending reduce action.
+		stackTop --;
+		lastAction += ERROR_ACTION;
+	}
 	for (;;) {  
 		if (lastAction > ERROR_ACTION) {  
-			lastAction -= ERROR_ACTION;    /* shift-reduce on loop entry from above, reduce on loop back */
+			lastAction -= ERROR_ACTION;    /* reduce or shift-reduce on loop entry from above, reduce on loop back */
 			do { /* reduce */
 				stackTop -= rhs[lastAction] - 1;
 //{ObjectTeams: protect against underrun, see org.eclipse.objectteams.otdt.ui.tests.dom.converter.DOMRegressionTests.testBug316666()

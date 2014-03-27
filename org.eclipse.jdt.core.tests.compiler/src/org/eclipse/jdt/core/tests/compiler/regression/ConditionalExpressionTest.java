@@ -251,6 +251,11 @@ public class ConditionalExpressionTest extends AbstractRegressionTest {
 				"----------\n" + 
 				"1. ERROR in X.java (at line 9)\n" + 
 				"	foo(false ? (a,b)->a+b :new StringCatenation());\n" + 
+				"	^^^\n" + 
+				"The method foo(BinaryOperation<Integer>) in the type X is not applicable for the arguments ((false ? (<no type> a, <no type> b) -> (a + b) : new StringCatenation()))\n" + 
+				"----------\n" + 
+				"2. ERROR in X.java (at line 9)\n" + 
+				"	foo(false ? (a,b)->a+b :new StringCatenation());\n" + 
 				"	                        ^^^^^^^^^^^^^^^^^^^^^^\n" + 
 				"Type mismatch: cannot convert from StringCatenation to BinaryOperation<Integer>\n" + 
 				"----------\n"
@@ -281,9 +286,259 @@ public class ConditionalExpressionTest extends AbstractRegressionTest {
 				"----------\n" + 
 				"1. ERROR in X.java (at line 9)\n" + 
 				"	foo(false ? new StringCatenation() : (a,b)->a+b);\n" + 
+				"	^^^\n" + 
+				"The method foo(BinaryOperation<Integer>) in the type X is not applicable for the arguments ((false ? new StringCatenation() : (<no type> a, <no type> b) -> (a + b)))\n" + 
+				"----------\n" + 
+				"2. ERROR in X.java (at line 9)\n" + 
+				"	foo(false ? new StringCatenation() : (a,b)->a+b);\n" + 
 				"	            ^^^^^^^^^^^^^^^^^^^^^^\n" + 
 				"Type mismatch: cannot convert from StringCatenation to BinaryOperation<Integer>\n" + 
 				"----------\n"
 				);
 	}
+	// https://bugs.eclipse.org/bugs/show_bug.cgi?id=427207, - [1.8][bytecode] Runtime type problem: Instruction type does not match stack map
+	// Reference poly conditional in assignment context 
+	public void test009() {
+		if (this.complianceLevel < ClassFileConstants.JDK1_8)
+			return;
+		this.runConformTest(
+				new String[] {
+						"X.java",
+						"import java.util.function.Function;\n" +
+						"public class X {\n" +
+						"	public static void main(String[] args) {\n" +
+						"		System.out.println(test(1, X::intToSome));\n" +
+						"	}\n" +
+						"	static <T> Some test(T value, Function<T, Some> f) {\n" +
+						"		return (value == null) ? new Nothing() : f.apply(value);\n" +
+						"	}\n" +
+						"	static SomeInt intToSome(int i) {\n" +
+						"		return new SomeInt();\n" +
+						"	}\n" +
+						"	static abstract class Some {}\n" +
+						"	static class SomeInt extends Some {\n" +
+						"	    public String toString() {\n" +
+						"			return \"SomeInt instance\";\n" +
+						"        }\n" +
+						"   }\n" +
+						"	static class Nothing extends Some {}\n" +
+						"}\n",
+				},
+				"SomeInt instance");
+	}
+	// https://bugs.eclipse.org/bugs/show_bug.cgi?id=427207, - [1.8][bytecode] Runtime type problem: Instruction type does not match stack map
+	// Reference poly conditional in poly invocation context 
+	public void test010() {
+		if (this.complianceLevel < ClassFileConstants.JDK1_8)
+			return;
+		this.runConformTest(
+				new String[] {
+						"X.java",
+						"import java.util.function.Function;\n" +
+						"public class X {\n" +
+						"	public static void main(String[] args) {\n" +
+						"		System.out.println(test(1, X::intToSome));\n" +
+						"	}\n" +
+						"	static <T> Some test(T value, Function<T, Some> f) {\n" +
+						"		return id((value == null) ? new Nothing<>() : f.apply(value));\n" +
+						"	}\n" +
+						"	static <T> T id(T t) {\n" +
+						"		return t;\n" +
+						"	}\n" +
+						"	static SomeInt intToSome(int i) {\n" +
+						"		return new SomeInt();\n" +
+						"	}\n" +
+						"	static abstract class Some {}\n" +
+						"	static class SomeInt extends Some {\n" +
+						"	    public String toString() {\n" +
+						"		return \"SomeInt instance\";\n" +
+						"            }\n" +
+						"        }\n" +
+						"	static class Nothing<T> extends Some {}\n" +
+						"}\n",
+				},
+				"SomeInt instance");
+	}
+	// https://bugs.eclipse.org/bugs/show_bug.cgi?id=427207, - [1.8][bytecode] Runtime type problem: Instruction type does not match stack map
+	// Reference poly conditional in assignment context, order reversed.
+	public void test011() {
+		if (this.complianceLevel < ClassFileConstants.JDK1_8)
+			return;
+		this.runConformTest(
+				new String[] {
+						"X.java",
+						"import java.util.function.Function;\n" +
+						"public class X {\n" +
+						"	public static void main(String[] args) {\n" +
+						"		System.out.println(test(1, X::intToSome));\n" +
+						"	}\n" +
+						"	static <T> Some test(T value, Function<T, Some> f) {\n" +
+						"		return (value == null) ? f.apply(value) : new Nothing();\n" +
+						"	}\n" +
+						"	static SomeInt intToSome(int i) {\n" +
+						"		return new SomeInt();\n" +
+						"	}\n" +
+						"	static abstract class Some {}\n" +
+						"	static class SomeInt extends Some {\n" +
+						"	    public String toString() {\n" +
+						"			return \"SomeInt instance\";\n" +
+						"        }\n" +
+						"   }\n" +
+						"	static class Nothing<T> extends Some {\n" +
+						"	    public String toString() {\n" +
+						"			return \"Nothing instance\";\n" +
+						"       }\n" +
+						"   }\n" +
+						"}\n",
+				},
+				"Nothing instance");
+	}
+	// https://bugs.eclipse.org/bugs/show_bug.cgi?id=427207, - [1.8][bytecode] Runtime type problem: Instruction type does not match stack map
+	// Reference poly conditional in poly invocation context, order reversed.
+	public void test012() {
+		if (this.complianceLevel < ClassFileConstants.JDK1_8)
+			return;
+		this.runConformTest(
+				new String[] {
+						"X.java",
+						"import java.util.function.Function;\n" +
+						"public class X {\n" +
+						"	public static void main(String[] args) {\n" +
+						"		System.out.println(test(1, X::intToSome));\n" +
+						"	}\n" +
+						"	static <T> Some test(T value, Function<T, Some> f) {\n" +
+						"		return id((value == null) ? f.apply(value) : new Nothing<>());\n" +
+						"	}\n" +
+						"	static <T> T id(T t) {\n" +
+						"		return t;\n" +
+						"	}\n" +
+						"	static SomeInt intToSome(int i) {\n" +
+						"		return new SomeInt();\n" +
+						"	}\n" +
+						"	static abstract class Some {}\n" +
+						"	static class SomeInt extends Some {\n" +
+						"	    public String toString() {\n" +
+						"		return \"SomeInt instance\";\n" +
+						"            }\n" +
+						"        }\n" +
+						"	static class Nothing<T> extends Some {\n" +
+						"	    public String toString() {\n" +
+						"			return \"Nothing instance\";\n" +
+						"       }\n" +
+						"   }\n" +
+						"}\n",
+				},
+				"Nothing instance");
+	}
+	// https://bugs.eclipse.org/bugs/show_bug.cgi?id=427207, - [1.8][bytecode] Runtime type problem: Instruction type does not match stack map
+	// Reference poly conditional in poly invocation context, interface types
+	public void test013() {
+		if (this.complianceLevel < ClassFileConstants.JDK1_8)
+			return;
+		this.runConformTest(
+				new String[] {
+						"X.java",
+						"import java.util.function.Function;\n" +
+						"public class X {\n" +
+						"	public static void main(String[] args) {\n" +
+						"		System.out.println(test(1, X::intToSome));\n" +
+						"	}\n" +
+						"	static <T> Some test(T value, Function<T, Some> f) {\n" +
+						"		return id((value == null) ? new Nothing<>() : f.apply(value));\n" +
+						"	}\n" +
+						"	static <T> T id(T t) {\n" +
+						"		return t;\n" +
+						"	}\n" +
+						"	static SomeInt intToSome(int i) {\n" +
+						"		return new SomeInt();\n" +
+						"	}\n" +
+						"	static interface Some {}\n" +
+						"	static class SomeInt implements Some {\n" +
+						"		public String toString() {\n" +
+						"			return \"SomeInt instance\";\n" +
+						"		}\n" +
+						"	}\n" +
+						"	static class Nothing<T> implements Some {}\n" +
+						"}",
+				},
+				"SomeInt instance");
+	}
+	// https://bugs.eclipse.org/bugs/show_bug.cgi?id=427438, - NPE at org.eclipse.jdt.internal.compiler.ast.ConditionalExpression.generateCode
+	public void test014() {
+		this.runNegativeTest(
+				new String[] {
+						"X.java",
+						"public class X {\n" +
+						"	public X(Class clazz) {\n" +
+						"	}\n" +
+						"	public void error() {\n" +
+						"		boolean test = false;\n" +
+						"		int i = 1;\n" +
+						"		new X(test ? (i == 2 ? D.class : E.class) : null);\n" +
+						"	}\n" +
+						"	public class D {\n" +
+						"	}\n" +
+						"	public class E {\n" +
+						"	}\n" +
+						"}\n",
+				},
+				this.complianceLevel < ClassFileConstants.JDK1_5 ? "" :
+					"----------\n" + 
+					"1. WARNING in X.java (at line 2)\n" + 
+					"	public X(Class clazz) {\n" + 
+					"	         ^^^^^\n" + 
+					"Class is a raw type. References to generic type Class<T> should be parameterized\n" + 
+					"----------\n");
+	}
+	// https://bugs.eclipse.org/bugs/show_bug.cgi?id=427438, - NPE at org.eclipse.jdt.internal.compiler.ast.ConditionalExpression.generateCode
+	public void test015() {
+		this.runNegativeTest(
+				new String[] {
+						"X.java",
+						"public class X {\n" +
+						"	public X(Class clazz) {\n" +
+						"	}\n" +
+						"	public void error() {\n" +
+						"		boolean test = false;\n" +
+						"		int i = 1;\n" +
+						"		new X(test ? null : (i == 2 ? D.class : E.class));\n" +
+						"	}\n" +
+						"	public class D {\n" +
+						"	}\n" +
+						"	public class E {\n" +
+						"	}\n" +
+						"}\n",
+				},
+				this.complianceLevel < ClassFileConstants.JDK1_5 ? "" :
+					"----------\n" + 
+					"1. WARNING in X.java (at line 2)\n" + 
+					"	public X(Class clazz) {\n" + 
+					"	         ^^^^^\n" + 
+					"Class is a raw type. References to generic type Class<T> should be parameterized\n" + 
+					"----------\n");
+	}
+	// https://bugs.eclipse.org/bugs/show_bug.cgi?id=427625, - NPE at org.eclipse.jdt.internal.compiler.ast.ConditionalExpression.generateCode
+	public void test427625() {
+		if (this.complianceLevel < ClassFileConstants.JDK1_5)
+			return;
+		this.runNegativeTest(
+				new String[] {
+						"X.java",
+						"import java.util.Collection;\n" +
+						"import java.util.List;\n" +
+						"public class X {\n" +
+						"	public void error(Collection<Object> c) {\n" +
+						"		boolean b  =true;\n" +
+						"		c.add(b ? new Integer(1)\n" +
+						"		        : c==null ? null \n" +
+						"				  : c instanceof List ? Integer.valueOf(1) \n" +
+						"				                      : o()); \n" +
+						"	}\n" +
+						"	public Object o() {\n" +
+						"		return null;\n" +
+						"	}\n" +
+						"}\n",
+				},
+				"");
+	}	
 }

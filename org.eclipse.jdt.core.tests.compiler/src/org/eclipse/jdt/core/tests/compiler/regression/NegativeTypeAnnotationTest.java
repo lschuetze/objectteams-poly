@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2013 IBM Corporation and others.
+ * Copyright (c) 2011, 2014 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -15,8 +15,11 @@
 package org.eclipse.jdt.core.tests.compiler.regression;
 
 import java.io.File;
+import java.util.Map;
 
 import org.eclipse.jdt.core.util.ClassFileBytesDisassembler;
+import org.eclipse.jdt.internal.compiler.impl.CompilerOptions;
+
 import junit.framework.Test;
 
 public class NegativeTypeAnnotationTest extends AbstractRegressionTest {
@@ -4306,5 +4309,118 @@ public class NegativeTypeAnnotationTest extends AbstractRegressionTest {
 				},
 				"",
 				true);
+	}
+	// https://bugs.eclipse.org/bugs/show_bug.cgi?id=424977,  [1.8][compiler]ArrayIndexIndexOutOfBoundException in annotated wrong<> code
+	public void testBug426977() {
+		Map customOptions = getCompilerOptions();
+		customOptions.put(CompilerOptions.OPTION_Store_Annotations, CompilerOptions.ENABLED);
+		runNegativeTest(
+			new String[] {
+				"test/X.java",
+				"package test;\n" +
+				"import java.lang.annotation.ElementType;\n" + 
+				"import java.lang.annotation.Target;\n" + 
+				"\n" + 
+				"public class X {\n" + 
+				"    test.@A Outer<>.@A Inner<> i;\n" + 
+				"}\n" +
+				"class Outer<T> {\n" +
+				"    class Inner {}\n" +
+				"}\n" +
+				"@Target(ElementType.TYPE_USE)\n" + 
+				"@interface A {}\n"
+			},
+			"----------\n" + 
+			"1. ERROR in test\\X.java (at line 6)\n" + 
+			"	test.@A Outer<>.@A Inner<> i;\n" + 
+			"	^^^^^^^^^^^^^\n" + 
+			"Incorrect number of arguments for type Outer<T>; it cannot be parameterized with arguments <>\n" + 
+			"----------\n",
+			null,
+			true,
+			customOptions);
+	}
+	// https://bugs.eclipse.org/bugs/show_bug.cgi?id=424977,  [1.8][compiler] ArrayIndexIndexOutOfBoundException in annotated wrong<> code
+	public void testBug426977a() {
+		Map customOptions = getCompilerOptions();
+		customOptions.put(CompilerOptions.OPTION_Store_Annotations, CompilerOptions.ENABLED);
+		runNegativeTest(
+			new String[] {
+				"test/X.java",
+				"package test;\n" +
+				"import java.lang.annotation.ElementType;\n" + 
+				"import java.lang.annotation.Target;\n" + 
+				"\n" + 
+				"public class X {\n" + 
+				"    test.@A Outer<Object>.@A Inner<> i;\n" + 
+				"}\n" +
+				"class Outer<T> {\n" +
+				"    class Inner {}\n" +
+				"}\n" +
+				"@Target(ElementType.TYPE_USE)\n" + 
+				"@interface A {}\n"
+			},
+			"----------\n" + 
+			"1. ERROR in test\\X.java (at line 6)\n" + 
+			"	test.@A Outer<Object>.@A Inner<> i;\n" + 
+			"	^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n" + 
+			"The type Outer<Object>.Inner is not generic; it cannot be parameterized with arguments <>\n" + 
+			"----------\n",
+			null,
+			true,
+			customOptions);
+	}
+	// https://bugs.eclipse.org/bugs/show_bug.cgi?id=425599, [1.8][compiler] ISE when trying to compile qualified and annotated class instance creation
+	public void test425599() {
+		Map customOptions = getCompilerOptions();
+		customOptions.put(CompilerOptions.OPTION_Store_Annotations, CompilerOptions.ENABLED);
+		runNegativeTest(
+			new String[] {
+				"X.java",
+				"import java.lang.annotation.ElementType;\n" +
+				"import java.lang.annotation.Target;\n" +
+				"public class X {\n" +
+				"    Object ax = new @A Outer().new Middle<String>();\n" +
+				"}\n" +
+				"@Target(ElementType.TYPE_USE) @interface A {}\n" +
+				"class Outer {\n" +
+				"    class Middle<E> {}\n" +
+				"}\n"
+			},
+			"",
+			null,
+			true,
+			customOptions);
+	}
+	// https://bugs.eclipse.org/bugs/show_bug.cgi?id=427955, [1.8][compiler] NPE in TypeSystem.getUnannotatedType
+	public void test427955() {
+		Map customOptions = getCompilerOptions();
+		customOptions.put(CompilerOptions.OPTION_Store_Annotations, CompilerOptions.ENABLED);
+		runNegativeTest(
+			new String[] {
+				"X.java",
+				"/**\n" +
+				" * @param <K> unused\n" +
+				" * @param <V> unused\n" +
+				" */\n" +
+				"public class X {}\n" +
+				"class Outer<K, V> {\n" +
+				"  void method() {\n" +
+				"    //Internal compiler error: java.lang.NullPointerException at\n" +
+				"    // org.eclipse.jdt.internal.compiler.lookup.TypeSystem.getUnannotatedType(TypeSystem.java:76)\n" +
+				"    new Inner<>(null);\n" +
+				"  }\n" +
+				"  final class Inner<K2, V2> {\n" +
+				"    /**\n" +
+				"     * @param next unused \n" +
+				"     */\n" +
+				"    Inner(Inner<K2, V2> next) {}\n" +
+				"  }\n" +
+				"}\n"
+			},
+			"",
+			null,
+			true,
+			customOptions);
 	}
 }

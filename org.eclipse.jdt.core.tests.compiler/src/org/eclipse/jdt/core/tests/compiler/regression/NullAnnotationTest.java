@@ -730,8 +730,12 @@ public void test_nonnull_local_001() {
 		"----------\n" +
 		"1. ERROR in X.java (at line 4)\n" +
 		"	@NonNull Object o1 = b ? null : new Object();\n" +
+		(this.complianceLevel < ClassFileConstants.JDK1_8 ?
 		"	                     ^^^^^^^^^^^^^^^^^^^^^^^\n" +
-		"Null type mismatch: required \'@NonNull Object\' but the provided value is inferred as @Nullable\n" +
+		"Null type mismatch: required \'@NonNull Object\' but the provided value is inferred as @Nullable\n"
+		:
+		"	                         ^^^^\n" + 
+		"Null type mismatch: required \'@NonNull Object\' but the provided value is null\n") + 
 		"----------\n" +
 		"2. ERROR in X.java (at line 6)\n" +
 		"	o2 = null;\n" +
@@ -767,8 +771,12 @@ public void test_nonnull_local_002() {
 		"----------\n" +
 		"1. ERROR in X.java (at line 5)\n" +
 		"	o1 = b ? null : new Object();\n" +
+		(this.complianceLevel < ClassFileConstants.JDK1_8 ?
 		"	     ^^^^^^^^^^^^^^^^^^^^^^^\n" +
-		"Null type mismatch: required \'@NonNull Object\' but the provided value is inferred as @Nullable\n" +
+		"Null type mismatch: required \'@NonNull Object\' but the provided value is inferred as @Nullable\n"
+		:
+		"	         ^^^^\n" + 
+		"Null type mismatch: required \'@NonNull Object\' but the provided value is null\n") + 
 		"----------\n" +
 		"2. ERROR in X.java (at line 8)\n" +
 		"	o2 = null;\n" +

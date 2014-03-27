@@ -23,6 +23,8 @@
  *								Bug 417295 - [1.8[[null] Massage type annotated null analysis to gel well with deep encoded type bindings.
  *								Bug 400874 - [1.8][compiler] Inference infrastructure should evolve to meet JLS8 18.x (Part G of JSR335 spec)
  *								Bug 425460 - [1.8] [inference] Type not inferred on stream.toArray
+ *								Bug 426792 - [1.8][inference][impl] generify new type inference engine
+ *								Bug 428019 - [1.8][compiler] Type inference failure with nested generic invocation.
  *******************************************************************************/
 package org.eclipse.jdt.internal.compiler.lookup;
 
@@ -61,7 +63,7 @@ public ArrayBinding(TypeBinding type, int dimensions, LookupEnvironment environm
 	if (type instanceof UnresolvedReferenceBinding)
 		((UnresolvedReferenceBinding) type).addWrapper(this, environment);
 	else
-		this.tagBits |= type.tagBits & (TagBits.HasTypeVariable | TagBits.HasDirectWildcard | TagBits.HasMissingType | TagBits.ContainsNestedTypeReferences);
+		this.tagBits |= type.tagBits & (TagBits.HasTypeVariable | TagBits.HasDirectWildcard | TagBits.HasMissingType | TagBits.ContainsNestedTypeReferences | TagBits.HasCapturedWildcard);
 	long mask = type.tagBits & TagBits.AnnotationNullMASK;
 	if (mask != 0) {
 		this.nullTagBitsPerDimension = new long[this.dimensions + 1];
@@ -119,6 +121,11 @@ public void collectSubstitutes(Scope scope, TypeBinding actualType, InferenceCon
 			// TODO (philippe) should consider array bounds, and recurse
 			break;
 	}
+}
+
+@Override
+public boolean mentionsAny(TypeBinding[] parameters, int idx) {
+	return this.leafComponentType.mentionsAny(parameters, idx);
 }
 
 //{ObjectTeams: cross the OT package, make protected:
@@ -296,6 +303,33 @@ public boolean isCompatibleWith(TypeBinding otherType, Scope captureScope) {
 	return false;
 }
 
+@Override
+public boolean isSubtypeOf(TypeBinding otherType) {
+	if (equalsEquals(this, otherType))
+		return true;
+
+	switch (otherType.kind()) {
+		case Binding.ARRAY_TYPE :
+			ArrayBinding otherArray = (ArrayBinding) otherType;
+			if (otherArray.leafComponentType.isBaseType())
+				return false; // relying on the fact that all equal arrays are identical
+			if (this.dimensions == otherArray.dimensions)
+				return this.leafComponentType.isSubtypeOf(otherArray.leafComponentType);
+			if (this.dimensions < otherArray.dimensions)
+				return false; // cannot assign 'String[]' into 'Object[][]' but can assign 'byte[][]' into 'Object[]'
+			break;
+		case Binding.BASE_TYPE :
+			return false;
+	}
+	switch (otherType.leafComponentType().id) {
+	    case TypeIds.T_JavaLangObject :
+	    case TypeIds.T_JavaLangCloneable :
+	    case TypeIds.T_JavaIoSerializable :
+	        return true;
+	}
+	return false;
+}
+
 public boolean isProperType(boolean admitCapture18) {
 	return this.leafComponentType.isProperType(admitCapture18);
 }
@@ -422,7 +456,7 @@ public char[] sourceName() {
 public void swapUnresolved(UnresolvedReferenceBinding unresolvedType, ReferenceBinding resolvedType, LookupEnvironment env) {
 	if (this.leafComponentType == unresolvedType) { //$IDENTITY-COMPARISON$
 		this.leafComponentType = env.convertUnresolvedBinaryToRawType(resolvedType);
-		this.tagBits |= this.leafComponentType.tagBits & (TagBits.HasTypeVariable | TagBits.HasDirectWildcard | TagBits.HasMissingType);
+		this.tagBits |= this.leafComponentType.tagBits & (TagBits.HasTypeVariable | TagBits.HasDirectWildcard | TagBits.HasMissingType | TagBits.HasCapturedWildcard);
 	}
 }
 //{ObjectTeams: role wrapping:
@@ -441,6 +475,13 @@ public String toString() {
 }
 public TypeBinding unannotated() {
 	return this.hasTypeAnnotations() ? this.environment.getUnannotatedType(this) : this;
+}
+@Override
+public TypeBinding uncapture(Scope scope) {
+	if ((this.tagBits & TagBits.HasCapturedWildcard) == 0)
+		return this;
+	TypeBinding leafType = this.leafComponentType.uncapture(scope);
+	return scope.environment().createArrayType(leafType, this.dimensions, this.typeAnnotations);
 }
 
 }

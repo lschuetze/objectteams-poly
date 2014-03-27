@@ -1441,8 +1441,8 @@ public class ASTConverter18Test extends ConverterTestSetup {
 
 		// TypeParameter with TYPE_USE and TYPE_PARAMETER annotation combination.
 		assertEquals("@Marker1 @Marker3 F extends @Marker1 @Marker2 File", typeParameter.toString());
-		assertTrue(typeParameter.annotations().size() == 2);
-		Annotation annotation = (Annotation)typeParameter.annotations().get(1);
+		assertTrue(typeParameter.modifiers().size() == 2);
+		Annotation annotation = (Annotation)typeParameter.modifiers().get(1);
 		assertEquals("@Marker3", annotation.toString());
 		IAnnotationBinding abinding = annotation.resolveAnnotationBinding();
 		assertEquals("@Marker3()", abinding.toString());
@@ -1530,8 +1530,8 @@ public class ASTConverter18Test extends ConverterTestSetup {
 		typedeclaration = (TypeDeclaration) getASTNode(cu, 1);
 		typeParameter = (TypeParameter) typedeclaration.typeParameters().get(0);
 		assertEquals("@Marker3 T", typeParameter.toString());
-		assertTrue(typeParameter.annotations().size() == 1);
-		annotation = (Annotation)typeParameter.annotations().get(0);
+		assertTrue(typeParameter.modifiers().size() == 1);
+		annotation = (Annotation)typeParameter.modifiers().get(0);
 		assertEquals("@Marker3", annotation.toString());
 		abinding = annotation.resolveAnnotationBinding();
 		assertEquals("@Marker3()", abinding.toString());
@@ -3328,8 +3328,8 @@ public class ASTConverter18Test extends ConverterTestSetup {
 		MethodDeclaration methodDeclaration = (MethodDeclaration) node;
 		Type returnType = methodDeclaration.getReturnType2();
 		ITypeBinding tBinding1 = returnType.resolveBinding();
-		assertEquals("Unexpected type", tBinding1.toString(), "@Marker{ value = (String)\"1\"} String @Marker{ value = (String)\"2\"} []");
-		assertEquals("Unexpected type", methodDeclaration.resolveBinding().getReturnType().toString(), "@Marker{ value = (String)\"1\"} String @Marker3{ value = (String)\"3\"} [] @Marker{ value = (String)\"2\"} []");
+		assertEquals("Unexpected type", tBinding1.toString(), "@Marker((String)\"1\") String @Marker((String)\"2\") []");
+		assertEquals("Unexpected type", methodDeclaration.resolveBinding().getReturnType().toString(), "@Marker((String)\"1\") String @Marker3((String)\"3\") [] @Marker((String)\"2\") []");
 		
 		List params = methodDeclaration.parameters();
 		assertEquals("Incorrect params", 1, params.size());
@@ -3346,7 +3346,7 @@ public class ASTConverter18Test extends ConverterTestSetup {
 		List fragments = field.fragments();
 		assertEquals("Incorrect no of fragments", 1, fragments.size());
 		VariableDeclarationFragment fragment = (VariableDeclarationFragment) fragments.get(0);
-		assertEquals("Unexpected type", fragment.resolveBinding().getType().toString(), "String @Marker{ value = (String)\"Extended\"} [] @Marker{ value = (String)\"i0\"} @Marker2 [] [] @Marker{ value = (String)\"i1\"} []");
+		assertEquals("Unexpected type", fragment.resolveBinding().getType().toString(), "String @Marker((String)\"Extended\") [] @Marker((String)\"i0\") @Marker2 [] [] @Marker((String)\"i1\") []");
 		assertEquals("Unexpected type", "String @Marker(\"i0\") @Marker2 [][] @Marker(\"i1\") []", field.getType().toString());
 	}
 	// https://bugs.eclipse.org/bugs/show_bug.cgi?id=417669
@@ -3740,18 +3740,18 @@ public class ASTConverter18Test extends ConverterTestSetup {
 	}
 	/*
 	 * https://bugs.eclipse.org/bugs/show_bug.cgi?id=418979
-	 * https://bugs.eclipse.org/bugs/show_bug.cgi?id=424977
 	 */
-	public void _testBug418979_002() throws JavaModelException {
+	public void testBug418979_002() throws JavaModelException {
 		String contents =
 				"package test;\n" +
 				"import java.lang.annotation.*;\n" +
 				"public class X {\n" +
-				"    test.@A Outer<>.@A Inner<> i;\n" +
+				"    test.@A Outer<C>.@A Inner<C> i;\n" +
 				" }\n" +
 				"class Outer<T> {\n" +
 				"	class Inner<S> {}\n" +
 				"}\n" +
+				"class C {}\n" +
 				"@Target (ElementType.TYPE_USE)\n" +
 				"@interface A{}";
 		this.workingCopy = getWorkingCopy("/Converter18/src/test/X.java", true/*resolve*/);
@@ -3761,13 +3761,13 @@ public class ASTConverter18Test extends ConverterTestSetup {
 		node = getASTNode(compilationUnit, 0);
 		assertEquals("Not a type declaration", ASTNode.TYPE_DECLARATION, node.getNodeType());
 		FieldDeclaration field = ((TypeDeclaration) node).getFields()[0];
-		checkSourceRange(field, "test.@A Outer<>.@A Inner<> i", contents);
+		checkSourceRange(field, "test.@A Outer<C>.@A Inner<C> i;", contents);
 		ParameterizedType parameterizedType = (ParameterizedType) field.getType();
-		checkSourceRange(parameterizedType, "test.@A Outer<>.@A Inner<>", contents);
+		checkSourceRange(parameterizedType, "test.@A Outer<C>.@A Inner<C>", contents);
 		QualifiedType qualifiedType = (QualifiedType) parameterizedType.getType();
-		checkSourceRange(qualifiedType, "test.@A Outer<>.@A Inner", contents);
+		checkSourceRange(qualifiedType, "test.@A Outer<C>.@A Inner", contents);
 		parameterizedType = (ParameterizedType) qualifiedType.getQualifier();
-		checkSourceRange(parameterizedType, "test.@A Outer<>", contents);
+		checkSourceRange(parameterizedType, "test.@A Outer<C>", contents);
 		NameQualifiedType nameQualifiedType = (NameQualifiedType) parameterizedType.getType();
 		checkSourceRange(nameQualifiedType, "test.@A Outer", contents);
 	}
@@ -3908,5 +3908,319 @@ public class ASTConverter18Test extends ConverterTestSetup {
 		typeBinding = typeBinding.getTypeDeclaration();
 		annots = typeBinding.getTypeAnnotations();
 		assertEquals("Incorrect type annotations", 0, annots.length);
+	}
+	/*
+	 * https://bugs.eclipse.org/bugs/show_bug.cgi?id=416560, [1.8] Incorrect source range for lambda expression's parameter after reconciliation
+	 */
+	public void testBug416560_001() throws JavaModelException {
+		String contents =
+				"import java.lang.annotation.ElementType;\n" +
+				"@Target (ElementType.FIELD)\n" +
+				"public class X{\n" +
+				"    public FI fi= /*a*/(int n1, int n2) -> n1 * n2;\n" +
+				"}\n" +
+				"public class X\n" +
+				"    public FI fi= /*a*/(int n1, int n2) -> n1 * n2;\n" +
+				"interface FI {\n" +
+				"    int foo(int s1, int s2);\n" +
+				"}\n";
+		this.workingCopy = getWorkingCopy("/Converter18/src/test/X.java", true/*resolve*/);
+		this.workingCopy.getBuffer().setContents(contents);
+		CompilationUnit compilationUnit = this.workingCopy.reconcile(AST.JLS8, ICompilationUnit.FORCE_PROBLEM_DETECTION, null, null);
+		ASTNode node = getASTNode(compilationUnit, 0);
+		FieldDeclaration[] field = ((TypeDeclaration) node).getFields();
+		List fragments = field[0].fragments();
+		VariableDeclarationFragment fragment = (VariableDeclarationFragment)fragments.get(0);
+		Expression expression = fragment.getInitializer();
+		LambdaExpression lambdaExpression = (LambdaExpression)expression;
+		VariableDeclaration variableDeclaration = (VariableDeclaration) lambdaExpression.parameters().get(0);
+		checkSourceRange(variableDeclaration, "int n1", contents);
+	}
+	/*
+	 * https://bugs.eclipse.org/bugs/show_bug.cgi?id=416560, [1.8] Incorrect source range for lambda expression's parameter after reconciliation
+	 */
+	public void testBug416560_002() throws JavaModelException {
+		String contents =
+				"import java.lang.annotation.ElementType;\n" +
+				"@Target (ElementType.FIELD)\n" +
+				"public class X{\n" +
+				"    public FI fi= /*a*/(int n1, int n2) -> n1 * n2;\n" +
+				"}\n" +
+				"public class X\n" +
+				"    public FI fi= /*a*/(int n1, int n2) -> n1 * n2;\n" +
+				"interface FI {\n" +
+				"    int foo(int s1, int s2);\n" +
+				"}\n";
+		this.workingCopy = getWorkingCopy("/Converter18/src/test/X.java", true/*resolve*/);
+		ASTNode node = buildAST(contents, this.workingCopy, false);
+		assertEquals("Not a compilation unit", ASTNode.COMPILATION_UNIT, node.getNodeType());
+		CompilationUnit compilationUnit = (CompilationUnit) node;
+		node = getASTNode(compilationUnit, 0);
+		FieldDeclaration[] field = ((TypeDeclaration) node).getFields();
+		List fragments = field[0].fragments();
+		VariableDeclarationFragment fragment = (VariableDeclarationFragment)fragments.get(0);
+		Expression expression = fragment.getInitializer();
+		LambdaExpression lambdaExpression = (LambdaExpression)expression;
+		VariableDeclaration variableDeclaration = (VariableDeclaration) lambdaExpression.parameters().get(0);
+		checkSourceRange(variableDeclaration, "int n1", contents);
+	}
+	/*
+	 * https://bugs.eclipse.org/bugs/show_bug.cgi?id=416560, [1.8] Incorrect source range for lambda expression's parameter after reconciliation
+	 */
+	public void testBug416560_003() throws JavaModelException {
+		String contents =
+				"public class X{\n" +
+				"    void f() {\n" +
+				"	    //a\n" +
+				"	    //few\n" +
+				"	    //comments\n" +
+				"	    //here\n" +
+				"       bar((int x) -> 91);\n" +
+				"	 }\n" +
+				"    int bar(FI f){ return 1;}" +
+				"}\n" +
+				"interface FI {\n" +
+				"    int foo(int s1);\n" +
+				"}\n";
+		this.workingCopy = getWorkingCopy("/Converter18/src/X.java", true/*resolve*/);
+		ASTNode node = buildAST(contents, this.workingCopy, true);
+		assertEquals("Not a compilation unit", ASTNode.COMPILATION_UNIT, node.getNodeType());
+		CompilationUnit compilationUnit = (CompilationUnit) node;
+		node = getASTNode(compilationUnit, 0);
+		MethodDeclaration[] methods = ((TypeDeclaration) node).getMethods();
+		MethodDeclaration method = methods[0];
+		Block block = method.getBody();
+		List statements = block.statements();
+		Statement statement = (Statement) statements.get(0);
+		MethodInvocation methodInvocation = (MethodInvocation) ((ExpressionStatement) statement).getExpression();
+		LambdaExpression lambdaExpression = (LambdaExpression) methodInvocation.arguments().get(0);
+		VariableDeclaration variableDeclaration = (VariableDeclaration) lambdaExpression.parameters().get(0);
+		checkSourceRange(variableDeclaration, "int x", contents);
+	}
+	/*
+	 * https://bugs.eclipse.org/bugs/show_bug.cgi?id=425743, [1.8][api] CompilationUnit#findDeclaringNode(IBinding binding) returns null for type inferred lambda parameter 
+	 */
+	public void testBug425743() throws JavaModelException {
+		String contents =
+				"public class X{\n" +
+				"    FI fi = (x2) -> x2;\n" +
+				"}\n" +
+				"interface FI {\n" +
+				"    int foo(int n);\n" +
+				"}\n";
+		this.workingCopy = getWorkingCopy("/Converter18/src/X.java", true/*resolve*/);
+		ASTNode node = buildAST(contents, this.workingCopy, true);
+		assertEquals("Not a compilation unit", ASTNode.COMPILATION_UNIT, node.getNodeType());
+		CompilationUnit compilationUnit = (CompilationUnit) node;
+		node = getASTNode(compilationUnit, 0);
+		FieldDeclaration fi = ((TypeDeclaration) node).getFields()[0];
+		VariableDeclarationFragment vdf = (VariableDeclarationFragment) fi.fragments().get(0);
+		LambdaExpression lambda = (LambdaExpression) vdf.getInitializer();
+		VariableDeclaration param = (VariableDeclaration) lambda.parameters().get(0);
+		IBinding binding = param.getName().resolveBinding();
+		ASTNode astNode = compilationUnit.findDeclaringNode(binding);
+		assertNotNull(astNode);
+		assertEquals("Not a variable declaration fragment", ASTNode.VARIABLE_DECLARATION_FRAGMENT, astNode.getNodeType());
+	}
+	// https://bugs.eclipse.org/bugs/show_bug.cgi?id=427357
+	public void testBug427357() throws JavaModelException {
+		String contents =
+			"public class X {\n" +
+			"	public static void foo(X this, int i){}\n" +
+			"	public void foo(Inner this){}\n" +
+			"	I I = new I() {\n" +
+			"		public void bar(I this, int i) {}\n" +
+			"	};\n" +
+			"	static class Inner {\n" +
+			"		public Inner(Test2 Test2.this){}\n" +
+			"		public Inner(Inner Inner.this, int i){}\n" + 
+			"	}\n" +
+			"}\n"+
+			"interface I {}";
+		this.workingCopy = getWorkingCopy("/Converter18/src/X.java", true);
+		ASTNode node = buildAST(contents, this.workingCopy, false);
+		assertEquals("Not a compilation unit", ASTNode.COMPILATION_UNIT, node.getNodeType());
+		CompilationUnit unit = (CompilationUnit) node;
+		TypeDeclaration typeDecl = (TypeDeclaration) unit.types().get(0);
+		MethodDeclaration method = (MethodDeclaration) typeDecl.bodyDeclarations().get(0);
+		Type receiver = method.getReceiverType();
+		assertNotNull("Receiver should not be null", receiver);
+		assertEquals("Incorrect receiver type", "X", receiver.toString());
+		
+		method = (MethodDeclaration) typeDecl.bodyDeclarations().get(1);
+		receiver = method.getReceiverType();
+		assertNotNull("Receiver should not be null", receiver);
+
+		FieldDeclaration field = (FieldDeclaration) typeDecl.bodyDeclarations().get(2);
+		ClassInstanceCreation anonymousInst =  (ClassInstanceCreation ) ((VariableDeclarationFragment) field.fragments().get(0)).getInitializer();
+		AnonymousClassDeclaration anonymousDecl = anonymousInst.getAnonymousClassDeclaration();
+		method = (MethodDeclaration) anonymousDecl.bodyDeclarations().get(0);
+		receiver = method.getReceiverType();
+		assertNotNull("Receiver should not be null", receiver);
+		assertEquals("Incorrect receiver type", "I", receiver.toString());
+		typeDecl = (TypeDeclaration) typeDecl.bodyDeclarations().get(3);
+		method = (MethodDeclaration) typeDecl.bodyDeclarations().get(0);
+		receiver = method.getReceiverType();
+		assertNotNull("Receiver should not be null", receiver);
+		assertEquals("Incorrect receiver type", "Test2", receiver.toString());
+		method = (MethodDeclaration) typeDecl.bodyDeclarations().get(1);
+		receiver = method.getReceiverType();
+		assertNotNull("Receiver should not be null", receiver);
+	}
+	// https://bugs.eclipse.org/bugs/show_bug.cgi?id=426459
+	public void testBug426459() throws JavaModelException {
+		String contents =
+			"import java.lang.annotation.*;\n" +
+			"@Target(ElementType.TYPE_USE) @interface A {}\n" +
+			"@Target(ElementType.TYPE_USE) @interface B {}\n" +
+			"@Target(ElementType.TYPE_USE) @interface C {}\n" +
+			"public class X {\n" +
+			"		@A int @B [] @C [] @A [] is;\n" +
+			"		@C String @A [] @B [] @C [] ss;\n" +
+			"		@C String @A [] [] [] [] sss;\n" +
+			"}";
+		this.workingCopy = getWorkingCopy("/Converter18/src/X.java", true);
+		ASTNode node = buildAST(contents, this.workingCopy);
+		assertEquals("Not a compilation unit", ASTNode.COMPILATION_UNIT, node.getNodeType());
+		CompilationUnit compilationUnit = (CompilationUnit) node;
+		assertProblemsSize(compilationUnit, 0);
+		node = getASTNode(compilationUnit, 3, 0);
+		assertTrue("Not a field declaration", node.getNodeType() == ASTNode.FIELD_DECLARATION);
+		FieldDeclaration field = (FieldDeclaration) node;
+		Type type = field.getType();
+		ITypeBinding original = type.resolveBinding();
+		assertEquals("Incorrect type binding", "@A int @B [] @C [] @A []", original.toString());
+		ITypeBinding binding = original.createArrayType(1);
+		assertEquals("Incorrect type binding", "@A int [] @B [] @C [] @A []", binding.toString());
+		int dims = binding.getDimensions();
+		assertEquals("Incorrect no of dimensions", 4, dims);
+		IAnnotationBinding[] annotations = binding.getTypeAnnotations();
+		assertEquals("Incorrect no of type annotations", 0, annotations.length);
+		binding = binding.getComponentType();
+		annotations = binding.getTypeAnnotations();
+		assertEquals("Incorrect no of type annotations", 1, annotations.length);
+		assertEquals("Incorrect annotation", "@B()", annotations[0].toString());
+		binding = binding.getComponentType();
+		annotations = binding.getTypeAnnotations();
+		assertEquals("Incorrect no of type annotations", 1, annotations.length);
+		assertEquals("Incorrect annotation", "@C()", annotations[0].toString());
+		binding = binding.getComponentType();
+		annotations = binding.getTypeAnnotations();
+		assertEquals("Incorrect no of type annotations", 1, annotations.length);
+		assertEquals("Incorrect annotation", "@A()", annotations[0].toString());
+		binding = binding.getElementType();
+		annotations = binding.getTypeAnnotations();
+		assertEquals("Incorrect no of type annotations", 1, annotations.length);
+		assertEquals("Incorrect annotation", "@A()", annotations[0].toString());
+		
+		node = getASTNode(compilationUnit, 3, 1);
+		assertTrue("Not a field declaration", node.getNodeType() == ASTNode.FIELD_DECLARATION);
+		field = (FieldDeclaration) node;
+		type = field.getType();
+		original = type.resolveBinding();
+		assertEquals("Incorrect type binding", "@C String @A [] @B [] @C []", original.toString());
+		binding = original.createArrayType(1);
+		assertEquals("Incorrect type binding", "@C String [] @A [] @B [] @C []", binding.toString());
+		dims = binding.getDimensions();
+		assertEquals("Incorrect no of dimensions", 4, dims);
+		
+		binding = original.createArrayType(-1);
+		assertEquals("Incorrect type binding", "@C String @B [] @C []", binding.toString());
+		dims = binding.getDimensions();
+		assertEquals("Incorrect no of dimensions", 2, dims);
+		
+		binding = original.createArrayType(-2);
+		assertEquals("Incorrect type binding", "@C String @C []", binding.toString());
+		dims = binding.getDimensions();
+		assertEquals("Incorrect no of dimensions", 1, dims);
+		
+		node = getASTNode(compilationUnit, 3, 2);
+		assertTrue("Not a field declaration", node.getNodeType() == ASTNode.FIELD_DECLARATION);
+		field = (FieldDeclaration) node;
+		type = field.getType();
+		original = type.resolveBinding();
+		assertEquals("Incorrect type binding", "@C String @A [] [] [] []", original.toString());
+		binding = original.createArrayType(-1);
+		assertEquals("Incorrect type binding", "@C String [] [] []", binding.toString());
+		dims = binding.getDimensions();
+		assertEquals("Incorrect no of dimensions", 3, dims);
+		binding = binding.createArrayType(-2);
+		assertEquals("Incorrect type binding", "@C String []", binding.toString());
+		dims = binding.getDimensions();
+		assertEquals("Incorrect no of dimensions", 1, dims);
+	}
+	// https://bugs.eclipse.org/bugs/show_bug.cgi?id=426459
+	public void testBug426459a() throws JavaModelException {
+		String contents =
+			"import java.lang.annotation.*;\n" +
+			"@Target(ElementType.TYPE_USE) @interface A {}\n" +
+			"@Target(ElementType.TYPE_USE) @interface B {}\n" +
+			"@Target(ElementType.TYPE_USE) @interface C {}\n" +
+			"public class X {\n" +
+			"		public void foo() {}\n" +
+			"		public @A X.@B Y foo(@C int i){ return null;}\n" +
+			"		public @A @B X foo(int i, int j){ return null;}\n" +
+			"		public @A X.Y [] @B [] foo(float f){ return null;}\n" +
+			"		class Y {}\n" +
+			"}";
+		this.workingCopy = getWorkingCopy("/Converter18/src/X.java", true);
+		ASTNode node = buildAST(contents, this.workingCopy);
+		assertEquals("Not a compilation unit", ASTNode.COMPILATION_UNIT, node.getNodeType());
+		CompilationUnit compilationUnit = (CompilationUnit) node;
+		assertProblemsSize(compilationUnit, 0);
+		
+		node = getASTNode(compilationUnit, 3, 0);
+		assertEquals("Not a method declaration", ASTNode.METHOD_DECLARATION, node.getNodeType());
+		Type type = ((MethodDeclaration) node).getReturnType2();
+		ITypeBinding binding = type.resolveBinding();
+		assertNotNull("Binding should not be null", binding);
+		try {
+			binding = binding.createArrayType(1);
+			binding = null;
+		} catch(IllegalArgumentException iae) {
+		}
+		assertNotNull("IllegalArgumentException should have been thrown", binding);
+
+		node = getASTNode(compilationUnit, 3, 1);
+		assertEquals("Not a method declaration", ASTNode.METHOD_DECLARATION, node.getNodeType());
+		type = ((MethodDeclaration) node).getReturnType2();
+		binding = type.resolveBinding();
+		assertEquals("Incorrect type binding", "@A X.@B Y", binding.toString());
+		binding = binding.createArrayType(2);
+		assertEquals("Incorrect type binding", "@A X.@B Y [] []", binding.toString());
+		int dims = binding.getDimensions();
+		assertEquals("Incorrect no of dimensions", 2, dims);
+		SingleVariableDeclaration param = (SingleVariableDeclaration) ((MethodDeclaration) node).parameters().get(0);
+		type = param.getType();
+		binding = type.resolveBinding();
+		assertEquals("Incorrect type binding", "@C int", binding.toString());
+		binding = binding.createArrayType(2);
+		assertEquals("Incorrect type binding", "@C int [] []", binding.toString());
+		
+		node = getASTNode(compilationUnit, 3, 2);
+		assertEquals("Not a method declaration", ASTNode.METHOD_DECLARATION, node.getNodeType());
+		type = ((MethodDeclaration) node).getReturnType2();
+		binding = type.resolveBinding();
+		assertEquals("Incorrect type binding", "@A @B X", binding.toString());
+		binding = binding.createArrayType(2);
+		assertEquals("Incorrect type binding", "@A @B X [] []", binding.toString());
+		dims = binding.getDimensions();
+		assertEquals("Incorrect no of dimensions", 2, dims);
+		
+		node = getASTNode(compilationUnit, 3, 3);
+		assertEquals("Not a method declaration", ASTNode.METHOD_DECLARATION, node.getNodeType());
+		type = ((MethodDeclaration) node).getReturnType2();
+		ITypeBinding original = type.resolveBinding();
+		assertEquals("Incorrect type binding", "@A X.Y [] @B []", original.toString());
+		binding = original.createArrayType(1);
+		assertEquals("Incorrect type binding", "@A X.Y [] [] @B []", binding.toString());
+		dims = binding.getDimensions();
+		assertEquals("Incorrect no of dimensions", 3, dims);
+		
+		binding = original.createArrayType(-1);
+		assertEquals("Incorrect type binding", "@A X.Y @B []", binding.toString());
+		dims = binding.getDimensions();
+		assertEquals("Incorrect no of dimensions", 1, dims);
+
 	}
 }

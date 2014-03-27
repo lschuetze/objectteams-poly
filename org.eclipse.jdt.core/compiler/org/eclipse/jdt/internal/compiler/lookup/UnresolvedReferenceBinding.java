@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2013 IBM Corporation and others.
+ * Copyright (c) 2000, 2014 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -93,11 +93,17 @@ public TypeBinding prototype() {
 //{ObjectTeams: changed to public (was default-vis)
 public ReferenceBinding resolve(LookupEnvironment environment, boolean convertGenericToRawType) {
 // SH}
+	ReferenceBinding targetType;
 	if (this != this.prototype) { //$IDENTITY-COMPARISON$
-		this.prototype.resolve(environment, convertGenericToRawType);
-		return this.resolvedType;
+		targetType = this.prototype.resolve(environment, convertGenericToRawType);
+		if (convertGenericToRawType && targetType != null && targetType.isRawType()) {
+			targetType = (ReferenceBinding) environment.createAnnotatedType(targetType, this.typeAnnotations);
+		} else {
+			targetType = this.resolvedType;
+		}
+		return targetType;
 	}
-    ReferenceBinding targetType = this.resolvedType;
+	targetType = this.resolvedType;
 	if (targetType == null) {
 		targetType = this.fPackage.getType0(this.compoundName[this.compoundName.length - 1]);
 		if (targetType == this) { //$IDENTITY-COMPARISON$
@@ -126,12 +132,12 @@ void setResolvedType(ReferenceBinding targetType, LookupEnvironment environment)
 
 	// targetType may be a source or binary type
 	this.resolvedType = targetType;
+	environment.updateCaches(this, targetType);
 	// must ensure to update any other type bindings that can contain the resolved type
 	// otherwise we could create 2 : 1 for this unresolved type & 1 for the resolved type
 	if (this.wrappers != null)
 		for (int i = 0, l = this.wrappers.length; i < l; i++)
 			this.wrappers[i].swapUnresolved(this, targetType, environment);
-	environment.updateCaches(this, targetType);
 }
 
 public void swapUnresolved(UnresolvedReferenceBinding unresolvedType, ReferenceBinding unannotatedType, LookupEnvironment environment) {
@@ -140,10 +146,10 @@ public void swapUnresolved(UnresolvedReferenceBinding unresolvedType, ReferenceB
 	this.resolvedType = annotatedType;
 	annotatedType.setTypeAnnotations(getTypeAnnotations(), environment.globalOptions.isAnnotationBasedNullAnalysisEnabled);
 	annotatedType.id = unannotatedType.id = this.id;
+	environment.updateCaches(this, annotatedType);
 	if (this.wrappers != null)
 		for (int i = 0, l = this.wrappers.length; i < l; i++)
 			this.wrappers[i].swapUnresolved(this, annotatedType, environment);
-	environment.updateCaches(this, annotatedType);
 }
 
 public String toString() {

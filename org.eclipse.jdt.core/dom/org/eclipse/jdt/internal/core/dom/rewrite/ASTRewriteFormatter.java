@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2013 IBM Corporation and others.
+ * Copyright (c) 2000, 2014 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -302,7 +302,8 @@ public final class ASTRewriteFormatter {
 				case ASTNode.PRIMITIVE_TYPE:
 				case ASTNode.QUALIFIED_TYPE:
 				case ASTNode.SIMPLE_TYPE:
-					suffix= " x;"; //$NON-NLS-1$
+					prefix= "void m("; //$NON-NLS-1$
+					suffix= " x);"; //$NON-NLS-1$
 					code= CodeFormatter.K_CLASS_BODY_DECLARATIONS;
 					break;
 				case ASTNode.WILDCARD_TYPE:
@@ -314,9 +315,13 @@ public final class ASTRewriteFormatter {
 					code= CodeFormatter.K_COMPILATION_UNIT;
 					break;
 				case ASTNode.VARIABLE_DECLARATION_EXPRESSION:
-				case ASTNode.SINGLE_VARIABLE_DECLARATION:
 					suffix= ";"; //$NON-NLS-1$
 					code= CodeFormatter.K_STATEMENTS;
+					break;
+				case ASTNode.SINGLE_VARIABLE_DECLARATION:
+					prefix= "void m("; //$NON-NLS-1$
+					suffix= ");"; //$NON-NLS-1$
+					code= CodeFormatter.K_CLASS_BODY_DECLARATIONS;
 					break;
 				case ASTNode.VARIABLE_DECLARATION_FRAGMENT:
 					prefix= "A "; //$NON-NLS-1$

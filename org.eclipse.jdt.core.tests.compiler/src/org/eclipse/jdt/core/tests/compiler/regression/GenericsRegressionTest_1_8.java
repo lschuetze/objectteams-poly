@@ -14,12 +14,16 @@
  *******************************************************************************/
 package org.eclipse.jdt.core.tests.compiler.regression;
 
+import java.util.Map;
+
+import org.eclipse.jdt.core.JavaCore;
+
 import junit.framework.Test;
 
 public class GenericsRegressionTest_1_8 extends AbstractRegressionTest {
 
 static {
-//	TESTS_NAMES = new String[] { "testBug426671b" };
+//	TESTS_NAMES = new String[] { "testBug428019" };
 //	TESTS_NUMBERS = new int[] { 40, 41, 43, 45, 63, 64 };
 //	TESTS_RANGE = new int[] { 11, -1 };
 }
@@ -231,7 +235,7 @@ public void testBug423504() {
 		});
 }
 // https://bugs.eclipse.org/420525 - [1.8] [compiler] Incorrect error "The type Integer does not define sum(Object, Object) that is applicable here"
-public void _testBug420525() {
+public void testBug420525() {
 	runConformTest(
 		new String[] {
 			"X.java",
@@ -262,6 +266,27 @@ public void _testBug420525() {
 			"\n" + 
 			"	}\n" +
 			"	void log(String msg) {}\n" +
+			"}\n"
+		});
+}
+//https://bugs.eclipse.org/420525 - [1.8] [compiler] Incorrect error "The type Integer does not define sum(Object, Object) that is applicable here"
+public void testBug420525_mini() {
+	runConformTest(
+		new String[] {
+			"X.java",
+			"import java.util.ArrayList;\n" + 
+			"import java.util.List;\n" + 
+			"import java.util.concurrent.CompletableFuture;\n" + 
+			"import java.util.concurrent.ExecutionException;\n" +
+			"public class X {\n" +
+			"	void test(List<CompletableFuture<Integer>> futures, boolean b) {\n" + 
+			"		Integer finalResult = futures.stream().map( (CompletableFuture<Integer> f) -> {\n" +
+			"					if (b) \n" +
+			"						return 1;\n" +
+			"					else\n" +
+			"						return Integer.valueOf(13);" +
+			"				}).reduce(0, Integer::sum);\n" + 
+			"	}\n" +
 			"}\n"
 		});
 }
@@ -594,6 +619,16 @@ public void testBug424712a() {
 		"	Set<Y> rosterSet = (Set<Y>) foo(null, Set::new);\n" + 
 		"	                        ^\n" + 
 		"Y cannot be resolved to a type\n" + 
+		"----------\n" + 
+		"3. ERROR in X.java (at line 12)\n" + 
+		"	Set<Y> rosterSet = (Set<Y>) foo(null, Set::new);\n" + 
+		"	                                      ^^^^^^^^\n" + 
+		"The target type of this expression must be a functional interface\n" + 
+		"----------\n" + 
+		"4. ERROR in X.java (at line 12)\n" + 
+		"	Set<Y> rosterSet = (Set<Y>) foo(null, Set::new);\n" + 
+		"	                                      ^^^\n" + 
+		"Cannot instantiate the type Set\n" + 
 		"----------\n");
 }
 public void testBug424712b() {
@@ -756,7 +791,7 @@ public void testBug425142_full() {
 		"----------\n");
 }
 public void testBug424195a() {
-	runNegativeTest(
+	runNegativeTestMultiResult(
 		new String[] {
 			"NPEOnCollector.java",
 			"import java.io.IOException;\n" + 
@@ -783,13 +818,22 @@ public void testBug424195a() {
 			"  }\n" + 
 			"}\n"
 		},
-		"----------\n" + 
-		"1. ERROR in NPEOnCollector.java (at line 17)\n" + 
-		"	Stream<JarEntry> stream = entries\n" + 
-		"          .distinct().collect(Collectors.toCollection(ArrayList::new));\n" + 
-		"	                          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n" + 
-		"Type mismatch: cannot convert from Collection<JarEntry> to Stream<JarEntry>\n" + 
-		"----------\n");
+		null,
+		new String[] {
+			"----------\n" + 
+			"1. ERROR in NPEOnCollector.java (at line 17)\n" + 
+			"	Stream<JarEntry> stream = entries\n" + 
+			"          .distinct().collect(Collectors.toCollection(ArrayList::new));\n" + 
+			"	                          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n" + 
+			"Type mismatch: cannot convert from Collection<JarEntry> to Stream<JarEntry>\n" + 
+			"----------\n",
+			"----------\n" + 
+			"1. ERROR in NPEOnCollector.java (at line 18)\n" + 
+			"	.distinct().collect(Collectors.toCollection(ArrayList::new));\n" + 
+			"	                                            ^^^^^^^^^^^^^^\n" + 
+			"The constructed object of type ArrayList is incompatible with the descriptor\'s return type: Stream<JarEntry>&Collection<T#2>&Collection<JarEntry>\n" + 
+			"----------\n"
+		});
 }
 public void testBug424195b() {
 	runConformTest(
@@ -942,7 +986,7 @@ public void testBug425783() {
 		});
 }
 public void testBug425798() {
-	runNegativeTest( // TODO: for now we just want to prove absence of NPE, should, however, be a conform test, actually.
+	runConformTest(
 		new String[] {
 			"X.java",
 			"import java.lang.annotation.*;\n" +
@@ -962,12 +1006,30 @@ public void testBug425798() {
 			"	}\n" +
 			"}\n"
 		},
-		"----------\n" + 
-		"1. ERROR in X.java (at line 12)\n" + 
-		"	.collect(toMap(Annotation::annotationType,\n" + 
-		"	               ^^^^^^^^^^^^^^^^^^^^^^^^^^\n" + 
-		"The type of annotationType() from the type Annotation is Class<? extends Annotation>, this is incompatible with the descriptor's return type: Class<capture#3-of ? extends Annotation>\n" + 
-		"----------\n");
+		"");
+}
+public void testBug425798a() {
+	runConformTest(
+		new String[] {
+			"X.java",
+			"import java.lang.annotation.*;\n" +
+			"import java.util.*;\n" +
+			"import java.util.function.*;\n" +
+			"import java.util.stream.*;\n" +
+			"interface MyCollector<T, A, R> extends Collector<T, A, R> {\n" + 
+			"}\n" +
+			"public abstract class X {\n" +
+			"	abstract <T, K, U, M extends Map<K, U>>\n" + 
+			"    MyCollector<T, ?, M> toMap(Function<? super T, ? extends K> km,\n" + 
+			"                                BinaryOperator<U> mf);" +
+			"	void test(Stream<Annotation> annotations) {\n" +
+			"		annotations\n" +
+			"			.collect(toMap(true ? Annotation::annotationType : Annotation::annotationType,\n" +
+			"				 (first, second) -> first));\n" +
+			"	}\n" +
+			"}\n"
+		},
+		"");
 }
 // witness for NPE mentioned in https://bugs.eclipse.org/bugs/show_bug.cgi?id=425798#c2
 public void testBug425798b() {
@@ -1330,7 +1392,39 @@ public void testBug426540() {
 			"}\n"
 		});
 }
-public void _testBug426671_full() {
+public void testBug426671_ok() {
+	runConformTest(
+		new String[] {
+			"X.java",
+			"import java.util.stream.Stream;\n" + 
+			"import java.util.*;\n" + 
+			"import static java.util.stream.Collectors.collectingAndThen;\n" + 
+			"import static java.util.stream.Collectors.toList;\n" + 
+			"public class X {\n" +
+			"	void test(Stream<List<Integer>> stream) {\n" +
+			"		stream.collect(collectingAndThen(toList(), Collections::<List<Integer>>unmodifiableList))\n" +
+			"			.remove(0);\n" +
+			"	}\n" + 
+			"}\n"
+		});
+}
+public void testBug426671_medium() {
+	runConformTest(
+		new String[] {
+			"X.java",
+			"import java.util.stream.Stream;\n" + 
+			"import java.util.*;\n" + 
+			"import static java.util.stream.Collectors.collectingAndThen;\n" + 
+			"import static java.util.stream.Collectors.toList;\n" + 
+			"public class X {\n" +
+			"	void test(Stream<List<Integer>> stream) {\n" +
+			"		stream.collect(collectingAndThen(toList(), Collections::unmodifiableList))\n" +
+			"			.remove(0);\n" +
+			"	}\n" + 
+			"}\n"
+		});
+}
+public void testBug426671_full() {
 	runConformTest(
 		new String[] {
 			"X.java",
@@ -1386,5 +1480,643 @@ public void testBug426652() {
 			"	Object o = toList();\n" + 
 			"}\n"
 		});
+}
+public void testBug426778() {
+	runConformTest(
+		new String[] {
+			"X.java",
+			"import java.util.*;\n" + 
+			"public class X {\n" + 
+			"	void test(List<CourseProviderEmploymentStatistics> result) {\n" + 
+			"          Collections.sort( result, \n" + 
+			"              Comparator.comparingInt(\n" + 
+			"                  (CourseProviderEmploymentStatistics stat) ->  stat.doneTrainingsTotal\n" + 
+			"				)\n" + 
+			"              .reversed()\n" + 
+			"              .thenComparing(\n" + 
+			"                  (CourseProviderEmploymentStatistics stat) -> stat.courseProviderName ) );\n" + 
+			"	}\n" + 
+			"}\n" + 
+			"class CourseProviderEmploymentStatistics {\n" + 
+			"   int doneTrainingsTotal;\n" + 
+			"   String courseProviderName;\n" + 
+			"}\n"
+		});
+}
+public void testBug426676() {
+	runConformTest(
+		new String[] {
+			"Test.java",
+			"import java.util.Arrays;\n" + 
+			"import java.util.function.Supplier;\n" + 
+			"import java.util.stream.Stream;\n" + 
+			"\n" + 
+			"\n" + 
+			"public class Test {\n" + 
+			"    public static void main(String[] args) throws Exception {\n" + 
+			"        // Type inference works on map call.\n" + 
+			"        Stream<String> s1 =\n" + 
+			"        Arrays.stream(new Integer[] { 1, 2 })\n" + 
+			"              .map(i -> i.toString());\n" + 
+			"        \n" + 
+			"        // Type inference doesn't work on map call.\n" + 
+			"        Stream<String> s2 =\n" + 
+			"        Arrays.stream(new Integer[] { 1, 2 })\n" + 
+			"              .map(i -> i.toString())\n" + 
+			"              .distinct();\n" + 
+			"    }\n" + 
+			"}\n"
+		});
+}
+public void testBug424591_comment20() {
+	runConformTest(
+		new String[] {
+			"MyList.java",
+			"import java.util.Arrays;\n" + 
+			"public class MyList {\n" + 
+			"    protected Object[] elements;\n" + 
+			"    private int size;\n" + 
+			"    @SuppressWarnings(\"unchecked\")\n" + 
+			"    public <A> A[] toArray(A[] a) {\n" + 
+			"        return (A[]) Arrays.copyOf(elements, size, a.getClass());\n" + 
+			"    }\n" + 
+			"}\n"
+		});
+}
+public void testBug424591_comment20_variant() {
+	runNegativeTest(
+		new String[] {
+			"MyList.java",
+			"import java.util.Arrays;\n" + 
+			"public class MyList {\n" + 
+			"    protected Object[] elements;\n" + 
+			"    private int size;\n" + 
+			"    @SuppressWarnings(\"unchecked\")\n" + 
+			"    public <A> A[] toArray(A[] a) {\n" + 
+			"        return (A[]) Arrays.copyOf(elements, size, getClass());\n" + 
+			"    }\n" + 
+			"}\n"
+		},
+		"----------\n" + 
+		"1. ERROR in MyList.java (at line 7)\n" + 
+		"	return (A[]) Arrays.copyOf(elements, size, getClass());\n" + 
+		"	                    ^^^^^^\n" + 
+		"The method copyOf(U[], int, Class<? extends T[]>) in the type Arrays is not applicable for the arguments (Object[], int, Class<capture#1-of ? extends MyList>)\n" + 
+		"----------\n");
+}
+public void testBug424591_comment22() {
+	runConformTest(
+		new String[] {
+			"Test.java",
+			"import java.util.*;\n" + 
+			"public class Test {\n" + 
+			"	public static void main(String[] args) {\n" + 
+			"        Test.forObject(new HashSet<>());\n" + 
+			"	}\n" + 
+			"    public static Test forObject(Object o) {\n" + 
+			"        return null;\n" + 
+			"    }\n" + 
+			"}\n"
+		});
+}
+public void testBug425063() {
+    runConformTest(
+        new String[] {
+            "ComparatorUse.java",
+            "import java.util.Comparator;\n" + 
+            "public class ComparatorUse {\n" + 
+            "   Comparator<String> c =\n" + 
+            "           Comparator.comparing((String s)->s.toString())\n" + 
+            "           .thenComparing(s -> s.length());\n" + 
+            "}\n"
+        });
+}
+public void testBug426764() {
+	runConformTest(
+		new String[] {
+			"X.java",
+			"interface I {}\n" + 
+			"class C1 implements I {}\n" + 
+			"class C2 implements I {}\n" + 
+			"public class X  {\n" + 
+			"    <T > void foo(T p1, I p2) {}\n" + 
+			"    <T extends I> void foo(T p1, I p2) {}\n" + 
+			"    void bar() {\n" + 
+			"        foo(true ? new C1(): new C2(), false ? new C2(): new C1());\n" + 
+			"        foo(new C1(), false ? new C2(): new C1());\n" + 
+			"    }\n" + 
+			"}\n"
+		});
+}
+// simplest: avoid any grief concerning dequeCapacity:
+public void testBug424930a() {
+	runConformTest(
+		new String[] {
+			"X.java",
+			"import java.util.ArrayDeque;\n" + 
+			"import java.util.Deque;\n" + 
+			"import java.util.function.Supplier;\n" + 
+			"\n" + 
+			"public class X<S, T extends Deque<S>> {\n" + 
+			"    private final Supplier<T> supplier;\n" + 
+			"\n" + 
+			"    public X(Supplier<T> supplier) {\n" + 
+			"        this.supplier = supplier;\n" + 
+			"    }\n" + 
+			"    \n" +
+			"	 int dequeCapacity;\n" + 
+			"    public static <S> X<S, Deque<S>> newDefaultMap() {\n" + 
+			"        return new X<>(() -> new ArrayDeque<>(13));\n" + 
+			"    }\n" + 
+			"}\n"
+		});
+}
+// original test:
+public void testBug424930b() {
+	runConformTest(
+		new String[] {
+			"X.java",
+			"import java.util.ArrayDeque;\n" + 
+			"import java.util.Deque;\n" + 
+			"import java.util.function.Supplier;\n" + 
+			"\n" + 
+			"public class X<S, T extends Deque<S>> {\n" + 
+			"    private final Supplier<T> supplier;\n" + 
+			"\n" + 
+			"    public X(Supplier<T> supplier) {\n" + 
+			"        this.supplier = supplier;\n" + 
+			"    }\n" + 
+			"    \n" + 
+			"    public static <S> X<S, Deque<S>> newDefaultMap(int dequeCapacity) {\n" + 
+			"        return new X<>(() -> new ArrayDeque<>(dequeCapacity));\n" + 
+			"    }\n" + 
+			"}\n"
+		});
+}
+// witness for an NPE during experiments
+public void testBug424930c() {
+	runNegativeTest(
+		new String[] {
+			"X.java",
+			"import java.util.ArrayDeque;\n" + 
+			"import java.util.Deque;\n" + 
+			"import java.util.function.Supplier;\n" + 
+			"\n" + 
+			"public class X<S, T extends Deque<S>> {\n" + 
+			"    private final Supplier<T> supplier;\n" + 
+			"\n" + 
+			"    public X(Supplier<T> supplier) {\n" + 
+			"        this.supplier = supplier;\n" + 
+			"    }\n" + 
+			"    \n" +
+			"	 int dequeCapacity;\n" + 
+			"    public static <S> X<S, Deque<S>> newDefaultMap() {\n" + 
+			"        return new X<>(() -> new ArrayDeque<>(dequeCapacity));\n" + 
+			"    }\n" + 
+			"}\n"
+		},
+		"----------\n" + 
+		"1. ERROR in X.java (at line 14)\n" + 
+		"	return new X<>(() -> new ArrayDeque<>(dequeCapacity));\n" + 
+		"	                                      ^^^^^^^^^^^^^\n" + 
+		"Cannot make a static reference to the non-static field dequeCapacity\n" + 
+		"----------\n");
+}
+public void testBug426998a() {
+	runConformTest(
+		new String[] {
+			"Snippet.java",
+			"public class Snippet {\n" + 
+			"	static void call(Class type, long init) {\n" + 
+			"		String string = new String();\n" + 
+			"		method(type, init == 0 ? new String() : string);\n" + 
+			"	}\n" + 
+			"	private static void method(Class type, String s) {}\n" + 
+			"}\n"
+		});
+}
+// from https://bugs.eclipse.org/bugs/show_bug.cgi?id=426764#c5
+public void testBug426998b() {
+	runConformTest(
+		new String[] {
+			"Snippet.java",
+			"public class Snippet {\n" + 
+			"  private static final String PLACEHOLDER_MEMORY = new String();\n" + 
+			"\n" + 
+			"  static void newInstance(Class type, long init) {\n" + 
+			"    method(type, init == 0 ? new String() : PLACEHOLDER_MEMORY);\n" + 
+			"  }\n" + 
+			"\n" + 
+			"  private static void method(Class type, String str) {}\n" + 
+			"}\n"
+		});
+}
+public void testBug427164() {
+	runNegativeTest(
+		new String[] {
+			"NNLambda.java",
+			"import java.util.*;\n" + 
+			"\n" + 
+			"@FunctionalInterface\n" + 
+			"interface FInter {\n" + 
+			"	String allToString(List<String> input);\n" + 
+			"}\n" + 
+			"\n" + 
+			"public abstract class NNLambda {\n" + 
+			"	abstract <INP> void printem(FInter conv, INP single);\n" + 
+			"	\n" + 
+			"	void test() {\n" + 
+			"		printem((i) -> {\n" + 
+			"				Collections.<String>singletonList(\"const\")\n" + 
+			"			}, \n" + 
+			"			\"single\");\n" + 
+			"	}\n" + 
+			"}\n"
+		},
+		"----------\n" + 
+		"1. ERROR in NNLambda.java (at line 13)\n" + 
+		"	Collections.<String>singletonList(\"const\")\n" + 
+		"	                                         ^\n" + 
+		"Syntax error, insert \";\" to complete BlockStatements\n" + 
+		"----------\n",
+		true); // statement recovery
+}
+public void testBug427168() {
+	runNegativeTest(
+		new String[] {
+			"X.java",
+			"interface Producer<T> {\n" + 
+			"	<P> P produce();\n" + 
+			"}\n" + 
+			"public class X {\n" + 
+			"	<T> void perform(Producer<T> r) { }\n" + 
+			"	void test() {\n" + 
+			"		perform(() -> 13); \n" + 
+			"	}\n" + 
+			"}\n"
+		},
+		"----------\n" + 
+		"1. ERROR in X.java (at line 7)\n" + 
+		"	perform(() -> 13); \n" + 
+		"	^^^^^^^\n" + 
+		"The method perform(Producer<T>) in the type X is not applicable for the arguments (() -> 13)\n" + 
+		"----------\n" + 
+		"2. ERROR in X.java (at line 7)\n" + 
+		"	perform(() -> 13); \n" + 
+		"	        ^^^^^^^^\n" + 
+		"Illegal lambda expression: Method produce of type Producer<T> is generic \n" + 
+		"----------\n");
+}
+public void testBug427196() {
+	runConformTest(
+		new String[] {
+			"MainTest.java",
+			"import java.util.ArrayList;\n" + 
+			"import java.util.Collection;\n" + 
+			"import java.util.List;\n" + 
+			"import java.util.function.Function;\n" + 
+			"\n" + 
+			"public class MainTest {\n" + 
+			"    public static <T> List<T> copyOf (Collection<T> c) {\n" + 
+			"        return new ArrayList<>(c);\n" + 
+			"    }\n" + 
+			"    \n" + 
+			"    public static <T> List<T> copyOf (Iterable<T> c) {\n" + 
+			"        return new ArrayList<>();\n" + 
+			"    }\n" + 
+			"    \n" + 
+			"    public static void main (String[] args) {\n" + 
+			"        Function<Collection<String>, List<String>> function1 = c -> MainTest.copyOf(c); //OK\n" + 
+			"        Function<Collection<String>, List<String>> function2 = MainTest::copyOf;        //error\n" + 
+			"    }\n" + 
+			"}\n"
+		});
+}
+public void testBug427224() {
+	runConformTest(
+		new String[] {
+			"Test2.java",
+			"import java.util.*;\n" +
+			"public class Test2 {\n" + 
+			"    public static native <T> T applyToSet(java.util.Set<String> s);\n" + 
+			"\n" + 
+			"    public static void applyToList(java.util.List<String> s) {\n" + 
+			"        applyToSet(new java.util.HashSet<>(s));\n" + 
+			"    }\n" + 
+			"}\n"
+		});
+}
+// comment 12
+public void testBug424637() {
+	Map options = getCompilerOptions();
+	options.put(JavaCore.COMPILER_ANNOTATION_NULL_ANALYSIS, JavaCore.ENABLED);
+	runConformTest(
+		new String[] {
+			"X.java",
+			"interface I {\n" + 
+			"	String foo(X x, String s2);\n" + 
+			"}\n" + 
+			"\n" + 
+			"public class X {\n" + 
+			"	String goo(String ...ts) {\n" + 
+			"		System.out.println(ts[0]);  \n" + 
+			"		return ts[0];\n" + 
+			"	}\n" + 
+			"	public static void main(String[] args) {\n" + 
+			"		I i = X::goo;\n" + 
+			"		String s = i.foo(new X(), \"world\");\n" + 
+			"		System.out.println(s);     \n" + 
+			"	}\n" + 
+			"}\n"
+		},
+		"world\n" +
+		"world",
+		options);
+}
+//https://bugs.eclipse.org/bugs/show_bug.cgi?id=427218, [1.8][compiler] Verify error varargs + inference 
+public void test427218_reduced() {
+	runNegativeTest(
+		new String[] {
+			"X.java",
+			"public class X {\n" +
+			"   public static void main(String[] args) {\n" +
+			"      match(getLast(\"a\"), null);\n" +
+			"   }\n" +
+			"   public static <T> T getLast(T... array) { return null; } // same with T[]\n" +
+			"   public static void match(boolean b, Object foo) { }\n" +
+			"}\n",
+		},
+		"----------\n" + 
+		"1. ERROR in X.java (at line 3)\n" + 
+		"	match(getLast(\"a\"), null);\n" + 
+		"	^^^^^\n" + 
+		"The method match(boolean, Object) in the type X is not applicable for the arguments (String, null)\n" + 
+		"----------\n" + 
+		"2. ERROR in X.java (at line 3)\n" + 
+		"	match(getLast(\"a\"), null);\n" + 
+		"	      ^^^^^^^^^^^^\n" + 
+		"Type mismatch: cannot convert from String to boolean\n" + 
+		"----------\n" + 
+		"3. WARNING in X.java (at line 5)\n" + 
+		"	public static <T> T getLast(T... array) { return null; } // same with T[]\n" + 
+		"	                                 ^^^^^\n" + 
+		"Type safety: Potential heap pollution via varargs parameter array\n" + 
+		"----------\n");
+}
+//https://bugs.eclipse.org/bugs/show_bug.cgi?id=427218, [1.8][compiler] Verify error varargs + inference 
+public void test427218() {
+	runConformTest(
+		new String[] {
+			"X.java",
+			"public class X {\n" +
+			"   public static void main(String[] args) {\n" +
+			"      match(getLast(\"a\"), null);\n" +
+			"   }\n" +
+			"   public static <T> T getLast(T... array) { return null; } // same with T[]\n" +
+			"   public static void match(boolean b, Object foo) { }\n" +
+			"   public static <A> void match(Object o, A foo) { }\n" +
+			"}\n",
+		},
+		"");
+}
+public void testBug427223() {
+	runConformTest(
+		new String[] {
+			"Test.java",
+			"import java.util.*;\n" +
+			"public class Test {\n" + 
+			"\n" + 
+			"	List<Object> toList(Object o) {\n" + 
+			"		if (o instanceof Optional) {\n" + 
+			"			return Arrays.asList(((Optional<?>) o).orElse(null));\n" + 
+			"		} else {\n" + 
+			"			return null;\n" + 
+			"		}\n" + 
+			"	}\n" + 
+			"\n" + 
+			"}\n"
+		});
+}
+public void testBug425183_comment8() {
+	// similar to what triggered the NPE, but it never did trigger
+	runConformTest(
+		new String[] {
+			"X.java",
+			"public class X {\n" +
+			"    public static void main(String... args) {\n" + 
+			"        java.util.Comparator.reverseOrder().thenComparingLong(X::toLong);\n" +
+			"        System.out.println(\"ok\");\n" + 
+			"    }\n" +
+			"    static <T> long toLong(T in) { return 0L; }\n" +
+			"}\n"
+		},
+		"ok");
+}
+public void testBug427483() {
+	runConformTest(
+		new String[] {
+			"X.java",
+			"import java.util.*;\n" +
+			"public class X {\n" +
+			"	void test() {\n" +
+			"		new TreeSet<>((String qn1, String qn2) -> {\n" + 
+			"   		boolean b = true;\n" + 
+			"			System.out.println(b); // ok\n" + 
+			"   		if(b) { }\n" + 
+			"	   		return qn1.compareTo(qn2);\n" + 
+			"		});\n" +
+			"	}\n" +
+			"}\n"
+		});
+}
+public void testBug427504() {
+	runConformTest(
+		new String[] {
+			"Test.java",
+			"public class Test {\n" + 
+			"\n" + 
+			"	public static <T> Tree<T> model(T o) {\n" + 
+			"		return Node(Leaf(o), Leaf(o));\n" + 
+			"	}\n" + 
+			"	\n" + 
+			"	interface Tree<T> {}\n" + 
+			"	static <T> Tree<T> Node(Tree<T>... children) { return null; }\n" + 
+			"	static <T> Tree<T> Leaf(T o) { return null; }\n" + 
+			"	\n" + 
+			"}\n"
+		});
+}
+public void testBug427479() {
+	runConformTest(
+		new String[] {
+			"Bug.java",
+			"import java.util.*;\n" + 
+			"import java.util.function.BinaryOperator; \n" + 
+			"import java.util.stream.*;\n" + 
+			"\n" + 
+			"public class Bug {\n" + 
+			" \n" + 
+			"	static List<String> names = Arrays.asList(\n" + 
+			"			\"ddd\",\n" + 
+			"			\"s\",\n" + 
+			"			\"sdfs\",\n" + 
+			"			\"sfdf d\"); \n" + 
+			" \n" + 
+			"	public static void main(String[] args) {\n" + 
+			"			 BinaryOperator<List<String>> merge = (List<String> first, List<String> second) -> {\n" + 
+			"				 first.addAll(second);\n" + 
+			"				 return first;\n" + 
+			"				 };\n" + 
+			"				 \n" + 
+			"			Collector<String,?,Map<Integer,List<String>>> collector= Collectors.toMap(\n" + 
+			"					s -> s.length(), \n" + 
+			"					Arrays::asList,\n" + 
+			"					merge); \n" + 
+			"			Map<Integer, List<String>> lengthToStrings = names.stream().collect(collector);\n" + 
+			"			\n" + 
+			"			lengthToStrings.forEach((Integer i, List<String> l)-> {\n" + 
+			"				System.out.println(i + \" : \" + Arrays.deepToString(l.toArray()));\n" + 
+			"			});\n" + 
+			"\n" + 
+			"	}\n" + 
+			"\n" + 
+			"}\n"
+		});
+}
+public void testBug427479b() {
+	runNegativeTest(
+		new String[] {
+			"Bug419048.java",
+			"import java.util.List;\n" + 
+			"import java.util.Map;\n" + 
+			"import java.util.stream.Collectors;\n" + 
+			"\n" + 
+			"\n" + 
+			"public class Bug419048 {\n" + 
+			"	void test1(List<Object> roster) {\n" + 
+			"        Map<String, Object> map = \n" + 
+			"                roster\n" + 
+			"                    .stream()\n" + 
+			"                    .collect(\n" + 
+			"                        Collectors.toMap(\n" + 
+			"                            p -> p.getLast(),\n" + 
+			"                            p -> p.getLast()\n" + 
+			"                        ));\n" + 
+			"	}\n" + 
+			"}\n"
+		},
+		"----------\n" + 
+		"1. ERROR in Bug419048.java (at line 9)\n" + 
+		"	roster\n" + 
+		"                    .stream()\n" + 
+		"                    .collect(\n" + 
+		"                        Collectors.toMap(\n" + 
+		"                            p -> p.getLast(),\n" + 
+		"                            p -> p.getLast()\n" + 
+		"                        ));\n" + 
+		"	^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n" + 
+		"Type mismatch: cannot convert from Map<Object,Object> to Map<String,Object>\n" + 
+		"----------\n" + 
+		"2. ERROR in Bug419048.java (at line 13)\n" + 
+		"	p -> p.getLast(),\n" + 
+		"	       ^^^^^^^\n" + 
+		"The method getLast() is undefined for the type Object\n" + 
+		"----------\n" + 
+		"3. ERROR in Bug419048.java (at line 14)\n" + 
+		"	p -> p.getLast()\n" + 
+		"	       ^^^^^^^\n" + 
+		"The method getLast() is undefined for the type Object\n" + 
+		"----------\n");
+}
+public void testBug427626() {
+	runNegativeTest(
+		new String[] {
+			"X.java",
+			"import java.util.Arrays;\n" + 
+			"import java.util.List;\n" + 
+			"\n" + 
+			"public class X {\n" + 
+			"	void m() {\n" + 
+			"        List<String> ss = Arrays.asList(\"1\", \"2\", \"3\");\n" + 
+			"        \n" + 
+			"        ss.stream().map(s -> {\n" + 
+			"          class L1 {};\n" + 
+			"          class L2 {\n" + 
+			"            void mm(L1 l) {}\n" + 
+			"          }\n" + 
+			"          return new L2().mm(new L1());\n" + 
+			"        }).forEach(e -> System.out.println(e));\n" + 
+			"	}\n" + 
+			"}"
+		},
+		"----------\n" + 
+		"1. ERROR in X.java (at line 13)\n" + 
+		"	return new L2().mm(new L1());\n" + 
+		"	^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n" + 
+		"Cannot return a void result\n" + 
+		"----------\n");
+}
+public void testBug426542() {
+	runConformTest(
+		new String[] {
+			"X.java",
+			"import java.io.Serializable;\n" +
+			"public class X {\n" + 
+			"	\n" + 
+			"	<T extends Comparable & Serializable> void foo(T o1) {\n" + 
+			"	}\n" + 
+			"\n" + 
+			"	<T extends Serializable> void foo(T o1) {\n" + 
+			"	}\n" + 
+			"\n" + 
+			"	void bar() {\n" + 
+			"		foo((Comparable & Serializable)0);\n" + 
+			"		foo(0);\n" + 
+			"	}\n" + 
+			"}\n"
+		});
+}
+public void testBug426836() {
+	runConformTest(
+		new String[] {
+			"ReferenceToGetClass.java",
+			"import java.util.function.Supplier;\n" + 
+			"\n" + 
+			"\n" + 
+			"public class ReferenceToGetClass {\n" + 
+			"	<T> T extract(Supplier<T> s) {\n" + 
+			"		return s.get();\n" + 
+			"	}\n" + 
+			"	Class<?> test() {\n" + 
+			"		Class<? extends ReferenceToGetClass> c = extract(this::getClass);\n" + 
+			"		return c;\n" + 
+			"	}\n" + 
+			"}\n"
+		} );
+}
+public void testBug428019() {
+    runConformTest(
+        new String[] {
+            "X.java",
+            "final public class X {\n" + 
+            "  static class Obj {}\n" + 
+            "  static class Dial<T> {}\n" + 
+            "\n" + 
+            "  <T> void put(Class<T> clazz, T data) {\n" + 
+            "  }\n" + 
+            "\n" + 
+            "  static <T> Dial<T> wrap(Dial<T> dl) {\n" + 
+            "	  return null;\n" + 
+            "  }\n" + 
+            "\n" + 
+            "  static void foo(Dial<? super Obj> dial, X context) {\n" + 
+            "    context.put(Dial.class, wrap(dial));\n" + 
+            "  }\n" + 
+            "  \n" + 
+            "  public static void main(String[] args) {\n" + 
+            "	X.foo(new Dial<Obj>(), new X());\n" + 
+            "  }\n" + 
+            "}\n"
+        });
 }
 }

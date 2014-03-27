@@ -847,7 +847,6 @@ public abstract class AbstractMethodDeclaration
 		/* neither static methods nor methods in anonymous types can have explicit 'this' */
 		if (this.isStatic() || declaringClass.isAnonymousType()) {
 			this.scope.problemReporter().disallowedThisParameter(this.receiver);
-			this.receiver = null;
 			return; // No need to do further validation
 		}
 
@@ -857,7 +856,6 @@ public abstract class AbstractMethodDeclaration
 			if (declaringClass.isStatic()
 					|| (declaringClass.tagBits & (TagBits.IsLocalType | TagBits.IsMemberType)) == 0) { /* neither member nor local type */
 				this.scope.problemReporter().disallowedThisParameter(this.receiver);
-				this.receiver = null;
 				return; // No need to do further validation
 			}
 			enclosingReceiver = enclosingReceiver.enclosingType();
@@ -876,7 +874,6 @@ public abstract class AbstractMethodDeclaration
 
 		if (TypeBinding.notEquals(enclosingReceiver, resolvedReceiverType)) {
 			this.scope.problemReporter().illegalTypeForExplicitThis(this.receiver, enclosingReceiver);
-			this.receiver = null;
 		}
 	}
 	public void resolveJavadoc() {

@@ -69,7 +69,7 @@ public class InferenceVariable extends TypeVariableBinding {
 //{ObjectTeams: cross the OT package, make protected:
 	protected
 // SH}
-	void collectInferenceVariables(Set variables) {
+	void collectInferenceVariables(Set<InferenceVariable> variables) {
 		variables.add(this);
 	}
 

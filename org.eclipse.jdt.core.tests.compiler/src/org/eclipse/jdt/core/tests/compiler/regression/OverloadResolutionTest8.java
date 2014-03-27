@@ -2147,4 +2147,259 @@ public void test401850() {
 			},
 			"foo(X<String>)");
 }
+// https://bugs.eclipse.org/bugs/show_bug.cgi?id=427072,  [1.8][compiler] Regression since fix of bug 423505: Method is ambiguous for type X 
+public void test427072() {
+	this.runConformTest(
+			new String[] {
+				"X.java",
+				"interface I {\n" +
+				"    Object m(X t);\n" +
+				"}\n" +
+				"interface J extends I {\n" +
+				"}\n" +
+				"public class X {\n" +
+				"    int foo()  { return 0; }\n" +
+				"    int test() {\n" +
+				"        return foo(X::foo);\n" +
+				"    }\n" +
+				"    int foo(I i) {return 0;}\n" +
+				"    int foo(J j) { return 1;}\n" +
+				"    public static void main(String args[]) {\n" +
+				"        X x = new X();\n" +
+				"        int i = x.test();\n" +
+				"        System.out.println(i);\n" +
+				"    }\n" +
+				"}\n",
+			},
+			"1");
+}
+// https://bugs.eclipse.org/bugs/show_bug.cgi?id=427072,  [1.8][compiler] Regression since fix of bug 423505: Method is ambiguous for type X 
+public void test427072a() {
+	this.runConformTest(
+			new String[] {
+				"X.java",
+				"interface I {\n" +
+				"    Object m(X t);\n" +
+				"}\n" +
+				"interface J extends I {\n" +
+				"}\n" +
+				"public class X {\n" +
+				"    int foo()  { return 0; }\n" +
+				"    int test() {\n" +
+				"        return foo((x) -> x);\n" +
+				"    }\n" +
+				"    int foo(I i) {return 0;}\n" +
+				"    int foo(J j) { return 1;}\n" +
+				"    public static void main(String args[]) {\n" +
+				"        X x = new X();\n" +
+				"        int i = x.test();\n" +
+				"        System.out.println(i);\n" +
+				"    }\n" +
+				"}\n",
+			},
+			"1");
+}
+// https://bugs.eclipse.org/bugs/show_bug.cgi?id=427072,  [1.8][compiler] Regression since fix of bug 423505: Method is ambiguous for type X 
+public void test427072b() {
+	this.runConformTest(
+			new String[] {
+				"X.java",
+				"interface I {\n" +
+				"    Object m(X t);\n" +
+				"}\n" +
+				"interface J extends I {\n" +
+				"}\n" +
+				"public class X {\n" +
+				"    int foo()  { return 0; }\n" +
+				"    int test() {\n" +
+				"        return foo(true ? (x) -> x : X::foo);\n" +
+				"    }\n" +
+				"    int foo(I i) {return 0;}\n" +
+				"    int foo(J j) { return 1;}\n" +
+				"    public static void main(String args[]) {\n" +
+				"        X x = new X();\n" +
+				"        int i = x.test();\n" +
+				"        System.out.println(i);\n" +
+				"    }\n" +
+				"}\n",
+			},
+			"1");
+}
+// https://bugs.eclipse.org/bugs/show_bug.cgi?id=427072,  [1.8][compiler] Regression since fix of bug 423505: Method is ambiguous for type X 
+public void test427072c() {
+	this.runConformTest(
+			new String[] {
+				"X.java",
+				"interface I {\n" +
+				"    Object m(X t);\n" +
+				"}\n" +
+				"interface J extends I {\n" +
+				"}\n" +
+				"public class X {\n" +
+				"    int foo1()  { return 0; }\n" +
+				"    int foo2()  { return 0; }\n" +
+				"    int test() {\n" +
+				"        return foo(true ? X::foo1 : X::foo2);\n" +
+				"    }\n" +
+				"    int foo(I i) {return 0;}\n" +
+				"    int foo(J j) { return 1;}\n" +
+				"    public static void main(String args[]) {\n" +
+				"        X x = new X();\n" +
+				"        int i = x.test();\n" +
+				"        System.out.println(i);\n" +
+				"    }\n" +
+				"}\n",
+			},
+			"1");
+}
+// https://bugs.eclipse.org/bugs/show_bug.cgi?id=427628,  regression : The method * is ambiguous for the type * 
+public void test427628() {
+	this.runConformTest(
+			new String[] {
+				"X.java",
+				"public class X {\n" +
+				"   public static void main(String [] args) {\n" +
+				"       new X().error(null);\n" +
+				"   }\n" +
+				"	public void error(I i) {\n" +
+				"		test(i!=null?i.getJ():null);\n" +
+				"	}\n" +
+				"	public void test(I i) {\n" +
+				"       System.out.println(\"I\");\n" +
+				"	}\n" +
+				"	public void test(J j) {\n" +
+				"       System.out.println(\"J\" + j);\n" +
+				"	}\n" +
+				"	public class I{\n" +
+				"		public J getJ() {\n" +
+				"			return null;\n" +
+				"		}\n" +
+				"	}\n" +
+				"	public class J{}\n" +
+				"}\n",
+			},
+			"Jnull");
+}
+// https://bugs.eclipse.org/bugs/show_bug.cgi?id=427628,  regression : The method * is ambiguous for the type * 
+public void test427628a() {
+	this.runNegativeTest(
+			new String[] {
+				"X.java",
+				"public class X {\n" +
+				"   public static void main(String [] args) {\n" +
+				"       new X().error(null);\n" +
+				"   }\n" +
+				"	public void error(I i) {\n" +
+				"		test(i!=null?i.getJ():null);\n" +
+				"	}\n" +
+				"	public void test(I i) {\n" +
+				"       System.out.println(\"I\");\n" +
+				"	}\n" +
+				"	public void test(K k) {\n" +
+				"       System.out.println(\"K\" + j);\n" +
+				"	}\n" +
+				"	public class I{\n" +
+				"		public J getJ() {\n" +
+				"			return null;\n" +
+				"		}\n" +
+				"	}\n" +
+				"	public class J{}\n" +
+				"	public class K{}\n" +
+				"}\n",
+			},
+			"----------\n" + 
+			"1. ERROR in X.java (at line 6)\n" + 
+			"	test(i!=null?i.getJ():null);\n" + 
+			"	^^^^\n" + 
+			"The method test(X.I) in the type X is not applicable for the arguments (((i != null) ? i.getJ() : null))\n" + 
+			"----------\n" + 
+			"2. ERROR in X.java (at line 6)\n" + 
+			"	test(i!=null?i.getJ():null);\n" + 
+			"	             ^^^^^^^^\n" + 
+			"Type mismatch: cannot convert from X.J to X.I\n" + 
+			"----------\n" + 
+			"3. ERROR in X.java (at line 12)\n" + 
+			"	System.out.println(\"K\" + j);\n" + 
+			"	                         ^\n" + 
+			"j cannot be resolved to a variable\n" + 
+			"----------\n");
+}
+// https://bugs.eclipse.org/bugs/show_bug.cgi?id=427628,  regression : The method * is ambiguous for the type * 
+public void test427628b() {
+	this.runNegativeTest(
+			new String[] {
+				"X.java",
+				"public class X {\n" +
+				"	public void setSetting(String key, String value) {\n" +
+				"	}\n" +
+				"	public void setSetting(String key, Integer value) {\n" +
+				"	    setSetting(key, value == null ? null : Integer.toString(value));\n" +
+				"	}\n" +
+				"}\n",
+			},
+			"");
+}
+// https://bugs.eclipse.org/bugs/show_bug.cgi?id=421922, [1.8][compiler] Varargs & Overload - Align to JLS8 
+public void _test421922() {
+	this.runConformTest(
+			new String[] {
+				"X.java",
+				"import java.util.Arrays;\n" +
+				"public class X {\n" +
+				"    public static void main(String[] args) {\n" +
+				"        test(1);\n" +
+				"    }\n" +
+				"    public static void test(int... a) {\n" +
+				"        System.out.print(\"int ... = \");\n" +
+				"        System.out.println(Arrays.toString(a));\n" +
+				"    }\n" +
+				"    public static <T> void test(Object... a) {\n" +
+				"        System.out.print(\"Object ... = \");\n" +
+				"        System.out.println(Arrays.toString(a));\n" +
+				"    }\n" +
+				"}\n",
+			},
+			"int ... = [1]");
+}
+// https://bugs.eclipse.org/bugs/show_bug.cgi?id=427748, [1.8][compiler] Cannot convert from Boolean to boolean on generic return type 
+public void test427748() {
+	this.runConformTest(
+			new String[] {
+				"X.java",
+				"public class X {\n" +
+				"  public static void main(String [] args) {\n" +
+				"    getLog(doit(baction));\n" +
+				"  }\n" +
+				"  private static interface Action<T> {T run();}\n" +
+				"  private static Action<Boolean> baction = () -> true;\n" +
+				"  static void getLog(int override) {}\n" +
+				"  static void getLog(boolean override) {\n" +
+				"      System.out.println(\"OK\");\n" +
+				"  }\n" +
+				"  private static <T> T doit(Action<T> action) { return action.run(); }\n" +
+				"}\n",
+			},
+			"OK");
+}
+// https://bugs.eclipse.org/bugs/show_bug.cgi?id=427808, [1.8] Correct super() invocation is not inferred when argument is a conditional expression 
+public void test427808() {
+	this.runConformTest(
+			new String[] {
+				"X.java",
+				"public class X extends Foo {\n" +
+				"	public X(I i) {\n" +
+				"		super(i != null ?  i.toString() : null);\n" +
+				"    }\n" +
+				"   public static void main(String [] args) {\n" +
+				"       new X(null);\n" +
+				"   }\n" +
+				"}\n" +
+				"class Foo implements I {\n" +
+				"	Foo(I i) {}\n" +
+				"	Foo(String string){ System.out.println(\"OK\"); }\n" +
+				"}\n" +
+				"interface I {}\n",
+			},
+			"OK");
+}
 }

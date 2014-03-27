@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2013 IBM Corporation and others.
+ * Copyright (c) 2000, 2014 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -30,6 +30,7 @@ package org.eclipse.jdt.internal.codeassist.complete;
 
 import java.util.HashSet;
 
+import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.jdt.internal.compiler.*;
 import org.eclipse.jdt.internal.compiler.classfmt.ClassFileConstants;
 import org.eclipse.jdt.internal.compiler.env.*;
@@ -199,6 +200,8 @@ public class CompletionParser extends AssistParser {
 	private boolean storeSourceEnds;
 	public HashtableOfObjectToInt sourceEnds;
 	private boolean inReferenceExpression;
+	private IProgressMonitor monitor;
+	private int resumeOnSyntaxError = 0;
 
 public CompletionParser(ProblemReporter problemReporter, boolean storeExtraSourceEnds) {
 	super(problemReporter);
@@ -209,6 +212,10 @@ public CompletionParser(ProblemReporter problemReporter, boolean storeExtraSourc
 		this.storeSourceEnds = true;
 		this.sourceEnds = new HashtableOfObjectToInt();
 	}
+}
+public CompletionParser(ProblemReporter problemReporter, boolean storeExtraSourceEnds, IProgressMonitor monitor) {
+	this(problemReporter, storeExtraSourceEnds);
+	this.monitor = monitor;
 }
 private void addPotentialName(char[] potentialVariableName, int start, int end) {
 	int length = this.potentialVariableNames.length;
@@ -1111,8 +1118,8 @@ private void buildMoreCompletionContext(Expression expression) {
 	} else {
 		if(this.currentElement instanceof RecoveredField && !(this.currentElement instanceof RecoveredInitializer)
 			&& ((RecoveredField) this.currentElement).fieldDeclaration.initialization == null) {
-
-			this.assistNodeParent = ((RecoveredField) this.currentElement).fieldDeclaration;
+			if (lastIndexOfElement(K_LAMBDA_EXPRESSION_DELIMITER) <= lastIndexOfElement(K_FIELD_INITIALIZER_DELIMITER))
+				this.assistNodeParent = ((RecoveredField) this.currentElement).fieldDeclaration;
 			this.currentElement = this.currentElement.add(buildMoreCompletionEnclosingContext(statement), 0);
 		} else if(this.currentElement instanceof RecoveredLocalVariable
 			&& ((RecoveredLocalVariable) this.currentElement).localDeclaration.initialization == null) {
@@ -2899,6 +2906,7 @@ protected void consumeExitVariableWithInitialization() {
 	} else if (this.assistNode != null && this.assistNode == variable.initialization) {
 			this.assistNodeParent = variable;
 	}
+	triggerRecoveryUponLambdaClosure(variable, false);
 }
 protected void consumeExitVariableWithoutInitialization() {
 	// ExitVariableWithoutInitialization ::= $empty
@@ -3152,9 +3160,12 @@ protected void consumeInsideCastExpressionLL1WithBounds() {
 			this.skipRecord = true;
 			super.consumeInsideCastExpressionLL1WithBounds();
 			if (this.record) {
-				Expression typeReference = this.expressionStack[this.expressionPtr];
-				if (!isAlreadyPotentialName(typeReference.sourceStart)) {
-					addPotentialName(null, typeReference.sourceStart, typeReference.sourceEnd);
+				int length =  this.expressionLengthStack[this.expressionLengthPtr];
+				for (int i = 0; i < length; i++) {
+					Expression typeReference = this.expressionStack[this.expressionPtr - length + i + 1];
+					if (!isAlreadyPotentialName(typeReference.sourceStart)) {
+						addPotentialName(null, typeReference.sourceStart, typeReference.sourceEnd);
+					}
 				}
 			}
 		} finally {
@@ -3379,6 +3390,7 @@ protected void consumeMethodHeaderName(boolean isAnnotationMethod) {
 		this.identifierLengthPtr--;
 		//type
 		md.returnType = getTypeReference(this.intStack[this.intPtr--]);
+		md.bits |= (md.returnType.bits & ASTNode.HasTypeAnnotations);
 		//modifiers
 		md.declarationSourceStart = this.intStack[this.intPtr--];
 		md.modifiers = this.intStack[this.intPtr--];
@@ -5475,6 +5487,17 @@ public void restoreAssistParser(Object parserState) {
 	
 	this.cursorLocation = state[0];
 	completionScanner.cursorLocation = state[1];
+}
+@Override
+protected int resumeOnSyntaxError() {
+	if (this.monitor != null) {
+		if (++this.resumeOnSyntaxError > 100) {
+			this.resumeOnSyntaxError = 0;
+			if (this.monitor.isCanceled()) 
+				return HALT;
+		}
+	}
+	return super.resumeOnSyntaxError();
 }
 /*
  * Reset context so as to resume to regular parse loop

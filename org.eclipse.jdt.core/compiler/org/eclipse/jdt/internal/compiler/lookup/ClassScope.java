@@ -665,6 +665,8 @@ public class ClassScope extends Scope {
 
 		SourceTypeBinding sourceType = this.referenceContext.binding;
 		environment().setAccessRestriction(sourceType, accessRestriction);
+		checkAndSetModifiers();
+		buildTypeVariables(); // do this before adding the type to avoid race: see https://bugs.eclipse.org/bugs/show_bug.cgi?id=428247
 		sourceType.fPackage.addType(sourceType);
 //{ObjectTeams: ROFI
 		if (isRoleFile) {
@@ -699,8 +701,6 @@ public class ClassScope extends Scope {
 			this.environment().getTeamMethodGenerator().registerOOTeamClass(sourceType);
 		}
 // SH}
-		checkAndSetModifiers();
-		buildTypeVariables();
 		buildMemberTypes(accessRestriction);
 //{ObjectTeams: setup cache for known role files:
 		if (this.referenceContext.isTeam())

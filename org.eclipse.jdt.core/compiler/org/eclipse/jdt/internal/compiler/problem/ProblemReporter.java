@@ -2351,6 +2351,14 @@ public void errorThisSuperInStatic(ASTNode reference) {
 		reference.sourceStart,
 		reference.sourceEnd);
 }
+public void errorNoSuperInInterface(ASTNode reference) {
+	this.handle(
+		IProblem.NoSuperInInterfaceContext,
+		NoArgument,
+		NoArgument,
+		reference.sourceStart,
+		reference.sourceEnd);
+}
 public void expressionShouldBeAVariable(Expression expression) {
 	this.handle(
 		IProblem.ExpressionShouldBeAVariable,

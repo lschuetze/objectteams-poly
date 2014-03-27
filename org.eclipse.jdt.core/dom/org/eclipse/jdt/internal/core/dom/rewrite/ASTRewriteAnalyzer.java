@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2013 IBM Corporation and others.
+ * Copyright (c) 2000, 2014 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -1528,9 +1528,8 @@ public final class ASTRewriteAnalyzer extends ASTVisitor {
 		boolean isAllInsert= isAllOfKind(children, RewriteEvent.INSERTED);
 		boolean isAllRemove= isAllOfKind(children, RewriteEvent.REMOVED);
 		String keyword= Util.EMPTY_STRING;
-		boolean isAnnotationsProperty = property == SingleVariableDeclaration.VARARGS_ANNOTATIONS_PROPERTY 
-				|| node instanceof AnnotatableType && property == ((AnnotatableType) node).getAnnotationsProperty();
-		if (isAnnotationsProperty) {
+		boolean isVarargsAnnotationsProperty = property == SingleVariableDeclaration.VARARGS_ANNOTATIONS_PROPERTY;
+		if (isVarargsAnnotationsProperty) {
 			keyword= " "; //$NON-NLS-1$
 		} else if (isAllInsert || isAllRemove) {
 			// update pos
@@ -1541,8 +1540,11 @@ public final class ASTRewriteAnalyzer extends ASTVisitor {
 			}
 		}
 
+		boolean isAnnotationsProperty = isVarargsAnnotationsProperty 
+				|| node instanceof AnnotatableType && property == ((AnnotatableType) node).getAnnotationsProperty();
 		Prefix formatterPrefix;
-		if (property == SingleVariableDeclaration.MODIFIERS2_PROPERTY || isAnnotationsProperty)
+		if (property == SingleVariableDeclaration.MODIFIERS2_PROPERTY || 
+				property == TypeParameter.MODIFIERS_PROPERTY || isAnnotationsProperty)
 			formatterPrefix= this.formatter.PARAM_ANNOTATION_SEPARATION;
 		else
 			formatterPrefix= this.formatter.ANNOTATION_SEPARATION;
@@ -1558,7 +1560,7 @@ public final class ASTRewriteAnalyzer extends ASTVisitor {
 				doTextRemove(endPos, nextPos - endPos, getEditGroup(lastChild));
 				return nextPos;
 			} else if ((isAllInsert || (nextPos == endPos && lastUnchanged)) // see bug 165654
-					&& !isAnnotationsProperty) {
+					&& !isVarargsAnnotationsProperty) {
 				String separator;
 				if (lastChild.getNewValue() instanceof Annotation) {
 					separator= formatterPrefix.getPrefix(getIndent(pos));
@@ -4293,7 +4295,7 @@ public final class ASTRewriteAnalyzer extends ASTVisitor {
 		}
 		int pos;
 		if (node.getAST().apiLevel() >= AST.JLS8) {
-			pos = rewriteTypeAnnotations(node, TypeParameter.ANNOTATIONS_PROPERTY, node.getStartPosition());
+			pos = rewriteModifiers2(node, TypeParameter.MODIFIERS_PROPERTY, node.getStartPosition());
 		}
 		pos= rewriteRequiredNode(node, TypeParameter.NAME_PROPERTY);
 //{ObjectTeams: <B base R>:

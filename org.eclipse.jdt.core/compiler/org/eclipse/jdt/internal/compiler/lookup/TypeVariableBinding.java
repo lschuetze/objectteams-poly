@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2013 IBM Corporation and others.
+ * Copyright (c) 2000, 2014 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -22,6 +22,8 @@
  *								Bug 415043 - [1.8][null] Follow-up re null type annotations after bug 392099
  *								Bug 417295 - [1.8[[null] Massage type annotated null analysis to gel well with deep encoded type bindings.
  *								Bug 400874 - [1.8][compiler] Inference infrastructure should evolve to meet JLS8 18.x (Part G of JSR335 spec)
+ *								Bug 426792 - [1.8][inference][impl] generify new type inference engine
+ *								Bug 428019 - [1.8][compiler] Type inference failure with nested generic invocation.
  *******************************************************************************/
 package org.eclipse.jdt.internal.compiler.lookup;
 
@@ -565,6 +567,21 @@ public class TypeVariableBinding extends ReferenceBinding {
 		return true;
 	}
 
+	@Override
+	public boolean isSubtypeOf(TypeBinding other) {
+		if (isSubTypeOfRTL(other))
+			return true;
+		if (this.firstBound != null && this.firstBound.isSubtypeOf(other))
+			return true;
+		if (this.superclass != null && this.superclass.isSubtypeOf(other))
+			return true;
+		if (this.superInterfaces != null)
+			for (int i = 0, l = this.superInterfaces.length; i < l; i++)
+		   		if (this.superInterfaces[i].isSubtypeOf(other))
+					return true;
+		return other.id == TypeIds.T_JavaLangObject;
+	}
+
 	// to prevent infinite recursion when inspecting recursive generics:
 	boolean inRecursiveFunction = false;
 	
@@ -688,7 +705,7 @@ public class TypeVariableBinding extends ReferenceBinding {
 //{ObjectTeams: cross the OT package, make protected:
 	protected
 // SH}
-	void collectInferenceVariables(Set variables) {
+	void collectInferenceVariables(Set<InferenceVariable> variables) {
 		if (this.inRecursiveFunction)
 			return; // nothing seen
 		this.inRecursiveFunction = true;

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2013 IBM Corporation and others.
+ * Copyright (c) 2014 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -44,7 +44,7 @@ public ICompilationUnit getWorkingCopy(String path, String source) throws JavaMo
 public void setUpSuite() throws Exception {
 	super.setUpSuite();
 
-	setUpJavaProject("Resolve", "1.8");
+	setUpJavaProject("Resolve", "1.8", true);
 
 	waitUntilIndexesReady();
 }
@@ -581,7 +581,7 @@ public void test0019() throws JavaModelException {
 	IJavaElement[] elements = this.wc.codeSelect(start, length);
 	assertElementsEqual(
 		"Unexpected elements",
-		"hashCode() [in Object [in Object.class [in java.lang [in "+ getExternalPath() + "jclMin1.8.jar]]]]",
+		"hashCode() [in Object [in Object.class [in java.lang [in "+ getExternalPath() + "jclFull1.8.jar]]]]",
 		elements
 	);
 }
@@ -607,7 +607,7 @@ public void test0020() throws JavaModelException {
 	IJavaElement[] elements = this.wc.codeSelect(start, length);
 	assertElementsEqual(
 		"Unexpected elements",
-		"hashCode() [in Object [in Object.class [in java.lang [in "+ getExternalPath() + "jclMin1.8.jar]]]]",
+		"hashCode() [in Object [in Object.class [in java.lang [in "+ getExternalPath() + "jclFull1.8.jar]]]]",
 		elements
 	);
 }
@@ -1000,7 +1000,7 @@ public void test0033() throws JavaModelException {
 //https://bugs.eclipse.org/bugs/show_bug.cgi?id=408230
 public void testBug408230a() throws CoreException {
 	try {
-		createJavaProject("P", new String[] {"src"}, new String[] {"JCL18_LIB"}, "bin", "1.8");
+		createJavaProject("P", new String[] {"src"}, new String[] {"JCL18_LIB"}, "bin", "1.8", true);
 		String source = "package p;\n" +
 				"public class X {\n" +
 				"  FI i1 = (a, barg) -> a+barg;\n" +
@@ -1023,7 +1023,7 @@ public void testBug408230a() throws CoreException {
 }
 public void testBug408230b() throws CoreException {
 	try {
-		createJavaProject("P", new String[] {"src"}, new String[] {"JCL18_LIB"}, "bin", "1.8");
+		createJavaProject("P", new String[] {"src"}, new String[] {"JCL18_LIB"}, "bin", "1.8", true);
 		String source = "package p;\n" +
 				"public class X {\n" +
 				"  void foo() {\n" +
@@ -1048,7 +1048,7 @@ public void testBug408230b() throws CoreException {
 }
 public void testBug408230c() throws CoreException {
 	try {
-		createJavaProject("P", new String[] {"src"}, new String[] {"JCL18_LIB"}, "bin", "1.8");
+		createJavaProject("P", new String[] {"src"}, new String[] {"JCL18_LIB"}, "bin", "1.8", true);
 		String source = "package p;\n" +
 				"public class X {\n" +
 				"  void foo() {\n" +
@@ -1073,7 +1073,7 @@ public void testBug408230c() throws CoreException {
 }
 public void testBug408230d() throws CoreException {
 	try {
-		createJavaProject("P", new String[] {"src"}, new String[] {"JCL18_LIB"}, "bin", "1.8");
+		createJavaProject("P", new String[] {"src"}, new String[] {"JCL18_LIB"}, "bin", "1.8", true);
 		String source = "package p;\n" +
 				"public class X {\n" +
 				"  FI i1 = (barg) -> ++barg;\n" +
@@ -1096,7 +1096,7 @@ public void testBug408230d() throws CoreException {
 }
 public void testBug408230e() throws CoreException {
 	try {
-		createJavaProject("P", new String[] {"src"}, new String[] {"JCL18_LIB"}, "bin", "1.8");
+		createJavaProject("P", new String[] {"src"}, new String[] {"JCL18_LIB"}, "bin", "1.8", true);
 		String source = "package p;\n" +
 				"public class X {\n" +
 				"  FI i1 = (aarg) -> { return aarg++;};\n" +
@@ -1119,7 +1119,7 @@ public void testBug408230e() throws CoreException {
 }
 public void testBug408230f() throws CoreException {
 	try {
-		createJavaProject("P", new String[] {"src"}, new String[] {"JCL18_LIB"}, "bin", "1.8");
+		createJavaProject("P", new String[] {"src"}, new String[] {"JCL18_LIB"}, "bin", "1.8", true);
 		String source = "package p;\n" +
 				"public class X {\n" +
 				"  FI i1 = (aarg) -> {  int x = aarg; return aarg++;};\n" +
@@ -1142,7 +1142,7 @@ public void testBug408230f() throws CoreException {
 }
 public void testBug408230g() throws CoreException {
 	try {
-		createJavaProject("P", new String[] {"src"}, new String[] {"JCL18_LIB"}, "bin", "1.8");
+		createJavaProject("P", new String[] {"src"}, new String[] {"JCL18_LIB"}, "bin", "1.8", true);
 		String source = "package p;\n" +
 				"public class X {\n" +
 				" public void boo(FI fi) {}\n" +
@@ -1168,7 +1168,7 @@ public void testBug408230g() throws CoreException {
 }
 public void testBug408230h() throws CoreException {
 	try {
-		createJavaProject("P", new String[] {"src"}, new String[] {"JCL18_LIB"}, "bin", "1.8");
+		createJavaProject("P", new String[] {"src"}, new String[] {"JCL18_LIB"}, "bin", "1.8", true);
 		String source = "package p;\n" +
 				"public class X {\n" +
 				" public void boo(FI fi) {}\n" +
@@ -1194,7 +1194,7 @@ public void testBug408230h() throws CoreException {
 }
 public void testBug408230i() throws CoreException {
 	try {
-		createJavaProject("P", new String[] {"src"}, new String[] {"JCL18_LIB"}, "bin", "1.8");
+		createJavaProject("P", new String[] {"src"}, new String[] {"JCL18_LIB"}, "bin", "1.8", true);
 		String source = "package p;\n" +
 				"public class X {\n" +
 				" public void boo(FI fi) {}\n" +
@@ -1220,7 +1220,7 @@ public void testBug408230i() throws CoreException {
 }
 public void testBug408230j() throws CoreException {
 	try {
-		createJavaProject("P", new String[] {"src"}, new String[] {"JCL18_LIB"}, "bin", "1.8");
+		createJavaProject("P", new String[] {"src"}, new String[] {"JCL18_LIB"}, "bin", "1.8", true);
 		String source = "package p;\n" +
 				"public class X {\n" +
 				" public void boo(FI fi) {}\n" +
@@ -1246,7 +1246,7 @@ public void testBug408230j() throws CoreException {
 }
 public void testBug408230k() throws CoreException {
 	try {
-		createJavaProject("P", new String[] {"src"}, new String[] {"JCL18_LIB"}, "bin", "1.8");
+		createJavaProject("P", new String[] {"src"}, new String[] {"JCL18_LIB"}, "bin", "1.8", true);
 		String source = "package p;\n" +
 				"public class X {\n" +
 				" public void boo(int x, int y, FI fi) {}\n" +
@@ -1272,7 +1272,7 @@ public void testBug408230k() throws CoreException {
 }
 public void testBug408230l() throws CoreException {
 	try {
-		createJavaProject("P", new String[] {"src"}, new String[] {"JCL18_LIB"}, "bin", "1.8");
+		createJavaProject("P", new String[] {"src"}, new String[] {"JCL18_LIB"}, "bin", "1.8", true);
 		String source = "package p;\n" +
 				"public class X {\n" +
 				" public void boo(int x, FI fi) {}\n" +
@@ -1298,7 +1298,7 @@ public void testBug408230l() throws CoreException {
 }
 public void testBug408230m() throws CoreException {
 	try {
-		createJavaProject("P", new String[] {"src"}, new String[] {"JCL18_LIB"}, "bin", "1.8");
+		createJavaProject("P", new String[] {"src"}, new String[] {"JCL18_LIB"}, "bin", "1.8", true);
 		String source = "package p;\n" +
 				"public class X {\n" +
 				" public void boo(int x, int y, FI fi) {}\n" +
@@ -1324,7 +1324,7 @@ public void testBug408230m() throws CoreException {
 }
 public void testBug408230n() throws CoreException {
 	try {
-		createJavaProject("P", new String[] {"src"}, new String[] {"JCL18_LIB"}, "bin", "1.8");
+		createJavaProject("P", new String[] {"src"}, new String[] {"JCL18_LIB"}, "bin", "1.8", true);
 		String source = "package p;\n" +
 				"public class X {\n" +
 				" public void boo(int x, FI fi) {}\n" +
@@ -1561,7 +1561,7 @@ public void test422468d() throws JavaModelException {
 	IJavaElement[] elements = this.wc.codeSelect(start, length);
 	assertElementsEqual(
 		"Unexpected elements",
-		"length() [in String [in String.class [in java.lang [in "+ getExternalPath() + "jclMin1.8.jar]]]]",
+		"length() [in String [in String.class [in java.lang [in "+ getExternalPath() + "jclFull1.8.jar]]]]",
 		elements
 	);
 }
@@ -1689,6 +1689,302 @@ public void test424110a() throws JavaModelException {
 		"Unexpected elements",
 		"m(int) [in X [in [Working copy] X.java [in <default> [in src [in Resolve]]]]]",
 		elements
+	);
+}
+// https://bugs.eclipse.org/bugs/show_bug.cgi?id=424071, [1.8][select] cannot select method invoked on a lambda parameter with inferred type
+public void test424071() throws JavaModelException {
+	this.wc = getWorkingCopy(
+			"/Resolve/src/X.java",
+			"import java.util.List;\n" +
+			"import java.util.Map;\n" +
+			"import java.util.stream.Collectors;\n" +
+			"class Person {\n" +
+			"	String getLast() { return \"\"; };\n" +
+			"}\n" +
+			"public class X {\n" +
+			"	void test1(List<Person> roster) {\n" +
+			"        Map<String, Person> map = \n" +
+			"                roster\n" +
+			"                    .stream()\n" +
+			"                    .collect(\n" +
+			"                        Collectors.toMap(\n" +
+			"                            p -> p.getLast(), //[1]\n" +
+			"                            p -> p            //[2]\n" +
+			"                        ));\n" +
+			"	}\n" +
+			"}\n"
+			);
+
+	String str = this.wc.getSource();
+	String selection = "getLast";
+	int start = str.lastIndexOf(selection);
+	int length = selection.length();
+
+	IJavaElement[] elements = this.wc.codeSelect(start, length);
+	assertElementsEqual(
+		"Unexpected elements",
+		"getLast() [in Person [in [Working copy] X.java [in <default> [in src [in Resolve]]]]]",
+		elements
+	);
+}
+// https://bugs.eclipse.org/bugs/show_bug.cgi?id=424198, [1.8][hover] IAE in Signature.createCharArrayTypeSignature when hovering on variable of wildcard type, plus compile errors
+public void test424198() throws JavaModelException {
+	this.wc = getWorkingCopy(
+			"/Resolve/src/X.java",
+			"import java.io.IOException;\n" +
+			"import java.nio.file.Path;\n" +
+			"import java.util.ArrayList;\n" +
+			"import java.util.List;\n" +
+			"import java.util.function.Function;\n" +
+			"import java.util.jar.JarEntry;\n" +
+			"import java.util.jar.JarFile;\n" +
+			"import java.util.stream.Collectors;\n" +
+			"import java.util.stream.Stream;\n" +
+			"class InsistentCapture {\n" +
+			"  static void processJar(Path plugin) throws IOException {\n" +
+			"    try(JarFile jar = new JarFile(plugin.toFile())) {\n" +
+			"      try(Stream<JarEntry> entries = jar.stream()) {\n" +
+			"        Function<? super JarEntry, ? extends String> toName =\n" +
+			"          entry -> entry.getName();\n" +
+			"        Stream<? extends String> stream = entries.map(toName).distinct(); // Ok\n" +
+			"        withWildcard(entries.map(toName).distinct()); // Ok\n" +
+			"        withWildcard(stream); // Ok\n" +
+			"        Stream<String> stream2 = entries.map(toName).distinct(); // ERROR\n" +
+			"        withoutWildcard(entries.map(toName).distinct()); // ERROR\n" +
+			"        withoutWildcard(stream); // ERROR\n" +
+			"        withoutWildcard(stream2); // Ok\n" +
+			"        withoutWildcard(coerce(stream)); // Ok\n" +
+			"        withoutWildcard(stream.map((String v1) -> { // ERROR\n" +
+			"          String r = \"\" + v1; // Hover on v: Ok\n" +
+			"          return r;\n" +
+			"        }));\n" +
+			"        withoutWildcard(stream.map((v2) -> { // Ok\n" +
+			"          String r = \"\" + v2; // Hover on v: NOT OK\n" +
+			"          return r;\n" +
+			"        }));\n" +
+			"      }\n" +
+			"    }\n" +
+			"  }\n" +
+			"  private static Stream<String> coerce(Stream<? extends String> stream) {\n" +
+			"    if(\"1\" == \"\") { return stream.collect(Collectors.toList()).stream(); // ERROR\n" +
+			"    }\n" +
+			"    return stream.collect(Collectors.toList()); // NO ERROR\n" +
+			"  }\n" +
+			"  private static void withWildcard(Stream<? extends String> distinct) {\n" +
+			"    distinct.forEach(s1 -> System.out.println(s1)); // hover on s: NOT OK\n" +
+			"  }\n" +
+			"  private static void withoutWildcard(Stream<String> distinct) {\n" +
+			"    distinct.forEach(s2 -> System.out.println(s2)); // hover on s: Ok\n" +
+			"  }\n" +
+			"}\n"
+			);
+
+	String str = this.wc.getSource();
+	String selection = "v1";
+	int start = str.lastIndexOf(selection);
+	int length = selection.length();
+
+	IJavaElement[] elements = this.wc.codeSelect(start, length);
+	assertElementsEqual(
+		"Unexpected elements",
+		"v1 [in processJar(Path) [in InsistentCapture [in [Working copy] X.java [in <default> [in src [in Resolve]]]]]]",
+		elements,
+		true
+	);
+}
+// https://bugs.eclipse.org/bugs/show_bug.cgi?id=424198, [1.8][hover] IAE in Signature.createCharArrayTypeSignature when hovering on variable of wildcard type, plus compile errors
+public void test424198a() throws JavaModelException {
+	this.wc = getWorkingCopy(
+			"/Resolve/src/X.java",
+			"import java.io.IOException;\n" +
+			"import java.nio.file.Path;\n" +
+			"import java.util.ArrayList;\n" +
+			"import java.util.List;\n" +
+			"import java.util.function.Function;\n" +
+			"import java.util.jar.JarEntry;\n" +
+			"import java.util.jar.JarFile;\n" +
+			"import java.util.stream.Collectors;\n" +
+			"import java.util.stream.Stream;\n" +
+			"class InsistentCapture {\n" +
+			"  static void processJar(Path plugin) throws IOException {\n" +
+			"    try(JarFile jar = new JarFile(plugin.toFile())) {\n" +
+			"      try(Stream<JarEntry> entries = jar.stream()) {\n" +
+			"        Function<? super JarEntry, ? extends String> toName =\n" +
+			"          entry -> entry.getName();\n" +
+			"        Stream<? extends String> stream = entries.map(toName).distinct(); // Ok\n" +
+			"        withWildcard(entries.map(toName).distinct()); // Ok\n" +
+			"        withWildcard(stream); // Ok\n" +
+			"        Stream<String> stream2 = entries.map(toName).distinct(); // ERROR\n" +
+			"        withoutWildcard(entries.map(toName).distinct()); // ERROR\n" +
+			"        withoutWildcard(stream); // ERROR\n" +
+			"        withoutWildcard(stream2); // Ok\n" +
+			"        withoutWildcard(coerce(stream)); // Ok\n" +
+			"        withoutWildcard(stream.map((String v1) -> { // ERROR\n" +
+			"          String r = \"\" + v1; // Hover on v: Ok\n" +
+			"          return r;\n" +
+			"        }));\n" +
+			"        withoutWildcard(stream.map((v2) -> { // Ok\n" +
+			"          String r = \"\" + v2; // Hover on v: NOT OK\n" +
+			"          return r;\n" +
+			"        }));\n" +
+			"      }\n" +
+			"    }\n" +
+			"  }\n" +
+			"  private static Stream<String> coerce(Stream<? extends String> stream) {\n" +
+			"    if(\"1\" == \"\") { return stream.collect(Collectors.toList()).stream(); // ERROR\n" +
+			"    }\n" +
+			"    return stream.collect(Collectors.toList()); // NO ERROR\n" +
+			"  }\n" +
+			"  private static void withWildcard(Stream<? extends String> distinct) {\n" +
+			"    distinct.forEach(s1 -> System.out.println(s1)); // hover on s: NOT OK\n" +
+			"  }\n" +
+			"  private static void withoutWildcard(Stream<String> distinct) {\n" +
+			"    distinct.forEach(s2 -> System.out.println(s2)); // hover on s: Ok\n" +
+			"  }\n" +
+			"}\n"
+			);
+
+	String str = this.wc.getSource();
+	String selection = "v2";
+	int start = str.lastIndexOf(selection);
+	int length = selection.length();
+
+	IJavaElement[] elements = this.wc.codeSelect(start, length);
+	assertElementsEqual(
+		"Unexpected elements",
+		"v2 [in processJar(Path) [in InsistentCapture [in [Working copy] X.java [in <default> [in src [in Resolve]]]]]]",
+		elements,
+		true
+	);
+}
+// https://bugs.eclipse.org/bugs/show_bug.cgi?id=424198, [1.8][hover] IAE in Signature.createCharArrayTypeSignature when hovering on variable of wildcard type, plus compile errors
+public void test424198b() throws JavaModelException {
+	this.wc = getWorkingCopy(
+			"/Resolve/src/X.java",
+			"import java.io.IOException;\n" +
+			"import java.nio.file.Path;\n" +
+			"import java.util.ArrayList;\n" +
+			"import java.util.List;\n" +
+			"import java.util.function.Function;\n" +
+			"import java.util.jar.JarEntry;\n" +
+			"import java.util.jar.JarFile;\n" +
+			"import java.util.stream.Collectors;\n" +
+			"import java.util.stream.Stream;\n" +
+			"class InsistentCapture {\n" +
+			"  static void processJar(Path plugin) throws IOException {\n" +
+			"    try(JarFile jar = new JarFile(plugin.toFile())) {\n" +
+			"      try(Stream<JarEntry> entries = jar.stream()) {\n" +
+			"        Function<? super JarEntry, ? extends String> toName =\n" +
+			"          entry -> entry.getName();\n" +
+			"        Stream<? extends String> stream = entries.map(toName).distinct(); // Ok\n" +
+			"        withWildcard(entries.map(toName).distinct()); // Ok\n" +
+			"        withWildcard(stream); // Ok\n" +
+			"        Stream<String> stream2 = entries.map(toName).distinct(); // ERROR\n" +
+			"        withoutWildcard(entries.map(toName).distinct()); // ERROR\n" +
+			"        withoutWildcard(stream); // ERROR\n" +
+			"        withoutWildcard(stream2); // Ok\n" +
+			"        withoutWildcard(coerce(stream)); // Ok\n" +
+			"        withoutWildcard(stream.map((String v1) -> { // ERROR\n" +
+			"          String r = \"\" + v1; // Hover on v: Ok\n" +
+			"          return r;\n" +
+			"        }));\n" +
+			"        withoutWildcard(stream.map((v2) -> { // Ok\n" +
+			"          String r = \"\" + v2; // Hover on v: NOT OK\n" +
+			"          return r;\n" +
+			"        }));\n" +
+			"      }\n" +
+			"    }\n" +
+			"  }\n" +
+			"  private static Stream<String> coerce(Stream<? extends String> stream) {\n" +
+			"    if(\"1\" == \"\") { return stream.collect(Collectors.toList()).stream(); // ERROR\n" +
+			"    }\n" +
+			"    return stream.collect(Collectors.toList()); // NO ERROR\n" +
+			"  }\n" +
+			"  private static void withWildcard(Stream<? extends String> distinct) {\n" +
+			"    distinct.forEach(s1 -> System.out.println(s1)); // hover on s: NOT OK\n" +
+			"  }\n" +
+			"  private static void withoutWildcard(Stream<String> distinct) {\n" +
+			"    distinct.forEach(s2 -> System.out.println(s2)); // hover on s: Ok\n" +
+			"  }\n" +
+			"}\n"
+			);
+
+	String str = this.wc.getSource();
+	String selection = "s1";
+	int start = str.lastIndexOf(selection);
+	int length = selection.length();
+
+	IJavaElement[] elements = this.wc.codeSelect(start, length);
+	assertElementsEqual(
+		"Unexpected elements",
+		"s1 [in withWildcard(Stream<? extends String>) [in InsistentCapture [in [Working copy] X.java [in <default> [in src [in Resolve]]]]]]",
+		elements,
+		true
+	);
+}
+// https://bugs.eclipse.org/bugs/show_bug.cgi?id=424198, [1.8][hover] IAE in Signature.createCharArrayTypeSignature when hovering on variable of wildcard type
+public void test424198c() throws JavaModelException {
+	this.wc = getWorkingCopy(
+			"/Resolve/src/X.java",
+			"import java.io.IOException;\n" +
+			"import java.nio.file.Path;\n" +
+			"import java.util.ArrayList;\n" +
+			"import java.util.List;\n" +
+			"import java.util.function.Function;\n" +
+			"import java.util.jar.JarEntry;\n" +
+			"import java.util.jar.JarFile;\n" +
+			"import java.util.stream.Collectors;\n" +
+			"import java.util.stream.Stream;\n" +
+			"class InsistentCapture {\n" +
+			"  static void processJar(Path plugin) throws IOException {\n" +
+			"    try(JarFile jar = new JarFile(plugin.toFile())) {\n" +
+			"      try(Stream<JarEntry> entries = jar.stream()) {\n" +
+			"        Function<? super JarEntry, ? extends String> toName =\n" +
+			"          entry -> entry.getName();\n" +
+			"        Stream<? extends String> stream = entries.map(toName).distinct(); // Ok\n" +
+			"        withWildcard(entries.map(toName).distinct()); // Ok\n" +
+			"        withWildcard(stream); // Ok\n" +
+			"        Stream<String> stream2 = entries.map(toName).distinct(); // ERROR\n" +
+			"        withoutWildcard(entries.map(toName).distinct()); // ERROR\n" +
+			"        withoutWildcard(stream); // ERROR\n" +
+			"        withoutWildcard(stream2); // Ok\n" +
+			"        withoutWildcard(coerce(stream)); // Ok\n" +
+			"        withoutWildcard(stream.map((String v1) -> { // ERROR\n" +
+			"          String r = \"\" + v1; // Hover on v: Ok\n" +
+			"          return r;\n" +
+			"        }));\n" +
+			"        withoutWildcard(stream.map((v2) -> { // Ok\n" +
+			"          String r = \"\" + v2; // Hover on v: NOT OK\n" +
+			"          return r;\n" +
+			"        }));\n" +
+			"      }\n" +
+			"    }\n" +
+			"  }\n" +
+			"  private static Stream<String> coerce(Stream<? extends String> stream) {\n" +
+			"    if(\"1\" == \"\") { return stream.collect(Collectors.toList()).stream(); // ERROR\n" +
+			"    }\n" +
+			"    return stream.collect(Collectors.toList()); // NO ERROR\n" +
+			"  }\n" +
+			"  private static void withWildcard(Stream<? extends String> distinct) {\n" +
+			"    distinct.forEach(s1 -> System.out.println(s1)); // hover on s: NOT OK\n" +
+			"  }\n" +
+			"  private static void withoutWildcard(Stream<String> distinct) {\n" +
+			"    distinct.forEach(s2 -> System.out.println(s2)); // hover on s: Ok\n" +
+			"  }\n" +
+			"}\n"
+			);
+
+	String str = this.wc.getSource();
+	String selection = "s2";
+	int start = str.lastIndexOf(selection);
+	int length = selection.length();
+
+	IJavaElement[] elements = this.wc.codeSelect(start, length);
+	assertElementsEqual(
+		"Unexpected elements",
+		"s2 [in withoutWildcard(Stream<String>) [in InsistentCapture [in [Working copy] X.java [in <default> [in src [in Resolve]]]]]]",
+		elements,
+		true
 	);
 }
 }

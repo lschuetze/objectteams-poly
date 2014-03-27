@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2013 GK Software AG.
+ * Copyright (c) 2013, 2014 GK Software AG and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -11,8 +11,11 @@
  *
  * Contributors:
  *     Stephan Herrmann - initial API and implementation
+ *     IBM Corporation - bug fixes
  *******************************************************************************/
 package org.eclipse.jdt.internal.compiler.lookup;
+
+import org.eclipse.jdt.core.compiler.CharOperation;
 
 /**
  * Implementation of 18.1.3 in JLS8
@@ -32,15 +35,24 @@ public class TypeBound extends ReductionResult {
 	/** Create a true type bound or a dependency. */
 	TypeBound(InferenceVariable inferenceVariable, TypeBinding typeBinding, int relation) {
 		this.left = inferenceVariable;
-		this.right = typeBinding;
+		this.right = safeType(typeBinding);
 		this.relation = relation;
 	}
 	
 	TypeBound(InferenceVariable inferenceVariable, TypeBinding typeBinding, int relation, boolean isSoft) {
 		this.left = inferenceVariable;
-		this.right = typeBinding;
+		this.right = safeType(typeBinding);
 		this.relation = relation;
 		this.isSoft = isSoft;
+	}
+	
+	private TypeBinding safeType(TypeBinding type) {
+		if (type != null && type.isLocalType()) {
+			MethodBinding enclosingMethod = ((LocalTypeBinding) type).enclosingMethod;
+			if (enclosingMethod != null && CharOperation.equals(TypeConstants.ANONYMOUS_METHOD, enclosingMethod.selector))
+				return type.superclass(); // don't use local class inside lambda: lambda is copied, type will be re-created and thus is unmatchable
+		}
+		return type;
 	}
 
 

@@ -13,12 +13,18 @@
  *     IBM Corporation - initial API and implementation
  *     Stephan Herrmann - Contribution for
  *							Bug 423504 - [1.8] Implement "18.5.3 Functional Interface Parameterization Inference"
+ *							Bug 426676 - [1.8][compiler] Wrong generic method type inferred from lambda expression
+ *							Bug 426542 - [1.8] Most specific method not picked when one method has intersection type as type parameter
+ *							Bug 428019 - [1.8][compiler] Type inference failure with nested generic invocation.
  *     Andy Clement (GoPivotal, Inc) aclement@gopivotal.com - Contributions for
  *                          Bug 405104 - [1.8][compiler][codegen] Implement support for serializeable lambdas
  *******************************************************************************/
 
 package org.eclipse.jdt.internal.compiler.lookup;
 
+import java.util.Set;
+
+import org.eclipse.jdt.internal.compiler.ast.Wildcard;
 import org.eclipse.jdt.internal.compiler.classfmt.ClassFileConstants;
 
 public class IntersectionCastTypeBinding extends ReferenceBinding {
@@ -118,8 +124,54 @@ public class IntersectionCastTypeBinding extends ReferenceBinding {
 	/* Answer true if the receiver type can be assigned to the argument type (right)
 	 */
 	public boolean isCompatibleWith(TypeBinding right, Scope scope) {
+
+		// easy way out?
+		if (TypeBinding.equalsEquals(this, right))
+			return true;
+
+		// need to compare two intersection types?
+		int rightKind = right.kind();
+		TypeBinding[] rightIntersectingTypes = null;
+		if (rightKind == INTERSECTION_TYPE && right.boundKind() == Wildcard.EXTENDS) {
+			TypeBinding allRightBounds = ((WildcardBinding) right).allBounds();
+			if (allRightBounds instanceof IntersectionCastTypeBinding)
+				rightIntersectingTypes = ((IntersectionCastTypeBinding) allRightBounds).intersectingTypes;
+		} else if (rightKind == INTERSECTION_CAST_TYPE) {
+			rightIntersectingTypes = ((IntersectionCastTypeBinding) right).intersectingTypes;
+		}
+		if (rightIntersectingTypes != null) {
+			int numRequired = rightIntersectingTypes.length;
+			TypeBinding[] required = new TypeBinding[numRequired];
+			System.arraycopy(rightIntersectingTypes, 0, required, 0, numRequired);
+			for (int i = 0; i < this.length; i++) {
+				TypeBinding provided = this.intersectingTypes[i];
+				for (int j = 0; j < required.length; j++) {
+					if (required[j] == null) continue;
+					if (provided.isCompatibleWith(required[j], scope)) {
+						required[j] = null;
+						if (--numRequired == 0)
+							return true;
+						break;
+					}
+				}
+			}
+			return false;
+		}
+
+		// normal case:
 		for (int i = 0; i < this.length; i++) {		
 			if (this.intersectingTypes[i].isCompatibleWith(right, scope))
+				return true;
+		}
+		return false;
+	}
+	
+	@Override
+	public boolean isSubtypeOf(TypeBinding other) {
+		if (TypeBinding.equalsEquals(this, other))
+			return true;
+		for (int i = 0; i < this.intersectingTypes.length; i++) {
+			if (this.intersectingTypes[i].isSubtypeOf(other))
 				return true;
 		}
 		return false;
@@ -198,5 +250,25 @@ public class IntersectionCastTypeBinding extends ReferenceBinding {
 			samType = typeBinding;
 		}
 		return samType;
+	}
+
+	@Override
+//{ObjectTeams:
+	protected
+// SH}
+	void collectInferenceVariables(Set<InferenceVariable> variables) {
+		for (int i = 0; i < this.intersectingTypes.length; i++)
+			this.intersectingTypes[i].collectInferenceVariables(variables);
+	}
+	
+	@Override
+	public boolean mentionsAny(TypeBinding[] parameters, int idx) {
+		if (super.mentionsAny(parameters, idx))
+			return true;
+		for (int i = 0; i < this.intersectingTypes.length; i++) {
+			if (this.intersectingTypes[i].mentionsAny(parameters, -1))
+				return true;
+		}
+		return false;
 	}
 }

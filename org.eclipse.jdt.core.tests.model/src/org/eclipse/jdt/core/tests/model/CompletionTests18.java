@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2013 IBM Corporation and others.
+ * Copyright (c) 2014 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -32,9 +32,9 @@ public CompletionTests18(String name) {
 
 public void setUpSuite() throws Exception {
 	if (COMPLETION_PROJECT == null)  {
-		COMPLETION_PROJECT = setUpJavaProject("Completion", "1.8");
+		COMPLETION_PROJECT = setUpJavaProject("Completion", "1.8", true);
 	} else {
-		setUpProjectCompliance(COMPLETION_PROJECT, "1.8");
+		setUpProjectCompliance(COMPLETION_PROJECT, "1.8", true);
 	}
 	super.setUpSuite();
 }
@@ -50,13 +50,13 @@ public void test001() throws JavaModelException {
 			"	void run1(int s1, int s2);\n" +
 			"}\n" +
 			"interface X extends Foo{\n" +
-			"  static Foo f = (first, second) -> System.out.print(fi);\n" +
+			"  static Foo f = (first, second) -> System.out.print(fir);\n" +
 			"}\n");
 
 	CompletionTestsRequestor2 requestor = new CompletionTestsRequestor2(true);
 	requestor.allowAllRequiredProposals();
 	String str = this.workingCopies[0].getSource();
-	String completeBehind = "fi";
+	String completeBehind = "fir";
 	int cursorLocation = str.lastIndexOf(completeBehind) + completeBehind.length();
 	this.workingCopies[0].codeComplete(cursorLocation, requestor, this.wcOwner);
 	assertResults(
@@ -72,14 +72,14 @@ public void test002() throws JavaModelException {
 			"}\n" +
 			"interface X extends Foo {\n" +
 			"  public static void main(String [] args) {\n" +
-			"      Foo f = (first, second) -> System.out.print(fi);\n" +
+			"      Foo f = (first, second) -> System.out.print(fir);\n" +
 			"  }\n" +
 			"}\n");
 
 	CompletionTestsRequestor2 requestor = new CompletionTestsRequestor2(true);
 	requestor.allowAllRequiredProposals();
 	String str = this.workingCopies[0].getSource();
-	String completeBehind = "fi";
+	String completeBehind = "fir";
 	int cursorLocation = str.lastIndexOf(completeBehind) + completeBehind.length();
 	this.workingCopies[0].codeComplete(cursorLocation, requestor, this.wcOwner);
 	assertResults(
@@ -103,7 +103,7 @@ public void test003() throws JavaModelException {
 			"	static void goo(J i) {}\n" +
 			"	public static void main(String[] args) {\n" +
 			"		goo ((first, second) -> {\n" +
-			"			return (xyz, pqr) -> first.\n" +
+			"			return (xyz, pqr) -> first.c\n" +
 			"		});\n" +
 			"	}\n" +
 			"}\n");
@@ -111,22 +111,26 @@ public void test003() throws JavaModelException {
 	CompletionTestsRequestor2 requestor = new CompletionTestsRequestor2(true);
 	requestor.allowAllRequiredProposals();
 	String str = this.workingCopies[0].getSource();
-	String completeBehind = "first.";
+	String completeBehind = "first.c";
 	int cursorLocation = str.lastIndexOf(completeBehind) + completeBehind.length();
 	this.workingCopies[0].codeComplete(cursorLocation, requestor, this.wcOwner);
 	assertResults(
+			"CASE_INSENSITIVE_ORDER[FIELD_REF]{CASE_INSENSITIVE_ORDER, Ljava.lang.String;, Ljava.util.Comparator<Ljava.lang.String;>;, CASE_INSENSITIVE_ORDER, null, 14}\n" +
+			"copyValueOf[METHOD_REF]{copyValueOf(), Ljava.lang.String;, ([C)Ljava.lang.String;, copyValueOf, (arg0), 24}\n" +
+			"copyValueOf[METHOD_REF]{copyValueOf(), Ljava.lang.String;, ([CII)Ljava.lang.String;, copyValueOf, (arg0, arg1, arg2), 24}\n" +
+			"charAt[METHOD_REF]{charAt(), Ljava.lang.String;, (I)C, charAt, (arg0), 35}\n" +
+			"chars[METHOD_REF]{chars(), Ljava.lang.CharSequence;, ()Ljava.util.stream.IntStream;, chars, null, 35}\n" +
 			"clone[METHOD_REF]{clone(), Ljava.lang.Object;, ()Ljava.lang.Object;, clone, null, 35}\n" +
-			"equals[METHOD_REF]{equals(), Ljava.lang.Object;, (Ljava.lang.Object;)Z, equals, (obj), 35}\n" +
-			"finalize[METHOD_REF]{finalize(), Ljava.lang.Object;, ()V, finalize, null, 35}\n" +
-			"getClass[METHOD_REF]{getClass(), Ljava.lang.Object;, ()Ljava.lang.Class<+Ljava.lang.Object;>;, getClass, null, 35}\n" +
-			"hashCode[METHOD_REF]{hashCode(), Ljava.lang.Object;, ()I, hashCode, null, 35}\n" +
-			"length[METHOD_REF]{length(), Ljava.lang.String;, ()I, length, null, 35}\n" +
-			"notify[METHOD_REF]{notify(), Ljava.lang.Object;, ()V, notify, null, 35}\n" +
-			"notifyAll[METHOD_REF]{notifyAll(), Ljava.lang.Object;, ()V, notifyAll, null, 35}\n" +
-			"toString[METHOD_REF]{toString(), Ljava.lang.Object;, ()Ljava.lang.String;, toString, null, 35}\n" +
-			"wait[METHOD_REF]{wait(), Ljava.lang.Object;, ()V, wait, null, 35}\n" +
-			"wait[METHOD_REF]{wait(), Ljava.lang.Object;, (J)V, wait, (millis), 35}\n" +
-			"wait[METHOD_REF]{wait(), Ljava.lang.Object;, (JI)V, wait, (millis, nanos), 35}",
+			"codePointAt[METHOD_REF]{codePointAt(), Ljava.lang.String;, (I)I, codePointAt, (arg0), 35}\n" +
+			"codePointBefore[METHOD_REF]{codePointBefore(), Ljava.lang.String;, (I)I, codePointBefore, (arg0), 35}\n" +
+			"codePointCount[METHOD_REF]{codePointCount(), Ljava.lang.String;, (II)I, codePointCount, (arg0, arg1), 35}\n" +
+			"codePoints[METHOD_REF]{codePoints(), Ljava.lang.CharSequence;, ()Ljava.util.stream.IntStream;, codePoints, null, 35}\n" +
+			"compareTo[METHOD_REF]{compareTo(), Ljava.lang.String;, (Ljava.lang.String;)I, compareTo, (arg0), 35}\n" +
+			"compareToIgnoreCase[METHOD_REF]{compareToIgnoreCase(), Ljava.lang.String;, (Ljava.lang.String;)I, compareToIgnoreCase, (arg0), 35}\n" +
+			"concat[METHOD_REF]{concat(), Ljava.lang.String;, (Ljava.lang.String;)Ljava.lang.String;, concat, (arg0), 35}\n" +
+			"contains[METHOD_REF]{contains(), Ljava.lang.String;, (Ljava.lang.CharSequence;)Z, contains, (arg0), 35}\n" +
+			"contentEquals[METHOD_REF]{contentEquals(), Ljava.lang.String;, (Ljava.lang.CharSequence;)Z, contentEquals, (arg0), 35}\n" +
+			"contentEquals[METHOD_REF]{contentEquals(), Ljava.lang.String;, (Ljava.lang.StringBuffer;)Z, contentEquals, (arg0), 35}",
 			requestor.getResults());
 }
 public void test004() throws JavaModelException {
@@ -376,7 +380,7 @@ public void test010() throws JavaModelException {
 			"clone[METHOD_REF]{clone(), Ljava.lang.Object;, ()Ljava.lang.Object;, clone, null, 35}\n" +
 			"equals[METHOD_REF]{equals(), Ljava.lang.Object;, (Ljava.lang.Object;)Z, equals, (obj), 35}\n" +
 			"finalize[METHOD_REF]{finalize(), Ljava.lang.Object;, ()V, finalize, null, 35}\n" +
-			"getClass[METHOD_REF]{getClass(), Ljava.lang.Object;, ()Ljava.lang.Class<+Ljava.lang.Object;>;, getClass, null, 35}\n" +
+			"getClass[METHOD_REF]{getClass(), Ljava.lang.Object;, ()Ljava.lang.Class<*>;, getClass, null, 35}\n" +
 			"hashCode[METHOD_REF]{hashCode(), Ljava.lang.Object;, ()I, hashCode, null, 35}\n" +
 			"notify[METHOD_REF]{notify(), Ljava.lang.Object;, ()V, notify, null, 35}\n" +
 			"notifyAll[METHOD_REF]{notifyAll(), Ljava.lang.Object;, ()V, notifyAll, null, 35}\n" +
@@ -491,7 +495,7 @@ public void test014() throws JavaModelException { // ensure higher relevance for
 			"	public static void main(String[] arrayOfStrings) {\n" +
 			"       int [] arrayOfInts = null;\n" +
 			"		I i = () -> {\n" +
-			"           return array\n" +
+			"           return arrayO\n" +
 			"		};\n" +
 			"	}\n" +
 			"}\n");
@@ -499,11 +503,11 @@ public void test014() throws JavaModelException { // ensure higher relevance for
 	CompletionTestsRequestor2 requestor = new CompletionTestsRequestor2(true, true, true, false);
 	requestor.allowAllRequiredProposals();
 	String str = this.workingCopies[0].getSource();
-	String completeBehind = "array";
+	String completeBehind = "arrayO";
 	int cursorLocation = str.lastIndexOf(completeBehind) + completeBehind.length();
 	this.workingCopies[0].codeComplete(cursorLocation, requestor, this.wcOwner);
-	assertResults("arrayOfStrings[LOCAL_VARIABLE_REF]{arrayOfStrings, null, [Ljava.lang.String;, null, null, arrayOfStrings, null, [168, 173], 27}\n" +
-					"arrayOfInts[LOCAL_VARIABLE_REF]{arrayOfInts, null, [I, null, null, arrayOfInts, null, [168, 173], 57}", requestor.getResults());
+	assertResults("arrayOfStrings[LOCAL_VARIABLE_REF]{arrayOfStrings, null, [Ljava.lang.String;, null, null, arrayOfStrings, null, [168, 174], 27}\n" +
+					"arrayOfInts[LOCAL_VARIABLE_REF]{arrayOfInts, null, [I, null, null, arrayOfInts, null, [168, 174], 57}", requestor.getResults());
 }
 // https://bugs.eclipse.org/bugs/show_bug.cgi?id=422901, [1.8][code assist] Code assistant sensitive to scope.referenceContext type identity.
 public void test015() throws JavaModelException { // ensure higher relevance for matching return type.
@@ -691,8 +695,8 @@ public void test018a() throws JavaModelException { // computing visible elements
 			"completion range=[419, 418]\n" +
 			"completion token=\"\"\n" +
 			"completion token kind=TOKEN_KIND_NAME\n" +
-			"expectedTypesSignatures=null\n" +
-			"expectedTypesKeys=null\n" +
+			"expectedTypesSignatures={Z,C,I,J,F,D,[C,Ljava.lang.String;,Ljava.lang.Object;}\n" +
+			"expectedTypesKeys={Z,C,I,J,F,D,[C,Ljava/lang/String;,Ljava/lang/Object;}\n" +
 			"completion token location=UNKNOWN\n" +
 			"visibleElements={\n" +
 			"	xLocal [in main(String[]) [in X [in [Working copy] X.java [in <default> [in src [in Completion]]]]]],\n" +
@@ -713,7 +717,7 @@ public void testUnspecifiedReference() throws JavaModelException { // ensure com
 			"	}\n" +
 			"	public static void main(String[] args) {\n" +
 			"		goo((StringParameter) -> {\n" +
-			"			Str\n" +
+			"			Stri\n" +
 			"		});\n" +
 			"	} \n" +
 			"}\n");
@@ -721,11 +725,23 @@ public void testUnspecifiedReference() throws JavaModelException { // ensure com
 	CompletionTestsRequestor2 requestor = new CompletionTestsRequestor2(true, true, true, false);
 	requestor.allowAllRequiredProposals();
 	String str = this.workingCopies[0].getSource();
-	String completeBehind = "Str";
+	String completeBehind = "Stri";
 	int cursorLocation = str.lastIndexOf(completeBehind) + completeBehind.length();
 	this.workingCopies[0].codeComplete(cursorLocation, requestor, this.wcOwner);
-	assertResults("String[TYPE_REF]{String, java.lang, Ljava.lang.String;, null, null, null, null, [155, 158], 27}\n" +
-                  "StringParameter[LOCAL_VARIABLE_REF]{StringParameter, null, LX;, null, null, StringParameter, null, [155, 158], 27}", requestor.getResults());
+	assertResults("StringBufferInputStream[TYPE_REF]{java.io.StringBufferInputStream, java.io, Ljava.io.StringBufferInputStream;, null, null, null, null, [155, 159], 24}\n" +
+			"StringCharBuffer[TYPE_REF]{java.nio.StringCharBuffer, java.nio, Ljava.nio.StringCharBuffer;, null, null, null, null, [155, 159], 24}\n" +
+			"StringCharacterIterator[TYPE_REF]{java.text.StringCharacterIterator, java.text, Ljava.text.StringCharacterIterator;, null, null, null, null, [155, 159], 24}\n" +
+			"StringJoiner[TYPE_REF]{java.util.StringJoiner, java.util, Ljava.util.StringJoiner;, null, null, null, null, [155, 159], 24}\n" +
+			"StringReader[TYPE_REF]{java.io.StringReader, java.io, Ljava.io.StringReader;, null, null, null, null, [155, 159], 24}\n" +
+			"StringTokenizer[TYPE_REF]{java.util.StringTokenizer, java.util, Ljava.util.StringTokenizer;, null, null, null, null, [155, 159], 24}\n" +
+			"StringWriter[TYPE_REF]{java.io.StringWriter, java.io, Ljava.io.StringWriter;, null, null, null, null, [155, 159], 24}\n" +
+			"StrictMath[TYPE_REF]{StrictMath, java.lang, Ljava.lang.StrictMath;, null, null, null, null, [155, 159], 27}\n" +
+			"String[TYPE_REF]{String, java.lang, Ljava.lang.String;, null, null, null, null, [155, 159], 27}\n" +
+			"StringBuffer[TYPE_REF]{StringBuffer, java.lang, Ljava.lang.StringBuffer;, null, null, null, null, [155, 159], 27}\n" +
+			"StringBuilder[TYPE_REF]{StringBuilder, java.lang, Ljava.lang.StringBuilder;, null, null, null, null, [155, 159], 27}\n" +
+			"StringCoding[TYPE_REF]{StringCoding, java.lang, Ljava.lang.StringCoding;, null, null, null, null, [155, 159], 27}\n" +
+			"StringIndexOutOfBoundsException[TYPE_REF]{StringIndexOutOfBoundsException, java.lang, Ljava.lang.StringIndexOutOfBoundsException;, null, null, null, null, [155, 159], 27}\n" +
+			"StringParameter[LOCAL_VARIABLE_REF]{StringParameter, null, LX;, null, null, StringParameter, null, [155, 159], 27}", requestor.getResults());
 }
 public void testBrokenMethodCall() throws JavaModelException { // ensure completion works when the containing call is not terminated properly.
 	this.workingCopies = new ICompilationUnit[1];
@@ -739,7 +755,7 @@ public void testBrokenMethodCall() throws JavaModelException { // ensure complet
 			"	}\n" +
 			"	public static void main(String[] args) {\n" +
 			"		goo((StringParameter) -> {\n" +
-			"			Str\n" +
+			"			StringP\n" +
 			"		})\n" +
 			"	} \n" +
 			"}\n");
@@ -747,11 +763,10 @@ public void testBrokenMethodCall() throws JavaModelException { // ensure complet
 	CompletionTestsRequestor2 requestor = new CompletionTestsRequestor2(true, true, true, false);
 	requestor.allowAllRequiredProposals();
 	String str = this.workingCopies[0].getSource();
-	String completeBehind = "Str";
+	String completeBehind = "StringP";
 	int cursorLocation = str.lastIndexOf(completeBehind) + completeBehind.length();
 	this.workingCopies[0].codeComplete(cursorLocation, requestor, this.wcOwner);
-	assertResults("String[TYPE_REF]{String, java.lang, Ljava.lang.String;, null, null, null, null, [155, 158], 27}\n" +
-                  "StringParameter[LOCAL_VARIABLE_REF]{StringParameter, null, LX;, null, null, StringParameter, null, [155, 158], 27}", requestor.getResults());
+	assertResults("StringParameter[LOCAL_VARIABLE_REF]{StringParameter, null, LX;, null, null, StringParameter, null, [155, 162], 27}", requestor.getResults());
 }
 public void testExpressionBody() throws JavaModelException {
 	this.workingCopies = new ICompilationUnit[1];
@@ -783,7 +798,7 @@ public void testExpressionBody() throws JavaModelException {
 			"field[FIELD_REF]{field, LX;, I, null, null, field, null, [173, 173], 35}\n" +
 			"finalize[METHOD_REF]{finalize(), Ljava.lang.Object;, ()V, null, null, finalize, null, [173, 173], 35}\n" +
 			"foo[METHOD_REF]{foo(), LX;, ()V, null, null, foo, null, [173, 173], 35}\n" +
-			"getClass[METHOD_REF]{getClass(), Ljava.lang.Object;, ()Ljava.lang.Class<+Ljava.lang.Object;>;, null, null, getClass, null, [173, 173], 35}\n" +
+			"getClass[METHOD_REF]{getClass(), Ljava.lang.Object;, ()Ljava.lang.Class<*>;, null, null, getClass, null, [173, 173], 35}\n" +
 			"hashCode[METHOD_REF]{hashCode(), Ljava.lang.Object;, ()I, null, null, hashCode, null, [173, 173], 35}\n" +
 			"notify[METHOD_REF]{notify(), Ljava.lang.Object;, ()V, null, null, notify, null, [173, 173], 35}\n" +
 			"notifyAll[METHOD_REF]{notifyAll(), Ljava.lang.Object;, ()V, null, null, notifyAll, null, [173, 173], 35}\n" +
@@ -822,7 +837,7 @@ public void testExpressionBody2() throws JavaModelException {
 			"field[FIELD_REF]{field, LX;, I, null, null, field, null, [173, 173], 35}\n" +
 			"finalize[METHOD_REF]{finalize(), Ljava.lang.Object;, ()V, null, null, finalize, null, [173, 173], 35}\n" +
 			"foo[METHOD_REF]{foo(), LX;, ()V, null, null, foo, null, [173, 173], 35}\n" +
-			"getClass[METHOD_REF]{getClass(), Ljava.lang.Object;, ()Ljava.lang.Class<+Ljava.lang.Object;>;, null, null, getClass, null, [173, 173], 35}\n" +
+			"getClass[METHOD_REF]{getClass(), Ljava.lang.Object;, ()Ljava.lang.Class<*>;, null, null, getClass, null, [173, 173], 35}\n" +
 			"hashCode[METHOD_REF]{hashCode(), Ljava.lang.Object;, ()I, null, null, hashCode, null, [173, 173], 35}\n" +
 			"notify[METHOD_REF]{notify(), Ljava.lang.Object;, ()V, null, null, notify, null, [173, 173], 35}\n" +
 			"notifyAll[METHOD_REF]{notifyAll(), Ljava.lang.Object;, ()V, null, null, notifyAll, null, [173, 173], 35}\n" +
@@ -841,9 +856,9 @@ public void testBug405125a() throws JavaModelException {
 				"	int run(int s1, int s2);\n" +
 				"}\n" +
 				"interface B {\n" +
-				"	static Foo f = (int x5, int x2) -> tw\n" +
+				"	static Foo f = (int x5, int x2) -> bar\n" +
 				"	static int x4 = 3;\n" +
-				"  	static int two () { return 2; }\n" +
+				"  	static int bars () { return 2; }\n" +
 				"}");
 
 		// do completion
@@ -853,12 +868,12 @@ public void testBug405125a() throws JavaModelException {
 		requestor.allowAllRequiredProposals();
 	
 	    String str = this.workingCopies[0].getSource();
-	    String completeBehind = "(int x5, int x2) -> tw";
+	    String completeBehind = "(int x5, int x2) -> bar";
 	    int cursorLocation = str.lastIndexOf(completeBehind) + completeBehind.length();
 	    this.workingCopies[0].codeComplete(cursorLocation, requestor, this.wcOwner);
 	    
 	    assertResults(
-	    	"two[METHOD_REF]{two(), LB;, ()I, two, null, 27}",
+	    	"bars[METHOD_REF]{bars(), LB;, ()I, bars, null, 27}",
 	    	requestor.getResults());
 }
 public void testBug405125b() throws JavaModelException {
@@ -890,7 +905,7 @@ public void testBug405125b() throws JavaModelException {
 	    	requestor.getResults());
 }
 // https://bugs.eclipse.org/bugs/show_bug.cgi?id=425084, [1.8][completion] Eclipse freeze while autocompleting try block in lambda.
-public void _test425084() throws JavaModelException {
+public void test425084() throws JavaModelException {
 	this.workingCopies = new ICompilationUnit[1];
 	this.workingCopies[0] = getWorkingCopy(
 			"/Completion/src/X.java",
@@ -899,6 +914,7 @@ public void _test425084() throws JavaModelException {
 			"}\n" +
 			"public class X {\n" +
 			"	I goo() {\n" +
+			"       int tryit = 0;\n" +
 			"		return () -> {\n" +
 			"			try\n" +
 			"		};\n" +
@@ -911,7 +927,208 @@ public void _test425084() throws JavaModelException {
 	String completeBehind = "try";
 	int cursorLocation = str.lastIndexOf(completeBehind) + completeBehind.length();
 	this.workingCopies[0].codeComplete(cursorLocation, requestor, this.wcOwner);
-	assertResults("String[TYPE_REF]{String, java.lang, Ljava.lang.String;, null, null, null, null, [155, 158], 27}\n" +
-                  "StringParameter[LOCAL_VARIABLE_REF]{StringParameter, null, LX;, null, null, StringParameter, null, [155, 158], 27}", requestor.getResults());
+	assertResults("tryit[LOCAL_VARIABLE_REF]{tryit, null, I, null, null, tryit, null, [99, 102], 27}", requestor.getResults());
+}
+// https://bugs.eclipse.org/bugs/show_bug.cgi?id=422901, [1.8][code assist] Code assistant sensitive to scope.referenceContext type identity.
+public void test422901() throws JavaModelException {
+	this.workingCopies = new ICompilationUnit[1];
+	this.workingCopies[0] = getWorkingCopy(
+			"/Completion/src/X.java",
+			"interface I {\n" +
+			"	void foo();\n" +
+			"}\n" +
+			"public class X {\n" +
+			"	I i = () -> {\n" +
+			"		syso    // no proposals here.\n" +
+			"	};\n" +
+			"}\n");
+
+	CompletionTestsRequestor2 requestor = new CompletionTestsRequestor2(true, true, true, false);
+	requestor.allowAllRequiredProposals();
+	String str = this.workingCopies[0].getSource();
+	String completeBehind = "syso";
+	int cursorLocation = str.lastIndexOf(completeBehind) + completeBehind.length();
+	this.workingCopies[0].codeComplete(cursorLocation, requestor, this.wcOwner);
+	assertResults("", requestor.getResults());
+	assertEquals("completion offset=67\n" +
+			"completion range=[63, 66]\n" +
+			"completion token=\"syso\"\n" +
+			"completion token kind=TOKEN_KIND_NAME\n" +
+			"expectedTypesSignatures=null\n" +
+			"expectedTypesKeys=null\n" +
+			"completion token location={STATEMENT_START}", requestor.getContext());
+}
+// https://bugs.eclipse.org/bugs/show_bug.cgi?id=422901, [1.8][code assist] Code assistant sensitive to scope.referenceContext type identity.
+public void test422901a() throws JavaModelException {
+	this.workingCopies = new ICompilationUnit[1];
+	this.workingCopies[0] = getWorkingCopy(
+			"/Completion/src/X.java",
+			"interface I {\n" +
+			"	void foo();\n" +
+			"}\n" +
+			"public class X {\n" +
+			"   void foo() {\n" +
+			"	    I i = () -> {\n" +
+			"		    syso    // no proposals here.\n" +
+			"	    };\n" +
+			"   }\n" +
+			"}\n");
+
+	CompletionTestsRequestor2 requestor = new CompletionTestsRequestor2(true, true, true, false);
+	requestor.allowAllRequiredProposals();
+	String str = this.workingCopies[0].getSource();
+	String completeBehind = "syso";
+	int cursorLocation = str.lastIndexOf(completeBehind) + completeBehind.length();
+	this.workingCopies[0].codeComplete(cursorLocation, requestor, this.wcOwner);
+	assertResults("", requestor.getResults());
+	assertEquals("completion offset=91\n" +
+			"completion range=[87, 90]\n" +
+			"completion token=\"syso\"\n" +
+			"completion token kind=TOKEN_KIND_NAME\n" +
+			"expectedTypesSignatures=null\n" +
+			"expectedTypesKeys=null\n" +
+			"completion token location={STATEMENT_START}", requestor.getContext());
+}
+// https://bugs.eclipse.org/bugs/show_bug.cgi?id=426851, [1.8][content assist] content assist for a type use annotation
+public void test426851() throws JavaModelException {
+	this.workingCopies = new ICompilationUnit[1];
+	this.workingCopies[0] = getWorkingCopy(
+			"/Completion/src/X.java",
+			"import java.lang.annotation.ElementType;\n" +
+			"import java.lang.annotation.Target;\n" +
+			"@Target(ElementType.TYPE_USE)\n" +
+			"@interface TypeUse {\n" +
+			"}\n" +
+			"@Ty\n" +
+			"interface I {\n" +
+			"	default void foo() { }\n" +
+			"}\n");
+
+	CompletionTestsRequestor2 requestor = new CompletionTestsRequestor2(true, true, true, false);
+	requestor.allowAllRequiredProposals();
+	String str = this.workingCopies[0].getSource();
+	String completeBehind = "Ty";
+	int cursorLocation = str.lastIndexOf(completeBehind) + completeBehind.length();
+	this.workingCopies[0].codeComplete(cursorLocation, requestor, this.wcOwner);
+	assertResults("TypeUse[TYPE_REF]{TypeUse, , LTypeUse;, null, null, null, null, [131, 133], 52}", requestor.getResults());
+}
+// https://bugs.eclipse.org/bugs/show_bug.cgi?id=427532, [1.8][code assist] Completion engine does not like intersection casts
+public void test427532() throws JavaModelException {
+	this.workingCopies = new ICompilationUnit[1];
+	this.workingCopies[0] = getWorkingCopy(
+			"/Completion/src/X.java",
+			"import java.io.Serializable;\n" +
+			"interface I {\n" +
+			"	void foo();\n" +
+			"}\n" +
+			"public class X {\n" +
+			"	public static void main(String[] args) {\n" +
+			"		I i = (I & Serializable) () -> {};\n" +
+			"		syso\n" +
+			"	}\n" +
+			"}\n");
+
+	CompletionTestsRequestor2 requestor = new CompletionTestsRequestor2(true, true, true, false);
+	requestor.allowAllRequiredProposals();
+	String str = this.workingCopies[0].getSource();
+	String completeBehind = "syso";
+	int cursorLocation = str.lastIndexOf(completeBehind) + completeBehind.length();
+	this.workingCopies[0].codeComplete(cursorLocation, requestor, this.wcOwner);
+	assertResults("", requestor.getResults());
+	assertEquals("completion offset=160\n" +
+			"completion range=[156, 159]\n" +
+			"completion token=\"syso\"\n" +
+			"completion token kind=TOKEN_KIND_NAME\n" +
+			"expectedTypesSignatures=null\n" +
+			"expectedTypesKeys=null\n" +
+			"completion token location={STATEMENT_START}", requestor.getContext());
+}
+// https://bugs.eclipse.org/bugs/show_bug.cgi?id=427532, [1.8][code assist] Completion engine does not like intersection casts
+public void test427532a() throws JavaModelException {
+	this.workingCopies = new ICompilationUnit[1];
+	this.workingCopies[0] = getWorkingCopy(
+			"/Completion/src/X.java",
+			"import java.io.Serializable;\n" +
+			"interface I {\n" +
+			"	void foo();\n" +
+			"}\n" +
+			"public class X {\n" +
+			"	public static void main(String[] args) {\n" +
+			"		syso\n" +
+			"		I i = (I & Serializable) () -> {};\n" +
+			"	}\n" +
+			"}\n");
+
+	CompletionTestsRequestor2 requestor = new CompletionTestsRequestor2(true, true, true, false);
+	requestor.allowAllRequiredProposals();
+	String str = this.workingCopies[0].getSource();
+	String completeBehind = "syso";
+	int cursorLocation = str.lastIndexOf(completeBehind) + completeBehind.length();
+	this.workingCopies[0].codeComplete(cursorLocation, requestor, this.wcOwner);
+	assertResults("", requestor.getResults());
+	assertEquals("completion offset=123\n" +
+			"completion range=[119, 122]\n" +
+			"completion token=\"syso\"\n" +
+			"completion token kind=TOKEN_KIND_NAME\n" +
+			"expectedTypesSignatures=null\n" +
+			"expectedTypesKeys=null\n" +
+			"completion token location={STATEMENT_START}", requestor.getContext());
+}
+// https://bugs.eclipse.org/bugs/show_bug.cgi?id=427532, [1.8][code assist] Completion engine does not like intersection casts
+public void test427532b() throws JavaModelException {
+	this.workingCopies = new ICompilationUnit[1];
+	this.workingCopies[0] = getWorkingCopy(
+			"/Completion/src/X.java",
+			"import java.io.Serializable;\n" +
+			"interface I {\n" +
+			"	void foo();\n" +
+			"}\n" +
+			"public class X {\n" +
+			"	public static void main(String[] args) {\n" +
+			"		I i = (I & Serializable) () -> {\n" +
+			"                 syso\n" +
+			"             };\n" +
+			"	}\n" +
+			"}\n");
+
+	CompletionTestsRequestor2 requestor = new CompletionTestsRequestor2(true, true, true, false);
+	requestor.allowAllRequiredProposals();
+	String str = this.workingCopies[0].getSource();
+	String completeBehind = "syso";
+	int cursorLocation = str.lastIndexOf(completeBehind) + completeBehind.length();
+	this.workingCopies[0].codeComplete(cursorLocation, requestor, this.wcOwner);
+	assertResults("", requestor.getResults());
+	assertEquals("completion offset=173\n" +
+			"completion range=[169, 172]\n" +
+			"completion token=\"syso\"\n" +
+			"completion token kind=TOKEN_KIND_NAME\n" +
+			"expectedTypesSignatures=null\n" +
+			"expectedTypesKeys=null\n" +
+			"completion token location={STATEMENT_START}", requestor.getContext());
+}
+// https://bugs.eclipse.org/bugs/show_bug.cgi?id=427464, [1.8][content assist] CCE : MethodDeclaration incompatible with CompletionOnAnnotationOfType 
+public void test427464() throws JavaModelException {
+	this.workingCopies = new ICompilationUnit[1];
+	this.workingCopies[0] = getWorkingCopy(
+			"/Completion/src/X.java",
+			"@interface Annotation {}\n" +
+			"interface FI1 {\n" +
+			"	int foo(int x) throws Exception;\n" +
+			"}\n" +
+			"class Test {\n" +
+			"	private void foo() {\n" +
+			"		FI1 fi1 = (x) -> { \n" +
+			"			@Ann\n" +
+			"		};\n" +
+			"	}\n" +
+			"}\n");
+
+	CompletionTestsRequestor2 requestor = new CompletionTestsRequestor2(true, true, true, false);
+	requestor.allowAllRequiredProposals();
+	String str = this.workingCopies[0].getSource();
+	String completeBehind = "@Ann";
+	int cursorLocation = str.lastIndexOf(completeBehind) + completeBehind.length();
+	this.workingCopies[0].codeComplete(cursorLocation, requestor, this.wcOwner);
+	assertResults("Annotation[TYPE_REF]{Annotation, , LAnnotation;, null, null, null, null, [138, 141], 47}", requestor.getResults());
 }
 }

@@ -2693,7 +2693,7 @@ public MethodBinding resolveTypesFor(MethodBinding method, boolean fromSynthetic
 			}
 		}
 	}
-	if (compilerOptions.isAnnotationBasedNullAnalysisEnabled || compilerOptions.processAnnotations)
+	if (compilerOptions.storeAnnotations)
 		createArgumentBindings(method, compilerOptions); // need annotations resolved already at this point
 	if (foundReturnTypeProblem)
 		return method; // but its still unresolved with a null return type & is still connected to its method declaration

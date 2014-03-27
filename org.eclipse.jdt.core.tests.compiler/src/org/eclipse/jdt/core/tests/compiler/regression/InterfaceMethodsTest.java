@@ -2354,4 +2354,163 @@ public class InterfaceMethodsTest extends AbstractComparableTest {
 			"Type safety: Potential heap pollution via varargs parameter x\n" + 
 			"----------\n");
 	}
+	// https://bugs.eclipse.org/bugs/show_bug.cgi?id=424914, [1.8][compiler] No error shown for method reference with super enclosed in an interface
+	public void test424914() throws Exception {
+		this.runNegativeTest(
+			new String[] {
+					"X.java",
+					"interface A {\n" +
+					"	String foo();\n" +
+					"	String b = super.toString();\n" +
+					"	default void fun1() {\n" +
+					"		System.out.println((A) super::toString);\n" +
+					"		super.toString();\n" +
+					"		Object.super.toString();\n" +
+					"	}\n" +
+					"}\n",
+			},
+			"----------\n" + 
+			"1. ERROR in X.java (at line 3)\n" + 
+			"	String b = super.toString();\n" + 
+			"	           ^^^^^\n" + 
+			"Cannot use super in a static context\n" + 
+			"----------\n" + 
+			"2. ERROR in X.java (at line 5)\n" + 
+			"	System.out.println((A) super::toString);\n" + 
+			"	                       ^^^^^\n" + 
+			"super reference is illegal in interface context\n" + 
+			"----------\n" + 
+			"3. ERROR in X.java (at line 6)\n" + 
+			"	super.toString();\n" + 
+			"	^^^^^\n" + 
+			"super reference is illegal in interface context\n" + 
+			"----------\n" + 
+			"4. ERROR in X.java (at line 7)\n" + 
+			"	Object.super.toString();\n" + 
+			"	^^^^^^^^^^^^\n" + 
+			"No enclosing instance of the type Object is accessible in scope\n" + 
+			"----------\n");
+	}
+	// https://bugs.eclipse.org/bugs/show_bug.cgi?id=424914, [1.8][compiler] No error shown for method reference with super enclosed in an interface
+	public void test424914a() throws Exception {
+		this.runConformTest(
+			new String[] {
+					"X.java",
+					"interface B {\n" +
+					"	default void foo() {\n" +
+					"		System.out.println(\"B.foo\");\n" +
+					"	}\n" +
+					"}\n" +
+					"interface A extends B {\n" +
+					"	default void foo() {\n" +
+					"		System.out.println(\"A.foo\");\n" +
+					"		B.super.foo();\n" +
+					"	}\n" +
+					"}\n" +
+					"public class X implements A {\n" +
+					"	public static void main(String[] args) {\n" +
+					"		A a = new X();\n" +
+					"		a.foo();\n" +
+					"	}\n" +
+					"}\n",
+			},
+			"A.foo\n" + 
+			"B.foo");
+	}	
+	// https://bugs.eclipse.org/bugs/show_bug.cgi?id=427478, [1.8][compiler] Wrong "Duplicate default methods" error on AbstractDoubleSpliterator
+	public void test427478() throws Exception { // extracted smaller test case.
+		this.runConformTest(
+			new String[] {
+					"X.java",
+					"import java.util.function.Consumer;\n" +
+					"import java.util.function.DoubleConsumer;\n" +
+					"public interface X<T> {\n" +
+					"    default void forEachRemaining(Consumer<? super T> action) {\n" +
+					"    }\n" +
+					"    public interface OfPrimitive<T, T_CONS, T_SPLITR extends OfPrimitive<T, T_CONS, T_SPLITR>> extends X<T> {\n" +
+					"        default void forEachRemaining(T_CONS action) {\n" +
+					"        }\n" +
+					"    }\n" +
+					"    public interface OfDouble extends OfPrimitive<Double, DoubleConsumer, OfDouble> {\n" +
+					"        default void forEachRemaining(Consumer<? super Double> action) {\n" +
+					"        }\n" +
+					"        default void forEachRemaining(DoubleConsumer action) {\n" +
+					"        }\n" +
+					"    }\n" +
+					"}\n" +
+					"abstract class AbstractDoubleSpliterator implements X.OfDouble {\n" +
+					"}\n",
+			},
+			"");
+	}
+	// https://bugs.eclipse.org/bugs/show_bug.cgi?id=427478, [1.8][compiler] Wrong "Duplicate default methods" error on AbstractDoubleSpliterator
+	public void test427478a() throws Exception { // full test case.
+		this.runConformTest(
+			new String[] {
+					"Spliterator.java",
+					"import java.util.function.Consumer;\n" +
+					"import java.util.function.DoubleConsumer;\n" +
+					"public interface Spliterator<T> {\n" +
+					"    default void forEachRemaining(Consumer<? super T> action) {\n" +
+					"    }\n" +
+					"    public interface OfPrimitive<T, T_CONS, T_SPLITR extends OfPrimitive<T, T_CONS, T_SPLITR>>\n" +
+					"            extends Spliterator<T> {\n" +
+					"        // overloads Spliterator#forEachRemaining(Consumer<? super T>)\n" +
+					"        default void forEachRemaining(T_CONS action) {\n" +
+					"        }\n" +
+					"    }\n" +
+					"    public interface OfDouble extends OfPrimitive<Double, DoubleConsumer, OfDouble> {\n" +
+					"        @Override // the method from Spliterator\n" +
+					"        default void forEachRemaining(Consumer<? super Double> action) {\n" +
+					"        }\n" +
+					"        \n" +
+					"        @Override // the method from OfPrimitive\n" +
+					"        default void forEachRemaining(DoubleConsumer action) {\n" +
+					"        }\n" +
+					"    }\n" +
+					"}\n" +
+					"class Spliterators {\n" +
+					"    /* Error on class: Duplicate default methods named forEachRemaining with\n" +
+					"     * the parameters (Consumer<? super Double>) and (Consumer<? super T>) are\n" +
+					"     * inherited from the types Spliterator.OfDouble and Spliterator<Double>\n" +
+					"     */\n" +
+					"    public abstract static class AbstractDoubleSpliterator implements Spliterator.OfDouble {\n" +
+					"        /* Implementation that prevents the compile error: */\n" +
+					"//        @Override // the method from Spliterator\n" +
+					"//        public void forEachRemaining(Consumer<? super Double> action) {\n" +
+					"//        }\n" +
+					"    }\n" +
+					"}\n",
+			},
+			"");
+	}
+	// https://bugs.eclipse.org/bugs/show_bug.cgi?id=423467, [1.8][compiler] wrong error for functional interface with @Override default method
+	public void test423467() throws Exception { // full test case.
+		this.runConformTest(
+			new String[] {
+					"X.java",
+					"interface I {\n" +
+					"    int foo(String s);\n" +
+					"}\n" +
+					"@FunctionalInterface\n" +
+					"interface A extends I { // wrong compile error (A *is* a functional interface)\n" +
+					"    @Override\n" +
+					"    default int foo(String s) {\n" +
+					"        return -1;\n" +
+					"    }\n" +
+					"    Integer foo(java.io.Serializable s);\n" +
+					"}\n" +
+					"public class X {\n" +
+					"    A a = (s) -> 10;\n" +
+					"}\n" +
+					"@FunctionalInterface\n" +
+					"interface B { // OK\n" +
+					"    default int foo(String s) {\n" +
+					"        return -1;\n" +
+					"    }\n" +
+					"    Integer foo(java.io.Serializable s);\n" +
+					"}\n"
+			},
+			"");
+	}
 }

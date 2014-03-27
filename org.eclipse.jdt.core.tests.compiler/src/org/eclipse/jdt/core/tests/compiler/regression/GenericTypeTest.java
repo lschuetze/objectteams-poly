@@ -22,6 +22,8 @@
  *								bug 406928 - computation of inherited methods seems damaged (affecting @Overrides)
  *								Bug 400874 - [1.8][compiler] Inference infrastructure should evolve to meet JLS8 18.x (Part G of JSR335 spec)
  *								Bug 424286 - [1.8] Update type inference to spec version 0.9.1
+ *								Bug 426676 - [1.8][compiler] Wrong generic method type inferred from lambda expression
+ *								Bug 423505 - [1.8] Implement "18.5.4 More Specific Method Inference"
  *******************************************************************************/
 package org.eclipse.jdt.core.tests.compiler.regression;
 
@@ -46,7 +48,7 @@ public class GenericTypeTest extends AbstractComparableTest {
 	// Static initializer to specify tests subset using TESTS_* static variables
 	// All specified tests which does not belong to the class are skipped...
 	static {
-//		TESTS_NAMES = new String[] { "test1031" };
+//		TESTS_NAMES = new String[] { "test1277" };
 //		TESTS_NUMBERS = new int[] { 470, 627 };
 //		TESTS_RANGE = new int[] { 1097, -1 };
 	}
@@ -19727,7 +19729,11 @@ public void test0617() {
     		"1. ERROR in X.java (at line 9)\n" +
     		"	String s = foo(l1, l2);\n" +
     		"	           ^^^^^^^^^^^\n" +
-    		"Type mismatch: cannot convert from List<capture#2-of ? extends Object&Serializable&Comparable<?>> to String\n" +
+    		(this.complianceLevel < ClassFileConstants.JDK1_8 ? 
+    		"Type mismatch: cannot convert from List<capture#2-of ? extends Object&Serializable&Comparable<?>> to String\n"
+			:
+			"Type mismatch: cannot convert from List<? extends Object&Serializable&Comparable<?>> to String\n"
+    		) +
     		"----------\n");
 	}
 	// check capture for conditional operator
@@ -19758,13 +19764,8 @@ public void test0617() {
 	    			"----------\n" + 
 	    			"1. ERROR in X.java (at line 10)\n" + 
 	    			"	String s = l1 != null ? foo(l1, l2) : l3;\n" + 
-	    			"	                        ^^^^^^^^^^^\n" + 
-	    			"Type mismatch: cannot convert from List<capture#2-of ? extends Number&Comparable<?>> to String\n" + 
-	    			"----------\n" + 
-	    			"2. ERROR in X.java (at line 10)\n" + 
-	    			"	String s = l1 != null ? foo(l1, l2) : l3;\n" + 
-	    			"	                                      ^^\n" + 
-	    			"Type mismatch: cannot convert from List<capture#3-of ?> to String\n" + 
+		    		"	                        ^^^^^^^^^^^\n" +
+		    		"Type mismatch: cannot convert from List<? extends Number&Comparable<?>> to String\n" +
 	    			"----------\n");
 	}
 	// https://bugs.eclipse.org/bugs/show_bug.cgi?id=92556
@@ -25704,20 +25705,35 @@ public void test0799() {
 				"	                           ^^^\n" + 
 				"Type mismatch: cannot convert from Y<capture#3-of ? extends T> to Y<capture#2-of ? extends T>\n" + 
 				"----------\n" + 
-				"5. ERROR in X.java (at line 14)\n" + 
+				"5. WARNING in X.java (at line 13)\n" + 
+				"	ref.next = first == null ? ref : first;\n" + 
+				"	                                 ^^^^^\n" + 
+				"Type safety: The expression of type Y needs unchecked conversion to conform to Y<capture#2-of ? extends T>\n" + 
+				"----------\n" + 
+				"6. ERROR in X.java (at line 14)\n" + 
 				"	String s = first == null ? ref : first;\n" + 
 				"	                           ^^^\n" + 
 				"Type mismatch: cannot convert from Y<capture#4-of ? extends T> to String\n" + 
 				"----------\n" + 
-				"6. ERROR in X.java (at line 14)\n" + 
+				"7. ERROR in X.java (at line 14)\n" + 
 				"	String s = first == null ? ref : first;\n" + 
 				"	                                 ^^^^^\n" + 
 				"Type mismatch: cannot convert from Y to String\n" + 
 				"----------\n" + 
-				"7. ERROR in X.java (at line 15)\n" + 
+				"8. ERROR in X.java (at line 15)\n" + 
 				"	ref.next = first2 == null ? ref : first2;\n" + 
 				"	                            ^^^\n" + 
 				"Type mismatch: cannot convert from Y<capture#6-of ? extends T> to Y<capture#5-of ? extends T>\n" + 
+				"----------\n" + 
+				"9. WARNING in X.java (at line 15)\n" + 
+				"	ref.next = first2 == null ? ref : first2;\n" + 
+				"	                                  ^^^^^^\n" + 
+				"Type safety: The expression of type Y needs unchecked conversion to conform to Y<capture#5-of ? extends T>\n" + 
+				"----------\n" + 
+				"10. WARNING in X.java (at line 18)\n" + 
+				"	return first == null ? ref : first;\n" + 
+				"	                             ^^^^^\n" + 
+				"Type safety: The expression of type Y needs unchecked conversion to conform to Y<? extends T>\n" + 
 				"----------\n");
 }
 //https://bugs.eclipse.org/bugs/show_bug.cgi?id=106744
@@ -33025,11 +33041,14 @@ public void test0992() {
 			"	^^^^^^^^^^^^^^^^^^^^^^\n" +
 			"Type safety: The method add(Object) belongs to the raw type Collection. References to generic type Collection<E> should be parameterized\n" +
 			"----------\n" +
+			(this.complianceLevel < ClassFileConstants.JDK1_8 ?
 			"4. WARNING in X.java (at line 6)\n" +
 			"	this.add(null);\n" +
 			"	^^^^^^^^^^^^^^\n" +
 			"Type safety: The method add(Object) belongs to the raw type Collection. References to generic type Collection<E> should be parameterized\n" +
-			"----------\n");
+			"----------\n"
+			: // 1.8 picks the non-raw version as being more specific(?)
+			""));
 }
 
 //https://bugs.eclipse.org/bugs/show_bug.cgi?id=142897
@@ -43183,6 +43202,7 @@ public void test1234() {
 		"	^\n" +
 		"H is a raw type. References to generic type H<T3> should be parameterized\n" +
 		"----------\n" +
+		(this.complianceLevel < ClassFileConstants.JDK1_8 ?
 		"3. ERROR in X.java (at line 8)\n" +
 		"	new X().a3(hx);\n" +
 		"	        ^^\n" +
@@ -43192,7 +43212,9 @@ public void test1234() {
 		"	new X().a3(hraw);\n" +
 		"	        ^^\n" +
 		"The method a3(G) is ambiguous for the type X\n" +
-		"----------\n");
+		"----------\n"
+		: // not ambiguous in 1.8
+		""));
 }
 //https://bugs.eclipse.org/bugs/show_bug.cgi?id=215843 - variation
 public void test1235() {
@@ -44296,43 +44318,58 @@ public void test1272() {
 			"#3##CLASSCAST#");
 }
 //https://bugs.eclipse.org/bugs/show_bug.cgi?id=216686 - variation
-// FIXME javac8 rejects
 public void test1273() {
-	this.runConformTest(
+	String sourceX =
+			"public class X {\n" +
+			"	// some functor and functor instances definitions\n" +
+			"	static interface OO<T, E> { \n" +
+			"		public T eval(E x);\n" +
+			"	}\n" +
+			"	static interface TO<T> extends OO<String, T> {\n" +
+			"		public String eval(T x);\n" +
+			"	}\n" +
+			"	static interface TT extends TO<String> {\n" +
+			"		public String eval(String x);\n" +
+			"	}\n" +
+			"	static final TO<Object> FUNC1 = null;\n" +
+			"	static final TT FUNC2 = null;\n" +
+			"\n" +
+			"	// some functor combinators\n" +
+			"	static <E> TO<E> combine(final TT x, final TO<? super E> y) { // # 1\n" +
+			"		System.out.println(\"#1#\");\n" +
+			"		return new TO<E>() { public String eval(E o) { return x.eval(y.eval(o)); } }; \n" +
+			"	}\n" +
+			"	static <E, T> TO<T> combine(final TO<? super E> x, final OO<E, T> y) { // # 2\n" +
+			"		System.out.println(\"#2#\");\n" +
+			"		return new TO<T>() { public String eval(T o) { return x.eval(y.eval(o)); } }; \n" +
+			"	}\n" +
+			"	// body of the test\n" +
+			"	static <E> void put(Class<E> type, TO<? super E> func) {\n" +
+			"	}\n" +
+			"	public static void main(String[] args) {\n" +
+			"		put(Integer.class, combine(FUNC2, FUNC1));\n" +
+			"	}\n" +
+			"}\n";
+	if (this.complianceLevel < ClassFileConstants.JDK1_8) {
+		this.runConformTest(
 			new String[] {
-					"X.java",
-					"public class X {\n" +
-					"	// some functor and functor instances definitions\n" +
-					"	static interface OO<T, E> { \n" +
-					"		public T eval(E x);\n" +
-					"	}\n" +
-					"	static interface TO<T> extends OO<String, T> {\n" +
-					"		public String eval(T x);\n" +
-					"	}\n" +
-					"	static interface TT extends TO<String> {\n" +
-					"		public String eval(String x);\n" +
-					"	}\n" +
-					"	static final TO<Object> FUNC1 = null;\n" +
-					"	static final TT FUNC2 = null;\n" +
-					"\n" +
-					"	// some functor combinators\n" +
-					"	static <E> TO<E> combine(final TT x, final TO<? super E> y) { // # 1\n" +
-					"		System.out.println(\"#1#\");\n" +
-					"		return new TO<E>() { public String eval(E o) { return x.eval(y.eval(o)); } }; \n" +
-					"	}\n" +
-					"	static <E, T> TO<T> combine(final TO<? super E> x, final OO<E, T> y) { // # 2\n" +
-					"		System.out.println(\"#2#\");\n" +
-					"		return new TO<T>() { public String eval(T o) { return x.eval(y.eval(o)); } }; \n" +
-					"	}\n" +
-					"	// body of the test\n" +
-					"	static <E> void put(Class<E> type, TO<? super E> func) {\n" +
-					"	}\n" +
-					"	public static void main(String[] args) {\n" +
-					"		put(Integer.class, combine(FUNC2, FUNC1));\n" +
-					"	}\n" +
-					"}\n", // =================
+				"X.java",
+				sourceX,
 			},
 			"#1#");
+	} else {
+		runNegativeTest(
+			new String[] {
+				"X.java",
+				sourceX
+			},
+			"----------\n" + 
+			"1. ERROR in X.java (at line 28)\n" + 
+			"	put(Integer.class, combine(FUNC2, FUNC1));\n" + 
+			"	                   ^^^^^^^\n" + 
+			"The method combine(X.TT, X.TO<? super Object>) is ambiguous for the type X\n" + 
+			"----------\n" );
+	}
 }
 //https://bugs.eclipse.org/bugs/show_bug.cgi?id=216686 - variation
 public void test1274() {
@@ -44373,9 +44410,8 @@ public void test1274() {
 			"#1#");
 }
 //https://bugs.eclipse.org/bugs/show_bug.cgi?id=216686 - variation
-//FIXME javac8 rejects
 public void test1275() {
-	this.runConformTest(
+	String[] input = 
 			new String[] {
 					"X.java",
 					"public class X {\n" +
@@ -44408,8 +44444,21 @@ public void test1275() {
 					"		put(Integer.class, combine(FUNC2, FUNC1));\n" +
 					"	}\n" +
 					"}\n", // =================
-			},
+			};
+	if (this.complianceLevel < ClassFileConstants.JDK1_8) {
+		runConformTest(
+			input,
 			"#1#");
+	} else {
+		runNegativeTest(
+			input,
+			"----------\n" + 
+			"1. ERROR in X.java (at line 28)\n" + 
+			"	put(Integer.class, combine(FUNC2, FUNC1));\n" + 
+			"	                   ^^^^^^^\n" + 
+			"The method combine(X.TT, X.TO<? super Object>) is ambiguous for the type X\n" + 
+			"----------\n");
+	}
 }
 //https://bugs.eclipse.org/bugs/show_bug.cgi?id=216686 - variation
 public void test1276() {
@@ -44488,9 +44537,8 @@ public void test1277() {
 			"#2#");
 }
 //https://bugs.eclipse.org/bugs/show_bug.cgi?id=216686 - variation
-//FIXME javac8 rejects
 public void test1278() {
-	this.runConformTest(
+	String[] input =
 			new String[] {
 					"X.java",
 					"public class X {\n" +
@@ -44527,8 +44575,21 @@ public void test1278() {
 					"		put(Integer.class, combine(FUNC2, FUNC1));\n" +
 					"	}\n" +
 					"}\n", // =================
-			},
+			};
+	if (this.complianceLevel < ClassFileConstants.JDK1_8) {
+		runConformTest(
+			input,
 			"#1#");
+	} else {
+		runNegativeTest(
+			input,
+			"----------\n" + 
+			"1. ERROR in X.java (at line 32)\n" + 
+			"	put(Integer.class, combine(FUNC2, FUNC1));\n" + 
+			"	                   ^^^^^^^\n" + 
+			"The method combine(X.TT, X.TO<? super Object>) is ambiguous for the type X\n" + 
+			"----------\n");
+	}
 }
 //https://bugs.eclipse.org/bugs/show_bug.cgi?id=216686 - variation
 public void test1279() {

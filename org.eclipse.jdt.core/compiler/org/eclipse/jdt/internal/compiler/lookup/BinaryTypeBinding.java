@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2013 IBM Corporation and others.
+ * Copyright (c) 2000, 2014 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -315,6 +315,7 @@ public BinaryTypeBinding(BinaryTypeBinding prototype) {
 	this.environment = prototype.environment;
 	this.storedAnnotations = prototype.storedAnnotations;
 }
+
 /**
  * Standard constructor for creating binary type bindings from binary models (classfiles)
  * @param packageBinding
@@ -322,6 +323,16 @@ public BinaryTypeBinding(BinaryTypeBinding prototype) {
  * @param environment
  */
 public BinaryTypeBinding(PackageBinding packageBinding, IBinaryType binaryType, LookupEnvironment environment) {
+	this(packageBinding, binaryType, environment, false);
+}
+/**
+ * Standard constructor for creating binary type bindings from binary models (classfiles)
+ * @param packageBinding
+ * @param binaryType
+ * @param environment
+ * @param needFieldsAndMethods
+ */
+public BinaryTypeBinding(PackageBinding packageBinding, IBinaryType binaryType, LookupEnvironment environment, boolean needFieldsAndMethods) {
 	
 	this.prototype = this;
 	this.compoundName = CharOperation.splitOn('/', binaryType.getName());
@@ -367,6 +378,8 @@ public BinaryTypeBinding(PackageBinding packageBinding, IBinaryType binaryType, 
 		if (enclosingType().isDeprecated())
 			this.modifiers |= ExtraCompilerModifiers.AccDeprecatedImplicitly;
 	}
+	if (needFieldsAndMethods)
+		cachePartsFrom(binaryType, true);
 //{ObjectTeams: ROFI if this is a team, record the package that contains its role files.
 	maybeSetTeamPackage(this.compoundName, this.fPackage, environment);
 // SH}

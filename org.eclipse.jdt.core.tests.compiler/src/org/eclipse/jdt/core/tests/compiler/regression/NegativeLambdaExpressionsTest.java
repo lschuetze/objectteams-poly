@@ -8344,6 +8344,137 @@ public void testBug426563() {
 		"The target type of this expression must be a functional interface\n" + 
 		"----------\n");
 }
+// https://bugs.eclipse.org/bugs/show_bug.cgi?id=426965,  [1.8] Eclipse rejects valid type conversion in lambda
+public void test426965() {
+	runNegativeTest(
+		new String[] {
+			"X.java",
+			"import java.util.List;\n" +
+					"public class X {\n" +
+					"	interface I<U extends List<X>, V> {\n" +
+					"		V foo(U p);\n" +
+					"	}\n" +
+					"	public void main() {\n" +
+					"		I<List<X>, Object> fi = p -> p.toArray(new X[] {});\n" +
+					"	}\n" +
+					"}\n"
+		},
+		"");
+}
+// https://bugs.eclipse.org/bugs/show_bug.cgi?id=427207, - [1.8][bytecode] Runtime type problem: Instruction type does not match stack map
+public void test427207() {
+	runNegativeTest(
+		new String[] {
+			"X.java",
+			"interface I {\n" +
+			"	void foo();\n" +
+			"}\n" +
+			"public class X {\n" +
+			"	public static void main(String[] args) {\n" +
+			"		I i = (I) ((args == null) ? ()->{} : ()-> {});\n" +
+			"	}\n" +
+			"}\n"
+		},
+		"----------\n" + 
+		"1. ERROR in X.java (at line 6)\n" + 
+		"	I i = (I) ((args == null) ? ()->{} : ()-> {});\n" + 
+		"	                            ^^^^\n" + 
+		"The target type of this expression must be a functional interface\n" + 
+		"----------\n" + 
+		"2. ERROR in X.java (at line 6)\n" + 
+		"	I i = (I) ((args == null) ? ()->{} : ()-> {});\n" + 
+		"	                                     ^^^^\n" + 
+		"The target type of this expression must be a functional interface\n" + 
+		"----------\n");
+}
+// https://bugs.eclipse.org/bugs/show_bug.cgi?id=425278, [1.8][compiler] Suspect error: The target type of this expression is not a well formed parameterized type due to bound(s) mismatch
+// NOTE: javac 8b127 incorrectly accepts this program due to https://bugs.openjdk.java.net/browse/JDK-8033810
+public void test425278() {
+	runNegativeTest(
+		new String[] {
+			"X.java",
+			"interface I<T, S extends X<T>> { \n" +
+			"    T foo(S p);\n" +
+			"}\n" +
+			"public class X<T>  {\n" +
+			"    public void bar() {\n" +
+			"    	I<Object, ? extends X<Object>> f = (p) -> p;\n" +
+			"    }\n" +
+			"}\n"
+		},
+		"----------\n" + 
+		"1. ERROR in X.java (at line 6)\n" + 
+		"	I<Object, ? extends X<Object>> f = (p) -> p;\n" + 
+		"	                                   ^^^^^^^^\n" + 
+		"The target type of this expression is not a well formed parameterized type due to bound(s) mismatch\n" + 
+		"----------\n");
+}
+// https://bugs.eclipse.org/bugs/show_bug.cgi?id=427265, - [1.8][compiler] Type inference with anonymous classes 
+public void test427265() {
+	runNegativeTest(
+		new String[] {
+			"X.java",
+			"import java.util.Arrays;\n" +
+			"import java.util.List;\n" +
+			"public class X {\n" +
+			"    public static void main(String[] args) {\n" +
+			"	     List<String> ss = Arrays.asList(\"1\", \"2\", \"3\");\n" +
+			"	     ss.stream().map(s -> new Object() {});\n" +
+			"    }\n" +
+			"}\n"
+		},
+		"");
+}
+// https://bugs.eclipse.org/bugs/show_bug.cgi?id=427749, - [1.8][compiler]NullPointerException in ReferenceExpression.resolveType
+public void test427749() {
+	runNegativeTest(
+		new String[] {
+			"X.java",
+			"interface I {\n" +
+			"    void foo(X<String> y);\n" +
+			"}\n" +
+			"public class X<T> {\n" +
+			"    class Z<K> {\n" +
+			"        Z(X<String> y) {\n" +
+			"            System.out.println(\"Y<T>.Z<K>::new\");\n" +
+			"        }\n" +
+			"        public void bar() {\n" +
+			"            I i = Y<String>.Z<Integer>::<String> new;\n" +
+			"            i.foo(new Y<String>());\n" +
+			"        }\n" +
+			"    }\n" +
+			"	public void foo() {\n" +
+			"		Z<String> z = new Z<String>(null);\n" +
+			"		z.bar();\n" +
+			"	}\n" +
+			"	public static void main(String[] args) {\n" +
+			"		Y<String> y = new Y<String>();\n" +
+			"		y.foo();\n" +
+			"	}\n" +
+			"}\n"
+		},
+		"----------\n" + 
+		"1. ERROR in X.java (at line 10)\n" + 
+		"	I i = Y<String>.Z<Integer>::<String> new;\n" + 
+		"	      ^\n" + 
+		"Y cannot be resolved to a type\n" + 
+		"----------\n" + 
+		"2. ERROR in X.java (at line 11)\n" + 
+		"	i.foo(new Y<String>());\n" + 
+		"	          ^\n" + 
+		"Y cannot be resolved to a type\n" + 
+		"----------\n" + 
+		"3. ERROR in X.java (at line 19)\n" + 
+		"	Y<String> y = new Y<String>();\n" + 
+		"	^\n" + 
+		"Y cannot be resolved to a type\n" + 
+		"----------\n" + 
+		"4. ERROR in X.java (at line 19)\n" + 
+		"	Y<String> y = new Y<String>();\n" + 
+		"	                  ^\n" + 
+		"Y cannot be resolved to a type\n" + 
+		"----------\n");
+}
 public static Class testClass() {
 	return NegativeLambdaExpressionsTest.class;
 }

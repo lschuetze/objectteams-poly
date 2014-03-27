@@ -22,6 +22,7 @@
  *								Bug 400874 - [1.8][compiler] Inference infrastructure should evolve to meet JLS8 18.x (Part G of JSR335 spec)
  *								Bug 423496 - [1.8] Implement new incorporation rule once it becomes available
  *								Bug 426590 - [1.8][compiler] Compiler error with tenary operator
+ *								Bug 427216 - [Java8] array to varargs regression
  *******************************************************************************/
 package org.eclipse.jdt.core.tests.compiler.regression;
 
@@ -42,7 +43,7 @@ public class GenericsRegressionTest extends AbstractComparableTest {
 	// Static initializer to specify tests subset using TESTS_* static variables
 	// All specified tests which does not belong to the class are skipped...
 	static {
-//		TESTS_NAMES = new String[] { "testBug413958" };
+//		TESTS_NAMES = new String[] { "testBug427438c3" };
 //		TESTS_NUMBERS = new int[] { 1465 };
 //		TESTS_RANGE = new int[] { 1097, -1 };
 	}
@@ -3749,6 +3750,29 @@ public void test426678a() {
 		},
 		"PGMB");
 }
+// https://bugs.eclipse.org/bugs/show_bug.cgi?id=421922, [1.8][compiler] Varargs & Overload - Align to JLS8
+public void _test421922() {
+	runConformTest(
+		new String[] {
+			"X.java",
+			"import p.*;\n" +
+			"public class X  {\n" +
+			"    public static void main(String argv[]) {\n" +
+			"        new B().foo(null, null);\n" +
+			"    }\n" +
+			"}\n",
+				
+			"p/B.java",
+			"package p;\n" +
+			"interface A {\n" +
+			"}\n" +
+			"public class B implements A {\n" +
+			"    public <T extends A> void foo(T ... o) { System.out.println(\"PGMB\"); }\n" +
+			"    public void foo(Object... o) { System.out.println(\"MB\"); }\n" +
+			"}\n",
+		},
+		"PGMB");
+}
 // https://bugs.eclipse.org/bugs/show_bug.cgi?id=425719, [1.8][compiler] Bogus ambiguous call error from compiler.
 public void test425719() {
 	String interfaceMethod = this.complianceLevel < ClassFileConstants.JDK1_8 ?
@@ -3846,6 +3870,341 @@ public void test425719b() {
 			"}\n",
 		},
 		"Y.foo");
+}
+// https://bugs.eclipse.org/bugs/show_bug.cgi?id=427282,  Internal compiler error: java.lang.ArrayIndexOutOfBoundsException: -1 at org.eclipse.jdt.internal.compiler.ClassFile.traverse
+public void test427282() {
+	runNegativeTest(
+		new String[] {
+			"X.java",
+			"import java.util.Collection;\n" +
+			"public class X {\n" +
+			"	public X(String... a) {\n" +
+			"	}\n" +
+			"	public static <T> T[] a(T[] a, T[] b) {\n" +
+			"		return null;\n" +
+			"	}\n" +
+			"	public static void error() {\n" +
+			"		final Collection<X> as = null;\n" +
+			"       for (X a : as) {\n" +
+			"           new X(X.a(new String[0], new String[0]));\n" +
+			"       }\n" +
+			"	}\n" +
+			"}\n",
+		},
+		"----------\n" + 
+		"1. WARNING in X.java (at line 10)\n" + 
+		"	for (X a : as) {\n" + 
+		"	           ^^\n" + 
+		"Null pointer access: The variable as can only be null at this location\n" + 
+		"----------\n");
+}
+public void testBug427216() {
+	runConformTest(
+		new String[] {
+			"Test.java",
+			"public class Test\n" + 
+			"{\n" + 
+			"   public static void main(String[] args)\n" + 
+			"   {\n" + 
+			"      foo(args); // ok in 1.7 and 1.8\n" + 
+			"      foo(java.util.Arrays.asList(\"1\").toArray(new String[0]));\n" +
+			"		System.out.println(\"good\");\n" + 
+			"   }\n" + 
+			"\n" + 
+			"   private static void foo(String... args) { }\n" + 
+			"}\n"
+		},
+		"good");
+}
+// https://bugs.eclipse.org/bugs/show_bug.cgi?id=427433, NPE at org.eclipse.jdt.internal.compiler.lookup.Scope.parameterCompatibilityLevel(Scope.java:4755)
+public void testBug427433() {
+	runNegativeTest(
+		new String[] {
+			"X.java",
+			"public class X {\n" +
+			"	public void testError() {\n" +
+			"		assertEquals(A.e(null, null, null), null);\n" +
+			"	}\n" +
+			"	public static boolean assertEquals(String a, String b) {\n" +
+			"		return false;\n" +
+			"	}\n" +
+			"	public static boolean assertEquals(Object a, Object b) {\n" +
+			"		return false;\n" +
+			"	}\n" +
+			"}\n" +
+			"class A {\n" +
+			"	public static <T, V> V e(T[] t, V[] v, T object) {\n" +
+			"		return null;\n" +
+			"	}\n" +
+			"}\n"
+		},
+		"");
+}
+// https://bugs.eclipse.org/bugs/show_bug.cgi?id=427433, NPE at org.eclipse.jdt.internal.compiler.lookup.Scope.parameterCompatibilityLevel(Scope.java:4755)
+// variant to challenge a varargs invocation
+public void testBug427433b() {
+	runNegativeTest(
+		new String[] {
+			"X.java",
+			"public class X {\n" +
+			"	public void testError() {\n" +
+			"		assertEquals(A.e(null, null, null), null);\n" +
+			"	}\n" +
+			"	public static boolean assertEquals(String a, String b, X... xs) {\n" +
+			"		return false;\n" +
+			"	}\n" +
+			"	public static boolean assertEquals(Object a, Object b, X... xs) {\n" +
+			"		return false;\n" +
+			"	}\n" +
+			"}\n" +
+			"class A {\n" +
+			"	public static <T, V> V e(T[] t, V[] v, T object) {\n" +
+			"		return null;\n" +
+			"	}\n" +
+			"}\n"
+		},
+		"");
+}
+// https://bugs.eclipse.org/bugs/show_bug.cgi?id=427438#c3, [1.8][compiler] NPE at org.eclipse.jdt.internal.compiler.ast.ConditionalExpression.generateCode
+public void testBug427438c3() {
+	runNegativeTest(
+		new String[] {
+			"X.java",
+			"import java.io.Serializable;\n" +
+			"import java.util.List;\n" +
+			"public class X {\n" +
+			"	boolean b;\n" +
+			"	public List<A> getLignes() {\n" +
+			"		return (List<A>) data(b ? (Serializable) get() : null);\n" +
+			"	}\n" +
+			"	public List<A> get() {\n" +
+			"		return null;\n" +
+			"	}\n" +
+			"	public <T extends Serializable> T data(T data) {\n" +
+			"		return data;\n" +
+			"	}\n" +
+			"	public class A implements Serializable {\n" +
+			"	}\n" +
+			"}\n"
+		},
+		"----------\n" + 
+		"1. WARNING in X.java (at line 6)\n" + 
+		"	return (List<A>) data(b ? (Serializable) get() : null);\n" + 
+		"	       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n" + 
+		"Type safety: Unchecked cast from Serializable to List<X.A>\n" + 
+		"----------\n" + 
+		"2. WARNING in X.java (at line 14)\n" + 
+		"	public class A implements Serializable {\n" + 
+		"	             ^\n" + 
+		"The serializable class A does not declare a static final serialVersionUID field of type long\n" + 
+		"----------\n");
+}
+// https://bugs.eclipse.org/bugs/show_bug.cgi?id=427411, [1.8][generics] JDT reports type mismatch when using method that returns generic type 
+public void test427411() {
+	runNegativeTest(
+		new String[] {
+			"X.java",
+			"import java.util.List;\n" +
+			"public class X {\n" +
+			"\n" +
+			"    public static void main() {\n" +
+			
+			"        List<Object> list = null;\n" +
+			"        Object o = null;\n" +
+			
+			"        genericMethod(list, genericClassTransformer(genericClassFactory(o)));\n" +
+			
+			"        genericMethod(list, genericClassFactory(o)); // works\n" +
+			
+			"        GenericClass<Iterable<? super Object>> tempVariable = genericClassTransformer(genericClassFactory(o));\n" +
+			
+			"        GenericClass<Iterable<? super Object>> tempVariable2 = genericClassFactory(o); // works\n" +
+			
+			"    }\n" +
+			
+			"    private static <T> void genericMethod(T param1, GenericClass<? super T> param2) {\n" +
+			"        throw new UnsupportedOperationException();\n" +
+			"    }\n" +
+			
+			"    public static <T> GenericClass<Iterable<? super T>> genericClassFactory(T item) {\n" +
+			"        throw new UnsupportedOperationException();\n" +
+			"    }\n" +
+			
+			"    public static <T> GenericClass<T> genericClassTransformer(GenericClass<T> matcher) {\n" +
+			"        throw new UnsupportedOperationException();\n" +
+			"    }\n" +
+			
+			"    private static class GenericClass<T> {\n" +
+			"    }\n" +
+			"}\n"
+		},
+		"");
+}
+// https://bugs.eclipse.org/bugs/show_bug.cgi?id=427728, [1.8] Type Inference rejects calls requiring boxing/unboxing  
+public void test427728() {
+	runConformTest(
+		new String[] {
+			"X.java",
+			"public class X {\n" +
+			"	static <T> int foo(T t) {\n" +
+			"		return 1234;\n" +
+			"	}\n" +
+			"	public static void main(String[] args) {\n" +
+			"            goo(foo(10));\n" +
+			"        }\n" +
+			"	static void goo(Integer i) {\n" +
+			"		System.out.println(i);\n" +
+			"	}\n" +
+			"}\n"
+		},
+		"1234");
+}
+// https://bugs.eclipse.org/bugs/show_bug.cgi?id=427728, [1.8] Type Inference rejects calls requiring boxing/unboxing  
+public void test427728a() {
+	runNegativeTest(
+		new String[] {
+			"X.java",
+			"import java.util.Collections;\n" +
+			"public class X {\n" +
+			"	public static void mai(String[] args) {\n" +
+			"		Math.max(2345, java.util.Collections.max(Collections.<Integer>emptySet()));\n" +
+			"		Math.max(0, java.util.Collections.<Integer>max(Collections.<Integer>emptySet()));\n" +
+			"    }\n" +
+			"}\n"
+		},
+		"");
+}
+// https://bugs.eclipse.org/bugs/show_bug.cgi?id=427728, [1.8] Type Inference rejects calls requiring boxing/unboxing  
+public void test427728b() {
+	if (this.complianceLevel < ClassFileConstants.JDK1_7) // uses diamond
+		return;
+	runConformTest(
+		new String[] {
+			"X.java",
+			"import java.util.Collections;\n" +
+			"import java.util.LinkedHashMap;\n" +
+			"import java.util.Map;\n" +
+			"public class X {\n" +
+			"	public static void main(String[] args) {\n" +
+			"		   Map<X, Integer> map = new LinkedHashMap<>();\n" +
+			"		   map.put(null, X.getInt());\n" +
+			"		   map.put(null, X.getint());\n" +
+			"		}\n" +
+			"		private static <T> int getInt() {\n" +
+			"		   return 0;\n" +
+			"		}\n" +
+			"		private static int getint() {\n" +
+			"			   return 0;\n" +
+			"		}\n" +
+			"}\n"
+		},
+		"");
+}
+// https://bugs.eclipse.org/bugs/show_bug.cgi?id=427736, [1.8][generics] Method not applicable error with identical parameter types  
+public void test427736() {
+	Map customOptions = getCompilerOptions();
+	customOptions.put(CompilerOptions.OPTION_DocCommentSupport, CompilerOptions.ENABLED);
+	runNegativeTest(
+		new String[] {
+			"Test1.java",
+			"class Test1<K, V> {\n" +
+			" static class Node<K2, V2> {}\n" +
+			" void keySet(V v) {}\n" +
+			" /**\n" +
+			"  * See {@link #keySet() keySet()},\n" +
+			"  */\n" +
+			" class KeySetView {}\n" +
+			" static <K4, V4> void untree0(Node<K4, V4> hi) {}    \n" +
+			" void untreesomething(Node<K, V> n) {\n" +
+			"   untree0(n); \n" +
+			" }\n" +
+			"}\n"
+		},
+		"", null, true, customOptions);
+}
+// https://bugs.eclipse.org/bugs/show_bug.cgi?id=426836, [1.8] special handling for return type in references to method getClass() ? 
+public void test426836() {
+	runNegativeTest(
+		new String[] {
+			"X.java",
+			"public class X {\n" +
+			"	static <T> T id(T t) {\n" +
+			"		return t;\n" +
+			"	}\n" +
+			"	public static void main(String[] args) {\n" +
+			"		Class<? extends String> id = id(new X().getClass());\n" +
+			"	}\n" +
+			"}\n" 
+		},
+		"----------\n" + 
+		"1. ERROR in X.java (at line 6)\n" + 
+		"	Class<? extends String> id = id(new X().getClass());\n" + 
+		"	                             ^^^^^^^^^^^^^^^^^^^^^^\n" + 
+		"Type mismatch: cannot convert from Class<capture#1-of ? extends X> to Class<? extends String>\n" + 
+		"----------\n");
+}
+// https://bugs.eclipse.org/bugs/show_bug.cgi?id=428071, [1.8][compiler] Bogus error about incompatible return type during override
+public void test428071() {
+	Map customOptions = getCompilerOptions();
+	customOptions.put(CompilerOptions.OPTION_Store_Annotations, CompilerOptions.ENABLED);
+	runNegativeTest(
+		new String[] {
+			"K1.java",
+			"import java.util.List;\n" +
+			"import java.util.Map;\n" +
+			"interface K1 {\n" +
+			"	public Map<String,List> get();\n" +
+			"}\n",
+			"K.java",
+			"import java.util.List;\n" +
+			"import java.util.Map;\n" +
+			"public class K implements K1 {\n" +
+			"	public Map<String, List> get() {\n" +
+			"		return null;\n" +
+			"	}\n" +
+			"}\n"
+		},
+		"----------\n" + 
+		"1. WARNING in K1.java (at line 4)\n" + 
+		"	public Map<String,List> get();\n" + 
+		"	                  ^^^^\n" + 
+		"List is a raw type. References to generic type List<E> should be parameterized\n" + 
+		"----------\n" + 
+		"----------\n" + 
+		"1. WARNING in K.java (at line 4)\n" + 
+		"	public Map<String, List> get() {\n" + 
+		"	                   ^^^^\n" + 
+		"List is a raw type. References to generic type List<E> should be parameterized\n" + 
+		"----------\n",
+		null,
+		true,
+		customOptions);
+}
+// https://bugs.eclipse.org/bugs/show_bug.cgi?id=428019, [1.8][compiler] Type inference failures with nested generic invocation.
+public void test428019() {
+	if (this.complianceLevel == ClassFileConstants.JDK1_8)
+		return;
+	runConformTest(
+		new String[] {
+			"X.java",
+			"public final class X {\n" +
+			"  static class Obj {}\n" +
+			"  static class Dial<T> {}\n" +
+			"  static void foo(Dial<? super Obj> dial, X context) {\n" +
+			"    context.put(Dial.class, wrap(dial));\n" +
+			"  }\n" +
+			"  <T> void put(Class<T> clazz, T data) {\n" +
+			"	System.out.println(\"put\");\n" +
+			"  }\n" +
+			"  static <T> Dial<T> wrap(Dial<T> dl) {\n" +
+			"	  return null;\n" +
+			"  }\n" +
+			"  public static void main(String[] args) {\n" +
+			"	X.foo(new Dial<Obj>(), new X());\n" +
+			"  }\n" +
+			"}\n"
+		},
+		"put");
 }
 }
 

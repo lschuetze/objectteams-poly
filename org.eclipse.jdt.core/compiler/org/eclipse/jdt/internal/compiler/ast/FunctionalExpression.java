@@ -21,10 +21,13 @@
  *							Bug 425153 - [1.8] Having wildcard allows incompatible types in a lambda expression
  *							Bug 425156 - [1.8] Lambda as an argument is flagged with incompatible error
  *							Bug 424403 - [1.8][compiler] Generic method call with method reference argument fails to resolve properly.
+ *							Bug 427438 - [1.8][compiler] NPE at org.eclipse.jdt.internal.compiler.ast.ConditionalExpression.generateCode(ConditionalExpression.java:280)
  *     Andy Clement (GoPivotal, Inc) aclement@gopivotal.com - Contributions for
  *                          Bug 405104 - [1.8][compiler][codegen] Implement support for serializeable lambdas
  *******************************************************************************/
 package org.eclipse.jdt.internal.compiler.ast;
+
+import static org.eclipse.jdt.internal.compiler.ast.ExpressionContext.VANILLA_CONTEXT;
 
 import org.eclipse.jdt.internal.compiler.CompilationResult;
 import org.eclipse.jdt.internal.compiler.DefaultErrorHandlingPolicies;
@@ -66,6 +69,11 @@ public abstract class FunctionalExpression extends Expression {
 	
 	public FunctionalExpression() {
 		super();
+	}
+	
+	// for lambda's and reference expressions boxing compatibility is same as vanilla compatibility.
+	public boolean isBoxingCompatibleWith(TypeBinding targetType, Scope scope) {
+		return isCompatibleWith(targetType, scope);
 	}
 	
 	public void setCompilationResult(CompilationResult compilationResult) {
@@ -173,6 +181,7 @@ public abstract class FunctionalExpression extends Expression {
 	}
 
 	public TypeBinding checkAgainstFinalTargetType(TypeBinding targetType) {
+		targetType = targetType.uncapture(this.enclosingScope);
 		return resolveTypeExpecting(this.enclosingScope, targetType);
 	}
 

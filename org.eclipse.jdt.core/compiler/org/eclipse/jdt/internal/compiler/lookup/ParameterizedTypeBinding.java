@@ -34,6 +34,7 @@
  *								Bug 425798 - [1.8][compiler] Another NPE in ConstraintTypeFormula.reduceSubType
  *								Bug 425156 - [1.8] Lambda as an argument is flagged with incompatible error
  *								Bug 426563 - [1.8] AIOOBE when method with error invoked with lambda expression as argument
+ *								Bug 426792 - [1.8][inference][impl] generify new type inference engine
  *******************************************************************************/
 package org.eclipse.jdt.internal.compiler.lookup;
 
@@ -183,6 +184,23 @@ public class ParameterizedTypeBinding extends ReferenceBinding implements Substi
 			}
 		}
 		return capturedParameterizedType;
+	}
+	
+	/**
+	 * Perform capture deconversion for a parameterized type with captured wildcard arguments
+	 * @see org.eclipse.jdt.internal.compiler.lookup.TypeBinding#uncapture(Scope)
+	 */
+	public TypeBinding uncapture(Scope scope) {
+		if ((this.tagBits & TagBits.HasCapturedWildcard) == 0)
+			return this;
+
+		int length = this.arguments == null ? 0 : this.arguments.length;
+		TypeBinding[] freeTypes = new TypeBinding[length];
+
+		for (int i = 0; i < length; i++) {
+			freeTypes[i] = this.arguments[i].uncapture(scope);
+		}
+		return scope.environment().createParameterizedType(this.type, freeTypes, (ReferenceBinding) (this.enclosingType != null ? this.enclosingType.uncapture(scope) : null), this.typeAnnotations);
 	}
 
 	/**
@@ -744,7 +762,7 @@ public class ParameterizedTypeBinding extends ReferenceBinding implements Substi
 			this.modifiers |= ExtraCompilerModifiers.AccGenericSignature;
 		} else if (this.enclosingType != null) {
 			this.modifiers |= (this.enclosingType.modifiers & ExtraCompilerModifiers.AccGenericSignature);
-			this.tagBits |= this.enclosingType.tagBits & (TagBits.HasTypeVariable | TagBits.HasMissingType);
+			this.tagBits |= this.enclosingType.tagBits & (TagBits.HasTypeVariable | TagBits.HasMissingType | TagBits.HasCapturedWildcard);
 		}
 		if (someArguments != null) {
 			this.arguments = someArguments;
@@ -764,7 +782,7 @@ public class ParameterizedTypeBinding extends ReferenceBinding implements Substi
 						this.tagBits |= TagBits.IsBoundParameterizedType;
 						break;
 				}
-				this.tagBits |= someArgument.tagBits & (TagBits.HasTypeVariable | TagBits.HasMissingType | TagBits.ContainsNestedTypeReferences);
+				this.tagBits |= someArgument.tagBits & (TagBits.HasTypeVariable | TagBits.HasMissingType | TagBits.ContainsNestedTypeReferences | TagBits.HasCapturedWildcard);
 			}
 		}
 //{ObjectTeams: share models
@@ -774,7 +792,7 @@ public class ParameterizedTypeBinding extends ReferenceBinding implements Substi
 // SH}
 		this.tagBits |= someType.tagBits & (TagBits.IsLocalType| TagBits.IsMemberType | TagBits.IsNestedType | TagBits.ContainsNestedTypeReferences
 				 | TagBits.HasMissingType | TagBits.AnnotationNullMASK
-				 | TagBits.AnnotationNonNullByDefault | TagBits.AnnotationNullUnspecifiedByDefault);
+				 | TagBits.AnnotationNonNullByDefault | TagBits.AnnotationNullUnspecifiedByDefault | TagBits.HasCapturedWildcard);
 		this.tagBits &= ~(TagBits.AreFieldsComplete|TagBits.AreMethodsComplete);
 	}
 
@@ -982,7 +1000,7 @@ public class ParameterizedTypeBinding extends ReferenceBinding implements Substi
 //{ObjectTeams:
 	protected
 // SH}
-	void collectInferenceVariables(Set variables) {
+	void collectInferenceVariables(Set<InferenceVariable> variables) {
 		if (this.arguments != null) {
 			int len = this.arguments.length;
 			for (int i = 0; i < len; i++) {
@@ -1132,7 +1150,7 @@ public class ParameterizedTypeBinding extends ReferenceBinding implements Substi
 		return false;
 	}
 // SH}
-	
+
 	ReferenceBinding resolve() {
 		if ((this.tagBits & TagBits.HasUnresolvedTypeVariables) == 0)
 			return this;
@@ -1339,7 +1357,7 @@ public class ParameterizedTypeBinding extends ReferenceBinding implements Substi
 		return null;
 	}
 //SH}
-	
+
 	/**
 	 * @see org.eclipse.jdt.internal.compiler.lookup.ReferenceBinding#superclass()
 	 */

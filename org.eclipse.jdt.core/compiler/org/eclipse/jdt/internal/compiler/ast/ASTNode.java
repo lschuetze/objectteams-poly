@@ -30,6 +30,8 @@
  *								Bug 424205 - [1.8] Cannot infer type for diamond type with lambda on method invocation
  *								Bug 424415 - [1.8][compiler] Eventual resolution of ReferenceExpression is not seen to be happening.
  *								Bug 426366 - [1.8][compiler] Type inference doesn't handle multiple candidate target types in outer overload context
+ *								Bug 427282 - [1.8][compiler] AIOOB (-1) at org.eclipse.jdt.internal.compiler.ClassFile.traverse(ClassFile.java:6209)
+ *								Bug 427483 - [Java 8] Variables in lambdas sometimes can't be resolved
  *     Jesper S Moller - Contributions for
  *								bug 382721 - [1.8][compiler] Effectively final variables needs special treatment
  *								bug 412153 - [1.8][compiler] Check validity of annotations which may be repeatable
@@ -562,6 +564,10 @@ public abstract class ASTNode implements TypeConstants, TypeIds {
 
 		return false;
 	}
+	
+	public boolean isUnqualifiedSuper() {
+		return false;
+	}
 
 	/* Answer true if the type use is considered deprecated.
 	* An access in the same compilation unit is allowed.
@@ -715,8 +721,8 @@ public abstract class ASTNode implements TypeConstants, TypeIds {
 		if (candidateMethod != null) {
 			boolean variableArity = candidateMethod.isVarargs();
 			InferenceContext18 infCtx = null;
-			if (candidateMethod instanceof ParameterizedGenericMethodBinding) {
-				infCtx = invocation.getInferenceContext((ParameterizedGenericMethodBinding) candidateMethod);
+			if (candidateMethod instanceof ParameterizedMethodBinding) {
+				infCtx = invocation.getInferenceContext((ParameterizedMethodBinding) candidateMethod);
 				if (infCtx != null) {
 					if (infCtx.stepCompleted != InferenceContext18.TYPE_INFERRED) {
 						// only work in the exact state of TYPE_INFERRED
@@ -734,6 +740,13 @@ public abstract class ASTNode implements TypeConstants, TypeIds {
 			final TypeBinding[] parameters = candidateMethod.parameters;
 			Expression[] innerArguments = invocation.arguments();
 			Expression [] arguments = innerArguments;
+			if (infCtx == null && variableArity && parameters.length == arguments.length) { // re-check
+				TypeBinding lastParam = parameters[parameters.length-1];
+				Expression lastArg = arguments[arguments.length-1];
+				if (lastArg.isCompatibleWith(lastParam, null)) {
+					variableArity = false;
+				}
+			}
 			for (int i = 0, length = arguments == null ? 0 : arguments.length; i < length; i++) {
 				Expression argument = arguments[i];
 				TypeBinding updatedArgumentType = null;
@@ -754,10 +767,12 @@ public abstract class ASTNode implements TypeConstants, TypeIds {
 							if (!innerContext.hasResultFor(parameterType)) {
 								argument.setExpectedType(parameterType);
 								MethodBinding improvedBinding = innerContext.inferInvocationType(innerInvocation, parameterizedMethod);
+								if (!improvedBinding.isValidBinding()) {
+									innerContext.reportInvalidInvocation(innerInvocation, improvedBinding);
+								}
 								if (innerInvocation.updateBindings(improvedBinding, parameterType)) {
 									resolvePolyExpressionArguments(innerInvocation, improvedBinding);
 								}
-								// TODO need to report invalidMethod if !improvedBinding.isValidBinding() ?
 							} else if (innerContext.stepCompleted < InferenceContext18.BINDINGS_UPDATED) {
 								innerContext.rebindInnerPolies(parameterizedMethod, innerInvocation);
 							}
