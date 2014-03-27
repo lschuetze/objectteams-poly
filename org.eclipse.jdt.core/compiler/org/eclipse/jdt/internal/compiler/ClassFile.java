@@ -5166,12 +5166,18 @@ public class ClassFile implements TypeConstants, TypeIds {
 				if ((arguments = methodBinding.parameters) != null) {
 					for (int i = 0, max = arguments.length; i < max; i++) {
 						final TypeBinding typeBinding = arguments[i];
-						// For the branching complexities in the generated $deserializeLambda$ we need the local variable
-						LocalVariableBinding localVariableBinding = new LocalVariableBinding((" synthetic"+i).toCharArray(), typeBinding, 0, true); //$NON-NLS-1$
-						localVariableBinding.resolvedPosition = i;
-						this.codeStream.record(localVariableBinding);
-						localVariableBinding.recordInitializationStartPC(0);
-						localVariableBinding.recordInitializationEndPC(codeLength);
+//{ObjectTeams: bugfix (?) re Bug 416781 - reconcile compiler changes from BETA_JAVA8 with OT/J
+						if (CharOperation.equals(TypeConstants.DESERIALIZE_LAMBDA, methodBinding.selector)) {
+// orig:
+							// For the branching complexities in the generated $deserializeLambda$ we need the local variable
+							LocalVariableBinding localVariableBinding = new LocalVariableBinding((" synthetic"+i).toCharArray(), typeBinding, 0, true); //$NON-NLS-1$
+							localVariableBinding.resolvedPosition = i;
+							this.codeStream.record(localVariableBinding);
+							localVariableBinding.recordInitializationStartPC(0);
+							localVariableBinding.recordInitializationEndPC(codeLength);
+// :giro
+						}
+// SH}
 						frame.putLocal(resolvedPosition,
 								new VerificationTypeInfo(typeBinding));
 						switch (typeBinding.id) {
