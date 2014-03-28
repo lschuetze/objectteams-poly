@@ -118,12 +118,7 @@ public class ReportedBugs extends AbstractOTJLDTest {
     		"	                       ^^^^^^^\n" + 
     		"TeamB11sh1f1 cannot be resolved to a type\n" + 
     		"----------\n" + 
-    		"4. ERROR in TB11sh1fMain.java (at line 7)\n" + 
-    		"	r1s[0] = theTeam.new R1();\n" + 
-    		"	                     ^^\n" + 
-    		"TeamB11sh1f1.R1 cannot be resolved to a type\n" + 
-    		"----------\n" + 
-    		"5. ERROR in TB11sh1fMain.java (at line 8)\n" + 
+    		"4. ERROR in TB11sh1fMain.java (at line 8)\n" + 
     		"	theTeam.R3 r3 = r1s[0].getR2().getR3();\n" + 
     		"	^^^^^^^\n" + 
     		"TeamB11sh1f1 cannot be resolved to a type\n" + 

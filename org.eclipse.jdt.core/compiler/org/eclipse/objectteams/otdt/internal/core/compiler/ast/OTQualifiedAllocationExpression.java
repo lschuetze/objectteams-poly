@@ -119,12 +119,14 @@ public abstract class OTQualifiedAllocationExpression extends AbstractQualifiedA
 
 	    CompilationResult compilationResult = scope.referenceContext().compilationResult();
 		CheckPoint cp = compilationResult.getCheckPoint(scope.referenceContext());
+		boolean hasEnclosingInstanceProblem = false;
 	    if (this.anonymousType == null && this.creatorCall == null) { // no double processing
 
         	if (this.enclosingInstance instanceof CastExpression)
 				this.enclosingInstance.bits |= DisableUnnecessaryCastCheck; // will check later on (within super.resolveType())
 
-	        TypeBinding enclosingInstanceType = this.enclosingInstance.resolveType(scope);
+        	TypeBinding enclosingInstanceType = this.enclosingInstance.resolveType(scope);
+       		hasEnclosingInstanceProblem = enclosingInstanceType == null;
 
 	        if (   !scope.isGeneratedScope()
 	        	&& enclosingInstanceType != null
@@ -175,25 +177,27 @@ public abstract class OTQualifiedAllocationExpression extends AbstractQualifiedA
 	        }
 	    }
 	    if (this.creatorCall == null) {
-	    	// if resolve failed above roll back, because it will be analyzed again during the super call:
-	    	if (this.enclosingInstance != null && this.enclosingInstance.resolvedType == null)
-	    		compilationResult.rollBack(cp);
-	        this.resolvedType = super.resolveType(scope);
-	        // if enclosing is a role request a cast to the class part as required by the inner constructor
-	        if (this.enclosingInstance != null) {
-	        	TypeBinding enclosingType = this.enclosingInstance.resolvedType;
-				if (enclosingType instanceof ReferenceBinding && ((ReferenceBinding)enclosingType).isDirectRole())
-	        		this.enclosingInstanceCast = ((ReferenceBinding)enclosingType).getRealClass();
-	        }
-	        ReferenceBinding superType = null;
-	        if (this.resolvedType instanceof ReferenceBinding)
-	        	superType= ((ReferenceBinding)this.resolvedType).superclass();
-	    	if (   superType != null
-	    		&& (superType instanceof RoleTypeBinding))
-	    	{
-	    		RoleTypeBinding superRole = (RoleTypeBinding)superType;
-		        if (superRole.hasExplicitAnchor())
-		        	scope.problemReporter().extendingExternalizedRole(superRole, this.type);
+	    	if (!hasEnclosingInstanceProblem) {
+		    	// if resolve failed above roll back, because it will be analyzed again during the super call:
+		    	if (this.enclosingInstance != null && this.enclosingInstance.resolvedType == null)
+		    		compilationResult.rollBack(cp);
+		        this.resolvedType = super.resolveType(scope);
+		        // if enclosing is a role request a cast to the class part as required by the inner constructor
+		        if (this.enclosingInstance != null) {
+		        	TypeBinding enclosingType = this.enclosingInstance.resolvedType;
+					if (enclosingType instanceof ReferenceBinding && ((ReferenceBinding)enclosingType).isDirectRole())
+		        		this.enclosingInstanceCast = ((ReferenceBinding)enclosingType).getRealClass();
+		        }
+		        ReferenceBinding superType = null;
+		        if (this.resolvedType instanceof ReferenceBinding)
+		        	superType= ((ReferenceBinding)this.resolvedType).superclass();
+		    	if (   superType != null
+		    		&& (superType instanceof RoleTypeBinding))
+		    	{
+		    		RoleTypeBinding superRole = (RoleTypeBinding)superType;
+			        if (superRole.hasExplicitAnchor())
+			        	scope.problemReporter().extendingExternalizedRole(superRole, this.type);
+		    	}
 	    	}
 	    } else {  // === with creatorCall ===
 	    	this.resolvedType = this.creatorCall.resolveType(scope);

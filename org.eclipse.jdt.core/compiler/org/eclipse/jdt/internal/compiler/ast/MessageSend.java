@@ -117,6 +117,7 @@ import org.eclipse.objectteams.otdt.internal.core.compiler.mappings.CallinImplem
 import org.eclipse.objectteams.otdt.internal.core.compiler.mappings.CalloutImplementor;
 import org.eclipse.objectteams.otdt.internal.core.compiler.model.MethodModel;
 import org.eclipse.objectteams.otdt.internal.core.compiler.model.TeamModel;
+import org.eclipse.objectteams.otdt.internal.core.compiler.statemachine.copyinheritance.CopyInheritance.RoleConstructorCall;
 import org.eclipse.objectteams.otdt.internal.core.compiler.statemachine.transformer.StandardElementGenerator;
 import org.eclipse.objectteams.otdt.internal.core.compiler.util.AstGenerator;
 import org.eclipse.objectteams.otdt.internal.core.compiler.util.RoleTypeCreator;
@@ -799,12 +800,16 @@ public TypeBinding resolveType(BlockScope scope) {
 		this.receiver.bits |= ASTNode.DisableUnnecessaryCastCheck; // will check later on
 		receiverCast = true;
 	}
-//{ObjectTeams: FIXME: stale comment regarding removed code: "receiver may already be resolved, keep that result:"
+//{ObjectTeams: receiver may already be resolved (e.g. for _OT$cacheInitTrigger), keep that result:
+  if (this.receiver.resolvedType != null && (this.isGenerated || this instanceof RoleConstructorCall)) {
+	  this.actualReceiverType = this.receiver.resolvedType;
+  } else {
 // orig:
 	if (this.receiver.resolvedType != null)
 		scope.problemReporter().genericInferenceError("Receiver was unexpectedly found resolved", this); //$NON-NLS-1$
 	this.actualReceiverType = this.receiver.resolveType(scope);
 // :giro
+  }
   /*orig:
 	boolean receiverIsType = this.receiver instanceof NameReference && (((NameReference) this.receiver).bits & Binding.TYPE) != 0;
    */
