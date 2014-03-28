@@ -183,17 +183,19 @@ public class AbstractOTJLDTest extends AbstractComparableTest {
 
 	/** Relaxed comparison using contains rather than equals. TODO(SH): pattern matching. */
 	protected void checkCompilerLog(String[] testFiles, Requestor requestor,
-			String platformIndependantExpectedLog, Throwable exception) {
+			String[] alternatePlatformIndependantExpectedLogs, Throwable exception) {
 		String computedProblemLog = Util.convertToIndependantLineDelimiter(requestor.problemLog.toString());
-		if (!computedProblemLog.contains(platformIndependantExpectedLog)) {
-			logTestTitle();
-			System.out.println(Util.displayString(computedProblemLog, INDENT, SHIFT));
-			logTestFiles(false, testFiles);
-			if (errorMatching && exception == null)
-				assertTrue("Invalid problem log\n"+computedProblemLog, false);
+		for (String platformIndependantExpectedLog : alternatePlatformIndependantExpectedLogs) {
+			if (computedProblemLog.contains(platformIndependantExpectedLog))
+				return; // OK
 		}
+		logTestTitle();
+		System.out.println(Util.displayString(computedProblemLog, INDENT, SHIFT));
+		logTestFiles(false, testFiles);
+		if (errorMatching && exception == null)
+			fail("Invalid problem log\n"+computedProblemLog);
 		if (!errorMatching && exception == null) {
-			assertEquals("Invalid problem log ", platformIndependantExpectedLog, computedProblemLog);
+			assertEquals("Invalid problem log ", alternatePlatformIndependantExpectedLogs[0], computedProblemLog);
 		}
     }
 	// inaccessible helper from super
