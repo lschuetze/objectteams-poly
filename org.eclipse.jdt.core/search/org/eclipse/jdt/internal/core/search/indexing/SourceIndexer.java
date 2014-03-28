@@ -85,6 +85,14 @@ public class SourceIndexer extends AbstractIndexer implements ITypeRequestor, Su
 		super(document);
 		this.requestor = new SourceIndexerRequestor(this);
 	}
+
+//{ObjectTeams: new method:
+	@Override
+	public Parser getPlainParser() {
+		return null;
+	}
+// SH}
+
 	public void indexDocument() {
 		// Create a new Parser
 		String documentPath = this.document.getPath();
@@ -221,6 +229,9 @@ public class SourceIndexer extends AbstractIndexer implements ITypeRequestor, Su
 								ONE_ZERO_CHAR, // enclosing types.
 								CharOperation.NO_CHAR, // super class
 								new char[][] { superinterface },
+//{ObjectTeams: new parameter baseclass:
+								null,
+// SH}
 								CharOperation.NO_CHAR_CHAR,
 								true); // not primary.
 
