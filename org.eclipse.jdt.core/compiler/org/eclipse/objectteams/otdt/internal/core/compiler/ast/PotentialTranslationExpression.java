@@ -37,7 +37,6 @@ import org.eclipse.jdt.internal.compiler.lookup.TypeBinding;
 import org.eclipse.jdt.internal.compiler.lookup.TypeIds;
 import org.eclipse.objectteams.otdt.core.compiler.IOTConstants;
 import org.eclipse.objectteams.otdt.internal.core.compiler.control.Config;
-import org.eclipse.objectteams.otdt.internal.core.compiler.lookup.RoleTypeBinding;
 
 /**
  * NEW for OTDT.
@@ -136,8 +135,8 @@ public abstract class PotentialTranslationExpression extends Expression  impleme
 	}
 
 	private boolean areTypesCompatible(TypeBinding thisType, TypeBinding thatType) {
-	    if (    RoleTypeBinding.isRoleType(thisType)
-	         && RoleTypeBinding.isRoleType(thatType))
+	    if (    thisType.isRoleType()
+	         && thatType.isRoleType())
 	    {
 	        // ignore anchors for now:
 	    	thisType = ((ReferenceBinding)thisType).getRealClass();

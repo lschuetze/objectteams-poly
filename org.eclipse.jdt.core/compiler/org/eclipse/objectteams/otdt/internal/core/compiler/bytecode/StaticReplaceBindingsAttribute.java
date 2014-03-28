@@ -192,7 +192,7 @@ public class StaticReplaceBindingsAttribute extends AbstractAttribute {
 		ReferenceBinding baseClass = null;
 		if (roleClass != null)
 			baseClass = roleClass.baseclass();
-		if (baseClass != null && RoleTypeBinding.isRoleType(baseClass))
+		if (baseClass != null && baseClass.isRoleType())
 			baseClass = ((RoleTypeBinding)baseClass).getRealClass();
 		this._size += 10; // 5 names: 1 roleclass, 2 selectors, 2 signatures
 		Mapping currentMapping = new Mapping(

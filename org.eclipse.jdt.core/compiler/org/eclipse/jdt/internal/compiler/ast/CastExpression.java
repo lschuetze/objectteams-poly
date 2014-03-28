@@ -633,7 +633,7 @@ public TypeBinding resolveType(BlockScope scope) {
 				this.resolvedType = RoleTypeCreator.maybeWrapUnqualifiedRoleType(scope, this.resolvedType, this);
 			// check success:
 			if (   this.resolvedType == null
-				|| !RoleTypeBinding.isRoleType(this.resolvedType.leafComponentType()))
+				|| !this.resolvedType.leafComponentType().isRoleType())
 			{
 				// Although it is a role, wrapping failed. Error is already reported (hopefully).
 				assert scope.referenceCompilationUnit().compilationResult().hasErrors();
@@ -740,7 +740,7 @@ public TypeBinding resolveType(BlockScope scope) {
 private boolean shouldUnwrapExpressionType(TypeBinding expressionType) {
 	if (!this.isGenerated)
 		return false; // never unwrap for source statements
-	if (expressionType == null || !DependentTypeBinding.isDependentType(expressionType))
+	if (!(expressionType instanceof DependentTypeBinding))
 		return false; // never unwrap null nor non-RTB
 	if (this.requireRoleClass)
 		return true; // wrapping would falsely pretend compatibility

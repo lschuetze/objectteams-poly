@@ -841,7 +841,7 @@ public class ParameterizedTypeBinding extends ReferenceBinding implements Substi
 	// for mixed type and value parameters:
 	@Override
 	public DependentTypeBinding asPlainDependentType() {
-		if (DependentTypeBinding.isPlainDependentType(this.type))
+		if (this.type != null && this.type.isPlainDependentType())
 			return (DependentTypeBinding) this.type;
 		return null;
 	}
@@ -1145,7 +1145,7 @@ public class ParameterizedTypeBinding extends ReferenceBinding implements Substi
 	}
 	// hook for dependent type printing:
 	public boolean appendReadableValueParameterNames(StringBuffer buf) {
-		if (DependentTypeBinding.isDependentType(this.type))
+		if (this.type instanceof DependentTypeBinding)
 			return ((DependentTypeBinding)this.type).appendReadableValueParameterNames(buf);
 		return false;
 	}

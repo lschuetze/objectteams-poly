@@ -780,7 +780,7 @@ class RecoveredTypeBinding implements ITypeBinding {
 		if (this.binding != null) {
 			if (onlyRelevant)
 				return RoleTypeBinding.isRoleWithExplicitAnchor(this.binding);
-			return DependentTypeBinding.isDependentType(this.binding);
+			return this.binding instanceof DependentTypeBinding;
 		}
 		if (   this.currentType != null
 			&& this.currentType.isParameterizedType())
@@ -791,7 +791,7 @@ class RecoveredTypeBinding implements ITypeBinding {
 	/* implement method from ITypeBinding. */
 	public String[] getAnchorPath() {
 		if (this.binding != null) {
-			if (DependentTypeBinding.isDependentType(this.binding))
+			if (this.binding instanceof DependentTypeBinding)
 				return TypeBinding.getBestNamePath((DependentTypeBinding)this.binding);
 		} else if (    this.currentType != null
 			        && this.currentType.isParameterizedType()

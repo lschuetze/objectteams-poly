@@ -2144,7 +2144,7 @@ public class CopyInheritance implements IOTConstants, ClassFileConstants, ExtraC
 
 
         // true weakening (with weakened type binding) avoids bridge methods
-        if (TypeBinding.notEquals(method.binding.returnType, template.returnType) && DependentTypeBinding.isDependentType(method.binding.returnType))
+        if (TypeBinding.notEquals(method.binding.returnType, template.returnType) && method.binding.returnType instanceof DependentTypeBinding)
         	method.binding.returnType = WeakenedTypeBinding.makeWeakenedTypeBinding((DependentTypeBinding)method.binding.returnType.leafComponentType(),
         																	   	    (ReferenceBinding) template.returnType.leafComponentType(),
         																	   	    template.returnType.dimensions());

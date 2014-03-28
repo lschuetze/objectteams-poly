@@ -166,8 +166,6 @@ public class RoleTypeBinding extends DependentTypeBinding
 
     	initializeDependentType(teamAnchor, -1); // role type bindings have no explicit value parameters
 
-        this.tagBits |= TagBits.IsWrappedRole;
-
         // infer argument position.
         ITeamAnchor firstAnchorSegment = teamAnchor.getBestNamePath()[0];
         if (   firstAnchorSegment instanceof LocalVariableBinding
@@ -311,11 +309,11 @@ public class RoleTypeBinding extends DependentTypeBinding
 		DependentTypeBinding leftDep= null;
 		DependentTypeBinding rightDep= null;
 		// nesting occurs for WeakenedTypeBinding(RoleTypeBinding), e.g.
-		while (DependentTypeBinding.isDependentType(left)) {
+		while (left instanceof DependentTypeBinding) {
 			leftDep= (DependentTypeBinding)left;
 			left= leftDep.type;
 		}
-		while (DependentTypeBinding.isDependentType(right)) {
+		while (right instanceof DependentTypeBinding) {
 			rightDep= (DependentTypeBinding)right;
 			right= rightDep.type;
 		}
@@ -324,9 +322,14 @@ public class RoleTypeBinding extends DependentTypeBinding
 			&& CharOperation.equals(left.internalName(), right.internalName());
     }
 
-    public static boolean isRoleType(TypeBinding binding) {
-    	if (binding == null) return false;
-    	return (binding.tagBits & TagBits.IsWrappedRole) != 0;
+    @Override
+    public boolean isRoleType() {
+    	return true;
+    }
+    
+    @Override
+    public boolean isPlainDependentType() {
+    	return false;
     }
 
     public static boolean isRoleTypeOrArrayOfRole(TypeBinding binding) {
@@ -340,7 +343,8 @@ public class RoleTypeBinding extends DependentTypeBinding
 //				if (isRoleTypeOrArrayOfRole(typeArg)) return true;
 //			return false;
 //    	}
-    	return (binding.leafComponentType().tagBits & TagBits.IsWrappedRole) != 0;
+    	TypeBinding leafType = binding.leafComponentType();
+		return leafType != null && leafType.isRoleType();
     }
 
 	/**
@@ -352,7 +356,7 @@ public class RoleTypeBinding extends DependentTypeBinding
 	public static boolean isRoleWithExplicitAnchor(TypeBinding type) {
 		if (type == null)
 			return false;
-		if ((type.tagBits & TagBits.IsWrappedRole) == 0)
+		if (!type.isRoleType())
 			return false;
 		return ((DependentTypeBinding)type).hasExplicitAnchor();
 	}
@@ -366,9 +370,14 @@ public class RoleTypeBinding extends DependentTypeBinding
 	public static boolean isRoleWithoutExplicitAnchor(TypeBinding type) {
 		if (type == null)
 			return false;
-		if ((type.tagBits & TagBits.IsWrappedRole) == 0)
+		if (!type.isRoleType())
 			return false;
 		return !((DependentTypeBinding)type).hasExplicitAnchor();
+	}
+	
+	@Override
+	public DependentTypeBinding asPlainDependentType() {
+		return null;
 	}
 
 	/**
@@ -771,7 +780,7 @@ public class RoleTypeBinding extends DependentTypeBinding
         	return true;
 
         ReferenceBinding referenceBinding = (ReferenceBinding) right;
-        if (isRoleType(referenceBinding))
+        if (referenceBinding.isRoleType())
         {
         	RoleTypeBinding rightRole = getRoleTypeBinding(referenceBinding);
         	ReferenceBinding rightTeam = referenceBinding.enclosingType();

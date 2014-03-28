@@ -122,6 +122,11 @@ public class WeakenedTypeBinding extends DependentTypeBinding {
 		return (DependentTypeBinding) this.type; // cast is safe by construction in constructor
 	}
 
+	@Override
+	public DependentTypeBinding asPlainDependentType() {
+		return this.type.asPlainDependentType();
+	}
+
 	public static ReferenceBinding getBytecodeType(TypeBinding returnType) {
 		if (returnType instanceof WeakenedTypeBinding)
 			// recursivly unpack all contained WTB, too:
@@ -131,6 +136,16 @@ public class WeakenedTypeBinding extends DependentTypeBinding {
 
 	public boolean isSignificantlyWeakened() {
 		return TypeBinding.notEquals(this.weakenedType, this.type.getRealType());
+	}
+	
+	@Override
+	public boolean isRoleType() {
+		return this.type.isRoleType();
+	}
+	
+	@Override
+	public boolean isPlainDependentType() {
+		return this.type.isPlainDependentType();
 	}
 	
 	/**

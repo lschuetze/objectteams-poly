@@ -482,7 +482,7 @@ public class CallinMappingDeclaration extends AbstractMethodMappingDeclaration
 				roleReturnLeaf = RoleModel.getTopmostBoundRole(this.scope, (ReferenceBinding)roleReturnLeaf);
 
 			// need the RTB:
-			if (!DependentTypeBinding.isDependentType(roleReturnLeaf))
+			if (!(roleReturnLeaf instanceof DependentTypeBinding))
 				roleReturnLeaf = RoleTypeCreator.maybeWrapUnqualifiedRoleType(roleReturnLeaf,this.scope.enclosingSourceType());
 
 			// array?

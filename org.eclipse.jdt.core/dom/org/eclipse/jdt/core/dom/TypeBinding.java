@@ -1485,11 +1485,11 @@ class TypeBinding implements ITypeBinding {
 	public boolean isDependentType(boolean onlyRelevant) {
 		if (onlyRelevant)
 			return RoleTypeBinding.isRoleWithExplicitAnchor(this.binding);
-		return DependentTypeBinding.isDependentType(this.binding);
+		return this.binding instanceof DependentTypeBinding;
 	}
 
 	public String[] getAnchorPath() {
-		if (!DependentTypeBinding.isDependentType(this.binding))
+		if (!(this.binding instanceof DependentTypeBinding))
 			return new String[0];
 
 		return getBestNamePath((DependentTypeBinding)this.binding);

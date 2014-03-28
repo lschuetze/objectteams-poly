@@ -103,7 +103,7 @@ public class AnchorListAttribute extends ListValueAttribute {
     private void writeElement(TypeBinding type) {
         if (type.isArrayType())
             type = type.leafComponentType();
-        if (DependentTypeBinding.isDependentType(type)) {
+        if (type instanceof DependentTypeBinding) {
             DependentTypeBinding roleType = (DependentTypeBinding)type;
             ITeamAnchor anchor = roleType._teamAnchor;
             if (anchor instanceof TThisBinding)
@@ -253,7 +253,7 @@ public class AnchorListAttribute extends ListValueAttribute {
         if (binding.isBaseType())
             return false;
         ReferenceBinding refBinding = (ReferenceBinding)binding;
-        if (!DependentTypeBinding.isDependentType(refBinding))
+        if (!(refBinding instanceof DependentTypeBinding))
             return false;
         ITeamAnchor anchor = ((DependentTypeBinding)refBinding)._teamAnchor;
         return !(anchor instanceof TThisBinding);

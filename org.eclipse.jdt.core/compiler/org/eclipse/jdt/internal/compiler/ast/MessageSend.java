@@ -109,7 +109,6 @@ import org.eclipse.objectteams.otdt.internal.core.compiler.control.Dependencies;
 import org.eclipse.objectteams.otdt.internal.core.compiler.control.ITranslationStates;
 import org.eclipse.objectteams.otdt.internal.core.compiler.lookup.AnchorMapping;
 import org.eclipse.objectteams.otdt.internal.core.compiler.lookup.DependentTypeBinding;
-import org.eclipse.objectteams.otdt.internal.core.compiler.lookup.RoleTypeBinding;
 import org.eclipse.objectteams.otdt.internal.core.compiler.lookup.SyntheticRoleBridgeMethodBinding;
 import org.eclipse.objectteams.otdt.internal.core.compiler.lookup.WeakenedTypeBinding;
 import org.eclipse.objectteams.otdt.internal.core.compiler.mappings.CallinImplementorDyn;
@@ -602,7 +601,7 @@ public void generateCode(BlockScope currentScope, CodeStream codeStream, boolean
 		} else if (constantPoolDeclaringClass.isInterface()) { // interface or annotation type
   :giro */
 		} else if (constantPoolDeclaringClass.isInterface()  // interface or annotation type
-				   || constantPoolDeclaringClass instanceof RoleTypeBinding)
+				   || constantPoolDeclaringClass.isRoleType())
 		{
 // SH}
 			codeStream.invoke(Opcodes.OPC_invokeinterface, codegenBinding, constantPoolDeclaringClass, this.typeArguments);

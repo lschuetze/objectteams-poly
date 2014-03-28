@@ -199,12 +199,6 @@ public interface TagBits {
 	// set when type binding has a captured wildcard somewhere
 	long HasCapturedWildcard = ASTNode.Bit62L;
 //{ObjectTeams:
-
-	// is it a wrapped role type?
-    long IsWrappedRole = ASTNode.Bit62L;					// for role type bindings
-    
-    // is it a dependent type?
-    long IsDependentType = ASTNode.Bit63L;					// for type bindings
     // is a _OT$base field faked to compensate for weakening?
     long IsFakedField = ASTNode.Bit63L;						// for field binding
     // have types been wrapped in the signature

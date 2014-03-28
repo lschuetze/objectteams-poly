@@ -173,7 +173,7 @@ public class ParameterizedGenericMethodBinding extends ParameterizedMethodBindin
 							// TODO: could this be integrated with TypeVariableBinding.boundCheck(Substitution, TypeBinding, ReferenceBinding, Scope)
 							//        which already uses Substitutation.substituteAnchore(ITeamAnchor,int) internally? 
 							for (int i = 0; i < solutions.length; i++) {
-								if (DependentTypeBinding.isDependentType(solutions[i])
+								if (solutions[i] instanceof DependentTypeBinding
 										&& typeVariables[i].anchors != null
 										&& !AnchorMapping.isLegalInstantiation(typeVariables[i], (DependentTypeBinding) solutions[i]))
 									return null; // illegal due to mismatching team anchors
@@ -826,7 +826,7 @@ public class ParameterizedGenericMethodBinding extends ParameterizedMethodBindin
 	}
 	public ITeamAnchor substituteAnchor(ITeamAnchor anchor, int rank) {
 		TypeBinding typeArgument = this.typeArguments[rank];
-		if (DependentTypeBinding.isDependentType(typeArgument))
+		if (typeArgument instanceof DependentTypeBinding)
 			return ((DependentTypeBinding)typeArgument)._teamAnchor;
 		return null;
 	}

@@ -51,7 +51,6 @@ import org.eclipse.jdt.internal.compiler.flow.*;
 import org.eclipse.jdt.internal.compiler.lookup.*;
 import org.eclipse.objectteams.otdt.internal.core.compiler.control.Config;
 import org.eclipse.objectteams.otdt.internal.core.compiler.lookup.DependentTypeBinding;
-import org.eclipse.objectteams.otdt.internal.core.compiler.lookup.RoleTypeBinding;
 import org.eclipse.objectteams.otdt.internal.core.compiler.util.IAlienScopeTypeReference;
 import org.eclipse.objectteams.otdt.internal.core.compiler.util.RoleTypeCreator;
 
@@ -354,7 +353,7 @@ public FlowInfo analyseCode(BlockScope currentScope, FlowContext flowContext, Fl
 						}
 					}
 //{ObjectTeams: additional re-check:
-					if (Config.getLoweringPossible() && RoleTypeBinding.isRoleType(initializationType))
+					if (Config.getLoweringPossible() && initializationType != null && initializationType.isRoleType())
 						((DependentTypeBinding)initializationType).recheckAmbiguousLowering(variableType, this, scope, null);
 // SH}
 				}

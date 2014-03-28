@@ -685,6 +685,12 @@ public boolean isTeam() {
 public boolean isRole() {
 	return false;
 }
+public boolean isRoleType() {
+	return false;
+}
+public boolean isPlainDependentType() {
+	return false;
+}
 // SH}
 
 /**
@@ -914,7 +920,7 @@ public boolean isProvablyDistinct(TypeBinding otherType) {
 //{ObjectTeams: relax if at least one type is a dependent type binding:
 boolean distinctRealTypes(TypeBinding one, TypeBinding two) {
 	if (one instanceof ReferenceBinding && two instanceof ReferenceBinding)
-		if (DependentTypeBinding.isDependentType(one) || DependentTypeBinding.isDependentType(two))
+		if (one instanceof DependentTypeBinding || two instanceof DependentTypeBinding)
 			return notEquals(((ReferenceBinding)one).getRealType(), ((ReferenceBinding)two).getRealType());
 	return TypeBinding.notEquals(one, two);
 }

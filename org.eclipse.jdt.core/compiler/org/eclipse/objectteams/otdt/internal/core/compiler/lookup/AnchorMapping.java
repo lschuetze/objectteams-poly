@@ -378,8 +378,9 @@ public class AnchorMapping {
 						scope.problemReporter().externalizingNonPublicRole(arguments[i], roleType);
 						success = false;
 					}
-				} else if (   loweringPossible 										 // if we detected lowering possible before, recheck here
-						   && RoleTypeBinding.isRoleType(arguments[i].resolvedType)) 
+				} else if (   loweringPossible 							// if we detected lowering possible before, recheck here
+							&& arguments[i].resolvedType != null
+						    && arguments[i].resolvedType.isRoleType()) 
 				{
 					((DependentTypeBinding)arguments[i].resolvedType).recheckAmbiguousLowering(parameters[i], arguments[i], scope, messageSend.binding);
 				}

@@ -70,7 +70,6 @@ import org.eclipse.objectteams.otdt.internal.core.compiler.ast.ParameterMapping;
 import org.eclipse.objectteams.otdt.internal.core.compiler.control.Dependencies;
 import org.eclipse.objectteams.otdt.internal.core.compiler.control.ITranslationStates;
 import org.eclipse.objectteams.otdt.internal.core.compiler.control.StateHelper;
-import org.eclipse.objectteams.otdt.internal.core.compiler.lookup.RoleTypeBinding;
 import org.eclipse.objectteams.otdt.internal.core.compiler.model.RoleModel;
 
 /**
@@ -842,7 +841,7 @@ public final class SelectionEngine extends Engine implements ISearchRequestor {
 	private boolean isLocal(ReferenceBinding binding) {
 		if(binding instanceof ParameterizedTypeBinding) {
 //{ObjectTeams:
-			if (binding instanceof RoleTypeBinding)
+			if (binding.isRoleType())
 				return false; // prevents infinite recursion below:
 // SH}
 			return isLocal(((ParameterizedTypeBinding)binding).genericType());

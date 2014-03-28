@@ -436,7 +436,7 @@ public class ParameterizedSingleTypeReference extends ArrayTypeReference {
 		AnnotationBinding[] currentAnnotations = currentType.getAnnotations();
 		ITeamAnchor anchor = null;
 		int valParPos = -1;
-		if (DependentTypeBinding.isDependentType(currentType)) {
+		if (currentType instanceof DependentTypeBinding) {
 			anchor = ((DependentTypeBinding)currentType)._teamAnchor;
 			valParPos = ((DependentTypeBinding)currentType)._valueParamPosition;
 		}

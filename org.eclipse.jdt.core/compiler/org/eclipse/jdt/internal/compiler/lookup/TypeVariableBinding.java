@@ -239,7 +239,7 @@ public class TypeVariableBinding extends ReferenceBinding {
 		if (this.anchors != null) {
 			ITeamAnchor anchor = substitution.substituteAnchor(this.anchors[0], 0); // TODO(SH): support multiple anchors 
 			if (anchor != null) {
-				if (!DependentTypeBinding.isDependentType(argumentType)) {
+				if (!(argumentType instanceof DependentTypeBinding)) {
 					return TypeConstants.MISMATCH;
 				} else {
 					ITeamAnchor argAnchor = ((DependentTypeBinding)argumentType).getAnchor();

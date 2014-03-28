@@ -441,10 +441,10 @@ public class TypeSystem {
 		if (   valueParamPosition > -1 							// position specified, requires dependent type
 		    && !(cachedType instanceof DependentTypeBinding))
 			return false;
-		if (   (cachedType instanceof DependentTypeBinding)		// dependent type specified, positions must match
+		if (   (cachedType instanceof DependentTypeBinding)	// dependent type specified, positions must match
 		    && ((DependentTypeBinding)cachedType)._valueParamPosition != valueParamPosition)
 			return false;
-		if (teamAnchor == null && RoleTypeBinding.isRoleType(cachedType)) // role type found though not requested?
+		if (teamAnchor == null && cachedType.isRoleType()) 		// role type found though not requested?
 			return false;
 		return true;
 	}

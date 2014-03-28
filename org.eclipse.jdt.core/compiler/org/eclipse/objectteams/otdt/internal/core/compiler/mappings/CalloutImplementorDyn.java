@@ -26,7 +26,6 @@ import org.eclipse.jdt.internal.compiler.lookup.TypeConstants;
 import org.eclipse.jdt.internal.compiler.parser.TerminalTokens;
 import org.eclipse.objectteams.otdt.internal.core.compiler.ast.FieldAccessSpec;
 import org.eclipse.objectteams.otdt.internal.core.compiler.ast.MethodSpec;
-import org.eclipse.objectteams.otdt.internal.core.compiler.lookup.RoleTypeBinding;
 import org.eclipse.objectteams.otdt.internal.core.compiler.model.RoleModel;
 import org.eclipse.objectteams.otdt.internal.core.compiler.model.TeamModel;
 import org.eclipse.objectteams.otdt.internal.core.compiler.util.AstGenerator;
@@ -68,7 +67,7 @@ public class CalloutImplementorDyn {
 	}
 
 	private static char[] ensureAccessor(Scope scope, ReferenceBinding baseType, boolean isStatic) {
-		if (baseType instanceof RoleTypeBinding)
+		if (baseType.isRoleType())
 			baseType = baseType.getRealClass();
 		char[] selector = isStatic ? ACCESS_STATIC : ACCESS;
 		MethodBinding[] methods = baseType.getMethods(selector);

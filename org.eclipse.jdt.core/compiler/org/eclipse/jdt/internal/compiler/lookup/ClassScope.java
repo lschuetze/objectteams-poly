@@ -1752,7 +1752,7 @@ public class ClassScope extends Scope {
 			if (baseclass != null) { // is null if a cycle was detected
 
 				if (   baseclass.isRole()
-					&& !(baseclass instanceof RoleTypeBinding))
+					&& !baseclass.isRoleType())
 				{
 					if (RoleModel.isRoleFromOuterEnclosing(sourceType, baseclass)) {
 						TeamModel outerTeam = baseclass.enclosingType().getTeamModel();
@@ -2363,7 +2363,7 @@ public class ClassScope extends Scope {
 			this.superTypeReference = typeReference;
 			ReferenceBinding superType = (ReferenceBinding) typeReference.resolveSuperType(this);
 //{ObjectTeams:	anchor.R is not allowed in this position
-			if (superType instanceof RoleTypeBinding)
+			if (superType != null && superType.isRoleType())
 			{
 				RoleTypeBinding superRole = (RoleTypeBinding)superType;
 				if (superRole.hasExplicitAnchor()) {

@@ -235,7 +235,7 @@ public class TypeAnalyzer  {
         // guaranteed to be scalar now
         if (currentType instanceof ReferenceBinding)
         {
-            if (DependentTypeBinding.isDependentType(currentType))
+            if (currentType instanceof DependentTypeBinding)
                 currentType = ((DependentTypeBinding)currentType).getRealType();
             if (! (tsuperType instanceof ReferenceBinding))
                 return false;
@@ -360,7 +360,7 @@ public class TypeAnalyzer  {
     		tb = ((UnresolvedReferenceBinding)tb).resolve(env, false);
     	}
         if (   createTeamAnchor
-        	&& DependentTypeBinding.isDependentType(tb)
+        	&& tb instanceof DependentTypeBinding
            	&& ((DependentTypeBinding)tb).hasExplicitAnchor())
         {
         	DependentTypeBinding roleTypeBinding = (DependentTypeBinding)tb;

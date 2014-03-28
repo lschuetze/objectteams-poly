@@ -65,6 +65,7 @@ import org.eclipse.objectteams.otdt.internal.core.compiler.lookup.ITeamAnchor;
 import org.eclipse.objectteams.otdt.internal.core.compiler.lookup.RoleTypeBinding;
 import org.eclipse.objectteams.otdt.internal.core.compiler.lookup.SyntheticOTMethodBinding;
 import org.eclipse.objectteams.otdt.internal.core.compiler.lookup.SyntheticRoleFieldAccess;
+import org.eclipse.objectteams.otdt.internal.core.compiler.lookup.WeakenedTypeBinding;
 
 /**
  * OTDT changes:
@@ -7491,10 +7492,11 @@ public int recordTypeBinding(TypeBinding aTypeBinding) {
 	 * 	   constantPool.literalIndexForType(aTypeBinding)
 	 */
 	int idx = this.constantPool.literalIndexForType(aTypeBinding);
-	if (aTypeBinding instanceof RoleTypeBinding) {
+	if (RoleTypeBinding.isRoleWithExplicitAnchor(aTypeBinding)) {
+		if (aTypeBinding instanceof WeakenedTypeBinding)
+			aTypeBinding = ((WeakenedTypeBinding) aTypeBinding).getStrongType();
 		RoleTypeBinding role = (RoleTypeBinding)aTypeBinding;
-		if (role.hasExplicitAnchor())
-			this.classFile.referenceBinding.model.addTypeAnchor(role._teamAnchor, idx);
+		this.classFile.referenceBinding.model.addTypeAnchor(role._teamAnchor, idx);
 	}
 	return idx;
 }

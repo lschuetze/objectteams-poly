@@ -53,7 +53,6 @@ import org.eclipse.objectteams.otdt.core.exceptions.InternalCompilerError;
 import org.eclipse.objectteams.otdt.internal.core.compiler.control.Dependencies;
 import org.eclipse.objectteams.otdt.internal.core.compiler.control.ITranslationStates;
 import org.eclipse.objectteams.otdt.internal.core.compiler.lookup.AbstractOTReferenceBinding;
-import org.eclipse.objectteams.otdt.internal.core.compiler.lookup.RoleTypeBinding;
 import org.eclipse.objectteams.otdt.internal.core.compiler.model.TypeModel;
 import org.eclipse.objectteams.otdt.internal.core.compiler.statemachine.transformer.RoleSplitter;
 import org.eclipse.objectteams.otdt.internal.core.compiler.util.TSuperHelper;
@@ -92,7 +91,6 @@ null is NOT a valid value for a non-public field... it just means the field is n
  * Note: now sourceName and sourceName() have different semantics.
  *
  */
-@SuppressWarnings({"rawtypes", "unchecked"})
 //{ObjectTeams: changed superclass in order to separate out OT features:
 abstract public class ReferenceBinding extends AbstractOTReferenceBinding {
 	protected ReferenceBinding _this() { return this; } // used in AbstractOTReferenceBinding to refer to 'this'
@@ -1403,7 +1401,7 @@ public final boolean hasRestrictedAccess() {
 //{ObjectTeams: support asymmetric comparison. // FIXME(SH): is this needed or is super-impl smart enough??
 @Override
 public boolean isProvablyDistinct(TypeBinding otherType) {
-	if (RoleTypeBinding.isRoleType(otherType))
+	if (otherType.isRoleType())
 		return otherType.isProvablyDistinct(this);
 	else
 		return super.isProvablyDistinct(otherType);

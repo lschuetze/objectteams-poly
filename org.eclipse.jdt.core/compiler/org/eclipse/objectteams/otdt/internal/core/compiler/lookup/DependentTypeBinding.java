@@ -105,7 +105,7 @@ public class DependentTypeBinding extends ParameterizedTypeBinding {
 	private void initializeFromType(ReferenceBinding givenType) {
 		this.model = givenType.model; // shared model from type.
 		this.modifiers      = givenType.modifiers;
-		this.tagBits        = givenType.tagBits | TagBits.IsDependentType;
+		this.tagBits        = givenType.tagBits;
 		this.tagBits 		&= ~(TagBits.AreMethodsSorted|TagBits.AreMethodsComplete); // in case the generic type was already processed
 		
 		this.compoundName     	= givenType.compoundName;
@@ -262,34 +262,29 @@ public class DependentTypeBinding extends ParameterizedTypeBinding {
 			return true; // could be anchored type variable
 		return binding.valueParamSynthArgs() != NO_SYNTH_ARGUMENTS;
 	}
-    public static boolean isDependentType(TypeBinding binding) {
-    	if (binding == null) return false;
-    	return (binding.tagBits & TagBits.IsDependentType) != 0;
-    }
 
-    public static boolean isPlainDependentType(TypeBinding binding) {
-    	if (binding == null) return false;
-    	return (binding.tagBits & (TagBits.IsDependentType|TagBits.IsWrappedRole)) == TagBits.IsDependentType;
-	}
     @Override
     public DependentTypeBinding asPlainDependentType() {
-    	if ((this.tagBits & (TagBits.IsWrappedRole)) == 0)
-    		return this;
-    	return null;
+    	return this;
     }
     
+    @Override
+    public boolean isPlainDependentType() {
+    	return true;
+    }
+
     /**
      * Is type a dependent type and declaredAnchor the field representing its type value parameter?
      */
     public static boolean isDependentTypeOf(TypeBinding type, ITeamAnchor declaredAnchor) {
-    	if (!isPlainDependentType(type))
+    	if (type == null || !type.isPlainDependentType())
     		return false;
     	DependentTypeBinding depType = (DependentTypeBinding)type;
     	return depType._matchingVariable == declaredAnchor;
     }
 
 	public static boolean isDependentTypeVariable(TypeBinding binding) {
-		if ((binding.tagBits & (TagBits.IsDependentType|TagBits.IsWrappedRole)) == 0)
+		if (!(binding instanceof DependentTypeBinding))
 			return false;
 		return ((DependentTypeBinding)binding).type.kind() == TYPE_PARAMETER;
 	}
@@ -316,7 +311,7 @@ public class DependentTypeBinding extends ParameterizedTypeBinding {
 
 	@Override
 	public boolean isProvablyDistinct(TypeBinding otherType) {
-		if (DependentTypeBinding.isDependentType(otherType))
+		if (otherType instanceof DependentTypeBinding)
 			otherType = ((DependentTypeBinding)otherType).getRealType();
 			// for internal casting purposes type anchors can be ignored:
 		return getRealType().isProvablyDistinct(otherType);

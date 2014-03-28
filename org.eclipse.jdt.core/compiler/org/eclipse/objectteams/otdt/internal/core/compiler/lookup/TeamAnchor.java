@@ -291,7 +291,7 @@ public abstract class TeamAnchor extends Binding implements ITeamAnchor {
 		if (bind != null && (bind instanceof TeamAnchor))
 			return (TeamAnchor)bind;
 		TypeBinding type = expression.resolvedType;
-		if (RoleTypeBinding.isRoleType(type))
+		if (type != null && type.isRoleType())
 			return ((IRoleTypeBinding)type).getAnchor();
 		else
 			return null;
@@ -409,9 +409,10 @@ public abstract class TeamAnchor extends Binding implements ITeamAnchor {
 	public ITeamAnchor retrieveAnchorFromAnchorRoleTypeFor(ReferenceBinding roleType) {
 		// TODO (SH) copied and not yet validated!
 		// in contrast to the above, this method will never return 'this'
-	    if ((this.type != null) && RoleTypeBinding.isRoleType(leafType()))
+	    ReferenceBinding leafType = leafType();
+		if (this.type != null && leafType != null && leafType.isRoleType())
 	    {
-	        ITeamAnchor anchor = ((IRoleTypeBinding)leafType()).getAnchor();
+	        ITeamAnchor anchor = ((IRoleTypeBinding)leafType).getAnchor();
 	        if (anchor.isTeamContainingRole(roleType))
 	        {
 	            return anchor;
@@ -746,7 +747,7 @@ public abstract class TeamAnchor extends Binding implements ITeamAnchor {
     			if (strongRoleType != null)
     				return WeakenedTypeBinding.makeWeakenedTypeBinding(strongRoleType, roleBinding, dimensions);
     		}
-    		if (dimensions == roleBinding.dimensions() && DependentTypeBinding.isDependentType(roleBinding))
+    		if (dimensions == roleBinding.dimensions() && roleBinding instanceof DependentTypeBinding)
     			return roleBinding;
     	}
 

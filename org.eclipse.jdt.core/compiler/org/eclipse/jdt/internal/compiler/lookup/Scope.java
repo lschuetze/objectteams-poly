@@ -570,7 +570,7 @@ public abstract class Scope {
 					}
 					if (substitutedArguments != originalArguments || substitutedEnclosing != originalEnclosing) { //$IDENTITY-COMPARISON$
 //{ObjectTeams: combination role & parameterized:
-						if (RoleTypeBinding.isRoleType(originalParameterizedType)) {
+						if (originalParameterizedType.isRoleType()) {
 							DependentTypeBinding originalRole = (DependentTypeBinding) originalParameterizedType;
 							return originalParameterizedType.environment.createParameterizedType(
 								originalParameterizedType.genericType(), substitutedArguments, originalRole._teamAnchor, originalRole._valueParamPosition, substitutedEnclosing, Binding.NO_ANNOTATIONS);

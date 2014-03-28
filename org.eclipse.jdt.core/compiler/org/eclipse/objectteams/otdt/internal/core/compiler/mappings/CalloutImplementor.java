@@ -952,7 +952,7 @@ public class CalloutImplementor extends MethodMappingImplementor
 		TypeVariableBinding[] arguments = null;
 		if (givenType.isParameterizedType())
 			arguments = ((ParameterizedTypeBinding)givenType).typeVariables();
-		if (DependentTypeBinding.isDependentType(baseBinding)) {
+		if (baseBinding instanceof DependentTypeBinding) {
 			ITeamAnchor anchor = ((DependentTypeBinding)baseBinding).getAnchor();
 			if (anchor.isTeamContainingRole(givenLeaf)) {
 				if (TypeBinding.notEquals(anchor.getResolvedType(), givenLeaf.enclosingType()))
@@ -1098,7 +1098,7 @@ public class CalloutImplementor extends MethodMappingImplementor
 
 		// return type adjustments:
 		TypeBinding expectedType= roleMethodSpec.resolvedType();
-		if (DependentTypeBinding.isDependentType(expectedType)) {
+		if (expectedType instanceof DependentTypeBinding) {
 			DependentTypeBinding roleBinding = (DependentTypeBinding)expectedType;
 			if (roleBinding.getAnchor() instanceof TThisBinding)
 				expectedType= roleBinding.baseclass();

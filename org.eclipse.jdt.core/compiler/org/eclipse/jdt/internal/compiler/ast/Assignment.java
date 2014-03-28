@@ -48,7 +48,6 @@ import org.eclipse.jdt.internal.compiler.lookup.*;
 import org.eclipse.objectteams.otdt.internal.core.compiler.control.Config;
 import org.eclipse.objectteams.otdt.internal.core.compiler.lifting.Lowering;
 import org.eclipse.objectteams.otdt.internal.core.compiler.lookup.DependentTypeBinding;
-import org.eclipse.objectteams.otdt.internal.core.compiler.lookup.RoleTypeBinding;
 import org.eclipse.objectteams.otdt.internal.core.compiler.util.RoleTypeCreator;
 
 /**
@@ -265,7 +264,7 @@ public TypeBinding resolveType(BlockScope scope) {
 		}
 
 //{ObjectTeams: additional check and record team anchor equivalence:
-		if (Config.getLoweringPossible() && RoleTypeBinding.isRoleType(rhsType))
+		if (Config.getLoweringPossible() && rhsType.isRoleType())
 			((DependentTypeBinding)rhsType).recheckAmbiguousLowering(lhsType, this, scope, null);
 
 		VariableBinding lhsBinding = null;

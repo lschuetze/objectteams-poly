@@ -359,7 +359,7 @@ public class OTSpecialAccessAttribute extends AbstractAttribute {
 						continue;  // current role is not relevant (not bound)
 					if (!CharOperation.equals(newBase.sourceName(), oldBase.sourceName()))
 						continue;  // current role is bound to a different base
-					if (RoleTypeBinding.isRoleType(newBase)) {
+					if (newBase.isRoleType()) {
 						if (newBase instanceof WeakenedTypeBinding)
 							newBase = ((WeakenedTypeBinding)newBase).getStrongType();
 						if (((RoleTypeBinding)newBase)._teamAnchor.isBaseAnchor()) {

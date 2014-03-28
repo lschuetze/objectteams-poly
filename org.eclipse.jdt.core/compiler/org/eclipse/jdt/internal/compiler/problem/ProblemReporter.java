@@ -8441,8 +8441,8 @@ public void typeMismatchError(TypeBinding actualType, TypeBinding expectedType, 
 	}
 //{ObjectTeams: differentiate for role types:
 	int problemId = expectingLocation instanceof ReturnStatement ? IProblem.ReturnTypeMismatch : IProblem.TypeMismatch; // default
-	if (   RoleTypeBinding.isRoleType(expectedType)
-		&& RoleTypeBinding.isRoleType(actualType))
+	if (   expectedType.isRoleType()
+		&& actualType != null && actualType.isRoleType())
 	{
 		DependentTypeBinding resultRole = (DependentTypeBinding)actualType;
 		DependentTypeBinding expectedRole = (DependentTypeBinding)expectedType;

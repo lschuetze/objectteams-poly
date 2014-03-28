@@ -185,7 +185,7 @@ public class RoleTypeCreator implements TagBits {
         if (   (variableBinding instanceof LocalVariableBinding) // note that for FieldBinding Bit63L has a different meaning!
 			&& (((LocalVariableBinding)variableBinding).tagBits & TagBits.IsFreshTeamInstance) != 0) 
         {
-        	if (!RoleTypeBinding.isRoleType(refBinding))
+        	if (!refBinding.isRoleType())
         		return variableBinding.getDependentTypeBinding(refBinding, -1, null, dimensions);
         	return 
         		originalType;
@@ -263,7 +263,7 @@ public class RoleTypeCreator implements TagBits {
 		ReferenceBinding refReturn = (ReferenceBinding)returnType.leafComponentType();
 
 		// don't try externalized non-public role if compatibility can be established with plain types:
-        if (send.expectedType != null && !DependentTypeBinding.isDependentType(send.expectedType))
+        if (send.expectedType != null && !(send.expectedType instanceof DependentTypeBinding))
         	if (   refReturn.isRole()
         		&& !refReturn.isPublic()
         		&& returnType.isCompatibleWith(send.expectedType))
@@ -910,7 +910,7 @@ public class RoleTypeCreator implements TagBits {
 		    		anchorBinding = ((RoleTypeBinding)receiverLeaf)._teamAnchor;
 		    	} else {
 		    		// regression fix during work on https://bugs.eclipse.org/331877
-		    		if (RoleTypeBinding.isRoleType(anchorExpr.resolvedType))
+		    		if (anchorExpr.resolvedType != null && anchorExpr.resolvedType.isRoleType())
 		    			return ((DependentTypeBinding)anchorExpr.resolvedType)._teamAnchor;
 		    		return cannotWrapType(roleType, problemReporter, typedNode);
 		    	}
@@ -974,7 +974,7 @@ public class RoleTypeCreator implements TagBits {
 	    ProblemReporter  problemReporter,
 	    ASTNode          typedNode)
 	{
-	    if (   !RoleTypeBinding.isRoleType(roleType)
+	    if (   !roleType.isRoleType()
 	        && problemReporter != null)
 	    {
 	    	if ((typedNode.bits & ASTNode.IsGeneratedWithProblem) == 0) {
@@ -1257,7 +1257,7 @@ public class RoleTypeCreator implements TagBits {
 						problemReason);
 	   	}
 
-	    if (DependentTypeBinding.isDependentType(roleBinding))
+	    if (roleBinding instanceof DependentTypeBinding)
 	    {
 	        DependentTypeBinding wrappedRole = (DependentTypeBinding)roleBinding;
 	        if (wrappedRole._teamAnchor != variableBinding)
@@ -1363,7 +1363,7 @@ public class RoleTypeCreator implements TagBits {
 	    		scope.problemReporter().invalidType(type, anchoredType);
 	    		return null;
 	    	}
-	    	if (RoleTypeBinding.isRoleType(anchoredType.leafComponentType())) {
+	    	if (anchoredType.leafComponentType().isRoleType()) {
 		    	// prepare for creating an AnchorListAttribute
 		        RoleTypeBinding leafRoleType = (RoleTypeBinding)anchoredType.leafComponentType();
 				leafRoleType._argumentPosition = argPos;
@@ -1656,7 +1656,7 @@ public class RoleTypeCreator implements TagBits {
 		   }
 	   }
 
-       if (DependentTypeBinding.isDependentType(type)) {
+       if (type instanceof DependentTypeBinding) {
     	   TypeBinding substituted = substitution.substitute((DependentTypeBinding) type, typeArguments, dimensions); 
            if (substituted != type) // includes substituted == null //$IDENTITY-COMPARISON$
         	   return substituted;

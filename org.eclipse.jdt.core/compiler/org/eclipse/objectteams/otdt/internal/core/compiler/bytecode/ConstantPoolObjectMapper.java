@@ -100,9 +100,7 @@ public class ConstantPoolObjectMapper implements ClassFileConstants{
 			declaringClass = src_cpo.getFieldRef().declaringClass;
 			break;
 		}
-		if (   declaringClass != null
-			&& declaringClass instanceof RoleTypeBinding
-			&& ((RoleTypeBinding)declaringClass).hasExplicitAnchor())
+		if (RoleTypeBinding.isRoleWithExplicitAnchor(declaringClass))
 		{
 			return src_cpo; // don't map features of externalized roles!
 		}
