@@ -220,8 +220,8 @@ class ConstraintTypeFormula extends ConstraintFormula {
 			case Binding.PARAMETERIZED_TYPE:
 				{
 					List<ConstraintFormula> constraints = new ArrayList<ConstraintFormula>();
-					while (superCandidate instanceof ParameterizedTypeBinding && subCandidate != null)  {
-						if (!addConstraintsFromTypeParamters(subCandidate, (ParameterizedTypeBinding) superCandidate, constraints))
+					while (superCandidate != null && superCandidate.kind() == Binding.PARAMETERIZED_TYPE && subCandidate != null)  {
+						if (!addConstraintsFromTypeParameters(subCandidate, (ParameterizedTypeBinding) superCandidate, constraints))
 							return FALSE;
 						// travel to enclosing types to check if they have type parameters, too:
 						superCandidate = superCandidate.enclosingType();
@@ -266,18 +266,31 @@ class ConstraintTypeFormula extends ConstraintFormula {
 
 			// "type variable" has two implementations in JDT:
 			case Binding.WILDCARD_TYPE:
-				// TODO If S is an intersection type of which T is an element, the constraint reduces to true. 
-				if (subCandidate.kind() == Binding.INTERSECTION_TYPE)
-					InferenceContext18.missingImplementation("NYI"); //$NON-NLS-1$
+				if (subCandidate.kind() == Binding.INTERSECTION_TYPE) {
+					ReferenceBinding[] intersectingTypes = subCandidate.getIntersectingTypes();
+					if (intersectingTypes != null)
+						for (int i = 0; i < intersectingTypes.length; i++)
+							if (TypeBinding.equalsEquals(intersectingTypes[i], superCandidate))
+								return true;
+				}
 				WildcardBinding variable = (WildcardBinding) superCandidate;
 				if (variable.boundKind == Wildcard.SUPER)
 					return new ConstraintTypeFormula(subCandidate, variable.bound, SUBTYPE, this.isSoft);
 				return FALSE;
 			case Binding.TYPE_PARAMETER:
-				// same as wildcard (but we don't have a lower bound any way)
-				// TODO If S is an intersection type of which T is an element, the constraint reduces to true.
-				if (subCandidate.kind() == Binding.INTERSECTION_TYPE)
-					InferenceContext18.missingImplementation("NYI"); //$NON-NLS-1$
+				// similar to wildcard, but different queries for lower bound
+				if (subCandidate.kind() == Binding.INTERSECTION_TYPE) {
+					ReferenceBinding[] intersectingTypes = subCandidate.getIntersectingTypes();
+					if (intersectingTypes != null)
+						for (int i = 0; i < intersectingTypes.length; i++)
+							if (TypeBinding.equalsEquals(intersectingTypes[i], superCandidate))
+								return true;
+				}
+				if (superCandidate instanceof CaptureBinding) {
+					CaptureBinding capture = (CaptureBinding) superCandidate;
+					if (capture.lowerBound != null && (capture.firstBound == null || capture.firstBound.id == TypeIds.T_JavaLangObject))
+						return new ConstraintTypeFormula(subCandidate, capture.lowerBound, SUBTYPE, this.isSoft);
+				}
 				return FALSE;
 			case Binding.INTERSECTION_TYPE:
 				InferenceContext18.missingImplementation("NYI"); //$NON-NLS-1$
@@ -306,7 +319,7 @@ class ConstraintTypeFormula extends ConstraintFormula {
 		return null;
 	}
 
-	boolean addConstraintsFromTypeParamters(TypeBinding subCandidate, ParameterizedTypeBinding ca, List<ConstraintFormula> constraints) {
+	boolean addConstraintsFromTypeParameters(TypeBinding subCandidate, ParameterizedTypeBinding ca, List<ConstraintFormula> constraints) {
 		TypeBinding[] ai = ca.arguments;								// C<A1,A2,...>
 		if (ai == null)
 			return true; // no arguments here means nothing to check

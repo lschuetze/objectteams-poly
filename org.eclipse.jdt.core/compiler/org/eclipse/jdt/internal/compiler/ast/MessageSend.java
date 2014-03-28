@@ -50,6 +50,8 @@
  *								Bug 426290 - [1.8][compiler] Inference + overloading => wrong method resolution ?
  *								Bug 427483 - [Java 8] Variables in lambdas sometimes can't be resolved
  *								Bug 427438 - [1.8][compiler] NPE at org.eclipse.jdt.internal.compiler.ast.ConditionalExpression.generateCode(ConditionalExpression.java:280)
+ *								Bug 426996 - [1.8][inference] try to avoid method Expression.unresolve()? 
+ *								Bug 428352 - [1.8][compiler] Resolution errors don't always surface
  *     Jesper S Moller - Contributions for
  *								Bug 378674 - "The method can be declared as static" is wrong
  *        Andy Clement (GoPivotal, Inc) aclement@gopivotal.com - Contributions for
@@ -800,7 +802,7 @@ public TypeBinding resolveType(BlockScope scope) {
 //{ObjectTeams: FIXME: stale comment regarding removed code: "receiver may already be resolved, keep that result:"
 // orig:
 	if (this.receiver.resolvedType != null)
-		this.receiver.unresolve(); // some cleanup before second attempt
+		scope.problemReporter().genericInferenceError("Receiver was unexpectedly found resolved", this); //$NON-NLS-1$
 	this.actualReceiverType = this.receiver.resolveType(scope);
 // :giro
   /*orig:
@@ -853,7 +855,7 @@ public TypeBinding resolveType(BlockScope scope) {
 		  if (!this.isGenerated)
 // SH}
 			if (this.arguments[i].resolvedType != null) 
-				this.arguments[i].unresolve(); // some cleanup before second attempt
+				scope.problemReporter().genericInferenceError("Argument was unexpectedly found resolved", this); //$NON-NLS-1$
 			if (argument instanceof CastExpression) {
 				argument.bits |= ASTNode.DisableUnnecessaryCastCheck; // will check later on
 				argsContainCast = true;
@@ -1288,7 +1290,7 @@ protected void findMethodBinding(BlockScope scope, TypeBinding[] argumentTypes) 
 	this.binding = this.receiver.isImplicitThis()
 			? scope.getImplicitMethod(this.selector, argumentTypes, this)
 			: scope.getMethod(this.actualReceiverType, this.selector, argumentTypes, this);
-		resolvePolyExpressionArguments(this, this.binding, argumentTypes);
+	resolvePolyExpressionArguments(this, this.binding, argumentTypes, scope);
 }
 
 //{ObjectTeams: utils:
@@ -1451,6 +1453,21 @@ protected int getDepthForSynthMethodAccess(MethodBinding methodBinding, SourceTy
 }
 // SH}
 
+@Override
+public TypeBinding checkAgainstFinalTargetType(TypeBinding targetType, Scope scope) {
+	if (this.binding instanceof ParameterizedGenericMethodBinding) {
+		InferenceContext18 ctx = getInferenceContext((ParameterizedMethodBinding) this.binding);
+		if (ctx != null && ctx.stepCompleted < InferenceContext18.TYPE_INFERRED) {
+			this.expectedType = targetType;
+			MethodBinding updatedBinding = ctx.inferInvocationType(this, (ParameterizedGenericMethodBinding) this.binding);
+			if (updateBindings(updatedBinding, targetType)) {
+				ASTNode.resolvePolyExpressionArguments(this, updatedBinding, scope);
+			}
+		}
+	}
+	return this.resolvedType;
+}
+
 public void setActualReceiverType(ReferenceBinding receiverType) {
 	if (receiverType == null) return; // error scenario only
 	this.actualReceiverType = receiverType;
@@ -1547,7 +1564,13 @@ public boolean receiverIsImplicitThis() {
 	return this.receiver.isImplicitThis();
 }
 // -- interface Invocation: --
-public MethodBinding binding(TypeBinding targetType) {
+public MethodBinding binding(TypeBinding targetType, boolean reportErrors, Scope scope) {
+	if (reportErrors) {
+		if (this.binding == null)
+			scope.problemReporter().genericInferenceError("method is unexpectedly unresolved", this); //$NON-NLS-1$
+		else if (!this.binding.isValidBinding())
+			scope.problemReporter().invalidMethod(this, this.binding);
+	}
 	return this.binding;
 }
 public Expression[] arguments() {

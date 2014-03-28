@@ -29,6 +29,9 @@
  *								Bug 426792 - [1.8][inference][impl] generify new type inference engine
  *								Bug 423505 - [1.8] Implement "18.5.4 More Specific Method Inference"
  *								Bug 427438 - [1.8][compiler] NPE at org.eclipse.jdt.internal.compiler.ast.ConditionalExpression.generateCode(ConditionalExpression.java:280)
+ *								Bug 426996 - [1.8][inference] try to avoid method Expression.unresolve()?
+ *								Bug 428274 - [1.8] [compiler] Cannot cast from Number to double
+ *								Bug 428352 - [1.8][compiler] Resolution errors don't always surface
  *******************************************************************************/
 package org.eclipse.jdt.internal.compiler.ast;
 
@@ -421,8 +424,10 @@ public final boolean checkCastTypesCompatibility(
 				return true;
 
 			}
-		} else if (use17specifics && expressionType.id == TypeIds.T_JavaLangObject){
-			// cast from Object to base type allowed from 1.7, see JLS $5.5
+		} else if (use17specifics && castType.isPrimitiveType() && expressionType instanceof ReferenceBinding && 
+				!expressionType.isBoxedPrimitiveType() && checkCastTypesCompatibility(scope, scope.boxing(castType), expressionType, expression)) {
+			// cast from any reference type (other than boxing types) to base type allowed from 1.7, see JLS $5.5
+			// by our own interpretation (in accordance with javac) we reject arays, though.
 			return true;
 		} else if (use15specifics
 							&& scope.environment().computeBoxingType(expressionType).isCompatibleWith(castType)) { // unboxing - only widening match is allowed
@@ -841,7 +846,10 @@ public void computeConversion(Scope scope, TypeBinding runtimeType, TypeBinding 
 	int compileTimeTypeID, runtimeTypeID;
 	if ((compileTimeTypeID = compileTimeType.id) >= TypeIds.T_LastWellKnownTypeId) { // e.g. ? extends String  ==> String (103227); >= TypeIds.T_LastWellKnownTypeId implies TypeIds.NoId
 		compileTimeTypeID = compileTimeType.erasure().id == TypeIds.T_JavaLangString ? TypeIds.T_JavaLangString : TypeIds.T_JavaLangObject;
+	} else if (runtimeType.isPrimitiveType() && compileTimeType instanceof ReferenceBinding && !compileTimeType.isBoxedPrimitiveType()) {
+		compileTimeTypeID = TypeIds.T_JavaLangObject; // treatment is the same as for jlO.
 	}
+
 	switch (runtimeTypeID = runtimeType.id) {
 		case T_byte :
 		case T_short :
@@ -1138,11 +1146,6 @@ public Constant optimizedBooleanConstant() {
 public boolean isPertinentToApplicability(TypeBinding targetType, MethodBinding method) {
 	return true;
 }
-// call this before resolving an expression for the second time.
-// FIXME: we should find a better strategy, see LambdaExpressionsTest.testLambdaInference1() f. for tests that currently need this.
-void unresolve() {
-	this.resolvedType = null;
-}
 /**
  * Returns the type of the expression after required implicit conversions. When expression type gets promoted
  * or inserted a generic cast, the converted type will differ from the resolved type (surface side-effects from
@@ -1247,8 +1250,9 @@ public TypeBinding resolveTypeExpecting(BlockScope scope, TypeBinding expectedTy
  * Once outer contexts have finalized the target type for this expression,
  * perform any checks that might have been delayed previously.
  * @param targetType the final target type (aka expectedType) for this expression.
+ * @param scope scope for error reporting
  */
-public TypeBinding checkAgainstFinalTargetType(TypeBinding targetType) {
+public TypeBinding checkAgainstFinalTargetType(TypeBinding targetType, Scope scope) {
 	return this.resolvedType; // subclasses may choose to do real stuff here
 }
 

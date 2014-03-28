@@ -22,6 +22,7 @@
  *							Bug 395977 - [compiler][resource] Resource leak warning behavior possibly incorrect for anonymous inner class
  *							Bug 395002 - Self bound generic class doesn't resolve bounds properly for wildcards for certain parametrisation.
  *							Bug 416176 - [1.8][compiler][null] null type annotations cause grief on type variables
+ *							Bug 427199 - [1.8][resource] avoid resource leak warnings on Streams that have no resource
  *        Andy Clement (GoPivotal, Inc) aclement@gopivotal.com - Contributions for
  *                          Bug 415821 - [1.8][compiler] CLASS_EXTENDS target type annotation missing for anonymous classes
  *******************************************************************************/
@@ -665,8 +666,8 @@ public class ClassScope extends Scope {
 
 		SourceTypeBinding sourceType = this.referenceContext.binding;
 		environment().setAccessRestriction(sourceType, accessRestriction);
-		checkAndSetModifiers();
-		buildTypeVariables(); // do this before adding the type to avoid race: see https://bugs.eclipse.org/bugs/show_bug.cgi?id=428247
+		TypeParameter[] typeParameters = this.referenceContext.typeParameters;
+		sourceType.typeVariables = typeParameters == null || typeParameters.length == 0 ? Binding.NO_TYPE_VARIABLES : null;
 		sourceType.fPackage.addType(sourceType);
 //{ObjectTeams: ROFI
 		if (isRoleFile) {
@@ -701,6 +702,8 @@ public class ClassScope extends Scope {
 			this.environment().getTeamMethodGenerator().registerOOTeamClass(sourceType);
 		}
 // SH}
+		checkAndSetModifiers();
+		buildTypeVariables();
 		buildMemberTypes(accessRestriction);
 //{ObjectTeams: setup cache for known role files:
 		if (this.referenceContext.isTeam())
@@ -1612,7 +1615,7 @@ public class ClassScope extends Scope {
 				sourceType.typeBits |= (superclass.typeBits & TypeIds.InheritableBits);
 				// further analysis against white lists for the unlikely case we are compiling java.io.*:
 				if ((sourceType.typeBits & (TypeIds.BitAutoCloseable|TypeIds.BitCloseable)) != 0)
-					sourceType.typeBits |= sourceType.applyCloseableWhitelists();
+					sourceType.typeBits |= sourceType.applyCloseableClassWhitelists();
 				return true;
 			}
 		}
@@ -2097,6 +2100,9 @@ public class ClassScope extends Scope {
 			}
 			// only want to reach here when no errors are reported
 			sourceType.typeBits |= (superInterface.typeBits & TypeIds.InheritableBits);
+			// further analysis against white lists for the unlikely case we are compiling java.util.stream.Stream:
+			if ((sourceType.typeBits & (TypeIds.BitAutoCloseable|TypeIds.BitCloseable)) != 0)
+				sourceType.typeBits |= sourceType.applyCloseableInterfaceWhitelists();
 			interfaceBindings[count++] = superInterface;
 		}
 		// hold onto all correctly resolved superinterfaces

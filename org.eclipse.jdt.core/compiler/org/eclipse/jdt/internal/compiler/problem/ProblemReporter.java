@@ -49,6 +49,8 @@
  *								Bug 416307 - [1.8][compiler][null] subclass with type parameter substitution confuses null checking
  *								Bug 400874 - [1.8][compiler] Inference infrastructure should evolve to meet JLS8 18.x (Part G of JSR335 spec)
  *								Bug 424637 - [1.8][compiler][null] AIOOB in ReferenceExpression.resolveType with a method reference to Files::walk
+ *								Bug 428294 - [1.8][compiler] Type mismatch: cannot convert from List<Object> to Collection<Object[]>
+ *								Bug 428366 - [1.8] [compiler] The method valueAt(ObservableList<Object>, int) is ambiguous for the type Bindings
  *      Jesper S Moller <jesper@selskabet.org> -  Contributions for
  *								bug 382701 - [1.8][compiler] Implement semantic analysis of Lambda expressions & Reference expression
  *								bug 382721 - [1.8][compiler] Effectively final variables needs special treatment
@@ -1765,7 +1767,8 @@ public int computeSeverity(int problemID){
 			return ProblemSeverities.Warning;
 		case IProblem.IllegalUseOfUnderscoreAsAnIdentifier:
 			return this.underScoreIsLambdaParameter ? ProblemSeverities.Error : ProblemSeverities.Warning;
-		
+		case IProblem.LambdaShapeComputationError:
+			return ProblemSeverities.InternalError;
 	}
 	int irritant = getIrritant(problemID);
 	if (irritant != 0) {
@@ -14299,8 +14302,16 @@ public void disallowedTargetForContainerAnnotation(Annotation annotation, TypeBi
 		annotation.sourceEnd);
 }
 public void genericInferenceError(String message, InvocationSite invocationSite) {
+	genericInferenceProblem(message, invocationSite, ProblemSeverities.Error);
+}
+public void genericInferenceProblem(String message, InvocationSite invocationSite, int severity) {
 	String[] args = new String[]{message};
-	this.handle( IProblem.GenericInferenceError, args, args, invocationSite.sourceStart(), invocationSite.sourceEnd());	
+	int start = 0, end = 0;
+	if (invocationSite != null) {
+		start = invocationSite.sourceStart();
+		end = invocationSite.sourceEnd();
+	}
+	this.handle(IProblem.GenericInferenceError, args, args, severity, start, end);	
 }
 public void uninternedIdentityComparison(EqualExpression expr, TypeBinding lhs, TypeBinding rhs, CompilationUnitDeclaration unit) {
 	
@@ -14340,5 +14351,14 @@ public void uninternedIdentityComparison(EqualExpression expr, TypeBinding lhs, 
 			},
 			expr.sourceStart,
 			expr.sourceEnd);
+}
+
+public void lambdaShapeComputationError(LambdaExpression expression) {
+	this.handle(
+			IProblem.LambdaShapeComputationError,
+			NoArgument,
+			NoArgument,
+			expression.sourceStart,
+			expression.diagnosticsSourceEnd());
 }
 }

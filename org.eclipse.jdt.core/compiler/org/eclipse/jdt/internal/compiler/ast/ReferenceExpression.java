@@ -27,6 +27,7 @@
  *							Bug 424403 - [1.8][compiler] Generic method call with method reference argument fails to resolve properly.
  *							Bug 427196 - [1.8][compiler] Compiler error for method reference to overloaded method
  *							Bug 427438 - [1.8][compiler] NPE at org.eclipse.jdt.internal.compiler.ast.ConditionalExpression.generateCode(ConditionalExpression.java:280)
+ *							Bug 428264 - [1.8] method reference of generic class causes problems (wrong inference result or NPE)
  *        Andy Clement (GoPivotal, Inc) aclement@gopivotal.com - Contribution for
  *                          Bug 383624 - [1.8][compiler] Revive code generation support for type annotations (from Olivier's work)
  *******************************************************************************/
@@ -52,6 +53,7 @@ import org.eclipse.jdt.internal.compiler.lookup.ArrayBinding;
 import org.eclipse.jdt.internal.compiler.lookup.Binding;
 import org.eclipse.jdt.internal.compiler.lookup.BlockScope;
 import org.eclipse.jdt.internal.compiler.lookup.InferenceContext18;
+import org.eclipse.jdt.internal.compiler.lookup.IntersectionCastTypeBinding;
 import org.eclipse.jdt.internal.compiler.lookup.InvocationSite;
 import org.eclipse.jdt.internal.compiler.lookup.MethodBinding;
 import org.eclipse.jdt.internal.compiler.lookup.PolyTypeBinding;
@@ -59,6 +61,7 @@ import org.eclipse.jdt.internal.compiler.lookup.ProblemReasons;
 import org.eclipse.jdt.internal.compiler.lookup.ReferenceBinding;
 import org.eclipse.jdt.internal.compiler.lookup.Scope;
 import org.eclipse.jdt.internal.compiler.lookup.SourceTypeBinding;
+import org.eclipse.jdt.internal.compiler.lookup.SyntheticArgumentBinding;
 import org.eclipse.jdt.internal.compiler.lookup.SyntheticMethodBinding;
 import org.eclipse.jdt.internal.compiler.lookup.TagBits;
 import org.eclipse.jdt.internal.compiler.lookup.TypeBinding;
@@ -152,12 +155,25 @@ public class ReferenceExpression extends FunctionalExpression implements Invocat
 		} finally {
 			currentScope.problemReporter().switchErrorHandlingPolicy(oldPolicy);
 		}
+		SyntheticArgumentBinding[] outerLocals = this.receiverType.syntheticOuterLocalVariables();
+		for (int i = 0, length = outerLocals == null ? 0 : outerLocals.length; i < length; i++)
+			implicitLambda.addSyntheticArgument(outerLocals[i].actualOuterLocalVariable);
+		
 		implicitLambda.generateCode(currentScope, codeStream, valueRequired);
 	}	
 	
+	private boolean shouldGenerateImplicitLambda(BlockScope currentScope) {
+		// these cases are either too complicated, impossible to handle or result in significant code duplication 
+		return (this.binding.isVarargs() || 
+				(isConstructorReference() && this.receiverType.syntheticOuterLocalVariables() != null && currentScope.methodScope().isStatic) ||
+				this.expectedType instanceof IntersectionCastTypeBinding || // marker interfaces require alternate meta factory.
+				this.expectedType.findSuperTypeOriginatingFrom(currentScope.getJavaIoSerializable()) != null); // serialization support.
+	}
+	
 	public void generateCode(BlockScope currentScope, CodeStream codeStream, boolean valueRequired) {
 		this.actualMethodBinding = this.binding; // grab before synthetics come into play.
-		if (this.binding.isVarargs()) {
+		// Handle some special cases up front and transform them into implicit lambdas.
+		if (shouldGenerateImplicitLambda(currentScope)) {
 			generateImplicitLambda(currentScope, codeStream, valueRequired);
 			return;
 		}
@@ -220,6 +236,8 @@ public class ReferenceExpression extends FunctionalExpression implements Invocat
 									true /* disallow instance reference in explicit constructor call */);
 							codeStream.generateOuterAccess(emulationPath, this, syntheticArgumentType, currentScope);
 						}
+					} else {
+						enclosingInstances = Binding.NO_REFERENCE_TYPES;
 					}
 					// Reject types that capture outer local arguments, these cannot be manufactured by the metafactory.
 					if (nestedType.syntheticOuterLocalVariables() != null) {
@@ -743,6 +761,10 @@ public class ReferenceExpression extends FunctionalExpression implements Invocat
 	}
 
 	public boolean isCompatibleWith(TypeBinding left, Scope scope) {
+		if (this.binding != null && this.binding.isValidBinding() // binding indicates if full resolution has already happened
+				&& this.resolvedType != null && this.resolvedType.isValidBinding()) {
+			return this.resolvedType.isCompatibleWith(left, scope);
+		}
 		// 15.28.2
 		left = left.uncapture(this.enclosingScope);
 		final MethodBinding sam = left.getSingleAbstractMethod(this.enclosingScope, true);

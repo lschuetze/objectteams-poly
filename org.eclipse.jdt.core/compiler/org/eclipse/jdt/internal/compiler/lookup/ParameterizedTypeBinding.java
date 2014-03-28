@@ -35,9 +35,12 @@
  *								Bug 425156 - [1.8] Lambda as an argument is flagged with incompatible error
  *								Bug 426563 - [1.8] AIOOBE when method with error invoked with lambda expression as argument
  *								Bug 426792 - [1.8][inference][impl] generify new type inference engine
+ *								Bug 428294 - [1.8][compiler] Type mismatch: cannot convert from List<Object> to Collection<Object[]>
+ *								Bug 427199 - [1.8][resource] avoid resource leak warnings on Streams that have no resource
  *******************************************************************************/
 package org.eclipse.jdt.internal.compiler.lookup;
 
+import java.util.Arrays;
 import java.util.List;
 import java.util.Set;
 
@@ -171,7 +174,11 @@ public class ParameterizedTypeBinding extends ReferenceBinding implements Substi
 		for (int i = 0; i < length; i++) {
 			TypeBinding argument = originalArguments[i];
 			if (argument.kind() == Binding.WILDCARD_TYPE) { // no capture for intersection types
-				capturedArguments[i] = new CaptureBinding((WildcardBinding) argument, contextType, position, scope.compilationUnitScope().nextCaptureID());
+				final WildcardBinding wildcard = (WildcardBinding) argument;
+				if (wildcard.boundKind == Wildcard.SUPER && wildcard.bound.id == TypeIds.T_JavaLangObject)
+					capturedArguments[i] = wildcard.bound;
+				else
+					capturedArguments[i] = new CaptureBinding(wildcard, contextType, position, scope.compilationUnitScope().nextCaptureID());
 			} else {
 				capturedArguments[i] = argument;
 			}
@@ -1367,6 +1374,9 @@ public class ParameterizedTypeBinding extends ReferenceBinding implements Substi
 	        ReferenceBinding genericSuperclass = this.type.superclass();
 	        if (genericSuperclass == null) return null; // e.g. interfaces
 		    this.superclass = (ReferenceBinding) Scope.substitute(this, genericSuperclass);
+			this.typeBits |= (this.superclass.typeBits & TypeIds.InheritableBits);
+			if ((this.typeBits & (TypeIds.BitAutoCloseable|TypeIds.BitCloseable)) != 0) // avoid the side-effects of hasTypeBit()! 
+				this.typeBits |= applyCloseableClassWhitelists();
 	    }
 		return this.superclass;
 	}
@@ -1376,9 +1386,16 @@ public class ParameterizedTypeBinding extends ReferenceBinding implements Substi
 	 */
 	public ReferenceBinding[] superInterfaces() {
 	    if (this.superInterfaces == null) {
-	    		if (this.type.isHierarchyBeingConnected())
-	    			return Binding.NO_SUPERINTERFACES; // prevent superinterfaces from being assigned before they are connected
-	    		this.superInterfaces = Scope.substitute(this, this.type.superInterfaces());
+    		if (this.type.isHierarchyBeingConnected())
+    			return Binding.NO_SUPERINTERFACES; // prevent superinterfaces from being assigned before they are connected
+    		this.superInterfaces = Scope.substitute(this, this.type.superInterfaces());
+    		if (this.superInterfaces != null) {
+	    		for (int i = this.superInterfaces.length; --i >= 0;) {
+	    			this.typeBits |= (this.superInterfaces[i].typeBits & TypeIds.InheritableBits);
+	    			if ((this.typeBits & (TypeIds.BitAutoCloseable|TypeIds.BitCloseable)) != 0) // avoid the side-effects of hasTypeBit()! 
+	    				this.typeBits |= applyCloseableInterfaceWhitelists();
+	    		}
+    		}
 	    }
 		return this.superInterfaces;
 	}
@@ -1517,22 +1534,26 @@ public class ParameterizedTypeBinding extends ReferenceBinding implements Substi
 		return this.fields;
 	}
 	public MethodBinding getSingleAbstractMethod(final Scope scope, boolean replaceWildcards) {
+		int index = replaceWildcards ? 0 : 1;
 		if (this.singleAbstractMethod != null) {
-			return this.singleAbstractMethod;
+			if (this.singleAbstractMethod[index] != null)
+			return this.singleAbstractMethod[index];
+		} else {
+			this.singleAbstractMethod = new MethodBinding[2];
 		}
 		if (!isValidBinding())
 			return null;
 		final ReferenceBinding genericType = genericType();
 		MethodBinding theAbstractMethod = genericType.getSingleAbstractMethod(scope, replaceWildcards);
 		if (theAbstractMethod == null || !theAbstractMethod.isValidBinding())
-			return this.singleAbstractMethod = theAbstractMethod;
+			return this.singleAbstractMethod[index] = theAbstractMethod;
 		
 		ParameterizedTypeBinding declaringType = null;
 		TypeBinding [] types = this.arguments; 
 		if (replaceWildcards) {
-			types = getNonWildcardParameterization();
+			types = getNonWildcardParameterization(scope);
 			if (types == null)
-				return this.singleAbstractMethod = new ProblemMethodBinding(TypeConstants.ANONYMOUS_METHOD, null, ProblemReasons.NotAWellFormedParameterizedType);
+				return this.singleAbstractMethod[index] = new ProblemMethodBinding(TypeConstants.ANONYMOUS_METHOD, null, ProblemReasons.NotAWellFormedParameterizedType);
 		} else if (types == null) {
 			types = NO_TYPES;
 		}
@@ -1540,21 +1561,21 @@ public class ParameterizedTypeBinding extends ReferenceBinding implements Substi
 		TypeVariableBinding [] typeParameters = genericType.typeVariables();
 		for (int i = 0, length = typeParameters.length; i < length; i++) {
 			if (typeParameters[i].boundCheck(declaringType, types[i], scope) != TypeConstants.OK)
-				return this.singleAbstractMethod = new ProblemMethodBinding(TypeConstants.ANONYMOUS_METHOD, null, ProblemReasons.NotAWellFormedParameterizedType);			
+				return this.singleAbstractMethod[index] = new ProblemMethodBinding(TypeConstants.ANONYMOUS_METHOD, null, ProblemReasons.NotAWellFormedParameterizedType);			
 		}
 		ReferenceBinding substitutedDeclaringType = (ReferenceBinding) declaringType.findSuperTypeOriginatingFrom(theAbstractMethod.declaringClass);
 		MethodBinding [] choices = substitutedDeclaringType.getMethods(theAbstractMethod.selector);
 		for (int i = 0, length = choices.length; i < length; i++) {
 			MethodBinding method = choices[i];
 			if (!method.isAbstract() || method.redeclaresPublicObjectMethod(scope)) continue; // (re)skip statics, defaults, public object methods ...
-			this.singleAbstractMethod = method;
+			this.singleAbstractMethod[index] = method;
 			break;
 		}
-		return this.singleAbstractMethod;
+		return this.singleAbstractMethod[index];
 	}
 
 	// from JLS 9.8
-	public TypeBinding[] getNonWildcardParameterization() {
+	public TypeBinding[] getNonWildcardParameterization(Scope scope) {
 		// precondition: isValidBinding()
 		TypeBinding[] typeArguments = this.arguments; 							// A1 ... An
 		if (typeArguments == null)
@@ -1576,29 +1597,32 @@ public class ParameterizedTypeBinding extends ReferenceBinding implements Substi
 						int len = 1 + (otherUBounds != null ? otherUBounds.length : 0) + otherBBounds.length;
 						if (typeParameters[i].firstBound != null)
 							len++;
-						ReferenceBinding[] allBounds = new ReferenceBinding[len];
-						try {
-							int idx = 0;
-							// Ui
-							allBounds[idx++] = (ReferenceBinding) wildcard.bound;
-							if (otherUBounds != null)
-								for (int j = 0; j < otherUBounds.length; j++)
-									allBounds[idx++] = (ReferenceBinding) otherUBounds[j];
-							// Bi
-							if (typeParameters[i].firstBound != null)
-								allBounds[idx++] = (ReferenceBinding) typeParameters[i].firstBound;
-							for (int j = 0; j < otherBBounds.length; j++)
-								allBounds[idx++] = (ReferenceBinding) otherBBounds[j];
-						} catch (ClassCastException cce) {
-							return null;
-						}
-						ReferenceBinding[] glb = Scope.greaterLowerBound(allBounds);
+						TypeBinding[] allBounds = new TypeBinding[len]; // TypeBinding so that in this round we accept ArrayBinding, too.
+						int idx = 0;
+						// Ui
+						allBounds[idx++] = wildcard.bound;
+						if (otherUBounds != null)
+							for (int j = 0; j < otherUBounds.length; j++)
+								allBounds[idx++] = otherUBounds[j];
+						// Bi
+						if (typeParameters[i].firstBound != null)
+							allBounds[idx++] = typeParameters[i].firstBound;
+						for (int j = 0; j < otherBBounds.length; j++)
+							allBounds[idx++] = otherBBounds[j];
+						TypeBinding[] glb = Scope.greaterLowerBound(allBounds, null, this.environment);
 						if (glb == null || glb.length == 0) {
 							return null;
 						} else if (glb.length == 1) {
 							types[i] = glb[0];
 						} else {
-							types[i] = new IntersectionCastTypeBinding(glb, this.environment);
+							try {
+								ReferenceBinding[] refs = new ReferenceBinding[glb.length];
+								System.arraycopy(glb, 0, refs, 0, glb.length); // TODO: if an array type plus more types get here, we get ArrayStoreException!
+								types[i] = new IntersectionCastTypeBinding(refs, this.environment);
+							} catch (ArrayStoreException ase) {
+								scope.problemReporter().genericInferenceError("Cannot compute glb of "+Arrays.toString(glb), null); //$NON-NLS-1$
+								return null;
+							}
 						}
 						break;
 					case Wildcard.SUPER :

@@ -23,7 +23,7 @@ import junit.framework.Test;
 public class GenericsRegressionTest_1_8 extends AbstractRegressionTest {
 
 static {
-//	TESTS_NAMES = new String[] { "testBug428019" };
+//	TESTS_NAMES = new String[] { "testBug428198b" };
 //	TESTS_NUMBERS = new int[] { 40, 41, 43, 45, 63, 64 };
 //	TESTS_RANGE = new int[] { 11, -1 };
 }
@@ -213,7 +213,7 @@ public void testBug424038() {
 		"1. ERROR in Foo.java (at line 8)\n" + 
 		"	List<Consumer<E>> list2 = stream.gather(() -> new Stuff<>()).toList(); // ERROR\n" + 
 		"	                          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n" + 
-		"Type mismatch: cannot convert from List<Foo<E>.Stuff<E>> to List<Consumer<E>>\n" + 
+		"Type mismatch: cannot convert from List<Foo.Stuff<E>> to List<Consumer<E>>\n" + 
 		"----------\n");
 }
 
@@ -2118,5 +2118,294 @@ public void testBug428019() {
             "  }\n" + 
             "}\n"
         });
+}
+public void testBug428198() {
+	runConformTest(
+		new String[] {
+			"Snippet.java",
+			"import java.util.*;\n" + 
+			"interface BundleRevision {}\n" + 
+			"interface BundleDescription extends BundleRevision {}\n" + 
+			"public class Snippet {\n" + 
+			"  static Collection<BundleRevision> test(BundleDescription[] triggers) {\n" + 
+			"    @SuppressWarnings(\"unchecked\")\n" + 
+			"    Collection<BundleRevision> triggerRevisions =\n" + 
+			"    //Type mismatch: cannot convert from Collection<Object> to Collection<BundleRevision>\n" + 
+			"      Collections\n" + 
+			"        .unmodifiableCollection(triggers == null ? Collections.EMPTY_LIST\n" + 
+			"        : Arrays.asList((BundleRevision[]) triggers));\n" + 
+			"    return triggerRevisions;\n" + 
+			"  }\n" + 
+			"}\n"
+		});
+}
+public void testBug428198b() {
+	runConformTest(
+		new String[] {
+			"Snippet.java",
+			"import java.util.*;\n" + 
+			"interface BundleRevision {}\n" + 
+			"interface BundleDescription extends BundleRevision {}\n" + 
+			"public class Snippet {\n" + 
+			"  static Collection<BundleRevision> test(BundleDescription[] triggers) {\n" + 
+			"    @SuppressWarnings(\"unchecked\")\n" + 
+			"    Collection<BundleRevision> triggerRevisions =\n" + 
+			"      Collections\n" + 
+			"        .unmodifiableCollection(triggers == null ? Collections.emptyList()\n" + 
+			"        : Arrays.asList((BundleRevision[]) triggers));\n" + 
+			"    return triggerRevisions;\n" + 
+			"  }\n" + 
+			"}\n"
+		});
+}
+public void testBug428264() {
+	runConformTest(
+		new String[] {
+			"Y.java",
+			"import java.util.function.*;\n" + 
+			"import java.util.Optional;\n" + 
+			"\n" + 
+			"interface I<E,F> {}\n" + 
+			"class A<G> implements I<G, Optional<G>> {}\n" + 
+			"\n" + 
+			"public class Y<S,T> {\n" + 
+			"    Y(T o, Predicate<T> p, Supplier<I<S,T>> s) {}\n" + 
+			"\n" + 
+			"    static <Z> Y<Z, Optional<Z>> m() {\n" + 
+			"        return new Y<>(Optional.empty(), Optional::isPresent, A::new);\n" + 
+			"    }\n" + 
+			"}\n"
+		});
+}
+public void testBug428294() {
+	runConformTest(
+		new String[] {
+			"Junk5.java",
+			"import java.util.Collection;\n" + 
+			"import java.util.List;\n" + 
+			"import java.util.stream.Collectors;\n" + 
+			"\n" + 
+			"\n" + 
+			"public class Junk5 {\n" + 
+			"\n" + 
+			"    class TestTouchDevice {\n" + 
+			"        public Object [] points;\n" + 
+			"    }\n" + 
+			"    \n" + 
+			"    public static List<TestTouchDevice> getTouchDevices() {\n" + 
+			"        return null;\n" + 
+			"    }\n" + 
+			"\n" + 
+			"    public static Collection<Object[]> getTouchDeviceParameters2(int minPoints) {\n" + 
+			"        Collection c = getTouchDevices().stream()\n" + 
+			"                .filter(d -> d.points.length >= minPoints)\n" + 
+			"                .map(d -> new Object[] { d })\n" + 
+			"                .collect(Collectors.toList());\n" + 
+			"         return c;\n" + 
+			"    }\n" + 
+			"    \n" + 
+			"    public static Collection<Object[]> getTouchDeviceParameters3(int minPoints) {\n" + 
+			"        return getTouchDevices().stream()\n" + 
+			"                .filter(d -> d.points.length >= minPoints)\n" + 
+			"                .map(d -> new Object[] { d })\n" + 
+			"                .collect(Collectors.toList());\n" + 
+			"    }\n" + 
+			"}\n"
+		});
+}
+public void testBug428291() {
+	runConformTest(
+		new String[] {
+			"AC3.java",
+			"import java.util.List;\n" + 
+			"\n" + 
+			"interface I0<T> { }\n" + 
+			"\n" + 
+			"interface I1 { }\n" + 
+			"interface I1List<E> extends List<E>, I1 {}\n" + 
+			"interface I2<T> extends I1 {\n" + 
+			"	void foo(I0<? super T> arg1);\n" + 
+			"	void bar(I0<? super T> arg2);\n" + 
+			"}\n" + 
+			"interface I3<T> extends I2<T> {}\n" + 
+			"interface I4<T> extends I2<T> { }\n" + 
+			"interface I3List<E> extends I3<I1List<E>>, I1List<E> {}\n" + 
+			"abstract class AC1<E> implements I3List<E> { }\n" + 
+			"\n" + 
+			"abstract class AC2<E>  {\n" + 
+			"    public static <E> AC2<E> bork(AC2<E> f1, I3List<E> i3l, I0<? super I1List<E>> i1l) {\n" + 
+			"        return null;\n" + 
+			"    }\n" + 
+			"    public static <E> AC2<E> garp(AC2<E> f2, I0<? super I1List<E>> i1l) {\n" + 
+			"        return null;\n" + 
+			"    }\n" + 
+			"}\n" + 
+			"\n" + 
+			"public abstract class AC3<E> extends AC1<E> implements I4<I1List<E>> {\n" + 
+			"\n" + 
+			"    AC2<E> f = null;\n" + 
+			"\n" + 
+			"    @Override\n" + 
+			"    public void foo(I0<? super I1List<E>> arg1) {\n" + 
+			"        f = AC2.bork(f, this, arg1);\n" + 
+			"    }\n" + 
+			"\n" + 
+			"    @Override\n" + 
+			"    public void bar(I0<? super I1List<E>> arg2) {\n" + 
+			"        f = AC2.garp(f, arg2);\n" + 
+			"    }\n" + 
+			"}\n"
+		});
+}
+// https://bugs.eclipse.org/bugs/show_bug.cgi?id=428275,  [1.8][compiler] CCE in InferenceContext18.varArgTypes 
+public void testBug428275() {
+	runConformTest(
+		new String[] {
+			"p1/C1.java",
+			"package p1;\n" + 
+			"\n" + 
+			"import java.util.List;\n" + 
+			"\n" + 
+			"public class C1<T1> {\n" + 
+			"\n" + 
+			"	public static class CInner<T2A,T2B> {\n" + 
+			"		public CInner(T2A a, T2B b) {}\n" + 
+			"	}\n" + 
+			"	\n" + 
+			"	public static class CInner2<T3A,T3B> {\n" + 
+			"		public CInner2(String n, List<CInner<T3A,T3B>> arg) {}\n" + 
+			"	}\n" + 
+			"	\n" + 
+			"    public static <E> List<E> getList1(E... items) {\n" + 
+			"    	return null;\n" + 
+			"    }\n" + 
+			"}\n",
+			"Test.java",
+			"import java.util.List;\n" + 
+			"\n" + 
+			"import p1.C1;\n" + 
+			"\n" + 
+			"public class Test {\n" + 
+			"	void test2(List<C1.CInner2> l) {\n" + 
+			"		l.add(\n" + 
+			"			new C1.CInner2<>(\"a\",\n" + 
+			"				C1.getList1(new C1.CInner<>(\"b\", 13))\n" + 
+			"			)\n" + 
+			"		);\n" + 
+			"	}\n" + 
+			"}\n"
+		});
+}
+// https://bugs.eclipse.org/bugs/show_bug.cgi?id=428352, [1.8][compiler] NPE in AllocationExpression.analyseCode when trying to pass Consumer as Function 
+public void test428352() {
+	runNegativeTest(
+		new String[] {
+			"OperationsPile.java",
+			"import java.util.Collection;\n" +
+			"import java.util.List;\n" +
+			"import java.util.function.Consumer;\n" +
+			"import java.util.function.Function;\n" +
+			"\n" +
+			"class OperationsPile<B> {\n" +
+			"  OperationsPile(Function<B, ?> handler) {}\n" +
+			"\n" +
+			"  private static <T> void addAll3(Collection<T> c, T t) {}\n" +
+			"\n" +
+			"  static <S> void adaad3(List<OperationsPile<?>> combined, Consumer<S> handler) {\n" +
+			"    addAll3(combined, new OperationsPile<>(null));\n" +
+			"    addAll3(combined, new OperationsPile<>(handler));\n" +
+			"  }\n" +
+			"}\n"
+		},
+		"----------\n" + 
+		"1. ERROR in OperationsPile.java (at line 13)\n" + 
+		"	addAll3(combined, new OperationsPile<>(handler));\n" + 
+		"	                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n" + 
+		"Cannot infer type arguments for OperationsPile<>\n" + 
+		"----------\n");
+}
+public void test428352b() {
+	runConformTest(
+		new String[] {
+			"OperationsPile.java",
+			"import java.util.Collection;\n" +
+			"import java.util.List;\n" +
+			"import java.util.function.Consumer;\n" +
+			"import java.util.function.Function;\n" +
+			"\n" +
+			"public class OperationsPile<B> {\n" +
+			"  OperationsPile(Function<B, ?> handler) {}\n" +
+			"\n" +
+			"  private static <T> void addAll3(Collection<T> c, T t) {}\n" +
+			"\n" +
+			"  static <S> void adaad3(List<OperationsPile<?>> combined, Consumer<S> handler) {\n" +
+			"    addAll3(combined, new OperationsPile<>(null));\n" +
+			"  }\n" +
+			"	public static void main(String[] args) {\n" +
+			"		adaad3(null, null);\n" +
+			"		System.out.println(13);\n" +
+			"	}\n" +
+			"}\n"
+		},
+		"13");
+}
+public void testBug428307() {
+	runConformTest(
+		new String[] {
+			"X.java",
+			"import java.util.*;\n" + 
+			"import java.util.function.Function;\n" + 
+			"import java.util.stream.*;\n" + 
+			"\n" + 
+			"interface Bar {\n" + 
+			"	Class<? extends Bar> type();\n" + 
+			"}\n" + 
+			"public class X {\n" + 
+			" \n" + 
+			"    <T extends Bar> T[] test(Class<T> barClass, Stream<Bar> bars) {\n" + 
+			"        return get(bars.\n" + 
+			"                    collect(Collectors.toMap(Bar::type,\n" + 
+			"                                             Function.identity(),\n" + 
+			"                                             ((first,second) -> first),\n" + 
+			"                                             HashMap::new)),\n" + 
+			"                            barClass);\n" + 
+			"    }\n" + 
+			"    \n" + 
+			"    <A extends Bar> A[] get(Map<Class<? extends Bar>,Bar> m, Class<A> c) {\n" + 
+			"    	return null;\n" + 
+			"    }\n" + 
+			"}\n"
+		});
+}
+// https://bugs.eclipse.org/bugs/show_bug.cgi?id=428524, [1.8][compiler] NPE when using JSE8 Class Constructor ref "TheClass::new" and "TheClass" is using default no-arg constructor 
+public void test428524() {
+	runConformTest(
+		new String[] {
+			"X.java",
+			"import java.util.function.Supplier;\n" +
+			"public class X {\n" +
+			"	public static void main(String[] args) {\n" +
+			"		Supplier<WithNoArgConstructor> works = WithNoArgConstructor::new;\n" +
+			"		System.out.println(works.get());\n" +
+			"		Supplier<WithoutNoArgConstructor> error = WithoutNoArgConstructor::new;\n" +
+			"		System.out.println(error.get());\n" +
+			"		\n" +
+			"	}\n" +
+			"	private static class WithNoArgConstructor {\n" +
+			"		public WithNoArgConstructor() {\n" +
+			"		}\n" +
+			"       public String toString() {\n" +
+			"           return(\"WithNoArgConstructor\");\n" +
+			"       }\n" +
+			"	}\n" +
+			"	private static class WithoutNoArgConstructor {\n" +
+			"       public String toString() {\n" +
+			"           return(\"WithOutNoArgConstructor\");\n" +
+			"       }\n" +
+			"	}\n" +
+			"}\n"
+		}, 
+		"WithNoArgConstructor\n" + 
+		"WithOutNoArgConstructor");
 }
 }

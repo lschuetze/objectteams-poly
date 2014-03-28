@@ -33,6 +33,7 @@
  *								Bug 423504 - [1.8] Implement "18.5.3 Functional Interface Parameterization Inference"
  *								Bug 426792 - [1.8][inference][impl] generify new type inference engine
  *								Bug 428019 - [1.8][compiler] Type inference failure with nested generic invocation.
+ *								Bug 427199 - [1.8][resource] avoid resource leak warnings on Streams that have no resource
  *      Jesper S Moller - Contributions for
  *								bug 382701 - [1.8][compiler] Implement semantic analysis of Lambda expressions & Reference expression
  *								bug 412153 - [1.8][compiler] Check validity of annotations which may be repeatable
@@ -119,7 +120,7 @@ abstract public class ReferenceBinding extends AbstractOTReferenceBinding {
 	private SimpleLookupTable compatibleCache;
 
 	int typeBits; // additional bits characterizing this type
-	protected MethodBinding singleAbstractMethod;
+	protected MethodBinding [] singleAbstractMethod;
 
 	public static final ReferenceBinding LUB_GENERIC = new ReferenceBinding() { /* used for lub computation */
 		{ this.id = TypeIds.T_undefined; }
@@ -2237,9 +2238,6 @@ public ReferenceBinding[] syntheticEnclosingInstanceTypes() {
 		return null;
 	return new ReferenceBinding[] {enclosingType};
 }
-public SyntheticArgumentBinding[] syntheticOuterLocalVariables() {
-	return null;		// is null if no enclosing instances are required
-}
 
 MethodBinding[] unResolvedMethods() { // for the MethodVerifier so it doesn't resolve types
 	return methods();
@@ -2253,7 +2251,7 @@ public FieldBinding[] unResolvedFields() {
  * If a type - known to be a Closeable - is mentioned in one of our white lists
  * answer the typeBit for the white list (BitWrapperCloseable or BitResourceFreeCloseable).
  */
-protected int applyCloseableWhitelists() {
+protected int applyCloseableClassWhitelists() {
 	switch (this.compoundName.length) {
 		case 3:
 			if (CharOperation.equals(TypeConstants.JAVA, this.compoundName[0])) {
@@ -2292,6 +2290,20 @@ protected int applyCloseableWhitelists() {
 		if (CharOperation.equals(this.compoundName, TypeConstants.OTHER_WRAPPER_CLOSEABLES[i]))
 			return TypeIds.BitWrapperCloseable;
 	}	
+	return 0;
+}
+
+/*
+ * If a type - known to be a Closeable - is mentioned in one of our white lists
+ * answer the typeBit for the white list (BitWrapperCloseable or BitResourceFreeCloseable).
+ */
+protected int applyCloseableInterfaceWhitelists() {
+	switch (this.compoundName.length) {
+		case 4:
+			if (CharOperation.equals(this.compoundName, TypeConstants.RESOURCE_FREE_CLOSEABLE_STREAM))
+				return TypeIds.BitResourceFreeCloseable;
+			break;
+	}
 	return 0;
 }
 
@@ -2386,8 +2398,12 @@ private MethodBinding [] getInterfaceAbstractContracts(Scope scope) throws Inval
 }
 public MethodBinding getSingleAbstractMethod(Scope scope, boolean replaceWildcards) {
 	
+	int index = replaceWildcards ? 0 : 1;
 	if (this.singleAbstractMethod != null) {
-		return this.singleAbstractMethod;
+		if (this.singleAbstractMethod[index] != null)
+		return this.singleAbstractMethod[index];
+	} else {
+		this.singleAbstractMethod = new MethodBinding[2];
 	}
 
 	if (this.compoundName != null)
@@ -2396,10 +2412,10 @@ public MethodBinding getSingleAbstractMethod(Scope scope, boolean replaceWildcar
 	try {
 		methods = getInterfaceAbstractContracts(scope);
 	} catch (InvalidInputException e) {
-		return this.singleAbstractMethod = samProblemBinding;
+		return this.singleAbstractMethod[index] = samProblemBinding;
 	}
 	if (methods != null && methods.length == 1)
-		return this.singleAbstractMethod = methods[0];
+		return this.singleAbstractMethod[index] = methods[0];
 	
 	final LookupEnvironment environment = scope.environment();
 	boolean genericMethodSeen = false;
@@ -2483,15 +2499,15 @@ public MethodBinding getSingleAbstractMethod(Scope scope, boolean replaceWildcar
 		if (exceptionsCount != exceptionsLength) {
 			System.arraycopy(exceptions, 0, exceptions = new ReferenceBinding[exceptionsCount], 0, exceptionsCount);
 		}
-		this.singleAbstractMethod = new MethodBinding(theAbstractMethod.modifiers, 
+		this.singleAbstractMethod[index] = new MethodBinding(theAbstractMethod.modifiers, 
 				theAbstractMethod.selector, 
 				theAbstractMethod.returnType, 
 				theAbstractMethod.parameters, 
 				exceptions, 
 				theAbstractMethod.declaringClass);
-	    this.singleAbstractMethod.typeVariables = theAbstractMethod.typeVariables;
-		return this.singleAbstractMethod;
+	    this.singleAbstractMethod[index].typeVariables = theAbstractMethod.typeVariables;
+		return this.singleAbstractMethod[index];
 	}
-	return this.singleAbstractMethod = samProblemBinding;
+	return this.singleAbstractMethod[index] = samProblemBinding;
 }
 }

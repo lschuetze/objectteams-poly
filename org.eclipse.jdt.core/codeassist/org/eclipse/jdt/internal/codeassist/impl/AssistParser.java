@@ -21,6 +21,8 @@ package org.eclipse.jdt.internal.codeassist.impl;
  *
  */
 
+import java.util.HashSet;
+
 import org.eclipse.jdt.internal.compiler.ast.ASTNode;
 import org.eclipse.jdt.internal.compiler.ast.AbstractMethodDeclaration;
 import org.eclipse.jdt.internal.compiler.ast.AbstractVariableDeclaration;
@@ -54,6 +56,7 @@ import org.eclipse.jdt.internal.compiler.parser.RecoveredElement;
 import org.eclipse.jdt.internal.compiler.parser.RecoveredField;
 import org.eclipse.jdt.internal.compiler.parser.RecoveredInitializer;
 import org.eclipse.jdt.internal.compiler.parser.RecoveredMethod;
+import org.eclipse.jdt.internal.compiler.parser.RecoveredStatement;
 import org.eclipse.jdt.internal.compiler.parser.RecoveredType;
 import org.eclipse.jdt.internal.compiler.parser.RecoveredUnit;
 import org.eclipse.jdt.internal.compiler.parser.TerminalTokens;
@@ -63,6 +66,7 @@ import org.eclipse.objectteams.otdt.core.compiler.OTNameUtils;
 import org.eclipse.objectteams.otdt.internal.core.compiler.ast.AbstractMethodMappingDeclaration;
 import org.eclipse.objectteams.otdt.internal.core.compiler.ast.ParameterMapping;
 
+@SuppressWarnings({"rawtypes"})
 public abstract class AssistParser extends Parser {
 	public ASTNode assistNode;
 	public boolean isOrphanCompletionNode;
@@ -478,12 +482,39 @@ protected boolean triggerRecoveryUponLambdaClosure(Statement statement, boolean 
 	
 	if (lambdaClosed && this.currentElement != null) {
 		this.restartRecovery = true;
-		if (!(statement instanceof AbstractVariableDeclaration)) // added already as part of standard recovery since these contribute a name to the scope prevailing at the cursor.
+		if (!(statement instanceof AbstractVariableDeclaration)) { // added already as part of standard recovery since these contribute a name to the scope prevailing at the cursor.
+			/* See if CompletionParser.attachOrphanCompletionNode has already added bits and pieces of AST to the recovery tree. If so, we want to
+			   replace those fragments with the fuller statement that provides target type for the lambda that got closed just now. There is prior
+			   art/precedent in the Java 7 world to this: Search for recoveredBlock.statements[--recoveredBlock.statementCount] = null;
+			   See also that this concern does not arise in the case of field/local initialization since the initializer is replaced with full tree by consumeExitVariableWithInitialization.
+			*/
+			ASTNode assistNodeParent = this.assistNodeParent();
+			ASTNode enclosingNode = this.enclosingNode();
+			if (assistNodeParent != null || enclosingNode != null) {
+				RecoveredBlock recoveredBlock = (RecoveredBlock) (this.currentElement instanceof RecoveredBlock ? this.currentElement : 
+													(this.currentElement.parent instanceof RecoveredBlock) ? this.currentElement.parent : null);
+				if (recoveredBlock != null) {
+					RecoveredStatement recoveredStatement = recoveredBlock.statementCount > 0 ? recoveredBlock.statements[recoveredBlock.statementCount - 1] : null;
+					ASTNode parseTree = recoveredStatement != null ? recoveredStatement.updatedStatement(0, new HashSet()) : null;
+					if (parseTree == assistNodeParent || parseTree == enclosingNode) {
+						recoveredBlock.statements[--recoveredBlock.statementCount] = null;
+						this.currentElement = recoveredBlock;
+					}
+				}
+			}
 			this.currentElement.add(statement, 0);
+		}
 	}
 	this.snapShot = null;
 	return lambdaClosed;
 }
+protected ASTNode assistNodeParent() {
+	return null;
+}
+protected ASTNode enclosingNode() {
+	return null;
+}
+
 //{ObjectTeams: make public (was protected)
 public boolean isAssistParser() {
 //SH}

@@ -153,17 +153,15 @@ public class ThisReference extends Reference {
 			if (method != null && method.receiver != null && TypeBinding.equalsEquals(method.receiver, this.resolvedType))
 				this.resolvedType = method.receiver;
 		}
-//{ObjectTeams: only implicit this returned directly:
-	  if (isImplicitThis())
-// orig:
-		return this.resolvedType = enclosingReceiverType;
-// : giro
-		this.resolvedType = RoleTypeCreator.maybeWrapUnqualifiedRoleType(
-                scope.enclosingReceiverType(),
+//{ObjectTeams: wrap explicit this:
+		if (!isImplicitThis()) {
+			this.resolvedType = RoleTypeCreator.maybeWrapUnqualifiedRoleType(
+                this.resolvedType,
                 scope,
-                this);
-        return this.resolvedType;
+                this);	
+		}
 // SH}
+		return this.resolvedType;
 	}
 
 	public void traverse(ASTVisitor visitor, BlockScope blockScope) {

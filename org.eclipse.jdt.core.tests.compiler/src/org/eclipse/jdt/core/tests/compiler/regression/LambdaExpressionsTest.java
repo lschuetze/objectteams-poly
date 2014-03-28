@@ -3259,6 +3259,175 @@ public void test428112() {
 			"de"
 			);
 }
+// https://bugs.eclipse.org/bugs/show_bug.cgi?id=428003, [1.8][compiler] Incorrect error on lambda expression when preceded by another explicit lambda expression
+public void test428003() { // extracted small test
+	this.runConformTest(
+			new String[] {
+				"X.java",
+				"import java.util.Arrays;\n" +
+				"public class X {\n" +
+				"    public static void main(String[] args) {\n" +
+				"        Arrays.sort(args, (String x, String y) -> x.length() - y.length());\n" +
+				"        Arrays.sort(args, (x, y) -> Integer.compare(x.length(), y.length()));\n" +
+				"    }\n" +
+				"}\n"
+			},
+			""
+			);
+}
+// https://bugs.eclipse.org/bugs/show_bug.cgi?id=428003, [1.8][compiler] Incorrect error on lambda expression when preceded by another explicit lambda expression
+public void test428003a() { // full test case
+	this.runConformTest(
+			new String[] {
+				"X.java",
+				"import java.util.Arrays;\n" +
+				"public class X {\n" +
+				"    public static void main(String[] args) {\n" +
+				"        String[] words = {\"java\", \"interface\", \"lambda\", \"expression\" };\n" +
+				"        Arrays.sort(words, (String word1, String word2) -> {\n" +
+				"                    if (word1.length() < word2.length())\n" +
+				"                        return -1;\n" +
+				"                    else if (word1.length() > word2.length())\n" +
+				"                        return 1;\n" +
+				"                    else\n" +
+				"                        return 0;\n" +
+				"                  });\n" +
+				"        for (String word : words)\n" +
+				"            System.out.println(word);\n" +
+				"        words = new String [] {\"java\", \"interface\", \"lambda\", \"expression\" };\n" +
+				"        Arrays.sort(words, (word1, word2) -> Integer.compare(word1.length(), word2.length()));\n" +
+				"        for (String word : words)\n" +
+				"            System.out.println(word);\n" +
+				"        words = new String [] {\"java\", \"interface\", \"lambda\", \"expression\" };\n" +
+				"        Arrays.sort(words, (String word1, String word2) -> Integer.compare(word1.length(), word2.length()));\n" +
+				"        for (String word : words)\n" +
+				"            System.out.println(word);\n" +
+				"      }\n" +
+				"  }\n"
+			},
+			"java\n" +
+			"lambda\n" +
+			"interface\n" +
+			"expression\n" +
+			"java\n" +
+			"lambda\n" +
+			"interface\n" +
+			"expression\n" +
+			"java\n" +
+			"lambda\n" +
+			"interface\n" +
+			"expression"
+			);
+}
+// https://bugs.eclipse.org/bugs/show_bug.cgi?id=428261, [1.8][compiler] Incorrect error: No enclosing instance of the type X is accessible in scope
+public void test428261() {
+	this.runConformTest(
+			new String[] {
+				"X.java",
+				"interface I {\n" +
+				"	X foo(int a);\n" +
+				"}\n" +
+				"public class X {\n" +
+				"	public static void main(String[] args) {\n" +
+				"		String s = \"Blah\";\n" +
+				"		class Local extends X {\n" +
+				"			Local(int a) {\n" +
+				"				System.out.println(a);\n" +
+				"				System.out.println(s);\n" +
+				"			}\n" +
+				"		}\n" +
+				"		I i = Local::new; // Incorrect error here.\n" +
+				"       i.foo(10);\n" +
+				"	}\n" +
+				"}\n"
+			},
+			"10\n" +
+			"Blah"
+			);
+}
+// https://bugs.eclipse.org/bugs/show_bug.cgi?id=428261, [1.8][compiler] Incorrect error: No enclosing instance of the type X is accessible in scope
+public void test428261a() {
+	this.runConformTest(
+			new String[] {
+				"X.java",
+				"interface I {\n" +
+				"	X foo(int a);\n" +
+				"}\n" +
+				"public class X {\n" +
+				"	void goo() {\n" +
+				"		class Local extends X {\n" +
+				"			Local(int a) {\n" +
+				"				System.out.println(a);\n" +
+				"			}\n" +
+				"		}\n" +
+				"		I i = Local::new;\n" +
+				"       i.foo(10);\n" +
+				"	}\n" +
+				"   public static void main(String [] args) {\n" +
+				"        new X().goo();\n" +
+				"   }\n" +
+				"}\n"
+			},
+			"10");
+}
+// https://bugs.eclipse.org/bugs/show_bug.cgi?id=428552,  [1.8][compiler][codegen] Serialization does not work for method references
+public void test428552() {
+	this.runConformTest(
+			new String[] {
+				"X.java",
+				"import java.io.*;\n" +
+				"public class X {\n" +
+				"	interface Example extends Serializable {\n" +
+				"		String convert(Object o);\n" +
+				"	}\n" +
+				"	public static void main(String[] args) throws IOException {\n" +
+				"		Example e=Object::toString;\n" +
+				"		try(ObjectOutputStream os=new ObjectOutputStream(new ByteArrayOutputStream())) {\n" +
+				"			os.writeObject(e);\n" +
+				"		}\n" +
+				"       System.out.println(\"No exception !\");\n" +
+				"	}\n" +
+				"}\n"
+			},
+			"No exception !",
+			null,
+			true,
+			new String [] { "-Ddummy" }); // Not sure, unless we force the VM to not be reused by passing dummy vm argument, the generated program aborts midway through its execution.);
+}
+// https://bugs.eclipse.org/bugs/show_bug.cgi?id=428642, [1.8][compiler] java.lang.IllegalArgumentException: Invalid lambda deserialization exception
+public void test428642() {
+	this.runConformTest(
+			new String[] {
+				"QuickSerializedLambdaTest.java",
+				"import java.io.*;\n" +
+				"import java.util.function.IntConsumer;\n" +
+				"public class QuickSerializedLambdaTest {\n" +
+				"	interface X extends IntConsumer,Serializable{}\n" +
+				"	public static void main(String[] args) throws IOException, ClassNotFoundException {\n" +
+				"		X x1 = i -> System.out.println(i);// lambda expression\n" +
+				"		X x2 = System::exit; // method reference\n" +
+				"		ByteArrayOutputStream debug=new ByteArrayOutputStream();\n" +
+				"		try(ObjectOutputStream oo=new ObjectOutputStream(debug))\n" +
+				"		{\n" +
+				"			oo.writeObject(x1);\n" +
+				"			oo.writeObject(x2);\n" +
+				"		}\n" +
+				"		try(ObjectInputStream oi=new ObjectInputStream(new ByteArrayInputStream(debug.toByteArray())))\n" +
+				"		{\n" +
+				"			X x=(X)oi.readObject();\n" +
+				"			x.accept(42);// shall print 42\n" +
+				"			x=(X)oi.readObject();\n" +
+				"			x.accept(0);// shall exit\n" +
+				"		}\n" +
+				"		throw new AssertionError(\"should not reach this point\");\n" +
+				"	}\n" +
+				"}\n"
+			},
+			"42",
+			null,
+			true,
+			new String [] { "-Ddummy" }); // Not sure, unless we force the VM to not be reused by passing dummy vm argument, the generated program aborts midway through its execution.);
+}
 public static Class testClass() {
 	return LambdaExpressionsTest.class;
 }

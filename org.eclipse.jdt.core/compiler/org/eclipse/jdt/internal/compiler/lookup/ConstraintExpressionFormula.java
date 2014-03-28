@@ -60,6 +60,7 @@ class ConstraintExpressionFormula extends ConstraintFormula {
 
 	public Object reduce(InferenceContext18 inferenceContext) throws InferenceFailureException {
 		// JLS 18.2.1
+		proper:
 		if (this.right.isProperType(true)) {
 			TypeBinding exprType = this.left.resolvedType;
 			if (exprType == null) {
@@ -80,8 +81,18 @@ class ConstraintExpressionFormula extends ConstraintFormula {
 				return TRUE;
 			} else if (this.left instanceof AllocationExpression && this.left.isPolyExpression()) {
 				// half-resolved diamond has a resolvedType, but that may not be the final word, try one more step of resolution:
-            	MethodBinding binding = ((AllocationExpression) this.left).binding(this.right);
-            	return (binding != null && binding.declaringClass.isCompatibleWith(this.right)) ? TRUE : FALSE;
+            	MethodBinding binding = ((AllocationExpression) this.left).binding(this.right, false, null);
+            	return (binding != null && binding.declaringClass.isCompatibleWith(this.right, inferenceContext.scope)) ? TRUE : FALSE;
+            } else if (this.left instanceof Invocation && this.left.isPolyExpression()) {
+            	Invocation invoc = (Invocation) this.left;
+            	MethodBinding binding = invoc.binding(this.right, false, null);
+            	if (binding instanceof ParameterizedGenericMethodBinding) {
+            		ParameterizedGenericMethodBinding method = (ParameterizedGenericMethodBinding) binding;
+					InferenceContext18 leftCtx = invoc.getInferenceContext(method);
+            		if (leftCtx.stepCompleted < InferenceContext18.TYPE_INFERRED) {
+            			break proper; // fall through into nested inference below (not explicit in the spec!)
+            		}
+            	}
             }
 			return FALSE;
 		}
@@ -95,7 +106,7 @@ class ConstraintExpressionFormula extends ConstraintFormula {
 			// - parenthesized expression : these are transparent in our AST
 			if (this.left instanceof Invocation) {
 				Invocation invocation = (Invocation) this.left;
-				MethodBinding previousMethod = invocation.binding(this.right);
+				MethodBinding previousMethod = invocation.binding(this.right, false, null);
 				if (previousMethod == null)  	// can happen, e.g., if inside a copied lambda with ignored errors
 					return null; 				// -> proceed with no new constraints
 				MethodBinding method = previousMethod;
@@ -335,7 +346,11 @@ class ConstraintExpressionFormula extends ConstraintFormula {
 				// spec says erasure, but we don't really have compatibility rules for erasure, use raw type instead:
 				TypeBinding erasure = inferenceContext.environment.convertToRawType(returnType, false);
 				ConstraintTypeFormula newConstraint = new ConstraintTypeFormula(erasure, targetType, COMPATIBLE);
-				return inferenceContext.reduceAndIncorporate(newConstraint);
+				if (!inferenceContext.reduceAndIncorporate(newConstraint))
+					return false;
+				// continuing at true is not spec'd but needed for javac-compatibility,
+				// see org.eclipse.jdt.core.tests.compiler.regression.GenericsRegressionTest_1_8.testBug428198()
+				// and org.eclipse.jdt.core.tests.compiler.regression.GenericsRegressionTest_1_8.testBug428264()
 			}
 			TypeBinding rTheta = inferenceContext.substitute(returnType);
 			ParameterizedTypeBinding parameterizedType = InferenceContext18.parameterizedWithWildcard(rTheta);

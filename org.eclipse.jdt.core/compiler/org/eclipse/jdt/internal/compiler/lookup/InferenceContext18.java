@@ -122,10 +122,10 @@ import org.eclipse.objectteams.otdt.internal.core.compiler.lookup.ITeamAnchor;
  *      18.5.2 finishes.</li>
  *    <li>If the inner poly expression is a functional expression or a conditional expression no inference variables
  *      exist representing the inner. In this case the final target type is pushed into the inner using
- *      {@link Expression#checkAgainstFinalTargetType(TypeBinding)}, which, too, is called from 
+ *      {@link Expression#checkAgainstFinalTargetType(TypeBinding, Scope)}, which, too, is called from 
  *      {@link #rebindInnerPolies(BoundSet, TypeBinding[])}.</li>
  *    <li>For recursively pushing target types into arguments of an invocation
- *    	method {@link ASTNode#resolvePolyExpressionArguments(Invocation, MethodBinding, TypeBinding[])} exists,
+ *    	method {@link ASTNode#resolvePolyExpressionArguments(Invocation, MethodBinding, TypeBinding[], Scope)} exists,
  *    	which is called in two situations: (1) for non-generic outer invocations from MessageSend#findMethodBinding() and
  *    	Statement#findConstructorBinding(); (2) for generic outer invocations from {@link #rebindInnerPolies(BoundSet, TypeBinding[])}.</li>
  *    <li>In some situations invocation arguments that are poly invocations need to be resolved in the middle of overload resolution
@@ -319,7 +319,7 @@ public class InferenceContext18 {
 		}
 		InferenceVariable[] newVariables = new InferenceVariable[len];
 		for (int i = 0; i < len; i++)
-			newVariables[i] = new InferenceVariable(typeVariables[i], this.variableCount++, this.currentInvocation, this.environment);
+			newVariables[i] = new InferenceVariable(typeVariables[i], this.variableCount++, this.currentInvocation, this.environment, this.object);
 		if (this.inferenceVariables == null || this.inferenceVariables.length == 0) {
 			this.inferenceVariables = newVariables;
 		} else {
@@ -339,7 +339,7 @@ public class InferenceContext18 {
 			if (typeVariables[i] instanceof InferenceVariable)
 				newVariables[i] = (InferenceVariable) typeVariables[i]; // prevent double substitution of an already-substituted inferenceVariable
 			else
-				newVariables[i] = new InferenceVariable(typeVariables[i], this.variableCount++, this.currentInvocation, this.environment);
+				newVariables[i] = new InferenceVariable(typeVariables[i], this.variableCount++, this.currentInvocation, this.environment, this.object);
 		}
 
 		int start = 0;
@@ -483,11 +483,12 @@ public class InferenceContext18 {
 			c.add(new ConstraintExceptionFormula((FunctionalExpression) expri, substF));
 		} else if (expri instanceof Invocation && expri.isPolyExpression()) {
 			Invocation invocation = (Invocation) expri;
-			MethodBinding innerMethod = invocation.binding(null);
+			MethodBinding innerMethod = invocation.binding(null, false, null);
 			if (innerMethod instanceof ParameterizedGenericMethodBinding) {
 				InferenceContext18 innerCtx = invocation.getInferenceContext((ParameterizedMethodBinding) innerMethod);
-				int innerKind = innerCtx != null ? innerCtx.inferenceKind : this.inferenceKind;
-				return addConstraintsToC(invocation.arguments(), c, innerMethod.genericMethod(), innerKind);
+				if (innerCtx != null) { // otherwise innerMethod does not participate in inference
+					return addConstraintsToC(invocation.arguments(), c, innerMethod.genericMethod(), innerCtx.inferenceKind);
+				}
 			}
 		} else if (expri instanceof ConditionalExpression) {
 			ConditionalExpression ce = (ConditionalExpression) expri;
@@ -1345,8 +1346,10 @@ public class InferenceContext18 {
 			Expression inner = (Expression) this.innerPolies.get(i);
 			if (inner instanceof Invocation) {
 				Invocation innerMessage = (Invocation) inner;
-				TypeBinding innerTargetType = getParameter(parameterTypes, i, isVarargs);
-				MethodBinding binding = innerMessage.binding(innerTargetType);
+				TypeBinding innerTargetType = inner.expectedType(); // may be set from acceptPendingPolyArguments
+				if (innerTargetType != null && !innerTargetType.isProperType(true))
+					innerTargetType = null;
+				MethodBinding binding = innerMessage.binding(innerTargetType, innerTargetType != null, this.scope);
 				if (binding == null)
 					continue;
 				MethodBinding original = binding.shallowOriginal();
@@ -1373,7 +1376,7 @@ public class InferenceContext18 {
 				ParameterizedGenericMethodBinding innerBinding = this.environment.createParameterizedGenericMethod(original, solutions);
 				
 				if (innerMessage.updateBindings(innerBinding, innerTargetType)) { // only if we are actually improving anything
-					ASTNode.resolvePolyExpressionArguments(innerMessage, innerBinding);
+					ASTNode.resolvePolyExpressionArguments(innerMessage, innerBinding, this.scope);
 				}
 			}
 		}
@@ -1388,11 +1391,10 @@ public class InferenceContext18 {
 			if (!targetType.isProperType(true))
 				targetType = Scope.substitute(substitution, targetType);
 			Expression expression = this.invocationArguments[i];
-			expression.checkAgainstFinalTargetType(targetType);
 			if (expression instanceof Invocation) {
 				Invocation invocation = (Invocation) expression;
 				if (!this.innerPolies.contains(invocation)) {
-					MethodBinding method = invocation.binding(targetType);
+					MethodBinding method = invocation.binding(targetType, true, this.scope);
 					if (method instanceof ParameterizedGenericMethodBinding) {
 						ParameterizedGenericMethodBinding previousBinding = (ParameterizedGenericMethodBinding) method;
 						InferenceContext18 innerCtx = invocation.getInferenceContext(previousBinding);
@@ -1404,11 +1406,15 @@ public class InferenceContext18 {
 								innerCtx.reportInvalidInvocation(invocation, innerBinding);
 							}
 							if (invocation.updateBindings(innerBinding, targetType)) { // only if we are actually improving anything
-								ASTNode.resolvePolyExpressionArguments(invocation, innerBinding);
+								ASTNode.resolvePolyExpressionArguments(invocation, innerBinding, this.scope);
 							}
 						}
 					}
+				} else {
+					expression.setExpectedType(targetType);
 				}
+			} else {
+				expression.checkAgainstFinalTargetType(targetType, this.scope);
 			}
 		}
 	}
