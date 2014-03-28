@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2013 IBM Corporation and others.
+ * Copyright (c) 2000, 2014 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -116,6 +116,8 @@ public class CompilationUnitDeclaration extends ASTNode implements ProblemSeveri
 	Annotation[] suppressWarningAnnotations;
 	long[] suppressWarningScopePositions; // (start << 32) + end
 	int suppressWarningsCount;
+	public int functionalExpressionsCount;
+	public FunctionalExpression[] functionalExpressions;
 
 public CompilationUnitDeclaration(ProblemReporter problemReporter, CompilationResult compilationResult, int sourceLength) {
 	this.problemReporter = problemReporter;
@@ -500,6 +502,10 @@ public boolean isSuppressed(CategorizedProblem problem) {
 	return false;
 }
 
+public boolean hasFunctionalTypes() {
+	return this.compilationResult.hasFunctionalTypes;
+}
+
 public boolean hasErrors() {
 	return this.ignoreFurtherInvestigation;
 }
@@ -650,6 +656,20 @@ public void record(LocalTypeBinding localType) {
 		System.arraycopy(this.localTypes, 0, (this.localTypes = new LocalTypeBinding[this.localTypeCount * 2]), 0, this.localTypeCount);
 	}
 	this.localTypes[this.localTypeCount++] = localType;
+}
+
+/*
+ * Keep track of all lambda/method reference expressions, so as to be able to look it up later without 
+ * having to traverse AST. Return the 1 based "ordinal" in the CUD.
+ */
+public int record(FunctionalExpression expression) {
+	if (this.functionalExpressionsCount == 0) {
+		this.functionalExpressions = new FunctionalExpression[5];
+	} else if (this.functionalExpressionsCount == this.functionalExpressions.length) {
+		System.arraycopy(this.functionalExpressions, 0, (this.functionalExpressions = new FunctionalExpression[this.functionalExpressionsCount * 2]), 0, this.functionalExpressionsCount);
+	}
+	this.functionalExpressions[this.functionalExpressionsCount] = expression;
+	return ++this.functionalExpressionsCount;
 }
 
 //{ObjectTeams: should only be called by Dependencies!
@@ -820,8 +840,12 @@ public void resetErrorFlag() {
 	this.ignoreFurtherInvestigation = false;
 }
 // SH}
+
 public void traverse(ASTVisitor visitor, CompilationUnitScope unitScope) {
-	if (this.ignoreFurtherInvestigation)
+	traverse(visitor, unitScope, true);
+}
+public void traverse(ASTVisitor visitor, CompilationUnitScope unitScope, boolean skipOnError) {
+	if (skipOnError && this.ignoreFurtherInvestigation)
 		return;
 	try {
 		if (visitor.visit(this, this.scope)) {

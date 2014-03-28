@@ -14,6 +14,7 @@
  *     Technical University Berlin - extended API and implementation
  *     Stephan Herrmann - Contribution for
  *								Bug 400874 - [1.8][compiler] Inference infrastructure should evolve to meet JLS8 18.x (Part G of JSR335 spec)
+ *								Bug 429384 - [1.8][null] implement conformance rules for null-annotated lower / upper type bounds
  *******************************************************************************/
 package org.eclipse.jdt.internal.compiler.lookup;
 
@@ -22,6 +23,7 @@ import org.eclipse.jdt.internal.compiler.ast.ASTNode;
 import org.eclipse.jdt.internal.compiler.ast.Expression;
 import org.eclipse.jdt.internal.compiler.ast.Wildcard;
 import org.eclipse.jdt.internal.compiler.classfmt.ClassFileConstants;
+import org.eclipse.jdt.internal.compiler.impl.CompilerOptions;
 import org.eclipse.objectteams.otdt.internal.core.compiler.util.RoleTypeCreator;
 
 public class CaptureBinding extends TypeVariableBinding {
@@ -45,6 +47,8 @@ public class CaptureBinding extends TypeVariableBinding {
 		this.tagBits |= TagBits.HasCapturedWildcard;
 		if (wildcard.hasTypeAnnotations()) {
 			setTypeAnnotations(wildcard.getTypeAnnotations(), wildcard.environment.globalOptions.isAnnotationBasedNullAnalysisEnabled);
+			if (wildcard.hasNullTypeAnnotations())
+				this.tagBits |= TagBits.HasNullTypeAnnotation;
 		}
 	}
 	
@@ -293,6 +297,30 @@ public class CaptureBinding extends TypeVariableBinding {
 		return super.shortReadableName();
 	}
 	
+	@Override
+	public char[] nullAnnotatedReadableName(CompilerOptions options, boolean shortNames) {
+	    StringBuffer nameBuffer = new StringBuffer(10);
+		appendNullAnnotation(nameBuffer, options);
+		nameBuffer.append(this.sourceName());
+		if (this.wildcard != null) {
+			nameBuffer.append("of "); //$NON-NLS-1$
+			nameBuffer.append(this.wildcard.nullAnnotatedReadableName(options, shortNames));
+		} else if (this.lowerBound != null) {
+			nameBuffer.append(" super "); //$NON-NLS-1$
+			nameBuffer.append(this.lowerBound.nullAnnotatedReadableName(options, shortNames));
+		} else if (this.firstBound != null) {
+			nameBuffer.append(" extends "); //$NON-NLS-1$
+			nameBuffer.append(this.firstBound.nullAnnotatedReadableName(options, shortNames));
+			TypeBinding[] otherUpperBounds = this.otherUpperBounds();
+			if (otherUpperBounds != NO_TYPES)
+				nameBuffer.append(" & ..."); //$NON-NLS-1$ // only hint at more bounds, we currently don't evaluate null annotations on otherUpperBounds
+		}
+		int nameLength = nameBuffer.length();
+		char[] readableName = new char[nameLength];
+		nameBuffer.getChars(0, nameLength, readableName, 0);
+	    return readableName;
+	}
+
 	@Override
 	public TypeBinding uncapture(Scope scope) {
 		return this.wildcard;

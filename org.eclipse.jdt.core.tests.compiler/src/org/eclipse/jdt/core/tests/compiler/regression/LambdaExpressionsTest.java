@@ -3428,6 +3428,179 @@ public void test428642() {
 			true,
 			new String [] { "-Ddummy" }); // Not sure, unless we force the VM to not be reused by passing dummy vm argument, the generated program aborts midway through its execution.);
 }
+// https://bugs.eclipse.org/bugs/show_bug.cgi?id=429112,  [1.8][compiler] Exception when compiling Serializable array constructor reference
+public void test429112() {
+	this.runConformTest(
+			new String[] {
+				"ArrayConstructorReference.java",
+				"import java.io.Serializable;\n" +
+				"import java.util.function.IntFunction;\n" +
+				"public class ArrayConstructorReference {\n" +
+				"  interface IF extends IntFunction<Object>, Serializable {}\n" +
+				"  public static void main(String[] args) {\n" +
+				"    IF factory=String[][][]::new;\n" +
+				"    Object o = factory.apply(10);\n" +
+				"    System.out.println(o.getClass());\n" +
+				"    String [][][] sa = (String [][][]) o;\n" +
+				"    System.out.println(sa.length);\n" +
+				"  }\n" +
+				"}\n"
+			},
+			"class [[[Ljava.lang.String;\n" + 
+			"10");
+}
+// https://bugs.eclipse.org/bugs/show_bug.cgi?id=429112,  [1.8][compiler] Exception when compiling Serializable array constructor reference
+public void test429112a() {
+	this.runConformTest(
+			new String[] {
+				"ArrayConstructorReference.java",
+				"import java.io.Serializable;\n" +
+				"import java.util.function.IntFunction;\n" +
+				"public class ArrayConstructorReference {\n" +
+				"  interface IF extends IntFunction<Object>, Serializable {}\n" +
+				"  public static void main(String[] args) {\n" +
+				"    IF factory=java.util.function.IntFunction[][][]::new;\n" +
+				"    Object o = factory.apply(10);\n" +
+				"    System.out.println(o.getClass());\n" +
+				"    java.util.function.IntFunction[][][] sa = (java.util.function.IntFunction[][][]) o;\n" +
+				"    System.out.println(sa.length);\n" +
+				"  }\n" +
+				"}\n"
+			},
+			"class [[[Ljava.util.function.IntFunction;\n" + 
+			"10");
+}
+// https://bugs.eclipse.org/bugs/show_bug.cgi?id=429112,  [1.8][compiler] Exception when compiling Serializable array constructor reference
+public void test429112b() {
+	this.runConformTest(
+			new String[] {
+				"ArrayConstructorReference.java",
+				"import java.io.Serializable;\n" +
+				"import java.util.function.IntFunction;\n" +
+				"public class ArrayConstructorReference {\n" +
+				"  interface IF extends IntFunction<Object>, Serializable {}\n" +
+				"  public static void main(String[] args) {\n" +
+				"    IF factory=java.util.function.IntFunction[]::new;\n" +
+				"    Object o = factory.apply(10);\n" +
+				"    System.out.println(o.getClass());\n" +
+				"    java.util.function.IntFunction[] sa = (java.util.function.IntFunction[]) o;\n" +
+				"    System.out.println(sa.length);\n" +
+				"  }\n" +
+				"}\n"
+			},
+			"class [Ljava.util.function.IntFunction;\n" + 
+			"10");
+}
+// https://bugs.eclipse.org/bugs/show_bug.cgi?id=429112,  [1.8][compiler] Exception when compiling Serializable array constructor reference
+public void test429112c() {
+	this.runConformTest(
+			new String[] {
+				"ArrayConstructorReference.java",
+				"import java.io.Serializable;\n" +
+				"import java.util.function.IntFunction;\n" +
+				"public class ArrayConstructorReference {\n" +
+				"  interface IF extends IntFunction<Object>, Serializable {}\n" +
+				"  public static void main(String[] args) {\n" +
+				"    IF factory=String[]::new;\n" +
+				"    Object o = factory.apply(10);\n" +
+				"    System.out.println(o.getClass());\n" +
+				"    String [] sa = (String []) o;\n" +
+				"    System.out.println(sa.length);\n" +
+				"  }\n" +
+				"}\n"
+			},
+			"class [Ljava.lang.String;\n" + 
+			"10");
+}
+// https://bugs.eclipse.org/bugs/show_bug.cgi?id=428857, [1.8] Method reference to instance method of generic class incorrectly gives raw type warning
+public void test428857() {
+	Map customOptions = getCompilerOptions();
+	customOptions.put(CompilerOptions.OPTION_ReportRawTypeReference, CompilerOptions.ERROR);
+	this.runConformTest(
+			new String[] {
+				"X.java",
+				"import java.util.Arrays;\n" +
+				"import java.util.List;\n" +
+				"import java.util.function.Function;\n" +
+				"public class X {\n" +
+				"    public static void main (String[] args) {\n" +
+				"        Function<List<String>, String> func = List::toString;\n" +
+				"        System.out.println(func.apply(Arrays.asList(\"a\", \"b\")));\n" +
+				"    }\n" +
+				"}\n"
+			},
+			"[a, b]",
+			customOptions);
+}
+// https://bugs.eclipse.org/bugs/show_bug.cgi?id=428857, - [1.8] Method reference to instance method of generic class incorrectly gives raw type warning
+public void test428857a() {
+	Map customOptions = getCompilerOptions();
+	customOptions.put(CompilerOptions.OPTION_ReportRawTypeReference, CompilerOptions.ERROR);
+	runConformTest(
+		new String[] {
+			"X.java",
+			"import java.util.Arrays;\n" +
+			"import java.util.List;\n" +
+			"import java.util.ArrayList;\n" +
+			"import java.util.function.Function;\n" +
+			"interface I {\n" +
+			"    List<String> getList();\n" +
+			"}\n" +
+			"public class X {\n" +
+			"    public static void main (String[] args) {\n" +
+			"        I i = ArrayList::new;\n" +
+			"        System.out.println(i.getList());\n" +
+			"    }\n" +
+			"}\n"
+		},
+		"[]",
+		customOptions);
+}
+// https://bugs.eclipse.org/bugs/show_bug.cgi?id=428857, - [1.8] Method reference to instance method of generic class incorrectly gives raw type warning
+public void test428857b() {
+	Map customOptions = getCompilerOptions();
+	customOptions.put(CompilerOptions.OPTION_ReportRawTypeReference, CompilerOptions.ERROR);
+	runConformTest(
+		new String[] {
+			"X.java",
+			"import java.util.Arrays;\n" +
+			"import java.util.List;\n" +
+			"import java.util.ArrayList;\n" +
+			"import java.util.function.Function;\n" +
+			"interface I {\n" +
+			"    ArrayList<String> getList();\n" +
+			"}\n" +
+			"public class X {\n" +
+			"    public static void main (String[] args) {\n" +
+			"        I i = ArrayList::new;\n" +
+			"        System.out.println(i.getList());\n" +
+			"    }\n" +
+			"}\n"
+		},
+		"[]",
+		customOptions);
+}
+// https://bugs.eclipse.org/bugs/show_bug.cgi?id=428857, [1.8] Method reference to instance method of generic class incorrectly gives raw type warning
+public void test428857c() {
+	Map customOptions = getCompilerOptions();
+	customOptions.put(CompilerOptions.OPTION_ReportRawTypeReference, CompilerOptions.ERROR);
+	this.runConformTest(
+			new String[] {
+				"X.java",
+				"import java.util.Arrays;\n" +
+				"import java.util.List;\n" +
+				"import java.util.function.Function;\n" +
+				"import java.util.ArrayList;\n" +
+				"public class X {\n" +
+				"    public static void main (String[] args) {\n" +
+				"        Function<ArrayList<String>, String> func = List::toString;\n" +
+				"        System.out.println(func.apply(new ArrayList<>(Arrays.asList(\"a\", \"b\"))));\n" +
+				"    }\n" +
+				"}\n"
+			},
+			"[a, b]",
+			customOptions);
+}
 public static Class testClass() {
 	return LambdaExpressionsTest.class;
 }

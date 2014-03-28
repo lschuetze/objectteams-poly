@@ -33,6 +33,7 @@ import org.eclipse.jdt.internal.compiler.ast.FunctionalExpression;
 import org.eclipse.jdt.internal.compiler.ast.Invocation;
 import org.eclipse.jdt.internal.compiler.ast.LambdaExpression;
 import org.eclipse.jdt.internal.compiler.ast.MessageSend;
+import org.eclipse.jdt.internal.compiler.ast.NullAnnotationMatching;
 import org.eclipse.jdt.internal.compiler.ast.ReferenceExpression;
 import org.eclipse.jdt.internal.compiler.ast.Statement;
 import org.eclipse.jdt.internal.compiler.ast.Wildcard;
@@ -205,12 +206,12 @@ public class InferenceContext18 {
 	public static final int CHECK_LOOSE = 2;
 	public static final int CHECK_VARARG = 3;
 	
-	static class InvocationRecord {
+	static class SuspendedInferenceRecord {
 		InvocationSite site;
 		Expression[] invocationArguments;
 		InferenceVariable[] inferenceVariables;
 		int inferenceKind;
-		InvocationRecord(InvocationSite site, Expression[] invocationArguments, InferenceVariable[] inferenceVariables, int inferenceKind) {
+		SuspendedInferenceRecord(InvocationSite site, Expression[] invocationArguments, InferenceVariable[] inferenceVariables, int inferenceKind) {
 			this.site = site;
 			this.invocationArguments = invocationArguments;
 			this.inferenceVariables = inferenceVariables;
@@ -304,10 +305,6 @@ public class InferenceContext18 {
 			this.initialConstraints = ConstraintFormula.NO_CONSTRAINTS;
 		else if (numConstraints < maxConstraints)
 			System.arraycopy(this.initialConstraints, 0, this.initialConstraints = new ConstraintFormula[numConstraints], 0, numConstraints);
-	}
-
-	public void setInitialConstraint(ConstraintFormula constraintFormula) {
-		this.initialConstraints = new ConstraintFormula[] { constraintFormula };
 	}
 
 	private InferenceVariable[] addInitialTypeVariableSubstitutions(TypeBinding[] typeVariables) {
@@ -533,6 +530,8 @@ public class InferenceContext18 {
 				TypeBinding[] solutions = getSolutions(original.typeVariables(), invocation, result);
 				if (solutions != null) {
 					finalMethod = this.environment.createParameterizedGenericMethod(original, solutions);
+					if (this.scope.compilerOptions().isAnnotationBasedNullAnalysisEnabled)
+						NullAnnotationMatching.checkForContraditions(finalMethod, invocation, this.scope);
 					invocation.registerInferenceContext(finalMethod, this);
 					this.solutionsPerTargetType.put(targetType, new Solution(finalMethod, result));
 				}
@@ -602,6 +601,80 @@ public class InferenceContext18 {
 	}
 
 	/**
+	 * 18.5.3 Functional Interface Parameterization Inference
+	 */
+	public ReferenceBinding inferFunctionalInterfaceParameterization(LambdaExpression lambda, BlockScope blockScope, 
+			ParameterizedTypeBinding targetTypeWithWildCards) 
+	{
+		TypeBinding[] q = createBoundsForFunctionalInterfaceParameterizationInference(targetTypeWithWildCards);
+		if (q == null || q.length != lambda.arguments().length) {
+			// fail  TODO: can this still happen here?
+		} else {
+			if (reduceWithEqualityConstraints(lambda.argumentTypes(), q)) {
+				ReferenceBinding genericType = targetTypeWithWildCards.genericType();
+				TypeBinding[] a = targetTypeWithWildCards.arguments; // a is not-null by construction of parameterizedWithWildcard()
+				TypeBinding[] aprime = getFunctionInterfaceArgumentSolutions(a);
+				// TODO If F<A'1, ..., A'm> is a well-formed type, ...
+				return blockScope.environment().createParameterizedType(genericType, aprime, genericType.enclosingType());
+			}
+		}
+		return targetTypeWithWildCards;
+	}
+
+	/**
+	 * Create initial bound set for 18.5.3 Functional Interface Parameterization Inference
+	 * @param functionalInterface the functional interface F<A1,..Am>
+	 * @return the parameter types Q1..Qk of the function type of the type F<α1, ..., αm>, or null 
+	 */
+	TypeBinding[] createBoundsForFunctionalInterfaceParameterizationInference(ParameterizedTypeBinding functionalInterface) {
+		if (this.currentBounds == null)
+			this.currentBounds = new BoundSet();
+		TypeBinding[] a = functionalInterface.arguments;
+		if (a == null)
+			return null;
+		InferenceVariable[] alpha = addInitialTypeVariableSubstitutions(a);
+
+		for (int i = 0; i < a.length; i++) {
+			TypeBound bound;
+			if (a[i].kind() == Binding.WILDCARD_TYPE) {
+				WildcardBinding wildcard = (WildcardBinding) a[i];
+				switch(wildcard.boundKind) {
+    				case Wildcard.EXTENDS :
+    					bound = new TypeBound(alpha[i], wildcard.allBounds(), ReductionResult.SUBTYPE);
+    					break;
+    				case Wildcard.SUPER :
+    					bound = new TypeBound(alpha[i], wildcard.bound, ReductionResult.SUPERTYPE);
+    					break;
+    				case Wildcard.UNBOUND :
+    					bound = new TypeBound(alpha[i], this.object, ReductionResult.SUBTYPE);
+    					break;
+    				default:
+    					continue; // cannot
+				}
+			} else {
+				bound = new TypeBound(alpha[i], a[i], ReductionResult.SAME);
+			}
+			this.currentBounds.addBound(bound, this.environment);
+		}
+		TypeBinding falpha = substitute(functionalInterface);
+		return falpha.getSingleAbstractMethod(this.scope, true).parameters;
+	}
+
+	public boolean reduceWithEqualityConstraints(TypeBinding[] p, TypeBinding[] q) {
+		if (p != null) {
+			for (int i = 0; i < p.length; i++) {
+				try {
+					if (!this.reduceAndIncorporate(ConstraintTypeFormula.create(p[i], q[i], ReductionResult.SAME)))
+						return false;
+				} catch (InferenceFailureException e) {
+					return false;
+				}
+			}
+		}
+		return true;
+	}
+
+	/**
 	 * 18.5.4 More Specific Method Inference
 	 */
 	public boolean isMoreSpecificThan(MethodBinding m1, MethodBinding m2, boolean isVarArgs, boolean isVarArgs2) {
@@ -626,13 +699,13 @@ public class InferenceContext18 {
 				if (result == Boolean.FALSE)
 					return false;
 				if (result == null)
-					if (!reduceAndIncorporate(new ConstraintTypeFormula(si, ti, ReductionResult.SUBTYPE)))
+					if (!reduceAndIncorporate(ConstraintTypeFormula.create(si, ti, ReductionResult.SUBTYPE)))
 						return false;
 			}
 			if (t.length == numInvocArgs + 1) {
 				TypeBinding skplus1 = getParameter(s, numInvocArgs, true);
 				TypeBinding tkplus1 = getParameter(t, numInvocArgs, true);
-				if (!reduceAndIncorporate(new ConstraintTypeFormula(skplus1, tkplus1, ReductionResult.SUBTYPE)))
+				if (!reduceAndIncorporate(ConstraintTypeFormula.create(skplus1, tkplus1, ReductionResult.SUBTYPE)))
 					return false;
 			}
 			return solve() != null;
@@ -715,11 +788,11 @@ public class InferenceContext18 {
 				}
 				return true;
 			}
-			return reduceAndIncorporate(new ConstraintTypeFormula(r1, r2, ReductionResult.SUBTYPE));
+			return reduceAndIncorporate(ConstraintTypeFormula.create(r1, r2, ReductionResult.SUBTYPE));
 		} else if (expri instanceof ReferenceExpression && ((ReferenceExpression)expri).isExactMethodReference()) {
 			for (int i = 0; i < u.length; i++) {
 				ReferenceExpression reference = (ReferenceExpression) expri;
-				if (!reduceAndIncorporate(new ConstraintTypeFormula(u[i], v[i], ReductionResult.SAME)))
+				if (!reduceAndIncorporate(ConstraintTypeFormula.create(u[i], v[i], ReductionResult.SAME)))
 					return false;
 				if (r2.id == TypeIds.T_void)
 					return true;
@@ -730,7 +803,7 @@ public class InferenceContext18 {
 				if (r2.isPrimitiveType() && !r1.isPrimitiveType() && !returnType.isPrimitiveType())
 					return true;
 			}
-			return reduceAndIncorporate(new ConstraintTypeFormula(r1, r2, ReductionResult.SUBTYPE));
+			return reduceAndIncorporate(ConstraintTypeFormula.create(r1, r2, ReductionResult.SUBTYPE));
 		} else if (expri instanceof ConditionalExpression) {
 			ConditionalExpression cond = (ConditionalExpression) expri;
 			return  checkExpression(cond.valueIfTrue, u, r1, v, r2) && checkExpression(cond.valueIfFalse, u, r1, v, r2);
@@ -820,7 +893,7 @@ public class InferenceContext18 {
 			for (int j = 0; j < this.inferenceVariables.length; j++) {
 				InferenceVariable variable = this.inferenceVariables[j];
 				if (variable.site == site && TypeBinding.equalsEquals(variable.typeParameter, typeParameters[i])) {
-					substitutions[i] = boundSet.getInstantiation(variable);
+					substitutions[i] = boundSet.getInstantiation(variable, this.environment);
 					break;
 				}
 			}
@@ -866,13 +939,13 @@ public class InferenceContext18 {
 								TypeBinding lub = this.scope.lowerUpperBound(lowerBounds);
 								if (lub == TypeBinding.VOID || lub == null)
 									return null;
-								tmpBoundSet.addBound(new TypeBound(variable, lub, ReductionResult.SAME));
+								tmpBoundSet.addBound(new TypeBound(variable, lub, ReductionResult.SAME), this.environment);
 							} else {
 								TypeBinding[] upperBounds = tmpBoundSet.upperBounds(variable, true/*onlyProper*/);
 								// check exception bounds:
 								if (tmpBoundSet.inThrows.contains(variable) && tmpBoundSet.hasOnlyTrivialExceptionBounds(variable, upperBounds)) {
 									TypeBinding runtimeException = this.scope.getType(TypeConstants.JAVA_LANG_RUNTIMEEXCEPTION, 3);
-									tmpBoundSet.addBound(new TypeBound(variable, runtimeException, ReductionResult.SAME));
+									tmpBoundSet.addBound(new TypeBound(variable, runtimeException, ReductionResult.SAME), this.environment);
 								} else {
 									// try upper bounds:
 									TypeBinding glb = this.object;
@@ -889,7 +962,7 @@ public class InferenceContext18 {
 												glb = new IntersectionCastTypeBinding(glbs, this.environment);
 										}
 									}
-									tmpBoundSet.addBound(new TypeBound(variable, glb, ReductionResult.SAME));
+									tmpBoundSet.addBound(new TypeBound(variable, glb, ReductionResult.SAME), this.environment);
 								}
 							}
 						}
@@ -956,7 +1029,7 @@ public class InferenceContext18 {
 						captureKeys = toRemove.iterator();
 						while (captureKeys.hasNext())
 							tmpBoundSet.captures.remove(captureKeys.next());
-						tmpBoundSet.addBound(new TypeBound(variable, zsj, ReductionResult.SAME));
+						tmpBoundSet.addBound(new TypeBound(variable, zsj, ReductionResult.SAME), this.environment);
 					}
 					if (tmpBoundSet.incorporate(this)) {
 						if (tmpBoundSet.numUninstantiatedVariables(this.inferenceVariables) == oldNumUninstantiated)
@@ -1271,8 +1344,8 @@ public class InferenceContext18 {
 		return types;
 	}
 	
-	public InvocationRecord enterPolyInvocation(InvocationSite invocation, Expression[] innerArguments) {
-		InvocationRecord record = new InvocationRecord(this.currentInvocation, this.invocationArguments, this.inferenceVariables, this.inferenceKind);
+	public SuspendedInferenceRecord enterPolyInvocation(InvocationSite invocation, Expression[] innerArguments) {
+		SuspendedInferenceRecord record = new SuspendedInferenceRecord(this.currentInvocation, this.invocationArguments, this.inferenceVariables, this.inferenceKind);
 		this.inferenceVariables = null;
 		this.invocationArguments = innerArguments;
 		this.currentInvocation = invocation;
@@ -1281,8 +1354,16 @@ public class InferenceContext18 {
 		this.innerPolies.add(invocation);
 		return record;
 	}
+	
+	public SuspendedInferenceRecord enterLambda(LambdaExpression lambda) {
+		SuspendedInferenceRecord record = new SuspendedInferenceRecord(this.currentInvocation, this.invocationArguments, this.inferenceVariables, this.inferenceKind);
+		this.inferenceVariables = null;
+		this.invocationArguments = null;
+		this.currentInvocation = null;
+		return record;
+	}
 
-	public void leavePolyInvocation(InvocationRecord record) {
+	public void resumeSuspendedInference(SuspendedInferenceRecord record) {
 		// merge inference variables:
 		if (this.inferenceVariables == null) { // no new ones, assume we aborted prematurely
 			this.inferenceVariables = record.inferenceVariables;
@@ -1360,6 +1441,8 @@ public class InferenceContext18 {
 					TypeBinding[] arguments = getSolutions(declaringClass.typeVariables(), innerMessage, bounds);
 					declaringClass = this.environment.createParameterizedType(declaringClass, arguments, declaringClass.enclosingType());
 					original = ((ParameterizedTypeBinding)declaringClass).createParameterizedMethod(original);
+					if (this.environment.globalOptions.isAnnotationBasedNullAnalysisEnabled)
+						NullAnnotationMatching.checkForContraditions(original, innerMessage, this.scope);
 				}
 				
 				// apply results of the combined inference onto the binding of the inner invocation:
@@ -1429,7 +1512,7 @@ public class InferenceContext18 {
 			}
 			public TypeBinding substitute(TypeVariableBinding typeVariable) {
 				if (typeVariable instanceof InferenceVariable) {
-					return result.getInstantiation((InferenceVariable) typeVariable);
+					return result.getInstantiation((InferenceVariable) typeVariable, InferenceContext18.this.environment);
 				}
 				return typeVariable;
 			}
@@ -1506,7 +1589,7 @@ public class InferenceContext18 {
 			for (int i = 0; i < this.inferenceVariables.length; i++) {
 				buf.append('\t').append(this.inferenceVariables[i].sourceName).append("\t:\t"); //$NON-NLS-1$
 				if (this.currentBounds != null && this.currentBounds.isInstantiated(this.inferenceVariables[i]))
-					buf.append(this.currentBounds.getInstantiation(this.inferenceVariables[i]).readableName());
+					buf.append(this.currentBounds.getInstantiation(this.inferenceVariables[i], this.environment).readableName());
 				else
 					buf.append("NOT INSTANTIATED"); //$NON-NLS-1$
 				buf.append('\n');
@@ -1546,62 +1629,12 @@ public class InferenceContext18 {
 		return null;
 	}
 
-	/**
-	 * Create initial bound set for 18.5.3 Functional Interface Parameterization Inference
-	 * @param functionalInterface the functional interface F<A1,..Am>
-	 * @return the parameter types Q1..Qk of the function type of the type F<α1, ..., αm>, or null 
-	 */
-	public TypeBinding[] createBoundsForFunctionalInterfaceParameterizationInference(ParameterizedTypeBinding functionalInterface) {
-		this.currentBounds = new BoundSet();
-		TypeBinding[] a = functionalInterface.arguments;
-		if (a == null)
-			return null;
-		InferenceVariable[] alpha = addInitialTypeVariableSubstitutions(a);
-
-		for (int i = 0; i < a.length; i++) {
-			TypeBound bound;
-			if (a[i].kind() == Binding.WILDCARD_TYPE) {
-				WildcardBinding wildcard = (WildcardBinding) a[i];
-				switch(wildcard.boundKind) {
-    				case Wildcard.EXTENDS :
-    					bound = new TypeBound(alpha[i], wildcard.allBounds(), ReductionResult.SUBTYPE);
-    					break;
-    				case Wildcard.SUPER :
-    					bound = new TypeBound(alpha[i], wildcard.bound, ReductionResult.SUPERTYPE);
-    					break;
-    				case Wildcard.UNBOUND :
-    					bound = new TypeBound(alpha[i], this.object, ReductionResult.SUBTYPE);
-    					break;
-    				default:
-    					continue; // cannot
-				}
-			} else {
-				bound = new TypeBound(alpha[i], a[i], ReductionResult.SAME);
-			}
-			this.currentBounds.addBound(bound);
-		}
-		TypeBinding falpha = substitute(functionalInterface);
-		return falpha.getSingleAbstractMethod(this.scope, true).parameters;
-	}
-
-	public boolean reduceWithEqualityConstraints(TypeBinding[] p, TypeBinding[] q) {
-		for (int i = 0; i < p.length; i++) {
-			try {
-				if (!this.reduceAndIncorporate(new ConstraintTypeFormula(p[i], q[i], ReductionResult.SAME)))
-					return false;
-			} catch (InferenceFailureException e) {
-				return false;
-			}
-		}
-		return true;
-	}
-
 	public TypeBinding[] getFunctionInterfaceArgumentSolutions(TypeBinding[] a) {
 		int m = a.length;
 		TypeBinding[] aprime = new TypeBinding[m];
 		for (int i = 0; i < this.inferenceVariables.length; i++) {
 			InferenceVariable alphai = this.inferenceVariables[i];
-			TypeBinding t = this.currentBounds.getInstantiation(alphai);
+			TypeBinding t = this.currentBounds.getInstantiation(alphai, this.environment);
 			if (t != null)
 				aprime[i] = t;
 			else

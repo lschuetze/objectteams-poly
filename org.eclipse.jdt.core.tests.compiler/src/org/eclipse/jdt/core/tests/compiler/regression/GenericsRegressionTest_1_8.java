@@ -877,7 +877,7 @@ public void testBug424195_comment2() {
 			"\n" + 
 			"    public static void main(String argv[]) {\n" + 
 			"        ArrayList<Integer> al = IntStream\n" + 
-			"        	     .range(0, 10_000_000)\n" + 
+			"        	     .range(0, 10_000)\n" + 
 			"        	     .boxed()\n" + 
 			"        	     .collect(Collectors.toCollection(ArrayList::new));\n" + 
 			"\n" + 
@@ -2407,5 +2407,139 @@ public void test428524() {
 		}, 
 		"WithNoArgConstructor\n" + 
 		"WithOutNoArgConstructor");
+}
+public void testBug428786() {
+	runConformTest(
+		new String[] {
+			"Junk9.java",
+			"import java.util.*;\n" +
+			"public class Junk9 {\n" + 
+			"    class Node {\n" + 
+			"        public double getLayoutY() {return 12;}\n" + 
+			"    }\n" + 
+			"    class Node2 extends Node {\n" + 
+			"    }\n" + 
+			"    void junk() {\n" + 
+			"        List<Node2> visibleCells = new ArrayList<>(20);\n" + 
+			"        Collections.sort(visibleCells, (Node o1, Node o2) -> Double.compare(o1.getLayoutY(), o2.getLayoutY()));\n" + 
+			"    }\n" + 
+			"}\n"
+		});
+}
+public void testBug429090_comment1() {
+	runNegativeTest(
+		new String[] {
+			"Junk10.java",
+			"\n" + 
+			"public class Junk10 {\n" + 
+			"    class Observable<T> {}\n" + 
+			"    interface InvalidationListener {\n" + 
+			"        public void invalidated(Observable<?> observable);\n" + 
+			"    }\n" + 
+			"    public static abstract class Change<E2> {}\n" + 
+			"    interface SetChangeListener<E1> {\n" + 
+			"        void onChanged(Change<? extends E1> change);\n" + 
+			"    }\n" + 
+			"    class SetListenerHelper<T> {}\n" + 
+			"    public static <E> SetListenerHelper<E> addListener(\n" +
+			"			SetListenerHelper<E> helper, SetChangeListener<? super E> listener) {\n" + 
+			"        return helper;\n" + 
+			"    }\n" + 
+			"    void junk() {\n" + 
+			"        addListener(null, (SetChangeListener.Change<?> c) -> {});\n" + 
+			"    }\n" + 
+			"}\n"
+		},
+		"----------\n" + 
+		"1. ERROR in Junk10.java (at line 17)\n" + 
+		"	addListener(null, (SetChangeListener.Change<?> c) -> {});\n" + 
+		"	^^^^^^^^^^^\n" + 
+		"The method addListener(Junk10.SetListenerHelper<E>, Junk10.SetChangeListener<? super E>) in the type Junk10 is not applicable for the arguments (null, (SetChangeListener.Change<?> c) -> {\n" + 
+		"})\n" + 
+		"----------\n" + 
+		"2. ERROR in Junk10.java (at line 17)\n" + 
+		"	addListener(null, (SetChangeListener.Change<?> c) -> {});\n" + 
+		"	                   ^^^^^^^^^^^^^^^^^^^^^^^^\n" + 
+		"SetChangeListener.Change cannot be resolved to a type\n" + 
+		"----------\n");
+}
+public void testBug429090() {
+	runConformTest(
+		new String[] {
+			"Junk10.java",
+			"public class Junk10 {\n" + 
+			"    class Observable<T> {}\n" + 
+			"    interface InvalidationListener {\n" + 
+			"        public void invalidated(Observable observable);\n" + 
+			"    }\n" + 
+			"    interface SetChangeListener<E> {\n" + 
+			"        public static abstract class Change<E> {}\n" + 
+			"        void onChanged(Change<? extends E> change);\n" + 
+			"    }\n" + 
+			"    class SetListenerHelper<T> {}\n" + 
+			"    public static <E> SetListenerHelper<E> addListener(SetListenerHelper<E> helper, InvalidationListener listener) {\n" + 
+			"        return helper;\n" + 
+			"    }\n" + 
+			"    public static <E> SetListenerHelper<E> addListener(SetListenerHelper<E> helper, SetChangeListener<? super E> listener) {\n" + 
+			"        return helper;\n" + 
+			"    }\n" + 
+			"    void junk() {\n" + 
+			"        addListener(null, new SetChangeListener () {\n" + 
+			"            public void onChanged(SetChangeListener.Change change) {}\n" + 
+			"        });\n" + 
+			"        addListener(null, (SetChangeListener.Change<? extends Object> c) -> {});\n" + // original was without "extends Object" 
+			"    }\n" + 
+			"}\n"
+		});
+}
+public void _testBug428811() {
+	// perhaps fail is the correct answer?
+	runConformTest(
+		new String[] {
+			"MoreCollectors.java",
+			"import java.util.AbstractList;\n" + 
+			"import java.util.ArrayList;\n" + 
+			"import java.util.Arrays;\n" + 
+			"import java.util.Collection;\n" + 
+			"import java.util.List;\n" + 
+			"import java.util.stream.Collector;\n" + 
+			"\n" + 
+			"public class MoreCollectors {\n" + 
+			"    public static void main (String[] args) {\n" + 
+			"        ImmutableList<String> list = Arrays.asList(\"a\", \"b\", \"c\").stream().collect(toImmutableList());\n" + 
+			"        \n" + 
+			"        System.out.println(list);\n" + 
+			"    }\n" + 
+			"    \n" + 
+			"    public static <T> Collector<T, ?, ImmutableList<T>> toImmutableList () {\n" + 
+			"        return Collector.of(ArrayList<T>::new,\n" + 
+			"                List<T>::add,\n" + 
+			"                (left, right) -> { left.addAll(right); return left; },\n" + 
+			"                ImmutableList::copyOf);\n" + 
+			"    }\n" + 
+			"    \n" + 
+			"    private static class ImmutableList<T> extends AbstractList<T> {\n" + 
+			"        public static <T> ImmutableList<T> copyOf (Collection<T> c) {\n" + 
+			"            return new ImmutableList<>(c.toArray());\n" + 
+			"        }\n" + 
+			"\n" + 
+			"        private Object[] array;\n" + 
+			"        \n" + 
+			"        private ImmutableList (Object[] array) {\n" + 
+			"            this.array = array;\n" + 
+			"        }\n" + 
+			"\n" + 
+			"        @Override @SuppressWarnings(\"unchecked\")\n" + 
+			"        public T get(int index) {\n" + 
+			"            return (T)array[index];\n" + 
+			"        }\n" + 
+			"\n" + 
+			"        @Override\n" + 
+			"        public int size() {\n" + 
+			"            return array.length;\n" + 
+			"        }\n" + 
+			"    }\n" + 
+			"}\n"
+		});
 }
 }

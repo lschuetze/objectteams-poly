@@ -28,6 +28,7 @@
  *								Bug 416183 - [1.8][compiler][null] Overload resolution fails with null annotations
  *								Bug 416307 - [1.8][compiler][null] subclass with type parameter substitution confuses null checking
  *								Bug 417295 - [1.8[[null] Massage type annotated null analysis to gel well with deep encoded type bindings.
+ *								Bug 416190 - [1.8][null] detect incompatible overrides due to null type annotations
  *******************************************************************************/
 package org.eclipse.jdt.internal.compiler.lookup;
 
@@ -1210,6 +1211,26 @@ public TypeBinding createAnnotatedType(TypeBinding type, AnnotationBinding[] new
 	if (oldLength > 0) {
 		System.arraycopy(newbies, 0, newbies = new AnnotationBinding[newLength + oldLength], 0, newLength);
 		System.arraycopy(oldies, 0, newbies, newLength, oldLength);
+	}
+	if (this.globalOptions.isAnnotationBasedNullAnalysisEnabled) {
+		// filter duplicate null annotations
+		// (do we want to filter other annotations as well? only if not repeatable?)
+		long tagBitsSeen = 0;
+		AnnotationBinding[] filtered = new AnnotationBinding[newbies.length];
+		int count = 0;
+		for (int i = 0; i < newbies.length; i++) {
+			long tagBits = 0;
+			switch (newbies[i].type.id) {
+				case TypeIds.T_ConfiguredAnnotationNonNull  : tagBits = TagBits.AnnotationNonNull; break;
+				case TypeIds.T_ConfiguredAnnotationNullable : tagBits = TagBits.AnnotationNullable; break;
+			}
+			if ((tagBitsSeen & tagBits) == 0) {
+				tagBitsSeen |= tagBits;
+				filtered[count++] = newbies[i];
+			}
+		}
+		if (count < newbies.length)
+			System.arraycopy(filtered, 0, newbies = new AnnotationBinding[count], 0, count);
 	}
 	return this.typeSystem.getAnnotatedType(type, new AnnotationBinding [][] { newbies });
 }

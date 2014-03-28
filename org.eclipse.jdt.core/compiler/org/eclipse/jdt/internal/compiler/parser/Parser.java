@@ -172,6 +172,12 @@ public class Parser extends CommitRollbackParser implements ConflictedParser, Op
 
 	private static final String UNEXPECTED_EOF = "Unexpected End Of File" ; //$NON-NLS-1$
 	public static boolean VERBOSE_RECOVERY = false;
+	
+	private static enum LocalTypeKind {
+		LOCAL,
+		METHOD_REFERENCE,
+		LAMBDA,
+	}
 
 	static {
 		try{
@@ -917,6 +923,7 @@ public class Parser extends CommitRollbackParser implements ConflictedParser, Op
 	protected int lParenPos,rParenPos; //accurate only when used !
 	protected int modifiers;
 	protected int modifiersSourceStart;
+	protected int colonColonStart = -1;
 	protected int[] nestedMethod; //the ptr is nestedType
 
 	protected int nestedType, dimensions;
@@ -5655,21 +5662,35 @@ protected void consumeInterfaceMethodDeclaration(boolean hasSemicolonBody) {
 	this.intStack :
 	*/
 
+	int explicitDeclarations = 0;
+	Statement[] statements = null;
 	if (!hasSemicolonBody) {
 		// pop the position of the {  (body of the method) pushed in block decl
 		this.intPtr--;
-		// retrieve end position of method declarator
-
+		this.intPtr--;
+		
+		explicitDeclarations = this.realBlockStack[this.realBlockPtr--];
+		
 		//statements
-		this.realBlockPtr--;
 		int length;
 		if ((length = this.astLengthStack[this.astLengthPtr--]) != 0) {
-			this.astPtr -= length;
+			if (this.options.ignoreMethodBodies) {
+				this.astPtr -= length;
+			} else {
+				System.arraycopy(
+					this.astStack,
+					(this.astPtr -= length) + 1,
+					statements = new Statement[length],
+					0,
+					length);
+			}
 		}
 	}
 
 	//watch for } that could be given as a unicode ! ( u007D is '}' )
 	MethodDeclaration md = (MethodDeclaration) this.astStack[this.astPtr];
+	md.statements = statements;
+	md.explicitDeclarations = explicitDeclarations;
 	md.bodyEnd = this.endPosition;
 	md.declarationSourceEnd = flushCommentsDefinedPriorTo(this.endStatementPosition);
 	
@@ -10083,6 +10104,8 @@ protected void consumeLambdaExpression() {
 	if (this.currentElement != null) {
 		this.lastCheckPoint = body.sourceEnd + 1;
 	}
+	this.referenceContext.compilationResult().hasFunctionalTypes = true;
+	markEnclosingMemberWithLocalOrFunctionalType(LocalTypeKind.LAMBDA);
 }
 
 protected Argument typeElidedArgument() {
@@ -10214,11 +10237,7 @@ protected void consumeReferenceExpressionTypeForm(boolean isPrimitive) { // actu
 	} else {
 		referenceExpression.initialize(this.compilationUnit.compilationResult, getUnspecifiedReference(), typeArguments, selector, sourceEnd);
 	}
-	pushOnExpressionStack(referenceExpression);
-
-	if (!this.parsingJava8Plus) {
-		problemReporter().referenceExpressionsNotBelow18(referenceExpression);
-	}
+	consumeReferenceExpression(referenceExpression);
 }
 protected void consumeReferenceExpressionPrimaryForm() {
 	// ReferenceExpression ::= Primary '::' NonWildTypeArgumentsopt Identifier
@@ -10242,10 +10261,7 @@ protected void consumeReferenceExpressionPrimaryForm() {
 	Expression primary = this.expressionStack[this.expressionPtr--];
 	this.expressionLengthPtr--;
 	referenceExpression.initialize(this.compilationUnit.compilationResult, primary, typeArguments, selector, sourceEnd);
-	pushOnExpressionStack(referenceExpression);
-	if (!this.parsingJava8Plus) {
-		problemReporter().referenceExpressionsNotBelow18(referenceExpression);
-	}
+	consumeReferenceExpression(referenceExpression);
 }
 protected void consumeReferenceExpressionSuperForm() {
 	// ReferenceExpression ::= 'super' '::' NonWildTypeArgumentsopt Identifier
@@ -10268,10 +10284,15 @@ protected void consumeReferenceExpressionSuperForm() {
 	
 	SuperReference superReference = new SuperReference(this.intStack[this.intPtr--], this.endPosition);
 	referenceExpression.initialize(this.compilationUnit.compilationResult, superReference, typeArguments, selector, sourceEnd);
+	consumeReferenceExpression(referenceExpression);
+}
+protected void consumeReferenceExpression(ReferenceExpression referenceExpression) {
 	pushOnExpressionStack(referenceExpression);
 	if (!this.parsingJava8Plus) {
 		problemReporter().referenceExpressionsNotBelow18(referenceExpression);
 	}
+	this.referenceContext.compilationResult().hasFunctionalTypes = true;
+	markEnclosingMemberWithLocalOrFunctionalType(LocalTypeKind.METHOD_REFERENCE);
 }
 protected void consumeReferenceExpressionTypeArgumentsAndTrunk(boolean qualified) {
 	// ReferenceExpressionTypeArgumentsAndTrunk ::= OnlyTypeArguments Dimsopt ==> qualified == false
@@ -10316,10 +10337,7 @@ protected void consumeReferenceExpressionGenericTypeForm() {
 	
 	referenceExpression.initialize(this.compilationUnit.compilationResult, type, typeArguments, selector, sourceEnd);
 
-	pushOnExpressionStack(referenceExpression);
-	if (!this.parsingJava8Plus) {
-		problemReporter().referenceExpressionsNotBelow18(referenceExpression);
-	}
+	consumeReferenceExpression(referenceExpression);
 }
 protected void consumeEnterInstanceCreationArgumentList() {
 	return;
@@ -10970,6 +10988,9 @@ protected void consumeToken(int type) {
 			consumeLambdaHeader();
   :giro */
 // SH}
+			break;
+		case TokenNameCOLON_COLON:
+			this.colonColonStart = this.scanner.currentPosition - 2;
 			break;
 		case TokenNameBeginLambda:
 			flushCommentsDefinedPriorTo(this.scanner.currentPosition);
@@ -13270,6 +13291,9 @@ private void jumpOverType(){
 }
 protected void markEnclosingMemberWithLocalType() {
 	if (this.currentElement != null) return; // this is already done in the recovery code
+	markEnclosingMemberWithLocalOrFunctionalType(LocalTypeKind.LOCAL);
+}
+protected void markEnclosingMemberWithLocalOrFunctionalType(LocalTypeKind context) {
 	for (int i = this.astPtr; i >= 0; i--) {
 		ASTNode node = this.astStack[i];
 		if (node instanceof AbstractMethodDeclaration
@@ -13277,14 +13301,33 @@ protected void markEnclosingMemberWithLocalType() {
 				|| (node instanceof TypeDeclaration // mark type for now: all initializers will be marked when added to this type
 						// and enclosing type must not be closed (see https://bugs.eclipse.org/bugs/show_bug.cgi?id=147485)
 						&& ((TypeDeclaration) node).declarationSourceEnd == 0)) {
-			node.bits |= ASTNode.HasLocalType;
+			switch (context) {
+				case METHOD_REFERENCE:
+					node.bits |= ASTNode.HasFunctionalInterfaceTypes;
+					break;
+				case LAMBDA:
+					node.bits |= ASTNode.HasFunctionalInterfaceTypes;
+					//$FALL-THROUGH$
+				case LOCAL:
+					node.bits |= ASTNode.HasLocalType;
+			}
 			return;
 		}
 	}
 	// default to reference context (case of parse method body)
 	if (this.referenceContext instanceof AbstractMethodDeclaration
 			|| this.referenceContext instanceof TypeDeclaration) {
-		((ASTNode)this.referenceContext).bits |= ASTNode.HasLocalType;
+		ASTNode node = (ASTNode)this.referenceContext;
+		switch (context) {
+			case METHOD_REFERENCE:
+				node.bits |= ASTNode.HasFunctionalInterfaceTypes;
+				break;
+			case LAMBDA:
+				node.bits |= ASTNode.HasFunctionalInterfaceTypes;
+				//$FALL-THROUGH$
+			case LOCAL:
+				node.bits |= ASTNode.HasLocalType;
+		}
 	}
 }
 

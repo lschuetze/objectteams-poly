@@ -26,6 +26,9 @@ public class TypeBound extends ReductionResult {
 	
 	// this flag contributes to the workaround controlled by InferenceContext18.ARGUMENT_CONSTRAINTS_ARE_SOFT:
 	boolean isSoft;
+
+	// here we accumulate null tagBits from any types that have been related to this type bound during incorporation:
+	long nullHints;
 	
 	static TypeBound createBoundOrDependency(InferenceContext18 context, TypeBinding type, InferenceVariable variable) {
         // Part of JLS8 sect 18.1.3:
@@ -49,7 +52,7 @@ public class TypeBound extends ReductionResult {
 	private TypeBinding safeType(TypeBinding type) {
 		if (type != null && type.isLocalType()) {
 			MethodBinding enclosingMethod = ((LocalTypeBinding) type).enclosingMethod;
-			if (enclosingMethod != null && CharOperation.equals(TypeConstants.ANONYMOUS_METHOD, enclosingMethod.selector))
+			if (enclosingMethod != null && CharOperation.prefixEquals(TypeConstants.ANONYMOUS_METHOD, enclosingMethod.selector))
 				return type.superclass(); // don't use local class inside lambda: lambda is copied, type will be re-created and thus is unmatchable
 		}
 		return type;

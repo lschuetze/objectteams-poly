@@ -24,6 +24,7 @@
  *								Bug 400874 - [1.8][compiler] Inference infrastructure should evolve to meet JLS8 18.x (Part G of JSR335 spec)
  *								Bug 426792 - [1.8][inference][impl] generify new type inference engine
  *								Bug 428019 - [1.8][compiler] Type inference failure with nested generic invocation.
+ *								Bug 429384 - [1.8][null] implement conformance rules for null-annotated lower / upper type bounds
  *******************************************************************************/
 package org.eclipse.jdt.internal.compiler.lookup;
 
@@ -37,6 +38,7 @@ import org.eclipse.jdt.internal.compiler.ast.TypeParameter;
 import org.eclipse.jdt.internal.compiler.ast.TypeReference;
 import org.eclipse.jdt.internal.compiler.ast.Wildcard;
 import org.eclipse.jdt.internal.compiler.classfmt.ClassFileConstants;
+import org.eclipse.jdt.internal.compiler.impl.CompilerOptions;
 import org.eclipse.objectteams.otdt.internal.core.compiler.lookup.CallinCalloutBinding;
 import org.eclipse.objectteams.otdt.internal.core.compiler.lookup.DependentTypeBinding;
 import org.eclipse.objectteams.otdt.internal.core.compiler.lookup.ITeamAnchor;
@@ -857,6 +859,31 @@ public class TypeVariableBinding extends ReferenceBinding {
 		return buffer.toString();
 	}
 
+	@Override
+	public char[] nullAnnotatedReadableName(CompilerOptions options, boolean shortNames) {
+	    StringBuffer nameBuffer = new StringBuffer(10);
+		appendNullAnnotation(nameBuffer, options);
+		nameBuffer.append(this.sourceName());
+		if (this.superclass != null && TypeBinding.equalsEquals(this.firstBound, this.superclass)) {
+			nameBuffer.append(" extends ").append(this.superclass.nullAnnotatedReadableName(options, shortNames)); //$NON-NLS-1$
+		}
+		if (this.superInterfaces != null && this.superInterfaces != Binding.NO_SUPERINTERFACES) {
+		   if (TypeBinding.notEquals(this.firstBound, this.superclass)) {
+			   nameBuffer.append(" extends "); //$NON-NLS-1$
+	        }
+		    for (int i = 0, length = this.superInterfaces.length; i < length; i++) {
+		        if (i > 0 || TypeBinding.equalsEquals(this.firstBound, this.superclass)) {
+		        	nameBuffer.append(" & "); //$NON-NLS-1$
+		        }
+		        nameBuffer.append(this.superInterfaces[i].nullAnnotatedReadableName(options, shortNames));
+			}
+		}
+		int nameLength = nameBuffer.length();
+		char[] readableName = new char[nameLength];
+		nameBuffer.getChars(0, nameLength, readableName, 0);
+	    return readableName;
+	}
+
 	// May still carry declaration site annotations.
 	public TypeBinding unannotated() {
 		return this.hasTypeAnnotations() ? this.environment.getUnannotatedType(this) : this;
@@ -935,6 +962,8 @@ public class TypeVariableBinding extends ReferenceBinding {
 				annotatedType.firstBound = firstBound;
 			}
 		}
+		if (firstBound != null && firstBound.hasNullTypeAnnotations())
+			this.tagBits |= TagBits.HasNullTypeAnnotation;
 		return firstBound;
 	}
 	/* An annotated type variable use differs from its declaration exactly in its annotations and in nothing else.

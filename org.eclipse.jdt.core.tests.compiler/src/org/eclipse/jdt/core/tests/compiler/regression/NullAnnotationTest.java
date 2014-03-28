@@ -1288,6 +1288,7 @@ public void test_parameter_specification_inheritance_014() {
 			"}\n",
 		},
 		customOptions,
+		(this.complianceLevel < ClassFileConstants.JDK1_8 ?
 		"----------\n" +
 		"1. ERROR in p1\\Y.java (at line 2)\n" +
 		"	public class Y extends X implements IY {\n" +
@@ -1308,7 +1309,29 @@ public void test_parameter_specification_inheritance_014() {
 		"	public class Y extends X implements IY {\n" +
 		"	             ^\n" +
 		"The method getString3(String) from X cannot implement the corresponding method from IY due to incompatible nullness constraints\n" +
-		"----------\n");
+		"----------\n"
+		: // at 1.8 we show null type annotations in the message:
+		"----------\n" + 
+		"1. ERROR in p1\\Y.java (at line 2)\n" + 
+		"	public class Y extends X implements IY {\n" + 
+		"	             ^\n" + 
+		"The method @Nullable String getString1(String) from X cannot implement the corresponding method from IY due to incompatible nullness constraints\n" + 
+		"----------\n" + 
+		"2. ERROR in p1\\Y.java (at line 2)\n" + 
+		"	public class Y extends X implements IY {\n" + 
+		"	             ^\n" + 
+		"The method String getString2(String) from X cannot implement the corresponding method from IY due to incompatible nullness constraints\n" + 
+		"----------\n" + 
+		"3. ERROR in p1\\Y.java (at line 2)\n" + 
+		"	public class Y extends X implements IY {\n" + 
+		"	             ^\n" + 
+		"The method getString5(@NonNull String) from X cannot implement the corresponding method from IY due to incompatible nullness constraints\n" + 
+		"----------\n" + 
+		"4. ERROR in p1\\Y.java (at line 2)\n" + 
+		"	public class Y extends X implements IY {\n" + 
+		"	             ^\n" + 
+		"The method getString3(String) from X cannot implement the corresponding method from IY due to incompatible nullness constraints\n" + 
+		"----------\n"));
 }
 // a method relaxes the parameter null specification from @NonNull to un-annotated
 // see https://bugs.eclipse.org/381443
@@ -3248,6 +3271,27 @@ public void test_contradictory_annotations_02() {
 		"----------\n" + 
 		"1. ERROR in p2\\Y.java (at line 4)\n" + 
 		"	@NonNull @Nullable Object o;\n" + 
+		"	         ^^^^^^^^^\n" + 
+		"Contradictory null specification; only one of @NonNull and @Nullable can be specified at any location\n" + 
+		"----------\n");
+}
+
+// contradictory null annotations on a field - array type
+public void test_contradictory_annotations_03() {
+	Map customOptions = getCompilerOptions();
+	runNegativeTestWithLibs(
+		new String[] {
+			"p2/Y.java",
+			"package p2;\n" +
+			"import org.eclipse.jdt.annotation.*;\n" +
+			"public class Y {\n" +
+			"    @NonNull @Nullable Object[] o;\n" +
+			"}\n"
+		},
+		customOptions,
+		"----------\n" + 
+		"1. ERROR in p2\\Y.java (at line 4)\n" + 
+		"	@NonNull @Nullable Object[] o;\n" + 
 		"	         ^^^^^^^^^\n" + 
 		"Contradictory null specification; only one of @NonNull and @Nullable can be specified at any location\n" + 
 		"----------\n");
@@ -5838,6 +5882,7 @@ public void testBug388281_06() {
 																  // whereas I2A cancels that same default
 			"}\n"
 		},
+		(this.complianceLevel < ClassFileConstants.JDK1_8 ?
 		"----------\n" + 
 		"1. ERROR in ctest\\C.java (at line 2)\n" + 
 		"	public class C extends c.C2 implements i2.I2A {\n" + 
@@ -5848,7 +5893,19 @@ public void testBug388281_06() {
 		"	public class C extends c.C2 implements i2.I2A {\n" + 
 		"	             ^\n" + 
 		"The method m1(Object) from C2 cannot implement the corresponding method from I2A due to incompatible nullness constraints\n" + 
-		"----------\n",
+		"----------\n"
+		: // at 1.8 we show null type annotations:
+		"----------\n" + 
+		"1. ERROR in ctest\\C.java (at line 2)\n" + 
+		"	public class C extends c.C2 implements i2.I2A {\n" + 
+		"	             ^\n" + 
+		"The method m2(@NonNull Object) from C2 cannot implement the corresponding method from I2A due to incompatible nullness constraints\n" + 
+		"----------\n" + 
+		"2. ERROR in ctest\\C.java (at line 2)\n" + 
+		"	public class C extends c.C2 implements i2.I2A {\n" + 
+		"	             ^\n" + 
+		"The method m1(@NonNull Object) from C2 cannot implement the corresponding method from I2A due to incompatible nullness constraints\n" + 
+		"----------\n"),
 		libs,		
 		true /* shouldFlush*/,
 		options);
@@ -6675,5 +6732,88 @@ public void testBug418235() {
     		"	                                 ^^^^^^\n" + 
             "Illegal redefinition of parameter o, inherited method from GenericInterface<Object> does not constrain this parameter\n" + 
             "----------\n");
+}
+
+public void testTypeAnnotationProblemNotIn17() {
+	String source =
+			"import org.eclipse.jdt.annotation.*;\n" +
+			"public class X {\n" +
+			"	public @NonNull java.lang.String test(@NonNull java.lang.String arg) {\n" +
+			"		@NonNull java.lang.String local = arg;\n" +
+			"		return local;\n" +
+			"	}\n" +
+			"}\n";
+	if (this.complianceLevel < ClassFileConstants.JDK1_8)
+		runConformTestWithLibs(
+			new String[] {
+				"X.java",
+				source
+			}, 
+			getCompilerOptions(),
+			"");
+	else
+		runNegativeTestWithLibs(
+			new String[] {
+				"X.java",
+				source
+			}, 
+			getCompilerOptions(),
+			"----------\n" + 
+			"1. ERROR in X.java (at line 3)\n" + 
+			"	public @NonNull java.lang.String test(@NonNull java.lang.String arg) {\n" + 
+			"	       ^^^^^^^^\n" + 
+			"The annotation @NonNull is disallowed for this location\n" + 
+			"----------\n" + 
+			"2. ERROR in X.java (at line 3)\n" + 
+			"	public @NonNull java.lang.String test(@NonNull java.lang.String arg) {\n" + 
+			"	                                      ^^^^^^^^\n" + 
+			"The annotation @NonNull is disallowed for this location\n" + 
+			"----------\n" + 
+			"3. ERROR in X.java (at line 4)\n" + 
+			"	@NonNull java.lang.String local = arg;\n" + 
+			"	^^^^^^^^\n" + 
+			"The annotation @NonNull is disallowed for this location\n" + 
+			"----------\n");
+}
+public void testBug420313() {
+	runNegativeTestWithLibs(
+		new String[] {
+			"OverrideTest.java",
+			"import org.eclipse.jdt.annotation.NonNull;\n" + 
+			"\n" + 
+			"public class OverrideTest implements TypedBase<String>, UntypedBase\n" + 
+			"{\n" + 
+			"   public void doSomething(String text) // No warning\n" + 
+			"   {\n" + 
+			"      System.out.println(text);\n" + 
+			"   }\n" + 
+			"   \n" + 
+			"   public void doSomethingElse(String text) // \"Missing non-null annotation\" warning\n" + 
+			"   {\n" + 
+			"      System.out.println(text);\n" + 
+			"   }\n" + 
+			"}\n" + 
+			"\n" + 
+			"interface TypedBase<T>\n" + 
+			"{\n" + 
+			"   void doSomething(@NonNull T text);\n" + 
+			"}\n" + 
+			"\n" + 
+			"interface UntypedBase\n" + 
+			"{\n" + 
+			"   void doSomethingElse(@NonNull String text);\n" + 
+			"}\n"
+		},
+		"----------\n" + 
+		"1. WARNING in OverrideTest.java (at line 5)\n" + 
+		"	public void doSomething(String text) // No warning\n" + 
+		"	                        ^^^^^^\n" + 
+		"Missing non-null annotation: inherited method from TypedBase<String> specifies this parameter as @NonNull\n" + 
+		"----------\n" + 
+		"2. WARNING in OverrideTest.java (at line 10)\n" + 
+		"	public void doSomethingElse(String text) // \"Missing non-null annotation\" warning\n" + 
+		"	                            ^^^^^^\n" + 
+		"Missing non-null annotation: inherited method from UntypedBase specifies this parameter as @NonNull\n" + 
+		"----------\n");
 }
 }

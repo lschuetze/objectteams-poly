@@ -22,6 +22,7 @@
  *								Bug 392238 - [1.8][compiler][null] Detect semantically invalid null type annotations
  *								Bug 415850 - [1.8] Ensure RunJDTCoreTests can cope with null annotations enabled
  *								Bug 417295 - [1.8[[null] Massage type annotated null analysis to gel well with deep encoded type bindings.
+ *								Bug 424728 - [1.8][null] Unexpected error: The nullness annotation 'XXXX' is not applicable at this location
  *        Andy Clement (GoPivotal, Inc) aclement@gopivotal.com - Contributions for
  *                          Bug 383624 - [1.8][compiler] Revive code generation support for type annotations (from Olivier's work)
  *                          Bug 409517 - [1.8][compiler] Type annotation problems on more elaborate array references
@@ -927,6 +928,10 @@ public abstract class Annotation extends Expression {
 					// jsr 308
 					return true;
 				}
+				if (scope.compilerOptions().sourceLevel < ClassFileConstants.JDK1_8) {
+					// already reported as syntax error; don't report secondary problems
+					return true;
+				}
 				break;
 			case Binding.TYPE :
 			case Binding.GENERIC_TYPE :
@@ -1078,6 +1083,12 @@ public abstract class Annotation extends Expression {
 						if (currentType.isStatic()) {
 							QualifiedTypeReference.rejectAnnotationsOnStaticMemberQualififer(scope, currentType, new Annotation [] { annotation });
 							continue nextAnnotation;
+						} else {
+							int id = annotation.resolvedType.id;
+							if (id == TypeIds.T_ConfiguredAnnotationNonNull || id == TypeIds.T_ConfiguredAnnotationNullable) {
+								scope.problemReporter().nullAnnotationUnsupportedLocation(annotation);
+								continue nextAnnotation;
+							}
 						}
 						currentType = currentType.enclosingType();
 					}

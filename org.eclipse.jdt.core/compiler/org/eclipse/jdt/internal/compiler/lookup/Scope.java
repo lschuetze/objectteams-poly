@@ -44,6 +44,8 @@
  *								Bug 427628 - [1.8] regression : The method * is ambiguous for the type *
  *								Bug 428352 - [1.8][compiler] Resolution errors don't always surface
  *								Bug 428366 - [1.8] [compiler] The method valueAt(ObservableList<Object>, int) is ambiguous for the type Bindings
+ *								Bug 424728 - [1.8][null] Unexpected error: The nullness annotation 'XXXX' is not applicable at this location 
+ *								Bug 428811 - [1.8][compiler] Type witness unnecessarily required
  *     Jesper S Moller - Contributions for
  *								Bug 378674 - "The method can be declared as static" is wrong
  *  							Bug 405066 - [1.8][compiler][codegen] Implement code generation infrastructure for JSR335
@@ -5252,6 +5254,9 @@ public abstract class Scope {
 		if (arg == null || param == null)
 			return NOT_COMPATIBLE;
 		
+		if (arg instanceof PolyTypeBinding && !((PolyTypeBinding)arg).isPertinentToApplicability(param))
+			return COMPATIBLE;
+
 		if (arg.isCompatibleWith(param, this))
 			return COMPATIBLE;
 		
@@ -5267,6 +5272,8 @@ public abstract class Scope {
 		// only called if env.options.sourceLevel >= ClassFileConstants.JDK1_5
 		if (arg == null || param == null)
 			return NOT_COMPATIBLE;
+		if (arg instanceof PolyTypeBinding && !((PolyTypeBinding)arg).isPertinentToApplicability(param))
+			return COMPATIBLE;
 		if (arg.isCompatibleWith(param, this))
 			return COMPATIBLE;
 		if (tieBreakingVarargsMethods && (this.compilerOptions().complianceLevel >= ClassFileConstants.JDK1_7 || !CompilerOptions.tolerateIllegalAmbiguousVarargsInvocation)) {
@@ -5575,16 +5582,7 @@ public abstract class Scope {
 					problemReporter().illegalAnnotationForBaseType(typeRef, annotations, nullAnnotationTagBit);
 				return false;
 			}
-			if (annotations != null && typeRef instanceof QualifiedTypeReference) {
-				// illegal @NonNull Outer.Inner:
-				for (int i = 0; i < annotations.length; i++) {
-					int id = annotations[i].resolvedType.id;
-					if (id == TypeIds.T_ConfiguredAnnotationNonNull || id == TypeIds.T_ConfiguredAnnotationNullable) {
-						problemReporter().nullAnnotationUnsupportedLocation(annotations[i]);
-						return false;
-					}
-				}
-			}
+			// for type annotations, more problems are detected in Annotation.isTypeUseCompatible()
 		}
 		return true;
 	}

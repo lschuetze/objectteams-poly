@@ -716,8 +716,8 @@ public boolean isPlainDependentType() {
  * Note that some instances of ParameterizedTypeBinding have no arguments, like for non-generic members 
  * of a parameterized type. Use {@link #isParameterizedTypeWithActualArguments()} instead to find out.
  */
-public final boolean isParameterizedType() {
-	return kind() == Binding.PARAMETERIZED_TYPE;
+public boolean isParameterizedType() {
+	return false;
 }
 
 /**
@@ -1477,7 +1477,12 @@ public TypeBinding unannotated() {
 	return this;
 }
 
+//{ObjectTeams: we need to override this method:
+/* orig:
+public final boolean hasTypeAnnotations() {
+  :giro */
 public boolean hasTypeAnnotations() {
+// SH}
 	return (this.tagBits & TagBits.HasTypeAnnotations) != 0;
 }
 

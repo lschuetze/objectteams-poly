@@ -34,6 +34,7 @@
  *								Bug 426792 - [1.8][inference][impl] generify new type inference engine
  *								Bug 428019 - [1.8][compiler] Type inference failure with nested generic invocation.
  *								Bug 427199 - [1.8][resource] avoid resource leak warnings on Streams that have no resource
+ *								Bug 418743 - [1.8][null] contradictory annotations on invocation of generic method not reported
  *      Jesper S Moller - Contributions for
  *								bug 382701 - [1.8][compiler] Implement semantic analysis of Lambda expressions & Reference expression
  *								bug 412153 - [1.8][compiler] Check validity of annotations which may be repeatable
@@ -2009,7 +2010,8 @@ protected void appendNullAnnotation(StringBuffer nameBuffer, CompilerOptions opt
 	    if ((this.tagBits & TagBits.AnnotationNonNull) != 0) {
 	    	char[][] nonNullAnnotationName = options.nonNullAnnotationName;
 			nameBuffer.append('@').append(nonNullAnnotationName[nonNullAnnotationName.length-1]).append(' ');
-	    } else if ((this.tagBits & TagBits.AnnotationNullable) != 0) {
+	    }
+	    if ((this.tagBits & TagBits.AnnotationNullable) != 0) {
 	    	char[][] nullableAnnotationName = options.nullableAnnotationName;
 			nameBuffer.append('@').append(nullableAnnotationName[nullableAnnotationName.length-1]).append(' ');
 	    }
@@ -2499,7 +2501,7 @@ public MethodBinding getSingleAbstractMethod(Scope scope, boolean replaceWildcar
 		if (exceptionsCount != exceptionsLength) {
 			System.arraycopy(exceptions, 0, exceptions = new ReferenceBinding[exceptionsCount], 0, exceptionsCount);
 		}
-		this.singleAbstractMethod[index] = new MethodBinding(theAbstractMethod.modifiers, 
+		this.singleAbstractMethod[index] = new MethodBinding(theAbstractMethod.modifiers | ClassFileConstants.AccSynthetic, 
 				theAbstractMethod.selector, 
 				theAbstractMethod.returnType, 
 				theAbstractMethod.parameters, 

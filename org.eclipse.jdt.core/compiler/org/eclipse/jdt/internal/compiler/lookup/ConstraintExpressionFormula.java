@@ -33,7 +33,7 @@ import org.eclipse.jdt.internal.compiler.ast.LambdaExpression;
 import org.eclipse.jdt.internal.compiler.ast.ReferenceExpression;
 import org.eclipse.jdt.internal.compiler.ast.ReturnStatement;
 import org.eclipse.jdt.internal.compiler.ast.Statement;
-import org.eclipse.jdt.internal.compiler.lookup.InferenceContext18.InvocationRecord;
+import org.eclipse.jdt.internal.compiler.lookup.InferenceContext18.SuspendedInferenceRecord;
 
 /**
  * Implementation of 18.1.2 in JLS8, case:
@@ -100,7 +100,7 @@ class ConstraintExpressionFormula extends ConstraintFormula {
 			TypeBinding exprType = this.left.resolvedType;
 			if (exprType == null || !exprType.isValidBinding())
 				return FALSE;
-			return new ConstraintTypeFormula(exprType, this.right, COMPATIBLE, this.isSoft);
+			return ConstraintTypeFormula.create(exprType, this.right, COMPATIBLE, this.isSoft);
 		} else {
 			// shapes of poly expressions (18.2.1)
 			// - parenthesized expression : these are transparent in our AST
@@ -114,7 +114,7 @@ class ConstraintExpressionFormula extends ConstraintFormula {
 				// avoid original(), since we only want to discard one level of instantiation 
 				// (method type variables - not class type variables)!
 				method = previousMethod.shallowOriginal();
-				InvocationRecord prevInvocation = inferenceContext.enterPolyInvocation(invocation, invocation.arguments());
+				SuspendedInferenceRecord prevInvocation = inferenceContext.enterPolyInvocation(invocation, invocation.arguments());
 
 				// Invocation Applicability Inference: 18.5.1 & Invocation Type Inference: 18.5.2
 				try {
@@ -129,7 +129,7 @@ class ConstraintExpressionFormula extends ConstraintFormula {
 							TypeBinding exprType = this.left.resolvedType;
 							if (exprType == null || !exprType.isValidBinding())
 								return FALSE;
-							return new ConstraintTypeFormula(exprType, this.right, COMPATIBLE, this.isSoft);
+							return ConstraintTypeFormula.create(exprType, this.right, COMPATIBLE, this.isSoft);
 						}
 						inferenceContext.inferenceKind = innerCtx.inferenceKind;
 						innerCtx.outerContext = inferenceContext;
@@ -140,7 +140,7 @@ class ConstraintExpressionFormula extends ConstraintFormula {
 						return FALSE;
 					return null; // already incorporated
 				} finally {
-					inferenceContext.leavePolyInvocation(prevInvocation);
+					inferenceContext.resumeSuspendedInference(prevInvocation);
 				}
 			} else if (this.left instanceof ConditionalExpression) {
 				ConditionalExpression conditional = (ConditionalExpression) this.left;
@@ -150,9 +150,16 @@ class ConstraintExpressionFormula extends ConstraintFormula {
 				};
 			} else if (this.left instanceof LambdaExpression) {
 				LambdaExpression lambda = (LambdaExpression) this.left;
-				Scope scope = inferenceContext.scope;
-				TypeBinding t = this.right;
-				if (!t.isFunctionalInterface(scope))
+				BlockScope scope = lambda.enclosingScope;
+				if (!this.right.isFunctionalInterface(scope))
+					return FALSE;
+				
+				ReferenceBinding t = (ReferenceBinding) this.right;
+				ParameterizedTypeBinding withWildCards = InferenceContext18.parameterizedWithWildcard(t);
+				if (withWildCards != null) {
+					t = findGroundTargetType(inferenceContext, scope, lambda, withWildCards);
+				}
+				if (t == null)
 					return FALSE;
 				MethodBinding functionType = t.getSingleAbstractMethod(scope, true);
 				if (functionType == null)
@@ -178,10 +185,10 @@ class ConstraintExpressionFormula extends ConstraintFormula {
 				if (!lambda.argumentsTypeElided()) {
 					Argument[] arguments = lambda.arguments();
 					for (int i = 0; i < parameters.length; i++)
-						result.add(new ConstraintTypeFormula(parameters[i], arguments[i].type.resolveType(lambda.enclosingScope), SAME));
+						result.add(ConstraintTypeFormula.create(parameters[i], arguments[i].type.resolveType(lambda.enclosingScope), SAME));
 					// in addition, ⟨T' <: T⟩:
 					if (lambda.resolvedType != null)
-						result.add(new ConstraintTypeFormula(lambda.resolvedType, this.right, SUBTYPE));
+						result.add(ConstraintTypeFormula.create(lambda.resolvedType, this.right, SUBTYPE));
 				}
 				if (functionType.returnType != TypeBinding.VOID) {
 					TypeBinding r = functionType.returnType;
@@ -212,6 +219,21 @@ class ConstraintExpressionFormula extends ConstraintFormula {
 			}
 		}
 		return FALSE;
+	}
+
+	public ReferenceBinding findGroundTargetType(InferenceContext18 inferenceContext, BlockScope scope,
+													LambdaExpression lambda, ParameterizedTypeBinding targetTypeWithWildCards)
+	{
+		if (lambda.argumentsTypeElided()) {
+			return lambda.findGroundTargetTypeForElidedLambda(scope, targetTypeWithWildCards);
+		} else {
+			SuspendedInferenceRecord previous = inferenceContext.enterLambda(lambda);
+			try {
+				return inferenceContext.inferFunctionalInterfaceParameterization(lambda, scope, targetTypeWithWildCards);
+			} finally {
+				inferenceContext.resumeSuspendedInference(previous);
+			}
+		}
 	}
 
 	private boolean canBePolyExpression(Expression expr) {
@@ -248,18 +270,18 @@ class ConstraintExpressionFormula extends ConstraintFormula {
 			int k = pPrime.length;
 			int offset = 0;
 			if (n == k+1) {
-				newConstraints.add(new ConstraintTypeFormula(p[0], reference.lhs.resolvedType, COMPATIBLE));
+				newConstraints.add(ConstraintTypeFormula.create(p[0], reference.lhs.resolvedType, COMPATIBLE));
 				offset = 1;
 			}
 			for (int i = offset; i < n; i++)
-				newConstraints.add(new ConstraintTypeFormula(p[i], pPrime[i-offset], COMPATIBLE));
+				newConstraints.add(ConstraintTypeFormula.create(p[i], pPrime[i-offset], COMPATIBLE));
 			TypeBinding r = functionType.returnType;
 			if (r != TypeBinding.VOID) {
 				TypeBinding rAppl = potentiallyApplicable.isConstructor() && !reference.isArrayConstructorReference() ? potentiallyApplicable.declaringClass : potentiallyApplicable.returnType;
 				if (rAppl == TypeBinding.VOID)
 					return FALSE;
 				TypeBinding rPrime = rAppl.capture(inferenceContext.scope, 14); // FIXME capture position??
-				newConstraints.add(new ConstraintTypeFormula(rPrime, r, COMPATIBLE));
+				newConstraints.add(ConstraintTypeFormula.create(rPrime, r, COMPATIBLE));
 			}
 			return newConstraints.toArray(new ConstraintFormula[newConstraints.size()]);
 		} else { // inexact
@@ -282,7 +304,7 @@ class ConstraintExpressionFormula extends ConstraintFormula {
 					&& ((original.typeVariables() != Binding.NO_TYPE_VARIABLES && r.mentionsAny(original.typeVariables(), -1))
 						|| (original.isConstructor() && original.declaringClass.typeVariables() != Binding.NO_TYPE_VARIABLES && r.mentionsAny(original.declaringClass.typeVariables(), -1)))) 
 			{
-				InvocationRecord prevInvocation = inferenceContext.enterPolyInvocation(reference, null/*no invocation arguments available*/);
+				SuspendedInferenceRecord prevInvocation = inferenceContext.enterPolyInvocation(reference, null/*no invocation arguments available*/);
 
 				// Invocation Applicability Inference: 18.5.1 & Invocation Type Inference: 18.5.2
 				try {
@@ -293,13 +315,13 @@ class ConstraintExpressionFormula extends ConstraintFormula {
 				} catch (InferenceFailureException e) {
 					return FALSE;
 				} finally {
-					inferenceContext.leavePolyInvocation(prevInvocation);
+					inferenceContext.resumeSuspendedInference(prevInvocation);
 				}
 			}
 			TypeBinding rPrime = compileTimeDecl.isConstructor() ? compileTimeDecl.declaringClass : compileTimeDecl.returnType;
 			if (rPrime.id == TypeIds.T_void)
 				return FALSE;
-			return new ConstraintTypeFormula(rPrime, r, COMPATIBLE, this.isSoft);
+			return ConstraintTypeFormula.create(rPrime, r, COMPATIBLE, this.isSoft);
 		}
 	}
 
@@ -345,7 +367,7 @@ class ConstraintExpressionFormula extends ConstraintFormula {
 			if (inferenceContext.usesUncheckedConversion()) {
 				// spec says erasure, but we don't really have compatibility rules for erasure, use raw type instead:
 				TypeBinding erasure = inferenceContext.environment.convertToRawType(returnType, false);
-				ConstraintTypeFormula newConstraint = new ConstraintTypeFormula(erasure, targetType, COMPATIBLE);
+				ConstraintTypeFormula newConstraint = ConstraintTypeFormula.create(erasure, targetType, COMPATIBLE);
 				if (!inferenceContext.reduceAndIncorporate(newConstraint))
 					return false;
 				// continuing at true is not spec'd but needed for javac-compatibility,
@@ -360,7 +382,7 @@ class ConstraintExpressionFormula extends ConstraintFormula {
 				ParameterizedTypeBinding gbeta = inferenceContext.environment.createParameterizedType(
 						parameterizedType.genericType(), betas, parameterizedType.enclosingType(), parameterizedType.getTypeAnnotations());
 				inferenceContext.currentBounds.captures.put(gbeta, parameterizedType); // established: both types have nonnull arguments
-				ConstraintTypeFormula newConstraint = new ConstraintTypeFormula(gbeta, targetType, COMPATIBLE);
+				ConstraintTypeFormula newConstraint = ConstraintTypeFormula.create(gbeta, targetType, COMPATIBLE);
 				return inferenceContext.reduceAndIncorporate(newConstraint);
 			}
 			if (rTheta instanceof InferenceVariable) {
@@ -377,12 +399,12 @@ class ConstraintExpressionFormula extends ConstraintFormula {
 				}
 				if (toResolve) {
 					BoundSet solution = inferenceContext.solve(); // TODO: minimal resolving for only α
-					TypeBinding u = solution.getInstantiation(alpha).capture(inferenceContext.scope, invocationSite.sourceStart()); // TODO make position unique?
-					ConstraintTypeFormula newConstraint = new ConstraintTypeFormula(u, targetType, COMPATIBLE);
+					TypeBinding u = solution.getInstantiation(alpha, null).capture(inferenceContext.scope, invocationSite.sourceStart()); // TODO make position unique?
+					ConstraintTypeFormula newConstraint = ConstraintTypeFormula.create(u, targetType, COMPATIBLE);
 					return inferenceContext.reduceAndIncorporate(newConstraint);
 				}
 			}
-			ConstraintTypeFormula newConstraint = new ConstraintTypeFormula(rTheta, targetType, COMPATIBLE);
+			ConstraintTypeFormula newConstraint = ConstraintTypeFormula.create(rTheta, targetType, COMPATIBLE);
 			if (!inferenceContext.reduceAndIncorporate(newConstraint))
 				return false;
 		}

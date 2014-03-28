@@ -519,6 +519,15 @@ protected char[][][] computeSuperTypeNames(IType focusType) {
 	return this.allSuperTypeNames;
 }
 /**
+ * Creates an IMethod from the given lambda declaration and type.
+ */
+protected IJavaElement createHandle(LambdaExpression lambdaExpression, IJavaElement parent) {
+	org.eclipse.jdt.internal.core.LambdaExpression lambdaElement = new org.eclipse.jdt.internal.core.LambdaExpression((JavaElement) parent, lambdaExpression);
+	IMethod lambdaMethodElement = lambdaElement.getMethod();
+	this.methodHandles.add(lambdaMethodElement);
+	return lambdaMethodElement;
+}
+/**
  * Creates an IMethod from the given method declaration and type.
  */
 protected IJavaElement createHandle(AbstractMethodDeclaration method, IJavaElement parent) {
@@ -2361,6 +2370,54 @@ protected void reportBinaryMemberDeclaration(IResource resource, IMember binaryM
 	SearchMatch match = newDeclarationMatch(binaryMember, binaryMemberBinding, accuracy, range.getOffset(), range.getLength(), getParticipant(), resource);
 	report(match);
 }
+
+protected void reportMatching(LambdaExpression lambdaExpression,  IJavaElement parent, int accuracy, MatchingNodeSet nodeSet, boolean typeInHierarchy) throws CoreException {
+	IJavaElement enclosingElement = null;
+	// Report the lambda declaration itself.
+	if (accuracy > -1) {
+		enclosingElement = createHandle(lambdaExpression, parent);
+		if (enclosingElement != null) { // skip if unable to find method
+			// compute source positions of the selector
+			int nameSourceStart = lambdaExpression.sourceStart;
+			if (encloses(enclosingElement)) {
+				SearchMatch match = null;
+				int length = lambdaExpression.arrowPosition() + 1 - nameSourceStart;
+				match = this.patternLocator.newDeclarationMatch(lambdaExpression, enclosingElement, null, accuracy, length, this);
+				if (match != null) {
+					report(match);
+				}
+			}
+		}
+	}
+	if (enclosingElement == null) {
+		enclosingElement = createHandle(lambdaExpression, parent);
+	}
+	// Traverse the lambda declaration to report matches inside, these matches if any should see the present lambda as the parent model element.
+	ASTNode[] nodes = typeInHierarchy ? nodeSet.matchingNodes(lambdaExpression.sourceStart, lambdaExpression.sourceEnd) : null;
+	boolean report = (this.matchContainer & PatternLocator.METHOD_CONTAINER) != 0 && encloses(enclosingElement);
+	MemberDeclarationVisitor declarationVisitor = new MemberDeclarationVisitor(enclosingElement, report ? nodes : null, nodeSet, this, typeInHierarchy);
+	
+	if (lambdaExpression.arguments != null) {
+		int argumentsLength = lambdaExpression.arguments.length;
+		for (int i = 0; i < argumentsLength; i++)
+			lambdaExpression.arguments[i].traverse(declarationVisitor, (BlockScope) null);
+	}
+
+	if (lambdaExpression.body != null) {
+		lambdaExpression.body.traverse(declarationVisitor, (BlockScope) null);
+	}
+	
+	// Report all nodes and remove them
+	if (nodes != null) {
+		int length = nodes.length;
+		for (int i = 0; i < length; i++) {
+			Integer level = (Integer) nodeSet.matchingNodes.removeKey(nodes[i]);
+			if (report && level != null) {
+				this.patternLocator.matchReportReference(nodes[i], enclosingElement, declarationVisitor.getLocalElement(i), declarationVisitor.getOtherElements(i), lambdaExpression.binding, level.intValue(), this);
+			}
+		}
+	}
+}
 /**
  * Visit the given method declaration and report the nodes that match exactly the
  * search pattern (i.e. the ones in the matching nodes set)
@@ -2409,7 +2466,7 @@ protected void reportMatching(AbstractMethodDeclaration method, TypeDeclaration 
 		// and in local variables declaration
 		ASTNode[] nodes = typeInHierarchy ? nodeSet.matchingNodes(method.declarationSourceStart, method.declarationSourceEnd) : null;
 		boolean report = (this.matchContainer & PatternLocator.METHOD_CONTAINER) != 0 && encloses(enclosingElement);
-		MemberDeclarationVisitor declarationVisitor = new MemberDeclarationVisitor(enclosingElement, report ? nodes : null, nodeSet, this);
+		MemberDeclarationVisitor declarationVisitor = new MemberDeclarationVisitor(enclosingElement, report ? nodes : null, nodeSet, this, typeInHierarchy);
 		try {
 			method.traverse(declarationVisitor, (ClassScope) null);
 		} catch (WrappedCoreException e) {
@@ -2459,7 +2516,7 @@ protected void reportMatching(AbstractMethodDeclaration method, TypeDeclaration 
 				if (encloses(enclosingElement)) {
 					if (this.pattern.mustResolve) {
 						// Visit only if the pattern must resolve
-						MemberDeclarationVisitor declarationVisitor = new MemberDeclarationVisitor(enclosingElement, nodes, nodeSet, this);
+						MemberDeclarationVisitor declarationVisitor = new MemberDeclarationVisitor(enclosingElement, nodes, nodeSet, this, typeInHierarchy);
 						method.traverse(declarationVisitor, (ClassScope) null);
 						int length = nodes.length;
 						for (int i = 0; i < length; i++) {
@@ -2724,7 +2781,7 @@ protected void reportMatching(FieldDeclaration field, FieldDeclaration[] otherFi
 		int fieldEnd = field.endPart2Position == 0 ? field.declarationSourceEnd : field.endPart2Position;
 		ASTNode[] nodes = typeInHierarchy ? nodeSet.matchingNodes(field.sourceStart, fieldEnd) : null;
 		boolean report = (this.matchContainer & PatternLocator.FIELD_CONTAINER) != 0 && encloses(enclosingElement);
-		MemberDeclarationVisitor declarationVisitor = new MemberDeclarationVisitor(enclosingElement, report ? nodes : null, nodeSet, this);
+		MemberDeclarationVisitor declarationVisitor = new MemberDeclarationVisitor(enclosingElement, report ? nodes : null, nodeSet, this, typeInHierarchy);
 		try {
 			field.traverse(declarationVisitor, (MethodScope) null);
 		} catch (WrappedCoreException e) {
@@ -2800,7 +2857,7 @@ protected void reportMatching(FieldDeclaration field, FieldDeclaration[] otherFi
 					enclosingElement = createHandle(field, type, parent);
 				}
 				if (encloses(enclosingElement)) {
-					MemberDeclarationVisitor declarationVisitor = new MemberDeclarationVisitor(enclosingElement, nodes, nodeSet, this);
+					MemberDeclarationVisitor declarationVisitor = new MemberDeclarationVisitor(enclosingElement, nodes, nodeSet, this, typeInHierarchy);
 					field.traverse(declarationVisitor, (MethodScope) null);
 					int length = nodes.length;
 					for (int i = 0; i < length; i++) {

@@ -1,9 +1,13 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2009 IBM Corporation and others.
+ * Copyright (c) 2000, 2014 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
+ *
+ * This is an implementation of an early-draft specification developed under the Java
+ * Community Process (JCP) and is made available for testing and evaluation purposes
+ * only. The code is not compatible with any specification of the JCP.
  *
  * Contributors:
  *     IBM Corporation - initial API and implementation
@@ -48,9 +52,11 @@ class MemberDeclarationVisitor extends ASTVisitor {
 	IJavaElement[][] allOtherElements;
 	int ptr = -1;
 	int[] ptrs;
+	private boolean typeInHierarchy;
 
-public MemberDeclarationVisitor(IJavaElement element, ASTNode[] nodes, MatchingNodeSet set, MatchLocator locator) {
+public MemberDeclarationVisitor(IJavaElement element, ASTNode[] nodes, MatchingNodeSet set, MatchLocator locator, boolean typeInHierarchy) {
 	this.enclosingElement = element;
+	this.typeInHierarchy = typeInHierarchy;
 	this.nodeSet = set;
 	this.locator = locator;
 	if (nodes == null) {
@@ -202,6 +208,16 @@ private void storeHandle(int idx) {
 public boolean visit(Argument argument, BlockScope scope) {
     this.localDeclaration = argument;
     return true;
+}
+public boolean visit(LambdaExpression lambdaExpression, BlockScope scope) {
+	Integer level = (Integer) this.nodeSet.matchingNodes.removeKey(lambdaExpression);
+	try {
+		if (lambdaExpression.binding != null && lambdaExpression.binding.isValidBinding())
+			this.locator.reportMatching(lambdaExpression, this.enclosingElement, level != null ? level.intValue() : -1, this.nodeSet, this.typeInHierarchy);
+	} catch (CoreException e) {
+		throw new WrappedCoreException(e);
+	}
+	return false; // Don't visit the children as they get traversed under control of reportMatching.
 }
 public boolean visit(LocalDeclaration declaration, BlockScope scope) {
     this.localDeclaration = declaration;

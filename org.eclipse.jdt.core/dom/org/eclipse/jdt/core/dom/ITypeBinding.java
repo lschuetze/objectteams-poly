@@ -97,6 +97,7 @@ public interface ITypeBinding extends IBinding {
 	 * @return the bound of this wildcard type, or <code>null</code> if none
 	 * @see #isWildcardType()
 	 * @see #isUpperbound()
+	 * @see #getTypeBounds()
 	 * @since 3.1
 	 */
 	public ITypeBinding getBound();
@@ -125,10 +126,12 @@ public interface ITypeBinding extends IBinding {
 	/**
 	 * Returns the binding representing the component type of this array type,
 	 * or <code>null</code> if this is not an array type binding. The component
-	 * type of an array might be an array type.
+	 * type of an array might be an array type (with one dimension less than
+	 * this array type).
 	 *
 	 * @return the component type binding, or <code>null</code> if this is
 	 *   not an array type
+	 * @see #getElementType()
 	 * @since 3.2
 	 */
 	public ITypeBinding getComponentType();
@@ -273,7 +276,7 @@ public interface ITypeBinding extends IBinding {
 	/**
 	 * Returns the binding representing the element type of this array type,
 	 * or <code>null</code> if this is not an array type binding. The element
-	 * type of an array is never itself an array type.
+	 * type of an array type is never itself an array type.
 	 *
 	 * @return the element type binding, or <code>null</code> if this is
 	 *   not an array type
@@ -311,13 +314,15 @@ public interface ITypeBinding extends IBinding {
 	/**
 	 * Returns the single abstract method that constitutes the single function 
 	 * contract (aside from any redeclarations of methods of <code>java.lang.Object</code>) 
-	 * of the receiver interface type or null if there no such contract or if the receiver 
-	 * is not an interface. 
+	 * of the receiver interface type or <code>null</code> if there is no such contract or if the receiver 
+	 * is not an interface.
+	 * <p>
+	 * The returned method binding may be synthetic and its {@link #getDeclaringClass() declaring type}
+	 * may be a super interface type of this type binding.
+	 * </p>
 	 * 
-	 * @return the single abstract method that represents the single function contract 
-	 * (aside from any redeclarations of methods of <code>java.lang.Object</code>) of 
-	 * this interface type or null if the receiver is not an interface or if the receiver 
-	 * has more than one abstract method or no abstract methods.
+	 * @return the single abstract method that represents the single function contract, or
+	 * <code>null</code> if the receiver is not a functional interface type
 	 *
 	 * @since 3.9 BETA_JAVA8
 	 */
@@ -567,8 +572,8 @@ public interface ITypeBinding extends IBinding {
 	public ITypeBinding[] getTypeArguments();
 
 	/**
-	 * Returns the declared type bounds of this type variable or capture. If the
-	 * variable or the capture had no explicit bound, then it returns an empty list.
+	 * Returns the upper type bounds of this type variable, wildcard, or capture. If the
+	 * variable, wildcard, or capture had no explicit bound, then it returns an empty list.
      * <p>
      * Note that per construction, it can only contain one class or array type,
      * at most, and then it is located in first position.
@@ -578,10 +583,11 @@ public interface ITypeBinding extends IBinding {
      * binding, e.g. <code>capture-of ? extends Object[]</code>
      * </p>
 	 *
-	 * @return the list of type bindings for this type variable or capture,
+	 * @return the list of upper bounds for this type variable, wildcard, or capture,
      * or otherwise the empty list
+     * @see #isTypeVariable()
+     * @see #isWildcardType()
 	 * @see #isCapture()
-	 * @see #isTypeVariable()
 	 * @since 3.1
 	 */
 	public ITypeBinding[] getTypeBounds();
@@ -788,15 +794,6 @@ public interface ITypeBinding extends IBinding {
 	 * @since 3.1
 	 */
 	public boolean isGenericType();
-
-	/**
-	 * Returns whether this type binding represents a functional interface type.
-	 *
-	 * @return <code>true</code> if this object represents a functional interface,
-	 *    and <code>false</code> otherwise
-	 * @since 3.9 BETA_JAVA8
-	 */
-	public boolean isFunctionalInterface();
 
 	/**
 	 * Returns whether this type binding represents an interface type.
@@ -1068,10 +1065,10 @@ public interface ITypeBinding extends IBinding {
 	 * Returns whether this type binding represents a wildcard type. A wildcard
 	 * type occurs only as an argument to a parameterized type reference.
 	 * <p>
-	 * For example, a AST type like
-	 * <code>Collection&lt;? extends Object&gt;</code> typically resolves to a
+	 * For example, an AST type like
+	 * <code>Collection&lt;? extends Number&gt;</code> typically resolves to a
 	 * parameterized type binding whose type argument is a wildcard type
-	 * with upper type bound <code>java.util.Object</code>.
+	 * with upper type bound <code>java.lang.Number</code>.
 	 * </p>
 	 *
 	 * @return <code>true</code> if this object represents a wildcard type,
