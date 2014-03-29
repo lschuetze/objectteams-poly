@@ -11,6 +11,7 @@
  *     Technical University Berlin - extended API and implementation
  *     Stephan Herrmann - Contribution for
  *								Bug 392238 - [1.8][compiler][null] Detect semantically invalid null type annotations
+ *								Bug 429958 - [1.8][null] evaluate new DefaultLocation attribute of @NonNullByDefault
  *******************************************************************************/
 package org.eclipse.jdt.internal.compiler.ast;
 
@@ -99,7 +100,7 @@ public class SingleTypeReference extends TypeReference {
 // SH}
 		boolean hasError = false;
 		// https://bugs.eclipse.org/bugs/show_bug.cgi?id=391500
-		resolveAnnotations(scope);
+		resolveAnnotations(scope, 0); // defaultNullness not relevant, the only caller within the compiler: QAE
 		TypeBinding memberType = this.resolvedType; // load after possible update in resolveAnnotations()
 		if (!memberType.isValidBinding()) {
 			hasError = true;
@@ -126,7 +127,7 @@ public class SingleTypeReference extends TypeReference {
 
 //{ObjectTeams: for base-imported types (only single is supported):
 	@Override
-	public TypeBinding checkResolveUsingBaseImportScope(Scope scope, boolean tolerate) {
+	public TypeBinding checkResolveUsingBaseImportScope(Scope scope, int location, boolean tolerate) {
 		if (   this.getBaseclassDecapsulation().isAllowed()
 			|| tolerate
 			|| scope.isBaseGuard())
@@ -140,7 +141,7 @@ public class SingleTypeReference extends TypeReference {
 					if (baseImportScope != null) {
 						this.resolvedType = getTypeBinding(baseImportScope);
 						if (this.resolvedType != null && this.resolvedType.isValidBinding())
-							return this.resolvedType = checkResolvedType(this.resolvedType, baseImportScope, false);
+							return this.resolvedType = checkResolvedType(this.resolvedType, baseImportScope, location, false);
 					}
 				}
 				currentScope = currentScope.parent;

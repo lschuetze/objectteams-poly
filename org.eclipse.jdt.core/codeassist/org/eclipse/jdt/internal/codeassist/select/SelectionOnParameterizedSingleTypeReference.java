@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2009 IBM Corporation and others.
+ * Copyright (c) 2000, 2014 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -8,6 +8,8 @@
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *     Technical University Berlin - extended API and implementation
+ *     Stephan Herrmann - Contribution for
+ *								Bug 429958 - [1.8][null] evaluate new DefaultLocation attribute of @NonNullByDefault
  *******************************************************************************/
 package org.eclipse.jdt.internal.codeassist.select;
 
@@ -23,19 +25,19 @@ public class SelectionOnParameterizedSingleTypeReference extends ParameterizedSi
 		super(name, typeArguments, 0, pos);
 	}
 
-	public TypeBinding resolveType(BlockScope scope, boolean checkBounds) {
-		super.resolveType(scope, checkBounds);
+	public TypeBinding resolveType(BlockScope scope, boolean checkBounds, int location) {
+		super.resolveType(scope, checkBounds, location);
 		throw new SelectionNodeFound(this.resolvedType);
 	}
 
-	public TypeBinding resolveType(ClassScope scope) {
-		super.resolveType(scope);
+	public TypeBinding resolveType(ClassScope scope, int location) {
+		super.resolveType(scope, location);
 		throw new SelectionNodeFound(this.resolvedType);
 	}
 //{ObjectTeams: one more method to override:
 	@Override
-	public TypeBinding checkResolveUsingBaseImportScope(Scope scope, boolean tolerate) {
-		TypeBinding result = super.checkResolveUsingBaseImportScope(scope, tolerate);
+	public TypeBinding checkResolveUsingBaseImportScope(Scope scope, int location, boolean tolerate) {
+		TypeBinding result = super.checkResolveUsingBaseImportScope(scope, location, tolerate);
 		if (this.resolvedType != null)
 			throw new SelectionNodeFound(this.resolvedType);
 		return result;

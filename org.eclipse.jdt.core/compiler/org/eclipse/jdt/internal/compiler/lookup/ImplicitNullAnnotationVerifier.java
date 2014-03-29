@@ -82,7 +82,9 @@ public class ImplicitNullAnnotationVerifier {
 			if (TypeAnalyzer.isTopConfined(currentType))
 				return;
 // SH}
-			boolean needToApplyNonNullDefault = currentMethod.hasNonNullDefault();
+			long sourceLevel = scope.compilerOptions().sourceLevel;
+			boolean needToApplyNonNullDefault = currentMethod.hasNonNullDefaultFor(Binding.DefaultLocationParameter|Binding.DefaultLocationReturnType,
+																					sourceLevel >= ClassFileConstants.JDK1_8);
 			// compatibility & inheritance do not consider constructors / static methods:
 			boolean isInstanceMethod = !currentMethod.isConstructor() && !currentMethod.isStatic();
 			complain &= isInstanceMethod;
@@ -118,7 +120,6 @@ public class ImplicitNullAnnotationVerifier {
 					checkNullSpecInheritance(currentMethod, srcMethod, needToApplyNonNullDefault, complain, currentSuper, scope, inheritedNonNullnessInfos);
 					needToApplyNonNullDefault = false;
 				}
-				long sourceLevel = scope.compilerOptions().sourceLevel;
 				
 				// transfer collected information into currentMethod:
 				InheritedNonNullnessInfo info = inheritedNonNullnessInfos[0];

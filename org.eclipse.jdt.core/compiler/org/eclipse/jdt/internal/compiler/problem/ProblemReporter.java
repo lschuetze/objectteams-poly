@@ -13796,10 +13796,6 @@ public void nullDefaultAnnotationIsRedundant(ASTNode location, Annotation[] anno
 	this.handle(problemId, args, shortArgs, start, end);
 }
 
-public void nonNullDefaultDetailNotEvaluated(ASTNode location) {
-	this.handle(IProblem.NonNullDefaultDetailIsNotEvaluated, NoArgument, NoArgument, ProblemSeverities.Warning, location.sourceStart, location.sourceEnd);
-}
-
 public void contradictoryNullAnnotations(Annotation annotation) {
 	contradictoryNullAnnotations(annotation.sourceStart, annotation.sourceEnd);
 }

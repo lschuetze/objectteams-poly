@@ -17,6 +17,7 @@
  *								Bug 415850 - [1.8] Ensure RunJDTCoreTests can cope with null annotations enabled
  *								Bug 417295 - [1.8[[null] Massage type annotated null analysis to gel well with deep encoded type bindings.
  *								Bug 427163 - [1.8][null] bogus error "Contradictory null specification" on varags
+ *								Bug 429958 - [1.8][null] evaluate new DefaultLocation attribute of @NonNullByDefault
  *        Andy Clement (GoPivotal, Inc) aclement@gopivotal.com - Contributions for
  *                          Bug 383624 - [1.8][compiler] Revive code generation support for type annotations (from Olivier's work)
  *                          Bug 409236 - [1.8][compiler] Type annotations on intersection cast types dropped by code generator
@@ -482,7 +483,7 @@ protected abstract TypeBinding getTypeBinding(Scope scope);
  */
 public abstract char [][] getTypeName() ;
 
-protected TypeBinding internalResolveType(Scope scope) {
+protected TypeBinding internalResolveType(Scope scope, int location) {
 	// handle the error here
 	this.constant = Constant.NotAConstant;
 	if (this.resolvedType != null) { // is a shared type reference which was already resolved
@@ -510,7 +511,7 @@ protected TypeBinding internalResolveType(Scope scope) {
 	CompilationResult compilationResult = scope.referenceCompilationUnit().compilationResult();
 	CompilationResult.CheckPoint cp = compilationResult.getCheckPoint(scope.referenceContext());
 	try {
-	  type = checkResolveUsingBaseImportScope(scope, false); // apply TOLERATE strategy only as a last resort below
+	  type = checkResolveUsingBaseImportScope(scope, location, false); // apply TOLERATE strategy only as a last resort below
 	  // copied from below:
 	  if (type != null && type.isValidBinding()) {
 		type = scope.environment().convertToRawType(type, false /*do not force conversion of enclosing types*/);
@@ -561,7 +562,7 @@ protected TypeBinding internalResolveType(Scope scope) {
 	   || (this.resolvedType.problemId() == ProblemReasons.NotFound))
 	{
    		if (this.baseclassDecapsulation == DecapsulationState.TOLERATED) {
-   			TypeBinding result = checkResolveUsingBaseImportScope(scope, true);
+   			TypeBinding result = checkResolveUsingBaseImportScope(scope, -1, true);
    			if (result != null)             // did we do any better than before?
    				type = this.resolvedType = result; // if non-null but ProblemBinding report below.
    		}
@@ -588,9 +589,9 @@ protected TypeBinding internalResolveType(Scope scope) {
 		}
 	}
 //{ObjectTeams: Split method to make tail accessible:
-	return checkResolvedType(type, scope, hasError);
+	return checkResolvedType(type, scope, location, hasError);
 }
-public TypeBinding checkResolvedType(TypeBinding type, Scope scope, boolean hasError) {
+public TypeBinding checkResolvedType(TypeBinding type, Scope scope, int location, boolean hasError) {
 // SH}
 	if (type.isArrayType() && ((ArrayBinding) type).leafComponentType == TypeBinding.VOID) {
 		scope.problemReporter().cannotAllocateVoidArray(this);
@@ -607,19 +608,19 @@ public TypeBinding checkResolvedType(TypeBinding type, Scope scope, boolean hasE
 		scope.problemReporter().rawTypeReference(this, type);
 	}
 	if (hasError) {
-		resolveAnnotations(scope);		
+		resolveAnnotations(scope, 0); // don't apply null defaults to buggy type
 		return type;
 	} else {
 		// store the computed type only if no error, otherwise keep the problem type instead
 		this.resolvedType = type;
-		resolveAnnotations(scope);
+		resolveAnnotations(scope, location);
 		return this.resolvedType; // pick up value that may have been changed in resolveAnnotations(..)
 	}
 }
 
 //{ObjectTeams: alternative strategies for resolving:
 /** Try to resolve this reference from base imports. */
-public TypeBinding checkResolveUsingBaseImportScope(Scope scope, boolean tolerate) {
+public TypeBinding checkResolveUsingBaseImportScope(Scope scope, int location, boolean tolerate) {
 	return null; // override to do something useful (only in SingleTypeReference).
 }
 /**
@@ -724,15 +725,23 @@ public final TypeBinding resolveType(BlockScope blockScope) {
 }
 
 public TypeBinding resolveType(BlockScope scope, boolean checkBounds) {
-	return internalResolveType(scope);
+	return resolveType(scope, checkBounds, 0);
+}
+
+public TypeBinding resolveType(BlockScope scope, boolean checkBounds, int location) {
+	return internalResolveType(scope, location);
 }
 
 public TypeBinding resolveType(ClassScope scope) {
-	return internalResolveType(scope);
+	return resolveType(scope, 0);
+}
+
+public TypeBinding resolveType(ClassScope scope, int location) {
+	return internalResolveType(scope, location);
 }
 
 public TypeBinding resolveTypeArgument(BlockScope blockScope, ReferenceBinding genericType, int rank) {
-    return resolveType(blockScope, true /* check bounds*/);
+    return resolveType(blockScope, true /* check bounds*/, Binding.DefaultLocationTypeArgument);
 }
 
 public TypeBinding resolveTypeArgument(ClassScope classScope, ReferenceBinding genericType, int rank) {
@@ -746,7 +755,7 @@ public TypeBinding resolveTypeArgument(ClassScope classScope, ReferenceBinding g
 			ref.tagBits |= TagBits.PauseHierarchyCheck;
 			pauseHierarchyCheck = true;
 		}
-	    return resolveType(classScope);
+	    return resolveType(classScope, Binding.DefaultLocationTypeArgument);
 	} finally {
 		if (pauseHierarchyCheck) {
 			ref.tagBits &= ~TagBits.PauseHierarchyCheck;
@@ -758,7 +767,7 @@ public abstract void traverse(ASTVisitor visitor, BlockScope scope);
 
 public abstract void traverse(ASTVisitor visitor, ClassScope scope);
 
-protected void resolveAnnotations(Scope scope) {
+protected void resolveAnnotations(Scope scope, int location) {
 	Annotation[][] annotationsOnDimensions = getAnnotationsOnDimensions();
 	if (this.annotations != null || annotationsOnDimensions != null) {
 		BlockScope resolutionScope = Scope.typeAnnotationsResolutionScope(scope);
@@ -785,6 +794,17 @@ protected void resolveAnnotations(Scope scope) {
 				}
 			}
 		}
+	}
+	if (this.resolvedType != null
+			&& (this.resolvedType.tagBits & TagBits.AnnotationNullMASK) == 0
+			&& !this.resolvedType.isTypeVariable()
+			&& !this.resolvedType.isWildcard()
+			&& location != 0 
+			&& scope.hasDefaultNullnessFor(location)) 
+	{
+		LookupEnvironment environment = scope.environment();
+		AnnotationBinding[] annots = new AnnotationBinding[]{environment.getNonNullAnnotation()};
+		this.resolvedType = environment.createAnnotatedType(this.resolvedType, annots);
 	}
 }
 public int getAnnotatableLevels() {

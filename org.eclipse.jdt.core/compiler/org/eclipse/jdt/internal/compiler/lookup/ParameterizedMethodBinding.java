@@ -15,6 +15,7 @@
  *								Bug 415043 - [1.8][null] Follow-up re null type annotations after bug 392099
  *								Bug 417295 - [1.8[[null] Massage type annotated null analysis to gel well with deep encoded type bindings.
  *								Bug 425152 - [1.8] [compiler] Lambda Expression not resolved but flow analyzed leading to NPE.
+ *								Bug 429958 - [1.8][null] evaluate new DefaultLocation attribute of @NonNullByDefault
  *******************************************************************************/
 package org.eclipse.jdt.internal.compiler.lookup;
 
@@ -50,6 +51,7 @@ public class ParameterizedMethodBinding extends MethodBinding {
 		 */
 		this.tagBits = originalMethod.tagBits & ~TagBits.HasMissingType;
 		this.parameterNonNullness = originalMethod.parameterNonNullness;
+		this.defaultNullness = originalMethod.defaultNullness;
 
 		final TypeVariableBinding[] originalVariables = originalMethod.typeVariables;
 		Substitution substitution = null;
@@ -195,6 +197,7 @@ public class ParameterizedMethodBinding extends MethodBinding {
 		 */
 		this.tagBits = originalMethod.tagBits & ~TagBits.HasMissingType;
 		this.parameterNonNullness = originalMethod.parameterNonNullness;
+		this.defaultNullness = originalMethod.defaultNullness;
 
 		final TypeVariableBinding[] originalVariables = originalMethod.typeVariables;
 		Substitution substitution = null;

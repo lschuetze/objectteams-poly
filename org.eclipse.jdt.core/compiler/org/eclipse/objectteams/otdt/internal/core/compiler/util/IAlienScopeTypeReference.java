@@ -51,8 +51,8 @@ public interface IAlienScopeTypeReference {
 		}
 		public Scope getAlienScope() { return this.alienScope; }
 		@Override
-		public TypeBinding checkResolveUsingBaseImportScope(Scope scope, boolean tolerate) {
-			return super.checkResolveUsingBaseImportScope(this.alienScope, tolerate);
+		public TypeBinding checkResolveUsingBaseImportScope(Scope scope, int location, boolean tolerate) {
+			return super.checkResolveUsingBaseImportScope(this.alienScope, location, tolerate);
 		}
 		@Override
 		public TypeBinding resolveType(ClassScope scope) {
@@ -87,8 +87,8 @@ public interface IAlienScopeTypeReference {
 		}
 		public Scope getAlienScope() { return this.alienScope; }
 		@Override
-		public TypeBinding checkResolveUsingBaseImportScope(Scope scope, boolean tolerate) {
-			return super.checkResolveUsingBaseImportScope(this.alienScope, tolerate);
+		public TypeBinding checkResolveUsingBaseImportScope(Scope scope, int location, boolean tolerate) {
+			return super.checkResolveUsingBaseImportScope(this.alienScope, location, tolerate);
 		}
 		@Override
 		public TypeBinding resolveType(ClassScope scope) {
@@ -124,15 +124,15 @@ public interface IAlienScopeTypeReference {
 		}
 		public Scope getAlienScope() { return this.alienScope; }
 		@Override
-		public TypeBinding checkResolveUsingBaseImportScope(Scope scope, boolean tolerate) {
+		public TypeBinding checkResolveUsingBaseImportScope(Scope scope, int location, boolean tolerate) {
 			// `scope` may be stronger then `alienScope`, try it first:
 			// (see 1.1.22-otjld-layered-teams-5)
-			TypeBinding result= super.checkResolveUsingBaseImportScope(scope, tolerate);
+			TypeBinding result= super.checkResolveUsingBaseImportScope(scope, location, tolerate);
 			if (result != null && result.isValidBinding())
 				return result;
 			// remove problem binding if any:
 			this.resolvedType = null;
-			return super.checkResolveUsingBaseImportScope(this.alienScope, tolerate);
+			return super.checkResolveUsingBaseImportScope(this.alienScope, location, tolerate);
 		}
 		@Override
 		public TypeBinding resolveType(ClassScope scope) {
@@ -168,8 +168,8 @@ public interface IAlienScopeTypeReference {
 		}
 		public Scope getAlienScope() { return this.alienScope; }
 		@Override
-		public TypeBinding checkResolveUsingBaseImportScope(Scope scope, boolean tolerate) {
-			return super.checkResolveUsingBaseImportScope(this.alienScope, tolerate);
+		public TypeBinding checkResolveUsingBaseImportScope(Scope scope, int location, boolean tolerate) {
+			return super.checkResolveUsingBaseImportScope(this.alienScope, location, tolerate);
 		}
 		@Override
 		public TypeBinding resolveType(ClassScope scope) {
@@ -208,8 +208,8 @@ public interface IAlienScopeTypeReference {
 		}
 		public Scope getAlienScope() { return this.alienScope; }
 		@Override
-		public TypeBinding checkResolveUsingBaseImportScope(Scope scope, boolean tolerate) {
-			return super.checkResolveUsingBaseImportScope(this.alienScope, tolerate);
+		public TypeBinding checkResolveUsingBaseImportScope(Scope scope, int location, boolean tolerate) {
+			return super.checkResolveUsingBaseImportScope(this.alienScope, location, tolerate);
 		}
 		@Override
 		public TypeBinding resolveType(ClassScope scope) {
