@@ -12306,9 +12306,9 @@ protected void internalDispatchDeclarationInto(int length) {
 				if ((roleType.modifiers & ClassFileConstants.AccEnum) == 0)
 					roleType.modifiers |= ExtraCompilerModifiers.AccRole;
 			}
+// SH}
 		}
 	}
-// SH}
 }
 protected void dispatchDeclarationIntoEnumDeclaration(int length) {
 
