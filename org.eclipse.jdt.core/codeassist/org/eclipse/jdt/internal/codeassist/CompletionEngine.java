@@ -9223,11 +9223,13 @@ public final class CompletionEngine
 /* orig:
 					InternalCompletionProposal proposal =  createProposal(completionOnReferenceExpressionName ? CompletionProposal.METHOD_NAME_REFERENCE : CompletionProposal.METHOD_REF, this.actualCompletionPosition);
   :giro */
-					if (invocationSite == null && kind == CompletionProposal.OT_METHOD_SPEC)
-						// method-spec short: chop off empty param list:
-						completion = CharOperation.replace(completion, "()".toCharArray(), new char[0]); //$NON-NLS-1$
-					else
+					if (kind == CompletionProposal.OT_METHOD_SPEC) {
+						if (invocationSite == null)
+							// method-spec short: chop off empty param list:
+							completion = CharOperation.replace(completion, "()".toCharArray(), new char[0]); //$NON-NLS-1$
+					} else {
 						kind = completionOnReferenceExpressionName ? CompletionProposal.METHOD_NAME_REFERENCE : CompletionProposal.METHOD_REF;
+					}
 					InternalCompletionProposal proposal = createProposal(kind, this.actualCompletionPosition);
 // SH}
 					proposal.setDeclarationSignature(getSignature(method.declaringClass));
