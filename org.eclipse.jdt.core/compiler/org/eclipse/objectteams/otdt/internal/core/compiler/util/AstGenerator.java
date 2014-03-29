@@ -858,6 +858,7 @@ public class AstGenerator extends AstFactory {
 		result.statementEnd = this.sourceEnd;
 		result.type = typeRef;
 		result.arguments = arguments;
+		result.isGenerated = true;
 		return result;
 	}
 

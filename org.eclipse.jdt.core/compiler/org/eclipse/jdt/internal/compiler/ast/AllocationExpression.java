@@ -504,12 +504,22 @@ public TypeBinding resolveType(BlockScope scope) {
 				argsContainCast = true;
 			}
 			argument.setExpressionContext(INVOCATION_CONTEXT);
+//{ObjectTeams: generated arguments can be pre-resolved indeed:
+		  if (argument.resolvedType != null && argument.isGenerated()) {
+			  argumentTypes[i] = argument.resolvedType;
+			  if (argumentTypes[i] == null)
+				  argHasError = true;
+		  } else {
+// orig:
 			if (this.arguments[i].resolvedType != null) 
 				scope.problemReporter().genericInferenceError("Argument was unexpectedly found resolved", this); //$NON-NLS-1$
 			if ((argumentTypes[i] = argument.resolveType(scope)) == null) {
 				argHasError = true;
 			}
-			if (sourceLevel >= ClassFileConstants.JDK1_8 && argument.isPolyExpression()) {
+// :giro
+		  }
+// SH}
+		  if (sourceLevel >= ClassFileConstants.JDK1_8 && argument.isPolyExpression()) {
 				if (this.innerInferenceHelper == null)
 					this.innerInferenceHelper = new InnerInferenceHelper();
 			}
