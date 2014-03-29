@@ -23,6 +23,7 @@
  *								Bug 423496 - [1.8] Implement new incorporation rule once it becomes available
  *								Bug 426590 - [1.8][compiler] Compiler error with tenary operator
  *								Bug 427216 - [Java8] array to varargs regression
+ *								Bug 425031 - [1.8] nondeterministic inference for GenericsRegressionTest.test283353
  *******************************************************************************/
 package org.eclipse.jdt.core.tests.compiler.regression;
 
@@ -2528,28 +2529,44 @@ public void test347426c() {
 			"");
 }
 // https://bugs.eclipse.org/bugs/show_bug.cgi?id=283353
-public void _test283353() {
-	this.runConformTest(
-			new String[] {
-				"X.java",
-				"public class X {\n" +
-				"  public static void main(String[] args) {\n" +
-				"    EntityKey entityKey = null;\n" +
-				"    new EntityCondenser().condense(entityKey);  \n" +
-				"  }\n" +
-				"  public static class EntityCondenser {\n" +
-				"    <I, E extends EntityType<I, E, K>, K extends EntityKey<I>> void condense(K entityKey) {\n" +
-				"    }\n" +
-				"  }\n" +
-				"  public class EntityKey<I> {}\n" +
-				"  public interface EntityType<\n" +
-				"    I,\n" +
-				"    E extends EntityType<I, E, K>,\n" +
-				"    K extends EntityKey<I>> {\n" +
-				"  }\n" +
-				"}\n"
-			},
+public void test283353() {
+	String source = 
+			"public class X {\n" +
+			"  public static void main(String[] args) {\n" +
+			"    EntityKey entityKey = null;\n" +
+			"    new EntityCondenser().condense(entityKey);  \n" +
+			"  }\n" +
+			"  public static class EntityCondenser {\n" +
+			"    <I, E extends EntityType<I, E, K>, K extends EntityKey<I>> void condense(K entityKey) {\n" +
+			"    }\n" +
+			"  }\n" +
+			"  public class EntityKey<I> {}\n" +
+			"  public interface EntityType<\n" +
+			"    I,\n" +
+			"    E extends EntityType<I, E, K>,\n" +
+			"    K extends EntityKey<I>> {\n" +
+			"  }\n" +
+			"}\n";
+	if (this.complianceLevel < ClassFileConstants.JDK1_8) {
+		this.runConformTest(
+			new String[] { "X.java", source },
 			"");
+	} else {
+		// see https://bugs.eclipse.org/425031
+		runNegativeTest(
+			new String[] { "X.java", source },
+			"----------\n" + 
+			"1. WARNING in X.java (at line 3)\n" + 
+			"	EntityKey entityKey = null;\n" + 
+			"	^^^^^^^^^\n" + 
+			"X.EntityKey is a raw type. References to generic type X.EntityKey<I> should be parameterized\n" + 
+			"----------\n" + 
+			"2. ERROR in X.java (at line 4)\n" + 
+			"	new EntityCondenser().condense(entityKey);  \n" + 
+			"	                      ^^^^^^^^\n" + 
+			"The method condense(K) in the type X.EntityCondenser is not applicable for the arguments (X.EntityKey)\n" + 
+			"----------\n");
+	}
 }
 // https://bugs.eclipse.org/bugs/show_bug.cgi?id=347600
 public void test347600() {
@@ -4242,6 +4259,286 @@ public void testBug428366() {
 		"	Zork z;\n" + 
 		"	^^^^\n" + 
 		"Zork cannot be resolved to a type\n" + 
+		"----------\n");
+}
+//https://bugs.eclipse.org/bugs/show_bug.cgi?id=429733, [1.8][bytecode] Bad type on operand stack
+public void test429733() {
+	if (this.complianceLevel < ClassFileConstants.JDK1_7)
+		return; // uses diamond.
+	runConformTest(
+		new String[] {
+			"X.java",
+			"public class X {\n" +
+			"	public static void main(String[] args) {\n" +
+			"		test(new Some<>(1.1d));\n" +
+			"	}\n" +
+			"	static <S> void test(Option<S> value) {\n" +
+			"	}\n" +
+			"	static interface Option<T> {\n" +
+			"	}\n" +
+			"	static class Some<T> implements Option<T> {\n" +
+			"		Some(T value) {\n" +
+			"         System.out.println(value);\n" +
+			"		}\n" +
+			"	}\n" +
+			"}\n"
+		},
+		"1.1");
+}
+//https://bugs.eclipse.org/bugs/show_bug.cgi?id=429733, [1.8][bytecode] Bad type on operand stack
+public void test429733a() {
+	if (this.complianceLevel < ClassFileConstants.JDK1_7)
+		return; // uses diamond.
+	runConformTest(
+		new String[] {
+			"X.java",
+			"public class X {\n" +
+			"	public static void main(String[] args) {\n" +
+			"		test(new Some<Double>(1.1d));\n" +
+			"	}\n" +
+			"	static <S> void test(Option<S> value) {\n" +
+			"	}\n" +
+			"	static interface Option<T> {\n" +
+			"	}\n" +
+			"	static class Some<T> implements Option<T> {\n" +
+			"		Some(T value) {\n" +
+			"         System.out.println(value);\n" +
+			"		}\n" +
+			"	}\n" +
+			"}\n"
+		},
+		"1.1");
+}
+public void test429733b() {
+	runConformTest(
+		new String[] {
+			"X.java",
+			"public class X {\n" +
+			"	public static void main(String[] args) {\n" +
+			"		test(id(1.1d));\n" +
+			"	}\n" +
+			"	static <S> void test(S value) {\n" +
+			"       System.out.println(value);\n" +
+			"	}\n" +
+			"	static <T> T id(T t) {\n" +
+			"       return t;\n" +
+			"   }\n" +
+			"}\n"
+		},
+		"1.1");
+}
+public void test429733c() {
+	runConformTest(
+		new String[] {
+			"X.java",
+			"public class X {\n" +
+			"	public static void main(String[] args) {\n" +
+			"		new X();\n" +
+			"	}\n" +
+			"	<S> X(S value) {\n" +
+			"       System.out.println(value);\n" +
+			"	}\n" +
+			"	static <T> T id(T t) {\n" +
+			"       return t;\n" +
+			"   }\n" +
+			"   X() {\n" +
+			"      this(id(1.1d));\n" +
+			"   }\n" +
+			"}\n"
+		},
+		"1.1");
+}
+// https://bugs.eclipse.org/bugs/show_bug.cgi?id=426537,  [1.8][inference] Eclipse compiler thinks I<? super J> is compatible with I<J<?>> - raw type J involved 
+public void testBug426537() { // non generic case
+	runNegativeTest(
+		new String[] {
+			"X.java",
+			"public class X {\n" +
+			"	void foo(J[] list, I<J<?>> i) {\n" +
+			"		sort(list, i);\n" +
+			"	}\n" +
+			"	J[] sort(J[] list, I<? super J> i) {\n" +
+			"		return list;\n" +
+			"	}\n" +
+			"}\n" +
+			"interface I<T> {}\n" +
+			"interface J<T> {}\n"
+		},
+		"----------\n" + 
+		"1. WARNING in X.java (at line 2)\n" + 
+		"	void foo(J[] list, I<J<?>> i) {\n" + 
+		"	         ^\n" + 
+		"J is a raw type. References to generic type J<T> should be parameterized\n" + 
+		"----------\n" + 
+		"2. ERROR in X.java (at line 3)\n" + 
+		"	sort(list, i);\n" + 
+		"	^^^^\n" + 
+		"The method sort(J[], I<? super J>) in the type X is not applicable for the arguments (J[], I<J<?>>)\n" + 
+		"----------\n" + 
+		"3. WARNING in X.java (at line 5)\n" + 
+		"	J[] sort(J[] list, I<? super J> i) {\n" + 
+		"	^\n" + 
+		"J is a raw type. References to generic type J<T> should be parameterized\n" + 
+		"----------\n" + 
+		"4. WARNING in X.java (at line 5)\n" + 
+		"	J[] sort(J[] list, I<? super J> i) {\n" + 
+		"	         ^\n" + 
+		"J is a raw type. References to generic type J<T> should be parameterized\n" + 
+		"----------\n" + 
+		"5. WARNING in X.java (at line 5)\n" + 
+		"	J[] sort(J[] list, I<? super J> i) {\n" + 
+		"	                             ^\n" + 
+		"J is a raw type. References to generic type J<T> should be parameterized\n" + 
+		"----------\n");
+}
+// https://bugs.eclipse.org/bugs/show_bug.cgi?id=426537,  [1.8][inference] Eclipse compiler thinks I<? super J> is compatible with I<J<?>> - raw type J involved 
+public void testBug426537_generic() {
+	runNegativeTest(
+		new String[] {
+			"X.java",
+			"public class X {\n" +
+			"	void foo(J[] list, I<J<?>> i) {\n" +
+			"		sort(list, i);\n" +
+			"	}\n" +
+			"	<T> T[] sort(T[] list, I<? super T> i) {\n" +
+			"		return list;\n" +
+			"	}\n" +
+			"}\n" +
+			"interface I<T> {}\n" +
+			"interface J<T> {}\n"
+		},
+		"----------\n" + 
+		"1. WARNING in X.java (at line 2)\n" + 
+		"	void foo(J[] list, I<J<?>> i) {\n" + 
+		"	         ^\n" + 
+		"J is a raw type. References to generic type J<T> should be parameterized\n" + 
+		"----------\n" + 
+		"2. ERROR in X.java (at line 3)\n" + 
+		"	sort(list, i);\n" + 
+		"	^^^^\n" + 
+		"The method sort(T[], I<? super T>) in the type X is not applicable for the arguments (J[], I<J<?>>)\n" + 
+		"----------\n");
+}
+// https://bugs.eclipse.org/bugs/show_bug.cgi?id=427957, [1.8] Type inference incorrect when a wildcard is missing 
+public void testBug427957() {
+	runNegativeTest(
+		new String[] {
+			"X.java",
+			"public class X {\n" +
+			"    <T> void sort(T[] a, I<? super T> c) { }\n" +
+			"    void foo(I[] e, I<I<?>> comp) {\n" +
+			"        sort(e, comp);\n" +
+			"    }\n" +
+			"}\n" +
+			"interface I<T> {}\n"
+		},
+		"----------\n" + 
+		"1. WARNING in X.java (at line 3)\n" + 
+		"	void foo(I[] e, I<I<?>> comp) {\n" + 
+		"	         ^\n" + 
+		"I is a raw type. References to generic type I<T> should be parameterized\n" + 
+		"----------\n" + 
+		"2. ERROR in X.java (at line 4)\n" + 
+		"	sort(e, comp);\n" + 
+		"	^^^^\n" + 
+		"The method sort(T[], I<? super T>) in the type X is not applicable for the arguments (I[], I<I<?>>)\n" + 
+		"----------\n");
+}
+// https://bugs.eclipse.org/bugs/show_bug.cgi?id=427957, [1.8] Type inference incorrect when a wildcard is missing 
+public void testBug427957a() { // verify escape hatch works.
+	if (this.complianceLevel < ClassFileConstants.JDK1_8)  
+		return;
+	Map customOptions = getCompilerOptions();
+	customOptions.put(CompilerOptions.OPTION_PostResolutionRawTypeCompatibilityCheck, CompilerOptions.DISABLED);
+	runNegativeTest(
+		new String[] {
+			"X.java",
+			"public class X {\n" +
+			"    <T> void sort(T[] a, I<? super T> c) { }\n" +
+			"    void foo(I[] e, I<I<?>> comp) {\n" +
+			"        sort(e, comp);\n" +
+			"    }\n" +
+			"}\n" +
+			"interface I<T> {}\n"
+		},
+		"----------\n" + 
+		"1. WARNING in X.java (at line 3)\n" + 
+		"	void foo(I[] e, I<I<?>> comp) {\n" + 
+		"	         ^\n" + 
+		"I is a raw type. References to generic type I<T> should be parameterized\n" + 
+		"----------\n", null, true, customOptions);
+}
+// https://bugs.eclipse.org/bugs/show_bug.cgi?id=427992,  [1.8] compiler difference to javac involving a raw array
+public void test427992() {
+	if (this.complianceLevel < ClassFileConstants.JDK1_6)
+		return; // uses @Override
+	runNegativeTest(
+		new String[] {
+			"X.java",
+			"import static org.junit.Assert.assertArrayEquals;\n" +
+			"import java.util.Arrays;\n" +
+			"import org.junit.Test;\n" +
+			"public class X {\n" +
+			"  @Test(expected = IllegalArgumentException.class)\n" +
+			"  public void shouldThrowExceptionWhenClassesAreNotInSameInheritanceTree() {\n" +
+			"    Arrays.sort(new Class[] {Chimp.class, Cat.class}, ClassInheritanceDepthComparator.INSTANCE);\n" +
+			"  }\n" +
+			"  public static class Animal {\n" +
+			"  }\n" +
+			"  public static class Monkey extends Animal {\n" +
+			"  }\n" +
+			"  public static class Chimp extends Monkey {\n" +
+			"  }\n" +
+			"  public static class Cat extends Animal {\n" +
+			"  }\n" +
+			"public static class ClassInheritanceDepthComparator implements Comparator<Class<?>> {\n" +
+			"  public static final ClassInheritanceDepthComparator INSTANCE = new ClassInheritanceDepthComparator();\n" +
+			"  @Override\n" +
+			"  public int compare(Class<?> c1, Class<?> c2) {\n" +
+			"    if(c1.equals(c2)) {\n" +
+			"      return 0;\n" +
+			"    }\n" +
+			"    if(c1.isAssignableFrom(c2)) {\n" +
+			"      return -1;\n" +
+			"    }\n" +
+			"    if(c2.isAssignableFrom(c1)) {\n" +
+			"      return 1;\n" +
+			"    }\n" +
+			"    throw new IllegalArgumentException(\"classes to compare must be in the same inheritance tree: \" + c1 + \"; \" + c2);\n" +
+			"  }\n" +
+			"}\n" +
+			"}\n"
+		},
+		"----------\n" + 
+		"1. ERROR in X.java (at line 1)\n" + 
+		"	import static org.junit.Assert.assertArrayEquals;\n" + 
+		"	              ^^^^^^^^^\n" + 
+		"The import org.junit cannot be resolved\n" + 
+		"----------\n" + 
+		"2. ERROR in X.java (at line 3)\n" + 
+		"	import org.junit.Test;\n" + 
+		"	       ^^^^^^^^^\n" + 
+		"The import org.junit cannot be resolved\n" + 
+		"----------\n" + 
+		"3. ERROR in X.java (at line 5)\n" + 
+		"	@Test(expected = IllegalArgumentException.class)\n" + 
+		"	 ^^^^\n" + 
+		"Test cannot be resolved to a type\n" + 
+		"----------\n" + 
+		"4. ERROR in X.java (at line 7)\n" + 
+		"	Arrays.sort(new Class[] {Chimp.class, Cat.class}, ClassInheritanceDepthComparator.INSTANCE);\n" + 
+		"	       ^^^^\n" + 
+		"The method sort(T[], Comparator<? super T>) in the type Arrays is not applicable for the arguments (Class[], X.ClassInheritanceDepthComparator)\n" + 
+		"----------\n" + 
+		"5. ERROR in X.java (at line 17)\n" + 
+		"	public static class ClassInheritanceDepthComparator implements Comparator<Class<?>> {\n" + 
+		"	                                                               ^^^^^^^^^^\n" + 
+		"Comparator cannot be resolved to a type\n" + 
+		"----------\n" + 
+		"6. ERROR in X.java (at line 20)\n" + 
+		"	public int compare(Class<?> c1, Class<?> c2) {\n" + 
+		"	           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n" + 
+		"The method compare(Class<?>, Class<?>) of type X.ClassInheritanceDepthComparator must override or implement a supertype method\n" + 
 		"----------\n");
 }
 }

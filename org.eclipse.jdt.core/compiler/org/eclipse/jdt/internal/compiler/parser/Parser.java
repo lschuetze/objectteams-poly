@@ -7362,18 +7362,23 @@ private void rejectIllegalTypeAnnotations(TypeReference typeReference, boolean t
 		}
 	}
 	annotations = typeReference.getAnnotationsOnDimensions(true);
+	boolean tolerated = false;
 	for (int i = 0, length = annotations == null ? 0 : annotations.length; i < length; i++) {
 		misplacedAnnotations = annotations[i];
 		if (misplacedAnnotations != null) {
-			if (tolerateAnnotationsOnDimensions)
+			if (tolerateAnnotationsOnDimensions) {
 				problemReporter().toleratedMisplacedTypeAnnotations(misplacedAnnotations[0], misplacedAnnotations[misplacedAnnotations.length - 1]);
+				tolerated = true;
+			}
 			else 
 				problemReporter().misplacedTypeAnnotations(misplacedAnnotations[0], misplacedAnnotations[misplacedAnnotations.length - 1]);
 		}
 	}
-	typeReference.annotations = null;
-	typeReference.setAnnotationsOnDimensions(null);
-	typeReference.bits &= ~ASTNode.HasTypeAnnotations;
+	if (!tolerated) {
+		typeReference.annotations = null;
+		typeReference.setAnnotationsOnDimensions(null);
+		typeReference.bits &= ~ASTNode.HasTypeAnnotations;
+	}
 }
 protected void consumePrimaryNoNewArrayNameSuper() {
 	// PrimaryNoNewArray ::= Name '.' 'super'

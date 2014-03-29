@@ -37,6 +37,7 @@ import org.eclipse.jdt.internal.compiler.ast.NullAnnotationMatching;
 import org.eclipse.jdt.internal.compiler.ast.ReferenceExpression;
 import org.eclipse.jdt.internal.compiler.ast.Statement;
 import org.eclipse.jdt.internal.compiler.ast.Wildcard;
+import org.eclipse.jdt.internal.compiler.util.Sorting;
 import org.eclipse.objectteams.otdt.internal.core.compiler.lookup.ITeamAnchor;
 
 /**
@@ -851,6 +852,15 @@ public class InferenceContext18 {
 
 		return resolve(this.inferenceVariables);
 	}
+	
+	public /*@Nullable*/ BoundSet solve(InferenceVariable[] toResolve) throws InferenceFailureException {
+		if (!reduce())
+			return null;
+		if (!this.currentBounds.incorporate(this))
+			return null;
+
+		return resolve(toResolve);
+	}
 
 	/**
 	 * JLS 18.2. reduce all initial constraints 
@@ -914,6 +924,7 @@ public class InferenceContext18 {
 	 * @throws InferenceFailureException 
 	 */
 	private /*@Nullable*/ BoundSet resolve(InferenceVariable[] toResolve) throws InferenceFailureException {
+		this.captureId = 0;
 		// NOTE: 18.5.2 ... 
 		// "(While it was necessary to demonstrate that the inference variables in B1 could be resolved
 		//   in order to establish applicability, the resulting instantiations are not considered part of B1.)
@@ -971,6 +982,7 @@ public class InferenceContext18 {
 						tmpBoundSet = prevBoundSet;// clean-up for second attempt
 					}
 					// Otherwise, a second attempt is made...
+					Sorting.sortInferenceVariables(variables); // ensure stability of capture IDs
 					final CaptureBinding18[] zs = new CaptureBinding18[numVars];
 					for (int j = 0; j < numVars; j++)
 						zs[j] = freshCapture(variables[j]);
@@ -1043,13 +1055,15 @@ public class InferenceContext18 {
 		return tmpBoundSet;
 	}
 	
-	// === FIXME(stephan): this capture business is a bit drafty: ===
 	int captureId = 0;
 	
 	/** For 18.4: "Let Z1, ..., Zn be fresh type variables" use capture bindings. */
 	private CaptureBinding18 freshCapture(InferenceVariable variable) {
-		char[] sourceName = CharOperation.concat("Z-".toCharArray(), variable.sourceName); //$NON-NLS-1$
-		return new CaptureBinding18(this.scope.enclosingSourceType(), sourceName, variable.typeParameter.shortReadableName(), this.captureId++, this.environment);
+		int id = this.captureId++;
+		char[] sourceName = CharOperation.concat("Z".toCharArray(), '#', String.valueOf(id).toCharArray(), '-', variable.sourceName); //$NON-NLS-1$
+		int position = this.currentInvocation != null ? this.currentInvocation.sourceStart() : 0;
+		return new CaptureBinding18(this.scope.enclosingSourceType(), sourceName, variable.typeParameter.shortReadableName(),
+						position, id, this.environment);
 	}
 	// === ===
 	
@@ -1441,6 +1455,7 @@ public class InferenceContext18 {
 					TypeBinding[] arguments = getSolutions(declaringClass.typeVariables(), innerMessage, bounds);
 					declaringClass = this.environment.createParameterizedType(declaringClass, arguments, declaringClass.enclosingType());
 					original = ((ParameterizedTypeBinding)declaringClass).createParameterizedMethod(original);
+					inner.checkAgainstFinalTargetType(innerTargetType, this.scope);	
 					if (this.environment.globalOptions.isAnnotationBasedNullAnalysisEnabled)
 						NullAnnotationMatching.checkForContraditions(original, innerMessage, this.scope);
 				}

@@ -52,6 +52,7 @@
  *								Bug 428294 - [1.8][compiler] Type mismatch: cannot convert from List<Object> to Collection<Object[]>
  *								Bug 428366 - [1.8] [compiler] The method valueAt(ObservableList<Object>, int) is ambiguous for the type Bindings
  *								Bug 416190 - [1.8][null] detect incompatible overrides due to null type annotations
+ *								Bug 392245 - [1.8][compiler][null] Define whether / how @NonNullByDefault applies to TYPE_USE locations
  *      Jesper S Moller <jesper@selskabet.org> -  Contributions for
  *								bug 382701 - [1.8][compiler] Implement semantic analysis of Lambda expressions & Reference expression
  *								bug 382721 - [1.8][compiler] Effectively final variables needs special treatment
@@ -6806,7 +6807,26 @@ public void missingTypeInConstructor(ASTNode location, MethodBinding constructor
 			start,
 			end);
 }
-
+public void missingTypeInLambda(LambdaExpression lambda, MethodBinding method) {
+	int nameSourceStart = lambda.sourceStart();
+	int nameSourceEnd = lambda.diagnosticsSourceEnd();
+	List missingTypes = method.collectMissingTypes(null);
+	if (missingTypes == null) {
+		System.err.println("The lambda expression " + method + " is wrongly tagged as containing missing types"); //$NON-NLS-1$ //$NON-NLS-2$
+		return;
+	}
+	TypeBinding missingType = (TypeBinding) missingTypes.get(0);
+	this.handle(
+			IProblem.MissingTypeInLambda,
+			new String[] {
+			        new String(missingType.readableName()),
+			},
+			new String[] {
+			        new String(missingType.shortReadableName()),
+			},
+			nameSourceStart,
+			nameSourceEnd);
+}
 public void missingTypeInMethod(ASTNode astNode, MethodBinding method) {
 	int nameSourceStart, nameSourceEnd;
 	if (astNode instanceof MessageSend) {
@@ -13778,6 +13798,10 @@ public void nullDefaultAnnotationIsRedundant(ASTNode location, Annotation[] anno
 		problemId = IProblem.RedundantNullDefaultAnnotationMethod;
 	}
 	this.handle(problemId, args, shortArgs, start, end);
+}
+
+public void nonNullDefaultDetailNotEvaluated(ASTNode location) {
+	this.handle(IProblem.NonNullDefaultDetailIsNotEvaluated, NoArgument, NoArgument, ProblemSeverities.Warning, location.sourceStart, location.sourceEnd);
 }
 
 public void contradictoryNullAnnotations(Annotation annotation) {

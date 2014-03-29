@@ -33,6 +33,7 @@
  *							Bug 428294 - [1.8][compiler] Type mismatch: cannot convert from List<Object> to Collection<Object[]>
  *							Bug 428786 - [1.8][compiler] Inference needs to compute the "ground target type" when reducing a lambda compatibility constraint
  *							Bug 428980 - [1.8][null] simple expression as lambda body doesn't leverage null annotation on argument
+ *							Bug 429430 - [1.8] Lambdas and method reference infer wrong exception type with generics (RuntimeException instead of IOException)
  *     Andy Clement (GoPivotal, Inc) aclement@gopivotal.com - Contributions for
  *                          Bug 405104 - [1.8][compiler][codegen] Implement support for serializeable lambdas
  *******************************************************************************/
@@ -40,6 +41,8 @@ package org.eclipse.jdt.internal.compiler.ast;
 
 import static org.eclipse.jdt.internal.compiler.ast.ExpressionContext.INVOCATION_CONTEXT;
 
+import java.util.Collections;
+import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.Set;
 
@@ -95,7 +98,7 @@ import org.eclipse.jdt.internal.compiler.problem.ProblemSeverities;
 public class LambdaExpression extends FunctionalExpression implements ReferenceContext, ProblemSeverities {
 	public Argument [] arguments;
 	private TypeBinding [] argumentTypes;
-	private int arrowPosition;
+	public int arrowPosition;
 	public Statement body;
 	public boolean hasParentheses;
 	public MethodScope scope;
@@ -105,7 +108,7 @@ public class LambdaExpression extends FunctionalExpression implements ReferenceC
 	boolean returnsValue;
 	public boolean isSerializable;
 	boolean returnsVoid;
-	protected LambdaExpression original = this;
+	public LambdaExpression original = this;
 	public SyntheticArgumentBinding[] outerLocalVariables = NO_SYNTHETIC_ARGUMENTS;
 	private int outerLocalVariablesSlotSize = 0;
 	public boolean shouldCaptureInstance = false;
@@ -113,6 +116,7 @@ public class LambdaExpression extends FunctionalExpression implements ReferenceC
 	private boolean hasIgnoredMandatoryErrors = false;
 	private ReferenceBinding classType;
 	public int ordinal;
+	private Set thrownExceptions;
 	private static final SyntheticArgumentBinding [] NO_SYNTHETIC_ARGUMENTS = new SyntheticArgumentBinding[0];
 	private static final Block NO_BODY = new Block(0, true);
 
@@ -218,8 +222,8 @@ public class LambdaExpression extends FunctionalExpression implements ReferenceC
 		if (this.resolvedType != null)
 			return this.resolvedType;
 		
-		if (this.expectedType != null && this.original == this) {  // final resolution.
-			this.ordinal = blockScope.referenceCompilationUnit().record(this);
+		if (this.expectedType != null && this.original == this) {  // final resolution ? may be not - i.e may be, but only in a non-final universe.
+			this.ordinal = recordFunctionalType(blockScope);
 		}
 		
 		this.constant = Constant.NotAConstant;
@@ -243,40 +247,32 @@ public class LambdaExpression extends FunctionalExpression implements ReferenceC
 		
 		final boolean haveDescriptor = this.descriptor != null;
 		
-		if (haveDescriptor && this.descriptor.typeVariables != Binding.NO_TYPE_VARIABLES) // already complained in kosher*
-			return null;
-		
-		if (!haveDescriptor) {
-			if (argumentsTypeElided) {
-				if (!this.assistNode)
-					return null; // FUBAR, bail out...
-				// for code assist ONLY, keep the sluice gate shut on bogus errors otherwise.
-				argumentsTypeElided = false;
-				for (int i = 0; i < length; i++) {
-					this.arguments[i].type = new SingleTypeReference(TypeConstants.OBJECT, 0);
-				}
-			}
-		}
+		if (!haveDescriptor || this.descriptor.typeVariables != Binding.NO_TYPE_VARIABLES) // already complained in kosher*
+			return this.resolvedType = null;
 		
 		this.binding = new MethodBinding(ClassFileConstants.AccPrivate | ClassFileConstants.AccSynthetic | ExtraCompilerModifiers.AccUnresolved,
 							CharOperation.concat(TypeConstants.ANONYMOUS_METHOD, Integer.toString(this.ordinal).toCharArray()), // will be fixed up later.
-							haveDescriptor ? this.descriptor.returnType : null, 
+							haveDescriptor ? this.descriptor.returnType : TypeBinding.VOID, 
 							Binding.NO_PARAMETERS, // for now. 
 							haveDescriptor ? this.descriptor.thrownExceptions : Binding.NO_EXCEPTIONS, 
 							blockScope.enclosingSourceType());
 		this.binding.typeVariables = Binding.NO_TYPE_VARIABLES;
 		
+		boolean buggyArguments = false;
 		if (haveDescriptor) {
 			int descriptorParameterCount = this.descriptor.parameters.length;
 			int lambdaArgumentCount = this.arguments != null ? this.arguments.length : 0;
             if (descriptorParameterCount != lambdaArgumentCount) {
             	this.scope.problemReporter().lambdaSignatureMismatched(this);
-            	if (argumentsTypeElided) 
-            		return null; // FUBAR, bail out ...
+            	if (argumentsTypeElided || this.original != this) // no interest in continuing to error check copy.
+            		return this.resolvedType = null; // FUBAR, bail out ...
+            	else {
+            		this.resolvedType = null; // continue to type check.
+            		buggyArguments = true;
+            	}
             }
 		}
 		
-		boolean buggyArguments = false;
 		TypeBinding[] newParameters = new TypeBinding[length];
 
 		AnnotationBinding [][] parameterAnnotations = null;
@@ -334,7 +330,10 @@ public class LambdaExpression extends FunctionalExpression implements ReferenceC
 			parameterType = argumentsTypeElided ? expectedParameterType : this.argumentTypes[i];
 			if (parameterType != null && parameterType != TypeBinding.VOID) {
 				if (haveDescriptor && expectedParameterType != null && parameterType.isValidBinding() && TypeBinding.notEquals(parameterType, expectedParameterType)) {
-					this.scope.problemReporter().lambdaParameterTypeMismatched(argument, argument.type, expectedParameterType);
+					if (expectedParameterType.isProperType(true)) {
+						this.scope.problemReporter().lambdaParameterTypeMismatched(argument, argument.type, expectedParameterType);
+						this.resolvedType = null; // continue to type check.
+					}
 				}
 
 				TypeBinding leafType = parameterType.leafComponentType();
@@ -417,6 +416,9 @@ public class LambdaExpression extends FunctionalExpression implements ReferenceC
 		} else if (this.expectedType != null && 
 				   this.expectedType.findSuperTypeOriginatingFrom(TypeIds.T_JavaIoSerializable, false /*Serializable is not a class*/) != null) {
 			this.isSerializable = true;
+		}
+		if ((this.binding.tagBits & TagBits.HasMissingType) != 0) {
+			this.scope.problemReporter().missingTypeInLambda(this, this.binding);
 		}
 		return this.resolvedType;
 	}
@@ -1052,6 +1054,20 @@ public class LambdaExpression extends FunctionalExpression implements ReferenceC
 		}
 	}
 	
+	public void throwsException(TypeBinding exceptionType) {
+		if (this.expressionContext != INVOCATION_CONTEXT)
+			return;
+		if (this.thrownExceptions == null)
+			this.thrownExceptions = new HashSet<TypeBinding>();
+		this.thrownExceptions.add(exceptionType);
+	}
+
+	public Set<TypeBinding> getThrownExceptions() {
+		if (this.thrownExceptions == null)
+			return Collections.emptySet();
+		return this.thrownExceptions;
+	}
+
 	public void generateCode(ClassScope classScope, ClassFile classFile) {
 		int problemResetPC = 0;
 		classFile.codeStream.wideMode = false;
@@ -1236,6 +1252,10 @@ public class LambdaExpression extends FunctionalExpression implements ReferenceC
 			}
 			public ReferenceBinding[] superInterfaces() {
 				return new ReferenceBinding[] { (ReferenceBinding) LambdaExpression.this.resolvedType };
+			}
+			@Override
+			public char[] computeUniqueKey() {
+				return LambdaExpression.this.descriptor.declaringClass.computeUniqueKey();
 			}
 			public String toString() {
 				StringBuffer output = new StringBuffer("()->{} implements "); //$NON-NLS-1$

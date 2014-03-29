@@ -968,7 +968,7 @@ public class NullTypeAnnotationTest extends AbstractNullAnnotationTest {
 					"import org.eclipse.jdt.annotation.*;\n" +
 					"public abstract class X1 {\n" +
 					"	public static String @Nullable [] f1 = null;\n" +
-					"	public static String [] @Nullable [] f2 = new String[][] { null };\n" +
+					"	public static String [] @Nullable [] f2 = new String[] @Nullable[] { null };\n" +
 					"}\n"
 				},
 				customOptions,
@@ -1511,7 +1511,7 @@ public class NullTypeAnnotationTest extends AbstractNullAnnotationTest {
 						"import org.eclipse.jdt.annotation.NonNull;\n" +
 						"import org.eclipse.jdt.annotation.Nullable;\n" +
 						"public class X {\n" +
-						"	@NonNull String @Nullable [] f @NonNull [] = new @NonNull String @Nullable [0] @NonNull [];\n" +
+						"	@NonNull String @Nullable [] f @NonNull [] = new @NonNull String @NonNull [0] @Nullable [];\n" +
 						"}\n"
 				},
 				customOptions,
@@ -4301,6 +4301,49 @@ public void test429387() {
 		"	return IntStreamy.fromFlatMap(func, mapper, classOfE, maker);\n" + 
 		"	       ^^^^^^^^^^\n" + 
 		"IntStreamy cannot be resolved\n" + 
+		"----------\n");
+}
+public void testBug392245_tmp_warning() {
+	runNegativeTestWithLibs(
+		new String[] {
+			"X.java",
+			"import org.eclipse.jdt.annotation.*;\n" +
+			"@NonNullByDefault(DefaultLocation.TYPE_ARGUMENT)\n" +
+			"public class X {\n" +
+			"	void m(Object o) {}\n" +
+			"	void test() {\n" +
+			"		m(null); // ERR\n" + // since @NonNullByDefault is still interpreted as all or nothing
+			"	}\n" +
+			"}\n"
+		},
+		"----------\n" + 
+		"1. WARNING in X.java (at line 2)\n" + 
+		"	@NonNullByDefault(DefaultLocation.TYPE_ARGUMENT)\n" + 
+		"	                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n" + 
+		"Arguments controling the details of the nullness default are not yet evaluated by the analysis.\n" + 
+		"----------\n" + 
+		"2. ERROR in X.java (at line 6)\n" + 
+		"	m(null); // ERR\n" + 
+		"	  ^^^^\n" + 
+		"Null type mismatch: required \'@NonNull Object\' but the provided value is null\n" + 
+		"----------\n");
+}
+public void testBug429403() {
+	runNegativeTestWithLibs(
+		new String[] {
+			"X.java",
+			"import java.util.*;\n" +
+			"import org.eclipse.jdt.annotation.*;\n" +
+			"class Person {}\n" +
+			"public class X {\n" +
+			"	List<@NonNull Person> l = new ArrayList<@Nullable Person>();" +
+			"}\n"
+		},
+		"----------\n" + 
+		"1. ERROR in X.java (at line 5)\n" + 
+		"	List<@NonNull Person> l = new ArrayList<@Nullable Person>();}\n" + 
+		"	                          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n" + 
+		"Null type mismatch (type annotations): required \'List<@NonNull Person>\' but this expression has type \'ArrayList<@Nullable Person>\', corresponding supertype is \'List<@Nullable Person>\'\n" + 
 		"----------\n");
 }
 }

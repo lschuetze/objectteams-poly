@@ -69,16 +69,18 @@ public class ConstraintExceptionFormula extends ConstraintFormula {
 			}
 		}
 		TypeBinding[] thrown = sam.thrownExceptions;
-		TypeBinding[] e = new TypeBinding[thrown.length];
+		InferenceVariable[] e = new InferenceVariable[thrown.length];
 		int n = 0;
 		for (int i = 0; i < thrown.length; i++)
 			if (!thrown[i].isProperType(true))
-				e[n++] = thrown[i];
+				e[n++] = (InferenceVariable) thrown[i]; // thrown[i] is not a proper type, since it's an exception it must be an inferenceVariable, right?
 		TypeBinding[] ePrime = null;
 		if (this.left instanceof LambdaExpression) {
-// TODO find exceptions thrown by the lambda's body, see 18.2.5 bullet 5
-//				((LambdaExpression)this.left).
-//				InferenceContext18.missingImplementation("NYI");
+			LambdaExpression lambda = ((LambdaExpression) this.left).getResolvedCopyForInferenceTargeting(this.right);
+			if (lambda == null)
+				return TRUE; // cannot make use of this buggy constraint
+			Set<TypeBinding> ePrimeSet = lambda.getThrownExceptions();
+			ePrime = ePrimeSet.toArray(new TypeBinding[ePrimeSet.size()]);
 		} else {
 			ReferenceExpression referenceExpression = (ReferenceExpression)this.left;
 			MethodBinding method = referenceExpression.findCompileTimeMethodTargeting(this.right, scope);
@@ -106,7 +108,7 @@ public class ConstraintExceptionFormula extends ConstraintFormula {
 					result.add(ConstraintTypeFormula.create(ePrime[i], e[j], SUBTYPE));
 			}				
 			for (int j = 0; j < n; j++)
-				result.add(new ConstraintExceptionFormula(this.left, e[j]));
+				inferenceContext.currentBounds.inThrows.add(e[j]);
 			return result.toArray(new ConstraintFormula[result.size()]);
 		}
 	}

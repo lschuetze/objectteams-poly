@@ -528,6 +528,10 @@ public abstract class MethodMapping extends OTJavaElement implements IMethodMapp
 	    return getIMethod().isMainMethod();
 	}
 	
+	public boolean isLambdaMethod() {
+		return false;
+	}
+	
 	public boolean isSimilar(IMethod method)
 	{
 	    return getIMethod().isSimilar(method);

@@ -46,6 +46,7 @@
  *								Bug 428366 - [1.8] [compiler] The method valueAt(ObservableList<Object>, int) is ambiguous for the type Bindings
  *								Bug 424728 - [1.8][null] Unexpected error: The nullness annotation 'XXXX' is not applicable at this location 
  *								Bug 428811 - [1.8][compiler] Type witness unnecessarily required
+ *								Bug 429424 - [1.8][inference] Problem inferring type of method's parameter
  *     Jesper S Moller - Contributions for
  *								Bug 378674 - "The method can be declared as static" is wrong
  *  							Bug 405066 - [1.8][compiler][codegen] Implement code generation infrastructure for JSR335
@@ -64,7 +65,6 @@ import org.eclipse.jdt.internal.compiler.impl.CompilerOptions;
 import org.eclipse.jdt.internal.compiler.impl.ReferenceContext;
 import org.eclipse.jdt.internal.compiler.problem.AbortCompilation;
 import org.eclipse.jdt.internal.compiler.problem.ProblemReporter;
-import org.eclipse.jdt.internal.compiler.problem.ProblemSeverities;
 import org.eclipse.jdt.internal.compiler.util.HashtableOfObject;
 import org.eclipse.jdt.internal.compiler.util.ObjectVector;
 import org.eclipse.jdt.internal.compiler.util.SimpleLookupTable;
@@ -866,11 +866,12 @@ public abstract class Scope {
 				TypeBinding[] parameters = AnchorMapping.instantiateParameters(this, method.parameters, method);
 // SH}
 				for (int i = 0; i < argLen; i++) {
+					TypeBinding argumentType = i < arguments.length ? arguments[i] : null; // length mismatch may happen from CodeSnippetMessageSend.resolveType() in the if (argHasError) block.
 //{ObjectTeams: new arg:
 /* orig:
-					int nextLevel = compatibilityLevel18FromInner(method, innerInferenceHelper, invocationArguments[i], argLen, i, isVarArgs);
+					int nextLevel = compatibilityLevel18FromInner(method, innerInferenceHelper, invocationArguments[i], argumentType, argLen, i, isVarArgs);
   :giro */
-					int nextLevel = compatibilityLevel18FromInner(method, parameters, innerInferenceHelper, invocationArguments[i], argLen, i, isVarArgs);
+					int nextLevel = compatibilityLevel18FromInner(method, parameters, innerInferenceHelper, invocationArguments[i], argumentType, argLen, i, isVarArgs);
 // SH}
 					if (nextLevel == NOT_COMPATIBLE)
 						return nextLevel;
@@ -890,9 +891,9 @@ public abstract class Scope {
 
 //{ObjectTeams: new arg:
 /* orig:
-	private int compatibilityLevel18FromInner(MethodBinding method, InnerInferenceHelper innerInferenceHelper, Expression invocArg, int argLen, int i, boolean[] isVarArgs)
+	private int compatibilityLevel18FromInner(MethodBinding method, InnerInferenceHelper innerInferenceHelper, Expression invocArg, TypeBinding argType, int argLen, int i, boolean[] isVarArgs)
   :giro */
-	private int compatibilityLevel18FromInner(MethodBinding method, TypeBinding[] parameters, InnerInferenceHelper innerInferenceHelper, Expression invocArg, int argLen, int i, boolean[] isVarArgs)
+	private int compatibilityLevel18FromInner(MethodBinding method, TypeBinding[] parameters, InnerInferenceHelper innerInferenceHelper, Expression invocArg, TypeBinding argType, int argLen, int i, boolean[] isVarArgs)
 // SH}
 	{
 		int compatible = isVarArgs[0] ? VARARGS_COMPATIBLE : COMPATIBLE;
@@ -918,6 +919,8 @@ public abstract class Scope {
 			Invocation innerPoly = (Invocation) invocArg;
 			level = parameterCompatibilityLevel(resolvedType, targetType);
 			if (level != NOT_COMPATIBLE) {
+				if (TypeBinding.notEquals(argType, resolvedType) && innerInferenceHelper != null)
+					innerInferenceHelper.registerInnerResult(method, resolvedType, argLen, i);
 				return Math.max(compatible, level);
 			} else {
 				MethodBinding innerBinding = innerPoly.binding(null, false, null); // 1. try without update
@@ -972,16 +975,16 @@ public abstract class Scope {
 				ConditionalExpression ce = (ConditionalExpression) invocArg;
 //{ObjectTeams: new arg:
 /* orig:
-				int level1 = compatibilityLevel18FromInner(method, innerInferenceHelper, ce.valueIfTrue, argLen, i, isVarArgs);
+				int level1 = compatibilityLevel18FromInner(method, innerInferenceHelper, ce.valueIfTrue, argType, argLen, i, isVarArgs);
   :giro */
-				int level1 = compatibilityLevel18FromInner(method, parameters, innerInferenceHelper, ce.valueIfTrue, argLen, i, isVarArgs);
+				int level1 = compatibilityLevel18FromInner(method, parameters, innerInferenceHelper, ce.valueIfTrue, argType, argLen, i, isVarArgs);
 // orig:
 				if (level1 == NOT_COMPATIBLE)
 					return NOT_COMPATIBLE;
 /*
-				int level2 = compatibilityLevel18FromInner(method, innerInferenceHelper, ce.valueIfFalse, argLen, i, isVarArgs);
+				int level2 = compatibilityLevel18FromInner(method, innerInferenceHelper, ce.valueIfFalse, argType, argLen, i, isVarArgs);
   :giro */
-				int level2 = compatibilityLevel18FromInner(method, parameters, innerInferenceHelper, ce.valueIfFalse, argLen, i, isVarArgs);
+				int level2 = compatibilityLevel18FromInner(method, parameters, innerInferenceHelper, ce.valueIfFalse, argType, argLen, i, isVarArgs);
 // SH}
 				if (level2 == NOT_COMPATIBLE)
 					return NOT_COMPATIBLE;
@@ -4823,9 +4826,10 @@ public abstract class Scope {
 		  Config.removeOrRestore(oldConfig, this);
 // SH}
 	  	}
-		if (compatibleCount != visibleSize) {
-			problemReporter().genericInferenceProblem("(Recovered) Internal inconsistency while checking invocation ambiguity", invocationSite, ProblemSeverities.Warning); //$NON-NLS-1$
-		}
+// TODO: Disabled, because we know a situation where this is expected, see https://bugs.eclipse.org/429490
+//		if (compatibleCount != visibleSize) {
+//			problemReporter().genericInferenceProblem("(Recovered) Internal inconsistency while checking invocation ambiguity", invocationSite, ProblemSeverities.Warning); //$NON-NLS-1$
+//		}
 		if (compatibleCount == 0) {
 			return new ProblemMethodBinding(visible[0].selector, argumentTypes, ProblemReasons.NotFound);
 		} else if (compatibleCount == 1) {
@@ -5253,9 +5257,6 @@ public abstract class Scope {
 		
 		if (arg == null || param == null)
 			return NOT_COMPATIBLE;
-		
-		if (arg instanceof PolyTypeBinding && !((PolyTypeBinding)arg).isPertinentToApplicability(param))
-			return COMPATIBLE;
 
 		if (arg.isCompatibleWith(param, this))
 			return COMPATIBLE;
@@ -5272,8 +5273,6 @@ public abstract class Scope {
 		// only called if env.options.sourceLevel >= ClassFileConstants.JDK1_5
 		if (arg == null || param == null)
 			return NOT_COMPATIBLE;
-		if (arg instanceof PolyTypeBinding && !((PolyTypeBinding)arg).isPertinentToApplicability(param))
-			return COMPATIBLE;
 		if (arg.isCompatibleWith(param, this))
 			return COMPATIBLE;
 		if (tieBreakingVarargsMethods && (this.compilerOptions().complianceLevel >= ClassFileConstants.JDK1_7 || !CompilerOptions.tolerateIllegalAmbiguousVarargsInvocation)) {
@@ -5393,6 +5392,32 @@ public abstract class Scope {
 // SH}
 				case METHOD_SCOPE :
 					return ((MethodScope) current).referenceContext;
+				case CLASS_SCOPE :
+					return ((ClassScope) current).referenceContext;
+				case COMPILATION_UNIT_SCOPE :
+					return ((CompilationUnitScope) current).referenceContext;
+			}
+		} while ((current = current.parent) != null);
+		return null;
+	}
+	
+	/**
+	 * Returns the nearest original reference context, starting from current scope.
+	 * If starting on a class, it will return current class. If starting on unitScope, returns unit.
+	 */
+	public ReferenceContext originalReferenceContext() {
+		Scope current = this;
+		do {
+			switch(current.kind) {
+				case METHOD_SCOPE :
+					ReferenceContext context = ((MethodScope) current).referenceContext;
+					if (context instanceof LambdaExpression) {
+						LambdaExpression expression = (LambdaExpression) context;
+						while (expression != expression.original)
+							expression = expression.original;
+						return expression;
+					}
+					return context; 
 				case CLASS_SCOPE :
 					return ((ClassScope) current).referenceContext;
 				case COMPILATION_UNIT_SCOPE :

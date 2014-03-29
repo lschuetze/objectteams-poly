@@ -195,6 +195,7 @@
  *									ContradictoryNullAnnotationsOnBound
  *									UnsafeNullnessCast
  *									ContradictoryNullAnnotationsInferred
+ *									NonNullDefaultDetailIsNotEvaluated
  *      Jesper S Moller  - added the following constants
  *									TargetTypeNotAFunctionalInterface
  *									OuterLocalMustBeEffectivelyFinal
@@ -730,6 +731,9 @@ void setSourceStart(int sourceStart);
 	int UnderscoresInLiteralsNotBelow17 = Syntax + Internal + 269;
 	/** @since 3.7.1 */
 	int IllegalHexaLiteral = Syntax + Internal + 270;
+
+	/** @since 3.9 BETA_JAVA8 */
+	int MissingTypeInLambda = MethodRelated + 271;
 
 	// type related problems
 	/** @since 3.1 */
@@ -1781,6 +1785,8 @@ void setSourceStart(int sourceStart);
 	int ContradictoryNullAnnotationsInferred = Internal + 966;
 	/** @since 3.9 BETA_JAVA8 */
 	int UnsafeNullnessCast = Internal + 967;
+	/** @since 3.9 BETA_JAVA8 */
+	int NonNullDefaultDetailIsNotEvaluated = 968;
 
 	// Java 8 work
 	/** @since 3.9 BETA_JAVA8 */

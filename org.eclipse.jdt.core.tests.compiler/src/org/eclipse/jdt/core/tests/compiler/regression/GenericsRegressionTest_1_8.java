@@ -17,6 +17,7 @@ package org.eclipse.jdt.core.tests.compiler.regression;
 import java.util.Map;
 
 import org.eclipse.jdt.core.JavaCore;
+import org.eclipse.jdt.internal.compiler.impl.CompilerOptions;
 
 import junit.framework.Test;
 
@@ -2492,9 +2493,40 @@ public void testBug429090() {
 			"}\n"
 		});
 }
-public void _testBug428811() {
-	// perhaps fail is the correct answer?
-	runConformTest(
+public void testBug429490_comment33() {
+    runConformTest(
+        new String[] {
+            "Junk12.java",
+            "public class Junk12 {\n" + 
+            "    class Observable<T> {}\n" + 
+            "    class ObservableValue<T> {}\n" + 
+            "    interface InvalidationListener {\n" + 
+            "        public void invalidated(Observable observable);\n" + 
+            "    }\n" + 
+            "    public interface ChangeListener<T> {\n" + 
+            "        void changed(ObservableValue<? extends T> observable, T oldValue, T newValue);\n" + 
+            "    }\n" + 
+            "    class ExpressionHelper<T> {}\n" + 
+            "    public static <T> ExpressionHelper<T> addListener(ExpressionHelper<T> helper, ObservableValue<T> observable, InvalidationListener listener) {\n" + 
+            "        return helper;\n" + 
+            "    }\n" + 
+            "    public static <T> ExpressionHelper<T> addListener(ExpressionHelper<T> helper, ObservableValue<T> observable, ChangeListener<? super T> listener) {\n" + 
+            "        return helper;\n" + 
+            "    }\n" + 
+            "    void junk() {\n" + 
+            "        addListener(null, null, new ChangeListener () {\n" + 
+            "            public void changed(ObservableValue observable, Object oldValue, Object newValue) {\n" + 
+            "                throw new RuntimeException();\n" + 
+            "            }\n" + 
+            "        });\n" + 
+            "        addListener(null, null, (value, o1, o2) -> {throw new RuntimeException();});\n" + 
+            "    }\n" + 
+            "}\n"
+        });
+}
+public void testBug428811() {
+	// perhaps fail is the correct answer? FIXME: validate!
+	runNegativeTest(
 		new String[] {
 			"MoreCollectors.java",
 			"import java.util.AbstractList;\n" + 
@@ -2538,6 +2570,268 @@ public void _testBug428811() {
 			"        public int size() {\n" + 
 			"            return array.length;\n" + 
 			"        }\n" + 
+			"    }\n" + 
+			"}\n"
+		},
+		"----------\n" + 
+		"1. ERROR in MoreCollectors.java (at line 16)\n" + 
+		"	return Collector.of(ArrayList<T>::new,\n" + 
+		"	                 ^^\n" + 
+		"The method of(ArrayList<T>::new, List<T>::add, (<no type> left, <no type> right) -> {\n" + 
+		"  left.addAll(right);\n" + 
+		"  return left;\n" + 
+		"}, ImmutableList::copyOf) is undefined for the type Collector\n" + 
+		"----------\n" + 
+		"2. WARNING in MoreCollectors.java (at line 23)\n" + 
+		"	public static <T> ImmutableList<T> copyOf (Collection<T> c) {\n" + 
+		"	                                   ^^^^^^^^^^^^^^^^^^^^^^^^\n" + 
+		"The method copyOf(Collection<T>) from the type MoreCollectors.ImmutableList<T> is never used locally\n" + 
+		"----------\n");
+}
+// all exceptions can be inferred to match
+public void testBug429430() {
+	runConformTest(
+		new String[] {
+			"Main.java",
+			"import java.io.*;\n" + 
+			"public class Main {\n" + 
+			"  public static interface Closer<T, X extends Exception> {\n" + 
+			"    void closeIt(T it) throws X;\n" + 
+			"  }\n" + 
+			"\n" + 
+			"  public static <T, X extends Exception> void close( Closer<T, X> closer, T it ) throws X {\n" + 
+			"    closer.closeIt(it);\n" + 
+			"  }\n" + 
+			"\n" + 
+			"  public static void main(String[] args) throws IOException {\n" + 
+			"    InputStream in = new ByteArrayInputStream(\"hello\".getBytes());\n" + 
+			"    close( x -> x.close(), in );\n" +
+			"    close( InputStream::close, in );\n" + 
+			"    close( (Closer<InputStream, IOException>)InputStream::close, in );\n" + 
+			"  }\n" +
+			"}\n"
+		});
+}
+// incompatible exceptions prevent suitable inference of exception type
+public void testBug429430a() {
+	runNegativeTest(
+		new String[] {
+			"Main.java",
+			"import java.io.*;\n" +
+			"@SuppressWarnings(\"serial\") class EmptyStream extends Exception {}\n" + 
+			"public class Main {\n" + 
+			"  public static interface Closer<T, X extends Exception> {\n" + 
+			"    void closeIt(T it) throws X;\n" + 
+			"  }\n" + 
+			"\n" + 
+			"  public static <T, X extends Exception> void close( Closer<T, X> closer, T it ) throws X {\n" + 
+			"    closer.closeIt(it);\n" + 
+			"  }\n" + 
+			"\n" + 
+			"  public static void main(String[] args) throws IOException, EmptyStream {\n" + 
+			"    InputStream in = new ByteArrayInputStream(\"hello\".getBytes());\n" + 
+			"    close( x ->  { if (in.available() == 0) throw new EmptyStream(); x.close(); }, in );\n" + 
+			"  }\n" +
+			"}\n"
+		},
+		"----------\n" + 
+		"1. ERROR in Main.java (at line 14)\n" + 
+		"	close( x ->  { if (in.available() == 0) throw new EmptyStream(); x.close(); }, in );\n" + 
+		"	^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n" + 
+		"Unhandled exception type Exception\n" + 
+		"----------\n");
+}
+// one of two incompatible exceptions is caught
+// FIXME: should be possible to infer X to EmptyStream
+public void _testBug429430b() {
+	runConformTest(
+		new String[] {
+			"Main.java",
+			"import java.io.*;\n" +
+			"@SuppressWarnings(\"serial\") class EmptyStream extends Exception {}\n" + 
+			"public class Main {\n" + 
+			"  public static interface Closer<T, X extends Exception> {\n" + 
+			"    void closeIt(T it) throws X;\n" + 
+			"  }\n" + 
+			"\n" + 
+			"  public static <T, X extends Exception> void close( Closer<T, X> closer, T it ) throws X {\n" + 
+			"    closer.closeIt(it);\n" + 
+			"  }\n" + 
+			"\n" + 
+			"  public static void main(String[] args) throws EmptyStream {\n" + 
+			"    InputStream in = new ByteArrayInputStream(\"hello\".getBytes());\n" + 
+			"    close( x ->  {\n" + 
+			"			try {\n" + 
+			"				x.close();\n" + 
+			"			} catch (IOException ioex) { throw new EmptyStream(); } \n" + 
+			"		}," +
+			"		in);\n" + 
+			"  }\n" +
+			"}\n"
+		});
+}
+// ensure type annotation on exception doesn't confuse the inference
+public void testBug429430c() {
+	Map options = getCompilerOptions();
+	options.put(CompilerOptions.OPTION_Store_Annotations, CompilerOptions.ENABLED);
+	runConformTest(
+		new String[] {
+			"Main.java",
+			"import java.io.*;\n" +
+			"import java.lang.annotation.*;\n" +
+			"@Target(ElementType.TYPE_USE) @interface Severe {}\n" + 
+			"public class Main {\n" + 
+			"  public static interface Closer<T, X extends Exception> {\n" + 
+			"    void closeIt(T it) throws X;\n" + 
+			"  }\n" + 
+			"\n" + 
+			"  public static <T, X extends Exception> void close( Closer<T, X> closer, T it ) throws X {\n" + 
+			"    closer.closeIt(it);\n" + 
+			"  }\n" + 
+			"\n" +
+			"  static @Severe IOException getException() { return new IOException(\"severe\"); }\n" + 
+			"  public static void main(String[] args) throws IOException {\n" + 
+			"    InputStream in = new ByteArrayInputStream(\"hello\".getBytes());\n" + 
+			"    close( x -> {\n" +
+			"			if (in.available() > 0)\n" +
+			"				x.close();\n" +
+			"			else\n" +
+			"				throw getException();\n" +
+			"		},\n" +
+			"		in);\n" + 
+			"  }\n" +
+			"}\n"
+		},
+		options);
+}
+public void testBug429490() {
+	runConformTest(
+		new String[] {
+			"Junk11.java",
+			"public class Junk11 {\n" + 
+			"    class Observable<T> {}\n" + 
+			"    class ObservableValue<T> {}\n" + 
+			"    interface InvalidationListener {\n" + 
+			"        public void invalidated(Observable observable);\n" + 
+			"    }\n" + 
+			"    public interface ChangeListener<T> {\n" + 
+			"        void changed(ObservableValue<? extends T> observable, T oldValue, T newValue);\n" + 
+			"    }\n" + 
+			"    class ExpressionHelper<T> {}\n" + 
+			"    public static <T> ExpressionHelper<T> addListener(ExpressionHelper<T> helper, ObservableValue<T> observable, InvalidationListener listener) {\n" + 
+			"        return helper;\n" + 
+			"    }\n" + 
+			"    public static <T> ExpressionHelper<T> addListener(ExpressionHelper<T> helper, ObservableValue<T> observable, ChangeListener<? super T> listener) {\n" + 
+			"        return helper;\n" + 
+			"    }\n" + 
+			"    void junk() {\n" + 
+			"        addListener(null, null, new InvalidationListener () {\n" + 
+			"            public void invalidated(Observable o) {throw new RuntimeException();}\n" + 
+			"        });\n" + 
+			"        addListener(null, null, (o) -> {throw new RuntimeException();});\n" + 
+			"    }\n" + 
+			"}\n"
+		});
+}
+public void testBug429424() {
+	runConformTest(
+		new String[] {
+			"X.java",
+			"import java.util.*;\n" + 
+			"public class X {\n" + 
+			"    public static void main (String[] args) {\n" + 
+			"        List<String> list = new ArrayList<>();\n" + 
+			"        list.addAll(X.newArrayList());\n" + 
+			"        System.out.println(list);\n" + 
+			"    }\n" + 
+			"    \n" + 
+			"    public static <T> List<T> newArrayList () {\n" + 
+			"        return new ArrayList<T>();\n" + 
+			"    }\n" + 
+			"}\n" + 
+			"\n"
+		});
+}
+public void _testBug426537() {
+	runNegativeTest(
+		new String[] {
+			"X.java",
+			"public class X {\n" + 
+			"	void foo(J[] list, I<J<?>> i) {\n" + 
+			"		sort(list, i);\n" + 
+			"	}\n" + 
+			"	\n" + 
+			"	<T> T[] sort(T[] list, I<? super T> i) {\n" + 
+			"		return list;\n" + 
+			"	}\n" + 
+			"}\n" + 
+			"interface I<T> {}\n" + 
+			"interface J<T> {}\n"
+		},
+		"----------\n" + 
+		"1. WARNING in X.java (at line 2)\n" + 
+		"	void foo(J[] list, I<J<?>> i) {\n" + 
+		"	         ^\n" + 
+		"J is a raw type. References to generic type J<T> should be parameterized\n" + 
+		"----------\n" + 
+		"2. ERROR in X.java (at line 3)\n" + 
+		"	sort(list, i);\n" + 
+		"	^^^^\n" + 
+		"The method sort(T[], I<? super T>) in the type X is not applicable for the arguments (J[], I<J<?>>)\n" + 
+		"----------\n");
+}
+public void testBug426537b() {
+	runConformTest(
+		new String[] {
+			"Test.java",
+			"interface C<T, A, R> {}\n" + 
+			"\n" + 
+			"class MImpl<K, V> {}\n" + 
+			"\n" + 
+			"interface S<T> { T get(); }\n" + 
+			"\n" + 
+			"public class Test {\n" + 
+			"	static <T, K, D> C<T, ?, MImpl<K, D>> m1() {\n" + 
+			"        return m2(MImpl::new);\n" + 
+			"    }\n" + 
+			"    \n" + 
+			"    static <T, K, D, M extends MImpl<K, D>> C<T, ?, M> m2(S<M> s) {\n" + 
+			"    	return null;\n" + 
+			"    }\n" + 
+			"}\n" + 
+			"\n"
+		});
+}
+public void testBug426537c() {
+	// touching MImpl#RAW before type inference we got undesired results from #typeArguments() 
+	runConformTest(
+		new String[] {
+			"Ups.java",
+			"public class Ups {\n" + 
+			"    static Object innocent(MImpl o) {\n" + 
+			"            return o.remove(\"nice\");\n" + // method lookup triggers initialization of the RawTypeBinding.
+			"    }\n" + 
+			"}\n",
+			"Test.java",
+			"interface S<T> { T get(); }\n" + 
+			"interface F<T, R> { R apply(T t); }\n" + 
+			"interface C<T, A, R> { }\n" + 
+			"interface IM<K,V> {}\n" + 
+			"class MImpl<K,V>  implements IM<K,V> { \n" + 
+			"	public V remove(Object key) { return null; } \n" + 
+			"}\n" + 
+			"public final class Test {\n" + 
+			"\n" + 
+			"    static <T, K, A, D>\n" + 
+			"    C<T, ?, IM<K, D>> m1(F<? super T, ? extends K> f, C<? super T, A, D> c) {\n" + 
+			"        return m2(f, MImpl::new, c);\n" + 
+			"    }\n" + 
+			"\n" + 
+			"    static <T, K, D, A, M extends IM<K, D>>\n" + 
+			"    C<T, ?, M> m2(F<? super T, ? extends K> classifier,\n" + 
+			"                                  S<M> mapFactory,\n" + 
+			"                                  C<? super T, A, D> downstream) {\n" + 
+			"    	return null;\n" + 
 			"    }\n" + 
 			"}\n"
 		});

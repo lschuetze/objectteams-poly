@@ -3601,6 +3601,95 @@ public void test428857c() {
 			"[a, b]",
 			customOptions);
 }
+// https://bugs.eclipse.org/bugs/show_bug.cgi?id=429763,  [1.8][compiler] Incompatible type specified for lambda expression's parameter 
+public void test429763() {
+	this.runConformTest(
+			new String[] {
+				"X.java",
+				"import java.util.function.Function;\n" +
+				"public class X {\n" +
+				"	public static void main(String[] args) {\n" +
+				"       try {\n" +
+				"		    final int i = new Test<Integer>().test((Byte b) -> (int) b);\n" +
+				"       } catch (NullPointerException e) {\n" +
+				"            System.out.println(\"NPE\");\n" +
+				"       }\n" +
+				"	}\n" +
+				"	static class Test<R> {\n" +
+				"		<T> R test(Function<T,R> f) {\n" +
+				"			return null;\n" +
+				"		}\n" +
+				"	}\n" +
+				"}\n"
+			},
+			"NPE");
+}
+// https://bugs.eclipse.org/bugs/show_bug.cgi?id=429763,  [1.8][compiler] Incompatible type specified for lambda expression's parameter 
+public void test429763a() {
+	this.runConformTest(
+			new String[] {
+				"X.java",
+				"import java.util.function.Function;\n" +
+				"public class X {\n" +
+				"	public static void main(String[] args) {\n" +
+				"		// does not compile\n" +
+				"		new Test<Integer>().test((Byte b) -> (int) b);\n" +
+				"	}\n" +
+				"	static class Test<R> {\n" +
+				"		<T> void test(Function<T,R> f) {\n" +
+				"		}\n" +
+				"	}\n" +
+				"}\n"
+			},
+			"");
+}
+// https://bugs.eclipse.org/bugs/show_bug.cgi?id=429759, [1.8][compiler] Lambda expression's signature matching error
+public void test429759() {
+	this.runConformTest(
+			new String[] {
+				"X.java",
+				"import java.util.function.Function;\n" +
+				"import java.util.function.Supplier;\n" +
+				"public class X {\n" +
+				"	public static void main(String[] args) {\n" +
+				"		final int i = new Test<Integer>().test(\"\", (String s) -> 1);\n" +
+				"	}\n" +
+				"	static class Test<R> {\n" +
+				"		<T> R test(T t, Supplier<R> s) {\n" +
+				"			return s.get();\n" +
+				"		}\n" +
+				"		<T> R test(T t, Function<T, R> f) {\n" +
+				"			return f.apply(t);\n" +
+				"		}\n" +
+				"	}\n" +
+				"}\n"
+			},
+			"");
+}
+// https://bugs.eclipse.org/bugs/show_bug.cgi?id=429948, Unhandled event loop exception is thrown when a lambda expression is nested
+public void test429948() {
+	this.runConformTest(
+			new String[] {
+				"X.java",
+				"import java.util.function.Supplier;\n" +
+				"public class X {\n" +
+				"	public static void main(String[] args) {\n" +
+				"		execute(() -> {\n" +
+				"			executeInner(() -> {\n" +
+				"			});\n" +
+				"			return null;\n" +
+				"		});\n" +
+				"		System.out.println(\"done\");\n" +
+				"	}\n" +
+				"	static <R> R execute(Supplier<R> supplier) {\n" +
+				"		return null;\n" +
+				"	}\n" +
+				"	static void executeInner(Runnable callback) {\n" +
+				"	}\n" +
+				"}\n"
+			},
+			"done");
+}
 public static Class testClass() {
 	return LambdaExpressionsTest.class;
 }

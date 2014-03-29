@@ -17,10 +17,13 @@ package org.eclipse.jdt.core.tests.model;
 import junit.framework.Test;
 import junit.framework.TestSuite;
 
+import org.eclipse.core.runtime.CoreException;
 import org.eclipse.jdt.core.ICompilationUnit;
+import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.IType;
+import org.eclipse.jdt.core.ITypeHierarchy;
 import org.eclipse.jdt.core.JavaCore;
 
 public class JavaElement8Tests extends AbstractJavaModelTests { 
@@ -40,6 +43,11 @@ public class JavaElement8Tests extends AbstractJavaModelTests {
 		TestSuite suite = new Suite(JavaElement8Tests.class.getName());
 		suite.addTest(new JavaElement8Tests("testBug428178"));
 		suite.addTest(new JavaElement8Tests("testBug428178a"));
+		suite.addTest(new JavaElement8Tests("testBug429641"));
+		suite.addTest(new JavaElement8Tests("testBug429641a"));
+		suite.addTest(new JavaElement8Tests("test429948"));
+		suite.addTest(new JavaElement8Tests("test429948a"));
+		suite.addTest(new JavaElement8Tests("test429966"));
 		return suite;
 	}
 	public void testBug428178() throws Exception {
@@ -86,6 +94,193 @@ public class JavaElement8Tests extends AbstractJavaModelTests {
 		}
 		finally {
 			deleteProject("Bug428178");
+		}
+	}
+	public void testBug429641() throws Exception {
+		try {
+			IJavaProject project = createJavaProject("Bug429641", new String[] {"src"}, new String[] {"JCL18_LIB"}, "bin", "1.8");
+			project.open(null);
+			String fileContent =  "package p;\n" +
+					 "public interface Test {\n" +
+					 "	static void main(String[] args) {\n" +
+					 "		I i = (x) -> {};\n" +
+					 "	}\n" +
+					 "}\n" + 
+					 "interface I {\n" + 
+					 "  public void foo(int x);\n" +
+					 "}";
+			createFolder("/Bug429641/src/p");
+			createFile(	"/Bug429641/src/p/Test.java",	fileContent);
+			ICompilationUnit unit = getCompilationUnit("/Bug429641/src/p/Test.java");
+			int start = fileContent.indexOf("x) ->");
+			IJavaElement[] elements = unit.codeSelect(start, 1);
+			assertEquals("Incorrect no of elements", 1, elements.length);
+			assertEquals("Incorrect element type", IJavaElement.LOCAL_VARIABLE, elements[0].getElementType());
+			IMethod method = (IMethod) elements[0].getParent();
+			assertTrue("Should be a lambda method", method.isLambdaMethod());
+		}
+		finally {
+			deleteProject("Bug429641");
+		}
+	}
+	public void testBug429641a() throws Exception {
+		try {
+			IJavaProject project = createJavaProject("Bug429641", new String[] {"src"}, new String[] {"JCL18_LIB"}, "bin", "1.8");
+			project.open(null);
+			String fileContent =  "package p;\n" +
+					 "public interface Test {\n" +
+					 "	static void main(String[] args) {\n" +
+					 "		I i = (x) -> {};\n" +
+					 "	}\n" +
+					 "}\n" + 
+					 "interface I {\n" + 
+					 "  public void foo(int x);\n" +
+					 "}";
+			createFolder("/Bug429641/src/p");
+			createFile(	"/Bug429641/src/p/Test.java",	fileContent);
+			ICompilationUnit unit = getCompilationUnit("/Bug429641/src/p/Test.java");
+			int start = fileContent.lastIndexOf("x");
+			IJavaElement[] elements = unit.codeSelect(start, 1);
+			assertEquals("Incorrect no of elements", 1, elements.length);
+			assertEquals("Incorrect element type", IJavaElement.LOCAL_VARIABLE, elements[0].getElementType());
+			IMethod method = (IMethod) elements[0].getParent();
+			assertTrue("Should not be a lambda method", !method.isLambdaMethod());
+		}
+		finally {
+			deleteProject("Bug429641");
+		}
+	}
+	// https://bugs.eclipse.org/bugs/show_bug.cgi?id=429948, Unhandled event loop exception is thrown when a lambda expression is nested
+	public void test429948() throws Exception {
+		try {
+			IJavaProject project = createJavaProject("Bug429948", new String[] {"src"}, new String[] {"JCL18_LIB"}, "bin", "1.8");
+			project.open(null);
+			String fileContent = 
+					"interface Supplier<T> {\n" +
+					"    T get();\n" +
+					"}\n" +
+					"interface Runnable {\n" +
+					"    public abstract void run();\n" +
+					"}\n" +
+					"public class X {\n" +
+					"	public static void main(String[] args) {\n" +
+					"		execute(() -> {\n" +
+					"			executeInner(() -> {\n" +
+					"			});\n" +
+					"			return null;\n" +
+					"		});\n" +
+					"		System.out.println(\"done\");\n" +
+					"	}\n" +
+					"	static <R> R execute(Supplier<R> supplier) {\n" +
+					"		return null;\n" +
+					"	}\n" +
+					"	static void executeInner(Runnable callback) {\n" +
+					"	}\n" +
+					"}\n";
+			createFile(	"/Bug429948/src/X.java",	fileContent);
+			IType type = getCompilationUnit("/Bug429948/src/X.java").getType("X");
+			ITypeHierarchy h = type.newSupertypeHierarchy(null);
+			assertHierarchyEquals(
+					"Focus: X [in X.java [in <default> [in src [in Bug429948]]]]\n" + 
+					"Super types:\n" + 
+					"  Object [in Object.class [in java.lang [in "+ getExternalPath() + "jclMin1.8.jar]]]\n" + 
+					"Sub types:\n",
+					h);
+		}
+		finally {
+			deleteProject("Bug429948");
+		}
+	}
+	// https://bugs.eclipse.org/bugs/show_bug.cgi?id=429948, Unhandled event loop exception is thrown when a lambda expression is nested
+	public void test429948a() throws Exception {
+		try {
+			IJavaProject project = createJavaProject("Bug429948", new String[] {"src"}, new String[] {"JCL18_LIB"}, "bin", "1.8");
+			project.open(null);
+			String fileContent = 
+					"interface Supplier<T> {\n" +
+					"    T get();\n" +
+					"}\n" +
+					"interface Runnable {\n" +
+					"    public abstract void run();\n" +
+					"}\n" +
+					"public class X {\n" +
+					"	public static void main(String[] args) {\n" +
+					"		execute(() -> {\n" +
+					"           executeOuter(() -> {\n" +
+					"			    executeInner(() -> {\n" +
+					"			    });\n" +
+					"			    return null;\n" +
+					"		    });\n" +
+					"       });\n" +
+					"		System.out.println(\"done\");\n" +
+					"	}\n" +
+					"	static <R> R execute(Supplier<R> supplier) {\n" +
+					"		return null;\n" +
+					"	}\n" +
+					"	static void executeInner(Runnable callback) {\n" +
+					"	}\n" +
+					"	static void executeOuter(Runnable callback) {\n" +
+					"	}\n" +
+					"}\n";
+			createFile(	"/Bug429948/src/X.java",	fileContent);
+			IType type = getCompilationUnit("/Bug429948/src/X.java").getType("X");
+			ITypeHierarchy h = type.newSupertypeHierarchy(null);
+			assertHierarchyEquals(
+					"Focus: X [in X.java [in <default> [in src [in Bug429948]]]]\n" + 
+					"Super types:\n" + 
+					"  Object [in Object.class [in java.lang [in "+ getExternalPath() + "jclMin1.8.jar]]]\n" + 
+					"Sub types:\n",
+					h);
+		}
+		finally {
+			deleteProject("Bug429948");
+		}
+	}
+	// https://bugs.eclipse.org/bugs/show_bug.cgi?id=429966, [1.8] CUD#functionalExpressions may record lambda copies in nested lambda situations
+	public void test429966() throws CoreException {
+		String projectName = "Bug429966";
+		try {
+			IJavaProject project = createJavaProject(projectName, new String[] {"src"}, new String[] {"JCL18_LIB"}, "bin", "1.8");
+			project.open(null);
+			String fileContent = 
+					"interface Supplier<T> {\n" +
+					"    T get();\n" +
+					"}\n" +
+					"interface Runnable {\n" +
+					"    public abstract void run();\n" +
+					"}\n" +
+					"public class X {\n" +
+					"	public static void main(String[] args) {\n" +
+					"		execute(() -> {\n" +
+					"           executeOuter(() -> {\n" +
+					"			    executeInner(() -> {\n" +
+					"			    });\n" +
+					"		    });\n" +
+					"		return null;\n" +
+					"       });\n" +
+					"	}\n" +
+					"	static <R> R execute(Supplier<R> supplier) {\n" +
+					"		return null;\n" +
+					"	}\n" +
+					"	static void executeInner(Runnable callback) {\n" +
+					"	}\n" +
+					"	static void executeOuter(Runnable callback) {\n" +
+					"	}\n" +
+					"}\n";
+			String fileName = "/" + projectName + "/src/X.java";
+			createFile(fileName, fileContent);
+			IType type = getCompilationUnit(fileName).getType("Runnable");
+			ITypeHierarchy h = type.newTypeHierarchy(null);
+			assertHierarchyEquals(
+					"Focus: Runnable [in X.java [in <default> [in src [in Bug429966]]]]\n" + 
+					"Super types:\n" + 
+					"Sub types:\n" + 
+					"  Lambda(Runnable) [in get() [in Lambda(Supplier) [in main(String[]) [in X [in X.java [in <default> [in src [in Bug429966]]]]]]]]\n" + 
+					"  Lambda(Runnable) [in run() [in Lambda(Runnable) [in get() [in Lambda(Supplier) [in main(String[]) [in X [in X.java [in <default> [in src [in Bug429966]]]]]]]]]]\n",
+					h);
+		}
+		finally {
+			deleteProject(projectName);
 		}
 	}
 }

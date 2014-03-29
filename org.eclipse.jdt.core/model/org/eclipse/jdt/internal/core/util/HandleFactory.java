@@ -173,7 +173,7 @@ public class HandleFactory {
 	/**
 	 * Create handle by adding child to parent obtained by recursing into parent scopes.
 	 */
-	private IJavaElement createElement(Scope scope, int elementPosition, ICompilationUnit unit, HashSet existingElements, HashMap knownScopes) {
+	public IJavaElement createElement(Scope scope, int elementPosition, ICompilationUnit unit, HashSet existingElements, HashMap knownScopes) {
 		IJavaElement newElement = (IJavaElement)knownScopes.get(scope);
 		if (newElement != null) return newElement;
 
@@ -211,13 +211,14 @@ public class HandleFactory {
 				break;
 			case Scope.METHOD_SCOPE :
 				if (scope.isLambdaScope()) {
-					LambdaExpression expression = (LambdaExpression) scope.referenceContext();
-					if (expression.binding != null && expression.binding.isValidBinding()) { // chain in lambda element only if resolved properly.
-						parentElement = createElement(scope.parent, elementPosition, unit, existingElements, knownScopes);
+					parentElement = createElement(scope.parent, elementPosition, unit, existingElements, knownScopes);
+					LambdaExpression expression = (LambdaExpression) scope.originalReferenceContext();
+					if (expression.resolvedType != null && expression.resolvedType.isValidBinding()) { // chain in lambda element only if resolved properly.
 						newElement = new org.eclipse.jdt.internal.core.LambdaExpression((JavaElement) parentElement, expression).getMethod();
 						knownScopes.put(scope, newElement);
 						return newElement;
 					}
+					return parentElement;
 				}
 				IType parentType = (IType) createElement(scope.parent, elementPosition, unit, existingElements, knownScopes);
 				MethodScope methodScope = (MethodScope) scope;

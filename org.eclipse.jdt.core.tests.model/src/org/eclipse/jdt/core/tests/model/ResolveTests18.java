@@ -718,7 +718,7 @@ public void test0024() throws JavaModelException {
 	IJavaElement[] elements = this.wc.codeSelect(start, length);
 	assertElementsEqual(
 		"Unexpected elements",
-		"xyz [in foo() [in X [in [Working copy] X.java [in <default> [in src [in Resolve]]]]]]",
+		"xyz [in foo(int) [in Lambda(I) [in foo() [in X [in [Working copy] X.java [in <default> [in src [in Resolve]]]]]]]]",
 		elements
 	);
 }
@@ -743,7 +743,7 @@ public void test0025() throws JavaModelException {
 	IJavaElement[] elements = this.wc.codeSelect(start, length);
 	assertElementsEqual(
 		"Unexpected elements",
-		"abc [in foo() [in X [in [Working copy] X.java [in <default> [in src [in Resolve]]]]]]",
+		"abc [in foo(int) [in Lambda(I) [in foo() [in X [in [Working copy] X.java [in <default> [in src [in Resolve]]]]]]]]",
 		elements
 	);
 }
@@ -766,7 +766,7 @@ public void test0026() throws JavaModelException {
 	IJavaElement[] elements = this.wc.codeSelect(start, length);
 	assertElementsEqual(
 		"Unexpected elements",
-		"abc [in i [in X [in [Working copy] X.java [in <default> [in src [in Resolve]]]]]]",
+		"abc [in foo(int) [in Lambda(I) [in i [in X [in [Working copy] X.java [in <default> [in src [in Resolve]]]]]]]]",
 		elements
 	);
 }
@@ -794,7 +794,7 @@ public void test0027() throws JavaModelException {
 	IJavaElement[] elements = this.wc.codeSelect(start, length);
 	assertElementsEqual(
 		"Unexpected elements",
-		"abc [in main(String[]) [in X [in [Working copy] X.java [in <default> [in src [in Resolve]]]]]]",
+		"abc [in doit(I) [in Lambda(I) [in doit(I) [in Lambda(I) [in doit(I) [in Lambda(I) [in main(String[]) [in X [in [Working copy] X.java [in <default> [in src [in Resolve]]]]]]]]]]]]",
 		elements
 	);
 }
@@ -822,7 +822,7 @@ public void test0028() throws JavaModelException {
 	IJavaElement[] elements = this.wc.codeSelect(start, length);
 	assertElementsEqual(
 		"Unexpected elements",
-		"xyz [in main(String[]) [in X [in [Working copy] X.java [in <default> [in src [in Resolve]]]]]]",
+		"xyz [in doit(I) [in Lambda(I) [in doit(I) [in Lambda(I) [in main(String[]) [in X [in [Working copy] X.java [in <default> [in src [in Resolve]]]]]]]]]]",
 		elements
 	);
 }
@@ -888,7 +888,7 @@ public void test0030() throws JavaModelException {
 	IJavaElement[] elements = this.wc.codeSelect(start, length);
 	assertElementsEqual(
 		"Unexpected elements",
-		"zyx [in fx [in X [in [Working copy] X.java [in <default> [in src [in Resolve]]]]]]",
+		"zyx [in doit(I) [in Lambda(I) [in doit(I) [in Lambda(I) [in fx [in X [in [Working copy] X.java [in <default> [in src [in Resolve]]]]]]]]]]",
 		elements
 	);
 }
@@ -921,7 +921,7 @@ public void test0031() throws JavaModelException {
 	IJavaElement[] elements = this.wc.codeSelect(start, length);
 	assertElementsEqual(
 		"Unexpected elements",
-		"xyz [in main(String[]) [in X [in [Working copy] X.java [in <default> [in src [in Resolve]]]]]]",
+		"xyz [in doit(I) [in Lambda(I) [in doit(I) [in Lambda(I) [in main(String[]) [in X [in [Working copy] X.java [in <default> [in src [in Resolve]]]]]]]]]]",
 		elements
 	);
 }
@@ -956,7 +956,7 @@ public void test0032() throws JavaModelException {
 	IJavaElement[] elements = this.wc.codeSelect(start, length);
 	assertElementsEqual(
 		"Unexpected elements",
-		"hij [in main(String[]) [in X [in [Working copy] X.java [in <default> [in src [in Resolve]]]]]]",
+		"hij [in doit(I) [in Lambda(I) [in doit(I) [in Lambda(I) [in main(String[]) [in X [in [Working copy] X.java [in <default> [in src [in Resolve]]]]]]]]]]",
 		elements
 	);
 }
@@ -992,7 +992,7 @@ public void test0033() throws JavaModelException {
 	IJavaElement[] elements = this.wc.codeSelect(start, length);
 	assertElementsEqual(
 		"Unexpected elements",
-		"hij [in main(String[]) [in X [in [Working copy] X.java [in <default> [in src [in Resolve]]]]]]",
+		"hij [in doit(I) [in Lambda(I) [in doit(I) [in Lambda(I) [in main(String[]) [in X [in [Working copy] X.java [in <default> [in src [in Resolve]]]]]]]]]]",
 		elements
 	);
 }
@@ -1431,7 +1431,7 @@ public void testFieldInit() throws JavaModelException {
 	IJavaElement[] elements = this.wc.codeSelect(start, length);
 	assertElementsEqual(
 		"Unexpected elements",
-		"first [in i [in X [in [Working copy] X.java [in <default> [in src [in Resolve]]]]]]",
+		"first [in foo(int, int) [in Lambda(I) [in i [in X [in [Working copy] X.java [in <default> [in src [in Resolve]]]]]]]]",
 		elements
 	);
 }
@@ -1454,7 +1454,7 @@ public void test422468() throws JavaModelException {
 	IJavaElement[] elements = this.wc.codeSelect(start, length);
 	assertElementsEqual(
 		"Unexpected elements",
-		"first [in i [in X [in [Working copy] X.java [in <default> [in src [in Resolve]]]]]]",
+		"first [in foo(X, java/lang/Object) [in Lambda(I) [in i [in X [in [Working copy] X.java [in <default> [in src [in Resolve]]]]]]]]",
 		elements
 	);
 }
@@ -1477,7 +1477,7 @@ public void test422468a() throws JavaModelException {
 	IJavaElement[] elements = this.wc.codeSelect(start, length);
 	assertElementsEqual(
 		"Unexpected elements",
-		"second [in i [in X [in [Working copy] X.java [in <default> [in src [in Resolve]]]]]]",
+		"second [in foo(X, java/lang/Object) [in Lambda(I) [in i [in X [in [Working copy] X.java [in <default> [in src [in Resolve]]]]]]]]",
 		elements
 	);
 }
@@ -1503,7 +1503,7 @@ public void test422468b() throws JavaModelException {
 	IJavaElement[] elements = this.wc.codeSelect(start, length);
 	assertElementsEqual(
 		"Unexpected elements",
-		"y [in main(String[]) [in X [in [Working copy] X.java [in <default> [in src [in Resolve]]]]]]",
+		"y [in foo(I) [in Lambda(I) [in foo(I) [in Lambda(I) [in main(String[]) [in X [in [Working copy] X.java [in <default> [in src [in Resolve]]]]]]]]]]",
 		elements
 	);
 }
@@ -1529,7 +1529,7 @@ public void test422468c() throws JavaModelException {
 	IJavaElement[] elements = this.wc.codeSelect(start, length);
 	assertElementsEqual(
 		"Unexpected elements",
-		"y [in main(String[]) [in X [in [Working copy] X.java [in <default> [in src [in Resolve]]]]]]",
+		"y [in foo(I) [in Lambda(I) [in foo(I) [in Lambda(I) [in main(String[]) [in X [in [Working copy] X.java [in <default> [in src [in Resolve]]]]]]]]]]",
 		elements
 	);
 }
@@ -1593,7 +1593,7 @@ public void test422468e() throws JavaModelException {
 	IJavaElement[] elements = this.wc.codeSelect(start, length);
 	assertElementsEqual(
 		"Unexpected elements",
-		"q [in main(String[]) [in X [in [Working copy] X.java [in <default> [in src [in Resolve]]]]]]",
+		"q [in foo(java/lang/String, int) [in Lambda(K) [in foo(java/lang/String, java/lang/String) [in Lambda(J) [in foo(java/lang/String, java/lang/String) [in Lambda(I) [in main(String[]) [in X [in [Working copy] X.java [in <default> [in src [in Resolve]]]]]]]]]]]]",
 		elements
 	);
 }
@@ -1628,7 +1628,7 @@ public void testParser() throws JavaModelException {
 	IJavaElement[] elements = this.wc.codeSelect(start, length);
 	assertElementsEqual(
 		"Unexpected elements",
-		"x [in main(String[]) [in X [in [Working copy] X.java [in <default> [in src [in Resolve]]]]]]",
+		"x [in foo(java/lang/String, java/lang/Integer) [in Lambda(I) [in main(String[]) [in X [in [Working copy] X.java [in <default> [in src [in Resolve]]]]]]]]",
 		elements
 	);
 }
@@ -1787,7 +1787,7 @@ public void test424198() throws JavaModelException {
 	IJavaElement[] elements = this.wc.codeSelect(start, length);
 	assertElementsEqual(
 		"Unexpected elements",
-		"v1 [in processJar(Path) [in InsistentCapture [in [Working copy] X.java [in <default> [in src [in Resolve]]]]]]",
+		"v1 [in apply(java/lang/String) [in Lambda(Function) [in processJar(Path) [in InsistentCapture [in [Working copy] X.java [in <default> [in src [in Resolve]]]]]]]]",
 		elements,
 		true
 	);
@@ -1852,7 +1852,7 @@ public void test424198a() throws JavaModelException {
 	IJavaElement[] elements = this.wc.codeSelect(start, length);
 	assertElementsEqual(
 		"Unexpected elements",
-		"v2 [in processJar(Path) [in InsistentCapture [in [Working copy] X.java [in <default> [in src [in Resolve]]]]]]",
+		"v2 [in apply(java/lang/String) [in Lambda(Function) [in processJar(Path) [in InsistentCapture [in [Working copy] X.java [in <default> [in src [in Resolve]]]]]]]]",
 		elements,
 		true
 	);
@@ -1917,7 +1917,7 @@ public void test424198b() throws JavaModelException {
 	IJavaElement[] elements = this.wc.codeSelect(start, length);
 	assertElementsEqual(
 		"Unexpected elements",
-		"s1 [in withWildcard(Stream<? extends String>) [in InsistentCapture [in [Working copy] X.java [in <default> [in src [in Resolve]]]]]]",
+		"s1 [in accept(java/lang/String) [in Lambda(Consumer) [in withWildcard(Stream<? extends String>) [in InsistentCapture [in [Working copy] X.java [in <default> [in src [in Resolve]]]]]]]]",
 		elements,
 		true
 	);
@@ -1982,7 +1982,7 @@ public void test424198c() throws JavaModelException {
 	IJavaElement[] elements = this.wc.codeSelect(start, length);
 	assertElementsEqual(
 		"Unexpected elements",
-		"s2 [in withoutWildcard(Stream<String>) [in InsistentCapture [in [Working copy] X.java [in <default> [in src [in Resolve]]]]]]",
+		"s2 [in accept(java/lang/String) [in Lambda(Consumer) [in withoutWildcard(Stream<String>) [in InsistentCapture [in [Working copy] X.java [in <default> [in src [in Resolve]]]]]]]]",
 		elements,
 		true
 	);
@@ -2157,5 +2157,214 @@ public void test429262e() throws JavaModelException {
 		"foo(int) [in I [in [Working copy] X.java [in <default> [in src [in Resolve]]]]]",
 		elements
 	);
+}
+// https://bugs.eclipse.org/bugs/show_bug.cgi?id=428968, [1.8] NPE while computing a text hover
+public void test428968() throws JavaModelException {
+	this.wc = getWorkingCopy(
+			"/Resolve/src/X.java",
+			"import java.util.ArrayList;\n" +
+			"import java.util.Collections;\n" +
+			"import java.util.Comparator;\n" +
+			"import java.util.List;\n" +
+			"public class X {\n" +
+			"	private void foo() {\n" +
+			"		List<Person> people= new ArrayList<>();\n" +
+			"		Collections.sort(people, Comparator.comparing(p -> p.getLastName()));\n" +
+			"	}\n" +
+			"}\n" +
+			"class Person{\n" +
+			"	String getLastName() {\n" +
+			"		return null;\n" +
+			"	}\n" +
+			"}\n");
+
+	String str = this.wc.getSource();
+	String selection = "comparing";
+	int start = str.lastIndexOf(selection);
+	int length = selection.length();
+
+	IJavaElement[] elements = this.wc.codeSelect(start, length);
+	assertElementsEqual(
+		"Unexpected elements",
+		"comparing(java.util.function.Function<? super T,? extends U>) {key=Ljava/util/Comparator<>;.comparing<T:Ljava/lang/Object;U::Ljava/lang/Comparable<-TU;>;>(Ljava/util/function/Function<-TT;+TU;>;)Ljava/util/Comparator<TT;>;%<Ljava/lang/Object;^{218#0};>} [in Comparator [in Comparator.class [in java.util [in "+ getExternalPath() + "jclFull1.8.jar]]]]",
+		elements, true
+	);
+}
+// https://bugs.eclipse.org/bugs/show_bug.cgi?id=428968, [1.8] NPE while computing a text hover
+public void test428968a() throws JavaModelException {
+	this.wc = getWorkingCopy(
+			"/Resolve/src/X.java",
+			"import java.util.ArrayList;\n" +
+			"import java.util.Collections;\n" +
+			"import java.util.Comparator;\n" +
+			"import java.util.List;\n" +
+			"public class X {\n" +
+			"	private void foo() {\n" +
+			"		List<Person> people= new ArrayList<>();\n" +
+			"		Collections.sort(people, Comparator.comparing((Person p) -> p.getLastName()));\n" +
+			"	}\n" +
+			"}\n" +
+			"class Person{\n" +
+			"	String getLastName() {\n" +
+			"		return null;\n" +
+			"	}\n" +
+			"}\n");
+
+	String str = this.wc.getSource();
+	String selection = "comparing";
+	int start = str.lastIndexOf(selection);
+	int length = selection.length();
+
+	IJavaElement[] elements = this.wc.codeSelect(start, length);
+	assertElementsEqual(
+		"Unexpected elements",
+		"comparing(java.util.function.Function<? super T,? extends U>) {key=Ljava/util/Comparator<>;.comparing<T:Ljava/lang/Object;U::Ljava/lang/Comparable<-TU;>;>(Ljava/util/function/Function<-TT;+TU;>;)Ljava/util/Comparator<TT;>;%<LX~Person;Ljava/lang/String;>} [in Comparator [in Comparator.class [in java.util [in "+ getExternalPath() + "jclFull1.8.jar]]]]",
+		elements, true
+	);
+}
+// https://bugs.eclipse.org/bugs/show_bug.cgi?id=425064,  [1.8][compiler] NPE in CaptureBinding.computeUniqueKey
+public void test425064() throws JavaModelException {
+	this.wc = getWorkingCopy(
+			"/Resolve/src/X.java",
+			"import java.util.Comparator;\n" +
+			"public class ComparatorUse {\n" +
+			"	Comparator<String> c =\n" +
+			"			Comparator.comparing((String s)->s.toString())\n" +
+			"			.thenComparing(s -> s.length());\n" +
+			"}\n");
+
+	String str = this.wc.getSource();
+	String selection = "comparing";
+	int start = str.lastIndexOf(selection);
+	int length = selection.length();
+
+	IJavaElement[] elements = this.wc.codeSelect(start, length);
+	assertElementsEqual(
+		"Unexpected elements",
+		"comparing(java.util.function.Function<? super T,? extends U>) {key=Ljava/util/Comparator<>;.comparing<T:Ljava/lang/Object;U::Ljava/lang/Comparable<-TU;>;>(Ljava/util/function/Function<-TT;+TU;>;)Ljava/util/Comparator<TT;>;%<Ljava/lang/String;Ljava/lang/String;>} [in Comparator [in Comparator.class [in java.util [in "+ getExternalPath() + "jclFull1.8.jar]]]]",
+		elements, true
+	);
+}
+// https://bugs.eclipse.org/bugs/show_bug.cgi?id=425064,  [1.8][compiler] NPE in CaptureBinding.computeUniqueKey
+public void test425064a() throws JavaModelException {
+	this.wc = getWorkingCopy(
+			"/Resolve/src/X.java",
+			"import java.util.Comparator;\n" +
+			"public class ComparatorUse {\n" +
+			"	Comparator<String> c =\n" +
+			"			Comparator.comparing((String s)->s.toString())\n" +
+			"			.thenComparing(s -> s.length());\n" +
+			"}\n");
+
+	String str = this.wc.getSource();
+	String selection = "thenComparing";
+	int start = str.lastIndexOf(selection);
+	int length = selection.length();
+
+	IJavaElement[] elements = this.wc.codeSelect(start, length);
+	assertElementsEqual(
+		"Unexpected elements",
+		"thenComparing(java.util.function.Function<? super T,? extends U>) {key=Ljava/util/Comparator<Ljava/lang/String;>;.thenComparing<U::Ljava/lang/Comparable<-TU;>;>(Ljava/util/function/Function<-Ljava/lang/String;+TU;>;)Ljava/util/Comparator<Ljava/lang/String;>;%<Ljava/lang/Integer;>} [in Comparator [in Comparator.class [in java.util [in "+ getExternalPath() + "jclFull1.8.jar]]]]",
+		elements, true
+	);
+}
+// https://bugs.eclipse.org/bugs/show_bug.cgi?id=429845, [1.8] CCE on hover 
+public void test429845() throws JavaModelException {
+	this.wc = getWorkingCopy(
+			"/Resolve/src/X.java",
+			"@FunctionalInterface\n" +
+			"interface FI {\n" +
+			"	int foo();\n" +
+			"}\n" +
+			"class C1 {\n" +
+			"	void fun1(int x) {\n" +
+			"		FI test= () -> {\n" +
+			"			for (int k=0;k<1;) ;\n" +
+			"			for (int k=0;k<1;) ;\n" +
+			"			try {\n" +
+			"			} catch (Exception ex) {\n" +
+			"			}\n" +
+			"			return 0;\n" +
+			"		};\n" +
+			"	}\n" +
+			"}\n");
+
+	String str = this.wc.getSource();
+	String selection = "ex";
+	int start = str.lastIndexOf(selection);
+	int length = selection.length();
+
+	IJavaElement[] elements = this.wc.codeSelect(start, length);
+	assertElementsEqual(
+		"Unexpected elements",
+		"ex [in foo() [in Lambda(FI) [in fun1(int) [in C1 [in [Working copy] X.java [in <default> [in src [in Resolve]]]]]]]]",
+		elements, true
+	);
+}
+// https://bugs.eclipse.org/bugs/show_bug.cgi?id=429948, Unhandled event loop exception is thrown when a lambda expression is nested
+public void test429948() throws JavaModelException {
+	this.wc = getWorkingCopy(
+			"/Resolve/src/X.java",
+			"interface Supplier<T> {\n" +
+			"    T get();\n" +
+			"}\n" +
+			"interface Runnable {\n" +
+			"    public abstract void run();\n" +
+			"}\n" +
+			"public class X {\n" +
+			"	public static void main(String[] args) {\n" +
+			"		execute(() -> {\n" +
+			"			executeInner(() -> {\n" +
+			"                int xxx = 10;\n" +
+			"			});\n" +
+			"			return null;\n" +
+			"		});\n" +
+			"		System.out.println(\"done\");\n" +
+			"	}\n" +
+			"	static <R> R execute(Supplier<R> supplier) {\n" +
+			"		return null;\n" +
+			"	}\n" +
+			"	static void executeInner(Runnable callback) {\n" +
+			"	}\n" +
+			"}\n");
+
+	String str = this.wc.getSource();
+	String selection = "xxx";
+	int start = str.lastIndexOf(selection);
+	int length = selection.length();
+
+	IJavaElement[] elements = this.wc.codeSelect(start, length);
+	assertElementsEqual(
+		"Unexpected elements",
+		"xxx [in run() [in Lambda(Runnable) [in get() [in Lambda(Supplier) [in main(String[]) [in X [in [Working copy] X.java [in <default> [in src [in Resolve]]]]]]]]]]",
+		elements, true
+	);
+}
+// https://bugs.eclipse.org/bugs/show_bug.cgi?id=429934, [1.8][search] for references to type of lambda with 'this' parameter throws AIIOBE
+public void test429934() throws CoreException {
+	this.workingCopies = new ICompilationUnit[1];
+	this.workingCopies[0] = getWorkingCopy("/Resolve/src/X.java",
+			"interface Function<T, R> {\n" +
+			"    R apply(T t);\n" +
+			"}\n" +
+			"public class X {\n" +
+			"	public static void main(String[] args) {\n" +
+			"		Function<String, String> f1= (String s, Function this) -> s;\n" +
+			"		Function<String, String> f2= (Function this, String s) -> s;\n" +
+			"	} \n" +
+			"}\n"
+	);
+	
+	String str = this.workingCopies[0].getSource();
+	String selection = "s";
+	int start = str.lastIndexOf(selection);
+	int length = selection.length();
+
+	IJavaElement[] elements = this.workingCopies[0].codeSelect(start, length);
+	assertElementsEqual(
+			"Unexpected elements",
+			"s [in main(String[]) [in X [in [Working copy] X.java [in <default> [in src [in Resolve]]]]]]",
+			elements, true
+		);	
 }
 }
