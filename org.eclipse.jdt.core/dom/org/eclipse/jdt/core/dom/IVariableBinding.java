@@ -165,7 +165,7 @@ public interface IVariableBinding extends IBinding {
 	 *
 	 * @return <code>true</code> if this is an effectively final local variable
 	 * 				and <code>false</code> otherwise
-	 * @since 3.9 BETA_JAVA8
+	 * @since 3.10
 	 */
 	public boolean isEffectivelyFinal();
 }

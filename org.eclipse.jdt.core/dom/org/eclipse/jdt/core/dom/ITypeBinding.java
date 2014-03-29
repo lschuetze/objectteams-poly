@@ -320,7 +320,7 @@ public interface ITypeBinding extends IBinding {
 	 * @return the single abstract method that represents the single function contract, or
 	 * <code>null</code> if the receiver is not a functional interface type
 	 *
-	 * @since 3.9 BETA_JAVA8
+	 * @since 3.10
 	 */
 	public IMethodBinding getFunctionalInterfaceMethod();
 
@@ -541,7 +541,7 @@ public interface ITypeBinding extends IBinding {
 	 * no type use annotations are found.
 	 * @see #getTypeDeclaration()
 	 * @see #getKey()
-	 * @since 3.9 BETA_JAVA8
+	 * @since 3.10
 	 */
 	public IAnnotationBinding[] getTypeAnnotations();
 

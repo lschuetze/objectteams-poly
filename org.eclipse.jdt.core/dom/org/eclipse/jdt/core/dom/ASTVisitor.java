@@ -540,7 +540,7 @@ public abstract class ASTVisitor {
 	 * @return <code>true</code> if the children of this node should be
 	 * visited, and <code>false</code> if the children of this node should
 	 * be skipped
-	 * @since 3.9 BETA_JAVA8
+	 * @since 3.10
 	 */
 	public boolean visit(CreationReference node) {
 		return true;
@@ -557,7 +557,7 @@ public abstract class ASTVisitor {
 	 * @return <code>true</code> if the children of this node should be
 	 * visited, and <code>false</code> if the children of this node should
 	 * be skipped
-	 * @since 3.9 BETA_JAVA8
+	 * @since 3.10
 	 */
 	public boolean visit(Dimension node) {
 		return true;
@@ -657,7 +657,7 @@ public abstract class ASTVisitor {
 	 * @return <code>true</code> if the children of this node should be
 	 * visited, and <code>false</code> if the children of this node should
 	 * be skipped
-	 * @since 3.9 BETA_JAVA8
+	 * @since 3.10
 	 */
 	public boolean visit(ExpressionMethodReference node) {
 		return true;
@@ -818,7 +818,7 @@ public abstract class ASTVisitor {
 	 * @return <code>true</code> if the children of this node should be
 	 * visited, and <code>false</code> if the children of this node should
 	 * be skipped
-	 * @since 3.9 BETA_JAVA8
+	 * @since 3.10
 	 */
 	public boolean visit(IntersectionType node) {
 		return true;
@@ -874,7 +874,7 @@ public abstract class ASTVisitor {
 	 * @return <code>true</code> if the children of this node should be
 	 * visited, and <code>false</code> if the children of this node should
 	 * be skipped
-	 * @since 3.9 BETA_JAVA8
+	 * @since 3.10
 	 */
 	public boolean visit(LambdaExpression node) {
 		return true;
@@ -1054,7 +1054,7 @@ public abstract class ASTVisitor {
 	 * @return <code>true</code> if the children of this node should be
 	 * visited, and <code>false</code> if the children of this node should
 	 * be skipped
-	 * @since 3.9 BETA_JAVA8
+	 * @since 3.10
 	 */
 	public boolean visit(NameQualifiedType node) {
 		return true;
@@ -1397,7 +1397,7 @@ public abstract class ASTVisitor {
 	 * @return <code>true</code> if the children of this node should be
 	 * visited, and <code>false</code> if the children of this node should
 	 * be skipped
-	 * @since 3.9 BETA_JAVA8
+	 * @since 3.10
 	 */
 	public boolean visit(SuperMethodReference node) {
 		return true;
@@ -1595,7 +1595,7 @@ public abstract class ASTVisitor {
 	 * visited, and <code>false</code> if the children of this node should
 	 * be skipped
 	 * 
-	 * @since 3.9 BETA_JAVA8
+	 * @since 3.10
 	 */
 	public boolean visit(TypeMethodReference node) {
 		return true;
@@ -2245,7 +2245,7 @@ public abstract class ASTVisitor {
 	 * </p>
 	 *
 	 * @param node the node to visit
-	 * @since 3.9 BETA_JAVA8
+	 * @since 3.10
 	 */
 	public void endVisit(CreationReference node) {
 		// default implementation: do nothing
@@ -2321,7 +2321,7 @@ public abstract class ASTVisitor {
 	 * </p>
 	 *
 	 * @param node the node to visit
-	 * @since 3.9 BETA_JAVA8
+	 * @since 3.10
 	 */
 	public void endVisit(ExpressionMethodReference node) {
 		// default implementation: do nothing
@@ -2346,7 +2346,7 @@ public abstract class ASTVisitor {
 	 * </p>
 	 *
 	 * @param node the node to visit
-	 * @since 3.9 BETA_JAVA8
+	 * @since 3.10
 	 */
 	public void endVisit(Dimension node) {
 		// do nothing by default
@@ -2479,7 +2479,7 @@ public abstract class ASTVisitor {
 	 * </p>
 	 *
 	 * @param node the node to visit
-	 * @since 3.9 BETA_JAVA8
+	 * @since 3.10
 	 */
 	public void endVisit(LambdaExpression node) {
 		// default implementation: do nothing
@@ -2612,7 +2612,7 @@ public abstract class ASTVisitor {
 	 * </p>
 	 *
 	 * @param node the node to visit
-	 * @since 3.9 BETA_JAVA8
+	 * @since 3.10
 	 */
 	public void endVisit(NameQualifiedType node) {
 		// default implementation: do nothing
@@ -2869,7 +2869,7 @@ public abstract class ASTVisitor {
 	 * </p>
 	 *
 	 * @param node the node to visit
-	 * @since 3.9 BETA_JAVA8
+	 * @since 3.10
 	 */
 	public void endVisit(SuperMethodReference node) {
 		// default implementation: do nothing
@@ -3016,7 +3016,7 @@ public abstract class ASTVisitor {
 	 *
 	 * @param node the node to visit
 	 * 
-	 * @since 3.9 BETA_JAVA8
+	 * @since 3.10
 	 */
 	public void endVisit(TypeMethodReference node) {
 		// default implementation: do nothing
@@ -3055,7 +3055,7 @@ public abstract class ASTVisitor {
 	 * </p>
 	 *
 	 * @param node the node to visit
-	 * @since 3.9 BETA_JAVA8
+	 * @since 3.10
 	 */
 	public void endVisit(IntersectionType node) {
 		// default implementation: do nothing

@@ -451,7 +451,7 @@ public final class ImportRewrite {
 	 * @return an annotation node. The returned annotation contains unqualified type names where
 	 * an import could be added or was already known. Type names are fully qualified if an import conflict prevented an import.
 	 * 
-	 * @since 3.9 BETA_JAVA8
+	 * @since 3.10
 	 */
 	public Annotation addAnnotation(IAnnotationBinding annotation, AST ast, ImportRewriteContext context) {
 		Type type = addImport(annotation.getAnnotationType(), ast, context);

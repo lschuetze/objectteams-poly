@@ -25,7 +25,7 @@ import java.util.List;
  * <code>modifiers()</code> list.
  * </p>
  *
- * @since 3.9 BETA_JAVA8
+ * @since 3.10
  */
 public abstract class AnnotatableType extends Type {
 	

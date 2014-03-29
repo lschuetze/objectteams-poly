@@ -156,7 +156,7 @@ public abstract class SearchParticipant {
 	 * @param document the document to index
 	 * @param indexLocation the location in the file system to the index
 	 * 
-	 * @since 3.9 BETA_JAVA8
+	 * @since 3.10
 	 */
 	public void indexResolvedDocument(SearchDocument document, IPath indexLocation) {
 		// do nothing, subtypes should do the "appropriate thing"
@@ -217,7 +217,7 @@ public abstract class SearchParticipant {
 	 * </p>
 	 *
 	 * @param document the document to resolve
-	 * @since 3.9 BETA_JAVA8
+	 * @since 3.10
 	 * @see SearchParticipant#indexResolvedDocument
 	 * @see SearchDocument#requireIndexingResolvedDocument
 	 */

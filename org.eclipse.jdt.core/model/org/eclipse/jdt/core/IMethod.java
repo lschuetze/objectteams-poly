@@ -262,7 +262,7 @@ boolean isMainMethod() throws JavaModelException;
 /**
  * Returns whether this method represents a lambda expression.
  *
- * @since 3.9 BETA_JAVA8
+ * @since 3.10
  * @return true if this method represents a lambda expression, false otherwise.
  */
 boolean isLambdaMethod();

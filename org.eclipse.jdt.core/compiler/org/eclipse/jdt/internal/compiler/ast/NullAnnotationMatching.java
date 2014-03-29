@@ -36,7 +36,7 @@ import org.eclipse.jdt.internal.compiler.lookup.WildcardBinding;
 /**
  * Performs matching of null type annotations.
  * Instances are used to encode result from this analysis.
- * @since 3.9 BETA_JAVA8
+ * @since 3.10
  */
 public class NullAnnotationMatching {
 	

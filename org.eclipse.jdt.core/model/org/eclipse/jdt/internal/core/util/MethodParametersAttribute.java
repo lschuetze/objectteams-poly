@@ -18,7 +18,7 @@ import org.eclipse.jdt.core.util.IConstantPoolEntry;
 import org.eclipse.jdt.core.util.IMethodParametersAttribute;
 
 /**
- * @since 3.9 BETA_JAVA8
+ * @since 3.10
  */
 public class MethodParametersAttribute extends ClassFileAttribute implements IMethodParametersAttribute {
 

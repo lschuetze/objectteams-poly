@@ -169,7 +169,7 @@ public abstract class SearchDocument {
 	 *  to resolve the document via {@link SearchParticipant#resolveDocument} and to index the document adding 
 	 *  additional entries via {@link SearchParticipant#indexResolvedDocument} 
 	 *  
-	 * @since 3.9 BETA_JAVA8 
+	 * @since 3.10 
 	 */
 	public void requireIndexingResolvedDocument() {
 		this.shouldIndexResolvedDocument = true;

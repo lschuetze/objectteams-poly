@@ -119,7 +119,7 @@ public abstract class Type extends ASTNode {
 	 *
 	 * @return <code>true</code> if this is a name qualified type, and
 	 *    <code>false</code> otherwise
-	 * @since 3.9 BETA_JAVA8
+	 * @since 3.10
 	 */
 	public final boolean isNameQualifiedType() {
 		return (this instanceof NameQualifiedType);
@@ -183,7 +183,7 @@ public abstract class Type extends ASTNode {
 	 *
 	 * @return <code>true</code> if this is an intersection type, and
 	 * 		<code>false</code> otherwise
-	 * @since 3.9 BETA_JAVA8
+	 * @since 3.10
 	 */
 	public final boolean isIntersectionType() {
 		return (this instanceof IntersectionType);
@@ -212,7 +212,7 @@ public abstract class Type extends ASTNode {
 	 * @return <code>true</code> if this type is an instance of {@link AnnotatableType}, and
 	 * <code>false</code> otherwise
 	 * 			
-	 * @since 3.9 BETA_JAVA8
+	 * @since 3.10
 	 */
 	public boolean isAnnotatable() {
 		return (this instanceof AnnotatableType);

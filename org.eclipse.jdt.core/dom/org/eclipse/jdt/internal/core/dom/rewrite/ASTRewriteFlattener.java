@@ -1500,7 +1500,7 @@ public class ASTRewriteFlattener extends ASTVisitor {
 
 	/*
 	 * @see ASTVisitor#visit(NameQualifiedType)
-	 * @since 3.9 BETA_JAVA8
+	 * @since 3.10
 	 */
 	public boolean visit(NameQualifiedType node) {
 		getChildNode(node, NameQualifiedType.QUALIFIER_PROPERTY).accept(this);

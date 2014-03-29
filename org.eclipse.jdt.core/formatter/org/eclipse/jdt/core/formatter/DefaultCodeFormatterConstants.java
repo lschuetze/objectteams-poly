@@ -621,7 +621,7 @@ public class DefaultCodeFormatterConstants {
 	 * @see #NEXT_LINE
 	 * @see #NEXT_LINE_SHIFTED
 	 * @see #NEXT_LINE_ON_WRAP
-	 * @since 3.9 BETA_JAVA8
+	 * @since 3.10
 	 */
 	public static final String FORMATTER_BRACE_POSITION_FOR_LAMBDA_BODY = JavaCore.PLUGIN_ID + ".formatter.brace_position_for_lambda_body";	//$NON-NLS-1$
 
@@ -1411,7 +1411,7 @@ public class DefaultCodeFormatterConstants {
 	 * </pre>
 	 * @see JavaCore#INSERT
 	 * @see JavaCore#DO_NOT_INSERT
-	 * @since 3.9 BETA_JAVA8
+	 * @since 3.10
 	 */
 	public static final String FORMATTER_INSERT_NEW_LINE_AFTER_TYPE_ANNOTATION = JavaCore.PLUGIN_ID + ".formatter.insert_new_line_after_type_annotation";//$NON-NLS-1$
 	/**
@@ -2039,7 +2039,7 @@ public class DefaultCodeFormatterConstants {
 	 * </pre>
 	 * @see JavaCore#INSERT
 	 * @see JavaCore#DO_NOT_INSERT
-	 * @since 3.9 BETA_JAVA8
+	 * @since 3.10
 	 */
 	public static final String FORMATTER_INSERT_SPACE_AFTER_LAMBDA_ARROW  = JavaCore.PLUGIN_ID + ".formatter.insert_space_after_lambda_arrow";	//$NON-NLS-1$
 	/**
@@ -2976,7 +2976,7 @@ public class DefaultCodeFormatterConstants {
 	 * </pre>
 	 * @see JavaCore#INSERT
 	 * @see JavaCore#DO_NOT_INSERT
-	 * @since 3.9 BETA_JAVA8
+	 * @since 3.10
 	 */
 	public static final String FORMATTER_INSERT_SPACE_BEFORE_LAMBDA_ARROW = JavaCore.PLUGIN_ID + ".formatter.insert_space_before_lambda_arrow";	//$NON-NLS-1$
 	/**

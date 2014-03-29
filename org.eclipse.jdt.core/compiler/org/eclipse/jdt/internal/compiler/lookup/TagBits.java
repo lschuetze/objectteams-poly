@@ -182,7 +182,7 @@ public interface TagBits {
 				| AnnotationRepeatable;
 	
 	long AnnotationNullMASK = AnnotationNullable | AnnotationNonNull;
-	/** @since 3.9_BETA_JAVA8 marks a type that has a nullness annotation directly or on a detail (array dimension/type argument). */
+	/** @since 3.10 marks a type that has a nullness annotation directly or on a detail (array dimension/type argument). */
 	long HasNullTypeAnnotation = ASTNode.Bit21;
 
 	long HasTypeAnnotations = ASTNode.Bit22;

@@ -159,7 +159,7 @@ public interface IMethodBinding extends IBinding {
 	 * @return the type of this method's receiver or <code>null</code> 
 	 * if there is no receiver declared explicitly.
 	 * 
-	 * @since 3.9 BETA_JAVA8
+	 * @since 3.10
 	 */
 	public ITypeBinding getDeclaredReceiverType();
 	

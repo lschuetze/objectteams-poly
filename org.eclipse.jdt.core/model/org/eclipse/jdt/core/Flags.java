@@ -179,7 +179,7 @@ public final class Flags {
 	 * Note that this flag's value is internal and is not defined in the
 	 * Virtual Machine specification.
 	 * </p>
-	 * @since 3.9 BETA_JAVA8
+	 * @since 3.10
 	 */
 	public static final int AccDefaultMethod = ExtraCompilerModifiers.AccDefaultMethod;
 
@@ -190,7 +190,7 @@ public final class Flags {
 	 * Note that this flag's value is internal and is not defined in the
 	 * Virtual Machine specification.
 	 * </p>
-	 * @since 3.9 BETA_JAVA8
+	 * @since 3.10
 	 */
 	public static final int AccAnnotationDefault = ClassFileConstants.AccAnnotationDefault;
 	
@@ -410,7 +410,7 @@ public final class Flags {
 	 *
 	 * @return <code>true</code> if the <code>AccDefaultMethod</code> flag is included
 	 * @see #AccDefaultMethod
-	 * @since 3.9 BETA_JAVA8
+	 * @since 3.10
 	 */
 	public static boolean isDefaultMethod(int flags) {
 		return (flags & AccDefaultMethod) != 0;
@@ -457,7 +457,7 @@ public final class Flags {
 	 *
 	 * @return <code>true</code> if the <code>AccAnnotationDefault</code> flag is included
 	 * @see #AccAnnotationDefault
-	 * @since 3.9 BETA_JAVA8
+	 * @since 3.10
 	 */
 	public static boolean isAnnnotationDefault(int flags) {
 		return (flags & AccAnnotationDefault) != 0;

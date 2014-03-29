@@ -61,7 +61,7 @@ public class NaiveASTFlattener extends ASTVisitor {
 	 * Internal synonym for {@link AST#JLS4}. Use to alleviate
 	 * deprecation warnings.
 	 * @deprecated
-	 * @since 3.9 BETA_JAVA8
+	 * @since 3.10
 	 */
 	private static final int JLS4 = AST.JLS4;
 
@@ -133,7 +133,7 @@ public class NaiveASTFlattener extends ASTVisitor {
 	 * Internal synonym for {@link MethodDeclaration#thrownExceptions()}. Use to alleviate
 	 * deprecation warnings.
 	 * @deprecated
-	 * @since 3.9 BETA_JAVA8
+	 * @since 3.10
 	 */
 	private static List thrownExceptions(MethodDeclaration node) {
 		return node.thrownExceptions();
@@ -609,7 +609,7 @@ public class NaiveASTFlattener extends ASTVisitor {
 	/*
 	 * @see ASTVisitor#visit(CreationReference)
 	 * 
-	 * @since 3.9 BETA_JAVA8
+	 * @since 3.10
 	 */
 	public boolean visit(CreationReference node) {
 		node.getType().accept(this);
@@ -741,7 +741,7 @@ public class NaiveASTFlattener extends ASTVisitor {
 	/*
 	 * @see ASTVisitor#visit(ExpressionMethodReference)
 	 * 
-	 * @since 3.9 BETA_JAVA8
+	 * @since 3.10
 	 */
 	public boolean visit(ExpressionMethodReference node) {
 		node.getExpression().accept(this);
@@ -1210,7 +1210,7 @@ public class NaiveASTFlattener extends ASTVisitor {
 
 	/*
 	 * @see ASTVisitor#visit(NameQualifiedType)
-	 * @since 3.9 BETA_JAVA8
+	 * @since 3.10
 	 */
 	public boolean visit(NameQualifiedType node) {
 		node.getQualifier().accept(this);
@@ -1539,7 +1539,7 @@ public class NaiveASTFlattener extends ASTVisitor {
 	/*
 	 * @see ASTVisitor#visit(SuperMethodReference)
 	 * 
-	 * @since 3.9 BETA_JAVA8
+	 * @since 3.10
 	 */
 	public boolean visit(SuperMethodReference node) {
 		if (node.getQualifier() != null) {
@@ -1811,7 +1811,7 @@ public class NaiveASTFlattener extends ASTVisitor {
 	/*
 	 * @see ASTVisitor#visit(TypeMethodReference)
 	 * 
-	 * @since 3.9 BETA_JAVA8
+	 * @since 3.10
 	 */
 	public boolean visit(TypeMethodReference node) {
 		node.getType().accept(this);

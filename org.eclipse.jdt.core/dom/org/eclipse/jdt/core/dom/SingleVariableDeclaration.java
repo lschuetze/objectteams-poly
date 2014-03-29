@@ -59,7 +59,7 @@ public class SingleVariableDeclaration extends VariableDeclaration {
 	/**
 	 * The "varargsAnnotations" structural property of variable arguments of this node type (element type: {@link Annotation})
 	 * (added in JLS8 API).
-	 * @since 3.9 BETA_JAVA8
+	 * @since 3.10
 	 */
 	public static final ChildListPropertyDescriptor VARARGS_ANNOTATIONS_PROPERTY =
 			new ChildListPropertyDescriptor(SingleVariableDeclaration.class, "varargsAnnotations", Annotation.class, CYCLE_RISK); //$NON-NLS-1$
@@ -90,7 +90,7 @@ public class SingleVariableDeclaration extends VariableDeclaration {
 
 	/**
 	 * The "extraDimensions2" structural property of this node type (element type: {@link Dimension}) (added in JLS8 API).
-	 * @since 3.9 BETA_JAVA8
+	 * @since 3.10
 	 */
 	public static final ChildListPropertyDescriptor EXTRA_DIMENSIONS2_PROPERTY =
 			internalExtraDimensions2PropertyFactory(SingleVariableDeclaration.class);
@@ -122,7 +122,7 @@ public class SingleVariableDeclaration extends VariableDeclaration {
 	 * A list of property descriptors (element type:
 	 * {@link StructuralPropertyDescriptor}),
 	 * or null if uninitialized.
-	 * @since 3.9 BETA_JAVA8
+	 * @since 3.10
 	 */
 	private static final List PROPERTY_DESCRIPTORS_8_0;
 
@@ -204,7 +204,7 @@ public class SingleVariableDeclaration extends VariableDeclaration {
 	 * Null before JLS8. Added in JLS8; defaults to an empty list
 	 * (see constructor).
 	 * 
-	 * @since 3.9 BETA_JAVA8
+	 * @since 3.10
 	 */
 	private ASTNode.NodeList varargsAnnotations = null;
 
@@ -289,7 +289,7 @@ public class SingleVariableDeclaration extends VariableDeclaration {
 
 	/* (omit javadoc for this method)
 	 * Method declared on VariableDeclaration.
-	 * @since 3.9 BETA_JAVA8
+	 * @since 3.10
 	 */
 	final ChildListPropertyDescriptor internalExtraDimensions2Property() {
 		return EXTRA_DIMENSIONS2_PROPERTY;
@@ -641,7 +641,7 @@ public class SingleVariableDeclaration extends VariableDeclaration {
 	 * @return the list of annotations on the varargs token (element type: {@link Annotation})
 	 * @exception UnsupportedOperationException if this operation is used
 	 *            in a JLS2, JLS3 or JLS4 AST
-	 * @since 3.9 BETA_JAVA8
+	 * @since 3.10
 	 */
 	public List varargsAnnotations() {
 		if (this.varargsAnnotations == null) {
