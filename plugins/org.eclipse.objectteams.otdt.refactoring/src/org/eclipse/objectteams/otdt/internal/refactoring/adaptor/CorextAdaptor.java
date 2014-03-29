@@ -34,33 +34,19 @@ import org.eclipse.jdt.core.IMember;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.BaseCallMessageSend;
-import org.eclipse.jdt.core.dom.BaseConstructorInvocation;
 import org.eclipse.jdt.core.dom.CallinMappingDeclaration;
 import org.eclipse.jdt.core.dom.ChildListPropertyDescriptor;
-import org.eclipse.jdt.core.dom.ClassInstanceCreation;
-import org.eclipse.jdt.core.dom.ConstructorInvocation;
-import org.eclipse.jdt.core.dom.EnumConstantDeclaration;
 import org.eclipse.jdt.core.dom.Expression;
 import org.eclipse.jdt.core.dom.IMethodBinding;
 import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.Invocation;
 import org.eclipse.jdt.core.dom.MethodDeclaration;
-import org.eclipse.jdt.core.dom.MethodInvocation;
 import org.eclipse.jdt.core.dom.MethodSpec;
 import org.eclipse.jdt.core.dom.RoleTypeDeclaration;
-import org.eclipse.jdt.core.dom.SuperConstructorInvocation;
-import org.eclipse.jdt.core.dom.SuperMethodInvocation;
-import org.eclipse.jdt.core.dom.TSuperConstructorInvocation;
-import org.eclipse.jdt.core.dom.TSuperMessageSend;
-import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
-import org.eclipse.jdt.core.dom.rewrite.ListRewrite;
 import org.eclipse.jdt.core.search.IJavaSearchScope;
 import org.eclipse.jdt.internal.core.JavaProject;
 import org.eclipse.jdt.internal.core.search.JavaSearchScope;
 import org.eclipse.jdt.internal.corext.refactoring.ParameterInfo;
-
-import base org.eclipse.jdt.internal.corext.refactoring.code.Invocations;
-
 import org.eclipse.jdt.internal.corext.util.JdtFlags;
 import org.eclipse.ltk.core.refactoring.RefactoringStatus;
 import org.eclipse.objectteams.otdt.core.IOTJavaElement;
@@ -72,6 +58,7 @@ import org.eclipse.objectteams.otdt.internal.refactoring.util.RefactoringUtil;
 import base org.eclipse.jdt.internal.corext.refactoring.RefactoringScopeFactory;
 import base org.eclipse.jdt.internal.corext.refactoring.TypedSource;
 import base org.eclipse.jdt.internal.corext.refactoring.code.ExtractMethodRefactoring;
+import base org.eclipse.jdt.internal.corext.refactoring.code.Invocations;
 import base org.eclipse.jdt.internal.corext.refactoring.surround.ExceptionAnalyzer;
 
 /**
@@ -244,8 +231,9 @@ public team class CorextAdaptor
 	/** Need to analyze one more node type: BaseCallMessageSend. */
 	protected class ExceptionAnalyzer playedBy ExceptionAnalyzer
 	{
+		
 		@SuppressWarnings("decapsulation")
-		boolean handleExceptions(IMethodBinding binding) -> boolean handleExceptions(IMethodBinding binding);
+		boolean handleExceptions(IMethodBinding binding, ASTNode node) -> boolean handleExceptions(IMethodBinding binding, ASTNode node);
 		@SuppressWarnings("decapsulation")
 		boolean isSelected(ASTNode node) -> boolean isSelected(ASTNode node);
 				
@@ -282,7 +270,7 @@ public team class CorextAdaptor
 					for (ASTNode elem : baseMethods) {
 						if (elem.getNodeType() == ASTNode.METHOD_SPEC) {
 							MethodSpec baseMethod= (MethodSpec)elem;
-							if (handleExceptions(baseMethod.resolveBinding()))
+							if (handleExceptions(baseMethod.resolveBinding(), baseMethod))
 								result= true;
 						}
 					}
