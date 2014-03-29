@@ -262,6 +262,11 @@ public class DependentTypeBinding extends ParameterizedTypeBinding {
 			return true; // could be anchored type variable
 		return binding.valueParamSynthArgs() != NO_SYNTH_ARGUMENTS;
 	}
+	
+	@Override
+	public boolean isParameterizedType() {
+		return this.arguments != null; // by inheritance we'd be parameterized, but if we don't have arguments, it's only value parameters.
+	}
 
     @Override
     public DependentTypeBinding asPlainDependentType() {
