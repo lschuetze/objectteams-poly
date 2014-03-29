@@ -65,7 +65,7 @@
 		<ant antfile="plugins/${testPlugin}/test.xml" dir="${test.eclipseDir}">
 			<property name="eclipse-home" value="${test.eclipseDir}" />
 			<property name="library-file" value="${test.root.dir}/library.xml"/>
-            <property name="extraVMargs" value="-XX:MaxPermSize=320m -XX:+HeapDumpOnOutOfMemoryError -Djava.io.tmpdir=${test.tmpDir}"/>
+            <property name="extraVMargs" value="-XX:+HeapDumpOnOutOfMemoryError -Djava.io.tmpdir=${test.tmpDir}"/>
 		</ant>
 	</target>
 

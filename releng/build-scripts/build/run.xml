@@ -86,7 +86,6 @@ directory for tempory files during testing:
 		<!-- Configure Java for STAGE 1 and STAGE 2 building: -->
 		<property name="vm" value="java" />
 		<property name="vm.args" value="-Xmx912m" />
-		<property name="vm.args2" value="-XX:MaxPermSize=128m" />
 
 		<property name="installmode" value="clean" />
 	
@@ -249,7 +248,6 @@ directory for tempory files during testing:
 	            <arg value="-Declipse.tests.zip=${eclipse.tests.zip}"/>
 	            <!--arg value="-verbose" /-->
 	            <jvmarg value="${vm.args}"/>
-	            <jvmarg value="${vm.args2}"/>
         </java>
 		<!-- Now we should have an update site with the patch feature, time to install it into base: -->
         <ant antfile="${OTScriptDir}/p2helper.xml" target="installFeature" dir="${baseLocation}">
@@ -328,7 +326,6 @@ directory for tempory files during testing:
 				<arg value="-Declipse.tests.zip=${eclipse.tests.zip}"/>
 				<!--arg value="-verbose" /-->
 				<jvmarg value="${vm.args}"/>
-				<jvmarg value="${vm.args2}"/>
 				<!-- arg value="${verboseAnt}"/ -->
 				<!-- arg value="-debug" / -->
 		</java>
