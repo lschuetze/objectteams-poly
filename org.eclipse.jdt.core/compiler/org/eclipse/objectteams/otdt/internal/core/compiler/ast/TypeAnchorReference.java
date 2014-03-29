@@ -106,7 +106,7 @@ public class TypeAnchorReference extends TypeReference implements InvocationSite
 
 	@Override
 	public TypeReference augmentTypeWithAdditionalDimensions(int additionalDimensions, Annotation[][] additionalAnnotations, boolean isVarargs) {
-		throw new InternalCompilerError("Method not applicable");
+		throw new InternalCompilerError("Method not applicable"); //$NON-NLS-1$
 	}
 
 	@Override
@@ -172,7 +172,7 @@ public class TypeAnchorReference extends TypeReference implements InvocationSite
 		return null;
 	}
 	@Override
-	public TypeBinding resolveType(BlockScope scope, boolean checkBounds) {
+	public TypeBinding resolveType(BlockScope scope, boolean checkBounds, int location) {
 		if (!this.isExpression) {
 			scope.problemReporter().valueParamWrongPosition(this);
 			return null;
