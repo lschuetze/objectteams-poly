@@ -6,10 +6,6 @@
  * http://www.eclipse.org/legal/epl-v10.html
  * $Id: LocalTypeBinding.java 19874 2009-04-13 17:59:05Z stephan $
  *
- * This is an implementation of an early-draft specification developed under the Java
- * Community Process (JCP) and is made available for testing and evaluation purposes
- * only. The code is not compatible with any specification of the JCP.
- *
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *     Fraunhofer FIRST - extended API and implementation

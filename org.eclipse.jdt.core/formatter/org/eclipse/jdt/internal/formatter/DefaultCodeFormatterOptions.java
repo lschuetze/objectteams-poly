@@ -6,10 +6,6 @@
  * http://www.eclipse.org/legal/epl-v10.html
  * $Id: DefaultCodeFormatterOptions.java 22626 2009-09-30 17:37:31Z stephan $
  *
- * This is an implementation of an early-draft specification developed under the Java
- * Community Process (JCP) and is made available for testing and evaluation purposes
- * only. The code is not compatible with any specification of the JCP.
- * 
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *     Brock Janiczak - Contribution for bug 150741
