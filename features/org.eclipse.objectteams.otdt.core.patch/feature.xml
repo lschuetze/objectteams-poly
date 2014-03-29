@@ -55,11 +55,11 @@ Project Leader:
    </license>
 
    <url>
-      <update label="Object Teams Updates" url="http://download.eclipse.org/objectteams/updates/ot2.2"/>
+      <update label="Object Teams Updates" url="http://download.eclipse.org/objectteams/updates/ot2.3"/>
    </url>
 
    <requires>
-      <import feature="org.eclipse.jdt" version="3.9.0.v20130605-2000" patch="true"/>
+      <import feature="org.eclipse.jdt" version="3.10.0.v20140325-0830" patch="true"/>
    </requires>
 
    <plugin

@@ -58,7 +58,7 @@ Project Leader:
    </license>
 
    <url>
-      <update label="Object Teams Updates" url="http://download.eclipse.org/objectteams/updates/ot2.2"/>
+      <update label="Object Teams Updates" url="http://download.eclipse.org/objectteams/updates/ot2.3"/>
       <discovery label="Object Teams Contributions" url="http://download.eclipse.org/objectteams/updates/contrib"/>
    </url>
 
@@ -154,13 +154,6 @@ Project Leader:
          download-size="12"
          install-size="18"
          version="0.0.0"
-         unpack="false"/>
-
-   <plugin
-         id="org.eclipse.jdt.ui"
-         download-size="0"
-         install-size="0"
-         version="3.9.1.qualifier"
          unpack="false"/>
 
 </feature>
