@@ -15,17 +15,10 @@
  **********************************************************************/
 package org.eclipse.objectteams.otdt.tests.otjld.roleplaying;
 
-import static org.eclipse.jdt.core.tests.util.AbstractCompilerTest.F_1_6;
-
-import java.util.ArrayList;
-import java.util.List;
+import static org.eclipse.objectteams.otdt.tests.otjld.AllTests.addComplianceSuite;
 
 import junit.framework.Test;
-
-import org.eclipse.jdt.core.tests.compiler.regression.RegressionTestSetup;
-import org.eclipse.jdt.core.tests.junit.extension.TestCase;
-import org.eclipse.jdt.core.tests.util.AbstractCompilerTest;
-import org.eclipse.objectteams.otdt.tests.otjld.AbstractOTJLDTest;
+import junit.framework.TestSuite;
 
 /**
  * @author stephan
@@ -33,35 +26,23 @@ import org.eclipse.objectteams.otdt.tests.otjld.AbstractOTJLDTest;
 public class AllBindingAmbiguitiesTests {
 
 	public static Test suite() {
-	
-		List<Class<? extends TestCase>> testClasses = new ArrayList<Class<? extends TestCase>>();
+		TestSuite suite = new TestSuite("All Binding Ambiguity Tests");
 
-		testClasses.add(BindingAmbiguitiesM.testClass());
+		addComplianceSuite(suite, BindingAmbiguitiesM.testClass());
 
-		testClasses.add(BindingAmbiguities1.testClass());
-		testClasses.add(BindingAmbiguities2.testClass());
-		testClasses.add(BindingAmbiguities3.testClass());
-		testClasses.add(BindingAmbiguities4.testClass());
-		testClasses.add(BindingAmbiguities5.testClass());
-		testClasses.add(BindingAmbiguities6.testClass());
-		testClasses.add(BindingAmbiguities7.testClass());
-		testClasses.add(BindingAmbiguities8.testClass());
-		testClasses.add(BindingAmbiguities9.testClass());
-		testClasses.add(BindingAmbiguities10.testClass());
-		testClasses.add(BindingAmbiguities11.testClass());
-		testClasses.add(BindingAmbiguities12.testClass());
-
-		// Reset forgotten subsets tests
-		TestCase.TESTS_PREFIX = null;
-		TestCase.TESTS_NAMES = null;
-		TestCase.TESTS_NUMBERS= null;
-		TestCase.TESTS_RANGE = null;
-		TestCase.RUN_ONLY_ID = null;
+		addComplianceSuite(suite, BindingAmbiguities1.testClass());
+		addComplianceSuite(suite, BindingAmbiguities2.testClass());
+		addComplianceSuite(suite, BindingAmbiguities3.testClass());
+		addComplianceSuite(suite, BindingAmbiguities4.testClass());
+		addComplianceSuite(suite, BindingAmbiguities5.testClass());
+		addComplianceSuite(suite, BindingAmbiguities6.testClass());
+		addComplianceSuite(suite, BindingAmbiguities7.testClass());
+		addComplianceSuite(suite, BindingAmbiguities8.testClass());
+		addComplianceSuite(suite, BindingAmbiguities9.testClass());
+		addComplianceSuite(suite, BindingAmbiguities10.testClass());
+		addComplianceSuite(suite, BindingAmbiguities11.testClass());
+		addComplianceSuite(suite, BindingAmbiguities12.testClass());
 		
-		return AbstractCompilerTest.buildAllCompliancesTestSuite(AllBindingAmbiguitiesTests.class, RegressionTestSetup.class, testClasses);
-	}
-
-	static Test buildSuite(Class testClass) {
-		return AbstractOTJLDTest.buildMinimalComplianceTestSuite(testClass, F_1_6);
+		return suite;
 	}
 }
