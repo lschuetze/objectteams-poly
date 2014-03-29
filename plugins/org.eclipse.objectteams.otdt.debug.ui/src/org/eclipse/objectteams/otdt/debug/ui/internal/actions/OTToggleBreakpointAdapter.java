@@ -1,10 +1,9 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2008 IBM Corporation and others.
+ * Copyright (c) 2000, 2014 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
- * $Id: OTToggleBreakpointAdapter.java 23432 2010-02-03 23:13:42Z stephan $
  * 
  * Contributors:
  *     IBM Corporation - initial API and implementation
@@ -29,16 +28,20 @@ import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Platform;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
+import org.eclipse.core.runtime.preferences.IEclipsePreferences;
+import org.eclipse.core.runtime.preferences.InstanceScope;
 import org.eclipse.debug.core.DebugException;
 import org.eclipse.debug.core.DebugPlugin;
 import org.eclipse.debug.core.IBreakpointManager;
 import org.eclipse.debug.core.model.IBreakpoint;
-import org.eclipse.debug.ui.actions.IToggleBreakpointsTargetExtension;
+import org.eclipse.debug.ui.DebugUITools;
+import org.eclipse.debug.ui.actions.IToggleBreakpointsTargetExtension2;
 import org.eclipse.jdt.core.Flags;
 import org.eclipse.jdt.core.IClassFile;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IField;
 import org.eclipse.jdt.core.IJavaElement;
+import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IMember;
 import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.IPackageDeclaration;
@@ -48,9 +51,15 @@ import org.eclipse.jdt.core.ITypeParameter;
 import org.eclipse.jdt.core.ITypeRoot;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.Signature;
-import org.eclipse.jdt.core.dom.AST;
-import org.eclipse.jdt.core.dom.ASTParser;
+import org.eclipse.jdt.core.SourceRange;
+import org.eclipse.jdt.core.dom.ASTNode;
+import org.eclipse.jdt.core.dom.ClassInstanceCreation;
 import org.eclipse.jdt.core.dom.CompilationUnit;
+import org.eclipse.jdt.core.dom.IBinding;
+import org.eclipse.jdt.core.dom.ITypeBinding;
+import org.eclipse.jdt.core.dom.NodeFinder;
+import org.eclipse.jdt.core.dom.SimpleName;
+import org.eclipse.jdt.core.dom.SimpleType;
 import org.eclipse.jdt.debug.core.IJavaBreakpoint;
 import org.eclipse.jdt.debug.core.IJavaClassPrepareBreakpoint;
 import org.eclipse.jdt.debug.core.IJavaFieldVariable;
@@ -60,30 +69,42 @@ import org.eclipse.jdt.debug.core.IJavaType;
 import org.eclipse.jdt.debug.core.IJavaWatchpoint;
 import org.eclipse.jdt.debug.core.JDIDebugModel;
 import org.eclipse.jdt.internal.debug.core.JavaDebugUtils;
+import org.eclipse.jdt.internal.debug.core.breakpoints.ValidBreakpointLocationLocator;
 import org.eclipse.jdt.internal.debug.ui.BreakpointUtils;
 import org.eclipse.jdt.internal.debug.ui.DebugWorkingCopyManager;
+import org.eclipse.jdt.internal.debug.ui.IJDIPreferencesConstants;
 import org.eclipse.jdt.internal.debug.ui.JDIDebugUIPlugin;
 import org.eclipse.jdt.internal.debug.ui.actions.ActionDelegateHelper;
 import org.eclipse.jdt.internal.debug.ui.actions.ActionMessages;
 import org.eclipse.jdt.ui.IWorkingCopyManager;
 import org.eclipse.jdt.ui.JavaUI;
+import org.eclipse.jdt.ui.SharedASTProvider;
+import org.eclipse.jface.dialogs.IDialogConstants;
+import org.eclipse.jface.dialogs.MessageDialogWithToggle;
 import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.IRegion;
 import org.eclipse.jface.text.ITextSelection;
+import org.eclipse.jface.text.source.IVerticalRulerInfo;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.StructuredSelection;
-import org.eclipse.ui.IEditorInput;
-import org.eclipse.ui.IEditorPart;
-import org.eclipse.ui.IWorkbenchPart;
-import org.eclipse.ui.texteditor.IDocumentProvider;
-import org.eclipse.ui.texteditor.IEditorStatusLine;
-import org.eclipse.ui.texteditor.ITextEditor;
 import org.eclipse.objectteams.otdt.core.IOTJavaElement;
 import org.eclipse.objectteams.otdt.core.IOTType;
 import org.eclipse.objectteams.otdt.core.OTModelManager;
 import org.eclipse.objectteams.otdt.core.compiler.IOTConstants;
+import org.eclipse.swt.SWT;
+import org.eclipse.swt.widgets.Display;
+import org.eclipse.swt.widgets.Event;
+import org.eclipse.swt.widgets.Shell;
+import org.eclipse.ui.IEditorInput;
+import org.eclipse.ui.IEditorPart;
+import org.eclipse.ui.IWorkbenchPart;
+import org.eclipse.ui.PlatformUI;
+import org.eclipse.ui.dialogs.PreferencesUtil;
+import org.eclipse.ui.texteditor.IDocumentProvider;
+import org.eclipse.ui.texteditor.IEditorStatusLine;
+import org.eclipse.ui.texteditor.ITextEditor;
 
 /**
  * @author ike
@@ -95,7 +116,7 @@ import org.eclipse.objectteams.otdt.core.compiler.IOTConstants;
 // to instantiate OTBreakpointLocationVerifierJob in favor of BreakpointLocationVerifierJob
 // and to access a protected method of ValidBreakpointLocationLocator
 @SuppressWarnings("restriction") // copy&paste adaptation needs access to internals
-public class OTToggleBreakpointAdapter implements IToggleBreakpointsTargetExtension {
+public class OTToggleBreakpointAdapter implements IToggleBreakpointsTargetExtension2 {
 
 	
 	private static final String EMPTY_STRING = ""; //$NON-NLS-1$
@@ -123,9 +144,6 @@ public class OTToggleBreakpointAdapter implements IToggleBreakpointsTargetExtens
                     } else {
                         statusLine.setMessage(true, null, null);
                     }
-                }
-                if (message != null && JDIDebugUIPlugin.getActiveWorkbenchShell() != null) {
-                    JDIDebugUIPlugin.getActiveWorkbenchShell().getDisplay().beep();
                 }
             }
         });
@@ -184,7 +202,7 @@ public class OTToggleBreakpointAdapter implements IToggleBreakpointsTargetExtens
      * @see org.eclipse.debug.ui.actions.IToggleBreakpointsTarget#toggleLineBreakpoints(org.eclipse.ui.IWorkbenchPart, org.eclipse.jface.viewers.ISelection)
      */
     public void toggleLineBreakpoints(IWorkbenchPart part, ISelection selection) throws CoreException {
-    	toggleLineBreakpoints(part, selection, false);
+    	toggleLineBreakpoints(part, selection, false, null);
     }
     
     /**
@@ -193,74 +211,14 @@ public class OTToggleBreakpointAdapter implements IToggleBreakpointsTargetExtens
      * @param selection the current selection
      * @param bestMatch if we should make a best match or not
      */
-    public void toggleLineBreakpoints(final IWorkbenchPart part, final ISelection selection, final boolean bestMatch) {
+    public void toggleLineBreakpoints(final IWorkbenchPart part, final ISelection selection, final boolean bestMatch, final ValidBreakpointLocationLocator locator) {
         Job job = new Job("Toggle Line Breakpoint") { //$NON-NLS-1$
-            protected IStatus run(IProgressMonitor monitor) {
-            	ITextEditor editor = getTextEditor(part);
-                if (editor != null && selection instanceof ITextSelection) {
-                    if (monitor.isCanceled()) {
-                        return Status.CANCEL_STATUS;
-                    }
-                    try {
-	                    report(null, part);
-	                    ISelection sel = selection;
-	                	if(!(selection instanceof IStructuredSelection)) {
-	                		sel = translateToMembers(part, selection);
-	                	}
-	                	if(isInterface(sel, part)) {
-	                		report(ActionMessages.ToggleBreakpointAdapter_6, part);
-	                    	return Status.OK_STATUS;
-	                	}
-	                    if(sel instanceof IStructuredSelection) {
-	                    	IMember member = (IMember) ((IStructuredSelection)sel).getFirstElement();
-	                    	IType type = null;
-//{ObjectTeams: also handle IOTJavaElement.{ROLE,TEAM}:
-/* orig:
-	                    	if(member.getElementType() == IJavaElement.TYPE) {
-  :giro */
-	                    	if(member instanceof IType) {
-// SH}
-	                    		type = (IType) member;
-	                    	}
-	                    	else {
-	                    		type = member.getDeclaringType();
-	                    	}
-	                    	String tname = createQualifiedTypeName(type);
-	                    	IResource resource = BreakpointUtils.getBreakpointResource(type);
-							int lnumber = ((ITextSelection) selection).getStartLine() + 1;
-							IJavaLineBreakpoint existingBreakpoint = JDIDebugModel.lineBreakpointExists(resource, tname, lnumber);
-							if (existingBreakpoint != null) {
-								DebugPlugin.getDefault().getBreakpointManager().removeBreakpoint(existingBreakpoint, true);
-								return Status.OK_STATUS;
-							}
-							Map attributes = new HashMap(10);
-							IDocumentProvider documentProvider = editor.getDocumentProvider();
-							if (documentProvider == null) {
-							    return Status.CANCEL_STATUS;
-							}
-							IDocument document = documentProvider.getDocument(editor.getEditorInput());
-							try {
-								IRegion line = document.getLineInformation(lnumber - 1);
-								int start = line.getOffset();
-								int end = start + line.getLength() - 1;
-								BreakpointUtils.addJavaBreakpointAttributesWithMemberDetails(attributes, type, start, end);
-							} 	
-							catch (BadLocationException ble) {JDIDebugUIPlugin.log(ble);}
-							IJavaLineBreakpoint breakpoint = JDIDebugModel.createLineBreakpoint(resource, tname, lnumber, -1, -1, 0, true, attributes);
-//{ObjectTeams: replace BreakpointLocationVerifierJob with own OTBreakpointLocationVerifierJob
-							new OTBreakpointLocationVerifierJob(document, breakpoint, lnumber, bestMatch, tname, type, resource, editor).schedule();
-// ike}							
-	                    }
-	                    else {
-	                    	report(ActionMessages.ToggleBreakpointAdapter_3, part);
-	                    	return Status.OK_STATUS;
-	                    }
-                    } 
-                    catch (CoreException ce) {return ce.getStatus();}
-                }
-                return Status.OK_STATUS;
+            @Override
+			protected IStatus run(IProgressMonitor monitor) {
+            	return doLineBreakpointToggle(selection, part, locator, bestMatch, monitor);
             }
         };
+        job.setPriority(Job.INTERACTIVE);
         job.setSystem(true);
         job.schedule();
     }
@@ -286,6 +244,7 @@ public class OTToggleBreakpointAdapter implements IToggleBreakpointsTargetExtens
      */
     public void toggleMethodBreakpoints(final IWorkbenchPart part, final ISelection finalSelection) {
         Job job = new Job("Toggle Method Breakpoints") { //$NON-NLS-1$
+            @Override
             protected IStatus run(IProgressMonitor monitor) {
                 if (monitor.isCanceled()) {
                     return Status.CANCEL_STATUS;
@@ -296,19 +255,19 @@ public class OTToggleBreakpointAdapter implements IToggleBreakpointsTargetExtens
                     if(!(selection instanceof IStructuredSelection)) {
                     	selection = translateToMembers(part, selection);
                     }
-                    if(isInterface(selection, part)) {
-                    	report(ActionMessages.ToggleBreakpointAdapter_7, part);
-                    	return Status.OK_STATUS;
-                    }
+                    boolean isInterface = isInterface(selection, part);
                     if (selection instanceof IStructuredSelection) {
-                        IMethod[] members = getMethods((IStructuredSelection) selection);
+                    	IMethod[] members = getMethods((IStructuredSelection) selection, isInterface);
                         if (members.length == 0) {
+                        	if(isInterface)
+                        		report(ActionMessages.ToggleBreakpointAdapter_6, part); 
+                        	else
                             report(ActionMessages.ToggleBreakpointAdapter_9, part); 
                             return Status.OK_STATUS;
                         }
                         IJavaBreakpoint breakpoint = null;
                         ISourceRange range = null;
-                        Map attributes = null;
+                        Map<String, Object> attributes = null;
                         IType type = null;
                         String signature = null;
                         String mname = null;
@@ -322,7 +281,7 @@ public class OTToggleBreakpointAdapter implements IToggleBreakpointsTargetExtens
                                     start = range.getOffset();
                                     end = start + range.getLength();
                                 }
-                                attributes = new HashMap(10);
+                                attributes = new HashMap<String, Object>(10);
                                 BreakpointUtils.addJavaBreakpointAttributes(attributes, members[i]);
                                 type = members[i].getDeclaringType();
                                 signature = members[i].getSignature();
@@ -340,9 +299,9 @@ public class OTToggleBreakpointAdapter implements IToggleBreakpointsTargetExtens
                                         return Status.OK_STATUS;
                                     }
                                 }
-                                JDIDebugModel.createMethodBreakpoint(BreakpointUtils.getBreakpointResource(members[i]), createQualifiedTypeName(type), mname, signature, true, false, false, -1, start, end, 0, true, attributes);
+                                JDIDebugModel.createMethodBreakpoint(BreakpointUtils.getBreakpointResource(members[i]), getQualifiedName(type), mname, signature, true, false, false, -1, start, end, 0, true, attributes);
                             } else {
-                            	DebugPlugin.getDefault().getBreakpointManager().removeBreakpoint(breakpoint, true);
+								deleteBreakpoint(breakpoint, part, monitor);
                             }
                         }
                     }
@@ -356,8 +315,97 @@ public class OTToggleBreakpointAdapter implements IToggleBreakpointsTargetExtens
                 return Status.OK_STATUS;
             }
         };
+        job.setPriority(Job.INTERACTIVE);
         job.setSystem(true);
         job.schedule();
+    }
+    
+    /**
+     * Performs the actual toggling of the line breakpoint
+     * @param selection the current selection (from the editor or view)
+     * @param part the active part
+     * @param locator the locator, may be <code>null</code>
+     * @param bestMatch if we should consider the best match rather than an exact match
+     * @param monitor progress reporting
+     * @return the status of the toggle
+     * @since 3.8
+     */
+    IStatus doLineBreakpointToggle(ISelection selection, IWorkbenchPart part, ValidBreakpointLocationLocator locator, boolean bestMatch, IProgressMonitor monitor) {
+    	ITextEditor editor = getTextEditor(part);
+        if (editor != null && selection instanceof ITextSelection) {
+            if (monitor.isCanceled()) {
+                return Status.CANCEL_STATUS;
+            }
+            ITextSelection tsel = (ITextSelection) selection;
+            if(tsel.getStartLine() < 0) {
+            	return Status.CANCEL_STATUS;
+            }
+            try {
+                report(null, part);
+                ISelection sel = selection;
+            	if(!(selection instanceof IStructuredSelection)) {
+            		sel = translateToMembers(part, selection);
+            	}
+            	if(sel instanceof IStructuredSelection) {
+                	IMember member = (IMember) ((IStructuredSelection)sel).getFirstElement();
+                	IType type = null;
+//{ObjectTeams: also handle IOTJavaElement.{ROLE,TEAM}:
+/* orig:
+                    if(member.getElementType() == IJavaElement.TYPE) {
+  :giro */
+                    if(member instanceof IType) {
+// SH}
+                		type = (IType) member;
+                	}
+                	else {
+                		type = member.getDeclaringType();
+                	}
+                	String tname = null;
+                	IJavaProject project = type.getJavaProject();
+                	if (locator == null || (project != null && !project.isOnClasspath(type))) {
+                		tname = createQualifiedTypeName(type);
+                	} else {
+                		tname = locator.getFullyQualifiedTypeName();
+                	}
+                	IResource resource = BreakpointUtils.getBreakpointResource(type);
+					int lnumber = locator == null ? tsel.getStartLine() + 1 : locator.getLineLocation();
+					IJavaLineBreakpoint existingBreakpoint = JDIDebugModel.lineBreakpointExists(resource, tname, lnumber);
+					if (existingBreakpoint != null) {
+						deleteBreakpoint(existingBreakpoint, editor, monitor);
+						return Status.OK_STATUS;
+					}
+					Map<String, Object> attributes = new HashMap<String, Object>(10);
+					IDocumentProvider documentProvider = editor.getDocumentProvider();
+					if (documentProvider == null) {
+					    return Status.CANCEL_STATUS;
+					}
+					IDocument document = documentProvider.getDocument(editor.getEditorInput());
+					int charstart = -1, charend = -1;
+					try {
+						IRegion line = document.getLineInformation(lnumber - 1);
+						charstart = line.getOffset();
+						charend = charstart + line.getLength();
+					} 	
+					catch (BadLocationException ble) {JDIDebugUIPlugin.log(ble);}
+					BreakpointUtils.addJavaBreakpointAttributes(attributes, type);
+					IJavaLineBreakpoint breakpoint = JDIDebugModel.createLineBreakpoint(resource, tname, lnumber, charstart, charend, 0, true, attributes);
+					if(locator == null) {
+//{ObjectTeams: replace BreakpointLocationVerifierJob with own OTBreakpointLocationVerifierJob
+/* orig:
+						new BreakpointLocationVerifierJob(document, parseCompilationUnit(type.getTypeRoot()), breakpoint, lnumber, tname, type, editor, bestMatch).schedule();
+  :giro */
+                        new OTBreakpointLocationVerifierJob(document, breakpoint, lnumber, bestMatch, tname, type, resource, editor).schedule();
+//ike}                         
+					}
+                }
+                else {
+                	report(ActionMessages.ToggleBreakpointAdapter_3, part);
+                	return Status.OK_STATUS;
+                }
+            } 
+            catch (CoreException ce) {return ce.getStatus();}
+        }
+        return Status.OK_STATUS;
     }
     
     /**
@@ -368,6 +416,7 @@ public class OTToggleBreakpointAdapter implements IToggleBreakpointsTargetExtens
      */
     public void toggleClassBreakpoints(final IWorkbenchPart part, final ISelection selection) {
     	Job job = new Job("Toggle Class Load Breakpoints") { //$NON-NLS-1$
+			@Override
 			protected IStatus run(IProgressMonitor monitor) {
 				if (monitor.isCanceled()) {
                     return Status.CANCEL_STATUS;
@@ -385,12 +434,12 @@ public class OTToggleBreakpointAdapter implements IToggleBreakpointsTargetExtens
 					if(sel instanceof IStructuredSelection) {
 						IMember member = (IMember)((IStructuredSelection)sel).getFirstElement();
 						IType type = (IType) member;
-						IBreakpoint existing = getClassLoadBreakpoint(type);
+						IJavaBreakpoint existing= getClassLoadBreakpoint(type);
 						if (existing != null) {
-							existing.delete(); 
+							deleteBreakpoint(existing, part, monitor);
+							return Status.OK_STATUS;
 						}
-						else {
-							HashMap map = new HashMap(10);
+						HashMap<String, Object> map = new HashMap<String, Object>(10);
 							BreakpointUtils.addJavaBreakpointAttributes(map, type);
 							ISourceRange range= type.getNameRange();
 							int start = -1;
@@ -399,8 +448,7 @@ public class OTToggleBreakpointAdapter implements IToggleBreakpointsTargetExtens
 								start = range.getOffset();
 								end = start + range.getLength();
 							}
-							JDIDebugModel.createClassPrepareBreakpoint(BreakpointUtils.getBreakpointResource(member), createQualifiedTypeName(type), IJavaClassPrepareBreakpoint.TYPE_CLASS, start, end, true, map);
-						}
+						JDIDebugModel.createClassPrepareBreakpoint(BreakpointUtils.getBreakpointResource(member), getQualifiedName(type), IJavaClassPrepareBreakpoint.TYPE_CLASS, start, end, true, map);
 					}
 					else {
 						report(ActionMessages.ToggleBreakpointAdapter_0, part);
@@ -413,6 +461,7 @@ public class OTToggleBreakpointAdapter implements IToggleBreakpointsTargetExtens
 				return Status.OK_STATUS;
 			}
     	};
+    	job.setPriority(Job.INTERACTIVE);
     	job.setSystem(true);
     	job.schedule();
     }
@@ -424,20 +473,80 @@ public class OTToggleBreakpointAdapter implements IToggleBreakpointsTargetExtens
      * @throws CoreException
      * @since 3.3
      */
-    protected IBreakpoint getClassLoadBreakpoint(IType type) throws CoreException {
+	protected IJavaBreakpoint getClassLoadBreakpoint(IType type) throws CoreException {
     	IBreakpoint[] breakpoints = DebugPlugin.getDefault().getBreakpointManager().getBreakpoints(JDIDebugModel.getPluginIdentifier());
-    	IBreakpoint existing = null;
-    	IJavaBreakpoint breakpoint = null;
     	for (int i = 0; i < breakpoints.length; i++) {
-			breakpoint = (IJavaBreakpoint) breakpoints[i];
-			if (breakpoint instanceof IJavaClassPrepareBreakpoint && createQualifiedTypeName(type).equals(breakpoint.getTypeName())) {
-				existing = breakpoint;
-				break;
+			IJavaBreakpoint breakpoint= (IJavaBreakpoint)breakpoints[i];
+			if (breakpoint instanceof IJavaClassPrepareBreakpoint && getQualifiedName(type).equals(breakpoint.getTypeName())) {
+				return breakpoint;
 			}
 		}
-    	return existing;
+		return null;
     }
     	
+    /**
+     * Returns the binary name for the {@link IType} derived from its {@link ITypeBinding}.
+     * <br><br>
+     * If the {@link ITypeBinding} cannot be derived this method falls back to calling
+     * {@link #createQualifiedTypeName(IType)} to try and compose the type name.
+     * @param type
+     * @return the binary name for the given {@link IType}
+     * @since 3.6
+     */
+    String getQualifiedName(IType type) throws JavaModelException {
+    	IJavaProject project = type.getJavaProject();
+    	if (project != null && project.isOnClasspath(type) && needsBindings(type)) {
+    		CompilationUnit cuNode = parseCompilationUnit(type.getTypeRoot());
+    		ISourceRange nameRange = type.getNameRange();
+    		if (SourceRange.isAvailable(nameRange)) {
+				ASTNode node = NodeFinder.perform(cuNode, nameRange);
+				if (node instanceof SimpleName) {
+					IBinding binding;
+					if (node.getLocationInParent() == SimpleType.NAME_PROPERTY &&
+							node.getParent().getLocationInParent() == ClassInstanceCreation.TYPE_PROPERTY) {
+						binding = ((ClassInstanceCreation) node.getParent().getParent()).resolveTypeBinding();
+					} else {
+						binding = ((SimpleName) node).resolveBinding();
+					}
+					if (binding instanceof ITypeBinding) {
+			    		String name = ((ITypeBinding) binding).getBinaryName();
+			    		if (name != null) {
+			    			return name;
+			    		}
+					}
+				}
+    		}    		
+    	}
+	    return createQualifiedTypeName(type);
+    }
+    
+    /**
+     * Checks if the type or any of its enclosing types are local types.
+     * @param type
+     * @return <code>true</code> if the type or a parent type are a local type
+     * @throws JavaModelException
+     * @since 3.6
+     */
+    boolean needsBindings(IType type) throws JavaModelException {
+    	if(type.isMember()) {
+    		if(type.isLocal() && !type.isAnonymous()) {
+    			return true;
+    		}
+    		IJavaElement parent = type.getParent();
+    		IType ptype = null;
+    		while(parent != null) {
+    			if(parent.getElementType() == IJavaElement.TYPE) {
+    				ptype = (IType) parent;
+    				if(ptype.isLocal() && !ptype.isAnonymous()) {
+    					return true;
+    				}
+    			}
+    			parent = parent.getParent();
+    		}
+    	}
+    	return false;
+    }
+    
     /**
      * Returns the package qualified name, while accounting for the fact that a source file might
      * not have a project
@@ -553,7 +662,7 @@ public class OTToggleBreakpointAdapter implements IToggleBreakpointsTargetExtens
     	}
         if (selection instanceof IStructuredSelection) {
             IStructuredSelection ss = (IStructuredSelection) selection;
-            return getMethods(ss).length > 0;
+            return getMethods(ss, isInterface(selection, part)).length > 0;
         }
         return (selection instanceof ITextSelection) && isMethod((ITextSelection) selection, part);
     }
@@ -603,25 +712,55 @@ public class OTToggleBreakpointAdapter implements IToggleBreakpointsTargetExtens
      * @param selection the selection to get the methods from
      * @return an array of the methods from the selection or an empty array
      */
-    protected IMethod[] getMethods(IStructuredSelection selection) {
+    protected IMethod[] getMethods(IStructuredSelection selection,  boolean isInterace) {
         if (selection.isEmpty()) {
             return new IMethod[0];
         }
-        List methods = new ArrayList(selection.size());
-        Iterator iterator = selection.iterator();
+        List<IMethod> methods = new ArrayList<IMethod>(selection.size());
+        Iterator<?> iterator = selection.iterator();
         while (iterator.hasNext()) {
             Object thing = iterator.next();
             try {
                 if (thing instanceof IMethod) {
                 	IMethod method = (IMethod) thing;
-                	if (!Flags.isAbstract(method.getFlags())) {
+                	if(isInterace){
+                		if (Flags.isDefaultMethod(method.getFlags()) || Flags.isStatic(method.getFlags())) 
+                    		methods.add(method);
+                	}
+                	else if (!Flags.isAbstract(method.getFlags())) {
                 		methods.add(method);
                 	}
                 }
             } 
             catch (JavaModelException e) {}
         }
-        return (IMethod[]) methods.toArray(new IMethod[methods.size()]);
+        return methods.toArray(new IMethod[methods.size()]);
+    }
+
+    /**
+     * Returns the methods from the selection, or an empty array
+     * @param selection the selection to get the methods from
+     * @return an array of the methods from the selection or an empty array
+     */
+    protected IMethod[] getInterfaceMethods(IStructuredSelection selection) {
+        if (selection.isEmpty()) {
+            return new IMethod[0];
+        }
+        List<IMethod> methods = new ArrayList<IMethod>(selection.size());
+        Iterator<?> iterator = selection.iterator();
+        while (iterator.hasNext()) {
+            Object thing = iterator.next();
+            try {
+                if (thing instanceof IMethod) {
+                	IMethod method = (IMethod) thing;
+                	if (Flags.isDefaultMethod(method.getFlags())) {
+                		methods.add(method);
+                	}
+                }
+            } 
+            catch (JavaModelException e) {}
+        }
+        return methods.toArray(new IMethod[methods.size()]);
     }
 
     /**
@@ -659,12 +798,12 @@ public class OTToggleBreakpointAdapter implements IToggleBreakpointsTargetExtens
      * @return list of <code>IField</code> and <code>IJavaFieldVariable</code>, possibly empty
      * @throws CoreException
      */
-    protected List getFields(IStructuredSelection selection) throws CoreException {
+    protected List<Object> getFields(IStructuredSelection selection) throws CoreException {
         if (selection.isEmpty()) {
             return Collections.EMPTY_LIST;
         }
-        List fields = new ArrayList(selection.size());
-        Iterator iterator = selection.iterator();
+        List<Object> fields = new ArrayList<Object>(selection.size());
+        Iterator<?> iterator = selection.iterator();
         while (iterator.hasNext()) {
             Object thing = iterator.next();
             if (thing instanceof IField) {
@@ -748,7 +887,7 @@ public class OTToggleBreakpointAdapter implements IToggleBreakpointsTargetExtens
     private boolean isFields(IStructuredSelection selection) {
         if (!selection.isEmpty()) {
         	try {
-	            Iterator iterator = selection.iterator();
+	            Iterator<?> iterator = selection.iterator();
 	            while (iterator.hasNext()) {
 	                Object thing = iterator.next();
 	                if (thing instanceof IField) {
@@ -775,6 +914,7 @@ public class OTToggleBreakpointAdapter implements IToggleBreakpointsTargetExtens
      */
     public void toggleWatchpoints(final IWorkbenchPart part, final ISelection finalSelection) {
         Job job = new Job("Toggle Watchpoints") { //$NON-NLS-1$
+            @Override
             protected IStatus run(IProgressMonitor monitor) {
                 if (monitor.isCanceled()) {
                     return Status.CANCEL_STATUS;
@@ -791,25 +931,25 @@ public class OTToggleBreakpointAdapter implements IToggleBreakpointsTargetExtens
                 	}
                     boolean allowed = false;
 	                if (selection instanceof IStructuredSelection) {
-	                	List fields = getFields((IStructuredSelection) selection);
+	                	List<Object> fields = getFields((IStructuredSelection) selection);
 	                    if (fields.isEmpty()) {
 	                        report(ActionMessages.ToggleBreakpointAdapter_10, part); 
 	                        return Status.OK_STATUS;
 	                    }
-	                    Iterator theFields = fields.iterator();
+	                    Iterator<Object> theFields = fields.iterator();
 	                    IField javaField = null;
 	                    IResource resource = null;
                         String typeName = null;
                         String fieldName = null;
                         Object element = null;
-                        Map attributes = null;
+                        Map<String, Object> attributes = null;
                         IJavaBreakpoint breakpoint = null;
 	                    while (theFields.hasNext()) {
 	                        element = theFields.next();
 	                        if (element instanceof IField) {
 								javaField = (IField) element;
 								IType type = javaField.getDeclaringType();
-								typeName = createQualifiedTypeName(type);
+								typeName = getQualifiedName(type);
 								fieldName = javaField.getElementName();
 								int f = javaField.getFlags();
 								boolean fin = Flags.isFinal(f);
@@ -824,12 +964,11 @@ public class OTToggleBreakpointAdapter implements IToggleBreakpointsTargetExtens
 	                        breakpoint = getWatchpoint(typeName, fieldName);
 	                        if (breakpoint == null) {
 	                        	if(!allowed) {
-	                        		toggleLineBreakpoints(part, finalSelection);
-	                        		return Status.OK_STATUS;
+	                        		return doLineBreakpointToggle(finalSelection, part, null, true, monitor);
 	                        	}
 	                        	int start = -1;
 	                            int end = -1;
-	                            attributes = new HashMap(10);
+	                            attributes = new HashMap<String, Object>(10);
 	                            if (javaField == null) {
 	                            	resource = ResourcesPlugin.getWorkspace().getRoot();
 	                            } else {
@@ -844,7 +983,7 @@ public class OTToggleBreakpointAdapter implements IToggleBreakpointsTargetExtens
 	                            }
 	                        	JDIDebugModel.createWatchpoint(resource, typeName, fieldName, -1, start, end, 0, true, attributes);
 	                        } else {
-	                            DebugPlugin.getDefault().getBreakpointManager().removeBreakpoint(breakpoint, true);
+								deleteBreakpoint(breakpoint, part, monitor);
 	                        }
 	                    }
                     }
@@ -856,6 +995,7 @@ public class OTToggleBreakpointAdapter implements IToggleBreakpointsTargetExtens
                 return Status.OK_STATUS;
             }
         };
+        job.setPriority(Job.INTERACTIVE);
         job.setSystem(true);
         job.schedule();
     }
@@ -937,10 +1077,9 @@ public class OTToggleBreakpointAdapter implements IToggleBreakpointsTargetExtens
 				String[] bounds = typeParameter.getBounds();
 				if (bounds.length == 0) {
 					return "Ljava/lang/Object;"; //$NON-NLS-1$
-				} else {
-					String bound = Signature.createTypeSignature(bounds[0], false);
-					return resolveTypeSignature(method, bound);
 				}
+				String bound = Signature.createTypeSignature(bounds[0], false);
+				return Signature.createArraySignature(resolveTypeSignature(method, bound), count);
     		}
             // the type name cannot be resolved
             return null;
@@ -1059,11 +1198,17 @@ public class OTToggleBreakpointAdapter implements IToggleBreakpointsTargetExtens
      * @return the compilation unit or <code>null</code>
      */
     protected CompilationUnit parseCompilationUnit(ITextEditor editor) {
-        ITypeRoot root = getTypeRoot(editor.getEditorInput());
+        return parseCompilationUnit(getTypeRoot(editor.getEditorInput()));
+    }
+
+    /**
+     * Parses the {@link ITypeRoot}.
+     * @param root the root
+     * @return the parsed {@link CompilationUnit}
+     */
+    CompilationUnit parseCompilationUnit(ITypeRoot root) {
         if(root != null) {
-	        ASTParser parser = ASTParser.newParser(AST.JLS3);
-	        parser.setSource(root);
-	        return (CompilationUnit) parser.createAST(null);
+    		return SharedASTProvider.getAST(root, SharedASTProvider.WAIT_YES, null);
         }
         return null;
     }
@@ -1190,15 +1335,15 @@ public class OTToggleBreakpointAdapter implements IToggleBreakpointsTargetExtens
     	if(sel instanceof IStructuredSelection) {
     		IMember member = (IMember) ((IStructuredSelection)sel).getFirstElement();
     		int mtype = member.getElementType();
-    		if(mtype == IJavaElement.FIELD || mtype == IJavaElement.METHOD) {
+    		if(mtype == IJavaElement.FIELD || mtype == IJavaElement.METHOD || mtype == IJavaElement.INITIALIZER) {
     			// remove line breakpoint if present first
     	    	if (selection instanceof ITextSelection) {
     				ITextSelection ts = (ITextSelection) selection;
     				IType declaringType = member.getDeclaringType();
     				IResource resource = BreakpointUtils.getBreakpointResource(declaringType);
-					IJavaLineBreakpoint breakpoint = JDIDebugModel.lineBreakpointExists(resource, createQualifiedTypeName(declaringType), ts.getStartLine() + 1);
+					IJavaLineBreakpoint breakpoint = JDIDebugModel.lineBreakpointExists(resource, getQualifiedName(declaringType), ts.getStartLine() + 1);
     				if (breakpoint != null) {
-    					breakpoint.delete();
+						deleteBreakpoint(breakpoint, part, null);
     					return;
     				}
     				CompilationUnit unit = parseCompilationUnit(getTextEditor(part));
@@ -1222,10 +1367,43 @@ public class OTToggleBreakpointAdapter implements IToggleBreakpointsTargetExtens
     		}
     		else {
     			//fall back to old behavior, always create a line breakpoint
-    			toggleLineBreakpoints(part, selection, true);
+    			toggleLineBreakpoints(part, selection, true, null);
     		}
     	}
     }
+
+	/**
+	 * Deletes the given breakpoint using the operation history, which allows to undo the deletion.
+	 * 
+	 * @param breakpoint the breakpoint to delete
+	 * @param part a workbench part, or <code>null</code> if unknown
+	 * @param progressMonitor the progress monitor
+	 * @throws CoreException if the deletion fails
+	 */
+	private static void deleteBreakpoint(IJavaBreakpoint breakpoint, IWorkbenchPart part, IProgressMonitor monitor) throws CoreException {
+		final Shell shell= part != null ? part.getSite().getShell() : null;
+		final boolean[] result= new boolean[] { true };
+
+		final IEclipsePreferences prefs= InstanceScope.INSTANCE.getNode(JDIDebugUIPlugin.getUniqueIdentifier());
+		boolean prompt= prefs.getBoolean(IJDIPreferencesConstants.PREF_PROMPT_DELETE_CONDITIONAL_BREAKPOINT, true);
+		if (prompt && breakpoint instanceof IJavaLineBreakpoint && ((IJavaLineBreakpoint)breakpoint).getCondition() != null) {
+			Display display= shell != null && !shell.isDisposed() ? shell.getDisplay() : PlatformUI.getWorkbench().getDisplay();
+			if (!display.isDisposed()) {
+				display.syncExec(new Runnable() {
+					public void run() {
+						MessageDialogWithToggle dialog= MessageDialogWithToggle.openOkCancelConfirm(shell, ActionMessages.ToggleBreakpointAdapter_confirmDeleteTitle,
+								ActionMessages.ToggleBreakpointAdapter_confirmDeleteMessage, ActionMessages.ToggleBreakpointAdapter_confirmDeleteShowAgain, false,
+								null, null);
+						if (dialog.getToggleState())
+							prefs.putBoolean(IJDIPreferencesConstants.PREF_PROMPT_DELETE_CONDITIONAL_BREAKPOINT, false);
+						result[0]= dialog.getReturnCode() == IDialogConstants.OK_ID;
+					}
+				});
+			}
+		}
+		if (result[0])
+			DebugUITools.deleteBreakpoints(new IBreakpoint[] { breakpoint }, shell, monitor);
+	}
 
     /*
      * (non-Javadoc)
@@ -1239,6 +1417,52 @@ public class OTToggleBreakpointAdapter implements IToggleBreakpointsTargetExtens
     	}    	
         return canToggleLineBreakpoints(part, selection);
     }
-}
 
+	/* (non-Javadoc)
+	 * @see org.eclipse.debug.ui.actions.IToggleBreakpointsTargetExtension2#toggleBreakpointsWithEvent(org.eclipse.ui.IWorkbenchPart, org.eclipse.jface.viewers.ISelection, org.eclipse.swt.widgets.Event)
+	 */
+	public void toggleBreakpointsWithEvent(IWorkbenchPart part, ISelection selection, Event event) throws CoreException {
+		if(event != null) {
+			if((event.stateMask & SWT.MOD2) > 0) {
+				ITextEditor editor = getTextEditor(part);
+				if(editor != null) {
+					IVerticalRulerInfo info = (IVerticalRulerInfo) editor.getAdapter(IVerticalRulerInfo.class);
+					if(info != null) {
+						IBreakpoint bp = BreakpointUtils.getBreakpointFromEditor(editor, info);
+						if(bp != null) {
+							bp.setEnabled(!bp.isEnabled());
+							return;
+						}
+					}
+				}
+			}
+			else if((event.stateMask & SWT.MOD1) > 0) {
+				ITextEditor editor = getTextEditor(part);
+				if(editor != null) {
+					IVerticalRulerInfo info = (IVerticalRulerInfo) editor.getAdapter(IVerticalRulerInfo.class);
+					if(info != null) {
+						IBreakpoint bp = BreakpointUtils.getBreakpointFromEditor(editor, info);
+						if(bp != null) {
+							PreferencesUtil.createPropertyDialogOn(
+									editor.getSite().getShell(),
+									bp,
+									null,
+									null,
+									null).open();
+							return;
+						}
+					}
+				}
+			}
+		}
+		toggleBreakpoints(part, selection);
+	}
+
+	/* (non-Javadoc)
+	 * @see org.eclipse.debug.ui.actions.IToggleBreakpointsTargetExtension2#canToggleBreakpointsWithEvent(org.eclipse.ui.IWorkbenchPart, org.eclipse.jface.viewers.ISelection, org.eclipse.swt.widgets.Event)
+	 */
+	public boolean canToggleBreakpointsWithEvent(IWorkbenchPart part, ISelection selection, Event event) {
+		return canToggleBreakpoints(part, selection);
+	}
+}
 //ike}
