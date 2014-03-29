@@ -115,7 +115,7 @@ static boolean areMethodsCompatible(MethodBinding one, MethodBinding two, Lookup
 boolean areReturnTypesCompatible(MethodBinding one, MethodBinding two) {
 	return areReturnTypesCompatible(one, two, this.type.scope.environment());
 }
-static boolean areReturnTypesCompatible(MethodBinding one, MethodBinding two, LookupEnvironment environment) {
+public static boolean areReturnTypesCompatible(MethodBinding one, MethodBinding two, LookupEnvironment environment) {
 //{ObjectTeams: consider enhanced callin signatures:
 	TypeBinding oneReturnType = MethodModel.getReturnType(one);
 	TypeBinding twoReturnType = MethodModel.getReturnType(two);
@@ -887,7 +887,7 @@ MethodBinding computeSubstituteMethod(MethodBinding inheritedMethod, MethodBindi
 	return computeSubstituteMethod(inheritedMethod, currentMethod, this.environment);
 }
 
-static MethodBinding computeSubstituteMethod(MethodBinding inheritedMethod, MethodBinding currentMethod, LookupEnvironment environment) {
+public static MethodBinding computeSubstituteMethod(MethodBinding inheritedMethod, MethodBinding currentMethod, LookupEnvironment environment) {
 	if (inheritedMethod == null) return null;
 //{ObjectTeams: use source-level params in case of enhanced callin methods:
 /* orig:
@@ -1109,7 +1109,7 @@ boolean isSubstituteParameterSubsignature(MethodBinding method, MethodBinding su
 	return isSubstituteParameterSubsignature(method, substituteMethod, this.environment);
 }
 
-static boolean isSubstituteParameterSubsignature(MethodBinding method, MethodBinding substituteMethod, LookupEnvironment environment) {
+public static boolean isSubstituteParameterSubsignature(MethodBinding method, MethodBinding substituteMethod, LookupEnvironment environment) {
 //{ObjectTeams: added 3. argument:
 	if (!areParametersEqual(method, substituteMethod, environment)) {
 // SH}

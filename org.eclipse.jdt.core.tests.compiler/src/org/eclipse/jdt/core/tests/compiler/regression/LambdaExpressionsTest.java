@@ -3729,7 +3729,7 @@ public void test430015() {
 				"        Method[] methods = X.class.getDeclaredMethods();\n" +
 				"        for (Method method : methods) {\n" +
 				"        	if (method.getName().contains(\"lambda\")) {\n" +
-				"         		Parameter[] parameters = methods[2].getParameters();\n" +
+				"         		Parameter[] parameters = method.getParameters();\n" +
 				"        		System.out.println(Arrays.asList(parameters));\n" +
 				"        	}\n" +
 				"        }\n" +
@@ -3807,6 +3807,296 @@ public void test430043() {
 			},
 			"OK");
 }
+// https://bugs.eclipse.org/bugs/show_bug.cgi?id=430035, [1.8][compiler][codegen] Bridge methods are not generated for lambdas/method references 
+public void test430035() {
+	this.runConformTest(
+			new String[] {
+				"X.java",
+				"import java.util.function.Consumer;\n" +
+				"public class X {\n" +
+				"    interface StringConsumer extends Consumer<String> {\n" +
+				"        void accept(String t);\n" +
+				"    }\n" +
+				"    public static void main(String... x) {\n" +
+				"      StringConsumer c = s->System.out.println(\"m(\"+s+')');\n" +
+				"      c.accept(\"direct call\");\n" +
+				"      Consumer<String> c4b=c;\n" +
+				"      c4b.accept(\"bridge method\");\n" +
+				"    }\n" +
+				"}\n"
+			},
+			"m(direct call)\n" + 
+			"m(bridge method)");
+}
+// https://bugs.eclipse.org/bugs/show_bug.cgi?id=430035, [1.8][compiler][codegen] Bridge methods are not generated for lambdas/method references 
+public void test430035a() { // test reference expressions requiring bridges.
+	this.runConformTest(
+			new String[] {
+				"X.java",
+				"import java.util.function.Consumer;\n" +			
+				"public class X {\n" +
+				"    interface StringConsumer extends Consumer<String> {\n" +
+				"        void accept(String t);\n" +
+				"    }\n" +
+				"    static void m(String s) { System.out.println(\"m(\"+s+\")\"); } \n" +
+				"    public static void main(String... x) {\n" +
+				"      StringConsumer c = X::m;\n" +
+				"      c.accept(\"direct call\");\n" +
+				"      Consumer<String> c4b=c;\n" +
+				"      c4b.accept(\"bridge method\");\n" +
+				"    }\n" +
+				"}\n"
+			},
+			"m(direct call)\n" + 
+			"m(bridge method)");
+}
+// https://bugs.eclipse.org/bugs/show_bug.cgi?id=430035, [1.8][compiler][codegen] Bridge methods are not generated for lambdas/method references 
+public void test430035b() {
+	this.runConformTest(
+			new String[] {
+				"X.java",
+				"interface I<T> {\n" +
+				"	void foo(T t);\n" +
+				"}\n" +
+				"interface J<T> {\n" +
+				"	void foo(T t);\n" +
+				"}\n" +
+				"interface K extends I<String>, J<String> {\n" +
+				"}\n" +
+				"public class X {\n" +
+				"    public static void main(String... x) {\n" +
+				"      K k = s -> System.out.println(\"m(\"+s+')');\n" +
+				"      k.foo(\"direct call\");\n" +
+				"      J<String> j = k;\n" +
+				"      j.foo(\"bridge method\");\n" +
+				"      I<String> i = k;\n" +
+				"      i.foo(\"bridge method\");\n" +
+				"    }\n" +
+				"}\n"
+			},
+			"m(direct call)\n" +
+			"m(bridge method)\n" +
+			"m(bridge method)");
+}
+// https://bugs.eclipse.org/bugs/show_bug.cgi?id=430035, [1.8][compiler][codegen] Bridge methods are not generated for lambdas/method references 
+public void test430035c() {
+	this.runConformTest(
+			new String[] {
+				"X.java",
+				"interface I<T> {\n" +
+				"	void foo(String t, T u);\n" +
+				"}\n" +
+				"interface J<T> {\n" +
+				"	void foo(T t, String u);\n" +
+				"}\n" +
+				"interface K extends I<String>, J<String> {\n" +
+				"	void foo(String t, String u);\n" +
+				"}\n" +
+				"public class X {\n" +
+				"    public static void main(String... x) {\n" +
+				"      K k = (s, u) -> System.out.println(\"m(\"+ s + u + ')');\n" +
+				"      k.foo(\"direct\", \" call\");\n" +
+				"      J<String> j = k;\n" +
+				"      j.foo(\"bridge\",  \" method(j)\");\n" +
+				"      I<String> i = k;\n" +
+				"      i.foo(\"bridge\",  \" method(i)\");\n" +
+				"    }\n" +
+				"}\n"
+			},
+			"m(direct call)\n" + 
+			"m(bridge method(j))\n" + 
+			"m(bridge method(i))");
+}
+// https://bugs.eclipse.org/bugs/show_bug.cgi?id=430035, [1.8][compiler][codegen] Bridge methods are not generated for lambdas/method references 
+public void test430035d() { // 8b131 complains of ambiguity.
+	this.runConformTest(
+			new String[] {
+				"X.java",
+				"interface I<T> {\n" +
+				"	void foo(String t, T u);\n" +
+				"}\n" +
+				"interface J<T> {\n" +
+				"	void foo(T t, String u);\n" +
+				"}\n" +
+				"interface K extends I<String>, J<String> {\n" +
+				"}\n" +
+				"public class X {\n" +
+				"    public static void main(String... x) {\n" +
+				"      K k = (s, u) -> System.out.println(\"m(\"+ s + u + ')');\n" +
+				"      k.foo(\"direct\", \" call\");\n" +
+				"      J<String> j = k;\n" +
+				"      j.foo(\"bridge\",  \" method(j)\");\n" +
+				"      I<String> i = k;\n" +
+				"      i.foo(\"bridge\",  \" method(i)\");\n" +
+				"    }\n" +
+				"}\n"
+			},
+			"m(direct call)\n" + 
+			"m(bridge method(j))\n" + 
+			"m(bridge method(i))");
+}
+// https://bugs.eclipse.org/bugs/show_bug.cgi?id=430035, [1.8][compiler][codegen] Bridge methods are not generated for lambdas/method references 
+public void test430035e() { // 8b131 complains of ambiguity in call.
+	this.runConformTest(
+			new String[] {
+				"X.java",
+				"interface I<T> {\n" +
+				"	Object foo(String t, T u);\n" +
+				"}\n" +
+				"interface J<T> {\n" +
+				"	String foo(T t, String u);\n" +
+				"}\n" +
+				"interface K extends I<String>, J<String> {\n" +
+				"}\n" +
+				"public class X {\n" +
+				"    public static void main(String... x) {\n" +
+				"      K k = (s, u) -> s + u;\n" +
+				"      System.out.println(k.foo(\"direct\", \" call\"));\n" +
+				"      J<String> j = k;\n" +
+				"      System.out.println(j.foo(\"bridge\",  \" method(j)\"));\n" +
+				"      I<String> i = k;\n" +
+				"      System.out.println(i.foo(\"bridge\",  \" method(i)\"));\n" +
+				"    }\n" +
+				"}\n"
+			},
+			"direct call\n" + 
+			"bridge method(j)\n" + 
+			"bridge method(i)");
+}
+// https://bugs.eclipse.org/bugs/show_bug.cgi?id=430035, [1.8][compiler][codegen] Bridge methods are not generated for lambdas/method references 
+public void test430035f() { // ensure co-variant return emits a bridge request.
+	this.runConformTest(
+			new String[] {
+				"X.java",
+				"interface I<T> {\n" +
+				"	Object foo(String t, String u);\n" +
+				"}\n" +
+				"interface J<T> {\n" +
+				"	String foo(String t, String u);\n" +
+				"}\n" +
+				"interface K extends I<String>, J<String> {\n" +
+				"}\n" +
+				"public class X {\n" +
+				"    public static void main(String... x) {\n" +
+				"      K k = (s, u) -> s + u;\n" +
+				"      System.out.println(k.foo(\"direct\", \" call\"));\n" +
+				"      J<String> j = k;\n" +
+				"      System.out.println(j.foo(\"bridge\",  \" method(j)\"));\n" +
+				"      I<String> i = k;\n" +
+				"      System.out.println(i.foo(\"bridge\",  \" method(i)\"));\n" +
+				"    }\n" +
+				"}\n"
+			},
+			"direct call\n" + 
+			"bridge method(j)\n" + 
+			"bridge method(i)");
+}
+// https://bugs.eclipse.org/bugs/show_bug.cgi?id=430241,  [1.8][compiler] Raw return type results in incorrect covariant return bridge request to LambdaMetaFactory
+public void test430241() { // ensure raw return type variant does not emit a bridge request.
+	this.runConformTest(
+			new String[] {
+				"X.java",
+				"interface K extends I, J {\n" +
+				"}\n" +
+				"interface I {\n" +
+				"    Comparable<Integer> foo();\n" +
+				"}\n" +
+				"interface J {\n" +
+				"    Comparable foo();\n" +
+				"}\n" +
+				"public class X {\n" +
+				"	public static void main(String[] args) {\n" +
+				"		K k = () -> null;\n" +
+				"		System.out.println(k.foo());\n" +
+				"	}\n" +
+				"}\n"
+			},
+			"null");
+}
+// https://bugs.eclipse.org/bugs/show_bug.cgi?id=430310, [1.8][compiler] Functional interface incorrectly rejected as not being.
+public void test430310() {
+	this.runConformTest(
+			new String[] {
+				"X.java",
+				"interface Func1<T1, R> {\n" +
+				"        R apply(T1 v1);\n" +
+				"        void other();\n" +
+				"}\n" +
+				"@FunctionalInterface // spurious error: F1<T, R> is not a functional interface\n" +
+				"public interface X<T1, R> extends Func1<T1, R> {\n" +
+				"	default void other() {}\n" +
+				"   public static void main(String [] args) {\n" +
+				"       System.out.println(\"OK\");\n" +
+				"   }\n" +
+				"}\n"
+			},
+			"OK");
+}
+// https://bugs.eclipse.org/bugs/show_bug.cgi?id=430310, [1.8][compiler] Functional interface incorrectly rejected as not being.
+public void test430310a() {
+	this.runConformTest(
+			new String[] {
+				"X.java",
+				"@FunctionalInterface\n" +
+				"public interface X<T1, T2, R> {\n" +
+				"    R apply(T1 v1, T2 v2);\n" +
+				"    default void other() {}\n" +
+				"    public static void main(String[] args) {\n" +
+				"        System.out.println(\"OK\");\n" +
+				"    }\n" +
+				"}\n"
+			},
+			"OK");
+}
+// https://bugs.eclipse.org/bugs/show_bug.cgi?id=430310, [1.8][compiler] Functional interface incorrectly rejected as not being.
+public void test430310b() {
+	this.runConformTest(
+			new String[] {
+				"X.java",
+				"interface I1 {\n" +
+				"	int foo(String s);\n" +
+				"}\n" +
+				"@FunctionalInterface\n" +
+				"interface A1 extends I1 {\n" +
+				"	@Override\n" +
+				"	default int foo(String s) {\n" +
+				"		return -1;\n" +
+				"	}\n" +
+				"	int foo(java.io.Serializable s);\n" +
+				"}\n" +
+				"public class X {\n" +
+				"	public static void main(String[] args) {\n" +
+				"		System.out.println(\"OK\");\n" +
+				"	}\n" +
+				"}\n"
+			},
+			"OK");
+}
+// https://bugs.eclipse.org/bugs/show_bug.cgi?id=430310, [1.8][compiler] Functional interface incorrectly rejected as not being.
+public void test430310c() {
+	this.runConformTest(
+			new String[] {
+				"X.java",
+				"interface I2 {\n" +
+				"	int foo(String s);\n" +
+				"}\n" +
+				"@FunctionalInterface\n" +
+				"interface A2 extends I2 {\n" +
+				"	@Override\n" +
+				"	default int foo(String s) {\n" +
+				"		return -1;\n" +
+				"	}\n" +
+				"	int bar(java.io.Serializable s);\n" +
+				"}\n" +
+				"public class X {\n" +
+				"	public static void main(String[] args) {\n" +
+				"		System.out.println(\"OK\");\n" +
+				"	}\n" +
+				"}\n"
+			},
+			"OK");
+}
+
 public static Class testClass() {
 	return LambdaExpressionsTest.class;
 }

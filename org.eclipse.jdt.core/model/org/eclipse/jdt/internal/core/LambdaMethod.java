@@ -130,24 +130,24 @@ public class LambdaMethod extends SourceMethod {
 		return this.elementInfo;
 	}
 	
-	public void getHandleMemento(StringBuffer buff, boolean memoizeParent) {
-		if (memoizeParent)
-			((JavaElement) getParent()).getHandleMemento(buff);
-		char delimiter = getHandleMementoDelimiter();
-		buff.append(delimiter);
+	public void getHandleMemento(StringBuffer buff, boolean serializeParent) {
+		if (serializeParent) {
+			((LambdaExpression) getParent()).getHandleMemento(buff, true, false);
+		}
+		appendEscapedDelimiter(buff, getHandleMementoDelimiter());
 		escapeMementoName(buff, getElementName());
 		buff.append(JEM_COUNT);
 		buff.append(this.parameterTypes.length);
 		for (int i = 0, length = this.parameterTypes.length; i < length; i++) {
-			buff.append(JEM_STRING);
-			buff.append(this.parameterTypes[i]);
-			buff.append(JEM_STRING);
-			buff.append(this.parameterNameStrings[i]);
+			appendEscapedDelimiter(buff, JEM_STRING);
+			escapeMementoName(buff, this.parameterTypes[i]);
+			appendEscapedDelimiter(buff, JEM_STRING);
+			escapeMementoName(buff, this.parameterNameStrings[i]);
 		}
-		buff.append(JEM_STRING);
-		buff.append(this.returnTypeString);
-		buff.append(JEM_STRING);
-		buff.append(this.key);
+		appendEscapedDelimiter(buff, JEM_STRING);
+		escapeMementoName(buff, this.returnTypeString);
+		appendEscapedDelimiter(buff, JEM_STRING);
+		escapeMementoName(buff, this.key);
 		ILocalVariable[] arguments = this.elementInfo.arguments;
 		for (int i = 0, length = arguments.length; i < length; i++) {
 			LocalVariable local = (LocalVariable) arguments[i];
@@ -156,6 +156,8 @@ public class LambdaMethod extends SourceMethod {
 	}
 	public void getHandleMemento(StringBuffer buff) {
 		getHandleMemento(buff, true);
+		// lambda method and lambda expression cannot share the same memento - add a trailing discriminator.
+		appendEscapedDelimiter(buff, getHandleMementoDelimiter());
 	}
 	
 	protected char getHandleMementoDelimiter() {

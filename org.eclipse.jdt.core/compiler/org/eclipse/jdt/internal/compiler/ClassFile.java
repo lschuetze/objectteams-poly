@@ -2987,11 +2987,12 @@ public class ClassFile implements TypeConstants, TypeIds {
 		this.contents[localContentsOffset++] = (byte) numberOfBootstraps;
 		for (int i = 0; i < numberOfBootstraps; i++) {
 			FunctionalExpression functional = (FunctionalExpression) functionalExpressionList.get(i);
-			
+			MethodBinding [] bridges = functional.getRequiredBridges();
 			TypeBinding[] markerInterfaces = null;
 			if (functional instanceof LambdaExpression && 
 				   (((markerInterfaces=((LambdaExpression)functional).getMarkerInterfaces()) != null) ||
-				   	((LambdaExpression)functional).isSerializable)) {
+				   	((LambdaExpression)functional).isSerializable) ||
+				   	bridges != null) {
 				
 				LambdaExpression lambdaEx = (LambdaExpression)functional;
 				// may need even more space
@@ -2999,6 +3000,10 @@ public class ClassFile implements TypeConstants, TypeIds {
 				if (markerInterfaces != null) {
 					// 2 for the marker interface list size then 2 per marker interface index
 					extraSpace += (2 + 2 * markerInterfaces.length);
+				}
+				if (bridges != null) {
+					// 2 for bridge count then 2 per bridge method type.
+					extraSpace += (2 + 2 * bridges.length);
 				}
 				if (extraSpace + localContentsOffset >= this.contents.length) {
 					resizeContents(extraSpace);
@@ -3014,7 +3019,8 @@ public class ClassFile implements TypeConstants, TypeIds {
 				
 				// u2 num_bootstrap_arguments
 				this.contents[localContentsOffset++] = 0;
-				this.contents[localContentsOffset++] = (byte) (4+(markerInterfaces==null?0:1+markerInterfaces.length));
+				this.contents[localContentsOffset++] = (byte) (4 + (markerInterfaces==null?0:1+markerInterfaces.length) + 
+						                                                   (bridges == null ? 0 : 1 + bridges.length));
 				
 				int functionalDescriptorIndex = this.constantPool.literalIndexForMethodType(functional.descriptor.original().signature());
 				this.contents[localContentsOffset++] = (byte) (functionalDescriptorIndex >> 8);
@@ -3029,13 +3035,15 @@ public class ClassFile implements TypeConstants, TypeIds {
 				this.contents[localContentsOffset++] = (byte) (methodTypeIndex >> 8);
 				this.contents[localContentsOffset++] = (byte) methodTypeIndex;
 
-				// Does this block have to deal with FLAG_BRIDGE? When is it needed?
 				int bitflags = 0;
 				if (lambdaEx.isSerializable) {
 					bitflags |= ClassFileConstants.FLAG_SERIALIZABLE;
 				}
 				if (markerInterfaces!=null) {
 					bitflags |= ClassFileConstants.FLAG_MARKERS;
+				}
+				if (bridges != null) {
+					bitflags |= ClassFileConstants.FLAG_BRIDGES;
 				}
 				int indexForBitflags = this.constantPool.literalIndex(bitflags);
 				
@@ -3050,6 +3058,17 @@ public class ClassFile implements TypeConstants, TypeIds {
 						int classTypeIndex = this.constantPool.literalIndexForType(markerInterfaces[m]);
 						this.contents[localContentsOffset++] = (byte)(classTypeIndex>>8);
 						this.contents[localContentsOffset++] = (byte)(classTypeIndex);
+					}					
+				}
+				if (bridges != null) {
+					int bridgeCountIndex =  this.constantPool.literalIndex(bridges.length);
+					this.contents[localContentsOffset++] = (byte) (bridgeCountIndex >> 8);
+					this.contents[localContentsOffset++] = (byte) (bridgeCountIndex);
+					for (int m = 0, maxm = bridges.length; m < maxm; m++) {
+						char [] bridgeSignature = bridges[m].signature();
+						int bridgeMethodTypeIndex = this.constantPool.literalIndexForMethodType(bridgeSignature);
+						this.contents[localContentsOffset++] = (byte) (bridgeMethodTypeIndex >> 8);
+						this.contents[localContentsOffset++] = (byte) bridgeMethodTypeIndex;
 					}					
 				}
 			} else {

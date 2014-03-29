@@ -36,11 +36,11 @@ public class LambdaExpression extends SourceType {
 	
 	// Construction from AST node
 	public LambdaExpression(JavaElement parent, org.eclipse.jdt.internal.compiler.ast.LambdaExpression lambdaExpression) {
-		super(parent, new String("Lambda(") + new String(lambdaExpression.descriptor.declaringClass.sourceName()) + ')'); //$NON-NLS-1$
+		super(parent, new String("Lambda(") + new String(lambdaExpression.resolvedType.sourceName()) + ')'); //$NON-NLS-1$
 		this.sourceStart = lambdaExpression.sourceStart;
 		this.sourceEnd = lambdaExpression.sourceEnd;
 		this.arrowPosition = lambdaExpression.arrowPosition;
-		this.interphase = new String(lambdaExpression.descriptor.declaringClass.readableName());
+		this.interphase = new String(CharOperation.replaceOnCopy(lambdaExpression.resolvedType.genericTypeSignature(), '/', '.'));
 		this.elementInfo = makeTypeElementInfo(this, this.interphase, this.sourceStart, this.sourceEnd, this.arrowPosition); 
 		this.lambdaMethod = LambdaMethod.make(this, lambdaExpression);
 		this.elementInfo.children = new IJavaElement[] { this.lambdaMethod };
@@ -84,7 +84,7 @@ public class LambdaExpression extends SourceType {
 		elementInfo.addCategories(handle, null);
 		
 		JavaModelManager manager = JavaModelManager.getJavaModelManager();
-		char[][] superinterfaces = new char [][] { manager.intern(interphase.toCharArray()) }; // drops marker interfaces - to fix.
+		char[][] superinterfaces = new char [][] { manager.intern(Signature.toString(interphase).toCharArray()) }; // drops marker interfaces - to fix.
 		elementInfo.setSuperInterfaceNames(superinterfaces);
 		return elementInfo;
 	}
@@ -127,15 +127,17 @@ public class LambdaExpression extends SourceType {
 	 * @see JavaElement#getHandleMemento(StringBuffer)
 	 */
 	protected void getHandleMemento(StringBuffer buff) {
-		getHandleMemento(buff, true);
+		getHandleMemento(buff, true, true);
+		// lambda method and lambda expression cannot share the same memento - add a trailing discriminator.
+		appendEscapedDelimiter(buff, getHandleMementoDelimiter());
 	}
 	
-	protected void getHandleMemento(StringBuffer buff, boolean memoizeParent) {
-		if (memoizeParent) 
+	protected void getHandleMemento(StringBuffer buff, boolean serializeParent, boolean serializeChild) {
+		if (serializeParent) 
 			((JavaElement)getParent()).getHandleMemento(buff);
-		buff.append(getHandleMementoDelimiter());
+		appendEscapedDelimiter(buff, getHandleMementoDelimiter());
 		escapeMementoName(buff, this.name);
-		buff.append(JEM_STRING);
+		appendEscapedDelimiter(buff, JEM_STRING);
 		escapeMementoName(buff, this.interphase);
 		buff.append(JEM_COUNT);
 		buff.append(this.sourceStart);
@@ -143,6 +145,8 @@ public class LambdaExpression extends SourceType {
 		buff.append(this.sourceEnd);
 		buff.append(JEM_COUNT);
 		buff.append(this.arrowPosition);
+		if (serializeChild)
+			this.lambdaMethod.getHandleMemento(buff, false);
 	}
 	
 	public IJavaElement getHandleFromMemento(String token, MementoTokenizer memento, WorkingCopyOwner workingCopyOwner) {
@@ -175,11 +179,17 @@ public class LambdaExpression extends SourceType {
 		}
 		this.lambdaMethod.elementInfo.arguments  = parameters;
 		this.elementInfo.children = new IJavaElement[] { this.lambdaMethod };
-		return this.lambdaMethod;
-	}
-	
-	public boolean isReadOnly() {
-		return true;
+		if (!memento.hasMoreTokens())
+			return this.lambdaMethod;
+		switch (memento.nextToken().charAt(0)) {
+			case JEM_LAMBDA_METHOD:
+				if (!memento.hasMoreTokens())
+					return this.lambdaMethod;
+				return this.lambdaMethod.getHandleFromMemento(memento, workingCopyOwner);
+			case JEM_LAMBDA_EXPRESSION:
+			default:
+				return this;	
+		}
 	}
 
 	public IJavaElement[] getChildren() throws JavaModelException {
@@ -209,8 +219,7 @@ public class LambdaExpression extends SourceType {
 		if (primaryParent instanceof JavaElement) {
 			JavaElement ancestor = (JavaElement) primaryParent;
 			StringBuffer buffer = new StringBuffer(32);
-			getHandleMemento(buffer, false);
-			this.lambdaMethod.getHandleMemento(buffer, false);
+			getHandleMemento(buffer, false, true);
 			String memento = buffer.toString();
 			return ancestor.getHandleFromMemento(new MementoTokenizer(memento), DefaultWorkingCopyOwner.PRIMARY).getParent();
 		}
@@ -218,15 +227,6 @@ public class LambdaExpression extends SourceType {
 	}
 
 	public String[] getSuperInterfaceTypeSignatures() throws JavaModelException {
-		SourceTypeElementInfo info = (SourceTypeElementInfo) getElementInfo();
-		char[][] names = info.getInterfaceNames();
-		if (names == null) {
-			return CharOperation.NO_STRINGS;
-		}
-		String[] strings = new String[names.length];
-		for (int i= 0; i < names.length; i++) {
-			strings[i] = new String(Signature.createTypeSignature(names[i], true));
-		}
-		return strings;
+		return new String[] { this.interphase };
 	}
 }

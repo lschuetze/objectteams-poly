@@ -14,7 +14,6 @@ import java.io.IOException;
 import java.util.HashMap;
 
 import junit.framework.Test;
-import junit.framework.TestSuite;
 
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.jdt.core.IClassFile;
@@ -41,22 +40,7 @@ public class JavaElement8Tests extends AbstractJavaModelTests {
 		this.endChar = "";
 	}
 	public static Test suite() {
-		if (TESTS_PREFIX != null || TESTS_NAMES != null || TESTS_NUMBERS!=null || TESTS_RANGE !=null) {
-			return buildModelTestSuite(JavaElement8Tests.class);
-		}
-		TestSuite suite = new Suite(JavaElement8Tests.class.getName());
-		suite.addTest(new JavaElement8Tests("testBug428178"));
-		suite.addTest(new JavaElement8Tests("testBug428178a"));
-		suite.addTest(new JavaElement8Tests("testBug429641"));
-		suite.addTest(new JavaElement8Tests("testBug429641a"));
-		suite.addTest(new JavaElement8Tests("test429948"));
-		suite.addTest(new JavaElement8Tests("test429948a"));
-		suite.addTest(new JavaElement8Tests("test429966"));
-		suite.addTest(new JavaElement8Tests("testBug429910"));
-		suite.addTest(new JavaElement8Tests("test430026"));
-		suite.addTest(new JavaElement8Tests("test430026a"));
-		suite.addTest(new JavaElement8Tests("test430033"));
-		return suite;
+		return buildModelTestSuite(JavaElement8Tests.class);
 	}
 	public void testBug428178() throws Exception {
 		try {
@@ -325,6 +309,38 @@ public class JavaElement8Tests extends AbstractJavaModelTests {
 			deleteProject("Bug429910");
 		}
 	}
+	// https://bugs.eclipse.org/bugs/show_bug.cgi?id=429910 [1.8][model] Superinterfaces of lambda element's IType are missing type arguments
+	public void testBug429910a() throws Exception {
+		try {
+			IJavaProject project = createJavaProject("Bug429910", new String[] {"src"}, new String[] {"JCL18_LIB"}, "bin", "1.8");
+			project.open(null);
+			String fileContent =  "package p;\n" +
+					"public interface MyFunction<T, R> {\n" +
+					"	R apply(T t);\n" +
+					"	default <V> MyFunction<V, R> compose(MyFunction<? super V, ? extends T> before) {\n" +
+					"		return (V v) -> apply(before.apply(v));" +
+					"	}" +
+					"}";
+			createFolder("/Bug429910/src/p");
+			createFile(	"/Bug429910/src/p/MyFunction.java",	fileContent);
+			ICompilationUnit unit = getCompilationUnit("/Bug429910/src/p/MyFunction.java");
+			int start = fileContent.indexOf("v))");
+			IJavaElement[] elements = unit.codeSelect(start, 1);
+			assertEquals("Incorrect no of elements", 1, elements.length);
+			assertEquals("Incorrect element type", IJavaElement.LOCAL_VARIABLE, elements[0].getElementType());
+			IMethod method = (IMethod) elements[0].getParent();
+			assertTrue("Should be a lambda method",method.isLambdaMethod());
+			assertEquals("Incorrect lambda method signature", "(TV;)TR;", method.getSignature());
+			IJavaElement parent = method.getParent();
+			assertTrue("Should be a lambda expression", (parent instanceof LambdaExpression));
+			LambdaExpression lambda = (LambdaExpression) parent;
+			String sigs = lambda.getSuperInterfaceTypeSignatures()[0];
+			assertEquals("Incorrect super interface signature", "Lp.MyFunction<TV;TR;>;", sigs);
+		}
+		finally {
+			deleteProject("Bug429910");
+		}
+	}
 	// https://bugs.eclipse.org/bugs/show_bug.cgi?id=430026,  [1.8] Lambda parameter has wrong parent if it declares its type
 	public void test430026() throws CoreException {
 		String projectName = "Bug429966";
@@ -412,6 +428,101 @@ public class JavaElement8Tests extends AbstractJavaModelTests {
 				removeLibrary(project, jarName, srcName);
 				deleteProject(projectName);
 			}
+		}
+	}
+	// https://bugs.eclipse.org/bugs/show_bug.cgi?id=430141,  [1.8][hierarchy] Incorrect hierarchy with lambda elements missing
+	public void test430141() throws Exception {
+		try {
+			IJavaProject project = createJavaProject("Bug430141", new String[] {"src"}, new String[] {"JCL18_LIB"}, "bin", "1.8");
+			project.open(null);
+			String fileContent = 
+							"interface I {\n" +
+							"	void doit();\n" +
+							"}\n" +
+							"interface J extends I {\n" +
+							"}\n" +
+							"public class X {\n" +
+							"	public static void main(String[] args) {\n" +
+							"		J j  = () -> { System.out.println(\"Lambda\"); };\n" +
+							"		j.doit();\n" +
+							"	}\n" +
+							"}\n";
+			createFile(	"/Bug430141/src/X.java",	fileContent);
+			IType type = getCompilationUnit("/Bug430141/src/X.java").getType("I");
+			ITypeHierarchy h = type.newTypeHierarchy(null);
+			assertHierarchyEquals(
+							"Focus: I [in X.java [in <default> [in src [in Bug430141]]]]\n" + 
+							"Super types:\n" + 
+							"Sub types:\n" + 
+							"  J [in X.java [in <default> [in src [in Bug430141]]]]\n" + 
+							"    Lambda(J) [in main(String[]) [in X [in X.java [in <default> [in src [in Bug430141]]]]]]\n",
+					h);
+		}
+		finally {
+			deleteProject("Bug430141");
+		}
+	}
+	// https://bugs.eclipse.org/bugs/show_bug.cgi?id=430141,  [1.8][hierarchy] Incorrect hierarchy with lambda elements missing
+	public void test430141a() throws Exception {
+		try {
+			IJavaProject project = createJavaProject("Bug430141", new String[] {"src"}, new String[] {"JCL18_LIB"}, "bin", "1.8");
+			project.open(null);
+			String fileContent = 
+							"interface I {\n" +
+							"	void doit();\n" +
+							"}\n" +
+							"interface J extends I {\n" +
+							"}\n" +
+							"public class X {\n" +
+							"	public static void main(String[] args) {\n" +
+							"		J j  = () -> { System.out.println(\"Lambda\"); };\n" +
+							"		j.doit();\n" +
+							"	}\n" +
+							"}\n";
+			createFile(	"/Bug430141/src/X.java",	fileContent);
+			IType type = getCompilationUnit("/Bug430141/src/X.java").getType("J");
+			ITypeHierarchy h = type.newTypeHierarchy(null);
+			assertHierarchyEquals(
+					"Focus: J [in X.java [in <default> [in src [in Bug430141]]]]\n" + 
+							"Super types:\n" + 
+							"  I [in X.java [in <default> [in src [in Bug430141]]]]\n" + 
+							"Sub types:\n" + 
+							"  Lambda(J) [in main(String[]) [in X [in X.java [in <default> [in src [in Bug430141]]]]]]\n",
+					h);
+		}
+		finally {
+			deleteProject("Bug430141");
+		}
+	}
+	// https://bugs.eclipse.org/bugs/show_bug.cgi?id=430136
+	public void test430136() throws CoreException {
+		String projectName = "([Bug430136])";
+		try {
+			IJavaProject project = createJavaProject(projectName, new String[] {"src"}, new String[] {"JCL18_LIB"}, "bin", "1.8");
+			project.open(null);
+			String fileContent = 
+					"interface MyFunction<T, R> {\n" +
+					"    R apply(T t);\n" +
+					"    default <V> MyFunction<V, R> compose(MyFunction<? super V, ? extends T> before) {\n" +
+					"        return v -> apply(before.apply(v));\n" +
+					"    }\n" +
+					"}\n";
+			String fileName = "/" + projectName + "/src/X.java";
+			createFile(fileName, fileContent);
+			
+			ICompilationUnit unit = getCompilationUnit(fileName);
+			int start = fileContent.indexOf("v");
+			IJavaElement[] elements = unit.codeSelect(start, 1);
+			assertEquals("Incorrect java element", IJavaElement.LOCAL_VARIABLE, elements[0].getElementType());
+			IType lambda = (IType) elements[0].getParent().getParent();
+			String mem = lambda.getHandleIdentifier();
+			String expected = "=\\(\\[Bug430136\\])/src<{X.java[MyFunction~compose~QMyFunction\\<-QV;+QT;>;=)Lambda\\(MyFunction)=\"LMyFunction\\<TV;TR;>;!148!174!151=&apply!1=\"TV;=\"v=\"TR;=\"LX\\~MyFunction\\<LX\\~MyFunction;:1TV;LX\\~MyFunction;:TR;>;.apply\\(TV;)TR;@v!148!148!148!148!Ljava\\/lang\\/Object;!0!true=)";
+			assertEquals("Incorrect memento", expected, mem);
+			IJavaElement result = JavaCore.create(expected);
+			assertEquals("Incorrect element created", lambda, result);
+		}
+		finally {
+			deleteProject(projectName);
 		}
 	}
 }
