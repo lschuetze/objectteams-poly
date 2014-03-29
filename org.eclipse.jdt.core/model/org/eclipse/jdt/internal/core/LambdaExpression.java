@@ -19,7 +19,9 @@ import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.ILocalVariable;
 import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.JavaModelException;
+import org.eclipse.jdt.core.Signature;
 import org.eclipse.jdt.core.WorkingCopyOwner;
+import org.eclipse.jdt.core.compiler.CharOperation;
 import org.eclipse.jdt.internal.compiler.lookup.Binding;
 import org.eclipse.jdt.internal.core.util.MementoTokenizer;
 import org.eclipse.jdt.internal.core.util.Util;
@@ -42,7 +44,7 @@ public class LambdaExpression extends SourceType {
 		this.sourceStart = lambdaExpression.sourceStart;
 		this.sourceEnd = lambdaExpression.sourceEnd;
 		this.arrowPosition = lambdaExpression.arrowPosition;
-		this.interphase = new String(lambdaExpression.descriptor.declaringClass.sourceName());
+		this.interphase = new String(lambdaExpression.descriptor.declaringClass.readableName());
 		this.elementInfo = makeTypeElementInfo(this, this.interphase, this.sourceStart, this.sourceEnd, this.arrowPosition); 
 		this.lambdaMethod = LambdaMethod.make(this, lambdaExpression);
 		this.elementInfo.children = new IJavaElement[] { this.lambdaMethod };
@@ -129,7 +131,12 @@ public class LambdaExpression extends SourceType {
 	 * @see JavaElement#getHandleMemento(StringBuffer)
 	 */
 	protected void getHandleMemento(StringBuffer buff) {
-		((JavaElement)getParent()).getHandleMemento(buff);
+		getHandleMemento(buff, true);
+	}
+	
+	protected void getHandleMemento(StringBuffer buff, boolean memoizeParent) {
+		if (memoizeParent) 
+			((JavaElement)getParent()).getHandleMemento(buff);
 		buff.append(getHandleMementoDelimiter());
 		escapeMementoName(buff, this.name);
 		buff.append(JEM_STRING);
@@ -194,5 +201,36 @@ public class LambdaExpression extends SourceType {
 
 	public IMethod getMethod() {
 		return this.lambdaMethod;
+	}
+	
+	@Override
+	public IJavaElement getPrimaryElement(boolean checkOwner) {
+		if (checkOwner) {
+			CompilationUnit cu = (CompilationUnit)getAncestor(COMPILATION_UNIT);
+			if (cu == null || cu.isPrimary()) return this;
+		}
+		IJavaElement primaryParent = this.parent.getPrimaryElement(false);
+		if (primaryParent instanceof JavaElement) {
+			JavaElement ancestor = (JavaElement) primaryParent;
+			StringBuffer buffer = new StringBuffer(32);
+			getHandleMemento(buffer, false);
+			this.lambdaMethod.getHandleMemento(buffer, false);
+			String memento = buffer.toString();
+			return ancestor.getHandleFromMemento(new MementoTokenizer(memento), DefaultWorkingCopyOwner.PRIMARY).getParent();
+		}
+		return this;
+	}
+
+	public String[] getSuperInterfaceTypeSignatures() throws JavaModelException {
+		SourceTypeElementInfo info = (SourceTypeElementInfo) getElementInfo();
+		char[][] names = info.getInterfaceNames();
+		if (names == null) {
+			return CharOperation.NO_STRINGS;
+		}
+		String[] strings = new String[names.length];
+		for (int i= 0; i < names.length; i++) {
+			strings[i] = new String(Signature.createTypeSignature(names[i], true));
+		}
+		return strings;
 	}
 }

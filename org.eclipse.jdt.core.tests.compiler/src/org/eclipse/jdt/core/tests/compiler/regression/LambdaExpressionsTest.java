@@ -3690,6 +3690,127 @@ public void test429948() {
 			},
 			"done");
 }
+// https://bugs.eclipse.org/bugs/show_bug.cgi?id=429969, [1.8][compiler] Possible RuntimeException in Lambda tangles ECJ
+public void test429969() {
+	this.runConformTest(
+			new String[] {
+				"X.java",
+				"import java.util.Arrays;\n" +
+				"import java.util.Optional;\n" +
+				"public class X {\n" +
+				"    public static void main(String[] args) {\n" +
+				"        final String s = Arrays.asList(\"done\").stream().reduce(null, (s1,s2) -> {\n" +
+				"                // THE FOLLOWING LINE CAUSES THE PROBLEM\n" +
+				"                require(s1 != null || s2 != null, \"both strings are null\");\n" +
+				"                    return (s1 != null) ? s1 : s2;\n" +
+				"            }, (s1,s2) -> (s1 != null) ? s1 : s2);\n" +
+				"	\n" +
+				"        System.out.println(s);\n" +
+				"    }\n" +
+				"    static void require(boolean condition, String msg) throws RuntimeException {\n" +
+				"        if (!condition) {\n" +
+				"            throw new RuntimeException(msg);\n" +
+				"        }\n" +
+				"    }\n" +
+				"}\n"
+			},
+			"done");
+}
+// https://bugs.eclipse.org/bugs/show_bug.cgi?id=430015, [1.8] NPE trying to disassemble classfile with lambda method and MethodParameters 
+public void test430015() {
+	this.runConformTest(
+			new String[] {
+				"X.java",
+				"import java.lang.reflect.Method;\n" +
+				"import java.lang.reflect.Parameter;\n" +
+				"import java.util.Arrays;\n" +
+				"import java.util.function.IntConsumer;\n" +
+				"public class X {\n" +
+				"    IntConsumer xx(int a) {\n" +
+				"        return i -> { };\n" +
+				"    }\n" +
+				"    public static void main(String[] args) {\n" +
+				"        Method[] methods = X.class.getDeclaredMethods();\n" +
+				"        for (Method method : methods) {\n" +
+				"        	if (method.getName().contains(\"lambda\")) {\n" +
+				"         		Parameter[] parameters = methods[2].getParameters();\n" +
+				"        		System.out.println(Arrays.asList(parameters));\n" +
+				"        	}\n" +
+				"        }\n" +
+				"    }\n" +
+				"}\n"
+			},
+			"[int arg0]");
+}
+// https://bugs.eclipse.org/bugs/show_bug.cgi?id=430040, [1.8] [compiler] Type Type mismatch: cannot convert from Junk13.ExpressionHelper<Object> to Junk13.ExpressionHelper<Object> 
+public void test430040() {
+	this.runConformTest(
+			new String[] {
+				"X.java",
+				"public class X {\n" +
+				"    public static void main(String [] args) {\n" +
+				"        System.out.println(\"OK\");\n" +
+				"    }\n" +
+				"    class Observable<T> {}\n" +
+				"    class ObservableValue<T> {}\n" +
+				"    interface InvalidationListener {\n" +
+				"        public void invalidated(Observable observable);\n" +
+				"    }\n" +
+				"    public interface ChangeListener<T> {\n" +
+				"        void changed(ObservableValue<? extends T> observable, T oldValue, T newValue);\n" +
+				"    }\n" +
+				"    static class ExpressionHelper<T> {}\n" +
+				"    public static <T> ExpressionHelper<T> addListener(ExpressionHelper<T> helper, ObservableValue<T> observable, InvalidationListener listener) {\n" +
+				"        return helper;\n" +
+				"    }\n" +
+				"    public static <T> ExpressionHelper<T> addListener(ExpressionHelper<T> helper, ObservableValue<T> observable, ChangeListener<? super T> listener) {\n" +
+				"        return helper;\n" +
+				"    }\n" +
+				"    private ExpressionHelper<Object> helper;\n" +
+				"    public void junk() {\n" +
+				"        helper = (ExpressionHelper<Object>) addListener(helper, null, (Observable o) -> {throw new RuntimeException();});\n" +
+				"        helper = addListener(helper, null, (Observable o) -> {throw new RuntimeException();});\n" +
+				"    }\n" +
+				"}\n"
+			},
+			"OK");
+}
+// https://bugs.eclipse.org/bugs/show_bug.cgi?id=430043, [1.8][compiler] Cannot infer type arguments for Junk14<> 
+public void test430043() {
+	this.runConformTest(
+			new String[] {
+				"X.java",
+				"import java.io.File;\n" +
+				"import java.io.IOException;\n" +
+				"import java.io.StringReader;\n" +
+				"import java.nio.file.Files;\n" +
+				"import java.text.MessageFormat;\n" +
+				"import java.util.*;\n" +
+				"import java.util.function.Function;\n" +
+				"import java.util.jar.Attributes;\n" +
+				"import java.util.jar.JarFile;\n" +
+				"import java.util.jar.Manifest;\n" +
+				"public class X<T>  {\n" +
+				"    public X(String name, String description, String id, Class<T> valueType, String[] fallbackIDs, Function<Map<String, ? super Object>, T> defaultValueFunction, boolean requiresUserSetting, Function<String, T> stringConverter) {\n" +
+				"    }\n" +
+				"    public static final X<String> NAME  =\n" +
+				"            new X<>(\n" +
+				"                    null,\n" +
+				"                    null,\n" +
+				"                    null,\n" +
+				"                    String.class,\n" +
+				"                    null,\n" +
+				"                    params -> {throw new IllegalArgumentException(\"junk14\");},\n" +
+				"                    true,\n" +
+				"                    s -> s\n" +
+				"            );\n" +
+				"     public static void main(String [] args) {\n" +
+				"         System.out.println(\"OK\");\n" +
+				"     }\n" +
+				"}\n"
+			},
+			"OK");
+}
 public static Class testClass() {
 	return LambdaExpressionsTest.class;
 }
