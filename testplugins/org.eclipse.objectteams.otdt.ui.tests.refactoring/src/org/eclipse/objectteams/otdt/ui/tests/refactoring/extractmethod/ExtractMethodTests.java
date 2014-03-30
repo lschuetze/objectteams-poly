@@ -103,7 +103,6 @@ public class ExtractMethodTests extends AbstractSelectionTestCase
 		performTest(packageFragment, ids, mode, outputFolder, null, null, 0);
 	}
 	
-	@SuppressWarnings("unchecked")
 	protected void performTest(
 	        IPackageFragment packageFragment,
 	        String[] ids,
@@ -124,6 +123,7 @@ public class ExtractMethodTests extends AbstractSelectionTestCase
 		refactoring.setVisibility(Modifier.PROTECTED);
 		RefactoringStatus status =
 		    refactoring.checkInitialConditions(new NullProgressMonitor());
+		refactoring.setReplaceDuplicates(false);
 		switch (mode)
 		{
 			case VALID_SELECTION:
@@ -133,7 +133,7 @@ public class ExtractMethodTests extends AbstractSelectionTestCase
 				if (!status.isOK())
 					return;
 		}
-		List parameters = refactoring.getParameterInfos();
+		List<ParameterInfo> parameters = refactoring.getParameterInfos();
 		if (newNames != null && newNames.length > 0)
 		{
 			for (int idx= 0; idx < newNames.length; idx++)
@@ -147,7 +147,7 @@ public class ExtractMethodTests extends AbstractSelectionTestCase
 		if (newOrder != null && newOrder.length > 0)
 		{
 			assertTrue(newOrder.length == parameters.size());
-			List current = new ArrayList(parameters);
+			List<ParameterInfo> current = new ArrayList<ParameterInfo>(parameters);
 			for (int idx= 0; idx < newOrder.length; idx++)
 			{
 				parameters.set(newOrder[idx], current.get(idx));
