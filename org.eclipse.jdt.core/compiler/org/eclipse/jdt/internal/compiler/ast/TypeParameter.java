@@ -116,7 +116,8 @@ public class TypeParameter extends AbstractVariableDeclaration {
 					&& existingType.isValidBinding()
 					&& (existingType.kind() != Binding.TYPE_PARAMETER || !staticContext)) {
 //{ObjectTeams: could be equivalent type parameters of class/ifc-parts of the same role:
-			  if (!RoleModel.areTypeParametersOfSameRole(this.binding, existingType))
+			  if (!(RoleModel.areTypeParametersOfSameRole(this.binding, existingType)
+					  || scope.isGeneratedScope())) // don't report in generated methods
 // SH}
 				scope.problemReporter().typeHiding(this, existingType);
 			}
