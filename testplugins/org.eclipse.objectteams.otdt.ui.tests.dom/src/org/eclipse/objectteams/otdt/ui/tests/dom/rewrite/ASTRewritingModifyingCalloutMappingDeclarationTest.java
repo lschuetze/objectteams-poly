@@ -277,11 +277,11 @@ public class ASTRewritingModifyingCalloutMappingDeclarationTest extends ASTRewri
 		RoleTypeDeclaration role = (RoleTypeDeclaration) aTeam.bodyDeclarations().get(0);
 		CalloutMappingDeclaration callout = (CalloutMappingDeclaration) role.bodyDeclarations().get(0); 
 		
-		List argList1 = new ArrayList();
-		argList1.add(ASTNodeCreator.createArgument(ast,0,ASTNodeCreator.createType(ast, "String"),"s1",0,null));
+		List<SingleVariableDeclaration> argList1 = new ArrayList<SingleVariableDeclaration>();
+		argList1.add(ASTNodeCreator.createArgument(ast,0,ASTNodeCreator.createType(ast, "String"),"s1",null));
 		    
-		List argList2 = new ArrayList();
-		argList2.add(ASTNodeCreator.createArgument(ast,0,ASTNodeCreator.createType(ast, "String"),"s2",0,null));    
+		List<SingleVariableDeclaration> argList2 = new ArrayList<SingleVariableDeclaration>();
+		argList2.add(ASTNodeCreator.createArgument(ast,0,ASTNodeCreator.createType(ast, "String"),"s2",null));    
 		
 		MethodSpec methodSpec1 = ASTNodeCreator.createMethodSpec(
 		        ast,

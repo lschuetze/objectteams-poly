@@ -1304,12 +1304,12 @@ public class BindingConfiguration extends Composite
 			{
 				SingleVariableDeclaration param = (SingleVariableDeclaration)mSpecParameters.get(idx);
 				roleParameter = 
-					ASTNodeCreator.createArgument(ast, 0, parameterType, param.getName().toString(), 0, null);
+					ASTNodeCreator.createArgument(ast, 0, parameterType, param.getName().toString(), null);
 			}
 			else
 			{
 				roleParameter = 
-					ASTNodeCreator.createArgument(ast, 0, parameterType, parameterNames[idx], 0, null);
+					ASTNodeCreator.createArgument(ast, 0, parameterType, parameterNames[idx], null);
 			}
 
 			methodParameters.add(roleParameter);

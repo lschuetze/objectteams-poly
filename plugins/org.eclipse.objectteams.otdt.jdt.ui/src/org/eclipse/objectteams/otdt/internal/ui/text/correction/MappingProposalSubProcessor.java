@@ -410,7 +410,6 @@ public class MappingProposalSubProcessor {
 				ASTNodeCreator.createArgument(ast, 0/*modifiers*/, 
 						imports.addImport(paramType, ast), 
 						argNames[i],
-						0 /*extraDimensions*/,
 						null));
 		}
 		ITypeBinding providedReturnType = methodBinding.getReturnType();

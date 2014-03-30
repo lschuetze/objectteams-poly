@@ -284,27 +284,6 @@ public class ASTNodeCreator
     	newFieldAcc.setSignatureFlag(true);
     	return newFieldAcc;
     }
-    public static MethodSpec createMethodSpec(AST ast, String methodName, String returnType, List<String> argumentNames, List<String> argumentTypes, List<Integer> dimensions, boolean signatureFlag)
-    {
-        MethodSpec methodSpec = ast.newMethodSpec();
-        methodSpec.setName(ast.newSimpleName(methodName));
-        methodSpec.setReturnType2(createType(ast, returnType));
-        methodSpec.setSignatureFlag(signatureFlag);
-
-        if (argumentTypes !=null && argumentTypes.size()!=0)
-        {
-            List<VariableDeclaration> methodParameters = methodSpec.parameters();
-            for (int idx = 0; idx < argumentTypes.size(); idx++)
-            {
-            	String argumentName = (argumentNames != null)
-            						  ? argumentNames.get(idx)
-            						  : "arg"+idx; //$NON-NLS-1$
-                VariableDeclaration tmp = createArgument(ast, 0, createType(ast, argumentTypes.get(idx)), argumentName, dimensions.get(idx), null);
-                methodParameters.add(tmp);
-            }
-        }
-        return methodSpec;
-    }
 
     public static MethodSpec createMethodSpec(AST ast, String methodName, Type returnType, List parameters, boolean signatureFlag)
     {
@@ -393,19 +372,13 @@ public class ASTNodeCreator
         return null;
     }
 
-    @SuppressWarnings("deprecation")
-	public static SingleVariableDeclaration createArgument(AST ast, int modifier, Type parameterType, String parameterName, int dimension,
-            Expression initializer)
+	public static SingleVariableDeclaration createArgument(AST ast, int modifier, Type parameterType, String parameterName, Expression initializer)
     {
         SingleVariableDeclaration methodSpecParameter = ast.newSingleVariableDeclaration();
-        if(ast.apiLevel() == AST.JLS2)
-        	methodSpecParameter.setModifiers(modifier);
-        else
-        	methodSpecParameter.modifiers().addAll(ast.newModifiers(modifier));
+       	methodSpecParameter.modifiers().addAll(ast.newModifiers(modifier));
 
         methodSpecParameter.setType(parameterType);
         methodSpecParameter.setName(ast.newSimpleName(parameterName));
-        methodSpecParameter.setExtraDimensions(dimension);
         methodSpecParameter.setInitializer(initializer);
         return methodSpecParameter;
     }

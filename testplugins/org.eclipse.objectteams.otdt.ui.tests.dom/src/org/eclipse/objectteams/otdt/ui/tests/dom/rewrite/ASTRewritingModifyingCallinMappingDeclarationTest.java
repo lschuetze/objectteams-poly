@@ -274,8 +274,8 @@ public class ASTRewritingModifyingCallinMappingDeclarationTest extends ASTRewrit
 		RoleTypeDeclaration role = (RoleTypeDeclaration) aTeam.bodyDeclarations().get(0);
 		CallinMappingDeclaration callin = (CallinMappingDeclaration) role.bodyDeclarations().get(0); 
 
-		List argList1 = new ArrayList();
-		argList1.add(ASTNodeCreator.createArgument(ast,0,ASTNodeCreator.createType(ast, "String"),"s1",0,null));
+		List<SingleVariableDeclaration> argList1 = new ArrayList<SingleVariableDeclaration>();
+		argList1.add(ASTNodeCreator.createArgument(ast,0,ASTNodeCreator.createType(ast, "String"),"s1",null));
 		
 		MethodSpec methodSpec1 = ASTNodeCreator.createMethodSpec(
 		        ast,
@@ -330,8 +330,8 @@ public class ASTRewritingModifyingCallinMappingDeclarationTest extends ASTRewrit
 		RoleTypeDeclaration role = (RoleTypeDeclaration) aTeam.bodyDeclarations().get(0);
 		CallinMappingDeclaration callin = (CallinMappingDeclaration) role.bodyDeclarations().get(0); 
 
-		List argList1 = new ArrayList();
-		argList1.add(ASTNodeCreator.createArgument(ast,0,ASTNodeCreator.createType(ast, "String"),"s3",0,null));
+		List<SingleVariableDeclaration> argList1 = new ArrayList<SingleVariableDeclaration>();
+		argList1.add(ASTNodeCreator.createArgument(ast,0,ASTNodeCreator.createType(ast, "String"),"s3",null));
 		
 		MethodSpec methodSpec1 = ASTNodeCreator.createMethodSpec(
 		        ast,

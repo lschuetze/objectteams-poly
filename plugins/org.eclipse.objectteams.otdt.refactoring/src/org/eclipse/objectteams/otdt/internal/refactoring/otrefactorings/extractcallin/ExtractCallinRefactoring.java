@@ -440,7 +440,7 @@ public class ExtractCallinRefactoring extends Refactoring {
 		List<SingleVariableDeclaration> args = new ArrayList<SingleVariableDeclaration>();
 		for (int i = 0; i < methodBinding.getParameterTypes().length; i++) {
 			ITypeBinding paramType = methodBinding.getParameterTypes()[i];
-			args.add(ASTNodeCreator.createArgument(ast, 0/* modifiers */, imports.addImport(paramType, ast), argNames[i], 0 /* extraDimensions */, null));
+			args.add(ASTNodeCreator.createArgument(ast, 0/* modifiers */, imports.addImport(paramType, ast), argNames[i], null));
 		}
 		ITypeBinding providedReturnType = methodBinding.getReturnType();
 		Type returnType = imports.addImport(providedReturnType, ast);
