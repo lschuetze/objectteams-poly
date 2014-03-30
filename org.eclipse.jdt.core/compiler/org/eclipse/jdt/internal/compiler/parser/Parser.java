@@ -11480,6 +11480,12 @@ protected void convertTypeAnchor(int annotationKind) {
 	this.typeAnnotationLengthPtr--; // drop the empty list pushed in consumeTypeAnchor()
 	pushOnTypeAnnotationStack(annotationSentinel);
 	pushOnTypeAnnotationStack(annotation);
+	// still need to check if the type annotation is legal:
+	if (!this.statementRecoveryActivated &&
+			this.options.sourceLevel < ClassFileConstants.JDK1_8 &&
+			this.lastErrorEndPositionBeforeRecovery < this.scanner.currentPosition) {
+		problemReporter().invalidUsageOfTypeAnnotations(annotation);
+	}
 }
 protected void consumeTypeArgumentFromAnchor() {
 	// TypeAnchorOrAnnotatedTypeArgument -> TentativeTypeAnchor NotAnAnchor ReferenceType
