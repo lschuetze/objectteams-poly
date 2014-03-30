@@ -36,6 +36,7 @@ import org.eclipse.objectteams.otdt.tests.otjld.other.AccessModifiers;
 import org.eclipse.objectteams.otdt.tests.otjld.other.Exceptions;
 import org.eclipse.objectteams.otdt.tests.otjld.other.Java5;
 import org.eclipse.objectteams.otdt.tests.otjld.other.Java7;
+import org.eclipse.objectteams.otdt.tests.otjld.other.Java8;
 import org.eclipse.objectteams.otdt.tests.otjld.other.Misc;
 import org.eclipse.objectteams.otdt.tests.otjld.other.Modifiers;
 import org.eclipse.objectteams.otdt.tests.otjld.regression.CompilationOrder;
@@ -133,6 +134,7 @@ public class AllTests {
 		/*7.5*/addComplianceSuite(suite, Exceptions.testClass());
 		/*A.1*/addComplianceSuite(suite, Java5.testClass());
 		/*A.2*/addComplianceSuite(suite, Java7.testClass(), AbstractCompilerTest.F_1_7);
+		/*---*/addComplianceSuite(suite, Java8.testClass(), AbstractCompilerTest.F_1_8);
 		/*0.m*/addComplianceSuite(suite, Misc.testClass());
 		
 		// regression:

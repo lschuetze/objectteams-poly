@@ -28,7 +28,7 @@ public class Java8 extends AbstractOTJLDTest {
 // Static initializer to specify tests subset using TESTS_* static variables
 // All tests which do not belong to the subset are skipped...
 	static {
-		TESTS_NAMES = new String[] { "testTypeAnnotationAndTypeAnchor_2"};
+//		TESTS_NAMES = new String[] { "testA11_lambdaExpression02"};
 //		TESTS_NUMBERS = new int[] { 1459 };
 //		TESTS_RANGE = new int[] { 1097, -1 };
 	}
@@ -87,7 +87,7 @@ public class Java8 extends AbstractOTJLDTest {
 			"package p1;\n" +
 			"public team class TeamA11le02 {\n" +
 			"    protected class Role playedBy TA11le02 {\n" +
-			"        void outside() -> void run(String s, Runnable r) with {\n" +
+			"        void outside() -> void run(String s, RunWithArg<String> r) with {\n" +
 			"            \"prefix.\" -> s,\n" +
 			"            x -> System.out.println(Role.this) -> r\n" +
 			"        }\n" +
@@ -99,13 +99,18 @@ public class Java8 extends AbstractOTJLDTest {
 			"        new TeamA11le02().test(new TA11le02());\n" +
 			"    }\n" +
 			"}",
+	"p1/RunWithArg.java",
+			"package p1;\n" +
+			"public interface RunWithArg<T> {\n" +
+			"	void run(T a);\n" +
+			"}\n",
 	"p1/TA11le02.java",
 			"package p1;\n" +
 			"public class TA11le02 {\n" +
-			"    public void run(String s, Runnable r) {\n" +
+			"    public void run(String s, RunWithArg<String> r) {\n" +
 			"        System.out.print(s);\n" +
 			"      try {\n" +
-			"        r.run();\n" +
+			"        r.run(s);\n" +
 			"      } catch (NullPointerException npe) {System.out.print(\"caught\"); }\n" +
 			"    }\n" +
 			"}",
@@ -233,7 +238,7 @@ public class Java8 extends AbstractOTJLDTest {
 			"public abstract class C1 {\n" +
 			"	final T1 t = new T1();\n" +
 			"	abstract void test1(final C1 a, R<@a.t> c);\n" +
-			"	abstract void test2(final Object o, C2<@p1.Marker java.lang.Object> c);\n" + // bug, should be java.lang. @p1.Marker Object
+			"	abstract void test2(final Object o, C2<java.lang.@p1.Marker Object> c);\n" + // bug, should be java.lang. @p1.Marker Object
 			"	abstract void test3(final Object o, C2<@p1.Marker @p1.Marker2 Object> c);\n" + // bug, should be java.lang. @p1.Marker Object
 			"}\n" +
 			"class C2<T> {}\n"
