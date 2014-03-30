@@ -790,31 +790,6 @@ public final class ImportRewrite {
 		return type;
 	}
 
-// FIXME
-//{ObjectTeams: silently refuse to import a role type:
-/* orig:
-			String res= internalAddImport(qualifiedName, context);
-  :giro */
-//			String res= importRefusingRole(binding, qualifiedName, context);
-// SH}
-
-//{ObjectTeams:
-/* orig:
-			return ast.newSimpleType(ast.newName(res));
-  :giro */
-//			Type type = ast.newSimpleType(ast.newName(res));
-//			if (binding.isDependentType(true)) {
-//				// ignoring value parameters would introduce type errors in refactorings.
-//				String[] segments = binding.getAnchorPath();
-//				if (segments.length > 0) {
-//					ParameterizedType pType = ast.newParameterizedType(type);
-//					pType.typeArguments().add(ast.newTypeAnchor(ast.newName(segments)));
-//					type = pType;
-//				}
-//			}
-//			return type;
-// SH}
-
 //{ObjectTeams: try to add an import but refuse if binding is a role.
 	private String importRefusingRole(ITypeBinding binding, String qualifiedName, ImportRewriteContext context) {
 		String res= qualifiedName;
@@ -1407,6 +1382,28 @@ public final class ImportRewrite {
 	}
 
 	private Type internalAddImport(ITypeBinding binding, AST ast, ImportRewriteContext context, Type currentType, boolean getBase) {
+//{ObjectTeams: consider roles and dependent types
+		Type type;
+		if (binding.isRole()) {
+			// refuse to import a role, still use the simple name:
+			String name = binding.getName();
+			type = ast.newSimpleType(ast.newSimpleName(name));
+		} else {
+			type = internaleAddNonRoleImport(binding, ast, context, currentType, getBase);
+		}
+		if (binding.isDependentType(true)) {
+			// ignoring value parameters would introduce type errors in refactorings.
+			String[] segments = binding.getAnchorPath();
+			if (segments.length > 0) {
+				ParameterizedType pType = ast.newParameterizedType(type);
+				pType.typeArguments().add(ast.newTypeAnchor(ast.newName(segments)));
+				type = pType;
+			}
+		}
+		return type;
+	}
+	private Type internaleAddNonRoleImport(ITypeBinding binding, AST ast, ImportRewriteContext context, Type currentType, boolean getBase) {
+// SH}
 		Type type = null;
 		ITypeBinding normalizedBinding = null;
 		
