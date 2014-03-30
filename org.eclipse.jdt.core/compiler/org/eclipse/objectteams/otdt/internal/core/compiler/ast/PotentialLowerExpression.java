@@ -73,6 +73,8 @@ public class PotentialLowerExpression extends PotentialTranslationExpression {
 
     public TypeBinding resolveType(BlockScope scope)
     {
+    	if (this.expectedType != null)
+    		this.expression.setExpectedType(this.expectedType);
         TypeBinding rawType = this.expression.resolveType(scope);
         if (rawType == null)
         	return null; // no chance
