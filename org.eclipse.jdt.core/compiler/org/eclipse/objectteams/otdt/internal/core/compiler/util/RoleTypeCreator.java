@@ -553,6 +553,7 @@ public class RoleTypeCreator implements TagBits {
 	        		@Override public boolean hasTypeAnnotations() 			{ return rawUnresolved.hasTypeAnnotations(); }
 	        		@Override public boolean hasNullTypeAnnotations() 		{ return rawUnresolved.hasNullTypeAnnotations(); }
 	        		@Override public AnnotationBinding[] getAnnotations() 	{ return rawUnresolved.getAnnotations(); }
+	        		{ this.tagBits = rawUnresolved.tagBits; }
 	        	};
 	        }
 	        if (typeToWrap instanceof IntersectionCastTypeBinding) { // FIXME (recurse?)
