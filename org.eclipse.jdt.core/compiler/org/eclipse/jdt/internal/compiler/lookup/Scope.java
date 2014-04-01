@@ -81,6 +81,7 @@ import org.eclipse.objectteams.otdt.internal.core.compiler.model.MethodModel;
 import org.eclipse.objectteams.otdt.internal.core.compiler.model.TypeModel;
 import org.eclipse.objectteams.otdt.internal.core.compiler.model.MethodModel.FakeKind;
 import org.eclipse.objectteams.otdt.internal.core.compiler.util.RoleTypeCreator;
+import org.eclipse.objectteams.otdt.internal.core.compiler.util.TSuperHelper;
 import org.eclipse.objectteams.otdt.internal.core.compiler.util.TypeAnalyzer;
 
 /**
@@ -861,6 +862,13 @@ public abstract class Scope {
 				int level = COMPATIBLE;
 //{ObjectTeams: integrate anchor mapping
 				TypeBinding[] parameters = AnchorMapping.instantiateParameters(this, method.parameters, method);
+				// tsuper marker?
+				if (invocation instanceof ExplicitConstructorCall 
+						&& ((ExplicitConstructorCall)invocation).isTsuperAccess() 
+						&& TSuperHelper.isMarkerArg(invocationArguments[argLen-1]) 
+						&& argLen > arguments.length) {
+					argLen--; // cut off trailing marker arg
+				}
 // SH}
 				for (int i = 0; i < argLen; i++) {
 					TypeBinding argumentType = i < arguments.length ? arguments[i] : null; // length mismatch may happen from CodeSnippetMessageSend.resolveType() in the if (argHasError) block.
