@@ -4858,6 +4858,14 @@ public abstract class Scope {
 						else
 							continue nextJ; // j cannot be more specific
 					}
+//{ObjectTeams: one more reason for preferring one over the other:
+					if (useTranslation[j] != useTranslation[k]) { 
+						if (useTranslation[k])
+							continue nextK; // j is more specific than k
+						else 
+							continue nextJ; // j cannot be more specific						
+					}
+// SH}
 					MethodBinding mbk = visible[k].genericMethod();
 					final TypeBinding[] mbkParameters = mbk.parameters;
 					// TODO: should the following line also find diamond-typeVariables?
