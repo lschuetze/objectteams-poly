@@ -1,7 +1,7 @@
 /**********************************************************************
  * This file is part of "Object Teams Dynamic Runtime Environment"
  * 
- * Copyright 2009, 2012 Oliver Frank and others.
+ * Copyright 2009, 2014 Oliver Frank and others.
  * 
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -112,7 +112,7 @@ class AsmWritableBoundClass extends AsmBoundClass {
 		
 		reader = new ClassReader(allocateAndGetBytecode());
 
-		writer = new ClassWriter(reader, 0);
+		writer = new ClassWriter(reader, ClassWriter.COMPUTE_FRAMES);
 		multiAdapter = new MultiClassAdapter(writer);
 		nodes = new ArrayList<AbstractTransformableClassNode>();
 		isTransformationActive = true;
@@ -141,7 +141,7 @@ class AsmWritableBoundClass extends AsmBoundClass {
 			reader = new ClassReader(allocateAndGetBytecode());
 			reader.accept(node, ClassReader.SKIP_FRAMES);
 			node.transform();
-			writer = new ClassWriter(reader, 0);
+			writer = new ClassWriter(reader, ClassWriter.COMPUTE_FRAMES);
 			node.accept(writer);
 			setBytecode(writer.toByteArray());
 		}
