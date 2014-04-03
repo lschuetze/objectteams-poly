@@ -1,7 +1,7 @@
 /**********************************************************************
  * This file is part of "Object Teams Development Tooling"-Software
  *
- * Copyright 2003, 2011 Fraunhofer Gesellschaft, Munich, Germany,
+ * Copyright 2003, 2014 Fraunhofer Gesellschaft, Munich, Germany,
  * for its Fraunhofer Institute for Computer Architecture and Software
  * Technology (FIRST), Berlin, Germany and Technical University Berlin,
  * Germany.
@@ -10,7 +10,6 @@
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
- * $Id: Lowering.java 23417 2010-02-03 20:13:55Z stephan $
  *
  * Please visit http://www.eclipse.org/objectteams for updates and contact.
  *
@@ -189,14 +188,16 @@ public class Lowering implements IOTConstants {
         	// ((local = (expression)) == null) ? (RequiredType)local : lower(local));
         	@SuppressWarnings("null") // needNullCheck => localVar != null
 			SingleNameReference lhs = gen.singleNameReference(localVar.name);
-			lhs.binding = localVar;
-			lhs.resolvedType = unloweredType;
-			lhs.bits = Binding.LOCAL|ASTNode.FirstAssignmentToLocal;
 			Assignment assignment = gen.assignment(lhs, expression);
-			assignment.constant = Constant.NotAConstant;
 			loweringExpr = new CheckedLoweringExpression(expression, gen.nullCheck(assignment), gen.nullLiteral(), loweringExpr, localVar);
-			loweringExpr.constant = Constant.NotAConstant;
-			loweringExpr.resolvedType = requiredType;
+			if (!deferredResolve) {
+				lhs.binding = localVar;
+				lhs.resolvedType = unloweredType;
+				lhs.bits = Binding.LOCAL|ASTNode.FirstAssignmentToLocal;
+				assignment.constant = Constant.NotAConstant;
+				loweringExpr.constant = Constant.NotAConstant;
+				loweringExpr.resolvedType = requiredType;
+			}
         }
         return loweringExpr;
 	}
