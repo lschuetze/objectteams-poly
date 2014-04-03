@@ -1171,9 +1171,9 @@ public class RoleModel extends TypeModel
 	 * Record that a given field is accessed using callout.
 	 * @param field
 	 * @param calloutModifier either TokenNameget or TokenNameset (from TerminalTokens).
-	 * @return the target class into which the OTRE will insert the accessor method
+	 * @return the accessId (per team) for this field
 	 */
-	public ReferenceBinding addAccessedBaseField(FieldBinding field, int calloutModifier) {
+	public int addAccessedBaseField(FieldBinding field, int calloutModifier) {
 		// find appropriate target class
 		ReferenceBinding targetClass = field.declaringClass; // default: the class declaring the field (could be super of bound base)
 		if (!field.isStatic() && (field.isProtected() || field.isPublic()))
@@ -1181,9 +1181,9 @@ public class RoleModel extends TypeModel
 
 		// push out to the team to ensure early evaluation by the OTRE:
 		OTSpecialAccessAttribute specialAccess = getTeamModel().getSpecialAccessAttribute();
-		specialAccess.addCalloutFieldAccess(field, targetClass, calloutModifier);
+		int accessId = specialAccess.addCalloutFieldAccess(field, targetClass, calloutModifier);
 		specialAccess.addAdaptedBaseClass(field.declaringClass);
-		return targetClass;
+		return accessId;
 	}
 
 	/**

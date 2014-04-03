@@ -114,7 +114,7 @@ public abstract class MethodMappingImplementor {
     	int implementationArgLen = implParameters.length;
 
 		int expressionsOffset = 0;
-        if (isFieldAccess) {
+        if (isFieldAccess && !CallinImplementorDyn.DYNAMIC_WEAVING) { // OTREDyn uses non-static accessor for non-static fields
         	// field access is mapped to static method with additional first parameter _OT$base (unless static):
         	if (!((FieldAccessSpec)methodMapping.getBaseMethodSpecs()[0]).isStatic())
         		expressionsOffset = 1;

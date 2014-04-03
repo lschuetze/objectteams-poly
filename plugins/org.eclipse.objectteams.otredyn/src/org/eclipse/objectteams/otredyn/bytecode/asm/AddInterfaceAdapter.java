@@ -1,7 +1,7 @@
 /**********************************************************************
  * This file is part of "Object Teams Dynamic Runtime Environment"
  * 
- * Copyright 2009, 2012 Oliver Frank and others.
+ * Copyright 2009, 2014 Oliver Frank and others.
  * 
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -19,6 +19,7 @@ package org.eclipse.objectteams.otredyn.bytecode.asm;
 import org.objectweb.asm.ClassAdapter;
 import org.objectweb.asm.ClassVisitor;
 import org.objectweb.asm.MethodVisitor;
+import org.objectweb.asm.Opcodes;
 
 /**
  * Adds an interface to the bytecode of a class
@@ -39,6 +40,9 @@ public class AddInterfaceAdapter extends ClassAdapter{
 		String[] newInterfaces = new String[interfaces.length + 1];
 		System.arraycopy(interfaces, 0, newInterfaces, 0, interfaces.length);
 		newInterfaces[interfaces.length] = interfaceName;
+		// Assumption: when it should potentially be a bound baseclass it may have to be public, too:
+		access &= ~(Opcodes.ACC_PRIVATE|Opcodes.ACC_PROTECTED);
+		access |= Opcodes.ACC_PUBLIC;
 		super.visit(version, access, name, signature, superName, newInterfaces);
 	}
 	

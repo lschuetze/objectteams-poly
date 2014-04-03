@@ -178,7 +178,11 @@ public class FieldAccessSpec extends MethodSpec {
 		{
 			// record this field access for Attribute generation:
 			RoleModel roleModel = scope.enclosingSourceType().roleModel;
-			ReferenceBinding targetClass =  roleModel.addAccessedBaseField(this.resolvedField, this.calloutModifier);
+			// find appropriate target class
+			FieldBinding field = this.resolvedField;
+			ReferenceBinding targetClass = field.declaringClass; // default: the class declaring the field (could be super of bound base)
+			if (!field.isStatic() && (field.isProtected() || field.isPublic()))
+				targetClass = roleModel.getBaseTypeBinding();	// use the specific declared bound class (avoids weaving into possibly inaccessible super base)
 
 			// create accessor method:
 			result = createMethod(targetClass, accessorSelector);
@@ -288,8 +292,10 @@ public class FieldAccessSpec extends MethodSpec {
 
 	@Override
 	void checkDecapsulation(ReferenceBinding baseClass, Scope scope) {
-		if (this.implementationStrategy != ImplementationStrategy.DIRECT)
+		if (this.implementationStrategy != ImplementationStrategy.DIRECT) {
+    		this.accessId = createAccessAttribute(scope.enclosingSourceType().roleModel);
 			scope.problemReporter().decapsulation(this, baseClass, scope, isSetter());
+		}
 	}
 
 	public boolean checkBaseReturnType(CallinCalloutScope scope, int bindDir)
@@ -393,8 +399,8 @@ public class FieldAccessSpec extends MethodSpec {
 		return this.resolvedField.canBeSeenBy(receiverType, this, scope);
 	}
 
-	public void createAccessAttribute(RoleModel roleModel) {		
-		roleModel.addAccessedBaseField(this.resolvedField, this.calloutModifier);
+	public int createAccessAttribute(RoleModel roleModel) {		
+		return roleModel.addAccessedBaseField(this.resolvedField, this.calloutModifier);
 	}
 
 }

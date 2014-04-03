@@ -65,10 +65,12 @@ import org.eclipse.jdt.internal.compiler.lookup.TagBits;
 import org.eclipse.jdt.internal.compiler.lookup.TypeBinding;
 import org.eclipse.jdt.internal.compiler.lookup.TypeConstants;
 import org.eclipse.jdt.internal.compiler.lookup.TypeIds;
+import org.eclipse.objectteams.otdt.internal.core.compiler.ast.ConstructorDecapsulationException;
 import org.eclipse.objectteams.otdt.internal.core.compiler.ast.OTQualifiedAllocationExpression;
 import org.eclipse.objectteams.otdt.internal.core.compiler.control.Dependencies;
 import org.eclipse.objectteams.otdt.internal.core.compiler.control.ITranslationStates;
 import org.eclipse.objectteams.otdt.internal.core.compiler.lookup.AnchorMapping;
+import org.eclipse.objectteams.otdt.internal.core.compiler.mappings.CallinImplementorDyn;
 import org.eclipse.objectteams.otdt.internal.core.compiler.util.RoleTypeCreator;
 
 
@@ -602,8 +604,12 @@ public static abstract class AbstractQualifiedAllocationExpression extends Alloc
 //{ObjectTeams: decapsulating base constructor call?
 			  if (this.type.getBaseclassDecapsulation().isAllowed()) {
 				  this.binding = ((ProblemMethodBinding)this.binding).closestMatch;
-				  scope.enclosingSourceType().roleModel.addInaccessibleBaseMethod(this.binding);
+				  int accessId = scope.enclosingSourceType().roleModel.addInaccessibleBaseMethod(this.binding);
 				  scope.problemReporter().decapsulation(this, scope);
+				  if (CallinImplementorDyn.DYNAMIC_WEAVING) {
+					  this.resolvedType = allocationType;
+					  throw new ConstructorDecapsulationException(accessId);
+				  }
 			  } else {
 // orig:
 				  scope.problemReporter().invalidConstructor(this, this.binding);

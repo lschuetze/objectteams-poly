@@ -27,31 +27,43 @@ import org.eclipse.jdt.core.compiler.CharOperation;
 import org.eclipse.jdt.internal.compiler.ASTVisitor;
 import org.eclipse.jdt.internal.compiler.ast.AbstractMethodDeclaration;
 import org.eclipse.jdt.internal.compiler.ast.AllocationExpression;
+import org.eclipse.jdt.internal.compiler.ast.ArrayAllocationExpression;
 import org.eclipse.jdt.internal.compiler.ast.Assignment;
+import org.eclipse.jdt.internal.compiler.ast.CastExpression;
 import org.eclipse.jdt.internal.compiler.ast.ConstructorDeclaration;
 import org.eclipse.jdt.internal.compiler.ast.ExplicitConstructorCall;
 import org.eclipse.jdt.internal.compiler.ast.Expression;
+import org.eclipse.jdt.internal.compiler.ast.IntLiteral;
 import org.eclipse.jdt.internal.compiler.ast.MessageSend;
 import org.eclipse.jdt.internal.compiler.ast.QualifiedAllocationExpression;
+import org.eclipse.jdt.internal.compiler.ast.Reference;
 import org.eclipse.jdt.internal.compiler.ast.SingleNameReference;
 import org.eclipse.jdt.internal.compiler.ast.Statement;
 import org.eclipse.jdt.internal.compiler.ast.TypeDeclaration;
 import org.eclipse.jdt.internal.compiler.ast.TypeReference;
+import org.eclipse.jdt.internal.compiler.classfmt.ClassFileConstants;
 import org.eclipse.jdt.internal.compiler.codegen.CodeStream;
 import org.eclipse.jdt.internal.compiler.flow.FlowContext;
 import org.eclipse.jdt.internal.compiler.flow.FlowInfo;
+import org.eclipse.jdt.internal.compiler.impl.Constant;
 import org.eclipse.jdt.internal.compiler.impl.ReferenceContext;
+import org.eclipse.jdt.internal.compiler.lookup.ArrayBinding;
+import org.eclipse.jdt.internal.compiler.lookup.BaseTypeBinding;
+import org.eclipse.jdt.internal.compiler.lookup.Binding;
 import org.eclipse.jdt.internal.compiler.lookup.BlockScope;
 import org.eclipse.jdt.internal.compiler.lookup.MemberTypeBinding;
+import org.eclipse.jdt.internal.compiler.lookup.MethodBinding;
 import org.eclipse.jdt.internal.compiler.lookup.ReferenceBinding;
 import org.eclipse.jdt.internal.compiler.lookup.Scope;
 import org.eclipse.jdt.internal.compiler.lookup.TypeBinding;
+import org.eclipse.jdt.internal.compiler.lookup.TypeConstants;
 import org.eclipse.objectteams.otdt.core.exceptions.InternalCompilerError;
 import org.eclipse.objectteams.otdt.internal.core.compiler.control.ITranslationStates;
 import org.eclipse.objectteams.otdt.internal.core.compiler.control.StateHelper;
 import org.eclipse.objectteams.otdt.internal.core.compiler.lifting.Lifting;
 import org.eclipse.objectteams.otdt.internal.core.compiler.lookup.ITeamAnchor;
 import org.eclipse.objectteams.otdt.internal.core.compiler.lookup.RoleTypeBinding;
+import org.eclipse.objectteams.otdt.internal.core.compiler.mappings.CalloutImplementorDyn;
 import org.eclipse.objectteams.otdt.internal.core.compiler.model.MethodModel;
 import org.eclipse.objectteams.otdt.internal.core.compiler.model.RoleModel;
 import org.eclipse.objectteams.otdt.internal.core.compiler.util.AstGenerator;
@@ -186,6 +198,7 @@ public class BaseAllocationExpression extends Assignment {
         	allocSend.receiver = receiver;
         	allocSend.selector = selector;
         	allocSend.arguments = this.arguments;
+        	allocSend.accessId = -1; // request that MessageSend.resolveType() assigns a fresh accessId if decapsulation is detected
         	allocation = allocSend;
         } else {
             AllocationExpression alloc = newAllocation(baseclass, gen);
@@ -239,8 +252,94 @@ public class BaseAllocationExpression extends Assignment {
     		}
         }
     }
-    
-    private boolean isArgOfOtherCtor(ConstructorDeclaration constructorDecl, BlockScope scope) {
+
+	public static Expression convertToDynAccess(BlockScope scope, AllocationExpression expression, int accessId) {
+		AstGenerator gen = new AstGenerator(expression);
+    	Expression receiver;
+    	char[] selector;
+    	int modifiers = ClassFileConstants.AccPublic;
+		TypeBinding baseclass = expression.resolvedType;
+		if (expression instanceof QualifiedAllocationExpression) {
+			receiver = ((QualifiedAllocationExpression) expression).enclosingInstance;
+			selector = CalloutImplementorDyn.OT_ACCESS;
+			// FIXME: here we should call a non-static outer._OT$access() which must invoke this.new Inner().
+		} else {
+			receiver = gen.typeReference(baseclass);
+			selector = CalloutImplementorDyn.OT_ACCESS_STATIC;
+			modifiers |= ClassFileConstants.AccStatic;
+		}
+		MessageSend allocSend = new MessageSend() {
+    		@Override
+			public boolean isDecapsulationAllowed(Scope scope2) {
+    			// this message send can decapsulate independent of scope
+    			return true;
+    		}
+    		@Override
+    		public DecapsulationState getBaseclassDecapsulation() {
+    			return DecapsulationState.ALLOWED;
+    		}
+    	};
+    	gen.setPositions(allocSend);
+    	allocSend.receiver = receiver;
+    	allocSend.selector = selector;
+    	allocSend.arguments = expression.arguments;
+    	allocSend.constant = Constant.NotAConstant;
+    	allocSend.actualReceiverType = baseclass;
+    	allocSend.accessId = accessId;
+   		allocSend.arguments = createResolvedAccessArguments(gen, accessId, expression.arguments, scope);
+    	allocSend.binding = new MethodBinding(modifiers, new TypeBinding[] {
+    			TypeBinding.INT,
+    			TypeBinding.INT,
+    			scope.createArrayType(scope.getJavaLangObject(), 1),
+    			scope.getOrgObjectteamsITeam() 
+    		}, 
+    		Binding.NO_EXCEPTIONS,
+    		(ReferenceBinding) baseclass);
+    	allocSend.binding.returnType = scope.getJavaLangObject();
+    	allocSend.binding.selector = selector;
+    	return gen.resolvedCastExpression(allocSend, baseclass, CastExpression.RAW);
+	}
+
+	private static Expression[] createResolvedAccessArguments(AstGenerator gen, int accessId, Expression[] arguments, BlockScope scope) {
+		IntLiteral accessIdLiteral = gen.intLiteral(accessId);
+		accessIdLiteral.resolveType(scope);
+
+		IntLiteral opKindLiteral = gen.intLiteral(0);
+		opKindLiteral.resolveType(scope);
+		
+		Expression[] boxedArgs = null;
+		if (arguments != null) {
+			boxedArgs = new Expression[arguments.length];
+			for (int i = 0; i < arguments.length; i++) {
+				Expression argument = arguments[i];
+				if (argument.resolvedType.isPrimitiveType()) {
+					BaseTypeBinding baseType = (BaseTypeBinding) argument.resolvedType;
+					AllocationExpression boxingAllocation = gen.createBoxing(argument, baseType);
+					boxingAllocation.resolvedType = scope.environment().computeBoxingType(baseType);
+					boxingAllocation.binding = scope.getConstructor((ReferenceBinding) boxingAllocation.resolvedType, new TypeBinding[]{baseType}, boxingAllocation);
+					boxingAllocation.constant = Constant.NotAConstant;
+					argument = boxingAllocation;
+				}
+				boxedArgs[i] = argument;
+			}
+		}
+		ArrayAllocationExpression packedArgs = gen.arrayAllocation(gen.qualifiedTypeReference(TypeConstants.JAVA_LANG_OBJECT), 
+				boxedArgs != null ? 1 : 0, boxedArgs); // arguments are already resolved at this point
+		ArrayBinding objectArray = scope.createArrayType(scope.getJavaLangObject(), 1);
+		if (packedArgs.initializer != null)
+			packedArgs.initializer.binding = objectArray;
+		else
+			packedArgs.dimensions[0].resolveType(scope);
+		packedArgs.resolvedType = objectArray;
+		packedArgs.constant = Constant.NotAConstant;
+
+		Reference teamReference = gen.qualifiedThisReference(scope.enclosingSourceType().enclosingType());
+		teamReference.resolveType(scope);
+		
+		return new Expression[] { accessIdLiteral, opKindLiteral, packedArgs, teamReference };
+	}
+
+	private boolean isArgOfOtherCtor(ConstructorDeclaration constructorDecl, BlockScope scope) {
     	// two marker exception types:
     	@SuppressWarnings("serial") class FoundException extends RuntimeException { /*empty*/}
     	@SuppressWarnings("serial") class NotFoundException extends RuntimeException { /*empty*/ }
@@ -359,9 +458,9 @@ public class BaseAllocationExpression extends Assignment {
         }
 		if (this.isExpression) // don't treat as assignment
 			return this.resolvedType = this.expression.resolveType(scope);
-        if (!scope.methodScope().referenceContext.hasErrors())
-            return super.resolveType(scope);
-        return null;
+		if (!scope.methodScope().referenceContext.hasErrors())
+			return super.resolveType(scope);
+		return null;
     }
     
     @Override
@@ -397,5 +496,4 @@ public class BaseAllocationExpression extends Assignment {
     		return super.printExpressionNoParenthesis(indent, output);
     	return output.append("<no expression yet>"); //$NON-NLS-1$
 	}
-
 }

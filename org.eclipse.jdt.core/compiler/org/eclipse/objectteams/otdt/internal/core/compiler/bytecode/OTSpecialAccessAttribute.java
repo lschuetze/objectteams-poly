@@ -1,7 +1,7 @@
 /**********************************************************************
  * This file is part of "Object Teams Development Tooling"-Software
  *
- * Copyright 2006 Fraunhofer Gesellschaft, Munich, Germany,
+ * Copyright 2006, 2014 Fraunhofer Gesellschaft, Munich, Germany,
  * for its Fraunhofer Institute for Computer Architecture and Software
  * Technology (FIRST), Berlin, Germany and Technical University Berlin,
  * Germany.
@@ -10,7 +10,6 @@
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
- * $Id: $
  *
  * Please visit http://www.eclipse.org/objectteams for updates and contact.
  *
@@ -61,8 +60,24 @@ public class OTSpecialAccessAttribute extends AbstractAttribute {
 	private static final int DYN_CALLOUT_FIELD_ACCESS = 5;
 	private static final int DYN_SUPER_METHOD_ACCESS = 6;
 	private static final int M_SIZE = CallinImplementorDyn.DYNAMIC_WEAVING ? 8 : 6;
-	private static final int F_SIZE = CallinImplementorDyn.DYNAMIC_WEAVING ? 8 : 7;
+	private static final int F_SIZE = CallinImplementorDyn.DYNAMIC_WEAVING ? 9 : 7;
 
+	/*
+	 * For OTREDyn, each attribute of this type maintains a set of locally unique (per team) access IDs.
+	 * These IDs are consumed and translated by OTREDyn to obtain those IDs that uniquely identify the
+	 * base feature within a generated _OT$access or _OT$accessStatic method.
+	 * 
+	 * AccessIds are generated during resolve and stored in these AST nodes:
+	 * - MethodSpec / FieldAccessSpec
+	 *   - From here it is directly picked up by CallinImplementorDyn to insert
+	 *     the accessId as an argument for the generated _OT$access[Static] call.
+	 * - MessageSend; accessId is preset for message sends implementing decapsulating BaseAllocationExpression
+	 *   - regular base class:
+	 *     - detected during AllocationExpression.resolveType, throws ConstructorDecapsulationExpression
+	 *     - allocation is then replaced by a MessageSend to the _OT$access method
+	 *   - base is role:
+	 *     - generated AST has accessId = -1 to be updated during MessageSend.resolveType() if decaps needed
+	 */
 	int nextAccessId = 0;
 	
 	/** Descriptor for a decapsulated base-method. */
@@ -76,8 +91,15 @@ public class OTSpecialAccessAttribute extends AbstractAttribute {
 			if (CopyInheritance.isCreator(method))
 				// creator is declared in the enclosing team
 				this.boundBaseclass = this.boundBaseclass.enclosingType();
-			if (CallinImplementorDyn.DYNAMIC_WEAVING)
+			if (CallinImplementorDyn.DYNAMIC_WEAVING) {
+				for (DecapsulatedMethodDesc methodDesc : OTSpecialAccessAttribute.this._decapsulatedMethods) {
+					if (methodDesc.method == method) {
+						this.accessId = methodDesc.accessId; // share the accessId from another callout to the same method
+						return;
+					}
+				}
 				this.accessId = OTSpecialAccessAttribute.this.nextAccessId++;
+			}
 		}
 
 		void write() {
@@ -100,16 +122,16 @@ public class OTSpecialAccessAttribute extends AbstractAttribute {
 				writeName(this.boundBaseclass.attributeName()); // where to weave into
 				writeName(encodedName);
 				writeName(this.method.signature());
-				if (CallinImplementorDyn.DYNAMIC_WEAVING)
-					writeUnsignedShort(this.accessId);
 			}
+			if (CallinImplementorDyn.DYNAMIC_WEAVING)
+				writeUnsignedShort(this.accessId);
 		}
 
 		public String toString() {
 			return new String(this.method.readableName());
 		}
 	}
-	private List<DecapsulatedMethodDesc> _decapsulatedMethods = new ArrayList<DecapsulatedMethodDesc>();
+	List<DecapsulatedMethodDesc> _decapsulatedMethods = new ArrayList<DecapsulatedMethodDesc>();
 
 	/** Descriptor for a callout-bound base field. */
 	private class CalloutToFieldDesc {
@@ -121,7 +143,7 @@ public class OTSpecialAccessAttribute extends AbstractAttribute {
 		FieldBinding field;
 		ReferenceBinding targetClass;
 		int flags; // use the above constants
-		private int accessId;
+		int accessId;
 		CalloutToFieldDesc(FieldBinding field, ReferenceBinding targetClass, int calloutModifier)
 		{
 			this.field = field;
@@ -130,8 +152,15 @@ public class OTSpecialAccessAttribute extends AbstractAttribute {
 							CALLOUT_GET_FIELD : CALLOUT_SET_FIELD;
 			if (field.isStatic())
 				this.flags |= CALLOUT_STATIC_FIELD;
-			if (CallinImplementorDyn.DYNAMIC_WEAVING)
+			if (CallinImplementorDyn.DYNAMIC_WEAVING) {
+				for (CalloutToFieldDesc ctf : OTSpecialAccessAttribute.this._calloutToFields) {
+					if (ctf.field == field) {
+						this.accessId = ctf.accessId; // share the accessId from another callout to the same field
+						return;
+					}
+				}
 				this.accessId = OTSpecialAccessAttribute.this.nextAccessId++;
+			}
 		}
 
 		public int calloutModifier() {
@@ -143,7 +172,7 @@ public class OTSpecialAccessAttribute extends AbstractAttribute {
 		void write() {
 			if (CallinImplementorDyn.DYNAMIC_WEAVING) {
 				writeByte((byte)DYN_CALLOUT_FIELD_ACCESS);
-				writeByte((byte)this.accessId);
+				writeUnsignedShort(this.accessId);
 			} else {
 				writeByte((byte)CALLOUT_FIELD_ACCESS);
 			}
@@ -166,7 +195,7 @@ public class OTSpecialAccessAttribute extends AbstractAttribute {
 			return  result.toString();
 		}
 	}
-	private List<CalloutToFieldDesc> _calloutToFields = new ArrayList<CalloutToFieldDesc>();
+	List<CalloutToFieldDesc> _calloutToFields = new ArrayList<CalloutToFieldDesc>();
 
 	/** Descriptor for base.super.m() special method access. */
 	public class SuperMethodDesc
@@ -177,7 +206,7 @@ public class OTSpecialAccessAttribute extends AbstractAttribute {
 		}
 
 		void write() {
-			writeByte((byte)SUPER_METHOD_ACCESS);
+			writeByte((byte)(CallinImplementorDyn.DYNAMIC_WEAVING ? DYN_SUPER_METHOD_ACCESS : SUPER_METHOD_ACCESS));
 			writeName(this.method.declaringClass.attributeName());
 			writeName(this.method.declaringClass.superclass().attributeName());
 			writeName(this.method.selector);
@@ -215,8 +244,10 @@ public class OTSpecialAccessAttribute extends AbstractAttribute {
 		return accessId;
 	}
 
-	public void addCalloutFieldAccess(FieldBinding field, ReferenceBinding targetClass, int calloutModifier) {
-		this._calloutToFields.add(new CalloutToFieldDesc(field, targetClass, calloutModifier));
+	public int addCalloutFieldAccess(FieldBinding field, ReferenceBinding targetClass, int calloutModifier) {
+		CalloutToFieldDesc calloutToFieldDesc = new CalloutToFieldDesc(field, targetClass, calloutModifier);
+		this._calloutToFields.add(calloutToFieldDesc);
+		return calloutToFieldDesc.accessId;
 	}
 
 	public void addSuperMethodAccess(MethodBinding method) {

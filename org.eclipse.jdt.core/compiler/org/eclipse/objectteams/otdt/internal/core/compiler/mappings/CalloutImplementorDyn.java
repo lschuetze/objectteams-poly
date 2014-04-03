@@ -16,6 +16,7 @@
 package org.eclipse.objectteams.otdt.internal.core.compiler.mappings;
 
 import org.eclipse.jdt.internal.compiler.ast.Expression;
+import org.eclipse.jdt.internal.compiler.ast.MessageSend;
 import org.eclipse.jdt.internal.compiler.classfmt.ClassFileConstants;
 import org.eclipse.jdt.internal.compiler.lookup.Binding;
 import org.eclipse.jdt.internal.compiler.lookup.MethodBinding;
@@ -39,19 +40,17 @@ import org.eclipse.objectteams.otdt.internal.core.compiler.util.AstGenerator;
 public class CalloutImplementorDyn {
 
 	// wrapper methods for decapsulating callout
-	public static final char[] ACCESS = "_OT$access".toCharArray(); //$NON-NLS-1$
-	public static final char[] ACCESS_STATIC = "_OT$accessStatic".toCharArray(); //$NON-NLS-1$
+	public static final char[] OT_ACCESS = "_OT$access".toCharArray(); //$NON-NLS-1$
+	public static final char[] OT_ACCESS_STATIC = "_OT$accessStatic".toCharArray(); //$NON-NLS-1$
 	
 
 	public static Expression baseAccessExpression(Scope scope, RoleModel roleModel, ReferenceBinding baseType, 
 												  Expression receiver, MethodSpec baseSpec, Expression[] arguments,
 												  AstGenerator gen) 
 	{
-		baseSpec.createAccessAttribute(roleModel);
-
 		char[] selector = ensureAccessor(scope, baseType, baseSpec.isStatic());
 		TeamModel teamModel = roleModel.getTeamModel();
-		Expression memberIdArg = gen.intLiteral(teamModel.getNewCallinId(baseSpec));
+		Expression accessIdArg = gen.intLiteral(baseSpec.accessId);
 		int opKind = 0;
 		if (baseSpec instanceof FieldAccessSpec)
 			if (((FieldAccessSpec) baseSpec).calloutModifier == TerminalTokens.TokenNameset)
@@ -59,7 +58,7 @@ public class CalloutImplementorDyn {
 		Expression opKindArg = gen.intLiteral(opKind);
 		Expression packagedArgs = gen.arrayAllocation(gen.qualifiedTypeReference(TypeConstants.JAVA_LANG_OBJECT), 1, arguments);
 		Expression callerArg = gen.qualifiedThisReference(gen.typeReference(teamModel.getBinding()));
-		Expression messageSend = gen.messageSend(receiver, selector, new Expression[] {memberIdArg, opKindArg, packagedArgs, callerArg});
+		MessageSend messageSend = gen.messageSend(receiver, selector, new Expression[] {accessIdArg, opKindArg, packagedArgs, callerArg});
 		if (baseSpec.resolvedType() == TypeBinding.VOID)
 			return messageSend;
 		else
@@ -69,7 +68,7 @@ public class CalloutImplementorDyn {
 	private static char[] ensureAccessor(Scope scope, ReferenceBinding baseType, boolean isStatic) {
 		if (baseType.isRoleType())
 			baseType = baseType.getRealClass();
-		char[] selector = isStatic ? ACCESS_STATIC : ACCESS;
+		char[] selector = isStatic ? OT_ACCESS_STATIC : OT_ACCESS;
 		MethodBinding[] methods = baseType.getMethods(selector);
 		if (methods == null || methods.length != 1) {
 			int modifiers = ClassFileConstants.AccPublic|ClassFileConstants.AccSynthetic;

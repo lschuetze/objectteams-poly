@@ -1,7 +1,7 @@
 /**********************************************************************
  * This file is part of "Object Teams Dynamic Runtime Environment"
  * 
- * Copyright 2009, 2012 Oliver Frank and others.
+ * Copyright 2009, 2014 Oliver Frank and others.
  * 
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -259,6 +259,7 @@ abstract class Attributes {
 
 		List<DecapsMethod> methods = new ArrayList<DecapsMethod>();
 		List<DecapsField> fields = new ArrayList<DecapsField>();
+		List<String> decapsulatedBaseClasses = new ArrayList<String>(); // not currently used, see AddInterfaceAdapter for brute force solution
 		
 		protected OTSpecialAccessAttribute() {
 			super(ATTRIBUTE_OT_SPECIAL_ACCESS);
@@ -273,13 +274,25 @@ abstract class Attributes {
 				int kind = cr.readByte(off++);
 				switch (kind) {
 				case DECAPSULATION_METHOD_ACCESS:
-					attr.readMethodAccess(cr, off, buf);	off+=6;
+					attr.readMethodAccess(cr, off, buf);	off+=8;
 					break;
 				case CALLOUT_FIELD_ACCESS:
 					attr.readFieldAccess(cr, off, buf); 	off+=8;
+					break;
+				case SUPER_METHOD_ACCESS:
+					throw new IllegalStateException("Not yet handled: OTSpecialAccess for SUPER_METHOD_ACCESS");
+//					off+=8;
+//					break;
 				default:
-					// FIXME(SH): handle!
+					throw new IllegalStateException("Unexpected kind in OTSpecialAccess attribute: "+kind);
 				}
+			}
+			size = cr.readUnsignedShort(off);				off+=2;
+			for (int i = 0; i < size; i++) {
+				String baseClass = cr.readUTF8(off, buf);	off+=2;
+				int flag = cr.readByte(off++);
+				if (flag == 1)
+					decapsulatedBaseClasses.add(baseClass);
 			}
 			return attr;
 		}
@@ -291,13 +304,20 @@ abstract class Attributes {
 			boolean isStatic = false;
 			String baseClass;
 			String methodName;
-			int pos = encodedName.indexOf('?');
-			if (pos == -1) {
-				pos = encodedName.indexOf('!');
-				isStatic = true;
+			if (encodedName.charAt(0) == '<') {
+				// constructor
+				baseClass = className;
+				methodName = encodedName;
+				isStatic = true; // use static accessor
+			} else {
+				int pos = encodedName.indexOf('?');
+				if (pos == -1) {
+					pos = encodedName.indexOf('!');
+					isStatic = true;
+				}
+				baseClass = encodedName.substring(0, pos);
+				methodName = encodedName.substring(pos+1);
 			}
-			baseClass = encodedName.substring(0, pos);
-			methodName = encodedName.substring(pos+1);
 			this.methods.add(new DecapsMethod(baseClass, methodName, methodDesc, id, isStatic));
 		}
 		private void readFieldAccess(ClassReader cr, int off, char[] buf) {

@@ -60,6 +60,7 @@ import org.eclipse.jdt.internal.compiler.impl.Constant;
 import org.eclipse.jdt.internal.compiler.lookup.*;
 import org.eclipse.jdt.internal.compiler.problem.ProblemSeverities;
 import org.eclipse.jdt.internal.compiler.util.SimpleLookupTable;
+import org.eclipse.objectteams.otdt.internal.core.compiler.ast.ConstructorDecapsulationException;
 import org.eclipse.objectteams.otdt.internal.core.compiler.control.Dependencies;
 import org.eclipse.objectteams.otdt.internal.core.compiler.control.ITranslationStates;
 import org.eclipse.objectteams.otdt.internal.core.compiler.control.StateMemento;
@@ -67,6 +68,7 @@ import org.eclipse.objectteams.otdt.internal.core.compiler.lookup.AnchorMapping;
 import org.eclipse.objectteams.otdt.internal.core.compiler.lookup.DependentTypeBinding;
 import org.eclipse.objectteams.otdt.internal.core.compiler.lookup.ITeamAnchor;
 import org.eclipse.objectteams.otdt.internal.core.compiler.lookup.RoleTypeBinding;
+import org.eclipse.objectteams.otdt.internal.core.compiler.mappings.CallinImplementorDyn;
 import org.eclipse.objectteams.otdt.internal.core.compiler.model.RoleModel;
 import org.eclipse.objectteams.otdt.internal.core.compiler.statemachine.copyinheritance.CopyInheritance;
 import org.eclipse.objectteams.otdt.internal.core.compiler.util.AstGenerator;
@@ -635,8 +637,12 @@ TypeBinding resolvePart3(ResolutionState state) {
 	  {
 		this.binding = ((ProblemMethodBinding)this.binding).closestMatch;
 		if (baseclassDecapsulationAllowed) {
-			state.scope.enclosingSourceType().roleModel.addInaccessibleBaseMethod(this.binding);
+			int accessId = state.scope.enclosingSourceType().roleModel.addInaccessibleBaseMethod(this.binding);
 			state.scope.problemReporter().decapsulation(this, state.scope);
+			if (CallinImplementorDyn.DYNAMIC_WEAVING) {
+				this.resolvedType = allocationType;
+				throw new ConstructorDecapsulationException(accessId);
+			}
 		}
 	  } else {
 //  orig:

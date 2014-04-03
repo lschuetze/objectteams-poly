@@ -41,6 +41,8 @@ import org.eclipse.jdt.internal.compiler.flow.*;
 import org.eclipse.jdt.internal.compiler.lookup.*;
 import org.eclipse.jdt.internal.compiler.util.SimpleLookupTable;
 import org.eclipse.objectteams.otdt.core.compiler.IOTConstants;
+import org.eclipse.objectteams.otdt.internal.core.compiler.ast.BaseAllocationExpression;
+import org.eclipse.objectteams.otdt.internal.core.compiler.ast.ConstructorDecapsulationException;
 import org.eclipse.objectteams.otdt.internal.core.compiler.ast.TsuperReference;
 import org.eclipse.objectteams.otdt.internal.core.compiler.bytecode.BytecodeTransformer;
 import org.eclipse.objectteams.otdt.internal.core.compiler.control.Dependencies;
@@ -492,9 +494,21 @@ public class ExplicitConstructorCall extends Statement implements Invocation {
 						argsContainCast = true;
 					}
 					argument.setExpressionContext(INVOCATION_CONTEXT);
+//{ObjectTeams: OTDyn may need to translate super(base(..)) if decapsulation is involved:
+				  try {
+// orig:
 					if ((argumentTypes[i] = argument.resolveType(scope)) == null) {
 						argHasError = true;
 					}
+// giro:
+				  } catch (ConstructorDecapsulationException cde) {
+					  argument = BaseAllocationExpression.convertToDynAccess(scope, (AllocationExpression) argument, cde.accessId);
+					  if (argument.resolvedType == null)
+						  argHasError = true;
+					  else
+						  argumentTypes[i] = argument.resolvedType;
+				  }
+// SH}
 					if (sourceLevel >= ClassFileConstants.JDK1_8 && argument.isPolyExpression()) {
 						if (this.innerInferenceHelper == null)
 							this.innerInferenceHelper = new InnerInferenceHelper();

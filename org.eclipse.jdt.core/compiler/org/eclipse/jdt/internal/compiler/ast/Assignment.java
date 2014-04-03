@@ -41,6 +41,8 @@ import org.eclipse.jdt.internal.compiler.flow.*;
 import org.eclipse.jdt.internal.compiler.impl.CompilerOptions;
 import org.eclipse.jdt.internal.compiler.impl.Constant;
 import org.eclipse.jdt.internal.compiler.lookup.*;
+import org.eclipse.objectteams.otdt.internal.core.compiler.ast.BaseAllocationExpression;
+import org.eclipse.objectteams.otdt.internal.core.compiler.ast.ConstructorDecapsulationException;
 import org.eclipse.objectteams.otdt.internal.core.compiler.control.Config;
 import org.eclipse.objectteams.otdt.internal.core.compiler.lifting.Lowering;
 import org.eclipse.objectteams.otdt.internal.core.compiler.lookup.DependentTypeBinding;
@@ -232,7 +234,18 @@ public TypeBinding resolveType(BlockScope scope) {
 	if (localVariableBinding != null && (localVariableBinding.isCatchParameter() || localVariableBinding.isParameter())) { 
 		localVariableBinding.tagBits &= ~TagBits.IsEffectivelyFinal;  // as it is already definitely assigned, we can conclude already. Also note: catch parameter cannot be compound assigned.
 	}
+//{ObjectTeams:
+/* orig:
 	TypeBinding rhsType = this.expression.resolveType(scope);
+  :giro */
+	TypeBinding rhsType;
+	try {
+		rhsType = this.expression.resolveType(scope);
+	} catch (ConstructorDecapsulationException e) {
+		this.expression = BaseAllocationExpression.convertToDynAccess(scope, (AllocationExpression) this.expression, e.accessId);
+		rhsType = this.expression.resolvedType;
+	}
+// SH}
 	if (lhsType == null || rhsType == null) {
 		return null;
 	}

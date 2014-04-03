@@ -1,7 +1,7 @@
 /**********************************************************************
  * This file is part of "Object Teams Development Tooling"-Software
  *
- * Copyright 2003, 2011 Fraunhofer Gesellschaft, Munich, Germany,
+ * Copyright 2003, 2014 Fraunhofer Gesellschaft, Munich, Germany,
  * for its Fraunhofer Institute for Computer Architecture and Software
  * Technology (FIRST), Berlin, Germany and Technical University Berlin,
  * Germany.
@@ -571,8 +571,10 @@ public class CalloutImplementor extends MethodMappingImplementor
 
     		boolean isCalloutToField = calloutDecl.isCalloutToField();
     		MethodBinding targetMethod = calloutDecl.baseMethodSpec.resolvedMethod;
-	    	baseAccess = new PrivateRoleMethodCall(receiver, selector, arguments, isCalloutToField,
+	    	MessageSend baseSend = new PrivateRoleMethodCall(receiver, selector, arguments, isCalloutToField,
 	    										   calloutDecl.scope, baseType, targetMethod, gen);
+    		baseSend.accessId = calloutDecl.baseMethodSpec.accessId;
+    		baseAccess = baseSend;
     	} else {
     		if (calloutDecl.baseMethodSpec.isStatic())
     			// we thought we should use an instance
@@ -589,8 +591,7 @@ public class CalloutImplementor extends MethodMappingImplementor
 						else
 							baseAccess = gen.qualifiedNameReference(new char[][] {IOTConstants._OT_BASE, baseField.name });
 						if (fieldSpec.isSetter()) {
-							int pos = fieldSpec.isStatic() ? 0 : 1;
-							baseAccess = gen.assignment((NameReference)baseAccess, arguments[pos]);
+							baseAccess = gen.assignment((NameReference)baseAccess, arguments[0]);
 							returnType = TypeBinding.VOID; // signal that no result processing is necessary
 						}
 					} else {
@@ -602,7 +603,9 @@ public class CalloutImplementor extends MethodMappingImplementor
 						// we thought we should use an instance
 						// but decapsulating c-t-f (non-role-base) is sent to the base *class*
 						receiver = gen.baseNameReference(baseType.getRealClass());
-		    		baseAccess = gen.messageSend(receiver, selector, arguments);
+		    		MessageSend baseSend = gen.messageSend(receiver, selector, arguments);
+		    		baseSend.accessId = calloutDecl.baseMethodSpec.accessId;
+		    		baseAccess = baseSend;
 		    		break;
 				case DYN_ACCESS:
 					baseAccess = CalloutImplementorDyn.baseAccessExpression(calloutDecl.scope, this._role, baseType, receiver, calloutDecl.baseMethodSpec, arguments, gen);
@@ -674,7 +677,7 @@ public class CalloutImplementor extends MethodMappingImplementor
 				minArguments = 1;
 			else
 				minArguments = 0;
-        	if (!baseMethodSpec.isStatic()) {
+        	if (!baseMethodSpec.isStatic() && !CallinImplementorDyn.DYNAMIC_WEAVING) { // OTREDyn uses non-static accessor for non-static fields
         		arguments = new Expression[minArguments+1];
 	        	// cast needed against weakened _OT$base reference
         		//   and if base is a role, to go to the class type (FIXME)

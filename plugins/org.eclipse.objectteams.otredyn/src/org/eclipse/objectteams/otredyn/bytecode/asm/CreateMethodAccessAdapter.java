@@ -1,7 +1,7 @@
 /**********************************************************************
  * This file is part of "Object Teams Dynamic Runtime Environment"
  * 
- * Copyright 2009, 2012 Oliver Frank and others.
+ * Copyright 2009, 2014 Oliver Frank and others.
  * 
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -42,11 +42,13 @@ public class CreateMethodAccessAdapter extends AbstractTransformableClassNode {
 	private int accessId;
 	private Method access;
 	private int firstArgIndex;
+	private boolean isConstructor;
 
 	public CreateMethodAccessAdapter(Method method, int accessId) {
 		this.method = method;
 		this.accessId = accessId;
-		if (method.isStatic()) {
+		isConstructor = method.getName().equals("<init>");
+		if (method.isStatic() || isConstructor) {
 			access = ConstantMembers.accessStatic;
 			firstArgIndex = 0;
 		} else {
@@ -60,8 +62,12 @@ public class CreateMethodAccessAdapter extends AbstractTransformableClassNode {
 		MethodNode methodNode = getMethod(method);
 		InsnList instructions = new InsnList();
 		
-		//put "this" on the stack for a non-static method 
-		if (!method.isStatic()) {
+		if (isConstructor) {
+			// create empty object for constructor invocation:
+			instructions.add(new TypeInsnNode(Opcodes.NEW, name));
+			instructions.add(new InsnNode(Opcodes.DUP));
+		} else if (!method.isStatic()) {
+			//put "this" on the stack for a non-static method
 			instructions.add(new IntInsnNode(Opcodes.ALOAD, 0));
 		}
 		
@@ -93,6 +99,8 @@ public class CreateMethodAccessAdapter extends AbstractTransformableClassNode {
 		int opcode = Opcodes.INVOKEVIRTUAL;
 		if (method.isStatic()) {
 			opcode = Opcodes.INVOKESTATIC;
+		} else if (isConstructor) {
+			opcode = Opcodes.INVOKESPECIAL;
 		}
 		instructions.add(new MethodInsnNode(opcode, name, method.getName(), method.getSignature()));
 		
@@ -106,7 +114,7 @@ public class CreateMethodAccessAdapter extends AbstractTransformableClassNode {
 			
 				instructions.add(AsmTypeHelper.getBoxingInstructionForType(returnType));
 				instructions.add(new InsnNode(Opcodes.ARETURN));
-		} else if (returnType.getSort() == Type.VOID) {
+		} else if (returnType.getSort() == Type.VOID && !isConstructor) {
 			instructions.add(new InsnNode(Opcodes.ACONST_NULL));
 			instructions.add(new InsnNode(Opcodes.ARETURN));
 		} else {

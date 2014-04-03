@@ -1283,7 +1283,7 @@ public class AstGenerator extends AstFactory {
 	 * @param resultExpr
 	 * @return an allocation expression for the boxed value.
 	 */
-	public Expression createBoxing(Expression resultExpr, BaseTypeBinding type)
+	public AllocationExpression createBoxing(Expression resultExpr, BaseTypeBinding type)
 	{
 		char[][] boxedType = boxTypeName(type);
 		return allocation(qualifiedTypeReference(boxedType), new Expression[]{resultExpr});

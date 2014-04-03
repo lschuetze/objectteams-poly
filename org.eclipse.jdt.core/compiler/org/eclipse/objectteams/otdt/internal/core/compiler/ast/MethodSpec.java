@@ -101,6 +101,7 @@ public class MethodSpec extends ASTNode implements InvocationSite
 	public boolean isDeclaration = false;
 //{OTDyn:
 	public int callinID = -1;
+	public int accessId;
 // SH}
 
 	public enum ImplementationStrategy {
@@ -503,6 +504,7 @@ public class MethodSpec extends ASTNode implements InvocationSite
 		if (!this.resolvedMethod.canBeSeenBy(baseClass, this, scope)) {
 			this.implementationStrategy = CallinImplementorDyn.DYNAMIC_WEAVING 
 					? ImplementationStrategy.DYN_ACCESS : ImplementationStrategy.DECAPS_WRAPPER;
+    		this.accessId = createAccessAttribute(scope.enclosingSourceType().roleModel);
    			scope.problemReporter().decapsulation(this, baseClass, scope);
 		} else {
 			this.implementationStrategy = ImplementationStrategy.DIRECT;
@@ -788,7 +790,7 @@ public class MethodSpec extends ASTNode implements InvocationSite
 		throw new InternalCompilerError("Method not applicable"); //$NON-NLS-1$
 	}
 	
-	public void createAccessAttribute(RoleModel roleModel) {
-		roleModel.addInaccessibleBaseMethod(this.resolvedMethod);		
+	public int createAccessAttribute(RoleModel roleModel) {
+		return roleModel.addInaccessibleBaseMethod(this.resolvedMethod);		
 	}
 }

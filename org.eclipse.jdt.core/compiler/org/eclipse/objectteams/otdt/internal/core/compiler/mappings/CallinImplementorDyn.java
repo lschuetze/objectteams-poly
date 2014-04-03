@@ -99,10 +99,6 @@ public class CallinImplementorDyn extends MethodMappingImplementor {
 	//  - both the team version (II[Object;) and the base version (I[Object;)
 	public static final char[] OT_CALL_ORIG_STATIC = "_OT$callOrigStatic".toCharArray(); //$NON-NLS-1$
 	
-	// for decapsulation:
-	public static final char[] OT_ACCESS 		= "_OT$access".toCharArray(); //$NON-NLS-1$
-	public static final char[] OT_ACCESS_STATIC = "_OT$accessStatic".toCharArray(); //$NON-NLS-1$
-	
 	// variable names (arguments ...)
 	static final char[] TEAMS 			= "teams".toCharArray(); //$NON-NLS-1$
 	static final char[] INDEX			= "index".toCharArray(); //$NON-NLS-1$
