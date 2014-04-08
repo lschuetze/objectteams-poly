@@ -1,7 +1,7 @@
 /**********************************************************************
  * This file is part of "Object Teams Dynamic Runtime Environment"
  * 
- * Copyright 2009, 2012 Oliver Frank and others.
+ * Copyright 2009, 2014 Oliver Frank and others.
  * 
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -38,7 +38,12 @@ public class Binding implements Comparable<Binding>, IBinding {
 	private String memberSignature;
 	private String declaringBaseClassName;
 	private int callinModifier;
-	private int callinId;
+	/**
+	 * Locally unique id for (an element in) this binding:
+	 * For CALLIN_BINDING this is the callinId,
+	 * for METHOD_ACCESS or FIELD_ACCESS it is the perTeamAccessId
+	 */
+	private int perTeamId;
 	private IBinding.BindingType type;
 	private boolean isHandleCovariantReturn;
 	
@@ -61,7 +66,7 @@ public class Binding implements Comparable<Binding>, IBinding {
 		this.memberSignature = memberSignature;
 		this.declaringBaseClassName = declaringBaseClassName;
 		this.callinModifier = callinModifier;
-		this.callinId = callinId;
+		this.perTeamId = callinId;
 		this.type = IBinding.BindingType.CALLIN_BINDING;
 		this.isHandleCovariantReturn = handleCovariantReturn;
 	}
@@ -71,13 +76,13 @@ public class Binding implements Comparable<Binding>, IBinding {
 	 */
 	public Binding(AbstractBoundClass teamClass,
 			String boundClassName, 
-			String memberName, String memberSignature, int callinId, IBinding.BindingType type) 
+			String memberName, String memberSignature, int perTeamAccessId, IBinding.BindingType type) 
 	{
 		this.teamClass = teamClass;
 		this.boundClass = boundClassName;
 		this.memberName = memberName;
 		this.memberSignature = memberSignature;
-		this.callinId = callinId;
+		this.perTeamId = perTeamAccessId;
 		this.type = type;
 	}
 
@@ -93,8 +98,8 @@ public class Binding implements Comparable<Binding>, IBinding {
 		return memberSignature;
 	}
 
-	public int getCallinId() {
-		return callinId;
+	public int getPerTeamId() {
+		return perTeamId;
 	}
 
 	public boolean isHandleCovariantReturn() {
@@ -111,7 +116,7 @@ public class Binding implements Comparable<Binding>, IBinding {
 		return boundClass.equals(other.boundClass)
 				&& memberName.equals(other.memberName)
 				&& memberSignature.equals(other.memberSignature)
-				&& type == other.type && callinId == other.callinId;
+				&& type == other.type && perTeamId == other.perTeamId;
 	}
 	
 	public int compareTo(Binding other) {
@@ -154,7 +159,7 @@ public class Binding implements Comparable<Binding>, IBinding {
 		case FIELD_ACCESS: buf.append("callout-to-field: ");break;
 		}
 		buf.append('{');
-		buf.append(this.callinId);
+		buf.append(this.perTeamId);
 		buf.append("} ");
 		buf.append(this.boundClass);
 		buf.append('.');

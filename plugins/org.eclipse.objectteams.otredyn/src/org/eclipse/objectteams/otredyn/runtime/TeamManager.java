@@ -1,7 +1,7 @@
 /**********************************************************************
  * This file is part of "Object Teams Dynamic Runtime Environment"
  * 
- * Copyright 2009, 2012 Oliver Frank and others.
+ * Copyright 2009, 2014 Oliver Frank and others.
  * 
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -44,6 +44,7 @@ public class TeamManager {
 	private static List<List<ITeam>> _teams = new ArrayList<List<ITeam>>();
 	private static List<List<Integer>> _callinIds = new ArrayList<List<Integer>>();
 	private static Map<String, Integer> joinpointMap = new HashMap<String, Integer>();
+	// key: Team class, value: list of global memberIds, indexed by local accessId
 	private static Map<Class<?>, List<Integer>> accessIdMap = new HashMap<Class<?>, List<Integer>>();
 	private static int currentJoinpointId = 0;
 	// map all original joinpoints to their inherited versions in subclasses
@@ -102,7 +103,8 @@ public class TeamManager {
 	 * @return
 	 */
 	public static int getMemberId(int accessId, Class<? extends ITeam> teamClass) {
-		return accessIdMap.get(teamClass).get(accessId);
+		Integer id = accessIdMap.get(teamClass).get(accessId);
+		return id;
 	}
 
 	/**
@@ -162,11 +164,11 @@ public class TeamManager {
 				int joinpointId = getJoinpointId(boundClass
 						.getMethodIdentifier(method));
 				synchronized (method) {
-					changeTeamsForJoinpoint(t, binding.getCallinId(), joinpointId, stateChange);
+					changeTeamsForJoinpoint(t, binding.getPerTeamId(), joinpointId, stateChange);
 					List<Integer> subJoinpoints = joinpointToSubJoinpoints.get(joinpointId);
 					if (subJoinpoints != null)
 						for (Integer subJoinpoint : subJoinpoints)
-							changeTeamsForJoinpoint(t, binding.getCallinId(), subJoinpoint, stateChange);
+							changeTeamsForJoinpoint(t, binding.getPerTeamId(), subJoinpoint, stateChange);
 				}
 				boundClass.handleAddingOfBinding(binding); // TODO(SH): more lazy
 				break;
@@ -201,9 +203,9 @@ public class TeamManager {
 					member = boundClass.getMethod(binding.getMemberName(), binding.getMemberSignature(), false/*covariantReturn*/);
 				}
 				
-				int memberId = member.getId(boundClass);
+				int memberId = member.getGlobalId(boundClass);
 				synchronized (member) {
-					addAccessIds(teamClass, teem, binding.getCallinId(), memberId);
+					addAccessIds(teamClass, teem, binding.getPerTeamId(), memberId);
 				}
 				boundClass.handleAddingOfBinding(binding);
 				break;
@@ -211,22 +213,23 @@ public class TeamManager {
 		}
 	}
 	/**
-	 * Stores the access ids of a team and the corresponding member ids
-	 * @param t
+	 * Stores the access ids of a team and the corresponding member ids,
+	 * where accessId is local to the team and the member id is globally unique.
+	 * @param teamClass
 	 * @param teem
 	 * @param accessId
 	 * @param memberId
 	 * @param stateChange
 	 */
-	private static void addAccessIds(Class<? extends ITeam> clazz, IBoundTeam teem, int accessId, int memberId) {
-		List<Integer> accessIds = accessIdMap.get(clazz);
+	private static void addAccessIds(Class<? extends ITeam> teamClass, IBoundTeam teem, int accessId, int memberId) {
+		List<Integer> accessIds = accessIdMap.get(teamClass);
 		if (accessIds == null) {
 			int highestAccessId = teem.getHighestAccessId() + 1;
 			accessIds = new ArrayList<Integer>(highestAccessId);
 			for (int i = 0; i <= highestAccessId; i++) {
 				accessIds.add(0);
 			}
-			accessIdMap.put(clazz, accessIds);
+			accessIdMap.put(teamClass, accessIds);
 		}
 		accessIds.set(accessId, memberId);
 	}

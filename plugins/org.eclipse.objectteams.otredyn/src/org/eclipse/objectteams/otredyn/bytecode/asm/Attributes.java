@@ -231,25 +231,25 @@ abstract class Attributes {
 			String accessMode;
 			boolean isStatic;
 			String baseclass, name, desc;
-			public int accessId;
+			public int perTeamAccessId;
 			public DecapsField(String baseclass, String name, String desc, int accessId, String accessMode, boolean isStatic) {
 				this.baseclass = baseclass;
 				this.name = name;
 				this.desc = desc;
-				this.accessId = accessId;
+				this.perTeamAccessId = accessId;
 				this.accessMode = accessMode;
 				this.isStatic = isStatic;
 			}
 		}
 		class DecapsMethod {
 			String baseclass, name, desc;
-			int id;
+			int perTeamAccessId;
 			boolean isStatic;
 			DecapsMethod(String baseclass, String name, String desc, int id, boolean isStatic) {
 				this.baseclass = baseclass;
 				this.name = name;
 				this.desc = desc;
-				this.id = id;
+				this.perTeamAccessId = id;
 				this.isStatic = isStatic;
 			}
 		}
@@ -277,7 +277,7 @@ abstract class Attributes {
 					attr.readMethodAccess(cr, off, buf);	off+=8;
 					break;
 				case CALLOUT_FIELD_ACCESS:
-					attr.readFieldAccess(cr, off, buf); 	off+=8;
+					attr.readFieldAccess(cr, off, buf); 	off+=9;
 					break;
 				case SUPER_METHOD_ACCESS:
 					throw new IllegalStateException("Not yet handled: OTSpecialAccess for SUPER_METHOD_ACCESS");
@@ -300,7 +300,7 @@ abstract class Attributes {
 			String className   = cr.readUTF8(off, buf);
 			String encodedName = cr.readUTF8(off+2, buf);
 			String methodDesc  = cr.readUTF8(off+4, buf);
-			int id = cr.readUnsignedShort(off+6);
+			int accessId = cr.readUnsignedShort(off+6);
 			boolean isStatic = false;
 			String baseClass;
 			String methodName;
@@ -318,14 +318,14 @@ abstract class Attributes {
 				baseClass = encodedName.substring(0, pos);
 				methodName = encodedName.substring(pos+1);
 			}
-			this.methods.add(new DecapsMethod(baseClass, methodName, methodDesc, id, isStatic));
+			this.methods.add(new DecapsMethod(baseClass, methodName, methodDesc, accessId, isStatic));
 		}
 		private void readFieldAccess(ClassReader cr, int off, char[] buf) {
-			int accessId = cr.readByte(off);
-			int flags = cr.readByte(off+1);
-			String className   = cr.readUTF8(off+2, buf);
-			String fieldName = cr.readUTF8(off+4, buf);
-			String fieldDesc  = cr.readUTF8(off+6, buf);
+			int accessId = cr.readUnsignedShort(off);
+			int flags = cr.readByte(off+2);
+			String className   = cr.readUTF8(off+3, buf);
+			String fieldName = cr.readUTF8(off+5, buf);
+			String fieldDesc  = cr.readUTF8(off+7, buf);
 			boolean isStatic = (flags & 2) != 0;
 			String accessMode = (flags & 1) == 1 ? "set" : "get";
 			this.fields.add(new DecapsField(className, fieldName, fieldDesc, accessId, accessMode, isStatic));
@@ -341,8 +341,8 @@ abstract class Attributes {
 				AbstractBoundClass baseclass = repo.getBoundClass(dMethod.baseclass, dMethod.baseclass.replace('.', '/'), clazz.getClassLoader());
 				// register the target method:
 				baseclass.getMethod(dMethod.name, dMethod.desc, false/*covariantReturn*/, dMethod.isStatic);
-				clazz.recordAccessId(dMethod.id);
-				clazz.addBinding(new Binding(clazz, dMethod.baseclass, dMethod.name, dMethod.desc, dMethod.id, IBinding.BindingType.METHOD_ACCESS));
+				clazz.recordAccessId(dMethod.perTeamAccessId);
+				clazz.addBinding(new Binding(clazz, dMethod.baseclass, dMethod.name, dMethod.desc, dMethod.perTeamAccessId, IBinding.BindingType.METHOD_ACCESS));
 			}
 
 			for (DecapsField dField: this.fields) {
@@ -352,8 +352,8 @@ abstract class Attributes {
 				AbstractBoundClass baseclass = repo.getBoundClass(dField.baseclass, dField.baseclass.replace('.', '/'), clazz.getClassLoader());
 				// register the target field:
 				baseclass.getField(dField.name, dField.desc);
-				clazz.recordAccessId(dField.accessId);
-				clazz.addBinding(new Binding(clazz, dField.baseclass, dField.name, dField.desc, dField.accessId, IBinding.BindingType.FIELD_ACCESS));
+				clazz.recordAccessId(dField.perTeamAccessId);
+				clazz.addBinding(new Binding(clazz, dField.baseclass, dField.name, dField.desc, dField.perTeamAccessId, IBinding.BindingType.FIELD_ACCESS));
 			}
 		}
 	}

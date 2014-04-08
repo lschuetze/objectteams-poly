@@ -1,7 +1,7 @@
 /**********************************************************************
  * This file is part of "Object Teams Dynamic Runtime Environment"
  * 
- * Copyright 2009, 2012 Oliver Frank and others.
+ * Copyright 2009, 2014 Oliver Frank and others.
  * 
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -32,6 +32,9 @@ public abstract class AbstractTeam extends AbstractBoundClass implements IBoundT
 	 * based on {@link Binding#compareTo(Binding)} (see there).
 	 */
 	private Set<Binding> bindings;
+	/**
+	 * The highest perTeamAccessId that has been read from an OTSpecialAccess attribute
+	 */
 	private int highestAccessId;
 
 	protected AbstractTeam(String name, String id, ClassLoader loader) {

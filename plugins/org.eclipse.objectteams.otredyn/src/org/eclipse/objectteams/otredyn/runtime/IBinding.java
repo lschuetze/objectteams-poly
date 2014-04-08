@@ -1,7 +1,7 @@
 /**********************************************************************
  * This file is part of "Object Teams Dynamic Runtime Environment"
  * 
- * Copyright 2011, 2012 GK Software AG and others.
+ * Copyright 2011, 2014 GK Software AG and others.
  * 
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -43,8 +43,8 @@ public interface IBinding {
 	/** Signature (JVM encoding) of the bound base member. */
 	String getMemberSignature();
 
-	/** Answer the callin ID (also used for callout decapsulation bindings) */
-	int getCallinId();
+	/** Answer the ID (callinId or perTeamAccessId) */
+	int getPerTeamId();
 
 	/** Does base method matching include overrides with covariant return type?. */
 	boolean isHandleCovariantReturn();

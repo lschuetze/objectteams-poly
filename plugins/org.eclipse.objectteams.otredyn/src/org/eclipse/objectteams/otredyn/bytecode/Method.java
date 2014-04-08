@@ -1,7 +1,7 @@
 /**********************************************************************
  * This file is part of "Object Teams Dynamic Runtime Environment"
  * 
- * Copyright 2009, 2012 Oliver Frank and others.
+ * Copyright 2009, 2014 Oliver Frank and others.
  * 
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -46,14 +46,14 @@ public class Method extends Member implements IMethod {
 	/**
 	 * Returns a globally unique id for the method
 	 * @param clazz
-	 * @return 
+	 * @return the ID
 	 */
 	@Override
-	public int getId(IBoundClass clazz) {
+	public int getGlobalId(IBoundClass clazz) {
 		String key = null;
 		// special treatment of private conflicts with test415_nonexistingBaseMethod3i
 		// see also AbstractBoundClass.handleTaskList()
-		if (/*isPrivate() ||*/ isStatic()) {
+		if (/*isPrivate() ||*/ isStatic() || "<init>".equals(getName())) { // also no dynamic binding for constructors
 			key = clazz.getId() + getName() + getSignature();
 		} else {
 			key = getName() + getSignature();

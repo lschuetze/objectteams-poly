@@ -1,7 +1,7 @@
 /**********************************************************************
  * This file is part of "Object Teams Dynamic Runtime Environment"
  * 
- * Copyright 2009, 2012 Oliver Frank and others.
+ * Copyright 2009, 2014 Oliver Frank and others.
  * 
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -30,7 +30,8 @@ import org.objectweb.asm.Opcodes;
  * @author Oliver Frank
  */
 public abstract class Member implements IMember {
-	
+
+	/** Map of globally unique Ids by keys that are constructed from the resolved target member. */
 	private static Map<String, Integer> idMap = new HashMap<String, Integer>();
 	private static int currentId = 0;
 	
@@ -91,5 +92,5 @@ public abstract class Member implements IMember {
 		return id;
 	}
 	
-	public abstract int getId(IBoundClass clazz);
+	public abstract int getGlobalId(IBoundClass clazz);
 }

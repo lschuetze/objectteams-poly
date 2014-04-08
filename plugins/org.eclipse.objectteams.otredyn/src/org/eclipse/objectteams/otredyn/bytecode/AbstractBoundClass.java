@@ -1,7 +1,7 @@
 /**********************************************************************
  * This file is part of "Object Teams Dynamic Runtime Environment"
  * 
- * Copyright 2009, 2012 Oliver Frank and others.
+ * Copyright 2009, 2014 Oliver Frank and others.
  * 
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -663,7 +663,7 @@ public abstract class AbstractBoundClass implements IBoundClass {
 				prepareForFirstMemberAccess();
 				Field field = getField(task.getMemberName(), task
 						.getMemberSignature());
-				weaveFieldAccess(field, field.getId(this));
+				weaveFieldAccess(field, field.getGlobalId(this));
 				if (!field.isStatic()) {
 					// If the field is not static it could be accessed through a subclass
 					// so weave the subclass
@@ -680,7 +680,7 @@ public abstract class AbstractBoundClass implements IBoundClass {
 				prepareForFirstMemberAccess();
 				Method method = getMethod(task.getMemberName(), task.getMemberSignature(),
 										  task.isHandleCovariantReturn());
-				weaveMethodAccess(method, method.getId(this));
+				weaveMethodAccess(method, method.getGlobalId(this));
 				if (!method.isStatic()) {
 					// If the method is not static it could be accessed through a subclass
 					// so weave the subclass
@@ -874,7 +874,7 @@ public abstract class AbstractBoundClass implements IBoundClass {
 								  false/*covariantReturn*/);
 		int joinpointId = TeamManager
 				.getJoinpointId(getMethodIdentifier(method));
-		int boundMethodId = method.getId(this);
+		int boundMethodId = method.getGlobalId(this);
 
 		moveCodeToCallOrig(method, boundMethodId);
 		createDispatchCodeInOrgMethod(method, joinpointId, boundMethodId);
@@ -891,7 +891,7 @@ public abstract class AbstractBoundClass implements IBoundClass {
 								  task.isHandleCovariantReturn());
 		int joinpointId = TeamManager
 				.getJoinpointId(getMethodIdentifier(method));
-		int boundMethodId = method.getId(this);
+		int boundMethodId = method.getGlobalId(this);
 		if (task.doAllTransformations()) {
 			createDispatchCodeInCallAllBindings(joinpointId, boundMethodId);
 			// TODO(SH): instead of iterating superclasses fetch it from the Binding
@@ -927,7 +927,7 @@ public abstract class AbstractBoundClass implements IBoundClass {
 		prepareForFirstTransformation();
 		Method method = getMethod(task.getMemberName(), task.getMemberSignature(),
 				                  task.isHandleCovariantReturn());
-		int boundMethodId = method.getId(this);
+		int boundMethodId = method.getGlobalId(this);
 		if (task.doAllTransformations()) {
 			createSuperCallInCallOrig(boundMethodId);
 		}		
@@ -944,7 +944,7 @@ public abstract class AbstractBoundClass implements IBoundClass {
 								  task.isHandleCovariantReturn());
 		int joinpointId = TeamManager
 				.getJoinpointId(getMethodIdentifier(method));
-		int boundMethodId = method.getId(this);
+		int boundMethodId = method.getGlobalId(this);
 		if (task.doAllTransformations()) {
 			moveCodeToCallOrig(method, boundMethodId);
 			createDispatchCodeInCallAllBindings(joinpointId, boundMethodId);
@@ -963,7 +963,7 @@ public abstract class AbstractBoundClass implements IBoundClass {
 		prepareForFirstTransformation();
 		Method method = getMethod(task.getMemberName(), task.getMemberSignature(),
 								  task.isHandleCovariantReturn());
-		int boundMethodId = method.getId(this);
+		int boundMethodId = method.getGlobalId(this);
 		moveCodeToCallOrig(method, boundMethodId);
 		createCallAllBindingsCallInOrgMethod(method, boundMethodId, false);
 
