@@ -254,19 +254,21 @@ public class BaseAllocationExpression extends Assignment {
     }
 
 	public static Expression convertToDynAccess(BlockScope scope, AllocationExpression expression, int accessId) {
-		AstGenerator gen = new AstGenerator(expression);
-    	Expression receiver;
-    	char[] selector;
-    	int modifiers = ClassFileConstants.AccPublic;
 		TypeBinding baseclass = expression.resolvedType;
+		AstGenerator gen = new AstGenerator(expression);
+    	Expression receiver = gen.typeReference(baseclass);
+    	char[] selector = CalloutImplementorDyn.OT_ACCESS_STATIC;
+    	int modifiers = ClassFileConstants.AccPublic|ClassFileConstants.AccStatic;
+		Expression[] arguments = expression.arguments;
 		if (expression instanceof QualifiedAllocationExpression) {
-			receiver = ((QualifiedAllocationExpression) expression).enclosingInstance;
-			selector = CalloutImplementorDyn.OT_ACCESS;
-			// FIXME: here we should call a non-static outer._OT$access() which must invoke this.new Inner().
-		} else {
-			receiver = gen.typeReference(baseclass);
-			selector = CalloutImplementorDyn.OT_ACCESS_STATIC;
-			modifiers |= ClassFileConstants.AccStatic;
+			Expression enclosingInstance = ((QualifiedAllocationExpression) expression).enclosingInstance;
+			if (arguments == null) {
+				arguments = new Expression[] { enclosingInstance };
+			} else {
+				int len = arguments.length;
+				System.arraycopy(arguments, 0, arguments = new Expression[len+1], 1, len);
+				arguments[0] = enclosingInstance;
+			}
 		}
 		MessageSend allocSend = new MessageSend() {
     		@Override
@@ -282,16 +284,15 @@ public class BaseAllocationExpression extends Assignment {
     	gen.setPositions(allocSend);
     	allocSend.receiver = receiver;
     	allocSend.selector = selector;
-    	allocSend.arguments = expression.arguments;
     	allocSend.constant = Constant.NotAConstant;
     	allocSend.actualReceiverType = baseclass;
     	allocSend.accessId = accessId;
-   		allocSend.arguments = createResolvedAccessArguments(gen, accessId, expression.arguments, scope);
+   		allocSend.arguments = createResolvedAccessArguments(gen, accessId, arguments, scope);
     	allocSend.binding = new MethodBinding(modifiers, new TypeBinding[] {
     			TypeBinding.INT,
     			TypeBinding.INT,
     			scope.createArrayType(scope.getJavaLangObject(), 1),
-    			scope.getOrgObjectteamsITeam() 
+    			scope.getOrgObjectteamsITeam()
     		}, 
     		Binding.NO_EXCEPTIONS,
     		(ReferenceBinding) baseclass);

@@ -3800,7 +3800,7 @@ public class ExplicitRoleCreation extends AbstractOTJLDTest {
 			    "    protected final Team2335crori2_1 lower = new Team2335crori2_1();\n" +
 			    "    protected class R playedBy Inner<@lower> {\n" +
 			    "        protected R(Team2335crori2_1 outer) {\n" +
-			    "            outer.base(\"OK\");\n" +
+			    "            outer.base(\"OK\");\n" + // TODO: is outer. acceptable, shouldn't it always be lower.base()??
 			    "        }\n" +
 			    "        String getVal() -> get String val;\n" +
 			    "        protected void print() {\n" +

@@ -75,13 +75,10 @@ public class CreateMethodAccessAdapter extends AbstractTransformableClassNode {
 		Type[] args = Type.getArgumentTypes(methodNode.desc);
 		
 		if (args.length > 0) {
-			instructions.add(new IntInsnNode(Opcodes.ALOAD, firstArgIndex + 2));
 			
 			
 			for (int i = 0; i < args.length; i++) {
-				if (i < args.length - 1) {
-					instructions.add(new InsnNode(Opcodes.DUP));
-				}
+				instructions.add(new IntInsnNode(Opcodes.ALOAD, firstArgIndex + 2));
 				instructions.add(createLoadIntConstant(i));
 				instructions.add(new InsnNode(Opcodes.AALOAD));
 				Type arg = args[i];
