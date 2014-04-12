@@ -533,11 +533,9 @@ public class CallinImplementorDyn extends MethodMappingImplementor {
 															 CastExpression.DO_WRAP);
 									if (!roleParam.leafComponentType().isBaseType()) {
 										// lift?(MyBaseClass)
-										Reference liftReceiver;
+										Reference liftReceiver = null; // default: let gen find the team
 										if (roleType.isTeam() && TypeBinding.equalsEquals(roleParam.enclosingType(), roleType))
 											liftReceiver = gen.singleNameReference(roleVar); // lift to inner role
-										else 
-											liftReceiver = gen.thisReference(); // default
 										arg = gen.potentialLift(liftReceiver, arg, roleParam, isReplace/*reversible*/);
 										canLiftingFail |= checkLiftingProblem(teamDecl, callinDecl, (ReferenceBinding)roleParam.leafComponentType());
 									}
