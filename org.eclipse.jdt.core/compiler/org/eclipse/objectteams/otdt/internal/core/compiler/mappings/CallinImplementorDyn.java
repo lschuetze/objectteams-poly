@@ -30,6 +30,7 @@ import org.eclipse.jdt.internal.compiler.ast.CastExpression;
 import org.eclipse.jdt.internal.compiler.ast.Expression;
 import org.eclipse.jdt.internal.compiler.ast.MessageSend;
 import org.eclipse.jdt.internal.compiler.ast.MethodDeclaration;
+import org.eclipse.jdt.internal.compiler.ast.Reference;
 import org.eclipse.jdt.internal.compiler.ast.SingleNameReference;
 import org.eclipse.jdt.internal.compiler.ast.Statement;
 import org.eclipse.jdt.internal.compiler.ast.SwitchStatement;
@@ -531,8 +532,13 @@ public class CallinImplementorDyn extends MethodMappingImplementor {
 																	callinDecl.scope),
 															 CastExpression.DO_WRAP);
 									if (!roleParam.leafComponentType().isBaseType()) {
-										// lift?(MyBaseClass) 
-										arg = gen.potentialLift(gen.thisReference(), arg, roleParam, isReplace/*reversible*/);
+										// lift?(MyBaseClass)
+										Reference liftReceiver;
+										if (roleType.isTeam() && TypeBinding.equalsEquals(roleParam.enclosingType(), roleType))
+											liftReceiver = gen.singleNameReference(roleVar); // lift to inner role
+										else 
+											liftReceiver = gen.thisReference(); // default
+										arg = gen.potentialLift(liftReceiver, arg, roleParam, isReplace/*reversible*/);
 										canLiftingFail |= checkLiftingProblem(teamDecl, callinDecl, (ReferenceBinding)roleParam.leafComponentType());
 									}
 								}

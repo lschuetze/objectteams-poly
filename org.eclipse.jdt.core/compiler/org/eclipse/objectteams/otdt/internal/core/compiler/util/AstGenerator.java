@@ -1413,28 +1413,32 @@ public class AstGenerator extends AstFactory {
 //		if (origScope.parent.kind == Scope.CLASS_SCOPE)
 //			origScope = (ClassScope)origScope.parent;
 	
+		TypeReference result;
 		if (original instanceof ParameterizedSingleTypeReference) {
 			ParameterizedSingleTypeReference pstRef = (ParameterizedSingleTypeReference) original;
 			TypeReference[] typeArguments = AstClone.copyTypeArguments(original, this.pos, pstRef.typeArguments);
-			return new AlienScopeParameterizedSingleTypeReference(pstRef.token, typeArguments, pstRef.dimensions, this.pos, origScope);
+			result = new AlienScopeParameterizedSingleTypeReference(pstRef.token, typeArguments, pstRef.dimensions, this.pos, origScope);
 		} else if (original instanceof SingleTypeReference) {
 			if (original instanceof ArrayTypeReference && original.dimensions() > 0) { // could be parameterized type reference
 				ArrayTypeReference singleTypeRef = (ArrayTypeReference) original;
-				return new AlienScopeArrayTypeReference(singleTypeRef.token, this.pos, singleTypeRef.dimensions, origScope);				
+				result = new AlienScopeArrayTypeReference(singleTypeRef.token, this.pos, singleTypeRef.dimensions, origScope);				
 			} else {
 				SingleTypeReference singleTypeRef = (SingleTypeReference) original;
-				return new AlienScopeSingleTypeReference(singleTypeRef.token, this.pos, origScope);
+				result = new AlienScopeSingleTypeReference(singleTypeRef.token, this.pos, origScope);
 			}
 		} else if (original instanceof QualifiedTypeReference) {
 			if (original instanceof ArrayQualifiedTypeReference && original.dimensions() > 0) { // could be parameterized type reference
 				ArrayQualifiedTypeReference qTypeRef= (ArrayQualifiedTypeReference)original;
-				return new AlienScopeArrayQualifiedTypeReference(qTypeRef.tokens, qTypeRef.sourcePositions, qTypeRef.dimensions(), origScope);				
+				result = new AlienScopeArrayQualifiedTypeReference(qTypeRef.tokens, qTypeRef.sourcePositions, qTypeRef.dimensions(), origScope);				
 			} else {
 				QualifiedTypeReference qTypeRef= (QualifiedTypeReference)original;
-				return new AlienScopeQualifiedTypeReference(qTypeRef.tokens, qTypeRef.sourcePositions, origScope);
+				result = new AlienScopeQualifiedTypeReference(qTypeRef.tokens, qTypeRef.sourcePositions, origScope);
 			}
+		} else {			
+			throw new InternalCompilerError("Unexpected type reference: "+original); //$NON-NLS-1$
 		}
-		throw new InternalCompilerError("Unexpected type reference: "+original); //$NON-NLS-1$
+		result.setBaseclassDecapsulation(DecapsulationState.REPORTED);
+		return result;
 	}
 
 }

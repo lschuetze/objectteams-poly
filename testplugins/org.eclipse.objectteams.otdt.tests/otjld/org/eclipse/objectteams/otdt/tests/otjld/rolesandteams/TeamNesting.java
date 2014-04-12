@@ -2003,19 +2003,19 @@ public class TeamNesting extends AbstractOTJLDTest {
 			    "public team class Team1122lt4_2 {\n" +
 			    "    protected team class Mid playedBy Team1122lt4_1 {\n" +
 			    "        @SuppressWarnings(\"decapsulation\")\n" +
-			    "	protected class RInner playedBy R<@base> {\n" +
-			    "	    protected void test() { System.out.print(\"OK\"); }\n" +
-			    "	}\n" +
-			    "	void testMid(RInner r) {\n" +
-			    "	    r.test();\n" +
-			    "	}\n" +
+			    "        protected class RInner playedBy R<@base> {\n" +
+			    "            protected void test() { System.out.print(\"OK\"); }\n" +
+			    "        }\n" +
+			    "        void testMid(RInner r) {\n" +
+			    "            r.test();\n" +
+			    "        }\n" +
 			    "        @SuppressWarnings(\"decapsulation\")\n" +
-			    "	void testMid(RInner r) <- after void test(R<@base> r);\n" +
+			    "        void testMid(RInner r) <- after void test(R<@base> r);\n" +
 			    "    }\n" +
 			    "    public static void main(String[] args) {\n" +
-			    "	Team1122lt4_2 t = new Team1122lt4_2();\n" +
-			    "	t.activate();\n" +
-			    "	new Team1122lt4_1().run();\n" +
+			    "        Team1122lt4_2 t = new Team1122lt4_2();\n" +
+			    "        t.activate();\n" +
+			    "        new Team1122lt4_1().run();\n" +
 			    "    }\n" +
 			    "}\n" +
 			    "    \n",
