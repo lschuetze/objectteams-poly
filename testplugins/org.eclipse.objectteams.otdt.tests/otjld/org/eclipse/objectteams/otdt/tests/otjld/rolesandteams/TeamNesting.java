@@ -2897,18 +2897,18 @@ public class TeamNesting extends AbstractOTJLDTest {
     // nested teams with implicit inheritance adapt a hierarchy of lower teams - with private method decapsulation
     // three step compilation: access lower team from binary
     public void test1126_nestingAndLayering3p3() {
-       compileOrder = new String[][]{{"Team1126nal3p_1.java"}, {"Team1126nal3p_2.java"}, {"Team1126nal3p_3.java"}};
+       compileOrder = new String[][]{{"Team1126nal3p3_1.java"}, {"Team1126nal3p3_2.java"}, {"Team1126nal3p3_3.java"}};
        runConformTest(
             new String[] {
-		"Team1126nal3p_3.java",
+		"Team1126nal3p3_3.java",
 			    "\n" +
-			    "public team class Team1126nal3p_3 {\n" +
-			    "    protected team class Mid1 playedBy Team1126nal3p_1 {\n" +
+			    "public team class Team1126nal3p3_3 {\n" +
+			    "    protected team class Mid1 playedBy Team1126nal3p3_1 {\n" +
 			    "        protected class RU playedBy R<@base> {\n" +
 			    "        }\n" +
 			    "        RU getR() -> R<@base> getR();\n" +
 			    "    }\n" +
-			    "    protected team class Mid2 extends Mid1 playedBy Team1126nal3p_2 {\n" +
+			    "    protected team class Mid2 extends Mid1 playedBy Team1126nal3p3_2 {\n" +
 			    "        protected class RU  {\n" +
 			    "            @SuppressWarnings(\"decapsulation\")\n" +
 			    "            protected void testRU(char c) -> void test(char c);\n" +
@@ -2917,18 +2917,18 @@ public class TeamNesting extends AbstractOTJLDTest {
 			    "            getR().testRU('K');\n" +
 			    "        }\n" +
 			    "    }\n" +
-			    "    Team1126nal3p_3() {\n" +
-			    "        Mid2 m = new Mid2(new Team1126nal3p_2());\n" +
+			    "    Team1126nal3p3_3() {\n" +
+			    "        Mid2 m = new Mid2(new Team1126nal3p3_2());\n" +
 			    "        m.testMid2();\n" +
 			    "    }\n" +
 			    "    public static void main(String[] args) {\n" +
-			    "        new Team1126nal3p_3();\n" +
+			    "        new Team1126nal3p3_3();\n" +
 			    "    }\n" +
 			    "}\n" +
 			    "    \n",
-		"Team1126nal3p_1.java",
+		"Team1126nal3p3_1.java",
 			    "\n" +
-			    "public team class Team1126nal3p_1 {\n" +
+			    "public team class Team1126nal3p3_1 {\n" +
 			    "    protected R getR() {\n" +
 			    "        return new R();\n" +
 			    "    }\n" +
@@ -2939,9 +2939,9 @@ public class TeamNesting extends AbstractOTJLDTest {
 			    "    }\n" +
 			    "}\n" +
 			    "    \n",
-		"Team1126nal3p_2.java",
+		"Team1126nal3p3_2.java",
 			    "\n" +
-			    "public team class Team1126nal3p_2 extends Team1126nal3p_1 {\n" +
+			    "public team class Team1126nal3p3_2 extends Team1126nal3p3_1 {\n" +
 			    "}\n" +
 			    "    \n"
             },

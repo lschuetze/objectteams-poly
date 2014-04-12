@@ -3432,10 +3432,10 @@ public class ExternalizedRoles extends AbstractOTJLDTest {
     public void test1626_loopingOverExternalized3() {
     	runConformTest(
         		new String[] {
-    	"Team1626loe2_1.java",
+    	"Team1626loe3_1.java",
 	    		"import java.util.ArrayList;\n" +
 	    		"import java.util.Iterator;\n" +
-	    		"public team class Team1626loe2_1 {\n" +
+	    		"public team class Team1626loe3_1 {\n" +
 	    		"	public class R1 extends MyIterable<R0> {\n" +
 	    		"		public Iterator<R0> iterator() {\n" +
 	    		"			ArrayList<R0> list = new ArrayList<R0>();\n" +
@@ -3457,27 +3457,27 @@ public class ExternalizedRoles extends AbstractOTJLDTest {
         		});
     	runConformTest(
     		new String[] {
-    	"T1626loe2Main.java",
-	    		"public class T1626loe2Main {\n" +
+    	"T1626loe3Main.java",
+	    		"public class T1626loe3Main {\n" +
 	    		"	public static void main(String... args) {\n" +
-	    		"		final Team1626loe2_2 t2 = new Team1626loe2_2();\n" +
-	    		"		final Team1626loe2_3<@t2> t3 = new Team1626loe2_3<@t2>();\n" +
-	    		"		R1<@t3> r1 = new R1<@t3>(new T1626loe2());\n" +
+	    		"		final Team1626loe3_2 t2 = new Team1626loe3_2();\n" +
+	    		"		final Team1626loe3_3<@t2> t3 = new Team1626loe3_3<@t2>();\n" +
+	    		"		R1<@t3> r1 = new R1<@t3>(new T1626loe3());\n" +
 	    		"		for (R0<@t3> r2 : r1)\n" +
 	    		"			System.out.print(r2);\n" +
 	    		"	}\n" +
 	    		"}\n",
-    	"Team1626loe2_2.java",
-    			"public team class Team1626loe2_2 {\n" +
-    			"	public team class Team1626loe2_3 extends Team1626loe2_1 {\n" +
+    	"Team1626loe3_2.java",
+    			"public team class Team1626loe3_2 {\n" +
+    			"	public team class Team1626loe3_3 extends Team1626loe3_1 {\n" +
     			"		@Override\n" +
     			"		public class R0 {}\n" +
     			"		@Override\n" +
-    			"		public class R1 playedBy T1626loe2 {}\n" +
+    			"		public class R1 playedBy T1626loe3 {}\n" +
     			"	}\n" +
     			"}\n",
-    	"T1626loe2.java",
-    			"public class T1626loe2 {} \n"
+    	"T1626loe3.java",
+    			"public class T1626loe3 {} \n"
     		},
     		"RaRb",
     		null/*classLibraries*/,

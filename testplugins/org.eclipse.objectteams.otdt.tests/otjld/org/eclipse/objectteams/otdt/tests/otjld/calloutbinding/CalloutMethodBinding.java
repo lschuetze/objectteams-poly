@@ -2953,32 +2953,32 @@ public class CalloutMethodBinding extends AbstractOTJLDTest {
        
        runConformTest(
             new String[] {
-		"Team3117ic11_2.java",
+		"Team3117ic12_2.java",
 			    "\n" +
-			    "public team class Team3117ic11_2 extends Team3117ic11_1 {\n" +
+			    "public team class Team3117ic12_2 extends Team3117ic12_1 {\n" +
 			    "    @Override\n" +
 			    "    @SuppressWarnings(\"inferredcallout\")\n" +
-			    "    protected class R playedBy T3117ic11 {\n" +
+			    "    protected class R playedBy T3117ic12 {\n" +
 			    "    }\n" +
-			    "    Team3117ic11_2() {\n" +
-			    "        new R(new T3117ic11()).test();\n" +
+			    "    Team3117ic12_2() {\n" +
+			    "        new R(new T3117ic12()).test();\n" +
 			    "    }\n" +
 			    "    public static void main(String[] args) {\n" +
-			    "        new Team3117ic11_2();\n" +
+			    "        new Team3117ic12_2();\n" +
 			    "    }\n" +
 			    "}\n" +
 			    "    \n",
-		"Team3117ic11_1.java",
+		"Team3117ic12_1.java",
 			    "\n" +
-			    "public abstract team class Team3117ic11_1 {\n" +
+			    "public abstract team class Team3117ic12_1 {\n" +
 			    "    protected abstract class R {\n" +
 			    "        abstract protected void test();\n" +
 			    "    }\n" +
 			    "}\n" +
 			    "    \n",
-		"T3117ic11.java",
+		"T3117ic12.java",
 			    "\n" +
-			    "public class T3117ic11 {\n" +
+			    "public class T3117ic12 {\n" +
 			    "    public void test() {\n" +
 			    "        System.out.print(\"OK\");\n" +
 			    "    }\n" +

@@ -1285,12 +1285,12 @@ public class Confinement extends AbstractOTJLDTest {
        
        runConformTest(
             new String[] {
-		"T1710cbr1Main.java",
+		"T1710cbr2Main.java",
 			    "\n" +
-			    "public class T1710cbr1Main {\n" +
+			    "public class T1710cbr2Main {\n" +
 			    "    public static void main(String[] args) {\n" +
-			    "        Team1710cbr1 safe = new Team1710cbr1();\n" +
-			    "        T1710cbr1 object = safe.getT1710cbr1(\"Agent\");\n" +
+			    "        Team1710cbr2 safe = new Team1710cbr2();\n" +
+			    "        T1710cbr2 object = safe.getT1710cbr2(\"Agent\");\n" +
 			    "        if (safe.checkCredentials(object))\n" +
 			    "            System.out.print(\"OK\");\n" +
 			    "        else\n" +
@@ -1298,19 +1298,19 @@ public class Confinement extends AbstractOTJLDTest {
 			    "    }\n" +
 			    "}\n" +
 			    "    \n",
-		"T1710cbr1.java",
+		"T1710cbr2.java",
 			    "\n" +
-			    "public class T1710cbr1 {\n" +
+			    "public class T1710cbr2 {\n" +
 			    "    String name;\n" +
-			    "    T1710cbr1(String name) {\n" +
+			    "    T1710cbr2(String name) {\n" +
 			    "        this.name = name;\n" +
 			    "    }\n" +
 			    "}\n" +
 			    "    \n",
-		"Team1710cbr1.java",
+		"Team1710cbr2.java",
 			    "\n" +
-			    "public team class Team1710cbr1 {\n" +
-			    "    protected class Credentials extends Confined playedBy T1710cbr1 {\n" +
+			    "public team class Team1710cbr2 {\n" +
+			    "    protected class Credentials extends Confined playedBy T1710cbr2 {\n" +
 			    "		 protected Credentials(String name) {\n" +
 			    "			 base(name);\n" +
 			    "		 }\n" +
@@ -1325,13 +1325,13 @@ public class Confinement extends AbstractOTJLDTest {
 			    "            return pw.equals(given);\n" +
 			    "        }\n" +
 			    "    }\n" +
-			    "    public void createCredentials(T1710cbr1 as Credentials object) {\n" +
+			    "    public void createCredentials(T1710cbr2 as Credentials object) {\n" +
 			    "        object.setCredentials();\n" +
 			    "    }\n" +
-			    "    public boolean checkCredentials(T1710cbr1 as Credentials object) {\n" +
+			    "    public boolean checkCredentials(T1710cbr2 as Credentials object) {\n" +
 			    "        return object.checkCredentials();\n" +
 			    "    }\n" +
-			    "    public T1710cbr1 getT1710cbr1(String name) {\n" +
+			    "    public T1710cbr2 getT1710cbr2(String name) {\n" +
 			    "		 Credentials object = new Credentials(name);" +
 			    "		 object.setCredentials();\n" +
 			    "		 return object;" +
@@ -1348,22 +1348,22 @@ public class Confinement extends AbstractOTJLDTest {
        
        runConformTest(
             new String[] {
-		"T1710cbr2Main.java",
+		"T1710cbr3Main.java",
 			    "\n" +
-			    "public class T1710cbr2Main {\n" +
+			    "public class T1710cbr3Main {\n" +
 			    "    public static void main(String[] args) {\n" +
-			    "        Team1710cbr2 safe = new Team1710cbr2();\n" +
+			    "        Team1710cbr3 safe = new Team1710cbr3();\n" +
 			    "        safe.activate();\n" +
-			    "        T1710cbr2 object = new T1710cbr2(\"secret\");\n" +
+			    "        T1710cbr3 object = new T1710cbr3(\"secret\");\n" +
 			    "        object.print();\n" +
 			    "    }\n" +
 			    "}\n" +
 			    "    \n",
-		"T1710cbr2.java",
+		"T1710cbr3.java",
 			    "\n" +
-			    "public class T1710cbr2 {\n" +
+			    "public class T1710cbr3 {\n" +
 			    "    String name;\n" +
-			    "    T1710cbr2(String name) {\n" +
+			    "    T1710cbr3(String name) {\n" +
 			    "        this.name = name;\n" +
 			    "    }\n" +
 			    "    void print() {\n" +
@@ -1371,10 +1371,10 @@ public class Confinement extends AbstractOTJLDTest {
 			    "    }\n" +
 			    "}\n" +
 			    "    \n",
-		"Team1710cbr2.java",
+		"Team1710cbr3.java",
 			    "\n" +
-			    "public team class Team1710cbr2 {\n" +
-			    "    protected class Guard extends Confined playedBy T1710cbr2 {\n" +
+			    "public team class Team1710cbr3 {\n" +
+			    "    protected class Guard extends Confined playedBy T1710cbr3 {\n" +
 			    "        callin void forbid() {\n" +
 			    "            System.out.print(\"forbidden\");\n" +
 			    "        }\n" +
