@@ -36,9 +36,11 @@ import org.objectweb.asm.tree.MethodInsnNode;
 import org.objectweb.asm.tree.MethodNode;
 import org.objectweb.asm.tree.TypeInsnNode;
 
+import static org.eclipse.objectteams.otredyn.bytecode.asm.AsmBoundClass.ASM_API;
+
 /**
  * Every class, that wants to manipulate the bytecode of a class
- * with the ASM Trea API, have to inherit from this class and do
+ * with the ASM Tree API, have to inherit from this class and do
  * the transformations in the method transform().
  * Additionally the class provides util methods to
  * manipulate the bytecode 
@@ -46,6 +48,10 @@ import org.objectweb.asm.tree.TypeInsnNode;
  */
 public abstract class AbstractTransformableClassNode extends ClassNode {
 	
+	public AbstractTransformableClassNode() {
+		super(ASM_API);
+	}
+
 	/**
 	 * Returns instructions, that are needed to pack all arguments of a method
 	 * in an {@link Object} Array
@@ -192,7 +198,7 @@ public abstract class AbstractTransformableClassNode extends ClassNode {
 				"java/lang/System", "out", "Ljava/io/PrintStream;"));
 		instructions.add(new LdcInsnNode(message));
 		instructions.add(new MethodInsnNode(Opcodes.INVOKEVIRTUAL,
-				"java/io/PrintStream", "println", "(Ljava/lang/String;)V"));
+				"java/io/PrintStream", "println", "(Ljava/lang/String;)V", false));
 		return instructions;
 	}
 	

@@ -16,21 +16,22 @@
  **********************************************************************/
 package org.eclipse.objectteams.otredyn.bytecode.asm;
 
-import org.objectweb.asm.ClassAdapter;
 import org.objectweb.asm.ClassVisitor;
 import org.objectweb.asm.MethodVisitor;
 import org.objectweb.asm.Opcodes;
+
+import static org.eclipse.objectteams.otredyn.bytecode.asm.AsmBoundClass.ASM_API;
 
 /**
  * Adds an interface to the bytecode of a class
  * @author Oliver Frank
  *
  */
-public class AddInterfaceAdapter extends ClassAdapter{
+public class AddInterfaceAdapter extends ClassVisitor {
 	private String interfaceName;
 	
 	public AddInterfaceAdapter(ClassVisitor cv, String interfaceName) {
-		super(cv);
+		super(ASM_API, cv);
 		this.interfaceName = interfaceName;
 	}
 

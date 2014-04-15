@@ -58,13 +58,14 @@ public class CreateSwitchForAccessAdapter extends CreateSwitchAdapter {
 		// put "caller".getClass() on the stack
 		method.instructions.add(new IntInsnNode(Opcodes.ALOAD,
 				getFirstArgIndex() + 3));
-		method.instructions.add(new MethodInsnNode(Opcodes.INVOKEVIRTUAL, "java/lang/Object", "getClass", "()Ljava/lang/Class;"));
+		method.instructions.add(new MethodInsnNode(Opcodes.INVOKEVIRTUAL, "java/lang/Object", "getClass", "()Ljava/lang/Class;", false));
 		// call "getMemberId(accessId, callerClass)
 		method.instructions
 				.add(new MethodInsnNode(Opcodes.INVOKESTATIC,
 						ClassNames.TEAM_MANAGER_SLASH,
 						ConstantMembers.getMemberId.getName(),
-						ConstantMembers.getMemberId.getSignature()));
+						ConstantMembers.getMemberId.getSignature(),
+						false));
 	}
 	
 	@Override
@@ -75,7 +76,7 @@ public class CreateSwitchForAccessAdapter extends CreateSwitchAdapter {
 			method.instructions.add(new IntInsnNode(Opcodes.ILOAD, getFirstArgIndex())); // accessId
 			method.instructions.add(new LdcInsnNode(clazz.getName()));					 // current class
 			method.instructions.add(new LdcInsnNode("decapsulating access"));			 // access reason
-			method.instructions.add(new MethodInsnNode(Opcodes.INVOKESPECIAL, "org/objectteams/NoSuchMethodError", "<init>", "(ILjava/lang/String;Ljava/lang/String;)V"));
+			method.instructions.add(new MethodInsnNode(Opcodes.INVOKESPECIAL, "org/objectteams/NoSuchMethodError", "<init>", "(ILjava/lang/String;Ljava/lang/String;)V", false));
 			method.instructions.add(new InsnNode(Opcodes.ATHROW));
 		} else {
 			Type[] args = Type.getArgumentTypes(method.desc);

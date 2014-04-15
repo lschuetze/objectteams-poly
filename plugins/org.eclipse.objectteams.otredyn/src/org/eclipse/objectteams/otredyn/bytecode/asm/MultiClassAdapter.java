@@ -19,9 +19,10 @@ package org.eclipse.objectteams.otredyn.bytecode.asm;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.objectweb.asm.ClassAdapter;
 import org.objectweb.asm.ClassVisitor;
 import org.objectweb.asm.MethodVisitor;
+
+import static org.eclipse.objectteams.otredyn.bytecode.asm.AsmBoundClass.ASM_API;
 
 /**
  * This class is needed to make it possible, that many 
@@ -29,13 +30,13 @@ import org.objectweb.asm.MethodVisitor;
  * It just delegates all method calls to the concrete Adapters.
  * @author Oliver Frank
  */
-class MultiClassAdapter extends ClassAdapter {
+class MultiClassAdapter extends ClassVisitor {
 
 	private List<ClassVisitor> visitors;
 	private ClassVisitor toplevelVisitor;
 	
 	public MultiClassAdapter(ClassVisitor v) {
-		super(v);
+		super(ASM_API, v);
 		this.visitors = new ArrayList<ClassVisitor>();
 	}
 

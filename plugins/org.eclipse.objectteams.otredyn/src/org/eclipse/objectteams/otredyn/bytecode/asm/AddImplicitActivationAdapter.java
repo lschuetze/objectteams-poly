@@ -17,12 +17,13 @@ package org.eclipse.objectteams.otredyn.bytecode.asm;
 
 import org.eclipse.objectteams.otredyn.transformer.names.ClassNames;
 import org.eclipse.objectteams.otredyn.transformer.names.ConstantMembers;
-import org.objectweb.asm.ClassAdapter;
 import org.objectweb.asm.ClassVisitor;
 import org.objectweb.asm.MethodVisitor;
 import org.objectweb.asm.commons.AdviceAdapter;
 
 import org.objectweb.asm.Opcodes;
+
+import static org.eclipse.objectteams.otredyn.bytecode.asm.AsmBoundClass.ASM_API;
 
 /**
  * This visitor adds calls to _OT$implicitlyActivate and _OT$implicitlyDeactivate
@@ -32,7 +33,7 @@ import org.objectweb.asm.Opcodes;
  * <li>annotation {@link org.objectteams.ImplicitTeamActivation}.
  * </ul>
  */
-public class AddImplicitActivationAdapter extends ClassAdapter {
+public class AddImplicitActivationAdapter extends ClassVisitor {
 
 	public static final Object ANNOTATION_IMPLICIT_ACTIVATION = 'L'+ClassNames.IMPLICIT_ACTIVATION+';';
 
@@ -60,7 +61,7 @@ public class AddImplicitActivationAdapter extends ClassAdapter {
 	private AsmBoundClass clazz;
 	
 	public AddImplicitActivationAdapter(ClassVisitor cv, AsmBoundClass clazz) {
-		super(cv);
+		super(ASM_API, cv);
 		this.clazz = clazz;
 	}
 
@@ -70,31 +71,31 @@ public class AddImplicitActivationAdapter extends ClassAdapter {
         if (isCandidateForImplicitActivation(name, desc, access)) {
         	final MethodVisitor methodVisitor = cv.visitMethod(access, name, desc, null, null);
         	final String enclTeamDesc = clazz.isRole() ? 'L'+clazz.getEnclosingClass().getName().replace('.', '/')+';' : null;
-            return new AdviceAdapter(methodVisitor, access, name, desc) {
+            return new AdviceAdapter(this.api, methodVisitor, access, name, desc) {
             	@Override
             	protected void onMethodEnter() {
             		if (clazz.isTeam()) {
             			methodVisitor.visitIntInsn(Opcodes.ALOAD, 0);
-            			methodVisitor.visitMethodInsn(INVOKEINTERFACE, TARGET_CLASS_NAME, IMPLICIT_ACTIVATE_METHOD_NAME, METHOD_DESC);
+            			methodVisitor.visitMethodInsn(INVOKEINTERFACE, TARGET_CLASS_NAME, IMPLICIT_ACTIVATE_METHOD_NAME, METHOD_DESC, true);
             		}
             		if (clazz.isRole()) {
             			// TODO(SH): respect nesting depth (this$n)
             			methodVisitor.visitIntInsn(Opcodes.ALOAD, 0);
 						methodVisitor.visitFieldInsn(Opcodes.GETFIELD, clazz.getName().replace('.', '/'), "this$0", enclTeamDesc);
-            			methodVisitor.visitMethodInsn(INVOKEINTERFACE, TARGET_CLASS_NAME, IMPLICIT_ACTIVATE_METHOD_NAME, METHOD_DESC);
+            			methodVisitor.visitMethodInsn(INVOKEINTERFACE, TARGET_CLASS_NAME, IMPLICIT_ACTIVATE_METHOD_NAME, METHOD_DESC, true);
             		}
             	}
             	@Override
             	protected void onMethodExit(int opcode) {
             		if (clazz.isTeam()) {
             			methodVisitor.visitIntInsn(Opcodes.ALOAD, 0);
-            			methodVisitor.visitMethodInsn(INVOKEINTERFACE, TARGET_CLASS_NAME, IMPLICIT_DEACTIVATE_METHOD_NAME, METHOD_DESC);
+            			methodVisitor.visitMethodInsn(INVOKEINTERFACE, TARGET_CLASS_NAME, IMPLICIT_DEACTIVATE_METHOD_NAME, METHOD_DESC, true);
             		}
             		if (clazz.isRole()) {
             			// TODO(SH): respect nesting depth (this$n)
             			methodVisitor.visitIntInsn(Opcodes.ALOAD, 0);
             			methodVisitor.visitFieldInsn(Opcodes.GETFIELD, clazz.getName().replace('.', '/'), "this$0", enclTeamDesc);
-            			methodVisitor.visitMethodInsn(INVOKEINTERFACE, TARGET_CLASS_NAME, IMPLICIT_DEACTIVATE_METHOD_NAME, METHOD_DESC);
+            			methodVisitor.visitMethodInsn(INVOKEINTERFACE, TARGET_CLASS_NAME, IMPLICIT_DEACTIVATE_METHOD_NAME, METHOD_DESC, true);
             		}
             		if (clazz.isTeam() || clazz.isRole())
             			methodVisitor.visitMaxs(0, 0);

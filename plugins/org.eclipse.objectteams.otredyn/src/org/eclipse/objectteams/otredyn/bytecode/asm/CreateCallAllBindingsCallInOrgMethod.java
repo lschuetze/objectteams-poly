@@ -157,7 +157,7 @@ public class CreateCallAllBindingsCallInOrgMethod extends
 		// catch (SneakyException e) { e.rethrow(); }
 		LabelNode catchSneaky = new LabelNode();
 		instructions.add(catchSneaky);
-		instructions.add(new MethodInsnNode(Opcodes.INVOKEVIRTUAL, ClassNames.SNEAKY_EXCEPTION_SLASH, ClassNames.RETHROW_SELECTOR, ClassNames.RETHROW_SIGNATURE));
+		instructions.add(new MethodInsnNode(Opcodes.INVOKEVIRTUAL, ClassNames.SNEAKY_EXCEPTION_SLASH, ClassNames.RETHROW_SELECTOR, ClassNames.RETHROW_SIGNATURE, false));
 		
 		// never reached, just to please the verifier:
 		Type returnType = Type.getReturnType(method.getSignature());

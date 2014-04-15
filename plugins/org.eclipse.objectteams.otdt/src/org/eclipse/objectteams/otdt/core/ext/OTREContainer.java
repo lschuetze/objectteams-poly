@@ -56,7 +56,7 @@ public class OTREContainer implements IClasspathContainer
     private static IPath  OTRE_AGENT_JAR_PATH;
     private static IPath  OTEQUINOX_AGENT_JAR_PATH;
     
-    public static IPath  BYTECODE_LIBRARY_PATH; // will be initialized in {@link findBytecodeLib(BundleContext,boolean)}
+    public static IPath[]  BYTECODE_LIBRARY_PATH; // will be initialized in {@link findBytecodeLib(BundleContext,boolean)}
 
     // details of this container: name and hosting plugin:
     private static final IPath  OTRE_CONTAINER_PATH = new Path(OTRE_CONTAINER_NAME);
@@ -71,8 +71,8 @@ public class OTREContainer implements IClasspathContainer
     private static final String BCEL_BUNDLE_NAME = "org.apache.bcel"; //$NON-NLS-1$
     private static final String BCEL_VERSION_RANGE = "[5.2.0,5.3.0)"; //$NON-NLS-1$
 
-	private static final String ASM_BUNDLE_NAME = "org.objectweb.asm"; //$NON-NLS-1$
-	private static final String ASM_VERSION_RANGE = "[3.3.1,4.0.0)"; //$NON-NLS-1$
+	private static final String[] ASM_BUNDLE_NAMES = { "org.objectweb.asm", "org.objectweb.asm.tree", "org.objectweb.asm.commons" }; //$NON-NLS-1$
+	private static final String ASM_VERSION_RANGE = "[5.0.1,6.0.0)"; //$NON-NLS-1$
 
     private IClasspathEntry[] _cpEntries;
 
@@ -215,11 +215,23 @@ public class OTREContainer implements IClasspathContainer
 		if (ref == null)
 			throw new IllegalStateException("Cannot connect to PackageAdmin"); //$NON-NLS-1$
 		PackageAdmin packageAdmin = context.getService(ref);
-		String bundleName = useDynamicWeaving ? ASM_BUNDLE_NAME : BCEL_BUNDLE_NAME;
-		String bundleVersionRange = useDynamicWeaving ? ASM_VERSION_RANGE : BCEL_VERSION_RANGE;
-		for (Bundle bundle : packageAdmin.getBundles(bundleName, bundleVersionRange)) {			
-			BYTECODE_LIBRARY_PATH = new Path(FileLocator.toFileURL(bundle.getEntry("/")).getFile()); //$NON-NLS-1$
+		if (useDynamicWeaving) {
+			BYTECODE_LIBRARY_PATH = new IPath[ASM_BUNDLE_NAMES.length];
+			int i = 0;
+			for (String bundleName : ASM_BUNDLE_NAMES) {
+				for (Bundle bundle : packageAdmin.getBundles(bundleName, ASM_VERSION_RANGE)) {			
+					BYTECODE_LIBRARY_PATH[i++] = new Path(FileLocator.toFileURL(bundle.getEntry("/")).getFile()); //$NON-NLS-1$
+					break;
+				}
+			}
 			return;
+		} else {
+			String bundleName = BCEL_BUNDLE_NAME;
+			String bundleVersionRange = BCEL_VERSION_RANGE;
+			for (Bundle bundle : packageAdmin.getBundles(bundleName, bundleVersionRange)) {			
+				BYTECODE_LIBRARY_PATH = new IPath[] { new Path(FileLocator.toFileURL(bundle.getEntry("/")).getFile()) }; //$NON-NLS-1$
+				return;
+			}
 		}
 		throw new RuntimeException("bytecode libarary not found, useDynamicWeaving="+useDynamicWeaving); //$NON-NLS-1$
 	}

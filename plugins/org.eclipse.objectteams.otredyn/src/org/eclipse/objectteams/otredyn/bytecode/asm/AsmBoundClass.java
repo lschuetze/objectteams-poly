@@ -18,9 +18,9 @@ package org.eclipse.objectteams.otredyn.bytecode.asm;
 
 import org.eclipse.objectteams.otredyn.bytecode.AbstractBoundClass;
 import org.eclipse.objectteams.otredyn.bytecode.AbstractTeam;
-import org.eclipse.objectteams.otredyn.bytecode.Binding;
 import org.eclipse.objectteams.otredyn.bytecode.IBytecodeProvider;
 import org.objectweb.asm.ClassReader;
+import org.objectweb.asm.Opcodes;
 
 /**
  * This class implements the bytecode parsing for {@link AbstractBoundClass}.
@@ -28,6 +28,8 @@ import org.objectweb.asm.ClassReader;
  * @author Oliver Frank
  */
 abstract class AsmBoundClass extends AbstractTeam {
+	
+	public static final int ASM_API = Opcodes.ASM5;
 
 	private boolean parsed;
 	private IBytecodeProvider bytecodeProvider;

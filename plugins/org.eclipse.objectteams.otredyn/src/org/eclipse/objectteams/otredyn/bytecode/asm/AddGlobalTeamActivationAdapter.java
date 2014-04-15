@@ -23,7 +23,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.eclipse.objectteams.otredyn.transformer.names.ClassNames;
-import org.objectweb.asm.ClassAdapter;
 import org.objectweb.asm.ClassVisitor;
 import org.objectweb.asm.ClassWriter;
 import org.objectweb.asm.Label;
@@ -31,13 +30,15 @@ import org.objectweb.asm.MethodVisitor;
 import org.objectweb.asm.Opcodes;
 import org.objectweb.asm.commons.AdviceAdapter;
 
+import static org.eclipse.objectteams.otredyn.bytecode.asm.AsmBoundClass.ASM_API;
+
 /**
  * This adapter adds some instructions to the front of the main-method.
  * These instructions will instantiate and globally activate all teams 
  * that are listed in the team config file.
  * The team config file is specified via the <code>ot.teamconfig</code> property.
  */
-public class AddGlobalTeamActivationAdapter extends ClassAdapter {
+public class AddGlobalTeamActivationAdapter extends ClassVisitor {
 	
 	/** Initialized from property <tt>ot.teamconfig</tt>. */
 	private final static String TEAM_CONFIG_FILE = System.getProperty("ot.teamconfig");
@@ -47,7 +48,7 @@ public class AddGlobalTeamActivationAdapter extends ClassAdapter {
 	private static boolean done = false;
 
 	private AddGlobalTeamActivationAdapter(ClassVisitor cv) {
-		super(cv);
+		super(ASM_API, cv);
 	}
 
 	/**
@@ -68,7 +69,7 @@ public class AddGlobalTeamActivationAdapter extends ClassAdapter {
 			if (!done && isMainMethod(name, desc, access)) {
 				done = true;
 				final MethodVisitor methodVisitor = cv.visitMethod(access, name, desc, null, null);
-				return new AdviceAdapter(methodVisitor, access, name, desc) {
+				return new AdviceAdapter(this.api, methodVisitor, access, name, desc) {
 					@Override
 					protected void onMethodEnter() {
 						List<String> teams = getTeamsFromConfigFile();
@@ -82,9 +83,9 @@ public class AddGlobalTeamActivationAdapter extends ClassAdapter {
 							methodVisitor.visitTypeInsn(Opcodes.NEW, aTeamSlash);
 							// 		.activate(Team.ALL_THREADS):
 							methodVisitor.visitInsn(Opcodes.DUP);
-							methodVisitor.visitMethodInsn(Opcodes.INVOKESPECIAL, aTeamSlash, "<init>", "()V");
+							methodVisitor.visitMethodInsn(Opcodes.INVOKESPECIAL, aTeamSlash, "<init>", "()V", false);
 							methodVisitor.visitFieldInsn(Opcodes.GETSTATIC, ClassNames.TEAM_SLASH, "ALL_THREADS", "Ljava/lang/Thread;");
-							methodVisitor.visitMethodInsn(Opcodes.INVOKEVIRTUAL, aTeamSlash, "activate", "(Ljava/lang/Thread;)V");
+							methodVisitor.visitMethodInsn(Opcodes.INVOKEVIRTUAL, aTeamSlash, "activate", "(Ljava/lang/Thread;)V", false);
 							
 							methodVisitor.visitLabel(end=new Label());
 							methodVisitor.visitJumpInsn(Opcodes.GOTO, after=new Label());
@@ -95,7 +96,7 @@ public class AddGlobalTeamActivationAdapter extends ClassAdapter {
 							methodVisitor.visitInsn(Opcodes.POP); // discard the exception
 							methodVisitor.visitFieldInsn(Opcodes.GETSTATIC, "java/lang/System", "err", "Ljava/io/PrintStream;");
 							methodVisitor.visitLdcInsn("Config error: Team class '"+aTeam+ "' in config file '"+ TEAM_CONFIG_FILE+"' can not be found!");
-							methodVisitor.visitMethodInsn(Opcodes.INVOKEVIRTUAL, "java/io/PrintStream", "println", "(Ljava/lang/String;)V");
+							methodVisitor.visitMethodInsn(Opcodes.INVOKEVIRTUAL, "java/io/PrintStream", "println", "(Ljava/lang/String;)V", false);
 							methodVisitor.visitJumpInsn(Opcodes.GOTO, after);
 							methodVisitor.visitTryCatchBlock(start, end, typeHandler, "java/lang/ClassNotFoundException");
 							methodVisitor.visitTryCatchBlock(start, end, typeHandler, "java/lang/NoClassDefFoundError");
@@ -106,7 +107,7 @@ public class AddGlobalTeamActivationAdapter extends ClassAdapter {
 							methodVisitor.visitInsn(Opcodes.POP); // discard the exception
 							methodVisitor.visitFieldInsn(Opcodes.GETSTATIC, "java/lang/System", "err", "Ljava/io/PrintStream;");
 							methodVisitor.visitLdcInsn("Activation failed: Team class '"+aTeam+ "' has no default constuctor!");
-							methodVisitor.visitMethodInsn(Opcodes.INVOKEVIRTUAL, "java/io/PrintStream", "println", "(Ljava/lang/String;)V");
+							methodVisitor.visitMethodInsn(Opcodes.INVOKEVIRTUAL, "java/io/PrintStream", "println", "(Ljava/lang/String;)V", false);
 							methodVisitor.visitTryCatchBlock(start, end, ctorHandler, "java/lang/NoSuchMethodError");
 
 							methodVisitor.visitLabel(after);

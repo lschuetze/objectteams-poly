@@ -16,18 +16,19 @@
  **********************************************************************/
 package org.eclipse.objectteams.otredyn.bytecode.asm;
 
-import org.objectweb.asm.ClassAdapter;
 import org.objectweb.asm.ClassVisitor;
 import org.objectweb.asm.MethodVisitor;
 import org.objectweb.asm.Opcodes;
 import org.objectweb.asm.Type;
+
+import static org.eclipse.objectteams.otredyn.bytecode.asm.AsmBoundClass.ASM_API;
 
 /**
  * This class adds an method only with a return statement
  * to the bytecode of a class with the ASM Core API  
  * @author Oliver Frank
  */
-class AddEmptyMethodAdapter extends ClassAdapter {
+class AddEmptyMethodAdapter extends ClassVisitor {
 
 	private int access;
 	private String name;
@@ -39,7 +40,7 @@ class AddEmptyMethodAdapter extends ClassAdapter {
 	public AddEmptyMethodAdapter(ClassVisitor cv, String name, int access,
 			String desc, String[] exceptions, String signature,
 			int maxLocals) {
-		super(cv);
+		super(ASM_API, cv);
 		this.access = access;
 		this.desc = desc;
 		this.exceptions = exceptions;

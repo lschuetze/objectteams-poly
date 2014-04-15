@@ -112,14 +112,16 @@ public class AbstractOTJLDTest extends AbstractComparableTest {
 		super(name);
 	}
 
-	/** Add otre and bcel to the class path. */
+	/** Add otre and (bcel or asm) to the class path. */
 	@Override
 	protected String[] getDefaultClassPaths() {
 		String[] defaults = super.getDefaultClassPaths();
 		int len = defaults.length;
-		System.arraycopy(defaults, 0, defaults=new String[len+2], 0, len);
+		int len2 = ClasspathUtil.BYTECODE_LIB_JAR_PATH.length;
+		System.arraycopy(defaults, 0, defaults=new String[len+1+len2], 0, len);
 		defaults[len] = new Path(ClasspathUtil.OTRE_PATH).toString();
-		defaults[len+1] = ClasspathUtil.BYTECODE_LIB_JAR_PATH.toString();
+		for (int i=0; i<len2; i++)
+			defaults[len+1+i] = ClasspathUtil.BYTECODE_LIB_JAR_PATH[i].toString();
 		return defaults;
 	}
 

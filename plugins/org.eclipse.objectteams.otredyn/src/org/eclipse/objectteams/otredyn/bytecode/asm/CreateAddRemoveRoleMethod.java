@@ -54,7 +54,7 @@ public class CreateAddRemoveRoleMethod extends AbstractTransformableClassNode {
 				// set.add(role);
 				method.instructions.add(new IntInsnNode(Opcodes.ALOAD, 3));
 				method.instructions.add(new IntInsnNode(Opcodes.ALOAD, 1));
-				method.instructions.add(new MethodInsnNode(Opcodes.INVOKEVIRTUAL, ClassNames.HASH_SET_SLASH, "add", "(Ljava/lang/Object;)Z"));
+				method.instructions.add(new MethodInsnNode(Opcodes.INVOKEVIRTUAL, ClassNames.HASH_SET_SLASH, "add", "(Ljava/lang/Object;)Z", false));
 				method.instructions.add(new InsnNode(Opcodes.POP));
 				
 			LabelNode jumpToEnd = new LabelNode();
@@ -64,7 +64,7 @@ public class CreateAddRemoveRoleMethod extends AbstractTransformableClassNode {
 				// set.remove(role);
 				method.instructions.add(new IntInsnNode(Opcodes.ALOAD, 3));
 				method.instructions.add(new IntInsnNode(Opcodes.ALOAD, 1));
-				method.instructions.add(new MethodInsnNode(Opcodes.INVOKEVIRTUAL, ClassNames.HASH_SET_SLASH, "remove", "(Ljava/lang/Object;)Z"));
+				method.instructions.add(new MethodInsnNode(Opcodes.INVOKEVIRTUAL, ClassNames.HASH_SET_SLASH, "remove", "(Ljava/lang/Object;)Z", false));
 				method.instructions.add(new InsnNode(Opcodes.POP));
 	
 			method.instructions.add(jumpToEnd);
@@ -93,7 +93,7 @@ public class CreateAddRemoveRoleMethod extends AbstractTransformableClassNode {
 			instructions.add(new IntInsnNode(Opcodes.ALOAD, 0));
 			instructions.add(new TypeInsnNode(Opcodes.NEW, ClassNames.HASH_SET_SLASH));
 			instructions.add(new InsnNode(Opcodes.DUP));
-			instructions.add(new MethodInsnNode(Opcodes.INVOKESPECIAL, ClassNames.HASH_SET_SLASH, "<init>", "()V"));
+			instructions.add(new MethodInsnNode(Opcodes.INVOKESPECIAL, ClassNames.HASH_SET_SLASH, "<init>", "()V", false));
 			
 			instructions.add(new IntInsnNode(Opcodes.ASTORE, targetLocal));
 			instructions.add(new IntInsnNode(Opcodes.ALOAD, targetLocal));

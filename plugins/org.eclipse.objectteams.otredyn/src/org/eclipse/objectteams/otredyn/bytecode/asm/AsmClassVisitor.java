@@ -25,21 +25,24 @@ import org.eclipse.objectteams.otredyn.bytecode.asm.Attributes.CallinPrecedenceA
 import org.eclipse.objectteams.otredyn.bytecode.asm.Attributes.OTSpecialAccessAttribute;
 import org.objectweb.asm.AnnotationVisitor;
 import org.objectweb.asm.Attribute;
+import org.objectweb.asm.ClassVisitor;
 import org.objectweb.asm.FieldVisitor;
 import org.objectweb.asm.MethodVisitor;
 import org.objectweb.asm.Opcodes;
-import org.objectweb.asm.commons.EmptyVisitor;
+
+import static org.eclipse.objectteams.otredyn.bytecode.asm.AsmBoundClass.ASM_API;
 
 /**
  * This class is used to parse the bytecode of a class.
  * It sets the informations, that are parsed, in the {@link AsmBoundClass}
  * @author Oliver Frank
  */
-class AsmClassVisitor extends EmptyVisitor {
+class AsmClassVisitor extends ClassVisitor {
 
 	private AsmBoundClass clazz;
 	
 	public AsmClassVisitor(AsmBoundClass clazz) {
+		super(ASM_API);
 		this.clazz = clazz;
 	}
 	
@@ -62,7 +65,7 @@ class AsmClassVisitor extends EmptyVisitor {
 		clazz.addMethod(name, desc, (access & Opcodes.ACC_STATIC) != 0, (access & (Opcodes.ACC_PUBLIC|Opcodes.ACC_PROTECTED|Opcodes.ACC_PRIVATE)));
 		if (clazz.isTeam() || clazz.isRole())
 			// check for method annotation ImplicitTeamActivation:
-			return new EmptyVisitor() {
+			return new MethodVisitor(this.api) {
 				@Override
 				public AnnotationVisitor visitAnnotation(String annDesc, boolean visible) {
 					if (annDesc.equals(AddImplicitActivationAdapter.ANNOTATION_IMPLICIT_ACTIVATION))

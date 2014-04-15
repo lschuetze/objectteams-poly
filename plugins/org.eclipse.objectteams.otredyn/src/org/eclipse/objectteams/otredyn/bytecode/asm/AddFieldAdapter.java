@@ -16,16 +16,17 @@
  **********************************************************************/
 package org.eclipse.objectteams.otredyn.bytecode.asm;
 
-import org.objectweb.asm.ClassAdapter;
 import org.objectweb.asm.ClassVisitor;
 import org.objectweb.asm.FieldVisitor;
 import org.objectweb.asm.MethodVisitor;
+
+import static org.eclipse.objectteams.otredyn.bytecode.asm.AsmBoundClass.ASM_API;
 
 /**
  * Adds an field to the bytecode of a class
  * @author Oliver Frank
  */
-class AddFieldAdapter extends ClassAdapter {
+class AddFieldAdapter extends ClassVisitor {
 
 	private int access;
 	private String name;
@@ -33,7 +34,7 @@ class AddFieldAdapter extends ClassAdapter {
 
 	public AddFieldAdapter(ClassVisitor cv, String name, int access,
 			String desc) {
-		super(cv);
+		super(ASM_API, cv);
 		this.access = access;
 		this.desc = desc;
 		this.name = name;

@@ -71,7 +71,8 @@ public abstract class AbstractCreateDispatchCodeAdapter extends
 
 		instructions.add(new MethodInsnNode(Opcodes.INVOKESTATIC,
 				ClassNames.TEAM_MANAGER_SLASH, ConstantMembers.getTeams.getName(),
-				ConstantMembers.getTeams.getSignature()));
+				ConstantMembers.getTeams.getSignature(),
+				false));
 		
 		instructions.add(createInstructionsToCheackTeams(method));
 		
@@ -99,7 +100,8 @@ public abstract class AbstractCreateDispatchCodeAdapter extends
 				.add(new MethodInsnNode(Opcodes.INVOKESTATIC,
 						ClassNames.TEAM_MANAGER_SLASH,
 						ConstantMembers.getCallinIds.getName(),
-						ConstantMembers.getCallinIds.getSignature()));
+						ConstantMembers.getCallinIds.getSignature(),
+						false));
 
 		instructions.add(createLoadIntConstant(boundMethodId));
 		args = Type.getArgumentTypes(method.desc);
@@ -108,9 +110,10 @@ public abstract class AbstractCreateDispatchCodeAdapter extends
 		instructions.add(getBoxedArguments(args));
 
 		instructions.add(new MethodInsnNode(Opcodes.INVOKEINTERFACE,
-				ClassNames.ITEAM_SLASH, ConstantMembers.callAllBindingsTeam
-						.getName(), ConstantMembers.callAllBindingsTeam
-						.getSignature()));
+						ClassNames.ITEAM_SLASH, 
+						ConstantMembers.callAllBindingsTeam.getName(),
+						ConstantMembers.callAllBindingsTeam.getSignature(),
+						true));
 
 		Type returnType = Type.getReturnType(method.desc);
 		instructions.add(getUnboxingInstructionsForReturnValue(returnType));

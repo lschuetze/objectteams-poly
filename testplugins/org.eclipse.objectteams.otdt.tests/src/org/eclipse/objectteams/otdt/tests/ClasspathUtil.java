@@ -32,7 +32,7 @@ public class ClasspathUtil {
 	public static final String OTDT_PATH 		 = JavaCore.getClasspathVariable(OTDTPlugin.OTDT_INSTALLDIR).toOSString();
 	public static final String OTRE_MIN_JAR_PATH; 
 	public static final String OTAGENT_JAR_PATH; 
-	public static final IPath  BYTECODE_LIB_JAR_PATH = OTREContainer.BYTECODE_LIBRARY_PATH;
+	public static final IPath[]  BYTECODE_LIB_JAR_PATH = OTREContainer.BYTECODE_LIBRARY_PATH;
 
 	static {
 		if (CallinImplementorDyn.DYNAMIC_WEAVING) {

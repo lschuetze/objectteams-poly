@@ -17,7 +17,6 @@ package org.eclipse.objectteams.otredyn.bytecode.asm;
 
 import org.eclipse.objectteams.otredyn.bytecode.AbstractBoundClass;
 import org.eclipse.objectteams.otredyn.transformer.names.ClassNames;
-import org.objectweb.asm.ClassAdapter;
 import org.objectweb.asm.ClassVisitor;
 import org.objectweb.asm.MethodVisitor;
 import org.objectweb.asm.Type;
@@ -28,6 +27,8 @@ import org.objectweb.asm.Opcodes;
 import static org.eclipse.objectteams.otredyn.bytecode.Types.ACCESS_STATIC;
 import static org.objectweb.asm.Opcodes.INVOKESTATIC;
 import static org.objectweb.asm.Opcodes.RETURN;
+
+import static org.eclipse.objectteams.otredyn.bytecode.asm.AsmBoundClass.ASM_API;
 
 
 /**
@@ -41,7 +42,7 @@ import static org.objectweb.asm.Opcodes.RETURN;
  * @author stephan
  *
  */
-public class AddAfterClassLoadingHook extends ClassAdapter {
+public class AddAfterClassLoadingHook extends ClassVisitor {
 
 	// the method to look for or add:
 	private static final String CLINIT_NAME = "<clinit>";
@@ -56,7 +57,7 @@ public class AddAfterClassLoadingHook extends ClassAdapter {
 	AbstractBoundClass clazz;
 	
 	public AddAfterClassLoadingHook(ClassVisitor arg0, AbstractBoundClass clazz) {
-		super(arg0);
+		super(ASM_API, arg0);
 		this.clazz = clazz;
 	}
 	
@@ -66,7 +67,7 @@ public class AddAfterClassLoadingHook extends ClassAdapter {
         	// clinit already exists, add our statement to the front:
         	this.needToAdd = false;
         	final MethodVisitor clinit = cv.visitMethod(access, name, desc, null, null);
-            return new AdviceAdapter(clinit, access, name, desc) {
+            return new AdviceAdapter(this.api, clinit, access, name, desc) {
             	@Override
             	protected void onMethodEnter() {
             		createHookCall(clinit);
@@ -98,6 +99,6 @@ public class AddAfterClassLoadingHook extends ClassAdapter {
 			clinit.visitLdcInsn(Type.getObjectType(clazz.getName().replace('.', '/')));
 		else
 			clinit.visitInsn(Opcodes.ACONST_NULL);
-		clinit.visitMethodInsn(INVOKESTATIC, TARGET_CLASS_NAME, TARGET_METHOD_NAME, TARGET_METHOD_DESC);
+		clinit.visitMethodInsn(INVOKESTATIC, TARGET_CLASS_NAME, TARGET_METHOD_NAME, TARGET_METHOD_DESC, false);
 	}
 }

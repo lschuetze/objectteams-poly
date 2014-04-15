@@ -31,7 +31,7 @@ class AsmTypeHelper {
 		String methodName = primitiveType.getClassName() + "Value";
 		String desc = Type.getMethodDescriptor(primitiveType, new Type[] {});
 		
-		return new MethodInsnNode(Opcodes.INVOKEVIRTUAL, objectType, methodName, desc);
+		return new MethodInsnNode(Opcodes.INVOKEVIRTUAL, objectType, methodName, desc, false);
 	}
 
 	public static String getObjectType(Type primitiveType) {
@@ -74,6 +74,6 @@ class AsmTypeHelper {
 			return new InsnNode(Opcodes.NOP);
 		
 		String desc = Type.getMethodDescriptor(Type.getObjectType(className), new Type[] {type});
-		return new MethodInsnNode(Opcodes.INVOKESTATIC, className, "valueOf", desc);
+		return new MethodInsnNode(Opcodes.INVOKESTATIC, className, "valueOf", desc, false);
 	}
 }
