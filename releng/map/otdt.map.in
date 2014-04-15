@@ -23,7 +23,6 @@ plugin@org.eclipse.objectteams.runtime=GIT,repo=git://git.eclipse.org/gitroot/ob
 !fragment@org.eclipse.objectteams.otequinox.sunjvm,2.0.0=GIT,repo=git://git.eclipse.org/gitroot/objectteams/org.eclipse.objectteams.git,path=plugins/org.eclipse.objectteams.otequinox.sunjvm
 !the following is also referenced in otdt.doc/buildDoc.xml (plugin-name without version):
 plugin@org.eclipse.objectteams.otequinox=GIT,repo=git://git.eclipse.org/gitroot/objectteams/org.eclipse.objectteams.git,path=plugins/org.eclipse.objectteams.otequinox
-fragment@org.eclipse.objectteams.otequinox.bug253244workaround,1.0.0=GIT,repo=git://git.eclipse.org/gitroot/objectteams/org.eclipse.objectteams.git,path=plugins/org.eclipse.objectteams.otequinox.bug253244workaround
 plugin@org.eclipse.objectteams.eclipse.monitor,2.0.0=GIT,repo=git://git.eclipse.org/gitroot/objectteams/org.eclipse.objectteams.git,path=plugins/org.eclipse.objectteams.eclipse.monitor
 
 !not currently maintained:
