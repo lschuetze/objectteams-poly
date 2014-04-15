@@ -438,7 +438,7 @@ public class CallinImplementorDyn extends MethodMappingImplementor {
 								blockStatements.add(gen.localVariable(roleVar, roleType.sourceName(),				//   RoleType local$n = this._OT$liftToRoleType((BaseType)base);
 										Lifting.liftCall(callMethod.scope,
 														 gen.thisReference(),
-														 gen.castExpression(gen.singleNameReference(IOTConstants.BASE), 
+														 gen.castExpression(gen.baseNameReference(IOTConstants.BASE), 
 																 			gen.baseTypeReference(roleType.baseclass()), 
 																 			CastExpression.RAW),
 														 callMethod.scope.getType(IOTConstants.ORG_OBJECTTEAMS_IBOUNDBASE, 3),
