@@ -1,6 +1,6 @@
 requires.0.namespace = org.eclipse.equinox.p2.iu
 requires.0.name = org.eclipse.objectteams.otequinox.configuration
-requires.0.range = [$version$,$version$)
+requires.0.range = [$version$,$version$]
 
 
 units.0.id = org.eclipse.objectteams.otequinox.configuration
