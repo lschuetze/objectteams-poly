@@ -26,7 +26,7 @@ units.0.requires.1.greedy = false
 
 units.0.provides.0.namespace = org.eclipse.equinox.p2.iu
 units.0.provides.0.name = org.eclipse.objectteams.otequinox.configuration
-units.0.provides.0.version = $version$.$qualifier$
+units.0.provides.0.version = 2.3.0.$qualifier$
 
 units.0.instructions.install=\
 	installBundle(bundle:${artifact})
