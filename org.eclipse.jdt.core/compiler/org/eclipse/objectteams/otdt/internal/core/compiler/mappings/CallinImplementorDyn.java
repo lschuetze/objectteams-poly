@@ -885,7 +885,7 @@ public class CallinImplementorDyn extends MethodMappingImplementor {
 				result = Lifting.liftCall(mapping.scope,
 										  liftReceiver,
 										  gen.castExpression(result,
-												  			 gen.typeReference(returnTypes[1]),
+												  			 gen.baseclassReference(returnTypes[1]),
 												  			 CastExpression.RAW),
 										  returnTypes[1],
 										  returnTypes[0],
