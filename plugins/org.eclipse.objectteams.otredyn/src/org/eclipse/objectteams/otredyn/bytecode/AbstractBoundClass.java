@@ -913,7 +913,7 @@ public abstract class AbstractBoundClass implements IBoundClass {
 				createSuperCallInCallOrig(boundMethodId);
 			else
 				// can't weave into the declaring class, add an override here:
-				createCallAllBindingsCallInOrgMethod(method, joinpointId, true/*needToAddMethod*/);
+				createCallAllBindingsCallInOrgMethod(method, boundMethodId, true/*needToAddMethod*/);
 		} else {
 			createDispatchCodeInCallAllBindings(joinpointId, boundMethodId);
 		}
