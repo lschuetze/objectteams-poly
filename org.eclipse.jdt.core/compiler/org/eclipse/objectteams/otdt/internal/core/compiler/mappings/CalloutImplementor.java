@@ -591,7 +591,7 @@ public class CalloutImplementor extends MethodMappingImplementor
 						else
 							baseAccess = gen.qualifiedNameReference(new char[][] {IOTConstants._OT_BASE, baseField.name });
 						if (fieldSpec.isSetter()) {
-							int pos = fieldSpec.isStatic() ? 0 : 1;
+							int pos = (fieldSpec.isStatic() | CallinImplementorDyn.DYNAMIC_WEAVING) ? 0 : 1;
 							baseAccess = gen.assignment((NameReference)baseAccess, arguments[pos]);
 							returnType = TypeBinding.VOID; // signal that no result processing is necessary
 						}
