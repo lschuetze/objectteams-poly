@@ -208,6 +208,7 @@ class AsmWritableBoundClass extends AsmBoundClass {
 	 */
 	@Override
 	protected void moveCodeToCallOrig(Method boundMethod, int boundMethodId) {
+		if (boundMethod.getName().equals("<init>")) return; // don't move constructor code
 		assert (isTransformationActive) : "No transformation active";
 		nodes.add(new MoveCodeToCallOrigAdapter(this, boundMethod, boundMethodId));
 	}

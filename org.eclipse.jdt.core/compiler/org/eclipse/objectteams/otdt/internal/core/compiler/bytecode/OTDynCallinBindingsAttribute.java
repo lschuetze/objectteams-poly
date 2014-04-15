@@ -244,7 +244,7 @@ public class OTDynCallinBindingsAttribute extends ListValueAttribute {
 				baseFlags |= BaseMethod.CALLIN;
 			if (baseSpec.isStatic())
 				baseFlags |= BaseMethod.STATIC;
-			mapping.addBaseMethod(i, baseSpec.selector, baseSpec.signature(), baseSpec.resolvedMethod.declaringClass.constantPoolName(), baseSpec.getCallinId(this.theTeam), baseFlags, baseSpec.getTranslationFlags());
+			mapping.addBaseMethod(i, baseSpec.codegenSeletor(), baseSpec.signature(), baseSpec.resolvedMethod.declaringClass.constantPoolName(), baseSpec.getCallinId(this.theTeam), baseFlags, baseSpec.getTranslationFlags());
 		}
 		mapping.setSMAPinfo(callinDecl);
 		this.mappings.add(mapping);

@@ -21,6 +21,7 @@ import org.eclipse.objectteams.otredyn.transformer.names.ClassNames;
 import org.eclipse.objectteams.otredyn.transformer.names.ConstantMembers;
 import org.objectweb.asm.Opcodes;
 import org.objectweb.asm.Type;
+import org.objectweb.asm.tree.AbstractInsnNode;
 import org.objectweb.asm.tree.InsnList;
 import org.objectweb.asm.tree.InsnNode;
 import org.objectweb.asm.tree.IntInsnNode;
@@ -54,28 +55,80 @@ public class CreateCallAllBindingsCallInOrgMethod extends
 	@Override
 	public void transform() {
 		MethodNode method = getMethod(orgMethod);
-		method.instructions.clear();
+
+//		if (method.name.equals("<init>")) {
+//			int size = method.instructions.size();
+//			for (int i = 0; i < size; i++) {
+//				AbstractInsnNode insn = method.instructions.get(i);
+//				System.out.println(insn+" "+insn.getOpcode());
+//			}
+//		}
+//		System.out.println("================");
+
+		AbstractInsnNode insertBefore = null;
+		if (orgMethod.getName().equals("<init>")) {
+			// keep instructions, find insertion point:
+			int last = method.instructions.size();
+			LabelNode callAll = new LabelNode();
+			while (--last >= 0) {
+				if (method.instructions.get(last).getOpcode() == Opcodes.RETURN) {
+					AbstractInsnNode ret = method.instructions.get(last);
+					method.instructions.set(ret, callAll);					
+					insertBefore = callAll;
+					break;
+				}
+			}
+			if (insertBefore == null)
+				throw new IllegalStateException("Insertion point for weaving into ctor not found!!!");
+
+// FIXME: triggers NPE in MethodVisitor.visitMaxs
+//			// replace RETURN with GOTO
+//			for (int i=0; i<last; i++) {
+//				AbstractInsnNode current = method.instructions.get(i);
+//				if (current.getOpcode() == Opcodes.RETURN)
+//					method.instructions.set(current, new JumpInsnNode(Opcodes.GOTO, callAll));
+//			}
+
+		} else {
+			method.instructions.clear();
+		}
 
 		// start of try-block:
+		InsnList newInstructions = new InsnList();
 		LabelNode start = new LabelNode();
-		method.instructions.add(start);
+		newInstructions.add(start);
 
 		// put this on the stack
-		method.instructions.add(new IntInsnNode(Opcodes.ALOAD, 0));
+		newInstructions.add(new IntInsnNode(Opcodes.ALOAD, 0));
 		// put boundMethodId on the stack
-		method.instructions.add(createLoadIntConstant(boundMethodId));
+		newInstructions.add(createLoadIntConstant(boundMethodId));
 		Type[] args = Type.getArgumentTypes(method.desc);
 		// box the arguments
-		method.instructions.add(getBoxingInstructions(args, false));
+		newInstructions.add(getBoxingInstructions(args, false));
 
 		// this.callAllBindings(boundMethodId, args);
-		method.instructions.add(new MethodInsnNode(Opcodes.INVOKEVIRTUAL,
+		newInstructions.add(new MethodInsnNode(Opcodes.INVOKEVIRTUAL,
 				this.name, ConstantMembers.callAllBindingsClient.getName(),
 				ConstantMembers.callAllBindingsClient.getSignature()));
 		Type returnType = Type.getReturnType(method.desc);
-		method.instructions
+		newInstructions
 				.add(getUnboxingInstructionsForReturnValue(returnType));
+		
+		if (insertBefore != null) {
+			method.instructions.insertBefore(insertBefore, newInstructions);
+			method.instructions.remove(insertBefore); // remove extra RETURN
+		} else {
+			method.instructions.add(newInstructions);
+		}
 
+//		if (method.name.equals("<init>")) {
+//			int size = method.instructions.size();
+//			for (int i = 0; i < size; i++) {
+//				AbstractInsnNode insn = method.instructions.get(i);
+//				System.out.println(insn+" "+insn.getOpcode());
+//			}
+//		}
+		
 		// catch and unwrap SneakyException:
 		addCatchSneakyException(method, start);
 

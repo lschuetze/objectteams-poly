@@ -33,7 +33,7 @@ public class CallinMethodBinding extends AbstractOTJLDTest {
 	// Static initializer to specify tests subset using TESTS_* static variables
 	// All specified tests which does not belong to the class are skipped...
 	static {
-//		TESTS_NAMES = new String[] { "test4143_callinToTeamMethod" };
+//		TESTS_NAMES = new String[] { "test4146_callinToConstructor4" };
 //		TESTS_NUMBERS = new int[] { 1459 };
 //		TESTS_RANGE = new int[] { 1097, -1 };
 	}
@@ -7896,23 +7896,23 @@ public class CallinMethodBinding extends AbstractOTJLDTest {
     public void test4146_callinToConstructor3() {
     	runConformTest(
     		new String[] {
-    			"Team4146ctc1.java",
-    			"public team class Team4146ctc1 {\n" +
-    			"	protected class R playedBy T4146ctc1 {\n" +
+    			"Team4146ctc3.java",
+    			"public team class Team4146ctc3 {\n" +
+    			"	protected class R playedBy T4146ctc3 {\n" +
     			"		void print(String prefix, int n) {\n" +
     			"			for (int i=0; i<n; i++)\n" +
     			"				System.out.print(prefix);\n" +
     			"		}" +
-    			"		print <- after T4146ctc1;\n" +
+    			"		print <- after T4146ctc3;\n" +
     			"	}\n" +
     			"	public static void main(String... args) {\n" +
-    			"		new Team4146ctc1().activate();\n" +
-    			"		new T4146ctc1(\"_\", 3).test();\n" +
+    			"		new Team4146ctc3().activate();\n" +
+    			"		new T4146ctc3(\"_\", 3).test();\n" +
     			"	}\n" +
     			"}\n",
-    			"T4146ctc1.java",
-    			"public class T4146ctc1 {\n" +
-    			"	T4146ctc1(String prefix, int n) { System.out.print('O'); }\n" +
+    			"T4146ctc3.java",
+    			"public class T4146ctc3 {\n" +
+    			"	T4146ctc3(String prefix, int n) { System.out.print('O'); }\n" +
     			"	public void test() { System.out.print('!'); }\n" +
     			"}\n"
     		},
@@ -7923,23 +7923,23 @@ public class CallinMethodBinding extends AbstractOTJLDTest {
     public void test4146_callinToConstructor4() {
     	runConformTest(
     		new String[] {
-    			"Team4146ctc1.java",
-    			"public team class Team4146ctc1 {\n" +
-    			"	protected class R playedBy T4146ctc1 {\n" +
+    			"Team4146ctc4.java",
+    			"public team class Team4146ctc4 {\n" +
+    			"	protected class R playedBy T4146ctc4 {\n" +
     			"		void print(String prefix, int n) {\n" +
     			"			for (int i=0; i<n; i++)\n" +
     			"				System.out.print(prefix);\n" +
     			"		}" +
-    			"		print <- after T4146ctc1;\n" +
+    			"		print <- after T4146ctc4;\n" +
     			"	}\n" +
     			"	public static void main(String... args) {\n" +
-    			"		new Team4146ctc1().activate();\n" +
-    			"		new T4146ctc1(\"_\", 3).test();\n" +
+    			"		new Team4146ctc4().activate();\n" +
+    			"		new T4146ctc4(\"_\", 3).test();\n" +
     			"	}\n" +
     			"}\n",
-    			"T4146ctc1.java",
-    			"public class T4146ctc1 {\n" +
-    			"	T4146ctc1(String prefix, int n) {\n" +
+    			"T4146ctc4.java",
+    			"public class T4146ctc4 {\n" +
+    			"	T4146ctc4(String prefix, int n) {\n" +
     			"		if (n == 3) {\n" +
     			"			System.out.print('O');\n" +
     			"			return;\n" +
