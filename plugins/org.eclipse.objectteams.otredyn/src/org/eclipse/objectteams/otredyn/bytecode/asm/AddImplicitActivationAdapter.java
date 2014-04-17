@@ -1,7 +1,7 @@
 /**********************************************************************
  * This file is part of "Object Teams Dynamic Runtime Environment"
  * 
- * Copyright 2011, 2012 GK Software AG.
+ * Copyright 2011, 2014 GK Software AG.
  * 
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -97,6 +97,9 @@ public class AddImplicitActivationAdapter extends ClassVisitor {
             			methodVisitor.visitFieldInsn(Opcodes.GETFIELD, clazz.getName().replace('.', '/'), "this$0", enclTeamDesc);
             			methodVisitor.visitMethodInsn(INVOKEINTERFACE, TARGET_CLASS_NAME, IMPLICIT_DEACTIVATE_METHOD_NAME, METHOD_DESC, true);
             		}
+            	}
+            	@Override
+            	public void endMethod() {
             		if (clazz.isTeam() || clazz.isRole())
             			methodVisitor.visitMaxs(0, 0);
             	}
