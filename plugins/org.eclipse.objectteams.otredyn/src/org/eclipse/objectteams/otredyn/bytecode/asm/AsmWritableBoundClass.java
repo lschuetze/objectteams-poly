@@ -427,7 +427,7 @@ class AsmWritableBoundClass extends AsmBoundClass {
 	 * Was the class already transformed?
 	 */
 	@Override
-	protected boolean isFirstTransformation() {
+	public boolean isFirstTransformation() {
 		return isFirstTransformation;
 	}
 }

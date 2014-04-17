@@ -32,7 +32,6 @@ import org.eclipse.objectteams.otredyn.runtime.IMethod;
 import org.eclipse.objectteams.otredyn.runtime.TeamManager;
 import org.eclipse.objectteams.otredyn.runtime.ISubclassWiringTask;
 import org.eclipse.objectteams.otredyn.transformer.jplis.ObjectTeamsTransformer;
-
 import org.objectweb.asm.Opcodes;
 
 /**
@@ -996,7 +995,7 @@ public abstract class AbstractBoundClass implements IBoundClass {
 
 	protected abstract void prepareForFirstStaticTransformation();
 
-	protected abstract boolean isFirstTransformation();
+	public abstract boolean isFirstTransformation();
 
 	protected abstract void createDispatchCodeInOrgMethod(Method boundMethod,
 			int joinpointId, int boundMethodId);
@@ -1030,5 +1029,4 @@ public abstract class AbstractBoundClass implements IBoundClass {
 			this.wiringTasks.clear();
 		}
 	}
-
 }

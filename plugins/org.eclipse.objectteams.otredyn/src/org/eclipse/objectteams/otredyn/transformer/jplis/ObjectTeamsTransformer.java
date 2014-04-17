@@ -1,7 +1,7 @@
 /**********************************************************************
  * This file is part of "Object Teams Dynamic Runtime Environment"
  * 
- * Copyright 2002, 2012 Berlin Institute of Technology, Germany.
+ * Copyright 2002, 2014 Berlin Institute of Technology, Germany, and others.
  * 
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -46,6 +46,9 @@ public class ObjectTeamsTransformer implements ClassFileTransformer {
 		
 		AbstractBoundClass clazz = ClassRepository.getInstance().getBoundClass(
 				className.replace('/','.'), classId, loader);
+		if (classBeingRedefined == null && !clazz.isFirstTransformation()) {
+			return clazz.getBytecode(); // FIXME: re-loading existing class?? Investigate classloader, check classId strategy etc.pp.
+		}
 		try {
 			if (clazz.isTransformationActive()) {
 				return null;
