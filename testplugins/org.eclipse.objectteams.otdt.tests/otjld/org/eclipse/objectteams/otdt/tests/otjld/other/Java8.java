@@ -53,8 +53,9 @@ public class Java8 extends AbstractOTJLDTest {
 			"package p1;\n" +
 			"public team class TeamA11le01 {\n" +
 			"    protected class Role playedBy TA11le01 {\n" +
+			"        protected String v = \"OK\";\n" +
 			"        void outside() -> void run(Runnable r) with {\n" +
-			"            () -> System.out.println(Role.this) -> r\n" +
+			"            () -> System.out.println(v) -> r\n" +
 			"        }\n" +
 			"    }\n" +
 			"    void test(TA11le01 as Role r) {\n" +
@@ -74,7 +75,7 @@ public class Java8 extends AbstractOTJLDTest {
 			"    }\n" +
 			"}",
 			},
-			"caught"); // FIXME real execution of lambda
+			"OK"); // FIXME real execution of lambda
 	}
 
 	// A lambda expression appears in a parameter mapping
@@ -87,12 +88,14 @@ public class Java8 extends AbstractOTJLDTest {
 			"package p1;\n" +
 			"public team class TeamA11le02 {\n" +
 			"    protected class Role playedBy TA11le02 {\n" +
+			"        protected String v;\n" +
 			"        void outside() -> void run(String s, RunWithArg<String> r) with {\n" +
 			"            \"prefix.\" -> s,\n" +
-			"            x -> System.out.println(Role.this) -> r\n" +
+			"            x -> System.out.println(Role.this.v) -> r\n" +
 			"        }\n" +
 			"    }\n" +
 			"    void test(TA11le02 as Role r) {\n" +
+			"        r.v = \"OK\";" +
 			"        r.outside();\n" +
 			"    } \n" +
 			"    public static void main(String[] args) throws Exception {\n" +
@@ -115,7 +118,7 @@ public class Java8 extends AbstractOTJLDTest {
 			"    }\n" +
 			"}",
 			},
-			"prefix.caught"); // FIXME real execution of lambda
+			"prefix.OK");
 	}
 
 	// A lambda expression appears in a parameter mapping
@@ -153,7 +156,7 @@ public class Java8 extends AbstractOTJLDTest {
 			"    }\n" +
 			"}",
 			},
-			"caught"); // FIXME real execution of lambda
+			"OK");
 	}
 
 	// A lambda expression appears in a parameter mapping
@@ -191,7 +194,7 @@ public class Java8 extends AbstractOTJLDTest {
 			"    }\n" +
 			"}",
 			},
-			"caught"); // FIXME real execution of lambda
+			"OK");
 	}
 	
 	public void testTypeAnnotationAndTypeAnchor_1() {
