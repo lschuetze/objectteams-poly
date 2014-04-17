@@ -20,6 +20,7 @@ package org.eclipse.objectteams.otdt.tests.otjld.roleplaying;
 import java.util.Map;
 
 import org.eclipse.jdt.internal.compiler.impl.CompilerOptions;
+import org.eclipse.objectteams.otdt.internal.core.compiler.mappings.CallinImplementorDyn;
 import org.eclipse.objectteams.otdt.tests.otjld.AbstractOTJLDTest;
 
 import junit.framework.Test;
@@ -1024,6 +1025,7 @@ public class BindingAmbiguities1 extends AbstractOTJLDTest {
      public void test731_ambiguousBinding8e() {
          Map options = getCompilerOptions();
          options.put(CompilerOptions.OPTION_ReportMissingOverrideAnnotation, CompilerOptions.DISABLED);
+         boolean isOTdyn = CallinImplementorDyn.DYNAMIC_WEAVING;
         runNegativeTest(
              new String[] {
 		"T731ab8e_3.java",
@@ -1123,12 +1125,18 @@ public class BindingAmbiguities1 extends AbstractOTJLDTest {
 			"3. ERROR in Team731ab8e_3.java (at line 1)\n" + 
 			"	public team class Team731ab8e_3 extends Team731ab8e_2 {\n" + 
 			"	                  ^^^^^^^^^^^^^\n" + 
-			"Team introduces binding ambiguity for role Role731ab8e_2<@tthis[Team731ab8e_3]>, which may break clients of the super team (OTJLD 2.3.5(d)).\n" + 
+			(isOTdyn ?
+			"Team introduces binding ambiguity for role Role731ab8e_3<@tthis[Team731ab8e_3]>, which may break clients of the super team (OTJLD 2.3.5(d)).\n"
+			:"Team introduces binding ambiguity for role Role731ab8e_2<@tthis[Team731ab8e_3]>, which may break clients of the super team (OTJLD 2.3.5(d)).\n" 
+			)+ 
 			"----------\n" + 
 			"4. ERROR in Team731ab8e_3.java (at line 1)\n" + 
 			"	public team class Team731ab8e_3 extends Team731ab8e_2 {\n" + 
 			"	                  ^^^^^^^^^^^^^\n" + 
-			"Team introduces binding ambiguity for role Role731ab8e_3<@tthis[Team731ab8e_3]>, which may break clients of the super team (OTJLD 2.3.5(d)).\n" + 
+			(isOTdyn ?
+			"Team introduces binding ambiguity for role Role731ab8e_2<@tthis[Team731ab8e_3]>, which may break clients of the super team (OTJLD 2.3.5(d)).\n" 
+			:"Team introduces binding ambiguity for role Role731ab8e_3<@tthis[Team731ab8e_3]>, which may break clients of the super team (OTJLD 2.3.5(d)).\n" 
+			) +
 			"----------\n",
      		null/*classLibs*/,
             true/*shouldFlush*/,
