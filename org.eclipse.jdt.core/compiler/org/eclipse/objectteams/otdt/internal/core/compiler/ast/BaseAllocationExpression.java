@@ -57,6 +57,7 @@ import org.eclipse.jdt.internal.compiler.lookup.ReferenceBinding;
 import org.eclipse.jdt.internal.compiler.lookup.Scope;
 import org.eclipse.jdt.internal.compiler.lookup.TypeBinding;
 import org.eclipse.jdt.internal.compiler.lookup.TypeConstants;
+import org.eclipse.objectteams.otdt.core.compiler.IOTConstants;
 import org.eclipse.objectteams.otdt.core.exceptions.InternalCompilerError;
 import org.eclipse.objectteams.otdt.internal.core.compiler.control.ITranslationStates;
 import org.eclipse.objectteams.otdt.internal.core.compiler.control.StateHelper;
@@ -260,8 +261,21 @@ public class BaseAllocationExpression extends Assignment {
     	char[] selector = CalloutImplementorDyn.OT_ACCESS_STATIC;
     	int modifiers = ClassFileConstants.AccPublic|ClassFileConstants.AccStatic;
 		Expression[] arguments = expression.arguments;
+		Expression enclosingInstance = null;
 		if (expression instanceof QualifiedAllocationExpression) {
-			Expression enclosingInstance = ((QualifiedAllocationExpression) expression).enclosingInstance;
+			enclosingInstance = ((QualifiedAllocationExpression) expression).enclosingInstance;
+		} else if (baseclass.isMemberType()) {
+			// extract the enclosing base instance from an outer playedBy:
+			ReferenceBinding enclosingTeam = scope.enclosingReceiverType().enclosingType();
+			if (enclosingTeam != null
+					&& TypeBinding.equalsEquals(baseclass.enclosingType(), enclosingTeam.baseclass)) {
+				enclosingInstance = gen.fieldReference(
+										gen.qualifiedThisReference(gen.typeReference(enclosingTeam)),
+										IOTConstants._OT_BASE);
+				enclosingInstance.resolve(scope);
+			}
+		}
+		if (enclosingInstance != null) {
 			if (arguments == null) {
 				arguments = new Expression[] { enclosingInstance };
 			} else {
