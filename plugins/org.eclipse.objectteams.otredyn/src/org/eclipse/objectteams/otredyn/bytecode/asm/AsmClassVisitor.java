@@ -51,10 +51,8 @@ class AsmClassVisitor extends ClassVisitor {
 	 */
 	@Override
 	public void visit(int version, int access, String name, String signature, String superName, String[] interfaces) {
-			clazz.setSuperClassName(superName);
-			clazz.setTeam((access & Types.TEAM) != 0);
-			clazz.setInterface((access & Opcodes.ACC_INTERFACE) != 0);
-			clazz.setVisibility((access & (Opcodes.ACC_PRIVATE|Opcodes.ACC_PROTECTED|Opcodes.ACC_PUBLIC)));
+		clazz.setSuperClassName(superName);
+		clazz.setModifiers(access);
 	}
 	
 	/**

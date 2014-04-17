@@ -15,15 +15,14 @@
  **********************************************************************/
 package org.eclipse.objectteams.otredyn.bytecode.asm;
 
+import static org.eclipse.objectteams.otredyn.bytecode.asm.AsmBoundClass.ASM_API;
+
 import org.eclipse.objectteams.otredyn.transformer.names.ClassNames;
 import org.eclipse.objectteams.otredyn.transformer.names.ConstantMembers;
 import org.objectweb.asm.ClassVisitor;
 import org.objectweb.asm.MethodVisitor;
-import org.objectweb.asm.commons.AdviceAdapter;
-
 import org.objectweb.asm.Opcodes;
-
-import static org.eclipse.objectteams.otredyn.bytecode.asm.AsmBoundClass.ASM_API;
+import org.objectweb.asm.commons.AdviceAdapter;
 
 /**
  * This visitor adds calls to _OT$implicitlyActivate and _OT$implicitlyDeactivate
@@ -71,6 +70,7 @@ public class AddImplicitActivationAdapter extends ClassVisitor {
         if (isCandidateForImplicitActivation(name, desc, access)) {
         	final MethodVisitor methodVisitor = cv.visitMethod(access, name, desc, null, null);
         	final String enclTeamDesc = clazz.isRole() ? 'L'+clazz.getEnclosingClass().getName().replace('.', '/')+';' : null;
+        	final int nesting = clazz.nestingDepth()-1;
             return new AdviceAdapter(this.api, methodVisitor, access, name, desc) {
             	@Override
             	protected void onMethodEnter() {
@@ -81,7 +81,7 @@ public class AddImplicitActivationAdapter extends ClassVisitor {
             		if (clazz.isRole()) {
             			// TODO(SH): respect nesting depth (this$n)
             			methodVisitor.visitIntInsn(Opcodes.ALOAD, 0);
-						methodVisitor.visitFieldInsn(Opcodes.GETFIELD, clazz.getName().replace('.', '/'), "this$0", enclTeamDesc);
+						methodVisitor.visitFieldInsn(Opcodes.GETFIELD, clazz.getName().replace('.', '/'), "this$"+nesting, enclTeamDesc);
             			methodVisitor.visitMethodInsn(INVOKEINTERFACE, TARGET_CLASS_NAME, IMPLICIT_ACTIVATE_METHOD_NAME, METHOD_DESC, true);
             		}
             	}
@@ -94,7 +94,7 @@ public class AddImplicitActivationAdapter extends ClassVisitor {
             		if (clazz.isRole()) {
             			// TODO(SH): respect nesting depth (this$n)
             			methodVisitor.visitIntInsn(Opcodes.ALOAD, 0);
-            			methodVisitor.visitFieldInsn(Opcodes.GETFIELD, clazz.getName().replace('.', '/'), "this$0", enclTeamDesc);
+            			methodVisitor.visitFieldInsn(Opcodes.GETFIELD, clazz.getName().replace('.', '/'), "this$"+nesting, enclTeamDesc);
             			methodVisitor.visitMethodInsn(INVOKEINTERFACE, TARGET_CLASS_NAME, IMPLICIT_DEACTIVATE_METHOD_NAME, METHOD_DESC, true);
             		}
             	}

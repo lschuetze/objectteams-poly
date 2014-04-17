@@ -150,16 +150,14 @@ public abstract class AbstractBoundClass implements IBoundClass {
 	// already loaded by a class loader or not
 	private boolean isLoaded;
 	
-	// Does this AbstractBoundClass represent a team
-	private boolean isTeam;
-	private boolean isInterface;
+	private int modifiers;
 
 	private int otClassFlags;
-	private int visibilityFlags;
 	private boolean implicitTeamActivationEnabled = false;
 	private Set<String> methodsForImplicitActivation;
 
 	protected ClassLoader loader;
+
 
 
 	/**
@@ -238,15 +236,7 @@ public abstract class AbstractBoundClass implements IBoundClass {
 	 */
 	public boolean isInterface() {
 		parseBytecode();
-		return isInterface;
-	}
-
-	/**
-	 * Mark as interface
-	 * @param isInterface
-	 */
-	public void setInterface(boolean isInterface) {
-		this.isInterface = isInterface;
+		return (this.modifiers & Opcodes.ACC_INTERFACE) != 0;
 	}
 	
 	/**
@@ -256,22 +246,30 @@ public abstract class AbstractBoundClass implements IBoundClass {
 	 */
 	public boolean isTeam() {
 		parseBytecode();
-		return isTeam;
+		return (this.modifiers & Types.TEAM) != 0;
+	}
+	
+	/**
+	 * Number of outer instances required in an instance of this class.
+	 */
+	public int nestingDepth() {
+		parseBytecode();
+		if ((this.modifiers & Opcodes.ACC_STATIC) != 0)
+			return 0;
+		if (this.enclosingClass != null)
+			return this.enclosingClass.nestingDepth()+1;
+		return 0;
 	}
 
 	/**
-	 * Mark as team
-	 * @param isTeam
+	 * Store class modifiers (incl. visibility, AccStatic, AccInterface, AccStatic
 	 */
-	public void setTeam(boolean isTeam) {
-		this.isTeam = isTeam;
+	public void setModifiers(int modifiers) {
+		this.modifiers = modifiers;
 	}
 
 	public void setOTClassFlags(int flags) {
 		this.otClassFlags = flags;		
-	}
-	public void setVisibility(int flags) {
-		this.visibilityFlags = flags;
 	}
 	
 	public boolean isRole() {
@@ -279,7 +277,7 @@ public abstract class AbstractBoundClass implements IBoundClass {
 	}
 
 	public boolean isProtected() {
-		return (this.visibilityFlags & Opcodes.ACC_PROTECTED) != 0;
+		return (this.modifiers & Opcodes.ACC_PROTECTED) != 0;
 	}
 
 	public void enableImplicitActivation() {
