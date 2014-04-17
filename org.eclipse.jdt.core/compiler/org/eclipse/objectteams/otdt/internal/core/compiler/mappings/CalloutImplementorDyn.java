@@ -59,7 +59,7 @@ public class CalloutImplementorDyn {
 		Expression packagedArgs = gen.arrayAllocation(gen.qualifiedTypeReference(TypeConstants.JAVA_LANG_OBJECT), 1, arguments);
 		Expression callerArg = gen.qualifiedThisReference(gen.typeReference(teamModel.getBinding()));
 		MessageSend messageSend = gen.messageSend(receiver, selector, new Expression[] {accessIdArg, opKindArg, packagedArgs, callerArg});
-		if (baseSpec.resolvedType() == TypeBinding.VOID)
+		if (baseSpec.resolvedType() == TypeBinding.VOID || opKind == 1)
 			return messageSend;
 		else
 			return gen.createCastOrUnboxing(messageSend, baseSpec.resolvedType(), true/*baseAccess*/);
