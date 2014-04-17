@@ -49,6 +49,8 @@ import org.eclipse.jdt.internal.compiler.lookup.ReferenceBinding;
 import org.eclipse.jdt.internal.compiler.lookup.SourceTypeBinding;
 import org.eclipse.jdt.internal.compiler.lookup.TypeBinding;
 import org.eclipse.jdt.internal.compiler.lookup.TypeConstants;
+import org.eclipse.jdt.internal.compiler.parser.TerminalTokens;
+import org.eclipse.objectteams.otdt.core.compiler.IOTConstants;
 import org.eclipse.objectteams.otdt.core.exceptions.InternalCompilerError;
 import org.eclipse.objectteams.otdt.internal.core.compiler.bytecode.BytecodeTransformer;
 import org.eclipse.objectteams.otdt.internal.core.compiler.bytecode.ConstantPoolObject;
@@ -56,6 +58,8 @@ import org.eclipse.objectteams.otdt.internal.core.compiler.bytecode.ConstantPool
 import org.eclipse.objectteams.otdt.internal.core.compiler.bytecode.ConstantPoolObjectReader;
 import org.eclipse.objectteams.otdt.internal.core.compiler.control.Dependencies;
 import org.eclipse.objectteams.otdt.internal.core.compiler.control.ITranslationStates;
+import org.eclipse.objectteams.otdt.internal.core.compiler.lookup.CallinCalloutBinding;
+import org.eclipse.objectteams.otdt.internal.core.compiler.mappings.CallinImplementorDyn;
 import org.eclipse.objectteams.otdt.internal.core.compiler.model.MethodModel;
 import org.eclipse.objectteams.otdt.internal.core.compiler.model.RoleModel;
 import org.eclipse.objectteams.otdt.internal.core.compiler.util.AstEdit;
@@ -99,22 +103,60 @@ public class TeamMethodGenerator {
 			this.modifiers  = modifiers;
 		}
 
+		@SuppressWarnings("nls")
 		Argument[] makeArgs(AstGenerator gen) {
 			switch (this.args) {
 				case THREAD:
 					return new Argument[] { 
-						gen.argument("thread".toCharArray(),  //$NON-NLS-1$
-								     gen.qualifiedTypeReference(JAVA_LANG_THREAD))
+						gen.argument("thread".toCharArray(), gen.qualifiedTypeReference(JAVA_LANG_THREAD))
 					};
 				case BOOLEAN:
 					return new Argument[] { 
-						gen.argument("flag".toCharArray(),  //$NON-NLS-1$
-								     gen.baseTypeReference(TypeConstants.BOOLEAN))
+						gen.argument("flag".toCharArray(), gen.baseTypeReference(TypeConstants.BOOLEAN))
 					};
 				case INT:
 					return new Argument[] { 
-						gen.argument("flags".toCharArray(),  //$NON-NLS-1$
-								     gen.baseTypeReference(TypeConstants.INT))
+						gen.argument("flags".toCharArray(), gen.baseTypeReference(TypeConstants.INT))
+					};
+				case OTDYNARGS1:
+					return new Argument[] {
+						gen.argument("base".toCharArray(),			gen.qualifiedTypeReference(IOTConstants.ORG_OBJECTTEAMS_IBOUNDBASE)),
+						gen.argument("teams".toCharArray(), 		gen.qualifiedArrayTypeReference(IOTConstants.ORG_OBJECTTEAMS_ITEAM, 1)),
+						gen.argument("idx".toCharArray(), 			gen.baseTypeReference(TypeConstants.INT)),
+						gen.argument("callinIds".toCharArray(), 	gen.arrayTypeReference(TypeConstants.INT, 1)),
+						gen.argument("boundMethodId".toCharArray(), gen.baseTypeReference(TypeConstants.INT)),
+						gen.argument("args".toCharArray(), 			gen.qualifiedArrayTypeReference(TypeConstants.JAVA_LANG_OBJECT, 1))
+					};
+				case OTDYNARGS2:
+					return new Argument[] {
+						gen.argument("base".toCharArray(),			gen.qualifiedTypeReference(IOTConstants.ORG_OBJECTTEAMS_IBOUNDBASE)),
+						gen.argument("teams".toCharArray(), 		gen.qualifiedArrayTypeReference(IOTConstants.ORG_OBJECTTEAMS_ITEAM, 1)),
+						gen.argument("idx".toCharArray(), 			gen.baseTypeReference(TypeConstants.INT)),
+						gen.argument("callinIds".toCharArray(), 	gen.arrayTypeReference(TypeConstants.INT, 1)),
+						gen.argument("boundMethodId".toCharArray(), gen.baseTypeReference(TypeConstants.INT)),
+						gen.argument("args".toCharArray(), 			gen.qualifiedArrayTypeReference(TypeConstants.JAVA_LANG_OBJECT, 1)),
+						gen.argument("baseCallArgs".toCharArray(), 	gen.qualifiedArrayTypeReference(TypeConstants.JAVA_LANG_OBJECT, 1))
+					};
+				case OTDYNARGS3:
+					return new Argument[] {
+						gen.argument("base".toCharArray(),			gen.qualifiedTypeReference(IOTConstants.ORG_OBJECTTEAMS_IBOUNDBASE)),
+						gen.argument("callinId".toCharArray(), 		gen.baseTypeReference(TypeConstants.INT)),
+						gen.argument("boundMethodId".toCharArray(), gen.baseTypeReference(TypeConstants.INT)),
+						gen.argument("args".toCharArray(), 			gen.qualifiedArrayTypeReference(TypeConstants.JAVA_LANG_OBJECT, 1))
+					};
+				case OTDYNARGS4:
+					return new Argument[] {
+						gen.argument("base".toCharArray(),			gen.qualifiedTypeReference(IOTConstants.ORG_OBJECTTEAMS_IBOUNDBASE)),
+						gen.argument("callinId".toCharArray(), 		gen.baseTypeReference(TypeConstants.INT)),
+						gen.argument("boundMethodId".toCharArray(), gen.baseTypeReference(TypeConstants.INT)),
+						gen.argument("args".toCharArray(), 			gen.qualifiedArrayTypeReference(TypeConstants.JAVA_LANG_OBJECT, 1)),
+						gen.argument("result".toCharArray(), 		gen.qualifiedTypeReference(TypeConstants.JAVA_LANG_OBJECT))
+					};
+				case OTDYNARGS5:
+					return new Argument[] {
+						gen.argument("callinId".toCharArray(), 		gen.baseTypeReference(TypeConstants.INT)),
+						gen.argument("boundMethodId".toCharArray(), gen.baseTypeReference(TypeConstants.INT)),
+						gen.argument("args".toCharArray(), 			gen.qualifiedArrayTypeReference(TypeConstants.JAVA_LANG_OBJECT, 1))
 					};
 				default:
 					return null;
@@ -129,15 +171,30 @@ public class TeamMethodGenerator {
 					return gen.baseTypeReference(TypeConstants.INT);
 				case NONE:
 					return gen.baseTypeReference(TypeConstants.VOID);
+				case OBJECT:
+					return gen.qualifiedTypeReference(TypeConstants.JAVA_LANG_OBJECT);
 				default:
 					throw new InternalCompilerError("Unexpected return type "+this.returnType); //$NON-NLS-1$
 			}
 		}
 	}
-	enum Type { NONE, THREAD, BOOLEAN, INT }
+	enum Type { 
+		NONE {
+			@Override public int length() { return 0; }
+		}, 
+		THREAD, BOOLEAN, INT, OBJECT, 
+		OTDYNARGS1 { @Override int length() { return 6; } },
+		OTDYNARGS2 { @Override int length() { return 7; } },
+		OTDYNARGS3 { @Override int length() { return 4; } },
+		OTDYNARGS4 { @Override int length() { return 5; } },
+		OTDYNARGS5 { @Override int length() { return 3; } };
+		int length() {
+			return 1;
+		}
+	}
 	/** Public methods to copy from o.o.Team: */
 	@SuppressWarnings("nls")
-	final MethodDescriptor[] methodDescriptors = new MethodDescriptor[] {
+	MethodDescriptor[] methodDescriptors = new MethodDescriptor[] {
     	new MethodDescriptor("activate",                         	"()V", 					Type.NONE, 		Type.NONE,		AccPublic),
     	new MethodDescriptor("activate",   							"(Ljava/lang/Thread;)V",Type.THREAD,	Type.NONE,		AccPublic),
     	new MethodDescriptor("deactivate", 							"()V", 					Type.NONE,		Type.NONE,		AccPublic),
@@ -154,6 +211,21 @@ public class TeamMethodGenerator {
 		new MethodDescriptor("doRegistration", 						"()V", 					Type.NONE, 		Type.NONE,		AccPrivate),
 		new MethodDescriptor("doUnregistration", 					"()V", 					Type.NONE, 		Type.NONE,		AccPrivate),
 	};
+	@SuppressWarnings("nls")
+	final MethodDescriptor[] methodDescriptorsDyn = new MethodDescriptor[] {
+		new MethodDescriptor("_OT$callAllBindings",		"(Lorg/objectteams/IBoundBase;[Lorg/objectteams/ITeam;I[II[Ljava/lang/Object;)Ljava/lang/Object;", 
+																							Type.OTDYNARGS1,		Type.OBJECT,	AccPublic),
+		new MethodDescriptor("_OT$callNext",			"(Lorg/objectteams/IBoundBase;[Lorg/objectteams/ITeam;I[II[Ljava/lang/Object;[Ljava/lang/Object;)Ljava/lang/Object;", 
+																							Type.OTDYNARGS2,		Type.OBJECT,	AccPublic),
+		new MethodDescriptor("_OT$callReplace",			"(Lorg/objectteams/IBoundBase;[Lorg/objectteams/ITeam;I[II[Ljava/lang/Object;)Ljava/lang/Object;", 
+																							Type.OTDYNARGS1,		Type.OBJECT,	AccPublic),
+		new MethodDescriptor("_OT$callBefore",			"(Lorg/objectteams/IBoundBase;II[Ljava/lang/Object;)V", 
+																							Type.OTDYNARGS3,		Type.NONE,		AccPublic),
+		new MethodDescriptor("_OT$callAfter",			"(Lorg/objectteams/IBoundBase;II[Ljava/lang/Object;Ljava/lang/Object;)V", 
+																							Type.OTDYNARGS4,		Type.NONE,		AccPublic),
+		new MethodDescriptor("_OT$callOrigStatic",		"(II[Ljava/lang/Object;)Ljava/lang/Object;", 
+																							Type.OTDYNARGS5,		Type.OBJECT,	AccPublic)
+	};
 
 	// ==== Currently, this is where we globally store the byte code of org.objectteams.Team: ====
 	public byte[] classBytes;
@@ -162,6 +234,17 @@ public class TeamMethodGenerator {
 	public SourceTypeBinding ooTeamBinding;
 	// ==== ====
 	
+	public TeamMethodGenerator() {
+		if (CallinImplementorDyn.DYNAMIC_WEAVING) {
+			int l1 = this.methodDescriptors.length;
+			int l2 = this.methodDescriptorsDyn.length;
+			MethodDescriptor[] all = new MethodDescriptor[l1+l2];
+			System.arraycopy(this.methodDescriptors, 0, all, 0, l1);
+			System.arraycopy(this.methodDescriptorsDyn, 0, all, l1, l2);
+			this.methodDescriptors = all;
+		}
+	}
+
     /** When binary methods for o.o.Team are created record the relevant method bindings. */
     public void registerTeamMethod(IBinaryMethod method, MethodBinding methodBinding) {
     	String selector = String.valueOf(method.getSelector());
@@ -253,9 +336,14 @@ public class TeamMethodGenerator {
     			break;
     		}			
     	}
-    	// methods:
+		// methods:
 		for (MethodDescriptor methodDescriptor : this.methodDescriptors) {
 			MethodDeclaration newMethod = null;
+			// don't duplicate methods that will be generated later
+			if (("_OT$callBefore".equals(methodDescriptor.selector) && hasCallins(teamDecl.binding, TerminalTokens.TokenNamebefore)) //$NON-NLS-1$
+					|| ("_OT$callReplace".equals(methodDescriptor.selector) && hasCallins(teamDecl.binding, TerminalTokens.TokenNamereplace)) //$NON-NLS-1$
+					|| ("_OT$callAfter".equals(methodDescriptor.selector) && hasCallins(teamDecl.binding, TerminalTokens.TokenNameafter))) //$NON-NLS-1$
+				continue;
 			if ((methodDescriptor.modifiers & AccVisibilityMASK) == AccPublic) {
 				// public methods are always copied
 				newMethod = new CopiedTeamMethod(teamDecl.compilationResult, methodDescriptor, gen);
@@ -277,7 +365,15 @@ public class TeamMethodGenerator {
 		// fields:
 		addFields(teamDecl, gen);
     }
-    /** create field ASTs. */
+    private boolean hasCallins(SourceTypeBinding teamBinding, int modifier) {
+		for(ReferenceBinding member : teamBinding.memberTypes)
+			for(CallinCalloutBinding binding : member.callinCallouts)
+				if (binding.isCallin() && binding.callinModifier == modifier)
+					return true;
+		return false;
+	}
+
+	/** create field ASTs. */
     @SuppressWarnings("nls")
 	void addFields(TypeDeclaration teamDecl, AstGenerator gen) {
 		// private WeakHashMap<Thread, Boolean> _OT$activatedThreads = new WeakHashMap<Thread, Boolean>();
