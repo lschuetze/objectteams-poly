@@ -31,7 +31,7 @@ public class Syntax extends AbstractOTJLDTest {
 	// Static initializer to specify tests subset using TESTS_* static variables
 	// All specified tests which does not belong to the class are skipped...
 	static {
-//		TESTS_NAMES = new String[] { "test881_buggyRole3"};
+		TESTS_NAMES = new String[] { "test8112_declaredLiftingSyntaxError4"};
 //		TESTS_NUMBERS = new int[] { 1459 };
 //		TESTS_RANGE = new int[] { 1097, -1 };
 	}
@@ -1260,7 +1260,7 @@ public class Syntax extends AbstractOTJLDTest {
     		"----------\n");
     }
 
-    // a declared lifting lacks an argument name, callin method of nested team
+    // Fixed: a declared lifting lacks an argument name, callin method of nested team
     // 8.11.2-otjld-declared-lifting-syntax-error-4
     public void test8112_declaredLiftingSyntaxError4() {
        

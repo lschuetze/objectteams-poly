@@ -28,6 +28,7 @@ import org.eclipse.jdt.internal.compiler.ast.AbstractMethodDeclaration;
 import org.eclipse.jdt.internal.compiler.ast.Argument;
 import org.eclipse.jdt.internal.compiler.ast.CastExpression;
 import org.eclipse.jdt.internal.compiler.ast.Expression;
+import org.eclipse.jdt.internal.compiler.ast.LocalDeclaration;
 import org.eclipse.jdt.internal.compiler.ast.MessageSend;
 import org.eclipse.jdt.internal.compiler.ast.MethodDeclaration;
 import org.eclipse.jdt.internal.compiler.ast.Reference;
@@ -38,6 +39,7 @@ import org.eclipse.jdt.internal.compiler.ast.ThisReference;
 import org.eclipse.jdt.internal.compiler.ast.TryStatement;
 import org.eclipse.jdt.internal.compiler.ast.TypeDeclaration;
 import org.eclipse.jdt.internal.compiler.ast.TypeReference;
+import org.eclipse.jdt.internal.compiler.classfmt.ClassFileConstants;
 import org.eclipse.jdt.internal.compiler.lookup.BaseTypeBinding;
 import org.eclipse.jdt.internal.compiler.lookup.BlockScope;
 import org.eclipse.jdt.internal.compiler.lookup.ClassScope;
@@ -462,27 +464,26 @@ public class CallinImplementorDyn extends MethodMappingImplementor {
 						// ArgTypeN argn = args[n]
 						if (callinDecl.mappings != null || (hasBasePredicate && baseSpec.arguments != null)) {
 							TypeBinding[] baseParams = baseSpec.resolvedParameters();
-							for (int i=0; i<baseSpec.arguments.length; i++) {
+							for (int i=0; i<baseSpec.arguments.length; i++) {										//   BaseType baseArg = castAndOrUnbox(arguments[n]);
 								Argument baseArg = baseSpec.arguments[i];
 								Expression rawArg = gen.arrayReference(gen.singleNameReference(ARGUMENTS), i+baseArgOffset);
 								Expression init = rawArg;
 								if (!baseParams[i].isTypeVariable())
 									init = gen.createCastOrUnboxing(rawArg, baseParams[i], callinDecl.scope);
-								if (baseArgs.add(String.valueOf(baseArg.name)))
-									tryStats.add(i, gen.localVariable(baseArg.name,
-														gen.alienScopeTypeReference(baseArg.type, callinDecl.scope),
-														null));
-								if (hasBasePredicate) {										 						//   BaseType baseArg = castAndOrUnbox(arguments[n]);
+								LocalDeclaration baseArgLocal = gen.localVariable(baseArg.name,
+																	gen.alienScopeTypeReference(baseArg.type, callinDecl.scope),
+																	init);
+								baseArgLocal.modifiers |= (baseArg.modifiers & ClassFileConstants.AccFinal);
+								if (hasBasePredicate) {
 									// add to front so it is already available for the base predicate check:
-									blockStatements.add(i, gen.assignment(gen.singleNameReference(baseArg.name),
-																		  init));
+									blockStatements.add(i, baseArgLocal);
 								} else {
 									// otherwise give it a chance for expressions/types that depend on the role instance
-									blockStatements.add(gen.assignment(gen.singleNameReference(baseArg.name),
-																		  new PotentialRoleReceiverExpression(
-																				  init,
-																				  roleVar,
-																				  gen.typeReference(roleType))));
+									baseArgLocal.initialization = new PotentialRoleReceiverExpression(
+																	  init,
+																	  roleVar,
+																	  gen.typeReference(roleType));
+									blockStatements.add(baseArgLocal);
 								}
 							}
 						}
