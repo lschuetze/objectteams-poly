@@ -37,7 +37,6 @@ import org.eclipse.objectteams.otdt.internal.core.compiler.util.Sorting;
  * Creates an instanceof cascade as needed for lifting and for base predicate checks.
  *
  * @author stephan
- * @version $Id: SwitchOnBaseTypeGenerator.java 23417 2010-02-03 20:13:55Z stephan $
  */
 public abstract class SwitchOnBaseTypeGenerator implements IOTConstants {
 
@@ -96,11 +95,13 @@ public abstract class SwitchOnBaseTypeGenerator implements IOTConstants {
 		
 		Statement[] stmts = new Statement[2];
 	    Expression baseArg = gen.singleNameReference(baseVarName());
+	    ReferenceBinding castType = null;
 	    if (staticRoleType.baseclass() instanceof WeakenedTypeBinding)
-	    	baseArg = gen.castExpression(
-	    						baseArg,
-	    						gen.typeReference(((WeakenedTypeBinding)staticRoleType.baseclass()).getStrongType()),
-	    						CastExpression.RAW);
+	    	castType = ((WeakenedTypeBinding)staticRoleType.baseclass()).getStrongType();
+    	else if (hasBindingAmbiguity)
+    		castType = staticBaseType;
+	    if (castType != null)
+	    	baseArg = gen.castExpression(baseArg, gen.typeReference(castType), CastExpression.RAW);
 	    char[] LOCAL_BASE_NAME = "_OT$local$base".toCharArray(); //$NON-NLS-1$
 		stmts[0] = gen.localVariable(LOCAL_BASE_NAME, gen.baseclassReference(staticBaseType), baseArg);
 		
