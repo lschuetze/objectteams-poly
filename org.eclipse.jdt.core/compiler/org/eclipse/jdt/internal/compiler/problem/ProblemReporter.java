@@ -9194,6 +9194,20 @@ public void unsafeTypeConversion(Expression expression, TypeBinding expressionTy
 		expression.sourceStart,
 		expression.sourceEnd);
 }
+//{ObjectTeams: variant:
+public void unsafeTypeConversion(MethodSpec spec, TypeBinding expressionType, TypeBinding expectedType) {
+	if (this.options.sourceLevel < ClassFileConstants.JDK1_5) return; // https://bugs.eclipse.org/bugs/show_bug.cgi?id=305259
+	int severity = computeSeverity(IProblem.UnsafeTypeConversion);
+	if (severity == ProblemSeverities.Ignore) return;
+	this.handle(
+		IProblem.UnsafeTypeConversion,
+		new String[] { new String(expressionType.readableName()), new String(expectedType.readableName()), new String(expectedType.erasure().readableName()) },
+		new String[] { new String(expressionType.shortReadableName()), new String(expectedType.shortReadableName()), new String(expectedType.erasure().shortReadableName()) },
+		severity,
+		spec.sourceStart,
+		spec.sourceEnd);
+}
+// SH}
 public void unsafeElementTypeConversion(Expression expression, TypeBinding expressionType, TypeBinding expectedType) {
 	if (this.options.sourceLevel < ClassFileConstants.JDK1_5) return; // https://bugs.eclipse.org/bugs/show_bug.cgi?id=305259
 	int severity = computeSeverity(IProblem.UnsafeElementTypeConversion);

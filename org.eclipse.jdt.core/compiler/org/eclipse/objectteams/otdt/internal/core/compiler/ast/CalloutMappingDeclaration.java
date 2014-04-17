@@ -224,6 +224,8 @@ public class CalloutMappingDeclaration extends AbstractMethodMappingDeclaration
 			if (providedType.isCompatibleWith(requiredType)) {
 				if (this.roleMethodSpec.returnType.resolvedType == null)
                     this.roleMethodSpec.returnType.resolvedType = requiredType; // need a valid type here
+				if (providedType.needsUncheckedConversion(requiredType))
+					this.scope.problemReporter().unsafeTypeConversion(fieldSpec, providedType, requiredType);
 				return; // OK => done
 			} else {
 				TypeBinding roleToLiftTo = TeamModel.getRoleToLiftTo(this.scope, providedType, requiredType, false, fieldSpec);
@@ -259,8 +261,11 @@ public class CalloutMappingDeclaration extends AbstractMethodMappingDeclaration
 			}
 			providedType = params[0];
 			requiredType = fieldSpec.resolvedType();
-			if (providedType.isCompatibleWith(requiredType))
+			if (providedType.isCompatibleWith(requiredType)) {
+				if (providedType.needsUncheckedConversion(requiredType))
+					this.scope.problemReporter().unsafeTypeConversion(this.roleMethodSpec, providedType, requiredType);
 				return;
+			}
 		}
 		// fall through in any case of incompatibility:
 		this.scope.problemReporter().calloutIncompatibleFieldType(
