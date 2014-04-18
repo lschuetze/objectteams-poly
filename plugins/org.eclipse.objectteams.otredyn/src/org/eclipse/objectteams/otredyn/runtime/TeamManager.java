@@ -64,11 +64,25 @@ public class TeamManager {
 	 * if there are no active teams
 	 */
 	public static ITeam[] getTeams(int joinpointId) {
-		List<ITeam> teams = _teams.get(joinpointId);
-		if (teams.size() == 0) {
-			return null;
+		synchronized(_teams) {
+			List<ITeam> teams = _teams.get(joinpointId);
+			int size = teams.size();
+			if (size == 0)
+				return null;
+			ITeam[] active = new ITeam[size];
+			int count = 0;
+			Thread th = Thread.currentThread();
+			for (int i = 0; i < active.length; i++) {
+				ITeam t = teams.get(i);
+				if (t.isActive(th))
+					active[count++] = t;
+			}
+			if (count == 0)
+				return null;
+			if (count != size) 
+				System.arraycopy(active, 0, active = new ITeam[count], 0, count);
+			return active;
 		}
-		return teams.toArray(new ITeam[teams.size()]);
 	}
 
 	/**
