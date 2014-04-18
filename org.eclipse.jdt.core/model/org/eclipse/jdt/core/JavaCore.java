@@ -1368,6 +1368,8 @@ public final class JavaCore extends Plugin {
 
 //{ObjectTeams: new option: scoped keywords (use stateful scanner?)
 	public static final String COMPILER_OPT_SCOPED_KEYWORDS = OTDT_PLUGIN_ID + ".compiler.option.scoped_keywords"; //$NON-NLS-1$
+	
+	public static final String COMPILER_OPT_WEAVING_SCHEME = OTDT_PLUGIN_ID + ".compiler.option.weaving_scheme"; //$NON-NLS-1$
 // SH}
 
 	/**

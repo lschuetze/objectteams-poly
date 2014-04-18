@@ -21,6 +21,7 @@ import org.eclipse.jdt.core.compiler.CharOperation;
 import org.eclipse.jdt.internal.compiler.ast.CompilationUnitDeclaration;
 import org.eclipse.jdt.internal.compiler.classfmt.ClassFileConstants;
 import org.eclipse.jdt.internal.compiler.classfmt.ClassFileStruct;
+import org.eclipse.jdt.internal.compiler.impl.CompilerOptions.WeavingScheme;
 import org.eclipse.jdt.internal.compiler.lookup.Binding;
 import org.eclipse.jdt.internal.compiler.lookup.LookupEnvironment;
 import org.eclipse.jdt.internal.compiler.lookup.MethodBinding;
@@ -234,7 +235,7 @@ public class OTDynCallinBindingsAttribute extends ListValueAttribute {
 		MethodSpec roleSpec = callinDecl.roleMethodSpec;
 		MethodSpec[] baseMethodSpecs = callinDecl.getBaseMethodSpecs();
 		Mapping mapping = new Mapping(callinDecl.scope.enclosingSourceType().sourceName(), // indeed: simple name
-									  callinDecl.declaringRoleName(), callinDecl.name, roleSpec.selector, roleSpec.signature(),
+									  callinDecl.declaringRoleName(), callinDecl.name, roleSpec.selector, roleSpec.signature(WeavingScheme.OTDRE),
 									  callinDecl.getCallinModifier(), flags, 
 									  baseClassName, baseMethodSpecs.length);
 		for (int i=0; i<baseMethodSpecs.length; i++) {
@@ -244,7 +245,9 @@ public class OTDynCallinBindingsAttribute extends ListValueAttribute {
 				baseFlags |= BaseMethod.CALLIN;
 			if (baseSpec.isStatic())
 				baseFlags |= BaseMethod.STATIC;
-			mapping.addBaseMethod(i, baseSpec.codegenSeletor(), baseSpec.signature(), baseSpec.resolvedMethod.declaringClass.constantPoolName(), baseSpec.getCallinId(this.theTeam), baseFlags, baseSpec.getTranslationFlags());
+			mapping.addBaseMethod(i, baseSpec.codegenSeletor(), baseSpec.signature(WeavingScheme.OTDRE), 
+									baseSpec.resolvedMethod.declaringClass.constantPoolName(),
+									baseSpec.getCallinId(this.theTeam), baseFlags, baseSpec.getTranslationFlags());
 		}
 		mapping.setSMAPinfo(callinDecl);
 		this.mappings.add(mapping);
@@ -407,7 +410,7 @@ public class OTDynCallinBindingsAttribute extends ListValueAttribute {
 		while (currentType != null) {
 			MethodBinding[] methods = currentType.getMethods(mapping.roleSelector);
 			for (int j = 0; j < methods.length; j++) {
-				if (CharOperation.prefixEquals(roleSignature, MethodSpec.signature(methods[j])))
+				if (CharOperation.prefixEquals(roleSignature, MethodSpec.signature(methods[j], WeavingScheme.OTDRE)))
 				{
 					result._roleMethodBinding = methods[j];
 					break roleMethod;

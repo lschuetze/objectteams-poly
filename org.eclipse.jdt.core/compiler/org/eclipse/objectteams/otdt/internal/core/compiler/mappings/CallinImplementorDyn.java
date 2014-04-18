@@ -40,6 +40,7 @@ import org.eclipse.jdt.internal.compiler.ast.TryStatement;
 import org.eclipse.jdt.internal.compiler.ast.TypeDeclaration;
 import org.eclipse.jdt.internal.compiler.ast.TypeReference;
 import org.eclipse.jdt.internal.compiler.classfmt.ClassFileConstants;
+import org.eclipse.jdt.internal.compiler.impl.CompilerOptions.WeavingScheme;
 import org.eclipse.jdt.internal.compiler.lookup.BaseTypeBinding;
 import org.eclipse.jdt.internal.compiler.lookup.BlockScope;
 import org.eclipse.jdt.internal.compiler.lookup.ClassScope;
@@ -85,10 +86,6 @@ import org.eclipse.objectteams.otdt.internal.core.compiler.util.RoleTypeCreator;
  * @since 1.3.0M3
  */
 public class CallinImplementorDyn extends MethodMappingImplementor {
-	
-
-	public static boolean DYNAMIC_WEAVING = "dynamic".equals(System.getProperty("ot.weaving")); //$NON-NLS-1$ //$NON-NLS-2$
-
 
 	//_OT$role
 	static final char[] ROLE_VAR_NAME = CharOperation.concat(IOTConstants.OT_DOLLAR_NAME, IOTConstants.ROLE);
@@ -125,7 +122,6 @@ public class CallinImplementorDyn extends MethodMappingImplementor {
 	static final char[] CATCH_ARG = "_OT$caughtException".toCharArray(); //$NON-NLS-1$
 
 	
-	private RoleModel _role;
 	private ClassScope _roleScope;
 
 	/**
@@ -197,7 +193,7 @@ public class CallinImplementorDyn extends MethodMappingImplementor {
 	    char[]     targetArgName = null;
 
 		int generatedArgsLen = methodMapping.isReplaceCallin() ?
-									MethodSignatureEnhancer.ENHANCING_ARG_LEN:
+									MethodSignatureEnhancer.getEnhancingArgLen(WeavingScheme.OTDRE):
 									0;
 		final int srcIdx = idx-generatedArgsLen; // index into source-code signatures.
 
@@ -457,7 +453,7 @@ public class CallinImplementorDyn extends MethodMappingImplementor {
 						}
 						
 						int baseArgOffset = 0;
-						if (baseSpec.isCallin()) baseArgOffset+=MethodSignatureEnhancer.ENHANCING_ARG_LEN;
+						if (baseSpec.isCallin()) baseArgOffset+=MethodSignatureEnhancer.getEnhancingArgLen(WeavingScheme.OTDRE);
 						if (baseSpec.isStatic() && baseSpec.getDeclaringClass().isRole()) baseArgOffset+=2;
 						// unpack arguments to be used by parameter mappings and base predicate:
 						// ArgTypeN argn = args[n]
@@ -489,7 +485,7 @@ public class CallinImplementorDyn extends MethodMappingImplementor {
 	
 						// -- assemble arguments:
 						TypeBinding[] roleParams = callinDecl.roleMethodSpec.resolvedParameters();
-						Expression[] callArgs = new Expression [roleParams.length + (isReplace ? MethodSignatureEnhancer.ENHANCING_ARG_LEN : 0)];
+						Expression[] callArgs = new Expression [roleParams.length + (isReplace ? MethodSignatureEnhancer.getEnhancingArgLen(WeavingScheme.OTDRE) : 0)];
 						int idx = 0;
 						if (isReplace)
 							for (char[] argName : REPLACE_ARG_NAMES)
@@ -757,8 +753,10 @@ public class CallinImplementorDyn extends MethodMappingImplementor {
 				methodDecl.hasParsedStatements = true;
 				return true;
 			}
+
 		});
 	}
+
 	/**
 	 * Assemble message send arguments plus perhaps a result reference to
 	 * yield argument expressions for a predicate call.

@@ -40,6 +40,7 @@ import org.eclipse.jdt.internal.compiler.classfmt.MethodInfo;
 import org.eclipse.jdt.internal.compiler.env.IBinaryMethod;
 import org.eclipse.jdt.internal.compiler.flow.FlowContext;
 import org.eclipse.jdt.internal.compiler.flow.FlowInfo;
+import org.eclipse.jdt.internal.compiler.impl.CompilerOptions.WeavingScheme;
 import org.eclipse.jdt.internal.compiler.lookup.Binding;
 import org.eclipse.jdt.internal.compiler.lookup.ClassScope;
 import org.eclipse.jdt.internal.compiler.lookup.ExtraCompilerModifiers;
@@ -59,7 +60,6 @@ import org.eclipse.objectteams.otdt.internal.core.compiler.bytecode.ConstantPool
 import org.eclipse.objectteams.otdt.internal.core.compiler.control.Dependencies;
 import org.eclipse.objectteams.otdt.internal.core.compiler.control.ITranslationStates;
 import org.eclipse.objectteams.otdt.internal.core.compiler.lookup.CallinCalloutBinding;
-import org.eclipse.objectteams.otdt.internal.core.compiler.mappings.CallinImplementorDyn;
 import org.eclipse.objectteams.otdt.internal.core.compiler.model.MethodModel;
 import org.eclipse.objectteams.otdt.internal.core.compiler.model.RoleModel;
 import org.eclipse.objectteams.otdt.internal.core.compiler.util.AstEdit;
@@ -234,8 +234,8 @@ public class TeamMethodGenerator {
 	public SourceTypeBinding ooTeamBinding;
 	// ==== ====
 	
-	public TeamMethodGenerator() {
-		if (CallinImplementorDyn.DYNAMIC_WEAVING) {
+	public TeamMethodGenerator(WeavingScheme weavingScheme) {
+		if (weavingScheme == WeavingScheme.OTDRE) {
 			int l1 = this.methodDescriptors.length;
 			int l2 = this.methodDescriptorsDyn.length;
 			MethodDescriptor[] all = new MethodDescriptor[l1+l2];

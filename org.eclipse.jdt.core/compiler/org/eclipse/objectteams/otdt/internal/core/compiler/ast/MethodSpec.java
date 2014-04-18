@@ -38,6 +38,7 @@ import org.eclipse.jdt.internal.compiler.ast.TypeParameter;
 import org.eclipse.jdt.internal.compiler.ast.TypeReference;
 import org.eclipse.jdt.internal.compiler.ast.Expression.DecapsulationState;
 import org.eclipse.jdt.internal.compiler.classfmt.ClassFileConstants;
+import org.eclipse.jdt.internal.compiler.impl.CompilerOptions.WeavingScheme;
 import org.eclipse.jdt.internal.compiler.impl.ReferenceContext;
 import org.eclipse.jdt.internal.compiler.lookup.Binding;
 import org.eclipse.jdt.internal.compiler.lookup.BlockScope;
@@ -59,7 +60,6 @@ import org.eclipse.objectteams.otdt.core.compiler.IOTConstants;
 import org.eclipse.objectteams.otdt.core.exceptions.InternalCompilerError;
 import org.eclipse.objectteams.otdt.internal.core.compiler.lookup.AnchorMapping;
 import org.eclipse.objectteams.otdt.internal.core.compiler.lookup.CallinCalloutScope;
-import org.eclipse.objectteams.otdt.internal.core.compiler.mappings.CallinImplementorDyn;
 import org.eclipse.objectteams.otdt.internal.core.compiler.model.MethodModel;
 import org.eclipse.objectteams.otdt.internal.core.compiler.model.RoleModel;
 import org.eclipse.objectteams.otdt.internal.core.compiler.model.TeamModel;
@@ -502,7 +502,8 @@ public class MethodSpec extends ASTNode implements InvocationSite
 
 	void checkDecapsulation(ReferenceBinding baseClass, Scope scope) {
 		if (!this.resolvedMethod.canBeSeenBy(baseClass, this, scope)) {
-			this.implementationStrategy = CallinImplementorDyn.DYNAMIC_WEAVING 
+			WeavingScheme weavingScheme = scope.compilerOptions().weavingScheme;
+			this.implementationStrategy = weavingScheme == WeavingScheme.OTDRE 
 					? ImplementationStrategy.DYN_ACCESS : ImplementationStrategy.DECAPS_WRAPPER;
     		this.accessId = createAccessAttribute(scope.enclosingSourceType().roleModel);
    			scope.problemReporter().decapsulation(this, baseClass, scope);
@@ -656,8 +657,8 @@ public class MethodSpec extends ASTNode implements InvocationSite
 			return this.selector;
 	}
 	/** Like MethodBinding.signature() but use getSourceParamters() instead of enhanced parameters. */
-	public char[] signature() {
-		return signature(this.resolvedMethod);
+	public char[] signature(WeavingScheme weavingScheme) {
+		return signature(this.resolvedMethod, weavingScheme);
 	}
 	/**
 	 * This method is used by 
@@ -666,19 +667,19 @@ public class MethodSpec extends ASTNode implements InvocationSite
 	 * @param method
 	 * @return the bytecode level signature of the given method (yet retrenched)
 	 */
-	public static char[] signature(MethodBinding method) {
+	public static char[] signature(MethodBinding method, WeavingScheme weavingScheme) {
 
 		StringBuffer buffer = new StringBuffer();
 		buffer.append('(');
 		// synthetic args for static role method?
 		MethodBinding orig = method.copyInheritanceSrc != null ? method.copyInheritanceSrc : method; // normalize to copyInhSrc so reading a callin-attr. from bytes can more easily find the method
-		if (CallinImplementorDyn.DYNAMIC_WEAVING && orig.declaringClass.isRole() && orig.isStatic()) {
+		if (weavingScheme == WeavingScheme.OTDRE && orig.declaringClass.isRole() && orig.isStatic()) {
 			buffer.append('I');
 			buffer.append(String.valueOf(orig.declaringClass.enclosingType().signature()));
 		}
 		// manual retrenching?
-		boolean shouldRetrench = !CallinImplementorDyn.DYNAMIC_WEAVING && method.isCallin();
-		int offset = shouldRetrench ? MethodSignatureEnhancer.ENHANCING_ARG_LEN : 0;
+		boolean shouldRetrench = weavingScheme == WeavingScheme.OTRE && method.isCallin();
+		int offset = shouldRetrench ? MethodSignatureEnhancer.getEnhancingArgLen(weavingScheme) : 0;
 		int paramLen = method.parameters.length;	
 		for (int i = offset; i < paramLen; i++) {
 			// 'weaken' to that erasure that was used in the tsuper version:

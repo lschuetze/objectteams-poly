@@ -113,7 +113,6 @@ public class CallinImplementor extends MethodMappingImplementor
 	//_OT$role
 	static final char[] ROLE_VAR_NAME = CharOperation.concat(IOTConstants.OT_DOLLAR_NAME, IOTConstants.ROLE);
 	private static final char[] OLD_IS_EXECUTING = "_OT$oldIsExecuting".toCharArray(); //$NON-NLS-1$
-	private RoleModel _role;
 	private ClassScope _roleScope;
 
 	/**
@@ -122,7 +121,7 @@ public class CallinImplementor extends MethodMappingImplementor
 	 */
 	public CallinImplementor(RoleModel role)
 	{
-		this._role = role;
+		super(role);
 		this._roleScope = role.getAst().scope; // we definitely have an AST here
 		this.bindingDirection = TerminalTokens.TokenNameBINDIN;
 	}
@@ -356,7 +355,8 @@ public class CallinImplementor extends MethodMappingImplementor
 								arguments,
 								new char[0],
 								true, // isWrapper
-								gen);
+								gen,
+								this._role.getWeavingScheme());
 			if (wrapperReturnType.isBaseType()) {
 				TypeBinding baseReturn = baseReturnType;
 				isReturnBoxed = (baseReturn.isBaseType() && baseReturn != TypeBinding.VOID);
@@ -528,7 +528,7 @@ public class CallinImplementor extends MethodMappingImplementor
 		// for role-side predicate
         Expression[] predicateArgs = null;
         int offset = callinBindingDeclaration.isReplaceCallin() ?
-        										MethodSignatureEnhancer.ENHANCING_ARG_LEN :
+        										getMethodSignatureEnhancer().ENHANCING_ARG_LEN :
         										0;
         int plainLen = messageSendArguments.length-offset;
         boolean needRoleVar = false;
@@ -821,18 +821,18 @@ public class CallinImplementor extends MethodMappingImplementor
 	        int basePos = 1; // skip base object
 	        if (callinBindingDeclaration.isReplaceCallin()) {
 	        	// we have enhanced arguments including _OT$unusedArgs
-	        	basePos += MethodSignatureEnhancer.ENHANCING_ARG_LEN;
+	        	basePos += getMethodSignatureEnhancer().ENHANCING_ARG_LEN;
 				unusedIdx = 0;
 				// check what is already in _OT$unusedArgs:
 				if (baseMethodSpec.isCallin()) {
-					unusedIdx = MethodSignatureEnhancer.ENHANCING_ARG_LEN;
+					unusedIdx = getMethodSignatureEnhancer().ENHANCING_ARG_LEN;
 					if (baseMethodSpec.isStatic()) // FIXME(SH): Static role methods other the callin?
 						unusedIdx += 2; // a (dummyInt,MyTeam) pair of synthetics
 				}
 	        } else {
 	        	// no enhanced arguments, means also: no _OT$unusedArgs available yet.
 	        	statements.add(gen.localVariable(
-	        			MethodSignatureEnhancer.UNUSED_ARGS,
+	        			getMethodSignatureEnhancer().UNUSED_ARGS,
 	        			new ArrayQualifiedTypeReference(
 	        					TypeConstants.JAVA_LANG_OBJECT,
 	        					1, // dims
@@ -852,7 +852,7 @@ public class CallinImplementor extends MethodMappingImplementor
 				statements.add(
 					gen.assignment(
 						new ArrayReference(
-								gen.singleNameReference(MethodSignatureEnhancer.UNUSED_ARGS),
+								gen.singleNameReference(getMethodSignatureEnhancer().UNUSED_ARGS),
 								gen.intLiteral(unusedIdx++)),
 						rhs));
 			}
@@ -1018,7 +1018,7 @@ public class CallinImplementor extends MethodMappingImplementor
 	    char[]     targetArgName = null;
 
 		int generatedArgsLen = methodMapping.isReplaceCallin() ?
-									MethodSignatureEnhancer.ENHANCING_ARG_LEN:
+									getMethodSignatureEnhancer().ENHANCING_ARG_LEN:
 									0;
 		final int srcIdx = idx-generatedArgsLen; // index into source-code signatures.
 		int wrapperPrefixLen = hasResultArgument ? 2 : 1; // skip prepended base_arg, and possibly result arg

@@ -62,6 +62,7 @@ import org.eclipse.jdt.internal.compiler.ast.Wildcard;
 import org.eclipse.jdt.internal.compiler.ast.AbstractMethodDeclaration.WrapperKind;
 import org.eclipse.jdt.internal.compiler.classfmt.ClassFileConstants;
 import org.eclipse.jdt.internal.compiler.impl.CompilerOptions;
+import org.eclipse.jdt.internal.compiler.impl.CompilerOptions.WeavingScheme;
 import org.eclipse.jdt.internal.compiler.lookup.BlockScope;
 import org.eclipse.jdt.internal.compiler.lookup.ExtraCompilerModifiers;
 import org.eclipse.jdt.internal.compiler.lookup.TypeConstants;
@@ -110,6 +111,7 @@ class ASTConverter {
 	private DefaultCommentMapper commentMapper;
 //{ObjectTeams: one more configuration option:
 	private boolean includeRoleFiles= false;
+	private WeavingScheme weavingScheme = WeavingScheme.OTRE; // avoid null
 // SH}
 
 	public ASTConverter(Map options, boolean resolveBindings, IProgressMonitor monitor) {
@@ -141,6 +143,9 @@ class ASTConverter {
 		Object option = options.get(JavaCore.COMPILER_OPT_SCOPED_KEYWORDS);
 		if (option != null)
 			this.scanner.parseOTJonly = JavaCore.DISABLED.equals(option);
+		option = options.get(JavaCore.COMPILER_OPT_WEAVING_SCHEME);
+		if (option != null)
+			this.weavingScheme = WeavingScheme.valueOf((String) option);
 // SH}
 	}
 
@@ -682,7 +687,7 @@ class ASTConverter {
 /* orig:
 		org.eclipse.jdt.internal.compiler.ast.Argument[] parameters = methodDeclaration.arguments;
   :giro */
-		org.eclipse.jdt.internal.compiler.ast.Argument[] parameters = MethodSignatureEnhancer.getSourceArguments(methodDeclaration);
+		org.eclipse.jdt.internal.compiler.ast.Argument[] parameters = MethodSignatureEnhancer.getSourceArguments(methodDeclaration, this.weavingScheme);
 // SH}
 		int parametersLength = parameters == null ? 0 : parameters.length;
 		if (parametersLength > 0) {
@@ -6533,7 +6538,8 @@ public BaseConstructorInvocation convert(
 		if (arguments != null) {
 			int argumentsLength = arguments.length;
 			// FIXME(SH): static?
-			for (int idx = MethodSignatureEnhancer.ENHANCING_ARG_LEN+1; idx < argumentsLength; idx++) { // +1: skip 'isSuperAccess'
+			int startIdx = MethodSignatureEnhancer.getEnhancingArgLen(this.weavingScheme)+1; // +1: skip 'isSuperAccess'
+			for (int idx = startIdx; idx < argumentsLength; idx++) {
 				Expression argExpr = convert(arguments[idx]);
 				if (this.resolveBindings) {
 					recordNodes(argExpr, arguments[idx]);

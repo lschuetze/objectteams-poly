@@ -38,7 +38,6 @@ import org.eclipse.objectteams.otdt.internal.core.compiler.ast.CallinMappingDecl
 import org.eclipse.objectteams.otdt.internal.core.compiler.bytecode.WordValueAttribute;
 import org.eclipse.objectteams.otdt.internal.core.compiler.lookup.CallinCalloutScope;
 import org.eclipse.objectteams.otdt.internal.core.compiler.model.MethodModel;
-import org.eclipse.objectteams.otdt.internal.core.compiler.statemachine.transformer.MethodSignatureEnhancer;
 
 /**
  * OTDT changes:
@@ -330,8 +329,7 @@ private void checkAndSetModifiersForMethod(final MethodBinding methodBinding) {
 		// only allowed in direct role:
 		if (!methodBinding.declaringClass.isDirectRole()) {
 			problemReporter().callinInNonRole(methodBinding.declaringClass, referenceMethod);
-			// revert callin specifica:
-			referenceMethod.arguments = MethodSignatureEnhancer.maybeRetrenchArguments(referenceMethod);
+			// remove callin flag (note that method arguments will not be enhanced (during STB.resolveTypesFor())):
 			referenceMethod.modifiers &= ~ExtraCompilerModifiers.AccCallin;
 			modifiers &= ~ExtraCompilerModifiers.AccCallin;
 		} else {

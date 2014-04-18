@@ -54,7 +54,6 @@ import org.eclipse.objectteams.otdt.internal.core.compiler.lifting.LiftingEnviro
 import org.eclipse.objectteams.otdt.internal.core.compiler.lifting.TreeNode;
 import org.eclipse.objectteams.otdt.internal.core.compiler.lookup.ITeamAnchor;
 import org.eclipse.objectteams.otdt.internal.core.compiler.lookup.TeamAnchor;
-import org.eclipse.objectteams.otdt.internal.core.compiler.mappings.CallinImplementorDyn;
 import org.eclipse.objectteams.otdt.internal.core.compiler.util.AstEdit;
 import org.eclipse.objectteams.otdt.internal.core.compiler.util.AstGenerator;
 import org.eclipse.objectteams.otdt.internal.core.compiler.util.RoleTypeCreator;
@@ -370,22 +369,24 @@ public class RoleMigrationImplementor
 	static void genAddOrRemoveRole(CodeStream codeStream, Scope scope, ReferenceBinding iboundBase, boolean isAdding) {
 		codeStream.aload_0(); // this
 		// OTDYN: Slightly different methods depending on the weaving strategy:
-		if (CallinImplementorDyn.DYNAMIC_WEAVING) {
-			// _OT$addOrRemoveRole(role, isAdding)
-			if (isAdding) 
-				codeStream.iconst_1();  // isAdding=true
-			else
-				codeStream.iconst_0(); 	// isAdding=false	
-			codeStream.invoke(Opcodes.OPC_invokeinterface,
-						  iboundBase.getMethod(scope, IOTConstants.ADD_REMOVE_ROLE),
-						  iboundBase);
-		} else {
-			// _OT$addRole(role) or _OT$removeRole(role):
-			codeStream.invoke(Opcodes.OPC_invokeinterface, 
-							  isAdding 
-							  		? iboundBase.getMethod(scope, IOTConstants.ADD_ROLE) 
-							  		: iboundBase.getMethod(scope, IOTConstants.REMOVE_ROLE), 
+		switch (scope.compilerOptions().weavingScheme) {
+			case OTDRE:
+				// _OT$addOrRemoveRole(role, isAdding)
+				if (isAdding) 
+					codeStream.iconst_1();  // isAdding=true
+				else
+					codeStream.iconst_0(); 	// isAdding=false	
+				codeStream.invoke(Opcodes.OPC_invokeinterface,
+							  iboundBase.getMethod(scope, IOTConstants.ADD_REMOVE_ROLE),
 							  iboundBase);
+				break;
+			case OTRE:
+				// _OT$addRole(role) or _OT$removeRole(role):
+				codeStream.invoke(Opcodes.OPC_invokeinterface, 
+								  isAdding 
+								  		? iboundBase.getMethod(scope, IOTConstants.ADD_ROLE) 
+								  		: iboundBase.getMethod(scope, IOTConstants.REMOVE_ROLE), 
+								  iboundBase);
 		}
 	}
 

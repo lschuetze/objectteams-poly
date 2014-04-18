@@ -20,6 +20,7 @@ import org.eclipse.jdt.core.compiler.CharOperation;
 import org.eclipse.jdt.internal.compiler.classfmt.ClassFileConstants;
 import org.eclipse.jdt.internal.compiler.codegen.CodeStream;
 import org.eclipse.jdt.internal.compiler.codegen.Opcodes;
+import org.eclipse.jdt.internal.compiler.impl.CompilerOptions.WeavingScheme;
 import org.eclipse.jdt.internal.compiler.lookup.ExtraCompilerModifiers;
 import org.eclipse.jdt.internal.compiler.lookup.LookupEnvironment;
 import org.eclipse.jdt.internal.compiler.lookup.MethodBinding;
@@ -33,7 +34,6 @@ import org.eclipse.objectteams.otdt.core.compiler.IOTConstants;
 import org.eclipse.objectteams.otdt.internal.core.compiler.bytecode.WordValueAttribute;
 import org.eclipse.objectteams.otdt.internal.core.compiler.control.Config;
 import org.eclipse.objectteams.otdt.internal.core.compiler.control.Config.NotConfiguredException;
-import org.eclipse.objectteams.otdt.internal.core.compiler.mappings.CallinImplementorDyn;
 import org.eclipse.objectteams.otdt.internal.core.compiler.model.MethodModel;
 import org.eclipse.objectteams.otdt.internal.core.compiler.model.RoleModel;
 import org.eclipse.objectteams.otdt.internal.core.compiler.statemachine.transformer.MethodSignatureEnhancer;
@@ -66,7 +66,7 @@ public class SyntheticBaseCallSurrogate extends SyntheticOTMethodBinding
 		this.selector = SyntheticBaseCallSurrogate.genSurrogateName(callinMethod.selector, callinMethod.declaringClass.sourceName(), callinMethod.isStatic());
 		if (!callinMethod.isStatic() && callinMethod.isCallin()) { // don't change paramaters if enhancement is absent
 			// additional arg "boolean isSuperAccess":
-			this.parameters = addIsSuperAccessArg(this.parameters);
+			this.parameters = addIsSuperAccessArg(this.parameters, declaringClass.scope.compilerOptions().weavingScheme);
 		}
 		this.purpose = MethodAccess;
 		this.targetMethod = callinMethod;
@@ -125,14 +125,14 @@ public class SyntheticBaseCallSurrogate extends SyntheticOTMethodBinding
 	 * Add any required base-call surrogates to the given type.
 	 * @param type must be a role class. 
 	 */
-	public static void addFakedBaseCallSurrogates(SourceTypeBinding type) {
+	public static void addFakedBaseCallSurrogates(SourceTypeBinding type, LookupEnvironment environment) {
 		if (type.methods() == null)
 			return;
-		if (CallinImplementorDyn.DYNAMIC_WEAVING) // no surrogates for the dynamic weaver.
+		if (environment.globalOptions.weavingScheme == WeavingScheme.OTDRE) // no surrogates for the dynamic weaver.
 			return;
 		for (MethodBinding method : type.methods())
 			if (method.isCallin() && (method.returnType != null))
-				SyntheticBaseCallSurrogate.getBaseCallSurrogate(method, type.roleModel, type.scope.environment());
+				SyntheticBaseCallSurrogate.getBaseCallSurrogate(method, type.roleModel, environment);
 	}
 
 	/**
@@ -165,7 +165,7 @@ public class SyntheticBaseCallSurrogate extends SyntheticOTMethodBinding
 			TypeBinding returnType = MethodSignatureEnhancer.getGeneralizedReturnType(callinMethod.returnType, environment);
 			TypeBinding[] baseCallParameters = callinMethod.parameters;
 			if (!callinMethod.isStatic())
-				baseCallParameters = addIsSuperAccessArg(baseCallParameters);
+				baseCallParameters = addIsSuperAccessArg(baseCallParameters, environment.globalOptions.weavingScheme);
 	
 			// search existing surrogate:
 			candidates:
@@ -228,15 +228,16 @@ public class SyntheticBaseCallSurrogate extends SyntheticOTMethodBinding
 		return CharOperation.equals(one.sourceName(), two.sourceName());
 	}
 	
-	static TypeBinding[] addIsSuperAccessArg(TypeBinding[] baseCallParameters) 
+	static TypeBinding[] addIsSuperAccessArg(TypeBinding[] baseCallParameters, WeavingScheme weavingScheme) 
 	{
 		int len = baseCallParameters.length;
 		TypeBinding[] newParams = new TypeBinding[len+1];
-		System.arraycopy(baseCallParameters, 0, newParams, 0, MethodSignatureEnhancer.ENHANCING_ARG_LEN);
-		newParams[MethodSignatureEnhancer.ENHANCING_ARG_LEN] = TypeBinding.BOOLEAN;
-		System.arraycopy(baseCallParameters, MethodSignatureEnhancer.ENHANCING_ARG_LEN,
-						 newParams, 		 MethodSignatureEnhancer.ENHANCING_ARG_LEN+1,
-						 len-MethodSignatureEnhancer.ENHANCING_ARG_LEN);
+		int enhancingArgLen = MethodSignatureEnhancer.getEnhancingArgLen(weavingScheme);
+		System.arraycopy(baseCallParameters, 0, newParams, 0, enhancingArgLen);
+		newParams[enhancingArgLen] = TypeBinding.BOOLEAN;
+		System.arraycopy(baseCallParameters, enhancingArgLen,
+						 newParams, 		 enhancingArgLen+1,
+						 len-enhancingArgLen);
 		return newParams;
 	}
 

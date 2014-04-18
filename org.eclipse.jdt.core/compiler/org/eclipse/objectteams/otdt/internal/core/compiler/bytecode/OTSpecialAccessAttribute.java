@@ -25,6 +25,7 @@ import java.util.List;
 import org.eclipse.jdt.core.compiler.CharOperation;
 import org.eclipse.jdt.internal.compiler.ClassFile;
 import org.eclipse.jdt.internal.compiler.classfmt.ClassFileStruct;
+import org.eclipse.jdt.internal.compiler.impl.CompilerOptions.WeavingScheme;
 import org.eclipse.jdt.internal.compiler.lookup.Binding;
 import org.eclipse.jdt.internal.compiler.lookup.FieldBinding;
 import org.eclipse.jdt.internal.compiler.lookup.LookupEnvironment;
@@ -34,7 +35,6 @@ import org.eclipse.jdt.internal.compiler.parser.TerminalTokens;
 import org.eclipse.objectteams.otdt.core.compiler.IOTConstants;
 import org.eclipse.objectteams.otdt.internal.core.compiler.lookup.RoleTypeBinding;
 import org.eclipse.objectteams.otdt.internal.core.compiler.lookup.WeakenedTypeBinding;
-import org.eclipse.objectteams.otdt.internal.core.compiler.mappings.CallinImplementorDyn;
 import org.eclipse.objectteams.otdt.internal.core.compiler.model.RoleModel;
 import org.eclipse.objectteams.otdt.internal.core.compiler.model.TeamModel;
 import org.eclipse.objectteams.otdt.internal.core.compiler.statemachine.copyinheritance.CopyInheritance;
@@ -59,8 +59,6 @@ public class OTSpecialAccessAttribute extends AbstractAttribute {
 	private static final int DYN_DECAPSULATION_METHOD_ACCESS= 4;
 	private static final int DYN_CALLOUT_FIELD_ACCESS = 5;
 	private static final int DYN_SUPER_METHOD_ACCESS = 6;
-	private static final int M_SIZE = CallinImplementorDyn.DYNAMIC_WEAVING ? 8 : 6;
-	private static final int F_SIZE = CallinImplementorDyn.DYNAMIC_WEAVING ? 9 : 7;
 
 	/*
 	 * For OTREDyn, each attribute of this type maintains a set of locally unique (per team) access IDs.
@@ -91,7 +89,7 @@ public class OTSpecialAccessAttribute extends AbstractAttribute {
 			if (CopyInheritance.isCreator(method))
 				// creator is declared in the enclosing team
 				this.boundBaseclass = this.boundBaseclass.enclosingType();
-			if (CallinImplementorDyn.DYNAMIC_WEAVING) {
+			if (OTSpecialAccessAttribute.this._weavingScheme == WeavingScheme.OTDRE) {
 				for (DecapsulatedMethodDesc methodDesc : OTSpecialAccessAttribute.this._decapsulatedMethods) {
 					if (methodDesc.method == method) {
 						this.accessId = methodDesc.accessId; // share the accessId from another callout to the same method
@@ -103,7 +101,7 @@ public class OTSpecialAccessAttribute extends AbstractAttribute {
 		}
 
 		void write() {
-			if (CallinImplementorDyn.DYNAMIC_WEAVING)
+			if (OTSpecialAccessAttribute.this._weavingScheme == WeavingScheme.OTDRE)
 				writeByte((byte)DYN_DECAPSULATION_METHOD_ACCESS);
 			else
 				writeByte((byte)DECAPSULATION_METHOD_ACCESS);
@@ -123,7 +121,7 @@ public class OTSpecialAccessAttribute extends AbstractAttribute {
 				writeName(encodedName);
 				writeName(this.method.signature());
 			}
-			if (CallinImplementorDyn.DYNAMIC_WEAVING)
+			if (OTSpecialAccessAttribute.this._weavingScheme == WeavingScheme.OTDRE)
 				writeUnsignedShort(this.accessId);
 		}
 
@@ -152,7 +150,7 @@ public class OTSpecialAccessAttribute extends AbstractAttribute {
 							CALLOUT_GET_FIELD : CALLOUT_SET_FIELD;
 			if (field.isStatic())
 				this.flags |= CALLOUT_STATIC_FIELD;
-			if (CallinImplementorDyn.DYNAMIC_WEAVING) {
+			if (OTSpecialAccessAttribute.this._weavingScheme == WeavingScheme.OTDRE) {
 				for (CalloutToFieldDesc ctf : OTSpecialAccessAttribute.this._calloutToFields) {
 					if (ctf.field == field) {
 						this.accessId = ctf.accessId; // share the accessId from another callout to the same field
@@ -170,7 +168,7 @@ public class OTSpecialAccessAttribute extends AbstractAttribute {
 		}
 
 		void write() {
-			if (CallinImplementorDyn.DYNAMIC_WEAVING) {
+			if (OTSpecialAccessAttribute.this._weavingScheme == WeavingScheme.OTDRE) {
 				writeByte((byte)DYN_CALLOUT_FIELD_ACCESS);
 				writeUnsignedShort(this.accessId);
 			} else {
@@ -206,7 +204,7 @@ public class OTSpecialAccessAttribute extends AbstractAttribute {
 		}
 
 		void write() {
-			writeByte((byte)(CallinImplementorDyn.DYNAMIC_WEAVING ? DYN_SUPER_METHOD_ACCESS : SUPER_METHOD_ACCESS));
+			writeByte((byte)(OTSpecialAccessAttribute.this._weavingScheme == WeavingScheme.OTDRE ? DYN_SUPER_METHOD_ACCESS : SUPER_METHOD_ACCESS));
 			writeName(this.method.declaringClass.attributeName());
 			writeName(this.method.declaringClass.superclass().attributeName());
 			writeName(this.method.selector);
@@ -232,10 +230,12 @@ public class OTSpecialAccessAttribute extends AbstractAttribute {
 	 * FALSE means: use in a team referring to a super base class, which is indirectly adapted.*/
 	private List<Boolean> _baseclassDecapsulation = new ArrayList<Boolean>();
 
+	WeavingScheme _weavingScheme;
 
-	public OTSpecialAccessAttribute (ReferenceBinding site) {
+	public OTSpecialAccessAttribute (ReferenceBinding site, WeavingScheme weavingScheme) {
 		super(IOTConstants.OTSPECIAL_ACCESS);
 		this._site = site;
+		this._weavingScheme = weavingScheme;
 	}
 
 	public int addDecapsulatedMethodAccess(ReferenceBinding boundBaseclass, MethodBinding method) {
@@ -279,6 +279,8 @@ public class OTSpecialAccessAttribute extends AbstractAttribute {
         super.write(classFile);
 
         int attributeSize  = 4; // initially empty, except for two counts
+        int M_SIZE = this._weavingScheme == WeavingScheme.OTDRE ? 8 : 6;
+        int F_SIZE = this._weavingScheme == WeavingScheme.OTDRE ? 9 : 7;
 		attributeSize += this._decapsulatedMethods.size() * (1+M_SIZE); // 1 byte kind, 3 names (+1 short for otredyn)
 		attributeSize += this._calloutToFields.size() * (1+F_SIZE);		// 1 byte kind, 1 byte flags, 3 names (+1 byte for otredyn) 
 		attributeSize += this._superMethods.size() * 9;        			// 1 byte kind, 4 names

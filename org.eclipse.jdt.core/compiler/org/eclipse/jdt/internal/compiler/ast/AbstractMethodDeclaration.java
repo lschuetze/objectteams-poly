@@ -740,8 +740,8 @@ public abstract class AbstractMethodDeclaration
 		if (this.arguments != null) {
 //{ObjectTeams: retrench enhanced callin args:
 			int firstArg = 0;
-			if (isCallin())
-				firstArg = MethodSignatureEnhancer.ENHANCING_ARG_LEN;
+			if (isCallin() && this.scope != null)
+				firstArg = MethodSignatureEnhancer.getEnhancingArgLen(this.scope.compilerOptions().weavingScheme);
 			for (int i = firstArg; i < this.arguments.length; i++) {
 /* orig:
 			for (int i = 0; i < this.arguments.length; i++) {

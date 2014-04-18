@@ -55,6 +55,7 @@ import org.eclipse.jdt.internal.compiler.env.ClassSignature;
 import org.eclipse.jdt.internal.compiler.env.EnumConstantSignature;
 import org.eclipse.jdt.internal.compiler.env.IBinaryAnnotation;
 import org.eclipse.jdt.internal.compiler.env.IDependent;
+import org.eclipse.jdt.internal.compiler.impl.CompilerOptions.WeavingScheme;
 import org.eclipse.jdt.internal.compiler.impl.Constant;
 import org.eclipse.jdt.internal.compiler.lookup.Binding;
 import org.eclipse.jdt.internal.compiler.lookup.FieldBinding;
@@ -1429,7 +1430,10 @@ public class Util {
 					parameterSignatures = new String[arguments.length];
 					for (int i = 0; i < arguments.length; i++) {
 //{ObjectTeams: skip enhanced args of callin method:
-						if (methodDeclaration.isCallin() && i < MethodSignatureEnhancer.ENHANCING_ARG_LEN)
+						WeavingScheme weavingScheme = WeavingScheme.OTRE; // avoid null!
+						if (methodDeclaration.scope != null)
+							weavingScheme = methodDeclaration.scope.compilerOptions().weavingScheme;
+						if (methodDeclaration.isCallin() && i < MethodSignatureEnhancer.getEnhancingArgLen(weavingScheme))
 							continue;
 // SH}
 						Argument argument = arguments[i];

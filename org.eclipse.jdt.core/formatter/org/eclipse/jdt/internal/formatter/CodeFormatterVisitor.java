@@ -122,6 +122,7 @@ import org.eclipse.jdt.internal.compiler.ast.WhileStatement;
 import org.eclipse.jdt.internal.compiler.ast.Wildcard;
 import org.eclipse.jdt.internal.compiler.classfmt.ClassFileConstants;
 import org.eclipse.jdt.internal.compiler.impl.CompilerOptions;
+import org.eclipse.jdt.internal.compiler.impl.CompilerOptions.WeavingScheme;
 import org.eclipse.jdt.internal.compiler.lookup.BlockScope;
 import org.eclipse.jdt.internal.compiler.lookup.ClassScope;
 import org.eclipse.jdt.internal.compiler.lookup.CompilationUnitScope;
@@ -211,6 +212,8 @@ public class CodeFormatterVisitor extends ASTVisitor {
 		Arrays.sort(CLOSING_GENERICS_EXPECTEDTOKENS);
 		Arrays.sort(SINGLETYPEREFERENCE_EXPECTEDTOKENS);
 	}
+	// for access to MethodSignatureEnhancer:
+	private WeavingScheme weavingScheme = WeavingScheme.OTRE;
 // SH}	
 	public int lastLocalDeclarationSourceStart;
 	int lastBinaryExpressionAlignmentBreakIndentation;
@@ -243,6 +246,9 @@ public class CodeFormatterVisitor extends ASTVisitor {
 		Object javaOption = settings.get(CompilerOptions.OPTION_PureJavaOnly);
 		if (CompilerOptions.ENABLED.equals(javaOption))
 			this.preferences.isPureJava = true;
+		Object weavingOption = settings.get(JavaCore.COMPILER_OPT_WEAVING_SCHEME);
+		if (weavingOption != null)
+			this.weavingScheme = WeavingScheme.valueOf((String) weavingOption);
 // SH}
 		this.scribe = new Scribe(this, sourceLevel, regions, codeSnippetParsingUtil, includeComments);
 	}
@@ -2168,7 +2174,7 @@ public class CodeFormatterVisitor extends ASTVisitor {
 	/* orig:
 				methodDeclaration.arguments,
 	  :giro */
-				MethodSignatureEnhancer.getSourceArguments(methodDeclaration),
+				MethodSignatureEnhancer.getSourceArguments(methodDeclaration, this.weavingScheme),
 // SH}
 				methodDeclaration.scope,
 				spaceBeforeOpenParen,

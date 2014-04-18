@@ -31,6 +31,7 @@ import org.eclipse.jdt.internal.compiler.ast.AbstractMethodDeclaration;
 import org.eclipse.jdt.internal.compiler.ast.TypeDeclaration;
 import org.eclipse.jdt.internal.compiler.classfmt.ClassFileReader;
 import org.eclipse.jdt.internal.compiler.classfmt.ClassFormatException;
+import org.eclipse.jdt.internal.compiler.impl.CompilerOptions.WeavingScheme;
 import org.eclipse.jdt.internal.compiler.lookup.BinaryTypeBinding;
 import org.eclipse.jdt.internal.compiler.lookup.Binding;
 import org.eclipse.jdt.internal.compiler.lookup.ClassScope;
@@ -110,6 +111,9 @@ public class TypeModel extends ModelElement {
 	 * Version number of the compiler that created a (binary) type;
 	 */
 	public int _compilerVersion;
+	
+	WeavingScheme weavingScheme;
+
 
 	public void setBinding (ReferenceBinding binding) {
         this._binding = binding;
@@ -510,7 +514,7 @@ public class TypeModel extends ModelElement {
 	}
 	protected OTSpecialAccessAttribute getSpecialAccessAttribute() {
 		if (this._specialAccess == null) {
-			this._specialAccess = new OTSpecialAccessAttribute(this._binding);
+			this._specialAccess = new OTSpecialAccessAttribute(this._binding, getWeavingScheme());
 			addAttribute(this._specialAccess);
 		}
 		return this._specialAccess;
@@ -558,5 +562,10 @@ public class TypeModel extends ModelElement {
 			}
 		}
 		return false;
+	}
+	public WeavingScheme getWeavingScheme() {
+		if (this.weavingScheme == null && this._ast != null && this._ast.scope != null)
+			this.weavingScheme = this._ast.scope.compilerOptions().weavingScheme;
+		return this.weavingScheme;
 	}
 }

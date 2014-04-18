@@ -88,6 +88,7 @@ import org.eclipse.objectteams.otdt.internal.core.compiler.statemachine.transfor
 import org.eclipse.objectteams.otdt.internal.core.compiler.statemachine.transformer.PredicateGenerator;
 import org.eclipse.objectteams.otdt.internal.core.compiler.statemachine.transformer.RoleMigrationImplementor;
 import org.eclipse.objectteams.otdt.internal.core.compiler.statemachine.transformer.RoleSplitter;
+import org.eclipse.objectteams.otdt.internal.core.compiler.util.AstGenerator;
 import org.eclipse.objectteams.otdt.internal.core.compiler.util.RoleTypeCreator;
 import org.eclipse.objectteams.otdt.internal.core.compiler.util.TypeAnalyzer;
 
@@ -2396,7 +2397,14 @@ public MethodBinding resolveTypesFor(MethodBinding method, boolean fromSynthetic
 	AbstractMethodDeclaration methodDecl = method.sourceMethod();
 	if (methodDecl == null) return null; // method could not be resolved in previous iteration
 
-//{ObjectTeams: pre-fetch (resolve) potential type anchors:
+//{ObjectTeams: enhance callin signature (previously done in the parser):
+	if (methodDecl.isCallin() && !methodDecl.isCopied) {
+		AstGenerator gen = new AstGenerator(methodDecl.sourceEnd+1, methodDecl.sourceEnd+2);
+		methodDecl.arguments = MethodSignatureEnhancer.enhanceArguments(
+								methodDecl.arguments, new char[0], /*isWrapper*/false, gen, this.scope.compilerOptions().weavingScheme);
+	}
+
+	// pre-fetch (resolve) potential type anchors:
 	boolean[] anchorFlags = null; // keep track so we don't doubly resolve
 	if (methodDecl.arguments != null) {
 		anchorFlags = TypeAnchorReference.fetchAnchorFlags(methodDecl.arguments, methodDecl.typeParameters());
@@ -3512,7 +3520,7 @@ void verifyMethods(MethodVerifier verifier) {
 	// (requires inherited callin bindings (from STATE_LATE_ATTRIBUTES_EVALUATED), but must happend
 	//  before resolve() so resolving BaseCallMessageSends will find inherited surrogates)
 	if (this.isDirectRole() && !this.isInterface())
-		SyntheticBaseCallSurrogate.addFakedBaseCallSurrogates(this);
+		SyntheticBaseCallSurrogate.addFakedBaseCallSurrogates(this, verifier.environment);
 // SH}
 }
 

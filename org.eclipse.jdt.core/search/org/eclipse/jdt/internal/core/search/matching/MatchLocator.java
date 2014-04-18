@@ -534,7 +534,7 @@ protected IJavaElement createHandle(AbstractMethodDeclaration method, IJavaEleme
 /* orig:
 	Argument[] arguments = method.arguments;
   :giro */	
-	Argument[] arguments = MethodSignatureEnhancer.getSourceArguments(method);
+	Argument[] arguments = MethodSignatureEnhancer.getSourceArguments(method, this.options.weavingScheme);
 // SH}
 	int argCount = arguments == null ? 0 : arguments.length;
 	if (type.isBinary()) {

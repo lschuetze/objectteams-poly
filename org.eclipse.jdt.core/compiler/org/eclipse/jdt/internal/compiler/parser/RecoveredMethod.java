@@ -38,8 +38,6 @@ import org.eclipse.jdt.internal.compiler.ast.TypeReference;
 import org.eclipse.jdt.internal.compiler.classfmt.ClassFileConstants;
 import org.eclipse.jdt.internal.compiler.lookup.TypeBinding;
 import org.eclipse.jdt.internal.compiler.util.Util;
-import org.eclipse.objectteams.otdt.internal.core.compiler.statemachine.transformer.MethodSignatureEnhancer;
-import org.eclipse.objectteams.otdt.internal.core.compiler.util.AstGenerator;
 
 /**
  * Internal method structure for parsing recovery
@@ -411,12 +409,6 @@ public AbstractMethodDeclaration updatedMethodDeclaration(int depth, Set knownTy
 			}
 		}
 	}
-//{ObjectTeams: ensure signature has taken place apropriately:
-	if (this.methodDeclaration.isCallin() && !MethodSignatureEnhancer.isEnhanced(this.methodDeclaration)) {
-		AstGenerator gen = new AstGenerator(this.methodDeclaration.sourceStart, this.methodDeclaration.sourceEnd);
-		this.methodDeclaration.arguments = MethodSignatureEnhancer.enhanceArguments(this.methodDeclaration.arguments, new char[0], /*isWrapper*/false, gen);
-	}
-// SH}
 	if (this.localTypeCount > 0) this.methodDeclaration.bits |= ASTNode.HasLocalType;
 	return this.methodDeclaration;
 }

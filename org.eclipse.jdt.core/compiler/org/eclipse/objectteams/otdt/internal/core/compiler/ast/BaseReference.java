@@ -26,12 +26,12 @@ import org.eclipse.jdt.internal.compiler.ast.MethodDeclaration;
 import org.eclipse.jdt.internal.compiler.ast.QualifiedThisReference;
 import org.eclipse.jdt.internal.compiler.ast.ThisReference;
 import org.eclipse.jdt.internal.compiler.codegen.CodeStream;
+import org.eclipse.jdt.internal.compiler.impl.CompilerOptions.WeavingScheme;
 import org.eclipse.jdt.internal.compiler.impl.Constant;
 import org.eclipse.jdt.internal.compiler.lookup.Binding;
 import org.eclipse.jdt.internal.compiler.lookup.BlockScope;
 import org.eclipse.jdt.internal.compiler.lookup.ReferenceBinding;
 import org.eclipse.jdt.internal.compiler.lookup.TypeBinding;
-import org.eclipse.objectteams.otdt.internal.core.compiler.mappings.CallinImplementorDyn;
 import org.eclipse.objectteams.otdt.internal.core.compiler.util.AstGenerator;
 import org.eclipse.objectteams.otdt.internal.core.compiler.util.RoleTypeCreator;
 
@@ -58,15 +58,17 @@ public class BaseReference extends ThisReference {
 	 * @param isStatic
 	 * @param outerCallinMethod
 	 * @param gen
+	 * @param weavingScheme which weaver to compile for
 	 * @return the exact role class containing this base call (respecting local types).
 	 */
 	ReferenceBinding adjustReceiver(
 			ReferenceBinding enclosingType,
 			boolean isStatic,
 			MethodDeclaration outerCallinMethod,
-			AstGenerator gen)
+			AstGenerator gen,
+			WeavingScheme weavingScheme)
 	{
-		boolean redirectToTeam = isStatic || CallinImplementorDyn.DYNAMIC_WEAVING; // _OT$callNext is found via MyTeam.this
+		boolean redirectToTeam = isStatic || (weavingScheme == WeavingScheme.OTDRE); // _OT$callNext is found via MyTeam.this
 		if (outerCallinMethod != null) {
 			// use "R.this" in order to point to the correct class, direct enclosing is a local class.
 	        ReferenceBinding enclosingRole = outerCallinMethod.binding.declaringClass;

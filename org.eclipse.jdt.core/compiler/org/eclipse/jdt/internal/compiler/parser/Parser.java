@@ -71,7 +71,6 @@ import org.eclipse.objectteams.otdt.internal.core.compiler.model.RoleModel;
 import org.eclipse.objectteams.otdt.internal.core.compiler.statemachine.transformer.MethodSignatureEnhancer;
 import org.eclipse.objectteams.otdt.internal.core.compiler.util.AstClone;
 import org.eclipse.objectteams.otdt.internal.core.compiler.util.AstEdit;
-import org.eclipse.objectteams.otdt.internal.core.compiler.util.AstGenerator;
 import org.eclipse.objectteams.otdt.internal.core.compiler.util.TypeAnalyzer;
 
 /**
@@ -6198,13 +6197,6 @@ protected void consumeMethodHeaderRightParen() {
 			}
 		}
 	}
-//{ObjectTeams: enhance callin method:
-	if (md.isCallin()) {
-		AstGenerator gen = new AstGenerator(md.sourceEnd+1, md.sourceEnd+2);
-		md.arguments = MethodSignatureEnhancer.enhanceArguments(
-								md.arguments, new char[0], /*isWrapper*/false, gen);
-	}
-// SH}
 	md.bodyStart = this.rParenPos+1;
 	this.listLength = 0; // reset this.listLength after having read all parameters
 	// recovery
@@ -7102,7 +7094,7 @@ private void consumePredicate(boolean isBase) {
 			arguments = new Argument[] {targetArg};
 		else
 			arguments = makePredicateArguments(
-						null, MethodSignatureEnhancer.maybeRetrenchArguments(methodDecl), null, poss);
+						null, MethodSignatureEnhancer.maybeRetrenchArguments(methodDecl, this.options.weavingScheme), null, poss);
 	} else if (this.astStack[this.astPtr] instanceof MethodSpec) {
 		bmSpec = (MethodSpec)this.astStack[this.astPtr];
 		mappingDecl = (CallinMappingDeclaration)this.astStack[this.astPtr-this.astLengthStack[this.astLengthPtr]];

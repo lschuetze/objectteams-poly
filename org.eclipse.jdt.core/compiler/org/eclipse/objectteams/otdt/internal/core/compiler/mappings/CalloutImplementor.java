@@ -44,6 +44,7 @@ import org.eclipse.jdt.internal.compiler.ast.ThisReference;
 import org.eclipse.jdt.internal.compiler.ast.TypeDeclaration;
 import org.eclipse.jdt.internal.compiler.ast.AbstractMethodDeclaration.WrapperKind;
 import org.eclipse.jdt.internal.compiler.ast.Expression.DecapsulationState;
+import org.eclipse.jdt.internal.compiler.impl.CompilerOptions.WeavingScheme;
 import org.eclipse.jdt.internal.compiler.lookup.Binding;
 import org.eclipse.jdt.internal.compiler.lookup.ExtraCompilerModifiers;
 import org.eclipse.jdt.internal.compiler.lookup.FieldBinding;
@@ -122,7 +123,6 @@ public class CalloutImplementor extends MethodMappingImplementor
 	private static final int INTERFACE = 0;
 	private static final int CLASS = 1;
 
-	private RoleModel _role;
 
 	/**
 	 * Generates a callout method for every callout mapping in the given RoleModel.
@@ -142,7 +142,7 @@ public class CalloutImplementor extends MethodMappingImplementor
 
 	public CalloutImplementor(RoleModel role)
 	{
-		this._role = role;
+		super(role);
 	    this.bindingDirection = TerminalTokens.TokenNameBINDOUT;
 	}
 
@@ -591,7 +591,7 @@ public class CalloutImplementor extends MethodMappingImplementor
 						else
 							baseAccess = gen.qualifiedNameReference(new char[][] {IOTConstants._OT_BASE, baseField.name });
 						if (fieldSpec.isSetter()) {
-							int pos = (fieldSpec.isStatic() | CallinImplementorDyn.DYNAMIC_WEAVING) ? 0 : 1;
+							int pos = (fieldSpec.isStatic() | this._role.getWeavingScheme() == WeavingScheme.OTDRE) ? 0 : 1;
 							baseAccess = gen.assignment((NameReference)baseAccess, arguments[pos]);
 							returnType = TypeBinding.VOID; // signal that no result processing is necessary
 						}
@@ -678,7 +678,7 @@ public class CalloutImplementor extends MethodMappingImplementor
 				minArguments = 1;
 			else
 				minArguments = 0;
-        	if (!baseMethodSpec.isStatic() && !CallinImplementorDyn.DYNAMIC_WEAVING) { // OTREDyn uses non-static accessor for non-static fields
+        	if (!baseMethodSpec.isStatic() && this._role.getWeavingScheme() == WeavingScheme.OTRE) { // OTREDyn uses non-static accessor for non-static fields
         		arguments = new Expression[minArguments+1];
 	        	// cast needed against weakened _OT$base reference
         		//   and if base is a role, to go to the class type (FIXME)

@@ -29,6 +29,7 @@ import org.eclipse.jdt.internal.compiler.ast.TypeDeclaration;
 import org.eclipse.jdt.internal.compiler.ast.TypeReference;
 import org.eclipse.jdt.internal.compiler.ast.Wildcard;
 import org.eclipse.jdt.internal.compiler.classfmt.ClassFileConstants;
+import org.eclipse.jdt.internal.compiler.impl.CompilerOptions.WeavingScheme;
 import org.eclipse.jdt.internal.compiler.lookup.MethodBinding;
 import org.eclipse.jdt.internal.compiler.lookup.ParameterizedTypeBinding;
 import org.eclipse.jdt.internal.compiler.lookup.ReferenceBinding;
@@ -37,7 +38,6 @@ import org.eclipse.jdt.internal.compiler.lookup.TypeConstants;
 import org.eclipse.objectteams.otdt.core.compiler.IOTConstants;
 import org.eclipse.objectteams.otdt.core.exceptions.InternalCompilerError;
 import org.eclipse.objectteams.otdt.internal.core.compiler.control.StateMemento;
-import org.eclipse.objectteams.otdt.internal.core.compiler.mappings.CallinImplementorDyn;
 import org.eclipse.objectteams.otdt.internal.core.compiler.util.AstEdit;
 import org.eclipse.objectteams.otdt.internal.core.compiler.util.AstGenerator;
 import org.eclipse.objectteams.otdt.internal.core.compiler.util.TypeAnalyzer;
@@ -158,7 +158,7 @@ public class SerializationGenerator {
 				    		}),
 				    	// ((IBoundBase)base)._OT$addRole(castedRole);
 				    	// OTDYN: Slightly different methods depending on the weaving strategy:
-				    	CallinImplementorDyn.DYNAMIC_WEAVING 
+				    	teamType.scope.compilerOptions().weavingScheme == WeavingScheme.OTDRE
 				    	 ? gen.messageSend(
 				    		gen.castExpression(gen.singleNameReference(IOTConstants.BASE), 
 				    						   gen.qualifiedTypeReference(IOTConstants.ORG_OBJECTTEAMS_IBOUNDBASE), CastExpression.RAW),

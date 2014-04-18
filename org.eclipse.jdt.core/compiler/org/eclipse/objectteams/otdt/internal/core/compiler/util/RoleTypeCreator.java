@@ -29,6 +29,7 @@ import org.eclipse.jdt.internal.compiler.ast.*;
 import org.eclipse.jdt.internal.compiler.ast.Expression.DecapsulationState;
 import org.eclipse.jdt.internal.compiler.classfmt.ClassFileConstants;
 import org.eclipse.jdt.internal.compiler.impl.ReferenceContext;
+import org.eclipse.jdt.internal.compiler.impl.CompilerOptions.WeavingScheme;
 import org.eclipse.jdt.internal.compiler.lookup.*;
 import org.eclipse.jdt.internal.compiler.parser.TerminalTokens;
 import org.eclipse.jdt.internal.compiler.problem.ProblemReporter;
@@ -335,7 +336,7 @@ public class RoleTypeCreator implements TagBits {
 		            else
 		            	returnType = roleReturn;
 		        }
-		        if (CallinImplementorDyn.DYNAMIC_WEAVING) {
+		        if (scope.compilerOptions().weavingScheme == WeavingScheme.OTDRE) {
 			        if (CallinImplementorDyn.avoidWrapRoleType(scope, send.receiver))
 		    			// don't use synthetic local$role$n as additional anchor
 		    			return returnType;		        	
@@ -488,7 +489,7 @@ public class RoleTypeCreator implements TagBits {
 	    		&& methodScope.referenceMethod() != null
 	    		&& methodScope.referenceMethod().isMappingWrapper._callin()
 //{OTDyn
-	    		&& !CallinImplementorDyn.DYNAMIC_WEAVING) // this heuristic doesn't work for dyn weaving, FIXME(SH): check if still needed!
+	    		&& scope.compilerOptions().weavingScheme == WeavingScheme.OTRE) // this heuristic doesn't work for dyn weaving, FIXME(SH): check if still needed!
 // SH}
 	    	{
 	    		// in a callin wrapper, for visibility reasons, pretend we are in the

@@ -28,12 +28,12 @@ import org.eclipse.jdt.internal.compiler.ast.Expression;
 import org.eclipse.jdt.internal.compiler.ast.MethodDeclaration;
 import org.eclipse.jdt.internal.compiler.ast.TypeReference;
 import org.eclipse.jdt.internal.compiler.classfmt.ClassFileConstants;
+import org.eclipse.jdt.internal.compiler.impl.CompilerOptions.WeavingScheme;
 import org.eclipse.jdt.internal.compiler.lookup.LookupEnvironment;
 import org.eclipse.jdt.internal.compiler.lookup.Scope;
 import org.eclipse.jdt.internal.compiler.lookup.TypeBinding;
 import org.eclipse.jdt.internal.compiler.lookup.TypeConstants;
 import org.eclipse.objectteams.otdt.core.compiler.IOTConstants;
-import org.eclipse.objectteams.otdt.internal.core.compiler.mappings.CallinImplementorDyn;
 import org.eclipse.objectteams.otdt.internal.core.compiler.model.MethodModel;
 import org.eclipse.objectteams.otdt.internal.core.compiler.util.AstGenerator;
 
@@ -75,23 +75,34 @@ import org.eclipse.objectteams.otdt.internal.core.compiler.util.AstGenerator;
 public class MethodSignatureEnhancer implements IOTConstants, TypeConstants, ClassFileConstants
 {
 	
-	private static final char[] OBJECT_SIGNATURE = "Ljava/lang/Object;".toCharArray();
+	private final static char[] OBJECT_SIGNATURE = "Ljava/lang/Object;".toCharArray();
 
 	/**
 	 * Names for arguments in enhanced signature used for passing runtime meta-information to the wrapper/role method.
 	 */
-	private final static char[][] ENHANCING_ARG_NAMES;
+	private final char[][] ENHANCING_ARG_NAMES;
+
 
 	/** Length of the sublist of enhancing arguments. */
-	public final static int ENHANCING_ARG_LEN;
-	public final static char[] UNUSED_ARGS;
+	public final int ENHANCING_ARG_LEN;
+	public final char[] UNUSED_ARGS;
+	
+	public static MethodSignatureEnhancer[] variants = new MethodSignatureEnhancer[WeavingScheme.values().length];
+	
+	private WeavingScheme weavingScheme;
+
 // {OT/JamVM support:
 	private static final boolean JAMVM_ASPECTBI = System.getProperty("ot.jamvm.aspectBI") != null;
 // CH}
 //{OTDyn: make constants configurable:
 	static {
-		if (CallinImplementorDyn.DYNAMIC_WEAVING) {
-			ENHANCING_ARG_NAMES = new char[][] {
+		for(WeavingScheme scheme : WeavingScheme.values())
+			variants[scheme.ordinal()] = new MethodSignatureEnhancer(scheme);
+	}
+	private MethodSignatureEnhancer(WeavingScheme weavingScheme) {
+		this.weavingScheme = weavingScheme;
+		if (weavingScheme == WeavingScheme.OTDRE) {
+			this.ENHANCING_ARG_NAMES = new char[][] {
 					"_OT$baseArg".toCharArray(), 
 					"_OT$teams".toCharArray(), 
 					"_OT$index".toCharArray(),
@@ -100,14 +111,14 @@ public class MethodSignatureEnhancer implements IOTConstants, TypeConstants, Cla
 					"_OT$args".toCharArray()};
   // {OT/JamVM support:
 		} else if (JAMVM_ASPECTBI) {
-			ENHANCING_ARG_NAMES = new char[][] {
+			this.ENHANCING_ARG_NAMES = new char[][] {
 					"_OT$teamIterator".toCharArray(),
 					"_OT$bindIdx".toCharArray(),
 					"_OT$baseMethodTag".toCharArray(),
 					"_OT$unusedArgs".toCharArray() };
   // CH}
 		} else {
-			ENHANCING_ARG_NAMES = new char[][] {
+			this.ENHANCING_ARG_NAMES = new char[][] {
 					"_OT$teams".toCharArray(),
 					"_OT$teamIDs".toCharArray(),
 					"_OT$idx".toCharArray(),
@@ -115,15 +126,15 @@ public class MethodSignatureEnhancer implements IOTConstants, TypeConstants, Cla
 					"_OT$baseMethodTag".toCharArray(),
 					"_OT$unusedArgs".toCharArray() };
 		}
-		ENHANCING_ARG_LEN = ENHANCING_ARG_NAMES.length;
-		UNUSED_ARGS = ENHANCING_ARG_NAMES[ENHANCING_ARG_LEN-1];
+		this.ENHANCING_ARG_LEN = this.ENHANCING_ARG_NAMES.length;
+		this.UNUSED_ARGS = this.ENHANCING_ARG_NAMES[this.ENHANCING_ARG_LEN-1];
 	}
 // SH}
 	
 	/** Get Typebindings for all enhancing arguments. */
 	private static TypeBinding[] getEnhancingArgTypes (Scope scope) {
 //{OTDyn: configurable:
-		if (CallinImplementorDyn.DYNAMIC_WEAVING)
+		if (scope.compilerOptions().weavingScheme == WeavingScheme.OTDRE)
 			return new TypeBinding[] {
 				scope.getType(IOTConstants.ORG_OBJECTTEAMS_IBOUNDBASE, 3), 	// _OT$baseArg
 				scope.createArrayType(scope.getOrgObjectteamsITeam(), 1),  	// _OT$teams
@@ -164,14 +175,19 @@ public class MethodSignatureEnhancer implements IOTConstants, TypeConstants, Cla
 	 * @return a new array of args
 	 */
 	public static Argument[] enhanceArguments(
+			Argument[] arguments, char[] namePrefix, boolean isWrapper, AstGenerator gen, WeavingScheme weavingScheme)
+	{
+		return variants[weavingScheme.ordinal()].internalEnhanceArguments(arguments, namePrefix, isWrapper, gen);
+	}
+	private Argument[] internalEnhanceArguments(
 			Argument[] arguments, char[] namePrefix, boolean isWrapper, AstGenerator gen)
 	{
-		int fullLen = ENHANCING_ARG_LEN;
+		int fullLen = this.ENHANCING_ARG_LEN;
 		if (arguments != null) fullLen += arguments.length; // source arguments?
 		Argument[] newArgs = new Argument[fullLen];
 		TypeReference[] enhanceTypes = 
 //{OTDyn: configurable:
-			CallinImplementorDyn.DYNAMIC_WEAVING 
+			this.weavingScheme == WeavingScheme.OTDRE
 			? new TypeReference[] {
 					gen.qualifiedTypeReference(ORG_OBJECTTEAMS_IBOUNDBASE),		// _OT$baseArg
 					gen.qualifiedArrayTypeReference(ORG_OBJECTTEAMS_ITEAM, 1),	// _OT$teams
@@ -203,33 +219,37 @@ public class MethodSignatureEnhancer implements IOTConstants, TypeConstants, Cla
 		if (isWrapper && arguments != null)
 			newArgs[prefixLen++] = arguments[0];
 		// enhancing args:
-		for (int i=0; i<ENHANCING_ARG_LEN; i++)
+		for (int i=0; i<this.ENHANCING_ARG_LEN; i++)
 			newArgs[i+prefixLen] = gen.argument(
-					CharOperation.concat(namePrefix, ENHANCING_ARG_NAMES[i]),
+					CharOperation.concat(namePrefix, this.ENHANCING_ARG_NAMES[i]),
 					enhanceTypes[i], AccFinal);
 		// source args:
 		if (arguments != null)
 			System.arraycopy(arguments, prefixLen,
-							 newArgs, ENHANCING_ARG_LEN+prefixLen, arguments.length-prefixLen);
+							 newArgs, this.ENHANCING_ARG_LEN+prefixLen, arguments.length-prefixLen);
 
 		return newArgs;
 	}
 
 	/** Enhance the arguments of a base call or self-call within callin. */
-	public static Expression[] enhanceArguments(Expression[] arguments, int pos)
+	public static Expression[] enhanceArguments(Expression[] arguments, int pos, WeavingScheme weavingScheme)
+	{
+		return variants[weavingScheme.ordinal()].internalEnhanceArguments(arguments, pos);
+	}
+	private Expression[] internalEnhanceArguments(Expression[] arguments, int pos)
 	{
 		AstGenerator gen = new AstGenerator(pos, pos);
-		int fullLen = ENHANCING_ARG_LEN;					// enhancing arguments
+		int fullLen = this.ENHANCING_ARG_LEN;					// enhancing arguments
 		if (arguments != null) fullLen += arguments.length; // source arguments?
 
 		Expression[] enhancedArgs = new Expression[fullLen];
 
 		// enhancing arguments:
-		for (int i = 0; i < ENHANCING_ARG_LEN; i++)
-			enhancedArgs[i] = gen.singleNameReference(ENHANCING_ARG_NAMES[i]);
+		for (int i = 0; i < this.ENHANCING_ARG_LEN; i++)
+			enhancedArgs[i] = gen.singleNameReference(this.ENHANCING_ARG_NAMES[i]);
 		// source arguments?
 		if (arguments != null )
-			System.arraycopy(arguments, 0, enhancedArgs, ENHANCING_ARG_LEN, arguments.length);
+			System.arraycopy(arguments, 0, enhancedArgs, this.ENHANCING_ARG_LEN, arguments.length);
 
 		return enhancedArgs;
 	}
@@ -244,17 +264,21 @@ public class MethodSignatureEnhancer implements IOTConstants, TypeConstants, Cla
 	 */
 	public static TypeBinding[] enhanceParameters(Scope scope, TypeBinding[] parameters)
 	{
-		int fullLen = parameters.length + ENHANCING_ARG_LEN;
+		return variants[scope.compilerOptions().weavingScheme.ordinal()].internalEnhanceParameters(scope, parameters);
+	}
+	private TypeBinding[] internalEnhanceParameters(Scope scope, TypeBinding[] parameters)
+	{
+		int fullLen = parameters.length + this.ENHANCING_ARG_LEN;
 
 		TypeBinding[] newParameters = new TypeBinding[fullLen];
 		// enhancing parameters:
 		System.arraycopy(
 				getEnhancingArgTypes(scope), 0,
-				newParameters, 0, ENHANCING_ARG_LEN);
+				newParameters, 0, this.ENHANCING_ARG_LEN);
 		// source parameters:
 		System.arraycopy(
 				parameters, 0,
-				newParameters, ENHANCING_ARG_LEN, parameters.length);
+				newParameters, this.ENHANCING_ARG_LEN, parameters.length);
 
 		return newParameters;
 	}
@@ -331,42 +355,48 @@ public class MethodSignatureEnhancer implements IOTConstants, TypeConstants, Cla
 	}
 
 	/** If methodDecl is a callin method return just its source-level arguments. */
-	public static Argument[] maybeRetrenchArguments(MethodDeclaration methodDecl) {
+	public static Argument[] maybeRetrenchArguments(MethodDeclaration methodDecl, WeavingScheme weavingScheme) {
+		return variants[weavingScheme.ordinal()].internalMaybeRetrenchArguments(methodDecl);
+	}
+	private Argument[] internalMaybeRetrenchArguments(MethodDeclaration methodDecl) {
 		if (!methodDecl.isCallin())
 			return methodDecl.arguments;
 		int len = methodDecl.arguments.length;
-		Argument[] result = new Argument[len-ENHANCING_ARG_LEN];
-		System.arraycopy(methodDecl.arguments, ENHANCING_ARG_LEN, result, 0, result.length);
+		Argument[] result = new Argument[len-this.ENHANCING_ARG_LEN];
+		System.arraycopy(methodDecl.arguments, this.ENHANCING_ARG_LEN, result, 0, result.length);
 		return result;
 	}
 
-	public static Expression[] retrenchBasecallArguments(Expression[] arguments, boolean isEnhanced) {
+	public static Expression[] retrenchBasecallArguments(Expression[] arguments, boolean isEnhanced, WeavingScheme weavingScheme) {
+		return variants[weavingScheme.ordinal()].internalRetrenchBasecallArguments(arguments, isEnhanced);
+	}
+	private Expression[] internalRetrenchBasecallArguments(Expression[] arguments, boolean isEnhanced) {
 		if (arguments == null) return null;
 		int len = arguments.length;
-		int discard = CallinImplementorDyn.DYNAMIC_WEAVING ? 0 : 1; // isSuperAccess (unconditionally) // FIXME(OTDYN) must handle super flag?
+		int discard = this.weavingScheme == WeavingScheme.OTDRE ? 0 : 1; // isSuperAccess (unconditionally) // FIXME(OTDYN) must handle super flag?
 		if (isEnhanced)  // if TransformStatementsVisitor has modified this node
-			discard += ENHANCING_ARG_LEN;
+			discard += this.ENHANCING_ARG_LEN;
 		Expression[] result = new Expression[len-discard];
 		System.arraycopy(arguments, discard, result, 0, result.length);
 		return result;
 	}
 
-	public static TypeBinding[] retrenchParameterTypes(TypeBinding[] parameters) {
+	public TypeBinding[] retrenchParameterTypes(TypeBinding[] parameters) {
 		if (parameters == null) return null;
 		int len = parameters.length;
-		if (len >= ENHANCING_ARG_LEN) {
-			TypeBinding[] result = new TypeBinding[len-ENHANCING_ARG_LEN];
-			System.arraycopy(parameters, ENHANCING_ARG_LEN, result, 0, result.length);
+		if (len >= this.ENHANCING_ARG_LEN) {
+			TypeBinding[] result = new TypeBinding[len-this.ENHANCING_ARG_LEN];
+			System.arraycopy(parameters, this.ENHANCING_ARG_LEN, result, 0, result.length);
 			return result;
 		}
 		return parameters;
 	}
 
-	public static void beautifyTypesString(StringBuffer types, boolean makeShort) {
+	public static void beautifyTypesString(StringBuffer types, boolean makeShort, WeavingScheme weavingScheme) {
 		String typeString = types.toString();
 		String prefix =
 //{OTDyn: configurable:
-			CallinImplementorDyn.DYNAMIC_WEAVING 
+			weavingScheme == WeavingScheme.OTDRE 
 			? (makeShort 
 				? "IBoundBase, ITeam[], int, int[], int, Object[]"
 				: "org.objectteams.IBoundBase, org.objectteams.ITeam[], int, int[] int, java.lang.Object[]))")
@@ -387,17 +417,27 @@ public class MethodSignatureEnhancer implements IOTConstants, TypeConstants, Cla
 		}
 	}
 
+	public static Argument[] getSourceArguments(AbstractMethodDeclaration methodDeclaration, WeavingScheme weavingScheme) {
+		return variants[weavingScheme.ordinal()].internalGetSourceArguments(methodDeclaration);
+	}
 	public static Argument[] getSourceArguments(AbstractMethodDeclaration methodDeclaration) {
+		WeavingScheme weavingScheme = WeavingScheme.OTRE; // "default" just to avoid null
+		if (methodDeclaration.scope != null) {
+			weavingScheme = methodDeclaration.scope.compilerOptions().weavingScheme;
+		}
+		return variants[weavingScheme.ordinal()].internalGetSourceArguments(methodDeclaration);
+	}
+	private Argument[] internalGetSourceArguments(AbstractMethodDeclaration methodDeclaration) {
 		Argument[] arguments = methodDeclaration.arguments;
 		if (methodDeclaration.isCallin()) {
 			assert arguments != null;
-			int len = arguments.length - ENHANCING_ARG_LEN;
+			int len = arguments.length - this.ENHANCING_ARG_LEN;
 			assert len >= 0;
 			if (len == 0)
 				arguments = null;
 			else
 				System.arraycopy(
-					arguments, ENHANCING_ARG_LEN,
+					arguments, this.ENHANCING_ARG_LEN,
 					arguments = new Argument[len], 0, len);
 		} else if (CharOperation.prefixEquals(IOTConstants.BASE_PREDICATE_PREFIX, methodDeclaration.selector)) {
 			// hide base arg of base predicate (has dummy type after parsing):
@@ -406,14 +446,21 @@ public class MethodSignatureEnhancer implements IOTConstants, TypeConstants, Cla
 		return arguments;
 	}
 
-	public static boolean isEnhanced(AbstractMethodDeclaration methodDeclaration) {
+	public static boolean isEnhanced(AbstractMethodDeclaration methodDeclaration, WeavingScheme weavingScheme) {
+		return variants[weavingScheme.ordinal()].internalIsEnhanced(methodDeclaration);
+	}
+	private boolean internalIsEnhanced(AbstractMethodDeclaration methodDeclaration) {
 		Argument[] arguments = methodDeclaration.arguments;
-		if (arguments == null || arguments.length < ENHANCING_ARG_LEN)
+		if (arguments == null || arguments.length < this.ENHANCING_ARG_LEN)
 			return false;
-		for (int i = 0; i < ENHANCING_ARG_LEN; i++) {
-			if (!CharOperation.endsWith(arguments[i].name, ENHANCING_ARG_NAMES[i]))
+		for (int i = 0; i < this.ENHANCING_ARG_LEN; i++) {
+			if (!CharOperation.endsWith(arguments[i].name, this.ENHANCING_ARG_NAMES[i]))
 				return false;
 		}
 		return true;
+	}
+
+	public static int getEnhancingArgLen(WeavingScheme weavingScheme) {
+		return variants[weavingScheme.ordinal()].ENHANCING_ARG_LEN;
 	}
 }

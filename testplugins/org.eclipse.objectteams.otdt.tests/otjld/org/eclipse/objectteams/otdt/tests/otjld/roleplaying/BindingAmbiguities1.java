@@ -20,6 +20,7 @@ package org.eclipse.objectteams.otdt.tests.otjld.roleplaying;
 import java.util.Map;
 
 import org.eclipse.jdt.internal.compiler.impl.CompilerOptions;
+import org.eclipse.jdt.internal.compiler.impl.CompilerOptions.WeavingScheme;
 import org.eclipse.objectteams.otdt.internal.core.compiler.mappings.CallinImplementorDyn;
 import org.eclipse.objectteams.otdt.tests.otjld.AbstractOTJLDTest;
 
@@ -1025,7 +1026,7 @@ public class BindingAmbiguities1 extends AbstractOTJLDTest {
      public void test731_ambiguousBinding8e() {
          Map options = getCompilerOptions();
          options.put(CompilerOptions.OPTION_ReportMissingOverrideAnnotation, CompilerOptions.DISABLED);
-         boolean isOTdyn = CallinImplementorDyn.DYNAMIC_WEAVING;
+         boolean isOTdyn = this.weavingScheme == WeavingScheme.OTDRE;
         runNegativeTest(
              new String[] {
 		"T731ab8e_3.java",

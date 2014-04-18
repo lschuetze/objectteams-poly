@@ -39,6 +39,7 @@ import org.eclipse.jdt.internal.compiler.ast.ReturnStatement;
 import org.eclipse.jdt.internal.compiler.ast.Statement;
 import org.eclipse.jdt.internal.compiler.ast.ThisReference;
 import org.eclipse.jdt.internal.compiler.ast.TypeDeclaration;
+import org.eclipse.jdt.internal.compiler.impl.CompilerOptions.WeavingScheme;
 import org.eclipse.jdt.internal.compiler.lookup.Binding;
 import org.eclipse.jdt.internal.compiler.lookup.MethodBinding;
 import org.eclipse.jdt.internal.compiler.lookup.ReferenceBinding;
@@ -50,7 +51,6 @@ import org.eclipse.objectteams.otdt.internal.core.compiler.ast.GuardPredicateDec
 import org.eclipse.objectteams.otdt.internal.core.compiler.ast.MethodSpec;
 import org.eclipse.objectteams.otdt.internal.core.compiler.control.Config;
 import org.eclipse.objectteams.otdt.internal.core.compiler.lookup.CallinCalloutScope;
-import org.eclipse.objectteams.otdt.internal.core.compiler.mappings.CallinImplementorDyn;
 import org.eclipse.objectteams.otdt.internal.core.compiler.model.RoleModel;
 import org.eclipse.objectteams.otdt.internal.core.compiler.util.AstGenerator;
 import org.eclipse.objectteams.otdt.internal.core.compiler.util.TSuperHelper;
@@ -338,8 +338,11 @@ public class PredicateGenerator extends SwitchOnBaseTypeGenerator
 	private Expression baseReference(char[] baseVarName, ReferenceBinding roleType, AstGenerator gen) {
 		Expression result= gen.singleNameReference(baseVarName);
 		if (roleType != null) {
+			WeavingScheme weavingScheme = WeavingScheme.OTRE;
+			if (roleType.roleModel != null)
+				weavingScheme = roleType.roleModel.getWeavingScheme();
 			if (   TypeBinding.notEquals(roleType.baseclass(), this._currentRole.baseclass())
-				|| CallinImplementorDyn.DYNAMIC_WEAVING) // under OTREDyn base is passed as IBoundBase => always need to cast.
+				|| weavingScheme == WeavingScheme.OTDRE) // under OTREDyn base is passed as IBoundBase => always need to cast.
 			{
 				result= gen.castExpression(result, gen.baseTypeReference(roleType.baseclass()), CastExpression.RAW);
 			}	

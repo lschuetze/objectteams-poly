@@ -48,6 +48,7 @@ import org.eclipse.jdt.internal.compiler.codegen.Opcodes;
 import org.eclipse.jdt.internal.compiler.flow.FlowContext;
 import org.eclipse.jdt.internal.compiler.flow.FlowInfo;
 import org.eclipse.jdt.internal.compiler.impl.CompilerOptions;
+import org.eclipse.jdt.internal.compiler.impl.CompilerOptions.WeavingScheme;
 import org.eclipse.jdt.internal.compiler.impl.Constant;
 import org.eclipse.jdt.internal.compiler.lookup.Binding;
 import org.eclipse.jdt.internal.compiler.lookup.BlockScope;
@@ -70,7 +71,6 @@ import org.eclipse.objectteams.otdt.internal.core.compiler.ast.OTQualifiedAlloca
 import org.eclipse.objectteams.otdt.internal.core.compiler.control.Dependencies;
 import org.eclipse.objectteams.otdt.internal.core.compiler.control.ITranslationStates;
 import org.eclipse.objectteams.otdt.internal.core.compiler.lookup.AnchorMapping;
-import org.eclipse.objectteams.otdt.internal.core.compiler.mappings.CallinImplementorDyn;
 import org.eclipse.objectteams.otdt.internal.core.compiler.util.RoleTypeCreator;
 
 
@@ -606,7 +606,7 @@ public static abstract class AbstractQualifiedAllocationExpression extends Alloc
 				  this.binding = ((ProblemMethodBinding)this.binding).closestMatch;
 				  int accessId = scope.enclosingSourceType().roleModel.addInaccessibleBaseMethod(this.binding);
 				  scope.problemReporter().decapsulation(this, scope);
-				  if (CallinImplementorDyn.DYNAMIC_WEAVING) {
+				  if (scope.compilerOptions().weavingScheme == WeavingScheme.OTDRE) {
 					  this.resolvedType = allocationType;
 					  throw new ConstructorDecapsulationException(accessId);
 				  }

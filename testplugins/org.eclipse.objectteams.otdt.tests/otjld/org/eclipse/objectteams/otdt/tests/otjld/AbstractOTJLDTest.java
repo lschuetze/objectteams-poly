@@ -22,8 +22,10 @@ import java.net.URL;
 import java.util.Map;
 
 import org.eclipse.core.runtime.FileLocator;
+import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.Path;
 import org.eclipse.core.runtime.Platform;
+import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.tests.compiler.regression.AbstractComparableTest;
 import org.eclipse.jdt.core.tests.compiler.regression.InMemoryNameEnvironment;
 import org.eclipse.jdt.core.tests.compiler.regression.RegressionTestSetup;
@@ -36,6 +38,10 @@ import org.eclipse.jdt.internal.compiler.batch.FileSystem;
 import org.eclipse.jdt.internal.compiler.classfmt.ClassFileConstants;
 import org.eclipse.jdt.internal.compiler.env.INameEnvironment;
 import org.eclipse.jdt.internal.compiler.impl.CompilerOptions;
+import org.eclipse.jdt.internal.compiler.impl.CompilerOptions.WeavingScheme;
+import org.eclipse.objectteams.otdt.core.ext.OTDTPlugin;
+import org.eclipse.objectteams.otdt.core.ext.OTREContainer;
+import org.eclipse.objectteams.otdt.internal.core.compiler.mappings.CallinImplementorDyn;
 import org.eclipse.objectteams.otdt.tests.ClasspathUtil;
 
 /**
@@ -45,10 +51,10 @@ import org.eclipse.objectteams.otdt.tests.ClasspathUtil;
 public class AbstractOTJLDTest extends AbstractComparableTest {
 
 	/** a test verifier that allows reusing a running vm even in the presence of (constant) vm arguments. */
-	protected static class OTTestVerifier extends TestVerifier {
+	protected class OTTestVerifier extends TestVerifier {
 		protected OTTestVerifier(boolean reuseVM) {
 			super(reuseVM);
-			this.fVMArguments = OT_VM_ARGS;
+			this.fVMArguments = getOTVMArgs();
 		}
 		@Override
 		public boolean verifyClassFiles(String sourceFilePath, String className, String expectedOutputString, String expectedErrorStringStart, 
@@ -61,24 +67,44 @@ public class AbstractOTJLDTest extends AbstractComparableTest {
 			return super.vmArgsEqual(mergeArgs(newArgs));
 		}
 		protected String[] mergeArgs(String[] newArgs) {
+			String[] OTVMArgs = getOTVMArgs();
 			if (newArgs == null)
-				return OT_VM_ARGS;
+				return OTVMArgs;
 			else {
-				int l1 = OT_VM_ARGS.length;
+				int l1 = OTVMArgs.length;
 				int l2 = newArgs.length;
 				String[] result = new String[l1+l2];
-				System.arraycopy(OT_VM_ARGS, 0, result, 0, l1);
+				System.arraycopy(OTVMArgs, 0, result, 0, l1);
 				System.arraycopy(newArgs, 0, result, l1, l2);
 				return result;
 			}
 		}
 	}
 	
-	public static final String[] OT_VM_ARGS = new String[] {
-			"-javaagent:"+ClasspathUtil.OTAGENT_JAR_PATH,
-			"-Xbootclasspath/a:"+ClasspathUtil.OTRE_MIN_JAR_PATH,
-			"-Dot.dump=1"
+	private static String getOTDTJarPath(String jarName) {
+		return ClasspathUtil.OTDT_PATH + File.separator + "lib" + File.separator + jarName + ".jar";
+	}
+	
+	public String[] getOTVMArgs() {
+		String OTRE_MIN_JAR_PATH, OTAGENT_JAR_PATH;
+		switch (this.weavingScheme) {
+		case OTDRE:
+			OTRE_MIN_JAR_PATH 		= getOTDTJarPath("otredyn_min");
+			OTAGENT_JAR_PATH  		= getOTDTJarPath("otredyn_agent");
+			break;
+		case OTRE:
+			OTRE_MIN_JAR_PATH 		= getOTDTJarPath("otre_min");
+			OTAGENT_JAR_PATH  		= getOTDTJarPath("otre_agent");
+			break;
+		default:
+			throw new IllegalStateException("Unsupported weavingScheme "+this.weavingScheme);
+		}
+		return new String[] {
+				"-javaagent:"+OTAGENT_JAR_PATH,
+				"-Xbootclasspath/a:"+OTRE_MIN_JAR_PATH,
+				"-Dot.dump=1"
 		};
+	}
 	
 	public static boolean IS_JRE_8;
 	static {
@@ -108,6 +134,8 @@ public class AbstractOTJLDTest extends AbstractComparableTest {
 	// each subarray defines a set of classes to be compiled together:
 	protected String[][] compileOrder;
 	
+	protected WeavingScheme weavingScheme = WeavingScheme.OTRE;
+	
 	public AbstractOTJLDTest(String name) {
 		super(name);
 	}
@@ -128,6 +156,8 @@ public class AbstractOTJLDTest extends AbstractComparableTest {
 	@Override
 	public void initialize(CompilerTestSetup setUp) {
 		super.initialize(setUp);
+		if ("dynamic".equals(System.getProperty("ot.weaving")))
+			weavingScheme = WeavingScheme.OTDRE;
 		if (setUp instanceof RegressionTestSetup) {
 			RegressionTestSetup regressionSetTup = (RegressionTestSetup) setUp;
 			if (!(regressionSetTup.verifier instanceof OTTestVerifier)) {
@@ -155,6 +185,7 @@ public class AbstractOTJLDTest extends AbstractComparableTest {
 		options.put(CompilerOptions.OPTION_ReportUnnecessaryElse, CompilerOptions.IGNORE);
 		options.put(CompilerOptions.OPTION_ReportSyntheticAccessEmulation, CompilerOptions.IGNORE);
 		options.put(CompilerOptions.OPTION_ReportUnusedWarningToken, CompilerOptions.ERROR);
+		options.put(CompilerOptions.OPTION_WeavingScheme, this.weavingScheme.toString());
 		return options;
 	}
 	

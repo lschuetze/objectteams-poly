@@ -140,7 +140,7 @@ public class AnchorMapping {
    	   	   scope = this._scope; // scope would be more specific but _scope is OK, too.
        TypeBinding[] newParams = null;
        boolean isMethodEnhanced = currentMethod != null && currentMethod.isCallin();
-       int start = isMethodEnhanced ? MethodSignatureEnhancer.ENHANCING_ARG_LEN : 0; // don't map enhancement args, have no source expr.
+       int start = isMethodEnhanced ? this._methodSignatureEnhancer.ENHANCING_ARG_LEN : 0; // don't map enhancement args, have no source expr.
        for (int i=start; i<parameters.length; i++)
        {
     	   TypeBinding newParameter = instantiateParameter(scope, parameters[i], i, currentMethod, isMethodEnhanced);
@@ -163,7 +163,7 @@ public class AnchorMapping {
 			   	new IDependentTypeSubstitution() {
 					@SuppressWarnings("synthetic-access")
 					public TypeBinding substitute(DependentTypeBinding paramDependentType, TypeBinding[] typeArguments, int dimensions) {
-						int srcIdx = isMethodEnhanced ? i-MethodSignatureEnhancer.ENHANCING_ARG_LEN : i;
+						int srcIdx = isMethodEnhanced ? (i - AnchorMapping.this._methodSignatureEnhancer.ENHANCING_ARG_LEN) : i;
 						ITeamAnchor anchor = null;
 						if (AnchorMapping.this._arguments != null)
 							anchor = translateAnchor(scope, AnchorMapping.this._arguments[srcIdx], paramDependentType, currentMethod);
@@ -340,6 +340,7 @@ public class AnchorMapping {
     private Scope        _scope     = null;
     private HashMap<MethodBinding,TypeBinding[]> _instantiatedParameters = new HashMap<MethodBinding, TypeBinding[]>();
     private boolean       _allowInstantiation = true;
+	private MethodSignatureEnhancer _methodSignatureEnhancer;
 
     private AnchorMapping(Expression receiver, Statement[] arguments, Scope scope)
     {
@@ -348,6 +349,7 @@ public class AnchorMapping {
         if (this._receiver instanceof ArrayReference)
         	this._receiver = ((ArrayReference)this._receiver).receiver;
         this._scope     = scope;
+        this._methodSignatureEnhancer = MethodSignatureEnhancer.variants[scope.compilerOptions().weavingScheme.ordinal()];
     }
 
     /**

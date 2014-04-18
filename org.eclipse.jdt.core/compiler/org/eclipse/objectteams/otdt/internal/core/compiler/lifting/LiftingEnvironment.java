@@ -44,6 +44,7 @@ import org.eclipse.jdt.internal.compiler.ast.TypeDeclaration;
 import org.eclipse.jdt.internal.compiler.ast.TypeReference;
 import org.eclipse.jdt.internal.compiler.classfmt.ClassFileConstants;
 import org.eclipse.jdt.internal.compiler.impl.Constant;
+import org.eclipse.jdt.internal.compiler.impl.CompilerOptions.WeavingScheme;
 import org.eclipse.jdt.internal.compiler.lookup.ExtraCompilerModifiers;
 import org.eclipse.jdt.internal.compiler.lookup.FieldBinding;
 import org.eclipse.jdt.internal.compiler.lookup.ParameterizedTypeBinding;
@@ -150,11 +151,11 @@ public class LiftingEnvironment
      * @param lateRole
      * @param needMethodBodies
      */
-    public void createLiftingInfrastructure(RoleModel lateRole, boolean needMethodBodies) {
-        TreeNode[] boundRoles = getBoundRoles();
+    public void createLiftingInfrastructure(RoleModel lateRole, boolean needMethodBodies, WeavingScheme weavingScheme) {
+    	TreeNode[] boundRoles = getBoundRoles();
         if ((boundRoles == null) || (boundRoles.length == 0)) {
             if (lateRole == null && needMethodBodies)
-           		ReflectionGenerator.createRoleQueryMethods(this._teamType);
+           		ReflectionGenerator.createRoleQueryMethods(this._teamType, weavingScheme);
             return;
         }
         
@@ -187,7 +188,7 @@ public class LiftingEnvironment
             generateRoleCaches(this._teamType);
             // TODO(SH): split into decl and statements (see fillGeneratedMethods()).
             if (needMethodBodies)
-            	ReflectionGenerator.createRoleQueryMethods(this._teamType);
+            	ReflectionGenerator.createRoleQueryMethods(this._teamType, weavingScheme);
         } else {
         	// isTopBound?
     		if (node != null && node.getTopmostBoundParent(true) == node) {

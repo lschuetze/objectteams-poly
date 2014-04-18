@@ -40,6 +40,7 @@ import org.eclipse.jdt.internal.compiler.ast.TypeReference;
 import org.eclipse.jdt.internal.compiler.ast.Wildcard;
 import org.eclipse.jdt.internal.compiler.ast.Expression.DecapsulationState;
 import org.eclipse.jdt.internal.compiler.classfmt.ClassFileConstants;
+import org.eclipse.jdt.internal.compiler.impl.CompilerOptions.WeavingScheme;
 import org.eclipse.jdt.internal.compiler.lookup.MethodBinding;
 import org.eclipse.jdt.internal.compiler.lookup.ReferenceBinding;
 import org.eclipse.jdt.internal.compiler.lookup.TypeBinding;
@@ -48,7 +49,6 @@ import org.eclipse.objectteams.otdt.core.compiler.IOTConstants;
 import org.eclipse.objectteams.otdt.internal.core.compiler.control.Config;
 import org.eclipse.objectteams.otdt.internal.core.compiler.control.Config.NotConfiguredException;
 import org.eclipse.objectteams.otdt.internal.core.compiler.lifting.LiftingEnvironment;
-import org.eclipse.objectteams.otdt.internal.core.compiler.mappings.CallinImplementorDyn;
 import org.eclipse.objectteams.otdt.internal.core.compiler.model.RoleModel;
 import org.eclipse.objectteams.otdt.internal.core.compiler.util.AstClone;
 import org.eclipse.objectteams.otdt.internal.core.compiler.util.AstConverter;
@@ -123,8 +123,9 @@ public class ReflectionGenerator implements IOTConstants, ClassFileConstants {
 	 * Due to the similarities, we create all six methods simultaneously.
 	 *
 	 * @param teamDecl
+	 * @param weavingScheme TODO
 	 */
-	public static void createRoleQueryMethods(TypeDeclaration teamDecl)
+	public static void createRoleQueryMethods(TypeDeclaration teamDecl, WeavingScheme weavingScheme)
 	{
 		if (   TypeAnalyzer.isOrgObjectteamsTeam(teamDecl.binding)
 			|| Protections.hasClassKindProblem(teamDecl.binding))
@@ -303,7 +304,7 @@ public class ReflectionGenerator implements IOTConstants, ClassFileConstants {
 				hasStats2  [m2]   = createIfTypeEqualAndContains(roleType, cacheName, gen, objectBinding);
 				getStats2  [m2++] = createIfTypeEqualAndGet     (roleType, cacheName, gen);
 				getAStats2 [g2++] = createIfTypeEqualFetchValues(roleType, cacheName, gen);
-				unregStats2[u2++] = createRemove                (roleType, cacheName, gen);
+				unregStats2[u2++] = createRemove                (roleType, cacheName, gen, weavingScheme);
 			}
 		}
 		if (g2 > 1)
@@ -339,7 +340,7 @@ public class ReflectionGenerator implements IOTConstants, ClassFileConstants {
 											null));
 			// no duplicate means: if found remove from first_cache;
 			if (u1 > 3)
-				unregStats1[u1]=createRemoveIfFound(gen2); // if u1 <= 3 this would not be reachable due to definite null
+				unregStats1[u1]=createRemoveIfFound(gen2, weavingScheme); // if u1 <= 3 this would not be reachable due to definite null
 			hasRole1.setStatements(hasStats1);
 			getRole1.setStatements(getStats1);
 			getARoles1.setStatements(getAStats1);
@@ -568,7 +569,7 @@ public class ReflectionGenerator implements IOTConstants, ClassFileConstants {
 				);
 	}
 
-	private static Statement createRemoveIfFound (AstGenerator gen)
+	private static Statement createRemoveIfFound (AstGenerator gen, WeavingScheme weavingScheme)
 	{
 		/*
 		 * For the end of unregisterRole(Object) create:
@@ -591,7 +592,7 @@ public class ReflectionGenerator implements IOTConstants, ClassFileConstants {
 							new Expression[] { gen.singleNameReference(FOUND_BASE) }
 						),
 						// OTDYN: Slightly different methods depending on the weaving strategy:
-						CallinImplementorDyn.DYNAMIC_WEAVING
+						weavingScheme == WeavingScheme.OTDRE
 						? gen.messageSend(
 							gen.castExpression(
 								gen.singleNameReference(FOUND_BASE),
@@ -822,7 +823,7 @@ public class ReflectionGenerator implements IOTConstants, ClassFileConstants {
 
 
 	private static Statement createRemove(
-			ReferenceBinding roleType, char[] cacheName, AstGenerator gen)
+			ReferenceBinding roleType, char[] cacheName, AstGenerator gen, WeavingScheme weavingScheme)
 	{
 		/*
 		 * for each bound role create:
@@ -860,7 +861,7 @@ public class ReflectionGenerator implements IOTConstants, ClassFileConstants {
 						}
 					),
 					// OTDYN: Slightly different methods depending on the weaving strategy:
-					CallinImplementorDyn.DYNAMIC_WEAVING
+					weavingScheme == WeavingScheme.OTDRE
 					? gen.messageSend(
 						gen.castExpression(
 							gen.singleNameReference(BASE_OBJ),

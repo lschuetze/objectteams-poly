@@ -228,8 +228,20 @@ public class CompilerOptions {
 	
 	public static final String OPTION_PureJavaOnly =
 		"org.eclipse.objectteams.otdt.compiler.option.pure_java"; //$NON-NLS-1$ // not for explicit configuration, set from project nature
-
-	// multi value options
+	
+	// === multi value options ===:
+	
+	public static final String OPTION_WeavingScheme =
+		"org.eclipse.objectteams.otdt.compiler.option.weaving_scheme"; //$NON-NLS-1$
+	/** Supported weaving schemes. */
+	public static enum WeavingScheme { 
+		/** Code generation for the traditional "Object Teams Runtime Environment" implementation based on BCEL. */
+		OTRE,
+		/** Code generation for the newer "Object Teams Dynamic Runtime Environment" implementation based on ASM. */
+		OTDRE
+	}
+	
+	
 	public static final String OPTION_Decapsulation = "org.eclipse.objectteams.otdt.core.compiler.problem.decapsulation"; //$NON-NLS-1$
 	// values for the above:
 	public static final String REPORT_CLASS = "report class"; //$NON-NLS-1$
@@ -533,6 +545,8 @@ public class CompilerOptions {
 	public boolean allowScopedKeywords = true;
 	// even stronger: forcing the scanner to pure Java?
 	public boolean isPureJava = false;
+	// which scheme should be used for code generation (esp. callin bindings)?
+	public WeavingScheme weavingScheme = WeavingScheme.OTRE;
 // SH}
 
 	// === Support for Null Annotations: ===
@@ -1330,9 +1344,6 @@ public class CompilerOptions {
 	}
 
 	
-//{ObjectTeams: be nice:
-	@SuppressWarnings("unchecked")
-// SH}
 	public Map getMap() {
 		Map optionsMap = new HashMap(30);
 		optionsMap.put(OPTION_LocalVariableAttribute, (this.produceDebugAttributes & ClassFileConstants.ATTR_VARS) != 0 ? GENERATE : DO_NOT_GENERATE);
@@ -1483,6 +1494,7 @@ public class CompilerOptions {
 
 		optionsMap.put(OPTION_AllowScopedKeywords, this.allowScopedKeywords? ENABLED : DISABLED);
 		optionsMap.put(OPTION_PureJavaOnly, this.isPureJava ? ENABLED : DISABLED);
+		optionsMap.put(OPTION_WeavingScheme, this.weavingScheme.toString());
 // SH}
 		optionsMap.put(OPTION_AnnotationBasedNullAnalysis, this.isAnnotationBasedNullAnalysisEnabled ? ENABLED : DISABLED);
 		optionsMap.put(OPTION_ReportNullSpecViolation, getSeverityString(NullSpecViolation));
@@ -2024,6 +2036,9 @@ public class CompilerOptions {
 		}
 		if ((optionValue = optionsMap.get(OPTION_Decapsulation)) != null) {
 			this.decapsulation = (String)optionValue;
+		}
+		if ((optionValue = optionsMap.get(OPTION_WeavingScheme)) != null) {
+			this.weavingScheme = WeavingScheme.valueOf((String)optionValue);
 		}
 // SH}
 

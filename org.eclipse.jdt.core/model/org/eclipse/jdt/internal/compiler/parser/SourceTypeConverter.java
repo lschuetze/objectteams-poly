@@ -57,8 +57,6 @@ import org.eclipse.objectteams.otdt.core.IOTType;
 import org.eclipse.objectteams.otdt.core.IRoleType;
 import org.eclipse.objectteams.otdt.core.OTModelManager;
 import org.eclipse.objectteams.otdt.internal.core.compiler.ast.AbstractMethodMappingDeclaration;
-import org.eclipse.objectteams.otdt.internal.core.compiler.statemachine.transformer.MethodSignatureEnhancer;
-import org.eclipse.objectteams.otdt.internal.core.compiler.util.AstGenerator;
 
 public class SourceTypeConverter extends TypeConverter {
 
@@ -450,13 +448,6 @@ public class SourceTypeConverter extends TypeConverter {
 				}
 			}
 		}
-//{ObjectTeams: enhance signature for callin method:
-		if (method.isCallin()) {
-			AstGenerator gen = new AstGenerator(method.sourceEnd+1);
-			method.arguments = MethodSignatureEnhancer.enhanceArguments(
-									method.arguments, new char[0], /*isWrapper*/false, gen);
-		}
-// SH}
 
 		/* convert thrown exceptions */
 		char[][] exceptionTypeNames = methodInfo.getExceptionTypeNames();

@@ -8603,7 +8603,7 @@ private String typesAsString(MethodBinding methodBinding, TypeBinding[] paramete
 		}
 	}
 //{ObjectTeams: heuristically beautify:
-	MethodSignatureEnhancer.beautifyTypesString(buffer, makeShort);
+	MethodSignatureEnhancer.beautifyTypesString(buffer, makeShort, this.options.weavingScheme);
 // SH}
 	return buffer.toString();
 }
@@ -8623,7 +8623,7 @@ private String typesAsString(TypeBinding[] types, boolean makeShort, boolean sho
 			buffer.append(new String(makeShort ? type.shortReadableName() : type.readableName()));
 	}
 //{ObjectTeams: heuristically beautify:
-	MethodSignatureEnhancer.beautifyTypesString(buffer, makeShort);
+	MethodSignatureEnhancer.beautifyTypesString(buffer, makeShort, this.options.weavingScheme);
 // SH}
 	return buffer.toString();
 }

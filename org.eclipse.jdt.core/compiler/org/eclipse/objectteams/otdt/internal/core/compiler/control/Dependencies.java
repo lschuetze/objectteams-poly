@@ -31,6 +31,7 @@ import org.eclipse.jdt.internal.compiler.ast.MethodDeclaration;
 import org.eclipse.jdt.internal.compiler.ast.TypeDeclaration;
 import org.eclipse.jdt.internal.compiler.classfmt.ClassFileConstants;
 import org.eclipse.jdt.internal.compiler.env.AccessRestriction;
+import org.eclipse.jdt.internal.compiler.impl.CompilerOptions.WeavingScheme;
 import org.eclipse.jdt.internal.compiler.lookup.BinaryTypeBinding;
 import org.eclipse.jdt.internal.compiler.lookup.Binding;
 import org.eclipse.jdt.internal.compiler.lookup.ClassScope;
@@ -1462,7 +1463,7 @@ public class Dependencies implements ITranslationStates {
         if (   teamDeclaration != null
         	&& teamDeclaration.memberTypes != null)
         {
-            model.liftingEnv.createLiftingInfrastructure(null, needMethodBodies(teamDeclaration));
+            model.liftingEnv.createLiftingInfrastructure(null, needMethodBodies(teamDeclaration), model.getWeavingScheme());
 	       	model.setState(STATE_FULL_LIFTING);
 	       	// shallow traversal only:
 	       	for (RoleModel roleModel : model.getRoles(true))
@@ -1470,7 +1471,7 @@ public class Dependencies implements ITranslationStates {
         } else {
 	       	// nothing to do for binary types and role-less teams.
         	if (teamDeclaration != null && ReflectionGenerator.needToImplementITeamMethods(teamDeclaration))
-				ReflectionGenerator.createRoleQueryMethods(teamDeclaration); // need to implement methods from ITeam
+				ReflectionGenerator.createRoleQueryMethods(teamDeclaration, model.getWeavingScheme()); // need to implement methods from ITeam
 	       	model.setState(STATE_FULL_LIFTING);
 	       	model.setMemberState(STATE_FULL_LIFTING);
         }
@@ -1487,7 +1488,7 @@ public class Dependencies implements ITranslationStates {
         	return true;
     	}
     	TeamModel teamModel = model.getTeamModel();
-    	teamModel.liftingEnv.createLiftingInfrastructure(model, needMethodBodies(roleDecl));
+    	teamModel.liftingEnv.createLiftingInfrastructure(model, needMethodBodies(roleDecl), model.getWeavingScheme());
         model.setState(STATE_FULL_LIFTING);
         return success;
     }
@@ -1939,7 +1940,7 @@ public class Dependencies implements ITranslationStates {
         TypeDeclaration type = clazz.getAst();
         if (type != null) {
         	if (needMethodBodies(type)) {
-        		TransformStatementsVisitor transformer = new TransformStatementsVisitor();
+        		TransformStatementsVisitor transformer = new TransformStatementsVisitor(clazz.getWeavingScheme());
         		if ((type.bits & ASTNode.IsLocalType) != 0) {
         			MethodScope methodScope = type.scope.methodScope();
         			if (methodScope != null)
@@ -1977,7 +1978,7 @@ public class Dependencies implements ITranslationStates {
 	{
 		CopyInheritance.copyAttribute(aTeam);
 //{OTDyn:
-    	if (CallinImplementorDyn.DYNAMIC_WEAVING) {
+    	if (aTeam.getWeavingScheme() == WeavingScheme.OTDRE) {
     		CallinImplementorDyn callinImplementor = new CallinImplementorDyn();
     		callinImplementor.transformTeam(aTeam);
     	}
@@ -2006,14 +2007,15 @@ public class Dependencies implements ITranslationStates {
 	        	if (!roleDecl.binding.isSynthInterface()) {
 	        		// synth interfaces have no callins anyway ;-)
 		            if (needMethodBodies) {  // not translating callin bindings will cause no secondary errors -> skip if no body needed
-//{OTDyn:
-		            	if (CallinImplementorDyn.DYNAMIC_WEAVING) {
-		            		CallinImplementorDyn callinImplementor = new CallinImplementorDyn();
-		            		callinImplementor.transformRole(role);
-		            	} else {
-// SH}
+		            	switch (roleDecl.scope.compilerOptions().weavingScheme) {
+		            	case OTDRE:
+		            		CallinImplementorDyn callinImplementorDyn = new CallinImplementorDyn();
+		            		callinImplementorDyn.transformRole(role);
+		            		break;
+		            	case OTRE:
 		            		CallinImplementor callinImplementor = new CallinImplementor(role);
 		            		success &= callinImplementor.transform();
+		            		break;
 		            	}
 		            }
 	        	}

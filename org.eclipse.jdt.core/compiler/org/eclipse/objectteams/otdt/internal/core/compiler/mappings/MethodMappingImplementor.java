@@ -29,6 +29,7 @@ import org.eclipse.jdt.internal.compiler.ast.Statement;
 import org.eclipse.jdt.internal.compiler.ast.TypeParameter;
 import org.eclipse.jdt.internal.compiler.ast.TypeReference;
 import org.eclipse.jdt.internal.compiler.classfmt.ClassFileConstants;
+import org.eclipse.jdt.internal.compiler.impl.CompilerOptions.WeavingScheme;
 import org.eclipse.jdt.internal.compiler.lookup.Binding;
 import org.eclipse.jdt.internal.compiler.lookup.MethodBinding;
 import org.eclipse.jdt.internal.compiler.lookup.ParameterizedTypeBinding;
@@ -46,7 +47,9 @@ import org.eclipse.objectteams.otdt.internal.core.compiler.ast.MethodSpec;
 import org.eclipse.objectteams.otdt.internal.core.compiler.ast.TypeAnchorReference;
 import org.eclipse.objectteams.otdt.internal.core.compiler.lookup.ITeamAnchor;
 import org.eclipse.objectteams.otdt.internal.core.compiler.lookup.RoleTypeBinding;
+import org.eclipse.objectteams.otdt.internal.core.compiler.model.RoleModel;
 import org.eclipse.objectteams.otdt.internal.core.compiler.model.TeamModel;
+import org.eclipse.objectteams.otdt.internal.core.compiler.statemachine.transformer.MethodSignatureEnhancer;
 import org.eclipse.objectteams.otdt.internal.core.compiler.statemachine.transformer.ReplaceResultReferenceVisitor;
 import org.eclipse.objectteams.otdt.internal.core.compiler.util.AstClone;
 import org.eclipse.objectteams.otdt.internal.core.compiler.util.AstGenerator;
@@ -67,6 +70,24 @@ public abstract class MethodMappingImplementor {
 	// use this if source positions must be mapped between roleFile and enclosing team:
 	protected AstGenerator synthGen;
 
+	protected RoleModel _role;
+
+	private MethodSignatureEnhancer methodSignatureEnhancer;
+
+	public MethodMappingImplementor(RoleModel role) {
+		this._role = role;
+	}
+	// for subclass CallinImplementorDyn, which uses one role per transform call.
+	protected MethodMappingImplementor() {
+		// empty
+	}
+	
+	MethodSignatureEnhancer getMethodSignatureEnhancer() {
+		if (this.methodSignatureEnhancer == null)
+			this.methodSignatureEnhancer = MethodSignatureEnhancer.variants[this._role.getWeavingScheme().ordinal()];
+		return this.methodSignatureEnhancer;
+	}
+	
 	/**
 	 * Make arguments for message send which implements a callout or a callin wrapper.
 	 * For a callout mapping this method is used only if signatures are given
@@ -114,7 +135,7 @@ public abstract class MethodMappingImplementor {
     	int implementationArgLen = implParameters.length;
 
 		int expressionsOffset = 0;
-        if (isFieldAccess && !CallinImplementorDyn.DYNAMIC_WEAVING) { // OTREDyn uses non-static accessor for non-static fields
+        if (isFieldAccess && this._role.getWeavingScheme() == WeavingScheme.OTRE) { // OTREDyn uses non-static accessor for non-static fields
         	// field access is mapped to static method with additional first parameter _OT$base (unless static):
         	if (!((FieldAccessSpec)methodMapping.getBaseMethodSpecs()[0]).isStatic())
         		expressionsOffset = 1;

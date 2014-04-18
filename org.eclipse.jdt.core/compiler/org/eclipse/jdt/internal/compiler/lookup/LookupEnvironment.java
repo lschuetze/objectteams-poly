@@ -165,7 +165,7 @@ public class LookupEnvironment implements ProblemReasons, TypeConstants {
 	private TeamMethodGenerator teamMethodGenerator;
 	public TeamMethodGenerator getTeamMethodGenerator() {
 		if (this.teamMethodGenerator == null)
-			this.teamMethodGenerator = new TeamMethodGenerator();
+			this.teamMethodGenerator = new TeamMethodGenerator(this.globalOptions.weavingScheme);
 		return this.teamMethodGenerator;
 	}
 // SH}

@@ -72,6 +72,7 @@ import org.eclipse.jdt.internal.compiler.flow.UnconditionalFlowInfo;
 import org.eclipse.jdt.internal.compiler.impl.CompilerOptions;
 import org.eclipse.jdt.internal.compiler.impl.Constant;
 import org.eclipse.jdt.internal.compiler.impl.ReferenceContext;
+import org.eclipse.jdt.internal.compiler.impl.CompilerOptions.WeavingScheme;
 import org.eclipse.jdt.internal.compiler.lookup.BaseTypeBinding;
 import org.eclipse.jdt.internal.compiler.lookup.Binding;
 import org.eclipse.jdt.internal.compiler.lookup.BlockScope;
@@ -110,7 +111,6 @@ import org.eclipse.objectteams.otdt.internal.core.compiler.lookup.AnchorMapping;
 import org.eclipse.objectteams.otdt.internal.core.compiler.lookup.DependentTypeBinding;
 import org.eclipse.objectteams.otdt.internal.core.compiler.lookup.SyntheticRoleBridgeMethodBinding;
 import org.eclipse.objectteams.otdt.internal.core.compiler.lookup.WeakenedTypeBinding;
-import org.eclipse.objectteams.otdt.internal.core.compiler.mappings.CallinImplementorDyn;
 import org.eclipse.objectteams.otdt.internal.core.compiler.mappings.CalloutImplementor;
 import org.eclipse.objectteams.otdt.internal.core.compiler.mappings.CalloutImplementorDyn;
 import org.eclipse.objectteams.otdt.internal.core.compiler.model.MethodModel;
@@ -1025,6 +1025,7 @@ public TypeBinding resolveType(BlockScope scope) {
 			return this.resolvedType = null;
 		}
 	}
+	WeavingScheme weavingScheme = scope.compilerOptions().weavingScheme;
 // SH}
 
 	if (!this.binding.isValidBinding()) {
@@ -1047,7 +1048,7 @@ public TypeBinding resolveType(BlockScope scope) {
 					this.accessId = scope.enclosingSourceType().roleModel.addInaccessibleBaseMethod(this.binding);
 				// pretend that accessor method were already there:
 				this.binding = new MethodBinding(this.binding, this.binding.declaringClass.getRealClass());
-				if (CallinImplementorDyn.DYNAMIC_WEAVING) {
+				if (weavingScheme == WeavingScheme.OTDRE) {
 					if (this.binding.isStatic())
 						this.binding.selector = CalloutImplementorDyn.OT_ACCESS_STATIC;
 					else
@@ -1115,7 +1116,7 @@ public TypeBinding resolveType(BlockScope scope) {
 //{ObjectTeams: new check (base.m() within m() ?)
     if (this.receiver instanceof BaseReference)
     {
-    	if (!CallinImplementorDyn.DYNAMIC_WEAVING) { // FIXME(OTDYN): need a new strategy to check this for dyn weaving.
+    	if (weavingScheme == WeavingScheme.OTRE) { // FIXME(OTDYN): need a new strategy to check this for dyn weaving.
 	        AbstractMethodDeclaration enclosingMethod = scope.methodScope().referenceMethod();
 	        if (!enclosingMethod.isCallin())
 	        	enclosingMethod = BaseCallMessageSend.getOuterCallinMethod(scope.methodScope());

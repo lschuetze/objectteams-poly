@@ -22,6 +22,7 @@ package org.eclipse.objectteams.otdt.internal.core.compiler.bytecode;
 import org.eclipse.jdt.internal.compiler.ClassFile;
 import org.eclipse.jdt.internal.compiler.classfmt.ClassFileConstants;
 import org.eclipse.jdt.internal.compiler.classfmt.ClassFileStruct;
+import org.eclipse.jdt.internal.compiler.impl.CompilerOptions.WeavingScheme;
 import org.eclipse.jdt.internal.compiler.lookup.Binding;
 import org.eclipse.jdt.internal.compiler.lookup.LookupEnvironment;
 import org.eclipse.jdt.internal.compiler.lookup.ReferenceBinding;
@@ -198,7 +199,7 @@ public class StaticReplaceBindingsAttribute extends AbstractAttribute {
 		Mapping currentMapping = new Mapping(
 									decl.roleMethodSpec.resolvedMethod.declaringClass.sourceName(),
 									decl.roleMethodSpec.selector,
-									decl.roleMethodSpec.signature(),
+									decl.roleMethodSpec.signature(WeavingScheme.OTRE),
 						            decl.liftMethod != null ?
 							            	decl.liftMethod.selector : new char[0],
 									decl.liftMethod != null ?

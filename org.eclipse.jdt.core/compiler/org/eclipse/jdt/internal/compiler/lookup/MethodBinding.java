@@ -39,6 +39,7 @@ import org.eclipse.jdt.internal.compiler.ast.TypeDeclaration;
 import org.eclipse.jdt.internal.compiler.classfmt.ClassFileConstants;
 import org.eclipse.jdt.internal.compiler.codegen.ConstantPool;
 import org.eclipse.jdt.internal.compiler.impl.CompilerOptions;
+import org.eclipse.jdt.internal.compiler.impl.CompilerOptions.WeavingScheme;
 import org.eclipse.jdt.internal.compiler.util.Util;
 import org.eclipse.objectteams.otdt.core.compiler.IOTConstants;
 import org.eclipse.objectteams.otdt.internal.core.compiler.bytecode.AnchorListAttribute;
@@ -790,9 +791,9 @@ protected TypeBinding generalizedReturnType = null; // only set if return and pa
 public TypeBinding[] getSourceParameters() {
 	TypeBinding[] allParameters = this.parameters;
 	if ((this.switchCount == 0) && isCallin()) {
-		int numGeneratedArgs = MethodSignatureEnhancer.ENHANCING_ARG_LEN;
+		int numGeneratedArgs = getMethodSignatureEnhancer().ENHANCING_ARG_LEN;
 		TypeBinding[] sourceParameters = new TypeBinding[allParameters.length - numGeneratedArgs];
-		System.arraycopy(allParameters, MethodSignatureEnhancer.ENHANCING_ARG_LEN,
+		System.arraycopy(allParameters, numGeneratedArgs,
 				         sourceParameters, 0, sourceParameters.length);
 		return sourceParameters;
 	} else {
@@ -802,9 +803,20 @@ public TypeBinding[] getSourceParameters() {
 /** How many source-level parameters does this method have? */
 public int getSourceParamLength() {
 	if ((this.switchCount == 0) && isCallin())
-		return this.parameters.length - MethodSignatureEnhancer.ENHANCING_ARG_LEN;
+		return this.parameters.length - getMethodSignatureEnhancer().ENHANCING_ARG_LEN;
 
 	return this.parameters.length;
+}
+public MethodSignatureEnhancer getMethodSignatureEnhancer() {
+	WeavingScheme weavingScheme = WeavingScheme.OTRE;
+	if (this.declaringClass instanceof BinaryTypeBinding)
+		weavingScheme = ((BinaryTypeBinding)this.declaringClass).environment.globalOptions.weavingScheme;
+	else if (this.declaringClass instanceof SourceTypeBinding) {
+		Scope scope = ((SourceTypeBinding)this.declaringClass).scope;
+		if (scope != null)
+			weavingScheme = scope.compilerOptions().weavingScheme;
+	}
+	return MethodSignatureEnhancer.variants[weavingScheme.ordinal()];
 }
 /**
  * Temporarily set the source parameters as this method's parameters.
@@ -1361,7 +1373,7 @@ public char[] readableName() /* foo(int, Thread) */ {
 			buffer.insert(0, "tsuper."); //$NON-NLS-1$
 		}
 		if (isCallin())
-			firstParam = MethodSignatureEnhancer.ENHANCING_ARG_LEN;
+			firstParam = getMethodSignatureEnhancer().ENHANCING_ARG_LEN;
 /* orig:
 		for (int i = 0, length = this.parameters.length; i < length; i++) {
 			if (i > 0)
@@ -1427,7 +1439,7 @@ public char[] shortReadableName() {
 			buffer.insert(0, "tsuper."); //$NON-NLS-1$
 		}
 		if (isCallin())
-			firstParam = MethodSignatureEnhancer.ENHANCING_ARG_LEN;
+			firstParam = getMethodSignatureEnhancer().ENHANCING_ARG_LEN;
 /* orig:
 		for (int i = 0, length = this.parameters.length; i < length; i++) {
 			if (i > 0)

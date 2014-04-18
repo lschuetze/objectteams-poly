@@ -34,6 +34,7 @@ import org.eclipse.jdt.internal.compiler.ast.ReturnStatement;
 import org.eclipse.jdt.internal.compiler.ast.Statement;
 import org.eclipse.jdt.internal.compiler.ast.ThisReference;
 import org.eclipse.jdt.internal.compiler.ast.TypeDeclaration;
+import org.eclipse.jdt.internal.compiler.impl.CompilerOptions.WeavingScheme;
 import org.eclipse.jdt.internal.compiler.lookup.BaseTypeBinding;
 import org.eclipse.jdt.internal.compiler.lookup.BlockScope;
 import org.eclipse.jdt.internal.compiler.lookup.ClassScope;
@@ -41,6 +42,7 @@ import org.eclipse.jdt.internal.compiler.lookup.TypeBinding;
 import org.eclipse.jdt.internal.compiler.lookup.TypeConstants;
 import org.eclipse.objectteams.otdt.core.compiler.IOTConstants;
 import org.eclipse.objectteams.otdt.core.exceptions.InternalCompilerError;
+import org.eclipse.objectteams.otdt.internal.core.compiler.ast.BaseCallMessageSend;
 import org.eclipse.objectteams.otdt.internal.core.compiler.ast.BaseReference;
 import org.eclipse.objectteams.otdt.internal.core.compiler.control.ITranslationStates;
 import org.eclipse.objectteams.otdt.internal.core.compiler.control.StateHelper;
@@ -75,6 +77,12 @@ public class TransformStatementsVisitor
 
     // -- fields and methods for scope management ---
     private Stack<MethodDeclaration> _methodDeclarationStack = new Stack<MethodDeclaration>();
+
+    private WeavingScheme weavingScheme;
+    
+    public TransformStatementsVisitor(WeavingScheme weavingScheme) {
+    	this.weavingScheme = weavingScheme;
+    }
 
     /**
      * If methodDeclaration is a callin method remember it for translating base calls.
@@ -132,7 +140,12 @@ public class TransformStatementsVisitor
     }
 
     // === Adjustments following enhancement of callin method signatures:
-
+    @Override
+    public boolean visit(BaseCallMessageSend messageSend, BlockScope scope) {
+    	messageSend.prepareSuperAccess(this.weavingScheme);
+    	return true;
+    }
+    
     /** May need to add arguments to a 'recursive' callin message send. */
     @Override
     public boolean visit(MessageSend messageSend, BlockScope scope) {
@@ -146,31 +159,35 @@ public class TransformStatementsVisitor
     	{
     		// argument enhancing within callin methods:
     		Expression[] args = messageSend.arguments;
-    		if (CallinImplementorDyn.DYNAMIC_WEAVING) {
-    			if (isBaseCall) {
-	    			AstGenerator gen = new AstGenerator(messageSend);
-	    			if (args == null || args.length == 0) {
-	    				args = new Expression[] { gen.nullLiteral() };
-	    			} else {
-	    				Expression[] boxedArgs = new Expression[args.length];
-	    				for (int i = 0; i < args.length; i++) {
-	    					TypeBinding argType = methodDecl.arguments[i+MethodSignatureEnhancer.ENHANCING_ARG_LEN].binding.type;
-							if (argType.isBaseType())
-	    						boxedArgs[i] = gen.createBoxing(args[i], (BaseTypeBinding) argType);
-							else
-								boxedArgs[i] = args[i];
-	    				}
-	    				args = new Expression[] {
-	    					gen.arrayAllocation(gen.qualifiedTypeReference(TypeConstants.JAVA_LANG_OBJECT), 1, boxedArgs)
-	    				};	
-	    			}
-    			}
-    		} else if (args != null) {
-    			int len = args.length;
-    			if (isBaseCall && methodDecl.isStatic()) // chop of premature isSuperAccess flag:
-    				System.arraycopy(args, 1, args=new Expression[len-1], 0, len-1);
+    		if (isBaseCall) {
+	    		switch (this.weavingScheme) {
+	    			case OTDRE:
+		    			AstGenerator gen = new AstGenerator(messageSend);
+		    			if (args == null || args.length == 0) {
+		    				args = new Expression[] { gen.nullLiteral() };
+		    			} else {
+		    				Expression[] boxedArgs = new Expression[args.length];
+		    				for (int i = 0; i < args.length; i++) {
+		    					TypeBinding argType = methodDecl.arguments[i+MethodSignatureEnhancer.getEnhancingArgLen(this.weavingScheme)].binding.type;
+								if (argType.isBaseType())
+		    						boxedArgs[i] = gen.createBoxing(args[i], (BaseTypeBinding) argType);
+								else
+									boxedArgs[i] = args[i];
+		    				}
+		    				args = new Expression[] {
+		    					gen.arrayAllocation(gen.qualifiedTypeReference(TypeConstants.JAVA_LANG_OBJECT), 1, boxedArgs)
+		    				};	
+		    			}
+		    			break;
+	    			case OTRE:
+		    			if (args != null) {
+		    				int len = args.length;
+		    				if (methodDecl.isStatic()) // chop of premature isSuperAccess flag:
+		    					System.arraycopy(args, 1, args=new Expression[len-1], 0, len-1);
+		    			}	
+	    		}
     		}
-			messageSend.arguments = MethodSignatureEnhancer.enhanceArguments(args, messageSend.sourceEnd+1);
+			messageSend.arguments = MethodSignatureEnhancer.enhanceArguments(args, messageSend.sourceEnd+1, this.weavingScheme);
 			messageSend.bits |= ASTNode.HasBeenTransformed;
     	}
     	return true;
@@ -187,8 +204,8 @@ public class TransformStatementsVisitor
     	if (callinMethod.arguments == null)
     		return false;
     	int sendArgs = messageSend.arguments == null ? 0 : messageSend.arguments.length;
-    	sendArgs += MethodSignatureEnhancer.ENHANCING_ARG_LEN;
-    	if (isBaseCall && !CallinImplementorDyn.DYNAMIC_WEAVING)
+    	sendArgs += MethodSignatureEnhancer.getEnhancingArgLen(this.weavingScheme);
+    	if (isBaseCall && this.weavingScheme == WeavingScheme.OTRE)
     		sendArgs--; // don't count the isSuperAccess flag
     	return sendArgs == callinMethod.arguments.length;
     }
@@ -302,7 +319,7 @@ public class TransformStatementsVisitor
 		{
 			// but if class has errors the visitor bailed out.
 			// need to transform before changing the selector
-			method.traverse(new TransformStatementsVisitor(), scope);
+			method.traverse(new TransformStatementsVisitor(scope.compilerOptions().weavingScheme), scope);
 		}
 	}
 }

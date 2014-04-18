@@ -28,6 +28,7 @@ import org.eclipse.jdt.internal.compiler.ClassFile;
 import org.eclipse.jdt.internal.compiler.ast.CompilationUnitDeclaration;
 import org.eclipse.jdt.internal.compiler.ast.MethodDeclaration;
 import org.eclipse.jdt.internal.compiler.classfmt.ClassFileStruct;
+import org.eclipse.jdt.internal.compiler.impl.CompilerOptions.WeavingScheme;
 import org.eclipse.jdt.internal.compiler.lookup.Binding;
 import org.eclipse.jdt.internal.compiler.lookup.ExtraCompilerModifiers;
 import org.eclipse.jdt.internal.compiler.lookup.LookupEnvironment;
@@ -293,7 +294,7 @@ public class CallinMethodMappingsAttribute extends AbstractAttribute {
 				  this._mappings[idx++] = new Mapping(
 										decl.name,
 										decl.roleMethodSpec.selector,
-										decl.roleMethodSpec.signature(),
+										decl.roleMethodSpec.signature(WeavingScheme.OTRE),
 										flags,
 							            decl.liftMethod != null ?
 								            	decl.liftMethod.selector : new char[0],
@@ -531,7 +532,7 @@ public class CallinMethodMappingsAttribute extends AbstractAttribute {
 			while (currentType2 != null) {
 				MethodBinding[] methods = currentType2.getMethods(mapping._roleSelector);
 				for (int j = 0; j < methods.length; j++) {
-					if (CharOperation.prefixEquals(roleSignature, MethodSpec.signature(methods[j])))
+					if (CharOperation.prefixEquals(roleSignature, MethodSpec.signature(methods[j], WeavingScheme.OTRE)))
 					{
 						result._roleMethodBinding = methods[j];
 						break roleMethod;

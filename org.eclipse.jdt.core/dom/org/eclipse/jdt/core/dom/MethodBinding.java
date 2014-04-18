@@ -27,7 +27,6 @@ import org.eclipse.jdt.internal.compiler.problem.AbortCompilation;
 import org.eclipse.jdt.internal.core.JavaElement;
 import org.eclipse.jdt.internal.core.util.Util;
 import org.eclipse.objectteams.otdt.internal.core.compiler.model.MethodModel;
-import org.eclipse.objectteams.otdt.internal.core.compiler.statemachine.transformer.MethodSignatureEnhancer;
 
 /**
  * Internal implementation of method bindings.
@@ -169,7 +168,7 @@ class MethodBinding implements IMethodBinding {
 		org.eclipse.jdt.internal.compiler.lookup.TypeBinding[] parameters = this.binding.parameters;
 //{ObjectTeams: retrench callin method:
 		if ((this.getModifiers() & ExtraCompilerModifiers.AccCallin) != 0)
-			parameters = MethodSignatureEnhancer.retrenchParameterTypes(parameters);
+			parameters = this.binding.getMethodSignatureEnhancer().retrenchParameterTypes(parameters);
 // SH}
 		int length = parameters == null ? 0 : parameters.length;
 		if (length == 0) {
