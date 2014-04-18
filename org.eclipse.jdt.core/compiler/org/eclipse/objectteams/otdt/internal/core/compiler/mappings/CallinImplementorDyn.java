@@ -277,8 +277,7 @@ public class CallinImplementorDyn extends MethodMappingImplementor {
 		List<CallinMappingDeclaration> beforeMappings = new ArrayList<CallinMappingDeclaration>();
 		List<CallinMappingDeclaration> replaceMappings = new ArrayList<CallinMappingDeclaration>();
 		List<CallinMappingDeclaration> afterMappings = new ArrayList<CallinMappingDeclaration>();
-		
-		boolean hasReplaceStatic = false;
+		List<CallinMappingDeclaration> mappingsWithStaticBase = new ArrayList<CallinMappingDeclaration>();
 		for (RoleModel role : aTeam.getRoles(false)) {
 			TypeDeclaration roleDecl = role.getAst(); // FIXME(SH): this breaks incremental compilation: all roles must be present as AST!!
 			if (roleDecl == null) continue; // FIXME(SH): check if this is OK
@@ -289,10 +288,10 @@ public class CallinImplementorDyn extends MethodMappingImplementor {
 						switch (callinDecl.callinModifier) {
 							case TerminalTokens.TokenNamebefore: 	beforeMappings.add(callinDecl); 	break;
 							case TerminalTokens.TokenNameafter: 	afterMappings.add(callinDecl); 		break;
-							case TerminalTokens.TokenNamereplace: 	replaceMappings.add(callinDecl);
-																	hasReplaceStatic |= callinDecl.isStaticReplace();
-																	break;
+							case TerminalTokens.TokenNamereplace: 	replaceMappings.add(callinDecl); 	break;
 						}
+						if (callinDecl.hasStaticBaseMethod())
+							mappingsWithStaticBase.add(callinDecl);
 					}
 				}
 			}
@@ -304,9 +303,9 @@ public class CallinImplementorDyn extends MethodMappingImplementor {
 		if (replaceMappings.size() > 0) {
 			generateDispatchMethod(OT_CALL_REPLACE, true,  false, replaceMappings, aTeam);
 			generateCallNext(replaceMappings, aTeam);
-			if (hasReplaceStatic)
-				generateCallOrigStatic(replaceMappings, aTeam);
 		}
+		if (!mappingsWithStaticBase.isEmpty())
+			generateCallOrigStatic(mappingsWithStaticBase, aTeam);
 	}
 
 	private void generateDispatchMethod(char[] methodName, final boolean isReplace, final boolean isAfter, final List<CallinMappingDeclaration> callinDecls, final TeamModel aTeam) 

@@ -677,7 +677,12 @@ public class CallinMappingDeclaration extends AbstractMethodMappingDeclaration
 	public boolean isStaticReplace() {
 		return isReplaceCallin() && this.roleMethodSpec.resolvedMethod.isStatic();
 	}
-
+	public boolean hasStaticBaseMethod() {
+		for (MethodSpec spec : this.baseMethodSpecs)
+			if (spec.isStatic())
+				return true;
+		return false;
+	}
 	public boolean isCallout()
 	{
 		return false;

@@ -144,7 +144,6 @@ public class CreateCallAllBindingsCallInOrgMethod extends
 		method.maxLocals = localSlots+1;
 	}
 
-	@SuppressWarnings("unchecked") // access to raw type List in ASM
 	void addCatchSneakyException(MethodNode method, LabelNode start) {
 		method.tryCatchBlocks.add(getCatchBlock(method.instructions, start, orgMethod));
 	}
