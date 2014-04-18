@@ -20,6 +20,7 @@ import java.util.Map;
 
 import org.eclipse.jdt.core.tests.util.Util;
 import org.eclipse.jdt.internal.compiler.impl.CompilerOptions;
+import org.eclipse.objectteams.otdt.internal.core.compiler.mappings.CallinImplementorDyn;
 import org.eclipse.objectteams.otdt.tests.otjld.AbstractOTJLDTest;
 
 import junit.framework.Test;
@@ -4417,7 +4418,7 @@ public class DevelopmentExamples extends AbstractOTJLDTest {
 			    "}\n" +
 			    "    \n"
             },
-            "NO");
+            (CallinImplementorDyn.DYNAMIC_WEAVING ? "OK" : "NO"));
     }
 
     // an after callin passes the base result to the team
