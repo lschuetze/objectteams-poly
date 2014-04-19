@@ -359,7 +359,7 @@ public class MethodSignatureEnhancer implements IOTConstants, TypeConstants, Cla
 		return variants[weavingScheme.ordinal()].internalMaybeRetrenchArguments(methodDecl);
 	}
 	private Argument[] internalMaybeRetrenchArguments(MethodDeclaration methodDecl) {
-		if (!methodDecl.isCallin())
+		if (!methodDecl.isCallin() || !internalIsEnhanced(methodDecl))
 			return methodDecl.arguments;
 		int len = methodDecl.arguments.length;
 		Argument[] result = new Argument[len-this.ENHANCING_ARG_LEN];
