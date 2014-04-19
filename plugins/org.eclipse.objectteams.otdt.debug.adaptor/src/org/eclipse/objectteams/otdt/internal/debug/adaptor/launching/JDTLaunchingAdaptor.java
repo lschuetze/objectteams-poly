@@ -28,7 +28,10 @@ import org.eclipse.debug.core.ILaunchManager;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.launching.IRuntimeClasspathEntry;
 import org.eclipse.jdt.launching.JavaRuntime;
+import org.eclipse.objectteams.otdt.core.ext.OTDREContainer;
+import org.eclipse.objectteams.otdt.core.ext.OTJavaNature;
 import org.eclipse.objectteams.otdt.core.ext.OTREContainer;
+import org.eclipse.objectteams.otdt.core.ext.WeavingScheme;
 import org.eclipse.objectteams.otdt.debug.OTDebugPlugin;
 import org.eclipse.objectteams.otdt.debug.OTVMRunnerAdaptor;
 import org.eclipse.objectteams.otdt.debug.TeamBreakpointInstaller;
@@ -67,9 +70,10 @@ public team class JDTLaunchingAdaptor {
 	    	if (!isOTJApplicationLaunch(config))
 	    		return origEntries;
 	    	
-	    	// add BCEL and otre_min (classpath / bootclasspath)
+	    	// add BCEL or ASM and otre_min or otredyn.min (classpath / bootclasspath)
+	    	WeavingScheme scheme = OTJavaNature.getWeavingScheme(JavaRuntime.getJavaProject(config));
 	    	int oldLength = origEntries.length;
-			IRuntimeClasspathEntry[] otRuntimeEntries = computePathsToAdd(origEntries);
+			IRuntimeClasspathEntry[] otRuntimeEntries = computePathsToAdd(origEntries, scheme);
 			
 			// merge results:
 	    	IRuntimeClasspathEntry[] result = new IRuntimeClasspathEntry[oldLength + otRuntimeEntries.length];
@@ -78,29 +82,46 @@ public team class JDTLaunchingAdaptor {
 	        return result;
 		}
 		
-	    static IRuntimeClasspathEntry[] computePathsToAdd( IRuntimeClasspathEntry[] origEntries)
+	    static IRuntimeClasspathEntry[] computePathsToAdd(IRuntimeClasspathEntry[] origEntries, WeavingScheme scheme)
 		{
-			boolean hasBCEL = false;
+			boolean hasBytecodeLib = false;
 			boolean hasOTRE_min = false;
 	
-			IPath otreMinJarPath = OTREContainer.getOtreMinJarPath();
-			for (int i = 0; i < origEntries.length; i++)
-	        {
+			IPath otreMinJarPath;
+			IPath[] bytecodeLibraryPaths;
+			if (scheme == WeavingScheme.OTRE) {
+				otreMinJarPath = OTREContainer.getOtreMinJarPath();
+				bytecodeLibraryPaths = OTREContainer.BYTECODE_LIBRARY_PATH;
+			} else if (scheme == WeavingScheme.OTDRE) {
+				otreMinJarPath = OTDREContainer.getOtreMinJarPath();
+				bytecodeLibraryPaths = OTDREContainer.BYTECODE_LIBRARY_PATH;
+			} else {
+				throw new IncompatibleClassChangeError("Unexpected enum constant: "+scheme);
+			}
+			int pathsNeeded = bytecodeLibraryPaths.length;
+			for (int i = 0; i < origEntries.length; i++) {
 	            IPath entryPath = origEntries[i].getPath();
-				if (OTREContainer.BYTECODE_LIBRARY_PATH.length == 1
-						&& OTREContainer.BYTECODE_LIBRARY_PATH[0].equals(entryPath))
-					hasBCEL = true;
-				else if (otreMinJarPath.equals(entryPath))
-					hasOTRE_min = true;
+	            if (otreMinJarPath.equals(entryPath)) {
+	            	hasOTRE_min = true;
+	            } else {
+	            	for (IPath bcPath : bytecodeLibraryPaths) {
+	            		if (bcPath.equals(entryPath)) {
+	            			pathsNeeded--;
+	            			break;
+	            		}
+	            	}
+	            	if (pathsNeeded == 0)
+	            		hasBytecodeLib = true;
+				}
 	        }
 	
 			List<IRuntimeClasspathEntry> result = new LinkedList<IRuntimeClasspathEntry>();
 			IRuntimeClasspathEntry entry;
 	
-			if (!hasBCEL) {
-				int l = OTREContainer.BYTECODE_LIBRARY_PATH.length;
+			if (!hasBytecodeLib) {
+				int l = bytecodeLibraryPaths.length;
 				for (int i = 0; i < l; i++) {					
-					entry = JavaRuntime.newArchiveRuntimeClasspathEntry(OTREContainer.BYTECODE_LIBRARY_PATH[i]);
+					entry = JavaRuntime.newArchiveRuntimeClasspathEntry(bytecodeLibraryPaths[i]);
 					result.add(entry);			
 				}
 			}

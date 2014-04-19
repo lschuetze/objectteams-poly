@@ -140,11 +140,10 @@ public class OTDREContainer implements IClasspathContainer
 		BYTECODE_LIBRARY_PATH = new IPath[ASM_BUNDLE_NAMES.length];
 		int i = 0;
 		for (String bundleName : ASM_BUNDLE_NAMES) {
-			for (Bundle bundle : packageAdmin.getBundles(bundleName, ASM_VERSION_RANGE)) {			
+			for (Bundle bundle : packageAdmin.getBundles(bundleName, ASM_VERSION_RANGE))	
 				BYTECODE_LIBRARY_PATH[i++] = new Path(FileLocator.toFileURL(bundle.getEntry("/")).getFile()); //$NON-NLS-1$
-				return;
-			}
 		}
-		throw new RuntimeException("bytecode libarary for OTDRE not found"); //$NON-NLS-1$
+		if (i != 3)
+			throw new RuntimeException("bytecode libarary for OTDRE not found"); //$NON-NLS-1$
 	}
 }
