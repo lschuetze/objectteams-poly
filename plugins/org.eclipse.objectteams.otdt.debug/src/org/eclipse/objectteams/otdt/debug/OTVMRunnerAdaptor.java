@@ -1,7 +1,7 @@
 /**********************************************************************
  * This file is part of "Object Teams Development Tooling"-Software
  * 
- * Copyright 2004, 2006 Fraunhofer Gesellschaft, Munich, Germany,
+ * Copyright 2004, 2014 Fraunhofer Gesellschaft, Munich, Germany,
  * for its Fraunhofer Institute for Computer Architecture and Software
  * Technology (FIRST), Berlin, Germany and Technical University Berlin,
  * Germany.
@@ -10,7 +10,6 @@
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
- * $Id$
  * 
  * Please visit http://www.eclipse.org/objectteams for updates and contact.
  * 
@@ -24,9 +23,11 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.PrintStream;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IStatus;
@@ -34,9 +35,13 @@ import org.eclipse.debug.core.ILaunch;
 import org.eclipse.debug.core.ILaunchConfiguration;
 import org.eclipse.debug.core.ILaunchManager;
 import org.eclipse.debug.core.model.ILaunchConfigurationDelegate;
+import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaCore;
+import org.eclipse.objectteams.otdt.core.ext.OTDREContainer;
 import org.eclipse.objectteams.otdt.core.ext.OTREContainer;
+import org.eclipse.objectteams.otdt.core.ext.WeavingScheme;
+import org.eclipse.objectteams.otdt.core.ext.OTJavaNature;
 import org.eclipse.objectteams.otdt.debug.internal.TempFileManager;
 
 
@@ -51,12 +56,17 @@ public class OTVMRunnerAdaptor
 	private static final String OT_DEBUG_VMARG = "-Dot.debug";
 	private static final String OT_DEBUG_CALLIN_STEPPING_VMARG = "-Dot.debug.callin.stepping";
 	private static final String OT_TEAMCONFIG_VMARG = "-Dot.teamconfig";
-	private static List<String> JPLIS_VMARGS;
+	private static Map<WeavingScheme,List<String>> JPLIS_VMARGS = new HashMap<WeavingScheme, List<String>>();
 
 	private ILaunchConfiguration _launchConfig;
 	private String _mode;
 	private ILaunch _launch;
-
+	private WeavingScheme weavingScheme;
+	
+	public OTVMRunnerAdaptor(IJavaProject javaProject) {
+		this.weavingScheme = OTJavaNature.getWeavingScheme(javaProject);
+	}
+	
 	/**
 	 * Store the original arguments as passed to {@link ILaunchConfigurationDelegate#launch(ILaunchConfiguration, String, ILaunch, org.eclipse.core.runtime.IProgressMonitor)}
 	 * @param configuration see first argument of {@link ILaunchConfigurationDelegate#launch(ILaunchConfiguration, String, ILaunch, org.eclipse.core.runtime.IProgressMonitor) launch(..)}
@@ -101,14 +111,23 @@ public class OTVMRunnerAdaptor
 	}
 
 	private List<String> getJplisVmargs() {
-		if (JPLIS_VMARGS == null) {
-			JPLIS_VMARGS = new ArrayList<String>();
-			JPLIS_VMARGS.add("-Dot.otdt");
-			JPLIS_VMARGS.add("-javaagent:" + "\""+OTREContainer.getOtreAgentJarPath().toOSString()+'"'); // support blanks in path
+		List<String> args = JPLIS_VMARGS.get(this.weavingScheme);
+		if (args == null) {
+			args = new ArrayList<String>();
+			args.add("-Dot.otdt");
+			switch (this.weavingScheme) {
+			case OTRE:
+				args.add("-javaagent:" + "\""+OTREContainer.getOtreAgentJarPath().toOSString()+'"'); // support blanks in path
+				break;
+			case OTDRE:
+				args.add("-javaagent:" + "\""+OTDREContainer.getOtreAgentJarPath().toOSString()+'"'); // support blanks in path
+				break;
+			}
+			JPLIS_VMARGS.put(this.weavingScheme, args);
 		}
-		return JPLIS_VMARGS;
+		return args;
 	}
-
+	
 	private String getCallinSteppingVMArg() {
 		String value = OTDebugPlugin.getDefault().getCallinSteppingConfig();
 		if (value == null) return null;

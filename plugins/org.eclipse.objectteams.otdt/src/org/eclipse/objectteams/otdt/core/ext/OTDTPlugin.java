@@ -10,7 +10,6 @@
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
- * $Id: OTDTPlugin.java 23427 2010-02-03 22:23:59Z stephan $
  * 
  * Please visit http://www.eclipse.org/objectteams for updates and contact.
  * 
@@ -249,17 +248,9 @@ public class OTDTPlugin extends Plugin
     @Override
     public void start(BundleContext context) throws Exception {    
     	super.start(context);
-    	try {
-    		// FIXME avoid global config but configure from CompilerOptions where needed
-    		String weavingProperty = System.getProperty("ot.weaving"); //$NON-NLS-1$
-    		boolean useDynamicWeaving;
-    		if (weavingProperty != null) {
-				useDynamicWeaving = "dynamic".equals(weavingProperty);
-			} else
-    			useDynamicWeaving = TransformerPlugin.useDynamicWeaving();
-    		OTREContainer.findBytecodeLib(context, useDynamicWeaving);
-    		if (useDynamicWeaving)
-    			OTREContainer.OT_RUNTIME_PLUGIN = "org.eclipse.objectteams.otredyn"; //$NON-NLS-1$
+    	try {    		
+    		OTREContainer.findBytecodeLib(context);
+    		OTDREContainer.findBytecodeLib(context);
     	} catch (RuntimeException re) {
     		this.getLog().log(new Status(IStatus.ERROR, PLUGIN_ID, "Cannot initialize BCEL location", re)); //$NON-NLS-1$
     	}

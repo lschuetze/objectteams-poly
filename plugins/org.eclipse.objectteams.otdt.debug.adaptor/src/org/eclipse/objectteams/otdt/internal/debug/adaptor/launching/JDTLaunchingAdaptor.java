@@ -1,13 +1,12 @@
 /**********************************************************************
  * This file is part of "Object Teams Development Tooling"-Software
  * 
- * Copyright 2008, 2010 Technical University Berlin, Germany.
+ * Copyright 2008, 2014 Technical University Berlin, Germany.
  * 
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
- * $Id: JDTLaunchingAdaptor.java 23456 2010-02-04 20:44:45Z stephan $
  * 
  * Please visit http://www.eclipse.org/objectteams for updates and contact.
  * 
@@ -137,7 +136,7 @@ public team class JDTLaunchingAdaptor {
 				this.fAdaptor = null;
 				return;
 			}
-			this.fAdaptor = new OTVMRunnerAdaptor();
+			this.fAdaptor = new OTVMRunnerAdaptor(getJavaProject(config));
 			this.fAdaptor.setAdaptationArgs(config, mode, launch);
 			// install OT-breakpoints
 			if (ILaunchManager.DEBUG_MODE.equals(mode))

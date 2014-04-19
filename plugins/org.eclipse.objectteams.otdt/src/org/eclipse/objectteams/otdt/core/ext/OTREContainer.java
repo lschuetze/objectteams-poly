@@ -39,7 +39,6 @@ import org.eclipse.objectteams.otdt.internal.core.ext.OTVariableInitializer;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
-import org.osgi.service.packageadmin.PackageAdmin;
 
 /**
  * This class serves the "OTRE" classpath container.
@@ -67,12 +66,9 @@ public class OTREContainer implements IClasspathContainer
     private static final String OTRE_AGENT_JAR_FILENAME = "otre_agent.jar"; //$NON-NLS-1$
     private static final String OTEQUINOX_AGENT_JAR_FILENAME = "otequinoxAgent.jar"; //$NON-NLS-1$
 
-    // data for initializing the above BCEL_PATH:
+    // data for initializing the above BYTECODE_LIBRARY_PATH:
     private static final String BCEL_BUNDLE_NAME = "org.apache.bcel"; //$NON-NLS-1$
     private static final String BCEL_VERSION_RANGE = "[5.2.0,5.3.0)"; //$NON-NLS-1$
-
-	private static final String[] ASM_BUNDLE_NAMES = { "org.objectweb.asm", "org.objectweb.asm.tree", "org.objectweb.asm.commons" }; //$NON-NLS-1$
-	private static final String ASM_VERSION_RANGE = "[5.0.1,6.0.0)"; //$NON-NLS-1$
 
     private IClasspathEntry[] _cpEntries;
 
@@ -147,6 +143,7 @@ public class OTREContainer implements IClasspathContainer
 	/**
 	 * Adds the ObjectTeams classes to the given JavaProject's classpath,
 	 * and ensures the Java compliance is >= 1.5
+	 * Handles both variants, OTRE and OTDRE.
 	 */
 	public static void initializeOTJProject(IProject project) throws CoreException
 	{		
@@ -179,7 +176,8 @@ public class OTREContainer implements IClasspathContainer
 	private static boolean isOTREAlreadyInClasspath(IClasspathEntry[] classpath) {
 	    for (int idx = 0; classpath != null && idx < classpath.length; idx++) {
 	        IClasspathEntry entry = classpath[idx];
-	        if (entry.getEntryKind() == IClasspathEntry.CPE_CONTAINER && entry.getPath().equals(OTRE_CONTAINER_PATH))
+	        if (entry.getEntryKind() == IClasspathEntry.CPE_CONTAINER &&
+	        		(entry.getPath().equals(OTRE_CONTAINER_PATH) || entry.getPath().equals(OTDREContainer.CONTAINER_PATH)))
 				return true;
 	    }
 	    
@@ -196,7 +194,11 @@ public class OTREContainer implements IClasspathContainer
 	
 		System.arraycopy( classpath, 0, newClasspath, 0, classpath.length );
 	
-		newClasspath[classpath.length] = JavaCore.newContainerEntry(OTRE_CONTAINER_PATH, false);
+		IPath containerPath = OTRE_CONTAINER_PATH;
+		Object weavingOption = javaPrj.getOption(JavaCore.COMPILER_OPT_WEAVING_SCHEME, true);
+		if (WeavingScheme.OTDRE.toString().equals(weavingOption))
+			containerPath = OTDREContainer.CONTAINER_PATH;
+		newClasspath[classpath.length] = JavaCore.newContainerEntry(containerPath, false);
 	    
 		if (newClasspath[classpath.length] != null)
 			javaPrj.setRawClasspath( newClasspath, null );
@@ -209,31 +211,21 @@ public class OTREContainer implements IClasspathContainer
 										null) );
 	}
 	
-	/** Fetch the location of the bcel or asm bundle into BCEL_PATH. */
-	static void findBytecodeLib(BundleContext context, boolean useDynamicWeaving) throws IOException {
-		ServiceReference<PackageAdmin> ref= (ServiceReference<PackageAdmin>) context.getServiceReference(PackageAdmin.class);
+	/** Fetch the location of the bcel bundle into BYTECODE_LIBRARY_PATH. */
+	@SuppressWarnings("deprecation") // class PackageAdmin is "deprecated"
+	static void findBytecodeLib(BundleContext context) throws IOException {
+		ServiceReference<org.osgi.service.packageadmin.PackageAdmin> ref =
+				(ServiceReference<org.osgi.service.packageadmin.PackageAdmin>) context.getServiceReference(org.osgi.service.packageadmin.PackageAdmin.class);
 		if (ref == null)
 			throw new IllegalStateException("Cannot connect to PackageAdmin"); //$NON-NLS-1$
-		PackageAdmin packageAdmin = context.getService(ref);
-		if (useDynamicWeaving) {
-			BYTECODE_LIBRARY_PATH = new IPath[ASM_BUNDLE_NAMES.length];
-			int i = 0;
-			for (String bundleName : ASM_BUNDLE_NAMES) {
-				for (Bundle bundle : packageAdmin.getBundles(bundleName, ASM_VERSION_RANGE)) {			
-					BYTECODE_LIBRARY_PATH[i++] = new Path(FileLocator.toFileURL(bundle.getEntry("/")).getFile()); //$NON-NLS-1$
-					break;
-				}
-			}
+		org.osgi.service.packageadmin.PackageAdmin packageAdmin = context.getService(ref);
+		String bundleName = BCEL_BUNDLE_NAME;
+		String bundleVersionRange = BCEL_VERSION_RANGE;
+		for (Bundle bundle : packageAdmin.getBundles(bundleName, bundleVersionRange)) {			
+			BYTECODE_LIBRARY_PATH = new IPath[] { new Path(FileLocator.toFileURL(bundle.getEntry("/")).getFile()) }; //$NON-NLS-1$
 			return;
-		} else {
-			String bundleName = BCEL_BUNDLE_NAME;
-			String bundleVersionRange = BCEL_VERSION_RANGE;
-			for (Bundle bundle : packageAdmin.getBundles(bundleName, bundleVersionRange)) {			
-				BYTECODE_LIBRARY_PATH = new IPath[] { new Path(FileLocator.toFileURL(bundle.getEntry("/")).getFile()) }; //$NON-NLS-1$
-				return;
-			}
 		}
-		throw new RuntimeException("bytecode libarary not found, useDynamicWeaving="+useDynamicWeaving); //$NON-NLS-1$
+		throw new RuntimeException("bytecode libarary for OTRE not found"); //$NON-NLS-1$
 	}
 	
 }
