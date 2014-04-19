@@ -33,6 +33,13 @@ Author: Stephan Herrmann.
          unpack="false"/>
 
    <plugin
+         id="org.apache.bcel"
+         download-size="0"
+         install-size="0"
+         version="0.0.0"
+         unpack="false"/>
+
+   <plugin
          id="org.eclipse.objectteams.otredyn"
          download-size="89"
          install-size="202"
@@ -40,7 +47,21 @@ Author: Stephan Herrmann.
          unpack="false"/>
 
    <plugin
-         id="org.apache.bcel"
+         id="org.objectweb.asm"
+         download-size="0"
+         install-size="0"
+         version="0.0.0"
+         unpack="false"/>
+
+   <plugin
+         id="org.objectweb.asm.tree"
+         download-size="0"
+         install-size="0"
+         version="0.0.0"
+         unpack="false"/>
+
+   <plugin
+         id="org.objectweb.asm.commons"
          download-size="0"
          install-size="0"
          version="0.0.0"
