@@ -129,6 +129,8 @@ public class RepositoryAccess {
 			subJClass = Repository.lookupClass(subClassName);
 			superJClass= Repository.lookupClass(superClassName);
 		}
+		if (subJClass == null)
+			return false;
 		return subJClass.instanceOf(superJClass);
 	}
 }
