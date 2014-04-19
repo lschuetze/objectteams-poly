@@ -147,6 +147,11 @@
               class="org.eclipse.objectteams.otdt.internal.ui.compare.StructureCompare"
               icon="platform:/plugin/org.eclipse.objectteams.otdt.ui/icons/ot/team_obj.gif">
         </team>
+        <team
+              activation="NONE"
+              class="org.eclipse.objectteams.otdt.internal.ui.wizards.NewOTProjectWizard"
+              icon="platform:/plugin/org.eclipse.objectteams.otdt.ui/icons/ot/team_obj.gif">
+        </team>
      </aspectBinding>   
      <aspectBinding icon="platform:/plugin/org.eclipse.objectteams.otdt.ui/icons/ot/calloutbinding_obj.gif">
 	     <basePlugin 
@@ -235,6 +240,26 @@
             id="org.eclipse.objectteams.otdt.ui.text.correction.QuickAssitProcessor"
             name="OT/J Quick Assit Processor">
       </quickAssistProcessor>
+   </extension>
+   <extension
+         point="org.eclipse.ui.newWizards">
+      <category
+            id="org.eclipse.objectteams.otdt.ui.wizards"
+            name="%ObjectTeams">
+      </category>
+      <wizard
+            category="org.eclipse.objectteams.otdt.ui.wizards"
+            class="org.eclipse.objectteams.otdt.internal.ui.wizards.NewOTProjectWizard"
+            finalPerspective="org.eclipse.objectteams.otdt.ui.OTJavaPerspective"
+            icon="platform:/plugin/org.eclipse.objectteams.otdt.ui/icons/ot/wizard/newprj_wiz.gif"
+            id="org.eclipse.objectteams.otdt.ui.wizards.OTNewProjectWizard"
+            name="%NewOTProject.label"
+            preferredPerspectives="org.eclipse.objectteams.otdt.ui.OTJavaPerspective"
+            project="true">
+         <description>
+            %NewOTProject.description
+         </description>
+      </wizard>
    </extension>
 
 </plugin>

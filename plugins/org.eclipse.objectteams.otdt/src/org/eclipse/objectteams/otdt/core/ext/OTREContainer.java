@@ -184,6 +184,14 @@ public class OTREContainer implements IClasspathContainer
 	    return false;
 	}
 
+	public static IPath getContainerPath(WeavingScheme scheme) {
+		switch (scheme) {
+			case OTRE: return OTRE_CONTAINER_PATH;
+			case OTDRE: return OTDREContainer.CONTAINER_PATH;
+			default: throw new IncompatibleClassChangeError("unexpected enum constant "+scheme);
+		}
+	}
+
 	/**
 	 * Add the object teams foundation classes to the classpath.
 	 */

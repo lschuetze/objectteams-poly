@@ -93,19 +93,6 @@
             id="org.eclipse.objectteams.otdt.ui.wizards">
       </category>
       <wizard
-            name="%NewOTProject.label"
-            icon="icons/ot/wizard/newprj_wiz.gif"
-            category="org.eclipse.objectteams.otdt.ui.wizards"
-            class="org.eclipse.objectteams.otdt.internal.ui.wizards.OTNewProjectWizard"
-            preferredPerspectives="org.eclipse.objectteams.otdt.ui.OTJavaPerspective"
-            project="true"
-            finalPerspective="org.eclipse.objectteams.otdt.ui.OTJavaPerspective"
-            id="org.eclipse.objectteams.otdt.ui.wizards.OTNewProjectWizard">
-         <description>
-            %NewOTProject.description
-         </description>
-      </wizard>
-      <wizard
             name="%NewTeam.label"
             icon="icons/ot/newteam_obj.gif"
             category="org.eclipse.objectteams.otdt.ui.wizards"

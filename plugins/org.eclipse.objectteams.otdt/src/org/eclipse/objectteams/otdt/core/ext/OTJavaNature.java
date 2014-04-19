@@ -142,6 +142,30 @@ public class OTJavaNature implements IProjectNature
     	return WeavingScheme.OTRE;
     }
 
+	public static void addOTNatureAndBuilder(IProject project) throws CoreException {
+		IProjectDescription prjDesc = project.getDescription();
+		prjDesc.setNatureIds(OTDTPlugin.createProjectNatures(prjDesc));
+		ICommand[] buildSpecs = prjDesc.getBuildSpec();
+		prjDesc.setBuildSpec(replaceOrAddOTBuilder(prjDesc, buildSpecs));
+		project.setDescription(prjDesc, null);
+	}
+
+	private static ICommand[] replaceOrAddOTBuilder(IProjectDescription prjDesc, ICommand[] buildSpecs) {
+		ICommand otBuildCmd = OTDTPlugin.createProjectBuildCommand(prjDesc);
+		// replace existing Java builder?
+		for(int i=0; i<buildSpecs.length; i++) {
+			if (buildSpecs[i].getBuilderName().equals(JavaCore.BUILDER_ID)) {
+				buildSpecs[i] = otBuildCmd;
+				return buildSpecs;
+			}
+		}
+		// not found, add to front:
+		int len = buildSpecs.length;
+		System.arraycopy(buildSpecs, 0, buildSpecs = new ICommand[len+1], 1, len);
+		buildSpecs[0] = otBuildCmd;
+		return buildSpecs;
+	}
+
 	private boolean contains(ICommand[] commands, String builderId) {
         for (int i = 0; i < commands.length; i++)
 			if (commands[i].getBuilderName().equals(builderId))

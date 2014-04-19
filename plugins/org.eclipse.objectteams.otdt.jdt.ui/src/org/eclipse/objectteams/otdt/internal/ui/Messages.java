@@ -21,6 +21,7 @@ import org.eclipse.osgi.util.NLS;
 public class Messages extends NLS {
 	private static final String BUNDLE_NAME = Messages.class.getName();
 
+
 	public static String Completion_method_binding_label;
 	public static String Completion_callout_label;
 	public static String Completion_callin_label;
@@ -42,7 +43,10 @@ public class Messages extends NLS {
 	public static String QuickOutline__and_role_files;
 
 	public static String ViewAdaptor_guard_predicate_postfix;
-	
+
+	public static String NewOTProjectWizardPageOne_JREGroup_title;
+	public static String NewOTProjectWizardPageOne_Weaving_label;
+
 	static {
 		// initialize resource bundle
 		NLS.initializeMessages(BUNDLE_NAME, Messages.class);
