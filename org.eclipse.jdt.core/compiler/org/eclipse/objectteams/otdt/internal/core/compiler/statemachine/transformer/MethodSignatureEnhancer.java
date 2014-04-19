@@ -429,7 +429,7 @@ public class MethodSignatureEnhancer implements IOTConstants, TypeConstants, Cla
 	}
 	private Argument[] internalGetSourceArguments(AbstractMethodDeclaration methodDeclaration) {
 		Argument[] arguments = methodDeclaration.arguments;
-		if (methodDeclaration.isCallin()) {
+		if (methodDeclaration.isCallin() && internalIsEnhanced(methodDeclaration)) {
 			assert arguments != null;
 			int len = arguments.length - this.ENHANCING_ARG_LEN;
 			assert len >= 0;
