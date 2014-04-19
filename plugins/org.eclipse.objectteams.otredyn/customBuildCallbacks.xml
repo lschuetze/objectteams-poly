@@ -82,7 +82,7 @@
 	</target>
 
 	<target name="post.compile.@dot">
-		<echo message="Jaring variants of OTRE from ${target.folder} into ${buildDirectory}/plugins/org.eclipse.objectteams.otdt/lib" />		<jar destfile="${buildDirectory}/plugins/org.eclipse.objectteams.otdt/lib/otre_min.jar"			 basedir="${target.folder}"			 includes="org/objectteams/*.class"			 compress="true"/>		<jar destfile="${buildDirectory}/plugins/org.eclipse.objectteams.otdt/lib/otre_agent.jar"			 basedir="${target.folder}"			 includes="org/eclipse/objectteams/otredyn/transformer/jplis/otreAgent.class"			 compress="true">			<manifest>				<attribute name="Premain-Class" value="org.eclipse.objectteams.otredyn.transformer.jplis.otreAgent"/>				<attribute name="Can-Redefine-Classes" value="true"/>			</manifest>		</jar>	</target>
+		<echo message="Jaring variants of OTRE from ${target.folder} into ${buildDirectory}/plugins/org.eclipse.objectteams.otdt/lib" />		<jar destfile="${buildDirectory}/plugins/org.eclipse.objectteams.otdt/lib/otredyn_min.jar"			 basedir="${target.folder}"			 includes="org/objectteams/*.class"			 compress="true"/>		<jar destfile="${buildDirectory}/plugins/org.eclipse.objectteams.otdt/lib/otredyn_agent.jar"			 basedir="${target.folder}"			 includes="org/eclipse/objectteams/otredyn/transformer/jplis/otreAgent.class"			 compress="true">			<manifest>				<attribute name="Premain-Class" value="org.eclipse.objectteams.otredyn.transformer.jplis.otreAgent"/>				<attribute name="Can-Redefine-Classes" value="true"/>			</manifest>		</jar>	</target>
 	
 	<!-- ===================================================================== -->
 	<!-- Steps to do after the compilation target <name>                       -->
