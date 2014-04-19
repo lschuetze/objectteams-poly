@@ -11,6 +11,7 @@
 package org.eclipse.jdt.internal.compiler.lookup;
 
 import org.eclipse.jdt.core.compiler.CharOperation;
+import org.eclipse.objectteams.otdt.internal.core.compiler.lookup.ITeamAnchor;
 
 /**
  * Capture-like type variable introduced during 1.8 type inference.
@@ -30,25 +31,15 @@ public class CaptureBinding18 extends CaptureBinding {
 		if (upperBounds.length > 0)
 			this.firstBound = upperBounds[0];
 		int numReferenceInterfaces = 0;
+		if (!isConsistentIntersection(upperBounds))
+			return false;
 		for (int i = 0; i < upperBounds.length; i++) {
 			TypeBinding aBound = upperBounds[i];
-			if (!aBound.isWildcard() && !aBound.isTypeVariable() && aBound.isProperType(true)) {
-				// check for inconsistency between any two real types:
-				for (int j = 0; j < upperBounds.length; j++) {
-					if (i == j) continue;
-					TypeBinding otherBound = upperBounds[j];
-					if (!otherBound.isWildcard() && !otherBound.isTypeVariable() && otherBound.isProperType(true))
-						if (aBound.erasure().isCompatibleWith(otherBound.erasure()))
-							if (!aBound.isCompatibleWith(otherBound))
-								return false;
-				}
-			}
 			if (aBound instanceof ReferenceBinding) {
 				if (this.superclass == null && aBound.isClass())
-					this.superclass = (ReferenceBinding) upperBounds[i];
+					this.superclass = (ReferenceBinding) aBound;
 				else if (aBound.isInterface())
 					numReferenceInterfaces++;
-				// TODO: what about additional super classes?? (see isCompatibleWith)
 			}
 		}
 		this.superInterfaces = new ReferenceBinding[numReferenceInterfaces];
@@ -80,9 +71,16 @@ public class CaptureBinding18 extends CaptureBinding {
 	public TypeBinding erasure() {
 		if (this.upperBounds != null && this.upperBounds.length > 1) {
 			ReferenceBinding[] erasures = new ReferenceBinding[this.upperBounds.length];
+			boolean multipleErasures = false;
 			for (int i = 0; i < this.upperBounds.length; i++) {
 				erasures[i] = (ReferenceBinding) this.upperBounds[i].erasure(); // FIXME cast?
+				if (i > 0) {
+					if (TypeBinding.notEquals(erasures[0], erasures[i]))
+						multipleErasures = true;
+				}
 			}
+			if (!multipleErasures)
+				return erasures[0];
 			return new IntersectionCastTypeBinding(erasures, this.environment);
 		}
 		return super.erasure();
@@ -199,11 +197,31 @@ public class CaptureBinding18 extends CaptureBinding {
 				}
 			}
 			if (haveSubstitution) {
-				CaptureBinding18 newCapture = (CaptureBinding18) clone(enclosingType());
-				newCapture.superclass = currentSuperclass;
-				newCapture.superInterfaces = currentSuperInterfaces;
-				newCapture.upperBounds = currentUpperBounds;
+				final CaptureBinding18 newCapture = (CaptureBinding18) clone(enclosingType());
 				newCapture.tagBits = this.tagBits;
+				Substitution substitution = new Substitution() {
+					@Override
+					public TypeBinding substitute(TypeVariableBinding typeVariable) {
+						return  (typeVariable == CaptureBinding18.this) ? newCapture : typeVariable; //$IDENTITY-COMPARISON$
+					}
+					@Override
+					public boolean isRawSubstitution() {
+						return false;
+					}
+					@Override
+					public LookupEnvironment environment() {
+						return CaptureBinding18.this.environment;
+					}
+//{ObjectTeams:
+					@Override
+					public ITeamAnchor substituteAnchor(ITeamAnchor anchor, int rank2) {
+						return anchor;
+					}
+// SH}
+				};
+				newCapture.superclass = (ReferenceBinding) Scope.substitute(substitution, currentSuperclass);
+				newCapture.superInterfaces = Scope.substitute(substitution, currentSuperInterfaces);
+				newCapture.upperBounds = Scope.substitute(substitution, currentUpperBounds);
 				return newCapture;
 			}
 			return this;

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2013 IBM Corporation and others.
+ * Copyright (c) 2000, 2014 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -10,6 +10,7 @@
  *     IBM Corporation - initial API and implementation
  *     Fraunhofer FIRST - extended API and implementation
  *     Technical University Berlin - extended API and implementation
+ *     Terry Parker <tparker@google.com> - [performance] Low hit rates in JavaModel caches - https://bugs.eclipse.org/421165
  *******************************************************************************/
 package org.eclipse.jdt.internal.core.builder;
 
@@ -613,7 +614,6 @@ private int initializeBuilder(int kind, boolean forBuild) throws CoreException {
 		// Flush the existing external files cache if this is the beginning of a build cycle
 		String projectName = this.currentProject.getName();
 		if (builtProjects == null || builtProjects.contains(projectName)) {
-			JavaModel.flushExternalFileCache();
 			builtProjects = new ArrayList();
 		}
 		builtProjects.add(projectName);

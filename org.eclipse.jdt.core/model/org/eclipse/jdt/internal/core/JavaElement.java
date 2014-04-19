@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2013 IBM Corporation and others.
+ * Copyright (c) 2000, 2014 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -27,6 +27,8 @@ import java.net.URLConnection;
 import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Set;
 
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.*;
@@ -103,6 +105,9 @@ public abstract class JavaElement extends PlatformObject implements IJavaElement
 
 	protected static final JavaElement[] NO_ELEMENTS = new JavaElement[0];
 	protected static final Object NO_INFO = new Object();
+	
+	private static Set<String> invalidURLs = null;
+	private static Set<String> validURLs = null;
 
 	/**
 	 * Constructs a handle for a java element with
@@ -811,9 +816,9 @@ public abstract class JavaElement extends PlatformObject implements IJavaElement
 		if (arrayLength < toBeFoundLength)
 			return -1;
 		loop: for (int i = start, max = arrayLength - toBeFoundLength + 1; i < max; i++) {
-			if (array[i] == toBeFound[0]) {
+			if (isSameCharacter(array[i], toBeFound[0])) {
 				for (int j = 1; j < toBeFoundLength; j++) {
-					if (array[i + j] != toBeFound[j])
+					if (!isSameCharacter(array[i + j], toBeFound[j]))
 						continue loop;
 				}
 				return i;
@@ -821,11 +826,52 @@ public abstract class JavaElement extends PlatformObject implements IJavaElement
 		}
 		return -1;
 	}
+	boolean isSameCharacter(byte b1, byte b2) {
+		if (b1 == b2 || Character.toUpperCase((char) b1) == Character.toUpperCase((char) b2)) {
+			return true;
+		}
+		return false;
+	}
+	
+	/*
+	 * This method caches a list of good and bad Javadoc locations in the current eclipse session. 
+	 */
+	protected void validateAndCache(URL baseLoc, FileNotFoundException e) throws JavaModelException {
+		String url = baseLoc.toString();
+		if (validURLs != null && validURLs.contains(url)) return;
+		
+		if (invalidURLs != null && invalidURLs.contains(url)) 
+				throw new JavaModelException(e, IJavaModelStatusConstants.CANNOT_RETRIEVE_ATTACHED_JAVADOC);
+
+		InputStream input = null;
+		try {
+			URLConnection connection = baseLoc.openConnection();
+			input = connection.getInputStream();
+			if (validURLs == null) {
+				validURLs = new HashSet<String>(1);
+			}
+			validURLs.add(url);
+		} catch (Exception e1) {
+			if (invalidURLs == null) { 
+				invalidURLs = new HashSet<String>(1);
+			}
+			invalidURLs.add(url);
+			throw new JavaModelException(e, IJavaModelStatusConstants.CANNOT_RETRIEVE_ATTACHED_JAVADOC);
+		} finally {
+			if (input != null) {
+				try {
+					input.close();
+				} catch (Exception e1) {
+					// Ignore
+				}
+			}
+		}
+	}
 	/*
 	 * We don't use getContentEncoding() on the URL connection, because it might leave open streams behind.
 	 * See https://bugs.eclipse.org/bugs/show_bug.cgi?id=117890
 	 */
-	protected String getURLContents(String docUrlValue) throws JavaModelException {
+	protected String getURLContents(URL baseLoc, String docUrlValue) throws JavaModelException {
 		InputStream stream = null;
 		JarURLConnection connection2 = null;
 		try {
@@ -909,8 +955,8 @@ public abstract class JavaElement extends PlatformObject implements IJavaElement
 		} catch (MalformedURLException e) {
 			throw new JavaModelException(new JavaModelStatus(IJavaModelStatusConstants.CANNOT_RETRIEVE_ATTACHED_JAVADOC, this));
 		} catch (FileNotFoundException e) {
-			// Ignore, see https://bugs.eclipse.org/bugs/show_bug.cgi?id=120559 &
-			// https://bugs.eclipse.org/bugs/show_bug.cgi?id=403036
+			// https://bugs.eclipse.org/bugs/show_bug.cgi?id=403154
+			validateAndCache(baseLoc, e);
 		} catch (SocketException e) {
 			// see bug https://bugs.eclipse.org/bugs/show_bug.cgi?id=247845 &
 			// https://bugs.eclipse.org/bugs/show_bug.cgi?id=400060

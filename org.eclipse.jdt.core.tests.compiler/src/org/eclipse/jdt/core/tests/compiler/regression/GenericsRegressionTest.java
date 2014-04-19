@@ -20,6 +20,9 @@
  *								Bug 426590 - [1.8][compiler] Compiler error with tenary operator
  *								Bug 427216 - [Java8] array to varargs regression
  *								Bug 425031 - [1.8] nondeterministic inference for GenericsRegressionTest.test283353
+ *								Bug 430686 - [1.8][compiler] Generics: erroneously reports 'method not applicable for the arguments'
+ *								Bug 430759 - [1.8][compiler] SourceTypeBinding cannot be cast to ParameterizedTypeBinding
+ *								Bug 431408 - Java 8 (1.8) generics bug
  *******************************************************************************/
 package org.eclipse.jdt.core.tests.compiler.regression;
 
@@ -4621,6 +4624,139 @@ public void testBug430987() {
 			"Type safety: The expression of type X.Foo needs unchecked conversion to conform to X.Foo<Object>\n" + 
 			"----------\n");
 	}
+}
+public void testBug430686() {
+	runConformTest(
+		new String[] {
+			"TestClass.java",
+			"\n" + 
+			"public class TestClass\n" + 
+			"{\n" + 
+			"    private static class Alice<A extends Alice<A, B>, B extends Bob>\n" + 
+			"    {\n" + 
+			"    }\n" + 
+			"\n" + 
+			"    public static class Bob\n" + 
+			"    {\n" + 
+			"    }\n" + 
+			"\n" + 
+			"    public void callingMethod()\n" + 
+			"    {\n" + 
+			"        calledMethod(); // error: The method calledMethod() in the type TestClass is not applicable for the arguments ()\n" + 
+			"    }\n" + 
+			"\n" + 
+			"    private <A extends Alice<A, B>, B extends Bob> A calledMethod()\n" + 
+			"    {\n" + 
+			"        return null;\n" + 
+			"    }\n" + 
+			"}\n"
+		});
+}
+public void testBug430759() {
+	runConformTest(
+		new String[] {
+			"A.java",
+			"class CriteriaBuilder {\n" + 
+			"\n" + 
+			"}\n" + 
+			"\n" + 
+			"class CriteriaQuery<T> {\n" + 
+			"\n" + 
+			"}\n" + 
+			"\n" + 
+			"class Root<T> {\n" + 
+			"\n" + 
+			"}\n" + 
+			"\n" + 
+			"public class A<E> {\n" + 
+			"\n" + 
+			"    protected abstract class CustomGenericQuery<T> {\n" + 
+			"    }\n" + 
+			"\n" + 
+			"    protected <T> T executeCustomSingleQuery(CustomGenericQuery<T> customQuery, Class<T> resultClass) {\n" + 
+			"	return null;\n" + 
+			"    }\n" + 
+			"\n" + 
+			"    public Long getCount() {\n" + 
+			"	return executeCustomSingleQuery(\n" + 
+			"\n" + 
+			"	new CustomGenericQuery<Long>() {\n" + 
+			"	    public void customizeQuery(final Root<E> root, final CriteriaBuilder cb,\n" + 
+			"		    CriteriaQuery<Long> cq) {\n" + 
+			"	    }\n" + 
+			"	}, Long.class);\n" + 
+			"    }\n" + 
+			"}\n"
+		});
+}
+public void testBug431408() {
+	runConformTest(
+		new String[] {
+			"EclipseJava8Generics.java",
+			"public class EclipseJava8Generics {\n" + 
+			"\n" + 
+			"  public interface Foo<V> {\n" + 
+			"  }\n" + 
+			"\n" + 
+			"  public static class FooBar<V, T extends Foo<V>> {\n" + 
+			"  }\n" + 
+			"\n" + 
+			"  public static class BaseClass {\n" + 
+			"    protected <V> FooBar<V, ? extends Foo<V>> doSomething() {\n" + 
+			"      return null;\n" + 
+			"    }\n" + 
+			"  }\n" + 
+			"\n" + 
+			"  public static class DerivedClass extends BaseClass {\n" + 
+			"    @Override\n" + 
+			"    protected <V> FooBar<V, ? extends Foo<V>> doSomething() {\n" + 
+			"      //Eclipse 4.3.2 with Java 8 can't compile the next line \n" + 
+			"      FooBar<V, ? extends Foo<V>> prop = super.doSomething();\n" + 
+			"      return prop;\n" + 
+			"    }\n" + 
+			"  }\n" + 
+			"}\n"
+		});
+}
+
+public void testBug431581() {
+	runNegativeTest(
+		new String[] {
+			"BugEclipse.java",
+			"public class BugEclipse\n" + 
+			"{\n" + 
+			"  static Dog dog = new Dog();\n" + 
+			"  public static void main(String[] args)\n" + 
+			"  {\n" + 
+			"    System.out.println(\"bug compile eclipse\");\n" + 
+			"    Cat cat = getDog(); // <- error here, eclipse compile this line but the execution print ClassCastException\n" + 
+			"  }\n" + 
+			"  public static <T extends Dog> T getDog()\n" + 
+			"  {\n" + 
+			"    return (T) dog;\n" + 
+			"  }\n" + 
+			"  static class Cat {\n" + 
+			"  }\n" + 
+			"  static class Dog {\n" + 
+			"  }\n" + 
+			"}\n"
+		},
+		"----------\n" + 
+		"1. ERROR in BugEclipse.java (at line 7)\n" + 
+		"	Cat cat = getDog(); // <- error here, eclipse compile this line but the execution print ClassCastException\n" + 
+		(this.complianceLevel < ClassFileConstants.JDK1_8	?
+		"	          ^^^^^^\n" + 
+		"Bound mismatch: The generic method getDog() of type BugEclipse is not applicable for the arguments (). The inferred type BugEclipse.Cat&BugEclipse.Dog is not a valid substitute for the bounded parameter <T extends BugEclipse.Dog>\n"
+		: 
+		"	          ^^^^^^^^\n" + 
+		"Type mismatch: cannot convert from BugEclipse.Dog to BugEclipse.Cat\n"
+		) +
+		"----------\n" + 
+		"2. WARNING in BugEclipse.java (at line 11)\n" + 
+		"	return (T) dog;\n" + 
+		"	       ^^^^^^^\n" + 
+		"Type safety: Unchecked cast from BugEclipse.Dog to T\n" + 
+		"----------\n");
 }
 }
 

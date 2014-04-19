@@ -866,6 +866,7 @@ public class Parser extends CommitRollbackParser implements ConflictedParser, Op
 	protected int[] expressionLengthStack;
 	protected int expressionPtr;
 	protected Expression[] expressionStack = new Expression[ExpressionStackIncrement];
+	protected int rBracketPosition;
 	public int firstToken ; // handle for multiple parsing goals
 	
 	/* jsr308 -- Type annotation management, we now maintain type annotations in a separate stack
@@ -11262,6 +11263,7 @@ protected void consumeToken(int type) {
 			break;
 			//let extra semantic action decide when to push
 		case TokenNameRBRACKET :
+			this.rBracketPosition = this.scanner.startPosition;
 			this.endPosition = this.scanner.startPosition;
 			this.endStatementPosition = this.scanner.currentPosition - 1;
 			break;
@@ -12749,7 +12751,7 @@ protected TypeReference getTypeReference(int dim, boolean liftingTypeAllowed) {
 			ref.sourceEnd = this.intStack[this.intPtr--];
 		} else {
 			this.intPtr--;
-			ref.sourceEnd = this.endPosition;
+			ref.sourceEnd = this.rBracketPosition;
 		}
 	} else {
 		int numberOfIdentifiers = this.genericsIdentifiersLengthStack[this.genericsIdentifiersLengthPtr--];
@@ -13220,6 +13222,7 @@ public void initialize(boolean parsingCompilationUnit) {
 	this.rBraceStart = 0;
 	this.rBraceEnd = 0;
 	this.rBraceSuccessorStart = 0;
+	this.rBracketPosition = 0;
 
 	this.genericsIdentifiersLengthPtr = -1;
 	this.genericsLengthPtr = -1;

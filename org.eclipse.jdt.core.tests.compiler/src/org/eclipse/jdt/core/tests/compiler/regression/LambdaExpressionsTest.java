@@ -2147,7 +2147,7 @@ public void testBug424742() {
 		"1. ERROR in TestInlineLambdaArray.java (at line 4)\n" + 
 		"	TestInlineLambdaArray h = new TestInlineLambdaArray(x -> x++);	// [9]\n" + 
 		"	                          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n" + 
-		"The constructor TestInlineLambdaArray((<no type> x) -> x ++) is undefined\n" + 
+		"The constructor TestInlineLambdaArray((<no type> x) -> {}) is undefined\n" + 
 		"----------\n" + 
 		"2. ERROR in TestInlineLambdaArray.java (at line 5)\n" + 
 		"	public TestInlineLambda(FI fi) {}\n" + 
@@ -4096,7 +4096,122 @@ public void test430310c() {
 			},
 			"OK");
 }
-
+// https://bugs.eclipse.org/bugs/show_bug.cgi?id=432619, [1.8] Bogus error from method reference: "should be accessed in a static way"
+public void test432619() throws Exception {
+	this.runConformTest(
+		new String[] {
+			"X.java",
+			"import java.util.function.BiConsumer;\n" +
+			"public interface X<E extends Exception> {\n" +
+			"	static void foo() {\n" +
+			"	    BiConsumer<double[][], Double> biConsumer2 = Re2::accumulate;\n" +
+			"	}\n" +
+			"	static class Re2 {\n" +
+			"	    static void accumulate(double[][] container, Double value) {}\n" +
+			"	}\n" +
+			"   public static void main(String [] args) {\n" +
+			"       System.out.println(\"OK\");\n" +
+			"   }\n" +
+			"}\n"
+		},
+		"OK");
+}
+// https://bugs.eclipse.org/bugs/show_bug.cgi?id=432619, [1.8] Bogus error from method reference: "should be accessed in a static way"
+public void test432619a() throws Exception {
+	this.runConformTest(
+		new String[] {
+			"StreamInterface.java",
+			"import java.util.Map;\n" +
+			"import java.util.stream.Collector;\n" +
+			"public interface StreamInterface<E extends Exception> {\n" +
+			"	static class DoubleCo {\n" +
+			"		private static class Re2 {\n" +
+			"			static <K, E extends Exception> Map<K, double[]> internalToMapToList2() {\n" +
+			"				Collector<Double, double[][], double[][]> toContainer1 = Collector.of(\n" +
+			"				//The method supply() from the type StreamInterface.DoubleCo.Re2 should be accessed in a static way\n" +
+			"				  StreamInterface.DoubleCo.Re2::supply,\n" +
+			"				  //The method accumulate(double[][], Double) from the type StreamInterface.DoubleCo.Re2 should be accessed in a static way\n" +
+			"				  StreamInterface.DoubleCo.Re2::accumulate,\n" +
+			"				  //The method combine(double[][], double[][]) from the type StreamInterface.DoubleCo.Re2 should be accessed in a static way\n" +
+			"				  StreamInterface.DoubleCo.Re2::combine);\n" +
+			"				Collector<Double, double[][], double[][]> toContainer2 =\n" +
+			"				//All 3 from above:\n" +
+			"				  Collector.of(DoubleCo.Re2::supply, DoubleCo.Re2::accumulate, DoubleCo.Re2::combine);\n" +
+			"				return null;\n" +
+			"			}\n" +
+			"			private static double[][] supply() {\n" +
+			"				return new double[64][];\n" +
+			"			}\n" +
+			"			private static void accumulate(double[][] container, Double value) {}\n" +
+			"			private static double[][] combine(double[][] container, double[][] containerRight) {\n" +
+			"				return new double[container.length + containerRight.length][];\n" +
+			"			}\n" +
+			"		}\n" +
+			"	}\n" +
+			"     public static void main(String [] args) {\n" +
+			"         System.out.println(\"OK\");\n" +
+			"     }\n" +
+			"}\n"
+		},
+		"OK");
+}
+// https://bugs.eclipse.org/bugs/show_bug.cgi?id=432682, [1.8][compiler] Type mismatch error with lambda expression
+public void _test432682() throws Exception {
+	this.runConformTest(
+		new String[] {
+			"X.java",
+			"import java.util.Optional;\n" +
+			"public class X {\n" +
+			"	public static void main(String[] args) {\n" +
+			"		Optional<String> userName = Optional.of(\"sa\");\n" +
+			"		Optional<String> password = Optional.of(\"sa\");\n" +
+			"		boolean isValid = userName.flatMap(u -> {\n" +
+			"			return password.map(p -> {\n" +
+			"				return u.equals(\"sa\") && p.equals(\"sa\");\n" +
+			"			});\n" +
+			"		}).orElse(false);\n" +
+			"		System.out.println(isValid);\n" +
+			"	}\n" +
+			"}\n"
+		},
+		"OK");
+}
+// https://bugs.eclipse.org/bugs/show_bug.cgi?id=432520, compiler "duplicate method" bug with lamdas and generic interfaces 
+public void test432520() throws Exception {
+	this.runConformTest(
+		new String[] {
+			"X.java",
+			"public class X {\n" +
+			"	public static void withProvider(Provider<String> provider) { }\n" +
+			"	public static void main(String [] args) {\n" +
+			"		withProvider(() -> \"user\");\n" +
+			"	}\n" +
+			"}\n" +
+			"interface ParentProvider<T> {\n" +
+			"	T get();\n" +
+			"}\n" +
+			"// if you remove the extends clause everything works fine\n" +
+			"interface Provider<T> extends ParentProvider<T> {\n" +
+			"	T get();\n" +
+			"}\n"
+		},
+		"");
+}
+// https://bugs.eclipse.org/bugs/show_bug.cgi?id=432625, [1.8] VerifyError with lambdas and wildcards  
+public void test432625() throws Exception {
+	this.runConformTest(
+		new String[] {
+			"X.java",
+			"import java.util.stream.Stream;\n" +
+			"public class X {\n" +
+			"    public static void main(String[] args) {\n" +
+			"        Stream<?> stream = Stream.of(\"A\");\n" +
+			"        stream.map(x -> (String) x);\n" +
+			"    }\n" +
+			"}\n"
+		},
+		"");
+}
 public static Class testClass() {
 	return LambdaExpressionsTest.class;
 }

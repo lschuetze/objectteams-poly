@@ -20,6 +20,7 @@ import org.eclipse.jdt.core.dom.*;
 import org.eclipse.jdt.core.BindingKey;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaElement;
+import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.JavaModelException;
 
@@ -3666,7 +3667,7 @@ public class ASTConverter18Test extends ConverterTestSetup {
 		ASTNode node = buildAST(contents, this.workingCopy, false);
 		assertEquals("Not a compilation unit", ASTNode.COMPILATION_UNIT, node.getNodeType());
 		CompilationUnit compilationUnit = (CompilationUnit) node;
-		assertProblemsSize(compilationUnit, 2, "The method goo(I) in the type X is not applicable for the arguments ((<no type> s) -> 0)\n" + 
+		assertProblemsSize(compilationUnit, 2, "The method goo(I) in the type X is not applicable for the arguments ((<no type> s) -> {})\n" + 
 												"The target type of this expression must be a functional interface");
 		node = getASTNode(compilationUnit, 1);
 		assertEquals("Not a type declaration", ASTNode.TYPE_DECLARATION, node.getNodeType());
@@ -4324,5 +4325,41 @@ public void testBug425183a() throws JavaModelException {
 	
 	// assert that KeyToSignature doesn't throw AIOOBE, the result containing '!*' is a workaround for now, see https://bugs.eclipse.org/429264
 	assertEquals("wrong signature", "<T::Ljava.lang.Comparable<-TT;>;>()LComparator<!*>;", new BindingKey(method.getKey()).toSignature());
+}
+/**
+ * https://bugs.eclipse.org/bugs/show_bug.cgi?id=432051
+ * 
+ * @throws JavaModelException
+ */
+public void testBug432051() throws JavaModelException {
+	String contents =
+			"public class X {\n" +
+			"     * Delete line '/**' above.\n" +
+			"     *\n" +
+			"     * @param a (for example 'QVector')\n" +
+			"     * @param declaringMember the context for resolving (made in)\n" +
+			"     * @return if\n" +
+			"     */\n" +
+			"    void foo() {\n" +
+			"    }\n" +
+			"}\n";
+	this.workingCopy = getWorkingCopy("/Converter18/src/test432051/X.java", contents, true/*computeProblems*/);
+	IJavaProject javaProject = this.workingCopy.getJavaProject();
+	class BindingRequestor extends ASTRequestor {
+		ITypeBinding _result = null;
+		public void acceptBinding(String bindingKey, IBinding binding) {
+			if (this._result == null && binding != null && binding.getKind() == IBinding.TYPE)
+				this._result = (ITypeBinding) binding;
+		}
+	}
+	final BindingRequestor requestor = new BindingRequestor();
+	final ASTParser parser = ASTParser.newParser(AST.JLS8);
+	parser.setResolveBindings(false);
+	parser.setProject(javaProject);
+	try {
+		parser.createASTs(new ICompilationUnit[] {this.workingCopy}, new String[0], requestor, null);
+	} catch (IllegalArgumentException e) {
+		assertTrue("Test Failed", false);
+	}
 }
 }
