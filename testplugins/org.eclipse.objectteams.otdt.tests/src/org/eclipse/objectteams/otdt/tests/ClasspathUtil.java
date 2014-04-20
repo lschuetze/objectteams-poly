@@ -1,13 +1,12 @@
 /**********************************************************************
  * This file is part of "Object Teams Development Tooling"-Software
  * 
- * Copyright 2010 GK Software AG
+ * Copyright 2010, 2014 GK Software AG
  * 
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
- * $Id$
  * 
  * Please visit http://www.eclipse.org/objectteams for updates and contact.
  * 
@@ -18,16 +17,30 @@ package org.eclipse.objectteams.otdt.tests;
 
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.jdt.core.JavaCore;
+import org.eclipse.objectteams.otdt.core.ext.OTDREContainer;
 import org.eclipse.objectteams.otdt.core.ext.OTDTPlugin;
 import org.eclipse.objectteams.otdt.core.ext.OTREContainer;
+import org.eclipse.objectteams.otdt.core.ext.WeavingScheme;
 
 /** Constants for the classpath of OT/J Projects.*/
 public class ClasspathUtil {
 
 	// === OT Paths: ===
 	public static final String OTDT_PATH 		 = JavaCore.getClasspathVariable(OTDTPlugin.OTDT_INSTALLDIR).toOSString();
-	public static final String OTRE_PATH		 = new OTREContainer().getClasspathEntries()[0].getPath().toOSString();
-	public static final IPath[]  BYTECODE_LIB_JAR_PATH = OTREContainer.BYTECODE_LIBRARY_PATH;
+	public static IPath[] getBytecodeLibJarPath(WeavingScheme weavingScheme) {
+		switch (weavingScheme) {
+		case OTRE : return OTREContainer.BYTECODE_LIBRARY_PATH;
+		case OTDRE : return OTDREContainer.BYTECODE_LIBRARY_PATH;
+		default: throw new IncompatibleClassChangeError("Unexpected enum constant "+weavingScheme);
+		}
+	}
+	public static String getOTREPath(WeavingScheme weavingScheme) {
+		switch (weavingScheme) {
+		case OTRE : return new OTREContainer().getClasspathEntries()[0].getPath().toOSString();
+		case OTDRE : return new OTDREContainer().getClasspathEntries()[0].getPath().toOSString();
+		default: throw new IncompatibleClassChangeError("Unexpected enum constant "+weavingScheme);
+		}
+	}
 	
 
 

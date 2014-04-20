@@ -1,10 +1,10 @@
 /**********************************************************************
  * This file is part of "Object Teams Development Tooling"-Software
  * 
- * Copyright 2004, 2010 Fraunhofer Gesellschaft, Munich, Germany,
+ * Copyright 2004, 2014 Fraunhofer Gesellschaft, Munich, Germany,
  * for its Fraunhofer Institute and Computer Architecture and Software
  * Technology (FIRST), Berlin, Germany and Technical University Berlin,
- * Germany.
+ * Germany, and others.
  * 
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -52,6 +52,7 @@ import org.eclipse.jdt.internal.compiler.env.ICompilationUnit;
 import org.eclipse.jdt.internal.compiler.env.INameEnvironment;
 import org.eclipse.jdt.internal.compiler.impl.CompilerOptions;
 import org.eclipse.jdt.internal.compiler.problem.DefaultProblemFactory;
+import org.eclipse.objectteams.otdt.core.ext.WeavingScheme;
 import org.eclipse.objectteams.otdt.debug.internal.breakpoints.IOOTBreakPoints;
 import org.eclipse.objectteams.otdt.internal.core.compiler.smap.RoleSmapGenerator;
 import org.eclipse.objectteams.otdt.internal.core.compiler.smap.SmapStratum;
@@ -81,6 +82,8 @@ public abstract class AbstractSourceMapGeneratorTest extends FileBasedModelTest 
 	public static long sourceLevel = ClassFileConstants.JDK1_5; //$NON-NLS-1$
 
 	public static String OUTPUT_DIR = Util.getOutputDirectory() + File.separator + "smaptest";
+	
+	private WeavingScheme weavingScheme = WeavingScheme.OTRE; // FIXME: test OTDRE, too!
 	
 	// the source line within method Team.java:__OT__Confined._OT$getTeam().
 	public static int OT_CONFINED_GET_TEAM_LINE = IOOTBreakPoints.LINE_ConfinedGetTeam;
@@ -174,7 +177,7 @@ public abstract class AbstractSourceMapGeneratorTest extends FileBasedModelTest 
     {
 		return Util.concatWithClassLibs(new String[]{
 					getWorkspaceRoot().getLocation().toFile().getCanonicalPath()+'/'+getTestProjectDir()+"/src",
-					ClasspathUtil.OTRE_PATH
+					ClasspathUtil.getOTREPath(this.weavingScheme)
 				},
 				false);
     }

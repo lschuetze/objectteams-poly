@@ -1,7 +1,7 @@
 /**********************************************************************
  * This file is part of "Object Teams Development Tooling"-Software
  * 
- * Copyright 2004, 2010 Fraunhofer Gesellschaft, Munich, Germany,
+ * Copyright 2004, 2014 Fraunhofer Gesellschaft, Munich, Germany,
  * for its Fraunhofer Institute and Computer Architecture and Software
  * Technology (FIRST), Berlin, Germany and Technical University Berlin,
  * Germany.
@@ -10,7 +10,6 @@
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
- * $Id: TestBase.java 23494 2010-02-05 23:06:44Z stephan $
  * 
  * Please visit http://www.eclipse.org/objectteams for updates and contact.
  * 
@@ -41,13 +40,13 @@ import org.eclipse.core.runtime.Path;
 import org.eclipse.jdt.core.compiler.IProblem;
 import org.eclipse.jdt.internal.compiler.batch.Main;
 import org.eclipse.jdt.internal.compiler.impl.CompilerOptions;
+import org.eclipse.objectteams.otdt.core.ext.WeavingScheme;
 import org.eclipse.objectteams.otdt.tests.ClasspathUtil;
 
 /**
  * This class represents a base for testing the compiler with several files.
  *
  * @author Jan Wloka
- * @version $Id: TestBase.java 23494 2010-02-05 23:06:44Z stephan $
  */
 public class TestBase extends TestCase
 {
@@ -63,7 +62,9 @@ public class TestBase extends TestCase
 	
 	public static final String JAVA_HOME = System.getProperty("java.home");
 	public static final String USER_HOME = System.getProperty("user.home");
-	
+
+	private WeavingScheme weavingScheme = WeavingScheme.OTRE; // FIXME: test OTDRE, too!
+
 	public static final String JRE_JAR_PATH;
 	static {
 		String path = JAVA_HOME+File.separator+"lib"+File.separator+"rt.jar";
@@ -190,11 +191,12 @@ public class TestBase extends TestCase
 
     private String missingClasspathEntry()
     {
-        File otreJar = new File(ClasspathUtil.OTRE_PATH);
+    	String otrePath = ClasspathUtil.getOTREPath(this.weavingScheme);
+        File otreJar = new File(otrePath);
         File jreJar = new File(JRE_JAR_PATH);
         
         if (!otreJar.exists())
-        	return ClasspathUtil.OTRE_PATH;
+        	return otrePath;
         if (!jreJar.exists())
         	return JRE_JAR_PATH;
         return null;
@@ -493,7 +495,7 @@ public class TestBase extends TestCase
         String[] args =
         {
             "-classpath",
-            new Path(ClasspathUtil.OTRE_PATH).toString()
+            new Path(ClasspathUtil.getOTREPath(this.weavingScheme)).toString()
                 		+ File.pathSeparator
                 		+ new Path(JRE_JAR_PATH).toString()
                 		+ File.pathSeparator

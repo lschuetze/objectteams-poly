@@ -1,7 +1,7 @@
 /**********************************************************************
  * This file is part of "Object Teams Development Tooling"-Software
  * 
- * Copyright 2010 Stephan Herrmann
+ * Copyright 2010, 2014 Stephan Herrmann
  * 
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -25,7 +25,6 @@ import org.eclipse.core.runtime.FileLocator;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.Path;
 import org.eclipse.core.runtime.Platform;
-import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.tests.compiler.regression.AbstractComparableTest;
 import org.eclipse.jdt.core.tests.compiler.regression.InMemoryNameEnvironment;
 import org.eclipse.jdt.core.tests.compiler.regression.RegressionTestSetup;
@@ -38,10 +37,7 @@ import org.eclipse.jdt.internal.compiler.batch.FileSystem;
 import org.eclipse.jdt.internal.compiler.classfmt.ClassFileConstants;
 import org.eclipse.jdt.internal.compiler.env.INameEnvironment;
 import org.eclipse.jdt.internal.compiler.impl.CompilerOptions;
-import org.eclipse.jdt.internal.compiler.impl.CompilerOptions.WeavingScheme;
-import org.eclipse.objectteams.otdt.core.ext.OTDTPlugin;
-import org.eclipse.objectteams.otdt.core.ext.OTREContainer;
-import org.eclipse.objectteams.otdt.internal.core.compiler.mappings.CallinImplementorDyn;
+import org.eclipse.objectteams.otdt.core.ext.WeavingScheme;
 import org.eclipse.objectteams.otdt.tests.ClasspathUtil;
 
 /**
@@ -140,16 +136,17 @@ public class AbstractOTJLDTest extends AbstractComparableTest {
 		super(name);
 	}
 
-	/** Add otre and (bcel or asm) to the class path. */
+	/** Add otre/otdre and (bcel or asm) to the class path. */
 	@Override
 	protected String[] getDefaultClassPaths() {
 		String[] defaults = super.getDefaultClassPaths();
 		int len = defaults.length;
-		int len2 = ClasspathUtil.BYTECODE_LIB_JAR_PATH.length;
+		IPath[] bytecodeLibJarPath = ClasspathUtil.getBytecodeLibJarPath(this.weavingScheme);
+		int len2 = bytecodeLibJarPath.length;
 		System.arraycopy(defaults, 0, defaults=new String[len+1+len2], 0, len);
-		defaults[len] = new Path(ClasspathUtil.OTRE_PATH).toString();
+		defaults[len] = new Path(ClasspathUtil.getOTREPath(this.weavingScheme)).toString();
 		for (int i=0; i<len2; i++)
-			defaults[len+1+i] = ClasspathUtil.BYTECODE_LIB_JAR_PATH[i].toString();
+			defaults[len+1+i] = bytecodeLibJarPath[i].toString();
 		return defaults;
 	}
 

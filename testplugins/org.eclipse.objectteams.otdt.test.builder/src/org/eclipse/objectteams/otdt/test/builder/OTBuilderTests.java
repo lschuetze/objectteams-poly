@@ -1,7 +1,7 @@
 /**********************************************************************
  * This file is part of "Object Teams Development Tooling"-Software
  * 
- * Copyright 2004, 2010 Fraunhofer Gesellschaft, Munich, Germany,
+ * Copyright 2004, 2014 Fraunhofer Gesellschaft, Munich, Germany,
  * for its Fraunhofer Institute and Computer Architecture and Software
  * Technology (FIRST), Berlin, Germany and Technical University Berlin,
  * Germany.
@@ -24,12 +24,15 @@ import org.eclipse.core.runtime.IPath;
 import org.eclipse.jdt.core.tests.builder.BuilderTests;
 import org.eclipse.jdt.core.tests.builder.Problem;
 import org.eclipse.jdt.core.tests.builder.TestingEnvironment;
+import org.eclipse.objectteams.otdt.core.ext.WeavingScheme;
 import org.eclipse.objectteams.otdt.internal.compiler.adaptor.BuildManager;
 import org.eclipse.pde.internal.core.PDECoreMessages;
 
 public class OTBuilderTests extends BuilderTests {
 
 	OTTestingEnvironment otenv;
+
+	WeavingScheme weavingScheme = WeavingScheme.OTRE; // FIXME: test OTDRE, too!
 
 	public OTBuilderTests(String name) {
 		super(name);

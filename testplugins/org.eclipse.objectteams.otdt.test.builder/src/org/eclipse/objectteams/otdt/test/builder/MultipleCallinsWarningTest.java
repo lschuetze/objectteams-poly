@@ -1,7 +1,7 @@
 /**********************************************************************
  * This file is part of "Object Teams Development Tooling"-Software
  * 
- * Copyright 2011 GK Software AG
+ * Copyright 2011, 2014 GK Software AG
  * 
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -15,7 +15,6 @@
  **********************************************************************/
 package org.eclipse.objectteams.otdt.test.builder;
 
-import static org.eclipse.objectteams.otdt.tests.ClasspathUtil.OTRE_PATH;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -34,6 +33,7 @@ import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.tests.builder.Problem;
 import org.eclipse.jdt.core.tests.util.Util;
+import org.eclipse.objectteams.otdt.tests.ClasspathUtil;
 
 /**
  * Tests for  Bug 314610 - Produce warning when two roles capture the same method at the same time
@@ -59,7 +59,7 @@ public class MultipleCallinsWarningTest extends OTBuilderTests {
 		super.setUp();
 		this.projectPath = env.addProject("MultipleCallinsProject", "1.5"); 
 		env.addExternalJars(projectPath, Util.getJavaClassLibs());
-		env.addExternalJar(projectPath, OTRE_PATH);
+		env.addExternalJar(projectPath, ClasspathUtil.getOTREPath(this.weavingScheme));
 		
 		// remove old package fragment root so that names don't collide
 		env.removePackageFragmentRoot(projectPath, "");

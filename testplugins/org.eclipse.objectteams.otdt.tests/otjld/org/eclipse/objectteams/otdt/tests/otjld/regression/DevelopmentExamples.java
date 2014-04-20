@@ -1,7 +1,7 @@
 /**********************************************************************
  * This file is part of "Object Teams Development Tooling"-Software
  * 
- * Copyright 2005-2010 Berlin Institute of Technology, Germany.
+ * Copyright 2005-2014 Berlin Institute of Technology, Germany.
  * 
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -20,8 +20,7 @@ import java.util.Map;
 
 import org.eclipse.jdt.core.tests.util.Util;
 import org.eclipse.jdt.internal.compiler.impl.CompilerOptions;
-import org.eclipse.jdt.internal.compiler.impl.CompilerOptions.WeavingScheme;
-import org.eclipse.objectteams.otdt.internal.core.compiler.mappings.CallinImplementorDyn;
+import org.eclipse.objectteams.otdt.core.ext.WeavingScheme;
 import org.eclipse.objectteams.otdt.tests.otjld.AbstractOTJLDTest;
 
 import junit.framework.Test;

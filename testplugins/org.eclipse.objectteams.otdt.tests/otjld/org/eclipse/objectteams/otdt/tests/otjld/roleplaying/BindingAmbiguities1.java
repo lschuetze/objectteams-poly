@@ -1,7 +1,7 @@
 /**********************************************************************
  * This file is part of "Object Teams Development Tooling"-Software
  * 
- * Copyright 2004, 2010 IT Service Omikron GmbH and others.
+ * Copyright 2004, 2014 IT Service Omikron GmbH and others.
  * 
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -20,8 +20,7 @@ package org.eclipse.objectteams.otdt.tests.otjld.roleplaying;
 import java.util.Map;
 
 import org.eclipse.jdt.internal.compiler.impl.CompilerOptions;
-import org.eclipse.jdt.internal.compiler.impl.CompilerOptions.WeavingScheme;
-import org.eclipse.objectteams.otdt.internal.core.compiler.mappings.CallinImplementorDyn;
+import org.eclipse.objectteams.otdt.core.ext.WeavingScheme;
 import org.eclipse.objectteams.otdt.tests.otjld.AbstractOTJLDTest;
 
 import junit.framework.Test;
