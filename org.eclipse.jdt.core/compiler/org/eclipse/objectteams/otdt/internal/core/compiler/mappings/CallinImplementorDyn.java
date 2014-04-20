@@ -1,13 +1,12 @@
 /** 
  * This file is part of "Object Teams Development Tooling"-Software
  * 
- * Copyright 2009 Stephan Herrmann
+ * Copyright 2009, 2014 Stephan Herrmann
  * 
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
- * $Id: CallinImplementorDyn.java 23417 2010-02-03 20:13:55Z stephan $
  * 
  * Please visit http://www.eclipse.org/objectteams for updates and contact.
  * 
@@ -18,7 +17,6 @@ package org.eclipse.objectteams.otdt.internal.core.compiler.mappings;
 import static org.eclipse.jdt.internal.compiler.classfmt.ClassFileConstants.AccPublic;
 
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 
@@ -91,8 +89,8 @@ public class CallinImplementorDyn extends MethodMappingImplementor {
 	static final char[] ROLE_VAR_NAME = CharOperation.concat(IOTConstants.OT_DOLLAR_NAME, IOTConstants.ROLE);
 
 	// method names
-	static final char[] OT_CALL_BEFORE  = "_OT$callBefore".toCharArray(); //$NON-NLS-1$
-	static final char[] OT_CALL_AFTER   = "_OT$callAfter".toCharArray(); //$NON-NLS-1$
+	public static final char[] OT_CALL_BEFORE  = "_OT$callBefore".toCharArray(); //$NON-NLS-1$
+	public static final char[] OT_CALL_AFTER   = "_OT$callAfter".toCharArray(); //$NON-NLS-1$
 	static final char[] OT_CALL_REPLACE = "_OT$callReplace".toCharArray(); //$NON-NLS-1$
 	// used for base calls:
 	public static final char[] OT_CALL_NEXT        = "_OT$callNext".toCharArray(); //$NON-NLS-1$
@@ -351,7 +349,6 @@ public class CallinImplementorDyn extends MethodMappingImplementor {
 				
 				// into head of tryStats we generate local vars to be shared by case statements:
 				List<Statement> tryStats = new ArrayList<Statement>();
-				HashSet<String> baseArgs = new HashSet<String>();
 
 				SwitchStatement switchStat = new SwitchStatement();
 				switchStat.expression =
@@ -668,13 +665,27 @@ public class CallinImplementorDyn extends MethodMappingImplementor {
 				gen.retargetFrom(teamDecl);
 				
 				boolean needSuperCall = false;
-				// callinIds handled by super call?
-				for (int i=0; i < callinIdCount; i++)
-					if (!handledCallinIds[i]) {
-						statements.add(gen.caseStatement(gen.intLiteral(i)));									// case callinIdOfSuper:
+				// do we have a relevant super team, which possibly defines more callins?
+				ReferenceBinding superTeam = aTeam.getBinding().superclass();
+				if (superTeam != null && superTeam.isTeam() && superTeam.id != IOTConstants.T_OrgObjectTeamsTeam) {
+					// callinIds to be handled by super call?
+					for (int i=0; i < callinIdCount; i++)
+						if (!handledCallinIds[i]) {
+							statements.add(gen.caseStatement(gen.intLiteral(i)));									// case callinIdOfSuper:
+							needSuperCall = true;
+						}
+					if (!isReplace)
 						needSuperCall = true;
-					}
+					// a super call might become necessary after the fact when this dispatch method
+					// is copy-inherited to a tsub-team, because the tsub-team may have a super
+					// with more callins, see test1111_roleInheritsCallinFromTsupers1.
+					// TODO: can we safely handle this for the replace-case, too??
+					// (replace needs to "return _OT$callNext();" in the default branch, see below).
+					// See https://bugs.eclipse.org/433123
+				}
 				if (needSuperCall) {
+					if (!isReplace)
+						statements.add(gen.caseStatement(null)); // default label
 					char[]   selector;				char[][] argNames;
 					if (isReplace) {
 						selector = OT_CALL_REPLACE;	argNames = REPLACE_ARG_NAMES;
@@ -686,10 +697,10 @@ public class CallinImplementorDyn extends MethodMappingImplementor {
 					Expression[] superCallArgs = new Expression[argNames.length];
 					for (int idx=0; idx < argNames.length; idx++)
 						superCallArgs[idx] = gen.singleNameReference(argNames[idx]);
-					MessageSend superCall = gen.messageSend(
-							gen.superReference(), 
-							selector, 
-							superCallArgs);
+					// if we have a tsuper team which a corresponding dispatch method that one takes precedence:
+					MessageSend superCall = aTeam.hasTSuperTeamMethod(selector)
+							? gen.tsuperMessageSend(gen.thisReference(), selector, superCallArgs)
+							: gen.messageSend(gen.superReference(), selector, superCallArgs);
 					if (isReplace)
 						statements.add(gen.returnStatement(superCall));											//    return super._OT$callReplace(..);
 					else
@@ -706,7 +717,7 @@ public class CallinImplementorDyn extends MethodMappingImplementor {
 						callArgs[idx] = gen.singleNameReference(REPLACE_ARG_NAMES[idx]);
 					callArgs[callArgs.length-1] = gen.nullLiteral(); // no explicit baseCallArguments
 					statements.add(gen.caseStatement(null)); 													// default:
-					statements.add(gen.returnStatement(															//    _OT$callNext(..);
+					statements.add(gen.returnStatement(															//    return _OT$callNext(..);
 										gen.messageSend(
 											gen.qualifiedThisReference(aTeam.getBinding()), 
 											OT_CALL_NEXT, 

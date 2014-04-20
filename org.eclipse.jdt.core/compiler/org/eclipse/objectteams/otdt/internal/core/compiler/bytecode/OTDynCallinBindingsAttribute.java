@@ -1,7 +1,7 @@
 /** 
  * This file is part of "Object Teams Development Tooling"-Software
  * 
- * Copyright 2009, 2011 Stephan Herrmann
+ * Copyright 2009, 2014 Stephan Herrmann
  * 
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -36,6 +36,7 @@ import org.eclipse.objectteams.otdt.internal.core.compiler.ast.CallinMappingDecl
 import org.eclipse.objectteams.otdt.internal.core.compiler.ast.MethodSpec;
 import org.eclipse.objectteams.otdt.internal.core.compiler.control.ITranslationStates;
 import org.eclipse.objectteams.otdt.internal.core.compiler.lookup.CallinCalloutBinding;
+import org.eclipse.objectteams.otdt.internal.core.compiler.model.ModelElement;
 import org.eclipse.objectteams.otdt.internal.core.compiler.model.TeamModel;
 
 /**
@@ -68,6 +69,12 @@ import org.eclipse.objectteams.otdt.internal.core.compiler.model.TeamModel;
  *   } bindings[bindings_count];
  * }
  * </pre>
+ * 
+ * This attribute is inherited / copied / merged into all sub and tsub teams, as to advise
+ * the OTDRE to generate dispatch code into the team.
+ * 
+ * No team declares callinIds that would conflict with any of its supers/tsupers
+ * (see TeamModel.nextCallinID and the methods operating on it).
  * 
  * @author stephan
  * @since 1.3.0M3
@@ -502,4 +509,22 @@ public class OTDynCallinBindingsAttribute extends ListValueAttribute {
 		return new OTDynCallinBindingsAttribute(teamBinding._teamModel, filteredMappings);
 	}
 
+	@Override
+	public void merge(ModelElement model, AbstractAttribute other) {
+		List<Mapping> newMappings = ((OTDynCallinBindingsAttribute)other).mappings;
+		for (Mapping mapping : newMappings) {
+			if (!hasMapping(mapping)) {
+				this.mappings.add(mapping);
+				this._count ++;
+			}
+		}
+	}
+
+	private boolean hasMapping(Mapping mapping) {
+		for (Mapping current : this.mappings) {
+			if (current.callinName.equals(mapping.callinName)) // including generated callin names
+				return true;
+		}
+		return false;
+	}
 }

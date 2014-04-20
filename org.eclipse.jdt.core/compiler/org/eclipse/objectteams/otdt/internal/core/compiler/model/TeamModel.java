@@ -1,7 +1,7 @@
 /**********************************************************************
  * This file is part of "Object Teams Development Tooling"-Software
  *
- * Copyright 2004, 2010 Fraunhofer Gesellschaft, Munich, Germany,
+ * Copyright 2004, 2014 Fraunhofer Gesellschaft, Munich, Germany,
  * for its Fraunhofer Institute for Computer Architecture and Software
  * Technology (FIRST), Berlin, Germany and Technical University Berlin,
  * Germany.
@@ -10,7 +10,6 @@
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
- * $Id: TeamModel.java 23416 2010-02-03 19:59:31Z stephan $
  *
  * Please visit http://www.eclipse.org/objectteams for updates and contact.
  *
@@ -886,17 +885,40 @@ public class TeamModel extends TypeModel {
 		return scope.compilationUnitScope().environment.createMissingType(pkgBinding, compoundName);
 	}
 //{OTDyn:
+	// in nested teams the outermost team assigns locally unique IDs to callins (baseMethodSpec, to be precise).
 	private int nextCallinID = 0;
+	private TeamModel getOutermostTeam() {
+		if (isRole())
+			return this._binding.enclosingType().getTeamModel().getOutermostTeam();
+		return this;
+	}
+	/** Assign a fresh callin ID for this method spec, and store it in the method spec. */
 	public int getNewCallinId(MethodSpec baseMethodSpec) {
-		int callinID = this.nextCallinID++;
-		baseMethodSpec.callinID = callinID;
+		TeamModel outermostTeam = getOutermostTeam();
+		int callinID = outermostTeam.nextCallinID++;
+		if (baseMethodSpec != null)
+			baseMethodSpec.callinID = callinID;
 		return callinID;
 	}
+	/** Record the fact that the given callinID has been assigned in the context of this team. */
 	public void recordCallinId(int callinIdMax) {
-		this.nextCallinID = Math.max(this.nextCallinID, callinIdMax+1);
+		TeamModel outermostTeam = getOutermostTeam();
+		outermostTeam.nextCallinID = Math.max(outermostTeam.nextCallinID, callinIdMax+1);
 	}
+	/** Answer the number callinIDs assigned in the context of this team. */
 	public int getCallinIdCount() {
-		return this.nextCallinID;
+		return getOutermostTeam().nextCallinID;
+	}
+	public boolean hasTSuperTeamMethod(char[] selector) {
+		if (!isRole())
+			return false;
+		RoleModel role = getRoleModelOfThis();
+			for (ReferenceBinding tsuperTeam : role.getTSuperRoleBindings())
+				if (tsuperTeam.isTeam()) {
+					if (tsuperTeam.getMethods(selector) != Binding.NO_METHODS)
+						return true;
+				}
+		return false;
 	}
 	@Override
 	public void addOrMergeAttribute(AbstractAttribute attr) {

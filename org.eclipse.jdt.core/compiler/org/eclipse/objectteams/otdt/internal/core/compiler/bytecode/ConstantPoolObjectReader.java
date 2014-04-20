@@ -1,7 +1,7 @@
 /**********************************************************************
  * This file is part of "Object Teams Development Tooling"-Software
  *
- * Copyright 2003, 2006 Fraunhofer Gesellschaft, Munich, Germany,
+ * Copyright 2003, 2014 Fraunhofer Gesellschaft, Munich, Germany,
  * for its Fraunhofer Institute for Computer Architecture and Software
  * Technology (FIRST), Berlin, Germany and Technical University Berlin,
  * Germany.
@@ -10,7 +10,6 @@
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
- * $Id: ConstantPoolObjectReader.java 23416 2010-02-03 19:59:31Z stephan $
  *
  * Please visit http://www.eclipse.org/objectteams for updates and contact.
  *
@@ -55,16 +54,16 @@ import org.eclipse.objectteams.otdt.core.compiler.IOTConstants;
 import org.eclipse.objectteams.otdt.core.exceptions.InternalCompilerError;
 import org.eclipse.objectteams.otdt.internal.core.compiler.lookup.SyntheticBaseCallSurrogate;
 import org.eclipse.objectteams.otdt.internal.core.compiler.lookup.SyntheticRoleFieldAccess;
+import org.eclipse.objectteams.otdt.internal.core.compiler.mappings.CallinImplementorDyn;
 import org.eclipse.objectteams.otdt.internal.core.compiler.model.MethodModel;
 import org.eclipse.objectteams.otdt.internal.core.compiler.model.RoleModel;
 import org.eclipse.objectteams.otdt.internal.core.compiler.model.TypeModel;
 
 /**
- * Reads BinaryTypeBinding ConstantPool Entrys
+ * Reads BinaryTypeBinding ConstantPool Entries
  * and returns the Binding/Object at the specific ConstantPoolOffset
  *
  * @author Markus Witte
- * @version $Id: ConstantPoolObjectReader.java 23416 2010-02-03 19:59:31Z stephan $
  */
 public class ConstantPoolObjectReader extends ClassFileStruct implements ClassFileConstants
 {
@@ -493,6 +492,13 @@ public class ConstantPoolObjectReader extends ClassFileStruct implements ClassFi
 		if (CharOperation.prefixEquals(IOTConstants.OT_SETFIELD, name))
 			return true;
 		if (CharOperation.prefixEquals(IOTConstants.ADD_ROLE, name))
+			return true;
+		// The next two are not searched in order to avoid receiver type o.o.Team.
+		// We want the tsub to always try to invoke its direct super, which may
+		// have more callin bindings than where known to the original dispatch method.
+		if (CharOperation.equals(CallinImplementorDyn.OT_CALL_AFTER, name))
+			return true;
+		if (CharOperation.equals(CallinImplementorDyn.OT_CALL_BEFORE, name))
 			return true;
 		return false;
 	}

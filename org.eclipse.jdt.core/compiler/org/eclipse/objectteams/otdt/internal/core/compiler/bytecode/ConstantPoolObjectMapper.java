@@ -1,7 +1,7 @@
 /**********************************************************************
  * This file is part of "Object Teams Development Tooling"-Software
  *
- * Copyright 2003, 2010 Fraunhofer Gesellschaft, Munich, Germany,
+ * Copyright 2003, 2014 Fraunhofer Gesellschaft, Munich, Germany,
  * for its Fraunhofer Institute for Computer Architecture and Software
  * Technology (FIRST), Berlin, Germany and Technical University Berlin,
  * Germany.
@@ -10,7 +10,6 @@
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
- * $Id: ConstantPoolObjectMapper.java 23416 2010-02-03 19:59:31Z stephan $
  *
  * Please visit http://www.eclipse.org/objectteams for updates and contact.
  *
@@ -43,6 +42,7 @@ import org.eclipse.objectteams.otdt.core.exceptions.InternalCompilerError;
 import org.eclipse.objectteams.otdt.internal.core.compiler.control.Config;
 import org.eclipse.objectteams.otdt.internal.core.compiler.control.Config.NotConfiguredException;
 import org.eclipse.objectteams.otdt.internal.core.compiler.lookup.RoleTypeBinding;
+import org.eclipse.objectteams.otdt.internal.core.compiler.mappings.CallinImplementorDyn;
 import org.eclipse.objectteams.otdt.internal.core.compiler.model.RoleModel;
 import org.eclipse.objectteams.otdt.internal.core.compiler.model.TeamModel;
 import org.eclipse.objectteams.otdt.internal.core.compiler.statemachine.copyinheritance.CopyInheritance;
@@ -506,6 +506,11 @@ public class ConstantPoolObjectMapper implements ClassFileConstants{
 				if (rank < bestRank) {
 					bestMethod = methods[i];
 					bestRank = rank;
+				} else if (CharOperation.equals(CallinImplementorDyn.OT_CALL_AFTER, methods[i].selector)
+						|| CharOperation.equals(CallinImplementorDyn.OT_CALL_BEFORE, methods[i].selector)) {
+					// don't bother ranking these, because they're not linked via overriddenTSupers,
+					// But we need to verbatim translate super-calls in generated dispatch code
+					return methods[i];
 				}
 			}
 		}

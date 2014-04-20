@@ -1,7 +1,7 @@
 /**********************************************************************
  * This file is part of "Object Teams Development Tooling"-Software
  *
- * Copyright 2004, 2006 Fraunhofer Gesellschaft, Munich, Germany,
+ * Copyright 2004, 2014 Fraunhofer Gesellschaft, Munich, Germany,
  * for its Fraunhofer Institute for Computer Architecture and Software
  * Technology (FIRST), Berlin, Germany and Technical University Berlin,
  * Germany.
@@ -10,7 +10,6 @@
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
- * $Id: AstGenerator.java 23416 2010-02-03 19:59:31Z stephan $
  *
  * Please visit http://www.eclipse.org/objectteams for updates and contact.
  *
@@ -62,6 +61,8 @@ import org.eclipse.objectteams.otdt.internal.core.compiler.ast.PotentialLiftExpr
 import org.eclipse.objectteams.otdt.internal.core.compiler.ast.QualifiedBaseReference;
 import org.eclipse.objectteams.otdt.internal.core.compiler.ast.ResultReference;
 import org.eclipse.objectteams.otdt.internal.core.compiler.ast.RoleInitializationMethod;
+import org.eclipse.objectteams.otdt.internal.core.compiler.ast.TSuperMessageSend;
+import org.eclipse.objectteams.otdt.internal.core.compiler.ast.TsuperReference;
 import org.eclipse.objectteams.otdt.internal.core.compiler.ast.TypeAnchorReference;
 import org.eclipse.objectteams.otdt.internal.core.compiler.lookup.DependentTypeBinding;
 import org.eclipse.objectteams.otdt.internal.core.compiler.lookup.ITeamAnchor;
@@ -748,13 +749,27 @@ public class AstGenerator extends AstFactory {
 	}
 
 	public MessageSend messageSend(Expression receiver, char[] selector, Expression[] parameters) {
-		MessageSend messageSend = new MessageSend();
+		MessageSend messageSend =  new MessageSend();
 		messageSend.isGenerated = true;
 		messageSend.sourceStart = this.sourceStart;
 		messageSend.sourceEnd   = this.sourceEnd;
 		messageSend.statementEnd = this.sourceEnd;
 		messageSend.nameSourcePosition = this.pos;
 		messageSend.receiver = receiver;
+		messageSend.selector = selector;
+		messageSend.arguments = parameters;
+		messageSend.constant = Constant.NotAConstant;
+		return messageSend;
+	}
+	public MessageSend tsuperMessageSend(Expression receiver, char[] selector, Expression[] parameters) {
+		TSuperMessageSend messageSend =  new TSuperMessageSend();
+		messageSend.isGenerated = true;
+		messageSend.sourceStart = this.sourceStart;
+		messageSend.sourceEnd   = this.sourceEnd;
+		messageSend.statementEnd = this.sourceEnd;
+		messageSend.nameSourcePosition = this.pos;
+		messageSend.receiver = receiver;
+		messageSend.tsuperReference = new TsuperReference(this.sourceStart, this.sourceEnd);
 		messageSend.selector = selector;
 		messageSend.arguments = parameters;
 		messageSend.constant = Constant.NotAConstant;
@@ -1204,6 +1219,10 @@ public class AstGenerator extends AstFactory {
 		return new SuperReference(this.sourceStart, this.sourceEnd);
 	}
 
+	public ThisReference tsuperReference() {
+		return new TsuperReference(this.sourceStart, this.sourceEnd);
+	}
+
 	/**
 	 * @param binding prefix the "this" reference by this type.
 	 * @return Outer.this where "Outer" is identified by binding
@@ -1440,5 +1459,6 @@ public class AstGenerator extends AstFactory {
 		result.setBaseclassDecapsulation(DecapsulationState.REPORTED);
 		return result;
 	}
+
 
 }

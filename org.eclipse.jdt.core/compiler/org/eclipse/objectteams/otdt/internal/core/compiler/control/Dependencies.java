@@ -1,7 +1,7 @@
 /**********************************************************************
  * This file is part of "Object Teams Development Tooling"-Software
  *
- * Copyright 2003, 2011 Fraunhofer Gesellschaft, Munich, Germany,
+ * Copyright 2003, 2014 Fraunhofer Gesellschaft, Munich, Germany,
  * for its Fraunhofer Institute for Computer Architecture and Software
  * Technology (FIRST), Berlin, Germany and Technical University Berlin,
  * Germany.
@@ -10,7 +10,6 @@
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
- * $Id: Dependencies.java 23417 2010-02-03 20:13:55Z stephan $
  *
  * Please visit http://www.eclipse.org/objectteams for updates and contact.
  *
@@ -1979,6 +1978,12 @@ public class Dependencies implements ITranslationStates {
 		CopyInheritance.copyAttribute(aTeam);
 //{OTDyn:
     	if (aTeam.getWeavingScheme() == WeavingScheme.OTDRE) {
+    		TeamModel superTeam = aTeam.getSuperTeam();
+			if (superTeam != null) {
+				// include callinIDs assigned by the super team to avoid conflicts:
+				ensureTeamState(superTeam, STATE_CALLINS_TRANSFORMED);
+				aTeam.recordCallinId(superTeam.getCallinIdCount()-1);
+			}
     		CallinImplementorDyn callinImplementor = new CallinImplementorDyn();
     		callinImplementor.transformTeam(aTeam);
     	}

@@ -1,7 +1,7 @@
 /**********************************************************************
  * This file is part of "Object Teams Development Tooling"-Software
  *
- * Copyright 2003, 2013 Fraunhofer Gesellschaft, Munich, Germany,
+ * Copyright 2003, 2014 Fraunhofer Gesellschaft, Munich, Germany,
  * for its Fraunhofer Institute for Computer Architecture and Software
  * Technology (FIRST), Berlin, Germany and Technical University Berlin,
  * Germany.
@@ -807,8 +807,8 @@ public class CopyInheritance implements IOTConstants, ClassFileConstants, ExtraC
     	}
     }
     /**
-     * Copy a byte code attribute from super team.
-     * Currently only supported: StaticReplaceBindingsAttribute
+     * Copy a byte code attribute from super team (and tsuper teams).
+     * Currently only supported: StaticReplaceBindingsAttribute and OTDynCallinBindings
      *
      * @param subTeam
      */
@@ -823,16 +823,24 @@ public class CopyInheritance implements IOTConstants, ClassFileConstants, ExtraC
 	    		&& superTeam.isTeam()
 	    		&& !TypeAnalyzer.isOrgObjectteamsTeam(superTeam))
 	    	{
-	            Dependencies.ensureBindingState(superTeam, STATE_CALLINS_TRANSFORMED);
-	    		subTeam.copyAttributeFrom(superTeam.getTeamModel(), IOTConstants.STATIC_REPLACE_BINDINGS);
-	    		subTeam.copyAttributeFrom(superTeam.getTeamModel(), OTDynCallinBindingsAttribute.ATTRIBUTE_NAME);
-	    		OTSpecialAccessAttribute attrib = (OTSpecialAccessAttribute)superTeam.getTeamModel().getAttribute(IOTConstants.OTSPECIAL_ACCESS);
-	    		if (attrib != null)
-	    			attrib.addFieldAccessesTo(subTeam);
+	    		copyAttributesFromTo(superTeam, subTeam);
+	    	}
+	    	if (subTeam.isRole()) {
+	    		for (ReferenceBinding tsuperRole : subTeam.getRoleModelOfThis().getTSuperRoleBindings())
+	    			if (tsuperRole.isTeam())
+						copyAttributesFromTo(tsuperRole, subTeam);
 	    	}
     	}
     }
-   	/**
+   	private static void copyAttributesFromTo(ReferenceBinding superTeam, TeamModel subTeam) {
+        Dependencies.ensureBindingState(superTeam, STATE_CALLINS_TRANSFORMED);
+		subTeam.copyAttributeFrom(superTeam.getTeamModel(), IOTConstants.STATIC_REPLACE_BINDINGS);
+		subTeam.copyAttributeFrom(superTeam.getTeamModel(), OTDynCallinBindingsAttribute.ATTRIBUTE_NAME);
+		OTSpecialAccessAttribute attrib = (OTSpecialAccessAttribute)superTeam.getTeamModel().getAttribute(IOTConstants.OTSPECIAL_ACCESS);
+		if (attrib != null)
+			attrib.addFieldAccessesTo(subTeam);		
+	}
+	/**
 	 * If adjustSuperinterfaces updates a superinterface, we will check compatibility,
 	 * ie., the new superinterface must be a subtype from the originally resolved version.
 	 * Reasons why this could fail should be sought in the field of nested teams,
