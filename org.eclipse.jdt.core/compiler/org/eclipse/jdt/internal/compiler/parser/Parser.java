@@ -11389,7 +11389,8 @@ private boolean doingOrgObjectteamsInternalType() {
 		return false;
 	if (!(   CharOperation.equals(type.name, IOTConstants.TEAM)
 		  || CharOperation.equals(type.name, IOTConstants.ITEAM)
-		  || CharOperation.equals(type.name, IOTConstants.IBOUNDBASE)))
+		  || CharOperation.equals(type.name, IOTConstants.IBOUNDBASE)
+		  || CharOperation.equals(type.name, IOTConstants.IBOUNDBASE2)))
 		return false;
 	return    this.compilationUnit.currentPackage != null
 	       && CharOperation.equals(this.compilationUnit.currentPackage.tokens, IOTConstants.ORG_OBJECTTEAMS);
