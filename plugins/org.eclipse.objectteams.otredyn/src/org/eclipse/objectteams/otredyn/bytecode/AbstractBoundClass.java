@@ -299,7 +299,7 @@ public abstract class AbstractBoundClass implements IBoundClass {
 
 	/**
 	 * Do all needed transformations needed at load time:
-	 * Add the interface IBoundBase
+	 * Add the interface IBoundBase2
 	 * Add the empty method callOrig
 	 * Add the empty method callOrigStatic
 	 * Add the empty method access

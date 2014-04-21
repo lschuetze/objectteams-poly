@@ -769,7 +769,8 @@ public class TypeAnalyzer  {
 				|| CharOperation.equals(name, IOTConstants.OTCONFINED)
 				|| CharOperation.equals(name, IOTConstants.CONFINED)
 				|| CharOperation.equals(name, IOTConstants.ILOWERABLE)
-				|| CharOperation.equals(name, IOTConstants.IBOUNDBASE);
+				|| CharOperation.equals(name, IOTConstants.IBOUNDBASE)
+				|| CharOperation.equals(name, IOTConstants.IBOUNDBASE2);
 	}
 
 	public static boolean extendsOTConfined(TypeDeclaration type) {

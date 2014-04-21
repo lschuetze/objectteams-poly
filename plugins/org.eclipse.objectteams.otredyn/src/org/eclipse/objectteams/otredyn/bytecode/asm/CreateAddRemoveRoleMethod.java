@@ -30,7 +30,7 @@ import org.objectweb.asm.tree.TypeInsnNode;
 
 /**
  * Implements the method <code>void _OT$addOrRemoveRole(Object role, boolean isAdding)</code>
- * from <code>org.objectteams.IBoundBase</code>
+ * from <code>org.objectteams.IBoundBase2</code>
  * 
  * @author stephan
  */

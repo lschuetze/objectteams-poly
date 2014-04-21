@@ -310,9 +310,9 @@ public class CallinImplementorDyn extends MethodMappingImplementor {
 		if (teamDecl == null) return;
 		final AstGenerator gen = new AstGenerator(teamDecl);
 		
-		// public void _OT$callBefore   (IBoundBase base, 							int boundMethodId, int callinId, 	Object[] args)
-		// public void _OT$callAfter	(IBoundBase base, 							int boundMethodId, int callinId, 	Object[] args, Object result)
-		// public void _OT$callReplace	(IBoundBase base, Team[] teams, int index, 	int boundMethodId, int[] callinIds, Object[] args)
+		// public void _OT$callBefore   (IBoundBase2 base, 							int boundMethodId, int callinId, 	Object[] args)
+		// public void _OT$callAfter	(IBoundBase2 base, 							int boundMethodId, int callinId, 	Object[] args, Object result)
+		// public void _OT$callReplace	(IBoundBase2 base, Team[] teams, int index, 	int boundMethodId, int[] callinIds, Object[] args)
 		int length = 4;
 		if (isReplace)
 			length = 6;
@@ -320,7 +320,7 @@ public class CallinImplementorDyn extends MethodMappingImplementor {
 			length = 5;
 		Argument[] arguments = new Argument[length]; 
 		int a = 0;
-		arguments[a++] 		= gen.argument(IOTConstants.BASE, gen.qualifiedTypeReference(IOTConstants.ORG_OBJECTTEAMS_IBOUNDBASE));
+		arguments[a++] 		= gen.argument(IOTConstants.BASE, gen.qualifiedTypeReference(IOTConstants.ORG_OBJECTTEAMS_IBOUNDBASE2));
 		if (isReplace)
 			arguments[a++] 	= gen.argument(TEAMS, gen.qualifiedArrayTypeReference(IOTConstants.ORG_OBJECTTEAMS_ITEAM, 1));
 		if (isReplace)
@@ -435,7 +435,7 @@ public class CallinImplementorDyn extends MethodMappingImplementor {
 														 gen.castExpression(gen.baseNameReference(IOTConstants.BASE), 
 																 			gen.baseTypeReference(roleType.baseclass()), 
 																 			CastExpression.RAW),
-														 callMethod.scope.getType(IOTConstants.ORG_OBJECTTEAMS_IBOUNDBASE, 3),
+														 callMethod.scope.getType(IOTConstants.ORG_OBJECTTEAMS_IBOUNDBASE2, 3),
 														 roleType,
 														 false,
 														 gen)));
@@ -549,7 +549,7 @@ public class CallinImplementorDyn extends MethodMappingImplementor {
 														  && CharOperation.equals(((SingleNameReference)arg).token, IOTConstants.BASE);
 								if (needLiftedRoleVar)
 									arg = new PotentialRoleReceiverExpression(arg, roleVar, gen.typeReference(roleType.getRealClass()));
-								// mapped expression may require casting: "base" reference has static type IBoundBase
+								// mapped expression may require casting: "base" reference has static type IBoundBase2
 								if (isBaseReference)
 									arg = gen.castExpression(arg, gen.typeReference(roleParam), CastExpression.RAW);
 							}
@@ -792,12 +792,12 @@ public class CallinImplementorDyn extends MethodMappingImplementor {
 	}
 	
 	private void generateCallNext(final List<CallinMappingDeclaration> callinDecls, final TeamModel aTeam) {
-		// public Object _OT$callNext(IBoundBase baze, Team[] teams, int idx, int[] callinIds, int boundMethodId, Object[] args, Object[] baseCallArgs) 
+		// public Object _OT$callNext(IBoundBase2 baze, Team[] teams, int idx, int[] callinIds, int boundMethodId, Object[] args, Object[] baseCallArgs) 
 		final TypeDeclaration teamDecl = aTeam.getAst();
 		if (teamDecl == null) return;
 		final AstGenerator gen = new AstGenerator(teamDecl);
 		Argument[] args = new Argument[] {
-				gen.argument(IOTConstants.BASE, gen.qualifiedTypeReference(IOTConstants.ORG_OBJECTTEAMS_IBOUNDBASE)),
+				gen.argument(IOTConstants.BASE, gen.qualifiedTypeReference(IOTConstants.ORG_OBJECTTEAMS_IBOUNDBASE2)),
 				gen.argument(TEAMS, 			gen.qualifiedArrayTypeReference(IOTConstants.ORG_OBJECTTEAMS_ITEAM, 1)),
 				gen.argument(INDEX, 			gen.typeReference(TypeBinding.INT)),
 				gen.argument(CALLIN_ID, 		gen.createArrayTypeReference(TypeBinding.INT, 1)),

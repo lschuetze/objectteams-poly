@@ -20,7 +20,7 @@ import java.util.HashSet;
 import java.util.List;
 
 import org.eclipse.objectteams.otredyn.runtime.TeamManager;
-import org.objectteams.IBoundBase;
+import org.objectteams.IBoundBase2;
 import org.objectteams.ITeam;
 import org.objectteams.ImplicitTeamActivation;
 import org.objectteams.SneakyException;
@@ -31,10 +31,10 @@ import org.objectteams.Team;
  * @author Oliver Frank
  */
 public abstract class ClassNames {
-	public final static String I_BOUND_BASE_SLASH = IBoundBase.class.getName().replace('.', '/');
+	public final static String I_BOUND_BASE_SLASH = IBoundBase2.class.getName().replace('.', '/');
 	public final static String OBJECT_SLASH = Object.class.getName().replace('.', '/');
 	public final static String CLASS_SLASH = Class.class.getName().replace('.', '/');
-	public final static String I_BOUND_BASE_DOT = IBoundBase.class.getName();
+	public final static String I_BOUND_BASE_DOT = IBoundBase2.class.getName();
 	public final static String TEAM_MANAGER_SLASH = TeamManager.class.getName().replace('.', '/');
 	public final static String ITEAM_SLASH = ITeam.class.getName().replace('.', '/');
 	public final static String TEAM_SLASH = Team.class.getName().replace('.', '/');

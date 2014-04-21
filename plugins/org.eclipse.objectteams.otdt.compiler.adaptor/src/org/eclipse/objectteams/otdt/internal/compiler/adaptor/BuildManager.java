@@ -343,6 +343,7 @@ public team class BuildManager extends CompilationThreadWatcher
 			|| CharOperation.equals(roleName, IOTConstants.OTCONFINED)
 			|| CharOperation.equals(roleName, IOTConstants.ICONFINED)
 			|| CharOperation.equals(roleName, IOTConstants.IBOUNDBASE)
+			|| CharOperation.equals(roleName, IOTConstants.IBOUNDBASE2)
 			|| CharOperation.equals(roleName, IOTConstants.ILOWERABLE);					
 	}
 	

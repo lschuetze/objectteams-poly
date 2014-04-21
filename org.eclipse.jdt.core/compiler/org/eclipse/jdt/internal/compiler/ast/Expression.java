@@ -658,7 +658,8 @@ public final boolean checkCastTypesCompatibility(
 //{ObjectTeams: conformance of final bound base class to IBoundBase?
 							if (   match == null
 								&& refExprType.isBoundBase()
-								&& castType.id == IOTConstants.T_OrgObjectTeamsIBoundBase)
+								&& (castType.id == IOTConstants.T_OrgObjectTeamsIBoundBase
+										|| castType.id == IOTConstants.T_OrgObjectTeamsIBoundBase2))
 								match = castType;
 // SH}
 							if (match != null) {

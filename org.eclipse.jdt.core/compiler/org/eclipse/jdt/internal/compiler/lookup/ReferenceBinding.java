@@ -592,6 +592,8 @@ public void computeId() {
 					this.id = IOTConstants.T_OrgObjectTeamsTeam;
 				else if(CharOperation.equals(IOTConstants.IBOUNDBASE, this.compoundName[2]))
 					this.id = IOTConstants.T_OrgObjectTeamsIBoundBase;
+				else if(CharOperation.equals(IOTConstants.IBOUNDBASE2, this.compoundName[2]))
+					this.id = IOTConstants.T_OrgObjectTeamsIBoundBase2;
 				else if(CharOperation.equals(IOTConstants.INSTANTIATION, this.compoundName[2]))
 					this.id = IOTConstants.T_OrgObjectTeamsInstantiation;
 				return;
@@ -1475,7 +1477,8 @@ public boolean implementsInterface(ReferenceBinding anInterface, boolean searchH
 	}
 //{ObjectTeams: special case: bound base classes are conform to o.o.IBoundBase:
 	if (isBoundBase())
-		return anInterface.id == IOTConstants.T_OrgObjectTeamsIBoundBase;
+		return (anInterface.id == IOTConstants.T_OrgObjectTeamsIBoundBase
+				|| anInterface.id == IOTConstants.T_OrgObjectTeamsIBoundBase2); // assume only one of these can be used during one compile
 //SH}
 	return false;
 }

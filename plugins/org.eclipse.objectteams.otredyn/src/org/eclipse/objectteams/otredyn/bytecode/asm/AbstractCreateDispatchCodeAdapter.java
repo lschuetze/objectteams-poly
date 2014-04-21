@@ -84,7 +84,7 @@ public abstract class AbstractCreateDispatchCodeAdapter extends
 		if (isStatic) {
 			instructions.add(new InsnNode(Opcodes.ACONST_NULL));
 		} else {
-			// put "this" on the stack and cast it to IBoundBase
+			// put "this" on the stack and cast it to IBoundBase2
 			instructions.add(new IntInsnNode(Opcodes.ALOAD, 0));
 			instructions.add(new TypeInsnNode(Opcodes.CHECKCAST,
 					ClassNames.I_BOUND_BASE_SLASH));

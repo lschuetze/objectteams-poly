@@ -265,6 +265,10 @@ public interface IOTConstants
 	 * @since 3.7 (OT 2.0)
 	 */
 	public static final int T_OrgObjectTeamsInstantiation = 103;
+	/**
+	 * @since 3.10 (OT 2.3)
+	 */
+	public static final int T_OrgObjectTeamsIBoundBase2 = 104;
 
     // special identifiers:
 	public static final char[] RESULT = "result".toCharArray();
