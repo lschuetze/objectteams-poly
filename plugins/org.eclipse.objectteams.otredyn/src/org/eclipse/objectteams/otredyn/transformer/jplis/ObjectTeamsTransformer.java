@@ -71,7 +71,9 @@ public class ObjectTeamsTransformer implements ClassFileTransformer {
 			t.printStackTrace();
 		}
 		
-		this.boundBaseClassNames.addAll(clazz.getBoundBaseClasses());
+		Collection<String> boundBaseClasses = clazz.getBoundBaseClasses();
+		if (boundBaseClasses != null)
+			this.boundBaseClassNames.addAll(boundBaseClasses);
 
 		return classfileBuffer;
 	}
@@ -137,7 +139,9 @@ public class ObjectTeamsTransformer implements ClassFileTransformer {
 			t.printStackTrace();
 		}
 		
-		this.boundBaseClassNames.addAll(clazz.getBoundBaseClasses());
+		Collection<String> boundBaseClasses = clazz.getBoundBaseClasses();
+		if (boundBaseClasses != null)
+			this.boundBaseClassNames.addAll(boundBaseClasses);
 	}
 	
 	/**
