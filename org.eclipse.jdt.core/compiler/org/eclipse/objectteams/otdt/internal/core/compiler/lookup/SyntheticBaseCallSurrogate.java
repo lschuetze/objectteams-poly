@@ -204,7 +204,7 @@ public class SyntheticBaseCallSurrogate extends SyntheticOTMethodBinding
 				// note: we have no source to report this error against,
 				// so use whatever the current problem reporter is configured for.
 				String errorMessage = "Byte code for class "+String.valueOf(clazz.getBinding().readableName())
-									  +" has incompatible version "+version;
+									  +" has incompatible version "+version+", original error was: "+ex.toString();
 				try {
 					Config.getLookupEnvironment().problemReporter.abortDueToInternalError(
 							errorMessage);
