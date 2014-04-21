@@ -35,6 +35,7 @@ import org.eclipse.jdt.internal.compiler.codegen.CodeStream;
 import org.eclipse.jdt.internal.compiler.codegen.Opcodes;
 import org.eclipse.jdt.internal.compiler.flow.FlowContext;
 import org.eclipse.jdt.internal.compiler.flow.FlowInfo;
+import org.eclipse.jdt.internal.compiler.impl.CompilerOptions.WeavingScheme;
 import org.eclipse.jdt.internal.compiler.lookup.ClassScope;
 import org.eclipse.jdt.internal.compiler.lookup.FieldBinding;
 import org.eclipse.jdt.internal.compiler.lookup.InvocationSite;
@@ -309,7 +310,10 @@ public class RoleMigrationImplementor
 		MethodBinding remove = getMethod(cacheTypeBinding, "remove".toCharArray(), 1); //$NON-NLS-1$
 		MethodBinding put    = cacheTypeBinding.getMethod(scope, "put".toCharArray()); //$NON-NLS-1$
 		// accessing the base object (using _OT$removeRole() and _OT$addRole()):
-		ReferenceBinding iboundBase = (ReferenceBinding) scope.getType(IOTConstants.ORG_OBJECTTEAMS_IBOUNDBASE, 3);
+		WeavingScheme weavingScheme = scope.compilerOptions().weavingScheme;
+		ReferenceBinding iboundBase = (ReferenceBinding) scope.getType(
+				weavingScheme == WeavingScheme.OTDRE ? IOTConstants.ORG_OBJECTTEAMS_IBOUNDBASE2 : IOTConstants.ORG_OBJECTTEAMS_IBOUNDBASE,
+				3);
 
 		// remove old from cache
 		codeStream.aload_0();														// this

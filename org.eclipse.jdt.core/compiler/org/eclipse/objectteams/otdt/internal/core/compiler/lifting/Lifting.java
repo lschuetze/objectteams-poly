@@ -478,7 +478,7 @@ public class Lifting extends SwitchOnBaseTypeGenerator
         	? gen.messageSend(
 					gen.castExpression(
 							gen.singleNameReference(_OT_BASE),
-							gen.qualifiedTypeReference(ORG_OBJECTTEAMS_IBOUNDBASE),
+							gen.qualifiedTypeReference(ORG_OBJECTTEAMS_IBOUNDBASE2),
 							CastExpression.RAW),
 					ADD_REMOVE_ROLE,
 					new Expression[] {

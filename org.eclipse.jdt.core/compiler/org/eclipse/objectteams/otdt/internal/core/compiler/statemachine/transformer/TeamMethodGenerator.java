@@ -120,7 +120,7 @@ public class TeamMethodGenerator {
 					};
 				case OTDYNARGS1:
 					return new Argument[] {
-						gen.argument("base".toCharArray(),			gen.qualifiedTypeReference(IOTConstants.ORG_OBJECTTEAMS_IBOUNDBASE)),
+						gen.argument("base".toCharArray(),			gen.qualifiedTypeReference(IOTConstants.ORG_OBJECTTEAMS_IBOUNDBASE2)),
 						gen.argument("teams".toCharArray(), 		gen.qualifiedArrayTypeReference(IOTConstants.ORG_OBJECTTEAMS_ITEAM, 1)),
 						gen.argument("idx".toCharArray(), 			gen.baseTypeReference(TypeConstants.INT)),
 						gen.argument("callinIds".toCharArray(), 	gen.arrayTypeReference(TypeConstants.INT, 1)),
@@ -129,7 +129,7 @@ public class TeamMethodGenerator {
 					};
 				case OTDYNARGS2:
 					return new Argument[] {
-						gen.argument("base".toCharArray(),			gen.qualifiedTypeReference(IOTConstants.ORG_OBJECTTEAMS_IBOUNDBASE)),
+						gen.argument("base".toCharArray(),			gen.qualifiedTypeReference(IOTConstants.ORG_OBJECTTEAMS_IBOUNDBASE2)),
 						gen.argument("teams".toCharArray(), 		gen.qualifiedArrayTypeReference(IOTConstants.ORG_OBJECTTEAMS_ITEAM, 1)),
 						gen.argument("idx".toCharArray(), 			gen.baseTypeReference(TypeConstants.INT)),
 						gen.argument("callinIds".toCharArray(), 	gen.arrayTypeReference(TypeConstants.INT, 1)),
@@ -139,14 +139,14 @@ public class TeamMethodGenerator {
 					};
 				case OTDYNARGS3:
 					return new Argument[] {
-						gen.argument("base".toCharArray(),			gen.qualifiedTypeReference(IOTConstants.ORG_OBJECTTEAMS_IBOUNDBASE)),
+						gen.argument("base".toCharArray(),			gen.qualifiedTypeReference(IOTConstants.ORG_OBJECTTEAMS_IBOUNDBASE2)),
 						gen.argument("callinId".toCharArray(), 		gen.baseTypeReference(TypeConstants.INT)),
 						gen.argument("boundMethodId".toCharArray(), gen.baseTypeReference(TypeConstants.INT)),
 						gen.argument("args".toCharArray(), 			gen.qualifiedArrayTypeReference(TypeConstants.JAVA_LANG_OBJECT, 1))
 					};
 				case OTDYNARGS4:
 					return new Argument[] {
-						gen.argument("base".toCharArray(),			gen.qualifiedTypeReference(IOTConstants.ORG_OBJECTTEAMS_IBOUNDBASE)),
+						gen.argument("base".toCharArray(),			gen.qualifiedTypeReference(IOTConstants.ORG_OBJECTTEAMS_IBOUNDBASE2)),
 						gen.argument("callinId".toCharArray(), 		gen.baseTypeReference(TypeConstants.INT)),
 						gen.argument("boundMethodId".toCharArray(), gen.baseTypeReference(TypeConstants.INT)),
 						gen.argument("args".toCharArray(), 			gen.qualifiedArrayTypeReference(TypeConstants.JAVA_LANG_OBJECT, 1)),
@@ -213,15 +213,15 @@ public class TeamMethodGenerator {
 	};
 	@SuppressWarnings("nls")
 	final MethodDescriptor[] methodDescriptorsDyn = new MethodDescriptor[] {
-		new MethodDescriptor("_OT$callAllBindings",		"(Lorg/objectteams/IBoundBase;[Lorg/objectteams/ITeam;I[II[Ljava/lang/Object;)Ljava/lang/Object;", 
+		new MethodDescriptor("_OT$callAllBindings",		"(Lorg/objectteams/IBoundBase2;[Lorg/objectteams/ITeam;I[II[Ljava/lang/Object;)Ljava/lang/Object;", 
 																							Type.OTDYNARGS1,		Type.OBJECT,	AccPublic),
-		new MethodDescriptor("_OT$callNext",			"(Lorg/objectteams/IBoundBase;[Lorg/objectteams/ITeam;I[II[Ljava/lang/Object;[Ljava/lang/Object;)Ljava/lang/Object;", 
+		new MethodDescriptor("_OT$callNext",			"(Lorg/objectteams/IBoundBase2;[Lorg/objectteams/ITeam;I[II[Ljava/lang/Object;[Ljava/lang/Object;)Ljava/lang/Object;", 
 																							Type.OTDYNARGS2,		Type.OBJECT,	AccPublic),
-		new MethodDescriptor("_OT$callReplace",			"(Lorg/objectteams/IBoundBase;[Lorg/objectteams/ITeam;I[II[Ljava/lang/Object;)Ljava/lang/Object;", 
+		new MethodDescriptor("_OT$callReplace",			"(Lorg/objectteams/IBoundBase2;[Lorg/objectteams/ITeam;I[II[Ljava/lang/Object;)Ljava/lang/Object;", 
 																							Type.OTDYNARGS1,		Type.OBJECT,	AccPublic),
-		new MethodDescriptor("_OT$callBefore",			"(Lorg/objectteams/IBoundBase;II[Ljava/lang/Object;)V", 
+		new MethodDescriptor("_OT$callBefore",			"(Lorg/objectteams/IBoundBase2;II[Ljava/lang/Object;)V", 
 																							Type.OTDYNARGS3,		Type.NONE,		AccPublic),
-		new MethodDescriptor("_OT$callAfter",			"(Lorg/objectteams/IBoundBase;II[Ljava/lang/Object;Ljava/lang/Object;)V", 
+		new MethodDescriptor("_OT$callAfter",			"(Lorg/objectteams/IBoundBase2;II[Ljava/lang/Object;Ljava/lang/Object;)V", 
 																							Type.OTDYNARGS4,		Type.NONE,		AccPublic),
 		new MethodDescriptor("_OT$callOrigStatic",		"(II[Ljava/lang/Object;)Ljava/lang/Object;", 
 																							Type.OTDYNARGS5,		Type.OBJECT,	AccPublic)

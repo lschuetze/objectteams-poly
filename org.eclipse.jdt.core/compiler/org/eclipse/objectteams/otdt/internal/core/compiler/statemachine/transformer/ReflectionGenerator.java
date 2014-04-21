@@ -596,7 +596,7 @@ public class ReflectionGenerator implements IOTConstants, ClassFileConstants {
 						? gen.messageSend(
 							gen.castExpression(
 								gen.singleNameReference(FOUND_BASE),
-								gen.qualifiedTypeReference(ORG_OBJECTTEAMS_IBOUNDBASE),
+								gen.qualifiedTypeReference(ORG_OBJECTTEAMS_IBOUNDBASE2),
 								CastExpression.RAW),
 							ADD_REMOVE_ROLE,
 							new Expression[] {gen.singleNameReference(_OT_ROLE_ARG), 
@@ -843,15 +843,17 @@ public class ReflectionGenerator implements IOTConstants, ClassFileConstants {
 				gen.block(new Statement[] {
 					gen.localVariable(
 						BASE_OBJ,
-						gen.qualifiedTypeReference(ORG_OBJECTTEAMS_IBOUNDBASE),
+						(weavingScheme == WeavingScheme.OTDRE
+							? gen.qualifiedTypeReference(ORG_OBJECTTEAMS_IBOUNDBASE2)
+							: gen.qualifiedTypeReference(ORG_OBJECTTEAMS_IBOUNDBASE)),
 						gen.messageSend(
 							gen.castExpression(
 									gen.singleNameReference(_OT_ROLE_ARG),
 									gen.singleTypeReference(roleType),
 									CastExpression.RAW
 								),
-								_OT_GETBASE,
-								new Expression[0]
+							_OT_GETBASE,
+							new Expression[0]
 							)),
 					gen.messageSend(
 						gen.fieldReference(gen.thisReference(), cacheName, DecapsulationState.REPORTED),
@@ -865,7 +867,7 @@ public class ReflectionGenerator implements IOTConstants, ClassFileConstants {
 					? gen.messageSend(
 						gen.castExpression(
 							gen.singleNameReference(BASE_OBJ),
-							gen.qualifiedTypeReference(ORG_OBJECTTEAMS_IBOUNDBASE),
+							gen.qualifiedTypeReference(ORG_OBJECTTEAMS_IBOUNDBASE2),
 							CastExpression.RAW),
 						ADD_REMOVE_ROLE,
 						new Expression[] {gen.singleNameReference(_OT_ROLE_ARG), 

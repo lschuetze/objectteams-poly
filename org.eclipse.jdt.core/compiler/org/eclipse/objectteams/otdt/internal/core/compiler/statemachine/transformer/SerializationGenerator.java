@@ -161,7 +161,7 @@ public class SerializationGenerator {
 				    	teamType.scope.compilerOptions().weavingScheme == WeavingScheme.OTDRE
 				    	 ? gen.messageSend(
 				    		gen.castExpression(gen.singleNameReference(IOTConstants.BASE), 
-				    						   gen.qualifiedTypeReference(IOTConstants.ORG_OBJECTTEAMS_IBOUNDBASE), CastExpression.RAW),
+				    						   gen.qualifiedTypeReference(IOTConstants.ORG_OBJECTTEAMS_IBOUNDBASE2), CastExpression.RAW),
 						    IOTConstants.ADD_REMOVE_ROLE,
 						    new Expression[]{gen.singleNameReference(CASTED_ROLE), gen.booleanLiteral(true)})
 				    	 : gen.messageSend(

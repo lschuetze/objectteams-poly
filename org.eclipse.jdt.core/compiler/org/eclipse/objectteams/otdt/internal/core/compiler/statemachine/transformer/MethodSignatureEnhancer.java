@@ -136,12 +136,12 @@ public class MethodSignatureEnhancer implements IOTConstants, TypeConstants, Cla
 //{OTDyn: configurable:
 		if (scope.compilerOptions().weavingScheme == WeavingScheme.OTDRE)
 			return new TypeBinding[] {
-				scope.getType(IOTConstants.ORG_OBJECTTEAMS_IBOUNDBASE, 3), 	// _OT$baseArg
-				scope.createArrayType(scope.getOrgObjectteamsITeam(), 1),  	// _OT$teams
-				TypeBinding.INT,    	                               	 	// _OT$index
-				scope.createArrayType(TypeBinding.INT, 1),         		 	// _OT$callinIds
-				TypeBinding.INT,   	                                	 	// _OT$boundMethodId 
-				scope.createArrayType(scope.getJavaLangObject(), 1), 	 	// _OT$args				
+				scope.getType(IOTConstants.ORG_OBJECTTEAMS_IBOUNDBASE2, 3), 	// _OT$baseArg
+				scope.createArrayType(scope.getOrgObjectteamsITeam(), 1),  		// _OT$teams
+				TypeBinding.INT,    	                               	 		// _OT$index
+				scope.createArrayType(TypeBinding.INT, 1),         		 		// _OT$callinIds
+				TypeBinding.INT,   	                                	 		// _OT$boundMethodId 
+				scope.createArrayType(scope.getJavaLangObject(), 1), 	 		// _OT$args				
 			};
 // SH}
 // {OT/JamVM support:
@@ -189,12 +189,12 @@ public class MethodSignatureEnhancer implements IOTConstants, TypeConstants, Cla
 //{OTDyn: configurable:
 			this.weavingScheme == WeavingScheme.OTDRE
 			? new TypeReference[] {
-					gen.qualifiedTypeReference(ORG_OBJECTTEAMS_IBOUNDBASE),		// _OT$baseArg
+					gen.qualifiedTypeReference(ORG_OBJECTTEAMS_IBOUNDBASE2),		// _OT$baseArg
 					gen.qualifiedArrayTypeReference(ORG_OBJECTTEAMS_ITEAM, 1),	// _OT$teams
-					gen.singleTypeReference(TypeConstants.INT),					// _OT$index
-					new ArrayTypeReference(TypeConstants.INT, 1, gen.pos),		// _OT$callinIds
-					gen.singleTypeReference(TypeConstants.INT),					// _OT$boundMethodId
-					gen.qualifiedArrayTypeReference(JAVA_LANG_OBJECT, 1),		// _OT$args
+					gen.singleTypeReference(TypeConstants.INT),						// _OT$index
+					new ArrayTypeReference(TypeConstants.INT, 1, gen.pos),			// _OT$callinIds
+					gen.singleTypeReference(TypeConstants.INT),						// _OT$boundMethodId
+					gen.qualifiedArrayTypeReference(JAVA_LANG_OBJECT, 1),			// _OT$args
 				} 
 // SH}
 // {OT/JamVM support:
