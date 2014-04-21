@@ -1,7 +1,7 @@
 /**********************************************************************
  * This file is part of "Object Teams Development Tooling"-Software
  *
- * Copyright 2003, 2006 Fraunhofer Gesellschaft, Munich, Germany,
+ * Copyright 2003, 2014 Fraunhofer Gesellschaft, Munich, Germany,
  * for its Fraunhofer Institute for Computer Architecture and Software
  * Technology (FIRST), Berlin, Germany and Technical University Berlin,
  * Germany.
@@ -10,7 +10,6 @@
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
- * $Id: IOTConstants.java 23483 2010-02-05 20:26:47Z stephan $
  *
  * Please visit http://www.eclipse.org/objectteams for updates and contact.
  *
@@ -246,9 +245,7 @@ public interface IOTConstants
 	public static final char[] MIGRATE_TO_BASE = "migrateToBase".toCharArray();
 
 	public static final char[][] OTRE_INTERNAL_ERROR = new char[][]{"org".toCharArray(), 
-																	"eclipse".toCharArray(), 
 																	"objectteams".toCharArray(), 
-																	"otre".toCharArray(), 
 																	"OTREInternalError".toCharArray()};
 	/**
 	 * @since 3.9 (OT 2.2)
