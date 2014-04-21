@@ -29,7 +29,11 @@ import org.eclipse.jdt.internal.compiler.lookup.Scope;
 import org.eclipse.jdt.internal.compiler.lookup.SourceTypeBinding;
 import org.eclipse.jdt.internal.compiler.lookup.SyntheticMethodBinding;
 import org.eclipse.jdt.internal.compiler.lookup.TypeBinding;
+import org.eclipse.jdt.internal.compiler.problem.AbortCompilation;
 import org.eclipse.objectteams.otdt.core.compiler.IOTConstants;
+import org.eclipse.objectteams.otdt.internal.core.compiler.bytecode.WordValueAttribute;
+import org.eclipse.objectteams.otdt.internal.core.compiler.control.Config;
+import org.eclipse.objectteams.otdt.internal.core.compiler.control.Config.NotConfiguredException;
 import org.eclipse.objectteams.otdt.internal.core.compiler.model.MethodModel;
 import org.eclipse.objectteams.otdt.internal.core.compiler.model.RoleModel;
 import org.eclipse.objectteams.otdt.internal.core.compiler.statemachine.transformer.MethodSignatureEnhancer;
@@ -194,21 +198,21 @@ public class SyntheticBaseCallSurrogate extends SyntheticOTMethodBinding
 			return result;
 		} catch (RuntimeException ex) {
 			// check if failure is due to incompatible class file version
-//			if (clazz != null && clazz.isIncompatibleCompilerVersion()) {
-//				String version;
-//				version = WordValueAttribute.getBytecodeVersionString(clazz._compilerVersion);
-//				// note: we have no source to report this error against,
-//				// so use whatever the current problem reporter is configured for.
-//				String errorMessage = "Byte code for class "+String.valueOf(clazz.getBinding().readableName())
-//									  +" has incompatible version "+version+", original error was: "+ex.toString();
-//				try {
-//					Config.getLookupEnvironment().problemReporter.abortDueToInternalError(
-//							errorMessage);
-//				} catch (NotConfiguredException e) {
-//					throw new AbortCompilation(false, e);
-//				}
-//				return null;
-//			}
+			if (clazz != null && clazz.isIncompatibleCompilerVersion()) {
+				String version;
+				version = WordValueAttribute.getBytecodeVersionString(clazz._compilerVersion);
+				// note: we have no source to report this error against,
+				// so use whatever the current problem reporter is configured for.
+				String errorMessage = "Byte code for class "+String.valueOf(clazz.getBinding().readableName()) //$NON-NLS-1$
+									  +" has incompatible version "+version+", original error was: "+ex.toString(); //$NON-NLS-1$ //$NON-NLS-2$
+				try {
+					Config.getLookupEnvironment().problemReporter.abortDueToInternalError(
+							errorMessage);
+				} catch (NotConfiguredException e) {
+					throw new AbortCompilation(false, e);
+				}
+				return null;
+			}
 			throw ex; // want to see all other exceptions
 		}
 	}
