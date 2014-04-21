@@ -22,8 +22,8 @@ import java.io.InputStream;
 
 import org.eclipse.objectteams.otre.ClassEnhancer;
 import org.eclipse.objectteams.otre.ClassLoaderAccess;
-import org.eclipse.objectteams.otre.OTREInternalError;
 import org.eclipse.objectteams.otre.ObjectTeamsTransformation;
+import org.objectteams.OTREInternalError;
 import org.apache.bcel.Constants;
 import org.apache.bcel.classfile.ClassParser;
 import org.apache.bcel.classfile.Field;

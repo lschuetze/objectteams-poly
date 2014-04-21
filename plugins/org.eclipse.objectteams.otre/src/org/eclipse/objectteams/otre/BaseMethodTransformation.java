@@ -35,6 +35,7 @@ import org.eclipse.objectteams.otre.util.DebugUtil;
 import org.eclipse.objectteams.otre.util.ListValueHashMap;
 import org.eclipse.objectteams.otre.util.MethodBinding;
 import org.eclipse.objectteams.otre.util.TeamIdDispenser;
+import org.objectteams.OTREInternalError;
 import org.apache.bcel.Constants;
 import org.apache.bcel.classfile.Field;
 import org.apache.bcel.classfile.LineNumber;

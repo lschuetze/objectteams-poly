@@ -34,7 +34,7 @@ import org.eclipse.objectteams.otre.util.AnnotationHelper;
 import org.eclipse.objectteams.otre.util.AttributeReadingGuard;
 import org.eclipse.objectteams.otre.util.CallinBindingManager;
 import org.eclipse.objectteams.otre.util.RoleBaseBinding;
-
+import org.objectteams.OTREInternalError;
 import org.apache.bcel.Constants;
 import org.apache.bcel.classfile.Attribute;
 import org.apache.bcel.classfile.Constant;

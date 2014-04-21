@@ -24,6 +24,7 @@ import java.util.*;
 
 import org.eclipse.objectteams.otre.jplis.JPLISEnhancer;
 import org.eclipse.objectteams.otre.util.*;
+import org.objectteams.OTREInternalError;
 
 /**
  * for callin-role-methods with recursive method-calls (base calls) we add a

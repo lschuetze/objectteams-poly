@@ -14,7 +14,7 @@
  * Contributors:
  * Berlin Institute of Technology - Initial API and implementation
  **********************************************************************/
-package org.eclipse.objectteams.otre;
+package org.objectteams;
 
 /**
  * @author stephan 

@@ -47,8 +47,8 @@ public interface OTConstants {
     ObjectType liftingVeto   = new ObjectType("org.objectteams.LiftingVetoException");
 	/**                            Type <tt>org.objectteams.LiftingVetoException</tt> */
     ObjectType liftingFailed = new ObjectType("org.objectteams.LiftingFailedException");
-    /**                            Type <tt>org.eclipse.objectteams.otre.OTREInternalError</tt> */	
-    ObjectType internalError = new ObjectType("org.eclipse.objectteams.otre.OTREInternalError");
+    /**                            Type <tt>org.objectteams.OTREInternalError</tt> */	
+    ObjectType internalError = new ObjectType("org.objectteams.OTREInternalError");
 	/**                            Type <tt>org.objectteams.ResultNotProvidedError</tt> */	
 	ObjectType notProvidedError = new ObjectType("org.objectteams.ResultNotProvidedError");
 	/**                            Type <tt>org.objectteams.UnsupportedFeatureException</tt> */	

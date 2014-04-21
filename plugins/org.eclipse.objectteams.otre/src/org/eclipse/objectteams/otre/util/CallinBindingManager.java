@@ -19,11 +19,10 @@ package org.eclipse.objectteams.otre.util;
 //import org.apache.bcel.generic.Type; // just for javadoc.
 import org.apache.bcel.classfile.JavaClass;
 import org.apache.bcel.generic.ObjectType;
-
-import org.eclipse.objectteams.otre.OTREInternalError;
 import org.eclipse.objectteams.otre.ObjectTeamsTransformation;
 import org.eclipse.objectteams.otre.RepositoryAccess;
 import org.eclipse.objectteams.otre.ObjectTeamsTransformation.BaseMethodInfo;
+import org.objectteams.OTREInternalError;
 
 import java.util.ArrayList;
 import java.util.Collection;
