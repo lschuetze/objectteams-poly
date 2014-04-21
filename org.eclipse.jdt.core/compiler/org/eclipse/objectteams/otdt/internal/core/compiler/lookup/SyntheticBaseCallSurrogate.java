@@ -70,7 +70,7 @@ public class SyntheticBaseCallSurrogate extends SyntheticOTMethodBinding
 		MethodModel.saveReturnType(this, origReturnType);
 		// fetch type bindings while we have a scope:
 		Scope scope = declaringClass.scope;
-		this.errorType = scope.getType(IOTConstants.OTRE_INTERNAL_ERROR, 5);
+		this.errorType = scope.getType(IOTConstants.OTRE_INTERNAL_ERROR, 3);
 		this.stringType = scope.getJavaLangString();
 		// the synthetic methods of a class will be sorted according to a per-class index, find the index now: 
 		SyntheticMethodBinding[] knownAccessMethods = declaringClass.syntheticMethods();
