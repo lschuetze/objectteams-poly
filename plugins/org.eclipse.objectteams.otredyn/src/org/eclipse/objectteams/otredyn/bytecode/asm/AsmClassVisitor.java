@@ -1,7 +1,7 @@
 /**********************************************************************
  * This file is part of "Object Teams Dynamic Runtime Environment"
  * 
- * Copyright 2009, 2012 Oliver Frank and others.
+ * Copyright 2009, 2014 Oliver Frank and others.
  * 
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -16,8 +16,9 @@
  **********************************************************************/
 package org.eclipse.objectteams.otredyn.bytecode.asm;
 
+import java.util.HashSet;
+
 import org.eclipse.objectteams.otredyn.bytecode.Binding;
-import org.eclipse.objectteams.otredyn.bytecode.Types;
 import org.eclipse.objectteams.otredyn.bytecode.asm.Attributes.CallinBindingsAttribute;
 import org.eclipse.objectteams.otredyn.bytecode.asm.Attributes.OTClassFlagsAttribute;
 import org.eclipse.objectteams.otredyn.bytecode.asm.Attributes.CallinBindingsAttribute.MultiBinding;
@@ -89,6 +90,8 @@ class AsmClassVisitor extends ClassVisitor {
 	 */
 	@Override
 	public void visitAttribute(Attribute attribute) {
+		if (clazz.boundBaseClasses == null)
+			clazz.boundBaseClasses = new HashSet<String>();
 		if (attribute.type.equals(Attributes.ATTRIBUTE_OT_DYN_CALLIN_BINDINGS)) {
 			CallinBindingsAttribute attr = (CallinBindingsAttribute) attribute;
 			MultiBinding[] multiBindings = attr.getBindings();
@@ -96,6 +99,7 @@ class AsmClassVisitor extends ClassVisitor {
 				String roleClassName = multiBindings[i].getRoleClassName();
 				String callinLabel = multiBindings[i].getCallinLabel();
 				String baseClassName = multiBindings[i].getBaseClassName();
+				clazz.boundBaseClasses.add(baseClassName.replace('/', '.'));
 				String[] baseMethodNames = multiBindings[i].getBaseMethodNames();
 				String[] baseMethodSignatures = multiBindings[i].getBaseMethodSignatures();
 				String[] declaringBaseClassNames = multiBindings[i].getDeclaringBaseClassName();

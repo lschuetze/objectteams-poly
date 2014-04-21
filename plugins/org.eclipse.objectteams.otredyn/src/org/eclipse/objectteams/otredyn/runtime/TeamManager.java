@@ -23,6 +23,8 @@ import java.util.Map;
 
 import org.eclipse.objectteams.otredyn.bytecode.AbstractBoundClass;
 import org.objectteams.ITeam;
+import org.objectteams.ITeamManager;
+import org.objectteams.Team;
 
 /**
  * This class administrates the the active teams and their
@@ -34,12 +36,8 @@ import org.objectteams.ITeam;
  * @author Oliver Frank
  *
  */
-public class TeamManager {
-	
-	public static enum TeamStateChange {
-			REGISTER,
-			UNREGISTER
-		}
+public class TeamManager implements ITeamManager {
+
 	//	void handleTeamStateChange(ITeam t, TeamStateChange stateChange) ;
 	private static List<List<ITeam>> _teams = new ArrayList<List<ITeam>>();
 	private static List<List<Integer>> _callinIds = new ArrayList<List<Integer>>();
@@ -53,6 +51,7 @@ public class TeamManager {
 
 	public static void setup(IClassRepository repo) {
 		classRepository = repo;
+		Team.registerTeamManager(new TeamManager()); // install callback
 	}
 
 	/**
@@ -160,7 +159,7 @@ public class TeamManager {
 	 * @param t
 	 * @param stateChange
 	 */
-	public static void handleTeamStateChange(ITeam t, TeamManager.TeamStateChange stateChange) {
+	public void handleTeamStateChange(ITeam t, ITeamManager.TeamStateChange stateChange) {
 		IClassIdentifierProvider provider = ClassIdentifierProviderFactory.getClassIdentifierProvider();
 		Class<? extends ITeam> teamClass = t.getClass();
 		String teamId = provider.getClassIdentifier(teamClass);
@@ -184,12 +183,37 @@ public class TeamManager {
 						for (Integer subJoinpoint : subJoinpoints)
 							changeTeamsForJoinpoint(t, binding.getPerTeamId(), subJoinpoint, stateChange);
 				}
-				boundClass.handleAddingOfBinding(binding); // TODO(SH): more lazy
+				boundClass.handleAddingOfBinding(binding); // TODO: do we want/need to group all bindings into one action?
 				break;
 			}
-			
 		}
 	}
+	
+	/**
+	 * When a team is about to be activated propagate its bindings to all base classes,
+	 * but don't yet register any join points, we aren't activating yet. 
+	 */
+	public static void prepareTeamActivation(Class<? extends ITeam> teamClass) {
+		String teamName = teamClass.getName();
+		ClassLoader teamClassLoader = teamClass.getClassLoader();
+		IClassIdentifierProvider provider = ClassIdentifierProviderFactory.getClassIdentifierProvider();
+		String teamId = provider.getClassIdentifier(teamClass);
+		IBoundTeam teem = classRepository.getTeam(teamName, teamId, teamClassLoader);
+
+		for (IBinding binding : teem.getBindings()) {
+			String boundClassName = binding.getBoundClass();
+			String boundClassIdentifier = provider.getBoundClassIdentifier(teamClass, boundClassName);
+			// FIXME(SH): the following may need adaptation for OT/Equinox or other multi-classloader settings:
+			IBoundClass boundClass = classRepository.getBoundClass(boundClassName.replace('/', '.'), boundClassIdentifier, teamClass.getClassLoader());
+			// FIXME(SH): if boundClass is a role we need to find tsub roles, too!
+			switch (binding.getType()) {
+			case CALLIN_BINDING:
+				boundClass.handleAddingOfBinding(binding);
+				break;
+			}
+		}		
+	}
+
 	public static void handleTeamLoaded(Class<? extends ITeam> teamClass) {
 		if (teamClass != null)
 			handleDecapsulation(teamClass);

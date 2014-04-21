@@ -5,8 +5,7 @@ Bundle-SymbolicName: org.eclipse.objectteams.otredyn
 Bundle-Version: 0.8.0.qualifier
 Bundle-Vendor: %providerName
 Bundle-Localization: plugin
-Export-Package: org.objectteams,
- org.eclipse.objectteams.otredyn.bytecode,
+Export-Package: org.eclipse.objectteams.otredyn.bytecode,
  org.eclipse.objectteams.otredyn.bytecode.asm,
  org.eclipse.objectteams.otredyn.runtime,
  org.eclipse.objectteams.otredyn.transformer,
@@ -15,6 +14,7 @@ Export-Package: org.objectteams,
  org.eclipse.objectteams.otredyn.util
 Bundle-RequiredExecutionEnvironment: J2SE-1.5
 Bundle-ClassPath: .
-Require-Bundle: org.objectweb.asm;bundle-version="5.0.1",
+Require-Bundle: org.eclipse.objectteams.runtime;bundle-version="[2.3.0,3.0.0)",
+ org.objectweb.asm;bundle-version="5.0.1",
  org.objectweb.asm.tree;bundle-version="5.0.1",
  org.objectweb.asm.commons;bundle-version="5.0.1"

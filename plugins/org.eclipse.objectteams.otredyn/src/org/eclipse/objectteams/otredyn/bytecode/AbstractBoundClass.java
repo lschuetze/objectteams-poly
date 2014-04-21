@@ -374,7 +374,7 @@ public abstract class AbstractBoundClass implements IBoundClass {
 	/**
 	 * This method parses the bytecode, if that has not already been done 
 	 */
-	protected abstract void parseBytecode();
+	public abstract void parseBytecode();
 	
 	/**
 	 * Returns the internal name of the super class of this class
@@ -1011,6 +1011,8 @@ public abstract class AbstractBoundClass implements IBoundClass {
 	public abstract byte[] getBytecode();
 
 	public void dump(byte[] classfileBuffer, String postfix) {}
+
+	public Collection<String> getBoundBaseClasses() { return null; }
 
 	public abstract int compare(String callinLabel1, String callinLabel2);
 

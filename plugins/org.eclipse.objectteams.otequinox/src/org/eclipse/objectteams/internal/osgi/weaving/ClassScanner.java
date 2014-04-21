@@ -1,7 +1,7 @@
 /**********************************************************************
  * This file is part of "Object Teams Development Tooling"-Software
  * 
- * Copyright 2008, 2013 Technical University Berlin, Germany and others
+ * Copyright 2008, 2014 Technical University Berlin, Germany and others
  * 
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -30,7 +30,6 @@ import org.eclipse.core.runtime.IStatus;
 import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
-import org.eclipse.objectteams.otre.jplis.ObjectTeamsTransformer;
 import org.eclipse.objectteams.otre.util.CallinBindingManager;
 import org.osgi.framework.Bundle;
 
@@ -69,18 +68,17 @@ public class ClassScanner
 	 * @throws IOException
 	 * @throws ClassNotFoundException the team or role class was not found
 	 */
-	public String readOTAttributes(Bundle bundle, String className)
+	public String readOTAttributes(Bundle bundle, String className, DelegatingTransformer transformer)
 			throws ClassFormatError, IOException, ClassNotFoundException 
 	{
-		Object loader = REPOSITORY_USE_RESOURCE_LOADER ? bundle : null;
+		Bundle loader = REPOSITORY_USE_RESOURCE_LOADER ? bundle : null;
 		Pair<URL,String> result = TeamLoader.findTeamClassResource(className, bundle);
 		if (result == null)
 			throw new ClassNotFoundException(className);
 		URL classFile = result.first;
 		className = result.second;
-		ObjectTeamsTransformer transformer = new ObjectTeamsTransformer();
 		try (InputStream inputStream = classFile.openStream()) {
-			transformer.readOTAttributes(inputStream, classFile.getFile(), loader);
+			transformer.readOTAttributes(className, inputStream, classFile.getFile(), loader);
 		}
 		Collection<String> currentBaseNames = transformer.fetchAdaptedBases(); // destructive read
 		if (currentBaseNames != null) {
@@ -132,7 +130,7 @@ public class ClassScanner
 	 */
 	void readMemberTypeAttributes(Bundle			     bundle,
 								  String                 className, 
-								  ObjectTeamsTransformer transformer)
+								  DelegatingTransformer  transformer)
 	{
 		List<String> roles = CallinBindingManager.getRolePerTeam(className);
 		if (roles != null) {
@@ -140,7 +138,7 @@ public class ClassScanner
 				log(IStatus.OK, "scanning role "+roleName);
 				try {
 					this.roleClassNames.add(roleName);
-					readOTAttributes(bundle, roleName);					
+					readOTAttributes(bundle, roleName, transformer);					
 				} catch (Throwable t) {
 					log(t, "Failed to read OT-Attributes of role "+roleName);
 				}

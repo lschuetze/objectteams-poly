@@ -16,6 +16,9 @@
  **********************************************************************/
 package org.eclipse.objectteams.otredyn.bytecode.asm;
 
+import java.util.Collection;
+import java.util.Set;
+
 import org.eclipse.objectteams.otredyn.bytecode.AbstractBoundClass;
 import org.eclipse.objectteams.otredyn.bytecode.AbstractTeam;
 import org.eclipse.objectteams.otredyn.bytecode.IBytecodeProvider;
@@ -44,6 +47,12 @@ abstract class AsmBoundClass extends AbstractTeam {
 	 */
 	public String[] precedences;
 
+	/**
+	 * Set of base classes to which the current class or one of its roles as playedBy bindings.
+	 * Qualified class names are '.' separated.
+	 */
+	public Set<String> boundBaseClasses;
+
 	protected AsmBoundClass(String name, String id, IBytecodeProvider bytecodeProvider, ClassLoader loader) {
 		super(name, id, loader);
 		this.bytecodeProvider = bytecodeProvider;
@@ -54,7 +63,7 @@ abstract class AsmBoundClass extends AbstractTeam {
 	 * of {@link AbstractBoundClass} to set the information
 	 */
 	@Override
-	protected synchronized void parseBytecode() {
+	public synchronized void parseBytecode() {
 		if (parsed) {
 			// Already parsed, nothing to do
 			return;
@@ -78,6 +87,11 @@ abstract class AsmBoundClass extends AbstractTeam {
 		bytecode = null;
 	}
 	
+	@Override
+	public Collection<String> getBoundBaseClasses() {
+		return this.boundBaseClasses;
+	}
+
 	/**
 	 * Returns the bytecode of this class and cache it temporary.
 	 * This method is only needed, if getBytecode of the {@link IBytecodeProvider}

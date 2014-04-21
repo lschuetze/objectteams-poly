@@ -1,7 +1,7 @@
 /**********************************************************************
  * This file is part of "Object Teams Development Tooling"-Software
  * 
- * Copyright 2013 GK Software AG
+ * Copyright 2013, 2014 GK Software AG
  *  
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -31,6 +31,7 @@ import org.eclipse.objectteams.internal.osgi.weaving.AspectBinding.TeamBinding;
 import org.eclipse.objectteams.internal.osgi.weaving.Util.ProfileKind;
 import org.eclipse.objectteams.otequinox.ActivationKind;
 import org.eclipse.objectteams.otequinox.TransformerPlugin;
+import org.eclipse.objectteams.otredyn.runtime.TeamManager;
 import org.objectteams.Team;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.hooks.weaving.WovenClass;
@@ -57,9 +58,12 @@ public class TeamLoader {
 
 	private Set<String> beingDefined;
 	
-	public TeamLoader(List<WaitingTeamRecord> deferredTeams, Set<String> beingDefined) {
+	boolean useDynamicWeaving;
+
+	public TeamLoader(List<WaitingTeamRecord> deferredTeams, Set<String> beingDefined, boolean useDynamicWeaving) {
 		this.deferredTeams = deferredTeams;
 		this.beingDefined = beingDefined;
+		this.useDynamicWeaving = useDynamicWeaving;
 	}
 
 	/**
@@ -154,8 +158,11 @@ public class TeamLoader {
 		String teamName = team.teamName;
 		// don't try to instantiate before all base classes successfully loaded.
 		synchronized(aspectBinding) {
-			if (!isReadyToLoad(aspectBinding, team, teamName, activationKind))
+			if (!isReadyToLoad(aspectBinding, team, teamName, activationKind)) {
+				if (this.useDynamicWeaving)
+					TeamManager.prepareTeamActivation(team.teamClass);
 				return;
+			}
 			for (TeamBinding equivalent : team.equivalenceSet)
 				equivalent.isActivated = true;
 		}

@@ -1,7 +1,7 @@
 /**********************************************************************
  * This file is part of "Object Teams Development Tooling"-Software
  * 
- * Copyright 2013 GK Software AG
+ * Copyright 2013, 2014 GK Software AG
  *  
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -73,6 +73,8 @@ public class BaseBundleLoadTrigger {
 				log(IStatus.INFO, "Adding OTRE import to "+baseBundleName);
 				List<String> imports = baseClass.getDynamicImports();
 				imports.add("org.objectteams");
+				if (hook.useDynamicWeaver)
+					imports.add("org.eclipse.objectteams.otredyn.runtime"); // for access to TeamManager
 			}
 		}
 		
@@ -100,13 +102,15 @@ public class BaseBundleLoadTrigger {
 				}
 				// (2) scan all teams in affecting aspect bindings:
 				if (!aspectBinding.hasScannedTeams)
-					aspectBinding.scanTeamClasses(aspectBundle);
+					aspectBinding.scanTeamClasses(aspectBundle, DelegatingTransformer.newTransformer(hook.useDynamicWeaver));
+					// TODO: record adapted base classes?
 				
 				// (3) add dependencies to the base bundle:
-				aspectBinding.addImports(baseClass);
+				if (!hook.useDynamicWeaver) // OTDRE access aspects by generic interface in o.o.Team
+					aspectBinding.addImports(baseClass);
 
 				// (4) try optional steps:
-				TeamLoader loading = new TeamLoader(deferredTeamClasses, beingDefined);
+				TeamLoader loading = new TeamLoader(deferredTeamClasses, beingDefined, hook.useDynamicWeaver);
 				loading.loadTeamsForBase(aspectBundle, aspectBinding, baseClass);
 			}
 		}

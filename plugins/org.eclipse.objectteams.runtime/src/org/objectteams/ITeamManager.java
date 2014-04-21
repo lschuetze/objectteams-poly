@@ -16,7 +16,7 @@
 package org.objectteams;
 
 /**
- * This interface encapsulates the OTDRE for callbacks from {@link Team}.
+ * This interface encapsulates the OTDRE for callbacks from class {@link Team}.
  * NOT API.
  */
 public interface ITeamManager {
@@ -26,5 +26,5 @@ public interface ITeamManager {
 		UNREGISTER
 	}
 
-	void handleTeamStateChange(Team aTeam, TeamStateChange register);
+	void handleTeamStateChange(ITeam aTeam, TeamStateChange register);
 }

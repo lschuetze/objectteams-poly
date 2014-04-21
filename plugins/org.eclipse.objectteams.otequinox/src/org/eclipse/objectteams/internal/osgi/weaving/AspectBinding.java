@@ -33,7 +33,6 @@ import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
 import org.eclipse.objectteams.internal.osgi.weaving.Util.ProfileKind;
 import org.eclipse.objectteams.otequinox.ActivationKind;
-import org.eclipse.objectteams.otre.jplis.ObjectTeamsTransformer;
 import org.objectteams.Team;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.hooks.weaving.WovenClass;
@@ -224,7 +223,7 @@ public class AspectBinding {
 
 	/** Create an initial (unconnected) resolved team binding. */
 	public TeamBinding createResolvedTeam(int count, String teamName, @Nullable String activationSpecifier, @Nullable String superTeamName) {
-		ActivationKind kind = ActivationKind.NONE;
+		@NonNull ActivationKind kind = ActivationKind.NONE;
 		try {
 			if (activationSpecifier != null)
 				kind = ActivationKind.valueOf(activationSpecifier);
@@ -288,7 +287,7 @@ public class AspectBinding {
 	 * Read OT attributes of all teams in this aspectBinding 
 	 * and collect affected base classes into the teamBindings.
 	 */
-	public synchronized void scanTeamClasses(Bundle bundle) {
+	public synchronized void scanTeamClasses(Bundle bundle, DelegatingTransformer transformer) {
 		long time = 0;
 		if (Util.PROFILE) time= System.nanoTime();
 		ClassScanner scanner = new ClassScanner();
@@ -296,14 +295,14 @@ public class AspectBinding {
 			if (team.hasScannedBases) { // not a surprise for members of equivalentSet or classes already processed by weave()
 				if (!team.hasScannedRoles) { // weave() only scans bases, not roles!
 					team.hasScannedRoles = true;
-					scanner.readMemberTypeAttributes(bundle, team.teamName, new ObjectTeamsTransformer());
+					scanner.readMemberTypeAttributes(bundle, team.teamName, transformer);
 				}
 				continue;
 			}
 			team.hasScannedBases = true;
 			team.hasScannedRoles = true;
 			try {
-				String teamName = scanner.readOTAttributes(bundle, team.teamName);
+				String teamName = scanner.readOTAttributes(bundle, team.teamName, transformer);
 				Collection<String> baseClassNames = scanner.getCollectedBaseClassNames();
 				if (team.baseClassNames.isEmpty()) {
 					for (TeamBinding equivalent : team.equivalenceSet)

@@ -15,8 +15,13 @@
  **********************************************************************/
 package org.eclipse.objectteams.otredyn.transformer.jplis;
 
+import java.io.IOException;
+import java.io.InputStream;
 import java.lang.instrument.ClassFileTransformer;
 import java.security.ProtectionDomain;
+import java.util.Collection;
+import java.util.HashSet;
+import java.util.Set;
 
 import org.eclipse.objectteams.otredyn.bytecode.AbstractBoundClass;
 import org.eclipse.objectteams.otredyn.bytecode.ClassRepository;
@@ -26,16 +31,16 @@ import org.eclipse.objectteams.otredyn.bytecode.ClassRepository;
  * This class does all needed transformations at load time.
  * @author  Christine Hundt
  */
-
 public class ObjectTeamsTransformer implements ClassFileTransformer {
+
+	private Set<String> boundBaseClassNames = new HashSet<String>();
+
 	/* (non-Javadoc)
 	 * @see java.lang.instrument.ClassFileTransformer#transform(java.lang.ClassLoader, java.lang.String, java.lang.Class, java.security.ProtectionDomain, byte[])
 	 */
-
 	public byte[] transform(ClassLoader loader, String className, Class<?> classBeingRedefined,
-            ProtectionDomain protectionDomain, byte[] classfileBuffer) {
-			
-			
+            ProtectionDomain protectionDomain, byte[] classfileBuffer)
+	{
 		return transform(loader, className, className, classBeingRedefined, classfileBuffer);
 	}
 	
@@ -66,6 +71,8 @@ public class ObjectTeamsTransformer implements ClassFileTransformer {
 			t.printStackTrace();
 		}
 		
+		this.boundBaseClassNames.addAll(clazz.getBoundBaseClasses());
+
 		return classfileBuffer;
 	}
 
@@ -104,5 +111,40 @@ public class ObjectTeamsTransformer implements ClassFileTransformer {
 			return false;
 		}
 		return true;
+	}
+	
+	/** Parse the bytecode of the given class, so we are able to answer {@link #fetchAdaptedBases()} afterwards. */
+	public void readOTAttributes(String className, String classId, InputStream inputStream, ClassLoader loader) throws ClassFormatError, IOException {		
+		AbstractBoundClass clazz = ClassRepository.getInstance().getBoundClass(
+				className.replace('/','.'), classId, loader);
+		if (!clazz.isFirstTransformation()) {
+			return; // FIXME: re-loading existing class?? Investigate classloader, check classId strategy etc.pp.
+		}
+		try {
+			if (clazz.isTransformationActive()) {
+				return;
+			}
+			int available = inputStream.available();
+			byte[] bytes = new byte[available];
+			inputStream.read(bytes);
+			clazz = ClassRepository.getInstance().getBoundClass(
+					className, classId, bytes, loader);
+			if (!clazz.isInterface())
+				ClassRepository.getInstance().linkClassWithSuperclass(clazz);
+			if (!clazz.isInterface() || clazz.isRole())
+				clazz.parseBytecode();
+		} catch(Throwable t) {
+			t.printStackTrace();
+		}
+		
+		this.boundBaseClassNames.addAll(clazz.getBoundBaseClasses());
+	}
+	
+	/**
+	 * After {@link #transform(ClassLoader, String, Class, ProtectionDomain, byte[])} or {@link #readOTAttributes(String, String, InputStream, ClassLoader)}
+	 * this method will answer the qualified names (dot-separated) of all base classes adapated by the current team and its roles.
+	 */
+	public Collection<String> fetchAdaptedBases() {
+		return this.boundBaseClassNames;
 	}
 }

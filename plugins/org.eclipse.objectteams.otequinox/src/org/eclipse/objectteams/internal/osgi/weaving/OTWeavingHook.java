@@ -1,7 +1,7 @@
 /**********************************************************************
  * This file is part of "Object Teams Development Tooling"-Software
  * 
- * Copyright 2013 GK Software AG
+ * Copyright 2013, 2014 GK Software AG
  *  
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -36,7 +36,6 @@ import org.eclipse.objectteams.internal.osgi.weaving.AspectBinding.TeamBinding;
 import org.eclipse.objectteams.internal.osgi.weaving.Util.ProfileKind;
 import org.eclipse.objectteams.otequinox.Constants;
 import org.eclipse.objectteams.otequinox.TransformerPlugin;
-import org.eclipse.objectteams.otre.jplis.ObjectTeamsTransformer;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
@@ -65,6 +64,9 @@ import org.osgi.service.packageadmin.PackageAdmin;
  * </ul>
  */
 public class OTWeavingHook implements WeavingHook, WovenClassListener {
+
+	// TODO: this master-switch, which selects the weaver, should probably be replaced by s.t. else?
+	boolean useDynamicWeaver = "dynamic".equals(System.getProperty("ot.weaving"));
 
 	enum WeavingReason { None, Aspect, Base }
 	
@@ -151,7 +153,7 @@ public class OTWeavingHook implements WeavingHook, WovenClassListener {
 				// do whatever is needed *before* loading this class:
 				triggerBaseTripWires(bundleName, wovenClass);
 
-				ObjectTeamsTransformer transformer = new ObjectTeamsTransformer();
+				DelegatingTransformer transformer = DelegatingTransformer.newTransformer(useDynamicWeaver);
 				Class<?> classBeingRedefined = null; // TODO prepare for otre-dyn
 				ProtectionDomain protectionDomain = wovenClass.getProtectionDomain();
 				byte[] bytes = wovenClass.getBytes();
@@ -161,7 +163,7 @@ public class OTWeavingHook implements WeavingHook, WovenClassListener {
 					if (Util.PROFILE) time= System.nanoTime();
 					byte[] newBytes = transformer.transform(bundleWiring.getBundle(),
 										className, classBeingRedefined, protectionDomain, bytes);
-					if (newBytes != bytes && !Arrays.equals(newBytes, bytes)) {
+					if (newBytes != null && newBytes != bytes && !Arrays.equals(newBytes, bytes)) {
 						if (Util.PROFILE) Util.profile(time, ProfileKind.Transformation, className);
 						log(IStatus.INFO, "Transformation performed on "+className);
 						wovenClass.setBytes(newBytes);
@@ -189,7 +191,7 @@ public class OTWeavingHook implements WeavingHook, WovenClassListener {
 		return WeavingReason.None;
 	}
 
-	private void recordBaseClasses(ObjectTeamsTransformer transformer, @NonNull String aspectBundle, String className) {
+	private void recordBaseClasses(DelegatingTransformer transformer, @NonNull String aspectBundle, String className) {
 		Collection<String> adaptedBases = transformer.fetchAdaptedBases();
 		if (adaptedBases == null || adaptedBases.isEmpty()) return;
 		List<AspectBinding> aspectBindings = aspectBindingRegistry.getAspectBindings(aspectBundle);
@@ -242,7 +244,7 @@ public class OTWeavingHook implements WeavingHook, WovenClassListener {
 			String teamName = record.team.teamName;
 			log(IStatus.INFO, "Consider for instantiation/activation: team "+teamName);
 			try {
-				TeamLoader loader = new TeamLoader(deferredTeams, beingDefined);
+				TeamLoader loader = new TeamLoader(deferredTeams, beingDefined, this.useDynamicWeaver);
 				// Instantiate (we only get here if activationKind != NONE)
 				loader.instantiateAndActivate(record.aspectBinding, record.team, record.activationKind); // may re-insert to deferredTeams
 			} catch (Exception e) {
