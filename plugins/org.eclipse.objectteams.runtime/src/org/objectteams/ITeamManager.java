@@ -1,7 +1,7 @@
 /**********************************************************************
  * This file is part of the "Object Teams Runtime Environment"
  *
- * Copyright 2007-2009 Berlin Institute of Technology, Germany.
+ * Copyright 2014 Stephan Herrmann.
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -11,24 +11,20 @@
  * Please visit http://www.eclipse.org/objectteams for updates and contact.
  *
  * Contributors:
- *		Berlin Institute of Technology - Initial API and implementation
+ * 		Stephan Herrmann - Initial API and implementation
  **********************************************************************/
 package org.objectteams;
 
 /**
- * Exception to be thrown when a bound role is being instantiated but
- * the constructor does not assign a base object.
- *
- * @author stephan
+ * This interface encapsulates the OTDRE for callbacks from {@link Team}.
+ * NOT API.
  */
-@SuppressWarnings("serial")
-public class IllegalRoleCreationException extends RuntimeException {
-	public IllegalRoleCreationException() {
-		super();
+public interface ITeamManager {
+	
+	public static enum TeamStateChange {
+		REGISTER,
+		UNREGISTER
 	}
 
-	@Override
-	public String getMessage() {
-		return "Cannot instantiate a bound role using a default constructor of its tsuper class";
-	}
+	void handleTeamStateChange(Team aTeam, TeamStateChange register);
 }

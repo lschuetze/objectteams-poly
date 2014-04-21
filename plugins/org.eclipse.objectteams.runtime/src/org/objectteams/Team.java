@@ -54,6 +54,8 @@ public /* team */ class Team implements ITeam {
 	 * Internal field used by the runtime to install a lifting participant if one is configured.
 	 */
 	public static ILiftingParticipant _OT$liftingParticipant = null;
+	
+	private static ITeamManager teamManager; // callback into OTDRE, if set
 
 	/**
 	 * Default constructor for debugging purpose.
@@ -368,14 +370,20 @@ public /* team */ class Team implements ITeam {
 
 	private void doRegistration() {
 		if (_OT$registrationState == _OT$UNREGISTERED) {
-			_OT$registerAtBases();
+			if (teamManager != null)
+				teamManager.handleTeamStateChange(this, ITeamManager.TeamStateChange.REGISTER);
+			else
+				_OT$registerAtBases();
 			_OT$registrationState = _OT$REGISTERED;
 		}
 	}
 
 	private void doUnregistration() {
 		if (_OT$registrationState == _OT$REGISTERED) {
-			_OT$unregisterFromBases();
+			if (teamManager != null)
+				teamManager.handleTeamStateChange(this, ITeamManager.TeamStateChange.UNREGISTER);
+			else
+				_OT$unregisterFromBases();
 			_OT$registrationState = _OT$UNREGISTERED;
 		}
 	}
@@ -517,4 +525,133 @@ public /* team */ class Team implements ITeam {
 	 * for each role that has been retrieved and shall be re-registered for this team.
 	 */
 	protected void restoreRole(Class<?> clazz, Object role) { /* empty; implementation will be generated for each serializable sub-class. */ }
+	
+	// === BELOW THIS POINT: Methods used by the Object Teams Dynamic Runtime Environment, NOT API ===
+	
+	public static void registerTeamManager(ITeamManager teamManager) {
+		if (Team.teamManager != null) throw new IllegalStateException("team manager already defined.");
+		Team.teamManager = teamManager;
+	}
+
+	/**
+	 * This method is the first part of the new chaining wrapper.
+	 * It should be called from the generated client code.
+	 *
+	 * @param baze the current base object
+	 * @param teams the current team objects
+	 * @param idx the index of the current team in teams
+	 * @param callinIds an array of ids, that are unique in the team
+	 *                  for a base method in a base class
+	 * @param boundMethodId an unique id for a base method in the base class.
+	 *                      This id is needed for a base call.
+	 * @param args packed arguments.
+	 * @return possibly boxed result
+	 */
+	public Object _OT$callAllBindings(IBoundBase2 baze, ITeam[] teams,int idx,int[] callinIds, int boundMethodId, Object[] args)
+	{
+
+
+		this._OT$callBefore(baze, callinIds[idx], boundMethodId, args);
+
+		Object res = this._OT$callReplace(baze, teams, idx, callinIds, boundMethodId, args);
+
+		this._OT$callAfter(baze, callinIds[idx], boundMethodId, args, res); // make result available to param mappings!
+
+		return res;
+	}
+
+	/**
+	 * This method calls the next team or a base method,
+	 * if there are no more active teams for a joinpoint
+	 *
+	 * @param baze the current base object
+	 * @param teams the current base object
+	 * @param idx the index of the current team in teams, also points into callinIds, i.e., both lists run synchroneously.
+	 * @param callinIds an array of ids, that are unique in the team
+	 *                  for a base method in a base class
+	 * @param boundMethodId an unique id for a base method in the base class.
+	 *                      This id is needed for a base call.
+	 * @param args original packed arguments.
+	 * @param baseCallArgs packed arguments as provided to the base call.
+	 * @return possibly boxed result
+	 */
+	public Object _OT$callNext(IBoundBase2 baze, ITeam[] teams, int idx, int[] callinIds, int boundMethodId, Object[] args, Object[] baseCallArgs)
+	{
+		// Are there still active teams?
+		if (idx+1 < teams.length) {
+			// Yes, so call the next team/callin
+			return teams[idx+1]._OT$callAllBindings(baze, teams, idx+1, callinIds, boundMethodId, args);
+		} else {
+			//No, call the base method
+			if (baze == null) {
+				//handle base call to a static base method
+				return teams[idx]._OT$callOrigStatic(callinIds[idx], boundMethodId, args);
+			} else {
+				return baze._OT$callOrig(boundMethodId, args);
+			}
+		}
+	}
+
+	/**
+	 * Executes all before callins for a given callin id.
+	 * Must be overridden by a team, if the team gets replace callins.
+	 *
+	 * @param baze the current base object
+	 * @param callinId the current callin id
+	 * @param boundMethodId an unique id for a base method in the base class.
+	 *                      This id is needed for a base call.
+	 * @param args packed arguments.
+	 * @return possibly boxed result
+	 */
+	public void _OT$callBefore(IBoundBase2 baze, int callinId, int boundMethodId, Object[] args) {
+		// nop; override with code from before callin bindings.
+	}
+
+	/**
+	 * Executes all after callins for a given callin id.
+	 * Must be overridden by a team, if the team gets replace callins.
+	 *
+	 * @param baze the current base object
+	 * @param callinId the current callin id
+	 * @param boundMethodId an unique id for a base method in the base class.
+	 *                      This id is needed for a base call.
+	 * @param args packed arguments.
+	 * @param result the result of the base method. Could be used by after callins
+	 */
+	public void _OT$callAfter(IBoundBase2 baze, int callinId, int boundMethodId, Object[] args, Object result) {
+		// nop; override with code from after callin bindings.
+	}
+
+	/**
+	 * Execute replace callins of the team for the current callin id.
+	 * Must be overridden by a team, if the team has got replace callins.
+	 *
+	 * @param baze the current base object
+	 * @param teams the current base object
+	 * @param idx the index of the current team in teams
+	 * @param callinIds an array of ids, that are unique in the team
+	 *                  for a base method in a base class
+	 * @param boundMethodId an unique id for a base method in the base class.
+	 *                      This id is needed for a base call.
+	 * @param args packed arguments.
+	 * @return possibly boxed result
+	 */
+	public Object _OT$callReplace(IBoundBase2 baze, ITeam[] teams, int idx, int[] callinIds, int boundMethodId, Object[] args) {
+		// default; override with code from replace callin bindings.
+		return _OT$callNext(baze, teams, idx, callinIds, boundMethodId, args, null);
+	}
+
+	/**
+	 * Calls the method callOrigStatic of a concrete class dependend on the
+	 * given callin id.
+	 * Must be overridden in a team, if the team has got base calls
+	 * to static base methods
+	 * @param callinId
+	 * @param boundMethodId
+	 * @param args
+	 * @return
+	 */
+	public Object _OT$callOrigStatic(int callinId, int boundMethodId, Object[] args) {
+		return null;
+	}
 }

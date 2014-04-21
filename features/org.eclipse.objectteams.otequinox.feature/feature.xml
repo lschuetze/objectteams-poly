@@ -33,6 +33,13 @@ Author: Stephan Herrmann.
          unpack="false"/>
 
    <plugin
+         id="org.eclipse.objectteams.otre"
+         download-size="89"
+         install-size="202"
+         version="0.0.0"
+         unpack="false"/>
+
+   <plugin
          id="org.apache.bcel"
          download-size="0"
          install-size="0"

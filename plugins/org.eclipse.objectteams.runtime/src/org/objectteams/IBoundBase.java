@@ -11,12 +11,13 @@
  * Please visit http://www.eclipse.org/objectteams for updates and contact.
  *
  * Contributors:
- * Berlin Institute of Technology - Initial API and implementation
+ *		Berlin Institute of Technology - Initial API and implementation
  **********************************************************************/
 package org.objectteams;
 
 /**
- * Super type for all bound base classes. Purely internal class, not intended for client use.
+ * Super type for all bound base classes when using the traditional weaver (OTRE).
+ * Purely internal class, not intended for client use.
  * @author Stephan Herrmann
  */
 public interface IBoundBase {

@@ -11,7 +11,7 @@
  * Please visit http://www.eclipse.org/objectteams for updates and contact.
  *
  * Contributors:
- * Berlin Institute of Technology - Initial API and implementation
+ *		Berlin Institute of Technology - Initial API and implementation
  **********************************************************************/
 package org.objectteams;
 
