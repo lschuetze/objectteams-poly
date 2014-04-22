@@ -15,9 +15,6 @@
  **********************************************************************/
 package org.eclipse.objectteams.otredyn.runtime;
 
-import org.eclipse.objectteams.otredyn.bytecode.Field;
-import org.eclipse.objectteams.otredyn.bytecode.Method;
-
 /**
  * Interface through which the {@link TeamManager} reaches into the OTREDyn.
  * Representation of a class that participates in a binding.

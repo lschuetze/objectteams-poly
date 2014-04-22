@@ -21,7 +21,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.eclipse.objectteams.otredyn.bytecode.AbstractBoundClass;
 import org.objectteams.ITeam;
 import org.objectteams.ITeamManager;
 import org.objectteams.Team;
@@ -185,6 +184,7 @@ public class TeamManager implements ITeamManager {
 				}
 				boundClass.handleAddingOfBinding(binding); // TODO: do we want/need to group all bindings into one action?
 				break;
+				//$CASES-OMITTED$ // TODO: this marker-comment has not effect?
 			}
 		}
 	}

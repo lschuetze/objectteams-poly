@@ -17,8 +17,6 @@ package org.eclipse.objectteams.otredyn.runtime;
 
 import java.util.Collection;
 
-import org.eclipse.objectteams.otredyn.bytecode.Binding;
-
 /**
  * Interface through which the {@link TeamManager} reaches into the OTREDyn.
  * Representation of a team class.
@@ -32,7 +30,7 @@ public interface IBoundTeam {
 	 * Parses the bytecode, if thats needed
 	 * @return
 	 */
-	Collection<Binding> getBindings();
+	Collection<IBinding> getBindings();
 
 	/**
 	 * Returns the highest access defined by this team.

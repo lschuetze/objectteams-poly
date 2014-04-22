@@ -20,6 +20,7 @@ import java.util.Collection;
 import java.util.Set;
 import java.util.TreeSet;
 
+import org.eclipse.objectteams.otredyn.runtime.IBinding;
 import org.eclipse.objectteams.otredyn.runtime.IBoundTeam;
 
 /**
@@ -31,7 +32,7 @@ public abstract class AbstractTeam extends AbstractBoundClass implements IBoundT
 	 * By internally using a TreeSet the set of bindings is naturally sorted 
 	 * based on {@link Binding#compareTo(Binding)} (see there).
 	 */
-	private Set<Binding> bindings;
+	private Set<IBinding> bindings;
 	/**
 	 * The highest perTeamAccessId that has been read from an OTSpecialAccess attribute
 	 */
@@ -39,7 +40,7 @@ public abstract class AbstractTeam extends AbstractBoundClass implements IBoundT
 
 	protected AbstractTeam(String name, String id, ClassLoader loader) {
 		super(name, id, loader);
-		bindings = new TreeSet<Binding>();
+		bindings = new TreeSet<IBinding>();
 	}
 
 	/**
@@ -52,7 +53,7 @@ public abstract class AbstractTeam extends AbstractBoundClass implements IBoundT
 		bindings.add(binding);
 	}
 
-	public Collection<Binding> getBindings() {
+	public Collection<IBinding> getBindings() {
 		parseBytecode();
 		return bindings;
 	}

@@ -7,7 +7,6 @@ Bundle-Vendor: %providerName
 Bundle-Localization: plugin
 Export-Package: org.eclipse.objectteams.otredyn.bytecode,
  org.eclipse.objectteams.otredyn.bytecode.asm,
- org.eclipse.objectteams.otredyn.runtime,
  org.eclipse.objectteams.otredyn.transformer,
  org.eclipse.objectteams.otredyn.transformer.jplis,
  org.eclipse.objectteams.otredyn.transformer.names,

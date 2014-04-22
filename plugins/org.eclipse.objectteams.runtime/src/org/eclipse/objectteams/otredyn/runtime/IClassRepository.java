@@ -15,9 +15,6 @@
  **********************************************************************/
 package org.eclipse.objectteams.otredyn.runtime;
 
-import org.eclipse.objectteams.otredyn.bytecode.AbstractBoundClass;
-import org.eclipse.objectteams.otredyn.bytecode.AbstractTeam;
-
 /**
  * Interface through which the {@link TeamManager} reaches into the OTREDyn.
  * Representation of a repository of {@link IBoundClass}es.
@@ -38,7 +35,7 @@ public interface IClassRepository {
 	 * @param id a globally unique identifier for the class 
 	 * @return
 	 */
-	public AbstractBoundClass getBoundClass(String className, String id, ClassLoader loader);
+	public IBoundClass getBoundClass(String className, String id, ClassLoader loader);
 
 	/**
 	 * Returns a instance of AbstractBoundClass for the
@@ -52,7 +49,7 @@ public interface IClassRepository {
 	 * @param id a globally unique identifier for the class 
 	 * @return
 	 */
-	public AbstractBoundClass getBoundClass(String className, String id, byte[] classBytes, ClassLoader loader);
+	public IBoundClass getBoundClass(String className, String id, byte[] classBytes, ClassLoader loader);
 
 	/**
 	 * Returns a instance of AbstractTeam for the
@@ -68,6 +65,6 @@ public interface IClassRepository {
 	 * @param id a globally unique identifier for the team 
 	 * @return
 	 */
-	public AbstractTeam getTeam(String teamName, String id, ClassLoader loader);
+	public IBoundTeam getTeam(String teamName, String id, ClassLoader loader);
 
 }
