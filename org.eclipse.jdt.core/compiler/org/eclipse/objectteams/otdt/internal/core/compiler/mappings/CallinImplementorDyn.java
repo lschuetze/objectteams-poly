@@ -395,24 +395,27 @@ public class CallinImplementorDyn extends MethodMappingImplementor {
 						List<Statement> blockStatements = new ArrayList<Statement>();
 
 						// do we need to expose _OT$result as result?
+						char[] resultName = null;
 						if (callinDecl.callinModifier == TerminalTokens.TokenNameafter
 								&& (callinDecl.mappings != null || callinDecl.predicate != null) 
-								&& baseReturn != TypeBinding.VOID)
+								&& baseReturn != TypeBinding.VOID) {
+							resultName = RESULT;
 							blockStatements.add(gen.localVariable(RESULT, baseReturn,								//   BaseReturnType result = (BaseReturnType)_OT$result; 
 												  gen.createCastOrUnboxing(gen.singleNameReference(_OT_RESULT), baseReturn, true/*baseAccess*/)));
+						}
 
 						// -------------- base predicate check -------
 						boolean hasBasePredicate = false;
-				        for (MethodSpec baseMethodSpec : callinDecl.baseMethodSpecs) {
-				        	char[] resultName = null;
+				        for (MethodSpec baseMethodSpec : callinDecl.baseMethodSpecs) { // FIXME: check this inner loop, outer already loops over baseMethods!!
+				        	char[] resultName2 = null;
 				        	if (   callinDecl.callinModifier == TerminalTokens.TokenNameafter
 				    			&& baseMethodSpec.resolvedType() != TypeBinding.VOID)
 				        	{
-								resultName = IOTConstants.RESULT;
+								resultName2 = IOTConstants.RESULT;
 				        	}
 				        	// FIXME(SH): only call predidate for the current base method (from BoundMethodID?)
 							Statement predicateCheck = predGen.createBasePredicateCheck(
-									callinDecl, baseMethodSpec, resultName, gen);
+									callinDecl, baseMethodSpec, resultName2, gen);
 							if (predicateCheck != null) {
 								blockStatements.add(predicateCheck);												//   if (!base$when(baseArg,...)) throw new LiftingVetoException();
 								hasBasePredicate = true;
@@ -571,7 +574,10 @@ public class CallinImplementorDyn extends MethodMappingImplementor {
 							continue;
 
 						// -- role side predicate:
-						Expression[] predicateArgs = maybeAddResultReference(callinDecl, callArgs, RESULT, gen);
+						Expression[] predicateArgs = isReplace 
+								? MethodSignatureEnhancer.retrenchBasecallArguments(callArgs, true, WeavingScheme.OTDRE)
+								: callArgs;
+						predicateArgs = maybeAddResultReference(callinDecl, predicateArgs, resultName, gen);
 				        Statement rolePredicateCheck = predGen.createPredicateCheck(								//    if (!when(callArgs)) throw new LiftingVetoException();
 				        		callinDecl,
 				        		callinDecl.scope.referenceType(),
