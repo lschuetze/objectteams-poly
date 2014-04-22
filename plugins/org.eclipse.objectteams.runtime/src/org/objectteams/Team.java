@@ -55,7 +55,7 @@ public /* team */ class Team implements ITeam {
 	 */
 	public static ILiftingParticipant _OT$liftingParticipant = null;
 	
-	private static ITeamManager teamManager; // callback into OTDRE, if set
+	public static ITeamManager _OT$teamManager; // callback into OTDRE, if set
 
 	/**
 	 * Default constructor for debugging purpose.
@@ -370,8 +370,8 @@ public /* team */ class Team implements ITeam {
 
 	private void doRegistration() {
 		if (_OT$registrationState == _OT$UNREGISTERED) {
-			if (teamManager != null)
-				teamManager.handleTeamStateChange(this, ITeamManager.TeamStateChange.REGISTER);
+			if (_OT$teamManager != null)
+				_OT$teamManager.handleTeamStateChange(this, ITeamManager.TeamStateChange.REGISTER);
 			else
 				_OT$registerAtBases();
 			_OT$registrationState = _OT$REGISTERED;
@@ -380,8 +380,8 @@ public /* team */ class Team implements ITeam {
 
 	private void doUnregistration() {
 		if (_OT$registrationState == _OT$REGISTERED) {
-			if (teamManager != null)
-				teamManager.handleTeamStateChange(this, ITeamManager.TeamStateChange.UNREGISTER);
+			if (_OT$teamManager != null)
+				_OT$teamManager.handleTeamStateChange(this, ITeamManager.TeamStateChange.UNREGISTER);
 			else
 				_OT$unregisterFromBases();
 			_OT$registrationState = _OT$UNREGISTERED;
@@ -529,8 +529,8 @@ public /* team */ class Team implements ITeam {
 	// === BELOW THIS POINT: Methods used by the Object Teams Dynamic Runtime Environment, NOT API ===
 	
 	public static void registerTeamManager(ITeamManager teamManager) {
-		if (Team.teamManager != null) throw new IllegalStateException("team manager already defined.");
-		Team.teamManager = teamManager;
+		if (Team._OT$teamManager != null) throw new IllegalStateException("team manager already defined.");
+		Team._OT$teamManager = teamManager;
 	}
 
 	/**
