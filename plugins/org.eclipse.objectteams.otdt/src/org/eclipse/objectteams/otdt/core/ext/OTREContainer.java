@@ -56,7 +56,7 @@ public class OTREContainer implements IClasspathContainer
     private static IPath  OTDRE_AGENT_JAR_PATH;
     private static IPath  OTEQUINOX_AGENT_JAR_PATH;
     
-    private static IPath[][]  BYTECODE_LIBRARY_PATH = new IPath[WeavingScheme.values().length][]; // will be initialized in {@link findBytecodeLib(BundleContext,boolean)}
+    private static IPath[][]  BYTECODE_WEAVER_PATHS = new IPath[WeavingScheme.values().length][]; // will be initialized in {@link findBytecodeLib(BundleContext,boolean)}
 
     // details of this container: name and hosting plugin:
     private static final IPath  OTRE_CONTAINER_PATH = new Path(OTRE_CONTAINER_NAME);
@@ -67,6 +67,9 @@ public class OTREContainer implements IClasspathContainer
     private static final String OTRE_AGENT_JAR_FILENAME = "otre_agent.jar"; //$NON-NLS-1$
     private static final String OTDRE_AGENT_JAR_FILENAME = "otredyn_agent.jar"; //$NON-NLS-1$
     private static final String OTEQUINOX_AGENT_JAR_FILENAME = "otequinoxAgent.jar"; //$NON-NLS-1$
+    
+    private static final String OTRE_PLUGIN_NAME = "org.eclipse.objectteams.otre";    
+    private static final String OTDRE_PLUGIN_NAME = "org.eclipse.objectteams.otredyn";
 
     // data for initializing the above BYTECODE_LIBRARY_PATH:
     private static final String BCEL_BUNDLE_NAME = "org.apache.bcel"; //$NON-NLS-1$
@@ -75,6 +78,7 @@ public class OTREContainer implements IClasspathContainer
     // data for initializing the ASM_PATH:
 	private static final String[] ASM_BUNDLE_NAMES = { "org.objectweb.asm", "org.objectweb.asm.tree", "org.objectweb.asm.commons" }; //$NON-NLS-1$
 	private static final String ASM_VERSION_RANGE = "[5.0.1,6.0.0)"; //$NON-NLS-1$
+
 
     private IClasspathEntry[] _cpEntries;
 
@@ -203,8 +207,8 @@ public class OTREContainer implements IClasspathContainer
 		return OTRE_CONTAINER_PATH;
 	}
 
-	public static IPath[] getBytecodeLibraryPaths(WeavingScheme scheme) {
-		return BYTECODE_LIBRARY_PATH[scheme.ordinal()];
+	public static IPath[] getWeaverPaths(WeavingScheme scheme) {
+		return BYTECODE_WEAVER_PATHS[scheme.ordinal()];
 	}
 
 	/**
@@ -230,7 +234,7 @@ public class OTREContainer implements IClasspathContainer
 										null) );
 	}
 	
-	/** Fetch the location of the bcel and asm bundles into {@link #BYTECODE_LIBRARY_PATH}. */
+	/** Fetch the location of the otre, otdre, bcel and asm bundles into {@link #BYTECODE_WEAVER_PATHS}. */
 	@SuppressWarnings("deprecation") // class PackageAdmin is "deprecated"
 	static void findBytecodeLibs(BundleContext context) throws IOException {
 		ServiceReference<org.osgi.service.packageadmin.PackageAdmin> ref =
@@ -242,21 +246,25 @@ public class OTREContainer implements IClasspathContainer
 			String bundleName = BCEL_BUNDLE_NAME;
 			String bundleVersionRange = BCEL_VERSION_RANGE;
 			for (Bundle bundle : packageAdmin.getBundles(bundleName, bundleVersionRange)) {			
-				BYTECODE_LIBRARY_PATH[WeavingScheme.OTRE.ordinal()] =
-						new IPath[] { new Path(FileLocator.toFileURL(bundle.getEntry("/")).getFile()) }; //$NON-NLS-1$
+				BYTECODE_WEAVER_PATHS[WeavingScheme.OTRE.ordinal()] =
+						new IPath[] {
+							new Path(FileLocator.toFileURL(bundle.getEntry("/")).getFile()), //$NON-NLS-1$
+							new Path(OTVariableInitializer.getInstallatedPath(OTDTPlugin.getDefault(), OTRE_PLUGIN_NAME, "bin")) //$NON-NLS-1$
+						};
 				break BCEL;
 			}
 			throw new RuntimeException("bytecode libarary for OTRE not found"); //$NON-NLS-1$
 		}
 		ASM : {
 			int asm = WeavingScheme.OTDRE.ordinal();
-			BYTECODE_LIBRARY_PATH[asm] = new IPath[ASM_BUNDLE_NAMES.length];
+			BYTECODE_WEAVER_PATHS[asm] = new IPath[ASM_BUNDLE_NAMES.length+1];
 			int i = 0;
+			BYTECODE_WEAVER_PATHS[asm][i++] = new Path(OTVariableInitializer.getInstallatedPath(OTDTPlugin.getDefault(), OTDRE_PLUGIN_NAME, "bin")); //$NON-NLS-1$
 			for (String bundleName : ASM_BUNDLE_NAMES) {
 				for (Bundle bundle : packageAdmin.getBundles(bundleName, ASM_VERSION_RANGE))	
-					BYTECODE_LIBRARY_PATH[asm][i++] = new Path(FileLocator.toFileURL(bundle.getEntry("/")).getFile()); //$NON-NLS-1$
+					BYTECODE_WEAVER_PATHS[asm][i++] = new Path(FileLocator.toFileURL(bundle.getEntry("/")).getFile()); //$NON-NLS-1$
 			}
-			if (i == 3)
+			if (i == 4)
 				break ASM;
 			throw new RuntimeException("bytecode libarary for OTDRE not found"); //$NON-NLS-1$
 		}

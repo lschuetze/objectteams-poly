@@ -87,14 +87,14 @@ public team class JDTLaunchingAdaptor {
 			boolean hasOTRE_min = false;
 	
 			IPath otreMinJarPath = OTREContainer.getOtreMinJarPath();
-			IPath[] bytecodeLibraryPaths = OTREContainer.getBytecodeLibraryPaths(scheme);
-			int pathsNeeded = bytecodeLibraryPaths.length;
+			IPath[] weaverPaths = OTREContainer.getWeaverPaths(scheme);
+			int pathsNeeded = weaverPaths.length;
 			for (int i = 0; i < origEntries.length; i++) {
 	            IPath entryPath = origEntries[i].getPath();
 	            if (otreMinJarPath.equals(entryPath)) {
 	            	hasOTRE_min = true;
 	            } else {
-	            	for (IPath bcPath : bytecodeLibraryPaths) {
+	            	for (IPath bcPath : weaverPaths) {
 	            		if (bcPath.equals(entryPath)) {
 	            			pathsNeeded--;
 	            			break;
@@ -109,9 +109,9 @@ public team class JDTLaunchingAdaptor {
 			IRuntimeClasspathEntry entry;
 	
 			if (!hasBytecodeLib) {
-				int l = bytecodeLibraryPaths.length;
+				int l = weaverPaths.length;
 				for (int i = 0; i < l; i++) {					
-					entry = JavaRuntime.newArchiveRuntimeClasspathEntry(bytecodeLibraryPaths[i]);
+					entry = JavaRuntime.newArchiveRuntimeClasspathEntry(weaverPaths[i]);
 					result.add(entry);			
 				}
 			}

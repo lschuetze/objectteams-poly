@@ -26,8 +26,8 @@ public class ClasspathUtil {
 
 	// === OT Paths: ===
 	public static final String OTDT_PATH 		 = JavaCore.getClasspathVariable(OTDTPlugin.OTDT_INSTALLDIR).toOSString();
-	public static IPath[] getBytecodeLibJarPath(WeavingScheme weavingScheme) {
-		return OTREContainer.getBytecodeLibraryPaths(weavingScheme);
+	public static IPath[] getWeaverPaths(WeavingScheme weavingScheme) {
+		return OTREContainer.getWeaverPaths(weavingScheme);
 	}
 	public static String getOTREPath(WeavingScheme weavingScheme) {
 		return new OTREContainer().getClasspathEntries()[0].getPath().toOSString();

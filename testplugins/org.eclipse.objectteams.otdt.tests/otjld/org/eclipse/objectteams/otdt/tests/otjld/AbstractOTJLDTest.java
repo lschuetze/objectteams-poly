@@ -83,13 +83,12 @@ public class AbstractOTJLDTest extends AbstractComparableTest {
 	
 	public String[] getOTVMArgs() {
 		String OTRE_MIN_JAR_PATH, OTAGENT_JAR_PATH;
+		OTRE_MIN_JAR_PATH 		= getOTDTJarPath("otre_min");
 		switch (this.weavingScheme) {
 		case OTDRE:
-			OTRE_MIN_JAR_PATH 		= getOTDTJarPath("otredyn_min");
 			OTAGENT_JAR_PATH  		= getOTDTJarPath("otredyn_agent");
 			break;
 		case OTRE:
-			OTRE_MIN_JAR_PATH 		= getOTDTJarPath("otre_min");
 			OTAGENT_JAR_PATH  		= getOTDTJarPath("otre_agent");
 			break;
 		default:
@@ -141,7 +140,7 @@ public class AbstractOTJLDTest extends AbstractComparableTest {
 	protected String[] getDefaultClassPaths() {
 		String[] defaults = super.getDefaultClassPaths();
 		int len = defaults.length;
-		IPath[] bytecodeLibJarPath = ClasspathUtil.getBytecodeLibJarPath(this.weavingScheme);
+		IPath[] bytecodeLibJarPath = ClasspathUtil.getWeaverPaths(this.weavingScheme);
 		int len2 = bytecodeLibJarPath.length;
 		System.arraycopy(defaults, 0, defaults=new String[len+1+len2], 0, len);
 		defaults[len] = new Path(ClasspathUtil.getOTREPath(this.weavingScheme)).toString();
