@@ -17,7 +17,6 @@ package org.eclipse.objectteams.otdt.tests;
 
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.jdt.core.JavaCore;
-import org.eclipse.objectteams.otdt.core.ext.OTDREContainer;
 import org.eclipse.objectteams.otdt.core.ext.OTDTPlugin;
 import org.eclipse.objectteams.otdt.core.ext.OTREContainer;
 import org.eclipse.objectteams.otdt.core.ext.WeavingScheme;
@@ -28,20 +27,10 @@ public class ClasspathUtil {
 	// === OT Paths: ===
 	public static final String OTDT_PATH 		 = JavaCore.getClasspathVariable(OTDTPlugin.OTDT_INSTALLDIR).toOSString();
 	public static IPath[] getBytecodeLibJarPath(WeavingScheme weavingScheme) {
-		switch (weavingScheme) {
-		case OTRE : return OTREContainer.BYTECODE_LIBRARY_PATH;
-		case OTDRE : return OTDREContainer.BYTECODE_LIBRARY_PATH;
-		default: throw new IncompatibleClassChangeError("Unexpected enum constant "+weavingScheme);
-		}
+		return OTREContainer.getBytecodeLibraryPaths(weavingScheme);
 	}
 	public static String getOTREPath(WeavingScheme weavingScheme) {
-		switch (weavingScheme) {
-		case OTRE : return new OTREContainer().getClasspathEntries()[0].getPath().toOSString();
-		case OTDRE : return new OTDREContainer().getClasspathEntries()[0].getPath().toOSString();
-		default: throw new IncompatibleClassChangeError("Unexpected enum constant "+weavingScheme);
-		}
+		return new OTREContainer().getClasspathEntries()[0].getPath().toOSString();
 	}
-	
-
 
 }

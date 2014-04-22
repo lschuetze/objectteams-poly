@@ -153,7 +153,8 @@ public class AbstractOTJLDTest extends AbstractComparableTest {
 	@Override
 	public void initialize(CompilerTestSetup setUp) {
 		super.initialize(setUp);
-		if ("dynamic".equals(System.getProperty("ot.weaving")))
+		if ("dynamic".equals(System.getProperty("ot.weaving"))
+				||"otdre".equals(System.getProperty("test.ot.weaving")))
 			weavingScheme = WeavingScheme.OTDRE;
 		if (setUp instanceof RegressionTestSetup) {
 			RegressionTestSetup regressionSetTup = (RegressionTestSetup) setUp;
