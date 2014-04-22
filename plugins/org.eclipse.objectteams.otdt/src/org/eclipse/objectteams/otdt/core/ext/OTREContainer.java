@@ -256,7 +256,7 @@ public class OTREContainer implements IClasspathContainer
 				for (Bundle bundle : packageAdmin.getBundles(bundleName, ASM_VERSION_RANGE))	
 					BYTECODE_LIBRARY_PATH[asm][i++] = new Path(FileLocator.toFileURL(bundle.getEntry("/")).getFile()); //$NON-NLS-1$
 			}
-			if (i != 3)
+			if (i == 3)
 				break ASM;
 			throw new RuntimeException("bytecode libarary for OTDRE not found"); //$NON-NLS-1$
 		}
