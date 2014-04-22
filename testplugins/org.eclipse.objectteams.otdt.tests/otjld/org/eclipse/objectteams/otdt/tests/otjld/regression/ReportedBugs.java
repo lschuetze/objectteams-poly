@@ -40,7 +40,7 @@ public class ReportedBugs extends AbstractOTJLDTest {
 	// Static initializer to specify tests subset using TESTS_* static variables
 	// All specified tests which does not belong to the class are skipped...
 	static {
-//		TESTS_NAMES = new String[] { "testBug391876"};
+		TESTS_NAMES = new String[] { "testBug433146"};
 //		TESTS_NUMBERS = new int[] { 1459 };
 //		TESTS_RANGE = new int[] { 1097, -1 };
 	}
@@ -5291,5 +5291,24 @@ public class ReportedBugs extends AbstractOTJLDTest {
 						"		implements UserByCustomerIndex {}\n",
 			},
 			"", null, false/*flush*/, null);
+    }
+    
+    public void testBug433146() {
+    	runConformTest(
+    		new String[] {
+    			"T433146.java",
+    			"public class T433146 {\n" +
+    			"	void m(String s) {}\n" +
+    			"}\n",
+    			"Team433146.java",
+    			"public team class Team433146 {\n" +
+    			"	protected class R playedBy T433146 {\n" +
+    			"		boolean should() { return false; }\n" +
+    			"		callin void doit() {}\n" +
+    			"		void doit() <- replace void m(String s)\n" +
+    			"			when (should());\n" +
+    			"	}\n" +
+    			"}\n"
+    		});
     }
 }
