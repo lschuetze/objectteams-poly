@@ -722,14 +722,16 @@ public abstract class AbstractBoundClass implements IBoundClass {
 			throw new RuntimeException("Unknown binding type: "
 					+ binding.getType().name());
 		}
-		if (   binding.getType() == IBinding.BindingType.CALLIN_BINDING 
-			&& !binding.getBoundClass().equals(binding.getDeclaringBaseClassName()))
-			try {
-				// need to load the declaring base class outside the transform() callback:
-				this.loader.loadClass(binding.getDeclaringBaseClassName().replace('/', '.'));
-			} catch (ClassNotFoundException e) {
-				throw new NoClassDefFoundError(e.getMessage());
-			}
+// TODO: once needed for test4141_dangerousCallinBinding3, but no longer.
+// Instead it causes the need to redefine classes in OT/Equinox, hence disabled.
+//		if (   binding.getType() == IBinding.BindingType.CALLIN_BINDING 
+//			&& !binding.getBoundClass().equals(binding.getDeclaringBaseClassName()))
+//			try {
+//				// need to load the declaring base class outside the transform() callback:
+//				this.loader.loadClass(binding.getDeclaringBaseClassName().replace('/', '.'));
+//			} catch (ClassNotFoundException e) {
+//				throw new NoClassDefFoundError(e.getMessage());
+//			}
 		WeavingTask task = new WeavingTask(type, binding.getMemberName(), binding.getMemberSignature(), binding.isHandleCovariantReturn());
 		addWeavingTask(task);
 	}
