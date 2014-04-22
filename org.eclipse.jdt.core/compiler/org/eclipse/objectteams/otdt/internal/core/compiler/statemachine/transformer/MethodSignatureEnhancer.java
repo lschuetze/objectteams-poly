@@ -398,18 +398,18 @@ public class MethodSignatureEnhancer implements IOTConstants, TypeConstants, Cla
 //{OTDyn: configurable:
 			weavingScheme == WeavingScheme.OTDRE 
 			? (makeShort 
-				? "IBoundBase, ITeam[], int, int[], int, Object[]"
-				: "org.objectteams.IBoundBase, org.objectteams.ITeam[], int, int[] int, java.lang.Object[]))")
+				? "IBoundBase2, ITeam[], int, int[], int, Object[]"
+				: "org.objectteams.IBoundBase2, org.objectteams.ITeam[], int, int[], int, java.lang.Object[]")
 // SH}
 // {OT/JamVM support:
 			: JAMVM_ASPECTBI
 			? (makeShort 
 					? "Object, int, int, Object[]"
-							: "java.lang.Object, int, int, java.lang.Object[]))")
+							: "java.lang.Object, int, int, java.lang.Object[]")
 // CH}
 			: (makeShort 
 				? "ITeam[], int[], int, int, int, Object[]"
-				: "org.objectteams.ITeam[], int[], int, int, int, java.lang.Object[]))");
+				: "org.objectteams.ITeam[], int[], int, int, int, java.lang.Object[]");
 		if (typeString.startsWith(prefix)) {
 			types.delete(0, prefix.length());
 			if (types.length()> 0 && types.charAt(0) == ',')
