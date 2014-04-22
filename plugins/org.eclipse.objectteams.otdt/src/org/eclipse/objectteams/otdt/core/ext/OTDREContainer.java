@@ -48,7 +48,7 @@ public class OTDREContainer implements IClasspathContainer
 
     // details of this container: name and hosting plugin:
     static final IPath  CONTAINER_PATH = new Path(CONTAINER_NAME);
-    static String OT_RUNTIME_PLUGIN = "org.eclipse.objectteams.otredyn"; //$NON-NLS-1$
+    static String OT_RUNTIME_PLUGIN = "org.eclipse.objectteams.runtime"; //$NON-NLS-1$
 
     // file names for the above OTRE_X_JAR_PATH constants:
     private static final String OTRE_MIN_JAR_FILENAME   = "otredyn_min.jar"; //$NON-NLS-1$
