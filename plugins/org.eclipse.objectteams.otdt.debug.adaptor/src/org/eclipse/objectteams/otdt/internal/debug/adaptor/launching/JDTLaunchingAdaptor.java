@@ -28,7 +28,6 @@ import org.eclipse.debug.core.ILaunchManager;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.launching.IRuntimeClasspathEntry;
 import org.eclipse.jdt.launching.JavaRuntime;
-import org.eclipse.objectteams.otdt.core.ext.OTDREContainer;
 import org.eclipse.objectteams.otdt.core.ext.OTJavaNature;
 import org.eclipse.objectteams.otdt.core.ext.OTREContainer;
 import org.eclipse.objectteams.otdt.core.ext.WeavingScheme;
@@ -87,17 +86,8 @@ public team class JDTLaunchingAdaptor {
 			boolean hasBytecodeLib = false;
 			boolean hasOTRE_min = false;
 	
-			IPath otreMinJarPath;
-			IPath[] bytecodeLibraryPaths;
-			if (scheme == WeavingScheme.OTRE) {
-				otreMinJarPath = OTREContainer.getOtreMinJarPath();
-				bytecodeLibraryPaths = OTREContainer.BYTECODE_LIBRARY_PATH;
-			} else if (scheme == WeavingScheme.OTDRE) {
-				otreMinJarPath = OTDREContainer.getOtreMinJarPath();
-				bytecodeLibraryPaths = OTDREContainer.BYTECODE_LIBRARY_PATH;
-			} else {
-				throw new IncompatibleClassChangeError("Unexpected enum constant: "+scheme);
-			}
+			IPath otreMinJarPath = OTREContainer.getOtreMinJarPath();
+			IPath[] bytecodeLibraryPaths = OTREContainer.getBytecodeLibraryPaths(scheme);
 			int pathsNeeded = bytecodeLibraryPaths.length;
 			for (int i = 0; i < origEntries.length; i++) {
 	            IPath entryPath = origEntries[i].getPath();

@@ -49,10 +49,6 @@
       <classpathContainerInitializer
 	 		id="OTRE"
             class="org.eclipse.objectteams.otdt.internal.core.ext.OTREContainerInitializer"/>
-      <classpathContainerInitializer
-            class="org.eclipse.objectteams.otdt.internal.core.ext.OTDREContainerInitializer"
-            id="OTDRE">
-      </classpathContainerInitializer>
    </extension>
    <extension
          point="org.eclipse.objectteams.otequinox.aspectBindings">

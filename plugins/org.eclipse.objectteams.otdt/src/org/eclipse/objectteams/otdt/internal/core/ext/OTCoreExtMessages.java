@@ -25,7 +25,6 @@ public class OTCoreExtMessages extends NLS {
 	private static final String BUNDLE_NAME = "org.eclipse.objectteams.otdt.internal.core.ext.OTCoreExtMessages"; //$NON-NLS-1$
 
 	public static String OTREContainer__Description;
-	public static String OTDREContainer__Description;
 
 	public static String OTREContainer_otre_not_found;
 

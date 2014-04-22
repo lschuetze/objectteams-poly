@@ -53,9 +53,10 @@ public class OTREContainer implements IClasspathContainer
     // these are served from the current plugin:
     private static IPath  OTRE_MIN_JAR_PATH;
     private static IPath  OTRE_AGENT_JAR_PATH;
+    private static IPath  OTDRE_AGENT_JAR_PATH;
     private static IPath  OTEQUINOX_AGENT_JAR_PATH;
     
-    public static IPath[]  BYTECODE_LIBRARY_PATH; // will be initialized in {@link findBytecodeLib(BundleContext,boolean)}
+    private static IPath[][]  BYTECODE_LIBRARY_PATH = new IPath[WeavingScheme.values().length][]; // will be initialized in {@link findBytecodeLib(BundleContext,boolean)}
 
     // details of this container: name and hosting plugin:
     private static final IPath  OTRE_CONTAINER_PATH = new Path(OTRE_CONTAINER_NAME);
@@ -64,11 +65,16 @@ public class OTREContainer implements IClasspathContainer
     // file names for the above OTRE_X_JAR_PATH constants:
     private static final String OTRE_MIN_JAR_FILENAME   = "otre_min.jar"; //$NON-NLS-1$
     private static final String OTRE_AGENT_JAR_FILENAME = "otre_agent.jar"; //$NON-NLS-1$
+    private static final String OTDRE_AGENT_JAR_FILENAME = "otredyn_agent.jar"; //$NON-NLS-1$
     private static final String OTEQUINOX_AGENT_JAR_FILENAME = "otequinoxAgent.jar"; //$NON-NLS-1$
 
     // data for initializing the above BYTECODE_LIBRARY_PATH:
     private static final String BCEL_BUNDLE_NAME = "org.apache.bcel"; //$NON-NLS-1$
     private static final String BCEL_VERSION_RANGE = "[5.2.0,5.3.0)"; //$NON-NLS-1$
+
+    // data for initializing the ASM_PATH:
+	private static final String[] ASM_BUNDLE_NAMES = { "org.objectweb.asm", "org.objectweb.asm.tree", "org.objectweb.asm.commons" }; //$NON-NLS-1$
+	private static final String ASM_VERSION_RANGE = "[5.0.1,6.0.0)"; //$NON-NLS-1$
 
     private IClasspathEntry[] _cpEntries;
 
@@ -124,10 +130,19 @@ public class OTREContainer implements IClasspathContainer
      * Answer the path of the "otre_agent.jar" archive, which is passed as a -javaagent to the JVM.
      * @return resolved path
      */
-    public static IPath getOtreAgentJarPath() {
-    	if (OTRE_AGENT_JAR_PATH == null)
-            OTRE_AGENT_JAR_PATH = OTDTPlugin.getResolvedVariablePath(OTDTPlugin.OTDT_INSTALLDIR, "lib/"+OTRE_AGENT_JAR_FILENAME); //$NON-NLS-1$
-    	return OTRE_AGENT_JAR_PATH;
+    public static IPath getOtreAgentJarPath(WeavingScheme scheme) {
+    	switch (scheme) {
+    	case OTRE:
+    		if (OTRE_AGENT_JAR_PATH == null)
+    			OTRE_AGENT_JAR_PATH = OTDTPlugin.getResolvedVariablePath(OTDTPlugin.OTDT_INSTALLDIR, "lib/"+OTRE_AGENT_JAR_FILENAME); //$NON-NLS-1$
+    		return OTRE_AGENT_JAR_PATH;
+    	case OTDRE:
+    		if (OTDRE_AGENT_JAR_PATH == null)
+    			OTDRE_AGENT_JAR_PATH = OTDTPlugin.getResolvedVariablePath(OTDTPlugin.OTDT_INSTALLDIR, "lib/"+OTDRE_AGENT_JAR_FILENAME); //$NON-NLS-1$
+    		return OTDRE_AGENT_JAR_PATH;
+    	default:
+    		throw new IncompatibleClassChangeError("Unexpected enum constant "+scheme);
+    	}
     }
     
     /**
@@ -177,19 +192,19 @@ public class OTREContainer implements IClasspathContainer
 	    for (int idx = 0; classpath != null && idx < classpath.length; idx++) {
 	        IClasspathEntry entry = classpath[idx];
 	        if (entry.getEntryKind() == IClasspathEntry.CPE_CONTAINER &&
-	        		(entry.getPath().equals(OTRE_CONTAINER_PATH) || entry.getPath().equals(OTDREContainer.CONTAINER_PATH)))
+	        		(entry.getPath().equals(OTRE_CONTAINER_PATH)))
 				return true;
 	    }
 	    
 	    return false;
 	}
 
-	public static IPath getContainerPath(WeavingScheme scheme) {
-		switch (scheme) {
-			case OTRE: return OTRE_CONTAINER_PATH;
-			case OTDRE: return OTDREContainer.CONTAINER_PATH;
-			default: throw new IncompatibleClassChangeError("unexpected enum constant "+scheme);
-		}
+	public static IPath getContainerPath() {
+		return OTRE_CONTAINER_PATH;
+	}
+
+	public static IPath[] getBytecodeLibraryPaths(WeavingScheme scheme) {
+		return BYTECODE_LIBRARY_PATH[scheme.ordinal()];
 	}
 
 	/**
@@ -202,11 +217,7 @@ public class OTREContainer implements IClasspathContainer
 	
 		System.arraycopy( classpath, 0, newClasspath, 0, classpath.length );
 	
-		IPath containerPath = OTRE_CONTAINER_PATH;
-		Object weavingOption = javaPrj.getOption(JavaCore.COMPILER_OPT_WEAVING_SCHEME, true);
-		if (WeavingScheme.OTDRE.toString().equals(weavingOption))
-			containerPath = OTDREContainer.CONTAINER_PATH;
-		newClasspath[classpath.length] = JavaCore.newContainerEntry(containerPath, false);
+		newClasspath[classpath.length] = JavaCore.newContainerEntry(OTRE_CONTAINER_PATH, false);
 	    
 		if (newClasspath[classpath.length] != null)
 			javaPrj.setRawClasspath( newClasspath, null );
@@ -219,21 +230,36 @@ public class OTREContainer implements IClasspathContainer
 										null) );
 	}
 	
-	/** Fetch the location of the bcel bundle into BYTECODE_LIBRARY_PATH. */
+	/** Fetch the location of the bcel and asm bundles into {@link #BYTECODE_LIBRARY_PATH}. */
 	@SuppressWarnings("deprecation") // class PackageAdmin is "deprecated"
-	static void findBytecodeLib(BundleContext context) throws IOException {
+	static void findBytecodeLibs(BundleContext context) throws IOException {
 		ServiceReference<org.osgi.service.packageadmin.PackageAdmin> ref =
 				(ServiceReference<org.osgi.service.packageadmin.PackageAdmin>) context.getServiceReference(org.osgi.service.packageadmin.PackageAdmin.class);
 		if (ref == null)
 			throw new IllegalStateException("Cannot connect to PackageAdmin"); //$NON-NLS-1$
 		org.osgi.service.packageadmin.PackageAdmin packageAdmin = context.getService(ref);
-		String bundleName = BCEL_BUNDLE_NAME;
-		String bundleVersionRange = BCEL_VERSION_RANGE;
-		for (Bundle bundle : packageAdmin.getBundles(bundleName, bundleVersionRange)) {			
-			BYTECODE_LIBRARY_PATH = new IPath[] { new Path(FileLocator.toFileURL(bundle.getEntry("/")).getFile()) }; //$NON-NLS-1$
-			return;
+		BCEL: {
+			String bundleName = BCEL_BUNDLE_NAME;
+			String bundleVersionRange = BCEL_VERSION_RANGE;
+			for (Bundle bundle : packageAdmin.getBundles(bundleName, bundleVersionRange)) {			
+				BYTECODE_LIBRARY_PATH[WeavingScheme.OTRE.ordinal()] =
+						new IPath[] { new Path(FileLocator.toFileURL(bundle.getEntry("/")).getFile()) }; //$NON-NLS-1$
+				break BCEL;
+			}
+			throw new RuntimeException("bytecode libarary for OTRE not found"); //$NON-NLS-1$
 		}
-		throw new RuntimeException("bytecode libarary for OTRE not found"); //$NON-NLS-1$
+		ASM : {
+			int asm = WeavingScheme.OTDRE.ordinal();
+			BYTECODE_LIBRARY_PATH[asm] = new IPath[ASM_BUNDLE_NAMES.length];
+			int i = 0;
+			for (String bundleName : ASM_BUNDLE_NAMES) {
+				for (Bundle bundle : packageAdmin.getBundles(bundleName, ASM_VERSION_RANGE))	
+					BYTECODE_LIBRARY_PATH[asm][i++] = new Path(FileLocator.toFileURL(bundle.getEntry("/")).getFile()); //$NON-NLS-1$
+			}
+			if (i != 3)
+				break ASM;
+			throw new RuntimeException("bytecode libarary for OTDRE not found"); //$NON-NLS-1$
+		}
 	}
 	
 }

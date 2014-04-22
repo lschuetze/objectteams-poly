@@ -184,10 +184,9 @@ public team class NewOTProjectWizard extends JavaProjectWizard {
 
 		callin IClasspathEntry[] getDefaultClasspathEntries() {
 			IClasspathEntry[] regulars = base.getDefaultClasspathEntries();
-			WeavingScheme weavingScheme = WeavingScheme.values()[weavingControl.getSelectionIndex()];
 			int l1 = regulars.length;
 			System.arraycopy(regulars, 0, regulars = new IClasspathEntry[l1+1], 0, l1);
-			regulars[l1] = JavaCore.newContainerEntry(OTREContainer.getContainerPath(weavingScheme));
+			regulars[l1] = JavaCore.newContainerEntry(OTREContainer.getContainerPath());
 			return regulars;
 		}
 	}

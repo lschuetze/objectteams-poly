@@ -38,7 +38,6 @@ import org.eclipse.debug.core.model.ILaunchConfigurationDelegate;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaCore;
-import org.eclipse.objectteams.otdt.core.ext.OTDREContainer;
 import org.eclipse.objectteams.otdt.core.ext.OTREContainer;
 import org.eclipse.objectteams.otdt.core.ext.WeavingScheme;
 import org.eclipse.objectteams.otdt.core.ext.OTJavaNature;
@@ -115,14 +114,7 @@ public class OTVMRunnerAdaptor
 		if (args == null) {
 			args = new ArrayList<String>();
 			args.add("-Dot.otdt");
-			switch (this.weavingScheme) {
-			case OTRE:
-				args.add("-javaagent:" + "\""+OTREContainer.getOtreAgentJarPath().toOSString()+'"'); // support blanks in path
-				break;
-			case OTDRE:
-				args.add("-javaagent:" + "\""+OTDREContainer.getOtreAgentJarPath().toOSString()+'"'); // support blanks in path
-				break;
-			}
+			args.add("-javaagent:" + "\""+OTREContainer.getOtreAgentJarPath(this.weavingScheme).toOSString()+'"'); // support blanks in path
 			JPLIS_VMARGS.put(this.weavingScheme, args);
 		}
 		return args;

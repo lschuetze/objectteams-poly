@@ -27,7 +27,6 @@ import org.eclipse.core.runtime.Path;
 import org.eclipse.core.runtime.Plugin;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.jdt.core.JavaCore;
-import org.eclipse.objectteams.otequinox.TransformerPlugin;
 import org.osgi.framework.BundleContext;
 
 
@@ -249,8 +248,7 @@ public class OTDTPlugin extends Plugin
     public void start(BundleContext context) throws Exception {    
     	super.start(context);
     	try {    		
-    		OTREContainer.findBytecodeLib(context);
-    		OTDREContainer.findBytecodeLib(context);
+    		OTREContainer.findBytecodeLibs(context);
     	} catch (RuntimeException re) {
     		this.getLog().log(new Status(IStatus.ERROR, PLUGIN_ID, "Cannot initialize BCEL location", re)); //$NON-NLS-1$
     	}
