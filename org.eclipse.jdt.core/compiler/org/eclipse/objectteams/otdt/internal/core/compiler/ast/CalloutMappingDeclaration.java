@@ -1,7 +1,7 @@
 /**********************************************************************
  * This file is part of "Object Teams Development Tooling"-Software
  *
- * Copyright 2003, 2006 Fraunhofer Gesellschaft, Munich, Germany,
+ * Copyright 2003, 2014 Fraunhofer Gesellschaft, Munich, Germany,
  * for its Fraunhofer Institute for Computer Architecture and Software
  * Technology (FIRST), Berlin, Germany and Technical University Berlin,
  * Germany.
@@ -10,7 +10,6 @@
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
- * $Id: CalloutMappingDeclaration.java 23401 2010-02-02 23:56:05Z stephan $
  *
  * Please visit http://www.eclipse.org/objectteams for updates and contact.
  *
@@ -52,7 +51,6 @@ import static org.eclipse.jdt.internal.compiler.parser.TerminalTokens.TokenNameg
  * Main responsibility: type checking
  *
  * @author Markus Witte
- * @version $Id: CalloutMappingDeclaration.java 23401 2010-02-02 23:56:05Z stephan $
  */
 public class CalloutMappingDeclaration extends AbstractMethodMappingDeclaration
 {
@@ -285,7 +283,7 @@ public class CalloutMappingDeclaration extends AbstractMethodMappingDeclaration
 		// update modifiers after tsuper has generated callout methods (perhaps giving implementation to abstract decl)
 		if (roleMethod.isAbstract() && roleMethod.copyInheritanceSrc != null && !roleMethod.copyInheritanceSrc.isAbstract())
 			roleMethod.modifiers &= ~ClassFileConstants.AccAbstract;
-		roleHasImplementation = !roleMethod.isAbstract();
+		roleHasImplementation = !roleMethod.isAbstract() && !roleMethod.isDefaultMethod();
 
 		if (roleHasImplementation != isCalloutOverride())
 		{
