@@ -436,7 +436,7 @@ public class CallinImplementorDyn extends MethodMappingImplementor {
 										Lifting.liftCall(callMethod.scope,
 														 gen.thisReference(),
 														 gen.castExpression(gen.baseNameReference(IOTConstants.BASE), 
-																 			gen.baseTypeReference(roleType.baseclass()), 
+																 			gen.alienScopeTypeReference(gen.baseTypeReference(roleType.baseclass()),callinDecl.scope), 
 																 			CastExpression.RAW),
 														 callMethod.scope.getType(IOTConstants.ORG_OBJECTTEAMS_IBOUNDBASE2, 3),
 														 roleType,
@@ -506,6 +506,7 @@ public class CallinImplementorDyn extends MethodMappingImplementor {
 										roleParam = roleParam.erasure();
 								}
 							}
+							TypeReference localTypeRef = null;
 							if (callinDecl.mappings == null) {
 								arg = gen.arrayReference(gen.singleNameReference(ARGUMENTS), i+baseArgOffset);					//    prepare: somePreparation(arguments[i])
 								TypeBinding baseArgType = baseSpec.resolvedParameters()[i];
@@ -527,17 +528,26 @@ public class CallinImplementorDyn extends MethodMappingImplementor {
 																	gen.typeReference(baseArgType),
 																	callinDecl.scope),
 															 CastExpression.DO_WRAP);
-									if (!roleParam.leafComponentType().isBaseType()) {
+									if (!roleParam.leafComponentType().isBaseType()
+											&& PotentialLiftExpression.isLiftingRequired(callinDecl.scope, roleParam, baseArgType, arg)) {
 										// lift?(MyBaseClass)
 										Reference liftReceiver = null; // default: let gen find the team
 										if (roleType.isTeam() && TypeBinding.equalsEquals(roleParam.enclosingType(), roleType))
 											liftReceiver = gen.singleNameReference(roleVar); // lift to inner role
 										arg = gen.potentialLift(liftReceiver, arg, roleParam, isReplace/*reversible*/);
+										localTypeRef = gen.typeReference(roleParam);
 										canLiftingFail |= checkLiftingProblem(teamDecl, callinDecl, (ReferenceBinding)roleParam.leafComponentType());
 									}
 								}
+								if (localTypeRef == null)
+									localTypeRef = gen.baseclassReference(baseArgType); // unless lifting was required above
 							} else {
-								arg = getArgument(callinDecl, 														//    prepare:  <mappedArg<n>>
+				 				if (roleParam.isTypeVariable() && ((TypeVariableBinding)roleParam).declaringElement instanceof CallinCalloutBinding)
+				 					localTypeRef = gen.typeReference(roleParam.erasure()); // cannot explicitly mention this TVB
+				 				else
+				 					localTypeRef = gen.typeReference(roleParam);
+								
+				 				arg = getArgument(callinDecl, 														//    prepare:  <mappedArg<n>>
 												  (MethodDeclaration) methodDecl,
 												  callinDecl.getRoleMethod().parameters, 
 												  i+idx,
@@ -563,10 +573,7 @@ public class CallinImplementorDyn extends MethodMappingImplementor {
 							//            (B): make subsequent blocks share the same local var??
 							// Witness: CallinParameterMapping_LiftingAndLowering.test439_paramMapMultipleBasemethods2()
 			 				char[] localName = (OT_LOCAL+i).toCharArray();											//    RoleParamType _OT$local$n = preparedArg<n>;
-			 				TypeReference roleParamType = gen.typeReference(roleParam);
-			 				if (roleParam.isTypeVariable() && ((TypeVariableBinding)roleParam).declaringElement instanceof CallinCalloutBinding)
-			 					roleParamType = gen.typeReference(roleParam.erasure());
-							blockStatements.add(gen.localVariable(localName, gen.alienScopeTypeReference(roleParamType, callinDecl.scope), arg));
+							blockStatements.add(gen.localVariable(localName, gen.alienScopeTypeReference(localTypeRef, callinDecl.scope), arg));
 							callArgs[i+idx] = gen.singleNameReference(localName);									//    prepare: ... _OT$local$ ...
 	
 						}

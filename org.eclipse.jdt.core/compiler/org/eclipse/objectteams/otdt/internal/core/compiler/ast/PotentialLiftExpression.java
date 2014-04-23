@@ -1,7 +1,7 @@
 /**********************************************************************
  * This file is part of "Object Teams Development Tooling"-Software
  *
- * Copyright 2004, 2006 Fraunhofer Gesellschaft, Munich, Germany,
+ * Copyright 2004, 2014 Fraunhofer Gesellschaft, Munich, Germany,
  * for its Fraunhofer Institute for Computer Architecture and Software
  * Technology (FIRST), Berlin, Germany and Technical University Berlin,
  * Germany.
@@ -10,7 +10,6 @@
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
- * $Id: PotentialLiftExpression.java 23401 2010-02-02 23:56:05Z stephan $
  *
  * Please visit http://www.eclipse.org/objectteams for updates and contact.
  *
@@ -114,11 +113,16 @@ public class PotentialLiftExpression extends PotentialTranslationExpression {
         
         if (this.expectedType == null)
         	this.expectedType = this.expectedTypeReference.resolvedType;
-        this.resolvedType = this.expectedType; // be optimistic.
         this.checked = true;
+        return internalResolveType(scope, providedType, false);
+    }
+
+	// in testOnly mode we avoid error reporting and AST generation, just signal nonnull if lifting is required
+	private TypeBinding internalResolveType(BlockScope scope, TypeBinding providedType, boolean testOnly) {
+		this.resolvedType = this.expectedType; // be optimistic.
         TypeBinding compatibleType = compatibleType(scope, providedType);
         if (compatibleType != null)
-        	return compatibleType;
+        	return testOnly ? null : compatibleType;
 
         TypeBinding roleSideType;
         TypeBinding baseType;
@@ -133,12 +137,12 @@ public class PotentialLiftExpression extends PotentialTranslationExpression {
         }
         ReferenceBinding roleType = null;
         if (!(baseType instanceof ReferenceBinding)) {
-        	return reportIncompatibility(scope, providedType);
+        	return testOnly ? null : reportIncompatibility(scope, providedType);
         } else {
             roleType = (ReferenceBinding)roleSideType;
             if (   !roleType.isDirectRole()
                 || !(baseType instanceof ReferenceBinding))
-            	return reportIncompatibility(scope, providedType);
+            	return testOnly ? null : reportIncompatibility(scope, providedType);
         }
 
         // reset Config, because below we want to check loweringRequired.
@@ -171,6 +175,7 @@ public class PotentialLiftExpression extends PotentialTranslationExpression {
 	        if (   roleType.isHierarchyInconsistent()
 	        	|| roleType.roleModel.hasBaseclassProblem())
 	        {
+	        	if (testOnly) return null;
 	        	// don't install unresolvable liftcall
 	        	scope.problemReporter().referenceContext.tagAsHavingErrors();
 	        	return this.resolvedType;
@@ -180,6 +185,7 @@ public class PotentialLiftExpression extends PotentialTranslationExpression {
         } finally {
         	Config.removeOrRestore(oldConfig, this);
         }
+        if (testOnly) return this.expectedType;
 
         TypeBinding expectedBaseclass = ((ReferenceBinding)this.expectedType.leafComponentType()).baseclass();
         if (this.expectedType.isArrayType())
@@ -227,5 +233,10 @@ public class PotentialLiftExpression extends PotentialTranslationExpression {
 		Expression[] args = new Expression[] { this.expression };
 		this.expression = gen.messageSend(this.teamExpr, DeclaredLifting.dynamicLiftSelector(roleType), args);
 		this.resolvedType = this.expression.resolveType(scope); // or resolve bits individually ? (expression is already resolved?)
+	}
+
+	public static boolean isLiftingRequired(BlockScope scope, TypeBinding requiredType, TypeBinding providedType, Expression location) {
+		PotentialLiftExpression ple = new PotentialLiftExpression(null, location, requiredType);
+		return ple.internalResolveType(scope, providedType, true) != null;
 	}
 }

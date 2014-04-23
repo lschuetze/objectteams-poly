@@ -1,13 +1,12 @@
 /**********************************************************************
  * This file is part of "Object Teams Development Tooling"-Software
  *
- * Copyright 2008, 2011 Technical University Berlin, Germany.
+ * Copyright 2008, 2014 Technical University Berlin, Germany.
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
- * $Id: IAlienScopeTypeReference.java 23417 2010-02-03 20:13:55Z stephan $
  *
  * Please visit http://www.eclipse.org/objectteams for updates and contact.
  *
@@ -19,6 +18,7 @@ package org.eclipse.objectteams.otdt.internal.core.compiler.util;
 import org.eclipse.jdt.internal.compiler.CompilationResult.CheckPoint;
 import org.eclipse.jdt.internal.compiler.ast.ArrayQualifiedTypeReference;
 import org.eclipse.jdt.internal.compiler.ast.ArrayTypeReference;
+import org.eclipse.jdt.internal.compiler.ast.ParameterizedQualifiedTypeReference;
 import org.eclipse.jdt.internal.compiler.ast.ParameterizedSingleTypeReference;
 import org.eclipse.jdt.internal.compiler.ast.QualifiedTypeReference;
 import org.eclipse.jdt.internal.compiler.ast.SingleTypeReference;
@@ -163,6 +163,46 @@ public interface IAlienScopeTypeReference {
 		Scope alienScope;
 		public AlienScopeQualifiedTypeReference(char[][] sources, long[] poss, Scope alienScope) {
 			super(sources, poss);
+			this.alienScope = alienScope;
+			this.isGenerated = true; // allow qualified reference to role
+		}
+		public Scope getAlienScope() { return this.alienScope; }
+		@Override
+		public TypeBinding checkResolveUsingBaseImportScope(Scope scope, int location, boolean tolerate) {
+			return super.checkResolveUsingBaseImportScope(this.alienScope, location, tolerate);
+		}
+		@Override
+		public TypeBinding resolveType(ClassScope scope) {
+			TypeDeclaration referenceContext = scope.referenceContext;
+			CheckPoint cp = null;
+			if (referenceContext != null)
+				cp = referenceContext.compilationResult().getCheckPoint(referenceContext);
+			TypeBinding result= super.resolveType(scope);
+			if (result != null && result.isValidBinding())
+				return result;
+			// reset:
+			this.resolvedType = null;
+			if (cp != null && referenceContext != null) // 2. check redundant via correlation
+				referenceContext.compilationResult.rollBack(cp);
+			return super.resolveType(this.alienScope.classScope());
+		}
+		@Override
+		public TypeBinding resolveType(BlockScope scope, boolean checkBounds) {
+			// this variant for use within callin wrappers:
+			return super.resolveType((BlockScope) this.alienScope, checkBounds);
+		}
+		@Override
+		protected void reportDeprecatedPathSyntax(Scope scope) {
+			// no-op, simply suppress this warning.
+		}
+	}
+	
+
+	class AlienScopeParameterizedQualifiedTypeReference extends ParameterizedQualifiedTypeReference implements IAlienScopeTypeReference
+	{
+		Scope alienScope;
+		public AlienScopeParameterizedQualifiedTypeReference(ParameterizedQualifiedTypeReference proto, Scope alienScope) {
+			super(proto.tokens, proto.typeArguments, proto.dimensions(), proto.sourcePositions);
 			this.alienScope = alienScope;
 			this.isGenerated = true; // allow qualified reference to role
 		}

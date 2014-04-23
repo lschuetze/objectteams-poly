@@ -1,7 +1,7 @@
 /**********************************************************************
  * This file is part of "Object Teams Development Tooling"-Software
  * 
- * Copyright 2010, 2013 Stephan Herrmann
+ * Copyright 2010, 2014 Stephan Herrmann
  * 
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -1386,11 +1386,11 @@ public class Java5 extends AbstractOTJLDTest {
     			"}\n"
     		},
     		"----------\n" + 
-    		"1. ERROR in TeamA12grf16_2.java (at line 4)\n" + 
-    		"	test <- before test;\n" + 
-    		"	^^^^\n" + 
-    		"Type mismatch: cannot convert from String to U\n" + 
-    		"----------\n");
+			"1. ERROR in TeamA12grf16_2.java (at line 4)\n" + 
+			"	test <- before test;\n" + 
+			"	^^^^\n" + 
+			"The method test(U) in the type TeamA12grf16_2<U>.R is not applicable for the arguments (String)\n" + 
+			"----------\n");
     }
 
     // a role does not use the type parameter of its enclosing team, has callin binding

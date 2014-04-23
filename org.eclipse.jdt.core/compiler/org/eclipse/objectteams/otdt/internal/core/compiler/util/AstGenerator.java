@@ -1449,6 +1449,9 @@ public class AstGenerator extends AstFactory {
 			if (original instanceof ArrayQualifiedTypeReference && original.dimensions() > 0) { // could be parameterized type reference
 				ArrayQualifiedTypeReference qTypeRef= (ArrayQualifiedTypeReference)original;
 				result = new AlienScopeArrayQualifiedTypeReference(qTypeRef.tokens, qTypeRef.sourcePositions, qTypeRef.dimensions(), origScope);				
+			} else if (original instanceof ParameterizedQualifiedTypeReference) {
+				ParameterizedQualifiedTypeReference qTypeRef= (ParameterizedQualifiedTypeReference)original;
+				result = new AlienScopeParameterizedQualifiedTypeReference(qTypeRef, origScope);
 			} else {
 				QualifiedTypeReference qTypeRef= (QualifiedTypeReference)original;
 				result = new AlienScopeQualifiedTypeReference(qTypeRef.tokens, qTypeRef.sourcePositions, origScope);

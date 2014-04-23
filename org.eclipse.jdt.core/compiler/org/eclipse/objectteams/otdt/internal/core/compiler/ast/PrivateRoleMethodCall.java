@@ -1,7 +1,7 @@
 /** 
  * This file is part of "Object Teams Development Tooling"-Software
  * 
- * Copyright 2011 GK Software AG
+ * Copyright 2014 GK Software AG
  * 
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -54,6 +54,7 @@ public class PrivateRoleMethodCall extends MessageSend {
 		this.isCalloutToField = isCalloutToField;
 		this.gen = gen;
 		this.constant = Constant.NotAConstant;
+		this.nameSourcePosition = gen.pos;
 	}
 
 	@Override
