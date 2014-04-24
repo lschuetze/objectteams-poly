@@ -177,11 +177,11 @@ public abstract class OTQualifiedAllocationExpression extends AbstractQualifiedA
 	        }
 	    }
 	    if (this.creatorCall == null) {
-	    	if (!hasEnclosingInstanceProblem) {
-		    	// if resolve failed above roll back, because it will be analyzed again during the super call:
-		    	if (this.enclosingInstance != null && this.enclosingInstance.resolvedType == null)
-		    		compilationResult.rollBack(cp);
-		        this.resolvedType = super.resolveType(scope);
+	    	// if resolve failed above roll back, because it will be analyzed again during the super call:
+	    	if (this.enclosingInstance != null && this.enclosingInstance.resolvedType == null)
+	    		compilationResult.rollBack(cp);
+	    	this.resolvedType = super.resolveType(scope);
+	    	if (!hasEnclosingInstanceProblem) { // more checks only if no error already
 		        // if enclosing is a role request a cast to the class part as required by the inner constructor
 		        if (this.enclosingInstance != null) {
 		        	TypeBinding enclosingType = this.enclosingInstance.resolvedType;
