@@ -1,7 +1,7 @@
 /**********************************************************************
  * This file is part of "Object Teams Development Tooling"-Software
  * 
- * Copyright 2006, 2010 Fraunhofer Gesellschaft, Munich, Germany,
+ * Copyright 2006, 2014 Fraunhofer Gesellschaft, Munich, Germany,
  * for its Fraunhofer Institute for Computer Architecture and Software
  * Technology (FIRST), Berlin, Germany and Technical University Berlin,
  * Germany.
@@ -10,7 +10,6 @@
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
- * $Id$
  * 
  * Please visit http://www.eclipse.org/objectteams for updates and contact.
  * 
@@ -28,11 +27,11 @@ package org.eclipse.objectteams.otdt.debug.internal.breakpoints;
  */
 public interface IOOTBreakPoints 
 {
-  int LINE_TeamConstructor = 61;
-  int LINE_ConfinedGetTeam = 92;
-  int LINE_ActivateMethod = 164;
-  int LINE_DeactivateMethod = 195;
-  int LINE_ImplicitActivateMethod = 242;
-  int LINE_ImplicitDeactivateMethod = 277;
-  int LINE_FinalizeMethod = 486;
+  int LINE_TeamConstructor = 63;
+  int LINE_ConfinedGetTeam = 94;
+  int LINE_ActivateMethod = 166;
+  int LINE_DeactivateMethod = 197;
+  int LINE_ImplicitActivateMethod = 244;
+  int LINE_ImplicitDeactivateMethod = 279;
+  int LINE_FinalizeMethod = 494;
 }

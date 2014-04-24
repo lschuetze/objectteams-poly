@@ -16,7 +16,7 @@ PROG=`echo $0 | sed "s|${CWD}/||"`
 HEADER="/**********************************************************************
  * This file is part of \"Object Teams Development Tooling\"-Software
  * 
- * Copyright 2006, 2010 Fraunhofer Gesellschaft, Munich, Germany,
+ * Copyright 2006, 2014 Fraunhofer Gesellschaft, Munich, Germany,
  * for its Fraunhofer Institute for Computer Architecture and Software
  * Technology (FIRST), Berlin, Germany and Technical University Berlin,
  * Germany.
@@ -25,7 +25,6 @@ HEADER="/**********************************************************************
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
- * \$Id\$
  * 
  * Please visit http://www.eclipse.org/objectteams for updates and contact.
  * 
