@@ -1412,6 +1412,29 @@ protected char[][] identifierSubSet(int subsetLength){
 protected int indexOfAssistIdentifier(){
 	return this.indexOfAssistIdentifier(false);
 }
+//{ObjectTeams: cope with lookahead tricks in our scanner:
+
+// somehow the restarting parser (recovery) and our lookahead caused
+// that the assistIdentifier could nowhere be found for identity comparison.
+
+// 1. when consuming the lookahead identifier after '->' store it here:
+char[] pendingBindoutId;
+@Override
+protected void pushIdentifier() {
+	this.pendingBindoutId = this.scanner.peekPendingIdentifier();
+	super.pushIdentifier();
+}
+// 2. record when we are consuming a 'expr -> id' parameter mapping
+boolean insideParamMappingOut;
+@Override
+protected void consumeParameterMappingOut() {
+	this.insideParamMappingOut = true;
+	super.consumeParameterMappingOut();
+	this.insideParamMappingOut = false;
+}
+// 3. to be continued in indexOfAssistIdentifier(boolean) below ...
+// SH}
+
 /*
  * Iterate the most recent group of awaiting identifiers (grouped for qualified name reference (e.g. aa.bb.cc)
  * so as to check whether one of them is the assist identifier.
@@ -1440,6 +1463,11 @@ protected int indexOfAssistIdentifier(boolean useGenericsStack){
 			return length - i - 1;
 		}
 	}
+//{ObjectTeams: ...check info remembered above...
+	if (this.insideParamMappingOut && this.pendingBindoutId == assistIdentifier)
+		// we are in a 'expr -> id' parameter mapping and the 'id' is our assistIdentifier
+		return 0; // always a single identifier, so answer index 0
+// SH}
 	// none of the awaiting identifiers is the completion one
 	return -1;
 }

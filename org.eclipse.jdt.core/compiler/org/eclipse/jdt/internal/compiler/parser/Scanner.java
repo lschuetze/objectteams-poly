@@ -173,6 +173,12 @@ public class Scanner implements TerminalTokens {
 		}
     }
     protected BindoutLookahead _bindoutLookahead = null;
+    
+    public char[] peekPendingIdentifier() {
+    	if (this._bindoutLookahead != null)
+    		return this._bindoutLookahead.identifier;
+    	return null;
+    }
 
     public void resetOTFlags() {
     	this._isOTSource = this.parseOTJonly;
