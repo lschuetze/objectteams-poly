@@ -1,7 +1,7 @@
 /**********************************************************************
  * This file is part of "Object Teams Development Tooling"-Software
  * 
- * Copyright 2004, 2009 Fraunhofer Gesellschaft, Munich, Germany,
+ * Copyright 2004, 2014 Fraunhofer Gesellschaft, Munich, Germany,
  * for its Fraunhofer Institute and Computer Architecture and Software
  * Technology (FIRST), Berlin, Germany and Technical University Berlin,
  * Germany.
@@ -10,7 +10,6 @@
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
- * $Id: RefactoringUtil.java 23473 2010-02-05 19:46:08Z stephan $
  * 
  * Please visit http://www.objectteams.org for updates and contact.
  * 
@@ -225,9 +224,13 @@ public class RefactoringUtil implements ITeamConstants {
 			if (roleType.getBaseclassName() == null) {
 				continue;
 			}
-			IType baseType = roleType.getBaseClass();
-			if (baseType != null && !baseTypes.contains(baseType)) {
-				baseTypes.add(baseType);
+			try {
+				IType baseType = roleType.getBaseClass();
+				if (baseType != null && !baseTypes.contains(baseType)) {
+					baseTypes.add(baseType);
+				}
+			} catch (JavaModelException jme) {
+				// not resolved;
 			}
 		}
 		return baseTypes;
