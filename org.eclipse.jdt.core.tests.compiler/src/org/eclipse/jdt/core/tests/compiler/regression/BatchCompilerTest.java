@@ -2066,6 +2066,7 @@ public void test012b(){
 //{ObjectTeams: new options
             "		<option key=\"org.eclipse.objectteams.otdt.compiler.option.pure_java\" value=\"disabled\"/>\n" +
             "		<option key=\"org.eclipse.objectteams.otdt.compiler.option.scoped_keywords\" value=\"enabled\"/>\n" + 
+            "		<option key=\"org.eclipse.objectteams.otdt.compiler.option.weaving_scheme\" value=\"OTRE\"/>\n" +
 			"		<option key=\"org.eclipse.objectteams.otdt.compiler.problem.abstract_potential_relevant_role\" value=\"warning\"/>\n" + 
 			"		<option key=\"org.eclipse.objectteams.otdt.compiler.problem.adapting_deprecated\" value=\"error\"/>\n" + 
 			"		<option key=\"org.eclipse.objectteams.otdt.compiler.problem.ambiguous_lowering\" value=\"warning\"/>\n" + 
@@ -2080,7 +2081,8 @@ public void test012b(){
 			"		<option key=\"org.eclipse.objectteams.otdt.compiler.problem.fragile_callin\" value=\"warning\"/>\n" + 
 			"		<option key=\"org.eclipse.objectteams.otdt.compiler.problem.hidden_lifting_problem\" value=\"error\"/>\n" + 
 			"		<option key=\"org.eclipse.objectteams.otdt.compiler.problem.ignoring_role_return\" value=\"warning\"/>\n" +
-			"		<option key=\"org.eclipse.objectteams.otdt.compiler.problem.inferred_callout\" value=\"error\"/>\n" + 
+			"		<option key=\"org.eclipse.objectteams.otdt.compiler.problem.inferred_callout\" value=\"error\"/>\n" +
+			"		<option key=\"org.eclipse.objectteams.otdt.compiler.problem.otre_into_java8\" value=\"warning\"/>\n" + 
 			"		<option key=\"org.eclipse.objectteams.otdt.compiler.problem.override_final_role\" value=\"error\"/>\n" +
             "		<option key=\"org.eclipse.objectteams.otdt.compiler.problem.potential_ambiguous_playedby\" value=\"warning\"/>\n" + 
 			"		<option key=\"org.eclipse.objectteams.otdt.compiler.problem.unsafe_role_instantiation\" value=\"warning\"/>\n" +

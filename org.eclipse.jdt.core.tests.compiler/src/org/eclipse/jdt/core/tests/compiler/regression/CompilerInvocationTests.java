@@ -2592,6 +2592,7 @@ public void test012_compiler_problems_tuning() {
         expectedProblemAttributes.put("BaseMigrateUnboundRole", SKIP);
         expectedProblemAttributes.put("MigrateToWrongBase", SKIP);
         expectedProblemAttributes.put("RoleFileMissingTeamDeclaration", SKIP);
+        expectedProblemAttributes.put("OtreCannotWeaveIntoJava8", SKIP);
 //SH}
 		Map constantNamesIndex = new HashMap();
 		Field[] fields = JavaCore.class.getFields();
