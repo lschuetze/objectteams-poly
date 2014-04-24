@@ -20,6 +20,7 @@ import java.util.Map;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.internal.compiler.classfmt.ClassFileConstants;
 import org.eclipse.jdt.internal.compiler.impl.CompilerOptions;
+import org.eclipse.objectteams.otdt.core.ext.WeavingScheme;
 import org.eclipse.objectteams.otdt.tests.otjld.AbstractOTJLDTest;
 
 import junit.framework.Test;
@@ -1389,7 +1390,10 @@ public class Java5 extends AbstractOTJLDTest {
 			"1. ERROR in TeamA12grf16_2.java (at line 4)\n" + 
 			"	test <- before test;\n" + 
 			"	^^^^\n" + 
-			"The method test(U) in the type TeamA12grf16_2<U>.R is not applicable for the arguments (String)\n" + 
+			(this.weavingScheme == WeavingScheme.OTRE
+			? "Type mismatch: cannot convert from String to U\n"
+			: "The method test(U) in the type TeamA12grf16_2<U>.R is not applicable for the arguments (String)\n"
+			) +
 			"----------\n");
     }
 
