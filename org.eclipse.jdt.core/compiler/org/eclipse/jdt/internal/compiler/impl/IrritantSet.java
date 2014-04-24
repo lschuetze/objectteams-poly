@@ -145,7 +145,8 @@ public class IrritantSet {
 				| CompilerOptions.WeaveIntoSystemClass
 				| CompilerOptions.DangerousCallin
 				| CompilerOptions.AmbiguousLowering
-				| CompilerOptions.IgnoringRoleReturn)
+				| CompilerOptions.IgnoringRoleReturn
+				| CompilerOptions.OTREintoJava8)
 // SH}
 			// group-0 warnings enabled by default
 			.set(

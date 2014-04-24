@@ -183,6 +183,8 @@ public class AbstractOTJLDTest extends AbstractComparableTest {
 		options.put(CompilerOptions.OPTION_ReportSyntheticAccessEmulation, CompilerOptions.IGNORE);
 		options.put(CompilerOptions.OPTION_ReportUnusedWarningToken, CompilerOptions.ERROR);
 		options.put(CompilerOptions.OPTION_WeavingScheme, this.weavingScheme.toString());
+		// FIXME: consider setting to warning:
+		options.put(CompilerOptions.OPTION_ReportOtreWeavingIntoJava8, CompilerOptions.IGNORE);
 		return options;
 	}
 	

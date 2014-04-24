@@ -145,6 +145,7 @@ public class BinaryTypeBinding extends ReferenceBinding {
 	private ReferenceBinding containerAnnotationType;
 	int defaultNullness = 0;
 
+
 //{ObjectTeams: support callout-to-field
 
 	/** Callout to field adds faked access method (set or get): */
@@ -163,8 +164,11 @@ public class BinaryTypeBinding extends ReferenceBinding {
 			this.methods[size] = methodBinding;
 		}
 	}
-// SH}
-//{ObjectTeams: enclosing type may be set while evaluating ROLE_LOCAL_TYPES attribte:
+
+	// the class file version
+	public long version;
+
+	// enclosing type may be set while evaluating ROLE_LOCAL_TYPES attribte:
 	/** Set enclosingType and update dependent fields. */
     public void setEnclosingOfRoleLocal(ReferenceBinding enclosing) {
     	this.enclosingType = enclosing;
@@ -680,10 +684,13 @@ void cachePartsFrom(IBinaryType binaryType, boolean needFieldsAndMethods) {
 		}
 //{ObjectTeams: now this type is setup enough to evaluate attributes
 		if (binaryType instanceof ClassFileReader) {
-			((ClassFileReader)binaryType).evaluateOTAttributes(this, this.environment, missingTypeNames);
+			ClassFileReader reader = (ClassFileReader)binaryType;
+			reader.evaluateOTAttributes(this, this.environment, missingTypeNames);
 			// remember o.o.Team:
 			if (needFieldsAndMethods && TypeAnalyzer.isOrgObjectteamsTeam(this))
-				this.environment.getTeamMethodGenerator().maybeRegisterTeamClassBytes((ClassFileReader)binaryType, this);
+				this.environment.getTeamMethodGenerator().maybeRegisterTeamClassBytes(reader, this);
+			// store class file version
+			this.version = reader.getVersion();
 		}
 // SH}
 		if (this.environment.globalOptions.storeAnnotations)

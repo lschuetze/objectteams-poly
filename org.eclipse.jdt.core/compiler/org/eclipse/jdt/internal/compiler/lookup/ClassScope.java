@@ -49,6 +49,7 @@ import org.eclipse.jdt.internal.compiler.ast.TypeParameter;
 import org.eclipse.jdt.internal.compiler.ast.TypeReference;
 import org.eclipse.jdt.internal.compiler.classfmt.ClassFileConstants;
 import org.eclipse.jdt.internal.compiler.env.AccessRestriction;
+import org.eclipse.jdt.internal.compiler.impl.CompilerOptions.WeavingScheme;
 import org.eclipse.jdt.internal.compiler.impl.IrritantSet;
 import org.eclipse.jdt.internal.compiler.problem.AbortCompilation;
 import org.eclipse.jdt.internal.compiler.problem.IProblemRechecker;
@@ -1786,7 +1787,11 @@ public class ClassScope extends Scope {
 
 				if (baseclass.isFinal())
 					problemReporter().decapsulationOfFinal(baseclassRef, baseclass);
-			
+				if (baseclass instanceof BinaryTypeBinding 
+					&& ((BinaryTypeBinding)baseclass).version >= ClassFileConstants.JDK1_8
+					&& compilerOptions().weavingScheme == WeavingScheme.OTRE) {
+					problemReporter().otreCannotWeaveIntoJava8(baseclassRef, baseclass, (int) (((BinaryTypeBinding)baseclass).version >> 16));
+				}			
 				if (/*   !sourceType.isInterface() // FIXME(SH): ifc playedBy ifc is currently incompatible with add/removeRole infrastructure.
                     && */baseclass.isInterface() && (baseclass.tagBits & TagBits.HasMissingType) == 0)
 				{

@@ -15,8 +15,13 @@
  **********************************************************************/
 package org.eclipse.objectteams.otdt.tests.otjld.other;
 
+import java.util.Map;
+
 import junit.framework.Test;
 
+import org.eclipse.jdt.core.tests.util.CompilerTestSetup;
+import org.eclipse.jdt.internal.compiler.impl.CompilerOptions;
+import org.eclipse.objectteams.otdt.core.ext.WeavingScheme;
 import org.eclipse.objectteams.otdt.tests.otjld.AbstractOTJLDTest;
 
 public class Java8 extends AbstractOTJLDTest {
@@ -40,13 +45,29 @@ public class Java8 extends AbstractOTJLDTest {
 		return suite;
 	}
 
-	public static Class testClass() {
+	public static Class<Java8> testClass() {
 		return Java8.class;
+	}
+	
+	@Override
+	public void initialize(CompilerTestSetup setUp) {
+		super.initialize(setUp);
+		if (this.weavingScheme == WeavingScheme.OTRE)
+			System.err.println("Running Java8 tests for OTRE weaver will skip most tests");
+	}
+
+	private void runNegativeTestNoFlush(String[] testFiles, Map<String, String> compilerOptions, String error) {
+		runNegativeTest(false, testFiles, null, compilerOptions, error, DEFAULT_TEST_OPTIONS);
+	}
+
+	private void runConformTestNoFlush(String[] testFiles, Map<String, String> compilerOptions) {
+		runConformTest(false, testFiles, null, compilerOptions, "", "", "", DEFAULT_TEST_OPTIONS);
 	}
 
 	// A lambda expression appears in a parameter mapping
 	// - empty param list
 	public void testA11_lambdaExpression01() {
+		if (this.weavingScheme == WeavingScheme.OTRE) return;
 		runConformTest(
 			new String[] {
 		"p1/TeamA11le01.java",
@@ -82,6 +103,7 @@ public class Java8 extends AbstractOTJLDTest {
 	// - single ident param
 	// - lambda is 2nd mapping
 	public void testA11_lambdaExpression02() {
+		if (this.weavingScheme == WeavingScheme.OTRE) return;
 		runConformTest(
 			new String[] {
 		"p1/TeamA11le02.java",
@@ -124,6 +146,7 @@ public class Java8 extends AbstractOTJLDTest {
 	// A lambda expression appears in a parameter mapping
 	// - two type elided params
 	public void testA11_lambdaExpression03() {
+		if (this.weavingScheme == WeavingScheme.OTRE) return;
 		runConformTest(
 			new String[] {
 		"p1/TeamA11le03.java",
@@ -162,6 +185,7 @@ public class Java8 extends AbstractOTJLDTest {
 	// A lambda expression appears in a parameter mapping
 	// - two typed params
 	public void testA11_lambdaExpression04() {
+		if (this.weavingScheme == WeavingScheme.OTRE) return;
 		runConformTest(
 			new String[] {
 		"p1/TeamA11le04.java",
@@ -198,6 +222,7 @@ public class Java8 extends AbstractOTJLDTest {
 	}
 	
 	public void testTypeAnnotationAndTypeAnchor_1() {
+		if (this.weavingScheme == WeavingScheme.OTRE) return;
 		runConformTest(
 			new String[] {
 		"Marker.java",
@@ -219,6 +244,7 @@ public class Java8 extends AbstractOTJLDTest {
 	}
 	
 	public void testTypeAnnotationAndTypeAnchor_2() {
+		if (this.weavingScheme == WeavingScheme.OTRE) return;
 		runConformTest(
 			new String[] {
 		"p1/Marker.java",
@@ -246,5 +272,32 @@ public class Java8 extends AbstractOTJLDTest {
 			"}\n" +
 			"class C2<T> {}\n"
 			});
+	}
+
+	public void testOtreWarning() {
+		runConformTest(
+			new String[] {
+				"B.java",
+				"public class B {}\n"
+			});
+		@SuppressWarnings("unchecked")
+		Map<String, String> compilerOptions = getCompilerOptions();
+		compilerOptions.put(CompilerOptions.OPTION_ReportOtreWeavingIntoJava8, CompilerOptions.ERROR);
+		String[] teamSource = new String[] { "MyTeam.java",
+				"public team class MyTeam {\n" +
+				"	protected class R playedBy B {}\n" +
+				"}\n" };
+		if (this.weavingScheme == WeavingScheme.OTRE)
+			runNegativeTestNoFlush(
+				teamSource,
+				compilerOptions,
+				"----------\n" + 
+				"1. WARNING in MyTeam.java (at line 2)\n" + 
+				"	protected class R playedBy B {}\n" + 
+				"	                           ^\n" + 
+				"Base class B has class file version 52 which cannot be handled by the traditional OTRE based on BCEL. Please consider using the ASM based OTDRE instead.\n" + 
+				"----------\n");
+		else
+			runConformTestNoFlush(teamSource, compilerOptions);
 	}
 }

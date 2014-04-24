@@ -223,6 +223,9 @@ public class CompilerOptions {
 	public static final String OPTION_ReportIgnoringRoleMethodReturn=
 		"org.eclipse.objectteams.otdt.compiler.problem.ignoring_role_return"; //$NON-NLS-1$
 
+	public static final String OPTION_ReportOtreWeavingIntoJava8=
+		"org.eclipse.objectteams.otdt.compiler.problem.otre_into_java8"; //$NON-NLS-1$
+	
 	public static final String OPTION_AllowScopedKeywords =
 		"org.eclipse.objectteams.otdt.compiler.option.scoped_keywords"; //$NON-NLS-1$
 	
@@ -405,6 +408,7 @@ public class CompilerOptions {
 	public static final int EffectlessFieldaccess= 			 OTJFlag | ASTNode.Bit19; 
 	public static final int UnusedParammap= 				 OTJFlag | ASTNode.Bit20;
 	public static final int HiddenLiftingProblem=      		 OTJFlag | ASTNode.Bit21;
+	public static final int OTREintoJava8=					 OTJFlag | ASTNode.Bit22;
 // SH}
 
 	// Severity level for handlers
@@ -850,6 +854,8 @@ public class CompilerOptions {
 				return OPTION_ReportAdaptingDeprecated;
 			case IgnoringRoleReturn:
 				return OPTION_ReportIgnoringRoleMethodReturn;
+			case OTREintoJava8:
+				return OPTION_ReportOtreWeavingIntoJava8;
 // SH}
 			case NullSpecViolation :
 				return OPTION_ReportNullSpecViolation;
@@ -1056,6 +1062,7 @@ public class CompilerOptions {
 			OPTION_ReportAmbiguousLowering,
 			OPTION_ReportAdaptingDeprecated,
 			OPTION_ReportIgnoringRoleMethodReturn,
+			OPTION_ReportOtreWeavingIntoJava8,
 			OPTION_AllowScopedKeywords,
 // SH}
 			OPTION_AnnotationBasedNullAnalysis,
@@ -1491,6 +1498,7 @@ public class CompilerOptions {
 		optionsMap.put(OPTION_ReportAmbiguousLowering, getSeverityString(AmbiguousLowering));
 		optionsMap.put(OPTION_ReportAdaptingDeprecated, getSeverityString(AdaptingDeprecated));
 		optionsMap.put(OPTION_ReportIgnoringRoleMethodReturn, getSeverityString(IgnoringRoleReturn));
+		optionsMap.put(OPTION_ReportOtreWeavingIntoJava8, getSeverityString(OTREintoJava8));
 
 		optionsMap.put(OPTION_AllowScopedKeywords, this.allowScopedKeywords? ENABLED : DISABLED);
 		optionsMap.put(OPTION_PureJavaOnly, this.isPureJava ? ENABLED : DISABLED);
@@ -2018,6 +2026,7 @@ public class CompilerOptions {
 		if ((optionValue = optionsMap.get(OPTION_ReportAmbiguousLowering)) != null) updateSeverity(AmbiguousLowering, optionValue);
 		if ((optionValue = optionsMap.get(OPTION_ReportAdaptingDeprecated)) != null) updateSeverity(AdaptingDeprecated, optionValue);
 		if ((optionValue = optionsMap.get(OPTION_ReportIgnoringRoleMethodReturn)) != null) updateSeverity(IgnoringRoleReturn, optionValue);
+		if ((optionValue = optionsMap.get(OPTION_ReportOtreWeavingIntoJava8)) != null) updateSeverity(OTREintoJava8, optionValue);
 
 		if ((optionValue = optionsMap.get(OPTION_AllowScopedKeywords)) != null) {
 			if (ENABLED.equals(optionValue)) {

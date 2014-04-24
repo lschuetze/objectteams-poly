@@ -704,6 +704,9 @@ public static int getIrritant(int problemID) {
 			
 		case IProblem.IgnoringRoleMethodReturn:
 			return CompilerOptions.IgnoringRoleReturn;
+			
+		case IProblem.OtreCannotWeaveIntoJava8:
+			return CompilerOptions.OTREintoJava8;
 
 		case IProblem.OverridingFinalRole:
 			return CompilerOptions.OverridingFinalRole;
@@ -13531,6 +13534,13 @@ public void callinBindingToInterface(AbstractMethodMappingDeclaration callinMapp
 	String[] args = { String.valueOf(baseIfc.readableName()) };
 	this.handle(IProblem.CallinBindingToInterface, args, args, callinMapping.sourceStart, callinMapping.sourceEnd);	
 }
+public void otreCannotWeaveIntoJava8(TypeReference baseclassRef, ReferenceBinding baseclass, int major) {
+	this.handle(IProblem.OtreCannotWeaveIntoJava8,
+			new String[] { new String(baseclass.readableName()), String.valueOf(major) },
+			new String[] { new String(baseclass.readableName()), String.valueOf(major) },
+			ProblemSeverities.Warning,
+			baseclassRef.sourceStart, baseclassRef.sourceEnd);
+}
 // EXPERIMENTAL FEATURE:
 public void migrateWithinNonFinalTeam(TypeReference superTypeRef, ReferenceBinding teamType) {
 	String[] args = { String.valueOf(teamType.readableName()) };
@@ -13569,6 +13579,7 @@ public void migrateToWrongBase(Expression expression, TypeBinding providedType, 
 					  String.valueOf(baseclass.readableName()) };
 	this.handle(IProblem.MigrateToWrongBase, args, args, expression.sourceStart, expression.sourceEnd);
 }
+
 // SH}
 
 public void illegalRedefinitionToNonNullParameter(Argument argument, ReferenceBinding declaringClass, char[][] inheritedAnnotationName) {
