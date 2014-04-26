@@ -133,6 +133,8 @@ public static abstract class AbstractQualifiedAllocationExpression extends Alloc
 //{ObjectTeams:
 	/** If not generating a createCall, this marks the request to cast the enclosingInstance before calling the ctor. */
 	protected ReferenceBinding enclosingInstanceCast = null;
+
+	protected boolean hasEnclosingInstanceProblem;
 // SH}
 	public TypeDeclaration anonymousType;
 
@@ -392,7 +394,7 @@ public static abstract class AbstractQualifiedAllocationExpression extends Alloc
 			if ((enclosingInstanceType = this.enclosingInstance.resolveType(scope)) == null){
   :giro */
             enclosingInstanceType = this.enclosingInstance.resolvedType;
-            if (enclosingInstanceType == null)
+            if (enclosingInstanceType == null && !this.hasEnclosingInstanceProblem)
                 enclosingInstanceType = this.enclosingInstance.resolveType(scope);
             if (enclosingInstanceType == null) {
 // SH}

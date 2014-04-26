@@ -1,7 +1,7 @@
 /**********************************************************************
  * This file is part of "Object Teams Development Tooling"-Software
  *
- * Copyright 2004, 2009 Fraunhofer Gesellschaft, Munich, Germany,
+ * Copyright 2004, 2014 Fraunhofer Gesellschaft, Munich, Germany,
  * for its Fraunhofer Institute for Computer Architecture and Software
  * Technology (FIRST), Berlin, Germany and Technical University Berlin,
  * Germany.
@@ -10,7 +10,6 @@
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
- * $Id$
  *
  * Please visit http://www.eclipse.org/objectteams for updates and contact.
  *
@@ -55,7 +54,6 @@ import org.eclipse.objectteams.otdt.internal.core.compiler.statemachine.copyinhe
  * This decision can only be made after the receiver (lhs of dot) is resolved.
  *
  * @author stephan
- * @version $Id: QualifiedAllocationExpression.java 23401 2010-02-02 23:56:05Z stephan $
  */
 public abstract class OTQualifiedAllocationExpression extends AbstractQualifiedAllocationExpression {
     /** if this is set, we are using the translated version. */
@@ -119,14 +117,14 @@ public abstract class OTQualifiedAllocationExpression extends AbstractQualifiedA
 
 	    CompilationResult compilationResult = scope.referenceContext().compilationResult();
 		CheckPoint cp = compilationResult.getCheckPoint(scope.referenceContext());
-		boolean hasEnclosingInstanceProblem = false;
+		this.hasEnclosingInstanceProblem = false;
 	    if (this.anonymousType == null && this.creatorCall == null) { // no double processing
 
         	if (this.enclosingInstance instanceof CastExpression)
 				this.enclosingInstance.bits |= DisableUnnecessaryCastCheck; // will check later on (within super.resolveType())
 
         	TypeBinding enclosingInstanceType = this.enclosingInstance.resolveType(scope);
-       		hasEnclosingInstanceProblem = enclosingInstanceType == null;
+       		this.hasEnclosingInstanceProblem = enclosingInstanceType == null;
 
 	        if (   !scope.isGeneratedScope()
 	        	&& enclosingInstanceType != null
@@ -177,11 +175,8 @@ public abstract class OTQualifiedAllocationExpression extends AbstractQualifiedA
 	        }
 	    }
 	    if (this.creatorCall == null) {
-	    	// if resolve failed above roll back, because it will be analyzed again during the super call:
-	    	if (this.enclosingInstance != null && this.enclosingInstance.resolvedType == null)
-	    		compilationResult.rollBack(cp);
 	    	this.resolvedType = super.resolveType(scope);
-	    	if (!hasEnclosingInstanceProblem) { // more checks only if no error already
+	    	if (!this.hasEnclosingInstanceProblem) { // more checks only if no error already
 		        // if enclosing is a role request a cast to the class part as required by the inner constructor
 		        if (this.enclosingInstance != null) {
 		        	TypeBinding enclosingType = this.enclosingInstance.resolvedType;
