@@ -535,10 +535,12 @@ public class Syntax extends AbstractOTJLDTest {
     public void test861_parammapIllegalSemi1() {
         runNegativeTest(
             new String[] {
+		"T861pis1.java",
+				"public class T861pis1 {}\n",
 		"Team861pis1.java",
 			    "\n" +
 			    "public team class Team861pis1 {\n" +
-			    "	protected class Role playedBy Object {\n" +
+			    "	protected class Role playedBy T861pis1{\n" +
 			    "		abstract String getHashStr();\n" +
 			    "		\n" +
 			    "		String getHashStr() -> boolean equals(Object other) with {\n" +
@@ -549,14 +551,8 @@ public class Syntax extends AbstractOTJLDTest {
 			    "}\n" +
 			    "	\n"
             },
-            "----------\n" + 
-    		"1. WARNING in Team861pis1.java (at line 3)\n" + 
-    		"	protected class Role playedBy Object {\n" + 
-    		"	                              ^^^^^^\n" + 
-    		"Base class java.lang.Object appears to be a system class, which means that load time weaving could possibly fail\n" + 
-    		"if this class is loaded from rt.jar/the bootstrap classpath.\n" + 
     		"----------\n" + 
-    		"2. ERROR in Team861pis1.java (at line 7)\n" + 
+    		"1. ERROR in Team861pis1.java (at line 7)\n" + 
     		"	this -> other;\n" + 
     		"	             ^\n" + 
     		"Syntax error on token \";\", , expected\n" + 
@@ -1160,11 +1156,12 @@ public class Syntax extends AbstractOTJLDTest {
     public void test8112_declaredLiftingSyntaxError1() {
         runNegativeTest(
             new String[] {
+		"T8112dlse1.java",
+				"public class T8112dlse1 {}\n",
 		"Team8112dlse1.java",
 			    "\n" +
 			    "public team class Team8112dlse1 {\n" +
-			    "   @SuppressWarnings(\"bindingtosystemclass\")\n" +
-			    "	protected class R playedBy Object {\n" +
+			    "	protected class R playedBy T8112dlse1 {\n" +
 			    "		int bla;\n" +
 			    "	}\n" +
 			    "	void run(Object as R)  {\n" +
@@ -1175,7 +1172,7 @@ public class Syntax extends AbstractOTJLDTest {
 			    "	\n"
             },
             "----------\n" + 
-    		"1. ERROR in Team8112dlse1.java (at line 7)\n" + 
+    		"1. ERROR in Team8112dlse1.java (at line 6)\n" + 
     		"	void run(Object as R)  {\n" + 
     		"	                   ^\n" + 
     		"Syntax error, insert \"... VariableDeclaratorId\" to complete FormalParameterList\n" + 
@@ -1187,12 +1184,13 @@ public class Syntax extends AbstractOTJLDTest {
     public void test8112_declaredLiftingSyntaxError2() {
         runNegativeTestMatching(
             new String[] {
+		"T8112dlse2.java",
+				"public class T8112dlse2 {}\n",
 		"Team8112dlse2.java",
 			    "\n" +
 			    "public team class Team8112dlse2 {\n" +
 			    "	protected team class Mid {\n" +
-			    "       @SuppressWarnings(\"bindingtosystemclass\")\n" +
-			    "		protected class R playedBy Object {\n" +
+			    "		protected class R playedBy T8112dlse2 {\n" +
 			    "			int bla;\n" +
 			    "		}\n" +
 			    "		callin void run(Object as R)  {\n" +
@@ -1203,17 +1201,17 @@ public class Syntax extends AbstractOTJLDTest {
 			    "	\n"
             },
             "----------\n" + 
-    		"1. ERROR in Team8112dlse2.java (at line 8)\n" + 
+    		"1. ERROR in Team8112dlse2.java (at line 7)\n" + 
     		"	callin void run(Object as R)  {\n" + 
     		"	                          ^\n" + 
     		"Syntax error, insert \"... VariableDeclaratorId\" to complete FormalParameterList\n" + 
     		"----------\n" + 
-    		"2. ERROR in Team8112dlse2.java (at line 11)\n" + 
+    		"2. ERROR in Team8112dlse2.java (at line 10)\n" + 
     		"	}\n" + 
     		"	^\n" + 
     		"Syntax error on token \"}\", delete this token\n" + 
     		"----------\n" + 
-    		"3. ERROR in Team8112dlse2.java (at line 12)\n" + 
+    		"3. ERROR in Team8112dlse2.java (at line 11)\n" + 
     		"	}\n" + 
     		"	^\n" + 
     		"Syntax error, insert \"}\" to complete ClassBody\n" + 

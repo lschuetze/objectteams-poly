@@ -20,7 +20,9 @@ import java.util.Map;
 
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.tests.util.Util;
+import org.eclipse.jdt.internal.compiler.classfmt.ClassFileConstants;
 import org.eclipse.jdt.internal.compiler.impl.CompilerOptions;
+import org.eclipse.objectteams.otdt.core.ext.WeavingScheme;
 import org.eclipse.objectteams.otdt.tests.otjld.AbstractOTJLDTest;
 
 import junit.framework.Test;
@@ -1390,10 +1392,12 @@ public class ReportedBugs extends AbstractOTJLDTest {
     public void testB11_sh36() {
         runNegativeTestMatching(
             new String[] {
+		"TB11sh36.java",
+				"public class TB11sh36 {}\n",
 		"TeamB11sh36.java",
 			    "\n" +
 			    "public team class TeamB11sh36 {\n" +
-			    "    protected class R playedBy Object {\n" +
+			    "    protected class R playedBy TB11sh36 {\n" +
 			    "        toString =>  // incomplete\n" +
 			    "        R() {}\n" +
 			    "        @SuppressWarnings(\"basecall\")\n" +
@@ -1404,22 +1408,16 @@ public class ReportedBugs extends AbstractOTJLDTest {
 			    "}\n" +
 			    "    \n"
             },
-            "----------\n" + 
-    		"1. WARNING in TeamB11sh36.java (at line 3)\n" + 
-    		"	protected class R playedBy Object {\n" + 
-    		"	                           ^^^^^^\n" + 
-    		"Base class java.lang.Object appears to be a system class, which means that load time weaving could possibly fail\n" + 
-    		"if this class is loaded from rt.jar/the bootstrap classpath.\n" + 
     		"----------\n" + 
-    		"2. ERROR in TeamB11sh36.java (at line 4)\n" + 
+    		"1. ERROR in TeamB11sh36.java (at line 4)\n" + 
     		"	toString =>  // incomplete\n" + 
     		"	         ^^\n" + 
     		"Syntax error on token \"=>\", delete this token\n" + 
     		"----------\n" + 
-    		"3. ERROR in TeamB11sh36.java (at line 5)\n" + 
+    		"2. ERROR in TeamB11sh36.java (at line 5)\n" + 
     		"	R() {}\n" + 
     		"	^\n" + 
-    		"No method R found in type java.lang.Object to resolve method designator (OTJLD 3.1(c)).\n" + 
+    		"No method R found in type TB11sh36 to resolve method designator (OTJLD 3.1(c)).\n" + 
     		"----------\n");
     }
 
@@ -2082,6 +2080,40 @@ public class ReportedBugs extends AbstractOTJLDTest {
 			    "}\n" +
 			    "    \n"
             },
+		    (this.weavingScheme == WeavingScheme.OTRE && this.complianceLevel >= ClassFileConstants.JDK1_8
+		    ?
+    		"----------\n" + 
+    		"1. WARNING in TeamB11sh47.java (at line 6)\n" + 
+    		"	protected class R1 playedBy JFrame {\n" + 
+    		"	                            ^^^^^^\n" + 
+    		"Base class javax.swing.JFrame has class file version 52 which cannot be handled by the traditional OTRE based on BCEL. Please consider using the ASM based OTDRE instead.\n" + 
+    		"----------\n" + 
+    		"2. ERROR in TeamB11sh47.java (at line 11)\n" + 
+    		"	correct <- replace show;\n" + 
+    		"	                   ^^^^\n" + 
+    		"Method specifier \"show\" is ambiguous for the type javax.swing.JFrame. Please use the exact method signature to disambiguate (OTJLD 4.1(c)).\n" + 
+    		"----------\n" + 
+    		"3. ERROR in TeamB11sh47.java (at line 14)\n" + 
+    		"	protected class Unfinished playedBy\n" + 
+    		"	^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n" + 
+    		"Syntax error on token(s), misplaced construct(s)\n" + 
+    		"----------\n" + 
+    		"4. ERROR in TeamB11sh47.java (at line 15)\n" + 
+    		"	protected class R3 playedBy String {\n" + 
+    		"	                ^^\n" + 
+    		"Member types not allowed in regular roles. Mark class TeamB11sh47.Unfinished as a team if R3 should be its role (OTJLD 1.5(a,b)). \n" + 
+    		"----------\n" + 
+    		"5. WARNING in TeamB11sh47.java (at line 15)\n" + 
+    		"	protected class R3 playedBy String {\n" + 
+    		"	                            ^^^^^^\n" + 
+    		"PlayedBy binding overrides finalness of base class java.lang.String (OTJLD 2.1.2(c)).\n" + 
+    		"----------\n" + 
+    		"6. WARNING in TeamB11sh47.java (at line 15)\n" + 
+    		"	protected class R3 playedBy String {\n" + 
+    		"	                            ^^^^^^\n" + 
+    		"Base class java.lang.String has class file version 52 which cannot be handled by the traditional OTRE based on BCEL. Please consider using the ASM based OTDRE instead.\n" + 
+    		"----------\n"
+		    :
             "----------\n" + 
     		"1. ERROR in TeamB11sh47.java (at line 11)\n" + 
     		"	correct <- replace show;\n" + 
@@ -2102,7 +2134,8 @@ public class ReportedBugs extends AbstractOTJLDTest {
     		"	protected class R3 playedBy String {\n" + 
     		"	                            ^^^^^^\n" + 
     		"PlayedBy binding overrides finalness of base class java.lang.String (OTJLD 2.1.2(c)).\n" + 
-    		"----------\n",
+    		"----------\n"
+    		),
     		null/*classLibraries*/,
     		true/*shouldFlushOutputDirectory*/,
     		customOptions);
@@ -3951,6 +3984,25 @@ public class ReportedBugs extends AbstractOTJLDTest {
 			    "    \n"
             },
             // FIXME(SH): why these errors:?
+		    (this.weavingScheme == WeavingScheme.OTRE && this.complianceLevel >= ClassFileConstants.JDK1_8
+		    ?
+    		"----------\n" + 
+    		"1. WARNING in TeamB11sh86_2.java (at line 5)\n" + 
+    		"	protected class R playedBy TB11sh86_2 {\n" + 
+    		"	                           ^^^^^^^^^^\n" + 
+    		"Base class TB11sh86_2 has class file version 52 which cannot be handled by the traditional OTRE based on BCEL. Please consider using the ASM based OTDRE instead.\n" + 
+    		"----------\n" + 
+    		"2. ERROR in TeamB11sh86_2.java (at line 6)\n" + 
+    		"	getBase -> bm;\n" + 
+    		"	^^^^^^^\n" + 
+    		"A non-abstract role method exists for this callout-binding. Use callout-override (\'=>\') if you want to override it (OTJLD 3.1(e)).\n" + 
+    		"----------\n" + 
+    		"3. ERROR in TeamB11sh86_2.java (at line 6)\n" + 
+    		"	getBase -> bm;\n" + 
+    		"	^^^^^^^\n" + 
+    		"The return type is incompatible with TeamB11sh86_1.R.getBase(Object)\n" + 
+    		"----------\n"
+    		:
             "----------\n" + 
     		"1. ERROR in TeamB11sh86_2.java (at line 6)\n" + 
     		"	getBase -> bm;\n" + 
@@ -3961,7 +4013,8 @@ public class ReportedBugs extends AbstractOTJLDTest {
     		"	getBase -> bm;\n" + 
     		"	^^^^^^^\n" + 
     		"The return type is incompatible with TeamB11sh86_1.R.getBase(Object)\n" + 
-    		"----------\n",
+    		"----------\n"
+    		),
             null/*classLibraries*/,
             false/*shouldFlushOutputDirectory*/,
             customOptions,

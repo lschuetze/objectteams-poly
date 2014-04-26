@@ -19,7 +19,9 @@ package org.eclipse.objectteams.otdt.tests.otjld.roleplaying;
 
 import java.util.Map;
 
+import org.eclipse.jdt.internal.compiler.classfmt.ClassFileConstants;
 import org.eclipse.jdt.internal.compiler.impl.CompilerOptions;
+import org.eclipse.objectteams.otdt.core.ext.WeavingScheme;
 import org.eclipse.objectteams.otdt.tests.otjld.AbstractOTJLDTest;
 
 import junit.framework.Test;
@@ -2280,13 +2282,29 @@ public class PlayedByRelation extends AbstractOTJLDTest {
 			    "}\n" +
 			    "    \n"
             },
+            (this.weavingScheme == WeavingScheme.OTDRE
+            ?
             "----------\n" + 
     		"1. WARNING in Team2110bi6.java (at line 4)\n" + 
     		"	protected class Role playedBy JFrame {}\n" + 
     		"	                              ^^^^^^\n" + 
     		"Base class javax.swing.JFrame appears to be a system class, which means that load time weaving could possibly fail\n" + 
     		"if this class is loaded from rt.jar/the bootstrap classpath.\n" + 
-    		"----------\n",
+    		"----------\n"
+    		:
+    		"----------\n" + 
+    		"1. WARNING in Team2110bi6.java (at line 4)\n" + 
+    		"	protected class Role playedBy JFrame {}\n" + 
+    		"	                              ^^^^^^\n" + 
+    		"Base class javax.swing.JFrame has class file version 52 which cannot be handled by the traditional OTRE based on BCEL. Please consider using the ASM based OTDRE instead.\n" + 
+    		"----------\n" + 
+    		"2. WARNING in Team2110bi6.java (at line 4)\n" + 
+    		"	protected class Role playedBy JFrame {}\n" + 
+    		"	                              ^^^^^^\n" + 
+    		"Base class javax.swing.JFrame appears to be a system class, which means that load time weaving could possibly fail\n" + 
+    		"if this class is loaded from rt.jar/the bootstrap classpath.\n" + 
+    		"----------\n"
+            ),
     		customOptions);
     }
 

@@ -22,6 +22,7 @@ import java.util.Map;
 import junit.framework.Test;
 
 import org.eclipse.jdt.internal.compiler.impl.CompilerOptions;
+import org.eclipse.objectteams.otdt.core.ext.WeavingScheme;
 import org.eclipse.objectteams.otdt.tests.otjld.AbstractOTJLDTest;
 
 @SuppressWarnings("unchecked")
@@ -4495,12 +4496,27 @@ public class LiftingAndLowering extends AbstractOTJLDTest {
 			    "    }\n" +
 			    "}\n"
             },
+            (this.weavingScheme == WeavingScheme.OTDRE
+            ?
             "----------\n" + 
     		"1. ERROR in Team2228dlic6l_3.java (at line 4)\n" + 
     		"	public Team2228dlic6l_3(T2228dlic6l as R2 r) {\n" + 
     		"	       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n" + 
     		"Compiler limitation: This constructor seems to request lifting of an argument. However, the self call in Team2228dlic6l_2(R) of class Team2228dlic6l_2 passes its arguments in an unexpected way. Cannot perform required transitive byte-code translation.\n" + 
-    		"----------\n",
+    		"----------\n"
+    		:
+            "----------\n" + 
+    		"1. WARNING in Team2228dlic6l_3.java (at line 3)\n" + 
+    		"	public class R2 extends R playedBy T2228dlic6l {}\n" + 
+    		"	                                   ^^^^^^^^^^^\n" + 
+    		"Base class T2228dlic6l has class file version 52 which cannot be handled by the traditional OTRE based on BCEL. Please consider using the ASM based OTDRE instead.\n" + 
+            "----------\n" + 
+    		"2. ERROR in Team2228dlic6l_3.java (at line 4)\n" + 
+    		"	public Team2228dlic6l_3(T2228dlic6l as R2 r) {\n" + 
+    		"	       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n" + 
+    		"Compiler limitation: This constructor seems to request lifting of an argument. However, the self call in Team2228dlic6l_2(R) of class Team2228dlic6l_2 passes its arguments in an unexpected way. Cannot perform required transitive byte-code translation.\n" + 
+    		"----------\n"
+            ),
         	null/*classLibraries*/,
         	false/*shouldFlushOutputDirectory*/);
     }
@@ -4675,12 +4691,26 @@ public class LiftingAndLowering extends AbstractOTJLDTest {
 			    "}    \n" +
 			    "    \n"
             },
+            (this.weavingScheme == WeavingScheme.OTDRE
+            ?
             "----------\n" + 
     		"1. ERROR in Team2228dlic7l_3.java (at line 4)\n" + 
     		"	public Team2228dlic7l_3(T2228dlic7l as R2 r) {\n" + 
     		"	       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n" + 
     		"Compiler limitation: This constructor seems to request lifting of an argument. However, the self call in Team2228dlic7l_2(R) of class Team2228dlic7l_2 passes its arguments in an unexpected way. Cannot perform required transitive byte-code translation.\n" + 
-    		"----------\n",
+    		"----------\n"
+    		:
+    		"1. WARNING in Team2228dlic7l_3.java (at line 3)\n" + 
+    		"	public class R2 extends R playedBy T2228dlic7l {}\n" + 
+    		"	                                   ^^^^^^^^^^^\n" + 
+    		"Base class T2228dlic7l has class file version 52 which cannot be handled by the traditional OTRE based on BCEL. Please consider using the ASM based OTDRE instead.\n" + 
+            "----------\n" + 
+    		"2. ERROR in Team2228dlic7l_3.java (at line 4)\n" + 
+    		"	public Team2228dlic7l_3(T2228dlic7l as R2 r) {\n" + 
+    		"	       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n" + 
+    		"Compiler limitation: This constructor seems to request lifting of an argument. However, the self call in Team2228dlic7l_2(R) of class Team2228dlic7l_2 passes its arguments in an unexpected way. Cannot perform required transitive byte-code translation.\n" + 
+    		"----------\n"
+        	),
             null/*classLibraries*/,
             false/*shouldFlushOutputDirectory*/);
     }

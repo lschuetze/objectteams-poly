@@ -3988,9 +3988,13 @@ public class Java5 extends AbstractOTJLDTest {
 			    "    void test() throws NoSuchMethodException {\n" +
 			    "        new R().test();\n" +
 			    "    }\n" +
+			    (this.weavingScheme == WeavingScheme.OTRE && this.complianceLevel >= ClassFileConstants.JDK1_8
+			    ? "" // skip execution
+			    :
 			    "    public static void main(String[] args) throws NoSuchMethodException {\n" +
 			    "        new TeamA117cfa5_2().test();\n" +
-			    "    }\n" +
+			    "    }\n"
+			    ) +
 			    "}\n" +
 			    "    \n",
 		"TeamA117cfa5_1.java",
@@ -4020,7 +4024,9 @@ public class Java5 extends AbstractOTJLDTest {
 			    "}\n" +
 			    "    \n"
             },
-            "@IA117cfa5_2(left=one, right=@IA117cfa5_1(value=two))");
+		    (this.weavingScheme == WeavingScheme.OTRE && this.complianceLevel >= ClassFileConstants.JDK1_8
+		    ? ""
+		    : "@IA117cfa5_2(left=one, right=@IA117cfa5_1(value=two))"));
     }
 
     // a role method has a custom annotation with enum values, annotation was in conflict with implicit activation annotation
@@ -4047,9 +4053,13 @@ public class Java5 extends AbstractOTJLDTest {
 			    "    void test() throws NoSuchMethodException {\n" +
 			    "        new R().test();\n" +
 			    "    }\n" +
+			    (this.weavingScheme == WeavingScheme.OTRE && this.complianceLevel >= ClassFileConstants.JDK1_8
+			    ? "" // skip execution
+			    :
 			    "    public static void main(String[] args) throws NoSuchMethodException {\n" +
 			    "        new TeamA117cfa5e_2().test();\n" +
-			    "    }\n" +
+			    "    }\n"
+			    ) +
 			    "}\n" +
 			    "    \n",
 		"EA117cfa5e_2.java",
@@ -4086,7 +4096,9 @@ public class Java5 extends AbstractOTJLDTest {
 			    "}\n" +
 			    "    \n"
             },
-            "@IA117cfa5e(val1=TWO, val2=C)@org.objectteams.ImplicitTeamActivation()Active");
+		    (this.weavingScheme == WeavingScheme.OTRE && this.complianceLevel >= ClassFileConstants.JDK1_8
+		    ? ""
+		    : "@IA117cfa5e(val1=TWO, val2=C)@org.objectteams.ImplicitTeamActivation()Active"));
     }
 
     // a role field is deprecated, so should be its tsub
@@ -4150,9 +4162,13 @@ public class Java5 extends AbstractOTJLDTest {
 			    "    void test() throws NoSuchFieldException {\n" +
 			    "        new R().test();\n" +
 			    "    }\n" +
+			    (this.weavingScheme == WeavingScheme.OTRE && this.complianceLevel >= ClassFileConstants.JDK1_8
+			    ? "" // skip execution
+			    :
 			    "    public static void main(String[] args) throws NoSuchFieldException {\n" +
 			    "        new TeamA117cfa7_2().test();\n" +
-			    "    }\n" +
+			    "    }\n"
+			    ) +
 			    "}\n" +
 			    "    \n",
 		"IA117cfa7.java",
@@ -4173,7 +4189,9 @@ public class Java5 extends AbstractOTJLDTest {
 			    "}\n" +
 			    "    \n"
             },
-            "@IA117cfa7(value=[one, two])");
+		    (this.weavingScheme == WeavingScheme.OTRE && this.complianceLevel >= ClassFileConstants.JDK1_8
+		    ? ""
+		    : "@IA117cfa7(value=[one, two])"));
     }
 
     // a role field has a custom annotation (scalar arg), so should its tsub  -  testing at runtime via reflection
@@ -4199,9 +4217,13 @@ public class Java5 extends AbstractOTJLDTest {
 			    "    void test() throws NoSuchFieldException {\n" +
 			    "        new R().test();\n" +
 			    "    }\n" +
+			    (this.weavingScheme == WeavingScheme.OTRE && this.complianceLevel >= ClassFileConstants.JDK1_8
+			    ? ""
+	    		:
 			    "    public static void main(String[] args) throws NoSuchFieldException {\n" +
 			    "        new TeamA117cfa8_2().test();\n" +
-			    "    }\n" +
+			    "    }\n"
+			    ) +
 			    "}\n" +
 			    "    \n",
 		"IA117cfa8.java",
@@ -4222,7 +4244,9 @@ public class Java5 extends AbstractOTJLDTest {
 			    "}\n" +
 			    "    \n"
             },
-            "@IA117cfa8(value=val)");
+		    (this.weavingScheme == WeavingScheme.OTRE && this.complianceLevel >= ClassFileConstants.JDK1_8
+		    ? ""
+    		: "@IA117cfa8(value=val)"));
     }
 
     // a role field has a custom annotation (enum typed arg), so should its tsub  -  testing at runtime via reflection
@@ -4248,9 +4272,13 @@ public class Java5 extends AbstractOTJLDTest {
 			    "    void test() throws NoSuchFieldException {\n" +
 			    "        new R().test();\n" +
 			    "    }\n" +
+			    (this.weavingScheme == WeavingScheme.OTRE && this.complianceLevel >= ClassFileConstants.JDK1_8
+			    ? ""
+	    		:
 			    "    public static void main(String[] args) throws NoSuchFieldException {\n" +
 			    "        new TeamA117cfa8e_2().test();\n" +
-			    "    }\n" +
+			    "    }\n"
+			    ) +
 			    "}\n" +
 			    "    \n",
 		"TeamA117cfa8e_1.java",
@@ -4272,7 +4300,9 @@ public class Java5 extends AbstractOTJLDTest {
 			    "}\n" +
 			    "    \n"
             },
-            "@IA117cfa8e(theVal=TWO)");
+		    (this.weavingScheme == WeavingScheme.OTRE && this.complianceLevel >= ClassFileConstants.JDK1_8
+		    ? ""
+		    : "@IA117cfa8e(theVal=TWO)"));
     }
 
     // a role field has a custom annotation, so should its tsub  -  testing at runtime via reflection
@@ -4298,9 +4328,13 @@ public class Java5 extends AbstractOTJLDTest {
 			    "    void test() throws NoSuchFieldException {\n" +
 			    "        new R().test();\n" +
 			    "    }\n" +
+			    (this.weavingScheme == WeavingScheme.OTRE && this.complianceLevel >= ClassFileConstants.JDK1_8
+			    ? ""
+	    		:
 			    "    public static void main(String[] args) throws NoSuchFieldException {\n" +
 			    "        new TeamA117cfa9_2().test();\n" +
-			    "    }\n" +
+			    "    }\n"
+			    ) +
 			    "}\n" +
 			    "    \n",
 		"TeamA117cfa9_1.java",
@@ -4321,7 +4355,9 @@ public class Java5 extends AbstractOTJLDTest {
 			    "}\n" +
 			    "    \n"
             },
-            "@IA117cfa9(value=[1, 2])");
+		    (this.weavingScheme == WeavingScheme.OTRE && this.complianceLevel >= ClassFileConstants.JDK1_8
+		    ? ""
+    		: "@IA117cfa9(value=[1, 2])"));
     }
 
     // a role class extends a generic class providing type parameters
@@ -4629,6 +4665,15 @@ public class Java5 extends AbstractOTJLDTest {
     		"	                                            ^^^^^^^^^^^^^^\n" + 
     		"Qualified reference to base class pb.TA119nvp4_2 is deprecated, should use a base import instead (OTJLD 2.1.2(d)).\n" + 
     		"----------\n" + 
+    		(this.weavingScheme == WeavingScheme.OTRE
+    		? 
+			"2. WARNING in pt\\TeamA119nvp4.java (at line 6)\n" + 
+			"	public class Role extends Showable playedBy pb.TA119nvp4_2 {\n" + 
+			"	                                            ^^^^^^^^^^^^^^\n" + 
+			"Base class pb.TA119nvp4_2 has class file version 52 which cannot be handled by the traditional OTRE based on BCEL. Please consider using the ASM based OTDRE instead.\n" + 
+			"----------\n"
+    		: ""
+			) +
     		"----------\n" + 
     		"1. ERROR in TA119nvp4Main.java (at line 6)\n" + 
     		"	pb.TA119nvp4_1<@t1,Role<@t1>> c = new pb.TA119nvp4_1<@t1,Role<@t1>>();\n" + 
