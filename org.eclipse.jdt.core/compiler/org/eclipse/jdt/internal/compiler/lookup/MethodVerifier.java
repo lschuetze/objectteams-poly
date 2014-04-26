@@ -352,16 +352,11 @@ public void checkAgainstImplicitlyInherited(
 				return; // orig: continue nextMethod;
 		}
 	reportRawReferences(currentMethod, inheritedMethod); // if they were deferred, emit them now.
-	reportRawReferences(currentMethod, inheritedMethod); // if they were deferred, emit them now.
 	if (currentMethod.thrownExceptions != Binding.NO_EXCEPTIONS)
 		checkExceptions(currentMethod, inheritedMethod);
 	if (inheritedMethod.isFinal())
 		problemReporter(currentMethod).finalMethodCannotBeOverridden(currentMethod, inheritedMethod);
 	if (!isAsVisible(currentMethod, inheritedMethod))
-//{ObjectTeams: only if both methods are role interface methods or both are not
-        if (   Protections.isRoleInterfaceMethod(inheritedMethod)
-            == Protections.isRoleInterfaceMethod(currentMethod))
-//SH}
 /*OT:*/		this.problemReporter(currentMethod).tsubMethodReducesVisibility(currentMethod, inheritedMethod);
 	if(inheritedMethod.isSynchronized() && !currentMethod.isSynchronized()) {
 		problemReporter(currentMethod).missingSynchronizedOnInheritedMethod(currentMethod, inheritedMethod);
