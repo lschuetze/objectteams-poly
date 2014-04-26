@@ -104,27 +104,33 @@ public class ReportedBugs extends AbstractOTJLDTest {
 			    "}    \n" +
 			    "    \n"
             },
-            "----------\n" + 
-    		"1. ERROR in TB11sh1fMain.java (at line 5)\n" + 
-    		"	final TeamB11sh1f1 theTeam = new TeamB11sh1f();\n" + 
-    		"	      ^^^^^^^^^^^^\n" + 
-    		"TeamB11sh1f1 cannot be resolved to a type\n" + 
     		"----------\n" + 
-    		"2. ERROR in TB11sh1fMain.java (at line 6)\n" + 
-    		"	theTeam.R1[] r1s = new theTeam.R1[1];\n" + 
-    		"	^^^^^^^\n" + 
-    		"TeamB11sh1f1 cannot be resolved to a type\n" + 
-    		"----------\n" + 
-    		"3. ERROR in TB11sh1fMain.java (at line 6)\n" + 
-    		"	theTeam.R1[] r1s = new theTeam.R1[1];\n" + 
-    		"	                       ^^^^^^^\n" + 
-    		"TeamB11sh1f1 cannot be resolved to a type\n" + 
-    		"----------\n" + 
-    		"4. ERROR in TB11sh1fMain.java (at line 8)\n" + 
-    		"	theTeam.R3 r3 = r1s[0].getR2().getR3();\n" + 
-    		"	^^^^^^^\n" + 
-    		"TeamB11sh1f1 cannot be resolved to a type\n" + 
-    		"----------\n");
+			"1. ERROR in TB11sh1fMain.java (at line 5)\n" + 
+			"	final TeamB11sh1f1 theTeam = new TeamB11sh1f();\n" + 
+			"	      ^^^^^^^^^^^^\n" + 
+			"TeamB11sh1f1 cannot be resolved to a type\n" + 
+			"----------\n" + 
+			"2. ERROR in TB11sh1fMain.java (at line 6)\n" + 
+			"	theTeam.R1[] r1s = new theTeam.R1[1];\n" + 
+			"	^^^^^^^\n" + 
+			"TeamB11sh1f1 cannot be resolved to a type\n" + 
+			"----------\n" + 
+			"3. ERROR in TB11sh1fMain.java (at line 6)\n" + 
+			"	theTeam.R1[] r1s = new theTeam.R1[1];\n" + 
+			"	                       ^^^^^^^\n" + 
+			"TeamB11sh1f1 cannot be resolved to a type\n" + 
+			"----------\n" + 
+			"4. ERROR in TB11sh1fMain.java (at line 7)\n" + 
+			"	r1s[0] = theTeam.new R1();\n" + 
+			"	                     ^^\n" + 
+			"TeamB11sh1f1.R1 cannot be resolved to a type\n" + 
+			"----------\n" + 
+			"5. ERROR in TB11sh1fMain.java (at line 8)\n" + 
+			"	theTeam.R3 r3 = r1s[0].getR2().getR3();\n" + 
+			"	^^^^^^^\n" + 
+			"TeamB11sh1f1 cannot be resolved to a type\n" + 
+			"----------\n"
+    		);
     }
 
     // reported by Robert in GebitProposalComputer
