@@ -1513,7 +1513,12 @@ public abstract class Scope {
 			if (exactMethod.isAbstract() && exactMethod.thrownExceptions != Binding.NO_EXCEPTIONS)
 				return null; // may need to merge exceptions with interface method
 			// special treatment for Object.getClass() in 1.5 mode (substitute parameterized return type)
+//{ObjectTeams: scoping for pushed out role methods
+/* orig:
 			if (exactMethod.canBeSeenBy(receiverType, invocationSite, this)) {
+  giro: */
+			if (exactMethod.canBeSeenBy(this.origImplicitScope, receiverType, invocationSite, this)) {
+// SH}
 				if (argumentTypes == Binding.NO_PARAMETERS
 				    && CharOperation.equals(selector, TypeConstants.GETCLASS)
 				    && exactMethod.returnType.isParameterizedType()/*1.5*/) {
