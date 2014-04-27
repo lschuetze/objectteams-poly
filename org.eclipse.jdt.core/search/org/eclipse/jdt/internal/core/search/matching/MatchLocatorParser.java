@@ -635,13 +635,11 @@ protected void consumeCalloutBindingLeft(boolean hasSignature) {
 	}
 }
 @Override
-protected LiftingTypeReference completeLiftingTypeReference(int dims) {
-	LiftingTypeReference result = super.completeLiftingTypeReference(dims);
+protected void liftingTypeReferenceRecognized(LiftingTypeReference ltr) {
 	// patternFineGrain == 0 already handled in getTypeReference() from super.completeLiftingTypeReference()
 	if ((this.patternFineGrain & IJavaSearchConstants.CLASS_INSTANCE_CREATION_TYPE_REFERENCE) != 0) {
-		this.patternLocator.match(result.roleReference, this.nodeSet);
+		this.patternLocator.match(ltr.roleReference, this.nodeSet);
 	}
-	return result;
 }
 //carp}
 

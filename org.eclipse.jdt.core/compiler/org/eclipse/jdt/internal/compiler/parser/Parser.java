@@ -5178,6 +5178,7 @@ protected void consumeFormalParameter(boolean isVarArgs) {
 //{ObjectTeams: LiftingTypeReference? Compose:  FIXME?!? jdt moved some to getTypeReference?
 	if (ltr != null) {
 		ltr.setReferences(type, roleRef);
+		liftingTypeReferenceRecognized(ltr);
 		type = ltr;
 	}
 // SH}
@@ -12837,7 +12838,11 @@ protected LiftingTypeReference completeLiftingTypeReference(int dims) {
 	if (liftingType.hasIncompatibleArrayDimensions)
 		if(!this.statementRecoveryActivated)
 			problemReporter().syntaxErrorInDeclaredArrayLifting(liftingType);
+	liftingTypeReferenceRecognized(liftingType);
 	return liftingType;
+}
+protected void liftingTypeReferenceRecognized(LiftingTypeReference ltr) {
+	// nop, hookfor subclasses
 }
 //SH}
 protected TypeReference getTypeReferenceForGenericType(int dim, int identifierLength, int numberOfIdentifiers) {

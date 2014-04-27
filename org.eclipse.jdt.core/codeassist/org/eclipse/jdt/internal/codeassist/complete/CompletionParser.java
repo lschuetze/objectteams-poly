@@ -5701,11 +5701,9 @@ protected boolean isInImportStatement() {
 }
 //{ObjectTeams: OT completion
 @Override
-protected LiftingTypeReference completeLiftingTypeReference(int dims) {
-	LiftingTypeReference ltr = super.completeLiftingTypeReference(dims);
+protected void liftingTypeReferenceRecognized(LiftingTypeReference ltr) {
 	if (ltr.roleReference instanceof CompletionOnSingleTypeReference)
 		((CompletionOnSingleTypeReference)ltr.roleReference).isLiftingRoleType = true;
-	return ltr;
 }
 @Override
 protected MethodSpec newMethodSpec(char[] ident, long poss) {
