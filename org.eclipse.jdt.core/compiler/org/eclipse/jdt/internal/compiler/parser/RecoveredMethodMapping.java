@@ -58,6 +58,8 @@ public class RecoveredMethodMapping extends RecoveredElement implements Terminal
 
 	public boolean foundBase = false; // for completion on base guard of recovered callin binding
 
+	private Expression predicateExpression;
+
 public RecoveredMethodMapping(AbstractMethodMappingDeclaration methodMapping, RecoveredElement parent, int bracketBalance, Parser parser){
 	super(parent, bracketBalance, parser);
 	this.methodMappingDeclaration = methodMapping;
@@ -248,7 +250,12 @@ public void updateBodyStart(int bodyStart){
 	this.foundOpeningBrace = true;
 	this.methodMappingDeclaration.bodyStart = bodyStart;
 }
-
+public void updateFromParserState() {
+	Parser parser = parser();
+	if (this.predicateExpression == null && parser.expressionPtr > -1) {
+		this.predicateExpression = parser.expressionStack[parser.expressionPtr--];
+	}
+}
 public AbstractMethodMappingDeclaration updatedMethodMappingDeclaration(int bodyEnd)
 {
 	// update/transfer base methods
@@ -280,7 +287,9 @@ public AbstractMethodMappingDeclaration updatedMethodMappingDeclaration(int body
 			&& callinDecl.predicate.bodyStart == 0)
 		{
 			Parser parser = parser();
-			if (parser.expressionPtr > -1)
+			if (this.predicateExpression != null)
+				callinDecl.predicate.updatePredicateExpression(this.predicateExpression, this.predicateExpression.sourceEnd);
+			else if (parser.expressionPtr > -1)
 				parser.consumePredicateExpression();
 			else
 				callinDecl.predicate.tagAsHavingErrors();

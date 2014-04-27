@@ -552,7 +552,7 @@ public void testCompletionBindingGuard() throws JavaModelException {
     
     CompletionTestsRequestor2 requestor = new CompletionTestsRequestor2(true);
     String str = this.wc.getSource();
-    String completeBehind = "CompletionB";
+    String completeBehind = "(CompletionB";
     int cursorLocation = str.lastIndexOf(completeBehind) + completeBehind.length();
     this.wc.codeComplete(cursorLocation, requestor, this.wcOwner);
 
