@@ -21,6 +21,7 @@ import java.util.Map;
 
 import junit.framework.Test;
 
+import org.eclipse.jdt.internal.compiler.classfmt.ClassFileConstants;
 import org.eclipse.jdt.internal.compiler.impl.CompilerOptions;
 import org.eclipse.objectteams.otdt.core.ext.WeavingScheme;
 import org.eclipse.objectteams.otdt.tests.otjld.AbstractOTJLDTest;
@@ -3135,7 +3136,7 @@ public class CalloutMethodBinding extends AbstractOTJLDTest {
 			    "	}\n" + 
 			    "}\n",
             },
-            (this.weavingScheme == WeavingScheme.OTDRE
+            (this.weavingScheme == WeavingScheme.OTDRE || this.complianceLevel < ClassFileConstants.JDK1_8
             ?
             "----------\n" + 
             "1. ERROR in t\\Team3117ic14_2.java (at line 9)\n" + 

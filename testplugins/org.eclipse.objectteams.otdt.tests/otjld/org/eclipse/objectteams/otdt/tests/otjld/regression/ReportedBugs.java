@@ -2086,7 +2086,7 @@ public class ReportedBugs extends AbstractOTJLDTest {
 			    "}\n" +
 			    "    \n"
             },
-		    (this.weavingScheme == WeavingScheme.OTRE && this.complianceLevel >= ClassFileConstants.JDK1_8
+		    (this.weavingScheme == WeavingScheme.OTRE && IS_JRE_8
 		    ?
     		"----------\n" + 
     		"1. WARNING in TeamB11sh47.java (at line 6)\n" + 

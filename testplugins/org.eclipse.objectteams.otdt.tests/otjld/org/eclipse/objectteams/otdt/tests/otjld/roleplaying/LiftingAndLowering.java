@@ -21,6 +21,7 @@ import java.util.Map;
 
 import junit.framework.Test;
 
+import org.eclipse.jdt.internal.compiler.classfmt.ClassFileConstants;
 import org.eclipse.jdt.internal.compiler.impl.CompilerOptions;
 import org.eclipse.objectteams.otdt.core.ext.WeavingScheme;
 import org.eclipse.objectteams.otdt.tests.otjld.AbstractOTJLDTest;
@@ -4496,7 +4497,7 @@ public class LiftingAndLowering extends AbstractOTJLDTest {
 			    "    }\n" +
 			    "}\n"
             },
-            (this.weavingScheme == WeavingScheme.OTDRE
+            (this.weavingScheme == WeavingScheme.OTDRE || this.complianceLevel < ClassFileConstants.JDK1_8
             ?
             "----------\n" + 
     		"1. ERROR in Team2228dlic6l_3.java (at line 4)\n" + 
@@ -4691,7 +4692,7 @@ public class LiftingAndLowering extends AbstractOTJLDTest {
 			    "}    \n" +
 			    "    \n"
             },
-            (this.weavingScheme == WeavingScheme.OTDRE
+            (this.weavingScheme == WeavingScheme.OTDRE || this.complianceLevel < ClassFileConstants.JDK1_8
             ?
             "----------\n" + 
     		"1. ERROR in Team2228dlic7l_3.java (at line 4)\n" + 

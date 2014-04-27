@@ -4665,7 +4665,7 @@ public class Java5 extends AbstractOTJLDTest {
     		"	                                            ^^^^^^^^^^^^^^\n" + 
     		"Qualified reference to base class pb.TA119nvp4_2 is deprecated, should use a base import instead (OTJLD 2.1.2(d)).\n" + 
     		"----------\n" + 
-    		(this.weavingScheme == WeavingScheme.OTRE
+    		(this.weavingScheme == WeavingScheme.OTRE && this.complianceLevel >= ClassFileConstants.JDK1_8
     		? 
 			"2. WARNING in pt\\TeamA119nvp4.java (at line 6)\n" + 
 			"	public class Role extends Showable playedBy pb.TA119nvp4_2 {\n" + 
