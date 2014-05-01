@@ -4212,6 +4212,200 @@ public void test432625() throws Exception {
 		},
 		"");
 }
+// https://bugs.eclipse.org/bugs/show_bug.cgi?id=430766, [1.8] Internal compiler error.
+public void test430766() {
+	this.runNegativeTest(
+			new String[] {
+				"X.java",
+				"import java.util.ArrayList;\n" +
+				"import java.util.Comparator;\n" +
+				"import java.util.List;\n" +
+				"public class X {\n" +
+				"	static class Person {\n" +
+			    "		private String email;\n" +
+			    "		public Person(String email) {\n" +
+			    "			this.email = email;\n" +
+			    "		}\n" +
+			    "		public String getEmail() {\n" +
+			    "			return email;" +
+			    "		}\n" +
+			    "	}\n" +
+			    "	public static void main(String[] args) {\n" +
+			    "		List<Person> persons = new ArrayList<Person>();\n" +
+			    "		persons.add(new Person(\"joe.smith@gmail.com\"));\n" +
+			    "		persons.add(new Person(\"alice.smith@gmail.com\"));\n" +
+			    "		persons.sort(Comparator.comparing(Comparator.nullsLast(Person::getEmail)));\n" +
+				"	}\n" +
+				"}\n",
+			},
+			"----------\n" + 
+			"1. ERROR in X.java (at line 17)\n" + 
+			"	persons.sort(Comparator.comparing(Comparator.nullsLast(Person::getEmail)));\n" + 
+			"	                                             ^^^^^^^^^\n" + 
+			"The method nullsLast(Comparator<? super T>) in the type Comparator is not applicable for the arguments (Person::getEmail)\n" + 
+			"----------\n" + 
+			"2. ERROR in X.java (at line 17)\n" + 
+			"	persons.sort(Comparator.comparing(Comparator.nullsLast(Person::getEmail)));\n" + 
+			"	                                                       ^^^^^^^^^^^^^^^^\n" + 
+			"The type X.Person does not define getEmail(T, T) that is applicable here\n" + 
+			"----------\n");
+}
+// https://bugs.eclipse.org/bugs/show_bug.cgi?id=430766, [1.8] Internal compiler error.
+public void test430766a() {
+	this.runNegativeTest(
+			new String[] {
+				"X.java",
+				"import java.util.ArrayList;\n" +
+				"import java.util.Comparator;\n" +
+				"import java.util.List;\n" +
+				"import java.io.Serializable;\n" +
+				"public class X {\n" +
+				"	static class Person {\n" +
+			    "		private String email;\n" +
+			    "		public Person(String email) {\n" +
+			    "			this.email = email;\n" +
+			    "		}\n" +
+			    "		public String getEmail() {\n" +
+			    "			return email;" +
+			    "		}\n" +
+			    "	public static <T extends Runnable,V extends Serializable> int isRunnable(T first, V second) {\n" +
+		        "		return (second instanceof Runnable) ? 1 : 0;\n" +
+		        "	}\n" +
+			    "	}\n" +
+			    "	public static void main(String[] args) {\n" +
+			    "		List<Person> persons = new ArrayList<Person>();\n" +
+			    "		persons.add(new Person(\"joe.smith@gmail.com\"));\n" +
+			    "		persons.add(new Person(\"alice.smith@gmail.com\"));\n" +
+			    "		persons.sort(Comparator.comparing(Comparator.nullsLast(Person::<Runnable>isRunnable)));\n" +
+				"	}\n" +
+				"}\n",
+			},
+			"----------\n" + 
+			"1. ERROR in X.java (at line 21)\n" + 
+			"	persons.sort(Comparator.comparing(Comparator.nullsLast(Person::<Runnable>isRunnable)));\n" + 
+			"	                                             ^^^^^^^^^\n" + 
+			"The method nullsLast(Comparator<? super T>) in the type Comparator is not applicable for the arguments (Person::<Runnable>isRunnable)\n" + 
+			"----------\n" + 
+			"2. ERROR in X.java (at line 21)\n" + 
+			"	persons.sort(Comparator.comparing(Comparator.nullsLast(Person::<Runnable>isRunnable)));\n" + 
+			"	                                                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n" + 
+			"The type X.Person does not define isRunnable(T, T) that is applicable here\n" + 
+			"----------\n");
+}
+// https://bugs.eclipse.org/bugs/show_bug.cgi?id=431190, [1.8] VerifyError when using a method reference
+public void test431190() throws Exception {
+	this.runConformTest(
+		new String[] {
+			"Java8VerifyError.java",
+			"public class Java8VerifyError {\n" +
+			"    public static class Foo {\n" +
+			"        public Object get() {\n" +
+			"            return new Object();\n" +
+			"        }\n" +
+			"    }\n" +
+			"    @FunctionalInterface\n" +
+			"    public static interface Provider<T> {\n" +
+			"        public T get();\n" +
+			"    }\n" +
+			"    public static void main(String[] args) {\n" +
+			"        Provider<Foo> f = () -> new Foo();\n" +
+			"        Provider<Provider<Object>> meta = () -> f.get()::get;\n" +
+			"    }\n" +
+			"}\n"
+		},
+		"");
+}
+// https://bugs.eclipse.org/bugs/show_bug.cgi?id=431514 [1.8] Incorrect compilation error in lambda expression
+public void test431514() {
+	this.runConformTest(
+			new String[] {
+				"X.java",
+				"class X {\n" + 
+				"	void fun1(int x) {\n" + 
+				"		class Local {\n" + 
+				"			FI test= () -> {\n" + 
+				"				try {\n" + 
+				"				} catch (Exception e) {\n" +
+				"					int x;\n" +
+				"				};\n" + 
+				"			};\n" + 
+				"		}\n" + 
+				"	}\n" + 
+				"}\n" + 
+				"interface FI {\n" + 
+				"	void foo();\n" + 
+				"}"
+		});
+}
+// https://bugs.eclipse.org/bugs/show_bug.cgi?id=431514 [1.8] Incorrect compilation error in lambda expression
+public void test431514a() {
+	this.runConformTest(
+		new String[] {
+			"X.java",
+			"class X {\n" + 
+			"	void fun1(int x) {\n" + 
+			"		class Local {\n" + 
+			"			class L1 { }\n" + 
+			"			int y;\n" + 
+			"			FI test= () -> {\n" + 
+			"				class L1 { } \n" + 
+			"				int y; \n" + 
+			"			};\n" + 
+			"		}\n" + 
+			"	}\n" + 
+			"	\n" + 
+			"}\n" + 
+			"interface FI {\n" + 
+			"	void foo();\n" + 
+			"}"
+	});
+}
+// https://bugs.eclipse.org/bugs/show_bug.cgi?id=432531 [1.8] VerifyError with anonymous subclass inside of lambda expression in the superclass constructor call
+public void test432531() {
+	this.runConformTest(
+		new String[] {
+			"Y.java", 
+			"import java.util.function.Supplier;\n" + 
+			"class E {\n" + 
+			"	E(Supplier<Object> factory) { }\n" + 
+			"}\n" + 
+			"public class Y extends E {\n" + 
+			"	Y() {\n" + 
+			"		super(() -> new Object() {\n" + 
+			"		});\n" + 
+			"	}\n" + 
+			"	public static void main(String[] args) {\n" + 
+			"		new Y();\n" + 
+			"	}\n" + 
+			"}"
+	});
+}
+// https://bugs.eclipse.org/bugs/show_bug.cgi?id=432531 [1.8] VerifyError with anonymous subclass inside of lambda expression in the superclass constructor call
+public void test432531a() {
+	this.runConformTest(
+		new String[] {
+			"Y.java", 
+			"import java.util.function.Supplier;\n" + 
+			"class E {\n" + 
+			"	E(Supplier<Object> factory) { }\n" + 
+			"}\n" + 
+			"public class Y extends E {\n" + 
+			"	Y() {\n" + 
+			"		super( () -> {\n" + 
+			"			class Z extends E {\n" + 
+			"				Z() {\n" + 
+			"					super(() -> new Object());\n" + 
+			"				}\n" + 
+			"			}\n" + 
+			"			return new Z();\n" + 
+			"			});\n" + 
+			"	}\n" + 
+			"	public static void main(String[] args) {\n" + 
+			"		new Y();\n" + 
+			"	}\n" + 
+			"}"
+	});
+}
 public static Class testClass() {
 	return LambdaExpressionsTest.class;
 }

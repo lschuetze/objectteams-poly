@@ -192,6 +192,8 @@
  *									UnsafeNullnessCast
  *									ContradictoryNullAnnotationsInferred
  *									NonNullDefaultDetailIsNotEvaluated
+ *									NullNotCompatibleToFreeTypeVariable
+ *									NullityMismatchAgainstFreeTypeVariable
  *      Jesper S Moller  - added the following constants
  *									TargetTypeNotAFunctionalInterface
  *									OuterLocalMustBeEffectivelyFinal
@@ -1783,6 +1785,10 @@ void setSourceStart(int sourceStart);
 	int UnsafeNullnessCast = Internal + 967;
 	/** @since 3.10 */
 	int NonNullDefaultDetailIsNotEvaluated = 968; // no longer reported
+	/** @since 3.10 */
+	int NullNotCompatibleToFreeTypeVariable = 969;
+	/** @since 3.10 */
+	int NullityMismatchAgainstFreeTypeVariable = 970;
 
 	// Java 8 work
 	/** @since 3.10 */

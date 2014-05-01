@@ -225,8 +225,9 @@ public class NullTypeAnnotationTest extends AbstractNullAnnotationTest {
 				  "import org.eclipse.jdt.annotation.*;\n" +
 				  "public class A<X> {\n" +
 				  "    public class I<Y> {\n" +
+				  "        X anX;\n" +
 				  "        public X foo(Y l) {\n" +
-				  "            return null;\n" +
+				  "            return anX;\n" +
 				  "        }\n" +
 				  "    }\n" +
 				  "    void bar(A<@Nullable Object>.I<@NonNull Object> i) {\n" + // legal instantiation
@@ -234,12 +235,12 @@ public class NullTypeAnnotationTest extends AbstractNullAnnotationTest {
 				  "    }\n" +
 				  "}\n"},
 			"----------\n" + 
-			"1. ERROR in A.java (at line 9)\n" + 
+			"1. ERROR in A.java (at line 10)\n" + 
 			"	@NonNull Object o = i.foo(null); // problems: argument and assignment violate null contracts\n" + 
 			"	                    ^^^^^^^^^^^\n" + 
 			"Null type mismatch (type annotations): required '@NonNull Object' but this expression has type '@Nullable Object'\n" + 
 			"----------\n" + 
-			"2. ERROR in A.java (at line 9)\n" + 
+			"2. ERROR in A.java (at line 10)\n" + 
 			"	@NonNull Object o = i.foo(null); // problems: argument and assignment violate null contracts\n" + 
 			"	                          ^^^^\n" + 
 			"Null type mismatch: required \'@NonNull Object\' but the provided value is null\n" + 
@@ -2594,20 +2595,27 @@ public class NullTypeAnnotationTest extends AbstractNullAnnotationTest {
 			},
 			getCompilerOptions(),
 			"----------\n" + 
-			"1. WARNING in PolyNull.java (at line 9)\n" + 
+			"1. ERROR in PolyNull.java (at line 7)\n" + 
+			"	<X> X extract(Func<@Nullable X> f, @Nullable X s) { return f.a(s); }\n" + 
+			"	                                                           ^^^^^^\n" + 
+			"Null type mismatch (type annotations): required \'X\' but this expression has type \'@Nullable X\', where 'X' is a free type variable\n" + 
+			"----------\n" + 
+			"2. WARNING in PolyNull.java (at line 9)\n" + 
 			"	return extract(i -> needNN(i), \"ola\");\n" + 
 			"	       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n" + 
 			"Null type safety (type annotations): The expression of type \'String\' needs unchecked conversion to conform to \'@NonNull String\'\n" + 
 			"----------\n" + 
-			"2. ERROR in PolyNull.java (at line 9)\n" + 
+			"3. ERROR in PolyNull.java (at line 9)\n" + 
 			"	return extract(i -> needNN(i), \"ola\");\n" + 
 			"	                           ^\n" + 
 			"Null type mismatch (type annotations): required \'@NonNull String\' but this expression has type \'@Nullable String\'\n" + 
 			"----------\n");
 	}
 
-	// conflicting annotations from type variable application and type variable substitution
+	// conflicting annotations from type variable application and type variable substitution -> exclude null annotations from inference
 	public void testNullTypeInference3() {
+		Map compilerOptions = getCompilerOptions();
+		compilerOptions.put(JavaCore.COMPILER_PB_NULL_UNCHECKED_CONVERSION, JavaCore.ERROR);
 		runNegativeTestWithLibs(
 			new String[] {
 				"Generics.java",
@@ -2624,16 +2632,21 @@ public class NullTypeAnnotationTest extends AbstractNullAnnotationTest {
 				"	}\n" + 
 				"}\n"
 			},
-			getCompilerOptions(),
+			compilerOptions,
 			"----------\n" + 
-			"1. ERROR in Generics.java (at line 6)\n" + 
+			"1. ERROR in Generics.java (at line 4)\n" + 
+			"	<X> X m(@Nullable X a) { return null; }\n" + 
+			"	                                ^^^^\n" + 
+			"Null type mismatch (type annotations): \'null\' is not compatible to the free type variable 'X'\n" + 
+			"----------\n" + 
+			"2. ERROR in Generics.java (at line 6)\n" + 
 			"	@NonNull String s = m(in);\n" + 
-			"	                      ^^\n" + 
-			"Contradictory null annotations: method was inferred as \'@NonNull String m(@NonNull @Nullable String)\', but only one of \'@NonNull\' and \'@Nullable\' can be effective at any location\n" + 
+			"	                    ^^^^^\n" + 
+			"Null type safety (type annotations): The expression of type \'String\' needs unchecked conversion to conform to \'@NonNull String\'\n" + 
 			"----------\n");
 	}
 
-	// conflicting annotations from type variable application and type variable substitution
+	// conflicting annotations from type variable application and type variable substitution -> exclude null annotations from inference
 	public void testNullTypeInference3b() {
 		runNegativeTestWithLibs(
 			new String[] {
@@ -2657,12 +2670,12 @@ public class NullTypeAnnotationTest extends AbstractNullAnnotationTest {
 			"1. ERROR in Generics.java (at line 7)\n" + 
 			"	@NonNull String s1 = m1(in);\n" + 
 			"	                     ^^^^^^\n" + 
-			"Contradictory null annotations: method was inferred as \'@NonNull @Nullable String m1(@NonNull @Nullable String)\', but only one of \'@NonNull\' and \'@Nullable\' can be effective at any location\n" + 
+			"Null type mismatch (type annotations): required \'@NonNull String\' but this expression has type \'@Nullable String\'\n" + 
 			"----------\n" + 
 			"2. ERROR in Generics.java (at line 8)\n" + 
 			"	@NonNull String s2 = m2(in);\n" + 
 			"	                     ^^^^^^\n" + 
-			"Contradictory null annotations: method was inferred as \'@NonNull @Nullable String m2(@NonNull String)\', but only one of \'@NonNull\' and \'@Nullable\' can be effective at any location\n" + 
+			"Null type mismatch (type annotations): required \'@NonNull String\' but this expression has type \'@Nullable String\'\n" + 
 			"----------\n");
 	}
 
@@ -3531,7 +3544,7 @@ public class NullTypeAnnotationTest extends AbstractNullAnnotationTest {
 			"Null type mismatch (type annotations): required \'@NonNull X<@NonNull ?>\' but this expression has type \'@NonNull X<@Nullable String>\'\n" + 
 			"----------\n");		
 	}
-	public void testTypeVariable() {
+	public void testTypeVariable1() {
 		runNegativeTestWithLibs(
 			new String[] {
 				"X.java",
@@ -3558,6 +3571,150 @@ public class NullTypeAnnotationTest extends AbstractNullAnnotationTest {
 			"	             ^^^^\n" + 
 			"Null type mismatch: required \'@NonNull T\' but the provided value is null\n" + 
 			"----------\n");		
+	}
+	// free type variable does not ensure @NonNull, but cannot accept null either, unbounded type variable
+	public void testTypeVariable2() {
+		runNegativeTestWithLibs(
+			new String[] {
+				"X.java",
+				"import org.eclipse.jdt.annotation.*;\n" +
+				"public class X<T> {\n" +
+				"	void consumeAny(T t) {\n" +
+				"		consume(t); // error, t can be null\n" +
+				"		consumeObject(t); // error, t can be null\n" +
+				"	}\n" +
+				"	void consumeNullable(@Nullable T t) {\n" +
+				"		consume(t); // error, both sides explicit, mismatch\n" +
+				"		consumeObject(t); // error, both sides explicit, mismatch\n" +
+				"	}\n" +
+				"	void consume(@NonNull T t) {}\n" +
+				"	void consumeObject(@NonNull Object o) {}\n" +
+				"	T produce() {\n" +
+				"		return null; // error, T may not accept null\n" +
+				"	}\n" +
+				"	T produceFromNullable(@Nullable T t) {\n" +
+				"		return t; // error, T may not accept nullable\n" +
+				"	}\n" +
+				"}\n"
+			},
+			getCompilerOptions(),
+			"----------\n" + 
+			"1. WARNING in X.java (at line 4)\n" + 
+			"	consume(t); // error, t can be null\n" + 
+			"	        ^\n" + 
+			"Null type safety (type annotations): The expression of type \'T\' needs unchecked conversion to conform to \'@NonNull T\'\n" + 
+			"----------\n" + 
+			"2. WARNING in X.java (at line 5)\n" + 
+			"	consumeObject(t); // error, t can be null\n" + 
+			"	              ^\n" + 
+			"Null type safety (type annotations): The expression of type \'T\' needs unchecked conversion to conform to \'@NonNull Object\'\n" + 
+			"----------\n" + 
+			"3. ERROR in X.java (at line 8)\n" + 
+			"	consume(t); // error, both sides explicit, mismatch\n" + 
+			"	        ^\n" + 
+			"Null type mismatch (type annotations): required \'@NonNull T\' but this expression has type \'@Nullable T\'\n" + 
+			"----------\n" + 
+			"4. ERROR in X.java (at line 9)\n" + 
+			"	consumeObject(t); // error, both sides explicit, mismatch\n" + 
+			"	              ^\n" + 
+			"Null type mismatch (type annotations): required \'@NonNull Object\' but this expression has type \'@Nullable T\'\n" + 
+			"----------\n" + 
+			"5. ERROR in X.java (at line 14)\n" + 
+			"	return null; // error, T may not accept null\n" + 
+			"	       ^^^^\n" + 
+			"Null type mismatch (type annotations): \'null\' is not compatible to the free type variable 'T'\n" + 
+			"----------\n" + 
+			"6. ERROR in X.java (at line 17)\n" + 
+			"	return t; // error, T may not accept nullable\n" + 
+			"	       ^\n" + 
+			"Null type mismatch (type annotations): required \'T\' but this expression has type \'@Nullable T\', where \'T\' is a free type variable\n" + 
+			"----------\n");
+	}
+	// free type variable does not ensure @NonNull, but cannot accept null either, type variable with upper bound
+	public void testTypeVariable3() {
+		runNegativeTestWithLibs(
+			new String[] {
+				"X.java",
+				"import org.eclipse.jdt.annotation.*;\n" +
+				"public class X<T extends Number> {\n" +
+				"	void consumeAny(T t) {\n" +
+				"		consume(t); // error, t can be null\n" +
+				"		consumeObject(t); // error, t can be null\n" +
+				"	}\n" +
+				"	void consumeNullable(@Nullable T t) {\n" +
+				"		consume(t); // error, both sides explicit, mismatch\n" +
+				"		consumeObject(t); // error, both sides explicit, mismatch\n" +
+				"	}\n" +
+				"	void consume(@NonNull T t) {}\n" +
+				"	void consumeObject(@NonNull Object o) {}\n" +
+				"	T produce() {\n" +
+				"		return null; // error, T may not accept null\n" +
+				"	}\n" +
+				"	T produceFromNullable(@Nullable T t) {\n" +
+				"		return t; // error, T may not accept nullable\n" +
+				"	}\n" +
+				"}\n"
+			},
+			getCompilerOptions(),
+			"----------\n" + 
+			"1. WARNING in X.java (at line 4)\n" + 
+			"	consume(t); // error, t can be null\n" + 
+			"	        ^\n" + 
+			"Null type safety (type annotations): The expression of type \'T extends Number\' needs unchecked conversion to conform to \'@NonNull T extends Number\'\n" + 
+			"----------\n" + 
+			"2. WARNING in X.java (at line 5)\n" + 
+			"	consumeObject(t); // error, t can be null\n" + 
+			"	              ^\n" + 
+			"Null type safety (type annotations): The expression of type \'T extends Number\' needs unchecked conversion to conform to \'@NonNull Object\'\n" + 
+			"----------\n" + 
+			"3. ERROR in X.java (at line 8)\n" + 
+			"	consume(t); // error, both sides explicit, mismatch\n" + 
+			"	        ^\n" + 
+			"Null type mismatch (type annotations): required \'@NonNull T extends Number\' but this expression has type \'@Nullable T extends Number\'\n" + 
+			"----------\n" + 
+			"4. ERROR in X.java (at line 9)\n" + 
+			"	consumeObject(t); // error, both sides explicit, mismatch\n" + 
+			"	              ^\n" + 
+			"Null type mismatch (type annotations): required \'@NonNull Object\' but this expression has type \'@Nullable T extends Number\'\n" + 
+			"----------\n" + 
+			"5. ERROR in X.java (at line 14)\n" + 
+			"	return null; // error, T may not accept null\n" + 
+			"	       ^^^^\n" + 
+			"Null type mismatch (type annotations): \'null\' is not compatible to the free type variable \'T\'\n" + 
+			"----------\n" + 
+			"6. ERROR in X.java (at line 17)\n" + 
+			"	return t; // error, T may not accept nullable\n" + 
+			"	       ^\n" + 
+			"Null type mismatch (type annotations): required \'T\' but this expression has type \'@Nullable T extends Number\', where \'T\' is a free type variable\n" + 
+			"----------\n");
+	}
+	// free type variable is compatible to itself even with different not null-related type annotations
+	public void testTypeVariable4() {
+		runNegativeTestWithLibs(
+			new String[] {
+				"X.java",
+				"import java.lang.annotation.*;\n" +
+				"import org.eclipse.jdt.annotation.*;\n" +
+				"@Target(ElementType.TYPE_USE) @interface TypeMarker {}\n" +
+				"public class X<T> {\n" +
+				"	T passThrough1(@TypeMarker T t) {\n" +
+				"		return t; // OK\n" +
+				"	}\n" +
+				"	@TypeMarker T passThrough2(T t) {\n" +
+				"		return t; // OK\n" +
+				"	}\n" +
+				"	@TypeMarker T passThrough3(@Nullable @TypeMarker T t) {\n" +
+				"		return t; // Not OK\n" +
+				"	}\n" +
+				"}\n"
+			},
+			getCompilerOptions(),
+			"----------\n" + 
+			"1. ERROR in X.java (at line 12)\n" + 
+			"	return t; // Not OK\n" + 
+			"	       ^\n" + 
+			"Null type mismatch (type annotations): required \'T\' but this expression has type \'@Nullable T\', where 'T' is a free type variable\n" + 
+			"----------\n");
 	}
 	public void testSE7AnnotationCopy() { // we were dropping annotations here, but null analysis worked already since the tagbits were not "dropped", just the same capturing in a test
 		runNegativeTestWithLibs(
@@ -4393,9 +4550,9 @@ public void testDefault01() {
 		"----------\n");
 }
 
-// apply null default to type arguments - no effect on type variable or wildcard:
+// apply null default to type arguments - no effect on type variable or wildcard, but apply strict checking assuming nothing
 public void testDefault01b() {
-	runConformTestWithLibs(
+	runNegativeTestWithLibs(
 		new String[] {
 			"X.java",
 			"import org.eclipse.jdt.annotation.*;\n" +
@@ -4403,13 +4560,30 @@ public void testDefault01b() {
 			"@NonNullByDefault(DefaultLocation.TYPE_ARGUMENT)\n" +
 			"public class X<T> {\n" +
 			"	List<T> test(List<? extends Number> in) {\n" +
-			"		in.add(null); // OK\n" +
-			"		return new ArrayList<@Nullable T>();\n" + // TODO: unannotated type variable should be regarded as 'could be either'
+			"		in.add(null); // NOK, cannot assume nullable\n" +
+			"		needNN(in.get(0)); // NOK, cannot assume nonnull\n" +
+			"		return new ArrayList<@Nullable T>(); // NOK, cannot assume nullable for T in List<T>\n" +
 			"	}\n" +
+			"	void needNN(@NonNull Number n) {}\n" +
 			"}\n"
 		},
 		getCompilerOptions(),
-		"");
+		"----------\n" + 
+		"1. ERROR in X.java (at line 6)\n" + 
+		"	in.add(null); // NOK, cannot assume nullable\n" + 
+		"	       ^^^^\n" + 
+		"Null type mismatch (type annotations): \'null\' is not compatible to the free type variable '? extends Number'\n" + 
+		"----------\n" + 
+		"2. WARNING in X.java (at line 7)\n" + 
+		"	needNN(in.get(0)); // NOK, cannot assume nonnull\n" + 
+		"	       ^^^^^^^^^\n" + 
+		"Null type safety (type annotations): The expression of type \'capture#of ? extends Number\' needs unchecked conversion to conform to \'@NonNull Number\'\n" + 
+		"----------\n" + 
+		"3. ERROR in X.java (at line 8)\n" + 
+		"	return new ArrayList<@Nullable T>(); // NOK, cannot assume nullable for T in List<T>\n" + 
+		"	       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n" + 
+		"Null type mismatch (type annotations): required \'List<T>\' but this expression has type \'ArrayList<@Nullable T>\', corresponding supertype is \'List<@Nullable T>\'\n" + 
+		"----------\n");
 }
 
 // apply null default to parameters:
@@ -4901,5 +5075,86 @@ public void testBug431269() {
 		"	       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n" + 
 		"Type mismatch: cannot convert from QField<R,Long> to QField<R,String>\n" + 
 		"----------\n");
+}
+// was inferring null type annotations too aggressively
+public void testBug432223() {
+	runConformTestWithLibs(
+		new String[] {
+			"X.java",
+			"import org.eclipse.jdt.annotation.*;\n" +
+			"public class X {\n" +
+			"	String val;\n" +
+			"	public static @NonNull <T> T assertNotNull(@Nullable T object) {\n" + 
+			"		return assertNotNull(null, object);\n" + 
+			"	}\n" + 
+			"\n" + 
+			"	public static @NonNull <T> T assertNotNull(@Nullable String message, @Nullable T object) {\n" + 
+			"		if (object == null) {\n" + 
+			"			throw new NullPointerException(message);\n" + 
+			"		}\n" + 
+			"		return object;\n" + 
+			"	}\n" +
+			"	void test(@Nullable X x) {\n" +
+			"		@NonNull X safe = assertNotNull(x);\n" +
+			"		System.out.println(safe.val);\n" +
+			"	}\n" +
+			"}\n"
+		},
+		getCompilerOptions(),
+		"");
+}
+public void testBug432977() {
+	runConformTestWithLibs(
+		new String[] {
+			"Bar.java",
+			"import org.eclipse.jdt.annotation.*;\n" +
+			"@NonNullByDefault\n" + 
+			"public class Bar {\n" + 
+			"	private String prop = \"\";\n" + 
+			"\n" + 
+			"	public String getProp() {\n" + 
+			"		return prop;\n" + 
+			"	}\n" + 
+			"}\n"
+		},
+		getCompilerOptions(),
+		"");
+	runConformTestWithLibs(
+		new String[] {
+			"Fu.java",
+			"public class Fu {\n" + 
+			"	private Bar fubar = new Bar();\n" + 
+			"	\n" + 
+			"	public void method() {\n" + 
+			"		fubar.getProp().equals(\"\");\n" + 
+			"	}	\n" + 
+			"}\n"
+		},
+		getCompilerOptions(),
+		"");
+}
+public void testBug433586() {
+	runConformTestWithLibs(
+		new String[] {
+			"NullConversionWarning.java",
+			"import java.util.function.Consumer;\n" + 
+			"public class NullConversionWarning<T> {\n" + 
+			"\n" + 
+			"	public Consumer<T> peek2(Consumer<? super T> action) {\n" + 
+			"		// Null type safety: parameter 1 provided via\n" + 
+			"		// method descriptor Consumer<T>.accept(T) needs\n" + 
+			"		// unchecked conversion to conform to 'capture#of ? super T'\n" + 
+			"		Consumer<T> action2 = action::accept;\n" + 
+			"		return action2;\n" + 
+			"	}\n" +
+			"	void foo(Consumer<? super T> action, T t) {\n" + 
+			"	  Consumer<T> action2 = t2 -> action.accept(t2);\n" + 
+			"	  action.accept(t);\n" + 
+			"	  action2.accept(t);\n" + 
+			"	}\n" + 
+			"}\n"
+		},
+		getCompilerOptions(),
+		"");
 }
 }

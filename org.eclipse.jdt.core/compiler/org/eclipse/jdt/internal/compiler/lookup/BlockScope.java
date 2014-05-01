@@ -131,7 +131,7 @@ public final void addAnonymousType(TypeDeclaration anonymousType, ReferenceBindi
 // SH}
 	while (methodScope != null && methodScope.referenceContext instanceof LambdaExpression) {
 		LambdaExpression lambda = (LambdaExpression) methodScope.referenceContext;
-		if (!lambda.scope.isStatic) {
+		if (!lambda.scope.isStatic && !lambda.scope.isConstructorCall) {
 			lambda.shouldCaptureInstance = true;
 		}
 		methodScope = methodScope.enclosingMethodScope();
@@ -149,7 +149,7 @@ public final void addLocalType(TypeDeclaration localType) {
 	MethodScope methodScope = methodScope();
 	while (methodScope != null && methodScope.referenceContext instanceof LambdaExpression) {
 		LambdaExpression lambda = (LambdaExpression) methodScope.referenceContext;
-		if (!lambda.scope.isStatic) {
+		if (!lambda.scope.isStatic && !lambda.scope.isConstructorCall) {
 			lambda.shouldCaptureInstance = true;
 		}
 		methodScope = methodScope.enclosingMethodScope();

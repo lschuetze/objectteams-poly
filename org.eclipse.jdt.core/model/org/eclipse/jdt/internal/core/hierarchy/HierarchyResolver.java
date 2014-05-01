@@ -249,7 +249,7 @@ private IType[] findSuperInterfaces(IGenericType type, ReferenceBinding typeBind
 		separator = '/';
 	} else if (type instanceof ISourceType) {
 		ISourceType sourceType = (ISourceType)type;
-		if (sourceType.getName().length == 0) { // if anonymous type
+		if (sourceType.isAnonymous()) { // if anonymous type
 			if (typeBinding.superInterfaces() != null && typeBinding.superInterfaces().length > 0) {
 				superInterfaceNames = new char[][] {sourceType.getSuperclassName()};
 			} else {
@@ -264,7 +264,7 @@ private IType[] findSuperInterfaces(IGenericType type, ReferenceBinding typeBind
 		separator = '.';
 	} else if (type instanceof HierarchyType) {
 		HierarchyType hierarchyType = (HierarchyType)type;
-		if (hierarchyType.name.length == 0) { // if anonymous type
+		if (hierarchyType.isAnonymous()) { // if anonymous type
 			if (typeBinding.superInterfaces() != null && typeBinding.superInterfaces().length > 0) {
 				superInterfaceNames = new char[][] {hierarchyType.superclassName};
 			} else {
@@ -460,7 +460,12 @@ private void remember(IType type, ReferenceBinding typeBinding) {
 		}
 	} else {
 		if (typeBinding == null) return;
-
+		boolean isAnonymous = false;
+		try {
+			isAnonymous = type.isAnonymous();
+		} catch(JavaModelException jme) {
+			// Ignore
+		}
 		if (typeBinding instanceof SourceTypeBinding) {
 			TypeDeclaration typeDeclaration = ((SourceTypeBinding)typeBinding).scope.referenceType();
 
@@ -495,7 +500,8 @@ private void remember(IType type, ReferenceBinding typeBinding) {
 					typeDeclaration.name,
 					typeDeclaration.binding.modifiers,
 					superclassName,
-					superInterfaceNames);
+					superInterfaceNames,
+					isAnonymous);
 			remember(hierarchyType, typeDeclaration.binding);
 		} else {
 			HierarchyType hierarchyType = new HierarchyType(
@@ -503,7 +509,8 @@ private void remember(IType type, ReferenceBinding typeBinding) {
 					typeBinding.sourceName(),
 					typeBinding.modifiers,
 					typeBinding.superclass().sourceName(),
-					new char [][] { typeBinding.superInterfaces()[0].sourceName() });
+					new char [][] { typeBinding.superInterfaces()[0].sourceName() },
+					isAnonymous);
 			remember(hierarchyType, typeBinding);
 		}
 	}

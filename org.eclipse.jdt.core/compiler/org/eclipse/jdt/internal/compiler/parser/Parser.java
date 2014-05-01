@@ -5925,7 +5925,11 @@ protected void consumeMethodDeclaration(boolean isNotAbstract, boolean isDefault
 	md.bodyEnd = this.endPosition;
 	md.declarationSourceEnd = flushCommentsDefinedPriorTo(this.endStatementPosition);
 	if (isDefaultMethod && !this.tolerateDefaultClassMethods) {
-		problemReporter().defaultModifierIllegallySpecified(md.bodyStart, this.endPosition);
+		if (this.options.sourceLevel >= ClassFileConstants.JDK1_8) {
+			problemReporter().defaultModifierIllegallySpecified(md.sourceStart, md.sourceEnd);
+		} else {
+			problemReporter().illegalModifierForMethod(md);
+		}
 	}
 }
 protected void consumeMethodHeader() {
@@ -10203,6 +10207,7 @@ protected void consumeReferenceExpressionTypeForm(boolean isPrimitive) { // actu
 	int sourceEnd;
 
 	sourceEnd = (int) this.identifierPositionStack[this.identifierPtr];
+	referenceExpression.nameSourceStart = (int) (this.identifierPositionStack[this.identifierPtr] >>> 32);
 	selector = this.identifierStack[this.identifierPtr--];
 	this.identifierLengthPtr--;
 	
@@ -10243,6 +10248,7 @@ protected void consumeReferenceExpressionPrimaryForm() {
 	int sourceEnd;
 
 	sourceEnd = (int) this.identifierPositionStack[this.identifierPtr];
+	referenceExpression.nameSourceStart = (int) (this.identifierPositionStack[this.identifierPtr] >>> 32);
 	selector = this.identifierStack[this.identifierPtr--];
 	this.identifierLengthPtr--;
 
@@ -10267,6 +10273,7 @@ protected void consumeReferenceExpressionSuperForm() {
 	int sourceEnd;
 
 	sourceEnd = (int) this.identifierPositionStack[this.identifierPtr];
+	referenceExpression.nameSourceStart = (int) (this.identifierPositionStack[this.identifierPtr] >>> 32);
 	selector = this.identifierStack[this.identifierPtr--];
 	this.identifierLengthPtr--;
 
@@ -10306,6 +10313,7 @@ protected void consumeReferenceExpressionGenericTypeForm() {
 	int sourceEnd;
 
 	sourceEnd = (int) this.identifierPositionStack[this.identifierPtr];
+	referenceExpression.nameSourceStart = (int) (this.identifierPositionStack[this.identifierPtr] >>> 32);
 	selector = this.identifierStack[this.identifierPtr--];
 	this.identifierLengthPtr--;
 

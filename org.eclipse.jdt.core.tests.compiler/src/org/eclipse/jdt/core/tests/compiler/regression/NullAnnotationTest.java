@@ -10,6 +10,7 @@
  *     Till Brychcy <register.eclipse@brychcy.de> - Contribution for
  *								Bug 415413 - [compiler][null] NullpointerException in Null Analysis caused by interaction of LoopingFlowContext and FinallyFlowContext
  *								Bug 415269 - [compiler][null] NonNullByDefault is not always inherited to nested classes
+ *     IBM Corporation - additional tests
  *******************************************************************************/
 package org.eclipse.jdt.core.tests.compiler.regression;
 
@@ -7134,5 +7135,164 @@ public void testBug432348() {
 			"Syntax error, type annotations are illegal here\n" + 
 			"----------\n");
 	}
+}
+// Bug 403674 - [compiler][null] Switching on @Nullable enum value does not trigger "Potential null pointer access" warning
+// String value being used in switch condition.
+public void testBug403674() {
+	Map options = getCompilerOptions();
+	runNegativeTestWithLibs(
+			new String[]{
+				"X.java",
+				"import org.eclipse.jdt.annotation.Nullable;\n" +
+				"public class X {\n" +
+				"   public static void main(String[] args) {\n" +
+				"      // Correctly flagged as \"Potential null pointer access.\"\n" +
+				"      switch (computeStringValue()) {}\n" +
+				"   }\n" +
+				"   private static @Nullable String computeStringValue() { return null; }\n" +
+				"}\n"
+			},
+			options,
+			"----------\n" +
+			"1. ERROR in X.java (at line 5)\n" +
+			"	switch (computeStringValue()) {}\n" +
+			"	        ^^^^^^^^^^^^^^^^^^^^\n" +
+			(this.complianceLevel < ClassFileConstants.JDK1_7
+			?
+			"Cannot switch on a value of type String for source level below 1.7. " +
+			"Only convertible int values or enum variables are permitted\n"
+			:
+			"Potential null pointer access: The method computeStringValue() may return null\n"
+			) +
+			"----------\n");
+}
+// Bug 403674 - [compiler][null] Switching on @Nullable enum value does not trigger "Potential null pointer access" warning
+// Enum value being used in switch condition.
+public void testBug403674a() {
+	Map options = getCompilerOptions();
+	runNegativeTestWithLibs(
+			new String[]{
+				"X.java",
+				"import org.eclipse.jdt.annotation.Nullable;\n" +
+				"public class X {\n" +
+				"   private enum EnumValue{}\n" +
+				"   public static void main(String[] args) {\n" +
+				"      // Before Fix: Not flagged.\n" +
+				"      switch (computeEnumValue()) {}\n" +
+				"      @Nullable EnumValue value = computeEnumValue();\n" +
+				"      // Correctly flagged as \"Potential null pointer access.\"\n" +
+				"      // Before Fix: Not flagged.\n" +
+				"      switch (value) {}\n" +
+				"   }\n" +
+				"   private static @Nullable EnumValue computeEnumValue() { return null; }\n" +
+				"}\n"
+			},
+			options,
+			"----------\n" +
+			"1. ERROR in X.java (at line 6)\n" +
+			"	switch (computeEnumValue()) {}\n" +
+			"	        ^^^^^^^^^^^^^^^^^^\n" +
+			"Potential null pointer access: The method computeEnumValue() may return null\n" +
+			"----------\n" +
+			"2. ERROR in X.java (at line 10)\n" +
+			"	switch (value) {}\n" +
+			"	        ^^^^^\n" +
+			(this.complianceLevel < ClassFileConstants.JDK1_8
+			?
+			"Potential null pointer access: The variable value may be null at this location\n"
+			:
+			"Potential null pointer access: this expression has a '@Nullable' type\n"
+			) +
+			"----------\n");
+}
+// original test
+public void testBug422796() {
+	runConformTestWithLibs(
+		new String[] {
+			"NullExprTest.java",
+			"import org.eclipse.jdt.annotation.NonNullByDefault;\n" + 
+			"import org.eclipse.jdt.annotation.Nullable;\n" + 
+			"\n" + 
+			"@NonNullByDefault\n" + 
+			"public class NullExprTest {\n" + 
+			"	\n" + 
+			"	private @Nullable Boolean b() { return null; }\n" + 
+			"	\n" + 
+			"	public void testBoolean() {\n" + 
+			"		Boolean b1 = b();\n" + 
+			"		boolean b = b1 == null || \n" + 
+			"				b1; // <-- Previously bugggy: reported potential NPE (*)\n" + 
+			"		assertTrue(b);\n" + 
+			"	}\n" +
+			"	static void assertTrue(boolean b) {}\n" + 
+			"\n" + 
+			"}"
+		},
+		getCompilerOptions(),
+		"");
+}
+// inverted logic:
+public void testBug422796a() {
+	runConformTestWithLibs(
+		new String[] {
+			"NullExprTest.java",
+			"import org.eclipse.jdt.annotation.NonNullByDefault;\n" + 
+			"import org.eclipse.jdt.annotation.Nullable;\n" + 
+			"\n" + 
+			"@NonNullByDefault\n" + 
+			"public class NullExprTest {\n" + 
+			"	\n" + 
+			"	private @Nullable Boolean b() { return null; }\n" + 
+			"	\n" + 
+			"	public void testBoolean() {\n" + 
+			"		Boolean b1 = b();\n" + 
+			"		boolean b = b1 != null && \n" + 
+			"				b1; // <-- Previously bugggy: reported potential NPE (*)\n" + 
+			"		assertTrue(b);\n" + 
+			"	}\n" +
+			"	static void assertTrue(boolean b) {}\n" + 
+			"\n" + 
+			"}"
+		},
+		getCompilerOptions(),
+		"");
+}
+// negative tests:
+public void testBug422796b() {
+	runNegativeTestWithLibs(
+		new String[] {
+			"NullExprTest.java",
+			"public class NullExprTest {\n" + 
+			"	\n" + 
+			"	private Boolean b() { return null; }\n" + 
+			"	\n" + 
+			"	public void testBoolean1() {\n" + 
+			"		Boolean b1 = b();\n" + 
+			"		boolean b = b1 == null && \n" + 
+			"				b1; // <-- definite NPE (*)\n" + 
+			"		assertTrue(b);\n" + 
+			"	}\n" +
+			"	public void testBoolean2(boolean x) {\n" + 
+			"		Boolean b1 = b();\n" + 
+			"		boolean b = (b1 == null || x) && \n" + 
+			"				b1; // <-- potential NPE (*)\n" + 
+			"		assertTrue(b);\n" + 
+			"	}\n" +
+			"	static void assertTrue(boolean b) {}\n" + 
+			"\n" + 
+			"}"
+		},
+		getCompilerOptions(),
+		"----------\n" + 
+		"1. ERROR in NullExprTest.java (at line 8)\n" + 
+		"	b1; // <-- definite NPE (*)\n" + 
+		"	^^\n" + 
+		"Null pointer access: This expression of type Boolean is null but requires auto-unboxing\n" + 
+		"----------\n" + 
+		"2. ERROR in NullExprTest.java (at line 14)\n" + 
+		"	b1; // <-- potential NPE (*)\n" + 
+		"	^^\n" + 
+		"Potential null pointer access: This expression of type Boolean may be null but requires auto-unboxing\n" + 
+		"----------\n");
 }
 }

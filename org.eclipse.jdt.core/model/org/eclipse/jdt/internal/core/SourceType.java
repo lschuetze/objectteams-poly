@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2013 IBM Corporation and others.
+ * Copyright (c) 2000, 2014 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -929,8 +929,7 @@ public JavaElement resolved(Binding binding) {
 protected void toStringInfo(int tab, StringBuffer buffer, Object info, boolean showResolvedInfo) {
 	buffer.append(tabString(tab));
 	if (info == null) {
-		String elementName = getElementName();
-		if (elementName.length() == 0) {
+		if (isAnonymous()) {
 			buffer.append("<anonymous #"); //$NON-NLS-1$
 			buffer.append(this.occurrenceCount);
 			buffer.append(">"); //$NON-NLS-1$
@@ -939,8 +938,7 @@ protected void toStringInfo(int tab, StringBuffer buffer, Object info, boolean s
 		}
 		buffer.append(" (not open)"); //$NON-NLS-1$
 	} else if (info == NO_INFO) {
-		String elementName = getElementName();
-		if (elementName.length() == 0) {
+		if (isAnonymous()) {
 			buffer.append("<anonymous #"); //$NON-NLS-1$
 			buffer.append(this.occurrenceCount);
 			buffer.append(">"); //$NON-NLS-1$
@@ -958,8 +956,7 @@ protected void toStringInfo(int tab, StringBuffer buffer, Object info, boolean s
 			} else {
 				buffer.append("class "); //$NON-NLS-1$
 			}
-			String elementName = getElementName();
-			if (elementName.length() == 0) {
+			if (isAnonymous()) {
 				buffer.append("<anonymous #"); //$NON-NLS-1$
 				buffer.append(this.occurrenceCount);
 				buffer.append(">"); //$NON-NLS-1$
@@ -970,5 +967,9 @@ protected void toStringInfo(int tab, StringBuffer buffer, Object info, boolean s
 			buffer.append("<JavaModelException in toString of " + getElementName()); //$NON-NLS-1$
 		}
 	}
+}
+@Override
+public boolean isLambda() {
+	return false;
 }
 }

@@ -66,6 +66,7 @@ import org.eclipse.jdt.internal.core.JarPackageFragmentRoot;
 import org.eclipse.jdt.internal.core.JavaElement;
 import org.eclipse.jdt.internal.core.JavaModelManager;
 import org.eclipse.jdt.internal.core.JavaProject;
+import org.eclipse.jdt.internal.core.LambdaFactory;
 import org.eclipse.jdt.internal.core.LocalVariable;
 import org.eclipse.jdt.internal.core.NameLookup;
 import org.eclipse.jdt.internal.core.Openable;
@@ -518,7 +519,7 @@ protected char[][][] computeSuperTypeNames(IType focusType) {
  * Creates an IMethod from the given lambda declaration and type.
  */
 protected IJavaElement createHandle(LambdaExpression lambdaExpression, IJavaElement parent) {
-	org.eclipse.jdt.internal.core.LambdaExpression lambdaElement = new org.eclipse.jdt.internal.core.LambdaExpression((JavaElement) parent, lambdaExpression);
+	org.eclipse.jdt.internal.core.LambdaExpression lambdaElement = LambdaFactory.createLambdaExpression((JavaElement) parent, lambdaExpression);
 	IMethod lambdaMethodElement = lambdaElement.getMethod();
 	this.methodHandles.add(lambdaMethodElement);
 	return lambdaMethodElement;

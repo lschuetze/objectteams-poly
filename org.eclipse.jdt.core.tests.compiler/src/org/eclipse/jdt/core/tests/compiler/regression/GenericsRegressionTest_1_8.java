@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2013, 2014 GK Software AG, IBM Corporation.
+ * Copyright (c) 2013, 2014 GK Software AG, and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -7,6 +7,7 @@
  *
  * Contributors:
  *     Stephan Herrmann - initial API and implementation
+ *     IBM Corporation - additional tests     
  *******************************************************************************/
 package org.eclipse.jdt.core.tests.compiler.regression;
 
@@ -2923,6 +2924,195 @@ public void testBug430759() {
 			"      }\n" + 
 			"    };\n" + 
 			"  }\n" + 
+			"}\n"
+		});
+}
+// https://bugs.eclipse.org/bugs/show_bug.cgi?id=431577 [1.8][bytecode] Bad type on operand stack (different than Bug 429733)
+public void testBug431577() {
+	runConformTest(
+		new String[] {
+			"Test.java",
+			"import java.util.function.Function;\n" + 
+			"import java.util.function.IntFunction;\n" + 
+			"public class Test<R> {\n" + 
+			"	public static void main(String[] args) {\n" + 
+			"	new Test<>().test((Integer i) -> null);\n" + 
+			"	}\n" + 
+			"	<T> void test(Function<T, R> f) {\n" + 
+			"	}\n" + 
+			"	void test(int i, IntFunction<R> f) {\n" + 
+			"		new State<>(new Val<>(i));\n" + 
+			"	}\n" + 
+			"	static class State<R> {\n" + 
+			"		State(Val<?> o) {\n" + 
+			"		}\n" + 
+			"	}\n" + 
+			"	static class Val<T> {\n" + 
+			"		Val(T t) {}\n" + 
+			"	}\n" + 
+			"}"
+	});
+}
+public void testBug432110() {
+	runConformTest(
+		new String[] {
+			"Bug.java",
+			"import java.util.List;\n" + 
+			"import java.util.function.Function;\n" + 
+			"import java.util.stream.Stream;\n" + 
+			"\n" + 
+			"class Bug\n" + 
+			"{\n" + 
+			"    // fully inline\n" + 
+			"    // compiles successfully\n" + 
+			"    Stream<? extends Integer> flatten1(\n" + 
+			"        final Stream<List<Integer>> input)\n" + 
+			"    {\n" + 
+			"        return input.flatMap(item -> item.stream().map(value -> value));\n" + 
+			"    }\n" + 
+			"\n" + 
+			"    // lambda using braces\n" + 
+			"    // compiles with error in eclipse, successfully with javac\n" + 
+			"    Stream<? extends Integer> flatten2(\n" + 
+			"        final Stream<List<Integer>> input)\n" + 
+			"    {\n" + 
+			"        return input.flatMap(item -> {\n" + 
+			"            return item.stream().map(value -> value);\n" + 
+			"        });\n" + 
+			"    }\n" + 
+			"\n" + 
+			"    // without map step\n" + 
+			"    // compiles successfully\n" + 
+			"    Stream<? extends Integer> flatten3(\n" + 
+			"        final Stream<List<Integer>> input)\n" + 
+			"    {\n" + 
+			"        return input.flatMap(item -> {\n" + 
+			"            return item.stream();\n" + 
+			"        });\n" + 
+			"    }\n" + 
+			"\n" + 
+			"    // with map step, but not inline\n" + 
+			"    // compiles successfully\n" + 
+			"    Stream<? extends Integer> flatten4(\n" + 
+			"        final Stream<List<Integer>> input)\n" + 
+			"    {\n" + 
+			"        return input.flatMap(item -> {\n" + 
+			"            final Function<? super Integer, ? extends Integer> mapper = value -> value;\n" + 
+			"            return item.stream().map(mapper);\n" + 
+			"        });\n" + 
+			"    }\n" + 
+			"\n" + 
+			"    // with map step, but outer lambda is not inline\n" + 
+			"    // compiles successfully\n" + 
+			"    Stream<? extends Integer> flatten5(\n" + 
+			"        final Stream<List<Integer>> input)\n" + 
+			"    {\n" + 
+			"        final Function<? super List<Integer>, ? extends Stream<? extends Integer>> func = item -> {\n" + 
+			"            return item.stream().map(value -> value);\n" + 
+			"        };\n" + 
+			"        return input.flatMap(func);\n" + 
+			"    }\n" + 
+			"}\n"});
+}
+public void testBug433158() {
+	runNegativeTest(
+		new String[] {
+			"CollectorsMaps.java",
+			"\n" + 
+			"import java.util.List;\n" + 
+			"import java.util.Map;\n" + 
+			"import static java.util.stream.Collectors.*;\n" + 
+			"\n" + 
+			"public class CollectorsMaps {/*Q*/\n" + 
+			"	private static class Pair<L, R> {\n" + 
+			"		public final L lhs; public final R rhs;\n" + 
+			"		public Pair(L lhs, R rhs) { this.lhs = lhs; this.rhs = rhs; }\n" + 
+			"		public R rhs() { return rhs; }\n" + 
+			"		public L lhs() { return lhs; }\n" + 
+			"		public <N> Pair<N, R> keepingRhs(N newLhs) { return new Pair<>(newLhs, rhs); }\n" + 
+			"		/*E*/}\n" + 
+			"\n" + 
+			"	static Map<String, List<String>> invert(Map<String, List<String>> packages) {\n" + 
+			"		return packages.entrySet().stream().map(e -> new Pair<>(e.getValue(), e.getKey())).flatMap(\n" + 
+			"			//The method collect(Collector<? super Object,A,R>) in the type Stream<Object>\n" + 
+			"			//is not applicable for the arguments \n" + 
+			"			//(Collector<CollectorsMaps.Pair<String,String>,capture#3-of ?,Map<String,List<String>>>)\n" + 
+			"		  p -> p.lhs.stream().map(p::keepingRhs)).collect(\n" + 
+			"		  groupingBy(Pair<String, String>::lhs, mapping(Pair<String, String>::rhs, toList())));\n" + 
+			"	}\n" + 
+			"}\n"
+		},
+		"----------\n" + 
+		"1. ERROR in CollectorsMaps.java (at line 20)\n" + 
+		"	p -> p.lhs.stream().map(p::keepingRhs)).collect(\n" + 
+		"	                                        ^^^^^^^\n" + 
+		"The method collect(Collector<? super Object,A,R>) in the type Stream<Object> is not applicable for the arguments (Collector<CollectorsMaps.Pair<String,String>,capture#3-of ?,Map<String,List<String>>>)\n" + 
+		"----------\n");
+}
+public void _testBug432626() {
+	runConformTest(
+		new String[] {
+			"StreamInterface2.java",
+			"import java.util.ArrayList;\n" + 
+			"import java.util.HashMap;\n" + 
+			"import java.util.Map;\n" + 
+			"import java.util.function.Function;\n" + 
+			"import java.util.function.Supplier;\n" + 
+			"import java.util.stream.Collector;\n" + 
+			"import java.util.stream.Collectors;\n" + 
+			"import java.util.stream.Stream;\n" + 
+			"\n" + 
+			"public interface StreamInterface2 {\n" + 
+			"\n" + 
+			"	static <T, E extends Exception, K> Map<K, ArrayList<T>> terminalAsMapToList(\n" + 
+			"	  Function<? super T, ? extends K> classifier,\n" + 
+			"	  Supplier<Stream<T>> supplier,\n" + 
+			"	  Class<E> classOfE) throws E {\n" + 
+			"		return terminalAsCollected(classOfE, Collectors.groupingBy(\n" + 
+			"			  classifier,\n" + 
+			"			  //This is OK:\n" + 
+			"			  //Redundant specification of type arguments <K, ArrayList<T>>\n" + 
+			"			  () -> new HashMap<K, ArrayList<T>>(),\n" + 
+			"			  Collector.<T, ArrayList<T>> of(\n" + 
+			"			    () -> new ArrayList<>(),\n" + 
+			"			    (left, value) -> left.add(value),\n" + 
+			"			    (left, right) -> combined(left, right))), supplier);\n" + 
+			"	}\n" + 
+			"	static <T, E extends Exception, K> Map<K, ArrayList<T>> terminalAsMapToList2(\n" + 
+			"	  Function<? super T, ? extends K> classifier,\n" + 
+			"	  Supplier<Stream<T>> supplier,\n" + 
+			"	  Class<E> classOfE) throws E {\n" + 
+			"		//After removing type arguments, ECJ shows error, javac doesn't:\n" + 
+			"		//Type mismatch: cannot convert from HashMap<capture#2-of ? extends K,ArrayList<T>> to Map<K,ArrayList<T>>\n" + 
+			"		return terminalAsCollected(classOfE, Collectors.groupingBy(\n" + 
+			"			  classifier,\n" + 
+			"			  () -> new HashMap<>(),\n" + 
+			"			  Collector.<T, ArrayList<T>> of(\n" + 
+			"			    () -> new ArrayList<>(),\n" + 
+			"			    (left, value) -> left.add(value),\n" + 
+			"			    (left, right) -> combined(left, right))), supplier);\n" + 
+			"	}\n" + 
+			"	static <E extends Exception, T, M> M terminalAsCollected(\n" + 
+			"	  Class<E> classOfE,\n" + 
+			"	  Collector<T, ?, M> collector,\n" + 
+			"	  Supplier<Stream<T>> supplier) throws E {\n" + 
+			"		try(Stream<T> s = supplier.get()) {\n" + 
+			"			return s.collect(collector);\n" + 
+			"		} catch(RuntimeException e) {\n" + 
+			"			throw unwrapCause(classOfE, e);\n" + 
+			"		}\n" + 
+			"	}\n" + 
+			"	static <E extends Exception> E unwrapCause(Class<E> classOfE, RuntimeException e) throws E {\n" + 
+			"		Throwable cause = e.getCause();\n" + 
+			"		if(classOfE.isInstance(cause) == false) {\n" + 
+			"			throw e;\n" + 
+			"		}\n" + 
+			"		throw classOfE.cast(cause);\n" + 
+			"	}\n" + 
+			"	static <T> ArrayList<T> combined(ArrayList<T> left, ArrayList<T> right) {\n" + 
+			"		left.addAll(right);\n" + 
+			"		return left;\n" + 
+			"	}\n" +
 			"}\n"
 		});
 }

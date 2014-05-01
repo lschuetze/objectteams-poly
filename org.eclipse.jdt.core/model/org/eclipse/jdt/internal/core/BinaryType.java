@@ -436,6 +436,7 @@ public IJavaElement getHandleFromMemento(String token, MementoTokenizer memento,
 			params.toArray(parameters);
 			JavaElement method = (JavaElement)getMethod(selector, parameters);
 			switch (token.charAt(0)) {
+				case JEM_LAMBDA_EXPRESSION:
 				case JEM_TYPE:
 				case JEM_TYPE_PARAMETER:
 				case JEM_LOCALVARIABLE:
@@ -1086,5 +1087,9 @@ public JavadocContents getJavadocContents(IProgressMonitor monitor) throws JavaM
 		projectInfo.javadocCache.put(this, javadocContents);
 	}
 	return javadocContents;
+}
+@Override
+public boolean isLambda() {
+	return false;
 }
 }
