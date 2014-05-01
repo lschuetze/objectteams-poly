@@ -518,7 +518,12 @@ public class OTType extends OTJavaElement implements IOTType
         return getIType().isMember();
     }
 
-    public ITypeHierarchy loadTypeHierachy(InputStream input, IProgressMonitor monitor) throws JavaModelException
+	@Override
+	public boolean isLambda() {
+		return false;
+	}
+
+	public ITypeHierarchy loadTypeHierachy(InputStream input, IProgressMonitor monitor) throws JavaModelException
     {
         return getIType().loadTypeHierachy(input, monitor);
     }

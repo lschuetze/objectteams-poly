@@ -464,6 +464,11 @@ public class PhantomType implements IPhantomType
         return true;
     }
 
+    @Override
+    public boolean isLambda() {
+    	return false;
+    }
+
     /* (non-Javadoc)
      * @see org.eclipse.jdt.core.IType#loadTypeHierachy(java.io.InputStream, org.eclipse.core.runtime.IProgressMonitor)
      */
