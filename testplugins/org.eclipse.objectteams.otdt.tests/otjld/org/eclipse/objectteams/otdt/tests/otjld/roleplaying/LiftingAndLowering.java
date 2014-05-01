@@ -2492,6 +2492,33 @@ public class LiftingAndLowering extends AbstractOTJLDTest {
                 });
     }
     
+    public void test2212_arrayLoweringToBaseclass9() {
+    	runConformTest(
+    		new String[] {
+    			"Team2214altb9.java",
+    			"import java.util.*;\n" +
+    			"public team class Team2214altb9 {\n" +
+    			"	protected class R playedBy T2214altb9 { protected R() { base(); } }\n" +
+    			"	T2214altb9[] toBaseArray(List<R> roles) {\n" +
+    			"		return roles.toArray(new R[roles.size()]);\n" +
+    			"	}\n" +
+    			"	void test() {\n" +
+    			"		List<R> roles = new ArrayList<R>();\n" +
+    			"		roles.add(new R());\n" +
+    			"		T2214altb9[] bases = toBaseArray(roles);\n" +
+    			"		System.out.println(bases[0].getClass().getName());\n" +
+    			"	}\n" +
+    			"	public static void main(String[] args) {\n" +
+    			"		new Team2214altb9().test();\n" +
+    			"	}\n" +
+    			"}\n",
+    			"T2214altb9.java",
+    			"public class T2214altb9 {\n" +
+    			"}\n"
+    		},
+    		"T2214altb9");
+    }
+    
     // lowering of a role object array for the same base objects produces the an equal object array
     // 2.2.14-otjld-array-lowering-produces-equal-object-1
     public void test2214_arrayLoweringProducesEqualObject1() {

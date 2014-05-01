@@ -500,6 +500,13 @@ public void computeConversion(Scope scope, TypeBinding runtimeTimeType, TypeBind
 	    		? compileTimeType  // unboxing: checkcast before conversion
 	    		: runtimeTimeType;
 	        this.valueCast = originalType.genericCast(targetType);
+//{ObjectTeams: don't try to let casting do the job of lowering:
+	        TypeBinding leafCompile = compileTimeType.leafComponentType();
+	        TypeBinding leafRuntime = runtimeTimeType.leafComponentType();
+	        if (!compileTimeType.isBaseType() && !runtimeTimeType.isBaseType()
+	        		&& ((ReferenceBinding)leafCompile).isCompatibleViaLowering((ReferenceBinding) leafRuntime))
+	        	this.valueCast = originalType.genericCast(compileTimeType);	        	
+// SH}
 		} 	else if (this.binding == scope.environment().arrayClone
 				&& runtimeTimeType.id != TypeIds.T_JavaLangObject
 				&& scope.compilerOptions().sourceLevel >= ClassFileConstants.JDK1_5) {
