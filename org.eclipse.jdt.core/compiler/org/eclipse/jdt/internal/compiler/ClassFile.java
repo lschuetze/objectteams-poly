@@ -5011,8 +5011,9 @@ public class ClassFile implements TypeConstants, TypeIds {
 					| ClassFileConstants.AccNative);
 
 //{ObjectTeams: synthetic interfaces are illegal in class files (why???):
-		if (  (accessFlags & (ClassFileConstants.AccSynthetic|ClassFileConstants.AccInterface))
-			              == (ClassFileConstants.AccSynthetic|ClassFileConstants.AccInterface))
+		if (this.targetJDK < ClassFileConstants.JDK1_7
+				&& (accessFlags & (ClassFileConstants.AccSynthetic|ClassFileConstants.AccInterface))
+						== (ClassFileConstants.AccSynthetic|ClassFileConstants.AccInterface))
 		{
 			accessFlags ^= ClassFileConstants.AccSynthetic;
 		}
