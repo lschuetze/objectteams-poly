@@ -47,6 +47,8 @@ public class TeamManager implements ITeamManager {
 	// map all original joinpoints to their inherited versions in subclasses
 	private static Map<Integer,List<Integer>> joinpointToSubJoinpoints = new HashMap<Integer, List<Integer>>();
 	private static IClassRepository classRepository;
+	
+	// synchronization: fields _teams and _callinIds are protected using the TeamManager class object as the monitor
 
 	public static void setup(IClassRepository repo) {
 		classRepository = repo;
@@ -61,26 +63,24 @@ public class TeamManager implements ITeamManager {
 	 * @return all active teams for the joinpoint or null
 	 * if there are no active teams
 	 */
-	public static ITeam[] getTeams(int joinpointId) {
-		synchronized(_teams) {
-			List<ITeam> teams = _teams.get(joinpointId);
-			int size = teams.size();
-			if (size == 0)
-				return null;
-			ITeam[] active = new ITeam[size];
-			int count = 0;
-			Thread th = Thread.currentThread();
-			for (int i = 0; i < active.length; i++) {
-				ITeam t = teams.get(i);
-				if (t.isActive(th))
-					active[count++] = t;
-			}
-			if (count == 0)
-				return null;
-			if (count != size) 
-				System.arraycopy(active, 0, active = new ITeam[count], 0, count);
-			return active;
+	public synchronized static ITeam[] getTeams(int joinpointId) {
+		List<ITeam> teams = _teams.get(joinpointId);
+		int size = teams.size();
+		if (size == 0)
+			return null;
+		ITeam[] active = new ITeam[size];
+		int count = 0;
+		Thread th = Thread.currentThread();
+		for (int i = 0; i < active.length; i++) {
+			ITeam t = teams.get(i);
+			if (t.isActive(th))
+				active[count++] = t;
 		}
+		if (count == 0)
+			return null;
+		if (count != size) 
+			System.arraycopy(active, 0, active = new ITeam[count], 0, count);
+		return active;
 	}
 
 	/**
@@ -91,7 +91,7 @@ public class TeamManager implements ITeamManager {
 	 * @return the callin ids for the joinpoint or null
 	 * if there are no active teams
 	 */
-	public static int[] getCallinIds(int joinpointId) {
+	public synchronized static int[] getCallinIds(int joinpointId) {
 		List<Integer> callinIds = _callinIds.get(joinpointId);
 		if (callinIds.size() == 0) {
 			return null;
@@ -279,7 +279,7 @@ public class TeamManager implements ITeamManager {
 	 * @param joinpointId
 	 * @param stateChange
 	 */
-	private static void changeTeamsForJoinpoint(ITeam t, int callinId, int joinpointId, TeamManager.TeamStateChange stateChange) {
+	private synchronized static void changeTeamsForJoinpoint(ITeam t, int callinId, int joinpointId, TeamManager.TeamStateChange stateChange) {
 		switch (stateChange) {
 		case REGISTER:
 			List<ITeam> teams = _teams.get(joinpointId);
@@ -290,7 +290,6 @@ public class TeamManager implements ITeamManager {
 		case UNREGISTER:
 			teams = _teams.get(joinpointId);
 			callinIds = _callinIds.get(joinpointId);
-			
 			int index = teams.indexOf(t);
 			while (index > -1) {
 				teams.remove(index);
