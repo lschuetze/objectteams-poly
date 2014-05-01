@@ -1,7 +1,7 @@
 /**********************************************************************
  * This file is part of "Object Teams Dynamic Runtime Environment"
  * 
- * Copyright 2009, 2012 Oliver Frank and others.
+ * Copyright 2009, 2014 Oliver Frank and others.
  * 
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -25,6 +25,7 @@ import org.objectteams.ITeam;
 import org.objectteams.ImplicitTeamActivation;
 import org.objectteams.SneakyException;
 import org.objectteams.Team;
+import org.objectteams.TeamThreadManager;
 
 /**
  * Container for class names used in the bytecode manipulating classes
@@ -46,4 +47,9 @@ public abstract class ClassNames {
 	// member of SneakyException:
 	public static final String RETHROW_SELECTOR = "rethrow";
 	public static final String RETHROW_SIGNATURE = "()V"; 
+	
+	public static final String THREAD_SLASH = Thread.class.getName().replace('.', '/');
+	public static final String TEAM_THREAD_MANAGER_SLASH = TeamThreadManager.class.getName().replace('.', '/');
+	public static final String THROWABLE_SLASH = Throwable.class.getName().replace('.', '/');
+	public static final String RUNNABLE_SLASH = Runnable.class.getName().replace('.', '/');
 }

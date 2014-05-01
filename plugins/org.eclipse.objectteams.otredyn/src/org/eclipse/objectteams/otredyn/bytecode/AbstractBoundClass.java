@@ -139,6 +139,7 @@ public abstract class AbstractBoundClass implements IBoundClass {
 	private String id;
 	private String superClassName;
 	private String internalSuperClassName;
+	private String[] internalSuperInterfaces;
 	private AbstractBoundClass superclass;
 	private AbstractBoundClass enclosingClass;
 	private Map<String, Method> methods;
@@ -156,6 +157,7 @@ public abstract class AbstractBoundClass implements IBoundClass {
 	private Set<String> methodsForImplicitActivation;
 
 	protected ClassLoader loader;
+
 
 
 
@@ -223,6 +225,12 @@ public abstract class AbstractBoundClass implements IBoundClass {
 		}
 		this.superClassName = superClassName.replace('/', '.');
 		this.internalSuperClassName = superClassName.replace('.', '/');
+	}
+
+	public void setSuperInterfaces(String[] interfaces) {
+		if (interfaces == null)
+			return;
+		this.internalSuperInterfaces = interfaces;
 	}
 
 	public boolean isJavaLangObject() {
@@ -338,6 +346,14 @@ public abstract class AbstractBoundClass implements IBoundClass {
 		}
 		return superclass;
 	}
+	
+	/**
+	 * Returns the internal names of all superInterfaces or null.
+	 */
+	public /*@Nullable*/ String[] getSuperInterfaceNames() {
+		parseBytecode();
+		return this.internalSuperInterfaces;
+	}
 
 	/**
 	 * Returns an instance of AbstractBoundClass that represents 
@@ -381,7 +397,7 @@ public abstract class AbstractBoundClass implements IBoundClass {
 	 * It parses the bytecode, if that has not already been done
 	 * @return
 	 */
-	protected String getInternalSuperClassName() {
+	public String getInternalSuperClassName() {
 		parseBytecode();
 		return internalSuperClassName;
 	}
@@ -390,7 +406,7 @@ public abstract class AbstractBoundClass implements IBoundClass {
 	 * Returns the internal name of this class
 	 * @return
 	 */
-	protected String getInternalName() {
+	public String getInternalName() {
 		return internalName;
 	}
 	

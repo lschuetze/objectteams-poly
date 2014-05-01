@@ -358,6 +358,9 @@ class AsmWritableBoundClass extends AsmBoundClass {
 		
 		if (!isInterface())
 			multiAdapter.addVisitor(new AddAfterClassLoadingHook(this.writer, this));
+
+		if (AddThreadNotificationAdapter.shouldNotify(this))
+			multiAdapter.addVisitor(new AddThreadNotificationAdapter(this.writer, this));
 	}
 
 	/** Get the suitable variant of _OT$callOrigStatic, respecting synth args for static role methods. */
