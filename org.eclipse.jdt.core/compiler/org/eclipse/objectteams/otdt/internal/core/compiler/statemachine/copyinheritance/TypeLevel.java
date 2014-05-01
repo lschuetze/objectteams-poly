@@ -114,19 +114,21 @@ public class TypeLevel {
 		if (destRole == null)
 			return; // no hope;
 	    ReferenceBinding[] superinterfaces = destRole.superInterfaces();
-	    for (int i=0; i<superinterfaces.length; i++) {
-	    	// TODO(SH): enclosingType could be a tsuper of superTeam.
-	        if (TypeBinding.equalsEquals(superinterfaces[i].enclosingType(), superTeam)) {
-	    		ReferenceBinding teamType  = destRole.enclosingType();
-	            ReferenceBinding superinterface =
-	                    teamType.getMemberType(superinterfaces[i].internalName());
-	            if (TypeBinding.notEquals(superinterface, destRole)) // not for the tsuper link.
-	            {
-	                obligations.add(new SupertypeObligation(superinterface, superinterfaces[i], null, null));
-	                superinterfaces[i] = superinterfaces[i].transferTypeArguments(superinterface);
-	                destRole.scope.compilationUnitScope().recordSuperTypeReference(superinterface);
-	            }
-	        }
+	    if (superinterfaces != null) {
+		    for (int i=0; i<superinterfaces.length; i++) {
+		    	// TODO(SH): enclosingType could be a tsuper of superTeam.
+		        if (TypeBinding.equalsEquals(superinterfaces[i].enclosingType(), superTeam)) {
+		    		ReferenceBinding teamType  = destRole.enclosingType();
+		            ReferenceBinding superinterface =
+		                    teamType.getMemberType(superinterfaces[i].internalName());
+		            if (TypeBinding.notEquals(superinterface, destRole)) // not for the tsuper link.
+		            {
+		                obligations.add(new SupertypeObligation(superinterface, superinterfaces[i], null, null));
+		                superinterfaces[i] = superinterfaces[i].transferTypeArguments(superinterface);
+		                destRole.scope.compilationUnitScope().recordSuperTypeReference(superinterface);
+		            }
+		        }
+		    }
 	    }
 	}
 
