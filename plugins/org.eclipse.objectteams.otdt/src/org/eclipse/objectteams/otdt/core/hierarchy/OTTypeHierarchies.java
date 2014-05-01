@@ -651,8 +651,6 @@ public team class OTTypeHierarchies {
 		protected IType[] getAllTSuperTypes(IType as ConnectedType type) {
 			ConnectedType[] result = type.getAllTSuperTypes();
 			return this.phantomMode ? result : filterPhantomRoles(result);  
-				// FIXME(SH) return without intermediate local var -> CCE
-				// like: return type.getAllTSuperTypes();
 		}
 
 		protected IType[] getDirectTSupers(IType as ConnectedType type) throws JavaModelException {
@@ -676,10 +674,9 @@ public team class OTTypeHierarchies {
 		protected IType[] getAllTSubTypes(IType as ConnectedType type) {
 			Set<ConnectedType> tsubs = new HashSet<ConnectedType>();
 			internalGetAllTSubTypes(type, tsubs);
-			ConnectedType[] result = tsubs.toArray(new ConnectedType[tsubs.size()]);
-			return result;// FIXME(SH) return without intermediate local var -> CCE
+			return tsubs.toArray(new ConnectedType[tsubs.size()]);
 		}
-		protected void internalGetAllTSubTypes(ConnectedType type, Set<ConnectedType> tsubs) { // FIXME(SH) private gives type error (in bridge?)
+		private void internalGetAllTSubTypes(ConnectedType type, Set<ConnectedType> tsubs) { // FIXME(SH) private gives type error (in bridge?)
 			if (type.knownTSubTypes != null) {
 				for (ConnectedType tsub : type.knownTSubTypes) {
 					internalGetAllTSubTypes(tsub, tsubs); // use the originally connected type not a mostly empty phantom wrapper
