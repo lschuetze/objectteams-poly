@@ -379,7 +379,7 @@ public class ClassFile implements TypeConstants, TypeIds {
         attributesNumber += ModelElement.writeAttributes(this.referenceBinding, this);
 // SH}
 //{ObjectTeams: convert synthetic flag to attribute :(
-		if (this.referenceBinding.isSynthInterface()) {
+		if (this.referenceBinding.isSynthInterface() && this.targetJDK < ClassFileConstants.JDK1_7) {
 			// Synthetic attribute
 			// Check that there is enough space to write the Synthetic attribute
 			if (this.contentsOffset + 6 >= this.contents.length) {
