@@ -406,7 +406,7 @@ public class OTEquinoxBuilderTests extends OTBuilderTests {
 	}
 	private void expectAccessRestriction(IJavaProject project, String fileName, int start, int end) {
 		expectingSpecificProblemFor(project.getPath(), 
-			new Problem("", "Access restriction: The type SampleAction is not accessible due to restriction on required project Trac18b",
+			new Problem("", "Access restriction: The type 'SampleAction' is not API (restriction on required project 'Trac18b')",
 						project.getPath().append(new Path(fileName)), 
 						start, end, 
 						CategorizedProblem.CAT_RESTRICTION, IMarker.SEVERITY_ERROR)
