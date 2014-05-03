@@ -80,41 +80,41 @@ This team defines another layer over the team FlightBonus, observing the behavio
 <h2>OT/J concepts used</h2>
 The following concepts are demonstrated and documented in the source code (<a href="guide/otjld/def/index.html"><img src="images/ot_paragraph.gif" /> numbers refer to paragraphs in the language definition</a>):
 <dl>
-<dt><strong>team inheritance and implicit inheritance of roles</strong> (<a href="guide/otjld/def/team.html"><img src="images/ot_paragraph.gif" /> 1</a>)</dt>
+<dt><strong>team inheritance and implicit inheritance of roles</strong> (<a href="guide/otjld/def/s1.html"><img src="images/ot_paragraph.gif" /> 1</a>)</dt>
 <dd>There are two team inheritance relations: <code>FlightBonus extends Bonus</code>
   and <code>GUIConnector extends BonusGUI</code>.
   In both cases the contained roles are further specialized in the sub-team.<br />
-  Implicit inheritance works accross levels (<a href="guide/otjld/def/team.html#s1.5"><img src="images/ot_paragraph.gif" /> 1.5</a>): 
+  Implicit inheritance works accross levels (<a href="guide/otjld/def/s1.html#s1.5"><img src="images/ot_paragraph.gif" /> 1.5</a>): 
   the nested team <code>FlightBonusDialog</code>
   implicitly inherits all roles from its implicit super team of the same name.
   The inner most roles recursively inherit from their implicit super roles.<br />
   You may want to try the special hierarchy view (F4) for exploring this implicit inheritance.
   </dd>
-<dt><strong>callin method bindinds</strong> (<a href="guide/otjld/def/callin.html"><img src="images/ot_paragraph.gif" /> 4</a>)</dt>
+<dt><strong>callin method bindinds</strong> (<a href="guide/otjld/def/s4.html"><img src="images/ot_paragraph.gif" /> 4</a>)</dt>
 <dd>The <code>FlightBonus</code> and the <code>GUIConnector</code> teams are both triggered
   via callin bindings, by which they hook into the underlying system.
   In the case of the <code>FlightBonusDialog</code> the base classes are roles, too.
   This means roles are used to intercept events at some other roles.</dd>
-<dt><strong>callout method bindinds</strong> (<a href="guide/otjld/def/callout.html"><img src="images/ot_paragraph.gif" /> 3</a>)</dt>
+<dt><strong>callout method bindinds</strong> (<a href="guide/otjld/def/s3.html"><img src="images/ot_paragraph.gif" /> 3</a>)</dt>
 <dd>Most roles access features of their base class using callout bindings.</dd>
-<dt><strong>role files</strong> (<a href="guide/otjld/def/team.html#s1.2.5"><img src="images/ot_paragraph.gif" /> 1.2.5</a>)</dt>
+<dt><strong>role files</strong> (<a href="guide/otjld/def/s1.html#s1.2.5"><img src="images/ot_paragraph.gif" /> 1.2.5</a>)</dt>
 <dd><code>fbapplication.BonusGUI.FlightBonusDialog</code> and 
     <code>fbapplication.GUIConnector.FlightBonusDialog</code>.
     Each role file resides in a <strong><code>team package</code></strong>
     that has the same name as the enclosing team (i.e., a team is a class and a package).</dd>
-<dt><strong>team activation</strong> (<a href="guide/otjld/def/activation.html"><img src="images/ot_paragraph.gif" /> 5</a>)</dt>
+<dt><strong>team activation</strong> (<a href="guide/otjld/def/s5.html"><img src="images/ot_paragraph.gif" /> 5</a>)</dt>
 <dd>The 'bootstrap' team <code>GUIConnector</code> is activated via the <strong>launch configuration</strong>
-  (<a href="guide/otjld/def/activation.html#s5.5"><img src="images/ot_paragraph.gif" /> 5.5</a>).
+  (<a href="guide/otjld/def/s5.html#s5.5"><img src="images/ot_paragraph.gif" /> 5.5</a>).
   By this technique it is possible to adapt the flight booking application without changing
   a single line of source code.
   In the sequel the <code>GUIConnector</code> creates instances of <code>FlightBonus</code>
   and <code>FlightBonusDialog</code>, both of which invoke <strong><code>activate()</code></strong>
-  (<a href="guide/otjld/def/activation.html#s5.2.b"><img src="images/ot_paragraph.gif" /> 5.2(b)</a>) from their constructor in order to enable all callins of contained roles.<br />
+  (<a href="guide/otjld/def/s5.html#s5.2.b"><img src="images/ot_paragraph.gif" /> 5.2(b)</a>) from their constructor in order to enable all callins of contained roles.<br />
   Roles <code>FlightBonus.Subscriber</code> and <code>BonusGUI.Collector</code> restrict
-  activation to specific instances using a <strong>guard predicate</strong> (<a href="guide/otjld/def/activation.html#s5.4"><img src="images/ot_paragraph.gif" /> 5.4</a>).
-<dt><strong>lifting</strong> (<a href="guide/otjld/def/rolebinding.html#s2.3"><img src="images/ot_paragraph.gif" /> 2.3</a>)</dt>
+  activation to specific instances using a <strong>guard predicate</strong> (<a href="guide/otjld/def/s5.html#s5.4"><img src="images/ot_paragraph.gif" /> 5.4</a>).
+<dt><strong>lifting</strong> (<a href="guide/otjld/def/s2.html#s2.3"><img src="images/ot_paragraph.gif" /> 2.3</a>)</dt>
 <dd>The constructor <code>FlightBonus(Passenger as Subscriber s)</code> uses declared lifting
-  (<a href="guide/otjld/def/rolebinding.html#s2.3.2"><img src="images/ot_paragraph.gif" /> 2.3.2</a>)
+  (<a href="guide/otjld/def/s2.html#s2.3.2"><img src="images/ot_paragraph.gif" /> 2.3.2</a>)
   to force creation of a subscriber role for each passenger to be registered.<br />
   The constructor <code>FlightBonusDialog(FlightBonus fb)</code> is a lifting constructor,
   which means it will implicitly be used by the lifting operation, but it can also be
