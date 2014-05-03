@@ -69,7 +69,7 @@ plugin@org.eclipse.objectteams.otdt.test.builder=GIT,repo=git://git.eclipse.org/
 plugin@org.eclipse.objectteams.otdt.ui.tests=GIT,repo=git://git.eclipse.org/gitroot/objectteams/org.eclipse.objectteams.git,path=testplugins/org.eclipse.objectteams.otdt.ui.tests
 
 !-- Tests fetched from original GIT (some are required indirectly by jdt.ui.tests): --
-plugin@org.eclipse.jdt.core.tests.builder=GIT,tag=branches/BETA_JAVA8,repo=git://git.eclipse.org/gitroot/jdt/eclipse.jdt.core.git,path=org.eclipse.jdt.core.tests.builder
+plugin@org.eclipse.jdt.core.tests.builder=GIT,tag=@SDK_QUALIFIER@,repo=git://git.eclipse.org/gitroot/jdt/eclipse.jdt.core.git,path=org.eclipse.jdt.core.tests.builder
 plugin@org.eclipse.jdt.debug.tests=GIT,tag=@SDK_QUALIFIER@,repo=git://git.eclipse.org/gitroot/jdt/eclipse.jdt.debug.git,path=org.eclipse.jdt.debug.tests
 plugin@org.eclipse.jdt.text.tests=GIT,tag=@SDK_QUALIFIER@,repo=git://git.eclipse.org/gitroot/jdt/eclipse.jdt.ui.git,path=org.eclipse.jdt.text.tests
 plugin@org.eclipse.jface.text.tests=GIT,tag=@SDK_QUALIFIER@,repo=git://git.eclipse.org/gitroot/platform/eclipse.platform.text.git,path=org.eclipse.jface.text.tests
@@ -77,5 +77,5 @@ plugin@org.eclipse.text.tests=GIT,tag=@SDK_QUALIFIER@,repo=git://git.eclipse.org
 plugin@org.eclipse.core.filebuffers.tests=GIT,tag=@SDK_QUALIFIER@,repo=git://git.eclipse.org/gitroot/platform/eclipse.platform.text.git,path=org.eclipse.core.filebuffers.tests
 
 !-- jdt.annotation: --!
-plugin@org.eclipse.jdt.annotation,2.0.0=GIT,tag=BETA_JAVA8,repo=git://git.eclipse.org/gitroot/jdt/eclipse.jdt.core.git,path=org.eclipse.jdt.annotation
-plugin@org.eclipse.jdt.annotation,1.1.0=GIT,tag=BETA_JAVA8,repo=git://git.eclipse.org/gitroot/jdt/eclipse.jdt.core.git,path=org.eclipse.jdt.annotation_v1
+plugin@org.eclipse.jdt.annotation,2.0.0=GIT,tag=@SDK_QUALIFIER@,repo=git://git.eclipse.org/gitroot/jdt/eclipse.jdt.core.git,path=org.eclipse.jdt.annotation
+plugin@org.eclipse.jdt.annotation,1.1.0=GIT,tag=@SDK_QUALIFIER@,repo=git://git.eclipse.org/gitroot/jdt/eclipse.jdt.core.git,path=org.eclipse.jdt.annotation_v1
