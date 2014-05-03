@@ -220,7 +220,13 @@ public interface IOTConstants
 	public static final char[][] ORG_OBJECTTEAMS_RESULT_NOT_PROVIDED = {ORG, OBJECTTEAMS, RESULT_NOT_PROVIDED_EXCEPTION};
 	public static final char[] IBOUNDBASE                        = "IBoundBase".toCharArray();
 	public static final char[][] ORG_OBJECTTEAMS_IBOUNDBASE  = {ORG, OBJECTTEAMS, IBOUNDBASE};
+	/**
+	 * @since 3.10 OT 2.3 for OTDRE
+	 */
 	public static final char[] IBOUNDBASE2                        = "IBoundBase2".toCharArray();
+	/**
+	 * @since 3.10 OT 2.3 for OTDRE
+	 */
 	public static final char[][] ORG_OBJECTTEAMS_IBOUNDBASE2  = {ORG, OBJECTTEAMS, IBOUNDBASE2};
 
 	public static final char[][] ROLE_CAST_EXCEPTION 			  = {ORG, OBJECTTEAMS,

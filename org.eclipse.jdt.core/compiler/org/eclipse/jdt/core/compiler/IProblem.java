@@ -2262,7 +2262,7 @@ void setSourceStart(int sourceStart);
 	/** @since 4.3 OT 2.2 */
 	int RoleFileMissingTeamDeclaration			 = LIMITATIONS + 	 32;
 	
-	/** @since 4.4 OT 2.3 */
+	/** @since 3.10 OT 2.3 */
 	int OtreCannotWeaveIntoJava8					 = LIMITATIONS + 33;
 	
 // ==== EXPERIMENTAL: ====

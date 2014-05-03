@@ -36,6 +36,9 @@ import org.eclipse.jdt.core.search.SearchMatch;
 import org.eclipse.jdt.core.search.SearchPattern;
 import org.eclipse.jdt.core.search.SearchRequestor;
 
+/**
+ * @since 3.10 (OT 2.3)
+ */
 public class OTSearchHelper {
 
 	/**

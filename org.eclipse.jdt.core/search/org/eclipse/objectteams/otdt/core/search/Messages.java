@@ -17,6 +17,9 @@ package org.eclipse.objectteams.otdt.core.search;
 
 import org.eclipse.osgi.util.NLS;
 
+/**
+ * @since 3.10 (OT 2.3)
+ */
 public class Messages extends NLS {
 	
 	private static final String BUNDLE_NAME = "org.eclipse.objectteams.otdt.core.search.messages"; //$NON-NLS-1$

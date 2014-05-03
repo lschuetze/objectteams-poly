@@ -372,6 +372,9 @@ public class ASTNodeCreator
         return null;
     }
 
+	/**
+	 * @since 3.10 OT 2.3
+	 */
 	public static SingleVariableDeclaration createArgument(AST ast, int modifier, Type parameterType, String parameterName, Expression initializer)
     {
         SingleVariableDeclaration methodSpecParameter = ast.newSingleVariableDeclaration();
