@@ -6,7 +6,7 @@ Bundle-Version: 2.0.0
 Bundle-ClassPath: otdt-debugtests.jar
 Bundle-Activator: org.eclipse.objectteams.otdt.debug.tests.DebugTestsPlugin
 Bundle-Vendor: Fraunhofer FIRST
-Require-Bundle: org.apache.bcel, 
+Require-Bundle: org.apache.bcel,
  org.eclipse.ui,
  org.eclipse.core.runtime,
  org.eclipse.jdt.debug.tests,
@@ -24,7 +24,8 @@ Require-Bundle: org.apache.bcel,
  org.eclipse.objectteams.otdt.debug,
  org.eclipse.objectteams.otdt,
  org.eclipse.objectteams.otdt.debug.ui,
- org.eclipse.objectteams.otdt.ui.tests
+ org.eclipse.objectteams.otdt.ui.tests,
+ org.eclipse.jdt.ui.tests
 Bundle-ActivationPolicy: lazy
 Export-Package: org.eclipse.objectteams.otdt.debug.tests,
  org.eclipse.objectteams.otdt.debug.tests.core
