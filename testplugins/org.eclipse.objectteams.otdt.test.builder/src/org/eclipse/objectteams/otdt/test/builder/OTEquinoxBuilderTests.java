@@ -207,7 +207,7 @@ public class OTEquinoxBuilderTests extends OTBuilderTests {
 		fullBuild();
 		
 		// now add content to the team, binding to Trac213b1:
-		fileManager.replaceWorkspaceFile("Trac213a/aux/TheTeam_step1.java", aspectPlugin, "src/trac213a/TheTeam.java");
+		fileManager.replaceWorkspaceFile("Trac213a/auxil/TheTeam_step1.java", aspectPlugin, "src/trac213a/TheTeam.java");
 		
 		incrementalBuild();
 		expectingNoProblemsFor(trac213b1.getPath());
@@ -215,8 +215,8 @@ public class OTEquinoxBuilderTests extends OTBuilderTests {
 		expectingNoProblemsFor(aspectPlugin.getPath());
 
 		// now add content to the team, binding to Trac213b2:
-		fileManager.replaceWorkspaceFile("Trac213a/aux/plugin_step2.xml", aspectPlugin, "plugin.xml");
-		fileManager.replaceWorkspaceFile("Trac213a/aux/TheTeam_step2.java", aspectPlugin, "src/trac213a/TheTeam.java");
+		fileManager.replaceWorkspaceFile("Trac213a/auxil/plugin_step2.xml", aspectPlugin, "plugin.xml");
+		fileManager.replaceWorkspaceFile("Trac213a/auxil/TheTeam_step2.java", aspectPlugin, "src/trac213a/TheTeam.java");
 		
 		incrementalBuild();
 		expectingNoProblemsFor(trac213b1.getPath());
