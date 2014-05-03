@@ -1,5 +1,5 @@
 Manifest-Version: 1.0
-Premain-Class: org.eclipse.objectteams.otre.transformer.jplis.otreAgent
+Premain-Class: org.eclipse.objectteams.otre.jplis.otreAgent
 Can-Redefine-Classes: true
 
 
