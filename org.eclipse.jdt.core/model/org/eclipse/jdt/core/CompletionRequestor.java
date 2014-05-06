@@ -112,6 +112,9 @@ public abstract class CompletionRequestor {
 	 * @see CompletionProposal#getKind()
 	 */
 	public boolean isIgnored(int completionProposalKind) {
+//{ObjectTeams: fold OT constants into int space:
+		completionProposalKind = completionProposalKind % 32;
+// SH}
 		if (completionProposalKind < CompletionProposal.FIRST_KIND
 			|| completionProposalKind > CompletionProposal.LAST_KIND) {
 				throw new IllegalArgumentException("Unknown kind of completion proposal: "+completionProposalKind); //$NON-NLS-1$
@@ -140,22 +143,6 @@ public abstract class CompletionRequestor {
 		} else {
 			this.ignoreSet &= ~(1 << completionProposalKind);
 		}
-//{ObjectTeams: align bits for OT-specific proposals:
-		if (completionProposalKind == CompletionProposal.METHOD_DECLARATION) {
-			setIgnored(CompletionProposal.OT_CALLOUT_DECLARATION, ignore);
-			setIgnored(CompletionProposal.OT_CALLOUT_OVERRIDE_DECLARATION, ignore);
-			setIgnored(CompletionProposal.OT_CALLOUT_GET, ignore);
-			setIgnored(CompletionProposal.OT_CALLOUT_SET, ignore);
-			setIgnored(CompletionProposal.OT_CALLIN_DECLARATION, ignore);
-			setIgnored(CompletionProposal.OT_METHOD_SPEC, ignore);
-			setIgnored(CompletionProposal.OT_FIELD_SPEC, ignore);
-		} else if (completionProposalKind == CompletionProposal.VARIABLE_DECLARATION) {
-			setIgnored(CompletionProposal.OT_CALLOUT_GET, ignore);
-			setIgnored(CompletionProposal.OT_CALLOUT_SET, ignore);
-			setIgnored(CompletionProposal.OT_METHOD_SPEC, ignore);
-			setIgnored(CompletionProposal.OT_FIELD_SPEC, ignore);			
-		}
-// SH}
 	}
 
 	/**

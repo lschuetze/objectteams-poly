@@ -159,4 +159,69 @@
             </message_arguments>
         </filter>
     </resource>
+    <resource path="model/org/eclipse/jdt/core/CompletionProposal.java" type="org.eclipse.jdt.core.CompletionProposal">
+        <filter comment="need to adjust OT constants to be correctly folded into int bitset" id="388194388">
+            <message_arguments>
+                <message_argument value="org.eclipse.jdt.core.CompletionProposal"/>
+                <message_argument value="OT_CALLIN_DECLARATION"/>
+                <message_argument value="32"/>
+            </message_arguments>
+        </filter>
+        <filter comment="need to adjust OT constants to be correctly folded into int bitset" id="388194388">
+            <message_arguments>
+                <message_argument value="org.eclipse.jdt.core.CompletionProposal"/>
+                <message_argument value="OT_CALLOUT_DECLARATION"/>
+                <message_argument value="28"/>
+            </message_arguments>
+        </filter>
+        <filter comment="need to adjust OT constants to be correctly folded into int bitset" id="388194388">
+            <message_arguments>
+                <message_argument value="org.eclipse.jdt.core.CompletionProposal"/>
+                <message_argument value="OT_CALLOUT_GET"/>
+                <message_argument value="30"/>
+            </message_arguments>
+        </filter>
+        <filter comment="need to adjust OT constants to be correctly folded into int bitset" id="388194388">
+            <message_arguments>
+                <message_argument value="org.eclipse.jdt.core.CompletionProposal"/>
+                <message_argument value="OT_CALLOUT_OVERRIDE_DECLARATION"/>
+                <message_argument value="29"/>
+            </message_arguments>
+        </filter>
+        <filter comment="need to adjust OT constants to be correctly folded into int bitset" id="388194388">
+            <message_arguments>
+                <message_argument value="org.eclipse.jdt.core.CompletionProposal"/>
+                <message_argument value="OT_CALLOUT_SET"/>
+                <message_argument value="31"/>
+            </message_arguments>
+        </filter>
+        <filter comment="need to adjust OT constants to be correctly folded into int bitset" id="388194388">
+            <message_arguments>
+                <message_argument value="org.eclipse.jdt.core.CompletionProposal"/>
+                <message_argument value="OT_FIELD_SPEC"/>
+                <message_argument value="33"/>
+            </message_arguments>
+        </filter>
+        <filter comment="need to adjust OT constants to be correctly folded into int bitset" id="388194388">
+            <message_arguments>
+                <message_argument value="org.eclipse.jdt.core.CompletionProposal"/>
+                <message_argument value="OT_METHOD_SPEC"/>
+                <message_argument value="34"/>
+            </message_arguments>
+        </filter>
+        <filter comment="need to adjust OT constants to be correctly folded into int bitset" id="388194388">
+            <message_arguments>
+                <message_argument value="org.eclipse.jdt.core.CompletionProposal"/>
+                <message_argument value="OVERRIDE_ROLE_DECLARATION"/>
+                <message_argument value="28"/>
+            </message_arguments>
+        </filter>
+        <filter comment="need to adjust OT constants to be correctly folded into int bitset" id="388194388">
+            <message_arguments>
+                <message_argument value="org.eclipse.jdt.core.CompletionProposal"/>
+                <message_argument value="OVERRIDE_ROLE_DECLARATION"/>
+                <message_argument value="35"/>
+            </message_arguments>
+        </filter>
+    </resource>
 </component>

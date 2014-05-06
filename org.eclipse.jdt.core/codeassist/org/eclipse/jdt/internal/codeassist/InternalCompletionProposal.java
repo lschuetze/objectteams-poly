@@ -433,7 +433,12 @@ public class InternalCompletionProposal extends CompletionProposal {
 	 */
 	public InternalCompletionProposal(int kind, int completionLocation) {
 		if ((kind < FIRST_KIND)
+//{ObjectTeams: fold OT constants into int space:
+/* orig:
 				|| (kind > LAST_KIND)) {
+  giro: */
+				|| ((kind % 32) > LAST_KIND)) {
+// SH}
 			throw new IllegalArgumentException();
 		}
 		if (this.completion == null || completionLocation < 0) {

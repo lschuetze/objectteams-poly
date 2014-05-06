@@ -874,54 +874,57 @@ public class CompletionProposal {
 	public static final int ANONYMOUS_CLASS_CONSTRUCTOR_INVOCATION = 27;
 
 //{ObjectTeams: new completion kinds
+	// when forming bitsets of completion kinds we need to fold multiple of our OT constants into the same slot.
+	// therefore we let them differ only by a offsets that are multiples of 32, which will be ignored during bitset operations
+	private static final int INTWRAP = 32;
 	/**
 	 * Within the body of a role class generate a callout declaration, like
 	 *   <pre>String bar(double d) -> String bar(double d);</pre>
 	 */
-	public static final int OT_CALLOUT_DECLARATION= 28;
+	public static final int OT_CALLOUT_DECLARATION= METHOD_DECLARATION + INTWRAP;
 	/**
 	 * Within the body of a role class generate a callout override declaration, like
 	 *   <pre>String bar(double d) => String bar(double d);</pre>
 	 */
-	public static final int OT_CALLOUT_OVERRIDE_DECLARATION= 29;
+	public static final int OT_CALLOUT_OVERRIDE_DECLARATION= METHOD_DECLARATION + 2 * INTWRAP;
 	/**
 	 * Within the body of a role class after typing
 	 *   <pre>get</pre>
 	 * generate a callout-to-field declaration like
 	 *   <pre>int getCount() -> get int count;</pre>
 	 */
-	public static final int OT_CALLOUT_GET= 30;
+	public static final int OT_CALLOUT_GET= METHOD_DECLARATION + 3 * INTWRAP;
 	/**
 	 * Within the body of a role class after typing
 	 *   <pre>set</pre>
 	 * generate a callout-to-field declaration like
 	 *   <pre>void setCount(int count) -> set int count;</pre>
 	 */
-	public static final int OT_CALLOUT_SET= 31;
+	public static final int OT_CALLOUT_SET= METHOD_DECLARATION + 4 * INTWRAP;
 	/**
 	 * Within the body of a role class generate a callin declaration, like
 	 *   <pre>String bar(double d) <- after String bar(double d);</pre>
 	 */
-	public static final int OT_CALLIN_DECLARATION= 32;
+	public static final int OT_CALLIN_DECLARATION= METHOD_DECLARATION + 5 * INTWRAP;
 	/**
 	 * After initial parts of a callout-to-field
 	 *   <pre>void setCount(int count) -> set</pre> (either set or get)
 	 * generate
 	 *   <pre>void setCount(int count) -> set int count;</pre>
 	 */
-	public static final int OT_FIELD_SPEC= 33;
+	public static final int OT_FIELD_SPEC= METHOD_DECLARATION + 6 * INTWRAP;
 	/**
 	 * After initial parts of a callout
 	 *   <pre>String bar(double d) -></pre>
 	 * generate
 	 *   <pre>String bar(double d) -> String bar(double d);</pre>
 	 */
-	public static final int OT_METHOD_SPEC= 34;
+	public static final int OT_METHOD_SPEC= METHOD_DECLARATION + 7 * INTWRAP;
 	
 	/**
 	 * Generate a role type declaration overriding an implicitly inherited role from the super team.
 	 */
-	public static final int OVERRIDE_ROLE_DECLARATION= 35;
+	public static final int OVERRIDE_ROLE_DECLARATION= 28;
 // SH}
 
 	/**

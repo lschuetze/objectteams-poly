@@ -65,6 +65,7 @@ import org.eclipse.jdt.internal.ui.text.java.FieldProposalInfo;
 import org.eclipse.jdt.internal.ui.text.java.JavaCompletionProposal;
 import org.eclipse.jdt.internal.ui.viewsupport.JavaElementImageProvider;
 import org.eclipse.jdt.ui.JavaElementImageDescriptor;
+import org.eclipse.jdt.ui.text.java.CompletionProposalCollector;
 import org.eclipse.jdt.ui.text.java.IJavaCompletionProposal;
 import org.eclipse.jdt.ui.text.java.JavaContentAssistInvocationContext;
 import org.eclipse.jface.resource.ImageDescriptor;
@@ -85,6 +86,8 @@ import org.eclipse.objectteams.otdt.ui.ImageManager;
 import org.eclipse.osgi.util.NLS;
 
 import base org.eclipse.jdt.internal.corext.codemanipulation.StubUtility2;
+import base org.eclipse.jdt.internal.corext.fix.LinkedProposalPositionGroup.JavaLinkedModeProposal;
+import base org.eclipse.jdt.internal.ui.text.java.JavaNoTypeCompletionProposalComputer;
 import base org.eclipse.jdt.internal.ui.text.java.LazyJavaTypeCompletionProposal;
 import base org.eclipse.jdt.internal.ui.text.java.MethodDeclarationCompletionProposal;
 import base org.eclipse.jdt.internal.ui.text.java.MethodProposalInfo;
@@ -93,8 +96,6 @@ import base org.eclipse.jdt.ui.CodeGeneration;
 import base org.eclipse.jdt.ui.text.java.CompletionProposalCollector;
 import base org.eclipse.jdt.ui.text.java.CompletionProposalLabelProvider;
 import base org.eclipse.jdt.ui.text.java.JavaTextMessages;
-
-import base org.eclipse.jdt.internal.corext.fix.LinkedProposalPositionGroup.JavaLinkedModeProposal;
 
 /**
  * This team helps the jdt.ui to handle completion for OT-specific elements.
@@ -114,11 +115,24 @@ import base org.eclipse.jdt.internal.corext.fix.LinkedProposalPositionGroup.Java
 public team class CompletionAdaptor
 {
 	
+	/** Tell one JDT/UI class that OVERRIDE_ROLE_DECLARATION proposals should not be ignored. */
+	protected class Unignore playedBy JavaNoTypeCompletionProposalComputer {
+
+		void createCollector(CompletionProposalCollector collector)
+		<- after CompletionProposalCollector createCollector(JavaContentAssistInvocationContext context)
+			with { collector <- result}
+
+		private void createCollector(CompletionProposalCollector collector) {
+			collector.setIgnored(CompletionProposal.OVERRIDE_ROLE_DECLARATION, false);
+		}
+	}
+
 	/** 
 	 * Relevance factor.
 	 * (cf. e.g. {@link org.eclipse.jdt.internal.ui.text.java.LazyJavaCompletionProposal#computeRelevance()} 
 	 */
 	public static int R_METHOD_MAPPING = 16;
+	
 	/**
 	 * This role defines the entry-hooks of this team. 
 	 */
