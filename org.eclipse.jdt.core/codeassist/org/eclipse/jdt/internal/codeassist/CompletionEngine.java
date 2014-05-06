@@ -6716,7 +6716,7 @@ public final class CompletionEngine
 //{ObjectTeams: mark callout-to-field in flags as needed by the CompletionAdaptor:
 					if (   kind == CompletionProposal.OT_CALLOUT_GET
 						|| kind == CompletionProposal.OT_CALLOUT_SET)
-						proposal.setFlags(isOverride ? TerminalTokens.TokenNameCALLOUT_OVERRIDE : TerminalTokens.TokenNameBINDOUT); // pass down for label computation: callout
+						proposal.setAdditionalFlags(isOverride ? TerminalTokens.TokenNameCALLOUT_OVERRIDE : TerminalTokens.TokenNameBINDOUT); // pass down for label computation: callout
 // SH}
 					proposal.setReplaceRange(this.startPosition - this.offset, this.endPosition - this.offset);
 					proposal.setTokenRange(this.tokenStart - this.offset, this.tokenEnd - this.offset);
@@ -8906,9 +8906,9 @@ public final class CompletionEngine
 //{ObjectTeams: callout?
 				switch (curKind) {
 				case CompletionProposal.OT_CALLOUT_OVERRIDE_DECLARATION:
-					proposal.setFlags(TerminalTokens.TokenNameCALLOUT_OVERRIDE); break;
+					proposal.setAdditionalFlags(TerminalTokens.TokenNameCALLOUT_OVERRIDE); break;
 				case CompletionProposal.OT_CALLOUT_DECLARATION:
-					proposal.setFlags(TerminalTokens.TokenNameBINDOUT); break;
+					proposal.setAdditionalFlags(TerminalTokens.TokenNameBINDOUT); break;
 				}
 // SH}
 				proposal.setReplaceRange(this.startPosition - this.offset, this.endPosition - this.offset);
@@ -9275,10 +9275,10 @@ public final class CompletionEngine
 //{ObjectTeams: encode kind of method mapping:
 					if (this.currentMethodMapping != null) {
 						if (this.currentMethodMapping.isCallin()) {
-							proposal.setFlags(((CallinMappingDeclaration)this.currentMethodMapping).callinModifier); // pass down for label computation.
+							proposal.setAdditionalFlags(((CallinMappingDeclaration)this.currentMethodMapping).callinModifier); // pass down for label computation.
 						} else {
 							boolean isOverride = ((CalloutMappingDeclaration)this.currentMethodMapping).isCalloutOverride();
-							proposal.setFlags(isOverride ? TerminalTokens.TokenNameCALLOUT_OVERRIDE : TerminalTokens.TokenNameBINDOUT); // pass down for label computation: callout
+							proposal.setAdditionalFlags(isOverride ? TerminalTokens.TokenNameCALLOUT_OVERRIDE : TerminalTokens.TokenNameBINDOUT); // pass down for label computation: callout
 						}
 					}
 // SH}

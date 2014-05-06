@@ -190,7 +190,7 @@ public team class CompletionAdaptor
 		
 		private IJavaCompletionProposal createRoleProposal(CompletionProposal proposal) {
 			// compute label: image ...
-			int modifiers = proposal.getFlags();			
+			int modifiers = proposal.getAdditionalFlags();			
 			String roleclassImg = Flags.isTeam(modifiers) ? ImageConstants.TEAM_ROLE_IMG : ImageConstants.ROLECLASS_IMG;
 			ImageDescriptor baseDesc = ImageManager.getSharedInstance().getDescriptor(roleclassImg);
 			Image image= getImage(new JavaElementImageDescriptor(baseDesc, JavaElementImageDescriptor.OVERRIDES, JavaElementImageProvider.SMALL_SIZE));
@@ -215,7 +215,7 @@ public team class CompletionAdaptor
 				paramTypes[index]= Signature.toString(paramTypes[index]);
 			int length=       getLength(proposal);
 			
-			int bindingModifier = proposal.getFlags();
+			int bindingModifier = proposal.getAdditionalFlags();
 			boolean isCallin= true;
 			boolean isOverride= false;
 			switch(bindingModifier) {
