@@ -21,6 +21,7 @@ import java.util.Map;
 
 import junit.framework.Test;
 
+import org.eclipse.jdt.internal.compiler.classfmt.ClassFileConstants;
 import org.eclipse.jdt.internal.compiler.impl.CompilerOptions;
 import org.eclipse.objectteams.otdt.tests.otjld.AbstractOTJLDTest;
 
@@ -1343,29 +1344,12 @@ public class DeclaredLifting extends AbstractOTJLDTest {
     }
 
     public void test6113_maximalSyntax1() {
-        
+        if (this.complianceLevel < ClassFileConstants.JDK1_8) return;
         runConformTest(
              new String[] {
- 		"T6113ms1Main.java",
- 			    "\n" +
- 			    "public class T6113ms1Main {\n" +
- 			    "    @SuppressWarnings(\"roletypesyntax\")\n" +
- 			    "    public static void main(String[] args) {\n" +
- 			    "        final Team6113ms1 t = new Team6113ms1();\n" +
- 			    "        t.Role6113ms1_2   r = t.new Role6113ms1_2(\"NOTOK\");\n" +
- 			    "\n" +
- 			    "        // should lower the role object as the external signature of the method is\n" +
- 			    "        //   Team6113ms1.getValue(T6113ms1 obj)\n" +
- 			    "        System.out.print(t.getValue(r));\n" +
- 			    "    }\n" +
- 			    "}\n" +
- 			    "    \n",
- 		"T6113ms1.java",
- 			    "\n" +
- 			    "public class T6113ms1 {}\n" +
- 			    "    \n",
- 		"Team6113ms1.java",
- 			    "\n" +
+ 		"p2/Team6113ms1.java",
+ 			    "package p2;\n" +
+	    		"import base p1.T6113ms1;\n" +
  			    "public team class Team6113ms1 {\n" +
  			    "    public class Role6113ms1_1 playedBy T6113ms1 {\n" +
  			    "        protected String getValue() {\n" +
@@ -1383,12 +1367,35 @@ public class DeclaredLifting extends AbstractOTJLDTest {
  			    "        }\n" +
  			    "    }\n" +
  			    "\n" +
-// 			    "    public String getValue(int i, final @NonNullB T6113ms1<@NullableB String>@d1[]@d12 @d123[]@d2 @d22 @d234[] as @NonNullR Role6113ms1_1<@NullableR String>@D2[]@D2 @D22[] obj) {\n" +
- 				"    public String getValue(java.lang.Object i, final @NonNullB p1.T6113ms1[][][] as @NonNullR Role6113ms1_1[][] obj) {\n" +
- 			    "        return obj.getValue();\n" +
+//         			    "    public String getValue(int i, final @NonNullB T6113ms1<@NullableB String>@d1[]@d12 @d123[]@d2 @d22 @d234[] as @NonNullR Role6113ms1_1<@NullableR String>@D2[]@D2 @D22[] obj) {\n" +
+ 				"    public String getValue(java.lang.Object i, final p1.@NonNullB T6113ms1[] as @NonNullR Role6113ms1_1[] obj) {\n" +
+ 			    "        return obj[0].getValue();\n" +
+ 			    "    }\n" +
+ 			    "    public static void main(String[] args) {\n" +
+ 			    "		new Team6113ms1().test();\n" +
+ 			    "	}\n" +
+ 			    "	void test() {\n" +
+ 			    "        Role6113ms1_2   r = new Role6113ms1_2(\"NOTOK\");\n" +
+ 			    "		 Role6113ms1_2[] rs = new Role6113ms1_2[]{r};\n" +
+ 			    "\n" +
+ 			    "        // should lower the role object as the external signature of the method is\n" +
+ 			    "        //   Team6113ms1.getValue(Object,T6113ms1[] obj)\n" +
+ 			    "        System.out.print(getValue(null, rs));\n" +
  			    "    }\n" +
  			    "}\n" +
- 			    "    \n"
+ 			    "    \n",
+ 		"p1/T6113ms1.java",
+ 			    "package p1;\n" +
+ 			    "public class T6113ms1 {}\n" +
+ 			    "    \n",
+ 		"p2/NonNullB.java\n",
+ 				"package p2;\n" +
+ 				"import java.lang.annotation.*;\n" +
+				"@Target(ElementType.TYPE_USE) public @interface NonNullB {}\n",
+ 		"p2/NonNullR.java\n",
+ 				"package p2;\n" +
+ 				"import java.lang.annotation.*;\n" +
+				"@Target(ElementType.TYPE_USE) public @interface NonNullR {}\n"
              },
              "OK");
     	
