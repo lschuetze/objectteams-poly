@@ -3988,7 +3988,7 @@ public class Java5 extends AbstractOTJLDTest {
 			    "    void test() throws NoSuchMethodException {\n" +
 			    "        new R().test();\n" +
 			    "    }\n" +
-			    (this.weavingScheme == WeavingScheme.OTRE && this.complianceLevel >= ClassFileConstants.JDK1_8
+			    (this.weavingScheme == WeavingScheme.OTRE
 			    ? "" // skip execution
 			    :
 			    "    public static void main(String[] args) throws NoSuchMethodException {\n" +
@@ -4024,7 +4024,7 @@ public class Java5 extends AbstractOTJLDTest {
 			    "}\n" +
 			    "    \n"
             },
-		    (this.weavingScheme == WeavingScheme.OTRE && this.complianceLevel >= ClassFileConstants.JDK1_8
+		    (this.weavingScheme == WeavingScheme.OTRE
 		    ? ""
 		    : "@IA117cfa5_2(left=one, right=@IA117cfa5_1(value=two))"));
     }
