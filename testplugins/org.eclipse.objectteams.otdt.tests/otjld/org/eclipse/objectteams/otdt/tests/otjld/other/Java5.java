@@ -3914,9 +3914,9 @@ public class Java5 extends AbstractOTJLDTest {
     // a role method has a custom annotation, so should its tsub  -  testing at runtime via reflection
     // A.1.17-otjld-copyinheritance-for-annotation-4
     public void testA117_copyinheritanceForAnnotation4() {
-       if (this.weavingScheme == WeavingScheme.OTRE && this.complianceLevel >= ClassFileConstants.JDK1_8) {
+       if (this.weavingScheme == WeavingScheme.OTRE) {
     	   // bytecode at 1.8 contains a method handle, cannot be read by BCEL
-    	   System.err.println("Cannot execute a test at 1.8+ against OTRE");
+    	   System.err.println("BCEL cannot handle this byte code, uses method handles.");
     	   return;
        }
        runConformTest(
