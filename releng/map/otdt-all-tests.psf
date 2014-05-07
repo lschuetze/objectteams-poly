@@ -1,21 +1,21 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <psf version="2.0">
 <provider id="org.eclipse.egit.core.GitProvider">
-<project reference="1.0,ssh://sherrmann@git.eclipse.org/gitroot/jdt/eclipse.jdt.core.binaries.git,master,org.eclipse.jdt.core.tests.binaries"/>
-<project reference="1.0,ssh://sherrmann@git.eclipse.org/gitroot/jdt/eclipse.jdt.core.git,master,org.eclipse.jdt.core.tests.builder"/>
-<project reference="1.0,ssh://sherrmann@git.eclipse.org/gitroot/objectteams/org.eclipse.objectteams.git,master,org.eclipse.jdt.core.tests.compiler"/>
-<project reference="1.0,ssh://sherrmann@git.eclipse.org/gitroot/objectteams/org.eclipse.objectteams.git,master,org.eclipse.jdt.core.tests.model"/>
-<project reference="1.0,ssh://sherrmann@git.eclipse.org/gitroot/jdt/eclipse.jdt.core.git,master,org.eclipse.jdt.core.tests.performance"/>
+<project reference="1.0,git://git.eclipse.org/gitroot/jdt/eclipse.jdt.core.binaries.git,master,org.eclipse.jdt.core.tests.binaries"/>
+<project reference="1.0,git://git.eclipse.org/gitroot/jdt/eclipse.jdt.core.git,master,org.eclipse.jdt.core.tests.builder"/>
+<project reference="1.0,git://git.eclipse.org/gitroot/objectteams/org.eclipse.objectteams.git,master,org.eclipse.jdt.core.tests.compiler"/>
+<project reference="1.0,git://git.eclipse.org/gitroot/objectteams/org.eclipse.objectteams.git,master,org.eclipse.jdt.core.tests.model"/>
+<project reference="1.0,git://git.eclipse.org/gitroot/jdt/eclipse.jdt.core.git,master,org.eclipse.jdt.core.tests.performance"/>
 <project reference="1.0,git://git.eclipse.org/gitroot/jdt/eclipse.jdt.debug.git,master,org.eclipse.jdt.debug.tests"/>
 <project reference="1.0,git://git.eclipse.org/gitroot/jdt/eclipse.jdt.ui.git,master,org.eclipse.jdt.ui.tests"/>
 <project reference="1.0,git://git.eclipse.org/gitroot/jdt/eclipse.jdt.ui.git,master,org.eclipse.jdt.ui.tests.refactoring"/>
 <project reference="1.0,git://git.eclipse.org/gitroot/jdt/eclipse.jdt.ui.git,master,org.eclipse.ltk.ui.refactoring.tests"/>
-<project reference="1.0,ssh://sherrmann@git.eclipse.org/gitroot/objectteams/org.eclipse.objectteams.git,master,testplugins/org.eclipse.objectteams.otdt.debug.tests"/>
-<project reference="1.0,ssh://sherrmann@git.eclipse.org/gitroot/objectteams/org.eclipse.objectteams.git,master,testplugins/org.eclipse.objectteams.otdt.test.builder"/>
-<project reference="1.0,ssh://sherrmann@git.eclipse.org/gitroot/objectteams/org.eclipse.objectteams.git,master,testplugins/org.eclipse.objectteams.otdt.tests"/>
-<project reference="1.0,ssh://sherrmann@git.eclipse.org/gitroot/objectteams/org.eclipse.objectteams.git,master,testplugins/org.eclipse.objectteams.otdt.ui.tests"/>
-<project reference="1.0,ssh://sherrmann@git.eclipse.org/gitroot/objectteams/org.eclipse.objectteams.git,master,testplugins/org.eclipse.objectteams.otdt.ui.tests.dom"/>
-<project reference="1.0,ssh://sherrmann@git.eclipse.org/gitroot/objectteams/org.eclipse.objectteams.git,master,testplugins/org.eclipse.objectteams.otdt.ui.tests.refactoring"/>
+<project reference="1.0,git://git.eclipse.org/gitroot/objectteams/org.eclipse.objectteams.git,master,testplugins/org.eclipse.objectteams.otdt.debug.tests"/>
+<project reference="1.0,git://git.eclipse.org/gitroot/objectteams/org.eclipse.objectteams.git,master,testplugins/org.eclipse.objectteams.otdt.test.builder"/>
+<project reference="1.0,git://git.eclipse.org/gitroot/objectteams/org.eclipse.objectteams.git,master,testplugins/org.eclipse.objectteams.otdt.tests"/>
+<project reference="1.0,git://git.eclipse.org/gitroot/objectteams/org.eclipse.objectteams.git,master,testplugins/org.eclipse.objectteams.otdt.ui.tests"/>
+<project reference="1.0,git://git.eclipse.org/gitroot/objectteams/org.eclipse.objectteams.git,master,testplugins/org.eclipse.objectteams.otdt.ui.tests.dom"/>
+<project reference="1.0,git://git.eclipse.org/gitroot/objectteams/org.eclipse.objectteams.git,master,testplugins/org.eclipse.objectteams.otdt.ui.tests.refactoring"/>
 <project reference="1.0,git://git.eclipse.org/gitroot/platform/eclipse.platform.releng.git,master,bundles/org.eclipse.test.performance"/>
 <project reference="1.0,git://git.eclipse.org/gitroot/platform/eclipse.platform.text.git,master,org.eclipse.text.tests"/>
 </provider>
