@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<psf version="2.0">
+<provider id="org.eclipse.egit.core.GitProvider">
+<project reference="1.0,ssh://sherrmann@git.eclipse.org/gitroot/objectteams/org.eclipse.objectteams.git,master,org.eclipse.jdt.core"/>
+<project reference="1.0,ssh://sherrmann@git.eclipse.org/gitroot/objectteams/org.eclipse.objectteams.git,master,plugins/org.eclipse.objectteams.eclipse.monitor"/>
+<project reference="1.0,ssh://sherrmann@git.eclipse.org/gitroot/objectteams/org.eclipse.objectteams.git,master,plugins/org.eclipse.objectteams.otdt"/>
+<project reference="1.0,ssh://sherrmann@git.eclipse.org/gitroot/objectteams/org.eclipse.objectteams.git,master,plugins/org.eclipse.objectteams.otdt.apt"/>
+<project reference="1.0,ssh://sherrmann@git.eclipse.org/gitroot/objectteams/org.eclipse.objectteams.git,master,plugins/org.eclipse.objectteams.otdt.compiler.adaptor"/>
+<project reference="1.0,ssh://sherrmann@git.eclipse.org/gitroot/objectteams/org.eclipse.objectteams.git,master,features/org.eclipse.objectteams.otdt.core.patch"/>
+<project reference="1.0,ssh://sherrmann@git.eclipse.org/gitroot/objectteams/org.eclipse.objectteams.git,master,plugins/org.eclipse.objectteams.otdt.debug"/>
+<project reference="1.0,ssh://sherrmann@git.eclipse.org/gitroot/objectteams/org.eclipse.objectteams.git,master,plugins/org.eclipse.objectteams.otdt.debug.adaptor"/>
+<project reference="1.0,ssh://sherrmann@git.eclipse.org/gitroot/objectteams/org.eclipse.objectteams.git,master,plugins/org.eclipse.objectteams.otdt.debug.ui"/>
+<project reference="1.0,ssh://sherrmann@git.eclipse.org/gitroot/objectteams/org.eclipse.objectteams.git,master,plugins/org.eclipse.objectteams.otdt.doc"/>
+<project reference="1.0,ssh://sherrmann@git.eclipse.org/gitroot/objectteams/org.eclipse.objectteams.git,master,features/org.eclipse.objectteams.otdt.feature"/>
+<project reference="1.0,ssh://sherrmann@git.eclipse.org/gitroot/objectteams/org.eclipse.objectteams.git,master,plugins/org.eclipse.objectteams.otdt.jdt.ui"/>
+<project reference="1.0,ssh://sherrmann@git.eclipse.org/gitroot/objectteams/org.eclipse.objectteams.git,master,plugins/org.eclipse.objectteams.otdt.pde.ui"/>
+<project reference="1.0,ssh://sherrmann@git.eclipse.org/gitroot/objectteams/org.eclipse.objectteams.git,master,plugins/org.eclipse.objectteams.otdt.refactoring"/>
+<project reference="1.0,ssh://sherrmann@git.eclipse.org/gitroot/objectteams/org.eclipse.objectteams.git,master,plugins/org.eclipse.objectteams.otdt.samples"/>
+<project reference="1.0,ssh://sherrmann@git.eclipse.org/gitroot/objectteams/org.eclipse.objectteams.git,master,plugins/org.eclipse.objectteams.otdt.ui"/>
+<project reference="1.0,ssh://sherrmann@git.eclipse.org/gitroot/objectteams/org.eclipse.objectteams.git,master,plugins/org.eclipse.objectteams.otdt.ui.help"/>
+<project reference="1.0,ssh://sherrmann@git.eclipse.org/gitroot/objectteams/org.eclipse.objectteams.git,master,plugins/org.eclipse.objectteams.otequinox"/>
+<project reference="1.0,ssh://sherrmann@git.eclipse.org/gitroot/objectteams/org.eclipse.objectteams.git,master,plugins/org.eclipse.objectteams.otequinox.branding"/>
+<project reference="1.0,ssh://sherrmann@git.eclipse.org/gitroot/objectteams/org.eclipse.objectteams.git,master,features/org.eclipse.objectteams.otequinox.feature"/>
+<project reference="1.0,ssh://sherrmann@git.eclipse.org/gitroot/objectteams/org.eclipse.objectteams.git,master,plugins/org.eclipse.objectteams.otre"/>
+<project reference="1.0,ssh://sherrmann@git.eclipse.org/gitroot/objectteams/org.eclipse.objectteams.git,master,plugins/org.eclipse.objectteams.otredyn"/>
+<project reference="1.0,ssh://sherrmann@git.eclipse.org/gitroot/objectteams/org.eclipse.objectteams.git,master,plugins/org.eclipse.objectteams.runtime"/>
+</provider>
+</psf>
