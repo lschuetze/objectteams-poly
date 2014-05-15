@@ -107,6 +107,8 @@ public abstract class AbstractMethodDeclaration
 	implements ProblemSeverities, ReferenceContext {
 
 //	{ObjectTeams
+	// fake argument binding for all role method to allocate a slot for a tsuper marker arg added dyring bytecode-copy:
+	private static final char[] TSUPER_PLACEHOLDER = "$tsuperMarkerArgPlaceholder$".toCharArray(); //$NON-NLS-1$
     // this holds additional info for role methods:
     public MethodModel model = null;
 	public MethodModel getModel() {
@@ -293,6 +295,13 @@ public abstract class AbstractMethodDeclaration
 			}
 			if (paramAnnotations != null)
 				this.binding.setParameterAnnotations(paramAnnotations);
+		}
+//{ObjectTeams: for all role methods allocate the slot for tsuper marker arg:
+		if (!this.ignoreFurtherInvestigation && this.binding.declaringClass.isDirectRole()) {
+			LocalVariableBinding placeholderArg = new LocalVariableBinding(TSUPER_PLACEHOLDER, this.scope.getJavaLangObject(), 0, true);
+			placeholderArg.useFlag = LocalVariableBinding.USED;
+			this.scope.addLocalVariable(placeholderArg);
+// SH}
 		}
 	}
 
