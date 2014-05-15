@@ -246,7 +246,6 @@ System.err.println("record(3) "+this);
 		this.initializationPCs[index] = pc;
 		this.initializationPCs[index + 1] = -1;
 		this.initializationCount++;
-System.err.println("record(4) "+this);
 	}
 
 	public void setAnnotations(AnnotationBinding[] annotations, Scope scope) {

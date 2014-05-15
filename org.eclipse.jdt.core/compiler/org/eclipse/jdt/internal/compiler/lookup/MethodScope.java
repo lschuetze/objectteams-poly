@@ -375,8 +375,10 @@ public void computeLocalVariablePositions(int initOffset, CodeStream codeStream)
 
 	// manage arguments
 	int ilocal = 0, maxLocals = this.localIndex;
+System.err.println("maxLocals "+maxLocals);
 	while (ilocal < maxLocals) {
 		LocalVariableBinding local = this.locals[ilocal];
+System.err.println("compute for local "+local+((local != null && (local.tagBits & TagBits.IsArgument) != 0)?"arg":"local"));
 		if (local == null || ((local.tagBits & TagBits.IsArgument) == 0)) break; // done with arguments
 
 		// record user-defined argument for attribute generation
