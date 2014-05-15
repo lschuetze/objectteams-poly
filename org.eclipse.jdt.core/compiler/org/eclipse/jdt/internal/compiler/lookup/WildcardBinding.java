@@ -79,27 +79,34 @@ public class WildcardBinding extends ReferenceBinding {
     }
 	@Override
 	public TypeBinding maybeWrapRoleType(ASTNode typedNode, TypeArgumentUpdater updater) {
-		TypeBinding newBound = null;
-		boolean haveChange = false;
-		if (this.bound instanceof ReferenceBinding) {
-			newBound = updater.updateArg((ReferenceBinding) this.bound);
-			haveChange = newBound != this.bound; //$IDENTITY-COMPARISON$
-		}
-		TypeBinding[] newOtherBounds = null;
-		if (this.otherBounds != null) {
-			newOtherBounds = new TypeBinding[this.otherBounds.length];
-			for (int i = 0; i < this.otherBounds.length; i++) {
-				if (this.otherBounds[i] instanceof ReferenceBinding) {
-					newOtherBounds[i] = updater.updateArg((ReferenceBinding) this.otherBounds[i]);
-					haveChange |= newOtherBounds[i] != this.otherBounds[i]; //$IDENTITY-COMPARISON$
-				} else {
-					newOtherBounds[i] = this.otherBounds[i];
+		if (this.inRecursiveFunction)
+			return this;
+		this.inRecursiveFunction = true;
+		try {
+			TypeBinding newBound = null;
+			boolean haveChange = false;
+			if (this.bound instanceof ReferenceBinding) {
+				newBound = updater.updateArg((ReferenceBinding) this.bound);
+				haveChange = newBound != this.bound; //$IDENTITY-COMPARISON$
+			}
+			TypeBinding[] newOtherBounds = null;
+			if (this.otherBounds != null) {
+				newOtherBounds = new TypeBinding[this.otherBounds.length];
+				for (int i = 0; i < this.otherBounds.length; i++) {
+					if (this.otherBounds[i] instanceof ReferenceBinding) {
+						newOtherBounds[i] = updater.updateArg((ReferenceBinding) this.otherBounds[i]);
+						haveChange |= newOtherBounds[i] != this.otherBounds[i]; //$IDENTITY-COMPARISON$
+					} else {
+						newOtherBounds[i] = this.otherBounds[i];
+					}
 				}
 			}
+			if (!haveChange)
+				return this;
+			return this.environment.createWildcard(this.genericType, this.rank, newBound, newOtherBounds, this.boundKind);
+		} finally {
+			this.inRecursiveFunction = false;
 		}
-		if (!haveChange)
-			return this;
-		return this.environment.createWildcard(this.genericType, this.rank, newBound, newOtherBounds, this.boundKind);
 	}
 // SH}
 
