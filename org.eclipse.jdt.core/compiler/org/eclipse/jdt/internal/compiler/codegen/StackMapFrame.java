@@ -12,6 +12,7 @@ package org.eclipse.jdt.internal.compiler.codegen;
 
 import java.text.MessageFormat;
 
+import org.eclipse.jdt.internal.compiler.lookup.MethodBinding;
 import org.eclipse.jdt.internal.compiler.lookup.TypeBinding;
 import org.eclipse.jdt.internal.compiler.lookup.TypeIds;
 
@@ -33,6 +34,7 @@ public class StackMapFrame {
 	public VerificationTypeInfo[] stackItems;
 	private int numberOfDifferentLocals = -1;
 	public int tagBits;
+	public MethodBinding method;
 
 public StackMapFrame(int initialLocalSize) {
 	this.locals = new VerificationTypeInfo[initialLocalSize];
@@ -78,6 +80,7 @@ public void addLocal(int resolvedPosition, VerificationTypeInfo info) {
 }
 public void addStackItem(VerificationTypeInfo info) {
 	if (info == null) {
+		new IllegalArgumentException(new String(this.method.readableName())+" : "+this.toString()).printStackTrace();
 		throw new IllegalArgumentException("info cannot be null"); //$NON-NLS-1$
 	}
 	if (this.stackItems == null) {

@@ -5389,6 +5389,10 @@ public class ClassFile implements TypeConstants, TypeIds {
 				}
 			}
 		}
+		System.err.println("no local at resolvedPosition "+resolvedPosition+" in "+new String(this.referenceBinding.readableName()));
+		for (int i = 0; i < this.codeStream.locals.length; i++) {
+			System.out.println("Local "+i+" = "+this.codeStream.locals[i]);
+		}
 		return null;
 	}
 
@@ -5491,6 +5495,7 @@ public class ClassFile implements TypeConstants, TypeIds {
 		}
 
 		StackMapFrame frame = new StackMapFrame(maxLocals);
+		frame.method = methodBinding;
 		if (!isClinit) {
 			initializeDefaultLocals(frame, methodBinding, maxLocals, codeLength);
 		}
