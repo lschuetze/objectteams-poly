@@ -357,23 +357,16 @@ public class ConstantPoolObjectMapper implements ClassFileConstants{
 			                   			  boolean addMarkerArgAllowed)
 	{
 		ReferenceBinding refTeamBinding=getTeam(refMethodBinding);
-		if(refTeamBinding!=null){
+		if(refTeamBinding!=null) {
 			refTeamBinding = (ReferenceBinding) refTeamBinding.erasure();
 			ReferenceBinding srcTeamBinding = getTeam(srcMethod);
 			if(srcTeamBinding!=null){
 				// same team (direct tsuper) or compatible (indirect tsuper)
-				if(srcTeamBinding.isCompatibleWith(refTeamBinding)){
-					if(dstTeam!=null){
+				if(srcTeamBinding.isCompatibleWith(refTeamBinding)) {
+					if(dstTeam!=null) {
 						MethodBinding newBinding=searchRoleMethodInTeam(dstTeam, refMethodBinding, addMarkerArgAllowed);
-						if (newBinding == null) {
-							// indirect tsuper may not be copied to this class:
-							if (TypeBinding.notEquals(srcTeamBinding, refTeamBinding))
-								return refMethodBinding;
-							// is the method (inherited from a non role and) adjusted by getUpdatedMethodBinding?
-							if (!hasMethod(refMethodBinding.declaringClass, refMethodBinding))
-								return refMethodBinding;
-						}
-						return newBinding;
+						if (newBinding != null)
+							return newBinding;
 					}
 				}
 			}
@@ -457,7 +450,7 @@ public class ConstantPoolObjectMapper implements ClassFileConstants{
 			MethodBinding roleMethod = searchRoleMethodInRole(dstRefRoleBinding, refMethod, addMarkerArgAllowed);
 			if (roleMethod != null)
 				return roleMethod;
-			if (dstRefRoleBinding.isCompatibleWith(refRoleBinding)) {
+			if (dstRefRoleBinding.isCompatibleWith(refRoleBinding) || ConstantPoolObjectReader.isFakedOTREMethod(refMethod.selector) != 0) {
 				return new MethodBinding(refMethod, dstRefRoleBinding);
 			}
 //			System.out.println("method "+new String(refMethod.declaringClass.qualifiedSourceName())+"."+refMethod+" not found in "+new String(dstRefRoleBinding.qualifiedSourceName()));
