@@ -222,17 +222,20 @@ public class LocalVariableBinding extends VariableBinding {
 	public void recordInitializationStartPC(int pc) {
 
 		if (this.initializationPCs == null) {
+System.err.println("record(1) "+this);
 			return;
 		}
 		if (this.initializationCount > 0) {
 			int previousEndPC = this.initializationPCs[ ((this.initializationCount - 1) << 1) + 1];
 			 // interval still open, keep using it (108180)
 			if (previousEndPC == -1) {
+System.err.println("record(2) "+this);
 				return;
 			}
 			// optimize cases where reopening a contiguous interval
 			if (previousEndPC == pc) {
 				this.initializationPCs[ ((this.initializationCount - 1) << 1) + 1] = -1; // reuse previous interval (its range will be augmented)
+System.err.println("record(3) "+this);
 				return;
 			}
 		}
@@ -243,6 +246,7 @@ public class LocalVariableBinding extends VariableBinding {
 		this.initializationPCs[index] = pc;
 		this.initializationPCs[index + 1] = -1;
 		this.initializationCount++;
+System.err.println("record(4) "+this);
 	}
 
 	public void setAnnotations(AnnotationBinding[] annotations, Scope scope) {
