@@ -23,6 +23,9 @@
  *								Bug 430686 - [1.8][compiler] Generics: erroneously reports 'method not applicable for the arguments'
  *								Bug 430759 - [1.8][compiler] SourceTypeBinding cannot be cast to ParameterizedTypeBinding
  *								Bug 431408 - Java 8 (1.8) generics bug
+ *								Bug 432603 - [compile][1.7] ecj reports an Error while javac doesn't
+ *								Bug 399527 - Type inference problem
+ *								Bug 434570 - Generic type mismatch for parametrized class annotation attribute with inner class
  *******************************************************************************/
 package org.eclipse.jdt.core.tests.compiler.regression;
 
@@ -4757,6 +4760,325 @@ public void testBug431581() {
 		"	       ^^^^^^^\n" + 
 		"Type safety: Unchecked cast from BugEclipse.Dog to T\n" + 
 		"----------\n");
+}
+public void testBug432603() {
+	runNegativeTest(
+		new String[] {
+			"Test.java",
+			"import java.util.Map;\n" + 
+			"import java.util.Map.Entry;\n" + 
+			"\n" + 
+			"abstract class Optional<T> {\n" +
+			"	public static <T> Optional<T> fromNullable(T t) { return null; }\n" +
+			"	abstract Optional<T> or(Optional<? extends T> secondChoice);\n" + 
+			"	abstract T or(Supplier<? extends T> supplier);\n" + 
+			"	abstract T or(T defaultValue);\n" +
+			"}\n" + 
+			"\n" +
+			"interface Supplier<T> { T get(); }\n" +
+			"\n" + 
+			"public class Test {\n" + 
+			"\n" + 
+			"    private static final Object NO_VALUE = new Object();\n" + 
+			"\n" + 
+			"    public void method(Map<String, ?> map) {\n" + 
+			"        for (Entry<String, ?> entry : map.entrySet()) {\n" + 
+			"            Optional.fromNullable(entry.getValue()).or(NO_VALUE);\n" + 
+			"//                                                  ^^ error here\n" + 
+			"        }\n" + 
+			"    }\n" + 
+			"}\n"
+		},
+		"----------\n" + 
+		"1. ERROR in Test.java (at line 19)\n" + 
+		"	Optional.fromNullable(entry.getValue()).or(NO_VALUE);\n" + 
+		"	                                        ^^\n" + 
+		"The method or(Optional<? extends capture#2-of ?>) in the type Optional<capture#2-of ?> is not applicable for the arguments (Object)\n" + 
+		"----------\n");
+}
+public void testBug432603a() {
+	runConformTest(
+		new String[] {
+			"Test.java",
+			"import java.util.Map;\n" + 
+			"import java.util.Map.Entry;\n" + 
+			"\n" + 
+			"abstract class Optional<T> {\n" +
+			"	public static <T> Optional<T> fromNullable(T t) { return null; }\n" +
+			"	abstract Optional<T> or(Optional<? extends T> secondChoice);\n" + 
+			"	abstract T or(Supplier<? extends T> supplier);\n" + 
+			"	abstract T or(T defaultValue);\n" +
+			"}\n" + 
+			"\n" +
+			"interface Supplier<T> { T get(); }\n" +
+			"\n" + 
+			"public class Test {\n" + 
+			"\n" + 
+			"    private static final Object NO_VALUE = new Object();\n" + 
+			"\n" + 
+			"    public void method(Map<String, ?> map) {\n" + 
+			"        for (Entry<String, ?> entry : map.entrySet()) {\n" + 
+			"            Optional.<Object>fromNullable(entry.getValue()).or(NO_VALUE);\n" + 
+			"//                                                  ^^ error here\n" + 
+			"        }\n" + 
+			"    }\n" + 
+			"}\n"
+		});
+}
+public void testBug399527() {
+	runNegativeTest(
+		new String[] {
+			"TypeInferenceProblem.java",
+			"\n" + 
+			"public class TypeInferenceProblem {\n" + 
+			"  interface HeaderAccess<T> {\n" + 
+			"    T getHeader();\n" + 
+			"  }\n" + 
+			"\n" + 
+			"  interface IExpectationSetters<T> {\n" + 
+			"    IExpectationSetters<T> andReturn(T value);\n" + 
+			"  }\n" + 
+			"\n" + 
+			"  static class MocksControl implements IExpectationSetters<Object> {\n" + 
+			"    public IExpectationSetters<Object> andReturn(Object value) {\n" + 
+			"      return null;\n" + 
+			"    }\n" + 
+			"  }\n" + 
+			"\n" + 
+			"  @SuppressWarnings(\"unchecked\")\n" + 
+			"  public static <T> IExpectationSetters<T> expect(final T value) {\n" + 
+			"    return (IExpectationSetters<T>) new MocksControl();\n" + 
+			"  }\n" + 
+			"\n" + 
+			"  private HeaderAccess<Object> mockHeaderAccess;\n" + 
+			"  private HeaderAccess<?> unboundedMockHeaderAccess;\n" + 
+			"\n" + 
+			"  public void test() {\n" + 
+			"    // No error\n" + 
+			"    expect(mockHeaderAccess.getHeader()).andReturn(new Object());\n" + 
+			"    /*\n" + 
+			"     * Error: The method andReturn(capture#1-of ?) in the type\n" + 
+			"     * TypeInferenceProblem.IExpectationSetters<capture#1-of ?> \n" + 
+			"     * is not applicable for the arguments (Object)\n" + 
+			"     */\n" + 
+			"    expect(unboundedMockHeaderAccess.getHeader()).andReturn(new Object());\n" + 
+			"  }\n" + 
+			"}\n"
+		},
+		"----------\n" + 
+		"1. ERROR in TypeInferenceProblem.java (at line 33)\n" + 
+		"	expect(unboundedMockHeaderAccess.getHeader()).andReturn(new Object());\n" + 
+		"	                                              ^^^^^^^^^\n" + 
+		"The method andReturn(capture#1-of ?) in the type TypeInferenceProblem.IExpectationSetters<capture#1-of ?> is not applicable for the arguments (Object)\n" + 
+		"----------\n");
+}
+public void testBug399527_corrected() {
+	runConformTest(
+		new String[] {
+			"TypeInferenceProblem.java",
+			"\n" + 
+			"public class TypeInferenceProblem {\n" + 
+			"  interface HeaderAccess<T> {\n" + 
+			"    T getHeader();\n" + 
+			"  }\n" + 
+			"\n" + 
+			"  interface IExpectationSetters<T> {\n" + 
+			"    IExpectationSetters<T> andReturn(T value);\n" + 
+			"  }\n" + 
+			"\n" + 
+			"  static class MocksControl implements IExpectationSetters<Object> {\n" + 
+			"    public IExpectationSetters<Object> andReturn(Object value) {\n" + 
+			"      return null;\n" + 
+			"    }\n" + 
+			"  }\n" + 
+			"\n" + 
+			"  @SuppressWarnings(\"unchecked\")\n" + 
+			"  public static <T> IExpectationSetters<T> expect(final T value) {\n" + 
+			"    return (IExpectationSetters<T>) new MocksControl();\n" + 
+			"  }\n" + 
+			"\n" + 
+			"  private HeaderAccess<Object> mockHeaderAccess;\n" + 
+			"  private HeaderAccess<?> unboundedMockHeaderAccess;\n" + 
+			"\n" + 
+			"  public void test() {\n" + 
+			"    // No error\n" + 
+			"    expect(mockHeaderAccess.getHeader()).andReturn(new Object());\n" + 
+			"    this.<Object>expect(unboundedMockHeaderAccess.getHeader()).andReturn(new Object());\n" + 
+			"  }\n" + 
+			"}\n"
+		});
+}
+public void testBug399527_comment1() {
+	String sourceString =
+			"public class TypeInferenceProblemMin {\n" + 
+			"  interface HeaderAccess<T> {\n" + 
+			"    T getHeader();\n" + 
+			"  }\n" + 
+			"\n" + 
+			"  interface IExpectationSetters<T> {\n" + 
+			"  }\n" + 
+			"\n" + 
+			"  public static <T> IExpectationSetters<T> expect(final T value) {\n" + 
+			"	  return null;\n" + 
+			"  }\n" + 
+			"\n" + 
+			"  private HeaderAccess<?> unboundedMockHeaderAccess;\n" + 
+			"  \n" + 
+			"  public void test() {\n" + 
+			"    // no error:\n" + 
+			"    Object header = unboundedMockHeaderAccess.getHeader();\n" + 
+			"    IExpectationSetters<Object> exp1 = expect(header);\n" + 
+			"\n" + 
+			"    // Type mismatch: cannot convert from TypeInferenceProblemMin.IExpectationSetters<capture#2-of ?> to TypeInferenceProblemMin.IExpectationSetters<Object>\n" + 
+			"    IExpectationSetters<Object> exp2 = expect(unboundedMockHeaderAccess.getHeader());\n" + 
+			"  }\n" + 
+			"}\n";
+	if (this.complianceLevel < ClassFileConstants.JDK1_8)
+		runNegativeTest(
+			new String[] {
+				"TypeInferenceProblemMin.java",
+				sourceString
+			},
+			"----------\n" + 
+			"1. ERROR in TypeInferenceProblemMin.java (at line 21)\n" + 
+			"	IExpectationSetters<Object> exp2 = expect(unboundedMockHeaderAccess.getHeader());\n" + 
+			"	                                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n" + 
+			"Type mismatch: cannot convert from TypeInferenceProblemMin.IExpectationSetters<capture#2-of ?> to TypeInferenceProblemMin.IExpectationSetters<Object>\n" + 
+			"----------\n");
+	else
+		// conform due to target typing
+		runConformTest(
+			new String[] {
+				"TypeInferenceProblemMin.java",
+				sourceString
+			});
+}
+public void testBug434570() {
+	runConformTest(
+		new String[] {
+			"example/Example.java",
+			"package example;\n" + 
+			"\n" + 
+			"import example.Example.Config;\n" + 
+			"import example.Example.CustomInitializer;\n" + 
+			"\n" + 
+			"@Config(initializers = CustomInitializer.class)\n" + 
+			"public class Example {\n" + 
+			"\n" + 
+			"	static interface Context {\n" + 
+			"	}\n" + 
+			"\n" + 
+			"	static interface ConfigurableContext extends Context {\n" + 
+			"	}\n" + 
+			"\n" + 
+			"	static abstract class AbstractContext implements ConfigurableContext {\n" + 
+			"	}\n" + 
+			"\n" + 
+			"	static class GenericContext extends AbstractContext {\n" + 
+			"	}\n" + 
+			"\n" + 
+			"	static interface Initializer<C extends ConfigurableContext> {\n" + 
+			"	}\n" + 
+			"\n" + 
+			"	static @interface Config {\n" + 
+			"		Class<? extends Initializer<? extends ConfigurableContext>>[] initializers() default {};\n" + 
+			"	}\n" + 
+			"\n" + 
+			"	static class CustomInitializer implements Initializer<GenericContext> {\n" + 
+			"	}\n" + 
+			"\n" + 
+			"	@Config(initializers = CustomInitializer.class)\n" + 
+			"	static class CompilationSuccess {\n" + 
+			"	}\n" + 
+			"\n" + 
+			"}\n"
+		});
+}
+public void testBug434630() {
+	runConformTest(
+		new String[] {
+			"Foo.java",
+			"interface Provider<T> {}\n" +
+			"@interface ProvidedBy {\n" +
+			"	Class<? extends Provider<?>> value();" +
+			"}\n" + 
+			"\n" + 
+			"@ProvidedBy(Foo.SomeProvider.class)\n" + 
+			"public interface Foo {\n" + 
+			"	\n" + 
+			"	public static class SomeProvider implements Provider<Foo> {\n" + 
+			"\n" + 
+			"		public Foo get() {\n" + 
+			"			return null;\n" + 
+			"		}\n" + 
+			"		\n" + 
+			"	}\n" + 
+			"}\n"
+		});
+}
+public void _testBug434570_comment3() {
+	runConformTest(
+		new String[] {
+			"TestWontCompile.java",
+			"import org.bug.AnnotationWithClassParameter;\n" + 
+			"import org.bug.CustomHandler;\n" + 
+			"import org.bug.Handler;\n" + 
+			"\n" + 
+			"\n" + 
+			"@AnnotationWithClassParameter(CustomHandler.class)\n" + 
+			"public class TestWontCompile extends ATest<Object> {\n" + 
+			"	\n" + 
+			"	public static void main(String[] args) {\n" + 
+			"		Class<? extends Handler<?>> h = CustomHandler.class;\n" + 
+			"	}\n" + 
+			"\n" + 
+			"}\n",
+			"ATest.java",
+			"public abstract class ATest<T> {\n" + 
+			"\n" + 
+			"}\n",
+			"org/bug/Item.java",
+			"package org.bug;\n" + 
+			"\n" + 
+			"public interface Item {\n" + 
+			"\n" + 
+			"}\n",
+			"org/bug/CustomItem.java",
+			"package org.bug;\n" + 
+			"\n" + 
+			"public class CustomItem implements Item {\n" + 
+			"\n" + 
+			"}\n",
+			"org/bug/Handler.java",
+			"package org.bug;\n" + 
+			"\n" + 
+			"public abstract class Handler<T extends Item> {\n" + 
+			"\n" + 
+			"}\n",
+			"org/bug/CustomHandler.java",
+			"package org.bug;\n" + 
+			"\n" + 
+			"public class CustomHandler extends Handler<CustomItem> {\n" + 
+			"\n" + 
+			"}\n",
+			"org/bug/AnnotationWithClassParameter.java",
+			"package org.bug;\n" + 
+			"\n" + 
+			"import java.lang.annotation.Documented;\n" + 
+			"import java.lang.annotation.ElementType;\n" + 
+			"import java.lang.annotation.Retention;\n" + 
+			"import java.lang.annotation.RetentionPolicy;\n" + 
+			"import java.lang.annotation.Target;\n" + 
+			"\n" + 
+			"@Target(ElementType.TYPE)\n" + 
+			"@Retention(RetentionPolicy.RUNTIME)\n" + 
+			"@Documented\n" + 
+			"public @interface AnnotationWithClassParameter {\n" + 
+			"	\n" + 
+			"	Class<? extends Handler<?>> value();\n" + 
+			"\n" + 
+			"}\n"
+		});
 }
 }
 

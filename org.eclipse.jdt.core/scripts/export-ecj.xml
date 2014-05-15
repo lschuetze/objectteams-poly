@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <!--
-    Copyright (c) 2007, 2013 IBM Corporation and others.
+    Copyright (c) 2007, 2014 IBM Corporation and others.
     All rights reserved. This program and the accompanying materials
     are made available under the terms of the Eclipse Public License v1.0
     which accompanies this distribution, and is available at
@@ -31,11 +31,13 @@
 			project.setProperty("bundleVersionService", sArray[3]);
 			project.setProperty("bundleVersionQualifer", sArray[4])
 		</script>
+<!--{ObjectTeams: debug: -->
 		<echo message="bundleVersion: ${bundleVersion}"/>
 		<echo message="bundleVersionMajor: ${bundleVersionMajor}"/>
 		<echo message="bundleVersionMinor: ${bundleVersionMinor}"/>
 		<echo message="bundleVersionService: ${bundleVersionService}"/>
 		<echo message="bundleVersionQualifier: ${bundleVersionQualifer}"/>
+<!-- SH} -->
 		<property name="ecj-temp-folder" value="${basedir}/ecj-temp-folder" />
 		<property name="ecj-temp-src-folder" value="${basedir}/ecj-temp-src-folder" />
 		<mkdir dir="${ecj-temp-src-folder}" />
@@ -111,6 +113,7 @@
 		<delete file="${dest}/ecotj-${buildLabel}.jar" failonerror="false"/>
 		<copy todir="${ecj-temp-folder}">
 			<fileset dir="scripts/binary" />
+			<fileset dir="scripts" includes="ecj.1"/>
 		</copy>
 		<replace file="${ecj-temp-folder}/META-INF/MANIFEST.MF" token="qualifier" value="${buildLabel}"/>
 		<zip zipfile="${dest}/ecotj-${buildLabel}.jar">
@@ -122,9 +125,9 @@
 			</fileset>
 		</zip>
 
-
 		<echo message="UPDATE ecotjsrc-${buildLabel}.jar" />
 		<delete file="${dest}/ecotjsrc-${buildLabel}.jar" failonerror="false"/>
+<!-- SH} -->
 		<copy todir="${ecj-temp-src-folder}">
 			<fileset dir="scripts/source" />
 		</copy>
@@ -140,6 +143,7 @@
 			</zipfileset>
 			<fileset dir="${ecj-temp-folder}">
 				<include name="**/messages.properties"/>
+				<include name="ecj.1"/>
 			</fileset>
 			<zipfileset dir="compiler" />
 			<zipfileset dir="antadapter">
@@ -161,6 +165,7 @@
 		<delete file="${dest}/ecj_all.jar" failonerror="false"/>
 		<mkdir dir="${ecj-temp-src-folder}/src" />
 		<copy todir="${ecj-temp-folder}">
+			<fileset dir="scripts" includes="ecj.1"/>
 			<fileset dir="scripts/binary" />
 		</copy>
 		<replace file="${ecj-temp-folder}/META-INF/MANIFEST.MF" token="qualifier" value="${bundleVersionQualifer}"/>

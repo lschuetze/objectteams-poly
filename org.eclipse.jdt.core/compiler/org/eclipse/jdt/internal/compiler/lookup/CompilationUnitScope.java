@@ -77,6 +77,18 @@ public class CompilationUnitScope extends Scope {
 	
 	private ImportBinding[] tempImports;	// to keep a record of resolved imports while traversing all in faultInImports()
 	
+		/**
+		 * Flag that should be set during annotation traversal or similar runs
+		 * to prevent caching of failures regarding imports of yet to be generated classes.
+		 */
+		public boolean suppressImportErrors;
+		
+		/**
+		 * Skips import caching if unresolved imports were
+		 * found last time.
+		 */
+		private boolean skipCachingImports;
+	
 public CompilationUnitScope(CompilationUnitDeclaration unit, LookupEnvironment environment) {
 	super(COMPILATION_UNIT_SCOPE, null);
 	this.environment = environment;
@@ -563,7 +575,11 @@ private boolean faultInImportsDone = false;
 public
 // SH}
 void faultInImports() {
-	if (this.typeOrPackageCache != null)
+	boolean unresolvedFound = false;
+	// should report unresolved only if we are not suppressing caching of failed resolutions
+	boolean reportUnresolved = !this.suppressImportErrors;
+
+	if (this.typeOrPackageCache != null && !this.skipCachingImports)
 		return; // can be called when a field constant is resolved before static imports
 	if (this.referenceContext.imports == null) {
 		this.typeOrPackageCache = new HashtableOfObject(1);
@@ -647,7 +663,10 @@ void faultInImports() {
 				if (importBinding.problemId() == ProblemReasons.Ambiguous) {
 					// keep it unless a duplicate can be found below
 				} else {
-					problemReporter().importProblem(importReference, importBinding);
+					unresolvedFound = true;
+					if (reportUnresolved) {
+						problemReporter().importProblem(importReference, importBinding);
+					}
 					continue nextImport;
 				}
 // :giro
@@ -694,6 +713,7 @@ void faultInImports() {
 		if (!binding.onDemand && binding.resolvedImport instanceof ReferenceBinding || binding instanceof ImportConflictBinding)
 			this.typeOrPackageCache.put(binding.compoundName[binding.compoundName.length - 1], binding);
 	}
+	this.skipCachingImports = this.suppressImportErrors && unresolvedFound;
 }
 public void faultInTypes() {
 	faultInImports();
