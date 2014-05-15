@@ -30,4 +30,4 @@ Export-Package: org.eclipse.objectteams.otdt.debug.ui,
  org.eclipse.objectteams.otdt.debug.ui.internal.preferences;x-internal:=true,
  org.eclipse.objectteams.otdt.debug.ui.views
 Bundle-ActivationPolicy: lazy
-Bundle-RequiredExecutionEnvironment: J2SE-1.5
+Bundle-RequiredExecutionEnvironment: JavaSE-1.7

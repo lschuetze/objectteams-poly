@@ -26,4 +26,4 @@ Bundle-Localization: plugin
 Export-Package: org.eclipse.objectteams.otdt.internal.migration;x-internal:=true,
  org.eclipse.objectteams.otdt.internal.pde.ui;x-internal:=true,
  org.eclipse.objectteams.otdt.internal.pde.validation;x-internal:=true
-Bundle-RequiredExecutionEnvironment: J2SE-1.5
+Bundle-RequiredExecutionEnvironment: JavaSE-1.7
