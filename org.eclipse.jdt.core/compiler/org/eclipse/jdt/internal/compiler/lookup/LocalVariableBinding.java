@@ -259,6 +259,7 @@ System.err.println("record(3) "+this);
 	}
 
 	public void resetInitializations() {
+new RuntimeException("resetting local "+this+'@'+this.hashCode()).printStackTrace();
 		this.initializationCount = 0;
 		this.initializationPCs = null;
 	}
