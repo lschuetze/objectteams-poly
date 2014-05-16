@@ -56,7 +56,6 @@ public class LocalVariableBinding extends VariableBinding {
 
 	public FakedTrackingVariable closeTracker; // track closing of instances of type AutoCloseable, maybe null
 
-static boolean trigger;
 	// for synthetic local variables
 	// if declaration slot is not positionned, the variable will not be listed in attribute
 	// note that the name of a variable should be chosen so as not to conflict with user ones (usually starting with a space char is all needed)
@@ -64,10 +63,8 @@ static boolean trigger;
 		super(name, type, modifiers, isArgument ? Constant.NotAConstant : null);
 		if (isArgument) this.tagBits |= TagBits.IsArgument;
 		this.tagBits |= TagBits.IsEffectivelyFinal;
-if (trigger)
-	new RuntimeException("new local "+this).printStackTrace();
-if ("packageExplorer".equals(new String(name)) && type.isRoleType())
-	trigger = true;
+if ("adaptor".equals(new String(name)))
+	new RuntimeException("new local "+this+'@'+hashCode()).printStackTrace();
 	}
 
 	// regular local variable or argument
