@@ -5392,9 +5392,9 @@ public class ClassFile implements TypeConstants, TypeIds {
 		System.err.println("no local at resolvedPosition "+resolvedPosition+" in "+new String(this.referenceBinding.readableName()));
 		System.err.println("currentPC="+currentPC);
 		for (int i = 0; i < this.codeStream.locals.length; i++) {
-			System.err.println("Local "+i+" = "+this.codeStream.locals[i]+'@'+this.codeStream.locals[i].hashCode());
 			LocalVariableBinding localVariable = this.codeStream.locals[i];
 			if (localVariable == null) continue;
+			System.err.println("Local "+i+" = "+this.codeStream.locals[i]+'@'+this.codeStream.locals[i].hashCode());
 			if (resolvedPosition == localVariable.resolvedPosition) {
 				for (int j = 0; j < localVariable.initializationCount; j++) {
 					int startPC = localVariable.initializationPCs[j << 1];
