@@ -63,8 +63,6 @@ public class LocalVariableBinding extends VariableBinding {
 		super(name, type, modifiers, isArgument ? Constant.NotAConstant : null);
 		if (isArgument) this.tagBits |= TagBits.IsArgument;
 		this.tagBits |= TagBits.IsEffectivelyFinal;
-if ("adaptor".equals(new String(name)))
-	new RuntimeException("new local "+this+'@'+hashCode()).printStackTrace();
 	}
 
 	// regular local variable or argument
@@ -224,20 +222,17 @@ if ("adaptor".equals(new String(name)))
 	public void recordInitializationStartPC(int pc) {
 
 		if (this.initializationPCs == null) {
-new RuntimeException("record(1) "+this+'@'+this.hashCode()).printStackTrace();
 			return;
 		}
 		if (this.initializationCount > 0) {
 			int previousEndPC = this.initializationPCs[ ((this.initializationCount - 1) << 1) + 1];
 			 // interval still open, keep using it (108180)
 			if (previousEndPC == -1) {
-System.err.println("record(2) "+this+'@'+this.hashCode());
 				return;
 			}
 			// optimize cases where reopening a contiguous interval
 			if (previousEndPC == pc) {
 				this.initializationPCs[ ((this.initializationCount - 1) << 1) + 1] = -1; // reuse previous interval (its range will be augmented)
-System.err.println("record(3) "+this+'@'+this.hashCode());
 				return;
 			}
 		}
