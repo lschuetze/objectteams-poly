@@ -56,6 +56,7 @@ public class LocalVariableBinding extends VariableBinding {
 
 	public FakedTrackingVariable closeTracker; // track closing of instances of type AutoCloseable, maybe null
 
+static boolean trigger;
 	// for synthetic local variables
 	// if declaration slot is not positionned, the variable will not be listed in attribute
 	// note that the name of a variable should be chosen so as not to conflict with user ones (usually starting with a space char is all needed)
@@ -63,6 +64,10 @@ public class LocalVariableBinding extends VariableBinding {
 		super(name, type, modifiers, isArgument ? Constant.NotAConstant : null);
 		if (isArgument) this.tagBits |= TagBits.IsArgument;
 		this.tagBits |= TagBits.IsEffectivelyFinal;
+if (trigger)
+	new RuntimeException("new local "+this).printStackTrace();
+if ("packageExplorer".equals(new String(name)) && type.isRoleType())
+	trigger = true;
 	}
 
 	// regular local variable or argument
@@ -222,7 +227,7 @@ public class LocalVariableBinding extends VariableBinding {
 	public void recordInitializationStartPC(int pc) {
 
 		if (this.initializationPCs == null) {
-System.err.println("record(1) "+this+'@'+this.hashCode());
+new RuntimeException("record(1) "+this+'@'+this.hashCode()).printStackTrace();
 			return;
 		}
 		if (this.initializationCount > 0) {
@@ -259,7 +264,6 @@ System.err.println("record(3) "+this+'@'+this.hashCode());
 	}
 
 	public void resetInitializations() {
-new RuntimeException("resetting local "+this+'@'+this.hashCode()).printStackTrace();
 		this.initializationCount = 0;
 		this.initializationPCs = null;
 	}
