@@ -108,7 +108,7 @@ public abstract class AbstractMethodDeclaration
 
 //	{ObjectTeams
 	// fake argument binding for all role method to allocate a slot for a tsuper marker arg added dyring bytecode-copy:
-	private static final char[] TSUPER_PLACEHOLDER = "$tsuperMarkerArgPlaceholder$".toCharArray(); //$NON-NLS-1$
+	private static final char[] TSUPER_PLACEHOLDER = "_OT$tsuperMarkerArgPlaceholder$".toCharArray(); //$NON-NLS-1$
     // this holds additional info for role methods:
     public MethodModel model = null;
 	public MethodModel getModel() {
