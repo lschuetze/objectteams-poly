@@ -1,7 +1,7 @@
 /**********************************************************************
  * This file is part of "Object Teams Dynamic Runtime Environment"
  * 
- * Copyright 2009, 2012 Oliver Frank and others.
+ * Copyright 2009, 2014 Oliver Frank and others.
  * 
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -41,7 +41,7 @@ public class CreateSuperCallInCallOrigAdapter extends AbstractTransformableClass
 	}
 
 	@Override
-	public void transform() {
+	public boolean transform() {
 		MethodNode callOrig = getMethod(ConstantMembers.callOrig);
 		InsnList instructions = new InsnList();
 		
@@ -54,5 +54,6 @@ public class CreateSuperCallInCallOrigAdapter extends AbstractTransformableClass
 		instructions.add(new InsnNode(Opcodes.ARETURN));
 		addNewLabelToSwitch(callOrig.instructions, instructions, joinpointId);
 		callOrig.maxStack = Math.max(callOrig.maxStack, args.length + 1);
+		return true;
 	}
 }

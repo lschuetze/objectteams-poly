@@ -1,7 +1,7 @@
 /**********************************************************************
  * This file is part of "Object Teams Dynamic Runtime Environment"
  * 
- * Copyright 2009, 2012 Oliver Frank and others.
+ * Copyright 2009, 2014 Oliver Frank and others.
  * 
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -55,9 +55,9 @@ public class CreateSwitchAdapter extends AbstractTransformableClassNode {
 	}
 	
 	@Override
-	public void transform() {
+	public boolean transform() {
 		MethodNode methodNode = getMethod(method);
-		if (methodNode == null) return; // doesn't exist, don't transform
+		if (methodNode == null) return false; // doesn't exist, don't transform
 		methodNode.instructions.clear();
 		
 		addPreSwitchInstructions(methodNode);
@@ -71,6 +71,7 @@ public class CreateSwitchAdapter extends AbstractTransformableClassNode {
 		
 		addPostSwitchInstructions(methodNode);
 		methodNode.maxStack = getMaxStack();
+		return true;
 	}
 	
 	/**

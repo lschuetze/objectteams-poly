@@ -140,10 +140,11 @@ class AsmWritableBoundClass extends AsmBoundClass {
 		for (AbstractTransformableClassNode node : nodes) {
 			reader = new ClassReader(allocateAndGetBytecode());
 			reader.accept(node, ClassReader.SKIP_FRAMES);
-			node.transform();
-			writer = new ClassWriter(reader, ClassWriter.COMPUTE_FRAMES);
-			node.accept(writer);
-			setBytecode(writer.toByteArray());
+			if (node.transform()) {
+				writer = new ClassWriter(reader, ClassWriter.COMPUTE_FRAMES);
+				node.accept(writer);
+				setBytecode(writer.toByteArray());
+			}
 		}
 		
 		dump();

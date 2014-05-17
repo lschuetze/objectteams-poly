@@ -1,7 +1,7 @@
 /**********************************************************************
  * This file is part of "Object Teams Dynamic Runtime Environment"
  * 
- * Copyright 2009, 2012 Oliver Frank and others.
+ * Copyright 2009, 2014 Oliver Frank and others.
  * 
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -65,7 +65,7 @@ public class CreateFieldAccessAdapter extends AbstractTransformableClassNode {
 	}
 
 	@Override
-	public void transform() {
+	public boolean transform() {
 
 		InsnList instructions = new InsnList();
 		// put accessId on the stack
@@ -125,6 +125,8 @@ public class CreateFieldAccessAdapter extends AbstractTransformableClassNode {
 		//add the instructions to a new label in the existing switch
 		MethodNode method = getMethod(access);
 		addNewLabelToSwitch(method.instructions, instructions, accessId);
+		
+		return true;
 	}
 
 }

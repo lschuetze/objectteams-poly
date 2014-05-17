@@ -58,7 +58,7 @@ public class CreateMethodAccessAdapter extends AbstractTransformableClassNode {
 	}
 	
 	@Override
-	public void transform() {
+	public boolean transform() {
 		MethodNode methodNode = getMethod(method);
 		InsnList instructions = new InsnList();
 		
@@ -121,6 +121,8 @@ public class CreateMethodAccessAdapter extends AbstractTransformableClassNode {
 		//add the instructions to a new label in the existing switch
 		MethodNode access = getMethod(this.access);
 		addNewLabelToSwitch(access.instructions, instructions, accessId);
+		
+		return true;
 	}
 
 }

@@ -1,7 +1,7 @@
 /**********************************************************************
  * This file is part of "Object Teams Dynamic Runtime Environment"
  * 
- * Copyright 2009, 2012 Oliver Frank and others.
+ * Copyright 2009, 2014 Oliver Frank and others.
  * 
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -52,8 +52,10 @@ public class MoveCodeToCallOrigAdapter extends AbstractTransformableClassNode {
 		}
 	}
 	
-	public void transform() {
+	public boolean transform() {
 		MethodNode orgMethod = getMethod(method);
+		if ((orgMethod.access & Opcodes.ACC_ABSTRACT) != 0) return false;
+		
 		MethodNode callOrig = getMethod(this.callOrig);
 		
 		Type returnType = Type.getReturnType(orgMethod.desc);
@@ -105,5 +107,6 @@ public class MoveCodeToCallOrigAdapter extends AbstractTransformableClassNode {
 			callOrig.maxStack += 1;
 		}
 		callOrig.maxLocals = Math.max(callOrig.maxLocals, orgMethod.maxLocals);
+		return true;
 	}
 }

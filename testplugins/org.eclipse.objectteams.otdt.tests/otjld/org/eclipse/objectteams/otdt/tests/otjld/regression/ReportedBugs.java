@@ -1,13 +1,12 @@
 /**********************************************************************
  * This file is part of "Object Teams Development Tooling"-Software
  * 
- * Copyright 2005-2010 Berlin Institute of Technology, Germany.
+ * Copyright 2005, 2014 Berlin Institute of Technology, Germany.
  * 
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
- * $Id$
  * 
  * Please visit http://www.eclipse.org/objectteams for updates and contact.
  * 
@@ -2269,6 +2268,34 @@ public class ReportedBugs extends AbstractOTJLDTest {
     		"	                            ^^^^^^^\n" + 
     		"Missing cannot be resolved to a type\n" + 
     		"----------\n");
+    }
+
+    // tiny exercise towards sh51: OTDRE could not weave into abstract base method.
+    public void testB11_sh51_0() {
+    	runConformTest(
+    		new String[] {
+    			"TeamB11sh51_0.java",
+    			"public team class TeamB11sh51_0 {\n" +
+    			"	protected class R playedBy TB11sh51_0_1 {\n" +
+    			"		void print() { System.out.print('p'); }\n" +
+    			"		print <- after test;\n" +
+    			"	}\n" +
+    			"	public static void main(String... args) {\n" +
+    			"		within (new TeamB11sh51_0()) {\n" +
+    			"			new TB11sh51_0_2().test();\n" +
+    			"		}\n" +
+    			"	}\n" +
+    			"}\n",
+    			"TB11sh51_0_1.java",
+    			"public abstract class TB11sh51_0_1 {\n" +
+    			"	abstract void test();\n" +
+    			"}\n",
+    			"TB11sh51_0_2.java",
+    			"public class TB11sh51_0_2 extends TB11sh51_0_1 {\n" +
+    			"	void test() { System.out.print('t'); }\n" +
+    			"}\n",
+    		},
+    		"tp");
     }
 
     // curiosities if bound base method is covariantly redefined, reported by hsudof, base version: OK

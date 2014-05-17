@@ -1,7 +1,7 @@
 /**********************************************************************
  * This file is part of "Object Teams Dynamic Runtime Environment"
  * 
- * Copyright 2009, 2012 Stephan Herrmann.
+ * Copyright 2009, 2014 Stephan Herrmann.
  * 
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -38,7 +38,7 @@ public class CreateAddRemoveRoleMethod extends AbstractTransformableClassNode {
 
 	
 	@Override
-	protected void transform() {
+	protected boolean transform() {
 		// void _OT$addRemoveRole(Object role, boolean isAdding) {
 		MethodNode method = getMethod(ConstantMembers.addOrRemoveRole);
 		method.instructions.clear();
@@ -75,6 +75,7 @@ public class CreateAddRemoveRoleMethod extends AbstractTransformableClassNode {
 		method.maxStack = 3;
 		method.maxLocals = 4; // this + 2 args + 1 local ("set")
 
+		return true;
 	}
 
 	void genGetInitializedRoleSet(InsnList instructions, int targetLocal) {

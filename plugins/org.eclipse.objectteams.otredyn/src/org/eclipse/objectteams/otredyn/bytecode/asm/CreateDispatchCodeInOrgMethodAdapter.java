@@ -1,7 +1,7 @@
 /**********************************************************************
  * This file is part of "Object Teams Dynamic Runtime Environment"
  * 
- * Copyright 2009, 2012 Oliver Frank and others.
+ * Copyright 2009, 2014 Oliver Frank and others.
  * 
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -60,13 +60,15 @@ public class CreateDispatchCodeInOrgMethodAdapter extends
 	}
 
 	@Override
-	public void transform() {
+	public boolean transform() {
 		MethodNode orgMethod = getMethod(method);
+		if ((orgMethod.access & Opcodes.ACC_ABSTRACT) != 0) return false;
 		
 		orgMethod.instructions.clear();
 		orgMethod.instructions.add(getDispatchCode(orgMethod, joinPointId, boundMethodId));
 		orgMethod.maxStack = getMaxStack();
 		orgMethod.maxLocals = getMaxLocals();
+		return true;
 	}
 
 	@Override
