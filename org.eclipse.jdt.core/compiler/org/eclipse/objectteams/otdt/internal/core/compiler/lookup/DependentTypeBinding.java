@@ -24,6 +24,7 @@ import java.util.WeakHashMap;
 
 import org.eclipse.jdt.core.compiler.CharOperation;
 import org.eclipse.jdt.internal.compiler.ast.ASTNode;
+import org.eclipse.jdt.internal.compiler.ast.Argument;
 import org.eclipse.jdt.internal.compiler.lookup.ArrayBinding;
 import org.eclipse.jdt.internal.compiler.lookup.Binding;
 import org.eclipse.jdt.internal.compiler.lookup.ExtraCompilerModifiers;
@@ -147,6 +148,12 @@ public class DependentTypeBinding extends ParameterizedTypeBinding {
 			((LocalVariableBinding)anchor).useFlag = LocalVariableBinding.USED;
 		else if (anchor instanceof FieldBinding)
 			((FieldBinding)anchor).modifiers |= ExtraCompilerModifiers.AccLocallyUsed; // avoid unused-warning
+	}
+	
+	public void updateAnchor(Argument[] methodArguments) {
+		if (this._argumentPosition > -1) {
+			this._teamAnchor = methodArguments[this._argumentPosition].binding;
+		}
 	}
 
 	public ITeamAnchor getAnchor() { return this._teamAnchor; }

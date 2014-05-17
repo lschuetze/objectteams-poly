@@ -1,18 +1,18 @@
 /**********************************************************************
  * This file is part of "Object Teams Development Tooling"-Software
  * 
- * Copyright 2009 Stephan Herrmann
+ * Copyright 2009, 2014 Stephan Herrmann
  * 
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
- * $Id: VisitorsAdaptor.java 23449 2010-02-04 20:26:45Z stephan $
  *
  * Please visit http://www.eclipse.org/objectteams for updates and contact.
  **********************************************************************/
 package org.eclipse.objectteams.otdt.internal.apt;
 
+import org.eclipse.jdt.internal.compiler.ast.AbstractMethodDeclaration;
 import org.eclipse.jdt.internal.compiler.ast.Annotation;
 import org.eclipse.jdt.internal.compiler.ast.Argument;
 import org.eclipse.jdt.internal.compiler.ast.TypeDeclaration;
@@ -20,10 +20,12 @@ import org.eclipse.jdt.internal.compiler.lookup.AptSourceLocalVariableBinding;
 import org.eclipse.jdt.internal.compiler.lookup.Binding;
 import org.eclipse.jdt.internal.compiler.lookup.BlockScope;
 import org.eclipse.jdt.internal.compiler.lookup.MethodBinding;
+import org.eclipse.jdt.internal.compiler.lookup.MethodScope;
 import org.eclipse.jdt.internal.compiler.lookup.Scope;
 import org.eclipse.objectteams.otdt.internal.core.compiler.ast.AbstractMethodMappingDeclaration;
 import org.eclipse.objectteams.otdt.internal.core.compiler.control.Dependencies;
 import org.eclipse.objectteams.otdt.internal.core.compiler.control.ITranslationStates;
+import org.eclipse.objectteams.otdt.internal.core.compiler.lookup.DependentTypeBinding;
 import org.eclipse.objectteams.otdt.internal.core.compiler.model.RoleModel;
 
 import base org.eclipse.jdt.internal.compiler.apt.dispatch.AnnotationDiscoveryVisitor;
@@ -75,7 +77,17 @@ public team class VisitorsAdaptor {
 				}
 				return false;
 			} else {
-				return base.visit(argument, scope);
+				boolean result = base.visit(argument, scope);
+				if (argument.binding != null && argument.binding.type instanceof DependentTypeBinding) {
+					// avoid that an unreplaced LVB leaks past this point:
+					MethodScope methodScope = scope.methodScope();
+					if (methodScope != null) {
+						AbstractMethodDeclaration method = methodScope.referenceMethod();
+						if (method != null)
+							((DependentTypeBinding)argument.binding.type).updateAnchor(method.arguments);
+					}
+				}
+				return result;
 			}
 		}
 	}
