@@ -4053,7 +4053,7 @@ public class Java5 extends AbstractOTJLDTest {
 			    "    void test() throws NoSuchMethodException {\n" +
 			    "        new R().test();\n" +
 			    "    }\n" +
-			    (this.weavingScheme == WeavingScheme.OTRE && this.complianceLevel >= ClassFileConstants.JDK1_8
+			    (this.weavingScheme == WeavingScheme.OTRE && IS_JRE_8
 			    ? "" // skip execution
 			    :
 			    "    public static void main(String[] args) throws NoSuchMethodException {\n" +
@@ -4096,7 +4096,7 @@ public class Java5 extends AbstractOTJLDTest {
 			    "}\n" +
 			    "    \n"
             },
-		    (this.weavingScheme == WeavingScheme.OTRE && this.complianceLevel >= ClassFileConstants.JDK1_8
+		    (this.weavingScheme == WeavingScheme.OTRE && IS_JRE_8
 		    ? ""
 		    : "@IA117cfa5e(val1=TWO, val2=C)@org.objectteams.ImplicitTeamActivation()Active"));
     }

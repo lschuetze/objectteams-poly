@@ -1460,6 +1460,7 @@ public class AstGenerator extends AstFactory {
 			throw new InternalCompilerError("Unexpected type reference: "+original); //$NON-NLS-1$
 		}
 		result.setBaseclassDecapsulation(DecapsulationState.REPORTED);
+		result.bits |= ASTNode.IgnoreRawTypeCheck;
 		return result;
 	}
 

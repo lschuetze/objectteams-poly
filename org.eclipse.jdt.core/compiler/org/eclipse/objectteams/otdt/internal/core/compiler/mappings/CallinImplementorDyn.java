@@ -432,7 +432,8 @@ public class CallinImplementorDyn extends MethodMappingImplementor {
 								canLiftingFail |= checkLiftingProblem(teamDecl, callinDecl, roleType);
 	
 								roleVar = (LOCAL_ROLE+statements.size()).toCharArray();
-								blockStatements.add(gen.localVariable(roleVar, roleType.sourceName(),				//   RoleType local$n = this._OT$liftToRoleType((BaseType)base);
+								blockStatements.add(gen.localVariable(roleVar, 										//   RoleType local$n = this._OT$liftToRoleType((BaseType)base);
+														gen.alienScopeTypeReference(gen.typeReference(roleType), callinDecl.scope),
 										Lifting.liftCall(callMethod.scope,
 														 gen.thisReference(),
 														 gen.castExpression(gen.baseNameReference(IOTConstants.BASE), 
