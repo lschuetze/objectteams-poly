@@ -1588,6 +1588,10 @@ public void test012(){
         "    -target <version>  set classfile target: 1.1 to 1.8 (or 5, 5.0, etc)\n" +
         "                       cldc1.1 can also be used to generate the StackMap\n" +
         "                       attribute\n" +
+//{ObjectTeams: specific target option:
+        "    -ot.weaving:otre   compile for the traditional Object Teams weaver\n" +
+        "    -ot.weaving:otdre  compile for the dynamic Object Teams weaver\n" +
+// SH}
         " \n" +
         " Warning options:\n" +
         "    -deprecation     + deprecation outside deprecated code (equivalent to\n" +

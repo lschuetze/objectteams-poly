@@ -2488,6 +2488,20 @@ public void configure(String[] argv) {
 							CompilerOptions.REPORT_NONE);
 				    continue;
 				}
+				if (currentArg.equals("-ot.weaving:otre")) { //$NON-NLS-1$
+				    mode = DEFAULT;
+					this.options.put(
+							CompilerOptions.OPTION_WeavingScheme,
+							CompilerOptions.WeavingScheme.OTRE.toString());
+				    continue;
+				}
+				if (currentArg.equals("-ot.weaving:otdre")) { //$NON-NLS-1$
+				    mode = DEFAULT;
+					this.options.put(
+							CompilerOptions.OPTION_WeavingScheme,
+							CompilerOptions.WeavingScheme.OTDRE.toString());
+				    continue;
+				}
 // SH}
 				// tolerated javac options - quietly filtered out
 				if (currentArg.startsWith("-X")) { //$NON-NLS-1$
