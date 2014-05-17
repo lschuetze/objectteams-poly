@@ -42,33 +42,45 @@ import org.objectweb.asm.Opcodes;
  */
 public abstract class AbstractBoundClass implements IBoundClass {
 	
+	private static enum WeavingTaskType {
+		WEAVE_BINDING_OF_SUBCLASS,
+		WEAVE_BINDING,
+		WEAVE_INHERITED_BINDING,
+		WEAVE_METHOD_ACCESS,
+		WEAVE_FIELD_ACCESS,
+		WEAVE_INHERITED_MEMBER_ACCESS
+	}
+
 	/**
 	 * A structure that is internally used to store which methods are still woven
 	 * and which has to be woven.
 	 */
 	private static class WeavingTask {
-		public static enum WeavingTaskType {
-			WEAVE_BINDING_OF_SUBCLASS,
-			WEAVE_BINDING,
-			WEAVE_INHERITED_BINDING,
-			WEAVE_METHOD_ACCESS,
-			WEAVE_FIELD_ACCESS,
-			WEAVE_INHERITED_MEMBER_ACCESS
-		}
 		
 		private WeavingTaskType weavingTaskType;
 		private String memberName;
 		private String memberSignature;
+		private int baseFlags;
 		private boolean doAllTransformations;
 		private boolean isHandleCovariantReturn;
 
-		public WeavingTask(WeavingTaskType weavingTaskType, String memberName, String memberSignature, boolean handleCovariantReturn) {
+		public WeavingTask(WeavingTaskType weavingTaskType, String memberName, String memberSignature, int baseFlags, boolean handleCovariantReturn) {
 			this.weavingTaskType = weavingTaskType;
 			this.memberName = memberName;
 			this.memberSignature = memberSignature;
 			this.isHandleCovariantReturn = handleCovariantReturn;
+			this.baseFlags = baseFlags;
 		}
 		
+		public WeavingTask(WeavingTaskType weavingTaskType, Method method, WeavingTask upstream) {
+			this(weavingTaskType, method.getName(), method.getSignature(),
+					upstream.getBaseFlags(), upstream.isHandleCovariantReturn());
+		}
+
+		public WeavingTask(WeavingTaskType type) {
+			this(type, null, null, 0, false);
+		}
+
 		/**
 		 * Returns the type of the WeavingTask
 		 * @return
@@ -91,6 +103,10 @@ public abstract class AbstractBoundClass implements IBoundClass {
 		 */
 		public String getMemberSignature() {
 			return memberSignature;
+		}
+		
+		public int getBaseFlags() {
+			return baseFlags;
 		}
 		
 		/**
@@ -470,7 +486,7 @@ public abstract class AbstractBoundClass implements IBoundClass {
 		}
 	}
 
-	public synchronized Method getMethod(String name, String desc, boolean allowCovariantReturn) {
+	public synchronized Method getMethod(String name, String desc, int flags, boolean allowCovariantReturn) {
 		parseBytecode();
 		String methodKey = getMethodKey(name, desc);
 		Method method = methods.get(methodKey);
@@ -478,10 +494,18 @@ public abstract class AbstractBoundClass implements IBoundClass {
 			method = null; // don't use this
 		if (method == null) {
 			// class was not yet loaded
-			method = new Method(name, desc);
+			method = new Method(name, desc, ((flags&IBinding.STATIC_BASE) != 0), 0/*accessFlags*/);
 			methods.put(methodKey, method);
 		}
 		return method;
+	}
+	
+	Method getMethod(WeavingTask task) {
+		return getMethod(task.getMemberName(), task.getMemberSignature(), task.getBaseFlags(), task.isHandleCovariantReturn());
+	}
+
+	Method getMethod(Method method, WeavingTask task) {
+		return getMethod(method.getName(), method.getSignature(), task.getBaseFlags(), task.isHandleCovariantReturn());
 	}
 
 	// same as above but specifically request a static/non-static method
@@ -607,12 +631,8 @@ public abstract class AbstractBoundClass implements IBoundClass {
 						//No, so weave this class and delegate to the super class
 						weaveBindingInNotImplementedMethod(task);
 						AbstractBoundClass superclass = getSuperclass();
-						Method superMethod = superclass.getMethod(method.getName(), method.getSignature(),
-																  task.isHandleCovariantReturn());
-						WeavingTask newTask = new WeavingTask(
-								WeavingTask.WeavingTaskType.WEAVE_BINDING_OF_SUBCLASS,
-								superMethod.getName(), superMethod.getSignature(),
-								task.isHandleCovariantReturn());
+						Method superMethod = superclass.getMethod(method, task);
+						WeavingTask newTask = new WeavingTask(WeavingTaskType.WEAVE_BINDING_OF_SUBCLASS, superMethod, task);
 						superclass.addWeavingTask(newTask);
 					}
 
@@ -625,12 +645,8 @@ public abstract class AbstractBoundClass implements IBoundClass {
 //					if (!method.isPrivate()) {
 						// Delegate the WeavingTask to the subclasses
 						for (AbstractBoundClass subclass : getSubclasses()) {
-							Method subMethod = subclass.getMethod(method.getName(), method.getSignature(),
-																  task.isHandleCovariantReturn());
-							WeavingTask newTask = new WeavingTask(
-									WeavingTask.WeavingTaskType.WEAVE_INHERITED_BINDING,
-									subMethod.getName(), subMethod.getSignature(),
-									task.isHandleCovariantReturn());
+							Method subMethod = subclass.getMethod(method, task);
+							WeavingTask newTask = new WeavingTask(WeavingTaskType.WEAVE_INHERITED_BINDING, subMethod, task);
 							subclass.addWeavingTask(newTask);
 							TeamManager.mergeJoinpoints(this, subclass, method, subMethod, task.isHandleCovariantReturn());
 						}
@@ -647,12 +663,8 @@ public abstract class AbstractBoundClass implements IBoundClass {
 
 				// Delegate the WeavingTask to the subclasses
 				for (AbstractBoundClass subclass : getSubclasses()) {
-					Method subMethod = subclass.getMethod(method.getName(), method.getSignature(),
-														  task.isHandleCovariantReturn());
-					WeavingTask newTask = new WeavingTask(
-							WeavingTask.WeavingTaskType.WEAVE_INHERITED_BINDING, subMethod
-									.getName(), subMethod.getSignature(),
-									task.isHandleCovariantReturn());
+					Method subMethod = subclass.getMethod(method, task);
+					WeavingTask newTask = new WeavingTask(WeavingTaskType.WEAVE_INHERITED_BINDING, subMethod, task);
 					subclass.addWeavingTask(newTask);
 					TeamManager.mergeJoinpoints(this, subclass, method, subMethod, task.isHandleCovariantReturn());
 				}
@@ -681,9 +693,7 @@ public abstract class AbstractBoundClass implements IBoundClass {
 					// If the field is not static it could be accessed through a subclass
 					// so weave the subclass
 					for (AbstractBoundClass subclass : getSubclasses()) {
-						WeavingTask newTask = new WeavingTask(
-								WeavingTask.WeavingTaskType.WEAVE_INHERITED_MEMBER_ACCESS,
-								null, null, false/*handleCovariantReturn*/);
+						WeavingTask newTask = new WeavingTask(WeavingTaskType.WEAVE_INHERITED_MEMBER_ACCESS);
 						subclass.addWeavingTask(newTask);
 					}
 				}
@@ -691,16 +701,13 @@ public abstract class AbstractBoundClass implements IBoundClass {
 			// handle decaspulation binding to a method
 			case WEAVE_METHOD_ACCESS:
 				prepareForFirstMemberAccess();
-				Method method = getMethod(task.getMemberName(), task.getMemberSignature(),
-										  task.isHandleCovariantReturn());
+				Method method = getMethod(task);
 				weaveMethodAccess(method, method.getGlobalId(this));
 				if (!method.isStatic()) {
 					// If the method is not static it could be accessed through a subclass
 					// so weave the subclass
 					for (AbstractBoundClass subclass : getSubclasses()) {
-						WeavingTask newTask = new WeavingTask(
-								WeavingTask.WeavingTaskType.WEAVE_INHERITED_MEMBER_ACCESS,
-								null, null, false/*handleCovariantReturn*/);
+						WeavingTask newTask = new WeavingTask(WeavingTaskType.WEAVE_INHERITED_MEMBER_ACCESS);
 						subclass.addWeavingTask(newTask);
 					}
 				}
@@ -723,16 +730,16 @@ public abstract class AbstractBoundClass implements IBoundClass {
 	}
 
 	public void handleAddingOfBinding(IBinding binding) {
-		WeavingTask.WeavingTaskType type = null;
+		WeavingTaskType type = null;
 		switch (binding.getType()) {
 		case CALLIN_BINDING:
-			type = WeavingTask.WeavingTaskType.WEAVE_BINDING;
+			type = WeavingTaskType.WEAVE_BINDING;
 			break;
 		case FIELD_ACCESS:
-			type = WeavingTask.WeavingTaskType.WEAVE_FIELD_ACCESS;
+			type = WeavingTaskType.WEAVE_FIELD_ACCESS;
 			break;
 		case METHOD_ACCESS:
-			type = WeavingTask.WeavingTaskType.WEAVE_METHOD_ACCESS;
+			type = WeavingTaskType.WEAVE_METHOD_ACCESS;
 			break;
 		default:
 			throw new RuntimeException("Unknown binding type: "
@@ -748,7 +755,8 @@ public abstract class AbstractBoundClass implements IBoundClass {
 //			} catch (ClassNotFoundException e) {
 //				throw new NoClassDefFoundError(e.getMessage());
 //			}
-		WeavingTask task = new WeavingTask(type, binding.getMemberName(), binding.getMemberSignature(), binding.isHandleCovariantReturn());
+		WeavingTask task = new WeavingTask(type, binding.getMemberName(), binding.getMemberSignature(), 
+											binding.getBaseFlags(), binding.isHandleCovariantReturn());
 		addWeavingTask(task);
 	}
 	
@@ -761,11 +769,11 @@ public abstract class AbstractBoundClass implements IBoundClass {
 	}
 	
 	private boolean addWeavingTaskLazy(WeavingTask task) {
-		WeavingTask.WeavingTaskType type = task.getType();
+		WeavingTaskType type = task.getType();
 		boolean isNewTask = false;
-		if (type == WeavingTask.WeavingTaskType.WEAVE_BINDING
-				|| type == WeavingTask.WeavingTaskType.WEAVE_BINDING_OF_SUBCLASS
-				|| type == WeavingTask.WeavingTaskType.WEAVE_INHERITED_BINDING) {
+		if (type == WeavingTaskType.WEAVE_BINDING
+				|| type == WeavingTaskType.WEAVE_BINDING_OF_SUBCLASS
+				|| type == WeavingTaskType.WEAVE_INHERITED_BINDING) {
 			isNewTask = addBindingWeavingTask(task);
 		} else {
 			isNewTask = addAccessWeavingTask(task);
@@ -781,14 +789,14 @@ public abstract class AbstractBoundClass implements IBoundClass {
 	 * @return
 	 */
 	private boolean addAccessWeavingTask(WeavingTask task) {
-		WeavingTask.WeavingTaskType type = task.getType();
+		WeavingTaskType type = task.getType();
 		Member member = null;
 		switch (type) {
 		case WEAVE_FIELD_ACCESS:
 			member = getField(task.getMemberName(), task.getMemberSignature());
 			break;
 		case WEAVE_METHOD_ACCESS:
-			member = getMethod(task.getMemberName(), task.getMemberSignature(), false/*covariantReturn*/);
+			member = getMethod(task);
 			break;
 		case WEAVE_INHERITED_MEMBER_ACCESS:
 			openAccessTasks.put(null, task);
@@ -822,8 +830,7 @@ public abstract class AbstractBoundClass implements IBoundClass {
 	 * @return
 	 */
 	private boolean addBindingWeavingTask(WeavingTask task) {
-		Method method = getMethod(task.getMemberName(), task.getMemberSignature(),
-								  task.isHandleCovariantReturn());
+		Method method = getMethod(task);
 		synchronized (method) {
 			WeavingTask prevTask = completedBindingTasks.get(method);
 			// Is there a already completed task for the method?
@@ -845,7 +852,7 @@ public abstract class AbstractBoundClass implements IBoundClass {
 				return false;
 			case WEAVE_BINDING_OF_SUBCLASS:
 				// In  this case only the callAllBings was redefined.
-				if (task.getType() != WeavingTask.WeavingTaskType.WEAVE_BINDING_OF_SUBCLASS) {
+				if (task.getType() != WeavingTaskType.WEAVE_BINDING_OF_SUBCLASS) {
 					// Do the other transformations, if the new WeavingTask is not the same
 					// as already existing
 					openBindingTasks.put(method, task);
@@ -885,8 +892,7 @@ public abstract class AbstractBoundClass implements IBoundClass {
 
 	private void weaveBindingInStaticMethod(WeavingTask task) {
 		prepareForFirstStaticTransformation();
-		Method method = getMethod(task.getMemberName(), task.getMemberSignature(),
-								  false/*covariantReturn*/);
+		Method method = getMethod(task);
 		int joinpointId = TeamManager
 				.getJoinpointId(getMethodIdentifier(method));
 		int boundMethodId = method.getGlobalId(this);
@@ -901,9 +907,12 @@ public abstract class AbstractBoundClass implements IBoundClass {
 	 * @param task
 	 */
 	private void weaveBindingInNotImplementedMethod(WeavingTask task) {
-		prepareForFirstTransformation();
-		Method method = getMethod(task.getMemberName(), task.getMemberSignature(),
-								  task.isHandleCovariantReturn());
+		if ((task.getBaseFlags() & IBinding.STATIC_BASE) == 0)
+			prepareForFirstTransformation();
+		else
+			prepareForFirstStaticTransformation();
+
+		Method method = getMethod(task);
 		int joinpointId = TeamManager
 				.getJoinpointId(getMethodIdentifier(method));
 		int boundMethodId = method.getGlobalId(this);
@@ -917,7 +926,7 @@ public abstract class AbstractBoundClass implements IBoundClass {
 					isWeavable = false;
 					break;
 				}
-				Method superMethod = superClass.getMethod(task.getMemberName(), task.getMemberSignature(), task.isHandleCovariantReturn());
+				Method superMethod = superClass.getMethod(task);
 				if (superMethod.isImplemented()) {
 					isWeavable = ObjectTeamsTransformer.isWeavable(superClass.getInternalName());
 					break;
@@ -940,8 +949,7 @@ public abstract class AbstractBoundClass implements IBoundClass {
 	 */
 	private void weaveSuperCallInCallOrig(WeavingTask task) {
 		prepareForFirstTransformation();
-		Method method = getMethod(task.getMemberName(), task.getMemberSignature(),
-				                  task.isHandleCovariantReturn());
+		Method method = getMethod(task);
 		int boundMethodId = method.getGlobalId(this);
 		if (task.doAllTransformations()) {
 			createSuperCallInCallOrig(boundMethodId);
@@ -955,8 +963,7 @@ public abstract class AbstractBoundClass implements IBoundClass {
 	 */
 	private void weaveBindingInImplementedMethod(WeavingTask task) {
 		prepareForFirstTransformation();
-		Method method = getMethod(task.getMemberName(), task.getMemberSignature(),
-								  task.isHandleCovariantReturn());
+		Method method = getMethod(task);
 		int joinpointId = TeamManager
 				.getJoinpointId(getMethodIdentifier(method));
 		int boundMethodId = method.getGlobalId(this);
@@ -976,8 +983,7 @@ public abstract class AbstractBoundClass implements IBoundClass {
 	 */
 	private void weaveBindingOfSubclass(WeavingTask task) {
 		prepareForFirstTransformation();
-		Method method = getMethod(task.getMemberName(), task.getMemberSignature(),
-								  task.isHandleCovariantReturn());
+		Method method = getMethod(task);
 		int boundMethodId = method.getGlobalId(this);
 		moveCodeToCallOrig(method, boundMethodId);
 		createCallAllBindingsCallInOrgMethod(method, boundMethodId, false);

@@ -44,6 +44,7 @@ public class Binding implements Comparable<Binding>, IBinding {
 	 * for METHOD_ACCESS or FIELD_ACCESS it is the perTeamAccessId
 	 */
 	private int perTeamId;
+	private int baseFlags;
 	private IBinding.BindingType type;
 	private boolean isHandleCovariantReturn;
 	
@@ -57,7 +58,7 @@ public class Binding implements Comparable<Binding>, IBinding {
 	public Binding(AbstractBoundClass teamClass,
 			String roleClassName, String callinLabel, String boundClassName, 
 			String memberName, String memberSignature, String declaringBaseClassName, 
-			int callinModifier, int callinId, boolean handleCovariantReturn) 
+			int callinModifier, int callinId, int baseFlags, boolean handleCovariantReturn) 
 	{
 		this.teamClass = teamClass;
 		this.callinLabel = callinLabel;
@@ -67,6 +68,7 @@ public class Binding implements Comparable<Binding>, IBinding {
 		this.declaringBaseClassName = declaringBaseClassName;
 		this.callinModifier = callinModifier;
 		this.perTeamId = callinId;
+		this.baseFlags = baseFlags;
 		this.type = IBinding.BindingType.CALLIN_BINDING;
 		this.isHandleCovariantReturn = handleCovariantReturn;
 	}
@@ -96,6 +98,10 @@ public class Binding implements Comparable<Binding>, IBinding {
 
 	public String getMemberSignature() {
 		return memberSignature;
+	}
+	
+	public int getBaseFlags() {
+		return baseFlags;
 	}
 
 	public int getPerTeamId() {
@@ -147,6 +153,8 @@ public class Binding implements Comparable<Binding>, IBinding {
 			if (compare != 0)
 				return compare;
 		}
+		if (this.baseFlags != other.baseFlags)
+			return Integer.valueOf(this.baseFlags).compareTo(other.baseFlags);
 		return (boundClass + memberName + memberSignature).compareTo(other.boundClass + other.memberName + other.memberSignature);
 	}
 

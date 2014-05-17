@@ -3892,7 +3892,9 @@ public class DevelopmentExamples extends AbstractOTJLDTest {
 			    "        }\n" +
 			    "    \n"
             },
-            "OOK");
+            (this.weavingScheme == WeavingScheme.OTRE 
+            ? "OOK"
+            : "KK")); // see restriction https://bugs.eclipse.org/435136#c1
     }
 
     // an inherited static base method is bound (replace) in a sub base class
@@ -3938,7 +3940,9 @@ public class DevelopmentExamples extends AbstractOTJLDTest {
 			    "        }\n" +
 			    "    \n"
             },
-            "OOK");
+            (this.weavingScheme == WeavingScheme.OTRE 
+            ? "OOK"
+            : "KK")); // see restriction https://bugs.eclipse.org/435136#c1
     }
 
     // a static base method is redefined and rebound (after) to a static (also redefined) role method

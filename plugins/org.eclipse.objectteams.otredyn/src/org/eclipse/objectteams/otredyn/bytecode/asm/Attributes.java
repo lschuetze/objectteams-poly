@@ -59,11 +59,12 @@ abstract class Attributes {
 			private String[] declaringBaseClassNames;
 			private int      callinModifier;
 			private int[]    callinIds;
+			private int[]    baseFlags;
 			private boolean  isHandleCovariantReturn;
 			MultiBinding(String roleName, String callinLabel,
 						 String baseClassName, 
 						 String[] baseMethodNames, String[] baseMethodSignatures, String[] declaringBaseClassNames,
-						 int callinModifier, int[] callinIds, boolean handleCovariantReturn) 
+						 int callinModifier, int[] callinIds, int[] baseFlags, boolean handleCovariantReturn) 
 			{
 				this.roleClassName = roleName;
 				this.callinLabel = callinLabel;
@@ -73,6 +74,7 @@ abstract class Attributes {
 				this.declaringBaseClassNames = declaringBaseClassNames;
 				this.callinModifier = callinModifier;
 				this.callinIds = callinIds;
+				this.baseFlags = baseFlags;
 				this.isHandleCovariantReturn = handleCovariantReturn;
 			}
 			protected String getRoleClassName() {
@@ -99,6 +101,10 @@ abstract class Attributes {
 				return callinIds;
 			}
 
+			public int[] getBaseFlags() {
+				return baseFlags;
+			}
+
 			protected String getCallinLabel() {
 				return callinLabel;
 			}
@@ -120,7 +126,7 @@ abstract class Attributes {
 		private void addBinding(int i, String roleName, String callinLabel,
 				                String baseClassName, 
 				                String[] baseMethodNames, String[] baseMethodSignatures, String[] declaringBaseClassNames,
-				                String callinModifierName, int[] callinIds, boolean handleCovariantReturn) {
+				                String callinModifierName, int[] callinIds, int[] baseFlags, boolean handleCovariantReturn) {
 			int callinModifier = 0;
 			if ("before".equals(callinModifierName))
 				callinModifier = Binding.BEFORE;
@@ -131,7 +137,7 @@ abstract class Attributes {
 			this.bindings[i] = new MultiBinding(roleName, callinLabel,
 					                            baseClassName, 
 					                            baseMethodNames, baseMethodSignatures, declaringBaseClassNames,
-					                            callinModifier, callinIds, handleCovariantReturn);
+					                            callinModifier, callinIds, baseFlags, handleCovariantReturn);
 		}
 		
 		@Override
@@ -153,21 +159,19 @@ abstract class Attributes {
 				String[] baseMethodSignatures 	= new String[baseMethodsCount];
 				String[] declaringBaseClassNames 	= new String[baseMethodsCount];
 				int[] callinIds = new int[baseMethodsCount];
+				int[] baseFlags = new int[baseMethodsCount];
 				for (int m = 0; m < baseMethodsCount; m++) {
-					String baseMethodName 		= cr.readUTF8(off, buf);	off += 2;
-					String baseMethodSignature 	= cr.readUTF8(off, buf);	off += 2;
-					String declaringBaseClass 	= cr.readUTF8(off, buf);	off += 2;
-					int callinId				= cr.readInt(off);			off += 4;
-					baseMethodNames[m] 			= baseMethodName;
-					baseMethodSignatures[m]		= baseMethodSignature;
-					declaringBaseClassNames[m]  = declaringBaseClass;
-					callinIds[m] 				= callinId;
-					/* skip baseFlags & translationFlags */					off += 3;
+					baseMethodNames[m] 			= cr.readUTF8(off, buf);	off += 2;
+					baseMethodSignatures[m]		= cr.readUTF8(off, buf);	off += 2;
+					declaringBaseClassNames[m]  = cr.readUTF8(off, buf);	off += 2;
+					callinIds[m] 				= cr.readInt(off);			off += 4;
+					baseFlags[m]				= cr.readByte(off);			off++;
+					/* skip translationFlags */								off += 2;
 				}
 				attr.addBinding(i, roleName, callinLabel,
 								baseClassName,
 								baseMethodNames, baseMethodSignatures, declaringBaseClassNames,
-								callinModifier, callinIds, ((flags & COVARIANT_BASE_RETURN) != 0));
+								callinModifier, callinIds, baseFlags, ((flags & COVARIANT_BASE_RETURN) != 0));
 			}
 			return attr;
 		}

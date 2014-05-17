@@ -29,6 +29,9 @@ public interface IBinding {
 		METHOD_ACCESS
 	}
 	
+	public final static int CALLIN_BASE = 1;
+	public final static int STATIC_BASE = 2;
+
 	BindingType getType();
 
 	/** The base class as declared in the source level playedBy clause. */
@@ -43,11 +46,15 @@ public interface IBinding {
 	/** Signature (JVM encoding) of the bound base member. */
 	String getMemberSignature();
 
+	/** Answer flags describing the base method (static, callin). */
+	int getBaseFlags();
+
 	/** Answer the ID (callinId or perTeamAccessId) */
 	int getPerTeamId();
 
 	/** Does base method matching include overrides with covariant return type?. */
 	boolean isHandleCovariantReturn();
+
 
 
 }

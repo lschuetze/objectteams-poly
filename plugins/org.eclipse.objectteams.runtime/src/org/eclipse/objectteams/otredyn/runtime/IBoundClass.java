@@ -1,7 +1,7 @@
 /**********************************************************************
  * This file is part of "Object Teams Dynamic Runtime Environment"
  * 
- * Copyright 2011, 2012 GK Software AG and others.
+ * Copyright 2011, 2014 GK Software AG and others.
  * 
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -40,12 +40,13 @@ public interface IBoundClass {
 	 * of {@link Method} for the same tuple of name and desc. More formally:
 	 * if (name1 + desc1).equals(name2 + desc2) then 
 	 * getMethod(name1, desc1) == getMethod(name2, desc2) 
+	 * @param flags see IBinding.STATIC_BASE and IBinding.CALLIN_BASE
+	 * @param handleCovariantReturn	whether or not methods with covariant return type should be considered
 	 * @param name the name of the method
 	 * @param desc the signature of the method (JVM encoding)
-	 * @param handleCovariantReturn	whether or not methods with covariant return type should be considered
 	 * @return
 	 */
-	IMethod getMethod(String memberName, String memberSignature, boolean handleCovariantReturn);
+	IMethod getMethod(String memberName, String memberSignature, int flags, boolean handleCovariantReturn);
 
 	/**
 	 * This method creates a globally unique identifier for the method

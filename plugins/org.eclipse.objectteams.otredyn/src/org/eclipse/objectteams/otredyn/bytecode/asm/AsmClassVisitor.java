@@ -106,11 +106,12 @@ class AsmClassVisitor extends ClassVisitor {
 				String[] declaringBaseClassNames = multiBindings[i].getDeclaringBaseClassName();
 				int callinModifier = multiBindings[i].getCallinModifier();
 				int[] callinIds = multiBindings[i].getCallinIds();
+				int[] baseFlags = multiBindings[i].getBaseFlags();
 				boolean handleCovariantReturn = multiBindings[i].isHandleCovariantReturn();
 				for (int j = 0; j < baseMethodNames.length; j++) {
 					Binding binding = new Binding(clazz, roleClassName, callinLabel, baseClassName, 
 												  baseMethodNames[j], baseMethodSignatures[j], declaringBaseClassNames[j],
-												  callinModifier, callinIds[j], handleCovariantReturn);
+												  callinModifier, callinIds[j], baseFlags[j], handleCovariantReturn);
 					clazz.addBinding(binding);
 				}
 			}

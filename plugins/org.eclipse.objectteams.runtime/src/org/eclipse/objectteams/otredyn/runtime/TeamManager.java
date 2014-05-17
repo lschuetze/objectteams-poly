@@ -165,14 +165,17 @@ public class TeamManager implements ITeamManager {
 		IBoundTeam teem = classRepository.getTeam(teamClass.getName(), teamId, teamClass.getClassLoader());
 
 		for (IBinding binding : teem.getBindings()) {
-			String boundClassName = binding.getBoundClass();
+			// OTDRE cannot add methods into a sub base, hence we have to use the declaring base class for static methods:
+			// (see https://bugs.eclipse.org/435136#c1)
+			String boundClassName = ((binding.getBaseFlags() & IBinding.STATIC_BASE) != 0) ? 
+										binding.getDeclaringBaseClassName() : binding.getBoundClass();
 			String boundClassIdentifier = provider.getBoundClassIdentifier(teamClass, boundClassName);
 			// FIXME(SH): the following may need adaptation for OT/Equinox or other multi-classloader settings:
 			IBoundClass boundClass = classRepository.getBoundClass(boundClassName.replace('/', '.'), boundClassIdentifier, teamClass.getClassLoader());
 			// FIXME(SH): if boundClass is a role we need to find tsub roles, too!
 			switch (binding.getType()) {
 			case CALLIN_BINDING:
-				IMethod method = boundClass.getMethod(binding.getMemberName(), binding.getMemberSignature(), binding.isHandleCovariantReturn());
+				IMethod method = boundClass.getMethod(binding.getMemberName(), binding.getMemberSignature(), binding.getBaseFlags(), binding.isHandleCovariantReturn());
 				int joinpointId = getJoinpointId(boundClass
 						.getMethodIdentifier(method));
 				synchronized (method) {
@@ -238,7 +241,7 @@ public class TeamManager implements ITeamManager {
 					member = boundClass.getField(binding.getMemberName(),
 							binding.getMemberSignature());
 				} else {
-					member = boundClass.getMethod(binding.getMemberName(), binding.getMemberSignature(), false/*covariantReturn*/);
+					member = boundClass.getMethod(binding.getMemberName(), binding.getMemberSignature(), 0/*flags*/, false/*covariantReturn*/);
 				}
 				
 				int memberId = member.getGlobalId(boundClass);
@@ -317,7 +320,7 @@ public class TeamManager implements ITeamManager {
 			subClass.addWiringTask(new ISubclassWiringTask() {
 				public void wire(IBoundClass superClass, IBoundClass subClass) {
 					IMethod subMethod = subClass.getMethod(superMethod.getName(), superMethod.getSignature(),
-														   handleCovariantReturn);
+														   0/*flags*/, handleCovariantReturn);
 					mergeJoinpoints(superClass, subClass, superMethod, subMethod, handleCovariantReturn);
 				}
 			});
