@@ -535,6 +535,7 @@ public class StandardElementGenerator {
             		if (superInterfaces != null)
             			for (ReferenceBinding superIfc : superInterfaces)
 							if (superIfc.baseclass() != null && !superBase.isCompatibleWith(superIfc.baseclass())) {
+			                    createGetBaseMethod(role.getInterfaceAst(), baseclass, _OT_GETBASE, AccPublic|AccAbstract|AccSemicolonBody);
 								createGetBaseMethod(roleType, baseclass, _OT_GETBASE, AccPublic);
 								break;
 							}

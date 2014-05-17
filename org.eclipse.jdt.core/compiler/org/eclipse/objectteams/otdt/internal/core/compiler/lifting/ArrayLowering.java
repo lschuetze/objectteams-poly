@@ -22,6 +22,7 @@ package org.eclipse.objectteams.otdt.internal.core.compiler.lifting;
 
 import org.eclipse.jdt.internal.compiler.ast.Expression;
 import org.eclipse.jdt.internal.compiler.lookup.BlockScope;
+import org.eclipse.jdt.internal.compiler.lookup.MethodBinding;
 import org.eclipse.jdt.internal.compiler.lookup.ReferenceBinding;
 import org.eclipse.jdt.internal.compiler.lookup.TypeBinding;
 import org.eclipse.objectteams.otdt.internal.core.compiler.util.AstGenerator;
@@ -55,6 +56,16 @@ public class ArrayLowering extends ArrayTranslations {
 		if (!deferredResolve)
 			this._teamExpr.resolveType(scope);
 		return translateArray(scope, expression, providedType, requiredType, /*isLifting*/false, deferredResolve);
+	}
+	
+	public MethodBinding ensureTransformMethod(BlockScope scope, Expression teamExpr, TypeBinding providedType, TypeBinding requiredType, boolean isLifting) {
+		TypeBinding providedLeaf = providedType.leafComponentType();
+		TypeBinding matchingBase = ((ReferenceBinding)providedLeaf).baseclass();
+		TypeBinding requiredLeaf = requiredType.leafComponentType();
+		if (TypeBinding.notEquals(matchingBase, requiredLeaf) && matchingBase.isCompatibleWith(requiredLeaf, scope)) {
+			requiredType = scope.environment().createArrayType(matchingBase, requiredType.dimensions());
+		}		
+		return super.ensureTransformMethod(scope, teamExpr, providedType, requiredType, isLifting);
 	}
 
 	/* implement hook. */
