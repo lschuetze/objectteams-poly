@@ -482,6 +482,10 @@ public class ForeachStatement extends Statement {
 					this.elementVariableImplicitWidening = BOXING | (compileTimeTypeID << 4) | compileTimeTypeID; // use primitive type in implicit conversion
 					compileTimeTypeID = boxedID;
 					this.scope.problemReporter().autoboxing(this.collection, this.collectionElementType, elementType);
+//{ObjectTeams: is lowering the conversion we need?
+				} else if (this.needLowering) {
+					// no additional conversion / checking needed
+// SH}
 				} else {
 					expectedCollectionType = upperScope.createArrayType(elementType, 1);
 					this.collection.computeConversion(this.scope, expectedCollectionType, collectionType);
