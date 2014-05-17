@@ -117,7 +117,7 @@ class AsmClassVisitor extends ClassVisitor {
 			}
 		} else if (attribute.type.equals(Attributes.ATTRIBUTE_CALLIN_PRECEDENCE)) {
 			CallinPrecedenceAttribute attr = (CallinPrecedenceAttribute)attribute;
-			clazz.precedences = attr.labels;
+			clazz.precedenceses.add(attr.labels);
 		} else if (attribute.type.equals(Attributes.ATTRIBUTE_OT_CLASS_FLAGS)) {
 			clazz.setOTClassFlags(((OTClassFlagsAttribute)attribute).flags);
 		} else if (attribute.type.equals(Attributes.ATTRIBUTE_OT_SPECIAL_ACCESS)) {

@@ -1,7 +1,7 @@
 /**********************************************************************
  * This file is part of "Object Teams Dynamic Runtime Environment"
  * 
- * Copyright 2009, 2012 Oliver Frank and others.
+ * Copyright 2009, 2014 Oliver Frank and others.
  * 
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -16,7 +16,9 @@
  **********************************************************************/
 package org.eclipse.objectteams.otredyn.bytecode.asm;
 
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.List;
 import java.util.Set;
 
 import org.eclipse.objectteams.otredyn.bytecode.AbstractBoundClass;
@@ -43,9 +45,9 @@ abstract class AsmBoundClass extends AbstractTeam {
 	private byte[] bytecode;
 	
 	/**
-	 * ordered list of qualified callin labels
+	 * ordered lists of qualified callin labels
 	 */
-	public String[] precedences;
+	public List<String[]> precedenceses = new ArrayList<String[]>();
 
 	/**
 	 * Set of base classes to which the current class or one of its roles as playedBy bindings.
@@ -150,9 +152,9 @@ abstract class AsmBoundClass extends AbstractTeam {
 	}
 	
 	public int compare(String callinLabel1, String callinLabel2) {
-		boolean label1Seen = false, label2Seen = false;
-		if (this.precedences != null) {
-			for (String label : this.precedences) {
+		for (String[] precedences : this.precedenceses) {
+			boolean label1Seen = false, label2Seen = false;
+			for (String label : precedences) {
 				if (label.equals(callinLabel1)) {
 					if (label2Seen)
 						return -1; // saw two then one: one has lower priority than two
