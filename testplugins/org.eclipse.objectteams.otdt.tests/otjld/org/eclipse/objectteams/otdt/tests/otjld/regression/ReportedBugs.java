@@ -5317,7 +5317,8 @@ public class ReportedBugs extends AbstractOTJLDTest {
             "Adaptation");
     }
     public void testBug372786() {
-    	runNegativeTest(
+    	String jarFilename = this.weavingScheme == WeavingScheme.OTRE ? "bug372786.jar" : "bug372786otdre.jar";
+		runNegativeTest(
     		new String[] {
     	"TBug372786.java",
     			"import jarred.TeamBug372786;\n" +
@@ -5334,7 +5335,7 @@ public class ReportedBugs extends AbstractOTJLDTest {
     		"	^\n" + 
     		"The type notjarred.Missing cannot be resolved. It is indirectly referenced from required .class files\n" + 
     		"----------\n",
-    		getClassLibraries("bug372786.jar"),
+    		getClassLibraries(jarFilename),
     		false);
     }
 

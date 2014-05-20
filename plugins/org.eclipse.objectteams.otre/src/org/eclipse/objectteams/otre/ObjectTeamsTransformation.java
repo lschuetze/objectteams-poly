@@ -1,7 +1,7 @@
 /**********************************************************************
  * This file is part of the "Object Teams Runtime Environment"
  * 
- * Copyright 2002-2009 Berlin Institute of Technology, Germany.
+ * Copyright 2002-2014 Berlin Institute of Technology, Germany.
  * 
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -1087,8 +1087,17 @@ public abstract class ObjectTeamsTransformation
                     if(logging) printLogMessage("**** class file was produced by compiler version "
                             + major + "." + minor + "." + revision + " ****");
                     IS_COMPILER_GREATER_123 = false; // reset, may be updated below
+                    // OTDRE?
+                    if ((encodedVersion & 0x8000) != 0)
+                    	throw new UnsupportedClassVersionError("OTRE: Class "+class_name+" was compiled for incompatible weaving target OTDRE");
+					// 1.7 stream:
+					if (major == 1 && minor == 7) {
+						// accept all revisions within this stream
+						IS_COMPILER_GREATER_123 = true;
+						IS_COMPILER_13X_PLUS = true;
+						IS_COMPILER_14X_PLUS = true;
 					// 1.6 stream:
-					if (major == 1 && minor == 6) {
+					} else if (major == 1 && minor == 6) {
 						// accept all revisions within this stream
 						IS_COMPILER_GREATER_123 = true;
 						IS_COMPILER_13X_PLUS = true;

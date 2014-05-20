@@ -38,13 +38,30 @@ abstract class Attributes {
 	protected final static String ATTRIBUTE_CALLIN_PRECEDENCE = "CallinPrecedence";
 	protected final static String ATTRIBUTE_OT_CLASS_FLAGS = "OTClassFlags";
 	protected final static String ATTRIBUTE_OT_SPECIAL_ACCESS = "OTSpecialAccess";
+	protected final static String ATTRIBUTE_OT_COMPILER_VERSION = "OTCompilerVersion";
+	
+	private static final int OTDRE_FLAG = 0x8000; // high bit in OTCompilerVersion
 
 	protected final static Attribute[] attributes = { 
 		new CallinBindingsAttribute(0),
 		new CallinPrecedenceAttribute(0),
 		new OTClassFlagsAttribute(0),
-		new OTSpecialAccessAttribute()
+		new OTSpecialAccessAttribute(),
+		new OTCompilerVersion(0)
 	};
+	protected static class OTCompilerVersion extends Attribute {
+
+		protected OTCompilerVersion(int version) {
+			super(ATTRIBUTE_OT_COMPILER_VERSION);
+		}
+		@Override
+		protected Attribute read(ClassReader cr, int off, int len, char[] buf, int codeOff, Label[] labels) {
+			int encodedVersion  = cr.readUnsignedShort(off);
+			if ((encodedVersion & OTDRE_FLAG) == 0)
+            	throw new UnsupportedClassVersionError("OTDRE: Class "+cr.getClassName()+" was compiled for incompatible weaving target OTRE");
+			return new OTCompilerVersion(encodedVersion);
+		}
+	}
 	
 	protected static class CallinBindingsAttribute extends Attribute {
 		static final short COVARIANT_BASE_RETURN = 8;

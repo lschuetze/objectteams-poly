@@ -149,9 +149,11 @@ import org.eclipse.jdt.internal.compiler.env.AccessRestriction;
 import org.eclipse.jdt.internal.compiler.env.ICompilationUnit;
 import org.eclipse.jdt.internal.compiler.flow.FlowInfo;
 import org.eclipse.jdt.internal.compiler.impl.CompilerOptions;
+import org.eclipse.jdt.internal.compiler.impl.CompilerOptions.WeavingScheme;
 import org.eclipse.jdt.internal.compiler.impl.IrritantSet;
 import org.eclipse.jdt.internal.compiler.impl.ReferenceContext;
 import org.eclipse.jdt.internal.compiler.lookup.ArrayBinding;
+import org.eclipse.jdt.internal.compiler.lookup.BinaryTypeBinding;
 import org.eclipse.jdt.internal.compiler.lookup.Binding;
 import org.eclipse.jdt.internal.compiler.lookup.CaptureBinding;
 import org.eclipse.jdt.internal.compiler.lookup.ExtraCompilerModifiers;
@@ -13541,6 +13543,14 @@ public void incompatibleOTJByteCodeVersion(char[] className, String versionStrin
 	String[] argument = new String[] { new String(className), versionString };
 	this.handle(
 			IProblem.IncompatibleOTJByteCodeVersion,
+			argument,
+			argument,
+			0, 0);
+}
+public void incompatibleWeavingScheme(BinaryTypeBinding type, WeavingScheme scheme) {
+	String[] argument = new String[] { new String(type.getFileName()), scheme.name() };
+	this.handle(
+			IProblem.IncompatibleWeavingScheme,
 			argument,
 			argument,
 			0, 0);

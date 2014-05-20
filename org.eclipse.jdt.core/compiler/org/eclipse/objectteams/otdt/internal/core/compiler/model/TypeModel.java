@@ -1,7 +1,7 @@
 /**********************************************************************
  * This file is part of "Object Teams Development Tooling"-Software
  *
- * Copyright 2004, 2010 Fraunhofer Gesellschaft, Munich, Germany,
+ * Copyright 2004, 2014 Fraunhofer Gesellschaft, Munich, Germany,
  * for its Fraunhofer Institute for Computer Architecture and Software
  * Technology (FIRST), Berlin, Germany and Technical University Berlin,
  * Germany.
@@ -49,6 +49,7 @@ import org.eclipse.objectteams.otdt.internal.core.compiler.bytecode.CPTypeAnchor
 import org.eclipse.objectteams.otdt.internal.core.compiler.bytecode.OTSpecialAccessAttribute;
 import org.eclipse.objectteams.otdt.internal.core.compiler.bytecode.ReferencedTeamsAttribute;
 import org.eclipse.objectteams.otdt.internal.core.compiler.bytecode.RoleFilesAttribute;
+import org.eclipse.objectteams.otdt.internal.core.compiler.bytecode.WordValueAttribute;
 import org.eclipse.objectteams.otdt.internal.core.compiler.control.Dependencies;
 import org.eclipse.objectteams.otdt.internal.core.compiler.control.ITranslationStates;
 import org.eclipse.objectteams.otdt.internal.core.compiler.control.StateMemento;
@@ -564,8 +565,17 @@ public class TypeModel extends ModelElement {
 		return false;
 	}
 	public WeavingScheme getWeavingScheme() {
-		if (this.weavingScheme == null && this._ast != null && this._ast.scope != null)
+		if (this.weavingScheme == null && this._ast != null && this._ast.scope != null) {
 			this.weavingScheme = this._ast.scope.compilerOptions().weavingScheme;
+			if (this.weavingScheme == WeavingScheme.OTDRE) {
+				if (this._attributes != null)
+					for (int i = 0; i < this._attributes.length; i++)
+						if (this._attributes[i].nameEquals(IOTConstants.OT_COMPILER_VERSION)) {
+							((WordValueAttribute)this._attributes[i]).setWeavingScheme(this.weavingScheme);
+							break;
+						}
+			}
+		}
 		return this.weavingScheme;
 	}
 }

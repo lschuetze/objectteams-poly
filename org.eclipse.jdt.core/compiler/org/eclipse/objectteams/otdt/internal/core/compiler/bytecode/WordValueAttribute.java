@@ -1,7 +1,7 @@
 /**********************************************************************
  * This file is part of "Object Teams Development Tooling"-Software
  *
- * Copyright 2004, 2006 Fraunhofer Gesellschaft, Munich, Germany,
+ * Copyright 2004, 2014 Fraunhofer Gesellschaft, Munich, Germany,
  * for its Fraunhofer Institute for Computer Architecture and Software
  * Technology (FIRST), Berlin, Germany and Technical University Berlin,
  * Germany.
@@ -10,7 +10,6 @@
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
- * $Id: WordValueAttribute.java 23416 2010-02-03 19:59:31Z stephan $
  *
  * Please visit http://www.eclipse.org/objectteams for updates and contact.
  *
@@ -28,6 +27,7 @@ import org.eclipse.jdt.internal.compiler.classfmt.ClassFileStruct;
 import org.eclipse.jdt.internal.compiler.classfmt.FieldInfo;
 import org.eclipse.jdt.internal.compiler.classfmt.MethodInfo;
 import org.eclipse.jdt.internal.compiler.classfmt.ClassFileConstants;
+import org.eclipse.jdt.internal.compiler.impl.CompilerOptions.WeavingScheme;
 import org.eclipse.jdt.internal.compiler.lookup.BinaryTypeBinding;
 import org.eclipse.jdt.internal.compiler.lookup.Binding;
 import org.eclipse.jdt.internal.compiler.lookup.ExtraCompilerModifiers;
@@ -40,6 +40,7 @@ import org.eclipse.objectteams.otdt.core.compiler.IOTConstants;
 import org.eclipse.objectteams.otdt.core.exceptions.InternalCompilerError;
 import org.eclipse.objectteams.otdt.internal.core.compiler.model.MethodModel;
 import org.eclipse.objectteams.otdt.internal.core.compiler.model.TypeModel;
+import org.eclipse.objectteams.otdt.internal.core.compiler.util.TSuperHelper;
 import org.eclipse.objectteams.otdt.internal.core.compiler.util.TypeAnalyzer;
 
 
@@ -98,12 +99,13 @@ import org.eclipse.objectteams.otdt.internal.core.compiler.util.TypeAnalyzer;
  *
  * </ul>
  * @author stephan
- * @version $Id: WordValueAttribute.java 23416 2010-02-03 19:59:31Z stephan $
  */
 public class WordValueAttribute
         extends AbstractAttribute
 {
     // ============== STATIC API ===================
+
+	private static final int OTDRE_FLAG = 1 << 15;
 
 	public static void maybeCreateClassFlagsAttribute(TypeDeclaration type) {
 		TypeModel model = null;
@@ -252,6 +254,16 @@ public class WordValueAttribute
 				+ (OTVersion.getRevsion()));
     }
 
+	public void setWeavingScheme(WeavingScheme weavingScheme) {
+		switch (weavingScheme) {
+			case OTRE:
+				break; // is the default
+			case OTDRE: 
+				this._value |= OTDRE_FLAG;
+				break;
+		}
+	}
+
     // ============== INSTANCE FEATURES ===================
 
 
@@ -350,6 +362,22 @@ public class WordValueAttribute
         		type.getTeamModel()._compilerVersion = this._value;
         	if (this._value < IOTConstants.OTVersion.getCompilerVersionMin())
         		environment.problemReporter.incompatibleOTJByteCodeVersion(((BinaryTypeBinding)binding).getFileName(), getBytecodeVersionString(this._value));
+        	if ((type.isRole() || type.isTeam())
+        			&& !CharOperation.equals(type.getPackage().compoundName, IOTConstants.ORG_OBJECTTEAMS)
+        			&& !TypeAnalyzer.isPredefinedRole(type)
+        			&& !TSuperHelper.isMarkerInterface(type))
+        	{
+				switch (environment.globalOptions.weavingScheme) {
+	        		case OTRE: 
+	        			if ((this._value & OTDRE_FLAG) != 0)
+	        				environment.problemReporter.incompatibleWeavingScheme(type, WeavingScheme.OTDRE);
+	        			break;
+	        		case OTDRE: 
+	        			if ((this._value & OTDRE_FLAG) == 0)
+	        				environment.problemReporter.incompatibleWeavingScheme(type, WeavingScheme.OTRE);
+	        			break;
+	        	}
+			}
         }
     }
 

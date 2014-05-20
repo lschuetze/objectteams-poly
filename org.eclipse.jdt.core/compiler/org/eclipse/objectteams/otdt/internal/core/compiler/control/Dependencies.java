@@ -1996,6 +1996,7 @@ public class Dependencies implements ITranslationStates {
 	{
         boolean success = true;
         TypeDeclaration roleDecl = role.getAst();
+        WeavingScheme weavingScheme = role.getWeavingScheme(); // always trigger initialization
 		if (Config.getConfig().verifyMethods)
         { 
 			if (roleDecl == null) {
@@ -2012,7 +2013,7 @@ public class Dependencies implements ITranslationStates {
 	        	if (!roleDecl.binding.isSynthInterface()) {
 	        		// synth interfaces have no callins anyway ;-)
 		            if (needMethodBodies) {  // not translating callin bindings will cause no secondary errors -> skip if no body needed
-		            	switch (roleDecl.scope.compilerOptions().weavingScheme) {
+						switch (weavingScheme) {
 		            	case OTDRE:
 		            		CallinImplementorDyn callinImplementorDyn = new CallinImplementorDyn();
 		            		callinImplementorDyn.transformRole(role);

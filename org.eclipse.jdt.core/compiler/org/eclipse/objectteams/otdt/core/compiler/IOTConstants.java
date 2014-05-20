@@ -34,7 +34,7 @@ public interface IOTConstants
 	public final static class OTVersion {
 		// methods, not constants, so these won't get inlined in any byte code.
 		public static final int  getMajor() { return 1; }
-		public static final int  getMinor() { return 6; }
+		public static final int  getMinor() { return 7; }
 		public static final int  getRevsion() { return 0; }
 		public static final int  getCompilerVersionMin() { return (1<<9)+(4<<5)+1; }// byte code incompatibility introduced in internal version 1.4.1 (OTDT 1.4.0M3)
 	}

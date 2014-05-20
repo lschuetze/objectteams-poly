@@ -20,8 +20,10 @@ import java.util.Map;
 
 import junit.framework.Test;
 
+import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.tests.util.Util;
 import org.eclipse.jdt.internal.compiler.impl.CompilerOptions;
+import org.eclipse.objectteams.otdt.core.ext.WeavingScheme;
 import org.eclipse.objectteams.otdt.tests.otjld.AbstractOTJLDTest;
 
 @SuppressWarnings("unchecked")
@@ -34,7 +36,7 @@ public class Misc extends AbstractOTJLDTest {
      // Static initializer to specify tests subset using TESTS_* static variables
      // All specified tests which does not belong to the class are skipped...
      static {
-//        TESTS_NAMES = new String[] { "test04m_javadocBaseImportReference1"};
+//        TESTS_NAMES = new String[] { "testMixedClassFileFormats3"};
 //        TESTS_NUMBERS = new int { 1459 };
 //        TESTS_RANGE = new int { 1097, -1 };
      }
@@ -504,6 +506,121 @@ public class Misc extends AbstractOTJLDTest {
             null/*vmArguments*/);
      }
      
+     // reading a base class compiled with a different weaving scheme is *no* problem
+     public void testMixedClassFileFormats2() {
+    	 WeavingScheme scheme = this.weavingScheme;
+    	 try {
+	    	 Map options = getCompilerOptions();
+	    	 options.put(JavaCore.COMPILER_OPT_WEAVING_SCHEME, WeavingScheme.OTRE.name());
+	    	 this.weavingScheme = WeavingScheme.OTRE;
+	    	 runConformTest(
+	    		new String[] {
+	    			"mcff2/Base.java",
+	    			"package mcff2;\n" +
+	    			"public class Base {" +
+	    			"	public static void main(String[] args) {}\n" +
+	    			"}\n"
+	    		}, 
+	    		"", null, false, new String[] {"-Dotre2"}, options, null); // force starting a new vm
+	    	 options.put(JavaCore.COMPILER_OPT_WEAVING_SCHEME, WeavingScheme.OTDRE.name());
+	    	 this.weavingScheme = WeavingScheme.OTDRE;
+	    	 runConformTest(
+	    		new String[] {
+	    			"mcff2/Team1.java",
+	    			"package mcff2;\n" +
+	    			"public team class Team1 {\n" +
+	    			"	protected class R playedBy Base {\n" +
+	    			"	}\n" +
+	    			"	public static void main(String[] args) {}\n" +
+	    			"}\n"
+	    		}, 
+	    		"", null, false, new String[] {"-Dotdre2"}, options, null);
+    	 } finally {
+    		 this.weavingScheme = scheme;
+    	 }
+     }
+     
+     // reading a team class compiled with a different weaving scheme *is* a problem
+     public void testMixedClassFileFormats3() {
+    	 WeavingScheme scheme = this.weavingScheme;
+    	 try {
+	    	 Map options = getCompilerOptions();
+	    	 options.put(JavaCore.COMPILER_OPT_WEAVING_SCHEME, WeavingScheme.OTRE.name());
+	    	 this.weavingScheme = WeavingScheme.OTRE;
+	    	 runConformTest(
+	    		new String[] {
+	    			"mcff3/Team1.java",
+	    			"package mcff3;\n" +
+	    			"public team class Team1 {\n" +
+	    			"	public static void main(String[] args) {}\n" +
+	    			"}\n"
+	    		}, 
+	    		"", null, false, new String[] {"-Dotre3"}, options, null);
+	    	 options.put(JavaCore.COMPILER_OPT_WEAVING_SCHEME, WeavingScheme.OTDRE.name());
+	    	 this.weavingScheme = WeavingScheme.OTDRE;
+	    	 runNegativeTest(
+	    		new String[] {
+	    			"mcff3/Team2.java",
+	    			"package mcff3;\n" +
+	    			"public team class Team2 extends Team1 {\n" +
+	    			"	protected class R {\n" +
+	    			"	}\n" +
+	    			"}\n"
+	    		},
+	    		"----------\n" + 
+				"1. ERROR in mcff3\\Team2.java (at line 1)\n" + 
+				"	package mcff3;\n" + 
+				"	^\n" + 
+				"Class file "+OUTPUT_DIR+"/mcff3/Team1.class has been compiled for incompatible weaving target \'OTRE\', please consider a full build of the declaring project.\n" + 
+				"----------\n",
+				null,
+	    		false,
+	    		options);
+    	 } finally {
+    		 this.weavingScheme = scheme;
+    	 }
+     }
+
+     // reading a team class compiled with a different weaving scheme *is* a problem - opposite direction
+     public void testMixedClassFileFormats4() {
+    	 WeavingScheme scheme = this.weavingScheme;
+    	 try {
+    		 Map options = getCompilerOptions();
+	    	 options.put(JavaCore.COMPILER_OPT_WEAVING_SCHEME, WeavingScheme.OTDRE.name());
+	    	 this.weavingScheme = WeavingScheme.OTDRE;
+	    	 runConformTest(
+	    		new String[] {
+	    			"mcff4/Team1.java",
+	    			"package mcff4;\n" +
+	    			"public team class Team1 {\n" +
+	    			"	public static void main(String[] args) {}\n" +
+	    			"}\n"
+	    		}, 
+	    		"", null, false, new String[] {"-Dotdre4"}, options, null);
+	    	 options.put(JavaCore.COMPILER_OPT_WEAVING_SCHEME, WeavingScheme.OTRE.name());
+	    	 this.weavingScheme = WeavingScheme.OTRE;
+	    	 runNegativeTest(
+	    		new String[] {
+	    			"mcff4/Team2.java",
+	    			"package mcff4;\n" +
+	    			"public team class Team2 extends Team1 {\n" +
+	    			"	protected class R {}\n" +
+	    			"}\n"
+	    		},
+	    		"----------\n" + 
+				"1. ERROR in mcff4\\Team2.java (at line 1)\n" + 
+				"	package mcff4;\n" + 
+				"	^\n" + 
+				"Class file "+OUTPUT_DIR+"/mcff4/Team1.class has been compiled for incompatible weaving target \'OTDRE\', please consider a full build of the declaring project.\n" + 
+				"----------\n",
+				null,
+	    		false,
+	    		options);
+    	 } finally {
+    		 this.weavingScheme = scheme;
+    	 }
+     }
+
      // Bug 304728 - [otre] [compiler] Support basic serialization of teams and roles
      // Bug 304729 - [otre] Selectively consider activation state during team serialization
      public void _testTeamSerialization1() {

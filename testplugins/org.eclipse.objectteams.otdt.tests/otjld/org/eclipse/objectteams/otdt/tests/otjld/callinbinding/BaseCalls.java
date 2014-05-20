@@ -24,6 +24,7 @@ import junit.framework.Test;
 
 import org.eclipse.jdt.core.tests.util.Util;
 import org.eclipse.jdt.internal.compiler.impl.CompilerOptions;
+import org.eclipse.objectteams.otdt.core.ext.WeavingScheme;
 import org.eclipse.objectteams.otdt.tests.otjld.AbstractOTJLDTest;
 
 @SuppressWarnings("unchecked") // working with raw map
@@ -2001,6 +2002,8 @@ public class BaseCalls extends AbstractOTJLDTest {
 			    "}\n" +
 			    "    \n"
             },
+            (this.weavingScheme == WeavingScheme.OTRE
+            ?
             "----------\n" + 
     		"1. ERROR in T4513bsa3Main.java (at line 1)\n" + 
     		"	\n" + 
@@ -2013,7 +2016,22 @@ public class BaseCalls extends AbstractOTJLDTest {
     		"public class T4513bsa3Main {\n" + 
     		"	^\n" + 
     		"Class file Team4513bsa3$__OT__Confined.class has incompatible OT/J byte code version 1.2.3, please consider a full build of the declaring project.\n" + 
-    		"----------\n",
+    		"----------\n"
+    		:
+            "----------\n" + 
+    		"1. ERROR in T4513bsa3Main.java (at line 1)\n" + 
+    		"	\n" + 
+    		"public class T4513bsa3Main {\n" + 
+    		"	^\n" + 
+    		"Class file Team4513bsa3$__OT__R.class has incompatible OT/J byte code version 1.2.3, please consider a full build of the declaring project.\n" + 
+    		"----------\n" + 
+    		"2. ERROR in T4513bsa3Main.java (at line 0)\n" + 
+    		"	\n" + 
+    		"public class T4513bsa3Main {\n" + 
+    		"	^\n" + 
+    		"Class file Team4513bsa3$__OT__R.class has been compiled for incompatible weaving target 'OTRE', please consider a full build of the declaring project.\n" + 
+    		"----------\n"
+    		),
             classPaths,
             false/*shouldFlushOutputDirectory*/);
     }

@@ -2263,8 +2263,11 @@ void setSourceStart(int sourceStart);
 	int RoleFileMissingTeamDeclaration			 = LIMITATIONS + 	 32;
 	
 	/** @since 3.10 OT 2.3 */
-	int OtreCannotWeaveIntoJava8					 = LIMITATIONS + 33;
+	int OtreCannotWeaveIntoJava8				 = LIMITATIONS + 	 33;
 	
+	/** @since 3.10 OT 2.3 */
+	int IncompatibleWeavingScheme				 = LIMITATIONS + 	 34;
+
 // ==== EXPERIMENTAL: ====
 	int EXPERIMENTAL = OTJ_RELATED + 12*OTCHAP;
 	int MigrateNonRole 							 = EXPERIMENTAL +     1;
