@@ -58,8 +58,8 @@ SDK_QUALIFIER=I20140515-1230
 ARCH=`arch`
 
 # used only locally (components of the ECLIPSE_SDK_TGZ path):
-EVERSION=I20140515-1230
-DROP=${BASEDIR}/drops4/I20140515-1230
+EVERSION=4.4RC1
+DROP=${BASEDIR}/drops4/S-4.4RC1-201405151230
 
 # EXPORT: archive file of the base eclipse SDK build:
 ECLIPSE_SDK_TGZ=${DROP}/eclipse-SDK-${EVERSION}-linux-gtk-${ARCH}.tar.gz
