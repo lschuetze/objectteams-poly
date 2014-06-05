@@ -1,7 +1,7 @@
 /**********************************************************************
  * This file is part of "Object Teams Development Tooling"-Software
  * 
- * Copyright 2009, 2013 Germany and Technical University Berlin, Germany and others.
+ * Copyright 2009, 2014 Germany and Technical University Berlin, Germany and others.
  * 
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -89,6 +89,7 @@ public class AspectBinding {
 		/** After scanning class file attributes: add the names of all bound base classes. */
 		public void addBaseClassNames(Collection<String> baseClassNames) {
 			this.baseClassNames.addAll(baseClassNames);
+			AspectBinding.this.allBaseClassNames.addAll(baseClassNames);
 			for (String baseClassName : baseClassNames) {
 				Set<TeamBinding> teams = baseBundle.teamsPerBase.get(baseClassName);
 				if (teams == null)
@@ -205,6 +206,7 @@ public class AspectBinding {
 	public BaseBundle baseBundle;
 	public @Nullable IConfigurationElement[] forcedExports; // not yet evaluated
 	public TeamBinding[]   teams;
+	public Set<String> allBaseClassNames = new HashSet<>();
 
 	public boolean hasScannedTeams;
 	

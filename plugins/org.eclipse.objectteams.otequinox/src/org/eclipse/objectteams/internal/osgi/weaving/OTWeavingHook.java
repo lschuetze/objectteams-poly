@@ -70,6 +70,9 @@ public class OTWeavingHook implements WeavingHook, WovenClassListener {
 
 	// TODO: this master-switch, which selects the weaver, should probably be replaced by s.t. else?
 	boolean useDynamicWeaver = "dynamic".equals(System.getProperty("ot.weaving"));
+	
+	// TODO: temporary switch to fall back to coarse grain checking:
+	boolean skipBaseClassCheck = "skip".equals(System.getProperty("otequinox.baseClassChecks"));
 
 	enum WeavingReason { None, Aspect, Base, Thread }
 	
@@ -200,9 +203,18 @@ public class OTWeavingHook implements WeavingHook, WovenClassListener {
 		Bundle bundle = bundleWiring.getBundle();
 		if (aspectBindingRegistry.getAdaptedBasePlugins(bundle) != null)
 			return WeavingReason.Aspect;
-		if (aspectBindingRegistry.isAdaptedBasePlugin(bundle.getSymbolicName()))
-			return WeavingReason.Base;
 
+		List<AspectBinding> aspectBindings = aspectBindingRegistry.getAdaptingAspectBindings(bundle.getSymbolicName());
+		if (aspectBindings != null && !aspectBindings.isEmpty()) {
+			// potential base class: look deeper:
+			for (AspectBinding aspectBinding : aspectBindings) {
+				if (!aspectBinding.hasScannedTeams)
+					return WeavingReason.Base; // we may be first, go ahead and trigger the trip wire
+			}
+			if (isAdaptedBaseClass(aspectBindings, className, bytes, bundleWiring.getClassLoader()))
+				return WeavingReason.Base;					
+		}
+			
 		// 2. test for implementation of Runnable / Thread (per class):
 		long time = 0;
 		if (Util.PROFILE) time= System.nanoTime();
@@ -211,6 +223,45 @@ public class OTWeavingHook implements WeavingHook, WovenClassListener {
 		if (Util.PROFILE) Util.profile(time, ProfileKind.SuperClassFetching, "");
 
 		return WeavingReason.None;
+	}
+	
+	/** check need for weaving by finding an aspect binding affecting this exact base class or one of its supers. */
+	boolean isAdaptedBaseClass(List<AspectBinding> aspectBindings, String className, byte[] bytes, ClassLoader resourceLoader) {
+		if (skipBaseClassCheck) return true; // have aspect bindings, flag requests to transform *all* classes in this base bundle
+		
+		if ("java.lang.Object".equals(className))
+			return false; // shortcut, not weavable nor do we have supers
+
+		long start = 0;
+		if (Util.PROFILE) start = System.nanoTime();
+
+		try {
+			for (AspectBinding aspectBinding : aspectBindings) {
+				if (aspectBinding.allBaseClassNames.contains(className))
+					return true;					
+			}
+			// attempt recursion to superclass (not superInterfaces atm):
+			ClassInformation classInfo = null;
+			if (bytes != null) {
+				classInfo = this.byteCodeAnalyzer.getClassInformation(bytes, className);
+			} else {
+				try (InputStream is = resourceLoader.getResourceAsStream(className.replace('.', '/')+".class")) {
+					if (is != null)
+						classInfo = this.byteCodeAnalyzer.getClassInformation(is, className);
+				} catch (IOException e) {
+					return false;
+				}
+			}
+			if (classInfo != null && !classInfo.isInterface()) {
+				// TODO(performance): check common prefix to recognize when crossing the plugin-boundary?
+				return isAdaptedBaseClass(aspectBindings, classInfo.getSuperClassName(), null, resourceLoader);
+			}
+			return false;
+		} finally {
+			if (bytes != null && Util.PROFILE) { // only report at top invocation
+				Util.profile(start, ProfileKind.SuperClassFetching, className);
+			}
+		}
 	}
 
 	private void recordBaseClasses(DelegatingTransformer transformer, @NonNull String aspectBundle, String className) {

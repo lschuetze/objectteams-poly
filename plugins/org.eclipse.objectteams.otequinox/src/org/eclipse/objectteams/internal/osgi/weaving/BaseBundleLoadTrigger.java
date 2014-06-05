@@ -117,7 +117,7 @@ public class BaseBundleLoadTrigger {
 		}
 
 		// mark done for this base class 
-		// (do outside the look in case multiple aspect bindings point to the same baseBundle)
+		// (do outside the loop in case multiple aspect bindings point to the same baseBundle)
 		for (AspectBinding aspectBinding : aspectBindings) {
 			String baseClassName = baseClass.getClassName();
 			assert baseClassName != null : "WovenClass.getClassName() should not answer null";
