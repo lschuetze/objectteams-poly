@@ -156,9 +156,13 @@ public class TransformerPlugin implements BundleActivator, IAspectRegistry {
 
 	public static synchronized void doLog(int status, String msg) {
 		msg = "OT/Equinox: "+msg;
+		try {
 // this seems to cause java.lang.NoClassDefFoundError: org/eclipse/ui/statushandlers/StatusAdapter etc.
 //		if (log == null) acquireLog(context);
-		pendingLogEntries.add(new Status(status, TRANSFORMER_PLUGIN_ID, msg));
+			pendingLogEntries.add(new Status(status, TRANSFORMER_PLUGIN_ID, msg));
+		} catch (NoClassDefFoundError e) {
+			System.err.println("OT/Euqinox (not ready for logging): "+msg);
+		}
 	}
 	
 	public static void flushLog() {
