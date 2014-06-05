@@ -111,6 +111,10 @@ public class ThreadActivation
 															 Constants.INVOKESTATIC));
 		LocalVariableGen flag = mg.addLocalVariable("_OT$isThreadStart", Type.BOOLEAN, il.getStart(), il.getEnd());
 		threadActivation.append(new ISTORE(flag.getIndex()));
+
+		threadActivation.append(InstructionConstants.ALOAD_0); // this._OT$creationThread = null; // avoid leak
+		threadActivation.append(new ACONST_NULL());
+		threadActivation.append(factory.createFieldAccess(class_name, CREATION_THREAD, OTConstants.threadType, Constants.PUTFIELD));
 		il.insert(threadActivation);
 		
 		/** *** Insert a call to TeamThreadManager.threadEnded() before every return of the run() method: ******** */	

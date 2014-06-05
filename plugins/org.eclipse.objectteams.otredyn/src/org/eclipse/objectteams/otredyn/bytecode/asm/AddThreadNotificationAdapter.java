@@ -105,6 +105,10 @@ public class AddThreadNotificationAdapter extends ClassVisitor {
             		methodVisitor.visitMethodInsn(Opcodes.INVOKESTATIC, ClassNames.TEAM_THREAD_MANAGER_SLASH, 
             										NEW_THREAD_STARTED, NEW_THREAD_STARTED_DESC, false);
             		methodVisitor.visitIntInsn(Opcodes.ISTORE, isThreadStartIdx);
+            		// this._OT$creationThread = null; // avoid leak
+            		methodVisitor.visitIntInsn(Opcodes.ALOAD, 0);
+            		methodVisitor.visitInsn(Opcodes.ACONST_NULL);
+            		methodVisitor.visitFieldInsn(Opcodes.PUTFIELD, clazz.getInternalName(), CREATION_THREAD, THREAD_DESC);
             	}
             	
             	@Override
