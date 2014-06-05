@@ -25,6 +25,7 @@ import java.lang.instrument.Instrumentation;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.security.ProtectionDomain;
+import java.util.List;
 
 /** 
  * When debugging an OT/Equinox application, the regular framework hooks will
@@ -82,51 +83,44 @@ public class OTEquinoxDebugAgent {
 		
 		// cached reflection members:
 		private Class<?> dclClass;
-		private Method getBundle;
-		private Method getBundleData;
-		private Method getAdaptor;
+		private Method getConfiguration;
 		private Method getHookRegistry;
-		private Method getClassLoadingHooks;
+		private Method getClassLoaderHooks;
 		private Method getClasspathManager;
 		private Method processClass;
 		
 		private boolean isDefaultClassLoader(ClassLoader loader) {
 			/* Emulates:
-			 *   return loader instanceof DefaultClassLoader;
+			 *   return loader instanceof EquinoxClassLoader;
 			 */
 			Class<?> clazz = loader.getClass();
 			if (this.dclClass != null) {
 				return this.dclClass == clazz;
-			} else if (clazz.getName().equals("org.eclipse.osgi.internal.baseadaptor.DefaultClassLoader")) {
+			} else if (clazz.getName().equals("org.eclipse.osgi.internal.loader.EquinoxClassLoader")) {
 				this.dclClass = clazz;
 				return true;
 			}
 			return false;
 		}
 		
-		private Object[] getClassLoadingHooks(ClassLoader loader) 
+		private List<?> getClassLoadingHooks(ClassLoader loader) 
 				throws SecurityException, NoSuchMethodException, IllegalArgumentException, IllegalAccessException, InvocationTargetException 
 		{
 			/* Emulates:
-			 *   AbstractBundle bundle = (AbstractBundle)((DefaultClassLoader)loader).getBundle();
-			 *   BaseData data = (BaseData)bundle.getBundleData();
-			 *   return data.getAdaptor().getHookRegistry().getClassLoadingHooks();
+			 *  EquinoxConfiguration conf = ((EquinoxClassLoader)loader).getConfiguration();
+			 *  return conf.getHookRegistry().getClassLoaderHooks();
 			 */
-			if (this.getBundle == null)
-				this.getBundle = this.dclClass.getMethod("getBundle", (Class[])null);
-			Object bundle = this.getBundle.invoke(loader, (Object[])null);
-			if (this.getBundleData == null)
-				this.getBundleData = bundle.getClass().getMethod("getBundleData", (Class[])null);
-			Object bundleData = this.getBundleData.invoke(bundle, (Object[]) null);
-			if (this.getAdaptor == null)
-				this.getAdaptor = bundleData.getClass().getMethod("getAdaptor", (Class[]) null);
-			Object adaptor = this.getAdaptor.invoke(bundleData, (Object[]) null);
+			if (this.getConfiguration == null) {
+				this.getConfiguration = this.dclClass.getDeclaredMethod("getConfiguration", (Class[])null);
+				this.getConfiguration.setAccessible(true);
+			}
+			Object conf = this.getConfiguration.invoke(loader, (Object[])null);
 			if (this.getHookRegistry == null)
-				this.getHookRegistry = adaptor.getClass().getMethod("getHookRegistry", (Class[]) null);
-			Object hookRegistry = this.getHookRegistry.invoke(adaptor, (Object[]) null);
-			if (this.getClassLoadingHooks == null)
-				this.getClassLoadingHooks = hookRegistry.getClass().getMethod("getClassLoadingHooks", (Class[])null);
-			return (Object[]) this.getClassLoadingHooks.invoke(hookRegistry, (Object[])null);
+				this.getHookRegistry = conf.getClass().getMethod("getHookRegistry", (Class[]) null);
+			Object hookRegistry = this.getHookRegistry.invoke(conf, (Object[]) null);
+			if (this.getClassLoaderHooks == null)
+				this.getClassLoaderHooks = hookRegistry.getClass().getMethod("getClassLoaderHooks", (Class[])null);
+			return (List<?>) this.getClassLoaderHooks.invoke(hookRegistry, (Object[])null);
 		}
 		
 		private Object getClasspathManager(ClassLoader loader) 
@@ -144,24 +138,20 @@ public class OTEquinoxDebugAgent {
 				throws IllegalArgumentException, IllegalAccessException, InvocationTargetException 
 		{
 			// TODO: support other hooks, too? (need all arguments!)
-			if (!hook.getClass().getName().equals("org.eclipse.objectteams.otequinox.internal.hook.TransformerHook"))
+			if (!hook.getClass().getName().equals("org.eclipse.osgi.internal.weaving.WeavingHookConfigurator"))
 				return null;
 			/* Emulates:
-			 *   return ((ClassLoadingHook)hook).processClass(hook, className, classfileBuffer, classpathEntry, entry, classpathManager);
+			 *   return ((WeavingHookConfigurator)hook).processClass(className, classfileBuffer, classpathEntry, entry, classpathManager);
 			 */
+			findMethod:
 			if (this.processClass == null) {
-				findMethod:
-				for (Class<?> superIfc : hook.getClass().getInterfaces()) {
-					if (superIfc.getName().equals("org.eclipse.osgi.baseadaptor.hooks.ClassLoadingHook")) {
-						for (Method m : superIfc.getMethods()) {
-							if (m.getName().equals("processClass")) {
-								this.processClass = m;
-								break findMethod;
-							}
-						}
+				for (Method m : hook.getClass().getMethods()) {
+					if (m.getName().equals("processClass")) {
+						this.processClass = m;
+						break findMethod;
 					}
-					throw new NoSuchMethodError("processClass");
 				}
+				throw new NoSuchMethodError("processClass");
 			}
 			return (byte[])this.processClass.invoke(hook, className, classfileBuffer, classpathEntry, entry, classpathManager);
 		}

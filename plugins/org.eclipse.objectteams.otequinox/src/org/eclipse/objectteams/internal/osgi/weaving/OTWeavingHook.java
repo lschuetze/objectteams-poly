@@ -171,13 +171,12 @@ public class OTWeavingHook implements WeavingHook, WovenClassListener {
 
 				DelegatingTransformer transformer = DelegatingTransformer.newTransformer(useDynamicWeaver);
 				Class<?> classBeingRedefined = null; // TODO prepare for otre-dyn
-				ProtectionDomain protectionDomain = wovenClass.getProtectionDomain();
 				try {
 					log(IStatus.OK, "About to transform class "+className);
 					time = 0;
 					if (Util.PROFILE) time= System.nanoTime();
 					byte[] newBytes = transformer.transform(bundleWiring.getBundle(),
-										className, classBeingRedefined, protectionDomain, bytes);
+										className, classBeingRedefined, null/*protectionDomain*/, bytes);
 					if (newBytes != null && newBytes != bytes && !Arrays.equals(newBytes, bytes)) {
 						if (Util.PROFILE) Util.profile(time, ProfileKind.Transformation, className);
 						log(IStatus.INFO, "Transformation performed on "+className);
