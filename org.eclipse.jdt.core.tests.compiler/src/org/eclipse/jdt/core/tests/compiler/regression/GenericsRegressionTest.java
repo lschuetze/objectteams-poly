@@ -26,6 +26,8 @@
  *								Bug 432603 - [compile][1.7] ecj reports an Error while javac doesn't
  *								Bug 399527 - Type inference problem
  *								Bug 434570 - Generic type mismatch for parametrized class annotation attribute with inner class
+ *								Bug 434044 - Java 8 generics thinks single method is ambiguous
+ *								Bug 434793 - [1.8][null][compiler] AIOOBE in ParameterizedGenericMethodBinding.substitute when inlining a method
  *******************************************************************************/
 package org.eclipse.jdt.core.tests.compiler.regression;
 
@@ -46,7 +48,7 @@ public class GenericsRegressionTest extends AbstractComparableTest {
 	// Static initializer to specify tests subset using TESTS_* static variables
 	// All specified tests which does not belong to the class are skipped...
 	static {
-//		TESTS_NAMES = new String[] { "testBug427438c3" };
+//		TESTS_NAMES = new String[] { "testBug435643" };
 //		TESTS_NUMBERS = new int[] { 1465 };
 //		TESTS_RANGE = new int[] { 1097, -1 };
 	}
@@ -5016,7 +5018,7 @@ public void testBug434630() {
 			"}\n"
 		});
 }
-public void _testBug434570_comment3() {
+public void testBug434570_comment3() {
 	runConformTest(
 		new String[] {
 			"TestWontCompile.java",
@@ -5076,6 +5078,275 @@ public void _testBug434570_comment3() {
 			"public @interface AnnotationWithClassParameter {\n" + 
 			"	\n" + 
 			"	Class<? extends Handler<?>> value();\n" + 
+			"\n" + 
+			"}\n"
+		});
+}
+// same test but with null annotations analysis enabled
+public void testBug434570_comment3b() {
+	Map options = getCompilerOptions();
+	options.put(JavaCore.COMPILER_ANNOTATION_NULL_ANALYSIS, JavaCore.ENABLED);
+	runConformTest(
+		new String[] {
+			"TestWontCompile.java",
+			"import org.bug.AnnotationWithClassParameter;\n" + 
+			"import org.bug.CustomHandler;\n" + 
+			"import org.bug.Handler;\n" + 
+			"\n" + 
+			"\n" + 
+			"@AnnotationWithClassParameter(CustomHandler.class)\n" + 
+			"public class TestWontCompile extends ATest<Object> {\n" + 
+			"	\n" + 
+			"	public static void main(String[] args) {\n" + 
+			"		Class<? extends Handler<?>> h = CustomHandler.class;\n" + 
+			"	}\n" + 
+			"\n" + 
+			"}\n",
+			"ATest.java",
+			"public abstract class ATest<T> {\n" + 
+			"\n" + 
+			"}\n",
+			"org/bug/Item.java",
+			"package org.bug;\n" + 
+			"\n" + 
+			"public interface Item {\n" + 
+			"\n" + 
+			"}\n",
+			"org/bug/CustomItem.java",
+			"package org.bug;\n" + 
+			"\n" + 
+			"public class CustomItem implements Item {\n" + 
+			"\n" + 
+			"}\n",
+			"org/bug/Handler.java",
+			"package org.bug;\n" + 
+			"\n" + 
+			"public abstract class Handler<T extends Item> {\n" + 
+			"\n" + 
+			"}\n",
+			"org/bug/CustomHandler.java",
+			"package org.bug;\n" + 
+			"\n" + 
+			"public class CustomHandler extends Handler<CustomItem> {\n" + 
+			"\n" + 
+			"}\n",
+			"org/bug/AnnotationWithClassParameter.java",
+			"package org.bug;\n" + 
+			"\n" + 
+			"import java.lang.annotation.Documented;\n" + 
+			"import java.lang.annotation.ElementType;\n" + 
+			"import java.lang.annotation.Retention;\n" + 
+			"import java.lang.annotation.RetentionPolicy;\n" + 
+			"import java.lang.annotation.Target;\n" + 
+			"\n" + 
+			"@Target(ElementType.TYPE)\n" + 
+			"@Retention(RetentionPolicy.RUNTIME)\n" + 
+			"@Documented\n" + 
+			"public @interface AnnotationWithClassParameter {\n" + 
+			"	\n" + 
+			"	Class<? extends Handler<?>> value();\n" + 
+			"\n" + 
+			"}\n"
+		},
+		options);
+}
+public void testBug434630_comment7() {
+	runConformTest(
+		new String[] {
+			"test/FooImpl.java",
+			"package test;\n" + 
+			"\n" + 
+			"public class FooImpl implements Foo {\n" + 
+			"\n" + 
+			"}\n",
+			"test/Foo.java",
+			"package test;\n" +
+			"interface Provider<T> {}\n" +
+			"@interface ProvidedBy {\n" +
+			"	Class<? extends Provider<?>> value();" +
+			"}\n" + 
+			"\n" + 
+			"@ProvidedBy(Foo.SomeProvider.class)\n" + 
+			"public interface Foo {\n" + 
+			"	\n" + 
+			"	public static class SomeProvider implements Provider<Foo> {\n" + 
+			"\n" + 
+			"		public Foo get() {\n" + 
+			"			return null;\n" + 
+			"		}\n" + 
+			"		\n" + 
+			"	}\n" + 
+			"}\n"
+		});
+}
+public void testBug434044() {
+	runConformTest(
+		new String[] {
+			"EclipseJava8Generics.java",
+			"public class EclipseJava8Generics {\n" + 
+			"\n" + 
+			"  public interface Foo<V> {\n" + 
+			"    public V doFoo();\n" + 
+			"  }\n" + 
+			"\n" + 
+			"  public static class FooBar<V, T extends Foo<V>> {\n" + 
+			"    public T getBar() {\n" + 
+			"      return null;\n" + 
+			"    }\n" + 
+			"  }\n" + 
+			"\n" + 
+			"  public static class Factory {\n" + 
+			"\n" + 
+			"    public static <V, T extends Foo<V>> FooBar<V, T> createFooBar() {\n" + 
+			"      return null;\n" + 
+			"    }\n" + 
+			"  }\n" + 
+			"\n" + 
+			"  public static void test() {\n" + 
+			"    final FooBar<?, ? extends Foo<?>> typedProperty = Factory.createFooBar();\n" + 
+			"    //TODO Eclipse Bug 434044\n" + 
+			"    final Object propertyValue = typedProperty.getBar().doFoo();\n" + 
+			"\n" + 
+			"  }\n" + 
+			"\n" + 
+			"}\n"
+		});
+}
+public void testBug434044_comment20() {
+	runConformTest(
+		new String[] {
+			"EclipseJava8Generics.java",
+			"public class EclipseJava8Generics {\n" + 
+			"\n" + 
+			"  public interface Foo<V> {\n" + 
+			"    public V doFoo();\n" + 
+			"  }\n" + 
+			"\n" + 
+			"  public static class FooBar<V, T extends Foo<V>> {\n" + 
+			"    public T getBar() {\n" + 
+			"      return null;\n" + 
+			"    }\n" + 
+			"  }\n" + 
+			"\n" + 
+			"  public static abstract class AbstractFoo<V> implements Foo<V> {\n" + 
+			"  }\n" + 
+			"\n" + 
+			"  public static class Factory {\n" + 
+			"    public static <V, T extends AbstractFoo<V>> FooBar<V, T> createFooBar() {\n" + 
+			"      return null;\n" + 
+			"    }\n" + 
+			"  }\n" + 
+			"\n" + 
+			"  public static void test() {\n" + 
+			"    final FooBar<?, ? extends AbstractFoo<?>> typedProperty = Factory.createFooBar();\n" + 
+			"    //TODO Eclipse Bug 434044 still exists\n" + 
+			"    final Object propertyValue = typedProperty.getBar().doFoo();\n" + 
+			"  }\n" + 
+			"\n" + 
+			"}\n"
+		});
+}
+public void testBug434044_comment36() {
+	runNegativeTest(
+		new String[] {
+			"EclipseJava8Generics.java",
+			"public class EclipseJava8Generics {\n" + 
+			"\n" + 
+			"  public interface Nasty {\n" + 
+			"    public Object doFoo(Integer a);\n" + 
+			"  }\n" + 
+			"  public interface Foo<V> {\n" + 
+			"    public V doFoo(String a);\n" + 
+			"  }\n" + 
+			"\n" + 
+			"  public static class FooBar<V, T extends Foo<V>> {\n" + 
+			"    public T getBar() {\n" + 
+			"      return null;\n" + 
+			"    }\n" + 
+			"  }\n" + 
+			"\n" + 
+			"  public static abstract class AbstractFoo<V> implements Foo<V>, Nasty {\n" + 
+			"  }\n" + 
+			"\n" + 
+			"  public static class Factory {\n" + 
+			"    public static <V, T extends AbstractFoo<V>> FooBar<V, T> createFooBar() {\n" + 
+			"      return null;\n" + 
+			"    }\n" + 
+			"  }\n" + 
+			"\n" + 
+			"  public static void test() {\n" + 
+			"    final FooBar<?, ? extends AbstractFoo<?>> typedProperty = Factory.createFooBar();\n" + 
+			"    //TODO Eclipse Bug 434044 still exists\n" + 
+			"    final Object propertyValue = typedProperty.getBar().doFoo(null);\n" + 
+			"  }\n" + 
+			"}\n"
+		},
+		"----------\n" + 
+		"1. ERROR in EclipseJava8Generics.java (at line 28)\n" + 
+		"	final Object propertyValue = typedProperty.getBar().doFoo(null);\n" + 
+		"	                                                    ^^^^^\n" + 
+		"The method doFoo(String) is ambiguous for the type capture#2-of ? extends EclipseJava8Generics.AbstractFoo<?>\n" + 
+		"----------\n");
+}
+public void testBug434793() {
+	Map options = getCompilerOptions();
+	options.put(JavaCore.COMPILER_ANNOTATION_NULL_ANALYSIS, JavaCore.ENABLED);
+	runConformTest(
+		new String[] {
+			"Outer.java",
+			"import java.util.*;\n" + 
+			"\n" + 
+			"public class Outer {\n" + 
+			"	private static class SingletonList<E>\n" +
+			"				 extends AbstractList<E>\n" +
+			"				 implements java.util.RandomAccess, java.io.Serializable {\n" +
+			"		public E get(int i) { throw new RuntimeException(); }\n" +
+			"		public int size() { return 0; }\n" + 
+			"	}\n" +
+			"}\n"
+		},
+		options);
+}
+public void testBug435643() {
+	runConformTest(
+		new String[] {
+			"test/Main.java",
+			"package test;\n" + 
+			"abstract class ASTNode<T extends ASTNode> implements Iterable<T> {\n" + 
+			"	public T getChild(int i) { return null; }\n" + 
+			"} \n" + 
+			"abstract class List<T extends ASTNode> extends ASTNode<T> { }\n" + 
+			"class Joiner {\n" + 
+			"	  public static Joiner on(String separator) {\n" + 
+			"	    return null;\n" + 
+			"	  }\n" + 
+			"	  String join(Iterable<?> parts) {\n" + 
+			"		  return \"\";\n" + 
+			"	  }\n" + 
+			"}\n" + 
+			"class AstFunctions {\n" + 
+			"	  public static <T extends ASTNode<?>> Function<T, String> prettyPrint() {\n" + 
+			"		  return null;\n" + 
+			"	  }\n" + 
+			"}\n" + 
+			"class Iterables {\n" + 
+			"	public static <F, T> Iterable<T> transform(final Iterable<F> fromIterable,\n" + 
+			"		      final Function<? super F, ? extends T> function) {\n" + 
+			"		return null;\n" + 
+			"	}\n" + 
+			"}\n" + 
+			"interface Function<F, T> {\n" + 
+			"	 T apply(F input);\n" + 
+			"}\n" + 
+			"public class Main {\n" + 
+			"\n" + 
+			"	  String test(ASTNode<?> node, ASTNode rawNode) {\n" + 
+			"		rawNode.getChild(0); \n" + 
+			"	    \n" + 
+			"        @SuppressWarnings(\"unchecked\")\n" + 
+			"        List<? extends ASTNode<?>> list = (List<? extends ASTNode<?>>) node;\n" + 
+			"        return Joiner.on(\", \").join(Iterables.transform(list, AstFunctions.prettyPrint()));\n" + 
+			"	  }\n" + 
 			"\n" + 
 			"}\n"
 		});

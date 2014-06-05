@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2013 IBM Corporation and others.
+ * Copyright (c) 2000, 2014 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -358,6 +358,13 @@ private void generateMethodInfos(IType type, IBinaryType typeInfo, HashMap newEl
 	}
 	for (int i = 0, methodCount = methods.length; i < methodCount; i++) {
 		IBinaryMethod methodInfo = methods[i];
+		final boolean isConstructor = methodInfo.isConstructor();
+		boolean isEnum = false;
+		try {
+			isEnum = type.isEnum();
+		} catch (JavaModelException e) {
+			// ignore
+		}
 //{ObjectTeams: filter out OT-generated methods (concerns Outline et al for binary types):
 		if (CharOperation.prefixEquals(IOTConstants.OT_DOLLAR_NAME, methodInfo.getSelector()))
 			continue; // skip;
@@ -367,12 +374,18 @@ private void generateMethodInfos(IType type, IBinaryType typeInfo, HashMap newEl
 		// if ((methodInfo.getModifiers() & IConstants.AccSynthetic) != 0) continue; // skip synthetic
 		boolean useGenericSignature = true;
 		char[] signature = methodInfo.getGenericSignature();
+		String[] pNames = null;
 		if (signature == null) {
 			useGenericSignature = false;
 			signature = methodInfo.getMethodDescriptor();
+			if (isEnum && isConstructor) {
+				pNames = Signature.getParameterTypes(new String(signature));
+				int length = pNames.length - 2;
+				if (length >= 0) // https://bugs.eclipse.org/bugs/show_bug.cgi?id=436347
+					System.arraycopy(pNames, 2, pNames = new String[length], 0, length);
+			}
 		}
 		String selector = new String(methodInfo.getSelector());
-		final boolean isConstructor = methodInfo.isConstructor();
 		if (isConstructor) {
 			selector = type.getElementName();
 //{ObjectTeams: role constructor?
@@ -380,9 +393,10 @@ private void generateMethodInfos(IType type, IBinaryType typeInfo, HashMap newEl
 				selector = selector.substring(IOTConstants.OT_DELIM_LEN);
 // SH}
 		}
-		String[] pNames = null;
 		try {
-			pNames = Signature.getParameterTypes(new String(signature));
+			if (!(isEnum && isConstructor && !useGenericSignature)) {
+				pNames = Signature.getParameterTypes(new String(signature));
+			}
 			if (isConstructor
 					&& useGenericSignature
 					&& type.isMember()
@@ -433,7 +447,7 @@ private void generateMethodInfos(IType type, IBinaryType typeInfo, HashMap newEl
 		int startIndex = 0;
 		try {
 			if (isConstructor) {
-				if (type.isEnum()) {
+				if (isEnum) {
 					startIndex = 2;
 				} else if (type.isMember()
 						&& !Flags.isStatic(type.getFlags())) {

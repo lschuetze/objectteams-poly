@@ -147,7 +147,6 @@ public class ClassScope extends Scope {
 	public TypeDeclaration referenceContext;
 	public TypeReference superTypeReference;
 	java.util.ArrayList<Object> deferredBoundChecks; // contains TypeReference or Runnable. TODO consider making this a List<Runnable>
-	boolean connectingHierarchy;
 
 	public ClassScope(Scope parent, TypeDeclaration context) {
 		super(Scope.CLASS_SCOPE, parent);
@@ -1454,6 +1453,8 @@ public class ClassScope extends Scope {
 			Object toCheck = this.deferredBoundChecks.get(i);
 			if (toCheck instanceof TypeReference)
 				((TypeReference) toCheck).checkBounds(this);
+			else if (toCheck instanceof Runnable)
+				((Runnable) toCheck).run();
 		}
 		this.deferredBoundChecks = null;
   :giro */
@@ -1463,6 +1464,8 @@ public class ClassScope extends Scope {
 			Object toCheck = toCheckList.get(i);
 			if (toCheck instanceof TypeReference)
 				((TypeReference) toCheck).checkBounds(this);
+			else if (toCheck instanceof Runnable)
+				((Runnable) toCheck).run();
 		}
 // SH}
 
@@ -2158,38 +2161,32 @@ public class ClassScope extends Scope {
 			return; // catchup was blocked.
 // SH}
 		SourceTypeBinding sourceType = this.referenceContext.binding;
-		try {
-			if ((sourceType.tagBits & TagBits.BeginHierarchyCheck) == 0) {
-				this.connectingHierarchy = true;
-				sourceType.tagBits |= TagBits.BeginHierarchyCheck;
-				environment().typesBeingConnected.add(sourceType);
-				boolean noProblems = connectSuperclass();
-				noProblems &= connectSuperInterfaces();
-				environment().typesBeingConnected.remove(sourceType);
-				sourceType.tagBits |= TagBits.EndHierarchyCheck;
-				noProblems &= connectTypeVariables(this.referenceContext.typeParameters, false);
-				sourceType.tagBits |= TagBits.TypeVariablesAreConnected;
-				if (noProblems && sourceType.isHierarchyInconsistent())
-					problemReporter().hierarchyHasProblems(sourceType);
-			}
-//{ObjectTeams: top level source super-team must be fully loaded/connected:
-			ReferenceBinding superType= sourceType.superclass;
-			if (   superType != null
-					&& superType.isTeam()) 
-			{
-				ReferenceBinding superOriginal = (ReferenceBinding) superType.original();
-				if (!superOriginal.isBinaryBinding()) {
-					ClassScope superScope = ((SourceTypeBinding) superOriginal).scope;
-					if (superScope != null)
-						superScope.connectTypeHierarchy();
-				}
-			}
-// SH}
-			connectMemberTypes();
-		} finally {
-			this.connectingHierarchy = false;
-			deferredMemberValueCheck();
+		if ((sourceType.tagBits & TagBits.BeginHierarchyCheck) == 0) {
+			sourceType.tagBits |= TagBits.BeginHierarchyCheck;
+			environment().typesBeingConnected.add(sourceType);
+			boolean noProblems = connectSuperclass();
+			noProblems &= connectSuperInterfaces();
+			environment().typesBeingConnected.remove(sourceType);
+			sourceType.tagBits |= TagBits.EndHierarchyCheck;
+			noProblems &= connectTypeVariables(this.referenceContext.typeParameters, false);
+			sourceType.tagBits |= TagBits.TypeVariablesAreConnected;
+			if (noProblems && sourceType.isHierarchyInconsistent())
+				problemReporter().hierarchyHasProblems(sourceType);
 		}
+//{ObjectTeams: top level source super-team must be fully loaded/connected:
+		ReferenceBinding superType= sourceType.superclass;
+		if (   superType != null
+				&& superType.isTeam()) 
+		{
+			ReferenceBinding superOriginal = (ReferenceBinding) superType.original();
+			if (!superOriginal.isBinaryBinding()) {
+				ClassScope superScope = ((SourceTypeBinding) superOriginal).scope;
+				if (superScope != null)
+					superScope.connectTypeHierarchy();
+			}
+		}
+// SH}
+		connectMemberTypes();
 		LookupEnvironment env = environment();
 		try {
 			env.missingClassFileLocation = this.referenceContext;
@@ -2203,26 +2200,13 @@ public class ClassScope extends Scope {
 	}
 	@Override
 	public boolean deferCheck(Runnable check) {
-		if (this.connectingHierarchy) {
+		if (compilationUnitScope().connectingHierarchy) {
 			if (this.deferredBoundChecks == null)
 				this.deferredBoundChecks = new ArrayList<Object>();
 			this.deferredBoundChecks.add(check);
 			return true;
 		} else {
-			return super.deferCheck(check);
-		}
-	}
-
-	private void deferredMemberValueCheck() {
-		if (this.deferredBoundChecks != null) {
-			Iterator iterator = this.deferredBoundChecks.iterator();
-			while (iterator.hasNext()) {
-				Object check = iterator.next();
-				if (check instanceof Runnable) {
-					((Runnable)check).run();
-					iterator.remove();
-				}
-			}
+			return false;
 		}
 	}
 

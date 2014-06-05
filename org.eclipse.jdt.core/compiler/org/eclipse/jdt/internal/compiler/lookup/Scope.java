@@ -1390,8 +1390,9 @@ public abstract class Scope {
 		int startFoundSize = found.size;
 		final boolean sourceLevel18 = this.compilerOptions().sourceLevel >= ClassFileConstants.JDK1_8;
 		ReferenceBinding currentType = classHierarchyStart;
+		List<TypeBinding> visitedTypes = new ArrayList<TypeBinding>();
 		while (currentType != null) {
-			findMethodInSuperInterfaces(currentType, selector, found, invocationSite);
+			findMethodInSuperInterfaces(currentType, selector, found, visitedTypes, invocationSite);
 			currentType = currentType.superclass();
 		}
 		MethodBinding[] candidates = null;
@@ -1891,7 +1892,7 @@ public abstract class Scope {
 			MethodBinding[] receiverMethods = receiverType.getMethods(selector, argumentTypes.length);
 			if (receiverMethods.length > 0)
 				found.addAll(receiverMethods);
-			findMethodInSuperInterfaces(receiverType, selector, found, invocationSite);
+			findMethodInSuperInterfaces(receiverType, selector, found, null, invocationSite);
 //{ObjectTeams: confined types don't proceed to java.lang.Object:
 		  if (!(TypeAnalyzer.isConfined(receiverType)))
 // SH}
@@ -2205,14 +2206,22 @@ public abstract class Scope {
 		return methodBinding;
 	}
 
-	protected void findMethodInSuperInterfaces(ReferenceBinding receiverType, char[] selector, ObjectVector found, InvocationSite invocationSite) {
+	protected void findMethodInSuperInterfaces(ReferenceBinding receiverType, char[] selector, ObjectVector found, List<TypeBinding> visitedTypes, InvocationSite invocationSite) {
 		ReferenceBinding currentType = receiverType;
 		ReferenceBinding[] itsInterfaces = currentType.superInterfaces();
 		if (itsInterfaces != null && itsInterfaces != Binding.NO_SUPERINTERFACES) {
 			ReferenceBinding[] interfacesToVisit = itsInterfaces;
 			int nextPosition = interfacesToVisit.length;
-			for (int i = 0; i < nextPosition; i++) {
+			interfaces: for (int i = 0; i < nextPosition; i++) {
 				currentType = interfacesToVisit[i];
+				if (visitedTypes != null) {
+					TypeBinding uncaptured = currentType.uncapture(this);
+					for (TypeBinding visited : visitedTypes) {
+						if (uncaptured.isEquivalentTo(visited))
+							continue interfaces;
+					}
+					visitedTypes.add(uncaptured);
+				}
 				compilationUnitScope().recordTypeReference(currentType);
 				currentType = (ReferenceBinding) currentType.capture(this, invocationSite == null ? 0 : invocationSite.sourceEnd());
 				MethodBinding[] currentMethods = currentType.getMethods(selector);
@@ -5453,6 +5462,7 @@ public abstract class Scope {
 	}
 
 	public void deferBoundCheck(TypeReference typeRef) {
+		// TODO: use dynamic binding rather than explicit type check
 		if (this.kind == CLASS_SCOPE) {
 			ClassScope classScope = (ClassScope) this;
 			if (classScope.deferredBoundChecks == null) {

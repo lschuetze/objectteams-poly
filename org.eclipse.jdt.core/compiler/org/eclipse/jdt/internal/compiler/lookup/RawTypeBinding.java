@@ -195,6 +195,15 @@ public class RawTypeBinding extends ParameterizedTypeBinding {
 		this.arguments = typeArguments;
 	}
 	
+	@Override
+//{ObjectTeams:
+	protected
+// SH}
+	TypeBinding substituteInferenceVariable(InferenceVariable var, TypeBinding substituteType) {
+		// NEVER substitute the type arguments of a raw type
+		return this;
+	}
+
 	public MethodBinding getSingleAbstractMethod(Scope scope, boolean replaceWildcards) {
 		int index = replaceWildcards ? 0 : 1;
 		if (this.singleAbstractMethod != null) {
