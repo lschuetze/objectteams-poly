@@ -1,13 +1,12 @@
 /**********************************************************************
  * This file is part of "Object Teams Development Tooling"-Software
  * 
- * Copyright 2009 Technical University Berlin, Germany.
+ * Copyright 2009, 2014 Technical University Berlin, Germany.
  * 
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
- * $Id: BundleValidation.java 23470 2010-02-05 19:13:24Z stephan $
  * 
  * Please visit http://www.eclipse.org/objectteams for updates and contact.
  * 
@@ -22,30 +21,50 @@ import java.util.HashSet;
 import java.util.Set;
 
 import org.eclipse.core.resources.IMarker;
+import org.eclipse.core.resources.IProject;
+import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.Path;
+import org.eclipse.core.runtime.Status;
+import org.eclipse.jdt.core.IJavaElement;
+import org.eclipse.jdt.core.IJavaProject;
+import org.eclipse.jdt.core.JavaCore;
+import org.eclipse.jdt.core.JavaModelException;
+import org.eclipse.objectteams.otdt.internal.migration.OTEquinoxMigration;
 import org.eclipse.objectteams.otdt.internal.pde.ui.OTPDEUIMessages;
+import org.eclipse.objectteams.otdt.internal.pde.ui.OTPDEUIPlugin;
 import org.eclipse.objectteams.otequinox.ActivationKind;
 import org.eclipse.osgi.service.resolver.BundleDescription;
 import org.eclipse.osgi.service.resolver.State;
 import org.eclipse.osgi.util.ManifestElement;
 import org.eclipse.osgi.util.NLS;
+import org.eclipse.pde.core.IBaseModel;
+import org.eclipse.pde.core.plugin.IExtensions;
+import org.eclipse.pde.core.plugin.IPluginExtension;
 import org.eclipse.pde.core.plugin.IPluginModelBase;
+import org.eclipse.pde.core.plugin.IPluginObject;
+import org.eclipse.pde.core.plugin.IPluginParent;
 import org.eclipse.pde.internal.core.builders.CompilerFlags;
 import org.eclipse.pde.internal.core.builders.IHeader;
 import org.eclipse.pde.internal.core.builders.PDEMarkerFactory;
 import org.eclipse.pde.internal.core.ibundle.IManifestHeader;
 import org.eclipse.pde.internal.core.text.bundle.BundleActivationPolicyHeader;
 import org.eclipse.pde.internal.core.text.bundle.BundleModel;
+import org.eclipse.pde.internal.core.text.plugin.PluginAttribute;
 import org.eclipse.pde.internal.ui.correction.AbstractManifestMarkerResolution;
 import org.eclipse.pde.internal.ui.correction.AbstractPDEMarkerResolution;
+import org.eclipse.pde.internal.ui.correction.AbstractXMLMarkerResolution;
 import org.eclipse.pde.internal.ui.correction.AddExportPackageMarkerResolution;
 import org.eclipse.ui.IMarkerResolution;
 import org.osgi.framework.Constants;
 import org.w3c.dom.Element;
+import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
 import base org.eclipse.pde.internal.core.builders.BundleErrorReporter;
 import base org.eclipse.pde.internal.core.builders.ExtensionsErrorReporter;
 import base org.eclipse.pde.internal.core.builders.ManifestConsistencyChecker;
+import base org.eclipse.pde.internal.core.builders.XMLErrorReporter;
 import base org.eclipse.pde.internal.ui.correction.ResolutionGenerator;
 
 /**
@@ -65,7 +84,8 @@ public team class BundleValidation
 	static final int ADD_ACTIVATION_POLICY = 0x1801; // must not overlap with any constant in org.eclipse.pde.internal.core.builders.PDEMarkerFactory. 
 	/** Constant for a problem that can be resolved by adding an activation policy to the manifest. */
 	static final int ADD_PACKAGE_EXPORT = 0x1802; // must not overlap with any constant in org.eclipse.pde.internal.core.builders.PDEMarkerFactory. 
-	
+	static final int CHANGE_DOT_TO_DOLLAR = 0x1803; // must not overlap with any constant in org.eclipse.pde.internal.core.builders.PDEMarkerFactory.
+
 	ThreadLocal<BundleCheckingContext> bundleContext = new ThreadLocal<BundleCheckingContext>();
 	
 	/** 
@@ -79,6 +99,8 @@ public team class BundleValidation
 		protected boolean isAspectBundle = false;
 		protected boolean hasTeamActivation = false;
 		protected Set<String> aspectPackages = new HashSet<String>();
+		
+		IProject getProject() -> IProject getProject();  
 
 		@SuppressWarnings("decapsulation")
 		spanContext <- replace validateFiles;
@@ -95,10 +117,17 @@ public team class BundleValidation
 		}
 	}
 	
+	/** Super-role for access to one private method. */
+	protected class XMLAnalyzer playedBy XMLErrorReporter {
+		@SuppressWarnings("decapsulation")
+		protected String generateLocationPath(Node node, String attrName) -> String generateLocationPath(Node node, String attrName);
+	}
+
 	/**
 	 * Detects aspectBindings declared in plugin.xml and records information in the current {@link BundleCheckingContext}.
+	 * Directly reports erroneous use of '.' for nested team names.
 	 */
-	protected class ExtensionAnalyzer playedBy ExtensionsErrorReporter 
+	protected class ExtensionAnalyzer extends XMLAnalyzer playedBy ExtensionsErrorReporter 
 			base when (BundleValidation.this.bundleContext.get() != null)
 	{	
 		
@@ -106,11 +135,14 @@ public team class BundleValidation
 		State getState() -> get IPluginModelBase fModel
 			with { result <- fModel.getBundleDescription().getContainingState() }
 		
-		IMarker report(String message, int line, int severity, String category)
-		-> IMarker report(String message, int line, int severity, String category);
+		IMarker report(String message, int line, int severity, int fixId, String category)
+		-> IMarker report(String message, int line, int severity, int fixId, String category);
 
 		@SuppressWarnings("decapsulation")
 		int getLine(Element element) -> int getLine(Element element);
+		
+		@SuppressWarnings("decapsulation")
+		int getLine(Element element, String attrName) -> int getLine(Element element, String attrName);
 
 
 		void checkAspectBinding(Element element) <- after void validateExtension(Element element);
@@ -143,8 +175,12 @@ public team class BundleValidation
 					Object teamClass = teamNode.getAttribute(CLASS);
 					if (teamClass instanceof String) {
 						String teamName = (String) teamClass;
-						int lastDot = teamName.lastIndexOf('.');
-						context.aspectPackages.add(teamName.substring(0, lastDot));
+						String actualPackage = checkActualPackage(context, teamNode, teamName);
+						if (actualPackage == null)
+							report(OTPDEUIMessages.Validation_MissingPackage_error, getLine(teamNode),
+									CompilerFlags.ERROR, PDEMarkerFactory.NO_RESOLUTION, PDEMarkerFactory.CAT_FATAL);
+						else
+							context.aspectPackages.add(actualPackage);
 					}
 					// team activation?
 					Object activation = teamNode.getAttribute(ACTIVATION);
@@ -158,12 +194,57 @@ public team class BundleValidation
 				}
 			}
 		}
+		String checkActualPackage(BundleCheckingContext context, Element teamNode, String teamName) {
+			int lastDot = teamName.lastIndexOf('.');
+			if (lastDot == -1)
+				return null;
+			String packageName = teamName.substring(0, lastDot);
+			String actualPackage = getContainingPackage(context, packageName);
+			if (packageName != actualPackage) {
+				IMarker marker = report(NLS.bind(OTPDEUIMessages.Validation_NotAPackage_error, packageName),
+						   getLine(teamNode, CLASS), 
+						   CompilerFlags.ERROR,
+						   CHANGE_DOT_TO_DOLLAR,
+						   PDEMarkerFactory.CAT_FATAL);
+				if (marker != null)
+					try {
+						marker.setAttribute("package", actualPackage); //$NON-NLS-1$
+						marker.setAttribute("team", teamName); //$NON-NLS-1$
+						marker.setAttribute(PDEMarkerFactory.MPK_LOCATION_PATH, generateLocationPath(teamNode, CLASS));
+					} catch (CoreException e) { /* nop */ }
+			}
+			return actualPackage;
+		}
+		String getContainingPackage(BundleCheckingContext context, String packageNameCandidate) {
+			IProject project = context.getProject();
+			if (project != null) {
+				IJavaProject jProject = JavaCore.create(project);
+				if (jProject != null) {
+					try {
+						IJavaElement jElement = jProject.findElement(new Path(packageNameCandidate));
+						if (jElement != null && jElement.getElementType() == IJavaElement.PACKAGE_FRAGMENT)
+							return packageNameCandidate;
+						jElement = jProject.findType(packageNameCandidate);
+						if (jElement != null) {
+							IJavaElement ancestor = jElement.getAncestor(IJavaElement.PACKAGE_FRAGMENT);
+							if (ancestor != null)
+								return ancestor.getElementName();
+						}
+					} catch (JavaModelException e) {
+						// cannot analyse
+					}
+				}
+			}
+			return packageNameCandidate; // be shy about reporting errors in error contexts
+		}
+
 		void checkBasePlugIn(String symbolicName, int lineNo) {
 			BundleDescription[] bundles = getState().getBundles(symbolicName);
 			if (bundles.length == 0)
 				report(NLS.bind(OTPDEUIMessages.Validation_UnresolveBasePlugin_error, symbolicName),
 						   lineNo, 
-						   CompilerFlags.ERROR, 
+						   CompilerFlags.ERROR,
+						   PDEMarkerFactory.NO_RESOLUTION,
 						   PDEMarkerFactory.CAT_OTHER);
 		}
 	}
@@ -276,6 +357,38 @@ public team class BundleValidation
 			return NLS.bind(OTPDEUIMessages.Resolution_AddAspectPackageExport_description, packageName, export);
 		}
 	}
+
+	/** Unbound role: rewrite the team@class attribute for proper usage of '$' as inner class separator. */
+	protected class ChangeDotToDollarResolution extends AbstractXMLMarkerResolution {
+		String packageName;
+		String teamName;
+		String newName;
+
+		public ChangeDotToDollarResolution(IMarker marker) {
+			super(CHANGE_DOT_TO_DOLLAR, marker);
+			this.packageName = marker.getAttribute("package", null); //$NON-NLS-1$
+			this.teamName = marker.getAttribute("team", null); //$NON-NLS-1$
+			this.newName = packageName + '.' +teamName.substring(this.packageName.length()+1).replace('.', '$');
+		}
+		@Override
+		public String getLabel() {
+			return NLS.bind(OTPDEUIMessages.Resolution_ChangeDotToDollar_label, this.teamName);
+		}
+		@Override
+		public String getDescription() {
+			return NLS.bind(OTPDEUIMessages.Resolution_ChangeDotToDollar_description, this.teamName, this.newName);
+		}
+
+		@Override
+		protected void createChange(IPluginModelBase model) {
+			Object node = findNode(model);
+			if (!(node instanceof PluginAttribute))
+				return;
+			
+			PluginAttribute attr = (PluginAttribute) node;
+			attr.getEnclosingElement().setXMLAttribute(attr.getName(), this.newName);
+		}
+	}
 	
 	/**
 	 * Advise the base class for handling missing/incorrect activation policy 
@@ -294,6 +407,8 @@ public team class BundleValidation
 						return new IMarkerResolution[] {new SetActivationPolicyResolution(AbstractPDEMarkerResolution.CREATE_TYPE)};
 					case BundleValidation.ADD_PACKAGE_EXPORT :
 						return new IMarkerResolution[] {new ExportAspectPackageResolution(marker) };
+					case BundleValidation.CHANGE_DOT_TO_DOLLAR :
+						return new IMarkerResolution[] {new ChangeDotToDollarResolution(marker) };
 				}
 			}
 			return result;

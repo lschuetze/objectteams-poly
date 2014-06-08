@@ -1,13 +1,12 @@
 /**********************************************************************
  * This file is part of "Object Teams Development Tooling"-Software
  * 
- * Copyright 2007, 2009 Technical University Berlin, Germany.
+ * Copyright 2007, 2014 Technical University Berlin, Germany.
  * 
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
- * $Id: OTPDEUIMessages.java 23470 2010-02-05 19:13:24Z stephan $
  * 
  * Please visit http://www.eclipse.org/objectteams for updates and contact.
  * 
@@ -49,9 +48,16 @@ public class OTPDEUIMessages extends NLS
 
 
 	public static String Validation_MissingAspectPackageExport_error;
+	public static String Validation_NotAPackage_error;
+	public static String Validation_MissingPackage_error;
 
 	public static String Resolution_AddAspectPackageExport_label;
 	public static String Resolution_AddAspectPackageExport_description;
+
+	public static String Resolution_ChangeDotToDollar_label;
+	public static String Resolution_ChangeDotToDollar_description;
+
+
 
 	static {
 		NLS.initializeMessages(BUNDLE_NAME, OTPDEUIMessages.class);
