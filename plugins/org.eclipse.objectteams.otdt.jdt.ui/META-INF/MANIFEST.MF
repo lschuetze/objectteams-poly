@@ -32,6 +32,7 @@ Export-Package: org.eclipse.objectteams.otdt.internal.corext;ot-aspect-host="org
  org.eclipse.objectteams.otdt.internal.ui.compare;ot-aspect-host="org.eclipse.objectteams.otdt.jdt.ui",
  org.eclipse.objectteams.otdt.internal.ui.javaeditor;ot-aspect-host="org.eclipse.objectteams.otdt.jdt.ui",
  org.eclipse.objectteams.otdt.internal.ui.packageview;ot-aspect-host="org.eclipse.objectteams.otdt.jdt.ui";x-friends:="org.eclipse.objectteams.otdt.ui.tests",
+ org.eclipse.objectteams.otdt.internal.ui.preferences;ot-aspect-host="org.eclipse.objectteams.otdt.jdt.ui";x-friends:="org.eclipse.jdt.ui",
  org.eclipse.objectteams.otdt.internal.ui.search;ot-aspect-host="org.eclipse.objectteams.otdt.jdt.ui",
  org.eclipse.objectteams.otdt.internal.ui.text;ot-aspect-host="org.eclipse.objectteams.otdt.jdt.ui",
  org.eclipse.objectteams.otdt.internal.ui.typehierarchy;ot-aspect-host="org.eclipse.objectteams.otdt.jdt.ui",

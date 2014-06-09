@@ -47,6 +47,11 @@ public class Messages extends NLS {
 	public static String NewOTProjectWizardPageOne_JREGroup_title;
 	public static String NewOTProjectWizardPageOne_Weaving_label;
 
+
+	public static String Validation_Target18IncompatibleWithOTRE_warning;
+	public static String Validation_MultipleComplianceProblems_error;
+
+
 	static {
 		// initialize resource bundle
 		NLS.initializeMessages(BUNDLE_NAME, Messages.class);
