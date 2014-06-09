@@ -12,12 +12,10 @@
 			<topic label="OT/J syntax highlighting" href="guide/syntaxhighlight.html"/>
 			<topic label="OT/J content/code assist" href="guide/contentassist.html">
 				<topic label="OT/J code completion" href="guide/completion.html"/>
-				<topic href="guide/quickfix.html" label="OT/J quick fixes">
-    </topic>
+				<topic href="guide/quickfix.html" label="OT/J quick fixes"/>
 				<topic label="OT/J quick assists" href="guide/quickassist.html"/>
-    <topic href="guide/assist/addRemoveSignatures.html" label="Add/Remove signature of method binding">
-    </topic>
-			</topic>
+    				<topic href="guide/assist/addRemoveSignatures.html" label="Add/Remove signature of method binding"/>
+				</topic>
 			<topic label="Binding markers" href="guide/callinmarker.html"/>
 			<topic label="Comparing bound methods" href="guide/methodcompare.html"/>
 			<topic label="Refactoring Object Teams programs" href="guide/refactoring.html"/>
@@ -33,7 +31,9 @@
 		<topic label="Compiling Object Teams programs" href="guide/compilation.html">
 			<topic label="Java builder extended for Object Teams" href="guide/builder.html"/>
 		</topic>
-		<topic label="Running Object Teams programs" href="guide/running.html"/>
+		<topic label="Running Object Teams programs" href="guide/running.html">
+			<topic label="Selecting the target weaving scheme" href="guide/weavingscheme.html"/>
+		</topic>
 		<topic label="Debugging Object Teams programs" href="guide/debugging.html">
 			<topic label="Team monitor view" href="guide/teammonitor.html"/>
 			<topic label="Stepping through OT/J code" href="guide/stepping.html"/>
