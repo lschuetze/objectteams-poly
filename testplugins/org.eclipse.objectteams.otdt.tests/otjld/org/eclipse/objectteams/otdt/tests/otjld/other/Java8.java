@@ -300,4 +300,44 @@ public class Java8 extends AbstractOTJLDTest {
 		else
 			runConformTestNoFlush(teamSource, compilerOptions);
 	}
+
+
+    public void testImplicitInheritanceWithDefaultMethods1() {
+		if (this.weavingScheme == WeavingScheme.OTRE) return;
+    	runConformTest(
+    		new String[]{
+    			"SubTeam.java",
+    			"public team class SubTeam extends SuperTeam {\n" +
+    			"	public interface I2  {\n" + 
+    			"		default void bar() { System.out.println(\"subbar\"); }\n" + 
+    			"	}\n" + 
+    			"	protected class R {\n" + 
+    			"		protected void foo() {\n" + 
+    			"			System.out.println(\"foosub\");\n" + 
+    			"		}\n" + 
+    			"	}\n" + 
+    			"	public static void main(String[] args) {\n" + 
+    			"		new SubTeam().test();\n" + 
+    			"	}\n" + 
+    			"}\n",
+    			"SuperTeam.java",
+    			"public team class SuperTeam {\n" +
+    			"	public interface I2 {\n" + 
+    			"		default void bar() { System.out.println(\"bar\"); }\n" + 
+    			"	}\n" + 
+    			"	protected class R implements I2 {\n" + 
+    			"		protected void foo() {\n" + 
+    			"			System.out.println(\"foo\");\n" + 
+    			"		}\n" + 
+    			"	}\n" + 
+    			"	protected void test() {\n" + 
+    			"		R r = new R();\n" + 
+    			"		r.foo();\n" + 
+    			"		r.bar();\n" + 
+    			"	}\n" + 
+    			"}\n"
+    		},
+    		"foosub\n" +
+    		"subbar");
+    }
 }
