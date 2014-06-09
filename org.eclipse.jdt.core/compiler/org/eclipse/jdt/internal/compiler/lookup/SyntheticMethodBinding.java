@@ -259,8 +259,8 @@ public class SyntheticMethodBinding extends MethodBinding {
 
 	public SyntheticMethodBinding(FieldBinding targetField, ReferenceBinding declaringClass, TypeBinding enumBinding, char[] selector) {
 		this.modifiers = (declaringClass.isInterface() ? ClassFileConstants.AccPublic : ClassFileConstants.AccDefault) | ClassFileConstants.AccStatic | ClassFileConstants.AccSynthetic;
-//{ObjectTeams: different visibility for team accessors:
-		if (declaringClass.isTeam())
+//{ObjectTeams: different visibility for team accessors or synthetics in roles:
+		if (declaringClass.isTeam() || declaringClass.isRole())
 			this.modifiers |= ClassFileConstants.AccPublic;
 // SH}
 		this.tagBits |= (TagBits.AnnotationResolved | TagBits.DeprecatedAnnotationResolved);

@@ -1,7 +1,7 @@
 /**********************************************************************
  * This file is part of "Object Teams Development Tooling"-Software
  * 
- * Copyright 2010 Stephan Herrmann
+ * Copyright 2010, 2014 Stephan Herrmann
  * 
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -1394,5 +1394,38 @@ public class ImplicitInheritance extends AbstractOTJLDTest {
     		"}\n"
     		},
     		"");
+    }
+    // Bug 433109 - [compiler] Cannot generate method $SWITCH_TABLE$ ...
+    public void test0c16_implicitInheritanceRegression3() {
+    	runConformTest(
+    		new String[]{
+    	"p2/SubTeam.java",
+    		"package p2;\n" +
+    		"import java.lang.annotation.*;\n" +
+    		"import p1.SuperTeam;\n" +
+    		"public team class SubTeam extends SuperTeam {\n" +
+    		"	public void test() {\n" +
+    		"		new R().test(ElementType.METHOD);\n" +
+    		"	}\n" +
+    		"	public static void main(String... args) {\n" +
+    		"		new SubTeam().test();\n" +
+    		"	}\n" +
+    		"}\n",
+    	"p1/SuperTeam.java",
+    		"package p1;\n" +
+    		"import java.lang.annotation.*;\n" +
+    		"public team class SuperTeam {\n" +
+    		"	public class R {\n" +
+    		"		protected void test(ElementType e) {\n" +
+    		"			switch (e) {\n" +
+    		"				case FIELD: System.out.println(\"F\"); break;\n" +
+    		"				case METHOD: System.out.println(\"M\"); break;\n" +
+    		"				default: System.out.println(\"?\"); break;\n" +
+    		"			}\n" +
+    		"		}\n" +
+    		"	}\n" +
+    		"}\n"
+    		},
+    		"M");
     }
 }
