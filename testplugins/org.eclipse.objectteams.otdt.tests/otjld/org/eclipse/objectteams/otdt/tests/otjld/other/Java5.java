@@ -4162,7 +4162,7 @@ public class Java5 extends AbstractOTJLDTest {
 			    "    void test() throws NoSuchFieldException {\n" +
 			    "        new R().test();\n" +
 			    "    }\n" +
-			    (this.weavingScheme == WeavingScheme.OTRE && this.complianceLevel >= ClassFileConstants.JDK1_8
+			    (this.weavingScheme == WeavingScheme.OTRE && IS_JRE_8
 			    ? "" // skip execution
 			    :
 			    "    public static void main(String[] args) throws NoSuchFieldException {\n" +
@@ -4189,7 +4189,7 @@ public class Java5 extends AbstractOTJLDTest {
 			    "}\n" +
 			    "    \n"
             },
-		    (this.weavingScheme == WeavingScheme.OTRE && this.complianceLevel >= ClassFileConstants.JDK1_8
+		    (this.weavingScheme == WeavingScheme.OTRE && IS_JRE_8
 		    ? ""
 		    : "@IA117cfa7(value=[one, two])"));
     }
@@ -4217,7 +4217,7 @@ public class Java5 extends AbstractOTJLDTest {
 			    "    void test() throws NoSuchFieldException {\n" +
 			    "        new R().test();\n" +
 			    "    }\n" +
-			    (this.weavingScheme == WeavingScheme.OTRE && this.complianceLevel >= ClassFileConstants.JDK1_8
+			    (this.weavingScheme == WeavingScheme.OTRE && IS_JRE_8
 			    ? ""
 	    		:
 			    "    public static void main(String[] args) throws NoSuchFieldException {\n" +
@@ -4244,7 +4244,7 @@ public class Java5 extends AbstractOTJLDTest {
 			    "}\n" +
 			    "    \n"
             },
-		    (this.weavingScheme == WeavingScheme.OTRE && this.complianceLevel >= ClassFileConstants.JDK1_8
+		    (this.weavingScheme == WeavingScheme.OTRE && IS_JRE_8
 		    ? ""
     		: "@IA117cfa8(value=val)"));
     }
@@ -4272,7 +4272,7 @@ public class Java5 extends AbstractOTJLDTest {
 			    "    void test() throws NoSuchFieldException {\n" +
 			    "        new R().test();\n" +
 			    "    }\n" +
-			    (this.weavingScheme == WeavingScheme.OTRE && this.complianceLevel >= ClassFileConstants.JDK1_8
+			    (this.weavingScheme == WeavingScheme.OTRE && IS_JRE_8
 			    ? ""
 	    		:
 			    "    public static void main(String[] args) throws NoSuchFieldException {\n" +
@@ -4300,7 +4300,7 @@ public class Java5 extends AbstractOTJLDTest {
 			    "}\n" +
 			    "    \n"
             },
-		    (this.weavingScheme == WeavingScheme.OTRE && this.complianceLevel >= ClassFileConstants.JDK1_8
+		    (this.weavingScheme == WeavingScheme.OTRE && IS_JRE_8
 		    ? ""
 		    : "@IA117cfa8e(theVal=TWO)"));
     }
@@ -4328,7 +4328,7 @@ public class Java5 extends AbstractOTJLDTest {
 			    "    void test() throws NoSuchFieldException {\n" +
 			    "        new R().test();\n" +
 			    "    }\n" +
-			    (this.weavingScheme == WeavingScheme.OTRE && this.complianceLevel >= ClassFileConstants.JDK1_8
+			    (this.weavingScheme == WeavingScheme.OTRE && IS_JRE_8
 			    ? ""
 	    		:
 			    "    public static void main(String[] args) throws NoSuchFieldException {\n" +
@@ -4355,7 +4355,7 @@ public class Java5 extends AbstractOTJLDTest {
 			    "}\n" +
 			    "    \n"
             },
-		    (this.weavingScheme == WeavingScheme.OTRE && this.complianceLevel >= ClassFileConstants.JDK1_8
+		    (this.weavingScheme == WeavingScheme.OTRE && IS_JRE_8
 		    ? ""
     		: "@IA117cfa9(value=[1, 2])"));
     }
