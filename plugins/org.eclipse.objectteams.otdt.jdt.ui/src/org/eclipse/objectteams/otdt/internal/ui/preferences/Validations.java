@@ -33,6 +33,7 @@ import base org.eclipse.jdt.internal.ui.preferences.ComplianceConfigurationBlock
 
 /**
  * Additions to JDT/UI's validations for project settings
+ * @since 2.3
  */
 @SuppressWarnings("restriction")
 public team class Validations {
