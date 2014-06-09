@@ -33,9 +33,9 @@
 		href="/org.eclipse.objectteams.otdt.doc/guide/project.html"
 		title="Create an Object Teams Project"
 		skip="true">
-		<action
-			pluginId="org.eclipse.objectteams.otdt.ui"
-			class="org.eclipse.objectteams.otdt.internal.ui.wizards.OpenOTProjectWizardAction"/>
+    <command
+          required="false"
+          serialization="org.eclipse.ui.newWizard(newWizardId=org.eclipse.objectteams.otdt.ui.wizards.OTNewProjectWizard)"/>
 		<description>
 			The first thing you will need is an Object Teams project. If you
 			already have an Object Teams project in your workspace that you
@@ -54,9 +54,9 @@
 		href="/org.eclipse.jdt.doc.user/gettingStarted/qs-9.htm" 
 		title="Create a Base class"
 		skip="true">
-		<action
-			pluginId="org.eclipse.jdt.ui"
-			class="org.eclipse.jdt.ui.actions.OpenNewClassWizardAction"/>
+    <command
+          required="false"
+          serialization="org.eclipse.ui.newWizard(newWizardId=org.eclipse.jdt.ui.wizards.NewClassCreationWizard)"/>
 		<description>
 			You should now have an Object Teams project in your workspace. The
 			next step in building your Object Teams application is to first
@@ -89,9 +89,9 @@
 		href="/org.eclipse.objectteams.otdt.doc/guide/wizards.html"
 		title="Create a Team class"
 		skip="true">
-		<action
-			pluginId="org.eclipse.objectteams.otdt.ui"
-			class="org.eclipse.objectteams.otdt.internal.ui.wizards.OpenTeamWizardAction"/>
+    <command
+          required="false"
+          serialization="org.eclipse.ui.newWizard(newWizardId=org.eclipse.objectteams.otdt.ui.wizards.NewTeamCreationWizard)"/>
 		<description>
 			The next step in building your Object Teams application is to create a
 			Team class, which is going to be the enclosing context for the Role class.
@@ -108,9 +108,9 @@
 		href="/org.eclipse.objectteams.otdt.doc/guide/wizards.html"
 		title="Create a Role class"
 		skip="true">
-		<action
-			pluginId="org.eclipse.objectteams.otdt.ui"
-			class="org.eclipse.objectteams.otdt.internal.ui.wizards.OpenRoleWizardAction"/>
+    <command
+          required="false"
+          serialization="org.eclipse.ui.newWizard(newWizardId=org.eclipse.objectteams.otdt.ui.wizards.NewRoleCreationWizard)"/>
 		<description>
 			The next step in building your Object Teams application is to create a
 			Role class for the previously created Team class.
