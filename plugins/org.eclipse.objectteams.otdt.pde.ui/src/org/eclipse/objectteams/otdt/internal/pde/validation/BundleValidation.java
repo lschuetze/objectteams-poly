@@ -186,10 +186,8 @@ public team class BundleValidation
 					Object activation = teamNode.getAttribute(ACTIVATION);
 					if (ActivationKind.ALL_THREADS.toString().equals(activation)) {
 						context.hasTeamActivation = true;
-						break;
 					} else if (ActivationKind.THREAD.toString().equals(activation)) {
 						context.hasTeamActivation = true;
-						break;
 					}
 				}
 			}
