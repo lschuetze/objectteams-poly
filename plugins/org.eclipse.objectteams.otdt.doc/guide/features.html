@@ -12,12 +12,12 @@
     </head>
     <body>
         <div id="head">
-            <h1>Features of the OTDT (version 2.2)</h1>
+            <h1>Features of the OTDT (version 2.3)</h1>
         </div>
 		<div style="margin:10px;margin-top:100px;">
 		 <div style="margin-left:40px;padding:2px;float:left;background-color:#D0D0D0;">
           <div style="padding:4px;background-color:#def4fe;">
-			The release 2.2 is based on Eclipse SDK 4.3.<br/>
+			The release 2.3 is based on Eclipse SDK 4.4 (Luna).<br/>
 			The OTDT contains a modified version of the JDT core and several added plugins.
           </div>
          </div>
@@ -46,7 +46,8 @@
 			            <h1>Compiler</h1>
 			        </div></div>
 			            
-			The Object Teams Compiler is an incremental compiler, based on the Eclipse Compiler for Java. 
+			The Object Teams Compiler is an incremental compiler, based on the Eclipse Compiler for Java.
+			As of version 2.3 the compiler supports all features of <strong>Java&trade; 8</strong>.
 			<dl>
 			<dt><strong>Language Definition</strong></dt>
 			<dd>The compiler implements the language as defined in the OT/J
@@ -69,6 +70,7 @@
 				      source code using the <code>@SuppressWarnings</code> annotation.</li>
 				  <li>Scoped keywords <a href="otjld/def/sA.html#sA.0.1"><img alt="otjld"  src="../images/ot_paragraph.png"/> OTJLD &#167; A.0.1</a> can be disabled (default is enabled).
 				  </li>
+				  <li>The <a href="#weaving_scheme">target weaving scheme</a> can be selected during project creation.</li>
 				</ul>
 			</dd>
 			</dl>
@@ -204,7 +206,9 @@
 			<dt><strong>Java Structure Compare</strong></dt>
 			<dd><ul>
 				<li>When comparing versions of an OT/J file, the Java Structure Compare will correctly render
-					Object Teams elements, too.
+					Object Teams elements, too.</li>
+				<li>When selecting a callin replace binding, an action "Compare With &gt; Bound Base Method" is available via the context menu,
+					which easily let's you compare the method implementations of role and base.</li>
 			</ul></dd>
 			</dl>
 			
@@ -243,8 +247,33 @@
 			All this is handled transparently using the standard Eclipse "Run" feature.
 			Running any main class of an Object Teams project automatically includes
 			the OTRE (This feature has been <a href="new_in_1.3.html#launch">changed in the OTDT 1.2.2</a>).
-			</li>
-			</ul></dd>
+			    </li>
+			    </ul>
+			</dd>
+			<dt id="weaving_scheme"><strong>Weaving schemes</strong></dt>
+			<dd><ul>
+			<li>As of version 2.3, the OTDT ships with two distinct weavers with the properties mentioned below.
+				Since the OT/J compiler performs some preparation for the respective weaver,
+				it has to generate different byte code formats, depending on the targeted weaving scheme.
+				As a result, switching from one weaving scheme to the other requires a full recompilation of all OT/J code involved.
+				<ul>
+				<li><strong>OTRE</strong>: This is the traditional <strong>load-time</strong> weaver.
+					This weaver has <strong>matured</strong> over many years,
+					but unfortunately, the underlying library <strong>BCEL</strong> is no longer maintained
+					and thus cannot handle class files from recent Java versions.
+					Up-to Java 7 this could be worked around,
+					but Java 8 class files contain several elements that this BCEL-based weaver cannot handle.</li>
+				<li><strong>OTDRE</strong>:
+					The newer Object Teams Dynamic Runtime Environment has been developed to enable even <strong>runtime weaving</strong>.
+				 	To work around limitations of the JVM this weaver has to insert a few general hooks into every weavable class.
+				 	This weaver is also interesting for weaving into <strong>Java 8</strong> class files,
+				 	as it is based on the library <strong>ASM</strong>, for which a Java-8-enabled version already exists.
+					It should be noted, however, that the OTDRE is not as mature as the OTRE, 
+					both in terms of complete coverage of all combinations of language features
+					as well as in terms of performance measurement (we simply have no large-scale experience with the OTDRE, yet).</li>
+				</ul>
+				</li>
+				</ul></dd>
 			<dt><strong>Aspect deployment/activation</strong></dt>
 			<dd><ul>
 			    <li>A new "Team Activation" tab in the "Run-Configuration" allows to instantiate and activate teams without modifying the program's source code.
@@ -265,8 +294,6 @@
 			<li id="JPLIS">Integrating the weaver into the JVM leverages the Java-agent concept of Java 5 
 			    (<a href="http://java.sun.com/developer/technicalArticles/releases/j2se15/index.html">JPLIS</a>).
 			    (<i>The original implementation using the JMangler framework is no longer maintained</i>).<br/> 
-				In the future this integration will support aspect weaving not only at load time 
-				but also while an application is running.
 			    </li>
 			</ul></dd>
 			</dl>
@@ -299,12 +326,9 @@
 				<code>Object Teams Plugin Project</code> is provided, supporting the
 			    development of plugins written in OT/J.</li>
 			<li>Support for OT/Equinox is added to the run/debug dialogs for all Equinox related launches.</li>
-			<li>If desired the load-time weaver can be disabled by commenting out or removing the following
-			    line from the file <code>configuration/config.ini</code>:
-			    <div class="ttindent" style="font-size:small;">
-			    osgi.hook.configurators.include=org.eclipse.objectteams.otequinox.hook.HookConfigurator</div>
-			    Ideally, disabling OT/Equinox will be handled by temporarily uninstalling this feature,
-			    but the required support by the p2 provisioning system is not yet stable enough to do this.</li>
+			<li>If desired the load-time weaver can be disabled by adding the following
+			    line to the file <code>eclipse.ini</code> after a <code>-vmargs</code> line:
+			    <div class="ttindent">-Dot.equinox=false</div>.</li>
 			</ul>
 			<p></p>
 			
