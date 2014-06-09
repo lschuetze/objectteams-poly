@@ -38,13 +38,6 @@
 			<topic label="Team monitor view" href="guide/teammonitor.html"/>
 			<topic label="Stepping through OT/J code" href="guide/stepping.html"/>
 		</topic>
-		<topic label="What's new" href="guide/whatsnew.html">
-			<topic label="OTDT 2.2 New&amp;Noteworthy" href="guide/news/new_in_2.2.html"/>
-			<topic label="OTDT 2.1 New&amp;Noteworthy" href="guide/news/new_in_2.1.html"/>
-			<topic label="OTDT 2.0 New&amp;Noteworthy" href="guide/news/new_in_2.0.html"/>
-			<topic label="OTDT 0.7.1 New&amp;Noteworthy" href="guide/news/new_in_0.7.1.html"/>
-			<topic label="OTDT 0.7 New&amp;Noteworthy" href="guide/news/new_in_0.7.html"/>
-		</topic>
 	</topic>
 	<topic label="Object Teams Language Definition" href="/org.eclipse.objectteams.otdt.doc/guide/otjld/def/index.html">
 		<topic label="Teams and Roles" href="/org.eclipse.objectteams.otdt.doc/guide/otjld/def/s1.html"/>
@@ -62,5 +55,13 @@
 	 	<topic label="org.eclipse.objectteams.otequinox.aspectBindings" href="/org.eclipse.objectteams.otdt.doc/reference/extension-points/org_eclipse_objectteams_otequinox_aspectBindings.html"/>
 	 	<topic label="org.eclipse.objectteams.otequinox.aspectBindingNegotiators" href="/org.eclipse.objectteams.otdt.doc/reference/extension-points/org_eclipse_objectteams_otequinox_aspectBindingNegotiators.html"/>
 	 	<topic label="org.eclipse.objectteams.otequinox.liftingParticipant" href="/org.eclipse.objectteams.otdt.doc/reference/extension-points/org_eclipse_objectteams_otequinox_liftingParticipant.html"/>
+	</topic>
+	<topic label="What's new" href="guide/whatsnew.html">
+		<topic label="OTDT 2.3 New&amp;Noteworthy" href="guide/news/new_in_2.3.html"/>
+		<topic label="OTDT 2.2 New&amp;Noteworthy" href="guide/news/new_in_2.2.html"/>
+		<topic label="OTDT 2.1 New&amp;Noteworthy" href="guide/news/new_in_2.1.html"/>
+		<topic label="OTDT 2.0 New&amp;Noteworthy" href="guide/news/new_in_2.0.html"/>
+		<topic label="OTDT 0.7.1 New&amp;Noteworthy" href="guide/news/new_in_0.7.1.html"/>
+		<topic label="OTDT 0.7 New&amp;Noteworthy" href="guide/news/new_in_0.7.html"/>
 	</topic>
 </toc>
