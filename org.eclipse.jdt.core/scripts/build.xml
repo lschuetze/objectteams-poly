@@ -21,7 +21,7 @@
 		<mkdir dir="${output}" />
 
 		<javac srcdir="${basedir}" destdir="${output}"
-				debuglevel="lines,source"
+					debuglevel="lines,source"
 					source="1.6"
 					target="1.6">
 			<compilerarg line="-Xlint:none"/>
