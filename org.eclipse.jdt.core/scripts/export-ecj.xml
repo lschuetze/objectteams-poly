@@ -47,6 +47,9 @@
 	<target name="extract-batch-compiler" depends="init">
 		<property name="target.folder" value="${basedir}/bin"/>
 		<replace file="${target.folder}/org/eclipse/jdt/internal/compiler/batch/messages.properties" token="bundle_qualifier" value="${bundleVersionQualifer}"/>
+<!-- {ObjectTeams: more replacement (strategy no longer maintained in JDT?) -->
+		<replace file="${target.folder}/org/eclipse/jdt/internal/compiler/batch/messages.properties" token="bundle_version" value="${bundleVersion}"/>
+<!-- SH}-->
 		<echo message="Extract .class file and properties for the batch compiler" />
 		<copy todir="${ecj-temp-folder}">
 			<fileset dir="${target.folder}">
