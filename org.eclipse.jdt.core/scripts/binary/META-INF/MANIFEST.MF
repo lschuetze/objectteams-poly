@@ -24,3 +24,5 @@ Export-Package: org.eclipse.jdt.core,
  org.eclipse.jdt.internal.compiler.problem;x-internal:=true,
  org.eclipse.jdt.internal.compiler.util;x-internal:=true,
  org.eclipse.jdt.internal.compiler.tool;x-internal:=true
+Main-Class: org.eclipse.jdt.internal.compiler.batch.Main
+ 
