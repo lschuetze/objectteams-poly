@@ -1,3 +1,4 @@
+Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: Eclipse Compiler for Java(TM)
 Bundle-SymbolicName: org.eclipse.jdt.core.compiler.batch
