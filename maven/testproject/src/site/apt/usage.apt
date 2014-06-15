@@ -3,12 +3,12 @@
 	------
 	Olaf Otto & Stephan Herrmann
 	------
-	2013-06-23
+	2014-06-15
 	------
 
 Using Object Teams with Maven3
 
- Declaring <<<org.eclipse:objectteams-parent-pom>>> as the parent of your project will add basic capabilities
+ Declaring <<<org.eclipse.objectteams:objectteams-parent-pom>>> as the parent of your project will add basic capabilities
  for using OT/J in your sources.
  
 * Include the parent pom
@@ -31,9 +31,9 @@ Using Object Teams with Maven3
 
 +-----
 	<parent>
-		<groupId>org.eclipse</groupId>
+		<groupId>org.eclipse.objectteams</groupId>
 		<artifactId>objectteams-parent-pom</artifactId>
-		<version>2.2.0</version>
+		<version>2.3.0</version>
 	</parent>
 +-----
 

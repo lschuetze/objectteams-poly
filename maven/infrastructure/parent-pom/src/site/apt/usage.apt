@@ -3,7 +3,7 @@
 	------
 	Olaf Otto & Stephan Herrmann
 	------
-	2013-06-23
+	2014-06-15
 	------
 
 Using the Object Teams Parent POM
@@ -31,9 +31,9 @@ Using the Object Teams Parent POM
 
 +-----
 	<parent>
-		<groupId>org.eclipse</groupId>
+		<groupId>org.eclipse.objectteams</groupId>
 		<artifactId>objectteams-parent-pom</artifactId>
-		<version>2.2.0</version>
+		<version>2.3.0</version>
 	</parent>
 +-----
 
@@ -48,14 +48,16 @@ Using the Object Teams Parent POM
 ** Standard OT/J dependencies documented
 
   All OT/J projects using the <<<objectteams-parent-pom>>> implicitly depend on the following artifacts which are developed 
-  independent of maven and simply repackaged using the {{{../objectteams-artifact-deployer}org.eclipse:objectteams-artifact-deployer}} module:
+  independent of maven and simply repackaged using the {{{../objectteams-artifact-deployer}org.eclipse.objectteams:objectteams-artifact-deployer}} module:
   
-  [org.eclipse:objectteams-runtime] the Object Teams runtime repackaged from the <<<org.eclipse.objectteams.runtime>>> OSGi bundle.
+  [org.eclipse.objectteams:objectteams-runtime] the Object Teams runtime (minimal OT/J API) repackaged from the <<<org.eclipse.objectteams.runtime>>> OSGi bundle.
   
-  [org.eclipse:objectteams-otre-agent] the Java agent that hooks the Object Teams runtime into the JVM (repackaged from file <<<otre_agent.jar>>>
+  [org.eclipse.objectteams:objectteams-otre] the Object Teams Runtime Environment (the bytecode weaver) repackaged from the <<<org.eclipse.objectteams.otre>>> OSGi bundle.
+  
+  [org.eclipse.objectteams:objectteams-otre-agent] the Java agent that hooks the Object Teams runtime into the JVM (repackaged from file <<<otre_agent.jar>>>
   from the <<<org.eclipse.objectteams.otdt>>> project).
   
-  [org.eclipse:objectteams-otj-compiler] a compatible replacement for <<<org.eclipse.tycho:org.eclipse.jdt.core>>> that enables the 
+  [org.eclipse.objectteams:objectteams-otj-compiler] a compatible replacement for <<<org.eclipse.tycho:org.eclipse.jdt.core>>> that enables the 
   <<<org.eclipse.tycho:tycho-compiler-jdt>>> plugin to compile OT/J sources.
 
   []
