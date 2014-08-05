@@ -274,7 +274,11 @@ public class AstGenerator extends AstFactory {
 		EqualExpression result = new EqualExpression(
 				value,
 				nullLiteral(),
-				OperatorIds.EQUAL_EQUAL);
+				OperatorIds.EQUAL_EQUAL) {
+			protected void checkNullComparison(BlockScope scope, FlowContext flowContext, FlowInfo flowInfo, FlowInfo initsWhenTrue, FlowInfo initsWhenFalse) {
+				// nop, never warn about generated null checks
+			}
+		};
 		result.sourceStart = this.sourceStart;
 		result.sourceEnd = this.sourceEnd;
 		result.constant = Constant.NotAConstant;

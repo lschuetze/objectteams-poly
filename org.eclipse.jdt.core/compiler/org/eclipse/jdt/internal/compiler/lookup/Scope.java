@@ -5660,6 +5660,13 @@ public abstract class Scope {
 			case Scope.METHOD_SCOPE :
 				resolutionScope = (BlockScope) scope;
 				break;
+//{ObjectTeams: consider baseImportScopes:
+			case Scope.COMPILATION_UNIT_SCOPE:
+				Scope originalScope = ((CompilationUnitScope)scope).originalScope;
+				if (originalScope instanceof BlockScope)
+					return (BlockScope) originalScope;
+				break;
+// SH}
 		}
 		return resolutionScope;
 	}

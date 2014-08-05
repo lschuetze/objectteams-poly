@@ -18,6 +18,7 @@ import org.eclipse.jdt.internal.compiler.impl.Constant;
 import org.eclipse.jdt.internal.compiler.lookup.Binding;
 import org.eclipse.jdt.internal.compiler.lookup.BlockScope;
 import org.eclipse.jdt.internal.compiler.lookup.ClassScope;
+import org.eclipse.jdt.internal.compiler.lookup.CompilationUnitScope;
 import org.eclipse.jdt.internal.compiler.lookup.PackageBinding;
 import org.eclipse.jdt.internal.compiler.lookup.ProblemReasons;
 import org.eclipse.jdt.internal.compiler.lookup.Scope;
@@ -82,15 +83,19 @@ public class JavadocSingleTypeReference extends SingleTypeReference {
 				Scope currentScope = scope;
 				while (currentScope != null) {
 					if (currentScope instanceof OTClassScope) {
-						Scope baseScope = ((OTClassScope)currentScope).getBaseImportScope();
+						CompilationUnitScope baseScope = ((OTClassScope)currentScope).getBaseImportScope(scope);
 						if (baseScope != null) {
-							TypeBinding previousType = this.resolvedType;
-							this.resolvedType = null;
-							TypeBinding baseImportedType = getTypeBinding(baseScope);
-							if (baseImportedType != null && baseImportedType.isValidBinding())
-								return this.resolvedType = baseImportedType;
-							this.resolvedType = previousType;
-							break;
+							try {
+								TypeBinding previousType = this.resolvedType;
+								this.resolvedType = null;
+								TypeBinding baseImportedType = getTypeBinding(baseScope);
+								if (baseImportedType != null && baseImportedType.isValidBinding())
+									return this.resolvedType = baseImportedType;
+								this.resolvedType = previousType;
+								break;
+							} finally {
+								baseScope.originalScope = null;
+							}
 						}
 					}
 					currentScope = currentScope.parent;

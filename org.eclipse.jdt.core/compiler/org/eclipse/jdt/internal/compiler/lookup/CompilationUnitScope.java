@@ -91,6 +91,9 @@ public class CompilationUnitScope extends Scope {
 	private boolean skipCachingImports;
 
 	boolean connectingHierarchy;
+//{ObjectTeams: when used as a baseimport scope, remember the original scope during this current lookup
+	public Scope originalScope;
+// SH}
 
 public CompilationUnitScope(CompilationUnitDeclaration unit, LookupEnvironment environment) {
 	super(COMPILATION_UNIT_SCOPE, null);

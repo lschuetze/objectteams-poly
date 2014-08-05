@@ -31,7 +31,7 @@ public class OTNullTypeAnnotationTest extends AbstractOTJLDNullAnnotationTest {
 	// Static initializer to specify tests subset using TESTS_* static variables
 	// All specified tests which do not belong to the class are skipped...
 	static {
-//			TESTS_NAMES = new String[] { "testImplicitTeamAnchor1" };
+//			TESTS_NAMES = new String[] { "testLiftingType2" };
 //			TESTS_NUMBERS = new int[] { 561 };
 //			TESTS_RANGE = new int[] { 1, 2049 };
 	}
@@ -99,6 +99,60 @@ public class OTNullTypeAnnotationTest extends AbstractOTJLDNullAnnotationTest {
 			"	@NonNull MyRole role = someRoles.get(0);\n" + 
 			"	                       ^^^^^^^^^^^^^^^^\n" + 
 			"Null type mismatch (type annotations): required \'MyTeam.@NonNull MyRole\' but this expression has type \'MyTeam.@Nullable MyRole\'\n" + 
+			"----------\n");
+	}
+
+	public void testLiftingType1() {
+		if (this.weavingScheme == WeavingScheme.OTRE) return;
+		runNegativeTestWithLibs(
+			new String[] {
+				"MyTeam.java",
+				"import org.eclipse.jdt.annotation.*;\n" +
+				"public team class MyTeam {\n" +
+				"	protected class MyRole playedBy MyBase {\n" +
+				"		protected void print() {}\n" +
+				"	}\n" +
+				"	void test(@Nullable MyBase as @NonNull MyRole r) {}\n" +
+				"}\n",
+				"MyBase.java",
+				"public class MyBase {}\n"
+			},
+			getCompilerOptions(),
+			"----------\n" + 
+			"1. ERROR in MyTeam.java (at line 6)\n" + 
+			"	void test(@Nullable MyBase as @NonNull MyRole r) {}\n" + 
+			"	                    ^^^^^^^^^^^^^^^^^^^^^^^^^\n" + 
+			"Null type mismatch (type annotations): required \'MyTeam.@NonNull MyRole\' but this expression has type \'@Nullable MyBase\'\n" + 
+			"----------\n");
+	}
+
+	public void testLiftingType2() {
+		if (this.weavingScheme == WeavingScheme.OTRE) return;
+		runNegativeTestWithLibs(
+			new String[] {
+				"MyTeam.java",
+				"import org.eclipse.jdt.annotation.*;\n" +
+				"public team class MyTeam {\n" +
+				"	protected class MyRole playedBy MyBase {\n" +
+				"		protected void print() {}\n" +
+				"	}\n" +
+				"	void test1(MyBase @Nullable[] as MyRole @NonNull[] r) {}\n" +
+				"	void test2(@Nullable MyBase @NonNull[] as @NonNull MyRole @NonNull[] r) {}\n" +
+				"}\n",
+				"MyBase.java",
+				"public class MyBase {}\n"
+			},
+			getCompilerOptions(),
+			"----------\n" + 
+			"1. ERROR in MyTeam.java (at line 6)\n" + 
+			"	void test1(MyBase @Nullable[] as MyRole @NonNull[] r) {}\n" + 
+			"	           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n" + 
+			"Null type mismatch (type annotations): required \'MyTeam.MyRole @NonNull[]\' but this expression has type \'MyBase @Nullable[]\'\n" + 
+			"----------\n" + 
+			"2. ERROR in MyTeam.java (at line 7)\n" + 
+			"	void test2(@Nullable MyBase @NonNull[] as @NonNull MyRole @NonNull[] r) {}\n" + 
+			"	                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n" + 
+			"Null type mismatch (type annotations): required \'MyTeam.@NonNull MyRole @NonNull[]\' but this expression has type \'@Nullable MyBase @NonNull[]\'\n" + 
 			"----------\n");
 	}
 

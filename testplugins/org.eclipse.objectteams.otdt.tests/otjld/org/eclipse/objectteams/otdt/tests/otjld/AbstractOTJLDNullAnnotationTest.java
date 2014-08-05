@@ -211,23 +211,6 @@ public class AbstractOTJLDNullAnnotationTest extends AbstractNullAnnotationTest 
 		this.errorMatching = false;
 	}
 
-	/** Relaxed comparison using contains rather than equals. TODO(SH): pattern matching. */
-	protected void checkCompilerLog(String[] testFiles, Requestor requestor,
-			String[] alternatePlatformIndependantExpectedLogs, Throwable exception) {
-		String computedProblemLog = Util.convertToIndependantLineDelimiter(requestor.problemLog.toString());
-		for (String platformIndependantExpectedLog : alternatePlatformIndependantExpectedLogs) {
-			if (computedProblemLog.contains(platformIndependantExpectedLog))
-				return; // OK
-		}
-		logTestTitle();
-		System.out.println(Util.displayString(computedProblemLog, INDENT, SHIFT));
-		logTestFiles(false, testFiles);
-		if (errorMatching && exception == null)
-			fail("Invalid problem log\n"+computedProblemLog);
-		if (!errorMatching && exception == null) {
-			assertEquals("Invalid problem log ", alternatePlatformIndependantExpectedLogs[0], computedProblemLog);
-		}
-    }
 	// inaccessible helper from super
 	void logTestFiles(boolean logTitle, String[] testFiles) {
 		if (logTitle) {

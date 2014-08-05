@@ -38,9 +38,9 @@ import org.eclipse.jdt.internal.compiler.ast.FloatLiteral;
 import org.eclipse.jdt.internal.compiler.ast.IntLiteral;
 import org.eclipse.jdt.internal.compiler.ast.LocalDeclaration;
 import org.eclipse.jdt.internal.compiler.ast.LongLiteral;
+import org.eclipse.jdt.internal.compiler.ast.NullAnnotationMatching;
 import org.eclipse.jdt.internal.compiler.ast.NullLiteral;
 import org.eclipse.jdt.internal.compiler.ast.TypeReference;
-import org.eclipse.jdt.internal.compiler.lookup.Binding;
 import org.eclipse.jdt.internal.compiler.lookup.BlockScope;
 import org.eclipse.jdt.internal.compiler.lookup.ClassScope;
 import org.eclipse.jdt.internal.compiler.lookup.MissingTypeBinding;
@@ -206,7 +206,7 @@ public class LiftingTypeReference extends TypeReference {
 	    			ITeamAnchor anchor = null;
 	    			if (roleRefType.baseclass() instanceof RoleTypeBinding)
 	    				anchor = ((RoleTypeBinding)roleRefType.baseclass())._teamAnchor;
-	    			roleBase = parameterizedRole.environment.createParameterizedType((ReferenceBinding)roleBase.original(), typeArgs, anchor, -1, roleBase.enclosingType(), Binding.NO_ANNOTATIONS);
+	    			roleBase = parameterizedRole.environment.createParameterizedType((ReferenceBinding)roleBase.original(), typeArgs, anchor, -1, roleBase.enclosingType(), roleBase.getTypeAnnotations());
 	    		}
 	    		// THE compatibility check:
 		    	if (   !baseType.isCompatibleWith(roleBase)
@@ -258,6 +258,17 @@ public class LiftingTypeReference extends TypeReference {
 
 	    }
 	    return null;
+	}
+
+	public void updateBindingAndCheckNullness(BlockScope scope) {
+		this.baseReference.resolvedType = this.resolvedType;
+		TypeBinding roleType = this.roleReference.resolvedType;
+		if (roleType != null && roleType.isValidBinding() && scope.compilerOptions().isAnnotationBasedNullAnalysisEnabled) {
+	    	NullAnnotationMatching status = NullAnnotationMatching.analyse(roleType, this.resolvedType, -1);
+			if (status.isAnyMismatch()) {
+	    		scope.problemReporter().nullityMismatchingTypeAnnotation(this.fakedArgument.initialization, this.resolvedType, roleType, status);
+	    	}
+		}
 	}
 
 	@Override

@@ -252,12 +252,12 @@ public class ParameterizedSingleTypeReference extends ArrayTypeReference {
 		    }
 		}
 		// find a base import scope if that's allowed:
-	    Scope importScope = null;
+	    CompilationUnitScope importScope = null;
 		if (getBaseclassDecapsulation().isAllowed()) {
 			Scope currentScope = scope;
 			while (currentScope != null) {
 				if (currentScope instanceof OTClassScope) {
-					importScope = ((OTClassScope)currentScope).getBaseImportScope();
+					importScope = ((OTClassScope)currentScope).getBaseImportScope(scope);
 					if (importScope != null)
 						break;
 				}
@@ -268,6 +268,8 @@ public class ParameterizedSingleTypeReference extends ArrayTypeReference {
 /* orig:
 		TypeBinding type = internalResolveLeafType(scope, enclosingType, checkBounds);
   :giro */
+		if (importScope != null)
+			importScope.originalScope = null;
 // SH}
 
 		// handle three different outcomes:
@@ -553,11 +555,15 @@ public class ParameterizedSingleTypeReference extends ArrayTypeReference {
 			Scope currentScope = scope;
 			while (currentScope != null) {
 				if (currentScope instanceof OTClassScope) {
-					Scope baseImportScope = ((OTClassScope)currentScope).getBaseImportScope();
+					CompilationUnitScope baseImportScope = ((OTClassScope)currentScope).getBaseImportScope(scope);
 					if (baseImportScope != null) {
-						this.resolvedType = getTypeBinding(baseImportScope);
-						if (this.resolvedType != null && this.resolvedType.isValidBinding())
-							return this.resolvedType = checkResolvedType(this.resolvedType, baseImportScope, location, false);
+						try {
+							this.resolvedType = getTypeBinding(baseImportScope);
+							if (this.resolvedType != null && this.resolvedType.isValidBinding())
+								return this.resolvedType = checkResolvedType(this.resolvedType, baseImportScope, location, false);
+						} finally {
+							baseImportScope.originalScope = null;
+						}
 					}
 				}
 				currentScope = currentScope.parent;
