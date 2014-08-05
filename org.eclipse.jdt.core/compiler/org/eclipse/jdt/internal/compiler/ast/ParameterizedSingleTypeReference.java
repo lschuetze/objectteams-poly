@@ -244,8 +244,12 @@ public class ParameterizedSingleTypeReference extends ArrayTypeReference {
 								 this.typeArguments = new TypeReference[len], 0, len); // FIXME(SH): reducing this array conflicts with loop condition
 	
 				// note: handling of arrays differs for role and regular types
-				if (len == 0)
+				if (len == 0) {
+					resolveAnnotations(scope, location);
+					if (checkBounds)
+						checkNullConstraints(scope, this.typeArguments);
 					return this.resolvedType; // we're done
+				}
 
 				// proceed with a word of warning:
 				scope.problemReporter().experimentalFeature(this, "Implementation for mixed type and value parameters is experimental.");

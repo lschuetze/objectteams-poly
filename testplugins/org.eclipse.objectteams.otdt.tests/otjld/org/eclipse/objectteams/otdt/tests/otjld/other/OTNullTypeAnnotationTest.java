@@ -31,7 +31,7 @@ public class OTNullTypeAnnotationTest extends AbstractOTJLDNullAnnotationTest {
 	// Static initializer to specify tests subset using TESTS_* static variables
 	// All specified tests which do not belong to the class are skipped...
 	static {
-//			TESTS_NAMES = new String[] { "testLiftingType2" };
+//			TESTS_NAMES = new String[] { "testExplicitTeamAnchor1" };
 //			TESTS_NUMBERS = new int[] { 561 };
 //			TESTS_RANGE = new int[] { 1, 2049 };
 	}
@@ -98,6 +98,35 @@ public class OTNullTypeAnnotationTest extends AbstractOTJLDNullAnnotationTest {
 			"1. ERROR in MyTeam.java (at line 9)\n" + 
 			"	@NonNull MyRole role = someRoles.get(0);\n" + 
 			"	                       ^^^^^^^^^^^^^^^^\n" + 
+			"Null type mismatch (type annotations): required \'MyTeam.@NonNull MyRole\' but this expression has type \'MyTeam.@Nullable MyRole\'\n" + 
+			"----------\n");
+	}
+
+	public void testExplicitTeamAnchor1() {
+		if (this.weavingScheme == WeavingScheme.OTRE) return;
+		runNegativeTestWithLibs(
+			new String[] {
+				"Main.java",
+				"import org.eclipse.jdt.annotation.*;\n" +
+				"import java.util.*;\n" +
+				"public class Main {\n" +
+				"	void test(final MyTeam t, List<@Nullable MyRole<@t>> someRoles) {\n" +
+				"		@NonNull MyRole<@t> role = someRoles.get(0);\n" + 
+				"		role.print();\n" + 
+				"	}\n" +
+				"}\n",
+				"MyTeam.java",
+				"public team class MyTeam {\n" +
+				"	public class MyRole {\n" +
+				"		public void print() {}\n" +
+				"	}\n" +
+				"}\n"
+			},
+			getCompilerOptions(),
+			"----------\n" + 
+			"1. ERROR in Main.java (at line 5)\n" + 
+			"	@NonNull MyRole<@t> role = someRoles.get(0);\n" + 
+			"	                           ^^^^^^^^^^^^^^^^\n" + 
 			"Null type mismatch (type annotations): required \'MyTeam.@NonNull MyRole\' but this expression has type \'MyTeam.@Nullable MyRole\'\n" + 
 			"----------\n");
 	}

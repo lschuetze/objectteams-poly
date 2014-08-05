@@ -235,6 +235,11 @@ public class RoleTypeBinding extends DependentTypeBinding
 		// record as known role type at teamAnchor and in our own cache
         registerAnchor();
     }
+    
+    public TypeBinding clone(TypeBinding outerType) {
+    	RoleTypeBinding clone = new RoleTypeBinding(this.type, typeArguments(), this._teamAnchor, (ReferenceBinding) outerType, this.environment);
+    	return clone;
+    }
 
     // hook of maybeInstantiate
     TypeBinding forAnchor(ITeamAnchor anchor, int dimensions) {
@@ -956,20 +961,18 @@ public class RoleTypeBinding extends DependentTypeBinding
     	return super.attributeName();
     }
     public String toString() {
-    	String anchorStr = ""; //$NON-NLS-1$
+    	StringBuilder sb = new StringBuilder();
+    	sb.append(annotatedDebugName());
+    	sb.append('<').append('@');
     	ITeamAnchor[] bestNamePath = this._teamAnchor.getBestNamePath(false);
 		for (int i = 0; i < bestNamePath.length; i++) {
     		if (i>0)
-    			anchorStr += '.';
-			anchorStr += new String(bestNamePath[i].readableName());
+    			sb.append('.');
+			sb.append(bestNamePath[i].readableName());
 		}
-    	String staticTeam = ""; //$NON-NLS-1$
-    	if (!(this._teamAnchor instanceof TThisBinding))
-    		staticTeam = '['+new String(this._staticallyKnownTeam.sourceName())+']';
-        return
-            anchorStr
-            +staticTeam
-            +'.'
-            +new String(sourceName());
+		if (!(this._teamAnchor instanceof TThisBinding))
+			sb.append('[').append(this._staticallyKnownTeam.sourceName()).append(']');
+		sb.append('>');
+		return sb.toString();
     }
 }
