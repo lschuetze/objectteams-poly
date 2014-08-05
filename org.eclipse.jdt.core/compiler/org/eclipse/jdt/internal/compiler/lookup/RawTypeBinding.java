@@ -228,6 +228,9 @@ public class RawTypeBinding extends ParameterizedTypeBinding {
 		}
 		return this.singleAbstractMethod[index];
 	}
+	public boolean mentionsAny(TypeBinding[] parameters, int idx) {
+		return false;
+	}
 	/**
 	 * @see org.eclipse.jdt.internal.compiler.lookup.Binding#readableName()
 	 */

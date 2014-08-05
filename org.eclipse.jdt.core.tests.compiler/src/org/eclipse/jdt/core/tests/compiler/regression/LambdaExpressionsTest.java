@@ -14,8 +14,15 @@
  *******************************************************************************/
 package org.eclipse.jdt.core.tests.compiler.regression;
 
+import java.io.File;
 import java.util.Map;
 
+import org.eclipse.jdt.core.ToolFactory;
+import org.eclipse.jdt.core.tests.util.Util;
+import org.eclipse.jdt.core.util.IAttributeNamesConstants;
+import org.eclipse.jdt.core.util.IClassFileAttribute;
+import org.eclipse.jdt.core.util.IClassFileReader;
+import org.eclipse.jdt.core.util.IMethodInfo;
 import org.eclipse.jdt.internal.compiler.impl.CompilerOptions;
 
 import junit.framework.Test;
@@ -4432,6 +4439,115 @@ public void test434297() {
 			"	}\n" + 
 			"  }\n" + 
 			"}"
+	});
+}
+// https://bugs.eclipse.org/bugs/show_bug.cgi?id=436542 : Eclipse 4.4 compiler generates "bad class file" according to javac
+public void test436542() throws Exception {
+	String jreDirectory = Util.getJREDirectory();
+	String jfxJar = Util.toNativePath(jreDirectory + "/lib/ext/jfxrt.jar");
+	this.runConformTest(
+		new String[] {
+			"Utility.java",
+			"import java.util.Collection;\n" + 
+			"import java.util.List;\n" + 
+			"import java.util.function.Function;\n" + 
+			"import java.util.stream.Collectors;\n" + 
+			"import javafx.collections.ListChangeListener;\n" + 
+			"import javafx.collections.ObservableList;\n" + 
+			"public class Utility {\n" + 
+			"	public static void main(String[] args) {\n" + 
+			"		System.out.println(\"Success\");\n" + 
+			"	}\n" + 
+			"    public static <T, R> List<R> mapList(Collection<T> original, Function<T, R> func) {\n" + 
+			"        return original.stream().map(func).collect(Collectors.toList());\n" + 
+			"    }\n" + 
+			"    /**\n" + 
+			"     * \"Binds\" the destination list to the observable source list with a transformation function applied.\n" + 
+			"     * Whenever the source list changes, the destination list is altered to match by applying\n" + 
+			"     * the given function to each element in the source list.\n" + 
+			"     */\n" + 
+			"    public static <S, T> void bindMap(List<T> dest, ObservableList<S> src, Function<S, T> func) {\n" + 
+			"        dest.clear();\n" + 
+			"        dest.addAll(mapList(src, func));\n" + 
+			"        src.addListener((ListChangeListener<S>) changes -> {\n" + 
+			"            while (changes.next()) {\n" + 
+			"                if (changes.wasPermutated() || changes.wasUpdated()) {\n" + 
+			"                    // Same code for updated, replaced and permutation, just recalc the range:\n" + 
+			"                    for (int i = changes.getFrom(); i < changes.getTo(); i++)\n" + 
+			"                        dest.set(i, func.apply(src.get(i)));\n" + 
+			"                } else {\n" + 
+			"                    for (int i = 0; i < changes.getRemovedSize(); i++)\n" + 
+			"                        dest.remove(changes.getFrom());\n" + 
+			"                    for (int i = 0; i < changes.getAddedSubList().size();i++)\n" + 
+			"                        dest.add(i + changes.getFrom(), func.apply(changes.getAddedSubList().get(i)));\n" + 
+			"                }\n" + 
+			"            }\n" + 
+			"        });\n" + 
+			"    }\n" + 
+			"}",
+		},
+		"Success",
+		Util.concatWithClassLibs(new String[]{jfxJar,OUTPUT_DIR}, false),
+		true,
+		null);
+	IClassFileReader classFileReader = ToolFactory.createDefaultClassFileReader(OUTPUT_DIR + File.separator + "Utility.class", IClassFileReader.ALL);
+	IMethodInfo lambdaMethod = null;
+	IMethodInfo[] methodInfos = classFileReader.getMethodInfos();
+	int length = methodInfos.length;
+	for (int i = 0; i < length; i++) {
+		IMethodInfo methodInfo = methodInfos[i];
+		if ("lambda$0".equals(new String(methodInfo.getName()))) {
+			lambdaMethod = methodInfo;
+			break;
+		}
+	}
+	assertNotNull("Could not find lambda method",lambdaMethod);
+	IClassFileAttribute signature = org.eclipse.jdt.internal.core.util.Util.getAttribute(lambdaMethod, IAttributeNamesConstants.SIGNATURE);
+	assertNull("Found generic signature for lambda method", signature);
+}
+// https://bugs.eclipse.org/bugs/show_bug.cgi?id=440152 [codegen]"Missing code implementation in the compiler" on cascaded inner class references
+public void test440152() {
+	this.runConformTest(
+		new String[] {
+			"Foo.java",
+			"import java.util.function.Function;\n" + 
+			"interface Foo {void alpha(Bar pBar);}\n" + 
+			"class Bar {Object bravo() {return null;}}\n" + 
+			"class Test {\n" + 
+			"  Test(Function pFunction) {\n" + 
+			"    class Baz {public Baz(Object pObj) {pFunction.apply(pObj);}}\n" + 
+			"    delta(pBar -> charlie(new Baz(pBar.bravo())));\n" + 
+			"  }\n" + 
+			"  void charlie(Object pRemovals) {}\n" + 
+			"  void delta(Foo pListener) {}\n" + 
+			"}"
+	});
+}
+// https://bugs.eclipse.org/bugs/show_bug.cgi?id=440152 [codegen]"Missing code implementation in the compiler" on cascaded inner class references
+public void test440152a() {
+	this.runConformTest(
+		new String[] {
+			"Foo.java",
+			"import java.util.function.Function;\n" + 
+			"interface Foo {void alpha(Bar pBar);}\n" + 
+			"class Bar {Object bravo() {return null;}}\n" + 
+			"class Test {\n" + 
+			"	Test(Function pFunction) {\n" + 
+			"	    class Baz {\n" + 
+			"	    	public Baz(Object pObj) {\n" + 
+			"	    	}\n" + 
+			"	    	class NestedBaz extends Baz {\n" + 
+			"	    		NestedBaz(Object pObj) {\n" + 
+			"	    			super(pObj);\n" + 
+			"	    			pFunction.apply(pObj);\n" + 
+			"	    		}\n" + 
+			"	    	}\n" + 
+			"	    	}\n" + 
+			"	    delta(pBar -> charlie(new Baz(pBar).new NestedBaz(pBar.bravo())));\n" + 
+			"	  }\n" + 
+			"	  void charlie(Object pRemovals) {}\n" + 
+			"	  void delta(Foo pListener) {}\n" + 
+			"}\n"
 	});
 }
 public static Class testClass() {
