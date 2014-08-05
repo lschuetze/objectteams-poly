@@ -7602,6 +7602,12 @@ protected void consumeZeroTypeAnnotations() {
 	// PushZeroTypeAnnotations ::= $empty
 	// Name ::= SimpleName
 	// TypeAnnotationsopt ::= $empty
+	int sentinelPos = -1;
+	if (this.typeAnnotationLengthPtr != -1) {
+		sentinelPos = this.typeAnnotationPtr - this.typeAnnotationLengthStack[this.typeAnnotationLengthPtr];
+		if (sentinelPos > -1 && this.typeAnnotationStack[sentinelPos] == annotationSentinel)
+			return; // convertTypeAnchor already allocated a sentinel-delimited annotation list, don't add another one
+	}
 	pushOnTypeAnnotationLengthStack(0); // signal absence of @308 annotations.
 }
 // This method is part of an automatic generation : do NOT edit-modify
@@ -9398,6 +9404,10 @@ protected void consumeRule(int act) {
 		    consumeAnnotationsOnTypeArgumentFromAnchor();  
 			break;
  
+    case 763 : if (DEBUG) { System.out.println("TypeAnchorOrAnnotatedTypeArgument1 ::= AnyTypeAnchor..."); }  //$NON-NLS-1$
+		    confirmTypeAnchor();  
+			break;
+ 
     case 764 : if (DEBUG) { System.out.println("TypeAnchorOrAnnotatedTypeArgument1 ::=..."); }  //$NON-NLS-1$
 		    consumeAnnotationsOnTypeArgumentFromAnchor();  
 			break;
@@ -9406,12 +9416,20 @@ protected void consumeRule(int act) {
 		    consumeAnnotationsOnTypeArgumentFromAnchor();  
 			break;
  
+    case 766 : if (DEBUG) { System.out.println("TypeAnchorOrAnnotatedTypeArgument2 ::= AnyTypeAnchor..."); }  //$NON-NLS-1$
+		    confirmTypeAnchor();  
+			break;
+ 
     case 767 : if (DEBUG) { System.out.println("TypeAnchorOrAnnotatedTypeArgument2 ::=..."); }  //$NON-NLS-1$
 		    consumeAnnotationsOnTypeArgumentFromAnchor();  
 			break;
  
     case 768 : if (DEBUG) { System.out.println("TypeAnchorOrAnnotatedTypeArgument2 ::=..."); }  //$NON-NLS-1$
 		    consumeAnnotationsOnTypeArgumentFromAnchor();  
+			break;
+ 
+    case 769 : if (DEBUG) { System.out.println("TypeAnchorOrAnnotatedTypeArgument3 ::= AnyTypeAnchor..."); }  //$NON-NLS-1$
+		    confirmTypeAnchor();  
 			break;
  
     case 770 : if (DEBUG) { System.out.println("TypeAnchorOrAnnotatedTypeArgument3 ::=..."); }  //$NON-NLS-1$
@@ -11420,6 +11438,11 @@ protected void consumeTypeAnchor(boolean haveBase) {
 	// anchor has no type annotations, yet it will be consumed in a context where type annotations are possible
 	pushOnTypeAnnotationLengthStack(0);
 }
+protected void confirmTypeAnchor() {
+	// tentative type anchor is indeed a type anchor (not converted to type annotation).
+	// need to remove the empty type annotation list now (see consumeTypeAnchor()).
+	this.typeAnnotationLengthPtr--;
+}
 // this sentinel annotation is pushed below a type annotation that was converted from a type anchor.
 // it signals to a subsequent type annotation that it shall be merged into the existing list
 static final Annotation annotationSentinel = new MarkerAnnotation(new SingleTypeReference("annotationSentinel".toCharArray(), 0), 0); //$NON-NLS-1$
@@ -11518,35 +11541,13 @@ protected void consumeAnnotationsOnTypeArgumentFromAnchor() {
 	// TypeAnchorOrAnnotatedTypeArgument2 -> TentativeTypeAnchor NotAnAnchor ReferenceType2
 	// TypeAnchorOrAnnotatedTypeArgument2 -> TentativeTypeAnchor NotAnAnchor Wildcard2
 
-	// in all these cases a type reference (with dims) already exists
-	// and only type annotations need to be added/merged (if any)
-	
-	TypeReference ref = (TypeReference) this.genericsStack[this.genericsPtr];
-	// insert or merge converted annotation at first level into ref's annotations:
-	int length = this.typeAnnotationLengthStack[this.typeAnnotationLengthPtr--];
-	if (length != 0) {
-		if (ref.annotations == null)
-			ref.annotations = new Annotation[ref.getAnnotatableLevels()][];
-		Annotation[] annotations = ref.annotations[0];
-		int oldLen = 0;
-		if (annotations != null) {
-			oldLen = annotations.length;
-			System.arraycopy(annotations, 0, annotations = new Annotation[oldLen+length], length, oldLen);
-		} else {
-			annotations = new Annotation[length];				
-		}
-		System.arraycopy(
-				this.typeAnnotationStack,
-				(this.typeAnnotationPtr -= length) + 1,
-				annotations,
-				0,
-				length);
-		ref.annotations[0] = annotations;
-		ref.sourceStart = annotations[0].sourceStart;
-		ref.bits |= ASTNode.HasTypeAnnotations;
+	// in all these cases a type reference (with dims) already exists on the genericsStack
+	//    (will be collected by consumeTypeArgumentList1())
+	// type annotations should have been attached via the tail of the production (e.g., consumeReferenceType1())
+	// now just clean-up the remaining annotation sentinel
+	if (this.typeAnnotationStack[this.typeAnnotationPtr] == annotationSentinel) {
+		this.typeAnnotationPtr--; // drop the annotationSentinel
 	}
-	// type references are already on genericsStack, will be collected by consumeTypeArgumentList1()
-	this.typeAnnotationPtr--; // drop the annotationSentinel
 }
 protected NameReference newBaseReference() {
 	return new SingleNameReference(IOTConstants._OT_BASE, (((long)this.intStack[this.intPtr--])<<32)+this.intStack[this.intPtr--]);
@@ -11558,6 +11559,8 @@ protected void skipThisAnchor() {
 	// Cannot use ThisReference as type anchor.
 	// Since R<@this> is redundant, simply drop the argument (see also concatGenericsList()).
 	this.intPtr-=2;
+	// anchor has not type annotations, yet it will be consumed in a context where type annotations are possible
+	pushOnTypeAnnotationLengthStack(0);
 }
 protected void consumeQualifiedBaseTypeAnchor() {
 	// TypeAnchor ::= '@OT' UnannotatableName '.' 'base'
@@ -11566,7 +11569,8 @@ protected void consumeQualifiedBaseTypeAnchor() {
 	// handle type arguments (see consumePrimaryNoNewArrayNameThis):
 	pushOnGenericsIdentifiersLengthStack(this.identifierLengthStack[this.identifierLengthPtr]);
 	pushOnGenericsLengthStack(0); // handle type arguments
-	TypeReference prefix = getTypeReference(0);
+	pushOnTypeAnnotationLengthStack(0); // unannotated by construction, but haven't yet pushed zero type annotatations
+	TypeReference prefix = getTypeReference(0); // consumes the above zero type annotations
 	
 	Reference anchor = new QualifiedBaseReference(prefix, this.intStack[this.intPtr--], this.intStack[this.intPtr--]);
 	pushOnGenericsStack(new TypeAnchorReference(anchor, this.intStack[this.intPtr--]));
