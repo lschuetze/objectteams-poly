@@ -7604,9 +7604,17 @@ protected void consumeZeroTypeAnnotations() {
 	// TypeAnnotationsopt ::= $empty
 	int sentinelPos = -1;
 	if (this.typeAnnotationLengthPtr != -1) {
-		sentinelPos = this.typeAnnotationPtr - this.typeAnnotationLengthStack[this.typeAnnotationLengthPtr];
-		if (sentinelPos > -1 && this.typeAnnotationStack[sentinelPos] == annotationSentinel)
-			return; // convertTypeAnchor already allocated a sentinel-delimited annotation list, don't add another one
+		int len = this.typeAnnotationLengthStack[this.typeAnnotationLengthPtr];
+		sentinelPos = this.typeAnnotationPtr - len;
+		if (sentinelPos > -1 && this.typeAnnotationStack[sentinelPos] == annotationSentinel) {
+			// new ZeroTypeAnnotations in a sentinal situation means: the sentinel has served its purpose, we move on.
+			// Ergo:
+			// - remove the sentinel, transforming the special list into a regular one (lenght is already correct).
+			// - this leaves the rest of the sentinel list as the pending type annotations (instead of zero)
+			System.arraycopy(this.typeAnnotationStack, sentinelPos+1, this.typeAnnotationStack, sentinelPos, len);
+			this.typeAnnotationPtr--;
+			return;
+		}
 	}
 	pushOnTypeAnnotationLengthStack(0); // signal absence of @308 annotations.
 }
@@ -11517,20 +11525,10 @@ protected void convertTypeAnchor(int annotationKind) {
 protected void consumeTypeArgumentFromAnchor() {
 	// TypeAnchorOrAnnotatedTypeArgument -> TentativeTypeAnchor NotAnAnchor ReferenceType
 
-	// the Name in ReferenceType has pushed an annotation length,
-	// merge that into the previous empty list (from convertTypeAnchor()):
-	int dim = this.intStack[this.intPtr];
-	int ptr = this.typeAnnotationLengthPtr;
-	if (dim > 1) {
-		this.typeAnnotationLengthStack[ptr-dim] += this.typeAnnotationLengthStack[ptr-dim+1];
-		System.arraycopy(this.typeAnnotationLengthStack, ptr-dim+2, this.typeAnnotationLengthStack, ptr-dim+1, dim-1);
-	} else {
-		this.typeAnnotationLengthStack[ptr-1] += this.typeAnnotationLengthStack[ptr];		
-	}
-	this.typeAnnotationLengthPtr--;
 	// collect everything into a regular type argument:
 	consumeTypeArgument();
-	this.typeAnnotationPtr--; // drop the annotationSentinel
+	if (this.typeAnnotationPtr > -1 && this.typeAnnotationStack[this.typeAnnotationPtr] == annotationSentinel)
+		this.typeAnnotationPtr--; // drop the annotationSentinel if still present
 }
 protected void consumeAnnotationsOnTypeArgumentFromAnchor() {
 	// TypeAnchorOrAnnotatedTypeArgument -> TentativeTypeAnchor NotAnAnchor Wildcard
@@ -11544,10 +11542,10 @@ protected void consumeAnnotationsOnTypeArgumentFromAnchor() {
 	// in all these cases a type reference (with dims) already exists on the genericsStack
 	//    (will be collected by consumeTypeArgumentList1())
 	// type annotations should have been attached via the tail of the production (e.g., consumeReferenceType1())
-	// now just clean-up the remaining annotation sentinel
-	if (this.typeAnnotationStack[this.typeAnnotationPtr] == annotationSentinel) {
-		this.typeAnnotationPtr--; // drop the annotationSentinel
-	}
+
+	// now just perform final clean-up:
+	if (this.typeAnnotationPtr > -1 && this.typeAnnotationStack[this.typeAnnotationPtr] == annotationSentinel)
+		this.typeAnnotationPtr--; // drop the annotationSentinel if still present
 }
 protected NameReference newBaseReference() {
 	return new SingleNameReference(IOTConstants._OT_BASE, (((long)this.intStack[this.intPtr--])<<32)+this.intStack[this.intPtr--]);
@@ -14723,10 +14721,9 @@ protected void pushOnTypeAnnotationStack(Annotation annotation) {
 			stackLength);
 	}
 //{ObjectTeams: at the sentinal situation we merge this new annotation into the previous list:
-  if (atSentinel) {
-	this.typeAnnotationLengthStack[this.typeAnnotationLengthPtr-1]++;
-	this.typeAnnotationLengthStack[this.typeAnnotationLengthPtr] = 0; // clear any previous data to start an empty list
-  } else
+  if (atSentinel)
+	this.typeAnnotationLengthStack[--this.typeAnnotationLengthPtr]++;
+  else
 // SH}
 	this.typeAnnotationLengthStack[this.typeAnnotationLengthPtr] = 1;
 }
