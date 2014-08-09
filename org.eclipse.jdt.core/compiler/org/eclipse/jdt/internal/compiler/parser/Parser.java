@@ -7701,6 +7701,10 @@ protected void consumeRule(int act) {
 		    consumeZeroTypeAnnotations();  
 			break;
  
+    case 85 : if (DEBUG) { System.out.println("TypeAnnotationsopt -> TypeAnnotations"); }  //$NON-NLS-1$
+		    consumeTypeAnnotationSeen();  
+			break;
+ 
      case 88 : if (DEBUG) { System.out.println("TypeAnnotations0 ::= TypeAnnotations0 TypeAnnotation"); }  //$NON-NLS-1$
 		    consumeOneMoreTypeAnnotation();  
 			break;
@@ -11546,6 +11550,21 @@ protected void consumeAnnotationsOnTypeArgumentFromAnchor() {
 	// now just perform final clean-up:
 	if (this.typeAnnotationPtr > -1 && this.typeAnnotationStack[this.typeAnnotationPtr] == annotationSentinel)
 		this.typeAnnotationPtr--; // drop the annotationSentinel if still present
+}
+protected void consumeTypeAnnotationSeen() {
+	int sentinelPos = -1;
+	if (this.typeAnnotationLengthPtr != -1) {
+		int len = this.typeAnnotationLengthStack[this.typeAnnotationLengthPtr];
+		sentinelPos = this.typeAnnotationPtr - len;
+		if (sentinelPos > -1 && this.typeAnnotationStack[sentinelPos] == annotationSentinel) {
+			// new ZeroTypeAnnotations in a sentinal situation means: the sentinel has served its purpose, we move on.
+			// Ergo:
+			// - remove the sentinel, transforming the special list into a regular one (lenght is already correct).
+			// - this leaves the rest of the sentinel list as the pending type annotations (instead of zero)
+			System.arraycopy(this.typeAnnotationStack, sentinelPos+1, this.typeAnnotationStack, sentinelPos, len);
+			this.typeAnnotationPtr--;
+		}
+	}
 }
 protected NameReference newBaseReference() {
 	return new SingleNameReference(IOTConstants._OT_BASE, (((long)this.intStack[this.intPtr--])<<32)+this.intStack[this.intPtr--]);

@@ -404,6 +404,9 @@ QualifiedName ::= Name '.' TypeAnnotations SimpleName
 TypeAnnotationsopt ::= $empty
 /.$putCase consumeZeroTypeAnnotations(); $break ./
 TypeAnnotationsopt -> TypeAnnotations
+--{ObjectTeams: give a chance to eliminate sentinel
+/.$putCase consumeTypeAnnotationSeen(); $break ./
+-- SH}
 /:$compliance 1.8:/
 /:$readableName TypeAnnotationsopt:/
 
