@@ -228,16 +228,24 @@ public class FieldAccessSpec extends MethodSpec {
     		// because several callouts to the same field could exist.
     		// RoleTypeCreator.maybeWrapQualifiedRoleType(MessageSend,BlockScope)
     		// will wrap the type using a faked _OT$base receiver.
-    		return FieldModel.getDecapsulatingFieldAccessor(baseType, this.resolvedField, true);
+    		return FieldModel.getDecapsulatingFieldAccessor(baseType, this.resolvedField, true, this.implementationStrategy);
 		} else {
     		TypeBinding declaredFieldType = this.hasSignature ?
 					this.parameters[0] :
 					this.fieldType;
-    		TypeBinding[] argTypes = this.resolvedField.isStatic() ?
+			int access;
+			TypeBinding[] argTypes;
+			if (this.implementationStrategy == ImplementationStrategy.DYN_ACCESS) {
+				access = ClassFileConstants.AccPublic;
+				argTypes = new TypeBinding[]{declaredFieldType};
+			} else {
+				access = ClassFileConstants.AccPublic|ClassFileConstants.AccStatic;
+				argTypes = this.resolvedField.isStatic() ?
     									new TypeBinding[]{declaredFieldType} :
     									new TypeBinding[]{baseType, declaredFieldType};
+			}
 			return new MethodBinding(
-    				ClassFileConstants.AccPublic|ClassFileConstants.AccStatic,
+    					access,
 						accessorSelector,
 						TypeBinding.VOID,
 						argTypes,
@@ -267,8 +275,8 @@ public class FieldAccessSpec extends MethodSpec {
     	if (this.resolvedMethod == null)
     		return this.parameters; // empty; FIXME(SH): handle "set" access
     	TypeBinding[] methodParams = super.resolvedParameters();
-    	if (this.resolvedField.isStatic())
-    		return methodParams; // no base argument when accessing a static field
+    	if (this.resolvedField.isStatic() || this.implementationStrategy == ImplementationStrategy.DYN_ACCESS)
+    		return methodParams; // no base argument when accessing a static field, or in OTDRE mode
 		TypeBinding[] result = new TypeBinding[methodParams.length-1];
     	System.arraycopy(methodParams, 1, result, 0, result.length);
     	return result;
@@ -329,7 +337,7 @@ public class FieldAccessSpec extends MethodSpec {
 		if (this.calloutModifier == TerminalTokens.TokenNameget)
 			return true; // no parameter
 		int argumentPosition = 0; // safer against AIOOBE
-		if (this.resolvedField != null && !this.resolvedField.isStatic())
+		if (this.resolvedField != null && !this.resolvedField.isStatic() && this.implementationStrategy != ImplementationStrategy.DYN_ACCESS)
 			argumentPosition = 1;
 		TypeBinding accessorParamType = null;
 		if (this.resolvedMethod != null)

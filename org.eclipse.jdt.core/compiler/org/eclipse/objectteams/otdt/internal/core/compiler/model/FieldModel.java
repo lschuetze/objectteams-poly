@@ -20,10 +20,10 @@
  **********************************************************************/
 package org.eclipse.objectteams.otdt.internal.core.compiler.model;
 
+import static org.eclipse.objectteams.otdt.core.compiler.IOTConstants.ANCHOR_USAGE_RANKS;
+import static org.eclipse.objectteams.otdt.core.compiler.IOTConstants.AccSynthIfc;
 import static org.eclipse.objectteams.otdt.core.compiler.IOTConstants.OT_GETFIELD;
 import static org.eclipse.objectteams.otdt.core.compiler.IOTConstants.OT_SETFIELD;
-import static org.eclipse.objectteams.otdt.core.compiler.IOTConstants.AccSynthIfc;
-import static org.eclipse.objectteams.otdt.core.compiler.IOTConstants.ANCHOR_USAGE_RANKS;
 
 import org.eclipse.jdt.core.compiler.CharOperation;
 import org.eclipse.jdt.internal.compiler.ast.FieldDeclaration;
@@ -37,6 +37,7 @@ import org.eclipse.jdt.internal.compiler.lookup.TagBits;
 import org.eclipse.jdt.internal.compiler.lookup.TypeBinding;
 import org.eclipse.objectteams.otdt.core.exceptions.InternalCompilerError;
 import org.eclipse.objectteams.otdt.internal.core.compiler.ast.CalloutMappingDeclaration;
+import org.eclipse.objectteams.otdt.internal.core.compiler.ast.MethodSpec.ImplementationStrategy;
 import org.eclipse.objectteams.otdt.internal.core.compiler.bytecode.AnchorUsageRanksAttribute;
 import org.eclipse.objectteams.otdt.internal.core.compiler.bytecode.WordValueAttribute;
 import org.eclipse.objectteams.otdt.internal.core.compiler.model.MethodModel.FakeKind;
@@ -153,22 +154,33 @@ public class FieldModel extends ModelElement {
 	 */
 	public static MethodBinding getDecapsulatingFieldAccessor(ReferenceBinding baseType,
 												         		  FieldBinding     resolvedField,
-												         		  boolean 		   isGetter)
+												         		  boolean 		   isGetter,
+												         		  ImplementationStrategy strategy)
 	{
 		FieldModel model = FieldModel.getModel(resolvedField);
 		MethodBinding accessor = isGetter ? model._decapsulatingGetter : model._decapsulatingSetter;
 		if (accessor != null)
 			return accessor;
 		
-		TypeBinding[] argTypes = resolvedField.isStatic() 
+		TypeBinding[] argTypes;
+		int access;
+		if (strategy == ImplementationStrategy.DYN_ACCESS) {
+			argTypes = isGetter 
+							? new TypeBinding[0] 
+							: new TypeBinding[]{resolvedField.type};
+			access = ClassFileConstants.AccPublic;
+		} else {
+			argTypes = resolvedField.isStatic() 
 									? (isGetter 
 											? new TypeBinding[0] 
 											: new TypeBinding[]{resolvedField.type})
 									: (isGetter
 											? new TypeBinding[]{baseType}
 											: new TypeBinding[]{baseType, resolvedField.type});
+			access = ClassFileConstants.AccPublic|ClassFileConstants.AccStatic;
+		}
 		accessor = new MethodBinding(
-					ClassFileConstants.AccPublic|ClassFileConstants.AccStatic,
+					access,
 					CharOperation.concat(isGetter ? OT_GETFIELD : OT_SETFIELD, resolvedField.name),
 					isGetter ? resolvedField.type : TypeBinding.VOID,
 					argTypes,

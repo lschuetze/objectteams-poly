@@ -34,6 +34,7 @@ import org.eclipse.jdt.internal.compiler.codegen.Opcodes;
 import org.eclipse.jdt.internal.compiler.flow.FlowContext;
 import org.eclipse.jdt.internal.compiler.flow.FlowInfo;
 import org.eclipse.jdt.internal.compiler.impl.CompilerOptions;
+import org.eclipse.jdt.internal.compiler.impl.CompilerOptions.WeavingScheme;
 import org.eclipse.jdt.internal.compiler.impl.Constant;
 import org.eclipse.jdt.internal.compiler.lookup.Binding;
 import org.eclipse.jdt.internal.compiler.lookup.BlockScope;
@@ -59,6 +60,7 @@ import org.eclipse.jdt.internal.compiler.problem.ProblemSeverities;
 import org.eclipse.objectteams.otdt.core.compiler.IOTConstants;
 import org.eclipse.objectteams.otdt.internal.core.compiler.ast.CalloutMappingDeclaration;
 import org.eclipse.objectteams.otdt.internal.core.compiler.ast.FieldAccessSpec;
+import org.eclipse.objectteams.otdt.internal.core.compiler.ast.MethodSpec.ImplementationStrategy;
 import org.eclipse.objectteams.otdt.internal.core.compiler.lookup.DependentTypeBinding;
 import org.eclipse.objectteams.otdt.internal.core.compiler.lookup.ITeamAnchor;
 import org.eclipse.objectteams.otdt.internal.core.compiler.lookup.RoleTypeBinding;
@@ -854,7 +856,7 @@ public TypeBinding getOtherFieldBindings(BlockScope scope) {
 					// realize decapsulation by simulating an inferred callout-to-field
 					field = closestField;
 					scope.problemReporter().decapsulation(this, field, scope);
-					accessAsCalloutToField(enclosingReceiver, field, index);
+					accessAsCalloutToField(enclosingReceiver, field, index, scope.compilerOptions().weavingScheme);
 					fixedByDecapsulation = true;
 				}
 		  }
@@ -924,12 +926,13 @@ public TypeBinding getOtherFieldBindings(BlockScope scope) {
 }
 
 //{ObjectTeams: replace this field reference with an accessor call (simulated as callout-to-field):
-private void accessAsCalloutToField(ReferenceBinding enclosingReceiver, FieldBinding baseclassField, int idx)
+private void accessAsCalloutToField(ReferenceBinding enclosingReceiver, FieldBinding baseclassField, int idx, WeavingScheme weaving)
 {
 	ReferenceBinding baseClass = baseclassField.declaringClass;
 
 	// manually create and add binding as if it were a callout to field:
-	final MethodBinding fakedAccessorBinding = FieldModel.getDecapsulatingFieldAccessor(baseClass, baseclassField, true);
+	ImplementationStrategy strategy = weaving == WeavingScheme.OTDRE ? ImplementationStrategy.DYN_ACCESS : ImplementationStrategy.DECAPS_WRAPPER;
+	final MethodBinding fakedAccessorBinding = FieldModel.getDecapsulatingFieldAccessor(baseClass, baseclassField, true, strategy);
 	baseClass.addMethod(fakedAccessorBinding);
 
 	// record the need to have the OTRE create the accessor:

@@ -68,6 +68,7 @@ import org.eclipse.objectteams.otdt.internal.core.compiler.ast.AbstractMethodMap
 import org.eclipse.objectteams.otdt.internal.core.compiler.ast.CalloutMappingDeclaration;
 import org.eclipse.objectteams.otdt.internal.core.compiler.ast.FieldAccessSpec;
 import org.eclipse.objectteams.otdt.internal.core.compiler.ast.MethodSpec;
+import org.eclipse.objectteams.otdt.internal.core.compiler.ast.MethodSpec.ImplementationStrategy;
 import org.eclipse.objectteams.otdt.internal.core.compiler.ast.ParameterMapping;
 import org.eclipse.objectteams.otdt.internal.core.compiler.ast.PotentialLowerExpression;
 import org.eclipse.objectteams.otdt.internal.core.compiler.ast.PrivateRoleMethodCall;
@@ -558,7 +559,9 @@ public class CalloutImplementor extends MethodMappingImplementor
 							CastExpression.DO_WRAP);
 
 		Expression baseAccess = null;
-		if (calloutDecl.baseMethodSpec.isPrivate() && baseType.isRole()) {
+		if (calloutDecl.baseMethodSpec.isPrivate() && baseType.isRole()
+				&& calloutDecl.baseMethodSpec.implementationStrategy != ImplementationStrategy.DYN_ACCESS)
+		{
     		// tricky case: callout to a private role method (base-side)
     		// requires the indirection via two wrapper methods (privateBridgeMethod)
 

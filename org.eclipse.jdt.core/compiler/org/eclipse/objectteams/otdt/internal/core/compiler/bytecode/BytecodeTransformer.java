@@ -45,6 +45,7 @@ import org.eclipse.objectteams.otdt.core.exceptions.InternalCompilerError;
 import org.eclipse.objectteams.otdt.internal.core.compiler.bytecode.ConstantPoolObjectReader.IncompatibleBytecodeException;
 import org.eclipse.objectteams.otdt.internal.core.compiler.lifting.ArrayTranslations;
 import org.eclipse.objectteams.otdt.internal.core.compiler.lifting.Lifting;
+import org.eclipse.objectteams.otdt.internal.core.compiler.mappings.CalloutImplementorDyn;
 import org.eclipse.objectteams.otdt.internal.core.compiler.model.MethodModel;
 import org.eclipse.objectteams.otdt.internal.core.compiler.model.RoleModel;
 import org.eclipse.objectteams.otdt.internal.core.compiler.model.TeamModel;
@@ -161,6 +162,10 @@ public class BytecodeTransformer
         	dstMethod.binding.bytecodeMissing= true;
        		return;
         }
+        
+		if (CharOperation.equals(CalloutImplementorDyn.OT_ACCESS, dstMethod.selector)
+			||CharOperation.equals(CalloutImplementorDyn.OT_ACCESS_STATIC, dstMethod.selector))
+        	return;
 
         byte[] srcConstantPool  = null;
         int    offset           = -1;
