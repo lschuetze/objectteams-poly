@@ -67,7 +67,7 @@ public class AspectBinding {
 		final List<TeamBinding> subTeams = new ArrayList<>();
 		Set<TeamBinding> equivalenceSet = new HashSet<>();
 
-		ActivationKind activation;
+		private ActivationKind activation; // clients must use accessor getActivation()!
 		boolean hasScannedBases;
 		boolean hasScannedRoles;
 
@@ -183,6 +183,16 @@ public class AspectBinding {
 		public String toString() {
 			return "team "+teamName+"("+(this.activation)+") super "+superTeamName;
 		}
+
+		/** Get the highest activation kind from this team and its equivalents. */
+		public ActivationKind getActivation() {
+			ActivationKind activation = this.activation;
+			for (TeamBinding equiv : this.equivalenceSet) {
+				if (equiv.activation.ordinal() > activation.ordinal())
+					activation = equiv.activation;
+			}
+			return activation;
+		}
 	}
 	
 	/**
@@ -278,7 +288,7 @@ public class AspectBinding {
 	/** If a given team requires no activation, check if its super team should be activated instead. */
 	public @Nullable TeamBinding getOtherTeamToActivate(TeamBinding team) {
 		TeamBinding superTeam = team.superTeam;
-		if (superTeam != null && superTeam.activation != ActivationKind.NONE) {
+		if (superTeam != null && superTeam.getActivation() != ActivationKind.NONE) {
 			return superTeam;
 		}
 		// sub teams?

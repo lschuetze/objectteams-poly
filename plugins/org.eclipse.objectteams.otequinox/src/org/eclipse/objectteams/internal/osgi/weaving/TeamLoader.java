@@ -85,12 +85,12 @@ public class TeamLoader {
 				continue;
 			}
 			// Try to instantiate & activate, failures are recorded in deferredTeams
-			ActivationKind activationKind = teamForBase.activation;
+			ActivationKind activationKind = teamForBase.getActivation();
 			if (activationKind == ActivationKind.NONE) {
 				teamForBase = aspectBinding.getOtherTeamToActivate(teamForBase);
 				if (teamForBase != null) {
 					if (teamForBase.isActivated) continue;
-					activationKind = teamForBase.activation;
+					activationKind = teamForBase.getActivation();
 					teamClass = teamForBase.loadTeamClass(aspectBundle);
 					if (teamClass == null) {
 						log(new ClassNotFoundException("Not found: "+teamForBase.teamName+" in bundle "+aspectBundle.getSymbolicName()), "Failed to load team "+teamForBase);
