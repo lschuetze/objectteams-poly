@@ -1,7 +1,7 @@
 /**********************************************************************
  * This file is part of "Object Teams Dynamic Runtime Environment"
  * 
- * Copyright 2009, 2012 Oliver Frank and others.
+ * Copyright 2009, 2014 Oliver Frank and others.
  * 
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -27,6 +27,14 @@ import org.objectweb.asm.tree.MethodInsnNode;
  * @author Oliver Frank
  */
 class AsmTypeHelper {
+
+	public static AbstractInsnNode getUnboxingInstructionForType(Type primitiveType) {
+		String objectType = getObjectType(primitiveType);
+		if (objectType == null)
+			return new InsnNode(Opcodes.NOP);
+		return getUnboxingInstructionForType(primitiveType, objectType);
+	}
+
 	public static AbstractInsnNode getUnboxingInstructionForType(Type primitiveType, String objectType) {
 		String methodName = primitiveType.getClassName() + "Value";
 		String desc = Type.getMethodDescriptor(primitiveType, new Type[] {});

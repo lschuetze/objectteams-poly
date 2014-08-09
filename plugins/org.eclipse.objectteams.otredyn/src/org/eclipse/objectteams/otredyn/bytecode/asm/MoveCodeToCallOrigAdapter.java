@@ -16,13 +16,19 @@
  **********************************************************************/
 package org.eclipse.objectteams.otredyn.bytecode.asm;
 
+import java.util.ArrayList;
+import java.util.List;
+import java.util.ListIterator;
+
 import org.eclipse.objectteams.otredyn.bytecode.Method;
 import org.eclipse.objectteams.otredyn.transformer.names.ConstantMembers;
 import org.objectweb.asm.Opcodes;
 import org.objectweb.asm.Type;
+import org.objectweb.asm.tree.AbstractInsnNode;
 import org.objectweb.asm.tree.InsnList;
 import org.objectweb.asm.tree.InsnNode;
 import org.objectweb.asm.tree.IntInsnNode;
+import org.objectweb.asm.tree.MethodInsnNode;
 import org.objectweb.asm.tree.MethodNode;
 import org.objectweb.asm.tree.TypeInsnNode;
 
@@ -68,7 +74,14 @@ public class MoveCodeToCallOrigAdapter extends AbstractTransformableClassNode {
 		//Unboxing arguments
 		Type[] args = Type.getArgumentTypes(orgMethod.desc);
 		
+		int boundMethodIdSlot = firstArgIndex;
+		
 		if (args.length > 0) {
+			// move boundMethodId to a higher slot, to make lower slots available for original locals
+			newInstructions.add(new IntInsnNode(Opcodes.ILOAD, boundMethodIdSlot));
+			boundMethodIdSlot = callOrig.maxLocals+1;
+			newInstructions.add(new IntInsnNode(Opcodes.ISTORE, boundMethodIdSlot));
+			
 			newInstructions.add(new IntInsnNode(Opcodes.ALOAD, firstArgIndex + argOffset + 1));
 			
 			int slot = firstArgIndex + argOffset;
@@ -91,6 +104,8 @@ public class MoveCodeToCallOrigAdapter extends AbstractTransformableClassNode {
 				slot += arg.getSize();
 			}
 		}
+
+		adjustSuperCalls(orgMethod.instructions, orgMethod.name, args, returnType, boundMethodIdSlot);
 		
 		// replace return of the original method with areturn and box the result value if needed
 		replaceReturn(orgMethod.instructions, returnType);
@@ -99,7 +114,7 @@ public class MoveCodeToCallOrigAdapter extends AbstractTransformableClassNode {
 		
 		addNewLabelToSwitch(callOrig.instructions, newInstructions, boundMethodId);
 		
-		// a minimum stacksize of 3 is neede to box the arguments
+		// a minimum stacksize of 3 is needed to box the arguments
 		callOrig.maxStack = Math.max(Math.max(callOrig.maxStack, orgMethod.maxStack), 3);
 		
 		// we have to increment the max. stack size, because we have to put NULL on the stack
@@ -108,5 +123,49 @@ public class MoveCodeToCallOrigAdapter extends AbstractTransformableClassNode {
 		}
 		callOrig.maxLocals = Math.max(callOrig.maxLocals, orgMethod.maxLocals);
 		return true;
+	}
+	
+	/** To avoid infinite recursion, calls super.m(a1, a2) must be translated to super.callOrig(boundMethodId, new Object[] {a1, a2}). */
+	private void adjustSuperCalls(InsnList instructions, String selector, Type[] args, Type returnType, int boundMethodIdSlot) {
+		// search:
+		List<MethodInsnNode> toReplace = new ArrayList<MethodInsnNode>();
+		ListIterator<AbstractInsnNode> orgMethodIter = instructions.iterator();
+		while (orgMethodIter.hasNext()) {
+			AbstractInsnNode orgMethodNode = orgMethodIter.next();
+			if (orgMethodNode.getOpcode() == Opcodes.INVOKESPECIAL && ((MethodInsnNode)orgMethodNode).name.equals(selector))
+				toReplace.add((MethodInsnNode) orgMethodNode);
+		}
+		if (toReplace.isEmpty())
+			return;
+		// replace:
+		for (MethodInsnNode oldNode : toReplace) {
+			// we need to insert into the loading sequence before the invocation, find the insertion points:
+			AbstractInsnNode[] insertionPoints = StackBalanceAnalyzer.findInsertionPointsBefore(oldNode, args);
+			AbstractInsnNode firstInsert = insertionPoints.length > 0 ? insertionPoints[0] : oldNode;
+			
+			// push first arg to _OT$callOrig():
+			instructions.insertBefore(firstInsert, new IntInsnNode(Opcodes.ILOAD, boundMethodIdSlot));
+			
+			// prepare array as second arg to _OT$callOrig():
+			instructions.insertBefore(firstInsert, new IntInsnNode(Opcodes.BIPUSH, args.length));
+			instructions.insertBefore(firstInsert, new TypeInsnNode(Opcodes.ANEWARRAY, "java/lang/Object"));
+			
+			for (int i = 0; i < insertionPoints.length; i++) {
+				// NB: each iteration has an even stack balance, where the top is the Object[].
+				instructions.insertBefore(insertionPoints[i], new InsnNode(Opcodes.DUP));
+				instructions.insertBefore(insertionPoints[i], new IntInsnNode(Opcodes.BIPUSH, i));
+				// leave the original loading sequence in tact and continue at the next point:
+				AbstractInsnNode insertAt = (i +1 < insertionPoints.length) ? insertionPoints[i+1] : oldNode;
+				instructions.insertBefore(insertAt, AsmTypeHelper.getBoxingInstructionForType(args[i]));
+				instructions.insertBefore(insertAt, new InsnNode(Opcodes.AASTORE));
+			}
+
+			if (returnType == Type.VOID_TYPE)
+				instructions.insert(oldNode, new InsnNode(Opcodes.POP));
+			else
+				instructions.insert(oldNode, AsmTypeHelper.getUnboxingInstructionForType(returnType));
+
+			instructions.set(oldNode, new MethodInsnNode(Opcodes.INVOKESPECIAL, ((MethodInsnNode)oldNode).owner, callOrig.getName(), callOrig.getSignature()));
+		}
 	}
 }

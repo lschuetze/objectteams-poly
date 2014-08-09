@@ -30,7 +30,14 @@ public class OtreRedefineStrategy implements IRedefineStrategy {
 
 	public void redefine(Class<?> clazz, byte[] bytecode) throws ClassNotFoundException, UnmodifiableClassException {
 		ClassDefinition arr_cd[] = { new ClassDefinition(clazz, bytecode) };
-		otreAgent.getInstrumentation().redefineClasses(arr_cd);
+		try {
+			otreAgent.getInstrumentation().redefineClasses(arr_cd);
+		} catch (ClassFormatError cfe) {
+			// error output during redefinition tends to swallow the stack, print it now:
+			System.err.println("Error redifining "+clazz.getName());
+			cfe.printStackTrace();
+			throw cfe;
+		}
 	}
 
 }
