@@ -3123,9 +3123,13 @@ protected void consumeCatches() {
 	optimizedConcatNodeLists();
 }
 protected void consumeCatchFormalParameter() {
+//{ObjectTeams: support LiftingTypeReference:
+// orig:
+// CatchFormalParameter ::= Modifiersopt CatchType VariableDeclaratorId
+// :giro
 	// CatchFormalParameter ::= Modifiersopt CatchType CatchLiftingTypeopt VariableDeclaratorId
 	// CatchLiftingType ::= 'as' Type
-
+// SH}
 	this.identifierLengthPtr--;
 	char[] identifierName = this.identifierStack[this.identifierPtr];
 	long namePositions = this.identifierPositionStack[this.identifierPtr--];
@@ -6671,20 +6675,6 @@ protected void consumeTypeAnnotation() {
 }
 protected void consumeOneMoreTypeAnnotation() {
 	// TypeAnnotations ::= TypeAnnotations TypeAnnotation
-//{ObjectTeams: inside a sentinel-delimited list?
-	if (this.typeAnnotationLengthPtr > 1) {
-		int l = this.typeAnnotationLengthStack[this.typeAnnotationLengthPtr-2];
-		if (this.typeAnnotationPtr - l - 1 > -1) {
-			if (this.typeAnnotationStack[this.typeAnnotationPtr - l - 1] == annotationSentinel) {
-				// so we have a sentinal delimited list of annotations at lenghts[-2]
-				// merge into that list rather than in into the list at [-1]
-				this.typeAnnotationLengthStack[this.typeAnnotationLengthPtr-2]++;
-				this.typeAnnotationLengthStack[--this.typeAnnotationLengthPtr] = 0;
-				return;
-			}
-		}
-	}
-// SH}
 	this.typeAnnotationLengthStack[--this.typeAnnotationLengthPtr]++;
 }
 protected void consumeNameArrayType() {
@@ -7602,20 +7592,11 @@ protected void consumeZeroTypeAnnotations() {
 	// PushZeroTypeAnnotations ::= $empty
 	// Name ::= SimpleName
 	// TypeAnnotationsopt ::= $empty
-	int sentinelPos = -1;
-	if (this.typeAnnotationLengthPtr != -1) {
-		int len = this.typeAnnotationLengthStack[this.typeAnnotationLengthPtr];
-		sentinelPos = this.typeAnnotationPtr - len;
-		if (sentinelPos > -1 && this.typeAnnotationStack[sentinelPos] == annotationSentinel) {
-			// new ZeroTypeAnnotations in a sentinal situation means: the sentinel has served its purpose, we move on.
-			// Ergo:
-			// - remove the sentinel, transforming the special list into a regular one (lenght is already correct).
-			// - this leaves the rest of the sentinel list as the pending type annotations (instead of zero)
-			System.arraycopy(this.typeAnnotationStack, sentinelPos+1, this.typeAnnotationStack, sentinelPos, len);
-			this.typeAnnotationPtr--;
-			return;
-		}
+//{ObjectTeams: check presence of annotation sentinel (no longer needed, ambiguous tokens will be interpreted as type annotation):
+	if (confirmTypeAnnotation()) {
+		return;
 	}
+// SH}
 	pushOnTypeAnnotationLengthStack(0); // signal absence of @308 annotations.
 }
 // This method is part of an automatic generation : do NOT edit-modify
@@ -7702,7 +7683,7 @@ protected void consumeRule(int act) {
 			break;
  
     case 85 : if (DEBUG) { System.out.println("TypeAnnotationsopt -> TypeAnnotations"); }  //$NON-NLS-1$
-		    consumeTypeAnnotationSeen();  
+		    confirmTypeAnnotation();  
 			break;
  
      case 88 : if (DEBUG) { System.out.println("TypeAnnotations0 ::= TypeAnnotations0 TypeAnnotation"); }  //$NON-NLS-1$
@@ -9406,6 +9387,10 @@ protected void consumeRule(int act) {
  
     case 754 : if (DEBUG) { System.out.println("TypeArgument ::= ReferenceType"); }  //$NON-NLS-1$
 		    consumeTypeArgument();  
+			break;
+ 
+    case 760 : if (DEBUG) { System.out.println("TypeAnchorOrAnnotatedTypeArgument -> AnyTypeAnchor"); }  //$NON-NLS-1$
+		    confirmTypeAnchor();  
 			break;
  
     case 761 : if (DEBUG) { System.out.println("TypeAnchorOrAnnotatedTypeArgument ::=..."); }  //$NON-NLS-1$
@@ -11436,6 +11421,9 @@ private boolean doingOrgObjectteamsInternalType() {
 }
 // SH}
 //{ObjectTeams: new syntax for dependent types.
+
+//==== handle situations of TentativeTypeAnchor: could be either a TypeAnchor or a TypeAnnotation ====
+
 protected void consumeTypeAnchor(boolean haveBase) {
 	// TentativeTypeAnchor ::= '@OT' UnannotatableName
 	// TypeAnchor ::= '@OT' 'base'
@@ -11443,6 +11431,8 @@ protected void consumeTypeAnchor(boolean haveBase) {
 
 	// see also skipThisAnchor() and consumeQualifiedBaseTypeAnchor() for related productions
 	
+	// could be either TypeAnchor or TypeAnnotation
+	// create TypeAnchor for now, two avoid awaiting the decision between Annotation w or w/o member values
 	NameReference anchor = haveBase ?
 		  newBaseReference()
 		: getUnspecifiedReference(false);
@@ -11450,14 +11440,11 @@ protected void consumeTypeAnchor(boolean haveBase) {
 	// anchor has no type annotations, yet it will be consumed in a context where type annotations are possible
 	pushOnTypeAnnotationLengthStack(0);
 }
-protected void confirmTypeAnchor() {
-	// tentative type anchor is indeed a type anchor (not converted to type annotation).
-	// need to remove the empty type annotation list now (see consumeTypeAnchor()).
-	this.typeAnnotationLengthPtr--;
-}
+
 // this sentinel annotation is pushed below a type annotation that was converted from a type anchor.
 // it signals to a subsequent type annotation that it shall be merged into the existing list
 static final Annotation annotationSentinel = new MarkerAnnotation(new SingleTypeReference("annotationSentinel".toCharArray(), 0), 0); //$NON-NLS-1$
+
 protected void convertTypeAnchor(int annotationKind) {
 	// rule number corresponds to argument annotationKind:
 	// (0) NotAnAnchor ::= $empty
@@ -11517,6 +11504,7 @@ protected void convertTypeAnchor(int annotationKind) {
 	}
 	// and push it back
 	this.typeAnnotationLengthPtr--; // drop the empty list pushed in consumeTypeAnchor()
+	// mark that the following annotation may have to be integrated into a subsequent type annotation list:
 	pushOnTypeAnnotationStack(annotationSentinel);
 	pushOnTypeAnnotationStack(annotation);
 	// still need to check if the type annotation is legal:
@@ -11526,10 +11514,48 @@ protected void convertTypeAnchor(int annotationKind) {
 		problemReporter().invalidUsageOfTypeAnnotations(annotation);
 	}
 }
-protected void consumeTypeArgumentFromAnchor() {
-	// TypeAnchorOrAnnotatedTypeArgument -> TentativeTypeAnchor NotAnAnchor ReferenceType
 
-	// collect everything into a regular type argument:
+// --- The following two methods terminate a sentinal situation, by confirming either a type anchor or a type annotation list: ---
+protected void confirmTypeAnchor() {
+	// TypeAnchorOrAnnotatedTypeArgument -> AnyTypeAnchor
+	// TypeAnchorOrAnnotatedTypeArgument1 -> AnyTypeAnchor '>'
+	// TypeAnchorOrAnnotatedTypeArgument2 -> AnyTypeAnchor '>>'
+	// TypeAnchorOrAnnotatedTypeArgument3 -> AnyTypeAnchor '>>>'
+	
+	// tentative type anchor is indeed a type anchor (not converted to type annotation).
+	// need to remove the empty type annotation list now (see consumeTypeAnchor()).
+	this.typeAnnotationLengthPtr--;
+}
+protected boolean confirmTypeAnnotation() {
+	// TypeAnnotationsopt ::= $empty
+	// /.$putCase consumeZeroTypeAnnotations(); $break ./
+	//   - internally calls confirmTypeAnnotation()
+	// TypeAnnotationsopt -> TypeAnnotations
+	
+	int sentinelPos = -1;
+	if (this.typeAnnotationLengthPtr != -1) {
+		int len = this.typeAnnotationLengthStack[this.typeAnnotationLengthPtr];
+		sentinelPos = this.typeAnnotationPtr - len;
+		if (sentinelPos > -1 && this.typeAnnotationStack[sentinelPos] == annotationSentinel) {
+			// new (possibly zero) Type Annotation in a sentinal situation means: the sentinel has served its purpose, we move on.
+			// Ergo:
+			// - remove the sentinel, transforming the special list into a regular one (lenght is already correct).
+			// - this leaves the rest of the sentinel list as the pending type annotations (instead of zero)
+			System.arraycopy(this.typeAnnotationStack, sentinelPos+1, this.typeAnnotationStack, sentinelPos, len);
+			this.typeAnnotationPtr--;
+			return true; // yes, we were in a sentinel situation
+		}
+	}
+	return false; // no, nothing ambiuous to confirm
+}
+//--- finally collect the pieces involving the TentativeTypeAnchor that was not an anchor:
+protected void consumeTypeArgumentFromAnchor() {
+	// TypeAnchorOrAnnotatedTypeArgument ::= TentativeTypeAnchor NotAnAnchor ReferenceType
+
+	// original rule:
+	// TypeArgument ::= ReferenceType
+	// /.$putCase consumeTypeArgument(); $break ./
+
 	consumeTypeArgument();
 	if (this.typeAnnotationPtr > -1 && this.typeAnnotationStack[this.typeAnnotationPtr] == annotationSentinel)
 		this.typeAnnotationPtr--; // drop the annotationSentinel if still present
@@ -11551,24 +11577,9 @@ protected void consumeAnnotationsOnTypeArgumentFromAnchor() {
 	if (this.typeAnnotationPtr > -1 && this.typeAnnotationStack[this.typeAnnotationPtr] == annotationSentinel)
 		this.typeAnnotationPtr--; // drop the annotationSentinel if still present
 }
-protected void consumeTypeAnnotationSeen() {
-	int sentinelPos = -1;
-	if (this.typeAnnotationLengthPtr != -1) {
-		int len = this.typeAnnotationLengthStack[this.typeAnnotationLengthPtr];
-		sentinelPos = this.typeAnnotationPtr - len;
-		if (sentinelPos > -1 && this.typeAnnotationStack[sentinelPos] == annotationSentinel) {
-			// new ZeroTypeAnnotations in a sentinal situation means: the sentinel has served its purpose, we move on.
-			// Ergo:
-			// - remove the sentinel, transforming the special list into a regular one (lenght is already correct).
-			// - this leaves the rest of the sentinel list as the pending type annotations (instead of zero)
-			System.arraycopy(this.typeAnnotationStack, sentinelPos+1, this.typeAnnotationStack, sentinelPos, len);
-			this.typeAnnotationPtr--;
-		}
-	}
-}
-protected NameReference newBaseReference() {
-	return new SingleNameReference(IOTConstants._OT_BASE, (((long)this.intStack[this.intPtr--])<<32)+this.intStack[this.intPtr--]);
-}
+
+// ==============================================
+
 protected void skipThisAnchor() {
 	// TypeAnchor ::= '@OT' 'this'
 	//   where '@OT' is the synthetic token returned by the parser when a '@' is in a position suitable for a type anchor
@@ -11625,6 +11636,10 @@ protected void consumeBoundsOfAnchoredTypeParameter() {
 	this.genericsLengthPtr--;
 	TypeParameter parameter = (TypeParameter) this.genericsStack[this.genericsPtr];
 	parameter.bounds = new TypeReference[] { bound };
+}
+// ----
+protected NameReference newBaseReference() {
+	return new SingleNameReference(IOTConstants._OT_BASE, (((long)this.intStack[this.intPtr--])<<32)+this.intStack[this.intPtr--]);
 }
 // SH}
 protected void consumeTypeArgument() {

@@ -404,8 +404,8 @@ QualifiedName ::= Name '.' TypeAnnotations SimpleName
 TypeAnnotationsopt ::= $empty
 /.$putCase consumeZeroTypeAnnotations(); $break ./
 TypeAnnotationsopt -> TypeAnnotations
---{ObjectTeams: give a chance to eliminate sentinel
-/.$putCase consumeTypeAnnotationSeen(); $break ./
+--{ObjectTeams: after TentativeTypeAnchor confirm that it was a *type annotation*:
+/.$putCase confirmTypeAnnotation(); $break ./
 -- SH}
 /:$compliance 1.8:/
 /:$readableName TypeAnnotationsopt:/
@@ -2604,8 +2604,9 @@ TypeArgument3 -> TypeAnchorOrAnnotatedTypeArgument3
 -- ==== No Nested Generics ====
 -- case 1: it was indeed a type anchor:
 TypeAnchorOrAnnotatedTypeArgument -> AnyTypeAnchor
+/.$putCase confirmTypeAnchor(); $break ./
 -- case 2a: we were wrong in assuming a type anchor, converted marker type annotation exists, time to clean up
-TypeAnchorOrAnnotatedTypeArgument -> TentativeTypeAnchor NotAnAnchor ReferenceType
+TypeAnchorOrAnnotatedTypeArgument ::= TentativeTypeAnchor NotAnAnchor ReferenceType
 /.$putCase consumeTypeArgumentFromAnchor(); $break ./
 /:$readableName TypeArgument:/
 /:$compliance 1.5:/
