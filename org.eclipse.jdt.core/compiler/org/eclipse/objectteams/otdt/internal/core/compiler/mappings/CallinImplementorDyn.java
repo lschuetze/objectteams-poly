@@ -308,7 +308,10 @@ public class CallinImplementorDyn extends MethodMappingImplementor {
 		// we probably want to avoid generating empty methods here.
 		final TypeDeclaration teamDecl = aTeam.getAst();
 		if (teamDecl == null) return;
+
 		final AstGenerator gen = new AstGenerator(teamDecl);
+		gen.replaceableEnclosingClass = teamDecl.binding;
+
 		
 		// public void _OT$callBefore   (IBoundBase2 base, 							int boundMethodId, int callinId, 	Object[] args)
 		// public void _OT$callAfter	(IBoundBase2 base, 							int boundMethodId, int callinId, 	Object[] args, Object result)
@@ -387,7 +390,6 @@ public class CallinImplementorDyn extends MethodMappingImplementor {
 						boolean isStaticRoleMethod = callinDecl.getRoleMethod().isStatic();
 						ReferenceBinding roleType = callinDecl.scope.enclosingReceiverType();
 						MethodBinding roleMethodBinding = callinDecl.getRoleMethod();
-	
 						
 						boolean needLiftedRoleVar = !isStaticRoleMethod
 												&& roleType.isCompatibleWith(roleMethodBinding.declaringClass);
