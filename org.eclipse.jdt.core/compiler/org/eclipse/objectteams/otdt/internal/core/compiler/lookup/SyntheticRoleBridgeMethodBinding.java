@@ -17,10 +17,12 @@
 package org.eclipse.objectteams.otdt.internal.core.compiler.lookup;
 
 import static org.eclipse.jdt.internal.compiler.classfmt.ClassFileConstants.*;
+
 import org.eclipse.jdt.core.compiler.CharOperation;
 import org.eclipse.jdt.internal.compiler.codegen.CodeStream;
 import org.eclipse.jdt.internal.compiler.codegen.Opcodes;
 import org.eclipse.jdt.internal.compiler.lookup.MethodBinding;
+import org.eclipse.jdt.internal.compiler.lookup.ParameterizedMethodBinding;
 import org.eclipse.jdt.internal.compiler.lookup.ReferenceBinding;
 import org.eclipse.jdt.internal.compiler.lookup.Scope;
 import org.eclipse.jdt.internal.compiler.lookup.SourceTypeBinding;
@@ -29,6 +31,7 @@ import org.eclipse.jdt.internal.compiler.lookup.TypeBinding;
 import org.eclipse.jdt.internal.compiler.lookup.TypeIds;
 import org.eclipse.objectteams.otdt.core.compiler.IOTConstants;
 import org.eclipse.objectteams.otdt.internal.core.compiler.model.MethodModel;
+import org.eclipse.objectteams.otdt.internal.core.compiler.util.TSuperHelper;
 import org.eclipse.objectteams.otdt.internal.core.compiler.util.TypeAnalyzer;
 
 public class SyntheticRoleBridgeMethodBinding extends SyntheticOTMethodBinding {
@@ -36,8 +39,9 @@ public class SyntheticRoleBridgeMethodBinding extends SyntheticOTMethodBinding {
 	public static final char[] PRIVATE = "$private$".toCharArray(); //$NON-NLS-1$
 
 	public SyntheticRoleBridgeMethodBinding(SourceTypeBinding declaringRole, ReferenceBinding originalRole, MethodBinding targetMethod, int bridgeKind) {
-		super(declaringRole, AccPublic|AccSynthetic, targetMethod.selector, targetMethod.parameters, targetMethod.returnType);
+		super(declaringRole, AccPublic|AccSynthetic, targetMethod.selector, originalParameters(targetMethod), originalReturnType(targetMethod));
 		this.purpose = bridgeKind;
+		System.err.println(originalRole.toString());
 		switch (bridgeKind) {
 			case RoleMethodBridgeOuter:
 				// correction: this method sits in the team not the role:
@@ -53,15 +57,16 @@ public class SyntheticRoleBridgeMethodBinding extends SyntheticOTMethodBinding {
 				break;
 			case RoleMethodBridgeInner:
 				// correction: add role as first parameter:
-				len = targetMethod.parameters.length;
+				len = this.parameters.length;
 				int offset = targetMethod.isStatic()?2:0;
-				this.parameters = new TypeBinding[len+1+offset];
-				this.parameters[0] = originalRole.getRealType();
+				TypeBinding[] newParameters = new TypeBinding[len+1+offset];
+				newParameters[0] = originalRole.getRealType();
 				if (offset > 0) {
-					this.parameters[1] = TypeBinding.INT;				// dummy int
-					this.parameters[2] = originalRole.enclosingType(); // team arg
+					newParameters[1] = TypeBinding.INT;				// dummy int
+					newParameters[2] = originalRole.enclosingType(); // team arg
 				}
-				System.arraycopy(targetMethod.parameters, 0, this.parameters, 1+offset, len);
+				System.arraycopy(this.parameters, 0, newParameters, 1+offset, len);
+				this.parameters = newParameters;
 				// correction: this bridge is static:
 				this.modifiers |= AccStatic;
 				// correction: generate the bridge method name:
@@ -76,6 +81,40 @@ public class SyntheticRoleBridgeMethodBinding extends SyntheticOTMethodBinding {
 		this.index = methodId;
 	}
 
+	private static TypeBinding[] originalParameters(MethodBinding targetMethod) {
+		if (!TSuperHelper.isTSuper(targetMethod)) {
+			MethodBinding top = findTopMethod(targetMethod);
+			if (top != null)
+				return top.original().parameters;
+		}
+		return targetMethod.original().parameters;
+	}
+
+	private static TypeBinding originalReturnType(MethodBinding targetMethod) {
+		if (!TSuperHelper.isTSuper(targetMethod)) {
+			MethodBinding top = findTopMethod(targetMethod);
+			if (top != null)
+				return top.original().returnType;
+		}
+		return targetMethod.original().returnType;
+	}
+
+	static MethodBinding findTopMethod(MethodBinding targetMethod) {
+		while (targetMethod.copyInheritanceSrc != null)
+			targetMethod = targetMethod.copyInheritanceSrc;
+		tsupers: if (targetMethod.overriddenTSupers != null) {
+			for (int i = 0; i < targetMethod.overriddenTSupers.length; i++) {
+				MethodBinding cand = targetMethod.overriddenTSupers[i];
+				if (!(cand instanceof ParameterizedMethodBinding)) {
+					targetMethod = cand;
+					break tsupers;
+				}
+			}
+			if (targetMethod.overriddenTSupers.length > 0)
+				targetMethod = targetMethod.overriddenTSupers[0];
+		}
+		return targetMethod;
+	}
 	@Override
 	public void generateInstructions(CodeStream codeStream) {
 		TypeBinding[] arguments = this.parameters;

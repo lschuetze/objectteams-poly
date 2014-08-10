@@ -1322,22 +1322,22 @@ public class Java5 extends AbstractOTJLDTest {
     public void testA12_genericRoleFeature16a() {
     	runConformTest(
     		new String[] {
-    	"TeamA12grf16_3.java",
-    			"public team class TeamA12grf16_3 extends TeamA12grf16_2<String> {\n" +
+    	"TeamA12grf16a_3.java",
+    			"public team class TeamA12grf16a_3 extends TeamA12grf16a_2<String> {\n" +
 				"   @Override\n" +
-				"	public class R playedBy TA12grf16 {\n" +
+				"	public class R playedBy TA12grf16a {\n" +
 				"		 test <- before test;\n" +
 				"   }\n" +
     			"   public static void main(String... args) {\n" +
-    			"       new TeamA12grf16_3().activate();\n" +
-    			"       System.out.print(new TA12grf16().test(\"K\"));" +
+    			"       new TeamA12grf16a_3().activate();\n" +
+    			"       System.out.print(new TA12grf16a().test(\"K\"));" +
     			"   }\n" +
     			"}\n",
-    	"TeamA12grf16_2.java",
-				"public team class TeamA12grf16_2<U> extends TeamA12grf16_1<U> {\n" +
+    	"TeamA12grf16a_2.java",
+				"public team class TeamA12grf16a_2<U> extends TeamA12grf16a_1<U> {\n" +
 				"}\n",
-    	"TeamA12grf16_1.java",
-    			"public team class TeamA12grf16_1<U> {\n" +
+    	"TeamA12grf16a_1.java",
+    			"public team class TeamA12grf16a_1<U> {\n" +
     			"	public class R {\n" +
 				"        private U test(U u) {\n" +
 				"            System.out.print(\"O\");\n" +
@@ -1345,8 +1345,8 @@ public class Java5 extends AbstractOTJLDTest {
 				"        }\n" +
     			"   }\n" +
     			"}\n",
-    	"TA12grf16.java",
-    			"public class TA12grf16 {\n" +
+    	"TA12grf16a.java",
+    			"public class TA12grf16a {\n" +
     			"   protected String test(String u){ return u;}" +
     			"}\n"
     		},
@@ -1359,40 +1359,40 @@ public class Java5 extends AbstractOTJLDTest {
     public void testA12_genericRoleFeature16f() {
     	runNegativeTest(
     		new String[] {
-    	"TeamA12grf16_3.java",
-    			"public team class TeamA12grf16_3 extends TeamA12grf16_2<String> {\n" +
+    	"TeamA12grf16f_3.java",
+    			"public team class TeamA12grf16f_3 extends TeamA12grf16f_2<String> {\n" +
     			"   public static void main(String... args) {\n" +
-    			"       new TeamA12grf16_3().activate();\n" +
-    			"       System.out.print(new TA12grf16().test(\"K\"));" +
+    			"       new TeamA12grf16f_3().activate();\n" +
+    			"       System.out.print(new TA12grf16f().test(\"K\"));" +
     			"   }\n" +
     			"}\n",
-    	"TeamA12grf16_2.java",
-				"public team class TeamA12grf16_2<U> extends TeamA12grf16_1<U> {\n" +
+    	"TeamA12grf16f_2.java",
+				"public team class TeamA12grf16f_2<U> extends TeamA12grf16f_1<U> {\n" +
 				"   @Override\n" +
-				"	public class R playedBy TA12grf16 {\n" +
+				"	public class R playedBy TA12grf16f {\n" +
 				"		 test <- before test;\n" +
 				"   }\n" +
 				"}\n",
-    	"TeamA12grf16_1.java",
-    			"public team class TeamA12grf16_1<U> {\n" +
+    	"TeamA12grf16f_1.java",
+    			"public team class TeamA12grf16f_1<U> {\n" +
     			"	public class R {\n" +
 				"        private U test(U u) {\n" +
 				"            return u;\n" +
 				"        }\n" +
     			"   }\n" +
     			"}\n",
-    	"TA12grf16.java",
-    			"public class TA12grf16 {\n" +
+    	"TA12grf16f.java",
+    			"public class TA12grf16f {\n" +
     			"   protected String test(String u){ return u;}" +
     			"}\n"
     		},
     		"----------\n" + 
-			"1. ERROR in TeamA12grf16_2.java (at line 4)\n" + 
+			"1. ERROR in TeamA12grf16f_2.java (at line 4)\n" + 
 			"	test <- before test;\n" + 
 			"	^^^^\n" + 
 			(this.weavingScheme == WeavingScheme.OTRE
 			? "Type mismatch: cannot convert from String to U\n"
-			: "The method test(U) in the type TeamA12grf16_2<U>.R is not applicable for the arguments (String)\n"
+			: "The method test(U) in the type TeamA12grf16f_2<U>.R is not applicable for the arguments (String)\n"
 			) +
 			"----------\n");
     }

@@ -1124,9 +1124,6 @@ public class CopyInheritance implements IOTConstants, ClassFileConstants, ExtraC
 	    }
     	if (method.isPrivate()) {
     		newMethodDecl.binding.modifiers |= ExtraCompilerModifiers.AccLocallyUsed; // don't warn unused copied method
-    		MethodBinding synthBinding = SyntheticRoleBridgeMethodBinding.findOuterAccessor(targetRoleDecl.scope, targetRoleDecl.binding, newMethodDecl.binding);
-    		if (synthBinding != null)
-    			synthBinding.parameters[0] = srcRole.getRealType(); // manual weakening of bridge to copy-inherited method
     	}
 
 	    newMethodDecl.binding.copiedInContext = tgtTeam.enclosingType();
