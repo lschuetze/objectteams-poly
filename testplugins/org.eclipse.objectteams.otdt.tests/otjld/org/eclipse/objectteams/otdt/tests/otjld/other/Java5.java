@@ -1457,7 +1457,7 @@ public class Java5 extends AbstractOTJLDTest {
     		"OK",
     		null,
     		false/*shouldFlushOutputDirectory*/,
-    		null);
+    		new String[] {"-DA12grf18_2=2"}); // force new vm launch to accept the new class version
     }
 
     // a role does not use the type parameter of its enclosing team, has callin binding, copied as phantom role
@@ -1496,7 +1496,7 @@ public class Java5 extends AbstractOTJLDTest {
     		"OK",
     		null,
     		false/*shouldFlushOutputDirectory*/,
-    		null);
+    		new String[] {"-DA12grf19_2=2"}); // force new vm launch to accept the new class version
     }
 
     // a parameter of a callout binding requires autoboxing - explicit mapping
