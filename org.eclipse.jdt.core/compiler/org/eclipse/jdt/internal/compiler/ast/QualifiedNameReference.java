@@ -64,6 +64,7 @@ import org.eclipse.objectteams.otdt.internal.core.compiler.ast.MethodSpec.Implem
 import org.eclipse.objectteams.otdt.internal.core.compiler.lookup.DependentTypeBinding;
 import org.eclipse.objectteams.otdt.internal.core.compiler.lookup.ITeamAnchor;
 import org.eclipse.objectteams.otdt.internal.core.compiler.lookup.RoleTypeBinding;
+import org.eclipse.objectteams.otdt.internal.core.compiler.lookup.SyntheticOTTargetMethod;
 import org.eclipse.objectteams.otdt.internal.core.compiler.mappings.CalloutImplementor;
 import org.eclipse.objectteams.otdt.internal.core.compiler.model.FieldModel;
 import org.eclipse.objectteams.otdt.internal.core.compiler.model.TeamModel;
@@ -856,7 +857,7 @@ public TypeBinding getOtherFieldBindings(BlockScope scope) {
 					// realize decapsulation by simulating an inferred callout-to-field
 					field = closestField;
 					scope.problemReporter().decapsulation(this, field, scope);
-					accessAsCalloutToField(enclosingReceiver, field, index, scope.compilerOptions().weavingScheme);
+					accessAsCalloutToField(scope, enclosingReceiver, field, index, scope.compilerOptions().weavingScheme);
 					fixedByDecapsulation = true;
 				}
 		  }
@@ -926,20 +927,23 @@ public TypeBinding getOtherFieldBindings(BlockScope scope) {
 }
 
 //{ObjectTeams: replace this field reference with an accessor call (simulated as callout-to-field):
-private void accessAsCalloutToField(ReferenceBinding enclosingReceiver, FieldBinding baseclassField, int idx, WeavingScheme weaving)
+private void accessAsCalloutToField(BlockScope scope, ReferenceBinding enclosingReceiver, FieldBinding baseclassField, int idx, WeavingScheme weaving)
 {
 	ReferenceBinding baseClass = baseclassField.declaringClass;
 
 	// manually create and add binding as if it were a callout to field:
 	ImplementationStrategy strategy = weaving == WeavingScheme.OTDRE ? ImplementationStrategy.DYN_ACCESS : ImplementationStrategy.DECAPS_WRAPPER;
-	final MethodBinding fakedAccessorBinding = FieldModel.getDecapsulatingFieldAccessor(baseClass, baseclassField, true, strategy);
-	baseClass.addMethod(fakedAccessorBinding);
+	final MethodBinding fakedAccessorBinding = FieldModel.getDecapsulatingFieldAccessor(scope, baseClass, baseclassField, true, strategy);
 
 	// record the need to have the OTRE create the accessor:
-	enclosingReceiver.roleModel.addAccessedBaseField(baseclassField, TerminalTokens.TokenNameget);
+	int accessid = enclosingReceiver.roleModel.addAccessedBaseField(baseclassField, TerminalTokens.TokenNameget);
 
+	SyntheticMethodBinding accessor = (strategy == ImplementationStrategy.DYN_ACCESS)
+			? new SyntheticOTTargetMethod.OTDREFieldDecapsulation(fakedAccessorBinding, baseclassField.type, accessid, 0/*get*/, scope, this)
+			: new SyntheticOTTargetMethod.CalloutToField(fakedAccessorBinding);
+	
 	// convert to a synthetic method that generateCode can use:
-	setSyntheticAccessor(baseclassField, idx, new SyntheticMethodBinding(fakedAccessorBinding, SyntheticMethodBinding.InferredCalloutToField));
+	setSyntheticAccessor(baseclassField, idx, accessor);
 }
 // SH}
 
@@ -1307,8 +1311,7 @@ protected boolean resolveAsInferredCalloutToField(BlockScope scope) {
 	if (callout != null) {
 		if (this.syntheticReadAccessors == null)
 			this.syntheticReadAccessors = new SyntheticMethodBinding[this.tokens.length];
-		this.syntheticReadAccessors[0] =
-				new SyntheticMethodBinding(callout.roleMethodSpec.resolvedMethod, SyntheticMethodBinding.InferredCalloutToField);
+		this.syntheticReadAccessors[0] = new SyntheticOTTargetMethod.CalloutToField(callout.roleMethodSpec.resolvedMethod);
 		FieldBinding baseField = ((FieldAccessSpec)callout.baseMethodSpec).resolvedField;
 		// update resolved information:
 		this.binding = baseField;

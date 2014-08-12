@@ -44,7 +44,6 @@ import org.eclipse.jdt.internal.compiler.lookup.ProblemReferenceBinding;
 import org.eclipse.jdt.internal.compiler.lookup.ReferenceBinding;
 import org.eclipse.jdt.internal.compiler.lookup.Scope;
 import org.eclipse.jdt.internal.compiler.lookup.SourceTypeBinding;
-import org.eclipse.jdt.internal.compiler.lookup.SyntheticMethodBinding;
 import org.eclipse.jdt.internal.compiler.lookup.TagBits;
 import org.eclipse.jdt.internal.compiler.lookup.TypeBinding;
 import org.eclipse.jdt.internal.compiler.lookup.TypeConstants;
@@ -53,6 +52,7 @@ import org.eclipse.jdt.internal.compiler.lookup.VariableBinding;
 import org.eclipse.objectteams.otdt.internal.core.compiler.ast.CalloutMappingDeclaration;
 import org.eclipse.objectteams.otdt.internal.core.compiler.ast.FieldAccessSpec;
 import org.eclipse.objectteams.otdt.internal.core.compiler.lookup.RoleTypeBinding;
+import org.eclipse.objectteams.otdt.internal.core.compiler.lookup.SyntheticOTTargetMethod;
 import org.eclipse.objectteams.otdt.internal.core.compiler.mappings.CalloutImplementor;
 import org.eclipse.objectteams.otdt.internal.core.compiler.model.FieldModel;
 import org.eclipse.objectteams.otdt.internal.core.compiler.util.RoleTypeCreator;
@@ -740,7 +740,7 @@ public TypeBinding resolveType(BlockScope scope) {
 				if (this.syntheticAccessors == null)
 					this.syntheticAccessors = new MethodBinding[2];
 				this.syntheticAccessors[isSetter ? FieldReference.WRITE : FieldReference.READ] =
-						new SyntheticMethodBinding(callout.roleMethodSpec.resolvedMethod, SyntheticMethodBinding.InferredCalloutToField);
+											new SyntheticOTTargetMethod.CalloutToField(callout.roleMethodSpec.resolvedMethod);
 				fieldBinding = ((FieldAccessSpec)callout.baseMethodSpec).resolvedField;
 				this.binding = fieldBinding;
 				setDepth(fieldBinding.isStatic() ? 1 : 0); // static c-t-f needs to pass the enclosing team

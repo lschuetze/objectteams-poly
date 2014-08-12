@@ -66,7 +66,7 @@ import org.eclipse.objectteams.otdt.internal.core.compiler.model.TeamModel;
  *
  * @author stephan
  */
-public class SyntheticRoleFieldAccess extends SyntheticMethodBinding {
+public class SyntheticRoleFieldAccess extends SyntheticOTTargetMethod {
 
 	static final char[] FIELD_GET_NAME = "_fieldget_".toCharArray(); //$NON-NLS-1$
 	static final char[] FIELD_GET_PREFIX = CharOperation.concat(
@@ -264,7 +264,7 @@ public class SyntheticRoleFieldAccess extends SyntheticMethodBinding {
 	 *
 	 * @param codeStream
 	 */
-	public void generateInvoke(CodeStream codeStream) {
+	public byte prepareOrGenerateInvocation(CodeStream codeStream, byte opcode) {
 		ReferenceBinding roleType = (ReferenceBinding)this.parameters[0];
 		if (roleType instanceof UnresolvedReferenceBinding) {
 			try {
@@ -272,7 +272,7 @@ public class SyntheticRoleFieldAccess extends SyntheticMethodBinding {
 									.resolve(Config.getLookupEnvironment(), false);
 			} catch (NotConfiguredException e) {
 				e.logWarning("Failed to generate accessor"); //$NON-NLS-1$
-				return;
+				return opcode;
 			}
 			this.parameters[0] = roleType;
 		}
@@ -301,6 +301,7 @@ public class SyntheticRoleFieldAccess extends SyntheticMethodBinding {
 			if (arg.initializationPCs != null) // null checking is asymmetric in LocalVariableBinding.
 				arg.recordInitializationEndPC(codeStream.position);
 		}
+		return 0; // done
 	}
 
 	private void insertOuterAccess(CodeStream codeStream, ReferenceBinding roleType)

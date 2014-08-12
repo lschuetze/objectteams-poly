@@ -516,7 +516,7 @@ public class CallinImplementor extends MethodMappingImplementor
 				callinBindingDeclaration,
 				callinWrapperDecl,
 				baseMethodSpec,
-				false,
+				null,
 				resultName != null /*hasResultArg*/);
         if (messageSendArguments == null) {
         	callinBindingDeclaration.tagAsHavingErrors();

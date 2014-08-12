@@ -2356,11 +2356,11 @@ public FieldBinding resolveTypeFor(FieldBinding field) {
 			ImplementationStrategy strategy = this.scope.compilerOptions().weavingScheme == WeavingScheme.OTDRE
 												? ImplementationStrategy.DYN_ACCESS : ImplementationStrategy.DECAPS_WRAPPER;
 			if (strategy != ImplementationStrategy.DYN_ACCESS) {
-				inner = FieldModel.getDecapsulatingFieldAccessor(this, field, true/*isGetter*/, strategy);
+				inner = FieldModel.getDecapsulatingFieldAccessor(this.scope, this, field, true/*isGetter*/, strategy);
 				((SourceTypeBinding) enclosingType()).addSyntheticRoleMethodBridge(this, originalRole, inner, SyntheticMethodBinding.RoleMethodBridgeOuter);
 				if (!field.isFinal()) { // no setter for final (includes all static role fields)
 									    // otherwise we would have to handle different signatures (w/ w/o role arg), which we currently don't
-					inner = FieldModel.getDecapsulatingFieldAccessor(this, field, false/*isGetter*/, strategy);
+					inner = FieldModel.getDecapsulatingFieldAccessor(this.scope, this, field, false/*isGetter*/, strategy);
 					((SourceTypeBinding) enclosingType()).addSyntheticRoleMethodBridge(this, originalRole, inner, SyntheticMethodBinding.RoleMethodBridgeOuter);
 				}
 			}

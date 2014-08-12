@@ -534,7 +534,7 @@ public class CalloutImplementor extends MethodMappingImplementor
                     		calloutDecl,
 							roleMethodDeclaration,
 							calloutDecl.roleMethodSpec,
-							(calloutDecl.baseMethodSpec instanceof FieldAccessSpec),
+							(calloutDecl.baseMethodSpec instanceof FieldAccessSpec) ? ((FieldAccessSpec)calloutDecl.baseMethodSpec) : null,
 							false /*hasResultArg*/);
 			if (   arguments == null
                 || hasParamMappingProblems(calloutDecl, returnType, roleMethodDeclaration.scope.problemReporter()))
@@ -978,10 +978,12 @@ public class CalloutImplementor extends MethodMappingImplementor
 		int l= result.length;
 		if (result == Binding.NO_PARAMETERS || l == 0)
 			return result;
-		System.arraycopy(result, 0, result= new TypeBinding[l], 0, l);
 		TypeVariableBinding[] variables= wrapperMethod.binding.typeVariables();
-		for (int i = 0; i < result.length; i++)
-			result[i] = substituteVariables(result[i], variables);
+		if (variables != Binding.NO_TYPE_VARIABLES) {
+			System.arraycopy(result, 0, result= new TypeBinding[l], 0, l);
+			for (int i = 0; i < result.length; i++)
+				result[i] = substituteVariables(result[i], variables);
+		}
 		return result;
 	}
 

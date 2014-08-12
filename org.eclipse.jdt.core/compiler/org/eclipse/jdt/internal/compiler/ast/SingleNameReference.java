@@ -54,6 +54,7 @@ import org.eclipse.jdt.internal.compiler.problem.AbortMethod;
 import org.eclipse.jdt.internal.compiler.problem.ProblemSeverities;
 import org.eclipse.objectteams.otdt.internal.core.compiler.ast.CalloutMappingDeclaration;
 import org.eclipse.objectteams.otdt.internal.core.compiler.ast.FieldAccessSpec;
+import org.eclipse.objectteams.otdt.internal.core.compiler.lookup.SyntheticOTTargetMethod;
 import org.eclipse.objectteams.otdt.internal.core.compiler.mappings.CalloutImplementor;
 import org.eclipse.objectteams.otdt.internal.core.compiler.model.TeamModel;
 import org.eclipse.objectteams.otdt.internal.core.compiler.util.RoleTypeCreator;
@@ -1089,7 +1090,7 @@ public TypeBinding resolveType(BlockScope scope) {
 		if (this.syntheticAccessors == null)
 			this.syntheticAccessors = new MethodBinding[2];
 		this.syntheticAccessors[isSetter ? FieldReference.WRITE : FieldReference.READ] =
-				new SyntheticMethodBinding(callout.roleMethodSpec.resolvedMethod, SyntheticMethodBinding.InferredCalloutToField);
+						new SyntheticOTTargetMethod.CalloutToField(callout.roleMethodSpec.resolvedMethod);
 		FieldBinding baseField = ((FieldAccessSpec)callout.baseMethodSpec).resolvedField;
 		// update resolved information:
 		this.binding = baseField;
