@@ -15,6 +15,8 @@
  **********************************************************************/
 package org.eclipse.objectteams.otredyn.runtime;
 
+import java.util.List;
+
 /**
  * Interface through which the {@link TeamManager} reaches into the OTREDyn.
  * Representation of a class that participates in a binding.
@@ -80,5 +82,10 @@ public interface IBoundClass {
 	 * newly loaded class is linked to this class as its super class.
 	 */
 	void addWiringTask(ISubclassWiringTask subclassWiringTask);
+
+	/**
+	 * Assuming this instance represents a role, answer all tsub roles in any teams known at this point.
+	 */
+	List<IBoundClass> getTSubsOfThis(IClassRepository classRepository, IClassIdentifierProvider idProvider);
 
 }

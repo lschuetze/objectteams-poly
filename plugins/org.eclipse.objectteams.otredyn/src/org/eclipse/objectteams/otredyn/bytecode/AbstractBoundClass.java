@@ -160,7 +160,7 @@ public abstract class AbstractBoundClass implements IBoundClass {
 	private AbstractBoundClass enclosingClass;
 	private Map<String, Method> methods;
 	private Map<String, Field> fields;
-	private Map<AbstractBoundClass, Object> subclasses;
+	protected Map<AbstractBoundClass, Object> subclasses;
 	
 	// Is the java class, that was represented by the AbstractBoundClass
 	// already loaded by a class loader or not

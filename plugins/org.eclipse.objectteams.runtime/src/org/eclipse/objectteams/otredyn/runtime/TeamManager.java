@@ -172,24 +172,31 @@ public class TeamManager implements ITeamManager {
 			String boundClassIdentifier = provider.getBoundClassIdentifier(teamClass, boundClassName);
 			// FIXME(SH): the following may need adaptation for OT/Equinox or other multi-classloader settings:
 			IBoundClass boundClass = classRepository.getBoundClass(boundClassName.replace('/', '.'), boundClassIdentifier, teamClass.getClassLoader());
-			// FIXME(SH): if boundClass is a role we need to find tsub roles, too!
 			switch (binding.getType()) {
 			case CALLIN_BINDING:
-				IMethod method = boundClass.getMethod(binding.getMemberName(), binding.getMemberSignature(), binding.getBaseFlags(), binding.isHandleCovariantReturn());
-				int joinpointId = getJoinpointId(boundClass
-						.getMethodIdentifier(method));
-				synchronized (method) {
-					changeTeamsForJoinpoint(t, binding.getPerTeamId(), joinpointId, stateChange);
-					List<Integer> subJoinpoints = joinpointToSubJoinpoints.get(joinpointId);
-					if (subJoinpoints != null)
-						for (Integer subJoinpoint : subJoinpoints)
-							changeTeamsForJoinpoint(t, binding.getPerTeamId(), subJoinpoint, stateChange);
-				}
-				boundClass.handleAddingOfBinding(binding); // TODO: do we want/need to group all bindings into one action?
+				handleBindingForBase(t, stateChange, binding, boundClass, provider);
 				break;
 			default:
 				// no further action for *ACCESS bindings
 			}
+		}
+	}
+
+	private void handleBindingForBase(ITeam t, ITeamManager.TeamStateChange stateChange, IBinding binding, IBoundClass boundClass, IClassIdentifierProvider provider) {
+		IMethod method = boundClass.getMethod(binding.getMemberName(), binding.getMemberSignature(), binding.getBaseFlags(), binding.isHandleCovariantReturn());
+		int joinpointId = getJoinpointId(boundClass
+				.getMethodIdentifier(method));
+		synchronized (method) {
+			changeTeamsForJoinpoint(t, binding.getPerTeamId(), joinpointId, stateChange);
+			List<Integer> subJoinpoints = joinpointToSubJoinpoints.get(joinpointId);
+			if (subJoinpoints != null)
+				for (Integer subJoinpoint : subJoinpoints)
+					changeTeamsForJoinpoint(t, binding.getPerTeamId(), subJoinpoint, stateChange);
+		}
+		boundClass.handleAddingOfBinding(binding); // TODO: do we want/need to group all bindings into one action?
+
+		for (IBoundClass tsubBase : boundClass.getTSubsOfThis(classRepository, provider)) {
+			handleBindingForBase(t, stateChange, binding, tsubBase, provider);
 		}
 	}
 	
@@ -209,14 +216,19 @@ public class TeamManager implements ITeamManager {
 			String boundClassIdentifier = provider.getBoundClassIdentifier(teamClass, boundClassName);
 			// FIXME(SH): the following may need adaptation for OT/Equinox or other multi-classloader settings:
 			IBoundClass boundClass = classRepository.getBoundClass(boundClassName.replace('/', '.'), boundClassIdentifier, teamClass.getClassLoader());
-			// FIXME(SH): if boundClass is a role we need to find tsub roles, too!
 			switch (binding.getType()) {
 			case CALLIN_BINDING:
-				boundClass.handleAddingOfBinding(binding);
+				prepareBindingForBase(binding, boundClass, provider);
 				break;
 			default: // no further action for *ACCESS bindings
 			}
-		}		
+		}
+	}
+
+	private static void prepareBindingForBase(IBinding binding, IBoundClass boundClass, IClassIdentifierProvider idProvider) {
+		boundClass.handleAddingOfBinding(binding);
+		for (IBoundClass tsubBase : boundClass.getTSubsOfThis(classRepository, idProvider))
+			prepareBindingForBase(binding, tsubBase, idProvider);
 	}
 
 	public static void handleTeamLoaded(Class<? extends ITeam> teamClass) {
