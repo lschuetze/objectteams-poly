@@ -187,7 +187,8 @@ public class TeamManager implements ITeamManager {
 				}
 				boundClass.handleAddingOfBinding(binding); // TODO: do we want/need to group all bindings into one action?
 				break;
-				//$CASES-OMITTED$ // TODO: this marker-comment has not effect?
+			default:
+				// no further action for *ACCESS bindings
 			}
 		}
 	}
@@ -213,6 +214,7 @@ public class TeamManager implements ITeamManager {
 			case CALLIN_BINDING:
 				boundClass.handleAddingOfBinding(binding);
 				break;
+			default: // no further action for *ACCESS bindings
 			}
 		}		
 	}
@@ -250,6 +252,7 @@ public class TeamManager implements ITeamManager {
 				}
 				boundClass.handleAddingOfBinding(binding);
 				break;
+			default: // no action for CALLIN_BINDING here
 			}
 		}
 	}
@@ -355,8 +358,11 @@ public class TeamManager implements ITeamManager {
 			teams.add(d, srcTeams.get(s));
 			callinIds.add(0, srcCallins.get(s));
 		}
-		_teams.set(destJoinpointId, teams);
-		_callinIds.set(destJoinpointId, callinIds);
+		// transitively pass the new information down the tree of subJoinpoints:
+		List<Integer> destDests = joinpointToSubJoinpoints.get(destJoinpointId);
+		if (destDests != null && !destDests.isEmpty())
+			for (Integer destDest : destDests)
+				applyJoinpointMerge(destJoinpointId, destDest);
 	}
 	
 	/** 
