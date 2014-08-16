@@ -26,6 +26,7 @@ import org.eclipse.jdt.internal.compiler.lookup.ReferenceBinding;
 import org.eclipse.jdt.internal.compiler.lookup.SourceTypeBinding;
 import org.eclipse.jdt.internal.compiler.lookup.SyntheticMethodBinding;
 import org.eclipse.jdt.internal.compiler.lookup.TypeBinding;
+import org.eclipse.jdt.internal.compiler.lookup.TypeIds;
 
 /**
  * A synthetic method binding, which used as an invocation target needs to
@@ -137,6 +138,114 @@ public abstract class SyntheticOTTargetMethod extends SyntheticMethodBinding {
 				// what? - not hit for field read :)
 			}
 			return 0; // signal we're done
+		}
+	}
+
+	/**
+	 * Represents a decapsulating method access while targeting OTDRE (not an explicit callout).
+	 * We need to generate a special sequence to call _OT$access(int,int,Object[],ITeam)
+	 */
+	public static class OTDREMethodDecapsulation extends SyntheticOTTargetMethod {
+
+		private int accessId;
+		private ReferenceBinding enclosingTeam;
+		private TypeBinding[] originalParameters;
+		private TypeBinding originalReturnType;
+		private ASTNode site;
+		private BlockScope scope;
+		
+		/**
+		 * Create a binding for a method access using decapsulation.
+		 * @param targetMethod this method is member of the base class, representing the otdre-generated access method.
+		 * @param originalParameters parameters of the original target method (before replacing with _OT$access)
+		 * @param originalReturn return type of the original target method (before replacing with _OT$access)
+		 * @param accessId ID by which the base field is identified inside the access method
+		 * @param scope where this access has been seen
+		 * @param site the exact node where decapsulation happened
+		 */
+		public OTDREMethodDecapsulation(MethodBinding targetMethod, TypeBinding[] originalParameters, TypeBinding originalReturn, int accessId, BlockScope scope, ASTNode site) {
+			super(targetMethod, SyntheticMethodBinding.MethodDecapsulation);
+			this.accessId = accessId;
+			ReferenceBinding enclosingRole = scope.enclosingReceiverType();
+			this.enclosingTeam = enclosingRole.enclosingType();
+			this.originalParameters = originalParameters;
+			this.originalReturnType = originalReturn;
+			this.site = site;
+			this.scope = scope;
+		}
+
+		@Override
+		public byte prepareOrGenerateInvocation(CodeStream codeStream, byte opcode) {
+			TypeBinding[] tgtParams = this.originalParameters;
+			byte len = (byte) tgtParams.length;
+			// argument array:
+			codeStream.bipush(len);
+			codeStream.anewarray(this.scope.getJavaLangObject());
+			// fold array store into arguments on stack:
+			for (byte i = (byte) (len-1); i >= 0; i--) {
+				// argi, array
+				if (size(tgtParams[i]) == 1) {
+					codeStream.dup_x1();
+					// array, argi, array
+					codeStream.swap();
+				} else {
+					codeStream.dup_x2();
+					// array, argi, array
+					codeStream.dup_x2();
+					// array, array, argi, array
+					codeStream.pop();
+				}
+				// array, array, argi
+				if (tgtParams[i].isPrimitiveType())
+					codeStream.generateBoxingConversion(tgtParams[i].id); // no longer need to handle 2-byte values
+				codeStream.bipush(i);
+				// array, array, argi, i
+				codeStream.swap();
+				// array, array, i, argi
+				codeStream.aastore();
+				// array
+			}
+			// array (containing all arguments)
+
+			// accessId:
+			codeStream.bipush((byte) this.accessId);
+			codeStream.swap();
+			// accessId, array
+			
+			// opKind (ignored):
+			codeStream.iconst_0();
+			codeStream.swap();
+			// accessId, opKind, array
+
+			// enclosing team instance:
+			Object[] emulationPath = this.scope.getEmulationPath(this.enclosingTeam, true /*only exact match*/, false/*consider enclosing arg*/);
+			codeStream.generateOuterAccess(emulationPath, this.site, this.enclosingTeam, this.scope);
+			// invoke it:
+			byte invoke = this.targetMethod.isStatic() ? Opcodes.OPC_invokestatic : Opcodes.OPC_invokevirtual;
+			codeStream.invoke(invoke, this, this.targetMethod.declaringClass);
+			// convert result?:
+			if (this.originalReturnType != TypeBinding.VOID) {
+				if (this.originalReturnType.isBaseType()) {
+					codeStream.checkcast(this.scope.environment().computeBoxingType(this.originalReturnType));
+					codeStream.generateUnboxingConversion(this.originalReturnType.id);
+				} else {
+					codeStream.checkcast(this.originalReturnType);
+				}
+			} else {
+				codeStream.pop();
+			}
+			return 0; // signal we're done
+		}
+	}
+	static int size(TypeBinding type) {
+		switch (type.id) {
+			case TypeIds.T_double :
+			case TypeIds.T_long :
+				return 2;
+			case TypeIds.T_void :
+				return 0;
+			default :
+				return 1;
 		}
 	}
 }
