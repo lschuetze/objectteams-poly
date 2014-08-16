@@ -1,7 +1,7 @@
 /**********************************************************************
  * This file is part of "Object Teams Development Tooling"-Software
  * 
- * Copyright 2008, 2013 Technical University Berlin, Germany and others.
+ * Copyright 2008, 2014 Technical University Berlin, Germany and others.
  *  
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -45,7 +45,6 @@ import org.eclipse.objectteams.internal.osgi.weaving.AspectBinding.BaseBundle;
 import org.eclipse.objectteams.internal.osgi.weaving.AspectBinding.TeamBinding;
 import org.eclipse.objectteams.otequinox.Constants;
 import org.osgi.framework.Bundle;
-import org.osgi.service.packageadmin.PackageAdmin;
 
 /**
  * An instance of this class holds the information loaded from extensions
@@ -81,7 +80,7 @@ public class AspectBindingRegistry {
 	/* Load extensions for org.eclipse.objectteams.otequinox.aspectBindings and check aspect permissions. */
 	public void loadAspectBindings(
 			IExtensionRegistry extensionRegistry,
-			@SuppressWarnings("deprecation") @Nullable PackageAdmin packageAdmin,
+			@SuppressWarnings("deprecation") @Nullable org.osgi.service.packageadmin.PackageAdmin packageAdmin,
 			OTWeavingHook hook) 
 	{
 		IConfigurationElement[] aspectBindingConfigs = extensionRegistry
@@ -166,7 +165,7 @@ public class AspectBindingRegistry {
 	
 	@SuppressWarnings("deprecation") // multiple uses of deprecated but still recommended class PackageAdmin
 	private boolean checkRequiredFragments(String aspectBundleId, String baseBundleId, IConfigurationElement[] fragments, 
-			@Nullable PackageAdmin packageAdmin) 
+			@Nullable org.osgi.service.packageadmin.PackageAdmin packageAdmin) 
 	{
 		// checking only, no real action needed.
 		boolean hasError = false;

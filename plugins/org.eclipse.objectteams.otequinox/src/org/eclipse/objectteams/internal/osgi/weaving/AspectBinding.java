@@ -238,7 +238,7 @@ public class AspectBinding {
 		@NonNull ActivationKind kind = ActivationKind.NONE;
 		try {
 			if (activationSpecifier != null)
-				kind = ActivationKind.valueOf(activationSpecifier);
+				kind = ActivationKind.valueOf(activationSpecifier); // well-known API of all enums
 		} catch (IllegalArgumentException iae) {	
 			log(iae, "Invalid activation kind "+activationSpecifier+" for team "+teamName);
 		}

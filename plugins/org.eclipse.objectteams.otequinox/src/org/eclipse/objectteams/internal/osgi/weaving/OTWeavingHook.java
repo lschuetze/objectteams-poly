@@ -20,7 +20,6 @@ import static org.eclipse.objectteams.otequinox.TransformerPlugin.log;
 import java.io.IOException;
 import java.io.InputStream;
 import java.lang.instrument.IllegalClassFormatException;
-import java.security.ProtectionDomain;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -37,6 +36,7 @@ import org.eclipse.objectteams.internal.osgi.weaving.ASMByteCodeAnalyzer.ClassIn
 import org.eclipse.objectteams.internal.osgi.weaving.AspectBinding.BaseBundle;
 import org.eclipse.objectteams.internal.osgi.weaving.AspectBinding.TeamBinding;
 import org.eclipse.objectteams.internal.osgi.weaving.Util.ProfileKind;
+import org.eclipse.objectteams.internal.osgi.weaving.AspectPermissionManager;
 import org.eclipse.objectteams.otequinox.Constants;
 import org.eclipse.objectteams.otequinox.TransformerPlugin;
 import org.osgi.framework.Bundle;
@@ -48,8 +48,6 @@ import org.osgi.framework.hooks.weaving.WovenClassListener;
 import org.osgi.framework.namespace.PackageNamespace;
 import org.osgi.framework.wiring.BundleWiring;
 import org.osgi.resource.Wire;
-import org.osgi.service.packageadmin.PackageAdmin;
-
 
 /**
  * This class integrates the OT/J weaver into OSGi using the standard API {@link WeavingHook}.
@@ -90,13 +88,17 @@ public class OTWeavingHook implements WeavingHook, WovenClassListener {
 
 	private @NonNull ASMByteCodeAnalyzer byteCodeAnalyzer = new ASMByteCodeAnalyzer();
 
+	private AspectPermissionManager permissionManager;
+
 	/** Call-back once the extension registry is up and running. */
 	public void activate(BundleContext bundleContext, ServiceReference<IExtensionRegistry> serviceReference) {
 		loadAspectBindingRegistry(bundleContext, serviceReference);
-		TransformerPlugin.getDefault().registerAspectBindingRegistry(this.aspectBindingRegistry);
+		TransformerPlugin activator = TransformerPlugin.getDefault();
+		activator.registerAspectBindingRegistry(this.aspectBindingRegistry);
+		activator.registerAspectPermissionManager(this.permissionManager);
 	}
 
-	// ====== Aspect Binding: ======
+	// ====== Aspect Bindings & Permissions: ======
 
 	@SuppressWarnings("deprecation")
 	private void loadAspectBindingRegistry(BundleContext context, ServiceReference<IExtensionRegistry> serviceReference) {
@@ -107,12 +109,24 @@ public class OTWeavingHook implements WeavingHook, WovenClassListener {
 			packageAdmin = (org.osgi.service.packageadmin.PackageAdmin)context.getService(ref);
 		else
 			log(IStatus.ERROR, "Failed to load PackageAdmin service. Will not be able to handle fragments.");
+		
 
 		IExtensionRegistry extensionRegistry = context.getService(serviceReference);
-		if (extensionRegistry == null)
+		if (extensionRegistry == null) {
 			log(IStatus.ERROR, "Failed to acquire ExtensionRegistry service, cannot load aspect bindings.");
-		else
+		} else {
+			permissionManager = new AspectPermissionManager(context.getBundle(), packageAdmin); // known API
+			permissionManager.loadAspectBindingNegotiators(extensionRegistry);
+
 			aspectBindingRegistry.loadAspectBindings(extensionRegistry, packageAdmin, this);
+		}
+	}
+
+	public @NonNull AspectPermissionManager getAspectPermissionManager() {
+		AspectPermissionManager manager = this.permissionManager;
+		if (manager == null)
+			throw new NullPointerException("Missing AspectPermissionManager");
+		return manager;
 	}
 
 	// ====== Base Bundle Trip Wires: ======
@@ -121,7 +135,8 @@ public class OTWeavingHook implements WeavingHook, WovenClassListener {
 	 * Callback during AspectBindingRegistry#loadAspectBindings():
 	 * Set-up a trip wire to fire when the mentioned base bundle is loaded.
 	 */
-	void setBaseTripWire(@SuppressWarnings("deprecation") @Nullable PackageAdmin packageAdmin, @NonNull String baseBundleId, BaseBundle baseBundle) 
+	void setBaseTripWire(@SuppressWarnings("deprecation") @Nullable org.osgi.service.packageadmin.PackageAdmin packageAdmin,
+			@NonNull String baseBundleId, BaseBundle baseBundle) 
 	{
 		if (!baseTripWires.containsKey(baseBundleId))
 			baseTripWires.put(baseBundleId, new BaseBundleLoadTrigger(baseBundleId, baseBundle, aspectBindingRegistry, packageAdmin));
@@ -380,5 +395,5 @@ public class OTWeavingHook implements WeavingHook, WovenClassListener {
 		}
 		return false;
 	}
-	
+
 }

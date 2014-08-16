@@ -27,6 +27,7 @@ import org.eclipse.core.runtime.Status;
 import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.objectteams.internal.osgi.weaving.AspectBinding;
 import org.eclipse.objectteams.internal.osgi.weaving.AspectBindingRegistry;
+import org.eclipse.objectteams.internal.osgi.weaving.AspectPermissionManager;
 import org.eclipse.objectteams.internal.osgi.weaving.OTWeavingHook;
 import org.eclipse.objectteams.otre.ClassLoaderAccess;
 import org.objectteams.Team;
@@ -54,6 +55,7 @@ public class TransformerPlugin implements BundleActivator, IAspectRegistry {
 	
 	private AspectBindingRegistry aspectBindingRegistry;
 	private List<Team> teamInstances = new ArrayList<>();
+	private AspectPermissionManager aspectPermissionManager;
 
 	/*
 	 * (non-Javadoc)
@@ -192,6 +194,10 @@ public class TransformerPlugin implements BundleActivator, IAspectRegistry {
 		this.aspectBindingRegistry = aspectBindingRegistry;
 	}
 
+	public void registerAspectPermissionManager(AspectPermissionManager permissionManager) {
+		this.aspectPermissionManager = permissionManager;
+	}
+
 	/**
 	 * public API:
 	 * {@link IAspectRegistry#getAdaptingAspectPlugins(Bundle)} 
@@ -222,8 +228,7 @@ public class TransformerPlugin implements BundleActivator, IAspectRegistry {
 
 	@Override
 	public boolean isOTDT() {
-		// TODO Auto-generated method stub
-		return false;
+		return this.aspectBindingRegistry.isOTDT();
 	}
 
 	@Override
@@ -233,8 +238,7 @@ public class TransformerPlugin implements BundleActivator, IAspectRegistry {
 
 	@Override
 	public String[] getAdaptedBasePlugins(Bundle aspectBundle) {
-		// TODO Auto-generated method stub
-		return null;
+		return this.aspectBindingRegistry.getAdaptedBasePlugins(aspectBundle);
 	}
 
 	@Override
@@ -244,8 +248,7 @@ public class TransformerPlugin implements BundleActivator, IAspectRegistry {
 	}
 
 	@Override
-	public boolean isDeniedAspectPlugin(String symbolicName) {
-		// TODO Auto-generated method stub
-		return false;
+	public boolean isDeniedAspectPlugin(@NonNull String symbolicName) {
+		return aspectPermissionManager.isDeniedAspectPlugin(symbolicName);
 	}
 }

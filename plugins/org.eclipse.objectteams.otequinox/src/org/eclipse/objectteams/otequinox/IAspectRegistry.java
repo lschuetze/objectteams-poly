@@ -63,5 +63,5 @@ public interface IAspectRegistry {
 	 * @param symbolicName
 	 * @return
 	 */
-	public boolean isDeniedAspectPlugin(String symbolicName);
+	public boolean isDeniedAspectPlugin(@NonNull String symbolicName);
 }
