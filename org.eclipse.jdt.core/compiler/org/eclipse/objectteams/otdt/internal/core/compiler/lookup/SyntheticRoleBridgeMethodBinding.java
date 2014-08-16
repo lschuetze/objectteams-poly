@@ -41,7 +41,6 @@ public class SyntheticRoleBridgeMethodBinding extends SyntheticOTMethodBinding {
 	public SyntheticRoleBridgeMethodBinding(SourceTypeBinding declaringRole, ReferenceBinding originalRole, MethodBinding targetMethod, int bridgeKind) {
 		super(declaringRole, AccPublic|AccSynthetic, targetMethod.selector, originalParameters(targetMethod), originalReturnType(targetMethod));
 		this.purpose = bridgeKind;
-		System.err.println(originalRole.toString());
 		switch (bridgeKind) {
 			case RoleMethodBridgeOuter:
 				// correction: this method sits in the team not the role:

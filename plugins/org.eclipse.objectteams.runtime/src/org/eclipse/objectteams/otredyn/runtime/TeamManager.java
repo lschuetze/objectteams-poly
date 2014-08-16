@@ -115,7 +115,16 @@ public class TeamManager implements ITeamManager {
 	 * @return
 	 */
 	public static int getMemberId(int accessId, Class<? extends ITeam> teamClass) {
-		Integer id = accessIdMap.get(teamClass).get(accessId);
+		List<Integer> teamMap = accessIdMap.get(teamClass);
+		if (teamMap == null) {
+			// TODO: is it safe to assume that the accessId is the same between sub & super teams?
+			Class<?> superClass = teamClass.getSuperclass();
+			if (ITeam.class.isAssignableFrom(superClass)) {
+				@SuppressWarnings("unchecked") Class<? extends ITeam> superTeam = (Class<? extends ITeam>) superClass;
+				return getMemberId(accessId, superTeam);
+			}
+		}
+		Integer id = teamMap.get(accessId);
 		return id;
 	}
 
