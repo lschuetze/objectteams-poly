@@ -1373,22 +1373,22 @@ public class ImplicitInheritance extends AbstractOTJLDTest {
     public void test0c16_implicitInheritanceRegression2() {
     	runConformTest(
     		new String[]{
-    	"p2/SubTeam.java",
-    		"package p2;\n" +
-    		"import p1.SuperTeam;\n" +
+    	"p2b/SubTeam.java",
+    		"package p2b;\n" +
+    		"import p2a.SuperTeam;\n" +
     		"public team class SubTeam extends SuperTeam {\n" +
     		"	public abstract class R {}\n" +
     		"}\n",
-    	"p1/SuperTeam.java",
-    		"package p1;\n" +
+    	"p2a/SuperTeam.java",
+    		"package p2a;\n" +
     		"public team class SuperTeam {\n" +
     		"	final OtherTeam other=new OtherTeam();\n" +
     		"	public abstract class R {\n" +
     		"		OR<@other> otherRole;\n" +
     		"	}\n" +
     		"}\n",
-    	"p1/OtherTeam.java",
-    		"package p1;\n" +
+    	"p2a/OtherTeam.java",
+    		"package p2a;\n" +
     		"public team class OtherTeam {\n" +
     		"	public abstract class OR {}\n" +
     		"}\n"
@@ -1399,10 +1399,10 @@ public class ImplicitInheritance extends AbstractOTJLDTest {
     public void test0c16_implicitInheritanceRegression3() {
     	runConformTest(
     		new String[]{
-    	"p2/SubTeam.java",
-    		"package p2;\n" +
+    	"p3b/SubTeam.java",
+    		"package p3b;\n" +
     		"import java.lang.annotation.*;\n" +
-    		"import p1.SuperTeam;\n" +
+    		"import p3a.SuperTeam;\n" +
     		"public team class SubTeam extends SuperTeam {\n" +
     		"	public void test() {\n" +
     		"		new R().test(ElementType.METHOD);\n" +
@@ -1411,8 +1411,8 @@ public class ImplicitInheritance extends AbstractOTJLDTest {
     		"		new SubTeam().test();\n" +
     		"	}\n" +
     		"}\n",
-    	"p1/SuperTeam.java",
-    		"package p1;\n" +
+    	"p3a/SuperTeam.java",
+    		"package p3a;\n" +
     		"import java.lang.annotation.*;\n" +
     		"public team class SuperTeam {\n" +
     		"	public class R {\n" +

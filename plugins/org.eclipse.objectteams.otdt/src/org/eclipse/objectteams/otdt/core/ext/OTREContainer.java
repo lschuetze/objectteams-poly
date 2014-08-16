@@ -21,6 +21,7 @@
 package org.eclipse.objectteams.otdt.core.ext;
 
 import java.io.IOException;
+import java.net.URL;
 
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.CoreException;
@@ -261,8 +262,12 @@ public class OTREContainer implements IClasspathContainer
 			int i = 0;
 			BYTECODE_WEAVER_PATHS[asm][i++] = new Path(OTVariableInitializer.getInstallatedPath(OTDTPlugin.getDefault(), OTDRE_PLUGIN_NAME, "bin")); //$NON-NLS-1$
 			for (String bundleName : ASM_BUNDLE_NAMES) {
-				for (Bundle bundle : packageAdmin.getBundles(bundleName, ASM_VERSION_RANGE))	
-					BYTECODE_WEAVER_PATHS[asm][i++] = new Path(FileLocator.toFileURL(bundle.getEntry("/")).getFile()); //$NON-NLS-1$
+				for (Bundle bundle : packageAdmin.getBundles(bundleName, ASM_VERSION_RANGE)) {
+					URL bundleEntry = bundle.getEntry("bin"); // source project?
+					if (bundleEntry == null)
+						bundleEntry = bundle.getEntry("/"); // binary bundle
+					BYTECODE_WEAVER_PATHS[asm][i++] = new Path(FileLocator.toFileURL(bundleEntry).getFile()); //$NON-NLS-1$
+				}
 			}
 			if (i == 4)
 				break ASM;
