@@ -12,33 +12,33 @@ plugin@org.eclipse.jdt.core,3.10.0.v_OTDT_r231_qualifier=GIT,repo=git://git.ecli
 !next plug-in don't specify version so that org.eclipse.objectteams.runtime/customBuildCallbacks.xml will find the plug-in directory:
 plugin@org.eclipse.objectteams.otdt=GIT,repo=git://git.eclipse.org/gitroot/objectteams/org.eclipse.objectteams.git,path=plugins/org.eclipse.objectteams.otdt,tag=branches/maintenance/OTDT_2.3.x
 
-plugin@org.eclipse.objectteams.otdt.debug=GIT,repo=git://git.eclipse.org/gitroot/objectteams/org.eclipse.objectteams.git,path=plugins/org.eclipse.objectteams.otdt.debug,tag=releases/OTDT_2.3.0
-plugin@org.eclipse.objectteams.otdt.debug.ui=GIT,repo=git://git.eclipse.org/gitroot/objectteams/org.eclipse.objectteams.git,path=plugins/org.eclipse.objectteams.otdt.debug.ui,tag=releases/OTDT_2.3.0
-plugin@org.eclipse.objectteams.otdt.ui=GIT,repo=git://git.eclipse.org/gitroot/objectteams/org.eclipse.objectteams.git,path=plugins/org.eclipse.objectteams.otdt.ui,tag=releases/OTDT_2.3.0
-plugin@org.eclipse.objectteams.otdt.doc=GIT,repo=git://git.eclipse.org/gitroot/objectteams/org.eclipse.objectteams.git,path=plugins/org.eclipse.objectteams.otdt.doc,tag=releases/OTDT_2.3.0
+plugin@org.eclipse.objectteams.otdt.debug=GIT,repo=git://git.eclipse.org/gitroot/objectteams/org.eclipse.objectteams.git,path=plugins/org.eclipse.objectteams.otdt.debug,tag=builds/201406101339
+plugin@org.eclipse.objectteams.otdt.debug.ui=GIT,repo=git://git.eclipse.org/gitroot/objectteams/org.eclipse.objectteams.git,path=plugins/org.eclipse.objectteams.otdt.debug.ui,tag=builds/201406101339
+plugin@org.eclipse.objectteams.otdt.ui=GIT,repo=git://git.eclipse.org/gitroot/objectteams/org.eclipse.objectteams.git,path=plugins/org.eclipse.objectteams.otdt.ui,tag=builds/201406101339
+plugin@org.eclipse.objectteams.otdt.doc=GIT,repo=git://git.eclipse.org/gitroot/objectteams/org.eclipse.objectteams.git,path=plugins/org.eclipse.objectteams.otdt.doc,tag=builds/201406101339
 !plugin@org.eclipse.objectteams.otdt.metrics=GIT,repo=git://git.eclipse.org/gitroot/objectteams/org.eclipse.objectteams.git,path=plugins/org.eclipse.objectteams.otdt.metrics,tag=builds/201101290806
 
-plugin@org.eclipse.objectteams.runtime=GIT,repo=git://git.eclipse.org/gitroot/objectteams/org.eclipse.objectteams.git,path=plugins/org.eclipse.objectteams.runtime,tag=releases/OTDT_2.3.0
-plugin@org.eclipse.objectteams.otre=GIT,repo=git://git.eclipse.org/gitroot/objectteams/org.eclipse.objectteams.git,path=plugins/org.eclipse.objectteams.otre,tag=releases/OTDT_2.3.0
-plugin@org.eclipse.objectteams.otredyn=GIT,repo=git://git.eclipse.org/gitroot/objectteams/org.eclipse.objectteams.git,path=plugins/org.eclipse.objectteams.otredyn,tag=releases/OTDT_2.3.0
+plugin@org.eclipse.objectteams.runtime=GIT,repo=git://git.eclipse.org/gitroot/objectteams/org.eclipse.objectteams.git,path=plugins/org.eclipse.objectteams.runtime,tag=builds/201406101339
+plugin@org.eclipse.objectteams.otre=GIT,repo=git://git.eclipse.org/gitroot/objectteams/org.eclipse.objectteams.git,path=plugins/org.eclipse.objectteams.otre,tag=builds/201406101339
+plugin@org.eclipse.objectteams.otredyn=GIT,repo=git://git.eclipse.org/gitroot/objectteams/org.eclipse.objectteams.git,path=plugins/org.eclipse.objectteams.otredyn,tag=builds/201406101339
 !the following is also referenced in otdt.doc/buildDoc.xml (plugin-name without version):
 plugin@org.eclipse.objectteams.otequinox=GIT,repo=git://git.eclipse.org/gitroot/objectteams/org.eclipse.objectteams.git,path=plugins/org.eclipse.objectteams.otequinox,tag=branches/maintenance/OTDT_2.3.x
-plugin@org.eclipse.objectteams.eclipse.monitor=GIT,repo=git://git.eclipse.org/gitroot/objectteams/org.eclipse.objectteams.git,path=plugins/org.eclipse.objectteams.eclipse.monitor,tag=releases/OTDT_2.3.0
+plugin@org.eclipse.objectteams.eclipse.monitor=GIT,repo=git://git.eclipse.org/gitroot/objectteams/org.eclipse.objectteams.git,path=plugins/org.eclipse.objectteams.eclipse.monitor,tag=builds/201406101339
 
 !not currently maintained:
 !plugin@org.eclipse.objectteams.otdt.earlyui=GIT,repo=git://git.eclipse.org/gitroot/objectteams/org.eclipse.objectteams.git,path=plugins/org.eclipse.objectteams.otdt.earlyui
 !plugin@org.eclipse.objectteams.otdt.metrics.export=GIT,repo=git://git.eclipse.org/gitroot/objectteams/org.eclipse.objectteams.git,path=plugins/org.eclipse.objectteams.otdt.metrics.export
 
 !** OT/J Plugins **!
-plugin@org.eclipse.objectteams.otequinox.branding=GIT,repo=git://git.eclipse.org/gitroot/objectteams/org.eclipse.objectteams.git,path=plugins/org.eclipse.objectteams.otequinox.branding,tag=releases/OTDT_2.3.0
-plugin@org.eclipse.objectteams.otdt.jdt.ui=GIT,repo=git://git.eclipse.org/gitroot/objectteams/org.eclipse.objectteams.git,path=plugins/org.eclipse.objectteams.otdt.jdt.ui,tag=releases/OTDT_2.3.0
-plugin@org.eclipse.objectteams.otdt.ui.help=GIT,repo=git://git.eclipse.org/gitroot/objectteams/org.eclipse.objectteams.git,path=plugins/org.eclipse.objectteams.otdt.ui.help,tag=releases/OTDT_2.3.0
-plugin@org.eclipse.objectteams.otdt.apt=GIT,repo=git://git.eclipse.org/gitroot/objectteams/org.eclipse.objectteams.git,path=plugins/org.eclipse.objectteams.otdt.apt,tag=releases/OTDT_2.3.0
-plugin@org.eclipse.objectteams.otdt.compiler.adaptor=GIT,repo=git://git.eclipse.org/gitroot/objectteams/org.eclipse.objectteams.git,path=plugins/org.eclipse.objectteams.otdt.compiler.adaptor,tag=releases/OTDT_2.3.0
-plugin@org.eclipse.objectteams.otdt.debug.adaptor=GIT,repo=git://git.eclipse.org/gitroot/objectteams/org.eclipse.objectteams.git,path=plugins/org.eclipse.objectteams.otdt.debug.adaptor,tag=releases/OTDT_2.3.0
-plugin@org.eclipse.objectteams.otdt.refactoring=GIT,repo=git://git.eclipse.org/gitroot/objectteams/org.eclipse.objectteams.git,path=plugins/org.eclipse.objectteams.otdt.refactoring,tag=releases/OTDT_2.3.0
-plugin@org.eclipse.objectteams.otdt.pde.ui=GIT,repo=git://git.eclipse.org/gitroot/objectteams/org.eclipse.objectteams.git,path=plugins/org.eclipse.objectteams.otdt.pde.ui,tag=releases/OTDT_2.3.0
-plugin@org.eclipse.objectteams.otdt.samples=GIT,repo=git://git.eclipse.org/gitroot/objectteams/org.eclipse.objectteams.git,path=plugins/org.eclipse.objectteams.otdt.samples,tag=releases/OTDT_2.3.0
+plugin@org.eclipse.objectteams.otequinox.branding=GIT,repo=git://git.eclipse.org/gitroot/objectteams/org.eclipse.objectteams.git,path=plugins/org.eclipse.objectteams.otequinox.branding,tag=builds/201406101339
+plugin@org.eclipse.objectteams.otdt.jdt.ui=GIT,repo=git://git.eclipse.org/gitroot/objectteams/org.eclipse.objectteams.git,path=plugins/org.eclipse.objectteams.otdt.jdt.ui,tag=builds/201406101339
+plugin@org.eclipse.objectteams.otdt.ui.help=GIT,repo=git://git.eclipse.org/gitroot/objectteams/org.eclipse.objectteams.git,path=plugins/org.eclipse.objectteams.otdt.ui.help,tag=builds/201406101339
+plugin@org.eclipse.objectteams.otdt.apt=GIT,repo=git://git.eclipse.org/gitroot/objectteams/org.eclipse.objectteams.git,path=plugins/org.eclipse.objectteams.otdt.apt,tag=builds/201406101339
+plugin@org.eclipse.objectteams.otdt.compiler.adaptor=GIT,repo=git://git.eclipse.org/gitroot/objectteams/org.eclipse.objectteams.git,path=plugins/org.eclipse.objectteams.otdt.compiler.adaptor,tag=builds/201406101339
+plugin@org.eclipse.objectteams.otdt.debug.adaptor=GIT,repo=git://git.eclipse.org/gitroot/objectteams/org.eclipse.objectteams.git,path=plugins/org.eclipse.objectteams.otdt.debug.adaptor,tag=builds/201406101339
+plugin@org.eclipse.objectteams.otdt.refactoring=GIT,repo=git://git.eclipse.org/gitroot/objectteams/org.eclipse.objectteams.git,path=plugins/org.eclipse.objectteams.otdt.refactoring,tag=builds/201406101339
+plugin@org.eclipse.objectteams.otdt.pde.ui=GIT,repo=git://git.eclipse.org/gitroot/objectteams/org.eclipse.objectteams.git,path=plugins/org.eclipse.objectteams.otdt.pde.ui,tag=builds/201406101339
+plugin@org.eclipse.objectteams.otdt.samples=GIT,repo=git://git.eclipse.org/gitroot/objectteams/org.eclipse.objectteams.git,path=plugins/org.eclipse.objectteams.otdt.samples,tag=builds/201406101339
 
 !** Consume BCEL from Orbit: **!
 plugin@org.apache.bcel,5.2.0=p2IU,id=org.apache.bcel,version=5.2.0.v201005080400,repository=http://download.eclipse.org/tools/orbit/downloads/drops/R20140525021250/repository
