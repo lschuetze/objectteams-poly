@@ -81,8 +81,12 @@ public class TeamLoader {
 
 		// ==== check permissions before we start activating:
 		if (permissionManagerReady) { // otherwise we will register pending obligations below.
-			if (permissionManager.checkAspectPermissionDenial(aspectBundle, aspectBinding, teamsForBase))
+			if (permissionManager.checkAspectPermissionDenial(aspectBundle, aspectBinding, teamsForBase)) {
+				for (WaitingTeamRecord rec : new ArrayList<>(this.deferredTeams))
+					if (rec.aspectBinding == aspectBinding)
+						this.deferredTeams.remove(rec);
 				return;
+			}
 		}
 		
 		List<Team> teamInstances = new ArrayList<>();
@@ -225,7 +229,7 @@ public class TeamLoader {
 		for (@SuppressWarnings("null")@NonNull String baseclass : team.baseClassNames) {
 			if (this.beingDefined.contains(baseclass)) {
 				synchronized (deferredTeams) {
-					WaitingTeamRecord record = new WaitingTeamRecord(team, aspectBinding, activationKind, baseclass);
+					WaitingTeamRecord record = new WaitingTeamRecord(team, activationKind, baseclass);
 					deferredTeams.add(record);
 				}
 				log(IStatus.INFO, "Defer instantation/activation of team "+teamName);

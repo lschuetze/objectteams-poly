@@ -85,6 +85,10 @@ public class AspectBinding {
 			this.superTeamName = superTeamName;
 			this.equivalenceSet.add(this);
 		}
+		
+		AspectBinding getAspectBinding() {
+			return AspectBinding.this;
+		}
 
 		/** After scanning class file attributes: add the names of all bound base classes. */
 		public void addBaseClassNames(Collection<String> baseClassNames) {
