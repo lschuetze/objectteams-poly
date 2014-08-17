@@ -20,17 +20,13 @@ import static org.eclipse.objectteams.otequinox.AspectPermission.GRANT;
 import static org.eclipse.objectteams.otequinox.AspectPermission.UNDEFINED;
 import static org.eclipse.objectteams.otequinox.TransformerPlugin.log;
 
+import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Properties;
-import java.util.Set;
+import java.util.*;
 
 import org.eclipse.core.internal.runtime.InternalPlatform;
 import org.eclipse.core.runtime.CoreException;
@@ -91,6 +87,8 @@ public class AspectPermissionManager {
 	private static final String GRANTED_FORCED_EXPORTS_FILE = "grantedForcedExports.txt";
 	private static final String DENIED_FORCED_EXPORTS_FILE  = "deniedForcedExports.txt";
 
+	private static final String GRANTED_TEAMS_FILE = "grantedTeams.txt";
+	private static final String DENIED_TEAMS_FILE  = "deniedTeams.txt";
 
 	// set of aspect plug-ins for which some permission has been denied:
 	private Set<String> deniedAspects = new HashSet<String>();
@@ -169,72 +167,7 @@ public class AspectPermissionManager {
 		}
 	}
 
-	private void internalFetchAspectBindingPermssionsFromWorkspace(IPath state) {
-		// defaults:
-		IPath configFilePath = state.append(NEGOTIATION_DEFAULTS_FILE);
-		File configFile = new File(configFilePath.toOSString());		
-		if (configFile.exists()) {
-			Properties props = new Properties();
-			try {
-				try (FileInputStream inStream = new FileInputStream(configFile)) {
-					props.load(inStream);
-				}
-				String value = (String) props.get(ASPECT_BINDING_DEFAULT);
-				if (value != null)
-					try {
-						defaultAspectBindingPermission = AspectPermission.valueOf(value); // known API of all enums
-					} catch (IllegalArgumentException iae) {
-						defaultAspectBindingPermission = AspectPermission.DENY;
-						log(iae, "Cannot set default aspect permission from file "+NEGOTIATION_DEFAULTS_FILE+", assuming DENY.");
-					}
-				value = (String) props.get(FORCED_EXPORT_DEFAULT);
-				if (value != null)
-					try {
-						defaultForcedExportPermission = AspectPermission.valueOf(value); // known API of all enums
-					} catch (IllegalArgumentException iae) {
-						defaultForcedExportPermission = AspectPermission.DENY;
-						log(iae, "Cannot set default forced exports permission from file "+NEGOTIATION_DEFAULTS_FILE+", assuming DENY.");
-					}
-			} catch (IOException ioex) {
-				log(ioex, "Failed to read configuration file "+configFilePath.toOSString());
-			}
-		} else {
-			try {
-				File stateDir = new File(state.toOSString());
-				if (!stateDir.exists())
-					stateDir.mkdirs();
-				configFile.createNewFile();
-				writeNegotiationDefaults(configFile);
-			} catch (IOException ioex) {
-				log(ioex, "Failed to create configuration file "+configFilePath.toOSString());
-			}
-		}
-		
-//		// explicitly denied:
-//		configFilePath = this.otequinoxState.append(DENIED_FORCED_EXPORTS_FILE);
-//		configFile = new File(configFilePath.toOSString());
-//		if (configFile.exists())
-//			HookConfigurator.parseForcedExportsFile(configFile, DENY);
-		
-//		// explicitly granted:
-//		configFilePath = this.otequinoxState.append(GRANTED_FORCED_EXPORTS_FILE);
-//		configFile = new File(configFilePath.toOSString());
-//		if (configFile.exists())
-//			HookConfigurator.parseForcedExportsFile(configFile, GRANT);
-	}
 
-	private void writeNegotiationDefaults(File configFile)
-			throws IOException 
-	{
-		try (FileWriter writer = new FileWriter(configFile)) {
-			writer.append(ASPECT_BINDING_DEFAULT+'='+defaultAspectBindingPermission.toString()+'\n');
-			writer.append(FORCED_EXPORT_DEFAULT+'='+defaultForcedExportPermission.toString()+'\n');
-			writer.flush();
-		}
-		log(IStatus.INFO, "Created aspect binding defaults file "+configFile.getCanonicalPath());
-	}
-
-		
 	/** Load extensions for EP org.eclipse.objectteams.otequinox.aspectBindingNegotiators. */
 	public void loadAspectBindingNegotiators(IExtensionRegistry extensionRegistry) {
 		IConfigurationElement[] aspectBindingNegotiatorsConfigs = extensionRegistry.getConfigurationElementsFor(
@@ -498,6 +431,8 @@ public class AspectPermissionManager {
 		Set<String> deniedTeams = deniedTeamsByAspectBinding.get(key);
 		if (deniedTeams != null && !deniedTeams.isEmpty()) {
 			if (deniedTeams.contains(teamClass)) {
+				log(IStatus.ERROR, "Configured denial of aspect binding regarding base bundle "+baseBundleId+
+						   " as requested by bundle "+aspectBundleId+"; bundle not activated");
 				deniedAspects.add(aspectBundleId);
 				return false;
 			}
@@ -553,11 +488,6 @@ public class AspectPermissionManager {
 		return true;
 	}
 
-	private void persistTeamBindingAnswer(String aspectBundleId, String baseBundleId, String teamClass, AspectPermission negotiatedPermission) 
-	{
-		// FIXME(SH): implement persisting these!		
-	}
-		
 	List<Runnable> obligations = new ArrayList<Runnable>();
 	public void addBaseBundleObligations(final List<Team> teamInstances, final Collection<TeamBinding> teamClasses, final Bundle aspectBundle, final BaseBundle baseBundle) {
 		schedule(new Runnable() {
@@ -639,6 +569,154 @@ public class AspectPermissionManager {
 				} catch (BundleException e) {
 					log(e, "Failed to " + msgCore);
 				}
+		}
+	}
+
+	// ==== File I/O: ====
+
+	private void internalFetchAspectBindingPermssionsFromWorkspace(IPath state) {
+		// defaults:
+		IPath configFilePath = state.append(NEGOTIATION_DEFAULTS_FILE);
+		File configFile = new File(configFilePath.toOSString());		
+		if (configFile.exists()) {
+			Properties props = new Properties();
+			try {
+				try (FileInputStream inStream = new FileInputStream(configFile)) {
+					props.load(inStream);
+				}
+				String value = (String) props.get(ASPECT_BINDING_DEFAULT);
+				if (value != null)
+					try {
+						defaultAspectBindingPermission = AspectPermission.valueOf(value); // known API of all enums
+					} catch (IllegalArgumentException iae) {
+						defaultAspectBindingPermission = AspectPermission.DENY;
+						log(iae, "Cannot set default aspect permission from file "+NEGOTIATION_DEFAULTS_FILE+", assuming DENY.");
+					}
+				value = (String) props.get(FORCED_EXPORT_DEFAULT);
+				if (value != null)
+					try {
+						defaultForcedExportPermission = AspectPermission.valueOf(value); // known API of all enums
+					} catch (IllegalArgumentException iae) {
+						defaultForcedExportPermission = AspectPermission.DENY;
+						log(iae, "Cannot set default forced exports permission from file "+NEGOTIATION_DEFAULTS_FILE+", assuming DENY.");
+					}
+			} catch (IOException ioex) {
+				log(ioex, "Failed to read configuration file "+configFilePath.toOSString());
+			}
+		} else {
+			try {
+				File stateDir = new File(state.toOSString());
+				if (!stateDir.exists())
+					stateDir.mkdirs();
+				configFile.createNewFile();
+				writeNegotiationDefaults(configFile);
+			} catch (IOException ioex) {
+				log(ioex, "Failed to create configuration file "+configFilePath.toOSString());
+			}
+		}
+
+		// configured grant / deny per team:
+
+		configFilePath = state.append(GRANTED_TEAMS_FILE);
+		configFile = new File(configFilePath.toOSString());
+		if (configFile.exists())
+			parseTeamPermissionFile(grantedTeamsByAspectBinding, configFile);
+		
+		configFilePath = state.append(DENIED_TEAMS_FILE);
+		configFile = new File(configFilePath.toOSString());
+		if (configFile.exists())
+			parseTeamPermissionFile(deniedTeamsByAspectBinding, configFile);
+
+//		// configured grant / denied for forced exports:
+//
+//		configFilePath = this.otequinoxState.append(DENIED_FORCED_EXPORTS_FILE);
+//		configFile = new File(configFilePath.toOSString());
+//		if (configFile.exists())
+//			HookConfigurator.parseForcedExportsFile(configFile, DENY);
+//		
+//		configFilePath = this.otequinoxState.append(GRANTED_FORCED_EXPORTS_FILE);
+//		configFile = new File(configFilePath.toOSString());
+//		if (configFile.exists())
+//			HookConfigurator.parseForcedExportsFile(configFile, GRANT);
+	}
+
+	private void writeNegotiationDefaults(File configFile)
+			throws IOException 
+	{
+		try (FileWriter writer = new FileWriter(configFile)) {
+			writer.append(ASPECT_BINDING_DEFAULT+'='+defaultAspectBindingPermission.toString()+'\n');
+			writer.append(FORCED_EXPORT_DEFAULT+'='+defaultForcedExportPermission.toString()+'\n');
+			writer.flush();
+		}
+		log(IStatus.INFO, "Created aspect binding defaults file "+configFile.getCanonicalPath());
+	}
+
+	private void parseTeamPermissionFile(HashMap<String, Set<String>> teamsByAspectBinding, File configFile) {
+		try (BufferedReader reader = new BufferedReader(new FileReader(configFile))) {
+			String line;
+			while ((line = reader.readLine()) != null) {
+				if (line.length() > 0 && line.charAt(0) == '#') continue;
+				String[] parts = line.split("=");
+				if (parts.length == 2) {
+					Set<String> teams = new HashSet<String>();
+					StringTokenizer teamToks = new StringTokenizer(parts[1], ",");
+					while (teamToks.hasMoreElements())
+						teams.add(teamToks.nextToken());
+					teamsByAspectBinding.put(parts[0], teams);
+				}
+			}
+		} catch (IOException e) {
+			log(e, "Failed to read permission file "+configFile.getAbsolutePath());
+		}
+	}
+
+	private void persistTeamBindingAnswer(String aspectBundleId, String baseBundleId, String teamClass, AspectPermission negotiatedPermission) 
+	{
+		IPath state = this.otequinoxState;
+		if (state != null) {
+			HashMap<String, Set<String>> teamsByAspect = null;
+			IPath configFilePath = null;
+			switch (negotiatedPermission) {
+			case GRANT:
+				teamsByAspect = this.grantedTeamsByAspectBinding;
+				configFilePath = state.append(GRANTED_TEAMS_FILE);
+				break;
+			case DENY:
+				teamsByAspect = this.deniedTeamsByAspectBinding;
+				configFilePath = state.append(DENIED_TEAMS_FILE);
+				break;
+			default: return; // TODO: also persist UNDEFINED (just to avoid asking again?)
+			}
+			
+			// in fact we store the entire state for the given category (grant / deny)
+			// so first insert the new answer into the existing map:
+			String key = aspectBundleId+"->"+baseBundleId;
+			Set<String> teams = teamsByAspect.get(key);
+			if (teams == null)
+				teamsByAspect.put(key, teams = new HashSet<String>());
+			teams.add(teamClass);
+
+			// now dump the entire map:
+			File configFile = new File(configFilePath.toOSString());
+			try {
+				if (!configFile.exists())
+					configFile.createNewFile();
+				try (FileWriter writer = new FileWriter(configFile, false)) {
+					writer.write("# Aspect permission file generated from aspect negotiation results.\n");
+					for (Map.Entry<String, Set<String>> entry : teamsByAspect.entrySet()) {
+						writer.append(entry.getKey()).append('=');
+						String sep = "";
+						for (String t : entry.getValue()) {
+							writer.append(sep).append(t);
+							sep = ",";
+						}
+						writer.append('\n');
+					}
+					writer.flush();
+				}
+			} catch (IOException ioe) {
+				log(ioe, "Failed to persist negotiation result");
+			}
 		}
 	}
 }
