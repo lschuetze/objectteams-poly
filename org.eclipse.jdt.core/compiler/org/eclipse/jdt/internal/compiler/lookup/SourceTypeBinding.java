@@ -34,6 +34,7 @@
  *								Bug 392238 - [1.8][compiler][null] Detect semantically invalid null type annotations
  *								Bug 429958 - [1.8][null] evaluate new DefaultLocation attribute of @NonNullByDefault
  *								Bug 432348 - [1.8] Internal compiler error (NPE) after upgrade to 1.8
+ *								Bug 438458 - [1.8][null] clean up handling of null type annotations wrt type variables
  *      Jesper S Moller <jesper@selskabet.org> -  Contributions for
  *								Bug 412153 - [1.8][compiler] Check validity of annotations which may be repeatable
  *     Till Brychcy - Contributions for
@@ -3532,7 +3533,14 @@ void verifyMethods(MethodVerifier verifier) {
 // SH}
 }
 
-public TypeBinding unannotated() {
+public TypeBinding unannotated(boolean removeOnlyNullAnnotations) {
+	if (removeOnlyNullAnnotations) {
+		if (!hasNullTypeAnnotations())
+			return this;
+		AnnotationBinding[] newAnnotations = this.environment.filterNullTypeAnnotations(this.typeAnnotations);
+		if (newAnnotations.length > 0)
+			return this.environment.createAnnotatedType(this.prototype, newAnnotations);
+	}
 	return this.prototype;
 }
 

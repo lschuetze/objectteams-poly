@@ -3197,4 +3197,42 @@ public void testBug435462() {
 			"}"
 	});
 }
+public void testBug437007() {
+	runConformTest(
+		new String[] {
+			"ExecutorTests.java",
+			"import java.util.*;\n" + 
+			"\n" + 
+			"public class ExecutorTests {\n" + 
+			"    List<Runnable> tasks = Arrays.asList(\n" + 
+			"            () -> {\n" + 
+			"                System.out.println(\"task1 start\");\n" + 
+			"            }\n" + 
+			"    );\n" + 
+			"\n" + 
+			"    public void executeInSync(){\n" + 
+			"        tasks.stream().forEach(Runnable::run);\n" + 
+			"    }\n" + 
+			"}\n"
+		});
+}
+public void testBug435689() {
+	runConformTest(
+		new String[] {
+			"Test.java",
+			"import java.util.function.*;\n" +
+			"class Foo<T> {\n" + 
+			"  <U> void apply(Function<T, Consumer<U>> bar) {}\n" + 
+			"}\n" + 
+			"\n" + 
+			"class Bar {\n" + 
+			"  void setBar(String bar){}\n" + 
+			"}\n" +
+			"public class Test {\n" +
+			"	void test() {\n" +
+			"		new Foo<Bar>().apply(bar -> bar::setBar);\n" + 
+			"	}\n" +
+			"}\n"
+		});
+}
 }
