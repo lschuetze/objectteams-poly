@@ -374,30 +374,31 @@ public class AspectPermissionManager {
 	
 	/**
 	 * Check the permissions for all given teams.
-	 * @param aspectBundle the bundle containing the given teams
-	 * @param aspectBinding the binding mentioning the given teams
 	 * @param teamsForBase the teams to check
 	 * @return true if at least one binding was denied.
 	 */
-	boolean checkAspectPermissionDenial(Bundle aspectBundle, AspectBinding aspectBinding, Collection<TeamBinding> teamsForBase)
+	Set<TeamBinding> checkAspectPermissionDenial(Collection<TeamBinding> teamsForBase)
 	{
-		boolean hasDenial = false;
-		String aspectBundleName = aspectBundle.getSymbolicName();
-		if (aspectBundleName == null) {
-			log(IStatus.ERROR, "Cannot handle unnamed bundle "+aspectBundle);
-		} else {
-			for (TeamBinding teamForBase : teamsForBase)
-				if (!checkTeamBinding(aspectBundleName, aspectBinding.basePluginName, teamForBase.teamName)) {
-					hasDenial = true;
-					try {
+		Set<TeamBinding> deniedTeams = new HashSet<TeamBinding>();
+		for (TeamBinding teamForBase : teamsForBase) {
+			AspectBinding aspectBinding = teamForBase.getAspectBinding();
+			String aspectBundleName = aspectBinding.aspectPlugin;
+			if (!checkTeamBinding(aspectBundleName, aspectBinding.basePluginName, teamForBase)) {
+				deniedTeams.add(teamForBase);
+				try {
+					Bundle aspectBundle = aspectBinding.aspectBundle;
+					if (aspectBundle != null) {
 						aspectBundle.stop();
 						log(IStatus.ERROR, "Stopped bundle "+aspectBundleName+" which requests unconfirmed aspect binding(s).");
-					} catch (Throwable t) { // don't let the aspect bundle get by by throwing an unexpected exception!
-						log(t, "Failed to stop bundle "+aspectBundleName+" which requests unconfirmed aspect binding(s).");
+					} else {
+						log(IStatus.ERROR, "Cannot stop aspect bundle "+aspectBundleName);
 					}
+				} catch (Throwable t) { // don't let the aspect bundle get by by throwing an unexpected exception!
+					log(t, "Failed to stop bundle "+aspectBundleName+" which requests unconfirmed aspect binding(s).");
 				}
+			}	
 		}
-		return hasDenial;
+		return deniedTeams;
 	}
 
 	/**
@@ -408,10 +409,19 @@ public class AspectPermissionManager {
  	 * 
 	 * @param aspectBundleId
 	 * @param baseBundleId
-	 * @param teamClass
+	 * @param teamBinding
 	 * @return whether this team is permitted to adapt classes from the given base bundle.
 	 */
-	boolean checkTeamBinding(String aspectBundleId, String baseBundleId, String teamClass) 
+	boolean checkTeamBinding(String aspectBundleId, String baseBundleId, TeamBinding teamBinding) {
+		if (teamBinding.checkedPermission != null)
+			return teamBinding.checkedPermission == AspectPermission.GRANT;
+
+		boolean isGranted = internalCheckTeamBinding(aspectBundleId, baseBundleId, teamBinding.teamName);
+		teamBinding.checkedPermission = isGranted ? AspectPermission.GRANT : AspectPermission.DENY;
+		return isGranted;
+	}
+
+	boolean internalCheckTeamBinding(String aspectBundleId, String baseBundleId, String teamClass) 
 	{
 		boolean shouldReportGrant = false; // grant by default should not be reported
 		AspectPermission negotiatedPermission = this.defaultAspectBindingPermission;
@@ -489,19 +499,14 @@ public class AspectPermissionManager {
 	}
 
 	List<Runnable> obligations = new ArrayList<Runnable>();
-	public void addBaseBundleObligations(final List<Team> teamInstances, final Collection<TeamBinding> teamClasses, final Bundle aspectBundle, final BaseBundle baseBundle) {
+	public void addBaseBundleObligations(final List<Team> teamInstances, final Collection<TeamBinding> teamClasses, final BaseBundle baseBundle) {
 		schedule(new Runnable() {
 			public void run() {
 				List<TeamBinding> teamsToRevert = new ArrayList<TeamBinding>();
 				// aspect bindings:
-				String aspectBundleName = aspectBundle.getSymbolicName();
-				if (aspectBundleName == null) {
-					log(IStatus.ERROR, "Cannot handle unnamed aspect bundle "+aspectBundle);
-				} else {
-					for (TeamBinding teamClass : teamClasses)
-						if (!checkTeamBinding(aspectBundleName, baseBundle.bundleName, teamClass.teamName))
-							teamsToRevert.add(teamClass);
-				}
+				for (TeamBinding teamClass : teamClasses)
+					if (!checkTeamBinding(teamClass.getAspectBinding().aspectPlugin, baseBundle.bundleName, teamClass))
+						teamsToRevert.add(teamClass);
 				if (!teamsToRevert.isEmpty())
 					revert(teamsToRevert);
 			}
@@ -515,11 +520,13 @@ public class AspectPermissionManager {
 									teamInstance.deactivate(Team.ALL_THREADS);
 							// could also check if roles are present already ...
 						}
-						bundlesToStop.add(aspectBundle);
+						bundlesToStop.add(teamClass.getAspectBinding().aspectBundle);
 					}
 					for (Bundle bundle : bundlesToStop) {
-						log(IStatus.ERROR, "Stopping aspect bundle "+bundle.getSymbolicName()+" with denied aspect binding(s)");
-						bundle.stop();
+						if ((bundle.getState() & (Bundle.STARTING|Bundle.ACTIVE)) != 0) {
+							log(IStatus.ERROR, "Stopping aspect bundle "+bundle.getSymbolicName()+" with denied aspect binding(s)");
+							bundle.stop();
+						}
 					}
 				} catch (Exception e) {
 					log(e, "Failed to revert aspect bundle with denied aspect bindings.");
