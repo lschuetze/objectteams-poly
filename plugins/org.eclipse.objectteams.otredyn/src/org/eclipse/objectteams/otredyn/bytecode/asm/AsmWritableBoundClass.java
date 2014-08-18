@@ -141,7 +141,7 @@ class AsmWritableBoundClass extends AsmBoundClass {
 			reader = new ClassReader(allocateAndGetBytecode());
 			reader.accept(node, ClassReader.SKIP_FRAMES);
 			if (node.transform()) {
-				writer = new ClassWriter(reader, ClassWriter.COMPUTE_FRAMES);
+				writer = new LoaderAwareClassWriter(reader, ClassWriter.COMPUTE_FRAMES, this.loader);
 				node.accept(writer);
 				setBytecode(writer.toByteArray());
 			}
