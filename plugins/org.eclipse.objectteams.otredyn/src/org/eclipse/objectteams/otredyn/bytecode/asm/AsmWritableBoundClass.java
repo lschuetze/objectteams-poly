@@ -112,7 +112,7 @@ class AsmWritableBoundClass extends AsmBoundClass {
 		
 		reader = new ClassReader(allocateAndGetBytecode());
 
-		writer = new ClassWriter(reader, ClassWriter.COMPUTE_FRAMES);
+		writer = new LoaderAwareClassWriter(reader, ClassWriter.COMPUTE_FRAMES, this.loader);
 		multiAdapter = new MultiClassAdapter(writer);
 		nodes = new ArrayList<AbstractTransformableClassNode>();
 		isTransformationActive = true;

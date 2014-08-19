@@ -43,6 +43,7 @@ public class LoaderAwareClassWriter extends ClassWriter {
             throw new RuntimeException(e.toString());
         }
         // FIXME: analyse super types from the above streams!
+        // consider using (a copy of?) org.eclipse.objectteams.internal.osgi.weaving.ASMByteCodeAnalyzer
         return type2;
 //        if (c.isAssignableFrom(d)) {
 //        	System.err.println("answer "+type1);

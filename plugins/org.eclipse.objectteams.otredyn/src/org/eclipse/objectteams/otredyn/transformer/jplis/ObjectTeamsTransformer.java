@@ -46,7 +46,7 @@ public class ObjectTeamsTransformer implements ClassFileTransformer {
 	
 	public byte[] transform(ClassLoader loader, String className, String classId, Class<?> classBeingRedefined,
             byte[] classfileBuffer) {
-		if (!ObjectTeamsTransformer.isWeavable(className))
+		if (!ObjectTeamsTransformer.isWeavable(className) || loader == null)
 			return null;
 		
 		AbstractBoundClass clazz = ClassRepository.getInstance().getBoundClass(
