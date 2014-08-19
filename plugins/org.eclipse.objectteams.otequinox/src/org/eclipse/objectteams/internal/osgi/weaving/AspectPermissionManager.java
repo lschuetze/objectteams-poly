@@ -375,7 +375,7 @@ public class AspectPermissionManager {
 	/**
 	 * Check the permissions for all given teams.
 	 * @param teamsForBase the teams to check
-	 * @return true if at least one binding was denied.
+	 * @return the set of denied teams
 	 */
 	Set<TeamBinding> checkAspectPermissionDenial(Collection<TeamBinding> teamsForBase)
 	{
@@ -467,7 +467,7 @@ public class AspectPermissionManager {
 				shouldReportGrant = negotiatedPermission == GRANT;
 				// locally store as default for subsequent requests:
 				if (answer.allRequests)
-					this.defaultAspectBindingPermission = negotiatedPermission;
+					this.defaultAspectBindingPermission = negotiatedPermission; // FIXME: differentiate: apply to all / all of same aspect bundle
 
 				if (negotiatedPermission == DENY) {
 					denyingNegotiator = negotiator.getClass().getName();
@@ -492,7 +492,7 @@ public class AspectPermissionManager {
 			log(IStatus.ERROR, front+" aspect binding for "+aspectBundleId+
 							   " to base bundle "+baseBundleId+" by means of team "+teamClass+
 							   ". Aspect is not activated.");
-			this.deniedAspects.add(aspectBundleId); // keep for answering the TransformerHook.
+			this.deniedAspects.add(aspectBundleId); // keep for answering the TransformerPlugin.
 			return false; // don't install illegal aspect
 		}
 		return true;
