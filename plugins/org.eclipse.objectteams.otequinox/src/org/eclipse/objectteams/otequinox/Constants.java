@@ -25,7 +25,10 @@ public interface Constants {
 	
 	/** ID of this plugin. */
 	public static final String TRANSFORMER_PLUGIN_ID         = "org.eclipse.objectteams.otequinox" ; //$NON-NLS-1$
-	
+
+	/** Qualified name of class Team. */
+	public static final String ORG_OBJECTTEAMS_TEAM = "org.objectteams.Team";
+
 	// === Extension point elements: ===
 	
 	/** Simple name of the extension point org.eclipse.objectteams.otequinox.aspectBindings. */
