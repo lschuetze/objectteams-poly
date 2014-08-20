@@ -21,11 +21,15 @@ import java.util.List;
 
 import org.eclipse.objectteams.otredyn.runtime.TeamManager;
 import org.objectteams.IBoundBase2;
+import org.objectteams.ILiftingParticipant;
 import org.objectteams.ITeam;
 import org.objectteams.ImplicitTeamActivation;
+import org.objectteams.LiftingFailedException;
+import org.objectteams.LiftingVetoException;
 import org.objectteams.SneakyException;
 import org.objectteams.Team;
 import org.objectteams.TeamThreadManager;
+import org.objectteams.WrongRoleException;
 
 /**
  * Container for class names used in the bytecode manipulating classes
@@ -42,6 +46,10 @@ public abstract class ClassNames {
 	public final static String LIST_SLASH = List.class.getName().replace('.', '/');
 	public final static String HASH_SET_SLASH = HashSet.class.getName().replace('.', '/');
 	public final static String IMPLICIT_ACTIVATION = ImplicitTeamActivation.class.getName().replace('.', '/');
+	public final static String ILIFTING_PARTICIPANT = ILiftingParticipant.class.getName().replace('.', '/');
+	public static final String WRONG_ROLE_EXCEPTION = WrongRoleException.class.getName().replace('.', '/');
+	public static final String LIFTING_FAILED_EXCEPTION = LiftingFailedException.class.getName().replace('.', '/');
+	public static final String LIFTING_VETO_EXCEPTION = LiftingVetoException.class.getName().replace('.', '/');
 
 	public static final String SNEAKY_EXCEPTION_SLASH = SneakyException.class.getName().replace('.', '/');
 	// member of SneakyException:

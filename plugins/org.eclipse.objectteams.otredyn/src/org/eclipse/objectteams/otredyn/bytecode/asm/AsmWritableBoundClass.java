@@ -385,6 +385,13 @@ class AsmWritableBoundClass extends AsmBoundClass {
 		AddGlobalTeamActivationAdapter.checkAddVisitor(this.multiAdapter, this.writer);
 	}
 
+	@Override
+	protected void prepareLiftingParticipant() {
+		if (isTeam() && LiftingParticipantAdapter.isLiftingParticipantConfigured(this.loader)) {
+			multiAdapter.addVisitor(new LiftingParticipantAdapter(this.writer));
+		}
+	}
+
 	/**
 	 * Prepares the methods callAllBindings and callOrig with an empty
 	 * switch statement

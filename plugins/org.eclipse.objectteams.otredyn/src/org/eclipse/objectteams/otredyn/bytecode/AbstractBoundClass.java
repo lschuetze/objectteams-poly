@@ -588,12 +588,14 @@ public abstract class AbstractBoundClass implements IBoundClass {
 			parseBytecode();
 			prepareAsPossibleBaseClass();
 			prepareTeamActivation();
+			prepareLiftingParticipant();
 		} else if (isFirstTransformation()) {
 			// No, so only do load time transforming, if this method is called
 			// at load time
 			startTransformation();
 			prepareAsPossibleBaseClass();
 			prepareTeamActivation();
+			prepareLiftingParticipant();
 			endTransformation();
 		}
 
@@ -1004,6 +1006,8 @@ public abstract class AbstractBoundClass implements IBoundClass {
 	protected abstract void prepareAsPossibleBaseClass();
 
 	protected abstract void prepareTeamActivation();
+
+	protected abstract void prepareLiftingParticipant();
 
 	protected abstract void createSuperCallInCallOrig(int boundMethodId);
 
