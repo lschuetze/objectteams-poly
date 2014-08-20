@@ -25,6 +25,8 @@ import org.objectteams.Team;
 import org.objectweb.asm.ClassVisitor;
 import org.objectweb.asm.Label;
 import org.objectweb.asm.MethodVisitor;
+import org.objectweb.asm.Type;
+import org.objectweb.asm.commons.InstructionAdapter;
 
 /**
  * If a lifting participant has been configured, insert the code to invoke it.
@@ -93,7 +95,7 @@ public class LiftingParticipantAdapter extends ClassVisitor {
 	public MethodVisitor visitMethod(int access, String name, String desc, String signature, String[] exceptions) {
 		if (name.startsWith(LIFT_PREFIX)) {
         	final MethodVisitor methodVisitor = cv.visitMethod(access, name, desc, null, null);
-			return new MethodVisitor(this.api, methodVisitor) {
+			return new InstructionAdapter(this.api, methodVisitor) {
 				private Label done = null;
 				@Override
 				public void visitTypeInsn(int opcode, String type) {
@@ -109,25 +111,25 @@ public class LiftingParticipantAdapter extends ClassVisitor {
 				}
 				void insertParticipantSequence(String roleType) {
 					// o = Team._OT$liftingParticipant.createRole(aTeam, aBase, roleType);
-					mv.visitFieldInsn(GETSTATIC, TEAM_SLASH, LIFTING_PARTICIPANT_FIELD, 'L'+ILIFTING_PARTICIPANT+';');
-					mv.visitVarInsn(ALOAD, 0); 	// team 			: Team
-					mv.visitVarInsn(ALOAD, 1); 	// base				: Object
-					mv.visitLdcInsn(roleType); 	// role class name	: String
-					mv.visitMethodInsn(INVOKEINTERFACE, ILIFTING_PARTICIPANT, CREATE_ROLE_METHOD, CREATE_ROLE_DESC, true);
+					getstatic(TEAM_SLASH, LIFTING_PARTICIPANT_FIELD, 'L'+ILIFTING_PARTICIPANT+';');
+					visitVarInsn(ALOAD, 0); 	// team 			: Team
+					visitVarInsn(ALOAD, 1); 	// base				: Object
+					visitLdcInsn(roleType); 	// role class name	: String
+					invokeinterface(ILIFTING_PARTICIPANT, CREATE_ROLE_METHOD, CREATE_ROLE_DESC);
 		
 					// if (o != null)
-					mv.visitInsn(DUP);
+					dup();
 					Label doCreate = new Label(); 
-					mv.visitJumpInsn(IFNULL, doCreate);
+					ifnull(doCreate);
 					
 					// { ...
-					mv.visitTypeInsn(CHECKCAST, roleType);
+					checkcast(Type.getObjectType(roleType));
 					done = new Label();
-					mv.visitJumpInsn(GOTO, done);
+					goTo(done);
 					
 					// } else {...
-					mv.visitLabel(doCreate);
-					mv.visitInsn(POP); // discard unused DUP above
+					visitLabel(doCreate);
+					pop(); // discard unused DUP above
 					// ... continue with original role allocation...
 				}
 				@Override
@@ -135,7 +137,7 @@ public class LiftingParticipantAdapter extends ClassVisitor {
 					super.visitMethodInsn(opcode, owner, name, desc, itf);
 					if (done != null && opcode == INVOKESPECIAL) { // is it the <init> invocation after the original "new"?
 						// }
-						mv.visitLabel(done);
+						visitLabel(done);
 						done = null;
 					}
 				}
