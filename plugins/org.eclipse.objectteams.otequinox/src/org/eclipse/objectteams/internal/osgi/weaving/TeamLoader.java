@@ -212,6 +212,21 @@ public class TeamLoader {
 					break;
 				}
 				if (Util.PROFILE) Util.profile(time, ProfileKind.Activation, teamName);
+			} catch (NoClassDefFoundError e) {
+				try { // clean up:
+					switch (activationKind) {
+					case ALL_THREADS: instance.deactivate(Team.ALL_THREADS); break;
+					case THREAD: instance.deactivate(); break;
+					default: break;
+					}
+				} catch (Throwable t) { /* ignore */ }
+				for (TeamBinding eq : team.equivalenceSet)
+					eq.isActivated = false;
+				@SuppressWarnings("null") @NonNull // known API
+				String notFoundName = e.getMessage().replace('/', '.');
+				synchronized (this.deferredTeams) {
+					this.deferredTeams.add(new WaitingTeamRecord(team, activationKind, notFoundName));
+				}
 			} catch (Throwable t) {
 				// application errors during activation
 				log(t, "Failed to activate team "+teamName);
