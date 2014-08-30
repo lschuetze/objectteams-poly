@@ -31,7 +31,6 @@ import org.eclipse.objectteams.internal.osgi.weaving.AspectBinding.BaseBundle;
 import org.eclipse.objectteams.internal.osgi.weaving.AspectBinding.TeamBinding;
 import org.eclipse.objectteams.internal.osgi.weaving.Util.ProfileKind;
 import org.eclipse.objectteams.otequinox.ActivationKind;
-import org.eclipse.objectteams.otequinox.AspectPermission;
 import org.eclipse.objectteams.otequinox.TransformerPlugin;
 import org.eclipse.objectteams.otredyn.runtime.TeamManager;
 import org.objectteams.Team;
@@ -93,7 +92,11 @@ public class TeamLoader {
 		
 		List<Team> teamInstances = new ArrayList<>();
 		for (TeamBinding teamForBase : teamsForBase) {
-			if (teamForBase.isActivated || teamForBase.checkedPermission == AspectPermission.DENY) continue;
+			if (teamForBase.isActivated) continue;
+			if (teamForBase.hasBeenDenied()) {
+				log(IStatus.WARNING, "Not activating team "+teamForBase.teamName+" due to denied permissions.");
+				continue;
+			}
 			// Load:
 			Class<? extends Team> teamClass;
 			teamClass = teamForBase.loadTeamClass();

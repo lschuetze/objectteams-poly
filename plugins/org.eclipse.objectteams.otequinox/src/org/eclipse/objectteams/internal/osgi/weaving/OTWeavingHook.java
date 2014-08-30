@@ -8,7 +8,7 @@
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
  * 
- * Please visit http://www.objectteams.org for updates and contact.
+ * Please visit http://www.eclipse.org/objectteams for updates and contact.
  * 
  * Contributors:
  * 	Stephan Herrmann - Initial API and implementation
@@ -186,14 +186,19 @@ public class OTWeavingHook implements WeavingHook, WovenClassListener {
 			baseTripWires.put(baseBundleId, new BaseBundleLoadTrigger(baseBundleId, baseBundle, aspectBindingRegistry, packageAdmin));
 	}
 
-	/** Check if the given base bundle / base class mandate any loading/instantiation/activation of teams. */
-	void triggerBaseTripWires(@Nullable String bundleName, @NonNull WovenClass baseClass) {
+	/**
+	 * Check if the given base bundle / base class mandate any loading/instantiation/activation of teams.
+	 * @return true if all involved aspect bindings have been denied (permissions).
+	 */
+	boolean triggerBaseTripWires(@Nullable String bundleName, @NonNull WovenClass baseClass) {
 		BaseBundleLoadTrigger activation = baseTripWires.get(bundleName);
 		if (activation != null) {
 			activation.fire(baseClass, beingDefined, this);
 			if (activation.isDone())
 				baseTripWires.remove(bundleName);
+			return activation.areAllAspectsDenied();
 		}
+		return false;
 	}
 
 	// ====== Main Weaving Entry: ======
@@ -220,11 +225,13 @@ public class OTWeavingHook implements WeavingHook, WovenClassListener {
 			WeavingReason reason = requiresWeaving(bundleWiring, className, bytes);
 			if (reason != WeavingReason.None) {
 				// do whatever is needed *before* loading this class:
-				triggerBaseTripWires(bundleName, wovenClass);
-				if (reason == WeavingReason.Thread) {
+				boolean allAspectsAreDenied = triggerBaseTripWires(bundleName, wovenClass);
+				if (reason == WeavingReason.Base && allAspectsAreDenied) {
+					return; // don't weave for denied bindings
+				} else if (reason == WeavingReason.Thread) {
 					BaseBundle baseBundle = this.aspectBindingRegistry.getBaseBundle(bundleName);
 					BaseBundleLoadTrigger.addOTREImport(baseBundle, bundleName, wovenClass, this.useDynamicWeaver);
-				}
+				} 
 
 				long time = 0;
 
@@ -266,7 +273,7 @@ public class OTWeavingHook implements WeavingHook, WovenClassListener {
 		if (aspectBindings != null && !aspectBindings.isEmpty()) {
 			// potential base class: look deeper:
 			for (AspectBinding aspectBinding : aspectBindings) {
-				if (!aspectBinding.hasScannedTeams)
+				if (!aspectBinding.hasScannedTeams && !aspectBinding.hasBeenDenied)
 					return WeavingReason.Base; // we may be first, go ahead and trigger the trip wire
 			}
 			if (isAdaptedBaseClass(aspectBindings, className, bytes, bundleWiring.getClassLoader()))
@@ -295,7 +302,7 @@ public class OTWeavingHook implements WeavingHook, WovenClassListener {
 
 		try {
 			for (AspectBinding aspectBinding : aspectBindings) {
-				if (aspectBinding.allBaseClassNames.contains(className))
+				if (aspectBinding.allBaseClassNames.contains(className) && !aspectBinding.hasBeenDenied)
 					return true;					
 			}
 			// attempt recursion to superclass (not superInterfaces atm):

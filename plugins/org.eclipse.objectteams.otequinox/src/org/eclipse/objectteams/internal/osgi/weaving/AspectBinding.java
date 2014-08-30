@@ -130,6 +130,7 @@ public class AspectBinding {
 		 */
 		public void addImportTo(WovenClass baseClass, int direction) {
 			importsAdded = true;
+			if (AspectBinding.this.hasBeenDenied) return;
 			
 			String packageOfTeam = "";
 			int dot = teamName.lastIndexOf('.'); // TODO: can we detect if thats really the package (vs. Outer.Inner)?
@@ -207,6 +208,11 @@ public class AspectBinding {
 			// sub teams?
 			return null;
 		}
+
+		public boolean hasBeenDenied() {
+			return this.checkedPermission == AspectPermission.DENY
+						|| AspectBinding.this.hasBeenDenied;
+		}
 	}
 	
 	/**
@@ -233,6 +239,8 @@ public class AspectBinding {
 	public Set<String> allBaseClassNames = new HashSet<>();
 
 	public boolean hasScannedTeams;
+	public AspectPermission forcedExportsPermission = AspectPermission.UNDEFINED;
+	public boolean hasBeenDenied = false;
 	
 	Set<TeamBinding> teamsInProgress = new HashSet<>(); // TODO cleanup teams that are done
 	

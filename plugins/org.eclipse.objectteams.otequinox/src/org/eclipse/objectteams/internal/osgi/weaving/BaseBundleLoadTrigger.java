@@ -149,4 +149,11 @@ public class BaseBundleLoadTrigger {
 				return false;
 		return true;
 	}
+
+	public boolean areAllAspectsDenied() {
+		for (AspectBinding binding : aspectBindings)
+			if (!binding.hasBeenDenied)
+				return false;
+		return true;
+	}
 }
