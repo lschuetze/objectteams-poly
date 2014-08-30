@@ -56,6 +56,12 @@
             <param name="sourceUpdatesDir" value="${otdtUpdatesDir}"/>
             <param name="targetEclipseDir" value="${test.eclipseDir}"/>
         </antcall>
+		<!-- optional: -->
+	    <antcall target="installFeature">
+	        <param name="feature" value="org.eclipse.objectteams.otequinox.turbo.feature.group"/>
+	        <param name="sourceUpdatesDir" value="${otdtUpdatesDir}"/>
+	        <param name="targetEclipseDir" value="${test.eclipseDir}"/>
+	    </antcall>
         <antcall target="installFeature">
             <param name="feature" value="org.eclipse.objectteams.otdt.feature.group"/>
             <param name="sourceUpdatesDir" value="${otdtUpdatesDir}"/>
