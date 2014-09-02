@@ -984,7 +984,7 @@ public SyntheticMethodBinding addSyntheticFactoryMethod(MethodBinding privateCon
  */
 public SyntheticMethodBinding addSyntheticBridgeMethod(MethodBinding inheritedMethodToBridge, MethodBinding targetMethod) {
 	if (!isPrototype()) throw new IllegalStateException();
-	if (isInterface()) return null; // only classes & enums get bridge methods
+	if (isInterface() && this.scope.compilerOptions().sourceLevel <= ClassFileConstants.JDK1_7) return null; // only classes & enums get bridge methods, interfaces too at 1.8+
 	// targetMethod may be inherited
 //{ObjectTeams: retrieve callin method's real return type:
 	TypeBinding inheritedReturn= MethodModel.getReturnType(inheritedMethodToBridge);

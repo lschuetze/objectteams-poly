@@ -3154,9 +3154,9 @@ protected void runNegativeTest(
 		}
 		// clean up output dir
 		File outputDir = new File(OUTPUT_DIR);
-		if (outputDir.exists()) {
-			Util.flushDirectoryContent(outputDir);
-		}
+//		if (outputDir.exists()) {
+//			Util.flushDirectoryContent(outputDir);
+//		}
 		super.tearDown();
 		if (RUN_JAVAC) {
 			if (JAVAC_OUTPUT_DIR.exists()) {
