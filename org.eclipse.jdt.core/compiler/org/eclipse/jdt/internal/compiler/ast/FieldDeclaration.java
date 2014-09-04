@@ -283,6 +283,10 @@ public void resolve(MethodScope initializationScope) {
 				&& initializationScope.compilerOptions().sourceLevel >= ClassFileConstants.JDK1_5) {
 			initializationScope.problemReporter().missingDeprecatedAnnotationForField(this);
 		}
+//{ObjectTeams: _OT$base is strictly nonnull:
+		if (CharOperation.equals(this.name, IOTConstants._OT_BASE))
+			this.binding.tagBits |= TagBits.AnnotationNonNull;
+// SH}
 		// the resolution of the initialization hasn't been done
 		if (this.initialization == null) {
 			this.binding.setConstant(Constant.NotAConstant);

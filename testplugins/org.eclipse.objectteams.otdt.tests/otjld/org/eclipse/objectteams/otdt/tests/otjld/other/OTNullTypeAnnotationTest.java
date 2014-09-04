@@ -53,13 +53,14 @@ public class OTNullTypeAnnotationTest extends AbstractOTJLDNullAnnotationTest {
 	
 
 	// test standard generated methods via basic team-role-base setup
+	// Bug 443306 - [1.8][null] generated method getAllRoles() triggers null pointer warning / error 
 	public void testBoundRole() {
 		if (this.weavingScheme == WeavingScheme.OTRE) return;
 		runConformTestWithLibs(
 			new String[] {
-				"t/MyTeam.java",
-				"package t;\n" +
-				"import base b.MyBase;\n" +
+				"bug443306/MyTeam.java",
+				"package bug443306;\n" +
+				"import base bug443306.b.MyBase;\n" +
 				"public team class MyTeam {\n" +
 				"	protected class MyRole playedBy MyBase {\n" +
 				"		protected void print() {\n" +
@@ -70,11 +71,11 @@ public class OTNullTypeAnnotationTest extends AbstractOTJLDNullAnnotationTest {
 				"	public static void main(String... args) {\n" +
 				"		System.out.print(\"main\");\n" +
 				"		new MyTeam().activate();\n" + 
-				"		new b.MyBase().bar();\n" + 
+				"		new bug443306.b.MyBase().bar();\n" + 
 				"	}\n" +
 				"}\n",
-				"b/MyBase.java",
-				"package b;\n" +
+				"bub443306/b/MyBase.java",
+				"package bug443306.b;\n" +
 				"public class MyBase {\n" +
 				"	public void bar() { System.out.print(\"bar\"); }\n" +
 				"}\n"
@@ -84,6 +85,41 @@ public class OTNullTypeAnnotationTest extends AbstractOTJLDNullAnnotationTest {
 			"mainbarprint");
 	}
 
+
+	// test standard generated methods via basic team-role-base setup
+	// Bug 443299 - [1.8][null] lowered 'this' is not recognized as non-null
+	public void testLoweringThis() {
+		if (this.weavingScheme == WeavingScheme.OTRE) return;
+		runConformTestWithLibs(
+			new String[] {
+				"bug443299/MyTeam.java",
+				"package bug443299;\n" +
+				"import base bug443299.b.MyBase;\n" +
+				"public team class MyTeam {\n" +
+				"	protected class MyRole playedBy MyBase {\n" +
+				"		protected void print() {\n" +
+				"			System.out.println(bug443299.b.MyBase.getString(this));\n" +
+				"		}\n" +
+				"		print <- after bar;\n" +
+				"	}\n" +
+				"	public static void main(String... args) {\n" +
+				"		System.out.print(\"main\");\n" +
+				"		new MyTeam().activate();\n" + 
+				"		new bug443299.b.MyBase().bar();\n" + 
+				"	}\n" +
+				"}\n",
+				"bug443299/b/MyBase.java",
+				"package bug443299.b;\n" +
+				"import org.eclipse.jdt.annotation.*;\n" +
+				"public class MyBase {\n" +
+				"	public void bar() { System.out.print(\"bar\"); }\n" +
+				"	public static String getString(@NonNull MyBase b) { return \"MyBase\"; }\n" +
+				"}\n"
+			},
+			getCompilerOptions(),
+			"",
+			"mainbarMyBase");
+	}
 
 	// Bug 437767 - [java8][null] semantically integrate null type annotations with anchored role types 
 	// see comment 1
