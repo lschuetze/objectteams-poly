@@ -50,6 +50,40 @@ public class OTNullTypeAnnotationTest extends AbstractOTJLDNullAnnotationTest {
 		if (this.weavingScheme == WeavingScheme.OTRE)
 			System.err.println("Running Java8 tests for OTRE weaver will skip most tests");
 	}
+	
+
+	// test standard generated methods via basic team-role-base setup
+	public void testBoundRole() {
+		if (this.weavingScheme == WeavingScheme.OTRE) return;
+		runConformTestWithLibs(
+			new String[] {
+				"t/MyTeam.java",
+				"package t;\n" +
+				"import base b.MyBase;\n" +
+				"public team class MyTeam {\n" +
+				"	protected class MyRole playedBy MyBase {\n" +
+				"		protected void print() {\n" +
+				"			System.out.println(\"print\");\n" +
+				"		}\n" +
+				"		print <- after bar;\n" +
+				"	}\n" +
+				"	public static void main(String... args) {\n" +
+				"		System.out.print(\"main\");\n" +
+				"		new MyTeam().activate();\n" + 
+				"		new b.MyBase().bar();\n" + 
+				"	}\n" +
+				"}\n",
+				"b/MyBase.java",
+				"package b;\n" +
+				"public class MyBase {\n" +
+				"	public void bar() { System.out.print(\"bar\"); }\n" +
+				"}\n"
+			},
+			getCompilerOptions(),
+			"",
+			"mainbarprint");
+	}
+
 
 	// Bug 437767 - [java8][null] semantically integrate null type annotations with anchored role types 
 	// see comment 1

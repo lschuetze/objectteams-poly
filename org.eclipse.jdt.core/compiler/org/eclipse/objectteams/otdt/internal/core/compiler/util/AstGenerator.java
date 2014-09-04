@@ -40,6 +40,7 @@ import org.eclipse.jdt.internal.compiler.lookup.BaseTypeBinding;
 import org.eclipse.jdt.internal.compiler.lookup.Binding;
 import org.eclipse.jdt.internal.compiler.lookup.BlockScope;
 import org.eclipse.jdt.internal.compiler.lookup.FieldBinding;
+import org.eclipse.jdt.internal.compiler.lookup.LocalVariableBinding;
 import org.eclipse.jdt.internal.compiler.lookup.MethodBinding;
 import org.eclipse.jdt.internal.compiler.lookup.ParameterizedTypeBinding;
 import org.eclipse.jdt.internal.compiler.lookup.ReferenceBinding;
@@ -275,8 +276,24 @@ public class AstGenerator extends AstFactory {
 				value,
 				nullLiteral(),
 				OperatorIds.EQUAL_EQUAL) {
-			protected void checkNullComparison(BlockScope scope, FlowContext flowContext, FlowInfo flowInfo, FlowInfo initsWhenTrue, FlowInfo initsWhenFalse) {
-				// nop, never warn about generated null checks
+			protected void checkVariableComparison(BlockScope scope, FlowContext flowContext, FlowInfo flowInfo, FlowInfo initsWhenTrue, FlowInfo initsWhenFalse, LocalVariableBinding local, int nullStatus, Expression reference) {
+				// similar to super version: do mark flowInfo but avoid reporting any problems
+				switch (nullStatus) {
+					case FlowInfo.NULL :
+						if (((this.bits & OperatorMASK) >> OperatorSHIFT) == EQUAL_EQUAL) {
+							initsWhenTrue.markAsComparedEqualToNull(local); // from thereon it is set
+							initsWhenFalse.markAsComparedEqualToNonNull(local); // from thereon it is set
+						} else {
+							initsWhenTrue.markAsComparedEqualToNonNull(local); // from thereon it is set
+							initsWhenFalse.markAsComparedEqualToNull(local); // from thereon it is set
+						}
+						break;
+					case FlowInfo.NON_NULL :
+						if (((this.bits & OperatorMASK) >> OperatorSHIFT) == EQUAL_EQUAL) {
+							initsWhenTrue.markAsComparedEqualToNonNull(local); // from thereon it is set
+						}
+						break;
+				}
 			}
 		};
 		result.sourceStart = this.sourceStart;

@@ -36,12 +36,7 @@ public class EqualExpression extends BinaryExpression {
 	public EqualExpression(Expression left, Expression right,int operator) {
 		super(left,right,operator);
 	}
-//{ObjectTeams: made overridable:
-/*orig:
 	private void checkNullComparison(BlockScope scope, FlowContext flowContext, FlowInfo flowInfo, FlowInfo initsWhenTrue, FlowInfo initsWhenFalse) {
-  :giro */
-	protected void checkNullComparison(BlockScope scope, FlowContext flowContext, FlowInfo flowInfo, FlowInfo initsWhenTrue, FlowInfo initsWhenFalse) {
-// SH}
 
 		// collect null status of child nodes:
 		int rightStatus = this.right.nullStatus(flowInfo, flowContext);
@@ -110,7 +105,12 @@ public class EqualExpression extends BinaryExpression {
 			}
 		}
 	}
-	private void checkVariableComparison(BlockScope scope, FlowContext flowContext, FlowInfo flowInfo, FlowInfo initsWhenTrue, FlowInfo initsWhenFalse, LocalVariableBinding local, int nullStatus, Expression reference) {
+//{ObjectTeams: make overridable:
+/* orig:
+ 	private void checkVariableComparison(BlockScope scope, FlowContext flowContext, FlowInfo flowInfo, FlowInfo initsWhenTrue, FlowInfo initsWhenFalse, LocalVariableBinding local, int nullStatus, Expression reference) {
+  :giro */
+	protected void checkVariableComparison(BlockScope scope, FlowContext flowContext, FlowInfo flowInfo, FlowInfo initsWhenTrue, FlowInfo initsWhenFalse, LocalVariableBinding local, int nullStatus, Expression reference) {
+// SH}
 		switch (nullStatus) {
 			case FlowInfo.NULL :
 				if (((this.bits & OperatorMASK) >> OperatorSHIFT) == EQUAL_EQUAL) {
