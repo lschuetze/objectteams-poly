@@ -157,8 +157,15 @@ public class OTEquinoxDebugAgent {
 		}
 	}
 
+	private static Instrumentation instrumentation;
+
 	/** Install this transformer into the instrumentation. */
 	public static void premain(String options, Instrumentation inst) {
 		inst.addTransformer(new OTEquinoxTransformerDelegate());
+		OTEquinoxDebugAgent.instrumentation = inst;
+	}
+	
+	public static Instrumentation getInstrumentation() {
+		return instrumentation;
 	}
 }
