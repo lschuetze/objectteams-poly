@@ -25,6 +25,7 @@ import org.eclipse.jdt.internal.compiler.ast.CastExpression;
 import org.eclipse.jdt.internal.compiler.ast.Expression;
 import org.eclipse.jdt.internal.compiler.ast.IfStatement;
 import org.eclipse.jdt.internal.compiler.ast.Statement;
+import org.eclipse.jdt.internal.compiler.impl.CompilerOptions.WeavingScheme;
 import org.eclipse.jdt.internal.compiler.lookup.ReferenceBinding;
 import org.eclipse.objectteams.otdt.core.compiler.IOTConstants;
 import org.eclipse.objectteams.otdt.internal.core.compiler.lookup.WeakenedTypeBinding;
@@ -98,7 +99,7 @@ public abstract class SwitchOnBaseTypeGenerator implements IOTConstants {
 	    ReferenceBinding castType = null;
 	    if (staticRoleType.baseclass() instanceof WeakenedTypeBinding)
 	    	castType = ((WeakenedTypeBinding)staticRoleType.baseclass()).getStrongType();
-    	else if (hasBindingAmbiguity)
+    	else if (hasBindingAmbiguity || caseObjects[0].getWeavingScheme() == WeavingScheme.OTDRE)
     		castType = staticBaseType;
 	    if (castType != null)
 	    	baseArg = gen.castExpression(baseArg, gen.typeReference(castType), CastExpression.RAW);
