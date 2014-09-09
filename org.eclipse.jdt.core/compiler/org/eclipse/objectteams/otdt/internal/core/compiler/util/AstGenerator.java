@@ -130,6 +130,14 @@ public class AstGenerator extends AstFactory {
 		return localVariable(name, typeReference, init);
 	}
 
+	public LocalDeclaration localBaseVariable (char[] name, TypeBinding type, Expression init) {
+		TypeReference typeReference = baseclassReference(type);
+		typeReference.sourceStart = this.sourceStart;
+		typeReference.sourceEnd   = this.sourceEnd;
+
+		return localVariable(name, typeReference, init);
+	}
+
 	public LocalDeclaration localVariable(char[] name, TypeReference typeReference, Expression init) {
 		LocalDeclaration variable = new LocalDeclaration(name, this.sourceStart, this.sourceEnd);
 		variable.initialization = init;

@@ -66,6 +66,7 @@ import org.eclipse.objectteams.otdt.tests.otjld.rolesandteams.ValueParameters;
 import org.eclipse.objectteams.otdt.tests.otjld.syntax.Syntax;
 import org.eclipse.objectteams.otdt.tests.otjld.teamactivation.ExplicitTeamActivation;
 import org.eclipse.objectteams.otdt.tests.otjld.teamactivation.ImplicitTeamActivation;
+import org.eclipse.objectteams.otdt.tests.otjld.teamactivation.Predicates;
 
 /**
  * @author stephan
@@ -116,6 +117,7 @@ public class AllTests {
 		// 5. teamactivation
 		/*5.2*/addComplianceSuite(suite, ExplicitTeamActivation.testClass());
 		/*5.3*/addComplianceSuite(suite, ImplicitTeamActivation.testClass());
+		/*5.4*/addComplianceSuite(suite, Predicates.testClass());
 		
 		// 6.[14] liftlower
 		/*6.1*/addComplianceSuite(suite, DeclaredLifting.testClass());
