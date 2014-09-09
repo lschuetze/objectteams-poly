@@ -19,8 +19,8 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.lang.instrument.ClassDefinition;
 import java.lang.instrument.IllegalClassFormatException;
-import java.lang.instrument.Instrumentation;
 import java.lang.instrument.UnmodifiableClassException;
+import java.lang.reflect.InvocationTargetException;
 import java.security.ProtectionDomain;
 import java.util.Collection;
 
@@ -82,35 +82,33 @@ public abstract class DelegatingTransformer {
 	private static class OTEquinoxRedefineStrategy implements IRedefineStrategy {
 		private static final String OT_EQUINOX_DEBUG_AGENT = "org.eclipse.objectteams.otdt.internal.debug.adaptor.launching.OTEquinoxDebugAgent";
 
-		static Instrumentation instrumentation;
-
 		public void redefine(Class<?> clazz, byte[] bytecode) throws ClassNotFoundException, UnmodifiableClassException {
 			ClassDefinition arr_cd[] = { new ClassDefinition(clazz, bytecode) };
 			try {
-				Instrumentation instrum = getInstrumentation();
-				if (instrum == null)
-					throw new UnmodifiableClassException("Cannot redefined class "+clazz.getName()+", no instrumentation available");
-				instrum.redefineClasses(arr_cd);
-			} catch (ClassFormatError cfe) {
+				reflectivelyInvoke(arr_cd);
+			} catch (ClassFormatError|UnmodifiableClassException e) {
 				// error output during redefinition tends to swallow the stack, print it now:
 				System.err.println("Error redefining "+clazz.getName());
-				cfe.printStackTrace();
-				throw cfe;
+				e.printStackTrace();
+				throw e;
 			}
 		}
 		
-		static Instrumentation getInstrumentation() {
-			if (instrumentation == null) {
-				synchronized (OTEquinoxRedefineStrategy.class) {
-					if (instrumentation == null)
-						try {
-							Class<?> agentClass = ClassLoader.getSystemClassLoader().loadClass(OT_EQUINOX_DEBUG_AGENT);
-							java.lang.reflect.Method getInstr = agentClass.getMethod("getInstrumentation", new Class<?>[0]);
-							instrumentation = (Instrumentation)getInstr.invoke(null, new Object[0]);
-						} catch (Throwable t) {}
-				}
+		static void reflectivelyInvoke(ClassDefinition[] definitions) throws ClassFormatError, UnmodifiableClassException {
+			try {
+				Class<?> agentClass = ClassLoader.getSystemClassLoader().loadClass(OT_EQUINOX_DEBUG_AGENT);
+				java.lang.reflect.Method redefine = agentClass.getMethod("redefine", new Class<?>[]{ClassDefinition[].class});
+				redefine.invoke(null, new Object[]{definitions});
+			} catch (InvocationTargetException ite) {
+				Throwable cause = ite.getCause();
+				if (cause instanceof ClassFormatError)
+					throw (ClassFormatError)cause;
+				if (cause instanceof UnmodifiableClassException)
+					throw (UnmodifiableClassException)cause;
+				throw new UnmodifiableClassException(cause.getMessage());
+			} catch (Throwable t) {
+				throw new UnmodifiableClassException(t.getMessage());
 			}
-			return instrumentation;
 		}
 	}
 
