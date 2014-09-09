@@ -35,6 +35,7 @@ import org.objectweb.asm.Label;
  */
 abstract class Attributes {
 	protected final static String ATTRIBUTE_OT_DYN_CALLIN_BINDINGS="OTDynCallinBindings";
+	protected final static String ATTRIBUTE_ROLE_BASE_BINDINGS = "CallinRoleBaseBindings";
 	protected final static String ATTRIBUTE_CALLIN_PRECEDENCE = "CallinPrecedence";
 	protected final static String ATTRIBUTE_OT_CLASS_FLAGS = "OTClassFlags";
 	protected final static String ATTRIBUTE_OT_SPECIAL_ACCESS = "OTSpecialAccess";
@@ -44,6 +45,7 @@ abstract class Attributes {
 
 	protected final static Attribute[] attributes = { 
 		new CallinBindingsAttribute(0),
+		new RoleBaseBindingsAttribute(0),
 		new CallinPrecedenceAttribute(0),
 		new OTClassFlagsAttribute(0),
 		new OTSpecialAccessAttribute(),
@@ -215,6 +217,27 @@ abstract class Attributes {
 			}
 			return buf.toString();
 		}
+	}
+	protected static class RoleBaseBindingsAttribute extends Attribute {
+		String[] roles;
+		String[] bases;
+		protected RoleBaseBindingsAttribute(int elementCount) {
+			super(ATTRIBUTE_ROLE_BASE_BINDINGS);
+			roles = new String[elementCount];
+			bases = new String[elementCount];
+		}
+		@Override
+		protected Attribute read(ClassReader cr, int off, int len,
+				char[] buf, int codeOff, Label[] labels) 
+		{
+			int elementCount = cr.readShort(off);		off += 2;
+			RoleBaseBindingsAttribute attr = new RoleBaseBindingsAttribute(elementCount);
+			for (int i = 0; i < elementCount; i++) {
+				attr.roles[i] = cr.readUTF8(off, buf);	off += 2;
+				attr.bases[i] = cr.readUTF8(off, buf);	off += 2;
+			}
+			return attr;
+		}		
 	}
 	protected static class CallinPrecedenceAttribute extends Attribute {
 		String[] labels;

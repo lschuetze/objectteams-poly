@@ -21,6 +21,7 @@ import java.util.HashSet;
 import org.eclipse.objectteams.otredyn.bytecode.Binding;
 import org.eclipse.objectteams.otredyn.bytecode.asm.Attributes.CallinBindingsAttribute;
 import org.eclipse.objectteams.otredyn.bytecode.asm.Attributes.OTClassFlagsAttribute;
+import org.eclipse.objectteams.otredyn.bytecode.asm.Attributes.RoleBaseBindingsAttribute;
 import org.eclipse.objectteams.otredyn.bytecode.asm.Attributes.CallinBindingsAttribute.MultiBinding;
 import org.eclipse.objectteams.otredyn.bytecode.asm.Attributes.CallinPrecedenceAttribute;
 import org.eclipse.objectteams.otredyn.bytecode.asm.Attributes.OTSpecialAccessAttribute;
@@ -122,6 +123,9 @@ class AsmClassVisitor extends ClassVisitor {
 			clazz.setOTClassFlags(((OTClassFlagsAttribute)attribute).flags);
 		} else if (attribute.type.equals(Attributes.ATTRIBUTE_OT_SPECIAL_ACCESS)) {
 			((OTSpecialAccessAttribute)attribute).registerAt(clazz);
+		} else if (attribute.type.equals(Attributes.ATTRIBUTE_ROLE_BASE_BINDINGS)) {
+			for (String base : ((RoleBaseBindingsAttribute) attribute).bases)
+				clazz.boundBaseClasses.add(base.replace('/', '.'));
 		}
 	}
 	
