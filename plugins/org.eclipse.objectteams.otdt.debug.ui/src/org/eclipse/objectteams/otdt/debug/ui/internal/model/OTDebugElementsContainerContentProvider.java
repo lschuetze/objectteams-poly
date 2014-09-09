@@ -62,7 +62,8 @@ public class OTDebugElementsContainerContentProvider extends ElementContentProvi
         OTDebugElementsContainer container = (OTDebugElementsContainer) parent;
         if(container.hasTeamInstances())
         {
-        	ArrayList<TeamInstance> teamInstances = container.getTeamInstances();
+        	ArrayList<TeamInstance> teamInstances = new ArrayList<>(container.getTeamInstances());
+        	length = Math.min(length, teamInstances.size()-index);
         	Object[] result= new Object[length];
         	for (int i=0; i<length; i++)
         		result[i]= teamInstances.get(index+i);
