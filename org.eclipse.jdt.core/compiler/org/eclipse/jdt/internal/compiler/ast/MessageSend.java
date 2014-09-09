@@ -63,6 +63,7 @@ import static org.eclipse.objectteams.otdt.core.compiler.IOTConstants.CALLIN_FLA
 
 import org.eclipse.jdt.core.compiler.CharOperation;
 import org.eclipse.jdt.internal.compiler.ASTVisitor;
+import org.eclipse.jdt.internal.compiler.ast.AbstractMethodDeclaration.WrapperKind;
 import org.eclipse.jdt.internal.compiler.classfmt.ClassFileConstants;
 import org.eclipse.jdt.internal.compiler.codegen.CodeStream;
 import org.eclipse.jdt.internal.compiler.codegen.Opcodes;
@@ -1021,6 +1022,8 @@ public TypeBinding resolveType(BlockScope scope) {
 		boolean callinAllowed;
 		if (enclosingMethod == null)
 			callinAllowed = false;
+		else if (enclosingMethod instanceof MethodDeclaration && ((MethodDeclaration)enclosingMethod).isMappingWrapper == WrapperKind.CALLIN)
+			callinAllowed = true;
 		else if (isAnySuperAccess())
 			callinAllowed = ((enclosingMethod.modifiers & ExtraCompilerModifiers.AccCallin) != 0);
 		else
