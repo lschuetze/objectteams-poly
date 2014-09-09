@@ -52,14 +52,14 @@ fi
 
 # VERSIONS:
 # Eclipse SDK build identifier (used for substitution in otdt.map.in etc.):
-SDK_QUALIFIER=M20140902-1430
+SDK_QUALIFIER=M20140903-1600
 
 # Architecture (as used by OSGi):
 ARCH=`arch`
 
 # used only locally (components of the ECLIPSE_SDK_TGZ path):
-EVERSION=4.4.1RC2a
-DROP=${BASEDIR}/drops4/M-4.4.1RC2a-201409021430
+EVERSION=4.4.1RC3
+DROP=${BASEDIR}/drops4/M-4.4.1RC3-201409031600
 
 # EXPORT: archive file of the base eclipse SDK build:
 ECLIPSE_SDK_TGZ=${DROP}/eclipse-SDK-${EVERSION}-linux-gtk-${ARCH}.tar.gz
