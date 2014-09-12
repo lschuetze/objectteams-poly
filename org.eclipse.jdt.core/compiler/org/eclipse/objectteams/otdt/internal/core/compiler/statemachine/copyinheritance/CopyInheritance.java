@@ -1477,6 +1477,9 @@ public class CopyInheritance implements IOTConstants, ClassFileConstants, ExtraC
 		        	if (constructorBinding.isPrivate() || constructorBinding.isDefault())
 		        		roleModel.getAst().scope.problemReporter().roleConstructorHiddenByLiftingConstructor(constructor);
 		        }
+		        if (Lifting.isLiftingCtor(constructorBinding)) {
+		        	gen.addNonNullAnnotation(newArguments[0], teamDeclaration.scope.environment());
+		        }
 		    }
 	    }
 	    if (newArguments != null && constructorBinding != null && Lifting.isLiftingCtor(constructorBinding))

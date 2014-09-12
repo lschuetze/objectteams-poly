@@ -33,6 +33,7 @@ import org.eclipse.jdt.internal.compiler.classfmt.ClassFileConstants;
 import org.eclipse.jdt.internal.compiler.codegen.CodeStream;
 import org.eclipse.jdt.internal.compiler.flow.FlowContext;
 import org.eclipse.jdt.internal.compiler.flow.FlowInfo;
+import org.eclipse.jdt.internal.compiler.impl.CompilerOptions;
 import org.eclipse.jdt.internal.compiler.impl.Constant;
 import org.eclipse.jdt.internal.compiler.impl.ReferenceContext;
 import org.eclipse.jdt.internal.compiler.lookup.ArrayBinding;
@@ -41,6 +42,7 @@ import org.eclipse.jdt.internal.compiler.lookup.Binding;
 import org.eclipse.jdt.internal.compiler.lookup.BlockScope;
 import org.eclipse.jdt.internal.compiler.lookup.FieldBinding;
 import org.eclipse.jdt.internal.compiler.lookup.LocalVariableBinding;
+import org.eclipse.jdt.internal.compiler.lookup.LookupEnvironment;
 import org.eclipse.jdt.internal.compiler.lookup.MethodBinding;
 import org.eclipse.jdt.internal.compiler.lookup.ParameterizedTypeBinding;
 import org.eclipse.jdt.internal.compiler.lookup.ReferenceBinding;
@@ -1449,6 +1451,19 @@ public class AstGenerator extends AstFactory {
 		return new MarkerAnnotation(qualifiedTypeReference(compoundName), this.sourceStart);
 	}
 
+	public void addNonNullAnnotation(Argument argument, LookupEnvironment environment) {
+		CompilerOptions compilerOptions = environment.globalOptions;
+		if (compilerOptions.isAnnotationBasedNullAnalysisEnabled) {
+			if (compilerOptions.sourceLevel < ClassFileConstants.JDK1_8) {
+				argument.annotations = new Annotation[]{ markerAnnotation(environment.getNonNullAnnotationName()) };
+			} else {
+				int levels = argument.type.getAnnotatableLevels();
+				argument.type.annotations = new Annotation[levels][];
+				argument.type.annotations[levels-1] = new Annotation[] { markerAnnotation(environment.getNonNullAnnotationName()) };
+			}
+		}
+	}
+
 	/**
 	 * Wrap the baseclass reference from a tsuper role to a new type reference
 	 * yet using the original scope for resolving.
@@ -1492,6 +1507,4 @@ public class AstGenerator extends AstFactory {
 		result.bits |= ASTNode.IgnoreRawTypeCheck;
 		return result;
 	}
-
-
 }
