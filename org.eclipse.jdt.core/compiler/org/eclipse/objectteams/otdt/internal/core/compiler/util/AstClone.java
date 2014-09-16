@@ -47,6 +47,7 @@ import org.eclipse.jdt.internal.compiler.ast.Wildcard;
 import org.eclipse.jdt.internal.compiler.lookup.MethodBinding;
 import org.eclipse.jdt.internal.compiler.lookup.TypeBinding;
 import org.eclipse.jdt.internal.compiler.lookup.Binding;
+import org.eclipse.jdt.internal.compiler.lookup.TypeConstants;
 import org.eclipse.jdt.internal.compiler.lookup.TypeIds;
 import org.eclipse.objectteams.otdt.core.exceptions.InternalCompilerError;
 import org.eclipse.objectteams.otdt.internal.core.compiler.ast.LiftingTypeReference;
@@ -336,8 +337,14 @@ public class AstClone
 		int count = 0;
 		for (int i = 0; i < annotations.length; i++) {
 			if (annotations[i] instanceof MarkerAnnotation) { // refuse to generate complex annotations
-				if (annotations[i].resolvedType != null && annotations[i].resolvedType.id == TypeIds.T_JavaLangOverride)
-					continue; // don't copy @Override
+				// don't blindly copy @Override:
+				if (annotations[i].resolvedType != null) {
+					if (annotations[i].resolvedType.id == TypeIds.T_JavaLangOverride)
+						continue;
+				} else {
+					if (CharOperation.equals(annotations[i].type.getLastToken(), TypeConstants.JAVA_LANG_OVERRIDE[2]))
+						continue;
+				}
 				TypeReference ref = copyTypeReference(annotations[i].type);
 				result[count++] = new MarkerAnnotation(ref, annotations[i].sourceStart);
 			}
