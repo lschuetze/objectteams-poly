@@ -308,7 +308,10 @@ public class CallinImplementorDyn extends MethodMappingImplementor {
 		// we probably want to avoid generating empty methods here.
 		final TypeDeclaration teamDecl = aTeam.getAst();
 		if (teamDecl == null) return;
+
 		final AstGenerator gen = new AstGenerator(teamDecl);
+		gen.replaceableEnclosingClass = teamDecl.binding;
+
 		
 		// public void _OT$callBefore   (IBoundBase2 base, 							int boundMethodId, int callinId, 	Object[] args)
 		// public void _OT$callAfter	(IBoundBase2 base, 							int boundMethodId, int callinId, 	Object[] args, Object result)
@@ -387,7 +390,6 @@ public class CallinImplementorDyn extends MethodMappingImplementor {
 						boolean isStaticRoleMethod = callinDecl.getRoleMethod().isStatic();
 						ReferenceBinding roleType = callinDecl.scope.enclosingReceiverType();
 						MethodBinding roleMethodBinding = callinDecl.getRoleMethod();
-	
 						
 						boolean needLiftedRoleVar = !isStaticRoleMethod
 												&& roleType.isCompatibleWith(roleMethodBinding.declaringClass);
@@ -615,7 +617,7 @@ public class CallinImplementorDyn extends MethodMappingImplementor {
 								//   who is responsible for lowering: the team or the current role?
 								Expression lowerReceiver = (isRoleOfCurrentRole(roleType, returnTypes[0]))
 										? gen.singleNameReference(roleVar)
-										: gen.thisReference();
+										: genTeamThis(gen, returnTypes[0]);
 								result = new Lowering().lowerExpression(methodDecl.scope, result, returnTypes[0], returnTypes[1],
 										lowerReceiver, true/*needNullCheck*/, true/*delayedResolve*/);
 							}
@@ -904,7 +906,7 @@ public class CallinImplementorDyn extends MethodMappingImplementor {
 										gen.castExpression(gen.singleNameReference(IOTConstants.BASE), gen.typeReference(currentRole.baseclass()), CastExpression.RAW),
 										currentRole.baseclass(), currentRole, false)
 								// TODO: might want to extend the signature of callNext to pass the current role to avoid this lifting?
-					: gen.thisReference();
+					: genTeamThis(gen, returnTypes[0]);
 				result = Lifting.liftCall(mapping.scope,
 										  liftReceiver,
 										  gen.castExpression(result,
@@ -931,6 +933,16 @@ public class CallinImplementorDyn extends MethodMappingImplementor {
 		};
 		decl.hasParsedStatements = true;
 		AstEdit.addMethod(teamDecl, decl);
+	}
+
+	Reference genTeamThis(AstGenerator gen, TypeBinding type) {
+		TypeBinding leaf = type.leafComponentType();
+		if (leaf instanceof ReferenceBinding) {
+			ReferenceBinding teamBinding = ((ReferenceBinding) leaf).enclosingType();
+			if (teamBinding != null)
+				return gen.qualifiedThisReference(teamBinding);
+		}
+		return gen.thisReference();
 	}
 
 	TypeBinding[] getReturnTypes(CallinMappingDeclaration mapping, int i) {

@@ -45,6 +45,7 @@ import org.eclipse.jdt.internal.compiler.ast.TypeParameter;
 import org.eclipse.jdt.internal.compiler.classfmt.ClassFileConstants;
 import org.eclipse.jdt.internal.compiler.lookup.Binding;
 import org.eclipse.jdt.internal.compiler.lookup.BlockScope;
+import org.eclipse.jdt.internal.compiler.lookup.CompilationUnitScope;
 import org.eclipse.jdt.internal.compiler.lookup.LookupEnvironment;
 import org.eclipse.jdt.internal.compiler.lookup.MemberTypeBinding;
 import org.eclipse.jdt.internal.compiler.lookup.MethodBinding;
@@ -244,9 +245,11 @@ public class DeclaredLifting implements IOTConstants {
 					ReferenceBinding baseType = null;
 					if (scope.classScope() instanceof OTClassScope) {
 						// try base scope first:
-						Scope baseScope = ((OTClassScope) scope.classScope()).getBaseImportScope();
-						if (baseScope != null)
+						CompilationUnitScope baseScope = ((OTClassScope) scope.classScope()).getBaseImportScope(scope);
+						if (baseScope != null) {
 							baseType = (ReferenceBinding) baseScope.getType(ltr.baseTokens, ltr.baseTokens.length);
+							baseScope.originalScope = null;
+						}
 					} 
 					if (baseType == null || !baseType.isValidBinding())
 						// fall back to normal scope:

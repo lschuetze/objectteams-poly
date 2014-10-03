@@ -301,7 +301,9 @@ public class OTClassScope extends ClassScope {
 		this.baseImportScope.topLevelTypes = new SourceTypeBinding[0];
 	}
 
-	public Scope getBaseImportScope() {
+	public CompilationUnitScope getBaseImportScope(Scope originalScope) {
+		if (this.baseImportScope != null)
+			this.baseImportScope.originalScope = originalScope;
 		return this.baseImportScope;
 	}
 

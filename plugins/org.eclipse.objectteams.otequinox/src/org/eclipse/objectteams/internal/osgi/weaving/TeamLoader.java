@@ -70,11 +70,22 @@ public class TeamLoader {
 	 * Team loading, 1st attempt before the base class is even loaded
 	 * Trying to do these phases: load (now) instantiate/activate (if ready),
 	 */
-	public void loadTeamsForBase(Bundle aspectBundle, AspectBinding aspectBinding, WovenClass baseClass) {
+	public void loadTeamsForBase(Bundle aspectBundle, AspectBinding aspectBinding, WovenClass baseClass, AspectPermissionManager permissionManager) {
 		@SuppressWarnings("null")@NonNull String className = baseClass.getClassName();
 		Collection<TeamBinding> teamsForBase = aspectBinding.getTeamsForBase(className);
 		if (teamsForBase == null) 
 			return; // not done
+
+		// permission checking can be performed now or later, depending on readiness:
+		boolean permissionManagerReady = permissionManager.isReady();
+
+		// ==== check permissions before we start activating:
+		if (permissionManagerReady) { // otherwise we will register pending obligations below.
+			if (permissionManager.checkAspectPermissionDenial(aspectBundle, aspectBinding, teamsForBase))
+				return;
+		}
+		
+		List<Team> teamInstances = new ArrayList<>();
 		for (TeamBinding teamForBase : teamsForBase) {
 			if (teamForBase.isActivated) continue;
 			// Load:
@@ -85,12 +96,12 @@ public class TeamLoader {
 				continue;
 			}
 			// Try to instantiate & activate, failures are recorded in deferredTeams
-			ActivationKind activationKind = teamForBase.activation;
+			ActivationKind activationKind = teamForBase.getActivation();
 			if (activationKind == ActivationKind.NONE) {
 				teamForBase = aspectBinding.getOtherTeamToActivate(teamForBase);
 				if (teamForBase != null) {
 					if (teamForBase.isActivated) continue;
-					activationKind = teamForBase.activation;
+					activationKind = teamForBase.getActivation();
 					teamClass = teamForBase.loadTeamClass(aspectBundle);
 					if (teamClass == null) {
 						log(new ClassNotFoundException("Not found: "+teamForBase.teamName+" in bundle "+aspectBundle.getSymbolicName()), "Failed to load team "+teamForBase);
@@ -102,8 +113,13 @@ public class TeamLoader {
 			}
 			if (activationKind == ActivationKind.NONE) 
 				continue;
-			instantiateAndActivate(aspectBinding, teamForBase, activationKind);
+			Team instance = instantiateAndActivate(aspectBinding, teamForBase, activationKind);
+			if (instance != null)
+				teamInstances.add(instance);
 		}
+
+		if (!permissionManagerReady)
+			permissionManager.addBaseBundleObligations(teamInstances, teamsForBase, aspectBundle, aspectBinding.baseBundle);
 	}
 
 	public static @Nullable Pair<URL,String> findTeamClassResource(String className, Bundle bundle) {
@@ -153,7 +169,7 @@ public class TeamLoader {
 	/**
 	 * Check if the given team is ready. If so instantiate it and if activationKind requires also activate it.
 	 */
-	void instantiateAndActivate(AspectBinding aspectBinding, TeamBinding team, ActivationKind activationKind)
+	@Nullable Team instantiateAndActivate(AspectBinding aspectBinding, TeamBinding team, ActivationKind activationKind)
 	{
 		String teamName = team.teamName;
 		// don't try to instantiate before all base classes successfully loaded.
@@ -161,7 +177,7 @@ public class TeamLoader {
 			if (!isReadyToLoad(aspectBinding, team, teamName, activationKind)) {
 				if (this.useDynamicWeaving)
 					TeamManager.prepareTeamActivation(team.teamClass);
-				return;
+				return null;
 			}
 			for (TeamBinding equivalent : team.equivalenceSet)
 				equivalent.isActivated = true;
@@ -194,10 +210,12 @@ public class TeamLoader {
 				// application errors during activation
 				log(t, "Failed to activate team "+teamName);
 			}
+			return instance;
 		} catch (Throwable e) {
 			// application error during constructor execution?
 			log(e, "Failed to instantiate team "+teamName);
 		}
+		return null;
 	}
 
 	private boolean isReadyToLoad(AspectBinding aspectBinding,

@@ -137,11 +137,15 @@ public class SingleTypeReference extends TypeReference {
 			Scope currentScope = scope;
 			while (currentScope != null) {
 				if (currentScope instanceof OTClassScope) {
-					Scope baseImportScope = ((OTClassScope)currentScope).getBaseImportScope();
+					CompilationUnitScope baseImportScope = ((OTClassScope)currentScope).getBaseImportScope(scope);
 					if (baseImportScope != null) {
-						this.resolvedType = getTypeBinding(baseImportScope);
-						if (this.resolvedType != null && this.resolvedType.isValidBinding())
-							return this.resolvedType = checkResolvedType(this.resolvedType, baseImportScope, location, false);
+						try {
+							this.resolvedType = getTypeBinding(baseImportScope);
+							if (this.resolvedType != null && this.resolvedType.isValidBinding())
+								return this.resolvedType = checkResolvedType(this.resolvedType, baseImportScope, location, false);
+						} finally {
+							baseImportScope.originalScope = null;
+						}
 					}
 				}
 				currentScope = currentScope.parent;

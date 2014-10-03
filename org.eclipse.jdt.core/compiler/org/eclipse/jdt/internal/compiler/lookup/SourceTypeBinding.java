@@ -66,6 +66,7 @@ import org.eclipse.jdt.internal.compiler.ast.Expression.DecapsulationState;
 import org.eclipse.jdt.internal.compiler.classfmt.ClassFileConstants;
 import org.eclipse.jdt.internal.compiler.impl.CompilerOptions;
 import org.eclipse.jdt.internal.compiler.impl.Constant;
+import org.eclipse.jdt.internal.compiler.impl.CompilerOptions.WeavingScheme;
 import org.eclipse.jdt.internal.compiler.parser.Parser;
 import org.eclipse.jdt.internal.compiler.problem.ProblemSeverities;
 import org.eclipse.jdt.internal.compiler.util.SimpleLookupTable;
@@ -77,6 +78,7 @@ import org.eclipse.objectteams.otdt.internal.core.compiler.ast.LiftingTypeRefere
 import org.eclipse.objectteams.otdt.internal.core.compiler.ast.RoleFileCache;
 import org.eclipse.objectteams.otdt.internal.core.compiler.ast.TypeAnchorReference;
 import org.eclipse.objectteams.otdt.internal.core.compiler.ast.TypeValueParameter;
+import org.eclipse.objectteams.otdt.internal.core.compiler.ast.MethodSpec.ImplementationStrategy;
 import org.eclipse.objectteams.otdt.internal.core.compiler.control.*;
 import org.eclipse.objectteams.otdt.internal.core.compiler.lookup.AnchorMapping;
 import org.eclipse.objectteams.otdt.internal.core.compiler.lookup.SyntheticBaseCallSurrogate;
@@ -2351,12 +2353,16 @@ public FieldBinding resolveTypeFor(FieldBinding field) {
 			ReferenceBinding originalRole = field.declaringClass;
 			if (field.copyInheritanceSrc != null)
 				originalRole = field.copyInheritanceSrc.declaringClass;
-			inner = FieldModel.getDecapsulatingFieldAccessor(this, field, true/*isGetter*/);
-			((SourceTypeBinding) enclosingType()).addSyntheticRoleMethodBridge(this, originalRole, inner, SyntheticMethodBinding.RoleMethodBridgeOuter);
-			if (!field.isFinal()) { // no setter for final (includes all static role fields)
-								    // otherwise we would have to handle different signatures (w/ w/o role arg), which we currently don't
-				inner = FieldModel.getDecapsulatingFieldAccessor(this, field, false/*isGetter*/);
+			ImplementationStrategy strategy = this.scope.compilerOptions().weavingScheme == WeavingScheme.OTDRE
+												? ImplementationStrategy.DYN_ACCESS : ImplementationStrategy.DECAPS_WRAPPER;
+			if (strategy != ImplementationStrategy.DYN_ACCESS) {
+				inner = FieldModel.getDecapsulatingFieldAccessor(this.scope, this, field, true/*isGetter*/, strategy);
 				((SourceTypeBinding) enclosingType()).addSyntheticRoleMethodBridge(this, originalRole, inner, SyntheticMethodBinding.RoleMethodBridgeOuter);
+				if (!field.isFinal()) { // no setter for final (includes all static role fields)
+									    // otherwise we would have to handle different signatures (w/ w/o role arg), which we currently don't
+					inner = FieldModel.getDecapsulatingFieldAccessor(this.scope, this, field, false/*isGetter*/, strategy);
+					((SourceTypeBinding) enclosingType()).addSyntheticRoleMethodBridge(this, originalRole, inner, SyntheticMethodBinding.RoleMethodBridgeOuter);
+				}
 			}
 		}
 // SH}

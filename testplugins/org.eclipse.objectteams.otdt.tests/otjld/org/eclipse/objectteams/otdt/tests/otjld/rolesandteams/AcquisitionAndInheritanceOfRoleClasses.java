@@ -483,6 +483,57 @@ public class AcquisitionAndInheritanceOfRoleClasses extends AbstractOTJLDTest {
             "OK");
     }
 
+    // a role class accesses an overwritten feature that it indirectly inherited from its implicit super role
+    // challenge tsuper from private
+    public void _test132_roleInheritedFeatureAccess2b() {
+       
+       runConformTest(
+            new String[] {
+		"T132rfa2bMain.java",
+			    "\n" +
+			    "public class T132rfa2bMain {\n" +
+			    "    public static void main(String[] args) {\n" +
+			    "        Team132rfa2b_3 t = new Team132rfa2b_3();\n" +
+			    "\n" +
+			    "        System.out.print(t.getValue());\n" +
+			    "    }\n" +
+			    "}\n" +
+			    "    \n",
+		"Team132rfa2b_1.java",
+			    "\n" +
+			    "public team class Team132rfa2b_1 {\n" +
+			    "    protected class Role132rfa2b {\n" +
+			    "        private String getValueInternal() {\n" +
+			    "            return \"K\";\n" +
+			    "        }\n" +
+			    "    }\n" +
+			    "}\n" +
+			    "    \n",
+		"Team132rfa2b_2.java",
+			    "\n" +
+			    "public team class Team132rfa2b_2 extends Team132rfa2b_1 {}\n" +
+			    "    \n",
+		"Team132rfa2b_3.java",
+			    "\n" +
+			    "public team class Team132rfa2b_3 extends Team132rfa2b_2 {\n" +
+			    "    protected class Role132rfa2b {\n" +
+			    "        private String getValueInternal() {\n" +
+			    "            return \"O\"+tsuper.getValueInternal();\n" +
+			    "        }\n" +
+			    "        protected String getValue() {\n" +
+			    "            return getValueInternal();\n" +
+			    "        }\n" +
+			    "    }\n" +
+			    "\n" +
+			    "    public String getValue() {\n" +
+			    "        return new Role132rfa2b().getValue();\n" +
+			    "    }\n" +
+			    "}\n" +
+			    "    \n"
+            },
+            "OK");
+    }
+
     // a role class accesses a feature inherited from its direct explicit super role
     // 1.3.2-otjld-role-inherited-feature-access-3
     public void test132_roleInheritedFeatureAccess3() {

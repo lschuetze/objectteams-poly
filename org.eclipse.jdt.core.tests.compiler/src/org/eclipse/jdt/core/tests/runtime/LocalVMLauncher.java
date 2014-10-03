@@ -60,10 +60,12 @@ public static LocalVMLauncher getLauncher() {
 	if (vmName != null && vmName.indexOf("JRockit") != -1) {
 		return new JRockitVMLauncher();
 	}
-	final String osName = System.getProperty("os.name");
-	if (osName.startsWith("Mac")) {
-		return new MacVMLauncher();
-	}
+//{ObjectTeams: see https://bugs.eclipse.org/bugs/show_bug.cgi?id=413850
+//	final String osName = System.getProperty("os.name");
+//	if (osName.startsWith("Mac")) {
+//		return new MacVMLauncher();
+//	}
+// SH}
 	File file = new File(Util.getJREDirectory() + "/lib/rt.jar");
 	if (file.exists()) {
 		return new StandardVMLauncher();

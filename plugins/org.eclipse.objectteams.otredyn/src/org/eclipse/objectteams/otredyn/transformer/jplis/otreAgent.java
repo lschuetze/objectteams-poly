@@ -17,6 +17,10 @@ package org.eclipse.objectteams.otredyn.transformer.jplis;
 
 import java.lang.instrument.Instrumentation;
 
+import org.objectweb.asm.ClassVisitor;
+import org.objectweb.asm.commons.AdviceAdapter;
+import org.objectweb.asm.tree.InsnNode;
+
 
 /**
  * @author  Christine Hundt
@@ -29,11 +33,17 @@ public class otreAgent {
 
 	public static void premain(String options, Instrumentation inst) {
 		instCopy = inst;
-
+		checkASM();
 		otTransformer = new ObjectTeamsTransformer();
 		instCopy.addTransformer(otTransformer);
 	}
 	
+	private static void checkASM() {
+		ClassVisitor.class.getName(); // asm
+		AdviceAdapter.class.getName(); // asm.commons
+		InsnNode.class.getName(); // asm.tree
+	}
+
 	public static Instrumentation getInstrumentation() {
 		return instCopy;
 	}

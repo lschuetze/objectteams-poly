@@ -23,6 +23,7 @@ package org.eclipse.objectteams.otdt.internal.core.compiler.statemachine.transfo
 import java.util.HashSet;
 
 import org.eclipse.jdt.core.compiler.CharOperation;
+import org.eclipse.jdt.internal.compiler.ast.AND_AND_Expression;
 import org.eclipse.jdt.internal.compiler.ast.AbstractMethodDeclaration;
 import org.eclipse.jdt.internal.compiler.ast.Annotation;
 import org.eclipse.jdt.internal.compiler.ast.Argument;
@@ -573,19 +574,23 @@ public class ReflectionGenerator implements IOTConstants, ClassFileConstants {
 	{
 		/*
 		 * For the end of unregisterRole(Object) create:
-		 * 		if (first_cache != null) {
+		 * 		if (first_cache != null && found_base != null) { // ensure no null problems against either variable
 		 * 			first_cache.remove(_OT$base_arg);
 		 *          ((IBoundBase)found_base)._OT$removeRole(_OT$role_arg);
 		 *      }
 		 */
 		return gen.ifStatement(
-					new EqualExpression(
-						gen.singleNameReference(FIRST_CACHE),
-						gen.nullLiteral(),
-						OperatorIds.EQUAL_EQUAL
-					),
-					gen.block(null),
-					gen.block(new Statement[] { // "else" instead of negation
+					new AND_AND_Expression(
+						new EqualExpression(
+							gen.singleNameReference(FIRST_CACHE),
+							gen.nullLiteral(),
+							OperatorIds.NOT_EQUAL),
+						new EqualExpression(
+							gen.singleNameReference(FOUND_BASE),
+							gen.nullLiteral(),
+							OperatorIds.NOT_EQUAL),
+						OperatorIds.AND_AND),
+					gen.block(new Statement[] {
 						gen.messageSend(
 							gen.singleNameReference(FIRST_CACHE),
 							REMOVE,

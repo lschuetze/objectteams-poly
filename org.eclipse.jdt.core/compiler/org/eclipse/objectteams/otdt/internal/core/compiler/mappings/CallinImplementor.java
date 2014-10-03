@@ -516,7 +516,7 @@ public class CallinImplementor extends MethodMappingImplementor
 				callinBindingDeclaration,
 				callinWrapperDecl,
 				baseMethodSpec,
-				false,
+				null,
 				resultName != null /*hasResultArg*/);
         if (messageSendArguments == null) {
         	callinBindingDeclaration.tagAsHavingErrors();
@@ -773,6 +773,7 @@ public class CallinImplementor extends MethodMappingImplementor
 			TypeBinding[] typeArguments = liftMethod[0].typeVariables();
 			if (typeArguments != Binding.NO_TYPE_VARIABLES)
 				try {
+					// FIXME: pass null annotations, once JDT supports those on a type declaration.
 					roleVarType = Config.getLookupEnvironment().createParameterizedType(roleVarType, typeArguments, null, -1, roleModel.getBinding().enclosingType(), Binding.NO_ANNOTATIONS);
 				} catch (NotConfiguredException e) {
 					e.logWarning("Cannot lookup parameterized type"); //$NON-NLS-1$

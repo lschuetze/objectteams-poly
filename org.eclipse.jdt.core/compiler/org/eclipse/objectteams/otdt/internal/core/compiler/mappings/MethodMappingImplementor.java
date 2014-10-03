@@ -44,6 +44,7 @@ import org.eclipse.objectteams.otdt.internal.core.compiler.ast.CallinMappingDecl
 import org.eclipse.objectteams.otdt.internal.core.compiler.ast.CalloutMappingDeclaration;
 import org.eclipse.objectteams.otdt.internal.core.compiler.ast.FieldAccessSpec;
 import org.eclipse.objectteams.otdt.internal.core.compiler.ast.MethodSpec;
+import org.eclipse.objectteams.otdt.internal.core.compiler.ast.MethodSpec.ImplementationStrategy;
 import org.eclipse.objectteams.otdt.internal.core.compiler.ast.TypeAnchorReference;
 import org.eclipse.objectteams.otdt.internal.core.compiler.lookup.ITeamAnchor;
 import org.eclipse.objectteams.otdt.internal.core.compiler.lookup.RoleTypeBinding;
@@ -109,7 +110,7 @@ public abstract class MethodMappingImplementor {
 			AbstractMethodMappingDeclaration methodMapping,
 			MethodDeclaration      wrapperMethodDeclaration,
 			MethodSpec             sourceMethodSpec,
-			boolean                isFieldAccess,
+			FieldAccessSpec			baseFieldSpec,
 			boolean                hasResultArgument)
 	{
 		// prepare parameter mappings:
@@ -120,7 +121,7 @@ public abstract class MethodMappingImplementor {
 		}
 		
 	    Argument[]   wrapperMethodArguments = wrapperMethodDeclaration.arguments;
-	    Expression[] arguments;
+	    Expression[] arguments = null;
 
 	    boolean hasArgError = false;
 
@@ -135,25 +136,30 @@ public abstract class MethodMappingImplementor {
     	int implementationArgLen = implParameters.length;
 
 		int expressionsOffset = 0;
-        if (isFieldAccess && this._role.getWeavingScheme() == WeavingScheme.OTRE) { // OTREDyn uses non-static accessor for non-static fields
-        	// field access is mapped to static method with additional first parameter _OT$base (unless static):
-        	if (!((FieldAccessSpec)methodMapping.getBaseMethodSpecs()[0]).isStatic())
-        		expressionsOffset = 1;
+        if (baseFieldSpec != null) {
+			if (baseFieldSpec.implementationStrategy == ImplementationStrategy.DYN_ACCESS) {
+				 // in decapsulation scenarios OTREDyn uses non-static accessor for non-static fields
+				if (!baseFieldSpec.isSetter())
+					implementationArgLen = 0; // if resolved to a 4-arg _OT$access, don't consider these args during AST gen.
+			} else if (this._role.getWeavingScheme() == WeavingScheme.OTRE 
+					&& !((FieldAccessSpec)methodMapping.getBaseMethodSpecs()[0]).isStatic()) {
+				// for OTRE, non-static field access is mapped to static method with additional first parameter _OT$base:
+				expressionsOffset = 1;
 
-        	ReferenceBinding baseType = methodMapping.scope.enclosingSourceType().baseclass();
-        	arguments = new Expression[implementationArgLen+expressionsOffset];
-        	if (expressionsOffset > 0) {
-	        	// TODO(SH): generalize this and the corresponding statement in
-	        	//           CalloutImplementor.makeArguments().
-	        	// cast needed against weakened _OT$base reference.
-	        	MethodSpec baseSpec = ((CalloutMappingDeclaration)methodMapping).baseMethodSpec;
-	        	AstGenerator gen = new AstGenerator(baseSpec);
-	    		arguments[0] = new CastExpression(
+				ReferenceBinding baseType = methodMapping.scope.enclosingSourceType().baseclass();
+				arguments = new Expression[implementationArgLen+expressionsOffset];
+		    	// TODO(SH): generalize this and the corresponding statement in
+		    	//           CalloutImplementor.makeArguments().
+		    	// cast needed against weakened _OT$base reference.
+		    	MethodSpec baseSpec = ((CalloutMappingDeclaration)methodMapping).baseMethodSpec;
+		    	AstGenerator gen = new AstGenerator(baseSpec);
+				arguments[0] = new CastExpression(
 						gen.singleNameReference(IOTConstants._OT_BASE),
 						gen.baseclassReference(baseType),
 						baseType.isRole() ? CastExpression.NEED_CLASS : CastExpression.RAW); // FIXME (see also CalloutImplementor.makeArguments)
-        	}
-        } else {
+			}
+		} 
+        if (arguments == null) {
         	arguments = new Expression[implementationArgLen];
         }
 

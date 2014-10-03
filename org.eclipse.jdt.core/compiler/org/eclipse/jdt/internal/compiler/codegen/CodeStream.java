@@ -60,6 +60,7 @@ import org.eclipse.objectteams.otdt.internal.core.compiler.lookup.DependentTypeB
 import org.eclipse.objectteams.otdt.internal.core.compiler.lookup.ITeamAnchor;
 import org.eclipse.objectteams.otdt.internal.core.compiler.lookup.RoleTypeBinding;
 import org.eclipse.objectteams.otdt.internal.core.compiler.lookup.SyntheticOTMethodBinding;
+import org.eclipse.objectteams.otdt.internal.core.compiler.lookup.SyntheticOTTargetMethod;
 import org.eclipse.objectteams.otdt.internal.core.compiler.lookup.SyntheticRoleFieldAccess;
 import org.eclipse.objectteams.otdt.internal.core.compiler.lookup.WeakenedTypeBinding;
 
@@ -4420,16 +4421,17 @@ public void invoke(byte opcode, MethodBinding methodBinding, TypeBinding declari
 	if ((declaringClass.tagBits & TagBits.ContainsNestedTypeReferences) != 0) {
 		Util.recordNestedType(this.classFile, declaringClass);
 	}
-//{ObjectTeams: invoking role field accessors works differently:
+//{ObjectTeams: some OT accessor methods require different codegen:
     if (opcode == Opcodes.OPC_invokestatic) {
-        if (methodBinding instanceof SyntheticRoleFieldAccess) {
-            // these have generation built in:
-            ((SyntheticRoleFieldAccess)methodBinding).generateInvoke(this);
-            return;
-        }
-        // roles as parameter for field access may need casting:
-        if (methodBinding instanceof SyntheticMethodBinding)
-            opcode = checkInvokeCalloutToField(opcode, methodBinding);
+        if (methodBinding instanceof SyntheticOTTargetMethod) {
+        	// these have generation built in:
+			opcode = ((SyntheticOTTargetMethod)methodBinding).prepareOrGenerateInvocation(this, opcode);
+		} else if (methodBinding instanceof SyntheticMethodBinding) {
+			// roles as parameter for field access may need casting:
+			opcode = checkInvokeCalloutToField(opcode, (SyntheticMethodBinding)methodBinding);
+		}
+        if (opcode == 0)
+        	return;
     }
 // SH}
 	// compute receiverAndArgsSize
@@ -4515,38 +4517,31 @@ public void invoke(byte opcode, MethodBinding methodBinding, TypeBinding declari
 // SH}
 }
 //{ObjectTeams: misguided callout-to-field accessor?? 
-private byte checkInvokeCalloutToField(byte opcode, MethodBinding methodBinding) {
-	if (   !methodBinding.isStatic()
-	    && ((SyntheticMethodBinding)methodBinding).purpose == SyntheticMethodBinding.InferredCalloutToField)
+private byte checkInvokeCalloutToField(byte opcode, SyntheticMethodBinding accessor) {
+	if (  (   accessor.purpose == SyntheticMethodBinding.FieldReadAccess
+		   || accessor.purpose == SyntheticMethodBinding.FieldWriteAccess)
+		&& accessor.parameters.length > 0 // for static fields we have no parameter.
+	    && accessor.parameters[0].isRole())
 	{
-		opcode = Opcodes.OPC_invokevirtual;
-	} else {
-		SyntheticMethodBinding accessor = (SyntheticMethodBinding)methodBinding;
-		if (  (   accessor.purpose == SyntheticMethodBinding.FieldReadAccess
-			   || accessor.purpose == SyntheticMethodBinding.FieldWriteAccess)
-			&& accessor.parameters.length > 0 // for static fields we have no parameter.
-		    && accessor.parameters[0].isRole())
-		{
-			boolean wide = false;
-			if (accessor.purpose == SyntheticMethodBinding.FieldWriteAccess) {
-				wide =    accessor.targetWriteField.type.id == TypeIds.T_long
-				       || accessor.targetWriteField.type.id == TypeIds.T_double;
-				// expose first arg of two (role, value)
-				if (wide) {
-					dup2_x1(); // ref, wide -> wide, ref, wide
-					pop2();    //           -> wide, ref
-				} else
-					this.swap();
-			}
-			this.checkcast(methodBinding.parameters[0]);
-			if (accessor.purpose == SyntheticMethodBinding.FieldWriteAccess) {
-				// revert the above swap:
-				if (wide) {
-					dup_x2(); // wide, ref -> ref, wide, ref
-					pop();    //           -> ref, wide
-				} else
-					this.swap();
-			}
+		boolean wide = false;
+		if (accessor.purpose == SyntheticMethodBinding.FieldWriteAccess) {
+			wide =    accessor.targetWriteField.type.id == TypeIds.T_long
+			       || accessor.targetWriteField.type.id == TypeIds.T_double;
+			// expose first arg of two (role, value)
+			if (wide) {
+				dup2_x1(); // ref, wide -> wide, ref, wide
+				pop2();    //           -> wide, ref
+			} else
+				this.swap();
+		}
+		this.checkcast(accessor.parameters[0]);
+		if (accessor.purpose == SyntheticMethodBinding.FieldWriteAccess) {
+			// revert the above swap:
+			if (wide) {
+				dup_x2(); // wide, ref -> ref, wide, ref
+				pop();    //           -> ref, wide
+			} else
+				this.swap();
 		}
 	}
 	return opcode;

@@ -73,7 +73,6 @@ import org.eclipse.jdt.internal.compiler.impl.CompilerOptions;
 import org.eclipse.jdt.internal.compiler.impl.Constant;
 import org.eclipse.jdt.internal.compiler.impl.ReferenceContext;
 import org.eclipse.jdt.internal.compiler.impl.CompilerOptions.WeavingScheme;
-import org.eclipse.jdt.internal.compiler.lookup.BaseTypeBinding;
 import org.eclipse.jdt.internal.compiler.lookup.Binding;
 import org.eclipse.jdt.internal.compiler.lookup.BlockScope;
 import org.eclipse.jdt.internal.compiler.lookup.ExtraCompilerModifiers;
@@ -109,6 +108,7 @@ import org.eclipse.objectteams.otdt.internal.core.compiler.control.Dependencies;
 import org.eclipse.objectteams.otdt.internal.core.compiler.control.ITranslationStates;
 import org.eclipse.objectteams.otdt.internal.core.compiler.lookup.AnchorMapping;
 import org.eclipse.objectteams.otdt.internal.core.compiler.lookup.DependentTypeBinding;
+import org.eclipse.objectteams.otdt.internal.core.compiler.lookup.SyntheticOTTargetMethod;
 import org.eclipse.objectteams.otdt.internal.core.compiler.lookup.SyntheticRoleBridgeMethodBinding;
 import org.eclipse.objectteams.otdt.internal.core.compiler.lookup.WeakenedTypeBinding;
 import org.eclipse.objectteams.otdt.internal.core.compiler.mappings.CalloutImplementor;
@@ -117,7 +117,6 @@ import org.eclipse.objectteams.otdt.internal.core.compiler.model.MethodModel;
 import org.eclipse.objectteams.otdt.internal.core.compiler.model.TeamModel;
 import org.eclipse.objectteams.otdt.internal.core.compiler.statemachine.copyinheritance.CopyInheritance.RoleConstructorCall;
 import org.eclipse.objectteams.otdt.internal.core.compiler.statemachine.transformer.StandardElementGenerator;
-import org.eclipse.objectteams.otdt.internal.core.compiler.util.AstGenerator;
 import org.eclipse.objectteams.otdt.internal.core.compiler.util.RoleTypeCreator;
 
 /**
@@ -1054,22 +1053,13 @@ public TypeBinding resolveType(BlockScope scope) {
 				if (this.accessId == -1) // happens for BaseAllocationExpression with role-as-base
 					this.accessId = scope.enclosingSourceType().roleModel.addInaccessibleBaseMethod(this.binding);
 				// pretend that accessor method were already there:
-				this.binding = new MethodBinding(this.binding, this.binding.declaringClass.getRealClass());
 				if (weavingScheme == WeavingScheme.OTDRE) {
-					if (this.binding.isStatic())
-						this.binding.selector = CalloutImplementorDyn.OT_ACCESS_STATIC;
-					else
-						this.binding.selector = CalloutImplementorDyn.OT_ACCESS;
-					TypeBinding originalReturnType = this.binding.returnType;
-					if (originalReturnType.id != TypeIds.T_void) {
-						if (originalReturnType.isBaseType()) {
-							this.valueCast = scope.getType(AstGenerator.boxTypeName((BaseTypeBinding) originalReturnType), 3);
-							computeConversion(scope, this.valueCast, originalReturnType);
-						} else {
-							this.valueCast = originalReturnType;
-						}
-					}
+					MethodBinding accessor = CalloutImplementorDyn.ensureAccessor(scope, this.binding.declaringClass, this.binding.isStatic());
+					if (this.accessId == 0)
+						this.accessId = scope.enclosingSourceType().roleModel.addInaccessibleBaseMethod(this.binding);
+					this.syntheticAccessor = new SyntheticOTTargetMethod.OTDREMethodDecapsulation(accessor, this.binding.parameters, this.binding.returnType, this.accessId, scope, this);
 				} else {
+					this.binding = new MethodBinding(this.binding, this.binding.declaringClass.getRealClass());
 					this.binding.selector = CharOperation.concat(IOTConstants.OT_DECAPS, this.selector);
 				}
 			}

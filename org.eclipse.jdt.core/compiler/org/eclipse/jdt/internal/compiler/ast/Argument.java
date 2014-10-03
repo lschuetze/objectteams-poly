@@ -24,6 +24,7 @@ import org.eclipse.jdt.internal.compiler.ASTVisitor;
 import org.eclipse.jdt.internal.compiler.classfmt.ClassFileConstants;
 import org.eclipse.jdt.internal.compiler.impl.Constant;
 import org.eclipse.jdt.internal.compiler.lookup.*;
+import org.eclipse.objectteams.otdt.internal.core.compiler.ast.LiftingTypeReference;
 
 /**
  * OTDT changes:
@@ -97,6 +98,10 @@ public class Argument extends LocalDeclaration {
 				Annotation.isTypeUseCompatible(this.type, scope, this.annotations);
 				scope.validateNullAnnotation(this.binding.tagBits, this.type, this.annotations);
 			}
+//{ObjectTeams: LTR needs to do more work:
+			if (this.type instanceof LiftingTypeReference)
+				((LiftingTypeReference) this.type).updateBindingAndCheckNullness(scope);
+//SH}
 		}
 		this.binding.declaration = this;
 		return this.binding.type; // might have been updated during resolveAnnotations (for typeAnnotations)

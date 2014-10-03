@@ -123,9 +123,15 @@ public abstract class AbstractNullAnnotationTest extends AbstractComparableTest 
 				// runtime options
 			    JavacTestOptions.Excuse.EclipseWarningConfiguredAsError);
 	}
+//{ObjectTeams: make visible to downstream:
+	protected
+// SH}
 	void runNegativeTestWithLibs(String[] testFiles, Map customOptions, String expectedErrorLog) {
 		runNegativeTestWithLibs(false /* flush output directory */,	testFiles, customOptions, expectedErrorLog);
 	}
+//{ObjectTeams: make visible to downstream:
+	protected
+// SH}
 	void runConformTestWithLibs(String[] testFiles, Map customOptions, String expectedCompilerLog) {
 		runConformTestWithLibs(false /* flush output directory */, testFiles, customOptions, expectedCompilerLog);
 	}

@@ -69,6 +69,7 @@ public class SyntheticMethodBinding extends MethodBinding {
 	public final static int InferredCalloutToField = 18; // calling an inferred callout-to-field
 	public final static int RoleMethodBridgeOuter = 19; // a team-level bridge method towards a private role method (for callout)
 	public final static int RoleMethodBridgeInner = 20; // a role-level bridge method towards a private role method (for callout)
+	public final static int MethodDecapsulation = 21;
 // SH}
 
 	public int sourceStart = 0; // start position of the matching declaration

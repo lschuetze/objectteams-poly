@@ -887,6 +887,69 @@ public class DevelopmentExamples extends AbstractOTJLDTest {
             "MyBase.bm");
     }
 
+    // super call in base method - like 4a but with relevant signature
+    public void testX11_bindingInheritance4d() {
+       
+       runConformTest(
+            new String[] {
+		"MainX114d.java",
+			    "\n" +
+			    "public class MainX114d {\n" +
+			    "    public static void main(String[] args) {\n" +
+			    "        MyBaseX114d b = new MyBaseX114d();\n" +
+			    "        MyTeamX114d t = new MyTeamX114d();\n" +
+			    "        t.activate();\n" +
+			    "        System.out.println(b.bm(\"OK\"));\n" +
+			    "        System.out.println(\"----------------\");\n" +
+			    "        MySubSubBaseX114d ssb = new MySubSubBaseX114d();\n" +
+			    "        System.out.println(ssb.bm(\"Hoki\"));\n" +
+			    "    }\n" +
+			    "}   \n" +
+			    "    \n",
+		"MyBaseX114d.java",
+			    "\n" +
+			    "public class MyBaseX114d {\n" +
+			    "    public String bm(String in) {\n" +
+			    "        System.out.println(\"MyBase.bm(\"+in+\")\");\n" +
+			    "        return \"retBase\";\n" +
+			    "    }\n" +
+			    "}\n" +
+			    "    \n",
+		"MySubBaseX114d.java",
+			    "\n" +
+			    "public class MySubBaseX114d extends MyBaseX114d {}\n" +
+			    "    \n",
+		"MySubSubBaseX114d.java",
+			    "\n" +
+			    "public class MySubSubBaseX114d extends MySubBaseX114d {\n" +
+			    "    public String bm(String in) {\n" +
+			    "        String res = super.bm(in);\n" +
+			    "        System.out.println(\"MySubSubBase.bm(\"+in+\")\");\n" +
+			    "        return res;\n" +
+			    "    }\n" +
+			    "}\n" +
+			    "    \n",
+		"MyTeamX114d.java",
+			    "\n" +
+			    "public team class MyTeamX114d {\n" +
+			    "    public class MyRoleX114d playedBy MyBaseX114d {\n" +
+			    "        public void rm(String in) {\n" +
+			    "            System.out.println(\"MyTeam.MyRole.rm(\"+in+\")\");\n" +
+			    "        }\n" +
+			    "        rm <- after bm;\n" +
+			    "    }\n" +
+			    "}\n" +
+			    "    \n"
+            },
+            "MyBase.bm(OK)\n" +
+			"MyTeam.MyRole.rm(OK)\n" +
+			"retBase\n" +
+			"----------------\n" +
+			"MyBase.bm(Hoki)\n" +
+			"MySubSubBase.bm(Hoki)\n" +
+			"MyTeam.MyRole.rm(Hoki)\n" +
+			"retBase");
+    }
     // after callin inherited from super role, before callin to the same base method added
     // X.1.1-otjld-binding-inheritance-5
     public void testX11_bindingInheritance5() {

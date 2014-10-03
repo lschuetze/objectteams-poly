@@ -16,12 +16,18 @@
  **********************************************************************/
 package org.eclipse.objectteams.otredyn.bytecode;
 
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
+import java.util.List;
 import java.util.Set;
 import java.util.TreeSet;
 
 import org.eclipse.objectteams.otredyn.runtime.IBinding;
+import org.eclipse.objectteams.otredyn.runtime.IBoundClass;
 import org.eclipse.objectteams.otredyn.runtime.IBoundTeam;
+import org.eclipse.objectteams.otredyn.runtime.IClassIdentifierProvider;
+import org.eclipse.objectteams.otredyn.runtime.IClassRepository;
 
 /**
  * Represents a team class and stores the bindings this team has got.
@@ -76,5 +82,34 @@ public abstract class AbstractTeam extends AbstractBoundClass implements IBoundT
 
 	public int getHighestAccessId() {
 		return highestAccessId;
+	}
+
+	/** Answer known tsub-versions of the given role. */
+	private List<String> getTSubRoles(String simpleRoleName) {
+		List<String> result = new ArrayList<String>();
+		for (AbstractBoundClass subTeam : this.subclasses.keySet()) {
+			if (!subTeam.isAnonymous())
+				result.add(subTeam.getName()+'$'+simpleRoleName);
+		}
+		return result;
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	@Override
+	public List<IBoundClass> getTSubsOfThis(IClassRepository classRepository, IClassIdentifierProvider idProvider) {
+		String name = this.getName();
+		int dollar = name.lastIndexOf('$');
+		if (dollar == -1)
+			return Collections.emptyList();
+		String teamName = name.substring(0, dollar);
+		// FIXME: use the idProvider, but: we don't yet have that team class :(
+		IBoundTeam myTeam = classRepository.getTeam(teamName.replace('/', '.'), teamName.replace('.', '/'), this.loader);
+		List<String> tsubRoleNames = ((AbstractTeam)myTeam).getTSubRoles(name.substring(dollar+1));
+		List<IBoundClass> tsubBases = new ArrayList<IBoundClass>();
+		for  (String tsubRoleName : tsubRoleNames)
+			tsubBases.add(classRepository.getBoundClass(tsubRoleName.replace('/', '.'), tsubRoleName.replace('.', '/'), this.loader));
+		return tsubBases;
 	}
 }

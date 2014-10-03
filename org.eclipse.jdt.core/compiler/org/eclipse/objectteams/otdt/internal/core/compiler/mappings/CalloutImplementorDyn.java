@@ -1,7 +1,7 @@
 /**********************************************************************
  * This file is part of "Object Teams Development Tooling"-Software
  * 
- * Copyright 2011 GK Software AG and others.
+ * Copyright 2011, 2014 GK Software AG and others.
  * 
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -48,7 +48,7 @@ public class CalloutImplementorDyn {
 												  Expression receiver, MethodSpec baseSpec, Expression[] arguments,
 												  AstGenerator gen) 
 	{
-		char[] selector = ensureAccessor(scope, baseType, baseSpec.isStatic());
+		char[] selector = ensureAccessor(scope, baseType, baseSpec.isStatic()).selector;
 		TeamModel teamModel = roleModel.getTeamModel();
 		Expression accessIdArg = gen.intLiteral(baseSpec.accessId);
 		int opKind = 0;
@@ -65,12 +65,14 @@ public class CalloutImplementorDyn {
 			return gen.createCastOrUnboxing(messageSend, baseSpec.resolvedType(), true/*baseAccess*/);
 	}
 
-	private static char[] ensureAccessor(Scope scope, ReferenceBinding baseType, boolean isStatic) {
+	public static MethodBinding ensureAccessor(Scope scope, ReferenceBinding baseType, boolean isStatic) {
 		if (baseType.isRoleType())
 			baseType = baseType.getRealClass();
 		char[] selector = isStatic ? OT_ACCESS_STATIC : OT_ACCESS;
 		MethodBinding[] methods = baseType.getMethods(selector);
-		if (methods == null || methods.length != 1) {
+		if (methods != null && methods.length == 1) {
+			return methods[0];
+		} else {
 			int modifiers = ClassFileConstants.AccPublic|ClassFileConstants.AccSynthetic;
 			if (isStatic)
 				modifiers |= ClassFileConstants.AccStatic;
@@ -86,7 +88,7 @@ public class CalloutImplementorDyn {
 						Binding.NO_EXCEPTIONS,
 						baseType);
 			baseType.addMethod(method);
+			return method;
 		}
-		return selector;
 	}
 }

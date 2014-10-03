@@ -799,7 +799,7 @@ public abstract class TeamAnchor extends Binding implements ITeamAnchor {
 			LookupEnvironment   env) 
 	{
 	    DependentTypeBinding dependentTypeBinding =
-	    	(DependentTypeBinding)env.createParameterizedType(typeBinding, arguments, this, paramPosition, typeBinding.enclosingType(), Binding.NO_ANNOTATIONS);
+	    	(DependentTypeBinding)env.createParameterizedType(typeBinding, arguments, this, paramPosition, typeBinding.enclosingType(), typeBinding.getTypeAnnotations());
 	    return (dimensions > 0)
 	    	? dependentTypeBinding.getArrayType(dimensions)
 	    	: dependentTypeBinding;

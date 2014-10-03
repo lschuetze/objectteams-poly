@@ -39,6 +39,7 @@ import org.eclipse.objectteams.otdt.tests.otjld.other.Java7;
 import org.eclipse.objectteams.otdt.tests.otjld.other.Java8;
 import org.eclipse.objectteams.otdt.tests.otjld.other.Misc;
 import org.eclipse.objectteams.otdt.tests.otjld.other.Modifiers;
+import org.eclipse.objectteams.otdt.tests.otjld.other.OTNullTypeAnnotationTest;
 import org.eclipse.objectteams.otdt.tests.otjld.regression.CompilationOrder;
 import org.eclipse.objectteams.otdt.tests.otjld.regression.ComplexStructures;
 import org.eclipse.objectteams.otdt.tests.otjld.regression.DevelopmentExamples;
@@ -135,6 +136,7 @@ public class AllTests {
 		/*A.1*/addComplianceSuite(suite, Java5.testClass());
 		/*A.2*/addComplianceSuite(suite, Java7.testClass(), AbstractCompilerTest.F_1_7);
 		/*---*/addComplianceSuite(suite, Java8.testClass(), AbstractCompilerTest.F_1_8);
+		/*---*/addComplianceSuite(suite, OTNullTypeAnnotationTest.testClass(), AbstractCompilerTest.F_1_8);
 		/*0.m*/addComplianceSuite(suite, Misc.testClass());
 		
 		// regression:

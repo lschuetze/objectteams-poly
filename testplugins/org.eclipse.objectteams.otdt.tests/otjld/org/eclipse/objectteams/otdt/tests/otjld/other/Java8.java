@@ -264,7 +264,7 @@ public class Java8 extends AbstractOTJLDTest {
 			"	public class R {}\n" +
 			"}\n",
 		"C1.java",
-			"public abstract class C1 {\n" +
+			"public abstract team class C1 {\n" +
 			"	final T1 t = new T1();\n" +
 			"	abstract void test1(final C1 a, R<@a.t> c);\n" +
 			"	abstract void test2(final Object o, C2<java.lang.@p1.Marker Object> c);\n" + // bug, should be java.lang. @p1.Marker Object

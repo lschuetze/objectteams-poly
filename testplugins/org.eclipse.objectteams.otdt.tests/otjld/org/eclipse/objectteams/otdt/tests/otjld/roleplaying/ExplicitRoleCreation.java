@@ -3830,5 +3830,50 @@ public class ExplicitRoleCreation extends AbstractOTJLDTest {
             },
             "OK");
     }
+
+    // a role is bound to a lower role with a non-visible constructor invoked via base()
+    // addition: one more arg (2byte)
+    public void test2335_creatingRoleOfRegularInner2b() {
+       
+       runConformTest(
+            new String[] {
+		"Team2335crori2b_2.java",
+			    "\n" +
+			    "import b.Team2335crori2b_1;\n" +
+			    "@SuppressWarnings(\"decapsulation\")\n" +
+			    "public team class Team2335crori2b_2 {\n" +
+			    "    protected final Team2335crori2b_1 lower = new Team2335crori2b_1();\n" +
+			    "    protected class R playedBy Inner<@lower> {\n" +
+			    "        protected R(Team2335crori2b_1 outer) {\n" +
+			    "            outer.base(\"OK\", 1.2345d);\n" + // TODO: is outer. acceptable, shouldn't it always be lower.base()??
+			    "        }\n" +
+			    "        String getVal() -> get String val;\n" +
+			    "        protected void print() {\n" +
+			    "            System.out.print(getVal());\n" +
+			    "        }\n" +
+			    "    }\n" +
+			    "    void test() {\n" +
+			    "        new R(lower).print();\n" +
+			    "    }\n" +
+			    "    public static void main(String[] args) {\n" +
+			    "        new Team2335crori2b_2().test();\n" +
+			    "    }\n" +
+			    "}\n" +
+			    "    \n",
+		"b/Team2335crori2b_1.java",
+			    "\n" +
+			    "package b;\n" +
+			    "public team class Team2335crori2b_1 {\n" +
+			    "    protected class Inner {\n" +
+			    "        String val;\n" +
+			    "        protected Inner(String v, double d) {\n" +
+			    "            this.val = v+String.valueOf(d);\n" +
+			    "        }\n" +
+			    "    }\n" +
+			    "}\n" +
+			    "    \n"
+            },
+            "OK1.2345");
+    }
     // no test with private constructor: can never be called from  outside (has no creation method).
 }

@@ -68,6 +68,7 @@ import org.eclipse.objectteams.otdt.internal.core.compiler.ast.AbstractMethodMap
 import org.eclipse.objectteams.otdt.internal.core.compiler.ast.CalloutMappingDeclaration;
 import org.eclipse.objectteams.otdt.internal.core.compiler.ast.FieldAccessSpec;
 import org.eclipse.objectteams.otdt.internal.core.compiler.ast.MethodSpec;
+import org.eclipse.objectteams.otdt.internal.core.compiler.ast.MethodSpec.ImplementationStrategy;
 import org.eclipse.objectteams.otdt.internal.core.compiler.ast.ParameterMapping;
 import org.eclipse.objectteams.otdt.internal.core.compiler.ast.PotentialLowerExpression;
 import org.eclipse.objectteams.otdt.internal.core.compiler.ast.PrivateRoleMethodCall;
@@ -533,7 +534,7 @@ public class CalloutImplementor extends MethodMappingImplementor
                     		calloutDecl,
 							roleMethodDeclaration,
 							calloutDecl.roleMethodSpec,
-							(calloutDecl.baseMethodSpec instanceof FieldAccessSpec),
+							(calloutDecl.baseMethodSpec instanceof FieldAccessSpec) ? ((FieldAccessSpec)calloutDecl.baseMethodSpec) : null,
 							false /*hasResultArg*/);
 			if (   arguments == null
                 || hasParamMappingProblems(calloutDecl, returnType, roleMethodDeclaration.scope.problemReporter()))
@@ -558,7 +559,9 @@ public class CalloutImplementor extends MethodMappingImplementor
 							CastExpression.DO_WRAP);
 
 		Expression baseAccess = null;
-		if (calloutDecl.baseMethodSpec.isPrivate() && baseType.isRole()) {
+		if (calloutDecl.baseMethodSpec.isPrivate() && baseType.isRole()
+				&& calloutDecl.baseMethodSpec.implementationStrategy != ImplementationStrategy.DYN_ACCESS)
+		{
     		// tricky case: callout to a private role method (base-side)
     		// requires the indirection via two wrapper methods (privateBridgeMethod)
 
@@ -975,10 +978,12 @@ public class CalloutImplementor extends MethodMappingImplementor
 		int l= result.length;
 		if (result == Binding.NO_PARAMETERS || l == 0)
 			return result;
-		System.arraycopy(result, 0, result= new TypeBinding[l], 0, l);
 		TypeVariableBinding[] variables= wrapperMethod.binding.typeVariables();
-		for (int i = 0; i < result.length; i++)
-			result[i] = substituteVariables(result[i], variables);
+		if (variables != Binding.NO_TYPE_VARIABLES) {
+			System.arraycopy(result, 0, result= new TypeBinding[l], 0, l);
+			for (int i = 0; i < result.length; i++)
+				result[i] = substituteVariables(result[i], variables);
+		}
 		return result;
 	}
 
