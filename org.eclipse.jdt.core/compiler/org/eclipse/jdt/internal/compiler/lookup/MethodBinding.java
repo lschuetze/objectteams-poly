@@ -523,9 +523,12 @@ public final boolean canBeSeenBy(TypeBinding receiverType, InvocationSite invoca
     receiverType = receiverType.leafComponentType();
 
     // strip off RoleTypeBinding for determining visibility
-    ReferenceBinding receiverClass = ((ReferenceBinding)receiverType).getRealClass();
-    receiverType = ((ReferenceBinding)receiverType).getRealType();
-
+    ReferenceBinding receiverClass = null;
+    if (receiverType.isRole()) {
+    	receiverClass = ((ReferenceBinding)receiverType).getRealClass();
+    	receiverType = ((ReferenceBinding)receiverType).getRealType();
+    }
+	
     // short-cut for generated methods (here: callin wrappers)
 	if (scope.methodScope() != null && scope.methodScope().isCallinWrapper())
 		if (   !isPrivate()
@@ -535,11 +538,11 @@ public final boolean canBeSeenBy(TypeBinding receiverType, InvocationSite invoca
 			return true;
 		}
 // SH}
-//{ObjectTeams: use receiverClass:
+//{ObjectTeams: use receiverClass, if available
 /* orig:
 	if (TypeBinding.equalsEquals(invocationType, this.declaringClass) && TypeBinding.equalsEquals(invocationType, receiverType)) return true;
   :giro */
-	if (TypeBinding.equalsEquals(invocationType, this.declaringClass) && TypeBinding.equalsEquals(invocationType, receiverClass)) return true;
+	if (TypeBinding.equalsEquals(invocationType, this.declaringClass) && TypeBinding.equalsEquals(invocationType, receiverClass != null ? receiverClass : receiverType)) return true;
 // SH}
 
 	if (invocationType == null) // static import call
@@ -564,7 +567,8 @@ public final boolean canBeSeenBy(TypeBinding receiverType, InvocationSite invoca
 /* orig:
 		TypeBinding receiverErasure = receiverType.erasure();
   :giro*/
-		TypeBinding receiverErasure = receiverClass.erasure();
+		TypeBinding receiverErasure = receiverClass != null ? receiverClass.erasure() 
+									: receiverType.erasure();
 // SH}
 		ReferenceBinding declaringErasure = (ReferenceBinding) this.declaringClass.erasure();
 		int depth = 0;
@@ -645,7 +649,8 @@ public final boolean canBeSeenBy(TypeBinding receiverType, InvocationSite invoca
 /* orig:
 	ReferenceBinding currentType = (ReferenceBinding) (receiverType);
   :giro */
-	ReferenceBinding currentType = receiverClass;
+	ReferenceBinding currentType = receiverClass != null ? receiverClass
+									: (ReferenceBinding) receiverType;
 // SH}
 	do {
 		if (currentType.isCapture()) { // https://bugs.eclipse.org/bugs/show_bug.cgi?id=285002

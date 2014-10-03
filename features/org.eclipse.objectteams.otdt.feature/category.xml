@@ -53,4 +53,7 @@
    <iu id="org.eclipse.objectteams.otequinox.feature.group" range="[2.3.0,2.4.0)">
       <category name="org.eclipse.objectteams.otdt_2.3"/>
    </iu>
+   <iu id="org.eclipse.objectteams.otequinox.turbo.feature.group" range="[2.3.0,2.4.0)">
+      <category name="org.eclipse.objectteams.otdt_2.3"/>
+   </iu>
 </site>

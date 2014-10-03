@@ -24,6 +24,9 @@ import org.eclipse.core.runtime.IExtensionRegistry;
 import org.eclipse.core.runtime.ILog;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
+import org.eclipse.equinox.log.ExtendedLogReaderService;
+import org.eclipse.equinox.log.ExtendedLogService;
+import org.eclipse.equinox.log.Logger;
 import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.objectteams.internal.osgi.weaving.AspectBinding;
 import org.eclipse.objectteams.internal.osgi.weaving.AspectBindingRegistry;
@@ -40,6 +43,7 @@ import org.osgi.framework.ServiceListener;
 import org.osgi.framework.ServiceReference;
 import org.osgi.framework.hooks.weaving.WeavingHook;
 import org.osgi.framework.hooks.weaving.WovenClassListener;
+import org.osgi.util.tracker.ServiceTracker;
 
 public class TransformerPlugin implements BundleActivator, IAspectRegistry {
 
@@ -100,9 +104,25 @@ public class TransformerPlugin implements BundleActivator, IAspectRegistry {
 	@SuppressWarnings("restriction")
 	private static void acquireLog(BundleContext bundleContext) {
 		try {
-			TransformerPlugin.log = org.eclipse.core.internal.runtime.InternalPlatform.getDefault().getLog(bundleContext.getBundle());
+			log = org.eclipse.core.internal.runtime.InternalPlatform.getDefault().getLog(bundleContext.getBundle());
 		} catch (NullPointerException npe) {
-			// WTF?
+			// in case InternalPlatform isn't initialized yet, perform the same tasks manually:
+
+			ServiceTracker<ExtendedLogService,ExtendedLogService> tracker
+					= new ServiceTracker<ExtendedLogService,ExtendedLogService>(context, ExtendedLogService.class, null);
+			tracker.open();
+			ExtendedLogService logService = tracker.getService();
+			Bundle bundle = bundleContext.getBundle();
+			Logger logger = logService == null ? null 
+					: logService.getLogger(bundle, org.eclipse.core.internal.runtime.PlatformLogWriter.EQUINOX_LOGGER_NAME);
+			org.eclipse.core.internal.runtime.Log result = new org.eclipse.core.internal.runtime.Log(bundle, logger);
+
+			ServiceTracker<ExtendedLogReaderService, ExtendedLogReaderService> logReaderTracker 
+					= new ServiceTracker<ExtendedLogReaderService,ExtendedLogReaderService>(context, ExtendedLogReaderService.class.getName(), null);
+			logReaderTracker.open();
+			ExtendedLogReaderService logReader = logReaderTracker.getService();
+			logReader.addLogListener(result, result);
+			log = result;
 		}
 	}
 
@@ -146,9 +166,14 @@ public class TransformerPlugin implements BundleActivator, IAspectRegistry {
 
 	public static synchronized void log (Throwable ex, String msg) {
 		msg = "OT/Equinox: "+msg;
-		System.err.println(msg);
-		ex.printStackTrace();
-		pendingLogEntries.add(new Status(IStatus.ERROR, TRANSFORMER_PLUGIN_ID, msg, ex));
+		Status status = new Status(IStatus.ERROR, TRANSFORMER_PLUGIN_ID, msg, ex);
+		if (log != null) {
+			log.log(status);
+		} else {
+			System.err.println(msg);
+			ex.printStackTrace();
+			pendingLogEntries.add(status);
+		}
 	}
 	
 	public static void log(int status, String msg) {
@@ -156,15 +181,12 @@ public class TransformerPlugin implements BundleActivator, IAspectRegistry {
 			doLog(status, msg);
 	}
 
-	public static synchronized void doLog(int status, String msg) {
-		msg = "OT/Equinox: "+msg;
-		try {
-// this seems to cause java.lang.NoClassDefFoundError: org/eclipse/ui/statushandlers/StatusAdapter etc.
-//		if (log == null) acquireLog(context);
-			pendingLogEntries.add(new Status(status, TRANSFORMER_PLUGIN_ID, msg));
-		} catch (NoClassDefFoundError e) {
-			System.err.println("OT/Euqinox (not ready for logging): "+msg);
-		}
+	public static synchronized void doLog(int level, String msg) {
+		Status status = new Status(level, TRANSFORMER_PLUGIN_ID, "OT/Equinox: "+msg);
+		if (log != null)
+			log.log(status);
+		else
+			pendingLogEntries.add(status);
 	}
 	
 	public static void flushLog() {
@@ -202,7 +224,7 @@ public class TransformerPlugin implements BundleActivator, IAspectRegistry {
 	 * public API:
 	 * {@link IAspectRegistry#getAdaptingAspectPlugins(Bundle)} 
 	 */
-	public @NonNull String[] getAdaptingAspectPlugins(Bundle basePlugin) {
+	public @NonNull String[] getAdaptingAspectPlugins(@NonNull Bundle basePlugin) {
 		return getAdaptingAspectPlugins(basePlugin.getSymbolicName());
 	}
 
@@ -232,17 +254,17 @@ public class TransformerPlugin implements BundleActivator, IAspectRegistry {
 	}
 
 	@Override
-	public boolean isAdaptedBasePlugin(String baseBundleName) {
+	public boolean isAdaptedBasePlugin(@NonNull String baseBundleName) {
 		return this.aspectBindingRegistry.isAdaptedBasePlugin(baseBundleName);
 	}
 
 	@Override
-	public String[] getAdaptedBasePlugins(Bundle aspectBundle) {
+	public String[] getAdaptedBasePlugins(@NonNull Bundle aspectBundle) {
 		return this.aspectBindingRegistry.getAdaptedBasePlugins(aspectBundle);
 	}
 
 	@Override
-	public boolean hasInternalTeams(Bundle bundle) {
+	public boolean hasInternalTeams(@NonNull Bundle bundle) {
 		// TODO Auto-generated method stub
 		return false;
 	}

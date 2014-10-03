@@ -16,7 +16,7 @@
  **********************************************************************/
 package org.eclipse.objectteams.otequinox;
 
-import org.eclipse.jdt.annotation.NonNull;
+import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
 import org.osgi.framework.Bundle;
 
@@ -27,6 +27,7 @@ import org.osgi.framework.Bundle;
  * @author stephan
  * @since OTDT 1.1.4
  */
+@NonNullByDefault
 public interface IAspectRegistry {
 
 	/** Are we running within the OTDT? */
@@ -40,7 +41,7 @@ public interface IAspectRegistry {
 	 * @param basePlugin base plugin.
 	 * @return non-null array of symbolic names of aspect plugins.
  	 */
-	public @NonNull String[] getAdaptingAspectPlugins(Bundle baseBundle);
+	public String[] getAdaptingAspectPlugins(Bundle baseBundle);
 
 	/**
 	 *  Get the plugin IDs of all base plugins adapted by this aspect plugin.
@@ -63,5 +64,5 @@ public interface IAspectRegistry {
 	 * @param symbolicName
 	 * @return
 	 */
-	public boolean isDeniedAspectPlugin(@NonNull String symbolicName);
+	public boolean isDeniedAspectPlugin(String symbolicName);
 }

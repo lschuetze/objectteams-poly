@@ -27,6 +27,7 @@ import org.eclipse.core.runtime.IStatus;
 import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
+import org.eclipse.objectteams.internal.osgi.weaving.AspectBinding.BaseBundle;
 import org.eclipse.objectteams.internal.osgi.weaving.AspectBinding.TeamBinding;
 import org.eclipse.objectteams.internal.osgi.weaving.Util.ProfileKind;
 import org.eclipse.objectteams.otequinox.ActivationKind;
@@ -70,9 +71,9 @@ public class TeamLoader {
 	 * Team loading, 1st attempt before the base class is even loaded
 	 * Trying to do these phases: load (now) instantiate/activate (if ready),
 	 */
-	public void loadTeamsForBase(Bundle aspectBundle, AspectBinding aspectBinding, WovenClass baseClass, AspectPermissionManager permissionManager) {
+	public void loadTeamsForBase(BaseBundle baseBundle, WovenClass baseClass, AspectPermissionManager permissionManager) {
 		@SuppressWarnings("null")@NonNull String className = baseClass.getClassName();
-		Collection<TeamBinding> teamsForBase = aspectBinding.getTeamsForBase(className);
+		Collection<TeamBinding> teamsForBase = baseBundle.teamsPerBase.get(className);
 		if (teamsForBase == null) 
 			return; // not done
 
@@ -81,16 +82,24 @@ public class TeamLoader {
 
 		// ==== check permissions before we start activating:
 		if (permissionManagerReady) { // otherwise we will register pending obligations below.
-			if (permissionManager.checkAspectPermissionDenial(aspectBundle, aspectBinding, teamsForBase))
-				return;
+			Set<TeamBinding> deniedTeams = permissionManager.checkAspectPermissionDenial(teamsForBase);
+			if (!deniedTeams.isEmpty()){
+				for (WaitingTeamRecord rec : new ArrayList<>(this.deferredTeams))
+					if (deniedTeams.contains(rec.team))
+						this.deferredTeams.remove(rec);
+			}
 		}
 		
 		List<Team> teamInstances = new ArrayList<>();
 		for (TeamBinding teamForBase : teamsForBase) {
 			if (teamForBase.isActivated) continue;
+			if (teamForBase.hasBeenDenied()) {
+				log(IStatus.WARNING, "Not activating team "+teamForBase.teamName+" due to denied permissions.");
+				continue;
+			}
 			// Load:
 			Class<? extends Team> teamClass;
-			teamClass = teamForBase.loadTeamClass(aspectBundle);
+			teamClass = teamForBase.loadTeamClass();
 			if (teamClass == null) {
 				log(new ClassNotFoundException("Not found: "+teamForBase), "Failed to load team "+teamForBase);
 				continue;
@@ -98,13 +107,13 @@ public class TeamLoader {
 			// Try to instantiate & activate, failures are recorded in deferredTeams
 			ActivationKind activationKind = teamForBase.getActivation();
 			if (activationKind == ActivationKind.NONE) {
-				teamForBase = aspectBinding.getOtherTeamToActivate(teamForBase);
+				teamForBase = teamForBase.getOtherTeamToActivate();
 				if (teamForBase != null) {
 					if (teamForBase.isActivated) continue;
 					activationKind = teamForBase.getActivation();
-					teamClass = teamForBase.loadTeamClass(aspectBundle);
+					teamClass = teamForBase.loadTeamClass();
 					if (teamClass == null) {
-						log(new ClassNotFoundException("Not found: "+teamForBase.teamName+" in bundle "+aspectBundle.getSymbolicName()), "Failed to load team "+teamForBase);
+						log(new ClassNotFoundException("Not found: "+teamForBase.teamName+" in bundle "+teamForBase.getAspectBinding().aspectPlugin), "Failed to load team "+teamForBase);
 						continue;						
 					}
 				} else {
@@ -113,13 +122,13 @@ public class TeamLoader {
 			}
 			if (activationKind == ActivationKind.NONE) 
 				continue;
-			Team instance = instantiateAndActivate(aspectBinding, teamForBase, activationKind);
+			Team instance = instantiateAndActivate(teamForBase.getAspectBinding(), teamForBase, activationKind);
 			if (instance != null)
 				teamInstances.add(instance);
 		}
 
 		if (!permissionManagerReady)
-			permissionManager.addBaseBundleObligations(teamInstances, teamsForBase, aspectBundle, aspectBinding.baseBundle);
+			permissionManager.addBaseBundleObligations(teamInstances, teamsForBase, baseBundle);
 	}
 
 	public static @Nullable Pair<URL,String> findTeamClassResource(String className, Bundle bundle) {
@@ -206,6 +215,21 @@ public class TeamLoader {
 					break;
 				}
 				if (Util.PROFILE) Util.profile(time, ProfileKind.Activation, teamName);
+			} catch (NoClassDefFoundError e) {
+				try { // clean up:
+					switch (activationKind) {
+					case ALL_THREADS: instance.deactivate(Team.ALL_THREADS); break;
+					case THREAD: instance.deactivate(); break;
+					default: break;
+					}
+				} catch (Throwable t) { /* ignore */ }
+				for (TeamBinding eq : team.equivalenceSet)
+					eq.isActivated = false;
+				@SuppressWarnings("null") @NonNull // known API
+				String notFoundName = e.getMessage().replace('/', '.');
+				synchronized (this.deferredTeams) {
+					this.deferredTeams.add(new WaitingTeamRecord(team, activationKind, notFoundName));
+				}
 			} catch (Throwable t) {
 				// application errors during activation
 				log(t, "Failed to activate team "+teamName);
@@ -225,7 +249,7 @@ public class TeamLoader {
 		for (@SuppressWarnings("null")@NonNull String baseclass : team.baseClassNames) {
 			if (this.beingDefined.contains(baseclass)) {
 				synchronized (deferredTeams) {
-					WaitingTeamRecord record = new WaitingTeamRecord(team, aspectBinding, activationKind, baseclass);
+					WaitingTeamRecord record = new WaitingTeamRecord(team, activationKind, baseclass);
 					deferredTeams.add(record);
 				}
 				log(IStatus.INFO, "Defer instantation/activation of team "+teamName);

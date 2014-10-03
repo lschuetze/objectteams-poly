@@ -19,8 +19,10 @@
 <project reference="1.0,git://git.eclipse.org/gitroot/objectteams/org.eclipse.objectteams.git,master,plugins/org.eclipse.objectteams.otdt.ui"/>
 <project reference="1.0,git://git.eclipse.org/gitroot/objectteams/org.eclipse.objectteams.git,master,plugins/org.eclipse.objectteams.otdt.ui.help"/>
 <project reference="1.0,git://git.eclipse.org/gitroot/objectteams/org.eclipse.objectteams.git,master,plugins/org.eclipse.objectteams.otequinox"/>
+<project reference="1.0,git://git.eclipse.org/gitroot/objectteams/org.eclipse.objectteams.git,master,plugins/org.eclipse.objectteams.otequinox.turbo"/>
 <project reference="1.0,git://git.eclipse.org/gitroot/objectteams/org.eclipse.objectteams.git,master,plugins/org.eclipse.objectteams.otequinox.branding"/>
 <project reference="1.0,git://git.eclipse.org/gitroot/objectteams/org.eclipse.objectteams.git,master,features/org.eclipse.objectteams.otequinox.feature"/>
+<project reference="1.0,git://git.eclipse.org/gitroot/objectteams/org.eclipse.objectteams.git,master,features/org.eclipse.objectteams.otequinox.turbo.feature"/>
 <project reference="1.0,git://git.eclipse.org/gitroot/objectteams/org.eclipse.objectteams.git,master,plugins/org.eclipse.objectteams.otre"/>
 <project reference="1.0,git://git.eclipse.org/gitroot/objectteams/org.eclipse.objectteams.git,master,plugins/org.eclipse.objectteams.otredyn"/>
 <project reference="1.0,git://git.eclipse.org/gitroot/objectteams/org.eclipse.objectteams.git,master,plugins/org.eclipse.objectteams.runtime"/>

@@ -8,18 +8,22 @@
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
  * 
- * Please visit http://www.objectteams.org for updates and contact.
+ * Please visit http://www.eclipse.org/objectteams for updates and contact.
  * 
  * Contributors:
  * 	Stephan Herrmann - Initial API and implementation
  **********************************************************************/
 package org.eclipse.objectteams.internal.osgi.weaving;
 
+import static org.eclipse.objectteams.otequinox.Constants.LIFTING_PARTICIPANT_EXTPOINT_ID;
+import static org.eclipse.objectteams.otequinox.Constants.TRANSFORMER_PLUGIN_ID;
+import static org.eclipse.objectteams.otequinox.Constants.ORG_OBJECTTEAMS_TEAM;
 import static org.eclipse.objectteams.otequinox.TransformerPlugin.log;
 
 import java.io.IOException;
 import java.io.InputStream;
 import java.lang.instrument.IllegalClassFormatException;
+import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -28,6 +32,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+import org.eclipse.core.runtime.IConfigurationElement;
 import org.eclipse.core.runtime.IExtensionRegistry;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.jdt.annotation.NonNull;
@@ -66,11 +71,15 @@ import org.osgi.resource.Wire;
  */
 public class OTWeavingHook implements WeavingHook, WovenClassListener {
 
+
 	// TODO: this master-switch, which selects the weaver, should probably be replaced by s.t. else?
 	boolean useDynamicWeaver = "dynamic".equals(System.getProperty("ot.weaving"));
 	
 	// TODO: temporary switch to fall back to coarse grain checking:
 	boolean skipBaseClassCheck = "skip".equals(System.getProperty("otequinox.baseClassChecks"));
+
+	// for installing a lifting participant:
+	private static final String LIFTING_PARTICIPANT_FIELD = "_OT$liftingParticipant";
 
 	enum WeavingReason { None, Aspect, Base, Thread }
 	
@@ -89,6 +98,10 @@ public class OTWeavingHook implements WeavingHook, WovenClassListener {
 	private @NonNull ASMByteCodeAnalyzer byteCodeAnalyzer = new ASMByteCodeAnalyzer();
 
 	private AspectPermissionManager permissionManager;
+
+	/** A registered lifting participant is directly handled by us. */
+	private @Nullable IConfigurationElement liftingParticipantConfig;
+	private @Nullable Class<?> ooTeam;
 
 	/** Call-back once the extension registry is up and running. */
 	public void activate(BundleContext bundleContext, ServiceReference<IExtensionRegistry> serviceReference) {
@@ -119,6 +132,8 @@ public class OTWeavingHook implements WeavingHook, WovenClassListener {
 			permissionManager.loadAspectBindingNegotiators(extensionRegistry);
 
 			aspectBindingRegistry.loadAspectBindings(extensionRegistry, packageAdmin, this);
+
+			loadLiftingParticipant(extensionRegistry);
 		}
 	}
 
@@ -127,6 +142,35 @@ public class OTWeavingHook implements WeavingHook, WovenClassListener {
 		if (manager == null)
 			throw new NullPointerException("Missing AspectPermissionManager");
 		return manager;
+	}
+
+	/* Load extension for org.eclipse.objectteams.otequinox.liftingParticipant. */
+	private void loadLiftingParticipant(IExtensionRegistry extensionRegistry) {
+		IConfigurationElement[] liftingParticipantConfigs = extensionRegistry.getConfigurationElementsFor(
+				TRANSFORMER_PLUGIN_ID, LIFTING_PARTICIPANT_EXTPOINT_ID);
+		
+		if (liftingParticipantConfigs.length != 1) {
+			if (liftingParticipantConfigs.length > 1)
+				log(IStatus.ERROR, "Cannot install more than one lifting participant.");
+			return;
+		}
+		this.liftingParticipantConfig = liftingParticipantConfigs[0];
+		installLiftingParticipant();
+	}
+	
+	private void installLiftingParticipant() {
+		Class<?> teamClass = this.ooTeam;
+		IConfigurationElement config = this.liftingParticipantConfig;
+		if (teamClass != null && config != null) {
+			try {
+				Field field = teamClass.getDeclaredField(LIFTING_PARTICIPANT_FIELD); // field name cannot be mentioned in source
+				field.set(null, config.createExecutableExtension(Constants.CLASS));
+				log(IStatus.INFO, "Registered Lifting Participant from "+config.getContributor().getName());
+			} catch (Exception e) {
+				log(e, "Failed to install lifting participant from "+config.getContributor().getName());
+			}
+			this.liftingParticipantConfig = null; // signal done
+		}
 	}
 
 	// ====== Base Bundle Trip Wires: ======
@@ -142,14 +186,19 @@ public class OTWeavingHook implements WeavingHook, WovenClassListener {
 			baseTripWires.put(baseBundleId, new BaseBundleLoadTrigger(baseBundleId, baseBundle, aspectBindingRegistry, packageAdmin));
 	}
 
-	/** Check if the given base bundle / base class mandate any loading/instantiation/activation of teams. */
-	void triggerBaseTripWires(@Nullable String bundleName, @NonNull WovenClass baseClass) {
+	/**
+	 * Check if the given base bundle / base class mandate any loading/instantiation/activation of teams.
+	 * @return true if all involved aspect bindings have been denied (permissions).
+	 */
+	boolean triggerBaseTripWires(@Nullable String bundleName, @NonNull WovenClass baseClass) {
 		BaseBundleLoadTrigger activation = baseTripWires.get(bundleName);
 		if (activation != null) {
 			activation.fire(baseClass, beingDefined, this);
 			if (activation.isDone())
 				baseTripWires.remove(bundleName);
+			return activation.areAllAspectsDenied();
 		}
+		return false;
 	}
 
 	// ====== Main Weaving Entry: ======
@@ -176,11 +225,13 @@ public class OTWeavingHook implements WeavingHook, WovenClassListener {
 			WeavingReason reason = requiresWeaving(bundleWiring, className, bytes);
 			if (reason != WeavingReason.None) {
 				// do whatever is needed *before* loading this class:
-				triggerBaseTripWires(bundleName, wovenClass);
-				if (reason == WeavingReason.Thread) {
+				boolean allAspectsAreDenied = triggerBaseTripWires(bundleName, wovenClass);
+				if (reason == WeavingReason.Base && allAspectsAreDenied) {
+					return; // don't weave for denied bindings
+				} else if (reason == WeavingReason.Thread) {
 					BaseBundle baseBundle = this.aspectBindingRegistry.getBaseBundle(bundleName);
 					BaseBundleLoadTrigger.addOTREImport(baseBundle, bundleName, wovenClass, this.useDynamicWeaver);
-				}
+				} 
 
 				long time = 0;
 
@@ -222,7 +273,7 @@ public class OTWeavingHook implements WeavingHook, WovenClassListener {
 		if (aspectBindings != null && !aspectBindings.isEmpty()) {
 			// potential base class: look deeper:
 			for (AspectBinding aspectBinding : aspectBindings) {
-				if (!aspectBinding.hasScannedTeams)
+				if (!aspectBinding.hasScannedTeams && !aspectBinding.hasBeenDenied)
 					return WeavingReason.Base; // we may be first, go ahead and trigger the trip wire
 			}
 			if (isAdaptedBaseClass(aspectBindings, className, bytes, bundleWiring.getClassLoader()))
@@ -251,7 +302,7 @@ public class OTWeavingHook implements WeavingHook, WovenClassListener {
 
 		try {
 			for (AspectBinding aspectBinding : aspectBindings) {
-				if (aspectBinding.allBaseClassNames.contains(className))
+				if (aspectBinding.allBaseClassNames.contains(className) && !aspectBinding.hasBeenDenied)
 					return true;					
 			}
 			// attempt recursion to superclass (not superInterfaces atm):
@@ -344,6 +395,10 @@ public class OTWeavingHook implements WeavingHook, WovenClassListener {
 	@Override
 	public void modified(WovenClass wovenClass) {
 		if (wovenClass.getState() == WovenClass.DEFINED) {
+			if (wovenClass.getClassName().equals(ORG_OBJECTTEAMS_TEAM)) {
+				this.ooTeam = wovenClass.getDefinedClass();
+				installLiftingParticipant();
+			}
 			beingDefined.remove(wovenClass.getClassName());
 			@SuppressWarnings("null") @NonNull String className = wovenClass.getClassName();
 			instantiateScheduledTeams(className);

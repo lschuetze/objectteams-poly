@@ -112,7 +112,7 @@ class AsmWritableBoundClass extends AsmBoundClass {
 		
 		reader = new ClassReader(allocateAndGetBytecode());
 
-		writer = new ClassWriter(reader, ClassWriter.COMPUTE_FRAMES);
+		writer = new LoaderAwareClassWriter(reader, ClassWriter.COMPUTE_FRAMES, this.loader);
 		multiAdapter = new MultiClassAdapter(writer);
 		nodes = new ArrayList<AbstractTransformableClassNode>();
 		isTransformationActive = true;
@@ -141,7 +141,7 @@ class AsmWritableBoundClass extends AsmBoundClass {
 			reader = new ClassReader(allocateAndGetBytecode());
 			reader.accept(node, ClassReader.SKIP_FRAMES);
 			if (node.transform()) {
-				writer = new ClassWriter(reader, ClassWriter.COMPUTE_FRAMES);
+				writer = new LoaderAwareClassWriter(reader, ClassWriter.COMPUTE_FRAMES, this.loader);
 				node.accept(writer);
 				setBytecode(writer.toByteArray());
 			}
@@ -383,6 +383,13 @@ class AsmWritableBoundClass extends AsmBoundClass {
 		if (isTeam() || isRole())
 			multiAdapter.addVisitor(new AddImplicitActivationAdapter(this.writer, this));
 		AddGlobalTeamActivationAdapter.checkAddVisitor(this.multiAdapter, this.writer);
+	}
+
+	@Override
+	protected void prepareLiftingParticipant() {
+		if (isTeam() && LiftingParticipantAdapter.isLiftingParticipantConfigured(this.loader)) {
+			multiAdapter.addVisitor(new LiftingParticipantAdapter(this.writer));
+		}
 	}
 
 	/**

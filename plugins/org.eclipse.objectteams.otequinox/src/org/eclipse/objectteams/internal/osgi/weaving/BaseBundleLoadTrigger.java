@@ -104,10 +104,15 @@ public class BaseBundleLoadTrigger {
 				if (!useDynamicWeaver) // OTDRE access aspects by generic interface in o.o.Team
 					aspectBinding.addImports(baseClass);
 
-				// (4) try optional steps:
-				TeamLoader loading = new TeamLoader(deferredTeamClasses, beingDefined, useDynamicWeaver);
-				loading.loadTeamsForBase(aspectBundle, aspectBinding, baseClass, hook.getAspectPermissionManager());
 			}
+		}
+		// (4) try optional steps concerning all teams for this base (across all involved aspect bindings):
+		TeamLoader loading = new TeamLoader(deferredTeamClasses, beingDefined, useDynamicWeaver);
+		final BaseBundle baseBundle3 = this.baseBundle;
+		if (baseBundle3 != null) {
+			loading.loadTeamsForBase(baseBundle3, baseClass, hook.getAspectPermissionManager());
+		} else {
+			// FIXME: handle SELF adapting aspect binding!! (perhaps using a special kind of BaseBundle??
 		}
 
 		// if some had to be deferred collect them now:
@@ -141,6 +146,13 @@ public class BaseBundleLoadTrigger {
 	public boolean isDone() {
 		for (AspectBinding binding : aspectBindings)
 			if (!binding.isDone())
+				return false;
+		return true;
+	}
+
+	public boolean areAllAspectsDenied() {
+		for (AspectBinding binding : aspectBindings)
+			if (!binding.hasBeenDenied)
 				return false;
 		return true;
 	}

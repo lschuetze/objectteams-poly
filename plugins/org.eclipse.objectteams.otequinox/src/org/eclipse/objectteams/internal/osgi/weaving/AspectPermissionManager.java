@@ -20,17 +20,13 @@ import static org.eclipse.objectteams.otequinox.AspectPermission.GRANT;
 import static org.eclipse.objectteams.otequinox.AspectPermission.UNDEFINED;
 import static org.eclipse.objectteams.otequinox.TransformerPlugin.log;
 
+import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Properties;
-import java.util.Set;
+import java.util.*;
 
 import org.eclipse.core.internal.runtime.InternalPlatform;
 import org.eclipse.core.runtime.CoreException;
@@ -91,6 +87,8 @@ public class AspectPermissionManager {
 	private static final String GRANTED_FORCED_EXPORTS_FILE = "grantedForcedExports.txt";
 	private static final String DENIED_FORCED_EXPORTS_FILE  = "deniedForcedExports.txt";
 
+	private static final String GRANTED_TEAMS_FILE = "grantedTeams.txt";
+	private static final String DENIED_TEAMS_FILE  = "deniedTeams.txt";
 
 	// set of aspect plug-ins for which some permission has been denied:
 	private Set<String> deniedAspects = new HashSet<String>();
@@ -104,8 +102,8 @@ public class AspectPermissionManager {
 	
 	// collect all forced exports (denied/granted), granted should balance to an empty structure.
 	// structure is: aspect-id -> (base bundle x base package)*
-	private HashMap<String, ArrayList<String[]>> deniedForcedExportsByAspect= new HashMap<String, ArrayList<String[]>>();
-	private HashMap<String, ArrayList<String[]>> grantedForcedExportsByAspect= new HashMap<String, ArrayList<String[]>>();
+	private HashMap<String, List<String[]>> deniedForcedExportsByAspect= new HashMap<String, List<String[]>>();
+	private HashMap<String, List<String[]>> grantedForcedExportsByAspect= new HashMap<String, List<String[]>>();
 	
 	// key is aspectId+"->"+baseId, value is array of team names
 	private HashMap<String, Set<String>> deniedTeamsByAspectBinding = new HashMap<String, Set<String>>();
@@ -119,11 +117,14 @@ public class AspectPermissionManager {
 	@SuppressWarnings("deprecation")
 	@Nullable private org.osgi.service.packageadmin.PackageAdmin packageAdmin;
 	
+	private ForcedExportsDelegate forcedExportsDelegate;
+	
 	public AspectPermissionManager(Bundle bundle, 
 			@SuppressWarnings("deprecation") @Nullable org.osgi.service.packageadmin.PackageAdmin packageAdmin)
 	{
 		this.transformerBundle = bundle;
 		this.packageAdmin = packageAdmin;
+		this.forcedExportsDelegate = new ForcedExportsDelegate();
 	}
 
 	/* local cache for isReady(): */
@@ -169,72 +170,6 @@ public class AspectPermissionManager {
 		}
 	}
 
-	private void internalFetchAspectBindingPermssionsFromWorkspace(IPath state) {
-		// defaults:
-		IPath configFilePath = state.append(NEGOTIATION_DEFAULTS_FILE);
-		File configFile = new File(configFilePath.toOSString());		
-		if (configFile.exists()) {
-			Properties props = new Properties();
-			try {
-				try (FileInputStream inStream = new FileInputStream(configFile)) {
-					props.load(inStream);
-				}
-				String value = (String) props.get(ASPECT_BINDING_DEFAULT);
-				if (value != null)
-					try {
-						defaultAspectBindingPermission = AspectPermission.valueOf(value); // known API of all enums
-					} catch (IllegalArgumentException iae) {
-						defaultAspectBindingPermission = AspectPermission.DENY;
-						log(iae, "Cannot set default aspect permission from file "+NEGOTIATION_DEFAULTS_FILE+", assuming DENY.");
-					}
-				value = (String) props.get(FORCED_EXPORT_DEFAULT);
-				if (value != null)
-					try {
-						defaultForcedExportPermission = AspectPermission.valueOf(value); // known API of all enums
-					} catch (IllegalArgumentException iae) {
-						defaultForcedExportPermission = AspectPermission.DENY;
-						log(iae, "Cannot set default forced exports permission from file "+NEGOTIATION_DEFAULTS_FILE+", assuming DENY.");
-					}
-			} catch (IOException ioex) {
-				log(ioex, "Failed to read configuration file "+configFilePath.toOSString());
-			}
-		} else {
-			try {
-				File stateDir = new File(state.toOSString());
-				if (!stateDir.exists())
-					stateDir.mkdirs();
-				configFile.createNewFile();
-				writeNegotiationDefaults(configFile);
-			} catch (IOException ioex) {
-				log(ioex, "Failed to create configuration file "+configFilePath.toOSString());
-			}
-		}
-		
-//		// explicitly denied:
-//		configFilePath = this.otequinoxState.append(DENIED_FORCED_EXPORTS_FILE);
-//		configFile = new File(configFilePath.toOSString());
-//		if (configFile.exists())
-//			HookConfigurator.parseForcedExportsFile(configFile, DENY);
-		
-//		// explicitly granted:
-//		configFilePath = this.otequinoxState.append(GRANTED_FORCED_EXPORTS_FILE);
-//		configFile = new File(configFilePath.toOSString());
-//		if (configFile.exists())
-//			HookConfigurator.parseForcedExportsFile(configFile, GRANT);
-	}
-
-	private void writeNegotiationDefaults(File configFile)
-			throws IOException 
-	{
-		try (FileWriter writer = new FileWriter(configFile)) {
-			writer.append(ASPECT_BINDING_DEFAULT+'='+defaultAspectBindingPermission.toString()+'\n');
-			writer.append(FORCED_EXPORT_DEFAULT+'='+defaultForcedExportPermission.toString()+'\n');
-			writer.flush();
-		}
-		log(IStatus.INFO, "Created aspect binding defaults file "+configFile.getCanonicalPath());
-	}
-
-		
 	/** Load extensions for EP org.eclipse.objectteams.otequinox.aspectBindingNegotiators. */
 	public void loadAspectBindingNegotiators(IExtensionRegistry extensionRegistry) {
 		IConfigurationElement[] aspectBindingNegotiatorsConfigs = extensionRegistry.getConfigurationElementsFor(
@@ -269,13 +204,25 @@ public class AspectPermissionManager {
      * @param forcedExports any forced exports requested in this aspect binding.
 	 * @return whether all requests (if any) have been granted
 	 */
-	public boolean checkForcedExports(String aspectId, String baseBundleId, @Nullable IConfigurationElement[] forcedExports) 
-	{
+	public boolean checkForcedExports(AspectBinding aspectBinding) {
+		switch (aspectBinding.forcedExportsPermission) {
+			case GRANT: return true;
+			case DENY: return false;
+			case UNDEFINED: 
+				aspectBinding.forcedExportsPermission = internalCheckForcedExports(aspectBinding);
+				return aspectBinding.forcedExportsPermission == GRANT;
+		}
+		return true;
+	}
+	private AspectPermission internalCheckForcedExports(AspectBinding aspectBinding) {
+		IConfigurationElement[] forcedExports = aspectBinding.forcedExports;
 		if (forcedExports == null || forcedExports.length == 0)
-			return true;
+			return GRANT;
 		
-		ArrayList<String[]> deniedForcedExports = getConfiguredForcedExports(aspectId, DENY,  deniedForcedExportsByAspect);
-		ArrayList<String[]> grantedForcedExports= getConfiguredForcedExports(aspectId, GRANT, grantedForcedExportsByAspect);
+		String aspectId = aspectBinding.aspectPlugin;
+		String baseBundleId = aspectBinding.basePluginName; 
+		List<String[]> deniedForcedExports = getConfiguredForcedExports(aspectId, DENY,  deniedForcedExportsByAspect);
+		List<String[]> grantedForcedExports= getConfiguredForcedExports(aspectId, GRANT, grantedForcedExportsByAspect);
 
 		// iterate all requested forcedExports to search for a matching permission:
 		for (IConfigurationElement forcedExport : forcedExports) { // [0..1] (as defined in the schema)
@@ -295,7 +242,7 @@ public class AspectPermissionManager {
 					log(IStatus.ERROR, "Default denial of forced export regarding package "+singleForcedExportRequest+
 									   " from bundle "+baseBundleId+" as requested by bundle "+aspectId+"; bundle not activated");
 					this.deniedAspects.add(aspectId); // keep for answering the TransformerHook.
-					return false; // NOPE!					
+					return DENY; // NOPE!					
 				}
 				
 				// DENY from configuration?
@@ -304,7 +251,7 @@ public class AspectPermissionManager {
 					log(IStatus.ERROR, "Explicit denial of forced export regarding package "+singleForcedExportRequest+
 									   " from bundle "+baseBundleId+" as requested by bundle "+aspectId+"; bundle not activated");
 					this.deniedAspects.add(aspectId); // keep for answering the TransformerHook.
-					return false; // NOPE!
+					return DENY; // NOPE!
 				}
 
 				// GRANT from configuration?
@@ -350,13 +297,13 @@ public class AspectPermissionManager {
 									   ": "+singleForcedExportRequest+" (from bundle "+baseBundleId+")"+
 									   ". Aspect is not activated.");
 					this.deniedAspects.add(aspectId); // keep for answering the TransformerHook.
-					return false; // don't install illegal aspect
+					return DENY; // don't install illegal aspect
 				}
 			}
 		}
 		if (!grantedForcedExports.isEmpty())
 			reportUnmatchForcedExports(aspectId, grantedForcedExports);
-		return true;
+		return GRANT;
 	}
 
 	/**
@@ -368,22 +315,20 @@ public class AspectPermissionManager {
 	 * @param map		in/out param for storing results from OTStorageHook
 	 * @return		 	list of pairs (base bundle x base package)
 	 */
-	private ArrayList<String[]> getConfiguredForcedExports(String                               aspectId, 
-														   AspectPermission 				    perm, 
-														   HashMap<String, ArrayList<String[]>> map) 
+	private List<String[]> getConfiguredForcedExports( String                          aspectId, 
+														AspectPermission 				perm, 
+														HashMap<String, List<String[]>> map)
     {
-		ArrayList<String[]> forcedExports= map.get(aspectId);
+		List<String[]> forcedExports= map.get(aspectId);
 		if (forcedExports == null) {
 			// fetch declarations from config.ini or other locations.
-// FIXME
-//			forcedExports= HookConfigurator.getForcedExportsByAspect(aspectId, perm);
-//			map.put(aspectId, forcedExports);
-			forcedExports = new ArrayList<String[]>();
+			forcedExports= forcedExportsDelegate.getForcedExportsByAspect(aspectId, perm);
+			map.put(aspectId, forcedExports);
 		}
 		return forcedExports;
 	}
 
-	private @Nullable String[] findRequestInList(String baseBundleId, String basePackage, @Nullable ArrayList<String[]> list) {
+	private @Nullable String[] findRequestInList(String baseBundleId, String basePackage, @Nullable List<String[]> list) {
 		if (list != null)
 			for (String[] singleExport : list)
 				if (   singleExport[0].equals(baseBundleId)
@@ -398,7 +343,7 @@ public class AspectPermissionManager {
 	 * If the structure of grantedForcedExports is not empty we have mismatches between forced-export declarations.
 	 * Report these mismatches as warnings.
 	 */
-	void reportUnmatchForcedExports(String aspectId, ArrayList<String[]> unmatchedForcedExports) 
+	void reportUnmatchForcedExports(String aspectId, List<String[]> unmatchedForcedExports) 
 	{
 		for (String[] export: unmatchedForcedExports) {
 			String baseId = export[0];
@@ -441,30 +386,43 @@ public class AspectPermissionManager {
 	
 	/**
 	 * Check the permissions for all given teams.
-	 * @param aspectBundle the bundle containing the given teams
-	 * @param aspectBinding the binding mentioning the given teams
 	 * @param teamsForBase the teams to check
-	 * @return true if at least one binding was denied.
+	 * @return the set of denied teams
 	 */
-	boolean checkAspectPermissionDenial(Bundle aspectBundle, AspectBinding aspectBinding, Collection<TeamBinding> teamsForBase)
+	Set<TeamBinding> checkAspectPermissionDenial(Collection<TeamBinding> teamsForBase)
 	{
-		boolean hasDenial = false;
-		String aspectBundleName = aspectBundle.getSymbolicName();
-		if (aspectBundleName == null) {
-			log(IStatus.ERROR, "Cannot handle unnamed bundle "+aspectBundle);
-		} else {
-			for (TeamBinding teamForBase : teamsForBase)
-				if (!checkTeamBinding(aspectBundleName, aspectBinding.basePluginName, teamForBase.teamName)) {
-					hasDenial = true;
-					try {
-						aspectBundle.stop();
-						log(IStatus.ERROR, "Stopped bundle "+aspectBundleName+" which requests unconfirmed aspect binding(s).");
-					} catch (Throwable t) { // don't let the aspect bundle get by by throwing an unexpected exception!
-						log(t, "Failed to stop bundle "+aspectBundleName+" which requests unconfirmed aspect binding(s).");
-					}
+		Set<TeamBinding> deniedTeams = new HashSet<TeamBinding>();
+		for (TeamBinding teamForBase : teamsForBase) {
+			AspectBinding aspectBinding = teamForBase.getAspectBinding();
+			String aspectBundleName = aspectBinding.aspectPlugin;
+			if (aspectBinding.hasBeenDenied) {
+				deniedTeams.add(teamForBase);
+			} else {
+				if (!checkForcedExports(aspectBinding)) {
+					deniedTeams.add(teamForBase);
+					stopAspectBundle(aspectBinding, aspectBundleName, "requests unconfirmed forced export(s).");
+				} else if (!checkTeamBinding(aspectBundleName, aspectBinding.basePluginName, teamForBase)) {
+					deniedTeams.add(teamForBase);
+					stopAspectBundle(aspectBinding, aspectBundleName, "requests unconfirmed aspect binding(s).");
 				}
+			}
 		}
-		return hasDenial;
+		return deniedTeams;
+	}
+
+	void stopAspectBundle(AspectBinding aspectBinding, String aspectBundleName, String reason) {
+		try {
+			aspectBinding.hasBeenDenied = true;
+			Bundle aspectBundle = aspectBinding.aspectBundle;
+			if (aspectBundle != null) {
+				aspectBundle.stop();
+				log(IStatus.ERROR, "Stopped bundle "+aspectBundleName+" which "+reason);
+			} else {
+				log(IStatus.ERROR, "Cannot stop aspect bundle "+aspectBundleName);
+			}
+		} catch (Throwable t) { // don't let the aspect bundle get by by throwing an unexpected exception!
+			log(t, "Failed to stop bundle "+aspectBundleName+" which "+reason);
+		}
 	}
 
 	/**
@@ -475,10 +433,19 @@ public class AspectPermissionManager {
  	 * 
 	 * @param aspectBundleId
 	 * @param baseBundleId
-	 * @param teamClass
+	 * @param teamBinding
 	 * @return whether this team is permitted to adapt classes from the given base bundle.
 	 */
-	boolean checkTeamBinding(String aspectBundleId, String baseBundleId, String teamClass) 
+	boolean checkTeamBinding(String aspectBundleId, String baseBundleId, TeamBinding teamBinding) {
+		if (teamBinding.checkedPermission != null)
+			return teamBinding.checkedPermission == AspectPermission.GRANT;
+
+		boolean isGranted = internalCheckTeamBinding(aspectBundleId, baseBundleId, teamBinding.teamName);
+		teamBinding.checkedPermission = isGranted ? AspectPermission.GRANT : AspectPermission.DENY;
+		return isGranted;
+	}
+
+	boolean internalCheckTeamBinding(String aspectBundleId, String baseBundleId, String teamClass) 
 	{
 		boolean shouldReportGrant = false; // grant by default should not be reported
 		AspectPermission negotiatedPermission = this.defaultAspectBindingPermission;
@@ -498,6 +465,8 @@ public class AspectPermissionManager {
 		Set<String> deniedTeams = deniedTeamsByAspectBinding.get(key);
 		if (deniedTeams != null && !deniedTeams.isEmpty()) {
 			if (deniedTeams.contains(teamClass)) {
+				log(IStatus.ERROR, "Configured denial of aspect binding regarding base bundle "+baseBundleId+
+						   " as requested by bundle "+aspectBundleId+"; bundle not activated");
 				deniedAspects.add(aspectBundleId);
 				return false;
 			}
@@ -522,7 +491,7 @@ public class AspectPermissionManager {
 				shouldReportGrant = negotiatedPermission == GRANT;
 				// locally store as default for subsequent requests:
 				if (answer.allRequests)
-					this.defaultAspectBindingPermission = negotiatedPermission;
+					this.defaultAspectBindingPermission = negotiatedPermission; // FIXME: differentiate: apply to all / all of same aspect bundle
 
 				if (negotiatedPermission == DENY) {
 					denyingNegotiator = negotiator.getClass().getName();
@@ -547,31 +516,21 @@ public class AspectPermissionManager {
 			log(IStatus.ERROR, front+" aspect binding for "+aspectBundleId+
 							   " to base bundle "+baseBundleId+" by means of team "+teamClass+
 							   ". Aspect is not activated.");
-			this.deniedAspects.add(aspectBundleId); // keep for answering the TransformerHook.
+			this.deniedAspects.add(aspectBundleId); // keep for answering the TransformerPlugin.
 			return false; // don't install illegal aspect
 		}
 		return true;
 	}
 
-	private void persistTeamBindingAnswer(String aspectBundleId, String baseBundleId, String teamClass, AspectPermission negotiatedPermission) 
-	{
-		// FIXME(SH): implement persisting these!		
-	}
-		
 	List<Runnable> obligations = new ArrayList<Runnable>();
-	public void addBaseBundleObligations(final List<Team> teamInstances, final Collection<TeamBinding> teamClasses, final Bundle aspectBundle, final BaseBundle baseBundle) {
+	public void addBaseBundleObligations(final List<Team> teamInstances, final Collection<TeamBinding> teamClasses, final BaseBundle baseBundle) {
 		schedule(new Runnable() {
 			public void run() {
 				List<TeamBinding> teamsToRevert = new ArrayList<TeamBinding>();
 				// aspect bindings:
-				String aspectBundleName = aspectBundle.getSymbolicName();
-				if (aspectBundleName == null) {
-					log(IStatus.ERROR, "Cannot handle unnamed aspect bundle "+aspectBundle);
-				} else {
-					for (TeamBinding teamClass : teamClasses)
-						if (!checkTeamBinding(aspectBundleName, baseBundle.bundleName, teamClass.teamName))
-							teamsToRevert.add(teamClass);
-				}
+				for (TeamBinding teamClass : teamClasses)
+					if (!checkTeamBinding(teamClass.getAspectBinding().aspectPlugin, baseBundle.bundleName, teamClass))
+						teamsToRevert.add(teamClass);
 				if (!teamsToRevert.isEmpty())
 					revert(teamsToRevert);
 			}
@@ -585,32 +544,19 @@ public class AspectPermissionManager {
 									teamInstance.deactivate(Team.ALL_THREADS);
 							// could also check if roles are present already ...
 						}
-						bundlesToStop.add(aspectBundle);
+						bundlesToStop.add(teamClass.getAspectBinding().aspectBundle);
 					}
 					for (Bundle bundle : bundlesToStop) {
-						log(IStatus.ERROR, "Stopping aspect bundle "+bundle.getSymbolicName()+" with denied aspect binding(s)");
-						bundle.stop();
+						if ((bundle.getState() & (Bundle.STARTING|Bundle.ACTIVE)) != 0) {
+							log(IStatus.ERROR, "Stopping aspect bundle "+bundle.getSymbolicName()+" with denied aspect binding(s)");
+							bundle.stop();
+						}
 					}
 				} catch (Exception e) {
 					log(e, "Failed to revert aspect bundle with denied aspect bindings.");
 				}
 			}
 		});
-	}
-
-	public void addForcedExportsObligations(final List<AspectBinding> aspects, final Bundle baseBundle) {
-		final String baseBundleName = baseBundle.getSymbolicName();
-		if (baseBundleName == null) {
-			log(IStatus.ERROR, "Cannot handle unnamed base bundle "+baseBundle);
-		} else {
-			schedule(new Runnable () {
-				public void run() {
-					for (AspectBinding aspectBinding : aspects)
-						if (!checkForcedExports(aspectBinding.aspectPlugin, baseBundleName, aspectBinding.forcedExports))
-							stopIllegalBundle(aspectBinding.aspectPlugin);
-				}
-			});
-		}
 	}
 
 	void schedule(Runnable job) {
@@ -639,6 +585,153 @@ public class AspectPermissionManager {
 				} catch (BundleException e) {
 					log(e, "Failed to " + msgCore);
 				}
+		}
+	}
+
+	// ==== File I/O: ====
+
+	private void internalFetchAspectBindingPermssionsFromWorkspace(IPath state) {
+		// defaults:
+		IPath configFilePath = state.append(NEGOTIATION_DEFAULTS_FILE);
+		File configFile = new File(configFilePath.toOSString());		
+		if (configFile.exists()) {
+			Properties props = new Properties();
+			try {
+				try (FileInputStream inStream = new FileInputStream(configFile)) {
+					props.load(inStream);
+				}
+				String value = (String) props.get(ASPECT_BINDING_DEFAULT);
+				if (value != null)
+					try {
+						defaultAspectBindingPermission = AspectPermission.valueOf(value); // known API of all enums
+					} catch (IllegalArgumentException iae) {
+						defaultAspectBindingPermission = AspectPermission.DENY;
+						log(iae, "Cannot set default aspect permission from file "+NEGOTIATION_DEFAULTS_FILE+", assuming DENY.");
+					}
+				value = (String) props.get(FORCED_EXPORT_DEFAULT);
+				if (value != null)
+					try {
+						defaultForcedExportPermission = AspectPermission.valueOf(value); // known API of all enums
+					} catch (IllegalArgumentException iae) {
+						defaultForcedExportPermission = AspectPermission.DENY;
+						log(iae, "Cannot set default forced exports permission from file "+NEGOTIATION_DEFAULTS_FILE+", assuming DENY.");
+					}
+			} catch (IOException ioex) {
+				log(ioex, "Failed to read configuration file "+configFilePath.toOSString());
+			}
+		} else {
+			try {
+				File stateDir = new File(state.toOSString());
+				if (!stateDir.exists())
+					stateDir.mkdirs();
+				configFile.createNewFile();
+				writeNegotiationDefaults(configFile);
+			} catch (IOException ioex) {
+				log(ioex, "Failed to create configuration file "+configFilePath.toOSString());
+			}
+		}
+
+		// configured grant / deny per team:
+
+		configFilePath = state.append(GRANTED_TEAMS_FILE);
+		configFile = new File(configFilePath.toOSString());
+		if (configFile.exists())
+			parseTeamPermissionFile(grantedTeamsByAspectBinding, configFile);
+		
+		configFilePath = state.append(DENIED_TEAMS_FILE);
+		configFile = new File(configFilePath.toOSString());
+		if (configFile.exists())
+			parseTeamPermissionFile(deniedTeamsByAspectBinding, configFile);
+
+		// configured grant / denied for forced exports:
+		configFilePath = state.append(DENIED_FORCED_EXPORTS_FILE);
+		configFile = new File(configFilePath.toOSString());
+		if (configFile.exists())
+			forcedExportsDelegate.parseForcedExportsFile(configFile, DENY);
+		
+		configFilePath = state.append(GRANTED_FORCED_EXPORTS_FILE);
+		configFile = new File(configFilePath.toOSString());
+		if (configFile.exists())
+			forcedExportsDelegate.parseForcedExportsFile(configFile, GRANT);
+	}
+
+	private void writeNegotiationDefaults(File configFile)
+			throws IOException 
+	{
+		try (FileWriter writer = new FileWriter(configFile)) {
+			writer.append(ASPECT_BINDING_DEFAULT+'='+defaultAspectBindingPermission.toString()+'\n');
+			writer.append(FORCED_EXPORT_DEFAULT+'='+defaultForcedExportPermission.toString()+'\n');
+			writer.flush();
+		}
+		log(IStatus.INFO, "Created aspect binding defaults file "+configFile.getCanonicalPath());
+	}
+
+	private void parseTeamPermissionFile(HashMap<String, Set<String>> teamsByAspectBinding, File configFile) {
+		try (BufferedReader reader = new BufferedReader(new FileReader(configFile))) {
+			String line;
+			while ((line = reader.readLine()) != null) {
+				if (line.length() > 0 && line.charAt(0) == '#') continue;
+				String[] parts = line.split("=");
+				if (parts.length == 2) {
+					Set<String> teams = new HashSet<String>();
+					StringTokenizer teamToks = new StringTokenizer(parts[1], ",");
+					while (teamToks.hasMoreElements())
+						teams.add(teamToks.nextToken());
+					teamsByAspectBinding.put(parts[0], teams);
+				}
+			}
+		} catch (IOException e) {
+			log(e, "Failed to read permission file "+configFile.getAbsolutePath());
+		}
+	}
+
+	private void persistTeamBindingAnswer(String aspectBundleId, String baseBundleId, String teamClass, AspectPermission negotiatedPermission) 
+	{
+		IPath state = this.otequinoxState;
+		if (state != null) {
+			HashMap<String, Set<String>> teamsByAspect = null;
+			IPath configFilePath = null;
+			switch (negotiatedPermission) {
+			case GRANT:
+				teamsByAspect = this.grantedTeamsByAspectBinding;
+				configFilePath = state.append(GRANTED_TEAMS_FILE);
+				break;
+			case DENY:
+				teamsByAspect = this.deniedTeamsByAspectBinding;
+				configFilePath = state.append(DENIED_TEAMS_FILE);
+				break;
+			default: return; // TODO: also persist UNDEFINED (just to avoid asking again?)
+			}
+			
+			// in fact we store the entire state for the given category (grant / deny)
+			// so first insert the new answer into the existing map:
+			String key = aspectBundleId+"->"+baseBundleId;
+			Set<String> teams = teamsByAspect.get(key);
+			if (teams == null)
+				teamsByAspect.put(key, teams = new HashSet<String>());
+			teams.add(teamClass);
+
+			// now dump the entire map:
+			File configFile = new File(configFilePath.toOSString());
+			try {
+				if (!configFile.exists())
+					configFile.createNewFile();
+				try (FileWriter writer = new FileWriter(configFile, false)) {
+					writer.write("# Aspect permission file generated from aspect negotiation results.\n");
+					for (Map.Entry<String, Set<String>> entry : teamsByAspect.entrySet()) {
+						writer.append(entry.getKey()).append('=');
+						String sep = "";
+						for (String t : entry.getValue()) {
+							writer.append(sep).append(t);
+							sep = ",";
+						}
+						writer.append('\n');
+					}
+					writer.flush();
+				}
+			} catch (IOException ioe) {
+				log(ioe, "Failed to persist negotiation result");
+			}
 		}
 	}
 }

@@ -1,7 +1,7 @@
 /**********************************************************************
  * This file is part of "Object Teams Development Tooling"-Software
  * 
- * Copyright 2013 GK Software AG
+ * Copyright 2013, 2014 GK Software AG
  *  
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -27,9 +27,9 @@ class WaitingTeamRecord {
 	ActivationKind activationKind;
 	String notFoundClass;
 	
-	public WaitingTeamRecord(TeamBinding team, AspectBinding aspectBinding, ActivationKind activationKind, String notFoundClass) {
+	public WaitingTeamRecord(TeamBinding team, ActivationKind activationKind, String notFoundClass) {
 		this.team = team;
-		this.aspectBinding = aspectBinding;
+		this.aspectBinding = team.getAspectBinding();
 		this.notFoundClass = notFoundClass;
 		this.activationKind = activationKind;
 	}	

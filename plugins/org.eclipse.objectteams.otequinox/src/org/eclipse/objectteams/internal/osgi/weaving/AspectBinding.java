@@ -33,6 +33,7 @@ import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
 import org.eclipse.objectteams.internal.osgi.weaving.Util.ProfileKind;
 import org.eclipse.objectteams.otequinox.ActivationKind;
+import org.eclipse.objectteams.otequinox.AspectPermission;
 import org.objectteams.Team;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.hooks.weaving.WovenClass;
@@ -70,7 +71,8 @@ public class AspectBinding {
 		private ActivationKind activation; // clients must use accessor getActivation()!
 		boolean hasScannedBases;
 		boolean hasScannedRoles;
-
+		@Nullable AspectPermission checkedPermission; // null means: not yet checked
+		
 		boolean isActivated;
 
 		boolean importsAdded;
@@ -84,6 +86,10 @@ public class AspectBinding {
 			this.activation = activationKind;
 			this.superTeamName = superTeamName;
 			this.equivalenceSet.add(this);
+		}
+		
+		AspectBinding getAspectBinding() {
+			return AspectBinding.this;
 		}
 
 		/** After scanning class file attributes: add the names of all bound base classes. */
@@ -99,17 +105,16 @@ public class AspectBinding {
 		}
 
 		@SuppressWarnings("unchecked")
-		public @Nullable Class<? extends Team> loadTeamClass(Bundle fallbackBundle) {
+		public @Nullable Class<? extends Team> loadTeamClass() {
 			if (teamClass != null) return teamClass;
 			for (String candidate : TeamLoader.possibleTeamNames(teamName)) {
 				try {
 					Bundle aspectBundle = AspectBinding.this.aspectBundle;
-					// FIXME: no aspectBundle if no PackageAdmin was found, is using the fallbackBundle OK?
-					if (aspectBundle == null)
-						aspectBundle = fallbackBundle;
-					Class<?> result = aspectBundle.loadClass(candidate);
-					if (result != null)
-						return this.teamClass = (Class<? extends Team>) result;
+					if (aspectBundle != null) {
+						Class<?> result = aspectBundle.loadClass(candidate);
+						if (result != null)
+							return this.teamClass = (Class<? extends Team>) result;
+					}
 				} catch (NoClassDefFoundError|ClassNotFoundException e) {
 					e.printStackTrace();
 					// keep looking
@@ -125,6 +130,7 @@ public class AspectBinding {
 		 */
 		public void addImportTo(WovenClass baseClass, int direction) {
 			importsAdded = true;
+			if (AspectBinding.this.hasBeenDenied) return;
 			
 			String packageOfTeam = "";
 			int dot = teamName.lastIndexOf('.'); // TODO: can we detect if thats really the package (vs. Outer.Inner)?
@@ -193,6 +199,20 @@ public class AspectBinding {
 			}
 			return activation;
 		}
+
+		public @Nullable TeamBinding getOtherTeamToActivate() {
+			TeamBinding superTeam = this.superTeam;
+			if (superTeam != null && superTeam.getActivation() != ActivationKind.NONE) {
+				return superTeam;
+			}
+			// sub teams?
+			return null;
+		}
+
+		public boolean hasBeenDenied() {
+			return this.checkedPermission == AspectPermission.DENY
+						|| AspectBinding.this.hasBeenDenied;
+		}
 	}
 	
 	/**
@@ -202,7 +222,7 @@ public class AspectBinding {
 	static class BaseBundle {
 		String bundleName;
 		/** Team classes indexed by base classes that should trigger activating the team. */
-		private HashMap<String, Set<TeamBinding>> teamsPerBase = new HashMap<>();
+		final HashMap<String, Set<TeamBinding>> teamsPerBase = new HashMap<>();
 		boolean otreAdded;		
 
 		public BaseBundle(String bundleName) {
@@ -219,6 +239,8 @@ public class AspectBinding {
 	public Set<String> allBaseClassNames = new HashSet<>();
 
 	public boolean hasScannedTeams;
+	public AspectPermission forcedExportsPermission = AspectPermission.UNDEFINED;
+	public boolean hasBeenDenied = false;
 	
 	Set<TeamBinding> teamsInProgress = new HashSet<>(); // TODO cleanup teams that are done
 	
@@ -283,16 +305,6 @@ public class AspectBinding {
 			teamsInProgress.addAll(teams);
 		}
 		return teams;		
-	}
-
-	/** If a given team requires no activation, check if its super team should be activated instead. */
-	public @Nullable TeamBinding getOtherTeamToActivate(TeamBinding team) {
-		TeamBinding superTeam = team.superTeam;
-		if (superTeam != null && superTeam.getActivation() != ActivationKind.NONE) {
-			return superTeam;
-		}
-		// sub teams?
-		return null;
 	}
 
 	/**
