@@ -26,7 +26,6 @@
  *								bug 391376 - [1.8] check interaction of default methods with bridge methods and generics
  *								Bug 392099 - [1.8][compiler][null] Apply null annotation on types for null analysis
  *								Bug 415043 - [1.8][null] Follow-up re null type annotations after bug 392099
- *								Bug 392238 - [1.8][compiler][null] Detect semantically invalid null type annotations
  *								Bug 415850 - [1.8] Ensure RunJDTCoreTests can cope with null annotations enabled
  *								Bug 416172 - [1.8][compiler][null] null type annotation not evaluated on method return type
  *								Bug 417295 - [1.8[[null] Massage type annotated null analysis to gel well with deep encoded type bindings.
@@ -34,6 +33,8 @@
  *								Bug 392238 - [1.8][compiler][null] Detect semantically invalid null type annotations
  *								Bug 429958 - [1.8][null] evaluate new DefaultLocation attribute of @NonNullByDefault
  *								Bug 432348 - [1.8] Internal compiler error (NPE) after upgrade to 1.8
+ *								Bug 438458 - [1.8][null] clean up handling of null type annotations wrt type variables
+ *								Bug 435570 - [1.8][null] @NonNullByDefault illegally tries to affect "throws E"
  *      Jesper S Moller <jesper@selskabet.org> -  Contributions for
  *								Bug 412153 - [1.8][compiler] Check validity of annotations which may be repeatable
  *     Till Brychcy - Contributions for
@@ -2307,7 +2308,7 @@ public FieldBinding resolveTypeFor(FieldBinding field) {
 				Annotation [] annotations = fieldDecl.annotations;
 				if (annotations != null && annotations.length != 0) {
 					ASTNode.copySE8AnnotationsToType(initializationScope, field, annotations,
-							fieldDecl.getKind() != AbstractVariableDeclaration.ENUM_CONSTANT); // type annotation is illegal on enum constant
+							fieldDecl.getKind() == AbstractVariableDeclaration.ENUM_CONSTANT); // type annotation is illegal on enum constant
 				}
 				Annotation.isTypeUseCompatible(fieldDecl.type, this.scope, annotations);
 			}
@@ -2459,7 +2460,7 @@ public MethodBinding resolveTypesFor(MethodBinding method, boolean fromSynthetic
 			if ((resolvedExceptionType.tagBits & TagBits.HasMissingType) != 0) {
 				method.tagBits |= TagBits.HasMissingType;
 			}
-			if (resolvedExceptionType.hasNullTypeAnnotations()) {
+			if (exceptionTypes[i].hasNullTypeAnnotation()) {
 				methodDecl.scope.problemReporter().nullAnnotationUnsupportedLocation(exceptionTypes[i]);
 			}
 			method.modifiers |= (resolvedExceptionType.modifiers & ExtraCompilerModifiers.AccGenericSignature);
@@ -2657,7 +2658,7 @@ public MethodBinding resolveTypesFor(MethodBinding method, boolean fromSynthetic
 				if (sourceLevel >= ClassFileConstants.JDK1_8 && !method.isVoidMethod()) {
 					Annotation [] annotations = methodDecl.annotations;
 					if (annotations != null && annotations.length != 0) {
-						ASTNode.copySE8AnnotationsToType(methodDecl.scope, method, methodDecl.annotations, true);
+						ASTNode.copySE8AnnotationsToType(methodDecl.scope, method, methodDecl.annotations, false);
 					}
 					Annotation.isTypeUseCompatible(returnType, this.scope, methodDecl.annotations);
 				}
@@ -3532,7 +3533,14 @@ void verifyMethods(MethodVerifier verifier) {
 // SH}
 }
 
-public TypeBinding unannotated() {
+public TypeBinding unannotated(boolean removeOnlyNullAnnotations) {
+	if (removeOnlyNullAnnotations) {
+		if (!hasNullTypeAnnotations())
+			return this;
+		AnnotationBinding[] newAnnotations = this.environment.filterNullTypeAnnotations(this.typeAnnotations);
+		if (newAnnotations.length > 0)
+			return this.environment.createAnnotatedType(this.prototype, newAnnotations);
+	}
 	return this.prototype;
 }
 

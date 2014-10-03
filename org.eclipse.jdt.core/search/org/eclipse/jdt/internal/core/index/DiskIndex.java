@@ -62,6 +62,7 @@ private static final int DELETED = -2;
 private static final int CHUNK_SIZE = 100;
 
 private static final SimpleSetOfCharArray INTERNED_CATEGORY_NAMES = new SimpleSetOfCharArray(20);
+private static final String TMP_EXT = ".tmp"; //$NON-NLS-1$
 
 static class IntList {
 
@@ -254,6 +255,7 @@ private void cacheDocumentNames() throws IOException {
 		throw e;
 	} finally {
 		stream.close();
+		this.indexLocation.close();
 		this.streamBuffer = null;
 		BUFFER_READ_SIZE = DEFAULT_BUFFER_SIZE;
 	}
@@ -400,6 +402,7 @@ void initialize(boolean reuseExistingFile) throws IOException {
 				}
 			} finally {
 				stream.close();
+				this.indexLocation.close();
 			}
 			return;
 		}
@@ -526,8 +529,16 @@ DiskIndex mergeWith(MemoryIndex memoryIndex) throws IOException {
 		newDiskIndex.initialize(false);
 		return newDiskIndex;
 	}
+	boolean usingTmp = false;
 	File oldIndexFile = this.indexLocation.getIndexFile();
-	DiskIndex newDiskIndex = new DiskIndex(new FileIndexLocation(new File(oldIndexFile.getPath() + ".tmp"))); //$NON-NLS-1$
+	String indexFilePath = oldIndexFile.getPath();
+	if (indexFilePath.endsWith(TMP_EXT)) { // the tmp file could not be renamed last time
+		indexFilePath = indexFilePath.substring(0, indexFilePath.length()-TMP_EXT.length());
+		usingTmp = true;
+	} else {
+		indexFilePath += TMP_EXT;
+	}
+	DiskIndex newDiskIndex = new DiskIndex(new FileIndexLocation(new File(indexFilePath)));
 	File newIndexFile = newDiskIndex.indexLocation.getIndexFile();
 	try {
 		newDiskIndex.initializeFrom(this, newIndexFile);
@@ -568,10 +579,18 @@ DiskIndex mergeWith(MemoryIndex memoryIndex) throws IOException {
 				System.out.println("mergeWith - Failed to delete " + this.indexLocation); //$NON-NLS-1$
 			throw new IOException("Failed to delete index file " + this.indexLocation); //$NON-NLS-1$
 		}
-		if (!newIndexFile.renameTo(oldIndexFile)) {
-			if (DEBUG)
-				System.out.println("mergeWith - Failed to rename " + this.indexLocation); //$NON-NLS-1$
-			throw new IOException("Failed to rename index file " + this.indexLocation); //$NON-NLS-1$
+		if (!usingTmp && !newIndexFile.renameTo(oldIndexFile)) {
+			// try again after waiting for two milli secs
+			try {
+				Thread.sleep(2);
+			} catch (InterruptedException e) {
+				//ignore
+			}
+			if (!newIndexFile.renameTo(oldIndexFile)) {
+				if (DEBUG)
+					System.out.println("mergeWith - Failed to rename " + this.indexLocation); //$NON-NLS-1$
+				usingTmp = true;
+			}
 		}
 	} catch (IOException e) {
 		if (newIndexFile.exists() && !newIndexFile.delete())
@@ -580,7 +599,8 @@ DiskIndex mergeWith(MemoryIndex memoryIndex) throws IOException {
 		throw e;
 	}
 
-	newDiskIndex.indexLocation = this.indexLocation;
+	if (!usingTmp) // rename done, use the new file
+		newDiskIndex.indexLocation = this.indexLocation;
 	return newDiskIndex;
 }
 private synchronized String[] readAllDocumentNames() throws IOException {
@@ -601,6 +621,7 @@ private synchronized String[] readAllDocumentNames() throws IOException {
 		return docNames;
 	} finally {
 		stream.close();
+		this.indexLocation.close();
 		this.streamBuffer = null;
 	}
 }
@@ -689,6 +710,7 @@ private synchronized HashtableOfObject readCategoryTable(char[] categoryName, bo
 		throw ioe;
 	} finally {
 		stream.close();
+		this.indexLocation.close();
 	}
 
 	if (matchingWords != null && count > 0) {
@@ -705,6 +727,7 @@ private synchronized HashtableOfObject readCategoryTable(char[] categoryName, bo
 			throw ioe;
 		} finally {
 			stream.close();
+			this.indexLocation.close();
 		}
 	}
 	this.streamBuffer = null;
@@ -758,6 +781,7 @@ synchronized String readDocumentName(int docNumber) throws IOException {
 			throw ioe;
 		} finally {
 			file.close();
+			this.indexLocation.close();
 		}
 		int numberOfNames = isLastChunk ? this.sizeOfLastChunk : CHUNK_SIZE;
 		chunk = new String[numberOfNames];
@@ -787,6 +811,7 @@ synchronized int[] readDocumentNumbers(Object arrayOffset) throws IOException {
 		return readStreamDocumentArray(stream, readStreamInt(stream));
 	} finally {
 		stream.close();
+		this.indexLocation.close();
 		this.streamBuffer = null;
 	}
 }

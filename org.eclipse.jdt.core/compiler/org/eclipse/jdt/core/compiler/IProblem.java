@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2013 IBM Corporation and others.
+ * Copyright (c) 2000, 2014 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -194,6 +194,8 @@
  *									NonNullDefaultDetailIsNotEvaluated
  *									NullNotCompatibleToFreeTypeVariable
  *									NullityMismatchAgainstFreeTypeVariable
+ *									ImplicitObjectBoundNoNullDefault
+ *									IllegalParameterNullityRedefinition
  *      Jesper S Moller  - added the following constants
  *									TargetTypeNotAFunctionalInterface
  *									OuterLocalMustBeEffectivelyFinal
@@ -406,6 +408,8 @@ void setSourceStart(int sourceStart);
 	int NonStaticContextForEnumMemberType = Internal + 32;
 	/** @since 3.3 */
 	int TypeHidingType = TypeRelated + 33;
+	/** @since 3.11 */
+	int NotAnnotationType = TypeRelated + 34;
 
 	// variables
 	int UndefinedName = Internal + FieldRelated + 50;
@@ -459,6 +463,10 @@ void setSourceStart(int sourceStart);
 	int UnresolvedVariable = FieldRelated + 83;
 	/** @since 3.10 */
 	int NonStaticOrAlienTypeReceiver = MethodRelated + 84;
+
+	/** @since 3.11 */
+	int ExceptionParameterIsNeverUsed = Internal + 85;
+
 	// variable hiding
 	/** @since 3.0 */
 	int LocalVariableHidingLocalVariable = Internal + 90;
@@ -1789,6 +1797,11 @@ void setSourceStart(int sourceStart);
 	int NullNotCompatibleToFreeTypeVariable = 969;
 	/** @since 3.10 */
 	int NullityMismatchAgainstFreeTypeVariable = 970;
+	/** @since 3.11 */
+	int ImplicitObjectBoundNoNullDefault = 971;
+	/** @since 3.11 */
+	int IllegalParameterNullityRedefinition = MethodRelated + 972;
+
 
 	// Java 8 work
 	/** @since 3.10 */
