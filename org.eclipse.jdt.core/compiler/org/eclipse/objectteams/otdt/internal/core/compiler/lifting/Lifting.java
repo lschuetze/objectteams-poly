@@ -31,6 +31,7 @@ import org.eclipse.jdt.internal.compiler.impl.CompilerOptions.WeavingScheme;
 import org.eclipse.jdt.internal.compiler.impl.Constant;
 import org.eclipse.jdt.internal.compiler.lookup.Binding;
 import org.eclipse.jdt.internal.compiler.lookup.BlockScope;
+import org.eclipse.jdt.internal.compiler.lookup.ClassScope;
 import org.eclipse.jdt.internal.compiler.lookup.ExtraCompilerModifiers;
 import org.eclipse.jdt.internal.compiler.lookup.FieldBinding;
 import org.eclipse.jdt.internal.compiler.lookup.MethodBinding;
@@ -226,8 +227,9 @@ public class Lifting extends SwitchOnBaseTypeGenerator
         if (instantiableBoundRootRoleNode == null) return null;
 
         TypeDeclaration roleDecl = roleNode.getTreeObject().getAst();
-        if (instantiableBoundRootRoleNode == TreeNode.ProblemNode) {
-            roleDecl.scope.problemReporter().
+        ClassScope scope = roleDecl.scope;
+		if (instantiableBoundRootRoleNode == TreeNode.ProblemNode) {
+            scope.problemReporter().
                     overlappingRoleHierarchies(roleDecl, TreeNode.ProblemNode.toString());
             return null;
         }
@@ -243,7 +245,7 @@ public class Lifting extends SwitchOnBaseTypeGenerator
 					            	? defCtor.isValidBinding()
 					            	: (parent.getMethods(TypeConstants.INIT) == Binding.NO_METHODS);
             if (!hasEmptyCtor) {
-                roleDecl.scope.problemReporter().
+                scope.problemReporter().
                         missingEmptyCtorForLiftingCtor(roleDecl, parent);
                 return null;
             }
@@ -266,17 +268,19 @@ public class Lifting extends SwitchOnBaseTypeGenerator
         			: new AstGenerator(existingConstructor);
         gen.replaceableEnclosingClass = roleType.binding.enclosingType();
         // public MyRole(MyBase base)
+        Argument arg;
         ConstructorDeclaration generatedConstructor =
             gen.constructor(teamTypeDeclaration.compilationResult,
             		ClassFileConstants.AccPublic,
 					roleType.name,
 					new Argument[] {          		                  // (MyBase base)
-                    	gen.argument(
+                    	arg = gen.argument(
                    			BASE,                                     // name
 							gen.baseclassReference(baseClassBinding)) // type
                 	}
             );
-
+        gen.addNonNullAnnotation(arg, scope.environment());
+        
 
 		// default arg name is base.
         char[] baseArgName = BASE;
@@ -339,7 +343,6 @@ public class Lifting extends SwitchOnBaseTypeGenerator
         } else {
             //otherhwise insert new constructor
             AstEdit.addMethod(roleType, generatedConstructor);
-
             return generatedConstructor;
         }
     }

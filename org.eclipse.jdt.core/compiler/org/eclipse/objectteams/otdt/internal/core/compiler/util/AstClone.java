@@ -24,11 +24,13 @@ import java.util.Arrays;
 
 import org.eclipse.jdt.core.compiler.CharOperation;
 import org.eclipse.jdt.internal.compiler.ast.AbstractMethodDeclaration;
+import org.eclipse.jdt.internal.compiler.ast.Annotation;
 import org.eclipse.jdt.internal.compiler.ast.Argument;
 import org.eclipse.jdt.internal.compiler.ast.ArrayQualifiedTypeReference;
 import org.eclipse.jdt.internal.compiler.ast.ArrayTypeReference;
 import org.eclipse.jdt.internal.compiler.ast.FieldReference;
 import org.eclipse.jdt.internal.compiler.ast.ImportReference;
+import org.eclipse.jdt.internal.compiler.ast.MarkerAnnotation;
 import org.eclipse.jdt.internal.compiler.ast.MethodDeclaration;
 import org.eclipse.jdt.internal.compiler.ast.ParameterizedQualifiedTypeReference;
 import org.eclipse.jdt.internal.compiler.ast.ParameterizedSingleTypeReference;
@@ -320,10 +322,26 @@ public class AstClone
             			(((long)argument.sourceStart)<<32)+argument.sourceEnd,
                         copyTypeReference(argument.type),
                         argument.modifiers);
+            if (argument.annotations != null)
+            	result[i].annotations = copyAnnotations(argument.annotations, gen);
         }
         return result;
     }
 
+
+    private static Annotation[] copyAnnotations(Annotation[] annotations, AstGenerator gen) {
+		int length = annotations.length;
+		Annotation[] result = new Annotation[length];
+		for (int i = 0; i < annotations.length; i++) {
+			if (annotations[i] instanceof MarkerAnnotation) {
+				TypeReference ref = copyTypeReference(annotations[i].type);
+				result[i] = new MarkerAnnotation(ref, annotations[i].sourceStart);
+			} else {
+				return null; // refuse to generate complex annotations
+			}
+		}
+		return result;
+	}
 
     /**
      * Copy all source locations from srcMethod to generated tgtMethod
@@ -363,6 +381,8 @@ public class AstClone
 		                        AstClone.copyTypeArray(md.thrownExceptions);
 		newmethod.typeParameters =
 								AstClone.copyTypeParameters(md.typeParameters);
+		if (md.annotations != null)
+			newmethod.annotations = AstClone.copyAnnotations(md.annotations, gen);
 		if (gen != null)
 			gen.setMethodPositions(newmethod);
 		else

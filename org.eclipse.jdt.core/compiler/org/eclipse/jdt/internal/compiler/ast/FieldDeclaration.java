@@ -284,7 +284,7 @@ public void resolve(MethodScope initializationScope) {
 			initializationScope.problemReporter().missingDeprecatedAnnotationForField(this);
 		}
 //{ObjectTeams: _OT$base is strictly nonnull:
-		if (CharOperation.equals(this.name, IOTConstants._OT_BASE))
+		if (CharOperation.equals(this.name, IOTConstants._OT_BASE) && initializationScope.compilerOptions().isAnnotationBasedNullAnalysisEnabled)
 			this.binding.tagBits |= TagBits.AnnotationNonNull;
 // SH}
 		// the resolution of the initialization hasn't been done
