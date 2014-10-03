@@ -4705,4 +4705,158 @@ public void test436347() throws CoreException, IOException {
 }
 
 
+//https://bugs.eclipse.org/bugs/show_bug.cgi?id=433879, org.eclipse.jdt.internal.compiler.lookup.ArrayBinding cannot be cast to org.eclipse.jdt.internal.compiler.lookup.ReferenceBinding
+//@throws ClassCastException without the fix
+//Array type access in catch block. Test case picked up from the bug.
+public void testBug433879() throws JavaModelException {
+	String contents =
+			"package Bug433879;\r\n"+
+			"public class X {\n" +
+			"Class<? extends Exception>[] exceptions;\n" +
+			"	void foo() {\n" +
+			"	try {\n" +
+			"		// some stuff here\n" +
+			"	} catch (exceptions[0] e) {\n" +
+			"   	// some more stuff here\n" +
+			"	}\n" +
+			"	}\n" +
+			"}\n";
+	this.workingCopy = getWorkingCopy("/Converter18/src/Bug433879/X.java", true/*computeProblems*/);
+	try {
+		buildAST(AST.JLS8, contents, this.workingCopy, false, true, true);
+	} catch (ClassCastException e) {
+		fail(e.getMessage());
+	}
+}
+//https://bugs.eclipse.org/bugs/show_bug.cgi?id=433879, org.eclipse.jdt.internal.compiler.lookup.ArrayBinding cannot be cast to org.eclipse.jdt.internal.compiler.lookup.ReferenceBinding
+//@throws ClassCastException without the fix
+//Simplified version of the test case picked up from the bug report.
+public void testBug433879a() throws JavaModelException {
+	String contents =
+			"package Bug433879a;\n"+
+			"public class X {\n" +
+			"	void foo() {\n" +
+			"		try {\n" +
+			"		    // some stuff here\n" +
+			"		} catch (A[0] e) {\n" +
+			"		    // some more stuff here\n" +
+			"		}\n" +
+			"	}\n" +
+			"}\n";
+	this.workingCopy = getWorkingCopy("/Converter18/src/Bug433879a/X.java", true/*computeProblems*/);
+	try {
+		buildAST(AST.JLS8, contents, this.workingCopy, false, true, true);
+	} catch (ClassCastException e) {
+		fail(e.getMessage());
+	}
+}
+//https://bugs.eclipse.org/bugs/show_bug.cgi?id=433879, org.eclipse.jdt.internal.compiler.lookup.ArrayBinding cannot be cast to org.eclipse.jdt.internal.compiler.lookup.ReferenceBinding
+//Catch parameters Union Type
+public void testBug433879b() throws JavaModelException {
+	String contents =
+			"package Bug433879c;\n"+
+			"public class X {\n" +
+			"	void foo() {\n" +
+			"		try {\n" +
+			"		    // some stuff here\n" +
+			"		} catch (A[0] | B[0] e) {\n" +
+			"		    // some more stuff here\n" +
+			"		}\n" +
+			"	}\n" +
+			"}\n";
+	this.workingCopy = getWorkingCopy("/Converter18/src/Bug433879c/X.java", true/*computeProblems*/);
+	try {
+		buildAST(AST.JLS8, contents, this.workingCopy, false, true, true);
+	} catch (ClassCastException e) {
+		fail(e.getMessage());
+	}
+}
+//https://bugs.eclipse.org/bugs/show_bug.cgi?id=433879, org.eclipse.jdt.internal.compiler.lookup.ArrayBinding cannot be cast to org.eclipse.jdt.internal.compiler.lookup.ReferenceBinding
+//@throws ClassCastException without the fix
+//Catch parameters union type. Multiple Catch handlers.
+public void testBug433879c() throws JavaModelException {
+	String contents =
+			"package Bug433879d;\n"+
+			"class E1 extends Exception {private static final long serialVersionUID = 1L;}\n" +
+			"class E2 extends Exception { private static final long serialVersionUID = 1L;}\n" +
+			"\n" +
+			"\n" +
+			"public class X {\n" +
+			"	Class<? extends Exception>[] exceptions;\n" +
+			"	void foo() {\n" +
+			"		try {\n" +
+			"			bar();\n" +
+			"		} catch (exceptions[0] e) {\n" +
+			"		} catch (E1 | E2 eU) {}\n" +
+			"	}\n" +
+			"	private void bar() throws E1, E2 {}\n" +
+			"}\n";
+	this.workingCopy = getWorkingCopy("/Converter18/src/Bug433879d/X.java", true/*computeProblems*/);
+	try {
+		buildAST(AST.JLS8, contents, this.workingCopy, false, true, true);
+	} catch (ClassCastException e) {
+		fail(e.getMessage());
+	}
+}
+//https://bugs.eclipse.org/bugs/show_bug.cgi?id=433879, org.eclipse.jdt.internal.compiler.lookup.ArrayBinding cannot be cast to org.eclipse.jdt.internal.compiler.lookup.ReferenceBinding
+//@throws ClassCastException without the fix
+//Multiple Catch handlers.
+public void testBug433879d() throws JavaModelException {
+	String contents =
+			"package Bug433879e;\n"+
+			"class E1 extends Exception {private static final long serialVersionUID = 1L;}\n" +
+			"class E2 extends Exception { private static final long serialVersionUID = 1L;}\n" +
+			"public class X {\n" +
+			"	Class<? extends Exception>[] exceptions;\n" +
+			"	Class<? extends Exception>[] exceptions2;\n" +
+			"	void foo() {\n" +
+			"		try {\n" +
+			"			bar();\n" +
+			"		} catch (E2 e2) {\n" +
+			"		} catch (exceptions[0] e) {\n" +
+			"		} catch (E1 e1) {\n" +
+			"		} catch (exceptions2[0] e) {\n" +
+			"       }\n" +
+			"	}\n" +
+			"	private void bar() throws E1, E2 {}\n" +
+			"}\n";
+	this.workingCopy = getWorkingCopy("/Converter18/src/Bug433879e/X.java", true/*computeProblems*/);
+	try {
+		buildAST(AST.JLS8, contents, this.workingCopy, false, true, true);
+	} catch (ClassCastException e) {
+		fail(e.getMessage());
+	}
+}
+public void testBug432175() throws JavaModelException {
+	this.workingCopy = getWorkingCopy("/Converter18/src/testBug432175/X.java",
+			true/* resolve */);
+	String contents = "package testBug432175;\n" +
+			"interface Collection <T> {}\n" +
+			"class Collections {\n" +
+			"    public static final <T> T emptyList() {  return null; }\n" +
+			"}\n" +
+			"public class X {\n" +
+			"    public static <T extends Number & Comparable<?>> void method2(Collection<T> coll) {}\n" +
+			"\n" +
+			"    public static void main(String[] args) {\n" +
+			"        method2(Collections.emptyList());\n" +
+			"    }\n" +
+			"}\n" ;
+
+	CompilationUnit cu = (CompilationUnit) buildAST(contents, this.workingCopy);
+	TypeDeclaration typeDeclaration = (TypeDeclaration) getASTNode(cu, 2);
+	MethodDeclaration [] methods =  typeDeclaration.getMethods();
+
+	{
+		MethodDeclaration method = methods[1];
+		ExpressionStatement expressionStatement = (ExpressionStatement) method.getBody().statements().get(0);
+		MethodInvocation methodInvocation = (MethodInvocation) expressionStatement.getExpression();
+		methodInvocation = (MethodInvocation) methodInvocation.arguments().get(0);
+		ITypeBinding typeBinding = methodInvocation.resolveTypeBinding();
+		typeBinding = typeBinding.getTypeArguments()[0];
+		String res = typeBinding.getTypeDeclaration().getName();
+		this.ast.newSimpleType(this.ast.newName(res));
+	}
+}
+
 }

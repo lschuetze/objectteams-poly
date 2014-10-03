@@ -34,6 +34,8 @@
  *								Bug 424637 - [1.8][compiler][null] AIOOB in ReferenceExpression.resolveType with a method reference to Files::walk
  *								Bug 418743 - [1.8][null] contradictory annotations on invocation of generic method not reported
  *								Bug 430150 - [1.8][null] stricter checking against type variables
+ *								Bug 439516 - [1.8][null] NonNullByDefault wrongly applied to implicit type bound of binary type
+ *								Bug 438467 - [compiler][null] Better error position for "The method _ cannot implement the corresponding method _ due to incompatible nullness constraints"
  *     Jesper S Moller - Contributions for
  *								bug 382701 - [1.8][compiler] Implement semantic analysis of Lambda expressions & Reference expression
  *								bug 382721 - [1.8][compiler] Effectively final variables needs special treatment
@@ -493,6 +495,7 @@ public void _test011_problem_categories() {
 		expectedProblemAttributes.put("EnumConstantsCannotBeSurroundedByParenthesis", new ProblemAttributes(CategorizedProblem.CAT_SYNTAX));
 		expectedProblemAttributes.put("EnumStaticFieldInInInitializerContext", new ProblemAttributes(CategorizedProblem.CAT_MEMBER));
 		expectedProblemAttributes.put("EnumSwitchCannotTargetField", new ProblemAttributes(CategorizedProblem.CAT_MEMBER));
+		expectedProblemAttributes.put("ExceptionParameterIsNeverUsed", new ProblemAttributes(CategorizedProblem.CAT_UNNECESSARY_CODE));
 		expectedProblemAttributes.put("ExceptionTypeAmbiguous", DEPRECATED);
 		expectedProblemAttributes.put("ExceptionTypeInheritedNameHidesEnclosingName", DEPRECATED);
 		expectedProblemAttributes.put("ExceptionTypeInternalNameProvided", DEPRECATED);
@@ -574,6 +577,7 @@ public void _test011_problem_categories() {
 		expectedProblemAttributes.put("IllegalModifierForVariable", new ProblemAttributes(CategorizedProblem.CAT_MEMBER));
 		expectedProblemAttributes.put("IllegalModifiersForElidedType", new ProblemAttributes(CategorizedProblem.CAT_INTERNAL));
 		expectedProblemAttributes.put("IllegalModifiers", new ProblemAttributes(CategorizedProblem.CAT_INTERNAL));
+		expectedProblemAttributes.put("IllegalParameterNullityRedefinition", new ProblemAttributes(CategorizedProblem.CAT_MEMBER));
 		expectedProblemAttributes.put("IllegalPrimitiveOrArrayTypeForEnclosingInstance", new ProblemAttributes(CategorizedProblem.CAT_TYPE));
 		expectedProblemAttributes.put("IllegalQualifiedEnumConstantLabel", new ProblemAttributes(CategorizedProblem.CAT_MEMBER));
 		expectedProblemAttributes.put("IllegalQualifiedParameterizedTypeAllocation", new ProblemAttributes(CategorizedProblem.CAT_TYPE));
@@ -595,6 +599,7 @@ public void _test011_problem_categories() {
 		expectedProblemAttributes.put("IllegalVisibilityModifierCombinationForMemberType", new ProblemAttributes(CategorizedProblem.CAT_TYPE));
 		expectedProblemAttributes.put("IllegalVisibilityModifierCombinationForMethod", new ProblemAttributes(CategorizedProblem.CAT_MEMBER));
 		expectedProblemAttributes.put("IllegalVisibilityModifierForInterfaceMemberType", new ProblemAttributes(CategorizedProblem.CAT_TYPE));
+		expectedProblemAttributes.put("ImplicitObjectBoundNoNullDefault", new ProblemAttributes(CategorizedProblem.CAT_INTERNAL));
 		expectedProblemAttributes.put("ImportAmbiguous", DEPRECATED);
 		expectedProblemAttributes.put("ImportInheritedNameHidesEnclosingName", DEPRECATED);
 		expectedProblemAttributes.put("ImportInternalNameProvided", DEPRECATED);
@@ -835,6 +840,7 @@ public void _test011_problem_categories() {
 		expectedProblemAttributes.put("NonStaticFieldFromStaticInvocation", new ProblemAttributes(CategorizedProblem.CAT_MEMBER));
 		expectedProblemAttributes.put("NonStaticOrAlienTypeReceiver", new ProblemAttributes(CategorizedProblem.CAT_MEMBER));
 		expectedProblemAttributes.put("NonStaticTypeFromStaticInvocation", new ProblemAttributes(CategorizedProblem.CAT_INTERNAL));
+		expectedProblemAttributes.put("NotAnnoationType", new ProblemAttributes(CategorizedProblem.CAT_TYPE));
 		expectedProblemAttributes.put("NotVisibleConstructor", new ProblemAttributes(CategorizedProblem.CAT_MEMBER));
 		expectedProblemAttributes.put("NotVisibleConstructorInDefaultConstructor", new ProblemAttributes(CategorizedProblem.CAT_MEMBER));
 		expectedProblemAttributes.put("NotVisibleConstructorInImplicitConstructorCall", new ProblemAttributes(CategorizedProblem.CAT_MEMBER));
@@ -1396,6 +1402,7 @@ public void test012_compiler_problems_tuning() {
 		expectedProblemAttributes.put("EnumConstantsCannotBeSurroundedByParenthesis", SKIP);
 		expectedProblemAttributes.put("EnumStaticFieldInInInitializerContext", SKIP);
 		expectedProblemAttributes.put("EnumSwitchCannotTargetField", SKIP);
+		expectedProblemAttributes.put("ExceptionParameterIsNeverUsed", new ProblemAttributes(JavaCore.COMPILER_PB_UNUSED_PARAMETER));
 		expectedProblemAttributes.put("ExceptionTypeAmbiguous", SKIP);
 		expectedProblemAttributes.put("ExceptionTypeInheritedNameHidesEnclosingName", SKIP);
 		expectedProblemAttributes.put("ExceptionTypeInternalNameProvided", SKIP);
@@ -1477,6 +1484,7 @@ public void test012_compiler_problems_tuning() {
 		expectedProblemAttributes.put("IllegalModifierForVariable", SKIP);
 		expectedProblemAttributes.put("IllegalModifiersForElidedType", SKIP);
 		expectedProblemAttributes.put("IllegalModifiers", SKIP);
+		expectedProblemAttributes.put("IllegalParameterNullityRedefinition", SKIP);
 		expectedProblemAttributes.put("IllegalPrimitiveOrArrayTypeForEnclosingInstance", SKIP);
 		expectedProblemAttributes.put("IllegalQualifiedEnumConstantLabel", SKIP);
 		expectedProblemAttributes.put("IllegalQualifiedParameterizedTypeAllocation", SKIP);
@@ -1498,6 +1506,7 @@ public void test012_compiler_problems_tuning() {
 		expectedProblemAttributes.put("IllegalVisibilityModifierCombinationForMemberType", SKIP);
 		expectedProblemAttributes.put("IllegalVisibilityModifierCombinationForMethod", SKIP);
 		expectedProblemAttributes.put("IllegalVisibilityModifierForInterfaceMemberType", SKIP);
+		expectedProblemAttributes.put("ImplicitObjectBoundNoNullDefault", SKIP);
 		expectedProblemAttributes.put("ImportAmbiguous", SKIP);
 		expectedProblemAttributes.put("ImportInheritedNameHidesEnclosingName", SKIP);
 		expectedProblemAttributes.put("ImportInternalNameProvided", SKIP);
@@ -1738,6 +1747,7 @@ public void test012_compiler_problems_tuning() {
 		expectedProblemAttributes.put("NonStaticFieldFromStaticInvocation", SKIP);
 		expectedProblemAttributes.put("NonStaticOrAlienTypeReceiver", SKIP);
 		expectedProblemAttributes.put("NonStaticTypeFromStaticInvocation", SKIP);
+		expectedProblemAttributes.put("NotAnnoationType", SKIP);
 		expectedProblemAttributes.put("NotVisibleConstructor", SKIP);
 		expectedProblemAttributes.put("NotVisibleConstructorInDefaultConstructor", SKIP);
 		expectedProblemAttributes.put("NotVisibleConstructorInImplicitConstructorCall", SKIP);
