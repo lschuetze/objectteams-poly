@@ -213,6 +213,7 @@ public class OTWeavingHook implements WeavingHook, WovenClassListener {
 			String className = wovenClass.getClassName();
 			
 			if (bundleName.equals(Constants.TRANSFORMER_PLUGIN_ID)
+					|| bundleName.startsWith("org.eclipse.objectteams.otre") // incl. otredyn
 					|| bundleName.equals("org.objectweb.asm"))
 				return;
 

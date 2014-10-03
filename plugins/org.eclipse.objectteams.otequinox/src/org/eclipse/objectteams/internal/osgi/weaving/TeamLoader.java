@@ -215,7 +215,7 @@ public class TeamLoader {
 					break;
 				}
 				if (Util.PROFILE) Util.profile(time, ProfileKind.Activation, teamName);
-			} catch (NoClassDefFoundError e) {
+			} catch (NoClassDefFoundError|ClassCircularityError e) {
 				try { // clean up:
 					switch (activationKind) {
 					case ALL_THREADS: instance.deactivate(Team.ALL_THREADS); break;
@@ -235,6 +235,14 @@ public class TeamLoader {
 				log(t, "Failed to activate team "+teamName);
 			}
 			return instance;
+		} catch (ClassCircularityError e) {
+			for (TeamBinding eq : team.equivalenceSet)
+				eq.isActivated = false;
+			@SuppressWarnings("null") @NonNull // known API
+			String notFoundName = e.getMessage().replace('/', '.');
+			synchronized (this.deferredTeams) {
+				this.deferredTeams.add(new WaitingTeamRecord(team, activationKind, notFoundName));
+			}
 		} catch (Throwable e) {
 			// application error during constructor execution?
 			log(e, "Failed to instantiate team "+teamName);

@@ -1,7 +1,7 @@
 /**********************************************************************
  * This file is part of "Object Teams Development Tooling"-Software
  * 
- * Copyright 2003, 2010 Fraunhofer Gesellschaft, Munich, Germany,
+ * Copyright 2003, 2014 Fraunhofer Gesellschaft, Munich, Germany,
  * for its Fraunhofer Institute for Computer Architecture and Software
  * Technology (FIRST), Berlin, Germany and Technical University Berlin,
  * Germany.
@@ -267,6 +267,7 @@ public class OTREContainer implements IClasspathContainer
 					if (bundleEntry == null)
 						bundleEntry = bundle.getEntry("/"); // binary bundle
 					BYTECODE_WEAVER_PATHS[asm][i++] = new Path(FileLocator.toFileURL(bundleEntry).getFile()); //$NON-NLS-1$
+					break;
 				}
 			}
 			if (i == 4)

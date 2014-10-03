@@ -231,7 +231,6 @@ public abstract class AbstractTransformableClassNode extends ClassNode {
 	 * @param instructions
 	 * @param returnType
 	 */
-	@SuppressWarnings("unchecked")
 	protected void replaceReturn(InsnList instructions, Type returnType) {
 		if (returnType.getSort() != Type.OBJECT &&
 				returnType.getSort() != Type.ARRAY &&
@@ -240,9 +239,9 @@ public abstract class AbstractTransformableClassNode extends ClassNode {
 			while (orgMethodIter.hasNext()) {
 				AbstractInsnNode orgMethodNode = orgMethodIter.next();
 				if (orgMethodNode.getOpcode() == returnType.getOpcode(Opcodes.IRETURN)) {
+					instructions.insertBefore(orgMethodNode, AsmTypeHelper.getBoxingInstructionForType(returnType));
+					instructions.insertBefore(orgMethodNode, new InsnNode(Opcodes.ARETURN));
 					instructions.remove(orgMethodNode);
-					instructions.add(AsmTypeHelper.getBoxingInstructionForType(returnType));
-					instructions.add(new InsnNode(Opcodes.ARETURN));
 				}
 			}
 		} else if (returnType.getSort() == Type.VOID) {
@@ -250,11 +249,11 @@ public abstract class AbstractTransformableClassNode extends ClassNode {
 			while (orgMethodIter.hasNext()) {
 				AbstractInsnNode orgMethodNode = orgMethodIter.next();
 				if (orgMethodNode.getOpcode() == Opcodes.RETURN) {
+					instructions.insertBefore(orgMethodNode, new InsnNode(Opcodes.ACONST_NULL));
+					instructions.insertBefore(orgMethodNode, new InsnNode(Opcodes.ARETURN));
 					instructions.remove(orgMethodNode);
 				}
 			}
-			instructions.add(new InsnNode(Opcodes.ACONST_NULL));
-			instructions.add(new InsnNode(Opcodes.ARETURN));
 		}
 	}
 

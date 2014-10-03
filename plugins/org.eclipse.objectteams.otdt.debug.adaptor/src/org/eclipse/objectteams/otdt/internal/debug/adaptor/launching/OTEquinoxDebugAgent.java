@@ -19,13 +19,17 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.lang.instrument.ClassDefinition;
 import java.lang.instrument.ClassFileTransformer;
 import java.lang.instrument.IllegalClassFormatException;
 import java.lang.instrument.Instrumentation;
+import java.lang.instrument.UnmodifiableClassException;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.security.ProtectionDomain;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /** 
  * When debugging an OT/Equinox application, the regular framework hooks will
@@ -44,6 +48,8 @@ public class OTEquinoxDebugAgent {
 		{
 			if (classBeingRedefined == null)
 				return null; // first loading already goes through framework hooks.
+			if (bytesBeingRedefined.containsKey(classBeingRedefined))
+				return null; // our own transformer triggered the redefine, don' process again
 			try {
 				if (isDefaultClassLoader(loader)) {
 					String classNameDot = className.replace('/', '.'); // transformer expects dot-based names!
@@ -157,8 +163,25 @@ public class OTEquinoxDebugAgent {
 		}
 	}
 
+	private static Instrumentation instrumentation;
+	private static Map<Class<?>,byte[]> bytesBeingRedefined = new HashMap<>(); // to avoid reentrant transform requests, if our transformer triggers a redefine 
+
 	/** Install this transformer into the instrumentation. */
 	public static void premain(String options, Instrumentation inst) {
 		inst.addTransformer(new OTEquinoxTransformerDelegate());
+		OTEquinoxDebugAgent.instrumentation = inst;
+	}
+	
+	public static void redefine(ClassDefinition[] definitions) throws ClassNotFoundException, UnmodifiableClassException {
+		if (instrumentation == null)
+			throw new UnmodifiableClassException("Can't redefine classes, no instrumentation set.");
+		try {
+			for (ClassDefinition def : definitions)
+				bytesBeingRedefined.put(def.getDefinitionClass(), def.getDefinitionClassFile());
+			instrumentation.redefineClasses(definitions);
+		} finally {
+			for (ClassDefinition def : definitions)
+				bytesBeingRedefined.remove(def.getDefinitionClass());
+		}
 	}
 }

@@ -112,10 +112,18 @@ class AsmWritableBoundClass extends AsmBoundClass {
 		
 		reader = new ClassReader(allocateAndGetBytecode());
 
-		writer = new LoaderAwareClassWriter(reader, ClassWriter.COMPUTE_FRAMES, this.loader);
+		writer = getClassWriter();
 		multiAdapter = new MultiClassAdapter(writer);
 		nodes = new ArrayList<AbstractTransformableClassNode>();
 		isTransformationActive = true;
+	}
+
+	LoaderAwareClassWriter getClassWriter() {
+		int flags = ClassWriter.COMPUTE_FRAMES;
+// DEBUG: when frame computation throws an exception, enable dumping of class file without frames computed:
+//		if (getName().contains("JUnitLaunchConfigurationDelegate"))
+//			flags = 0;
+		return new LoaderAwareClassWriter(reader, flags, this.loader);
 	}
 	
 	/**
@@ -141,7 +149,7 @@ class AsmWritableBoundClass extends AsmBoundClass {
 			reader = new ClassReader(allocateAndGetBytecode());
 			reader.accept(node, ClassReader.SKIP_FRAMES);
 			if (node.transform()) {
-				writer = new LoaderAwareClassWriter(reader, ClassWriter.COMPUTE_FRAMES, this.loader);
+				writer = getClassWriter();
 				node.accept(writer);
 				setBytecode(writer.toByteArray());
 			}

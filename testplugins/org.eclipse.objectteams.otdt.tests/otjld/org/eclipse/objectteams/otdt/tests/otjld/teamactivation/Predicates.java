@@ -3203,4 +3203,45 @@ public class Predicates extends AbstractOTJLDTest {
             customOptions,
             null/*no custom requestor*/);
     }
+
+    public void testBugXYZ() {
+    	runConformTest(
+    		new String[] {
+    			"bugxyz/Main.java",
+    			"package bugxyz;\n" + 
+    			"\n" +
+    			"public class Main {\n" + 
+    			"	public static void main(String[] args) {\n" + 
+    			"		new T1().activate();\n" + 
+    			"		new B1().foo();\n" + 
+    			"	}\n" + 
+    			"}\n",
+    			"bugxzy/B1.java",
+    			"package bugxyz;\n" + 
+    			"\n" + 
+    			"public class B1 {\n" + 
+    			"	boolean test() { return true; }\n" + 
+    			"	void foo() { }\n" + 
+    			"}\n",
+    			"bugxzy/B2.java",
+    			"package bugxyz;\n" + 
+    			"\n" + 
+    			"public class B2 extends B1 {}\n",
+    			"bugxyz/T1.java",
+    			"package bugxyz;\n" + 
+    			"\n" + 
+    			"public team class T1 {\n" + 
+    			"	protected class R1 playedBy B1 {\n" + 
+    			"		bar <- before foo\n" + 
+    			"			base when (base.test());\n" + 
+    			"\n" + 
+    			"		private void bar() {\n" + 
+    			"			System.out.println(\"bar\");\n" + 
+    			"		}\n" + 
+    			"	}\n" + 
+    			"	protected class R2 extends R1 playedBy B2 { }\n" + 
+    			"}\n"
+    		},
+    		"bar");
+    }
 }
