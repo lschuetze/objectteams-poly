@@ -189,9 +189,7 @@ public team class ExtractInterfaceAdaptor {
 				arguments.put(JavaRefactoringDescriptorUtil.ATTRIBUTE_NAME, fSuperName);
 				for (int index= 0; index < fMembers.length; index++)
 					arguments.put(JavaRefactoringDescriptorUtil.ATTRIBUTE_ELEMENT + (index + 1), JavaRefactoringDescriptorUtil.elementToHandle(project, fMembers[index]));
-				arguments.put(ATTRIBUTE_ABSTRACT, Boolean.valueOf(fAbstract).toString());
 				arguments.put(ATTRIBUTE_COMMENTS, Boolean.valueOf(fComments).toString());
-				arguments.put(ATTRIBUTE_PUBLIC, Boolean.valueOf(fPublic).toString());
 				arguments.put(ATTRIBUTE_REPLACE, Boolean.valueOf(fReplace).toString());
 				arguments.put(ATTRIBUTE_INSTANCEOF, Boolean.valueOf(fInstanceOf).toString());
 //{ObjectTeams: different way to construct this change:
