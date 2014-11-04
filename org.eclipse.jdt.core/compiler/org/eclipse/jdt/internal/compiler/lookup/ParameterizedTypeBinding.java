@@ -36,6 +36,7 @@
  *								Bug 416182 - [1.8][compiler][null] Contradictory null annotations not rejected
  *								Bug 438458 - [1.8][null] clean up handling of null type annotations wrt type variables
  *								Bug 438179 - [1.8][null] 'Contradictory null annotations' error on type variable with explicit null-annotation.
+ *								Bug 441693 - [1.8][null] Bogus warning for type argument annotated with @NonNull
  *******************************************************************************/
 package org.eclipse.jdt.internal.compiler.lookup;
 
@@ -66,7 +67,7 @@ public class ParameterizedTypeBinding extends ReferenceBinding implements Substi
 
 //{ObjectTeams: make visible to objectteams package
 /* orig:
-	private ReferenceBinding type; // must ensure the type is resolved
+	protected ReferenceBinding type; // must ensure the type is resolved
   :giro */
 	public ReferenceBinding type; // must ensure the type is resolved
 // SH}
@@ -78,7 +79,7 @@ public class ParameterizedTypeBinding extends ReferenceBinding implements Substi
 	public FieldBinding[] fields;
 	public ReferenceBinding[] memberTypes;
 	public MethodBinding[] methods;
-	private ReferenceBinding enclosingType;
+	protected ReferenceBinding enclosingType;
 
 	public ParameterizedTypeBinding(ReferenceBinding type, TypeBinding[] arguments,  ReferenceBinding enclosingType, LookupEnvironment environment){
 		this.environment = environment;
@@ -968,27 +969,17 @@ public class ParameterizedTypeBinding extends ReferenceBinding implements Substi
 		return isRawType();
 	}
 
-	public TypeBinding unannotated(boolean removeOnlyNullAnnotations) {
-		if (!hasTypeAnnotations())
+	public TypeBinding unannotated() {
+		return this.hasTypeAnnotations() ? this.environment.getUnannotatedType(this) : this;
+	}
+
+	@Override
+	public TypeBinding withoutToplevelNullAnnotation() {
+		if (!hasNullTypeAnnotations())
 			return this;
-		if (removeOnlyNullAnnotations && !hasNullTypeAnnotations())
-			return this;
-		if (removeOnlyNullAnnotations) {
-			ReferenceBinding unannotatedGenericType = (ReferenceBinding) this.environment.getUnannotatedType(this.type);
-			AnnotationBinding[] newAnnotations = this.environment.filterNullTypeAnnotations(this.typeAnnotations);
-			TypeBinding[] newArguments = null;
-			if (this.arguments != null) {
-				newArguments = new TypeBinding[this.arguments.length];
-				for (int i = 0; i < this.arguments.length; i++) {
-					newArguments[i] = this.arguments[i].unannotated(removeOnlyNullAnnotations);
-				}
-			}
-			ReferenceBinding newEnclosing = null;
-			if (this.enclosingType != null)
-				newEnclosing = (ReferenceBinding)this.enclosingType.unannotated(removeOnlyNullAnnotations);
-			return this.environment.createParameterizedType(unannotatedGenericType, newArguments, newEnclosing, newAnnotations);
-		}
-		return this.environment.getUnannotatedType(this);
+		ReferenceBinding unannotatedGenericType = (ReferenceBinding) this.environment.getUnannotatedType(this.type);
+		AnnotationBinding[] newAnnotations = this.environment.filterNullTypeAnnotations(this.typeAnnotations);
+		return this.environment.createParameterizedType(unannotatedGenericType, this.arguments, this.enclosingType, newAnnotations);
 	}
 
 	public int kind() {

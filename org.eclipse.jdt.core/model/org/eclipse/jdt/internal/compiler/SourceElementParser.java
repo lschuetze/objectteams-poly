@@ -466,6 +466,7 @@ protected void consumeMethodHeaderName(boolean isAnnotationMethod) {
 		this.sourceEnds.put(this.astStack[this.astPtr], selectorSourceEnd);
 		rememberCategories();
 	}
+	flushCommentsDefinedPriorTo(this.scanner.currentPosition);
 }
 
 protected void consumeMethodHeaderNameWithTypeParameters(boolean isAnnotationMethod) {

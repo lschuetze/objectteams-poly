@@ -51,6 +51,7 @@ import org.eclipse.jdt.internal.compiler.parser.RecoveredBlock;
 import org.eclipse.jdt.internal.compiler.parser.RecoveredElement;
 import org.eclipse.jdt.internal.compiler.parser.RecoveredField;
 import org.eclipse.jdt.internal.compiler.parser.RecoveredInitializer;
+import org.eclipse.jdt.internal.compiler.parser.RecoveredLocalVariable;
 import org.eclipse.jdt.internal.compiler.parser.RecoveredMethod;
 import org.eclipse.jdt.internal.compiler.parser.RecoveredStatement;
 import org.eclipse.jdt.internal.compiler.parser.RecoveredType;
@@ -476,29 +477,47 @@ protected boolean triggerRecoveryUponLambdaClosure(Statement statement, boolean 
 		}
 	}
 	
-	if (lambdaClosed && this.currentElement != null) {
-		this.restartRecovery = true;
+	if (lambdaClosed && this.currentElement != null && !(this.currentElement instanceof RecoveredField)) {
 		if (!(statement instanceof AbstractVariableDeclaration)) { // added already as part of standard recovery since these contribute a name to the scope prevailing at the cursor.
 			/* See if CompletionParser.attachOrphanCompletionNode has already added bits and pieces of AST to the recovery tree. If so, we want to
 			   replace those fragments with the fuller statement that provides target type for the lambda that got closed just now. There is prior
 			   art/precedent in the Java 7 world to this: Search for recoveredBlock.statements[--recoveredBlock.statementCount] = null;
 			   See also that this concern does not arise in the case of field/local initialization since the initializer is replaced with full tree by consumeExitVariableWithInitialization.
 			*/
-			ASTNode assistNodeParent = this.assistNodeParent();
-			ASTNode enclosingNode = this.enclosingNode();
-			if (assistNodeParent != null || enclosingNode != null) {
-				RecoveredBlock recoveredBlock = (RecoveredBlock) (this.currentElement instanceof RecoveredBlock ? this.currentElement : 
-													(this.currentElement.parent instanceof RecoveredBlock) ? this.currentElement.parent : null);
-				if (recoveredBlock != null) {
-					RecoveredStatement recoveredStatement = recoveredBlock.statementCount > 0 ? recoveredBlock.statements[recoveredBlock.statementCount - 1] : null;
-					ASTNode parseTree = recoveredStatement != null ? recoveredStatement.updatedStatement(0, new HashSet()) : null;
-					if (parseTree != null && (parseTree == assistNodeParent || parseTree == enclosingNode)) {
+			RecoveredBlock recoveredBlock = (RecoveredBlock) (this.currentElement instanceof RecoveredBlock ? this.currentElement : 
+				(this.currentElement.parent instanceof RecoveredBlock) ? this.currentElement.parent : null);
+			if (recoveredBlock != null) {
+				RecoveredStatement recoveredStatement = recoveredBlock.statementCount > 0 ? recoveredBlock.statements[recoveredBlock.statementCount - 1] : null;
+				ASTNode parseTree = recoveredStatement != null ? recoveredStatement.updatedStatement(0, new HashSet()) : null;
+				if (parseTree != null) {
+					if ((parseTree.sourceStart == 0 || parseTree.sourceEnd == 0) || (parseTree.sourceStart >= statementStart && parseTree.sourceEnd <= statementEnd)) {
 						recoveredBlock.statements[--recoveredBlock.statementCount] = null;
 						this.currentElement = recoveredBlock;
+					} else if (recoveredStatement instanceof RecoveredLocalVariable && statement instanceof Expression) {
+						RecoveredLocalVariable local = (RecoveredLocalVariable) recoveredStatement;
+						if (local.localDeclaration != null && local.localDeclaration.initialization != null) {
+							if ((local.localDeclaration.initialization.sourceStart == 0 || local.localDeclaration.initialization.sourceEnd == 0) || 
+							        (local.localDeclaration.initialization.sourceStart >= statementStart && local.localDeclaration.initialization.sourceEnd <= statementEnd) ){
+								local.localDeclaration.initialization = (Expression) statement;
+								local.localDeclaration.declarationSourceEnd = statement.sourceEnd;
+								local.localDeclaration.declarationEnd = statement.sourceEnd;
+								statement = null;
+							}
+						}
 					}
 				}
 			}
-			this.currentElement.add(statement, 0);
+			
+			if (statement != null) {
+				while (this.currentElement != null) {
+					ASTNode tree = this.currentElement.parseTree();
+					if (tree.sourceStart < statement.sourceStart) {
+						this.currentElement.add(statement, 0);
+						break;
+					}
+					this.currentElement = this.currentElement.parent;
+				}
+			}
 		}
 	}
 	this.snapShot = null;
@@ -518,17 +537,22 @@ public boolean isAssistParser() {
 }
 protected void consumeBlockStatement() {
 	super.consumeBlockStatement();
-	triggerRecoveryUponLambdaClosure((Statement) this.astStack[this.astPtr], true);
+	if (triggerRecoveryUponLambdaClosure((Statement) this.astStack[this.astPtr], true) && this.currentElement != null)
+		this.restartRecovery = true;
 }
 protected void consumeBlockStatements() {
 	super.consumeBlockStatements();
-	triggerRecoveryUponLambdaClosure((Statement) this.astStack[this.astPtr], true);
+	if (triggerRecoveryUponLambdaClosure((Statement) this.astStack[this.astPtr], true) && this.currentElement != null) {
+		this.restartRecovery = true;
+	}
 }
 protected void consumeFieldDeclaration() {
 	super.consumeFieldDeclaration();
 	if (triggerRecoveryUponLambdaClosure((Statement) this.astStack[this.astPtr], true)) {
 		if (this.currentElement instanceof RecoveredType)
 			popUntilElement(K_TYPE_DELIMITER);
+		if (this.currentElement != null)
+			this.restartRecovery = true;
 	}
 }
 protected void consumeForceNoDiet() {
@@ -1508,6 +1532,15 @@ protected boolean isIndirectlyInsideLambdaExpression(){
 	int i = this.elementPtr;
 	while (i > -1) {
 		if (this.elementKindStack[i] == K_LAMBDA_EXPRESSION_DELIMITER)
+			return true;
+		i--;
+	}
+	return false;
+}
+protected boolean isIndirectlyInsideLambdaBlock(){
+	int i = this.elementPtr;
+	while (i > -1) {
+		if (this.elementKindStack[i] == K_LAMBDA_EXPRESSION_DELIMITER && this.elementInfoStack[i] == BLOCK_BODY)
 			return true;
 		i--;
 	}

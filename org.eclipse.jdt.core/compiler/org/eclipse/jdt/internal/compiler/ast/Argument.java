@@ -53,6 +53,11 @@ public class Argument extends LocalDeclaration {
 		}
 		this.bits |= (IsLocalDeclarationReachable | IsArgument);
 	}
+	
+	@Override
+	public boolean isRecoveredFromLoneIdentifier() {
+		return false;
+	}
 
 	public Argument(char[] name, long posNom, TypeReference tr, int modifiers, boolean typeElided) {
 

@@ -30,7 +30,6 @@ import org.eclipse.objectteams.otdt.internal.core.compiler.lookup.RoleTypeBindin
 
 public class AnnotatableTypeSystem extends TypeSystem {
 
-	private LookupEnvironment environment;
 	private boolean isAnnotationBasedNullAnalysisEnabled;
 	
 	public AnnotatableTypeSystem(LookupEnvironment environment) {
@@ -63,6 +62,9 @@ public class AnnotatableTypeSystem extends TypeSystem {
 	
 	/* This method replaces the version that used to sit in LE. The parameter `annotations' is a flattened sequence of annotations, 
 	   where each dimension's annotations end with a sentinel null. Leaf type can be an already annotated type.
+	   
+	   See ArrayBinding.swapUnresolved for further special case handling if incoming leafType is a URB that would resolve to a raw 
+	   type later.
 	*/
 	public ArrayBinding getArrayType(TypeBinding leafType, int dimensions, AnnotationBinding [] annotations) {
 		
@@ -113,50 +115,24 @@ public class AnnotatableTypeSystem extends TypeSystem {
 		if (genericType.hasTypeAnnotations())   // @NonNull (List<String>) and not (@NonNull List)<String>
 			throw new IllegalStateException();
 
-		ParameterizedTypeBinding nakedType = null;
-		TypeBinding[] derivedTypes = getDerivedTypes(genericType);
-		for (int i = 0, length = derivedTypes.length; i < length; i++) {
-			TypeBinding derivedType = derivedTypes[i];
-			if (derivedType == null)
-				break;
-//{ObjectTeams: parameterized and/or anchored?
-/* orig:
-			if (!derivedType.isParameterizedType() || derivedType.actualType() != genericType) //$IDENTITY-COMPARISON$
-				continue;
-  :giro */
-			if (!(derivedType instanceof ParameterizedTypeBinding)) // roles might answer 'false' to isParameterized(), still they are valid candidates, here
-				continue;
-			if (derivedType.actualType() != genericType) //$IDENTITY-COMPARISON$
-				continue;
-			if (derivedType.isRawType() && typeArguments != null)
-				continue;
-			// also match team anchor if given:
-			if (!isRoleTypeMatch(teamAnchor, valueParamPosition, derivedType))
-				continue;
-//SH}
-			if (derivedType.enclosingType() != enclosingType || !Util.effectivelyEqual(derivedType.typeArguments(), typeArguments)) //$IDENTITY-COMPARISON$
-				continue;
-			if (Util.effectivelyEqual(annotations, derivedType.getTypeAnnotations()))
-				return (ParameterizedTypeBinding) derivedType;
-			if (!derivedType.hasTypeAnnotations())
-				nakedType = (ParameterizedTypeBinding) derivedType;
-		}
-		if (nakedType == null)
-//{ObjectTeams: all parameters:
-/* orig:
-			nakedType = super.getParameterizedType(genericType, typeArguments, enclosingType);
-  :orig */
-			nakedType = super.getParameterizedType(genericType, typeArguments, teamAnchor, valueParamPosition, enclosingType);
+		ParameterizedTypeBinding parameterizedType = this.parameterizedTypes.get(genericType, typeArguments, enclosingType, annotations);
+		if (parameterizedType != null)
+			return parameterizedType;
+
+//{ObjectTeams: pass more args:
+/*
+		ParameterizedTypeBinding nakedType = super.getParameterizedType(genericType, typeArguments, enclosingType);
+ */
+		ParameterizedTypeBinding nakedType = super.getParameterizedType(genericType, typeArguments, teamAnchor, valueParamPosition, enclosingType);
 // SH}
-		
+
 		if (!haveTypeAnnotations(genericType, enclosingType, typeArguments, annotations))
 			return nakedType;
 		
 //{ObjectTeams: dependent type?
 /* orig:	
-		TypeBinding parameterizedType = new ParameterizedTypeBinding(genericType, typeArguments, enclosingType, this.environment);
+		parameterizedType = new ParameterizedTypeBinding(genericType, typeArguments, enclosingType, this.environment);
   :giro */
-		ParameterizedTypeBinding parameterizedType;
 		if (teamAnchor == null) {
 			parameterizedType = new ParameterizedTypeBinding(genericType,typeArguments, enclosingType, this.environment);
 		} else {
@@ -169,6 +145,7 @@ public class AnnotatableTypeSystem extends TypeSystem {
 // SH}
 		parameterizedType.id = nakedType.id;
 		parameterizedType.setTypeAnnotations(annotations, this.isAnnotationBasedNullAnalysisEnabled);
+		this.parameterizedTypes.put(genericType, typeArguments, enclosingType, parameterizedType);
 		return (ParameterizedTypeBinding) cacheDerivedType(genericType, nakedType, parameterizedType);
 	}
 	
@@ -336,6 +313,14 @@ public class AnnotatableTypeSystem extends TypeSystem {
 	   Likewise so the bindings for @Readonly List<@NonNull String> != @Readonly List<@Nullable String> != @Readonly List<@Interned String> 
 	*/
 	private TypeBinding getAnnotatedType(TypeBinding type, TypeBinding enclosingType, AnnotationBinding[] annotations) {
+		if (type.kind() == Binding.PARAMETERIZED_TYPE) {
+//{ObjectTeams: more args:
+/*
+			return getParameterizedType(type.actualType(), type.typeArguments(), (ReferenceBinding) enclosingType, annotations);
+ */
+			return getParameterizedType(type.actualType(), type.typeArguments(), null, -1, (ReferenceBinding) enclosingType, annotations);
+// SH}
+		}
 		TypeBinding nakedType = null;
 		TypeBinding[] derivedTypes = getDerivedTypes(type);
 		for (int i = 0, length = derivedTypes.length; i < length; i++) {
@@ -350,14 +335,11 @@ public class AnnotatableTypeSystem extends TypeSystem {
 					if (!derivedType.isArrayType() || derivedType.dimensions() != type.dimensions() || derivedType.leafComponentType() != type.leafComponentType()) //$IDENTITY-COMPARISON$
 						continue;
 					break;
-				case Binding.PARAMETERIZED_TYPE:
-					if (!derivedType.isParameterizedType() || derivedType.actualType() != type.actualType()) //$IDENTITY-COMPARISON$
-						continue;
-					break;
 				case Binding.RAW_TYPE:
 					if (!derivedType.isRawType() || derivedType.actualType() != type.actualType()) //$IDENTITY-COMPARISON$
 						continue;
 					break;
+				case Binding.INTERSECTION_TYPE:
 				case Binding.WILDCARD_TYPE:
 					if (!derivedType.isWildcard() || derivedType.actualType() != type.actualType() || derivedType.rank() != type.rank() || derivedType.boundKind() != type.boundKind()) //$IDENTITY-COMPARISON$
 						continue;
@@ -367,7 +349,6 @@ public class AnnotatableTypeSystem extends TypeSystem {
 				default:
 					switch(derivedType.kind()) {
 						case Binding.ARRAY_TYPE:
-						case Binding.PARAMETERIZED_TYPE:
 						case Binding.RAW_TYPE:
 						case Binding.WILDCARD_TYPE:
 						case Binding.INTERSECTION_CAST_TYPE:
@@ -377,9 +358,6 @@ public class AnnotatableTypeSystem extends TypeSystem {
 					break;
 			}
 			if (Util.effectivelyEqual(derivedType.getTypeAnnotations(), annotations)) {
-				// point-fix for https://bugs.eclipse.org/432977
-				if (!type.isUnresolvedType() && derivedType.isUnresolvedType())
-					return ((UnresolvedReferenceBinding)derivedType).resolve(this.environment, false);
 				return derivedType;
 			}
 			if (!derivedType.hasTypeAnnotations())
@@ -399,7 +377,6 @@ public class AnnotatableTypeSystem extends TypeSystem {
 			case Binding.ARRAY_TYPE:
 				keyType = type.leafComponentType();
 				break;
-			case Binding.PARAMETERIZED_TYPE:
 			case Binding.RAW_TYPE:
 			case Binding.WILDCARD_TYPE:
 				keyType = type.actualType();

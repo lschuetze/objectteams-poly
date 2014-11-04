@@ -149,8 +149,11 @@ public final void addLocalType(TypeDeclaration localType) {
 	MethodScope methodScope = methodScope();
 	while (methodScope != null && methodScope.referenceContext instanceof LambdaExpression) {
 		LambdaExpression lambda = (LambdaExpression) methodScope.referenceContext;
-		if (!lambda.scope.isStatic && !lambda.scope.isConstructorCall) {
+		if (!lambda.scope.isStatic) {
 			lambda.shouldCaptureInstance = true;
+			if (lambda.scope.isConstructorCall) {
+				lambda.scope.problemReporter().noSuchEnclosingInstance(enclosingSourceType(), lambda, true);
+			}
 		}
 		methodScope = methodScope.enclosingMethodScope();
 	}
@@ -1104,11 +1107,9 @@ public final boolean needBlankFinalFieldInitializationCheck(FieldBinding binding
 	boolean isStatic = binding.isStatic();
 	ReferenceBinding fieldDeclaringClass = binding.declaringClass;
 	// loop in enclosing context, until reaching the field declaring context
-	MethodScope methodScope = methodScope();
+	MethodScope methodScope = namedMethodScope();
 	while (methodScope != null) {
 		if (methodScope.isStatic != isStatic)
-			return false;
-		if (methodScope.isLambdaScope())
 			return false;
 		if (!methodScope.isInsideInitializer() // inside initializer
 				&& !((AbstractMethodDeclaration) methodScope.referenceContext).isInitializationMethod()) { // inside constructor or clinit
@@ -1121,7 +1122,7 @@ public final boolean needBlankFinalFieldInitializationCheck(FieldBinding binding
 		if (!enclosingType.erasure().isAnonymousType()) {
 			return false; // only check inside anonymous type
 		}
-		methodScope = methodScope.enclosingMethodScope();
+		methodScope = methodScope.enclosingMethodScope().namedMethodScope();
 	}
 	return false;
 }

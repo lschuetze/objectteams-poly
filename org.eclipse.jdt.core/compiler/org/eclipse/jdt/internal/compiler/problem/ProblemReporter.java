@@ -1781,8 +1781,6 @@ public int computeSeverity(int problemID){
 			return ProblemSeverities.Warning;
 		case IProblem.IllegalUseOfUnderscoreAsAnIdentifier:
 			return this.underScoreIsLambdaParameter ? ProblemSeverities.Error : ProblemSeverities.Warning;
-		case IProblem.LambdaShapeComputationError:
-			return ProblemSeverities.InternalError;
 	}
 	int irritant = getIrritant(problemID);
 	if (irritant != 0) {
@@ -5257,6 +5255,10 @@ public void illegalTypeAnnotationsInStaticMemberAccess(Annotation first, Annotat
 			last.sourceEnd);
 }
 public void isClassPathCorrect(char[][] wellKnownTypeName, CompilationUnitDeclaration compUnitDecl, Object location) {
+	// ProblemReporter is not designed to be reentrant. Just in case, we discovered a build path problem while we are already 
+	// in the midst of reporting some other problem, save and restore reference context thereby mimicking a stack.
+	// See https://bugs.eclipse.org/bugs/show_bug.cgi?id=442755.
+	ReferenceContext savedContext = this.referenceContext;
 	this.referenceContext = compUnitDecl;
 	String[] arguments = new String[] {CharOperation.toString(wellKnownTypeName)};
 	int start = 0, end = 0;
@@ -5271,12 +5273,16 @@ public void isClassPathCorrect(char[][] wellKnownTypeName, CompilationUnitDeclar
 			end = node.sourceEnd();
 		}
 	}
-	this.handle(
-		IProblem.IsClassPathCorrect,
-		arguments,
-		arguments,
-		start,
-		end);
+	try {
+		this.handle(
+				IProblem.IsClassPathCorrect,
+				arguments,
+				arguments,
+				start,
+				end);
+	} finally {
+		this.referenceContext = savedContext;
+	}
 }
 private boolean isIdentifier(int token) {
 	return token == TerminalTokens.TokenNameIdentifier;
@@ -7218,7 +7224,7 @@ public void noSuchEnclosingInstance(TypeBinding targetType, ASTNode location, bo
 		new String[] { new String(targetType.readableName())},
 		new String[] { new String(targetType.shortReadableName())},
 		location.sourceStart,
-		location.sourceEnd);
+		location instanceof LambdaExpression ? ((LambdaExpression)location).diagnosticsSourceEnd() : location.sourceEnd);
 }
 public void notCompatibleTypesError(EqualExpression expression, TypeBinding leftType, TypeBinding rightType) {
 	String leftName = new String(leftType.readableName());
@@ -14571,14 +14577,5 @@ public void uninternedIdentityComparison(EqualExpression expr, TypeBinding lhs, 
 			},
 			expr.sourceStart,
 			expr.sourceEnd);
-}
-
-public void lambdaShapeComputationError(LambdaExpression expression) {
-	this.handle(
-			IProblem.LambdaShapeComputationError,
-			NoArgument,
-			NoArgument,
-			expression.sourceStart,
-			expression.diagnosticsSourceEnd());
 }
 }

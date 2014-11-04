@@ -2919,6 +2919,11 @@ public final class CompletionEngine
 			
 			TypeBinding receiverType = (TypeBinding) qualifiedBinding;
 			if (receiverType != null && receiverType instanceof ReferenceBinding) {
+				if (!(receiverType.isInterface() || this.requestor.isIgnored(CompletionProposal.KEYWORD))) {
+					this.assistNodeIsConstructor = true;
+					setSourceAndTokenRange(referenceExpression.nameSourceStart, referenceExpression.sourceEnd);
+					findKeywords(this.completionToken, new char[][] { Keywords.NEW }, false, false);
+				}
 				findMethods(
 						this.completionToken,
 						referenceExpression.resolvedTypeArguments,
@@ -8563,6 +8568,9 @@ public final class CompletionEngine
 					relevance += computeRelevanceForExpectingType(TypeBinding.BOOLEAN);
 					relevance += computeRelevanceForQualification(false);
 				}
+				if (CharOperation.equals(choices[i], Keywords.NEW)) {
+					relevance += computeRelevanceForConstructor();
+				}
 				this.noProposal = false;
 				if(!this.requestor.isIgnored(CompletionProposal.KEYWORD)) {
 					InternalCompletionProposal proposal =  createProposal(CompletionProposal.KEYWORD, this.actualCompletionPosition);
@@ -9282,10 +9290,7 @@ public final class CompletionEngine
 						}
 					}
 // SH}
-					if (completionOnReferenceExpressionName)
-						proposal.setReplaceRange(this.endPosition - this.offset - methodLength, this.endPosition - this.offset);
-					else 
-						proposal.setReplaceRange(this.startPosition - this.offset, this.endPosition - this.offset);
+					proposal.setReplaceRange(this.startPosition - this.offset, this.endPosition - this.offset);
 					proposal.setTokenRange(this.tokenStart - this.offset, this.tokenEnd - this.offset);
 					proposal.setRelevance(relevance);
 					if(parameterNames != null) proposal.setParameterNames(parameterNames);
@@ -9839,7 +9844,7 @@ public final class CompletionEngine
 				((scope instanceof MethodScope && !((MethodScope)scope).isStatic)
 				|| ((methodScope = scope.enclosingMethodScope()) != null && !methodScope.isStatic))) {
 			if (token.length > 0) {
-				findKeywords(token, new char[][]{Keywords.THIS}, true, false);
+				findKeywords(token, new char[][]{Keywords.THIS, Keywords.SUPER}, true, false);
 			} else {
 				int relevance = computeBaseRelevance();
 				relevance += computeRelevanceForResolution();
