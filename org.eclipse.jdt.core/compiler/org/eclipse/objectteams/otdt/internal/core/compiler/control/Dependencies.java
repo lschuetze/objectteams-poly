@@ -33,6 +33,7 @@ import org.eclipse.jdt.internal.compiler.env.AccessRestriction;
 import org.eclipse.jdt.internal.compiler.impl.CompilerOptions.WeavingScheme;
 import org.eclipse.jdt.internal.compiler.lookup.BinaryTypeBinding;
 import org.eclipse.jdt.internal.compiler.lookup.Binding;
+import org.eclipse.jdt.internal.compiler.lookup.CaptureBinding;
 import org.eclipse.jdt.internal.compiler.lookup.ClassScope;
 import org.eclipse.jdt.internal.compiler.lookup.LookupEnvironment;
 import org.eclipse.jdt.internal.compiler.lookup.MemberTypeBinding;
@@ -476,6 +477,15 @@ public class Dependencies implements ITranslationStates {
         TypeBinding proto = type.prototype();
         if (proto instanceof ReferenceBinding)
         	type = (ReferenceBinding) proto;
+        if (type instanceof CaptureBinding) {
+        	boolean success = true;
+        	CaptureBinding capture = (CaptureBinding)type;
+        	success &= ensureBindingState(capture.superclass, state);
+        	for (ReferenceBinding superIfc : capture.superInterfaces) {
+				success &= ensureBindingState(superIfc, state);
+			}
+        	return success;
+        }
         if (type.isRole())
         {
         	// this includes the case of "team as role"
