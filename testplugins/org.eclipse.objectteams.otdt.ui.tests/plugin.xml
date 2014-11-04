@@ -26,6 +26,16 @@
                class="org.eclipse.objectteams.otdt.ui.tests.core.HierarchicalASTVisiting"
                icon="platform:/plugin/org.eclipse.objectteams.otdt.ui/icons/ot/team_obj.gif">
          </team>
+         <team
+               activation="ALL_THREADS"
+               class="org.eclipse.objectteams.otdt.ui.tests.TestAdjuster"
+               icon="platform:/plugin/org.eclipse.objectteams.otdt.ui/icons/ot/team_obj.gif">
+         </team>
+         <team
+               activation="NONE"
+               class="org.eclipse.objectteams.otdt.ui.tests.TestAdjuster$Collect"
+               icon="platform:/plugin/org.eclipse.objectteams.otdt.ui/icons/ot/team_obj.gif">
+         </team>
       </aspectBinding>
    </extension>
 </plugin>
