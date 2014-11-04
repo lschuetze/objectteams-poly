@@ -110,19 +110,22 @@ public class AnnotatableTypeSystem extends TypeSystem {
 			ITeamAnchor teamAnchor, int valueParamPosition, ReferenceBinding enclosingType, AnnotationBinding [] annotations) {
 		if (teamAnchor == null && genericType instanceof DependentTypeBinding)
 			teamAnchor = ((DependentTypeBinding) genericType)._teamAnchor;
-// SH}
+// orig:
 		
 		if (genericType.hasTypeAnnotations())   // @NonNull (List<String>) and not (@NonNull List)<String>
 			throw new IllegalStateException();
-
+/*
 		ParameterizedTypeBinding parameterizedType = this.parameterizedTypes.get(genericType, typeArguments, enclosingType, annotations);
+  :giro */
+		ParameterizedTypeBinding parameterizedType = this.parameterizedTypes.get(genericType, typeArguments, 
+				teamAnchor, valueParamPosition, enclosingType, annotations);
+// orig:
 		if (parameterizedType != null)
 			return parameterizedType;
 
-//{ObjectTeams: pass more args:
 /*
 		ParameterizedTypeBinding nakedType = super.getParameterizedType(genericType, typeArguments, enclosingType);
- */
+  :giro */
 		ParameterizedTypeBinding nakedType = super.getParameterizedType(genericType, typeArguments, teamAnchor, valueParamPosition, enclosingType);
 // SH}
 
@@ -142,10 +145,14 @@ public class AnnotatableTypeSystem extends TypeSystem {
 				parameterizedType = new DependentTypeBinding(genericType, typeArguments, teamAnchor, valueParamPosition, enclosingType, this.environment);
 			}
 		}
-// SH}
+// orig:
 		parameterizedType.id = nakedType.id;
 		parameterizedType.setTypeAnnotations(annotations, this.isAnnotationBasedNullAnalysisEnabled);
+/*
 		this.parameterizedTypes.put(genericType, typeArguments, enclosingType, parameterizedType);
+  :giro */
+		this.parameterizedTypes.put(genericType, typeArguments, teamAnchor, valueParamPosition, enclosingType, parameterizedType);
+// SH}
 		return (ParameterizedTypeBinding) cacheDerivedType(genericType, nakedType, parameterizedType);
 	}
 	
