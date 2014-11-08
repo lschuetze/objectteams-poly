@@ -192,7 +192,11 @@ public class OTDTUIPlugin extends AbstractUIPlugin implements OTDTUIPluginConsta
 	public CallinMarkerCreator2 getCallinMarkerCreator()
 	{
 	    if (_callinMarkerCreator == null)
-	        _callinMarkerCreator = new CallinMarkerCreator2();
+			try {
+				_callinMarkerCreator = new CallinMarkerCreator2();
+			} catch (IllegalStateException e) {
+				logException("Failed to activate callin marker creator", e); //$NON-NLS-1$
+			}
 	    
 	    return _callinMarkerCreator;
 	}
