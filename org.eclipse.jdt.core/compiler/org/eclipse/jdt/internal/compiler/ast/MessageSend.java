@@ -193,6 +193,11 @@ public class MessageSend extends Expression implements Invocation {
 	 // hold on to this context from invocation applicability inference until invocation type inference (per method candidate):
 	private SimpleLookupTable/*<PGMB,InferenceContext18>*/ inferenceContexts;
 	protected InnerInferenceHelper innerInferenceHelper;
+	private boolean receiverIsType;
+	protected boolean argsContainCast;
+	public TypeBinding[] argumentTypes = Binding.NO_PARAMETERS;
+	public boolean argumentsHaveErrors;
+	
 
 //{ObjectTeams:
 	private boolean isDecapsulation = false;
@@ -802,7 +807,7 @@ public TypeBinding resolveType(BlockScope scope) {
 
 	this.constant = Constant.NotAConstant;
 	long sourceLevel = scope.compilerOptions().sourceLevel;
-	boolean receiverCast = false, argsContainCast = false;
+	boolean receiverCast = false;
 	if (this.receiver instanceof CastExpression) {
 		this.receiver.bits |= ASTNode.DisableUnnecessaryCastCheck; // will check later on
 		receiverCast = true;
@@ -818,10 +823,10 @@ public TypeBinding resolveType(BlockScope scope) {
 // :giro
   }
   /*orig:
-	boolean receiverIsType = this.receiver instanceof NameReference && (((NameReference) this.receiver).bits & Binding.TYPE) != 0;
+	this.receiverIsType = this.receiver instanceof NameReference && (((NameReference) this.receiver).bits & Binding.TYPE) != 0;
    */
     // don't only expect NameReference, BaseReference can be static, too.
-	boolean receiverIsType = (   (this.receiver instanceof NameReference)
+	this.receiverIsType = (   (this.receiver instanceof NameReference)
 							  || (this.receiver instanceof BaseReference))
 							 && (this.receiver.bits & Binding.TYPE) != 0
 							 || (this.receiver instanceof TypeReference); // happens in generated AST
@@ -835,18 +840,18 @@ public TypeBinding resolveType(BlockScope scope) {
 	// resolve type arguments (for generic constructor call)
 	if (this.typeArguments != null) {
 		int length = this.typeArguments.length;
-		boolean argHasError = sourceLevel < ClassFileConstants.JDK1_5; // typeChecks all arguments
+		this.argumentsHaveErrors = sourceLevel < ClassFileConstants.JDK1_5; // typeChecks all arguments
 		this.genericTypeArguments = new TypeBinding[length];
 		for (int i = 0; i < length; i++) {
 			TypeReference typeReference = this.typeArguments[i];
 			if ((this.genericTypeArguments[i] = typeReference.resolveType(scope, true /* check bounds*/)) == null) {
-				argHasError = true;
+				this.argumentsHaveErrors = true;
 			}
-			if (argHasError && typeReference instanceof Wildcard) {
+			if (this.argumentsHaveErrors && typeReference instanceof Wildcard) {
 				scope.problemReporter().illegalUsageOfWildcard(typeReference);
 			}
 		}
-		if (argHasError) {
+		if (this.argumentsHaveErrors) {
 			if (this.arguments != null) { // still attempt to resolve arguments
 				for (int i = 0, max = this.arguments.length; i < max; i++) {
 					this.arguments[i].resolveType(scope);
@@ -856,11 +861,10 @@ public TypeBinding resolveType(BlockScope scope) {
 		}
 	}
 	// will check for null after args are resolved
-	TypeBinding[] argumentTypes = Binding.NO_PARAMETERS;
 	if (this.arguments != null) {
-		boolean argHasError = false; // typeChecks all arguments
+		this.argumentsHaveErrors = false; // typeChecks all arguments
 		int length = this.arguments.length;
-		argumentTypes = new TypeBinding[length];
+		this.argumentTypes = new TypeBinding[length];
 		for (int i = 0; i < length; i++){
 			Expression argument = this.arguments[i];
 //{ObjectTeams: keep pre-resolved binding inside generated code:
@@ -870,16 +874,16 @@ public TypeBinding resolveType(BlockScope scope) {
 				scope.problemReporter().genericInferenceError("Argument was unexpectedly found resolved", this); //$NON-NLS-1$
 			if (argument instanceof CastExpression) {
 				argument.bits |= ASTNode.DisableUnnecessaryCastCheck; // will check later on
-				argsContainCast = true;
+				this.argsContainCast = true;
 			}
 			argument.setExpressionContext(INVOCATION_CONTEXT);
 //{ObjectTeams: arguments might already be resolved, see e.g. CastExpression.createRoleCheck
 		  if (argument.resolvedType != null) {
-			argumentTypes[i] = argument.resolvedType;
+			this.argumentTypes[i] = argument.resolvedType;
 		  } else {
 // orig:
-			if ((argumentTypes[i] = argument.resolveType(scope)) == null){
-				argHasError = true;
+			if ((this.argumentTypes[i] = argument.resolveType(scope)) == null){
+				this.argumentsHaveErrors = true;
 			}
 // :giro
 		  }
@@ -892,12 +896,12 @@ public TypeBinding resolveType(BlockScope scope) {
 				}
 			}
 		}
-		if (argHasError) {
+		if (this.argumentsHaveErrors) {
 			if (this.actualReceiverType instanceof ReferenceBinding) {
 				//  record a best guess, for clients who need hint about possible method match
 				TypeBinding[] pseudoArgs = new TypeBinding[length];
 				for (int i = length; --i >= 0;)
-					pseudoArgs[i] = argumentTypes[i] == null ? TypeBinding.NULL : argumentTypes[i]; // replace args with errors with null type
+					pseudoArgs[i] = this.argumentTypes[i] == null ? TypeBinding.NULL : this.argumentTypes[i]; // replace args with errors with null type
 				this.binding =
 					this.receiver.isImplicitThis()
 						? scope.getImplicitMethod(this.selector, pseudoArgs, this)
@@ -933,7 +937,7 @@ public TypeBinding resolveType(BlockScope scope) {
 	}
 	// base type cannot receive any message
 	if (this.actualReceiverType.isBaseType()) {
-		scope.problemReporter().errorNoMethodFor(this, this.actualReceiverType, argumentTypes);
+		scope.problemReporter().errorNoMethodFor(this, this.actualReceiverType, this.argumentTypes);
 		return null;
 	}
 //{ObjectTeams: revert receiver weakening & setup anchorMapping:
@@ -974,7 +978,7 @@ public TypeBinding resolveType(BlockScope scope) {
 		this.selector=IOTConstants._OT_GETBASE;
 // orig:
 
-	findMethodBinding(scope, argumentTypes);
+	findMethodBinding(scope);
 
 // :giro
 	if (this.binding == null)
@@ -1043,7 +1047,7 @@ public TypeBinding resolveType(BlockScope scope) {
 			if (this.actualReceiverType instanceof ReferenceBinding) {
 				this.binding.declaringClass = (ReferenceBinding) this.actualReceiverType;
 			} else {
-				scope.problemReporter().errorNoMethodFor(this, this.actualReceiverType, argumentTypes);
+				scope.problemReporter().errorNoMethodFor(this, this.actualReceiverType, this.argumentTypes);
 				return null;
 			}
 		}
@@ -1161,7 +1165,7 @@ public TypeBinding resolveType(BlockScope scope) {
 	}
 	if (!this.binding.isStatic()) {
 		// the "receiver" must not be a type
-		if (receiverIsType) {
+		if (this.receiverIsType) {
 			scope.problemReporter().mustUseAStaticMethod(this, this.binding);
 			if (this.actualReceiverType.isRawType()
 					&& (this.receiver.bits & ASTNode.IgnoreRawTypeCheck) == 0
@@ -1180,14 +1184,14 @@ public TypeBinding resolveType(BlockScope scope) {
 		}
 	} else {
 		// static message invoked through receiver? legal but unoptimal (optional warning).
-		if (!(this.receiver.isImplicitThis() || this.receiver.isSuper() || receiverIsType)) {
+		if (!(this.receiver.isImplicitThis() || this.receiver.isSuper() || this.receiverIsType)) {
 			scope.problemReporter().nonStaticAccessToStaticMethod(this, this.binding);
 		}
 		if (!this.receiver.isImplicitThis() && TypeBinding.notEquals(this.binding.declaringClass, this.actualReceiverType)) {
 			scope.problemReporter().indirectAccessToStaticMethod(this, this.binding);
 		}
 	}
-	if (checkInvocationArguments(scope, this.receiver, this.actualReceiverType, this.binding, this.arguments, argumentTypes, argsContainCast, this)) {
+	if (checkInvocationArguments(scope, this.receiver, this.actualReceiverType, this.binding, this.arguments, this.argumentTypes, this.argsContainCast, this)) {
 		this.bits |= ASTNode.Unchecked;
 	}
 
@@ -1277,7 +1281,7 @@ public TypeBinding resolveType(BlockScope scope) {
 	}
 	if (this.receiver.isSuper() && this.actualReceiverType.isInterface()) {
 		// 15.12.3 (Java 8)
-		scope.checkAppropriateMethodAgainstSupers(this.selector, this.binding, argumentTypes, this);
+		scope.checkAppropriateMethodAgainstSupers(this.selector, this.binding, this.argumentTypes, this);
 	}
 	if (this.typeArguments != null && this.binding.original().typeVariables == Binding.NO_TYPE_VARIABLES) {
 		scope.problemReporter().unnecessaryTypeArgumentsForMethodInvocation(this.binding, this.genericTypeArguments, this.typeArguments);
@@ -1293,11 +1297,11 @@ public TypeBinding resolveType(BlockScope scope) {
  * after applicability checking (18.5.1) to include more information into the final
  * invocation type inference (18.5.2).
  */
-protected void findMethodBinding(BlockScope scope, TypeBinding[] argumentTypes) {
+protected void findMethodBinding(BlockScope scope) {
 	this.binding = this.receiver.isImplicitThis()
-			? scope.getImplicitMethod(this.selector, argumentTypes, this)
-			: scope.getMethod(this.actualReceiverType, this.selector, argumentTypes, this);
-	resolvePolyExpressionArguments(this, this.binding, argumentTypes, scope);
+			? scope.getImplicitMethod(this.selector, this.argumentTypes, this)
+			: scope.getMethod(this.actualReceiverType, this.selector, this.argumentTypes, this);
+	resolvePolyExpressionArguments(this, this.binding, this.argumentTypes, scope);
 	
 	/* There are embedded assumptions in the JLS8 type inference scheme that a successful solution of the type equations results in an
 	   applicable method. This appears to be a tenuous assumption, at least one not made by the JLS7 engine or the reference compiler and 
@@ -1672,5 +1676,9 @@ public InnerInferenceHelper innerInferenceHelper() {
 // -- Interface InvocationSite: --
 public InferenceContext18 freshInferenceContext(Scope scope) {
 	return new InferenceContext18(scope, this.arguments, this);
+}
+@Override
+public boolean isQualifiedSuper() {
+	return this.receiver.isQualifiedSuper();
 }
 }

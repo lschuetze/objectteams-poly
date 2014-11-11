@@ -231,6 +231,9 @@ public final class ASTRewriteAnalyzer extends ASTVisitor {
 		return this.lineInfo;
 	}
 
+	final LineCommentEndOffsets getLineCommentEndOffsets() {
+		return this.lineCommentEndOffsets;
+	}
 	/**
 	 * Returns the extended source range for a node.
 	 *
@@ -557,6 +560,19 @@ public final class ASTRewriteAnalyzer extends ASTVisitor {
 			return !isInsertBoundToPrevious(node);
 		}
 
+		private boolean lineCommentSwallowsActualCode(int prevEnd) {
+			if (ASTRewriteAnalyzer.this.getLineCommentEndOffsets().isEndOfLineComment(prevEnd)) {
+				int lastEndOffset = getEndOfNode((ASTNode) this.list[this.list.length - 1].getOriginalValue());
+				LineInformation lInfo = ASTRewriteAnalyzer.this.getLineInformation();
+				try {
+					return lInfo.getLineOfOffset(lastEndOffset) == lInfo.getLineOfOffset(getScanner().getNextStartOffset(lastEndOffset, false));
+				} catch (CoreException e) {
+					// ignore
+				}
+			}
+			return false;
+		}
+
 		protected boolean mustRemoveSeparator(int originalOffset, int nodeIndex) {
 			return true;
 		}
@@ -684,6 +700,7 @@ public final class ASTRewriteAnalyzer extends ASTVisitor {
 						// is last, remove previous separator: split delete to allow range copies
 						doTextRemove(prevEnd, currPos - prevEnd, editGroup); // remove separator
 						doTextRemoveAndVisit(currPos, currEnd - currPos, node, editGroup); // remove node
+						if (lineCommentSwallowsActualCode(prevEnd)) doTextInsert(currEnd, getLineDelimiter(), editGroup);
 						currPos= currEnd;
 						prevEnd= currEnd;
 					} else {
@@ -783,6 +800,7 @@ public final class ASTRewriteAnalyzer extends ASTVisitor {
 			}
 			return currPos;
 		}
+
 		public final int rewriteList(ASTNode parent, StructuralPropertyDescriptor property, int offset, String keyword) {
 			return rewriteList(parent, property, keyword, null, offset);
 		}
@@ -3171,9 +3189,10 @@ public final class ASTRewriteAnalyzer extends ASTVisitor {
 		if (node.getAST().apiLevel() >= JLS3_INTERNAL) {
 			int pos= rewriteJavadoc(node, PackageDeclaration.JAVADOC_PROPERTY);
 //{ObjectTeams: 'team' modifier:
-// almost orig: (added 'pos =')
-			pos = rewriteModifiers2(node, PackageDeclaration.ANNOTATIONS_PROPERTY, pos);
-//
+			pos =
+// orig:
+			rewriteModifiers2(node, PackageDeclaration.ANNOTATIONS_PROPERTY, pos);
+// :giro
 			rewriteModifiers2(node, PackageDeclaration.MODIFIERS_PROPERTY, pos);
 // SH}
 		}

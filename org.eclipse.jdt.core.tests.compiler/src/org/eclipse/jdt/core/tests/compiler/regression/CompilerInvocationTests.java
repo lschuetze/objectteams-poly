@@ -670,6 +670,7 @@ public void _test011_problem_categories() {
 		expectedProblemAttributes.put("InvalidParameterizedExceptionType", new ProblemAttributes(CategorizedProblem.CAT_TYPE));
 		expectedProblemAttributes.put("InvalidParenthesizedExpression", new ProblemAttributes(CategorizedProblem.CAT_SYNTAX));
 		expectedProblemAttributes.put("InvalidTypeExpression", new ProblemAttributes(CategorizedProblem.CAT_INTERNAL));
+		expectedProblemAttributes.put("InvalidTypeArguments", new ProblemAttributes(CategorizedProblem.CAT_TYPE));
 		expectedProblemAttributes.put("InvalidTypeForCollection", new ProblemAttributes(CategorizedProblem.CAT_INTERNAL));
 		expectedProblemAttributes.put("InvalidTypeForCollectionTarget14", new ProblemAttributes(CategorizedProblem.CAT_INTERNAL));
 		expectedProblemAttributes.put("InvalidTypeForStaticImport", new ProblemAttributes(CategorizedProblem.CAT_IMPORT));
@@ -1575,6 +1576,7 @@ public void test012_compiler_problems_tuning() {
 		expectedProblemAttributes.put("InvalidOperator", SKIP);
 		expectedProblemAttributes.put("InvalidParameterizedExceptionType", SKIP);
 		expectedProblemAttributes.put("InvalidParenthesizedExpression", SKIP);
+		expectedProblemAttributes.put("InvalidTypeArguments", SKIP);
 		expectedProblemAttributes.put("InvalidTypeExpression", SKIP);
 		expectedProblemAttributes.put("InvalidTypeForCollection", SKIP);
 		expectedProblemAttributes.put("InvalidTypeForCollectionTarget14", SKIP);

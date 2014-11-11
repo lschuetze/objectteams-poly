@@ -4680,31 +4680,6 @@ public void test437781() {
 		},
 		"Consumer");
 }
-// https://bugs.eclipse.org/bugs/show_bug.cgi?id=441907, [1.8][compiler] Eclipse 4.4.x compiler generics bugs with streams and lambdas
-public void _test441907() {
-	this.runConformTest(
-		new String[] {
-			"X.java",
-			"import java.util.*;\n" +
-			"public class X {\n" +
-			"  public static class FooBar<V> {\n" +
-			"  }\n" +
-			"  public interface FooBarred {\n" +
-			"    public <V> boolean hasFooBar(final FooBar<V> fooBar);\n" +
-			"  }\n" +
-			"  public interface Widget extends FooBarred {\n" +
-			"  }\n" +
-			"  public static void test() {\n" +
-			"    Set<FooBar<?>> foobars = new HashSet<>();\n" +
-			"    Set<Widget> widgets = new HashSet<>();\n" +
-			"    boolean anyWidgetHasFooBar = widgets.stream().anyMatch(\n" +
-			"        widget -> foobars.stream().anyMatch(widget::hasFooBar)\n" +
-			"        );\n" +
-			"  }\n" +
-			"}\n"
-		},
-		"");
-}
 // https://bugs.eclipse.org/bugs/show_bug.cgi?id=443889, [1.8][compiler] Lambdas get compiled to duplicate methods
 public void test443889() {
 	this.runConformTest(
@@ -4773,6 +4748,305 @@ public void test441907() {
 			"}\n"
 		},
 		"");
+}
+// https://bugs.eclipse.org/bugs/show_bug.cgi?id=444773, [1.8][compiler] NullPointerException in LambdaExpression.analyseCode 
+public void test444773() {
+	this.runConformTest(
+		new String[] {
+			"X.java",
+			"import java.util.ArrayList;\n" +
+			"import java.util.List;\n" +
+			"import java.util.Optional;\n" +
+			" \n" +
+			"public class X {\n" +
+			"  static class Container {\n" +
+			"    final private String s;\n" +
+			"    public Container(String s) { this.s = s; }\n" +
+			"  }\n" +
+			" \n" +
+			"  public static void main(String[] args) {\n" +
+			"    final List<Container> list = new ArrayList<>();\n" +
+			"    final Optional<String> optStr = Optional.of(\"foo\");\n" +
+			"    list.add(new Container(optStr.orElseThrow(() -> new IllegalStateException()))); // Error here\n" +
+			" \n" +
+			"    // This will work:\n" +
+			"    final String s = optStr.orElseThrow(IllegalStateException::new);\n" +
+			"    list.add(new Container(s));	\n" +
+			"  }\n" +
+			"}\n"
+		},
+		"");
+}
+// https://bugs.eclipse.org/bugs/show_bug.cgi?id=444772, [1.8][compiler] NullPointerException in ReferenceExpression.shouldGenerateImplicitLambda 
+public void test444772() {
+	this.runConformTest(
+		new String[] {
+			"X.java",
+			"import java.util.ArrayList;\n" +
+			"import java.util.List;\n" +
+			"import java.util.Optional;\n" +
+			" \n" +
+			"public class X {\n" +
+			"  static class Container {\n" +
+			"    final private String s;\n" +
+			"    public Container(String s) { this.s = s; }\n" +
+			"  }\n" +
+			" \n" +
+			"  public static void main(String[] args) {\n" +
+			"    final List<Container> list = new ArrayList<>();\n" +
+			"    final Optional<String> optStr = Optional.of(\"foo\");\n" +
+			"    list.add(new Container(optStr.orElseThrow(IllegalStateException::new))); // Error here\n" +
+			" \n" +
+			"    // This will work:\n" +
+			"    final String s = optStr.orElseThrow(IllegalStateException::new);\n" +
+			"    list.add(new Container(s));	\n" +
+			"  }\n" +
+			"}\n"
+		},
+		"");
+}
+// https://bugs.eclipse.org/bugs/show_bug.cgi?id=444803, [1.8][compiler] Exception in thread "main" java.lang.VerifyError: Bad local variable type
+public void test444803() {
+	this.runConformTest(
+		new String[] {
+			"X.java",
+			"import java.util.ArrayList;\n" +
+			"import java.util.Collection;\n" +
+			"import java.util.List;\n" +
+			"public class X {\n" +
+			"    X abc = null;\n" +
+			"    public static void main(String[] args) {\n" +
+			"        new X();\n" +
+			"    }\n" +
+			"    private void doSth() {\n" +
+			"        final List<String> l = new ArrayList<>();\n" +
+			"        try {\n" +
+			"            System.out.println(\"ok\");\n" +
+			//"            Runnable r = () -> abc.terminateInstances(abc.withInstanceIds(l));\n" +
+			"        } finally {\n" +
+			"            Runnable r = () -> abc.terminateInstances(abc.withInstanceIds(l));\n" +
+			"        }\n" +
+			"    }\n" +
+			"    public void terminateInstances(X abc) {\n" +
+			"    }\n" +
+			"    public X withInstanceIds(Collection<String> arg0) {\n" +
+			"    	return null;\n" +
+			"    }\n" +
+			"}\n" +
+			"interface FI {\n" +
+			"	public void foo(Collection<String> arg0);\n" +
+			"}\n"
+		},
+		"");
+}
+// https://bugs.eclipse.org/bugs/show_bug.cgi?id=444785, [1.8] Error in JDT Core during reconcile
+public void test444785() {
+	this.runConformTest(
+		new String[] {
+			"X.java",
+			"import java.io.Serializable;\n" +
+			"import java.util.function.Function;\n" +
+			"public interface X {\n" +
+			"	@FunctionalInterface\n" +
+			"	static interface Function1<T1, R> extends Function<T1, R>, Serializable {\n" +
+			"		@Override\n" +
+			"		R apply(T1 t1);\n" +
+			"	}\n" +
+			"	@FunctionalInterface\n" +
+			"	static interface Function6<T1, T2, T3, T4, T5, T6, R> extends Serializable {\n" +
+			"		R apply(T1 t1, T2 t2, T3 t3, T4 t4, T5 t5, T6 t6);\n" +
+			"		default Function1<T1, Function1<T2, Function1<T3, Function1<T4, Function1<T5, Function1<T6, R>>>>>> curried() {\n" +
+			"			return t1 -> t2 -> t3 -> t4 -> t5 -> t6 -> apply(t1, t2, t3, t4, t5, t6);\n" +
+			"		}\n" +
+			"		default Function1<Tuple6<T1, T2, T3, T4, T5, T6>, R> tupled() {\n" +
+			"			return t -> apply(t._1, t._2, t._3, t._4, t._5, t._6);\n" +
+			"		}\n" +
+			"	}\n" +
+			"	static final class Tuple6<T1, T2, T3, T4, T5, T6> {\n" +
+			"		public final T1 _1;\n" +
+			"		public final T2 _2;\n" +
+			"		public final T3 _3;\n" +
+			"		public final T4 _4;\n" +
+			"		public final T5 _5;\n" +
+			"		public final T6 _6;\n" +
+			"		public Tuple6(T1 t1, T2 t2, T3 t3, T4 t4, T5 t5, T6 t6) {\n" +
+			"			this._1 = t1;\n" +
+			"			this._2 = t2;\n" +
+			"			this._3 = t3;\n" +
+			"			this._4 = t4;\n" +
+			"			this._5 = t5;\n" +
+			"			this._6 = t6;\n" +
+			"		}\n" +
+			"	}\n" +
+			"}\n"
+		},
+		"");
+}
+// https://bugs.eclipse.org/bugs/show_bug.cgi?id=447119, [1.8][compiler] method references lost generic type information (4.4 -> 4.4.1 regression) 
+public void test447119() {
+	this.runConformTest(
+			new String[] {
+				"X.java",
+				"import java.lang.reflect.Method;\n" +
+				"import java.lang.reflect.Parameter;\n" +
+				"import java.util.Arrays;\n" +
+				"import java.util.function.Function;\n" +
+				"import java.util.List;\n" +
+				"public class X {\n" +
+				"    private static List<String> foo(List<String> x){return x;}\n" +
+				"    public static void main(String[] args) {\n" +
+				"        Function<List<String>,List<String>> f = i -> { return i; };\n" +
+				"        Method[] methods = X.class.getDeclaredMethods();\n" +
+				"        for (Method m : methods) {\n" +
+				"        	if (m.getName().contains(\"lambda\")) {\n" +
+				"        		System.out.println(\"- \" + m.getGenericReturnType() + \" \" + m.getName() + \"(\" + Arrays.asList(m.getGenericParameterTypes()) + \")\");\n" +
+				"        	}\n" +
+				"        }\n" +
+				"    }\n" +
+				"}\n"
+			},
+			"- interface java.util.List lambda$0([interface java.util.List])");
+}
+// https://bugs.eclipse.org/bugs/show_bug.cgi?id=447119, [1.8][compiler] method references lost generic type information (4.4 -> 4.4.1 regression) 
+public void test447119a() {
+	this.runConformTest(
+			new String[] {
+				"X.java",
+				"import java.lang.reflect.Method;\n" +
+				"import java.lang.reflect.Parameter;\n" +
+				"import java.util.Arrays;\n" +
+				"import java.util.function.Function;\n" +
+				"import java.util.List;\n" +
+				"public class X {\n" +
+				"    private static List<String> foo(List<String> x){return x;}\n" +
+				"    public static void main(String[] args) {\n" +
+				"        Function<List<String>,List<String>> f = X::foo;\n" +
+				"        Method[] methods = X.class.getDeclaredMethods();\n" +
+				"        for (Method m : methods) {\n" +
+				"        	if (m.getName().contains(\"lambda\")) {\n" +
+				"        		System.out.println(\"- \" + m.getGenericReturnType() + \" \" + m.getName() + \"(\" + Arrays.asList(m.getGenericParameterTypes()) + \")\");\n" +
+				"        	}\n" +
+				"        }\n" +
+				"    }\n" +
+				"}\n"
+			},
+			"");
+}
+// https://bugs.eclipse.org/bugs/show_bug.cgi?id=447119, [1.8][compiler] method references lost generic type information (4.4 -> 4.4.1 regression) 
+public void test447119b() {
+	this.runConformTest(
+			new String[] {
+				"X.java",
+				"import java.lang.reflect.Method;\n" +
+				"import java.lang.reflect.Parameter;\n" +
+				"import java.util.Arrays;\n" +
+				"import java.util.function.Function;\n" +
+				"import java.util.List;\n" +
+				"import java.io.Serializable;" +
+				"public class X {\n" +
+				"    private static interface SerializableFunction<A, R> extends Function<A, R>, Serializable { }" +
+				"    private static List<String> foo(List<String> x){return x;}\n" +
+				"    public static void main(String[] args) {\n" +
+				"        SerializableFunction<List<String>, List<String>> f = i -> { return i; };\n" +
+				"        Method[] methods = X.class.getDeclaredMethods();\n" +
+				"        for (Method m : methods) {\n" +
+				"        	if (m.getName().contains(\"lambda\")) {\n" +
+				"        		System.out.println(\"- \" + m.getGenericReturnType() + \" \" + m.getName() + \"(\" + Arrays.asList(m.getGenericParameterTypes()) + \")\");\n" +
+				"        	}\n" +
+				"        }\n" +
+				"    }\n" +
+				"}\n"
+			},
+			"- interface java.util.List lambda$0([interface java.util.List])");
+}
+// https://bugs.eclipse.org/bugs/show_bug.cgi?id=447119, [1.8][compiler] method references lost generic type information (4.4 -> 4.4.1 regression) 
+public void test447119c() {
+	this.runConformTest(
+			new String[] {
+				"X.java",
+				"import java.lang.reflect.Method;\n" +
+				"import java.lang.reflect.Parameter;\n" +
+				"import java.util.Arrays;\n" +
+				"import java.util.function.Function;\n" +
+				"import java.util.List;\n" +
+				"import java.io.Serializable;" +
+				"public class X {\n" +
+				"    private static interface SerializableFunction<A, R> extends Function<A, R>, Serializable { }" +
+				"    private static List<String> foo(List<String> x){return x;}\n" +
+				"    public static void main(String[] args) {\n" +
+				"        SerializableFunction<List<String>, List<String>> f = X::foo;\n" +
+				"        Method[] methods = X.class.getDeclaredMethods();\n" +
+				"        for (Method m : methods) {\n" +
+				"        	if (m.getName().contains(\"lambda\")) {\n" +
+				"        		System.out.println(\"- \" + m.getGenericReturnType() + \" \" + m.getName() + \"(\" + Arrays.asList(m.getGenericParameterTypes()) + \")\");\n" +
+				"        	}\n" +
+				"        }\n" +
+				"    }\n" +
+				"}\n"
+			},
+			"- java.util.List<java.lang.String> lambda$0([java.util.List<java.lang.String>])");
+}
+// https://bugs.eclipse.org/bugs/show_bug.cgi?id=447119, [1.8][compiler] method references lost generic type information (4.4 -> 4.4.1 regression) 
+public void test447119d() {
+	this.runConformTest(
+			new String[] {
+				"X.java",
+				"import java.io.ObjectStreamClass;\n" +
+				"import java.io.Serializable;\n" +
+				"import java.lang.invoke.SerializedLambda;\n" +
+				"import java.lang.reflect.Method;\n" +
+				"import java.util.List;\n" +
+				"import java.util.function.Function;\n" +
+				"public class X {\n" +
+				"	private static interface SerializableFunction<A, R> extends Function<A, R>, Serializable { }\n" +
+				"	private static List<String> noop(List<String> l) { return l; }\n" +
+				"	public static void main(String[] args) throws Exception {\n" +
+				"		SerializableFunction<List<String>, List<String>> f = X::noop;\n" +
+				"		Method invokeWriteReplaceMethod = ObjectStreamClass.class.getDeclaredMethod(\"invokeWriteReplace\", Object.class);\n" +
+				"		invokeWriteReplaceMethod.setAccessible(true);\n" +
+				"		SerializedLambda l = (SerializedLambda)invokeWriteReplaceMethod.invoke(ObjectStreamClass.lookupAny(f.getClass()), f);\n" +
+				"		System.out.println(\"Lambda binds to: \" + l.getImplClass() + \".\" + l.getImplMethodName());\n" +
+				"		System.out.println(\"Methods (with generics):\");\n" +
+				"		for(Method m : X.class.getDeclaredMethods()) {\n" +
+				"			if(m.getName().equals(\"main\")) continue;\n" +
+				"			if(m.getName().contains(\"deserializeLambda\")) continue;\n" +
+				"			System.out.println(\"- \" + m.getGenericReturnType() + \" \" + m.getName() + \"(\" + m.getGenericParameterTypes()[0] + \")\");\n" +
+				"		}\n" +
+				"	}\n" +
+				"}\n"
+			},
+			"Lambda binds to: X.lambda$0\n" + 
+			"Methods (with generics):\n" + 
+			"- java.util.List<java.lang.String> noop(java.util.List<java.lang.String>)\n" + 
+			"- java.util.List<java.lang.String> lambda$0(java.util.List<java.lang.String>)",
+			null,
+			true,
+			new String [] { "-Ddummy" }); // Not sure, unless we force the VM to not be reused by passing dummy vm argument, the generated program aborts midway through its execution.
+}
+// https://bugs.eclipse.org/bugs/show_bug.cgi?id=447119, [1.8][compiler] method references lost generic type information (4.4 -> 4.4.1 regression) 
+public void test447119e() {
+	this.runConformTest(
+			new String[] {
+				"X.java",
+				"import java.lang.reflect.Method;\n" +
+				"import java.lang.reflect.Parameter;\n" +
+				"import java.util.Arrays;\n" +
+				"import java.util.function.Function;\n" +
+				"import java.util.List;\n" +
+				"public class X implements java.io.Serializable {\n" +
+				"    private static List<String> foo(List<String> x){return x;}\n" +
+				"    public static void main(String[] args) {\n" +
+				"        Function<List<String>,List<String>> f = X::foo;\n" +
+				"        Method[] methods = X.class.getDeclaredMethods();\n" +
+				"        for (Method m : methods) {\n" +
+				"        	if (m.getName().contains(\"lambda\")) {\n" +
+				"        		System.out.println(\"- \" + m.getGenericReturnType() + \" \" + m.getName() + \"(\" + Arrays.asList(m.getGenericParameterTypes()) + \")\");\n" +
+				"        	}\n" +
+				"        }\n" +
+				"    }\n" +
+				"}\n"
+			},
+			"");
 }
 public static Class testClass() {
 	return LambdaExpressionsTest.class;

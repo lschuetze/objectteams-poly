@@ -2450,13 +2450,13 @@ public void fieldHiding(FieldDeclaration fieldDecl, Binding hiddenVariable) {
 			nodeSourceEnd(hiddenField, fieldDecl));
 	}
 }
-public void fieldsOrThisBeforeConstructorInvocation(ThisReference reference) {
+public void fieldsOrThisBeforeConstructorInvocation(ASTNode reference) {
 	this.handle(
 		IProblem.ThisSuperDuringConstructorInvocation,
 		NoArgument,
 		NoArgument,
 		reference.sourceStart,
-		reference.sourceEnd);
+		reference instanceof LambdaExpression ? ((LambdaExpression) reference).diagnosticsSourceEnd() : reference.sourceEnd);
 }
 public void finallyMustCompleteNormally(Block finallyBlock) {
 	this.handle(
@@ -4170,6 +4170,9 @@ public void invalidField(FieldReference fieldRef, TypeBinding searchedType) {
 		case ProblemReasons.Ambiguous :
 			id = IProblem.AmbiguousField;
 			break;
+		case ProblemReasons.NoProperEnclosingInstance:
+			noSuchEnclosingInstance(fieldRef.actualReceiverType, fieldRef.receiver, false);
+			return;
 		case ProblemReasons.NonStaticReferenceInStaticContext :
 			id = IProblem.NonStaticFieldFromStaticInvocation;
 			break;
@@ -4447,6 +4450,8 @@ public void invalidMethod(MessageSend messageSend, MethodBinding method) {
 	int id = IProblem.UndefinedMethod; //default...
     MethodBinding shownMethod = method;
 	switch (method.problemId()) {
+		case ProblemReasons.NoSuchMethodOnArray :
+			return; // secondary error.
 		case ProblemReasons.NotFound :
 			if ((method.declaringClass.tagBits & TagBits.HasMissingType) != 0) {
 				this.handle(
@@ -14577,5 +14582,11 @@ public void uninternedIdentityComparison(EqualExpression expr, TypeBinding lhs, 
 			},
 			expr.sourceStart,
 			expr.sourceEnd);
+}
+public void invalidTypeArguments(TypeReference[] typeReference) {
+	this.handle(IProblem.InvalidTypeArguments,
+			NoArgument, NoArgument,
+			typeReference[0].sourceStart,
+			typeReference[typeReference.length - 1].sourceEnd);
 }
 }

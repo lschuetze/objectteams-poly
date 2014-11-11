@@ -32,6 +32,7 @@ public class CaptureBinding extends TypeVariableBinding {
 	/* information to compute unique binding key */
 	public ReferenceBinding sourceType;
 	public int position;
+	public ASTNode cud; // to facilitate recaptures.
 
 	public CaptureBinding(WildcardBinding wildcard, ReferenceBinding sourceType, int position, int captureID) {
 		super(TypeConstants.WILDCARD_CAPTURE_NAME_PREFIX, null, 0, wildcard.environment);
@@ -55,6 +56,11 @@ public class CaptureBinding extends TypeVariableBinding {
 			if (wildcard.hasNullTypeAnnotations())
 				this.tagBits |= TagBits.HasNullTypeAnnotation;
 		}
+	}
+	
+	public CaptureBinding(WildcardBinding wildcard, ReferenceBinding sourceType, int position, ASTNode cud, int captureID) {
+		this(wildcard, sourceType, position, captureID);
+		this.cud = cud;
 	}
 	
 	// for subclass CaptureBinding18
@@ -357,6 +363,20 @@ public class CaptureBinding extends TypeVariableBinding {
 		return super.withoutToplevelNullAnnotation();
 	}
 
+	@Override
+//{ObjectTeams: cross the OT package, make protected:
+	protected
+// SH}
+	TypeBinding substituteInferenceVariable(InferenceVariable var, TypeBinding substituteType) {
+		TypeBinding newWildcard = this.wildcard.substituteInferenceVariable(var, substituteType);
+		if (newWildcard != this.wildcard) {  //$IDENTITY-COMPARISON$
+			CaptureBinding newCapture = new CaptureBinding((WildcardBinding) newWildcard, this.sourceType, this.position, this.cud, this.captureID);
+		    newCapture.id = this.id; // there is no need really to add this to the derived types, just equate the type system ids and the capture ids.
+			return newCapture;
+		}
+		return this;
+	}
+	
 	@Override
 	public void setTypeAnnotations(AnnotationBinding[] annotations, boolean evalNullAnnotations) {
 		super.setTypeAnnotations(annotations, evalNullAnnotations);

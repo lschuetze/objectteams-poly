@@ -40,6 +40,7 @@ import java.util.Set;
 
 import org.eclipse.jdt.core.compiler.CharOperation;
 import org.eclipse.jdt.internal.compiler.ClassFilePool;
+import org.eclipse.jdt.internal.compiler.ast.ASTNode;
 import org.eclipse.jdt.internal.compiler.ast.CompilationUnitDeclaration;
 import org.eclipse.jdt.internal.compiler.ast.TypeDeclaration;
 import org.eclipse.jdt.internal.compiler.ast.Wildcard;
@@ -1249,6 +1250,10 @@ public RawTypeBinding createRawType(ReferenceBinding genericType, ReferenceBindi
 
 public WildcardBinding createWildcard(ReferenceBinding genericType, int rank, TypeBinding bound, TypeBinding[] otherBounds, int boundKind) {
 	return this.typeSystem.getWildcard(genericType, rank, bound, otherBounds, boundKind);
+}
+
+public CaptureBinding createCapturedWildcard(WildcardBinding wildcard, ReferenceBinding contextType, int position, ASTNode cud, int id) {
+	return this.typeSystem.getCapturedWildcard(wildcard, contextType, position, cud, id);
 }
 
 public WildcardBinding createWildcard(ReferenceBinding genericType, int rank, TypeBinding bound, TypeBinding[] otherBounds, int boundKind, AnnotationBinding [] annotations) {

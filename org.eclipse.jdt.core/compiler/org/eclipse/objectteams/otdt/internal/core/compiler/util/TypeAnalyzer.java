@@ -609,6 +609,7 @@ public class TypeAnalyzer  {
 				@Override public boolean receiverIsImplicitThis() { return false; }
 				@Override public boolean isTypeAccess() { return false; }
 				@Override public boolean isSuperAccess() { return false; }
+				@Override public boolean isQualifiedSuper() { return false; }
 				
 				@Override
 				public TypeBinding invocationTargetType() {

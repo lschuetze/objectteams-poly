@@ -99,14 +99,14 @@ public class TSuperMessageSend extends MessageSend {
 	}
 
 	@Override
-	protected void findMethodBinding(BlockScope scope, TypeBinding[] argumentTypes) {
+	protected void findMethodBinding(BlockScope scope) {
 		
 		// check: is a tsuper call legal in the current context?
 		
 		AbstractMethodDeclaration context = scope.methodScope().referenceMethod();
 		if (context == null 
 				|| !CharOperation.equals(this.selector, context.selector)
-				|| context.binding.parameters.length != argumentTypes.length) 
+				|| context.binding.parameters.length != this.argumentTypes.length) 
 		{
 			scope.problemReporter().tsuperCallsWrongMethod(this);
 			return;
@@ -134,24 +134,24 @@ public class TSuperMessageSend extends MessageSend {
 	    	TypeBinding tsuperRole = this.tsuperReference.resolvedType;
 	    	if (tsuperRole == null || !tsuperRole.isRole())
 	    		return;
-	    	this.binding = scope.getMethod(tsuperRole, this.selector, argumentTypes, this);
+	    	this.binding = scope.getMethod(tsuperRole, this.selector, this.argumentTypes, this);
 	    	if (!this.binding.isValidBinding() && ((ProblemMethodBinding)this.binding).declaringClass == null)
 	    		this.binding.declaringClass = (ReferenceBinding) tsuperRole;
-    		resolvePolyExpressionArguments(this, this.binding, argumentTypes, scope);
+    		resolvePolyExpressionArguments(this, this.binding, this.argumentTypes, scope);
 	    	return;
 	    }
 	    // no qualification => search all tsupers by priority:
 	    MethodBinding bestMatch = null;
 	    for (int i=tsuperRoleBindings.length-1; i>=0; i--) {
 	    	ReferenceBinding tsuperRole = tsuperRoleBindings[i];
-	    	MethodBinding candidate = scope.getMethod(tsuperRole, this.selector, argumentTypes, this);
+	    	MethodBinding candidate = scope.getMethod(tsuperRole, this.selector, this.argumentTypes, this);
 	    	if (candidate.isValidBinding()) {
-	    		if (scope.parameterCompatibilityLevel(candidate, argumentTypes) != Scope.COMPATIBLE) {
+	    		if (scope.parameterCompatibilityLevel(candidate, this.argumentTypes) != Scope.COMPATIBLE) {
 	    			scope.problemReporter().tsuperCallsWrongMethod(this);
 	    			return;
 	    		}
 	    		this.binding = candidate;
-	    		resolvePolyExpressionArguments(this, this.binding, argumentTypes, scope);
+	    		resolvePolyExpressionArguments(this, this.binding, this.argumentTypes, scope);
 	    		return;
 	    	}
 	    	if (bestMatch == null || 
@@ -159,7 +159,7 @@ public class TSuperMessageSend extends MessageSend {
 	    		bestMatch = candidate;
 	    }
 	    if (bestMatch == null)
-	    	bestMatch = new ProblemMethodBinding(this.selector, argumentTypes, ProblemReasons.NotFound);
+	    	bestMatch = new ProblemMethodBinding(this.selector, this.argumentTypes, ProblemReasons.NotFound);
 	    if (bestMatch.declaringClass == null)
 	    	bestMatch.declaringClass = (ReferenceBinding) this.tsuperReference.resolvedType;
 	    this.binding = bestMatch;
@@ -231,9 +231,9 @@ public class TSuperMessageSend extends MessageSend {
 		codeStream.checkcast(tsuperMarkerBinding);
 	}
 
-	private MethodBinding getAlternateMethod(Scope scope, ReferenceBinding superRole, TypeBinding[] argumentTypes)
+	private MethodBinding getAlternateMethod(Scope scope, ReferenceBinding superRole, TypeBinding[] extendedArgumentTypes)
 	{
-		MethodBinding alternateMethod = scope.getMethod(superRole, this.selector, argumentTypes, this);
+		MethodBinding alternateMethod = scope.getMethod(superRole, this.selector, extendedArgumentTypes, this);
 		if (alternateMethod.problemId() == ProblemReasons.NotVisible) {
 			return alternateMethod; // want to see this error as IProblem.IndirectTSuperInvisible, cf. ProblemReporter.invalidMethod
 		}

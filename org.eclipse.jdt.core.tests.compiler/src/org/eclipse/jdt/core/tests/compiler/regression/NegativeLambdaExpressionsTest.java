@@ -9525,7 +9525,7 @@ public void test433735() {
 		"1. ERROR in X.java (at line 7)\n" + 
 		"	super( () -> {\n" + 
 		"	       ^^^^^\n" + 
-		"No enclosing instance of type X is available due to some intermediate constructor invocation\n" + 
+		"Cannot refer to \'this\' nor \'super\' while explicitly invoking a constructor\n" + 
 		"----------\n");
 }
 // https://bugs.eclipse.org/bugs/show_bug.cgi?id=432531 [1.8] VerifyError with anonymous subclass inside of lambda expression in the superclass constructor call
@@ -9557,8 +9557,155 @@ public void test432531a() {
 	"1. ERROR in Y.java (at line 7)\n" + 
 	"	super( () -> {\n" + 
 	"	       ^^^^^\n" + 
+	"Cannot refer to \'this\' nor \'super\' while explicitly invoking a constructor\n" + 
+	"----------\n");
+}
+// https://bugs.eclipse.org/bugs/show_bug.cgi?id=432605, [1.8] Incorrect error "The type ArrayList<T> does not define add(ArrayList<T>, Object) that is applicable here"
+public void _test432605() {
+	this.runNegativeTest(
+		new String[] {
+			"X.java", 
+			"import java.util.ArrayList;\n" +
+			"import java.util.HashMap;\n" +
+			"import java.util.function.Function;\n" +
+			"import java.util.function.Supplier;\n" +
+			"import java.util.stream.Collector;\n" +
+			"import java.util.stream.Collectors;\n" +
+			"import java.util.stream.Stream;\n" +
+			"public class X {\n" +
+			"static <T, E extends Exception, K, L, M> M terminalAsMapToList(\n" +
+			"    Function<? super T, ? extends K> classifier,\n" +
+			"    Function<HashMap<K, L>, M> intoMap,\n" +
+			"    Function<ArrayList<T>, L> intoList,\n" +
+			"    Supplier<Stream<T>> supplier,\n" +
+			"    Class<E> classOfE) throws E {\n" +
+			"  	return terminalAsCollected(\n" +
+			"  	  classOfE,\n" +
+			"  	  Collectors.collectingAndThen(\n" +
+			"  	    Collectors.groupingBy(\n" +
+			"  	      classifier,\n" +
+			"  	      HashMap<K, L>::new,\n" +
+			"  	      Collectors.collectingAndThen(\n" +
+			"  	      	// The type ArrayList<T> does not define add(ArrayList<T>, Object) that is applicable here\n" +
+			"  	      	// from ArrayList<T>::add:\n" +
+			"  	        Collector.of(ArrayList<T>::new, ArrayList<T>::add, (ArrayList<T> left, ArrayList<T> right) -> { \n" +
+			"  		        left.addAll(right);\n" +
+			"  		        return left;\n" +
+			"  	        }),\n" +
+			"  	        intoList)),\n" +
+			"  	    intoMap),\n" +
+			"  	  supplier);\n" +
+			"  }\n" +
+			"	static <E extends Exception, T, M> M terminalAsCollected(\n" +
+			"    Class<E> class1,\n" +
+			"    Collector<T, ?, M> collector,\n" +
+			"    Supplier<Stream<T>> supplier) throws E {\n" +
+			"  	try(Stream<T> s = supplier.get()) {\n" +
+			"  		return s.collect(collector);\n" +
+			"  	} catch(RuntimeException e) {\n" +
+			"  		throw unwrapCause(class1, e);\n" +
+			"  	}\n" +
+			"  }\n" +
+			"	static <E extends Exception> E unwrapCause(Class<E> classOfE, RuntimeException e) throws E {\n" +
+			"		Throwable cause = e.getCause();\n" +
+			"		if(classOfE.isInstance(cause) == false) {\n" +
+			"			throw e;\n" +
+			"		}\n" +
+			"		throw classOfE.cast(cause);\n" +
+			"}\n" +
+			"}\n"
+	},
+	"----------\n" + 
+	"1. ERROR in Y.java (at line 7)\n" + 
+	"	super( () -> {\n" + 
+	"	       ^^^^^\n" + 
 	"No enclosing instance of type Y is available due to some intermediate constructor invocation\n" + 
 	"----------\n");
+}
+// https://bugs.eclipse.org/bugs/show_bug.cgi?id=444665, Internal compiler error: java.lang.NullPointerException at org.eclipse.jdt.internal.compiler.problem.ProblemReporter.invalidMethod 
+public void test444665() {
+	this.runNegativeTest(
+		new String[] {
+			"X.java", 
+			"public class X {\n" +
+			"    static void foo(java.util.Map<Long, Long> map) {\n" +
+			"        java.util.function.Consumer<int[]> c = array -> map.compute(array.get(0), (k, v) -> null);\n" +
+			"    }\n" +
+			"}\n"
+	},
+	"----------\n" + 
+	"1. ERROR in X.java (at line 3)\n" + 
+	"	java.util.function.Consumer<int[]> c = array -> map.compute(array.get(0), (k, v) -> null);\n" + 
+	"	                                                            ^^^^^^^^^^^^\n" + 
+	"Cannot invoke get(int) on the array type int[]\n" + 
+	"----------\n");
+}
+// https://bugs.eclipse.org/bugs/show_bug.cgi?id=442446, [1.8][compiler] compiler unable to infer lambda's generic argument types
+public void _test442446() {
+	this.runNegativeTest(
+		new String[] {
+			"X.java", 
+			"import java.util.Collection;\n" +
+			"import java.util.Map;\n" +
+			"import java.util.function.Function;\n" +
+			"import java.util.stream.Collectors;\n" +
+			"public class X {\n" +
+			"  X(Collection<Object> pCollection) {\n" +
+			"    this(\n" +
+			"      pCollection.stream().collect(\n" +
+			"        Collectors.toMap(\n" +
+			"          Function.identity(), pElement -> 1, (pInt1, pInt2) -> pInt1 + pInt2\n" +
+			"        )\n" +
+			"      )\n" +
+			"    );\n" +
+			"  }\n" +
+			"  X(Map<Object,Integer> pMap) {}\n" +
+			"}\n" 
+	},
+	"");
+}
+// https://bugs.eclipse.org/bugs/show_bug.cgi?id=432759,  [1.8][compiler] Some differences between Javac and ECJ regarding wildcards and static methods
+public void test432759() {
+	this.runNegativeTest(
+		new String[] {
+			"X.java", 
+			"import java.util.function.BinaryOperator;\n" +
+			"import java.util.function.Consumer;\n" +
+			"\n" +
+			"/*Q*/\n" +
+			"@FunctionalInterface interface Subsumer<T> {	void accept(T t);\n" +
+			"  default                                 Subsumer<T> andThe1(                  Subsumer<? super T> afterT) { return (T t) -> {      accept(t); afterT.accept(t); }; }\n" +
+			"  default                                 Subsumer<T> andThe2(Subsumer<T> this, Subsumer<? super T> afterT) { return (T t) -> { this.accept(t); afterT.accept(t); }; }\n" +
+			"  static <U>                              Subsumer<U> andThe3(Subsumer<U> tihs, Subsumer<? super U> afterU) { return (U u) -> { tihs.accept(u); afterU.accept(u); }; }\n" +
+			"  static <S extends ISSUPER_S, ISSUPER_S> Subsumer<S> andThe4(Subsumer<S> tihs, Subsumer<ISSUPER_S> afterS) { return (S s) -> { tihs.accept(s); afterS.accept(s); }; }\n" +
+			"}\n" +
+			"public class X {\n" +
+			"	static <T extends ISSUPER_T, ISSUPER_T> void method() {\n" +
+			"		BinaryOperator<Consumer<? super T>> attempt_X_0 = Consumer::andThen;\n" +
+			"		BinaryOperator<Subsumer<? super T>> attempt_X_1 = Subsumer::andThe1;\n" +
+			"		BinaryOperator<Subsumer<? super T>> attempt_X_2 = Subsumer::andThe2;\n" +
+			"		BinaryOperator<Subsumer<? super T>> attempt_X_3 = Subsumer::andThe3;\n" +
+			"		BinaryOperator<Subsumer<? super T>> attempt_X_4 = Subsumer::andThe4;\n" +
+			"		BinaryOperator<Consumer<ISSUPER_T>> attempt_n_0 = Consumer::andThen;\n" +
+			"		BinaryOperator<Subsumer<ISSUPER_T>> attempt_n_1 = Subsumer::andThe1;\n" +
+			"		BinaryOperator<Subsumer<ISSUPER_T>> attempt_n_2 = Subsumer::andThe2;\n" +
+			"		BinaryOperator<Subsumer<ISSUPER_T>> attempt_n_3 = Subsumer::andThe3;\n" +
+			"		BinaryOperator<Subsumer<ISSUPER_T>> attempt_n_4 = Subsumer::andThe4;\n" +
+			"		// Summary:\n" +
+			"		// ECJ error #1, javac no error\n" +
+			"		// ECJ error #2, javac no error\n" +
+			"		// ECJ error #3, javac no error\n" +
+			"		// ECJ error #4, javac error #1\n" +
+			"		// ECJ error #5, javac error #2\n" +
+			"		// ECJ no error, javac no error\n" +
+			"		// ECJ no error, javac no error\n" +
+			"		// ECJ no error, javac no error\n" +
+			"		// ECJ no error, javac no error\n" +
+			"		// ECJ no error, javac no error\n" +
+			"	}\n" +
+			"}\n" 
+	},
+	"");
 }
 public static Class testClass() {
 	return NegativeLambdaExpressionsTest.class;

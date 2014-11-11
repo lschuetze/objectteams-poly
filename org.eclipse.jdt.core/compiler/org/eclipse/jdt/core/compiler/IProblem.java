@@ -1297,6 +1297,8 @@ void setSourceStart(int sourceStart);
 
 	/** @since 3.9 */
 	int UnsafeElementTypeConversion = TypeRelated + 585;
+	/** @since 3.11 */
+    int InvalidTypeArguments = MethodRelated + TypeRelated + 586;
 
 	/**
 	 * 1.5 Syntax errors (when source level < 1.5)

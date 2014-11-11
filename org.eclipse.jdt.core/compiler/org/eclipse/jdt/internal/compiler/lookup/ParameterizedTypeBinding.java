@@ -4,7 +4,7 @@
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
- * 
+ *
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *     Fraunhofer FIRST - extended API and implementation
@@ -37,6 +37,7 @@
  *								Bug 438458 - [1.8][null] clean up handling of null type annotations wrt type variables
  *								Bug 438179 - [1.8][null] 'Contradictory null annotations' error on type variable with explicit null-annotation.
  *								Bug 441693 - [1.8][null] Bogus warning for type argument annotated with @NonNull
+ *								Bug 446434 - [1.8][null] Enable interned captures also when analysing null type annotations
  *******************************************************************************/
 package org.eclipse.jdt.internal.compiler.lookup;
 
@@ -161,11 +162,12 @@ public class ParameterizedTypeBinding extends ReferenceBinding implements Substi
 	public boolean canBeInstantiated() {
 		return ((this.tagBits & TagBits.HasDirectWildcard) == 0) && super.canBeInstantiated(); // cannot instantiate param type with wildcard arguments
 	}
+
 	/**
 	 * Perform capture conversion for a parameterized type with wildcard arguments
 	 * @see org.eclipse.jdt.internal.compiler.lookup.TypeBinding#capture(Scope,int)
 	 */
-	public TypeBinding capture(Scope scope, int position) {
+	public ParameterizedTypeBinding capture(Scope scope, int position) {
 		if ((this.tagBits & TagBits.HasDirectWildcard) == 0)
 			return this;
 
@@ -177,14 +179,21 @@ public class ParameterizedTypeBinding extends ReferenceBinding implements Substi
 		ReferenceBinding contextType = scope.enclosingSourceType();
 		if (contextType != null) contextType = contextType.outermostEnclosingType(); // maybe null when used programmatically by DOM
 
+		CompilationUnitScope compilationUnitScope = scope.compilationUnitScope();
+		ASTNode cud = compilationUnitScope.referenceContext;
+		long sourceLevel = this.environment.globalOptions.sourceLevel;
+		final boolean needUniqueCapture = sourceLevel >= ClassFileConstants.JDK1_8;
+		
 		for (int i = 0; i < length; i++) {
 			TypeBinding argument = originalArguments[i];
 			if (argument.kind() == Binding.WILDCARD_TYPE) { // no capture for intersection types
 				final WildcardBinding wildcard = (WildcardBinding) argument;
 				if (wildcard.boundKind == Wildcard.SUPER && wildcard.bound.id == TypeIds.T_JavaLangObject)
 					capturedArguments[i] = wildcard.bound;
-				else
-					capturedArguments[i] = new CaptureBinding(wildcard, contextType, position, scope.compilationUnitScope().nextCaptureID());
+				else if (needUniqueCapture)
+					capturedArguments[i] = this.environment.createCapturedWildcard(wildcard, contextType, position, cud, compilationUnitScope.nextCaptureID());
+				else 
+					capturedArguments[i] = new CaptureBinding(wildcard, contextType, position, compilationUnitScope.nextCaptureID());	
 			} else {
 				capturedArguments[i] = argument;
 			}
@@ -198,7 +207,7 @@ public class ParameterizedTypeBinding extends ReferenceBinding implements Substi
 		}
 		return capturedParameterizedType;
 	}
-	
+
 	/**
 	 * Perform capture deconversion for a parameterized type with captured wildcard arguments
 	 * @see org.eclipse.jdt.internal.compiler.lookup.TypeBinding#uncapture(Scope)
@@ -1560,12 +1569,15 @@ public class ParameterizedTypeBinding extends ReferenceBinding implements Substi
 		return this.fields;
 	}
 	public MethodBinding getSingleAbstractMethod(final Scope scope, boolean replaceWildcards) {
-		int index = replaceWildcards ? 0 : 1;
+		return getSingleAbstractMethod(scope, replaceWildcards, -1 /* do not capture */);
+	}	
+	public MethodBinding getSingleAbstractMethod(final Scope scope, boolean replaceWildcards, int capturePosition) {
+		int index = replaceWildcards ? capturePosition < 0 ? 0 : 1 : 2; // capturePosition >= 0 IFF replaceWildcard == true
 		if (this.singleAbstractMethod != null) {
 			if (this.singleAbstractMethod[index] != null)
-			return this.singleAbstractMethod[index];
+				return this.singleAbstractMethod[index];
 		} else {
-			this.singleAbstractMethod = new MethodBinding[2];
+			this.singleAbstractMethod = new MethodBinding[3];
 		}
 		if (!isValidBinding())
 			return null;
@@ -1582,6 +1594,13 @@ public class ParameterizedTypeBinding extends ReferenceBinding implements Substi
 				return this.singleAbstractMethod[index] = new ProblemMethodBinding(TypeConstants.ANONYMOUS_METHOD, null, ProblemReasons.NotAWellFormedParameterizedType);
 		} else if (types == null) {
 			types = NO_TYPES;
+		}
+		if (capturePosition >= 0) { 
+			// caller is going to require the sam's parameters to be treated as argument expressions, post substitution capture will lose identity, where substitution results in fan out
+			// capture first and then substitute.
+			for (int i = 0, length = types.length; i < length; i++) {
+				types[i] = types[i].capture(scope, 0);
+			}
 		}
 		declaringType = scope.environment().createParameterizedType(genericType, types, genericType.enclosingType());
 		TypeVariableBinding [] typeParameters = genericType.typeVariables();
@@ -1668,21 +1687,6 @@ public class ParameterizedTypeBinding extends ReferenceBinding implements Substi
 			}
 		}
 		return types;
-	}
-	static boolean typeParametersMentioned(TypeBinding upperBound) {
-		class MentionListener extends TypeBindingVisitor {
-			private boolean typeParametersMentioned = false;
-			public boolean visit(TypeVariableBinding typeVariable) {
-				this.typeParametersMentioned = true;
-				return false;
-			}
-			public boolean typeParametersMentioned() {
-				return this.typeParametersMentioned;
-			}
-		}
-		MentionListener mentionListener = new MentionListener();
-		TypeBindingVisitor.visit(mentionListener, upperBound);
-		return mentionListener.typeParametersMentioned();
 	}
 
 //{ObjectTeams: recursive role wrapping:

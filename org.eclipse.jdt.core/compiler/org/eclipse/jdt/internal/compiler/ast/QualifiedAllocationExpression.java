@@ -18,9 +18,6 @@
  *								bug 345305 - [compiler][null] Compiler misidentifies a case of "variable can only be null"
  *								bug 388996 - [compiler][resource] Incorrect 'potential resource leak'
  *								bug 395977 - [compiler][resource] Resource leak warning behavior possibly incorrect for anonymous inner class
- *								Bug 416267 - NPE in QualifiedAllocationExpression.resolveType
- *        Andy Clement - Contributions for
- *                          Bug 383624 - [1.8][compiler] Revive code generation support for type annotations (from Olivier's work)
  *								bug 403147 - [compiler][null] FUP of bug 400761: consolidate interaction between unboxing, NPE, and deferred checking
  *								Bug 415850 - [1.8] Ensure RunJDTCoreTests can cope with null annotations enabled
  *								Bug 392238 - [1.8][compiler][null] Detect semantically invalid null type annotations
@@ -458,14 +455,14 @@ public static abstract class AbstractQualifiedAllocationExpression extends Alloc
 		final boolean isDiamond = this.type != null && (this.type.bits & ASTNode.IsDiamond) != 0;
 		if (this.typeArguments != null) {
 			int length = this.typeArguments.length;
-			boolean argHasError = sourceLevel < ClassFileConstants.JDK1_5;
+			this.argumentsHaveErrors = sourceLevel < ClassFileConstants.JDK1_5;
 			this.genericTypeArguments = new TypeBinding[length];
 			for (int i = 0; i < length; i++) {
 				TypeReference typeReference = this.typeArguments[i];
 				if ((this.genericTypeArguments[i] = typeReference.resolveType(scope, true /* check bounds*/)) == null) {
-					argHasError = true;
+					this.argumentsHaveErrors = true;
 				}
-				if (argHasError && typeReference instanceof Wildcard) {
+				if (this.argumentsHaveErrors && typeReference instanceof Wildcard) {
 					scope.problemReporter().illegalUsageOfWildcard(typeReference);
 				}
 			}
@@ -473,7 +470,7 @@ public static abstract class AbstractQualifiedAllocationExpression extends Alloc
 				scope.problemReporter().diamondNotWithExplicitTypeArguments(this.typeArguments);
 				return null;
 			}
-			if (argHasError) {
+			if (this.argumentsHaveErrors) {
 				if (this.arguments != null) { // still attempt to resolve arguments
 					for (int i = 0, max = this.arguments.length; i < max; i++) {
 						this.arguments[i].resolveType(scope);
@@ -484,10 +481,10 @@ public static abstract class AbstractQualifiedAllocationExpression extends Alloc
 		}
 
 		// will check for null after args are resolved
-		TypeBinding[] argumentTypes = Binding.NO_PARAMETERS;
+		this.argumentTypes = Binding.NO_PARAMETERS;
 		if (this.arguments != null) {
 			int length = this.arguments.length;
-			argumentTypes = new TypeBinding[length];
+			this.argumentTypes = new TypeBinding[length];
 			for (int i = 0; i < length; i++) {
 				Expression argument = this.arguments[i];
 				if (argument instanceof CastExpression) {
@@ -495,10 +492,10 @@ public static abstract class AbstractQualifiedAllocationExpression extends Alloc
 					argsContainCast = true;
 				}
 				argument.setExpressionContext(INVOCATION_CONTEXT);
-				if ((argumentTypes[i] = argument.resolveType(scope)) == null){
+				if ((this.argumentTypes[i] = argument.resolveType(scope)) == null){
 					hasError = true;
 				}
-				if (sourceLevel >= ClassFileConstants.JDK1_8 && argument.isPolyExpression()) {
+				if (sourceLevel >= ClassFileConstants.JDK1_8 && (argument.isPolyExpression() || (argument instanceof Invocation && ((Invocation)argument).usesInference()))) {
 					if (this.innerInferenceHelper == null)
 						this.innerInferenceHelper = new InnerInferenceHelper();
 				}
@@ -525,7 +522,7 @@ public static abstract class AbstractQualifiedAllocationExpression extends Alloc
 					int length = this.arguments  == null ? 0 : this.arguments.length;
 					TypeBinding[] pseudoArgs = new TypeBinding[length];
 					for (int i = length; --i >= 0;) {
-						pseudoArgs[i] = argumentTypes[i] == null ? TypeBinding.NULL : argumentTypes[i]; // replace args with errors with null type
+						pseudoArgs[i] = this.argumentTypes[i] == null ? TypeBinding.NULL : this.argumentTypes[i]; // replace args with errors with null type
 					}
 					this.binding = scope.findMethod(referenceReceiver, TypeConstants.INIT, pseudoArgs, this, false);
 					if (this.binding != null && !this.binding.isValidBinding()) {
@@ -561,7 +558,7 @@ public static abstract class AbstractQualifiedAllocationExpression extends Alloc
 				return this.resolvedType = receiverType;
 			}
 			if (isDiamond) {
-				TypeBinding [] inferredTypes = inferElidedTypes((ParameterizedTypeBinding) receiverType, receiverType.enclosingType(), argumentTypes, scope);
+				TypeBinding [] inferredTypes = inferElidedTypes((ParameterizedTypeBinding) receiverType, receiverType.enclosingType(), this.argumentTypes, scope);
 				if (inferredTypes == null) {
 					scope.problemReporter().cannotInferElidedTypes(this);
 					return this.resolvedType = null;
@@ -578,7 +575,7 @@ public static abstract class AbstractQualifiedAllocationExpression extends Alloc
                     null, this.arguments, scope);
           try {
    	// orig:
-			this.binding = findConstructorBinding(scope, this, allocationType, argumentTypes);
+			this.binding = findConstructorBinding(scope, this, allocationType, this.argumentTypes);
     // :giro
           } finally {
                 AnchorMapping.removeCurrentMapping(anchorMapping);
@@ -589,7 +586,7 @@ public static abstract class AbstractQualifiedAllocationExpression extends Alloc
 				if (isMethodUseDeprecated(this.binding, scope, true)) {
 					scope.problemReporter().deprecatedMethod(this.binding, this);
 				}
-				if (checkInvocationArguments(scope, null, allocationType, this.binding, this.arguments, argumentTypes, argsContainCast, this)) {
+				if (checkInvocationArguments(scope, null, allocationType, this.binding, this.arguments, this.argumentTypes, argsContainCast, this)) {
 					this.bits |= ASTNode.Unchecked;
 				}
 				if (this.typeArguments != null && this.binding.original().typeVariables == Binding.NO_TYPE_VARIABLES) {
@@ -614,8 +611,8 @@ public static abstract class AbstractQualifiedAllocationExpression extends Alloc
 				  }
 			  } else {
 // orig:
-				  scope.problemReporter().invalidConstructor(this, this.binding);
-				  return this.resolvedType = receiverType;
+				scope.problemReporter().invalidConstructor(this, this.binding);
+				return this.resolvedType = receiverType;
 // :giro
 			  }
 // SH}
@@ -624,7 +621,7 @@ public static abstract class AbstractQualifiedAllocationExpression extends Alloc
 				scope.problemReporter().missingTypeInConstructor(this, this.binding);
 			}
 			if (!isDiamond && receiverType.isParameterizedTypeWithActualArguments()) {
-		 		checkTypeArgumentRedundancy((ParameterizedTypeBinding)receiverType, receiverType.enclosingType(), argumentTypes , scope);
+		 		checkTypeArgumentRedundancy((ParameterizedTypeBinding)receiverType, receiverType.enclosingType(), this.argumentTypes , scope);
 		 	}
 			// The enclosing instance must be compatible with the innermost enclosing type
 			ReferenceBinding expectedType = this.binding.declaringClass.enclosingType();
@@ -670,7 +667,7 @@ public static abstract class AbstractQualifiedAllocationExpression extends Alloc
 		if ((this.resolvedType.tagBits & TagBits.HierarchyHasProblems) != 0) {
 			return null; // stop secondary errors
 		}
-		MethodBinding inheritedBinding = findConstructorBinding(scope, this, anonymousSuperclass, argumentTypes);
+		MethodBinding inheritedBinding = findConstructorBinding(scope, this, anonymousSuperclass, this.argumentTypes);
 			
 		if (!inheritedBinding.isValidBinding()) {
 			if (inheritedBinding.declaringClass == null) {
@@ -698,7 +695,7 @@ public static abstract class AbstractQualifiedAllocationExpression extends Alloc
 			this.enclosingInstance.computeConversion(scope, targetEnclosing, enclosingInstanceType);
 		}
 		if (this.arguments != null) {
-			if (checkInvocationArguments(scope, null, anonymousSuperclass, inheritedBinding, this.arguments, argumentTypes, argsContainCast, this)) {
+			if (checkInvocationArguments(scope, null, anonymousSuperclass, inheritedBinding, this.arguments, this.argumentTypes, argsContainCast, this)) {
 				this.bits |= ASTNode.Unchecked;
 			}
 		}

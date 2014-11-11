@@ -45,11 +45,14 @@ public interface ProblemReasons {
 	final int ParameterizedMethodExpectedTypeProblem = 23;
 	final int ApplicableMethodOverriddenByInapplicable = 24;
 	final int ContradictoryNullAnnotations = 25;
+	final int NoSuchMethodOnArray = 26;
+	final int InferredAppliableMethodInapplicable = 27; // 18.5.1 ignores arguments not pertinent to applicability. When these are taken into consideration method could fail applicability
+	final int NoProperEnclosingInstance = 28;
 //{ObjectTeams;
-    final int NoTeamContext = 26;
-    final int AnchorNotFinal = 27;
-    final int AnchorNotATeam = 28;
-    final int AnchorNotFound = 29;
-    final int ProblemAlreadyReported = 30;
+    final int NoTeamContext = 29;
+    final int AnchorNotFinal = 30;
+    final int AnchorNotATeam = 31;
+    final int AnchorNotFound = 32;
+    final int ProblemAlreadyReported = 33;
 // SH}
 }

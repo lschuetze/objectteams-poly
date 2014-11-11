@@ -20,12 +20,24 @@ public class CaptureBinding18 extends CaptureBinding {
 	
 	TypeBinding[] upperBounds;
 	private char[] originalName;
+	private CaptureBinding18 prototype;
 
 	public CaptureBinding18(ReferenceBinding contextType, char[] sourceName, char[] originalName, int position, int captureID, LookupEnvironment environment) {
 		super(contextType, sourceName, position, captureID, environment);
 		this.originalName = originalName;
+		this.prototype = this;
 	}
 	
+	private CaptureBinding18(CaptureBinding18 prototype) {
+		this(prototype.sourceType, CharOperation.append(prototype.sourceName, '\''), prototype.originalName, prototype.position, prototype.captureID, prototype.environment);
+		this.upperBounds = prototype.upperBounds;
+		this.firstBound = prototype.firstBound;
+		this.lowerBound = prototype.lowerBound;
+		this.superInterfaces = prototype.superInterfaces;
+		this.superclass = prototype.superclass;
+		this.prototype = prototype.prototype;		
+	}
+
 	public boolean setUpperBounds(TypeBinding[] upperBounds, ReferenceBinding javaLangObject) {
 		this.upperBounds = upperBounds;
 		if (upperBounds.length > 0)
@@ -59,7 +71,7 @@ public class CaptureBinding18 extends CaptureBinding {
 	}
 
 	public TypeBinding clone(TypeBinding enclosingType) {
-		return new CaptureBinding18(this.sourceType, CharOperation.append(this.sourceName, '\''), this.originalName, this.position, this.captureID, this.environment);
+		return new CaptureBinding18(this);
 	}
 
 	public MethodBinding[] getMethods(char[] selector) {
@@ -258,7 +270,7 @@ public class CaptureBinding18 extends CaptureBinding {
 		if (this.genericTypeSignature == null) {
 			char[] boundSignature;
 			try {
-				if (this.recursionLevel++ > 0 || this.firstBound == null) {
+				if (this.prototype.recursionLevel++ > 0 || this.firstBound == null) {
 					boundSignature = TypeConstants.WILDCARD_STAR;
 				} else if (this.upperBounds != null) {
 					boundSignature = CharOperation.concat(TypeConstants.WILDCARD_PLUS, this.firstBound.genericTypeSignature());
@@ -269,7 +281,7 @@ public class CaptureBinding18 extends CaptureBinding {
 				}
 				this.genericTypeSignature = CharOperation.concat(TypeConstants.WILDCARD_CAPTURE, boundSignature);
 			} finally {
-				this.recursionLevel--;
+				this.prototype.recursionLevel--;
 			}
 		}
 		return this.genericTypeSignature;
@@ -277,9 +289,9 @@ public class CaptureBinding18 extends CaptureBinding {
 	
 	public char[] readableName() {
 		if (this.lowerBound == null && this.firstBound != null) {
-			if (this.recursionLevel < 2) {
+			if (this.prototype.recursionLevel < 2) {
 				try {
-					this.recursionLevel ++;
+					this.prototype.recursionLevel ++;
 					if (this.upperBounds != null && this.upperBounds.length > 1) {
 						StringBuffer sb = new StringBuffer();
 						sb.append(this.upperBounds[0].readableName());
@@ -292,7 +304,7 @@ public class CaptureBinding18 extends CaptureBinding {
 					}
 					return this.firstBound.readableName();
 				} finally {
-					this.recursionLevel--;
+					this.prototype.recursionLevel--;
 				}
 			} else {
 				return this.originalName;
@@ -303,9 +315,9 @@ public class CaptureBinding18 extends CaptureBinding {
 
 	public char[] shortReadableName() {
 		if (this.lowerBound == null && this.firstBound != null) {
-			if (this.recursionLevel < 2) {
+			if (this.prototype.recursionLevel < 2) {
 				try {
-					this.recursionLevel++;
+					this.prototype.recursionLevel++;
 					if (this.upperBounds != null && this.upperBounds.length > 1) {
 						StringBuffer sb = new StringBuffer();
 						sb.append(this.upperBounds[0].shortReadableName());
@@ -318,7 +330,7 @@ public class CaptureBinding18 extends CaptureBinding {
 					}
 					return this.firstBound.shortReadableName();
 				} finally {
-					this.recursionLevel--;
+					this.prototype.recursionLevel--;
 				}
 			} else {
 				return this.originalName;

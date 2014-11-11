@@ -901,6 +901,7 @@ public class Parser extends CommitRollbackParser implements ConflictedParser, Op
 	protected int identifierPtr;
 	protected char[][] identifierStack;
 	protected boolean ignoreNextOpeningBrace;
+	protected boolean ignoreNextClosingBrace;
 
 	//positions , dimensions , .... (int stacks)
 	protected int intPtr;
@@ -1518,7 +1519,9 @@ protected void consumeAllocationHeader() {
 		this.lastCheckPoint = anonymousType.bodyStart = this.scanner.currentPosition;
 		this.currentElement = this.currentElement.add(anonymousType, 0);
 		this.lastIgnoredToken = -1;
-		if (!isIndirectlyInsideLambdaExpression())
+		if (isIndirectlyInsideLambdaExpression())
+			this.ignoreNextOpeningBrace = true;
+		else
 			this.currentToken = 0; // opening brace already taken into account
 		return;
 	}
@@ -4293,7 +4296,9 @@ protected void consumeEnterAnonymousClassBody(boolean qualified) {
 		this.lastCheckPoint = anonymousType.bodyStart;
 		this.currentElement = this.currentElement.add(anonymousType, 0);
 		if (!(this.currentElement instanceof RecoveredAnnotation)) {
-			if (!isIndirectlyInsideLambdaExpression())
+			if (isIndirectlyInsideLambdaExpression())
+				this.ignoreNextOpeningBrace = true;
+			else 
 				this.currentToken = 0; // opening brace already taken into account
 		} else {
 			this.ignoreNextOpeningBrace = true;
@@ -4495,8 +4500,10 @@ protected void consumeEnumConstantHeader() {
 	  	this.currentElement = this.currentElement.add(anonymousType, 0);
       	this.lastCheckPoint = anonymousType.bodyStart;
         this.lastIgnoredToken = -1;
-        if (!isIndirectlyInsideLambdaExpression())
-        	this.currentToken = 0; // opening brace already taken into account
+        if (isIndirectlyInsideLambdaExpression())
+			this.ignoreNextOpeningBrace = true;
+		else
+			this.currentToken = 0; // opening brace already taken into account
 	  } else {
 	  	  if(this.currentToken == TokenNameSEMICOLON) {
 		  	RecoveredType currentType = currentRecoveryType();
@@ -10144,9 +10151,11 @@ protected void consumeLambdaExpression() {
 	Statement body = (Statement) this.astStack[this.astPtr--];
 	if (body instanceof Block) {
 		if (this.options.ignoreMethodBodies) {
+			Statement oldBody = body;
 			body = new Block(0);
+			body.sourceStart = oldBody.sourceStart;
+			body.sourceEnd = oldBody.sourceEnd;
 		}
-		((Block) body).lambdaBody = true; // for consistency's sakes.
 	}
 
 	LambdaExpression lexp = (LambdaExpression) this.astStack[this.astPtr--];
@@ -13244,6 +13253,11 @@ public boolean hasLeadingTagComment(char[] commentPrefixTag, int rangeEnd) {
 	}
 	return false;
 }
+
+@Override
+protected void ignoreNextClosingBrace() {
+	this.ignoreNextClosingBrace = true;
+}
 protected void ignoreExpressionAssignment() {
 	// Assignment ::= InvalidArrayInitializerAssignement
 	// encoded operator would be: this.intStack[this.intPtr]
@@ -15239,6 +15253,10 @@ public void recoveryTokenCheck() {
 			break;
 
 		case TokenNameRBRACE :
+			if (this.ignoreNextClosingBrace) {
+				this.ignoreNextClosingBrace = false;
+				break;
+			}
 			this.rBraceStart = this.scanner.startPosition - 1;
 			this.rBraceEnd = this.scanner.currentPosition - 1;
 			this.endPosition = flushCommentsDefinedPriorTo(this.rBraceEnd);
