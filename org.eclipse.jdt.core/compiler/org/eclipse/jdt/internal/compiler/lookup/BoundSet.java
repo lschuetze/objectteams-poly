@@ -422,7 +422,13 @@ class BoundSet {
 		}
 		return hasProperBound;
 	}
-
+	
+	public void addBounds(BoundSet that, LookupEnvironment environment) {
+		if (that == null || environment == null)
+			return;
+		addBounds(that.flatten(), environment);
+	}
+	
 	public boolean isInstantiated(InferenceVariable inferenceVariable) {
 		ThreeSets three = this.boundsPerVariable.get(inferenceVariable.prototype());
 		if (three != null)
@@ -594,9 +600,7 @@ class BoundSet {
 		while (captIter.hasNext()) {
 			Entry<ParameterizedTypeBinding, ParameterizedTypeBinding> capt = captIter.next();
 			ParameterizedTypeBinding gAlpha = capt.getKey();
-			// We come in with capture(gA), we need to work with gA below. It was necessary to establish capture at the call site.
-			ParameterizedTypeBinding cgA = capt.getValue();
-			ParameterizedTypeBinding gA = (ParameterizedTypeBinding) cgA.uncapture(context.scope);
+			ParameterizedTypeBinding gA = capt.getValue();
 			ReferenceBinding g = (ReferenceBinding) gA.original();
 			final TypeVariableBinding[] parameters = g.typeVariables();
 			// construct theta = [P1:=alpha1,...]
@@ -615,7 +619,6 @@ class BoundSet {
 				addBounds(pi.getTypeBounds(alpha, theta), context.environment);
 
 				TypeBinding ai = gA.arguments[i];
-				TypeBinding cai = cgA.arguments[i];
 				if (ai instanceof WildcardBinding) {
 					WildcardBinding wildcardBinding = (WildcardBinding)ai;
 					TypeBinding t = wildcardBinding.bound;
@@ -627,14 +630,11 @@ class BoundSet {
 							it = three.sameBounds.iterator();
 							while (it.hasNext()) {
 								TypeBound bound = it.next();
-								/* With the expected type's declared type being Collector<? super T, A, R> and gAlpha being Collector<T#0,?#1,List<T#0>#2> and cgA being
-								   Collector<T#0,capture#1-of ?,List<T#0>>, without the constraint reduction below - we will never discover A to be capture#1-of ? and
-								   claim A is jlO. See https://bugs.eclipse.org/bugs/show_bug.cgi?id=437444#c24 - #27
-								*/
-								if (!reduceOneConstraint(context, ConstraintTypeFormula.create(bound.right, cai, ReductionResult.SAME)))
-									return false;
-								// Our = reduction transitively adds a new bound that necessitates the check below for capture. 
-								if (!(bound.right instanceof InferenceVariable) && !bound.right.isCapture())
+								if (InferenceContext18.SHOULD_WORKAROUND_BUG_JDK_8054721) {
+									if (bound.right instanceof CaptureBinding && bound.right.isProperType(true))
+										continue;
+								}
+								if (!(bound.right instanceof InferenceVariable))
 									return false;
 							}
 						}
@@ -656,7 +656,7 @@ class BoundSet {
 										ReferenceBinding[] allBounds = new ReferenceBinding[n];
 										allBounds[0] = (ReferenceBinding) bi1; // TODO is this safe?
 										System.arraycopy(otherBounds, 0, allBounds, 1, n-1);
-										bi = new IntersectionCastTypeBinding(allBounds, context.environment);
+										bi = context.environment.createIntersectionCastType(allBounds);
 									}
 									addTypeBoundsFromWildcardBound(context, theta, wildcardBinding.boundKind, t, r, bi);
 									//										if (otherBounds != null) {
@@ -978,21 +978,6 @@ class BoundSet {
 		if (three == null) return null;
 		return three.findSingleWrapperType();
 	}
-
-	private TypeBinding applyInstantiations(TypeBinding type) {
-		if (type.isProperType(true))
-			return type;
-	
-		Iterator<InferenceVariable> variableIt = this.boundsPerVariable.keySet().iterator();
-		while (variableIt.hasNext()) {
-			InferenceVariable inferenceVariable = variableIt.next();
-			TypeBinding instantiation = getInstantiation(inferenceVariable, null);
-			if (instantiation != null)
-				type = type.substituteInferenceVariable(inferenceVariable, instantiation);
-		}
-		return type;
-	}
-	
 	// this condition is just way too complex to check it in-line:
 	public boolean condition18_5_2_bullet_3_3_1(InferenceVariable alpha, TypeBinding targetType) {
 		// T is a reference type, but is not a wildcard-parameterized type, and either 
@@ -1032,10 +1017,9 @@ class BoundSet {
 						/* HashMap<K#8,V#9> and HashMap<K#8,ArrayList<T>> with an instantiation for V9 = ArrayList<T> already in the 
 						   bound set should not be seen as two different parameterizations of the same generic class or interface.
 						   See https://bugs.eclipse.org/bugs/show_bug.cgi?id=432626 for a test that triggers this condition.
+						   See https://bugs.openjdk.java.net/browse/JDK-8056092: recommendation is to check for proper types.
 						*/
-						supers[0] = applyInstantiations(supers[0]);
-						supers[1] = applyInstantiations(supers[1]);
-						if (!TypeBinding.equalsEquals(supers[0], supers[1]))
+						if (supers[0].isProperType(true) && supers[1].isProperType(true) && !TypeBinding.equalsEquals(supers[0], supers[1]))
 							return true;
 					}
 				}
@@ -1075,7 +1059,8 @@ class BoundSet {
 	private boolean superOnlyRaw(TypeBinding g, TypeBinding s, LookupEnvironment env) {
 		if (s instanceof InferenceVariable)
 			return false; // inference has no super types
-		if (s.findSuperTypeOriginatingFrom(g) == null)
+		final TypeBinding superType = s.findSuperTypeOriginatingFrom(g);
+		if (superType != null && !superType.isParameterizedType())
 			return s.isCompatibleWith(env.convertToRawType(g, false));
 		return false;
 	}

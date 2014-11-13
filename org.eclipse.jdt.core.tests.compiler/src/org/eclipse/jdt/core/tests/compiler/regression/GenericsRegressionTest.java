@@ -2553,13 +2553,8 @@ public void test283353() {
 			"    K extends EntityKey<I>> {\n" +
 			"  }\n" +
 			"}\n";
-	if (this.complianceLevel < ClassFileConstants.JDK1_8) {
-		this.runConformTest(
-			new String[] { "X.java", source },
-			"");
-	} else {
-		// see https://bugs.eclipse.org/425031
-		runNegativeTest(
+	
+	runNegativeTest(
 			new String[] { "X.java", source },
 			"----------\n" + 
 			"1. WARNING in X.java (at line 3)\n" + 
@@ -2567,12 +2562,11 @@ public void test283353() {
 			"	^^^^^^^^^\n" + 
 			"X.EntityKey is a raw type. References to generic type X.EntityKey<I> should be parameterized\n" + 
 			"----------\n" + 
-			"2. ERROR in X.java (at line 4)\n" + 
+			"2. WARNING in X.java (at line 4)\n" + 
 			"	new EntityCondenser().condense(entityKey);  \n" + 
-			"	                      ^^^^^^^^\n" + 
-			"The method condense(K) in the type X.EntityCondenser is not applicable for the arguments (X.EntityKey)\n" + 
+			"	^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n" + 
+			"Type safety: Unchecked invocation condense(X.EntityKey) of the generic method condense(K) of type X.EntityCondenser\n" + 
 			"----------\n");
-	}
 }
 // https://bugs.eclipse.org/bugs/show_bug.cgi?id=347600
 public void test347600() {
@@ -4577,60 +4571,62 @@ public void testBug430987() {
 			"  }\n" + 
 			"\n" + 
 			"}\n";
-	if (this.complianceLevel < ClassFileConstants.JDK1_8) {
-		runConformTest(
-			new String[] {
-				"X.java",
-				source
-			});
-	} else {
 		runNegativeTest(
 			new String[] {
 				"X.java",
 				source
 			},
 			"----------\n" + 
-			"1. ERROR in X.java (at line 8)\n" + 
+			"1. WARNING in X.java (at line 8)\n" + 
 			"	doSomethingWithFoo( any( Foo.class ), any( Foo.class ) );\n" + 
-			"	^^^^^^^^^^^^^^^^^^\n" + 
-			"The method doSomethingWithFoo(X.Foo<T>, X.Foo<T>) in the type X is not applicable for the arguments (X.Foo, X.Foo)\n" + 
+			"	^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n" + 
+			"Type safety: Unchecked invocation doSomethingWithFoo(X.Foo, X.Foo) of the generic method doSomethingWithFoo(X.Foo<T>, X.Foo<T>) of type X\n" + 
 			"----------\n" + 
-			"2. WARNING in X.java (at line 12)\n" + 
+			"2. WARNING in X.java (at line 8)\n" + 
+			"	doSomethingWithFoo( any( Foo.class ), any( Foo.class ) );\n" + 
+			"	                    ^^^^^^^^^^^^^^^^\n" + 
+			"Type safety: The expression of type X.Foo needs unchecked conversion to conform to X.Foo<Object>\n" + 
+			"----------\n" + 
+			"3. WARNING in X.java (at line 8)\n" + 
+			"	doSomethingWithFoo( any( Foo.class ), any( Foo.class ) );\n" + 
+			"	                                      ^^^^^^^^^^^^^^^^\n" + 
+			"Type safety: The expression of type X.Foo needs unchecked conversion to conform to X.Foo<Object>\n" + 
+			"----------\n" + 
+			"4. WARNING in X.java (at line 12)\n" + 
 			"	Foo foo = any( Foo.class );\n" + 
 			"	^^^\n" + 
 			"X.Foo is a raw type. References to generic type X.Foo<T> should be parameterized\n" + 
 			"----------\n" + 
-			"3. WARNING in X.java (at line 13)\n" + 
+			"5. WARNING in X.java (at line 13)\n" + 
 			"	doSomethingWithFoo( foo, foo );\n" + 
 			"	^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n" + 
 			"Type safety: Unchecked invocation doSomethingWithFoo(X.Foo, X.Foo) of the generic method doSomethingWithFoo(X.Foo<T>, X.Foo<T>) of type X\n" + 
 			"----------\n" + 
-			"4. WARNING in X.java (at line 13)\n" + 
+			"6. WARNING in X.java (at line 13)\n" + 
 			"	doSomethingWithFoo( foo, foo );\n" + 
 			"	                    ^^^\n" + 
 			"Type safety: The expression of type X.Foo needs unchecked conversion to conform to X.Foo<Object>\n" + 
 			"----------\n" + 
-			"5. WARNING in X.java (at line 13)\n" + 
+			"7. WARNING in X.java (at line 13)\n" + 
 			"	doSomethingWithFoo( foo, foo );\n" + 
 			"	                         ^^^\n" + 
 			"Type safety: The expression of type X.Foo needs unchecked conversion to conform to X.Foo<Object>\n" + 
 			"----------\n" + 
-			"6. WARNING in X.java (at line 17)\n" + 
+			"8. WARNING in X.java (at line 17)\n" + 
 			"	this.<Object>doSomethingWithFoo( any( Foo.class ), any( Foo.class ) );\n" + 
 			"	^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n" + 
 			"Type safety: Unchecked invocation doSomethingWithFoo(X.Foo, X.Foo) of the generic method doSomethingWithFoo(X.Foo<T>, X.Foo<T>) of type X\n" + 
 			"----------\n" + 
-			"7. WARNING in X.java (at line 17)\n" + 
+			"9. WARNING in X.java (at line 17)\n" + 
 			"	this.<Object>doSomethingWithFoo( any( Foo.class ), any( Foo.class ) );\n" + 
 			"	                                 ^^^^^^^^^^^^^^^^\n" + 
 			"Type safety: The expression of type X.Foo needs unchecked conversion to conform to X.Foo<Object>\n" + 
 			"----------\n" + 
-			"8. WARNING in X.java (at line 17)\n" + 
+			"10. WARNING in X.java (at line 17)\n" + 
 			"	this.<Object>doSomethingWithFoo( any( Foo.class ), any( Foo.class ) );\n" + 
 			"	                                                   ^^^^^^^^^^^^^^^^\n" + 
 			"Type safety: The expression of type X.Foo needs unchecked conversion to conform to X.Foo<Object>\n" + 
 			"----------\n");
-	}
 }
 public void _testBug430686() {
 	runConformTest(
@@ -5471,7 +5467,6 @@ public void test444024() {
 }
 // https://bugs.eclipse.org/bugs/show_bug.cgi?id=440019, [1.8][compiler] Type mismatch error with autoboxing/scalar types (works with 1.6)
 public void test440019() {
-	if (this.complianceLevel <= ClassFileConstants.JDK1_7)
 		this.runConformTest(
 		   new String[] {
 			   "A.java",
@@ -5486,9 +5481,8 @@ public void test440019() {
 		   "");
 }
 // https://bugs.eclipse.org/bugs/show_bug.cgi?id=443596, [1.8][compiler] Failure for overload resolution in case of Generics and Varags 
-public void _test443596() {
-	if (this.complianceLevel >= ClassFileConstants.JDK1_7)
-		this.runNegativeTest(
+public void test443596() {
+	this.runNegativeTest(
 		   new String[] {
 			   "X.java",
 			   "public final class X {\n" +
@@ -5502,12 +5496,270 @@ public void _test443596() {
 			   "    }\n" +
 			   "}\n",
 		   },
+		   this.complianceLevel < ClassFileConstants.JDK1_7 ?
+		   "" : 	   
 		   "----------\n" + 
 			"1. WARNING in X.java (at line 4)\n" + 
 			"	public static <T> Predicate<T> and(Predicate<? super T>... arg) { return null; }\n" + 
 			"	                                                           ^^^\n" + 
 			"Type safety: Potential heap pollution via varargs parameter arg\n" + 
 			"----------\n");
+}
+// https://bugs.eclipse.org/bugs/show_bug.cgi?id=446235, Java8 generics and boxing 
+public void test446235() {
+		this.runConformTest(
+		   new String[] {
+			   "IntegerLongBug.java",
+			   "public class IntegerLongBug {\n" +
+			   "	public static void main(String ar[]) {\n" +
+			   "		Integer number = 1000;\n" +
+			   "		long numberLong = number; //compiles fine\n" +
+			   "		long num = getNumber(5000); // compilation error\n" +
+			   "	}\n" +
+			   "	public static <T> T getNumber(T num) {\n" +
+			   "		return num;\n" +
+			   "	}\n" +
+			   "}\n",
+		   },
+		   "");
+}
+// https://bugs.eclipse.org/bugs/show_bug.cgi?id=440019, [1.8][compiler] Type mismatch error with autoboxing/scalar types (works with 1.6) 
+public void test440019_c9() {
+		this.runConformTest(
+		   new String[] {
+			   "X.java",
+			   "public class X {\n" +
+			   "    public static final int CORE_POOL_SIZE = 3;\n" +
+			   "    public static final int KEEP_ALIVE_TIME = 60; // seconds\n" +
+			   "    X(final int size, final long ttl){\n" +
+			   "        System.out.println(\"size: \" + size + \" \" + \" ttl: \" + ttl);\n" +
+			   "    }\n" +
+			   "    public static void main(String[] args) {\n" +
+			   "        new X(CORE_POOL_SIZE, get(KEEP_ALIVE_TIME)); // [1]\n" +
+			   "    }\n" +
+			   "    public static <T> T get(T value) {\n" +
+			   "        return value;\n" +
+			   "    }\n" +
+			   "}\n",
+		   },
+		   "size: 3  ttl: 60");
+}
+// https://bugs.eclipse.org/bugs/show_bug.cgi?id=446223, [1.8][compiler] Java8 generics eclipse doesn't compile  
+public void test446223() {
+		this.runNegativeTest(
+		   new String[] {
+			   "X.java",
+			   "public class X {\n" +
+			   "	public static void main(String ar[]) {\n" +
+			   "		System.out.println(\"hi\");\n" +
+			   "		DoNothing();\n" +
+			   "	}\n" +
+			   "	public interface Interface1 {\n" +
+			   "		public void go();\n" +
+			   "	}\n" +
+			   "	public interface Interface2<X> {\n" +
+			   "		public X go2();\n" +
+			   "	}\n" +
+			   "	private static <X, T extends Interface2<X> & Interface1> void DoNothing() {\n" +
+			   "		return;\n" +
+			   "	}\n" +
+			   "}\n",
+		   },
+		   "----------\n" + 
+			"1. WARNING in X.java (at line 9)\n" + 
+			"	public interface Interface2<X> {\n" + 
+			"	                            ^\n" + 
+			"The type parameter X is hiding the type X\n" + 
+			"----------\n" + 
+			"2. WARNING in X.java (at line 12)\n" + 
+			"	private static <X, T extends Interface2<X> & Interface1> void DoNothing() {\n" + 
+			"	                ^\n" + 
+			"The type parameter X is hiding the type X\n" + 
+			"----------\n");
+}
+// https://bugs.eclipse.org/bugs/show_bug.cgi?id=444334,  [1.8][compiler] Compiler generates error instead of warning on unchecked conversion 
+public void test444334() {
+		this.runNegativeTest(
+		   new String[] {
+			   "X.java",
+			   "import java.util.ArrayList;\n" +
+			   "import java.util.List;\n" +
+			   "public class X {\n" +
+			   "    public static void Main(String[] args) {\n" +
+			   "        doSomething(returnClassType(Class.class));\n" +
+			   "        doSomething(returnListType(new ArrayList<List>()));\n" +
+			   "    }\n" +
+			   "    public static <T> void doSomething(Class<T> clazz) {\n" +
+			   "        System.out.println(clazz.getSimpleName());\n" +
+			   "    }\n" +
+			   "    public static <T> T returnClassType(Class<T> clazz) {\n" +
+			   "        return null;\n" +
+			   "    }\n" +
+			   "    public static <T> void doSomething(List<T> list) {\n" +
+			   "        System.out.println(list.getClass().getSimpleName());\n" +
+			   "    }\n" +
+			   "    public static <T> T returnListType(List<T> list) {\n" +
+			   "        return null;\n" +
+			   "    }\n" +
+			   "}\n",
+		   },
+		   "----------\n" + 
+			"1. WARNING in X.java (at line 5)\n" + 
+			"	doSomething(returnClassType(Class.class));\n" + 
+			"	^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n" + 
+			"Type safety: Unchecked invocation doSomething(Class) of the generic method doSomething(Class<T>) of type X\n" + 
+			"----------\n" + 
+			"2. WARNING in X.java (at line 5)\n" + 
+			"	doSomething(returnClassType(Class.class));\n" + 
+			"	            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n" + 
+			"Type safety: The expression of type Class needs unchecked conversion to conform to Class<Object>\n" + 
+			"----------\n" + 
+			"3. WARNING in X.java (at line 6)\n" + 
+			"	doSomething(returnListType(new ArrayList<List>()));\n" + 
+			"	^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n" + 
+			"Type safety: Unchecked invocation doSomething(List) of the generic method doSomething(List<T>) of type X\n" + 
+			"----------\n" + 
+			"4. WARNING in X.java (at line 6)\n" + 
+			"	doSomething(returnListType(new ArrayList<List>()));\n" + 
+			"	            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n" + 
+			"Type safety: The expression of type List needs unchecked conversion to conform to List<Object>\n" + 
+			"----------\n" + 
+			"5. WARNING in X.java (at line 6)\n" + 
+			"	doSomething(returnListType(new ArrayList<List>()));\n" + 
+			"	                                         ^^^^\n" + 
+			"List is a raw type. References to generic type List<E> should be parameterized\n" + 
+			"----------\n");
+}
+// https://bugs.eclipse.org/bugs/show_bug.cgi?id=438246, [1.8][compiler] Java 8 static methods compilation error  
+public void test438246() {
+		if (this.complianceLevel < ClassFileConstants.JDK1_7)
+			return;
+		this.runNegativeTest(
+		   new String[] {
+			   "Foo.java",
+			   "import java.util.List;\n" +
+			   "public abstract class Foo<C>\n" +
+			   "{\n" +
+			   "  @SuppressWarnings(\"unchecked\")\n" +
+			   "  public static <C> void doit( List<Foo<C>> workers )\n" +
+			   "  {\n" +
+			   "    doit(  workers.toArray( new Foo[workers.size()] ) );\n" +
+			   "  }\n" +
+			   "  public static <C> void doit( Foo<C>... workers )\n" +
+			   "  {\n" +
+			   "  }\n" +
+			   "}\n",
+		   },
+		   "----------\n" + 
+			"1. WARNING in Foo.java (at line 9)\n" + 
+			"	public static <C> void doit( Foo<C>... workers )\n" + 
+			"	                                       ^^^^^^^\n" + 
+			"Type safety: Potential heap pollution via varargs parameter workers\n" + 
+			"----------\n");
+}
+// https://bugs.eclipse.org/bugs/show_bug.cgi?id=448795, [1.8][compiler] Inference should discriminate between strict and loose modes   
+public void test448795() {
+		this.runNegativeTest(
+		   new String[] {
+			   "X.java",
+			   "public class X<T> {\n" +
+			   "	static <T> T element(T [] ta) {\n" +
+			   "		return ta[0];\n" +
+			   "	}\n" +
+			   "	public static void main(String[] args) {\n" +
+			   "		int x = element(new int [] { 1234 });\n" +  // check that autoboxing does not kick in for arrays, i.e engine should not slip into loose mode.
+			   "	}\n" +
+			   "}\n",
+		   },
+		   "----------\n" + 
+			"1. ERROR in X.java (at line 6)\n" + 
+			"	int x = element(new int [] { 1234 });\n" + 
+			"	        ^^^^^^^\n" + 
+			"The method element(T[]) in the type X<T> is not applicable for the arguments (int[])\n" + 
+			"----------\n");
+}
+// https://bugs.eclipse.org/bugs/show_bug.cgi?id=448795, [1.8][compiler] Inference should discriminate between strict and loose modes   
+public void test448795a() {
+		this.runConformTest(
+		   new String[] {
+			   "X.java",
+			   "public class X<T> {\n" +
+			   "	static <T> T element(int x, T t) {\n" +
+			   "		System.out.println(\"Strict\");\n" +
+			   "		return t;\n" +
+			   "	}\n" +
+			   "	static <T> T element(T t1, T t2) {\n" +
+			   "		System.out.println(\"Loose\");\n" +
+			   "		return t2;\n" +
+			   "	}\n" +
+			   "	public static void main(String[] args) {\n" +
+			   "		int x = element(10, new Integer(20));\n" +
+			   "	}\n" +
+			   "}\n",
+		   },
+		   "Strict");
+}
+// https://bugs.eclipse.org/bugs/show_bug.cgi?id=448795, [1.8][compiler] Inference should discriminate between strict and loose modes   
+public void test448795b() {
+		this.runConformTest(
+		   new String[] {
+			   "X.java",
+			   "public class X<T> {\n" +
+			   "	static int element(int x, Integer t) {\n" +
+			   "		System.out.println(\"non-generic\");\n" +
+			   "		return t;\n" +
+			   "	}\n" +
+			   "	static <T> T element(int t1, T t2) {\n" +
+			   "		System.out.println(\"generic\");\n" +
+			   "		return t2;\n" +
+			   "	}\n" +
+			   "	public static void main(String[] args) {\n" +
+			   "		int x = element(10, new Integer(20));\n" +
+			   "	}\n" +
+			   "}\n",
+		   },
+		   "non-generic");
+}
+// https://bugs.eclipse.org/bugs/show_bug.cgi?id=448795, [1.8][compiler] Inference should discriminate between strict and loose modes   
+public void test448795c() {
+		this.runConformTest(
+		   new String[] {
+			   "X.java",
+			   "public class X<T> {\n" +
+			   "	static int element(Integer x, Integer t) {\n" +
+			   "		System.out.println(\"non-generic\");\n" +
+			   "		return t;\n" +
+			   "	}\n" +
+			   "	static <T> T element(int t1, T t2) {\n" +
+			   "		System.out.println(\"generic\");\n" +
+			   "		return t2;\n" +
+			   "	}\n" +
+			   "	public static void main(String[] args) {\n" +
+			   "		int x = element(10, new Integer(20));\n" +
+			   "	}\n" +
+			   "}\n",
+		   },
+		   "generic");
+}
+// https://bugs.eclipse.org/bugs/show_bug.cgi?id=434118, [1.8][compiler] Compilation error on generic capture/type inference   
+public void test434118() {
+		this.runConformTest(
+		   new String[] {
+			   "X.java",
+			   "public class X {\n" +
+			   "    public Object convertFails(Class<?> clazz, String value) {\n" +
+			   "        return Enum.valueOf(clazz.asSubclass(Enum.class), value);\n" +
+			   "    }\n" +
+			   "    public Object convertCompiles(Class<?> clazz, String value) {\n" +
+			   "        return Enum.valueOf(clazz.<Enum>asSubclass(Enum.class), value);\n" +
+			   "    }\n" +
+			   "    public Object convertCompiles2(Class<?> clazz, String value) {\n" +
+			   "        Class<? extends Enum> enumType = clazz.asSubclass(Enum.class);\n" +
+			   "        return Enum.valueOf(enumType, value);\n" +
+			   "    }\n" +
+			   "}\n",
+		   },
+		   "");
 }
 }
 

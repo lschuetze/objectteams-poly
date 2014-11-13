@@ -83,20 +83,32 @@ class ConstraintExpressionFormula extends ConstraintFormula {
 					if (previousMethod instanceof ParameterizedGenericMethodBinding) {
 						// find the previous inner inference context to see what inference kind this invocation needs:
 						InferenceContext18 innerCtx = invocation.getInferenceContext((ParameterizedGenericMethodBinding) previousMethod);
-						if (innerCtx == null) { // no inference -> assume it wasn't really poly after all
+						if (innerCtx == null || innerCtx.stepCompleted >= InferenceContext18.TYPE_INFERRED) { 
+							/* No inference context -> the method was likely manufactured by Scope.findExactMethod -> assume it wasn't really poly after all.
+							   Otherwise, either the constraints and initial bounds that would effectively reduce to b3 are already transferred to current context 
+							   during C Set construction. Otherwise all that is relevant is to relate the return type with expected type.
+							*/
 							TypeBinding exprType = this.left.resolvedType;
 							if (exprType == null || !exprType.isValidBinding())
 								return FALSE;
 							return ConstraintTypeFormula.create(exprType, this.right, COMPATIBLE, this.isSoft);
 						}
-						if (innerCtx.stepCompleted >= InferenceContext18.TYPE_INFERRED) {
-							// The constraints and initial bounds that would effectively reduce to b3 are already transferred to current context during C Set construction.
-							return TRUE;
+						if (innerCtx.stepCompleted >= InferenceContext18.APPLICABILITY_INFERRED) {
+							inferenceContext.currentBounds.addBounds(innerCtx.b2, inferenceContext.environment);
+							inferenceContext.inferenceVariables = innerCtx.inferenceVariables;
+							inferenceContext.inferenceKind = innerCtx.inferenceKind;
+							innerCtx.outerContext = inferenceContext;
+							inferenceContext.usesUncheckedConversion = innerCtx.usesUncheckedConversion;
+						} else {
+							return FALSE; // should not reach here.
 						}
-						inferenceContext.inferenceKind = innerCtx.inferenceKind;
+						// b2 has been lifted, inferring poly invocation type amounts to lifting b3.
+					} else {
+						inferenceContext.inferenceKind = inferenceContext.getInferenceKind(previousMethod, argumentTypes);
+						boolean isDiamond = method.isConstructor() && this.left.isPolyExpression(method);
+						inferInvocationApplicability(inferenceContext, method, argumentTypes, isDiamond, inferenceContext.inferenceKind);
+						// b2 has been lifted, inferring poly invocation type amounts to lifting b3.
 					}
-					boolean isDiamond = method.isConstructor() && this.left.isPolyExpression(method);
-					inferInvocationApplicability(inferenceContext, method, argumentTypes, isDiamond, inferenceContext.inferenceKind);
 					if (!inferPolyInvocationType(inferenceContext, invocation, this.right, method))
 						return FALSE;
 					return null; // already incorporated
@@ -214,9 +226,11 @@ class ConstraintExpressionFormula extends ConstraintFormula {
 		MethodBinding functionType = t.getSingleAbstractMethod(inferenceContext.scope, true);
 		if (functionType == null)
 			return FALSE;
-
+		// potentially-applicable method for the method reference when targeting T (15.13.1),
+		MethodBinding potentiallyApplicable = reference.findCompileTimeMethodTargeting(t, inferenceContext.scope);
+		if (potentiallyApplicable == null)
+			return FALSE;
 		if (reference.isExactMethodReference()) {
-			MethodBinding potentiallyApplicable = reference.getExactMethod(); 
 			List<ConstraintFormula> newConstraints = new ArrayList<ConstraintFormula>();
 			TypeBinding[] p = functionType.parameters;
 			int n = p.length;
@@ -226,8 +240,6 @@ class ConstraintExpressionFormula extends ConstraintFormula {
 			if (n == k+1) {
 				newConstraints.add(ConstraintTypeFormula.create(p[0], reference.lhs.resolvedType, COMPATIBLE));
 				offset = 1;
-			} else if (n != k) {
-				return FALSE;
 			}
 			for (int i = offset; i < n; i++)
 				newConstraints.add(ConstraintTypeFormula.create(p[i], pPrime[i-offset], COMPATIBLE));
@@ -241,10 +253,6 @@ class ConstraintExpressionFormula extends ConstraintFormula {
 			}
 			return newConstraints.toArray(new ConstraintFormula[newConstraints.size()]);
 		} else { // inexact
-			MethodBinding potentiallyApplicable = reference.findCompileTimeMethodTargeting(t, inferenceContext.scope); // // potentially-applicable method for the method reference when targeting T (15.13.1),
-			if (potentiallyApplicable == null)
-				return FALSE;
-			
 			int n = functionType.parameters.length;
 			for (int i = 0; i < n; i++)
 				if (!functionType.parameters[i].isProperType(true))
@@ -331,7 +339,7 @@ class ConstraintExpressionFormula extends ConstraintFormula {
 			if (returnType == TypeBinding.VOID)
 				throw new InferenceFailureException("expression has no value"); //$NON-NLS-1$
 
-			if (inferenceContext.usesUncheckedConversion()) {
+			if (inferenceContext.usesUncheckedConversion) {
 				// spec says erasure, but we don't really have compatibility rules for erasure, use raw type instead:
 				TypeBinding erasure = inferenceContext.environment.convertToRawType(returnType, false);
 				ConstraintTypeFormula newConstraint = ConstraintTypeFormula.create(erasure, targetType, COMPATIBLE);
@@ -348,18 +356,29 @@ class ConstraintExpressionFormula extends ConstraintFormula {
 				InferenceVariable[] betas = inferenceContext.addTypeVariableSubstitutions(arguments);
 				ParameterizedTypeBinding gbeta = inferenceContext.environment.createParameterizedType(
 						parameterizedType.genericType(), betas, parameterizedType.enclosingType(), parameterizedType.getTypeAnnotations());
-				inferenceContext.currentBounds.captures.put(gbeta, parameterizedType.capture(inferenceContext.scope, invocationSite.sourceEnd())); // established: both types have nonnull arguments
+				inferenceContext.currentBounds.captures.put(gbeta, parameterizedType); // established: both types have nonnull arguments
+				if (InferenceContext18.SHOULD_WORKAROUND_BUG_JDK_8054721) {
+					parameterizedType = parameterizedType.capture(inferenceContext.scope, invocationSite.sourceEnd());
+					arguments = parameterizedType.arguments;
+					for (int i = 0, length = arguments.length; i < length; i++) {
+						if (arguments[i].isCapture() && arguments[i].isProperType(true)) {
+							CaptureBinding capture = (CaptureBinding) arguments[i];
+							inferenceContext.currentBounds.addBound(new TypeBound(betas[i], capture, SAME), inferenceContext.environment);
+						}
+					}
+				}
 				ConstraintTypeFormula newConstraint = ConstraintTypeFormula.create(gbeta, targetType, COMPATIBLE);
 				return inferenceContext.reduceAndIncorporate(newConstraint);
 			}
-			if (rTheta instanceof InferenceVariable) {
-				InferenceVariable alpha = (InferenceVariable) rTheta;
+			if (rTheta.leafComponentType() instanceof InferenceVariable) { // https://bugs.openjdk.java.net/browse/JDK-8062082
+				InferenceVariable alpha = (InferenceVariable) rTheta.leafComponentType();
+				TypeBinding targetLeafType = targetType.leafComponentType();
 				boolean toResolve = false;
-				if (inferenceContext.currentBounds.condition18_5_2_bullet_3_3_1(alpha, targetType)) {
+				if (inferenceContext.currentBounds.condition18_5_2_bullet_3_3_1(alpha, targetLeafType)) {
 					toResolve = true;
-				} else if (inferenceContext.currentBounds.condition18_5_2_bullet_3_3_2(alpha, targetType, inferenceContext)) {
+				} else if (inferenceContext.currentBounds.condition18_5_2_bullet_3_3_2(alpha, targetLeafType, inferenceContext)) {
 					toResolve = true;
-				} else if (targetType.isPrimitiveType()) {
+				} else if (targetLeafType.isPrimitiveType()) {
 					TypeBinding wrapper = inferenceContext.currentBounds.findWrapperTypeBound(alpha);
 					if (wrapper != null)
 						toResolve = true;
@@ -369,6 +388,9 @@ class ConstraintExpressionFormula extends ConstraintFormula {
 					if (solution == null)
 						return false;
 					TypeBinding u = solution.getInstantiation(alpha, null).capture(inferenceContext.scope, invocationSite.sourceEnd());
+					if (rTheta.dimensions() != 0) {
+						u = inferenceContext.environment.createArrayType(u, rTheta.dimensions());
+					}
 					ConstraintTypeFormula newConstraint = ConstraintTypeFormula.create(u, targetType, COMPATIBLE);
 					return inferenceContext.reduceAndIncorporate(newConstraint);
 				}

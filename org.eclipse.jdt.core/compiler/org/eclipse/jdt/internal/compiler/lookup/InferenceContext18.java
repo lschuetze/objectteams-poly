@@ -79,11 +79,11 @@ import org.eclipse.objectteams.otdt.internal.core.compiler.lookup.ITeamAnchor;
  * <dt>18.5.1 Invocation Applicability Inference</dt>
  * <dd>{@link #inferInvocationApplicability(MethodBinding, TypeBinding[], boolean)}. Prepare the initial state for
  * 	inference of a generic invocation - no target type used at this point.
- *  Need to call {@link #solve()} afterwards to produce the intermediate result.<br/>
+ *  Need to call {@link #solve(boolean)} with true afterwards to produce the intermediate result.<br/>
  *  Called indirectly from {@link Scope#findMethod(ReferenceBinding, char[], TypeBinding[], InvocationSite, boolean)} et al
  *  to select applicable methods into overload resolution.</dd>
  * <dt>18.5.2 Invocation Type Inference</dt>
- * <dd>{@link InferenceContext18#inferInvocationType(BoundSet, TypeBinding, InvocationSite, MethodBinding)}. After a
+ * <dd>{@link InferenceContext18#inferInvocationType(TypeBinding, InvocationSite, MethodBinding)}. After a
  * 	most specific method has been picked, and given a target type determine the final generic instantiation.
  *  As long as a target type is still unavailable this phase keeps getting deferred.</br>
  *  Different wrappers exist for the convenience of different callers.</dd>
@@ -106,6 +106,12 @@ public class InferenceContext18 {
 
 	/** to conform with javac regarding https://bugs.openjdk.java.net/browse/JDK-8026527 */
 	static final boolean SIMULATE_BUG_JDK_8026527 = true;
+	
+	/** Temporary workaround until we know fully what to do with https://bugs.openjdk.java.net/browse/JDK-8054721 
+	 *  It looks likely that we have a bug independent of this JLS bug in that we clear the capture bounds eagerly.
+	*/
+	static final boolean SHOULD_WORKAROUND_BUG_JDK_8054721 = true; // See https://bugs.eclipse.org/bugs/show_bug.cgi?id=437444#c24 onwards
+	
 	/**
 	 * Detail flag to control the extent of {@link #SIMULATE_BUG_JDK_8026527}.
 	 * A setting of 'false' implements the advice from http://mail.openjdk.java.net/pipermail/lambda-spec-experts/2013-December/000447.html
@@ -148,11 +154,14 @@ public class InferenceContext18 {
 	
 	/** Signals whether any type compatibility makes use of unchecked conversion. */
 	public List<ConstraintFormula> constraintsWithUncheckedConversion;
-
+	public boolean usesUncheckedConversion;
+	public InferenceContext18 outerContext;
 	Scope scope;
 	LookupEnvironment environment;
 	ReferenceBinding object; // java.lang.Object
+	public BoundSet b2;
 	
+	public static final int CHECK_UNKNOWN = 0;
 	public static final int CHECK_STRICT = 1;
 	public static final int CHECK_LOOSE = 2;
 	public static final int CHECK_VARARG = 3;
@@ -162,11 +171,13 @@ public class InferenceContext18 {
 		Expression[] invocationArguments;
 		InferenceVariable[] inferenceVariables;
 		int inferenceKind;
-		SuspendedInferenceRecord(InvocationSite site, Expression[] invocationArguments, InferenceVariable[] inferenceVariables, int inferenceKind) {
+		boolean usesUncheckedConversion;
+		SuspendedInferenceRecord(InvocationSite site, Expression[] invocationArguments, InferenceVariable[] inferenceVariables, int inferenceKind, boolean usesUncheckedConversion) {
 			this.site = site;
 			this.invocationArguments = invocationArguments;
 			this.inferenceVariables = inferenceVariables;
 			this.inferenceKind = inferenceKind;
+			this.usesUncheckedConversion = usesUncheckedConversion;
 		}
 	}
 	
@@ -224,7 +235,6 @@ public class InferenceContext18 {
 
 	/** JLS 18.5.1: compute bounds from formal and actual parameters. */
 	public void createInitialConstraintsForParameters(TypeBinding[] parameters, boolean checkVararg, TypeBinding varArgsType, MethodBinding method) {
-		// TODO discriminate strict vs. loose invocations
 		if (this.invocationArguments == null)
 			return;
 		int len = checkVararg ? parameters.length - 1 : Math.min(parameters.length, this.invocationArguments.length);
@@ -326,17 +336,14 @@ public class InferenceContext18 {
 	}
 
 	/** JLS 18.5.2 Invocation Type Inference 
-	 * @param b1 "the bound set produced by reduction in order to demonstrate that m is applicable in 18.5.1"
 	 */
-	public BoundSet inferInvocationType(BoundSet b1, TypeBinding expectedType, InvocationSite invocationSite, MethodBinding method)
-			throws InferenceFailureException 
+	public BoundSet inferInvocationType(TypeBinding expectedType, InvocationSite invocationSite, MethodBinding method) throws InferenceFailureException 
 	{
 		// not JLS: simply ensure that null hints from the return type have been seen even in standalone contexts:
 		if (expectedType == null && method.returnType != null)
 			substitute(method.returnType); // result is ignore, the only effect is on InferenceVariable.nullHints
-		//
-		BoundSet previous = this.currentBounds.copy();
-		this.currentBounds = b1;
+		
+		this.currentBounds = this.b2.copy();
 		try {
 			// bullets 1&2: definitions only.
 			if (expectedType != null
@@ -392,7 +399,7 @@ public class InferenceContext18 {
 			// 6. bullet: solve
 			BoundSet solution = solve();
 			if (solution == null || !isResolved(solution)) {
-				this.currentBounds = previous; // don't let bounds from unsuccessful attempt leak into subsequent attempts
+				this.currentBounds = this.b2; // don't let bounds from unsuccessful attempt leak into subsequent attempts
 				return null;
 			}
 			// we're done, start reporting:
@@ -433,11 +440,6 @@ public class InferenceContext18 {
 
 	private boolean addConstraintsToC_OneExpr(Expression expri, Set<ConstraintFormula> c, TypeBinding fsi, TypeBinding substF, MethodBinding method, boolean interleaved) throws InferenceFailureException {
 		
-		// See https://bugs.openjdk.java.net/browse/JDK-8052325 for exclusion of poly expressions targeting proper types. CEF.reduce validates 
-		// that they are compatible in a loose invocation context against the target type. They contribute nothing further to solving the formulas.
-		if (substF.isProperType(true))
-			return true;
-		
 		// For all i (1 ≤ i ≤ k), if ei is not pertinent to applicability, the set contains ⟨ei → θ Fi⟩.
 		if (!expri.isPertinentToApplicability(fsi, method)) {
 			c.add(new ConstraintExpressionFormula(expri, substF, ReductionResult.COMPATIBLE, ARGUMENT_CONSTRAINTS_ARE_SOFT));
@@ -466,35 +468,37 @@ public class InferenceContext18 {
 				}
 			}
 		} else if (expri instanceof Invocation && expri.isPolyExpression()) {
+			
+			if (substF.isProperType(true)) // https://bugs.openjdk.java.net/browse/JDK-8052325 
+				return true;
+			
 			Invocation invocation = (Invocation) expri;
 			MethodBinding innerMethod = invocation.binding(substF, this.scope);
 			if (innerMethod == null)
 				return true; 		  // -> proceed with no new C set elements.
 			
+			Expression[] arguments = invocation.arguments();
+			TypeBinding[] argumentTypes = arguments == null ? Binding.NO_PARAMETERS : new TypeBinding[arguments.length];
+			for (int i = 0; i < argumentTypes.length; i++)
+				argumentTypes[i] = arguments[i].resolvedType;
+			int applicabilityKind;
+			InferenceContext18 innerContext = null;
+			if (innerMethod instanceof ParameterizedGenericMethodBinding)
+				 innerContext = invocation.getInferenceContext((ParameterizedGenericMethodBinding) innerMethod);
+			applicabilityKind = innerContext != null ? innerContext.inferenceKind : getInferenceKind(innerMethod, argumentTypes);
+			
 			if (interleaved) {
 				MethodBinding shallowMethod = innerMethod.shallowOriginal();
 				SuspendedInferenceRecord prevInvocation = enterPolyInvocation(invocation, invocation.arguments());
 				try {
-					Expression[] arguments = invocation.arguments();
-					TypeBinding[] argumentTypes = arguments == null ? Binding.NO_PARAMETERS : new TypeBinding[arguments.length];
-					for (int i = 0; i < argumentTypes.length; i++)
-						argumentTypes[i] = arguments[i].resolvedType;
-					if (innerMethod instanceof ParameterizedGenericMethodBinding) {
-						InferenceContext18 innerCtx = invocation.getInferenceContext((ParameterizedGenericMethodBinding) innerMethod);
-						this.inferenceKind = innerCtx.inferenceKind;
-					}
+					this.inferenceKind = applicabilityKind;
+					if (innerContext != null)
+						innerContext.outerContext = this;
 					inferInvocationApplicability(shallowMethod, argumentTypes, shallowMethod.isConstructor());
 					if (!ConstraintExpressionFormula.inferPolyInvocationType(this, invocation, substF, shallowMethod))
 						return false;
 				} finally {
 					resumeSuspendedInference(prevInvocation);
-				}
-			}
-			int applicabilityKind = CHECK_LOOSE;  // FIXME, for <> resolving to a non-generic method, this need to be computed.
-			if (innerMethod instanceof ParameterizedGenericMethodBinding) {
-				InferenceContext18 innerCtx = invocation.getInferenceContext((ParameterizedMethodBinding) innerMethod);
-				if (innerCtx != null) {
-					applicabilityKind = innerCtx.inferenceKind;
 				}
 			}
 			return addConstraintsToC(invocation.arguments(), c, innerMethod.genericMethod(), applicabilityKind, interleaved);
@@ -504,6 +508,18 @@ public class InferenceContext18 {
 					&& addConstraintsToC_OneExpr(ce.valueIfFalse, c, fsi, substF, method, interleaved);
 		}
 		return true;
+	}
+
+	
+	protected int getInferenceKind(MethodBinding nonGenericMethod, TypeBinding[] argumentTypes) {
+		switch (this.scope.parameterCompatibilityLevel(nonGenericMethod, argumentTypes)) {
+			case Scope.AUTOBOX_COMPATIBLE:
+				return CHECK_LOOSE;
+			case Scope.VARARGS_COMPATIBLE:
+				return CHECK_VARARG;
+			default:
+				return CHECK_STRICT;
+		}
 	}
 
 	public boolean hasResultFor(TypeBinding targetType) {
@@ -769,13 +785,19 @@ public class InferenceContext18 {
 	 * @return a bound set representing the solution, or null if inference failed
 	 * @throws InferenceFailureException a compile error has been detected during inference
 	 */
-	public /*@Nullable*/ BoundSet solve() throws InferenceFailureException {
+	public /*@Nullable*/ BoundSet solve(boolean inferringApplicability) throws InferenceFailureException {
 		if (!reduce())
 			return null;
 		if (!this.currentBounds.incorporate(this))
 			return null;
+		if (inferringApplicability)
+			this.b2 = this.currentBounds.copy(); // Preserve the result after reduction, without effects of resolve() for later use in invocation type inference.
 
 		return resolve(this.inferenceVariables);
+	}
+	
+	public /*@Nullable*/ BoundSet solve() throws InferenceFailureException {
+		return solve(false);
 	}
 	
 	public /*@Nullable*/ BoundSet solve(InferenceVariable[] toResolve) throws InferenceFailureException {
@@ -792,11 +814,14 @@ public class InferenceContext18 {
 	 * @throws InferenceFailureException 
 	 */
 	private boolean reduce() throws InferenceFailureException {
-		if (this.initialConstraints != null) {
-			for (int i = 0; i < this.initialConstraints.length; i++) {
-				if (!this.currentBounds.reduceOneConstraint(this, this.initialConstraints[i]))
-					return false;
-			}
+		// Caution: This can be reentered recursively even as an earlier call is munching through the constraints !
+		for (int i = 0; this.initialConstraints != null && i < this.initialConstraints.length; i++) {
+			final ConstraintFormula currentConstraint = this.initialConstraints[i];
+			if (currentConstraint == null)
+				continue;
+			this.initialConstraints[i] = null;
+			if (!this.currentBounds.reduceOneConstraint(this, currentConstraint))
+				return false;
 		}
 		this.initialConstraints = null;
 		return true;
@@ -895,7 +920,7 @@ public class InferenceContext18 {
 											} else if (glbs.length == 1) {
 												glb = glbs[0];
 											} else {
-												IntersectionCastTypeBinding intersection = new IntersectionCastTypeBinding(glbs, this.environment);
+												IntersectionCastTypeBinding intersection = (IntersectionCastTypeBinding) this.environment.createIntersectionCastType(glbs);
 												if (!ReferenceBinding.isConsistentIntersection(intersection.intersectingTypes)) {
 													tmpBoundSet = prevBoundSet; // clean up
 													break variables; // and start over
@@ -917,6 +942,7 @@ public class InferenceContext18 {
 					final CaptureBinding18[] zs = new CaptureBinding18[numVars];
 					for (int j = 0; j < numVars; j++)
 						zs[j] = freshCapture(variables[j]);
+					final BoundSet kurrentBoundSet = tmpBoundSet;
 					Substitution theta = new Substitution() {
 						public LookupEnvironment environment() { 
 							return InferenceContext18.this.environment;
@@ -928,6 +954,16 @@ public class InferenceContext18 {
 							for (int j = 0; j < numVars; j++)
 								if (TypeBinding.equalsEquals(variables[j], typeVariable))
 									return zs[j];
+							/* If we have an instantiation, lower it to the instantiation. We don't want downstream abstractions to be confused about multiple versions of bounds without
+							   and with instantiations propagated by incorporation. See https://bugs.eclipse.org/bugs/show_bug.cgi?id=430686. There is no value whatsoever in continuing
+							   to speak in two tongues. Also fixes https://bugs.eclipse.org/bugs/show_bug.cgi?id=425031.
+							*/
+							if (typeVariable instanceof InferenceVariable) {
+								InferenceVariable inferenceVariable = (InferenceVariable) typeVariable;
+								TypeBinding instantiation = kurrentBoundSet.getInstantiation(inferenceVariable, null);
+								if (instantiation != null)
+									return instantiation;
+							}
 							return typeVariable;
 						}
 //{ObjectTeams:
@@ -942,7 +978,6 @@ public class InferenceContext18 {
 						// add lower bounds:
 						TypeBinding[] lowerBounds = tmpBoundSet.lowerBounds(variable, true/*onlyProper*/);
 						if (lowerBounds != Binding.NO_TYPES) {
-							lowerBounds = Scope.substitute(theta, lowerBounds);
 							TypeBinding lub = this.scope.lowerUpperBound(lowerBounds);
 							if (lub != TypeBinding.VOID && lub != null)
 								zsj.lowerBound = lub;
@@ -1290,19 +1325,20 @@ public class InferenceContext18 {
 	}
 	
 	public SuspendedInferenceRecord enterPolyInvocation(InvocationSite invocation, Expression[] innerArguments) {
-		SuspendedInferenceRecord record = new SuspendedInferenceRecord(this.currentInvocation, this.invocationArguments, this.inferenceVariables, this.inferenceKind);
+		SuspendedInferenceRecord record = new SuspendedInferenceRecord(this.currentInvocation, this.invocationArguments, this.inferenceVariables, this.inferenceKind, this.usesUncheckedConversion);
 		this.inferenceVariables = null;
 		this.invocationArguments = innerArguments;
 		this.currentInvocation = invocation;
-		
+		this.usesUncheckedConversion = false;
 		return record;
 	}
 	
 	public SuspendedInferenceRecord enterLambda(LambdaExpression lambda) {
-		SuspendedInferenceRecord record = new SuspendedInferenceRecord(this.currentInvocation, this.invocationArguments, this.inferenceVariables, this.inferenceKind);
+		SuspendedInferenceRecord record = new SuspendedInferenceRecord(this.currentInvocation, this.invocationArguments, this.inferenceVariables, this.inferenceKind, this.usesUncheckedConversion);
 		this.inferenceVariables = null;
 		this.invocationArguments = null;
 		this.currentInvocation = null;
+		this.usesUncheckedConversion = false;
 		return record;
 	}
 
@@ -1322,6 +1358,7 @@ public class InferenceContext18 {
 		this.currentInvocation = record.site;
 		this.invocationArguments = record.invocationArguments;
 		this.inferenceKind = record.inferenceKind;
+		this.usesUncheckedConversion = record.usesUncheckedConversion;
 	}
 
 	private Substitution getResultSubstitution(final BoundSet result) {
@@ -1459,6 +1496,7 @@ public class InferenceContext18 {
 		if (this.constraintsWithUncheckedConversion == null)
 			this.constraintsWithUncheckedConversion = new ArrayList<ConstraintFormula>();
 		this.constraintsWithUncheckedConversion.add(constraint);
+		this.usesUncheckedConversion = true;
 	}
 	
 	void reportUncheckedConversions(BoundSet solution) {

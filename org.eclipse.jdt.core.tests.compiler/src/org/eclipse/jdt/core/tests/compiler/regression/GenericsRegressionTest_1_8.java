@@ -4680,4 +4680,116 @@ public void test437444_c113a() {
 		}, 
 		"");
 }
+// https://bugs.eclipse.org/bugs/show_bug.cgi?id=434394, [1.8] inference fails in some cases when conditional expression is involved
+public void test434394() {
+	this.runConformTest(
+		new String[] {
+			"X.java",
+			"import java.util.ArrayList;\n" +
+			"import java.util.Collections;\n" +
+			"import java.util.Comparator;\n" +
+			"import java.util.List;\n" +
+			"public class X {\n" +
+			"  public void bla() {\n" +
+			"    boolean b = Boolean.TRUE.booleanValue();\n" +
+			"    List<String> c1 = new ArrayList<>();\n" +
+			"    Collections.sort(c1, new Foo(new State<>((b ? new Val<>(\"AAAA\") : new Val<>(\"BBBB\"))))); // Cannot infer type arguments for State\n" +
+			"    Collections.sort(c1,new Foo(b ? new State<>(new Val<>(\"AAAA\")) : new State<>(new Val<>(\"BBBB\")))); // this is fine\n" +
+			"  }\n" +
+			"  static class Foo implements Comparator<String>{\n" +
+			"	  public Foo(State<String> st) {\n" +
+			"		  //\n" +
+			"	  }\n" +
+			"	@Override\n" +
+			"	public int compare(String o1, String o2) {\n" +
+			"		// TODO Auto-generated method stub\n" +
+			"		return 0;\n" +
+			"	}\n" +
+			"  }\n" +
+			"	static class State<R> {\n" +
+			"		State(Val<?> o) {\n" +
+			"		}\n" +
+			"	}\n" +
+			"	static class Val<T> {\n" +
+			"		Val(T t) {}\n" +
+			"	}\n" +
+			"}\n",
+		}, 
+		"");
+}
+// https://bugs.eclipse.org/bugs/show_bug.cgi?id=445725,  [1.8][inference] Type inference not occurring with lambda expression and constructor reference
+public void test445725() {
+	this.runConformTest(
+		new String[] {
+			"X.java",
+			"import java.util.ArrayList;\n" +
+			"import java.util.Arrays;\n" +
+			"import java.util.Collection;\n" +
+			"import java.util.function.Function;\n" +
+			"import java.util.stream.Collectors;\n" +
+			"import java.util.stream.Stream;\n" +
+			"public class X {\n" +
+			"/**\n" +
+			"   * Takes a collection, applies a mapper to it, and then passes the result into the finishing\n" +
+			"   * function\n" +
+			"   */\n" +
+			"  public static <FROM, TO, RESULT> RESULT mapped(Collection<FROM> collection,\n" +
+			"                                                 Function<? super FROM, ? extends TO> mapper,\n" +
+			"                                                 Function<? super Collection<TO>, RESULT> finisher)\n" +
+			"  {\n" +
+			"    return mapped(collection.stream(), mapper, finisher);\n" +
+			"  }\n" +
+			"  /**\n" +
+			"   * Takes a stream, applies a mapper to it, and then passes the result into the finishing function\n" +
+			"   */\n" +
+			"  public static <FROM, TO, RESULT> RESULT mapped(Stream<FROM> stream,\n" +
+			"                                                 Function<? super FROM, ? extends TO> mapper,\n" +
+			"                                                 Function<? super Collection<TO>, RESULT> finisher)\n" +
+			"  {\n" +
+			"    return finisher.apply(stream.map(mapper).collect(Collectors.toList()));\n" +
+			"  }\n" +
+			"  public static void example()\n" +
+			"  {\n" +
+			"    mapped(Stream.of(\"1, 2, 3\"), Integer::parseInt, ArrayList<Integer>::new);\n" +
+			"    mapped(Arrays.asList(\"1, 2, 3\"), Integer::parseInt, ArrayList<Integer>::new);\n" +
+			"\n" +
+			"    mapped(Stream.of(\"1, 2, 3\"), Integer::parseInt, IntCollection::new);\n" +
+			"    mapped(Arrays.asList(\"1, 2, 3\"), Integer::parseInt, IntCollection::new);\n" +
+			"  }\n" +
+			"  public static class IntCollection extends ArrayList<Integer>\n" +
+			"  {\n" +
+			"    public IntCollection(Collection<Integer> numbers)\n" +
+			"    {\n" +
+			"      super(numbers);\n" +
+			"    }\n" +
+			"  }\n" +
+			"}\n",
+		}, 
+		"");
+}
+// https://bugs.eclipse.org/bugs/show_bug.cgi?id=447767, [1.8][compiler] Spurious method not applicable error due to interaction between overload resolution and type inference
+public void test447767() {
+	this.runConformTest(
+		new String[] {
+			"X.java",
+			"interface I {\n" +
+			"	void bar(String t);\n" +
+			"}\n" +
+			"public class X<T> {\n" +
+			"	X(String x) {}\n" +
+			"	X(T x) { \n" +
+			"		System.out.println(\"Here\");\n" +
+			"	}\n" +
+			"	X(T x, String ...strings) {}\n" +
+			"	public void one(X<I> c){}\n" +
+			"	public void two() {\n" +
+			"		one(new X<>((String s) -> { }));\n" +
+			"	}\n" +
+			"	public static void main(String[] args) {\n" +
+			"		new X(\"\").two();\n" +
+			"	}\n" +
+			"}\n",
+		}, 
+		"Here");
+}
 }
