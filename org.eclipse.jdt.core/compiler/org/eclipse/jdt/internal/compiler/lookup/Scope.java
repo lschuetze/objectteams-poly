@@ -85,7 +85,6 @@ import org.eclipse.objectteams.otdt.internal.core.compiler.model.MethodModel;
 import org.eclipse.objectteams.otdt.internal.core.compiler.model.TypeModel;
 import org.eclipse.objectteams.otdt.internal.core.compiler.model.MethodModel.FakeKind;
 import org.eclipse.objectteams.otdt.internal.core.compiler.util.RoleTypeCreator;
-import org.eclipse.objectteams.otdt.internal.core.compiler.util.TSuperHelper;
 import org.eclipse.objectteams.otdt.internal.core.compiler.util.TypeAnalyzer;
 
 /**
@@ -149,19 +148,9 @@ public abstract class Scope {
 	public static final int NOT_RELATED = 0;
 	public static final int MORE_GENERIC = 1;
 
-	/*
-	 * Flags for PGMB.computeCompatibleMethod() and its callers, to request
-	 * which of two levels of inference should be performed (or both).
-	 */
-	/** Request Invocation Applicability Inference (18.5.1). */
-	public static final int APPLICABILITY = 1;
-	/** Request Invocation Type Inference (18.5.2). */
-	public static final int INVOCATION_TYPE = 2;
-	/** Request both {@link #APPLICABILITY} and {@link #INVOCATION_TYPE} inference. */
-	public static final int FULL_INFERENCE = APPLICABILITY | INVOCATION_TYPE;
-
 	public int kind;
 	public Scope parent;
+	
 
 	protected Scope(int kind, Scope parent) {
 		this.kind = kind;
@@ -764,10 +753,10 @@ public abstract class Scope {
 	 * Internal use only
 	 * Given a method, returns null if arguments cannot be converted to parameters.
 	 * Will answer a substituted method in case the method was generic and type inference got triggered;
-	 * in case the method was originally compatible, then simply answer it back.
+	 * in case the method was originally compatible, then simply answer it back. 
 	 */
-	protected final MethodBinding computeCompatibleMethod(MethodBinding method, TypeBinding[] arguments, InvocationSite invocationSite, int inferenceLevel) {
-		return computeCompatibleMethod(method, arguments, invocationSite, inferenceLevel, false);
+	protected final MethodBinding computeCompatibleMethod(MethodBinding method, TypeBinding[] arguments, InvocationSite invocationSite) {
+		return computeCompatibleMethod(method, arguments, invocationSite, false);
 	}	
 	/**
 	 * Internal use only
@@ -775,8 +764,7 @@ public abstract class Scope {
 	 * Will answer a substituted method in case the method was generic and type inference got triggered;
 	 * in case the method was originally compatible, then simply answer it back.
 	 */
-	protected final MethodBinding computeCompatibleMethod(MethodBinding method, TypeBinding[] arguments,
-			InvocationSite invocationSite, int inferenceLevel, boolean tiebreakingVarargsMethods)
+	protected final MethodBinding computeCompatibleMethod(MethodBinding method, TypeBinding[] arguments, InvocationSite invocationSite, boolean tiebreakingVarargsMethods)
 	{
 		TypeBinding[] genericTypeArguments = invocationSite.genericTypeArguments();
 		TypeBinding[] parameters = method.parameters;
@@ -811,9 +799,15 @@ public abstract class Scope {
 				arguments = newArgs;
 			else  // ensure that computeCompatibleMethod() below can update arguments without harming our caller: (TODO: always copy before the loop? only in 1.8?)
 				System.arraycopy(arguments, 0, arguments=new TypeBinding[argLength], 0, argLength);
-			method = ParameterizedGenericMethodBinding.computeCompatibleMethod(method, arguments, this, invocationSite, inferenceLevel);
+			method = ParameterizedGenericMethodBinding.computeCompatibleMethod(method, arguments, this, invocationSite);
 			if (method == null) return null; // incompatible
 			if (!method.isValidBinding()) return method; // bound check issue is taking precedence
+			if (compilerOptions.sourceLevel >= ClassFileConstants.JDK1_8 && method instanceof ParameterizedGenericMethodBinding && invocationSite instanceof Invocation) {
+				Invocation invocation = (Invocation) invocationSite;
+				InferenceContext18 infCtx = invocation.getInferenceContext((ParameterizedGenericMethodBinding) method);
+				if (infCtx != null)
+					return method; // inference is responsible, no need to recheck, actually we could check functional arguments, see https://bugs.eclipse.org/bugs/show_bug.cgi?id=437444#c125
+			}
 		} else if (genericTypeArguments != null && compilerOptions.complianceLevel < ClassFileConstants.JDK1_7) {
 			if (method instanceof ParameterizedGenericMethodBinding) {
 				if (!((ParameterizedGenericMethodBinding) method).wasInferred)
@@ -828,7 +822,7 @@ public abstract class Scope {
 			if (CompilerOptions.tolerateIllegalAmbiguousVarargsInvocation && compilerOptions.complianceLevel < ClassFileConstants.JDK1_7)
 				tiebreakingVarargsMethods = false;
 		}
-		if ((parameterCompatibilityLevel18(method, arguments, tiebreakingVarargsMethods, invocationSite)) > NOT_COMPATIBLE) {
+		if ((parameterCompatibilityLevel(method, arguments, tiebreakingVarargsMethods)) > NOT_COMPATIBLE) {
 			if ((method.tagBits & TagBits.AnnotationPolymorphicSignature) != 0) {
 				// generate polymorphic method
 				return this.environment().createPolymorphicMethod(method, arguments);
@@ -840,196 +834,10 @@ public abstract class Scope {
 		// in which case this problem category will be bogus
 		if (genericTypeArguments != null && typeVariables != Binding.NO_TYPE_VARIABLES)
 			return new ProblemMethodBinding(method, method.selector, arguments, ProblemReasons.ParameterizedMethodTypeMismatch);
+		// 18.5.1 ignores arguments not pertinent to applicability. When these are taken into consideration method could fail applicability (e.g, lambda shape/arity mismatch ...)
+		if (method instanceof PolyParameterizedGenericMethodBinding) // Not reached, but left in for now.
+			return new ProblemMethodBinding(method, method.selector, method.parameters, ProblemReasons.InferredApplicableMethodInapplicable);
 		return null; // incompatible
-	}
-
-	private int parameterCompatibilityLevel18(MethodBinding method, TypeBinding[] arguments, boolean tiebreakingVarargsMethods, InvocationSite site) {
-		jdk18checks:
-		if (site instanceof Invocation && compilerOptions().complianceLevel >= ClassFileConstants.JDK1_8) {
-			Invocation invocation = (Invocation) site;
-			if (method instanceof ParameterizedGenericMethodBinding) {
-				InferenceContext18 infCtx = invocation.getInferenceContext((ParameterizedGenericMethodBinding) method);
-				if (infCtx != null) {
-					// inference is responsible, no need to recheck
-					if (infCtx.isVarArgs())
-						return VARARGS_COMPATIBLE;
-					return COMPATIBLE;
-				}
-			}
-			// collect inner invocations where the outer did not involve any inference:
-			Expression[] invocationArguments = invocation.arguments();
-			if (invocationArguments != null) {
-				InnerInferenceHelper innerInferenceHelper = invocation.innerInferenceHelper();
-				int argLen = invocationArguments.length;
-				boolean isVarArgs[] = new boolean[1]; // emulate an in-out parameter for compatibilityLevel18FromInner(..)
-				isVarArgs[0] = method.isVarargs() && argLen != method.parameters.length; // if same lengths, isVarArgs can still be updated below
-				int level = COMPATIBLE;
-//{ObjectTeams: integrate anchor mapping
-				TypeBinding[] parameters = AnchorMapping.instantiateParameters(this, method.parameters, method);
-				// tsuper marker?
-				if (invocation instanceof ExplicitConstructorCall 
-						&& ((ExplicitConstructorCall)invocation).isTsuperAccess() 
-						&& TSuperHelper.isMarkerArg(invocationArguments[argLen-1]) 
-						&& argLen > arguments.length) {
-					argLen--; // cut off trailing marker arg
-				}
-// SH}
-				for (int i = 0; i < argLen; i++) {
-					TypeBinding argumentType = i < arguments.length ? arguments[i] : null; // length mismatch may happen from CodeSnippetMessageSend.resolveType() in the if (argHasError) block.
-//{ObjectTeams: new arg:
-/* orig:
-					int nextLevel = compatibilityLevel18FromInner(method, innerInferenceHelper, invocationArguments[i], argumentType, argLen, i, isVarArgs);
-  :giro */
-					int nextLevel = compatibilityLevel18FromInner(method, parameters, innerInferenceHelper, invocationArguments[i], argumentType, argLen, i, isVarArgs);
-// SH}
-					if (nextLevel == NOT_COMPATIBLE)
-						return nextLevel;
-					if (nextLevel == -2)
-						break jdk18checks;
-					level = Math.max(level,  nextLevel);
-				}
-//{ObjectTeams:
-				AnchorMapping.storeInstantiatedParameters(method, parameters);
-// SH}
-				return level; // neither NOT_COMPATIBLE nor unknown(-2) seen
-			}
-		}
-		// fall back to old method:
-		boolean tolerateInferenceVariables = ((site instanceof ReferenceExpression) && ((ReferenceExpression) site).trialResolution);
-		return parameterCompatibilityLevel(method, arguments, tiebreakingVarargsMethods, tolerateInferenceVariables);
-	}
-
-//{ObjectTeams: new arg:
-/* orig:
-	private int compatibilityLevel18FromInner(MethodBinding method, InnerInferenceHelper innerInferenceHelper, Expression invocArg, TypeBinding argType, int argLen, int i, boolean[] isVarArgs)
-  :giro */
-	private int compatibilityLevel18FromInner(MethodBinding method, TypeBinding[] parameters, InnerInferenceHelper innerInferenceHelper, Expression invocArg, TypeBinding argType, int argLen, int i, boolean[] isVarArgs)
-// SH}
-	{
-		int compatible = isVarArgs[0] ? VARARGS_COMPATIBLE : COMPATIBLE;
-		TypeBinding resolvedType = invocArg.resolvedType;
-//{ObjectTeams: parameters have been extracted to arg:
-/* orig:
-		TypeBinding targetType = InferenceContext18.getParameter(method.parameters, i, isVarArgs[0]);
-  :giro */
-		TypeBinding targetType = InferenceContext18.getParameter(parameters, i, isVarArgs[0]);
-// orig:
-		if (!isVarArgs[0] && shouldTryVarargs(method, resolvedType, targetType)) {
-			isVarArgs[0] = true;
-/*
-			targetType = InferenceContext18.getParameter(method.parameters, i, true);
-  :giro */
-			targetType = InferenceContext18.getParameter(parameters, i, true);
-// SH}
-		}
-		if (targetType == null)
-			return NOT_COMPATIBLE; // mismatching number of args or other severe problem inside method binding
-		int level = -2; // don't know
-		if (invocArg instanceof Invocation && resolvedType != null) {
-			Invocation innerPoly = (Invocation) invocArg;
-			level = parameterCompatibilityLevel(resolvedType, targetType);
-			if (level != NOT_COMPATIBLE) {
-				if (TypeBinding.notEquals(argType, resolvedType) && innerInferenceHelper != null)
-					innerInferenceHelper.registerInnerResult(method, resolvedType, argLen, i);
-				return Math.max(compatible, level);
-			} else {
-				MethodBinding innerBinding = innerPoly.binding(null, false, null); // 1. try without update
-				if (innerBinding instanceof ParameterizedGenericMethodBinding) {
-					ParameterizedGenericMethodBinding innerParameterized = (ParameterizedGenericMethodBinding) innerBinding;
-					InferenceContext18 infCtx18 = innerPoly.getInferenceContext(innerParameterized);
-					if (infCtx18 != null && !infCtx18.hasResultFor(targetType)) {
-						// not detected as compatible, because inference still needs to complete?
-						invocArg.setExpectedType(targetType);
-						MethodBinding solution = infCtx18.inferInvocationType(innerPoly, innerParameterized);
-						if (solution != null && solution.isValidBinding()) {
-							if (innerPoly.updateBindings(solution, targetType)) {
-								if (innerInferenceHelper != null)
-									innerInferenceHelper.registerInnerResult(method, invocArg.resolvedType, argLen, i);
-							}
-							if (solution.returnType != null) {
-								level = parameterCompatibilityLevel(solution.returnType, targetType);
-								if (level != NOT_COMPATIBLE)
-									return Math.max(compatible, level);
-							}
-						}
-						invocArg.setExpectedType(null);
-						return NOT_COMPATIBLE;
-					} else if (innerPoly instanceof AllocationExpression) {
-						// not detected as compatible, because its a diamond whose type hasn't yet been inferred?
-						TypeBinding[] typeArguments = resolvedType.typeArguments();
-						if (typeArguments != null && typeArguments.length == 0) {
-							AllocationExpression alloc = (AllocationExpression) innerPoly;
-							if ((alloc.type.bits & ASTNode.IsDiamond) != 0) {
-								// not-yet-inferred diamond: erasure compatibility should suffice, detail will be checked using inference
-								if (resolvedType.isCompatibleWith(targetType.erasure(), this))
-									return compatible;
-								return NOT_COMPATIBLE;
-							}
-						}
-					}
-				} else if (innerPoly instanceof AllocationExpression) {
-					MethodBinding updatedMethod = innerPoly.binding(targetType, false, null); // 2. try with updating
-					if (updatedMethod != innerBinding && updatedMethod != null) {
-						if (updatedMethod.isValidBinding()) {
-						if (updatedMethod.declaringClass.isCompatibleWith(targetType))
-							return compatible;
-						return NOT_COMPATIBLE;
-						} else if (updatedMethod.problemId() == ProblemReasons.Ambiguous) {
-							level = -2; // neither good nor bad, answer "unknown"
-						}
-					}
-				}
-			}
-		} else if (invocArg.isPolyExpression()) {
-			if (invocArg instanceof ConditionalExpression) {
-				ConditionalExpression ce = (ConditionalExpression) invocArg;
-//{ObjectTeams: new arg:
-/* orig:
-				int level1 = compatibilityLevel18FromInner(method, innerInferenceHelper, ce.valueIfTrue, argType, argLen, i, isVarArgs);
-  :giro */
-				int level1 = compatibilityLevel18FromInner(method, parameters, innerInferenceHelper, ce.valueIfTrue, argType, argLen, i, isVarArgs);
-// orig:
-				if (level1 == NOT_COMPATIBLE)
-					return NOT_COMPATIBLE;
-/*
-				int level2 = compatibilityLevel18FromInner(method, innerInferenceHelper, ce.valueIfFalse, argType, argLen, i, isVarArgs);
-  :giro */
-				int level2 = compatibilityLevel18FromInner(method, parameters, innerInferenceHelper, ce.valueIfFalse, argType, argLen, i, isVarArgs);
-// SH}
-				if (level2 == NOT_COMPATIBLE)
-					return NOT_COMPATIBLE;
-				return Math.max(level1, level2);
-			}
-			// LE or RE:
-			if (invocArg.isCompatibleWith(targetType, this))
-				return COMPATIBLE;
-			if (!isVarArgs[0] && method.isVarargs()) { // can't use shouldTryVarargs without a resolvedType, so just try it:
-				isVarArgs[0] = true;
-//{ObjectTeams: parameters have been extracted to new arg:
-/* orig:
-				targetType = InferenceContext18.getParameter(method.parameters, i, true);
-  :giro */
-				targetType = InferenceContext18.getParameter(parameters, i, true);
-// SH}
-				if (targetType != null && invocArg.isCompatibleWith(targetType, this))
-					return VARARGS_COMPATIBLE;
-			}
-			return NOT_COMPATIBLE;
-		} else if (resolvedType != null && resolvedType.isValidBinding()) {
-			// need to handle "normal" expressions too, since mixed poly/standalone argument lists must be fully analyzed.
-			return parameterCompatibilityLevel(resolvedType, targetType);
-		}
-		return level;
-	}
-
-	private boolean shouldTryVarargs(MethodBinding method, TypeBinding resolvedType, TypeBinding targetType) {
-		if (!method.isVarargs())
-			return false;
-		if (targetType == null)
-			return true;	// off range
-		if (targetType.isArrayType() && resolvedType != null && !resolvedType.isCompatibleWith(targetType, this))
-			return true;	// not a direct match but hope to improve
-		return false;
 	}
 
 	/**
@@ -1413,7 +1221,7 @@ public abstract class Scope {
 			next:
 			for (int i = startFoundSize; i < foundSize; i++) {
 				MethodBinding methodBinding = (MethodBinding) found.elementAt(i);
-				MethodBinding compatibleMethod = computeCompatibleMethod(methodBinding, argumentTypes, invocationSite, APPLICABILITY);
+				MethodBinding compatibleMethod = computeCompatibleMethod(methodBinding, argumentTypes, invocationSite);
 				if (compatibleMethod != null) {
 					if (compatibleMethod.isValidBinding()) {
 						if (concreteMatches != null) {
@@ -1436,7 +1244,6 @@ public abstract class Scope {
 				}
 			}
 		}
-
 		MethodBinding concreteMatch = null;
 		if (candidatesCount < 2) {
 			if (concreteMatches == null) {
@@ -1444,8 +1251,6 @@ public abstract class Scope {
 					return problemMethod; // can be null
 			}
 			concreteMatch = candidates[0];
-			// 1.8: Give inference a chance to perform outstanding tasks (18.5.2):
-			concreteMatch = inferInvocationType(invocationSite, concreteMatch, argumentTypes);
 			if (concreteMatch != null)
 				compilationUnitScope().recordTypeReferences(concreteMatch.thrownExceptions);
 //{ObjectTeams: visibility of role ifc methods:
@@ -1536,7 +1341,7 @@ public abstract class Scope {
 				// targeting a generic method could find an exact match with variable return type
 				if (invocationSite.genericTypeArguments() != null) {
 					// computeCompatibleMethod(..) will return a PolymorphicMethodBinding if needed
-					exactMethod = computeCompatibleMethod(exactMethod, argumentTypes, invocationSite, FULL_INFERENCE);
+					exactMethod = computeCompatibleMethod(exactMethod, argumentTypes, invocationSite);
 				} else if ((exactMethod.tagBits & TagBits.AnnotationPolymorphicSignature) != 0) {
 					// generate polymorphic method
 					return this.environment().createPolymorphicMethod(exactMethod, argumentTypes);
@@ -1977,22 +1782,13 @@ public abstract class Scope {
 			// argument type compatibility check
 			for (int i = 0; i < foundSize; i++) {
 				MethodBinding methodBinding = (MethodBinding) found.elementAt(i);
-				MethodBinding compatibleMethod = computeCompatibleMethod(methodBinding, argumentTypes, invocationSite, APPLICABILITY);
+				MethodBinding compatibleMethod = computeCompatibleMethod(methodBinding, argumentTypes, invocationSite);
 				if (compatibleMethod != null) {
 					if (compatibleMethod.isValidBinding()) {
 						if (foundSize == 1 && compatibleMethod.canBeSeenBy(receiverType, invocationSite, this)) {
 							// return the single visible match now
 							if (searchForDefaultAbstractMethod)
 								return findDefaultAbstractMethod(receiverType, selector, argumentTypes, invocationSite, classHierarchyStart, found, new MethodBinding [] {compatibleMethod});
-// ==== 1.8: Finalize type inference of generic methods: ====
-							MethodBinding improved = inferInvocationType(invocationSite, compatibleMethod, argumentTypes);
-							if (improved != null && improved.isValidBinding()) {
-								compatibleMethod = improved;
-							} else {
-								problemMethod = improved;
-								continue;
-							}
-// ==== 1.8 ====
 							unitScope.recordTypeReferences(compatibleMethod.thrownExceptions);
 							return compatibleMethod;
 						}
@@ -2105,16 +1901,15 @@ public abstract class Scope {
 		switch (visiblesCount) {
 			case 0 :
 				MethodBinding interfaceMethod =
-					findDefaultAbstractMethod(receiverType, selector, argumentTypes, invocationSite, classHierarchyStart, found, null);
+				findDefaultAbstractMethod(receiverType, selector, argumentTypes, invocationSite, classHierarchyStart, found, null);
 				if (interfaceMethod != null) return interfaceMethod;
-			MethodBinding candidate = candidates[0];
-			return new ProblemMethodBinding(candidates[0], candidates[0].selector, candidates[0].parameters, 
-					candidate.isStatic() && candidate.declaringClass.isInterface() ? ProblemReasons.NonStaticOrAlienTypeReceiver : ProblemReasons.NotVisible);
+				MethodBinding candidate = candidates[0];
+				return new ProblemMethodBinding(candidates[0], candidates[0].selector, candidates[0].parameters, 
+						candidate.isStatic() && candidate.declaringClass.isInterface() ? ProblemReasons.NonStaticOrAlienTypeReceiver : ProblemReasons.NotVisible);
 			case 1 :
 				if (searchForDefaultAbstractMethod)
 					return findDefaultAbstractMethod(receiverType, selector, argumentTypes, invocationSite, classHierarchyStart, found, new MethodBinding [] { candidates[0] });
-				// 1.8: Give inference a chance to perform outstanding tasks (18.5.2):
-				candidate = inferInvocationType(invocationSite, candidates[0], argumentTypes);
+				candidate = candidates[0];
 				if (candidate != null)
 					unitScope.recordTypeReferences(candidate.thrownExceptions);
 				return candidate;
@@ -2639,7 +2434,10 @@ public abstract class Scope {
 		}
 		if (exactMethod == null || !exactMethod.canBeSeenBy(invocationSite, this))
 			return null;
-		if (exactMethod.isVarargs() || exactMethod.typeVariables() != Binding.NO_TYPE_VARIABLES && invocationSite.genericTypeArguments() == null)
+		
+		final TypeBinding[] typeArguments = invocationSite.genericTypeArguments();
+		TypeVariableBinding[] typeVariables = exactMethod.typeVariables();
+		if (exactMethod.isVarargs() || (typeVariables != Binding.NO_TYPE_VARIABLES && (typeArguments == null || typeArguments.length != typeVariables.length)))
 			return null;
 		
 		if (receiverType.isArrayType()) {
@@ -2654,9 +2452,13 @@ public abstract class Scope {
 		{
 			return environment().createGetClassMethod(receiverType, exactMethod, this);
 		}
+		
+		if (typeVariables != Binding.NO_TYPE_VARIABLES) 
+			return environment().createParameterizedGenericMethod(exactMethod, typeArguments);
+	
 		return exactMethod;
 	}
-
+		
 	// For exact constructor references. 15.13.1
 	public MethodBinding getExactConstructor(TypeBinding receiverType, InvocationSite invocationSite) {
 		if (receiverType == null || !receiverType.isValidBinding() || !receiverType.canBeInstantiated() || receiverType.isBaseType())
@@ -2676,19 +2478,26 @@ public abstract class Scope {
 		MethodBinding exactConstructor = null;
 		unitScope.recordTypeReference(receiverType);
 		MethodBinding[] methods = receiverType.getMethods(TypeConstants.INIT);
+		final TypeBinding[] genericTypeArguments = invocationSite.genericTypeArguments();
 		for (int i = 0, length = methods.length; i < length; i++) {
 			MethodBinding constructor = methods[i];
 			if (!constructor.canBeSeenBy(invocationSite, this))
 				continue;
 			if (constructor.isVarargs())
 				return null;
-			if (constructor.typeVariables() != Binding.NO_TYPE_VARIABLES && invocationSite.genericTypeArguments() == null)
+			if (constructor.typeVariables() != Binding.NO_TYPE_VARIABLES && genericTypeArguments == null)
 				return null;
 			if (exactConstructor == null) {
 				exactConstructor = constructor;
 			} else {
 				return null;
 			}
+		}
+		final TypeVariableBinding[] typeVariables = exactConstructor.typeVariables();
+		if (typeVariables != Binding.NO_TYPE_VARIABLES) {
+			if (typeVariables.length != genericTypeArguments.length)
+				return null;
+			exactConstructor = environment().createParameterizedGenericMethod(exactConstructor, genericTypeArguments);
 		}
 		return exactConstructor;
 	}
@@ -2717,7 +2526,7 @@ public abstract class Scope {
 			if (methodBinding != null && methodBinding.canBeSeenBy(invocationSite, this)) {
 			    // targeting a non generic constructor with type arguments ?
 			    if (invocationSite.genericTypeArguments() != null)
-			    	methodBinding = computeCompatibleMethod(methodBinding, argumentTypes, invocationSite, FULL_INFERENCE);
+			    	methodBinding = computeCompatibleMethod(methodBinding, argumentTypes, invocationSite);
 				return methodBinding;
 			}
 			MethodBinding[] methods = receiverType.getMethods(TypeConstants.INIT, argumentTypes.length);
@@ -2731,7 +2540,7 @@ public abstract class Scope {
 			int compatibleIndex = 0;
 			MethodBinding problemMethod = null;
 			for (int i = 0, length = methods.length; i < length; i++) {
-				MethodBinding compatibleMethod = computeCompatibleMethod(methods[i], argumentTypes, invocationSite, APPLICABILITY);
+				MethodBinding compatibleMethod = computeCompatibleMethod(methods[i], argumentTypes, invocationSite);
 				if (compatibleMethod != null) {
 					if (compatibleMethod.isValidBinding())
 						compatible[compatibleIndex++] = compatibleMethod;
@@ -2754,8 +2563,7 @@ public abstract class Scope {
 					visible[visibleIndex++] = method;
 			}
 			if (visibleIndex == 1) {
-				// 1.8: Give inference a chance to perform outstanding tasks (18.5.2):
-				return inferInvocationType(invocationSite, visible[0], argumentTypes);
+				return visible[0];
 			}
 			if (visibleIndex == 0)
 				return new ProblemMethodBinding(
@@ -3064,7 +2872,7 @@ public abstract class Scope {
 								if (foundProblem == null)
 									foundProblem = possible; // answer as error case match
 							} else if (possible.isStatic()) {
-								MethodBinding compatibleMethod = computeCompatibleMethod(possible, argumentTypes, invocationSite, APPLICABILITY);
+								MethodBinding compatibleMethod = computeCompatibleMethod(possible, argumentTypes, invocationSite);
 								if (compatibleMethod != null) {
 									if (compatibleMethod.isValidBinding()) {
 										if (compatibleMethod.canBeSeenBy(unitScope.fPackage)) {
@@ -4040,8 +3848,8 @@ public abstract class Scope {
 			for (int i = (oneParamsLength > twoParamsLength ? twoParamsLength : oneParamsLength) - 2; i >= 0; i--)
 				if (TypeBinding.notEquals(oneParams[i], twoParams[i]) && !oneParams[i].isCompatibleWith(twoParams[i]))
 					return false;
-			if (parameterCompatibilityLevel(one, twoParams, true, false) == NOT_COMPATIBLE
-					&& parameterCompatibilityLevel(two, oneParams, true, false) == VARARGS_COMPATIBLE)
+			if (parameterCompatibilityLevel(one, twoParams, true) == NOT_COMPATIBLE
+					&& parameterCompatibilityLevel(two, oneParams, true) == VARARGS_COMPATIBLE)
 				return true;
 		}
 		return false;
@@ -4818,7 +4626,6 @@ public abstract class Scope {
 	protected final MethodBinding mostSpecificMethodBinding(MethodBinding[] visible, int visibleSize, TypeBinding[] argumentTypes, final InvocationSite invocationSite, ReferenceBinding receiverType) {
 
 		boolean isJdk18 = compilerOptions().sourceLevel >= ClassFileConstants.JDK1_8;
-				
 		// common part for all compliance levels:
 		int[] compatibilityLevels = new int[visibleSize];
 		int compatibleCount = 0;
@@ -4828,13 +4635,7 @@ public abstract class Scope {
 	  try {
 // orig:
 		for (int i = 0; i < visibleSize; i++) {
-			TypeBinding[] argTypes = argumentTypes;
-			if (isJdk18 && invocationSite instanceof Invocation) {
-				InnerInferenceHelper innerInferenceHelper = ((Invocation)invocationSite).innerInferenceHelper();
-				if (innerInferenceHelper != null)
-					argTypes = innerInferenceHelper.getArgumentTypesForCandidate(visible[i], argumentTypes);
-			}
-			if ((compatibilityLevels[i] = parameterCompatibilityLevel(visible[i], argTypes)) != NOT_COMPATIBLE) {
+			if ((compatibilityLevels[i] = parameterCompatibilityLevel(visible[i], argumentTypes)) != NOT_COMPATIBLE) {
 				if (i != compatibleCount) {
 					visible[compatibleCount] = visible[i];
 					compatibilityLevels[compatibleCount] = compatibilityLevels[i];
@@ -4846,16 +4647,13 @@ public abstract class Scope {
 		}
 	  } finally {
 		  Config.removeOrRestore(oldConfig, this);
+	  }
 // SH}
-	  	}
-// TODO: Disabled, because we know a situation where this is expected, see https://bugs.eclipse.org/429490
-//		if (compatibleCount != visibleSize) {
-//			problemReporter().genericInferenceProblem("(Recovered) Internal inconsistency while checking invocation ambiguity", invocationSite, ProblemSeverities.Warning); //$NON-NLS-1$
-//		}
+	  	
 		if (compatibleCount == 0) {
 			return new ProblemMethodBinding(visible[0].selector, argumentTypes, ProblemReasons.NotFound);
 		} else if (compatibleCount == 1) {
-			MethodBinding candidate = inferInvocationType(invocationSite, visible[0], argumentTypes);
+			MethodBinding candidate = visible[0];
 			if (candidate != null)
 				compilationUnitScope().recordTypeReferences(candidate.thrownExceptions);
 			return candidate;
@@ -4864,8 +4662,9 @@ public abstract class Scope {
 			System.arraycopy(visible, 0, visible = new MethodBinding[visibleSize = compatibleCount], 0, compatibleCount);
 			System.arraycopy(compatibilityLevels, 0, compatibilityLevels = new int[compatibleCount], 0, compatibleCount);
 		}
+		
+		
 		MethodBinding[] moreSpecific = new MethodBinding[visibleSize];
-
 		if (isJdk18) {
 			// 15.12.2.5 Choosing the Most Specific Method
 			int count = 0;
@@ -4933,7 +4732,7 @@ public abstract class Scope {
 			if (count == 0) {
 				return new ProblemMethodBinding(visible[0], visible[0].selector, visible[0].parameters, ProblemReasons.Ambiguous);
 			} else if (count == 1) {
-				MethodBinding candidate = inferInvocationType(invocationSite, moreSpecific[0], argumentTypes);
+				MethodBinding candidate = moreSpecific[0];
 				if (candidate != null)
 					compilationUnitScope().recordTypeReferences(candidate.thrownExceptions);
 				return candidate;
@@ -4944,87 +4743,86 @@ public abstract class Scope {
 		} else {
 
 			// JLS7 implementation  
-
-		InvocationSite tieBreakInvocationSite = new InvocationSite() {
-			public TypeBinding[] genericTypeArguments() { return null; } // ignore genericTypeArgs
-			public boolean isSuperAccess() { return invocationSite.isSuperAccess(); }
-			public boolean isTypeAccess() { return invocationSite.isTypeAccess(); }
-			public void setActualReceiverType(ReferenceBinding actualReceiverType) { /* ignore */}
-			public void setDepth(int depth) { /* ignore */}
-			public void setFieldIndex(int depth) { /* ignore */}
-			public int sourceStart() { return invocationSite.sourceStart(); }
-			public int sourceEnd() { return invocationSite.sourceStart(); }
-			public TypeBinding invocationTargetType() { return invocationSite.invocationTargetType(); }
-			public boolean receiverIsImplicitThis() { return invocationSite.receiverIsImplicitThis();}
-			public InferenceContext18 freshInferenceContext(Scope scope) { return null; /* no inference when ignoring genericTypeArgs */ }
-			public ExpressionContext getExpressionContext() { return ExpressionContext.VANILLA_CONTEXT; }
-			public boolean isQualifiedSuper() { return invocationSite.isQualifiedSuper(); }
-		};
-		int count = 0;
-		for (int level = 0, max = VARARGS_COMPATIBLE; level <= max; level++) {
-			nextVisible : for (int i = 0; i < visibleSize; i++) {
-				if (compatibilityLevels[i] != level) continue nextVisible;
-				max = level; // do not examine further categories, will either return mostSpecific or report ambiguous case
-				MethodBinding current = visible[i];
-				MethodBinding original = current.original();
-				MethodBinding tiebreakMethod = current.tiebreakMethod();
-				for (int j = 0; j < visibleSize; j++) {
-					if (i == j || compatibilityLevels[j] != level) continue;
+			
+			InvocationSite tieBreakInvocationSite = new InvocationSite() {
+				public TypeBinding[] genericTypeArguments() { return null; } // ignore genericTypeArgs
+				public boolean isSuperAccess() { return invocationSite.isSuperAccess(); }
+				public boolean isTypeAccess() { return invocationSite.isTypeAccess(); }
+				public void setActualReceiverType(ReferenceBinding actualReceiverType) { /* ignore */}
+				public void setDepth(int depth) { /* ignore */}
+				public void setFieldIndex(int depth) { /* ignore */}
+				public int sourceStart() { return invocationSite.sourceStart(); }
+				public int sourceEnd() { return invocationSite.sourceStart(); }
+				public TypeBinding invocationTargetType() { return invocationSite.invocationTargetType(); }
+				public boolean receiverIsImplicitThis() { return invocationSite.receiverIsImplicitThis();}
+				public InferenceContext18 freshInferenceContext(Scope scope) { return null; /* no inference when ignoring genericTypeArgs */ }
+				public ExpressionContext getExpressionContext() { return ExpressionContext.VANILLA_CONTEXT; }
+				public boolean isQualifiedSuper() { return invocationSite.isQualifiedSuper(); }
+			};
+			int count = 0;
+			for (int level = 0, max = VARARGS_COMPATIBLE; level <= max; level++) {
+				nextVisible : for (int i = 0; i < visibleSize; i++) {
+					if (compatibilityLevels[i] != level) continue nextVisible;
+					max = level; // do not examine further categories, will either return mostSpecific or report ambiguous case
+					MethodBinding current = visible[i];
+					MethodBinding original = current.original();
+					MethodBinding tiebreakMethod = current.tiebreakMethod();
+					for (int j = 0; j < visibleSize; j++) {
+						if (i == j || compatibilityLevels[j] != level) continue;
 //{ObjectTeams:
-					if (!useTranslation[i] && useTranslation[j]) 
-						continue;
+						if (!useTranslation[i] && useTranslation[j]) 
+							continue;
 // SH}
-					MethodBinding next = visible[j];
-					if (original == next.original()) {
-						// parameterized superclasses & interfaces may be walked twice from different paths so skip next from now on
-						compatibilityLevels[j] = -1;
-						continue;
-					}
-
-					MethodBinding methodToTest = next;
-					if (next instanceof ParameterizedGenericMethodBinding) {
-						ParameterizedGenericMethodBinding pNext = (ParameterizedGenericMethodBinding) next;
-						if (pNext.isRaw && !pNext.isStatic()) {
-							// hold onto the raw substituted method
-						} else {
-							methodToTest = pNext.originalMethod;
+						MethodBinding next = visible[j];
+						if (original == next.original()) {
+							// parameterized superclasses & interfaces may be walked twice from different paths so skip next from now on
+							compatibilityLevels[j] = -1;
+							continue;
 						}
+	
+						MethodBinding methodToTest = next;
+						if (next instanceof ParameterizedGenericMethodBinding) {
+							ParameterizedGenericMethodBinding pNext = (ParameterizedGenericMethodBinding) next;
+							if (pNext.isRaw && !pNext.isStatic()) {
+								// hold onto the raw substituted method
+							} else {
+								methodToTest = pNext.originalMethod;
+							}
+						}
+						MethodBinding acceptable = computeCompatibleMethod(methodToTest, tiebreakMethod.parameters,
+								tieBreakInvocationSite, level == VARARGS_COMPATIBLE);
+						/* There are 4 choices to consider with current & next :
+						 foo(B) & foo(A) where B extends A
+						 1. the 2 methods are equal (both accept each others parameters) -> want to continue
+						 2. current has more specific parameters than next (so acceptable is a valid method) -> want to continue
+						 3. current has less specific parameters than next (so acceptable is null) -> go on to next
+						 4. current and next are not compatible with each other (so acceptable is null) -> go on to next
+						 */
+						if (acceptable == null || !acceptable.isValidBinding())
+							continue nextVisible;
+						if (!isAcceptableMethod(tiebreakMethod, acceptable))
+							continue nextVisible;
+						// pick a concrete method over a bridge method when parameters are equal since the return type of the concrete method is more specific
+						if (current.isBridge() && !next.isBridge())
+							if (tiebreakMethod.areParametersEqual(acceptable))
+								continue nextVisible; // skip current so acceptable wins over this bridge method
 					}
-					MethodBinding acceptable = computeCompatibleMethod(methodToTest, tiebreakMethod.parameters,
-							tieBreakInvocationSite, INVOCATION_TYPE, level == VARARGS_COMPATIBLE);
-					/* There are 4 choices to consider with current & next :
-					 foo(B) & foo(A) where B extends A
-					 1. the 2 methods are equal (both accept each others parameters) -> want to continue
-					 2. current has more specific parameters than next (so acceptable is a valid method) -> want to continue
-					 3. current has less specific parameters than next (so acceptable is null) -> go on to next
-					 4. current and next are not compatible with each other (so acceptable is null) -> go on to next
-					 */
-					if (acceptable == null || !acceptable.isValidBinding())
-						continue nextVisible;
-					if (!isAcceptableMethod(tiebreakMethod, acceptable))
-						continue nextVisible;
-					// pick a concrete method over a bridge method when parameters are equal since the return type of the concrete method is more specific
-					if (current.isBridge() && !next.isBridge())
-						if (tiebreakMethod.areParametersEqual(acceptable))
-							continue nextVisible; // skip current so acceptable wins over this bridge method
-				}
-				moreSpecific[i] = current;
-				count++;
-			}
-		}
-		if (count == 1) {
-			for (int i = 0; i < visibleSize; i++) {
-				if (moreSpecific[i] != null) {
-					// 1.8: Give inference a chance to perform outstanding tasks (18.5.2):
-					MethodBinding candidate = inferInvocationType(invocationSite, visible[i], argumentTypes);
-					if (candidate != null)
-						compilationUnitScope().recordTypeReferences(candidate.thrownExceptions);
-					return candidate;
+					moreSpecific[i] = current;
+					count++;
 				}
 			}
-		} else if (count == 0) {
-			return new ProblemMethodBinding(visible[0], visible[0].selector, visible[0].parameters, ProblemReasons.Ambiguous);
-		}
+			if (count == 1) {
+				for (int i = 0; i < visibleSize; i++) {
+					if (moreSpecific[i] != null) {
+						MethodBinding candidate = visible[i];
+						if (candidate != null)
+							compilationUnitScope().recordTypeReferences(candidate.thrownExceptions);
+						return candidate;
+					}
+				}
+			} else if (count == 0) {
+				return new ProblemMethodBinding(visible[0], visible[0].selector, visible[0].parameters, ProblemReasons.Ambiguous);
+			}
 		}
 
 		// found several methods that are mutually acceptable -> must be equal
@@ -5137,8 +4935,7 @@ public abstract class Scope {
 				if (mostSpecificExceptions != null && mostSpecificExceptions != current.thrownExceptions) {
 					return new MostSpecificExceptionMethodBinding(current, mostSpecificExceptions);
 				}
-				// 1.8: Before returning give inference a chance to perform outstanding tasks (18.5.2):
-				return inferInvocationType(invocationSite, current, argumentTypes);
+				return current;
 			}
 		}
 
@@ -5203,9 +5000,9 @@ public abstract class Scope {
 	}
 
 	public int parameterCompatibilityLevel(MethodBinding method, TypeBinding[] arguments) {
-		return parameterCompatibilityLevel(method, arguments, false, false);
+		return parameterCompatibilityLevel(method, arguments, false);
 	}	
-	public int parameterCompatibilityLevel(MethodBinding method, TypeBinding[] arguments, boolean tiebreakingVarargsMethods, boolean tolerateInferenceVariables) {
+	public int parameterCompatibilityLevel(MethodBinding method, TypeBinding[] arguments, boolean tiebreakingVarargsMethods) {
 		TypeBinding[] parameters = method.parameters;
 		int paramLength = parameters.length;
 		int argLength = arguments.length;
@@ -5244,14 +5041,14 @@ public abstract class Scope {
 				TypeBinding param = parameters[lastIndex]; // is an ArrayBinding by definition
 				TypeBinding arg = arguments[lastIndex];
 				if (TypeBinding.notEquals(param, arg)) {
-					level = parameterCompatibilityLevel(arg, param, env, tiebreakingVarargsMethods, tolerateInferenceVariables);
+					level = parameterCompatibilityLevel(arg, param, env, tiebreakingVarargsMethods);
 					if (level == NOT_COMPATIBLE) {
 						// expect X[], is it called with X
 						param = ((ArrayBinding) param).elementsType();
 						if (tiebreakingVarargsMethods) {
 							arg = ((ArrayBinding) arg).elementsType();
 						}
-						if (parameterCompatibilityLevel(arg, param, env, tiebreakingVarargsMethods, tolerateInferenceVariables) == NOT_COMPATIBLE)
+						if (parameterCompatibilityLevel(arg, param, env, tiebreakingVarargsMethods) == NOT_COMPATIBLE)
 							return NOT_COMPATIBLE;
 						level = VARARGS_COMPATIBLE; // varargs support needed
 					}
@@ -5261,7 +5058,7 @@ public abstract class Scope {
 					TypeBinding param = ((ArrayBinding) parameters[lastIndex]).elementsType();
 					for (int i = lastIndex; i < argLength; i++) {
 						TypeBinding arg = (tiebreakingVarargsMethods && (i == (argLength - 1))) ? ((ArrayBinding)arguments[i]).elementsType() : arguments[i];
-						if (TypeBinding.notEquals(param, arg) && parameterCompatibilityLevel(arg, param, env, tiebreakingVarargsMethods, tolerateInferenceVariables) == NOT_COMPATIBLE)
+						if (TypeBinding.notEquals(param, arg) && parameterCompatibilityLevel(arg, param, env, tiebreakingVarargsMethods) == NOT_COMPATIBLE)
 							return NOT_COMPATIBLE;
 					}
 				}  else if (lastIndex != argLength) { // can call foo(int i, X ... x) with foo(1) but NOT foo();
@@ -5277,7 +5074,7 @@ public abstract class Scope {
 			TypeBinding param = parameters[i];
 			TypeBinding arg = (tiebreakingVarargsMethods && (i == (argLength - 1))) ? ((ArrayBinding)arguments[i]).elementsType() : arguments[i];
 			if (TypeBinding.notEquals(arg,param)) {
-				int newLevel = parameterCompatibilityLevel(arg, param, env, tiebreakingVarargsMethods, tolerateInferenceVariables);
+				int newLevel = parameterCompatibilityLevel(arg, param, env, tiebreakingVarargsMethods);
 				if (newLevel == NOT_COMPATIBLE)
 					return NOT_COMPATIBLE;
 				if (newLevel > level)
@@ -5309,7 +5106,7 @@ public abstract class Scope {
 		return NOT_COMPATIBLE;
 	}
 	
-	private int parameterCompatibilityLevel(TypeBinding arg, TypeBinding param, LookupEnvironment env, boolean tieBreakingVarargsMethods, boolean tolerateInferenceVariables) {
+	private int parameterCompatibilityLevel(TypeBinding arg, TypeBinding param, LookupEnvironment env, boolean tieBreakingVarargsMethods) {
 		// only called if env.options.sourceLevel >= ClassFileConstants.JDK1_5
 		if (arg == null || param == null)
 			return NOT_COMPATIBLE;
@@ -5328,11 +5125,6 @@ public abstract class Scope {
 			TypeBinding convertedType = env.computeBoxingType(arg);
 			if (TypeBinding.equalsEquals(convertedType, param) || convertedType.isCompatibleWith(param, this))
 				return AUTOBOX_COMPATIBLE;
-		}
-		if (tolerateInferenceVariables && (!arg.isProperType(false) || !param.isProperType(false))) {
-			// during type inference involving a ReferenceExpression ignore incompatibility due to an inference variable,
-			// knowing that we will produce constraints that will ensure compatible instantiation (if one exists).
-			return COMPATIBLE; 
 		}
 		return NOT_COMPATIBLE;
 	}
@@ -5499,7 +5291,7 @@ public abstract class Scope {
 	   that could instead be invoked with identical results. Return null if no compatible, visible, most specific method
 	   could be found. This method is modeled after Scope.getConstructor and Scope.getMethod.
 	 */
-	public MethodBinding getStaticFactory (ParameterizedTypeBinding allocationType, ReferenceBinding originalEnclosingType, TypeBinding[] argumentTypes, final Invocation allocationSite) {
+	public MethodBinding getStaticFactory (ParameterizedTypeBinding allocationType, ReferenceBinding originalEnclosingType, TypeBinding[] argumentTypes, final InvocationSite allocationSite) {
 		
 		// allocationType is the diamond type. originalEnclosingType is the real enclosing type ==> may be parameterized, parameterized with own type variables, raw, just plain type or null.
 		int classTypeVariablesArity = 0;
@@ -5632,7 +5424,7 @@ public abstract class Scope {
 		MethodBinding[] compatible = new MethodBinding[sfi];
 		int compatibleIndex = 0;
 		for (int i = 0; i < sfi; i++) {
-			MethodBinding compatibleMethod = computeCompatibleMethod(staticFactories[i], argumentTypes, allocationSite, APPLICABILITY);
+			MethodBinding compatibleMethod = computeCompatibleMethod(staticFactories[i], argumentTypes, allocationSite);
 			if (compatibleMethod != null) {
 				if (compatibleMethod.isValidBinding())
 					compatible[compatibleIndex++] = compatibleMethod;
@@ -5641,10 +5433,6 @@ public abstract class Scope {
 
 		if (compatibleIndex == 0) {
 			return null;
-		}
-		if (compatibleIndex == 1) {
-			// 1.8: Give inference a chance to perform outstanding tasks (18.5.2):
-			compatible[0] = inferInvocationType(allocationSite, compatible[0], argumentTypes);
 		}
 		return compatibleIndex == 1 ? compatible[0] : mostSpecificMethodBinding(compatible, compatibleIndex, argumentTypes, allocationSite, allocationType);
 	}
@@ -5722,31 +5510,5 @@ public abstract class Scope {
 				break;
 			}
 		}
-	}
-
-	/**
-	 * Given a selected applicable method, check if it has an unfinished InferenceContext18 associated.
-	 * If so perform the outstanding Invocation Type Inference and return the improved method,
-	 * otherwise return the applicable method unchanged.
-	 */
-	protected MethodBinding inferInvocationType(InvocationSite invocationSite, MethodBinding applicable, TypeBinding[] argumentTypes) {
-		if (invocationSite instanceof Invocation) {
-			Invocation invocation = (Invocation) invocationSite;
-			if (applicable instanceof ParameterizedGenericMethodBinding) {
-				ParameterizedGenericMethodBinding parameterizedMethod = (ParameterizedGenericMethodBinding) applicable;
-				InferenceContext18 infCtx18 = invocation.getInferenceContext(parameterizedMethod);
-				if (infCtx18 != null && !infCtx18.hasResultFor(invocation.invocationTargetType())) {
-					return infCtx18.inferInvocationType(invocation, argumentTypes, parameterizedMethod);
-				}
-			} else {
-				ASTNode.resolvePolyExpressionArguments(invocation, applicable, argumentTypes, this);
-			}
-		} else if (invocationSite instanceof ReferenceExpression) {
-			if (applicable instanceof ParameterizedGenericMethodBinding)
-				applicable = applicable.shallowOriginal();
-			if (applicable.typeVariables() != Binding.NO_TYPE_VARIABLES)
-				return ParameterizedGenericMethodBinding.computeCompatibleMethod(applicable, argumentTypes, this, invocationSite, FULL_INFERENCE);
-		}
-		return applicable;
 	}
 }

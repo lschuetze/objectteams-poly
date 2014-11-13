@@ -1730,4 +1730,8 @@ public boolean enterRecursiveFunction() {
 public void exitRecursiveFunction() {
 	// empty, subclasses to override
 }
+
+public boolean isFunctionalType() {
+	return false;
+}
 }

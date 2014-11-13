@@ -87,6 +87,8 @@ import org.eclipse.jdt.internal.compiler.lookup.MethodScope;
 import org.eclipse.jdt.internal.compiler.lookup.MissingTypeBinding;
 import org.eclipse.jdt.internal.compiler.lookup.ParameterizedGenericMethodBinding;
 import org.eclipse.jdt.internal.compiler.lookup.ParameterizedMethodBinding;
+import org.eclipse.jdt.internal.compiler.lookup.PolyParameterizedGenericMethodBinding;
+import org.eclipse.jdt.internal.compiler.lookup.PolyTypeBinding;
 import org.eclipse.jdt.internal.compiler.lookup.PolymorphicMethodBinding;
 import org.eclipse.jdt.internal.compiler.lookup.ProblemMethodBinding;
 import org.eclipse.jdt.internal.compiler.lookup.ProblemReasons;
@@ -192,11 +194,10 @@ public class MessageSend extends Expression implements Invocation {
 
 	 // hold on to this context from invocation applicability inference until invocation type inference (per method candidate):
 	private SimpleLookupTable/*<PGMB,InferenceContext18>*/ inferenceContexts;
-	protected InnerInferenceHelper innerInferenceHelper;
 	private boolean receiverIsType;
 	protected boolean argsContainCast;
 	public TypeBinding[] argumentTypes = Binding.NO_PARAMETERS;
-	public boolean argumentsHaveErrors;
+	public boolean argumentsHaveErrors = false;
 	
 
 //{ObjectTeams:
@@ -802,144 +803,138 @@ public StringBuffer printExpression(int indent, StringBuffer output){
 }
 
 public TypeBinding resolveType(BlockScope scope) {
-	// Answer the signature return type
+	// Answer the signature return type, answers PolyTypeBinding if there is at least one generic overloaded candidate that encoded type variables in return type and there is no target type  
 	// Base type promotion
-
-	this.constant = Constant.NotAConstant;
-	long sourceLevel = scope.compilerOptions().sourceLevel;
-	boolean receiverCast = false;
-	if (this.receiver instanceof CastExpression) {
-		this.receiver.bits |= ASTNode.DisableUnnecessaryCastCheck; // will check later on
-		receiverCast = true;
-	}
+	if (this.constant != Constant.NotAConstant) {
+		this.constant = Constant.NotAConstant;
+		long sourceLevel = scope.compilerOptions().sourceLevel;
+		boolean receiverCast = false;
+		if (this.receiver instanceof CastExpression) {
+			this.receiver.bits |= ASTNode.DisableUnnecessaryCastCheck; // will check later on
+			receiverCast = true;
+		}
 //{ObjectTeams: receiver may already be resolved (e.g. for _OT$cacheInitTrigger), keep that result:
-  if (this.receiver.resolvedType != null && (this.isGenerated || this instanceof RoleConstructorCall)) {
-	  this.actualReceiverType = this.receiver.resolvedType;
-  } else {
+	  if (this.receiver.resolvedType != null && (this.isGenerated || this instanceof RoleConstructorCall)) {
+		this.actualReceiverType = this.receiver.resolvedType;
+	  } else {
 // orig:
-	if (this.receiver.resolvedType != null)
-		scope.problemReporter().genericInferenceError("Receiver was unexpectedly found resolved", this); //$NON-NLS-1$
-	this.actualReceiverType = this.receiver.resolveType(scope);
+		this.actualReceiverType = this.receiver.resolveType(scope);
 // :giro
-  }
+	  }
   /*orig:
-	this.receiverIsType = this.receiver instanceof NameReference && (((NameReference) this.receiver).bits & Binding.TYPE) != 0;
+		this.receiverIsType = this.receiver instanceof NameReference && (((NameReference) this.receiver).bits & Binding.TYPE) != 0;
    */
-    // don't only expect NameReference, BaseReference can be static, too.
-	this.receiverIsType = (   (this.receiver instanceof NameReference)
-							  || (this.receiver instanceof BaseReference))
-							 && (this.receiver.bits & Binding.TYPE) != 0
-							 || (this.receiver instanceof TypeReference); // happens in generated AST
+    	// don't only expect NameReference, BaseReference can be static, too.
+		this.receiverIsType = (   (this.receiver instanceof NameReference)
+								  || (this.receiver instanceof BaseReference))
+								 && (this.receiver.bits & Binding.TYPE) != 0
+								 || (this.receiver instanceof TypeReference); // happens in generated AST
 // MW,JH,SH}
-	if (receiverCast && this.actualReceiverType != null) {
-		 // due to change of declaring class with receiver type, only identity cast should be notified
-		if (TypeBinding.equalsEquals(((CastExpression)this.receiver).expression.resolvedType, this.actualReceiverType)) {
-			scope.problemReporter().unnecessaryCast((CastExpression)this.receiver);
-		}
-	}
-	// resolve type arguments (for generic constructor call)
-	if (this.typeArguments != null) {
-		int length = this.typeArguments.length;
-		this.argumentsHaveErrors = sourceLevel < ClassFileConstants.JDK1_5; // typeChecks all arguments
-		this.genericTypeArguments = new TypeBinding[length];
-		for (int i = 0; i < length; i++) {
-			TypeReference typeReference = this.typeArguments[i];
-			if ((this.genericTypeArguments[i] = typeReference.resolveType(scope, true /* check bounds*/)) == null) {
-				this.argumentsHaveErrors = true;
-			}
-			if (this.argumentsHaveErrors && typeReference instanceof Wildcard) {
-				scope.problemReporter().illegalUsageOfWildcard(typeReference);
+		if (receiverCast && this.actualReceiverType != null) {
+			// due to change of declaring class with receiver type, only identity cast should be notified
+			if (TypeBinding.equalsEquals(((CastExpression)this.receiver).expression.resolvedType, this.actualReceiverType)) {
+				scope.problemReporter().unnecessaryCast((CastExpression)this.receiver);
 			}
 		}
-		if (this.argumentsHaveErrors) {
-			if (this.arguments != null) { // still attempt to resolve arguments
-				for (int i = 0, max = this.arguments.length; i < max; i++) {
-					this.arguments[i].resolveType(scope);
+		// resolve type arguments (for generic constructor call)
+		if (this.typeArguments != null) {
+			int length = this.typeArguments.length;
+			this.argumentsHaveErrors = sourceLevel < ClassFileConstants.JDK1_5; // typeChecks all arguments
+			this.genericTypeArguments = new TypeBinding[length];
+			for (int i = 0; i < length; i++) {
+				TypeReference typeReference = this.typeArguments[i];
+				if ((this.genericTypeArguments[i] = typeReference.resolveType(scope, true /* check bounds*/)) == null) {
+					this.argumentsHaveErrors = true;
+				}
+				if (this.argumentsHaveErrors && typeReference instanceof Wildcard) {
+					scope.problemReporter().illegalUsageOfWildcard(typeReference);
 				}
 			}
-			return null;
-		}
-	}
-	// will check for null after args are resolved
-	if (this.arguments != null) {
-		this.argumentsHaveErrors = false; // typeChecks all arguments
-		int length = this.arguments.length;
-		this.argumentTypes = new TypeBinding[length];
-		for (int i = 0; i < length; i++){
-			Expression argument = this.arguments[i];
-//{ObjectTeams: keep pre-resolved binding inside generated code:
-		  if (!this.isGenerated)
-// SH}
-			if (this.arguments[i].resolvedType != null) 
-				scope.problemReporter().genericInferenceError("Argument was unexpectedly found resolved", this); //$NON-NLS-1$
-			if (argument instanceof CastExpression) {
-				argument.bits |= ASTNode.DisableUnnecessaryCastCheck; // will check later on
-				this.argsContainCast = true;
-			}
-			argument.setExpressionContext(INVOCATION_CONTEXT);
-//{ObjectTeams: arguments might already be resolved, see e.g. CastExpression.createRoleCheck
-		  if (argument.resolvedType != null) {
-			this.argumentTypes[i] = argument.resolvedType;
-		  } else {
-// orig:
-			if ((this.argumentTypes[i] = argument.resolveType(scope)) == null){
-				this.argumentsHaveErrors = true;
-			}
-// :giro
-		  }
-// SH}
-			if (sourceLevel >= ClassFileConstants.JDK1_8) {
-				if (argument.isPolyExpression()
-					|| (argument instanceof Invocation && ((Invocation)argument).usesInference())) {
-					if (this.innerInferenceHelper == null)
-						this.innerInferenceHelper = new InnerInferenceHelper();
-				}
-			}
-		}
-		if (this.argumentsHaveErrors) {
-			if (this.actualReceiverType instanceof ReferenceBinding) {
-				//  record a best guess, for clients who need hint about possible method match
-				TypeBinding[] pseudoArgs = new TypeBinding[length];
-				for (int i = length; --i >= 0;)
-					pseudoArgs[i] = this.argumentTypes[i] == null ? TypeBinding.NULL : this.argumentTypes[i]; // replace args with errors with null type
-				this.binding =
-					this.receiver.isImplicitThis()
-						? scope.getImplicitMethod(this.selector, pseudoArgs, this)
-						: scope.findMethod((ReferenceBinding) this.actualReceiverType, this.selector, pseudoArgs, this, false);
-				if (this.binding != null && !this.binding.isValidBinding()) {
-					MethodBinding closestMatch = ((ProblemMethodBinding)this.binding).closestMatch;
-					// record the closest match, for clients who may still need hint about possible method match
-					if (closestMatch != null) {
-						if (closestMatch.original().typeVariables != Binding.NO_TYPE_VARIABLES) { // generic method
-							// shouldn't return generic method outside its context, rather convert it to raw method (175409)
-							closestMatch = scope.environment().createParameterizedGenericMethod(closestMatch.original(), (RawTypeBinding)null);
-						}
-						this.binding = closestMatch;
-						MethodBinding closestMatchOriginal = closestMatch.original();
-						if (closestMatchOriginal.isOrEnclosedByPrivateType() && !scope.isDefinedInMethod(closestMatchOriginal)) {
-							// ignore cases where method is used from within inside itself (e.g. direct recursions)
-							closestMatchOriginal.modifiers |= ExtraCompilerModifiers.AccLocallyUsed;
-						}
+			if (this.argumentsHaveErrors) {
+				if (this.arguments != null) { // still attempt to resolve arguments
+					for (int i = 0, max = this.arguments.length; i < max; i++) {
+						this.arguments[i].resolveType(scope);
 					}
 				}
-//{ObjectTeams: more tagging as used:
-				else if (this.binding != null && this.binding.isOrEnclosedByPrivateType() && !scope.isDefinedInMethod(this.binding)) {
-					// ignore cases where method is used from within inside itself (e.g. direct recursions)
-					this.binding.modifiers |= ExtraCompilerModifiers.AccLocallyUsed;
+				return null;
+			}
+		}
+		// will check for null after args are resolved
+		if (this.arguments != null) {
+			this.argumentsHaveErrors = false; // typeChecks all arguments
+			int length = this.arguments.length;
+			this.argumentTypes = new TypeBinding[length];
+			for (int i = 0; i < length; i++){
+				Expression argument = this.arguments[i];
+//{ObjectTeams: keep pre-resolved binding inside generated code:
+			  if (!this.isGenerated)
+// SH}
+				if (this.arguments[i].resolvedType != null) 
+					scope.problemReporter().genericInferenceError("Argument was unexpectedly found resolved", this); //$NON-NLS-1$
+				if (argument instanceof CastExpression) {
+					argument.bits |= ASTNode.DisableUnnecessaryCastCheck; // will check later on
+					this.argsContainCast = true;
 				}
+				argument.setExpressionContext(INVOCATION_CONTEXT);
+//{ObjectTeams: arguments might already be resolved, see e.g. CastExpression.createRoleCheck
+			  if (argument.resolvedType != null) {
+				this.argumentTypes[i] = argument.resolvedType;
+			  } else {
+// orig:
+				if ((this.argumentTypes[i] = argument.resolveType(scope)) == null){
+					this.argumentsHaveErrors = true;
+				}
+// :giro
+			  }
 // SH}
 			}
+			if (this.argumentsHaveErrors) {
+				if (this.actualReceiverType instanceof ReferenceBinding) {
+					//  record a best guess, for clients who need hint about possible method match
+					TypeBinding[] pseudoArgs = new TypeBinding[length];
+					for (int i = length; --i >= 0;)
+						pseudoArgs[i] = this.argumentTypes[i] == null ? TypeBinding.NULL : this.argumentTypes[i]; // replace args with errors with null type
+
+					this.binding = this.receiver.isImplicitThis() ?
+								scope.getImplicitMethod(this.selector, pseudoArgs, this) :
+									scope.findMethod((ReferenceBinding) this.actualReceiverType, this.selector, pseudoArgs, this, false);
+
+					if (this.binding != null && !this.binding.isValidBinding()) {
+						MethodBinding closestMatch = ((ProblemMethodBinding)this.binding).closestMatch;
+						// record the closest match, for clients who may still need hint about possible method match
+						if (closestMatch != null) {
+							if (closestMatch.original().typeVariables != Binding.NO_TYPE_VARIABLES) { // generic method
+								// shouldn't return generic method outside its context, rather convert it to raw method (175409)
+								closestMatch = scope.environment().createParameterizedGenericMethod(closestMatch.original(), (RawTypeBinding)null);
+							}
+							this.binding = closestMatch;
+							MethodBinding closestMatchOriginal = closestMatch.original();
+							if (closestMatchOriginal.isOrEnclosedByPrivateType() && !scope.isDefinedInMethod(closestMatchOriginal)) {
+								// ignore cases where method is used from within inside itself (e.g. direct recursions)
+								closestMatchOriginal.modifiers |= ExtraCompilerModifiers.AccLocallyUsed;
+							}
+						}
+					}
+//{ObjectTeams: more tagging as used:
+					else if (this.binding != null && this.binding.isOrEnclosedByPrivateType() && !scope.isDefinedInMethod(this.binding)) {
+						// ignore cases where method is used from within inside itself (e.g. direct recursions)
+						this.binding.modifiers |= ExtraCompilerModifiers.AccLocallyUsed;
+					}
+// SH}
+				}
+				return null;
+			}
+		}
+		if (this.actualReceiverType == null) {
+			return null;
+		}
+		// base type cannot receive any message
+		if (this.actualReceiverType.isBaseType()) {
+			scope.problemReporter().errorNoMethodFor(this, this.actualReceiverType, this.argumentTypes);
 			return null;
 		}
 	}
-	if (this.actualReceiverType == null) {
-		return null;
-	}
-	// base type cannot receive any message
-	if (this.actualReceiverType.isBaseType()) {
-		scope.problemReporter().errorNoMethodFor(this, this.actualReceiverType, this.argumentTypes);
-		return null;
-	}
+	
 //{ObjectTeams: revert receiver weakening & setup anchorMapping:
 	if (this.actualReceiverType instanceof WeakenedTypeBinding) {
 		// this happens if receiver is a role-type field from a super team, see B.1.1-otjld-sh-32.
@@ -959,7 +954,7 @@ public TypeBinding resolveType(BlockScope scope) {
     // forward declaration of original local used below:
     TypeBinding returnType = null;
   try {
-	anchorMapping = beforeMethodLookup(argumentTypes, scope);
+	anchorMapping = beforeMethodLookup(this.argumentTypes, scope);
 	if (isDecapsulationAllowed(scope) && receiverReferenceType != null) {
 	    // for now pretend all base classes are public/visible (avoid ReceiverTypeNotVisible)
 		baseTypeModifiers = receiverReferenceType.modifiers;
@@ -978,7 +973,11 @@ public TypeBinding resolveType(BlockScope scope) {
 		this.selector=IOTConstants._OT_GETBASE;
 // orig:
 
-	findMethodBinding(scope);
+	TypeBinding methodType = findMethodBinding(scope);
+	if (methodType != null && methodType.isPolyType()) {
+		this.resolvedType = this.binding.returnType.capture(scope, this.sourceEnd);
+		return methodType;
+	}
 
 // :giro
 	if (this.binding == null)
@@ -995,7 +994,7 @@ public TypeBinding resolveType(BlockScope scope) {
 	   	receiverReferenceType.modifiers = baseTypeModifiers; // not-null if baseTypeModifiers != -1
   }
   // more checks requiring the binding to be known (possibly updating returnType):
-  returnType = afterMethodLookup(scope, anchorMapping, argumentTypes, returnType);
+  returnType = afterMethodLookup(scope, anchorMapping, this.argumentTypes, returnType);
 // SH}
 //{ObjectTeams illegal call to callin? (do this before reporting mismatching args - where callin args are in fact enhanced!)
 	int bindingModifiers = this.binding.modifiers;
@@ -1008,7 +1007,7 @@ public TypeBinding resolveType(BlockScope scope) {
 	if (this.binding.problemId() == ProblemReasons.NotFound) {
 		if (CharOperation.prefixEquals(IOTConstants.OT_DOLLAR_NAME, this.selector) && scope.referenceType().ignoreFurtherInvestigation)
 			return null; // type already reported error, this message send is obviously generated, don't bother any more
-		if (CalloutImplementor.inferMappingFromCall(scope.referenceType(), this, argumentTypes)) {
+		if (CalloutImplementor.inferMappingFromCall(scope.referenceType(), this, this.argumentTypes)) {
 			scope.problemReporter().usingInferredCalloutForMessageSend(this);
 			returnType = this.binding.returnType;
 			bindingModifiers = this.binding.modifiers;
@@ -1093,6 +1092,12 @@ public TypeBinding resolveType(BlockScope scope) {
 		switch (this.binding.problemId()) {
 			case ProblemReasons.Ambiguous :
 				break; // no resilience on ambiguous
+			case ProblemReasons.InferredApplicableMethodInapplicable:
+			case ProblemReasons.InvocationTypeInferenceFailure:
+				// Grabbing the closest match improves error reporting in nested invocation contexts
+				if (this.expressionContext != INVOCATION_CONTEXT)
+					break;
+				//$FALL-THROUGH$
 			case ProblemReasons.NotVisible :
 			case ProblemReasons.NonStaticReferenceInConstructorInvocation :
 			case ProblemReasons.NonStaticReferenceInStaticContext :
@@ -1291,16 +1296,20 @@ public TypeBinding resolveType(BlockScope scope) {
 				? this.resolvedType
 				: null;
 }
-/**
- * Find the method binding; 
- * if this.innersNeedUpdate allow for two attempts where the first round may stop
- * after applicability checking (18.5.1) to include more information into the final
- * invocation type inference (18.5.2).
- */
-protected void findMethodBinding(BlockScope scope) {
-	this.binding = this.receiver.isImplicitThis()
-			? scope.getImplicitMethod(this.selector, this.argumentTypes, this)
+
+protected TypeBinding findMethodBinding(BlockScope scope) {
+	
+	
+	this.binding = this.receiver.isImplicitThis() ? 
+			scope.getImplicitMethod(this.selector, this.argumentTypes, this) 
 			: scope.getMethod(this.actualReceiverType, this.selector, this.argumentTypes, this);
+
+	if (this.binding == null) // can't happen ? I think we always get a problem binding, anyways.
+		return null;
+	
+	if (this.binding instanceof PolyParameterizedGenericMethodBinding)
+		return new PolyTypeBinding(this);
+	
 	resolvePolyExpressionArguments(this, this.binding, this.argumentTypes, scope);
 	
 	/* There are embedded assumptions in the JLS8 type inference scheme that a successful solution of the type equations results in an
@@ -1315,11 +1324,8 @@ protected void findMethodBinding(BlockScope scope) {
 	final CompilerOptions compilerOptions = scope.compilerOptions();
 	if (compilerOptions.sourceLevel >= ClassFileConstants.JDK1_8 && this.binding instanceof ParameterizedGenericMethodBinding && this.binding.isValidBinding()) {
 		if (!compilerOptions.postResolutionRawTypeCompatibilityCheck)
-			return;
+			return this.binding.returnType;
 		ParameterizedGenericMethodBinding pgmb = (ParameterizedGenericMethodBinding) this.binding;
-		InferenceContext18 ctx = getInferenceContext(pgmb);
-		if (ctx == null || ctx.stepCompleted < InferenceContext18.BINDINGS_UPDATED)
-			return;
 		int length = pgmb.typeArguments == null ? 0 : pgmb.typeArguments.length;
 		boolean sawRawType = false;
 		for (int i = 0;  i < length; i++) {
@@ -1328,25 +1334,26 @@ protected void findMethodBinding(BlockScope scope) {
 			   does not appear fully hooked up into isCompatibleWith and isEquivalent to everywhere. At the moment, bail out if we see capture.
 			*/   
 			if (pgmb.typeArguments[i].isCapture())
-				return;
+				return this.binding.returnType;
 			if (pgmb.typeArguments[i].isRawType())
 				sawRawType = true;
 		}
 		if (!sawRawType)
-			return;
+			return this.binding.returnType;
 		length = this.arguments == null ? 0 : this.arguments.length;
 		if (length == 0)
-			return;
+			return this.binding.returnType;
 		TypeBinding [] finalArgumentTypes = new TypeBinding[length];
 		for (int i = 0; i < length; i++) {
 			TypeBinding finalArgumentType = this.arguments[i].resolvedType;
 			if (finalArgumentType == null || !finalArgumentType.isValidBinding())  // already sided with the devil.
-				return;
+				return this.binding.returnType;
 			finalArgumentTypes[i] = finalArgumentType; 
 		}
-		if (scope.parameterCompatibilityLevel(this.binding, finalArgumentTypes, false, false) == Scope.NOT_COMPATIBLE)
+		if (scope.parameterCompatibilityLevel(this.binding, finalArgumentTypes, false) == Scope.NOT_COMPATIBLE)
 			this.binding = new ProblemMethodBinding(this.binding.original(), this.binding.selector, finalArgumentTypes, ProblemReasons.NotFound);
 	}
+	return this.binding.returnType;
 }
 
 
@@ -1510,21 +1517,6 @@ protected int getDepthForSynthMethodAccess(MethodBinding methodBinding, SourceTy
 }
 // SH}
 
-@Override
-public TypeBinding checkAgainstFinalTargetType(TypeBinding targetType, Scope scope) {
-	if (this.binding instanceof ParameterizedGenericMethodBinding) {
-		InferenceContext18 ctx = getInferenceContext((ParameterizedMethodBinding) this.binding);
-		if (ctx != null && ctx.stepCompleted < InferenceContext18.TYPE_INFERRED) {
-			this.expectedType = targetType;
-			MethodBinding updatedBinding = ctx.inferInvocationType(this, (ParameterizedGenericMethodBinding) this.binding);
-			if (updateBindings(updatedBinding, targetType)) {
-				ASTNode.resolvePolyExpressionArguments(this, updatedBinding, scope);
-			}
-		}
-	}
-	return this.resolvedType;
-}
-
 public void setActualReceiverType(ReferenceBinding receiverType) {
 	if (receiverType == null) return; // error scenario only
 	this.actualReceiverType = receiverType;
@@ -1558,6 +1550,44 @@ public boolean isPolyExpression() {
 	 */
 	return isPolyExpression(this.binding);
 }
+
+public boolean isBoxingCompatibleWith(TypeBinding targetType, Scope scope) {
+	if (this.argumentsHaveErrors || this.binding == null || !this.binding.isValidBinding() || targetType == null || scope == null)
+		return false;
+	if (isPolyExpression() && !targetType.isPrimitiveOrBoxedPrimitiveType()) // i.e it is dumb to trigger inference, checking boxing compatibility against say Collector<? super T, A, R>.
+		return false;
+	TypeBinding originalExpectedType = this.expectedType;
+	try {
+		this.expectedType = targetType;
+		// No need to tunnel through overload resolution. this.binding is the MSMB.
+		MethodBinding method = isPolyExpression() ? ParameterizedGenericMethodBinding.computeCompatibleMethod18(this.binding.shallowOriginal(), this.argumentTypes, scope, this) : this.binding;
+		if (method == null || !method.isValidBinding() || method.returnType == null || !method.returnType.isValidBinding())
+			return false;
+		return super.isBoxingCompatible(method.returnType.capture(scope, this.sourceEnd), targetType, this, scope);
+	} finally {
+		this.expectedType = originalExpectedType;
+	}
+}
+
+public boolean isCompatibleWith(TypeBinding targetType, final Scope scope) {
+	if (this.argumentsHaveErrors || this.binding == null || !this.binding.isValidBinding() || targetType == null || scope == null)
+		return false;
+	TypeBinding originalExpectedType = this.expectedType;
+	try {
+		this.expectedType = targetType;
+		// No need to tunnel through overload resolution. this.binding is the MSMB.
+		MethodBinding method = isPolyExpression() ? ParameterizedGenericMethodBinding.computeCompatibleMethod18(this.binding.shallowOriginal(), this.argumentTypes, scope, this) : this.binding;
+		TypeBinding returnType;
+		if (method == null || !method.isValidBinding() || (returnType = method.returnType) == null || !returnType.isValidBinding())
+			return false;
+		if (method == scope.environment().arrayClone)
+			returnType = this.actualReceiverType;
+		return returnType != null && returnType.capture(scope, this.sourceEnd).isCompatibleWith(targetType, scope);
+	} finally {
+		this.expectedType = originalExpectedType;
+	}
+}
+
 /** Variant of isPolyExpression() to be used during type inference, when a resolution candidate exists. */
 public boolean isPolyExpression(MethodBinding resolutionCandidate) {
 	if (this.expressionContext != ASSIGNMENT_CONTEXT && this.expressionContext != INVOCATION_CONTEXT)
@@ -1621,21 +1651,10 @@ public boolean receiverIsImplicitThis() {
 	return this.receiver.isImplicitThis();
 }
 // -- interface Invocation: --
-public MethodBinding binding(TypeBinding targetType, boolean reportErrors, Scope scope) {
-	if (reportErrors) {
-		if (this.binding == null)
-			scope.problemReporter().genericInferenceError("method is unexpectedly unresolved", this); //$NON-NLS-1$
-		else if (!this.binding.isValidBinding())
-			scope.problemReporter().invalidMethod(this, this.binding);
-	}
+public MethodBinding binding(TypeBinding targetType, Scope scope) {
 	return this.binding;
 }
-public Expression[] arguments() {
-	return this.arguments;
-}
-public ExpressionContext getExpressionContext() {
-	return this.expressionContext;
-}
+
 public void registerInferenceContext(ParameterizedGenericMethodBinding method, InferenceContext18 infCtx18) {
 	if (this.inferenceContexts == null)
 		this.inferenceContexts = new SimpleLookupTable();
@@ -1646,32 +1665,11 @@ public InferenceContext18 getInferenceContext(ParameterizedMethodBinding method)
 		return null;
 	return (InferenceContext18) this.inferenceContexts.get(method);
 }
-public boolean usesInference() {
-	return (this.binding instanceof ParameterizedGenericMethodBinding) 
-			&& getInferenceContext((ParameterizedGenericMethodBinding) this.binding) != null;
+public Expression[] arguments() {
+	return this.arguments;
 }
-public boolean updateBindings(MethodBinding updatedBinding, TypeBinding targetType) {
-	boolean hasUpdate = this.binding != updatedBinding;
-	if (this.inferenceContexts != null) {
-		InferenceContext18 ctx = (InferenceContext18)this.inferenceContexts.removeKey(this.binding);
-		if (ctx != null && updatedBinding instanceof ParameterizedGenericMethodBinding) {
-			this.inferenceContexts.put(updatedBinding, ctx);
-			// solution may have come from an outer inference, mark now that this (inner) is done (but not deep inners):
-			hasUpdate |= ctx.registerSolution(targetType, updatedBinding);
-		}
-	}
-	this.binding = updatedBinding;
-	this.resolvedType = updatedBinding.returnType;
-	return hasUpdate;
-}
-public boolean innersNeedUpdate() {
-	return this.innerInferenceHelper != null;
-}
-public void innerUpdateDone() {
-	this.innerInferenceHelper = null;
-}
-public InnerInferenceHelper innerInferenceHelper() {
-	return this.innerInferenceHelper;
+public ExpressionContext getExpressionContext() {
+	return this.expressionContext;
 }
 // -- Interface InvocationSite: --
 public InferenceContext18 freshInferenceContext(Scope scope) {

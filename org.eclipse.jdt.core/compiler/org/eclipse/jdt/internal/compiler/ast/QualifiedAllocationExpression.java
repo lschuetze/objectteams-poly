@@ -495,10 +495,6 @@ public static abstract class AbstractQualifiedAllocationExpression extends Alloc
 				if ((this.argumentTypes[i] = argument.resolveType(scope)) == null){
 					hasError = true;
 				}
-				if (sourceLevel >= ClassFileConstants.JDK1_8 && (argument.isPolyExpression() || (argument instanceof Invocation && ((Invocation)argument).usesInference()))) {
-					if (this.innerInferenceHelper == null)
-						this.innerInferenceHelper = new InnerInferenceHelper();
-				}
 			}
 		}
 

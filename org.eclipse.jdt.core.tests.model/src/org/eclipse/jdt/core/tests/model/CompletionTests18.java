@@ -25,7 +25,7 @@ import org.eclipse.jdt.internal.codeassist.RelevanceConstants;
 public class CompletionTests18 extends AbstractJavaModelCompletionTests {
 
 static {
-//		TESTS_NAMES = new String[] {"test001"};
+		TESTS_NAMES = new String[] {"test435281"};
 }
 
 public CompletionTests18(String name) {

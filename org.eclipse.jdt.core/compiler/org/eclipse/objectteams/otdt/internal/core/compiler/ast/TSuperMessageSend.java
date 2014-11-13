@@ -99,7 +99,7 @@ public class TSuperMessageSend extends MessageSend {
 	}
 
 	@Override
-	protected void findMethodBinding(BlockScope scope) {
+	protected TypeBinding findMethodBinding(BlockScope scope) {
 		
 		// check: is a tsuper call legal in the current context?
 		
@@ -109,7 +109,7 @@ public class TSuperMessageSend extends MessageSend {
 				|| context.binding.parameters.length != this.argumentTypes.length) 
 		{
 			scope.problemReporter().tsuperCallsWrongMethod(this);
-			return;
+			return null;
 		}
 
 		ReferenceBinding receiverRole;
@@ -117,13 +117,13 @@ public class TSuperMessageSend extends MessageSend {
 				|| !(receiverRole = (ReferenceBinding)this.actualReceiverType).isSourceRole()) 
 		{
 			scope.problemReporter().tsuperOutsideRole(context, this, this.actualReceiverType);
-			return;
+			return null;
 		}
 
 		ReferenceBinding[] tsuperRoleBindings = receiverRole.roleModel.getTSuperRoleBindings();
 	    if (tsuperRoleBindings.length == 0) {
 	    	scope.problemReporter().tsuperCallWithoutTsuperRole(receiverRole, this);
-	    	return;
+	    	return null;
 	    }
 
 	    // context is OK, start searching:
@@ -133,12 +133,12 @@ public class TSuperMessageSend extends MessageSend {
 	    if (this.tsuperReference.qualification != null) {
 	    	TypeBinding tsuperRole = this.tsuperReference.resolvedType;
 	    	if (tsuperRole == null || !tsuperRole.isRole())
-	    		return;
+	    		return null;
 	    	this.binding = scope.getMethod(tsuperRole, this.selector, this.argumentTypes, this);
 	    	if (!this.binding.isValidBinding() && ((ProblemMethodBinding)this.binding).declaringClass == null)
 	    		this.binding.declaringClass = (ReferenceBinding) tsuperRole;
     		resolvePolyExpressionArguments(this, this.binding, this.argumentTypes, scope);
-	    	return;
+	    	return this.binding.returnType;
 	    }
 	    // no qualification => search all tsupers by priority:
 	    MethodBinding bestMatch = null;
@@ -148,11 +148,11 @@ public class TSuperMessageSend extends MessageSend {
 	    	if (candidate.isValidBinding()) {
 	    		if (scope.parameterCompatibilityLevel(candidate, this.argumentTypes) != Scope.COMPATIBLE) {
 	    			scope.problemReporter().tsuperCallsWrongMethod(this);
-	    			return;
+	    			return candidate.returnType;
 	    		}
 	    		this.binding = candidate;
 	    		resolvePolyExpressionArguments(this, this.binding, this.argumentTypes, scope);
-	    		return;
+	    		return this.binding.returnType;
 	    	}
 	    	if (bestMatch == null || 
 	    			(bestMatch.problemId() == ProblemReasons.NotFound && candidate.problemId() != ProblemReasons.NotFound))
@@ -163,6 +163,7 @@ public class TSuperMessageSend extends MessageSend {
 	    if (bestMatch.declaringClass == null)
 	    	bestMatch.declaringClass = (ReferenceBinding) this.tsuperReference.resolvedType;
 	    this.binding = bestMatch;
+	    return this.binding.returnType;
 	}
 	
 	@Override
