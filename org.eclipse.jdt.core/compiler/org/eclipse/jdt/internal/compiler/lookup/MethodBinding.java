@@ -886,6 +886,7 @@ public TypeBinding getCodeGenType(int pos) {
 			return tsuperType.erasure();
 	}
 	if (   currentType instanceof TypeVariableBinding
+		&& !(currentType instanceof CaptureBinding)
 		&& ((TypeVariableBinding)currentType).declaringElement.kind() == Binding.BINDING
 		&& this instanceof ParameterizedGenericMethodBinding)
 		return ((ParameterizedGenericMethodBinding)this).reverseSubstitute((TypeVariableBinding) currentType).erasure();
