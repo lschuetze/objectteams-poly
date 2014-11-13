@@ -121,11 +121,14 @@ public abstract class ArrayTranslations {
 				methodBinding.selector,
 				new Expression[] {expression});
 
-		// manual resolving since expression is already resolved:
-        send.binding = methodBinding;
-	    send.actualReceiverType = expression.resolvedType;
-	    send.resolvedType   = methodBinding.returnType;
-	    send.constant = Constant.NotAConstant;
+		if (!deferredResolve) {
+			// manual resolving since expression is already resolved:
+			send.constant = Constant.NotAConstant;
+	        send.binding = methodBinding;
+		    send.actualReceiverType = this._teamExpr.resolveType(scope);
+		    send.argumentTypes = new TypeBinding[] { providedType };
+		    send.resolvedType   = methodBinding.returnType;
+		}
 	    return send;
 	}
 

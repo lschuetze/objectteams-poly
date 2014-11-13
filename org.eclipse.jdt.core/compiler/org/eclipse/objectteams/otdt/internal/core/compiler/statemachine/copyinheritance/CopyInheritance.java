@@ -50,7 +50,6 @@ import org.eclipse.jdt.internal.compiler.ast.TypeReference;
 import org.eclipse.jdt.internal.compiler.ast.AbstractMethodDeclaration.WrapperKind;
 import org.eclipse.jdt.internal.compiler.ast.Expression.DecapsulationState;
 import org.eclipse.jdt.internal.compiler.classfmt.ClassFileConstants;
-import org.eclipse.jdt.internal.compiler.impl.Constant;
 import org.eclipse.jdt.internal.compiler.impl.IrritantSet;
 import org.eclipse.jdt.internal.compiler.lookup.BinaryTypeBinding;
 import org.eclipse.jdt.internal.compiler.lookup.Binding;
@@ -1837,7 +1836,6 @@ public class CopyInheritance implements IOTConstants, ClassFileConstants, ExtraC
         message.selector = selector;
         message.receiver = receiver;
         message.arguments = allocationExpr.arguments;
-        message.constant = Constant.NotAConstant;
 
         // remove left-overs (if any):
         allocationExpr.resolvedType = null;

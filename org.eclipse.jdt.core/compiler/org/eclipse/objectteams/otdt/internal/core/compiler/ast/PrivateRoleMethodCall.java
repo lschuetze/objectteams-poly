@@ -18,7 +18,6 @@ package org.eclipse.objectteams.otdt.internal.core.compiler.ast;
 import org.eclipse.jdt.internal.compiler.ast.Expression;
 import org.eclipse.jdt.internal.compiler.ast.MessageSend;
 import org.eclipse.jdt.internal.compiler.codegen.CodeStream;
-import org.eclipse.jdt.internal.compiler.impl.Constant;
 import org.eclipse.jdt.internal.compiler.lookup.BlockScope;
 import org.eclipse.jdt.internal.compiler.lookup.MethodBinding;
 import org.eclipse.jdt.internal.compiler.lookup.ReferenceBinding;
@@ -53,7 +52,6 @@ public class PrivateRoleMethodCall extends MessageSend {
 		this.sourceEnd = gen.sourceEnd;
 		this.isCalloutToField = isCalloutToField;
 		this.gen = gen;
-		this.constant = Constant.NotAConstant;
 		this.nameSourcePosition = gen.pos;
 	}
 

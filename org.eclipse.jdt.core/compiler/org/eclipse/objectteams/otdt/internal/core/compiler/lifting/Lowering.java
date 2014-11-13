@@ -91,7 +91,7 @@ public class Lowering implements IOTConstants {
 			  boolean     needNullCheck,
 			  boolean 	   deferredResolve)
 	{
-        // Note, this method is responsible for 'resolving' all AST nodes it generates!
+        // Note, unless deferredResolve, this method is responsible for 'resolving' all AST nodes it generates!
 
         int sourceStart = expression.sourceStart;
         int sourceEnd   = expression.sourceEnd;
@@ -142,15 +142,19 @@ public class Lowering implements IOTConstants {
 						new Expression[0]);
 
                 // manual resolving:
-                callLower.actualReceiverType = unloweredType;
-                callLower.constant       = Constant.NotAConstant;
-                callLower.resolvedType   = roleType.baseclass();
-
-                callLower.binding =
-                            StandardElementGenerator.getGetBaseMethod(
-                            		scope,
-                                    roleType.roleModel,
-                                    roleType.baseclass());
+                if (!deferredResolve) {
+                	callLower.constant       = Constant.NotAConstant;
+                	callLower.actualReceiverType = unloweredType;
+                	if (unloweredExpression.constant == null)
+                		unloweredExpression.resolveType(scope);
+	                callLower.resolvedType   = roleType.baseclass();
+	
+	                callLower.binding =
+	                            StandardElementGenerator.getGetBaseMethod(
+	                            		scope,
+	                                    roleType.roleModel,
+	                                    roleType.baseclass());
+                }
                 loweringExpr = callLower;
             } else {
                 // (2) translation using field _OT$base:

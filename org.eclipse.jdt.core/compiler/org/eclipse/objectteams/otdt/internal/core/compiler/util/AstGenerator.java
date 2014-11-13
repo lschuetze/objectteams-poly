@@ -789,7 +789,6 @@ public class AstGenerator extends AstFactory {
 		messageSend.receiver = receiver;
 		messageSend.selector = selector;
 		messageSend.arguments = parameters;
-		messageSend.constant = Constant.NotAConstant;
 		return messageSend;
 	}
 	public MessageSend tsuperMessageSend(Expression receiver, char[] selector, Expression[] parameters) {
@@ -803,7 +802,6 @@ public class AstGenerator extends AstFactory {
 		messageSend.tsuperReference = new TsuperReference(this.sourceStart, this.sourceEnd);
 		messageSend.selector = selector;
 		messageSend.arguments = parameters;
-		messageSend.constant = Constant.NotAConstant;
 		return messageSend;
 	}
 
@@ -817,6 +815,7 @@ public class AstGenerator extends AstFactory {
 		MessageSend messageSend = new MessageSend() {
 			@Override
 			public TypeBinding resolveType(BlockScope scope) {
+				this.constant = Constant.NotAConstant;
 				// arguments always need resolving:
 				if (this.arguments != null) {
 					int length = this.arguments.length;
@@ -845,7 +844,6 @@ public class AstGenerator extends AstFactory {
 		messageSend.receiver = receiver;
 		messageSend.selector = selector;
 		messageSend.arguments = parameters;
-		messageSend.constant = Constant.NotAConstant;
 		return messageSend;
 	}
 
@@ -865,7 +863,6 @@ public class AstGenerator extends AstFactory {
 		messageSend.receiver = receiver;
 		messageSend.selector = selector;
 		messageSend.arguments = parameters;
-		messageSend.constant = Constant.NotAConstant;
 		return messageSend;
 	}
 
@@ -893,7 +890,6 @@ public class AstGenerator extends AstFactory {
 		messageSend.receiver = receiver;
 		messageSend.selector = selector;
 		messageSend.arguments = parameters;
-		messageSend.constant = Constant.NotAConstant;
 		return messageSend;
 	}
 

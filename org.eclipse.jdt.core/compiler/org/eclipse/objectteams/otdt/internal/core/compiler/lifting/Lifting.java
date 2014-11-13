@@ -203,7 +203,6 @@ public class Lifting extends SwitchOnBaseTypeGenerator
 		        teamExpr,
 		        getLiftMethodName(expectedRole),
 		        new Expression[] { unliftedExpr });
-	    send.constant = Constant.NotAConstant;
 	    return send;
 	}
 

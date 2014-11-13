@@ -1059,8 +1059,9 @@ public class CallinImplementor extends MethodMappingImplementor
 
 			AstGenerator gen = new AstGenerator(mappedArgExpr.sourceStart, mappedArgExpr.sourceEnd);
 			Expression receiver = null;
-			if (   RoleTypeBinding.isRoleWithoutExplicitAnchor(expectedType)
-				&& TypeBinding.equalsEquals(roleType.getRealClass(), ((ReferenceBinding)expectedType).enclosingType()))
+			TypeBinding expectedLeaf = expectedType.leafComponentType();
+			if (   RoleTypeBinding.isRoleWithoutExplicitAnchor(expectedLeaf)
+				&& TypeBinding.equalsEquals(roleType.getRealClass(), ((ReferenceBinding)expectedLeaf).enclosingType()))
 			{
 				// expectedType is a role of the current role(=team),
 				// use the role as the receiver for the lift call:
@@ -1070,7 +1071,7 @@ public class CallinImplementor extends MethodMappingImplementor
 				if (sourceMethodSpec.argNeedsTranslation(srcIdx)) {
 					mappedArgExpr.tagReportedBaseclassDecapsulation();
 					return Lifting.liftCall(methodMapping.scope,
-											receiver != null ? receiver : ThisReference.implicitThis(),
+											receiver != null ? receiver : gen.qualifiedThisReference(expectedLeaf.enclosingType()),
 											mappedArgExpr,
 											sourceMethodSpec.resolvedParameters()[srcIdx],
 											expectedType,

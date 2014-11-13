@@ -392,6 +392,7 @@ public class StandardElementGenerator {
 				assert castType.roleModel.isIgnoreFurtherInvestigation();
 			}
 			msg.actualReceiverType = castType.getRealType();
+//			msg.resolvedType = msg.binding.returnType;
 			msg.constant = Constant.NotAConstant;
 			teamCheck.right.constant = Constant.NotAConstant;
 			teamCheck.constant = Constant.NotAConstant;
