@@ -611,9 +611,9 @@ public class TeamModel extends TypeModel {
 		}
 		VariableBinding anchor = enclosingTeam.getTeamModel().getTThis();
 		if (roleType.isParameterizedType()) {
-			// consult original role type for type arguments:
+			// consult original role type for type arguments & type annotations:
 			ParameterizedTypeBinding ptb = (ParameterizedTypeBinding)roleType;
-			TypeBinding parameterized = ptb.environment.createParameterizedType(roleRefType, ptb.arguments, anchor, -1, roleRefType.enclosingType(), Binding.NO_ANNOTATIONS);
+			TypeBinding parameterized = ptb.environment.createParameterizedType(roleRefType, ptb.arguments, anchor, -1, roleRefType.enclosingType(), ptb.getTypeAnnotations());
 			if (dimensions > 0)
 				return ptb.environment.createArrayType(parameterized, dimensions);
 			return parameterized;

@@ -457,7 +457,7 @@ public class ParameterizedSingleTypeReference extends ArrayTypeReference {
 			return this.resolvedType;
 
 		// feed more parameters into createParameterizedType:
-		AnnotationBinding[] currentAnnotations = currentType.getAnnotations();
+		AnnotationBinding[] currentAnnotations = currentType.getTypeAnnotations();
 		ITeamAnchor anchor = null;
 		int valParPos = -1;
 		if (currentType instanceof DependentTypeBinding) {

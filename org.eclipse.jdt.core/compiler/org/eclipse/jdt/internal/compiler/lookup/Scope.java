@@ -569,7 +569,7 @@ public abstract class Scope {
 						if (originalParameterizedType.isRoleType()) {
 							DependentTypeBinding originalRole = (DependentTypeBinding) originalParameterizedType;
 							return originalParameterizedType.environment.createParameterizedType(
-								originalParameterizedType.genericType(), substitutedArguments, originalRole._teamAnchor, originalRole._valueParamPosition, substitutedEnclosing, Binding.NO_ANNOTATIONS);
+								originalParameterizedType.genericType(), substitutedArguments, originalRole._teamAnchor, originalRole._valueParamPosition, substitutedEnclosing, originalRole.getTypeAnnotations());
 						}
 // SH}
 						return originalParameterizedType.environment.createParameterizedType(
