@@ -25,7 +25,7 @@ import org.eclipse.jdt.internal.codeassist.RelevanceConstants;
 public class CompletionTests18 extends AbstractJavaModelCompletionTests {
 
 static {
-		TESTS_NAMES = new String[] {"test435281"};
+//	TESTS_NAMES = new String[] {"test001"};
 }
 
 public CompletionTests18(String name) {
@@ -2172,14 +2172,14 @@ public void test435219l() throws JavaModelException {
 public void test435281() throws JavaModelException {
 	this.workingCopies = new ICompilationUnit[3];
 	this.workingCopies[0] = getWorkingCopy(
-			"/Completion/src/FI1.java",
+			"/Completion/src/p4a/FI1.java",
 			"package p4a;\n" +
 			"@FunctionalInterface\n" +
 			"public interface FI1<R> {\n" +
 			"    public R foo1();\n" +
 			"}\n");
 	this.workingCopies[1] = getWorkingCopy(
-			"/Completion/src/FI2.java",
+			"/Completion/src/p4a/FI2.java",
 			"package p4a;\n" +
 			"@FunctionalInterface\n" +
 			"public interface FI2 {\n" +
