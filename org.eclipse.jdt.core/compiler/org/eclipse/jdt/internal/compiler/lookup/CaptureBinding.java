@@ -459,7 +459,7 @@ public class CaptureBinding extends TypeVariableBinding {
 	            	hasWrapped = true;
 	    	}
 	    	if (hasWrapped) {
-	    		CaptureBinding newCapture = new CaptureBinding(this.wildcard, this.sourceType, this.start, this.end, this.cud, scope.compilationUnitScope().nextCaptureID());
+	    		CaptureBinding newCapture = scope.environment().createCapturedWildcard(this.wildcard, this.sourceType, this.start, this.end, this.cud, scope.compilationUnitScope().nextCaptureID());
 	    		newCapture.firstBound = wrappedBound;
 	    		newCapture.superclass = (ReferenceBinding)newSuper;
 	    		newCapture.superInterfaces = newSuperIfcs;

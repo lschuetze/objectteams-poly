@@ -1549,6 +1549,11 @@ public boolean isCompatibleWith(TypeBinding targetType, final Scope scope) {
 			registerResult(targetType, method);
 		}
 		TypeBinding returnType;
+//{ObjectTeams:
+		if (this.resolvedType != null && this.resolvedType.isValidBinding() && !this.resolvedType.isPolyType() && this.resolvedType.isProperType(false))
+			if (this.resolvedType.isCompatibleWith(targetType, scope))
+				return true;
+// SH}
 		if (method == null || !method.isValidBinding() || (returnType = method.returnType) == null || !returnType.isValidBinding())
 			return false;
 		if (method == scope.environment().arrayClone)

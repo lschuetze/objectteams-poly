@@ -5115,6 +5115,27 @@ public class Java5 extends AbstractOTJLDTest {
             },
             "true");
     }
+    
+    // similar to above but not using OT specifics
+    public void testA119_plainJava() {
+    	runConformTest(
+    		new String[] {
+    			"GetRole.java",
+    			"\n" + 
+    			"class R<Z> {}\n" + 
+    			"\n" + 
+    			"public class GetRole {\n" + 
+    			"	public <T> T getRole(Object o, Class<T> clazz) {\n" + 
+    			"		return null;\n" + 
+    			"	}\n" + 
+    			"	public Class<? extends R> getRClass() { return R.class; }\n" + 
+    			"	static void test(GetRole gr, Object o) {\n" + 
+    			"		R<String> rs = gr.getRole(o, gr.getRClass());\n" + 
+    			"	}\n" + 
+    			"}\n"
+    		},
+    		"");
+    }
 
     // a collection is parameterized by a role, used in foreach outside the team
     // A.1.19-otjld-parameterized-by-role-6
