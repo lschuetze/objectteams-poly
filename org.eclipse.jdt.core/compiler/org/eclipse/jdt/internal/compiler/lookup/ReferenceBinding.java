@@ -1035,6 +1035,10 @@ public void computeId() {
 	}
 }
 
+public void computeId(LookupEnvironment environment) {
+	environment.getUnannotatedType(this);
+}
+
 /**
  * p.X<T extends Y & I, U extends Y> {} -> Lp/X<TT;TU;>;
  */
@@ -1695,7 +1699,7 @@ private boolean isCompatibleWith0(TypeBinding otherType, boolean useObjectShortc
 				if (this instanceof TypeVariableBinding && captureScope != null) {
 					TypeVariableBinding typeVariable = (TypeVariableBinding) this;
 					if (typeVariable.firstBound instanceof ParameterizedTypeBinding) {
-						TypeBinding bound = typeVariable.firstBound.capture(captureScope, -1); // no position needed as this capture will never escape this context
+						TypeBinding bound = typeVariable.firstBound.capture(captureScope, -1, -1); // no position needed as this capture will never escape this context
 						return bound.isCompatibleWith(otherReferenceType);
 					}
 				}

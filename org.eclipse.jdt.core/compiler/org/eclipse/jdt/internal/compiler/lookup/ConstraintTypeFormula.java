@@ -307,8 +307,8 @@ class ConstraintTypeFormula extends ConstraintFormula {
 			case Binding.INTERSECTION_TYPE:
 				superCandidate = ((WildcardBinding) superCandidate).allBounds();
 				//$FALL-THROUGH$
-			case Binding.INTERSECTION_CAST_TYPE:
-				TypeBinding[] intersectingTypes = ((IntersectionCastTypeBinding) superCandidate).intersectingTypes;
+			case Binding.INTERSECTION_TYPE18:
+				TypeBinding[] intersectingTypes = ((IntersectionTypeBinding18) superCandidate).intersectingTypes;
 				ConstraintFormula[] result = new ConstraintFormula[intersectingTypes.length];
 				for (int i = 0; i < intersectingTypes.length; i++) {
 					result[i] = ConstraintTypeFormula.create(subCandidate, intersectingTypes[i], SUBTYPE, this.isSoft);
@@ -317,10 +317,10 @@ class ConstraintTypeFormula extends ConstraintFormula {
 			case Binding.POLY_TYPE:
 				PolyTypeBinding poly = (PolyTypeBinding) superCandidate;
 				Invocation invocation = (Invocation) poly.expression;
-				MethodBinding binding = invocation.binding(subCandidate, scope);
+				MethodBinding binding = invocation.binding();
 				if (binding == null || !binding.isValidBinding())
 					return FALSE;
-				return reduceSubType(scope, subCandidate, binding.returnType.capture(scope, invocation.sourceEnd()));
+				return reduceSubType(scope, subCandidate, binding.returnType.capture(scope, invocation.sourceStart(), invocation.sourceEnd()));
 		}
 		throw new IllegalStateException("Unexpected RHS "+superCandidate); //$NON-NLS-1$
 	}

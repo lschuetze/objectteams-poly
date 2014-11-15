@@ -51,6 +51,8 @@ package org.eclipse.jdt.internal.compiler.ast;
 
 import static org.eclipse.jdt.internal.compiler.ast.ExpressionContext.*;
 
+import java.util.HashMap;
+
 import org.eclipse.jdt.core.compiler.IProblem;
 import org.eclipse.jdt.internal.compiler.ASTVisitor;
 import org.eclipse.jdt.internal.compiler.classfmt.ClassFileConstants;
@@ -90,9 +92,8 @@ import org.eclipse.objectteams.otdt.internal.core.compiler.util.TypeAnalyzer;
  *       if this expression creates a role using the lifting constructor
  * See:  Class comment in MethodBinding
  *
- * @version $Id: AllocationExpression.java 23405 2010-02-03 17:02:18Z stephan $
  */
-public class AllocationExpression extends Expression implements Invocation {
+public class AllocationExpression extends Expression implements IPolyExpression, Invocation {
 
 	public TypeReference type;
 	public Expression[] arguments;
@@ -105,11 +106,12 @@ public class AllocationExpression extends Expression implements Invocation {
 	public boolean inferredReturnType;
 
 	public FakedTrackingVariable closeTracker;	// when allocation a Closeable store a pre-liminary tracking variable here
-	private ExpressionContext expressionContext = VANILLA_CONTEXT;
+	public ExpressionContext expressionContext = VANILLA_CONTEXT;
 
 	 // hold on to this context from invocation applicability inference until invocation type inference (per method candidate):
 	private SimpleLookupTable/*<PMB,IC18>*/ inferenceContexts;
-	private boolean argsContainCast;
+	public HashMap<TypeBinding, MethodBinding> solutionsPerTargetType;
+	public boolean argsContainCast;
 	public TypeBinding[] argumentTypes = Binding.NO_PARAMETERS;
 	public boolean argumentsHaveErrors = false;
 	
@@ -536,57 +538,38 @@ public TypeBinding resolveType(BlockScope scope) {
 			scope.problemReporter().cannotInstantiate(this.type, this.resolvedType);
 			return this.resolvedType;
 		}
-		if (isDiamond) {
-			ReferenceBinding genericType = ((ParameterizedTypeBinding) this.resolvedType).genericType();
-			ParameterizedTypeBinding parameterizedType = scope.environment().createParameterizedType(genericType, genericType.typeVariables(), genericType.enclosingType());
-			if (this.typeExpected == null && compilerOptions.sourceLevel >= ClassFileConstants.JDK1_8 && this.expressionContext.definesTargetType()) {
-				this.binding = inferConstructorOfElidedParameterizedType(parameterizedType, this.resolvedType.enclosingType(), this.argumentTypes, scope);
-				if (this.binding == null) {
-					scope.problemReporter().cannotInferElidedTypes(this);
-					return this.resolvedType = null;
-				}
-				return new PolyTypeBinding(this);
-			}
-			TypeBinding [] inferredTypes = inferElidedTypes(parameterizedType, this.resolvedType.enclosingType(), this.argumentTypes, scope);
-			if (inferredTypes == null) {
-				scope.problemReporter().cannotInferElidedTypes(this);
-				return this.resolvedType = null;
-			}
-			ReferenceBinding allocationType = scope.environment().createParameterizedType(genericType, inferredTypes, ((ParameterizedTypeBinding) this.resolvedType).enclosingType());
-			this.resolvedType = this.type.resolvedType = allocationType; 
+	} 
+	if (isDiamond) {
+		this.binding = inferConstructorOfElidedParameterizedType(scope);
+		if (this.binding == null || !this.binding.isValidBinding()) {
+			scope.problemReporter().cannotInferElidedTypes(this);
+			return this.resolvedType = null;
 		}
+		if (this.typeExpected == null && compilerOptions.sourceLevel >= ClassFileConstants.JDK1_8 && this.expressionContext.definesTargetType()) {
+			return new PolyTypeBinding(this);
+		}
+		this.resolvedType = this.type.resolvedType = this.binding.declaringClass;
+		resolvePolyExpressionArguments(this, this.binding, this.argumentTypes, scope);
 	} else {
-		if (isDiamond) {
-			ReferenceBinding genericType = ((ParameterizedTypeBinding) this.resolvedType).genericType();
-			ParameterizedTypeBinding parameterizedType = scope.environment().createParameterizedType(genericType, genericType.typeVariables(), genericType.enclosingType());
-			TypeBinding [] inferredTypes = inferElidedTypes(parameterizedType, this.resolvedType.enclosingType(), this.argumentTypes, scope);
-			if (inferredTypes == null) {
-				scope.problemReporter().cannotInferElidedTypes(this);
-				return this.resolvedType = null;
-			}
-			this.resolvedType = this.type.resolvedType = scope.environment().createParameterizedType(genericType, inferredTypes, ((ParameterizedTypeBinding) this.resolvedType).enclosingType());
-		}
-	}
 	
-	ReferenceBinding allocationType = (ReferenceBinding) this.resolvedType;
 //{ObjectTeams: may need to instantiate parameters of constructor
-    AnchorMapping anchorMapping = AnchorMapping.setupNewMapping(null, this.arguments, scope);
-  try {
-	  // ensure allocation type has methods:
-	  Dependencies.ensureBindingState(allocationType, ITranslationStates.STATE_LENV_DONE_FIELDS_AND_METHODS);
-// SH}
-	this.binding = findConstructorBinding(scope, this, allocationType, this.argumentTypes);
+    	AnchorMapping anchorMapping = AnchorMapping.setupNewMapping(null, this.arguments, scope);
+	  try {
+		// ensure allocation type has methods:
+		Dependencies.ensureBindingState((ReferenceBinding) this.resolvedType, ITranslationStates.STATE_LENV_DONE_FIELDS_AND_METHODS);
+// orig:
+		this.binding = findConstructorBinding(scope, this, (ReferenceBinding) this.resolvedType, this.argumentTypes);
 //:giro
-  } finally {
-      AnchorMapping.removeCurrentMapping(anchorMapping);
-  }
+	  } finally {
+    	AnchorMapping.removeCurrentMapping(anchorMapping);
+	  }
 // SH}
-		
+	}
 	if (!this.binding.isValidBinding()) {
 //{ObjectTeams: baseclass decapsulation?
 	  boolean baseclassDecapsulationAllowed =
 						   this.type != null // null happens for enum constants
-						&& this.type.getBaseclassDecapsulation(allocationType).isAllowed();
+						&& this.type.getBaseclassDecapsulation((ReferenceBinding) this.resolvedType).isAllowed();
 	  if (   this.binding.problemId() == ProblemReasons.NotVisible
 		  && (   baseclassDecapsulationAllowed
 		      || scope.isGeneratedScope()))
@@ -596,14 +579,13 @@ public TypeBinding resolveType(BlockScope scope) {
 			int accessId = scope.enclosingSourceType().roleModel.addInaccessibleBaseMethod(this.binding);
 			scope.problemReporter().decapsulation(this, scope);
 			if (scope.compilerOptions().weavingScheme == WeavingScheme.OTDRE) {
-				this.resolvedType = allocationType;
 				throw new ConstructorDecapsulationException(accessId);
 			}
 		}
 	  } else {
 //  orig:
 		if (this.binding.declaringClass == null) {
-			this.binding.declaringClass = allocationType;
+			this.binding.declaringClass = (ReferenceBinding) this.resolvedType;
 		}
 		if (this.type != null && !this.type.resolvedType.isValidBinding()) {
 			return null;
@@ -620,23 +602,21 @@ public TypeBinding resolveType(BlockScope scope) {
 	if (isMethodUseDeprecated(this.binding, scope, true)) {
 		scope.problemReporter().deprecatedMethod(this.binding, this);
 	}
-	if (checkInvocationArguments(scope, null, allocationType, this.binding, this.arguments, this.argumentTypes, this.argsContainCast, this)) {
+	if (checkInvocationArguments(scope, null, this.resolvedType, this.binding, this.arguments, this.argumentTypes, this.argsContainCast, this)) {
 		this.bits |= ASTNode.Unchecked;
 	}
 	if (this.typeArguments != null && this.binding.original().typeVariables == Binding.NO_TYPE_VARIABLES) {
 		scope.problemReporter().unnecessaryTypeArgumentsForMethodInvocation(this.binding, this.genericTypeArguments, this.typeArguments);
 	}
 	if (!isDiamond && this.resolvedType.isParameterizedTypeWithActualArguments()) {
- 		checkTypeArgumentRedundancy((ParameterizedTypeBinding) this.resolvedType, this.resolvedType.enclosingType(), this.argumentTypes, scope);
+ 		checkTypeArgumentRedundancy((ParameterizedTypeBinding) this.resolvedType, scope);
  	}
 	if (compilerOptions.isAnnotationBasedNullAnalysisEnabled && (this.binding.tagBits & TagBits.IsNullnessKnown) == 0) {
 		new ImplicitNullAnnotationVerifier(scope.environment(), compilerOptions.inheritNullAnnotations)
 				.checkImplicitNullAnnotations(this.binding, null/*srcMethod*/, false, scope);
 	}
-	recordExceptionsForEnclosingLambda(scope, this.binding.thrownExceptions);
 //{ObjectTeams: may need to wrap the resolved type
-    this.resolvedType = allocationType =
-    	(ReferenceBinding)RoleTypeCreator.maybeWrapUnqualifiedRoleType(allocationType, scope, this);
+    this.resolvedType = RoleTypeCreator.maybeWrapUnqualifiedRoleType(this.resolvedType, scope, this);
 	DependentTypeBinding dependentTypeBinding = this.resolvedType.asPlainDependentType();
 	if (dependentTypeBinding != null) {
 		ITeamAnchor[] anchorPath = dependentTypeBinding._teamAnchor.getBestNamePath();
@@ -662,7 +642,7 @@ public TypeBinding resolveType(BlockScope scope) {
 		this.valueParam.resolve(scope);
 	}
 // SH}
-	return allocationType;
+	return this.resolvedType;
 }
 
 /**
@@ -692,13 +672,14 @@ public boolean isCompatibleWith(TypeBinding targetType, final Scope scope) {
 	if (isPolyExpression()) {
 		TypeBinding originalExpectedType = this.typeExpected;
 		try {
-			this.typeExpected = targetType;
-			ReferenceBinding genericType = ((ParameterizedTypeBinding) this.resolvedType).genericType();
-			ParameterizedTypeBinding parameterizedType = scope.environment().createParameterizedType(genericType, genericType.typeVariables(), genericType.enclosingType());
-			TypeBinding [] inferredTypes = inferElidedTypes(parameterizedType, this.resolvedType.enclosingType(), this.argumentTypes, scope);
-			if (inferredTypes == null)
-				return false;
-			allocationType = scope.environment().createParameterizedType(genericType, inferredTypes, ((ParameterizedTypeBinding) this.resolvedType).enclosingType());
+			MethodBinding method = this.solutionsPerTargetType != null ? this.solutionsPerTargetType.get(targetType) : null;
+			if (method == null) {
+				this.typeExpected = targetType;
+				method = inferConstructorOfElidedParameterizedType(scope); // caches result already.
+				if (method == null || !method.isValidBinding())
+					return false;
+			}
+			allocationType = method.declaringClass;
 		} finally {
 			this.typeExpected = originalExpectedType;
 		}
@@ -706,10 +687,21 @@ public boolean isCompatibleWith(TypeBinding targetType, final Scope scope) {
 	return allocationType != null && allocationType.isCompatibleWith(targetType, scope);
 }
 
-public MethodBinding inferConstructorOfElidedParameterizedType(ParameterizedTypeBinding allocationType, ReferenceBinding enclosingType, TypeBinding[] argumentTyps, final Scope scope) {
+public MethodBinding inferConstructorOfElidedParameterizedType(final Scope scope) {
+	if (this.typeExpected != null && this.binding != null) {
+		MethodBinding cached = this.solutionsPerTargetType != null ? this.solutionsPerTargetType.get(this.typeExpected) : null;
+		if (cached != null)
+			return cached;
+	}
+	ReferenceBinding genericType = ((ParameterizedTypeBinding) this.resolvedType).genericType();
+	ReferenceBinding enclosingType = this.resolvedType.enclosingType();
+	ParameterizedTypeBinding allocationType = scope.environment().createParameterizedType(genericType, genericType.typeVariables(), enclosingType);
+	
 	// Given the allocation type and the arguments to the constructor, see if we can infer the constructor of the elided parameterized type.
-	MethodBinding factory = scope.getStaticFactory(allocationType, enclosingType, argumentTyps, this);
+	MethodBinding factory = scope.getStaticFactory(allocationType, enclosingType, this.argumentTypes, this);
 	if (factory instanceof ParameterizedGenericMethodBinding && factory.isValidBinding()) {
+		ParameterizedGenericMethodBinding genericFactory = (ParameterizedGenericMethodBinding) factory;
+		this.inferredReturnType = genericFactory.inferredReturnType;
 		SyntheticFactoryMethodBinding sfmb = (SyntheticFactoryMethodBinding) factory.original();
 		TypeVariableBinding[] constructorTypeVariables = sfmb.getConstructor().typeVariables();
 		TypeBinding [] constructorTypeArguments = constructorTypeVariables != null ? new TypeBinding[constructorTypeVariables.length] : Binding.NO_TYPES;
@@ -718,21 +710,29 @@ public MethodBinding inferConstructorOfElidedParameterizedType(ParameterizedType
 												constructorTypeArguments, 0, constructorTypeArguments.length);
 		MethodBinding constructor = sfmb.applyTypeArgumentsOnConstructor(((ParameterizedTypeBinding)factory.returnType).arguments, constructorTypeArguments);
 		if (constructor instanceof ParameterizedGenericMethodBinding && scope.compilerOptions().sourceLevel >= ClassFileConstants.JDK1_8) {
-			// force an inference context to be established, but avoid tunneling through overload resolution. We know this is the MSMB.
-			return ParameterizedGenericMethodBinding.computeCompatibleMethod18(constructor.shallowOriginal(), argumentTyps, scope, this);
+			// force an inference context to be established for nested poly allocations (to be able to transfer b2), but avoid tunneling through overload resolution. We know this is the MSMB.
+			if (this.expressionContext == INVOCATION_CONTEXT && this.typeExpected == null)
+				constructor = ParameterizedGenericMethodBinding.computeCompatibleMethod18(constructor.shallowOriginal(), this.argumentTypes, scope, this);
 		}
+		if (this.typeExpected != null)
+			registerResult(this.typeExpected, constructor);
 		return constructor;
 	}
 	return null;
 }
 
-public TypeBinding[] inferElidedTypes(ParameterizedTypeBinding allocationType, ReferenceBinding enclosingType, TypeBinding[] argumentTyps, final Scope scope) {
+public TypeBinding[] inferElidedTypes(final Scope scope) {
+	
+	ReferenceBinding genericType = ((ParameterizedTypeBinding) this.resolvedType).genericType();
+	ReferenceBinding enclosingType = this.resolvedType.enclosingType();
+	ParameterizedTypeBinding allocationType = scope.environment().createParameterizedType(genericType, genericType.typeVariables(), enclosingType);
+	
 	/* Given the allocation type and the arguments to the constructor, see if we can synthesize a generic static factory
 	   method that would, given the argument types and the invocation site, manufacture a parameterized object of type allocationType.
 	   If we are successful then by design and construction, the parameterization of the return type of the factory method is identical
 	   to the types elided in the <>.
-	 */   
-	MethodBinding factory = scope.getStaticFactory(allocationType, enclosingType, argumentTyps, this);
+	*/
+	MethodBinding factory = scope.getStaticFactory(allocationType, enclosingType, this.argumentTypes, this);
 	if (factory instanceof ParameterizedGenericMethodBinding && factory.isValidBinding()) {
 		ParameterizedGenericMethodBinding genericFactory = (ParameterizedGenericMethodBinding) factory;
 		this.inferredReturnType = genericFactory.inferredReturnType;
@@ -741,12 +741,12 @@ public TypeBinding[] inferElidedTypes(ParameterizedTypeBinding allocationType, R
 	return null;
 }
 
-public void checkTypeArgumentRedundancy(ParameterizedTypeBinding allocationType, ReferenceBinding enclosingType, TypeBinding[] argumentTyps, final BlockScope scope) {
+public void checkTypeArgumentRedundancy(ParameterizedTypeBinding allocationType, final BlockScope scope) {
 	if ((scope.problemReporter().computeSeverity(IProblem.RedundantSpecificationOfTypeArguments) == ProblemSeverities.Ignore) || scope.compilerOptions().sourceLevel < ClassFileConstants.JDK1_7) return;
 	if (allocationType.arguments == null) return;  // raw binding
 	if (this.genericTypeArguments != null) return; // diamond can't occur with explicit type args for constructor
 	if (this.type == null) return;
-	if (argumentTyps == Binding.NO_PARAMETERS && this.typeExpected instanceof ParameterizedTypeBinding) {
+	if (this.argumentTypes == Binding.NO_PARAMETERS && this.typeExpected instanceof ParameterizedTypeBinding) {
 		ParameterizedTypeBinding expected = (ParameterizedTypeBinding) this.typeExpected;
 		if (expected.arguments != null && allocationType.arguments.length == expected.arguments.length) {
 			// check the case when no ctor takes no params and inference uses the expected type directly
@@ -768,7 +768,7 @@ public void checkTypeArgumentRedundancy(ParameterizedTypeBinding allocationType,
 		// checking for redundant type parameters must fake a diamond, 
 		// so we infer the same results as we would get with a diamond in source code:
 		this.type.bits |= IsDiamond;
-		inferredTypes = inferElidedTypes(allocationType, enclosingType, argumentTyps, scope);
+		inferredTypes = inferElidedTypes(scope);
 	} finally {
 		// reset effects of inference
 		this.type.bits = previousBits;
@@ -916,7 +916,7 @@ public boolean statementExpression() {
 }
 
 //-- interface Invocation: --
-public MethodBinding binding(TypeBinding targetType, Scope scope) {
+public MethodBinding binding() {
 	return this.binding;
 }
 public Expression[] arguments() {
@@ -928,6 +928,16 @@ public void registerInferenceContext(ParameterizedGenericMethodBinding method, I
 		this.inferenceContexts = new SimpleLookupTable();
 	this.inferenceContexts.put(method, infCtx18);
 }
+
+@Override
+public void registerResult(TypeBinding targetType, MethodBinding method) {
+	if (method != null && method.isConstructor()) { // ignore the factory.
+		if (this.solutionsPerTargetType == null)
+			this.solutionsPerTargetType = new HashMap<TypeBinding, MethodBinding>();
+		this.solutionsPerTargetType.put(targetType, method);
+	}
+}
+
 public InferenceContext18 getInferenceContext(ParameterizedMethodBinding method) {
 	if (this.inferenceContexts == null)
 		return null;

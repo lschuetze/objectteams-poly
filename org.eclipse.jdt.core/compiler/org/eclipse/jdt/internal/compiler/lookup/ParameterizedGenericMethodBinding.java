@@ -33,7 +33,6 @@ import org.eclipse.jdt.internal.compiler.ast.ReferenceExpression;
 import org.eclipse.jdt.internal.compiler.ast.Wildcard;
 import org.eclipse.jdt.internal.compiler.classfmt.ClassFileConstants;
 import org.eclipse.jdt.internal.compiler.impl.CompilerOptions;
-import org.eclipse.jdt.internal.compiler.lookup.InferenceContext18.Solution;
 import org.eclipse.objectteams.otdt.internal.core.compiler.lookup.AnchorMapping;
 import org.eclipse.objectteams.otdt.internal.core.compiler.lookup.DependentTypeBinding;
 import org.eclipse.objectteams.otdt.internal.core.compiler.lookup.ITeamAnchor;
@@ -188,8 +187,13 @@ public class ParameterizedGenericMethodBinding extends ParameterizedMethodBindin
 
 	public static MethodBinding computeCompatibleMethod18(MethodBinding originalMethod, TypeBinding[] arguments, final Scope scope, InvocationSite invocationSite) {
 		
-		ParameterizedGenericMethodBinding methodSubstitute = null;
 		TypeVariableBinding[] typeVariables = originalMethod.typeVariables;
+		if (invocationSite.checkingPotentialCompatibility()) {
+			// Not interested in a solution, only that there could potentially be one.
+			return scope.environment().createParameterizedGenericMethod(originalMethod, typeVariables);
+		}
+		
+		ParameterizedGenericMethodBinding methodSubstitute = null;
 		InferenceContext18 infCtx18 = invocationSite.freshInferenceContext(scope);
 		TypeBinding[] parameters = originalMethod.parameters;
 		CompilerOptions compilerOptions = scope.compilerOptions();
@@ -232,15 +236,13 @@ public class ParameterizedGenericMethodBinding extends ParameterizedMethodBindin
 				return null;
 			if (infCtx18.isResolved(result)) {
 				infCtx18.stepCompleted = InferenceContext18.APPLICABILITY_INFERRED;
-				if (invocationSite instanceof ReferenceExpression)
-					((ReferenceExpression) invocationSite).inferenceKind = infCtx18.inferenceKind;
 			} else {
 				return null;
 			}
 			// Applicability succeeded, proceed to infer invocation type, if possible.
 			TypeBinding expectedType = invocationSite.invocationTargetType();
 			boolean hasReturnProblem = false;
-			if (expectedType != null || !invocationSite.getExpressionContext().definesTargetType()) {
+			if (expectedType != null || !invocationSite.getExpressionContext().definesTargetType() || !isPolyExpression) {
 				// ---- 18.5.2 (Invocation type): ----
 				provisionalResult = result;
 				result = infCtx18.inferInvocationType(expectedType, invocationSite, originalMethod);
@@ -264,6 +266,8 @@ public class ParameterizedGenericMethodBinding extends ParameterizedMethodBindin
 					}
 //SH}
 					methodSubstitute = scope.environment().createParameterizedGenericMethod(originalMethod, solutions);
+					if (invocationSite instanceof Invocation)
+						infCtx18.forwardResults(result, (Invocation) invocationSite, methodSubstitute, expectedType);
 					if (hasReturnProblem) { // illegally working from the provisional result?
 						MethodBinding problemMethod = infCtx18.getReturnProblemMethodIfNeeded(expectedType, methodSubstitute);
 						if (problemMethod instanceof ProblemMethodBinding) {
@@ -282,12 +286,13 @@ public class ParameterizedGenericMethodBinding extends ParameterizedMethodBindin
 						if (problemMethod != null) {
 							return problemMethod;
 						}
-						infCtx18.solutionsPerTargetType.put(expectedType, new Solution(methodSubstitute, result));
 					} else {
 						methodSubstitute = new PolyParameterizedGenericMethodBinding(methodSubstitute);
 					}
 					if (invocationSite instanceof Invocation)
 						((Invocation) invocationSite).registerInferenceContext(methodSubstitute, infCtx18); // keep context so we can finish later
+					else if (invocationSite instanceof ReferenceExpression)
+						((ReferenceExpression) invocationSite).registerInferenceContext(methodSubstitute, infCtx18); // keep context so we can finish later
 					return methodSubstitute; 
 				}
 			}

@@ -1240,4 +1240,34 @@ protected void verifyDuplicationAndOrder(int length, TypeBinding[] argumentTypes
 		}
 	}
 }
+@Override
+public boolean doesNotCompleteNormally() {
+	if (!this.tryBlock.doesNotCompleteNormally()) {
+		return (this.finallyBlock != null) ? this.finallyBlock.doesNotCompleteNormally() : false;
+	}
+	if (this.catchBlocks != null) {
+		for (int i = 0; i < this.catchBlocks.length; i++) {
+			if (!this.catchBlocks[i].doesNotCompleteNormally()) {
+				return (this.finallyBlock != null) ? this.finallyBlock.doesNotCompleteNormally() : false;
+			}
+		}
+	}
+	return true;
+}
+@Override
+public boolean completesByContinue() {
+	if (this.tryBlock.completesByContinue()) {
+		return (this.finallyBlock == null) ? true :
+			!this.finallyBlock.doesNotCompleteNormally() || this.finallyBlock.completesByContinue(); 
+	}
+	if (this.catchBlocks != null) {
+		for (int i = 0; i < this.catchBlocks.length; i++) {
+			if (this.catchBlocks[i].completesByContinue()) {
+				return (this.finallyBlock == null) ? true :
+					!this.finallyBlock.doesNotCompleteNormally() || this.finallyBlock.completesByContinue();
+			}
+		}
+	}
+	return this.finallyBlock != null && this.finallyBlock.completesByContinue();
+}
 }

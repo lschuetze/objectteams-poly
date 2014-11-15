@@ -12,8 +12,9 @@
  *     Technical University Berlin - extended API and implementation
  *     Stephan Herrmann - Contributions for
  *								bug 365662 - [compiler][null] warn on contradictory and redundant null annotations
- *								bug 401030 - [1.8][null] Null analysis support for lambda methods. 
+ *								bug 401030 - [1.8][null] Null analysis support for lambda methods.
  *								Bug 429958 - [1.8][null] evaluate new DefaultLocation attribute of @NonNullByDefault
+ *								Bug 435805 - [1.8][compiler][null] Java 8 compiler does not recognize declaration style null annotations 
  *******************************************************************************/
 package org.eclipse.jdt.internal.compiler.lookup;
 
@@ -132,13 +133,13 @@ public ReferenceBinding anonymousOriginalSuperType() {
 	return this.superclass; // default answer
 }
 
-protected void checkRedundantNullnessDefaultRecurse(ASTNode location, Annotation[] annotations, long nullBits, boolean isJdk18) {
+protected void checkRedundantNullnessDefaultRecurse(ASTNode location, Annotation[] annotations, long nullBits, boolean useNullTypeAnnotations) {
 	
 	if (!isPrototype()) throw new IllegalStateException();
 	
 	long outerDefault = 0;
 	if (this.enclosingMethod != null) {
-		outerDefault = isJdk18 
+		outerDefault = useNullTypeAnnotations 
 				? this.enclosingMethod.defaultNullness 
 				: this.enclosingMethod.tagBits & (TagBits.AnnotationNonNullByDefault|TagBits.AnnotationNullUnspecifiedByDefault);
 	}
@@ -148,7 +149,7 @@ protected void checkRedundantNullnessDefaultRecurse(ASTNode location, Annotation
 		}
 		return;
 	}
-	super.checkRedundantNullnessDefaultRecurse(location, annotations, nullBits, isJdk18);
+	super.checkRedundantNullnessDefaultRecurse(location, annotations, nullBits, useNullTypeAnnotations);
 }
 
 public char[] computeUniqueKey(boolean isLeaf) {

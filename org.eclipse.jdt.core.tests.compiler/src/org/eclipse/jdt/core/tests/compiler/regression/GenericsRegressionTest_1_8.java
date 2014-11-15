@@ -467,10 +467,15 @@ public void testBug401850a() {
 			"}\n"
 		},
 		"----------\n" + 
-		"1. ERROR in X.java (at line 7)\n" + 
-		"	int i = m(new X<>(\"\"));\n" + 
-		"	          ^^^^^^^^^^^\n" + 
-		"The constructor X<String>(String) is ambiguous\n" + 
+		"1. WARNING in X.java (at line 1)\n" + 
+		"	import java.util.List;\n" + 
+		"	       ^^^^^^^^^^^^^^\n" + 
+		"The import java.util.List is never used\n" + 
+		"----------\n" + 
+		"2. WARNING in X.java (at line 2)\n" + 
+		"	import java.util.ArrayList;\n" + 
+		"	       ^^^^^^^^^^^^^^^^^^^\n" + 
+		"The import java.util.ArrayList is never used\n" + 
 		"----------\n");
 }
 public void testBug401850b() {
@@ -607,7 +612,6 @@ public void testBug424712a() {
 			"    }\n" + 
 			"}\n"
 		},
-		// The extra error with <unknown> reads a bit weird.
 		"----------\n" + 
 		"1. ERROR in X.java (at line 12)\n" + 
 		"	Set<Y> rosterSet = (Set<Y>) foo(null, Set::new);\n" + 
@@ -620,16 +624,6 @@ public void testBug424712a() {
 		"Y cannot be resolved to a type\n" + 
 		"----------\n" + 
 		"3. ERROR in X.java (at line 12)\n" + 
-		"	Set<Y> rosterSet = (Set<Y>) foo(null, Set::new);\n" + 
-		"	                            ^^^^^^^^^^^^^^^^^^^\n" + 
-		"Type mismatch: cannot convert from Collection<Object> to <unknown>\n" + 
-		"----------\n" + 
-		"4. ERROR in X.java (at line 12)\n" + 
-		"	Set<Y> rosterSet = (Set<Y>) foo(null, Set::new);\n" + 
-		"	                                      ^^^^^^^^\n" + 
-		"The target type of this expression must be a functional interface\n" + 
-		"----------\n" + 
-		"5. ERROR in X.java (at line 12)\n" + 
 		"	Set<Y> rosterSet = (Set<Y>) foo(null, Set::new);\n" + 
 		"	                                      ^^^\n" + 
 		"Cannot instantiate the type Set\n" + 
@@ -1687,11 +1681,6 @@ public void testBug424930c() {
 		"----------\n" + 
 		"1. ERROR in X.java (at line 14)\n" + 
 		"	return new X<>(() -> new ArrayDeque<>(dequeCapacity));\n" + 
-		"	       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n" + 
-		"The constructor X<S,Deque<S>>(() -> {}) is undefined\n" + 
-		"----------\n" + 
-		"2. ERROR in X.java (at line 14)\n" + 
-		"	return new X<>(() -> new ArrayDeque<>(dequeCapacity));\n" + 
 		"	                                      ^^^^^^^^^^^^^\n" + 
 		"Cannot make a static reference to the non-static field dequeCapacity\n" + 
 		"----------\n");
@@ -1748,7 +1737,12 @@ public void testBug427164() {
 			"}\n"
 		},
 		"----------\n" + 
-		"1. ERROR in NNLambda.java (at line 13)\n" + 
+		"1. ERROR in NNLambda.java (at line 1)\n" + 
+		"	printem((i) -> {\n" + 
+		"	^^^^^^^\n" + 
+		"The method printem(FInter, INP) in the type NNLambda is not applicable for the arguments (FInter, String)\n" + 
+		"----------\n" + 
+		"2. ERROR in NNLambda.java (at line 13)\n" + 
 		"	Collections.<String>singletonList(\"const\")\n" + 
 		"	                                         ^\n" + 
 		"Syntax error, insert \";\" to complete BlockStatements\n" + 
@@ -2653,8 +2647,7 @@ public void testBug429430a() {
 		"----------\n");
 }
 // one of two incompatible exceptions is caught
-// FIXME: should be possible to infer X to EmptyStream
-public void _testBug429430b() {
+public void testBug429430b() {
 	runConformTest(
 		new String[] {
 			"Main.java",
@@ -2680,6 +2673,45 @@ public void _testBug429430b() {
 			"  }\n" +
 			"}\n"
 		});
+}
+public void testBug429430b2() {
+	runNegativeTest(
+		new String[] {
+			"X.java",
+			"import java.io.*;\n" +
+			"@SuppressWarnings(\"serial\") class EmptyStream extends Exception {}\n" +
+			"public class X {\n" +
+			"  public static interface Closer<T, V extends Exception> {\n" +
+			"    void closeIt(T it) throws V;\n" +
+			"  }\n" +
+			"\n" +
+			"  public static void close( Closer<InputStream, EmptyStream> closer, InputStream it ) throws EmptyStream {\n" +
+			"    closer.closeIt(it);\n" +
+			"  }\n" +
+			"\n" +
+			"  public static void main(String[] args) throws EmptyStream {\n" +
+			"    InputStream in = new ByteArrayInputStream(\"hello\".getBytes());\n" +
+			"    close( x ->  {\n" +
+			"			if (x == null)\n" +
+			"				throw new IOException();\n" +
+			"			else \n" +
+			"				throw new EmptyStream(); \n" +
+			"		},\n" +
+			"		in);\n" +
+			"  }\n" +
+			"}\n"
+		},
+		"----------\n" + 
+		"1. ERROR in X.java (at line 16)\n" + 
+		"	throw new IOException();\n" + 
+		"	^^^^^^^^^^^^^^^^^^^^^^^^\n" + 
+		"Unhandled exception type IOException\n" + 
+		"----------\n" + 
+		"2. WARNING in X.java (at line 18)\n" + 
+		"	throw new EmptyStream(); \n" + 
+		"	^^^^^^^^^^^^^^^^^^^^^^^^\n" + 
+		"Statement unnecessarily nested within else clause. The corresponding then clause does not complete normally\n" + 
+		"----------\n");
 }
 // ensure type annotation on exception doesn't confuse the inference
 public void testBug429430c() {
@@ -2763,7 +2795,7 @@ public void testBug429424() {
 			"\n"
 		});
 }
-public void _testBug426537() {
+public void testBug426537() {
 	runNegativeTest(
 		new String[] {
 			"X.java",
@@ -2900,15 +2932,18 @@ public void testBug430296() {
 		"----------\n" + 
 		"1. ERROR in AnnotationCollector.java (at line 9)\n" + 
 		"	return persons.collect(Collectors.toMap((Person p) -> p.getLastName(),\n" + 
-		"                                                                Function::identity,\n" + 
-		"                                                        (p1, p2) -> p1));\n" + 
-		"	       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n" + 
-		"Type mismatch: cannot convert from Map<String,Object> to Map<String,Person>\n" + 
+		"	                                  ^^^^^\n" + 
+		"The method toMap(Function<? super T,? extends K>, Function<? super T,? extends U>, BinaryOperator<U>) in the type Collectors is not applicable for the arguments ((Person p) -> {}, Function::identity, BinaryOperator<U>)\n" + 
 		"----------\n" + 
-		"2. ERROR in AnnotationCollector.java (at line 10)\n" + 
+		"2. ERROR in AnnotationCollector.java (at line 9)\n" + 
+		"	return persons.collect(Collectors.toMap((Person p) -> p.getLastName(),\n" + 
+		"	                                        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n" + 
+		"Type mismatch: cannot convert from Function<Person,? extends K> to Function<? super T,? extends K>\n" + 
+		"----------\n" + 
+		"3. ERROR in AnnotationCollector.java (at line 10)\n" + 
 		"	Function::identity,\n" + 
 		"	^^^^^^^^^^^^^^^^^^\n" + 
-		"The type Function does not define identity(Person) that is applicable here\n" + 
+		"The type Function does not define identity(T) that is applicable here\n" + 
 		"----------\n");
 }
 public void testBug430759() {
@@ -4791,5 +4826,98 @@ public void test447767() {
 			"}\n",
 		}, 
 		"Here");
+}
+// https://bugs.eclipse.org/bugs/show_bug.cgi?id=426633, [1.8][compiler] Compiler generates code that invokes inapplicable method.
+public void test426633c() {
+	runNegativeTest(
+		new String[] {
+			"X.java",
+			"interface I {\n" +
+			"	 default <T> void foo (T... p) {}\n" +
+			"}\n" +
+			"abstract class A  {\n" +
+			"	public abstract void foo(Object [] p);\n" +
+			"}\n" +
+			"abstract class B extends A implements I {\n" +
+			"}\n" +
+			"public abstract class X extends B implements I {\n" +
+			"	public static void main(B b) {\n" +
+			"		b.foo(\"hello\", \"world\");\n" +
+			"	}\n" +
+			"}\n"
+		},
+		"----------\n" + 
+		"1. WARNING in X.java (at line 2)\n" + 
+		"	default <T> void foo (T... p) {}\n" + 
+		"	                           ^\n" + 
+		"Type safety: Potential heap pollution via varargs parameter p\n" + 
+		"----------\n");
+}
+// https://bugs.eclipse.org/bugs/show_bug.cgi?id=426633, [1.8][compiler] Compiler generates code that invokes inapplicable method.
+public void test426633d() {
+	runNegativeTest(
+		new String[] {
+			"X.java",
+			"interface I {\n" +
+			"	 default <T> void foo (T... p) {}\n" +
+			"}\n" +
+			"abstract class A  {\n" +
+			"	public void foo(Object [] p) {}\n" +
+			"}\n" +
+			"abstract class B extends A implements I {\n" +
+			"}\n" +
+			"public abstract class X extends B implements I {\n" +
+			"	public static void main(B b) {\n" +
+			"		b.foo(\"hello\", \"world\");\n" +
+			"	}\n" +
+			"}\n"
+		},
+		"----------\n" + 
+		"1. WARNING in X.java (at line 2)\n" + 
+		"	default <T> void foo (T... p) {}\n" + 
+		"	                           ^\n" + 
+		"Type safety: Potential heap pollution via varargs parameter p\n" + 
+		"----------\n" + 
+		"2. WARNING in X.java (at line 7)\n" + 
+		"	abstract class B extends A implements I {\n" + 
+		"	               ^\n" + 
+		"Varargs methods should only override or be overridden by other varargs methods unlike A.foo(Object[]) and I.foo(Object...)\n" + 
+		"----------\n" + 
+		"3. WARNING in X.java (at line 9)\n" + 
+		"	public abstract class X extends B implements I {\n" + 
+		"	                      ^\n" + 
+		"Varargs methods should only override or be overridden by other varargs methods unlike A.foo(Object[]) and I.foo(Object...)\n" + 
+		"----------\n" + 
+		"4. ERROR in X.java (at line 11)\n" + 
+		"	b.foo(\"hello\", \"world\");\n" + 
+		"	  ^^^\n" + 
+		"The method foo(T...) of type I cannot be invoked as it is overridden by an inapplicable method\n" + 
+		"----------\n");
+}
+// https://bugs.eclipse.org/bugs/show_bug.cgi?id=426633, [1.8][compiler] Compiler generates code that invokes inapplicable method.
+public void test426633e() {
+	runNegativeTest(
+		new String[] {
+			"X.java",
+			"interface I {\n" +
+			"	 default <T> void foo (T... p) {}\n" +
+			"}\n" +
+			"abstract class A  {\n" +
+			"	public void foo(String [] p) {}\n" +
+			"}\n" +
+			"abstract class B extends A implements I {\n" +
+			"}\n" +
+			"public abstract class X extends B implements I {\n" +
+			"	public static void main(B b) {\n" +
+			"		b.foo(\"hello\", \"world\");\n" +
+			"	}\n" +
+			"}\n"
+		},
+		"----------\n" + 
+		"1. WARNING in X.java (at line 2)\n" + 
+		"	default <T> void foo (T... p) {}\n" + 
+		"	                           ^\n" + 
+		"Type safety: Potential heap pollution via varargs parameter p\n" + 
+		"----------\n");
 }
 }

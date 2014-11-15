@@ -50,6 +50,17 @@ class ConstraintExpressionFormula extends ConstraintFormula {
 	}
 
 	public Object reduce(InferenceContext18 inferenceContext) throws InferenceFailureException {
+		
+		if (this.relation == POTENTIALLY_COMPATIBLE) {
+			/* 15.12.2.1: ... The definition of potential applicability goes beyond a basic arity check to also take into account the presence and "shape" of functional interface 
+			   target types. In some cases involving type argument inference, a lambda expression appearing as a method invocation argument cannot be properly typed until after 
+			   overload resolution. These rules allow the form of the lambda expression to still be taken into account, discarding obviously incorrect target types that might 
+			   otherwise cause ambiguity errors.
+			*/
+			
+			return  this.left.isPotentiallyCompatibleWith(this.right, inferenceContext.scope) ? TRUE: FALSE;
+		}
+	
 		// JLS 18.2.1
 		if (this.right.isProperType(true)) {
 			return this.left.isCompatibleWith(this.right, inferenceContext.scope) || this.left.isBoxingCompatibleWith(this.right, inferenceContext.scope) ? TRUE : FALSE;
@@ -64,7 +75,7 @@ class ConstraintExpressionFormula extends ConstraintFormula {
 			// - parenthesized expression : these are transparent in our AST
 			if (this.left instanceof Invocation) {
 				Invocation invocation = (Invocation) this.left;
-				MethodBinding previousMethod = invocation.binding(this.right, inferenceContext.scope);
+				MethodBinding previousMethod = invocation.binding();
 				if (previousMethod == null)  	// can happen, e.g., if inside a copied lambda with ignored errors
 					return null; 				// -> proceed with no new constraints
 				MethodBinding method = previousMethod;
@@ -144,7 +155,7 @@ class ConstraintExpressionFormula extends ConstraintFormula {
 					for (int i = 0; i < parameters.length; i++)
 						if (!parameters[i].isProperType(true))
 							return FALSE;
-				lambda = lambda.getResolvedCopyForInferenceTargeting(t);
+				lambda = lambda.resolveExpressionExpecting(t, inferenceContext.scope);
 				if (lambda == null)
 					return FALSE; // not strictly unreduceable, but proceeding with TRUE would likely produce secondary errors
 				if (functionType.returnType == TypeBinding.VOID) {
@@ -158,7 +169,7 @@ class ConstraintExpressionFormula extends ConstraintFormula {
 				if (!lambda.argumentsTypeElided()) {
 					Argument[] arguments = lambda.arguments();
 					for (int i = 0; i < parameters.length; i++)
-						result.add(ConstraintTypeFormula.create(parameters[i], arguments[i].type.resolveType(lambda.enclosingScope), SAME));
+						result.add(ConstraintTypeFormula.create(parameters[i], arguments[i].type.resolvedType, SAME));
 					// in addition, ⟨T' <: T⟩:
 					if (lambda.resolvedType != null)
 						result.add(ConstraintTypeFormula.create(lambda.resolvedType, this.right, SUBTYPE));
@@ -227,7 +238,8 @@ class ConstraintExpressionFormula extends ConstraintFormula {
 		if (functionType == null)
 			return FALSE;
 		// potentially-applicable method for the method reference when targeting T (15.13.1),
-		MethodBinding potentiallyApplicable = reference.findCompileTimeMethodTargeting(t, inferenceContext.scope);
+		reference = reference.resolveExpressionExpecting(t, inferenceContext.scope);
+		MethodBinding potentiallyApplicable = reference != null ? reference.binding : null;
 		if (potentiallyApplicable == null)
 			return FALSE;
 		if (reference.isExactMethodReference()) {
@@ -248,7 +260,7 @@ class ConstraintExpressionFormula extends ConstraintFormula {
 				TypeBinding rAppl = potentiallyApplicable.isConstructor() && !reference.isArrayConstructorReference() ? potentiallyApplicable.declaringClass : potentiallyApplicable.returnType;
 				if (rAppl == TypeBinding.VOID)
 					return FALSE;
-				TypeBinding rPrime = rAppl.capture(inferenceContext.scope, reference.sourceEnd);
+				TypeBinding rPrime = rAppl.capture(inferenceContext.scope, reference.sourceStart, reference.sourceEnd);
 				newConstraints.add(ConstraintTypeFormula.create(rPrime, r, COMPATIBLE));
 			}
 			return newConstraints.toArray(new ConstraintFormula[newConstraints.size()]);
@@ -279,7 +291,9 @@ class ConstraintExpressionFormula extends ConstraintFormula {
 
 				// Invocation Applicability Inference: 18.5.1 & Invocation Type Inference: 18.5.2
 				try {
-					inferInvocationApplicability(inferenceContext, original, functionType.parameters, original.isConstructor()/*mimic a diamond?*/, reference.inferenceKind);
+					InferenceContext18 innerContex = reference.getInferenceContext((ParameterizedMethodBinding) compileTimeDecl);
+					int innerInferenceKind = innerContex != null ? innerContex.inferenceKind : InferenceContext18.CHECK_STRICT;
+					inferInvocationApplicability(inferenceContext, original, functionType.parameters, original.isConstructor()/*mimic a diamond?*/, innerInferenceKind);
 					if (!inferPolyInvocationType(inferenceContext, reference, r, original))
 						return FALSE;
 					if (!original.isConstructor() 
@@ -293,7 +307,7 @@ class ConstraintExpressionFormula extends ConstraintFormula {
 					inferenceContext.resumeSuspendedInference(prevInvocation);
 				}
 			}
-			TypeBinding rPrime = compileTimeDecl.isConstructor() ? compileTimeDecl.declaringClass : compileTimeDecl.returnType.capture(inferenceContext.scope, reference.sourceEnd());
+			TypeBinding rPrime = compileTimeDecl.isConstructor() ? compileTimeDecl.declaringClass : compileTimeDecl.returnType.capture(inferenceContext.scope, reference.sourceStart(), reference.sourceEnd());
 			if (rPrime.id == TypeIds.T_void)
 				return FALSE;
 			return ConstraintTypeFormula.create(rPrime, r, COMPATIBLE, this.isSoft);
@@ -358,7 +372,7 @@ class ConstraintExpressionFormula extends ConstraintFormula {
 						parameterizedType.genericType(), betas, parameterizedType.enclosingType(), parameterizedType.getTypeAnnotations());
 				inferenceContext.currentBounds.captures.put(gbeta, parameterizedType); // established: both types have nonnull arguments
 				if (InferenceContext18.SHOULD_WORKAROUND_BUG_JDK_8054721) {
-					parameterizedType = parameterizedType.capture(inferenceContext.scope, invocationSite.sourceEnd());
+					parameterizedType = parameterizedType.capture(inferenceContext.scope, invocationSite.sourceStart(), invocationSite.sourceEnd());
 					arguments = parameterizedType.arguments;
 					for (int i = 0, length = arguments.length; i < length; i++) {
 						if (arguments[i].isCapture() && arguments[i].isProperType(true)) {
@@ -387,7 +401,7 @@ class ConstraintExpressionFormula extends ConstraintFormula {
 					BoundSet solution = inferenceContext.solve(new InferenceVariable[]{alpha});
 					if (solution == null)
 						return false;
-					TypeBinding u = solution.getInstantiation(alpha, null).capture(inferenceContext.scope, invocationSite.sourceEnd());
+					TypeBinding u = solution.getInstantiation(alpha, null).capture(inferenceContext.scope, invocationSite.sourceStart(), invocationSite.sourceEnd());
 					if (rTheta.dimensions() != 0) {
 						u = inferenceContext.environment.createArrayType(u, rTheta.dimensions());
 					}
@@ -422,7 +436,7 @@ class ConstraintExpressionFormula extends ConstraintFormula {
 				if (sam.returnType != TypeBinding.VOID) {
 					// ii)
 					final TypeBinding r = sam.returnType;
-					LambdaExpression resolved = lambda.getResolvedCopyForInferenceTargeting(this.right);
+					LambdaExpression resolved = lambda.resolveExpressionExpecting(this.right, context.scope);
 					Expression[] resultExpressions = resolved != null ? resolved.resultExpressions() : null;
 					for (int i = 0, length = resultExpressions == null ? 0 : resultExpressions.length; i < length; i++) {
 						variables.addAll(new ConstraintExpressionFormula(resultExpressions[i], r, COMPATIBLE).inputVariables(context));

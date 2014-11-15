@@ -29,6 +29,7 @@
  *								Bug 438458 - [1.8][null] clean up handling of null type annotations wrt type variables
  *								Bug 439516 - [1.8][null] NonNullByDefault wrongly applied to implicit type bound of binary type
  *								Bug 434602 - Possible error with inferred null annotations leading to contradictory null annotations
+ *								Bug 435805 - [1.8][compiler][null] Java 8 compiler does not recognize declaration style null annotations
  *******************************************************************************/
 package org.eclipse.jdt.internal.compiler.lookup;
 
@@ -665,7 +666,7 @@ public TypeBinding computeBoxingType(TypeBinding type) {
 			break;
 		case Binding.POLY_TYPE:
 			return ((PolyTypeBinding) type).computeBoxingType();
-		case Binding.INTERSECTION_CAST_TYPE:
+		case Binding.INTERSECTION_TYPE18:
 			return computeBoxingType(type.getIntersectingTypes()[0]);
 	}
 	return type;
@@ -902,8 +903,8 @@ public ArrayBinding createArrayType(TypeBinding leafComponentType, int dimension
 	return this.typeSystem.getArrayType(leafComponentType, dimensionCount, annotations);
 }
 
-public TypeBinding createIntersectionCastType(ReferenceBinding[] intersectingTypes) {
-	return this.typeSystem.getIntersectionCastType(intersectingTypes);
+public TypeBinding createIntersectionType18(ReferenceBinding[] intersectingTypes) {
+	return this.typeSystem.getIntersectionType18(intersectingTypes);
 }	
 
 public BinaryTypeBinding createBinaryTypeFrom(IBinaryType binaryType, PackageBinding packageBinding, AccessRestriction accessRestriction) {
@@ -1252,8 +1253,8 @@ public WildcardBinding createWildcard(ReferenceBinding genericType, int rank, Ty
 	return this.typeSystem.getWildcard(genericType, rank, bound, otherBounds, boundKind);
 }
 
-public CaptureBinding createCapturedWildcard(WildcardBinding wildcard, ReferenceBinding contextType, int position, ASTNode cud, int id) {
-	return this.typeSystem.getCapturedWildcard(wildcard, contextType, position, cud, id);
+public CaptureBinding createCapturedWildcard(WildcardBinding wildcard, ReferenceBinding contextType, int start, int end, ASTNode cud, int id) {
+	return this.typeSystem.getCapturedWildcard(wildcard, contextType, start, end, cud, id);
 }
 
 public WildcardBinding createWildcard(ReferenceBinding genericType, int rank, TypeBinding bound, TypeBinding[] otherBounds, int boundKind, AnnotationBinding [] annotations) {
@@ -1321,6 +1322,28 @@ public char[][] getNonNullAnnotationName() {
 
 public char[][] getNonNullByDefaultAnnotationName() {
 	return this.globalOptions.nonNullByDefaultAnnotationName;
+}
+
+public boolean usesNullTypeAnnotations() {
+	if (this.globalOptions.useNullTypeAnnotations != null)
+		return this.globalOptions.useNullTypeAnnotations;
+
+	this.globalOptions.useNullTypeAnnotations = Boolean.FALSE;
+	if (!this.globalOptions.isAnnotationBasedNullAnalysisEnabled || this.globalOptions.sourceLevel < ClassFileConstants.JDK1_8)
+		return false;
+	ReferenceBinding nullable = this.nullableAnnotation != null ? this.nullableAnnotation.getAnnotationType() : getType(this.getNullableAnnotationName());
+	ReferenceBinding nonNull = this.nonNullAnnotation != null ? this.nonNullAnnotation.getAnnotationType() : getType(this.getNonNullAnnotationName());
+	if (nullable == null && nonNull == null)
+		return false;
+	if (nullable == null || nonNull == null)
+		return false; // TODO should report an error about inconsistent setup
+	long nullableMetaBits = nullable.getAnnotationTagBits() & TagBits.AnnotationForTypeUse;
+	long nonNullMetaBits = nonNull.getAnnotationTagBits() & TagBits.AnnotationForTypeUse;
+	if (nullableMetaBits != nonNullMetaBits)
+		return false; // TODO should report an error about inconsistent setup
+	if (nullableMetaBits == 0)
+		return false;
+	return this.globalOptions.useNullTypeAnnotations = Boolean.TRUE;
 }
 
 /* Answer the top level package named name if it exists in the cache.

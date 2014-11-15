@@ -31,6 +31,7 @@
  *								Bug 417758 - [1.8][null] Null safety compromise during array creation.
  *								Bug 427438 - [1.8][compiler] NPE at org.eclipse.jdt.internal.compiler.ast.ConditionalExpression.generateCode(ConditionalExpression.java:280)
  *								Bug 430150 - [1.8][null] stricter checking against type variables
+ *								Bug 435805 - [1.8][compiler][null] Java 8 compiler does not recognize declaration style null annotations
  *     Jesper S Moller - Contributions for
  *								bug 382701 - [1.8][compiler] Implement semantic analysis of Lambda expressions & Reference expression
  *******************************************************************************/
@@ -39,7 +40,6 @@ package org.eclipse.jdt.internal.compiler.ast;
 import static org.eclipse.jdt.internal.compiler.ast.ExpressionContext.ASSIGNMENT_CONTEXT;
 
 import org.eclipse.jdt.internal.compiler.ASTVisitor;
-import org.eclipse.jdt.internal.compiler.classfmt.ClassFileConstants;
 import org.eclipse.jdt.internal.compiler.codegen.*;
 import org.eclipse.jdt.internal.compiler.flow.*;
 import org.eclipse.jdt.internal.compiler.impl.Constant;
@@ -184,11 +184,15 @@ public FlowInfo analyseCode(BlockScope currentScope, FlowContext flowContext, Fl
 	flowContext.recordAbruptExit();
 	return FlowInfo.DEAD_END;
 }
+@Override
+public boolean doesNotCompleteNormally() {
+	return true;
+}
 void checkAgainstNullAnnotation(BlockScope scope, FlowContext flowContext, FlowInfo flowInfo) {
 	int nullStatus = this.expression.nullStatus(flowInfo, flowContext);
 	long tagBits;
 	MethodBinding methodBinding = null;
-	boolean useTypeAnnotations = scope.compilerOptions().sourceLevel >= ClassFileConstants.JDK1_8;
+	boolean useTypeAnnotations = scope.environment().usesNullTypeAnnotations();
 	try {
 		methodBinding = scope.methodScope().referenceMethodBinding();
 		tagBits = (useTypeAnnotations) ? methodBinding.returnType.tagBits : methodBinding.tagBits;

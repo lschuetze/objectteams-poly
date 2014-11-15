@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2012 IBM Corporation and others.
+ * Copyright (c) 2000, 2014 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -17,7 +17,7 @@ public interface ParserBasicInformation {
 
       ERROR_SYMBOL      = 138,
       MAX_NAME_LENGTH   = 41,
-      NUM_STATES        = 1361,
+      NUM_STATES        = 1360,
 
       NT_OFFSET         = 138,
       SCOPE_UBOUND      = 371,

@@ -28,6 +28,7 @@ import org.eclipse.jdt.internal.compiler.ast.MessageSend;
 import org.eclipse.jdt.internal.compiler.impl.ReferenceContext;
 import org.eclipse.jdt.internal.compiler.lookup.MethodBinding;
 import org.eclipse.jdt.internal.compiler.lookup.ProblemMethodBinding;
+import org.eclipse.jdt.internal.compiler.lookup.Scope;
 import org.eclipse.jdt.internal.compiler.problem.ProblemReporter;
 import org.eclipse.objectteams.otdt.core.compiler.IOTConstants;
 import org.eclipse.objectteams.otdt.internal.core.compiler.ast.BaseCallMessageSend;
@@ -104,7 +105,7 @@ public class BaseCallProblemReporterWrapper extends ProblemReporterWrapper
 		}
 
 	}
-	public void invalidMethod(MessageSend messageSend, MethodBinding method) {
+	public void invalidMethod(MessageSend messageSend, MethodBinding method, Scope scope) {
 		ProblemMethodBinding problemMethod = (ProblemMethodBinding) method;
 		AbstractMethodDeclaration enclosingMethodDecl = ((AbstractMethodDeclaration)this.referenceContext);
 		if (enclosingMethodDecl.ignoreFurtherInvestigation)

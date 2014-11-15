@@ -189,6 +189,9 @@ public abstract class Expression extends Statement {
 
 	public int implicitConversion;
 	public TypeBinding resolvedType;
+	
+	static Expression [] NO_EXPRESSIONS = new Expression[0];
+	
 
 public static final boolean isConstantValueRepresentable(Constant constant, int constantTypeID, int targetTypeID) {
 	//true if there is no loss of precision while casting.
@@ -438,7 +441,7 @@ public final boolean checkCastTypesCompatibility(
 		return true;
 	}
 
-	if (castType.isIntersectionCastType()) {
+	if (castType.isIntersectionType18()) {
 		ReferenceBinding [] intersectingTypes = castType.getIntersectingTypes();
 		for (int i = 0, length = intersectingTypes.length; i < length; i++) {
 			if (!checkCastTypesCompatibility(scope, intersectingTypes[i], expressionType, expression))
@@ -521,7 +524,7 @@ public final boolean checkCastTypesCompatibility(
 			if (bound == null) bound = scope.getJavaLangObject();
 			// recursively on the type variable upper bound
 			return checkCastTypesCompatibility(scope, castType, bound, expression);
-		case Binding.INTERSECTION_CAST_TYPE:
+		case Binding.INTERSECTION_TYPE18:
 			ReferenceBinding [] intersectingTypes = expressionType.getIntersectingTypes();
 			for (int i = 0, length = intersectingTypes.length; i < length; i++) {
 				if (checkCastTypesCompatibility(scope, castType, intersectingTypes[i], expression))
@@ -835,6 +838,9 @@ public void computeConversion(Scope scope, TypeBinding runtimeType, TypeBinding 
 		TypeBinding boxedType = scope.environment().computeBoxingType(runtimeType);
 		if (TypeBinding.equalsEquals(boxedType, runtimeType)) // Object o = 12;
 			boxedType = compileTimeType;
+		if (boxedType.id >= TypeIds.T_LastWellKnownTypeId) {  // (Comparable & Serializable) 0
+			boxedType = compileTimeType;
+		}
 		this.implicitConversion = TypeIds.BOXING | (boxedType.id << 4) + compileTimeType.id;
 		scope.problemReporter().autoboxing(this, compileTimeType, scope.environment().computeBoxingType(boxedType));
 		return;
@@ -1097,14 +1103,6 @@ public boolean isConstantValueOfTypeAssignableToType(TypeBinding constantType, T
 	return false;
 }
 
-public boolean isAssignmentCompatible (TypeBinding left, Scope scope) {
-	if (this.resolvedType == null)
-		return false;
-	return isConstantValueOfTypeAssignableToType(this.resolvedType, left) || 
-				this.resolvedType.isCompatibleWith(left) || 
-				isBoxingCompatible(this.resolvedType, left, this, scope);
-}
-
 public boolean isTypeReference() {
 	return false;
 }
@@ -1249,6 +1247,10 @@ public TypeBinding resolveTypeExpecting(BlockScope scope, TypeBinding expectedTy
 	return expressionType;
 }
 
+public Expression resolveExpressionExpecting(TypeBinding targetType, Scope scope) {
+	return this; // subclasses should implement for a better resolved expression if required.
+}
+
 /**
  * Returns true if the receiver is forced to be of raw type either to satisfy the contract imposed
  * by a super type or because it *is* raw and the current type has no control over it (i.e the rawness
@@ -1348,10 +1350,6 @@ public boolean sIsMoreSpecific(TypeBinding s, TypeBinding t, Scope scope) {
 	return s.isCompatibleWith(t, scope);
 }
 
-public void tagAsEllipsisArgument() {
-	// don't care. Subclasses that are poly expressions in specific contexts should listen in and make note.
-}
-
 public boolean isExactMethodReference() {
 	return false;
 }
@@ -1430,5 +1428,14 @@ public VariableBinding nullAnnotatedVariableBinding(boolean supportTypeAnnotatio
 
 public boolean isFunctionalType() {
 	return false;
+}
+
+/** Returns contained poly expressions, result could be 0, 1 or more (for conditional expression) */
+public Expression [] getPolyExpressions() {
+	return isPolyExpression() ? new Expression [] { this } : NO_EXPRESSIONS;
+}
+
+public boolean isPotentiallyCompatibleWith(TypeBinding targetType, Scope scope) {
+	return isCompatibleWith(targetType, scope); // for all but functional expressions, potential compatibility is the same as compatibility.
 }
 }

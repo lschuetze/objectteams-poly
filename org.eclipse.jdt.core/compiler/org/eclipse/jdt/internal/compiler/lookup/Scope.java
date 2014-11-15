@@ -806,7 +806,7 @@ public abstract class Scope {
 				Invocation invocation = (Invocation) invocationSite;
 				InferenceContext18 infCtx = invocation.getInferenceContext((ParameterizedGenericMethodBinding) method);
 				if (infCtx != null)
-					return method; // inference is responsible, no need to recheck, actually we could check functional arguments, see https://bugs.eclipse.org/bugs/show_bug.cgi?id=437444#c125
+					return method; // inference is responsible, no need to recheck.
 			}
 		} else if (genericTypeArguments != null && compilerOptions.complianceLevel < ClassFileConstants.JDK1_7) {
 			if (method instanceof ParameterizedGenericMethodBinding) {
@@ -1464,7 +1464,7 @@ public abstract class Scope {
 
 			unitScope.recordTypeReference(currentType);
 			currentType.initializeForStaticImports();
-			currentType = (ReferenceBinding) currentType.capture(this, invocationSite == null ? 0 : invocationSite.sourceEnd());
+			currentType = (ReferenceBinding) currentType.capture(this, invocationSite == null ? 0 : invocationSite.sourceStart(), invocationSite == null ? 0 : invocationSite.sourceEnd());
 			if ((field = currentType.getField(fieldName, needResolve)) != null) {
 				if (invisibleFieldsOk) {
 					return field;
@@ -1720,7 +1720,7 @@ public abstract class Scope {
 		MethodVerifier verifier = environment().methodVerifier();
 		while (currentType != null) {
 			unitScope.recordTypeReference(currentType);
-			currentType = (ReferenceBinding) currentType.capture(this, invocationSite == null ? 0 : invocationSite.sourceEnd());
+			currentType = (ReferenceBinding) currentType.capture(this, invocationSite == null ? 0 : invocationSite.sourceStart(), invocationSite == null ? 0 : invocationSite.sourceEnd());
 			MethodBinding[] currentMethods = currentType.getMethods(selector, argumentTypes.length);
 			int currentLength = currentMethods.length;
 			if (currentLength > 0) {
@@ -2017,7 +2017,7 @@ public abstract class Scope {
 					visitedTypes.add(uncaptured);
 				}
 				compilationUnitScope().recordTypeReference(currentType);
-				currentType = (ReferenceBinding) currentType.capture(this, invocationSite == null ? 0 : invocationSite.sourceEnd());
+				currentType = (ReferenceBinding) currentType.capture(this, invocationSite == null ? 0 : invocationSite.sourceStart(), invocationSite == null ? 0 : invocationSite.sourceEnd());
 				MethodBinding[] currentMethods = currentType.getMethods(selector);
 				if (currentMethods.length > 0) {
 					int foundSize = found.size;
@@ -2394,7 +2394,7 @@ public abstract class Scope {
 		
 		CompilationUnitScope unitScope = compilationUnitScope();
 		unitScope.recordTypeReference(type);
-		type = type.capture(this, invocationSite.sourceEnd());
+		type = type.capture(this, invocationSite.sourceStart(), invocationSite.sourceEnd());
 		
 		for (int i = 0, typesLength = typePlusSupertypes.length; i < typesLength; i++) {
 			MethodBinding[] methods = i == 0 ? type.getMethods(selector) : new MethodBinding [] { getExactMethod(receiverType, typePlusSupertypes[i], selector, invocationSite, candidate) };
@@ -2493,11 +2493,13 @@ public abstract class Scope {
 				return null;
 			}
 		}
-		final TypeVariableBinding[] typeVariables = exactConstructor.typeVariables();
-		if (typeVariables != Binding.NO_TYPE_VARIABLES) {
-			if (typeVariables.length != genericTypeArguments.length)
-				return null;
-			exactConstructor = environment().createParameterizedGenericMethod(exactConstructor, genericTypeArguments);
+		if (exactConstructor != null) {
+			final TypeVariableBinding[] typeVariables = exactConstructor.typeVariables();
+			if (typeVariables != Binding.NO_TYPE_VARIABLES) {
+				if (typeVariables.length != genericTypeArguments.length)
+					return null;
+				exactConstructor = environment().createParameterizedGenericMethod(exactConstructor, genericTypeArguments);
+			}
 		}
 		return exactConstructor;
 	}
@@ -4626,6 +4628,11 @@ public abstract class Scope {
 	protected final MethodBinding mostSpecificMethodBinding(MethodBinding[] visible, int visibleSize, TypeBinding[] argumentTypes, final InvocationSite invocationSite, ReferenceBinding receiverType) {
 
 		boolean isJdk18 = compilerOptions().sourceLevel >= ClassFileConstants.JDK1_8;
+		if (isJdk18 && invocationSite.checkingPotentialCompatibility()) {
+			if (visibleSize != visible.length)
+				System.arraycopy(visible, 0, visible = new MethodBinding[visibleSize], 0, visibleSize);
+			invocationSite.acceptPotentiallyCompatibleMethods(visible);
+		}
 		// common part for all compliance levels:
 		int[] compatibilityLevels = new int[visibleSize];
 		int compatibleCount = 0;
@@ -4757,6 +4764,8 @@ public abstract class Scope {
 				public InferenceContext18 freshInferenceContext(Scope scope) { return null; /* no inference when ignoring genericTypeArgs */ }
 				public ExpressionContext getExpressionContext() { return ExpressionContext.VANILLA_CONTEXT; }
 				public boolean isQualifiedSuper() { return invocationSite.isQualifiedSuper(); }
+				public boolean checkingPotentialCompatibility() { return false; }
+				public void acceptPotentiallyCompatibleMethods(MethodBinding[] methods) {/* ignore */}
 			};
 			int count = 0;
 			for (int level = 0, max = VARARGS_COMPATIBLE; level <= max; level++) {
@@ -5009,23 +5018,21 @@ public abstract class Scope {
 				if (context != null)
 					inferenceKind = context.inferenceKind;
 			} else if (site instanceof ReferenceExpression) {
-				inferenceKind = ((ReferenceExpression) site).inferenceKind;
+				ReferenceExpression referenceExpression = (ReferenceExpression) site;
+				context = referenceExpression.getInferenceContext((ParameterizedGenericMethodBinding) method);
+				if (context != null)
+					inferenceKind = context.inferenceKind;
 			}
-			/* 1.8+ Post inference compatibility check policy: For non-functional-type arguments, trust inference. For functional type arguments apply compatibility checks as inference
-			   engine may not have checked arguments that are not pertinent to applicability. One complication to deal with is when the generic method's parameter is its own type variable 
-			   and only applicability was inferred and applicability inference instantiated it with jlO due to lack of upper bounds in the bound set.
-			*/
-			if (site instanceof Invocation && context != null) { // this block can be readily seen to be not relevant for reference expressions
-				MethodBinding shallowOriginal = method.shallowOriginal();
+			/* 1.8+ Post inference compatibility check policy: For non-functional-type arguments, trust inference. For functional type arguments apply compatibility checks after inference
+			   has completed to ensure arguments that were not pertinent to applicability which have only seen potential compatibility checks are actually compatible.
+			*/   
+			if (site instanceof Invocation && context != null && context.stepCompleted >= InferenceContext18.TYPE_INFERRED) {
 				for (int i = 0, length = arguments.length; i < length; i++) {
 					TypeBinding argument = arguments[i];
 					if (!argument.isFunctionalType())
 						continue;
 					TypeBinding parameter = InferenceContext18.getParameter(method.parameters, i, context.isVarArgs());
-					if (argument.isCompatibleWith(parameter, this))
-						continue;
-					TypeBinding shallowParameter = InferenceContext18.getParameter(shallowOriginal.parameters, i, context.isVarArgs());
-					if (shallowParameter.isPertinentToApplicability(argument, shallowOriginal))
+					if (!argument.isCompatibleWith(parameter, this))
 						return NOT_COMPATIBLE;
 				}
 			}
@@ -5355,7 +5362,7 @@ public abstract class Scope {
 			currentType = currentType.enclosingType();
 		}
 	
-		MethodBinding[] methods = genericType.getMethods(TypeConstants.INIT, argumentTypes.length);
+		MethodBinding[] methods = allocationType.getMethods(TypeConstants.INIT, argumentTypes.length);
 		MethodBinding [] staticFactories = new MethodBinding[methods.length];
 		int sfi = 0;
 		for (int i = 0, length = methods.length; i < length; i++) {
@@ -5374,7 +5381,7 @@ public abstract class Scope {
 			final int factoryArity = classTypeVariablesArity + methodTypeVariablesArity;
 			final LookupEnvironment environment = environment();
 			
-			MethodBinding staticFactory = new SyntheticFactoryMethodBinding(method, environment, originalEnclosingType);
+			MethodBinding staticFactory = new SyntheticFactoryMethodBinding(method.original(), environment, originalEnclosingType);
 			staticFactory.typeVariables = new TypeVariableBinding[factoryArity];
 			final SimpleLookupTable map = new SimpleLookupTable(factoryArity);
 			

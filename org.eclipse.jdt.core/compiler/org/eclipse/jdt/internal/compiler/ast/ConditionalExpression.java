@@ -36,7 +36,7 @@ import org.eclipse.jdt.internal.compiler.codegen.*;
 import org.eclipse.jdt.internal.compiler.flow.*;
 import org.eclipse.jdt.internal.compiler.lookup.*;
 
-public class ConditionalExpression extends OperatorExpression {
+public class ConditionalExpression extends OperatorExpression implements IPolyExpression {
 
 	public Expression condition, valueIfTrue, valueIfFalse;
 	public Constant optimizedBooleanConstant;
@@ -58,10 +58,8 @@ public class ConditionalExpression extends OperatorExpression {
 	private TypeBinding originalValueIfTrueType;
 	private TypeBinding originalValueIfFalseType;
 	private boolean use18specifics;
-	public ConditionalExpression(
-		Expression condition,
-		Expression valueIfTrue,
-		Expression valueIfFalse) {
+
+	public ConditionalExpression(Expression condition, Expression valueIfTrue, Expression valueIfFalse) {
 		this.condition = condition;
 		this.valueIfTrue = valueIfTrue;
 		this.valueIfFalse = valueIfFalse;
@@ -466,7 +464,6 @@ public FlowInfo analyseCode(BlockScope currentScope, FlowContext flowContext,
 			if (conditionType == null || this.originalValueIfTrueType == null || this.originalValueIfFalseType == null)
 				return null;
 		} else {
-
 			if (this.originalValueIfTrueType.kind() == Binding.POLY_TYPE)
 				this.originalValueIfTrueType = this.valueIfTrue.resolveType(scope);
 			if (this.originalValueIfFalseType.kind() == Binding.POLY_TYPE)
@@ -483,6 +480,7 @@ public FlowInfo analyseCode(BlockScope currentScope, FlowContext flowContext,
 			}
 			return this.resolvedType = computeConversions(scope, this.expectedType) ? this.expectedType : null;
 		}
+
 		TypeBinding valueIfTrueType = this.originalValueIfTrueType;
 		TypeBinding valueIfFalseType = this.originalValueIfFalseType;
 		if (use15specifics && TypeBinding.notEquals(valueIfTrueType, valueIfFalseType)) {
@@ -633,7 +631,7 @@ public FlowInfo analyseCode(BlockScope currentScope, FlowContext flowContext,
 			if (commonType != null) {
 				this.valueIfTrue.computeConversion(scope, commonType, this.originalValueIfTrueType);
 				this.valueIfFalse.computeConversion(scope, commonType, this.originalValueIfFalseType);
-				return this.resolvedType = commonType.capture(scope, this.sourceEnd);
+				return this.resolvedType = commonType.capture(scope, this.sourceStart, this.sourceEnd);
 			}
 		} else {
 			// < 1.5 : one operand must be convertible to the other
@@ -717,6 +715,20 @@ public FlowInfo analyseCode(BlockScope currentScope, FlowContext flowContext,
 		return this.expressionContext;
 	}
 	
+	@Override
+	public Expression[] getPolyExpressions() {
+		Expression [] truePolys = this.valueIfTrue.getPolyExpressions();
+		Expression [] falsePolys = this.valueIfFalse.getPolyExpressions();
+		if (truePolys.length == 0)
+			return falsePolys;
+		if (falsePolys.length == 0)
+			return truePolys;
+		Expression [] allPolys = new Expression [truePolys.length + falsePolys.length];
+		System.arraycopy(truePolys, 0, allPolys, 0, truePolys.length);
+		System.arraycopy(falsePolys, 0, allPolys, truePolys.length, falsePolys.length);
+		return allPolys;
+	}
+	
 	public boolean isPertinentToApplicability(TypeVariableBinding typeVariable, MethodBinding method) {
 		return this.valueIfTrue.isPertinentToApplicability(typeVariable, method) 
 				&& this.valueIfFalse.isPertinentToApplicability(typeVariable, method);
@@ -725,6 +737,12 @@ public FlowInfo analyseCode(BlockScope currentScope, FlowContext flowContext,
 	public boolean isPertinentToApplicability(TypeBinding targetType, MethodBinding method) {
 		return this.valueIfTrue.isPertinentToApplicability(targetType, method) 
 				&& this.valueIfFalse.isPertinentToApplicability(targetType, method);
+	}
+	
+	@Override
+	public boolean isPotentiallyCompatibleWith(TypeBinding targetType, Scope scope) {
+		return this.valueIfTrue.isPotentiallyCompatibleWith(targetType, scope) 
+				&& this.valueIfFalse.isPotentiallyCompatibleWith(targetType, scope);
 	}
 	
 	@Override
@@ -780,11 +798,6 @@ public FlowInfo analyseCode(BlockScope currentScope, FlowContext flowContext,
 		return isPolyExpression() ?
 				this.valueIfTrue.sIsMoreSpecific(s, t, scope) && this.valueIfFalse.sIsMoreSpecific(s, t, scope):
 				false;
-	}
-	
-	public void tagAsEllipsisArgument() {
-		this.valueIfTrue.tagAsEllipsisArgument();
-		this.valueIfFalse.tagAsEllipsisArgument();
 	}
 
 	public void traverse(ASTVisitor visitor, BlockScope scope) {

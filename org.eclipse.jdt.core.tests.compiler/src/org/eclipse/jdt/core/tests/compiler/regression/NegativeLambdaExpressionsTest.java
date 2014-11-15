@@ -5784,42 +5784,17 @@ public void test401939b() {
 				"	^^^\n" + 
 				"The method goo(I) in the type X is not applicable for the arguments ((<no type> x) -> {})\n" + 
 				"----------\n" + 
-				"2. ERROR in X.java (at line 15)\n" + 
-				"	goo((x) -> { while (TRUE) throw new Exception(); });\n" + 
-				"	^^^\n" + 
-				"The method goo(I) in the type X is not applicable for the arguments ((<no type> x) -> {})\n" + 
-				"----------\n" + 
-				"3. ERROR in X.java (at line 16)\n" + 
-				"	goo((x) -> { while (NIJAM) throw new Exception(); });\n" + 
-				"	^^^\n" + 
-				"The method goo(I) in the type X is not applicable for the arguments ((<no type> x) -> {})\n" + 
-				"----------\n" + 
-				"4. ERROR in X.java (at line 17)\n" + 
+				"2. ERROR in X.java (at line 17)\n" + 
 				"	goo((x) -> { while (POI) throw new Exception(); });\n" + 
 				"	^^^\n" + 
 				"The method goo(I) in the type X is not applicable for the arguments ((<no type> x) -> {})\n" + 
 				"----------\n" + 
-				"5. ERROR in X.java (at line 18)\n" + 
-				"	goo((x) -> { if (TRUE) throw new Exception(); else throw new Exception(); });\n" + 
-				"	^^^\n" + 
-				"The method goo(I) in the type X is not applicable for the arguments ((<no type> x) -> {})\n" + 
-				"----------\n" + 
-				"6. ERROR in X.java (at line 19)\n" + 
+				"3. ERROR in X.java (at line 19)\n" + 
 				"	goo((x) -> { if (TRUE) throw new Exception(); });\n" + 
 				"	^^^\n" + 
 				"The method goo(I) in the type X is not applicable for the arguments ((<no type> x) -> {})\n" + 
 				"----------\n" + 
-				"7. ERROR in X.java (at line 20)\n" + 
-				"	goo((x) -> { if (true) throw new Exception(); else throw new Exception(); });\n" + 
-				"	^^^\n" + 
-				"The method goo(I) in the type X is not applicable for the arguments ((<no type> x) -> {})\n" + 
-				"----------\n" + 
-				"8. ERROR in X.java (at line 21)\n" + 
-				"	goo((x) -> { if (false) throw new Exception(); else throw new Exception(); });\n" + 
-				"	^^^\n" + 
-				"The method goo(I) in the type X is not applicable for the arguments ((<no type> x) -> {})\n" + 
-				"----------\n" + 
-				"9. ERROR in X.java (at line 22)\n" + 
+				"4. ERROR in X.java (at line 22)\n" + 
 				"	goo((x) -> { while (BLANK) throw new Exception(); });\n" + 
 				"	^^^\n" + 
 				"The method goo(I) in the type X is not applicable for the arguments ((<no type> x) -> {})\n" + 
@@ -5893,8 +5868,8 @@ public void test401939d() {
 				"----------\n" + 
 				"1. ERROR in X.java (at line 8)\n" + 
 				"	goo((x) -> { if (x) return null; });\n" + 
-				"	^^^\n" + 
-				"The method goo(I) in the type X is not applicable for the arguments ((<no type> x) -> {})\n" + 
+				"	    ^^^^^^\n" + 
+				"This method must return a result of type String\n" + 
 				"----------\n");
 }
 // https://bugs.eclipse.org/bugs/show_bug.cgi?id=401939, [1.8][compiler] Incorrect shape analysis leads to method resolution failure .
@@ -6216,11 +6191,6 @@ public void test402609() {
 			},
 			"----------\n" + 
 			"1. ERROR in X.java (at line 18)\n" + 
-			"	f(super::foo);\n" + 
-			"	^\n" + 
-			"The method f(I) in the type X is not applicable for the arguments (super::foo)\n" + 
-			"----------\n" + 
-			"2. ERROR in X.java (at line 18)\n" + 
 			"	f(super::foo);\n" + 
 			"	  ^^^^^\n" + 
 			"Cannot use super in a static context\n" + 
@@ -6867,6 +6837,11 @@ public void test412453() {
 		},
 		"----------\n" + 
 		"1. ERROR in X.java (at line 13)\n" + 
+		"	final Optional<Integer> min = empty.minBy((a, b) -> a - b);\n" + 
+		"	                                    ^^^^^\n" + 
+		"The method minBy(Function<Integer,C>) in the type Y<Integer> is not applicable for the arguments ((<no type> a, <no type> b) -> {})\n" + 
+		"----------\n" + 
+		"2. ERROR in X.java (at line 13)\n" + 
 		"	final Optional<Integer> min = empty.minBy((a, b) -> a - b);\n" + 
 		"	                                          ^^^^^^^^^^^^^^^\n" + 
 		"Lambda expression\'s signature does not match the signature of the functional interface method apply(Integer)\n" + 
@@ -7776,21 +7751,16 @@ public void test423129() {
 					"	}\n" +
 					"}\n"
 			},
-			"----------\n" + 
-			"1. ERROR in X.java (at line 11)\n" + 
-			"	System.out.println(xyz);\n" + 
-			"	                   ^^^\n" + 
-			"xyz cannot be resolved to a variable\n" + 
+			"----------\n" +
+			"1. ERROR in X.java (at line 1)\n" + 
+			"	return xyz.\n" + 
+			"	       ^^^\n" + 
+			"Type mismatch: cannot convert from Integer to String\n" + 
 			"----------\n" + 
 			"2. ERROR in X.java (at line 12)\n" + 
 			"	return xyz.\n" + 
 			"	          ^\n" + 
-			"Syntax error, insert \"new ClassType ( )\" to complete ClassInstanceCreationExpression\n" + 
-			"----------\n" + 
-			"3. ERROR in X.java (at line 12)\n" + 
-			"	return xyz.\n" + 
-			"	          ^\n" + 
-			"Syntax error, insert \";\" to complete ReturnStatement\n" + 
+			"Syntax error on token \".\", ; expected\n" + 
 			"----------\n",
 			true);
 }
@@ -8557,7 +8527,7 @@ public void test428177() {
 		"5. ERROR in X.java (at line 38)\n" + 
 		"	return stream.collect(Collectors.toList()); // NO ERROR\n" + 
 		"	       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n" + 
-		"Type mismatch: cannot convert from List<capture#19-of ? extends String> to Stream<String>\n" + 
+		"Type mismatch: cannot convert from List<capture#18-of ? extends String> to Stream<String>\n" + 
 		"----------\n");
 }
 // https://bugs.eclipse.org/bugs/show_bug.cgi?id=428795, - [1.8]Internal compiler error: java.lang.NullPointerException at org.eclipse.jdt.internal.compiler.ast.MessageSend.analyseCode
@@ -9789,11 +9759,6 @@ public void testGroundTargetTypeWithWithWildcards() {
 		}, 
 		"----------\n" + 
 		"1. ERROR in X.java (at line 10)\n" + 
-		"	return m((X x1, X x2) -> { return new Y(); });\n" + 
-		"	       ^\n" + 
-		"The method m(I<? extends A,? extends B,? extends C>) in the type X is not applicable for the arguments ((X x1, X x2) -> {})\n" + 
-		"----------\n" + 
-		"2. ERROR in X.java (at line 10)\n" + 
 		"	return m((X x1, X x2) -> { return new Y(); });\n" + 
 		"	         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n" + 
 		"Type mismatch: cannot convert from I<X,X,? extends C> to I<? extends A,? extends B,? extends C>\n" + 

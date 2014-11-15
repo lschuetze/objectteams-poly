@@ -40,6 +40,7 @@ import org.eclipse.jdt.internal.compiler.lookup.BlockScope;
 import org.eclipse.jdt.internal.compiler.lookup.FieldBinding;
 import org.eclipse.jdt.internal.compiler.lookup.LocalVariableBinding;
 import org.eclipse.jdt.internal.compiler.lookup.MethodBinding;
+import org.eclipse.jdt.internal.compiler.lookup.PolyTypeBinding;
 import org.eclipse.jdt.internal.compiler.lookup.ReferenceBinding;
 import org.eclipse.jdt.internal.compiler.lookup.TypeBinding;
 import org.eclipse.jdt.internal.compiler.lookup.VariableBinding;
@@ -113,8 +114,6 @@ public abstract class OTQualifiedAllocationExpression extends AbstractQualifiedA
 	    if (this.anonymousType == null && this.creatorCall == null && this.enclosingInstance == null) // special case during code assist
             return super.resolveType(scope);
 
-	    this.constant = Constant.NotAConstant;
-
 	    CompilationResult compilationResult = scope.referenceContext().compilationResult();
 		CheckPoint cp = compilationResult.getCheckPoint(scope.referenceContext());
 		this.hasEnclosingInstanceProblem = false;
@@ -175,7 +174,10 @@ public abstract class OTQualifiedAllocationExpression extends AbstractQualifiedA
 	        }
 	    }
 	    if (this.creatorCall == null) {
-	    	this.resolvedType = super.resolveType(scope);
+	    	TypeBinding typ = super.resolveType(scope);
+	    	if (typ == null || typ instanceof PolyTypeBinding)
+	    		return typ;
+
 	    	if (!this.hasEnclosingInstanceProblem) { // more checks only if no error already
 		        // if enclosing is a role request a cast to the class part as required by the inner constructor
 		        if (this.enclosingInstance != null) {
@@ -195,6 +197,9 @@ public abstract class OTQualifiedAllocationExpression extends AbstractQualifiedA
 		    	}
 	    	}
 	    } else {  // === with creatorCall ===
+
+	    	this.constant = Constant.NotAConstant;
+
 	    	this.resolvedType = this.creatorCall.resolveType(scope);
 	    	// when creating role nested instance, no cast of enclosing role needed in this branch,
 	    	// because creator call is routed via the interface of the enclosing role.

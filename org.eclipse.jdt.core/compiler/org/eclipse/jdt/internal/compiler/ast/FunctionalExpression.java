@@ -32,10 +32,9 @@ import org.eclipse.jdt.internal.compiler.IErrorHandlingPolicy;
 import org.eclipse.jdt.internal.compiler.flow.FlowInfo;
 import org.eclipse.jdt.internal.compiler.impl.Constant;
 import org.eclipse.jdt.internal.compiler.impl.ReferenceContext;
-import org.eclipse.jdt.internal.compiler.lookup.ArrayBinding;
 import org.eclipse.jdt.internal.compiler.lookup.BlockScope;
 import org.eclipse.jdt.internal.compiler.lookup.CompilationUnitScope;
-import org.eclipse.jdt.internal.compiler.lookup.IntersectionCastTypeBinding;
+import org.eclipse.jdt.internal.compiler.lookup.IntersectionTypeBinding18;
 import org.eclipse.jdt.internal.compiler.lookup.LookupEnvironment;
 import org.eclipse.jdt.internal.compiler.lookup.MethodBinding;
 import org.eclipse.jdt.internal.compiler.lookup.MethodScope;
@@ -57,11 +56,8 @@ public abstract class FunctionalExpression extends Expression {
 	protected MethodBinding actualMethodBinding;  // void of synthetics.
 	boolean ignoreFurtherInvestigation;
 	protected ExpressionContext expressionContext = VANILLA_CONTEXT;
-	static Expression [] NO_EXPRESSIONS = new Expression[0];
-	protected Expression [] resultExpressions = NO_EXPRESSIONS;
 	public CompilationResult compilationResult;
 	public BlockScope enclosingScope;
-	protected boolean ellipsisArgument;
 	public int bootstrapMethodNumber = -1;
 	protected static IErrorHandlingPolicy silentErrorHandlingPolicy = DefaultErrorHandlingPolicies.ignoreAllProblems();
 	private boolean hasReportedSamProblem = false;
@@ -86,19 +82,19 @@ public abstract class FunctionalExpression extends Expression {
 	public MethodBinding getMethodBinding() {
 		return null;
 	}
+
 	public void setExpectedType(TypeBinding expectedType) {
-		this.expectedType = this.ellipsisArgument ? ((ArrayBinding) expectedType).elementsType() : expectedType;
+		this.expectedType = expectedType;
 	}
 	
 	public void setExpressionContext(ExpressionContext context) {
 		this.expressionContext = context;
 	}
+
 	public ExpressionContext getExpressionContext() {
 		return this.expressionContext;
 	}
-	public void tagAsEllipsisArgument() {
-		this.ellipsisArgument = true;
-	}
+
 	public boolean isPolyExpression(MethodBinding candidate) {
 		return true;
 	}
@@ -347,8 +343,8 @@ public abstract class FunctionalExpression extends Expression {
 		}
 		
 		ReferenceBinding functionalType;
-		if (this.expectedType instanceof IntersectionCastTypeBinding) {
-			functionalType = (ReferenceBinding) ((IntersectionCastTypeBinding)this.expectedType).getSAMType(this.enclosingScope);
+		if (this.expectedType instanceof IntersectionTypeBinding18) {
+			functionalType = (ReferenceBinding) ((IntersectionTypeBinding18)this.expectedType).getSAMType(this.enclosingScope);
 		} else {
 			functionalType = (ReferenceBinding) this.expectedType;
 		}

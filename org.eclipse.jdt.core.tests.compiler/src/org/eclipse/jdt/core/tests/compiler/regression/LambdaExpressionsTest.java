@@ -2189,11 +2189,6 @@ public void test424589() {
 		"----------\n" + 
 		"2. ERROR in X.java (at line 11)\n" + 
 		"	Set<Z> x = foo(Set::new);\n" + 
-		"	           ^^^^^^^^^^^^^\n" + 
-		"Type mismatch: cannot convert from Collection<Object> to Set<Z>\n" + 
-		"----------\n" + 
-		"3. ERROR in X.java (at line 11)\n" + 
-		"	Set<Z> x = foo(Set::new);\n" + 
 		"	               ^^^\n" + 
 		"Cannot instantiate the type Set\n" + 
 		"----------\n");
@@ -4290,18 +4285,13 @@ public void test430766a() {
 			"----------\n" + 
 			"1. ERROR in X.java (at line 21)\n" + 
 			"	persons.sort(Comparator.comparing(Comparator.nullsLast(Person::<Runnable>isRunnable)));\n" + 
-			"	                        ^^^^^^^^^\n" + 
-			"The method comparing(Function<? super T,? extends U>) in the type Comparator is not applicable for the arguments (Comparator<Object>)\n" + 
+			"	                                             ^^^^^^^^^\n" + 
+			"The method nullsLast(Comparator<? super T>) in the type Comparator is not applicable for the arguments (Person::<Runnable>isRunnable)\n" + 
 			"----------\n" + 
 			"2. ERROR in X.java (at line 21)\n" + 
 			"	persons.sort(Comparator.comparing(Comparator.nullsLast(Person::<Runnable>isRunnable)));\n" + 
-			"	                                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n" + 
-			"Type mismatch: cannot convert from Comparator<Object> to Function<? super T,? extends U>\n" + 
-			"----------\n" + 
-			"3. ERROR in X.java (at line 21)\n" + 
-			"	persons.sort(Comparator.comparing(Comparator.nullsLast(Person::<Runnable>isRunnable)));\n" + 
 			"	                                                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n" + 
-			"The type X.Person does not define isRunnable(Object, Object) that is applicable here\n" + 
+			"The type X.Person does not define isRunnable(T, T) that is applicable here\n" + 
 			"----------\n");
 }
 // https://bugs.eclipse.org/bugs/show_bug.cgi?id=431190, [1.8] VerifyError when using a method reference
@@ -5132,6 +5122,27 @@ public void testreduced432605() {
 			"}\n"
 	},
 	"");
+}
+// https://bugs.eclipse.org/bugs/show_bug.cgi?id=448802, [1.8][compiler] Poly invocations interleaved by a impertinent lambda may need some more changes,
+public void test448802() throws Exception {
+	this.runConformTest(
+		new String[] {
+			"X.java",
+			"import java.util.Optional;\n" +
+			"public class X {\n" +
+			"	public static void main(String[] args) {\n" +
+			"		Optional<String> userName = Optional.of(\"sa\");\n" +
+			"		Optional<String> password = Optional.of(\"sa\");\n" +
+			"		boolean isValid = userName.flatMap((String u) -> {\n" +
+			"			return password.map((String p) -> {\n" +
+			"				return u.equals(\"sa\") && p.equals(\"sa\");\n" +
+			"			});\n" +
+			"		}).orElse(false);\n" +
+			"		System.out.println(isValid);\n" +
+			"	}\n" +
+			"}\n"
+		},
+		"true");
 }
 public static Class testClass() {
 	return LambdaExpressionsTest.class;

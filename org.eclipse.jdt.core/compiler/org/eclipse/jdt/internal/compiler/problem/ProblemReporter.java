@@ -55,6 +55,7 @@
  *								Bug 439516 - [1.8][null] NonNullByDefault wrongly applied to implicit type bound of binary type
  *								Bug 438467 - [compiler][null] Better error position for "The method _ cannot implement the corresponding method _ due to incompatible nullness constraints"
  *								Bug 439298 - [null] "Missing code implementation in the compiler" when using @NonNullByDefault in package-info.java
+ *								Bug 435805 - [1.8][compiler][null] Java 8 compiler does not recognize declaration style null annotations
  *      Jesper S Moller <jesper@selskabet.org> -  Contributions for
  *								bug 382701 - [1.8][compiler] Implement semantic analysis of Lambda expressions & Reference expression
  *								bug 382721 - [1.8][compiler] Effectively final variables needs special treatment
@@ -4387,7 +4388,7 @@ public void invalidFileNameForPackageAnnotations(Annotation annotation) {
 			annotation.sourceEnd);
 }
 
-public void invalidMethod(MessageSend messageSend, MethodBinding method) {
+public void invalidMethod(MessageSend messageSend, MethodBinding method, Scope scope) {
 	if (isRecoveredName(messageSend.selector)) return;
 
 //{ObjectTeams: special messages:
@@ -4730,13 +4731,14 @@ public void invalidMethod(MessageSend messageSend, MethodBinding method) {
 			shownMethod = problemMethod.closestMatch;
 			if (problemMethod.returnType == shownMethod.returnType) //$IDENTITY-COMPARISON$
 				return; // funnily this can happen in a deeply nested call, because the inner lies by stealing its closest match and the outer does not know so. See GRT1_8.testBug430296
+			TypeBinding shownMethodReturnType = shownMethod.returnType.capture(scope, messageSend.sourceStart, messageSend.sourceEnd);
 			this.handle(
 				IProblem.TypeMismatch,
 				new String[] {
-				        String.valueOf(shownMethod.returnType.readableName()),
+				        String.valueOf(shownMethodReturnType.readableName()),
 				        (problemMethod.returnType != null ? String.valueOf(problemMethod.returnType.readableName()) : "<unknown>")}, //$NON-NLS-1$
 				new String[] {
-				        String.valueOf(shownMethod.returnType.shortReadableName()),
+				        String.valueOf(shownMethodReturnType.shortReadableName()),
 				        (problemMethod.returnType != null ? String.valueOf(problemMethod.returnType.shortReadableName()) : "<unknown>")}, //$NON-NLS-1$
 				messageSend.sourceStart,
 				messageSend.sourceEnd);
@@ -4801,22 +4803,12 @@ public void invalidMethod(MessageSend messageSend, MethodBinding method) {
 			ReferenceBinding roleClass = declaringClass.getRealClass();
 			if (roleClass != null) {
 				MethodBinding[] methods = roleClass.getMethods(method.selector);
-				Scope scope = null;
-				if (this.referenceContext instanceof AbstractMethodDeclaration) {
-					scope = ((AbstractMethodDeclaration)this.referenceContext).scope;
-				} else if (this.referenceContext instanceof AbstractMethodMappingDeclaration) {
-					scope = ((AbstractMethodMappingDeclaration)this.referenceContext).scope;
-				} else if (this.referenceContext instanceof TypeDeclaration) {
-					scope = ((TypeDeclaration)this.referenceContext).scope;
-				}
-				if (scope != null) {
-					for (int i = 0; i < methods.length; i++) {
-						if (scope.parameterCompatibilityLevel(methods[i], method.parameters) == Scope.COMPATIBLE)
-						{
-							((ProblemMethodBinding)method).closestMatch = methods[i];
-							id = IProblem.NotVisibleRoleMethod;
-							break;
-						}
+				for (int i = 0; i < methods.length; i++) {
+					if (scope.parameterCompatibilityLevel(methods[i], method.parameters) == Scope.COMPATIBLE)
+					{
+						((ProblemMethodBinding)method).closestMatch = methods[i];
+						id = IProblem.NotVisibleRoleMethod;
+						break;
 					}
 				}
 			}
@@ -4831,7 +4823,6 @@ public void invalidMethod(MessageSend messageSend, MethodBinding method) {
 	}
 	if (!typeIsBogus && this.referenceContext instanceof AbstractMethodDeclaration)
 	{
-		Scope scope = ((AbstractMethodDeclaration)this.referenceContext).scope;
 		typeIsBogus = scope.referenceType().ignoreFurtherInvestigation;
 	}
 	if (   typeIsBogus
@@ -9957,15 +9948,15 @@ public void nullityMismatch(Expression expression, TypeBinding providedType, Typ
 		nullityMismatchPotentiallyNull(expression, requiredType, annotationName);
 		return;
 	}
-	if (this.options.sourceLevel < ClassFileConstants.JDK1_8)
-		nullityMismatchIsUnknown(expression, providedType, requiredType, annotationName);
-	else
+	if (this.options.useNullTypeAnnotations == Boolean.TRUE)
 		nullityMismatchingTypeAnnotation(expression, providedType, requiredType, NullAnnotationMatching.NULL_ANNOTATIONS_UNCHECKED);
+	else
+		nullityMismatchIsUnknown(expression, providedType, requiredType, annotationName);
 }
 public void nullityMismatchIsNull(Expression expression, TypeBinding requiredType) {
 	int problemId = IProblem.RequiredNonNullButProvidedNull;
-	boolean below18 = this.options.sourceLevel < ClassFileConstants.JDK1_8;
-	if (!below18 && requiredType.isTypeVariable() && !requiredType.hasNullTypeAnnotations())
+	boolean useNullTypeAnnotations = this.options.useNullTypeAnnotations == Boolean.TRUE;
+	if (useNullTypeAnnotations && requiredType.isTypeVariable() && !requiredType.hasNullTypeAnnotations())
 		problemId = IProblem.NullNotCompatibleToFreeTypeVariable;
 	if (requiredType instanceof CaptureBinding) {
 		CaptureBinding capture = (CaptureBinding) requiredType;
@@ -9974,7 +9965,7 @@ public void nullityMismatchIsNull(Expression expression, TypeBinding requiredTyp
 	}
 	String[] arguments;
 	String[] argumentsShort;
-	if (below18) {
+	if (!useNullTypeAnnotations) {
 		arguments      = new String[] { annotatedTypeName(requiredType, this.options.nonNullAnnotationName) };
 		argumentsShort = new String[] { shortAnnotatedTypeName(requiredType, this.options.nonNullAnnotationName) };
 	} else {
@@ -13740,7 +13731,7 @@ public void illegalReturnRedefinition(AbstractMethodDeclaration abstractMethodDe
 	TypeBinding inheritedReturnType = inheritedMethod.returnType;
 	String[] arguments;
 	String[] argumentsShort;
-	if (this.options.complianceLevel < ClassFileConstants.JDK1_8) {
+	if (this.options.useNullTypeAnnotations != Boolean.TRUE) {
 		StringBuilder returnType = new StringBuilder();
 		returnType.append('@').append(CharOperation.concatWith(nonNullAnnotationName, '.'));
 		returnType.append(' ').append(inheritedReturnType.readableName());

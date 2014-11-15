@@ -36,8 +36,9 @@ package org.eclipse.jdt.internal.compiler.lookup;
 import java.util.Set;
 
 import org.eclipse.jdt.core.compiler.CharOperation;
-import org.eclipse.jdt.internal.compiler.ast.Annotation;
 import org.eclipse.jdt.internal.compiler.ast.ASTNode;
+import org.eclipse.jdt.internal.compiler.ast.Annotation;
+import org.eclipse.jdt.internal.compiler.ast.Expression;
 import org.eclipse.jdt.internal.compiler.ast.NullAnnotationMatching;
 import org.eclipse.jdt.internal.compiler.ast.TypeParameter;
 import org.eclipse.jdt.internal.compiler.ast.TypeReference;
@@ -84,6 +85,7 @@ public class TypeVariableBinding extends ReferenceBinding {
 		this.tagBits |= TagBits.HasTypeVariable;
 		this.environment = environment;
 		this.typeBits = TypeIds.BitUninitialized;
+		computeId(environment);
 	}
 	
 	public TypeVariableBinding(TypeVariableBinding prototype) {
@@ -113,7 +115,7 @@ public class TypeVariableBinding extends ReferenceBinding {
 			if (argumentType instanceof TypeVariableBinding && scope != null) {
 				TypeBinding bound = ((TypeVariableBinding)argumentType).firstBound;
 				if (bound instanceof ParameterizedTypeBinding) {
-					int code2 = boundCheck(substitution, bound.capture(scope, -1), scope); // no position needed as this capture will never escape this context
+					int code2 = boundCheck(substitution, bound.capture(scope, -1, -1), scope); // no position needed as this capture will never escape this context
 					return Math.min(code, code2);
 				}
 			}
@@ -611,8 +613,13 @@ public class TypeVariableBinding extends ReferenceBinding {
 		this.inRecursiveFunction = false;
 	}
 	
+	@Override
+	public boolean isPertinentToApplicability(Expression expression, MethodBinding method) {
+		return expression.isPertinentToApplicability(this, method);
+	}
+	
 	public boolean isPertinentToApplicability(TypeBinding argument, MethodBinding method) {
-		return argument.isPertinentToApplicability(this, method);
+		return argument != null && argument.isPertinentToApplicability(this, method);
 	}
 	
 	public boolean isProperType(boolean admitCapture18) {

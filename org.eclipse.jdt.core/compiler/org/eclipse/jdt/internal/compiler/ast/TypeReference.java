@@ -23,6 +23,7 @@
  *								Bug 439516 - [1.8][null] NonNullByDefault wrongly applied to implicit type bound of binary type
  *								Bug 438458 - [1.8][null] clean up handling of null type annotations wrt type variables
  *								Bug 435570 - [1.8][null] @NonNullByDefault illegally tries to affect "throws E"
+ *								Bug 435805 - [1.8][compiler][null] Java 8 compiler does not recognize declaration style null annotations
  *        Andy Clement (GoPivotal, Inc) aclement@gopivotal.com - Contributions for
  *                          Bug 383624 - [1.8][compiler] Revive code generation support for type annotations (from Olivier's work)
  *                          Bug 409236 - [1.8][compiler] Type annotations on intersection cast types dropped by code generator
@@ -39,7 +40,6 @@ import org.eclipse.jdt.internal.codeassist.select.SelectionNodeFound;
 import org.eclipse.jdt.internal.compiler.ASTVisitor;
 import org.eclipse.jdt.internal.compiler.CompilationResult;
 import org.eclipse.jdt.internal.compiler.ast.NullAnnotationMatching.CheckMode;
-import org.eclipse.jdt.internal.compiler.classfmt.ClassFileConstants;
 import org.eclipse.jdt.internal.compiler.codegen.AnnotationContext;
 import org.eclipse.jdt.internal.compiler.codegen.AnnotationTargetTypeConstants;
 import org.eclipse.jdt.internal.compiler.codegen.CodeStream;
@@ -64,7 +64,6 @@ import org.eclipse.objectteams.otdt.internal.core.compiler.util.TSuperHelper;
  *
  * What: Support baseclass decapsulation
  *
- * @version $Id: TypeReference.java 23404 2010-02-03 14:10:22Z stephan $
  */
 public abstract class TypeReference extends Expression {
 	public static final TypeReference[] NO_TYPE_ARGUMENTS = new TypeReference[0];
@@ -823,9 +822,7 @@ public int getAnnotatableLevels() {
 }
 /** Check all typeArguments against null constraints on their corresponding type variables. */
 protected void checkNullConstraints(Scope scope, TypeReference[] typeArguments) {
-	CompilerOptions compilerOptions = scope.compilerOptions();
-	if (compilerOptions.isAnnotationBasedNullAnalysisEnabled
-			&& compilerOptions.sourceLevel >= ClassFileConstants.JDK1_8
+	if (scope.environment().usesNullTypeAnnotations()
 			&& typeArguments != null)
 	{
 		TypeVariableBinding[] typeVariables = this.resolvedType.original().typeVariables();

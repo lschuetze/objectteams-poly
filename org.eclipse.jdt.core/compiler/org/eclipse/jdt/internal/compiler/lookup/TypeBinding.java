@@ -40,6 +40,7 @@ import java.util.Set;
 
 import org.eclipse.jdt.core.compiler.CharOperation;
 import org.eclipse.jdt.internal.compiler.ast.ASTNode;
+import org.eclipse.jdt.internal.compiler.ast.Expression;
 import org.eclipse.jdt.internal.compiler.ast.Wildcard;
 import org.eclipse.jdt.internal.compiler.impl.CompilerOptions;
 import org.eclipse.objectteams.otdt.internal.core.compiler.lookup.DependentTypeBinding;
@@ -196,7 +197,7 @@ public boolean canBeInstantiated() {
 /**
  * Perform capture conversion on a given type (only effective on parameterized type with wildcards)
  */
-public TypeBinding capture(Scope scope, int position) {
+public TypeBinding capture(Scope scope, int start, int end) {
 	return this;
 }
 
@@ -455,9 +456,9 @@ public TypeBinding findSuperTypeOriginatingFrom(TypeBinding otherType) {
 				}
 			}
 			break;
-		case Binding.INTERSECTION_CAST_TYPE:
-			IntersectionCastTypeBinding ictb = (IntersectionCastTypeBinding) this;
-			ReferenceBinding[] intersectingTypes = ictb.getIntersectingTypes();
+		case Binding.INTERSECTION_TYPE18:
+			IntersectionTypeBinding18 itb18 = (IntersectionTypeBinding18) this;
+			ReferenceBinding[] intersectingTypes = itb18.getIntersectingTypes();
 			for (int i = 0, length = intersectingTypes.length; i < length; i++) {
 				TypeBinding superType = intersectingTypes[i].findSuperTypeOriginatingFrom(otherType);
 				if (superType != null)
@@ -649,6 +650,10 @@ public boolean isCompatibleWith(TypeBinding right) {
 // version that allows to capture a type bound using 'scope':
 public abstract boolean isCompatibleWith(TypeBinding right, /*@Nullable*/ Scope scope);
 
+public boolean isPotentiallyCompatibleWith(TypeBinding right, /*@Nullable*/ Scope scope) {
+	return isCompatibleWith(right, scope);
+}
+
 /* Answer true if the receiver type can be assigned to the argument type (right) with boxing/unboxing applied.
  */
 public boolean isBoxingCompatibleWith(TypeBinding right, /*@NonNull */ Scope scope) {
@@ -782,7 +787,7 @@ public boolean acceptsNonNullDefault() {
 	return false;
 }
 
-public boolean isIntersectionCastType() {
+public boolean isIntersectionType18() {
 	return false;
 }
 
@@ -1330,8 +1335,8 @@ public boolean isTypeArgumentContainedBy(TypeBinding otherType) {
 			TypeBinding otherBound = otherWildcard.bound;
 			switch (otherWildcard.boundKind) {
 				case Wildcard.EXTENDS:
-					if (otherBound instanceof IntersectionCastTypeBinding) {
-						TypeBinding [] intersectingTypes = ((IntersectionCastTypeBinding) otherBound).intersectingTypes;
+					if (otherBound instanceof IntersectionTypeBinding18) {
+						TypeBinding [] intersectingTypes = ((IntersectionTypeBinding18) otherBound).intersectingTypes;
 						for (int i = 0, length = intersectingTypes.length; i < length; i++)
 							if (TypeBinding.equalsEquals(intersectingTypes[i], this))
 								return true;
@@ -1348,8 +1353,8 @@ public boolean isTypeArgumentContainedBy(TypeBinding otherType) {
 					return upperBound.isCompatibleWith(otherBound);
 
 				case Wildcard.SUPER:
-					if (otherBound instanceof IntersectionCastTypeBinding) {
-						TypeBinding [] intersectingTypes = ((IntersectionCastTypeBinding) otherBound).intersectingTypes;
+					if (otherBound instanceof IntersectionTypeBinding18) {
+						TypeBinding [] intersectingTypes = ((IntersectionTypeBinding18) otherBound).intersectingTypes;
 						for (int i = 0, length = intersectingTypes.length; i < length; i++)
 							if (TypeBinding.equalsEquals(intersectingTypes[i], this))
 								return true;
@@ -1781,5 +1786,9 @@ public void exitRecursiveFunction() {
 
 public boolean isFunctionalType() {
 	return false;
+}
+
+public boolean isPertinentToApplicability(Expression expression, MethodBinding method) {
+	return true;
 }
 }

@@ -22,19 +22,17 @@ public class CaptureBinding18 extends CaptureBinding {
 	private char[] originalName;
 	private CaptureBinding18 prototype;
 
-	public CaptureBinding18(ReferenceBinding contextType, char[] sourceName, char[] originalName, int position, int captureID, LookupEnvironment environment) {
-		super(contextType, sourceName, position, captureID, environment);
+	public CaptureBinding18(ReferenceBinding contextType, char[] sourceName, char[] originalName, int start, int end, int captureID, LookupEnvironment environment) {
+		super(contextType, sourceName, start, end, captureID, environment);
 		this.originalName = originalName;
 		this.prototype = this;
 	}
 	
 	private CaptureBinding18(CaptureBinding18 prototype) {
-		this(prototype.sourceType, CharOperation.append(prototype.sourceName, '\''), prototype.originalName, prototype.position, prototype.captureID, prototype.environment);
+		super(prototype);
+		this.sourceName = CharOperation.append(prototype.sourceName, '\'');
+		this.originalName = prototype.originalName;
 		this.upperBounds = prototype.upperBounds;
-		this.firstBound = prototype.firstBound;
-		this.lowerBound = prototype.lowerBound;
-		this.superInterfaces = prototype.superInterfaces;
-		this.superclass = prototype.superclass;
 		this.prototype = prototype.prototype;		
 	}
 
@@ -93,7 +91,7 @@ public class CaptureBinding18 extends CaptureBinding {
 			}
 			if (!multipleErasures)
 				return erasures[0];
-			return this.environment.createIntersectionCastType(erasures);
+			return this.environment.createIntersectionType18(erasures);
 		}
 		return super.erasure();
 	}
@@ -208,6 +206,11 @@ public class CaptureBinding18 extends CaptureBinding {
 					}
 				}
 			}
+			TypeBinding currentFirstBound = null;
+			if (this.firstBound != null) {
+				currentFirstBound = this.firstBound.substituteInferenceVariable(var, substituteType);
+				haveSubstitution |= TypeBinding.notEquals(this.firstBound, currentFirstBound);
+			}
 			if (haveSubstitution) {
 				final CaptureBinding18 newCapture = (CaptureBinding18) clone(enclosingType());
 				newCapture.tagBits = this.tagBits;
@@ -231,6 +234,8 @@ public class CaptureBinding18 extends CaptureBinding {
 					}
 // SH}
 				};
+				if (currentFirstBound != null)
+					newCapture.firstBound = Scope.substitute(substitution, currentFirstBound);
 				newCapture.superclass = (ReferenceBinding) Scope.substitute(substitution, currentSuperclass);
 				newCapture.superInterfaces = Scope.substitute(substitution, currentSuperInterfaces);
 				newCapture.upperBounds = Scope.substitute(substitution, currentUpperBounds);
@@ -347,7 +352,7 @@ public class CaptureBinding18 extends CaptureBinding {
 	public char[] computeUniqueKey(boolean isLeaf) {
 		StringBuffer buffer = new StringBuffer();
 		buffer.append(TypeConstants.CAPTURE18);
-		buffer.append('{').append(this.position).append('#').append(this.captureID).append('}');
+		buffer.append('{').append(this.end).append('#').append(this.captureID).append('}');
 		buffer.append(';');
 		int length = buffer.length();
 		char[] uniqueKey = new char[length];

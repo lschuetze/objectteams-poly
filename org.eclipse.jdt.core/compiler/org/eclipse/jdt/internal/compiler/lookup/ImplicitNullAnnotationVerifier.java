@@ -21,7 +21,6 @@ import org.eclipse.jdt.internal.compiler.ast.Argument;
 import org.eclipse.jdt.internal.compiler.ast.MethodDeclaration;
 import org.eclipse.jdt.internal.compiler.ast.NullAnnotationMatching;
 import org.eclipse.jdt.internal.compiler.ast.NullAnnotationMatching.CheckMode;
-import org.eclipse.jdt.internal.compiler.classfmt.ClassFileConstants;
 import org.eclipse.jdt.internal.compiler.impl.CompilerOptions;
 import org.eclipse.objectteams.otdt.internal.core.compiler.lookup.RoleTypeBinding;
 import org.eclipse.objectteams.otdt.internal.core.compiler.lookup.WeakenedTypeBinding;
@@ -83,11 +82,11 @@ public class ImplicitNullAnnotationVerifier {
 			if (TypeAnalyzer.isTopConfined(currentType))
 				return;
 // SH}
-			long sourceLevel = scope.compilerOptions().sourceLevel;
+			boolean usesTypeAnnotations = scope.environment().usesNullTypeAnnotations();
 			boolean needToApplyReturnNonNullDefault =
-					currentMethod.hasNonNullDefaultFor(Binding.DefaultLocationReturnType, sourceLevel >= ClassFileConstants.JDK1_8);
+					currentMethod.hasNonNullDefaultFor(Binding.DefaultLocationReturnType, usesTypeAnnotations);
 			boolean needToApplyParameterNonNullDefault =
-					currentMethod.hasNonNullDefaultFor(Binding.DefaultLocationParameter, sourceLevel >= ClassFileConstants.JDK1_8);
+					currentMethod.hasNonNullDefaultFor(Binding.DefaultLocationParameter, usesTypeAnnotations);
 			boolean needToApplyNonNullDefault = needToApplyReturnNonNullDefault | needToApplyParameterNonNullDefault;
 			// compatibility & inheritance do not consider constructors / static methods:
 			boolean isInstanceMethod = !currentMethod.isConstructor() && !currentMethod.isStatic();
@@ -135,7 +134,7 @@ public class ImplicitNullAnnotationVerifier {
 						tagBits = TagBits.AnnotationNullable;
 					}
 					if (tagBits != 0) {
-						if (sourceLevel < ClassFileConstants.JDK1_8) {
+						if (!usesTypeAnnotations) {
 							currentMethod.tagBits |= tagBits;
 						} else {
 							if (!currentMethod.returnType.isBaseType()) {
@@ -149,7 +148,7 @@ public class ImplicitNullAnnotationVerifier {
 					info = inheritedNonNullnessInfos[i+1];
 					if (!info.complained && info.inheritedNonNullness != null) {
 						Argument currentArg = srcMethod == null ? null : srcMethod.arguments[i];
-						if (sourceLevel < ClassFileConstants.JDK1_8)
+						if (!usesTypeAnnotations)
 							recordArgNonNullness(currentMethod, paramLen, i, currentArg, info.inheritedNonNullness);
 						else
 							recordArgNonNullness18(currentMethod, i, currentArg, info.inheritedNonNullness, scope.environment());
@@ -158,7 +157,7 @@ public class ImplicitNullAnnotationVerifier {
 
 			}
 			if (needToApplyNonNullDefault) {
-				if (scope.compilerOptions().sourceLevel < ClassFileConstants.JDK1_8)
+				if (!usesTypeAnnotations)
 					currentMethod.fillInDefaultNonNullness(srcMethod);
 				else
 					currentMethod.fillInDefaultNonNullness18(srcMethod, scope.environment());
@@ -249,7 +248,7 @@ public class ImplicitNullAnnotationVerifier {
 			// TODO (stephan): even here we may need to report problems? How to discriminate?
 			this.buddyImplicitNullAnnotationsVerifier.checkImplicitNullAnnotations(inheritedMethod, null, false, scope);
 		}
-		boolean useTypeAnnotations = this.environment.globalOptions.sourceLevel >= ClassFileConstants.JDK1_8;
+		boolean useTypeAnnotations = this.environment.usesNullTypeAnnotations();
 		long inheritedNullnessBits = getReturnTypeNullnessTagBits(inheritedMethod, useTypeAnnotations);
 		long currentNullnessBits = getReturnTypeNullnessTagBits(currentMethod, useTypeAnnotations);
 		
@@ -439,12 +438,12 @@ public class ImplicitNullAnnotationVerifier {
 	}
 
 	void applyReturnNullBits(MethodBinding method, long nullnessBits) {
-		if (this.environment.globalOptions.sourceLevel < ClassFileConstants.JDK1_8) {
-			method.tagBits |= nullnessBits;
-		} else {
+		if (this.environment.usesNullTypeAnnotations()) {
 			if (!method.returnType.isBaseType()) {
 				method.returnType = this.environment.createAnnotatedType(method.returnType, this.environment.nullAnnotationsFromTagBits(nullnessBits));
 			}
+		} else {
+			method.tagBits |= nullnessBits;
 		}
 	}
 

@@ -835,7 +835,7 @@ public TypeBinding resolveType(BlockScope scope) {
 			fieldType = this.resolvedType;
 // SH}
 		if ((this.bits & ASTNode.IsStrictlyAssigned) == 0) {
-			fieldType = fieldType.capture(scope, this.sourceEnd);	// perform capture conversion if read access
+			fieldType = fieldType.capture(scope, this.sourceStart, this.sourceEnd);	// perform capture conversion if read access
 		}
 //{ObjectTeams: also wrap resolvedType:
 		fieldType = RoleTypeCreator.maybeWrapQualifiedRoleType(

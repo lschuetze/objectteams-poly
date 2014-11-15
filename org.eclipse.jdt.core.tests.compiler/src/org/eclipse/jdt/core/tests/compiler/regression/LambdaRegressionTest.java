@@ -331,6 +331,164 @@ public void test447767d() {
 	},
 	"Right!");
 }
+// https://bugs.eclipse.org/bugs/show_bug.cgi?id=449410, [1.8][compiler] Eclipse java compiler does not detect a bad return type in lambda expression  
+public void test449410() {
+	this.runNegativeTest(
+		new String[] {
+			"X.java", 
+			"import java.util.Collections;\n" +
+			"public class X {\n" +
+			"  public static void main(String[] args) {\n" +
+			"    Collections.emptyMap()\n" +
+			"        .entrySet()\n" +
+			"        .forEach(entry -> test() ? bad() : returnType());\n" +
+			"  }\n" +
+			"  private static boolean test() {\n" +
+			"    return (System.currentTimeMillis() & 0x1) == 0;\n" +
+			"  }\n" +
+			"  private static void returnType() {\n" +
+			"  }\n" +
+			"  private static void bad() {\n" +
+			"  }\n" +
+			"}\n"
+	},
+	"----------\n" + 
+	"1. ERROR in X.java (at line 6)\n" + 
+	"	.forEach(entry -> test() ? bad() : returnType());\n" + 
+	"	 ^^^^^^^\n" + 
+	"The method forEach(Consumer<? super Map.Entry<Object,Object>>) in the type Iterable<Map.Entry<Object,Object>> is not applicable for the arguments ((<no type> entry) -> {})\n" + 
+	"----------\n");
+}
+// https://bugs.eclipse.org/bugs/show_bug.cgi?id=449824, [1.8] Difference in behaviour with method references and lambdas  
+// Captures present behavior - may not be correct.
+public void test449824() {
+	this.runNegativeTest(
+		new String[] {
+			"X.java", 
+			"public class X {\n" +
+			"  public static void main(String[] args) {\n" +
+			"    Concrete<Target> fl = new Concrete<Target>();\n" +
+			"    fl.call(each -> each.doSomething()); // fails\n" +
+			"    fl.call((Target each) -> each.doSomething()); // fails\n" +
+			"    fl.call(Target::doSomething); // succeeds in Eclipse 4.5M3 and 4.4.1\n" +
+			"    // but fails in Java 8 1.8.0_11\n" +
+			"  }\n" +
+			"  public static class Target {\n" +
+			"    public void doSomething() {\n" +
+			"    }\n" +
+			"  }\n" +
+			"  public static class Concrete<T> implements Left<T>, Right<T> {\n" +
+			"    public void call(RightHand<? super T> p) {\n" +
+			"    }\n" +
+			"  }\n" +
+			"  public interface Left<T> {\n" +
+			"    default void call(LeftHand<? super T> p) {\n" +
+			"    }\n" +
+			"  }\n" +
+			"  public interface LeftHand<T> {\n" +
+			"    public void left(T t);\n" +
+			"  }\n" +
+			"  public interface Right<T> {\n" +
+			"    public void call(RightHand<? super T> p);\n" +
+			"  }\n" +
+			"  public interface RightHand<T> {\n" +
+			"    public void right(T t);\n" +
+			"  }\n" +
+			"}\n"
+	},
+	"----------\n" + 
+	"1. ERROR in X.java (at line 4)\n" + 
+	"	fl.call(each -> each.doSomething()); // fails\n" + 
+	"	   ^^^^\n" + 
+	"The method call(X.RightHand<? super X.Target>) is ambiguous for the type X.Concrete<X.Target>\n" + 
+	"----------\n");
+}
+// https://bugs.eclipse.org/bugs/show_bug.cgi?id=448954, [1.8][compiler] Suspect error: "The method foo(String, String, X::goo) is undefined for the type X"
+public void test448954() {
+	this.runConformTest(
+		new String[] {
+			"X.java", 
+			"interface I<T, U, V> {\n" +
+			"	T goo(U u, V v);\n" +
+			"}\n" +
+			"interface J {\n" +
+			"	void foo();\n" +
+			"}\n" +
+			"public class X {\n" +
+			"	static String goo(String s, String s2) {\n" +
+			"		return null;\n" +
+			"	}\n" +
+			"	static <T, U, V> T foo(T t, U u, J j) {\n" +
+			"		System.out.println(\"Wrong!\");\n" +
+			"		return null;\n" +
+			"	}\n" +
+			"	static <T, U, V> V foo(T t, U u, I<T, U, V> i) {\n" +
+			"		System.out.println(\"Right!\");\n" +
+			"		return null;\n" +
+			"	}\n" +
+			"	public static void main(String[] args) {\n" +
+			"		String s = goo(foo(\"String\", \"String\", X::goo));\n" +
+			"	}\n" +
+			"	static <T> T goo(T t) {\n" +
+			"		return t;\n" +
+			"	}\n" +
+			"}\n"
+	},
+	"Right!");
+}
+// https://bugs.eclipse.org/bugs/show_bug.cgi?id=450380, [1.8][compiler] NPE in Scope.getExactConstructor(..) for bad constructor reference
+public void test450380() {
+	this.runNegativeTest(
+		new String[] {
+			"X.java", 
+			"import java.util.ArrayList;\n" +
+			"import java.util.function.IntFunction;\n" +
+			"public class X {\n" +
+			"    IntFunction<ArrayList<String>> noo() {\n" +
+			"        return System::new;\n" +
+			"    }\n" +
+			"}\n"
+	},
+	"----------\n" + 
+	"1. ERROR in X.java (at line 5)\n" + 
+	"	return System::new;\n" + 
+	"	       ^^^^^^^^^^^\n" + 
+	"The type System does not define System(int) that is applicable here\n" + 
+	"----------\n");
+}
+// https://bugs.eclipse.org/bugs/show_bug.cgi?id=450604, [1.8] CCE at InferenceContext18.getParameter line 1377
+public void test450604() {
+	this.runNegativeTest(
+		new String[] {
+			"X.java", 
+			"import java.io.IOException;\n" +
+			"import java.util.List;\n" +
+			"import java.util.function.Function;\n" +
+			"public class X<T, E extends Exception> {\n" +
+			"	public static <T> List<T> of(T one) { return null; }\n" +
+			"	public @SafeVarargs static <T> List<T> of(T... items) { return null; }\n" +
+			"	public static void printDependencyLoops() throws IOException {\n" +
+			"		Function<? super String, ? extends List<String>> mapping = X::of;\n" +
+			"	}\n" +
+			"}\n"
+	},
+	"");
+}
+// https://bugs.eclipse.org/bugs/show_bug.cgi?id=450604, [1.8] CCE at InferenceContext18.getParameter line 1377
+public void test450604a() {
+	this.runConformTest(
+		new String[] {
+			"X.java", 
+			"import java.util.List;\n" +
+			"public class X {\n" +
+			"	public static <T> List<T> of() { return null; }\n" +
+			"	public static @SafeVarargs <T> List<T> of(T... values) { return null; }\n" +
+			"	static void walkAll() {\n" +
+			"		X.<String> of();\n" +
+			"	}\n" +
+			"}\n"
+	});
+}
 public static Class testClass() {
 	return LambdaRegressionTest.class;
 }

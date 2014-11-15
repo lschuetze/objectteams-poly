@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2013 IBM Corporation and others.
+ * Copyright (c) 2000, 2014 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -21,6 +21,7 @@
  *								bug 388281 - [compiler][null] inheritance of null annotations as an option
  *								bug 381443 - [compiler][null] Allow parameter widening from @NonNull to unannotated
  *								bug 383368 - [compiler][null] syntactic null analysis for field references
+ *								Bug 435805 - [1.8][compiler][null] Java 8 compiler does not recognize declaration style null annotations
  *     Jesper Steen Moller - Contributions for
  *								bug 404146 - [1.7][compiler] nested try-catch-finally-blocks leads to unrunnable Java byte code
  *								bug 407297 - [1.8][compiler] Control generation of parameter names by option
@@ -152,7 +153,6 @@ public class CompilerOptions {
 	// OPTION_Store_Annotations: undocumented option for testing purposes
 	public static final String OPTION_Store_Annotations = "org.eclipse.jdt.core.compiler.storeAnnotations"; //$NON-NLS-1$
 	public static final String OPTION_EmulateJavacBug8031744 = "org.eclipse.jdt.core.compiler.emulateJavacBug8031744"; //$NON-NLS-1$
-	public static final String OPTION_PostResolutionRawTypeCompatibilityCheck = "org.eclipse.jdt.core.compiler.postResolutionRawTypeCompatibilityCheck"; //$NON-NLS-1$
 	public static final String OPTION_ReportRedundantSuperinterface =  "org.eclipse.jdt.core.compiler.problem.redundantSuperinterface"; //$NON-NLS-1$
 	public static final String OPTION_ReportComparingIdentical =  "org.eclipse.jdt.core.compiler.problem.comparingIdentical"; //$NON-NLS-1$
 	public static final String OPTION_ReportMissingSynchronizedOnInheritedMethod =  "org.eclipse.jdt.core.compiler.problem.missingSynchronizedOnInheritedMethod"; //$NON-NLS-1$
@@ -525,8 +525,6 @@ public class CompilerOptions {
 	public boolean processAnnotations;
 	/** Store annotations */
 	public boolean storeAnnotations;
-	/** extra check for raw type compatibility post overload resolution */
-	public boolean postResolutionRawTypeCompatibilityCheck = true;
 	/** Specify if need to report missing override annotation for a method implementing an interface method (java 1.6 and above)*/
 	public boolean reportMissingOverrideAnnotationForInterfaceMethodImplementation;
 	/** Indicate if annotation processing generates classfiles */
@@ -585,6 +583,9 @@ public class CompilerOptions {
 
 	public boolean complainOnUninternedIdentityComparison;
 	public boolean emulateJavacBug8031744 = true;
+
+	/** Not directly configurable, derived from other options by LookupEnvironment.usesNullTypeAnnotations() */
+	public Boolean useNullTypeAnnotations = null;
 
 	// keep in sync with warningTokenToIrritant and warningTokenFromIrritant
 	public final static String[] warningTokens = {
@@ -1454,7 +1455,6 @@ public class CompilerOptions {
 		optionsMap.put(OPTION_Process_Annotations, this.processAnnotations ? ENABLED : DISABLED);
 		optionsMap.put(OPTION_Store_Annotations, this.storeAnnotations ? ENABLED : DISABLED);
 		optionsMap.put(OPTION_EmulateJavacBug8031744, this.emulateJavacBug8031744 ? ENABLED : DISABLED);
-		optionsMap.put(OPTION_PostResolutionRawTypeCompatibilityCheck, this.postResolutionRawTypeCompatibilityCheck ? ENABLED : DISABLED);
 		optionsMap.put(OPTION_ReportRedundantSuperinterface, getSeverityString(RedundantSuperinterface));
 		optionsMap.put(OPTION_ReportComparingIdentical, getSeverityString(ComparingIdentical));
 		optionsMap.put(OPTION_ReportMissingSynchronizedOnInheritedMethod, getSeverityString(MissingSynchronizedModifierInInheritedMethod));
@@ -2213,13 +2213,6 @@ public class CompilerOptions {
 				this.emulateJavacBug8031744 = true;
 			} else if (DISABLED.equals(optionValue)) {
 				this.emulateJavacBug8031744 = false;
-			}
-		}
-		if ((optionValue = optionsMap.get(OPTION_PostResolutionRawTypeCompatibilityCheck)) != null) {
-			if (ENABLED.equals(optionValue)) {
-				this.postResolutionRawTypeCompatibilityCheck = true;
-			} else if (DISABLED.equals(optionValue)) {
-				this.postResolutionRawTypeCompatibilityCheck = false;
 			}
 		}
 		if ((optionValue = optionsMap.get(OPTION_ReportUninternedIdentityComparison)) != null) {

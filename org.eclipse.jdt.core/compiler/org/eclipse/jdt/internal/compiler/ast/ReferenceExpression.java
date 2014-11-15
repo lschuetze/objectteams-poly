@@ -40,6 +40,7 @@ package org.eclipse.jdt.internal.compiler.ast;
 
 import static org.eclipse.jdt.internal.compiler.ast.ExpressionContext.INVOCATION_CONTEXT;
 
+import java.util.HashMap;
 import org.eclipse.jdt.core.compiler.CharOperation;
 import org.eclipse.jdt.internal.compiler.ASTVisitor;
 import org.eclipse.jdt.internal.compiler.CompilationResult;
@@ -47,6 +48,7 @@ import org.eclipse.jdt.internal.compiler.IErrorHandlingPolicy;
 import org.eclipse.jdt.internal.compiler.classfmt.ClassFileConstants;
 import org.eclipse.jdt.internal.compiler.codegen.CodeStream;
 import org.eclipse.jdt.internal.compiler.codegen.ConstantPool;
+import org.eclipse.jdt.internal.compiler.env.ICompilationUnit;
 import org.eclipse.jdt.internal.compiler.flow.ExceptionHandlingFlowContext;
 import org.eclipse.jdt.internal.compiler.flow.FlowContext;
 import org.eclipse.jdt.internal.compiler.flow.FlowInfo;
@@ -58,9 +60,11 @@ import org.eclipse.jdt.internal.compiler.lookup.Binding;
 import org.eclipse.jdt.internal.compiler.lookup.BlockScope;
 import org.eclipse.jdt.internal.compiler.lookup.ExtraCompilerModifiers;
 import org.eclipse.jdt.internal.compiler.lookup.InferenceContext18;
-import org.eclipse.jdt.internal.compiler.lookup.IntersectionCastTypeBinding;
+import org.eclipse.jdt.internal.compiler.lookup.IntersectionTypeBinding18;
 import org.eclipse.jdt.internal.compiler.lookup.InvocationSite;
 import org.eclipse.jdt.internal.compiler.lookup.MethodBinding;
+import org.eclipse.jdt.internal.compiler.lookup.ParameterizedGenericMethodBinding;
+import org.eclipse.jdt.internal.compiler.lookup.ParameterizedMethodBinding;
 import org.eclipse.jdt.internal.compiler.lookup.ParameterizedTypeBinding;
 import org.eclipse.jdt.internal.compiler.lookup.PolyTypeBinding;
 import org.eclipse.jdt.internal.compiler.lookup.ProblemReasons;
@@ -75,7 +79,7 @@ import org.eclipse.jdt.internal.compiler.lookup.TypeConstants;
 import org.eclipse.jdt.internal.compiler.lookup.TypeIds;
 import org.eclipse.jdt.internal.compiler.parser.Parser;
 
-public class ReferenceExpression extends FunctionalExpression implements InvocationSite {
+public class ReferenceExpression extends FunctionalExpression implements IPolyExpression, InvocationSite {
 	
 	public Expression lhs;
 	public TypeReference [] typeArguments;
@@ -93,11 +97,16 @@ public class ReferenceExpression extends FunctionalExpression implements Invocat
 	private MethodBinding exactMethodBinding; // != null ==> exact method reference.
 	private boolean receiverPrecedesParameters = false;
 	private TypeBinding[] freeParameters; // descriptor parameters as used for method lookup - may or may not include the receiver
-	public boolean trialResolution = false;
-	public int inferenceKind; // TODO: define life-cycle: when to re-initialize? How long to keep value?
+	private boolean checkingPotentialCompatibility;
+	private MethodBinding[] potentialMethods = Binding.NO_METHODS;
+	protected ReferenceExpression original;
+	private HashMap<TypeBinding, ReferenceExpression> copiesPerTargetType;
+	public char[] text; // source representation of the expression.
+	private HashMap<ParameterizedGenericMethodBinding, InferenceContext18> inferenceContexts;
 	
 	public ReferenceExpression() {
 		super();
+		this.original = this;
 	}
 	
 	public void initialize(CompilationResult result, Expression expression, TypeReference [] optionalTypeArguments, char [] identifierOrNew, int sourceEndPosition) {
@@ -108,13 +117,22 @@ public class ReferenceExpression extends FunctionalExpression implements Invocat
 		this.sourceStart = expression.sourceStart;
 		this.sourceEnd = sourceEndPosition;
 	}
+	
+	private ReferenceExpression copy() {
+		final Parser parser = new Parser(this.enclosingScope.problemReporter(), false);
+		final ICompilationUnit compilationUnit = this.compilationResult.getCompilationUnit();
+		final char[] source = compilationUnit != null ? compilationUnit.getContents() : this.text;
+		ReferenceExpression copy =  (ReferenceExpression) parser.parseExpression(source, compilationUnit != null ? this.sourceStart : 0, this.sourceEnd - this.sourceStart + 1, 
+										this.enclosingScope.referenceCompilationUnit(), false /* record line separators */);
+		copy.original = this;
+		copy.sourceStart = this.sourceStart;
+		copy.sourceEnd = this.sourceEnd;
+		return copy;
+	}
  
 	public void generateImplicitLambda(BlockScope currentScope, CodeStream codeStream, boolean valueRequired) {
 		
-		final Parser parser = new Parser(this.enclosingScope.problemReporter(), false);
-		final char[] source = this.compilationResult.getCompilationUnit().getContents();
-		ReferenceExpression copy =  (ReferenceExpression) parser.parseExpression(source, this.sourceStart, this.sourceEnd - this.sourceStart + 1, 
-										this.enclosingScope.referenceCompilationUnit(), false /* record line separators */);
+		ReferenceExpression copy = copy();
 		
 		int argc = this.descriptor.parameters.length;
 		
@@ -191,7 +209,7 @@ public class ReferenceExpression extends FunctionalExpression implements Invocat
 		// these cases are either too complicated, impossible to handle or result in significant code duplication 
 		return (this.binding.isVarargs() || 
 				(isConstructorReference() && this.receiverType.syntheticOuterLocalVariables() != null && currentScope.methodScope().isStatic) ||
-				this.expectedType instanceof IntersectionCastTypeBinding || // marker interfaces require alternate meta factory.
+				this.expectedType instanceof IntersectionTypeBinding18 || // marker interfaces require alternate meta factory.
 				this.expectedType.findSuperTypeOriginatingFrom(currentScope.getJavaIoSerializable()) != null || // serialization support.
 				this.requiresBridges()); // bridges.
 		// To fix: We should opt for direct code generation wherever possible.
@@ -354,19 +372,28 @@ public class ReferenceExpression extends FunctionalExpression implements Invocat
 		return flowInfo;
 	}
 
+	@Override
+	public boolean checkingPotentialCompatibility() {
+		return this.checkingPotentialCompatibility;
+	}
+	
+	@Override
+	public void acceptPotentiallyCompatibleMethods(MethodBinding[] methods) {
+		if (this.checkingPotentialCompatibility)
+			this.potentialMethods = methods;
+	}
+	
 	public TypeBinding resolveType(BlockScope scope) {
-		
-		if (this.expectedType != null && !this.trialResolution) {  // final resolution ? may be not - i.e may be, but only in a non-final universe.
-			recordFunctionalType(scope);
-		}
 		
 		final CompilerOptions compilerOptions = scope.compilerOptions();
 		TypeBinding lhsType;
     	if (this.constant != Constant.NotAConstant) {
     		this.constant = Constant.NotAConstant;
     		this.enclosingScope = scope;
-    		this.lhs.bits |= ASTNode.IgnoreRawTypeCheck;
+    		if (this.original == this)
+    			recordFunctionalType(scope);
 
+    		this.lhs.bits |= ASTNode.IgnoreRawTypeCheck;
     		lhsType = this.lhs.resolveType(scope);
     		this.lhs.computeConversion(scope, lhsType, lhsType);
     		if (this.typeArguments != null) {
@@ -389,27 +416,69 @@ public class ReferenceExpression extends FunctionalExpression implements Invocat
     				return this.resolvedType = null;
     			}
     		}
+    		if (this.typeArgumentsHaveErrors || lhsType == null)
+				return this.resolvedType = null;
+	
+    		if (lhsType.problemId() == ProblemReasons.AttemptToBypassDirectSuper)
+    			lhsType = lhsType.closestMatch();	// improve resolving experience
+        	if (lhsType == null || !lhsType.isValidBinding()) 
+    			return this.resolvedType = null;	// nope, no useful type found
+        	
+    		this.receiverType = lhsType;
+			this.haveReceiver = true;
+			if (this.lhs instanceof NameReference) {
+				if ((this.lhs.bits & ASTNode.RestrictiveFlagMASK) == Binding.TYPE) {
+					this.haveReceiver = false;
+				}
+			} else if (this.lhs instanceof TypeReference) {
+				this.haveReceiver = false;
+			}
+			if (!this.haveReceiver && !this.lhs.isSuper() && !this.isArrayConstructorReference())
+				this.receiverType = lhsType.capture(scope, this.sourceStart, this.sourceEnd);
+
+			if (!lhsType.isRawType()) // RawType::m and RawType::new are not exact method references
+	    		this.binding = this.exactMethodBinding = isMethodReference() ? scope.getExactMethod(lhsType, this.selector, this) : scope.getExactConstructor(lhsType, this);
+
+    		if (isConstructorReference() && !lhsType.canBeInstantiated()) {
+    			scope.problemReporter().cannotInstantiate(this.lhs, lhsType);
+    			return this.resolvedType = null;
+    		}
+    		
+    		if (this.lhs instanceof TypeReference && ((TypeReference)this.lhs).hasNullTypeAnnotation()) {
+    			scope.problemReporter().nullAnnotationUnsupportedLocation((TypeReference) this.lhs);
+    		}
+
+    		if (isConstructorReference() && lhsType.isArrayType()) {
+	        	final TypeBinding leafComponentType = lhsType.leafComponentType();
+				if (!leafComponentType.isReifiable()) {
+	        		scope.problemReporter().illegalGenericArray(leafComponentType, this);
+	        		return this.resolvedType = null;
+	        	}
+				if (this.typeArguments != null) {
+	                scope.problemReporter().invalidTypeArguments(this.typeArguments);
+	                return this.resolvedType = null;
+	            }
+	        	this.binding = this.exactMethodBinding = scope.getExactConstructor(lhsType, this);
+	        }
+
+	    	if (this.expectedType == null && this.expressionContext == INVOCATION_CONTEXT) {
+	    		return new PolyTypeBinding(this);
+			}
+
     	} else {
     		lhsType = this.lhs.resolvedType;
     		if (this.typeArgumentsHaveErrors || lhsType == null)
 				return this.resolvedType = null;
     	}
 
-    	if (lhsType != null && !lhsType.isRawType()) // RawType::m and RawType::new are not exact method references
-    		this.exactMethodBinding = isMethodReference() ? scope.getExactMethod(lhsType, this.selector, this) : scope.getExactConstructor(lhsType, this);
+    	super.resolveType(scope);
 
-    	if (this.expectedType == null && this.expressionContext == INVOCATION_CONTEXT) {
-    		return new PolyTypeBinding(this);
-		}
-		super.resolveType(scope);
-		
-    	if (lhsType == null) 
-			return this.resolvedType = null; 	// no hope
-		if (lhsType.problemId() == ProblemReasons.AttemptToBypassDirectSuper)
-			lhsType = lhsType.closestMatch();	// improve resolving experience
-    	if (!lhsType.isValidBinding()) 
-			return this.resolvedType = null;	// nope, no useful type found
-    	
+		/* For Reference expressions unlike other call sites, we always have a receiver _type_ since LHS of :: cannot be empty. 
+		   LHS's resolved type == actual receiver type. All code below only when a valid descriptor is available.
+		*/
+    	if (this.descriptor == null || !this.descriptor.isValidBinding())
+    		return this.resolvedType =  null;
+     
     	// Convert parameters into argument expressions for look up.
 		TypeBinding[] descriptorParameters = descriptorParametersAsArgumentExpressions();
 		
@@ -418,15 +487,6 @@ public class ReferenceExpression extends FunctionalExpression implements Invocat
 			return this.resolvedType = null;
 		}
 		
-		if (isConstructorReference() && !lhsType.canBeInstantiated()) {
-			scope.problemReporter().cannotInstantiate(this.lhs, lhsType);
-			return this.resolvedType = null;
-		}
-		
-		if (this.lhs instanceof TypeReference && ((TypeReference)this.lhs).hasNullTypeAnnotation()) {
-			scope.problemReporter().nullAnnotationUnsupportedLocation((TypeReference) this.lhs);
-		}
-
 		/* 15.13: "If a method reference expression has the form super :: [TypeArguments] Identifier or TypeName . super :: [TypeArguments] Identifier,
 		   it is a compile-time error if the expression occurs in a static context. ": This is nop since the primary when it resolves
 		   itself will complain automatically.
@@ -438,27 +498,8 @@ public class ReferenceExpression extends FunctionalExpression implements Invocat
 		*/
 		
 		// handle the special case of array construction first.
-		this.receiverType = lhsType;
-		
-		this.haveReceiver = true;
-		if (this.lhs instanceof NameReference) {
-			if ((this.lhs.bits & ASTNode.RestrictiveFlagMASK) == Binding.TYPE) {
-				this.haveReceiver = false;
-			}
-		} else if (this.lhs instanceof TypeReference) {
-			this.haveReceiver = false;
-		}
-		
-		if (!this.haveReceiver && !this.lhs.isSuper() && !this.isArrayConstructorReference())
-			this.receiverType = lhsType.capture(scope, this.sourceEnd);
-		
 		final int parametersLength = descriptorParameters.length;
         if (isConstructorReference() && lhsType.isArrayType()) {
-        	final TypeBinding leafComponentType = lhsType.leafComponentType();
-			if (!leafComponentType.isReifiable()) {
-        		scope.problemReporter().illegalGenericArray(leafComponentType, this);
-        		return this.resolvedType = null;
-        	}
         	if (parametersLength != 1 || scope.parameterCompatibilityLevel(descriptorParameters[0], TypeBinding.INT) == Scope.NOT_COMPATIBLE) {
         		scope.problemReporter().invalidArrayConstructorReference(this, lhsType, descriptorParameters);
         		return this.resolvedType = null;
@@ -467,22 +508,9 @@ public class ReferenceExpression extends FunctionalExpression implements Invocat
         		scope.problemReporter().constructedArrayIncompatible(this, lhsType, this.descriptor.returnType);
         		return this.resolvedType = null;
         	}
-
-            if (this.typeArguments != null) {
-                scope.problemReporter().invalidTypeArguments(this.typeArguments);
-                return this.resolvedType = null;
-            }
-
-        	this.binding = this.exactMethodBinding = scope.getExactConstructor(lhsType, this);
         	return this.resolvedType;
         }
 
-		/* For Reference expressions unlike other call sites, we always have a receiver _type_ since LHS of :: cannot be empty. 
-		   LHS's resolved type == actual receiver type. All code below only when a valid descriptor is available.
-		 */
-        if (this.descriptor == null || !this.descriptor.isValidBinding())
-        	return this.resolvedType =  null;
-        
         // 15.13.1
         final boolean isMethodReference = isMethodReference();
         this.depth = 0;
@@ -510,7 +538,7 @@ public class ReferenceExpression extends FunctionalExpression implements Invocat
         		if (this.receiverType.isRawType()) {
         			TypeBinding superType = potentialReceiver.findSuperTypeOriginatingFrom(this.receiverType);
         			if (superType != null)
-        				typeToSearch = superType.capture(scope, this.sourceEnd);
+        				typeToSearch = superType.capture(scope, this.sourceStart, this.sourceEnd);
         		}
         		TypeBinding [] parameters = Binding.NO_PARAMETERS;
         		if (parametersLength > 1) {
@@ -656,7 +684,7 @@ public class ReferenceExpression extends FunctionalExpression implements Invocat
     			} else {
     				returnType = this.binding.returnType;
     				if (returnType != null) {
-    					returnType = returnType.capture(scope, this.sourceEnd);
+    					returnType = returnType.capture(scope, this.sourceStart, this.sourceEnd);
     				}
     			}
     		}
@@ -686,53 +714,63 @@ public class ReferenceExpression extends FunctionalExpression implements Invocat
 		*/
 		if (this.expectedType.isParameterizedType()) {
 			ParameterizedTypeBinding type = (ParameterizedTypeBinding) this.expectedType;
-			MethodBinding method = type.getSingleAbstractMethod(this.enclosingScope, true, this.sourceEnd);
+			MethodBinding method = type.getSingleAbstractMethod(this.enclosingScope, true, this.sourceStart, this.sourceEnd);
 			return method.parameters;
 		} 
 		return this.descriptor.parameters;
 	}
 
-	/** During inference: Try to find an applicable method binding without causing undesired side-effects. */
-	public MethodBinding findCompileTimeMethodTargeting(TypeBinding targetType, Scope scope) {
-		if (this.exactMethodBinding != null) {
+	// Cache resolved copies against various target types, so repeat overload resolution and possibly type inference could be avoided.
+	private ReferenceExpression cachedResolvedCopy(TypeBinding targetType) {
+
+		ReferenceExpression copy = this.copiesPerTargetType != null ? this.copiesPerTargetType.get(targetType) : null;
+		if (copy != null)
+			return copy;
+		
+		IErrorHandlingPolicy oldPolicy = this.enclosingScope.problemReporter().switchErrorHandlingPolicy(silentErrorHandlingPolicy);
+		try {
+			copy = copy();
+			if (copy == null) { // should never happen even for code assist.
+				return null;
+			}
+			copy.setExpressionContext(this.expressionContext);
+			copy.setExpectedType(targetType);
+			copy.resolveType(this.enclosingScope);
+			
+			if (this.copiesPerTargetType == null)
+				this.copiesPerTargetType = new HashMap<TypeBinding, ReferenceExpression>();
+			this.copiesPerTargetType.put(targetType, copy);
+			
+			return copy;
+		} finally {
+			this.enclosingScope.problemReporter().switchErrorHandlingPolicy(oldPolicy);
+		}
+	}
+	
+	public void registerInferenceContext(ParameterizedGenericMethodBinding method, InferenceContext18 context) {
+		if (this.inferenceContexts == null)
+			this.inferenceContexts = new HashMap<ParameterizedGenericMethodBinding, InferenceContext18>();
+		this.inferenceContexts.put(method, context);
+	}
+	
+	public InferenceContext18 getInferenceContext(ParameterizedMethodBinding method) {
+		if (this.inferenceContexts == null)
+			return null;
+		return this.inferenceContexts.get(method);
+	}
+	
+	public ReferenceExpression resolveExpressionExpecting(TypeBinding targetType, Scope scope) {
+		if (this.exactMethodBinding != null) { // We may see inference variables in target type.
 			MethodBinding functionType = targetType.getSingleAbstractMethod(scope, true);
 			if (functionType == null)
 				return null;
 			int n = functionType.parameters.length;
 			int k = this.exactMethodBinding.parameters.length;
-			return (n == k || n == k + 1) ? this.exactMethodBinding : null;
+			return (n == k || n == k + 1) ? this : null;
 		}
-		MethodBinding targetMethod = internalResolveTentatively(targetType, scope);
-		if (targetMethod == null || !targetMethod.isValidBinding())
-			return null;
-		return targetMethod;
-	}
-
-	MethodBinding internalResolveTentatively(TypeBinding targetType, Scope scope) {
-		// FIXME: could enclosingScope still be null here??
-		IErrorHandlingPolicy oldPolicy = this.enclosingScope.problemReporter().switchErrorHandlingPolicy(silentErrorHandlingPolicy);
-		ExpressionContext previousContext = this.expressionContext;
-		MethodBinding previousBinding = this.binding;
-		MethodBinding previousDescriptor = this.descriptor;
-		TypeBinding previousResolvedType = this.resolvedType;
-		TypeBinding previousExpectedType = this.expectedType;
-		try {
-			setExpressionContext(INVOCATION_CONTEXT);
-			setExpectedType(targetType);
-			this.binding = null;
-			this.trialResolution = true;
-			resolveType(this.enclosingScope);
-			return this.binding;
-		} finally {
-			this.enclosingScope.problemReporter().switchErrorHandlingPolicy(oldPolicy);
-			// remove *any relevant* traces of this 'inofficial' resolving:
-			this.binding = previousBinding;
-			this.descriptor = previousDescriptor;
-			this.resolvedType = previousResolvedType;
-			setExpressionContext(previousContext);
-			this.expectedType = previousExpectedType;
-			this.trialResolution = false;
-		}
+		// descriptors parameters should be free of inference variables.
+		ReferenceExpression copy = cachedResolvedCopy(targetType); 
+		return copy != null && copy.resolvedType != null && copy.resolvedType.isValidBinding() && copy.binding != null && copy.binding.isValidBinding() ? copy : null;
 	}
 
 	public boolean isConstructorReference() {
@@ -840,30 +878,102 @@ public class ReferenceExpression extends FunctionalExpression implements Invocat
 		return expressions;
 	}
 
-	public boolean isCompatibleWith(TypeBinding left, Scope scope) {
-		if (this.binding != null && this.binding.isValidBinding() // binding indicates if full resolution has already happened
-				&& this.resolvedType != null && this.resolvedType.isValidBinding()) {
-			return this.resolvedType.isCompatibleWith(left, scope);
-		}
-		// 15.13.2
-		final MethodBinding sam = left.getSingleAbstractMethod(this.enclosingScope, true);
+	@Override
+	public boolean isPotentiallyCompatibleWith(TypeBinding targetType, Scope scope) {
+		
+		// We get here only when the reference expression is NOT pertinent to applicability.
+		if (!super.isPertinentToApplicability(targetType, null))
+			return true;
+		final MethodBinding sam = targetType.getSingleAbstractMethod(this.enclosingScope, true);
 		if (sam == null || !sam.isValidBinding())
 			return false;
-		boolean isCompatible;
-		setExpectedType(left);
-		IErrorHandlingPolicy oldPolicy = this.enclosingScope.problemReporter().switchErrorHandlingPolicy(silentErrorHandlingPolicy);
-		try {
-			this.binding = null;
-			this.trialResolution = true;
-			resolveType(this.enclosingScope);
-		} finally {
-			this.enclosingScope.problemReporter().switchErrorHandlingPolicy(oldPolicy);
-			isCompatible = this.binding != null && this.binding.isValidBinding();
-			this.binding = null;
-			setExpectedType(null);
-			this.trialResolution = false;
+		if (this.typeArgumentsHaveErrors || this.lhs.resolvedType == null || !this.lhs.resolvedType.isValidBinding())
+			return false;
+		
+		int parametersLength = sam.parameters.length;
+		TypeBinding[] descriptorParameters = new TypeBinding[parametersLength];
+		for (int i = 0; i < parametersLength; i++) {
+			descriptorParameters[i] = new ReferenceBinding() {
+				{
+					this.compoundName = CharOperation.NO_CHAR_CHAR;
+				}
+				public boolean isCompatibleWith(TypeBinding otherType, Scope captureScope) {
+					return true;
+				}
+				public TypeBinding findSuperTypeOriginatingFrom(TypeBinding otherType) {
+					return otherType;
+				}
+				public String toString() {
+					return "(wildcard)"; //$NON-NLS-1$
+				}
+			};
 		}
-		return isCompatible;
+		
+		// 15.13.1
+        final boolean isMethodReference = isMethodReference();
+        this.freeParameters = descriptorParameters;
+        this.checkingPotentialCompatibility = true;
+        try {
+        	MethodBinding compileTimeDeclaration = 
+        			this.exactMethodBinding != null ? this.exactMethodBinding :
+        							isMethodReference ? scope.getMethod(this.receiverType, this.selector, descriptorParameters, this) :
+        												scope.getConstructor((ReferenceBinding) this.receiverType, descriptorParameters, this);
+
+        	if (compileTimeDeclaration != null && compileTimeDeclaration.isValidBinding()) // we have the mSMB.
+        		this.potentialMethods = new MethodBinding [] { compileTimeDeclaration };
+        	else {
+        		/* We EITHER have potential methods that are input to Scope.mSMb already captured in this.potentialMethods 
+        	       OR there is no potentially compatible compile time declaration ...
+        		 */
+        	}
+
+        	/* 15.12.2.1: A method reference expression (§15.13) is potentially compatible with a functional interface type if, where the type's function type arity is n, 
+		       there exists at least one potentially applicable method for the method reference expression with arity n (§15.13.1), and one of the following is true:
+                   – The method reference expression has the form ReferenceType ::[TypeArguments] Identifier and at least one potentially applicable method is
+                        i) static and supports arity n, or ii) not static and supports arity n-1.
+                   – The method reference expression has some other form and at least one potentially applicable method is not static.
+        	*/
+
+        	for (int i = 0, length = this.potentialMethods.length; i < length; i++) {
+        		if (this.potentialMethods[i].isStatic() || this.potentialMethods[i].isConstructor()) {
+        			if (!this.haveReceiver) // form ReferenceType ::[TypeArguments] Identifier
+        				return true;
+        		} else {
+        			if (this.haveReceiver) // some other form.
+        				return true;
+        		}
+        	}
+
+        	if (this.haveReceiver || parametersLength == 0)
+        		return false;
+
+        	System.arraycopy(descriptorParameters, 1, descriptorParameters = new TypeBinding[parametersLength - 1], 0, parametersLength - 1);
+        	this.freeParameters = descriptorParameters;
+        	compileTimeDeclaration = this.exactMethodBinding != null ? this.exactMethodBinding : scope.getMethod(this.receiverType, this.selector, descriptorParameters, this);
+        
+        	if (compileTimeDeclaration != null && compileTimeDeclaration.isValidBinding()) // we have the mSMB.
+        		this.potentialMethods = new MethodBinding [] { compileTimeDeclaration };
+        	else {
+        		/* We EITHER have potential methods that are input to Scope.mSMb already captured in this.potentialMethods 
+              	   OR there is no potentially compatible compile time declaration ...
+        		*/
+        	}
+        	for (int i = 0, length = this.potentialMethods.length; i < length; i++) {
+        		if (!this.potentialMethods[i].isStatic()) {
+        			return true;
+        		}
+        	}
+        } finally {
+        	this.checkingPotentialCompatibility = false;
+        	this.potentialMethods = Binding.NO_METHODS;
+        	this.freeParameters = null; // not used after method lookup
+        }
+        return false;
+	}
+	
+	public boolean isCompatibleWith(TypeBinding targetType, Scope scope) {
+		ReferenceExpression copy = cachedResolvedCopy(targetType);
+		return copy != null && copy.resolvedType != null && copy.resolvedType.isValidBinding() && copy.binding != null && copy.binding.isValidBinding();
 	}
 	
 	public boolean sIsMoreSpecific(TypeBinding s, TypeBinding t, Scope scope) {
@@ -874,7 +984,7 @@ public class ReferenceExpression extends FunctionalExpression implements Invocat
 		if (this.exactMethodBinding == null || t.findSuperTypeOriginatingFrom(s) != null)
 			return false;
 		
-		s = s.capture(this.enclosingScope, this.sourceEnd);
+		s = s.capture(this.enclosingScope, this.sourceStart, this.sourceEnd);
 		MethodBinding sSam = s.getSingleAbstractMethod(this.enclosingScope, true);
 		if (sSam == null || !sSam.isValidBinding())
 			return false;

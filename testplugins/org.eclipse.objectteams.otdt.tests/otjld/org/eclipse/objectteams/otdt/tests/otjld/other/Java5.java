@@ -5231,13 +5231,8 @@ public class Java5 extends AbstractOTJLDTest {
     		"----------\n" + 
     		"1. ERROR in TeamA120eit2.java (at line 3)\n" + 
     		"	protected class R playedBy B base when(unfinished.) {}\n" + 
-    		"	                                       ^^^^^^^^^^\n" + 
-    		"unfinished cannot be resolved to a variable\n" + 
-    		"----------\n" + 
-    		"2. ERROR in TeamA120eit2.java (at line 3)\n" + 
-    		"	protected class R playedBy B base when(unfinished.) {}\n" + 
     		"	                                                 ^\n" + 
-    		"Syntax error on token \".\", delete this token\n" + 
+    		"Syntax error on token \".\", this expected after this token\n" + 
     		"----------\n");
     }
 

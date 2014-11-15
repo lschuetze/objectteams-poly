@@ -31,8 +31,9 @@ import org.eclipse.jdt.internal.codeassist.impl.*;
 import org.eclipse.jdt.internal.compiler.ast.*;
 import org.eclipse.jdt.internal.compiler.lookup.BlockScope;
 import org.eclipse.jdt.internal.compiler.lookup.TypeBinding;
-import org.eclipse.jdt.internal.compiler.parser.*;
-import org.eclipse.jdt.internal.compiler.problem.*;
+import org.eclipse.jdt.internal.compiler.parser.JavadocParser;
+import org.eclipse.jdt.internal.compiler.parser.RecoveredType;
+import org.eclipse.jdt.internal.compiler.problem.ProblemReporter;
 import org.eclipse.jdt.internal.compiler.util.Util;
 import org.eclipse.objectteams.otdt.core.compiler.IOTConstants;
 import org.eclipse.objectteams.otdt.internal.codeassist.SelectionOnBaseCallMessageSend;
@@ -1271,7 +1272,7 @@ protected void consumeTypeImportOnDemandDeclarationName() {
 		this.restartRecovery = true; // used to avoid branching back into the regular automaton
 	}
 }
-protected CommitRollbackParser createSnapShotParser() {
+protected SelectionParser createSnapShotParser() {
 	return new SelectionParser(this.problemReporter);
 }
 public ImportReference createAssistImportReference(char[][] tokens, long[] positions, int mod){

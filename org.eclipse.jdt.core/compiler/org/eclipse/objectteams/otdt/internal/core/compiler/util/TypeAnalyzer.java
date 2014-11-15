@@ -610,6 +610,8 @@ public class TypeAnalyzer  {
 				@Override public boolean isTypeAccess() { return false; }
 				@Override public boolean isSuperAccess() { return false; }
 				@Override public boolean isQualifiedSuper() { return false; }
+				@Override public boolean checkingPotentialCompatibility() { return false; }
+				@Override public void acceptPotentiallyCompatibleMethods(MethodBinding[] methods) { /* nop */ }
 				
 				@Override
 				public TypeBinding invocationTargetType() {

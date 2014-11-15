@@ -767,7 +767,7 @@ public TypeBinding getOtherFieldBindings(BlockScope scope) {
 		this.constant = ((FieldBinding) this.binding).constant();
 		// perform capture conversion if read access
 		return (type != null && (this.bits & ASTNode.IsStrictlyAssigned) == 0)
-				? type.capture(scope, this.sourceEnd)
+				? type.capture(scope, this.sourceStart, this.sourceEnd)
 				: type;
 	}
 	// allocation of the fieldBindings array	and its respective constants
@@ -787,7 +787,7 @@ public TypeBinding getOtherFieldBindings(BlockScope scope) {
 
 		this.bits &= ~ASTNode.DepthMASK; // flush previous depth if any
 		FieldBinding previousField = field;
-		field = scope.getField(type.capture(scope, (int)this.sourcePositions[index]), token, this);
+		field = scope.getField(type.capture(scope, (int) (this.sourcePositions[index] >>> 32), (int)this.sourcePositions[index]), token, this);
 		int place = index - this.indexOfFirstFieldBinding;
 		this.otherBindings[place] = field;
 		this.otherDepths[place] = (this.bits & ASTNode.DepthMASK) >> ASTNode.DepthSHIFT;
@@ -922,7 +922,7 @@ public TypeBinding getOtherFieldBindings(BlockScope scope) {
 // SH}
 	// perform capture conversion if read access
 	return (type != null && (this.bits & ASTNode.IsStrictlyAssigned) == 0)
-			? type.capture(scope, this.sourceEnd)
+			? type.capture(scope, this.sourceStart, this.sourceEnd)
 			: type;
 }
 

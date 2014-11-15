@@ -557,7 +557,7 @@ public class RoleTypeCreator implements TagBits {
 	        		{ this.tagBits = rawUnresolved.tagBits; }
 	        	};
 	        }
-	        if (typeToWrap instanceof IntersectionCastTypeBinding) { // FIXME (recurse?)
+	        if (typeToWrap instanceof IntersectionTypeBinding18) { // FIXME (recurse?)
 	        	return originalType;
 	        }
 	        ReferenceBinding refBinding = (ReferenceBinding)typeToWrap;

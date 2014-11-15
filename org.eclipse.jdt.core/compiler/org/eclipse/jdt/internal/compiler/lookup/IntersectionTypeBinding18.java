@@ -4,7 +4,7 @@
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
- * 
+ *
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *     Stephan Herrmann - Contribution for
@@ -23,13 +23,13 @@ import java.util.Set;
 import org.eclipse.jdt.internal.compiler.ast.Wildcard;
 import org.eclipse.jdt.internal.compiler.classfmt.ClassFileConstants;
 
-public class IntersectionCastTypeBinding extends ReferenceBinding {
+public class IntersectionTypeBinding18 extends ReferenceBinding { // abstraction used for intersection casts in Java 8 + type inference at 1.8+
 
 	public ReferenceBinding [] intersectingTypes;
 	private ReferenceBinding javaLangObject;
 	int length;
 	
-	public IntersectionCastTypeBinding(ReferenceBinding[] intersectingTypes, LookupEnvironment environment) {
+	public IntersectionTypeBinding18(ReferenceBinding[] intersectingTypes, LookupEnvironment environment) {
 		this.intersectingTypes = intersectingTypes;
 		this.length = intersectingTypes.length;
 		if (!intersectingTypes[0].isClass()) {
@@ -38,7 +38,7 @@ public class IntersectionCastTypeBinding extends ReferenceBinding {
 		}
 	}
 	
-	private IntersectionCastTypeBinding(IntersectionCastTypeBinding prototype) {
+	private IntersectionTypeBinding18(IntersectionTypeBinding18 prototype) {
 		this.intersectingTypes = prototype.intersectingTypes;
 		this.length = prototype.length;
 		if (!this.intersectingTypes[0].isClass()) {
@@ -49,7 +49,7 @@ public class IntersectionCastTypeBinding extends ReferenceBinding {
 	
 	@Override
 	public TypeBinding clone(TypeBinding enclosingType) {
-		return new IntersectionCastTypeBinding(this);
+		return new IntersectionTypeBinding18(this);
 	}
 	
 	public MethodBinding getSingleAbstractMethod(Scope scope, boolean replaceWildcards) {
@@ -155,10 +155,10 @@ public class IntersectionCastTypeBinding extends ReferenceBinding {
 		TypeBinding[] rightIntersectingTypes = null;
 		if (rightKind == INTERSECTION_TYPE && right.boundKind() == Wildcard.EXTENDS) {
 			TypeBinding allRightBounds = ((WildcardBinding) right).allBounds();
-			if (allRightBounds instanceof IntersectionCastTypeBinding)
-				rightIntersectingTypes = ((IntersectionCastTypeBinding) allRightBounds).intersectingTypes;
-		} else if (rightKind == INTERSECTION_CAST_TYPE) {
-			rightIntersectingTypes = ((IntersectionCastTypeBinding) right).intersectingTypes;
+			if (allRightBounds instanceof IntersectionTypeBinding18)
+				rightIntersectingTypes = ((IntersectionTypeBinding18) allRightBounds).intersectingTypes;
+		} else if (rightKind == INTERSECTION_TYPE18) {
+			rightIntersectingTypes = ((IntersectionTypeBinding18) right).intersectingTypes;
 		}
 		if (rightIntersectingTypes != null) {
 			int numRequired = rightIntersectingTypes.length;
@@ -236,11 +236,11 @@ public class IntersectionCastTypeBinding extends ReferenceBinding {
 		}
 		return shortReadableName.toString().toCharArray();
 	}
-	public boolean isIntersectionCastType() {
+	public boolean isIntersectionType18() {
 		return true;
 	}
 	public int kind() {
-		return Binding.INTERSECTION_CAST_TYPE;
+		return Binding.INTERSECTION_TYPE18;
 	}
 	public String debugName() {
 		StringBuffer debugName = new StringBuffer(16);
@@ -273,10 +273,10 @@ public class IntersectionCastTypeBinding extends ReferenceBinding {
 		return samType;
 	}
 
-	@Override
-//{ObjectTeams:
+//{ObjectTeams: enable crossing package boundaries:
 	protected
 // SH}
+	@Override
 	void collectInferenceVariables(Set<InferenceVariable> variables) {
 		for (int i = 0; i < this.intersectingTypes.length; i++)
 			this.intersectingTypes[i].collectInferenceVariables(variables);
