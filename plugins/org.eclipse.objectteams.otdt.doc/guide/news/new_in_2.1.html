@@ -142,7 +142,7 @@
     <td><p align="right"><b>@Override for static&nbsp;role&nbsp;methods</b><br>
         <span class="since">since&nbsp;2.1M3</span><br>
         <a class="buglink" title="[compiler] support @Override for static role methods" href="https://bugs.eclipse.org/359894">359894</a></p></td>
-    <td><p>Along implicit inheritence a role can override even a static method from its implicit super role.
+    <td><p>Along implicit inheritance a role can override even a static method from its implicit super role.
     		This overriding can now be documented using an <code>@Override</code> annotation,
     		which will cause the compiler to check if the claimed overriding actually happens:
     	</p>
@@ -236,7 +236,7 @@
         <span class="since">since&nbsp;2.1M2</span><br>
         <a class="buglink" title="Produce warning when two roles capture the same method at the same time" href="https://bugs.eclipse.org/314610">314610</a></p></td>
     <td><p>When two independent callin bindings affect the same base method this <em>might</em> give rise to unanticipated behavior.
-    		Therefor a new warning is reported to alert the user of this situation:
+    		Therefore a new warning is reported to alert the user of this situation:
   		</p>
   		<p><img alt="Multiple callin bindings are affecting method foo()" src="../images/screenshots/NN21/MultipleCallins.png"></p>
   		<p>As mentioned in the warning message, this diagnostic is recomputed only during full builds,
