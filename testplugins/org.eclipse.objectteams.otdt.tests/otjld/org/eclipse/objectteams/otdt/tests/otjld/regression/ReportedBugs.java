@@ -5398,4 +5398,27 @@ public class ReportedBugs extends AbstractOTJLDTest {
     			"}\n"
     		});
     }
+    
+    public void testBug448378() {
+    	runNegativeTest(
+    		new String[] {
+    			"C.java",
+    			"public class C {\n" + 
+    			"	\n" + 
+    			"	void test() {\n" + 
+    			"		try {\n" + 
+    			"			final C c = missing().v;\n" + 
+    			"		} finally {\n" + 
+    			"			System.out.println(0); \n" + 
+    			"		}\n" + 
+    			"	}\n" + 
+    			"}\n"
+    		},
+    		"----------\n" + 
+			"1. ERROR in C.java (at line 5)\n" + 
+			"	final C c = missing().v;\n" + 
+			"	            ^^^^^^^\n" + 
+			"The method missing() is undefined for the type C\n" + 
+			"----------\n");
+    }
 }

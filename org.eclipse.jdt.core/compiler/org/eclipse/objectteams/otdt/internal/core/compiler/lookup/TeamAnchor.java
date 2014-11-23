@@ -243,7 +243,7 @@ public abstract class TeamAnchor extends Binding implements ITeamAnchor {
 		} else if (expr instanceof FieldReference) {
 			// a field reference => append one element to the receiver's bestNamePath:
 			FieldReference fieldRef = (FieldReference)expr;
-			if (fieldRef.binding.isFinal())
+			if (fieldRef.binding != null && fieldRef.binding.isFinal())
 			{
 				ITeamAnchor[] prefix = getBestNameFromStat(fieldRef.receiver);
 				if (prefix == null)
