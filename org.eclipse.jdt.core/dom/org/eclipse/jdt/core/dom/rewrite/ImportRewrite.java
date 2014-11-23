@@ -24,6 +24,7 @@ import org.eclipse.core.runtime.SubProgressMonitor;
 import org.eclipse.jdt.core.Flags;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IImportDeclaration;
+import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.ITypeRoot;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
@@ -422,15 +423,49 @@ public final class ImportRewrite {
 				}
 			}
 		}
-		if (this.filterImplicitImports && this.useContextToFilterImplicitImports) {
-			String fPackageName= this.compilationUnit.getParent().getElementName();
-			String mainTypeSimpleName= JavaCore.removeJavaLikeExtension(this.compilationUnit.getElementName());
-			String fMainTypeName= Util.concatenateName(fPackageName, mainTypeSimpleName, '.');
-			if (kind == ImportRewriteContext.KIND_TYPE
-					&& (qualifier.equals(fPackageName)
-							|| fMainTypeName.equals(Util.concatenateName(qualifier, name, '.'))))
-				return ImportRewriteContext.RES_NAME_FOUND;
+
+		String packageName= this.compilationUnit.getParent().getElementName();
+		if (kind == ImportRewriteContext.KIND_TYPE) {
+			if (this.filterImplicitImports && this.useContextToFilterImplicitImports) {
+				String mainTypeSimpleName= JavaCore.removeJavaLikeExtension(this.compilationUnit.getElementName());
+				String mainTypeName= Util.concatenateName(packageName, mainTypeSimpleName, '.');
+				if (qualifier.equals(packageName)
+						|| mainTypeName.equals(Util.concatenateName(qualifier, name, '.'))) {
+					return ImportRewriteContext.RES_NAME_FOUND;
+				}
+				
+				if (this.astRoot != null) {
+					List<AbstractTypeDeclaration> types = this.astRoot.types();
+					int nTypes = types.size();
+					for (int i = 0; i < nTypes; i++) {
+						AbstractTypeDeclaration type = types.get(i);
+						SimpleName simpleName = type.getName();
+						if (simpleName.getIdentifier().equals(name)) { 
+							return qualifier.equals(packageName)
+									? ImportRewriteContext.RES_NAME_FOUND
+									: ImportRewriteContext.RES_NAME_CONFLICT;
+						}
+					}
+				} else {
+					try {
+						IType[] types = this.compilationUnit.getTypes();
+						int nTypes = types.length;
+						for (int i = 0; i < nTypes; i++) {
+							IType type = types[i];
+							String typeName = type.getElementName();
+							if (typeName.equals(name)) {
+								return qualifier.equals(packageName)
+										? ImportRewriteContext.RES_NAME_FOUND
+										: ImportRewriteContext.RES_NAME_CONFLICT;
+							}
+						}
+					} catch (JavaModelException e) {
+						// don't want to throw an exception here
+					}
+				}
+			}
 		}
+
 		return ImportRewriteContext.RES_NAME_UNKNOWN;
 	}
 

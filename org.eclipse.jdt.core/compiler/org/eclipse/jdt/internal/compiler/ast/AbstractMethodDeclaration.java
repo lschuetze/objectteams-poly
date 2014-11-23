@@ -424,7 +424,6 @@ public abstract class AbstractMethodDeclaration
         	return;
         }
 // SH}
-		int problemResetPC = 0;
 		classFile.codeStream.wideMode = false; // reset wideMode to false
 		if (this.ignoreFurtherInvestigation) {
 			// method is known to have errors, dump a problem method
@@ -449,6 +448,16 @@ public abstract class AbstractMethodDeclaration
 // SH}
 			return;
 		}
+		int problemResetPC = 0;
+		CompilationResult unitResult = null;
+		int problemCount = 0;
+		if (classScope != null) {
+			TypeDeclaration referenceContext = classScope.referenceContext;
+			if (referenceContext != null) {
+				unitResult = referenceContext.compilationResult();
+				problemCount = unitResult.problemCount;
+			}
+		}
 		boolean restart = false;
 		boolean abort = false;
 		// regular code generation
@@ -464,11 +473,19 @@ public abstract class AbstractMethodDeclaration
 					classFile.contentsOffset = problemResetPC;
 					classFile.methodCount--;
 					classFile.codeStream.resetInWideMode(); // request wide mode
+					// reset the problem count to prevent reporting the same warning twice
+					if (unitResult != null) {
+						unitResult.problemCount = problemCount;
+					}
 					restart = true;
 				} else if (e.compilationResult == CodeStream.RESTART_CODE_GEN_FOR_UNUSED_LOCALS_MODE) {
 					classFile.contentsOffset = problemResetPC;
 					classFile.methodCount--;
 					classFile.codeStream.resetForCodeGenUnusedLocals();
+					// reset the problem count to prevent reporting the same warning twice
+					if (unitResult != null) {
+						unitResult.problemCount = problemCount;
+					}
 					restart = true;
 				} else {
 					restart = false;
