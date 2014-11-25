@@ -39,6 +39,7 @@ import org.eclipse.jdt.internal.corext.util.Messages;
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
 import org.eclipse.jdt.internal.ui.text.correction.ASTResolving;
 import org.eclipse.jdt.internal.ui.text.correction.CorrectionMessages;
+import org.eclipse.jdt.internal.ui.text.correction.IProposalRelevance;
 import org.eclipse.jdt.internal.ui.text.correction.proposals.NewMethodCorrectionProposal;
 import org.eclipse.jdt.internal.ui.viewsupport.BasicElementLabels;
 import org.eclipse.jdt.internal.ui.viewsupport.JavaElementImageProvider;
@@ -93,21 +94,20 @@ public team class CorrectionAdaptor {
 					if (parameterTypes != null) {
 						String sig= ASTResolving.getMethodSignature(methodName, parameterTypes, false);
 		
-						if (ASTResolving.isUseableTypeInContext(parameterTypes, senderDeclBinding, false)) {
-							if (nodeParentType == senderDeclBinding) {
-								label= Messages.format(CorrectionMessages.UnresolvedElementsSubProcessor_createmethod_description, sig);
-								image= JavaPluginImages.get(JavaPluginImages.IMG_MISC_PRIVATE);
-							} else {
-								label= Messages.format(CorrectionMessages.UnresolvedElementsSubProcessor_createmethod_other_description, new Object[] { sig, BasicElementLabels.getJavaElementName(senderDeclBinding.getName()) } );
-								image= JavaPluginImages.get(JavaPluginImages.IMG_MISC_PUBLIC);
-							}
-							proposals.add(new NewMethodCorrectionProposal(label, targetCU, invocationNode, arguments, senderDeclBinding, 5, image));
+						if (nodeParentType == senderDeclBinding) {
+							label= Messages.format(CorrectionMessages.UnresolvedElementsSubProcessor_createmethod_description, sig);
+							image= JavaPluginImages.get(JavaPluginImages.IMG_MISC_PRIVATE);
+						} else {
+							label= Messages.format(CorrectionMessages.UnresolvedElementsSubProcessor_createmethod_other_description, new Object[] { sig, BasicElementLabels.getJavaElementName(senderDeclBinding.getName()) } );
+							image= JavaPluginImages.get(JavaPluginImages.IMG_MISC_PUBLIC);
 						}
+						proposals.add(new NewMethodCorrectionProposal(label, targetCU, invocationNode, arguments, senderDeclBinding, IProposalRelevance.CREATE_METHOD, image));
+
 						if (senderDeclBinding.isNested() && cu.equals(targetCU) && sender == null && Bindings.findMethodInHierarchy(senderDeclBinding, methodName, (ITypeBinding[]) null) == null) { // no covering method
 							ASTNode anonymDecl= astRoot.findDeclaringNode(senderDeclBinding);
 							if (anonymDecl != null) {
 								senderDeclBinding= Bindings.getBindingOfParentType(anonymDecl.getParent());
-								if (!senderDeclBinding.isAnonymous() && ASTResolving.isUseableTypeInContext(parameterTypes, senderDeclBinding, false)) {
+								if (!senderDeclBinding.isAnonymous()) {
 									String[] args= new String[] { sig, ASTResolving.getTypeSignature(senderDeclBinding) };
 									label= Messages.format(CorrectionMessages.UnresolvedElementsSubProcessor_createmethod_other_description, args);
 									image= JavaPluginImages.get(JavaPluginImages.IMG_MISC_PROTECTED);
@@ -205,7 +205,7 @@ public team class CorrectionAdaptor {
 					String[] args= new String[] { ASTResolving.getMethodSignature( ASTResolving.getTypeSignature(targetDecl), getParameterTypes(arguments), false) };
 					String label= Messages.format(CorrectionMessages.UnresolvedElementsSubProcessor_createconstructor_description, args);
 					Image image= JavaElementImageProvider.getDecoratedImage(JavaPluginImages.DESC_MISC_PUBLIC, JavaElementImageDescriptor.CONSTRUCTOR, JavaElementImageProvider.SMALL_SIZE);
-					proposals.add(new NewMethodCorrectionProposal(label, targetCU, selectedNode, arguments, targetDecl, 5, image));
+					proposals.add(new NewMethodCorrectionProposal(label, targetCU, selectedNode, arguments, targetDecl, IProposalRelevance.CREATE_CONSTRUCTOR, image));
 				}
 			}
 		}
