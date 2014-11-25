@@ -162,7 +162,7 @@
          <action
 			   class="org.eclipse.objectteams.otdt.internal.refactoring.otrefactorings.rolefile.MoveToRoleFileAction"
                definitionId="org.eclipse.objectteams.otdt.refactoring.moveto.rolefile"
-               icon="platform:/plugin/org.eclipse.objectteams.otdt.ui/icons/ot/role_obj.gif"
+               icon="platform:/plugin/org.eclipse.objectteams.otdt.ui/icons/ot/role_obj.png"
                id="org.eclipse.objectteams.otdt.internal.refactoring.MoveToRoleFile"
                label="%Moveto.rolefile.label"
                menubarPath="org.eclipse.jdt.ui.refactoring.menu/codingGroup"
