@@ -1107,7 +1107,7 @@ public class RoleTypeCreator implements TagBits {
 	       	anchor = current.setPathPrefix(anchor);
 		}
 	    if (!anchor.hasValidReferenceType())
-	    	return anchor.getResolvedType();
+		    return null;
 
 	    // final component before the type must be a team:
 		if (!anchor.isTeam()) {

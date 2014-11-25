@@ -112,12 +112,12 @@ public class ReportedBugs extends AbstractOTJLDTest {
 			"2. ERROR in TB11sh1fMain.java (at line 6)\n" + 
 			"	theTeam.R1[] r1s = new theTeam.R1[1];\n" + 
 			"	^^^^^^^\n" + 
-			"TeamB11sh1f1 cannot be resolved to a type\n" + 
+			"theTeam cannot be resolved to a type\n" + 
 			"----------\n" + 
 			"3. ERROR in TB11sh1fMain.java (at line 6)\n" + 
 			"	theTeam.R1[] r1s = new theTeam.R1[1];\n" + 
 			"	                       ^^^^^^^\n" + 
-			"TeamB11sh1f1 cannot be resolved to a type\n" + 
+			"theTeam cannot be resolved to a type\n" + 
 			"----------\n" + 
 			"4. ERROR in TB11sh1fMain.java (at line 7)\n" + 
 			"	r1s[0] = theTeam.new R1();\n" + 
@@ -127,7 +127,7 @@ public class ReportedBugs extends AbstractOTJLDTest {
 			"5. ERROR in TB11sh1fMain.java (at line 8)\n" + 
 			"	theTeam.R3 r3 = r1s[0].getR2().getR3();\n" + 
 			"	^^^^^^^\n" + 
-			"TeamB11sh1f1 cannot be resolved to a type\n" + 
+			"theTeam cannot be resolved to a type\n" + 
 			"----------\n"
     		);
     }
@@ -5419,6 +5419,30 @@ public class ReportedBugs extends AbstractOTJLDTest {
 			"	final C c = missing().v;\n" + 
 			"	            ^^^^^^^\n" + 
 			"The method missing() is undefined for the type C\n" + 
+			"----------\n");
+    }
+    public void testBug448298() {
+    	runNegativeTest(
+    		new String[] {
+    			"Test.java",
+    			"public class Test {\n" + 
+    					"	Test(Test other) {}\n" + 
+    					"	\n" + 
+    					"	Test(final int arg, Object o) { \n" + 
+    					"		this((arg.nothing)o); \n" + 
+    					"	}\n" + 
+    					"}"
+    		},
+    		"----------\n" + 
+			"1. ERROR in Test.java (at line 5)\n" + 
+			"	this((arg.nothing)o); \n" + 
+			"	^^^^^^^^^^^^^^^^^^^^^\n" + 
+			"The constructor Test(nothing) is undefined\n" + 
+			"----------\n" + 
+			"2. ERROR in Test.java (at line 5)\n" + 
+			"	this((arg.nothing)o); \n" + 
+			"	      ^^^\n" + 
+			"arg cannot be resolved to a type\n" + 
 			"----------\n");
     }
 }

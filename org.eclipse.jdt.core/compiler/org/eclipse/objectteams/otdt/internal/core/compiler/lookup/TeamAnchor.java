@@ -139,7 +139,7 @@ public abstract class TeamAnchor extends Binding implements ITeamAnchor {
 	private ITeamAnchor[] flattenBestNamePath(ITeamAnchor[] tree, int start) {
 		if (tree == null || start >= tree.length)
 			return new ITeamAnchor[0];
-		TypeBinding firstType = ((TeamAnchor)this.bestNamePath[start]).leafType();
+		TypeBinding firstType = ((TeamAnchor)this.bestNamePath[start]).leafReferenceType();
 		ITeamAnchor[] prefix;
 		if (RoleTypeBinding.isRoleWithExplicitAnchor(firstType)) {
 			prefix = ((IRoleTypeBinding)firstType).getAnchorBestName();
@@ -390,7 +390,7 @@ public abstract class TeamAnchor extends Binding implements ITeamAnchor {
 	public ITeamAnchor asAnchorFor (ReferenceBinding roleType) {
 		if (! (this.type instanceof ReferenceBinding))
 			return null;
-		ReferenceBinding leafType = leafType();
+		ReferenceBinding leafType = leafReferenceType();
 		// TODO(SH): is it correct to compare leafType and roleType?
 		// shouldn't we look at roleType._teamAnchor[0] instead??
 		if (TeamModel.isTeamContainingRole(leafType, roleType)) {
@@ -409,7 +409,7 @@ public abstract class TeamAnchor extends Binding implements ITeamAnchor {
 	public ITeamAnchor retrieveAnchorFromAnchorRoleTypeFor(ReferenceBinding roleType) {
 		// TODO (SH) copied and not yet validated!
 		// in contrast to the above, this method will never return 'this'
-	    ReferenceBinding leafType = leafType();
+	    ReferenceBinding leafType = leafReferenceType();
 		if (this.type != null && leafType != null && leafType.isRoleType())
 	    {
 	        ITeamAnchor anchor = ((IRoleTypeBinding)leafType).getAnchor();
@@ -492,7 +492,7 @@ public abstract class TeamAnchor extends Binding implements ITeamAnchor {
 	 */
 	private boolean hasRoleTypeWithRelevantAnchor() {
 		for (int i = 0; i < this.bestNamePath.length; i++) {
-			ReferenceBinding currentLeafType = ((TeamAnchor)this.bestNamePath[i]).leafType();
+			ReferenceBinding currentLeafType = ((TeamAnchor)this.bestNamePath[i]).leafReferenceType();
 			if (RoleTypeBinding.isRoleWithExplicitAnchor(currentLeafType))
 				return true;
 		}
@@ -504,10 +504,10 @@ public abstract class TeamAnchor extends Binding implements ITeamAnchor {
 		return this.type != null && (this.type instanceof ReferenceBinding) && this.type.isValidBinding();
 	}
 	public boolean hasSameTypeAs(ITeamAnchor other) {
-		return TypeBinding.equalsEquals(leafType(), ((TeamAnchor)other).leafType());
+		return TypeBinding.equalsEquals(leafReferenceType(), ((TeamAnchor)other).leafReferenceType());
 	}
 	public TeamModel getTeamModelOfType() {
-		return leafType().getTeamModel();
+		return leafReferenceType().getTeamModel();
 	}
 	public boolean isTypeCompatibleWith(ReferenceBinding other) {
 		if (! (this.type instanceof ReferenceBinding))
@@ -528,7 +528,7 @@ public abstract class TeamAnchor extends Binding implements ITeamAnchor {
 	}
 
 	public void setStaticallyKnownTeam(RoleTypeBinding rtb) {
-		ReferenceBinding teamBinding = leafType();
+		ReferenceBinding teamBinding = leafReferenceType();
 
 		if (teamBinding.isSynthInterface()) {
 			// never use a synth interface as the team of a RTB
@@ -542,7 +542,7 @@ public abstract class TeamAnchor extends Binding implements ITeamAnchor {
 	}
 
 	public boolean isTeamContainingRole(ReferenceBinding roleType) {
-		return TeamModel.isTeamContainingRole(leafType(), roleType);
+		return TeamModel.isTeamContainingRole(leafReferenceType(), roleType);
 	}
 
 	/**
@@ -550,7 +550,7 @@ public abstract class TeamAnchor extends Binding implements ITeamAnchor {
 	 */
 	public FieldBinding getFieldOfType(char[] token, boolean isStatic, boolean allowOuter) {
 		return TypeAnalyzer.findField(
-				leafType(),
+				leafReferenceType(),
 				token,
 				isStatic,
 				allowOuter);
@@ -558,14 +558,14 @@ public abstract class TeamAnchor extends Binding implements ITeamAnchor {
 
 	public ReferenceBinding getMemberTypeOfType(char[] name) {
 		// safe if type is a class-part
-		ReferenceBinding roleType = (leafType()).getMemberType(name);
+		ReferenceBinding roleType = leafReferenceType().getMemberType(name);
 		if (roleType == null)
 			return null;
 		return (RoleTypeBinding)getRoleTypeBinding(roleType, 0);
 	}
 	public RoleModel getStrengthenedRole (ReferenceBinding role) {
-        if (TypeBinding.notEquals(role.roleModel.getTeamModel().getBinding(), leafType()))
-        	return (leafType()).getMemberType(role.internalName()).roleModel;
+        if (TypeBinding.notEquals(role.roleModel.getTeamModel().getBinding(), leafReferenceType()))
+        	return leafReferenceType().getMemberType(role.internalName()).roleModel;
         return role.roleModel;
 	}
 
@@ -634,7 +634,7 @@ public abstract class TeamAnchor extends Binding implements ITeamAnchor {
 					}
 					currentType = currentType.enclosingType();
 				}
-				currentType = receiverVar.leafType();
+				currentType = receiverVar.leafReferenceType();
 				while(currentType != null) {
 					if (currentType.isCompatibleWith(previousField.declaringClass)) {
 						if (firstImplicitlyReachable) {
@@ -657,8 +657,8 @@ public abstract class TeamAnchor extends Binding implements ITeamAnchor {
 	}
 
 	public TypeBinding getResolvedType() {
-		if (leafType() != null && leafType().isRole()) {
-			ReferenceBinding roleIfc = leafType().roleModel.getInterfacePartBinding();
+		if (leafReferenceType() != null && leafReferenceType().isRole()) {
+			ReferenceBinding roleIfc = leafReferenceType().roleModel.getInterfacePartBinding();
 			if (this.bestNamePath != null && this.bestNamePath.length > 1) {
 				int len = this.bestNamePath.length;
 				ITeamAnchor previousAnchor = this.bestNamePath[len-2];
@@ -675,9 +675,12 @@ public abstract class TeamAnchor extends Binding implements ITeamAnchor {
 	}
 
 	// internal helper: when used as an anchor an arraybinding is stripped to its leaf:
-	private ReferenceBinding leafType() {
-		if (this.type != null)
-			return (ReferenceBinding)this.type.leafComponentType();
+	private ReferenceBinding leafReferenceType() {
+		if (this.type != null) {
+			TypeBinding leafComponentType = this.type.leafComponentType();
+			if (leafComponentType instanceof ReferenceBinding)
+				return (ReferenceBinding)leafComponentType;
+		}
 		return null;
 	}
 
@@ -736,12 +739,12 @@ public abstract class TeamAnchor extends Binding implements ITeamAnchor {
 		}
     	ReferenceBinding roleEnclosing = roleBinding.enclosingType();
     	if (   roleEnclosing != null
-    		&& TypeBinding.notEquals(roleEnclosing.erasure(), leafType().getRealClass())) // i.e.: teams differ
+    		&& TypeBinding.notEquals(roleEnclosing.erasure(), leafReferenceType().getRealClass())) // i.e.: teams differ
     	{
     		//assert TeamModel.areCompatibleEnclosings(this.leafType(), roleEnclosing);
     		// team of roleBinding is less specific than this anchor => requesting a weakened type
     		ReferenceBinding strengthenedRole =
-    				(ReferenceBinding)TeamModel.strengthenRoleType(leafType(), roleBinding);
+    				(ReferenceBinding)TeamModel.strengthenRoleType(leafReferenceType(), roleBinding);
     		if (TypeBinding.notEquals(strengthenedRole, roleBinding)) {// avoid infinite recursion if strengthening made no difference
     			DependentTypeBinding strongRoleType = (DependentTypeBinding)getRoleTypeBinding(strengthenedRole, arguments, 0);
     			if (strongRoleType != null)
