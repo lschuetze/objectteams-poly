@@ -24,7 +24,6 @@ import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.IPartListener2;
 import org.eclipse.ui.IWindowListener;
-import org.eclipse.ui.IWorkbench;
 import org.eclipse.ui.IWorkbenchPart;
 import org.eclipse.ui.IWorkbenchPartReference;
 import org.eclipse.ui.IWorkbenchWindow;
@@ -56,33 +55,29 @@ public abstract class JavaEditorActivationListener implements IPartListener2, IW
 
 //{OT_COPY_PASTE from org.eclipse.jdt.internal.ui.javaeditor.ASTProvider.ActivationListener
 	protected IWorkbenchPart fActiveEditor;
-    private IWorkbench fWorkbench;
 
 	public void installListener() {
-		/*
-		 * XXX: Don't in-line this field unless the following bug has been fixed:
-		 *      https://bugs.eclipse.org/bugs/show_bug.cgi?id=55246
-		 */
-		fWorkbench= PlatformUI.getWorkbench();
-		
-		fWorkbench.addWindowListener(this);
+		try {
+			PlatformUI.getWorkbench().addWindowListener(this);
+		} catch (IllegalStateException ise) {
+			return; // wrongly trying to install in a headless environment?
+		}
 		
 		// Ensure existing windows get connected
-		IWorkbenchWindow[] windows= fWorkbench.getWorkbenchWindows();
-		for (int i= 0, length= windows.length; i < length; i++)
-			windows[i].getPartService().addPartListener(this);
+		for (IWorkbenchWindow windows : PlatformUI.getWorkbench().getWorkbenchWindows())
+			windows.getPartService().addPartListener(this);
 	}
 	
     public void uninstallListener() {
-        if (fWorkbench == null)
-            return;
-        
-		fWorkbench.removeWindowListener(this);
+    	try {
+    		PlatformUI.getWorkbench().removeWindowListener(this);
+    	} catch (IllegalStateException ise) {
+    		return; // wrongly trying to uninstall in a headless environment?
+    	}
 		
 		// Ensure existing windows get disconnected
-		IWorkbenchWindow[] windows= fWorkbench.getWorkbenchWindows();
-		for (int i= 0, length= windows.length; i < length; i++)
-			windows[i].getPartService().removePartListener(this);
+		for (IWorkbenchWindow windows : PlatformUI.getWorkbench().getWorkbenchWindows())
+			windows.getPartService().removePartListener(this);
 	}
 	
 	public void partActivated(IWorkbenchPartReference ref) {
