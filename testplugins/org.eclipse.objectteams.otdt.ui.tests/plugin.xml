@@ -33,7 +33,7 @@
          </team>
          <team
                activation="NONE"
-               class="org.eclipse.objectteams.otdt.ui.tests.TestAdjuster$Collect"
+               class="org.eclipse.objectteams.otdt.ui.tests.TestAdjuster$LocalCorrections"
                icon="platform:/plugin/org.eclipse.objectteams.otdt.ui/icons/ot/team_obj.gif">
          </team>
       </aspectBinding>
