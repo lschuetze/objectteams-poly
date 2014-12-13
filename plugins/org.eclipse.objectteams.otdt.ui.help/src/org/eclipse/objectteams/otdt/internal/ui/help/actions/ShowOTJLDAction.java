@@ -134,20 +134,20 @@ public class ShowOTJLDAction implements IViewActionDelegate
         
         if (marker == null) return; // either no type matched, or MarkerCategory.getMarker() returned null. 
         
-        try
-        {
+        try {
             if (!IJavaModelMarker.JAVA_MODEL_PROBLEM_MARKER.equals(marker.getType()))
                 return;
+        }
+        catch (CoreException ex) {
+        	// No longer reporting, frequently happens during workspace build, but doesn't seem to do any harm
+        	// OTHelpPlugin.logException("Cannot retrieve marker from selection", ex); //$NON-NLS-1$
+        	return;
+        }
 
-            String text = marker.getAttribute(IMarker.MESSAGE, null);
-            if (text == null)
-                return;
-            OTJLDError error = new OTJLDError(text);
-            m_urls = error.getURLs();
-        }
-        catch (CoreException ex)
-        {
-            OTHelpPlugin.logException("Cannot retrieve marker from selection", ex); //$NON-NLS-1$
-        }
+        String text = marker.getAttribute(IMarker.MESSAGE, null);
+        if (text == null)
+            return;
+        OTJLDError error = new OTJLDError(text);
+        m_urls = error.getURLs();
     }
 }
