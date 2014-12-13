@@ -1,16 +1,17 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2013 IBM Corporation and others.
+ * Copyright (c) 2000, 2014 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
- * 
+ *
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *     Fraunhofer FIRST - extended API and implementation
  *     Technical University Berlin - extended API and implementation
  *     Jesper Steen Moller - Contributions for
  *								bug 404146 - [1.7][compiler] nested try-catch-finally-blocks leads to unrunnable Java byte code
+ *     Harry Terkelsen (het@google.com) - Bug 449262 - Allow the use of third-party Java formatters
  *******************************************************************************/
 package org.eclipse.jdt.internal.formatter;
 
@@ -77,14 +78,13 @@ public class DefaultCodeFormatter extends CodeFormatter {
 	}
 
 	public DefaultCodeFormatter(DefaultCodeFormatterOptions defaultCodeFormatterOptions, Map options) {
-		if (options != null) {
-			this.options = options;
-			this.preferences = new DefaultCodeFormatterOptions(options);
-		} else {
+		if (options == null) {
 			this.options = JavaCore.getOptions();
 			this.preferences = new DefaultCodeFormatterOptions(DefaultCodeFormatterConstants.getJavaConventionsSettings());
+			setDefaultCompilerOptions();
+		} else {
+			setOptions(options);
 		}
-		this.defaultCompilerOptions = getDefaultCompilerOptions();
 		if (defaultCodeFormatterOptions != null) {
 			this.preferences.set(defaultCodeFormatterOptions.getMap());
 		}
@@ -93,12 +93,12 @@ public class DefaultCodeFormatter extends CodeFormatter {
 	public DefaultCodeFormatter(Map options) {
 		this(null, options);
 	}
-	
+
 	public String createIndentationString(final int indentationLevel) {
 		if (indentationLevel < 0) {
 			throw new IllegalArgumentException();
 		}
-		
+
 		int tabs = 0;
 		int spaces = 0;
 		switch(this.preferences.tab_char) {
@@ -131,7 +131,7 @@ public class DefaultCodeFormatter extends CodeFormatter {
 		}
 		return buffer.toString();
 	}
-	
+
 	/**
 	 * @see org.eclipse.jdt.core.formatter.CodeFormatter#format(int, java.lang.String, int, int, int, java.lang.String)
 	 */
@@ -173,7 +173,7 @@ public class DefaultCodeFormatter extends CodeFormatter {
 				return formatExpression(source, indentationLevel, lineSeparator, regions, includeComments);
 			case K_STATEMENTS :
 				return formatStatements(source, indentationLevel, lineSeparator, regions, includeComments);
-//{ObjectTeams: Parameter mappinmg is not handled by formatExpression because of separate parser method "parseParameterMapping" to parse snippets			
+//{ObjectTeams: Parameter mapping is not handled by formatExpression because of separate parser method "parseParameterMapping" to parse snippets			
 			case K_PARAMETER_MAPPING :
 				return formatParameterMapping(source, indentationLevel, lineSeparator, regions, includeComments);
 //jsv} 		
@@ -189,7 +189,7 @@ public class DefaultCodeFormatter extends CodeFormatter {
 	}
 
 	private TextEdit formatClassBodyDeclarations(String source, int indentationLevel, String lineSeparator, IRegion[] regions, boolean includeComments) {
-		ASTNode[] bodyDeclarations = this.codeSnippetParsingUtil.parseClassBodyDeclarations(source.toCharArray(), getDefaultCompilerOptions(), true);
+		ASTNode[] bodyDeclarations = this.codeSnippetParsingUtil.parseClassBodyDeclarations(source.toCharArray(), this.defaultCompilerOptions, true);
 
 		if (bodyDeclarations == null) {
 			// a problem occurred while parsing the source
@@ -227,7 +227,7 @@ public class DefaultCodeFormatter extends CodeFormatter {
 			}
 			this.preferences.initial_indentation_level = indentationLevel;
 			if (this.codeSnippetParsingUtil == null) this.codeSnippetParsingUtil = new CodeSnippetParsingUtil();
-			this.codeSnippetParsingUtil.parseCompilationUnit(source.toCharArray(), getDefaultCompilerOptions(), true);
+			this.codeSnippetParsingUtil.parseCompilationUnit(source.toCharArray(), this.defaultCompilerOptions, true);
 			this.newCodeFormatter = new CodeFormatterVisitor(this.preferences, this.options, regions, this.codeSnippetParsingUtil, true);
 			IRegion coveredRegion = getCoveredRegion(regions);
 			int start = coveredRegion.getOffset();
@@ -239,8 +239,8 @@ public class DefaultCodeFormatter extends CodeFormatter {
 	}
 
 	private TextEdit formatCompilationUnit(String source, int indentationLevel, String lineSeparator, IRegion[] regions, boolean includeComments) {
-		CompilationUnitDeclaration compilationUnitDeclaration = this.codeSnippetParsingUtil.parseCompilationUnit(source.toCharArray(), getDefaultCompilerOptions(), true);
-		
+		CompilationUnitDeclaration compilationUnitDeclaration = this.codeSnippetParsingUtil.parseCompilationUnit(source.toCharArray(), this.defaultCompilerOptions, true);
+
 		if (lineSeparator != null) {
 			this.preferences.line_separator = lineSeparator;
 		} else {
@@ -249,12 +249,12 @@ public class DefaultCodeFormatter extends CodeFormatter {
 		this.preferences.initial_indentation_level = indentationLevel;
 
 		this.newCodeFormatter = new CodeFormatterVisitor(this.preferences, this.options, regions, this.codeSnippetParsingUtil, includeComments);
-		
+
 		return this.newCodeFormatter.format(source, compilationUnitDeclaration);
 	}
 
 	private TextEdit formatExpression(String source, int indentationLevel, String lineSeparator, IRegion[] regions, boolean includeComments) {
-		Expression expression = this.codeSnippetParsingUtil.parseExpression(source.toCharArray(), getDefaultCompilerOptions(), true);
+		Expression expression = this.codeSnippetParsingUtil.parseExpression(source.toCharArray(), this.defaultCompilerOptions, true);
 
 		if (expression == null) {
 			// a problem occurred while parsing the source
@@ -265,7 +265,7 @@ public class DefaultCodeFormatter extends CodeFormatter {
 
 //{ObjectTeams: separate Method to format ParameterMappings
 	private TextEdit formatParameterMapping(String source, int indentationLevel, String lineSeparator, IRegion[] regions, boolean includeComments) {
-		Expression expression = this.codeSnippetParsingUtil.parseParameterMapping(source.toCharArray(), getDefaultCompilerOptions(), true);
+		Expression expression = this.codeSnippetParsingUtil.parseParameterMapping(source.toCharArray(), this.defaultCompilerOptions, true);
 		
 		if (expression == null) {
 			// a problem occured while parsing the source
@@ -277,7 +277,7 @@ public class DefaultCodeFormatter extends CodeFormatter {
 //jsv}
 	
 	private TextEdit formatStatements(String source, int indentationLevel, String lineSeparator, IRegion[] regions, boolean includeComments) {
-		ConstructorDeclaration constructorDeclaration = this.codeSnippetParsingUtil.parseStatements(source.toCharArray(), getDefaultCompilerOptions(), true, false);
+		ConstructorDeclaration constructorDeclaration = this.codeSnippetParsingUtil.parseStatements(source.toCharArray(), this.defaultCompilerOptions, true, false);
 
 		if (constructorDeclaration.statements == null) {
 			// a problem occured while parsing the source
@@ -291,10 +291,10 @@ public class DefaultCodeFormatter extends CodeFormatter {
 		if (length == 1) {
 			return regions[0];
 		}
-		
+
 		int offset = regions[0].getOffset();
 		IRegion lastRegion = regions[length - 1];
-		
+
 		return new Region(offset, lastRegion.getOffset() + lastRegion.getLength() - offset);
 	}
 
@@ -305,21 +305,21 @@ public class DefaultCodeFormatter extends CodeFormatter {
 //{ObjectTeams: be nice:
 	@SuppressWarnings("unchecked")
 // SH}
-	private Map getDefaultCompilerOptions() {
+	private void setDefaultCompilerOptions() {
 		if (this.defaultCompilerOptions ==  null) {
 			Map optionsMap = new HashMap(30);
-			optionsMap.put(CompilerOptions.OPTION_LocalVariableAttribute, CompilerOptions.DO_NOT_GENERATE); 
+			optionsMap.put(CompilerOptions.OPTION_LocalVariableAttribute, CompilerOptions.DO_NOT_GENERATE);
 			optionsMap.put(CompilerOptions.OPTION_LineNumberAttribute, CompilerOptions.DO_NOT_GENERATE);
 			optionsMap.put(CompilerOptions.OPTION_SourceFileAttribute, CompilerOptions.DO_NOT_GENERATE);
 			optionsMap.put(CompilerOptions.OPTION_MethodParametersAttribute, CompilerOptions.DO_NOT_GENERATE);
 			optionsMap.put(CompilerOptions.OPTION_PreserveUnusedLocal, CompilerOptions.PRESERVE);
-			optionsMap.put(CompilerOptions.OPTION_DocCommentSupport, CompilerOptions.DISABLED); 
-			optionsMap.put(CompilerOptions.OPTION_ReportMethodWithConstructorName, CompilerOptions.IGNORE); 
+			optionsMap.put(CompilerOptions.OPTION_DocCommentSupport, CompilerOptions.DISABLED);
+			optionsMap.put(CompilerOptions.OPTION_ReportMethodWithConstructorName, CompilerOptions.IGNORE);
 			optionsMap.put(CompilerOptions.OPTION_ReportOverridingPackageDefaultMethod, CompilerOptions.IGNORE);
 			optionsMap.put(CompilerOptions.OPTION_ReportOverridingMethodWithoutSuperInvocation, CompilerOptions.IGNORE);
 			optionsMap.put(CompilerOptions.OPTION_ReportDeprecation, CompilerOptions.IGNORE);
-			optionsMap.put(CompilerOptions.OPTION_ReportDeprecationInDeprecatedCode, CompilerOptions.DISABLED); 
-			optionsMap.put(CompilerOptions.OPTION_ReportDeprecationWhenOverridingDeprecatedMethod, CompilerOptions.DISABLED); 
+			optionsMap.put(CompilerOptions.OPTION_ReportDeprecationInDeprecatedCode, CompilerOptions.DISABLED);
+			optionsMap.put(CompilerOptions.OPTION_ReportDeprecationWhenOverridingDeprecatedMethod, CompilerOptions.DISABLED);
 			optionsMap.put(CompilerOptions.OPTION_ReportHiddenCatchBlock, CompilerOptions.IGNORE);
 			optionsMap.put(CompilerOptions.OPTION_ReportUnusedLocal, CompilerOptions.IGNORE);
 			optionsMap.put(CompilerOptions.OPTION_ReportUnusedObjectAllocation, CompilerOptions.IGNORE);
@@ -328,7 +328,7 @@ public class DefaultCodeFormatter extends CodeFormatter {
 			optionsMap.put(CompilerOptions.OPTION_ReportSyntheticAccessEmulation, CompilerOptions.IGNORE);
 			optionsMap.put(CompilerOptions.OPTION_ReportNoEffectAssignment, CompilerOptions.IGNORE);
 			optionsMap.put(CompilerOptions.OPTION_ReportNonExternalizedStringLiteral, CompilerOptions.IGNORE);
-			optionsMap.put(CompilerOptions.OPTION_ReportNoImplicitStringConversion, CompilerOptions.IGNORE); 
+			optionsMap.put(CompilerOptions.OPTION_ReportNoImplicitStringConversion, CompilerOptions.IGNORE);
 			optionsMap.put(CompilerOptions.OPTION_ReportNonStaticAccessToStatic, CompilerOptions.IGNORE);
 			optionsMap.put(CompilerOptions.OPTION_ReportIndirectStaticAccess, CompilerOptions.IGNORE);
 			optionsMap.put(CompilerOptions.OPTION_ReportIncompatibleNonInheritedInterfaceMethod, CompilerOptions.IGNORE);
@@ -355,7 +355,7 @@ public class DefaultCodeFormatter extends CodeFormatter {
 			optionsMap.put(CompilerOptions.OPTION_ReportMissingJavadocCommentsOverriding, CompilerOptions.DISABLED);
 			optionsMap.put(CompilerOptions.OPTION_ReportFinallyBlockNotCompletingNormally, CompilerOptions.IGNORE);
 			optionsMap.put(CompilerOptions.OPTION_ReportUnusedDeclaredThrownException, CompilerOptions.IGNORE);
-			optionsMap.put(CompilerOptions.OPTION_ReportUnusedDeclaredThrownExceptionWhenOverriding, CompilerOptions.DISABLED); 
+			optionsMap.put(CompilerOptions.OPTION_ReportUnusedDeclaredThrownExceptionWhenOverriding, CompilerOptions.DISABLED);
 			optionsMap.put(CompilerOptions.OPTION_ReportUnqualifiedFieldAccess, CompilerOptions.IGNORE);
 //{ObjectTeams:
 			optionsMap.put(CompilerOptions.OPTION_Decapsulation, CompilerOptions.REPORT_BINDING);
@@ -381,9 +381,10 @@ public class DefaultCodeFormatter extends CodeFormatter {
 			optionsMap.put(CompilerOptions.OPTION_TaskTags, Util.EMPTY_STRING);
 			optionsMap.put(CompilerOptions.OPTION_TaskPriorities, Util.EMPTY_STRING);
 			optionsMap.put(CompilerOptions.OPTION_TaskCaseSensitive, CompilerOptions.DISABLED);
-			optionsMap.put(CompilerOptions.OPTION_ReportUnusedParameterWhenImplementingAbstract, CompilerOptions.DISABLED); 
-			optionsMap.put(CompilerOptions.OPTION_ReportUnusedParameterWhenOverridingConcrete, CompilerOptions.DISABLED); 
-			optionsMap.put(CompilerOptions.OPTION_ReportSpecialParameterHidingField, CompilerOptions.DISABLED); 
+			optionsMap.put(CompilerOptions.OPTION_ReportUnusedParameterWhenImplementingAbstract, CompilerOptions.DISABLED);
+			optionsMap.put(CompilerOptions.OPTION_ReportUnusedParameterWhenOverridingConcrete, CompilerOptions.DISABLED);
+			optionsMap.put(CompilerOptions.OPTION_ReportSpecialParameterHidingField, CompilerOptions.DISABLED);
+			optionsMap.put(CompilerOptions.OPTION_ReportUnavoidableGenericTypeProblems, CompilerOptions.ENABLED);
 			optionsMap.put(CompilerOptions.OPTION_MaxProblemPerUnit, String.valueOf(100));
 			optionsMap.put(CompilerOptions.OPTION_InlineJsr, CompilerOptions.DISABLED);
 			optionsMap.put(CompilerOptions.OPTION_ShareCommonFinallyBlocks, CompilerOptions.DISABLED);
@@ -407,7 +408,6 @@ public class DefaultCodeFormatter extends CodeFormatter {
 		if (javaOption != null)
 			this.defaultCompilerOptions.put(CompilerOptions.OPTION_PureJavaOnly, javaOption);
 // SH}			
-		return this.defaultCompilerOptions;		
 	}
 
 	private TextEdit internalFormatClassBodyDeclarations(String source, int indentationLevel, String lineSeparator, ASTNode[] bodyDeclarations, IRegion[] regions, boolean includeComments) {
@@ -421,7 +421,7 @@ public class DefaultCodeFormatter extends CodeFormatter {
 		this.newCodeFormatter = new CodeFormatterVisitor(this.preferences, this.options, regions, this.codeSnippetParsingUtil, includeComments);
 		return this.newCodeFormatter.format(source, bodyDeclarations);
 	}
-	
+
 	private TextEdit internalFormatExpression(String source, int indentationLevel, String lineSeparator, Expression expression, IRegion[] regions, boolean includeComments) {
 		if (lineSeparator != null) {
 			this.preferences.line_separator = lineSeparator;
@@ -431,7 +431,7 @@ public class DefaultCodeFormatter extends CodeFormatter {
 		this.preferences.initial_indentation_level = indentationLevel;
 
 		this.newCodeFormatter = new CodeFormatterVisitor(this.preferences, this.options, regions, this.codeSnippetParsingUtil, includeComments);
-		
+
 		TextEdit textEdit = this.newCodeFormatter.format(source, expression);
 		return textEdit;
 	}
@@ -445,7 +445,7 @@ public class DefaultCodeFormatter extends CodeFormatter {
 		this.preferences.initial_indentation_level = indentationLevel;
 
 		this.newCodeFormatter = new CodeFormatterVisitor(this.preferences, this.options, regions, this.codeSnippetParsingUtil, includeComments);
-		
+
 		return this.newCodeFormatter.format(source, constructorDeclaration);
 	}
 
@@ -459,16 +459,16 @@ public class DefaultCodeFormatter extends CodeFormatter {
 
 	private TextEdit probeFormatting(String source, int indentationLevel, String lineSeparator, IRegion[] regions, boolean includeComments) {
 		if (PROBING_SCANNER == null) {
-			// scanner use to check if the kind could be K_JAVA_DOC, K_MULTI_LINE_COMMENT or K_SINGLE_LINE_COMMENT 
+			// scanner use to check if the kind could be K_JAVA_DOC, K_MULTI_LINE_COMMENT or K_SINGLE_LINE_COMMENT
 			// do not tokenize white spaces to get single comments even with spaces before...
 			PROBING_SCANNER = new Scanner(true, false/*do not tokenize whitespaces*/, false/*nls*/, ClassFileConstants.JDK1_6, ClassFileConstants.JDK1_6, null/*taskTags*/, null/*taskPriorities*/, true/*taskCaseSensitive*/);
 		}
 		PROBING_SCANNER.setSource(source.toCharArray());
-		
+
 		IRegion coveredRegion = getCoveredRegion(regions);
 		int offset = coveredRegion.getOffset();
 		int length = coveredRegion.getLength();
-		
+
 		PROBING_SCANNER.resetTo(offset, offset + length - 1);
 		try {
 			int kind = -1;
@@ -498,19 +498,19 @@ public class DefaultCodeFormatter extends CodeFormatter {
 		PROBING_SCANNER.setSource((char[]) null);
 
 		// probe for expression
-		Expression expression = this.codeSnippetParsingUtil.parseExpression(source.toCharArray(), getDefaultCompilerOptions(), true);
+		Expression expression = this.codeSnippetParsingUtil.parseExpression(source.toCharArray(), this.defaultCompilerOptions, true);
 		if (expression != null) {
 			return internalFormatExpression(source, indentationLevel, lineSeparator, expression, regions, includeComments);
 		}
 
 		// probe for body declarations (fields, methods, constructors)
-		ASTNode[] bodyDeclarations = this.codeSnippetParsingUtil.parseClassBodyDeclarations(source.toCharArray(), getDefaultCompilerOptions(), true);
+		ASTNode[] bodyDeclarations = this.codeSnippetParsingUtil.parseClassBodyDeclarations(source.toCharArray(), this.defaultCompilerOptions, true);
 		if (bodyDeclarations != null) {
 			return internalFormatClassBodyDeclarations(source, indentationLevel, lineSeparator, bodyDeclarations, regions, includeComments);
 		}
 
 		// probe for statements
-		ConstructorDeclaration constructorDeclaration = this.codeSnippetParsingUtil.parseStatements(source.toCharArray(), getDefaultCompilerOptions(), true, false);
+		ConstructorDeclaration constructorDeclaration = this.codeSnippetParsingUtil.parseStatements(source.toCharArray(), this.defaultCompilerOptions, true, false);
 		if (constructorDeclaration.statements != null) {
 			return internalFormatStatements(source, indentationLevel, lineSeparator, constructorDeclaration, regions, includeComments);
 		}
@@ -542,14 +542,28 @@ public class DefaultCodeFormatter extends CodeFormatter {
 			if (lastOffset > current.getOffset()) {
 				return false;
 			}
-			
+
 			if (current.getOffset() < 0 || current.getLength() < 0 || current.getOffset() + current.getLength() > maxLength) {
 				return false;
 			}
-			
+
 			lastOffset = current.getOffset() + current.getLength() - 1;
 		}
 
 		return true;
+	}
+
+	@Override
+	public void setOptions(Map<String, String> options) {
+		this.options = options;
+		Map<String, String> formatterPrefs = new HashMap<String, String>(options.size());
+		for (String key : options.keySet()) {
+			Object value = options.get(key);
+			if (value instanceof String) {
+				formatterPrefs.put(key, (String) value);
+			}
+		}
+		this.preferences = new DefaultCodeFormatterOptions(formatterPrefs);
+		setDefaultCompilerOptions();
 	}
 }

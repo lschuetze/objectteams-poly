@@ -16,6 +16,7 @@
  *								bug 393719 - [compiler] inconsistent warnings on iteration variables
  *								Bug 411964 - [1.8][null] leverage null type annotation in foreach statement
  *								Bug 392099 - [1.8][compiler][null] Apply null annotation on types for null analysis
+ *								Bug 453483 - [compiler][null][loop] Improve null analysis for loops
  *     Jesper S Moller -  Contribution for
  *								bug 401853 - Eclipse Java compiler creates invalid bytecode (java.lang.VerifyError)
  *******************************************************************************/
@@ -124,8 +125,8 @@ public class ForeachStatement extends Statement {
 		actionInfo.markAsDefinitelyUnknown(elementVarBinding);
 		if (currentScope.compilerOptions().isAnnotationBasedNullAnalysisEnabled) {
 			int elementNullStatus = FlowInfo.tagBitsToNullStatus(this.collectionElementType.tagBits);
-			int nullStatus = NullAnnotationMatching.checkAssignment(currentScope, flowContext, elementVarBinding, elementNullStatus,
-																		this.collection, this.collectionElementType);
+			int nullStatus = NullAnnotationMatching.checkAssignment(currentScope, flowContext, elementVarBinding, null, // have no useful flowinfo for element var
+																		elementNullStatus, this.collection, this.collectionElementType);
 			if ((elementVarBinding.type.tagBits & TagBits.IsBaseType) == 0) {
 				actionInfo.markNullStatus(elementVarBinding, nullStatus);
 			}

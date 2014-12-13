@@ -4,7 +4,7 @@
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
- * 
+ *
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *     Benjamin Muskalla - Contribution for bug 239066
@@ -1710,29 +1710,29 @@ public void test012b(){
         "{0} {1}\n" +
         "{2}\n" +
         " \n" +
-        " Warning options:\n" +
-        "    -deprecation     + deprecation outside deprecated code\n" +
-        "    -nowarn -warn:none disable all warnings\n" +
+        " Warning options:\n" + 
+        "    -deprecation         + deprecation outside deprecated code\n" + 
+        "    -nowarn -warn:none disable all warnings\n" + 
         "    -nowarn:[<directories separated by " + File.pathSeparator+ ">]\n" +
         "                       specify directories from which optional problems should\n" +
         "                       be ignored\n" +
-        "    -warn:<warnings separated by ,>    enable exactly the listed warnings\n" +
-        "    -warn:+<warnings separated by ,>   enable additional warnings\n" +
-        "    -warn:-<warnings separated by ,>   disable specific warnings\n" +
+        "    -warn:<warnings separated by ,>    enable exactly the listed warnings\n" + 
+        "    -warn:+<warnings separated by ,>   enable additional warnings\n" + 
+        "    -warn:-<warnings separated by ,>   disable specific warnings\n" + 
 //{ObjectTeams: new options (marked individually as //OT: )
 //OT (2x):
         "      abstractrelevantrole + abstract relevant role (OTJLD 2.5(b))\n" +
         "      adaptDeprecated    + adapting a deprecated type/method\n" +
         "      all                  enable all warnings\n" + 
-        "      allDeadCode          dead code including trivial if(DEBUG) check\n" +
-        "      allDeprecation       deprecation including inside deprecated code\n" +
-        "      allJavadoc           invalid or missing javadoc\n" +
-        "      allOver-ann          all missing @Override annotations\n" +
-        "      all-static-method    all method can be declared as static warnings\n" +
+        "      allDeadCode          dead code including trivial if(DEBUG) check\n" + 
+        "      allDeprecation       deprecation including inside deprecated code\n" + 
+        "      allJavadoc           invalid or missing javadoc\n" + 
+        "      allOver-ann          all missing @Override annotations\n" + 
+        "      all-static-method    all method can be declared as static warnings\n" + 
 //OT (2x):
         "      ambiguousbinding   + ambiguous role-base bindings (OTJLD 2.3.4(a))\n" + 
         "      ambiguouslowering  + ambiguous lowering or upcast (OTJLD 2.2(f))\n" +
-        "      assertIdentifier   + ''assert'' used as identifier\n" +
+        "      assertIdentifier   + ''assert'' used as identifier\n" + 
 //OT:
         "      basecall           + base call not issued exactly once on each path\n" +
         "                           (OTJLD 4.3(b,c))\n" +
@@ -1743,32 +1743,32 @@ public void test012b(){
         "                           (OTJLD 2.1.2(d))\n" +
 //OT:
         "      bindingtosystemclass 	+ trying to bind a role to a system class\n" +
-        "      boxing               autoboxing conversion\n" +
-        "      charConcat         + char[] in String concat\n" +
-        "      compareIdentical   + comparing identical expressions\n" +
-        "      conditionAssign      possible accidental boolean assignment\n" +
-        "      constructorName    + method with constructor name\n" +
+        "      boxing               autoboxing conversion\n" + 
+        "      charConcat         + char[] in String concat\n" + 
+        "      compareIdentical   + comparing identical expressions\n" + 
+        "      conditionAssign      possible accidental boolean assignment\n" + 
+        "      constructorName    + method with constructor name\n" + 
 //OT:
         "      dangerouscallin    + dangerous callin binding (hashCode or equals)\n" +
-        "      deadCode           + dead code excluding trivial if (DEBUG) check\n" +
+        "      deadCode           + dead code excluding trivial if (DEBUG) check\n" + 
 //OT:
         "      decapsulation      + overriding access restrictions of a base class\n" +
         "                           (OTJLD 3.4)\n" +
-        "      dep-ann              missing @Deprecated annotation\n" +
-        "      deprecation        + deprecation outside deprecated code\n" +
-        "      discouraged        + use of types matching a discouraged access rule\n" +
-        "      emptyBlock           undocumented empty block\n" +
+        "      dep-ann              missing @Deprecated annotation\n" + 
+        "      deprecation        + deprecation outside deprecated code\n" + 
+        "      discouraged        + use of types matching a discouraged access rule\n" + 
+        "      emptyBlock           undocumented empty block\n" + 
         "      enumIdentifier       ''enum'' used as identifier\n" + 
         "      enumSwitch           incomplete enum switch\n" + 
         "      enumSwitchPedantic + report missing enum switch cases even\n" + 
         "                           in the presence of a default case\n" + 
 //OT:
         "      exceptioninguard   + guard predicate throwing checked exception\n" +
-        "      fallthrough          possible fall-through case\n" +
-        "      fieldHiding          field hiding another variable\n" +
-        "      finalBound           type parameter with final bound\n" +
-        "      finally            + finally block not completing normally\n" +
-        "      forbidden          + use of types matching a forbidden access rule\n" +
+        "      fallthrough          possible fall-through case\n" + 
+        "      fieldHiding          field hiding another variable\n" + 
+        "      finalBound           type parameter with final bound\n" + 
+        "      finally            + finally block not completing normally\n" + 
+        "      forbidden          + use of types matching a forbidden access rule\n" + 
 //OT:
         "      fragilecallin      + replace callin not providing expected result\n" +
         "                           (OTJLD 4.3(e))\n" + 
@@ -1776,16 +1776,16 @@ public void test012b(){
 //OT:
 		"      hiddenLiftingProblem + a lifting that is not directly visible in source\n" + 
 		"                             code could fail at runtime (OTJLD 2.3.5)\n" +
-        "      hiding               macro for fieldHiding, localHiding, typeHiding and\n" +
-        "                           maskedCatchBlock\n" +
+        "      hiding               macro for fieldHiding, localHiding, typeHiding and\n" + 
+        "                           maskedCatchBlock\n" + 
         "      includeAssertNull    raise null warnings for variables\n" + 
         "                           that got tainted in an assert expression\n" + 
         "      indirectStatic       indirect reference to static member\n" +
 //OT:
         "      inferredcallout    + a callout binding has to be inferred (OTJLD 3.1(j))\n" +
         "      inheritNullAnnot     inherit null annotations\n" + 
-        "      intfAnnotation     + annotation type used as super interface\n" +
-        "      intfNonInherited   + interface non-inherited method compatibility\n" +
+        "      intfAnnotation     + annotation type used as super interface\n" + 
+        "      intfNonInherited   + interface non-inherited method compatibility\n" + 
         "      intfRedundant        find redundant superinterfaces\n" + 
         "      invalidJavadoc       all warnings for malformed javadoc tags\n" + 
         "      invalidJavadocTag    validate javadoc tag arguments\n" + 
@@ -1794,9 +1794,9 @@ public void test012b(){
         "							tag args\n" + 
         "      invalidJavadocVisibility(<visibility>)  specify visibility modifier\n" + 
         "							for malformed javadoc tag warnings\n" + 
-        "      javadoc              invalid javadoc\n" +
-        "      localHiding          local variable hiding another variable\n" +
-        "      maskedCatchBlock   + hidden catch block\n" +
+        "      javadoc              invalid javadoc\n" + 
+        "      localHiding          local variable hiding another variable\n" + 
+        "      maskedCatchBlock   + hidden catch block\n" + 
         "      missingJavadocTags   missing Javadoc tags\n" + 
         "      missingJavadocTagsOverriding missing Javadoc tags in overriding methods\n" + 
         "      missingJavadocTagsMethod missing Javadoc tags for method type parameter\n" + 
@@ -1807,12 +1807,12 @@ public void test012b(){
         "							methods\n" + 
         "      missingJavadocCommentsVisibility(<visibility>)  specify visibility\n" + 
         "							modifier for missing javadoc comments warnings\n" + 
-        "      nls                  string literal lacking non-nls tag //$NON-NLS-<n>$\n" +
-        "      noEffectAssign     + assignment without effect\n" +
-        "      null                 potential missing or redundant null check\n" +
-        "      nullAnnot(<annot. names separated by |>)   annotation based null analysis,\n" +
-        "                           nullable|nonnull|nonnullbydefault annotation types\n" +
-        "                           optionally specified using fully qualified names.\n" +
+        "      nls                  string literal lacking non-nls tag //$NON-NLS-<n>$\n" + 
+        "      noEffectAssign     + assignment without effect\n" + 
+        "      null                 potential missing or redundant null check\n" + 
+        "      nullAnnot(<annot. names separated by |>)   annotation based null analysis,\n" + 
+        "                           nullable|nonnull|nonnullbydefault annotation types\n" + 
+        "                           optionally specified using fully qualified names.\n" + 
         "							Enabling this option enables all null-annotation\n" + 
         "							related sub-options. These can be individually\n" + 
         "							controlled using options listed below.\n" + 
@@ -1828,7 +1828,7 @@ public void test012b(){
         "      over-ann             missing @Override annotation (superclass)\n" + 
         "      paramAssign          assignment to a parameter\n" + 
         "      pkgDefaultMethod   + attempt to override package-default method\n" + 
-        "      raw                + usage of raw type\n" +
+        "      raw                + usage of raw type\n" + 
         "      resource           + (pot.) unsafe usage of resource of type Closeable\n" + 
 //OT:
         "      roleinstantiation  + unsafe instantiation of a role\n" +
@@ -1836,50 +1836,52 @@ public void test012b(){
 //OT:
         "      roletypesyntax     + old style syntax for role types (dependent types)\n" +
         "                           (OTJLD 1.2.2(b))\n" +
-        "      semicolon            unnecessary semicolon, empty statement\n" +
-        "      serial             + missing serialVersionUID\n" +
-        "      specialParamHiding   constructor or setter parameter hiding a field\n" +
+        "      semicolon            unnecessary semicolon, empty statement\n" + 
+        "      serial             + missing serialVersionUID\n" + 
+        "      specialParamHiding   constructor or setter parameter hiding a field\n" + 
         "      static-method        method can be declared as static\n" + 
-        "      static-access        macro for indirectStatic and staticReceiver\n" +
-        "      staticReceiver     + non-static reference to static member\n" +
-        "      super                overriding a method without making a super invocation\n" +
+        "      static-access        macro for indirectStatic and staticReceiver\n" + 
+        "      staticReceiver     + non-static reference to static member\n" + 
+        "      super                overriding a method without making a super invocation\n" + 
         "      suppress           + enable @SuppressWarnings\n" + 
         "                           When used with -err:, it can also silent optional\n" + 
         "                           errors and warnings\n" + 
         "      switchDefault      + switch statement lacking a default case\n" + 
-        "      syncOverride         missing synchronized in synchr. method override\n" +
-        "      syntheticAccess      synthetic access for innerclass\n" +
-        "      tasks(<tags separated by |>) tasks identified by tags inside comments\n" +
-        "      typeHiding         + type parameter hiding another type\n" +
-        "      unavoidableGenericProblems + ignore unavoidable type safety problems\n" +
+        "      syncOverride         missing synchronized in synchr. method override\n" + 
+        "      syntheticAccess      synthetic access for innerclass\n" + 
+        "      tasks(<tags separated by |>) tasks identified by tags inside comments\n" + 
+        "      typeHiding         + type parameter hiding another type\n" + 
+        "      unavoidableGenericProblems + ignore unavoidable type safety problems\n" + 
         "                                   due to raw APIs\n" + 
-        "      unchecked          + unchecked type operation\n" +
-        "      unnecessaryElse      unnecessary else clause\n" +
-        "      unqualifiedField     unqualified reference to field\n" +
-        "      unused               macro for unusedAllocation, unusedArgument,\n" +
-        "                               unusedImport, unusedLabel, unusedLocal,\n" +
-        "                               unusedPrivate, unusedThrown, and unusedTypeArgs\n" +
-        "      unusedAllocation     allocating an object that is not used\n" +
+        "      unchecked          + unchecked type operation\n" + 
+        "      unnecessaryElse      unnecessary else clause\n" + 
+        "      unqualifiedField     unqualified reference to field\n" + 
+        "      unused               macro for unusedAllocation, unusedArgument,\n" + 
+        "                               unusedImport, unusedLabel, unusedLocal,\n" + 
+        "                               unusedPrivate, unusedThrown, and unusedTypeArgs,\n" + 
+        "								unusedExceptionParam\n"+
+        "      unusedAllocation     allocating an object that is not used\n" + 
         "      unusedArgument       unread method parameter\n" +
-        "      unusedImport       + unused import declaration\n" +
-        "      unusedLabel        + unused label\n" +
-        "      unusedLocal        + unread local variable\n" +
+        "      unusedExceptionParam unread exception parameter\n" + 
+        "      unusedImport       + unused import declaration\n" + 
+        "      unusedLabel        + unused label\n" + 
+        "      unusedLocal        + unread local variable\n" + 
         "      unusedParam		    unused parameter\n" + 
         "      unusedParamOverriding unused parameter for overriding method\n" + 
         "      unusedParamImplementing unused parameter for implementing method\n" + 
         "      unusedParamIncludeDoc unused parameter documented in comment tag\n" + 
-        "      unusedPrivate      + unused private member declaration\n" +
-        "      unusedThrown         unused declared thrown exception\n" +
+        "      unusedPrivate      + unused private member declaration\n" + 
+        "      unusedThrown         unused declared thrown exception\n" + 
         "      unusedThrownWhenOverriding unused declared thrown exception in \n" + 
         "							overriding method\n" + 
         "      unusedThrownIncludeDocComment     unused declared thrown exception,\n" + 
         "							documented in a comment tag\n" + 
         "      unusedThrownExemptExceptionThrowable  unused declared thrown exception,\n" + 
         "							exempt Exception and Throwable\n" + 
-        "      unusedTypeArgs     + unused type arguments for method and constructor\n" +
-        "      uselessTypeCheck     unnecessary cast/instanceof operation\n" +
-        "      varargsCast        + varargs argument need explicit cast\n" +
-        "      warningToken       + unsupported or unnecessary @SuppressWarnings\n" +
+        "      unusedTypeArgs     + unused type arguments for method and constructor\n" + 
+        "      uselessTypeCheck     unnecessary cast/instanceof operation\n" + 
+        "      varargsCast        + varargs argument need explicit cast\n" + 
+        "      warningToken       + unsupported or unnecessary @SuppressWarnings\n" + 
 // SH}
         "\n";
 	String expandedExpectedOutput =
@@ -1927,34 +1929,34 @@ public void test012b(){
 				true);
 		String logContents = Util.fileContent(logFileName);
 		String expectedLogContents =
-			"<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n" +
-			"<!DOCTYPE compiler PUBLIC \"-//Eclipse.org//DTD Eclipse JDT 3.2.004 Compiler//EN\" \"http://www.eclipse.org/jdt/core/compiler_32_004.dtd\">\n" +
-			"<compiler copyright=\"{2}\" name=\"{1}\" version=\"{3}\">\n" +
-			"	<command_line>\n" +
-			"		<argument value=\"---OUTPUT_DIR_PLACEHOLDER---{0}X.java\"/>\n" +
-			"		<argument value=\"-1.5\"/>\n" +
-			"		<argument value=\"-proceedOnError\"/>\n" +
-			"		<argument value=\"-log\"/>\n" +
-			"		<argument value=\"---OUTPUT_DIR_PLACEHOLDER---{0}log.xml\"/>\n" +
-			"		<argument value=\"-d\"/>\n" +
-			"		<argument value=\"---OUTPUT_DIR_PLACEHOLDER---\"/>\n" +
-			"	</command_line>\n" +
-			"	<options>\n" +
+			"<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n" + 
+			"<!DOCTYPE compiler PUBLIC \"-//Eclipse.org//DTD Eclipse JDT 3.2.004 Compiler//EN\" \"http://www.eclipse.org/jdt/core/compiler_32_004.dtd\">\n" + 
+			"<compiler copyright=\"{2}\" name=\"{1}\" version=\"{3}\">\n" + 
+			"	<command_line>\n" + 
+			"		<argument value=\"---OUTPUT_DIR_PLACEHOLDER---{0}X.java\"/>\n" + 
+			"		<argument value=\"-1.5\"/>\n" + 
+			"		<argument value=\"-proceedOnError\"/>\n" + 
+			"		<argument value=\"-log\"/>\n" + 
+			"		<argument value=\"---OUTPUT_DIR_PLACEHOLDER---{0}log.xml\"/>\n" + 
+			"		<argument value=\"-d\"/>\n" + 
+			"		<argument value=\"---OUTPUT_DIR_PLACEHOLDER---\"/>\n" + 
+			"	</command_line>\n" + 
+			"	<options>\n" + 
 			"		<option key=\"org.eclipse.jdt.core.compiler.annotation.inheritNullAnnotations\" value=\"disabled\"/>\n" +
 			"		<option key=\"org.eclipse.jdt.core.compiler.annotation.missingNonNullByDefaultAnnotation\" value=\"ignore\"/>\n" + 
-			"		<option key=\"org.eclipse.jdt.core.compiler.annotation.nonnull\" value=\"org.eclipse.jdt.annotation.NonNull\"/>\n" +
-			"		<option key=\"org.eclipse.jdt.core.compiler.annotation.nonnullbydefault\" value=\"org.eclipse.jdt.annotation.NonNullByDefault\"/>\n" +
-			"		<option key=\"org.eclipse.jdt.core.compiler.annotation.nullable\" value=\"org.eclipse.jdt.annotation.Nullable\"/>\n" +
-			"		<option key=\"org.eclipse.jdt.core.compiler.annotation.nullanalysis\" value=\"disabled\"/>\n" +
+			"		<option key=\"org.eclipse.jdt.core.compiler.annotation.nonnull\" value=\"org.eclipse.jdt.annotation.NonNull\"/>\n" + 
+			"		<option key=\"org.eclipse.jdt.core.compiler.annotation.nonnullbydefault\" value=\"org.eclipse.jdt.annotation.NonNullByDefault\"/>\n" + 
+			"		<option key=\"org.eclipse.jdt.core.compiler.annotation.nullable\" value=\"org.eclipse.jdt.annotation.Nullable\"/>\n" + 
+			"		<option key=\"org.eclipse.jdt.core.compiler.annotation.nullanalysis\" value=\"disabled\"/>\n" + 
 			"		<option key=\"org.eclipse.jdt.core.compiler.codegen.inlineJsrBytecode\" value=\"disabled\"/>\n" + 
 			"		<option key=\"org.eclipse.jdt.core.compiler.codegen.lambda.genericSignature\" value=\"do not generate\"/>\n" +
 			"		<option key=\"org.eclipse.jdt.core.compiler.codegen.methodParameters\" value=\"do not generate\"/>\n" + 
 			"		<option key=\"org.eclipse.jdt.core.compiler.codegen.shareCommonFinallyBlocks\" value=\"disabled\"/>\n" +
-			"		<option key=\"org.eclipse.jdt.core.compiler.codegen.targetPlatform\" value=\"1.5\"/>\n" +
-			"		<option key=\"org.eclipse.jdt.core.compiler.codegen.unusedLocal\" value=\"optimize out\"/>\n" +
-			"		<option key=\"org.eclipse.jdt.core.compiler.compliance\" value=\"1.5\"/>\n" +
-			"		<option key=\"org.eclipse.jdt.core.compiler.debug.lineNumber\" value=\"generate\"/>\n" +
-			"		<option key=\"org.eclipse.jdt.core.compiler.debug.localVariable\" value=\"do not generate\"/>\n" +
+			"		<option key=\"org.eclipse.jdt.core.compiler.codegen.targetPlatform\" value=\"1.5\"/>\n" + 
+			"		<option key=\"org.eclipse.jdt.core.compiler.codegen.unusedLocal\" value=\"optimize out\"/>\n" + 
+			"		<option key=\"org.eclipse.jdt.core.compiler.compliance\" value=\"1.5\"/>\n" + 
+			"		<option key=\"org.eclipse.jdt.core.compiler.debug.lineNumber\" value=\"generate\"/>\n" + 
+			"		<option key=\"org.eclipse.jdt.core.compiler.debug.localVariable\" value=\"do not generate\"/>\n" + 
 			"		<option key=\"org.eclipse.jdt.core.compiler.debug.sourceFile\" value=\"generate\"/>\n" + 
 			"		<option key=\"org.eclipse.jdt.core.compiler.doc.comment.support\" value=\"disabled\"/>\n" + 
 			"		<option key=\"org.eclipse.jdt.core.compiler.emulateJavacBug8031744\" value=\"enabled\"/>\n" +
@@ -1963,75 +1965,75 @@ public void test012b(){
 			"		<option key=\"org.eclipse.jdt.core.compiler.problem.annotationSuperInterface\" value=\"warning\"/>\n" + 
 			"		<option key=\"org.eclipse.jdt.core.compiler.problem.assertIdentifier\" value=\"warning\"/>\n" + 
 			"		<option key=\"org.eclipse.jdt.core.compiler.problem.autoboxing\" value=\"ignore\"/>\n" + 
-			"		<option key=\"org.eclipse.jdt.core.compiler.problem.comparingIdentical\" value=\"warning\"/>\n" +
-			"		<option key=\"org.eclipse.jdt.core.compiler.problem.deadCode\" value=\"warning\"/>\n" +
-			"		<option key=\"org.eclipse.jdt.core.compiler.problem.deadCodeInTrivialIfStatement\" value=\"disabled\"/>\n" +
-			"		<option key=\"org.eclipse.jdt.core.compiler.problem.deprecation\" value=\"warning\"/>\n" +
-			"		<option key=\"org.eclipse.jdt.core.compiler.problem.deprecationInDeprecatedCode\" value=\"disabled\"/>\n" +
-			"		<option key=\"org.eclipse.jdt.core.compiler.problem.deprecationWhenOverridingDeprecatedMethod\" value=\"disabled\"/>\n" +
-			"		<option key=\"org.eclipse.jdt.core.compiler.problem.discouragedReference\" value=\"warning\"/>\n" +
-			"		<option key=\"org.eclipse.jdt.core.compiler.problem.emptyStatement\" value=\"ignore\"/>\n" +
-			"		<option key=\"org.eclipse.jdt.core.compiler.problem.enumIdentifier\" value=\"warning\"/>\n" +
+			"		<option key=\"org.eclipse.jdt.core.compiler.problem.comparingIdentical\" value=\"warning\"/>\n" + 
+			"		<option key=\"org.eclipse.jdt.core.compiler.problem.deadCode\" value=\"warning\"/>\n" + 
+			"		<option key=\"org.eclipse.jdt.core.compiler.problem.deadCodeInTrivialIfStatement\" value=\"disabled\"/>\n" + 
+			"		<option key=\"org.eclipse.jdt.core.compiler.problem.deprecation\" value=\"warning\"/>\n" + 
+			"		<option key=\"org.eclipse.jdt.core.compiler.problem.deprecationInDeprecatedCode\" value=\"disabled\"/>\n" + 
+			"		<option key=\"org.eclipse.jdt.core.compiler.problem.deprecationWhenOverridingDeprecatedMethod\" value=\"disabled\"/>\n" + 
+			"		<option key=\"org.eclipse.jdt.core.compiler.problem.discouragedReference\" value=\"warning\"/>\n" + 
+			"		<option key=\"org.eclipse.jdt.core.compiler.problem.emptyStatement\" value=\"ignore\"/>\n" + 
+			"		<option key=\"org.eclipse.jdt.core.compiler.problem.enumIdentifier\" value=\"warning\"/>\n" + 
 			"		<option key=\"org.eclipse.jdt.core.compiler.problem.explicitlyClosedAutoCloseable\" value=\"ignore\"/>\n" + 
-			"		<option key=\"org.eclipse.jdt.core.compiler.problem.fallthroughCase\" value=\"ignore\"/>\n" +
-			"		<option key=\"org.eclipse.jdt.core.compiler.problem.fatalOptionalError\" value=\"disabled\"/>\n" +
-			"		<option key=\"org.eclipse.jdt.core.compiler.problem.fieldHiding\" value=\"ignore\"/>\n" +
-			"		<option key=\"org.eclipse.jdt.core.compiler.problem.finalParameterBound\" value=\"warning\"/>\n" +
-			"		<option key=\"org.eclipse.jdt.core.compiler.problem.finallyBlockNotCompletingNormally\" value=\"warning\"/>\n" +
-			"		<option key=\"org.eclipse.jdt.core.compiler.problem.forbiddenReference\" value=\"warning\"/>\n" +
-			"		<option key=\"org.eclipse.jdt.core.compiler.problem.hiddenCatchBlock\" value=\"warning\"/>\n" +
+			"		<option key=\"org.eclipse.jdt.core.compiler.problem.fallthroughCase\" value=\"ignore\"/>\n" + 
+			"		<option key=\"org.eclipse.jdt.core.compiler.problem.fatalOptionalError\" value=\"disabled\"/>\n" + 
+			"		<option key=\"org.eclipse.jdt.core.compiler.problem.fieldHiding\" value=\"ignore\"/>\n" + 
+			"		<option key=\"org.eclipse.jdt.core.compiler.problem.finalParameterBound\" value=\"warning\"/>\n" + 
+			"		<option key=\"org.eclipse.jdt.core.compiler.problem.finallyBlockNotCompletingNormally\" value=\"warning\"/>\n" + 
+			"		<option key=\"org.eclipse.jdt.core.compiler.problem.forbiddenReference\" value=\"warning\"/>\n" + 
+			"		<option key=\"org.eclipse.jdt.core.compiler.problem.hiddenCatchBlock\" value=\"warning\"/>\n" + 
 			"		<option key=\"org.eclipse.jdt.core.compiler.problem.includeNullInfoFromAsserts\" value=\"disabled\"/>\n" + 
-			"		<option key=\"org.eclipse.jdt.core.compiler.problem.incompatibleNonInheritedInterfaceMethod\" value=\"warning\"/>\n" +
-			"		<option key=\"org.eclipse.jdt.core.compiler.problem.incompleteEnumSwitch\" value=\"warning\"/>\n" +
-			"		<option key=\"org.eclipse.jdt.core.compiler.problem.indirectStaticAccess\" value=\"ignore\"/>\n" +
-			"		<option key=\"org.eclipse.jdt.core.compiler.problem.invalidJavadoc\" value=\"ignore\"/>\n" +
-			"		<option key=\"org.eclipse.jdt.core.compiler.problem.invalidJavadocTags\" value=\"disabled\"/>\n" +
-			"		<option key=\"org.eclipse.jdt.core.compiler.problem.invalidJavadocTagsDeprecatedRef\" value=\"disabled\"/>\n" +
-			"		<option key=\"org.eclipse.jdt.core.compiler.problem.invalidJavadocTagsNotVisibleRef\" value=\"disabled\"/>\n" +
-			"		<option key=\"org.eclipse.jdt.core.compiler.problem.invalidJavadocTagsVisibility\" value=\"public\"/>\n" +
-			"		<option key=\"org.eclipse.jdt.core.compiler.problem.localVariableHiding\" value=\"ignore\"/>\n" +
-			"		<option key=\"org.eclipse.jdt.core.compiler.problem.methodWithConstructorName\" value=\"warning\"/>\n" +
+			"		<option key=\"org.eclipse.jdt.core.compiler.problem.incompatibleNonInheritedInterfaceMethod\" value=\"warning\"/>\n" + 
+			"		<option key=\"org.eclipse.jdt.core.compiler.problem.incompleteEnumSwitch\" value=\"warning\"/>\n" + 
+			"		<option key=\"org.eclipse.jdt.core.compiler.problem.indirectStaticAccess\" value=\"ignore\"/>\n" + 
+			"		<option key=\"org.eclipse.jdt.core.compiler.problem.invalidJavadoc\" value=\"ignore\"/>\n" + 
+			"		<option key=\"org.eclipse.jdt.core.compiler.problem.invalidJavadocTags\" value=\"disabled\"/>\n" + 
+			"		<option key=\"org.eclipse.jdt.core.compiler.problem.invalidJavadocTagsDeprecatedRef\" value=\"disabled\"/>\n" + 
+			"		<option key=\"org.eclipse.jdt.core.compiler.problem.invalidJavadocTagsNotVisibleRef\" value=\"disabled\"/>\n" + 
+			"		<option key=\"org.eclipse.jdt.core.compiler.problem.invalidJavadocTagsVisibility\" value=\"public\"/>\n" + 
+			"		<option key=\"org.eclipse.jdt.core.compiler.problem.localVariableHiding\" value=\"ignore\"/>\n" + 
+			"		<option key=\"org.eclipse.jdt.core.compiler.problem.methodWithConstructorName\" value=\"warning\"/>\n" + 
 			"		<option key=\"org.eclipse.jdt.core.compiler.problem.missingDefaultCase\" value=\"ignore\"/>\n" +
 			"		<option key=\"org.eclipse.jdt.core.compiler.problem.missingDeprecatedAnnotation\" value=\"ignore\"/>\n" +
 			"		<option key=\"org.eclipse.jdt.core.compiler.problem.missingEnumCaseDespiteDefault\" value=\"disabled\"/>\n" +
-			"		<option key=\"org.eclipse.jdt.core.compiler.problem.missingHashCodeMethod\" value=\"ignore\"/>\n" +
-			"		<option key=\"org.eclipse.jdt.core.compiler.problem.missingJavadocComments\" value=\"ignore\"/>\n" +
-			"		<option key=\"org.eclipse.jdt.core.compiler.problem.missingJavadocCommentsOverriding\" value=\"disabled\"/>\n" +
-			"		<option key=\"org.eclipse.jdt.core.compiler.problem.missingJavadocCommentsVisibility\" value=\"public\"/>\n" +
-			"		<option key=\"org.eclipse.jdt.core.compiler.problem.missingJavadocTagDescription\" value=\"return_tag\"/>\n" +
-			"		<option key=\"org.eclipse.jdt.core.compiler.problem.missingJavadocTags\" value=\"ignore\"/>\n" +
+			"		<option key=\"org.eclipse.jdt.core.compiler.problem.missingHashCodeMethod\" value=\"ignore\"/>\n" + 
+			"		<option key=\"org.eclipse.jdt.core.compiler.problem.missingJavadocComments\" value=\"ignore\"/>\n" + 
+			"		<option key=\"org.eclipse.jdt.core.compiler.problem.missingJavadocCommentsOverriding\" value=\"disabled\"/>\n" + 
+			"		<option key=\"org.eclipse.jdt.core.compiler.problem.missingJavadocCommentsVisibility\" value=\"public\"/>\n" + 
+			"		<option key=\"org.eclipse.jdt.core.compiler.problem.missingJavadocTagDescription\" value=\"return_tag\"/>\n" + 
+			"		<option key=\"org.eclipse.jdt.core.compiler.problem.missingJavadocTags\" value=\"ignore\"/>\n" + 
 			"		<option key=\"org.eclipse.jdt.core.compiler.problem.missingJavadocTagsMethodTypeParameters\" value=\"disabled\"/>\n" + 
-			"		<option key=\"org.eclipse.jdt.core.compiler.problem.missingJavadocTagsOverriding\" value=\"disabled\"/>\n" +
-			"		<option key=\"org.eclipse.jdt.core.compiler.problem.missingJavadocTagsVisibility\" value=\"public\"/>\n" +
-			"		<option key=\"org.eclipse.jdt.core.compiler.problem.missingOverrideAnnotation\" value=\"ignore\"/>\n" +
-			"		<option key=\"org.eclipse.jdt.core.compiler.problem.missingOverrideAnnotationForInterfaceMethodImplementation\" value=\"enabled\"/>\n" +
-			"		<option key=\"org.eclipse.jdt.core.compiler.problem.missingSerialVersion\" value=\"warning\"/>\n" +
-			"		<option key=\"org.eclipse.jdt.core.compiler.problem.missingSynchronizedOnInheritedMethod\" value=\"ignore\"/>\n" +
-			"		<option key=\"org.eclipse.jdt.core.compiler.problem.noEffectAssignment\" value=\"warning\"/>\n" +
-			"		<option key=\"org.eclipse.jdt.core.compiler.problem.noImplicitStringConversion\" value=\"warning\"/>\n" +
+			"		<option key=\"org.eclipse.jdt.core.compiler.problem.missingJavadocTagsOverriding\" value=\"disabled\"/>\n" + 
+			"		<option key=\"org.eclipse.jdt.core.compiler.problem.missingJavadocTagsVisibility\" value=\"public\"/>\n" + 
+			"		<option key=\"org.eclipse.jdt.core.compiler.problem.missingOverrideAnnotation\" value=\"ignore\"/>\n" + 
+			"		<option key=\"org.eclipse.jdt.core.compiler.problem.missingOverrideAnnotationForInterfaceMethodImplementation\" value=\"enabled\"/>\n" + 
+			"		<option key=\"org.eclipse.jdt.core.compiler.problem.missingSerialVersion\" value=\"warning\"/>\n" + 
+			"		<option key=\"org.eclipse.jdt.core.compiler.problem.missingSynchronizedOnInheritedMethod\" value=\"ignore\"/>\n" + 
+			"		<option key=\"org.eclipse.jdt.core.compiler.problem.noEffectAssignment\" value=\"warning\"/>\n" + 
+			"		<option key=\"org.eclipse.jdt.core.compiler.problem.noImplicitStringConversion\" value=\"warning\"/>\n" + 
 			"		<option key=\"org.eclipse.jdt.core.compiler.problem.nonExternalizedStringLiteral\" value=\"ignore\"/>\n" +
 			"		<option key=\"org.eclipse.jdt.core.compiler.problem.nonnullParameterAnnotationDropped\" value=\"warning\"/>\n" +
 			"		<option key=\"org.eclipse.jdt.core.compiler.problem.nullAnnotationInferenceConflict\" value=\"error\"/>\n" + 
-			"		<option key=\"org.eclipse.jdt.core.compiler.problem.nullReference\" value=\"warning\"/>\n" +
-			"		<option key=\"org.eclipse.jdt.core.compiler.problem.nullSpecViolation\" value=\"error\"/>\n" +
+			"		<option key=\"org.eclipse.jdt.core.compiler.problem.nullReference\" value=\"warning\"/>\n" + 
+			"		<option key=\"org.eclipse.jdt.core.compiler.problem.nullSpecViolation\" value=\"error\"/>\n" + 
 			"		<option key=\"org.eclipse.jdt.core.compiler.problem.nullUncheckedConversion\" value=\"warning\"/>\n" + 
 			"		<option key=\"org.eclipse.jdt.core.compiler.problem.overridingMethodWithoutSuperInvocation\" value=\"ignore\"/>\n" + 
 			"		<option key=\"org.eclipse.jdt.core.compiler.problem.overridingPackageDefaultMethod\" value=\"warning\"/>\n" + 
 			"		<option key=\"org.eclipse.jdt.core.compiler.problem.parameterAssignment\" value=\"ignore\"/>\n" + 
 			"		<option key=\"org.eclipse.jdt.core.compiler.problem.possibleAccidentalBooleanAssignment\" value=\"ignore\"/>\n" + 
 			"		<option key=\"org.eclipse.jdt.core.compiler.problem.potentialNullReference\" value=\"ignore\"/>\n" + 
-			"		<option key=\"org.eclipse.jdt.core.compiler.problem.potentiallyUnclosedCloseable\" value=\"ignore\"/>\n" +
-			"		<option key=\"org.eclipse.jdt.core.compiler.problem.rawTypeReference\" value=\"warning\"/>\n" +
-			"		<option key=\"org.eclipse.jdt.core.compiler.problem.redundantNullAnnotation\" value=\"warning\"/>\n" +
+			"		<option key=\"org.eclipse.jdt.core.compiler.problem.potentiallyUnclosedCloseable\" value=\"ignore\"/>\n" + 
+			"		<option key=\"org.eclipse.jdt.core.compiler.problem.rawTypeReference\" value=\"warning\"/>\n" + 
+			"		<option key=\"org.eclipse.jdt.core.compiler.problem.redundantNullAnnotation\" value=\"warning\"/>\n" + 
 			"		<option key=\"org.eclipse.jdt.core.compiler.problem.redundantNullCheck\" value=\"ignore\"/>\n" + 
 			"		<option key=\"org.eclipse.jdt.core.compiler.problem.redundantSpecificationOfTypeArguments\" value=\"ignore\"/>\n" + 
 			"		<option key=\"org.eclipse.jdt.core.compiler.problem.redundantSuperinterface\" value=\"ignore\"/>\n" + 
 			"		<option key=\"org.eclipse.jdt.core.compiler.problem.reportMethodCanBePotentiallyStatic\" value=\"ignore\"/>\n" + 
 			"		<option key=\"org.eclipse.jdt.core.compiler.problem.reportMethodCanBeStatic\" value=\"ignore\"/>\n" + 
-			"		<option key=\"org.eclipse.jdt.core.compiler.problem.specialParameterHidingField\" value=\"disabled\"/>\n" +
-			"		<option key=\"org.eclipse.jdt.core.compiler.problem.staticAccessReceiver\" value=\"warning\"/>\n" +
-			"		<option key=\"org.eclipse.jdt.core.compiler.problem.suppressOptionalErrors\" value=\"disabled\"/>\n" +
-			"		<option key=\"org.eclipse.jdt.core.compiler.problem.suppressWarnings\" value=\"enabled\"/>\n" +
+			"		<option key=\"org.eclipse.jdt.core.compiler.problem.specialParameterHidingField\" value=\"disabled\"/>\n" + 
+			"		<option key=\"org.eclipse.jdt.core.compiler.problem.staticAccessReceiver\" value=\"warning\"/>\n" + 
+			"		<option key=\"org.eclipse.jdt.core.compiler.problem.suppressOptionalErrors\" value=\"disabled\"/>\n" + 
+			"		<option key=\"org.eclipse.jdt.core.compiler.problem.suppressWarnings\" value=\"enabled\"/>\n" + 
 			"		<option key=\"org.eclipse.jdt.core.compiler.problem.syntacticNullAnalysisForFields\" value=\"disabled\"/>\n" +
 			"		<option key=\"org.eclipse.jdt.core.compiler.problem.syntheticAccessEmulation\" value=\"ignore\"/>\n" + 
 			"		<option key=\"org.eclipse.jdt.core.compiler.problem.tasks\" value=\"warning\"/>\n" + 
@@ -2042,32 +2044,33 @@ public void test012b(){
 			"		<option key=\"org.eclipse.jdt.core.compiler.problem.undocumentedEmptyBlock\" value=\"ignore\"/>\n" + 
 			"		<option key=\"org.eclipse.jdt.core.compiler.problem.unhandledWarningToken\" value=\"warning\"/>\n" + 
 			"		<option key=\"org.eclipse.jdt.core.compiler.problem.uninternedIdentityComparison\" value=\"disabled\"/>\n" +
-			"		<option key=\"org.eclipse.jdt.core.compiler.problem.unnecessaryElse\" value=\"ignore\"/>\n" +
-			"		<option key=\"org.eclipse.jdt.core.compiler.problem.unnecessaryTypeCheck\" value=\"ignore\"/>\n" +
-			"		<option key=\"org.eclipse.jdt.core.compiler.problem.unqualifiedFieldAccess\" value=\"ignore\"/>\n" +
-			"		<option key=\"org.eclipse.jdt.core.compiler.problem.unusedDeclaredThrownException\" value=\"ignore\"/>\n" +
-			"		<option key=\"org.eclipse.jdt.core.compiler.problem.unusedDeclaredThrownExceptionExemptExceptionAndThrowable\" value=\"enabled\"/>\n" +
-			"		<option key=\"org.eclipse.jdt.core.compiler.problem.unusedDeclaredThrownExceptionIncludeDocCommentReference\" value=\"enabled\"/>\n" +
-			"		<option key=\"org.eclipse.jdt.core.compiler.problem.unusedDeclaredThrownExceptionWhenOverriding\" value=\"disabled\"/>\n" +
-			"		<option key=\"org.eclipse.jdt.core.compiler.problem.unusedImport\" value=\"warning\"/>\n" +
-			"		<option key=\"org.eclipse.jdt.core.compiler.problem.unusedLabel\" value=\"warning\"/>\n" +
-			"		<option key=\"org.eclipse.jdt.core.compiler.problem.unusedLocal\" value=\"warning\"/>\n" +
-			"		<option key=\"org.eclipse.jdt.core.compiler.problem.unusedObjectAllocation\" value=\"ignore\"/>\n" +
-			"		<option key=\"org.eclipse.jdt.core.compiler.problem.unusedParameter\" value=\"ignore\"/>\n" +
-			"		<option key=\"org.eclipse.jdt.core.compiler.problem.unusedParameterIncludeDocCommentReference\" value=\"enabled\"/>\n" +
-			"		<option key=\"org.eclipse.jdt.core.compiler.problem.unusedParameterWhenImplementingAbstract\" value=\"disabled\"/>\n" +
-			"		<option key=\"org.eclipse.jdt.core.compiler.problem.unusedParameterWhenOverridingConcrete\" value=\"disabled\"/>\n" +
-			"		<option key=\"org.eclipse.jdt.core.compiler.problem.unusedPrivateMember\" value=\"warning\"/>\n" +
+			"		<option key=\"org.eclipse.jdt.core.compiler.problem.unnecessaryElse\" value=\"ignore\"/>\n" + 
+			"		<option key=\"org.eclipse.jdt.core.compiler.problem.unnecessaryTypeCheck\" value=\"ignore\"/>\n" + 
+			"		<option key=\"org.eclipse.jdt.core.compiler.problem.unqualifiedFieldAccess\" value=\"ignore\"/>\n" + 
+			"		<option key=\"org.eclipse.jdt.core.compiler.problem.unusedDeclaredThrownException\" value=\"ignore\"/>\n" + 
+			"		<option key=\"org.eclipse.jdt.core.compiler.problem.unusedDeclaredThrownExceptionExemptExceptionAndThrowable\" value=\"enabled\"/>\n" + 
+			"		<option key=\"org.eclipse.jdt.core.compiler.problem.unusedDeclaredThrownExceptionIncludeDocCommentReference\" value=\"enabled\"/>\n" + 
+			"		<option key=\"org.eclipse.jdt.core.compiler.problem.unusedDeclaredThrownExceptionWhenOverriding\" value=\"disabled\"/>\n" + 
+			"		<option key=\"org.eclipse.jdt.core.compiler.problem.unusedExceptionParameter\" value=\"ignore\"/>\n" +
+			"		<option key=\"org.eclipse.jdt.core.compiler.problem.unusedImport\" value=\"warning\"/>\n" + 
+			"		<option key=\"org.eclipse.jdt.core.compiler.problem.unusedLabel\" value=\"warning\"/>\n" + 
+			"		<option key=\"org.eclipse.jdt.core.compiler.problem.unusedLocal\" value=\"warning\"/>\n" + 
+			"		<option key=\"org.eclipse.jdt.core.compiler.problem.unusedObjectAllocation\" value=\"ignore\"/>\n" + 
+			"		<option key=\"org.eclipse.jdt.core.compiler.problem.unusedParameter\" value=\"ignore\"/>\n" + 
+			"		<option key=\"org.eclipse.jdt.core.compiler.problem.unusedParameterIncludeDocCommentReference\" value=\"enabled\"/>\n" + 
+			"		<option key=\"org.eclipse.jdt.core.compiler.problem.unusedParameterWhenImplementingAbstract\" value=\"disabled\"/>\n" + 
+			"		<option key=\"org.eclipse.jdt.core.compiler.problem.unusedParameterWhenOverridingConcrete\" value=\"disabled\"/>\n" + 
+			"		<option key=\"org.eclipse.jdt.core.compiler.problem.unusedPrivateMember\" value=\"warning\"/>\n" + 
 			"		<option key=\"org.eclipse.jdt.core.compiler.problem.unusedTypeArgumentsForMethodInvocation\" value=\"warning\"/>\n" +
 			"		<option key=\"org.eclipse.jdt.core.compiler.problem.unusedTypeParameter\" value=\"ignore\"/>\n" +
 			"		<option key=\"org.eclipse.jdt.core.compiler.problem.unusedWarningToken\" value=\"warning\"/>\n" + 
 			"		<option key=\"org.eclipse.jdt.core.compiler.problem.varargsArgumentNeedCast\" value=\"warning\"/>\n" + 
-			"		<option key=\"org.eclipse.jdt.core.compiler.processAnnotations\" value=\"disabled\"/>\n" +
+			"		<option key=\"org.eclipse.jdt.core.compiler.processAnnotations\" value=\"disabled\"/>\n" + 
 			"		<option key=\"org.eclipse.jdt.core.compiler.source\" value=\"1.5\"/>\n" + 
 			"		<option key=\"org.eclipse.jdt.core.compiler.storeAnnotations\" value=\"disabled\"/>\n" +
-			"		<option key=\"org.eclipse.jdt.core.compiler.taskCaseSensitive\" value=\"enabled\"/>\n" +
-			"		<option key=\"org.eclipse.jdt.core.compiler.taskPriorities\" value=\"\"/>\n" +
-			"		<option key=\"org.eclipse.jdt.core.compiler.taskTags\" value=\"\"/>\n" +
+			"		<option key=\"org.eclipse.jdt.core.compiler.taskCaseSensitive\" value=\"enabled\"/>\n" + 
+			"		<option key=\"org.eclipse.jdt.core.compiler.taskPriorities\" value=\"\"/>\n" + 
+			"		<option key=\"org.eclipse.jdt.core.compiler.taskTags\" value=\"\"/>\n" + 
 //{ObjectTeams: new options
             "		<option key=\"org.eclipse.objectteams.otdt.compiler.option.pure_java\" value=\"disabled\"/>\n" +
             "		<option key=\"org.eclipse.objectteams.otdt.compiler.option.scoped_keywords\" value=\"enabled\"/>\n" + 
@@ -2095,25 +2098,25 @@ public void test012b(){
 			"		<option key=\"org.eclipse.objectteams.otdt.compiler.problem.weave_into_system_class\" value=\"warning\"/>\n" + 
 			"		<option key=\"org.eclipse.objectteams.otdt.core.compiler.problem.decapsulation\" value=\"report binding\"/>\n" + 
 // SH}
-			"	</options>\n" +
-			"	<classpaths>NORMALIZED SECTION</classpaths>\n" +
-			"	<sources>\n" +
-			"		<source output=\"---OUTPUT_DIR_PLACEHOLDER---\" path=\"---OUTPUT_DIR_PLACEHOLDER---" + File.separator + "X.java\">\n" +
-			"			<problems errors=\"1\" problems=\"1\" warnings=\"0\">\n" +
-			"				<problem categoryID=\"40\" charEnd=\"28\" charStart=\"25\" id=\"UndefinedType\" line=\"3\" problemID=\"16777218\" severity=\"ERROR\">\n" +
-			"					<message value=\"Zork cannot be resolved to a type\"/>\n" +
-			"					<source_context sourceEnd=\"3\" sourceStart=\"0\" value=\"Zork z;\"/>\n" +
-			"					<arguments>\n" +
-			"						<argument value=\"Zork\"/>\n" +
-			"					</arguments>\n" +
-			"				</problem>\n" +
-			"			</problems>\n" +
-			"			<classfile path=\"---OUTPUT_DIR_PLACEHOLDER---{0}X.class\"/>\n" +
-			"		</source>\n" +
-			"	</sources>\n" +
-			"	<stats>\n" +
-			"		<problem_summary errors=\"1\" problems=\"1\" tasks=\"0\" warnings=\"0\"/>\n" +
-			"	</stats>\n" +
+			"	</options>\n" + 
+			"	<classpaths>NORMALIZED SECTION</classpaths>\n" + 
+			"	<sources>\n" + 
+			"		<source output=\"---OUTPUT_DIR_PLACEHOLDER---\" path=\"---OUTPUT_DIR_PLACEHOLDER---" + File.separator + "X.java\">\n" + 
+			"			<problems errors=\"1\" problems=\"1\" warnings=\"0\">\n" + 
+			"				<problem categoryID=\"40\" charEnd=\"28\" charStart=\"25\" id=\"UndefinedType\" line=\"3\" problemID=\"16777218\" severity=\"ERROR\">\n" + 
+			"					<message value=\"Zork cannot be resolved to a type\"/>\n" + 
+			"					<source_context sourceEnd=\"3\" sourceStart=\"0\" value=\"Zork z;\"/>\n" + 
+			"					<arguments>\n" + 
+			"						<argument value=\"Zork\"/>\n" + 
+			"					</arguments>\n" + 
+			"				</problem>\n" + 
+			"			</problems>\n" + 
+			"			<classfile path=\"---OUTPUT_DIR_PLACEHOLDER---{0}X.class\"/>\n" + 
+			"		</source>\n" + 
+			"	</sources>\n" + 
+			"	<stats>\n" + 
+			"		<problem_summary errors=\"1\" problems=\"1\" tasks=\"0\" warnings=\"0\"/>\n" + 
+			"	</stats>\n" + 
 			"</compiler>\n";
 		String normalizedExpectedLogContents =
 				MessageFormat.format(
@@ -14119,5 +14122,40 @@ public void testBug419351() {
 		new File(endorsedPath).delete();
 		new File(lib1Path).delete();
 	}
+}
+// https://bugs.eclipse.org/bugs/show_bug.cgi?id=439750
+public void test439750() {
+	this.runConformTest(
+		new String[] {
+			"externalizable/warning/X.java",
+			"import java.io.FileInputStream;\n" +
+			"import java.io.IOException;\n" +
+			"class X {\n" +
+			"	public static void main(String[] args) {\n" +
+			"		FileInputStream fis = null;\n" +
+			"		try {\n" +
+			"			fis = new FileInputStream(\"xyz\");\n" +
+			"			System.out.println(\"fis\");\n" +
+			"		} catch (IOException e) {\n" +
+			"			e.printStackTrace();\n" +
+			"		} finally {\n" +
+			"			try {\n" +
+			"				if (fis != null) fis.close();\n" +
+			"			} catch (Exception e) {}\n" +
+ 			"		}\n" +
+ 			"	}\n" +
+			"}\n"
+			},
+			"\"" + OUTPUT_DIR +  File.separator + "externalizable" + File.separator + "warning" + File.separator + "X.java\""
+			+ " -1.6 -warn:unused -warn:unusedExceptionParam -d none",
+			"",
+			"----------\n" +
+			"1. WARNING in ---OUTPUT_DIR_PLACEHOLDER---/externalizable/warning/X.java (at line 14)\n" +
+			"	} catch (Exception e) {}\n" +
+			"	                   ^\n" +
+			"The value of the exception parameter e is not used\n" +
+			"----------\n" +
+			"1 problem (1 warning)\n",
+			true);
 }
 }

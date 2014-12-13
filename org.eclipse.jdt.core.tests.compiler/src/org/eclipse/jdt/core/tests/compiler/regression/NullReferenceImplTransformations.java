@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2005, 2012 IBM Corporation and others.
+ * Copyright (c) 2005, 2014 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -10,6 +10,7 @@
  *     Stephan Herrmann - Contribution for
  *								bug 345305 - [compiler][null] Compiler misidentifies a case of "variable can only be null"
  *								bug 386181 - [compiler][null] wrong transition in UnconditionalFlowInfo.mergedWith()
+ *								Bug 453635 - [compiler][null] Update NullReferenceImplTests and friends
  *******************************************************************************/
 package org.eclipse.jdt.core.tests.compiler.regression;
 
@@ -19,6 +20,7 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
@@ -32,19 +34,20 @@ public class NullReferenceImplTransformations {
 		markAsComparedEqualToNonNull =
 		// markAsComparedEqualToNonNull DEFINITION START
 		// start => prot. non null
-		// prot. non null => prot. non null
-		// prot. null => prot. non null
 		// pot. unknown => pot. nn & prot. nn
 		// pot. non null => pot. nn & prot. nn
-		// pot. nn & prot. nn => pot. nn & prot. nn
 		// pot. nn & pot. un => pot. nn & prot. nn
 		// pot. null => prot. non null
-		// pot. n & prot. n => prot. non null
 		// pot. n & pot. un => pot. nn & prot. nn
 		// pot. n & pot. nn => pot. nn & prot. nn
+		// pot. n & pot. nn & pot. un => prot. non null		 // pot. nn & prot. nn could be better?
 		// def. unknown => def. non null
 		// def. non null => def. non null
+		// pot. nn & prot. nn => pot. nn & prot. nn
 		// def. null => prot. non null
+		// pot. n & prot. n => prot. non null
+		// prot. null => prot. non null
+		// prot. non null => prot. non null
 		// markAsComparedEqualToNonNull DEFINITION END
 			new TwoDimensionalTransformation("markAsComparedEqualToNonNull",
 					new byte[][] {
@@ -56,6 +59,7 @@ public class NullReferenceImplTransformations {
 					{0x10,0x3C},
 					{0x14,0x2C},
 					{0x18,0x2C},
+					{0x1C,0x3C},
 					{0x24,0x28},
 					{0x28,0x28},
 					{0x2C,0x2C},
@@ -75,19 +79,20 @@ public class NullReferenceImplTransformations {
 		markAsComparedEqualToNull =
 		// markAsComparedEqualToNull DEFINITION START
 		// start => prot. null
-		// prot. non null => prot. null
-		// prot. null => prot. null
 		// pot. unknown => pot. n & prot. n
 		// pot. non null => prot. null
-		// pot. nn & prot. nn => prot. null
 		// pot. nn & pot. un => pot. n & prot. n
 		// pot. null => pot. n & prot. n
-		// pot. n & prot. n => pot. n & prot. n
 		// pot. n & pot. un => pot. n & prot. n
 		// pot. n & pot. nn => pot. n & prot. n
+		// pot. n & pot. nn & pot. un => pot. n & prot. n
 		// def. unknown => def. null
 		// def. non null => prot. null
+		// pot. nn & prot. nn => prot. null
 		// def. null => def. null
+		// pot. n & prot. n => pot. n & prot. n
+		// prot. null => prot. null
+		// prot. non null => prot. null
 		// markAsComparedEqualToNull DEFINITION END
 			new TwoDimensionalTransformation("markAsComparedEqualToNull",
 				new byte[][] {
@@ -99,6 +104,7 @@ public class NullReferenceImplTransformations {
 				{0x10,0x34},
 				{0x14,0x34},
 				{0x18,0x34},
+				{0x1C,0x34},
 				{0x24,0x30},
 				{0x28,0x38},
 				{0x2C,0x38},
@@ -118,19 +124,20 @@ public class NullReferenceImplTransformations {
 		markAsDefinitelyNonNull =
 		// markAsDefinitelyNonNull DEFINITION START
 		// start => def. non null
-		// prot. non null => def. non null
-		// prot. null => def. non null
 		// pot. unknown => def. non null
 		// pot. non null => def. non null
-		// pot. nn & prot. nn => def. non null
 		// pot. nn & pot. un => def. non null
 		// pot. null => def. non null
-		// pot. n & prot. n => def. non null
 		// pot. n & pot. un => def. non null
 		// pot. n & pot. nn => def. non null
+		// pot. n & pot. nn & pot. un => def. non null
 		// def. unknown => def. non null
 		// def. non null => def. non null
+		// pot. nn & prot. nn => def. non null
 		// def. null => def. non null
+		// pot. n & prot. n => def. non null
+		// prot. null => def. non null
+		// prot. non null => def. non null
 		// markAsDefinitelyNonNull DEFINITION END
 			new TwoDimensionalTransformation("markAsDefinitelyNonNull",
 				new byte[][] {
@@ -142,6 +149,7 @@ public class NullReferenceImplTransformations {
 				{0x10,0x28},
 				{0x14,0x28},
 				{0x18,0x28},
+				{0x1C,0x28},
 				{0x24,0x28},
 				{0x28,0x28},
 				{0x2C,0x28},
@@ -161,19 +169,20 @@ public class NullReferenceImplTransformations {
 		markAsDefinitelyNull =
 		// markAsDefinitelyNull DEFINITION START
 		// start => def. null
-		// prot. non null => def. null
-		// prot. null => def. null
 		// pot. unknown => def. null
 		// pot. non null => def. null
-		// pot. nn & prot. nn => def. null
 		// pot. nn & pot. un => def. null
 		// pot. null => def. null
-		// pot. n & prot. n => def. null
 		// pot. n & pot. un => def. null
 		// pot. n & pot. nn => def. null
+		// pot. n & pot. nn & pot. un => def. null
 		// def. unknown => def. null
 		// def. non null => def. null
+		// pot. nn & prot. nn => def. null
 		// def. null => def. null
+		// pot. n & prot. n => def. null
+		// prot. null => def. null
+		// prot. non null => def. null
 		// markAsDefinitelyNull DEFINITION END
 			// PREMATURE add 'catch rules'
 			new TwoDimensionalTransformation("markAsDefinitelyNull",
@@ -186,6 +195,7 @@ public class NullReferenceImplTransformations {
 				{0x10,0x30},
 				{0x14,0x30},
 				{0x18,0x30},
+				{0x1C,0x30},
 				{0x24,0x30},
 				{0x28,0x30},
 				{0x2C,0x30},
@@ -205,19 +215,20 @@ public class NullReferenceImplTransformations {
 		markAsDefinitelyUnknown =
 		// markAsDefinitelyUnknown DEFINITION START
 		// start => def. unknown
-		// prot. non null => def. unknown
-		// prot. null => def. unknown
 		// pot. unknown => def. unknown
 		// pot. non null => def. unknown
-		// pot. nn & prot. nn => def. unknown
 		// pot. nn & pot. un => def. unknown
 		// pot. null => def. unknown
-		// pot. n & prot. n => def. unknown
 		// pot. n & pot. un => def. unknown
 		// pot. n & pot. nn => def. unknown
+		// pot. n & pot. nn & pot. un => def. unknown
 		// def. unknown => def. unknown
 		// def. non null => def. unknown
+		// pot. nn & prot. nn => def. unknown
 		// def. null => def. unknown
+		// pot. n & prot. n => def. unknown
+		// prot. null => def. unknown
+		// prot. non null => def. unknown
 		// markAsDefinitelyUnknown DEFINITION END
 			new TwoDimensionalTransformation("markAsDefinitelyUnknown",
 				new byte[][] {
@@ -229,6 +240,7 @@ public class NullReferenceImplTransformations {
 				{0x10,0x24},
 				{0x14,0x24},
 				{0x18,0x24},
+				{0x1C,0x24},
 				{0x24,0x24},
 				{0x28,0x24},
 				{0x2C,0x24},
@@ -250,6 +262,7 @@ public class NullReferenceImplTransformations {
 		// def. non null + def. non null => def. non null
 		// def. non null + def. null => def. null
 		// def. non null + def. unknown => def. unknown
+		// def. non null + pot. n & pot. nn & pot. un => pot. non null // BOGUS
 		// def. non null + pot. n & pot. nn => pot. n & pot. nn
 		// def. non null + pot. n & pot. un => pot. n & pot. nn
 		// def. non null + pot. n & prot. n => pot. n & prot. n
@@ -264,6 +277,7 @@ public class NullReferenceImplTransformations {
 		// def. null + def. non null => def. non null
 		// def. null + def. null => def. null
 		// def. null + def. unknown => def. unknown
+		// def. null + pot. n & pot. nn & pot. un => pot. n & pot. nn & pot. un
 		// def. null + pot. n & pot. nn => pot. n & pot. nn
 		// def. null + pot. n & pot. un => pot. n & pot. un
 		// def. null + pot. n & prot. n => def. null
@@ -278,6 +292,7 @@ public class NullReferenceImplTransformations {
 		// def. unknown + def. non null => def. non null
 		// def. unknown + def. null => def. null
 		// def. unknown + def. unknown => def. unknown
+		// def. unknown + pot. n & pot. nn & pot. un => pot. non null // BOGUS
 		// def. unknown + pot. n & pot. nn => pot. n & pot. nn
 		// def. unknown + pot. n & pot. un => pot. n & pot. un	// we loose the def here, but we need the pot. null
 		// def. unknown + pot. n & prot. n => def. null
@@ -289,9 +304,25 @@ public class NullReferenceImplTransformations {
 		// def. unknown + prot. non null => def. non null
 		// def. unknown + prot. null => def. null
 		// def. unknown + start => def. unknown
+		// pot. n & pot. nn & pot. un + def. non null => def. non null
+		// pot. n & pot. nn & pot. un + def. null => def. null
+		// pot. n & pot. nn & pot. un + def. unknown => def. unknown
+		// pot. n & pot. nn & pot. un + pot. n & pot. nn & pot. un => pot. n & pot. nn
+		// pot. n & pot. nn & pot. un + pot. n & pot. nn => pot. n & pot. nn
+		// pot. n & pot. nn & pot. un + pot. n & pot. un => pot. n & pot. nn
+		// pot. n & pot. nn & pot. un + pot. n & prot. n => pot. n & prot. n
+		// pot. n & pot. nn & pot. un + pot. nn & pot. un => pot. n & pot. nn & pot. un
+		// pot. n & pot. nn & pot. un + pot. nn & prot. nn => pot. nn & prot. nn
+		// pot. n & pot. nn & pot. un + pot. non null => pot. n & pot. nn & pot. un
+		// pot. n & pot. nn & pot. un + pot. null => pot. n & pot. nn
+		// pot. n & pot. nn & pot. un + pot. unknown => pot. n & pot. nn & pot. un
+		// pot. n & pot. nn & pot. un + prot. non null => pot. nn & prot. nn
+		// pot. n & pot. nn & pot. un + prot. null => pot. n & prot. n
+		// pot. n & pot. nn & pot. un + start => pot. n & pot. nn & pot. un
 		// pot. n & pot. nn + def. non null => def. non null
 		// pot. n & pot. nn + def. null => def. null
 		// pot. n & pot. nn + def. unknown => def. unknown
+		// pot. n & pot. nn + pot. n & pot. nn & pot. un => pot. n & pot. nn
 		// pot. n & pot. nn + pot. n & pot. nn => pot. n & pot. nn
 		// pot. n & pot. nn + pot. n & pot. un => pot. n & pot. nn
 		// pot. n & pot. nn + pot. n & prot. n => pot. n & prot. n
@@ -306,6 +337,7 @@ public class NullReferenceImplTransformations {
 		// pot. n & pot. un + def. non null => def. non null
 		// pot. n & pot. un + def. null => def. null
 		// pot. n & pot. un + def. unknown => def. unknown
+		// pot. n & pot. un + pot. n & pot. nn & pot. un => pot. n & pot. nn // should ideally include un
 		// pot. n & pot. un + pot. n & pot. nn => pot. n & pot. nn
 		// pot. n & pot. un + pot. n & pot. un => pot. n & pot. un
 		// pot. n & pot. un + pot. n & prot. n => pot. n & prot. n
@@ -320,6 +352,7 @@ public class NullReferenceImplTransformations {
 		// pot. n & prot. n + def. non null => def. non null
 		// pot. n & prot. n + def. null => def. null
 		// pot. n & prot. n + def. unknown => def. unknown
+		// pot. n & prot. n + pot. n & pot. nn & pot. un => pot. n & pot. nn & pot. un
 		// pot. n & prot. n + pot. n & pot. nn => pot. n & pot. nn
 		// pot. n & prot. n + pot. n & pot. un => pot. n & pot. un
 		// pot. n & prot. n + pot. n & prot. n => pot. n & prot. n
@@ -334,6 +367,7 @@ public class NullReferenceImplTransformations {
 		// pot. nn & pot. un + def. non null => def. non null
 		// pot. nn & pot. un + def. null => def. null
 		// pot. nn & pot. un + def. unknown => def. unknown
+		// pot. nn & pot. un + pot. n & pot. nn & pot. un => pot. non null // should ideally include un
 		// pot. nn & pot. un + pot. n & pot. nn => pot. n & pot. nn
 		// pot. nn & pot. un + pot. n & pot. un => pot. n & pot. nn
 		// pot. nn & pot. un + pot. n & prot. n => pot. n & prot. n
@@ -348,6 +382,7 @@ public class NullReferenceImplTransformations {
 		// pot. nn & prot. nn + def. non null => def. non null
 		// pot. nn & prot. nn + def. null => def. null
 		// pot. nn & prot. nn + def. unknown => def. unknown
+		// pot. nn & prot. nn + pot. n & pot. nn & pot. un => pot. non null	// must include n
 		// pot. nn & prot. nn + pot. n & pot. nn => pot. n & pot. nn
 		// pot. nn & prot. nn + pot. n & pot. un => pot. n & pot. nn
 		// pot. nn & prot. nn + pot. n & prot. n => pot. n & prot. n
@@ -362,6 +397,7 @@ public class NullReferenceImplTransformations {
 		// pot. non null + def. non null => def. non null
 		// pot. non null + def. null => def. null
 		// pot. non null + def. unknown => def. unknown
+		// pot. non null + pot. n & pot. nn & pot. un => pot. non null // must include n
 		// pot. non null + pot. n & pot. nn => pot. n & pot. nn
 		// pot. non null + pot. n & pot. un => pot. n & pot. nn
 		// pot. non null + pot. n & prot. n => pot. n & prot. n
@@ -376,6 +412,7 @@ public class NullReferenceImplTransformations {
 		// pot. null + def. non null => def. non null
 		// pot. null + def. null => def. null
 		// pot. null + def. unknown => def. unknown
+		// pot. null + pot. n & pot. nn & pot. un => pot. n & pot. nn
 		// pot. null + pot. n & pot. nn => pot. n & pot. nn
 		// pot. null + pot. n & pot. un => pot. n & pot. un
 		// pot. null + pot. n & prot. n => pot. n & prot. n
@@ -390,6 +427,7 @@ public class NullReferenceImplTransformations {
 		// pot. unknown + def. non null => def. non null
 		// pot. unknown + def. null => def. null
 		// pot. unknown + def. unknown => def. unknown
+		// pot. unknown + pot. n & pot. nn & pot. un => pot. non null // must include n
 		// pot. unknown + pot. n & pot. nn => pot. n & pot. nn
 		// pot. unknown + pot. n & pot. un => pot. n & pot. un
 		// pot. unknown + pot. n & prot. n => pot. n & prot. n
@@ -404,6 +442,7 @@ public class NullReferenceImplTransformations {
 		// prot. non null + def. non null => def. non null
 		// prot. non null + def. null => def. null
 		// prot. non null + def. unknown => def. unknown
+		// prot. non null + pot. n & pot. nn & pot. un => pot. n & pot. nn & pot. un
 		// prot. non null + pot. n & pot. nn => pot. n & pot. nn
 		// prot. non null + pot. n & pot. un => pot. n & pot. un
 		// prot. non null + pot. n & prot. n => pot. n & prot. n
@@ -418,6 +457,7 @@ public class NullReferenceImplTransformations {
 		// prot. null + def. non null => def. non null
 		// prot. null + def. null => def. null
 		// prot. null + def. unknown => def. unknown
+		// prot. null + pot. n & pot. nn & pot. un => pot. n & pot. nn & pot. un
 		// prot. null + pot. n & pot. nn => pot. n & pot. nn
 		// prot. null + pot. n & pot. un => pot. n & pot. un
 		// prot. null + pot. n & prot. n => pot. n & prot. n
@@ -432,6 +472,7 @@ public class NullReferenceImplTransformations {
 		// start + def. non null => def. non null
 		// start + def. null => def. null
 		// start + def. unknown => def. unknown
+		// start + pot. n & pot. nn & pot. un => pot. n & pot. nn & pot. un
 		// start + pot. n & pot. nn => pot. n & pot. nn
 		// start + pot. n & pot. un => pot. n & pot. un
 		// start + pot. n & prot. n => pot. n & prot. n
@@ -454,6 +495,7 @@ public class NullReferenceImplTransformations {
 				{0x00,0x10,0x10},
 				{0x00,0x14,0x14},
 				{0x00,0x18,0x18},
+				{0x00,0x1C,0x1C},
 				{0x00,0x24,0x24},
 				{0x00,0x28,0x28},
 				{0x00,0x2C,0x2C},
@@ -468,6 +510,7 @@ public class NullReferenceImplTransformations {
 				{0x04,0x10,0x14},
 				{0x04,0x14,0x14},
 				{0x04,0x18,0x18},
+				{0x04,0x1C,0x08},
 				{0x04,0x24,0x24},
 				{0x04,0x28,0x28},
 				{0x04,0x2C,0x2C},
@@ -482,6 +525,7 @@ public class NullReferenceImplTransformations {
 				{0x08,0x10,0x18},
 				{0x08,0x14,0x18},
 				{0x08,0x18,0x18},
+				{0x08,0x1C,0x08},
 				{0x08,0x24,0x24},
 				{0x08,0x28,0x28},
 				{0x08,0x2C,0x2C},
@@ -496,6 +540,7 @@ public class NullReferenceImplTransformations {
 				{0x0C,0x10,0x18},
 				{0x0C,0x14,0x18},
 				{0x0C,0x18,0x18},
+				{0x0C,0x1C,0x08},
 				{0x0C,0x24,0x24},
 				{0x0C,0x28,0x28},
 				{0x0C,0x2C,0x2C},
@@ -510,6 +555,7 @@ public class NullReferenceImplTransformations {
 				{0x10,0x10,0x10},
 				{0x10,0x14,0x14},
 				{0x10,0x18,0x18},
+				{0x10,0x1C,0x18},
 				{0x10,0x24,0x24},
 				{0x10,0x28,0x28},
 				{0x10,0x2C,0x2C},
@@ -524,6 +570,7 @@ public class NullReferenceImplTransformations {
 				{0x14,0x10,0x14},
 				{0x14,0x14,0x14},
 				{0x14,0x18,0x18},
+				{0x14,0x1C,0x18},
 				{0x14,0x24,0x24},
 				{0x14,0x28,0x28},
 				{0x14,0x2C,0x2C},
@@ -538,6 +585,7 @@ public class NullReferenceImplTransformations {
 				{0x18,0x10,0x18},
 				{0x18,0x14,0x18},
 				{0x18,0x18,0x18},
+				{0x18,0x1C,0x18},
 				{0x18,0x24,0x24},
 				{0x18,0x28,0x28},
 				{0x18,0x2C,0x2C},
@@ -545,6 +593,21 @@ public class NullReferenceImplTransformations {
 				{0x18,0x34,0x34},
 				{0x18,0x38,0x34},
 				{0x18,0x3C,0x2C},
+				{0x1C,0x00,0x1C},
+				{0x1C,0x04,0x1C},
+				{0x1C,0x08,0x1C},
+				{0x1C,0x0C,0x1C},
+				{0x1C,0x10,0x18},
+				{0x1C,0x14,0x18},
+				{0x1C,0x18,0x18},
+				{0x1C,0x1C,0x18},
+				{0x1C,0x24,0x24},
+				{0x1C,0x28,0x28},
+				{0x1C,0x2C,0x2C},
+				{0x1C,0x30,0x30},
+				{0x1C,0x34,0x34},
+				{0x1C,0x38,0x34},
+				{0x1C,0x3C,0x2C},
 				{0x24,0x00,0x24},
 				{0x24,0x04,0x24},
 				{0x24,0x08,0x24},
@@ -552,6 +615,7 @@ public class NullReferenceImplTransformations {
 				{0x24,0x10,0x14},
 				{0x24,0x14,0x14},
 				{0x24,0x18,0x18},
+				{0x24,0x1C,0x08},
 				{0x24,0x24,0x24},
 				{0x24,0x28,0x28},
 				{0x24,0x2C,0x28},
@@ -566,6 +630,7 @@ public class NullReferenceImplTransformations {
 				{0x28,0x10,0x18},
 				{0x28,0x14,0x18},
 				{0x28,0x18,0x18},
+				{0x28,0x1C,0x08},
 				{0x28,0x24,0x24},
 				{0x28,0x28,0x28},
 				{0x28,0x2C,0x28},
@@ -580,6 +645,7 @@ public class NullReferenceImplTransformations {
 				{0x2C,0x10,0x18},
 				{0x2C,0x14,0x18},
 				{0x2C,0x18,0x18},
+				{0x2C,0x1C,0x08},
 				{0x2C,0x24,0x24},
 				{0x2C,0x28,0x28},
 				{0x2C,0x2C,0x2C},
@@ -594,6 +660,7 @@ public class NullReferenceImplTransformations {
 				{0x30,0x10,0x30},
 				{0x30,0x14,0x14},
 				{0x30,0x18,0x18},
+				{0x30,0x1C,0x1C},
 				{0x30,0x24,0x24},
 				{0x30,0x28,0x28},
 				{0x30,0x2C,0x2C},
@@ -608,6 +675,7 @@ public class NullReferenceImplTransformations {
 				{0x34,0x10,0x34},
 				{0x34,0x14,0x14},
 				{0x34,0x18,0x18},
+				{0x34,0x1C,0x1C},
 				{0x34,0x24,0x24},
 				{0x34,0x28,0x28},
 				{0x34,0x2C,0x2C},
@@ -622,6 +690,7 @@ public class NullReferenceImplTransformations {
 				{0x38,0x10,0x34},
 				{0x38,0x14,0x14},
 				{0x38,0x18,0x18},
+				{0x38,0x1C,0x1C},
 				{0x38,0x24,0x24},
 				{0x38,0x28,0x28},
 				{0x38,0x2C,0x2C},
@@ -636,6 +705,7 @@ public class NullReferenceImplTransformations {
 				{0x3C,0x10,0x10},
 				{0x3C,0x14,0x14},
 				{0x3C,0x18,0x18},
+				{0x3C,0x1C,0x1C},
 				{0x3C,0x24,0x24},
 				{0x3C,0x28,0x28},
 				{0x3C,0x2C,0x2C},
@@ -655,6 +725,7 @@ public class NullReferenceImplTransformations {
 		// def. non null + def. non null => def. non null
 		// def. non null + def. null => pot. n & pot. nn
 		// def. non null + def. unknown => def. unknown
+		// def. non null + pot. n & pot. nn & pot. un => pot. n & pot. nn
 		// def. non null + pot. n & pot. nn => pot. n & pot. nn
 		// def. non null + pot. n & pot. un => pot. n & pot. nn
 		// def. non null + pot. n & prot. n => pot. n & pot. nn
@@ -669,6 +740,7 @@ public class NullReferenceImplTransformations {
 		// def. null + def. non null => pot. n & pot. nn
 		// def. null + def. null => def. null
 		// def. null + def. unknown => pot. n & pot. un
+		// def. null + pot. n & pot. nn & pot. un => pot. n & pot. nn
 		// def. null + pot. n & pot. nn => pot. n & pot. nn
 		// def. null + pot. n & pot. un => pot. n & pot. un
 		// def. null + pot. n & prot. n => def. null
@@ -683,6 +755,7 @@ public class NullReferenceImplTransformations {
 		// def. unknown + def. non null => def. unknown
 		// def. unknown + def. null => pot. n & pot. un
 		// def. unknown + def. unknown => def. unknown
+		// def. unknown + pot. n & pot. nn & pot. un => pot. n & pot. nn // should ideally include un
 		// def. unknown + pot. n & pot. nn => pot. n & pot. nn
 		// def. unknown + pot. n & pot. un => pot. n & pot. un
 		// def. unknown + pot. n & prot. n => pot. n & pot. un
@@ -694,9 +767,25 @@ public class NullReferenceImplTransformations {
 		// def. unknown + prot. non null => def. unknown
 		// def. unknown + prot. null => def. unknown
 		// def. unknown + start => def. unknown
+		// pot. n & pot. nn & pot. un + def. non null => pot. n & pot. nn & pot. un
+		// pot. n & pot. nn & pot. un + def. null => pot. n & pot. nn
+		// pot. n & pot. nn & pot. un + def. unknown => pot. n & pot. nn & pot. un
+		// pot. n & pot. nn & pot. un + pot. n & pot. nn & pot. un => pot. n & pot. nn
+		// pot. n & pot. nn & pot. un + pot. n & pot. nn => pot. n & pot. nn
+		// pot. n & pot. nn & pot. un + pot. n & pot. un => pot. n & pot. nn
+		// pot. n & pot. nn & pot. un + pot. n & prot. n => pot. n & pot. nn
+		// pot. n & pot. nn & pot. un + pot. nn & pot. un => pot. n & pot. nn & pot. un
+		// pot. n & pot. nn & pot. un + pot. nn & prot. nn => pot. n & pot. nn & pot. un
+		// pot. n & pot. nn & pot. un + pot. non null => pot. n & pot. nn & pot. un
+		// pot. n & pot. nn & pot. un + pot. null => pot. n & pot. nn
+		// pot. n & pot. nn & pot. un + pot. unknown => pot. n & pot. nn & pot. un
+		// pot. n & pot. nn & pot. un + prot. non null => pot. n & pot. nn & pot. un
+		// pot. n & pot. nn & pot. un + prot. null => pot. n & pot. nn & pot. un
+		// pot. n & pot. nn & pot. un + start => pot. n & pot. nn & pot. un
 		// pot. n & pot. nn + def. non null => pot. n & pot. nn
 		// pot. n & pot. nn + def. null => pot. n & pot. nn
 		// pot. n & pot. nn + def. unknown => pot. n & pot. nn
+		// pot. n & pot. nn + pot. n & pot. nn & pot. un => pot. n & pot. nn
 		// pot. n & pot. nn + pot. n & pot. nn => pot. n & pot. nn
 		// pot. n & pot. nn + pot. n & pot. un => pot. n & pot. nn
 		// pot. n & pot. nn + pot. n & prot. n => pot. n & pot. nn
@@ -711,6 +800,7 @@ public class NullReferenceImplTransformations {
 		// pot. n & pot. un + def. non null => pot. n & pot. nn
 		// pot. n & pot. un + def. null => pot. n & pot. un
 		// pot. n & pot. un + def. unknown => pot. n & pot. un
+		// pot. n & pot. un + pot. n & pot. nn & pot. un => pot. n & pot. nn
 		// pot. n & pot. un + pot. n & pot. nn => pot. n & pot. nn
 		// pot. n & pot. un + pot. n & pot. un => pot. n & pot. un
 		// pot. n & pot. un + pot. n & prot. n => pot. n & pot. un
@@ -725,6 +815,7 @@ public class NullReferenceImplTransformations {
 		// pot. n & prot. n + def. non null => pot. n & pot. nn
 		// pot. n & prot. n + def. null => pot. n & prot. n
 		// pot. n & prot. n + def. unknown => pot. n & pot. un
+		// pot. n & prot. n + pot. n & pot. nn & pot. un => pot. n & pot. nn
 		// pot. n & prot. n + pot. n & pot. nn => pot. n & pot. nn
 		// pot. n & prot. n + pot. n & pot. un => pot. n & pot. un
 		// pot. n & prot. n + pot. n & prot. n => pot. n & prot. n
@@ -739,6 +830,7 @@ public class NullReferenceImplTransformations {
 		// pot. nn & pot. un + def. non null => pot. nn & pot. un
 		// pot. nn & pot. un + def. null => pot. n & pot. nn
 		// pot. nn & pot. un + def. unknown => pot. nn & pot. un
+		// pot. nn & pot. un + pot. n & pot. nn & pot. un => pot. n & pot. nn
 		// pot. nn & pot. un + pot. n & pot. nn => pot. n & pot. nn
 		// pot. nn & pot. un + pot. n & pot. un => pot. n & pot. nn
 		// pot. nn & pot. un + pot. n & prot. n => pot. n & pot. nn
@@ -753,6 +845,7 @@ public class NullReferenceImplTransformations {
 		// pot. nn & prot. nn + def. non null => pot. nn & prot. nn
 		// pot. nn & prot. nn + def. null => pot. n & pot. nn
 		// pot. nn & prot. nn + def. unknown => pot. nn & pot. un
+		// pot. nn & prot. nn + pot. n & pot. nn & pot. un => pot. n & pot. nn
 		// pot. nn & prot. nn + pot. n & pot. nn => pot. n & pot. nn
 		// pot. nn & prot. nn + pot. n & pot. un => pot. n & pot. nn
 		// pot. nn & prot. nn + pot. n & prot. n => pot. n & pot. nn
@@ -767,6 +860,7 @@ public class NullReferenceImplTransformations {
 		// pot. non null + def. non null => pot. non null
 		// pot. non null + def. null => pot. n & pot. nn
 		// pot. non null + def. unknown => pot. nn & pot. un
+		// pot. non null + pot. n & pot. nn & pot. un => pot. n & pot. nn
 		// pot. non null + pot. n & pot. nn => pot. n & pot. nn
 		// pot. non null + pot. n & pot. un => pot. n & pot. nn
 		// pot. non null + pot. n & prot. n => pot. n & pot. nn
@@ -781,6 +875,7 @@ public class NullReferenceImplTransformations {
 		// pot. null + def. non null => pot. n & pot. nn
 		// pot. null + def. null => pot. null
 		// pot. null + def. unknown => pot. n & pot. un
+		// pot. null + pot. n & pot. nn & pot. un => pot. n & pot. nn
 		// pot. null + pot. n & pot. nn => pot. n & pot. nn
 		// pot. null + pot. n & pot. un => pot. n & pot. un
 		// pot. null + pot. n & prot. n => pot. null
@@ -795,6 +890,7 @@ public class NullReferenceImplTransformations {
 		// pot. unknown + def. non null => pot. nn & pot. un
 		// pot. unknown + def. null => pot. n & pot. un
 		// pot. unknown + def. unknown => pot. unknown
+		// pot. unknown + pot. n & pot. nn & pot. un => pot. n & pot. nn // should ideally include un
 		// pot. unknown + pot. n & pot. nn => pot. n & pot. nn
 		// pot. unknown + pot. n & pot. un => pot. n & pot. un
 		// pot. unknown + pot. n & prot. n => pot. n & pot. un
@@ -809,6 +905,7 @@ public class NullReferenceImplTransformations {
 		// prot. non null + def. non null => pot. nn & prot. nn
 		// prot. non null + def. null => pot. null
 		// prot. non null + def. unknown => pot. unknown
+		// prot. non null + pot. n & pot. nn & pot. un => pot. n & pot. nn & pot. un
 		// prot. non null + pot. n & pot. nn => pot. n & pot. nn
 		// prot. non null + pot. n & pot. un => pot. n & pot. un
 		// prot. non null + pot. n & prot. n => pot. null
@@ -823,6 +920,7 @@ public class NullReferenceImplTransformations {
 		// prot. null + def. non null => pot. non null
 		// prot. null + def. null => pot. n & prot. n
 		// prot. null + def. unknown => pot. unknown
+		// prot. null + pot. n & pot. nn & pot. un => pot. n & pot. nn & pot. un
 		// prot. null + pot. n & pot. nn => pot. n & pot. nn
 		// prot. null + pot. n & pot. un => pot. n & pot. un
 		// prot. null + pot. n & prot. n => pot. n & prot. n
@@ -837,6 +935,7 @@ public class NullReferenceImplTransformations {
 		// start + def. non null => pot. non null
 		// start + def. null => pot. null
 		// start + def. unknown => pot. unknown
+		// start + pot. n & pot. nn & pot. un => pot. n & pot. nn // un?
 		// start + pot. n & pot. nn => pot. n & pot. nn
 		// start + pot. n & pot. un => pot. n & pot. un
 		// start + pot. n & prot. n => pot. null
@@ -860,6 +959,7 @@ public class NullReferenceImplTransformations {
 				{0x00,0x10,0x10},
 				{0x00,0x14,0x14},
 				{0x00,0x18,0x18},
+				{0x00,0x1C,0x18},
 				{0x00,0x24,0x04},
 				{0x00,0x28,0x08},
 				{0x00,0x2C,0x08},
@@ -874,6 +974,7 @@ public class NullReferenceImplTransformations {
 				{0x04,0x10,0x14},
 				{0x04,0x14,0x14},
 				{0x04,0x18,0x18},
+				{0x04,0x1C,0x18},
 				{0x04,0x24,0x04},
 				{0x04,0x28,0x0C},
 				{0x04,0x2C,0x0C},
@@ -888,6 +989,7 @@ public class NullReferenceImplTransformations {
 				{0x08,0x10,0x18},
 				{0x08,0x14,0x18},
 				{0x08,0x18,0x18},
+				{0x08,0x1C,0x18},
 				{0x08,0x24,0x0C},
 				{0x08,0x28,0x08},
 				{0x08,0x2C,0x08},
@@ -902,6 +1004,7 @@ public class NullReferenceImplTransformations {
 				{0x0C,0x10,0x18},
 				{0x0C,0x14,0x18},
 				{0x0C,0x18,0x18},
+				{0x0C,0x1C,0x18},
 				{0x0C,0x24,0x0C},
 				{0x0C,0x28,0x0C},
 				{0x0C,0x2C,0x0C},
@@ -916,6 +1019,7 @@ public class NullReferenceImplTransformations {
 				{0x10,0x10,0x10},
 				{0x10,0x14,0x14},
 				{0x10,0x18,0x18},
+				{0x10,0x1C,0x18},
 				{0x10,0x24,0x14},
 				{0x10,0x28,0x18},
 				{0x10,0x2C,0x18},
@@ -930,6 +1034,7 @@ public class NullReferenceImplTransformations {
 				{0x14,0x10,0x14},
 				{0x14,0x14,0x14},
 				{0x14,0x18,0x18},
+				{0x14,0x1C,0x18},
 				{0x14,0x24,0x14},
 				{0x14,0x28,0x18},
 				{0x14,0x2C,0x18},
@@ -944,6 +1049,7 @@ public class NullReferenceImplTransformations {
 				{0x18,0x10,0x18},
 				{0x18,0x14,0x18},
 				{0x18,0x18,0x18},
+				{0x18,0x1C,0x18},
 				{0x18,0x24,0x18},
 				{0x18,0x28,0x18},
 				{0x18,0x2C,0x18},
@@ -951,6 +1057,21 @@ public class NullReferenceImplTransformations {
 				{0x18,0x34,0x18},
 				{0x18,0x38,0x18},
 				{0x18,0x3C,0x18},
+				{0x1C,0x00,0x1C},
+				{0x1C,0x04,0x1C},
+				{0x1C,0x08,0x1C},
+				{0x1C,0x0C,0x1C},
+				{0x1C,0x10,0x18},
+				{0x1C,0x14,0x18},
+				{0x1C,0x18,0x18},
+				{0x1C,0x1C,0x18},
+				{0x1C,0x24,0x1C},
+				{0x1C,0x28,0x1C},
+				{0x1C,0x2C,0x1C},
+				{0x1C,0x30,0x18},
+				{0x1C,0x34,0x18},
+				{0x1C,0x38,0x1C},
+				{0x1C,0x3C,0x1C},
 				{0x24,0x00,0x24},
 				{0x24,0x04,0x24},
 				{0x24,0x08,0x24},
@@ -958,6 +1079,7 @@ public class NullReferenceImplTransformations {
 				{0x24,0x10,0x14},
 				{0x24,0x14,0x14},
 				{0x24,0x18,0x18},
+				{0x24,0x1C,0x18},
 				{0x24,0x24,0x24},
 				{0x24,0x28,0x24},
 				{0x24,0x2C,0x24},
@@ -972,6 +1094,7 @@ public class NullReferenceImplTransformations {
 				{0x28,0x10,0x18},
 				{0x28,0x14,0x18},
 				{0x28,0x18,0x18},
+				{0x28,0x1C,0x18},
 				{0x28,0x24,0x24},
 				{0x28,0x28,0x28},
 				{0x28,0x2C,0x28},
@@ -986,6 +1109,7 @@ public class NullReferenceImplTransformations {
 				{0x2C,0x10,0x18},
 				{0x2C,0x14,0x18},
 				{0x2C,0x18,0x18},
+				{0x2C,0x1C,0x18},
 				{0x2C,0x24,0x0C},
 				{0x2C,0x28,0x2C},
 				{0x2C,0x2C,0x2C},
@@ -1000,6 +1124,7 @@ public class NullReferenceImplTransformations {
 				{0x30,0x10,0x30},
 				{0x30,0x14,0x14},
 				{0x30,0x18,0x18},
+				{0x30,0x1C,0x18},
 				{0x30,0x24,0x14},
 				{0x30,0x28,0x18},
 				{0x30,0x2C,0x18},
@@ -1014,6 +1139,7 @@ public class NullReferenceImplTransformations {
 				{0x34,0x10,0x34},
 				{0x34,0x14,0x14},
 				{0x34,0x18,0x18},
+				{0x34,0x1C,0x18},
 				{0x34,0x24,0x14},
 				{0x34,0x28,0x18},
 				{0x34,0x2C,0x18},
@@ -1028,6 +1154,7 @@ public class NullReferenceImplTransformations {
 				{0x38,0x10,0x34},
 				{0x38,0x14,0x14},
 				{0x38,0x18,0x18},
+				{0x38,0x1C,0x1C},
 				{0x38,0x24,0x04},
 				{0x38,0x28,0x08},
 				{0x38,0x2C,0x08},
@@ -1042,6 +1169,7 @@ public class NullReferenceImplTransformations {
 				{0x3C,0x10,0x10},
 				{0x3C,0x14,0x14},
 				{0x3C,0x18,0x18},
+				{0x3C,0x1C,0x1C},
 				{0x3C,0x24,0x04},
 				{0x3C,0x28,0x2C},
 				{0x3C,0x2C,0x2C},
@@ -1061,45 +1189,72 @@ public class NullReferenceImplTransformations {
 		// mergedWith DEFINITION START
 		// def. non null + def. non null => def. non null
 		// def. non null + def. null => pot. n & pot. nn
+		// def. non null + pot. n & prot. n => pot. n & pot. nn
+		// def. non null + pot. nn & prot. nn => pot. nn & prot. nn
+		// def. non null + prot. non null => pot. nn & prot. nn
+		// def. non null + prot. null => pot. non null		 // PREMATURE should become tainted null & pot. nn... not really, depends on the three way merge... or even on the conditions that got there (pb with no contrib prot. null branch)
 		// def. null + def. null => def. null
-		// def. unknown + def. non null => def. unknown
+		// def. null + pot. n & prot. n => pot. n & prot. n
+		// def. null + prot. non null => pot. null
+		// def. null + prot. null => pot. n & prot. n
+		// def. unknown + def. non null => pot. nn & pot. un
 		// def. unknown + def. null => pot. n & pot. un // pot. n priv. over def. unknown
 		// def. unknown + def. unknown => def. unknown
+		// def. unknown + pot. n & prot. n => pot. n & pot. un
+		// def. unknown + pot. nn & prot. nn => pot. nn & pot. un
+		// def. unknown + prot. non null => def. unknown // test726
+		// def. unknown + prot. null => pot. unknown	// PREMATURE possibly wrong, but no test case yet
+		// pot. n & pot. nn & pot. un + def. non null => pot. n & pot. nn & pot. un
+		// pot. n & pot. nn & pot. un + def. null => pot. n & pot. nn & pot. un
+		// pot. n & pot. nn & pot. un + def. unknown => pot. n & pot. nn & pot. un
+		// pot. n & pot. nn & pot. un + pot. n & pot. nn & pot. un => pot. n & pot. nn & pot. un
+		// pot. n & pot. nn & pot. un + pot. n & prot. n => pot. n & pot. nn & pot. un
+		// pot. n & pot. nn & pot. un + pot. nn & prot. nn => pot. n & pot. nn & pot. un
+		// pot. n & pot. nn & pot. un + prot. non null => pot. n & pot. nn & pot. un
+		// pot. n & pot. nn & pot. un + prot. null => pot. n & pot. nn & pot. un
 		// pot. n & pot. nn + def. non null => pot. n & pot. nn
 		// pot. n & pot. nn + def. null => pot. n & pot. nn
 		// pot. n & pot. nn + def. unknown => pot. n & pot. nn
+		// pot. n & pot. nn + pot. n & pot. nn & pot. un => pot. n & pot. nn & pot. un
 		// pot. n & pot. nn + pot. n & pot. nn => pot. n & pot. nn
+		// pot. n & pot. nn + pot. n & prot. n => pot. n & pot. nn
+		// pot. n & pot. nn + pot. nn & prot. nn => pot. n & pot. nn
+		// pot. n & pot. nn + prot. non null => pot. n & pot. nn
+		// pot. n & pot. nn + prot. null => pot. n & pot. nn
 		// pot. n & pot. un + def. non null => pot. n & pot. nn
 		// pot. n & pot. un + def. null => pot. n & pot. un
 		// pot. n & pot. un + def. unknown => pot. n & pot. un
+		// pot. n & pot. un + pot. n & pot. nn & pot. un => pot. n & pot. nn & pot. un
 		// pot. n & pot. un + pot. n & pot. nn => pot. n & pot. nn
 		// pot. n & pot. un + pot. n & pot. un => pot. n & pot. un
-		// pot. n & prot. n + def. non null => pot. n & pot. nn
-		// pot. n & prot. n + def. null => pot. n & prot. n
-		// pot. n & prot. n + def. unknown => pot. n & pot. un
-		// pot. n & prot. n + pot. n & pot. nn => pot. n & pot. nn
-		// pot. n & prot. n + pot. n & pot. un => pot. n & pot. un
+		// pot. n & pot. un + pot. n & prot. n => pot. n & pot. un
+		// pot. n & pot. un + pot. nn & prot. nn => pot. n & pot. nn
+		// pot. n & pot. un + prot. non null => pot. n & pot. un
+		// pot. n & pot. un + prot. null => pot. n & pot. un
 		// pot. n & prot. n + pot. n & prot. n => pot. n & prot. n
+		// pot. n & prot. n + prot. non null => pot. null
+		// pot. n & prot. n + prot. null => pot. n & prot. n
 		// pot. nn & pot. un + def. non null => pot. nn & pot. un
 		// pot. nn & pot. un + def. null => pot. n & pot. nn
 		// pot. nn & pot. un + def. unknown => pot. nn & pot. un
+		// pot. nn & pot. un + pot. n & pot. nn & pot. un => pot. n & pot. nn & pot. un
 		// pot. nn & pot. un + pot. n & pot. nn => pot. n & pot. nn
 		// pot. nn & pot. un + pot. n & pot. un => pot. n & pot. nn
 		// pot. nn & pot. un + pot. n & prot. n => pot. n & pot. nn
 		// pot. nn & pot. un + pot. nn & pot. un => pot. nn & pot. un
+		// pot. nn & pot. un + pot. nn & prot. nn => pot. nn & pot. un
 		// pot. nn & pot. un + pot. null => pot. n & pot. nn
-		// pot. nn & prot. nn + def. non null => pot. nn & prot. nn
+		// pot. nn & pot. un + prot. non null => pot. nn & pot. un
+		// pot. nn & pot. un + prot. null => pot. n & pot. nn
 		// pot. nn & prot. nn + def. null => pot. n & pot. nn
-		// pot. nn & prot. nn + def. unknown => pot. nn & pot. un
-		// pot. nn & prot. nn + pot. n & pot. nn => pot. n & pot. nn
-		// pot. nn & prot. nn + pot. n & pot. un => pot. n & pot. nn
 		// pot. nn & prot. nn + pot. n & prot. n => pot. n & pot. nn
-		// pot. nn & prot. nn + pot. nn & pot. un => pot. nn & pot. un
 		// pot. nn & prot. nn + pot. nn & prot. nn => pot. nn & prot. nn
-		// pot. nn & prot. nn + pot. null => pot. n & pot. nn
+		// pot. nn & prot. nn + prot. non null => pot. nn & prot. nn
+		// pot. nn & prot. nn + prot. null => pot. n & pot. nn
 		// pot. non null + def. non null => pot. non null
 		// pot. non null + def. null => pot. n & pot. nn
 		// pot. non null + def. unknown => pot. nn & pot. un
+		// pot. non null + pot. n & pot. nn & pot. un => pot. n & pot. nn & pot. un
 		// pot. non null + pot. n & pot. nn => pot. n & pot. nn
 		// pot. non null + pot. n & pot. un => pot. n & pot. nn
 		// pot. non null + pot. n & prot. n => pot. n & pot. nn
@@ -1107,16 +1262,23 @@ public class NullReferenceImplTransformations {
 		// pot. non null + pot. nn & prot. nn => pot. non null
 		// pot. non null + pot. non null => pot. non null
 		// pot. non null + pot. null => pot. n & pot. nn
+		// pot. non null + prot. non null => pot. non null
+		// pot. non null + prot. null => pot. n & pot. nn
 		// pot. null + def. non null => pot. n & pot. nn
 		// pot. null + def. null => pot. null
 		// pot. null + def. unknown => pot. n & pot. un
+		// pot. null + pot. n & pot. nn & pot. un => pot. n & pot. nn & pot. un
 		// pot. null + pot. n & pot. nn => pot. n & pot. nn
 		// pot. null + pot. n & pot. un => pot. n & pot. un
 		// pot. null + pot. n & prot. n => pot. null
+		// pot. null + pot. nn & prot. nn => pot. n & pot. nn
 		// pot. null + pot. null => pot. null
+		// pot. null + prot. non null => pot. null
+		// pot. null + prot. null => pot. null
 		// pot. unknown + def. non null => pot. nn & pot. un
 		// pot. unknown + def. null => pot. n & pot. un
 		// pot. unknown + def. unknown => pot. unknown
+		// pot. unknown + pot. n & pot. nn & pot. un => pot. n & pot. nn & pot. un
 		// pot. unknown + pot. n & pot. nn => pot. n & pot. nn
 		// pot. unknown + pot. n & pot. un => pot. n & pot. un
 		// pot. unknown + pot. n & prot. n => pot. n & pot. un
@@ -1125,34 +1287,15 @@ public class NullReferenceImplTransformations {
 		// pot. unknown + pot. non null => pot. nn & pot. un
 		// pot. unknown + pot. null => pot. n & pot. un
 		// pot. unknown + pot. unknown => pot. unknown
-		// prot. non null + def. non null => pot. nn & prot. nn
-		// prot. non null + def. null => pot. null
-		// prot. non null + def. unknown => def. unknown // test726
-		// prot. non null + pot. n & pot. nn => pot. n & pot. nn
-		// prot. non null + pot. n & pot. un => pot. n & pot. un
-		// prot. non null + pot. n & prot. n => pot. null
-		// prot. non null + pot. nn & pot. un => pot. nn & pot. un
-		// prot. non null + pot. nn & prot. nn => pot. nn & prot. nn
-		// prot. non null + pot. non null => pot. non null
-		// prot. non null + pot. null => pot. null
-		// prot. non null + pot. unknown => pot. unknown
+		// pot. unknown + prot. non null => pot. unknown
+		// pot. unknown + prot. null => pot. unknown // PREMATURE possibly wrong, but no test case yet
 		// prot. non null + prot. non null => prot. non null
-		// prot. non null + prot. null => pot. null // PREMATURE use tainted instead
-		// prot. null + def. non null => pot. non null		 // PREMATURE should become tainted null & pot. nn... not really, depends on the three way merge... or even on the conditions that got there (pb with no contrib prot. null branch)
-		// prot. null + def. null => pot. n & prot. n
-		// prot. null + def. unknown => pot. unknown	// PREMATURE possibly wrong, but no test case yet
-		// prot. null + pot. n & pot. nn => pot. n & pot. nn
-		// prot. null + pot. n & pot. un => pot. n & pot. un
-		// prot. null + pot. n & prot. n => pot. n & prot. n
-		// prot. null + pot. nn & pot. un => pot. n & pot. nn
-		// prot. null + pot. nn & prot. nn => pot. n & pot. nn
-		// prot. null + pot. non null => pot. n & pot. nn
-		// prot. null + pot. null => pot. null
-		// prot. null + pot. unknown => pot. unknown // PREMATURE possibly wrong, but no test case yet
+		// prot. null + prot. non null => pot. null // PREMATURE use tainted instead
 		// prot. null + prot. null => prot. null
 		// start + def. non null => pot. non null
 		// start + def. null => pot. null
 		// start + def. unknown => pot. unknown
+		// start + pot. n & pot. nn & pot. un => pot. n & pot. nn & pot. un
 		// start + pot. n & pot. nn => pot. n & pot. nn
 		// start + pot. n & pot. un => pot. n & pot. un
 		// start + pot. n & prot. n => pot. null
@@ -1195,6 +1338,8 @@ public class NullReferenceImplTransformations {
 				{0x04,0x2C,0x0C},
 				{0x04,0x30,0x14},
 				{0x04,0x34,0x14},
+				{0x04,0x38,0x04},
+				{0x04,0x3C,0x04},
 				{0x08,0x08,0x08},
 				{0x08,0x0C,0x0C},
 				{0x08,0x10,0x18},
@@ -1206,6 +1351,8 @@ public class NullReferenceImplTransformations {
 				{0x08,0x2C,0x08},
 				{0x08,0x30,0x18},
 				{0x08,0x34,0x18},
+				{0x08,0x38,0x18},
+				{0x08,0x3C,0x08},
 				{0x0C,0x0C,0x0C},
 				{0x0C,0x10,0x18},
 				{0x0C,0x14,0x18},
@@ -1213,29 +1360,42 @@ public class NullReferenceImplTransformations {
 				{0x0C,0x1C,0x1C},
 				{0x0C,0x24,0x0C},
 				{0x0C,0x28,0x0C},
+				{0x0C,0x2C,0x0C},
 				{0x0C,0x30,0x18},
 				{0x0C,0x34,0x18},
+				{0x0C,0x38,0x18},
+				{0x0C,0x3C,0x0C},
 				{0x10,0x10,0x10},
 				{0x10,0x14,0x14},
 				{0x10,0x18,0x18},
 				{0x10,0x1C,0x1C},
 				{0x10,0x24,0x14},
 				{0x10,0x28,0x18},
+				{0x10,0x2C,0x18},
 				{0x10,0x30,0x10},
 				{0x10,0x34,0x10},
+				{0x10,0x38,0x10},
+				{0x10,0x3C,0x10},
 				{0x14,0x14,0x14},
 				{0x14,0x18,0x18},
 				{0x14,0x1C,0x1C},
 				{0x14,0x24,0x14},
 				{0x14,0x28,0x18},
+				{0x14,0x2C,0x18},
 				{0x14,0x30,0x14},
+				{0x14,0x34,0x14},
+				{0x14,0x38,0x14},
+				{0x14,0x3C,0x14},
 				{0x18,0x18,0x18},
 				{0x18,0x1C,0x1C},
 				{0x18,0x24,0x18},
 				{0x18,0x28,0x18},
+				{0x18,0x2C,0x18},
 				{0x18,0x30,0x18},
+				{0x18,0x34,0x18},
+				{0x18,0x38,0x18},
+				{0x18,0x3C,0x18},
 				{0x1C,0x1C,0x1C},
-				{0x1C,0x20,0x1C},
 				{0x1C,0x24,0x1C},
 				{0x1C,0x28,0x1C},
 				{0x1C,0x2C,0x1C},
@@ -1245,49 +1405,31 @@ public class NullReferenceImplTransformations {
 				{0x1C,0x3C,0x1C},
 				{0x24,0x24,0x24},
 				{0x24,0x28,0x0C},
+				{0x24,0x2C,0x0C},
 				{0x24,0x30,0x14},
+				{0x24,0x34,0x14},
+				{0x24,0x38,0x04},
+				{0x24,0x3C,0x24},
 				{0x28,0x28,0x28},
+				{0x28,0x2C,0x2C},
 				{0x28,0x30,0x18},
-				{0x2C,0x0C,0x0C},
-				{0x2C,0x10,0x18},
-				{0x2C,0x14,0x18},
-				{0x2C,0x18,0x18},
-				{0x2C,0x24,0x0C},
-				{0x2C,0x28,0x2C},
+				{0x28,0x34,0x18},
+				{0x28,0x38,0x08},
+				{0x28,0x3C,0x2C},
 				{0x2C,0x2C,0x2C},
 				{0x2C,0x30,0x18},
 				{0x2C,0x34,0x18},
+				{0x2C,0x38,0x18},
+				{0x2C,0x3C,0x2C},
 				{0x30,0x30,0x30},
-				{0x34,0x14,0x14},
-				{0x34,0x18,0x18},
-				{0x34,0x24,0x14},
-				{0x34,0x28,0x18},
-				{0x34,0x30,0x34},
+				{0x30,0x34,0x34},
+				{0x30,0x38,0x34},
+				{0x30,0x3C,0x10},
 				{0x34,0x34,0x34},
-				{0x38,0x04,0x04},
-				{0x38,0x08,0x18},
-				{0x38,0x0C,0x18},
-				{0x38,0x10,0x10},
-				{0x38,0x14,0x14},
-				{0x38,0x18,0x18},
-				{0x38,0x24,0x04},
-				{0x38,0x28,0x08},
-				{0x38,0x2C,0x18},
-				{0x38,0x30,0x34},
-				{0x38,0x34,0x34},
+				{0x34,0x38,0x34},
+				{0x34,0x3C,0x10},
 				{0x38,0x38,0x38},
-				{0x3C,0x04,0x04},
-				{0x3C,0x08,0x08},
-				{0x3C,0x0C,0x0C},
-				{0x3C,0x10,0x10},
-				{0x3C,0x14,0x14},
-				{0x3C,0x18,0x18},
-				{0x3C,0x24,0x24},
-				{0x3C,0x28,0x2C},
-				{0x3C,0x2C,0x2C},
-				{0x3C,0x30,0x10},
-				{0x3C,0x34,0x10},
-				{0x3C,0x38,0x10},
+				{0x38,0x3C,0x10},
 				{0x3C,0x3C,0x3C},
 				// mergedWith INITIALIZER END
 				}) {
@@ -1838,6 +1980,7 @@ void reinitializeFromComputedValues(BufferedReader input, BufferedWriter output,
 						// loop
 					}
 					int i, length;
+					// definitions of two-dim trafos in natural order (by state value):
 					for (i = 0, length = consideredStates.length; i < length; i++) {
 						output.write(tab);
 						output.write("// ");
@@ -2033,26 +2176,41 @@ void hydrate() {
 abstract UnconditionalFlowInfo output(UnconditionalFlowInfo input1, UnconditionalFlowInfo input2);
 void printDefinitions(BufferedWriter output, State[] consideredStates, String tab)
 		throws IOException {
-	int i, j, length;
+	int i, j, length = consideredStates.length;
 	State result;
-	for (i = 0, length = consideredStates.length; i < length; i++) {
+	// temporary store to support lexical sorting:
+	String[] lines = new String[length * length];
+	int lCount = 0;
+	for (i = 0; i < length; i++) {
 		for (j = 0; j < length; j++) {
-			output.write(tab);
-			output.write("// ");
-			output.write(consideredStates[i].name);
-			output.write(" + ");
-			output.write(consideredStates[j].name);
-			output.write(" => ");
-			output.write(
-				(result = (State)
-					((Map) this.computedTransitions.get(consideredStates[i])).get(consideredStates[j])).name);
+			StringBuffer line = new StringBuffer();
+			line.append(tab);
+			line.append("// ");
+			line.append(consideredStates[i].name);
+			line.append(" + ");
+			line.append(consideredStates[j].name);
+			line.append(" => ");
+			line.append(
+				(result = (State) getResult(this.computedTransitions, consideredStates[i], consideredStates[j])).name);
 			if (!result.symbolic ||
-				result != this.initializedTransitions.get(consideredStates[i])) {
-				output.write("\t\t CHECK");
+				result != getResult(this.initializedTransitions, consideredStates[i], consideredStates[j])) {
+				line.append("\t\t CHECK");
 			}
-			output.write('\n');
+			line.append('\n');
+			lines[lCount++] = line.toString();
 		}
 	}
+	Arrays.sort(lines);
+	for (i = 0; i < lCount; i++) {
+		output.write(lines[i]);
+	}
+}
+Object getResult(Map transitions, State statei, State statej) {
+	Object res1 = transitions.get(statei);
+	if (res1 instanceof Map) {
+		return ((Map)res1).get(statej);
+	}
+	return null;
 }
 void printInitializers(BufferedWriter output, State[] consideredStates, String tab)
 		throws IOException {
@@ -2822,26 +2980,40 @@ void printDefinitions(BufferedWriter output, State[] consideredStates, String ta
 		throws IOException {
 	// only difference with parent is that we print only half of possible
 	// combinations
-	int i, j, length;
+	int i, j, length = consideredStates.length;
 	State result;
-	for (i = 0, length = consideredStates.length; i < length; i++) {
+	// temporary store to support lexical sorting:
+	String[] lines = new String[length * (length +1) / 2 ];
+	int lCount = 0;
+	for (i = 0; i < length; i++) {
 		for (j = i; j < length; j++) {
-			output.write(tab);
-			output.write("// ");
-			output.write(consideredStates[i].name);
-			output.write(" + ");
-			output.write(consideredStates[j].name);
-			output.write(" => ");
-			output.write(
-				(result = (State)
-					((Map) this.computedTransitions.get(consideredStates[i])).get(consideredStates[j])).name);
+			StringBuffer line = new StringBuffer();
+			line.append(tab);
+			line.append("// ");
+			line.append(consideredStates[i].name);
+			line.append(" + ");
+			line.append(consideredStates[j].name);
+			line.append(" => ");
+			line.append(
+				(result = (State) getResult(this.computedTransitions, consideredStates[i], consideredStates[j])).name);
 			if (!result.symbolic ||
-				result != this.initializedTransitions.get(consideredStates[i])) {
-				output.write("\t\t CHECK");
+				result != getResult(this.initializedTransitions, consideredStates[i], consideredStates[j])) {
+				line.append("\t\t CHECK");
 			}
-			output.write('\n');
+			line.append('\n');
+			lines[lCount++] = line.toString();
 		}
 	}
+	Arrays.sort(lines);
+	for (i = 0; i < lCount; i++) {
+		output.write(lines[i]);
+	}
+}
+Object getResult(Map transitions, State statei, State statej) {
+	Object r = super.getResult(transitions, statei, statej);
+	if (r == null)
+		r = super.getResult(transitions, statej, statei);
+	return r;
 }
 void printInitializers(BufferedWriter output, State[] consideredStates, String tab)
 		throws IOException {

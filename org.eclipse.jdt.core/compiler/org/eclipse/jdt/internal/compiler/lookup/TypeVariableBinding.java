@@ -38,7 +38,6 @@ import java.util.Set;
 import org.eclipse.jdt.core.compiler.CharOperation;
 import org.eclipse.jdt.internal.compiler.ast.ASTNode;
 import org.eclipse.jdt.internal.compiler.ast.Annotation;
-import org.eclipse.jdt.internal.compiler.ast.Expression;
 import org.eclipse.jdt.internal.compiler.ast.NullAnnotationMatching;
 import org.eclipse.jdt.internal.compiler.ast.TypeParameter;
 import org.eclipse.jdt.internal.compiler.ast.TypeReference;
@@ -611,15 +610,6 @@ public class TypeVariableBinding extends ReferenceBinding {
 	@Override
 	public void exitRecursiveFunction() {
 		this.inRecursiveFunction = false;
-	}
-	
-	@Override
-	public boolean isPertinentToApplicability(Expression expression, MethodBinding method) {
-		return expression.isPertinentToApplicability(this, method);
-	}
-	
-	public boolean isPertinentToApplicability(TypeBinding argument, MethodBinding method) {
-		return argument != null && argument.isPertinentToApplicability(this, method);
 	}
 	
 	public boolean isProperType(boolean admitCapture18) {

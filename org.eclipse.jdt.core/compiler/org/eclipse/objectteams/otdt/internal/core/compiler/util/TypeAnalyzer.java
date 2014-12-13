@@ -630,7 +630,7 @@ public class TypeAnalyzer  {
 
 				@Override
 				public InferenceContext18 freshInferenceContext(Scope someScope) {
-					return new InferenceContext18(someScope, fakeArguments, this);
+					return new InferenceContext18(someScope, fakeArguments, this, null);
 				}
 			};
 		}

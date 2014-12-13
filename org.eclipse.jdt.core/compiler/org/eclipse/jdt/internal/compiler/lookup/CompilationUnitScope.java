@@ -571,13 +571,8 @@ public void registerBinaryNested(ReferenceBinding nestedBinding) {
 public
 // SH}
 void connectTypeHierarchy() {
-	this.connectingHierarchy = true;
-	try {
-		for (int i = 0, length = this.topLevelTypes.length; i < length; i++)
-			this.topLevelTypes[i].scope.connectTypeHierarchy();
-	} finally {
-		this.connectingHierarchy = false;
-	}
+	for (int i = 0, length = this.topLevelTypes.length; i < length; i++)
+		this.topLevelTypes[i].scope.connectTypeHierarchy();
 }
 //{ObjectTeams: support faultInTypes being controlled by Dependencies
 // record when imports have been built:

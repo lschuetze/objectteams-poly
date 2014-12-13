@@ -34,6 +34,7 @@
  *								Bug 440143 - [1.8][null] one more case of contradictory null annotations regarding type variables
  *								Bug 441693 - [1.8][null] Bogus warning for type argument annotated with @NonNull
  *								Bug 434483 - [1.8][compiler][inference] Type inference not picked up with method reference
+ *								Bug 446442 - [1.8] merge null annotations from super methods
  *     Jesper S Moller - Contributions for
  *								bug 382721 - [1.8][compiler] Effectively final variables needs special treatment
  *								bug 412153 - [1.8][compiler] Check validity of annotations which may be repeatable
@@ -1015,7 +1016,7 @@ public abstract class ASTNode implements TypeConstants, TypeIds {
 		AnnotationBinding [] se8Annotations = null;
 		int se8count = 0;
 		long se8nullBits = 0;
-		Annotation se8NullAnnotation = null;
+		Annotation se8NullAnnotation = null; // just any involved annotation so we have a location for error reporting
 		int firstSE8 = -1;
 		for (int i = 0, length = annotations.length; i < length; i++) {
 			AnnotationBinding annotation = annotations[i].getCompilerAnnotation();
@@ -1038,10 +1039,10 @@ public abstract class ASTNode implements TypeConstants, TypeIds {
 					se8Annotations[se8count++] = annotation;
 				}
 				if (annotationType.id == TypeIds.T_ConfiguredAnnotationNonNull) {
-					se8nullBits = TagBits.AnnotationNonNull;
+					se8nullBits |= TagBits.AnnotationNonNull;
 					se8NullAnnotation = annotations[i];
 				} else if (annotationType.id == TypeIds.T_ConfiguredAnnotationNullable) {
-					se8nullBits = TagBits.AnnotationNullable;
+					se8nullBits |= TagBits.AnnotationNullable;
 					se8NullAnnotation = annotations[i];
 				}
 			}
@@ -1106,13 +1107,14 @@ public abstract class ASTNode implements TypeConstants, TypeIds {
 		
 		// for arrays: @T X[] SE7 associates @T to the type, but in SE8 it affects the leaf component type
 		long prevNullBits = existingType.leafComponentType().tagBits & TagBits.AnnotationNullMASK;
-		if (se8nullBits != 0 && prevNullBits != se8nullBits && ((prevNullBits | se8nullBits) == TagBits.AnnotationNullMASK)) {
-			if (existingType instanceof TypeVariableBinding) {
-				// let type-use annotations override annotations on the type parameter declaration
-				existingType = existingType.withoutToplevelNullAnnotation();
-			} else {
-				scope.problemReporter().contradictoryNullAnnotations(se8NullAnnotation);
+		if ((prevNullBits | se8nullBits) == TagBits.AnnotationNullMASK) { // contradiction after merge?
+			if (!(existingType instanceof TypeVariableBinding)) { // let type-use annotations override annotations on the type parameter declaration
+				if (prevNullBits != TagBits.AnnotationNullMASK && se8nullBits != TagBits.AnnotationNullMASK) { // conflict caused by the merge?
+					scope.problemReporter().contradictoryNullAnnotations(se8NullAnnotation);
+				}
+				se8Annotations = Binding.NO_ANNOTATIONS;
 			}
+			existingType = existingType.withoutToplevelNullAnnotation();
 		}
 		TypeBinding oldLeafType = (unionRef == null) ? existingType.leafComponentType() : unionRef.resolvedType;
 		AnnotationBinding [][] goodies = new AnnotationBinding[typeRef.getAnnotatableLevels()][];

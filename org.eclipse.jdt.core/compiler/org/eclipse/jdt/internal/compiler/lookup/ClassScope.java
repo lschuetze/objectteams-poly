@@ -21,6 +21,7 @@
  *							Bug 427199 - [1.8][resource] avoid resource leak warnings on Streams that have no resource
  *							Bug 429958 - [1.8][null] evaluate new DefaultLocation attribute of @NonNullByDefault
  *							Bug 434570 - Generic type mismatch for parametrized class annotation attribute with inner class
+ *							Bug 444024 - [1.8][compiler][null] Type mismatch error in annotation generics assignment which happens "sometimes"
  *        Andy Clement (GoPivotal, Inc) aclement@gopivotal.com - Contributions for
  *                          Bug 415821 - [1.8][compiler] CLASS_EXTENDS target type annotation missing for anonymous classes
  *******************************************************************************/
@@ -2161,32 +2162,39 @@ public class ClassScope extends Scope {
 			return; // catchup was blocked.
 // SH}
 		SourceTypeBinding sourceType = this.referenceContext.binding;
-		if ((sourceType.tagBits & TagBits.BeginHierarchyCheck) == 0) {
-			sourceType.tagBits |= TagBits.BeginHierarchyCheck;
-			environment().typesBeingConnected.add(sourceType);
-			boolean noProblems = connectSuperclass();
-			noProblems &= connectSuperInterfaces();
-			environment().typesBeingConnected.remove(sourceType);
-			sourceType.tagBits |= TagBits.EndHierarchyCheck;
-			noProblems &= connectTypeVariables(this.referenceContext.typeParameters, false);
-			sourceType.tagBits |= TagBits.TypeVariablesAreConnected;
-			if (noProblems && sourceType.isHierarchyInconsistent())
-				problemReporter().hierarchyHasProblems(sourceType);
-		}
-//{ObjectTeams: top level source super-team must be fully loaded/connected:
-		ReferenceBinding superType= sourceType.superclass;
-		if (   superType != null
-				&& superType.isTeam()) 
-		{
-			ReferenceBinding superOriginal = (ReferenceBinding) superType.original();
-			if (!superOriginal.isBinaryBinding()) {
-				ClassScope superScope = ((SourceTypeBinding) superOriginal).scope;
-				if (superScope != null)
-					superScope.connectTypeHierarchy();
+		CompilationUnitScope compilationUnitScope = compilationUnitScope();
+		boolean wasAlreadyConnecting = compilationUnitScope.connectingHierarchy;
+		compilationUnitScope.connectingHierarchy = true;
+		try {
+			if ((sourceType.tagBits & TagBits.BeginHierarchyCheck) == 0) {
+				sourceType.tagBits |= TagBits.BeginHierarchyCheck;
+				environment().typesBeingConnected.add(sourceType);
+				boolean noProblems = connectSuperclass();
+				noProblems &= connectSuperInterfaces();
+				environment().typesBeingConnected.remove(sourceType);
+				sourceType.tagBits |= TagBits.EndHierarchyCheck;
+				noProblems &= connectTypeVariables(this.referenceContext.typeParameters, false);
+				sourceType.tagBits |= TagBits.TypeVariablesAreConnected;
+				if (noProblems && sourceType.isHierarchyInconsistent())
+					problemReporter().hierarchyHasProblems(sourceType);
 			}
-		}
+//{ObjectTeams: top level source super-team must be fully loaded/connected:
+			ReferenceBinding superType= sourceType.superclass;
+			if (   superType != null
+					&& superType.isTeam()) 
+			{
+				ReferenceBinding superOriginal = (ReferenceBinding) superType.original();
+				if (!superOriginal.isBinaryBinding()) {
+					ClassScope superScope = ((SourceTypeBinding) superOriginal).scope;
+					if (superScope != null)
+						superScope.connectTypeHierarchy();
+				}
+			}
 // SH}
-		connectMemberTypes();
+			connectMemberTypes();
+		} finally {
+			compilationUnitScope.connectingHierarchy = wasAlreadyConnecting;
+		}
 		LookupEnvironment env = environment();
 		try {
 			env.missingClassFileLocation = this.referenceContext;
@@ -2234,16 +2242,23 @@ public class ClassScope extends Scope {
 		if ((sourceType.tagBits & TagBits.BeginHierarchyCheck) != 0)
 			return;
 
-		sourceType.tagBits |= TagBits.BeginHierarchyCheck;
-		environment().typesBeingConnected.add(sourceType);
-		boolean noProblems = connectSuperclass();
-		noProblems &= connectSuperInterfaces();
-		environment().typesBeingConnected.remove(sourceType);
-		sourceType.tagBits |= TagBits.EndHierarchyCheck;
-		noProblems &= connectTypeVariables(this.referenceContext.typeParameters, false);
-		sourceType.tagBits |= TagBits.TypeVariablesAreConnected;
-		if (noProblems && sourceType.isHierarchyInconsistent())
-			problemReporter().hierarchyHasProblems(sourceType);
+		CompilationUnitScope compilationUnitScope = compilationUnitScope();
+		boolean wasAlreadyConnecting = compilationUnitScope.connectingHierarchy;
+		compilationUnitScope.connectingHierarchy = true;
+		try {
+			sourceType.tagBits |= TagBits.BeginHierarchyCheck;
+			environment().typesBeingConnected.add(sourceType);
+			boolean noProblems = connectSuperclass();
+			noProblems &= connectSuperInterfaces();
+			environment().typesBeingConnected.remove(sourceType);
+			sourceType.tagBits |= TagBits.EndHierarchyCheck;
+			noProblems &= connectTypeVariables(this.referenceContext.typeParameters, false);
+			sourceType.tagBits |= TagBits.TypeVariablesAreConnected;
+			if (noProblems && sourceType.isHierarchyInconsistent())
+				problemReporter().hierarchyHasProblems(sourceType);
+		} finally {
+			compilationUnitScope.connectingHierarchy = wasAlreadyConnecting;
+		}
 	}
 
 //{ObjectTeams: ROFI (to be overridden in OTClassScope)

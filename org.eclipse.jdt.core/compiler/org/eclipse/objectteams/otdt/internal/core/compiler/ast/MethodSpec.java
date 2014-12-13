@@ -794,7 +794,7 @@ public class MethodSpec extends ASTNode implements InvocationSite
 			expressions[i].resolvedType = argument.type.resolvedType;
 		}
 
-		return new InferenceContext18(scope, expressions, this);
+		return new InferenceContext18(scope, expressions, this, null);
 	}
 	
 	public ExpressionContext getExpressionContext() {
