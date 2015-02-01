@@ -57,6 +57,7 @@ import org.eclipse.jdt.internal.compiler.batch.ClasspathLocation;
 import org.eclipse.jdt.internal.compiler.batch.Main;
 import org.eclipse.jdt.internal.compiler.util.ManifestAnalyzer;
 
+@SuppressWarnings({ "unchecked", "rawtypes" })
 public class BatchCompilerTest extends AbstractRegressionTest {
 	public static final String OUTPUT_DIR_PLACEHOLDER = "---OUTPUT_DIR_PLACEHOLDER---";
 	public static final String LIB_DIR_PLACEHOLDER = "---LIB_DIR_PLACEHOLDER---";
@@ -1680,7 +1681,7 @@ public void test012(){
         "    -O                 optimize for execution time (ignored)\n" +
         "\n";
 	String expandedExpectedOutput =
-		MessageFormat.format(expectedOutput, new String[] {
+		MessageFormat.format(expectedOutput, new Object[] {
 				MAIN.bind("compiler.name"),
 				MAIN.bind("compiler.version"),
 				MAIN.bind("compiler.copyright")
@@ -1733,16 +1734,15 @@ public void test012b(){
         "      ambiguousbinding   + ambiguous role-base bindings (OTJLD 2.3.4(a))\n" + 
         "      ambiguouslowering  + ambiguous lowering or upcast (OTJLD 2.2(f))\n" +
         "      assertIdentifier   + ''assert'' used as identifier\n" + 
-//OT:
+//OT (4x):
         "      basecall           + base call not issued exactly once on each path\n" +
         "                           (OTJLD 4.3(b,c))\n" +
         "      baseclasscycle     + role involved in a baseclass-member cycle\n" +
         "                           (OTJLD 2.1.2(b)\n" +
-//OT:
         "      bindingconventions + discouraged use of import / import base\n" +
         "                           (OTJLD 2.1.2(d))\n" +
-//OT:
         "      bindingtosystemclass 	+ trying to bind a role to a system class\n" +
+//:TO
         "      boxing               autoboxing conversion\n" + 
         "      charConcat         + char[] in String concat\n" + 
         "      compareIdentical   + comparing identical expressions\n" + 
@@ -1830,10 +1830,9 @@ public void test012b(){
         "      pkgDefaultMethod   + attempt to override package-default method\n" + 
         "      raw                + usage of raw type\n" + 
         "      resource           + (pot.) unsafe usage of resource of type Closeable\n" + 
-//OT:
+//OT (2x):
         "      roleinstantiation  + unsafe instantiation of a role\n" +
         "                           (OTJLD 2.4.1(c), 2.4.3)\n" + 
-//OT:
         "      roletypesyntax     + old style syntax for role types (dependent types)\n" +
         "                           (OTJLD 1.2.2(b))\n" +
         "      semicolon            unnecessary semicolon, empty statement\n" + 
@@ -1885,7 +1884,7 @@ public void test012b(){
 // SH}
         "\n";
 	String expandedExpectedOutput =
-		MessageFormat.format(expectedOutput, new String[] {
+		MessageFormat.format(expectedOutput, new Object[] {
 				MAIN.bind("compiler.name"),
 				MAIN.bind("compiler.version"),
 				MAIN.bind("compiler.copyright")
@@ -2121,7 +2120,7 @@ public void test012b(){
 		String normalizedExpectedLogContents =
 				MessageFormat.format(
 						expectedLogContents,
-						new String[] {
+						new Object[] {
 								File.separator,
 								MAIN.bind("compiler.name"),
 								MAIN.bind("compiler.copyright"),

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2012, 2014 GK Software AG and others.
+ * Copyright (c) 2012, 2015 GK Software AG and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -11,6 +11,7 @@
  *******************************************************************************/
 package org.eclipse.jdt.core.tests.compiler.regression;
 
+import java.io.File;
 import java.util.Map;
 
 import junit.framework.Test;
@@ -18,6 +19,7 @@ import junit.framework.Test;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.tests.util.Util;
 
+@SuppressWarnings({ "unchecked", "rawtypes" })
 public class NullTypeAnnotationTest extends AbstractNullAnnotationTest {
 
 	public NullTypeAnnotationTest(String name) {
@@ -27,7 +29,7 @@ public class NullTypeAnnotationTest extends AbstractNullAnnotationTest {
 	// Static initializer to specify tests subset using TESTS_* static variables
 	// All specified tests which do not belong to the class are skipped...
 	static {
-//			TESTS_NAMES = new String[] { "testBug441693other" };
+//			TESTS_NAMES = new String[] { "testBug456497" };
 //			TESTS_NUMBERS = new int[] { 561 };
 //			TESTS_RANGE = new int[] { 1, 2049 };
 	}
@@ -1702,12 +1704,12 @@ public class NullTypeAnnotationTest extends AbstractNullAnnotationTest {
 			"1. WARNING in X.java (at line 6)\n" + 
 			"	return f == 0 ? good : dubious;\n" + 
 			"	                       ^^^^^^^\n" + 
-			"Null type safety (type annotations): The expression of type \'ArrayList<String>\' needs unchecked conversion to conform to \'List<@NonNull String>\'\n" + 
+			"Null type safety (type annotations): The expression of type \'ArrayList<String>\' needs unchecked conversion to conform to \'List<@NonNull String>\', corresponding supertype is 'List<String>'\n" + 
 			"----------\n" + 
 			"2. WARNING in X.java (at line 8)\n" + 
 			"	return f == 2 ? dubious : good;\n" + 
 			"	                ^^^^^^^\n" + 
-			"Null type safety (type annotations): The expression of type \'ArrayList<String>\' needs unchecked conversion to conform to \'List<@NonNull String>\'\n" + 
+			"Null type safety (type annotations): The expression of type \'ArrayList<String>\' needs unchecked conversion to conform to \'List<@NonNull String>\', corresponding supertype is 'List<String>'\n" + 
 			"----------\n");
 	}
 
@@ -2641,19 +2643,15 @@ public class NullTypeAnnotationTest extends AbstractNullAnnotationTest {
 			"	                                                           ^^^^^^\n" + 
 			"Null type mismatch (type annotations): required \'X\' but this expression has type \'@Nullable X\', where 'X' is a free type variable\n" + 
 			"----------\n" + 
-			"2. WARNING in PolyNull.java (at line 9)\n" + 
-			"	return extract(i -> needNN(i), \"ola\");\n" + 
-			"	       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n" + 
-			"Null type safety (type annotations): The expression of type \'String\' needs unchecked conversion to conform to \'@NonNull String\'\n" + 
-			"----------\n" + 
-			"3. ERROR in PolyNull.java (at line 9)\n" + 
+			"2. ERROR in PolyNull.java (at line 9)\n" + 
 			"	return extract(i -> needNN(i), \"ola\");\n" + 
 			"	                           ^\n" + 
 			"Null type mismatch (type annotations): required \'@NonNull String\' but this expression has type \'@Nullable String\'\n" + 
 			"----------\n");
 	}
 
-	// conflicting annotations from type variable application and type variable substitution -> exclude null annotations from inference
+	// seemingly conflicting annotations from type variable application and type variable substitution 
+	// -> ignore @Nullable which overrides the type variable's nullness for this one location
 	public void testNullTypeInference3() {
 		Map compilerOptions = getCompilerOptions();
 		compilerOptions.put(JavaCore.COMPILER_PB_NULL_UNCHECKED_CONVERSION, JavaCore.ERROR);
@@ -2665,7 +2663,7 @@ public class NullTypeAnnotationTest extends AbstractNullAnnotationTest {
 				"public class Generics {\n" + 
 				"	<X> X m(@Nullable X a) { return null; }\n" + 
 				"	void test(@NonNull String in) {\n" + 
-				"		@NonNull String s = m(in);\n" + 
+				"		@NonNull String s = m(in);\n" +  // inferred OK as 'm(@Nullable String) -> @NonNull String'
 				"		System.out.println(s.toLowerCase());\n" + 
 				"	}\n" + 
 				"	public static void main(String[] args) {\n" + 
@@ -2679,11 +2677,6 @@ public class NullTypeAnnotationTest extends AbstractNullAnnotationTest {
 			"	<X> X m(@Nullable X a) { return null; }\n" + 
 			"	                                ^^^^\n" + 
 			"Null type mismatch (type annotations): \'null\' is not compatible to the free type variable 'X'\n" + 
-			"----------\n" + 
-			"2. ERROR in Generics.java (at line 6)\n" + 
-			"	@NonNull String s = m(in);\n" + 
-			"	                    ^^^^^\n" + 
-			"Null type safety (type annotations): The expression of type \'String\' needs unchecked conversion to conform to \'@NonNull String\'\n" + 
 			"----------\n");
 	}
 
@@ -2747,12 +2740,12 @@ public class NullTypeAnnotationTest extends AbstractNullAnnotationTest {
 			"1. WARNING in Generics.java (at line 13)\n" + 
 			"	Collection<@Nullable String> result = map1(inList, f);\n" + 
 			"	                                           ^^^^^^\n" + 
-			"Null type safety (type annotations): The expression of type \'@NonNull List<Object>\' needs unchecked conversion to conform to \'Collection<@NonNull Object>\'\n" + 
+			"Null type safety (type annotations): The expression of type \'@NonNull List<Object>\' needs unchecked conversion to conform to \'Collection<@NonNull Object>\', corresponding supertype is 'Collection<Object>'\n" + 
 			"----------\n" + 
 			"2. WARNING in Generics.java (at line 14)\n" + 
 			"	map2(inList, f);\n" + 
 			"	     ^^^^^^\n" + 
-			"Null type safety (type annotations): The expression of type \'@NonNull List<Object>\' needs unchecked conversion to conform to \'Collection<@Nullable Object>\'\n" + 
+			"Null type safety (type annotations): The expression of type \'@NonNull List<Object>\' needs unchecked conversion to conform to \'Collection<@Nullable Object>\', corresponding supertype is 'Collection<Object>'\n" + 
 			"----------\n" + 
 			"3. ERROR in Generics.java (at line 14)\n" + 
 			"	map2(inList, f);\n" + 
@@ -3061,7 +3054,7 @@ public class NullTypeAnnotationTest extends AbstractNullAnnotationTest {
 			"1. WARNING in X.java (at line 8)\n" + 
 			"	List<@NonNull ? extends @NonNull String> ls = new ArrayList<String>();\n" + 
 			"	                                              ^^^^^^^^^^^^^^^^^^^^^^^\n" + 
-			"Null type safety (type annotations): The expression of type \'ArrayList<String>\' needs unchecked conversion to conform to \'List<@NonNull ? extends @NonNull String>\'\n" + 
+			"Null type safety (type annotations): The expression of type \'ArrayList<String>\' needs unchecked conversion to conform to \'List<@NonNull ? extends @NonNull String>\', corresponding supertype is 'List<String>'\n" + 
 			"----------\n" + 
 			"2. ERROR in X.java (at line 9)\n" + 
 			"	ls.add(null);\n" + 
@@ -3392,7 +3385,7 @@ public class NullTypeAnnotationTest extends AbstractNullAnnotationTest {
 			"1. WARNING in X.java (at line 10)\n" + 
 			"	s.foo(new ArrayList<String>()); // (1)\n" + 
 			"	      ^^^^^^^^^^^^^^^^^^^^^^^\n" + 
-			"Null type safety (type annotations): The expression of type \'ArrayList<String>\' needs unchecked conversion to conform to \'@NonNull List<@NonNull String>\'\n" + 
+			"Null type safety (type annotations): The expression of type \'ArrayList<String>\' needs unchecked conversion to conform to \'@NonNull List<@NonNull String>\', corresponding supertype is 'List<String>'\n" + 
 			"----------\n" + 
 			"2. ERROR in X.java (at line 11)\n" + 
 			"	s.foo(null); // (2)\n" + 
@@ -5673,7 +5666,7 @@ public void testTypeVariable15() {
 		"1. ERROR in Test.java (at line 3)\n" + 
 		"	public <T> @org.eclipse.jdt.annotation.Nullable T foo(T arg) {\n" + 
 		"	           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n" + 
-		"The return type is incompatible with 'T' returned from ITest.foo(T) (mismatching null constraints)\n" + 
+		"The return type is incompatible with the free type variable 'T' returned from ITest.foo(T) (mismatching null constraints)\n" + 
 		"----------\n" +
 		"----------\n" + 
 		"1. ERROR in Test2.java (at line 3)\n" + 
@@ -7297,5 +7290,297 @@ public void testBug446442_6b() {
 		"	^^^^^^^^\n" + 
 		"Contradictory null annotations: method was inferred as \'@NonNull @Nullable Integer get(int)\', but only one of \'@NonNull\' and \'@Nullable\' can be effective at any location\n" + 
 		"----------\n");
+}
+public void testBug453475() {
+	runConformTestWithLibs(
+		new String[] {
+			"TestMap.java",
+			"import java.util.*;\n" + 
+			"import org.eclipse.jdt.annotation.*;\n" + 
+			"\n" + 
+			"@NonNullByDefault\n" + 
+			"public abstract class TestMap extends AbstractMap<String,@Nullable String> {\n" + 
+			"\n" + 
+			"}\n"
+		}, null, "");
+	runConformTestWithLibs(
+			new String[] {
+			"Test.java",
+			"import java.util.*;\n" + 
+			"import org.eclipse.jdt.annotation.*;\n" + 
+			"\n" + 
+			"@NonNullByDefault\n" + 
+			"public class Test {\n" + 
+			"\n" + 
+			"  public static final void test(TestMap testMap) {\n" + 
+			"    testMap.putAll(new HashMap<String,@Nullable String>()); // Error: Contradictory null annotations: method was inferred as 'void putAll(Map<? extends @NonNull String,? extends @NonNull @Nullable String>)', but only one of '@NonNull' and '@Nullable' can be effective at any location\n" + 
+			"  }\n" + 
+			"\n" + 
+			"}\n"
+		}, null, "");
+}
+// also: don't apply default to use of type variable
+public void testBug453475a() {
+	runConformTestWithLibs(
+		new String[] {
+			"NamespaceStorage.java",
+			"import java.util.*;\n" +
+			"@org.eclipse.jdt.annotation.NonNullByDefault\n" + 
+			"public interface NamespaceStorage<T> \n" + 
+			"{\n" + 
+			"\n" + 
+			"	Set<T> getObjects(); \n" + // here <T> was wrongly read from .class as <@NonNull T>
+			"	T getObject(T in);\n" + 
+			"}\n"
+		}, null, "");
+	runConformTestWithLibs(
+		new String[] {
+			"NamespaceStorageImpl.java",
+			"import java.util.*;\n" +
+			"@org.eclipse.jdt.annotation.NonNullByDefault\n" + 
+			"public class NamespaceStorageImpl<T> implements NamespaceStorage<T>\n" + 
+			"{\n" + 
+			"	@Override\n" + 
+			"	public  Set<T> getObjects() \n" + 
+			"	{\n" + 
+			"		return new TreeSet<T>();\n" + 
+			"	}\n" + 
+			"	@Override\n" + 
+			"	public T getObject(T in)\n" + 
+			"	{\n" + 
+			"		return in;\n" + 
+			"	}\n" + 
+			"}\n"
+		},
+		null, "");
+}
+// also: don't apply default to wildcard
+public void testBug453475b() {
+	runConformTestWithLibs(
+		new String[] {
+			"X.java",
+			"import java.util.*;\n" +
+			"@org.eclipse.jdt.annotation.NonNullByDefault\n" + 
+			"public interface X {\n" + 
+			"\n" + 
+			"	void test(List<?> list);\n" +  // here <?> was wrongly read from .class as <@NonNull ?>
+			"	\n" + 
+			"}\n"
+		}, null, "");
+	runConformTestWithLibs(
+		new String[] {
+			"Y.java",
+			"import java.util.*;\n" +
+			"import org.eclipse.jdt.annotation.*;\n" +
+			"public class Y {\n" + 
+			"	public void run(X x, @NonNull List<@Nullable String> s) \n" + 
+			"	{\n" + 
+			"		x.test(s);\n" + 
+			"	}\n" + 
+			"}\n"
+		},
+		null, "");
+}
+public void testBug456236() {
+	runConformTestWithLibs(
+		new String[] {
+			"Nullsafe.java",
+			"import org.eclipse.jdt.annotation.*;\n" +
+			"class Nullsafe<T> {\n" + 
+			"	final @Nullable T t;\n" + 
+			"\n" + 
+			"	Nullsafe(@Nullable T t) {\n" + 
+			"		this.t = t;\n" + 
+			"	}\n" + 
+			"	public static <U> Nullsafe<U> of(@Nullable U u) {\n" + 
+			"		return new Nullsafe<>(u); // compile error\n" + 
+			"	}\n" + 
+			"}\n"
+		},
+		null,
+		"");
+}
+
+public void testBug456497() throws Exception {
+	runConformTestWithLibs(
+		new String[] {
+			"libs/Lib1.java",
+			"package libs;\n" + 
+			"\n" + 
+			"import java.util.Collection;\n" + 
+			"import java.util.Iterator;\n" + 
+			"import org.eclipse.jdt.annotation.*;\n" +
+			"\n" + 
+			"public interface Lib1 {\n" + 
+			"	<T> Iterator<T> unconstrainedTypeArguments1(Collection<@Nullable T> in);\n" + 
+			"	Iterator<@NonNull String> unconstrainedTypeArguments2(Collection<String> in);\n" + 
+			"}\n",
+			"tests/Test1.java",
+			"package tests;\n" + 
+			"import org.eclipse.jdt.annotation.*;\n" + 
+			"\n" + 
+			"import java.util.Collection;\n" + 
+			"import java.util.Iterator;\n" + 
+			"\n" + 
+			"import libs.Lib1;\n" + 
+			"\n" + 
+			"public class Test1 {\n" + 
+			"	Iterator<@NonNull String> test1(Lib1 lib, Collection<@Nullable String> coll) {\n" + 
+			"		return lib.unconstrainedTypeArguments1(coll);\n" + 
+			"	}\n" + 
+			"	Iterator<@NonNull String> test2(Lib1 lib, Collection<@Nullable String> coll) {\n" + 
+			"		return lib.unconstrainedTypeArguments2(coll);\n" + 
+			"	}\n" +
+			"}\n"
+		},	
+		null,
+		"");
+}
+// original case
+public void testBug456487a() {
+	runConformTestWithLibs(
+		new String[]{
+			"Optional.java",
+			"import org.eclipse.jdt.annotation.*;\n" +
+			"public class Optional<@NonNull T> {\n" + 
+			"  @Nullable T value;\n" + 
+			"  private Optional(T value) { this.value = value; }\n" + 
+			"  public static <@NonNull T> Optional<T> of(T value) { return new Optional<T>(value); }\n" + 
+			"  public T get() { \n" + 
+			"    @Nullable T t = this.value;\n" + 
+			"    if (t != null) return t; \n" + 
+			"    throw new RuntimeException(\"No value present\");\n" + 
+			"  }\n" + 
+			"  public @Nullable T orElse(@Nullable T other) { return (this.value != null) ? this.value : other; }\n" + 
+			"}\n"
+		},
+		null,
+		"");
+}
+// witness for NPE in NullAnnotationMatching.providedNullTagBits:
+public void testBug456487b() {
+	runNegativeTestWithLibs(
+		new String[]{
+			"Optional.java",
+			"import org.eclipse.jdt.annotation.*;\n" +
+			"public class Optional<@Nullable T> {\n" + 
+			"  @Nullable T value;\n" + 
+			"  private Optional(T value) { this.value = value; }\n" + 
+			"  public static <@NonNull T> Optional<T> of(T value) { return new Optional<T>(value); }\n" + 
+			"  public T get() { \n" + 
+			"    @Nullable T t = this.value;\n" + 
+			"    if (t != null) return t; \n" + 
+			"    throw new RuntimeException(\"No value present\");\n" + 
+			"  }\n" + 
+			"  public @Nullable T orElse(@Nullable T other) { return (this.value != null) ? this.value : other; }\n" + 
+			"}\n",
+			"OTest.java",
+			"import org.eclipse.jdt.annotation.*;\n" +
+			"@NonNullByDefault\n" + 
+			"class OTest {\n" + 
+			"  public static void good() {\n" + 
+			"    Optional<String> os1 = Optional.of(\"yes\");\n" + 
+			"    @NonNull String s = os1.get();\n" + 
+			"    @Nullable String ns = os1.orElse(null);\n" + 
+			"  }\n" + 
+			"  public static void bad() {\n" + 
+			"    Optional<String> os = Optional.of(null);\n" + 
+			"    @NonNull String s = os.orElse(null);\n" + 
+			"  }\n" + 
+			"}\n"
+		},
+		"----------\n" + 
+		"1. ERROR in Optional.java (at line 5)\n" + 
+		"	public static <@NonNull T> Optional<T> of(T value) { return new Optional<T>(value); }\n" + 
+		"	                                    ^\n" + 
+		"Null constraint mismatch: The type \'@NonNull T\' is not a valid substitute for the type parameter \'@Nullable T\'\n" + 
+		"----------\n" + 
+		"2. ERROR in Optional.java (at line 5)\n" + 
+		"	public static <@NonNull T> Optional<T> of(T value) { return new Optional<T>(value); }\n" + 
+		"	                                                            ^^^^^^^^^^^^^^^^^^^^^^\n" + 
+		"Contradictory null annotations: method was inferred as \'void <init>(@NonNull @Nullable T)\', but only one of \'@NonNull\' and \'@Nullable\' can be effective at any location\n" + 
+		"----------\n" + 
+		"3. ERROR in Optional.java (at line 5)\n" + 
+		"	public static <@NonNull T> Optional<T> of(T value) { return new Optional<T>(value); }\n" + 
+		"	                                                                         ^\n" + 
+		"Null constraint mismatch: The type \'@NonNull T\' is not a valid substitute for the type parameter \'@Nullable T\'\n" + 
+		"----------\n" + 
+		"----------\n" + 
+		"1. ERROR in OTest.java (at line 5)\n" + 
+		"	Optional<String> os1 = Optional.of(\"yes\");\n" + 
+		"	         ^^^^^^\n" + 
+		"Null constraint mismatch: The type \'@NonNull String\' is not a valid substitute for the type parameter \'@Nullable T\'\n" + 
+		"----------\n" + 
+		"2. ERROR in OTest.java (at line 6)\n" + 
+		"	@NonNull String s = os1.get();\n" + 
+		"	                    ^^^^^^^^^\n" + 
+		"Contradictory null annotations: method was inferred as \'@NonNull @Nullable String get()\', but only one of \'@NonNull\' and \'@Nullable\' can be effective at any location\n" + 
+		"----------\n" + 
+		"3. ERROR in OTest.java (at line 7)\n" + 
+		"	@Nullable String ns = os1.orElse(null);\n" + 
+		"	                      ^^^^^^^^^^^^^^^^\n" + 
+		"Contradictory null annotations: method was inferred as \'@NonNull @Nullable String orElse(@NonNull @Nullable String)\', but only one of \'@NonNull\' and \'@Nullable\' can be effective at any location\n" + 
+		"----------\n" + 
+		"4. ERROR in OTest.java (at line 10)\n" + 
+		"	Optional<String> os = Optional.of(null);\n" + 
+		"	         ^^^^^^\n" + 
+		"Null constraint mismatch: The type \'@NonNull String\' is not a valid substitute for the type parameter \'@Nullable T\'\n" + 
+		"----------\n" + 
+		"5. ERROR in OTest.java (at line 10)\n" + 
+		"	Optional<String> os = Optional.of(null);\n" + 
+		"	                                  ^^^^\n" + 
+		"Null type mismatch: required \'@NonNull String\' but the provided value is null\n" + 
+		"----------\n" + 
+		"6. ERROR in OTest.java (at line 11)\n" + 
+		"	@NonNull String s = os.orElse(null);\n" + 
+		"	                    ^^^^^^^^^^^^^^^\n" + 
+		"Contradictory null annotations: method was inferred as \'@NonNull @Nullable String orElse(@NonNull @Nullable String)\', but only one of \'@NonNull\' and \'@Nullable\' can be effective at any location\n" + 
+		"----------\n" + 
+		"7. ERROR in OTest.java (at line 11)\n" + 
+		"	@NonNull String s = os.orElse(null);\n" + 
+		"	                    ^^^^^^^^^^^^^^^\n" + 
+		"Null type mismatch: required \'@NonNull String\' but the provided value is inferred as @Nullable\n" + 
+		"----------\n");
+}
+public void testBug454182() {
+	
+	Map options = getCompilerOptions();
+	options.put(JavaCore.COMPILER_NONNULL_BY_DEFAULT_ANNOTATION_NAME, "annot.NonNullByDefault");
+	String[] libs = this.LIBS.clone();
+	libs[libs.length-1] = this.getCompilerTestsPluginDirectoryPath() + File.separator + "workspace" + File.separator + "Test454182.jar";
+	runConformTest(
+		new String[] {
+			"p/package-info.java",
+			"@annot.NonNullByDefault package p;\n"
+		},
+		"",
+		libs,
+		false,
+		null,
+		options,
+		null);
+}
+public void testBug443870() {
+	runConformTestWithLibs(
+		new String[] {
+			"X.java",
+			"import org.eclipse.jdt.annotation.*;\n" +
+			"interface Listener<T> {}\n" +
+			"interface I0<T,U extends Listener<T>> {}\n" +
+			"interface I1<T> extends I0<T,Listener<T>> {}\n" +
+			"class Y<S> {\n" +
+			"	private @NonNull I0<S,Listener<S>> f;\n" +
+			"	Y (@NonNull I0<S,Listener<S>> in) { this.f = in; }\n" +
+			"	@NonNull I0<S,Listener<S>> getI() { return f; }\n" +
+			"}\n" +
+			"public class X<V> extends Y<V> {\n" +
+			"	private @NonNull I1<V> f;\n" +
+			"	X (@NonNull I1<V> in) { super(in); this.f = in; }\n" +
+			"	@Override\n" +
+			"	@NonNull I1<V> getI() { return f; }\n" +
+			"}\n"
+		},
+		null,
+		"");
 }
 }

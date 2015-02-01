@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2014 IBM Corporation and others.
+ * Copyright (c) 2000, 2015 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -37,9 +37,10 @@
  *								Bug 435570 - [1.8][null] @NonNullByDefault illegally tries to affect "throws E"
  *								Bug 441693 - [1.8][null] Bogus warning for type argument annotated with @NonNull
  *								Bug 435805 - [1.8][compiler][null] Java 8 compiler does not recognize declaration style null annotations
+ *								Bug 457210 - [1.8][compiler][null] Wrong Nullness errors given on full build build but not on incremental build?
  *      Jesper S Moller <jesper@selskabet.org> -  Contributions for
  *								Bug 412153 - [1.8][compiler] Check validity of annotations which may be repeatable
- *     Till Brychcy - Contributions for
+ *      Till Brychcy - Contributions for
  *     							bug 415269 - NonNullByDefault is not always inherited to nested classes
  *      Andy Clement (GoPivotal, Inc) aclement@gopivotal.com - Contributions for
  *                          	Bug 405104 - [1.8][compiler][codegen] Implement support for serializeable lambdas
@@ -1324,7 +1325,6 @@ public long getAnnotationTagBits() {
 			&& (!isRole() || isInterface()))
 			this.scope.problemReporter().instantiationAnnotationInNonRole(typeDecl);
 // SH}
-		evaluateNullAnnotations(this.tagBits);
 	}
 	return this.tagBits;
 }
@@ -2767,12 +2767,27 @@ private void createArgumentBindings(MethodBinding method, CompilerOptions compil
 	}
 }
 
-private void evaluateNullAnnotations(long annotationTagBits) {
+public void evaluateNullAnnotations() {
 	
 	if (!isPrototype()) throw new IllegalStateException();
 	
 	if (this.nullnessDefaultInitialized > 0 || !this.scope.compilerOptions().isAnnotationBasedNullAnalysisEnabled)
 		return;
+
+	if ((this.tagBits & TagBits.AnnotationNullMASK) != 0) {
+		Annotation[] annotations = this.scope.referenceContext.annotations;
+		for (int i = 0; i < annotations.length; i++) {
+			ReferenceBinding annotationType = annotations[i].getCompilerAnnotation().getAnnotationType();
+			if (annotationType != null) {
+				if (annotationType.id == TypeIds.T_ConfiguredAnnotationNonNull
+						|| annotationType.id == TypeIds.T_ConfiguredAnnotationNullable) {
+					this.scope.problemReporter().nullAnnotationUnsupportedLocation(annotations[i]);
+					this.tagBits &= ~TagBits.AnnotationNullMASK;
+				}
+			}
+		}
+	}
+
 	boolean isPackageInfo = CharOperation.equals(this.sourceName, TypeConstants.PACKAGE_INFO_NAME);
 	PackageBinding pkg = getPackage();
 	boolean isInDefaultPkg = (pkg.compoundName == CharOperation.NO_CHAR_CHAR);
@@ -2810,6 +2825,7 @@ private void evaluateNullAnnotations(long annotationTagBits) {
 		}
 	} else {
 		// transfer nullness info from tagBits to this.defaultNullness
+		long annotationTagBits = this.tagBits;
 		int newDefaultNullness = NO_NULL_DEFAULT;
 		if ((annotationTagBits & TagBits.AnnotationNullUnspecifiedByDefault) != 0) {
 			newDefaultNullness = NULL_UNSPECIFIED_BY_DEFAULT;

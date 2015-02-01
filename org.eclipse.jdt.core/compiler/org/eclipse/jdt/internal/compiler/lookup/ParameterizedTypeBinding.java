@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2005, 2014 IBM Corporation and others.
+ * Copyright (c) 2005, 2015 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -39,6 +39,7 @@
  *								Bug 441693 - [1.8][null] Bogus warning for type argument annotated with @NonNull
  *								Bug 446434 - [1.8][null] Enable interned captures also when analysing null type annotations
  *								Bug 435805 - [1.8][compiler][null] Java 8 compiler does not recognize declaration style null annotations
+ *								Bug 456508 - Unexpected RHS PolyTypeBinding for: <code-snippet>
  *******************************************************************************/
 package org.eclipse.jdt.internal.compiler.lookup;
 
@@ -49,6 +50,7 @@ import java.util.Set;
 import org.eclipse.jdt.core.compiler.CharOperation;
 import org.eclipse.jdt.internal.compiler.ast.ASTNode;
 import org.eclipse.jdt.internal.compiler.ast.NullAnnotationMatching;
+import org.eclipse.jdt.internal.compiler.ast.ParameterizedSingleTypeReference;
 import org.eclipse.jdt.internal.compiler.ast.TypeReference;
 import org.eclipse.jdt.internal.compiler.ast.Wildcard;
 import org.eclipse.jdt.internal.compiler.classfmt.ClassFileConstants;
@@ -908,15 +910,17 @@ public class ParameterizedTypeBinding extends ReferenceBinding implements Substi
 	            		}
 	            	}
 	            }
-	            if (this.arguments == null) {
-	            	return otherParamType.arguments == null;
-	            }
-	            int length = this.arguments.length;
-	            TypeBinding[] otherArguments = otherParamType.arguments;
-	            if (otherArguments == null || otherArguments.length != length) return false;
-	            for (int i = 0; i < length; i++) {
-	            	if (!this.arguments[i].isTypeArgumentContainedBy(otherArguments[i]))
-	            		return false;
+	            if (this.arguments != ParameterizedSingleTypeReference.DIAMOND_TYPE_ARGUMENTS) {
+		            if (this.arguments == null) {
+		            	return otherParamType.arguments == null;
+		            }
+		            int length = this.arguments.length;
+		            TypeBinding[] otherArguments = otherParamType.arguments;
+		            if (otherArguments == null || otherArguments.length != length) return false;
+		            for (int i = 0; i < length; i++) {
+		            	if (!this.arguments[i].isTypeArgumentContainedBy(otherArguments[i]))
+		            		return false;
+		            }
 	            }
 	            return true;
 

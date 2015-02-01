@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2013, 2014 GK Software AG.
+ * Copyright (c) 2013, 2015 GK Software AG.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -99,6 +99,9 @@ class ConstraintTypeFormula extends ConstraintFormula {
 			// 18.2.3:
 			return reduceSubType(inferenceContext.scope, this.right, this.left);
 		case SAME:
+			if (inferenceContext.environment.globalOptions.isAnnotationBasedNullAnalysisEnabled)
+				if (!checkIVFreeTVmatch(this.left, this.right))
+					checkIVFreeTVmatch(this.right, this.left);
 			// 18.2.4:
 			return reduceTypeEquality(inferenceContext.object);
 		case TYPE_ARGUMENT_CONTAINED:
@@ -144,6 +147,16 @@ class ConstraintTypeFormula extends ConstraintFormula {
 			}
 		default: throw new IllegalStateException("Unexpected relation kind "+this.relation); //$NON-NLS-1$
 		}
+	}
+
+	/** Detect when we are equating an inference variable against a free type variable. */
+	boolean checkIVFreeTVmatch(TypeBinding one, TypeBinding two) {
+		if (one instanceof InferenceVariable && two.isTypeVariable() && (two.tagBits & TagBits.AnnotationNullMASK) == 0) {
+			// found match => avoid inferring any null annotation (by marking as contradiction):
+			((InferenceVariable)one).nullHints = TagBits.AnnotationNullMASK;
+			return true;
+		}
+		return false;
 	}
 
 	private Object reduceTypeEquality(TypeBinding object) {
@@ -320,7 +333,8 @@ class ConstraintTypeFormula extends ConstraintFormula {
 				MethodBinding binding = invocation.binding();
 				if (binding == null || !binding.isValidBinding())
 					return FALSE;
-				return reduceSubType(scope, subCandidate, binding.returnType.capture(scope, invocation.sourceStart(), invocation.sourceEnd()));
+				TypeBinding returnType = binding.isConstructor() ? binding.declaringClass : binding.returnType;
+				return reduceSubType(scope, subCandidate, returnType.capture(scope, invocation.sourceStart(), invocation.sourceEnd()));
 		}
 		throw new IllegalStateException("Unexpected RHS "+superCandidate); //$NON-NLS-1$
 	}

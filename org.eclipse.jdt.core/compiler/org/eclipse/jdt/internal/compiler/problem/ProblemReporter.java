@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2014 IBM Corporation and others.
+ * Copyright (c) 2000, 2015 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -57,6 +57,8 @@
  *								Bug 439298 - [null] "Missing code implementation in the compiler" when using @NonNullByDefault in package-info.java
  *								Bug 435805 - [1.8][compiler][null] Java 8 compiler does not recognize declaration style null annotations
  *								Bug 446442 - [1.8] merge null annotations from super methods
+ *								Bug 455723 - Nonnull argument not correctly inferred in loop
+ *								Bug 458361 - [1.8][null] reconciler throws NPE in ProblemReporter.illegalReturnRedefinition()
  *      Jesper S Moller <jesper@selskabet.org> -  Contributions for
  *								bug 382701 - [1.8][compiler] Implement semantic analysis of Lambda expressions & Reference expression
  *								bug 382721 - [1.8][compiler] Effectively final variables needs special treatment
@@ -454,6 +456,7 @@ public static int getIrritant(int problemID) {
 		case IProblem.RequiredNonNullButProvidedNull:
 		case IProblem.RequiredNonNullButProvidedSpecdNullable:
 		case IProblem.IllegalReturnNullityRedefinition:
+		case IProblem.IllegalReturnNullityRedefinitionFreeTypeVariable:
 		case IProblem.IllegalRedefinitionToNonNullParameter:
 		case IProblem.IllegalDefinitionToNonNullParameter:
 		case IProblem.ParameterLackingNullableAnnotation:
@@ -9956,14 +9959,14 @@ public void nullityMismatch(Expression expression, TypeBinding providedType, Typ
 		nullityMismatchPotentiallyNull(expression, requiredType, annotationName);
 		return;
 	}
-	if (this.options.useNullTypeAnnotations == Boolean.TRUE)
+	if (this.options.usesNullTypeAnnotations())
 		nullityMismatchingTypeAnnotation(expression, providedType, requiredType, NullAnnotationMatching.NULL_ANNOTATIONS_UNCHECKED);
 	else
 		nullityMismatchIsUnknown(expression, providedType, requiredType, annotationName);
 }
 public void nullityMismatchIsNull(Expression expression, TypeBinding requiredType) {
 	int problemId = IProblem.RequiredNonNullButProvidedNull;
-	boolean useNullTypeAnnotations = this.options.useNullTypeAnnotations == Boolean.TRUE;
+	boolean useNullTypeAnnotations = this.options.usesNullTypeAnnotations();
 	if (useNullTypeAnnotations && requiredType.isTypeVariable() && !requiredType.hasNullTypeAnnotations())
 		problemId = IProblem.NullNotCompatibleToFreeTypeVariable;
 	if (requiredType instanceof CaptureBinding) {
@@ -9998,6 +10001,11 @@ public void nullityMismatchSpecdNullable(Expression expression, TypeBinding requ
 			shortAnnotatedTypeName(requiredType, annotationName),
 			String.valueOf(nullableName[nullableName.length-1])
 	};
+	if (expression.resolvedType != null && expression.resolvedType.hasNullTypeAnnotations()) {
+		problemId = IProblem.NullityMismatchingTypeAnnotation;
+		arguments[1] = String.valueOf(expression.resolvedType.nullAnnotatedReadableName(this.options, false));
+		argumentsShort[1] = String.valueOf(expression.resolvedType.nullAnnotatedReadableName(this.options, true));
+	}
 	this.handle(problemId, arguments, argumentsShort, expression.sourceStart, expression.sourceEnd);
 }
 public void nullityMismatchPotentiallyNull(Expression expression, TypeBinding requiredType, char[][] annotationName) {
@@ -13737,26 +13745,32 @@ public void illegalReturnRedefinition(AbstractMethodDeclaration abstractMethodDe
 		sourceStart = annotation.sourceStart;
 	}
 	TypeBinding inheritedReturnType = inheritedMethod.returnType;
-	String[] arguments;
-	String[] argumentsShort;
-	if (this.options.useNullTypeAnnotations != Boolean.TRUE) {
-		StringBuilder returnType = new StringBuilder();
+	int problemId = IProblem.IllegalReturnNullityRedefinition;
+	StringBuilder returnType = new StringBuilder();
+	StringBuilder returnTypeShort = new StringBuilder();
+	if (this.options.usesNullTypeAnnotations()) {
+		// 1.8+
+		if (inheritedReturnType.isTypeVariable() && (inheritedReturnType.tagBits & TagBits.AnnotationNullMASK) == 0) {
+			problemId = IProblem.IllegalReturnNullityRedefinitionFreeTypeVariable;
+
+			returnType.append(inheritedReturnType.readableName());
+			returnTypeShort.append(inheritedReturnType.shortReadableName());
+		} else {
+			returnType.append(inheritedReturnType.nullAnnotatedReadableName(this.options, false));
+			returnTypeShort.append(inheritedReturnType.nullAnnotatedReadableName(this.options, true));
+		}
+	} else {
+		// 1.7-
 		returnType.append('@').append(CharOperation.concatWith(nonNullAnnotationName, '.'));
 		returnType.append(' ').append(inheritedReturnType.readableName());
-		arguments = new String[] { methodSignature.toString(), returnType.toString() };
 		
-		returnType = new StringBuilder();
-		returnType.append('@').append(nonNullAnnotationName[nonNullAnnotationName.length-1]);
-		returnType.append(' ').append(inheritedReturnType.shortReadableName());
-		argumentsShort = new String[] { shortSignature.toString(), returnType.toString() };
-	} else {
-		arguments = new String[] { methodSignature.toString(), 
-									String.valueOf(inheritedReturnType.nullAnnotatedReadableName(this.options, false))};
-		argumentsShort = new String[] { shortSignature.toString(),
-									String.valueOf(inheritedReturnType.nullAnnotatedReadableName(this.options, true))};
+		returnTypeShort.append('@').append(nonNullAnnotationName[nonNullAnnotationName.length-1]);
+		returnTypeShort.append(' ').append(inheritedReturnType.shortReadableName());
 	}
+	String[] arguments = new String[] { methodSignature.toString(), returnType.toString() };
+	String[] argumentsShort = new String[] { shortSignature.toString(), returnTypeShort.toString() };
 	this.handle(
-			IProblem.IllegalReturnNullityRedefinition, 
+			problemId, 
 			arguments,
 			argumentsShort,
 			sourceStart,
@@ -14164,17 +14178,26 @@ public void arrayReferencePotentialNullReference(ArrayReference arrayReference) 
 }
 public void nullityMismatchingTypeAnnotation(Expression expression, TypeBinding providedType, TypeBinding requiredType, NullAnnotationMatching status) 
 {
-	if (providedType.id == TypeIds.T_null) {
+	// try to improve nonnull vs. null:
+	if (providedType.id == TypeIds.T_null || status.nullStatus == FlowInfo.NULL) {
 		nullityMismatchIsNull(expression, requiredType);
 		return;
 	}
-	String[] arguments ;
+	// try to improve nonnull vs. nullable:
+	if (status.isPotentiallyNullMismatch()
+			&& (requiredType.tagBits & TagBits.AnnotationNonNull) != 0 
+			&& (providedType.tagBits & TagBits.AnnotationNullable) == 0)
+	{
+		nullityMismatchPotentiallyNull(expression, requiredType, this.options.nonNullAnnotationName);
+		return;
+	}
+	String[] arguments;
 	String[] shortArguments;
 		
 	int problemId = 0;
 	String superHint = null;
 	String superHintShort = null;
-	if (status.superTypeHint != null) {
+	if (status.superTypeHint != null && requiredType.isParameterizedType()) {
 		problemId = (status.isUnchecked()
 			? IProblem.NullityUncheckedTypeAnnotationDetailSuperHint
 			: IProblem.NullityMismatchingTypeAnnotationSuperHint);

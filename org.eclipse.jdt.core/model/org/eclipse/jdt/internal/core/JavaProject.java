@@ -1856,7 +1856,7 @@ public class JavaProject
 		return getPackageFragmentRoot(resource, null/*no entry path*/);
 	}
 
-	private IPackageFragmentRoot getPackageFragmentRoot(IResource resource, IPath entryPath) {
+	IPackageFragmentRoot getPackageFragmentRoot(IResource resource, IPath entryPath) {
 		switch (resource.getType()) {
 			case IResource.FILE:
 				return new JarPackageFragmentRoot(resource, this);

@@ -32,6 +32,7 @@ import org.eclipse.jdt.core.compiler.CategorizedProblem;
 import org.eclipse.jdt.core.compiler.CharOperation;
 import org.eclipse.jdt.internal.compiler.ast.CompilationUnitDeclaration;
 import org.eclipse.jdt.internal.compiler.ast.ConstructorDeclaration;
+import org.eclipse.jdt.internal.compiler.ast.ExplicitConstructorCall;
 import org.eclipse.jdt.internal.compiler.batch.Main;
 import org.eclipse.jdt.internal.compiler.env.IBinaryType;
 import org.eclipse.jdt.internal.compiler.parser.RecoveryScanner;
@@ -1356,6 +1357,10 @@ public class ASTParser {
 				compilationUnit.setLineEndTable(recordedParsingInformation.lineEnds);
 				Block block = ast.newBlock();
 				block.setSourceRange(this.sourceOffset, this.sourceOffset + this.sourceLength);
+				ExplicitConstructorCall constructorCall = constructorDeclaration.constructorCall;
+				if (constructorCall != null && constructorCall.accessMode != org.eclipse.jdt.internal.compiler.ast.ExplicitConstructorCall.ImplicitSuper) {
+					block.statements().add(converter.convert(constructorCall));
+				}
 				org.eclipse.jdt.internal.compiler.ast.Statement[] statements = constructorDeclaration.statements;
 				if (statements != null) {
 					int statementsLength = statements.length;

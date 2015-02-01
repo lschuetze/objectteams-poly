@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2010, 2013 IBM Corporation and others.
+ * Copyright (c) 2010, 2014 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -39,8 +39,7 @@ import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 import org.eclipse.jdt.core.dom.VariableDeclarationStatement;
 import org.eclipse.jdt.core.tests.compiler.regression.AbstractRegressionTest;
 
-//{ObjectTeams: moved from org.eclipse.jdt.core.tests.dom: 
-// avoid package overlap with tests.model to please our report generator
+@SuppressWarnings({ "rawtypes" })
 public class StandAloneASTParserTest extends AbstractRegressionTest {
 	public StandAloneASTParserTest(String name) {
 		super(name);

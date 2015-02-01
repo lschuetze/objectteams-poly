@@ -36,6 +36,7 @@ import org.eclipse.jdt.core.util.ClassFileBytesDisassembler;
 import org.eclipse.jdt.internal.compiler.classfmt.ClassFileConstants;
 import org.eclipse.jdt.internal.compiler.impl.CompilerOptions;
 
+@SuppressWarnings({ "unchecked", "rawtypes" })
 public class GenericTypeTest extends AbstractComparableTest {
 
 	public GenericTypeTest(String name) {
@@ -35565,7 +35566,6 @@ public void test1044() {
 		"");
 }
 //https://bugs.eclipse.org/bugs/show_bug.cgi?id=159214 - variation
-// FIXME javac8 rejects
 public void test1045() {
 	this.runConformTest(
 		new String[] {

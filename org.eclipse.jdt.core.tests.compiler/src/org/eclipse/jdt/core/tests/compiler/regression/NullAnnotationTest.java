@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2010, 2014 GK Software AG and others.
+ * Copyright (c) 2010, 2015 GK Software AG and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -25,6 +25,7 @@ import org.eclipse.jdt.internal.compiler.classfmt.ClassFileConstants;
 import org.eclipse.jdt.internal.compiler.impl.CompilerOptions;
 
 // see bug 186342 - [compiler][null] Using annotations for null checking
+@SuppressWarnings({ "unchecked", "rawtypes" })
 public class NullAnnotationTest extends AbstractNullAnnotationTest {
 
 private String TEST_JAR_SUFFIX = ".jar";
@@ -36,7 +37,7 @@ public NullAnnotationTest(String name) {
 // Static initializer to specify tests subset using TESTS_* static variables
 // All specified tests which do not belong to the class are skipped...
 static {
-//		TESTS_NAMES = new String[] { "testBug412076" };
+//		TESTS_NAMES = new String[] { "test_default_nullness_003a" };
 //		TESTS_NUMBERS = new int[] { 561 };
 //		TESTS_RANGE = new int[] { 1, 2049 };
 }
@@ -7877,5 +7878,179 @@ public void testBug452780() {
 		},
 		getCompilerOptions(),
 		"");
+}
+public void testBug455557() {
+	runConformTestWithLibs(
+		new String[] {
+			"X.java",
+			"import java.util.List;\n" + 
+			"\n" + 
+			"import org.eclipse.jdt.annotation.NonNull;\n" + 
+			"\n" + 
+			"\n" + 
+			"public class X {\n" + 
+			"	void test(List<String> list, boolean b) {\n" + 
+			"		if (b) {\n" + 
+			"			while (true) {\n" + 
+			"				for (@NonNull Object y : list) { \n" + 
+			"				}\n" + 
+			"			}\n" + 
+			"		}\n" + 
+			"	}\n" + 
+			"}\n"
+		},
+		null,
+		"----------\n" + 
+		"1. WARNING in X.java (at line 10)\n" + 
+		"	for (@NonNull Object y : list) { \n" + 
+		"	                         ^^^^\n" + 
+		(this.complianceLevel < ClassFileConstants.JDK1_8
+		? "Null type safety: The expression of type \'String\' needs unchecked conversion to conform to \'@NonNull Object\'\n"
+		: "Null type safety (type annotations): The expression of type \'String\' needs unchecked conversion to conform to \'@NonNull Object\'\n"
+		) +
+		"----------\n");
+}
+public void testBug455723() {
+	runConformTestWithLibs(
+		new String[] {
+			"Problem.java",
+			"import org.eclipse.jdt.annotation.*;\n" +
+			"public class Problem {\n" + 
+			"	public void fubar(final @Nullable String arg) {\n" + 
+			"		if (arg == null) {\n" + 
+			"			return;\n" + 
+			"		}\n" + 
+			"		\n" + 
+			"		doSomething(arg);\n" + 
+			"		// no errors here\n" + 
+			"		\n" + 
+			"		while (true) {	\n" + 
+			"			doSomething(arg);\n" + 
+			"			//          ^^^  compiler error\n" + 
+			"		}\n" + 
+			"	}\n" + 
+			"	\n" + 
+			"	private void doSomething(@NonNull String arg) {	}\n" + 
+			"}\n"
+		},
+		null,
+		"");
+}
+public void testBug455723b() {
+	runConformTestWithLibs(
+		new String[] {
+			"Problem.java",
+			"import org.eclipse.jdt.annotation.*;\n" +
+			"public class Problem {\n" + 
+			"	public void fubar(final @Nullable String arg) {\n" + 
+			"		if (arg == null) {\n" + 
+			"			return;\n" + 
+			"		}\n" + 
+			"		@NonNull String local;\n" + 
+			"		\n" + 
+			"		while (true) {	\n" + 
+			"			local = arg;\n" + 
+			"		}\n" + 
+			"	}\n" + 
+			"}\n"
+		},
+		null,
+		"");
+}
+// https://bugs.eclipse.org/bugs/show_bug.cgi?id=436486
+public void test_null_with_apt() {
+	boolean apt = this.enableAPT;
+	this.enableAPT = true;
+	Map customOptions = getCompilerOptions();
+	customOptions.put(JavaCore.COMPILER_PB_MISSING_NONNULL_BY_DEFAULT_ANNOTATION, JavaCore.WARNING);
+	customOptions.put(JavaCore.COMPILER_PB_UNUSED_WARNING_TOKEN, JavaCore.ERROR);
+	runConformTestWithLibs(
+		new String[] {
+			"NullWarn.java",
+			"@SuppressWarnings(\"null\")\n" + 
+			"public class NullWarn {\n" + 
+			"\n" + 
+			"    // Some code\n" + 
+			"\n" + 
+			"}\n"
+		},
+		customOptions,
+		"");
+	this.enableAPT = apt;
+}
+// https://bugs.eclipse.org/bugs/show_bug.cgi?id=436486#c4
+public void test_null_with_apt_comment4() {
+	boolean apt = this.enableAPT;
+	this.enableAPT = true;
+	Map customOptions = getCompilerOptions();
+	customOptions.put(JavaCore.COMPILER_PB_UNUSED_WARNING_TOKEN, JavaCore.ERROR);
+	runConformTestWithLibs(
+		new String[] {
+			"Test.java",
+			"import org.eclipse.jdt.annotation.NonNullByDefault;\n" + 
+			"\n" + 
+			"@NonNullByDefault\n" + 
+			"public class Test {\n" + 
+			"\n" + 
+			"	public static final Test t = new Test(Integer.valueOf(0));\n" + 
+			"\n" + 
+			"	public Test(Integer integer) {\n" + 
+			"		\n" + 
+			"	}\n" + 
+			"}\n"
+		},
+		customOptions,
+		"----------\n" + 
+		"1. WARNING in Test.java (at line 6)\n" + 
+		"	public static final Test t = new Test(Integer.valueOf(0));\n" + 
+		"	                                      ^^^^^^^^^^^^^^^^^^\n" + 
+		(this.complianceLevel < ClassFileConstants.JDK1_8 
+		? "Null type safety: The expression of type \'Integer\' needs unchecked conversion to conform to \'@NonNull Integer\'\n"
+		: "Null type safety (type annotations): The expression of type \'Integer\' needs unchecked conversion to conform to \'@NonNull Integer\'\n"
+		) +
+		"----------\n");
+	this.enableAPT = apt;
+}
+public void testBug457210() {
+	Map customOptions = getCompilerOptions();
+	customOptions.put(JavaCore.COMPILER_NULLABLE_ANNOTATION_NAME, "org.foo.Nullable");
+	customOptions.put(JavaCore.COMPILER_NONNULL_ANNOTATION_NAME, "org.foo.NonNull");
+	runNegativeTest(
+		new String[] {
+			"org/foo/NonNull.java",
+			"package org.foo;\n" +
+			"import java.lang.annotation.*;\n" +
+			"@Retention(RetentionPolicy.CLASS)\n" +
+			"public @interface NonNull {\n" +
+			"}\n",
+			"org/foo/Nullable.java",
+			"package org.foo;\n" +
+			"import java.lang.annotation.*;\n" +
+			"@Retention(RetentionPolicy.CLASS)\n" +
+			"public @interface Nullable {\n" +
+			"}\n",
+			"TestRunner.java",
+			"import org.foo.*;\n" +
+			"public class TestRunner {\n" +
+			"	private TestRunner() {}\n" + 
+			"\n" + 
+			"	@Nullable\n" + 
+			"	OutputHelper m_outputHelper;\n" +
+			"	int foo(@NonNull OutputHelper helper) { return helper.i; }\n" +
+			"}\n",
+			"OutputHelper.java",
+			"@org.foo.NonNull public class OutputHelper {\n" +
+			"	public int i;\n" +
+			"}\n"
+		},
+		"----------\n" + 
+		"1. ERROR in OutputHelper.java (at line 1)\n" + 
+		"	@org.foo.NonNull public class OutputHelper {\n" + 
+		"	^^^^^^^^^^^^^^^^\n" + 
+		"The nullness annotation \'NonNull\' is not applicable at this location\n" + 
+		"----------\n",
+		null,
+		true,
+		customOptions);
 }
 }

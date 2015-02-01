@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2014 IBM Corporation and others.
+ * Copyright (c) 2000, 2015 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -123,7 +123,7 @@ public class ClassButNoMethodDeclarationVisitor extends ASTVisitor {
 		MatchLocatorParser.this.patternLocator.match(fieldSpec, MatchLocatorParser.this.nodeSet);
 	    return true;
 	}
-//gbr}		
+//gbr}
 }
 public class ClassAndMethodDeclarationVisitor extends ClassButNoMethodDeclarationVisitor {
 	public boolean visit(TypeDeclaration localTypeDeclaration, BlockScope scope) {
@@ -182,7 +182,7 @@ public void checkComment() {
 			}
 		}
 // SH}
-		
+
 		// Search for pattern locator matches in javadoc comment @see tags
 		Expression[] references = this.javadoc.seeReferences;
 		if (references != null) {
@@ -355,7 +355,7 @@ protected void consumeEnterAnonymousClassBody(boolean qualified) {
 }
 
 protected void consumeEnterVariable() {
-	boolean isLocalDeclaration = this.nestedMethod[this.nestedType] != 0; 
+	boolean isLocalDeclaration = this.nestedMethod[this.nestedType] != 0;
 	super.consumeEnterVariable();
 	if (isLocalDeclaration) {
 		if ((this.patternFineGrain & IJavaSearchConstants.LOCAL_VARIABLE_DECLARATION_TYPE_REFERENCE) != 0) {
@@ -527,7 +527,7 @@ protected void consumeMethodInvocationNameWithTypeArguments() {
 }
 
 protected void consumeMethodInvocationPrimary() {
-	super.consumeMethodInvocationPrimary(); 
+	super.consumeMethodInvocationPrimary();
 	if (this.patternFineGrain == 0 || (this.patternFineGrain & IJavaSearchConstants.THIS_REFERENCE) != 0) {
 		this.patternLocator.match((MessageSend) this.expressionStack[this.expressionPtr], this.nodeSet);
 	}
@@ -674,15 +674,8 @@ protected void consumeOnlyTypeArguments() {
 	}
 }
 
-protected void consumePrimaryNoNewArray() {
-	// pop parenthesis positions (and don't update expression positions
-	// (see http://bugs.eclipse.org/bugs/show_bug.cgi?id=23329)
-	this.intPtr--;
-	this.intPtr--;
-}
-
 protected void consumePrimaryNoNewArrayWithName() {
-	// PrimaryNoNewArray ::=  PushLPAREN Expression PushRPAREN 
+	// PrimaryNoNewArray ::=  PushLPAREN Expression PushRPAREN
 	pushOnExpressionStack(getUnspecifiedReferenceOptimized());
 	// pop parenthesis positions (and don't update expression positions
 	// (see http://bugs.eclipse.org/bugs/show_bug.cgi?id=23329)
