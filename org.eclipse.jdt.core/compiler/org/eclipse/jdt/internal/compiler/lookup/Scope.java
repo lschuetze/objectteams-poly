@@ -1891,7 +1891,7 @@ public abstract class Scope {
 				visiblesCount++;
 			}
 //{ObjectTeams: check if decapsulation is allowed:
-			else if (allowsBaseclassDecapsulation(invocationSite, methodBinding.declaringClass)) {//MethodSpec.isBaseDecapsulationAllowed(invocationSite)) {
+			else if (allowsBaseclassDecapsulation(invocationSite, methodBinding.declaringClass)) {
 				methodBinding = new ProblemMethodBinding(methodBinding, selector, argumentTypes, ProblemReasons.NotVisible);
 				if (visiblesCount != i) {
 					candidates[i] = null;
