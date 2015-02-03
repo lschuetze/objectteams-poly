@@ -26,7 +26,6 @@ import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
 
-import org.eclipse.core.runtime.IAdaptable;
 import org.eclipse.jdt.core.Flags;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IMethod;
@@ -34,7 +33,6 @@ import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.Signature;
 import org.eclipse.jdt.internal.core.CompilationUnit;
-import org.eclipse.ui.model.IWorkbenchAdapter;
 import org.eclipse.objectteams.otdt.core.IOTJavaElement;
 import org.eclipse.objectteams.otdt.core.IOTType;
 import org.eclipse.objectteams.otdt.core.IRoleFileType;
@@ -72,7 +70,6 @@ protected class ContentProvider playedBy PackageExplorerContentProvider
         return this._hideRolePackages;
     }
         
-    @SuppressWarnings("basecall")
 	callin Object[] getChildren(Object parentElement) 
     {
         List<Object> children = null;
@@ -87,7 +84,7 @@ protected class ContentProvider playedBy PackageExplorerContentProvider
         	javaParentElement = (IJavaElement) parentElement;
         }
 		if (otType != null) {
-			children = new ArrayList<Object>(Arrays.asList(getChildrenAdapted(javaParentElement)));
+			children = new ArrayList<Object>(Arrays.asList(Util.replaceOTTypes(base.getChildren(javaParentElement), true/*lazyCopy*/)));
 			if (isHideRolePackages())
 			{
 				IType[] roleFiles = null;
@@ -137,15 +134,6 @@ protected class ContentProvider playedBy PackageExplorerContentProvider
     	return base.getParent(element);
     }
 	getParent <- replace getParent;
-
-    Object[] getChildrenAdapted(Object element) {
-    	 IWorkbenchAdapter adapter = getAdapter(element);
-         if (adapter != null) {
-             Object[] result = adapter.getChildren(element);
-             return Util.replaceOTTypes(result, true/*lazyCopy*/);
-         }
-         return new Object[0];
-    }
 
     protected List<Object> filterOTGenerated(List<Object> children) {
     	ArrayList<Object> result = new ArrayList<Object>(children.size());
@@ -242,15 +230,6 @@ protected class ContentProvider playedBy PackageExplorerContentProvider
 	        children.remove(removalIterator.next());
 	    }
 //TODO (haebor) : consider layoutmode 	    
-	}
-
-	// copied from BaseWorkbenchContentProvider
-	IWorkbenchAdapter getAdapter(Object element) {
-        if (!(element instanceof IAdaptable)) {
-            return null;
-        }
-        return (IWorkbenchAdapter) ((IAdaptable) element)
-                .getAdapter(IWorkbenchAdapter.class);
 	}
 
 	@SuppressWarnings("decapsulation")
