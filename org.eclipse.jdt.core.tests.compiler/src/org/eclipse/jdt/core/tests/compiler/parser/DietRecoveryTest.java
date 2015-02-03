@@ -8247,8 +8247,13 @@ public void test456861() {
 		"    super();\n" +
 		"  }\n" + 
 		"  public void foo(Point p, int[] a) {\n" + 
-		"    String s1 = \"\";\n" + 
+		"    String s1 = \"\";\n" +
+//{ObjectTeams: different grammar => different recovery:
+/* orig:
 		"    s = $missing$;\n" + 
+  :giro */
+		"    s --;\n" +
+// SH}
 		"  }\n" + 
 		"}\n";
 
