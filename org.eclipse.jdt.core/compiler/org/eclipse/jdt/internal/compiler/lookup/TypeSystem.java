@@ -4,7 +4,7 @@
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
- * 
+ *
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *     Stephan Herrmann - Contribution for
@@ -68,7 +68,7 @@ public class TypeSystem {
 	public final class HashedParameterizedTypes {
 		
 		private final class InternalParameterizedTypeBinding extends ParameterizedTypeBinding {
-
+						
 //{ObjectTeams: announce dependent types as parameterizations, too:
 			ITeamAnchor teamAnchor;
 			int valueParamPosition = -1;
@@ -109,13 +109,10 @@ public class TypeSystem {
 					hashCode += (i + 1) * this.arguments[i].id * this.arguments[i].hashCode();
 				}
 //{ObjectTeams: more
-				int i = this.arguments == null ? 14 : this.arguments.length;
-				if (this.teamAnchor != null) {
-					ITeamAnchor[] bestNamePath = this.teamAnchor.getBestNamePath();
-					for (ITeamAnchor pathSeg : bestNamePath)
-						hashCode += (i++) * pathSeg.hashCode();
-				}
-				if (this.valueParamPosition != -1) hashCode += (i+1) * this.valueParamPosition;
+				if (this.teamAnchor != null)
+					hashCode += 3 * CharOperation.hashCode(this.teamAnchor.getBestName());
+					// don't use getBaseNamePath() to avoid differences due to fake replica of FieldBindings
+				if (this.valueParamPosition != -1) hashCode += 5 * this.valueParamPosition;
 // SH}
 				return hashCode;
 			}
@@ -129,7 +126,8 @@ public class TypeSystem {
   :giro */
 		ParameterizedTypeBinding get(ReferenceBinding genericType, TypeBinding[] typeArguments, ITeamAnchor anchor, int valueParamPosition,
 				ReferenceBinding enclosingType, AnnotationBinding[] annotations) {
-// orig:			
+// orig:	
+			
 			ReferenceBinding unannotatedGenericType = (ReferenceBinding) getUnannotatedType(genericType);
 			int typeArgumentsLength = typeArguments == null ? 0: typeArguments.length;
 			TypeBinding [] unannotatedTypeArguments = typeArguments == null ? null : new TypeBinding[typeArgumentsLength];
@@ -137,6 +135,7 @@ public class TypeSystem {
 				unannotatedTypeArguments[i] = getUnannotatedType(typeArguments[i]);
 			}
 			ReferenceBinding unannotatedEnclosingType = enclosingType == null ? null : (ReferenceBinding) getUnannotatedType(enclosingType);
+			
 /*
 			ParameterizedTypeBinding typeParameterization = new InternalParameterizedTypeBinding(unannotatedGenericType, unannotatedTypeArguments, unannotatedEnclosingType, TypeSystem.this.environment);
   :giro */
@@ -180,7 +179,7 @@ public class TypeSystem {
 				unannotatedTypeArguments[i] = getUnannotatedType(typeArguments[i]);
 			}
 			ReferenceBinding unannotatedEnclosingType = enclosingType == null ? null : (ReferenceBinding) getUnannotatedType(enclosingType);
-
+			
 /*
 			ParameterizedTypeBinding typeParameterization = new InternalParameterizedTypeBinding(unannotatedGenericType, unannotatedTypeArguments, unannotatedEnclosingType, TypeSystem.this.environment);
   :giro */
@@ -336,21 +335,23 @@ public class TypeSystem {
 			unannotatedTypeArguments[i] = getUnannotatedType(typeArguments[i]);
 		}
 		ReferenceBinding unannotatedEnclosingType = enclosingType == null ? null : (ReferenceBinding) getUnannotatedType(enclosingType);
-		
+
 //{ObjectTeams: more arguments:
 /* orig:
 		ParameterizedTypeBinding parameterizedType = this.parameterizedTypes.get(unannotatedGenericType, unannotatedTypeArguments, unannotatedEnclosingType, Binding.NO_ANNOTATIONS);
-  :giro */
-		ParameterizedTypeBinding parameterizedType = this.parameterizedTypes.get(unannotatedGenericType, unannotatedTypeArguments, 
-				teamAnchor, valueParamPosition, unannotatedEnclosingType, Binding.NO_ANNOTATIONS);
-// SH}
 		if (parameterizedType != null) 
 			return parameterizedType;
 
-//{ObjectTeams: dependent type?
-/* orig:	
 		parameterizedType = new ParameterizedTypeBinding(unannotatedGenericType, unannotatedTypeArguments, unannotatedEnclosingType, this.environment);
+		cacheDerivedType(unannotatedGenericType, parameterizedType);
+		this.parameterizedTypes.put(genericType, typeArguments, enclosingType, parameterizedType);
   :giro */
+		ParameterizedTypeBinding parameterizedType = this.parameterizedTypes.get(unannotatedGenericType, unannotatedTypeArguments, 
+				teamAnchor, valueParamPosition, unannotatedEnclosingType, Binding.NO_ANNOTATIONS);
+		if (parameterizedType != null) 
+			return parameterizedType;
+
+		// dependent type?
 		if (teamAnchor == null) {
 			parameterizedType = new ParameterizedTypeBinding(unannotatedGenericType, unannotatedTypeArguments, unannotatedEnclosingType, this.environment);
 		} else {
@@ -360,12 +361,8 @@ public class TypeSystem {
 				parameterizedType = new DependentTypeBinding(unannotatedGenericType, unannotatedTypeArguments, teamAnchor, valueParamPosition, unannotatedEnclosingType, this.environment);
 			}
 		}
-// SH}
 		cacheDerivedType(unannotatedGenericType, parameterizedType);
-//{ObjectTeams: more arguments:
-/* orig:
-		this.parameterizedTypes.put(genericType, typeArguments, enclosingType, parameterizedType);
-  :giro */
+		// more arguments:
 		this.parameterizedTypes.put(genericType, typeArguments, teamAnchor, valueParamPosition, enclosingType, parameterizedType);
 // SH}
 		int typesLength = this.types.length;
@@ -374,7 +371,7 @@ public class TypeSystem {
 		this.types[this.typeid] = new TypeBinding[1];
 		return (ParameterizedTypeBinding) (this.types[parameterizedType.id = this.typeid++][0] = parameterizedType);
 	}
-	
+
 //{ObjectTeams: more parameters:
 /* orig:
 	public ParameterizedTypeBinding getParameterizedType(ReferenceBinding genericType, TypeBinding[] typeArguments, ReferenceBinding enclosingType, AnnotationBinding[] annotations) {
@@ -685,5 +682,4 @@ public class TypeSystem {
 		return true;
 	}
 //SH}
-
 }

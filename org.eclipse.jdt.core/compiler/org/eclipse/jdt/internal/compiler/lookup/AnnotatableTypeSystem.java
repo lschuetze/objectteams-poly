@@ -4,7 +4,7 @@
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
- * 
+ *
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *     Stephan Herrmann - Contribution for
@@ -114,36 +114,39 @@ public class AnnotatableTypeSystem extends TypeSystem {
 //{ObjectTeams: more arguments for role types:
 /* orig:
 	public ParameterizedTypeBinding getParameterizedType(ReferenceBinding genericType, TypeBinding[] typeArguments, ReferenceBinding enclosingType, AnnotationBinding [] annotations) {
+		
+		if (genericType.hasTypeAnnotations())   // @NonNull (List<String>) and not (@NonNull List)<String>
+			throw new IllegalStateException();
+		
+		ParameterizedTypeBinding parameterizedType = this.parameterizedTypes.get(genericType, typeArguments, enclosingType, annotations);
+		if (parameterizedType != null)
+			return parameterizedType;
+		
+		ParameterizedTypeBinding nakedType = super.getParameterizedType(genericType, typeArguments, enclosingType);
   :giro */
 	public ParameterizedTypeBinding getParameterizedType(ReferenceBinding genericType, TypeBinding[] typeArguments,
 			ITeamAnchor teamAnchor, int valueParamPosition, ReferenceBinding enclosingType, AnnotationBinding [] annotations) {
 		if (teamAnchor == null && genericType instanceof DependentTypeBinding)
 			teamAnchor = ((DependentTypeBinding) genericType)._teamAnchor;
-// orig:
-		
+
 		if (genericType.hasTypeAnnotations())   // @NonNull (List<String>) and not (@NonNull List)<String>
 			throw new IllegalStateException();
-/*
-		ParameterizedTypeBinding parameterizedType = this.parameterizedTypes.get(genericType, typeArguments, enclosingType, annotations);
-  :giro */
 		ParameterizedTypeBinding parameterizedType = this.parameterizedTypes.get(genericType, typeArguments, 
 				teamAnchor, valueParamPosition, enclosingType, annotations);
-// orig:
 		if (parameterizedType != null)
 			return parameterizedType;
-
-/*
-		ParameterizedTypeBinding nakedType = super.getParameterizedType(genericType, typeArguments, enclosingType);
-  :giro */
 		ParameterizedTypeBinding nakedType = super.getParameterizedType(genericType, typeArguments, teamAnchor, valueParamPosition, enclosingType);
 // SH}
-
+		
 		if (!haveTypeAnnotations(genericType, enclosingType, typeArguments, annotations))
 			return nakedType;
 		
 //{ObjectTeams: dependent type?
 /* orig:	
 		parameterizedType = new ParameterizedTypeBinding(genericType, typeArguments, enclosingType, this.environment);
+		parameterizedType.id = nakedType.id;
+		parameterizedType.setTypeAnnotations(annotations, this.isAnnotationBasedNullAnalysisEnabled);
+		this.parameterizedTypes.put(genericType, typeArguments, enclosingType, parameterizedType);
   :giro */
 		if (teamAnchor == null) {
 			parameterizedType = new ParameterizedTypeBinding(genericType,typeArguments, enclosingType, this.environment);
@@ -154,12 +157,8 @@ public class AnnotatableTypeSystem extends TypeSystem {
 				parameterizedType = new DependentTypeBinding(genericType, typeArguments, teamAnchor, valueParamPosition, enclosingType, this.environment);
 			}
 		}
-// orig:
 		parameterizedType.id = nakedType.id;
 		parameterizedType.setTypeAnnotations(annotations, this.isAnnotationBasedNullAnalysisEnabled);
-/*
-		this.parameterizedTypes.put(genericType, typeArguments, enclosingType, parameterizedType);
-  :giro */
 		this.parameterizedTypes.put(genericType, typeArguments, teamAnchor, valueParamPosition, enclosingType, parameterizedType);
 // SH}
 		return (ParameterizedTypeBinding) cacheDerivedType(genericType, nakedType, parameterizedType);
@@ -337,6 +336,15 @@ public class AnnotatableTypeSystem extends TypeSystem {
 			return getParameterizedType(type.actualType(), type.typeArguments(), null, -1, (ReferenceBinding) enclosingType, annotations);
 // SH}
 		}
+//{ObjectTeams: more ingredients to compare:
+		ITeamAnchor teamAnchor = null;
+		int valueParamPosition = -1;
+		if (type instanceof DependentTypeBinding) {
+			DependentTypeBinding dependentType = (DependentTypeBinding) type;
+			teamAnchor = dependentType._teamAnchor;
+			valueParamPosition = ((DependentTypeBinding) type)._valueParamPosition;
+		}
+// SH}
 		TypeBinding nakedType = null;
 		TypeBinding[] derivedTypes = getDerivedTypes(type);
 		for (int i = 0, length = derivedTypes.length; i < length; i++) {
@@ -373,6 +381,10 @@ public class AnnotatableTypeSystem extends TypeSystem {
 					}
 					break;
 			}
+//{ObjectTeams: more ingredients to compare:
+			if (!isRoleTypeMatch(teamAnchor, valueParamPosition, derivedType))
+				continue;
+// SH}
 			if (Util.effectivelyEqual(derivedType.getTypeAnnotations(), annotations)) {
 				return derivedType;
 			}
