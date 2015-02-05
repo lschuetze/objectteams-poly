@@ -1,7 +1,7 @@
 /**********************************************************************
  * This file is part of "Object Teams Development Tooling"-Software
  * 
- * Copyright 2006, 2007 Technical University Berlin, Germany.
+ * Copyright 2006, 2015 Technical University Berlin, Germany.
  * 
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -36,6 +36,7 @@ public team class FindActionAdaptor
 	protected class FindAction playedBy FindAction 
 	{
 		Class[] addClass(Class[] result, Class class1) {
+			FindActionAdaptor.this.unregisterRole(this); // when the current callin terminates, this role has done its job
 			int len = result.length;
 			System.arraycopy(result, 0, result = new Class[len+1], 0, len);
 			result[len] = class1;
