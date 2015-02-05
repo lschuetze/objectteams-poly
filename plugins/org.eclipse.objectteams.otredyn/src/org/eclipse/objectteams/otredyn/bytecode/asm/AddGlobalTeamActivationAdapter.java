@@ -1,7 +1,7 @@
 /**********************************************************************
  * This file is part of "Object Teams Dynamic Runtime Environment"
  * 
- * Copyright 2011, 2012 GK Software AG.
+ * Copyright 2011, 2015 GK Software AG.
  * 
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -99,6 +99,14 @@ public class AddGlobalTeamActivationAdapter extends ClassVisitor {
 							methodVisitor.visitMethodInsn(Opcodes.INVOKEVIRTUAL, "java/io/PrintStream", "println", "(Ljava/lang/String;)V", false);
 							methodVisitor.visitJumpInsn(Opcodes.GOTO, after);
 							methodVisitor.visitTryCatchBlock(start, end, typeHandler, "java/lang/ClassNotFoundException");
+// dup to avoid stackmap errors (ASM bug at 1.8)
+							methodVisitor.visitLabel(typeHandler=new Label());
+							methodVisitor.visitInsn(Opcodes.POP); // discard the exception
+							methodVisitor.visitFieldInsn(Opcodes.GETSTATIC, "java/lang/System", "err", "Ljava/io/PrintStream;");
+							methodVisitor.visitLdcInsn("Config error: Team class '"+aTeam+ "' in config file '"+ TEAM_CONFIG_FILE+"' can not be found!");
+							methodVisitor.visitMethodInsn(Opcodes.INVOKEVIRTUAL, "java/io/PrintStream", "println", "(Ljava/lang/String;)V", false);
+							methodVisitor.visitJumpInsn(Opcodes.GOTO, after);
+//
 							methodVisitor.visitTryCatchBlock(start, end, typeHandler, "java/lang/NoClassDefFoundError");
 
 							// catch (NoSuchMethodError):
