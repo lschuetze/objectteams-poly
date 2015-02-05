@@ -113,7 +113,7 @@ public abstract class ArrayTranslations {
 		MessageSend send = (hook != null)
 			? gen.messageSendWithResolveHook(
 				this._teamExpr,
-				methodBinding.selector,
+				methodBinding,
 				new Expression[] {expression},
 				hook)
 			: gen.messageSend(
@@ -121,7 +121,7 @@ public abstract class ArrayTranslations {
 				methodBinding.selector,
 				new Expression[] {expression});
 
-		if (!deferredResolve) {
+		if (!deferredResolve && expression.resolvedType != null) {
 			// manual resolving since expression is already resolved:
 			send.constant = Constant.NotAConstant;
 	        send.binding = methodBinding;

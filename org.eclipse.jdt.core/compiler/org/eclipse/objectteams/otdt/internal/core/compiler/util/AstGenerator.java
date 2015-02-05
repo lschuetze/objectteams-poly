@@ -811,7 +811,7 @@ public class AstGenerator extends AstFactory {
 	/**
 	 * Create a message send that has a custom resolve method (see inside for details).
 	 */
-	public MessageSend messageSendWithResolveHook(Expression receiver, char[] selector, Expression[] parameters, final IRunInScope hook) {
+	public MessageSend messageSendWithResolveHook(Expression receiver, final MethodBinding method, Expression[] parameters, final IRunInScope hook) {
 		MessageSend messageSend = new MessageSend() {
 			@Override
 			public TypeBinding resolveType(BlockScope scope) {
@@ -829,6 +829,9 @@ public class AstGenerator extends AstFactory {
 				if (this.receiver.getClass() == this.getClass())
 					this.receiver.resolveType(scope);
 				
+				this.binding = method;
+				this.resolvedType = method.returnType;
+
 				// the main payload:
 				hook.run(scope);
 				
@@ -842,7 +845,7 @@ public class AstGenerator extends AstFactory {
 		messageSend.statementEnd = this.sourceEnd;
 		messageSend.nameSourcePosition = this.pos;
 		messageSend.receiver = receiver;
-		messageSend.selector = selector;
+		messageSend.selector = method.selector;
 		messageSend.arguments = parameters;
 		return messageSend;
 	}
