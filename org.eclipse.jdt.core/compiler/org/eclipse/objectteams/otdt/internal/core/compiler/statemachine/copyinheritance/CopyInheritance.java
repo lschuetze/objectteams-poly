@@ -1891,8 +1891,9 @@ public class CopyInheritance implements IOTConstants, ClassFileConstants, ExtraC
                             subTeam,   methodFound.binding,
                             superTeam, inheritedMethod);
                 }
-                if (   !methodFound.isGenerated  // don't remove generated methods
-                	|| methodFound.hasErrors())  // unless erroneous
+                if ((   !methodFound.isGenerated  // don't remove generated methods
+                	 || methodFound.hasErrors())  // unless erroneous
+                	&& !methodFound.isDefaultMethod())
                 {
                 	foundMethodDecls.add(methodFound);
                 	foundMethodBinds.add(methodFound.binding);

@@ -77,8 +77,7 @@ public class TypeLevel {
 	
 			// don't bother with AST, we are called after hierarchies have been connected
 			// at the binding level.
-			if (!tsuperRole.isInterface()) // inherited instead of merged
-				mergeSuperinterfaces(superTeam, tsuperRole, destRole);
+			mergeSuperinterfaces(superTeam, tsuperRole, destRole);
 		    if (!roleDecl.isInterface())
 		    	copyAdjustSuperclass(tsuperRole, roleDecl, obligations);
 		    copyBaseclass(tsuperRole, roleDecl);
@@ -226,8 +225,6 @@ public class TypeLevel {
 	    {
 	    	return;
 	    }
-
-	    assert !srcRole.isInterface(): "tsuper role should not be an interface"; //$NON-NLS-1$
 
 		// for avoiding duplicates:
 		HashSet<ReferenceBinding> newInterfaces = new HashSet<ReferenceBinding>();
