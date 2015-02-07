@@ -46,6 +46,7 @@ import org.eclipse.objectteams.otdt.internal.core.compiler.model.RoleModel;
 import org.eclipse.objectteams.otdt.internal.core.compiler.model.TeamModel;
 import org.eclipse.objectteams.otdt.internal.core.compiler.util.RoleTypeCreator;
 import org.eclipse.objectteams.otdt.internal.core.compiler.util.TypeAnalyzer;
+import org.eclipse.objectteams.otdt.internal.core.compiler.util.RoleTypeCreator.TypeArgumentUpdater;
 
 /**
  * NEW for OTDT:
@@ -107,7 +108,7 @@ public class FieldAccessSpec extends MethodSpec {
 
 	@Override
 	// if an access method is needed, return that accessor, else null
-	public MethodBinding resolveFeature(ReferenceBinding baseType, BlockScope scope, boolean callinExpected, boolean isBaseSide, boolean allowEnclosing)
+	public MethodBinding resolveFeature(final ReferenceBinding baseType, final BlockScope scope, boolean callinExpected, boolean isBaseSide, boolean allowEnclosing)
     {
     	// find field in type or superclass:
 		this.resolvedField = TypeAnalyzer.findField(baseType, this.selector, /*don't check static*/false, /*outer*/false);
@@ -119,36 +120,43 @@ public class FieldAccessSpec extends MethodSpec {
 
 		this.fieldType = resolvedType(); // may be improved below
 
-   		TypeBinding fieldLeafType = this.fieldType.leafComponentType();
-   		if (   fieldLeafType instanceof ReferenceBinding
-			&& ((ReferenceBinding)fieldLeafType).isRole())
-   		{
-   			// find team anchor for role type of base field:
-   			ITeamAnchor newAnchor = null;
-   			if (baseType instanceof RoleTypeBinding)
-   			{
-	   			// base class is already a role: construct the full team anchor:
-	   			RoleTypeBinding baseRole = (RoleTypeBinding)baseType;
-	   			if (fieldLeafType instanceof RoleTypeBinding) {
-	   				RoleTypeBinding fieldRole = (RoleTypeBinding)fieldLeafType;
-	   				if (fieldRole.hasExplicitAnchor())
-	   					newAnchor = fieldRole._teamAnchor.setPathPrefix(baseRole._teamAnchor);
-	   				else
-	   					newAnchor = baseRole._teamAnchor;
-	   			} else {
-	   				newAnchor = baseRole._teamAnchor;
-	   			}
-   			} else if (baseType.isTeam()) {
-   				// base class is a team, construct simple anchor
-
-   				ReferenceBinding enclRole = scope.enclosingSourceType();
-   				newAnchor = TypeAnalyzer.findField(enclRole, IOTConstants._OT_BASE, /*don't check static*/false, /*outer*/false);
-   			} // else fieldLeafType might already be a anchored type,
-   			  // independent of _OT$base, leave it as it is
-   			if (newAnchor != null && newAnchor.isValidBinding())
-   				this.fieldType = newAnchor.getRoleTypeBinding(
-   					(ReferenceBinding)fieldLeafType, resolvedType().dimensions());
-   		}
+		final TypeBinding fieldLeafType = this.fieldType.leafComponentType();
+   		if (fieldLeafType instanceof ReferenceBinding) {
+   			final int outerDimensions = this.fieldType.dimensions();
+   			TypeArgumentUpdater updater = new TypeArgumentUpdater() {
+   				@Override public TypeBinding updateArg(ReferenceBinding type) {
+   					boolean atTopLevel = type == fieldLeafType; //$IDENTITY-COMPARISON$
+					if (type.isRole()) {
+   						// find team anchor for role type of base field:
+   						ITeamAnchor newAnchor = null;
+   						if (baseType instanceof RoleTypeBinding)
+   						{
+   							// base class is already a role: construct the full team anchor:
+   							RoleTypeBinding baseRole = (RoleTypeBinding)baseType;
+   							if (type instanceof RoleTypeBinding) {
+   								RoleTypeBinding fieldRole = (RoleTypeBinding)type;
+   								if (fieldRole.hasExplicitAnchor())
+   									newAnchor = fieldRole._teamAnchor.setPathPrefix(baseRole._teamAnchor);
+   								else
+   									newAnchor = baseRole._teamAnchor;
+   							} else {
+   								newAnchor = baseRole._teamAnchor;
+   							}
+   						} else if (baseType.isTeam()) {
+   							// base class is a team, construct simple anchor
+   							
+   							ReferenceBinding enclRole = scope.enclosingSourceType();
+   							newAnchor = TypeAnalyzer.findField(enclRole, IOTConstants._OT_BASE, /*don't check static*/false, /*outer*/false);
+   						} // else fieldLeafType might already be a anchored type,
+   						// independent of _OT$base, leave it as it is
+   						if (newAnchor != null && newAnchor.isValidBinding())
+   							return newAnchor.getRoleTypeBinding(type, atTopLevel ? outerDimensions : 0);
+   					}
+   					return atTopLevel ? FieldAccessSpec.this.fieldType : type;
+   				}
+   			};
+   			this.fieldType = updater.updateArg((ReferenceBinding) fieldLeafType).maybeWrapRoleType(this, updater);
+		}
 
    		if (   !baseType.isRole()
    			&& this.resolvedField.canBeSeenBy(scope.enclosingReceiverType().baseclass(), this, scope)) 
