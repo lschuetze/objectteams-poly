@@ -26,7 +26,8 @@ public interface IBinding {
 	public static enum BindingType {
 		CALLIN_BINDING,
 		FIELD_ACCESS,
-		METHOD_ACCESS
+		METHOD_ACCESS,
+		ROLE_BASE_BINDING
 	}
 	
 	public final static int CALLIN_BASE = 1;

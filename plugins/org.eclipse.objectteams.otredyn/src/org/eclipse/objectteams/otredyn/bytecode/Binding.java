@@ -1,7 +1,7 @@
 /**********************************************************************
  * This file is part of "Object Teams Dynamic Runtime Environment"
  * 
- * Copyright 2009, 2014 Oliver Frank and others.
+ * Copyright 2009, 2015 Oliver Frank and others.
  * 
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -86,6 +86,13 @@ public class Binding implements Comparable<Binding>, IBinding {
 		this.memberSignature = memberSignature;
 		this.perTeamId = perTeamAccessId;
 		this.type = type;
+	}
+
+	/** Create a binding for a role base binding to trigger generating _OT$addRemoveRole. */
+	public Binding(AbstractBoundClass teamClass, String baseClassName) {
+		this.teamClass = teamClass;
+		this.boundClass = baseClassName;
+		this.type = IBinding.BindingType.ROLE_BASE_BINDING;
 	}
 
 	public String getBoundClass() {

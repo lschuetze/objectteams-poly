@@ -1,7 +1,7 @@
 /**********************************************************************
  * This file is part of "Object Teams Dynamic Runtime Environment"
  * 
- * Copyright 2009, 2014 Oliver Frank and others.
+ * Copyright 2009, 2015 Oliver Frank and others.
  * 
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -124,8 +124,10 @@ class AsmClassVisitor extends ClassVisitor {
 		} else if (attribute.type.equals(Attributes.ATTRIBUTE_OT_SPECIAL_ACCESS)) {
 			((OTSpecialAccessAttribute)attribute).registerAt(clazz);
 		} else if (attribute.type.equals(Attributes.ATTRIBUTE_ROLE_BASE_BINDINGS)) {
-			for (String base : ((RoleBaseBindingsAttribute) attribute).bases)
+			for (String base : ((RoleBaseBindingsAttribute) attribute).bases) {
 				clazz.boundBaseClasses.add(base.replace('/', '.'));
+				clazz.addBinding(new Binding(clazz, base));
+			}
 		}
 	}
 	

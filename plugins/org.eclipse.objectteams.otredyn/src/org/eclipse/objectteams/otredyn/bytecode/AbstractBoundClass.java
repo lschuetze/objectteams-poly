@@ -1,7 +1,7 @@
 /**********************************************************************
  * This file is part of "Object Teams Dynamic Runtime Environment"
  * 
- * Copyright 2009, 2014 Oliver Frank and others.
+ * Copyright 2009, 2015 Oliver Frank and others.
  * 
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -48,7 +48,8 @@ public abstract class AbstractBoundClass implements IBoundClass {
 		WEAVE_INHERITED_BINDING,
 		WEAVE_METHOD_ACCESS,
 		WEAVE_FIELD_ACCESS,
-		WEAVE_INHERITED_MEMBER_ACCESS
+		WEAVE_INHERITED_MEMBER_ACCESS,
+		WEAVE_BASE_INFRASTRUCTURE
 	}
 
 	/**
@@ -717,6 +718,9 @@ public abstract class AbstractBoundClass implements IBoundClass {
 			case WEAVE_INHERITED_MEMBER_ACCESS:
 				prepareForFirstMemberAccess();
 				break;
+			case WEAVE_BASE_INFRASTRUCTURE:
+				prepareForFirstTransformation();
+				break;
 			}
 			
 			// Mark all WeavingTasks for decapsulation bindings 
@@ -733,6 +737,7 @@ public abstract class AbstractBoundClass implements IBoundClass {
 
 	public void handleAddingOfBinding(IBinding binding) {
 		WeavingTaskType type = null;
+		WeavingTask task = null;
 		switch (binding.getType()) {
 		case CALLIN_BINDING:
 			type = WeavingTaskType.WEAVE_BINDING;
@@ -742,6 +747,9 @@ public abstract class AbstractBoundClass implements IBoundClass {
 			break;
 		case METHOD_ACCESS:
 			type = WeavingTaskType.WEAVE_METHOD_ACCESS;
+			break;
+		case ROLE_BASE_BINDING:
+			task = new WeavingTask(WeavingTaskType.WEAVE_BASE_INFRASTRUCTURE);
 			break;
 		default:
 			throw new RuntimeException("Unknown binding type: "
@@ -757,7 +765,8 @@ public abstract class AbstractBoundClass implements IBoundClass {
 //			} catch (ClassNotFoundException e) {
 //				throw new NoClassDefFoundError(e.getMessage());
 //			}
-		WeavingTask task = new WeavingTask(type, binding.getMemberName(), binding.getMemberSignature(), 
+		if (task == null)
+			task = new WeavingTask(type, binding.getMemberName(), binding.getMemberSignature(), 
 											binding.getBaseFlags(), binding.isHandleCovariantReturn());
 		addWeavingTask(task);
 	}
@@ -801,6 +810,7 @@ public abstract class AbstractBoundClass implements IBoundClass {
 			member = getMethod(task);
 			break;
 		case WEAVE_INHERITED_MEMBER_ACCESS:
+		case WEAVE_BASE_INFRASTRUCTURE:
 			openAccessTasks.put(null, task);
 			return true;
 		}

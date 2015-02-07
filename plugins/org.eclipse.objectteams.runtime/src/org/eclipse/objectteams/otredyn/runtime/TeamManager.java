@@ -1,7 +1,7 @@
 /**********************************************************************
  * This file is part of "Object Teams Dynamic Runtime Environment"
  * 
- * Copyright 2009, 2014 Oliver Frank and others.
+ * Copyright 2009, 2015 Oliver Frank and others.
  * 
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -271,6 +271,8 @@ public class TeamManager implements ITeamManager {
 				synchronized (member) {
 					addAccessIds(teamClass, teem, binding.getPerTeamId(), memberId);
 				}
+				//$FALL-THROUGH$
+			case ROLE_BASE_BINDING:
 				boundClass.handleAddingOfBinding(binding);
 				break;
 			default: // no action for CALLIN_BINDING here

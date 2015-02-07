@@ -1,7 +1,7 @@
 /**********************************************************************
  * This file is part of "Object Teams Dynamic Runtime Environment"
  * 
- * Copyright 2009, 2014 Stephan Herrmann.
+ * Copyright 2009, 2015 Stephan Herrmann.
  * 
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -17,6 +17,7 @@ package org.eclipse.objectteams.otredyn.bytecode.asm;
 
 import org.eclipse.objectteams.otredyn.transformer.names.ClassNames;
 import org.eclipse.objectteams.otredyn.transformer.names.ConstantMembers;
+import org.objectweb.asm.Label;
 import org.objectweb.asm.Opcodes;
 import org.objectweb.asm.tree.FieldInsnNode;
 import org.objectweb.asm.tree.InsnList;
@@ -41,19 +42,24 @@ public class CreateAddRemoveRoleMethod extends AbstractTransformableClassNode {
 	protected boolean transform() {
 		// void _OT$addRemoveRole(Object role, boolean isAdding) {
 		MethodNode method = getMethod(ConstantMembers.addOrRemoveRole);
+		final int ROLE_SLOT = 1, IS_ADDING_SLOT = 2;
+		Label start = new Label(), end = new Label();
 		method.instructions.clear();
+		method.visitLabel(start);
 
 			// set = <initialized _OT$roleSet;>
-			genGetInitializedRoleSet(method.instructions, 3);
+			final int SET_SLOT = 3;
+			method.visitLocalVariable("set", "Ljava/util/Set;", null, start, end, SET_SLOT);
+			genGetInitializedRoleSet(method.instructions, SET_SLOT);
 						
 			// if (isAdding) {
-			method.instructions.add(new IntInsnNode(Opcodes.ILOAD, 2));
+			method.instructions.add(new IntInsnNode(Opcodes.ILOAD, IS_ADDING_SLOT));
 			LabelNode jumpToRemove = new LabelNode();
 			method.instructions.add(new JumpInsnNode(Opcodes.IFEQ, jumpToRemove));
 			
 				// set.add(role);
-				method.instructions.add(new IntInsnNode(Opcodes.ALOAD, 3));
-				method.instructions.add(new IntInsnNode(Opcodes.ALOAD, 1));
+				method.instructions.add(new IntInsnNode(Opcodes.ALOAD, SET_SLOT));
+				method.instructions.add(new IntInsnNode(Opcodes.ALOAD, ROLE_SLOT));
 				method.instructions.add(new MethodInsnNode(Opcodes.INVOKEVIRTUAL, ClassNames.HASH_SET_SLASH, "add", "(Ljava/lang/Object;)Z", false));
 				method.instructions.add(new InsnNode(Opcodes.POP));
 				
@@ -62,8 +68,8 @@ public class CreateAddRemoveRoleMethod extends AbstractTransformableClassNode {
 			// } else {
 			method.instructions.add(jumpToRemove);
 				// set.remove(role);
-				method.instructions.add(new IntInsnNode(Opcodes.ALOAD, 3));
-				method.instructions.add(new IntInsnNode(Opcodes.ALOAD, 1));
+				method.instructions.add(new IntInsnNode(Opcodes.ALOAD, SET_SLOT));
+				method.instructions.add(new IntInsnNode(Opcodes.ALOAD, ROLE_SLOT));
 				method.instructions.add(new MethodInsnNode(Opcodes.INVOKEVIRTUAL, ClassNames.HASH_SET_SLASH, "remove", "(Ljava/lang/Object;)Z", false));
 				method.instructions.add(new InsnNode(Opcodes.POP));
 	
@@ -71,10 +77,9 @@ public class CreateAddRemoveRoleMethod extends AbstractTransformableClassNode {
 			// }
 			
 			method.instructions.add(new InsnNode(Opcodes.RETURN));
+			method.visitLabel(end);
 		// }
-		method.maxStack = 3;
-		method.maxLocals = 4; // this + 2 args + 1 local ("set")
-
+		// maxs are computed, maxStack from flow, maxLocals from localVariable-slots
 		return true;
 	}
 
