@@ -2729,7 +2729,6 @@ public class ExplicitTeamActivation extends AbstractOTJLDTest {
 			    "    public static void main(String[] args) throws InterruptedException {\n" +
 			    "		org.objectteams.Team t = new Team5218ita2();\n" +
 			    "		t.activate();\n" +
-			    "Class c = T5218ita2.class;\n" +
 			    "		new Thread(new Runnable() { \n" +
 			    "	    	public void run() {\n" +
 		    	"System.out.print(1);\n" +
