@@ -1,7 +1,7 @@
 /**********************************************************************
  * This file is part of "Object Teams Development Tooling"-Software
  *
- * Copyright 2003, 2014 Fraunhofer Gesellschaft, Munich, Germany,
+ * Copyright 2003, 2015 Fraunhofer Gesellschaft, Munich, Germany,
  * for its Fraunhofer Institute for Computer Architecture and Software
  * Technology (FIRST), Berlin, Germany and Technical University Berlin,
  * Germany.
@@ -44,6 +44,7 @@ import org.eclipse.objectteams.otdt.internal.core.compiler.lookup.RoleTypeBindin
 import org.eclipse.objectteams.otdt.internal.core.compiler.model.TeamModel;
 import org.eclipse.objectteams.otdt.internal.core.compiler.statemachine.transformer.StandardElementGenerator;
 import org.eclipse.objectteams.otdt.internal.core.compiler.util.AstGenerator;
+import org.eclipse.objectteams.otdt.internal.core.compiler.util.RoleTypeCreator;
 
 /**
  * Helper that generates the lowering statements necessary for the callout compiler-feature.
@@ -109,12 +110,14 @@ public class Lowering implements IOTConstants {
     	if (expression instanceof ThisReference || expression instanceof AllocationExpression)
     		needNullCheck = false;
     	if (needNullCheck) {
-        	localVar = makeNewLocal(scope, unloweredType, sourceStart, sourceEnd);
+        	localVar = makeNewLocal(scope, unloweredType, sourceStart, sourceEnd, deferredResolve);
         	SingleNameReference varRef = gen.singleNameReference(localVar.name);
-        	varRef.binding = localVar;
-        	varRef.bits = Binding.LOCAL;
-        	varRef.constant = Constant.NotAConstant;
-        	varRef.resolvedType = unloweredType;
+        	if (!deferredResolve) {
+	        	varRef.binding = localVar;
+	        	varRef.bits = Binding.LOCAL;
+	        	varRef.constant = Constant.NotAConstant;
+	        	varRef.resolvedType = unloweredType;
+        	}
 			unloweredExpression = varRef;
     	}
 
@@ -193,7 +196,7 @@ public class Lowering implements IOTConstants {
         	@SuppressWarnings("null") // needNullCheck => localVar != null
 			SingleNameReference lhs = gen.singleNameReference(localVar.name);
 			Assignment assignment = gen.assignment(lhs, expression);
-			loweringExpr = new CheckedLoweringExpression(expression, gen.nullCheck(assignment), gen.nullLiteral(), loweringExpr, localVar);
+			loweringExpr = new CheckedLoweringExpression(expression, gen.nullCheck(assignment), gen.nullLiteral(), loweringExpr, localVar, teamExpression);
 			if (!deferredResolve) {
 				lhs.binding = localVar;
 				lhs.resolvedType = unloweredType;
@@ -206,11 +209,12 @@ public class Lowering implements IOTConstants {
         return loweringExpr;
 	}
 	
-	@NonNull LocalVariableBinding makeNewLocal(BlockScope scope, TypeBinding variableType, int sourceStart, int sourceEnd) {
+	@NonNull LocalVariableBinding makeNewLocal(BlockScope scope, TypeBinding variableType, int sourceStart, int sourceEnd, boolean deferredResolve) {
 		char[] name = ("_OT$unlowered$"+sourceStart).toCharArray(); //$NON-NLS-1$
 		LocalVariableBinding varBinding = new LocalVariableBinding(name, variableType, 0, false);
 		varBinding.declaration = new LocalDeclaration(name, sourceStart, sourceEnd); // needed for BlockScope.computeLocalVariablePositions() -> CodeStream.record()
-		scope.addLocalVariable(varBinding);
+		if (!deferredResolve)
+			scope.addLocalVariable(varBinding);
 		varBinding.setConstant(Constant.NotAConstant);
 		varBinding.useFlag = LocalVariableBinding.USED;
 		return varBinding;
@@ -221,16 +225,31 @@ public class Lowering implements IOTConstants {
 		
 		private final LocalVariableBinding localVar;
 		Expression origExpression;
+		private Expression teamExpression;
 
 		CheckedLoweringExpression(Expression origExpression,
 								  Expression condition,
 								  Expression valueIfTrue,
 								  Expression valueIfFalse,
-								  LocalVariableBinding localVar)
+								  LocalVariableBinding localVar,
+								  Expression teamExpression)
 		{
 			super(condition, valueIfTrue, valueIfFalse);
 			this.localVar = localVar;
 			this.origExpression = origExpression;
+			this.teamExpression = teamExpression;
+		}
+
+		@Override
+		public TypeBinding resolveType(BlockScope scope) {
+			if (this.localVar.declaringScope == null) {
+				scope.addLocalVariable(this.localVar);
+				if (this.teamExpression != null) {
+					this.teamExpression.resolveType(scope);
+					this.localVar.type = RoleTypeCreator.maybeWrapQualifiedRoleType(scope, this.teamExpression, this.localVar.type, this);
+				}
+			}
+			return super.resolveType(scope);
 		}
 
 		@Override

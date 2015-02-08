@@ -1,7 +1,7 @@
 /**********************************************************************
  * This file is part of "Object Teams Development Tooling"-Software
  *
- * Copyright 2003, 2006 Fraunhofer Gesellschaft, Munich, Germany,
+ * Copyright 2003, 2015 Fraunhofer Gesellschaft, Munich, Germany,
  * for its Fraunhofer Institute for Computer Architecture and Software
  * Technology (FIRST), Berlin, Germany and Technical University Berlin,
  * Germany.
@@ -21,6 +21,7 @@
 package org.eclipse.objectteams.otdt.internal.core.compiler.problem;
 
 import org.eclipse.jdt.internal.compiler.lookup.BlockScope;
+import org.eclipse.jdt.internal.compiler.lookup.LocalVariableBinding;
 import org.eclipse.jdt.internal.compiler.problem.ProblemReporter;
 
 /**
@@ -52,5 +53,11 @@ public class BlockScopeWrapper extends BlockScope
 		// a new instance for each problem for setting referenceContext.
 		this._problemWrapper = this._problemReporterFactory.create(super.problemReporter());
 		return this._problemWrapper;
+	}
+
+	@Override
+	public void addLocalVariable(LocalVariableBinding binding) {
+		// block needs to find its locals in CodeStream.exitUserScope()
+		((BlockScope) this.parent).addLocalVariable(binding);
 	}
 }

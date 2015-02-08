@@ -1,7 +1,7 @@
 /** 
  * This file is part of "Object Teams Development Tooling"-Software
  * 
- * Copyright 2009, 2014 Stephan Herrmann
+ * Copyright 2009, 2015 Stephan Herrmann
  * 
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -40,10 +40,8 @@ import org.eclipse.jdt.internal.compiler.ast.TypeReference;
 import org.eclipse.jdt.internal.compiler.classfmt.ClassFileConstants;
 import org.eclipse.jdt.internal.compiler.impl.CompilerOptions.WeavingScheme;
 import org.eclipse.jdt.internal.compiler.lookup.BaseTypeBinding;
-import org.eclipse.jdt.internal.compiler.lookup.BlockScope;
 import org.eclipse.jdt.internal.compiler.lookup.ClassScope;
 import org.eclipse.jdt.internal.compiler.lookup.MethodBinding;
-import org.eclipse.jdt.internal.compiler.lookup.MethodScope;
 import org.eclipse.jdt.internal.compiler.lookup.ReferenceBinding;
 import org.eclipse.jdt.internal.compiler.lookup.SourceTypeBinding;
 import org.eclipse.jdt.internal.compiler.lookup.TypeBinding;
@@ -436,6 +434,7 @@ public class CallinImplementorDyn extends MethodMappingImplementor {
 								roleVar = (LOCAL_ROLE+statements.size()).toCharArray();
 								blockStatements.add(gen.localVariable(roleVar, 										//   RoleType local$n = this._OT$liftToRoleType((BaseType)base);
 														gen.alienScopeTypeReference(gen.typeReference(roleType), callinDecl.scope),
+										ClassFileConstants.AccFinal,
 										Lifting.liftCall(callMethod.scope,
 														 gen.thisReference(),
 														 gen.castExpression(gen.baseNameReference(IOTConstants.BASE), 
@@ -1026,33 +1025,6 @@ public class CallinImplementorDyn extends MethodMappingImplementor {
 		if (iProblem != 0) {
 			callinDecl.addRoleLiftingProblem(roleType, iProblem);
 			return true;
-		}
-		return false;
-	}
-
-	/**
-	 * the expression local$role$n.roleMethod(..) should not wrap its
-	 * return type anchored to the generated team anchor _OT$role,
-	 * because the method should actually be seen as being within
-	 * the scope of this role already, although, physically it is part of
-	 * the team.
-	 *
-	 * @param scope use the scope to determine if we are actually within
-	 *        a callin wrapper.
-	 * @param receiver if this is _OT$role this is the role method call.
-	 * @return true if the return type should not be wrapped further.
-	 */
-	public static boolean avoidWrapRoleType(BlockScope scope, Expression receiver) {
-		MethodScope methodScope = scope.methodScope();
-		if (methodScope != null) { // CLOVER: never false in jacks suite
-			AbstractMethodDeclaration refMethod = methodScope.referenceMethod();
-			if (   refMethod != null
-				&& refMethod.isMappingWrapper._callin())
-			{
-				if (   receiver instanceof SingleNameReference
-					&& CharOperation.prefixEquals(LOCAL_ROLE.toCharArray(), ((SingleNameReference)receiver).token))
-					return true;
-			}
 		}
 		return false;
 	}

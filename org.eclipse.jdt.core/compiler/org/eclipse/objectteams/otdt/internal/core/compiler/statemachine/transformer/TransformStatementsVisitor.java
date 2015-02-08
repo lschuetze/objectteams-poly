@@ -1,7 +1,7 @@
 /**********************************************************************
  * This file is part of "Object Teams Development Tooling"-Software
  *
- * Copyright 2003, 2006 Fraunhofer Gesellschaft, Munich, Germany,
+ * Copyright 2003, 2015 Fraunhofer Gesellschaft, Munich, Germany,
  * for its Fraunhofer Institute for Computer Architecture and Software
  * Technology (FIRST), Berlin, Germany and Technical University Berlin,
  * Germany.
@@ -25,6 +25,7 @@ import java.util.Stack;
 import org.eclipse.jdt.core.compiler.CharOperation;
 import org.eclipse.jdt.internal.compiler.ast.ASTNode;
 import org.eclipse.jdt.internal.compiler.ast.AbstractMethodDeclaration;
+import org.eclipse.jdt.internal.compiler.ast.Argument;
 import org.eclipse.jdt.internal.compiler.ast.ExplicitConstructorCall;
 import org.eclipse.jdt.internal.compiler.ast.Expression;
 import org.eclipse.jdt.internal.compiler.ast.MessageSend;
@@ -44,8 +45,10 @@ import org.eclipse.objectteams.otdt.core.compiler.IOTConstants;
 import org.eclipse.objectteams.otdt.core.exceptions.InternalCompilerError;
 import org.eclipse.objectteams.otdt.internal.core.compiler.ast.BaseCallMessageSend;
 import org.eclipse.objectteams.otdt.internal.core.compiler.ast.BaseReference;
+import org.eclipse.objectteams.otdt.internal.core.compiler.ast.LiftingTypeReference;
 import org.eclipse.objectteams.otdt.internal.core.compiler.control.ITranslationStates;
 import org.eclipse.objectteams.otdt.internal.core.compiler.control.StateHelper;
+import org.eclipse.objectteams.otdt.internal.core.compiler.lifting.Lowering;
 import org.eclipse.objectteams.otdt.internal.core.compiler.mappings.CallinImplementorDyn;
 import org.eclipse.objectteams.otdt.internal.core.compiler.model.MethodModel;
 import org.eclipse.objectteams.otdt.internal.core.compiler.smap.SourcePosition;
@@ -168,11 +171,22 @@ public class TransformStatementsVisitor
 		    			} else {
 		    				Expression[] boxedArgs = new Expression[args.length];
 		    				for (int i = 0; i < args.length; i++) {
-		    					TypeBinding argType = methodDecl.arguments[i+MethodSignatureEnhancer.getEnhancingArgLen(this.weavingScheme)].binding.type;
-								if (argType.isBaseType())
-		    						boxedArgs[i] = gen.createBoxing(args[i], (BaseTypeBinding) argType);
-								else
-									boxedArgs[i] = args[i];
+		    					Argument argument = methodDecl.arguments[i+MethodSignatureEnhancer.getEnhancingArgLen(this.weavingScheme)];
+								TypeBinding argTypeBinding = argument.binding.type;
+								if (argTypeBinding.isBaseType()) {
+									boxedArgs[i] = gen.createBoxing(args[i], (BaseTypeBinding) argTypeBinding);
+									continue;
+								} else if (argument.type.isDeclaredLifting()) {
+									LiftingTypeReference ltr = (LiftingTypeReference)argument.type;
+									if (ltr.roleReference.resolvedType != null) {
+										Expression teamThis = gen.qualifiedThisReference(methodDecl.binding.declaringClass.enclosingType());
+										boxedArgs[i] = new Lowering().lowerExpression(scope, args[i],
+														ltr.roleReference.resolvedType, ltr.resolvedType, teamThis, true, true);
+ 										continue;
+									}
+									// fall through
+								}
+								boxedArgs[i] = args[i];
 		    				}
 		    				args = new Expression[] {
 		    					gen.arrayAllocation(gen.qualifiedTypeReference(TypeConstants.JAVA_LANG_OBJECT), 1, boxedArgs)

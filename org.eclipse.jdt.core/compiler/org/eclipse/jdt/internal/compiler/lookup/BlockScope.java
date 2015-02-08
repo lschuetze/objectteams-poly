@@ -159,7 +159,9 @@ public final void addLocalType(TypeDeclaration localType) {
 /* Insert a local variable into a given scope, updating its position
  * and checking there are not too many locals or arguments allocated.
  */
-public final void addLocalVariable(LocalVariableBinding binding) {
+//{ObjectTeams: was final
+public void addLocalVariable(LocalVariableBinding binding) {
+// SH}
 	checkAndSetModifiersForVariable(binding);
 	// insert local in scope
 	if (this.localIndex == this.locals.length)

@@ -1,7 +1,7 @@
 /**********************************************************************
  * This file is part of "Object Teams Development Tooling"-Software
  *
- * Copyright 2005, 2009 Fraunhofer Gesellschaft, Munich, Germany,
+ * Copyright 2005, 2015 Fraunhofer Gesellschaft, Munich, Germany,
  * for its Fraunhofer Institute for Computer Architecture and Software
  * Technology (FIRST), Berlin, Germany and Technical University Berlin,
  * Germany.
@@ -50,7 +50,6 @@ import org.eclipse.objectteams.otdt.internal.core.compiler.lookup.TThisBinding;
 import org.eclipse.objectteams.otdt.internal.core.compiler.lookup.TeamAnchor;
 import org.eclipse.objectteams.otdt.internal.core.compiler.lookup.WeakenedTypeBinding;
 import org.eclipse.objectteams.otdt.internal.core.compiler.mappings.CallinImplementor;
-import org.eclipse.objectteams.otdt.internal.core.compiler.mappings.CallinImplementorDyn;
 import org.eclipse.objectteams.otdt.internal.core.compiler.model.TeamModel;
 import org.eclipse.objectteams.otdt.internal.core.compiler.statemachine.copyinheritance.CopyInheritance;
 
@@ -58,7 +57,6 @@ import org.eclipse.objectteams.otdt.internal.core.compiler.statemachine.copyinhe
  * This class is a non-instantiate-utility for creating RoleTypeBindings.
  *
  * @author stephan
- * @version $Id: RoleTypeCreator.java 23417 2010-02-03 20:13:55Z stephan $
  */
 public class RoleTypeCreator implements TagBits {
 
@@ -112,6 +110,9 @@ public class RoleTypeCreator implements TagBits {
         if (!(typeToWrap instanceof ReferenceBinding) || typeToWrap.isEnum())
             return originalType;
         ReferenceBinding refBinding = (ReferenceBinding)typeToWrap;
+
+        if (scope instanceof BlockScope && avoidWrapRoleType((BlockScope) scope, anchorExpr))
+        	return originalType;
 
 		if (refBinding instanceof CaptureBinding)
 			return ((CaptureBinding) refBinding).maybeWrapQualifiedRoleType(scope, anchorExpr, typedNode, originalType);
@@ -336,15 +337,9 @@ public class RoleTypeCreator implements TagBits {
 		            else
 		            	returnType = roleReturn;
 		        }
-		        if (scope.compilerOptions().weavingScheme == WeavingScheme.OTDRE) {
-			        if (CallinImplementorDyn.avoidWrapRoleType(scope, send.receiver))
-		    			// don't use synthetic local$role$n as additional anchor
-		    			return returnType;		        	
-		        } else {
-		        	if (CallinImplementor.avoidWrapRoleType(scope, send.receiver))
-		        		// don't use synthetic _OT$role as additional anchor
-		        		return returnType;
-		        }
+		        if (avoidWrapRoleType(scope, receiver))
+		        	// don't use synthetic _OT$role as additional anchor
+		        	return returnType;
 		    }
         } else {
         	if (send.arguments != null && send.arguments.length > 0)
@@ -361,6 +356,15 @@ public class RoleTypeCreator implements TagBits {
 					receiver,
 					returnType,
 					send);
+	}
+
+	static boolean avoidWrapRoleType(BlockScope scope, Expression receiver) {
+        if (scope.compilerOptions().weavingScheme == WeavingScheme.OTRE) {
+        	if (CallinImplementor.avoidWrapRoleType(scope, receiver))
+        		// don't use synthetic _OT$role as additional anchor
+        		return true;
+        }
+		return false;
 	}
 
 	/**

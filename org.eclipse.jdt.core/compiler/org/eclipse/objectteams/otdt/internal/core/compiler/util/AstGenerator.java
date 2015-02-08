@@ -1,7 +1,7 @@
 /**********************************************************************
  * This file is part of "Object Teams Development Tooling"-Software
  *
- * Copyright 2004, 2014 Fraunhofer Gesellschaft, Munich, Germany,
+ * Copyright 2004, 2015 Fraunhofer Gesellschaft, Munich, Germany,
  * for its Fraunhofer Institute for Computer Architecture and Software
  * Technology (FIRST), Berlin, Germany and Technical University Berlin,
  * Germany.
@@ -146,6 +146,17 @@ public class AstGenerator extends AstFactory {
 		variable.declarationSourceStart = this.sourceStart;
 		variable.declarationSourceEnd   = this.sourceEnd;
 		variable.type = typeReference;
+		variable.isGenerated = true;
+		return variable;
+	}
+
+	public LocalDeclaration localVariable(char[] name, TypeReference typeReference, int modifiers, Expression init) {
+		LocalDeclaration variable = new LocalDeclaration(name, this.sourceStart, this.sourceEnd);
+		variable.initialization = init;
+		variable.declarationSourceStart = this.sourceStart;
+		variable.declarationSourceEnd   = this.sourceEnd;
+		variable.type = typeReference;
+		variable.modifiers = modifiers;
 		variable.isGenerated = true;
 		return variable;
 	}
