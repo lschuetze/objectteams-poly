@@ -266,10 +266,9 @@ public TypeBinding resolveType(BlockScope scope) {
 	findMethodBinding(scope);
 //{ObjectTeams:
   } finally {
-	afterMethodLookup(scope, anchorMapping, this.argumentTypes, this.binding.returnType);  
-	if (anchorMapping != null)
-	   	AnchorMapping.removeCurrentMapping(anchorMapping);
+	AnchorMapping.removeCurrentMapping(anchorMapping);
   }
+  	afterMethodLookup(scope, anchorMapping, this.argumentTypes, this.binding.returnType);  
 //jwl}
 		
 	if (!this.binding.isValidBinding()) {
@@ -300,8 +299,9 @@ public TypeBinding resolveType(BlockScope scope) {
 					: localScope.getMethod(this.delegateThis.type, this.selector, this.argumentTypes, this);
 //{ObjectTeams:
 	      } finally {
-			afterMethodLookup(localScope, privateAnchorMapping, this.argumentTypes, this.binding.returnType);
+	    	AnchorMapping.removeCurrentMapping(privateAnchorMapping);
 	      }
+		    afterMethodLookup(localScope, privateAnchorMapping, this.argumentTypes, this.binding.returnType);
 //jwl}
 			if (!privateBinding.isValidBinding()) {
 				if (this.binding.declaringClass == null) {
