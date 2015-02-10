@@ -2731,9 +2731,7 @@ public class ExplicitTeamActivation extends AbstractOTJLDTest {
 			    "		t.activate();\n" +
 			    "		new Thread(new Runnable() { \n" +
 			    "	    	public void run() {\n" +
-		    	"System.out.print(1);\n" +
 			    "				new T5218ita2().o();\n" +
-		    	"System.out.print(2);\n" +
 			    "	    	}\n" +
 			    "		}).start();\n" +
 			    "   	Thread.sleep(10);\n" +
