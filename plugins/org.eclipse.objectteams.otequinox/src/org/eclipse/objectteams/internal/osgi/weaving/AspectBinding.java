@@ -224,7 +224,7 @@ public class AspectBinding {
 			Class<? extends Team> cl = this.teamClass;
 			assert cl != null : "Precondition";
 			@SuppressWarnings("null")@NonNull Team nnInst = cl.newInstance();
-			TransformerPlugin.registerTeamInstance(instance);
+			TransformerPlugin.registerTeamInstance(nnInst);
 			log(IStatus.INFO, "Instantiated team "+teamName);
 			return this.instance = nnInst;
 		}
