@@ -179,7 +179,8 @@ public class TeamLoader {
 	 */
 	@Nullable Team instantiateAndActivate(AspectBinding aspectBinding, TeamBinding team, ActivationKind activationKind)
 	{
-		if (team.instance != null && team.isActivated) return team.instance;
+		for (TeamBinding equivalent : team.equivalenceSet)
+			if (equivalent.instance != null && equivalent.isActivated) return equivalent.instance;
 
 		String teamName = team.teamName;
 		// don't try to instantiate before all base classes successfully loaded.

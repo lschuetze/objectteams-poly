@@ -218,9 +218,11 @@ public class AspectBinding {
 
 		/** Precondition: teamClass is set. Create fresh or answer existing. */
 		public Team getInstance() throws InstantiationException, IllegalAccessException {
-			Team inst = this.instance;
-			if (inst != null)
-				return inst;
+			for (TeamBinding equalivalent : this.equivalenceSet) {
+				Team inst = equalivalent.instance;
+				if (inst != null)
+					return inst;
+			}
 			Class<? extends Team> cl = this.teamClass;
 			assert cl != null : "Precondition";
 			@SuppressWarnings("null")@NonNull Team nnInst = cl.newInstance();
