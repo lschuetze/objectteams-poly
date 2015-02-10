@@ -1,7 +1,7 @@
 /**********************************************************************
  * This file is part of "Object Teams Development Tooling"-Software
  * 
- * Copyright 2013, 2014 GK Software AG
+ * Copyright 2013, 2015 GK Software AG
  *  
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -254,16 +254,34 @@ public class TeamLoader {
 									TeamBinding team, String teamName,
 									ActivationKind activationKind)
 	{
-		for (@SuppressWarnings("null")@NonNull String baseclass : team.baseClassNames) {
-			if (this.beingDefined.contains(baseclass)) {
-				synchronized (deferredTeams) {
-					WaitingTeamRecord record = new WaitingTeamRecord(team, activationKind, baseclass);
-					deferredTeams.add(record);
-				}
-				log(IStatus.INFO, "Defer instantation/activation of team "+teamName);
-				return false;
+		String unloadableBaseClass = findUnloadableBaseClass(team);
+		if (unloadableBaseClass != null) {
+			synchronized (deferredTeams) {
+				WaitingTeamRecord record = new WaitingTeamRecord(team, activationKind, unloadableBaseClass);
+				deferredTeams.add(record);
 			}
+			log(IStatus.INFO, "Defer instantation/activation of team "+teamName);
+			return false;
 		}
 		return true;
+	}
+	
+	private @Nullable String findUnloadableBaseClass(TeamBinding team) {
+		// easy tests first:
+		for (@SuppressWarnings("null")@NonNull String baseclass : team.baseClassNames) {
+			if (this.beingDefined.contains(baseclass))
+				return baseclass;
+		}
+		// definite, more expensive tests:
+		Class<?> teamClass = team.teamClass;
+		if (teamClass != null) {
+			for (@SuppressWarnings("null")@NonNull String baseclass : team.baseClassNames)
+				try {
+					teamClass.getClassLoader().loadClass(baseclass);
+				} catch (Throwable t) {
+					return baseclass;
+				}
+		}
+		return null;
 	}
 }
