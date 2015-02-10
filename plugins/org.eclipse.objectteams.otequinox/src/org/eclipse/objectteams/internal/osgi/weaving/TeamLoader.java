@@ -275,9 +275,12 @@ public class TeamLoader {
 		// definite, more expensive tests:
 		Class<?> teamClass = team.teamClass;
 		if (teamClass != null) {
+			// use a throw-away class loader so we have a fresh chance to load any failed classes later
+			// (only initiating class loader remembers the failure, if this is discarded, the slate is clean):
+			ClassLoader tryLoader = new ClassLoader(teamClass.getClassLoader()) {};
 			for (@SuppressWarnings("null")@NonNull String baseclass : team.baseClassNames)
 				try {
-					teamClass.getClassLoader().loadClass(baseclass);
+					tryLoader.loadClass(baseclass);
 				} catch (Throwable t) {
 					return baseclass;
 				}
