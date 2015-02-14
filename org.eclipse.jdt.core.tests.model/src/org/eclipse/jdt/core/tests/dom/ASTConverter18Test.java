@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2014 IBM Corporation and others.
+ * Copyright (c) 2000, 2015 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -1768,7 +1768,7 @@ public class ASTConverter18Test extends ConverterTestSetup {
 		ITypeBinding typeBinding = typeMethodReference.resolveTypeBinding();
 		assertNotNull(typeBinding);
 		IMethodBinding methodBinding = typeMethodReference.resolveMethodBinding();
-		assertNotNull(methodBinding);
+		assertNull(methodBinding);
 		Type type = typeMethodReference.getType();
 		checkSourceRange(type, "@Marker int []", contents);
 		assertTrue(type.isArrayType());
@@ -2892,11 +2892,7 @@ public class ASTConverter18Test extends ConverterTestSetup {
 		Expression expression = fragment.getInitializer();
 		CreationReference creationReference = (CreationReference) expression;
 		IMethodBinding methodBinding = creationReference.resolveMethodBinding();
-		assertNotNull(methodBinding);
-		assertEquals("Wrong name", "lambda$0", methodBinding.getName());
-		ITypeBinding [] parameterTypes = methodBinding.getParameterTypes();
-		assertTrue("Incorrect Number of parameter type", parameterTypes.length == 1);
-		assertEquals("Incorrect parameter type", "int", parameterTypes[0].getName());
+		assertNull(methodBinding);
 	}
 
 	/**
@@ -4935,5 +4931,150 @@ public void testBug447062() throws JavaModelException {
 	} catch (IllegalArgumentException e) {
 		assertTrue("Test Failed", false);
 	}
+}
+/**
+ * https://bugs.eclipse.org/bugs/show_bug.cgi?id=399793
+ * 
+ * @throws JavaModelException
+ */
+public void testBug425601_001() throws JavaModelException {
+	this.workingCopy = getWorkingCopy("/Converter18/src/testBug425601_001/Outer.java",
+			true/* resolve */);
+	String contents = "package testBug425601_001;\n" +
+			"@Deprecated\n"+
+			"public class Outer<O> {\n"+
+			"    @Deprecated\n"+
+			"    public class Middle<X> {\n"+
+			"        @Deprecated\n"+
+			"        public class Inner<E> {\n"+
+			"        }\n"+
+			"    }\n"+
+			"    \n"+
+			"    Outer<String> o;\n"+
+			"    Middle<String> m; // Middle should be deprecated - Middle Case one\n"+
+			"    Outer<String>.Middle<String> m2; // Middle should be deprecated - Middle Case Two \n"+
+			"    @SuppressWarnings(\"rawtypes\")"+
+			"    Outer.Middle m3; \n"+
+			"    Middle<String>.Inner<Object> i; // Inner should be deprecated - Inner Case One\n"+
+			"}\n"+
+			"class Ref {\n"+
+			"    Outer<String> o;\n"+
+			"    Outer<String>.Middle<String> m;\n"+
+			"    Outer<String>.Middle<String>.Inner<Object> i;\n"+
+			"}\n";
+	CompilationUnit cu = (CompilationUnit) buildAST(contents, this.workingCopy);
+	TypeDeclaration typedeclaration = (TypeDeclaration) getASTNode(cu, 0);
+	FieldDeclaration[] fields = typedeclaration.getFields();
+	ITypeBinding binding = fields[0].getType().resolveBinding();
+	assertTrue(binding.isDeprecated());
+	binding = fields[3].getType().resolveBinding(); 
+	assertTrue(binding.isDeprecated());
+	binding = fields[1].getType().resolveBinding(); // Middle Case One
+	assertTrue(binding.isDeprecated());
+	binding = fields[2].getType().resolveBinding(); // Middle Case Two
+	assertTrue(binding.isDeprecated());
+	binding = fields[4].getType().resolveBinding(); // Inner Case One
+	assertTrue(binding.isDeprecated());
+}
+
+/**
+ * https://bugs.eclipse.org/bugs/show_bug.cgi?id=399793
+ * 
+ * @throws JavaModelException
+ */
+public void testBug425601_002() throws JavaModelException {
+	this.workingCopy = getWorkingCopy("/Converter18/src/testBug425601_002/Outer.java",
+			true/* resolve */);
+	String contents = "package testBug425601_002;\n" +
+			//"@Deprecated\n"+
+			"public class Outer<O> {\n"+
+			"    @Deprecated\n"+
+			"    public class Middle<X> {\n"+
+			"        @Deprecated\n"+
+			"        public class Inner<E> {\n"+
+			"        }\n"+
+			"    }\n"+
+			"    \n"+
+			"    Outer<String> o;\n"+
+			"    Middle<String> m; // Middle should be deprecated - Middle Case one\n"+
+			"    Outer<String>.Middle<String> m2; // Middle should be deprecated - Middle Case Two \n"+
+			"    @SuppressWarnings(\"rawtypes\")"+
+			"    Outer.Middle m3; \n"+
+			"    Middle<String>.Inner<Object> i; // Inner should be deprecated - Inner Case One\n"+
+			"}\n"+
+			"class Ref {\n"+
+			"    Outer<String> o;\n"+
+			"    Outer<String>.Middle<String> m;\n"+
+			"    Outer<String>.Middle<String>.Inner<Object> i;\n"+
+			"}\n";
+	CompilationUnit cu = (CompilationUnit) buildAST(contents, this.workingCopy);
+	TypeDeclaration typedeclaration = (TypeDeclaration) getASTNode(cu, 0);
+	FieldDeclaration[] fields = typedeclaration.getFields();
+	ITypeBinding binding = fields[0].getType().resolveBinding();
+	assertTrue(!binding.isDeprecated());
+	binding = fields[3].getType().resolveBinding(); 
+	assertTrue(binding.isDeprecated());
+	binding = fields[1].getType().resolveBinding(); // Middle Case One
+	assertTrue(binding.isDeprecated());
+	binding = fields[2].getType().resolveBinding(); // Middle Case Two
+	assertTrue(binding.isDeprecated());
+	binding = fields[4].getType().resolveBinding(); // Inner Case One
+	assertTrue(binding.isDeprecated());
+}
+
+/**
+ * https://bugs.eclipse.org/bugs/show_bug.cgi?id=44000
+ * 
+ * @bug Bug 440000 [1.8][dom] MethodReference#resolveMethodBinding() API should return null for CreationReference of an ArrayType 
+ * @throws JavaModelException
+ */
+public void testBug440000_001() throws JavaModelException {
+	String contents =
+			"interface I<T, R> {\n" +
+			"    R apply(T t);\n" +
+			"}\n" +
+			"public class X {\n" +
+			"    I<Integer, int[]> m1 = int[]::new;\n" +
+			"}\n";
+	this.workingCopy = getWorkingCopy("/Converter18/src/X.java", contents, true/*computeProblems*/);
+	CompilationUnit cu = (CompilationUnit) buildAST(contents, this.workingCopy);
+	TypeDeclaration typedeclaration = (TypeDeclaration) getASTNode(cu, 1);
+	FieldDeclaration fieldDeclaration = (FieldDeclaration) typedeclaration.bodyDeclarations().get(0);
+	VariableDeclarationFragment fragment = (VariableDeclarationFragment)fieldDeclaration.fragments().get(0);
+	Expression expression = fragment.getInitializer();
+	assertTrue(expression instanceof CreationReference);
+	CreationReference creationReference = (CreationReference) expression;
+	assertEquals("int[]::new", creationReference.toString());
+	IMethodBinding binding = creationReference.resolveMethodBinding();
+	assertNull(binding);
+}
+/**
+ * https://bugs.eclipse.org/bugs/show_bug.cgi?id=459344
+ * 
+ * @throws JavaModelException
+ */
+public void testBug459344_001() throws JavaModelException {
+	this.workingCopy = getWorkingCopy("/Converter18/src/test459344/X.java",
+			true/* resolve */);
+	String contents = "package test459344;" +
+			"interface I {\n" +
+			"	int foo();\n" +
+			"}\n" +
+			"public class X {\n" +
+			"	private void foo(Object arg) {\n" +
+			"		I i = arg :: hashCode;\n" +
+			"	}\n" +
+			"}\n";
+
+	CompilationUnit cu = (CompilationUnit) buildAST(contents, this.workingCopy);
+	TypeDeclaration typeDeclaration = (TypeDeclaration) getASTNode(cu, 1);
+	MethodDeclaration methodDeclaration = typeDeclaration.getMethods()[0];
+	VariableDeclarationStatement stmt = (VariableDeclarationStatement) methodDeclaration.getBody().statements().get(0);
+	VariableDeclarationFragment fragment = (VariableDeclarationFragment) stmt.fragments().get(0);
+	ExpressionMethodReference reference = (ExpressionMethodReference) fragment.getInitializer();
+	IMethodBinding methodBinding = reference.resolveMethodBinding();
+	assertNotNull(methodBinding);
+	assertEquals("Wrong name", "hashCode", methodBinding.getName());
+	assertNull("Non-Null",cu.findDeclaringNode(methodBinding));
 }
 }

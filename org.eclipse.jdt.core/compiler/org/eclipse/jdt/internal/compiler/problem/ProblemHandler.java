@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2014 IBM Corporation and others.
+ * Copyright (c) 2000, 2015 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -8,6 +8,8 @@
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *     Technical University Berlin - extended API and implementation
+ *     Stephan Herrmann - Contribution for
+ *								Bug 458396 - NPE in CodeStream.invoke()
  *******************************************************************************/
 package org.eclipse.jdt.internal.compiler.problem;
 
@@ -44,6 +46,9 @@ public class ProblemHandler {
 	public IErrorHandlingPolicy policy;
 	public final IProblemFactory problemFactory;
 	public final CompilerOptions options;
+	
+	/* When temporarily switching policies, store here the original root policy (for temporary resume). */
+	private IErrorHandlingPolicy rootPolicy;
 
 //{ObjectTeams: support for passing a rechecker:
 	public IProblemRechecker rechecker;
@@ -360,8 +365,27 @@ public void record(CategorizedProblem problem, CompilationResult unitResult, Ref
 }
 /** @return old policy. */
 public IErrorHandlingPolicy switchErrorHandlingPolicy(IErrorHandlingPolicy newPolicy) {
+	if (this.rootPolicy == null)
+		this.rootPolicy = this.policy;
 	IErrorHandlingPolicy presentPolicy = this.policy;
 	this.policy = newPolicy;
 	return presentPolicy;
+}
+/**
+ * Temporarily suspend a temporary error handling policy.
+ * @return old policy.
+ */
+public IErrorHandlingPolicy suspendTempErrorHandlingPolicy() {
+	IErrorHandlingPolicy presentPolicy = this.policy;
+	if (this.rootPolicy != null)
+		this.policy = this.rootPolicy;
+	return presentPolicy;
+}
+/**
+ * Resume from a corresponding {@link #suspendTempErrorHandlingPolicy()}.
+ * @param previousPolicy the result value of the matching suspend call
+ */
+public void resumeTempErrorHandlingPolicy(IErrorHandlingPolicy previousPolicy) {
+	this.policy = previousPolicy;
 }
 }

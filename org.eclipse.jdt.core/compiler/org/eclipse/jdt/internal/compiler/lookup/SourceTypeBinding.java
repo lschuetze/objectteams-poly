@@ -1167,8 +1167,6 @@ void faultInTypesForFieldsAndMethods() {
 	ReferenceBinding enclosingType = enclosingType();
 	if (enclosingType != null && enclosingType.isViewedAsDeprecated() && !isDeprecated())
 		this.modifiers |= ExtraCompilerModifiers.AccDeprecatedImplicitly;
-	fields();
-	methods();
 
 //{ObjectTeams: do not cache memberTypes.length!
 // During faultInTypesForFieldsAndMethods(), memberTypes may be added (role files, on demand)
@@ -1180,6 +1178,8 @@ void faultInTypesForFieldsAndMethods() {
 		if (!this.memberTypes[i].isBinaryBinding()) // roles could be binary contained in source
 //carp}
 		((SourceTypeBinding) this.memberTypes[i]).faultInTypesForFieldsAndMethods();
+	fields();
+	methods();
 }
 // NOTE: the type of each field of a source type is resolved when needed
 public FieldBinding[] fields() {

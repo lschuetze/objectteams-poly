@@ -1,10 +1,9 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2014 IBM Corporation and others.
+ * Copyright (c) 2000, 2015 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
- * $Id: DefaultCodeFormatterOptions.java 22626 2009-09-30 17:37:31Z stephan $
  *
  * Contributors:
  *     IBM Corporation - initial API and implementation
@@ -13,6 +12,7 @@
  *     Fraunhofer FIRST - extended API and implementation
  *     Technical University Berlin - extended API and implementation
  *     Jesper S Moller - Contribution for bug 402173
+ *     Mateusz Matela <mateusz.matela@gmail.com> - [formatter] Formatter does not format Java code correctly, especially when max line width is set - https://bugs.eclipse.org/303519
  *******************************************************************************/
 package org.eclipse.jdt.internal.formatter;
 
@@ -23,15 +23,72 @@ import org.eclipse.jdt.core.formatter.DefaultCodeFormatterConstants;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.internal.compiler.impl.CompilerOptions;
 import org.eclipse.jdt.internal.compiler.util.Util;
-import org.eclipse.jdt.internal.formatter.align.Alignment;
 
 /**
  * This is still subject to changes before 3.0.
  * @since 3.0
  */
 
-@SuppressWarnings({ "rawtypes", "unchecked" })
 public class DefaultCodeFormatterOptions {
+
+	/** Internal constants related to wrapping alignment settings */
+	public static class Alignment {
+
+		/*
+		 * Alignment modes
+		 */
+		public static final int M_FORCE = 1; // if bit set, then alignment will be non-optional (default is optional)
+		public static final int M_INDENT_ON_COLUMN = 2; // if bit set, broken fragments will be aligned on current location column (default is to break at current indentation level)
+		public static final int	M_INDENT_BY_ONE = 4; // if bit set, broken fragments will be indented one level below current (not using continuation indentation)
+
+		// split modes can be combined either with M_FORCE or M_INDENT_ON_COLUMN
+
+		/** foobar(#fragment1, #fragment2, <ul>
+		 *  <li>    #fragment3, #fragment4 </li>
+		 * </ul>
+		 */
+		public static final int M_COMPACT_SPLIT = 16; // fill each line with all possible fragments
+
+		/** foobar(<ul>
+		 * <li>    #fragment1, #fragment2,  </li>
+		 * <li>     #fragment3, #fragment4, </li>
+		 * </ul>
+		 */
+		public static final int M_COMPACT_FIRST_BREAK_SPLIT = 32; //  compact mode, but will first try to break before first fragment
+
+		/** foobar(<ul>
+		 * <li>     #fragment1,  </li>
+		 * <li>     #fragment2,  </li>
+		 * <li>     #fragment3 </li>
+		 * <li>     #fragment4,  </li>
+		 * </ul>
+		 */
+		public static final int M_ONE_PER_LINE_SPLIT = 32+16; // one fragment per line
+
+		/**
+		 * foobar(<ul>
+		 * <li>     #fragment1,  </li>
+		 * <li>        #fragment2,  </li>
+		 * <li>        #fragment3 </li>
+		 * <li>        #fragment4,  </li>
+		 * </ul>
+		 */
+		public static final int M_NEXT_SHIFTED_SPLIT = 64; // one fragment per line, subsequent are indented further
+
+		/** foobar(#fragment1, <ul>
+		 * <li>      #fragment2,  </li>
+		 * <li>      #fragment3 </li>
+		 * <li>      #fragment4,  </li>
+		 * </ul>
+		 */
+		public static final int M_NEXT_PER_LINE_SPLIT = 64+16; // one per line, except first fragment (if possible)
+
+		public static final int M_NO_ALIGNMENT = 0;
+
+		public static final int SPLIT_MASK = M_ONE_PER_LINE_SPLIT | M_NEXT_SHIFTED_SPLIT | M_COMPACT_SPLIT | M_COMPACT_FIRST_BREAK_SPLIT | M_NEXT_PER_LINE_SPLIT;
+	}
+
+
 	public static final int TAB = 1;
 	public static final int SPACE = 2;
 	public static final int MIXED = 4;
@@ -72,6 +129,7 @@ public class DefaultCodeFormatterOptions {
 	public int alignment_for_enum_constants;
 	public int alignment_for_expressions_in_array_initializer;
 	public int alignment_for_method_declaration;
+	// TODO following option cannot be set in preferences dialog (but it's used by old.CodeFormatter)
 	public int alignment_for_multiple_fields;
 	public int alignment_for_parameters_in_constructor_declaration;
 	public int alignment_for_parameters_in_method_declaration;
@@ -183,6 +241,7 @@ public class DefaultCodeFormatterOptions {
 	public boolean insert_space_after_closing_paren_in_cast;
 	public boolean insert_space_after_closing_brace_in_block;
 	public boolean insert_space_after_colon_in_assert;
+	//TODO field is never used
 	public boolean insert_space_after_colon_in_case;
 	public boolean insert_space_after_colon_in_conditional;
 	public boolean insert_space_after_colon_in_for;
@@ -347,7 +406,6 @@ public class DefaultCodeFormatterOptions {
 	public boolean join_lines_in_comments;
 	public boolean put_empty_statement_on_new_line;
 	public int tab_size;
-	public final char filling_space = ' ';
 	public int page_width;
 	public int tab_char;
 	public boolean use_tabs_only_for_leading_indentations;
@@ -362,7 +420,7 @@ public class DefaultCodeFormatterOptions {
 		// cannot be instantiated
 	}
 
-	public DefaultCodeFormatterOptions(Map settings) {
+	public DefaultCodeFormatterOptions(Map<String, String> settings) {
 		setDefaultSettings();
 		if (settings == null) return;
 		set(settings);
@@ -372,8 +430,8 @@ public class DefaultCodeFormatterOptions {
 		return Integer.toString(alignment);
 	}
 
-	public Map getMap() {
-		Map options = new HashMap();
+	public Map<String, String> getMap() {
+		Map<String, String> options = new HashMap<String, String>();
 		options.put(DefaultCodeFormatterConstants.FORMATTER_ALIGNMENT_FOR_ARGUMENTS_IN_ALLOCATION_EXPRESSION, getAlignment(this.alignment_for_arguments_in_allocation_expression));
 		options.put(DefaultCodeFormatterConstants.FORMATTER_ALIGNMENT_FOR_ARGUMENTS_IN_ANNOTATION, getAlignment(this.alignment_for_arguments_in_annotation));
 		options.put(DefaultCodeFormatterConstants.FORMATTER_ALIGNMENT_FOR_ARGUMENTS_IN_ENUM_CONSTANT, getAlignment(this.alignment_for_arguments_in_enum_constant));
@@ -452,7 +510,7 @@ public class DefaultCodeFormatterOptions {
 		options.put(DefaultCodeFormatterConstants.FORMATTER_INDENT_EMPTY_LINES, this.indent_empty_lines ? DefaultCodeFormatterConstants.TRUE : DefaultCodeFormatterConstants.FALSE);
 		options.put(DefaultCodeFormatterConstants.FORMATTER_INDENT_SWITCHSTATEMENTS_COMPARE_TO_CASES, this.indent_switchstatements_compare_to_cases ? DefaultCodeFormatterConstants.TRUE : DefaultCodeFormatterConstants.FALSE);
 		options.put(DefaultCodeFormatterConstants.FORMATTER_INDENT_SWITCHSTATEMENTS_COMPARE_TO_SWITCH, this.indent_switchstatements_compare_to_switch ? DefaultCodeFormatterConstants.TRUE : DefaultCodeFormatterConstants.FALSE);
-		options.put(DefaultCodeFormatterConstants.FORMATTER_INDENTATION_SIZE, Integer.toString(this.indentation_size));
+		options.put(DefaultCodeFormatterConstants.FORMATTER_INDENTATION_SIZE, Integer.toString(this.tab_char == MIXED ? this.indentation_size : this.tab_size)); // reverse values swapping performed by IndentationTabPage
 		options.put(DefaultCodeFormatterConstants.FORMATTER_INSERT_NEW_LINE_AFTER_ANNOTATION_ON_TYPE, this.insert_new_line_after_annotation_on_type ? JavaCore.INSERT : JavaCore.DO_NOT_INSERT);
 		options.put(DefaultCodeFormatterConstants.FORMATTER_INSERT_NEW_LINE_AFTER_TYPE_ANNOTATION, this.insert_new_line_after_type_annotation ? JavaCore.INSERT : JavaCore.DO_NOT_INSERT);
 		options.put(DefaultCodeFormatterConstants.FORMATTER_INSERT_NEW_LINE_AFTER_ANNOTATION_ON_FIELD, this.insert_new_line_after_annotation_on_field ? JavaCore.INSERT : JavaCore.DO_NOT_INSERT);
@@ -660,7 +718,7 @@ public class DefaultCodeFormatterOptions {
 				options.put(DefaultCodeFormatterConstants.FORMATTER_TAB_CHAR, DefaultCodeFormatterConstants.MIXED);
 				break;
 		}
-		options.put(DefaultCodeFormatterConstants.FORMATTER_TAB_SIZE, Integer.toString(this.tab_size));
+		options.put(DefaultCodeFormatterConstants.FORMATTER_TAB_SIZE, Integer.toString(this.tab_char == MIXED ? this.tab_size : this.indentation_size)); // reverse values swapping performed by IndentationTabPage
 		options.put(DefaultCodeFormatterConstants.FORMATTER_USE_TABS_ONLY_FOR_LEADING_INDENTATIONS, this.use_tabs_only_for_leading_indentations ?  DefaultCodeFormatterConstants.TRUE : DefaultCodeFormatterConstants.FALSE);
 		options.put(DefaultCodeFormatterConstants.FORMATTER_WRAP_BEFORE_BINARY_OPERATOR, this.wrap_before_binary_operator ? DefaultCodeFormatterConstants.TRUE : DefaultCodeFormatterConstants.FALSE);
 		options.put(DefaultCodeFormatterConstants.FORMATTER_WRAP_BEFORE_OR_OPERATOR_MULTICATCH, this.wrap_before_or_operator_multicatch ? DefaultCodeFormatterConstants.TRUE : DefaultCodeFormatterConstants.FALSE);
@@ -671,16 +729,16 @@ public class DefaultCodeFormatterOptions {
 		return options;
 	}
 
-	public void set(Map settings) {
+	public void set(Map<String, String> settings) {
 //{ObjectTeams: ot-options:
 		// allow non-OT/J code?
-		Object otjOption = settings.get(CompilerOptions.OPTION_AllowScopedKeywords);
+		String otjOption = settings.get(CompilerOptions.OPTION_AllowScopedKeywords);
 		if (otjOption != null)
-			this.scopedKeywords = ((String)otjOption).equals(otjOption);
-		Object javaOption = settings.get(CompilerOptions.OPTION_PureJavaOnly);
+			this.scopedKeywords = CompilerOptions.ENABLED.equals(otjOption);
+		String javaOption = settings.get(CompilerOptions.OPTION_PureJavaOnly);
 		if (CompilerOptions.ENABLED.equals(javaOption))
 			this.isPureJava = true;
-// SH}			
+// SH}
 		final Object alignmentForArgumentsInAllocationExpressionOption = settings.get(DefaultCodeFormatterConstants.FORMATTER_ALIGNMENT_FOR_ARGUMENTS_IN_ALLOCATION_EXPRESSION);
 		if (alignmentForArgumentsInAllocationExpressionOption != null) {
 			try {
@@ -786,9 +844,9 @@ public class DefaultCodeFormatterOptions {
 			try {
 				this.alignment_for_enum_constants = Integer.parseInt((String) alignmentForEnumConstantsOption);
 			} catch (NumberFormatException e) {
-				this.alignment_for_enum_constants = Alignment.NONE;
+				this.alignment_for_enum_constants = Alignment.M_NO_ALIGNMENT;
 			} catch (ClassCastException e) {
-				this.alignment_for_enum_constants = Alignment.NONE;
+				this.alignment_for_enum_constants = Alignment.M_NO_ALIGNMENT;
 			}
 		}
 		final Object alignmentForExpressionsInArrayInitializerOption = settings.get(DefaultCodeFormatterConstants.FORMATTER_ALIGNMENT_FOR_EXPRESSIONS_IN_ARRAY_INITIALIZER);
@@ -1274,13 +1332,19 @@ public class DefaultCodeFormatterOptions {
 		}
 		final Object indentationSizeOption = settings.get(DefaultCodeFormatterConstants.FORMATTER_INDENTATION_SIZE);
 		if (indentationSizeOption != null) {
+			int indentationSize = 4;
 			try {
-				this.indentation_size = Integer.parseInt((String) indentationSizeOption);
+				indentationSize = Integer.parseInt((String) indentationSizeOption);
 			} catch (NumberFormatException e) {
-				this.indentation_size = 4;
+				// keep default
 			} catch(ClassCastException e) {
-				this.indentation_size = 4;
+				// keep default
 			}
+			// reverse values swapping performed by IndentationTabPage
+			if (DefaultCodeFormatterConstants.MIXED.equals(settings.get(DefaultCodeFormatterConstants.FORMATTER_TAB_CHAR)))
+				this.indentation_size = indentationSize;
+			else
+				this.tab_size = indentationSize;
 		}
 		final Object insertNewLineAfterOpeningBraceInArrayInitializerOption = settings.get(DefaultCodeFormatterConstants.FORMATTER_INSERT_NEW_LINE_AFTER_OPENING_BRACE_IN_ARRAY_INITIALIZER);
 		if (insertNewLineAfterOpeningBraceInArrayInitializerOption != null) {
@@ -2042,13 +2106,19 @@ public class DefaultCodeFormatterOptions {
 		}
 		final Object tabSizeOption = settings.get(DefaultCodeFormatterConstants.FORMATTER_TAB_SIZE);
 		if (tabSizeOption != null) {
+			int tabSize = 4;
 			try {
-				this.tab_size = Integer.parseInt((String) tabSizeOption);
+				tabSize = Integer.parseInt((String) tabSizeOption);
 			} catch (NumberFormatException e) {
-				this.tab_size = 4;
+				// keep default
 			} catch(ClassCastException e) {
-				this.tab_size = 4;
+				// keep default
 			}
+			// reverse values swapping performed by IndentationTabPage
+			if (DefaultCodeFormatterConstants.MIXED.equals(settings.get(DefaultCodeFormatterConstants.FORMATTER_TAB_CHAR)))
+				this.tab_size = tabSize;
+			else
+				this.indentation_size = tabSize;
 		}
 		final Object useTabsOnlyForLeadingIndentationsOption = settings.get(DefaultCodeFormatterConstants.FORMATTER_USE_TABS_ONLY_FOR_LEADING_INDENTATIONS);
 		if (useTabsOnlyForLeadingIndentationsOption != null) {
@@ -2133,7 +2203,7 @@ public class DefaultCodeFormatterOptions {
 	 * @param settings the given map
 	 * @deprecated
 	 */
-	private void setDeprecatedOptions(Map settings) {
+	private void setDeprecatedOptions(Map<String, String> settings) {
 		// backward compatibility code
 		final Object commentClearBlankLinesOption = settings.get(DefaultCodeFormatterConstants.FORMATTER_COMMENT_CLEAR_BLANK_LINES);
 		if (commentClearBlankLinesOption != null) {
@@ -2229,7 +2299,7 @@ public class DefaultCodeFormatterOptions {
 		this.alignment_for_binary_expression = Alignment.M_COMPACT_SPLIT;
 		this.alignment_for_compact_if = Alignment.M_ONE_PER_LINE_SPLIT | Alignment.M_INDENT_BY_ONE;
 		this.alignment_for_conditional_expression = Alignment.M_ONE_PER_LINE_SPLIT;
-		this.alignment_for_enum_constants = Alignment.NONE;
+		this.alignment_for_enum_constants = Alignment.M_NO_ALIGNMENT;
 		this.alignment_for_expressions_in_array_initializer = Alignment.M_COMPACT_SPLIT;
 		this.alignment_for_method_declaration = Alignment.M_NO_ALIGNMENT;
 		this.alignment_for_multiple_fields = Alignment.M_COMPACT_SPLIT;
@@ -2524,7 +2594,7 @@ public class DefaultCodeFormatterOptions {
 		this.alignment_for_binary_expression = Alignment.M_COMPACT_SPLIT;
 		this.alignment_for_compact_if = Alignment.M_COMPACT_SPLIT;
 		this.alignment_for_conditional_expression = Alignment.M_NEXT_PER_LINE_SPLIT;
-		this.alignment_for_enum_constants = Alignment.NONE;
+		this.alignment_for_enum_constants = Alignment.M_NO_ALIGNMENT;
 		this.alignment_for_expressions_in_array_initializer = Alignment.M_COMPACT_SPLIT;
 		this.alignment_for_method_declaration = Alignment.M_NO_ALIGNMENT;
 		this.alignment_for_multiple_fields = Alignment.M_COMPACT_SPLIT;
