@@ -1,0 +1,9 @@
+class java/lang/String
+
+trim
+ ()Ljava/lang/String;
+ ()L1java/lang/String;
+
+replace
+ (CC)Ljava/lang/String;
+ (CC)L1java/lang/String;

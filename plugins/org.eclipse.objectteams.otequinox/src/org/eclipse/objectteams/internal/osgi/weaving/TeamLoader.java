@@ -71,7 +71,7 @@ public class TeamLoader {
 	 * Trying to do these phases: load (now) instantiate/activate (if ready),
 	 */
 	public void loadTeamsForBase(BaseBundle baseBundle, WovenClass baseClass, AspectPermissionManager permissionManager) {
-		@SuppressWarnings("null")@NonNull String className = baseClass.getClassName();
+		@NonNull String className = baseClass.getClassName();
 		Collection<TeamBinding> teamsForBase = baseBundle.teamsPerBase.get(className);
 		if (teamsForBase == null) 
 			return; // not done
@@ -225,7 +225,6 @@ public class TeamLoader {
 				} catch (Throwable t) { /* ignore */ }
 				for (TeamBinding eq : team.equivalenceSet)
 					eq.isActivated = false;
-				@SuppressWarnings("null") @NonNull // known API
 				String notFoundName = e.getMessage().replace('/', '.');
 				synchronized (this.deferredTeams) {
 					this.deferredTeams.add(new WaitingTeamRecord(team, activationKind, notFoundName));
@@ -238,7 +237,6 @@ public class TeamLoader {
 		} catch (ClassCircularityError e) {
 			for (TeamBinding eq : team.equivalenceSet)
 				eq.isActivated = false;
-			@SuppressWarnings("null") @NonNull // known API
 			String notFoundName = e.getMessage().replace('/', '.');
 			synchronized (this.deferredTeams) {
 				this.deferredTeams.add(new WaitingTeamRecord(team, activationKind, notFoundName));

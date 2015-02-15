@@ -92,7 +92,7 @@ public class AspectBindingRegistry {
 			IConfigurationElement currentBindingConfig = aspectBindingConfigs[i];
 
 			//aspect:
-			@SuppressWarnings("null")@NonNull String aspectBundleId= currentBindingConfig.getContributor().getName();
+			String aspectBundleId= currentBindingConfig.getContributor().getName();
 			IS_OTDT |= KNOWN_OTDT_ASPECTS.contains(aspectBundleId);
 			Bundle aspectBundle = null;
 			if (packageAdmin != null) {

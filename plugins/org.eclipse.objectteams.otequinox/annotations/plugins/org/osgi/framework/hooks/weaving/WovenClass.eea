@@ -1,0 +1,6 @@
+class org/osgi/framework/hooks/weaving/WovenClass
+
+getClassName
+ ()Ljava/lang/String;
+ ()L1java/lang/String;
+ 

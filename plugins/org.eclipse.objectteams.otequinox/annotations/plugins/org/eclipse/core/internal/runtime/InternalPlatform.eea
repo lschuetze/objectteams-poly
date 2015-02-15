@@ -1,0 +1,5 @@
+class org/eclipse/core/internal/runtime/InternalPlatform
+
+getStateLocation
+ (Lorg/osgi/framework/Bundle;Z)Lorg/eclipse/core/runtime/IPath;
+ (Lorg/osgi/framework/Bundle;Z)L1org/eclipse/core/runtime/IPath;

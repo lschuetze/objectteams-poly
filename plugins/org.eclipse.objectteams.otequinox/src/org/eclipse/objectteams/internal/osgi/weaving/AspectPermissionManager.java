@@ -160,8 +160,7 @@ public class AspectPermissionManager {
 	 */
 	private void fetchAspectBindingPermssionsFromWorkspace() {
 		try {
-			@SuppressWarnings("null") // known API
-			@NonNull IPath state = InternalPlatform.getDefault().getStateLocation(this.transformerBundle, true);
+			IPath state = InternalPlatform.getDefault().getStateLocation(this.transformerBundle, true);
 			this.otequinoxState = state;
 			internalFetchAspectBindingPermssionsFromWorkspace(state);
 		} catch (NoClassDefFoundError ncdfe) {
@@ -229,7 +228,7 @@ public class AspectPermissionManager {
 			String forcedExportsRequest = forcedExport.getValue();
 			if (forcedExportsRequest == null)
 				continue;
-			for (@NonNull String singleForcedExportRequest : forcedExportsRequest.split(",")) // well-known API
+			for (@SuppressWarnings("null")@NonNull String singleForcedExportRequest : forcedExportsRequest.split(","))
 			{
 				singleForcedExportRequest = singleForcedExportRequest.trim(); // well-known API
 

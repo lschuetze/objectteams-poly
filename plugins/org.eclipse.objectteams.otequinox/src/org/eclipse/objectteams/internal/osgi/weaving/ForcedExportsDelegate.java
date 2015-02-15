@@ -46,11 +46,12 @@ public class ForcedExportsDelegate {
 		return registryClass != null;
 	}
 
-	@SuppressWarnings({ "unchecked", "null" }) // neither reflection nor Collections.emptyList() knows about nullness
 	public @NonNull List<String[]> getForcedExportsByAspect(String aspectBundleId, AspectPermission perm) {
 		if (getForcedExportsByAspect != null) {
 			try {
-				return (List<String[]>) getForcedExportsByAspect.invoke(null, new Object[] {aspectBundleId, perm.ordinal()});
+				@SuppressWarnings({ "unchecked", "null" })@NonNull // reflection knows nothing about nullness, nor generics
+				List<String[]> result = (List<String[]>) getForcedExportsByAspect.invoke(null, new Object[] {aspectBundleId, perm.ordinal()});
+				return result;
 			} catch (SecurityException | IllegalAccessException | IllegalArgumentException | InvocationTargetException e) {
 				TransformerPlugin.log(e, "Failed to access forced exports");
 			}

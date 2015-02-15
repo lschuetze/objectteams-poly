@@ -265,7 +265,7 @@ public class OTWeavingHook implements WeavingHook, WovenClassListener {
 	WeavingReason requiresWeaving(BundleWiring bundleWiring, String className, byte[] bytes) {
 		
 		// 1. consult the aspect binding registry (for per-bundle info):
-		@SuppressWarnings("null")@NonNull
+		@SuppressWarnings("null")@NonNull // FIXME: org.eclipse.osgi.internal.resolver.BundleDescriptionImpl.getBundle() can return null!
 		Bundle bundle = bundleWiring.getBundle();
 		if (aspectBindingRegistry.getAdaptedBasePlugins(bundle) != null)
 			return WeavingReason.Aspect;
@@ -396,12 +396,12 @@ public class OTWeavingHook implements WeavingHook, WovenClassListener {
 	@Override
 	public void modified(WovenClass wovenClass) {
 		if (wovenClass.getState() == WovenClass.DEFINED) {
-			if (wovenClass.getClassName().equals(ORG_OBJECTTEAMS_TEAM)) {
+			@NonNull String className = wovenClass.getClassName();
+			if (className.equals(ORG_OBJECTTEAMS_TEAM)) {
 				this.ooTeam = wovenClass.getDefinedClass();
 				installLiftingParticipant();
 			}
-			beingDefined.remove(wovenClass.getClassName());
-			@SuppressWarnings("null") @NonNull String className = wovenClass.getClassName();
+			beingDefined.remove(className);
 			instantiateScheduledTeams(className);
 
 			TransformerPlugin.flushLog();
