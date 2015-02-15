@@ -286,6 +286,10 @@ public class DefaultCodeFormatter extends CodeFormatter {
 		ASTParser parser = ASTParser.newParser(AST.JLS8);
 		Map<String, String> parserOptions = JavaCore.getOptions();
 		parserOptions.put(CompilerOptions.OPTION_Source, this.sourceLevel);
+//{ObjectTeams:
+		parserOptions.put(CompilerOptions.OPTION_PureJavaOnly, this.workingOptions.isPureJava ? CompilerOptions.ENABLED : CompilerOptions.DISABLED);
+		parserOptions.put(CompilerOptions.OPTION_AllowScopedKeywords, this.workingOptions.scopedKeywords ? CompilerOptions.ENABLED : CompilerOptions.DISABLED);
+// SH}
 		parser.setCompilerOptions(parserOptions);
 
 		switch (kind & K_MASK) {
