@@ -120,6 +120,14 @@ public class ASTParser {
 	 */
 	public static final int K_COMPILATION_UNIT = 0x08;
 
+//{ObjectTeams:
+	/**
+	 * Kind constant used to request that the source be parsed
+	 * as a parameter mapping.
+	 */
+	public static final int K_PARAMETER_MAPPING = 0x10;	
+// SH}
+
 	/**
 	 * Creates a new object for creating a Java abstract syntax tree
      * (AST) following the specified set of API rules.
@@ -566,6 +574,9 @@ public class ASTParser {
 	    if ((kind != K_COMPILATION_UNIT)
 		    && (kind != K_CLASS_BODY_DECLARATIONS)
 		    && (kind != K_EXPRESSION)
+//{ObjectTeams:
+		    && (kind != K_PARAMETER_MAPPING)
+// SH}
 		    && (kind != K_STATEMENTS)) {
 	    	throw new IllegalArgumentException();
 	    }
@@ -1069,6 +1080,9 @@ public class ASTParser {
 		switch(this.astKind) {
 			case K_CLASS_BODY_DECLARATIONS :
 			case K_EXPRESSION :
+//{ObjectTeams:
+			case K_PARAMETER_MAPPING:
+// SH}
 			case K_STATEMENTS :
 				if (this.rawSource == null) {
 					if (this.typeRoot != null) {
@@ -1386,7 +1400,15 @@ public class ASTParser {
 				ast.setOriginalModificationCount(ast.modificationCount());
 				return block;
 			case K_EXPRESSION :
+//{ObjectTeams:
+			case K_PARAMETER_MAPPING:
+/* orig:
 				org.eclipse.jdt.internal.compiler.ast.Expression expression = codeSnippetParsingUtil.parseExpression(this.rawSource, this.sourceOffset, this.sourceLength, this.compilerOptions, true);
+  :giro */
+				org.eclipse.jdt.internal.compiler.ast.Expression expression = this.astKind == K_EXPRESSION
+							? codeSnippetParsingUtil.parseExpression(this.rawSource, this.sourceOffset, this.sourceLength, this.compilerOptions, true)
+							: codeSnippetParsingUtil.parseParameterMapping(this.rawSource, this.sourceOffset, this.sourceLength, this.compilerOptions, true);
+// SH}
 				recordedParsingInformation = codeSnippetParsingUtil.recordedParsingInformation;
 				comments = recordedParsingInformation.commentPositions;
 				if (comments != null) {

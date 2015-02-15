@@ -297,6 +297,10 @@ public class DefaultCodeFormatter extends CodeFormatter {
 				return parseSourceCode(parser, ASTParser.K_STATEMENTS, false);
 			case K_EXPRESSION:
 				return parseSourceCode(parser, ASTParser.K_EXPRESSION, false);
+//{ObjectTeams: own kind:
+			case K_PARAMETER_MAPPING:
+				return parseSourceCode(parser, ASTParser.K_PARAMETER_MAPPING, false);
+// SH}
 			case K_UNKNOWN:
 				int[] parserModes = { ASTParser.K_COMPILATION_UNIT, ASTParser.K_EXPRESSION,
 						ASTParser.K_CLASS_BODY_DECLARATIONS, ASTParser.K_STATEMENTS };

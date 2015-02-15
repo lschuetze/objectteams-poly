@@ -53,7 +53,7 @@ Export-Package: org.eclipse.jdt.core,
  org.eclipse.jdt.internal.eval;x-internal:=true,
  org.eclipse.jdt.internal.formatter;x-internal:=true,
  org.eclipse.jdt.internal.formatter.linewrap;x-internal:=true,
- org.eclipse.jdt.internal.formatter.old;x-internal:=true
+ org.eclipse.jdt.internal.formatter.old;x-internal:=true,
  org.eclipse.objectteams.otdt.core,
  org.eclipse.objectteams.otdt.core.compiler,
  org.eclipse.objectteams.otdt.core.exceptions,

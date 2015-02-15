@@ -12,6 +12,7 @@ package org.eclipse.jdt.internal.formatter;
 
 import static org.eclipse.jdt.internal.compiler.parser.TerminalTokens.*;
 
+import java.util.Collections;
 import java.util.List;
 
 import org.eclipse.jdt.core.dom.ASTNode;
@@ -26,7 +27,10 @@ import org.eclipse.jdt.core.dom.ArrayInitializer;
 import org.eclipse.jdt.core.dom.ArrayType;
 import org.eclipse.jdt.core.dom.AssertStatement;
 import org.eclipse.jdt.core.dom.Assignment;
+import org.eclipse.jdt.core.dom.BaseCallMessageSend;
 import org.eclipse.jdt.core.dom.Block;
+import org.eclipse.jdt.core.dom.CallinMappingDeclaration;
+import org.eclipse.jdt.core.dom.CalloutMappingDeclaration;
 import org.eclipse.jdt.core.dom.CastExpression;
 import org.eclipse.jdt.core.dom.CatchClause;
 import org.eclipse.jdt.core.dom.ClassInstanceCreation;
@@ -43,6 +47,7 @@ import org.eclipse.jdt.core.dom.ExpressionMethodReference;
 import org.eclipse.jdt.core.dom.ExpressionStatement;
 import org.eclipse.jdt.core.dom.FieldDeclaration;
 import org.eclipse.jdt.core.dom.ForStatement;
+import org.eclipse.jdt.core.dom.GuardPredicateDeclaration;
 import org.eclipse.jdt.core.dom.IfStatement;
 import org.eclipse.jdt.core.dom.InfixExpression;
 import org.eclipse.jdt.core.dom.InstanceofExpression;
@@ -54,10 +59,12 @@ import org.eclipse.jdt.core.dom.MemberValuePair;
 import org.eclipse.jdt.core.dom.MethodDeclaration;
 import org.eclipse.jdt.core.dom.MethodInvocation;
 import org.eclipse.jdt.core.dom.NormalAnnotation;
+import org.eclipse.jdt.core.dom.ParameterMapping;
 import org.eclipse.jdt.core.dom.ParameterizedType;
 import org.eclipse.jdt.core.dom.ParenthesizedExpression;
 import org.eclipse.jdt.core.dom.PostfixExpression;
 import org.eclipse.jdt.core.dom.PrefixExpression;
+import org.eclipse.jdt.core.dom.RoleTypeDeclaration;
 import org.eclipse.jdt.core.dom.PrefixExpression.Operator;
 import org.eclipse.jdt.core.dom.ReturnStatement;
 import org.eclipse.jdt.core.dom.SingleMemberAnnotation;
@@ -82,6 +89,7 @@ import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 import org.eclipse.jdt.core.dom.VariableDeclarationStatement;
 import org.eclipse.jdt.core.dom.WhileStatement;
 import org.eclipse.jdt.core.dom.WildcardType;
+import org.eclipse.jdt.core.dom.WithinStatement;
 import org.eclipse.jdt.internal.compiler.parser.ScannerHelper;
 
 public class SpacePreparator extends ASTVisitor {
@@ -873,6 +881,62 @@ public class SpacePreparator extends ASTVisitor {
 		handleTypeArguments(node.typeArguments());
 		return true;
 	}
+
+//{ObjectTeams: more visits:
+	@Override
+	public boolean visit(RoleTypeDeclaration node) {
+		return visit((TypeDeclaration)node);
+	}
+	@Override
+	public boolean visit(BaseCallMessageSend node) {
+		// see MethodInvocation (sauf type arguments).
+		handleInvocation(node, node.getName(), Collections.<Type>emptyList());
+		handleCommas(node.getArguments(), this.options.insert_space_before_comma_in_method_invocation_arguments,
+				this.options.insert_space_after_comma_in_method_invocation_arguments);
+		return true;
+	}
+	@Override
+	public boolean visit(CalloutMappingDeclaration node) {
+		handleTokenAfter(node.getRoleMappingElement(), TokenNameBINDOUT, true, true);
+		if (node.hasParameterMapping())
+			handleTokenAfter(node.getBaseMappingElement(), TokenNameLBRACE, true, true);
+		return true;
+	}
+	@Override
+	public boolean visit(CallinMappingDeclaration node) {
+		handleTokenAfter(node.getRoleMappingElement(), TokenNameBINDIN, true, true);
+		List<ASTNode> baseMappingElements = node.getBaseMappingElements();
+		handleCommas(baseMappingElements, false, true);
+		ASTNode lastBase = baseMappingElements.get(baseMappingElements.size()-1);
+		GuardPredicateDeclaration predicate = node.getGuardPredicate();
+		if (predicate != null)
+			handleTokenAfter(lastBase, predicate.isBase() ? TokenNamebase : TokenNamewhen, true, true);
+		if (node.hasParameterMapping())
+			handleTokenAfter(lastBase, TokenNamewith, true, true);
+		return true;
+	}
+	@Override
+	public boolean visit(ParameterMapping node) {
+		if (node.isBindIN())
+			handleTokenAfter(node.getIdentifier(), TokenNameBINDIN, true, true);
+		else
+			handleTokenBefore(node.getIdentifier(), TokenNameBINDOUT, true, true);
+		return true;
+	}
+	@Override
+	public boolean visit(GuardPredicateDeclaration node) {
+		handleToken(node, TokenNamewhen, true, true);
+		return true;
+	}
+	@Override
+	public boolean visit(WithinStatement node) { // like while
+		handleToken(node, TokenNameLPAREN, this.options.insert_space_before_opening_paren_in_while,
+				this.options.insert_space_after_opening_paren_in_while);
+		handleTokenBefore(node.getBody(), TokenNameRPAREN, this.options.insert_space_before_closing_paren_in_while,
+				false);
+		return true;
+	}
+// SH}
 
 	private void handleTypeArguments(List<Type> typeArguments) {
 		if (typeArguments.isEmpty())

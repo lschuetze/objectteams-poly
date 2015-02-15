@@ -16,9 +16,11 @@ import static org.eclipse.jdt.internal.compiler.parser.TerminalTokens.TokenNameC
 import static org.eclipse.jdt.internal.compiler.parser.TerminalTokens.TokenNameLBRACE;
 import static org.eclipse.jdt.internal.compiler.parser.TerminalTokens.TokenNameRBRACE;
 import static org.eclipse.jdt.internal.compiler.parser.TerminalTokens.TokenNameSEMICOLON;
+import static org.eclipse.jdt.internal.compiler.parser.TerminalTokens.TokenNamebase;
 import static org.eclipse.jdt.internal.compiler.parser.TerminalTokens.TokenNameelse;
 import static org.eclipse.jdt.internal.compiler.parser.TerminalTokens.TokenNamefinally;
 import static org.eclipse.jdt.internal.compiler.parser.TerminalTokens.TokenNamepackage;
+import static org.eclipse.jdt.internal.compiler.parser.TerminalTokens.TokenNamewhen;
 import static org.eclipse.jdt.internal.compiler.parser.TerminalTokens.TokenNamewhile;
 
 import java.util.List;
@@ -34,6 +36,8 @@ import org.eclipse.jdt.core.dom.ArrayInitializer;
 import org.eclipse.jdt.core.dom.Block;
 import org.eclipse.jdt.core.dom.BodyDeclaration;
 import org.eclipse.jdt.core.dom.BreakStatement;
+import org.eclipse.jdt.core.dom.CallinMappingDeclaration;
+import org.eclipse.jdt.core.dom.CalloutMappingDeclaration;
 import org.eclipse.jdt.core.dom.CatchClause;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.DoStatement;
@@ -43,6 +47,7 @@ import org.eclipse.jdt.core.dom.EnumConstantDeclaration;
 import org.eclipse.jdt.core.dom.EnumDeclaration;
 import org.eclipse.jdt.core.dom.FieldDeclaration;
 import org.eclipse.jdt.core.dom.ForStatement;
+import org.eclipse.jdt.core.dom.GuardPredicateDeclaration;
 import org.eclipse.jdt.core.dom.IfStatement;
 import org.eclipse.jdt.core.dom.ImportDeclaration;
 import org.eclipse.jdt.core.dom.Initializer;
@@ -53,6 +58,7 @@ import org.eclipse.jdt.core.dom.MethodDeclaration;
 import org.eclipse.jdt.core.dom.Modifier;
 import org.eclipse.jdt.core.dom.NormalAnnotation;
 import org.eclipse.jdt.core.dom.PackageDeclaration;
+import org.eclipse.jdt.core.dom.RoleTypeDeclaration;
 import org.eclipse.jdt.core.dom.SingleMemberAnnotation;
 import org.eclipse.jdt.core.dom.SingleVariableDeclaration;
 import org.eclipse.jdt.core.dom.Statement;
@@ -63,6 +69,7 @@ import org.eclipse.jdt.core.dom.TypeDeclaration;
 import org.eclipse.jdt.core.dom.VariableDeclarationExpression;
 import org.eclipse.jdt.core.dom.VariableDeclarationStatement;
 import org.eclipse.jdt.core.dom.WhileStatement;
+import org.eclipse.jdt.core.dom.WithinStatement;
 import org.eclipse.jdt.core.formatter.DefaultCodeFormatterConstants;
 
 public class LineBreaksPreparator extends ASTVisitor {
@@ -118,6 +125,15 @@ public class LineBreaksPreparator extends ASTVisitor {
 	}
 
 	public boolean visit(TypeDeclaration node) {
+//{ObjectTeams:
+		GuardPredicateDeclaration predicate = node.getGuardPredicate();
+		if (predicate != null) {
+			this.tm.firstTokenIn(node.getGuardPredicate(), predicate.isBase() ? TokenNamebase : TokenNamewhen).breakBefore();
+			indent(node.getGuardPredicate());
+			indent(node.getGuardPredicate());
+			this.tm.firstTokenAfter(node.getGuardPredicate(), TokenNameLBRACE).breakBefore();
+		}			
+// SH}
 		handleBodyDeclarations(node.bodyDeclarations());
 
 		if (node.getName().getStartPosition() == -1)
@@ -516,6 +532,46 @@ public class LineBreaksPreparator extends ASTVisitor {
 			breakLineBefore(node);
 		return true;
 	}
+
+//{ObjectTeams: more visits:
+	@Override
+	public boolean visit(RoleTypeDeclaration node) {
+		return visit((TypeDeclaration)node);
+	}
+	@Override
+	public boolean visit(CalloutMappingDeclaration node) {
+		if (node.hasParameterMapping()) {
+			for (Object pMap : node.getParameterMappings())
+				breakLineBefore((ASTNode) pMap);
+			String bracePosition = this.options.brace_position_for_block;
+			handleBracedCode(node, null, bracePosition, this.options.indent_statements_compare_to_block,
+					this.options.insert_new_line_in_empty_block);
+		}
+		return true;
+	}
+	@Override
+	public boolean visit(CallinMappingDeclaration node) {
+		GuardPredicateDeclaration predicate = node.getGuardPredicate();
+		if (predicate != null) {
+			this.tm.firstTokenIn(node.getGuardPredicate(), predicate.isBase() ? TokenNamebase : TokenNamewhen).breakBefore();
+			indent(node.getGuardPredicate());
+		}
+
+		if (node.hasParameterMapping()) {
+			for (Object pMap : node.getParameterMappings())
+				breakLineBefore((ASTNode) pMap);
+			String bracePosition = this.options.brace_position_for_block;
+			handleBracedCode(node, null, bracePosition, this.options.indent_statements_compare_to_block,
+					this.options.insert_new_line_in_empty_block);
+		}
+		return true;
+	}
+	@Override
+	public boolean visit(WithinStatement node) { // like while
+		handleLoopBody(node.getBody());
+		return true;
+	}
+// SH}
 
 	private void breakLineBefore(ASTNode node) {
 		this.tm.firstTokenIn(node, -1).breakBefore();

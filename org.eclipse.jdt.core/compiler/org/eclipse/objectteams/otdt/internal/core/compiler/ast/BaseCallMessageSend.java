@@ -1,7 +1,7 @@
 /**********************************************************************
  * This file is part of "Object Teams Development Tooling"-Software
  *
- * Copyright 2004, 2006 Fraunhofer Gesellschaft, Munich, Germany,
+ * Copyright 2004, 2015 Fraunhofer Gesellschaft, Munich, Germany,
  * for its Fraunhofer Institute for Computer Architecture and Software
  * Technology (FIRST), Berlin, Germany and Technical University Berlin,
  * Germany.
@@ -10,7 +10,6 @@
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
- * $Id: BaseCallMessageSend.java 23401 2010-02-02 23:56:05Z stephan $
  *
  * Please visit http://www.eclipse.org/objectteams for updates and contact.
  *
@@ -71,10 +70,7 @@ import org.eclipse.objectteams.otdt.internal.core.compiler.util.AstGenerator;
  *
  * What: create a method binding faking the base call surrogate to be created by the OTRE
  *
- * TODO(SH): pretty printing, mainly for error reporting! (hide enhancements!)
- *
  * @author gis
- * @version $Id: BaseCallMessageSend.java 23401 2010-02-02 23:56:05Z stephan $
  */
 public class BaseCallMessageSend extends AbstractExpressionWrapper
 {
@@ -422,7 +418,8 @@ public class BaseCallMessageSend extends AbstractExpressionWrapper
 				this._sendOrig.selector = this.sourceSelector;
 				argsSave = this._sendOrig.arguments;
 				boolean isEnhanced = (this._sendOrig.bits & ASTNode.HasBeenTransformed) != 0;
-				this._sendOrig.arguments = MethodSignatureEnhancer.retrenchBasecallArguments(argsSave, isEnhanced, this._weavingScheme);
+				if (isEnhanced)
+					this._sendOrig.arguments = MethodSignatureEnhancer.retrenchBasecallArguments(argsSave, true, this._weavingScheme);
 				return this._sendOrig.printExpression(indent, output);
 			}
 		} finally {

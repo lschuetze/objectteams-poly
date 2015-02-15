@@ -24,7 +24,6 @@ import java.util.Hashtable;
 
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.formatter.DefaultCodeFormatterConstants;
-import org.eclipse.jdt.internal.formatter.align.Alignment;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.ui.PreferenceConstants;
 import org.eclipse.jface.preference.IPreferenceStore;
@@ -433,22 +432,6 @@ class TestFormatterOptions
 
 	private void setDefaultSettings()
 	{
-		this.alignment_for_arguments_in_allocation_expression = Alignment.M_COMPACT_SPLIT;
-		this.alignment_for_arguments_in_explicit_constructor_call = Alignment.M_COMPACT_SPLIT;
-		this.alignment_for_arguments_in_method_invocation = Alignment.M_COMPACT_SPLIT;
-		this.alignment_for_arguments_in_qualified_allocation_expression = Alignment.M_COMPACT_SPLIT;
-		this.alignment_for_binary_expression = Alignment.M_COMPACT_SPLIT;
-		this.alignment_for_compact_if = Alignment.M_ONE_PER_LINE_SPLIT | Alignment.M_INDENT_BY_ONE;
-		this.alignment_for_conditional_expression = Alignment.M_ONE_PER_LINE_SPLIT;
-		this.alignment_for_expressions_in_array_initializer = Alignment.M_COMPACT_SPLIT;
-		this.alignment_for_multiple_fields = Alignment.M_COMPACT_SPLIT;
-		this.alignment_for_parameters_in_constructor_declaration = Alignment.M_COMPACT_SPLIT;
-		this.alignment_for_parameters_in_method_declaration = Alignment.M_COMPACT_SPLIT;
-		this.alignment_for_selector_in_method_invocation = Alignment.M_COMPACT_SPLIT;
-		this.alignment_for_superclass_in_type_declaration = Alignment.M_NEXT_SHIFTED_SPLIT;
-		this.alignment_for_superinterfaces_in_type_declaration = Alignment.M_NEXT_SHIFTED_SPLIT;
-		this.alignment_for_throws_clause_in_constructor_declaration = Alignment.M_COMPACT_SPLIT;
-		this.alignment_for_throws_clause_in_method_declaration = Alignment.M_COMPACT_SPLIT;
 		this.align_type_members_on_columns = false;
 		this.brace_position_for_anonymous_type_declaration = DefaultCodeFormatterConstants.END_OF_LINE;
 		this.brace_position_for_array_initializer = DefaultCodeFormatterConstants.END_OF_LINE;

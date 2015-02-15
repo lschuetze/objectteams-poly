@@ -6518,7 +6518,9 @@ public BaseConstructorInvocation convert(
 		if (arguments != null) {
 			int argumentsLength = arguments.length;
 			// FIXME(SH): static?
-			int startIdx = MethodSignatureEnhancer.getEnhancingArgLen(this.weavingScheme)+1; // +1: skip 'isSuperAccess'
+			int startIdx = 0;
+			if ((msgSend.bits & org.eclipse.jdt.internal.compiler.ast.ASTNode.HasBeenTransformed) != 0)
+				startIdx = MethodSignatureEnhancer.getEnhancingArgLen(this.weavingScheme)+1; // +1: skip 'isSuperAccess'
 			for (int idx = startIdx; idx < argumentsLength; idx++) {
 				Expression argExpr = convert(arguments[idx]);
 				if (this.resolveBindings) {
