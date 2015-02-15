@@ -58,6 +58,7 @@ import org.eclipse.jdt.core.dom.MarkerAnnotation;
 import org.eclipse.jdt.core.dom.MemberValuePair;
 import org.eclipse.jdt.core.dom.MethodDeclaration;
 import org.eclipse.jdt.core.dom.MethodInvocation;
+import org.eclipse.jdt.core.dom.MethodSpec;
 import org.eclipse.jdt.core.dom.NormalAnnotation;
 import org.eclipse.jdt.core.dom.ParameterMapping;
 import org.eclipse.jdt.core.dom.ParameterizedType;
@@ -899,7 +900,7 @@ public class SpacePreparator extends ASTVisitor {
 	public boolean visit(CalloutMappingDeclaration node) {
 		handleTokenAfter(node.getRoleMappingElement(), TokenNameBINDOUT, true, true);
 		if (node.hasParameterMapping())
-			handleTokenAfter(node.getBaseMappingElement(), TokenNameLBRACE, true, true);
+			handleTokenAfter(node.getBaseMappingElement(), TokenNamewith, true, true);
 		return true;
 	}
 	@Override
@@ -913,6 +914,12 @@ public class SpacePreparator extends ASTVisitor {
 			handleTokenAfter(lastBase, predicate.isBase() ? TokenNamebase : TokenNamewhen, true, true);
 		if (node.hasParameterMapping())
 			handleTokenAfter(lastBase, TokenNamewith, true, true);
+		return true;
+	}
+	@Override
+	public boolean visit(MethodSpec node) {
+		handleCommas(node.parameters(), this.options.insert_space_before_comma_in_method_declaration_parameters,
+				this.options.insert_space_after_comma_in_method_declaration_parameters);
 		return true;
 	}
 	@Override
