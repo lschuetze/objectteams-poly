@@ -4747,12 +4747,9 @@ protected void setPaths(ArrayList bootclasspaths,
 	this.logger.logClasspath(this.checkedClasspaths);
 
 	if (this.annotationPath != null) {
-System.out.println("Setting annotationpath "+this.annotationPath);
 		for (FileSystem.Classpath cp : this.checkedClasspaths) {
-			if (cp instanceof ClasspathJar) {
-System.out.println("\tfor "+cp.getPath());
+			if (cp instanceof ClasspathJar)
 				((ClasspathJar) cp).annotationPath = this.annotationPath;
-			}
 		}
 	}
 }
