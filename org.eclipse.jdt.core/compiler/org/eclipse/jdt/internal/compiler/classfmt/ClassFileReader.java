@@ -551,6 +551,7 @@ public ZipFile setExternalAnnotationProvider(String basePath, String qualifiedBi
 			try {
 				String filePath = annotationBase.getAbsolutePath()+'/'+qualifiedBinaryFileName;
 				this.annotationProvider = new ExternalAnnotationProvider(new FileInputStream(filePath), String.valueOf(getName()));
+System.out.println(this.annotationProvider);
 			} catch (FileNotFoundException e) {
 				// expected, no need to report an error here
 			}

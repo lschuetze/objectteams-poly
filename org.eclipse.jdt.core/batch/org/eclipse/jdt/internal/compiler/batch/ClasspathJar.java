@@ -106,7 +106,6 @@ public NameEnvironmentAnswer findClass(char[] typeName, String qualifiedPackageN
 				String qualifiedClassName = qualifiedBinaryFileName.substring(0, qualifiedBinaryFileName.length()-SuffixConstants.EXTENSION_CLASS.length()-1);
 				try {
 					this.annotationZipFile = reader.setExternalAnnotationProvider(this.annotationPath, qualifiedClassName, this.annotationZipFile, null);
-System.out.println("NO EXCEPTION for "+qualifiedClassName);
 				} catch (IOException e) {
 					// don't let error on annotations fail class reading
 				}
