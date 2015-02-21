@@ -197,7 +197,7 @@ public class DefaultCodeFormatter extends CodeFormatter {
 		prepareSpaces();
 		prepareLineBreaks();
 		prepareComments();
-		prepareWraps();
+		prepareWraps(kind);
 
 		this.tokenManager.applyFormatOff();
 
@@ -379,8 +379,8 @@ public class DefaultCodeFormatter extends CodeFormatter {
 		commentsPreparator.finishUp();
 	}
 
-	private void prepareWraps() {
-		WrapPreparator wrapPreparator = new WrapPreparator(this.tokenManager, this.workingOptions);
+	private void prepareWraps(int kind) {
+		WrapPreparator wrapPreparator = new WrapPreparator(this.tokenManager, this.workingOptions, kind);
 		this.astRoot.accept(wrapPreparator);
 		wrapPreparator.finishUp();
 	}
