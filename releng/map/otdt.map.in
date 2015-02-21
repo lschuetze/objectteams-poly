@@ -37,7 +37,7 @@ plugin@org.eclipse.objectteams.otdt.jdt.ui=GIT,repo=git://git.eclipse.org/gitroo
 plugin@org.eclipse.objectteams.otdt.ui.help=GIT,repo=git://git.eclipse.org/gitroot/objectteams/org.eclipse.objectteams.git,path=plugins/org.eclipse.objectteams.otdt.ui.help
 plugin@org.eclipse.objectteams.otdt.apt=GIT,repo=git://git.eclipse.org/gitroot/objectteams/org.eclipse.objectteams.git,path=plugins/org.eclipse.objectteams.otdt.apt,tag=builds/201406101339
 plugin@org.eclipse.objectteams.otdt.compiler.adaptor=GIT,repo=git://git.eclipse.org/gitroot/objectteams/org.eclipse.objectteams.git,path=plugins/org.eclipse.objectteams.otdt.compiler.adaptor,tag=builds/201406101339
-plugin@org.eclipse.objectteams.otdt.debug.adaptor=GIT,repo=git://git.eclipse.org/gitroot/objectteams/org.eclipse.objectteams.git,path=plugins/org.eclipse.objectteams.otdt.debug.adaptor,tag=builds/201406101339
+plugin@org.eclipse.objectteams.otdt.debug.adaptor=GIT,repo=git://git.eclipse.org/gitroot/objectteams/org.eclipse.objectteams.git,path=plugins/org.eclipse.objectteams.otdt.debug.adaptor
 plugin@org.eclipse.objectteams.otdt.refactoring=GIT,repo=git://git.eclipse.org/gitroot/objectteams/org.eclipse.objectteams.git,path=plugins/org.eclipse.objectteams.otdt.refactoring
 plugin@org.eclipse.objectteams.otdt.pde.ui=GIT,repo=git://git.eclipse.org/gitroot/objectteams/org.eclipse.objectteams.git,path=plugins/org.eclipse.objectteams.otdt.pde.ui,tag=builds/201406101339
 plugin@org.eclipse.objectteams.otdt.samples=GIT,repo=git://git.eclipse.org/gitroot/objectteams/org.eclipse.objectteams.git,path=plugins/org.eclipse.objectteams.otdt.samples,tag=builds/201406101339
@@ -50,9 +50,9 @@ plugin@org.objectweb.asm.tree,5.0.1=p2IU,id=org.objectweb.asm.tree,version=5.0.1
 plugin@org.objectweb.asm.commons,5.0.1=p2IU,id=org.objectweb.asm.commons,version=5.0.1.v201404251740,repository=http://download.eclipse.org/tools/orbit/downloads/drops/R20140525021250/repository/
 
 !========== JDT/UI: ==========!
-plugin@org.eclipse.jdt.ui=GIT,tag=@SDK_QUALIFIER@,repo=git://git.eclipse.org/gitroot/jdt/eclipse.jdt.ui.git,path=org.eclipse.jdt.ui
-plugin@org.eclipse.jdt.ui.tests=GIT,tag=@SDK_QUALIFIER@,repo=git://git.eclipse.org/gitroot/jdt/eclipse.jdt.ui.git,path=org.eclipse.jdt.ui.tests
-plugin@org.eclipse.jdt.ui.tests.refactoring=GIT,tag=@SDK_QUALIFIER@,repo=git://git.eclipse.org/gitroot/jdt/eclipse.jdt.ui.git,path=org.eclipse.jdt.ui.tests.refactoring
+plugin@org.eclipse.jdt.ui=GIT,tag=aaa5ad5f2614e4859ea7ac5c0bb6ca0f40d68260,repo=git://git.eclipse.org/gitroot/jdt/eclipse.jdt.ui.git,path=org.eclipse.jdt.ui
+plugin@org.eclipse.jdt.ui.tests=GIT,tag=aaa5ad5f2614e4859ea7ac5c0bb6ca0f40d68260,repo=git://git.eclipse.org/gitroot/jdt/eclipse.jdt.ui.git,path=org.eclipse.jdt.ui.tests
+plugin@org.eclipse.jdt.ui.tests.refactoring=GIT,tag=aaa5ad5f2614e4859ea7ac5c0bb6ca0f40d68260,repo=git://git.eclipse.org/gitroot/jdt/eclipse.jdt.ui.git,path=org.eclipse.jdt.ui.tests.refactoring
 
 !***************  OTDT Test CONTRIBUTION  ******************************************************** 
 
@@ -73,7 +73,7 @@ plugin@org.eclipse.objectteams.otdt.ui.tests=GIT,repo=git://git.eclipse.org/gitr
 !-- Tests fetched from original GIT (some are required indirectly by jdt.ui.tests): --
 plugin@org.eclipse.jdt.core.tests.builder=GIT,tag=@SDK_QUALIFIER@,repo=git://git.eclipse.org/gitroot/jdt/eclipse.jdt.core.git,path=org.eclipse.jdt.core.tests.builder
 plugin@org.eclipse.jdt.debug.tests=GIT,tag=@SDK_QUALIFIER@,repo=git://git.eclipse.org/gitroot/jdt/eclipse.jdt.debug.git,path=org.eclipse.jdt.debug.tests
-plugin@org.eclipse.jdt.text.tests=GIT,tag=@SDK_QUALIFIER@,repo=git://git.eclipse.org/gitroot/jdt/eclipse.jdt.ui.git,path=org.eclipse.jdt.text.tests
+plugin@org.eclipse.jdt.text.tests=GIT,tag=aaa5ad5f2614e4859ea7ac5c0bb6ca0f40d68260,repo=git://git.eclipse.org/gitroot/jdt/eclipse.jdt.ui.git,path=org.eclipse.jdt.text.tests
 plugin@org.eclipse.jface.text.tests=GIT,tag=@SDK_QUALIFIER@,repo=git://git.eclipse.org/gitroot/platform/eclipse.platform.text.git,path=org.eclipse.jface.text.tests
 plugin@org.eclipse.text.tests=GIT,tag=@SDK_QUALIFIER@,repo=git://git.eclipse.org/gitroot/platform/eclipse.platform.text.git,path=org.eclipse.text.tests
 plugin@org.eclipse.core.filebuffers.tests=GIT,tag=@SDK_QUALIFIER@,repo=git://git.eclipse.org/gitroot/platform/eclipse.platform.text.git,path=org.eclipse.core.filebuffers.tests
