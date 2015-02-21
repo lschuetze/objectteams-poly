@@ -73,7 +73,6 @@ import org.eclipse.jdt.internal.core.dom.SourceRangeVerifier;
 import org.eclipse.jdt.internal.core.util.Util;
 import org.eclipse.objectteams.otdt.core.compiler.IOTConstants;
 import org.eclipse.objectteams.otdt.core.exceptions.InternalCompilerError;
-import org.eclipse.objectteams.otdt.internal.core.compiler.ast.AbstractMethodMappingDeclaration;
 import org.eclipse.objectteams.otdt.internal.core.compiler.ast.BaseReference;
 import org.eclipse.objectteams.otdt.internal.core.compiler.ast.CalloutMappingDeclaration;
 import org.eclipse.objectteams.otdt.internal.core.compiler.ast.FieldAccessSpec;
@@ -204,7 +203,7 @@ class ASTConverter {
 			}});
 
 		// method mapping declarations (callins, callouts)
-		AbstractMethodMappingDeclaration[] callinCallouts = typeDeclaration.callinCallouts;
+		org.eclipse.objectteams.otdt.internal.core.compiler.ast.AbstractMethodMappingDeclaration[] callinCallouts = typeDeclaration.callinCallouts;
 		int methodMappingsLength = callinCallouts == null ? 0 : callinCallouts.length;
 		int methodMappingsIndex = 0;
 //gbr+SH}
@@ -1317,6 +1316,15 @@ class ASTConverter {
 //jwl}
 					typeDecl.bodyDeclarations().add(convert(false, nextMethodDeclaration));
 				}
+//{ObjectTeams: method mappings:
+			} else if (node instanceof org.eclipse.objectteams.otdt.internal.core.compiler.ast.AbstractMethodMappingDeclaration) {
+				AbstractMethodMappingDeclaration nextMethodMapping = convert((org.eclipse.objectteams.otdt.internal.core.compiler.ast.AbstractMethodMappingDeclaration) node);
+				if (nextMethodMapping == null) {
+					typeDecl.setFlags(typeDecl.getFlags() | ASTNode.MALFORMED);
+				} else {
+					typeDecl.bodyDeclarations().add(nextMethodMapping);
+				}
+// SH}
 			} else if(node instanceof org.eclipse.jdt.internal.compiler.ast.TypeDeclaration) {
 				org.eclipse.jdt.internal.compiler.ast.TypeDeclaration nextMemberDeclaration = (org.eclipse.jdt.internal.compiler.ast.TypeDeclaration) node;
 				ASTNode nextMemberDeclarationNode = convert(nextMemberDeclaration);
@@ -6438,8 +6446,8 @@ class ASTConverter {
 	 * @param mappingDecl
 	 * @param mappingDeclaration
 	 */
-	protected void setModifiers(org.eclipse.jdt.core.dom.AbstractMethodMappingDeclaration mappingDecl,
-			AbstractMethodMappingDeclaration mappingDeclaration) {
+	protected void setModifiers(AbstractMethodMappingDeclaration mappingDecl,
+			org.eclipse.objectteams.otdt.internal.core.compiler.ast.AbstractMethodMappingDeclaration mappingDeclaration) {
 		switch(this.ast.apiLevel) {
 			case AST.JLS2_INTERNAL :
 				if (mappingDeclaration.annotations != null) {
@@ -6590,8 +6598,8 @@ public BaseConstructorInvocation convert(
 	}
 
 // convert method for OT-specific internal type AbstractMethodMappingDeclaration
-	public org.eclipse.jdt.core.dom.AbstractMethodMappingDeclaration convert(
-	        AbstractMethodMappingDeclaration abstractMethodMapping)
+	public AbstractMethodMappingDeclaration convert(
+			org.eclipse.objectteams.otdt.internal.core.compiler.ast.AbstractMethodMappingDeclaration abstractMethodMapping)
 	{
 	    if (abstractMethodMapping instanceof org.eclipse.objectteams.otdt.internal.core.compiler.ast.CallinMappingDeclaration)
 	    {

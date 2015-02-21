@@ -23,6 +23,7 @@ import org.eclipse.jdt.core.dom.ASTVisitor;
 import org.eclipse.jdt.core.dom.AnonymousClassDeclaration;
 import org.eclipse.jdt.core.dom.ArrayInitializer;
 import org.eclipse.jdt.core.dom.Assignment;
+import org.eclipse.jdt.core.dom.BaseCallMessageSend;
 import org.eclipse.jdt.core.dom.Block;
 import org.eclipse.jdt.core.dom.ClassInstanceCreation;
 import org.eclipse.jdt.core.dom.CompilationUnit;
@@ -35,6 +36,8 @@ import org.eclipse.jdt.core.dom.FieldDeclaration;
 import org.eclipse.jdt.core.dom.IfStatement;
 import org.eclipse.jdt.core.dom.ImportDeclaration;
 import org.eclipse.jdt.core.dom.InfixExpression;
+import org.eclipse.jdt.core.dom.MethodSpec;
+import org.eclipse.jdt.core.dom.RoleTypeDeclaration;
 import org.eclipse.jdt.core.dom.InfixExpression.Operator;
 import org.eclipse.jdt.core.dom.LambdaExpression;
 import org.eclipse.jdt.core.dom.MethodDeclaration;
@@ -482,6 +485,38 @@ public class WrapPreparator extends ASTVisitor {
 		handleVariableDeclarations(node.fragments());
 		return true;
 	}
+
+//{ObjectTeams: more visits:
+	@Override
+	public boolean visit(RoleTypeDeclaration node) {
+		this.visit((TypeDeclaration) node);
+		Type baseclassType = node.getBaseClassType();
+		if (baseclassType != null) {
+			this.wrapParentIndex = this.tm.lastIndexIn(node.getName(), -1);
+			this.wrapGroupEnd = this.tm.lastIndexIn(baseclassType, -1);
+			this.wrapIndexes.add(this.tm.firstIndexBefore(baseclassType, TokenNameplayedBy));
+			this.wrapIndexes.add(this.tm.firstIndexIn(baseclassType, -1));
+			handleWrap(this.options.alignment_for_superclass_in_type_declaration, PREFERRED);
+		}
+		return true;
+	}
+	@Override
+	public boolean visit(MethodSpec node) {
+		List<SingleVariableDeclaration> parameters = node.parameters();
+		if (!parameters.isEmpty()) {
+			int wrappingOption = this.options.alignment_for_parameters_in_method_declaration;
+			this.wrapGroupEnd = this.tm.lastIndexIn(parameters.get(parameters.size() - 1), -1);
+			handleArguments(parameters, wrappingOption);
+		}
+		return true;
+	}
+	@Override
+	public boolean visit(BaseCallMessageSend node) {
+		handleArguments(node.getArguments(), this.options.alignment_for_arguments_in_method_invocation);
+		return true;
+	}
+	// TODO(SH): smart wrapping of long method mappings
+// SH}
 
 	/**
 	 * Makes sure all new lines within given node will have wrap policy so that
