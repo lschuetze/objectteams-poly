@@ -1,13 +1,12 @@
 /**********************************************************************
  * This file is part of "Object Teams Development Tooling"-Software
  * 
- * Copyright 2004, 2010 IT Service Omikron GmbH and others.
+ * Copyright 2004, 2015 IT Service Omikron GmbH and others.
  * 
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
- * $Id$
  * 
  * Please visit http://www.eclipse.org/objectteams for updates and contact.
  * 
@@ -2231,5 +2230,43 @@ public class FileStructure extends AbstractOTJLDTest {
             null/*vmArguments*/,
             customOptions,
             null/*no custom requestor*/);
+    }
+    
+    // Bug 460525 - Evaluating PlayedBy attribute may cause bad processing order
+    public void testBug460525() {
+    	compileOrder = new String[][] {
+			    			new String[] {"pb/BaseTeam.java", "pt/TopTeam.java", "pt/TopTeam/Mid/InnerRole.java"},
+			    			new String[] {"pt/Main.java"}
+    					};
+    	runConformTest(
+    		new String[] {
+    			"pb/BaseTeam.java",
+    				"package pb;\n" +
+    				"public team class BaseTeam {\n" +
+    				"	public class BaseRole {}\n" +
+    				"}\n",
+    			"pt/TopTeam.java",
+    				"package pt;\n" +
+    				"import base pb.BaseTeam;\n" +
+    				"public team class TopTeam {\n" +
+    				"	public team class Mid playedBy BaseTeam {\n" +
+    				"		public void mTest(BaseRole<@base> r) {}\n" +
+    				"	}\n" +
+    				"}\n",
+    			"pt/TopTeam/Mid/InnerRole.java",
+    				"team package pt.TopTeam.Mid;\n" +
+    				"public class InnerRole playedBy BaseRole<@Mid.base> {}\n",
+
+				// Compiling this class triggered:
+				// TopTeam.createFields() -> InnerRole.cachePartsFrom() -> InnerRole.evaluateOTAttributes() -> TopTeam.getField() -> NPE
+    			"pt/Main.java",
+    				"package pt;\n" +
+    				"public class Main {\n" +
+    				"	final TopTeam t = new TopTeam();\n" +
+    				"	void test(final Mid<@t> m, InnerRole<@m> i) {\n" +
+    				"		m.mTest(i);\n" + // need this call to force resolving of InnerRole.baseclass()
+    				"	}\n" +
+    				"}\n"
+    		});
     }
 }

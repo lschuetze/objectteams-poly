@@ -1,7 +1,7 @@
 /**********************************************************************
  * This file is part of "Object Teams Development Tooling"-Software
  *
- * Copyright 2004, 2010 Fraunhofer Gesellschaft, Munich, Germany,
+ * Copyright 2004, 2015 Fraunhofer Gesellschaft, Munich, Germany,
  * for its Fraunhofer Institute for Computer Architecture and Software
  * Technology (FIRST), Berlin, Germany and Technical University Berlin,
  * Germany.
@@ -36,14 +36,10 @@ public class ModelElement {
 
 
     /** Add an OT-specific bytecode attribute. */
-    public void addAttribute (AbstractAttribute attr)
-    {
-        if (this._attributes == null)
-        {
+    public void addAttribute (AbstractAttribute attr) {
+        if (this._attributes == null) {
             this._attributes = new AbstractAttribute[]{attr};
-        }
-        else
-        {
+        } else {
             int len = this._attributes.length;
             AbstractAttribute[] newAttrs = new AbstractAttribute[len+1];
             System.arraycopy(this._attributes, 0, newAttrs, 0, len);
@@ -93,6 +89,22 @@ public class ModelElement {
 		}
     	return null;
     }
+
+    public void removeAttribute(AbstractAttribute attr) {
+    	if (this._attributes == null) return;
+    	int newLength = this._attributes.length-1;
+		AbstractAttribute[] newAttributes = new AbstractAttribute[newLength];
+		int i = 0;
+		for (AbstractAttribute anAttr : this._attributes) {
+			if (anAttr != attr) {
+				if (i == newLength)
+					return; // trying to insert the last item means: not found, so just don't change
+				newAttributes[i++] = anAttr;
+			}
+		}
+		this._attributes = newAttributes;
+    }
+
     /**
      * Write all OT-specific attributes of a given type binding to the given class file
      * @param type the element whose attributes should be written

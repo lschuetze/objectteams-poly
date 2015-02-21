@@ -64,6 +64,7 @@ import org.eclipse.jdt.internal.compiler.problem.AbortCompilation;
 import org.eclipse.jdt.internal.compiler.util.SimpleLookupTable;
 import org.eclipse.jdt.internal.compiler.util.Util;
 import org.eclipse.objectteams.otdt.core.compiler.IOTConstants;
+import org.eclipse.objectteams.otdt.internal.core.compiler.bytecode.AbstractAttribute;
 import org.eclipse.objectteams.otdt.internal.core.compiler.control.Config;
 import org.eclipse.objectteams.otdt.internal.core.compiler.control.Dependencies;
 import org.eclipse.objectteams.otdt.internal.core.compiler.control.ITranslationStates;
@@ -807,8 +808,8 @@ private void createFields(IBinaryField[] iFields, IBinaryType binaryType, long s
 					this.fields[i].setAnnotations(createAnnotations(binaryField.getAnnotations(), this.environment, missingTypeNames));
 				}
 			}
-				}
-			}
+		}
+	}
 }
 //{ObjectTeams: some fields are indeed value parameters:
 private SyntheticArgumentBinding[] valueParameters = NO_SYNTH_ARGUMENTS;
@@ -2220,8 +2221,18 @@ public ReferenceBinding superclass() {
 }
 //{ObjectTeams:
 public ReferenceBinding baseclass () {
-    if (this.baseclass == null)
+	if (this.baseclass == null) {
+    	if (this.roleModel != null) {
+    		// check if evaluation of a PlayedBy attribute had to be deferred:
+    		AbstractAttribute attribute = this.roleModel.getAttribute(IOTConstants.PLAYEDBY_NAME);
+    		if (attribute != null) {
+    			attribute.evaluate(this, this.environment, null);
+    			this.roleModel.removeAttribute(attribute);
+    			return baseclass();
+    		}
+    	}
         return null;
+    }
     if (this.baseclass instanceof UnresolvedReferenceBinding)
         this.baseclass = ((UnresolvedReferenceBinding) this.baseclass).resolve(this.environment, false);
     return this.baseclass;

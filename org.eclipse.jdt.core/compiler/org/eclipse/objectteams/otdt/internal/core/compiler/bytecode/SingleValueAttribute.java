@@ -1,7 +1,7 @@
 /**********************************************************************
  * This file is part of "Object Teams Development Tooling"-Software
  *
- * Copyright 2004, 2006 Fraunhofer Gesellschaft, Munich, Germany,
+ * Copyright 2004, 2015 Fraunhofer Gesellschaft, Munich, Germany,
  * for its Fraunhofer Institute for Computer Architecture and Software
  * Technology (FIRST), Berlin, Germany and Technical University Berlin,
  * Germany.
@@ -10,7 +10,6 @@
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
- * $Id: SingleValueAttribute.java 23416 2010-02-03 19:59:31Z stephan $
  *
  * Please visit http://www.eclipse.org/objectteams for updates and contact.
  *
@@ -23,6 +22,7 @@ package org.eclipse.objectteams.otdt.internal.core.compiler.bytecode;
 import org.eclipse.jdt.core.compiler.CharOperation;
 import org.eclipse.jdt.internal.compiler.ClassFile;
 import org.eclipse.jdt.internal.compiler.classfmt.ClassFileStruct;
+import org.eclipse.jdt.internal.compiler.lookup.BinaryTypeBinding;
 import org.eclipse.jdt.internal.compiler.lookup.Binding;
 import org.eclipse.jdt.internal.compiler.lookup.ExtraCompilerModifiers;
 import org.eclipse.jdt.internal.compiler.lookup.FieldBinding;
@@ -66,7 +66,6 @@ import org.eclipse.objectteams.otdt.internal.core.compiler.model.FieldModel;
  *
  * </ul>
  * @author stephan
- * @version $Id: SingleValueAttribute.java 23416 2010-02-03 19:59:31Z stephan $
  */
 public class SingleValueAttribute
         extends AbstractAttribute
@@ -200,6 +199,11 @@ public class SingleValueAttribute
             	ReferenceBinding currentType = staticPart;
             	ITeamAnchor anchor = null; // accumulate anchor path here
             	while (i<anchorPath.length) {
+            		if (currentType instanceof BinaryTypeBinding && ((BinaryTypeBinding) currentType).version == 0) {
+            			// necessary type on the path is not fully initialized (version is about the last field to be assigned in cachePartsFrom()).
+            			roleType.roleModel.addAttribute(this);
+            			return; // defer evaluation
+            		}
             		FieldBinding f = currentType.getField(anchorPath[i], true);
             		if (f == null || !(f.type instanceof ReferenceBinding))
             			return; // not a valid anchor path.
