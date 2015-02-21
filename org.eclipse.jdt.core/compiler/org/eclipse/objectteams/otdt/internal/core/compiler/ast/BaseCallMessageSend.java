@@ -417,9 +417,8 @@ public class BaseCallMessageSend extends AbstractExpressionWrapper
 				selectorSave = this._sendOrig.selector;
 				this._sendOrig.selector = this.sourceSelector;
 				argsSave = this._sendOrig.arguments;
-				boolean isEnhanced = (this._sendOrig.bits & ASTNode.HasBeenTransformed) != 0;
-				if (isEnhanced)
-					this._sendOrig.arguments = MethodSignatureEnhancer.retrenchBasecallArguments(argsSave, true, this._weavingScheme);
+				if (hasBeenTransformed(this)) // signals presence of superAccess flag
+					this._sendOrig.arguments = MethodSignatureEnhancer.retrenchBasecallArguments(argsSave, hasBeenTransformed(this._sendOrig), this._weavingScheme);
 				return this._sendOrig.printExpression(indent, output);
 			}
 		} finally {
@@ -429,5 +428,8 @@ public class BaseCallMessageSend extends AbstractExpressionWrapper
 				this._sendOrig.arguments = argsSave;
 		}
 		return super.printExpression(indent, output);
+	}
+	private static boolean hasBeenTransformed(Expression expr) {
+		return (expr.bits & ASTNode.HasBeenTransformed) != 0;
 	}
 }

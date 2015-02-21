@@ -146,6 +146,7 @@ public class TransformStatementsVisitor
     @Override
     public boolean visit(BaseCallMessageSend messageSend, BlockScope scope) {
     	messageSend.prepareSuperAccess(this.weavingScheme);
+		messageSend.bits |= ASTNode.HasBeenTransformed; // only the outer has been transformed so far.
     	return true;
     }
     
@@ -202,7 +203,7 @@ public class TransformStatementsVisitor
 	    		}
     		}
 			messageSend.arguments = MethodSignatureEnhancer.enhanceArguments(args, messageSend.sourceEnd+1, this.weavingScheme);
-			messageSend.bits |= ASTNode.HasBeenTransformed;
+			messageSend.bits |= ASTNode.HasBeenTransformed; // mark only when args have really been enhanced
     	}
     	return true;
     }
