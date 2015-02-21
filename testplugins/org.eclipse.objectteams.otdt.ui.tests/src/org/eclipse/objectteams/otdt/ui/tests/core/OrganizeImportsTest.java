@@ -54,7 +54,6 @@ import org.osgi.service.prefs.BackingStoreException;
  * 
  * @author brcan
  */
-@SuppressWarnings("restriction")
 public class OrganizeImportsTest extends TestCase
 {
     private IJavaProject _project;

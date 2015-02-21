@@ -89,10 +89,28 @@ public final class ImportRewriteAnalyzer {
 			return extractQualifiedNames(true, this.createdImports);
 		}
 
+//{ObjectTeams: base
+		public String[] getCreatedBaseImports() {
+			List<String> names = new ArrayList<String>(this.createdImports.size());
+			for (ImportName importName : this.createdImports) {
+				if (importName.isBase) {
+					names.add(importName.qualifiedName);
+				}
+			}
+
+			return names.toArray(new String[names.size()]);
+		}
+// SH}
+
 		private String[] extractQualifiedNames(boolean b, Collection<ImportName> imports) {
 			List<String> names = new ArrayList<String>(imports.size());
 			for (ImportName importName : imports) {
+//{ObjectTeams: base
+/* orig:
 				if (importName.isStatic == b) {
+  :giro */
+				if (importName.isStatic == b && !importName.isBase) {
+// SH}
 					names.add(importName.qualifiedName);
 				}
 			}
@@ -496,8 +514,14 @@ public final class ImportRewriteAnalyzer {
 	 * <p>
 	 * Overrides any previous corresponding call to {@link #removeImport}.
 	 */
+//{ObjectTeams: base
+/* orig
 	public void addImport(boolean isStatic, String qualifiedName) {
 		ImportName importToAdd = ImportName.createFor(isStatic, qualifiedName);
+  :giro */
+	public void addImport(boolean isStatic, boolean isBase, String qualifiedName) {
+		ImportName importToAdd = ImportName.createFor(isStatic, isBase, qualifiedName);
+// SH}
 		this.importsToAdd.add(importToAdd);
 		this.importsToRemove.remove(importToAdd);
 	}
@@ -510,8 +534,14 @@ public final class ImportRewriteAnalyzer {
 	 * <p>
 	 * Overrides any previous corresponding call to {@link #addImport}.
 	 */
+//{ObjectTeams: base
+/* orig:
 	public void removeImport(boolean isStatic, String qualifiedName) {
 		ImportName importToRemove = ImportName.createFor(isStatic, qualifiedName);
+  :giro */
+	public void removeImport(boolean isStatic, boolean isBase, String qualifiedName) {
+		ImportName importToRemove = ImportName.createFor(isStatic, isBase, qualifiedName);
+// SH}
 		this.importsToAdd.remove(importToRemove);
 		this.importsToRemove.add(importToRemove);
 	}
@@ -595,9 +625,15 @@ public final class ImportRewriteAnalyzer {
 				this.importsToAdd.size() + this.importsToRemove.size());
 
 		for (ImportName addedImport : this.importsToAdd) {
+//{ObjectTeams: base import shouldn't participate in any on-demand magic:
+			if (addedImport.isBase) continue;
+// SH}
 			touchedContainers.add(addedImport.getContainerOnDemand());
 		}
 		for (ImportName removedImport : this.importsToRemove) {
+//{ObjectTeams: base import shouldn't participate in any on-demand magic:
+			if (removedImport.isBase) continue;
+// SH}
 			touchedContainers.add(removedImport.getContainerOnDemand());
 		}
 

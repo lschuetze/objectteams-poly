@@ -56,6 +56,9 @@ class OnDemandComputer {
 
 		for (Map.Entry<ImportName, Collection<ImportName>> containerAndImports : importsByContainer.entrySet()) {
 			ImportName containerOnDemand = containerAndImports.getKey();
+//{ObjectTeams: no on-demand base imports
+			if (containerOnDemand.isBase) continue;
+// SH}
 			Collection<ImportName> containerImports = containerAndImports.getValue();
 
 			Set<String> explicitSimpleNames =
@@ -79,6 +82,9 @@ class OnDemandComputer {
 	private Map<ImportName, Collection<ImportName>> mapByContainer(Collection<ImportName> imports) {
 		Map<ImportName, Collection<ImportName>> importsByContainer = new HashMap<ImportName, Collection<ImportName>>();
 		for (ImportName importName : imports) {
+//{ObjectTeams: base import shouldn't participate in any on-demand magic:
+			if (importName.isBase) continue;
+// SH}
 			ImportName containerOnDemand = importName.getContainerOnDemand();
 
 			Collection<ImportName> containerImports = importsByContainer.get(containerOnDemand);

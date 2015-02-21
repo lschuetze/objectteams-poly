@@ -29,6 +29,12 @@ final class ImportDeclarationWriter {
 			sb.append("static "); //$NON-NLS-1$
 		}
 
+//{OjbectTeams:
+		else if (importName.isBase) {
+			sb.append("base "); //$NON-NLS-1$
+		}
+// SH}
+
 		sb.append(importName.qualifiedName);
 
 		if (this.insertSpaceBeforeSemicolon) {

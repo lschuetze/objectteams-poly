@@ -58,18 +58,35 @@ final class ImportGroupComparator implements Comparator<ImportName>{
 	private static final class IndexedImportGroups {
 		final NavigableMap<String, ImportGroup> typeImportGroupsByName;
 		final NavigableMap<String, ImportGroup> staticImportGroupByName;
+//{ObjectTeams: base added:
+/* orig:
 
 		IndexedImportGroups(
 				NavigableMap<String, ImportGroup> typeImportGroupsByName,
 				NavigableMap<String, ImportGroup> staticImportGroupsByName) {
 			this.typeImportGroupsByName = typeImportGroupsByName;
 			this.staticImportGroupByName = staticImportGroupsByName;
+  giro: */
+		final NavigableMap<String, ImportGroup> baseImportGroupByName; // OT
+		
+		IndexedImportGroups(
+				NavigableMap<String, ImportGroup> typeImportGroupsByName,
+				NavigableMap<String, ImportGroup> staticImportGroupsByName,
+				NavigableMap<String, ImportGroup> baseImportGroupsByName) { // OT
+			this.typeImportGroupsByName = typeImportGroupsByName;
+			this.staticImportGroupByName = staticImportGroupsByName;
+			this.baseImportGroupByName = baseImportGroupsByName; // OT
+// SH}
 		}
 	}
 
 	private static final String MATCH_ALL = ""; //$NON-NLS-1$
 	private static final String STATIC_PREFIX = "#"; //$NON-NLS-1$
 	private static final String STATIC_MATCH_ALL = STATIC_PREFIX + MATCH_ALL;
+//{ObjectTeams: base
+	private static final String BASE_PREFIX = "%"; //$NON-NLS-1$
+	private static final String BASE_MATCH_ALL = BASE_PREFIX + MATCH_ALL;
+// SH}
 
 	private static List<String> memoizedImportOrder = null;
 	private static IndexedImportGroups memoizedIndexedImportGroups = null;
@@ -77,8 +94,15 @@ final class ImportGroupComparator implements Comparator<ImportName>{
 	private static List<String> includeMatchAllImportGroups(List<String> importOrder) {
 		boolean needsTypeMatchAll = !importOrder.contains(MATCH_ALL);
 		boolean needsStaticMatchAll = !importOrder.contains(STATIC_MATCH_ALL);
+//{ObjectTeams: base
+/* orig:
 
 		if (!needsTypeMatchAll && !needsStaticMatchAll) {
+  :giro */
+		boolean needsBaseMatchAll = !importOrder.contains(BASE_MATCH_ALL);
+		
+		if (!needsTypeMatchAll && !needsStaticMatchAll) {
+// SH}
 			return importOrder;
 		}
 
@@ -94,6 +118,11 @@ final class ImportGroupComparator implements Comparator<ImportName>{
 			augmentedOrder.add(MATCH_ALL);
 		}
 
+//{ObjectTeams: by default, base imports come last:
+		if (needsBaseMatchAll) {
+			augmentedOrder.add(BASE_MATCH_ALL);
+		}
+// SH}
 		return augmentedOrder;
 	}
 
@@ -104,6 +133,9 @@ final class ImportGroupComparator implements Comparator<ImportName>{
 
 		Map<String, Integer> typeGroupsAndIndices = new HashMap<String, Integer>();
 		Map<String, Integer> staticGroupsAndIndices = new HashMap<String, Integer>();
+//{ObjectTeams: base
+		Map<String, Integer> baseGroupsAndIndices = new HashMap<String, Integer>();
+// SH}
 		for (int i = 0; i < importOrder.size(); i++) {
 			String importGroupString = importOrder.get(i);
 
@@ -111,6 +143,11 @@ final class ImportGroupComparator implements Comparator<ImportName>{
 			if (importGroupString.startsWith(STATIC_PREFIX)) {
 				groupsAndIndices = staticGroupsAndIndices;
 				importGroupString = importGroupString.substring(1);
+//{ObjectTeams: base
+			} else if (importGroupString.startsWith(BASE_PREFIX)) {
+				groupsAndIndices = baseGroupsAndIndices;
+				importGroupString = importGroupString.substring(1);
+// SH}
 			} else {
 				groupsAndIndices = typeGroupsAndIndices;
 			}
@@ -122,7 +159,13 @@ final class ImportGroupComparator implements Comparator<ImportName>{
 
 		memoizedIndexedImportGroups = new IndexedImportGroups(
 				mapImportGroups(typeGroupsAndIndices),
+//{ObjectTeams: base
+/* orig:
 				mapImportGroups(staticGroupsAndIndices));
+  giro: */
+				mapImportGroups(staticGroupsAndIndices),
+				mapImportGroups(baseGroupsAndIndices));
+// SH}
 
 		return memoizedIndexedImportGroups;
 	}
@@ -186,6 +229,10 @@ final class ImportGroupComparator implements Comparator<ImportName>{
 		NavigableMap<String, ImportGroup> groupsByName = importName.isStatic
 				? this.indexedImportGroups.staticImportGroupByName
 						: this.indexedImportGroups.typeImportGroupsByName;
+//{ObjectTeams: base
+		if (importName.isBase)
+			groupsByName = this.indexedImportGroups.baseImportGroupByName;
+// SH}
 
 		ImportGroup prefixingGroup = groupsByName.floorEntry(name).getValue();
 		while (!isWholeSegmentPrefix(prefixingGroup.getName(), name)) {

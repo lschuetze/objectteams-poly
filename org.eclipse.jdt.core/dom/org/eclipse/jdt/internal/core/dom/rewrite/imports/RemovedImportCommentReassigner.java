@@ -130,6 +130,9 @@ final class RemovedImportCommentReassigner {
 		for (OriginalImportEntry removedImport : removedImportsWithComments) {
 			ImportName removedImportName = removedImport.importName;
 
+//{ObjectTeams: base import shouldn't participate in any on-demand magic:
+			if (removedImportName.isBase) continue;
+// SH}
 			final ImportEntry retainedImport;
 			if (removedImportName.isOnDemand()) {
 				retainedImport = firstSingleForOnDemand.get(removedImportName);

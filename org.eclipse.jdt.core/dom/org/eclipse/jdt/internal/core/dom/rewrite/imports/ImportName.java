@@ -28,17 +28,35 @@ public final class ImportName {
 		if (importDeclaration.isOnDemand()) {
 			return createOnDemand(importDeclaration.isStatic(), declName);
 		}
+//{ObjectTeams: base
+/* orig:
 		return createFor(importDeclaration.isStatic(), declName);
+  :giro */
+		return createFor(importDeclaration.isStatic(), importDeclaration.isBase(), declName);
+// SH}
 	}
 
 	static ImportName createOnDemand(boolean isStatic, String containerName) {
+//{ObjectTeams: no on-demand base imports
+/* orig:
 		return new ImportName(isStatic, containerName, "*"); //$NON-NLS-1$
+  :giro */
+		return new ImportName(isStatic, false, containerName, "*"); //$NON-NLS-1$
+// SH}
 	}
 
+//{ObjectTeams: base
+/* orig:
 	public static ImportName createFor(boolean isStatic, String qualifiedName) {
 		String containerName = Signature.getQualifier(qualifiedName);
 		String simpleName = qualifiedName.substring(containerName.length() + 1);
 		return new ImportName(isStatic, containerName, simpleName);
+  :giro */
+	public static ImportName createFor(boolean isStatic, /*OT:*/boolean isBase, String qualifiedName) {
+		String containerName = Signature.getQualifier(qualifiedName);
+		String simpleName = qualifiedName.substring(containerName.length() + 1);
+		return new ImportName(isStatic, /*OT:*/isBase, containerName, simpleName);
+// SH}
 	}
 
 	public final boolean isStatic;
@@ -46,7 +64,14 @@ public final class ImportName {
 	public final String simpleName;
 	public final String qualifiedName;
 
+//{ObjectTeams: base
+	public final boolean isBase;
+/* orig:
 	private ImportName(boolean isStatic, String containerName, String simpleName) {
+  :giro */
+	private ImportName(boolean isStatic, boolean isBase, String containerName, String simpleName) {
+		this.isBase = isBase;
+// SH}
 		this.isStatic = isStatic;
 		this.containerName = containerName;
 		this.simpleName = simpleName;
@@ -57,13 +82,21 @@ public final class ImportName {
 	@Override
 	public String toString() {
 		String template = this.isStatic ? "staticImport(%s)" : "typeImport(%s)"; //$NON-NLS-1$ //$NON-NLS-2$
+//{ObjectTeams: base
+		if (this.isBase) template = "baseImport(%s)"; //$NON-NLS-1$
+// SH}
 		return String.format(template, this.qualifiedName);
 	}
 
 	@Override
 	public int hashCode() {
 		int result = this.qualifiedName.hashCode();
+//{ObjectTeams: base
+/* orig:
 		result = 31 * result + (this.isStatic ? 1 : 0);
+  :giro */
+		result = 31 * result + (this.isStatic ? 1 : this.isBase ? 3 : 0);
+// SH}
 		return result;
 	}
 
@@ -74,6 +107,9 @@ public final class ImportName {
 		}
 
 		ImportName other = (ImportName) obj;
+//{ObjectTeams: base
+		if (this.isBase != other.isBase) return false;
+// SH}
 
 		return this.qualifiedName.equals(other.qualifiedName) && this.isStatic == other.isStatic;
 	}

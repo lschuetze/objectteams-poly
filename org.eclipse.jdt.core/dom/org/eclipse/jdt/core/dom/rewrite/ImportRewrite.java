@@ -176,6 +176,7 @@ public final class ImportRewrite {
 	private String[] createdStaticImports;
 
 //{ObjectTeams: import base:
+	private String[] createdBaseImports;
 	private List<String> importsToMarkAsBase;
 // SH}
 
@@ -292,7 +293,8 @@ public final class ImportRewrite {
 		this.staticExplicitSimpleNames = new HashSet<String>();
 		this.createdImports= null;
 		this.createdStaticImports= null;
-//{ObjectTeams:
+//{ObjectTeams: base
+		this.createdBaseImports= null;
 		this.importsToMarkAsBase = null;
 // SH}
 
@@ -1164,6 +1166,9 @@ public final class ImportRewrite {
 			if (!hasRecordedChanges()) {
 				this.createdImports= CharOperation.NO_STRINGS;
 				this.createdStaticImports= CharOperation.NO_STRINGS;
+//{ObjectTeams: base
+				this.createdBaseImports= CharOperation.NO_STRINGS;
+// SH}
 				return new MultiTextEdit();
 			}
 
@@ -1184,13 +1189,25 @@ public final class ImportRewrite {
 			for (String addedImport : this.addedImports) {
 				boolean isStatic = STATIC_PREFIX == addedImport.charAt(0);
 				String qualifiedName = addedImport.substring(1);
+//{ObjectTeams: base
+/* orig:
 				computer.addImport(isStatic, qualifiedName);
+  :giro */
+				boolean isBase = BASE_PREFIX == addedImport.charAt(0);
+				computer.addImport(isStatic, isBase, qualifiedName);
+// SH}
 			}
 
 			for (String removedImport : this.removedImports) {
 				boolean isStatic = STATIC_PREFIX == removedImport.charAt(0);
 				String qualifiedName = removedImport.substring(1);
+//{ObjectTeams: base
+/* orig:
 				computer.removeImport(isStatic, qualifiedName);
+  :giro */
+				boolean isBase = BASE_PREFIX == removedImport.charAt(0);
+				computer.removeImport(isStatic, isBase, qualifiedName);
+// SH}
 			}
 
 			for (String typeExplicitSimpleName : this.typeExplicitSimpleNames) {
@@ -1205,6 +1222,9 @@ public final class ImportRewrite {
 
 			this.createdImports= result.getCreatedImports();
 			this.createdStaticImports= result.getCreatedStaticImports();
+//{ObjectTeams: base
+			this.createdBaseImports= result.getCreatedBaseImports();
+// SH}
 
 			return result.getTextEdit();
 		} finally {
