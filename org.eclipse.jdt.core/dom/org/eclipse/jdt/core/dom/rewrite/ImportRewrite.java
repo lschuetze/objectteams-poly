@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2014 IBM Corporation and others.
+ * Copyright (c) 2000, 2015 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -8,14 +8,18 @@
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *     Technical University Berlin - extended API and implementation
+ *     John Glassmyer <jogl@google.com> - import group sorting is broken - https://bugs.eclipse.org/430303
  *******************************************************************************/
 
 package org.eclipse.jdt.core.dom.rewrite;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -32,7 +36,10 @@ import org.eclipse.jdt.core.Signature;
 import org.eclipse.jdt.core.compiler.CharOperation;
 import org.eclipse.jdt.core.dom.*;
 import org.eclipse.jdt.internal.compiler.lookup.ExtraCompilerModifiers;
-import org.eclipse.jdt.internal.core.dom.rewrite.ImportRewriteAnalyzer;
+import org.eclipse.jdt.internal.core.dom.rewrite.imports.ImportRewriteConfiguration;
+import org.eclipse.jdt.internal.core.dom.rewrite.imports.ImportRewriteAnalyzer;
+import org.eclipse.jdt.internal.core.dom.rewrite.imports.ImportRewriteConfiguration.ImplicitImportIdentification;
+import org.eclipse.jdt.internal.core.dom.rewrite.imports.ImportRewriteConfiguration.ImportContainerSorting;
 import org.eclipse.jdt.internal.core.util.Messages;
 import org.eclipse.jdt.internal.core.util.Util;
 import org.eclipse.text.edits.MultiTextEdit;
@@ -92,6 +99,14 @@ public final class ImportRewrite {
 		public final static int RES_NAME_CONFLICT= 3;
 
 		/**
+		 * Result constant signaling that the given element must be imported explicitly (and must not be folded into
+		 * an on-demand import or filtered as an implicit import).
+		 *
+		 * @since 3.11
+		 */
+		public final static int RES_NAME_UNKNOWN_NEEDS_EXPLICIT_IMPORT= 4;
+
+		/**
 		 * Kind constant specifying that the element is a type import.
 		 */
 		public final static int KIND_TYPE= 1;
@@ -108,14 +123,17 @@ public final class ImportRewrite {
 
 		/**
 		 * Searches for the given element in the context and reports if the element is known ({@link #RES_NAME_FOUND}),
-		 * unknown ({@link #RES_NAME_UNKNOWN}) or if its name conflicts ({@link #RES_NAME_CONFLICT}) with an other element.
+		 * unknown ({@link #RES_NAME_UNKNOWN}), unknown in the context but known to require an explicit import
+		 * ({@link #RES_NAME_UNKNOWN_NEEDS_EXPLICIT_IMPORT}), or if its name conflicts ({@link #RES_NAME_CONFLICT})
+		 * with an other element.
+		 *
 		 * @param qualifier The qualifier of the element, can be package or the qualified name of a type
 		 * @param name The simple name of the element; either a type, method or field name or * for on-demand imports.
 		 * @param kind The kind of the element. Can be either {@link #KIND_TYPE}, {@link #KIND_STATIC_FIELD} or
 		 * {@link #KIND_STATIC_METHOD}. Implementors should be prepared for new, currently unspecified kinds and return
 		 * {@link #RES_NAME_UNKNOWN} by default.
-		 * @return Returns the result of the lookup. Can be either {@link #RES_NAME_FOUND}, {@link #RES_NAME_UNKNOWN} or
-		 * {@link #RES_NAME_CONFLICT}.
+		 * @return Returns the result of the lookup. Can be either {@link #RES_NAME_FOUND}, {@link #RES_NAME_UNKNOWN},
+		 * {@link #RES_NAME_CONFLICT}, or {@link #RES_NAME_UNKNOWN_NEEDS_EXPLICIT_IMPORT}.
 		 */
 		public abstract int findInContext(String qualifier, String name, int kind);
 	}
@@ -139,8 +157,20 @@ public final class ImportRewrite {
 	private int importOnDemandThreshold;
 	private int staticImportOnDemandThreshold;
 
-	private List addedImports;
-	private List removedImports;
+	private List<String> addedImports;
+	private List<String> removedImports;
+
+	/**
+	 * Simple names of non-static imports which must not be reduced into on-demand imports
+	 * or filtered out as implicit.
+	 */
+	private Set<String> typeExplicitSimpleNames;
+
+	/**
+	 * Simple names of static imports which must not be reduced into on-demand imports
+	 * or filtered out as implicit.
+	 */
+	private Set<String> staticExplicitSimpleNames;
 
 	private String[] createdImports;
 	private String[] createdStaticImports;
@@ -256,8 +286,10 @@ public final class ImportRewrite {
 				return findInImports(qualifier, name, kind);
 			}
 		};
-		this.addedImports= null; // Initialized on use
-		this.removedImports= null; // Initialized on use
+		this.addedImports= new ArrayList<String>();
+		this.removedImports= new ArrayList<String>();
+		this.typeExplicitSimpleNames = new HashSet<String>();
+		this.staticExplicitSimpleNames = new HashSet<String>();
 		this.createdImports= null;
 		this.createdStaticImports= null;
 //{ObjectTeams:
@@ -267,7 +299,7 @@ public final class ImportRewrite {
 		this.importOrder= CharOperation.NO_STRINGS;
 		this.importOnDemandThreshold= 99;
 		this.staticImportOnDemandThreshold= 99;
-
+		
 		this.importsKindMap = new HashMap();
 	}
 
@@ -345,10 +377,10 @@ public final class ImportRewrite {
 	 * Note: {@link #setUseContextToFilterImplicitImports(boolean)} can be used to filter implicit imports
 	 * when a context is used.
 	 * </p>
-	 *
+	 * 
 	 * @param filterImplicitImports
 	 *            if <code>true</code>, implicit imports will be filtered
-	 *
+	 * 
 	 * @see #setUseContextToFilterImplicitImports(boolean)
 	 */
 	public void setFilterImplicitImports(boolean filterImplicitImports) {
@@ -365,16 +397,16 @@ public final class ImportRewrite {
 	* whether an import can be filtered because the type is implicitly visible. Note that too many imports
 	* may be kept if this option is set and <code>addImport*(...)</code> methods are called without a context.
 	* </p>
-	*
+	* 
 	* @param useContextToFilterImplicitImports the given setting
-	*
+	* 
 	* @see #setFilterImplicitImports(boolean)
 	* @since 3.6
 	*/
 	public void setUseContextToFilterImplicitImports(boolean useContextToFilterImplicitImports) {
 		this.useContextToFilterImplicitImports = useContextToFilterImplicitImports;
 	}
-
+	
 	private static int compareImport(char prefix, String qualifier, String name, String curr) {
 		if (curr.charAt(0) != prefix || !curr.endsWith(name)) {
 			return ImportRewriteContext.RES_NAME_UNKNOWN;
@@ -1000,6 +1032,10 @@ public final class ImportRewrite {
 		if (res == ImportRewriteContext.RES_NAME_UNKNOWN) {
 			addEntry(STATIC_PREFIX + key);
 		}
+		if (res == ImportRewriteContext.RES_NAME_UNKNOWN_NEEDS_EXPLICIT_IMPORT) {
+			addEntry(STATIC_PREFIX + key);
+			this.staticExplicitSimpleNames.add(simpleName);
+		}
 		return simpleName;
 	}
 
@@ -1028,35 +1064,31 @@ public final class ImportRewrite {
 		if (res == ImportRewriteContext.RES_NAME_UNKNOWN) {
 			addEntry(NORMAL_PREFIX + fullTypeName);
 		}
+		if (res == ImportRewriteContext.RES_NAME_UNKNOWN_NEEDS_EXPLICIT_IMPORT) {
+			addEntry(NORMAL_PREFIX + fullTypeName);
+			this.typeExplicitSimpleNames.add(typeName);
+		}
 		return typeName;
 	}
 
 	private void addEntry(String entry) {
 		this.existingImports.add(entry);
 
-		if (this.removedImports != null) {
-			if (this.removedImports.remove(entry)) {
-				return;
-			}
+		if (this.removedImports.remove(entry)) {
+			return;
 		}
 
-		if (this.addedImports == null) {
-			this.addedImports= new ArrayList();
-		}
 		this.addedImports.add(entry);
 	}
 
 	private boolean removeEntry(String entry) {
 		if (this.existingImports.remove(entry)) {
-			if (this.addedImports != null) {
-				if (this.addedImports.remove(entry)) {
-					return true;
-				}
+			if (this.addedImports.remove(entry)) {
+				return true;
 			}
-			if (this.removedImports == null) {
-				this.removedImports= new ArrayList();
-			}
+
 			this.removedImports.add(entry);
+
 			return true;
 		}
 		return false;
@@ -1144,59 +1176,64 @@ public final class ImportRewrite {
 				usedAstRoot= (CompilationUnit) parser.createAST(new SubProgressMonitor(monitor, 1));
 			}
 
+			ImportRewriteConfiguration config= buildImportRewriteConfiguration();
+
 			ImportRewriteAnalyzer computer=
-				new ImportRewriteAnalyzer(
-						this.compilationUnit,
-						usedAstRoot,
-						this.importOrder,
-						this.importOnDemandThreshold,
-						this.staticImportOnDemandThreshold,
-						this.restoreExistingImports,
-						this.useContextToFilterImplicitImports);
-			computer.setFilterImplicitImports(this.filterImplicitImports);
+				new ImportRewriteAnalyzer(this.compilationUnit, usedAstRoot, config);
 
-			if (this.addedImports != null) {
-				for (int i= 0; i < this.addedImports.size(); i++) {
-					String curr= (String) this.addedImports.get(i);
-//{ObjectTeams: base import:
-				  if (BASE_PREFIX == curr.charAt(0))
-					computer.addBaseImport(curr.substring(1));
-				  else
-					computer.addImport(curr.substring(1), STATIC_PREFIX == curr.charAt(0), /*isBase*/false, usedAstRoot, this.restoreExistingImports);
-  /* orig:
-					computer.addImport(curr.substring(1), STATIC_PREFIX == curr.charAt(0), usedAstRoot, this.restoreExistingImports);
-    :giro */
-// SH}
-				}
+			for (String addedImport : this.addedImports) {
+				boolean isStatic = STATIC_PREFIX == addedImport.charAt(0);
+				String qualifiedName = addedImport.substring(1);
+				computer.addImport(isStatic, qualifiedName);
 			}
 
-			if (this.removedImports != null) {
-				for (int i= 0; i < this.removedImports.size(); i++) {
-					String curr= (String) this.removedImports.get(i);
-//{ObjectTeams: added isBase arg:
-/* orig:
-					computer.removeImport(curr.substring(1), STATIC_PREFIX == curr.charAt(0));
-  :giro */
-					computer.removeImport(curr.substring(1), STATIC_PREFIX == curr.charAt(0), BASE_PREFIX == curr.charAt(0));
-// SH}
-				}
+			for (String removedImport : this.removedImports) {
+				boolean isStatic = STATIC_PREFIX == removedImport.charAt(0);
+				String qualifiedName = removedImport.substring(1);
+				computer.removeImport(isStatic, qualifiedName);
 			}
-//{ObjectTeams: import base:
-			if (this.importsToMarkAsBase != null) {
-				for (int i= 0; i < this.importsToMarkAsBase.size(); i++) {
-					String curr = this.importsToMarkAsBase.get(i);
-					computer.setBase(curr);
-				}
-			}
-// SH}
 
-			TextEdit result= computer.getResultingEdits(new SubProgressMonitor(monitor, 1));
-			this.createdImports= computer.getCreatedImports();
-			this.createdStaticImports= computer.getCreatedStaticImports();
-			return result;
+			for (String typeExplicitSimpleName : this.typeExplicitSimpleNames) {
+				computer.requireExplicitImport(false, typeExplicitSimpleName);
+			}
+
+			for (String staticExplicitSimpleName : this.staticExplicitSimpleNames) {
+				computer.requireExplicitImport(true, staticExplicitSimpleName);
+			}
+
+			ImportRewriteAnalyzer.RewriteResult result= computer.analyzeRewrite(new SubProgressMonitor(monitor, 1));
+
+			this.createdImports= result.getCreatedImports();
+			this.createdStaticImports= result.getCreatedStaticImports();
+
+			return result.getTextEdit();
 		} finally {
 			monitor.done();
 		}
+	}
+
+	private ImportRewriteConfiguration buildImportRewriteConfiguration() {
+		ImportRewriteConfiguration.Builder configBuilder;
+
+		if (this.restoreExistingImports) {
+			configBuilder= ImportRewriteConfiguration.Builder.preservingOriginalImports();
+		} else {
+			configBuilder= ImportRewriteConfiguration.Builder.discardingOriginalImports();
+		}
+
+		configBuilder.setImportOrder(Arrays.asList(this.importOrder));
+		configBuilder.setTypeOnDemandThreshold(this.importOnDemandThreshold);
+		configBuilder.setStaticOnDemandThreshold(this.staticImportOnDemandThreshold);
+
+		configBuilder.setTypeContainerSorting(this.useContextToFilterImplicitImports ?
+				ImportContainerSorting.BY_PACKAGE : ImportContainerSorting.BY_PACKAGE_AND_CONTAINING_TYPE);
+
+		configBuilder.setStaticContainerSorting(ImportContainerSorting.BY_PACKAGE_AND_CONTAINING_TYPE);
+
+		configBuilder.setImplicitImportIdentification(this.filterImplicitImports ?
+				ImplicitImportIdentification.JAVA_LANG_AND_CU_PACKAGE : ImplicitImportIdentification.NONE);
+
+		return configBuilder.build();
 	}
 
 	/**
@@ -1266,37 +1303,35 @@ public final class ImportRewrite {
 	 * @return boolean returns if any changes to imports have been recorded.
 	 */
 	public boolean hasRecordedChanges() {
-		return !this.restoreExistingImports ||
-			(this.addedImports != null && !this.addedImports.isEmpty()) ||
+		return !this.restoreExistingImports
+				|| !this.addedImports.isEmpty()
 //{ObjectTeams:
-			(this.importsToMarkAsBase != null && !this.importsToMarkAsBase.isEmpty()) ||
+				|| (this.importsToMarkAsBase != null && !this.importsToMarkAsBase.isEmpty())
 // SH}
-			(this.removedImports != null && !this.removedImports.isEmpty());
+				|| !this.removedImports.isEmpty();
 	}
 
 //{ObjectTeams: my version of above in anticipation of https://bugs.eclipse.org/bugs/show_bug.cgi?id=271812
 	public boolean myHasRecordedChanges() {
-		return
-			(this.addedImports != null && !this.addedImports.isEmpty()) ||
+		return !this.addedImports.isEmpty()
 //{ObjectTeams:
-			(this.importsToMarkAsBase != null && !this.importsToMarkAsBase.isEmpty()) ||
+				|| (this.importsToMarkAsBase != null && !this.importsToMarkAsBase.isEmpty())
 // SH}
-			(this.removedImports != null && !this.removedImports.isEmpty());
+				|| !this.removedImports.isEmpty();
 	}
 // SH}
 
-	private static String[] filterFromList(List imports, char prefix) {
+	private static String[] filterFromList(List<String> imports, char prefix) {
 		if (imports == null) {
 			return CharOperation.NO_STRINGS;
 		}
-		ArrayList res= new ArrayList();
-		for (int i= 0; i < imports.size(); i++) {
-			String curr= (String) imports.get(i);
+		List<String> res= new ArrayList<String>();
+		for (String curr : imports) {
 			if (prefix == curr.charAt(0)) {
 				res.add(curr.substring(1));
 			}
 		}
-		return (String[]) res.toArray(new String[res.size()]);
+		return res.toArray(new String[res.size()]);
 	}
 
 	private void annotateList(List annotations, IAnnotationBinding [] annotationBindings, AST ast, ImportRewriteContext context) {
