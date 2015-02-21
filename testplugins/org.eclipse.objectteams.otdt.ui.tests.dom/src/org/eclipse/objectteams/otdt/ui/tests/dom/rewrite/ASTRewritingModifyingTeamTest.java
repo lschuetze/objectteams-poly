@@ -283,7 +283,8 @@ public class ASTRewritingModifyingTeamTest extends ASTRewritingModifyingTest {
 			"	protected class OtherRole {}\n" +
 			"	void foo() { System.out.println(this); }\n" +
 		 	"    protected class DisposeWatcher playedBy Item\n" +
-		 	"        base when (hasRole(base)) {\n" +
+		 	"            base when (hasRole(base))\n" +
+		 	"    {\n" +
 		 	"        void bar() {\n" +
 		 	"            nop();\n" +
 		 	"        }\n" +
@@ -334,7 +335,8 @@ public class ASTRewritingModifyingTeamTest extends ASTRewritingModifyingTest {
 		String expected = 
 			"import javax.swing.JFrame;\n\n" +
 		 	"public team class MyTeam\n" +
-		 	"    when (isSunday(today())) {\n" +
+		 	"        when (isSunday(today()))\n" +
+		 	"{\n" +
 		 	"    void bar() {\n" +
 		 	"        nop();\n" +
 		 	"    }\n" +
