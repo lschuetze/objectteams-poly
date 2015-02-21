@@ -1106,8 +1106,12 @@ public class CodeCompletionTest extends CoreTests {
 
 	public void testPlayedBy2() throws Exception {
 		createBaseClass("test2", "AClass", "");
-		fBeforeImports= "";
-		fAfterImports= "\nimport base test2.AClass;\n"; 
+		fBeforeImports= "\n" +
+						"import java.util.Map;\n";
+		fAfterImports= "\n" +
+						"import java.util.Map;\n" +
+						"\n" +
+						"import base test2.AClass;\n"; 
 		assertTypeBodyProposal(
 				"protected class AClass playedBy A| {\n" +
 				"}\n", 
@@ -1116,7 +1120,41 @@ public class CodeCompletionTest extends CoreTests {
 				"}\n", 
 				0, false);
 	}
-	
+
+	// https://bugs.eclipse.org/460508 - Adopt and adjust new ImportRewriteAnalyzer from JDT/Core
+	// base import for other role already exists, correctly sort in.
+	public void testPlayedBy3() throws Exception {
+		IPackageFragment pkg = CompletionTestSetup.getTestPackage(this.fJProject1, "test3");
+		pkg.createCompilationUnit("OtherBase.java", 
+				"package test3;\n" +
+				"public class OtherBase {}\n", 
+				true, null);
+
+		createBaseClass("test2", "MyBase", "");
+		fBeforeImports= "\n" +
+						"import java.util.Map;\n" +
+						"\n" +
+						"import base test3.OtherBase;\n";
+		fAfterImports= "\n" +
+						"import java.util.Map;\n" +
+						"\n" +
+						"import base test2.MyBase;\n" +
+						"import base test3.OtherBase;\n"; 
+		assertTypeBodyProposal(
+				"protected class R playedBy MyBa| {\n" +
+				"}\n" +
+				"protected class R2 playedBy OtherBase {\n" +
+				"	Map<String,String> f;\n" +
+				"}\n", 
+				"MyBase",
+				"protected class R playedBy MyBase| {\n" +
+				"}\n" +
+				"protected class R2 playedBy OtherBase {\n" +
+				"	Map<String,String> f;\n" +
+				"}\n", 
+				0, false);
+	}
+
 	public void testBaseGuard1() throws Exception {
 		createBaseClass("test2", "AClass", "public boolean check() { return false; }");
 		fBeforeImports = "import base test2.AClass;";
