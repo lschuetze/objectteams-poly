@@ -318,7 +318,6 @@ public class AddImportQuickFixTest extends OTQuickFixTest {
 		buf.append("import java.util.List;\n");
 		buf.append("\n");
 		buf.append("import base java.awt.Window;\n");
-		buf.append("\n");
 		buf.append("import base test.base.Base1;\n");
 		buf.append("\n");
 		buf.append("public team class T {\n");

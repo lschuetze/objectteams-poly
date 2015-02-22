@@ -177,7 +177,6 @@ public final class ImportRewrite {
 
 //{ObjectTeams: import base:
 	private String[] createdBaseImports;
-	private List<String> importsToMarkAsBase;
 // SH}
 
 	private boolean filterImplicitImports;
@@ -295,7 +294,6 @@ public final class ImportRewrite {
 		this.createdStaticImports= null;
 //{ObjectTeams: base
 		this.createdBaseImports= null;
-		this.importsToMarkAsBase = null;
 // SH}
 
 		this.importOrder= CharOperation.NO_STRINGS;
@@ -1325,18 +1323,12 @@ public final class ImportRewrite {
 	public boolean hasRecordedChanges() {
 		return !this.restoreExistingImports
 				|| !this.addedImports.isEmpty()
-//{ObjectTeams:
-				|| (this.importsToMarkAsBase != null && !this.importsToMarkAsBase.isEmpty())
-// SH}
 				|| !this.removedImports.isEmpty();
 	}
 
 //{ObjectTeams: my version of above in anticipation of https://bugs.eclipse.org/bugs/show_bug.cgi?id=271812
 	public boolean myHasRecordedChanges() {
 		return !this.addedImports.isEmpty()
-//{ObjectTeams:
-				|| (this.importsToMarkAsBase != null && !this.importsToMarkAsBase.isEmpty())
-// SH}
 				|| !this.removedImports.isEmpty();
 	}
 // SH}
@@ -1402,9 +1394,8 @@ public final class ImportRewrite {
 			return false;
 		}
 		if (res == ImportRewriteContext.RES_NAME_FOUND) {
-			if (this.importsToMarkAsBase == null)
-				this.importsToMarkAsBase = new ArrayList(1);
-			this.importsToMarkAsBase.add(qualifiedTypeName);
+			this.removedImports.add(NORMAL_PREFIX+qualifiedTypeName);
+			this.addedImports.add(BASE_PREFIX+qualifiedTypeName);
 		}
 		return true;
 	}
