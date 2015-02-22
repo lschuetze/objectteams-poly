@@ -24,12 +24,6 @@ Author: Stephan Herrmann.
       <update label="Object Teams Updates" url="http://download.eclipse.org/objectteams/updates/ot2.3"/>
       <discovery label="Orbit Repository" url="http://download.eclipse.org/tools/orbit/downloads/drops/R20100519200754/repository"/>
    </url>
-   
-   <!-- temp: -->
-   <plugin
-   		id="org.eclipse.equinox.common"
-   		version="3.7.0"/>
-   
 
    <plugin
          id="org.eclipse.objectteams.runtime"

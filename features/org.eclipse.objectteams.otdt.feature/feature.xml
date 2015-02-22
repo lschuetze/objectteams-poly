@@ -66,8 +66,6 @@ Project Leader:
          id="org.eclipse.objectteams.otdt.core.patch"
          version="2.4.0.qualifier"/>
 
-   <plugin id="org.eclipse.core.runtime" version="3.11.0"/>
-
    <plugin
          id="org.eclipse.objectteams.otdt"
          download-size="73"
