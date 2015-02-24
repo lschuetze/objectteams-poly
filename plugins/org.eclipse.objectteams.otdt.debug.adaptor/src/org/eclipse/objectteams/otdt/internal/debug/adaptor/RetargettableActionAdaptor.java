@@ -36,6 +36,6 @@ public team class RetargettableActionAdaptor {
 	        }
 	        return base.getAdapter(adaptableObject, adapterType);
 	    }
-	    getAdapter <- replace getAdapter;
+	    <T> T getAdapter(Object adaptableObject, Class<T> adapterType) <- replace T getAdapter(Object adaptableObject, Class<T> adapterType);
 	}
 }
