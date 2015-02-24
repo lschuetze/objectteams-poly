@@ -29,10 +29,10 @@ import base org.eclipse.jdt.internal.debug.ui.actions.RetargettableActionAdapter
 @SuppressWarnings("restriction")
 public team class RetargettableActionAdaptor {
 	protected class RetargettableActionAdapterFactory playedBy RetargettableActionAdapterFactory {
-	    @SuppressWarnings({ "basecall", "rawtypes" })
-		callin Object getAdapter(Object adaptableObject, Class adapterType) {
+	    @SuppressWarnings({ "basecall", "unchecked" })
+		callin <T> T getAdapter(Object adaptableObject, Class<T> adapterType) {
 	        if (adapterType == IToggleBreakpointsTarget.class) {
-	            return new OTToggleBreakpointAdapter();
+	            return (T)new OTToggleBreakpointAdapter();
 	        }
 	        return base.getAdapter(adaptableObject, adapterType);
 	    }
