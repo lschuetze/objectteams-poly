@@ -65,7 +65,6 @@ import org.eclipse.jdt.internal.ui.text.java.FieldProposalInfo;
 import org.eclipse.jdt.internal.ui.text.java.JavaCompletionProposal;
 import org.eclipse.jdt.internal.ui.viewsupport.JavaElementImageProvider;
 import org.eclipse.jdt.ui.JavaElementImageDescriptor;
-import org.eclipse.jdt.ui.text.java.CompletionProposalCollector;
 import org.eclipse.jdt.ui.text.java.IJavaCompletionProposal;
 import org.eclipse.jdt.ui.text.java.JavaContentAssistInvocationContext;
 import org.eclipse.jface.resource.ImageDescriptor;
@@ -118,11 +117,11 @@ public team class CompletionAdaptor
 	/** Tell one JDT/UI class that OVERRIDE_ROLE_DECLARATION proposals should not be ignored. */
 	protected class Unignore playedBy JavaNoTypeCompletionProposalComputer {
 
-		void createCollector(CompletionProposalCollector collector)
+		void createCollector(ProposalCollector collector)
 		<- after CompletionProposalCollector createCollector(JavaContentAssistInvocationContext context)
 			with { collector <- result}
 
-		private void createCollector(CompletionProposalCollector collector) {
+		private void createCollector(ProposalCollector collector) {
 			collector.setIgnored(CompletionProposal.OVERRIDE_ROLE_DECLARATION, false);
 		}
 	}
@@ -307,8 +306,7 @@ public team class CompletionAdaptor
 	    CompletionContext getContext()			   -> CompletionContext getContext();
 	    
 	    protected
-	    void unsetIgnored(int kind)                -> void setIgnored(int kind, boolean ignore)
-	    	with { kind -> kind, false -> ignore }
+	    void setIgnored(int kind, boolean ignore)  -> void setIgnored(int kind, boolean ignore);
 	}
 	
 	/** This role adds new methods to the base-side label provider. */
@@ -606,6 +604,7 @@ public team class CompletionAdaptor
 			} else {
 				importRewrite= StubUtility.createImportRewrite(unit, true); // create a dummy import rewriter to have one
 				context= new ImportRewriteContext() { // forces that all imports are fully qualified
+					@Override
 					public int findInContext(String qualifier, String name, int kind) {
 						return RES_NAME_CONFLICT;
 					}
@@ -614,7 +613,7 @@ public team class CompletionAdaptor
 
 			ITypeBinding declaringType= null;
 			ChildListPropertyDescriptor descriptor= null;
-			ASTNode node= NodeFinder.perform(unit, offset, 0);
+			ASTNode node= NodeFinder.perform(unit, offset, 1);
 			if (node instanceof AnonymousClassDeclaration) {
 				declaringType= ((AnonymousClassDeclaration) node).resolveBinding();
 				descriptor= AnonymousClassDeclaration.BODY_DECLARATIONS_PROPERTY;
@@ -637,7 +636,7 @@ public team class CompletionAdaptor
 						CompletionAdaptor.enableSuperCallAdjustor.set(Boolean.TRUE);
 // orig:
 					CodeGenerationSettings settings= JavaPreferencesSettings.getCodeGenerationSettings(fJavaProject);
-					MethodDeclaration stub= org.eclipse.jdt.internal.corext.codemanipulation.StubUtility2.createImplementationStub(fCompilationUnit, rewrite, importRewrite, context, methodToOverride, declaringType.getName(), settings, declaringType.isInterface());
+					MethodDeclaration stub= org.eclipse.jdt.internal.corext.codemanipulation.StubUtility2.createImplementationStub(fCompilationUnit, rewrite, importRewrite, context, methodToOverride, declaringType, settings, declaringType.isInterface());
 					ListRewrite rewriter= rewrite.getListRewrite(node, descriptor);
 					rewriter.insertFirst(stub, null);
 
