@@ -59,15 +59,18 @@ class OnDemandComputer {
 //{ObjectTeams: no on-demand base imports
 			if (containerOnDemand.isBase) continue;
 // SH}
-			Collection<ImportName> containerImports = containerAndImports.getValue();
+			// Imports from an unnamed package should not be reduced (see bug 461863).
+			boolean isUnnamedPackage = containerOnDemand.containerName.isEmpty();
 
-			Set<String> explicitSimpleNames =
-					containerOnDemand.isStatic ? staticExplicitSimpleNames : typeExplicitSimpleNames;
+			if (touchedContainers.contains(containerOnDemand) && !isUnnamedPackage) {
+				Collection<ImportName> containerImports = containerAndImports.getValue();
 
-			int onDemandThreshold =
-					containerOnDemand.isStatic ? this.staticOnDemandThreshold : this.typeOnDemandThreshold;
+				Set<String> explicitSimpleNames =
+						containerOnDemand.isStatic ? staticExplicitSimpleNames : typeExplicitSimpleNames;
 
-			if (touchedContainers.contains(containerOnDemand)) {
+				int onDemandThreshold =
+						containerOnDemand.isStatic ? this.staticOnDemandThreshold : this.typeOnDemandThreshold;
+
 				OnDemandReduction candidate = maybeReduce(
 						containerOnDemand, containerImports, onDemandThreshold, explicitSimpleNames);
 				if (candidate != null) {

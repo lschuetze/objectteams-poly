@@ -38,6 +38,7 @@
  *								Bug 441693 - [1.8][null] Bogus warning for type argument annotated with @NonNull
  *								Bug 435805 - [1.8][compiler][null] Java 8 compiler does not recognize declaration style null annotations
  *								Bug 457210 - [1.8][compiler][null] Wrong Nullness errors given on full build build but not on incremental build?
+ *								Bug 461250 - ArrayIndexOutOfBoundsException in SourceTypeBinding.fields
  *      Jesper S Moller <jesper@selskabet.org> -  Contributions for
  *								Bug 412153 - [1.8][compiler] Check validity of annotations which may be repeatable
  *      Till Brychcy - Contributions for
@@ -1167,6 +1168,8 @@ void faultInTypesForFieldsAndMethods() {
 	ReferenceBinding enclosingType = enclosingType();
 	if (enclosingType != null && enclosingType.isViewedAsDeprecated() && !isDeprecated())
 		this.modifiers |= ExtraCompilerModifiers.AccDeprecatedImplicitly;
+	fields();
+	methods();
 
 //{ObjectTeams: do not cache memberTypes.length!
 // During faultInTypesForFieldsAndMethods(), memberTypes may be added (role files, on demand)
@@ -1178,8 +1181,6 @@ void faultInTypesForFieldsAndMethods() {
 		if (!this.memberTypes[i].isBinaryBinding()) // roles could be binary contained in source
 //carp}
 		((SourceTypeBinding) this.memberTypes[i]).faultInTypesForFieldsAndMethods();
-	fields();
-	methods();
 }
 // NOTE: the type of each field of a source type is resolved when needed
 public FieldBinding[] fields() {
@@ -1204,32 +1205,28 @@ public FieldBinding[] fields() {
 				ReferenceBinding.sortFields(this.fields, 0, length);
 			this.tagBits |= TagBits.AreFieldsSorted;
 		}
-//{ObjectTeams: don't cache length, may shrink in re-entrant executions
-/*orig
-		for (int i = 0, length = this.fields.length; i < length; i++) {
- */
-		for (int i = 0; i < this.fields.length; i++) {
-// check discouraged field in @Instantation(ALWAYS) roles:
+		FieldBinding[] fieldsSnapshot = this.fields;
+		for (int i = 0, length = fieldsSnapshot.length; i < length; i++) {
+//{ObjectTeams: check discouraged field in @Instantation(ALWAYS) roles:
 		  if (   this.scope != null 
 			  && (this.tagBits & TagBits.AnnotationInstantiation) != 0 
-			  && !this.fields[i].isStatic())
-			  this.scope.problemReporter().fieldInRoleWithInstantiationPolicy(this, this.fields[i]);
+			  && !fieldsSnapshot[i].isStatic())
+			  this.scope.problemReporter().fieldInRoleWithInstantiationPolicy(this, fieldsSnapshot[i]);
 			  
 // after compilation is finished we have no scope, can't resolve any better
 //   		    resolveTypeFor would NPE!
-		  int length = this.fields.length;
 		  if (   this.model!=null
 			  && this.model.getState() == ITranslationStates.STATE_FINAL
-			  && this.fields[i].type == null)
+			  && fieldsSnapshot[i].type == null)
 		  {
-			  this.fields[i] = null;
+			  fieldsSnapshot[i] = null;
 			  failed++;
 		  } else
 //SH}
-			if (resolveTypeFor(this.fields[i]) == null) {
+			if (resolveTypeFor(fieldsSnapshot[i]) == null) {
 				// do not alter original field array until resolution is over, due to reentrance (143259)
-				if (resolvedFields == this.fields) {
-					System.arraycopy(this.fields, 0, resolvedFields = new FieldBinding[length], 0, length);
+				if (resolvedFields == fieldsSnapshot) {
+					System.arraycopy(fieldsSnapshot, 0, resolvedFields = new FieldBinding[length], 0, length);
 				}
 				resolvedFields[i] = null;
 				failed++;
@@ -2697,12 +2694,9 @@ public MethodBinding resolveTypesFor(MethodBinding method, boolean fromSynthetic
 			if (nullTagBits != 0) {
 				TypeReference returnTypeRef = ((MethodDeclaration)methodDecl).returnType;
 				if (this.scope.environment().usesNullTypeAnnotations()) {
-					if (nullTagBits != (method.returnType.tagBits & TagBits.AnnotationNullMASK)) {
-						if (!this.scope.validateNullAnnotation(nullTagBits, returnTypeRef, methodDecl.annotations)) {
-							method.returnType.tagBits &= ~TagBits.AnnotationNullMASK;
-						}
-						method.tagBits &= ~TagBits.AnnotationNullMASK;
-					}
+					if (!this.scope.validateNullAnnotation(nullTagBits, returnTypeRef, methodDecl.annotations))
+						method.returnType.tagBits &= ~TagBits.AnnotationNullMASK;
+					method.tagBits &= ~TagBits.AnnotationNullMASK;
 				} else {
 					if (!this.scope.validateNullAnnotation(nullTagBits, returnTypeRef, methodDecl.annotations))
 						method.tagBits &= ~TagBits.AnnotationNullMASK;

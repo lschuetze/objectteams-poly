@@ -840,7 +840,8 @@ public abstract class AbstractMethodDeclaration
 			resolveAnnotations(this.scope, this.annotations, this.binding);
 			
 			long sourceLevel = this.scope.compilerOptions().sourceLevel;
-			validateNullAnnotations(this.scope.environment().usesNullTypeAnnotations());
+			if (sourceLevel < ClassFileConstants.JDK1_8) // otherwise already checked via Argument.createBinding
+				validateNullAnnotations(this.scope.environment().usesNullTypeAnnotations());
 
 			resolveStatements();
 			// check @Deprecated annotation presence
@@ -1017,7 +1018,7 @@ public abstract class AbstractMethodDeclaration
 				this.scope.validateNullAnnotation(this.binding.parameters[i].tagBits, this.arguments[i].type, this.arguments[i].annotations);
 // TODO(stephan) remove once we're sure:
 //					this.binding.parameters[i] = this.binding.parameters[i].unannotated();
-			}			
+			}
 		}
 	}
 }
