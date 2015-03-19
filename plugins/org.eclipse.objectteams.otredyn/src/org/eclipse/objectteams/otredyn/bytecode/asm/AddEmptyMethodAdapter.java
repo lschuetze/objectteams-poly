@@ -1,7 +1,7 @@
 /**********************************************************************
  * This file is part of "Object Teams Dynamic Runtime Environment"
  * 
- * Copyright 2009, 2012 Oliver Frank and others.
+ * Copyright 2009, 2015 Oliver Frank and others.
  * 
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -36,10 +36,11 @@ class AddEmptyMethodAdapter extends ClassVisitor {
 	private String signature;
 	private String[] exceptions;
 	private int maxLocals;
+	private String superToCall;
 
 	public AddEmptyMethodAdapter(ClassVisitor cv, String name, int access,
 			String desc, String[] exceptions, String signature,
-			int maxLocals) {
+			int maxLocals, String superToCall) {
 		super(ASM_API, cv);
 		this.access = access;
 		this.desc = desc;
@@ -47,6 +48,7 @@ class AddEmptyMethodAdapter extends ClassVisitor {
 		this.name = name;
 		this.signature = signature;
 		this.maxLocals = maxLocals;
+		this.superToCall = superToCall;
 	}
 
 	@Override
@@ -57,6 +59,18 @@ class AddEmptyMethodAdapter extends ClassVisitor {
 			return;
 		}
 		mv.visitCode();
+		boolean needConstValue = true;
+		if (superToCall != null) {
+			needConstValue = false;
+			boolean isStatic = (this.access & Opcodes.ACC_STATIC) != 0;
+			int firstArgIndex = isStatic ? 0 : 1;
+			if (!isStatic)
+				mv.visitVarInsn(Opcodes.ALOAD, 0); // "this"
+			Type[] args = Type.getArgumentTypes(desc);
+			for (int i=0, slot=firstArgIndex; i < args.length; slot+=args[i++].getSize())
+				mv.visitVarInsn(args[i].getOpcode(Opcodes.ILOAD), slot);
+			mv.visitMethodInsn(Opcodes.INVOKESPECIAL, superToCall, name, desc, false);
+		}
 		Type returnType = Type.getReturnType(this.desc);
 		switch (returnType.getSort()) {
 		case Type.VOID:
@@ -67,21 +81,25 @@ class AddEmptyMethodAdapter extends ClassVisitor {
         case Type.CHAR:
         case Type.BYTE:
         case Type.SHORT:
-			mv.visitInsn(Opcodes.ICONST_1);
+        	if (needConstValue)
+        		mv.visitInsn(Opcodes.ICONST_1);
 			mv.visitInsn(Opcodes.IRETURN);
 			break;
         case Type.FLOAT:
-			mv.visitInsn(Opcodes.FCONST_1);
+        	if (needConstValue)
+        		mv.visitInsn(Opcodes.FCONST_1);
 			mv.visitInsn(Opcodes.FRETURN);
 			break;
         case Type.LONG:
-			mv.visitInsn(Opcodes.LCONST_1);
+        	if (needConstValue)
+        		mv.visitInsn(Opcodes.LCONST_1);
 			mv.visitInsn(Opcodes.LRETURN);
 			break;
         case Type.DOUBLE:
 		case Type.OBJECT:
 		case Type.ARRAY:
-			mv.visitInsn(Opcodes.ACONST_NULL);
+			if (needConstValue)
+        		mv.visitInsn(Opcodes.ACONST_NULL);
 			mv.visitInsn(Opcodes.ARETURN);
 			break;
 		}

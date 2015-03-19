@@ -28,6 +28,7 @@ import org.eclipse.objectteams.otredyn.bytecode.Method;
 import org.eclipse.objectteams.otredyn.bytecode.RedefineStrategyFactory;
 import org.eclipse.objectteams.otredyn.bytecode.Types;
 import org.eclipse.objectteams.otredyn.runtime.TeamManager;
+import org.eclipse.objectteams.otredyn.transformer.jplis.ObjectTeamsTransformer;
 import org.eclipse.objectteams.otredyn.transformer.names.ClassNames;
 import org.eclipse.objectteams.otredyn.transformer.names.ConstantMembers;
 import org.objectweb.asm.ClassReader;
@@ -82,14 +83,15 @@ class AsmWritableBoundClass extends AsmBoundClass {
 	 * @param access
 	 * @param signature
 	 * @param exceptions
+	 * @param superToCall may be null, else the super class to which a super-call should be inserted
 	 * @see AddEmptyMethodAdapter
 	 */
-	private void addEmptyMethod(Method method, int access, String signature, String[] exceptions) {
+	private void addEmptyMethod(Method method, int access, String signature, String[] exceptions, String superToCall) {
 		assert (isTransformationActive) : "No transformation active";
 		String desc = method.getSignature();
 		Type[] args = Type.getArgumentTypes(desc);
 		multiAdapter.addVisitor(new AddEmptyMethodAdapter(writer, method.getName(),
-				access, desc, exceptions, signature, args.length + 1));
+				access, desc, exceptions, signature, args.length + 1, superToCall));
 	}
 
 	/**
@@ -246,7 +248,7 @@ class AsmWritableBoundClass extends AsmBoundClass {
 			String desc = boundMethod.getSignature();
 			Type[] args = Type.getArgumentTypes(desc);
 			multiAdapter.addVisitor(new AddEmptyMethodAdapter(writer, boundMethod.getName(),
-					boundMethod.getAccessFlags(), desc, null, boundMethod.getSignature(), args.length+1/*maxLocals*/));
+					boundMethod.getAccessFlags(), desc, null, boundMethod.getSignature(), args.length+1/*maxLocals*/, null));
 		}
 		nodes.add(new CreateCallAllBindingsCallInOrgMethod(boundMethod,
 				boundMethodId));
@@ -353,17 +355,20 @@ class AsmWritableBoundClass extends AsmBoundClass {
 		if (!isInterface())
 			addField(ConstantMembers.roleSet, Types.ACCESS_PUBLIC);
 		
-		addEmptyMethod(ConstantMembers.callOrig, methodModifiers, null, null);
-		addEmptyMethod(ConstantMembers.callAllBindingsClient, methodModifiers, null, null);
+		addEmptyMethod(ConstantMembers.callOrig, methodModifiers, null, null, null);
+		addEmptyMethod(ConstantMembers.callAllBindingsClient, methodModifiers, null, null, null);
 		
 		// the methods callOrigStatic and accessStatic have to already exist to call it in a concrete team
 		if (!isInterface()) {
-			addEmptyMethod(getCallOrigStatic(), Types.ACCESS_PUBLIC + Types.ACCESS_STATIC, null, null);
-			addEmptyMethod(ConstantMembers.accessStatic, Types.ACCESS_PUBLIC + Types.ACCESS_STATIC, null, null);
+			addEmptyMethod(getCallOrigStatic(), Types.ACCESS_PUBLIC + Types.ACCESS_STATIC, null, null, null);
+			addEmptyMethod(ConstantMembers.accessStatic, Types.ACCESS_PUBLIC + Types.ACCESS_STATIC, null, null, null);
 		}
 		
-		addEmptyMethod(ConstantMembers.access, methodModifiers, null, null);
-		addEmptyMethod(ConstantMembers.addOrRemoveRole, methodModifiers, null, null);
+		String superClassName = getSuperClassName().replace('.', '/');
+		if (!ObjectTeamsTransformer.isWeavable(superClassName))
+			superClassName = null;
+		addEmptyMethod(ConstantMembers.access, methodModifiers, null, null, superClassName);
+		addEmptyMethod(ConstantMembers.addOrRemoveRole, methodModifiers, null, null, null);
 		
 		if (!isInterface())
 			multiAdapter.addVisitor(new AddAfterClassLoadingHook(this.writer, this));
