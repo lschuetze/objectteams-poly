@@ -1704,7 +1704,7 @@ public class ParameterizedTypeBinding extends ReferenceBinding implements Substi
 		{
 			TypeBinding arg = this.arguments[i];
 			if (arg.isRawType()) {
-				ReferenceBinding originalType = ((RawTypeBinding)arg).type;
+				ReferenceBinding originalType = ((ParameterizedTypeBinding)arg).genericType();
 				TypeBinding updated = updater.updateArg(originalType);
 				if (updated != originalType) //$IDENTITY-COMPARISON$
 					newArguments[i] = this.environment.convertToRawType(updated, false);

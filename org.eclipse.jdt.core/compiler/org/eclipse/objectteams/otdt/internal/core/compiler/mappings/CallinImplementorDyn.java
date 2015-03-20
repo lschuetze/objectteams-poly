@@ -386,7 +386,9 @@ public class CallinImplementorDyn extends MethodMappingImplementor {
 	
 						TypeBinding baseReturn = baseSpec.resolvedType();
 						boolean isStaticRoleMethod = callinDecl.getRoleMethod().isStatic();
-						ReferenceBinding roleType = callinDecl.scope.enclosingReceiverType();
+						ReferenceBinding roleType = callinDecl.scope.enclosingSourceType();
+						if (roleType.isGenericType()) // cannot handle generic role in this generated code
+							roleType = (ReferenceBinding) callinDecl.scope.environment().convertToRawType(roleType, false);
 						MethodBinding roleMethodBinding = callinDecl.getRoleMethod();
 						
 						boolean needLiftedRoleVar = !isStaticRoleMethod
@@ -432,8 +434,9 @@ public class CallinImplementorDyn extends MethodMappingImplementor {
 								canLiftingFail |= checkLiftingProblem(teamDecl, callinDecl, roleType);
 	
 								roleVar = (LOCAL_ROLE+statements.size()).toCharArray();
+								TypeReference roleTypeReference = gen.roleTypeReference(teamDecl.getTeamModel().getTThis(), roleType, 0);
 								blockStatements.add(gen.localVariable(roleVar, 										//   RoleType local$n = this._OT$liftToRoleType((BaseType)base);
-														gen.alienScopeTypeReference(gen.typeReference(roleType), callinDecl.scope),
+														gen.alienScopeTypeReference(roleTypeReference, callinDecl.scope),
 										ClassFileConstants.AccFinal,
 										Lifting.liftCall(callMethod.scope,
 														 gen.thisReference(),

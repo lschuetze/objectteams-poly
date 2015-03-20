@@ -601,25 +601,30 @@ public class ParameterizedSingleTypeReference extends ArrayTypeReference {
 	boolean checkParameterizedRoleVisibility(Scope scope, ITeamAnchor anchor, ReferenceBinding type) {
 		if (!type.isPublic()) {
 			Dependencies.ensureBindingState(type, ITranslationStates.STATE_LENV_CONNECT_TYPE_HIERARCHY);
-			if (TypeAnalyzer.isConfined(type)) {
-				// confined has highest priority for reporting / doesn't allow decapsulation
-				scope.problemReporter().decapsulatingConfined(this, (ReferenceBinding)this.resolvedType);
-				setBaseclassDecapsulation(DecapsulationState.CONFINED);
-				this.resolvedType = new ProblemReferenceBinding(anchor, this.token, type, ProblemReasons.NotVisible);
-				return false;
-			} else if (RoleTypeBinding.isRoleWithExplicitAnchor(type)) {
-				// externalized non-public role
-				switch (getBaseclassDecapsulation()) {
-				case ALLOWED:
-					scope.problemReporter().decapsulation(this, type);
-					setBaseclassDecapsulation(DecapsulationState.REPORTED);
-					//$FALL-THROUGH$
-				case REPORTED:
-					return true;
-				case NONE:
+			if (RoleTypeBinding.isRoleWithExplicitAnchor(type)) {
+				if (TypeAnalyzer.isConfined(type)) {
+					// confined has highest priority for reporting / doesn't allow decapsulation
+					scope.problemReporter().decapsulatingConfined(this, (ReferenceBinding)this.resolvedType);
+					setBaseclassDecapsulation(DecapsulationState.CONFINED);
 					this.resolvedType = new ProblemReferenceBinding(anchor, this.token, type, ProblemReasons.NotVisible);
-					scope.problemReporter().qualifiedProtectedRole(this, type);
 					return false;
+				} else {
+					// externalized non-public role
+					switch (getBaseclassDecapsulation()) {
+					case ALLOWED:
+						scope.problemReporter().decapsulation(this, type);
+						setBaseclassDecapsulation(DecapsulationState.REPORTED);
+						//$FALL-THROUGH$
+					case REPORTED:
+					case TOLERATED:
+						return true;
+					case NONE:
+						this.resolvedType = new ProblemReferenceBinding(anchor, this.token, type, ProblemReasons.NotVisible);
+						scope.problemReporter().qualifiedProtectedRole(this, type);
+						return false;
+					case CONFINED:
+						return false;
+					}
 				}
 			} else 	if (!type.canBeSeenBy(scope)) {
 				// other invisible types

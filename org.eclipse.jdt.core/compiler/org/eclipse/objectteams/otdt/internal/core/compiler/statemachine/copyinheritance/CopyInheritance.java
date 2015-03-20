@@ -2178,7 +2178,7 @@ public class CopyInheritance implements IOTConstants, ClassFileConstants, ExtraC
         		if (param.isParameterizedType() && tmplParam.isParameterizedType()) {
         			// keep old type arguments, just replace the type itself
         			TypeBinding[] args= ((ParameterizedTypeBinding)param).arguments;
-        			ReferenceBinding tmplType= ((ParameterizedTypeBinding)tmplParam).actualType();
+        			ReferenceBinding tmplType= ((ParameterizedTypeBinding)tmplParam).genericType();
         			try {
 						LookupEnvironment env = Config.getLookupEnvironment();
 						binding.parameters[i]= new ParameterizedTypeBinding(tmplType, args, tmplType.enclosingType(), env);

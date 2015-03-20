@@ -355,6 +355,8 @@ public class TypeSystem {
 		if (teamAnchor == null) {
 			parameterizedType = new ParameterizedTypeBinding(unannotatedGenericType, unannotatedTypeArguments, unannotatedEnclosingType, this.environment);
 		} else {
+			if (unannotatedTypeArguments == null && unannotatedGenericType.isGenericType())
+				unannotatedGenericType = (ReferenceBinding) this.environment.convertToRawType(unannotatedGenericType, false); // half-raw: teamAnchor but missing regular type args
 			if (genericType.isRole()) {
 				parameterizedType = new RoleTypeBinding(unannotatedGenericType, unannotatedTypeArguments, teamAnchor, unannotatedEnclosingType, this.environment);
 			} else {
@@ -399,6 +401,7 @@ public class TypeSystem {
 			if (!derivedType.isRawType() || derivedType.actualType() != unannotatedGenericType || derivedType.hasTypeAnnotations()) //$IDENTITY-COMPARISON$
 				continue;
 			if (derivedType.enclosingType() == unannotatedEnclosingType) //$IDENTITY-COMPARISON$
+//{ObjectTeams: TODO: (how) can we handle half-raw dependent types? SH}
 				return (RawTypeBinding) derivedType;
 		}
 

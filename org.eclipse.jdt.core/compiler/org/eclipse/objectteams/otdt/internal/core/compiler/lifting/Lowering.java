@@ -241,6 +241,11 @@ public class Lowering implements IOTConstants {
 		}
 
 		@Override
+		public DecapsulationState getBaseclassDecapsulation() {
+			return DecapsulationState.REPORTED;
+		}
+
+		@Override
 		public TypeBinding resolveType(BlockScope scope) {
 			if (this.localVar.declaringScope == null) {
 				scope.addLocalVariable(this.localVar);

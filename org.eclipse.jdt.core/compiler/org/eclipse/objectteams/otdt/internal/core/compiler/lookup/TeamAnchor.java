@@ -179,25 +179,27 @@ public abstract class TeamAnchor extends Binding implements ITeamAnchor {
 			ITeamAnchor[] path =  getBestNameFromStat(rhs);
 			if (path != null) {
 				ITeamAnchor lastBinding = path[path.length-1];
-				if (   (this instanceof FieldBinding)
-					&& (lastBinding instanceof LocalVariableBinding))
-				{
-					LocalVariableBinding localVar = ((LocalVariableBinding)lastBinding);
-					Scope scope  = localVar.declaringScope;
-					if  (scope.referenceContext() instanceof ConstructorDeclaration) {
-						// don't record the initial field assignment within a constructor,
-						// but reverse this: pretend the local was initialized from the field,
-						// to make both equivalent within this ctor.
-						if (lastBinding.isFinal()) {
-							if (   (localVar.tagBits & TagBits.IsArgument) != 0
-								&& !localVar.pathIsAbsolute())
-							{
-								// localVar is really an argument not anchored to a field
-								lastBinding.shareBestName(this);
+				if (   this instanceof FieldBinding) {
+					if (lastBinding instanceof LocalVariableBinding) {
+						LocalVariableBinding localVar = ((LocalVariableBinding)lastBinding);
+						Scope scope  = localVar.declaringScope;
+						if  (scope.referenceContext() instanceof ConstructorDeclaration) {
+							// don't record the initial field assignment within a constructor,
+							// but reverse this: pretend the local was initialized from the field,
+							// to make both equivalent within this ctor.
+							if (lastBinding.isFinal()) {
+								if (   (localVar.tagBits & TagBits.IsArgument) != 0
+									&& !localVar.pathIsAbsolute())
+								{
+									// localVar is really an argument not anchored to a field
+									lastBinding.shareBestName(this);
+								}
 							}
 						}
+						return; // all others: ignore
+					} else if (lastBinding instanceof TThisBinding) {
+						return; // field may already have better anchor
 					}
-					return; // all others: ignore
 				}
 				this.bestNamePath = path;
 			}
@@ -262,6 +264,9 @@ public abstract class TeamAnchor extends Binding implements ITeamAnchor {
 		// Note(SH): getting best name from message send with non-wrapped type
 		// would require flow analysis to compute unique best name of the methods
 		// return value. Simply using the receiver as attempted above is incorrect.
+		if (expr.resolvedType instanceof IRoleTypeBinding) {
+			return ((IRoleTypeBinding)expr.resolvedType).getAnchorBestName();
+		}
 		return null;
 	}
 

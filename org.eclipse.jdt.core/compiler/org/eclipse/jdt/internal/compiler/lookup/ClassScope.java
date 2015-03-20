@@ -2298,7 +2298,12 @@ public class ClassScope extends Scope {
 	// Answer whether a cycle was found between the sourceType & the superType
 	private boolean detectHierarchyCycle(SourceTypeBinding sourceType, ReferenceBinding superType, TypeReference reference) {
 		if (superType.isRawType())
+//{ObjectTeams: relax the cast to include half-raw dependent types:
+/* orig:
 			superType = ((RawTypeBinding) superType).genericType();
+  :giro */
+			superType = ((ParameterizedTypeBinding) superType).genericType();
+// SH}
 		// by this point the superType must be a binary or source type
 
 		if (TypeBinding.equalsEquals(sourceType, superType)) {

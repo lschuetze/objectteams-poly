@@ -34,6 +34,7 @@ import org.eclipse.jdt.internal.compiler.lookup.MethodBinding;
 import org.eclipse.jdt.internal.compiler.lookup.MethodScope;
 import org.eclipse.jdt.internal.compiler.lookup.PackageBinding;
 import org.eclipse.jdt.internal.compiler.lookup.ParameterizedFieldBinding;
+import org.eclipse.jdt.internal.compiler.lookup.ParameterizedTypeBinding;
 import org.eclipse.jdt.internal.compiler.lookup.ProblemReasons;
 import org.eclipse.jdt.internal.compiler.lookup.ReferenceBinding;
 import org.eclipse.jdt.internal.compiler.lookup.Scope;
@@ -436,10 +437,12 @@ public class RoleTypeBinding extends DependentTypeBinding
     
     @Override
     public ReferenceBinding genericType() {
-//{ObjectTeams: role bindings are the original if no arguments defined:
-		if (this.arguments == null)
-			return this;
-// SH}
+    	// check if any regular genericity is involved:
+		if (this.arguments == null) {
+			if (this.type instanceof ParameterizedTypeBinding)
+				return ((ParameterizedTypeBinding) this.type).genericType();
+			return this; // no regular type parameters/arguments involved
+		}
     	return super.genericType();
     }
 
@@ -798,22 +801,26 @@ public class RoleTypeBinding extends DependentTypeBinding
 
     		// compensate weakened signature:
     		if (TypeBinding.notEquals(rightRole._staticallyKnownTeam, this._staticallyKnownTeam)) {
-    			if (TeamModel.areTypesCompatible(
-    					rightTeam,
-						this._staticallyKnownTeam))
-    			{
-    				ReferenceBinding leftStrengthened = this._teamAnchor.getMemberTypeOfType(internalName());
-    				if (TypeBinding.notEquals(leftStrengthened, this))
-    					return leftStrengthened.isCompatibleWith(right, captureScope);
-    			}
-    			else if (TeamModel.areTypesCompatible(
-    					this._staticallyKnownTeam,
-    					rightTeam))
-    			{
-    				rightRole = (RoleTypeBinding)this._teamAnchor.getMemberTypeOfType(rightRole.internalName());
-
-    			} else {
-    				return false;
+    			try {
+	    			if (TeamModel.areTypesCompatible(
+	    					rightTeam,
+							this._staticallyKnownTeam))
+	    			{
+	    				ReferenceBinding leftStrengthened = this._teamAnchor.getMemberTypeOfType(internalName());
+	    				if (TypeBinding.notEquals(leftStrengthened, this))
+	    					return leftStrengthened.isCompatibleWith(right, captureScope);
+	    			}
+	    			else if (TeamModel.areTypesCompatible(
+	    					this._staticallyKnownTeam,
+	    					rightTeam))
+	    			{
+	    				rightRole = (RoleTypeBinding)this._teamAnchor.getMemberTypeOfType(rightRole.internalName());
+	
+	    			} else {
+	    				return false;
+	    			}
+    			} finally {
+    				Config.setCastRequired(null); // reset
     			}
     		}
 

@@ -1554,8 +1554,11 @@ public ReferenceBinding getRealType() {
 	if (this.roleModel != null)
 	{
 		ReferenceBinding ifcPart = this.roleModel.getInterfacePartBinding();
-		if (ifcPart != null)
+		if (ifcPart != null) {
+			if (isRawType() && !ifcPart.isRawType())
+				return (ReferenceBinding) ((ParameterizedTypeBinding)this).environment.convertToRawType(ifcPart, false);
 			return ifcPart;
+		}
 	}
     return this;
 }

@@ -151,6 +151,8 @@ public class AnnotatableTypeSystem extends TypeSystem {
 		if (teamAnchor == null) {
 			parameterizedType = new ParameterizedTypeBinding(genericType,typeArguments, enclosingType, this.environment);
 		} else {
+			if (typeArguments == null && genericType.isGenericType())
+				genericType = (ReferenceBinding) this.environment.convertToRawType(genericType, false); // half-raw: teamAnchor but missing regular type args
 			if (genericType.isRole()) {
 				parameterizedType = new RoleTypeBinding(genericType, typeArguments, teamAnchor, enclosingType, this.environment);
 			} else {
@@ -194,6 +196,7 @@ public class AnnotatableTypeSystem extends TypeSystem {
 			if (!derivedType.isRawType() || derivedType.actualType() != genericType || derivedType.enclosingType() != enclosingType) //$IDENTITY-COMPARISON$
 				continue;
 			if (Util.effectivelyEqual(derivedType.getTypeAnnotations(), annotations))
+//{ObjectTeams: TODO: (how) can we handle half-raw dependent types? (here and 3 lines below) SH}
 				return (RawTypeBinding) derivedType;
 			if (!derivedType.hasTypeAnnotations())
 				nakedType = (RawTypeBinding) derivedType;

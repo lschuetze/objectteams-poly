@@ -18,7 +18,7 @@ import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.internal.compiler.lookup.ExtraCompilerModifiers;
 import org.eclipse.jdt.internal.compiler.lookup.LookupEnvironment;
 import org.eclipse.jdt.internal.compiler.lookup.ParameterizedGenericMethodBinding;
-import org.eclipse.jdt.internal.compiler.lookup.RawTypeBinding;
+import org.eclipse.jdt.internal.compiler.lookup.ParameterizedTypeBinding;
 import org.eclipse.jdt.internal.compiler.lookup.ReferenceBinding;
 import org.eclipse.jdt.internal.compiler.lookup.TagBits;
 import org.eclipse.jdt.internal.compiler.lookup.TypeBinding;
@@ -76,7 +76,12 @@ class MethodBinding implements IMethodBinding {
 	public boolean isDefaultConstructor() {
 		final ReferenceBinding declaringClassBinding = this.binding.declaringClass;
 		if (declaringClassBinding.isRawType()) {
+//{ObjectTeams: relax the cast to include half-raw dependent types:
+/* orig:
 			RawTypeBinding rawTypeBinding = (RawTypeBinding) declaringClassBinding;
+  :giro */
+			ParameterizedTypeBinding rawTypeBinding = (ParameterizedTypeBinding) declaringClassBinding;
+// SH}
 			if (rawTypeBinding.genericType().isBinaryBinding()) {
 				return false;
 			}

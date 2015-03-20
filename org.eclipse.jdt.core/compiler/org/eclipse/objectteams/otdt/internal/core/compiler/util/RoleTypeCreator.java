@@ -1492,7 +1492,7 @@ public class RoleTypeCreator implements TagBits {
 	{
 		ReferenceBinding leafType = (ReferenceBinding)typeToWrap.leafComponentType();
 		if (leafType.isRawType())
-			leafType = ((RawTypeBinding)leafType).actualType();
+			leafType = ((ParameterizedTypeBinding)leafType).genericType();
 		if (!DependentTypeBinding.mayTakeValueParam(leafType)) {
 			assert false : "this method should only be called for types requiring an anchor"; //$NON-NLS-1$
 			return typeToWrap; // TODO (SH): check why we came here in the first place!!

@@ -116,6 +116,10 @@ public class TypeBindingVisitor {
 				break;
 			
 			case Binding.RAW_TYPE:
+//{ObjectTeams: relax the type to include half-raw dependent types:
+				if (type.isRoleType())
+					type = ((ParameterizedTypeBinding) type).genericType();
+// SH}
 				visitor.visit((RawTypeBinding) type);
 				break;
 				

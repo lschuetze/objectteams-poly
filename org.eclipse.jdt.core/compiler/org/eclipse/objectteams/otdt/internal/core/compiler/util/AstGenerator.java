@@ -69,6 +69,7 @@ import org.eclipse.objectteams.otdt.internal.core.compiler.ast.TsuperReference;
 import org.eclipse.objectteams.otdt.internal.core.compiler.ast.TypeAnchorReference;
 import org.eclipse.objectteams.otdt.internal.core.compiler.lookup.DependentTypeBinding;
 import org.eclipse.objectteams.otdt.internal.core.compiler.lookup.ITeamAnchor;
+import org.eclipse.objectteams.otdt.internal.core.compiler.lookup.TThisBinding;
 import org.eclipse.objectteams.otdt.internal.core.compiler.model.RoleModel;
 
 /**
@@ -451,13 +452,23 @@ public class AstGenerator extends AstFactory {
 			result.bits |= ASTNode.IgnoreRawTypeCheck;
 		return result;
 	}
-	public TypeReference roleTypeReference(ITeamAnchor baseSideAnchor, ReferenceBinding roleType, int dims)
+	public ParameterizedSingleTypeReference roleTypeReference(ITeamAnchor baseSideAnchor, ReferenceBinding roleType, int dims)
 	{
 
 		TypeAnchorReference anchorRef = typeAnchorReference(baseSideAnchor);
+		TypeReference[] typeParameters;
+		TypeBinding[] typeArguments = roleType.isParameterizedType() ? ((ParameterizedTypeBinding) roleType).arguments : null;
+		if (typeArguments != null) {
+			typeParameters = new TypeReference[typeArguments.length+1];
+			typeParameters[0] = anchorRef;
+			for (int i = 0; i < typeArguments.length; i++)
+				typeParameters[i+1] = typeReference(typeArguments[i]);
+		} else {
+			typeParameters = new TypeReference[] { anchorRef };
+		}
 		ParameterizedSingleTypeReference result = new ParameterizedSingleTypeReference(
 				roleType.internalName(),
-				new TypeReference[] { anchorRef }, // TODO: additional type parameters
+				typeParameters,
 				dims,
 				this.pos);
 		return result;
@@ -617,15 +628,19 @@ public class AstGenerator extends AstFactory {
     		firstClass= anchor.getFirstDeclaringClass();
     	}
     	Reference nameRef = null;
-    	char[][] fieldPath = anchor.tokens();
+    	ITeamAnchor[] path = anchor.getBestNamePath();
     	if (firstClass != null) {
     		if (this.replaceableEnclosingClass != null)
     			firstClass = strengthenEnclosing(firstClass, this.replaceableEnclosingClass);
 	        nameRef = qualifiedThisReference(firstClass);
-	    	for (int i=0; i<fieldPath.length; i++)
-	    		nameRef = fieldReference(nameRef, fieldPath[i]);
+	    	for (int i=0; i<path.length; i++)
+	    		if (!(path[i] instanceof TThisBinding))
+	    			nameRef = fieldReference(nameRef, path[i].internalName());
     	} else {
-    		nameRef = qualifiedNameReference(fieldPath);
+    		if (anchor instanceof TThisBinding)
+    			nameRef = qualifiedThisReference(anchor.getFirstDeclaringClass());
+    		else
+    			nameRef = qualifiedNameReference(anchor.tokens());
     	}
     	TypeAnchorReference anchorRef = new TypeAnchorReference(nameRef, this.sourceStart);
     	return anchorRef;

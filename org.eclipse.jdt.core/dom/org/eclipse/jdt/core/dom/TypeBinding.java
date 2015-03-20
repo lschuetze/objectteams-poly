@@ -34,7 +34,6 @@ import org.eclipse.jdt.internal.compiler.lookup.LocalTypeBinding;
 import org.eclipse.jdt.internal.compiler.lookup.MethodBinding;
 import org.eclipse.jdt.internal.compiler.lookup.PackageBinding;
 import org.eclipse.jdt.internal.compiler.lookup.ParameterizedTypeBinding;
-import org.eclipse.jdt.internal.compiler.lookup.RawTypeBinding;
 import org.eclipse.jdt.internal.compiler.lookup.ReferenceBinding;
 import org.eclipse.jdt.internal.compiler.lookup.Scope;
 import org.eclipse.jdt.internal.compiler.lookup.TagBits;
@@ -1314,7 +1313,12 @@ class TypeBinding implements ITypeBinding {
 		if (isClass() || isInterface() || isEnum()) {
 			ReferenceBinding referenceBinding = (ReferenceBinding) this.binding;
 			if (referenceBinding.isRawType()) {
+//{ObjectTeams: relax the cast to include half-raw dependent types:
+/* orig:
 				return !((RawTypeBinding) referenceBinding).genericType().isBinaryBinding();
+  :giro */
+				return !((ParameterizedTypeBinding) referenceBinding).genericType().isBinaryBinding();
+// SH}
 			} else if (referenceBinding.isParameterizedType()) {
 				ParameterizedTypeBinding parameterizedTypeBinding = (ParameterizedTypeBinding) referenceBinding;
 				org.eclipse.jdt.internal.compiler.lookup.TypeBinding erasure = parameterizedTypeBinding.erasure();
