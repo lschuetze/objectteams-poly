@@ -617,6 +617,15 @@ public final boolean checkCastTypesCompatibility(
 							if (match != null) {
 								return checkUnsafeCast(scope, castType, expressionType, match, true);
 							}
+//{ObjectTeams: casting IBoundBase to final bound base class?
+							if ((expressionType.id == IOTConstants.T_OrgObjectTeamsIBoundBase
+									|| expressionType.id == IOTConstants.T_OrgObjectTeamsIBoundBase2)
+								&& castType instanceof ReferenceBinding
+								&& ((ReferenceBinding) castType).isBoundBase())
+							{
+								return true;
+							}
+// SH}
 							if (((ReferenceBinding) castType).isFinal()) {
 								// no subclass for castType, thus compile-time check is invalid
 								return false;

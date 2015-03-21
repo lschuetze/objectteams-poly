@@ -402,8 +402,9 @@ public class CallinImplementorDyn extends MethodMappingImplementor {
 								&& (callinDecl.mappings != null || callinDecl.predicate != null) 
 								&& baseReturn != TypeBinding.VOID) {
 							resultName = RESULT;
-							blockStatements.add(gen.localBaseVariable(RESULT, baseReturn,								//   BaseReturnType result = (BaseReturnType)_OT$result; 
-												  gen.createCastOrUnboxing(gen.singleNameReference(_OT_RESULT), baseReturn, true/*baseAccess*/)));
+							callinDecl.resultVar = gen.localBaseVariable(RESULT, baseReturn,							//   BaseReturnType result = (BaseReturnType)_OT$result; 
+									  				gen.createCastOrUnboxing(gen.singleNameReference(_OT_RESULT), baseReturn, true/*baseAccess*/));
+							blockStatements.add(callinDecl.resultVar);
 						}
 
 						// -------------- base predicate check -------
