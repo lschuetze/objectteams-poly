@@ -418,22 +418,23 @@ public class ConstantPoolObjectReader extends ClassFileStruct implements ClassFi
 			// (access$n are stored like normal methods).
 			if (class_rb.isBinaryBinding()) {
 				if (SyntheticBaseCallSurrogate.isBaseCallSurrogateName(name)) { // surrogate might be inherited
-					while ((class_rb = class_rb.superclass()) != null) {
-						MethodBinding candidate = doFindMethodBinding(class_rb, name, descriptor);
+					ReferenceBinding current = class_rb;
+					while ((current = current.superclass()) != null) {
+						MethodBinding candidate = doFindMethodBinding(current, name, descriptor);
 						if (candidate != null)
 							return candidate;
 					}
 				}
 				// TODO(SH): but when T has been compiled only with T.R1 while T.R2
 				//           requires a synth.method, than this method will be missing!
-				return null;
-			}
-			SourceTypeBinding stb = (SourceTypeBinding)class_rb.erasure();
-			SyntheticMethodBinding[] accessMethods = stb.syntheticMethods();
-			if (accessMethods != null) {
-				for (int i=0; i<accessMethods.length; i++) {
-					if (CharOperation.equals(accessMethods[i].selector, name))
-						return accessMethods[i];
+			} else {
+				SourceTypeBinding stb = (SourceTypeBinding)class_rb.erasure();
+				SyntheticMethodBinding[] accessMethods = stb.syntheticMethods();
+				if (accessMethods != null) {
+					for (int i=0; i<accessMethods.length; i++) {
+						if (CharOperation.equals(accessMethods[i].selector, name))
+							return accessMethods[i];
+					}
 				}
 			}
 		}
