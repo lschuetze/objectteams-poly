@@ -447,7 +447,7 @@ public class CallinImplementorDyn extends MethodMappingImplementor {
 														 roleType,
 														 false,
 														 gen)));
-								receiver = gen.singleNameReference(roleVar);
+								receiver = gen.thislikeNameReference(roleVar);
 								// private receiver needs to be casted to the class.
 							} else {
 								// method is from role's enclosing team

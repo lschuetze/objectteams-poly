@@ -239,7 +239,13 @@ public class AstGenerator extends AstFactory {
 		return result;
 	}
 
-    public ResultReference resultReference(
+	public Expression thislikeNameReference(char[] name) {
+		SingleNameReference result = singleNameReference(name);
+		result.isThisLike = true;
+		return result;
+	}
+
+	public ResultReference resultReference(
     		SingleNameReference ref, AbstractMethodMappingDeclaration mapping)
     {
     	return new ResultReference(ref, mapping);

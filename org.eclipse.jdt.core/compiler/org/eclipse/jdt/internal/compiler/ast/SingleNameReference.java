@@ -78,6 +78,9 @@ public class SingleNameReference extends NameReference implements OperatorIds {
 	public char[] token;
 	public MethodBinding[] syntheticAccessors; // [0]=read accessor [1]=write accessor
 	public TypeBinding genericCast;
+//{ObjectTeams: in generated out-of-scope code a name may have the privilige of a (t)this: 
+	public boolean isThisLike;
+// SH}
 
 public SingleNameReference(char[] source, long pos) {
 	super();

@@ -216,6 +216,7 @@ public class RoleTypeCreator implements TagBits {
         		};
         	}
         	if (   !(variableBinding instanceof TThisBinding)
+        		&& !isThisLike(anchorExpr)
         	    && !refBinding.isPublic()
         	    && !decapsulationAllowed)
 	        {
@@ -235,6 +236,12 @@ public class RoleTypeCreator implements TagBits {
 	        }
         }
         return originalType;
+    }
+
+    private static boolean isThisLike(Expression expression) {
+    	if (expression instanceof SingleNameReference)
+    		return ((SingleNameReference) expression).isThisLike;
+    	return false;
     }
 
     static ITeamAnchor retrieveAnchor(ReferenceBinding refBinding) {
@@ -360,11 +367,12 @@ public class RoleTypeCreator implements TagBits {
 
 	static boolean avoidWrapRoleType(BlockScope scope, Expression receiver) {
         if (scope.compilerOptions().weavingScheme == WeavingScheme.OTRE) {
-        	if (CallinImplementor.avoidWrapRoleType(scope, receiver))
-        		// don't use synthetic _OT$role as additional anchor
-        		return true;
+        	// don't use synthetic _OT$role as additional anchor
+        	return CallinImplementor.avoidWrapRoleType(scope, receiver);
+        } else {
+        	// same here, just different way to detect:
+        	return isThisLike(receiver);
         }
-		return false;
 	}
 
 	/**
