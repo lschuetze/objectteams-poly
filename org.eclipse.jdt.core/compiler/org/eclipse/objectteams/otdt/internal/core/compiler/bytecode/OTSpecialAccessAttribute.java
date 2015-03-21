@@ -1,7 +1,7 @@
 /**********************************************************************
  * This file is part of "Object Teams Development Tooling"-Software
  *
- * Copyright 2006, 2014 Fraunhofer Gesellschaft, Munich, Germany,
+ * Copyright 2006, 2015 Fraunhofer Gesellschaft, Munich, Germany,
  * for its Fraunhofer Institute for Computer Architecture and Software
  * Technology (FIRST), Berlin, Germany and Technical University Berlin,
  * Germany.
@@ -348,9 +348,13 @@ public class OTSpecialAccessAttribute extends AbstractAttribute {
 		case DECAPSULATION_METHOD_ACCESS:
 			this._readOffset += 6;
 			break;
+		case DYN_CALLOUT_FIELD_ACCESS:
+			this._readOffset += 2; // extra id
+				//$FALL-THROUGH$
 		case CALLOUT_FIELD_ACCESS:
 			this._readOffset += 7;
 			break;
+		case DYN_SUPER_METHOD_ACCESS:
 		case SUPER_METHOD_ACCESS:
 			this._readOffset += 8;
 			break;

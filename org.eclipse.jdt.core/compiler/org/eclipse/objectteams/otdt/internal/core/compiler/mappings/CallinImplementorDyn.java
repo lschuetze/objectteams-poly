@@ -624,6 +624,7 @@ public class CallinImplementorDyn extends MethodMappingImplementor {
 							? new PrivateRoleMethodCall(receiver, callinDecl.roleMethodSpec.selector, callArgs, false/*c-t-f*/, 
 													    callinDecl.scope, roleType, callinDecl.getRoleMethod(), gen)
 							: gen.messageSend(receiver, callinDecl.roleMethodSpec.selector, callArgs);
+						roleMethodCall.isGenerated = true; // for PrivateRoleMethodCall
 						roleMethodCall.isPushedOutRoleMethodCall = true;
 						
 						// -- post processing:
