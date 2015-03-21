@@ -107,14 +107,15 @@ public class CallinImplementorDyn extends MethodMappingImplementor {
 	static final char[] _OT_RESULT		= "_OT$result".toCharArray(); //$NON-NLS-1$
 	static final char[] RESULT		 	= "result".toCharArray(); //$NON-NLS-1$
 	static final String LOCAL_ROLE 		= "local$role$"; //$NON-NLS-1$
+	static final char[] _BASE$          = "_base$".toCharArray(); //$NON-NLS-1$
 	
 	// for call next:
 	private static final char[] BASE_CALL_ARGS  = "baseCallArguments".toCharArray();   //$NON-NLS-1$
 
 	// for call{replace,before,after}:
-	static final char[][] REPLACE_ARG_NAMES = new char[][]{IOTConstants.BASE, TEAMS, INDEX, CALLIN_ID, BOUND_METHOD_ID, ARGUMENTS};
-	static final char[][] BEFORE_ARG_NAMES = new char[][]{IOTConstants.BASE, CALLIN_ID, BOUND_METHOD_ID, ARGUMENTS};
-	static final char[][] AFTER_ARG_NAMES = new char[][]{IOTConstants.BASE, CALLIN_ID, BOUND_METHOD_ID, ARGUMENTS, _OT_RESULT};
+	static final char[][] REPLACE_ARG_NAMES = new char[][]{_BASE$, TEAMS, INDEX, CALLIN_ID, BOUND_METHOD_ID, ARGUMENTS};
+	static final char[][] BEFORE_ARG_NAMES = new char[][]{_BASE$, CALLIN_ID, BOUND_METHOD_ID, ARGUMENTS};
+	static final char[][] AFTER_ARG_NAMES = new char[][]{_BASE$, CALLIN_ID, BOUND_METHOD_ID, ARGUMENTS, _OT_RESULT};
 
 	protected static final String OT_LOCAL = "_OT$local$"; //$NON-NLS-1$
 
@@ -335,7 +336,7 @@ public class CallinImplementorDyn extends MethodMappingImplementor {
 			length = 5;
 		Argument[] arguments = new Argument[length]; 
 		int a = 0;
-		arguments[a++] 		= gen.argument(IOTConstants.BASE, gen.qualifiedTypeReference(IOTConstants.ORG_OBJECTTEAMS_IBOUNDBASE2));
+		arguments[a++] 		= gen.argument(_BASE$, gen.qualifiedTypeReference(IOTConstants.ORG_OBJECTTEAMS_IBOUNDBASE2));
 		if (isReplace)
 			arguments[a++] 	= gen.argument(TEAMS, gen.qualifiedArrayTypeReference(IOTConstants.ORG_OBJECTTEAMS_ITEAM, 1));
 		if (isReplace)
@@ -420,6 +421,12 @@ public class CallinImplementorDyn extends MethodMappingImplementor {
 									  				gen.createCastOrUnboxing(gen.singleNameReference(_OT_RESULT), baseReturn, true/*baseAccess*/));
 							blockStatements.add(callinDecl.resultVar);
 						}
+						// expose casted _base$ as "base":
+						blockStatements.add(gen.localVariable(IOTConstants.BASE,
+													gen.alienScopeTypeReference(gen.baseTypeReference(roleType.baseclass()),callinDecl.scope), 
+													gen.castExpression(gen.baseNameReference(_BASE$), 
+															gen.alienScopeTypeReference(gen.baseTypeReference(roleType.baseclass()),callinDecl.scope), 
+															CastExpression.RAW)));
 
 						// -------------- base predicate check -------
 						boolean hasBasePredicate = false;
@@ -441,6 +448,7 @@ public class CallinImplementorDyn extends MethodMappingImplementor {
 				        Expression resetFlag = 
 				        	CallinImplementor.setExecutingCallin(roleType.roleModel, blockStatements);				//   boolean _OT$oldIsExecutingCallin = _OT$setExecutingCallin(true);
 
+				        // ----------- receiver for role method call: -----------
 				        Expression receiver;
 						char[] roleVar = null;
 						if (!isStaticRoleMethod) {
@@ -455,9 +463,7 @@ public class CallinImplementorDyn extends MethodMappingImplementor {
 										ClassFileConstants.AccFinal,
 										Lifting.liftCall(callMethod.scope,
 														 gen.thisReference(),
-														 gen.castExpression(gen.baseNameReference(IOTConstants.BASE), 
-																 			gen.alienScopeTypeReference(gen.baseTypeReference(roleType.baseclass()),callinDecl.scope), 
-																 			CastExpression.RAW),
+														 gen.baseNameReference(IOTConstants.BASE),
 														 callMethod.scope.getType(IOTConstants.ORG_OBJECTTEAMS_IBOUNDBASE2, 3),
 														 roleType,
 														 false,
@@ -528,6 +534,7 @@ public class CallinImplementorDyn extends MethodMappingImplementor {
 							}
 							TypeReference localTypeRef = null;
 							if (callinDecl.mappings == null) {
+								// ------------ unmapped arguments --------------
 								arg = gen.arrayReference(gen.singleNameReference(ARGUMENTS), i+baseArgOffset);					//    prepare: somePreparation(arguments[i])
 								TypeBinding baseArgType = baseSpec.resolvedParameters()[i];
 								if (roleParam.isBaseType()) {
@@ -562,6 +569,7 @@ public class CallinImplementorDyn extends MethodMappingImplementor {
 								if (localTypeRef == null)
 									localTypeRef = gen.baseclassReference(baseArgType); // unless lifting was required above
 							} else {
+								// ------------ mapped arguments --------------
 				 				if (roleParam.isTypeVariable() && ((TypeVariableBinding)roleParam).declaringElement instanceof CallinCalloutBinding)
 				 					localTypeRef = gen.typeReference(roleParam.erasure()); // cannot explicitly mention this TVB
 				 				else
@@ -687,7 +695,7 @@ public class CallinImplementorDyn extends MethodMappingImplementor {
 							for (Map.Entry<ReferenceBinding, Integer> entry : callinDecl.rolesWithLiftingProblem.entrySet())
 								callinDecl.scope.problemReporter().callinDespiteLiftingProblem(entry.getKey(), entry.getValue(), callinDecl);
 					}
-				}
+				} // END for (CallinMappingDeclaration callinDecl : callinDecls) 
 				
 				gen.retargetFrom(teamDecl);
 				
