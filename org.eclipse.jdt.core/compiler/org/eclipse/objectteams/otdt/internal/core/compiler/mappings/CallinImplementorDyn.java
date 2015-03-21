@@ -38,15 +38,18 @@ import org.eclipse.jdt.internal.compiler.ast.TryStatement;
 import org.eclipse.jdt.internal.compiler.ast.TypeDeclaration;
 import org.eclipse.jdt.internal.compiler.ast.TypeReference;
 import org.eclipse.jdt.internal.compiler.classfmt.ClassFileConstants;
+import org.eclipse.jdt.internal.compiler.env.ICompilationUnit;
 import org.eclipse.jdt.internal.compiler.impl.CompilerOptions.WeavingScheme;
 import org.eclipse.jdt.internal.compiler.lookup.BaseTypeBinding;
 import org.eclipse.jdt.internal.compiler.lookup.ClassScope;
 import org.eclipse.jdt.internal.compiler.lookup.MethodBinding;
 import org.eclipse.jdt.internal.compiler.lookup.ReferenceBinding;
+import org.eclipse.jdt.internal.compiler.lookup.Scope;
 import org.eclipse.jdt.internal.compiler.lookup.SourceTypeBinding;
 import org.eclipse.jdt.internal.compiler.lookup.TypeBinding;
 import org.eclipse.jdt.internal.compiler.lookup.TypeConstants;
 import org.eclipse.jdt.internal.compiler.lookup.TypeVariableBinding;
+import org.eclipse.jdt.internal.compiler.parser.Parser;
 import org.eclipse.jdt.internal.compiler.parser.TerminalTokens;
 import org.eclipse.objectteams.otdt.core.compiler.IOTConstants;
 import org.eclipse.objectteams.otdt.core.compiler.Pair;
@@ -176,11 +179,11 @@ public class CallinImplementorDyn extends MethodMappingImplementor {
 
 	// copied and slightly adjusted from old CallinImplementor:
 	Expression getArgument(
-			AbstractMethodMappingDeclaration methodMapping,
-			MethodDeclaration       		 wrapperDeclaration,
-			TypeBinding[]                    implParameters,
-			int		      					 idx,
-			final MethodSpec				 sourceMethodSpec)
+			CallinMappingDeclaration	methodMapping,
+			MethodDeclaration       	wrapperDeclaration,
+			TypeBinding[]               implParameters,
+			int		      				idx,
+			final MethodSpec			sourceMethodSpec)
 	{
 		final MethodSpec implementationMethodSpec = methodMapping.getImplementationMethodSpec();
 
@@ -201,6 +204,9 @@ public class CallinImplementorDyn extends MethodMappingImplementor {
 			pos = mapper.second.intValue();
 
 	    if (mappedArgExpr != null) {
+	    	if (methodMapping.baseMethodSpecs.length > 1) // multi-mappings need to copy mapped argument expressions:
+	    		mappedArgExpr = copyExpression(mappedArgExpr, methodMapping.scope, methodMapping.compilationResult.getCompilationUnit());
+
 	    	SourceTypeBinding roleType = methodMapping.scope.enclosingSourceType();
 
 	    	if (idx >= implParameters.length) // CLOVER: never true in jacks suite
@@ -257,6 +263,14 @@ public class CallinImplementorDyn extends MethodMappingImplementor {
 	            implementationMethodSpec,
 				methodMapping.isCallout());
 	    return null;
+	}
+
+	Expression copyExpression(Expression expression, Scope scope, ICompilationUnit cu) {
+		if (cu == null) return expression; // FIXME: do we need a fallback when cu is built from model?
+		final Parser parser = new Parser(scope.problemReporter(), false);
+		char[] source = cu.getContents();
+		return parser.parseExpression(source, expression.sourceStart, expression.sourceEnd - expression.sourceStart + 1, 
+										scope.referenceCompilationUnit(), false /* record line separators */);
 	}
 
 	/**
@@ -572,12 +586,6 @@ public class CallinImplementorDyn extends MethodMappingImplementor {
 								if (isBaseReference)
 									arg = gen.castExpression(arg, gen.typeReference(roleParam), CastExpression.RAW);
 							}
-							// FIXME(SH): in the case of multiple base methods sharing a parameter mapping
-							// 			  the following local var will be duplicated over several case blocks,
-							//            yet the mapping expression is shared, so it cannot refer to different locals.
-							//            (A): copy mapping expression (generic AST clone needed!)
-							//            (B): make subsequent blocks share the same local var??
-							// Witness: CallinParameterMapping_LiftingAndLowering.test439_paramMapMultipleBasemethods2()
 			 				char[] localName = (OT_LOCAL+i).toCharArray();											//    RoleParamType _OT$local$n = preparedArg<n>;
 							blockStatements.add(gen.localVariable(localName, gen.alienScopeTypeReference(localTypeRef, callinDecl.scope), arg));
 							callArgs[i+idx] = gen.singleNameReference(localName);									//    prepare: ... _OT$local$ ...
