@@ -102,7 +102,7 @@ public abstract class SwitchOnBaseTypeGenerator implements IOTConstants {
     	else if (hasBindingAmbiguity || caseObjects[0].getWeavingScheme() == WeavingScheme.OTDRE)
     		castType = staticBaseType;
 	    if (castType != null)
-	    	baseArg = gen.castExpression(baseArg, gen.typeReference(castType), CastExpression.RAW);
+	    	baseArg = gen.castExpression(baseArg, gen.baseTypeReference(castType), CastExpression.RAW);
 	    char[] LOCAL_BASE_NAME = "_OT$local$base".toCharArray(); //$NON-NLS-1$
 		stmts[0] = gen.localVariable(LOCAL_BASE_NAME, gen.baseclassReference(staticBaseType), baseArg);
 		
