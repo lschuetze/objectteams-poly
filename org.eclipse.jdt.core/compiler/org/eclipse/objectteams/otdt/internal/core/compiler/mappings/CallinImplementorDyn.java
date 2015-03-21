@@ -97,6 +97,8 @@ public class CallinImplementorDyn extends MethodMappingImplementor {
 	public static final char[] OT_CALL_NEXT        = "_OT$callNext".toCharArray(); //$NON-NLS-1$
 	//  - both the team version (II[Object;) and the base version (I[Object;)
 	public static final char[] OT_CALL_ORIG_STATIC = "_OT$callOrigStatic".toCharArray(); //$NON-NLS-1$
+
+	private static final char[] OT_TERMINAL_CALL_NEXT = "_OT$terminalCallNext".toCharArray(); //$NON-NLS-1$
 	
 	// variable names (arguments ...)
 	static final char[] TEAMS 			= "teams".toCharArray(); //$NON-NLS-1$
@@ -916,7 +918,7 @@ public class CallinImplementorDyn extends MethodMappingImplementor {
 											   gen.emptyStatement(),
 											   gen.block(repackingStats.toArray(new Statement[repackingStats.size()]))));
 
-			Expression result = gen.messageSend(gen.superReference(), OT_CALL_NEXT, superArgs);						//    return cast+lift?(super._OT$callNext(..));
+			Expression result = genSuperCallNext(gen, teamDecl.binding, superArgs);									//    return cast+lift?(super._OT$callNext(..));
 			if (mapping.baseMethodSpecs[0].returnNeedsTranslation) { // FIXME(SH): per basemethod!
 				// lifting:
 				TypeBinding[]/*role,base*/ returnTypes = getReturnTypes(mapping, 0);
@@ -951,10 +953,17 @@ public class CallinImplementorDyn extends MethodMappingImplementor {
 		swStat.statements = swStatements.toArray(new Statement[swStatements.size()]);
 		decl.statements = new Statement[] {
 			swStat,
-			gen.returnStatement(gen.messageSend(gen.superReference(), OT_CALL_NEXT, superArgs)) // delegate with unchanged arguments/return
+			gen.returnStatement(genSuperCallNext(gen, teamDecl.binding, superArgs)) // delegate with unchanged arguments/return
 		};
 		decl.hasParsedStatements = true;
 		AstEdit.addMethod(teamDecl, decl);
+	}
+
+	private Expression genSuperCallNext(AstGenerator gen, SourceTypeBinding binding, Expression[] superArgs) {
+		if (binding.superclass.isTeam())
+			return gen.messageSend(gen.superReference(), OT_CALL_NEXT, superArgs);
+		// no super-*team* so call the static variant:
+		return gen.messageSend(gen.qualifiedNameReference(IOTConstants.ORG_OBJECTTEAMS_TEAM), OT_TERMINAL_CALL_NEXT, superArgs);
 	}
 
 	Reference genTeamThis(AstGenerator gen, TypeBinding type) {

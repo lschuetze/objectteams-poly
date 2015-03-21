@@ -577,6 +577,10 @@ public /* team */ class Team implements ITeam {
 	 */
 	public Object _OT$callNext(IBoundBase2 baze, ITeam[] teams, int idx, int[] callinIds, int boundMethodId, Object[] args, Object[] baseCallArgs)
 	{
+		return _OT$terminalCallNext(baze, teams, idx, callinIds, boundMethodId, args, baseCallArgs);
+	}
+	public static Object _OT$terminalCallNext(IBoundBase2 baze, ITeam[] teams, int idx, int[] callinIds, int boundMethodId, Object[] args, Object[] baseCallArgs)
+	{
 		// Are there still active teams?
 		if (idx+1 < teams.length) {
 			// Yes, so call the next team/callin
