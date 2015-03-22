@@ -142,47 +142,55 @@ class AsmWritableBoundClass extends AsmBoundClass {
 	@Override
 	protected void endTransformation() {
 		assert (isTransformationActive) : "No transformation active";
-		// //TODO (ofra): Do everything in one transformation
-		// Do all transformation with the Core API of ASM
-		reader.accept(multiAdapter, ClassReader.SKIP_FRAMES);
-		setBytecode(writer.toByteArray());
-		//Do all transformations with the Tree API of ASM
-		for (AbstractTransformableClassNode node : nodes) {
-			reader = new ClassReader(allocateAndGetBytecode());
-			reader.accept(node, ClassReader.SKIP_FRAMES);
-			if (node.transform()) {
-				writer = getClassWriter();
-				node.accept(writer);
-				setBytecode(writer.toByteArray());
-			}
-		}
 		
-		dump();
-		reader = null;
-		writer = null;
-		multiAdapter = null;
-		nodes = null;
-		//Check, if this is the first transformation for this class
-		if (!this.isFirstTransformation) {
-			// It is not the first transformation, so redefine the class
-			try {
-				redefine();
-			} catch (Throwable t) {
-//				t.printStackTrace(System.out);
-				// if redefinition failed (ClassCircularity?) install a runnable for deferred redefinition:
-				final Runnable previousTask = TeamManager.pendingTasks.get();
-				TeamManager.pendingTasks.set(new Runnable() {
-					public void run() {
-						if (previousTask != null)
-							previousTask.run();
-						redefine();
-					}
-					@Override
-					public String toString() {
-						return "Retry "+AsmWritableBoundClass.this.toString();
-					}
-				});
+		if (multiAdapter.hasVisitors() || !nodes.isEmpty()) {
+			// //TODO (ofra): Do everything in one transformation
+			// Do all transformation with the Core API of ASM
+			reader.accept(multiAdapter, ClassReader.SKIP_FRAMES);
+			setBytecode(writer.toByteArray());
+			//Do all transformations with the Tree API of ASM
+			for (AbstractTransformableClassNode node : nodes) {
+				reader = new ClassReader(allocateAndGetBytecode());
+				reader.accept(node, ClassReader.SKIP_FRAMES);
+				if (node.transform()) {
+					writer = getClassWriter();
+					node.accept(writer);
+					setBytecode(writer.toByteArray());
+				}
 			}
+			
+			dump();
+			reader = null;
+			writer = null;
+			multiAdapter = null;
+			nodes = null;
+			//Check, if this is the first transformation for this class
+			if (!this.isFirstTransformation) {
+				// It is not the first transformation, so redefine the class
+				try {
+					redefine();
+				} catch (Throwable t) {
+	//				t.printStackTrace(System.out);
+					// if redefinition failed (ClassCircularity?) install a runnable for deferred redefinition:
+					final Runnable previousTask = TeamManager.pendingTasks.get();
+					TeamManager.pendingTasks.set(new Runnable() {
+						public void run() {
+							if (previousTask != null)
+								previousTask.run();
+							redefine();
+						}
+						@Override
+						public String toString() {
+							return "Retry "+AsmWritableBoundClass.this.toString();
+						}
+					});
+				}
+			}
+		} else {
+			reader = null;
+			writer = null;
+			multiAdapter = null;
+			nodes = null;
 		}
 		isTransformationActive = false;
 		isFirstTransformation = false;

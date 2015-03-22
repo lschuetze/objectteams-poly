@@ -49,6 +49,10 @@ class MultiClassAdapter extends ClassVisitor {
 		this.toplevelVisitor = v;
 	}
 	
+	public boolean hasVisitors() {
+		return this.toplevelVisitor != null || !this.visitors.isEmpty();
+	}
+	
 	@Override
 	public void visit(int version, int access, String name, String signature,
 			String superName, String[] interfaces) {
