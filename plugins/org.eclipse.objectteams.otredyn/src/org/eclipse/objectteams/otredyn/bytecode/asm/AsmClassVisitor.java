@@ -114,6 +114,7 @@ class AsmClassVisitor extends ClassVisitor {
 												  baseMethodNames[j], baseMethodSignatures[j], declaringBaseClassNames[j],
 												  callinModifier, callinIds[j], baseFlags[j], handleCovariantReturn);
 					clazz.addBinding(binding);
+					clazz.boundBaseClasses.add(declaringBaseClassNames[j].replace('/', '.'));
 				}
 			}
 		} else if (attribute.type.equals(Attributes.ATTRIBUTE_CALLIN_PRECEDENCE)) {
