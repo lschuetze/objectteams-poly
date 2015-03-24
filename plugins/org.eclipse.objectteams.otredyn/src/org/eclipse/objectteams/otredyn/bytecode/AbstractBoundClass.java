@@ -31,6 +31,7 @@ import org.eclipse.objectteams.otredyn.runtime.IBoundClass;
 import org.eclipse.objectteams.otredyn.runtime.IMethod;
 import org.eclipse.objectteams.otredyn.runtime.TeamManager;
 import org.eclipse.objectteams.otredyn.runtime.ISubclassWiringTask;
+import org.eclipse.objectteams.otredyn.transformer.IWeavingContext;
 import org.eclipse.objectteams.otredyn.transformer.jplis.ObjectTeamsTransformer;
 import org.objectweb.asm.Opcodes;
 
@@ -175,6 +176,8 @@ public abstract class AbstractBoundClass implements IBoundClass {
 
 	protected ClassLoader loader;
 
+	// callback
+	protected IWeavingContext weavingContext;
 
 
 
@@ -331,7 +334,8 @@ public abstract class AbstractBoundClass implements IBoundClass {
 	 * Add the empty method accessStatic
 	 * Add the empty method callAllBindings
 	 */
-	public void transformAtLoadTime() {
+	public void transformAtLoadTime(IWeavingContext weavingContext) {
+		this.weavingContext = weavingContext;
 		handleTaskList();
 	}
 

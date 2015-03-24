@@ -1,7 +1,7 @@
 /**********************************************************************
  * This file is part of "Object Teams Dynamic Runtime Environment"
  * 
- * Copyright 2002, 2014 Berlin Institute of Technology, Germany, and others.
+ * Copyright 2002, 2015 Berlin Institute of Technology, Germany, and others.
  * 
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -25,6 +25,7 @@ import java.util.Set;
 
 import org.eclipse.objectteams.otredyn.bytecode.AbstractBoundClass;
 import org.eclipse.objectteams.otredyn.bytecode.ClassRepository;
+import org.eclipse.objectteams.otredyn.transformer.IWeavingContext;
 
 
 /**
@@ -33,8 +34,16 @@ import org.eclipse.objectteams.otredyn.bytecode.ClassRepository;
  */
 public class ObjectTeamsTransformer implements ClassFileTransformer {
 
+	private IWeavingContext weavingContext;
+	
 	private Set<String> boundBaseClassNames = new HashSet<String>();
 
+	public ObjectTeamsTransformer() { }
+
+	public ObjectTeamsTransformer(IWeavingContext weavingContext) {
+		this.weavingContext = weavingContext;
+	}
+	
 	/* (non-Javadoc)
 	 * @see java.lang.instrument.ClassFileTransformer#transform(java.lang.ClassLoader, java.lang.String, java.lang.Class, java.security.ProtectionDomain, byte[])
 	 */
@@ -63,7 +72,7 @@ public class ObjectTeamsTransformer implements ClassFileTransformer {
 			if (!clazz.isInterface())
 				ClassRepository.getInstance().linkClassWithSuperclass(clazz);
 			if (!clazz.isInterface() || clazz.isRole())
-				clazz.transformAtLoadTime();
+				clazz.transformAtLoadTime(this.weavingContext);
 			
 			classfileBuffer = clazz.getBytecode();
 			clazz.dump(classfileBuffer, "initial");

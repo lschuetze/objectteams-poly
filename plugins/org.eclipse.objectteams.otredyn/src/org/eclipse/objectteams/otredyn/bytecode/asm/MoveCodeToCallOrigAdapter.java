@@ -21,6 +21,7 @@ import java.util.List;
 import java.util.ListIterator;
 
 import org.eclipse.objectteams.otredyn.bytecode.Method;
+import org.eclipse.objectteams.otredyn.transformer.IWeavingContext;
 import org.eclipse.objectteams.otredyn.transformer.names.ConstantMembers;
 import org.objectweb.asm.Opcodes;
 import org.objectweb.asm.Type;
@@ -44,8 +45,9 @@ public class MoveCodeToCallOrigAdapter extends AbstractTransformableClassNode {
 	private int firstArgIndex; // slot index of the first argument (0 (static) or 1 (non-static))
 	private int argOffset; // used to skip synth args if the callOrig method itself is a statid role method
 	private Method callOrig;
+	private boolean superIsWeavable = true;
 	
-	public MoveCodeToCallOrigAdapter(AsmWritableBoundClass clazz, Method method, int boundMethodId) {
+	public MoveCodeToCallOrigAdapter(AsmWritableBoundClass clazz, Method method, int boundMethodId, IWeavingContext weavingContext) {
 		this.method = method;
 		this.boundMethodId = boundMethodId;
 		if (method.isStatic()) {
@@ -56,6 +58,8 @@ public class MoveCodeToCallOrigAdapter extends AbstractTransformableClassNode {
 			firstArgIndex = 1;
 			callOrig = ConstantMembers.callOrig;
 		}
+		if (weavingContext != null)
+			superIsWeavable = weavingContext.isWeavable(clazz.getSuperClassName());
 	}
 	
 	public boolean transform() {
@@ -105,7 +109,8 @@ public class MoveCodeToCallOrigAdapter extends AbstractTransformableClassNode {
 			}
 		}
 
-		adjustSuperCalls(orgMethod.instructions, orgMethod.name, args, returnType, boundMethodIdSlot);
+		if (superIsWeavable)
+			adjustSuperCalls(orgMethod.instructions, orgMethod.name, args, returnType, boundMethodIdSlot);
 		
 		// replace return of the original method with areturn and box the result value if needed
 		replaceReturn(orgMethod.instructions, returnType);

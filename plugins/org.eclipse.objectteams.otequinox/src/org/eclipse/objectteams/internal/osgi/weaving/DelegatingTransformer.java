@@ -1,7 +1,7 @@
 /**********************************************************************
  * This file is part of "Object Teams Development Tooling"-Software
  * 
- * Copyright 2014 GK Software AG
+ * Copyright 2015 GK Software AG
  *  
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -21,13 +21,18 @@ import java.lang.instrument.ClassDefinition;
 import java.lang.instrument.IllegalClassFormatException;
 import java.lang.instrument.UnmodifiableClassException;
 import java.lang.reflect.InvocationTargetException;
+import java.net.URL;
 import java.security.ProtectionDomain;
 import java.util.Collection;
+import java.util.List;
 
 import org.eclipse.jdt.annotation.NonNull;
+import org.eclipse.objectteams.internal.osgi.weaving.OTWeavingHook.WeavingReason;
 import org.eclipse.objectteams.otredyn.bytecode.IRedefineStrategy;
 import org.eclipse.objectteams.otredyn.bytecode.RedefineStrategyFactory;
+import org.eclipse.objectteams.otredyn.transformer.IWeavingContext;
 import org.osgi.framework.Bundle;
+import org.osgi.framework.wiring.BundleWiring;
 
 /**
  * Generalization over the transformers of OTRE and OTDRE.
@@ -35,9 +40,9 @@ import org.osgi.framework.Bundle;
 public abstract class DelegatingTransformer {
 
 	/** Factory method for a fresh transformer. */
-	static @NonNull DelegatingTransformer newTransformer(boolean useDynamicWeaver) {
+	static @NonNull DelegatingTransformer newTransformer(boolean useDynamicWeaver, OTWeavingHook hook, BundleWiring wiring) {
 		if (useDynamicWeaver)
-			return new OTDRETransformer();
+			return new OTDRETransformer(getWeavingContext(hook, wiring));
 		else
 			return new OTRETransformer();
 	}
@@ -59,10 +64,10 @@ public abstract class DelegatingTransformer {
 	}
 	
 	private static class OTDRETransformer extends DelegatingTransformer {
-		org.eclipse.objectteams.otredyn.transformer.jplis.ObjectTeamsTransformer transformer =
-				new org.eclipse.objectteams.otredyn.transformer.jplis.ObjectTeamsTransformer();
-		public OTDRETransformer() {
+		org.eclipse.objectteams.otredyn.transformer.jplis.ObjectTeamsTransformer transformer;
+		public OTDRETransformer(IWeavingContext weavingContext) {
 			RedefineStrategyFactory.setRedefineStrategy(new OTEquinoxRedefineStrategy());
+			transformer = new org.eclipse.objectteams.otredyn.transformer.jplis.ObjectTeamsTransformer(weavingContext);
 		}
 		@Override
 		public void readOTAttributes(String className, InputStream inputStream, String fileName, Bundle bundle) throws ClassFormatError, IOException {
@@ -117,6 +122,23 @@ public abstract class DelegatingTransformer {
 			@Override
 			public Class<?> loadClass(String name) throws ClassNotFoundException {
 				return bundle.loadClass(name);
+			}
+		};
+	}
+
+	static IWeavingContext getWeavingContext(final OTWeavingHook hook, final BundleWiring bundleWiring) {
+		return new IWeavingContext() {
+			@Override
+			public boolean isWeavable(String className) {
+				// currently, we don't support implicit crossing of bundle boundaries,
+				// so check if the requested class is provided by the current bundle:
+				int lastDot = className.lastIndexOf('.');
+				String path = className.substring(0, lastDot).replace('.', '/');
+				String filePattern = className.substring(lastDot+1)+".class";
+				List<URL> entry = bundleWiring.findEntries(path, filePattern, 0);
+				if (entry == null || entry.isEmpty())
+					return false;
+				return hook.requiresWeaving(bundleWiring, className, null) != WeavingReason.None;
 			}
 		};
 	}

@@ -1,7 +1,7 @@
 /**********************************************************************
  * This file is part of "Object Teams Development Tooling"-Software
  * 
- * Copyright 2013, 2014 GK Software AG
+ * Copyright 2013, 2015 GK Software AG
  *  
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -236,7 +236,7 @@ public class OTWeavingHook implements WeavingHook, WovenClassListener {
 
 				long time = 0;
 
-				DelegatingTransformer transformer = DelegatingTransformer.newTransformer(useDynamicWeaver);
+				DelegatingTransformer transformer = DelegatingTransformer.newTransformer(useDynamicWeaver, this, bundleWiring);
 				Class<?> classBeingRedefined = null; // TODO prepare for otre-dyn
 				try {
 					log(IStatus.OK, "About to transform class "+className);

@@ -1,7 +1,7 @@
 /**********************************************************************
  * This file is part of "Object Teams Development Tooling"-Software
  * 
- * Copyright 2013, 2014 GK Software AG
+ * Copyright 2013, 2015 GK Software AG
  *  
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -97,7 +97,7 @@ public class BaseBundleLoadTrigger {
 				}
 				// (2) scan all teams in affecting aspect bindings:
 				if (!aspectBinding.hasScannedTeams)
-					aspectBinding.scanTeamClasses(aspectBundle, DelegatingTransformer.newTransformer(useDynamicWeaver));
+					aspectBinding.scanTeamClasses(aspectBundle, DelegatingTransformer.newTransformer(useDynamicWeaver, hook, baseClass.getBundleWiring()));
 					// TODO: record adapted base classes?
 				
 				// (3) add dependencies to the base bundle:
