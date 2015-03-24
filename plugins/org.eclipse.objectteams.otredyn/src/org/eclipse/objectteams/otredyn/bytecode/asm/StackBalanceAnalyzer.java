@@ -33,7 +33,7 @@ public class StackBalanceAnalyzer {
 		AbstractInsnNode current = location;
 		for (int i = args.length-1; i >= 0; i--) {
 			current = findInsertionPointBefore(current, - args[i].getSize());
-			nodes[args.length-i-1] = current;
+			nodes[i] = current;
 		}
 		return nodes;
 	}
