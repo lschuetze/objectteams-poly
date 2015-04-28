@@ -1167,6 +1167,9 @@ private void checkAnnotationsInType() {
 		this.modifiers |= ExtraCompilerModifiers.AccDeprecatedImplicitly;
 
 	for (int i = 0, length = this.memberTypes.length; i < length; i++)
+//{ObjectTeams: roles could be binary contained in source:
+	  if (!this.memberTypes[i].isBinaryBinding())
+// SH}
 		((SourceTypeBinding) this.memberTypes[i]).checkAnnotationsInType();
 }
 
