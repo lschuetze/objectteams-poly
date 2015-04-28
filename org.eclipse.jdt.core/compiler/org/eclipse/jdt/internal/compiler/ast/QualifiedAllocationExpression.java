@@ -53,6 +53,7 @@ import org.eclipse.jdt.internal.compiler.lookup.ExtraCompilerModifiers;
 import org.eclipse.jdt.internal.compiler.lookup.ImplicitNullAnnotationVerifier;
 import org.eclipse.jdt.internal.compiler.lookup.LocalTypeBinding;
 import org.eclipse.jdt.internal.compiler.lookup.MethodBinding;
+import org.eclipse.jdt.internal.compiler.lookup.ParameterizedGenericMethodBinding;
 import org.eclipse.jdt.internal.compiler.lookup.ParameterizedTypeBinding;
 import org.eclipse.jdt.internal.compiler.lookup.PolyTypeBinding;
 import org.eclipse.jdt.internal.compiler.lookup.ProblemMethodBinding;
@@ -64,6 +65,7 @@ import org.eclipse.jdt.internal.compiler.lookup.TagBits;
 import org.eclipse.jdt.internal.compiler.lookup.TypeBinding;
 import org.eclipse.jdt.internal.compiler.lookup.TypeConstants;
 import org.eclipse.jdt.internal.compiler.lookup.TypeIds;
+import org.eclipse.jdt.internal.compiler.lookup.TypeVariableBinding;
 import org.eclipse.objectteams.otdt.internal.core.compiler.ast.ConstructorDecapsulationException;
 import org.eclipse.objectteams.otdt.internal.core.compiler.ast.OTQualifiedAllocationExpression;
 import org.eclipse.objectteams.otdt.internal.core.compiler.control.Dependencies;
@@ -361,9 +363,18 @@ public static abstract class AbstractQualifiedAllocationExpression extends Alloc
 		TypeBinding result = resolveTypeForQualifiedAllocationExpression(scope);
 		if (result != null && !result.isPolyType() && this.binding != null) {
 			final CompilerOptions compilerOptions = scope.compilerOptions();
-			if (compilerOptions.isAnnotationBasedNullAnalysisEnabled && (this.binding.tagBits & TagBits.IsNullnessKnown) == 0) {
-				new ImplicitNullAnnotationVerifier(scope.environment(), compilerOptions.inheritNullAnnotations)
-						.checkImplicitNullAnnotations(this.binding, null/*srcMethod*/, false, scope);
+			if (compilerOptions.isAnnotationBasedNullAnalysisEnabled) {
+				if ((this.binding.tagBits & TagBits.IsNullnessKnown) == 0) {
+					new ImplicitNullAnnotationVerifier(scope.environment(), compilerOptions.inheritNullAnnotations)
+							.checkImplicitNullAnnotations(this.binding, null/*srcMethod*/, false, scope);
+				}
+				if (compilerOptions.sourceLevel >= ClassFileConstants.JDK1_8) {
+					if (this.binding instanceof ParameterizedGenericMethodBinding && this.typeArguments != null) {
+						TypeVariableBinding[] typeVariables = this.binding.original().typeVariables();
+						for (int i = 0; i < this.typeArguments.length; i++)
+							this.typeArguments[i].checkNullConstraints(scope, typeVariables, i);
+					}
+				}
 			}
 		}
 		return result;

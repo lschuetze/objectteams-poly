@@ -26,6 +26,7 @@
  *								bug 391376 - [1.8] check interaction of default methods with bridge methods and generics
  *								Bug 392099 - [1.8][compiler][null] Apply null annotation on types for null analysis
  *								Bug 415043 - [1.8][null] Follow-up re null type annotations after bug 392099
+ *								Bug 392238 - [1.8][compiler][null] Detect semantically invalid null type annotations
  *								Bug 415850 - [1.8] Ensure RunJDTCoreTests can cope with null annotations enabled
  *								Bug 416172 - [1.8][compiler][null] null type annotation not evaluated on method return type
  *								Bug 417295 - [1.8[[null] Massage type annotated null analysis to gel well with deep encoded type bindings.
@@ -1158,16 +1159,27 @@ public char[] computeUniqueKey(boolean isLeaf) {
 	return uniqueKey;
 }
 
-//{ObjectTeams: allow access from Dependencies:
-public
-// SH}
-void faultInTypesForFieldsAndMethods() {
-	if (!isPrototype()) throw new IllegalStateException();
+private void checkAnnotationsInType() {
 	// check @Deprecated annotation
 	getAnnotationTagBits(); // marks as deprecated by side effect
 	ReferenceBinding enclosingType = enclosingType();
 	if (enclosingType != null && enclosingType.isViewedAsDeprecated() && !isDeprecated())
 		this.modifiers |= ExtraCompilerModifiers.AccDeprecatedImplicitly;
+
+	for (int i = 0, length = this.memberTypes.length; i < length; i++)
+		((SourceTypeBinding) this.memberTypes[i]).checkAnnotationsInType();
+}
+
+//{ObjectTeams: allow access from Dependencies:
+public
+// SH}
+void faultInTypesForFieldsAndMethods() {
+	if (!isPrototype()) throw new IllegalStateException();
+	checkAnnotationsInType();
+	internalFaultInTypeForFieldsAndMethods();
+}
+
+private void internalFaultInTypeForFieldsAndMethods() {
 	fields();
 	methods();
 
@@ -1180,7 +1192,7 @@ void faultInTypesForFieldsAndMethods() {
 	for (int i = 0; i < this.memberTypes.length; i++)
 		if (!this.memberTypes[i].isBinaryBinding()) // roles could be binary contained in source
 //carp}
-		((SourceTypeBinding) this.memberTypes[i]).faultInTypesForFieldsAndMethods();
+		((SourceTypeBinding) this.memberTypes[i]).internalFaultInTypeForFieldsAndMethods();
 }
 // NOTE: the type of each field of a source type is resolved when needed
 public FieldBinding[] fields() {
@@ -2519,7 +2531,7 @@ public MethodBinding resolveTypesFor(MethodBinding method, boolean fromSynthetic
 				 				arg.type.resolvedType :
 					 			arg.type.resolveType(methodDecl.scope, true /* check bounds*/);
 // orig:
-//				parameterType = arg.type.resolveType(methodDecl.scope, true /* check bounds*/); 
+//				parameterType = arg.type.resolveType(methodDecl.scope, true /* check bounds*/);
 			} finally {
 				if (deferRawTypeCheck) { 
 					arg.type.bits &= ~ASTNode.IgnoreRawTypeCheck;
@@ -2755,8 +2767,7 @@ private void createArgumentBindings(MethodBinding method, CompilerOptions compil
 			methodDecl.createArgumentBindings();
 		// add implicit annotations (inherited(?) & default):
 		if (compilerOptions.isAnnotationBasedNullAnalysisEnabled) {
-			new ImplicitNullAnnotationVerifier(this.scope.environment(), compilerOptions.inheritNullAnnotations)
-					.checkImplicitNullAnnotations(method, methodDecl, true, this.scope);
+			new ImplicitNullAnnotationVerifier(this.scope.environment()).checkImplicitNullAnnotations(method, methodDecl, true, this.scope);
 		}
 	}
 }

@@ -1212,7 +1212,7 @@ public class NullTypeAnnotationTest extends AbstractNullAnnotationTest {
 				"1. ERROR in Y1.java (at line 5)\n" + 
 				"	X1<@Nullable String> maybeStrings;\n" + 
 				"	   ^^^^^^^^^^^^^^^^\n" + 
-				"Null constraint mismatch: The type \'@Nullable String\' is not a valid substitute for the type parameter \'@NonNull T extends @NonNull Object\'\n" + 
+				"Null constraint mismatch: The type \'@Nullable String\' is not a valid substitute for the type parameter \'T extends @NonNull Object\'\n" + 
 				"----------\n" + 
 				"2. ERROR in Y1.java (at line 6)\n" + 
 				"	X2<@NonNull String> strings;\n" + 
@@ -1222,7 +1222,7 @@ public class NullTypeAnnotationTest extends AbstractNullAnnotationTest {
 				"3. ERROR in Y1.java (at line 8)\n" + 
 				"	x.<Y1, @NonNull Object>foo(this, new Object());\n" + 
 				"	       ^^^^^^^^^^^^^^^\n" + 
-				"Null constraint mismatch: The type \'@NonNull Object\' is not a valid substitute for the type parameter \'@Nullable V extends @Nullable Object'\n" + 
+				"Null constraint mismatch: The type \'@NonNull Object\' is not a valid substitute for the type parameter \'V extends @Nullable Object'\n" + 
 				"----------\n"
 				);
 	}
@@ -1288,7 +1288,7 @@ public class NullTypeAnnotationTest extends AbstractNullAnnotationTest {
 				"1. ERROR in Y1.java (at line 3)\n" + 
 				"	p.X1<java.lang.@Nullable String> maybeStrings;\n" + 
 				"	     ^^^^^^^^^^^^^^^^^^^^^^^^^^\n" + 
-				"Null constraint mismatch: The type \'@Nullable String\' is not a valid substitute for the type parameter \'@NonNull T extends @NonNull Object\'\n" + 
+				"Null constraint mismatch: The type \'@Nullable String\' is not a valid substitute for the type parameter \'T extends @NonNull Object\'\n" + 
 				"----------\n" + 
 				"2. ERROR in Y1.java (at line 4)\n" + 
 				"	p.X2<java.lang.@NonNull String> strings;\n" + 
@@ -1298,7 +1298,7 @@ public class NullTypeAnnotationTest extends AbstractNullAnnotationTest {
 				"3. ERROR in Y1.java (at line 6)\n" + 
 				"	x.<Y1, java.lang.@NonNull Object>foo(this, new Object());\n" + 
 				"	       ^^^^^^^^^^^^^^^^^^^^^^^^^\n" + 
-				"Null constraint mismatch: The type \'@NonNull Object\' is not a valid substitute for the type parameter \'@Nullable V extends @Nullable Object\'\n" + 
+				"Null constraint mismatch: The type \'@NonNull Object\' is not a valid substitute for the type parameter \'V extends @Nullable Object\'\n" + 
 				"----------\n"
 				);
 	}
@@ -1342,7 +1342,7 @@ public class NullTypeAnnotationTest extends AbstractNullAnnotationTest {
 				"1. ERROR in Y1.java (at line 5)\n" + 
 				"	x.<@NonNull Y1, @NonNull Object>foo(this, new Object())\n" + 
 				"	                ^^^^^^^^^^^^^^^\n" + 
-				"Null constraint mismatch: The type \'@NonNull Object\' is not a valid substitute for the type parameter \'@Nullable V extends @Nullable Object\'\n" + 
+				"Null constraint mismatch: The type \'@NonNull Object\' is not a valid substitute for the type parameter \'V extends @Nullable Object\'\n" + 
 				"----------\n" + 
 				"2. ERROR in Y1.java (at line 6)\n" + 
 				"	.get(0).put(null, null);\n" + 
@@ -4860,7 +4860,12 @@ public void testDefault06() {
 		"	       ^^^^\n" + 
 		"Null type mismatch: required \'@NonNull T\' but the provided value is null\n" + 
 		"----------\n" + 
-		"2. ERROR in X.java (at line 11)\n" + 
+		"2. ERROR in X.java (at line 10)\n" + 
+		"	void test(Inner<Number> inum) {\n" + 
+		"	                ^^^^^^\n" + 
+		"Null constraint mismatch: The type \'Number\' is not a valid substitute for the type parameter \'@NonNull T\'\n" + 
+		"----------\n" + 
+		"3. ERROR in X.java (at line 11)\n" + 
 		"	@NonNull Number nnn = inum.process(null); // ERR on argument\n" + 
 		"	                                   ^^^^\n" + 
 		"Null type mismatch: required \'@NonNull Number\' but the provided value is null\n" + 
@@ -4918,7 +4923,7 @@ public void testDefault07() {
 			" 		}\n" +
 			"	}\n" +
 			"	void test(Inner inner) {\n" +
-			"		@NonNull Number nnn = inner.process(Integer.MAX_VALUE, new ArrayList<@Nullable Integer>()); // WARN on 1. arg; ERR on 2. arg\n" +
+			"		@NonNull Number nnn = inner.process(Integer.valueOf(3), new ArrayList<@Nullable Integer>()); // WARN on 1. arg; ERR on 2. arg\n" +
 			"	}\n" +
 			"}\n"
 		},
@@ -4930,12 +4935,12 @@ public void testDefault07() {
 		"Null type mismatch: required \'T extends @NonNull Number\' but the provided value is null\n" + 
 		"----------\n" + 
 		"2. WARNING in X.java (at line 13)\n" + 
-		"	@NonNull Number nnn = inner.process(Integer.MAX_VALUE, new ArrayList<@Nullable Integer>()); // WARN on 1. arg; ERR on 2. arg\n" + 
-		"	                                    ^^^^^^^^^^^^^^^^^\n" + 
-		"Null type safety (type annotations): The expression of type \'int\' needs unchecked conversion to conform to \'@NonNull Integer\'\n" + 
+		"	@NonNull Number nnn = inner.process(Integer.valueOf(3), new ArrayList<@Nullable Integer>()); // WARN on 1. arg; ERR on 2. arg\n" + 
+		"	                                    ^^^^^^^^^^^^^^^^^^\n" + 
+		"Null type safety (type annotations): The expression of type \'Integer\' needs unchecked conversion to conform to \'@NonNull Integer\'\n" + 
 		"----------\n" + 
 		"3. ERROR in X.java (at line 13)\n" + 
-		"	@NonNull Number nnn = inner.process(Integer.MAX_VALUE, new ArrayList<@Nullable Integer>()); // WARN on 1. arg; ERR on 2. arg\n" + 
+		"	@NonNull Number nnn = inner.process(Integer.valueOf(3), new ArrayList<@Nullable Integer>()); // WARN on 1. arg; ERR on 2. arg\n" + 
 		"	                                                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n" + 
 		"Null type mismatch (type annotations): required \'List<? extends @NonNull Number>\' but this expression has type \'ArrayList<@Nullable Integer>\', corresponding supertype is \'List<@Nullable Integer>\'\n" + 
 		"----------\n");
@@ -5187,16 +5192,16 @@ public void testDefault07_bin() {
 			"import java.util.*;\n" +
 			"public class Y {\n" +
 			"	void test(X.Inner inner) {\n" +
-			"		@NonNull Number nnn = inner.process(Integer.MAX_VALUE, new ArrayList<@Nullable Integer>()); // WARN on 1. arg; ERR on 2. arg\n" +
+			"		@NonNull Number nnn = inner.process(Integer.valueOf(3), new ArrayList<@Nullable Integer>()); // WARN on 1. arg; ERR on 2. arg\n" +
 			"	}\n" +
 			"}\n"
 		},
 		getCompilerOptions(),
 		"----------\n" +  // FIXME: this should not be a warning, a case of unrecognized boxing
 		"1. WARNING in Y.java (at line 5)\n" + 
-		"	@NonNull Number nnn = inner.process(Integer.MAX_VALUE, new ArrayList<@Nullable Integer>()); // WARN on 1. arg; ERR on 2. arg\n" + 
-		"	                                    ^^^^^^^^^^^^^^^^^\n" + 
-		"Null type safety (type annotations): The expression of type \'int\' needs unchecked conversion to conform to \'@NonNull Integer\'\n" + 
+		"	@NonNull Number nnn = inner.process(Integer.valueOf(3), new ArrayList<@Nullable Integer>()); // WARN on 1. arg; ERR on 2. arg\n" + 
+		"	                                    ^^^^^^^^^^^^^^^^^^\n" + 
+		"Null type safety (type annotations): The expression of type \'Integer\' needs unchecked conversion to conform to \'@NonNull Integer\'\n" + 
 		"----------\n");
 }
 public void testBug431269() {
@@ -6984,7 +6989,7 @@ public void testBug448777() {
 		"5. ERROR in DoubleInference.java (at line 17)\n" + 
 		"	f2.a(null);\n" + 
 		"	^^^^^^^^^^\n" + 
-		"Contradictory null annotations: method was inferred as \'@NonNull @Nullable String a(@NonNull @Nullable String)\', but only one of \'@NonNull\' and \'@Nullable\' can be effective at any location\n" + 
+		"Contradictory null annotations: method was inferred as \'@Nullable @NonNull String a(@Nullable @NonNull String)\', but only one of \'@NonNull\' and \'@Nullable\' can be effective at any location\n" + 
 		"----------\n");
 }
 public void testBug446442_comment2a() {
@@ -7312,17 +7317,17 @@ public void testBug446442_6b() {
 		"		return x;\n" + 
 		"	};\n" + 
 		"	         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n" + 
-		"Contradictory null annotations: function type was inferred as \'ArrayList<@NonNull @Nullable Integer> (ArrayList<@NonNull @Nullable Integer>)\', but only one of \'@NonNull\' and \'@Nullable\' can be effective at any location\n" + 
+		"Contradictory null annotations: function type was inferred as \'ArrayList<@NonNull @Nullable Integer> (ArrayList<@Nullable @NonNull Integer>)\', but only one of \'@NonNull\' and \'@Nullable\' can be effective at any location\n" + 
 		"----------\n" + 
 		"4. ERROR in Test.java (at line 17)\n" + 
 		"	x.add(null);\n" + 
 		"	^^^^^^^^^^^\n" + 
-		"Contradictory null annotations: method was inferred as \'boolean add(@NonNull @Nullable Integer)\', but only one of \'@NonNull\' and \'@Nullable\' can be effective at any location\n" + 
+		"Contradictory null annotations: method was inferred as \'boolean add(@Nullable @NonNull Integer)\', but only one of \'@NonNull\' and \'@Nullable\' can be effective at any location\n" + 
 		"----------\n" + 
 		"5. ERROR in Test.java (at line 18)\n" + 
 		"	x.get(0);\n" + 
 		"	^^^^^^^^\n" + 
-		"Contradictory null annotations: method was inferred as \'@NonNull @Nullable Integer get(int)\', but only one of \'@NonNull\' and \'@Nullable\' can be effective at any location\n" + 
+		"Contradictory null annotations: method was inferred as \'@Nullable @NonNull Integer get(int)\', but only one of \'@NonNull\' and \'@Nullable\' can be effective at any location\n" + 
 		"----------\n");
 }
 public void testBug453475() {
@@ -7532,7 +7537,7 @@ public void testBug456487b() {
 		"2. ERROR in Optional.java (at line 5)\n" + 
 		"	public static <@NonNull T> Optional<T> of(T value) { return new Optional<T>(value); }\n" + 
 		"	                                                            ^^^^^^^^^^^^^^^^^^^^^^\n" + 
-		"Contradictory null annotations: method was inferred as \'void <init>(@NonNull @Nullable T)\', but only one of \'@NonNull\' and \'@Nullable\' can be effective at any location\n" + 
+		"Contradictory null annotations: method was inferred as \'void <init>(@Nullable @NonNull T)\', but only one of \'@NonNull\' and \'@Nullable\' can be effective at any location\n" + 
 		"----------\n" + 
 		"3. ERROR in Optional.java (at line 5)\n" + 
 		"	public static <@NonNull T> Optional<T> of(T value) { return new Optional<T>(value); }\n" + 
@@ -7548,12 +7553,12 @@ public void testBug456487b() {
 		"2. ERROR in OTest.java (at line 6)\n" + 
 		"	@NonNull String s = os1.get();\n" + 
 		"	                    ^^^^^^^^^\n" + 
-		"Contradictory null annotations: method was inferred as \'@NonNull @Nullable String get()\', but only one of \'@NonNull\' and \'@Nullable\' can be effective at any location\n" + 
+		"Contradictory null annotations: method was inferred as \'@Nullable @NonNull String get()\', but only one of \'@NonNull\' and \'@Nullable\' can be effective at any location\n" + 
 		"----------\n" + 
 		"3. ERROR in OTest.java (at line 7)\n" + 
 		"	@Nullable String ns = os1.orElse(null);\n" + 
 		"	                      ^^^^^^^^^^^^^^^^\n" + 
-		"Contradictory null annotations: method was inferred as \'@NonNull @Nullable String orElse(@NonNull @Nullable String)\', but only one of \'@NonNull\' and \'@Nullable\' can be effective at any location\n" + 
+		"Contradictory null annotations: method was inferred as \'@Nullable @NonNull String orElse(@Nullable @NonNull String)\', but only one of \'@NonNull\' and \'@Nullable\' can be effective at any location\n" + 
 		"----------\n" + 
 		"4. ERROR in OTest.java (at line 10)\n" + 
 		"	Optional<String> os = Optional.of(null);\n" + 
@@ -7568,7 +7573,7 @@ public void testBug456487b() {
 		"6. ERROR in OTest.java (at line 11)\n" + 
 		"	@NonNull String s = os.orElse(null);\n" + 
 		"	                    ^^^^^^^^^^^^^^^\n" + 
-		"Contradictory null annotations: method was inferred as \'@NonNull @Nullable String orElse(@NonNull @Nullable String)\', but only one of \'@NonNull\' and \'@Nullable\' can be effective at any location\n" + 
+		"Contradictory null annotations: method was inferred as \'@Nullable @NonNull String orElse(@Nullable @NonNull String)\', but only one of \'@NonNull\' and \'@Nullable\' can be effective at any location\n" + 
 		"----------\n");
 }
 public void testBug454182() {
@@ -7738,5 +7743,172 @@ public void testBug448709() {
 		"1->2\n" +
 		"1->2\n" +
 		"1->2");
+}
+public void testBug459967_Array_constructor() {
+	runConformTestWithLibs(
+		new String[] {
+			"X.java",
+			"import org.eclipse.jdt.annotation.*;\n" +
+			"interface FI<T> {\n" +
+			"	T @NonNull[] getArray(int size);" +
+			"}\n" +
+			"public class X {\n" +
+			"	void consumer(FI<String> fis) {}\n" +
+			"	void test() {\n" +
+			"		consumer(String[]::new);\n" +
+			"	}\n" +
+			"}\n"
+		},
+		getCompilerOptions(),
+		"");
+}
+public void testBug459967_Array_constructor_b() {
+	runNegativeTestWithLibs(
+		new String[] {
+			"X.java",
+			"import org.eclipse.jdt.annotation.*;\n" +
+			"interface FI<T> {\n" +
+			"	@NonNull T @NonNull[] getArray(int size);" +
+			"}\n" +
+			"public class X {\n" +
+			"	void consumer(FI<String> fis) {}\n" +
+			"	void test() {\n" +
+			"		consumer(String[]::new);\n" +
+			"	}\n" +
+			"}\n"
+		},
+		getCompilerOptions(),
+		"----------\n" + 
+		"1. WARNING in X.java (at line 7)\n" + 
+		"	consumer(String[]::new);\n" + 
+		"	         ^^^^^^^^^^^^^\n" + 
+		"Null type safety at method return type: Method descriptor FI<String>.getArray(int) promises \'@NonNull String @NonNull[]\' but referenced method provides \'String @NonNull[]\'\n" + 
+		"----------\n");
+}
+public void testBug459967_Array_clone() {
+	runConformTestWithLibs(
+		new String[] {
+			"X.java",
+			"import org.eclipse.jdt.annotation.*;\n" +
+			"interface FI<T> {\n" +
+			"	T @NonNull[] getArray(T[] orig);" +
+			"}\n" +
+			"public class X {\n" +
+			"	void consumer(FI<String> fis) {}\n" +
+			"	void test() {\n" +
+			"		consumer(String[]::clone);\n" +
+			"	}\n" +
+			"}\n"
+		},
+		getCompilerOptions(),
+		"");
+}
+public void testBug459967_Array_clone_b() {
+	runNegativeTestWithLibs(
+		new String[] {
+			"X.java",
+			"import org.eclipse.jdt.annotation.*;\n" +
+			"interface FI<T> {\n" +
+			"	@NonNull T @NonNull[] getArray(T[] orig);" +
+			"}\n" +
+			"public class X {\n" +
+			"	void consumer(FI<String> fis) {}\n" +
+			"	void test() {\n" +
+			"		consumer(String[]::clone);\n" +
+			"	}\n" +
+			"}\n"
+		},
+		getCompilerOptions(),
+		"----------\n" + 
+		"1. WARNING in X.java (at line 7)\n" + 
+		"	consumer(String[]::clone);\n" + 
+		"	         ^^^^^^^^^^^^^^^\n" + 
+		"Null type safety at method return type: Method descriptor FI<String>.getArray(String[]) promises \'@NonNull String @NonNull[]\' but referenced method provides \'String @NonNull[]\'\n" + 
+		"----------\n");
+}
+public void testBug448709_allocationExpression1() {
+	// inference prioritizes constraint (<@Nullable T>) over expected type (@NonNull String), hence a null type mismatch results
+	runNegativeTestWithLibs(
+		new String[] {
+			"X.java",
+			"import org.eclipse.jdt.annotation.*;\n" +
+			"interface F0<T> {}\n" +
+			"class FI<@Nullable T> implements F0<T> {\n" +
+			"}\n" +
+			"public abstract class X {\n" +
+			"	abstract <Z> Z zork(F0<Z> f);\n" +
+			"	@NonNull String test() {\n" +
+			"		 return zork(new FI<>());\n" +
+			"	}\n" +
+			"}\n"
+		},
+		getCompilerOptions(),
+		"----------\n" + 
+		"1. ERROR in X.java (at line 8)\n" + 
+		"	return zork(new FI<>());\n" + 
+		"	            ^^^^^^^^^^\n" + 
+		"Null type mismatch (type annotations): required \'F0<@NonNull String>\' but this expression has type \'FI<@Nullable String>\', corresponding supertype is \'F0<@Nullable String>\'\n" + 
+		"----------\n");
+}
+public void testBug448709_allocationExpression2() {
+	runNegativeTestWithLibs(
+		new String[] {
+			"X.java",
+			"import org.eclipse.jdt.annotation.*;\n" +
+			"class F {\n" +
+			"	<@Nullable U> F(U arg1, U arg2) {}\n" +
+			"}\n" +
+			"public class X {\n" +
+			"	F f = new <@NonNull Integer>F(1,2);\n" +
+			"}\n"
+		},
+		getCompilerOptions(),
+		"----------\n" + 
+		"1. ERROR in X.java (at line 6)\n" + 
+		"	F f = new <@NonNull Integer>F(1,2);\n" + 
+		"	           ^^^^^^^^^^^^^^^^\n" + 
+		"Null constraint mismatch: The type \'@NonNull Integer\' is not a valid substitute for the type parameter \'@Nullable U\'\n" + 
+		"----------\n");
+}
+public void testBug448709_allocationExpression3() {
+	runNegativeTestWithLibs(
+		new String[] {
+			"X.java",
+			"import org.eclipse.jdt.annotation.*;\n" +
+			"public class X {\n" +
+			"	class F {\n" +
+			"		<@Nullable U> F(U arg1, U arg2) {}\n" +
+			"	}\n" +
+			"	F f = this.new <@NonNull Integer>F(1,2);\n" +
+			"}\n"
+		},
+		getCompilerOptions(),
+		"----------\n" + 
+		"1. ERROR in X.java (at line 6)\n" + 
+		"	F f = this.new <@NonNull Integer>F(1,2);\n" + 
+		"	                ^^^^^^^^^^^^^^^^\n" + 
+		"Null constraint mismatch: The type \'@NonNull Integer\' is not a valid substitute for the type parameter \'@Nullable U\'\n" + 
+		"----------\n");
+}
+public void testBug465513() {
+	runConformTestWithLibs(
+		new String[] {
+			"pack1/A.java",
+			"package pack1;\r\n" + 
+			"import java.math.BigInteger;\r\n" + 
+			"\r\n" + 
+			"interface A { Object m(Class c); }\r\n" + 
+			"interface B<S extends Number> { Object m(Class<S> c); }\r\n" + 
+			"interface C<T extends BigInteger> { Object m(Class<T> c); }\r\n" + 
+			"@FunctionalInterface\r\n" + 
+			"interface D<S,T> extends A, B<BigInteger>, C<BigInteger> {}\n"
+		},
+		getCompilerOptions(),
+		"----------\n" + 
+		"1. WARNING in pack1\\A.java (at line 4)\n" + 
+		"	interface A { Object m(Class c); }\n" + 
+		"	                       ^^^^^\n" + 
+		"Class is a raw type. References to generic type Class<T> should be parameterized\n" + 
+		"----------\n");
 }
 }

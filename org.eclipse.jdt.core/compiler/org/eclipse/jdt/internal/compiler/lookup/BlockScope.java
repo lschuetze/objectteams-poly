@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2014 IBM Corporation and others.
+ * Copyright (c) 2000, 2015 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -20,6 +20,10 @@
  *								bug 394768 - [compiler][resource] Incorrect resource leak warning when creating stream in conditional
  *								bug 404649 - [1.8][compiler] detect illegal reference to indirect or redundant super
  *								Bug 429958 - [1.8][null] evaluate new DefaultLocation attribute of @NonNullByDefault
+ *								Bug 371614 - [compiler][resource] Wrong "resource leak" problem on return/throw inside while loop
+ *								Bug 421035 - [resource] False alarm of resource leak warning when casting a closeable in its assignment
+ *								Bug 444964 - [1.7+][resource] False resource leak warning (try-with-resources for ByteArrayOutputStream - return inside for loop)
+ *								Bug 396575 - [compiler][resources] Incorrect Errors/Warnings check for potential resource leak when surrounding with try-catch
  *     Jesper S Moller <jesper@selskabet.org> - Contributions for
  *								bug 378674 - "The method can be declared as static" is wrong
  *     Keigo Imai - Contribution for  bug 388903 - Cannot extend inner class as an anonymous class when it extends the outer class
@@ -27,10 +31,9 @@
 package org.eclipse.jdt.internal.compiler.lookup;
 
 import java.util.ArrayList;
-import java.util.HashSet;
+import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Set;
 
 import org.eclipse.jdt.core.compiler.CharOperation;
 import org.eclipse.jdt.internal.compiler.ast.*;
@@ -1212,7 +1215,7 @@ public int registerTrackingVariable(FakedTrackingVariable fakedTrackingVariable)
 /** When are no longer interested in this tracking variable - remove it. */
 public void removeTrackingVar(FakedTrackingVariable trackingVariable) {
 	if (trackingVariable.innerTracker != null) {
-		removeTrackingVar(trackingVariable.innerTracker);
+		trackingVariable.innerTracker.withdraw();
 		trackingVariable.innerTracker = null;
 	}
 	if (this.trackingVariables != null)
@@ -1242,10 +1245,10 @@ public void checkUnclosedCloseables(FlowInfo flowInfo, FlowContext flowContext, 
 	FakedTrackingVariable returnVar = (location instanceof ReturnStatement) ?
 			FakedTrackingVariable.getCloseTrackingVariable(((ReturnStatement)location).expression, flowInfo, flowContext) : null;
 
-	Set varSet = new HashSet(this.trackingVariables);
-	FakedTrackingVariable trackingVar;
-	// pick one outer-most variable from the set at a time
-	while ((trackingVar = FakedTrackingVariable.pickVarForReporting(varSet, this, location != null)) != null) {
+	// iterate variables according to the priorities defined in FakedTrackingVariable.IteratorForReporting.Stage
+	Iterator<FakedTrackingVariable> iterator = new FakedTrackingVariable.IteratorForReporting(this.trackingVariables, this, location != null);
+	while (iterator.hasNext()) {
+		FakedTrackingVariable trackingVar = iterator.next();
 
 		if (returnVar != null && trackingVar.isResourceBeingReturned(returnVar)) {
 			continue;
@@ -1270,7 +1273,7 @@ public void checkUnclosedCloseables(FlowInfo flowInfo, FlowContext flowContext, 
 		if (location == null) // at end of block and not definitely unclosed
 		{
 			// problems at specific locations: medium priority
-			if (trackingVar.reportRecordedErrors(this, status)) // ... report previously recorded errors
+			if (trackingVar.reportRecordedErrors(this, status, flowInfo.reachMode() != FlowInfo.REACHABLE)) // ... report previously recorded errors
 				continue;
 		} 
 		if (status == FlowInfo.POTENTIALLY_NULL) {
@@ -1287,12 +1290,6 @@ public void checkUnclosedCloseables(FlowInfo flowInfo, FlowContext flowContext, 
 		for (int i=0; i<this.localIndex; i++)
 			this.locals[i].closeTracker = null;		
 		this.trackingVariables = null;
-	} else {
-		int size = this.trackingVariables.size();
-		for (int i=0; i<size; i++) {
-			FakedTrackingVariable tracker = (FakedTrackingVariable) this.trackingVariables.get(i);
-			tracker.resetReportingBits();
-		}
 	}
 }
 

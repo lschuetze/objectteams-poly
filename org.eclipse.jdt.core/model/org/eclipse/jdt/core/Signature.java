@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2013 IBM Corporation and others.
+ * Copyright (c) 2000, 2015 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -10,6 +10,8 @@
  *     IBM Corporation - added J2SE 1.5 support
  *     Fraunhofer FIRST - extended API and implementation
  *     Technical University Berlin - extended API and implementation
+ *     Stephan Herrmann - Contribution for
+ *								Bug 463533 - Signature.getSignatureSimpleName() returns different results for resolved and unresolved extends
  *******************************************************************************/
 package org.eclipse.jdt.core;
 
@@ -1921,12 +1923,21 @@ public static char[] getSignatureSimpleName(char[] typeSignature) {
 	}
 
 	if(dotCount > 0) {
+		int typeStart = 0;
 		for(int i = 0; i < qualifiedType.length; i++) {
-			if(qualifiedType[i] == '.') {
-				dotCount--;
+			switch (qualifiedType[i]) {
+				case '.':
+					dotCount--;
+					break;
+				case ' ':
+					typeStart = i+1;
+					break;
 			}
 			if(dotCount <= 0) {
-				return CharOperation.subarray(qualifiedType, i + 1, qualifiedType.length);
+				char[] simpleName = CharOperation.subarray(qualifiedType, i + 1, qualifiedType.length);
+				if (typeStart > 0 && typeStart < qualifiedType.length)
+					return CharOperation.concat(CharOperation.subarray(qualifiedType, 0, typeStart), simpleName);
+				return simpleName;
 			}
 		}
 	}

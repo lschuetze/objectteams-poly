@@ -17,6 +17,7 @@
 package org.eclipse.jdt.internal.compiler;
 
 import java.io.PrintWriter;
+import java.util.HashMap;
 import java.util.Map;
 
 import org.eclipse.jdt.core.compiler.CategorizedProblem;
@@ -32,6 +33,7 @@ import org.eclipse.jdt.internal.compiler.env.ISourceType;
 import org.eclipse.jdt.internal.compiler.impl.CompilerOptions;
 import org.eclipse.jdt.internal.compiler.impl.CompilerStats;
 import org.eclipse.jdt.internal.compiler.impl.ITypeRequestor;
+import org.eclipse.jdt.internal.compiler.impl.ReferenceContext;
 import org.eclipse.jdt.internal.compiler.lookup.LookupEnvironment;
 import org.eclipse.jdt.internal.compiler.lookup.PackageBinding;
 import org.eclipse.jdt.internal.compiler.lookup.ReferenceBinding;
@@ -88,6 +90,8 @@ public class Compiler implements ITypeRequestor, ProblemSeverities {
 	//public CompilationUnitResult currentCompilationUnitResult;
 	public CompilationUnitDeclaration[] unitsToProcess;
 	public int totalUnits; // (totalUnits-1) gives the last unit in unitToProcess
+	
+	private Map<String, APTProblem[]> aptProblems;
 
 	// name lookup
 	public LookupEnvironment lookupEnvironment;
@@ -496,6 +500,7 @@ public class Compiler implements ITypeRequestor, ProblemSeverities {
 						return;
 					}
 				} catch (SourceTypeCollisionException e) {
+					backupAptProblems();
 					reset();
 					// a generated type was referenced before it was created
 					// the compiler either created a MissingType or found a BinaryType for it
@@ -511,6 +516,8 @@ public class Compiler implements ITypeRequestor, ProblemSeverities {
 					return;
 				}
 			}
+			// Restore the problems before the results are processed and cleaned up.
+			restoreAptProblems();
 			processCompiledUnits(0);
 		} catch (AbortCompilation e) {
 			this.handleInternalException(e, null);
@@ -524,6 +531,58 @@ public class Compiler implements ITypeRequestor, ProblemSeverities {
 					Messages.bind(Messages.compilation_unit, String.valueOf(this.totalUnits)));
 			}
 		}
+	}
+
+	class APTProblem {
+		CategorizedProblem problem;
+		ReferenceContext context;
+		APTProblem(CategorizedProblem problem, ReferenceContext context) {
+			this.problem = problem;
+			this.context = context;
+		}
+	}
+	
+	protected void backupAptProblems() {
+		if (this.unitsToProcess == null) return;
+		for (CompilationUnitDeclaration unitDecl : this.unitsToProcess) {
+			if (unitDecl == null) continue;
+			CompilationResult result = unitDecl.compilationResult;
+			if (result != null && result.hasErrors()) {
+				CategorizedProblem[] errors = result.getErrors();
+				for (CategorizedProblem problem : errors) {
+					if (problem.getCategoryID() == CategorizedProblem.CAT_UNSPECIFIED) {
+						if (this.aptProblems == null) {
+							this.aptProblems = new HashMap<>();
+						}
+						APTProblem[] problems = this.aptProblems.get(new String(unitDecl.getFileName()));
+						if (problems == null) {
+							this.aptProblems.put(
+									new String(unitDecl.getFileName()),
+									new APTProblem[] { new APTProblem(problem, result.getContext(problem)) });
+						} else {
+							APTProblem[] temp = new APTProblem[problems.length + 1];
+							System.arraycopy(problems, 0, temp, 0, problems.length);
+							temp[problems.length] = new APTProblem(problem, result.getContext(problem));
+							this.aptProblems.put(new String(unitDecl.getFileName()), temp);
+						}
+					}
+				}
+			}
+		}
+	}
+	
+	protected void restoreAptProblems() {
+		if (this.unitsToProcess != null && this.aptProblems!= null) {
+			for (CompilationUnitDeclaration unit : this.unitsToProcess) {
+				APTProblem[] problems = this.aptProblems.get(new String(unit.getFileName()));
+				if (problems != null) {
+					for (APTProblem problem : problems) {
+						unit.compilationResult.record(problem.problem, problem.context);
+					}
+				}
+			}
+		}
+		this.aptProblems = null; // No need for this.
 	}
 
 	protected void processCompiledUnits(int startingIndex) throws java.lang.Error {

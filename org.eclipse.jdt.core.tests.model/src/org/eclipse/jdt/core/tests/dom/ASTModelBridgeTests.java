@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2004, 2013 IBM Corporation and others.
+ * Copyright (c) 2004, 2015 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -7,6 +7,10 @@
  *
  * Contributors:
  *     IBM Corporation - initial API and implementation
+ *     Stephan Herrmann - Contributions for
+ *								Bug 463330 - [dom] DOMFinder doesn't find the VariableBinding corresponding to a method argument
+ *								Bug 464463 - [dom] DOMFinder doesn't find an ITypeParameter
+ *								Bug 464615 - [dom] ASTParser.createBindings() ignores parameterization of a method invocation
  *******************************************************************************/
 package org.eclipse.jdt.core.tests.dom;
 
@@ -1062,6 +1066,36 @@ public class ASTModelBridgeTests extends AbstractASTTests {
 
 	/*
 	 * Ensures that the correct IBindings are created for a given set of IJavaElement
+	 * (type parameter with bound)
+	 */
+	public void testCreateBindings14a() throws JavaModelException {
+		IBinding[] bindings = createBindings(
+			"public class X<T extends java.lang.Number> {\n" +
+			"}",
+			this.workingCopy.getType("X").getTypeParameter("T")
+		);
+		assertBindingsEqual(
+			"LX;:TT;",
+			bindings);
+	}
+
+	/*
+	 * Ensures that the correct IBindings are created for a given set of IJavaElement
+	 * (type parameter with parameterized bound)
+	 */
+	public void testCreateBindings14b() throws JavaModelException {
+		IBinding[] bindings = createBindings(
+			"public class X<T extends java.util.List<String>> {\n" +
+			"}",
+			this.workingCopy.getType("X").getTypeParameter("T")
+		);
+		assertBindingsEqual(
+			"LX;:TT;",
+			bindings);
+	}
+
+	/*
+	 * Ensures that the correct IBindings are created for a given set of IJavaElement
 	 * (binary type)
 	 */
 	public void testCreateBindings15() throws CoreException {
@@ -1219,6 +1253,83 @@ public class ASTModelBridgeTests extends AbstractASTTests {
 		assertBindingsEqual(
 			"@Ljava/lang/Deprecated;",
 			annotations);
+	}
+
+	/*
+	 * Ensures that the correct IBindings are created for a given set of IJavaElement
+	 * (method arguments)
+	 */
+	public void testCreateBindings25() throws JavaModelException {
+		this.workingCopy.getBuffer().setContents(
+				"public class X {\n" +
+				"  void foo(String str, int i) {}\n" +
+				"}");
+		this.workingCopy.makeConsistent(null);
+		IMethod method = this.workingCopy.getType("X").getMethod("foo", new String[]{"QString;", "I"});
+		ASTParser parser = ASTParser.newParser(AST.JLS8);
+		parser.setProject(getJavaProject("P"));
+		IBinding[] bindings = parser.createBindings(method.getParameters(), null);
+		assertBindingsEqual(
+			"LX;.foo(Ljava/lang/String;I)V#str\n" +
+			"LX;.foo(Ljava/lang/String;I)V#i",
+			bindings);
+	}
+
+	/*
+	 * Ensures that the correct IBindings are created for a given set of IJavaElement
+	 * (binary method arguments)
+	 */
+	public void testCreateBindings26() throws CoreException {
+		createClassFile("/P/lib", "A.class",
+				"public class A {\n" +
+				"  void foo(String str, int i) {}\n" +
+				"}");
+		IMethod method = getClassFile("/P/lib/A.class").getType().getMethod("foo", new String[] {"Ljava.lang.String;", "I"});
+		ASTParser parser = ASTParser.newParser(AST.JLS8);
+		parser.setProject(getJavaProject("P"));
+		IBinding[] bindings = parser.createBindings(method.getParameters(), null);
+		assertBindingsEqual(
+			"LA;.foo(Ljava/lang/String;I)V#str\n" +
+			"LA;.foo(Ljava/lang/String;I)V#i",
+			bindings);
+	}
+
+	/*
+	 * Ensures that the correct IBindings are created for a given set of IJavaElement
+	 * (invocation of a generic method - binary)
+	 */
+	public void testCreateBinding27() throws Exception {
+		createClassFile("/P/lib", "p/A.class",
+				"package p;\n" +
+				"public class A {\n" +
+				"  public static <T> T foo(T[] arg) { return arg[0]; }\n" +
+				"}");
+		this.workingCopies = new ICompilationUnit[1];
+		String xSource = "public class X {\n" +
+						"  public String test(String[] args) {\n" +
+						"    return p.A.foo(args);\n" +
+						"  }\n" +
+						"}";
+		this.workingCopies[0] = getWorkingCopy(
+			"/P/src/X.java",
+			xSource,
+			this.wcOwner
+		);
+
+		IJavaElement elem= this.workingCopies[0].codeSelect(xSource.indexOf("foo"), 0)[0];
+		ASTParser parser = ASTParser.newParser(AST.JLS8);
+		parser.setProject(getJavaProject("P"));
+		IBinding[] bindings = parser.createBindings(new IJavaElement[]{ elem }, null);
+		assertBindingsEqual(
+			"Lp/A;.foo<T:Ljava/lang/Object;>([TT;)TT;%<Ljava/lang/String;>",
+			bindings);
+		IMethodBinding method = (IMethodBinding) bindings[0];
+		assertBindingsEqual(
+			"[Ljava/lang/String;",
+			method.getParameterTypes());
+			assertBindingsEqual(
+				"Ljava/lang/String;",
+				new IBinding[] {method.getReturnType()});
 	}
 
 	/*
