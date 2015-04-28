@@ -146,7 +146,13 @@ class AsmWritableBoundClass extends AsmBoundClass {
 		if (multiAdapter.hasVisitors() || !nodes.isEmpty()) {
 			// //TODO (ofra): Do everything in one transformation
 			// Do all transformation with the Core API of ASM
-			reader.accept(multiAdapter, ClassReader.SKIP_FRAMES);
+//			try {
+				reader.accept(multiAdapter, ClassReader.SKIP_FRAMES);
+//			} catch (RuntimeException e) {
+//				System.err.println("Cannot transform class "+this+":");
+//				e.printStackTrace();
+//				return;
+//			}
 			setBytecode(writer.toByteArray());
 			//Do all transformations with the Tree API of ASM
 			for (AbstractTransformableClassNode node : nodes) {
