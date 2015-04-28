@@ -636,7 +636,7 @@ public team class CompletionAdaptor
 						CompletionAdaptor.enableSuperCallAdjustor.set(Boolean.TRUE);
 // orig:
 					CodeGenerationSettings settings= JavaPreferencesSettings.getCodeGenerationSettings(fJavaProject);
-					MethodDeclaration stub= org.eclipse.jdt.internal.corext.codemanipulation.StubUtility2.createImplementationStub(fCompilationUnit, rewrite, importRewrite, context, methodToOverride, declaringType, settings, declaringType.isInterface());
+					MethodDeclaration stub= org.eclipse.jdt.internal.corext.codemanipulation.StubUtility2.createImplementationStub(fCompilationUnit, rewrite, importRewrite, context, methodToOverride, declaringType, settings, declaringType.isInterface(), declaringType);
 					ListRewrite rewriter= rewrite.getListRewrite(node, descriptor);
 					rewriter.insertFirst(stub, null);
 
