@@ -361,8 +361,14 @@ public class Dependencies implements ITranslationStates {
 		            	unit.analyseCode();
 		            break;
 		        case STATE_BYTE_CODE_GENERATED:
-					if (Config.getGenerateCode())
-		            	unit.generateCode();
+					if (Config.getGenerateCode()) {
+						if (unit.isRoleUnit()) {
+							CompilationUnitDeclaration teamUnit = RoleFileHelper.getTeamUnit(unit);
+							if (teamUnit != null)
+								unit = teamUnit;
+						}
+						unit.generateCode();
+					}
 						// descending into already generated types is
 						// prevented by TypeDeclaration.hasBeenGenerated
 		            break;

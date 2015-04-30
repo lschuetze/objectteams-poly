@@ -975,6 +975,10 @@ public abstract class AbstractMethodDeclaration
 
 	public void tagAsHavingErrors() {
 		this.ignoreFurtherInvestigation = true;
+//{ObjectTeams: avoid attempts to copy the bytecode of this method:
+		if (this.binding != null)
+			this.binding.bytecodeMissing = true;
+// SH}
 	}
 	
 	public void tagAsHavingIgnoredMandatoryErrors(int problemId) {

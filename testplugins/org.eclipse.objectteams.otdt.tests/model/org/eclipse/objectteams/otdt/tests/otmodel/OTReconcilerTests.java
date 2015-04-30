@@ -187,7 +187,11 @@ public class OTReconcilerTests extends ReconcilerTests {
 // ===== End COPY_AND_PASTE
 	
 	protected IJavaProject createOTJavaProject(String projectName, String[] sourceFolders, String[] libraries, String output) throws CoreException {
-		IJavaProject javaProject = createJavaProject(projectName, sourceFolders, libraries, output, "1.5");
+		return createOTJavaProject(projectName, sourceFolders, libraries, "1.5", output);
+	}
+
+	protected IJavaProject createOTJavaProject(String projectName, String[] sourceFolders, String[] libraries, String compliance, String output) throws CoreException {
+		IJavaProject javaProject = createJavaProject(projectName, sourceFolders, libraries, output, compliance);
 		IProjectDescription description = javaProject.getProject().getDescription();
 		description.setNatureIds(OTDTPlugin.createProjectNatures(description));
 		javaProject.getProject().setDescription(description, null);
@@ -1747,6 +1751,59 @@ public class OTReconcilerTests extends ReconcilerTests {
 			
 			assertNoProblem(clientSourceChars, unit);
 
+    	} finally {
+    		deleteProject("P");
+    	}
+    }
+    
+
+    // static role method accesses enclosing team instance
+    public void testStaticRoleMethod() throws CoreException, InterruptedException {
+    	try {
+			// Resources creation
+			IJavaProject p = createOTJavaProject("P", new String[] {"src"}, new String[] {"JCL17_LIB"}, "1.7", "bin");
+			IProject project = p.getProject();
+			IProjectDescription prjDesc = project.getDescription();
+			prjDesc.setBuildSpec(OTDTPlugin.createProjectBuildCommands(prjDesc));
+			project.setDescription(prjDesc, null);
+			p.setOption(JavaCore.COMPILER_PB_UNUSED_LOCAL, JavaCore.IGNORE);
+	
+			OTREContainer.initializeOTJProject(project);
+
+			this.createFolder("/P/src/p");
+			String teamSourceString =	
+				"package p;\n" +
+				"public team class MyTeam {\n" +
+				"	String val;" +
+				"}\n";
+			this.createFile("P/src/p/MyTeam.java", teamSourceString);
+			project.build(IncrementalProjectBuilder.FULL_BUILD, null);
+
+			this.createFolder("/P/src/p/MyTeam");
+			String roleSourceString =	
+					"team package p.MyTeam;\n" +
+					"protected class R {\n" +
+					"    static String test() { /* missing return */ }\n" +
+					"}\n";
+			this.createFile("/P/src/p/MyTeam/R.java", roleSourceString);
+			project.build(IncrementalProjectBuilder.FULL_BUILD, null);
+			
+			this.workingCopy = getCompilationUnit("/P/src/p/MyTeam/R.java").getWorkingCopy(this.wcOwner, null);
+
+			roleSourceString =	
+				"team package p.MyTeam;\n" +
+				"protected class R {\n" +
+				"   static String test(boolean b) {\n" +
+				"		if (b)\n" +
+				"			return MyTeam.this.val;\n" +
+				"		return null;\n" +
+				"	}\n" +
+				"}\n";
+
+			char[] roleSourceChars = roleSourceString.toCharArray();
+
+			ICompilationUnit icu = getCompilationUnit("/P/src/p/MyTeam/R.java").getWorkingCopy(this.wcOwner, null);
+			assertNoProblem(roleSourceChars, icu);
     	} finally {
     		deleteProject("P");
     	}

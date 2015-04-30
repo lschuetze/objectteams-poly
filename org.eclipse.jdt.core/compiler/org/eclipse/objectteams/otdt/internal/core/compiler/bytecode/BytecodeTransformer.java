@@ -170,7 +170,7 @@ public class BytecodeTransformer
         byte[] srcConstantPool  = null;
         int    offset           = -1;
         ConstantPoolObjectReader reader = null;
-        if (!srcMethodBinding.bytecodeMissing) {
+        if (!srcMethodBinding.original().bytecodeMissing) {
 	        if (srcRole != null) {
         		srcConstantPool = srcRole.getByteCode();
         		offset          = srcRole.getByteCodeOffset(srcMethodBinding);

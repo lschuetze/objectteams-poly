@@ -24,11 +24,14 @@ import org.eclipse.jdt.core.compiler.CharOperation;
 import org.eclipse.jdt.internal.compiler.ast.CompilationUnitDeclaration;
 import org.eclipse.jdt.internal.compiler.ast.TypeDeclaration;
 import org.eclipse.jdt.internal.compiler.classfmt.ClassFileConstants;
+import org.eclipse.jdt.internal.compiler.lookup.ClassScope;
+import org.eclipse.jdt.internal.compiler.lookup.CompilationUnitScope;
 import org.eclipse.jdt.internal.compiler.lookup.ExtraCompilerModifiers;
 import org.eclipse.jdt.internal.compiler.lookup.LookupEnvironment;
 import org.eclipse.jdt.internal.compiler.lookup.ProblemReasons;
 import org.eclipse.jdt.internal.compiler.lookup.ProblemReferenceBinding;
 import org.eclipse.jdt.internal.compiler.lookup.ReferenceBinding;
+import org.eclipse.jdt.internal.compiler.lookup.Scope;
 import org.eclipse.jdt.internal.compiler.lookup.SourceTypeBinding;
 import org.eclipse.jdt.internal.compiler.problem.ProblemReporter;
 import org.eclipse.objectteams.otdt.core.compiler.IOTConstants;
@@ -214,5 +217,21 @@ public class RoleFileHelper {
 			}
 		}
 		return true;
+	}
+
+	public static CompilationUnitDeclaration getTeamUnit(CompilationUnitDeclaration unit) {
+		if (unit.types != null && unit.types.length > 0) {
+			TypeDeclaration firstType = unit.types[0];
+			ClassScope roleScope = firstType.scope;
+			if (roleScope != null) {
+				Scope teamTypeScope = roleScope.parent;
+				if (teamTypeScope != null) {
+					CompilationUnitScope teamUnitScope = teamTypeScope.compilationUnitScope();
+					if (teamUnitScope != null)
+						return teamUnitScope.referenceCompilationUnit();
+				}
+			}
+		}
+		return null;
 	}
 }
