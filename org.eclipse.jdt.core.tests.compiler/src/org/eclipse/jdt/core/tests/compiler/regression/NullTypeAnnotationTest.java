@@ -4941,7 +4941,7 @@ public void testDefault07() {
 		"----------\n" + 
 		"3. ERROR in X.java (at line 13)\n" + 
 		"	@NonNull Number nnn = inner.process(Integer.valueOf(3), new ArrayList<@Nullable Integer>()); // WARN on 1. arg; ERR on 2. arg\n" + 
-		"	                                                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n" + 
+		"	                                                        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n" + 
 		"Null type mismatch (type annotations): required \'List<? extends @NonNull Number>\' but this expression has type \'ArrayList<@Nullable Integer>\', corresponding supertype is \'List<@Nullable Integer>\'\n" + 
 		"----------\n");
 }
