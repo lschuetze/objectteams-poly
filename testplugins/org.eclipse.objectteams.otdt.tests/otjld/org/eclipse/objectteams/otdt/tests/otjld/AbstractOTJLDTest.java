@@ -251,6 +251,7 @@ public class AbstractOTJLDTest extends AbstractComparableTest {
 	@Override
 	protected void compileTestFiles(Compiler batchCompiler, String[] testFiles) {
 		if (this.compileOrder == null) {
+			batchCompiler.sortCompilationUnits = true;
 			super.compileTestFiles(batchCompiler, testFiles);
 		} else {
 			for (String[] bunch : this.compileOrder) {

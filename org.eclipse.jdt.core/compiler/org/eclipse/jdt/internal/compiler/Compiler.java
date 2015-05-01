@@ -87,6 +87,7 @@ public class Compiler implements ITypeRequestor, ProblemSeverities {
 	public int remainingIterations = 1;
 //{ObjectTeams: mark kind of compiler:
 	public boolean isBatchCompiler = false;
+	public boolean sortCompilationUnits = true; // only JDT-tests set to false to maintain original error output
 // SH}
 
 	// management of unit to be processed
@@ -851,14 +852,16 @@ public class Compiler implements ITypeRequestor, ProblemSeverities {
 		if (!this.useSingleThread && maxUnits >= ReadManager.THRESHOLD)
 			this.parser.readManager = new ReadManager(sourceUnits, maxUnits);
 //{ObjectTeams: ensure teams (short file name) come before their role files (longer file name):
-		Arrays.sort(sourceUnits, new Comparator<ICompilationUnit>() {
-			@Override public int compare(ICompilationUnit cu1, ICompilationUnit cu2) {
-				int relation = Integer.compare(cu1.getFileName().length, cu2.getFileName().length);
-				if (relation != 0)
-					return relation;
-				return CharOperation.compareTo(cu1.getFileName(), cu2.getFileName());
-			}
-		});
+		if (this.sortCompilationUnits) {
+			Arrays.sort(sourceUnits, new Comparator<ICompilationUnit>() {
+				@Override public int compare(ICompilationUnit cu1, ICompilationUnit cu2) {
+					int relation = Integer.compare(cu1.getFileName().length, cu2.getFileName().length);
+					if (relation != 0)
+						return relation;
+					return CharOperation.compareTo(cu1.getFileName(), cu2.getFileName());
+				}
+			});
+		}
 // SH}
 
 		// Switch the current policy and compilation result for this unit to the requested one.

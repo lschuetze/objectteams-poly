@@ -2489,6 +2489,7 @@ protected void runNegativeTest(String[] testFiles, String expectedCompilerLog, b
 /* orig:
 			batchCompiler.compile(Util.compilationUnits(testFiles)); // compile all files together
   :giro */
+			batchCompiler.sortCompilationUnits = false; // maintain original order for JDT/Core tests
 			compileTestFiles(batchCompiler, testFiles);
 // SH}
 		} catch(RuntimeException e){
