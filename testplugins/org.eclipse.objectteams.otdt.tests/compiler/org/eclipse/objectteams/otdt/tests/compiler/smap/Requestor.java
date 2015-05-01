@@ -26,7 +26,7 @@ import java.util.HashMap;
 import java.util.Hashtable;
 import java.util.Map;
 
-import junit.framework.Assert;
+import org.junit.Assert;
 import junit.framework.AssertionFailedError;
 
 import org.eclipse.jdt.core.compiler.CharOperation;

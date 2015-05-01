@@ -244,16 +244,6 @@ public class OTJStratumFlightbonusTest extends AbstractSourceMapGeneratorTest {
         _enclosingTypename = "FlightBonus";
 
     	SmapStratum stratum_role1 = new SmapStratum(ISMAPConstants.OTJ_STRATUM_NAME);
-        FileInfo fileInfo1 = stratum_role1.getOrCreateFileInfo("Subscriber.java", "org/eclipse/objectteams/example/fbapplication/FlightBonus/Subscriber.java");
-        LineInfo lineInfo1 = new LineInfo(7,7); 	// all lines of class Subscriber
-        lineInfo1.setRepeatCount(10);
-
-        LineInfo lineInfo2 = new LineInfo(ISMAPConstants.STEP_INTO_LINENUMBER,ISMAPConstants.STEP_INTO_LINENUMBER);
-        LineInfo lineInfo3 = new LineInfo(ISMAPConstants.STEP_OVER_LINENUMBER,ISMAPConstants.STEP_OVER_LINENUMBER);
-
-        fileInfo1.addLineInfo(lineInfo1);
-        fileInfo1.addLineInfo(lineInfo2);
-        fileInfo1.addLineInfo(lineInfo3);
         
         // copy-inherited methods
         FileInfo fileInfo2 = stratum_role1.getOrCreateFileInfo("Bonus.java", "org/eclipse/objectteams/example/bonussystem/Bonus.java");
@@ -272,6 +262,17 @@ public class OTJStratumFlightbonusTest extends AbstractSourceMapGeneratorTest {
         fileInfo2.addLineInfo(lineInfo6);
         fileInfo2.addLineInfo(lineInfo7);
         fileInfo2.addLineInfo(lineInfo8);
+
+        FileInfo fileInfo1 = stratum_role1.getOrCreateFileInfo("Subscriber.java", "org/eclipse/objectteams/example/fbapplication/FlightBonus/Subscriber.java");
+        LineInfo lineInfo1 = new LineInfo(7,7); 	// all lines of class Subscriber
+        lineInfo1.setRepeatCount(10);
+
+        LineInfo lineInfo2 = new LineInfo(ISMAPConstants.STEP_INTO_LINENUMBER,ISMAPConstants.STEP_INTO_LINENUMBER);
+        LineInfo lineInfo3 = new LineInfo(ISMAPConstants.STEP_OVER_LINENUMBER,ISMAPConstants.STEP_OVER_LINENUMBER);
+
+        fileInfo1.addLineInfo(lineInfo1);
+        fileInfo1.addLineInfo(lineInfo2);
+        fileInfo1.addLineInfo(lineInfo3);
         
         stratum_role1.optimize();
         

@@ -21,9 +21,15 @@
 
 package org.eclipse.objectteams.otdt.internal.core.compiler.smap;
 
+import java.util.Arrays;
+import java.util.Comparator;
+import java.util.Hashtable;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Set;
+import java.util.Vector;
 
+import org.eclipse.jdt.core.compiler.CharOperation;
 import org.eclipse.jdt.internal.compiler.ast.TypeDeclaration;
 import org.eclipse.jdt.internal.compiler.lookup.ReferenceBinding;
 import org.eclipse.jdt.internal.compiler.util.Util;
@@ -99,14 +105,22 @@ public class RoleSmapGenerator extends AbstractSmapGenerator
             }
         }
 
-        for (Iterator<ReferenceBinding> iter = provider.getLineInfos().keySet().iterator(); iter.hasNext();)
-        {
-            ReferenceBinding copySrc = iter.next();
-            List <LineInfo> lineInfos = provider.getLineInfosForType(copySrc);
+        Hashtable<ReferenceBinding, Vector<LineInfo>> allLineInfos = provider.getLineInfos();
+		if (!allLineInfos.isEmpty()) {
+	        Set<ReferenceBinding> typesSet = allLineInfos.keySet();
+	        // for testability ensure stable order:
+	        ReferenceBinding[] types = typesSet.toArray(new ReferenceBinding[typesSet.size()]);
+	        Arrays.sort(types, new Comparator<ReferenceBinding>() {
+	        	public int compare(ReferenceBinding o1, ReferenceBinding o2) { return CharOperation.compareTo(o1.constantPoolName, o2.constantPoolName); }
+			});
+			for (ReferenceBinding copySrc : types)
+	        {
+	            List <LineInfo> lineInfos = provider.getLineInfosForType(copySrc);
 
-            FileInfo fileInfo = getOrCreateFileInfoForType(stratum, getCUType(copySrc));
-            fileInfo.addLineInfo(lineInfos);
-            lineInfoCollector.storeLineInfos(lineInfos);
+	            FileInfo fileInfo = getOrCreateFileInfoForType(stratum, getCUType(copySrc));
+	            fileInfo.addLineInfo(lineInfos);
+	            lineInfoCollector.storeLineInfos(lineInfos);
+	        }
         }
 
         return isCompleted;
