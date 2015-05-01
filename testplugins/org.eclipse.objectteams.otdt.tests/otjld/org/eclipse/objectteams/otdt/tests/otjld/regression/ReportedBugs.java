@@ -1046,17 +1046,17 @@ public class ReportedBugs extends AbstractOTJLDTest {
 			    "    \n"
             },
             "----------\n" +
+    		"1. WARNING in TeamB11sh25_1.java (at line 3)\n" +
+    		"	public class R1 playedBy TeamB11sh25_2 {\n" +
+    		"	                         ^^^^^^^^^^^^^\n" +
+    		"Base class/member type circularity via chain TeamB11sh25_1.R1->TeamB11sh25_2->TeamB11sh25_2.R2->TeamB11sh25_1;\n" +
+    		"please read the hints in the OT/J Language Definition (OTJLD 2.1.2(b)).\n" +
+            "----------\n" +
+            "----------\n" +
 			"1. WARNING in TeamB11sh25_2.java (at line 3)\n" +
 			"	public class R2 playedBy TeamB11sh25_1 {}\n" +
 			"	                         ^^^^^^^^^^^^^\n" +
 			"Base class/member type circularity via chain TeamB11sh25_2.R2->TeamB11sh25_1->TeamB11sh25_1.R1->TeamB11sh25_2;\n" +
-			"please read the hints in the OT/J Language Definition (OTJLD 2.1.2(b)).\n" +
-			"----------\n" +
-			"----------\n" +
-			"1. WARNING in TeamB11sh25_1.java (at line 3)\n" +
-			"	public class R1 playedBy TeamB11sh25_2 {\n" +
-			"	                         ^^^^^^^^^^^^^\n" +
-			"Base class/member type circularity via chain TeamB11sh25_1.R1->TeamB11sh25_2->TeamB11sh25_2.R2->TeamB11sh25_1;\n" +
 			"please read the hints in the OT/J Language Definition (OTJLD 2.1.2(b)).\n" +
 			"----------\n");
     }
@@ -2170,12 +2170,6 @@ public class ReportedBugs extends AbstractOTJLDTest {
 			    "}\n" +
 			    "    \n"
             },
-            "----------\n" + 
-    		"1. WARNING in TeamB11sh48_2.java (at line 4)\n" + 
-    		"	protected class R2 playedBy R1<@base> {\n" + 
-    		"	                            ^^\n" + 
-    		"Overriding access restriction of base class R1<@base> (OTJLD 2.1.2(c)).\n" + 
-    		"----------\n" + 
     		"----------\n" + 
     		"1. ERROR in TeamB11sh48_1.java (at line 3)\n" + 
     		"	public team class TeamB11sh48_1 extends MissingTeam {\n" + 
@@ -2186,6 +2180,20 @@ public class ReportedBugs extends AbstractOTJLDTest {
     		"	protected class R1 playedBy Arrays {\n" + 
     		"	                ^^\n" + 
     		"The hierarchy of the type R1 is inconsistent\n" + 
+    		"----------\n" + 
+    		(this.weavingScheme == WeavingScheme.OTRE && IS_JRE_8 ?
+			"3. WARNING in TeamB11sh48_1.java (at line 5)\n" + 
+			"	protected class R1 playedBy Arrays {\n" + 
+			"	                            ^^^^^^\n" + 
+			"Base class java.util.Arrays has class file version 52 which cannot be handled by the traditional OTRE based on BCEL. Please consider using the ASM based OTDRE instead.\n" + 
+			"----------\n"
+			: ""
+    		) +
+    		"----------\n" + 
+    		"1. WARNING in TeamB11sh48_2.java (at line 4)\n" + 
+    		"	protected class R2 playedBy R1<@base> {\n" + 
+    		"	                            ^^\n" + 
+    		"Overriding access restriction of base class R1<@base> (OTJLD 2.1.2(c)).\n" + 
     		"----------\n");
     }
 

@@ -80,6 +80,7 @@ import org.eclipse.objectteams.otdt.internal.core.compiler.ast.TypeAnchorReferen
 import org.eclipse.objectteams.otdt.internal.core.compiler.ast.TypeValueParameter;
 import org.eclipse.objectteams.otdt.internal.core.compiler.control.Config;
 import org.eclipse.objectteams.otdt.internal.core.compiler.control.Dependencies;
+import org.eclipse.objectteams.otdt.internal.core.compiler.control.ITranslationStates;
 import org.eclipse.objectteams.otdt.internal.core.compiler.lookup.AnchorMapping;
 import org.eclipse.objectteams.otdt.internal.core.compiler.lookup.CallinCalloutScope;
 import org.eclipse.objectteams.otdt.internal.core.compiler.lookup.DependentTypeBinding;
@@ -2644,7 +2645,11 @@ public abstract class Scope {
 		LookupEnvironment env = environment();
 		try {
 			env.missingClassFileLocation = invocationSite;
-//{ObjectTeams generated _OT$getTeam() methods need access to this$n:
+//{ObjectTeams:
+			if (receiverType.isRole()) {
+				Dependencies.ensureBindingState((ReferenceBinding) receiverType, ITranslationStates.STATE_ROLE_FEATURES_COPIED);
+			}
+			// generated _OT$getTeam() methods need access to this$n:
 			if (TypeAnalyzer.isSearchingForSyntheticField(methodScope(), receiverType, fieldName))
 			{
 				ReferenceBinding role = (ReferenceBinding) ((ReferenceBinding)receiverType).getRealClass().erasure();
@@ -4668,6 +4673,7 @@ public abstract class Scope {
 			}
 // :giro
 			useTranslation[i] = Config.requireTypeAdjustment(); // TODO(SH): check kind of adjustment?
+			useTranslation[i] |= MethodModel.isGenerated(visible[i]); // demote generated methods, which should always be invoked with exact arguments
 		}
 	  } finally {
 		  Config.removeOrRestore(oldConfig, this);

@@ -918,7 +918,7 @@ public void generateCode(ClassFile enclosingClassFile) {
 //{ObjectTeams: don't generate code from types that have entered the compilation process
 //              via SourceTypeConverter (at least line number positions are missing).
 //              There should be no need to generate this code (except for copy inheritance??).
-	if (this.isConverted)
+	if (this.isConverted && !(isTeam() && getTeamModel().containsRoFi(true)))
 		return;
 	// from now on treat base class problem as fatal:
 	if (RoleModel.isRoleWithBaseProblem(this))

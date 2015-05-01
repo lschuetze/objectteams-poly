@@ -81,10 +81,13 @@ public class SyntheticRoleFieldAccess extends SyntheticOTTargetMethod {
 
 	public SyntheticRoleFieldAccess(FieldBinding targetField, boolean isReadAccess, SourceTypeBinding declaringClass) {
 		super(targetField, isReadAccess, false, declaringClass);
-		FieldDeclaration sourceField = targetField.sourceField();
-		if (sourceField != null) {
-			this.sourceStart = sourceField.sourceStart;
-			retrieveLineNumber(declaringClass);
+		
+		if (targetField.declaringClass instanceof SourceTypeBinding && ((SourceTypeBinding)targetField.declaringClass).scope != null) {
+			FieldDeclaration sourceField = targetField.sourceField();
+			if (sourceField != null) {
+				this.sourceStart = sourceField.sourceStart;
+				retrieveLineNumber(declaringClass);
+			}
 		}
 		this.modifiers &= ~ClassFileConstants.AccStatic;
 		this.selector = CharOperation.concatWith( isReadAccess ? FIELD_GET_PREFIX : FIELD_SET_PREFIX,

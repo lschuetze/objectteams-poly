@@ -1153,6 +1153,8 @@ public class CopyInheritance implements IOTConstants, ClassFileConstants, ExtraC
 			    {
 			    	MethodModel.getModel(newMethodDecl).storeModifiers(newMethodDecl.modifiers);
 			    }
+			    if (method.model != null && method.model._inferredCallout != null)
+			    	newModel._inferredCallout = method.model._inferredCallout;
 	    	}
 	    	// more checking: abstract method in non-abstract class?
 	    	if (newMethodDecl.isAbstract() && (targetRoleDecl.modifiers & ClassFileConstants.AccAbstract) == 0) {

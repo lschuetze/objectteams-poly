@@ -867,6 +867,17 @@ public class TeamModel extends TypeModel {
 		return result;
 	}
 
+	public boolean containsRoFi(boolean ignoreConverted) {
+		TypeDeclaration ast = getAst();
+		if (ast != null && ast.memberTypes != null) {
+			for (TypeDeclaration role : ast.memberTypes)
+				if (role != null && role.isRoleFile())
+					if (!(ignoreConverted && role.isConverted))
+						return true;
+		}
+		return false;
+	}
+
 	public TypeBinding getMarkerInterfaceBinding(Scope scope) {
 		if (this.markerInterface != null)
 			return this.markerInterface.binding;

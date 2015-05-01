@@ -503,7 +503,6 @@ public class OTReconcilerTests extends ReconcilerTests {
 			this.createFolder("/P/Foo");
 			
 			String sourceRole1= "team package Foo;\n" +
-				"@SuppressWarnings(\"unused\")\n" +
 				"public class Role1 {\n" +
 				"	String s1, s2, s3, s4, s5, s6;\n" +
 				"}\n";
@@ -512,7 +511,6 @@ public class OTReconcilerTests extends ReconcilerTests {
 					sourceRole1);
 
 			String sourceRole2 = "team package Foo;\n" +
-				"@SuppressWarnings(\"unused\")\n" +
 				"public class Role2 extends Role1 {\n" +
 				"        protected void test() {\n" + 
 				"            Plain isub = new Plain() {\n" + 
@@ -520,11 +518,13 @@ public class OTReconcilerTests extends ReconcilerTests {
 				"                    Object edits = super.getVal();\n" + 
 				"                    if (edits instanceof String) {\n" + 
 				"                        String string = (String)edits;\n" + 
+				"                        @SuppressWarnings(\"unused\")\n" + 
 				"                        int l = string.length();\n" + 
 				"                    }\n" + 
 				"                    return edits;\n" + 
 				"                }\n" + 
-				"            };\n" + 
+				"            };\n" +
+				"            @SuppressWarnings(\"unused\")\n" + 
 				"            Object v = isub.getVal();\n" + 
 				"        }\n" +
 				"}\n";
@@ -538,7 +538,7 @@ public class OTReconcilerTests extends ReconcilerTests {
 		
 			
 			ICompilationUnit wc = getCompilationUnit("/P/Foo/Role2.java").getWorkingCopy(this.wcOwner, null);
-			wc.reconcile(AST.JLS3, 
+			wc.reconcile(AST.JLS8, 
 						 ICompilationUnit.FORCE_PROBLEM_DETECTION|ICompilationUnit.ENABLE_STATEMENTS_RECOVERY|ICompilationUnit.ENABLE_BINDINGS_RECOVERY,
 						 wc.getOwner(), null);
 			

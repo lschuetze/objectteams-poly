@@ -498,18 +498,18 @@ public class PlayedByRelation extends AbstractOTJLDTest {
 				"	protected class Role212btrc6_1 playedBy Team212btrc6_2 {} \n" +
 				"}\n"
             },
-            "----------\n" + 
-    		"1. ERROR in Team212btrc6_2.java (at line 3)\n" + 
-    		"	protected class Role212btrc6_2 playedBy Team212btrc6_1 {\n" + 
-    		"	                                        ^^^^^^^^^^^^^^\n" + 
-    		"Base class/member type circularity via chain Team212btrc6_2.Role212btrc6_2->Team212btrc6_1->Team212btrc6_1.Role212btrc6_1->Team212btrc6_2;\n" + 
-    		"please read the hints in the OT/J Language Definition (OTJLD 2.1.2(b)).\n" + 
-    		"----------\n" + 
     		"----------\n" + 
     		"1. ERROR in Team212btrc6_1.java (at line 2)\n" + 
     		"	protected class Role212btrc6_1 playedBy Team212btrc6_2 {} \n" + 
     		"	                                        ^^^^^^^^^^^^^^\n" + 
     		"Base class/member type circularity via chain Team212btrc6_1.Role212btrc6_1->Team212btrc6_2->Team212btrc6_2.Role212btrc6_2->Team212btrc6_1;\n" + 
+    		"please read the hints in the OT/J Language Definition (OTJLD 2.1.2(b)).\n" + 
+    		"----------\n" + 
+    		"----------\n" + 
+    		"1. ERROR in Team212btrc6_2.java (at line 3)\n" + 
+    		"	protected class Role212btrc6_2 playedBy Team212btrc6_1 {\n" + 
+    		"	                                        ^^^^^^^^^^^^^^\n" + 
+    		"Base class/member type circularity via chain Team212btrc6_2.Role212btrc6_2->Team212btrc6_1->Team212btrc6_1.Role212btrc6_1->Team212btrc6_2;\n" + 
     		"please read the hints in the OT/J Language Definition (OTJLD 2.1.2(b)).\n" + 
     		"----------\n",
             null/*classLibraries*/,
@@ -2282,7 +2282,7 @@ public class PlayedByRelation extends AbstractOTJLDTest {
 			    "}\n" +
 			    "    \n"
             },
-            (this.weavingScheme == WeavingScheme.OTDRE
+            (this.weavingScheme == WeavingScheme.OTDRE || !IS_JRE_8
             ?
             "----------\n" + 
     		"1. WARNING in Team2110bi6.java (at line 4)\n" + 

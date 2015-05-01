@@ -742,6 +742,23 @@ public class RoleModel extends TypeModel
     	addAttribute(new RoleLocalTypesAttribute(this));
     }
 
+    /**
+     * The method at [sourceStart-sourceEnd] was found to have errors.
+     * Purge all recorded local types contained in that method (based on source positions).
+     * @param sourceStart
+     * @param sourceEnd
+     */
+	public void purgeLocalTypes(int sourceStart, int sourceEnd) {
+		Iterator<RoleModel> iterator = this._localTypes.iterator();
+		while (iterator.hasNext()) {
+			RoleModel role = iterator.next();
+			TypeDeclaration ast = role.getAst();
+			if (ast != null && sourceStart < ast.sourceStart && ast.declarationSourceEnd < sourceEnd) {
+				iterator.remove();
+			}
+		}
+	}
+
 	public void maybeAddLocalToEnclosing() {
 		ReferenceBinding enclosing= this._binding.enclosingType();
 		if (enclosing != null && enclosing.isRole()) {

@@ -644,8 +644,11 @@ public class ExplicitConstructorCall extends Statement implements Invocation {
 				}
 				
 				// perform any adjustments needed for declared lifting in team constructors:
-				if (this.binding.problemId() == ProblemReasons.NotFound)
+				if (this.binding.problemId() == ProblemReasons.NotFound) {
 					argumentTypes = checkLiftingTeamCtor(scope, argumentTypes, (ConstructorDeclaration)methodDeclaration);
+					if (argumentTypes == null && methodDeclaration.ignoreFurtherInvestigation) // couldn't create required constructor
+						return; // enough trouble seen
+				}
             } finally {
                 AnchorMapping.removeCurrentMapping(anchorMapping);
             }
@@ -735,13 +738,14 @@ public class ExplicitConstructorCall extends Statement implements Invocation {
 				MethodBinding ctor = ctors[i];
 				if (isChainingMatch(this.arguments, ctor.parameters)) {
 					if (this.accessMode == This) {
-						// At this spot we know: Lifting.prepareLiftingArg had added a marker arg.
+						// At this spot we know: DeclaredLifting.prepareArgLifting had added a marker arg.
 						// Now create a chaining ctor for this self call:
 						// (only now we have the types of all actual arguments).
 						MethodBinding newBinding;
 						newBinding = DeclaredLifting.createCopyOrTurningCtor(scope, ctor, argumentTypes, ctorDecl.needsLifting, new AstGenerator(this));
-						if (newBinding != null)
-							this.binding = newBinding;
+						if (newBinding == null)
+							return null;
+						this.binding = newBinding;
 						break;
 					}
 				} else {

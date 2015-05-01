@@ -976,8 +976,15 @@ public abstract class AbstractMethodDeclaration
 	public void tagAsHavingErrors() {
 		this.ignoreFurtherInvestigation = true;
 //{ObjectTeams: avoid attempts to copy the bytecode of this method:
-		if (this.binding != null)
+		if (this.binding != null) {
 			this.binding.bytecodeMissing = true;
+			if (this.scope != null) {
+				// similarly hide local types from copy inheritance:
+				SourceTypeBinding sourceType = this.scope.enclosingSourceType();
+				if (sourceType != null && sourceType.roleModel != null)
+					sourceType.roleModel.purgeLocalTypes(this.sourceStart, this.declarationSourceEnd);				
+			}
+		}
 // SH}
 	}
 	

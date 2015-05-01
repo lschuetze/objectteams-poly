@@ -194,6 +194,14 @@ public class MethodModel extends ModelElement {
 			return model._fakeKind == fakeKind;
 		return false;
 	}
+	public static boolean isGenerated(MethodBinding methodBinding) {
+		MethodModel model = model(methodBinding);
+		AbstractMethodDeclaration decl = model != null ? model.getDecl() : null;
+		if (decl != null)
+			return decl.isGenerated;
+		return false;
+	}
+
 	private MethodModel(AbstractMethodDeclaration decl) {
         this._decl    = decl;
         decl.model = this;

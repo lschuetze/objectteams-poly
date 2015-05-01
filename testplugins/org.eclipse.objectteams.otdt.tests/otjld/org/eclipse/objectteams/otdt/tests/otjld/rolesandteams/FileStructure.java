@@ -1575,19 +1575,18 @@ public class FileStructure extends AbstractOTJLDTest {
 			    "protected class R1517nrf5 {}\n" +
 			    "    \n"
             },
-    		"----------\n" + 
-			"1. ERROR in "+convertedOutputPath+"p\\Team1517nrf5.java (at line 4)\n" + 
-			"	\n" + 
-			"\n" + 
-			"	^^^\n" + 
-			"Type mismatch: cannot convert from Team1517nrf5.Mid1517nrf5 to Team1517nrf5.Mid1517nrf5\n" + 
 			"----------\n" + 
-			"----------\n" + 
-			"1. ERROR in "+convertedOutputPath+"p\\Team1517nrf5\\Mid1517nrf5.java (at line 3)\n" + 
+			"1. ERROR in p\\Team1517nrf5\\Mid1517nrf5.java (at line 3)\n" + 
 			"	public team class Mid1517nrf5 {}\n" + 
 			"    \n" + 
 			"	                            ^^^^^^^^^\n" + 
-			"The return type is incompatible with Team1517nrf5.Mid1517nrf5.R1517nrf5()\n" + 
+			"Type mismatch: cannot convert from Team1517nrf5.__OT__Mid1517nrf5.R1517nrf5 to Team1517nrf5.__OT__Mid1517nrf5.R1517nrf5\n" + 
+			"----------\n" + 
+			"----------\n" + 
+			"1. ERROR in "+convertedOutputPath+"p\\Team1517nrf5\\Mid1517nrf5\\R1517nrf5.java (at line 3)\n" + 
+			"	protected class R1517nrf5 {}\n" + 
+			"	                ^^^^^^^^^\n" + 
+			"Duplicate nested type R1517nrf5\n" + 
 			"----------\n" + 
             // this is the main error message, the others are mostly caused by compilation order issues:
 			"----------\n" + 
@@ -1595,18 +1594,6 @@ public class FileStructure extends AbstractOTJLDTest {
 			"	protected class Deep1517nrf5 {}\n" + 
 			"	                ^^^^^^^^^^^^\n" + 
 			"Member types not allowed in regular roles. Mark class p.Team1517nrf5.Mid1517nrf5.R1517nrf5 as a team if Deep1517nrf5 should be its role (OTJLD 1.5(a,b)). \n" + 
-			"----------\n" + 
-			"----------\n" + 
-			"1. ERROR in p\\Team1517nrf5.java (at line 3)\n" + 
-			"	public team class Team1517nrf5 {}\n" + 
-			"	                  ^^^^^^^^^^^^\n" + 
-			"The type Team1517nrf5 is already defined\n" + 
-			"----------\n" + 
-			"----------\n" + 
-			"1. ERROR in p\\Team1517nrf5\\Mid1517nrf5.java (at line 3)\n" + 
-			"	public team class Mid1517nrf5 {}\n" + 
-			"	                  ^^^^^^^^^^^\n" + 
-			"Duplicate nested type Mid1517nrf5\n" + 
 			"----------\n");
     }
 

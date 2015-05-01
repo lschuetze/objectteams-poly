@@ -4553,7 +4553,7 @@ public class LiftingAndLowering extends AbstractOTJLDTest {
     // this version generated ICE("Binary method has no code attribute")
     // 2.2.28-otjld-declared-lifting-in-constructor-6f
     public void test2228_declaredLiftingInConstructor6f() {
-        runNegativeTestMatching(
+        runNegativeTest(
             new String[] {
 		"Team2228dlic6f_3.java",
 			    "\n" +
