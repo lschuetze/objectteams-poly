@@ -364,8 +364,10 @@ public class Dependencies implements ITranslationStates {
 					if (Config.getGenerateCode()) {
 						if (unit.isRoleUnit()) {
 							CompilationUnitDeclaration teamUnit = RoleFileHelper.getTeamUnit(unit);
-							if (teamUnit != null)
+							if (teamUnit != null) {
+								ensureState(teamUnit, ITranslationStates.STATE_BYTE_CODE_GENERATED-1);
 								unit = teamUnit;
+							}
 						}
 						unit.generateCode();
 					}
