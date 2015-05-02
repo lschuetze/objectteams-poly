@@ -1,7 +1,7 @@
 /**********************************************************************
  * This file is part of "Object Teams Development Tooling"-Software
  * 
- * Copyright 2004, 2011 Fraunhofer Gesellschaft, Munich, Germany,
+ * Copyright 2004, 2015 Fraunhofer Gesellschaft, Munich, Germany,
  * for its Fraunhofer Institute and Computer Architecture and Software
  * Technology (FIRST), Berlin, Germany and Technical University Berlin,
  * Germany.
@@ -10,7 +10,6 @@
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
- * $Id: OTJavaMethodSearchTests.java 23494 2010-02-05 23:06:44Z stephan $
  * 
  * Please visit http://www.eclipse.org/objectteams for updates and contact.
  * 
@@ -33,10 +32,10 @@ import org.eclipse.objectteams.otdt.core.IOTJavaElement;
 import org.eclipse.objectteams.otdt.core.IRoleType;
 import org.eclipse.objectteams.otdt.core.OTModelManager;
 
+import static org.eclipse.jdt.core.search.SearchPattern.*;
+
 /**
  * @author svacina
- * 
- * @version $Id: OTJavaMethodSearchTests.java 23494 2010-02-05 23:06:44Z stephan $
  */
 public class OTJavaMethodSearchTests extends OTJavaSearchTestBase
 {
@@ -47,15 +46,15 @@ public class OTJavaMethodSearchTests extends OTJavaSearchTestBase
 	
 	public static Test suite()
 	{
-	    if (false)
-	    {
-	        System.err.println("Warning, only part of the OTJavaMethodSearchTest are being executed!");
-			Suite suite = new Suite(OTJavaMethodSearchTests.class.getName());
-			suite.addTest(new OTJavaMethodSearchTests("test031b"));
-			return suite;
-	    }
+/*
+        System.err.println("Warning, only part of the OTJavaMethodSearchTest are being executed!");
+		Suite suite = new Suite(OTJavaMethodSearchTests.class.getName());
+		suite.addTest(new OTJavaMethodSearchTests("test031b"));
+		return suite;
+/*/
 	    
 		return new Suite(OTJavaMethodSearchTests.class);
+//*/
 	}
 
 	/**
@@ -1417,5 +1416,23 @@ public class OTJavaMethodSearchTests extends OTJavaSearchTestBase
 				"src/bug323076/MyTeam.java void bug323076.MyTeam.test() [foo(new MyBase[]{ new MyBase() })]",
 				resultCollector);
 		
+	}
+
+	public void test459055() throws CoreException {
+		JavaSearchResultCollector resultCollector = new JavaSearchResultCollector();
+		IJavaProject project= getJavaProject("OTJavaSearch");
+		IType type= project.findType("bug459055.MyTeam.MyRole");
+		IMethod method = type.getMethod("targetMethod", new String[0]);
+		
+		search( method,
+				REFERENCES,
+				R_EXACT_MATCH | R_CASE_SENSITIVE | R_FULL_MATCH,
+				getJavaSearchScopeFromPackages(new String[]{"bug459055", "bug459055/MyTeam"}), 
+				resultCollector);
+		
+		assertSearchResults("Search for references to method of role file",
+				"src/bug459055/MyTeam.java void bug459055.MyTeam.teamTest(R) [targetMethod()]\n" +
+				"src/bug459055/MyTeam/MyRole.java void bug459055.MyTeam.MyRole.sourceMethod() [targetMethod()]",
+				resultCollector);		
 	}
 }

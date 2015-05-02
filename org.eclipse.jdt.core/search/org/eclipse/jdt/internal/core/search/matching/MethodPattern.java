@@ -17,6 +17,7 @@ import java.io.IOException;
 
 import org.eclipse.jdt.core.BindingKey;
 import org.eclipse.jdt.core.Flags;
+import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.ITypeHierarchy;
@@ -24,6 +25,7 @@ import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.compiler.CharOperation;
 import org.eclipse.jdt.core.search.IJavaSearchConstants;
 import org.eclipse.jdt.core.search.SearchPattern;
+import org.eclipse.jdt.internal.compiler.env.ICompilationUnit;
 import org.eclipse.jdt.internal.core.index.EntryResult;
 import org.eclipse.jdt.internal.core.index.Index;
 import org.eclipse.jdt.internal.core.util.Util;
@@ -396,18 +398,16 @@ public EntryResult[] queryIn(Index index) throws IOException {
 			// do a prefix query with the selector
 			break;
 	}
-//{ObjectTeams: merge results for both queries
+//{ObjectTeams: combine results for both queries
 	EntryResult[] key1Result = index.query(getIndexCategories(), key, matchRule); // match rule is irrelevant when the key is null
 	EntryResult[] key2Result = index.query(getIndexCategories(), key2, matchRule); // match rule is irrelevant when the key is null;
 	
-	if (key1Result == null && key2Result != null)
+	// no merging if one or both are null:
+	if (key1Result == null)
 		return key2Result;
-	
-	if (key2Result == null && key1Result != null)
+	if (key2Result == null)
 		return key1Result;
-	
-	if (key2Result == null && key1Result == null)
-		return null;
+	// beyond this point: both results are non-null, merge them:
 	
 	EntryResult[] result = new EntryResult[key1Result.length + key2Result.length];
 	System.arraycopy(key1Result, 0,result, 0, key1Result.length);
@@ -488,8 +488,13 @@ public char[] getDeclaringQualification() {
 	if (this.declaringQualification != null)
 		return this.declaringQualification;
 	// if a declaringRoleClass was stored use it instead:
-	if (this.declaringRoleClass != null)
-		return ((IType) this.declaringRoleClass.getParent()).getFullyQualifiedName().toCharArray();
+	if (this.declaringRoleClass != null) {
+		IJavaElement parent = this.declaringRoleClass.getParent();
+		if (parent instanceof IType)
+			return ((IType) parent).getFullyQualifiedName().toCharArray();
+		if (parent instanceof ICompilationUnit) // if role is a role file ...
+			return parent.getParent().getElementName().toCharArray(); // ... use the name of the package fragment
+	}
 	return null;
 }
 // SH}
