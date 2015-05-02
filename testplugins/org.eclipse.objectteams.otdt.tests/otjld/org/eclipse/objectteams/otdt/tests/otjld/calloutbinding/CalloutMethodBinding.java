@@ -3145,6 +3145,12 @@ public class CalloutMethodBinding extends AbstractOTJLDTest {
             "Zork cannot be resolved to a type\n" + 
             "----------\n"
             :
+        	"----------\n" + 
+        	"1. WARNING in t\\Team3117ic14_1.java (at line 10)\n" + 
+        	"	protected class Role1 implements IBase playedBy BaseClass {\n" + 
+        	"	                                                ^^^^^^^^^\n" + 
+        	"Base class b.BaseClass has class file version 52 which cannot be handled by the traditional OTRE based on BCEL. Please consider using the ASM based OTDRE instead.\n" + 
+        	"----------\n" +
     		"----------\n" + 
     		"1. WARNING in t\\Team3117ic14_2.java (at line 7)\n" + 
     		"	protected class Role1 {\n" + 
@@ -3155,12 +3161,6 @@ public class CalloutMethodBinding extends AbstractOTJLDTest {
     		"	Zork extra2;\n" + 
     		"	^^^^\n" + 
     		"Zork cannot be resolved to a type\n" + 
-    		"----------\n" + 
-    		"----------\n" + 
-    		"1. WARNING in t\\Team3117ic14_1.java (at line 10)\n" + 
-    		"	protected class Role1 implements IBase playedBy BaseClass {\n" + 
-    		"	                                                ^^^^^^^^^\n" + 
-    		"Base class b.BaseClass has class file version 52 which cannot be handled by the traditional OTRE based on BCEL. Please consider using the ASM based OTDRE instead.\n" + 
     		"----------\n"
     		),
             null,//libs
