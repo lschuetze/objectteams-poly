@@ -35,7 +35,6 @@ import org.eclipse.objectteams.otdt.ui.ImageManager;
 import org.eclipse.objectteams.otdt.ui.OTDTUIPlugin;
 import org.eclipse.objectteams.otequinox.Constants;
 import org.eclipse.pde.core.plugin.IPluginAttribute;
-import org.eclipse.pde.core.plugin.IPluginBase;
 import org.eclipse.pde.core.plugin.IPluginElement;
 import org.eclipse.pde.core.plugin.IPluginExtension;
 import org.eclipse.pde.internal.core.ischema.IMetaAttribute;

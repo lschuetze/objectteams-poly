@@ -89,7 +89,7 @@ public class BaseMethodCompareElement extends StorageTypedElement
 			public boolean isReadOnly() {
 				return true;
 			}
-			public Object getAdapter(Class adapter) {
+			public <T> T getAdapter(Class<T> adapter) {
 				return null;
 			}
 		};

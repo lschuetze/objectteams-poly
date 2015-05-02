@@ -110,8 +110,9 @@ public team class PresentationAdaptor
 			case CREATOR:
 			case INIT_FIELDS:
 				return true;
+			default:
+				return false;
 			}
-			return false;
 		}
 		protected boolean isOTSpecialSrc() {
 			switch(this.kind) {
@@ -120,8 +121,9 @@ public team class PresentationAdaptor
 			case WHEN:
 			case BASE_WHEN:
 				return true;
+			default:
+				return false;
 			}
-			return false;
 		}
 
 		String getMethodName() <- replace String getMethodName();
@@ -156,6 +158,8 @@ public team class PresentationAdaptor
 					return "[access to constructor of role "+segments[2]+"]";
 				case INIT_FIELDS:
 					return "[initialize role fields]";
+				default:
+					return result;
 				}
 			}
 			return result;
@@ -249,6 +253,8 @@ public team class PresentationAdaptor
 			case BASE_WHEN:
 				typeNames= typeNames.subList(2, typeNames.size()); // remove 2 synth args: dummy,Team
 				break;
+			default:
+				// no action
 			}
 			// may need to strip multiple sets of enhance-args:
 			List<String> stripped= stripEnhancementParams(typeNames);

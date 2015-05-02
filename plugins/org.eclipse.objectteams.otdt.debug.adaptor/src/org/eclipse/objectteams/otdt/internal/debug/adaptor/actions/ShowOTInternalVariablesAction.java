@@ -16,7 +16,6 @@
  **********************************************************************/
 package org.eclipse.objectteams.otdt.internal.debug.adaptor.actions;
 
-import org.eclipse.debug.internal.ui.viewers.model.provisional.IPresentationContext;
 import org.eclipse.jdt.internal.debug.ui.actions.ToggleBooleanPreferenceAction;
 import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.objectteams.otdt.internal.debug.adaptor.OTDebugAdaptorPlugin;

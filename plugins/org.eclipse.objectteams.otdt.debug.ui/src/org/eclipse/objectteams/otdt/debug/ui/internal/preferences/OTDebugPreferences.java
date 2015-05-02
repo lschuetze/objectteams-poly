@@ -39,6 +39,7 @@ import org.eclipse.swt.graphics.RGB;
 /**
  * @author gis
  */
+@SuppressWarnings("restriction") // reusing good stuff from o.e.debug.ui & o.e.jdt.debug.ui
 public class OTDebugPreferences extends AbstractPreferenceInitializer {
 
 	// preference key:

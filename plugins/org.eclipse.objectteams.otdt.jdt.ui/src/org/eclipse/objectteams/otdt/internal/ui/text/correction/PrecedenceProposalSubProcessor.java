@@ -86,7 +86,7 @@ public class PrecedenceProposalSubProcessor {
 			}
 			
 			// get a fresh AST:
-			ASTParser p = ASTParser.newParser(AST.JLS4);
+			ASTParser p = ASTParser.newParser(AST.JLS8);
 			p.setSource(cu);
 			p.setResolveBindings(false);
 			p.setFocalPosition(offset);

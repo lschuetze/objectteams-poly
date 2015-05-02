@@ -186,7 +186,7 @@ public class BindingEditorDialog extends Dialog
         {
 			_originalDocument = new Document(_team.getCompilationUnit().getSource());
 			
-			ASTParser parser = ASTParser.newParser(AST.JLS4);
+			ASTParser parser = ASTParser.newParser(AST.JLS8);
 
             parser.setSource(_team.getCompilationUnit());
             parser.setResolveBindings(true);

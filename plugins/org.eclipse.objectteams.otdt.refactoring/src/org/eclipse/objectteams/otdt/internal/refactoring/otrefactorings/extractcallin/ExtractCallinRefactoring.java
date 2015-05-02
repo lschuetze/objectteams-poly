@@ -123,7 +123,8 @@ public class ExtractCallinRefactoring extends Refactoring {
 
 	private MethodInvocation fExtractedMethodInvocation;
 
-	private ImportRewrite fBaseImportRewriter;
+// 	could be used for re-organizing base imports:
+//	private ImportRewrite fBaseImportRewriter;
 	
 	public ExtractCallinRefactoring() {
 		fCopyBaseMethod = true;
@@ -227,7 +228,8 @@ public class ExtractCallinRefactoring extends Refactoring {
 				if (fRootBase == null) {
 					fRootBase = RefactoringASTParser.parseWithASTProvider(fBaseCUnit, true, new SubProgressMonitor(monitor, 99));
 				}
-				fBaseImportRewriter = StubUtility.createImportRewrite(fRootBase, true);
+//				could be used for re-organizing base imports:
+//				fBaseImportRewriter = StubUtility.createImportRewrite(fRootBase, true);
 				fBaseMethodDeclaration = RefactoringUtil.methodToDeclaration(fBaseMethod, fRootBase);
 				
 				fBaseAST = fRootBase.getAST();

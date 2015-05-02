@@ -30,7 +30,6 @@ import org.eclipse.objectteams.otdt.core.compiler.IOTConstants;
  *  
  * @author stephan
  */
-@SuppressWarnings("restriction")
 public class ClassFileChangeTracker playedBy ClassFileReader 
 {	
 	void nonStructuralChange(String className) <- after boolean hasStructuralChanges(byte[] newBytes)

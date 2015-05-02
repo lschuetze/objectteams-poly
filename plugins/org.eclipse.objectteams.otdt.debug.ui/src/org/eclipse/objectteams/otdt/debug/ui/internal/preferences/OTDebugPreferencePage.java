@@ -54,6 +54,7 @@ import org.eclipse.ui.PlatformUI;
 /**
  * @author gis, stephan
  */
+@SuppressWarnings("restriction") // reusing good stuff from o.e.debug.ui
 public class OTDebugPreferencePage extends FieldEditorPreferencePage implements IWorkbenchPreferencePage
 {
     private static final String JAVA_STEP_FILTER_PREFERENCE_PAGE = "org.eclipse.jdt.debug.ui.JavaStepFilterPreferencePage"; //$NON-NLS-1$

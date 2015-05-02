@@ -24,6 +24,7 @@ import org.eclipse.debug.internal.ui.elements.adapters.VariableColumnPresentatio
 import org.eclipse.debug.internal.ui.viewers.model.provisional.IColumnPresentation;
 import org.eclipse.debug.internal.ui.viewers.model.provisional.IColumnPresentationFactory;
 import org.eclipse.debug.internal.ui.viewers.model.provisional.IPresentationContext;
+import org.eclipse.debug.ui.IDebugUIConstants;
 import org.eclipse.objectteams.otdt.debug.OTDebugElementsContainer;
 import org.eclipse.objectteams.otdt.debug.ui.OTDebugUIPlugin;
 
@@ -56,7 +57,7 @@ public class OTVariableColumnFactoryAdapter implements IColumnPresentationFactor
 		String id = context.getId();
 		if (OTDebugUIPlugin.TEAM_VIEW_ID.equals(id)) {
 			if (element instanceof OTDebugElementsContainer) {
-				return VariableColumnPresentation.DEFAULT_VARIABLE_COLUMN_PRESENTATION;
+				return IDebugUIConstants.COLUMN_PRESENTATION_ID_VARIABLE;
 			}
 		}
 		return null;

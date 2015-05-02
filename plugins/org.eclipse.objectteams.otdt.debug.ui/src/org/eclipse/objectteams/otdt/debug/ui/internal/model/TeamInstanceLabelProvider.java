@@ -22,9 +22,9 @@ package org.eclipse.objectteams.otdt.debug.ui.internal.model;
 
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.debug.core.model.IVariable;
-import org.eclipse.debug.internal.ui.elements.adapters.VariableColumnPresentation;
 import org.eclipse.debug.internal.ui.model.elements.VariableLabelProvider;
 import org.eclipse.debug.internal.ui.viewers.model.provisional.IPresentationContext;
+import org.eclipse.debug.ui.IDebugUIConstants;
 import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.jface.viewers.TreePath;
 import org.eclipse.objectteams.otdt.debug.OTDebugElementsContainer;
@@ -80,7 +80,7 @@ public class TeamInstanceLabelProvider extends VariableLabelProvider
 
 	private boolean isNameColumn(String columnId) {
 		return columnId == null
-		|| VariableColumnPresentation.COLUMN_VARIABLE_NAME.equals(columnId);
+		|| IDebugUIConstants.COLUMN_ID_VARIABLE_NAME.equals(columnId);
 	}
 	
     private ImageDescriptor getImageForState(int activationState)

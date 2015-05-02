@@ -22,10 +22,12 @@ package org.eclipse.objectteams.otdt.internal.ui.wizards.listeners;
 
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.jdt.core.IJavaElement;
+import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.ITypeHierarchy;
 import org.eclipse.jdt.core.JavaConventions;
+import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.Signature;
 import org.eclipse.jdt.core.search.IJavaSearchConstants;
@@ -353,8 +355,13 @@ public class NewRoleWizardPageListener extends NewTypeWizardPageListener
 		} catch (JavaModelException e) { /* nop */ }
         IStatus validJava = StatusInfo.OK_STATUS;
         if (baseType == null) { // check valid base class name only if base class doesn't yet exist
+        	String compliance = JavaCore.VERSION_1_8;
+        	if (enclosingType != null) {
+        		IJavaProject javaProject = enclosingType.getJavaProject();
+        		compliance = javaProject.getOption(JavaCore.COMPILER_COMPLIANCE, true);
+        	}
 	        // ERRORS:
-	        validJava = JavaConventions.validateJavaTypeName(baseclassName);
+	        validJava = JavaConventions.validateJavaTypeName(baseclassName, compliance, compliance);
 	        if (validJava.getSeverity() == IStatus.ERROR) 
 	            return new StatusInfo(IStatus.ERROR,
 	            		Messages.format(org.eclipse.jdt.internal.ui.wizards.NewWizardMessages.NewTypeWizardPage_error_InvalidTypeName, 

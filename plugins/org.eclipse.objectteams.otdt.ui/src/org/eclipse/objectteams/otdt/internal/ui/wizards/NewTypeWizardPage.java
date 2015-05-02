@@ -602,7 +602,7 @@ public abstract class NewTypeWizardPage extends org.eclipse.jdt.ui.wizards.NewTy
 					return status;
 				}
 				String typeDeclaration= "class " + typeNameWithParameters + " {}"; //$NON-NLS-1$//$NON-NLS-2$
-				ASTParser parser= ASTParser.newParser(AST.JLS4);
+				ASTParser parser= ASTParser.newParser(AST.JLS8);
 				parser.setSource(typeDeclaration.toCharArray());
 				parser.setProject(root.getJavaProject());
 				CompilationUnit compilationUnit= (CompilationUnit) parser.createAST(null);
@@ -673,6 +673,7 @@ public abstract class NewTypeWizardPage extends org.eclipse.jdt.ui.wizards.NewTy
 				return getSuperInterfacesStubTypeContext();
 			}
 		});
+		// note: same deprecation warnings are raised against original org.eclipse.jdt.ui.wizards.NewTypeWizardPage:
 		SubjectControlContentAssistant contentAssistant= ControlContentAssistHelper.createJavaContentAssistant(superInterfaceCompletionProcessor);
 		Text cellEditorText= cellEditor.getText();
 		ContentAssistHandler.createHandlerForText(cellEditorText, contentAssistant);

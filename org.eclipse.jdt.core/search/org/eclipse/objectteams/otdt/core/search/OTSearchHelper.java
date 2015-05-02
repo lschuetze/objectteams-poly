@@ -101,11 +101,7 @@ public class OTSearchHelper {
 			                    {
 			                        Object element = match.getElement();
 			                        if (element instanceof IType)
-			                        {
-			                        	// FIXME(SH): check: if mapping is a role, baseType must be conform to its baseclass 
-			                            IType mapping = (IType) element;
-			                            addToMapOfSets(resultMap, baseType, mapping);
-			                        }
+			                            addToMapOfSets(resultMap, baseType, (IType) element);
 			                    }
 	                        },
 	                        searchMonitor);

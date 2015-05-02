@@ -45,6 +45,7 @@ import org.osgi.framework.BundleContext;
 /**
  * The main plugin class to be used in the desktop.
  */
+@SuppressWarnings("restriction") // reusing ColorManager from o.e.debug.ui
 public class OTDebugUIPlugin extends AbstractUIPlugin 
 {
 	// preference constants

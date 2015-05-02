@@ -78,6 +78,7 @@ import org.eclipse.objectteams.otdt.debug.ui.OTDebugUIPlugin;
  * 
  * @author gis, stephan
  */
+@SuppressWarnings("restriction") // reusing BreakpointUtils from o.e.jdt.debug.ui
 public class CopyInheritanceBreakpointManager implements IJavaBreakpointListener, IResourceChangeListener
 {
     private static final Object OT_BREAKPOINT_COPY = "OT_BREAKPOINT_COPY"; //$NON-NLS-1$

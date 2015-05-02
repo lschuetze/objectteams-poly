@@ -133,8 +133,34 @@ public abstract class AbstractMarkable implements IMarkableJavaElement {
 		return subTypes;
 	}
 
-	/** Fetch projects from a resource or all workspace projects if resource === null */
+	/** Fetch
+	 *  - directly dependent projects from a resource, or
+	 *  - all workspace OT projects if resource == null
+	 */
 	IJavaProject[] getProjects(IResource resource) {
+		/*
+		 * Should we ever want to restrict the set of projects to those that have a direct
+		 * dependency on the "current" project, we'd need to perform these steps:
+		 *
+		 * PDE scenarii:
+		 * - determine the current plugin:
+		 *   - root = getJavaElement().getAncestor(PACKAGE_FRAGMENT_ROOT)
+		 *   - traverse getJavaElement().getJavaProject().getResolvedClasspath(true)
+		 *     - match javaProject.getPackageFragmentRoots(cpEntry) against root
+		 *     - when found extract pluginName = cpEntry.extraAttributes[o.e.ot.originBaseBundle*]
+		 * - for each candidate project 
+		 *   - fetch the AspectBindingReader
+		 *     (See org.eclipse.objectteams.otdt.internal.compiler.adaptor.ResourceProjectAdaptor.getAspectBindingReader(IProject))
+		 *   - check if an aspect binding exists towards pluginName
+		 * This appears to be quite heavy weight, will only pay off if
+		 * - number of OT-plugins is large
+		 * - looking at a class from a non-WS plugin
+		 * 
+		 * Plain-Java scenarii:
+		 * - have no dependency information other than project dependencies, see next.
+		 * 
+		 * Dependencies between workspace projects are already leveraged in calculateProjectsToSearch()
+		 */
 		IJavaProject[] projects = null;
         if (resource != null) {
         	IProject project = resource.getProject();
@@ -143,7 +169,7 @@ public abstract class AbstractMarkable implements IMarkableJavaElement {
         	IWorkspace ws = ResourcesPlugin.getWorkspace();
         	ArrayList<IJavaProject> projectList = new ArrayList<IJavaProject>(); 
         	for (IProject prj : ws.getRoot().getProjects())
-        		if (isOTProject(prj) && prj.isOpen()) // FIXME(SH): better project filtering
+        		if (isOTProject(prj) && prj.isOpen())
         			projectList.add(JavaCore.create(prj));
         	projects = projectList.toArray(new IJavaProject[projectList.size()]);
         }
@@ -153,7 +179,7 @@ public abstract class AbstractMarkable implements IMarkableJavaElement {
     private IJavaProject[] getProjectsToSearch(IProject baseProject)
     {
         Set<IJavaProject> result = new HashSet<IJavaProject>();
-        calculateProjectsToSearch(baseProject, result);
+        calculateProjectsToSearch(baseProject, result, true);
         return result.toArray(new IJavaProject[result.size()]);
     }
         
@@ -181,15 +207,18 @@ public abstract class AbstractMarkable implements IMarkableJavaElement {
         }
     }
     
-    private void calculateProjectsToSearch(IProject currentProject, Set<IJavaProject> allProjectsFound)
+    private void calculateProjectsToSearch(IProject currentProject, Set<IJavaProject> allProjectsFound, boolean descend)
     {
         if (isOTProject(currentProject))
             allProjectsFound.add(JavaCore.create(currentProject));
         
-//        if (isPluginProject(currentProject))
-//        	return; // don't search indirect dependencies of plug-in projects because aspectBindings must be declared directly 
+        if (!descend)
+        	return;
+        
+        // don't search indirect dependencies of plug-in projects because aspectBindings must be declared directly:
+        descend = !isPluginProject(currentProject);
         
         for(IProject referencingProject : currentProject.getReferencingProjects())
-        	calculateProjectsToSearch(referencingProject, allProjectsFound);
+        	calculateProjectsToSearch(referencingProject, allProjectsFound, descend);
     }
 }

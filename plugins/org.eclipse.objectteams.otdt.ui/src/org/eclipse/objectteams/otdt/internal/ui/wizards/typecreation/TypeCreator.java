@@ -341,7 +341,7 @@ public abstract class TypeCreator
 	}	
 	
 	private CompilationUnit createASTForImports(ICompilationUnit cu) {
-		ASTParser parser= ASTParser.newParser(AST.JLS4);
+		ASTParser parser= ASTParser.newParser(AST.JLS8);
 		parser.setSource(cu);
 		parser.setResolveBindings(false);
 		parser.setFocalPosition(0);
@@ -430,7 +430,7 @@ public abstract class TypeCreator
 	}
 	
 	private void removeUnusedImports(ICompilationUnit cu, Set<String> existingImports, boolean needsSave) throws CoreException {
-		ASTParser parser= ASTParser.newParser(AST.JLS4);
+		ASTParser parser= ASTParser.newParser(AST.JLS8);
 		parser.setSource(cu);
 		parser.setResolveBindings(true);
 
@@ -884,7 +884,7 @@ public abstract class TypeCreator
 		String content= getCompilationUnitContent(cu, fileComment, typeComment, typeContent, lineDelimiter);
 //carp}		
 		if (content != null) {
-			ASTParser parser= ASTParser.newParser(AST.JLS4);
+			ASTParser parser= ASTParser.newParser(AST.JLS8);
 //OTDTUI: set unit name and project for role-file handling in parser -- probably obsolete!
 			parser.setUnitName(cu.getPath().toString());
 //carp}
@@ -945,7 +945,7 @@ public abstract class TypeCreator
 		ArrayList<IMethod> newMethods= new ArrayList<IMethod>();
 		CodeGenerationSettings settings= JavaPreferencesSettings.getCodeGenerationSettings(type.getJavaProject());
 		settings.createComments= this._addComments;
-		ASTParser parser= ASTParser.newParser(AST.JLS4);
+		ASTParser parser= ASTParser.newParser(AST.JLS8);
 		parser.setResolveBindings(true);
 		parser.setSource(cu);
 		CompilationUnit unit= (CompilationUnit) parser.createAST(new SubProgressMonitor(monitor, 1));

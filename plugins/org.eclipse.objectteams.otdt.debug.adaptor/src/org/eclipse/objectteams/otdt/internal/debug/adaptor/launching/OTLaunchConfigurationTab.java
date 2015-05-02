@@ -74,7 +74,6 @@ public class OTLaunchConfigurationTab extends AbstractLaunchConfigurationTab imp
         // nothing to do -- empty defaults
     }
 
-    @SuppressWarnings("unchecked") // getAttribute(String,List) uses raw type
 	public void initializeFrom(ILaunchConfiguration configuration)
     {
         _teamsModel.clear();

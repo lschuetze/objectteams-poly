@@ -1,10 +1,9 @@
 /*******************************************************************************
- * Copyright (c) 2003, 2006 IBM Corporation and others.
+ * Copyright (c) 2003, 2015 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
- * $Id: OTBreakpointLocationVerifierJob.java 23432 2010-02-03 23:13:42Z stephan $
  * 
  * Contributors:
  *     IBM Corporation - initial API and implementation
@@ -13,7 +12,6 @@
  *******************************************************************************/
 package org.eclipse.objectteams.otdt.debug.ui.internal.actions;
 
-import java.text.MessageFormat;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -50,7 +48,6 @@ import org.eclipse.ui.texteditor.IEditorStatusLine;
 /**
  * Job used to verify the position of a breakpoint
  * copied from BreakpointLocationVerifierJob
- * $Id: OTBreakpointLocationVerifierJob.java 23432 2010-02-03 23:13:42Z stephan $
  */
 //{OT_COPY_PASTE: class copied from org.eclipse.jdt.internal.debug.ui.actions.BreakpointLocationVerifierJob
 // modified just to instantiate OTValidBreakpointLocationLocator in favor of ValidBreakpointLocationLocator
@@ -120,7 +117,7 @@ public class OTBreakpointLocationVerifierJob extends Job {
 	}
 	
 	public IStatus run(IProgressMonitor monitor) {
-		ASTParser parser = ASTParser.newParser(AST.JLS3);
+		ASTParser parser = ASTParser.newParser(AST.JLS8);
 		char[] source = fDocument.get().toCharArray();
 		parser.setSource(source);
 		IJavaElement javaElement = JavaCore.create(fResource);
@@ -171,7 +168,7 @@ public class OTBreakpointLocationVerifierJob extends Job {
 					}
 				}
 				if (unitName != null) {
-					parser = ASTParser.newParser(AST.JLS3);
+					parser = ASTParser.newParser(AST.JLS8);
 					parser.setSource(source);
 					parser.setProject(project);
 					parser.setUnitName(unitName);

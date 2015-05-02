@@ -217,7 +217,7 @@ public team class BaseImportRewriting
 			if (type instanceof ParameterizedType)
 				type = ((ParameterizedType) type).getType();
 			if (type instanceof ArrayType)
-				type = ((ArrayType) type).getComponentType();
+				type = ((ArrayType) type).getElementType();
 			if (type.isSimpleType()) {
 				Name name = ((SimpleType) type).getName();
 				if (name.isSimpleName())

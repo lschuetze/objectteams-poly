@@ -1,7 +1,7 @@
 /**********************************************************************
  * This file is part of "Object Teams Development Tooling"-Software
  * 
- * Copyright 2003, 2009 Fraunhofer Gesellschaft, Munich, Germany,
+ * Copyright 2003, 2015 Fraunhofer Gesellschaft, Munich, Germany,
  * for its Fraunhofer Institute for Computer Architecture and Software
  * Technology (FIRST), Berlin, Germany and Technical University Berlin,
  * Germany.
@@ -10,7 +10,6 @@
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
- * $Id: OTElementAdapterFactory.java 23435 2010-02-04 00:14:38Z stephan $
  * 
  * Please visit http://www.eclipse.org/objectteams for updates and contact.
  * 
@@ -29,27 +28,22 @@ import org.eclipse.ui.model.IWorkbenchAdapter;
  * needs to be registered by the platforms AdapterManager.
  * 
  * @author kaiser
- * @version $Id: OTElementAdapterFactory.java 23435 2010-02-04 00:14:38Z stephan $
  */
 public class OTElementAdapterFactory implements IAdapterFactory
 {
 	WorkbenchAdapter _otAdapter   = new WorkbenchAdapter();
-	Class[]          _allAdapters = { IWorkbenchAdapter.class };
+	Class<?>[]       _allAdapters = { IWorkbenchAdapter.class };
 
-    public Object getAdapter(Object adaptableObject, Class adapterType)
+    @SuppressWarnings("unchecked")
+	public <T> T getAdapter(Object adaptableObject, Class<T> adapterType)
     {
-    	Object adapter = null;
-    	
     	if (IWorkbenchAdapter.class.equals(adapterType))
-    	{
-    		adapter = _otAdapter;
-    	}
+    		return (T)_otAdapter;
     	
-    	return adapter;
+    	return null;
     }
 
-    public Class[] getAdapterList()
-    {
+    public Class<?>[] getAdapterList() {
         return _allAdapters;
     }
 }

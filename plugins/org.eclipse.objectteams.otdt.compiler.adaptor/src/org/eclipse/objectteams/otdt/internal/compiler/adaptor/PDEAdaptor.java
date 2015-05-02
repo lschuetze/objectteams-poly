@@ -91,7 +91,7 @@ public team class PDEAdaptor
 			}
 		}
 		
-		@SuppressWarnings({ "decapsulation", "rawtypes" })
+		@SuppressWarnings("decapsulation")
 		Rule[] addForcedExports(BundleDescription desc) 
 		 <- replace Rule[] getInclusions(Map<BundleDescription, ArrayList<Rule>> map, BundleDescription desc)
 		    with { desc <- desc }

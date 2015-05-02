@@ -199,6 +199,7 @@ public team class OTTypeHierarchies {
 		 * This role adds to ITypes the capability of connecting to all direct and indirect tsuper types,
 		 * which includes linearization of all super types (implicit & explicit). 
 		 */
+		@SuppressWarnings("bindingconventions") // IType is widely used in this team (directly, not via roles)
 		protected class ConnectedType playedBy IType 
 		{
 			ConnectedType getParent() -> IJavaElement getParent() 
