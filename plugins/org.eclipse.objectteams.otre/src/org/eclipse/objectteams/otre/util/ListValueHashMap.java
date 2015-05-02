@@ -1,13 +1,12 @@
 /**********************************************************************
  * This file is part of the "Object Teams Runtime Environment"
  *
- * Copyright 2004-2009 Berlin Institute of Technology, Germany.
+ * Copyright 2004-2015 Berlin Institute of Technology, Germany.
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
- * $Id: ListValueHashMap.java 23408 2010-02-03 18:07:35Z stephan $
  *
  * Please visit http://www.objectteams.org for updates and contact.
  *
@@ -46,6 +45,26 @@ public class ListValueHashMap<ValueType> {
 		list.add(value);
 		hashMap.put(key, list);
 		flattenValues.add(value);
+	}
+
+	/**
+	 * @param key
+	 * @param value
+	 */
+	public void synchronizedPut(String key, ValueType value) {
+		if (!hashMap.containsKey(key)) {
+			LinkedList<ValueType> list = new LinkedList<ValueType>();
+			list.add(value);
+			hashMap.put(key, list);
+			flattenValues.add(value);
+		} else {
+			LinkedList<ValueType> list = hashMap.get(key);
+			synchronized (list) {
+				list.add(value);
+				hashMap.put(key, list);
+				flattenValues.add(value);
+			}
+		}
 	}
 
 	/**

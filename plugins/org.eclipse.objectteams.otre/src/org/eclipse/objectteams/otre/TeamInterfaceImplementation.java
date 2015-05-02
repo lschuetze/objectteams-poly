@@ -666,12 +666,14 @@ public class TeamInterfaceImplementation
 			baseCallSurrogate.addLineNumber(il.getStart(), STEP_OVER_LINENUMBER);
 		}
 		
-		il.append(genBaseCallSwitch(cpg, base_methods, baseCallSurrogate,
-				argumentTypes,
-				returnType,
-				lift_method_name,
-				lift_method_signature,
-				otResult, loading, cg.getClassName()));
+		synchronized(base_methods) {
+			il.append(genBaseCallSwitch(cpg, base_methods, baseCallSurrogate,
+					argumentTypes,
+					returnType,
+					lift_method_name,
+					lift_method_signature,
+					otResult, loading, cg.getClassName()));
+		}
 		
 		il.append(InstructionFactory.createLoad(enhancedReturnType, otResult.getIndex()));
 		il.append(InstructionFactory.createReturn(enhancedReturnType));							

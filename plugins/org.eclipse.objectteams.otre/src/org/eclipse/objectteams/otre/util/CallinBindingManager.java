@@ -1201,7 +1201,7 @@ public class CallinBindingManager {
 	 * @param baseMethodInfo an Object contained base class name, base method name and base method signature
 	 */
 	public static void addStaticReplaceBindingForRoleMethod(String roleMethodKey, BaseMethodInfo baseMethodInfo) {
-		staticReplaceBindings.put(roleMethodKey, baseMethodInfo);
+		staticReplaceBindings.synchronizedPut(roleMethodKey, baseMethodInfo);
 	}
 	
 	/**
