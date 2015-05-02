@@ -2,6 +2,7 @@
 
 BASE=/shared/tools/objectteams
 STAGINGBASE=/opt/public/download-staging.priv/tools/objectteams
+export JAR_PROCESSOR_JAVA=java8
 
 # Find the master repository to build upon:
 if [ "$1" == "none" ]
