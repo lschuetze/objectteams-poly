@@ -28,14 +28,17 @@ package org.eclipse.jdt.internal.compiler.parser;
  *
  */
 
+import org.eclipse.core.runtime.CoreException;
 
 import org.eclipse.jdt.core.IAnnotatable;
 import org.eclipse.jdt.core.IAnnotation;
 import org.eclipse.jdt.core.IImportDeclaration;
 import org.eclipse.jdt.core.IJavaElement;
+import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.ILocalVariable;
 import org.eclipse.jdt.core.IPackageDeclaration;
 import org.eclipse.jdt.core.ISourceRange;
+import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.Signature;
 import org.eclipse.jdt.core.compiler.CharOperation;
@@ -125,6 +128,14 @@ public class SourceTypeConverter extends TypeConverter {
 		SourceTypeElementInfo topLevelTypeInfo = (SourceTypeElementInfo) sourceTypes[0];
 		org.eclipse.jdt.core.ICompilationUnit cuHandle = topLevelTypeInfo.getHandle().getCompilationUnit();
 		this.cu = (ICompilationUnit) cuHandle;
+//{ObjectTeams: does the target project require OT/J?
+		boolean isOTJ = false;
+		try {
+			IJavaProject jProj = cuHandle.getJavaProject();
+			if (jProj != null)
+				isOTJ = jProj.getProject().hasNature(JavaCore.OTJ_NATURE_ID);
+		} catch (CoreException e) { /* ignore */ }
+// SH}
 
 		final CompilationUnitElementInfo compilationUnitElementInfo = (CompilationUnitElementInfo) ((JavaElement) this.cu).getElementInfo();
 		if (this.has1_5Compliance && 
@@ -134,9 +145,16 @@ public class SourceTypeConverter extends TypeConverter {
 			// the client wants local and anonymous types to be converted (https://bugs.eclipse.org/bugs/show_bug.cgi?id=254738)
 			// Also see bug https://bugs.eclipse.org/bugs/show_bug.cgi?id=405843
 			if ((this.flags & LOCAL_TYPE) == 0) {
+//{ObjectTeams: pass down OT/J flag:
+/* orig:
 				return new Parser(this.problemReporter, true).dietParse(this.cu, compilationResult);
 			} else {
 				return new Parser(this.problemReporter, true).parse(this.cu, compilationResult);
+  :giro */
+				return Parser.create(this.problemReporter, true, isOTJ).dietParse(this.cu, compilationResult);
+			} else {
+				return Parser.create(this.problemReporter, true, isOTJ).parse(this.cu, compilationResult);
+// SH}
 			}
 		}
 
@@ -202,7 +220,12 @@ public class SourceTypeConverter extends TypeConverter {
 // SH}
 			return this.unit;
 		} catch (AnonymousMemberFound e) {
+//{ObjectTeams: pass down OT/J flag:
+/* orig:
 			return new Parser(this.problemReporter, true).parse(this.cu, compilationResult);
+  :giro */
+			return Parser.create(this.problemReporter, true, isOTJ).parse(this.cu, compilationResult);
+// SH}
 		}
 	}
 

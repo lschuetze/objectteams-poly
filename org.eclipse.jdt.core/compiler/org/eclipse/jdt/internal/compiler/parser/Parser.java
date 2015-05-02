@@ -1016,6 +1016,23 @@ public Parser(ProblemReporter problemReporter, boolean optimizeStringLiterals) {
 	// javadoc support
 	this.javadocParser = createJavadocParser();
 }
+//{ObjectTeams: variant that may enable OT/J:
+public static Parser create(ProblemReporter problemReporter, boolean optimizeStringLiterals, boolean enableOTJ) {
+	CompilerOptions options = problemReporter.options;
+	boolean pureJava = options.isPureJava;
+	boolean scopeKWs = options.allowScopedKeywords;
+	try {
+		if (enableOTJ) {
+			options.isPureJava = false;
+			options.allowScopedKeywords = true;
+		}
+		return new Parser(problemReporter, optimizeStringLiterals);
+	} finally {
+		options.isPureJava = pureJava;
+		options.allowScopedKeywords = scopeKWs;
+	}
+}
+// SH}
 protected void annotationRecoveryCheckPoint(int start, int end) {
 	if(this.lastCheckPoint < end) {
 		this.lastCheckPoint = end + 1;
