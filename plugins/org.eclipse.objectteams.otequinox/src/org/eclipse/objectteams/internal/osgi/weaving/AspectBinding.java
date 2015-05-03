@@ -251,7 +251,7 @@ public class AspectBinding {
 	public @Nullable Bundle aspectBundle; // null if we don't have a PackageAdmin for bundle lookup
 	public String basePluginName;
 	public BaseBundle baseBundle;
-	public @Nullable IConfigurationElement[] forcedExports; // not yet evaluated
+	public IConfigurationElement[] forcedExports;
 	public TeamBinding[]   teams;
 	public Set<String> allBaseClassNames = new HashSet<>();
 
@@ -261,7 +261,7 @@ public class AspectBinding {
 	
 	Set<TeamBinding> teamsInProgress = new HashSet<>(); // TODO cleanup teams that are done
 	
-	public AspectBinding(String aspectId, @Nullable Bundle aspectBundle, BaseBundle baseBundle, @Nullable IConfigurationElement[] forcedExportsConfs, int count) 
+	public AspectBinding(String aspectId, @Nullable Bundle aspectBundle, BaseBundle baseBundle, IConfigurationElement[] forcedExportsConfs, int count) 
 	{
 		this.aspectPlugin= aspectId;
 		this.aspectBundle= aspectBundle;
@@ -277,7 +277,7 @@ public class AspectBinding {
 		@NonNull ActivationKind kind = ActivationKind.NONE;
 		try {
 			if (activationSpecifier != null)
-				kind = ActivationKind.valueOf(activationSpecifier); // well-known API of all enums
+				kind = ActivationKind.valueOf(activationSpecifier);
 		} catch (IllegalArgumentException iae) {	
 			log(iae, "Invalid activation kind "+activationSpecifier+" for team "+teamName);
 		}

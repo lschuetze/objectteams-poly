@@ -104,11 +104,9 @@ public class OTWeavingHook implements WeavingHook, WovenClassListener {
 	private @Nullable Class<?> ooTeam;
 
 	/** Call-back once the extension registry is up and running. */
-	public void activate(BundleContext bundleContext, ServiceReference<IExtensionRegistry> serviceReference) {
+	public void activate(@NonNull BundleContext bundleContext, ServiceReference<IExtensionRegistry> serviceReference) {
 		loadAspectBindingRegistry(bundleContext, serviceReference);
-		TransformerPlugin activator = TransformerPlugin.getDefault();
-		activator.registerAspectBindingRegistry(this.aspectBindingRegistry);
-		activator.registerAspectPermissionManager(this.permissionManager);
+		TransformerPlugin.initialize(bundleContext, this.aspectBindingRegistry, this.permissionManager);
 	}
 
 	// ====== Aspect Bindings & Permissions: ======
@@ -128,7 +126,7 @@ public class OTWeavingHook implements WeavingHook, WovenClassListener {
 		if (extensionRegistry == null) {
 			log(IStatus.ERROR, "Failed to acquire ExtensionRegistry service, cannot load aspect bindings.");
 		} else {
-			permissionManager = new AspectPermissionManager(context.getBundle(), packageAdmin); // known API
+			permissionManager = new AspectPermissionManager(context.getBundle(), packageAdmin);
 			permissionManager.loadAspectBindingNegotiators(extensionRegistry);
 
 			aspectBindingRegistry.loadAspectBindings(extensionRegistry, packageAdmin, this);

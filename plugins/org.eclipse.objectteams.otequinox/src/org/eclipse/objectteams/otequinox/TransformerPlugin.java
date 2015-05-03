@@ -27,7 +27,8 @@ import org.eclipse.core.runtime.Status;
 import org.eclipse.equinox.log.ExtendedLogReaderService;
 import org.eclipse.equinox.log.ExtendedLogService;
 import org.eclipse.equinox.log.Logger;
-import org.eclipse.jdt.annotation.NonNull;
+import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.eclipse.jdt.annotation.Nullable;
 import org.eclipse.objectteams.internal.osgi.weaving.AspectBinding;
 import org.eclipse.objectteams.internal.osgi.weaving.AspectBindingRegistry;
 import org.eclipse.objectteams.internal.osgi.weaving.AspectPermissionManager;
@@ -45,51 +46,109 @@ import org.osgi.framework.hooks.weaving.WeavingHook;
 import org.osgi.framework.hooks.weaving.WovenClassListener;
 import org.osgi.util.tracker.ServiceTracker;
 
+@NonNullByDefault
 public class TransformerPlugin implements BundleActivator, IAspectRegistry {
 
-	private static BundleContext context;
+	/**
+	 * State class representing the initialized state, i.e., after {@link start()}
+	 * and {@link #initialize()} have been called.
+	 */
+	static class InitializedPlugin extends TransformerPlugin {
 
+		AspectBindingRegistry aspectBindingRegistry;
+		@Nullable AspectPermissionManager aspectPermissionManager;
+		ILog log;
+		List<Team> teamInstances = new ArrayList<>();
+		
+		public InitializedPlugin(AspectBindingRegistry aspectBindingRegistry, @Nullable AspectPermissionManager permissionManager, ILog log) {
+			this.aspectBindingRegistry = aspectBindingRegistry;
+			this.aspectPermissionManager = permissionManager;
+			this.log = log;
+		}
+
+		@Override
+		public boolean isDeniedAspectPlugin(String symbolicName) {
+			final AspectPermissionManager manager = this.aspectPermissionManager;
+			if (manager != null)
+				return manager.isDeniedAspectPlugin(symbolicName);
+			return false;
+		}
+
+		@Override
+		public boolean isOTDT() {
+			return this.aspectBindingRegistry.isOTDT();
+		}
+
+		@Override
+		public boolean isAdaptedBasePlugin(@Nullable String baseBundleName) {
+			return this.aspectBindingRegistry.isAdaptedBasePlugin(baseBundleName);
+		}
+
+		@Override
+		public @Nullable String[] getAdaptedBasePlugins(Bundle aspectBundle) {
+			return this.aspectBindingRegistry.getAdaptedBasePlugins(aspectBundle);
+		}
+
+		@Override
+		public String[] getAdaptingAspectPlugins(@Nullable String id) {
+			List<AspectBinding> aspectBindings = this.aspectBindingRegistry.getAdaptingAspectBindings(id);
+			if (aspectBindings == null)
+				return new String[0];
+			String[] result = new String[aspectBindings.size()];
+			for (int i = 0; i < result.length; i++)
+				result[i] = aspectBindings.get(i).aspectPlugin;
+			return result;
+		}
+	}
+	private static @Nullable InitializedPlugin plugin;
+	/**
+	 * Single point of access: either we get a fully initialized instance, or ISE is thrown.
+	 * @throws IllegalStateException if the plugin has not been initialized yet.
+	 */
+	private static InitializedPlugin plugin() {
+		InitializedPlugin plugin = TransformerPlugin.plugin;
+		if (plugin == null)
+			throw notInitialized();
+		return plugin;
+	}
+	
+	static @Nullable BundleContext context;
 	public static Bundle getBundle() {
-		return context.getBundle();
+		BundleContext context = TransformerPlugin.context;
+		if (context != null)
+			return context.getBundle();
+		throw new IllegalStateException("TransformerPlugin has not been started");
 	}
 
-	private static ILog log;
 	private static List<IStatus> pendingLogEntries = new ArrayList<>();
-	private static TransformerPlugin plugin;
 	
-	private AspectBindingRegistry aspectBindingRegistry;
-	private List<Team> teamInstances = new ArrayList<>();
-	private AspectPermissionManager aspectPermissionManager;
 
 	/*
 	 * (non-Javadoc)
 	 * @see org.osgi.framework.BundleActivator#start(org.osgi.framework.BundleContext)
 	 */
 	public void start(final BundleContext bundleContext) throws Exception {
-		plugin = this;
 		TransformerPlugin.context = bundleContext;
-		
-		acquireLog(bundleContext);
 	
 		if (!"false".equals(System.getProperty("ot.equinox"))) {
 			OTREInit();
 			
 			// register our weaving service:
 			final OTWeavingHook otWeavingHook = new OTWeavingHook();
-			context.registerService(new String[] { WeavingHook.class.getName(), WovenClassListener.class.getName() },
+			bundleContext.registerService(new String[] { WeavingHook.class.getName(), WovenClassListener.class.getName() },
 					otWeavingHook, null);
 			
 			// but wait until the extension registry is available for reading aspectBindings:
 			try {
-				ServiceReference<IExtensionRegistry> reference = context.getServiceReference(IExtensionRegistry.class);
+				ServiceReference<IExtensionRegistry> reference = bundleContext.getServiceReference(IExtensionRegistry.class);
 				if (reference != null) {
 					otWeavingHook.activate(bundleContext, reference);
 				} else {
-					context.addServiceListener(
+					bundleContext.addServiceListener(
 						new ServiceListener() { 
 							public void serviceChanged(ServiceEvent event) {
 								if(event.getType() == ServiceEvent.REGISTERED)
-									otWeavingHook.activate(bundleContext, context.getServiceReference(IExtensionRegistry.class));
+									otWeavingHook.activate(bundleContext, bundleContext.getServiceReference(IExtensionRegistry.class));
 							}
 						},
 						"(objectclass="+IExtensionRegistry.class.getName()+")"); //$NON-NLS-1$ //$NON-NLS-2$
@@ -102,14 +161,14 @@ public class TransformerPlugin implements BundleActivator, IAspectRegistry {
 	}
 
 	@SuppressWarnings("restriction")
-	private static void acquireLog(BundleContext bundleContext) {
+	private static ILog acquireLog(BundleContext bundleContext) {
 		try {
-			log = org.eclipse.core.internal.runtime.InternalPlatform.getDefault().getLog(bundleContext.getBundle());
+			return org.eclipse.core.internal.runtime.InternalPlatform.getDefault().getLog(bundleContext.getBundle());
 		} catch (NullPointerException npe) {
 			// in case InternalPlatform isn't initialized yet, perform the same tasks manually:
 
 			ServiceTracker<ExtendedLogService,ExtendedLogService> tracker
-					= new ServiceTracker<ExtendedLogService,ExtendedLogService>(context, ExtendedLogService.class, null);
+					= new ServiceTracker<ExtendedLogService,ExtendedLogService>(bundleContext, ExtendedLogService.class, null);
 			tracker.open();
 			ExtendedLogService logService = tracker.getService();
 			Bundle bundle = bundleContext.getBundle();
@@ -118,11 +177,11 @@ public class TransformerPlugin implements BundleActivator, IAspectRegistry {
 			org.eclipse.core.internal.runtime.Log result = new org.eclipse.core.internal.runtime.Log(bundle, logger);
 
 			ServiceTracker<ExtendedLogReaderService, ExtendedLogReaderService> logReaderTracker 
-					= new ServiceTracker<ExtendedLogReaderService,ExtendedLogReaderService>(context, ExtendedLogReaderService.class.getName(), null);
+					= new ServiceTracker<ExtendedLogReaderService,ExtendedLogReaderService>(bundleContext, ExtendedLogReaderService.class.getName(), null);
 			logReaderTracker.open();
 			ExtendedLogReaderService logReader = logReaderTracker.getService();
 			logReader.addLogListener(result, result);
-			log = result;
+			return result;
 		}
 	}
 
@@ -141,8 +200,8 @@ public class TransformerPlugin implements BundleActivator, IAspectRegistry {
 	 * (non-Javadoc)
 	 * @see org.osgi.framework.BundleActivator#stop(org.osgi.framework.BundleContext)
 	 */
-	public void stop(BundleContext bundleContext) throws Exception {
-		TransformerPlugin.context = null;
+	public void stop(@Nullable BundleContext bundleContext) throws Exception {
+		plugin = null;
 	}
 
 	// configure OT/Equinox debugging:
@@ -167,8 +226,9 @@ public class TransformerPlugin implements BundleActivator, IAspectRegistry {
 	public static synchronized void log (Throwable ex, String msg) {
 		msg = "OT/Equinox: "+msg;
 		Status status = new Status(IStatus.ERROR, TRANSFORMER_PLUGIN_ID, msg, ex);
-		if (log != null) {
-			log.log(status);
+		final InitializedPlugin plugin = TransformerPlugin.plugin;
+		if (plugin != null) {
+			plugin.log.log(status);
 		} else {
 			System.err.println(msg);
 			ex.printStackTrace();
@@ -183,8 +243,9 @@ public class TransformerPlugin implements BundleActivator, IAspectRegistry {
 
 	public static synchronized void doLog(int level, String msg) {
 		Status status = new Status(level, TRANSFORMER_PLUGIN_ID, "OT/Equinox: "+msg);
-		if (log != null)
-			log.log(status);
+		final InitializedPlugin plugin = TransformerPlugin.plugin;
+		if (plugin != null)
+			plugin.log.log(status);
 		else
 			pendingLogEntries.add(status);
 	}
@@ -196,8 +257,9 @@ public class TransformerPlugin implements BundleActivator, IAspectRegistry {
 			pendingLogEntries = new ArrayList<>();
 		}
 		for (IStatus status : copy) {
-			if (log != null) {
-				log.log(status);
+			final InitializedPlugin plugin = TransformerPlugin.plugin;
+			if (plugin != null) {
+				plugin.log.log(status);
 			} else {
 				if (status.getCode() == IStatus.ERROR)
 					System.err.println(status.getMessage());
@@ -207,70 +269,74 @@ public class TransformerPlugin implements BundleActivator, IAspectRegistry {
 		}
 	}
 	
+	public static void initialize(BundleContext bundleContext, AspectBindingRegistry aspectBindingRegistry, @Nullable AspectPermissionManager permissionManager) {
+		plugin = new InitializedPlugin(aspectBindingRegistry, permissionManager, acquireLog(bundleContext));
+	}
 
+	/**
+	 * Get the singleton instance of this class.
+	 * <p>
+	 * This method must not be called before the plugin is fully initialized, which depends
+	 * on two triggers:
+	 * </p>
+	 * <ul>
+	 * <li>This current plugin must be started by Equinox (should be guaranteed on access by Equinox).</li>
+	 * <li>The extension registry has been started, which in turn triggers reading extensions against our extension points.</li>
+	 * </ul>
+	 */
 	public static TransformerPlugin getDefault() {
-		return plugin;
+		return plugin();
 	}
 
-	public void registerAspectBindingRegistry(AspectBindingRegistry aspectBindingRegistry) {
-		this.aspectBindingRegistry = aspectBindingRegistry;
+	public static synchronized void registerTeamInstance(Team instance) {
+		plugin().teamInstances.add(instance);
 	}
-
-	public void registerAspectPermissionManager(AspectPermissionManager permissionManager) {
-		this.aspectPermissionManager = permissionManager;
+	/**
+	 * Copy all registered team instances into the given list,
+     */
+	public static synchronized void getTeamInstances(List<Team> list) {
+		list.addAll(plugin().teamInstances);
 	}
 
 	/**
 	 * public API:
 	 * {@link IAspectRegistry#getAdaptingAspectPlugins(Bundle)} 
 	 */
-	public @NonNull String[] getAdaptingAspectPlugins(@NonNull Bundle basePlugin) {
+	public String[] getAdaptingAspectPlugins(Bundle basePlugin) {
 		return getAdaptingAspectPlugins(basePlugin.getSymbolicName());
 	}
 
-	public @NonNull String[] getAdaptingAspectPlugins(String id) {
-		List<AspectBinding> aspectBindings = this.aspectBindingRegistry.getAdaptingAspectBindings(id);
-		if (aspectBindings == null)
-			return new String[0];
-		String[] result = new String[aspectBindings.size()];
-		for (int i = 0; i < result.length; i++)
-			result[i] = aspectBindings.get(i).aspectPlugin;
-		return result;
-	}
-
-	public static synchronized void registerTeamInstance(@NonNull Team instance) {
-		plugin.teamInstances.add(instance);
-	}
-	/**
-	 * Copy all registered team instances into the given list,
-     */
-	public static synchronized void getTeamInstances(List<Team> list) {
-		list.addAll(plugin.teamInstances);
+	public String[] getAdaptingAspectPlugins(@Nullable String id) {
+		throw notInitialized();
 	}
 
 	@Override
 	public boolean isOTDT() {
-		return this.aspectBindingRegistry.isOTDT();
+		throw notInitialized();
 	}
 
 	@Override
-	public boolean isAdaptedBasePlugin(@NonNull String baseBundleName) {
-		return this.aspectBindingRegistry.isAdaptedBasePlugin(baseBundleName);
+	public boolean isAdaptedBasePlugin(@Nullable String baseBundleName) {
+		throw notInitialized();
 	}
 
 	@Override
-	public String[] getAdaptedBasePlugins(@NonNull Bundle aspectBundle) {
-		return this.aspectBindingRegistry.getAdaptedBasePlugins(aspectBundle);
+	public @Nullable String[] getAdaptedBasePlugins(Bundle aspectBundle) {
+		throw notInitialized();
 	}
 
 	@Override
-	public boolean hasInternalTeams(@NonNull Bundle bundle) {
+	public boolean hasInternalTeams(Bundle bundle) {
 		// TODO Auto-generated method stub
 		return false;
 	}
 
 	@Override
-	public boolean isDeniedAspectPlugin(@NonNull String symbolicName) {
-		return aspectPermissionManager.isDeniedAspectPlugin(symbolicName);
+	public boolean isDeniedAspectPlugin(String symbolicName) {
+		throw notInitialized();
+	}
+
+	static IllegalStateException notInitialized() {
+		return new IllegalStateException("TransformerPlugin has not been initialized");
 	}
 }

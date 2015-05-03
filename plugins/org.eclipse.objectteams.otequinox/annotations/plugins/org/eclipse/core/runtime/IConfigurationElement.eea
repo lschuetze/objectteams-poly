@@ -1,0 +1,4 @@
+class org/eclipse/core/runtime/IConfigurationElement
+getChildren
+ (Ljava/lang/String;)[Lorg/eclipse/core/runtime/IConfigurationElement;
+ (Ljava/lang/String;)[1Lorg/eclipse/core/runtime/IConfigurationElement;

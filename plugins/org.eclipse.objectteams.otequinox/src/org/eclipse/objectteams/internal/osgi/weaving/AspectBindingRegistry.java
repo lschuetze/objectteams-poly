@@ -38,7 +38,6 @@ import java.util.Set;
 import org.eclipse.core.runtime.IConfigurationElement;
 import org.eclipse.core.runtime.IExtensionRegistry;
 import org.eclipse.core.runtime.IStatus;
-import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
 import org.eclipse.objectteams.internal.osgi.weaving.AspectBinding.BaseBundle;
@@ -120,8 +119,7 @@ public class AspectBindingRegistry {
 				
  			//base fragments?
 			IConfigurationElement[] fragments = basePlugins[0].getChildren(REQUIRED_FRAGMENT);
-			if (fragments != null 
-					&& !checkRequiredFragments(aspectBundleId, baseBundleId, fragments, packageAdmin)) // reported inside
+			if (!checkRequiredFragments(aspectBundleId, baseBundleId, fragments, packageAdmin)) // reported inside
 				continue;
 			
 			IConfigurationElement[] teams = currentBindingConfig.getChildren(TEAM);
@@ -130,7 +128,7 @@ public class AspectBindingRegistry {
 			AspectBinding binding = new AspectBinding(aspectBundleId,
 														aspectBundle,
 														baseBundle,
-														basePlugins[0].getChildren(Constants.FORCED_EXPORTS_ELEMENT), 
+														basePlugins[0].getChildren(Constants.FORCED_EXPORTS_ELEMENT),
 														teamCount);
 			bindings[i] = binding;
 			// TODO(SH): maybe enforce that every bundle id is given only once?
@@ -147,7 +145,7 @@ public class AspectBindingRegistry {
 					teamSet.add(team);
 				}
 				
-				@NonNull String realBaseBundleId = baseBundleId.toUpperCase().equals(SELF) ? aspectBundleId : baseBundleId;
+				String realBaseBundleId = baseBundleId.toUpperCase().equals(SELF) ? aspectBundleId : baseBundleId;
 				addBindingForBaseBundle(realBaseBundleId, binding);
 				addBindingForAspectBundle(aspectBundleId, binding);
 				hook.setBaseTripWire(packageAdmin, realBaseBundleId, baseBundle);

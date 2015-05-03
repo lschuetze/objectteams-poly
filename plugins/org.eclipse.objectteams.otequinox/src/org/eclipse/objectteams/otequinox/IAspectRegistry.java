@@ -34,7 +34,7 @@ public interface IAspectRegistry {
 	public boolean isOTDT();
 	
 	/** Is `symbolicName' the name of a base plugin for which an adapting team is registered? */
-	public boolean isAdaptedBasePlugin(String baseBundleName);
+	public boolean isAdaptedBasePlugin(@Nullable String baseBundleName);
 
 	/**
   	 * Get the names of aspect plugins adapting a given base plugin.

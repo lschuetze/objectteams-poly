@@ -1,5 +1,8 @@
 class org/eclipse/core/internal/runtime/InternalPlatform
 
+getLog
+ (Lorg/osgi/framework/Bundle;)Lorg/eclipse/core/runtime/ILog;
+ (Lorg/osgi/framework/Bundle;)L1org/eclipse/core/runtime/ILog;
 getStateLocation
  (Lorg/osgi/framework/Bundle;Z)Lorg/eclipse/core/runtime/IPath;
  (Lorg/osgi/framework/Bundle;Z)L1org/eclipse/core/runtime/IPath;

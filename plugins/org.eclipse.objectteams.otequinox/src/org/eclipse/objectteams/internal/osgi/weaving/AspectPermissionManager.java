@@ -76,8 +76,6 @@ import org.osgi.framework.BundleException;
 @NonNullByDefault
 public class AspectPermissionManager {
 
-	// FIXME: forced exports are unimplemented as of OT/Equinox 2.3.0!
-
 	// property names for default configuration:
 	private static final String FORCED_EXPORT_DEFAULT  = "forced.export.default";
 	private static final String ASPECT_BINDING_DEFAULT = "aspect.binding.default";
@@ -215,7 +213,7 @@ public class AspectPermissionManager {
 	}
 	private AspectPermission internalCheckForcedExports(AspectBinding aspectBinding) {
 		IConfigurationElement[] forcedExports = aspectBinding.forcedExports;
-		if (forcedExports == null || forcedExports.length == 0)
+		if (forcedExports.length == 0)
 			return GRANT;
 		
 		String aspectId = aspectBinding.aspectPlugin;
@@ -230,7 +228,7 @@ public class AspectPermissionManager {
 				continue;
 			for (@SuppressWarnings("null")@NonNull String singleForcedExportRequest : forcedExportsRequest.split(","))
 			{
-				singleForcedExportRequest = singleForcedExportRequest.trim(); // well-known API
+				singleForcedExportRequest = singleForcedExportRequest.trim();
 
 				String[] listEntry;
 				boolean grantReported = false;
@@ -327,14 +325,13 @@ public class AspectPermissionManager {
 		return forcedExports;
 	}
 
-	private @Nullable String[] findRequestInList(String baseBundleId, String basePackage, @Nullable List<String[]> list) {
-		if (list != null)
-			for (String[] singleExport : list)
-				if (   singleExport[0].equals(baseBundleId)
-					&& singleExport[1].equals(basePackage))
-				{
-					return singleExport;
-				}
+	private @Nullable String[] findRequestInList(String baseBundleId, String basePackage, List<String[]> list) {
+		for (String[] singleExport : list)
+			if (   singleExport[0].equals(baseBundleId)
+				&& singleExport[1].equals(basePackage))
+			{
+				return singleExport;
+			}
 		return null;
 	}
 
@@ -602,7 +599,7 @@ public class AspectPermissionManager {
 				String value = (String) props.get(ASPECT_BINDING_DEFAULT);
 				if (value != null)
 					try {
-						defaultAspectBindingPermission = AspectPermission.valueOf(value); // known API of all enums
+						defaultAspectBindingPermission = AspectPermission.valueOf(value);
 					} catch (IllegalArgumentException iae) {
 						defaultAspectBindingPermission = AspectPermission.DENY;
 						log(iae, "Cannot set default aspect permission from file "+NEGOTIATION_DEFAULTS_FILE+", assuming DENY.");
@@ -610,7 +607,7 @@ public class AspectPermissionManager {
 				value = (String) props.get(FORCED_EXPORT_DEFAULT);
 				if (value != null)
 					try {
-						defaultForcedExportPermission = AspectPermission.valueOf(value); // known API of all enums
+						defaultForcedExportPermission = AspectPermission.valueOf(value);
 					} catch (IllegalArgumentException iae) {
 						defaultForcedExportPermission = AspectPermission.DENY;
 						log(iae, "Cannot set default forced exports permission from file "+NEGOTIATION_DEFAULTS_FILE+", assuming DENY.");
