@@ -145,10 +145,9 @@ public class ExtractMethodRefactoringUtilTests extends FileBasedRefactoringTest 
 		return result;
 	}
 
-	@SuppressWarnings("unchecked")
 	// raw List from ExtractMethodRefactoring.
 	private String[] fetchNewParameterTypes() {
-		List parameterInfos = _refactoring.getParameterInfos();
+		List<ParameterInfo> parameterInfos = _refactoring.getParameterInfos();
 		String[] parameterTypes = new String[parameterInfos.size()];
 		for (int i = 0; i < parameterTypes.length; i++)
 			parameterTypes[i] = ((ParameterInfo) parameterInfos.get(i)).getNewTypeName();

@@ -60,7 +60,6 @@ public class CallinQuickFixTest extends OTQuickFixTest {
 		return allTests();
 	}
 	
-	@SuppressWarnings("unchecked")
 	@Override
 	protected void addOptions(Hashtable options) {
 		super.addOptions(options);

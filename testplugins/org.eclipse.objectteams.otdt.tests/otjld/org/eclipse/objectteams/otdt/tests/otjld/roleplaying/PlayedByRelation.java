@@ -19,7 +19,6 @@ package org.eclipse.objectteams.otdt.tests.otjld.roleplaying;
 
 import java.util.Map;
 
-import org.eclipse.jdt.internal.compiler.classfmt.ClassFileConstants;
 import org.eclipse.jdt.internal.compiler.impl.CompilerOptions;
 import org.eclipse.objectteams.otdt.core.ext.WeavingScheme;
 import org.eclipse.objectteams.otdt.tests.otjld.AbstractOTJLDTest;

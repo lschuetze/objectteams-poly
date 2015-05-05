@@ -123,7 +123,6 @@ public class CodeCompletionTest extends CoreTests {
 		cu.codeComplete(offset, collector);
 	}
 
-	@SuppressWarnings("unchecked")
 	protected void setUp() throws Exception {
 		fJProject1= JavaProjectHelper.createOTJavaProject("OTTestProject1", "bin");
 		JavaProjectHelper.addRTJar(fJProject1);

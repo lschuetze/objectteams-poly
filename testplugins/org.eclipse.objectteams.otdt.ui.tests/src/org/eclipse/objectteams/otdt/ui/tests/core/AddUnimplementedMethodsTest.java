@@ -84,7 +84,7 @@ public class AddUnimplementedMethodsTest extends TestCase {
 		fJavaProject= JavaProjectHelper.createJavaProject("DummyProject", "bin");
 		assertNotNull(JavaProjectHelper.addRTJar(fJavaProject));
 		
-		Hashtable options= TestOptions.getDefaultOptions();
+		Hashtable<String,String> options= TestOptions.getDefaultOptions();
 		options.put(DefaultCodeFormatterConstants.FORMATTER_TAB_CHAR, JavaCore.SPACE);
 		options.put(DefaultCodeFormatterConstants.FORMATTER_TAB_SIZE, "4");
 		options.put(DefaultCodeFormatterConstants.FORMATTER_LINE_SPLIT, "999");
@@ -141,7 +141,7 @@ public class AddUnimplementedMethodsTest extends TestCase {
 	}
 	
 	private void testHelper(IType testClass, int insertionPos, boolean implementAllOverridable) throws JavaModelException, CoreException {
-		RefactoringASTParser parser= new RefactoringASTParser(AST.JLS3);
+		RefactoringASTParser parser= new RefactoringASTParser(AST.JLS8);
 		CompilationUnit unit= parser.parse(testClass.getCompilationUnit(), true);
 		AbstractTypeDeclaration declaration= (AbstractTypeDeclaration) ASTNodes.getParent(NodeFinder.perform(unit, testClass.getNameRange()), AbstractTypeDeclaration.class);
 		assertNotNull("Could not find type declaration node", declaration);

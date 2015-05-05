@@ -606,7 +606,7 @@ public class OTReconcilerTests extends ReconcilerTests {
 							"		String s1, s2, s3, s4, s5, s6;\n" +
 					"	}\n").length()), 
 					null);
-			wc.reconcile(AST.JLS3, 
+			wc.reconcile(AST.JLS8, 
 					ICompilationUnit.FORCE_PROBLEM_DETECTION|ICompilationUnit.ENABLE_STATEMENTS_RECOVERY|ICompilationUnit.ENABLE_BINDINGS_RECOVERY,
 					wc.getOwner(), null);
 			

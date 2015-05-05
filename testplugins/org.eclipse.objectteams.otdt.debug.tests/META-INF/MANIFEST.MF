@@ -29,4 +29,4 @@ Require-Bundle: org.apache.bcel,
 Bundle-ActivationPolicy: lazy
 Export-Package: org.eclipse.objectteams.otdt.debug.tests,
  org.eclipse.objectteams.otdt.debug.tests.core
-Bundle-RequiredExecutionEnvironment: J2SE-1.5
+Bundle-RequiredExecutionEnvironment: JavaSE-1.7

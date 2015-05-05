@@ -28,7 +28,6 @@ import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
-import org.eclipse.jdt.core.compiler.CharOperation;
 import org.eclipse.jdt.internal.core.SourceType;
 import org.eclipse.objectteams.otdt.core.ICallinMapping;
 import org.eclipse.objectteams.otdt.core.IMethodMapping;
@@ -38,7 +37,6 @@ import org.eclipse.objectteams.otdt.core.IRoleType;
 import org.eclipse.objectteams.otdt.core.OTModelManager;
 
 /**
- * $Id: CallinMappingTest.java 23494 2010-02-05 23:06:44Z stephan $
  *
  * testcase:
  * a team class with a bound role class and various callin binding declarations

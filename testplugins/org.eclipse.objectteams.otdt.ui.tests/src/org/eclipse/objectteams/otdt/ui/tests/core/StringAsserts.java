@@ -26,7 +26,7 @@ import java.io.StringReader;
 import java.util.ArrayList;
 import java.util.Arrays;
 
-import junit.framework.Assert;
+import org.junit.Assert;
 
 /**
  * @author brcan

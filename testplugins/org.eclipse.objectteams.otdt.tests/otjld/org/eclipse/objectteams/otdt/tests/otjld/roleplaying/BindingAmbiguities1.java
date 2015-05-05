@@ -20,7 +20,6 @@ package org.eclipse.objectteams.otdt.tests.otjld.roleplaying;
 import java.util.Map;
 
 import org.eclipse.jdt.internal.compiler.impl.CompilerOptions;
-import org.eclipse.objectteams.otdt.core.ext.WeavingScheme;
 import org.eclipse.objectteams.otdt.tests.otjld.AbstractOTJLDTest;
 
 import junit.framework.Test;
@@ -50,7 +49,6 @@ public class BindingAmbiguities1 extends AbstractOTJLDTest {
 
      // smart-lifting of a base object to a role object results in an ambiguous binding
      // 7.3.1-otjld_g-ambiguous-binding-1
-     @SuppressWarnings("unchecked")
 	public void test731_ambiguousBinding1() {
          Map options = getCompilerOptions();
          options.put(CompilerOptions.OPTION_SuppressOptionalErrors, CompilerOptions.ENABLED);

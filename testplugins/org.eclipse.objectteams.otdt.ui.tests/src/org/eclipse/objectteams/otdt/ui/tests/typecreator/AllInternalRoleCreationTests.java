@@ -23,13 +23,12 @@ package org.eclipse.objectteams.otdt.ui.tests.typecreator;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 
+import org.eclipse.objectteams.otdt.tests.otmodel.TestDataHandler;
+import org.eclipse.objectteams.otdt.tests.otmodel.TestSetting;
+
 import junit.framework.Test;
 import junit.framework.TestCase;
 import junit.framework.TestSuite;
-
-import org.eclipse.objectteams.otdt.tests.AbstractJavaModelTests;
-import org.eclipse.objectteams.otdt.tests.otmodel.TestDataHandler;
-import org.eclipse.objectteams.otdt.tests.otmodel.TestSetting;
 
 /**
  * @author kaschja

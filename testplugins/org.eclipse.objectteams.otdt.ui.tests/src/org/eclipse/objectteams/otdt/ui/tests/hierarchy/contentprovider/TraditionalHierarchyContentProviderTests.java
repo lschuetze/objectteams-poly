@@ -20,18 +20,15 @@
  **********************************************************************/
 package org.eclipse.objectteams.otdt.ui.tests.hierarchy.contentprovider;
 
-import junit.framework.Test;
-
 import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.jdt.core.IType;
-import org.eclipse.jdt.core.ITypeHierarchy;
 import org.eclipse.jdt.core.JavaModelException;
-import org.eclipse.jdt.internal.ui.typehierarchy.SuperTypeHierarchyViewer;
 import org.eclipse.jdt.internal.ui.typehierarchy.TraditionalHierarchyViewer;
 import org.eclipse.jdt.internal.ui.typehierarchy.TraditionalHierarchyViewer.TraditionalHierarchyContentProvider;
 import org.eclipse.jdt.internal.ui.typehierarchy.TypeHierarchyLifeCycle;
-import org.eclipse.jface.viewers.ITreeContentProvider;
 import org.eclipse.objectteams.otdt.ui.tests.FileBasedUITest;
+
+import junit.framework.Test;
 
 /**
  * @author haebor

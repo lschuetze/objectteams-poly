@@ -29,9 +29,9 @@ import base org.eclipse.jdt.internal.ui.text.java.ParameterGuessingProposal;
 public team class ProposalAdaptor {
 
 	/** Just decapsulate one private field ;-) */
-	@SuppressWarnings("decapsulation")
 	protected class GuessingProposal playedBy ParameterGuessingProposal {
 
+		@SuppressWarnings("decapsulation")
 		protected ICompletionProposal[][] getFChoices() -> get ICompletionProposal[][] fChoices;
 		
 	}
@@ -42,6 +42,7 @@ public team class ProposalAdaptor {
 
 	/** Access to one protected method: */
 	protected class LinkedCorrectionProposal playedBy LinkedCorrectionProposal {
+		@SuppressWarnings("decapsulation")
 		LinkedProposalModel getLinkedProposalModel() -> LinkedProposalModel getLinkedProposalModel();
 	}	
 	/** API */

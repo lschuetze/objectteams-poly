@@ -1604,7 +1604,7 @@ public abstract class AbstractJavaModelTests extends SuiteOfTestCases {
 
 				// set compliance level options
 				if ("1.5".equals(compliance)) {
-					Map options = new HashMap();
+					Map<String, String> options = new HashMap<String, String>();
 					options.put(CompilerOptions.OPTION_Compliance, CompilerOptions.VERSION_1_5);
 					options.put(CompilerOptions.OPTION_Source, CompilerOptions.VERSION_1_5);
 					options.put(CompilerOptions.OPTION_TargetPlatform, CompilerOptions.VERSION_1_5);
@@ -2689,7 +2689,7 @@ public abstract class AbstractJavaModelTests extends SuiteOfTestCases {
 		setUpJCLClasspathVariables(compliance);
 
 		// set options
-		Map options = new HashMap();
+		Map<String, String> options = new HashMap<String, String>();
 		options.put(CompilerOptions.OPTION_Compliance, version);
 		options.put(CompilerOptions.OPTION_Source, version);
 		options.put(CompilerOptions.OPTION_TargetPlatform, version);

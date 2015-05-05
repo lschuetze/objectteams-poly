@@ -75,10 +75,11 @@ public class OTEquinoxBuilderTests extends OTBuilderTests {
 	}
 
 	public static Test suite() {
-		if (true) {
+//*
 			return buildTestSuite(OTEquinoxBuilderTests.class);
-		}
+/*/
 		return new OTEquinoxBuilderTests("testBaseImportTwoAspectBindings");
+//*/
 	}
 	
 	@Override

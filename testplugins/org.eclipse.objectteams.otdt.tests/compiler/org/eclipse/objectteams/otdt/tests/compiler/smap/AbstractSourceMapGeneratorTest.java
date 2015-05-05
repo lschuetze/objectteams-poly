@@ -136,7 +136,6 @@ public abstract class AbstractSourceMapGeneratorTest extends FileBasedModelTest 
         return classLibs;
     }
 
-    @SuppressWarnings("unchecked")
 	protected CompilerOptions getCompilerOptions()
     {
     	CompilerOptions cOptions = new CompilerOptions();

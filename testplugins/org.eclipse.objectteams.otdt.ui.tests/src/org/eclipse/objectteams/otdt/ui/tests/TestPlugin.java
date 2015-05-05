@@ -26,8 +26,8 @@ import java.net.URL;
 import java.util.MissingResourceException;
 import java.util.ResourceBundle;
 
+import org.eclipse.core.runtime.FileLocator;
 import org.eclipse.core.runtime.IPath;
-import org.eclipse.core.runtime.Platform;
 import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.objectteams.otdt.internal.ui.preferences.GeneralPreferences;
 import org.eclipse.objectteams.otdt.ui.OTDTUIPlugin;
@@ -111,7 +111,7 @@ public class TestPlugin extends AbstractUIPlugin {
         try
         {
             URL installURL = new URL(getDefault().getBundle().getEntry("/"), path.toString());
-            URL localURL = Platform.asLocalURL(installURL);
+            URL localURL = FileLocator.toFileURL(installURL);
             return new File(localURL.getFile());
         }
         catch (IOException ex)

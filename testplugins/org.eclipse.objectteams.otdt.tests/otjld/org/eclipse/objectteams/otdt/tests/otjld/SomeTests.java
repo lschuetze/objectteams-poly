@@ -16,7 +16,6 @@
  **********************************************************************/
 package org.eclipse.objectteams.otdt.tests.otjld;
 
-import org.eclipse.objectteams.otdt.tests.otjld.api.Reflection;
 import org.eclipse.objectteams.otdt.tests.otjld.callinbinding.BaseCalls;
 import org.eclipse.objectteams.otdt.tests.otjld.callinbinding.CallinMethodBinding;
 import org.eclipse.objectteams.otdt.tests.otjld.callinbinding.CallinParameterMapping_LiftingAndLowering;
@@ -24,39 +23,12 @@ import org.eclipse.objectteams.otdt.tests.otjld.callinbinding.CallinWithTranslat
 import org.eclipse.objectteams.otdt.tests.otjld.calloutbinding.CalloutMethodBinding;
 import org.eclipse.objectteams.otdt.tests.otjld.calloutbinding.CalloutParameterBinding_LiftingAndLowering;
 import org.eclipse.objectteams.otdt.tests.otjld.calloutbinding.CalloutToField;
-import org.eclipse.objectteams.otdt.tests.otjld.calloutbinding.OverridingAccessRestrictions;
-import org.eclipse.objectteams.otdt.tests.otjld.liftlower.AllSmartLiftingTests;
 import org.eclipse.objectteams.otdt.tests.otjld.liftlower.DeclaredLifting;
-import org.eclipse.objectteams.otdt.tests.otjld.other.AccessModifiers;
-import org.eclipse.objectteams.otdt.tests.otjld.other.Exceptions;
-import org.eclipse.objectteams.otdt.tests.otjld.other.Java5;
-import org.eclipse.objectteams.otdt.tests.otjld.other.Misc;
-import org.eclipse.objectteams.otdt.tests.otjld.other.Modifiers;
-import org.eclipse.objectteams.otdt.tests.otjld.regression.CompilationOrder;
 import org.eclipse.objectteams.otdt.tests.otjld.regression.DevelopmentExamples;
 import org.eclipse.objectteams.otdt.tests.otjld.regression.ReportedBugs;
-import org.eclipse.objectteams.otdt.tests.otjld.roleplaying.AllBindingAmbiguitiesTests;
-import org.eclipse.objectteams.otdt.tests.otjld.roleplaying.BaseClassVisibility;
-import org.eclipse.objectteams.otdt.tests.otjld.roleplaying.ExplicitRoleCreation;
-import org.eclipse.objectteams.otdt.tests.otjld.roleplaying.GC;
 import org.eclipse.objectteams.otdt.tests.otjld.roleplaying.LiftingAndLowering;
-import org.eclipse.objectteams.otdt.tests.otjld.roleplaying.PlayedByRelation;
-import org.eclipse.objectteams.otdt.tests.otjld.rolesandteams.AcquisitionAndInheritanceOfRoleClasses;
-import org.eclipse.objectteams.otdt.tests.otjld.rolesandteams.Confinement;
 import org.eclipse.objectteams.otdt.tests.otjld.rolesandteams.Covariance;
-import org.eclipse.objectteams.otdt.tests.otjld.rolesandteams.ExternalizedRoles;
-import org.eclipse.objectteams.otdt.tests.otjld.rolesandteams.FileStructure;
-import org.eclipse.objectteams.otdt.tests.otjld.rolesandteams.ImplicitInheritance;
-import org.eclipse.objectteams.otdt.tests.otjld.rolesandteams.InheritanceHierarchyOfTeams;
-import org.eclipse.objectteams.otdt.tests.otjld.rolesandteams.OldExternalizedRoles;
-import org.eclipse.objectteams.otdt.tests.otjld.rolesandteams.RegularRoleInheritance;
-import org.eclipse.objectteams.otdt.tests.otjld.rolesandteams.RelevantRole;
-import org.eclipse.objectteams.otdt.tests.otjld.rolesandteams.RoleObjectContainment;
 import org.eclipse.objectteams.otdt.tests.otjld.rolesandteams.TeamNesting;
-import org.eclipse.objectteams.otdt.tests.otjld.rolesandteams.ValueParameters;
-import org.eclipse.objectteams.otdt.tests.otjld.syntax.Syntax;
-import org.eclipse.objectteams.otdt.tests.otjld.teamactivation.ExplicitTeamActivation;
-import org.eclipse.objectteams.otdt.tests.otjld.teamactivation.ImplicitTeamActivation;
 
 import junit.framework.Test;
 import junit.framework.TestSuite;

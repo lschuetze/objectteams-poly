@@ -13,16 +13,11 @@
  *******************************************************************************/
 package org.eclipse.objectteams.otdt.ui.tests.core;
 
-import junit.extensions.TestSetup;
-import junit.framework.Test;
-
+import org.eclipse.core.resources.IProject;
+import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.Path;
-
-import org.eclipse.core.resources.IProject;
-import org.eclipse.core.resources.ResourcesPlugin;
-
 import org.eclipse.jdt.core.IClasspathEntry;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.JavaCore;
@@ -30,7 +25,9 @@ import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.util.CoreUtility;
 import org.eclipse.jdt.testplugin.JavaProjectHelper;
 import org.eclipse.jdt.testplugin.TestOptions;
-import org.eclipse.objectteams.otdt.core.ext.OTDTPlugin;
+
+import junit.extensions.TestSetup;
+import junit.framework.Test;
 
 //{OT_COPY_PASTE: Copy of class org.eclipse.jdt.ui.tests.core.ProjectTestSetup
 /**

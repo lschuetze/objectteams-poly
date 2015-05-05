@@ -26,8 +26,6 @@ import junit.framework.Test;
 import junit.framework.TestResult;
 import junit.framework.TestSuite;
 
-import org.eclipse.jdt.debug.tests.ProjectCreationDecorator;
-import org.eclipse.objectteams.otdt.debug.tests.core.JSR045Tests;
 import org.eclipse.objectteams.otdt.debug.tests.core.SourceDebugExtensionTest;
 import org.eclipse.objectteams.otdt.debug.tests.core.StratumTests;
 import org.eclipse.swt.widgets.Display;

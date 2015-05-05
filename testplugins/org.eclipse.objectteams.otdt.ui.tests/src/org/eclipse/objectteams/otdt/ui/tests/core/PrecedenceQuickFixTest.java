@@ -39,7 +39,6 @@ public class PrecedenceQuickFixTest extends OTQuickFixTest {
 		super(name);
 	}
 
-	@SuppressWarnings("unchecked")
 	public static Test allTests() {
 		return setUpTest(new TestSuite(THIS));
 	}

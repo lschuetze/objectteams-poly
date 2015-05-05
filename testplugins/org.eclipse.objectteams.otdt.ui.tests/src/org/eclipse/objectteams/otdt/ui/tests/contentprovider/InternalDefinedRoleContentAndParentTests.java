@@ -42,7 +42,6 @@ import org.eclipse.jdt.internal.ui.packageview.PackageExplorerContentProvider;
  * PackageExplorerContentProvider.getChildren and PackageExplorerContentProvider.getParent
  * with several internal defined role classes as argument
  */
-@SuppressWarnings("restriction")
 public class InternalDefinedRoleContentAndParentTests extends FileBasedUITest
 {
 	final int METHOD_IDX = 0;

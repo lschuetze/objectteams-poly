@@ -935,7 +935,7 @@ public class RoleCreationTests extends FileBasedUITest
 		_roleCreator.setTypeInfo(typeInfo);
 		_roleCreator.createType(new NullProgressMonitor());
 
-		cu1.reconcile(AST.JLS3, true, wcOwner, null);
+		cu1.reconcile(AST.JLS8, true, wcOwner, null);
 		String result = cu1.getBuffer().getContents();
 		String expectedCU = "package teampkg;\n" +
 				"team class Outer { \n" +

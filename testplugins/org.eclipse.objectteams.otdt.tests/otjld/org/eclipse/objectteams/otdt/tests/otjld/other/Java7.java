@@ -38,7 +38,6 @@ public class Java7 extends AbstractOTJLDTest {
 //		TESTS_RANGE = new int[] { 1097, -1 };
 	}
 
-	@SuppressWarnings("unchecked")
 	public static Test suite() {
 		Test suite = buildMinimalComplianceTestSuite(Java7.class, F_1_7);
 		TESTS_COUNTERS.put(Java7.class.getName(), new Integer(suite.countTestCases()));

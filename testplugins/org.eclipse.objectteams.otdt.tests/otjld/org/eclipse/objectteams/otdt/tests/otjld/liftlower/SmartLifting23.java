@@ -35,7 +35,6 @@ public class SmartLifting23 extends AbstractOTJLDTest {
 //		TESTS_RANGE = new int[] { 1097, -1 };
 	}
 
-	@SuppressWarnings("unchecked")
 	public static Test buildComparableTestSuite(Class evaluationTestClass) {
 		Test suite = buildMinimalComplianceTestSuite(evaluationTestClass, F_1_6); // one compliance level is enough for smart lifting tests.
 		TESTS_COUNTERS.put(evaluationTestClass.getName(), new Integer(suite.countTestCases()));

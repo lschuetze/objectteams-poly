@@ -20,6 +20,7 @@
  **********************************************************************/
 package org.eclipse.objectteams.otdt.debug.tests;
 
+import org.eclipse.core.runtime.FileLocator;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.Platform;
 import org.eclipse.ui.plugin.*;
@@ -28,7 +29,6 @@ import org.osgi.framework.BundleContext;
 import java.io.File;
 import java.io.IOException;
 import java.net.URL;
-import java.util.*;
 
 /**
  * The main plugin class to be used in the desktop.
@@ -85,7 +85,7 @@ public class DebugTestsPlugin extends AbstractUIPlugin {
             if (test_src_dir != null)
                 platformURL = new URL(platformURL, test_src_dir.toString());
             
-            return new File(Platform.asLocalURL(platformURL).getFile());
+            return new File(FileLocator.toFileURL(platformURL).getFile());
         }
         catch (IOException ex)
         {

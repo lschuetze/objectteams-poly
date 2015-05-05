@@ -41,7 +41,6 @@ import org.eclipse.jdt.internal.ui.packageview.PackageExplorerContentProvider;
  * PackageExplorerContentProvider.getChildren
  * with several team classes as argument
  */
-@SuppressWarnings("restriction")
 public class TeamContentTests extends FileBasedUITest
 {
     

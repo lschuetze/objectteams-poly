@@ -129,7 +129,7 @@ public class OTLaunchEnvironment extends URLClassLoader
 	public Object launch(String className, String methodName) 
 			throws Exception 
 	{
-		Class clazz = this.loadClass(className);
+		Class<?> clazz = this.loadClass(className);
 		Method method = clazz.getMethod(methodName, new Class[0]);		
 		return method.invoke(null, new Object[0]);
 	}

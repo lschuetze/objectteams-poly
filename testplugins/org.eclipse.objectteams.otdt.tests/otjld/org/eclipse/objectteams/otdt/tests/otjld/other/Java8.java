@@ -38,7 +38,6 @@ public class Java8 extends AbstractOTJLDTest {
 //		TESTS_RANGE = new int[] { 1097, -1 };
 	}
 
-	@SuppressWarnings("unchecked")
 	public static Test suite() {
 		Test suite = buildMinimalComplianceTestSuite(Java8.class, F_1_8);
 		TESTS_COUNTERS.put(Java8.class.getName(), new Integer(suite.countTestCases()));
@@ -280,7 +279,6 @@ public class Java8 extends AbstractOTJLDTest {
 				"B.java",
 				"public class B {}\n"
 			});
-		@SuppressWarnings("unchecked")
 		Map<String, String> compilerOptions = getCompilerOptions();
 		compilerOptions.put(CompilerOptions.OPTION_ReportOtreWeavingIntoJava8, CompilerOptions.ERROR);
 		String[] teamSource = new String[] { "MyTeam.java",

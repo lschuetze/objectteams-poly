@@ -10,7 +10,6 @@
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
- * $Id: LayeredTeamsTests.java 23494 2010-02-05 23:06:44Z stephan $
  * 
  * Please visit http://www.eclipse.org/objectteams for updates and contact.
  * 
@@ -30,12 +29,10 @@ import org.eclipse.objectteams.otdt.core.IOTJavaElement;
 import org.eclipse.objectteams.otdt.core.IOTType;
 import org.eclipse.objectteams.otdt.core.IRoleType;
 import org.eclipse.objectteams.otdt.core.OTModelManager;
-import org.eclipse.objectteams.otdt.tests.otmodel.FileBasedModelTest;
 import org.eclipse.objectteams.otdt.tests.otmodel.RetargetableFileBasedModelTest;
 
 /**
  * @author stephan
- * @version $Id: LayeredTeamsTests.java 23494 2010-02-05 23:06:44Z stephan $
  *
  * This class contains testing methods for a test setting with an empty role class
  * where the role class is bound to a baseclass which is a role of a lower team class
