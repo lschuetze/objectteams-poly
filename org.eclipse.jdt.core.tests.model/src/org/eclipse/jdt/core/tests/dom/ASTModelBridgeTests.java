@@ -11,6 +11,7 @@
  *								Bug 463330 - [dom] DOMFinder doesn't find the VariableBinding corresponding to a method argument
  *								Bug 464463 - [dom] DOMFinder doesn't find an ITypeParameter
  *								Bug 464615 - [dom] ASTParser.createBindings() ignores parameterization of a method invocation
+ *								Bug 466279 - [hovering] IAE on hover when annotation-based null analysis is enabled
  *******************************************************************************/
 package org.eclipse.jdt.core.tests.dom;
 
@@ -1270,8 +1271,8 @@ public class ASTModelBridgeTests extends AbstractASTTests {
 		parser.setProject(getJavaProject("P"));
 		IBinding[] bindings = parser.createBindings(method.getParameters(), null);
 		assertBindingsEqual(
-			"LX;.foo(Ljava/lang/String;I)V#str\n" +
-			"LX;.foo(Ljava/lang/String;I)V#i",
+			"LX;.foo(Ljava/lang/String;I)V#str#0#0\n" + // occurrence 0, rank 0
+			"LX;.foo(Ljava/lang/String;I)V#i#0#1", // occurrence 0, rank 1
 			bindings);
 	}
 
@@ -1289,8 +1290,8 @@ public class ASTModelBridgeTests extends AbstractASTTests {
 		parser.setProject(getJavaProject("P"));
 		IBinding[] bindings = parser.createBindings(method.getParameters(), null);
 		assertBindingsEqual(
-			"LA;.foo(Ljava/lang/String;I)V#str\n" +
-			"LA;.foo(Ljava/lang/String;I)V#i",
+			"LA;.foo(Ljava/lang/String;I)V#str#0#0\n" + // occurrence 0, rank 0
+			"LA;.foo(Ljava/lang/String;I)V#i#0#1", // occurrence 0, rank 1
 			bindings);
 	}
 
@@ -1330,6 +1331,43 @@ public class ASTModelBridgeTests extends AbstractASTTests {
 			assertBindingsEqual(
 				"Ljava/lang/String;",
 				new IBinding[] {method.getReturnType()});
+	}
+
+	/*
+	 * Ensures that the correct IBindings are created for a given set of IJavaElement
+	 * (method parameter - binary)
+	 */
+	public void testCreateBinding28() throws Exception {
+		IJavaProject javaProject = getJavaProject("P");
+		String codeGenOption = javaProject.getOption(JavaCore.COMPILER_LOCAL_VARIABLE_ATTR, true);
+		try {
+			javaProject.setOption(JavaCore.COMPILER_LOCAL_VARIABLE_ATTR, JavaCore.DISABLED);
+			createClassFile("/P/lib", "p/A.class",
+					"package p;\n" +
+					"public class A {\n" +
+					"  public static <T> T foo(int i, boolean f) { return null; }\n" +
+					"}");
+			IType typeA = javaProject.findType("p.A");
+			
+			IJavaElement[] elems= typeA.getMethod("foo", new String[]{"I", "Z"}).getParameters();
+			ASTParser parser = ASTParser.newParser(AST.JLS8);
+			parser.setProject(javaProject);
+			IBinding[] bindings = parser.createBindings(elems, null);
+			assertBindingsEqual(
+				"Lp/A;.foo<T:Ljava/lang/Object;>(IZ)TT;#arg0#0#0\n" + 
+				"Lp/A;.foo<T:Ljava/lang/Object;>(IZ)TT;#arg1#0#1",
+				bindings);
+			IVariableBinding param1 = (IVariableBinding) bindings[0];
+			IVariableBinding param2 = (IVariableBinding) bindings[1];
+			assertBindingsEqual(
+				"I\n" +
+				"Z",
+				new IBinding[] {
+					param1.getType(),
+					param2.getType()});
+		} finally {
+			javaProject.setOption(JavaCore.COMPILER_LOCAL_VARIABLE_ATTR, codeGenOption);
+		}
 	}
 
 	/*
@@ -2479,6 +2517,117 @@ public class ASTModelBridgeTests extends AbstractASTTests {
 	}
 
 	/*
+	 * Ensures that we can create a binding for an IJavaElement representing a type parameter (source type)
+	 * Bug 466279 - [hovering] IAE on hover when annotation-based null analysis is enabled
+	 */
+	public void testTypeParameter2() throws CoreException {
+		ICompilationUnit cu = null;
+		try {
+			ASTParser parser = ASTParser.newParser(JLS3_INTERNAL);
+			parser.setResolveBindings(true);
+			parser.setProject(getJavaProject("P"));
+			createFolder("/P/src/p");
+			createFile("/P/src/p/X.java",
+				"package p;\n" +
+				"public interface X<T> {\n" +
+				"  public T foo(int i, String s);\n" +
+				"}");
+			cu = (ICompilationUnit) getJavaProject("P").findElement(new Path("p/X.java"));
+			cu.becomeWorkingCopy(null);
+			IJavaElement[] elements = new IJavaElement[] {
+					cu.getType("X"),
+					cu.getType("X").getTypeParameters()[0],
+				};
+			IBinding[] bindings = parser.createBindings(elements, null);
+			assertBindingsEqual(
+				"Lp/X<TT;>;\n" +
+				"Lp/X;:TT;",
+				bindings);
+	
+			IJavaElement element = bindings[1].getJavaElement();
+			assertElementExists(
+				"Unexpected Java element",
+				"<T> [in X [in [Working copy] X.java [in p [in src [in P]]]]]",
+				element
+			);
+			assertEquals("Wrong type", IJavaElement.TYPE_PARAMETER, element.getElementType());
+			ITypeParameter typeParameter = (ITypeParameter) element;
+			ITypeRoot typeRoot = typeParameter.getTypeRoot();
+			assertNotNull("Not type root", typeRoot);
+			assertTrue("Invalid", typeRoot.exists());
+		} finally {
+			if (cu != null)
+				cu.discardWorkingCopy();
+			deleteFile("/P/src/p/X.java");
+			deleteFolder("/P/src/p");
+		}
+	}
+
+	/*
+	 * Ensures that we can create a binding for an IJavaElement representing a type parameter (binary type)
+	 * Bug 466279 - [hovering] IAE on hover when annotation-based null analysis is enabled
+	 */
+	public void testTypeParameter3() throws CoreException {
+		try {
+			createClassFile("/P/lib", "A.class",
+				"package lib;\n" +
+				"public interface A<T,Z> {\n" +
+				"  public T foo(int i, String s);\n" +
+				"}");
+			IJavaProject javaProject = getJavaProject("P");
+			IJavaElement[] elements = new IJavaElement[] {
+					javaProject.findType("lib.A"),
+					javaProject.findType("lib.A").getTypeParameters()[0],
+					javaProject.findType("lib.A").getTypeParameters()[1]
+				};
+			ASTParser parser = ASTParser.newParser(AST.JLS8);
+			parser.setProject(javaProject);
+			IBinding[] bindings = parser.createBindings(elements, null);
+			assertBindingsEqual(
+				"Llib/A<TT;TZ;>;\n" +
+				"Llib/A;:TT;\n" +
+				"Llib/A;:TZ;",
+				bindings);
+		} finally {
+			deleteFile("/P/lib/A.class");
+			deleteFolder("/P/lib");
+		}
+	}
+
+	/*
+	 * Ensures that we can create a binding for an IJavaElement representing a type parameter (binary method)
+	 * Bug 466279 - [hovering] IAE on hover when annotation-based null analysis is enabled
+	 */
+	public void testTypeParameter4() throws CoreException {
+		try {
+			createFolder("P/lib");
+			createClassFile("/P/lib", "A.class",
+				"package lib;\n" +
+				"public interface A {\n" +
+				"  public <T,Z> T foo(int i, Z s);\n" +
+				"}");
+			IJavaProject javaProject = getJavaProject("P");
+			IMethod method = javaProject.findType("lib.A").getMethod("foo", new String[] { "I", "TZ;" });
+			IJavaElement[] elements = new IJavaElement[] {
+					method,
+					method.getTypeParameters()[0],
+					method.getTypeParameters()[1]
+				};
+			ASTParser parser = ASTParser.newParser(AST.JLS8);
+			parser.setProject(javaProject);
+			IBinding[] bindings = parser.createBindings(elements, null);
+			assertBindingsEqual(
+				"Llib/A;.foo<T:Ljava/lang/Object;Z:Ljava/lang/Object;>(ITZ;)TT;\n" + 
+				"Llib/A;.foo<T:Ljava/lang/Object;Z:Ljava/lang/Object;>(ITZ;)TT;:TT;\n" + 
+				"Llib/A;.foo<T:Ljava/lang/Object;Z:Ljava/lang/Object;>(ITZ;)TT;:TZ;",
+				bindings);
+		} finally {
+			deleteFile("/P/lib/A.class");
+			deleteFolder("/P/lib");
+		}
+	}
+
+	/*
 	 * Ensures that the IJavaElement of an IBinding representing a wild card is correct.
 	 * (regression test for bug 81417 [dom] getJavaElement() throws a NPE for WildcardBinding)
 	 */
@@ -2659,6 +2808,7 @@ public class ASTModelBridgeTests extends AbstractASTTests {
 		} finally {
 			deleteFile(filePath);
 			deleteFile(filePathY);
+			deleteFolder("/P/src/p");
 		}
 	}
 }

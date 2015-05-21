@@ -8,6 +8,8 @@
  * Contributors:
  *     Stephan Herrmann - initial API and implementation
  *     IBM Corporation
+ *     Till Brychcy - Contribution for
+ *								Bug 467032 - TYPE_USE Null Annotations: IllegalStateException with annotated arrays of Enum when accessed via BinaryTypeBinding
  *******************************************************************************/
 package org.eclipse.jdt.core.tests.compiler.regression;
 
@@ -7910,5 +7912,194 @@ public void testBug465513() {
 		"	                       ^^^^^\n" + 
 		"Class is a raw type. References to generic type Class<T> should be parameterized\n" + 
 		"----------\n");
+}
+
+public void testBug455180() {
+    runNegativeTestWithLibs(
+            new String[] {
+                "projA/GenericType.java",
+                "package projA;\n"+
+                "public class GenericType<T> {\n" +
+                "}\n",
+                "projA/ClassWithRawUsage.java",
+                "package projA;\n"+
+                "@org.eclipse.jdt.annotation.NonNullByDefault\n"+
+                "public class ClassWithRawUsage {\n"+
+                "   public java.util.List<GenericType> method() {\n"+
+                "           throw new RuntimeException();\n"+
+                "   }\n"+
+                "}\n"
+            },
+            "----------\n" +
+    		"1. WARNING in projA\\ClassWithRawUsage.java (at line 4)\n" + 
+    		"	public java.util.List<GenericType> method() {\n" + 
+    		"	                      ^^^^^^^^^^^\n" + 
+            "GenericType is a raw type. References to generic type GenericType<T> should be parameterized\n" +
+            "----------\n");
+    runNegativeTestWithLibs(
+            new String[] {
+                "projB/ClassThatImports.java",
+                "package projB;\n" +
+                "import projA.ClassWithRawUsage;\n" +
+                "import projA.GenericType;\n" +
+                "import org.eclipse.jdt.annotation.*;\n" +
+                "public class ClassThatImports {\n" +
+                "	void test(ClassWithRawUsage cwru) {\n" +
+                "		@NonNull GenericType gt = cwru.method().get(0);\n" +
+                "	}\n" +
+                "}\n"
+            },
+            getCompilerOptions(),
+            "----------\n" + 
+    		"1. WARNING in projB\\ClassThatImports.java (at line 7)\n" + 
+    		"	@NonNull GenericType gt = cwru.method().get(0);\n" + 
+    		"	         ^^^^^^^^^^^\n" + 
+    		"GenericType is a raw type. References to generic type GenericType<T> should be parameterized\n" + 
+    		"----------\n");
+}
+
+public void testBug455180WithOtherAnnotation() {
+	runConformTestWithLibs(
+			new String[] {
+				"proj0/MyAnnotation.java",
+				"package proj0;\n"+
+				"@java.lang.annotation.Retention(java.lang.annotation.RetentionPolicy.CLASS)"+
+				"@java.lang.annotation.Target({ java.lang.annotation.ElementType.TYPE_USE })"+
+				"public @interface MyAnnotation {}"
+			}, null, "");
+	runNegativeTestWithLibs(
+			new String[] {
+				"projA/GenericType.java",
+				"package projA;\n"+
+				"public class GenericType<T> {\n" +
+				"}\n",
+				"projA/ClassWithRawUsage.java",
+				"package projA;\n"+
+				"public class ClassWithRawUsage {\n"+
+				"   public java.util.List<@proj0.MyAnnotation GenericType> method() {\n"+
+				"      		throw new RuntimeException();\n"+
+				"   }\n"+
+				"}\n"
+			},
+			"----------\n" +
+			"1. WARNING in projA\\ClassWithRawUsage.java (at line 3)\n" +
+			"	public java.util.List<@proj0.MyAnnotation GenericType> method() {\n" +
+			"	                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n" + 
+			"GenericType is a raw type. References to generic type GenericType<T> should be parameterized\n" +
+			"----------\n");
+	runNegativeTestWithLibs(
+			new String[] {
+				"projB/ClassThatImports.java",
+				"package projB;\n" +
+				"import projA.ClassWithRawUsage;\n" +
+				"import projA.GenericType;\n" +
+				"public class ClassThatImports {\n" +
+				"}\n"
+			},
+			getCompilerOptions(),
+			"----------\n" +
+			"1. WARNING in projB\\ClassThatImports.java (at line 2)\n" +
+			"	import projA.ClassWithRawUsage;\n" +
+			"	       ^^^^^^^^^^^^^^^^^^^^^^^\n" +
+			"The import projA.ClassWithRawUsage is never used\n" +
+			"----------\n" +
+			"2. WARNING in projB\\ClassThatImports.java (at line 3)\n" +
+			"	import projA.GenericType;\n" +
+			"	       ^^^^^^^^^^^^^^^^^\n" +
+			"The import projA.GenericType is never used\n" +
+			"----------\n");
+}
+// original test, witnessing NPE
+public void testBug466713() {
+	runConformTestWithLibs(
+		new String[] {
+			"Bug.java",
+			"class Bug {\n" + 
+			"    java.util.Iterator<int @org.eclipse.jdt.annotation.Nullable []> x;\n" + 
+			"}\n"
+		},
+		getCompilerOptions(),
+		"");
+}
+// variant to ensure we are still reporting the error at the other location
+public void testBug466713b() {
+	runNegativeTestWithLibs(
+		new String[] {
+			"Bug.java",
+			"import org.eclipse.jdt.annotation.*;\n" +
+			"class Bug {\n" + 
+			"    java.util.Iterator<@Nullable int @Nullable []> x;\n" + 
+			"}\n"
+		},
+		getCompilerOptions(),
+		"----------\n" + 
+		"1. ERROR in Bug.java (at line 3)\n" + 
+		"	java.util.Iterator<@Nullable int @Nullable []> x;\n" + 
+		"	                   ^^^^^^^^^\n" + 
+		"The nullness annotation @Nullable is not applicable for the primitive type int\n" + 
+		"----------\n");
+}
+// variant to ensure we are not complaining against an unrelated annotation
+public void testBug466713c() {
+	runConformTestWithLibs(
+		new String[] {
+			"MyAnnot.java",
+			"import java.lang.annotation.*;\n" +
+			"@Retention(RetentionPolicy.CLASS)\n" +
+			"@Target(ElementType.TYPE_USE)\n" +
+			"@interface MyAnnot {}\n",
+			"Bug.java",
+			"class Bug {\n" + 
+			"    java.util.Iterator<@MyAnnot int @org.eclipse.jdt.annotation.Nullable []> x;\n" + 
+			"}\n"
+		},
+		getCompilerOptions(),
+		"");
+}
+// variant for https://bugs.eclipse.org/bugs/show_bug.cgi?id=466713#c5
+public void testBug466713d() {
+	runNegativeTestWithLibs(
+		new String[] {
+			"MyAnnot.java",
+			"import java.lang.annotation.*;\n" +
+			"@Retention(RetentionPolicy.CLASS)\n" +
+			"@Target(ElementType.TYPE_USE)\n" +
+			"@interface MyAnnot {}\n",
+			"Bug.java",
+			"class Bug {\n" +
+			"	boolean test(Object o) {\n" + 
+			"		return o instanceof java.util.Iterator<java.lang. @MyAnnot @org.eclipse.jdt.annotation.Nullable String>;\n" +
+			"	}\n" + 
+			"}\n"
+		},
+		getCompilerOptions(),
+		"----------\n" + 
+		"1. ERROR in Bug.java (at line 3)\n" + 
+		"	return o instanceof java.util.Iterator<java.lang. @MyAnnot @org.eclipse.jdt.annotation.Nullable String>;\n" + 
+		"	       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n" + 
+		"Cannot perform instanceof check against parameterized type Iterator<String>. Use the form Iterator<?> instead since further generic type information will be erased at runtime\n" + 
+		"----------\n" + 
+		"2. ERROR in Bug.java (at line 3)\n" + 
+		"	return o instanceof java.util.Iterator<java.lang. @MyAnnot @org.eclipse.jdt.annotation.Nullable String>;\n" + 
+		"	                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n" + 
+		"Nullness annotations are not applicable at this location \n" + 
+		"----------\n");
+}
+public void testBug467032() {
+	runConformTestWithLibs(
+			new String[] {
+				"Class1.java",
+				"class Class1 {;\n"+
+				"   enum E {}\n"+
+				"   void m1(E @org.eclipse.jdt.annotation.Nullable [] a) {}\n"+
+				"}\n"
+			}, getCompilerOptions(), "");
+	runConformTestWithLibs(
+			new String[] {
+				"Class2.java",
+				"class Class2 {;\n"+
+				"  Class1 x;"+
+				"}\n"
+			}, getCompilerOptions(), "");
 }
 }

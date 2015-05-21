@@ -4,7 +4,7 @@
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
- * 
+ *
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *     Fraunhofer FIRST - extended API and implementation
@@ -33,6 +33,7 @@
  *								Bug 453475 - [1.8][null] Contradictory null annotations (4.5 M3 edition)
  *								Bug 457079 - Regression: type inference
  *								Bug 440477 - [null] Infrastructure for feeding external annotations into compilation
+ *								Bug 455180 - IllegalStateException in AnnotatableTypeSystem.getRawType
  *******************************************************************************/
 package org.eclipse.jdt.internal.compiler.lookup;
 
@@ -1185,11 +1186,25 @@ public ReferenceBinding createMemberType(ReferenceBinding memberType, ReferenceB
 	return this.typeSystem.getMemberType(memberType, enclosingType);
 }
 public ParameterizedTypeBinding createParameterizedType(ReferenceBinding genericType, TypeBinding[] typeArguments, ReferenceBinding enclosingType) {
+	AnnotationBinding[] annotations = genericType.typeAnnotations;
+	if (annotations != Binding.NO_ANNOTATIONS)
+//{ObjectTeams: additional parameters: for dependent types:
+/* orig:
+		return this.typeSystem.getParameterizedType((ReferenceBinding) genericType.unannotated(), typeArguments, enclosingType, annotations);
+	return this.typeSystem.getParameterizedType(genericType, typeArguments, enclosingType);
+  :giro */
+		return this.typeSystem.getParameterizedType((ReferenceBinding) genericType.unannotated(), typeArguments, null, -1, enclosingType, annotations);
 	return this.typeSystem.getParameterizedType(genericType, typeArguments, null, -1, enclosingType);
+// SH}
 }
 
 public ParameterizedTypeBinding createParameterizedType(ReferenceBinding genericType, TypeBinding[] typeArguments, ReferenceBinding enclosingType, AnnotationBinding [] annotations) {
+//{ObjectTeams: additional parameters: for dependent types:
+/* orig:
+	return this.typeSystem.getParameterizedType(genericType, typeArguments, enclosingType, annotations);
+  :giro */
 	return this.typeSystem.getParameterizedType(genericType, typeArguments, null, -1, enclosingType, annotations);
+// SH}
 }
 
 //{ObjectTeams: for anchored role types:
@@ -1247,6 +1262,9 @@ public TypeBinding createAnnotatedType(TypeBinding type, AnnotationBinding[] new
 }
 
 public RawTypeBinding createRawType(ReferenceBinding genericType, ReferenceBinding enclosingType) {
+	AnnotationBinding[] annotations = genericType.typeAnnotations;
+	if (annotations != Binding.NO_ANNOTATIONS)
+		return this.typeSystem.getRawType((ReferenceBinding) genericType.unannotated(), enclosingType, annotations);
 	return this.typeSystem.getRawType(genericType, enclosingType);
 }
 
@@ -1255,6 +1273,11 @@ public RawTypeBinding createRawType(ReferenceBinding genericType, ReferenceBindi
 }
 
 public WildcardBinding createWildcard(ReferenceBinding genericType, int rank, TypeBinding bound, TypeBinding[] otherBounds, int boundKind) {
+	if (genericType != null) {
+		AnnotationBinding[] annotations = genericType.typeAnnotations;
+		if (annotations != Binding.NO_ANNOTATIONS)
+			return this.typeSystem.getWildcard((ReferenceBinding) genericType.unannotated(), rank, bound, otherBounds, boundKind, annotations);
+	}
 	return this.typeSystem.getWildcard(genericType, rank, bound, otherBounds, boundKind);
 }
 

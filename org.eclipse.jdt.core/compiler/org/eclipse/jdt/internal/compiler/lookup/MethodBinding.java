@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2014 IBM Corporation and others.
+ * Copyright (c) 2000, 2015 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -26,6 +26,7 @@
  *								Bug 440759 - [1.8][null] @NonNullByDefault should never affect wildcards and uses of a type variable
  *								Bug 443347 - [1.8][null] @NonNullByDefault should not affect constructor arguments of an anonymous instantiation
  *								Bug 435805 - [1.8][compiler][null] Java 8 compiler does not recognize declaration style null annotations
+ *								Bug 466713 - Null Annotations: NullPointerException using <int @Nullable []> as Type Param
  *     Jesper Steen Moller - Contributions for
  *								Bug 412150 [1.8] [compiler] Enable reflected parameter names during annotation processing
  *******************************************************************************/
@@ -41,6 +42,7 @@ import org.eclipse.jdt.internal.compiler.ast.Argument;
 import org.eclipse.jdt.internal.compiler.ast.LambdaExpression;
 import org.eclipse.jdt.internal.compiler.ast.MethodDeclaration;
 import org.eclipse.jdt.internal.compiler.ast.TypeDeclaration;
+import org.eclipse.jdt.internal.compiler.ast.TypeReference.AnnotationPosition;
 import org.eclipse.jdt.internal.compiler.classfmt.ClassFileConstants;
 import org.eclipse.jdt.internal.compiler.codegen.ConstantPool;
 import org.eclipse.jdt.internal.compiler.impl.CompilerOptions;
@@ -956,7 +958,7 @@ protected void fillInDefaultNonNullness18(AbstractMethodDeclaration sourceMethod
 						sourceMethod.arguments[i].binding.type = this.parameters[i];
 				}
 			} else if (sourceMethod != null && (parameter.tagBits & TagBits.AnnotationNonNull) != 0
-							&& sourceMethod.arguments[i].hasNullTypeAnnotation()) {
+							&& sourceMethod.arguments[i].hasNullTypeAnnotation(AnnotationPosition.MAIN_TYPE)) {
 				sourceMethod.scope.problemReporter().nullAnnotationIsRedundant(sourceMethod, i);
 			}
 		}
@@ -967,7 +969,7 @@ protected void fillInDefaultNonNullness18(AbstractMethodDeclaration sourceMethod
 		if (this.returnType.acceptsNonNullDefault() && (this.returnType.tagBits & TagBits.AnnotationNullMASK) == 0) {
 			this.returnType = env.createAnnotatedType(this.returnType, new AnnotationBinding[]{env.getNonNullAnnotation()});
 		} else if (sourceMethod instanceof MethodDeclaration && (this.returnType.tagBits & TagBits.AnnotationNonNull) != 0 
-						&& ((MethodDeclaration)sourceMethod).hasNullTypeAnnotation()) {
+						&& ((MethodDeclaration)sourceMethod).hasNullTypeAnnotation(AnnotationPosition.MAIN_TYPE)) {
 			sourceMethod.scope.problemReporter().nullAnnotationIsRedundant(sourceMethod, -1/*signifies method return*/);
 		}
 	}
