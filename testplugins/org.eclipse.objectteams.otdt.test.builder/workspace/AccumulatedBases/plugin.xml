@@ -6,7 +6,7 @@
       <aspectBinding
             icon="platform:/plugin/org.eclipse.objectteams.otdt.ui/icons/ot/calloutbinding_obj.gif">
          <basePlugin
-               icon="platform:/plugin/org.eclipse.pde.ui/icons/obj16/plugin_obj.gif"
+               icon="platform:/plugin/org.eclipse.pde.ui/icons/obj16/plugin_obj.png"
                id="org.eclipse.debug.ui">
          </basePlugin>
          <team
@@ -17,7 +17,7 @@
       <aspectBinding
             icon="platform:/plugin/org.eclipse.objectteams.otdt.ui/icons/ot/calloutbinding_obj.gif">
          <basePlugin
-               icon="platform:/plugin/org.eclipse.pde.ui/icons/obj16/plugin_obj.gif"
+               icon="platform:/plugin/org.eclipse.pde.ui/icons/obj16/plugin_obj.png"
                id="org.eclipse.jdt.debug.ui">
          </basePlugin>
          <team
@@ -29,7 +29,7 @@
       <aspectBinding
             icon="platform:/plugin/org.eclipse.objectteams.otdt.ui/icons/ot/calloutbinding_obj.gif">
          <basePlugin
-               icon="platform:/plugin/org.eclipse.pde.ui/icons/obj16/plugin_obj.gif"
+               icon="platform:/plugin/org.eclipse.pde.ui/icons/obj16/plugin_obj.png"
                id="org.eclipse.jdt.junit">
          </basePlugin>
          <team

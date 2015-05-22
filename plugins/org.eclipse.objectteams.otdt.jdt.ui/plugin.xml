@@ -20,7 +20,7 @@
 
       <aspectBinding icon="platform:/plugin/org.eclipse.objectteams.otdt.ui/icons/ot/calloutbinding_obj.gif">
          <basePlugin 
-              icon="platform:/plugin/org.eclipse.pde.ui/icons/obj16/plugin_obj.gif"
+              icon="platform:/plugin/org.eclipse.pde.ui/icons/obj16/plugin_obj.png"
               id="org.eclipse.jface"/>
          <team
                activation="NONE"
@@ -30,7 +30,7 @@
       </aspectBinding>
       <aspectBinding icon="platform:/plugin/org.eclipse.objectteams.otdt.ui/icons/ot/calloutbinding_obj.gif">
          <basePlugin 
-              icon="platform:/plugin/org.eclipse.pde.ui/icons/obj16/plugin_obj.gif"
+              icon="platform:/plugin/org.eclipse.pde.ui/icons/obj16/plugin_obj.png"
               id="org.eclipse.jface.text"/>
          <team
                activation="ALL_THREADS"
@@ -39,7 +39,7 @@
       </aspectBinding>
 	  <aspectBinding icon="platform:/plugin/org.eclipse.objectteams.otdt.ui/icons/ot/calloutbinding_obj.gif">
          <basePlugin 
-              icon="platform:/plugin/org.eclipse.pde.ui/icons/obj16/plugin_obj.gif"
+              icon="platform:/plugin/org.eclipse.pde.ui/icons/obj16/plugin_obj.png"
               id="org.eclipse.jdt.ui"/>
          <team
                activation="ALL_THREADS"
@@ -160,7 +160,7 @@
      </aspectBinding>   
      <aspectBinding icon="platform:/plugin/org.eclipse.objectteams.otdt.ui/icons/ot/calloutbinding_obj.gif">
 	     <basePlugin 
-              icon="platform:/plugin/org.eclipse.pde.ui/icons/obj16/plugin_obj.gif"
+              icon="platform:/plugin/org.eclipse.pde.ui/icons/obj16/plugin_obj.png"
               id="org.eclipse.ui.workbench" />
      	 <team
              activation="ALL_THREADS"
@@ -169,7 +169,7 @@
      </aspectBinding>
      <aspectBinding icon="platform:/plugin/org.eclipse.objectteams.otdt.ui/icons/ot/calloutbinding_obj.gif">
         <basePlugin 
-              icon="platform:/plugin/org.eclipse.pde.ui/icons/obj16/plugin_obj.gif"
+              icon="platform:/plugin/org.eclipse.pde.ui/icons/obj16/plugin_obj.png"
               id="org.eclipse.jdt.core"/>
         <team
               activation="ALL_THREADS"
@@ -198,7 +198,7 @@
      <aspectBinding
            icon="platform:/plugin/org.eclipse.objectteams.otdt.ui/icons/ot/calloutbinding_obj.gif">
         <basePlugin
-              icon="platform:/plugin/org.eclipse.pde.ui/icons/obj16/plugin_obj.gif"
+              icon="platform:/plugin/org.eclipse.pde.ui/icons/obj16/plugin_obj.png"
               id="org.eclipse.ui.ide">
         </basePlugin>
         <team
