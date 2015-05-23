@@ -15,15 +15,17 @@
  **********************************************************************/
 package org.eclipse.objectteams.otredyn.bytecode.asm;
 
+import static org.eclipse.objectteams.otredyn.transformer.names.ClassNames.OBJECT_SLASH;
+
 import java.io.InputStream;
+import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 import org.eclipse.objectteams.otredyn.bytecode.asm.ASMByteCodeAnalyzer.ClassInformation;
 import org.objectweb.asm.ClassReader;
 import org.objectweb.asm.ClassWriter;
-
-import static org.eclipse.objectteams.otredyn.transformer.names.ClassNames.OBJECT_SLASH;
 
 /**
  * Variant of its superclass which strictly avoids the use of Class.forName(),
@@ -49,27 +51,29 @@ public class LoaderAwareClassWriter extends ClassWriter {
 		if (type1.equals(OBJECT_SLASH) || type2.equals(OBJECT_SLASH))
 			return OBJECT_SLASH;
 		
+		ClassInformation ci1;
+		ClassInformation ci2;
 		// need to load class bytes:
-		InputStream s1;
-		InputStream s2;
-        try {
-    		s1 = this.loader.getResourceAsStream(type1+".class");
-    		s2 = this.loader.getResourceAsStream(type2+".class");
-        } catch (Exception e) {
-            throw new RuntimeException(e.toString());
-        }
-        ClassInformation ci1 = this.analyzer.getClassInformation(s1, type1);
-        ClassInformation ci2 = this.analyzer.getClassInformation(s2, type2);
-        if (ci1 == null || ci2 == null)
-        	return OBJECT_SLASH;
+		try {
+			InputStream s1 = this.loader.getResourceAsStream(type1+".class");
+			ci1 = this.analyzer.getClassInformation(s1, type1);
+			if (ci1 == null)
+				return OBJECT_SLASH;
+			InputStream s2 = this.loader.getResourceAsStream(type2+".class");
+			ci2 = this.analyzer.getClassInformation(s2, type2);
+			if (ci2 == null)
+				return OBJECT_SLASH;
+		} catch (Exception e) {
+		    throw new RuntimeException(e.toString());
+		}
 
         // do a breadth-first search: each iteration adds just one more level of super types:
         Set<String> allTypes1 = new HashSet<String>();
         Set<String> allTypes2 = new HashSet<String>();
         allTypes1.add(type1);
         allTypes2.add(type2);
-        Set<String> newTypes1 = getDirectSupers(ci1);
-        Set<String> newTypes2 = getDirectSupers(ci2);
+        List<String> newTypes1 = getDirectSupers(ci1);
+        List<String> newTypes2 = getDirectSupers(ci2);
         while (true) {
         	if (newTypes1.isEmpty() && newTypes2.isEmpty())
         		return OBJECT_SLASH;
@@ -81,13 +85,13 @@ public class LoaderAwareClassWriter extends ClassWriter {
         			return newType2;
         	allTypes1.addAll(newTypes1);
         	allTypes2.addAll(newTypes2);
-        	newTypes1 = getDirectSupers(newTypes1);
-        	newTypes2 = getDirectSupers(newTypes2);
+        	newTypes1 = getDirectSupersLayer(newTypes1);
+        	newTypes2 = getDirectSupersLayer(newTypes2);
         }
 	}
 
-	private Set<String> getDirectSupers(Set<String> types) {
-		Set<String> result = new HashSet<String>();
+	private List<String> getDirectSupersLayer(List<String> types) {
+		List<String> result = new ArrayList<String>();
 		for (String type : types) {
 			InputStream s;
 			try {
@@ -102,8 +106,8 @@ public class LoaderAwareClassWriter extends ClassWriter {
 		return result;
 	}
 
-	private Set<String> getDirectSupers(ClassInformation ci) {
-		Set<String> result = new HashSet<String>();
+	private List<String> getDirectSupers(ClassInformation ci) {
+		List<String> result = new ArrayList<String>();
 		String superClass = ci.getSuperClassName();
 		if (superClass != null && !superClass.equals(OBJECT_SLASH)) // avoid prematurely answering j.l.Object
 			result.add(superClass);

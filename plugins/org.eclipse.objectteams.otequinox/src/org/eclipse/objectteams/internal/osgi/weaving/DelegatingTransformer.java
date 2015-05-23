@@ -123,6 +123,10 @@ public abstract class DelegatingTransformer {
 			public Class<?> loadClass(String name) throws ClassNotFoundException {
 				return bundle.loadClass(name);
 			}
+			@Override
+			public URL getResource(String name) {
+				return bundle.getResource(name);
+			}
 		};
 	}
 
