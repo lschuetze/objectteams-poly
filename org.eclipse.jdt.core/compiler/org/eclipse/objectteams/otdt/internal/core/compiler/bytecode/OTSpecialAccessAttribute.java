@@ -31,6 +31,7 @@ import org.eclipse.jdt.internal.compiler.lookup.FieldBinding;
 import org.eclipse.jdt.internal.compiler.lookup.LookupEnvironment;
 import org.eclipse.jdt.internal.compiler.lookup.MethodBinding;
 import org.eclipse.jdt.internal.compiler.lookup.ReferenceBinding;
+import org.eclipse.jdt.internal.compiler.lookup.TypeBinding;
 import org.eclipse.jdt.internal.compiler.parser.TerminalTokens;
 import org.eclipse.objectteams.otdt.core.compiler.IOTConstants;
 import org.eclipse.objectteams.otdt.internal.core.compiler.lookup.RoleTypeBinding;
@@ -117,7 +118,16 @@ public class OTSpecialAccessAttribute extends AbstractAttribute {
 														this.method.declaringClass.attributeName(),
 														this.method.selector
 													}, sep);
-				writeName(this.boundBaseclass.attributeName()); // where to weave into
+				char[] weaveIntoClasses = this.boundBaseclass.attributeName();
+				if (OTSpecialAccessAttribute.this._weavingScheme == WeavingScheme.OTDRE) {
+					// for OTDRE pass all classes to weave from boundBaseclass up to the actual declaring class (:-separated)
+					ReferenceBinding someClass = this.boundBaseclass.getRealClass();
+					if (someClass != null && TypeBinding.notEquals(someClass, this.method.declaringClass)) {
+						while ((someClass = someClass.superclass()) != null && TypeBinding.notEquals(someClass, this.method.declaringClass))
+							weaveIntoClasses = CharOperation.concat(weaveIntoClasses, someClass.attributeName(), ':');
+					}
+				}
+				writeName(weaveIntoClasses);
 				writeName(encodedName);
 				writeName(this.method.signature());
 			}

@@ -1613,4 +1613,36 @@ public class OverridingAccessRestrictions extends AbstractOTJLDTest {
 			"C1::printStr1(): C1.str\n" +
 			"T1.R1::getStr1(): C1.str");
     }
+    public void testX() throws Exception {
+    	runConformTest(
+    		new String[] {
+				"pt/MyTeam.java",
+				"package pt;\n" +
+				"public team class MyTeam {\n" +
+				"	protected class R playedBy p3.C3 {\n" +
+				"		protected void rm() -> void mc();\n" +
+				"	}\n" +
+				"	void test(p3.C3 as R r) {\n" +
+				"		r.rm();\n" +
+				"	}\n" +
+				"	public static void main(String... args) {\n" +
+				"		new MyTeam().test(new p3.C3());\n" +
+				"	}\n" +
+				"}\n",
+    			"p1/C1.java",
+    			"package p1;\n" +
+    			"public class C1 {\n" +
+    			"	protected void mc() {\n" +
+    			"		System.out.print(13);\n" +
+    			"	}\n" +
+    			"}\n",
+    			"p2/C2.java",
+    			"package p2;\n" +
+    			"public class C2 extends p1.C1 {}\n",
+    			"p3/C3.java",
+    			"package p3;\n" +
+    			"public class C3 extends p2.C2 {}\n",
+    		},
+    		"13");
+    }
 }

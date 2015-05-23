@@ -286,11 +286,13 @@ abstract class Attributes {
 			}
 		}
 		class DecapsMethod {
-			String baseclass, name, desc;
+			String[] weaveIntoClasses;
+			String declaringClass, name, desc;
 			int perTeamAccessId;
 			boolean isStatic;
-			DecapsMethod(String baseclass, String name, String desc, int id, boolean isStatic) {
-				this.baseclass = baseclass;
+			DecapsMethod(String weaveIntoClasses, String declaringClass, String name, String desc, int id, boolean isStatic) {
+				this.weaveIntoClasses = weaveIntoClasses.split(":");
+				this.declaringClass = declaringClass;
 				this.name = name;
 				this.desc = desc;
 				this.perTeamAccessId = id;
@@ -346,11 +348,11 @@ abstract class Attributes {
 			String methodDesc  = cr.readUTF8(off+4, buf);
 			int accessId = cr.readUnsignedShort(off+6);
 			boolean isStatic = false;
-			String baseClass;
+			String declaringClass;
 			String methodName;
 			if (encodedName.charAt(0) == '<') {
 				// constructor
-				baseClass = className;
+				declaringClass = className;
 				methodName = encodedName;
 				isStatic = true; // use static accessor
 			} else {
@@ -359,10 +361,10 @@ abstract class Attributes {
 					pos = encodedName.indexOf('!');
 					isStatic = true;
 				}
-				baseClass = encodedName.substring(0, pos);
+				declaringClass = encodedName.substring(0, pos);
 				methodName = encodedName.substring(pos+1);
 			}
-			this.methods.add(new DecapsMethod(baseClass, methodName, methodDesc, accessId, isStatic));
+			this.methods.add(new DecapsMethod(className, declaringClass, methodName, methodDesc, accessId, isStatic));
 		}
 		private void readFieldAccess(ClassReader cr, int off, char[] buf) {
 			int accessId = cr.readUnsignedShort(off);
@@ -382,11 +384,11 @@ abstract class Attributes {
 				// FIXME(SH): the following may need adaptation for OT/Equinox or other multi-classloader settings:
 				// bypassing the identifier provider (we don't have a Class<?> yet):
 				// String boundClassIdentifier = provider.getBoundClassIdentifier(clazz, dMethod.baseclass);
-				AbstractBoundClass baseclass = repo.getBoundClass(dMethod.baseclass, dMethod.baseclass.replace('.', '/'), clazz.getClassLoader());
+				AbstractBoundClass baseclass = repo.getBoundClass(dMethod.declaringClass, dMethod.declaringClass.replace('.', '/'), clazz.getClassLoader());
 				// register the target method:
 				baseclass.getMethod(dMethod.name, dMethod.desc, false/*covariantReturn*/, dMethod.isStatic);
 				clazz.recordAccessId(dMethod.perTeamAccessId);
-				clazz.addBinding(new Binding(clazz, dMethod.baseclass, dMethod.name, dMethod.desc, dMethod.perTeamAccessId, IBinding.BindingType.METHOD_ACCESS));
+				clazz.addBinding(new Binding(clazz, dMethod.declaringClass, dMethod.name, dMethod.desc, dMethod.perTeamAccessId, IBinding.BindingType.METHOD_ACCESS));
 			}
 
 			for (DecapsField dField: this.fields) {
