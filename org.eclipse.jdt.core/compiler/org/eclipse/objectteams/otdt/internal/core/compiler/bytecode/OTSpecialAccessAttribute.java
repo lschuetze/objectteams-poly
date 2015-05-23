@@ -123,8 +123,11 @@ public class OTSpecialAccessAttribute extends AbstractAttribute {
 					// for OTDRE pass all classes to weave from boundBaseclass up to the actual declaring class (:-separated)
 					ReferenceBinding someClass = this.boundBaseclass.getRealClass();
 					if (someClass != null && TypeBinding.notEquals(someClass, this.method.declaringClass)) {
-						while ((someClass = someClass.superclass()) != null && TypeBinding.notEquals(someClass, this.method.declaringClass))
+						while ((someClass = someClass.superclass()) != null) {
 							weaveIntoClasses = CharOperation.concat(weaveIntoClasses, someClass.attributeName(), ':');
+							if (TypeBinding.equalsEquals(someClass, this.method.declaringClass))
+								break;
+						}
 					}
 				}
 				writeName(weaveIntoClasses);
