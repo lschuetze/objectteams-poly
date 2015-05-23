@@ -190,6 +190,10 @@ class AsmWritableBoundClass extends AsmBoundClass {
 							return "Retry "+AsmWritableBoundClass.this.toString();
 						}
 					});
+					// not done, only partial cleanup:
+					isTransformationActive = false;
+					isFirstTransformation = false;
+					return;
 				}
 			}
 		} else {
