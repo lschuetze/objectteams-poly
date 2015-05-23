@@ -36,9 +36,10 @@ public interface IBoundBase2 {
 	 * @param accessId Unique identifier in the class for the field or method
 	 * @param opKind 0 for read access, 1 for write access. only used for fields
 	 * @param args arguments for a method
+	 * @param caller the team containing the calling role
 	 * @return
 	 */
-	Object _OT$access(int accessId, int opKind, Object[] args, Team caller);
+	Object _OT$access(int accessId, int opKind, Object[] args, ITeam caller);
 
 	/** Method to be used by generated code, only (lifting constructor & unregisterRole()). */
 	void _OT$addOrRemoveRole(Object aRole, boolean adding);
