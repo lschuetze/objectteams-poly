@@ -59,7 +59,7 @@ public class CreateMethodAccessAdapter extends AbstractTransformableClassNode {
 	
 	@Override
 	public boolean transform() {
-		MethodNode methodNode = getMethod(method);
+		String desc = method.getSignature();
 		InsnList instructions = new InsnList();
 		
 		if (isConstructor) {
@@ -72,7 +72,7 @@ public class CreateMethodAccessAdapter extends AbstractTransformableClassNode {
 		}
 		
 		//Unbox arguments
-		Type[] args = Type.getArgumentTypes(methodNode.desc);
+		Type[] args = Type.getArgumentTypes(desc);
 		
 		if (args.length > 0) {
 			
@@ -99,11 +99,11 @@ public class CreateMethodAccessAdapter extends AbstractTransformableClassNode {
 		} else if (isConstructor) {
 			opcode = Opcodes.INVOKESPECIAL;
 		}
-		instructions.add(new MethodInsnNode(opcode, name, method.getName(), method.getSignature()));
+		instructions.add(new MethodInsnNode(opcode, name, method.getName(), method.getSignature(), false));
 		
 		
 		//box return value
-		Type returnType = Type.getReturnType(methodNode.desc);
+		Type returnType = Type.getReturnType(desc);
 
 		if (returnType.getSort() != Type.OBJECT &&
 				returnType.getSort() != Type.ARRAY &&

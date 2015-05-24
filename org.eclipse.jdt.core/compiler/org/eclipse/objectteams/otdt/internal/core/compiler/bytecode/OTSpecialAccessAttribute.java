@@ -84,9 +84,11 @@ public class OTSpecialAccessAttribute extends AbstractAttribute {
 		ReferenceBinding boundBaseclass;
 		MethodBinding method;
 		private int accessId;
-		DecapsulatedMethodDesc(ReferenceBinding boundBaseclass, MethodBinding method) {
+		private boolean visibleInBaseclass;
+		DecapsulatedMethodDesc(ReferenceBinding boundBaseclass, MethodBinding method, boolean isVisibleInBaseclass) {
 			this.boundBaseclass = boundBaseclass;
 			this.method = method;
+			this.visibleInBaseclass = isVisibleInBaseclass;
 			if (CopyInheritance.isCreator(method))
 				// creator is declared in the enclosing team
 				this.boundBaseclass = this.boundBaseclass.enclosingType();
@@ -106,26 +108,29 @@ public class OTSpecialAccessAttribute extends AbstractAttribute {
 				writeByte((byte)DYN_DECAPSULATION_METHOD_ACCESS);
 			else
 				writeByte((byte)DECAPSULATION_METHOD_ACCESS);
+			ReferenceBinding declaringClass = this.method.declaringClass;
 			if (this.method.isConstructor()) { // no accessor method, old style attribute
-				writeName(this.method.declaringClass.attributeName());
+				writeName(declaringClass.attributeName());
 				writeName(this.method.selector);
 				writeName(this.method.signature());
 			} else {
 				// encode targetClass!selector(static) or targetClass?selector (virtual):
 				char sep = this.method.isStatic() ? '!' : '?';
+				if (this.visibleInBaseclass && OTSpecialAccessAttribute.this._weavingScheme == WeavingScheme.OTDRE)
+					declaringClass = this.boundBaseclass; // avoid scattering the dispatch code over the base hierarchy
 				char[] encodedName = CharOperation.concatWith(
 													new char[][] {
-														this.method.declaringClass.attributeName(),
+														declaringClass.attributeName(),
 														this.method.selector
 													}, sep);
 				char[] weaveIntoClasses = this.boundBaseclass.attributeName();
-				if (OTSpecialAccessAttribute.this._weavingScheme == WeavingScheme.OTDRE) {
+				if (!this.visibleInBaseclass && OTSpecialAccessAttribute.this._weavingScheme == WeavingScheme.OTDRE) {
 					// for OTDRE pass all classes to weave from boundBaseclass up to the actual declaring class (:-separated)
 					ReferenceBinding someClass = this.boundBaseclass.getRealClass();
-					if (someClass != null && TypeBinding.notEquals(someClass, this.method.declaringClass)) {
+					if (someClass != null && TypeBinding.notEquals(someClass, declaringClass)) {
 						while ((someClass = someClass.superclass()) != null) {
 							weaveIntoClasses = CharOperation.concat(weaveIntoClasses, someClass.attributeName(), ':');
-							if (TypeBinding.equalsEquals(someClass, this.method.declaringClass))
+							if (TypeBinding.equalsEquals(someClass, declaringClass))
 								break;
 						}
 					}
@@ -251,9 +256,9 @@ public class OTSpecialAccessAttribute extends AbstractAttribute {
 		this._weavingScheme = weavingScheme;
 	}
 
-	public int addDecapsulatedMethodAccess(ReferenceBinding boundBaseclass, MethodBinding method) {
+	public int addDecapsulatedMethodAccess(ReferenceBinding boundBaseclass, MethodBinding method, boolean isVisibleInBaseclass) {
 		int accessId = this.nextAccessId;
-		this._decapsulatedMethods.add(new DecapsulatedMethodDesc(boundBaseclass, method));
+		this._decapsulatedMethods.add(new DecapsulatedMethodDesc(boundBaseclass, method, isVisibleInBaseclass));
 		return accessId;
 	}
 

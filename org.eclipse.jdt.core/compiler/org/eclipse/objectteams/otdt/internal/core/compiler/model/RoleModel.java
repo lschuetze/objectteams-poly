@@ -37,6 +37,7 @@ import org.eclipse.jdt.internal.compiler.ast.AbstractMethodDeclaration;
 import org.eclipse.jdt.internal.compiler.ast.TypeDeclaration;
 import org.eclipse.jdt.internal.compiler.classfmt.ClassFileReader;
 import org.eclipse.jdt.internal.compiler.classfmt.ClassFormatException;
+import org.eclipse.jdt.internal.compiler.impl.CompilerOptions.WeavingScheme;
 import org.eclipse.jdt.internal.compiler.lookup.AnnotationBinding;
 import org.eclipse.jdt.internal.compiler.lookup.BinaryTypeBinding;
 import org.eclipse.jdt.internal.compiler.lookup.Binding;
@@ -47,6 +48,7 @@ import org.eclipse.jdt.internal.compiler.lookup.FieldBinding;
 import org.eclipse.jdt.internal.compiler.lookup.LookupEnvironment;
 import org.eclipse.jdt.internal.compiler.lookup.MethodBinding;
 import org.eclipse.jdt.internal.compiler.lookup.MethodScope;
+import org.eclipse.jdt.internal.compiler.lookup.PackageBinding;
 import org.eclipse.jdt.internal.compiler.lookup.ParameterizedTypeBinding;
 import org.eclipse.jdt.internal.compiler.lookup.ReferenceBinding;
 import org.eclipse.jdt.internal.compiler.lookup.Scope;
@@ -1180,8 +1182,27 @@ public class RoleModel extends TypeModel
 	public int addInaccessibleBaseMethod(MethodBinding binding) {
 		// push out to the team to ensure early evaluation by the OTRE:
 		OTSpecialAccessAttribute specialAccess = getTeamModel().getSpecialAccessAttribute();
-		specialAccess.addAdaptedBaseClass(binding.declaringClass);
-		return specialAccess.addDecapsulatedMethodAccess(this._binding.baseclass(), binding);
+		ReferenceBinding declaringClass = binding.declaringClass;
+		specialAccess.addAdaptedBaseClass(declaringClass);
+		ReferenceBinding baseclass = this._binding.baseclass();
+		boolean visibleInBaseClass = true;
+		if (getWeavingScheme() == WeavingScheme.OTDRE) {
+			TypeBinding declaringOriginal = declaringClass.original();
+			if (binding.isPrivate()) {
+				visibleInBaseClass = TypeBinding.equalsEquals(baseclass.original(), declaringOriginal);
+			} else if (binding.isDefault()) {
+				PackageBinding tgtPackage = declaringClass.fPackage;
+				ReferenceBinding currentType = baseclass;
+				while (currentType != null && TypeBinding.notEquals(currentType.original(), declaringOriginal)) {
+					if (tgtPackage != currentType.fPackage) {
+						visibleInBaseClass = false;
+						break;
+					}
+					currentType = currentType.superclass();
+				}
+			}
+		}
+		return specialAccess.addDecapsulatedMethodAccess(baseclass, binding, visibleInBaseClass);
 	}
 
 	/**
