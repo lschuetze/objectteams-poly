@@ -257,9 +257,9 @@ public class OTSpecialAccessAttribute extends AbstractAttribute {
 	}
 
 	public int addDecapsulatedMethodAccess(ReferenceBinding boundBaseclass, MethodBinding method, boolean isVisibleInBaseclass) {
-		int accessId = this.nextAccessId;
-		this._decapsulatedMethods.add(new DecapsulatedMethodDesc(boundBaseclass, method, isVisibleInBaseclass));
-		return accessId;
+		DecapsulatedMethodDesc desc = new DecapsulatedMethodDesc(boundBaseclass, method, isVisibleInBaseclass);
+		this._decapsulatedMethods.add(desc);
+		return desc.accessId;
 	}
 
 	public int addCalloutFieldAccess(FieldBinding field, ReferenceBinding targetClass, int calloutModifier) {
