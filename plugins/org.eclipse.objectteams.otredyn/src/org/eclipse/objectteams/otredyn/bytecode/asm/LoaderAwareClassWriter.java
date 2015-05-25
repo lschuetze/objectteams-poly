@@ -80,10 +80,10 @@ public class LoaderAwareClassWriter extends ClassWriter {
         	for (String newType1 : newTypes1)
         		if (allTypes2.contains(newType1))
         			return newType1;
+        	allTypes1.addAll(newTypes1);
         	for (String newType2 : newTypes2)
         		if (allTypes1.contains(newType2))
         			return newType2;
-        	allTypes1.addAll(newTypes1);
         	allTypes2.addAll(newTypes2);
         	newTypes1 = getDirectSupersLayer(newTypes1);
         	newTypes2 = getDirectSupersLayer(newTypes2);
