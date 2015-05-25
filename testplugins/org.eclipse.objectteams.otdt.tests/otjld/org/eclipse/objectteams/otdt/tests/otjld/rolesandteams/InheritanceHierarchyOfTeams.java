@@ -1,7 +1,7 @@
 /**********************************************************************
  * This file is part of "Object Teams Development Tooling"-Software
  * 
- * Copyright 2004, 2010 IT Service Omikron GmbH and others.
+ * Copyright 2004, 2015 IT Service Omikron GmbH and others.
  * 
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -345,12 +345,12 @@ public class InheritanceHierarchyOfTeams extends AbstractOTJLDTest {
 
     // a team class has a regular class as its explicit superclass - this class is also bound as a role's base class - two level team hierarchy
     // 1.2.7-otjld-non-team-superclass-1
-    public void test127_nonTeamSuperclass1() {
+    public void test127_nonTeamSuperclass1a() {
         runConformTest(
             new String[] {
-		"Team127nts1_2.java",
+		"Team127nts1a_2.java",
 			    "\n" +
-			    "public team class Team127nts1_2 extends Team127nts1_1 {\n" +
+			    "public team class Team127nts1a_2 extends Team127nts1a_1 {\n" +
 			    "    public void hello() {\n" +
 			    "        System.out.print(\"hello\");\n" +
 			    "    }\n" +
@@ -358,7 +358,7 @@ public class InheritanceHierarchyOfTeams extends AbstractOTJLDTest {
 			    "        System.out.print(\"world\");\n" +
 			    "    }\n" +
 			    "    public static void main(String[] args) {\n" +
-			    "        Team127nts1_2 t = new Team127nts1_2();\n" +
+			    "        Team127nts1a_2 t = new Team127nts1a_2();\n" +
 			    "        t.activate();\n" +
 			    "        t.hello();\n" +
 			    "        t.world();\n" +
@@ -366,22 +366,68 @@ public class InheritanceHierarchyOfTeams extends AbstractOTJLDTest {
 			    "    }\n" +
 			    "}\n" +
 			    "    \n",
-		"T127nts1.java",
+		"T127nts1a.java",
 			    "\n" +
-			    "public class T127nts1 {\n" +
+			    "public class T127nts1a {\n" +
 			    "    public void hello() {\n" +
 			    "        System.out.print(\"wrong\");\n" +
 			    "    }\n" +
 			    "}\n" +
 			    "    \n",
-		"Team127nts1_1.java",
+		"Team127nts1a_1.java",
 			    "\n" +
-			    "public team class Team127nts1_1 extends T127nts1 {\n" +
-			    "    protected class R playedBy T127nts1 {\n" +
+			    "public team class Team127nts1a_1 extends T127nts1a {\n" +
+			    "    protected class R playedBy T127nts1a {\n" +
 			    "        void blank() {\n" +
 			    "            System.out.print(\" \");\n" +
 			    "        }\n" +
 			    "        blank <- after hello;\n" +
+			    "    }\n" +
+			    "}\n" +
+			    "    \n"
+            },
+            "hello world1");
+    }
+
+    // replace callin:
+    public void test127_nonTeamSuperclass1b() {
+        runConformTest(
+            new String[] {
+		"Team127nts1b_2.java",
+			    "\n" +
+			    "public team class Team127nts1b_2 extends Team127nts1b_1 {\n" +
+			    "    public void hello() {\n" +
+			    "        System.out.print(\"hello\");\n" +
+			    "    }\n" +
+			    "    public void world() {\n" +
+			    "        System.out.print(\"world\");\n" +
+			    "    }\n" +
+			    "    public static void main(String[] args) {\n" +
+			    "        Team127nts1b_2 t = new Team127nts1b_2();\n" +
+			    "        t.activate();\n" +
+			    "        t.hello();\n" +
+			    "        t.world();\n" +
+			    "        System.out.print(t.getAllRoles().length);\n" +
+			    "    }\n" +
+			    "}\n" +
+			    "    \n",
+		"T127nts1b.java",
+			    "\n" +
+			    "public class T127nts1b {\n" +
+			    "    public void hello() {\n" +
+			    "        System.out.print(\"wrong\");\n" +
+			    "    }\n" +
+			    "}\n" +
+			    "    \n",
+		"Team127nts1b_1.java",
+			    "\n" +
+			    "public team class Team127nts1b_1 extends T127nts1b {\n" +
+			    "    protected class R playedBy T127nts1b {\n" +
+			    "        callin void blank() {\n" +
+			    "            base.blank();\n" +
+			    "            System.out.print(\" \");\n" +
+			    "        }\n" +
+			    "        blank <- replace hello;\n" +
 			    "    }\n" +
 			    "}\n" +
 			    "    \n"

@@ -1,13 +1,12 @@
 /**********************************************************************
  * This file is part of "Object Teams Development Tooling"-Software
  *
- * Copyright 2010 Stephan Herrmann
+ * Copyright 2010, 2015 Stephan Herrmann
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
- * $Id: TeamMethodGenerator.java 23417 2010-02-03 20:13:55Z stephan $
  *
  * Please visit http://www.eclipse.org/objectteams for updates and contact.
  *
@@ -23,6 +22,7 @@ import static org.eclipse.jdt.internal.compiler.classfmt.ClassFileConstants.AccP
 import static org.eclipse.jdt.internal.compiler.classfmt.ClassFileConstants.AccPublic;
 import static org.eclipse.jdt.internal.compiler.classfmt.ClassFileConstants.AccSynchronized;
 import static org.eclipse.jdt.internal.compiler.lookup.ExtraCompilerModifiers.AccVisibilityMASK;
+import static org.eclipse.objectteams.otdt.internal.core.compiler.mappings.CallinImplementorDyn.*;
 
 import org.eclipse.jdt.core.compiler.CharOperation;
 import org.eclipse.jdt.internal.compiler.ClassFile;
@@ -285,10 +285,10 @@ public class TeamMethodGenerator {
 		return false;
 	}
 	// --- alternative initialization when compiling o.o.Team from source: ---
-    public synchronized void registerOOTeamClass(SourceTypeBinding ooTeamBinding) {
+    public synchronized void registerOOTeamClass(SourceTypeBinding orgObjectteamsTeamBinding) {
     	if (this.classBytes != null)
     		return;
-    	this.ooTeamBinding = ooTeamBinding;
+    	this.ooTeamBinding = orgObjectteamsTeamBinding;
     }
 	public boolean requestBytes() {
 		if (this.classBytes != null)
@@ -330,19 +330,36 @@ public class TeamMethodGenerator {
     	AstGenerator gen = new AstGenerator(teamDecl);
     	
     	boolean hasBoundRole = false;
-    	for (RoleModel role : teamDecl.getTeamModel().getRoles(false)) {
-    		if (role.isBound()) {
-    			hasBoundRole = true;
-    			break;
-    		}			
-    	}
+    	// check what will be generated:
+    	boolean hasCallinBefore = false, hasCallinAfter = false, hasCallinReplace = false, hasStaticBase = false;
+		for (RoleModel role : teamDecl.getTeamModel().getRoles(false)) {
+			if (role.isBound())
+				hasBoundRole = true;
+			ReferenceBinding roleBinding = role.getBinding();
+			if (roleBinding == null) continue; // FIXME(SH): check if this is OK
+			if (roleBinding.callinCallouts != null) {
+				for (CallinCalloutBinding mappingBinding : roleBinding.callinCallouts) {
+					if (mappingBinding.isCallin()) {
+						switch (mappingBinding.callinModifier) {
+							case TerminalTokens.TokenNamebefore: 	hasCallinBefore = true; 	break;
+							case TerminalTokens.TokenNameafter: 	hasCallinAfter = true; 		break;
+							case TerminalTokens.TokenNamereplace: 	hasCallinReplace = true; 	break;
+						}
+						for (MethodBinding baseMethod : mappingBinding._baseMethods)
+							if (baseMethod.isStatic()) {
+								hasStaticBase = true;
+								break;
+							}
+					}
+				}
+			}
+		}
+
 		// methods:
 		for (MethodDescriptor methodDescriptor : this.methodDescriptors) {
 			MethodDeclaration newMethod = null;
 			// don't duplicate methods that will be generated later
-			if (("_OT$callBefore".equals(methodDescriptor.selector) && hasCallins(teamDecl.binding, TerminalTokens.TokenNamebefore)) //$NON-NLS-1$
-					|| ("_OT$callReplace".equals(methodDescriptor.selector) && hasCallins(teamDecl.binding, TerminalTokens.TokenNamereplace)) //$NON-NLS-1$
-					|| ("_OT$callAfter".equals(methodDescriptor.selector) && hasCallins(teamDecl.binding, TerminalTokens.TokenNameafter))) //$NON-NLS-1$
+			if (willBeGenerated(methodDescriptor, teamDecl, hasCallinBefore, hasCallinAfter, hasCallinReplace, hasStaticBase))
 				continue;
 			if ((methodDescriptor.modifiers & AccVisibilityMASK) == AccPublic) {
 				// public methods are always copied
@@ -365,11 +382,19 @@ public class TeamMethodGenerator {
 		// fields:
 		addFields(teamDecl, gen);
     }
-    private boolean hasCallins(SourceTypeBinding teamBinding, int modifier) {
-		for(ReferenceBinding member : teamBinding.memberTypes)
-			for(CallinCalloutBinding binding : member.callinCallouts)
-				if (binding.isCallin() && binding.callinModifier == modifier)
-					return true;
+
+	boolean willBeGenerated(MethodDescriptor methodDescriptor, TypeDeclaration teamDecl,
+			boolean hasCallinBefore, boolean hasCallinAfter, boolean hasCallinReplace, boolean hasStaticBase)
+	{
+		char[] selector = methodDescriptor.selector.toCharArray();
+		if (CharOperation.equals(OT_CALL_BEFORE, selector))
+			return hasCallinBefore;
+		else if (CharOperation.equals(OT_CALL_AFTER, selector))
+			return hasCallinAfter;
+		else if (CharOperation.equals(OT_CALL_REPLACE, selector) || CharOperation.equals(OT_CALL_NEXT, selector))
+			return hasCallinReplace;
+		else if (CharOperation.equals(OT_CALL_ORIG_STATIC, selector))
+			return hasStaticBase;
 		return false;
 	}
 
