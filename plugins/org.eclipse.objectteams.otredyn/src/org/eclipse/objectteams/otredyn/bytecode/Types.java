@@ -1,7 +1,7 @@
 /**********************************************************************
  * This file is part of "Object Teams Dynamic Runtime Environment"
  * 
- * Copyright 2009, 2012 Oliver Frank and others.
+ * Copyright 2009, 2015 Oliver Frank and others.
  * 
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -21,11 +21,7 @@ package org.eclipse.objectteams.otredyn.bytecode;
  * @author Oliver Frank
  */
 public abstract class Types {
-	public final static int ACCESS_PACKAGE = 0; // class, field, method
-	public final static int ACCESS_PUBLIC = 1; // class, field, method
-	public final static int ACCESS_PRIVATE = 2; // class, field, method
-	public final static int ACCESS_PROTECTED = 4; // class, field, method
-	public final static int ACCESS_STATIC = 8; // field, method
+
 	public final static int TEAM  = 0x8000;
 	public final static int ROLE_FLAG = 2; // within OTClassFlags attribute
     
@@ -49,19 +45,22 @@ public abstract class Types {
 
 	private static final String ARRAY = "[";
 
-	public static String getAsArrayType(String className) {
-		if (className.length() == 1) {
-			return ARRAY + className;
+	public static String getAsArrayType(String typeName) {
+		if (typeName.length() == 1) {
+			switch (typeName.charAt(0)) {
+			case 'Z': case 'C': case 'B': case 'S': case 'I': case 'F': case 'J': case 'D': 
+				return ARRAY + typeName;
+			}
 		}
 		
-		return ARRAY + "L" + className;
+		return ARRAY + "L" + typeName + ';';
 	}
 	
-	public static String getAsType(String type) {
-		return "L" + type;
+	public static String getAsInternalType(String className) {
+		return "L" + className + ';';
 	}
 	
-	public static String getAsType(Class<?> clazz) {
+	public static String getAsInternalType(Class<?> clazz) {
 		String type = null;
 		if (clazz.isPrimitive()) {
 			String name = clazz.getName();
@@ -87,7 +86,7 @@ public abstract class Types {
 		} else {
 			type = clazz.getName().replace('.', '/');
 			if (!clazz.isArray()) {
-				type = "L" + type;
+				type = "L" + type + ';';
 			}
 		}
 		
@@ -95,45 +94,26 @@ public abstract class Types {
 	}
 	
 	public static String getTypeStringForMethod(String returnType, String[] paramTypes) {
-		String result = "(";
+		StringBuilder buf = new StringBuilder();
+		buf.append('(');
 		if (paramTypes != null) {
-			for (String paramType : paramTypes) {
-				result += paramType;
-				if (paramType.length() > 2) {
-					result += ";";
-				}
-			}
+			for (String paramType : paramTypes)
+				buf.append(paramType);
 		}
-		result += ")" + returnType;
-		if (returnType.length() > 2) {
-			result += ";";
-		}
-		return result;
+		buf.append(')');
+		buf.append(returnType);
+		return buf.toString();
 	}
 	
 	public static String getTypeStringForMethod(Class<?> returnType, Class<?>[] paramTypes) {
-		String result = "(";
+		StringBuilder buf = new StringBuilder();
+		buf.append('(');
 		if (paramTypes != null) {
-			for (Class<?> paramType : paramTypes) {
-				String paramTypeString = getAsType(paramType);
-				result += paramTypeString;
-				if (!paramType.isPrimitive() && !paramType.isArray()) {
-					result += ";";
-				}
-			}
+			for (Class<?> paramType : paramTypes)
+				buf.append(getAsInternalType(paramType));
 		}
-		String returnTypeString = getAsType(returnType);
-		
-		result += ")" + returnTypeString;
-		if (!returnType.isPrimitive() && !returnType.isArray()) {
-			result += ";";
-		}
-		return result;
+		buf.append(')');
+		buf.append(getAsInternalType(returnType));
+		return buf.toString();
 	}
-	
-	public static String getTypeStringForField(String type) {
-		return type + ";";
-	}
-	
-	
 }

@@ -26,7 +26,6 @@ import org.eclipse.objectteams.otredyn.bytecode.Field;
 import org.eclipse.objectteams.otredyn.bytecode.IBytecodeProvider;
 import org.eclipse.objectteams.otredyn.bytecode.Method;
 import org.eclipse.objectteams.otredyn.bytecode.RedefineStrategyFactory;
-import org.eclipse.objectteams.otredyn.bytecode.Types;
 import org.eclipse.objectteams.otredyn.runtime.TeamManager;
 import org.eclipse.objectteams.otredyn.transformer.jplis.ObjectTeamsTransformer;
 import org.eclipse.objectteams.otredyn.transformer.names.ClassNames;
@@ -366,20 +365,20 @@ class AsmWritableBoundClass extends AsmBoundClass {
 
 		addInterface(ClassNames.I_BOUND_BASE_SLASH);
 		
-		int methodModifiers = Types.ACCESS_PUBLIC;
+		int methodModifiers = Opcodes.ACC_PUBLIC;
 		if (isInterface())
 			methodModifiers |= Opcodes.ACC_ABSTRACT;
 		
 		if (!isInterface())
-			addField(ConstantMembers.roleSet, Types.ACCESS_PUBLIC);
+			addField(ConstantMembers.roleSet, Opcodes.ACC_PUBLIC);
 		
 		addEmptyMethod(ConstantMembers.callOrig, methodModifiers, null, null, null);
 		addEmptyMethod(ConstantMembers.callAllBindingsClient, methodModifiers, null, null, null);
 		
 		// the methods callOrigStatic and accessStatic have to already exist to call it in a concrete team
 		if (!isInterface()) {
-			addEmptyMethod(getCallOrigStatic(), Types.ACCESS_PUBLIC + Types.ACCESS_STATIC, null, null, null);
-			addEmptyMethod(ConstantMembers.accessStatic, Types.ACCESS_PUBLIC + Types.ACCESS_STATIC, null, null, null);
+			addEmptyMethod(getCallOrigStatic(), Opcodes.ACC_PUBLIC + Opcodes.ACC_STATIC, null, null, null);
+			addEmptyMethod(ConstantMembers.accessStatic, Opcodes.ACC_PUBLIC + Opcodes.ACC_STATIC, null, null, null);
 		}
 		
 		String superClassName = getSuperClassName().replace('.', '/');

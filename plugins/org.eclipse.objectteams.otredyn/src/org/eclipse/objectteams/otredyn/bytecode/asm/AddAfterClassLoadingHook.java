@@ -1,7 +1,7 @@
 /**********************************************************************
  * This file is part of "Object Teams Dynamic Runtime Environment"
  * 
- * Copyright 2009, 2012 Stephan Herrmann.
+ * Copyright 2009, 2015 Stephan Herrmann.
  * 
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -24,7 +24,7 @@ import org.objectweb.asm.commons.AdviceAdapter;
 
 import org.objectweb.asm.Opcodes;
 
-import static org.eclipse.objectteams.otredyn.bytecode.Types.ACCESS_STATIC;
+import static org.objectweb.asm.Opcodes.ACC_STATIC;
 import static org.objectweb.asm.Opcodes.INVOKESTATIC;
 import static org.objectweb.asm.Opcodes.RETURN;
 
@@ -85,7 +85,7 @@ public class AddAfterClassLoadingHook extends ClassVisitor {
 	public void visitEnd() {
 		if (needToAdd) {
 			// no clinit found, add one now:
-			MethodVisitor mv = cv.visitMethod(ACCESS_STATIC, CLINIT_NAME, CLINIT_DESC, null, null);
+			MethodVisitor mv = cv.visitMethod(ACC_STATIC, CLINIT_NAME, CLINIT_DESC, null, null);
 			mv.visitCode();
 			createHookCall(mv);
 			mv.visitInsn(RETURN);

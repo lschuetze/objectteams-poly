@@ -1,7 +1,7 @@
 /**********************************************************************
  * This file is part of "Object Teams Dynamic Runtime Environment"
  * 
- * Copyright 2009, 2012 Oliver Frank and others.
+ * Copyright 2009, 2015 Oliver Frank and others.
  * 
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -32,19 +32,19 @@ public abstract class ConstantMembers {
 	// predefined field:
 	public static final String OT_ROLE_SET = "_OT$roleSet";
 	public static final String HASH_SET_FIELD_TYPE = Types 
-	.getTypeStringForField(Types.getAsType(ClassNames.HASH_SET_SLASH));
+			.getAsInternalType(ClassNames.HASH_SET_SLASH);
 	public static final Field roleSet = new Field(OT_ROLE_SET, HASH_SET_FIELD_TYPE);
 	
 	// predefined methods
 	public static final Method callOrig = new Method("_OT$callOrig", Types
-			.getTypeStringForMethod(Types.getAsType(ClassNames.OBJECT_SLASH),
+			.getTypeStringForMethod(Types.getAsInternalType(ClassNames.OBJECT_SLASH),
 					new String[] { Types.INT,
 							Types.getAsArrayType(ClassNames.OBJECT_SLASH) }));
 
 	public static final Method callOrigStatic = new Method(
 			"_OT$callOrigStatic",
 			Types.getTypeStringForMethod(Types
-					.getAsType(ClassNames.OBJECT_SLASH), new String[] {
+					.getAsInternalType(ClassNames.OBJECT_SLASH), new String[] {
 					Types.INT, Types.getAsArrayType(ClassNames.OBJECT_SLASH) }),
 			true, Opcodes.ACC_PUBLIC);
 
@@ -55,10 +55,10 @@ public abstract class ConstantMembers {
 		return  new Method(
 			"_OT$callOrigStatic",
 			Types.getTypeStringForMethod(
-					Types.getAsType(ClassNames.OBJECT_SLASH), 
+					Types.getAsInternalType(ClassNames.OBJECT_SLASH), 
 					new String[] {
 						Types.INT,
-						Types.getAsType(teamClass),
+						Types.getAsInternalType(teamClass),
 						Types.INT, 
 						Types.getAsArrayType(ClassNames.OBJECT_SLASH) 
 					}),
@@ -67,28 +67,28 @@ public abstract class ConstantMembers {
 
 	public static final Method callAllBindingsClient = new Method(
 			"callAllBindings", Types.getTypeStringForMethod(Types
-					.getAsType(ClassNames.OBJECT_SLASH), new String[] {
+					.getAsInternalType(ClassNames.OBJECT_SLASH), new String[] {
 					Types.INT, Types.getAsArrayType(ClassNames.OBJECT_SLASH) }));
 
 	public static final Method callAllBindingsTeam = new Method(
 			"_OT$callAllBindings", Types.getTypeStringForMethod(Types
-					.getAsType(ClassNames.OBJECT_SLASH), new String[] {
-					Types.getAsType(ClassNames.I_BOUND_BASE_SLASH),
+					.getAsInternalType(ClassNames.OBJECT_SLASH), new String[] {
+					Types.getAsInternalType(ClassNames.I_BOUND_BASE_SLASH),
 					Types.getAsArrayType(ClassNames.ITEAM_SLASH), Types.INT,
 					Types.getAsArrayType(Types.INT), Types.INT,
 					Types.getAsArrayType(ClassNames.OBJECT_SLASH) }));
 
 	public static final Method access = new Method("_OT$access", Types
-			.getTypeStringForMethod(Types.getAsType(ClassNames.OBJECT_SLASH),
+			.getTypeStringForMethod(Types.getAsInternalType(ClassNames.OBJECT_SLASH),
 					new String[] { Types.INT, Types.INT,
 							Types.getAsArrayType(ClassNames.OBJECT_SLASH),
-							Types.getAsType(ClassNames.ITEAM_SLASH) }));
+							Types.getAsInternalType(ClassNames.ITEAM_SLASH) }));
 
 	public static final Method accessStatic = new Method("_OT$accessStatic", Types
-			.getTypeStringForMethod(Types.getAsType(ClassNames.OBJECT_SLASH),
+			.getTypeStringForMethod(Types.getAsInternalType(ClassNames.OBJECT_SLASH),
 					new String[] { Types.INT, Types.INT,
 							Types.getAsArrayType(ClassNames.OBJECT_SLASH),
-							Types.getAsType(ClassNames.ITEAM_SLASH) }), true, Opcodes.ACC_PUBLIC);
+							Types.getAsInternalType(ClassNames.ITEAM_SLASH) }), true, Opcodes.ACC_PUBLIC);
 
 	public static final Method getTeams = new Method("getTeams", Types
 			.getTypeStringForMethod(
@@ -101,10 +101,10 @@ public abstract class ConstantMembers {
 
 	public static final Method getMemberId = new Method("getMemberId", Types
 			.getTypeStringForMethod(Types.INT, new String[] { Types.INT,
-					Types.getAsType(ClassNames.CLASS_SLASH) }));
+					Types.getAsInternalType(ClassNames.CLASS_SLASH) }));
 	
 	public static final Method addOrRemoveRole = new Method("_OT$addOrRemoveRole", Types
-			.getTypeStringForMethod(Types.VOID, new String[] { Types.getAsType(ClassNames.OBJECT_SLASH), Types.BOOLEAN }));
+			.getTypeStringForMethod(Types.VOID, new String[] { Types.getAsInternalType(ClassNames.OBJECT_SLASH), Types.BOOLEAN }));
 
 	public static boolean isReflectiveOTMethod(String methodName, String methodDescriptor) {
 		if ((methodName.equals("hasRole") && methodDescriptor.equals("(Ljava/lang/Object;)Z"))
