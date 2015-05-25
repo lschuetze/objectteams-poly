@@ -73,6 +73,7 @@ import org.eclipse.objectteams.otdt.internal.core.compiler.statemachine.transfor
 import org.eclipse.objectteams.otdt.internal.core.compiler.statemachine.transformer.MethodSignatureEnhancer;
 import org.eclipse.objectteams.otdt.internal.core.compiler.statemachine.transformer.PredicateGenerator;
 import org.eclipse.objectteams.otdt.internal.core.compiler.statemachine.transformer.ReplaceResultReferenceVisitor;
+import org.eclipse.objectteams.otdt.internal.core.compiler.statemachine.transformer.TeamMethodGenerator;
 import org.eclipse.objectteams.otdt.internal.core.compiler.util.AstEdit;
 import org.eclipse.objectteams.otdt.internal.core.compiler.util.AstGenerator;
 import org.eclipse.objectteams.otdt.internal.core.compiler.util.RoleTypeCreator;
@@ -1006,6 +1007,16 @@ public class CallinImplementorDyn extends MethodMappingImplementor {
 		// of the appropriate base classes.
 		final TypeDeclaration teamDecl = aTeam.getAst();
 		if (teamDecl == null) return;
+		int idxOfExisting = -1;
+		AbstractMethodDeclaration[] teamMethods = teamDecl.methods;
+		if (teamMethods != null) {
+			for (int i = 0; i < teamMethods.length; i++) {
+				if (CharOperation.equals(OT_CALL_ORIG_STATIC, teamMethods[i].selector) && teamMethods[i] instanceof TeamMethodGenerator.CopiedTeamMethod) {
+					idxOfExisting = i;
+					break;
+				}
+			}
+		}
 		final AstGenerator gen = new AstGenerator(teamDecl);
 		Argument[] args = new Argument[] {
 				gen.argument(CALLIN_ID, 		gen.typeReference(TypeBinding.INT)),
@@ -1049,7 +1060,12 @@ public class CallinImplementorDyn extends MethodMappingImplementor {
 			gen.returnStatement(gen.nullLiteral()) // shouldn't happen
 		};
 		decl.hasParsedStatements = true;
-		AstEdit.addMethod(teamDecl, decl);
+		if (teamMethods != null && idxOfExisting > -1) {
+			teamMethods[idxOfExisting] = decl; // directly replace
+			teamDecl.binding.resolveGeneratedMethod(decl, false, null);
+		} else {
+			AstEdit.addMethod(teamDecl, decl);
+		}
 	}
 
 	boolean checkLiftingProblem(TypeDeclaration teamDecl, CallinMappingDeclaration callinDecl, ReferenceBinding roleType) {

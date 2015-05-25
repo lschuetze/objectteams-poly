@@ -435,6 +435,51 @@ public class InheritanceHierarchyOfTeams extends AbstractOTJLDTest {
             "hello world1");
     }
 
+    // before static
+    public void test127_nonTeamSuperclass1c() {
+        runConformTest(
+            new String[] {
+		"Team127nts1c_2.java",
+			    "\n" +
+			    "public team class Team127nts1c_2 extends Team127nts1c_1 {\n" +
+			    "    public void hello() {\n" +
+			    "        System.out.print(\"hello\");\n" +
+			    "    }\n" +
+			    "    public static void world() {\n" +
+			    "        System.out.print(\"wrong\");\n" +
+			    "    }\n" +
+			    "    public static void main(String[] args) {\n" +
+			    "        Team127nts1c_2 t = new Team127nts1c_2();\n" +
+			    "        t.activate();\n" +
+			    "        t.hello();\n" +
+			    "        T127nts1c.world();\n" +
+			    "        System.out.print(t.getAllRoles().length);\n" +
+			    "    }\n" +
+			    "}\n" +
+			    "    \n",
+		"T127nts1c.java",
+			    "\n" +
+			    "public class T127nts1c {\n" +
+			    "    public static void world() {\n" +
+			    "        System.out.print(\"world\");\n" +
+			    "    }\n" +
+			    "}\n" +
+			    "    \n",
+		"Team127nts1c_1.java",
+			    "\n" +
+			    "public team class Team127nts1c_1 extends T127nts1c {\n" +
+			    "    protected class R playedBy T127nts1c {\n" +
+			    "        static void blank() {\n" +
+			    "            System.out.print(\" \");\n" +
+			    "        }\n" +
+			    "        blank <- before world;\n" +
+			    "    }\n" +
+			    "}\n" +
+			    "    \n"
+            },
+            "hello world0");
+    }
+
     // a team class has a superclass that is not a team
     // 1.2.7-otjld-non-team-superclass-2
     public void test127_nonTeamSuperclass2() {

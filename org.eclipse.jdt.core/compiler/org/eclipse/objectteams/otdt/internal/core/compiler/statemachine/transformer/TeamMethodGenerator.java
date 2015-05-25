@@ -331,7 +331,7 @@ public class TeamMethodGenerator {
     	
     	boolean hasBoundRole = false;
     	// check what will be generated:
-    	boolean hasCallinBefore = false, hasCallinAfter = false, hasCallinReplace = false, hasStaticBase = false;
+    	boolean hasCallinBefore = false, hasCallinAfter = false, hasCallinReplace = false;
 		for (RoleModel role : teamDecl.getTeamModel().getRoles(false)) {
 			if (role.isBound())
 				hasBoundRole = true;
@@ -345,11 +345,8 @@ public class TeamMethodGenerator {
 							case TerminalTokens.TokenNameafter: 	hasCallinAfter = true; 		break;
 							case TerminalTokens.TokenNamereplace: 	hasCallinReplace = true; 	break;
 						}
-						for (MethodBinding baseMethod : mappingBinding._baseMethods)
-							if (baseMethod.isStatic()) {
-								hasStaticBase = true;
-								break;
-							}
+						// note: we cannot detect static base methods, because the mapping has not yet been resolved.
+						// hence we overwrite _OT$callOrigStatic after the fact in CallinImplementorDyn.generateCallOrigStatic().
 					}
 				}
 			}
@@ -359,7 +356,7 @@ public class TeamMethodGenerator {
 		for (MethodDescriptor methodDescriptor : this.methodDescriptors) {
 			MethodDeclaration newMethod = null;
 			// don't duplicate methods that will be generated later
-			if (willBeGenerated(methodDescriptor, teamDecl, hasCallinBefore, hasCallinAfter, hasCallinReplace, hasStaticBase))
+			if (willBeGenerated(methodDescriptor, teamDecl, hasCallinBefore, hasCallinAfter, hasCallinReplace))
 				continue;
 			if ((methodDescriptor.modifiers & AccVisibilityMASK) == AccPublic) {
 				// public methods are always copied
@@ -384,7 +381,7 @@ public class TeamMethodGenerator {
     }
 
 	boolean willBeGenerated(MethodDescriptor methodDescriptor, TypeDeclaration teamDecl,
-			boolean hasCallinBefore, boolean hasCallinAfter, boolean hasCallinReplace, boolean hasStaticBase)
+			boolean hasCallinBefore, boolean hasCallinAfter, boolean hasCallinReplace)
 	{
 		char[] selector = methodDescriptor.selector.toCharArray();
 		if (CharOperation.equals(OT_CALL_BEFORE, selector))
@@ -393,8 +390,6 @@ public class TeamMethodGenerator {
 			return hasCallinAfter;
 		else if (CharOperation.equals(OT_CALL_REPLACE, selector) || CharOperation.equals(OT_CALL_NEXT, selector))
 			return hasCallinReplace;
-		else if (CharOperation.equals(OT_CALL_ORIG_STATIC, selector))
-			return hasStaticBase;
 		return false;
 	}
 
@@ -504,7 +499,7 @@ public class TeamMethodGenerator {
 	}
 
 	/** Special crippled method declarations that only serve as place-holder for copy-inheritance. */
-    class CopiedTeamMethod extends MethodDeclaration {
+    public class CopiedTeamMethod extends MethodDeclaration {
     	MethodDescriptor descriptor;
 		public CopiedTeamMethod(CompilationResult compilationResult, MethodDescriptor descriptor, AstGenerator gen) {
 			super(compilationResult);
