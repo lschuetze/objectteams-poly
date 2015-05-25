@@ -31,8 +31,8 @@ import org.eclipse.objectteams.otdt.core.compiler.IOTConstants;
 import org.eclipse.objectteams.otdt.debug.ui.OTDebugUIPlugin;
 import org.eclipse.objectteams.otdt.internal.debug.adaptor.actions.ShowOTInternalVariablesAction;
 
-import base org.eclipse.debug.internal.ui.model.elements.StackFrameContentProvider;
 import base org.eclipse.debug.internal.ui.model.elements.VariableContentProvider;
+import base org.eclipse.jdt.internal.debug.ui.variables.JavaStackFrameContentProvider;
 
 /**
  * Implements variables filtering for VariablesView and TeamView.
@@ -49,7 +49,7 @@ import base org.eclipse.debug.internal.ui.model.elements.VariableContentProvider
 public team class VariablesViewAdaptor 
 {
 	/** Adapt the content provider for root elements of the variables view. */
-	protected class StackFrameContentProvider playedBy StackFrameContentProvider {
+	protected class StackFrameContentProvider playedBy JavaStackFrameContentProvider {
 
 		getAllChildren <- replace getAllChildren;
 
@@ -72,10 +72,9 @@ public team class VariablesViewAdaptor
 	}
 
 	/** Adapt the content provider for non-toplevel elements. */
-	protected class ContentProvider playedBy VariableContentProvider 
+	protected class JavaContentProvider playedBy VariableContentProvider
 	{
-		Object[] getValueChildren(IDebugElement parent, IValue value, IPresentationContext context) 
-		<- replace Object[] getValueChildren(IDebugElement parent, IValue value, IPresentationContext context);
+		getValueChildren <- replace getValueChildren;
 
 		callin Object[] getValueChildren(IDebugElement parent, IValue value, IPresentationContext context)
 				throws CoreException 
@@ -93,7 +92,6 @@ public team class VariablesViewAdaptor
 			
 			return rawChildren;
 		}
-
 	}
 
 	/**
