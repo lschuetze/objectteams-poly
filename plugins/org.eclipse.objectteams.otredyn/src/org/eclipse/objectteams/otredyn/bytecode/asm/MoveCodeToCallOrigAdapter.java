@@ -165,12 +165,23 @@ public class MoveCodeToCallOrigAdapter extends AbstractTransformableClassNode {
 				instructions.insertBefore(insertAt, new InsnNode(Opcodes.AASTORE));
 			}
 
-			if (returnType == Type.VOID_TYPE)
-				instructions.insert(oldNode, new InsnNode(Opcodes.POP));
-			else
-				instructions.insert(oldNode, AsmTypeHelper.getUnboxingInstructionForType(returnType));
+			AbstractInsnNode next = oldNode.getNext();
+			boolean nextIsReturn = next != null && next.getOpcode() >= Opcodes.IRETURN && next.getOpcode() <= Opcodes.ARETURN;
+			if (!nextIsReturn) { 
+				if (returnType == Type.VOID_TYPE) {
+					instructions.insert(oldNode, new InsnNode(Opcodes.POP));
+				} else {
+					instructions.insert(oldNode, AsmTypeHelper.getUnboxingInstructionForType(returnType));
+					String boxTypeName = AsmTypeHelper.getObjectType(returnType);
+					if (boxTypeName != null)
+						instructions.insert(oldNode, new TypeInsnNode(Opcodes.CHECKCAST, boxTypeName));
+				}
+			}
 
-			instructions.set(oldNode, new MethodInsnNode(Opcodes.INVOKESPECIAL, ((MethodInsnNode)oldNode).owner, callOrig.getName(), callOrig.getSignature()));
+			MethodInsnNode newMethodNode = new MethodInsnNode(Opcodes.INVOKESPECIAL, ((MethodInsnNode)oldNode).owner, callOrig.getName(), callOrig.getSignature(), false);
+			instructions.set(oldNode, newMethodNode);
+			if (next != null && nextIsReturn && next.getOpcode() != Opcodes.ARETURN)
+				instructions.set(next, new InsnNode(Opcodes.ARETURN)); // prevent further manipulation by replaceReturn()
 		}
 	}
 }

@@ -238,8 +238,7 @@ public abstract class AbstractTransformableClassNode extends ClassNode {
 				AbstractInsnNode orgMethodNode = orgMethodIter.next();
 				if (orgMethodNode.getOpcode() == returnType.getOpcode(Opcodes.IRETURN)) {
 					instructions.insertBefore(orgMethodNode, AsmTypeHelper.getBoxingInstructionForType(returnType));
-					instructions.insertBefore(orgMethodNode, new InsnNode(Opcodes.ARETURN));
-					instructions.remove(orgMethodNode);
+					instructions.set(orgMethodNode, new InsnNode(Opcodes.ARETURN));
 				}
 			}
 		} else if (returnType.getSort() == Type.VOID) {
