@@ -51,7 +51,7 @@ public class StackBalanceAnalyzer {
     	int offset = 0;    	
     	AbstractInsnNode current = location;
     	while (offset != stackDifference) {
-    		current = location.getPrevious();
+    		current = current.getPrevious();
     		if (current == null)
     			return null;
     		offset -= SIZE[current.getOpcode()];
