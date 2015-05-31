@@ -147,8 +147,8 @@ public class MoveCodeToCallOrigAdapter extends AbstractTransformableClassNode {
 		if (toReplace.isEmpty())
 			return;
 		// replace:
-		replaceSuperCallsWithCallToCallOrig(instructions, toReplace, new IBoundMethodIdInsnProvider() {
-			@Override public IntInsnNode getLoadBoundMethodIdInsn(MethodInsnNode methodInsn) {
+		replaceSuperCallsWithCallToCallOrig(instructions, toReplace, true, new IBoundMethodIdInsnProvider() {
+			@Override public AbstractInsnNode getLoadBoundMethodIdInsn(MethodInsnNode methodInsn) {
 				return new IntInsnNode(Opcodes.ILOAD, boundMethodIdSlot);
 			}
 		});

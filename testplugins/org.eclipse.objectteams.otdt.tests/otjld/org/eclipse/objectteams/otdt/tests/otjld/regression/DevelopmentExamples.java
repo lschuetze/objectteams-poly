@@ -961,59 +961,61 @@ public class DevelopmentExamples extends AbstractOTJLDTest {
 				"\n" +
 				"public team class TeamX114e {\n" +
 				"    protected class R playedBy MyBaseX114e {\n" +
-				"        callin void rm() {\n" +
+				"        callin int rm() {\n" +
 				"            System.out.println(\"> R.rm\");\n" +
-				"            base.rm();\n" +
+				"            int res = base.rm();\n" +
 				"            System.out.println(\"< R.rm\");\n" +
+				"            return res+1;\n" +
 				"        }\n" +
 				"        rm <- replace bmA, bmB;\n" +
 				"    }\n" +
 				"    public static void main(String[] args) {\n" +
 				"        new TeamX114e().activate();\n" +
 				"        MySub2BaseX114e b = new MySub2BaseX114e();\n" +
-				"        b.bmA();\n" +
-				"        b.bmB();\n" +
+				"        int res = b.bmA();\n" +
+				"        res = b.bmB(res);\n" +
+				"        System.out.println(res);\n" +
 				"    }\n" +
 				"}\n" +
 				"    \n",
 		"MyBaseX114e.java",
 				"\n" +
 				"public class MyBaseX114e {\n" +
-				"    void bmA() { System.out.println(\"MyBase.bmA\"); }\n" +
-				"    void bmB() { System.out.println(\"MyBase.bmB\"); }\n" + // 2 methods to challenge reuse of existing ReplaceWickedSuperCallsAdapter (OTDRE)
+				"    protected int bmA() { System.out.println(\"MyBase.bmA\"); return 1; }\n" +
+				"    protected int bmB(int in) { System.out.println(\"MyBase.bmB\"); return in+2; }\n" + // 2 methods to challenge reuse of existing ReplaceWickedSuperCallsAdapter (OTDRE)
 				"}\n" +
 				"    \n",
 		"MySubBaseX114e.java",
 				"\n" +
 				"public class MySubBaseX114e extends MyBaseX114e {\n" +
-				"    void bmA2() {\n" +
+				"    protected int bmA2() {\n" +
 				"        System.out.println(\"MySubBase.bmA2\");\n" +
-				"        super.bmA();\n" +
+				"        return super.bmA() + 4;\n" +
 				"    }\n" +
-				"    void bmA() {\n" +
+				"    protected int bmA() {\n" +
 				"        System.out.println(\"MySubBase.bmA\");\n" +
-				"        bmA2();\n" +
+				"        return bmA2() + 8;\n" +
 				"    }\n" +
-				"    void bmB2() {\n" +
+				"    protected int bmB2(int in) {\n" +
 				"        System.out.println(\"MySubBase.bmB2\");\n" +
-				"        super.bmB();\n" +
+				"        return super.bmB(in+16);\n" + // invoke is last before return
 				"    }\n" +
-				"    void bmB() {\n" +
+				"    protected int bmB(int in) {\n" +
 				"        System.out.println(\"MySubBase.bmB\");\n" +
-				"        bmB2();\n" +
+				"        return bmB2(in+32) + 64;\n" +
 				"    }\n" +
 				"}\n" +
 				"    \n",
 		"MySub2BaseX114e.java",
 				"\n" +
 				"public class MySub2BaseX114e extends MySubBaseX114e {\n" +
-				"    void bmA() {\n" +
+				"    protected int bmA() {\n" +
 				"        System.out.println(\"MySub2Base.bmA\");\n" +
-				"        super.bmA();\n" +
+				"        return super.bmA() + 128;\n" +
 				"    }\n" +
-				"    void bmB() {\n" +
+				"    protected int bmB(int in) {\n" +
 				"        System.out.println(\"MySub2Base.bmB\");\n" +
-				"        super.bmB();\n" +
+				"        return super.bmB(in+256) + 512;\n" +
 				"    }\n" +
 				"}\n" +
 				"    \n"
@@ -1029,7 +1031,8 @@ public class DevelopmentExamples extends AbstractOTJLDTest {
 			"MySubBase.bmB\n" +
 			"MySubBase.bmB2\n" +
 			"MyBase.bmB\n" +
-"< R.rm");
+			"< R.rm\n" +
+			"1025");
 	}
 
     // after callin inherited from super role, before callin to the same base method added

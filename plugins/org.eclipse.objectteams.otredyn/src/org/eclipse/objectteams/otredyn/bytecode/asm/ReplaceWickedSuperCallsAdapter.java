@@ -15,6 +15,8 @@
  **********************************************************************/
 package org.eclipse.objectteams.otredyn.bytecode.asm;
 
+import static org.eclipse.objectteams.otredyn.transformer.names.ClassNames.OBJECT_SLASH;
+
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -26,8 +28,9 @@ import org.eclipse.objectteams.otredyn.bytecode.asm.AbstractTransformableClassNo
 import org.eclipse.objectteams.otredyn.runtime.IMethod;
 import org.objectweb.asm.MethodVisitor;
 import org.objectweb.asm.Opcodes;
+import org.objectweb.asm.Type;
+import org.objectweb.asm.tree.AbstractInsnNode;
 import org.objectweb.asm.tree.InsnList;
-import org.objectweb.asm.tree.IntInsnNode;
 import org.objectweb.asm.tree.MethodInsnNode;
 import org.objectweb.asm.tree.MethodNode;
 
@@ -118,18 +121,21 @@ public class ReplaceWickedSuperCallsAdapter extends AbstractTransformableClassNo
 		// morph an arg-load sequence into its packing variant.
 
 		for (Map.Entry<MethodNode,List<MethodInsnNode>> toWeave : instructionsToWeave.entrySet()) {
-			InsnList instructions = toWeave.getKey().instructions;
+			MethodNode enclosingMethod = toWeave.getKey();
+			InsnList instructions = enclosingMethod.instructions;
 			List<MethodInsnNode> superCallsToReplace = toWeave.getValue();
-			replaceSuperCallsWithCallToCallOrig(instructions, superCallsToReplace, this);
+			Type returnType = Type.getReturnType(enclosingMethod.desc);
+			boolean returnsJLObject = returnType.getSort() == Type.OBJECT ? returnType.getInternalName().equals(OBJECT_SLASH) : false;
+			replaceSuperCallsWithCallToCallOrig(instructions, superCallsToReplace, returnsJLObject, this);
 		}
 		return true;
 	}
 
 	/** Callback. */
-	public IntInsnNode getLoadBoundMethodIdInsn(MethodInsnNode methodInsn) {
+	public AbstractInsnNode getLoadBoundMethodIdInsn(MethodInsnNode methodInsn) {
 		// boundMethodId can be statically determined based on the target method.
 		IMethod otdreMethod = superclass.getMethod(methodInsn.name, methodInsn.desc, false, false);
 		int methodID = otdreMethod.getGlobalId(superclass);
-		return new IntInsnNode(Opcodes.BIPUSH, methodID);
+		return createLoadIntConstant(methodID);
 	}
 }

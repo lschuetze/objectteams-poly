@@ -274,16 +274,19 @@ public abstract class AbstractTransformableClassNode extends ClassNode {
 			return new InsnNode(Opcodes.ICONST_0+constant);
 		else if (constant < Byte.MAX_VALUE)
 			return new IntInsnNode(Opcodes.BIPUSH, constant);
+		else if (constant < Short.MAX_VALUE)
+			return new IntInsnNode(Opcodes.SIPUSH, constant);		
 		else
 			return new LdcInsnNode(constant);
 	}
 	
 	/** Call back interface for {@link #replaceSuperCallsWithCallToCallOrig()}. */
 	protected interface IBoundMethodIdInsnProvider {
-		IntInsnNode getLoadBoundMethodIdInsn(MethodInsnNode methodInsn);
+		AbstractInsnNode getLoadBoundMethodIdInsn(MethodInsnNode methodInsn);
 	}
 
-	protected void replaceSuperCallsWithCallToCallOrig(InsnList instructions, List<MethodInsnNode> superCalls, IBoundMethodIdInsnProvider insnProvider) {
+	protected void replaceSuperCallsWithCallToCallOrig(InsnList instructions, List<MethodInsnNode> superCalls, 
+			boolean returnsJLObject, IBoundMethodIdInsnProvider insnProvider) {
 		for (MethodInsnNode oldNode : superCalls) {
 			Type[] args = Type.getArgumentTypes(oldNode.desc);
 			Type returnType = Type.getReturnType(oldNode.desc);
@@ -296,22 +299,27 @@ public abstract class AbstractTransformableClassNode extends ClassNode {
 			instructions.insertBefore(firstInsert, insnProvider.getLoadBoundMethodIdInsn(oldNode));
 			
 			// prepare array as second arg to _OT$callOrig():
-			instructions.insertBefore(firstInsert, new IntInsnNode(Opcodes.BIPUSH, args.length));
+			instructions.insertBefore(firstInsert, createLoadIntConstant(args.length));
 			instructions.insertBefore(firstInsert, new TypeInsnNode(Opcodes.ANEWARRAY, "java/lang/Object"));
 			
 			for (int i = 0; i < insertionPoints.length; i++) {
 				// NB: each iteration has an even stack balance, where the top is the Object[].
 				instructions.insertBefore(insertionPoints[i], new InsnNode(Opcodes.DUP));
-				instructions.insertBefore(insertionPoints[i], new IntInsnNode(Opcodes.BIPUSH, i));
+				instructions.insertBefore(insertionPoints[i], createLoadIntConstant(i));
 				// leave the original loading sequence in tact and continue at the next point:
 				AbstractInsnNode insertAt = (i +1 < insertionPoints.length) ? insertionPoints[i+1] : oldNode;
 				instructions.insertBefore(insertAt, AsmTypeHelper.getBoxingInstructionForType(args[i]));
 				instructions.insertBefore(insertAt, new InsnNode(Opcodes.AASTORE));
 			}
 	
+			// before an areturn j.l.Object we don't need any type adjustments
+			// (incl. the case where we change another return to areturn j.l.O):
+			boolean nextIsGeneralizedReturn = false;
 			AbstractInsnNode next = oldNode.getNext();
-			boolean nextIsReturn = next != null && next.getOpcode() >= Opcodes.IRETURN && next.getOpcode() <= Opcodes.ARETURN;
-			if (!nextIsReturn) { 
+			if (returnsJLObject)
+				nextIsGeneralizedReturn = next != null && next.getOpcode() >= Opcodes.IRETURN && next.getOpcode() <= Opcodes.ARETURN; 
+
+			if (!nextIsGeneralizedReturn) {
 				if (returnType == Type.VOID_TYPE) {
 					instructions.insert(oldNode, new InsnNode(Opcodes.POP));
 				} else {
@@ -324,7 +332,7 @@ public abstract class AbstractTransformableClassNode extends ClassNode {
 	
 			MethodInsnNode newMethodNode = new MethodInsnNode(Opcodes.INVOKESPECIAL, ((MethodInsnNode)oldNode).owner, callOrig.getName(), callOrig.getSignature(), false);
 			instructions.set(oldNode, newMethodNode);
-			if (next != null && nextIsReturn && next.getOpcode() != Opcodes.ARETURN)
+			if (nextIsGeneralizedReturn && next != null && next.getOpcode() != Opcodes.ARETURN)
 				instructions.set(next, new InsnNode(Opcodes.ARETURN)); // prevent further manipulation by replaceReturn()
 		}
 	}
