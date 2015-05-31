@@ -37,6 +37,7 @@ import org.objectweb.asm.tree.MethodNode;
 import org.objectweb.asm.tree.TypeInsnNode;
 
 import static org.eclipse.objectteams.otredyn.bytecode.asm.AsmBoundClass.ASM_API;
+import static org.eclipse.objectteams.otredyn.transformer.names.ConstantMembers.callOrig;
 
 /**
  * Every class, that wants to manipulate the bytecode of a class
@@ -199,7 +200,17 @@ public abstract class AbstractTransformableClassNode extends ClassNode {
 				"java/io/PrintStream", "println", "(Ljava/lang/String;)V", false));
 		return instructions;
 	}
-	
+
+	protected InsnList getInstructionsForDebugObjectOutput(AbstractInsnNode getObjectInsn) {
+		InsnList instructions = new InsnList();
+		instructions.add(new FieldInsnNode(Opcodes.GETSTATIC,
+				"java/lang/System", "out", "Ljava/io/PrintStream;"));
+		instructions.add(getObjectInsn);
+		instructions.add(new MethodInsnNode(Opcodes.INVOKEVIRTUAL,
+				"java/io/PrintStream", "println", "(Ljava/lang/Object;)V", false));
+		return instructions;
+	}
+
 	/**
 	 * Adds instructions to put all arguments of a method on the stack.
 	 * @param instructions
@@ -266,6 +277,58 @@ public abstract class AbstractTransformableClassNode extends ClassNode {
 		else
 			return new LdcInsnNode(constant);
 	}
+	
+	/** Call back interface for {@link #replaceSuperCallsWithCallToCallOrig()}. */
+	protected interface IBoundMethodIdInsnProvider {
+		IntInsnNode getLoadBoundMethodIdInsn(MethodInsnNode methodInsn);
+	}
+
+	protected void replaceSuperCallsWithCallToCallOrig(InsnList instructions, List<MethodInsnNode> superCalls, IBoundMethodIdInsnProvider insnProvider) {
+		for (MethodInsnNode oldNode : superCalls) {
+			Type[] args = Type.getArgumentTypes(oldNode.desc);
+			Type returnType = Type.getReturnType(oldNode.desc);
+	
+			// we need to insert into the loading sequence before the invocation, find the insertion points:
+			AbstractInsnNode[] insertionPoints = StackBalanceAnalyzer.findInsertionPointsBefore(oldNode, args);
+			AbstractInsnNode firstInsert = insertionPoints.length > 0 ? insertionPoints[0] : oldNode;
+			
+			// push first arg to _OT$callOrig():
+			instructions.insertBefore(firstInsert, insnProvider.getLoadBoundMethodIdInsn(oldNode));
+			
+			// prepare array as second arg to _OT$callOrig():
+			instructions.insertBefore(firstInsert, new IntInsnNode(Opcodes.BIPUSH, args.length));
+			instructions.insertBefore(firstInsert, new TypeInsnNode(Opcodes.ANEWARRAY, "java/lang/Object"));
+			
+			for (int i = 0; i < insertionPoints.length; i++) {
+				// NB: each iteration has an even stack balance, where the top is the Object[].
+				instructions.insertBefore(insertionPoints[i], new InsnNode(Opcodes.DUP));
+				instructions.insertBefore(insertionPoints[i], new IntInsnNode(Opcodes.BIPUSH, i));
+				// leave the original loading sequence in tact and continue at the next point:
+				AbstractInsnNode insertAt = (i +1 < insertionPoints.length) ? insertionPoints[i+1] : oldNode;
+				instructions.insertBefore(insertAt, AsmTypeHelper.getBoxingInstructionForType(args[i]));
+				instructions.insertBefore(insertAt, new InsnNode(Opcodes.AASTORE));
+			}
+	
+			AbstractInsnNode next = oldNode.getNext();
+			boolean nextIsReturn = next != null && next.getOpcode() >= Opcodes.IRETURN && next.getOpcode() <= Opcodes.ARETURN;
+			if (!nextIsReturn) { 
+				if (returnType == Type.VOID_TYPE) {
+					instructions.insert(oldNode, new InsnNode(Opcodes.POP));
+				} else {
+					instructions.insert(oldNode, AsmTypeHelper.getUnboxingInstructionForType(returnType));
+					String boxTypeName = AsmTypeHelper.getObjectType(returnType);
+					if (boxTypeName != null)
+						instructions.insert(oldNode, new TypeInsnNode(Opcodes.CHECKCAST, boxTypeName));
+				}
+			}
+	
+			MethodInsnNode newMethodNode = new MethodInsnNode(Opcodes.INVOKESPECIAL, ((MethodInsnNode)oldNode).owner, callOrig.getName(), callOrig.getSignature(), false);
+			instructions.set(oldNode, newMethodNode);
+			if (next != null && nextIsReturn && next.getOpcode() != Opcodes.ARETURN)
+				instructions.set(next, new InsnNode(Opcodes.ARETURN)); // prevent further manipulation by replaceReturn()
+		}
+	}
+
 	/**
 	 * In this method, concrete Implementations of this class
 	 * can manipulate the bytecode

@@ -1,7 +1,7 @@
 /**********************************************************************
  * This file is part of "Object Teams Dynamic Runtime Environment"
  * 
- * Copyright 2009, 2014 Oliver Frank and others.
+ * Copyright 2009, 2015 Oliver Frank and others.
  * 
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -110,7 +110,7 @@ public class MoveCodeToCallOrigAdapter extends AbstractTransformableClassNode {
 		}
 
 		if (superIsWeavable)
-			adjustSuperCalls(orgMethod.instructions, orgMethod.name, args, returnType, boundMethodIdSlot);
+			adjustSuperCalls(orgMethod.instructions, orgMethod.name, orgMethod.desc, args, returnType, boundMethodIdSlot);
 		
 		// replace return of the original method with areturn and box the result value if needed
 		replaceReturn(orgMethod.instructions, returnType);
@@ -131,57 +131,26 @@ public class MoveCodeToCallOrigAdapter extends AbstractTransformableClassNode {
 	}
 	
 	/** To avoid infinite recursion, calls super.m(a1, a2) must be translated to super.callOrig(boundMethodId, new Object[] {a1, a2}). */
-	private void adjustSuperCalls(InsnList instructions, String selector, Type[] args, Type returnType, int boundMethodIdSlot) {
+	private void adjustSuperCalls(InsnList instructions, String selector, String descriptor, 
+			Type[] args, Type returnType, final int boundMethodIdSlot) {
+
 		// search:
 		List<MethodInsnNode> toReplace = new ArrayList<MethodInsnNode>();
 		ListIterator<AbstractInsnNode> orgMethodIter = instructions.iterator();
 		while (orgMethodIter.hasNext()) {
 			AbstractInsnNode orgMethodNode = orgMethodIter.next();
-			if (orgMethodNode.getOpcode() == Opcodes.INVOKESPECIAL && ((MethodInsnNode)orgMethodNode).name.equals(selector))
+			if (orgMethodNode.getOpcode() == Opcodes.INVOKESPECIAL 
+					&& ((MethodInsnNode)orgMethodNode).name.equals(selector)
+					&& ((MethodInsnNode)orgMethodNode).desc.equals(descriptor))
 				toReplace.add((MethodInsnNode) orgMethodNode);
 		}
 		if (toReplace.isEmpty())
 			return;
 		// replace:
-		for (MethodInsnNode oldNode : toReplace) {
-			// we need to insert into the loading sequence before the invocation, find the insertion points:
-			AbstractInsnNode[] insertionPoints = StackBalanceAnalyzer.findInsertionPointsBefore(oldNode, args);
-			AbstractInsnNode firstInsert = insertionPoints.length > 0 ? insertionPoints[0] : oldNode;
-			
-			// push first arg to _OT$callOrig():
-			instructions.insertBefore(firstInsert, new IntInsnNode(Opcodes.ILOAD, boundMethodIdSlot));
-			
-			// prepare array as second arg to _OT$callOrig():
-			instructions.insertBefore(firstInsert, new IntInsnNode(Opcodes.BIPUSH, args.length));
-			instructions.insertBefore(firstInsert, new TypeInsnNode(Opcodes.ANEWARRAY, "java/lang/Object"));
-			
-			for (int i = 0; i < insertionPoints.length; i++) {
-				// NB: each iteration has an even stack balance, where the top is the Object[].
-				instructions.insertBefore(insertionPoints[i], new InsnNode(Opcodes.DUP));
-				instructions.insertBefore(insertionPoints[i], new IntInsnNode(Opcodes.BIPUSH, i));
-				// leave the original loading sequence in tact and continue at the next point:
-				AbstractInsnNode insertAt = (i +1 < insertionPoints.length) ? insertionPoints[i+1] : oldNode;
-				instructions.insertBefore(insertAt, AsmTypeHelper.getBoxingInstructionForType(args[i]));
-				instructions.insertBefore(insertAt, new InsnNode(Opcodes.AASTORE));
+		replaceSuperCallsWithCallToCallOrig(instructions, toReplace, new IBoundMethodIdInsnProvider() {
+			@Override public IntInsnNode getLoadBoundMethodIdInsn(MethodInsnNode methodInsn) {
+				return new IntInsnNode(Opcodes.ILOAD, boundMethodIdSlot);
 			}
-
-			AbstractInsnNode next = oldNode.getNext();
-			boolean nextIsReturn = next != null && next.getOpcode() >= Opcodes.IRETURN && next.getOpcode() <= Opcodes.ARETURN;
-			if (!nextIsReturn) { 
-				if (returnType == Type.VOID_TYPE) {
-					instructions.insert(oldNode, new InsnNode(Opcodes.POP));
-				} else {
-					instructions.insert(oldNode, AsmTypeHelper.getUnboxingInstructionForType(returnType));
-					String boxTypeName = AsmTypeHelper.getObjectType(returnType);
-					if (boxTypeName != null)
-						instructions.insert(oldNode, new TypeInsnNode(Opcodes.CHECKCAST, boxTypeName));
-				}
-			}
-
-			MethodInsnNode newMethodNode = new MethodInsnNode(Opcodes.INVOKESPECIAL, ((MethodInsnNode)oldNode).owner, callOrig.getName(), callOrig.getSignature(), false);
-			instructions.set(oldNode, newMethodNode);
-			if (next != null && nextIsReturn && next.getOpcode() != Opcodes.ARETURN)
-				instructions.set(next, new InsnNode(Opcodes.ARETURN)); // prevent further manipulation by replaceReturn()
-		}
+		});
 	}
 }

@@ -46,6 +46,10 @@ public abstract class AbstractBoundClass implements IBoundClass {
 	private static enum WeavingTaskType {
 		WEAVE_BINDING_OF_SUBCLASS,
 		WEAVE_BINDING,
+		/**
+		 * Weaving of bindings for overridden methods whose super version is callin-bound.
+		 * Includes replacement of "wicked super calls" towards those bound super methods.
+		 */
 		WEAVE_INHERITED_BINDING,
 		WEAVE_METHOD_ACCESS,
 		WEAVE_FIELD_ACCESS,
@@ -604,6 +608,9 @@ public abstract class AbstractBoundClass implements IBoundClass {
 			endTransformation();
 		}
 
+		// collect other classes for which new tasks are recorded, to flush those tasks in bulk at the end
+		Set<AbstractBoundClass> affectedClasses = new HashSet<AbstractBoundClass>();
+
 		for (Map.Entry<Method, WeavingTask> entry : bindingEntrySet) {
 			WeavingTask task = entry.getValue();
 			Method method = entry.getKey();
@@ -618,9 +625,10 @@ public abstract class AbstractBoundClass implements IBoundClass {
 				} else {
 					//No, so just delegate the weaving task to the superclass
 					AbstractBoundClass superclass = getSuperclass();
-					// If superclass is null, her is something wrong
+					// If superclass is null, there is something wrong
 					if (superclass != null) {
-						superclass.addWeavingTask(task);
+						superclass.addWeavingTask(task, true/*standBy*/);
+						affectedClasses.add(superclass);
 						weaveSuperCallInCallOrig(task); // ensure we're actually calling that super version
 					}
 				}
@@ -637,10 +645,15 @@ public abstract class AbstractBoundClass implements IBoundClass {
 					} else {
 						//No, so weave this class and delegate to the super class
 						weaveBindingInNotImplementedMethod(task);
+					}
+					if (weavingContext.isWeavable(getSuperClassName())) {
 						AbstractBoundClass superclass = getSuperclass();
 						Method superMethod = superclass.getMethod(method, task);
-						WeavingTask newTask = new WeavingTask(WeavingTaskType.WEAVE_BINDING_OF_SUBCLASS, superMethod, task);
-						superclass.addWeavingTask(newTask);
+						if (superMethod != null) {
+							WeavingTask newTask = new WeavingTask(WeavingTaskType.WEAVE_BINDING_OF_SUBCLASS, superMethod, task);
+							superclass.addWeavingTask(newTask, true/*standBy*/);
+							affectedClasses.add(superclass);
+						}
 					}
 
 // Original comment:
@@ -654,7 +667,8 @@ public abstract class AbstractBoundClass implements IBoundClass {
 						for (AbstractBoundClass subclass : getSubclasses()) {
 							Method subMethod = subclass.getMethod(method, task);
 							WeavingTask newTask = new WeavingTask(WeavingTaskType.WEAVE_INHERITED_BINDING, subMethod, task);
-							subclass.addWeavingTask(newTask);
+							subclass.addWeavingTask(newTask, true/*standBy*/);
+							affectedClasses.add(subclass);
 							TeamManager.mergeJoinpoints(this, subclass, method, subMethod, task.isHandleCovariantReturn());
 						}
 //					}
@@ -667,12 +681,14 @@ public abstract class AbstractBoundClass implements IBoundClass {
 				} else {
 					weaveBindingInNotImplementedMethod(task);
 				}
+				replaceWickedSuperCalls(getSuperclass(), method);
 
 				// Delegate the WeavingTask to the subclasses
 				for (AbstractBoundClass subclass : getSubclasses()) {
 					Method subMethod = subclass.getMethod(method, task);
 					WeavingTask newTask = new WeavingTask(WeavingTaskType.WEAVE_INHERITED_BINDING, subMethod, task);
-					subclass.addWeavingTask(newTask);
+					subclass.addWeavingTask(newTask, true/*standBy*/);
+					affectedClasses.add(subclass);
 					TeamManager.mergeJoinpoints(this, subclass, method, subMethod, task.isHandleCovariantReturn());
 				}
 
@@ -701,7 +717,8 @@ public abstract class AbstractBoundClass implements IBoundClass {
 					// so weave the subclass
 					for (AbstractBoundClass subclass : getSubclasses()) {
 						WeavingTask newTask = new WeavingTask(WeavingTaskType.WEAVE_INHERITED_MEMBER_ACCESS);
-						subclass.addWeavingTask(newTask);
+						subclass.addWeavingTask(newTask, true/*standBy*/);
+						affectedClasses.add(subclass);
 					}
 				}
 				break;
@@ -715,7 +732,8 @@ public abstract class AbstractBoundClass implements IBoundClass {
 					// so weave the subclass
 					for (AbstractBoundClass subclass : getSubclasses()) {
 						WeavingTask newTask = new WeavingTask(WeavingTaskType.WEAVE_INHERITED_MEMBER_ACCESS);
-						subclass.addWeavingTask(newTask);
+						subclass.addWeavingTask(newTask, true/*standBy*/);
+						affectedClasses.add(subclass);
 					}
 				}
 				break;
@@ -731,6 +749,11 @@ public abstract class AbstractBoundClass implements IBoundClass {
 			// as completed
 			completedAccessTasks.put(member, task);
 		}
+		// flush collected tasks of other affected classes:
+		for (AbstractBoundClass affected : affectedClasses)
+			if (affected.isLoaded)
+				affected.handleTaskList();
+
 		if (openBindingTasks.size() > 0 || openAccessTasks.size() > 0) {
 			// Weave the class, if the method is not called at load time
 			endTransformation();
@@ -772,13 +795,13 @@ public abstract class AbstractBoundClass implements IBoundClass {
 		if (task == null)
 			task = new WeavingTask(type, binding.getMemberName(), binding.getMemberSignature(), 
 											binding.getBaseFlags(), binding.isHandleCovariantReturn());
-		addWeavingTask(task);
+		addWeavingTask(task, false);
 	}
 	
-	private void addWeavingTask(WeavingTask task) {
+	private void addWeavingTask(WeavingTask task, boolean standBy) {
 		boolean isNewTask = addWeavingTaskLazy(task);
 
-		if (this.isLoaded && isNewTask) {
+		if (this.isLoaded && isNewTask && !standBy) {
 			handleTaskList();
 		}
 	}
@@ -1005,7 +1028,10 @@ public abstract class AbstractBoundClass implements IBoundClass {
 		createCallAllBindingsCallInOrgMethod(method, boundMethodId, false);
 
 	}
-	
+
+	/** replace all "wicked super calls" targeting the given targetMethod. */
+	protected abstract void replaceWickedSuperCalls(AbstractBoundClass superclass, Method targetMethod);
+
 	@Override
 	public String toString() {
 		return this.name+"["+this.id+"]";

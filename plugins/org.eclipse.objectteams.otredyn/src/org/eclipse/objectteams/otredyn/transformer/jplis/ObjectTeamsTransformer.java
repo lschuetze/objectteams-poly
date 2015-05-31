@@ -38,7 +38,13 @@ public class ObjectTeamsTransformer implements ClassFileTransformer {
 	
 	private Set<String> boundBaseClassNames = new HashSet<String>();
 
-	public ObjectTeamsTransformer() { }
+	public ObjectTeamsTransformer() {
+		this.weavingContext = new IWeavingContext() {
+			@Override public boolean isWeavable(String className) {
+				return ObjectTeamsTransformer.isWeavable(className);
+			}
+		};
+	}
 
 	public ObjectTeamsTransformer(IWeavingContext weavingContext) {
 		this.weavingContext = weavingContext;

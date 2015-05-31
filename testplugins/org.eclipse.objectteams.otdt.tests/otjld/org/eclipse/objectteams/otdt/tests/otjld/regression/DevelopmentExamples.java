@@ -950,6 +950,88 @@ public class DevelopmentExamples extends AbstractOTJLDTest {
 			"MyTeam.MyRole.rm(Hoki)\n" +
 			"retBase");
     }
+
+	// wicked super call interferes with callin binding
+	// Bug 468712: [otdre] stack overflow at callin-bound base method involving wicked super call
+	public void testX11_bindingInheritance4e() {
+
+		runConformTest(
+				new String[] {
+		"TeamX114e.java",
+				"\n" +
+				"public team class TeamX114e {\n" +
+				"    protected class R playedBy MyBaseX114e {\n" +
+				"        callin void rm() {\n" +
+				"            System.out.println(\"> R.rm\");\n" +
+				"            base.rm();\n" +
+				"            System.out.println(\"< R.rm\");\n" +
+				"        }\n" +
+				"        rm <- replace bmA, bmB;\n" +
+				"    }\n" +
+				"    public static void main(String[] args) {\n" +
+				"        new TeamX114e().activate();\n" +
+				"        MySub2BaseX114e b = new MySub2BaseX114e();\n" +
+				"        b.bmA();\n" +
+				"        b.bmB();\n" +
+				"    }\n" +
+				"}\n" +
+				"    \n",
+		"MyBaseX114e.java",
+				"\n" +
+				"public class MyBaseX114e {\n" +
+				"    void bmA() { System.out.println(\"MyBase.bmA\"); }\n" +
+				"    void bmB() { System.out.println(\"MyBase.bmB\"); }\n" + // 2 methods to challenge reuse of existing ReplaceWickedSuperCallsAdapter (OTDRE)
+				"}\n" +
+				"    \n",
+		"MySubBaseX114e.java",
+				"\n" +
+				"public class MySubBaseX114e extends MyBaseX114e {\n" +
+				"    void bmA2() {\n" +
+				"        System.out.println(\"MySubBase.bmA2\");\n" +
+				"        super.bmA();\n" +
+				"    }\n" +
+				"    void bmA() {\n" +
+				"        System.out.println(\"MySubBase.bmA\");\n" +
+				"        bmA2();\n" +
+				"    }\n" +
+				"    void bmB2() {\n" +
+				"        System.out.println(\"MySubBase.bmB2\");\n" +
+				"        super.bmB();\n" +
+				"    }\n" +
+				"    void bmB() {\n" +
+				"        System.out.println(\"MySubBase.bmB\");\n" +
+				"        bmB2();\n" +
+				"    }\n" +
+				"}\n" +
+				"    \n",
+		"MySub2BaseX114e.java",
+				"\n" +
+				"public class MySub2BaseX114e extends MySubBaseX114e {\n" +
+				"    void bmA() {\n" +
+				"        System.out.println(\"MySub2Base.bmA\");\n" +
+				"        super.bmA();\n" +
+				"    }\n" +
+				"    void bmB() {\n" +
+				"        System.out.println(\"MySub2Base.bmB\");\n" +
+				"        super.bmB();\n" +
+				"    }\n" +
+				"}\n" +
+				"    \n"
+			},
+			"> R.rm\n" +
+			"MySub2Base.bmA\n" +
+			"MySubBase.bmA\n" +
+			"MySubBase.bmA2\n" +
+			"MyBase.bmA\n" +
+			"< R.rm\n" +
+			"> R.rm\n" +
+			"MySub2Base.bmB\n" +
+			"MySubBase.bmB\n" +
+			"MySubBase.bmB2\n" +
+			"MyBase.bmB\n" +
+"< R.rm");
+	}
+
     // after callin inherited from super role, before callin to the same base method added
     // X.1.1-otjld-binding-inheritance-5
     public void testX11_bindingInheritance5() {

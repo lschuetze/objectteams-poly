@@ -272,6 +272,11 @@ class AsmWritableBoundClass extends AsmBoundClass {
 
 	}
 
+	@Override
+	protected void replaceWickedSuperCalls(AbstractBoundClass superclass, Method targetMethod) {
+		ReplaceWickedSuperCallsAdapter.register(nodes, superclass, targetMethod);
+	}
+
 	/**
 	 * Prepares a the class for a decapsulation of one of its methods
 	 */
