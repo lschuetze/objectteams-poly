@@ -164,6 +164,10 @@ public class ObjectTeamsTransformer implements ClassFileTransformer {
 	 * this method will answer the qualified names (dot-separated) of all base classes adapated by the current team and its roles.
 	 */
 	public Collection<String> fetchAdaptedBases() {
-		return this.boundBaseClassNames;
+		try {
+			return this.boundBaseClassNames;
+		} finally {
+			this.boundBaseClassNames = new HashSet<String>();
+		}
 	}
 }
