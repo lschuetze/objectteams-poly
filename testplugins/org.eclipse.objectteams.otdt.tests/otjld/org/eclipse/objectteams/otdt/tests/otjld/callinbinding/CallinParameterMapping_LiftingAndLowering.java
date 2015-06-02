@@ -2051,4 +2051,35 @@ public class CallinParameterMapping_LiftingAndLowering extends AbstractOTJLDTest
             },
             "4.4(a)");
     }
+
+    public void testBug469204() {
+    	runConformTest(
+    		new String[] {
+    	"TBug469204.java",
+    			"public class TBug469204 {\n" +
+    			"	public static void main(String... args) {\n" +
+    			"		new TeamBug469204().activate();\n" +
+    			"		new Base469204_2().bm(new Base469204_1());\n" +
+    			"	}\n" +
+    			"}\n",
+    	"TeamBug469204.java",
+    			"public team class TeamBug469204 {\n" +
+    			"	protected team class Mid playedBy Base469204_2 {\n" +
+    			"		protected class Inner playedBy Base469204_1 {\n" +
+    			"		}\n" +
+    			"		callin void rm(Inner i) { System.out.print(i.getClass().getName()); }\n" +
+    			"		void rm(Inner i) <- replace void bm(Base469204_1 b) with {\n" +
+    			"			i <- b\n" +
+    			"		}\n" +
+    			"	}\n" +
+    			"}\n",
+    	"Base469204_1.java",
+    			"public class Base469204_1 {}\n",
+    	"Base469204_2.java",
+    			"public class Base469204_2 {\n" +
+    			"	void bm(Base469204_1 b) {}\n" +
+    			"}\n"
+    		},
+    		"TeamBug469204$__OT__Mid$__OT__Inner");
+    }
 }

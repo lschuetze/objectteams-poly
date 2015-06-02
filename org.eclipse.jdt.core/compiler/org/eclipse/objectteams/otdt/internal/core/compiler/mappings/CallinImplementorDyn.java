@@ -187,7 +187,8 @@ public class CallinImplementorDyn extends MethodMappingImplementor {
 			MethodDeclaration       	wrapperDeclaration,
 			TypeBinding[]               implParameters,
 			int		      				idx,
-			final MethodSpec			sourceMethodSpec)
+			final MethodSpec			sourceMethodSpec,
+			char[]						roleVar)
 	{
 		final MethodSpec implementationMethodSpec = methodMapping.getImplementationMethodSpec();
 
@@ -229,7 +230,7 @@ public class CallinImplementorDyn extends MethodMappingImplementor {
 			{
 				// expectedType is a role of the current role(=team),
 				// use the role as the receiver for the lift call:
-				receiver = gen.singleNameReference(ROLE_VAR_NAME);
+				receiver = gen.singleNameReference(roleVar);
 			}
 			if (sourceMethodSpec.hasSignature) {
 				if (sourceMethodSpec.argNeedsTranslation(srcIdx)) {
@@ -582,7 +583,8 @@ public class CallinImplementorDyn extends MethodMappingImplementor {
 												  (MethodDeclaration) methodDecl,
 												  callinDecl.getRoleMethod().parameters, 
 												  i+idx,
-												  baseSpec);
+												  baseSpec,
+												  roleVar);
 								if (arg == null) {
 									hasArgError = true;
 									continue; // keep going to find problems with other args, too.
