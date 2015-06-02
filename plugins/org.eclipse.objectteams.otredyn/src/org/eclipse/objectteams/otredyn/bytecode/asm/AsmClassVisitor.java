@@ -133,6 +133,8 @@ class AsmClassVisitor extends ClassVisitor {
 			}
 		} else if (attribute.type.equals(Attributes.ATTRIBUTE_ROLE_BASE_BINDINGS)) {
 			for (String base : ((RoleBaseBindingsAttribute) attribute).bases) {
+				if (base.charAt(0) == '^')
+					base = base.substring(1);
 				clazz.boundBaseClasses.add(base.replace('/', '.'));
 				clazz.addBinding(new Binding(clazz, base));
 			}
