@@ -133,7 +133,7 @@ By specifying &lt;code&gt;SELF&lt;/code&gt; as the basePlugin, a team may adapt 
          </appInfo>
          <documentation>
             The team class of this plug-in which is allowed to adapt classes of the given base plug-in.&lt;br/&gt;
-If a nested team shall be used it can be specified using either its source name (using &apos;.&apos; as the separator) or its binary name (using a &apos;$&apos; separator).
+If a nested team shall be used it must be specified using either its binary name (using a &apos;$&apos; separator).
          </documentation>
       </annotation>
       <complexType>
