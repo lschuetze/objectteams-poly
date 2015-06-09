@@ -59,6 +59,7 @@ directory for tempory files during testing:
 			<property name="test.eclipseDir" value="${test.root.dir}/eclipse" />
 
 		<!--	directories for update sites: -->
+		<property name="compilerUpdatesDir"		value="${user.dir}/updateSiteCompiler"/>
 		<property name="otdtUpdatesDir" 		value="${user.dir}/updateSite"/>
 		<property name="testsUpdatesDirBase" 	value="${user.dir}/updateSiteTests"/>
 			<!-- will have sub directories "eclipse" and "otdt" -->
@@ -235,7 +236,7 @@ directory for tempory files during testing:
 	            <arg value="-Dbuilder=${builder-otcompiler}"/>
 	            <arg value="-D${installmode}=true"/> <!-- <- obsolete? -->
 		    	<arg value="-Dcomponent.short=OT-Compiler"/>
-				<arg value="-DotdtUpdatesDir=${otdtUpdatesDir}"/>
+				<arg value="-DotdtUpdatesDir=${compilerUpdatesDir}"/>
 	            <arg value="-Dconfigs=*,*,*"/>
 	            <arg value="-Dbaseos=${os}"/>
 	            <arg value="-Dbasews=${ws}"/>
@@ -252,7 +253,7 @@ directory for tempory files during testing:
 		<!-- Now we should have an update site with the patch feature, time to install it into base: -->
         <ant antfile="${OTScriptDir}/p2helper.xml" target="installFeature" dir="${baseLocation}">
             <property name="feature" value="org.eclipse.objectteams.otdt.core.patch.feature.group"/>
-            <property name="sourceUpdatesDir" value="${otdtUpdatesDir}"/>
+            <property name="sourceUpdatesDir" value="${compilerUpdatesDir}"/>
             <property name="targetEclipseDir" value="${baseLocation}"/>
         </ant>
     </target>
