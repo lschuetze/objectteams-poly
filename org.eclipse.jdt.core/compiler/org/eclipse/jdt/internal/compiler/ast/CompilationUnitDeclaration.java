@@ -309,8 +309,11 @@ public void finalizeProblems() {
 			}
 			continue nextProblem;
 		}
+	}
 //{ObjectTeams: also remove marked problems in generated code (no longer need it to match SuppressWarnings):
-		// (see also CompilationUnitProblemFinder#initializeParser)
+	// (see also CompilationUnitProblemFinder#initializeParser)
+	for (int iProblem = 0, length = problemCount; iProblem < length; iProblem++) {
+		CategorizedProblem problem = problems[iProblem];
 		if (problem instanceof DefaultProblem) {
 			DefaultProblem defaultProblem = (DefaultProblem) problem;
 			if (defaultProblem.isInGenerated()) {
@@ -319,8 +322,8 @@ public void finalizeProblems() {
 				removed++;
 			}
 		}
-// SH}
 	}
+// SH}
 	// compact remaining problems
 	if (removed > 0) {
 		for (int i = 0, index = 0; i < problemCount; i++) {

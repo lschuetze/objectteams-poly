@@ -1,7 +1,7 @@
 /**********************************************************************
  * This file is part of "Object Teams Development Tooling"-Software
  * 
- * Copyright 2004, 2010 Fraunhofer Gesellschaft, Munich, Germany,
+ * Copyright 2004, 2015 Fraunhofer Gesellschaft, Munich, Germany,
  * for its Fraunhofer Institute and Computer Architecture and Software
  * Technology (FIRST), Berlin, Germany and Technical University Berlin,
  * Germany.
@@ -10,7 +10,6 @@
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
- * $Id: OTReconcilerTests.java 23494 2010-02-05 23:06:44Z stephan $
  * 
  * Please visit http://www.eclipse.org/objectteams for updates and contact.
  * 
@@ -25,8 +24,6 @@ import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.net.URL;
 import java.util.Map;
-
-import junit.framework.Test;
 
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IProjectDescription;
@@ -71,6 +68,8 @@ import org.eclipse.objectteams.otdt.internal.core.compiler.control.Dependencies;
 import org.eclipse.objectteams.otdt.internal.core.compiler.control.ITranslationStates;
 import org.eclipse.text.edits.DeleteEdit;
 import org.eclipse.text.edits.InsertEdit;
+
+import junit.framework.Test;
 
 /**
  * Tests for errors shown only in the gutter (CompilationUnitProblemFinder),
@@ -1804,6 +1803,79 @@ public class OTReconcilerTests extends ReconcilerTests {
 
 			ICompilationUnit icu = getCompilationUnit("/P/src/p/MyTeam/R.java").getWorkingCopy(this.wcOwner, null);
 			assertNoProblem(roleSourceChars, icu);
+    	} finally {
+    		deleteProject("P");
+    	}
+    }
+
+    // Bug 466097: Converted ast of org.objectteams.Team has no _OT$- methods
+    public void testSetExecutingCallin() throws CoreException, InterruptedException {
+    	try {
+			// Resources creation
+			IJavaProject p = createOTJavaProject("P", new String[] {"src"}, new String[] {"JCL17_LIB"}, "1.7", "bin");
+			IProject project = p.getProject();
+			IProjectDescription prjDesc = project.getDescription();
+			prjDesc.setBuildSpec(OTDTPlugin.createProjectBuildCommands(prjDesc));
+			project.setDescription(prjDesc, null);
+			p.setOption(JavaCore.COMPILER_PB_UNUSED_LOCAL, JavaCore.IGNORE);
+	
+			OTREContainer.initializeOTJProject(project);
+			
+			this.createFolder("/P/src/org/objectteams");
+			this.createFile("P/src/org/objectteams/Team.java", 
+					"package org.objectteams;\n" +
+					"public class Team implements ITeam {\n" +
+					"	public boolean _OT$setExecutingCallin(boolean newFlag) {\n" + 
+					"		boolean oldVal = _OT$isExecutingCallin;\n" + 
+					"		_OT$isExecutingCallin = newFlag;\n" + 
+					"		return oldVal;\n" + 
+					"	}\n" + 
+					"}\n");
+			this.createFolder("/P/src/b");
+			String b1SourceString =	
+				"package b;\n" +
+				"public class B1 {\n" +
+				"	void bm1() {};\n" +
+				"}\n";
+			this.createFile("P/src/b/B1.java", b1SourceString);
+
+			String b2SourceString =	
+					"package b;\n" +
+					"public class B2 {\n" +
+					"	public void bm2() {};\n" +
+					"}\n";
+			this.createFile("P/src/b/B2.java", b2SourceString);
+	
+			this.createFolder("/P/src/p");
+			String team1SourceString =	
+				"package p;\n" +
+				"import base b.B1;\n" +
+				"public team class MyTeam1 {\n" +
+				"	protected class R1 playedBy B1 {\n" +
+				"		void rm1() {}\n" +
+				"		rm1 <- after bm1;\n" +
+				"	}\n" +
+				"}\n";
+			this.createFile("P/src/p/MyTeam1.java", team1SourceString);
+			project.build(IncrementalProjectBuilder.FULL_BUILD, null);
+			p.close();
+			p.open(null);
+
+			String team2SourceString =	
+					"package p;\n" +
+					"import base b.B2;\n" +
+					"public team class MyTeam2 extends MyTeam1 {\n" +
+					"	protected class R2 playedBy B2 {\n" +
+					"		callin void rm2() { base.rm2(); }\n" +
+					"		rm2 <- replace bm2;\n" +
+					"	}\n" +
+					"}\n";
+			this.createFile("/P/src/p/MyTeam2.java", team2SourceString);
+			
+			this.problemRequestor.initialize(team2SourceString.toCharArray());
+			ICompilationUnit unit = getCompilationUnit("/P/src/p/MyTeam2.java").getWorkingCopy(this.wcOwner, null);
+			assertNoProblem((team2SourceString).toCharArray(), unit);
+
     	} finally {
     		deleteProject("P");
     	}

@@ -10,10 +10,11 @@
  *******************************************************************************/
 package java.util;
 
-public interface Collection<T> {
-	public Iterator<T> iterator();
+public interface Collection<E> extends Iterable<E> {
+	public Iterator<E> iterator();
 	public int size();
-	public T get(int index);
-	public boolean addAll(Collection<T> c);
-	public T[] toArray(T[] o);
+	public E get(int index);
+	void addAll(Collection<? extends E> other);
+	public <T> T[] toArray(T[] o);
+	public Object[] toArray();
 }
