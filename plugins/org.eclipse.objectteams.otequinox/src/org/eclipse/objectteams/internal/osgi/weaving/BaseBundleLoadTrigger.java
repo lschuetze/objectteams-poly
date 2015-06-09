@@ -74,8 +74,10 @@ public class BaseBundleLoadTrigger {
 		}
 		
 		// for each team in each aspect binding:
-		if (aspectBindings.isEmpty())
-			aspectBindings.addAll(aspectBindingRegistry.getAdaptingAspectBindings(baseBundleName));
+		synchronized (aspectBindings) {
+			if (aspectBindings.isEmpty())
+				aspectBindings.addAll(aspectBindingRegistry.getAdaptingAspectBindings(baseBundleName));
+		}
 		List<WaitingTeamRecord> deferredTeamClasses = new ArrayList<>();
 		for (AspectBinding aspectBinding : aspectBindings) {
 			if (!aspectBinding.hasScannedTeams)
