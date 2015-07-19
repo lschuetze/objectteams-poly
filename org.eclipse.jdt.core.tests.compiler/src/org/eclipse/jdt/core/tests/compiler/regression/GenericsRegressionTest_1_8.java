@@ -5228,4 +5228,188 @@ public void testBug445231() {
 	"not anon\n" +
 	"Ok", null);
 }
+public void testBug463728() {
+	runConformTest(
+		new String[] {
+			"Main.java",
+			"import java.util.function.Function;\n" + 
+			"\n" + 
+			"\n" + 
+			"class Color {\n" + 
+			"	\n" + 
+			"}\n" + 
+			"\n" + 
+			"class TypeMapper<R> {\n" + 
+			"\n" + 
+			"	public TypeMapper() {\n" + 
+			"	}\n" + 
+			"	public R orElse(R result) {\n" + 
+			"		return result;\n" + 
+			"	}\n" + 
+			"}\n" + 
+			"\n" + 
+			"public class Main {\n" + 
+			"	Color A;\n" + 
+			"	Color B;\n" + 
+			"\n" + 
+			"	public static <T, R> TypeMapper<R> mapType(Function<T, R> mapper) {\n" + 
+			"		return new TypeMapper<R>();\n" + 
+			"	}\n" + 
+			"\n" + 
+			"	public Color getForeground(Object element) {\n" + 
+			"		return mapType(library -> {\n" + 
+			"				return (element != null ? A : B);\n" + 
+			"			}).orElse(null);\n" + 
+			"	}\n" + 
+			"}\n"
+		});
+}
+public void testBug470942() {
+	runConformTest(
+		new String[] {
+			"EclipeMarsLamdaIssueWontBuild.java",
+			"import java.util.function.Supplier;\n" + 
+			"\n" + 
+			"public class EclipeMarsLamdaIssueWontBuild {\n" + 
+			"	class MyClass {\n" + 
+			"		long getNumber() {\n" + 
+			"			return 0;\n" + 
+			"		}\n" + 
+			"	}\n" + 
+			"\n" + 
+			"	private interface VoidSupplier {\n" + 
+			"		void perform();\n" + 
+			"	}\n" + 
+			"\n" + 
+			"	long processTxContent() {\n" + 
+			"		return withLogging(() -> new MyClass().getNumber());\n" + 
+			"	}\n" + 
+			"\n" + 
+			"	private static void withLogging(final VoidSupplier supplier) {\n" + 
+			"		// Do some logging\n" + 
+			"	}\n" + 
+			"\n" + 
+			"	private static <T> T withLogging(final Supplier<T> supplier) {\n" + 
+			"		// Do some logging\n" + 
+			"		return null;\n" + 
+			"	}\n" + 
+			"}\n"
+		});
+}
+public void testBug468999() {
+	runConformTest(
+		new String[] {
+			"Main.java",
+			"interface ExceptionAction<T>\n" + 
+			"{\n" + 
+			"    T run() throws Exception;\n" + 
+			"}\n" + 
+			"\n" + 
+			"interface Action<U> extends ExceptionAction<U>\n" + 
+			"{\n" + 
+			"    @Override\n" + 
+			"    U run();\n" + 
+			"}\n" + 
+			"\n" + 
+			"public class Main\n" + 
+			"{\n" + 
+			"    public static void main(String[] args) {\n" + 
+			"        runAction(() -> {                              // ERROR HERE\n" + 
+			"            return \"\";\n" + 
+			"        });\n" + 
+			"    }\n" + 
+			"\n" + 
+			"    static <V> void runAction(ExceptionAction<V> action) {\n" + 
+			"        System.out.println(\"run with exceptions\");\n" + 
+			"    }\n" + 
+			"\n" + 
+			"    static <W> void runAction(Action<W> action) {\n" + 
+			"        System.out.println(\"run without exceptions\");\n" + 
+			"    }\n" + 
+			"}\n"
+		});
+}
+public void testBug470826() {
+	runConformTest(
+		new String[] {
+			"EcjVsCollect.java",
+			"import java.util.ArrayList;\n" + 
+			"import java.util.stream.Stream;\n" + 
+			"\n" + 
+			"public class EcjVsCollect {\n" + 
+			"\n" + 
+			"  public static void main(String[] args) {\n" + 
+			"    try (final Stream<Record<String>> stream = getStream()) {\n" + 
+			"      stream.collect(ArrayList::new, ArrayList::add, ArrayList::addAll);\n" + 
+			"//      ArrayList<Record<String>> foo = stream.collect(ArrayList::new, ArrayList::add, ArrayList::addAll);\n" + 
+			"    }\n" + 
+			"  }\n" + 
+			"\n" + 
+			"  private static <K> Stream<Record<K>> getStream() {\n" + 
+			"    return Stream.empty();\n" + 
+			"  }\n" + 
+			"\n" + 
+			"  private interface Record<K> {\n" + 
+			"    K getKey();\n" + 
+			"  }\n" + 
+			"}\n"
+		});
+}
+public void testBug466487() {
+	runConformTest(
+		new String[] {
+			"C.java",
+			"import java.util.*;\n" + 
+			"import java.util.stream.*;\n" + 
+			"import static java.util.Arrays.asList;\n" + 
+			"\n" + 
+			"public class C {\n" + 
+			"  static final List<Integer> DIGITS = Collections.unmodifiableList(asList(0,1,2,3,4,5,6,7,8,9));\n" + 
+			"    \n" + 
+			"    Collection<String> flatMapSolutions(final boolean b) {\n" + 
+			"      Collection<String> solutions = \n" + 
+			"          DIGITS.stream().flatMap( s -> {\n" + 
+			"               return b ? Stream.empty() : Stream.of(\"\");\n" + 
+			"          }) .collect(Collectors.toList());\n" + 
+			"      return solutions;\n" + 
+			"  }\n" + 
+			"}\n"
+		});
+}
+public void testBug472426() {
+	runConformTest(
+		new String[] {
+			"InferenceBug.java",
+			"import java.util.Collections;\n" + 
+			"import java.util.List;\n" + 
+			"import java.util.function.BiFunction;\n" + 
+			"\n" + 
+			"public class InferenceBug {\n" + 
+			"\n" + 
+			"    public static void main(String[] args) {\n" + 
+			"\n" + 
+			"        // compiles\n" + 
+			"        List<String> l = Collections.singletonList(\"foo\");\n" + 
+			"        apply(Foo::foo, l);\n" + 
+			"\n" + 
+			"        // won't compile\n" + 
+			"        apply(Foo::foo, Collections.singletonList(\"foo\"));\n" + 
+			"    }\n" + 
+			"\n" + 
+			"    static <T> void apply(BiFunction<Foo, T, Foo> fun, T value) {\n" + 
+			"    }\n" + 
+			"\n" + 
+			"    static class Foo {\n" + 
+			"        public Foo foo(List<String> i) {\n" + 
+			"            return this;\n" + 
+			"        }\n" + 
+			"\n" + 
+			"        public Foo foo(String... i) {\n" + 
+			"            return this;\n" + 
+			"        }\n" + 
+			"    }\n" + 
+			"\n" + 
+			"}\n"
+		});
+}
 }

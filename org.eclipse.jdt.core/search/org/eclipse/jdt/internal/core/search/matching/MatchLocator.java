@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2014 IBM Corporation and others.
+ * Copyright (c) 2000, 2015 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -37,6 +37,7 @@ import org.eclipse.jdt.core.IJavaModelStatusConstants;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IMember;
 import org.eclipse.jdt.core.IMethod;
+import org.eclipse.jdt.core.IOpenable;
 import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.ISourceRange;
@@ -1256,6 +1257,7 @@ public void initialize(JavaProject project, int possibleMatchSize) throws JavaMo
 	this.lookupEnvironment = new LookupEnvironment(this, this.options, problemReporter, this.nameEnvironment);
 	this.lookupEnvironment.mayTolerateMissingType = true;
 	this.parser = MatchLocatorParser.createParser(problemReporter, this);
+	this.bindings = new SimpleLookupTable(); // For every LE
 
 	// basic parser needs also to be reset as project options may have changed
 	// see bug https://bugs.eclipse.org/bugs/show_bug.cgi?id=163072
@@ -3015,7 +3017,24 @@ protected void reportMatching(TypeDeclaration type, IJavaElement parent, int acc
 	} else if (enclosingElement instanceof IMember) {
 	    IMember member = (IMember) parent;
 		if (member.isBinary())  {
-			enclosingElement = ((IClassFile)this.currentPossibleMatch.openable).getType();
+			IOpenable openable = enclosingElement.getOpenable();
+			IJavaElement anonType = null;
+			if (openable instanceof ClassFile) {
+				BinaryType binaryType = (BinaryType)((ClassFile) openable).getType();
+				String fileName = binaryType.getPath().toOSString();
+				if ((type.bits & ASTNode.IsAnonymousType) != 0) {
+					if (fileName != null) {
+						if (fileName.endsWith("jar") || fileName.endsWith(SuffixConstants.SUFFIX_STRING_class)) { //$NON-NLS-1$
+							IClassFile classFile= binaryType.getPackageFragment().getClassFile(binaryType.getTypeQualifiedName() + 
+									"$" + Integer.toString(occurrenceCount) + SuffixConstants.SUFFIX_STRING_class);//$NON-NLS-1$
+							anonType =  classFile.getType();
+						}
+					} else {
+						// TODO: JAVA 9 - JIMAGE to be included later - currently assuming that only .class files will be dealt here.
+					}
+				}
+			}
+			enclosingElement = anonType != null ? anonType : ((IClassFile)this.currentPossibleMatch.openable).getType() ;
 		} else {
 			enclosingElement = member.getType(new String(type.name), occurrenceCount);
 		}
