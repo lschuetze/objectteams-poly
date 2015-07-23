@@ -17,6 +17,7 @@ package org.eclipse.objectteams.otdt.internal.core.compiler.mappings;
 import static org.eclipse.jdt.internal.compiler.classfmt.ClassFileConstants.AccPublic;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 
@@ -973,7 +974,8 @@ public class CallinImplementorDyn extends MethodMappingImplementor {
 		if (binding.superclass.isTeam())
 			return gen.messageSend(gen.superReference(), OT_CALL_NEXT, superArgs);
 		// no super-*team* so call the static variant:
-		return gen.messageSend(gen.qualifiedNameReference(IOTConstants.ORG_OBJECTTEAMS_TEAM), OT_TERMINAL_CALL_NEXT, superArgs);
+		return gen.messageSend(gen.qualifiedNameReference(IOTConstants.ORG_OBJECTTEAMS_TEAM), OT_TERMINAL_CALL_NEXT, 
+								Arrays.copyOf(superArgs, superArgs.length-1)); // one fewer arguments
 	}
 
 	Reference genTeamThis(AstGenerator gen, TypeBinding type) {

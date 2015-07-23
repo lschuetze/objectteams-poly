@@ -599,7 +599,7 @@ public /* team */ class Team implements ITeam {
 
 	/**
 	 * Executes all before callins for a given callin id.
-	 * Must be overridden by a team, if the team gets replace callins.
+	 * Must be overridden by a team, if the team gets before callins.
 	 *
 	 * @param baze the current base object
 	 * @param callinId the current callin id
@@ -614,7 +614,7 @@ public /* team */ class Team implements ITeam {
 
 	/**
 	 * Executes all after callins for a given callin id.
-	 * Must be overridden by a team, if the team gets replace callins.
+	 * Must be overridden by a team, if the team gets after callins.
 	 *
 	 * @param baze the current base object
 	 * @param callinId the current callin id
@@ -647,7 +647,7 @@ public /* team */ class Team implements ITeam {
 	}
 
 	/**
-	 * Calls the method callOrigStatic of a concrete class dependend on the
+	 * Calls the method callOrigStatic of a concrete class dependent on the
 	 * given callin id.
 	 * Must be overridden in a team, if the team has got base calls
 	 * to static base methods

@@ -136,7 +136,7 @@ public class TeamMethodGenerator {
 						gen.argument("boundMethodId".toCharArray(), gen.baseTypeReference(TypeConstants.INT)),
 						gen.argument("args".toCharArray(), 			gen.qualifiedArrayTypeReference(TypeConstants.JAVA_LANG_OBJECT, 1)),
 						gen.argument("baseCallArgs".toCharArray(), 	gen.qualifiedArrayTypeReference(TypeConstants.JAVA_LANG_OBJECT, 1)),
-						gen.argument("isBaseCall".toCharArray(), 	gen.baseTypeReference(TypeConstants.INT))
+						gen.argument("isBaseCall".toCharArray(), 	gen.baseTypeReference(TypeConstants.BOOLEAN))
 					};
 				case OTDYNARGS3:
 					return new Argument[] {
