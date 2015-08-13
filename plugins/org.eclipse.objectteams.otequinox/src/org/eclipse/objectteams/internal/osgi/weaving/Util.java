@@ -21,6 +21,7 @@
 package org.eclipse.objectteams.internal.osgi.weaving;
 
 import static org.eclipse.objectteams.otequinox.TransformerPlugin.doLog;
+
 import static org.eclipse.core.runtime.IStatus.*;
 
 public class Util 
@@ -48,7 +49,7 @@ public class Util
 	}
 
 	/** Profiling data: */
-	enum ProfileKind { Transformation, NoTransformation, Activation, Scan, SuperClassFetching }
+	enum ProfileKind { Transformation, NoTransformation, Activation, Scan, SuperClassFetching, RedefineClasses }
 	private static long[] profileTimes= new long[ProfileKind.values().length];
 	private static long systemStartTime= System.nanoTime();
 
@@ -61,6 +62,7 @@ public class Util
 		msg = msg.substring(msg.lastIndexOf('.')+1);
 		doLog(INFO, "Profile "+kind.name()+": "+m(delta)+"("+m(total)+"/"+m(now-systemStartTime)+") ["+msg+"]");
 	}
+
 	// nano-to milli conversion
 	private static double m(long l) {
 		return (l/1000000.0);

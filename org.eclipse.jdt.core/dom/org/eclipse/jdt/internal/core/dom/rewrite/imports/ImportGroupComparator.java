@@ -7,6 +7,8 @@
  *
  * Contributors:
  *     John Glassmyer <jogl@google.com> - import group sorting is broken - https://bugs.eclipse.org/430303
+ *     Lars Vogel <Lars.Vogel@vogella.com> - Contributions for
+ *     						Bug 473178
  *******************************************************************************/
 package org.eclipse.jdt.internal.core.dom.rewrite.imports;
 
@@ -106,7 +108,7 @@ final class ImportGroupComparator implements Comparator<ImportName>{
 			return importOrder;
 		}
 
-		List<String> augmentedOrder = new ArrayList<String>(importOrder.size() + 2);
+		List<String> augmentedOrder = new ArrayList<>(importOrder.size() + 2);
 
 		if (needsStaticMatchAll) {
 			augmentedOrder.add(STATIC_MATCH_ALL);
@@ -131,10 +133,10 @@ final class ImportGroupComparator implements Comparator<ImportName>{
 			return memoizedIndexedImportGroups;
 		}
 
-		Map<String, Integer> typeGroupsAndIndices = new HashMap<String, Integer>();
-		Map<String, Integer> staticGroupsAndIndices = new HashMap<String, Integer>();
+		Map<String, Integer> typeGroupsAndIndices = new HashMap<>();
+		Map<String, Integer> staticGroupsAndIndices = new HashMap<>();
 //{ObjectTeams: base
-		Map<String, Integer> baseGroupsAndIndices = new HashMap<String, Integer>();
+		Map<String, Integer> baseGroupsAndIndices = new HashMap<>();
 // SH}
 		for (int i = 0; i < importOrder.size(); i++) {
 			String importGroupString = importOrder.get(i);
@@ -175,12 +177,12 @@ final class ImportGroupComparator implements Comparator<ImportName>{
 			importGroupNamesAndIndices = Collections.singletonMap(MATCH_ALL, 0);
 		}
 
-		List<String> sortedNames = new ArrayList<String>(importGroupNamesAndIndices.keySet());
+		List<String> sortedNames = new ArrayList<>(importGroupNamesAndIndices.keySet());
 		Collections.sort(sortedNames);
 
-		ArrayList<ImportGroup> importGroups = new ArrayList<ImportGroup>(sortedNames.size());
+		ArrayList<ImportGroup> importGroups = new ArrayList<>(sortedNames.size());
 
-		Deque<ImportGroup> prefixingGroups = new ArrayDeque<ImportGroup>();
+		Deque<ImportGroup> prefixingGroups = new ArrayDeque<>();
 		for (String name : sortedNames) {
 			while (!prefixingGroups.isEmpty()
 					&& !isWholeSegmentPrefix(prefixingGroups.getLast().getName(), name)) {
@@ -195,7 +197,7 @@ final class ImportGroupComparator implements Comparator<ImportName>{
 			prefixingGroups.addLast(group);
 		}
 
-		NavigableMap<String, ImportGroup> groupsByName = new TreeMap<String, ImportGroup>();
+		NavigableMap<String, ImportGroup> groupsByName = new TreeMap<>();
 		for (ImportGroup group : importGroups) {
 			groupsByName.put(group.getName(), group);
 		}

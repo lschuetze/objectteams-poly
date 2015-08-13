@@ -567,7 +567,7 @@ class DefaultBindingResolver extends BindingResolver {
 		return null;
 	}
 
-	class AnnotationIdentityBinding {
+	static class AnnotationIdentityBinding {
 		org.eclipse.jdt.internal.compiler.lookup.AnnotationBinding internalInstance;
 		AnnotationIdentityBinding(org.eclipse.jdt.internal.compiler.lookup.AnnotationBinding internalInstance) {
 			this.internalInstance = internalInstance;
@@ -592,7 +592,7 @@ class DefaultBindingResolver extends BindingResolver {
 		}
 		Object key =  new AnnotationIdentityBinding(internalInstance);
 		IAnnotationBinding newDomInstance = new AnnotationBinding(internalInstance, this);
-		IAnnotationBinding domInstance = (IAnnotationBinding) ((ConcurrentHashMap)this.bindingTables.compilerBindingsToASTBindings).putIfAbsent(key, newDomInstance);
+		IAnnotationBinding domInstance = (IAnnotationBinding) ((ConcurrentHashMap)this.bindingTables.compilerAnnotationBindingsToASTBindings).putIfAbsent(key, newDomInstance);
 		return domInstance != null ? domInstance : newDomInstance;
 	}
 

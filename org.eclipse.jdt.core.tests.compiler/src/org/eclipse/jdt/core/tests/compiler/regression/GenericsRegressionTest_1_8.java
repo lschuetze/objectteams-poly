@@ -5412,4 +5412,84 @@ public void testBug472426() {
 			"}\n"
 		});
 }
+public void testBug469753() {
+	runConformTest(
+		new String[] {
+			"LambdaBug.java",
+			"import java.util.AbstractMap;\n" + 
+			"import java.util.Iterator;\n" + 
+			"import java.util.Map.Entry;\n" + 
+			"import java.util.function.Function;\n" + 
+			"\n" + 
+			"public class LambdaBug {\n" + 
+			"\n" + 
+			"    class Item {\n" + 
+			"        String foo;\n" + 
+			"    }\n" + 
+			"\n" + 
+			"    public void bug(String catalogKey, Iterator<Item> items) {\n" + 
+			"        go(transform(items, i -> pair(i.foo, i)));\n" + 
+			"    }\n" + 
+			"\n" + 
+			"    public static <K, V> Entry<K, V> pair(K key, V value) {\n" + 
+			"        return new AbstractMap.SimpleImmutableEntry<K, V>(key, value);\n" + 
+			"    }\n" + 
+			"\n" + 
+			"    void go(Iterator<Entry<String, Item>> items) {\n" + 
+			"    }\n" + 
+			"\n" + 
+			"    public static <F, T> Iterator<T> transform(Iterator<F> fromIterator, Function<? super F, ? extends T> function) {\n" + 
+			"        return null;\n" + 
+			"    }\n" + 
+			"\n" + 
+			"}\n"
+		});
+}
+public void testBug470958() {
+	runConformTest(
+		new String[] {
+			"Bug470958.java",
+			"import java.time.*;\n" + 
+			"import java.util.*;\n" + 
+			"import java.util.concurrent.*;\n" + 
+			"import static java.util.concurrent.CompletableFuture.*;\n" + 
+			"import static java.util.stream.Collectors.*;\n" + 
+			"\n" + 
+			"class Hotel {}\n" + 
+			"\n" + 
+			"class Bug470958 {\n" + 
+			"  public Map<String, CompletableFuture<List<Hotel>>> asyncLoadMany(List<String> codes, LocalDate begin, LocalDate end) {\n" + 
+			"    return loadMany(codes, begin, end)\n" + 
+			"    .entrySet()\n" + 
+			"    .stream()\n" + 
+			"    .collect(toMap(Map.Entry::getKey, entry -> completedFuture(entry.getValue())));\n" + 
+			"  }\n" + 
+			"\n" + 
+			"  public Map<String, List<Hotel>> loadMany(List<String> codes, LocalDate begin, LocalDate end) {\n" + 
+			"    return null;\n" + 
+			"  }\n" + 
+			"}\n"
+		});
+}
+public void testBug470542() {
+	runNegativeTest(
+		new String[] {
+			"X.java",
+			"import java.util.function.Consumer;\n" + 
+			"\n" + 
+			"public class X {\n" + 
+			"	void test() {\n" + 
+			"		process(missing::new);\n" + 
+			"	}\n" + 
+			"	\n" + 
+			"	<T> void process(Consumer<T> c) { }\n" + 
+			"}\n"
+		},
+		"----------\n" + 
+		"1. ERROR in X.java (at line 5)\n" + 
+		"	process(missing::new);\n" + 
+		"	        ^^^^^^^\n" + 
+		"missing cannot be resolved\n" + 
+		"----------\n");
+}
 }

@@ -23,6 +23,7 @@ import java.util.List;
 import org.eclipse.core.runtime.IExtensionRegistry;
 import org.eclipse.core.runtime.ILog;
 import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.Platform;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.equinox.log.ExtendedLogReaderService;
 import org.eclipse.equinox.log.ExtendedLogService;
@@ -242,12 +243,17 @@ public class TransformerPlugin implements BundleActivator, IAspectRegistry {
 	}
 
 	public static synchronized void doLog(int level, String msg) {
-		Status status = new Status(level, TRANSFORMER_PLUGIN_ID, "OT/Equinox: "+msg);
-		final InitializedPlugin plugin = TransformerPlugin.plugin;
-		if (plugin != null)
-			plugin.log.log(status);
-		else
-			pendingLogEntries.add(status);
+		try {
+			Status status = new Status(level, TRANSFORMER_PLUGIN_ID, "OT/Equinox: "+msg);
+			final InitializedPlugin plugin = TransformerPlugin.plugin;
+			if (plugin != null)
+				plugin.log.log(status);
+			else
+				pendingLogEntries.add(status);
+		} catch (NoClassDefFoundError err) {
+			if (level >= WARN_LEVEL)
+				System.out.println(">> OT/Equinox: "+msg);
+		}
 	}
 	
 	public static void flushLog() {
