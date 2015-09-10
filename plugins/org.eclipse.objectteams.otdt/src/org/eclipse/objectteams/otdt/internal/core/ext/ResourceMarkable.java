@@ -1,13 +1,12 @@
 /**********************************************************************
  * This file is part of "Object Teams Development Tooling"-Software
  * 
- * Copyright 2008 Technical University Berlin, Germany.
+ * Copyright 2008, 2015 Technical University Berlin, Germany.
  * 
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
- * $Id: ResourceMarkable.java 23435 2010-02-04 00:14:38Z stephan $
  * 
  * Please visit http://www.eclipse.org/objectteams for updates and contact.
  * 
@@ -92,6 +91,7 @@ public class ResourceMarkable extends AbstractMarkable {
 	public boolean exists() {
 		if (!this.fResource.exists()) return false;
 		IJavaElement javaElement = getJavaElement();
+		if (javaElement == null) return false;
 		do {
 			if (!javaElement.exists())
 				return false;

@@ -1,7 +1,7 @@
 /**********************************************************************
  * This file is part of "Object Teams Development Tooling"-Software
  * 
- * Copyright 2003, 2010 Fraunhofer Gesellschaft, Munich, Germany,
+ * Copyright 2003, 2015 Fraunhofer Gesellschaft, Munich, Germany,
  * for its Fraunhofer Institute for Computer Architecture and Software
  * Technology (FIRST), Berlin, Germany and Technical University Berlin,
  * Germany.
@@ -10,7 +10,6 @@
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
- * $Id: CallinMarkerCreator2.java 23435 2010-02-04 00:14:38Z stephan $
  * 
  * Please visit http://www.eclipse.org/objectteams for updates and contact.
  * 
@@ -190,12 +189,14 @@ public class CallinMarkerCreator2 extends JavaEditorActivationListener
 		IEditorPart editor = (IEditorPart) this.fActiveEditor;
 		if (baseMarkable.isBinary()) {
 			IJavaElement baseJavaElement = baseMarkable.getJavaElement();
-			this.m_cachedMarkersForJavaElements.remove(baseJavaElement);
-			if (this.fActiveEditor != null && this.fActiveEditor instanceof IEditorPart) {
-				if (editor.getEditorInput() instanceof IClassFileEditorInput) {
-					IClassFile editorClassFile = ((IClassFileEditorInput)editor.getEditorInput()).getClassFile();
-					if (editorClassFile != null && !isCreatingMarkersFor(editorClassFile) && editorClassFile.equals(baseJavaElement))
-						updateForBaseMarkable(baseMarkable, editor);					
+			if (baseJavaElement != null) {
+				this.m_cachedMarkersForJavaElements.remove(baseJavaElement);
+				if (this.fActiveEditor != null && this.fActiveEditor instanceof IEditorPart) {
+					if (editor.getEditorInput() instanceof IClassFileEditorInput) {
+						IClassFile editorClassFile = ((IClassFileEditorInput)editor.getEditorInput()).getClassFile();
+						if (editorClassFile != null && !isCreatingMarkersFor(editorClassFile) && editorClassFile.equals(baseJavaElement))
+							updateForBaseMarkable(baseMarkable, editor);
+					}
 				}
 			}
 		} else {
