@@ -137,7 +137,7 @@ public class TypeModel extends ModelElement {
      * Considers Ast or Bindings, whatever is more appropriate.
      * Note, that members could again be teams.
      *
-     * @returns all non-role members for this Team.
+     * @returns all members for this Team.
      */
     public TypeModel[] getMembers()
     {
@@ -150,7 +150,11 @@ public class TypeModel extends ModelElement {
         		|| this._binding.kind() == Binding.INTERSECTION_TYPE
         		|| this._binding.kind() == Binding.INTERSECTION_TYPE18)
         		return new TypeModel[0]; // has no members
-            //binary type
+        	
+        	if (this._binding.isUnresolvedType())
+        		return new TypeModel[0]; // members unknown and cannot resolve here :(
+
+        	//binary type
         	assert this._binding.isBinaryBinding();
         	// don't used memberTypes() as not to trigger resolving unneeded members.
         	// see tests.compiler.regegression.LookupTest.test044
