@@ -148,7 +148,7 @@ public class ObjectTeamsTransformer implements ClassFileTransformer {
 			} catch (ClassFormatException e) {
 				// CFE doesn't show the class name, so at least print it to console:
 				System.err.println(e.getMessage()+", offending className: "+className);
-				throw e;
+				throw new IllegalClassFormatException("BCEL cannot parse class "+className+": "+e.getMessage());
 			} finally {
 				if (is != null)
 					try {
