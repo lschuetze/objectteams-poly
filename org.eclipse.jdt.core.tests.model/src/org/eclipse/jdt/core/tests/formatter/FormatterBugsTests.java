@@ -11103,4 +11103,364 @@ public void testBug472962() {
 		"}";
 	formatSource(source);
 }
+/**
+ * @bug 470506: formatter option "align field in columns" changed in Mars
+ * @test test that fields separated by extra blank lines are not considered separate groups when aligning
+ * @see "https://bugs.eclipse.org/bugs/show_bug.cgi?id=470506"
+ */
+public void testBug470506() {
+	this.formatterPrefs.align_type_members_on_columns = true;
+	String source = 
+		"class C {\r\n" + 
+		"	private int						iii;\r\n" + 
+		"	String							sss;\r\n" + 
+		"\r\n" + 
+		"	protected ArrayList<Integer>	aaa;\r\n" + 
+		"\r\n" + 
+		"}";
+	formatSource(source);
+}
+
+/**
+ * @bug 472205: Class extends generic type and implements another type, missing space after ">"
+ */
+public void testBug472205() {
+	String source = 
+		"public class Test<E> extends ArrayList<String> implements Callable<String> {\n" +
+		"}\n" +
+		"\n" +
+		"class A extends B<ClientListener> implements C {\n" +
+		"}\n" +
+		"\n" +
+		"class D extends E<ClientListener> {\n" +
+		"}\n" +
+		"\n" +
+		"class F implements G<ClientListener> {\n" +
+		"}\n" +
+		"\n" +
+		"interface H extends I<ClientListener> {\n" +
+		"}\n";
+	formatSource(source);
+}
+/**
+ * @bug 471780 - [formatter] Regression in enum value Javadoc formatting
+ */
+public void testBug471780() {
+	String source = 
+		"public enum MyEnum {\r\n" + 
+		"	/** A. */\r\n" + 
+		"	A,\r\n" + 
+		"	/** B. */\r\n" + 
+		"	B\r\n" + 
+		"}";
+	formatSource(source);
+}
+/**
+ * https://bugs.eclipse.org/472009 - Formatter does not respect "keep else if on one line"
+ */
+public void testBug472009() {
+	this.formatterPrefs.alignment_for_compact_if |= Alignment.M_FORCE;
+	String source = 
+		"public class A {\r\n" + 
+		"	void a() {\r\n" + 
+		"		if (a == b) {\r\n" + 
+		"\r\n" + 
+		"		} else if (c == d) {\r\n" + 
+		"\r\n" + 
+		"		} else if (e == f) {\r\n" + 
+		"\r\n" + 
+		"		}\r\n" + 
+		"	}\r\n" + 
+		"}";
+	formatSource(source);
+}
+/**
+ * https://bugs.eclipse.org/474629 - [save actions][clean up] Exceptions thrown
+ */
+public void testBug474629() {
+	this.formatterPrefs.alignment_for_binary_expression |= Alignment.M_INDENT_ON_COLUMN;
+	String source = "aaaaa + bbbb";
+	formatSource(source, source, CodeFormatter.K_EXPRESSION, 0, true);
+}
+/**
+ * https://bugs.eclipse.org/467618 - [formatter] Empty lines should not affect indentation of wrapped elements
+ */
+public void testBug467618() {
+	this.formatterPrefs.alignment_for_enum_constants = Alignment.M_NEXT_PER_LINE_SPLIT + Alignment.M_INDENT_ON_COLUMN + Alignment.M_FORCE;
+	String source =
+		"public enum E2 {\r\n" + 
+		"\r\n" + 
+		"	FOOBAR,\r\n" + 
+		"\r\n" + 
+		"	FOOBARBAZ,\r\n" + 
+		"\r\n" + 
+		"	FOO;\r\n" + 
+		"}";
+	formatSource(source,
+		"public enum E2 {\r\n" + 
+		"\r\n" + 
+		"				FOOBAR,\r\n" + 
+		"\r\n" + 
+		"				FOOBARBAZ,\r\n" + 
+		"\r\n" + 
+		"				FOO;\r\n" + 
+		"}"
+	);
+}
+/**
+ * @bug 474916: [formatter] Formatting GridBagLayout from Java 8 takes too long
+ * @test test that formatting finishes in reasonable time
+ * @see "https://bugs.eclipse.org/bugs/show_bug.cgi?id=474916"
+ */
+public void testBug474916() {
+	String source = 
+			"/**\r\n" + 
+			" * <                                                           \r\n" + 
+			" * >  <p style='color:red'> Test    </p>\r\n" + 
+			" *  <a title=\"I like to 'quote' it\" \r\n" + 
+			"href = 'http://www.eclipse.org'>Toast</a> */\r\n" + 
+			"class A {}";
+	formatSource(source,
+			"/**\r\n" + 
+			" * < >\r\n" + 
+			" * <p style='color:red'>\r\n" + 
+			" * Test\r\n" + 
+			" * </p>\r\n" + 
+			" * <a title=\"I like to 'quote' it\" href = 'http://www.eclipse.org'>Toast</a>\r\n" + 
+			" */\r\n" + 
+			"class A {\r\n" + 
+			"}"
+	);
+}
+/**
+ * https://bugs.eclipse.org/474918 - [formatter] doesn't align fields in declarations of annotations, enums and anonymous classes
+ */
+public void testBug474918() {
+	this.formatterPrefs.align_type_members_on_columns = true;
+	String source = 
+		"import java.util.function.Function;\r\n" + 
+		"\r\n" + 
+		"public class A {\r\n" + 
+		"	private Function mapper = (Object a) -> {\r\n" + 
+		"		return a.toString().equals(\"test\");\r\n" + 
+		"	};\r\n" + 
+		"	String ssssssssssssssss = \"dsadaaaaaaaaaaaaaaaaaaaaaaaaa\";   //$NON-NLS-1$ // B // A\r\n" + 
+		"\r\n" + 
+		"	int bb = 4;\r\n" + 
+		"\r\n" + 
+		"	Object c = new Object() {\r\n" + 
+		"		int a = 55;\r\n" + 
+		"		Object cdddddddddddd = null;\r\n" + 
+		"	};\r\n" + 
+		"\r\n" + 
+		"	private enum E {\r\n" + 
+		"		AAA, BBB;\r\n" + 
+		"		int a = 55;\r\n" + 
+		"		String sssss = \"ssssss\";\r\n" + 
+		"	}\r\n" + 
+		"\r\n" + 
+		"	private @interface II {\r\n" + 
+		"		int aaaaaa = 1;\r\n" + 
+		"		String bbbbbbbbb = \"default\";\r\n" + 
+		"	}\r\n" + 
+		"}";
+	formatSource(source,
+		"import java.util.function.Function;\r\n" + 
+		"\r\n" + 
+		"public class A {\r\n" + 
+		"	private Function	mapper				= (Object a) -> {\r\n" + 
+		"												return a.toString().equals(\"test\");\r\n" + 
+		"											};\r\n" + 
+		"	String				ssssssssssssssss	= \"dsadaaaaaaaaaaaaaaaaaaaaaaaaa\";		//$NON-NLS-1$ //\r\n" + 
+		"																					// B\r\n" + 
+		"																					// //\r\n" + 
+		"																					// A\r\n" + 
+		"\r\n" + 
+		"	int					bb					= 4;\r\n" + 
+		"\r\n" + 
+		"	Object				c					= new Object() {\r\n" + 
+		"												int			a				= 55;\r\n" + 
+		"												Object		cdddddddddddd	= null;\r\n" + 
+		"											};\r\n" + 
+		"\r\n" + 
+		"	private enum E {\r\n" + 
+		"		AAA, BBB;\r\n" + 
+		"		int		a		= 55;\r\n" + 
+		"		String	sssss	= \"ssssss\";\r\n" + 
+		"	}\r\n" + 
+		"\r\n" + 
+		"	private @interface II {\r\n" + 
+		"		int		aaaaaa		= 1;\r\n" + 
+		"		String	bbbbbbbbb	= \"default\";\r\n" + 
+		"	}\r\n" + 
+		"}"
+	);
+}
+/**
+ * https://bugs.eclipse.org/474918 - [formatter] doesn't align fields in declarations of annotations, enums and anonymous classes
+ */
+public void testBug474918b() {
+	this.formatterPrefs.align_type_members_on_columns = true;
+	this.formatterPrefs.tab_char = DefaultCodeFormatterOptions.SPACE;
+	String source = 
+		"import java.util.function.Function;\r\n" + 
+		"\r\n" + 
+		"public class A {\r\n" + 
+		"	private Function mapper = (Object a) -> {\r\n" + 
+		"		return a.toString().equals(\"test\");\r\n" + 
+		"	};\r\n" + 
+		"	String ssssssssssssssss = \"dsadaaaaaaaaaaaaaaaaaaaaaaaaa\";   //$NON-NLS-1$ // B // A\r\n" + 
+		"\r\n" + 
+		"	int bb = 4;\r\n" + 
+		"\r\n" + 
+		"	Object c = new Object() {\r\n" + 
+		"		int a = 55;\r\n" + 
+		"		Object cdddddddddddd = null;\r\n" + 
+		"	};\r\n" + 
+		"\r\n" + 
+		"	private enum E {\r\n" + 
+		"		AAA, BBB;\r\n" + 
+		"		int a = 55;\r\n" + 
+		"		String sssss = \"ssssss\";\r\n" + 
+		"	}\r\n" + 
+		"\r\n" + 
+		"	private @interface II {\r\n" + 
+		"		int aaaaaa = 1;\r\n" + 
+		"		String bbbbbbbbb = \"default\";\r\n" + 
+		"	}\r\n" + 
+		"}";
+	formatSource(source,
+		"import java.util.function.Function;\r\n" + 
+		"\r\n" + 
+		"public class A {\r\n" + 
+		"    private Function mapper           = (Object a) -> {\r\n" + 
+		"                                          return a.toString().equals(\"test\");\r\n" + 
+		"                                      };\r\n" + 
+		"    String           ssssssssssssssss = \"dsadaaaaaaaaaaaaaaaaaaaaaaaaa\";     //$NON-NLS-1$ //\r\n" + 
+		"                                                                             // B\r\n" + 
+		"                                                                             // //\r\n" + 
+		"                                                                             // A\r\n" + 
+		"\r\n" + 
+		"    int              bb               = 4;\r\n" + 
+		"\r\n" + 
+		"    Object           c                = new Object() {\r\n" + 
+		"                                          int      a             = 55;\r\n" + 
+		"                                          Object   cdddddddddddd = null;\r\n" + 
+		"                                      };\r\n" + 
+		"\r\n" + 
+		"    private enum E {\r\n" + 
+		"        AAA, BBB;\r\n" + 
+		"        int    a     = 55;\r\n" + 
+		"        String sssss = \"ssssss\";\r\n" + 
+		"    }\r\n" + 
+		"\r\n" + 
+		"    private @interface II {\r\n" + 
+		"        int    aaaaaa    = 1;\r\n" + 
+		"        String bbbbbbbbb = \"default\";\r\n" + 
+		"    }\r\n" + 
+		"}"
+	);
+}
+/**
+ * https://bugs.eclipse.org/474918 - [formatter] doesn't align fields in declarations of annotations, enums and anonymous classes
+ */
+public void testBug474918c() {
+	this.formatterPrefs.align_type_members_on_columns = true;
+	this.formatterPrefs.use_tabs_only_for_leading_indentations = true;
+	String source = 
+		"import java.util.function.Function;\r\n" + 
+		"\r\n" + 
+		"public class A {\r\n" + 
+		"	private Function mapper = (Object a) -> {\r\n" + 
+		"		return a.toString().equals(\"test\");\r\n" + 
+		"	};\r\n" + 
+		"	String ssssssssssssssss = \"dsadaaaaaaaaaaaaaaaaaaaaaaaaa\";   //$NON-NLS-1$ // B // A\r\n" + 
+		"\r\n" + 
+		"	int bb = 4;\r\n" + 
+		"\r\n" + 
+		"	Object c = new Object() {\r\n" + 
+		"		int a = 55;\r\n" + 
+		"		Object cdddddddddddd = null;\r\n" + 
+		"	};\r\n" + 
+		"\r\n" + 
+		"	private enum E {\r\n" + 
+		"		AAA, BBB;\r\n" + 
+		"		int a = 55;\r\n" + 
+		"		String sssss = \"ssssss\";\r\n" + 
+		"	}\r\n" + 
+		"\r\n" + 
+		"	private @interface II {\r\n" + 
+		"		int aaaaaa = 1;\r\n" + 
+		"		String bbbbbbbbb = \"default\";\r\n" + 
+		"	}\r\n" + 
+		"}";
+	formatSource(source,
+		"import java.util.function.Function;\r\n" + 
+		"\r\n" + 
+		"public class A {\r\n" + 
+		"	private Function	mapper				= (Object a) -> {\r\n" + 
+		"		                                        return a.toString().equals(\"test\");\r\n" + 
+		"	                                        };\r\n" + 
+		"	String				ssssssssssssssss	= \"dsadaaaaaaaaaaaaaaaaaaaaaaaaa\";		//$NON-NLS-1$ //\r\n" + 
+		"	                                                                                // B\r\n" + 
+		"	                                                                                // //\r\n" + 
+		"	                                                                                // A\r\n" + 
+		"\r\n" + 
+		"	int					bb					= 4;\r\n" + 
+		"\r\n" + 
+		"	Object				c					= new Object() {\r\n" + 
+		"		                                        int			a				= 55;\r\n" + 
+		"		                                        Object		cdddddddddddd	= null;\r\n" + 
+		"	                                        };\r\n" + 
+		"\r\n" + 
+		"	private enum E {\r\n" + 
+		"		AAA, BBB;\r\n" + 
+		"		int		a		= 55;\r\n" + 
+		"		String	sssss	= \"ssssss\";\r\n" + 
+		"	}\r\n" + 
+		"\r\n" + 
+		"	private @interface II {\r\n" + 
+		"		int		aaaaaa		= 1;\r\n" + 
+		"		String	bbbbbbbbb	= \"default\";\r\n" + 
+		"	}\r\n" + 
+		"}"
+	);
+}
+/**
+ * https://bugs.eclipse.org/475865 - JDT deletes code
+ */
+public void testBug475865() {
+	String source = 
+		"public class Snippet {\r\n" + 
+		"\r\n" + 
+		"	Runnable disposeRunnable = this::dispose();\r\n" + 
+		"\r\n" + 
+		"	void dispose() {\r\n" + 
+		"	}\r\n" + 
+		"}";
+	formatSource(source);
+}
+/**
+ * https://bugs.eclipse.org/435241 - [1.8][lambda][formatter] if/else within lambda is incorrectly formatted
+ */
+public void testBug435241() {
+	this.formatterPrefs.brace_position_for_block = DefaultCodeFormatterConstants.NEXT_LINE;
+	this.formatterPrefs.insert_new_line_before_else_in_if_statement = true;
+	String source = 
+		"public class Snippet {\r\n" + 
+		"	public static void main(String[] args) {\r\n" + 
+		"		Executors.newSingleThreadExecutor().execute(() -> {\r\n" + 
+		"			if (true)\r\n" + 
+		"			{\r\n" + 
+		"				System.err.println(\"foo\");\r\n" + 
+		"			}\r\n" + 
+		"			else\r\n" + 
+		"			{\r\n" + 
+		"				System.err.println(\"bar\");\r\n" + 
+		"			}\r\n" + 
+		"		});\r\n" + 
+		"	}\r\n" + 
+		"}";
+	formatSource(source);
+}
 }

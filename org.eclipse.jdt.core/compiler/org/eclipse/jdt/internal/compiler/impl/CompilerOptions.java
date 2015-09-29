@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2014 IBM Corporation and others.
+ * Copyright (c) 2000, 2015 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -291,6 +291,7 @@ public class CompilerOptions {
 	public static final String VERSION_1_9 = "1.9"; //$NON-NLS-1$
 	public static final String ERROR = "error"; //$NON-NLS-1$
 	public static final String WARNING = "warning"; //$NON-NLS-1$
+	public static final String INFO = "info"; //$NON-NLS-1$
 	public static final String IGNORE = "ignore"; //$NON-NLS-1$
 	public static final String ENABLED = "enabled"; //$NON-NLS-1$
 	public static final String DISABLED = "disabled"; //$NON-NLS-1$
@@ -426,6 +427,11 @@ public class CompilerOptions {
 	 * @see #resetDefaults()
 	 */
 	protected IrritantSet warningThreshold;
+	/** 
+	 * Defaults defined at {@link IrritantSet#COMPILER_DEFAULT_INFOS}
+	 * @see #resetDefaults()
+	 */
+	protected IrritantSet infoThreshold;
 	
 	/**
 	 * Default settings are to be defined in {@lnk CompilerOptions#resetDefaults()}
@@ -1551,6 +1557,9 @@ public class CompilerOptions {
 		if (this.warningThreshold.isSet(irritant)) {
 			return ProblemSeverities.Warning | ProblemSeverities.Optional;
 		}
+		if (this.infoThreshold.isSet(irritant)) {
+			return ProblemSeverities.Info | ProblemSeverities.Optional;
+		}
 		return ProblemSeverities.Ignore;
 	}
 
@@ -1559,6 +1568,9 @@ public class CompilerOptions {
 			return ERROR;
 		if(this.warningThreshold.isSet(irritant))
 			return WARNING;
+		if (this.infoThreshold.isSet(irritant)) {
+			return INFO;
+		}
 		return IGNORE;
 	}
 	public String getVisibilityString(int level) {
@@ -1575,13 +1587,15 @@ public class CompilerOptions {
 	}
 
 	public boolean isAnyEnabled(IrritantSet irritants) {
-		return this.warningThreshold.isAnySet(irritants) || this.errorThreshold.isAnySet(irritants);
+		return this.warningThreshold.isAnySet(irritants) || this.errorThreshold.isAnySet(irritants)
+					|| this.infoThreshold.isAnySet(irritants);
 	}
 
 	protected void resetDefaults() {
 		// problem default severities defined on IrritantSet
 		this.errorThreshold = new IrritantSet(IrritantSet.COMPILER_DEFAULT_ERRORS);
 		this.warningThreshold = new IrritantSet(IrritantSet.COMPILER_DEFAULT_WARNINGS);
+		this.infoThreshold = new IrritantSet(IrritantSet.COMPILER_DEFAULT_INFOS);
 		
 		// by default only lines and source attributes are generated.
 		this.produceDebugAttributes = ClassFileConstants.ATTR_SOURCE | ClassFileConstants.ATTR_LINES;
@@ -2404,12 +2418,19 @@ public class CompilerOptions {
 		if (ERROR.equals(severityString)) {
 			this.errorThreshold.set(irritant);
 			this.warningThreshold.clear(irritant);
+			this.infoThreshold.clear(irritant);
 		} else if (WARNING.equals(severityString)) {
 			this.errorThreshold.clear(irritant);
 			this.warningThreshold.set(irritant);
+			this.infoThreshold.clear(irritant);
+		} else if (INFO.equals(severityString)) {
+			this.errorThreshold.clear(irritant);
+			this.warningThreshold.clear(irritant);
+			this.infoThreshold.set(irritant);
 		} else if (IGNORE.equals(severityString)) {
 			this.errorThreshold.clear(irritant);
 			this.warningThreshold.clear(irritant);
+			this.infoThreshold.clear(irritant);
 		}
 	}
 

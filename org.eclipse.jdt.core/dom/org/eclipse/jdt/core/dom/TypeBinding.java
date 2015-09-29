@@ -83,6 +83,7 @@ class TypeBinding implements ITypeBinding {
 	private IVariableBinding[] fields;
 	private IAnnotationBinding[] annotations;
 	private IAnnotationBinding[] typeAnnotations;
+	private IAnnotationBinding[][] typeAnnotationsOnDimensions;
 	private IMethodBinding[] methods;
 	private ITypeBinding[] members;
 	private ITypeBinding[] interfaces;
@@ -175,6 +176,34 @@ class TypeBinding implements ITypeBinding {
 		return AnnotationBinding.NoAnnotations;
 	}
 
+	private IAnnotationBinding[][] resolveAnnotationBindingsOnDimensions(org.eclipse.jdt.internal.compiler.lookup.AnnotationBinding[] internalAnnotations) {
+		int length = internalAnnotations == null ? 0 : internalAnnotations.length;
+		if (length != 0) {
+			IAnnotationBinding[][] dimAnnotations = new IAnnotationBinding[length][];
+			int row = 0;
+			List <IAnnotationBinding> tmpList = new ArrayList<>();
+			for (int i = 0; i < length; i++) {
+				org.eclipse.jdt.internal.compiler.lookup.AnnotationBinding internalAnnotation = internalAnnotations[i];
+				if (internalAnnotation == null) {
+					if (tmpList.size() > 0) {
+						dimAnnotations[row] = tmpList.toArray(new AnnotationBinding[0]);
+						tmpList.clear();
+					} else {
+						dimAnnotations[row] = AnnotationBinding.NoAnnotations;
+					}
+					++row;
+				}
+				IAnnotationBinding annotationInstance = this.resolver.getAnnotationInstance(internalAnnotation);
+				if (annotationInstance == null) {
+					continue;
+				}
+				tmpList.add(annotationInstance);
+			}
+			System.arraycopy(dimAnnotations, 0, (dimAnnotations = new IAnnotationBinding[row][]), 0, row);
+			return dimAnnotations;
+		}
+		return AnnotationBinding.NoAnnotationsOnDimensions;
+	}
 	/*
 	 * @see ITypeBinding#getBinaryName()
 	 * @since 3.0
@@ -667,6 +696,19 @@ class TypeBinding implements ITypeBinding {
 // SH}	
 	}
 
+	private ITypeBinding[] getIntersectingTypes() {
+		ITypeBinding[] intersectionBindings = TypeBinding.NO_TYPE_BINDINGS;
+		if (this.binding instanceof IntersectionTypeBinding18) {
+			ReferenceBinding[] intersectingTypes = this.binding.getIntersectingTypes();
+			int l = intersectingTypes.length;
+			intersectionBindings = new ITypeBinding[l];
+			for (int i = 0; i < l; ++i) {
+				intersectionBindings[i] = this.resolver.getTypeBinding(intersectingTypes[i]);
+			}
+		}
+		return intersectionBindings;
+	}
+
 	public IJavaElement getJavaElement() {
 		JavaElement element = getUnresolvedJavaElement();
 		if (element != null)
@@ -1084,6 +1126,8 @@ class TypeBinding implements ITypeBinding {
 		} else if (this.binding instanceof WildcardBinding) {
 			WildcardBinding wildcardBinding = (WildcardBinding) this.binding;
 			typeVariableBinding = wildcardBinding.typeVariable();
+		} else if (this.binding instanceof IntersectionTypeBinding18) {
+			return this.bounds = getIntersectingTypes();
 		}
 		if (typeVariableBinding != null) {
 			ReferenceBinding varSuperclass = typeVariableBinding.superclass();
@@ -1471,6 +1515,14 @@ class TypeBinding implements ITypeBinding {
 //	ira+SH}
 
 	/*
+	 * @see ITypeBinding#isIntersectionType18
+	 */
+	public boolean isIntersectionType() {
+		int kind = this.binding.kind();
+		return kind == Binding.INTERSECTION_TYPE18 || kind == Binding.INTERSECTION_TYPE;
+	}
+
+	/*
 	 * @see ITypeBinding#isLocal()
 	 */
 	public boolean isLocal() {
@@ -1659,6 +1711,17 @@ class TypeBinding implements ITypeBinding {
 		}
 		this.typeAnnotations = resolveAnnotationBindings(this.binding.getTypeAnnotations(), true);
 		return this.typeAnnotations;
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * @see org.eclipse.jdt.core.dom.ITypeBinding#getTypeAnnotationsOnDimensions()
+	 */
+	public IAnnotationBinding[][] getTypeAnnotationsOnDimensions() {
+		if (this.typeAnnotationsOnDimensions == null) {
+			this.typeAnnotationsOnDimensions = resolveAnnotationBindingsOnDimensions(this.binding.getTypeAnnotations());
+		}
+		return this.typeAnnotationsOnDimensions;
 	}
 
 	static class LocalTypeBinding extends TypeBinding {
