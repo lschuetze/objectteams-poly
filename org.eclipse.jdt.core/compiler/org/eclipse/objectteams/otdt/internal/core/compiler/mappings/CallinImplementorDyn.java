@@ -1000,8 +1000,12 @@ public class CallinImplementorDyn extends MethodMappingImplementor {
 
 	/** Convert custom exceptions into SneakyException as to bypass checking by the compiler. */
 	TryStatement protectRoleMethodCall(Statement[] statements, MethodBinding roleMethod, Statement finallyStat, AstGenerator gen) {
-		Argument catchArg = gen.argument(CATCH_ARG, gen.qualifiedTypeReference(TypeConstants.JAVA_LANG_EXCEPTION));
-		Statement[] catchStat = new Statement[] {
+		Argument catch1Arg = gen.argument(CATCH_ARG, gen.qualifiedTypeReference(TypeConstants.JAVA_LANG_RUNTIMEEXCEPTION)); // incl. LiftingVetoException
+		Statement[] catch1Stat = new Statement[] {
+				gen.throwStatement(gen.singleNameReference(CATCH_ARG)) // rethrow as-is
+		};
+		Argument catch2Arg = gen.argument(CATCH_ARG, gen.qualifiedTypeReference(TypeConstants.JAVA_LANG_EXCEPTION));
+		Statement[] catch2Stat = new Statement[] {
 				gen.throwStatement(gen.allocation(
 						gen.qualifiedTypeReference(IOTConstants.SNEAKY_EXCEPTION),
 						new Expression[] { gen.singleNameReference(CATCH_ARG) }
@@ -1009,8 +1013,8 @@ public class CallinImplementorDyn extends MethodMappingImplementor {
 		};
 		return gen.tryStatement(
 				statements,
-				new Argument[] {catchArg}, 
-				new Statement[][] {catchStat},
+				new Argument[] {catch1Arg, catch2Arg}, 
+				new Statement[][] {catch1Stat, catch2Stat},
 				new Statement[] {finallyStat});
 	}
 

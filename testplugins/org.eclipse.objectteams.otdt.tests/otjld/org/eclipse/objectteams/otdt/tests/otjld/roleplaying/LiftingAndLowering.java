@@ -5602,4 +5602,32 @@ public class LiftingAndLowering extends AbstractOTJLDTest {
     		},
     		"OK");
     }
+
+    // [otdre] SneakyException spoils catching of LiftingVetoException
+    public void testBug479687() {
+    	runConformTest(
+    		new String[] {
+    			"MyTeam.java",
+    			"import org.objectteams.LiftingVetoException;\n" +
+    			"public team class MyTeam {\n" +
+    			"	protected class R playedBy MyBase {\n" +
+    			"		void throwingMethod() throws LiftingVetoException {\n" +
+    			"			throw new LiftingVetoException();\n" +
+    			"		}\n" +
+    			"		throwingMethod <- before baseMethod;\n" +
+    			"	}\n" +
+    			"	public static void main(String... args) {\n" +
+    			"		new MyTeam().activate();\n" +
+    			"		new MyBase().baseMethod();\n" +
+    			"	}\n" +
+    			"}\n",
+    			"MyBase.java",
+    			"public class MyBase {\n" +
+    			"	void baseMethod() {\n" +
+    			"		System.out.print(\"base\");\n" +
+    			"	}\n" +
+    			"}\n"
+    		},
+    		"base");
+    }
 }
