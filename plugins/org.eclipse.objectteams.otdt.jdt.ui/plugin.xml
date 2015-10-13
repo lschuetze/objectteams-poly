@@ -129,6 +129,11 @@
         </team>
         <team
               activation="NONE"
+              class="org.eclipse.objectteams.otdt.internal.ui.javaeditor.JavaEditorAdaptor$JavaSourceViewerConfiguration"
+              icon="platform:/plugin/org.eclipse.objectteams.otdt.ui/icons/ot/team_obj.gif">
+        </team>
+        <team
+              activation="NONE"
               class="org.eclipse.objectteams.otdt.internal.ui.util.OTStubUtility"
               icon="platform:/plugin/org.eclipse.objectteams.otdt.ui/icons/ot/team_obj.gif">
         </team>
