@@ -193,8 +193,8 @@ public abstract class AbstractBoundClass implements IBoundClass {
 	 * @param loader classloader responsible for loading this class
 	 */
 	protected AbstractBoundClass(String name, String id, ClassLoader loader) {
-		if (name.indexOf('/')!= -1)
-			new RuntimeException(name).printStackTrace(System.out);
+//		if (name.indexOf('/')!= -1)
+//			new RuntimeException(name).printStackTrace(System.out);
 		this.name = name;
 		this.internalName = name.replace('.', '/');
 		this.id = id;

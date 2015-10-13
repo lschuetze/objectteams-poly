@@ -309,14 +309,11 @@ class AsmWritableBoundClass extends AsmBoundClass {
 		
 		FileOutputStream fos = null;
 		try {
-			String name = getName();
-			int index = name.indexOf('/');
-			if (index == -1)
-				index = name.indexOf('.');
+			String name = getName().replaceAll("/", ".");
 			File dir = new File("otdyn");
 			if (!dir.exists())
 				dir.mkdir();
-			String filename = "otdyn/" + name.substring(index + 1) + ".class";
+			String filename = "otdyn/" + name + ".class";
 			fos = new FileOutputStream(filename);
 			fos.write(allocateAndGetBytecode());
 			fos.close();
@@ -333,14 +330,11 @@ class AsmWritableBoundClass extends AsmBoundClass {
 
 		FileOutputStream fos = null;
 		try {
-			String name = getName();
-			int index = name.indexOf('/');
-			if (index == -1)
-				index = name.indexOf('.');
+			String name = getName().replaceAll("/", ".");
 			File dir = new File("otdyn");
 			if (!dir.exists())
 				dir.mkdir();
-			String filename = "otdyn/" + name.substring(index + 1) + postfix+".#"+(n++);
+			String filename = "otdyn/" + name + postfix+".#"+(n++);
 			fos = new FileOutputStream(filename);
 			fos.write(bytecode);
 			fos.close();
