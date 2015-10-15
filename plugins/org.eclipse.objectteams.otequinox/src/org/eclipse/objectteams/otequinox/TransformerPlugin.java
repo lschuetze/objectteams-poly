@@ -224,7 +224,7 @@ public class TransformerPlugin implements BundleActivator, IAspectRegistry {
 		}
 	}
 
-	public static synchronized void log (Throwable ex, String msg) {
+	public static void log (Throwable ex, String msg) {
 		msg = "OT/Equinox: "+msg;
 		Status status = new Status(IStatus.ERROR, TRANSFORMER_PLUGIN_ID, msg, ex);
 		final InitializedPlugin plugin = TransformerPlugin.plugin;
@@ -233,7 +233,9 @@ public class TransformerPlugin implements BundleActivator, IAspectRegistry {
 		} else {
 			System.err.println(msg);
 			ex.printStackTrace();
-			pendingLogEntries.add(status);
+			synchronized (TransformerPlugin.class) {
+				pendingLogEntries.add(status);
+			}
 		}
 	}
 	
@@ -242,14 +244,17 @@ public class TransformerPlugin implements BundleActivator, IAspectRegistry {
 			doLog(status, msg);
 	}
 
-	public static synchronized void doLog(int level, String msg) {
+	public static void doLog(int level, String msg) {
 		try {
 			Status status = new Status(level, TRANSFORMER_PLUGIN_ID, "OT/Equinox: "+msg);
 			final InitializedPlugin plugin = TransformerPlugin.plugin;
-			if (plugin != null)
+			if (plugin != null) {
 				plugin.log.log(status);
-			else
-				pendingLogEntries.add(status);
+			} else {
+				synchronized(TransformerPlugin.class) {
+					pendingLogEntries.add(status);
+				}
+			}
 		} catch (NoClassDefFoundError err) {
 			if (level >= WARN_LEVEL)
 				System.out.println(">> OT/Equinox: "+msg);
