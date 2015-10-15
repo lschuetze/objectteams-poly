@@ -1,7 +1,7 @@
 /**********************************************************************
  * This file is part of "Object Teams Development Tooling"-Software
  * 
- * Copyright 2011, 2014 GK Software AG and others.
+ * Copyright 2011, 2015 GK Software AG and others.
  * 
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -18,6 +18,7 @@ package org.eclipse.objectteams.otdt.internal.core.compiler.mappings;
 import org.eclipse.jdt.internal.compiler.ast.Expression;
 import org.eclipse.jdt.internal.compiler.ast.MessageSend;
 import org.eclipse.jdt.internal.compiler.classfmt.ClassFileConstants;
+import org.eclipse.jdt.internal.compiler.lookup.BaseTypeBinding;
 import org.eclipse.jdt.internal.compiler.lookup.Binding;
 import org.eclipse.jdt.internal.compiler.lookup.MethodBinding;
 import org.eclipse.jdt.internal.compiler.lookup.ReferenceBinding;
@@ -27,6 +28,7 @@ import org.eclipse.jdt.internal.compiler.lookup.TypeConstants;
 import org.eclipse.jdt.internal.compiler.parser.TerminalTokens;
 import org.eclipse.objectteams.otdt.internal.core.compiler.ast.FieldAccessSpec;
 import org.eclipse.objectteams.otdt.internal.core.compiler.ast.MethodSpec;
+import org.eclipse.objectteams.otdt.internal.core.compiler.ast.PotentialLowerExpression;
 import org.eclipse.objectteams.otdt.internal.core.compiler.model.RoleModel;
 import org.eclipse.objectteams.otdt.internal.core.compiler.model.TeamModel;
 import org.eclipse.objectteams.otdt.internal.core.compiler.util.AstGenerator;
@@ -52,6 +54,14 @@ public class CalloutImplementorDyn {
 		TeamModel teamModel = roleModel.getTeamModel();
 		TeamModel.UpdatableIntLiteral accessIdArg = gen.updatableIntLiteral(baseSpec.accessId);
 		teamModel.recordUpdatableAccessId(accessIdArg); // may need updating before codeGen.
+		for (int i = 0; i < arguments.length; i++) {
+			Expression arg = arguments[i];
+			if (arg instanceof PotentialLowerExpression) {
+				TypeBinding type = ((PotentialLowerExpression) arg).expectedType;
+				if (type instanceof BaseTypeBinding)
+					arguments[i] = gen.createBoxing(arg, (BaseTypeBinding) type);
+			}
+		}
 		int opKind = 0;
 		if (baseSpec instanceof FieldAccessSpec)
 			if (((FieldAccessSpec) baseSpec).calloutModifier == TerminalTokens.TokenNameset)

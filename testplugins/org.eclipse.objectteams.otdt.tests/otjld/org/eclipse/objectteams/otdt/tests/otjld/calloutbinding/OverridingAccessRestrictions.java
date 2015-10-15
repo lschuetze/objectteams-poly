@@ -1,7 +1,7 @@
 /**********************************************************************
  * This file is part of "Object Teams Development Tooling"-Software
  * 
- * Copyright 2004, 2012 IT Service Omikron GmbH and others.
+ * Copyright 2004, 2015 IT Service Omikron GmbH and others.
  * 
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -1678,5 +1678,40 @@ public class OverridingAccessRestrictions extends AbstractOTJLDTest {
     			"public class C3 extends p2.C2 {}\n",
     		},
     		"13");
+    }
+
+    public void testBug479887() throws Exception {
+    	runConformTest(
+    		new String[] {
+				"p479887/MyTeam.java",
+				"package p479887;\n" +
+				"import base p479887_1.C1;\n" +
+				"public team class MyTeam {\n" +
+				"	protected class R playedBy C1 {\n" +
+				"		protected void rmi() -> void mi(int i) with {\n" +
+				"			42 -> i\n" +
+				"		}\n" +
+				"		protected void rmb(boolean b) -> void mb(boolean b);\n" +
+				"	}\n" +
+				"	void test(C1 as R r) {\n" +
+				"		r.rmi();\n" +
+				"		r.rmb(true);\n" +
+				"	}\n" +
+				"	public static void main(String... args) {\n" +
+				"		new MyTeam().test(new p479887_1.C1());\n" +
+				"	}\n" +
+				"}\n",
+    			"p479887_1/C1.java",
+    			"package p479887_1;\n" +
+    			"public class C1 {\n" +
+    			"	void mi(int i) {\n" +
+    			"		System.out.print(i);\n" +
+    			"	}\n" +
+    			"	void mb(boolean b) {\n" +
+    			"		System.out.print(b);\n" +
+    			"	}\n" +
+    			"}\n"    				
+    		},
+    		"42true");
     }
 }

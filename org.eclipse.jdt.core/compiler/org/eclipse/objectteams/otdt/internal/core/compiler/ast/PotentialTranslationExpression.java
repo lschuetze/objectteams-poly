@@ -1,7 +1,7 @@
 /**********************************************************************
  * This file is part of "Object Teams Development Tooling"-Software
  *
- * Copyright 2004, 2006 Fraunhofer Gesellschaft, Munich, Germany,
+ * Copyright 2004, 2015 Fraunhofer Gesellschaft, Munich, Germany,
  * for its Fraunhofer Institute for Computer Architecture and Software
  * Technology (FIRST), Berlin, Germany and Technical University Berlin,
  * Germany.
@@ -53,7 +53,7 @@ public abstract class PotentialTranslationExpression extends Expression  impleme
 
 
 	public Expression expression;
-	protected TypeBinding expectedType;
+	public TypeBinding expectedType;
 	protected boolean checked = false;
 	protected Expression rawExpression = null; // just for pretty-printing
 	protected String operator;                 // just for pretty-printing
