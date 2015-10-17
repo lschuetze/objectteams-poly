@@ -1735,7 +1735,6 @@ public boolean compile(String[] argv) {
 	// decode command line arguments
 	try {
 		configure(argv);
-System.out.println("OT-Weaving: "+this.options.get(CompilerOptions.OPTION_WeavingScheme));
 		if (this.progress != null)
 			this.progress.begin(this.filenames == null ? 0 : this.filenames.length * this.maxRepetition);
 		if (this.proceed) {
@@ -2516,7 +2515,6 @@ public void configure(String[] argv) {
 				    continue;
 				}
 				if (currentArg.equals("-ot.weaving:otdre")) { //$NON-NLS-1$
-System.out.println(currentArg);
 				    mode = DEFAULT;
 					this.options.put(
 							CompilerOptions.OPTION_WeavingScheme,
@@ -4292,7 +4290,6 @@ public void performCompilation() {
 
 	FileSystem environment = getLibraryAccess();
 	this.compilerOptions = new CompilerOptions(this.options);
-System.out.println("CompilerOptions.weavingScheme: "+this.compilerOptions.weavingScheme);
 	this.compilerOptions.performMethodsFullRecovery = false;
 	this.compilerOptions.performStatementsRecovery = false;
 	this.batchCompiler =
