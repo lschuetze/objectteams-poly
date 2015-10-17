@@ -455,6 +455,10 @@ public abstract class AbstractBoundClass implements IBoundClass {
 	 * @param isPrivate is this method private
 	 */
 	public void addMethod(String name, String desc, boolean isStatic, int accessFlags) {
+		if (desc == null) {
+			System.err.println("Method "+name+" has no descriptor");
+			return;
+		}
 		String methodKey = getMethodKey(name, desc);
 		Method method = methods.get(methodKey);
 		// Does this method already exists?
@@ -470,7 +474,7 @@ public abstract class AbstractBoundClass implements IBoundClass {
 		}
 	}
 
-	/** Method signature sauf the return type. */
+	/** Method signature sans the return type. */
 	private String getMethodKey(String name, String desc) {
 		int pos = desc.indexOf(')');
 		return name+desc.substring(0,pos+1);
