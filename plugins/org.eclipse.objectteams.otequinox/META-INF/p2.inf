@@ -41,8 +41,8 @@ units.0.instructions.uninstall=\
 	
 instructions.install = \
 	addJvmArg(jvmArg:-Dot.weaving=otdre); \
-	addJvmArg(jvmArg:-javaagent:${installFolder}/plugins/org.eclipse.objectteams.otequinox_$version$/otequinoxAgent.jar);
+	addJvmArg(jvmArg:-javaagent:${installFolder}/plugins/org.eclipse.objectteams.otequinox_${version}/otequinoxAgent.jar);
 instructions.uninstall = \
 	removeJvmArg(jvmArg:-Dot.weaving=otdre); \
-	removeJvmArg(jvmArg:-javaagent:${installFolder}/plugins/org.eclipse.objectteams.otequinox_$version$/otequinoxAgent.jar);
+	removeJvmArg(jvmArg:-javaagent:${installFolder}/plugins/org.eclipse.objectteams.otequinox_${version}/otequinoxAgent.jar);
 	
