@@ -84,7 +84,7 @@ public abstract class DelegatingTransformer {
 
 	/** Enable OTDRE to use the OTEquinoxDebugAgent, if present, for class redefinition. */
 	private static class OTEquinoxRedefineStrategy implements IRedefineStrategy {
-		private static final String OT_EQUINOX_DEBUG_AGENT = "org.eclipse.objectteams.otdt.internal.debug.adaptor.launching.OTEquinoxDebugAgent";
+		private static final String OT_EQUINOX_DEBUG_AGENT = "org.eclipse.objectteams.otequinox.OTEquinoxAgent";
 
 		public void redefine(Class<?> clazz, byte[] bytecode) throws ClassNotFoundException, UnmodifiableClassException {
 			ClassDefinition arr_cd[] = { new ClassDefinition(clazz, bytecode) };
