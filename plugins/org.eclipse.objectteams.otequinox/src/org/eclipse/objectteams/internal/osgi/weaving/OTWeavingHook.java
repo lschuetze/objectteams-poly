@@ -73,7 +73,11 @@ public class OTWeavingHook implements WeavingHook, WovenClassListener {
 
 
 	// TODO: this master-switch, which selects the weaver, should probably be replaced by s.t. else?
-	boolean useDynamicWeaver = "dynamic".equals(System.getProperty("ot.weaving"));
+	static final boolean useDynamicWeaver;
+	static {
+		String weaving = System.getProperty("ot.weaving");
+		useDynamicWeaver = (weaving != null) && weaving.toLowerCase().equals("otdre");
+	}
 	
 	// TODO: temporary switch to fall back to coarse grain checking:
 	boolean skipBaseClassCheck = "skip".equals(System.getProperty("otequinox.baseClassChecks"));

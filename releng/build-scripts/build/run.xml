@@ -275,6 +275,7 @@ directory for tempory files during testing:
 		<!-- pre-load updateSite with published releases: -->
         <mkdir dir="${otdtUpdatesDir}/plugins"/>
         <mkdir dir="${otdtUpdatesDir}/features"/>
+<!-- don't use previous artifacts during the transition to OTDRE:
         <exec executable="/bin/sh">
                 <arg value="-c"/>
                 <arg value="ln -s ${published.updates}/features/* ${otdtUpdatesDir}/features/"/>
@@ -283,12 +284,15 @@ directory for tempory files during testing:
                 <arg value="-c"/>
                 <arg value="ln -s ${published.updates}/plugins/* ${otdtUpdatesDir}/plugins/"/>
         </exec>
+-->
 		<!-- pre-load category-less metadata: -->
+<!--
 		<copy failonerror="false" flatten="true" toDir="${otdtUpdatesDir}">
 	        <fileset dir="${user.dir}/metadata">
                        <include name="*.xml"/>
             </fileset>
     	</copy>
+-->
 	
 		<echo message="Invoke pdebuild for creating a full OTDT"/>
 		<java
