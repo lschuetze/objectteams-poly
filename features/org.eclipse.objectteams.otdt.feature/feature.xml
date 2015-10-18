@@ -71,7 +71,7 @@ Project Leader:
          download-size="73"
          install-size="110"
          version="0.0.0"
-         unpack="false"/>
+         unpack="true"/> <!-- need access to otequinoxAgent.jar before the platform is launched -->
 
    <plugin
          id="org.eclipse.objectteams.otdt.debug"
