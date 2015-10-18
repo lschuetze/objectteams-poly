@@ -73,10 +73,10 @@ public class OTWeavingHook implements WeavingHook, WovenClassListener {
 
 
 	// TODO: this master-switch, which selects the weaver, should probably be replaced by s.t. else?
-	static final boolean useDynamicWeaver;
+	static final boolean USE_DYNAMIC_WEAVER;
 	static {
 		String weaving = System.getProperty("ot.weaving");
-		useDynamicWeaver = (weaving != null) && weaving.toLowerCase().equals("otdre");
+		USE_DYNAMIC_WEAVER = (weaving != null) && weaving.toLowerCase().equals("otdre");
 	}
 	
 	// TODO: temporary switch to fall back to coarse grain checking:
@@ -233,12 +233,12 @@ public class OTWeavingHook implements WeavingHook, WovenClassListener {
 					return; // don't weave for denied bindings
 				} else if (reason == WeavingReason.Thread) {
 					BaseBundle baseBundle = this.aspectBindingRegistry.getBaseBundle(bundleName);
-					BaseBundleLoadTrigger.addOTREImport(baseBundle, bundleName, wovenClass, this.useDynamicWeaver);
+					BaseBundleLoadTrigger.addOTREImport(baseBundle, bundleName, wovenClass, USE_DYNAMIC_WEAVER);
 				} 
 
 				long time = 0;
 
-				DelegatingTransformer transformer = DelegatingTransformer.newTransformer(useDynamicWeaver, this, bundleWiring);
+				DelegatingTransformer transformer = DelegatingTransformer.newTransformer(USE_DYNAMIC_WEAVER, this, bundleWiring);
 				Class<?> classBeingRedefined = null; // TODO prepare for otre-dyn
 				try {
 					String displayName = reason+" class "+className;

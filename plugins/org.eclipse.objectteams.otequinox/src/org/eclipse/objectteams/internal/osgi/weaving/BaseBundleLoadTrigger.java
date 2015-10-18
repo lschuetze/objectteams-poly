@@ -64,7 +64,7 @@ public class BaseBundleLoadTrigger {
 	public void fire(WovenClass baseClass, Set<String> beingDefined, OTWeavingHook hook) {
 
 		// (1) OTRE import added once per base bundle:
-		boolean useDynamicWeaver = hook.useDynamicWeaver;
+		boolean useDynamicWeaver = OTWeavingHook.USE_DYNAMIC_WEAVER;
 		synchronized(this) {
 			final BaseBundle baseBundle2 = baseBundle;
 			if (!otreAdded) {
