@@ -219,6 +219,9 @@ public class OTWeavingHook implements WeavingHook, WovenClassListener {
 					|| bundleName.equals("org.objectweb.asm"))
 				return;
 
+			if (isEclipseLoggingClass(bundleName, className))
+				return;
+
 			if (BCELPatcher.BCEL_PLUGIN_ID.equals(bundleName)) {
 				BCELPatcher.fixBCEL(wovenClass);
 				return;
@@ -263,6 +266,22 @@ public class OTWeavingHook implements WeavingHook, WovenClassListener {
 		} catch (ClassCircularityError cce) {
 			log(cce, "Weaver encountered a circular class dependency");
 		}
+	}
+
+	private boolean isEclipseLoggingClass(String bundleName, String className) {
+		if (bundleName.equals("org.eclipse.ui.workbench")) {
+			if (className.equals("org.eclipse.ui.statushandlers.StatusAdapter"))
+				return true;
+			else if (className.equals("org.eclipse.ui.internal.misc.StatusUtil"))
+				return true;
+		} else if (bundleName.equals("org.eclipse.ui.views.log")) {
+			if (className.startsWith("org.eclipse.ui.internal.views.log.LogView$"))
+				return true;
+		} else if (bundleName.equals("org.eclipse.equinox.common")) {
+			if (className.equals("org.eclipse.core.runtime.ILogListener"))
+				return true;
+		}
+		return false;
 	}
 
 	WeavingReason requiresWeaving(BundleWiring bundleWiring, String className, byte[] bytes) {
@@ -386,7 +405,7 @@ public class OTWeavingHook implements WeavingHook, WovenClassListener {
 			String teamName = record.team.teamName;
 			log(IStatus.INFO, "Consider for instantiation/activation: team "+teamName);
 			try {
-				TeamLoader loader = new TeamLoader(deferredTeams, beingDefined, this.useDynamicWeaver);
+				TeamLoader loader = new TeamLoader(deferredTeams, beingDefined, USE_DYNAMIC_WEAVER);
 				// Instantiate (we only get here if activationKind != NONE)
 				loader.instantiateAndActivate(record.aspectBinding, record.team, record.activationKind); // may re-insert to deferredTeams
 			} catch (Exception e) {
