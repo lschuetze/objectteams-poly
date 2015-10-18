@@ -77,7 +77,7 @@
 	</target>
 
 	<target name="post.compile.agent">
-		<echo message="Jaring otequinoxAgent.jar from ${basedir}/agentBin into ${basedir}/otequinoxAgent.jar" />		<jar destfile="${basedir}/otequinoxAgent.jar"			 basedir="${basedir}/agentBin"			 includes="org/eclipse/objectteams/otequinox/OTEquinoxAgent*.class"			 compress="true">			<manifest>				<attribute name="Premain-Class" value="org.eclipse.objectteams.otequinox.OTEquinoxAgent"/>				<attribute name="Can-Redefine-Classes" value="true"/>			</manifest>		</jar>	</target>
+		<echo message="Jaring otequinoxAgent.jar from ${basedir}/agentBin into ${basedir}/otequinoxAgent.jar" />		<jar destfile="${basedir}/otequinoxAgent.jar"			 basedir="${basedir}/agent"			 includes="org/eclipse/objectteams/otequinox/OTEquinoxAgent*.class"			 compress="true">			<manifest>				<attribute name="Premain-Class" value="org.eclipse.objectteams.otequinox.OTEquinoxAgent"/>				<attribute name="Can-Redefine-Classes" value="true"/>			</manifest>		</jar>	</target>
 	
 	<!-- ===================================================================== -->
 	<!-- Steps to do after the compilation target <name>                       -->

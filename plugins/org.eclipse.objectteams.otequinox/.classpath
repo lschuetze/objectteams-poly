@@ -11,6 +11,6 @@
 		</attributes>
 	</classpathentry>
 	<classpathentry kind="src" path="src"/>
-	<classpathentry kind="src" output="agentBin" path="agentSrc"/>
+	<classpathentry kind="src" output="agent" path="agentSrc"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>
