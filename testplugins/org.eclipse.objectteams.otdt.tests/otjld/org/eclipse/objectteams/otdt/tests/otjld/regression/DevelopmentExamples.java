@@ -1706,6 +1706,45 @@ public class DevelopmentExamples extends AbstractOTJLDTest {
             "OK");
     }
 
+    public void testBug480257() {
+    	runConformTest(
+    		new String[] {
+    			"MT.java",
+    			"public team class MT {\n" + 
+    			"	public class R playedBy C1A {\n" + 
+    			"		void bm() <- replace void bm();\n" + 
+    			"		callin void bm() {\n" + 
+    			"			System.out.print(\"R\");\n" + 
+    			"			base.bm();\n" + 
+    			"		}\n" + 
+    			"	}\n" + 
+    			"	public static void main(String[] args) {\n" + 
+    			"		new MT().activate();\n" + 
+    			"		new C1B().bm();\n" + 
+    			"	}\n" + 
+    			"}\n",
+    			"C0.java",
+    			"public class C0 {\n" + 
+    			"	public void bm() {\n" + 
+    			"		System.out.print(\"C0\");\n" + 
+    			"	}\n" + 
+    			"}\n",
+    			"C1A.java",
+    			"public class C1A extends C0 {\n" + 
+    			"}\n",
+    			"C1B.java",
+    			"public class C1B extends C0 {\n" + 
+    			"	@Override\n" + 
+    			"	public void bm() {\n" + 
+    			"		System.out.print(\"C1B-\");\n" + 
+    			"		super.bm();\n" + // this super call was confused by the (unrelated) callin binding
+    			"		System.out.print('!');\n" + 
+    			"	}\n" + 
+    			"}\n"
+    		},
+    		"C1B-C0!");
+    }
+
     // base call requires a result lifting
     // X.1.2-otjld-result-lifting-1
     public void testX12_resultLifting1() {
