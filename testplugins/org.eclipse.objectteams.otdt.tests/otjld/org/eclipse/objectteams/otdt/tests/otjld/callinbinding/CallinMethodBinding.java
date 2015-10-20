@@ -1,7 +1,7 @@
 /**********************************************************************
  * This file is part of "Object Teams Development Tooling"-Software
  * 
- * Copyright 2004, 2013 IT Service Omikron GmbH and others.
+ * Copyright 2004, 2015 IT Service Omikron GmbH and others.
  * 
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -8326,5 +8326,38 @@ public class CallinMethodBinding extends AbstractOTJLDTest {
     				"    public void foo() {};\n" +
     				"}"
     		});
+    }
+
+    public void testBug480244() {
+    	runConformTest(
+    		new String[] {
+    			"test/T1.java",
+    			"package test;\n" +
+    			"public team class T1 {\n" +
+    			"	protected class R playedBy B {\n" +
+    			"		callin void rm() {\n" +
+    			"			base.rm();\n" +
+    			"			System.out.print(\"done\");\n" +
+    			"		}\n" +
+    			"		rm <- replace bm;\n" +
+    			"	}\n" +
+    			"	public static void main(String... args) {\n" +
+    			"		new T1().activate();\n" +
+    			"		new B().bm();\n" +
+    			"	}\n" +
+    			"}\n",
+    			"test/B.java",
+    			"package test;\n" +
+    			"public class B {\n" +
+    			"	public void bm() {\n" +
+    			"		try {\n" +
+    			"			throw new Exception(\"ex\");\n" +
+    			"		} catch (Exception ex) {\n" +
+    			"			System.out.print(ex.getMessage());\n" +
+    			"		}\n" +
+    			"	}\n" +
+    			"}\n"
+    		},
+    		"exdone");
     }
 }

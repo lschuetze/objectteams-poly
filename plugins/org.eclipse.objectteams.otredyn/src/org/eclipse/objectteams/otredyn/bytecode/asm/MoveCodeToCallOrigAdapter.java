@@ -32,6 +32,7 @@ import org.objectweb.asm.tree.InsnNode;
 import org.objectweb.asm.tree.IntInsnNode;
 import org.objectweb.asm.tree.MethodInsnNode;
 import org.objectweb.asm.tree.MethodNode;
+import org.objectweb.asm.tree.TryCatchBlockNode;
 import org.objectweb.asm.tree.TypeInsnNode;
 
 
@@ -120,6 +121,11 @@ public class MoveCodeToCallOrigAdapter extends AbstractTransformableClassNode {
 		replaceReturn(orgMethod.instructions, returnType);
 		
 		newInstructions.add(orgMethod.instructions);
+		if (orgMethod.tryCatchBlocks != null) {
+			if (callOrig.tryCatchBlocks == null)
+				callOrig.tryCatchBlocks = new ArrayList<TryCatchBlockNode>();
+			callOrig.tryCatchBlocks.addAll(orgMethod.tryCatchBlocks);
+		}
 		
 		addNewLabelToSwitch(callOrig.instructions, newInstructions, boundMethodId);
 		
