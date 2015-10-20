@@ -1,7 +1,7 @@
 /**********************************************************************
  * This file is part of "Object Teams Development Tooling"-Software
  * 
- * Copyright 2013, 2014 GK Software AG
+ * Copyright 2013, 2015 GK Software AG
  *  
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -17,13 +17,16 @@ package org.eclipse.objectteams.otequinox;
 
 import static org.eclipse.objectteams.otequinox.Constants.TRANSFORMER_PLUGIN_ID;
 
+import java.io.File;
+import java.io.IOException;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.eclipse.core.runtime.FileLocator;
 import org.eclipse.core.runtime.IExtensionRegistry;
 import org.eclipse.core.runtime.ILog;
 import org.eclipse.core.runtime.IStatus;
-import org.eclipse.core.runtime.Platform;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.equinox.log.ExtendedLogReaderService;
 import org.eclipse.equinox.log.ExtendedLogService;
@@ -49,6 +52,8 @@ import org.osgi.util.tracker.ServiceTracker;
 
 @NonNullByDefault
 public class TransformerPlugin implements BundleActivator, IAspectRegistry {
+
+    private static final String OTEQUINOX_AGENT_JAR_FILENAME = "otequinoxAgent.jar"; //$NON-NLS-1$
 
 	/**
 	 * State class representing the initialized state, i.e., after {@link start()}
@@ -122,6 +127,7 @@ public class TransformerPlugin implements BundleActivator, IAspectRegistry {
 	}
 
 	private static List<IStatus> pendingLogEntries = new ArrayList<>();
+	private static @Nullable URL agentURL; // null signals an error
 	
 
 	/*
@@ -159,6 +165,7 @@ public class TransformerPlugin implements BundleActivator, IAspectRegistry {
 				log(ex, "Failed to register service listener");
 			}
 		}
+		agentURL = bundleContext.getBundle().getEntry("/"+OTEQUINOX_AGENT_JAR_FILENAME);
 	}
 
 	@SuppressWarnings("restriction")
@@ -349,5 +356,19 @@ public class TransformerPlugin implements BundleActivator, IAspectRegistry {
 
 	static IllegalStateException notInitialized() {
 		return new IllegalStateException("TransformerPlugin has not been initialized");
+	}
+
+	public static @Nullable String getOtequinoxAgentPath() {
+		if (agentURL != null) {
+			try {
+				return new File(FileLocator.toFileURL(agentURL).getFile())
+							.getAbsolutePath();
+			} catch (IOException e) {
+				log(new IllegalStateException(e), "Failed to intialize location of "+OTEQUINOX_AGENT_JAR_FILENAME);
+			}
+		} else {
+			log(IStatus.ERROR, "Failed to intialize location of "+OTEQUINOX_AGENT_JAR_FILENAME);
+		}
+		return null;
 	}
 }

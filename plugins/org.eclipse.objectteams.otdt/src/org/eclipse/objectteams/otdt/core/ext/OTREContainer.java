@@ -1,7 +1,7 @@
 /**********************************************************************
  * This file is part of "Object Teams Development Tooling"-Software
  * 
- * Copyright 2003, 2014 Fraunhofer Gesellschaft, Munich, Germany,
+ * Copyright 2003, 2015 Fraunhofer Gesellschaft, Munich, Germany,
  * for its Fraunhofer Institute for Computer Architecture and Software
  * Technology (FIRST), Berlin, Germany and Technical University Berlin,
  * Germany.
@@ -37,6 +37,7 @@ import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.objectteams.otdt.internal.core.ext.OTCoreExtMessages;
 import org.eclipse.objectteams.otdt.internal.core.ext.OTVariableInitializer;
+import org.eclipse.objectteams.otequinox.TransformerPlugin;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
@@ -55,7 +56,6 @@ public class OTREContainer implements IClasspathContainer
     private static IPath  OTRE_MIN_JAR_PATH;
     private static IPath  OTRE_AGENT_JAR_PATH;
     private static IPath  OTDRE_AGENT_JAR_PATH;
-    private static IPath  OTEQUINOX_AGENT_JAR_PATH;
     
     private static IPath[][]  BYTECODE_WEAVER_PATHS = new IPath[WeavingScheme.values().length][]; // will be initialized in {@link findBytecodeLib(BundleContext,boolean)}
 
@@ -67,7 +67,6 @@ public class OTREContainer implements IClasspathContainer
     private static final String OTRE_MIN_JAR_FILENAME   = "otre_min.jar"; //$NON-NLS-1$
     private static final String OTRE_AGENT_JAR_FILENAME = "otre_agent.jar"; //$NON-NLS-1$
     private static final String OTDRE_AGENT_JAR_FILENAME = "otredyn_agent.jar"; //$NON-NLS-1$
-    private static final String OTEQUINOX_AGENT_JAR_FILENAME = "otequinoxAgent.jar"; //$NON-NLS-1$
     
     private static final String OTRE_PLUGIN_NAME = "org.eclipse.objectteams.otre";    
     private static final String OTDRE_PLUGIN_NAME = "org.eclipse.objectteams.otredyn";
@@ -155,9 +154,7 @@ public class OTREContainer implements IClasspathContainer
      * @return resolved path
      */
     public static IPath getOtequinoxAgentJarPath() {
-    	if (OTEQUINOX_AGENT_JAR_PATH == null)
-    		OTEQUINOX_AGENT_JAR_PATH = OTDTPlugin.getResolvedVariablePath(OTDTPlugin.OTDT_INSTALLDIR, "lib/"+OTEQUINOX_AGENT_JAR_FILENAME); //$NON-NLS-1$
-    	return OTEQUINOX_AGENT_JAR_PATH;
+    	return new Path(TransformerPlugin.getOtequinoxAgentPath());
     }
     
 	/**

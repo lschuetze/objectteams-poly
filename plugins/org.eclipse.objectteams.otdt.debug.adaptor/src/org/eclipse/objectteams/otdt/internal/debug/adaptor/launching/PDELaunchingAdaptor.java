@@ -1,7 +1,7 @@
 /**********************************************************************
  * This file is part of "Object Teams Development Tooling"-Software
  * 
- * Copyright 2008, 2014 Technical University Berlin, Germany.
+ * Copyright 2008, 2015 Technical University Berlin, Germany.
  * 
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -30,6 +30,7 @@ import org.eclipse.objectteams.otdt.debug.OTDebugPlugin;
 import org.eclipse.objectteams.otdt.debug.TeamBreakpointInstaller;
 import org.eclipse.objectteams.otdt.internal.debug.adaptor.DebugMessages;
 import org.eclipse.objectteams.otdt.internal.debug.adaptor.OTDebugAdaptorPlugin;
+import org.eclipse.objectteams.otequinox.TransformerPlugin;
 import org.eclipse.pde.core.plugin.IPluginModelBase;
 import org.eclipse.pde.core.plugin.ISharedPluginModel;
 import org.eclipse.swt.widgets.Button;
@@ -56,16 +57,17 @@ public team class PDELaunchingAdaptor {
 	static final String ENABLE_OTEQUINOX      = "-Dot.equinox=1"; //$NON-NLS-1$     // this also causes the WORKAROUND_REPOSITORY flag being set to true in OTRE.
 	static final String DISABLE_OTEQUINOX     = "-Dot.equinox=false"; //$NON-NLS-1$ // prevents OTWeavingHook installation
 	static final String OT_DEBUG_VMARG        = "-Dot.debug"; //$NON-NLS-1$
-	static final String OTE_AGENT_ARG		  = "-javaagent:" + OTREContainer.getOtequinoxAgentJarPath().toOSString();
+	static final String OTE_AGENT_ARG		  = "-javaagent:" + TransformerPlugin.getOtequinoxAgentPath();
 	// slot [0] to be filled in from the launch config:
-	static final String[] OT_VM_ARGS          = { ENABLE_OTEQUINOX };
+	static final String[] OT_VM_ARGS          = { ENABLE_OTEQUINOX }; // FIXME: revive via bug 480234
+	static final String[] OTDRE_VM_ARGS          = { ENABLE_OTEQUINOX, OTE_AGENT_ARG };
 	static final String[] OT_VM_DEBUG_ARGS    = { ENABLE_OTEQUINOX, OT_DEBUG_VMARG, OTE_AGENT_ARG };
 	static final String[] VM_ARGS          = { DISABLE_OTEQUINOX };
 	static final String[] VM_DEBUG_ARGS    = { DISABLE_OTEQUINOX, OT_DEBUG_VMARG };
 
 	/** select proper set of arguments for an OT-launch, insert otequinox.hook using it's actual install location. */
 	static String[] getOTArgs(String mode) {
-		String[] otArgs = OT_VM_ARGS;
+		String[] otArgs = OTDRE_VM_ARGS;
 		if (mode != null && mode.equals(ILaunchManager.DEBUG_MODE))
 			otArgs = OT_VM_DEBUG_ARGS;
 		return otArgs;

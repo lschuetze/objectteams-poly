@@ -258,7 +258,7 @@ public class TeamLoader {
 				WaitingTeamRecord record = new WaitingTeamRecord(team, activationKind, unloadableBaseClass);
 				deferredTeams.add(record);
 			}
-			log(IStatus.INFO, "Defer instantation/activation of team "+teamName);
+			log(IStatus.INFO, "Defer instantation/activation of team "+teamName+", waiting for "+unloadableBaseClass);
 			return false;
 		}
 		return true;
