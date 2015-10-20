@@ -17,8 +17,6 @@
 	<!--properties file containing the build information-->
 	<property file="src/label.properties" />
 	<property file="src/finalPluginsVersions.properties" />
-	<property name="otequinox.agent.jar" value="${test.root.dir}/../otequinoxAgent.jar"/>
-
 
 	<target name="readFlags">
 		<condition property="really.build.all">
@@ -67,7 +65,7 @@
 		<ant antfile="plugins/${testPlugin}/test.xml" dir="${test.eclipseDir}">
 			<property name="eclipse-home" value="${test.eclipseDir}" />
 			<property name="library-file" value="${test.root.dir}/library.xml"/>
-            <property name="extraVMargs" value="-XX:+HeapDumpOnOutOfMemoryError -Djava.io.tmpdir=${test.tmpDir} -Dot.weaving=otdre -javaagent:${otequinox.agent.jar}"/>
+            <property name="extraVMargs" value="-XX:+HeapDumpOnOutOfMemoryError -Djava.io.tmpdir=${test.tmpDir}"/>
 		</ant>
 	</target>
 
