@@ -8311,8 +8311,8 @@ public class CallinMethodBinding extends AbstractOTJLDTest {
     public void testBug387996a() {
     	runConformTest(
     		new String[] {
-    			"test/T1.java",
-    				"package test;\n" +
+    			"test387996/T1.java",
+    				"package test387996;\n" +
     				"public team class T1 {\n" +
     				"    private Object test;  // = name of package\n" +
     				"    protected class R playedBy B base when (true) {\n" +
@@ -8320,8 +8320,8 @@ public class CallinMethodBinding extends AbstractOTJLDTest {
     				"        bar <- after foo;  // <- warning!\n" +
     				"    }\n" +
     				"}",
-    			"test/B.java",
-    				"package test;\n" +
+    			"test387996/B.java",
+    				"package test387996;\n" +
     				"public class B {    \n" +
     				"    public void foo() {};\n" +
     				"}"
@@ -8331,8 +8331,8 @@ public class CallinMethodBinding extends AbstractOTJLDTest {
     public void testBug480244() {
     	runConformTest(
     		new String[] {
-    			"test/T1.java",
-    			"package test;\n" +
+    			"test480244/T1.java",
+    			"package test480244;\n" +
     			"public team class T1 {\n" +
     			"	protected class R playedBy B {\n" +
     			"		callin void rm() {\n" +
@@ -8346,8 +8346,8 @@ public class CallinMethodBinding extends AbstractOTJLDTest {
     			"		new B().bm();\n" +
     			"	}\n" +
     			"}\n",
-    			"test/B.java",
-    			"package test;\n" +
+    			"test480244/B.java",
+    			"package test480244;\n" +
     			"public class B {\n" +
     			"	public void bm() {\n" +
     			"		try {\n" +
