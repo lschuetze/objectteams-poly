@@ -1,7 +1,7 @@
 /**********************************************************************
  * This file is part of "Object Teams Dynamic Runtime Environment"
  * 
- * Copyright 2009, 2014 Oliver Frank and others.
+ * Copyright 2009, 2015 Oliver Frank and others.
  * 
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -209,6 +209,16 @@ public abstract class AbstractTransformableClassNode extends ClassNode {
 		instructions.add(getObjectInsn);
 		instructions.add(new MethodInsnNode(Opcodes.INVOKEVIRTUAL,
 				"java/io/PrintStream", "println", "(Ljava/lang/Object;)V", false));
+		return instructions;
+	}
+
+	protected InsnList getInstructionsForDebugIntOutput(AbstractInsnNode getIntInsn) {
+		InsnList instructions = new InsnList();
+		instructions.add(new FieldInsnNode(Opcodes.GETSTATIC,
+				"java/lang/System", "out", "Ljava/io/PrintStream;"));
+		instructions.add(getIntInsn);
+		instructions.add(new MethodInsnNode(Opcodes.INVOKEVIRTUAL,
+				"java/io/PrintStream", "println", "(I)V", false));
 		return instructions;
 	}
 
