@@ -375,18 +375,18 @@ class AsmWritableBoundClass extends AsmBoundClass {
 		if (!isInterface())
 			addField(ConstantMembers.roleSet, Opcodes.ACC_PUBLIC);
 		
-		addEmptyMethod(ConstantMembers.callOrig, methodModifiers, null, null, null);
-		addEmptyMethod(ConstantMembers.callAllBindingsClient, methodModifiers, null, null, null);
+		String superClassName = getSuperClassName().replace('.', '/');
+		if (!ObjectTeamsTransformer.isWeavable(superClassName))
+			superClassName = null;
+		
+		addEmptyMethod(ConstantMembers.callOrig, methodModifiers, null, null, superClassName);
+		addEmptyMethod(ConstantMembers.callAllBindingsClient, methodModifiers, null, null, superClassName);
 		
 		// the methods callOrigStatic and accessStatic have to already exist to call it in a concrete team
 		if (!isInterface()) {
 			addEmptyMethod(getCallOrigStatic(), Opcodes.ACC_PUBLIC + Opcodes.ACC_STATIC, null, null, null);
 			addEmptyMethod(ConstantMembers.accessStatic, Opcodes.ACC_PUBLIC + Opcodes.ACC_STATIC, null, null, null);
 		}
-		
-		String superClassName = getSuperClassName().replace('.', '/');
-		if (!ObjectTeamsTransformer.isWeavable(superClassName))
-			superClassName = null;
 		addEmptyMethod(ConstantMembers.access, methodModifiers, null, null, superClassName);
 		addEmptyMethod(ConstantMembers.addOrRemoveRole, methodModifiers, null, null, null);
 		
