@@ -41,7 +41,7 @@ public class ObjectTeamsTransformer implements ClassFileTransformer {
 	public ObjectTeamsTransformer() {
 		this.weavingContext = new IWeavingContext() {
 			@Override public boolean isWeavable(String className) {
-				return ObjectTeamsTransformer.isWeavable(className);
+				return ObjectTeamsTransformer.isWeavable(className.replace('.', '/'));
 			}
 		};
 	}

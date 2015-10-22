@@ -22,6 +22,7 @@ import org.objectweb.asm.tree.InsnNode;
 import org.objectweb.asm.tree.IntInsnNode;
 import org.objectweb.asm.tree.LabelNode;
 import org.objectweb.asm.tree.LookupSwitchInsnNode;
+import org.objectweb.asm.tree.MethodInsnNode;
 import org.objectweb.asm.tree.MethodNode;
 
 /**
@@ -33,6 +34,8 @@ public class CreateSwitchAdapter extends AbstractTransformableClassNode {
 
 	private int firstArgIndex;
 
+	private String superToCall;
+
 	public CreateSwitchAdapter(Method method) {
 		this.method = method;
 		if (method.isStatic()) {
@@ -40,6 +43,16 @@ public class CreateSwitchAdapter extends AbstractTransformableClassNode {
 		} else {
 			firstArgIndex = 1;
 		}
+	}
+
+	public CreateSwitchAdapter(Method method, String superToCall) {
+		this.method = method;
+		if (method.isStatic()) {
+			firstArgIndex = 0;
+		} else {
+			firstArgIndex = 1;
+		}
+		this.superToCall = superToCall;
 	}
 
 	public CreateSwitchAdapter(Method method, boolean isRoleMethod) {
@@ -94,7 +107,14 @@ public class CreateSwitchAdapter extends AbstractTransformableClassNode {
 	 * @param method
 	 */
 	protected void addInstructionForDefaultLabel(MethodNode method) {
-		method.instructions.add(new InsnNode(Opcodes.ACONST_NULL));
+		if (superToCall != null) {
+			method.instructions.add(new IntInsnNode(Opcodes.ALOAD, 0));
+			method.instructions.add(new IntInsnNode(Opcodes.ILOAD, 1));
+			method.instructions.add(new IntInsnNode(Opcodes.ALOAD, 2));
+			method.instructions.add(new MethodInsnNode(Opcodes.INVOKESPECIAL, superToCall, this.method.getName(), this.method.getSignature(), false));
+		} else {
+			method.instructions.add(new InsnNode(Opcodes.ACONST_NULL));
+		}
 		method.instructions.add(new InsnNode(Opcodes.ARETURN));
 	}
 	
