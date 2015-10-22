@@ -76,7 +76,9 @@ public class OTWeavingHook implements WeavingHook, WovenClassListener {
 	static final boolean USE_DYNAMIC_WEAVER;
 	static {
 		String weaving = System.getProperty("ot.weaving");
+System.err.println("OT/Equinox: ot.weaving="+weaving);
 		USE_DYNAMIC_WEAVER = (weaving != null) && weaving.toLowerCase().equals("otdre");
+System.err.println("OT/Equinox: USE_DYNAMIC_WEAVER="+USE_DYNAMIC_WEAVER);
 	}
 	
 	// TODO: temporary switch to fall back to coarse grain checking:
