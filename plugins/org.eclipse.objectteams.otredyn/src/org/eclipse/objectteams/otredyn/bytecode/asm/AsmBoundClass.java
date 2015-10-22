@@ -36,7 +36,6 @@ abstract class AsmBoundClass extends AbstractTeam {
 	
 	public static final int ASM_API = Opcodes.ASM5;
 
-	private boolean parsed;
 	private IBytecodeProvider bytecodeProvider;
 	
 	/**

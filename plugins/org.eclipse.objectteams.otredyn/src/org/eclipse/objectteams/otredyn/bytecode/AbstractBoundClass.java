@@ -150,7 +150,9 @@ public abstract class AbstractBoundClass implements IBoundClass {
 	private Map<Member, WeavingTask> openAccessTasks;
 	
 	private List<ISubclassWiringTask> wiringTasks;
-	
+
+	protected boolean parsed;
+
 	//FQN (e.g. "foo.bar.MyClass")
 	private String name;
 	
@@ -500,17 +502,29 @@ public abstract class AbstractBoundClass implements IBoundClass {
 	}
 
 	public synchronized Method getMethod(String name, String desc, int flags, boolean allowCovariantReturn) {
-		parseBytecode();
-		String methodKey = getMethodKey(name, desc);
-		Method method = methods.get(methodKey);
-		if (!allowCovariantReturn && method != null && !method.getSignature().equals(desc))
-			method = null; // don't use this
-		if (method == null) {
-			// class was not yet loaded
-			method = new Method(name, desc, ((flags&IBinding.STATIC_BASE) != 0), 0/*accessFlags*/);
-			methods.put(methodKey, method);
+		if (this.parsed) {
+			// in this state the current class may already be inside synchronized handleTaskList(), try without lock:
+			String methodKey = getMethodKey(name, desc);
+			Method method = methods.get(methodKey);
+			if (method != null) {
+				if (allowCovariantReturn || method.getSignature().equals(desc))
+					return method;
+				return null;
+			}
 		}
-		return method;
+		synchronized(this) {
+			parseBytecode();
+			String methodKey = getMethodKey(name, desc);
+			Method method = methods.get(methodKey);
+			if (!allowCovariantReturn && method != null && !method.getSignature().equals(desc))
+				return null; // don't use this
+			if (method == null) {
+				// class was not yet loaded
+				method = new Method(name, desc, ((flags&IBinding.STATIC_BASE) != 0), 0/*accessFlags*/);
+				methods.put(methodKey, method);
+			}
+			return method;
+		}
 	}
 	
 	Method getMethod(WeavingTask task) {
@@ -672,10 +686,12 @@ public abstract class AbstractBoundClass implements IBoundClass {
 						// Delegate the WeavingTask to the subclasses
 						for (AbstractBoundClass subclass : getSubclasses()) {
 							Method subMethod = subclass.getMethod(method, task);
-							WeavingTask newTask = new WeavingTask(WeavingTaskType.WEAVE_INHERITED_BINDING, subMethod, task);
-							subclass.addWeavingTask(newTask, true/*standBy*/);
-							affectedClasses.add(subclass);
-							TeamManager.mergeJoinpoints(this, subclass, method, subMethod, task.isHandleCovariantReturn());
+							if (subMethod != null) {
+								WeavingTask newTask = new WeavingTask(WeavingTaskType.WEAVE_INHERITED_BINDING, subMethod, task);
+								subclass.addWeavingTask(newTask, true/*standBy*/);
+								affectedClasses.add(subclass);
+								TeamManager.mergeJoinpoints(this, subclass, method, subMethod, task.isHandleCovariantReturn());
+							}
 						}
 //					}
 				}
