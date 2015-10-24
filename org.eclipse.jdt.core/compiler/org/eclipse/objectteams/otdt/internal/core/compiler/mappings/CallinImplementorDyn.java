@@ -381,6 +381,10 @@ public class CallinImplementorDyn extends MethodMappingImplementor {
 				// statements for the body of the switchStatement:
 				List<Statement> statements = new ArrayList<Statement>();
 
+				// count callins:
+				for (CallinMappingDeclaration callinDecl : callinDecls) 
+					for (MethodSpec baseSpec : callinDecl.baseMethodSpecs)
+						baseSpec.getCallinId(aTeam);
 				int callinIdCount = teamDecl.getTeamModel().getCallinIdCount();
 				// callinIds not handled here will be handled using a super-call.
 				boolean[] handledCallinIds = new boolean[callinIdCount];
@@ -398,8 +402,9 @@ public class CallinImplementorDyn extends MethodMappingImplementor {
 
 					// one case label per bound base method:
 					for (MethodSpec baseSpec : callinDecl.baseMethodSpecs) {
-						statements.add(gen.caseStatement(gen.intLiteral(baseSpec.callinID)));				// case <baseMethod.callinId>: 
-						handledCallinIds[baseSpec.callinID] = true;
+						int callinID = baseSpec.getCallinId(aTeam);
+						statements.add(gen.caseStatement(gen.intLiteral(callinID)));				// case <baseMethod.callinId>: 
+						handledCallinIds[callinID] = true;
 
 						PredicateGenerator predGen = new PredicateGenerator(
 															callinDecl.binding._declaringRoleClass,
