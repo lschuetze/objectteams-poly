@@ -1005,7 +1005,7 @@ public abstract class AbstractBoundClass implements IBoundClass {
 				}
 				Method superMethod = superClass.getMethod(task);
 				if (superMethod.isImplemented()) {
-					isWeavable = weavingContext.isWeavable(superClass.getInternalName());
+					isWeavable = weavingContext.isWeavable(superClass.getName());
 					break;
 				}
 				superClass = superClass.getSuperclass();

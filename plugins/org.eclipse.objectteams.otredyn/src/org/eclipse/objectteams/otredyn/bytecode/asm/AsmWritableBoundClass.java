@@ -372,24 +372,23 @@ class AsmWritableBoundClass extends AsmBoundClass {
 		if (isInterface())
 			methodModifiers |= Opcodes.ACC_ABSTRACT;
 		
-		String superClassName = getSuperClassName().replace('.', '/');
+		String superClassName = getSuperClassName();
 		boolean superIsWeavable = weavingContext.isWeavable(superClassName);
-		if (!superIsWeavable)
-			superClassName = null;
+		String internalSuperClassName = superIsWeavable ? getInternalSuperClassName() : null;
 
 		if (!isInterface() && !superIsWeavable)
 			addField(ConstantMembers.roleSet, Opcodes.ACC_PUBLIC);
 
 		
-		addEmptyMethod(ConstantMembers.callOrig, methodModifiers, null, null, superClassName);
-		addEmptyMethod(ConstantMembers.callAllBindingsClient, methodModifiers, null, null, superClassName);
+		addEmptyMethod(ConstantMembers.callOrig, methodModifiers, null, null, internalSuperClassName);
+		addEmptyMethod(ConstantMembers.callAllBindingsClient, methodModifiers, null, null, internalSuperClassName);
 		
 		// the methods callOrigStatic and accessStatic have to already exist to call it in a concrete team
 		if (!isInterface()) {
 			addEmptyMethod(getCallOrigStatic(), Opcodes.ACC_PUBLIC + Opcodes.ACC_STATIC, null, null, null);
 			addEmptyMethod(ConstantMembers.accessStatic, Opcodes.ACC_PUBLIC + Opcodes.ACC_STATIC, null, null, null);
 		}
-		addEmptyMethod(ConstantMembers.access, methodModifiers, null, null, superClassName);
+		addEmptyMethod(ConstantMembers.access, methodModifiers, null, null, internalSuperClassName);
 		addEmptyMethod(ConstantMembers.addOrRemoveRole, methodModifiers, null, null, null);
 		
 		if (!isInterface())
@@ -434,8 +433,8 @@ class AsmWritableBoundClass extends AsmBoundClass {
 	@Override
 	protected void prepareForFirstTransformation() {
 		if (!isTransformed && !isInterface()) {
-			String superClassName = this.weavingContext.isWeavable(getSuperClassName()) ? getInternalSuperClassName() : null;
-			nodes.add(new CreateSwitchAdapter(ConstantMembers.callOrig, superClassName));
+			String internalSuperClassName = this.weavingContext.isWeavable(getSuperClassName()) ? getInternalSuperClassName() : null;
+			nodes.add(new CreateSwitchAdapter(ConstantMembers.callOrig, internalSuperClassName));
 			nodes.add(new CreateSwitchForCallAllBindingsNode());
 			nodes.add(new CreateAddRemoveRoleMethod());
 			isTransformed = true;
@@ -461,9 +460,9 @@ class AsmWritableBoundClass extends AsmBoundClass {
 	@Override
 	protected void prepareForFirstMemberAccess() {
 		if (!isTransformedForMemberAccess && !isInterface()) {
-			String superClassName = this.weavingContext.isWeavable(getSuperClassName()) ? getInternalSuperClassName() : null;
-			nodes.add(new CreateSwitchForAccessAdapter(ConstantMembers.access, superClassName, this));
-			nodes.add(new CreateSwitchForAccessAdapter(ConstantMembers.accessStatic, superClassName, this));
+			String internalSuperClassName = this.weavingContext.isWeavable(getSuperClassName()) ? getInternalSuperClassName() : null;
+			nodes.add(new CreateSwitchForAccessAdapter(ConstantMembers.access, internalSuperClassName, this));
+			nodes.add(new CreateSwitchForAccessAdapter(ConstantMembers.accessStatic, internalSuperClassName, this));
 			isTransformedForMemberAccess = true;
 		}
 

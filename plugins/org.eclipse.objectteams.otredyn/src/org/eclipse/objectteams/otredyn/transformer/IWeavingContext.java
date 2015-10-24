@@ -41,7 +41,8 @@ public interface IWeavingContext {
 	 * <br/>
 	 * When answering <code>false</code> the class can be immediately rewoven,
 	 * and the weaving context does not directly participate in this.
-	 * @param className
+	 * @param className full qualified classname, dot-separated for packages 
+	 * 		and dollar-separated for nested classes. 
 	 * @param task
 	 * @return <code>true</code> indicates the task has been scheduled for later.
 	 */
