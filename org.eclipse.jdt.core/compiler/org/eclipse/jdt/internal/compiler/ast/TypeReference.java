@@ -402,6 +402,7 @@ public int dimensions() {
 	return 0;
 }
 
+
 /**
  * This method is used to return the array dimension declared after the
  * name of a local or a field declaration.

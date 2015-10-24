@@ -679,6 +679,7 @@ public class ClassScope extends Scope {
 
 		SourceTypeBinding sourceType = this.referenceContext.binding;
 		environment().setAccessRestriction(sourceType, accessRestriction);
+		
 		TypeParameter[] typeParameters = this.referenceContext.typeParameters;
 		sourceType.typeVariables = typeParameters == null || typeParameters.length == 0 ? Binding.NO_TYPE_VARIABLES : null;
 		sourceType.fPackage.addType(sourceType);
@@ -717,6 +718,7 @@ public class ClassScope extends Scope {
 // SH}
 		checkAndSetModifiers();
 		buildTypeVariables();
+		
 		buildMemberTypes(accessRestriction);
 //{ObjectTeams: setup cache for known role files:
 		if (this.referenceContext.isTeam())
@@ -1064,8 +1066,8 @@ public class ClassScope extends Scope {
 				final int UNEXPECTED_MODIFIERS = ~(ClassFileConstants.AccPublic | ClassFileConstants.AccAbstract | ClassFileConstants.AccInterface | ClassFileConstants.AccStrictfp | ClassFileConstants.AccAnnotation
 //{ObjectTeams
 										   | ClassFileConstants.AccSynthetic
+										   );
 //SH}
-				                           );
 				if ((realModifiers & UNEXPECTED_MODIFIERS) != 0) {
 					if ((realModifiers & ClassFileConstants.AccAnnotation) != 0)
 						problemReporter().illegalModifierForAnnotationType(sourceType);
@@ -2219,6 +2221,7 @@ public class ClassScope extends Scope {
 			env.missingClassFileLocation = null;
 		}
 	}
+
 	@Override
 	public boolean deferCheck(Runnable check) {
 		if (compilationUnitScope().connectingHierarchy) {
