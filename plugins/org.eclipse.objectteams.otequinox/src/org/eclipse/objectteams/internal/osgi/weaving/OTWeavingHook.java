@@ -357,7 +357,9 @@ System.err.println("OT/Equinox: USE_DYNAMIC_WEAVER="+USE_DYNAMIC_WEAVER);
 			}
 			if (classInfo != null && !classInfo.isInterface()) {
 				// TODO(performance): check common prefix to recognize when crossing the plugin-boundary?
-				return isAdaptedBaseClass(aspectBindings, classInfo.getSuperClassName(), null, resourceLoader);
+				String superClassName = classInfo.getSuperClassName();
+				if (superClassName != null)
+					return isAdaptedBaseClass(aspectBindings, superClassName, null, resourceLoader);
 			}
 			return false;
 		} finally {

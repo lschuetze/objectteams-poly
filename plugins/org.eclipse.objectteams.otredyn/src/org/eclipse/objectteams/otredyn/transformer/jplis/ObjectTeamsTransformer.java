@@ -79,10 +79,11 @@ public class ObjectTeamsTransformer implements ClassFileTransformer {
 			}
 			clazz = ClassRepository.getInstance().getBoundClass(
 					className, classId, classfileBuffer, loader);
+			clazz.setWeavingContext(this.weavingContext);
 			if (!clazz.isInterface())
 				ClassRepository.getInstance().linkClassWithSuperclass(clazz);
 			if (!clazz.isInterface() || clazz.isRole())
-				clazz.transformAtLoadTime(this.weavingContext);
+				clazz.transformAtLoadTime();
 			
 			classfileBuffer = clazz.getBytecode();
 			clazz.dump(classfileBuffer, "initial");

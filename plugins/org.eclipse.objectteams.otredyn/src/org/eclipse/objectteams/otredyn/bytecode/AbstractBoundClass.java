@@ -32,7 +32,6 @@ import org.eclipse.objectteams.otredyn.runtime.IMethod;
 import org.eclipse.objectteams.otredyn.runtime.TeamManager;
 import org.eclipse.objectteams.otredyn.runtime.ISubclassWiringTask;
 import org.eclipse.objectteams.otredyn.transformer.IWeavingContext;
-import org.eclipse.objectteams.otredyn.transformer.jplis.ObjectTeamsTransformer;
 import org.eclipse.objectteams.runtime.IReweavingTask;
 import org.objectweb.asm.Opcodes;
 
@@ -332,6 +331,10 @@ public abstract class AbstractBoundClass implements IBoundClass {
 		return this.methodsForImplicitActivation.contains(methodNameAndDesc);
 	}
 
+	public void setWeavingContext(IWeavingContext weavingContext) {
+		this.weavingContext = weavingContext;
+	}
+
 	/**
 	 * Do all needed transformations needed at load time:
 	 * Add the interface IBoundBase2
@@ -341,8 +344,7 @@ public abstract class AbstractBoundClass implements IBoundClass {
 	 * Add the empty method accessStatic
 	 * Add the empty method callAllBindings
 	 */
-	public void transformAtLoadTime(IWeavingContext weavingContext) {
-		this.weavingContext = weavingContext;
+	public void transformAtLoadTime() {
 		handleTaskList(null);
 	}
 
@@ -1003,7 +1005,7 @@ public abstract class AbstractBoundClass implements IBoundClass {
 				}
 				Method superMethod = superClass.getMethod(task);
 				if (superMethod.isImplemented()) {
-					isWeavable = ObjectTeamsTransformer.isWeavable(superClass.getInternalName());
+					isWeavable = weavingContext.isWeavable(superClass.getInternalName());
 					break;
 				}
 				superClass = superClass.getSuperclass();

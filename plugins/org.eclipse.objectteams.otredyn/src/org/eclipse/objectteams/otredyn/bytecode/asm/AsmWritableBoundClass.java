@@ -28,7 +28,6 @@ import org.eclipse.objectteams.otredyn.bytecode.IBytecodeProvider;
 import org.eclipse.objectteams.otredyn.bytecode.Method;
 import org.eclipse.objectteams.otredyn.bytecode.RedefineStrategyFactory;
 import org.eclipse.objectteams.otredyn.runtime.TeamManager;
-import org.eclipse.objectteams.otredyn.transformer.jplis.ObjectTeamsTransformer;
 import org.eclipse.objectteams.otredyn.transformer.names.ClassNames;
 import org.eclipse.objectteams.otredyn.transformer.names.ConstantMembers;
 import org.objectweb.asm.ClassReader;
@@ -373,12 +372,14 @@ class AsmWritableBoundClass extends AsmBoundClass {
 		if (isInterface())
 			methodModifiers |= Opcodes.ACC_ABSTRACT;
 		
-		if (!isInterface())
-			addField(ConstantMembers.roleSet, Opcodes.ACC_PUBLIC);
-		
 		String superClassName = getSuperClassName().replace('.', '/');
-		if (!ObjectTeamsTransformer.isWeavable(superClassName))
+		boolean superIsWeavable = weavingContext.isWeavable(superClassName);
+		if (!superIsWeavable)
 			superClassName = null;
+
+		if (!isInterface() && !superIsWeavable)
+			addField(ConstantMembers.roleSet, Opcodes.ACC_PUBLIC);
+
 		
 		addEmptyMethod(ConstantMembers.callOrig, methodModifiers, null, null, superClassName);
 		addEmptyMethod(ConstantMembers.callAllBindingsClient, methodModifiers, null, null, superClassName);
