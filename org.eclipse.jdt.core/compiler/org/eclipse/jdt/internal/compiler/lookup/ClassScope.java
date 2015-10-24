@@ -1601,7 +1601,7 @@ public class ClassScope extends Scope {
 //{ObjectTeams: for roles give a second chance
 	    if (superclass == null || superclass.erasure() instanceof MissingTypeBinding) { // problem binding is in superclassRef.resolvedType
             ReferenceBinding adjustedSuperclass = checkAdjustSuperclass(this.referenceContext.superclass, cp);
-            if (adjustedSuperclass != null && adjustedSuperclass.isValidBinding())
+            if (adjustedSuperclass == null || adjustedSuperclass.isValidBinding())
             	superclass = adjustedSuperclass;
 	    }
 // SH}
