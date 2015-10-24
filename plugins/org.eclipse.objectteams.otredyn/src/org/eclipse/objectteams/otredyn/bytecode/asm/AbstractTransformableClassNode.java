@@ -106,7 +106,7 @@ public abstract class AbstractTransformableClassNode extends ClassNode {
 			instructions.add(new InsnNode(Opcodes.ARETURN));
 			break;
 		default:
-			String objectType = AsmTypeHelper.getObjectType(returnType);
+			String objectType = AsmTypeHelper.getBoxingType(returnType);
 			instructions.add(new TypeInsnNode(Opcodes.CHECKCAST, objectType));
 			instructions.add(AsmTypeHelper.getUnboxingInstructionForType(
 					returnType, objectType));
@@ -338,9 +338,10 @@ public abstract class AbstractTransformableClassNode extends ClassNode {
 					instructions.insert(oldNode, new InsnNode(Opcodes.POP));
 				} else {
 					instructions.insert(oldNode, AsmTypeHelper.getUnboxingInstructionForType(returnType));
-					String boxTypeName = AsmTypeHelper.getObjectType(returnType);
-					if (boxTypeName != null)
-						instructions.insert(oldNode, new TypeInsnNode(Opcodes.CHECKCAST, boxTypeName));
+					String expectedReferenceTypeName = AsmTypeHelper.getBoxingType(returnType);
+					if (expectedReferenceTypeName == null)
+						expectedReferenceTypeName = returnType.getInternalName();
+					instructions.insert(oldNode, new TypeInsnNode(Opcodes.CHECKCAST, expectedReferenceTypeName)); // before unboxing, if any
 				}
 			}
 	

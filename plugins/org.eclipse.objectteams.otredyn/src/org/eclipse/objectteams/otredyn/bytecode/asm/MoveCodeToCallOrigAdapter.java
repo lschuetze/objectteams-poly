@@ -102,7 +102,7 @@ public class MoveCodeToCallOrigAdapter extends AbstractTransformableClassNode {
 				newInstructions.add(new InsnNode(Opcodes.AALOAD));
 				Type arg = args[i];
 				if (arg.getSort() != Type.ARRAY && arg.getSort() != Type.OBJECT) {
-					String objectType = AsmTypeHelper.getObjectType(arg);
+					String objectType = AsmTypeHelper.getBoxingType(arg);
 					newInstructions.add(new TypeInsnNode(Opcodes.CHECKCAST, objectType));
 					newInstructions.add(AsmTypeHelper.getUnboxingInstructionForType(arg, objectType));
 				} else {

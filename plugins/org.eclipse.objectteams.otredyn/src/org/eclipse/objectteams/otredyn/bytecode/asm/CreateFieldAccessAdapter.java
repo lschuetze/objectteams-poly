@@ -104,7 +104,7 @@ public class CreateFieldAccessAdapter extends AbstractTransformableClassNode {
 		instructions.add(new InsnNode(Opcodes.AALOAD));
 		//unbox it
 		if (type.getSort() != Type.ARRAY && type.getSort() != Type.OBJECT) {
-			String objectType = AsmTypeHelper.getObjectType(type);
+			String objectType = AsmTypeHelper.getBoxingType(type);
 			instructions.add(new TypeInsnNode(Opcodes.CHECKCAST, objectType));
 			instructions.add(AsmTypeHelper.getUnboxingInstructionForType(type, objectType));
 		} else {

@@ -83,7 +83,7 @@ public class CreateMethodAccessAdapter extends AbstractTransformableClassNode {
 				instructions.add(new InsnNode(Opcodes.AALOAD));
 				Type arg = args[i];
 				if (arg.getSort() != Type.ARRAY && arg.getSort() != Type.OBJECT) {
-					String objectType = AsmTypeHelper.getObjectType(arg);
+					String objectType = AsmTypeHelper.getBoxingType(arg);
 					instructions.add(new TypeInsnNode(Opcodes.CHECKCAST, objectType));
 					instructions.add(AsmTypeHelper.getUnboxingInstructionForType(arg, objectType));
 				} else {

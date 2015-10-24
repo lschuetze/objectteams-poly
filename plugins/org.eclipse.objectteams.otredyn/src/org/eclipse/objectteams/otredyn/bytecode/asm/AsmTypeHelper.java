@@ -1,7 +1,7 @@
 /**********************************************************************
  * This file is part of "Object Teams Dynamic Runtime Environment"
  * 
- * Copyright 2009, 2014 Oliver Frank and others.
+ * Copyright 2009, 2015 Oliver Frank and others.
  * 
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -29,7 +29,7 @@ import org.objectweb.asm.tree.MethodInsnNode;
 class AsmTypeHelper {
 
 	public static AbstractInsnNode getUnboxingInstructionForType(Type primitiveType) {
-		String objectType = getObjectType(primitiveType);
+		String objectType = getBoxingType(primitiveType);
 		if (objectType == null)
 			return new InsnNode(Opcodes.NOP);
 		return getUnboxingInstructionForType(primitiveType, objectType);
@@ -42,7 +42,7 @@ class AsmTypeHelper {
 		return new MethodInsnNode(Opcodes.INVOKEVIRTUAL, objectType, methodName, desc, false);
 	}
 
-	public static String getObjectType(Type primitiveType) {
+	public static String getBoxingType(Type primitiveType) {
 		String className = null;
 		switch (primitiveType.getSort()) {
 		case Type.BOOLEAN:
@@ -77,7 +77,7 @@ class AsmTypeHelper {
 	}
 	
 	public static AbstractInsnNode getBoxingInstructionForType(Type type) {
-		String className = getObjectType(type);
+		String className = getBoxingType(type);
 		if (className == null)
 			return new InsnNode(Opcodes.NOP);
 		
