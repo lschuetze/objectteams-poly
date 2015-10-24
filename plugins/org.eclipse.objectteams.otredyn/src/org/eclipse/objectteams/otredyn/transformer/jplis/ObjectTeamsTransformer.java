@@ -26,6 +26,7 @@ import java.util.Set;
 import org.eclipse.objectteams.otredyn.bytecode.AbstractBoundClass;
 import org.eclipse.objectteams.otredyn.bytecode.ClassRepository;
 import org.eclipse.objectteams.otredyn.transformer.IWeavingContext;
+import org.eclipse.objectteams.runtime.IReweavingTask;
 
 
 /**
@@ -42,6 +43,9 @@ public class ObjectTeamsTransformer implements ClassFileTransformer {
 		this.weavingContext = new IWeavingContext() {
 			@Override public boolean isWeavable(String className) {
 				return ObjectTeamsTransformer.isWeavable(className.replace('.', '/'));
+			}
+			@Override public boolean scheduleReweaving(String className, IReweavingTask task) {
+				return false; // default is to let the transformer work immediately
 			}
 		};
 	}

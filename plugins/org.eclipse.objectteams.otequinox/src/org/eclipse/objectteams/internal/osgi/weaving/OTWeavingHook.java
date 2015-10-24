@@ -30,6 +30,7 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import org.eclipse.core.runtime.IConfigurationElement;
@@ -44,6 +45,7 @@ import org.eclipse.objectteams.internal.osgi.weaving.Util.ProfileKind;
 import org.eclipse.objectteams.internal.osgi.weaving.AspectPermissionManager;
 import org.eclipse.objectteams.otequinox.Constants;
 import org.eclipse.objectteams.otequinox.TransformerPlugin;
+import org.eclipse.objectteams.runtime.IReweavingTask;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
@@ -97,6 +99,9 @@ System.err.println("OT/Equinox: USE_DYNAMIC_WEAVER="+USE_DYNAMIC_WEAVER);
 
 	/** Set of classes for which processing has started but which are not yet defined in the class loader. */
 	private @NonNull Set<String> beingDefined = new HashSet<>();
+
+	/** Map of tasks per qualified class name: reweaving requested during defineClass(). */
+	private @NonNull Map<String, IReweavingTask> pendingReweavingTasks = new HashMap<>();
 
 	/** Records of teams that have been deferred due to unresolved class dependencies: */
 	private @NonNull List<WaitingTeamRecord> deferredTeams = new ArrayList<>();
@@ -315,6 +320,14 @@ System.err.println("OT/Equinox: USE_DYNAMIC_WEAVER="+USE_DYNAMIC_WEAVER);
 		return WeavingReason.None;
 	}
 	
+	boolean scheduleReweaving(String className, IReweavingTask task) {
+		if (beingDefined.contains(className)) {
+			pendingReweavingTasks.put(className, task);
+			return true;
+		}
+		return false;
+	}
+
 	/** check need for weaving by finding an aspect binding affecting this exact base class or one of its supers. */
 	boolean isAdaptedBaseClass(List<AspectBinding> aspectBindings, String className, byte[] bytes, ClassLoader resourceLoader) {
 		if (skipBaseClassCheck) return true; // have aspect bindings, flag requests to transform *all* classes in this base bundle
@@ -426,6 +439,9 @@ System.err.println("OT/Equinox: USE_DYNAMIC_WEAVER="+USE_DYNAMIC_WEAVER);
 				installLiftingParticipant();
 			}
 			beingDefined.remove(className);
+			IReweavingTask task = pendingReweavingTasks.remove(className);
+			if (task != null)
+				task.reweave(wovenClass.getDefinedClass());
 			instantiateScheduledTeams(className);
 
 			TransformerPlugin.flushLog();

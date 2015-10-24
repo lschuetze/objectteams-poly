@@ -30,6 +30,7 @@ import org.eclipse.objectteams.internal.osgi.weaving.OTWeavingHook.WeavingReason
 import org.eclipse.objectteams.otredyn.bytecode.IRedefineStrategy;
 import org.eclipse.objectteams.otredyn.bytecode.RedefineStrategyFactory;
 import org.eclipse.objectteams.otredyn.transformer.IWeavingContext;
+import org.eclipse.objectteams.runtime.IReweavingTask;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.wiring.BundleWiring;
 
@@ -134,6 +135,11 @@ public abstract class DelegatingTransformer {
 			@Override
 			public boolean isWeavable(String className) {
 				return hook.requiresWeaving(bundleWiring, className, null) != WeavingReason.None;
+			}
+			
+			@Override
+			public boolean scheduleReweaving(String className, IReweavingTask task) {
+				return hook.scheduleReweaving(className, task);
 			}
 		};
 	}

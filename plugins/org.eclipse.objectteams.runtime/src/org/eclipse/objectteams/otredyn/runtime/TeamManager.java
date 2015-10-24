@@ -123,6 +123,8 @@ public class TeamManager implements ITeamManager {
 				@SuppressWarnings("unchecked") Class<? extends ITeam> superTeam = (Class<? extends ITeam>) superClass;
 				return getMemberId(accessId, superTeam);
 			}
+			if (id == null)
+				return -1;
 		}
 		return id;
 	}

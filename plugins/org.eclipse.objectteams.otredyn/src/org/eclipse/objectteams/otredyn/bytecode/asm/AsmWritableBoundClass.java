@@ -140,7 +140,7 @@ class AsmWritableBoundClass extends AsmBoundClass {
 	 * Executes all pending transformations.
 	 */
 	@Override
-	protected void endTransformation() {
+	protected void endTransformation(final Class<?> definedClass) {
 		assert (isTransformationActive) : "No transformation active";
 		
 		if (multiAdapter.hasVisitors() || !nodes.isEmpty()) {
@@ -174,7 +174,7 @@ class AsmWritableBoundClass extends AsmBoundClass {
 			if (!this.isFirstTransformation) {
 				// It is not the first transformation, so redefine the class
 				try {
-					redefine();
+					redefine(definedClass);
 				} catch (Throwable t) {
 	//				t.printStackTrace(System.out);
 					// if redefinition failed (ClassCircularity?) install a runnable for deferred redefinition:
@@ -183,7 +183,7 @@ class AsmWritableBoundClass extends AsmBoundClass {
 						public void run() {
 							if (previousTask != null)
 								previousTask.run();
-							redefine();
+							redefine(definedClass);
 						}
 						@Override
 						public String toString() {
@@ -207,7 +207,7 @@ class AsmWritableBoundClass extends AsmBoundClass {
 		releaseBytecode();
 		AbstractTeam mySuper = getSuperclass();
 		if (mySuper != null && !mySuper.openBindingTasks.isEmpty() && mySuper.isLoaded())
-			mySuper.handleTaskList();
+			mySuper.handleTaskList(definedClass != null ? definedClass.getSuperclass() : null);
 	}
 
 	/**
@@ -346,10 +346,11 @@ class AsmWritableBoundClass extends AsmBoundClass {
 
 	/**
 	 * Redefines the class
+	 * @param definedClass previously defined class if available
 	 */
-	private void redefine() {
+	private void redefine(Class<?> definedClass) {
 		try {
-			Class<?> clazz = this.loader.loadClass(this.getName()); // boot classes may have null classloader, can't be redefined anyway?
+			Class<?> clazz = definedClass != null ? definedClass : this.loader.loadClass(this.getName()); // boot classes may have null classloader, can't be redefined anyway?
 			byte[] bytecode = allocateAndGetBytecode();
 			dump(bytecode, "redef");
 			RedefineStrategyFactory.getRedefineStrategy().redefine(clazz, bytecode);

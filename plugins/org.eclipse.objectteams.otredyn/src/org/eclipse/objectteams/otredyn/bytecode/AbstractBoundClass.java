@@ -33,6 +33,7 @@ import org.eclipse.objectteams.otredyn.runtime.TeamManager;
 import org.eclipse.objectteams.otredyn.runtime.ISubclassWiringTask;
 import org.eclipse.objectteams.otredyn.transformer.IWeavingContext;
 import org.eclipse.objectteams.otredyn.transformer.jplis.ObjectTeamsTransformer;
+import org.eclipse.objectteams.runtime.IReweavingTask;
 import org.objectweb.asm.Opcodes;
 
 /**
@@ -342,7 +343,7 @@ public abstract class AbstractBoundClass implements IBoundClass {
 	 */
 	public void transformAtLoadTime(IWeavingContext weavingContext) {
 		this.weavingContext = weavingContext;
-		handleTaskList();
+		handleTaskList(null);
 	}
 
 	/**
@@ -597,8 +598,9 @@ public abstract class AbstractBoundClass implements IBoundClass {
 	/**
 	 * Handle all open weaving tasks for this class.
 	 * It redefines the class, if it is not called while loading
+	 * @param definedClass previously defined class if available
 	 */
-	public synchronized void handleTaskList() {
+	public synchronized void handleTaskList(Class<?> definedClass) {
 		if (isTransformationActive()) return;
 
 		Set<Map.Entry<Method, WeavingTask>> bindingEntrySet = openBindingTasks
@@ -625,7 +627,7 @@ public abstract class AbstractBoundClass implements IBoundClass {
 			prepareAsPossibleBaseClass();
 			prepareTeamActivation();
 			prepareLiftingParticipant();
-			endTransformation();
+			endTransformation(definedClass);
 		}
 
 		// collect other classes for which new tasks are recorded, to flush those tasks in bulk at the end
@@ -772,13 +774,20 @@ public abstract class AbstractBoundClass implements IBoundClass {
 			completedAccessTasks.put(member, task);
 		}
 		// flush collected tasks of other affected classes:
-		for (AbstractBoundClass affected : affectedClasses)
-			if (affected.isLoaded)
-				affected.handleTaskList();
+		for (final AbstractBoundClass affected : affectedClasses)
+			if (affected.isLoaded) {
+				IReweavingTask task = new IReweavingTask() {
+					@Override public void reweave(Class<?> definedClass) {
+						affected.handleTaskList(definedClass);
+					}
+				};
+				if (!weavingContext.scheduleReweaving(affected.name, task))
+					affected.handleTaskList(definedClass);
+			}
 
 		if (openBindingTasks.size() > 0 || openAccessTasks.size() > 0) {
 			// Weave the class, if the method is not called at load time
-			endTransformation();
+			endTransformation(definedClass);
 		}
 		openBindingTasks.clear();
 		openAccessTasks.clear();
@@ -824,7 +833,7 @@ public abstract class AbstractBoundClass implements IBoundClass {
 		boolean isNewTask = addWeavingTaskLazy(task);
 
 		if (this.isLoaded && isNewTask && !standBy) {
-			handleTaskList();
+			handleTaskList(null);
 		}
 	}
 	
@@ -1068,7 +1077,7 @@ public abstract class AbstractBoundClass implements IBoundClass {
 	
 	protected abstract void startTransformation();
 
-	protected abstract void endTransformation();
+	protected abstract void endTransformation(Class<?> definedClass);
 
 	protected abstract void prepareAsPossibleBaseClass();
 
