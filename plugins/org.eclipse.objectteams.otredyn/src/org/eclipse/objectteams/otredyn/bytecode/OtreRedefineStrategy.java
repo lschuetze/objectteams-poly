@@ -34,7 +34,7 @@ public class OtreRedefineStrategy implements IRedefineStrategy {
 			otreAgent.getInstrumentation().redefineClasses(arr_cd);
 		} catch (ClassFormatError cfe) {
 			// error output during redefinition tends to swallow the stack, print it now:
-			System.err.println("Error redifining "+clazz.getName());
+			System.err.println("OTDRE: Error redifining "+clazz.getName());
 			cfe.printStackTrace();
 			throw cfe;
 		}

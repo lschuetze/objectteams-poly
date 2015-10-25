@@ -461,7 +461,7 @@ public abstract class AbstractBoundClass implements IBoundClass {
 	 */
 	public void addMethod(String name, String desc, boolean isStatic, int accessFlags) {
 		if (desc == null) {
-			System.err.println("Method "+name+" has no descriptor");
+			System.err.println("OTDRE: Method "+name+" in class "+this.name+" has no descriptor");
 			return;
 		}
 		String methodKey = getMethodKey(name, desc);

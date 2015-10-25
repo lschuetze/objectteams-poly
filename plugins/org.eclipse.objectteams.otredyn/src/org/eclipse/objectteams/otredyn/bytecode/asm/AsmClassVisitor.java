@@ -42,6 +42,8 @@ import static org.eclipse.objectteams.otredyn.bytecode.asm.AsmBoundClass.ASM_API
  */
 class AsmClassVisitor extends ClassVisitor {
 
+	private static boolean DEBUG_ATTRIBUTES = System.getProperty("otdre.debug.attributes") != null;
+
 	private AsmBoundClass clazz;
 	
 	public AsmClassVisitor(AsmBoundClass clazz) {
@@ -93,8 +95,16 @@ class AsmClassVisitor extends ClassVisitor {
 	 */
 	@Override
 	public void visitAttribute(Attribute attribute) {
+		if (DEBUG_ATTRIBUTES) {
+			System.err.println("OTDRE: reading attribute of class "+this.clazz.getName());
+			System.err.println(attribute);
+		}
 		if (clazz.boundBaseClasses == null)
 			clazz.boundBaseClasses = new HashSet<String>();
+		if (attribute.type == null) {
+			System.err.println("OTDRE: bytecode attribute in class "+this.clazz.getName()+" has no type "+attribute.getClass().getName());
+			return;
+		}
 		if (attribute.type.equals(Attributes.ATTRIBUTE_OT_DYN_CALLIN_BINDINGS)) {
 			CallinBindingsAttribute attr = (CallinBindingsAttribute) attribute;
 			MultiBinding[] multiBindings = attr.getBindings();

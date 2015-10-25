@@ -52,9 +52,10 @@ abstract class Attributes {
 		new OTCompilerVersion(0)
 	};
 	protected static class OTCompilerVersion extends Attribute {
-
+		private int version;		
 		protected OTCompilerVersion(int version) {
 			super(ATTRIBUTE_OT_COMPILER_VERSION);
+			this.version = version;
 		}
 		@Override
 		protected Attribute read(ClassReader cr, int off, int len, char[] buf, int codeOff, Label[] labels) {
@@ -62,6 +63,9 @@ abstract class Attributes {
 			if ((encodedVersion & OTDRE_FLAG) == 0)
             	throw new UnsupportedClassVersionError("OTDRE: Class "+cr.getClassName()+" was compiled for incompatible weaving target OTRE");
 			return new OTCompilerVersion(encodedVersion);
+		}
+		@Override public String toString() {
+			return this.type+' '+this.version;
 		}
 	}
 	
@@ -237,7 +241,15 @@ abstract class Attributes {
 				attr.bases[i] = cr.readUTF8(off, buf);	off += 2;
 			}
 			return attr;
-		}		
+		}
+		@Override
+		public String toString() {
+			StringBuilder buf = new StringBuilder(this.type).append('\n');
+			for (int i = 0; i < roles.length; i++) {
+				buf.append('\t').append(roles[i]).append("->").append(bases[i]).append('\n');
+			}
+			return buf.toString();
+		}
 	}
 	protected static class CallinPrecedenceAttribute extends Attribute {
 		String[] labels;
