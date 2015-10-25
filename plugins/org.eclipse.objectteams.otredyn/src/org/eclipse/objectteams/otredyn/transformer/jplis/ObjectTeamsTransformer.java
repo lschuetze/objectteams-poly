@@ -15,6 +15,7 @@
  **********************************************************************/
 package org.eclipse.objectteams.otredyn.transformer.jplis;
 
+import java.io.DataInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.lang.instrument.ClassFileTransformer;
@@ -148,7 +149,7 @@ public class ObjectTeamsTransformer implements ClassFileTransformer {
 			}
 			int available = inputStream.available();
 			byte[] bytes = new byte[available];
-			inputStream.read(bytes);
+			new DataInputStream(inputStream).readFully(bytes);
 			clazz = ClassRepository.getInstance().getBoundClass(
 					className, classId, bytes, loader);
 			if (!clazz.isInterface())
