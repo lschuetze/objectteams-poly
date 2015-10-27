@@ -19,7 +19,6 @@ import java.io.DataInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.lang.instrument.ClassFileTransformer;
-import java.lang.instrument.IllegalClassFormatException;
 import java.security.ProtectionDomain;
 import java.util.Collection;
 import java.util.HashSet;
@@ -62,13 +61,13 @@ public class ObjectTeamsTransformer implements ClassFileTransformer {
 	 * @see java.lang.instrument.ClassFileTransformer#transform(java.lang.ClassLoader, java.lang.String, java.lang.Class, java.security.ProtectionDomain, byte[])
 	 */
 	public byte[] transform(ClassLoader loader, String className, Class<?> classBeingRedefined,
-            ProtectionDomain protectionDomain, byte[] classfileBuffer) throws IllegalClassFormatException
+            ProtectionDomain protectionDomain, byte[] classfileBuffer)
 	{
 		return transform(loader, className, className, classBeingRedefined, classfileBuffer);
 	}
 	
 	public byte[] transform(ClassLoader loader, String className, String classId, Class<?> classBeingRedefined,
-            byte[] classfileBuffer) throws IllegalClassFormatException {
+            byte[] classfileBuffer) {
 		if (loader == null)
 			loader = ClassLoader.getSystemClassLoader();
 
