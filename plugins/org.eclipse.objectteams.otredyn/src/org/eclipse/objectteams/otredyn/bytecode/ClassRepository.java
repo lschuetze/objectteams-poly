@@ -1,7 +1,7 @@
 /**********************************************************************
  * This file is part of "Object Teams Dynamic Runtime Environment"
  * 
- * Copyright 2009, 2012 Oliver Frank and others.
+ * Copyright 2009, 2015 Oliver Frank and others.
  * 
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -78,7 +78,16 @@ public abstract class ClassRepository implements IClassRepository {
 		
 		return clazz;
 	}
-	
+
+	/**
+	 * Similar to {@link getBoundClass(String, String, ClassLoader)},
+	 * but don't create a new bound class if none has been registered before.
+	 * @param id a globally unique identifier for the class 
+	 */
+	public synchronized AbstractBoundClass peekBoundClass(String id) {
+		return boundClassMap.get(id);
+	}
+
 	/**
 	 * Returns a instance of AbstractBoundClass for the
 	 * given FQN and id and sets the bytecode for this class. 

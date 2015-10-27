@@ -73,13 +73,23 @@ public class ObjectTeamsTransformer implements ClassFileTransformer {
 			loader = ClassLoader.getSystemClassLoader();
 
 		ClassRepository classRepo = ClassRepository.getInstance();
+		AbstractBoundClass clazz = classRepo.peekBoundClass(classId);
 		String sourceClassName = className.replace('/','.');
 
 		if (!weavingContext.isWeavable(sourceClassName) || loader == null) {
+			if (clazz != null) {
+				if (isWeavable(className) && clazz.needsWeaving()) {
+					// only print out for now, exceptions thrown by us are silently caught by TransformerManager.
+					new LinkageError("Classs "+className+" requires weaving, but is not weavable!").printStackTrace();
+				} else {
+					clazz.markAsUnweavable(); // mark in case we'll try to weave later
+				}
+			}
 			return null;
 		}
 
-		AbstractBoundClass clazz = classRepo.getBoundClass(sourceClassName, classId, loader);
+		if (clazz == null)
+			clazz = classRepo.getBoundClass(sourceClassName, classId, loader);
 		if (classBeingRedefined == null && !clazz.isFirstTransformation()) {
 			return clazz.getBytecode(); // FIXME: re-loading existing class?? Investigate classloader, check classId strategy etc.pp.
 		}

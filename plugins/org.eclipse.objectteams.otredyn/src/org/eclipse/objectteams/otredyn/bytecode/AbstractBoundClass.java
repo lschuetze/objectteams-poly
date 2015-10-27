@@ -173,6 +173,7 @@ public abstract class AbstractBoundClass implements IBoundClass {
 	// Is the java class, that was represented by the AbstractBoundClass
 	// already loaded by a class loader or not
 	private boolean isLoaded;
+	protected boolean isUnweavable;
 	
 	private int modifiers;
 
@@ -604,6 +605,9 @@ public abstract class AbstractBoundClass implements IBoundClass {
 	 */
 	public synchronized void handleTaskList(Class<?> definedClass) {
 		if (isTransformationActive()) return;
+
+		if (this.isUnweavable)
+			new LinkageError("Class "+this.name+" is requested to be woven, but it is marked as unweavable.").printStackTrace();
 
 		Set<Map.Entry<Method, WeavingTask>> bindingEntrySet = openBindingTasks
 				.entrySet();
@@ -1138,5 +1142,13 @@ public abstract class AbstractBoundClass implements IBoundClass {
 				task.wire(superclass, subclass);
 			this.wiringTasks.clear();
 		}
+	}
+
+	public boolean needsWeaving() {
+		return !this.openAccessTasks.isEmpty() || !this.openBindingTasks.isEmpty();
+	}
+
+	public void markAsUnweavable() {
+		this.isUnweavable = true;
 	}
 }
