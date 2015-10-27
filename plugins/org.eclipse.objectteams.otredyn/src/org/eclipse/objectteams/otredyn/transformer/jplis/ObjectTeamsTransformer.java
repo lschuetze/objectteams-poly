@@ -19,6 +19,7 @@ import java.io.DataInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.lang.instrument.ClassFileTransformer;
+import java.lang.instrument.IllegalClassFormatException;
 import java.security.ProtectionDomain;
 import java.util.Collection;
 import java.util.HashSet;
@@ -26,6 +27,7 @@ import java.util.Set;
 
 import org.eclipse.objectteams.otredyn.bytecode.AbstractBoundClass;
 import org.eclipse.objectteams.otredyn.bytecode.ClassRepository;
+import org.eclipse.objectteams.otredyn.bytecode.asm.WeavableRegionReader;
 import org.eclipse.objectteams.otredyn.transformer.IWeavingContext;
 import org.eclipse.objectteams.runtime.IReweavingTask;
 
@@ -43,7 +45,8 @@ public class ObjectTeamsTransformer implements ClassFileTransformer {
 	public ObjectTeamsTransformer() {
 		this.weavingContext = new IWeavingContext() {
 			@Override public boolean isWeavable(String className) {
-				return ObjectTeamsTransformer.isWeavable(className.replace('.', '/'));
+				return ObjectTeamsTransformer.isWeavable(className.replace('.', '/'))
+						&& WeavableRegionReader.isWeavable(className);
 			}
 			@Override public boolean scheduleReweaving(String className, IReweavingTask task) {
 				return false; // default is to let the transformer work immediately
@@ -59,18 +62,24 @@ public class ObjectTeamsTransformer implements ClassFileTransformer {
 	 * @see java.lang.instrument.ClassFileTransformer#transform(java.lang.ClassLoader, java.lang.String, java.lang.Class, java.security.ProtectionDomain, byte[])
 	 */
 	public byte[] transform(ClassLoader loader, String className, Class<?> classBeingRedefined,
-            ProtectionDomain protectionDomain, byte[] classfileBuffer)
+            ProtectionDomain protectionDomain, byte[] classfileBuffer) throws IllegalClassFormatException
 	{
 		return transform(loader, className, className, classBeingRedefined, classfileBuffer);
 	}
 	
 	public byte[] transform(ClassLoader loader, String className, String classId, Class<?> classBeingRedefined,
-            byte[] classfileBuffer) {
-		if (!ObjectTeamsTransformer.isWeavable(className) || loader == null)
+            byte[] classfileBuffer) throws IllegalClassFormatException {
+		if (loader == null)
+			loader = ClassLoader.getSystemClassLoader();
+
+		ClassRepository classRepo = ClassRepository.getInstance();
+		String sourceClassName = className.replace('/','.');
+
+		if (!weavingContext.isWeavable(sourceClassName) || loader == null) {
 			return null;
-		
-		AbstractBoundClass clazz = ClassRepository.getInstance().getBoundClass(
-				className.replace('/','.'), classId, loader);
+		}
+
+		AbstractBoundClass clazz = classRepo.getBoundClass(sourceClassName, classId, loader);
 		if (classBeingRedefined == null && !clazz.isFirstTransformation()) {
 			return clazz.getBytecode(); // FIXME: re-loading existing class?? Investigate classloader, check classId strategy etc.pp.
 		}
@@ -78,11 +87,11 @@ public class ObjectTeamsTransformer implements ClassFileTransformer {
 			if (clazz.isTransformationActive()) {
 				return null;
 			}
-			clazz = ClassRepository.getInstance().getBoundClass(
+			clazz = classRepo.getBoundClass(
 					className, classId, classfileBuffer, loader);
 			clazz.setWeavingContext(this.weavingContext);
 			if (!clazz.isInterface())
-				ClassRepository.getInstance().linkClassWithSuperclass(clazz);
+				classRepo.linkClassWithSuperclass(clazz);
 			if (!clazz.isInterface() || clazz.isRole())
 				clazz.transformAtLoadTime();
 			
