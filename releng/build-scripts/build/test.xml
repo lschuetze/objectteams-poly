@@ -17,7 +17,7 @@
 	<!--properties file containing the build information-->
 	<property file="src/label.properties" />
 	<property file="src/finalPluginsVersions.properties" />
-	<property name="otequinox.agent.jar" value="${test.root.dir}/../otequinoxAgent.jar"/>
+	<property name="otequinox.agent.jar" value="${test.root.dir}/eclipse/plugins/org.eclipse.objectteams.otequinox_${org.eclipse.objectteams.otequinox}/otequinoxAgent.jar"/>
 
 
 	<target name="readFlags">
