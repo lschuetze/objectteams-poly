@@ -228,6 +228,16 @@ public class OTDTPlugin extends Plugin
 	 * @category CompilerOptionID
 	 */
 	public static final String OT_COMPILER_PURE_JAVA = PLUGIN_ID + ".compiler.option.pure_java";
+
+	/**
+	 * Compiler option ID: For which weaving scheme should code be compiled?
+	 * <dl>
+	 * <dt>Possible values:</dt><dd><code>{ "OTRE", "OTDRE" }</code></dd>
+	 * <dt>Default:</dt><dd><code>"OTRE"</code></dd>
+	 * </dl>
+	 * @category CompilerOptionID
+	 */
+	public static final String OT_COMPILER_WEAVING_SCHEME = PLUGIN_ID + ".compiler.option.weaving_scheme";
 	
     private static OTDTPlugin _singleton = null;
 

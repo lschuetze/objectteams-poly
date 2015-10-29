@@ -31,6 +31,7 @@ import org.eclipse.jface.dialogs.ControlEnableState;
 import org.eclipse.jface.dialogs.IDialogSettings;
 import org.eclipse.jface.layout.PixelConverter;
 import org.eclipse.objectteams.otdt.core.ext.OTDTPlugin;
+import org.eclipse.objectteams.otdt.core.ext.WeavingScheme;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.graphics.Font;
 import org.eclipse.swt.graphics.FontData;
@@ -109,6 +110,8 @@ public class CompilerConfigurationBlock extends OptionsConfigurationBlock {
 	private static final Key PREF_PB_EFFECTLESS_FIELD_ACCESS = getJDTCoreKey(OTDTPlugin.OT_COMPILER_EFFECTLESS_FIELD_ACCESS);
 	private static final Key PREF_PB_UNUSED_PARAMMAP = getJDTCoreKey(OTDTPlugin.OT_COMPILER_UNUSED_PARAMMAP);
 
+	private static final Key PREF_WEAVING_SCHEME = getJDTCoreKey(OTDTPlugin.OT_COMPILER_WEAVING_SCHEME);
+
 	// values
 	private static final String ERROR= JavaCore.ERROR;
 	private static final String WARNING= JavaCore.WARNING;
@@ -150,6 +153,7 @@ public class CompilerConfigurationBlock extends OptionsConfigurationBlock {
 				PREF_PB_OVERRIDE_FINAL_ROLE,
 				PREF_PB_EXCEPTION_IN_GUARD,
 				PREF_PB_AMBIGUOUS_LOWERING,
+				PREF_WEAVING_SCHEME
 			};
 	}
 	
@@ -194,6 +198,23 @@ public class CompilerConfigurationBlock extends OptionsConfigurationBlock {
 	
 
 	private Composite createCompilerPreferenceTabContent(Composite folder) {
+
+		int indentStep=  fPixelConverter.convertWidthInCharsToPixels(1);
+
+		int nColumns= 3;
+		
+		Composite topComposite = new Composite(folder, SWT.NONE);
+		topComposite.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
+		GridLayout topLayout= new GridLayout(nColumns, false);
+		topLayout.marginHeight = fPixelConverter.convertHeightInCharsToPixels(1) / 2;
+		topComposite.setLayout(topLayout);
+
+		addComboBox(topComposite, OTPreferencesMessages.OTCompilerConfigurationBlock_weaving_label, PREF_WEAVING_SCHEME, 
+				new String[] { WeavingScheme.OTRE.toString(), WeavingScheme.OTDRE.toString() }, 
+				new String[] { OTPreferencesMessages.OTCompilerConfigurationBlock_weaving_otre_label,
+								OTPreferencesMessages.OTCompilerConfigurationBlock_weaving_otdre_label },
+				indentStep*2);
+
 		String[] errorWarningIgnore= new String[] { ERROR, WARNING, IGNORE };
 		
 		String[] errorWarningIgnoreLabels= new String[] {
@@ -209,15 +230,11 @@ public class CompilerConfigurationBlock extends OptionsConfigurationBlock {
 		fFilteredPrefTree= new FilteredPreferenceTree(this, folder, OTPreferencesMessages.OTCompilerConfigurationBlock_common_description);
 		final ScrolledPageContent sc1= fFilteredPrefTree.getScrolledPageContent();
 
-		int nColumns= 3;
-		
 		Composite composite= sc1.getBody();
 		GridLayout layout= new GridLayout(nColumns, false);
 		layout.marginHeight= 0;
 		layout.marginWidth= 0;
 		composite.setLayout(layout);
-
-		int indentStep=  fPixelConverter.convertWidthInCharsToPixels(1);
 
 		int defaultIndent= indentStep * 0;
 //		int extraIndent= indentStep * 3;

@@ -1,7 +1,7 @@
 /**********************************************************************
  * This file is part of "Object Teams Development Tooling"-Software
  * 
- * Copyright 2005, 2011 Fraunhofer Gesellschaft, Munich, Germany,
+ * Copyright 2005, 2015 Fraunhofer Gesellschaft, Munich, Germany,
  * for its Fraunhofer Institute for Computer Architecture and Software
  * Technology (FIRST), Berlin, Germany and Technical University Berlin,
  * Germany, and others.
@@ -10,7 +10,6 @@
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
- * $Id: OTPreferencesMessages.java 23435 2010-02-04 00:14:38Z stephan $
  * 
  * Please visit http://www.eclipse.org/objectteams for updates and contact.
  * 
@@ -29,7 +28,6 @@ import org.eclipse.osgi.util.NLS;
  * Created on Sep 11, 2005
  * 
  * @author stephan
- * @version $Id: OTPreferencesMessages.java 23435 2010-02-04 00:14:38Z stephan $
  */
 public class OTPreferencesMessages {
 
@@ -48,6 +46,9 @@ public class OTPreferencesMessages {
 
 	public static String OTCompilerPreferencePage_title;
 
+	public static String OTCompilerConfigurationBlock_weaving_label;
+	public static String OTCompilerConfigurationBlock_weaving_otre_label;
+	public static String OTCompilerConfigurationBlock_weaving_otdre_label;
 	
 	public static String OTCompilerConfigurationBlock_common_description;
 	public static String OTCompilerProblemConfiguration_otjld_ref_description;
