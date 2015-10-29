@@ -142,9 +142,9 @@ class AsmWritableBoundClass extends AsmBoundClass {
 	protected void endTransformation(final Class<?> definedClass) {
 		assert (isTransformationActive) : "No transformation active";
 		
-		if ((multiAdapter != null && multiAdapter.hasVisitors()) 
-				|| (nodes != null && !nodes.isEmpty()))
-		{
+		if (multiAdapter == null || nodes == null)
+			return;
+		if (multiAdapter.hasVisitors() || !nodes.isEmpty()) {
 			// //TODO (ofra): Do everything in one transformation
 			// Do all transformation with the Core API of ASM
 //			try {
