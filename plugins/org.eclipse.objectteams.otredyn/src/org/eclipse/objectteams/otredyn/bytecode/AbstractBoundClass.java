@@ -23,6 +23,7 @@ import java.util.HashSet;
 import java.util.IdentityHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
 
 import org.eclipse.objectteams.otredyn.runtime.ClassIdentifierProviderFactory;
@@ -139,7 +140,7 @@ public abstract class AbstractBoundClass implements IBoundClass {
 	
 	// not completed WeavingTasks for callin bindings mapped by the method,
 	// that has to be woven
-	public Map<Method, WeavingTask> openBindingTasks;
+	public Map<Method, WeavingTask> openBindingTasks; // NB: this map is used as the monitor for itself & openAccessTasks.
 	
 	// completed WeavingTasks for decapsulation bindings mapped by the member,
 	// that was woven
@@ -603,200 +604,216 @@ public abstract class AbstractBoundClass implements IBoundClass {
 	 * It redefines the class, if it is not called while loading
 	 * @param definedClass previously defined class if available
 	 */
-	public synchronized void handleTaskList(Class<?> definedClass) {
+	public void handleTaskList(Class<?> definedClass) {
 		if (isTransformationActive()) return;
 
 		if (this.isUnweavable)
 			new LinkageError("Class "+this.name+" is requested to be woven, but it is marked as unweavable.").printStackTrace();
 
-		Set<Map.Entry<Method, WeavingTask>> bindingEntrySet = openBindingTasks
-				.entrySet();
-
-		Set<Map.Entry<Member, WeavingTask>> accessEntrySet = openAccessTasks
-				.entrySet();
-
-		// Are there not handled callin or decapsulation bindings 
-		// for this class
-		if (bindingEntrySet.size() > 0 || accessEntrySet.size() > 0) {
-			// Yes, so start the transformation, parse the bytecode
-			// and do load time transforming, if this method is called
-			// at load time
-			startTransformation();
-			parseBytecode();
-			prepareAsPossibleBaseClass();
-			prepareTeamActivation();
-			prepareLiftingParticipant();
-		} else if (isFirstTransformation()) {
-			// No, so only do load time transforming, if this method is called
-			// at load time
-			startTransformation();
-			prepareAsPossibleBaseClass();
-			prepareTeamActivation();
-			prepareLiftingParticipant();
-			endTransformation(definedClass);
-		}
-
-		// collect other classes for which new tasks are recorded, to flush those tasks in bulk at the end
-		Set<AbstractBoundClass> affectedClasses = new HashSet<AbstractBoundClass>();
-
-		for (Map.Entry<Method, WeavingTask> entry : bindingEntrySet) {
-			WeavingTask task = entry.getValue();
-			Method method = entry.getKey();
-			switch (task.getType()) {
-			// Weave callin binding to a method of a subclass, that is not implemented
-			// in the subclass
-			case WEAVE_BINDING_OF_SUBCLASS:
-				// Is the method implemented in this class?
-				if (method.isImplemented()) {
-					// Yes, so weave this class
-					weaveBindingOfSubclass(task);
-				} else {
-					//No, so just delegate the weaving task to the superclass
-					AbstractBoundClass superclass = getSuperclass();
-					// If superclass is null, there is something wrong
-					if (superclass != null) {
-						superclass.addWeavingTask(task, true/*standBy*/);
-						affectedClasses.add(superclass);
-						weaveSuperCallInCallOrig(task); // ensure we're actually calling that super version
+		synchronized(this) {
+			boolean firstIteration = true;
+			while (true) {
+				boolean processingOpenTasks = false;
+				Set<Map.Entry<Method, WeavingTask>> bindingEntrySet;
+				Set<Map.Entry<Member, WeavingTask>> accessEntrySet;
+				synchronized (openBindingTasks) {
+					bindingEntrySet = openBindingTasks.entrySet();
+					accessEntrySet = openAccessTasks.entrySet();
+					processingOpenTasks = !openBindingTasks.isEmpty() || !openAccessTasks.isEmpty();
+					if (processingOpenTasks) {
+						openBindingTasks.clear();
+						openAccessTasks.clear();
+					} else {
+						if (!firstIteration)
+							break; // executed at least once and have not received more open tasks since previous
 					}
 				}
-				break;
-			// Weave callin binding to a method of this class
-			case WEAVE_BINDING:
-				if (method.isStatic()) {
-					weaveBindingInStaticMethod(task);
-				} else {
-					// Is the method implemented in this class?
-					if (method.isImplemented()) {
-						// So redefine the method
-						weaveBindingInImplementedMethod(task);
-					} else {
-						//No, so weave this class and delegate to the super class
-						weaveBindingInNotImplementedMethod(task);
-						AbstractBoundClass superclass = getSuperclass();
-						if (weavingContext.isWeavable(getSuperClassName())) {
-							Method superMethod = superclass.getMethod(method, task);
-							if (superMethod != null) {
-								WeavingTask newTask = new WeavingTask(WeavingTaskType.WEAVE_BINDING_OF_SUBCLASS, superMethod, task);
-								superclass.addWeavingTask(newTask, true/*standBy*/);
+				firstIteration = false;
+		
+				// Are there not handled callin or decapsulation bindings 
+				// for this class
+				if (bindingEntrySet.size() > 0 || accessEntrySet.size() > 0) {
+					// Yes, so start the transformation, parse the bytecode
+					// and do load time transforming, if this method is called
+					// at load time
+					startTransformation();
+					parseBytecode();
+					prepareAsPossibleBaseClass();
+					prepareTeamActivation();
+					prepareLiftingParticipant();
+				} else if (isFirstTransformation()) {
+					// No, so only do load time transforming, if this method is called
+					// at load time
+					startTransformation();
+					prepareAsPossibleBaseClass();
+					prepareTeamActivation();
+					prepareLiftingParticipant();
+					endTransformation(definedClass);
+				}
+		
+				// collect other classes for which new tasks are recorded, to flush those tasks in bulk at the end
+				Set<AbstractBoundClass> affectedClasses = new HashSet<AbstractBoundClass>();
+		
+				for (Map.Entry<Method, WeavingTask> entry : bindingEntrySet) {
+					WeavingTask task = entry.getValue();
+					Method method = entry.getKey();
+					switch (task.getType()) {
+					// Weave callin binding to a method of a subclass, that is not implemented
+					// in the subclass
+					case WEAVE_BINDING_OF_SUBCLASS:
+						// Is the method implemented in this class?
+						if (method.isImplemented()) {
+							// Yes, so weave this class
+							weaveBindingOfSubclass(task);
+						} else {
+							//No, so just delegate the weaving task to the superclass
+							AbstractBoundClass superclass = getSuperclass();
+							// If superclass is null, there is something wrong
+							if (superclass != null) {
+								superclass.addWeavingTask(task, true/*standBy*/);
 								affectedClasses.add(superclass);
+								weaveSuperCallInCallOrig(task); // ensure we're actually calling that super version
 							}
 						}
-					}
-
-// Original comment:
-//   If this method is private, the callin binding is not
-//   inherited by the subclasses
-// However, this conflicts with test415_nonexistingBaseMethod3i,
-// where an empty callAllBindings() was overriding a non-empty one.
-// see also Method.getId()
-//					if (!method.isPrivate()) {
+						break;
+					// Weave callin binding to a method of this class
+					case WEAVE_BINDING:
+						if (method.isStatic()) {
+							weaveBindingInStaticMethod(task);
+						} else {
+							// Is the method implemented in this class?
+							if (method.isImplemented()) {
+								// So redefine the method
+								weaveBindingInImplementedMethod(task);
+							} else {
+								//No, so weave this class and delegate to the super class
+								weaveBindingInNotImplementedMethod(task);
+								AbstractBoundClass superclass = getSuperclass();
+								if (weavingContext.isWeavable(getSuperClassName())) {
+									Method superMethod = superclass.getMethod(method, task);
+									if (superMethod != null) {
+										WeavingTask newTask = new WeavingTask(WeavingTaskType.WEAVE_BINDING_OF_SUBCLASS, superMethod, task);
+										superclass.addWeavingTask(newTask, true/*standBy*/);
+										affectedClasses.add(superclass);
+									}
+								}
+							}
+		
+		// Original comment:
+		//   If this method is private, the callin binding is not
+		//   inherited by the subclasses
+		// However, this conflicts with test415_nonexistingBaseMethod3i,
+		// where an empty callAllBindings() was overriding a non-empty one.
+		// see also Method.getId()
+		//					if (!method.isPrivate()) {
+								// Delegate the WeavingTask to the subclasses
+								for (AbstractBoundClass subclass : getSubclasses()) {
+									Method subMethod = subclass.getMethod(method, task);
+									if (subMethod != null) {
+										WeavingTask newTask = new WeavingTask(WeavingTaskType.WEAVE_INHERITED_BINDING, subMethod, task);
+										subclass.addWeavingTask(newTask, true/*standBy*/);
+										affectedClasses.add(subclass);
+										TeamManager.mergeJoinpoints(this, subclass, method, subMethod, task.isHandleCovariantReturn());
+									}
+								}
+		//					}
+						}
+						break;
+					// Weave Binding inherited from the superclass
+					case WEAVE_INHERITED_BINDING:
+						if (method.isImplemented()) {
+							weaveBindingInImplementedMethod(task);
+						} else {
+							weaveBindingInNotImplementedMethod(task);
+						}
+						replaceWickedSuperCalls(getSuperclass(), method);
+		
 						// Delegate the WeavingTask to the subclasses
 						for (AbstractBoundClass subclass : getSubclasses()) {
 							Method subMethod = subclass.getMethod(method, task);
-							if (subMethod != null) {
-								WeavingTask newTask = new WeavingTask(WeavingTaskType.WEAVE_INHERITED_BINDING, subMethod, task);
+							WeavingTask newTask = new WeavingTask(WeavingTaskType.WEAVE_INHERITED_BINDING, subMethod, task);
+							subclass.addWeavingTask(newTask, true/*standBy*/);
+							affectedClasses.add(subclass);
+							TeamManager.mergeJoinpoints(this, subclass, method, subMethod, task.isHandleCovariantReturn());
+						}
+		
+						break;
+					}
+					
+					// Mark all WeavingTasks for callin bindings 
+					// as completed
+					completedBindingTasks.put(method, task);
+				}
+				
+				//handle all WeavinTasks for decapsulation bindings
+				for (Map.Entry<Member, WeavingTask> entry : accessEntrySet) {
+					WeavingTask task = entry.getValue();
+					Member member = entry.getKey();
+					
+					switch (task.getType()) {
+					// handle decapsulation binding to a field
+					case WEAVE_FIELD_ACCESS:
+						prepareForFirstMemberAccess();
+						Field field = getField(task.getMemberName(), task
+								.getMemberSignature());
+						weaveFieldAccess(field, field.getGlobalId(this));
+						if (!field.isStatic()) {
+							// If the field is not static it could be accessed through a subclass
+							// so weave the subclass
+							for (AbstractBoundClass subclass : getSubclasses()) {
+								WeavingTask newTask = new WeavingTask(WeavingTaskType.WEAVE_INHERITED_MEMBER_ACCESS);
 								subclass.addWeavingTask(newTask, true/*standBy*/);
 								affectedClasses.add(subclass);
-								TeamManager.mergeJoinpoints(this, subclass, method, subMethod, task.isHandleCovariantReturn());
 							}
 						}
-//					}
+						break;
+					// handle decaspulation binding to a method
+					case WEAVE_METHOD_ACCESS:
+						prepareForFirstMemberAccess();
+						Method method = getMethod(task);
+						weaveMethodAccess(method, method.getGlobalId(this));
+						if (!method.isStatic()) {
+							// If the method is not static it could be accessed through a subclass
+							// so weave the subclass
+							for (AbstractBoundClass subclass : getSubclasses()) {
+								WeavingTask newTask = new WeavingTask(WeavingTaskType.WEAVE_INHERITED_MEMBER_ACCESS);
+								subclass.addWeavingTask(newTask, true/*standBy*/);
+								affectedClasses.add(subclass);
+							}
+						}
+						break;
+					case WEAVE_INHERITED_MEMBER_ACCESS:
+						prepareForFirstMemberAccess();
+						break;
+					case WEAVE_BASE_INFRASTRUCTURE:
+						prepareForFirstTransformation();
+						break;
+					}
+					
+					// Mark all WeavingTasks for decapsulation bindings 
+					// as completed
+					completedAccessTasks.put(member, task);
 				}
-				break;
-			// Weave Binding inherited from the superclass
-			case WEAVE_INHERITED_BINDING:
-				if (method.isImplemented()) {
-					weaveBindingInImplementedMethod(task);
-				} else {
-					weaveBindingInNotImplementedMethod(task);
-				}
-				replaceWickedSuperCalls(getSuperclass(), method);
-
-				// Delegate the WeavingTask to the subclasses
-				for (AbstractBoundClass subclass : getSubclasses()) {
-					Method subMethod = subclass.getMethod(method, task);
-					WeavingTask newTask = new WeavingTask(WeavingTaskType.WEAVE_INHERITED_BINDING, subMethod, task);
-					subclass.addWeavingTask(newTask, true/*standBy*/);
-					affectedClasses.add(subclass);
-					TeamManager.mergeJoinpoints(this, subclass, method, subMethod, task.isHandleCovariantReturn());
-				}
-
-				break;
-			}
-			
-			// Mark all WeavingTasks for callin bindings 
-			// as completed
-			completedBindingTasks.put(method, task);
-		}
+				// flush collected tasks of other affected classes:
+				for (final AbstractBoundClass affected : affectedClasses)
+					if (affected.isLoaded) {
+						IReweavingTask task = new IReweavingTask() {
+							@Override public void reweave(Class<?> definedClass) {
+								affected.handleTaskList(definedClass);
+							}
+						};
+						if (!weavingContext.scheduleReweaving(affected.name, task))
+							affected.handleTaskList(definedClass);
+					}
 		
-		//handle all WeavinTasks for decapsulation bindings
-		for (Map.Entry<Member, WeavingTask> entry : accessEntrySet) {
-			WeavingTask task = entry.getValue();
-			Member member = entry.getKey();
-			
-			switch (task.getType()) {
-			// handle decapsulation binding to a field
-			case WEAVE_FIELD_ACCESS:
-				prepareForFirstMemberAccess();
-				Field field = getField(task.getMemberName(), task
-						.getMemberSignature());
-				weaveFieldAccess(field, field.getGlobalId(this));
-				if (!field.isStatic()) {
-					// If the field is not static it could be accessed through a subclass
-					// so weave the subclass
-					for (AbstractBoundClass subclass : getSubclasses()) {
-						WeavingTask newTask = new WeavingTask(WeavingTaskType.WEAVE_INHERITED_MEMBER_ACCESS);
-						subclass.addWeavingTask(newTask, true/*standBy*/);
-						affectedClasses.add(subclass);
-					}
+				if (processingOpenTasks) {
+					// Weave the class, if the method is not called at load time
+					endTransformation(definedClass);
 				}
-				break;
-			// handle decaspulation binding to a method
-			case WEAVE_METHOD_ACCESS:
-				prepareForFirstMemberAccess();
-				Method method = getMethod(task);
-				weaveMethodAccess(method, method.getGlobalId(this));
-				if (!method.isStatic()) {
-					// If the method is not static it could be accessed through a subclass
-					// so weave the subclass
-					for (AbstractBoundClass subclass : getSubclasses()) {
-						WeavingTask newTask = new WeavingTask(WeavingTaskType.WEAVE_INHERITED_MEMBER_ACCESS);
-						subclass.addWeavingTask(newTask, true/*standBy*/);
-						affectedClasses.add(subclass);
-					}
-				}
-				break;
-			case WEAVE_INHERITED_MEMBER_ACCESS:
-				prepareForFirstMemberAccess();
-				break;
-			case WEAVE_BASE_INFRASTRUCTURE:
-				prepareForFirstTransformation();
-				break;
 			}
-			
-			// Mark all WeavingTasks for decapsulation bindings 
-			// as completed
-			completedAccessTasks.put(member, task);
 		}
-		// flush collected tasks of other affected classes:
-		for (final AbstractBoundClass affected : affectedClasses)
-			if (affected.isLoaded) {
-				IReweavingTask task = new IReweavingTask() {
-					@Override public void reweave(Class<?> definedClass) {
-						affected.handleTaskList(definedClass);
-					}
-				};
-				if (!weavingContext.scheduleReweaving(affected.name, task))
-					affected.handleTaskList(definedClass);
-			}
-
-		if (openBindingTasks.size() > 0 || openAccessTasks.size() > 0) {
-			// Weave the class, if the method is not called at load time
-			endTransformation(definedClass);
-		}
-		openBindingTasks.clear();
-		openAccessTasks.clear();
+		// after releasing the lock:
+		superTransformation(definedClass);
 	}
 
 	public void handleAddingOfBinding(IBinding binding) {
@@ -873,28 +890,33 @@ public abstract class AbstractBoundClass implements IBoundClass {
 		case WEAVE_METHOD_ACCESS:
 			member = getMethod(task);
 			break;
-		case WEAVE_INHERITED_MEMBER_ACCESS:
-		case WEAVE_BASE_INFRASTRUCTURE:
-			openAccessTasks.put(null, task);
-			return true;
+			// switch "continued" inside the synchronized block:
 		}
-		
-		synchronized (member) {
-			WeavingTask prevTask = completedAccessTasks.get(member);
-			// Is there a already completed task for the member?
-			if (prevTask == null) {
-				// No, so check the open tasks
-				prevTask = openAccessTasks.get(member);
-			}
-	
-			// Is there a open task for the member?
-			if (prevTask == null) {
-				// No, so weaving is needed
-				openAccessTasks.put(member, task);
+		synchronized (this.openBindingTasks) { // sic: openBindingTasks is used as the monitor for both maps
+			switch (type) {
+			case WEAVE_INHERITED_MEMBER_ACCESS:
+			case WEAVE_BASE_INFRASTRUCTURE:
+				openAccessTasks.put(null, task);
 				return true;
-			} else {
-				//Yes, so weaving is not needed
-				return false;
+			}
+			
+			synchronized (member) {
+				WeavingTask prevTask = completedAccessTasks.get(member);
+				// Is there a already completed task for the member?
+				if (prevTask == null) {
+					// No, so check the open tasks
+					prevTask = openAccessTasks.get(member);
+				}
+				
+				// Is there a open task for the member?
+				if (prevTask == null) {
+					// No, so weaving is needed
+					openAccessTasks.put(member, task);
+					return true;
+				} else {
+					//Yes, so weaving is not needed
+					return false;
+				}
 			}
 		}
 	}
@@ -908,38 +930,40 @@ public abstract class AbstractBoundClass implements IBoundClass {
 	private boolean addBindingWeavingTask(WeavingTask task) {
 		Method method = getMethod(task);
 		synchronized (method) {
-			WeavingTask prevTask = completedBindingTasks.get(method);
-			// Is there a already completed task for the method?
-			if (prevTask == null) {
-				// No, so check the open tasks
-				prevTask = openBindingTasks.get(method);
-			}
-		
-			// Is there a open task for the member?
-			if (prevTask == null) {
-				//No, so weaving is needed
-				task.setDoAllTransformations(true);
-				openBindingTasks.put(method, task);
-				return true;
-			}
-	
-			switch (prevTask.getType()) {
-			case WEAVE_BINDING:
-				return false;
-			case WEAVE_BINDING_OF_SUBCLASS:
-				// In  this case only the callAllBings was redefined.
-				if (task.getType() != WeavingTaskType.WEAVE_BINDING_OF_SUBCLASS) {
-					// Do the other transformations, if the new WeavingTask is not the same
-					// as already existing
+			synchronized (openBindingTasks) {				
+				WeavingTask prevTask = completedBindingTasks.get(method);
+				// Is there a already completed task for the method?
+				if (prevTask == null) {
+					// No, so check the open tasks
+					prevTask = openBindingTasks.get(method);
+				}
+				
+				// Is there a open task for the member?
+				if (prevTask == null) {
+					//No, so weaving is needed
+					task.setDoAllTransformations(true);
 					openBindingTasks.put(method, task);
 					return true;
 				}
-				return false;
-			case WEAVE_INHERITED_BINDING:
-				return false;
-			default:
-				throw new RuntimeException("Unknown WeavingTaskType: "
-						+ prevTask.getType().name());
+				
+				switch (prevTask.getType()) {
+				case WEAVE_BINDING:
+					return false;
+				case WEAVE_BINDING_OF_SUBCLASS:
+					// In  this case only the callAllBings was redefined.
+					if (task.getType() != WeavingTaskType.WEAVE_BINDING_OF_SUBCLASS) {
+						// Do the other transformations, if the new WeavingTask is not the same
+						// as already existing
+						openBindingTasks.put(method, task);
+						return true;
+					}
+					return false;
+				case WEAVE_INHERITED_BINDING:
+					return false;
+				default:
+					throw new RuntimeException("Unknown WeavingTaskType: "
+							+ prevTask.getType().name());
+				}
 			}
 		}
 	}
@@ -958,13 +982,16 @@ public abstract class AbstractBoundClass implements IBoundClass {
 	 */
 	protected boolean mergeTasks(AbstractBoundClass clazz) {
 		boolean isNewTask = false;
-		for (Map.Entry<Method, WeavingTask> entry : clazz.openBindingTasks
-				.entrySet()) {
-			isNewTask |= addWeavingTaskLazy(entry.getValue());
+		Set<Entry<Method, WeavingTask>> otherBindingTasks;
+		Set<Entry<Member, WeavingTask>> otherAccessTasks;
+		synchronized (clazz.openBindingTasks) {
+			otherBindingTasks = clazz.openBindingTasks.entrySet();
+			otherAccessTasks = clazz.openAccessTasks.entrySet();
 		}
-		
-		for (Map.Entry<Member, WeavingTask> entry : clazz.openAccessTasks
-				.entrySet()) {
+		for (Map.Entry<Method, WeavingTask> entry : otherBindingTasks) {
+			isNewTask |= addWeavingTaskLazy(entry.getValue());
+		}		
+		for (Map.Entry<Member, WeavingTask> entry : otherAccessTasks) {
 			isNewTask |= addWeavingTaskLazy(entry.getValue());
 		}
 		
@@ -1085,6 +1112,8 @@ public abstract class AbstractBoundClass implements IBoundClass {
 
 	protected abstract void endTransformation(Class<?> definedClass);
 
+	protected abstract void superTransformation(Class<?> definedClass);
+
 	protected abstract void prepareAsPossibleBaseClass();
 
 	protected abstract void prepareTeamActivation();
@@ -1145,7 +1174,9 @@ public abstract class AbstractBoundClass implements IBoundClass {
 	}
 
 	public boolean needsWeaving() {
-		return !this.openAccessTasks.isEmpty() || !this.openBindingTasks.isEmpty();
+		synchronized (this.openBindingTasks) {			
+			return !this.openAccessTasks.isEmpty() || !this.openBindingTasks.isEmpty();
+		}
 	}
 
 	public void markAsUnweavable() {

@@ -204,9 +204,18 @@ class AsmWritableBoundClass extends AsmBoundClass {
 		isTransformationActive = false;
 		isFirstTransformation = false;
 		releaseBytecode();
+	}
+
+	protected void superTransformation(Class<?> definedClass) {		
 		AbstractTeam mySuper = getSuperclass();
-		if (mySuper != null && !mySuper.openBindingTasks.isEmpty() && mySuper.isLoaded())
-			mySuper.handleTaskList(definedClass != null ? definedClass.getSuperclass() : null);
+		if (mySuper != null && mySuper.isLoaded()) {
+			boolean superNeedsWeaving = false;
+			synchronized (mySuper.openBindingTasks) {
+				superNeedsWeaving = !mySuper.openBindingTasks.isEmpty();
+			}
+			if (superNeedsWeaving) // no locks held during the following call!
+				mySuper.handleTaskList(definedClass != null ? definedClass.getSuperclass() : null);
+		}
 	}
 
 	/**
