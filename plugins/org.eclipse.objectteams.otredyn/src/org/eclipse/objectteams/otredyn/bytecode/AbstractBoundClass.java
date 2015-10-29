@@ -18,6 +18,7 @@ package org.eclipse.objectteams.otredyn.bytecode;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.IdentityHashMap;
@@ -506,7 +507,7 @@ public abstract class AbstractBoundClass implements IBoundClass {
 		}
 	}
 
-	public synchronized Method getMethod(String name, String desc, int flags, boolean allowCovariantReturn) {
+	public Method getMethod(String name, String desc, int flags, boolean allowCovariantReturn) {
 		if (this.parsed) {
 			// in this state the current class may already be inside synchronized handleTaskList(), try without lock:
 			String methodKey = getMethodKey(name, desc);
@@ -617,8 +618,8 @@ public abstract class AbstractBoundClass implements IBoundClass {
 				Set<Map.Entry<Method, WeavingTask>> bindingEntrySet;
 				Set<Map.Entry<Member, WeavingTask>> accessEntrySet;
 				synchronized (openBindingTasks) {
-					bindingEntrySet = openBindingTasks.entrySet();
-					accessEntrySet = openAccessTasks.entrySet();
+					bindingEntrySet = copyEntrySet(openBindingTasks);
+					accessEntrySet = copyEntrySet(openAccessTasks);
 					processingOpenTasks = !openBindingTasks.isEmpty() || !openAccessTasks.isEmpty();
 					if (processingOpenTasks) {
 						openBindingTasks.clear();
@@ -814,6 +815,14 @@ public abstract class AbstractBoundClass implements IBoundClass {
 		}
 		// after releasing the lock:
 		superTransformation(definedClass);
+	}
+
+	<K,V> Set<Entry<K, V>> copyEntrySet(Map<K,V> map) {
+		if (map.isEmpty()) return Collections.emptySet();
+		Map<K, V> bindingMap = new HashMap<K, V>();
+		for (Entry<K, V> entry : map.entrySet())
+			bindingMap.put(entry.getKey(), entry.getValue());
+		return bindingMap.entrySet();
 	}
 
 	public void handleAddingOfBinding(IBinding binding) {
