@@ -2087,7 +2087,11 @@ public class CompilerOptions {
 			this.decapsulation = (String)optionValue;
 		}
 		if ((optionValue = optionsMap.get(OPTION_WeavingScheme)) != null) {
-			this.weavingScheme = WeavingScheme.valueOf((String)optionValue);
+			try {
+				this.weavingScheme = WeavingScheme.valueOf((String)optionValue);
+			} catch (IllegalArgumentException iae) {
+				// ignore illegal value
+			}
 		}
 // SH}
 
