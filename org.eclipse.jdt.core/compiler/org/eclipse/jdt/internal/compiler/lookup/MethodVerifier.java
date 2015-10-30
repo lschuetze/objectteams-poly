@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2013 IBM Corporation and others.
+ * Copyright (c) 2000, 2015 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -21,7 +21,6 @@
  *								bug 406928 - computation of inherited methods seems damaged (affecting @Overrides)
  *								bug 409473 - [compiler] JDT cannot compile against JRE 1.8
  *								Bug 420080 - [1.8] Overridden Default method is reported as duplicated
- *								Bug 418235 - [compiler][null] Unreported nullness error when using generic
  *******************************************************************************/
 package org.eclipse.jdt.internal.compiler.lookup;
 
@@ -273,7 +272,8 @@ void checkAgainstInheritedMethods(MethodBinding currentMethod, MethodBinding[] m
 				}
 			}
 		}
-		checkForBridgeMethod(currentMethod, inheritedMethod, allInheritedMethods);
+		if (!inheritedMethod.isStatic() && !inheritedMethod.isFinal())
+			checkForBridgeMethod(currentMethod, inheritedMethod, allInheritedMethods);
 //{ObjectTeams: restore enhanced params:
 		} finally {
 			inheritedMethod.resetParameters();
@@ -363,7 +363,6 @@ public void checkAgainstImplicitlyInherited(
 	}
 	if (options.reportDeprecationWhenOverridingDeprecatedMethod && inheritedMethod.isViewedAsDeprecated()) {
 		if (!currentMethod.isViewedAsDeprecated() || options.reportDeprecationInsideDeprecatedCode) {
-
 		/* OT: removed check (don't have all methods here)
 			// check against the other inherited methods to see if they hide this inheritedMethod
 			ReferenceBinding declaringClass = inheritedMethod.declaringClass;
@@ -376,7 +375,8 @@ public void checkAgainstImplicitlyInherited(
 		}
 	}
  /* OT: removed check (don't have allInheritedMethods here)
-	checkForBridgeMethod(currentMethod, inheritedMethod, allInheritedMethods);
+	if (!inheritedMethod.isStatic() && !inheritedMethod.isFinal())
+		checkForBridgeMethod(currentMethod, inheritedMethod, allInheritedMethods);
   */
 // End COPY&PASTE
     this.type = saveType;
@@ -853,7 +853,6 @@ protected boolean canOverridingMethodDifferInErasure(MethodBinding overridingMet
 	return false;   // the case for <= 1.4  (cannot differ)
 }
 void computeMethods() {
-
 	MethodBinding[] methods = this.type.methods();
 	int size = methods.length;
 	this.currentMethods = new HashtableOfObject(size == 0 ? 1 : size); // maps method selectors to an array of methods... must search to match paramaters & return type
@@ -988,9 +987,6 @@ MethodBinding findBestInheritedAbstractOrDefaultMethod(MethodBinding[] methods, 
 	findMethod : for (int i = 0; i < length; i++) {
 		MethodBinding method = methods[i];
 		if (!(method.isAbstract() || method.isDefaultMethod())) continue findMethod;
-// from master:
-//		// when unexpectedly seeing a non-abstract interface method regard it as abstract, too, for this check:
-//		if (!(method.isAbstract() || method.declaringClass.isInterface())) continue findMethod;
 		for (int j = 0; j < length; j++) {
 			if (i == j) continue;
 			if (!checkInheritedReturnTypes(method, methods[j])) {

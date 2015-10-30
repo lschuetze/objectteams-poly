@@ -2233,7 +2233,7 @@ public class JavaModelManager implements ISaveParticipant, IContentTypeChangeLis
 
 	// Do not modify without modifying getDefaultOptions()
 	private Hashtable getDefaultOptionsNoInitialization() {
-		Map defaultOptionsMap = new CompilerOptions().getMap(); // compiler defaults
+		Map<String, String> defaultOptionsMap = new CompilerOptions().getMap(); // compiler defaults
 
 		// Override some compiler defaults
 		defaultOptionsMap.put(JavaCore.COMPILER_LOCAL_VARIABLE_ATTR, JavaCore.GENERATE);

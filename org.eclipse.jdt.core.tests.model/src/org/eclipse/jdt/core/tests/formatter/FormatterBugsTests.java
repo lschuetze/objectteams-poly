@@ -11463,4 +11463,499 @@ public void testBug435241() {
 		"}";
 	formatSource(source);
 }
+/**
+ * https://bugs.eclipse.org/472815 - [formatter] 'Indent Empty lines' option doesn't work inside empty blocks
+ */
+public void testBug472815() {
+	this.formatterPrefs.number_of_empty_lines_to_preserve = 2;
+	String source = 
+		"public class Snippet {\r\n" + 
+		"\r\n" + 
+		"	int[] a1 = { };\r\n" + 
+		"	int[] a2 = {\r\n" + 
+		"	};\r\n" + 
+		"	int[] a3 = {\r\n" + 
+		"\r\n" + 
+		"	};\r\n" + 
+		"	int[] a4 = {\r\n" + 
+		"\r\n" + 
+		"\r\n" + 
+		"	};\r\n" + 
+		"	int[] a5 = {\r\n" + 
+		"\r\n" + 
+		"\r\n" + 
+		"\r\n" + 
+		"	};\r\n" + 
+		"\r\n" + 
+		"	void f1() { }\r\n" + 
+		"	void f2() {\r\n" + 
+		"	}\r\n" + 
+		"	void f3() {\r\n" + 
+		"\r\n" + 
+		"	}\r\n" + 
+		"	void f4() {\r\n" + 
+		"\r\n" + 
+		"\r\n" + 
+		"	}\r\n" + 
+		"	void f5() {\r\n" + 
+		"\r\n" + 
+		"\r\n" + 
+		"\r\n" + 
+		"	}\r\n" + 
+		"}";
+	formatSource(source,
+		"public class Snippet {\r\n" + 
+		"\r\n" + 
+		"	int[] a1 = {};\r\n" + 
+		"	int[] a2 = {};\r\n" + 
+		"	int[] a3 = {\r\n" + 
+		"\r\n" + 
+		"	};\r\n" + 
+		"	int[] a4 = {\r\n" + 
+		"\r\n" + 
+		"\r\n" + 
+		"	};\r\n" + 
+		"	int[] a5 = {\r\n" + 
+		"\r\n" + 
+		"\r\n" + 
+		"	};\r\n" + 
+		"\r\n" + 
+		"	void f1() {\r\n" + 
+		"	}\r\n" + 
+		"\r\n" + 
+		"	void f2() {\r\n" + 
+		"	}\r\n" + 
+		"\r\n" + 
+		"	void f3() {\r\n" + 
+		"\r\n" + 
+		"	}\r\n" + 
+		"\r\n" + 
+		"	void f4() {\r\n" + 
+		"\r\n" + 
+		"\r\n" + 
+		"	}\r\n" + 
+		"\r\n" + 
+		"	void f5() {\r\n" + 
+		"\r\n" + 
+		"\r\n" + 
+		"	}\r\n" + 
+		"}"
+	);
+}
+/**
+ * https://bugs.eclipse.org/472815 - [formatter] 'Indent Empty lines' option doesn't work inside empty blocks
+ */
+public void testBug472815b() {
+	this.formatterPrefs.number_of_empty_lines_to_preserve = 2;
+	this.formatterPrefs.indent_empty_lines = true;
+	String source = 
+		"public class Snippet {\r\n" + 
+		"\r\n" + 
+		"	int[] a1 = { };\r\n" + 
+		"	int[] a2 = {\r\n" + 
+		"	};\r\n" + 
+		"	int[] a3 = {\r\n" + 
+		"\r\n" + 
+		"	};\r\n" + 
+		"	int[] a4 = {\r\n" + 
+		"\r\n" + 
+		"\r\n" + 
+		"	};\r\n" + 
+		"	int[] a5 = {\r\n" + 
+		"\r\n" + 
+		"\r\n" + 
+		"\r\n" + 
+		"	};\r\n" + 
+		"\r\n" + 
+		"	void f1() { }\r\n" + 
+		"	void f2() {\r\n" + 
+		"	}\r\n" + 
+		"	void f3() {\r\n" + 
+		"\r\n" + 
+		"	}\r\n" + 
+		"	void f4() {\r\n" + 
+		"\r\n" + 
+		"\r\n" + 
+		"	}\r\n" + 
+		"	void f5() {\r\n" + 
+		"\r\n" + 
+		"\r\n" + 
+		"\r\n" + 
+		"	}\r\n" + 
+		"}";
+	formatSource(source,
+		"public class Snippet {\r\n" + 
+		"	\r\n" + 
+		"	int[] a1 = {};\r\n" + 
+		"	int[] a2 = {};\r\n" + 
+		"	int[] a3 = {\r\n" + 
+		"			\r\n" + 
+		"	};\r\n" + 
+		"	int[] a4 = {\r\n" + 
+		"			\r\n" + 
+		"			\r\n" + 
+		"	};\r\n" + 
+		"	int[] a5 = {\r\n" + 
+		"			\r\n" + 
+		"			\r\n" + 
+		"	};\r\n" + 
+		"	\r\n" + 
+		"	void f1() {\r\n" + 
+		"	}\r\n" + 
+		"	\r\n" + 
+		"	void f2() {\r\n" + 
+		"	}\r\n" + 
+		"	\r\n" + 
+		"	void f3() {\r\n" + 
+		"		\r\n" + 
+		"	}\r\n" + 
+		"	\r\n" + 
+		"	void f4() {\r\n" + 
+		"		\r\n" + 
+		"		\r\n" + 
+		"	}\r\n" + 
+		"	\r\n" + 
+		"	void f5() {\r\n" + 
+		"		\r\n" + 
+		"		\r\n" + 
+		"	}\r\n" + 
+		"}"
+	);
+}
+/**
+ * https://bugs.eclipse.org/472413 - [formatter] Wrap all arguments on new lines and prefer outer expressions result is inconsistent
+ */
+public void testBug472413() {
+	this.formatterPrefs.alignment_for_arguments_in_method_invocation = 
+		DefaultCodeFormatterOptions.Alignment.M_ONE_PER_LINE_SPLIT
+		+ DefaultCodeFormatterOptions.Alignment.M_INDENT_BY_ONE;
+	this.formatterPrefs.page_width = 80;
+	String source = 
+		"class Snippet {\r\n" + 
+		"\r\n" + 
+		"	void foo1() {\r\n" + 
+		"		Other.bar(\r\n" + 
+		"			100,\r\n" + 
+		"			nestedMethod2Arg(\r\n" + 
+		"				nestedMethod1Arg(\r\n" + 
+		"					nestedMethod2Arg(nestedMethod1Arg(nestedMethod2Arg(\r\n" + 
+		"						nestedMethod1Arg(nestedMethod1Arg(nestedMethod1Arg(\r\n" + 
+		"							nested(200, 300, 400, 500, 600, 700, 800, 900)))),\r\n" + 
+		"						null)), null)),\r\n" + 
+		"				null),\r\n" + 
+		"			100);\r\n" + 
+		"	}\r\n" + 
+		"\r\n" + 
+		"	void foo2() {\r\n" + 
+		"		nestedMethodAAAA(\r\n" + 
+		"			nestedMethodBBBB(\r\n" + 
+		"				nestedMethodCCC(dddddd(200, 300, 400, 500, 600, 700, 800, 900)),\r\n" + 
+		"				null));\r\n" + 
+		"		nestedMethodAAAA(nestedMethodBBBB(\r\n" + 
+		"			nestedMethodCCC(dddddd(200, 300, 400, 500, 600, 700, 800, 900)),\r\n" + 
+		"			null));\r\n" + 
+		"	}\r\n" + 
+		"\r\n" + 
+		"	void foo3() {\r\n" + 
+		"		nestedMethodAAAA(\r\n" + 
+		"			nestedMethodBBBB(\r\n" + 
+		"				nestedMethodCCC(dddddd(200, 300, 400, 500, 600, 700, 800, 900)),\r\n" + 
+		"				null),\r\n" + 
+		"			null);\r\n" + 
+		"		nestedMethodAAAA(nestedMethodBBBB(\r\n" + 
+		"			nestedMethodCCC(dddddd(200, 300, 400, 500, 600, 700, 800, 900)),\r\n" + 
+		"			null), null);\r\n" + 
+		"	}\r\n" + 
+		"}";
+	formatSource(source,
+		"class Snippet {\r\n" + 
+		"\r\n" + 
+		"	void foo1() {\r\n" + 
+		"		Other.bar(\r\n" + 
+		"			100,\r\n" + 
+		"			nestedMethod2Arg(\r\n" + 
+		"				nestedMethod1Arg(\r\n" + 
+		"					nestedMethod2Arg(\r\n" + 
+		"						nestedMethod1Arg(\r\n" + 
+		"							nestedMethod2Arg(\r\n" + 
+		"								nestedMethod1Arg(\r\n" + 
+		"									nestedMethod1Arg(\r\n" + 
+		"										nestedMethod1Arg(\r\n" + 
+		"											nested(\r\n" + 
+		"												200,\r\n" + 
+		"												300,\r\n" + 
+		"												400,\r\n" + 
+		"												500,\r\n" + 
+		"												600,\r\n" + 
+		"												700,\r\n" + 
+		"												800,\r\n" + 
+		"												900)))),\r\n" + 
+		"								null)),\r\n" + 
+		"						null)),\r\n" + 
+		"				null),\r\n" + 
+		"			100);\r\n" + 
+		"	}\r\n" + 
+		"\r\n" + 
+		"	void foo2() {\r\n" + 
+		"		nestedMethodAAAA(\r\n" + 
+		"			nestedMethodBBBB(\r\n" + 
+		"				nestedMethodCCC(dddddd(200, 300, 400, 500, 600, 700, 800, 900)),\r\n" + 
+		"				null));\r\n" + 
+		"		nestedMethodAAAA(\r\n" + 
+		"			nestedMethodBBBB(\r\n" + 
+		"				nestedMethodCCC(dddddd(200, 300, 400, 500, 600, 700, 800, 900)),\r\n" + 
+		"				null));\r\n" + 
+		"	}\r\n" + 
+		"\r\n" + 
+		"	void foo3() {\r\n" + 
+		"		nestedMethodAAAA(\r\n" + 
+		"			nestedMethodBBBB(\r\n" + 
+		"				nestedMethodCCC(dddddd(200, 300, 400, 500, 600, 700, 800, 900)),\r\n" + 
+		"				null),\r\n" + 
+		"			null);\r\n" + 
+		"		nestedMethodAAAA(\r\n" + 
+		"			nestedMethodBBBB(\r\n" + 
+		"				nestedMethodCCC(dddddd(200, 300, 400, 500, 600, 700, 800, 900)),\r\n" + 
+		"				null),\r\n" + 
+		"			null);\r\n" + 
+		"	}\r\n" + 
+		"}"
+	);
+}
+/**
+ * https://bugs.eclipse.org/475793 - [formatter] Incorrect whitespace after lambda block
+ */
+public void testBug475793() {
+	this.formatterPrefs.insert_new_line_in_empty_block = false;
+	String source =
+		"public class C {\r\n" + 
+		"	public void f() {\r\n" + 
+		"		Foo.bar(() -> {} , IllegalArgumentException.class);\r\n" + 
+		"	}\r\n" + 
+		"}";
+	formatSource(source,
+		"public class C {\r\n" + 
+		"	public void f() {\r\n" + 
+		"		Foo.bar(() -> {}, IllegalArgumentException.class);\r\n" + 
+		"	}\r\n" + 
+		"}"
+	);
+}
+/**
+ * https://bugs.eclipse.org/475746 - [formatter] insert-space rules sometimes ignored with anonymous subclass or when Annotations present
+ */
+public void testBug475746() {
+	this.formatterPrefs.insert_new_line_in_empty_block = false;
+	this.formatterPrefs.insert_space_after_opening_paren_in_method_invocation = true;
+	this.formatterPrefs.insert_space_before_closing_paren_in_method_invocation = true;
+	this.formatterPrefs.insert_space_after_opening_paren_in_method_declaration = true;
+	this.formatterPrefs.insert_space_before_closing_paren_in_method_declaration = true;
+	this.formatterPrefs.insert_space_after_opening_paren_in_constructor_declaration = true;
+	this.formatterPrefs.insert_space_before_closing_paren_in_constructor_declaration = true;
+	this.formatterPrefs.insert_space_after_opening_paren_in_annotation = true;
+	this.formatterPrefs.insert_space_before_closing_paren_in_annotation = true;
+	String source =
+		"import java.awt.*;\r\n" + 
+		"\r\n" + 
+		"public class MyClass {\r\n" + 
+		"\r\n" + 
+		"	@Annotation( Arrays.asList( \"\" ))\r\n" + 
+		"	static Point p = new Point( x, y) {\r\n" + 
+		"		@Override\r\n" + 
+		"		public int hashCode( ) {\r\n" + 
+		"			return 42;\r\n" + 
+		"		}\r\n" + 
+		"	};\r\n" + 
+		"\r\n" + 
+		"	MyClass( @Annotation( \"annotationVal\" ) String s)\r\n" + 
+		"	{\r\n" + 
+		"		Foo.bar( ( @Annotation( \"annotationVal\" ) int a) -> { } , IllegalArgumentException.class );\r\n" + 
+		"	}\r\n" + 
+		"\r\n" + 
+		"}";
+	formatSource(source,
+		"import java.awt.*;\r\n" + 
+		"\r\n" + 
+		"public class MyClass {\r\n" + 
+		"\r\n" + 
+		"	@Annotation( Arrays.asList( \"\" ) )\r\n" + 
+		"	static Point p = new Point( x, y ) {\r\n" + 
+		"		@Override\r\n" + 
+		"		public int hashCode() {\r\n" + 
+		"			return 42;\r\n" + 
+		"		}\r\n" + 
+		"	};\r\n" + 
+		"\r\n" + 
+		"	MyClass( @Annotation( \"annotationVal\" ) String s ) {\r\n" + 
+		"		Foo.bar( ( @Annotation( \"annotationVal\" ) int a ) -> {}, IllegalArgumentException.class );\r\n" + 
+		"	}\r\n" + 
+		"\r\n" + 
+		"}"
+	);
+}
+/**
+ * https://bugs.eclipse.org/477005 - [formatter] NullPointerException when first line is empty and indented
+ */
+public void testBug477005() {
+	this.formatterPrefs.indent_empty_lines = true;
+	this.formatterPrefs.blank_lines_before_package = 2;
+	String source =
+		"\r\n" + 
+		"\r\n" + 
+		"package test;\r\n" + 
+		"\r\n" + 
+		"public class MyClass {\r\n" + 
+		"}";
+	formatSource(source);
+}
+/**
+ * https://bugs.eclipse.org/471202 - [formatter] Extra line break after annotation default expression
+ */
+public void testBug471202() {
+	String source =
+		"public @interface MyAnnotation {\r\n" + 
+		"	Attributes attributes() default @Attributes()\r\n" + 
+		"	;\r\n" + 
+		"\r\n" + 
+		"	@MyAnnotation(attributes = @Attributes() )\r\n" + 
+		"	String test();\r\n" + 
+		"}";
+	formatSource(source,
+		"public @interface MyAnnotation {\r\n" + 
+		"	Attributes attributes() default @Attributes();\r\n" + 
+		"\r\n" + 
+		"	@MyAnnotation(attributes = @Attributes())\r\n" + 
+		"	String test();\r\n" + 
+		"}"
+	);
+}
+/**
+ * https://bugs.eclipse.org/475791 - [formatter] Additional blank line before static initializer
+ */
+public void testBug475791() {
+	this.formatterPrefs.blank_lines_before_new_chunk = 0;
+	String source =
+		"public class Example {\r\n" + 
+		"	static String staticField;\r\n" + 
+		"	static {}\r\n" + 
+		"	String field;\r\n" + 
+		"	{}\r\n" + 
+		"	static String staticField2;\r\n" + 
+		"	{}\r\n" + 
+		"	String field2;\r\n" + 
+		"	static {}\r\n" + 
+		"	static void staticMethod() {};\r\n" + 
+		"	static {}\r\n" + 
+		"	void method() {}\r\n" + 
+		"	static{}\r\n" + 
+		"	{}\r\n" + 
+		"	static class staticClass {};\r\n" + 
+		"	{}\r\n" + 
+		"	static{}\r\n" + 
+		"}";
+	formatSource(source,
+		"public class Example {\r\n" + 
+		"	static String staticField;\r\n" + 
+		"	static {\r\n" + 
+		"	}\r\n" + 
+		"	String field;\r\n" + 
+		"	{\r\n" + 
+		"	}\r\n" + 
+		"	static String staticField2;\r\n" + 
+		"	{\r\n" + 
+		"	}\r\n" + 
+		"	String field2;\r\n" + 
+		"	static {\r\n" + 
+		"	}\r\n" + 
+		"\r\n" + 
+		"	static void staticMethod() {\r\n" + 
+		"	};\r\n" + 
+		"	static {\r\n" + 
+		"	}\r\n" + 
+		"\r\n" + 
+		"	void method() {\r\n" + 
+		"	}\r\n" + 
+		"	static {\r\n" + 
+		"	}\r\n" + 
+		"	{\r\n" + 
+		"	}\r\n" + 
+		"\r\n" + 
+		"	static class staticClass {\r\n" + 
+		"	};\r\n" + 
+		"	{\r\n" + 
+		"	}\r\n" + 
+		"	static {\r\n" + 
+		"	}\r\n" + 
+		"}"
+	);
+}
+/**
+ * https://bugs.eclipse.org/475791 - [formatter] Additional blank line before static initializer
+ */
+public void testBug475791b() {
+	this.formatterPrefs.blank_lines_before_new_chunk = 2;
+	String source =
+		"public class Example {\r\n" + 
+		"	static String staticField;\r\n" + 
+		"	static {}\r\n" + 
+		"	String field;\r\n" + 
+		"	{}\r\n" + 
+		"	static String staticField2;\r\n" + 
+		"	{}\r\n" + 
+		"	String field2;\r\n" + 
+		"	static {}\r\n" + 
+		"	static void staticMethod() {};\r\n" + 
+		"	static {}\r\n" + 
+		"	void method() {}\r\n" + 
+		"	static{}\r\n" + 
+		"	{}\r\n" + 
+		"	static class staticClass {};\r\n" + 
+		"	{}\r\n" + 
+		"	static{}\r\n" + 
+		"}";
+	formatSource(source,
+		"public class Example {\r\n" + 
+		"	static String staticField;\r\n" + 
+		"	static {\r\n" + 
+		"	}\r\n" + 
+		"	String field;\r\n" + 
+		"	{\r\n" + 
+		"	}\r\n" + 
+		"	static String staticField2;\r\n" + 
+		"	{\r\n" + 
+		"	}\r\n" + 
+		"	String field2;\r\n" + 
+		"	static {\r\n" + 
+		"	}\r\n" + 
+		"\r\n" + 
+		"\r\n" + 
+		"	static void staticMethod() {\r\n" + 
+		"	};\r\n" + 
+		"\r\n" + 
+		"\r\n" + 
+		"	static {\r\n" + 
+		"	}\r\n" + 
+		"\r\n" + 
+		"\r\n" + 
+		"	void method() {\r\n" + 
+		"	}\r\n" + 
+		"\r\n" + 
+		"\r\n" + 
+		"	static {\r\n" + 
+		"	}\r\n" + 
+		"	{\r\n" + 
+		"	}\r\n" + 
+		"\r\n" + 
+		"\r\n" + 
+		"	static class staticClass {\r\n" + 
+		"	};\r\n" + 
+		"\r\n" + 
+		"\r\n" + 
+		"	{\r\n" + 
+		"	}\r\n" + 
+		"	static {\r\n" + 
+		"	}\r\n" + 
+		"}"
+	);
+}
 }

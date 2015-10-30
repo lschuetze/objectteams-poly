@@ -137,6 +137,10 @@ public class WrapPreparator extends ASTVisitor {
 	@Override
 	public boolean preVisit2(ASTNode node) {
 		this.currentDepth++;
+
+		assert this.wrapIndexes.isEmpty() && this.wrapPenalties.isEmpty();
+		assert this.wrapParentIndex == -1 && this.wrapGroupEnd == -1;
+
 		boolean isMalformed = (node.getFlags() & ASTNode.MALFORMED) != 0;
 		if (isMalformed) {
 			this.tm.addDisableFormatTokenPair(this.tm.firstTokenIn(node, -1), this.tm.lastTokenIn(node, -1));
@@ -236,13 +240,16 @@ public class WrapPreparator extends ASTVisitor {
 		}
 
 		if (!node.isConstructor()) {
+			this.wrapParentIndex = this.tm.findFirstTokenInLine(this.tm.firstIndexIn(node.getName(), -1));
 			List<TypeParameter> typeParameters = node.typeParameters();
 			if (!typeParameters.isEmpty())
 				this.wrapIndexes.add(this.tm.firstIndexIn(typeParameters.get(0), -1));
-			if (node.getReturnType2() != null && !node.modifiers().isEmpty())
-				this.wrapIndexes.add(this.tm.firstIndexIn(node.getReturnType2(), -1));
+			if (node.getReturnType2() != null) {
+				int returTypeIndex = this.tm.firstIndexIn(node.getReturnType2(), -1);
+				if (returTypeIndex != this.wrapParentIndex)
+					this.wrapIndexes.add(returTypeIndex);
+			}
 			this.wrapIndexes.add(this.tm.firstIndexIn(node.getName(), -1));
-			this.wrapParentIndex = this.tm.findFirstTokenInLine(this.tm.firstIndexIn(node.getName(), -1));
 			this.wrapGroupEnd = this.tm.lastIndexIn(node.getName(), -1);
 			handleWrap(this.options.alignment_for_method_declaration);
 		}
@@ -617,7 +624,6 @@ public class WrapPreparator extends ASTVisitor {
 			this.wrapParentIndex = this.tm.findIndex(firstToken.originalStart - 1, TokenNameLPAREN, false);
 			if (!arguments.isEmpty() && this.wrapGroupEnd < 0)
 				this.wrapGroupEnd = this.tm.lastIndexIn(arguments.get(arguments.size() - 1), -1);
-			assert this.wrapGroupEnd >= 0;
 			handleWrap(wrappingOption, 1 / PREFERRED);
 		}
 	}
@@ -632,17 +638,22 @@ public class WrapPreparator extends ASTVisitor {
 	}
 
 	private void handleWrap(int wrappingOption, ASTNode parentNode) {
+		doHandleWrap(wrappingOption, parentNode);
+		this.wrapIndexes.clear();
+		this.wrapPenalties.clear();
+		this.wrapParentIndex = this.wrapGroupEnd = -1;
+	}
+
+	private void doHandleWrap(int wrappingOption, ASTNode parentNode) {
 		if (this.wrapIndexes.isEmpty())
 			return;
-		assert this.wrapParentIndex >= 0;
+		assert this.wrapParentIndex >= 0 && this.wrapParentIndex < this.wrapIndexes.get(0);
+		assert this.wrapGroupEnd >= this.wrapIndexes.get(this.wrapIndexes.size() - 1);
 		float penalty = this.wrapPenalties.isEmpty() ? 1 : this.wrapPenalties.get(0);
 		WrapPolicy policy = getWrapPolicy(wrappingOption, penalty, true, parentNode);
-		if (policy == null) {
-			this.wrapIndexes.clear();
-			this.wrapPenalties.clear();
-			this.wrapParentIndex = this.wrapGroupEnd = -1;
+		if (policy == null)
 			return;
-		}
+
 		setTokenWrapPolicy(this.wrapIndexes.get(0), policy, true);
 
 		boolean wrapPreceedingComments = !(parentNode instanceof InfixExpression)
@@ -670,9 +681,6 @@ public class WrapPreparator extends ASTVisitor {
 					this.tm.get(this.wrapIndexes.get(0)).breakBefore();
 			}
 		}
-		this.wrapIndexes.clear();
-		this.wrapPenalties.clear();
-		this.wrapParentIndex = this.wrapGroupEnd = -1;
 	}
 
 	private void setTokenWrapPolicy(int index, WrapPolicy policy, boolean wrapPreceedingComments) {
@@ -776,51 +784,54 @@ public class WrapPreparator extends ASTVisitor {
 
 			@Override
 			protected boolean token(Token token, int index) {
-				int lineBreaks = getLineBreaksBetween(getPrevious(), token);
-				if (index > WrapPreparator.this.importsStart && index < WrapPreparator.this.importsEnd) {
-					lineBreaks = lineBreaks > 1 ? (this.options2.blank_lines_between_import_groups + 1) : 0;
-				} else {
-					lineBreaks = Math.min(lineBreaks, this.options2.number_of_empty_lines_to_preserve + 1);
-				}
+				boolean isBetweenImports = index > WrapPreparator.this.importsStart && index < WrapPreparator.this.importsEnd;
+				int lineBreaks = getLineBreaksToPreserve(getPrevious(), token, isBetweenImports);
 				if (lineBreaks <= getLineBreaksBefore())
 					return true;
 
-				if (!this.options2.join_wrapped_lines && token.isWrappable() && lineBreaks == 1) {
-					token.breakBefore();
+				if (lineBreaks == 1) {
+					if ((!this.options2.join_wrapped_lines && token.isWrappable()) || index == 0)
+						token.breakBefore();
 				} else if (lineBreaks > 1) {
-					if (index == 0)
-						lineBreaks--;
 					token.putLineBreaksBefore(lineBreaks);
 				}
 				return true;
 			}
 
-			private int getLineBreaksBetween(Token token1, Token token2) {
-				if (token1 != null) {
-					List<Token> structure1 = token1.getInternalStructure();
-					if (structure1 != null && !structure1.isEmpty())
-						token1 = structure1.get(structure1.size() - 1);
-				}
-				List<Token> structure2 = token2.getInternalStructure();
-				if (structure2 != null && !structure2.isEmpty())
-					token2 = structure2.get(0);
-				int lineBreaks = WrapPreparator.this.tm.countLineBreaksBetween(token1, token2);
-				if (token1 == null)
-					lineBreaks++;
-				return lineBreaks;
-			}
 		});
 
 		Token last = this.tm.get(this.tm.size() - 1);
 		last.clearLineBreaksAfter();
-		int endingBreaks = this.tm.countLineBreaksBetween(last, null);
-		endingBreaks = Math.min(endingBreaks, this.options.number_of_empty_lines_to_preserve);
+		int endingBreaks = getLineBreaksToPreserve(last, null, false);
 		if (endingBreaks > 0) {
 			last.putLineBreaksAfter(endingBreaks);
 		} else if ((this.kind & CodeFormatter.K_COMPILATION_UNIT) != 0
 				&& this.options.insert_new_line_at_end_of_file_if_missing) {
 			last.breakAfter();
 		}
+	}
+
+	int getLineBreaksToPreserve(Token token1, Token token2, boolean isBetweenImports) {
+		if (token1 != null) {
+			List<Token> structure = token1.getInternalStructure();
+			if (structure != null && !structure.isEmpty())
+				token1 = structure.get(structure.size() - 1);
+		}
+		if (token2 != null) {
+			List<Token> structure = token2.getInternalStructure();
+			if (structure != null && !structure.isEmpty())
+				token2 = structure.get(0);
+		}
+		int lineBreaks = WrapPreparator.this.tm.countLineBreaksBetween(token1, token2);
+		if (isBetweenImports)
+			return lineBreaks > 1 ? (this.options.blank_lines_between_import_groups + 1) : 0;
+
+		int toPreserve = this.options.number_of_empty_lines_to_preserve;
+		if (token1 != null && token2 != null)
+			toPreserve++; // n empty lines = n+1 line breaks, except for file start and end
+		if (token1 != null && token1.tokenType == Token.TokenNameEMPTY_LINE)
+			toPreserve--;
+		return Math.min(lineBreaks, toPreserve);
 	}
 
 	private void wrapComments() {

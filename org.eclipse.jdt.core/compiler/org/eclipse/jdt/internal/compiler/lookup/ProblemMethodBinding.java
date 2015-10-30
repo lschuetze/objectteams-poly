@@ -66,19 +66,19 @@ public ProblemMethodBinding(MethodBinding closestMatch, char[] selector, TypeBin
 }
 
 //{ObjectTeams: Clone closestMatch before manipulation.
-private MethodBinding getMethodClone(MethodBinding closestMatch) {
-	if(closestMatch instanceof ParameterizedGenericMethodBinding) {
-		ParameterizedGenericMethodBinding pgmb = (ParameterizedGenericMethodBinding)closestMatch;
-		MethodBinding clone = new ParameterizedGenericMethodBinding(closestMatch, pgmb.typeArguments, pgmb.environment());
-		clone.declaringClass = closestMatch.declaringClass;
+private MethodBinding getMethodClone(MethodBinding givenClosestMatch) {
+	if(givenClosestMatch instanceof ParameterizedGenericMethodBinding) {
+		ParameterizedGenericMethodBinding pgmb = (ParameterizedGenericMethodBinding)givenClosestMatch;
+		MethodBinding clone = new ParameterizedGenericMethodBinding(givenClosestMatch, pgmb.typeArguments, pgmb.environment(), false, false);
+		clone.declaringClass = givenClosestMatch.declaringClass;
 		return clone;
-	} else if(closestMatch instanceof ParameterizedMethodBinding) {
-		if (closestMatch.declaringClass instanceof ParameterizedTypeBinding)
-			return new ParameterizedMethodBinding((ParameterizedTypeBinding)closestMatch.declaringClass, closestMatch);
+	} else if(givenClosestMatch instanceof ParameterizedMethodBinding) {
+		if (givenClosestMatch.declaringClass instanceof ParameterizedTypeBinding)
+			return new ParameterizedMethodBinding((ParameterizedTypeBinding)givenClosestMatch.declaringClass, givenClosestMatch);
 		else
 			return null;
 	} else {
-		return new MethodBinding(closestMatch, closestMatch.declaringClass);
+		return new MethodBinding(givenClosestMatch, givenClosestMatch.declaringClass);
 	}
 }
 // SH}

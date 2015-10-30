@@ -2224,6 +2224,7 @@ protected int resumeAfterRecovery() {
 			prepareForHeaders();
 			goForHeaders();
 			this.diet = true; // passed this point, will not consider method bodies
+			this.dietInt = 0;
 		}
 		return RESTART;
 	}

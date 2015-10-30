@@ -170,7 +170,7 @@ public class RoleMigrationImplementor
 		if (haveReportedError)
 			return new ProblemMethodBinding(originalMethod, originalMethod.selector, substitutes, ProblemReasons.ProblemAlreadyReported);
 		// substitution was successful
-		return new ParameterizedGenericMethodBinding(originalMethod, new TypeBinding[]{typeArgument}, scope.environment());
+		return new ParameterizedGenericMethodBinding(originalMethod, new TypeBinding[]{typeArgument}, scope.environment(), false, false);
 	}
 
 

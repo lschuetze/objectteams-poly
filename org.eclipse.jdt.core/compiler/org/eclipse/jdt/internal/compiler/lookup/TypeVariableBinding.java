@@ -260,7 +260,7 @@ public class TypeVariableBinding extends ReferenceBinding {
 			return TypeConstants.MISMATCH;
 		}
 		// check value-dependent type-variable:
-		if (this.anchors != null) {
+		if (this.anchors != null && substitution != null) {
 			ITeamAnchor anchor = substitution.substituteAnchor(this.anchors[0], 0); // TODO(SH): support multiple anchors 
 			if (anchor != null) {
 				if (!(argumentType instanceof DependentTypeBinding)) {
@@ -305,13 +305,11 @@ public class TypeVariableBinding extends ReferenceBinding {
 	}
 
 	public int boundsCount() {
-		if (this.firstBound == null) {
+		if (this.firstBound == null)
 			return 0;
-		} else if (TypeBinding.equalsEquals(this.firstBound, this.superclass)) {
-			return this.superInterfaces.length + 1;
-		} else {
-			return this.superInterfaces.length;
-		}
+		if (this.firstBound.isInterface())
+			return this.superInterfaces.length; // only interface bounds
+		return this.superInterfaces.length + 1; // class or array type isn't contained in superInterfaces
 	}
 
 //{ObjectTeams: type variable may depend on value param from declaring element
@@ -527,12 +525,13 @@ public class TypeVariableBinding extends ReferenceBinding {
 	TypeBound[] getTypeBounds(InferenceVariable variable, InferenceSubstitution theta) {
 		int n = boundsCount();
         if (n == 0)
-        	return Binding.NO_TYPE_BOUNDS; // OT: qualified reference for visibility reasons
+        	return Binding.NO_TYPE_BOUNDS; // OT: qualified name for visibility
         TypeBound[] bounds = new TypeBound[n];
-        bounds[0] = TypeBound.createBoundOrDependency(theta, this.firstBound, variable);
-        int ifcOffset = TypeBinding.equalsEquals(this.firstBound, this.superclass) ? -1 : 0;
-        for (int i = 1; i < n; i++)
-			bounds[i] = TypeBound.createBoundOrDependency(theta, this.superInterfaces[i+ifcOffset], variable);
+        int idx = 0;
+        if (!this.firstBound.isInterface())
+        	bounds[idx++] = TypeBound.createBoundOrDependency(theta, this.firstBound, variable);
+        for (int i = 0; i < this.superInterfaces.length; i++)
+			bounds[idx++] = TypeBound.createBoundOrDependency(theta, this.superInterfaces[i], variable);
         return bounds;
 	}
 

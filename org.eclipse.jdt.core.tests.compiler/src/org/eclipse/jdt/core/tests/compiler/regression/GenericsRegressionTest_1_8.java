@@ -5567,4 +5567,115 @@ public void testBug464496() {
 		},
 		"42");
 }
+public void testBug473657() {
+	runConformTest(
+		new String[] {
+			"T2.java",
+			"interface I<T> {\n" + 
+			"}\n" + 
+			"\n" + 
+			"@SuppressWarnings({\"unchecked\", \"rawtypes\"})\n" + 
+			"abstract class T1<T> implements I<T> {\n" + 
+			"    public I<T> t(I<? extends Number> l2) {\n" + 
+			"        return T2.m((I) this, (I) l2);\n" + 
+			"    }\n" + 
+			"    public I<T> t(Number l2) {\n" + 
+			"        return T2.m((I) this, (I) T2.t(l2));\n" + 
+			"    }\n" + 
+			"}\n" + 
+			"\n" + 
+			"public abstract class T2 {\n" + 
+			"    public static <T> I<T> t(T t) {\n" + 
+			"        return null;\n" + 
+			"    }\n" + 
+			"    public static <T extends Number> I<T> m(I<T> l1, I<? extends Number> l2) {\n" + 
+			"        return null;\n" + 
+			"    }\n" + 
+			"    public static <T extends Number> I<T> m(T l1, Number l2) {\n" + 
+			"        return null;\n" + 
+			"    }\n" + 
+			"}\n"
+		});
+}
+public void testBug478848() {
+	runNegativeTest(
+		new String[] {
+			"InferenceBug.java",
+			"import java.util.Optional;\n" + 
+			"public class InferenceBug {\n" + 
+			"    \n" + 
+			"    static class Wrapper<T> {\n" + 
+			"        T value;\n" + 
+			"        public T getValue() {\n" + 
+			"            return null;\n" + 
+			"        }\n" + 
+			"    }\n" + 
+			"    \n" + 
+			"    static class C1 {\n" + 
+			"        //an optional array of String wrappers\n" + 
+			"        public Optional<? extends Wrapper<String>[]> optionalArrayOfStringWrappers() {\n" + 
+			"            return Optional.empty();\n" + 
+			"        }\n" + 
+			"    }\n" + 
+			"    \n" + 
+			"    public static void main(String[] args) {\n" + 
+			"        C1 c1 = new C1();\n" + 
+			"        for (Wrapper<String> attribute: c1.optionalArrayOfStringWrappers().get()) {\n" + 
+			"            // error in previous line:\n" + 
+			"            // Can only iterate over an array or an instance of java.lang.Iterable\n" + 
+			"        }\n" + 
+			"    }\n" + 
+			"}\n"
+		},
+		"----------\n" + 
+		"1. ERROR in InferenceBug.java (at line 20)\n" + 
+		"	for (Wrapper<String> attribute: c1.optionalArrayOfStringWrappers().get()) {\n" + 
+		"	                                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n" + 
+		"Can only iterate over an array or an instance of java.lang.Iterable\n" + 
+		"----------\n");
+}
+public void testBug479167() {
+	runConformTest(
+		new String[] {
+			"ToArray.java",
+			"import java.io.Serializable;\n" + 
+			"interface ArrayFunction<E> {\n" + 
+			"	<S extends E> E[] apply(@SuppressWarnings(\"unchecked\") S... es);\n" + 
+			"}\n" + 
+			"public class ToArray<E extends Cloneable & Serializable> implements ArrayFunction<E> {\n" + 
+			"	public final @SafeVarargs @Override <S extends E> E[] apply(S... es) {\n" + 
+			"		return es;\n" + 
+			"	}\n" + 
+			"\n" + 
+			"	public static void main(String[] args) {\n" + 
+			"		ArrayFunction<String[]> toArray = new ToArray<>();\n" + 
+			"		String[][] array = toArray.apply(args);\n" + 
+			"		System.out.print(array.getClass().getName());\n" + 
+			"	}\n" + 
+			"}\n"
+		},
+		"[[Ljava.lang.String;");
+}
+public void testBug477751() {
+	runConformTest(
+		new String[] {
+			"Test.java",
+			"import java.util.function.Function;\n" + 
+			"class Test {\n" + 
+			"	public static <T, U> U map(T value, Function<T, U> mapper) {\n" + 
+			"		if (value != null)\n" + 
+			"			return mapper.apply(value);\n" + 
+			"		return null;\n" + 
+			"	}\n" + 
+			"\n" + 
+			"	String value;\n" + 
+			"	\n" + 
+			"	void test() {\n" + 
+			"		map(map(value, nnVal1 -> nnVal1.toLowerCase()),\n" + 
+			"				nnVal2 -> nnVal2.length());\n" + 
+			"	}\n" + 
+			"\n" + 
+			"}\n"
+		});
+}
 }

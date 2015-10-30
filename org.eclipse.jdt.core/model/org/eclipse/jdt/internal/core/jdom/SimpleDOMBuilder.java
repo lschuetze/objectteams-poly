@@ -33,7 +33,6 @@ import org.eclipse.jdt.internal.compiler.problem.DefaultProblemFactory;
  * powerful, fine-grained DOM/AST API found in the
  * org.eclipse.jdt.core.dom package.
  */
-@SuppressWarnings({"rawtypes"})
 public class SimpleDOMBuilder extends AbstractDOMBuilder implements ISourceElementRequestor {
 
 /**
@@ -191,7 +190,7 @@ public void exitType(int declarationEnd) {
 /**
  * Creates a new parser.
  */
-protected SourceElementParser getParser(Map settings) {
+protected SourceElementParser getParser(Map<String, String> settings) {
 	return new SourceElementParser(this, new DefaultProblemFactory(), new CompilerOptions(settings), false/*don't report local declarations*/, true/*optimize string literals*/);
 }
 

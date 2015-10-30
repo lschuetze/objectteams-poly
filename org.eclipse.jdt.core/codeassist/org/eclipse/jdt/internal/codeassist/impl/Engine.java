@@ -32,7 +32,6 @@ import org.eclipse.objectteams.otdt.internal.core.compiler.ast.CallinMappingDecl
 import org.eclipse.objectteams.otdt.internal.core.compiler.ast.CalloutMappingDeclaration;
 import org.eclipse.objectteams.otdt.internal.core.compiler.ast.ParameterMapping;
 
-@SuppressWarnings("rawtypes")
 public abstract class Engine implements ITypeRequestor {
 
 	public LookupEnvironment lookupEnvironment;
@@ -52,7 +51,7 @@ public abstract class Engine implements ITypeRequestor {
 	public int onDemandImportCacheCount = 0;
 	public char[] currentPackageName = null;
 
-	public Engine(Map settings){
+	public Engine(Map<String, String> settings){
 		this.options = new AssistOptions(settings);
 		this.compilerOptions = new CompilerOptions(settings);
 		this.forbiddenReferenceIsError =

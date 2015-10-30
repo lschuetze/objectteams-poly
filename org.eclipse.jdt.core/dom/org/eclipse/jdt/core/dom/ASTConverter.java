@@ -113,10 +113,10 @@ class ASTConverter {
 	private WeavingScheme weavingScheme = WeavingScheme.OTRE; // avoid null
 // SH}
 
-	public ASTConverter(Map options, boolean resolveBindings, IProgressMonitor monitor) {
+	public ASTConverter(Map<String, String> options, boolean resolveBindings, IProgressMonitor monitor) {
 		this.resolveBindings = resolveBindings;
 		this.referenceContext = null;
-		Object sourceModeSetting = options.get(JavaCore.COMPILER_SOURCE);
+		String sourceModeSetting = options.get(JavaCore.COMPILER_SOURCE);
 		long sourceLevel = CompilerOptions.versionToJdkLevel(sourceModeSetting);
 		if (sourceLevel == 0) {
 			// unknown sourceModeSetting

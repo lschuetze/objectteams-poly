@@ -226,8 +226,9 @@ import org.eclipse.jdt.internal.compiler.lookup.ProblemReasons;
  * technology reusing the compiler.
  * A problem provides access to:
  * <ul>
- * <li> its location (originating source file name, source position, line number), </li>
- * <li> its message description and a predicate to check its severity (warning or error). </li>
+ * <li> its location (originating source file name, source position, line number) </li>
+ * <li> its message description </li>
+ * <li> predicates to check its severity (error, warning, or info) </li>
  * <li> its ID : a number identifying the very nature of this problem. All possible IDs are listed
  * as constants on this interface. </li>
  * </ul>
@@ -292,18 +293,26 @@ int getSourceLineNumber();
 int getSourceStart();
 
 /**
- * Checks the severity to see if the Error bit is set.
+ * Returns whether the severity of this problem is 'Error'.
  *
- * @return true if the Error bit is set for the severity, false otherwise
+ * @return true if the severity of this problem is 'Error', false otherwise
  */
 boolean isError();
 
 /**
- * Checks the severity to see if the Error bit is not set.
+ * Returns whether the severity of this problem is 'Warning'.
  *
- * @return true if the Error bit is not set for the severity, false otherwise
+ * @return true if the severity of this problem is 'Warning', false otherwise
  */
 boolean isWarning();
+
+/**
+ * Returns whether the severity of this problem is 'Info'.
+ *
+ * @return true if the severity of this problem is 'Info', false otherwise
+ * @since 3.12
+ */
+boolean isInfo();
 
 /**
  * Set the end position of the problem (inclusive), or -1 if unknown.
