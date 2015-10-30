@@ -228,6 +228,8 @@ System.err.println("OT/Equinox: USE_DYNAMIC_WEAVER="+USE_DYNAMIC_WEAVER);
 
 			if (isEclipseLoggingClass(bundleName, className))
 				return;
+			if (isClassWithJSR(className))
+				return;
 
 			if (BCELPatcher.BCEL_PLUGIN_ID.equals(bundleName)) {
 				BCELPatcher.fixBCEL(wovenClass);
@@ -273,6 +275,19 @@ System.err.println("OT/Equinox: USE_DYNAMIC_WEAVER="+USE_DYNAMIC_WEAVER);
 		} catch (ClassCircularityError cce) {
 			log(cce, "Weaver encountered a circular class dependency");
 		}
+	}
+
+	private boolean isClassWithJSR(String className) {
+		// ASM cannot handle JSR instruction:
+		//		java.lang.RuntimeException: JSR/RET are not supported with computeFrames option
+		//        at org.objectweb.asm.Frame.execute(Frame.java:1178)
+		//        at org.objectweb.asm.MethodWriter.visitJumpInsn(MethodWriter.java:984)
+		//        at org.objectweb.asm.commons.AdviceAdapter.visitJumpInsn(AdviceAdapter.java:503)
+		//        at org.objectweb.asm.ClassReader.readCode(ClassReader.java:1335)
+		//        at org.objectweb.asm.ClassReader.readMethod(ClassReader.java:1017)
+		//        at org.objectweb.asm.ClassReader.accept(ClassReader.java:693)
+		// Hence any class known to contain that instruction is excluded:
+		return "org.apache.felix.gogo.runtime.Pipe".equals(className);
 	}
 
 	private boolean isEclipseLoggingClass(String bundleName, String className) {
