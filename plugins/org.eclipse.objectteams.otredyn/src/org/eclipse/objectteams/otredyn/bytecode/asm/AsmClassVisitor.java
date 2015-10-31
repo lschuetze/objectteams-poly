@@ -115,18 +115,18 @@ class AsmClassVisitor extends ClassVisitor {
 				clazz.boundBaseClasses.add(baseClassName.replace('/', '.'));
 				String[] baseMethodNames = multiBindings[i].getBaseMethodNames();
 				String[] baseMethodSignatures = multiBindings[i].getBaseMethodSignatures();
-				String[] declaringBaseClassNames = multiBindings[i].getDeclaringBaseClassName();
+				String[] weavableBaseClassNames = multiBindings[i].getDeclaringBaseClassName();
 				int callinModifier = multiBindings[i].getCallinModifier();
 				int[] callinIds = multiBindings[i].getCallinIds();
 				int[] baseFlags = multiBindings[i].getBaseFlags();
 				boolean handleCovariantReturn = multiBindings[i].isHandleCovariantReturn();
 				for (int j = 0; j < baseMethodNames.length; j++) {
-					String declaringBaseClassName = declaringBaseClassNames[j];
+					String weavableBaseClassName = weavableBaseClassNames[j];
 					Binding binding = new Binding(clazz, roleClassName, callinLabel, baseClassName, 
-												  baseMethodNames[j], baseMethodSignatures[j], declaringBaseClassName,
+												  baseMethodNames[j], baseMethodSignatures[j], weavableBaseClassName,
 												  callinModifier, callinIds[j], baseFlags[j], handleCovariantReturn);
 					clazz.addBinding(binding);
-					clazz.boundBaseClasses.add(declaringBaseClassName.replace('/', '.'));
+					clazz.boundBaseClasses.add(weavableBaseClassName.replace('/', '.'));
 				}
 			}
 		} else if (attribute.type.equals(Attributes.ATTRIBUTE_CALLIN_PRECEDENCE)) {

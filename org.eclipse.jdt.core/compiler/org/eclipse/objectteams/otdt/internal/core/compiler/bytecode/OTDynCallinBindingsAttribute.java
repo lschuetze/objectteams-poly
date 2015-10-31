@@ -252,8 +252,12 @@ public class OTDynCallinBindingsAttribute extends ListValueAttribute {
 				baseFlags |= BaseMethod.CALLIN;
 			if (baseSpec.isStatic())
 				baseFlags |= BaseMethod.STATIC;
+			MethodBinding baseMethod = baseSpec.resolvedMethod;
+			char[] weavableBaseClass = (baseMethod.isFinal() || baseMethod.isStatic()) 
+									? baseMethod.declaringClass.constantPoolName()
+									: baseClassName;
 			mapping.addBaseMethod(i, baseSpec.codegenSeletor(), baseSpec.signature(WeavingScheme.OTDRE), 
-									baseSpec.resolvedMethod.declaringClass.constantPoolName(),
+									weavableBaseClass,
 									baseSpec.getCallinId(this.theTeam), baseFlags, baseSpec.getTranslationFlags());
 		}
 		mapping.setSMAPinfo(callinDecl);

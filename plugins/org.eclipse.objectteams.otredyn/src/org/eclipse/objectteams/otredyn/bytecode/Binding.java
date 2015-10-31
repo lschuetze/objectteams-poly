@@ -36,7 +36,7 @@ public class Binding implements Comparable<Binding>, IBinding {
 	private String boundClass;
 	private String memberName;
 	private String memberSignature;
-	private String declaringBaseClassName;
+	private String weavableBaseClassName;
 	private int callinModifier;
 	/**
 	 * Locally unique id for (an element in) this binding:
@@ -57,7 +57,7 @@ public class Binding implements Comparable<Binding>, IBinding {
 	 */
 	public Binding(AbstractBoundClass teamClass,
 			String roleClassName, String callinLabel, String boundClassName, 
-			String memberName, String memberSignature, String declaringBaseClassName, 
+			String memberName, String memberSignature, String weavableBaseClassName, 
 			int callinModifier, int callinId, int baseFlags, boolean handleCovariantReturn) 
 	{
 		this.teamClass = teamClass;
@@ -65,7 +65,7 @@ public class Binding implements Comparable<Binding>, IBinding {
 		this.boundClass = boundClassName;
 		this.memberName = memberName;
 		this.memberSignature = memberSignature;
-		this.declaringBaseClassName = declaringBaseClassName;
+		this.weavableBaseClassName = weavableBaseClassName;
 		this.callinModifier = callinModifier;
 		this.perTeamId = callinId;
 		this.baseFlags = baseFlags;
@@ -120,7 +120,7 @@ public class Binding implements Comparable<Binding>, IBinding {
 	}
 	
 	public String getDeclaringBaseClassName() {
-		return this.declaringBaseClassName;
+		return this.weavableBaseClassName;
 	}
 
 	@Override
