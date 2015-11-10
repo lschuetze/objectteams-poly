@@ -588,7 +588,13 @@ public team class OTTypeHierarchies {
 		}
 
 		callin void ensureJavaType(IType type) {
-			if (type instanceof IOTType) type = (IType) ((IOTType)type).getCorrespondingJavaElement();
+			if (type instanceof IOTType) {
+				 IJavaElement jElem = ((IOTType)type).getCorrespondingJavaElement();
+				 if (jElem instanceof IType)
+					 type = (IType) jElem;
+				 else
+					 OTDTPlugin.getDefault().getLog().log(new Status(IStatus.WARNING, OTDTPlugin.PLUGIN_ID, "OTType has not corresponding JavaElement: "+type));
+			}
 			base.ensureJavaType(type);
 		}
 
