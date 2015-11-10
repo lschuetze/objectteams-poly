@@ -118,8 +118,8 @@ public class AstGenerator extends AstFactory {
 	}
 
 	public void setPositions(Expression expression) {
-		this.sourceStart = expression.sourceStart;
-		this.sourceEnd   = expression.sourceEnd;
+		expression.sourceStart = this.sourceStart;
+		expression.sourceEnd   = this.sourceEnd;
 	}
 
 	public LocalDeclaration localVariable (char[] name, char[] type, Expression init) {
