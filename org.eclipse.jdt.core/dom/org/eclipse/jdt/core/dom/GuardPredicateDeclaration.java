@@ -43,17 +43,17 @@ public class GuardPredicateDeclaration extends ASTNode {
         new SimplePropertyDescriptor(GuardPredicateDeclaration.class, "base", boolean.class, MANDATORY); //$NON-NLS-1$
 
 
-	private static final List PROPERTY_DESCRIPTORS_3_0;
+	private static final List<StructuralPropertyDescriptor> PROPERTY_DESCRIPTORS_3_0;
 
 	static {
-		List propertyList = new ArrayList(3);
+		List<StructuralPropertyDescriptor> propertyList = new ArrayList<StructuralPropertyDescriptor>(3);
 		createPropertyList(GuardPredicateDeclaration.class, propertyList);
 		addProperty(BASE_PROPERTY, propertyList);
 		addProperty(EXPRESSION_PROPERTY, propertyList);
 		PROPERTY_DESCRIPTORS_3_0 = reapPropertyList(propertyList);
 	}
 
-	public static List propertyDescriptors(int apiLevel) {
+	public static List<StructuralPropertyDescriptor> propertyDescriptors(int apiLevel) {
 		if (apiLevel == AST.JLS2_INTERNAL) {
 			throw new UnsupportedOperationException("JLS2 not supported"); //$NON-NLS-1$
 		} else {

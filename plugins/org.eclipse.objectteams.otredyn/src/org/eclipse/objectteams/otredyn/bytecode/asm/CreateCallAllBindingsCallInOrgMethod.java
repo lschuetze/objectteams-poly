@@ -110,7 +110,7 @@ public class CreateCallAllBindingsCallInOrgMethod extends
 		// this.callAllBindings(boundMethodId, args);
 		newInstructions.add(new MethodInsnNode(Opcodes.INVOKEVIRTUAL,
 				this.name, ConstantMembers.callAllBindingsClient.getName(),
-				ConstantMembers.callAllBindingsClient.getSignature()));
+				ConstantMembers.callAllBindingsClient.getSignature(), false));
 		Type returnType = Type.getReturnType(method.desc);
 		newInstructions
 				.add(getUnboxingInstructionsForReturnValue(returnType));

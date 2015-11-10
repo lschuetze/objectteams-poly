@@ -90,7 +90,7 @@ public class CreateDispatchCodeInOrgMethodAdapter extends
 		// box the arguments
 		instructions.add(getBoxingInstructions(args, (method.access & Opcodes.ACC_STATIC) != 0));
 		//callOrigStatic(boundMethodId, args);
-		instructions.add(new MethodInsnNode(Opcodes.INVOKESTATIC, name, ConstantMembers.callOrigStatic.getName(), ConstantMembers.callOrigStatic.getSignature()));
+		instructions.add(new MethodInsnNode(Opcodes.INVOKESTATIC, name, ConstantMembers.callOrigStatic.getName(), ConstantMembers.callOrigStatic.getSignature(), false));
 		Type returnType = Type.getReturnType(method.desc);
 		instructions
 				.add(getUnboxingInstructionsForReturnValue(returnType));

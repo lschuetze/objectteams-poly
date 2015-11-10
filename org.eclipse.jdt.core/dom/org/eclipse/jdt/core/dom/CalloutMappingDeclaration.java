@@ -119,7 +119,9 @@ public class CalloutMappingDeclaration extends AbstractMethodMappingDeclaration
 
 	/**
 	 * The "modifiers" structural property of this node type.
+	 * @deprecated use {@link #MODIFIERS2_PROPERTY}
 	 */
+	@Deprecated
 	public static final SimplePropertyDescriptor MODIFIERS_PROPERTY =
 		internalModifiersPropertyFactory(CalloutMappingDeclaration.class);
 
@@ -134,7 +136,7 @@ public class CalloutMappingDeclaration extends AbstractMethodMappingDeclaration
 	 * {@link StructuralPropertyDescriptor}),
 	 * or null if uninitialized.
 	 */
-	private static final List PROPERTY_DESCRIPTORS_2_0;
+	private static final List<StructuralPropertyDescriptor> PROPERTY_DESCRIPTORS_2_0;
 
 	/**
 	 * A list of property descriptors (element type:
@@ -142,7 +144,7 @@ public class CalloutMappingDeclaration extends AbstractMethodMappingDeclaration
 	 * or null if uninitialized.
 	 */
 
-	private static final List PROPERTY_DESCRIPTORS_3_0;
+	private static final List<StructuralPropertyDescriptor> PROPERTY_DESCRIPTORS_3_0;
 
 	private MethodMappingElement baseMappingElement = null;
 	private boolean baseMappingInitialized= false;
@@ -150,7 +152,7 @@ public class CalloutMappingDeclaration extends AbstractMethodMappingDeclaration
 
 	static
 	{
-		List propertyList = new ArrayList(8);
+		List<StructuralPropertyDescriptor> propertyList = new ArrayList<StructuralPropertyDescriptor>(8);
 		createPropertyList(CalloutMappingDeclaration.class, propertyList);
 		addProperty(JAVADOC_PROPERTY, propertyList);
 		addProperty(ROLE_MAPPING_ELEMENT_PROPERTY, propertyList);
@@ -161,7 +163,7 @@ public class CalloutMappingDeclaration extends AbstractMethodMappingDeclaration
 		addProperty(MODIFIERS_PROPERTY, propertyList);
 		PROPERTY_DESCRIPTORS_2_0 = reapPropertyList(propertyList);
 
-		propertyList = new ArrayList(8);
+		propertyList = new ArrayList<StructuralPropertyDescriptor>(8);
 		createPropertyList(CalloutMappingDeclaration.class, propertyList);
 		addProperty(JAVADOC_PROPERTY, propertyList);
 		addProperty(ROLE_MAPPING_ELEMENT_PROPERTY, propertyList);
@@ -181,7 +183,7 @@ public class CalloutMappingDeclaration extends AbstractMethodMappingDeclaration
 	 * @return a list of property descriptors (element type:
 	 * {@link StructuralPropertyDescriptor})
 	 */
-	public static List propertyDescriptors(int apiLevel)
+	public static List<StructuralPropertyDescriptor> propertyDescriptors(int apiLevel)
 	{
 		if(apiLevel >= AST.JLS3_INTERNAL)
 			return PROPERTY_DESCRIPTORS_3_0;
@@ -308,7 +310,6 @@ public class CalloutMappingDeclaration extends AbstractMethodMappingDeclaration
         return CALLOUT_MAPPING_DECLARATION;
     }
 
-    @SuppressWarnings("unchecked")
 	ASTNode clone0(AST target)
     {
         CalloutMappingDeclaration result = new CalloutMappingDeclaration(target);

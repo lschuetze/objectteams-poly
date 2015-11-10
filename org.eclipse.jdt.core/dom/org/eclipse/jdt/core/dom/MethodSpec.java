@@ -95,7 +95,7 @@ public class MethodSpec extends MethodMappingElement implements IMethodNode
 	 * {@link StructuralPropertyDescriptor}),
 	 * or null if uninitialized.
 	 */
-	private static final List PROPERTY_DESCRIPTORS_2_0;
+	private static final List<StructuralPropertyDescriptor> PROPERTY_DESCRIPTORS_2_0;
 
 	/**
 	 * A list of property descriptors (element type:
@@ -103,12 +103,12 @@ public class MethodSpec extends MethodMappingElement implements IMethodNode
 	 * or null if uninitialized.
 	 * @since 3.1
 	 */
-	private static final List PROPERTY_DESCRIPTORS_3_0;
+	private static final List<StructuralPropertyDescriptor> PROPERTY_DESCRIPTORS_3_0;
 
 
 	static
 	{
-		List propertyList = new ArrayList(6);
+		List<StructuralPropertyDescriptor> propertyList = new ArrayList<StructuralPropertyDescriptor>(6);
 		createPropertyList(MethodSpec.class, propertyList);
 		addProperty(RETURN_TYPE_PROPERTY, propertyList);
 		addProperty(NAME_PROPERTY, propertyList);
@@ -117,7 +117,7 @@ public class MethodSpec extends MethodMappingElement implements IMethodNode
 		addProperty(COVARIANT_RETURN_PROPERTY, propertyList);
 		PROPERTY_DESCRIPTORS_2_0 = reapPropertyList(propertyList);
 
-		propertyList = new ArrayList(7);
+		propertyList = new ArrayList<StructuralPropertyDescriptor>(7);
 		createPropertyList(MethodSpec.class, propertyList);
 		addProperty(RETURN_TYPE2_PROPERTY, propertyList);
 		addProperty(TYPE_PARAMETERS_PROPERTY, propertyList);
@@ -138,7 +138,7 @@ public class MethodSpec extends MethodMappingElement implements IMethodNode
 	 * {@link StructuralPropertyDescriptor})
 	 * @since 3.0
 	 */
-	public static List propertyDescriptors(int apiLevel) {
+	public static List<StructuralPropertyDescriptor> propertyDescriptors(int apiLevel) {
 		if (apiLevel == AST.JLS2_INTERNAL) {
 			return PROPERTY_DESCRIPTORS_2_0;
 		} else {

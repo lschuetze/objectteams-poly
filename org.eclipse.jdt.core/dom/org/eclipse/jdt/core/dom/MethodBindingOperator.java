@@ -29,7 +29,6 @@ import java.util.List;
  * @author stephan
  * @since 1.3.1
  */
-@SuppressWarnings("unchecked")
 public class MethodBindingOperator extends ASTNode {
 
 	public static final int KIND_CALLOUT 		  = 1;
@@ -54,24 +53,24 @@ public class MethodBindingOperator extends ASTNode {
 	 * {@link StructuralPropertyDescriptor}),
 	 * or null if uninitialized.
 	 */
-	private static final List PROPERTY_DESCRIPTORS_2_0;
+	private static final List<StructuralPropertyDescriptor> PROPERTY_DESCRIPTORS_2_0;
 
 	/**
 	 * A list of property descriptors (element type:
 	 * {@link StructuralPropertyDescriptor}),
 	 * or null if uninitialized.
 	 */
-	private static final List PROPERTY_DESCRIPTORS_3_0;
+	private static final List<StructuralPropertyDescriptor> PROPERTY_DESCRIPTORS_3_0;
 
 	static
 	{
-		List propertyList = new ArrayList(1);
+		List<StructuralPropertyDescriptor> propertyList = new ArrayList<StructuralPropertyDescriptor>(1);
 		createPropertyList(MethodBindingOperator.class, propertyList);
 		addProperty(BINDING_KIND_PROPERTY, propertyList);
 		addProperty(BINDING_MODIFIER_PROPERTY, propertyList);
 		PROPERTY_DESCRIPTORS_2_0 = reapPropertyList(propertyList);
 
-		propertyList = new ArrayList(1);
+		propertyList = new ArrayList<StructuralPropertyDescriptor>(1);
 		createPropertyList(MethodBindingOperator.class, propertyList);
 		addProperty(BINDING_KIND_PROPERTY, propertyList);
 		addProperty(BINDING_MODIFIER_PROPERTY, propertyList); // one flag, not a bitset
@@ -86,7 +85,7 @@ public class MethodBindingOperator extends ASTNode {
 	 * @return a list of property descriptors (element type:
 	 * {@link StructuralPropertyDescriptor})
 	 */
-	public static List propertyDescriptors(int apiLevel)
+	public static List<StructuralPropertyDescriptor> propertyDescriptors(int apiLevel)
 	{
 		if(apiLevel == AST.JLS3_INTERNAL)
 			return PROPERTY_DESCRIPTORS_3_0;

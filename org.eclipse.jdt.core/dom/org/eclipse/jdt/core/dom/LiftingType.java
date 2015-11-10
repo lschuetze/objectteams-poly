@@ -70,11 +70,11 @@ public class LiftingType extends Type
 	 * {@link StructuralPropertyDescriptor}),
 	 * or null if uninitialized.
 	 */
-	private static final List PROPERTY_DESCRIPTORS;
+	private static final List<StructuralPropertyDescriptor> PROPERTY_DESCRIPTORS;
 
 	static
 	{
-		List propertyList = new ArrayList(4);
+		List<StructuralPropertyDescriptor> propertyList = new ArrayList<StructuralPropertyDescriptor>(4);
 		createPropertyList(LiftingType.class, propertyList);
 		addProperty(NAME_PROPERTY, propertyList);
 		addProperty(BASE_TYPE_PROPERTY, propertyList);
@@ -91,7 +91,7 @@ public class LiftingType extends Type
 	 * @return a list of property descriptors (element type:
 	 * {@link StructuralPropertyDescriptor})
 	 */
-	public static List propertyDescriptors(int apiLevel)
+	public static List<StructuralPropertyDescriptor> propertyDescriptors(int apiLevel)
 	{
 		return PROPERTY_DESCRIPTORS;
 	}

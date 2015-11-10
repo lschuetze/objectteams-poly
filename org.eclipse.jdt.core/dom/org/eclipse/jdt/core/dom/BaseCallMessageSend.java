@@ -68,11 +68,11 @@ public class BaseCallMessageSend extends Expression implements Invocation
 	 * {@link StructuralPropertyDescriptor}),
 	 * or null if uninitialized.
 	 */
-	private static final List PROPERTY_DESCRIPTORS;
+	private static final List<StructuralPropertyDescriptor> PROPERTY_DESCRIPTORS;
 
 	static
 	{
-		List propertyList = new ArrayList(3);
+		List<StructuralPropertyDescriptor> propertyList = new ArrayList<StructuralPropertyDescriptor>(3);
 		createPropertyList(BaseCallMessageSend.class, propertyList);
         addProperty(NAME_PROPERTY, propertyList);
         addProperty(ARGUMENTS_PROPERTY, propertyList);
@@ -88,7 +88,7 @@ public class BaseCallMessageSend extends Expression implements Invocation
 	 * @return a list of property descriptors (element type:
 	 * {@link StructuralPropertyDescriptor})
 	 */
-	public static List propertyDescriptors(int apiLevel)
+	public static List<StructuralPropertyDescriptor> propertyDescriptors(int apiLevel)
 	{
 		return PROPERTY_DESCRIPTORS;
 	}

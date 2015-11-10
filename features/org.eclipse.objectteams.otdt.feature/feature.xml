@@ -46,6 +46,7 @@ Authors:
 	Marco Mosconi
 	Markus Witte
 	Michael Krüger
+	Oliver Frank
 	Ralf Anklam
 	Sascha Kolewa
 	Stephan Herrmann
@@ -58,7 +59,7 @@ Project Leader:
    </license>
 
    <url>
-      <update label="Object Teams Updates" url="http://download.eclipse.org/objectteams/updates/ot2.3"/>
+      <update label="Object Teams Updates" url="http://download.eclipse.org/objectteams/updates/ot2.5"/>
       <discovery label="Object Teams Contributions" url="http://download.eclipse.org/objectteams/updates/contrib"/>
    </url>
 

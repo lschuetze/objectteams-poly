@@ -151,7 +151,7 @@ public class CallinMappingDeclaration extends AbstractMethodMappingDeclaration
 	 * {@link StructuralPropertyDescriptor}),
 	 * or null if uninitialized.
 	 */
-	private static final List PROPERTY_DESCRIPTORS_2_0;
+	private static final List<StructuralPropertyDescriptor> PROPERTY_DESCRIPTORS_2_0;
 
 	/**
 	 * A list of property descriptors (element type:
@@ -159,7 +159,7 @@ public class CallinMappingDeclaration extends AbstractMethodMappingDeclaration
 	 * or null if uninitialized.
 	 */
 
-	private static final List PROPERTY_DESCRIPTORS_3_0;
+	private static final List<StructuralPropertyDescriptor> PROPERTY_DESCRIPTORS_3_0;
 
     private SimpleName _labelName = null;
 
@@ -170,7 +170,7 @@ public class CallinMappingDeclaration extends AbstractMethodMappingDeclaration
 
 	static
 	{
-		List propertyList = new ArrayList(7);
+		List<StructuralPropertyDescriptor> propertyList = new ArrayList<StructuralPropertyDescriptor>(7);
 		createPropertyList(CallinMappingDeclaration.class, propertyList);
         addProperty(NAME_PROPERTY, propertyList);
 		addProperty(JAVADOC_PROPERTY, propertyList);
@@ -180,7 +180,7 @@ public class CallinMappingDeclaration extends AbstractMethodMappingDeclaration
         addProperty(PARAMETER_MAPPINGS_PROPERTY, propertyList);
 		PROPERTY_DESCRIPTORS_2_0 = reapPropertyList(propertyList);
 
-		propertyList = new ArrayList(9);
+		propertyList = new ArrayList<StructuralPropertyDescriptor>(9);
 		createPropertyList(CallinMappingDeclaration.class, propertyList);
         addProperty(NAME_PROPERTY, propertyList);
 		addProperty(MODIFIERS2_PROPERTY, propertyList); // for annotations
@@ -201,7 +201,7 @@ public class CallinMappingDeclaration extends AbstractMethodMappingDeclaration
 	 * @return a list of property descriptors (element type:
 	 * {@link StructuralPropertyDescriptor})
 	 */
-	public static List propertyDescriptors(int apiLevel)
+	public static List<StructuralPropertyDescriptor> propertyDescriptors(int apiLevel)
 	{
 		if(apiLevel >= AST.JLS3_INTERNAL)
 			return PROPERTY_DESCRIPTORS_3_0;
@@ -424,6 +424,7 @@ public class CallinMappingDeclaration extends AbstractMethodMappingDeclaration
 	 * @exception UnsupportedOperationException if this operation is used in
 	 * a JLS2 AST
 	 */
+    @SuppressWarnings("rawtypes")
 	public List getBaseMappingElements()
 	{
 		return this._baseMappingElements;

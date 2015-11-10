@@ -59,11 +59,11 @@ public class BaseConstructorInvocation extends Statement implements Invocation
 	 * {@link StructuralPropertyDescriptor}),
 	 * or null if uninitialized.
 	 */
-	private static final List PROPERTY_DESCRIPTORS;
+	private static final List<StructuralPropertyDescriptor> PROPERTY_DESCRIPTORS;
 
 	static
 	{
-		List propertyList = new ArrayList(2);
+		List<StructuralPropertyDescriptor> propertyList = new ArrayList<StructuralPropertyDescriptor>(2);
 		createPropertyList(BaseConstructorInvocation.class, propertyList);
         addProperty(ARGUMENTS_PROPERTY, propertyList);
 		PROPERTY_DESCRIPTORS = reapPropertyList(propertyList);
@@ -78,7 +78,7 @@ public class BaseConstructorInvocation extends Statement implements Invocation
 	 * @return a list of property descriptors (element type:
 	 * {@link StructuralPropertyDescriptor})
 	 */
-	public static List propertyDescriptors(int apiLevel)
+	public static List<StructuralPropertyDescriptor> propertyDescriptors(int apiLevel)
 	{
 		return PROPERTY_DESCRIPTORS;
 	}

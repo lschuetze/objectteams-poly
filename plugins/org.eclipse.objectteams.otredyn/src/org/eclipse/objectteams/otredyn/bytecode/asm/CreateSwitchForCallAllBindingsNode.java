@@ -65,7 +65,7 @@ public class CreateSwitchForCallAllBindingsNode extends CreateSwitchAdapter {
 		}
 		
 		// return callOrig(boundMethodId, args);
-		method.instructions.add(new MethodInsnNode(Opcodes.INVOKEVIRTUAL, name, ConstantMembers.callOrig.getName(), ConstantMembers.callOrig.getSignature()));
+		method.instructions.add(new MethodInsnNode(Opcodes.INVOKEVIRTUAL, name, ConstantMembers.callOrig.getName(), ConstantMembers.callOrig.getSignature(), false));
 		method.instructions.add(new InsnNode(Opcodes.ARETURN));
 	}
 	

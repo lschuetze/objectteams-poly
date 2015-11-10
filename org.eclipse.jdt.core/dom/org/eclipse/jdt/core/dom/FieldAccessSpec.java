@@ -71,20 +71,20 @@ public class FieldAccessSpec extends MethodMappingElement
 	 * {@link StructuralPropertyDescriptor}),
 	 * or null if uninitialized.
 	 */
-	private static final List PROPERTY_DESCRIPTORS_2_0;
+	private static final List<StructuralPropertyDescriptor> PROPERTY_DESCRIPTORS_2_0;
 
-	private static final List PROPERTY_DESCRIPTORS_3_0;
+	private static final List<StructuralPropertyDescriptor> PROPERTY_DESCRIPTORS_3_0;
 
 	static
 	{
-		List propertyList = new ArrayList(4);
+		List<StructuralPropertyDescriptor> propertyList = new ArrayList<StructuralPropertyDescriptor>(4);
 		createPropertyList(FieldAccessSpec.class, propertyList);
 		addProperty(SIGNATURE_PROPERTY, propertyList);
 		addProperty(NAME_PROPERTY, propertyList);
 		addProperty(FIELD_TYPE_PROPERTY, propertyList);
 		PROPERTY_DESCRIPTORS_2_0 = reapPropertyList(propertyList);
 
-		propertyList = new ArrayList(4);
+		propertyList = new ArrayList<StructuralPropertyDescriptor>(4);
 		createPropertyList(FieldAccessSpec.class, propertyList);
 		addProperty(SIGNATURE_PROPERTY, propertyList);
 		addProperty(NAME_PROPERTY, propertyList);
@@ -100,7 +100,7 @@ public class FieldAccessSpec extends MethodMappingElement
 	 * @return a list of property descriptors (element type:
 	 * {@link StructuralPropertyDescriptor})
 	 */
-	public static List propertyDescriptors(int apiLevel)
+	public static List<StructuralPropertyDescriptor> propertyDescriptors(int apiLevel)
 	{
 		if (apiLevel == AST.JLS2_INTERNAL)
 			return PROPERTY_DESCRIPTORS_2_0;

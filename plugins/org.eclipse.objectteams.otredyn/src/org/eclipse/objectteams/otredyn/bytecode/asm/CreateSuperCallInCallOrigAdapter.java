@@ -50,7 +50,7 @@ public class CreateSuperCallInCallOrigAdapter extends AbstractTransformableClass
 
 		instructions.add(new MethodInsnNode(Opcodes.INVOKESPECIAL,
 				superClassName, ConstantMembers.callOrig.getName(),
-				ConstantMembers.callOrig.getSignature()));
+				ConstantMembers.callOrig.getSignature(), false));
 		instructions.add(new InsnNode(Opcodes.ARETURN));
 		addNewLabelToSwitch(callOrig.instructions, instructions, joinpointId);
 		callOrig.maxStack = Math.max(callOrig.maxStack, args.length + 1);
