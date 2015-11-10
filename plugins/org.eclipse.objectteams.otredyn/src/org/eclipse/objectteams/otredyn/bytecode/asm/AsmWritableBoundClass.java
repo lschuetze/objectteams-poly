@@ -400,7 +400,7 @@ class AsmWritableBoundClass extends AsmBoundClass {
 			addEmptyMethod(ConstantMembers.accessStatic, Opcodes.ACC_PUBLIC + Opcodes.ACC_STATIC, null, null, null);
 		}
 		addEmptyMethod(ConstantMembers.access, methodModifiers, null, null, internalSuperClassName);
-		addEmptyMethod(ConstantMembers.addOrRemoveRole, methodModifiers, null, null, null);
+		addEmptyMethod(ConstantMembers.addOrRemoveRole, methodModifiers, null, null, internalSuperClassName);
 		
 		if (!isInterface())
 			multiAdapter.addVisitor(new AddAfterClassLoadingHook(this.writer, this));
