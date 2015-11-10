@@ -1,13 +1,12 @@
 /*******************************************************************************
  * This file is part of "Object Teams Development Tooling"-Software
  * 
- * Copyright 2006, 2009 Technical University Berlin, Germany and others.
+ * Copyright 2006, 2015 Technical University Berlin, Germany and others.
  * 
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
- * $Id: ViewAdaptor.java 23438 2010-02-04 20:05:24Z stephan $
  * 
  * Please visit http://www.eclipse.org/objectteams for updates and contact.
  * 
@@ -405,6 +404,8 @@ public team class ViewAdaptor extends JFaceDecapsulator
 				return method.getDeclaringType().getElementName();
 			StringTokenizer tokens = new StringTokenizer(suffix, "$"); //$NON-NLS-1$
 			String roleSelector = tokens.nextToken();
+			if (!tokens.hasMoreTokens())
+				return roleSelector; // method guard
 			tokens.nextToken(); // modifier, unused
 			String baseSelector = tokens.nextToken();
 			return roleSelector+"<-"+baseSelector; //$NON-NLS-1$
