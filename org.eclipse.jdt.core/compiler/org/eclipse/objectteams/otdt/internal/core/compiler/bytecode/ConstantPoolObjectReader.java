@@ -503,7 +503,11 @@ public class ConstantPoolObjectReader extends ClassFileStruct implements ClassFi
 		if (CharOperation.prefixEquals(IOTConstants.OT_SETFIELD, name))
 			return AccPublic|AccStatic;
 		if (CharOperation.prefixEquals(IOTConstants.ADD_ROLE, name))
-			return AccPublic|AccStatic;
+			return AccPublic;
+		if (CharOperation.prefixEquals(IOTConstants.REMOVE_ROLE, name))
+			return AccPublic;
+		if (CharOperation.prefixEquals(IOTConstants.ADD_REMOVE_ROLE, name))
+			return AccPublic;
 		// The next two are not searched in order to avoid receiver type o.o.Team.
 		// We want the tsub to always try to invoke its direct super, which may
 		// have more callin bindings than where known to the original dispatch method.
