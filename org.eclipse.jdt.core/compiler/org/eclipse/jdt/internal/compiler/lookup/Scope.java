@@ -1047,7 +1047,8 @@ public abstract class Scope {
 		boolean declaresNullTypeAnnotation = false;
 		for (int i = 0; i < paramLength; i++) {
 			resolveTypeParameter(typeParameters[i]);
-			declaresNullTypeAnnotation |= typeParameters[i].binding.hasNullTypeAnnotations();
+			if (typeParameters[i].binding != null) // FIXME {ObjectTeams why null? see https://bugs.eclipse.org/483955
+				declaresNullTypeAnnotation |= typeParameters[i].binding.hasNullTypeAnnotations();
 		}
 		if (declaresNullTypeAnnotation)
 			for (int i = 0; i < paramLength; i++)
