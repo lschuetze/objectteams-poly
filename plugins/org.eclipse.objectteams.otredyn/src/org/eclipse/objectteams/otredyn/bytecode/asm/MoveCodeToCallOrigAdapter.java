@@ -16,6 +16,7 @@
  **********************************************************************/
 package org.eclipse.objectteams.otredyn.bytecode.asm;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.ListIterator;
@@ -65,6 +66,11 @@ public class MoveCodeToCallOrigAdapter extends AbstractTransformableClassNode {
 			superIsWeavable = weavingContext.isWeavable(clazz.getSuperClassName());
 		if (superIsWeavable)
 			superclass = clazz.getSuperclass();
+		try {
+			throw new IOException("create move " + clazz.getName());
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
 	}
 	
 	public boolean transform() {
@@ -74,8 +80,6 @@ public class MoveCodeToCallOrigAdapter extends AbstractTransformableClassNode {
 		MethodNode callOrig = getMethod(this.callOrig);
 		
 		Type returnType = Type.getReturnType(orgMethod.desc);
-		
-		
 				
 		InsnList newInstructions = new InsnList();
 		

@@ -44,6 +44,10 @@ class AsmClassVisitor extends ClassVisitor {
 
 	private static boolean DEBUG_ATTRIBUTES = System.getProperty("otdre.debug.attributes") != null;
 
+	static final int CALLIN = 1;
+	static final int STATIC = 2;
+	static final int FINAL = 4;
+
 	private AsmBoundClass clazz;
 	
 	public AsmClassVisitor(AsmBoundClass clazz) {
@@ -115,18 +119,19 @@ class AsmClassVisitor extends ClassVisitor {
 				clazz.boundBaseClasses.add(baseClassName.replace('/', '.'));
 				String[] baseMethodNames = multiBindings[i].getBaseMethodNames();
 				String[] baseMethodSignatures = multiBindings[i].getBaseMethodSignatures();
-				String[] weavableBaseClassNames = multiBindings[i].getDeclaringBaseClassName();
+				String[] declaringBaseClassNames = multiBindings[i].getDeclaringBaseClassName();
 				int callinModifier = multiBindings[i].getCallinModifier();
 				int[] callinIds = multiBindings[i].getCallinIds();
 				int[] baseFlags = multiBindings[i].getBaseFlags();
 				boolean handleCovariantReturn = multiBindings[i].isHandleCovariantReturn();
 				for (int j = 0; j < baseMethodNames.length; j++) {
-					String weavableBaseClassName = weavableBaseClassNames[j];
+					String declaringBaseClassName = declaringBaseClassNames[j];
+					String weavableBaseClass = (baseFlags[j] & (STATIC | FINAL)) != 0 ? declaringBaseClassName : baseClassName;
 					Binding binding = new Binding(clazz, roleClassName, callinLabel, baseClassName, 
-												  baseMethodNames[j], baseMethodSignatures[j], weavableBaseClassName,
+												  baseMethodNames[j], baseMethodSignatures[j], weavableBaseClass,
 												  callinModifier, callinIds[j], baseFlags[j], handleCovariantReturn);
 					clazz.addBinding(binding);
-					clazz.boundBaseClasses.add(weavableBaseClassName.replace('/', '.'));
+					clazz.boundBaseClasses.add(declaringBaseClassName.replace('/', '.'));
 				}
 			}
 		} else if (attribute.type.equals(Attributes.ATTRIBUTE_CALLIN_PRECEDENCE)) {

@@ -727,6 +727,10 @@ public class MethodSpec extends ASTNode implements InvocationSite
 		return this.resolvedMethod != null && this.resolvedMethod.isStatic();
 	}
 
+	public boolean isFinal() {
+		return this.resolvedMethod != null && this.resolvedMethod.isFinal();
+	}
+
 	public int getTranslationFlags() {
 		int translations = 0;
 		if (this.argNeedsTranslation != null)

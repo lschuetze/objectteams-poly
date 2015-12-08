@@ -180,6 +180,7 @@ public class OTDynCallinBindingsAttribute extends ListValueAttribute {
 	private class BaseMethod {
     	static final int CALLIN = 1;
     	static final int STATIC = 2;
+    	static final int FINAL = 4;
 		char[] baseMethodName, baseMethodSignature, declaringBaseClassName;
 		int callinID, baseFlags, translationFlags;
 		BaseMethod(char[] baseMethodName, char[] baseMethodSignature, char[] declaringBaseClassName, int callinID, int baseFlags, int translationFlags) {
@@ -252,12 +253,10 @@ public class OTDynCallinBindingsAttribute extends ListValueAttribute {
 				baseFlags |= BaseMethod.CALLIN;
 			if (baseSpec.isStatic())
 				baseFlags |= BaseMethod.STATIC;
-			MethodBinding baseMethod = baseSpec.resolvedMethod;
-			char[] weavableBaseClass = (baseMethod.isFinal() || baseMethod.isStatic()) 
-									? baseMethod.declaringClass.constantPoolName()
-									: baseClassName;
+			if (baseSpec.isFinal())
+				baseFlags |= BaseMethod.FINAL;
 			mapping.addBaseMethod(i, baseSpec.codegenSeletor(), baseSpec.signature(WeavingScheme.OTDRE), 
-									weavableBaseClass,
+									baseSpec.resolvedMethod.declaringClass.constantPoolName(),
 									baseSpec.getCallinId(this.theTeam), baseFlags, baseSpec.getTranslationFlags());
 		}
 		mapping.setSMAPinfo(callinDecl);
