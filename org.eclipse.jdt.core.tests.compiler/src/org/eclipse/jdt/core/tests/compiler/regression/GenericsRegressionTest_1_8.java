@@ -5678,4 +5678,107 @@ public void testBug477751() {
 			"}\n"
 		});
 }
+public void testBug482416() {
+	runConformTest(
+		new String[] {
+			"CompilerRegression.java",
+			"import java.util.Comparator;\n" + 
+			"import java.util.concurrent.Callable;\n" + 
+			"\n" + 
+			"public class CompilerRegression<T> {\n" + 
+			"	private ObjectProperty<Comparator<TreeItem<T>>> comparator = new ObjectProperty<Comparator<TreeItem<T>>>();\n" + 
+			"\n" + 
+			"	void sample() {\n" + 
+			"		//Fails in Mars.1 succeeds in Mars.0\n" + 
+			"		{\n" + 
+			"			ObjectBinding<Comparator<TreeItem<T>>> b = Bindings.createObjectBinding(() -> {\n" + 
+			"				if (this.comparator.get() == null)\n" + 
+			"					return null;\n" + 
+			"				return (o1, o2) -> this.comparator.get().compare(o1, o2);\n" + 
+			"			}, this.comparator);\n" + 
+			"		}\n" + 
+			"\n" + 
+			"		// Succeeds in both\n" + 
+			"		{\n" + 
+			"			ObjectBinding<Comparator<TreeItem<T>>> b = Bindings.createObjectBinding(() -> {\n" + 
+			"				if (this.comparator.get() == null)\n" + 
+			"					return null;\n" + 
+			"				Comparator<TreeItem<T>> cp = (o1, o2) -> this.comparator.get().compare(o1, o2);\n" + 
+			"				return cp;\n" + 
+			"			}, this.comparator);\n" + 
+			"		}\n" + 
+			"	}\n" + 
+			"}\n" + 
+			"\n" + 
+			"class Bindings {\n" + 
+			"    public static <X> ObjectBinding<X> createObjectBinding(final Callable<X> func, final Observable... dependencies) { return null; }\n" + 
+			"}\n" + 
+			"class ObjectBinding<U> { }\n" + 
+			"class TreeItem<V> { }\n" + 
+			"class ObjectProperty<W> implements Observable  {\n" + 
+			"	W get() { return null; }\n" + 
+			"}\n" + 
+			"interface Observable {}\n"
+		});
+}
+public void testBug483019() {
+	runConformTest(
+		new String[] {
+			"Test.java",
+			"import sub.B;\n" + 
+			"import sub.Marker;\n" + 
+			"\n" + 
+			"public class Test {\n" + 
+			"  public int test(B b) {\n" + 
+			"    return (((B & Marker) b).getValue());\n" + 
+			"  }\n" + 
+			"  public static void main(String[] args) {\n" + 
+			"    System.out.println(new Test().test(new B()));\n" + 
+			"  }\n" + 
+			"}",
+			"sub/A.java",
+			"package sub;\n" + 
+			"class A {\n" + 
+			"  public int getValue() {\n" + 
+			"    return 1;\n" + 
+			"  }\n" + 
+			"}\n",
+			"sub/B.java",
+			"package sub;\n" + 
+			"public class B extends A implements Marker{ }\n",
+			"sub/Marker.java",
+			"package sub;\n" + 
+			"public interface Marker{ }\n"
+		},
+		"1");
+}
+public void testBug483019a() {
+	runConformTest(
+		new String[] {
+			"Test.java",
+			"import sub.J;\n" + 
+			"import sub.Marker;\n" + 
+			"\n" + 
+			"public class Test {\n" + 
+			"  public int test(J j) {\n" + 
+			"    return (((Marker & J) j).getValue());\n" + 
+			"  }\n" + 
+			"  public static void main(String[] args) {\n" + 
+			"    System.out.println(new Test().test((J & Marker)() -> 0));\n" + 
+			"  }\n" + 
+			"}",
+			"sub/I.java",
+			"package sub;\n" + 
+			"interface I {\n" + 
+			"  int getValue();\n" + 
+			"}\n",
+			"sub/J.java",
+			"package sub;\n" + 
+			"public interface J extends I{ }\n",
+			"sub/Marker.java",
+			"package sub;\n" + 
+			"public interface Marker{ }\n"
+		},
+		"0");
+}
 }

@@ -215,9 +215,10 @@ public Expression enclosingInstance() {
 }
 
 public void generateCode(BlockScope currentScope, CodeStream codeStream, boolean valueRequired) {
+	cleanUpInferenceContexts();
 	if (!valueRequired)
 		currentScope.problemReporter().unusedObjectAllocation(this);
-	
+
 //{ObjectTeams: redirect?
 	if (this.roleCreatorCall != null) {
 		this.roleCreatorCall.generateCode(currentScope, codeStream, valueRequired);
@@ -556,7 +557,6 @@ public TypeBinding resolveType(BlockScope scope) {
 		this.resolvedType = this.type.resolvedType = this.binding.declaringClass;
 		resolvePolyExpressionArguments(this, this.binding, this.argumentTypes, scope);
 	} else {
-	
 //{ObjectTeams: may need to instantiate parameters of constructor
     	AnchorMapping anchorMapping = AnchorMapping.setupNewMapping(null, this.arguments, scope);
 	  try {
@@ -625,7 +625,7 @@ public TypeBinding resolveType(BlockScope scope) {
 			if (this.binding instanceof ParameterizedGenericMethodBinding && this.typeArguments != null) {
 				TypeVariableBinding[] typeVariables = this.binding.original().typeVariables();
 				for (int i = 0; i < this.typeArguments.length; i++)
-					this.typeArguments[i].checkNullConstraints(scope, typeVariables, i);
+					this.typeArguments[i].checkNullConstraints(scope, (ParameterizedGenericMethodBinding) this.binding, typeVariables, i);
 			}
 		}
 	}
@@ -957,6 +957,17 @@ public InferenceContext18 getInferenceContext(ParameterizedMethodBinding method)
 		return null;
 	return (InferenceContext18) this.inferenceContexts.get(method);
 }
+
+@Override
+public void cleanUpInferenceContexts() {
+	if (this.inferenceContexts == null)
+		return;
+	for (Object value : this.inferenceContexts.valueTable)
+		if (value != null)
+			((InferenceContext18) value).cleanUp();
+	this.inferenceContexts = null;
+}
+
 //-- interface InvocationSite: --
 public ExpressionContext getExpressionContext() {
 	return this.expressionContext;

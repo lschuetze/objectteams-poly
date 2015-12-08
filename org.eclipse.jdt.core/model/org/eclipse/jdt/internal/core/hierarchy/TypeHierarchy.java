@@ -28,6 +28,7 @@ import org.eclipse.core.runtime.ISafeRunnable;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.OperationCanceledException;
 import org.eclipse.core.runtime.SafeRunner;
+import org.eclipse.core.runtime.SubMonitor;
 import org.eclipse.jdt.core.*;
 import org.eclipse.jdt.core.search.IJavaSearchScope;
 import org.eclipse.jdt.core.search.SearchEngine;
@@ -92,7 +93,7 @@ public class TypeHierarchy implements ITypeHierarchy, IElementChangedListener {
 	/**
 	 * The progress monitor to report work completed too.
 	 */
-	protected IProgressMonitor progressMonitor = null;
+	protected SubMonitor progressMonitor = SubMonitor.convert(null);
 
 	/**
 	 * Change listeners - null if no one is listening.
@@ -1253,14 +1254,11 @@ protected boolean packageRegionContainsSamePackageFragment(PackageFragment eleme
  */
 public synchronized void refresh(IProgressMonitor monitor) throws JavaModelException {
 	try {
-		this.progressMonitor = monitor;
-		if (monitor != null) {
-			monitor.beginTask(
-					this.focusType != null ?
-							Messages.bind(Messages.hierarchy_creatingOnType, this.focusType.getFullyQualifiedName()) :
-							Messages.hierarchy_creating,
-					100);
-		}
+		this.progressMonitor = SubMonitor.convert(monitor,
+			this.focusType != null ?
+					Messages.bind(Messages.hierarchy_creatingOnType, this.focusType.getFullyQualifiedName()) :
+					Messages.hierarchy_creating,
+			100);
 		long start = -1;
 		if (DEBUG) {
 			start = System.currentTimeMillis();

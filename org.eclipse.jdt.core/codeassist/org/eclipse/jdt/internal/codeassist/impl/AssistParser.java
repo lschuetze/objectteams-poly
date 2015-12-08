@@ -1900,7 +1900,7 @@ public void parseBlockStatements(AbstractMethodMappingDeclaration mapping, Compi
 }
 // SH}
 
-//the name is a misnomer, we allow "pop"s not just at the TOS. Lambda wants to be sticky till fully reduced, however we do want other elements poppped at the right point, so ... 
+// the name is a misnomer, we allow "pop"s not just at the TOS. Lambda wants to be sticky till fully reduced, however we do want other elements popped at the right point, so ... 
 protected void popElement(int kind) {
 	
 	if (this.elementPtr < 0)
@@ -1910,7 +1910,7 @@ protected void popElement(int kind) {
 
 	if (kind != K_LAMBDA_EXPRESSION_DELIMITER) {
 		while (this.elementKindStack[stackPointer] == K_LAMBDA_EXPRESSION_DELIMITER) {
-			stackPointer --;
+			if (--stackPointer < 0) break;
 		}
 	}
 	if (stackPointer < 0 || this.elementKindStack[stackPointer] != kind)

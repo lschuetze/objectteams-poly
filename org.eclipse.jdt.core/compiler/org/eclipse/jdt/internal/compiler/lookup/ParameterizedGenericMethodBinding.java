@@ -27,6 +27,7 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.compiler.lookup;
 
+import org.eclipse.jdt.internal.compiler.ast.ASTNode;
 import org.eclipse.jdt.internal.compiler.ast.Expression;
 import org.eclipse.jdt.internal.compiler.ast.Invocation;
 import org.eclipse.jdt.internal.compiler.ast.MessageSend;
@@ -193,12 +194,12 @@ public class ParameterizedGenericMethodBinding extends ParameterizedMethodBindin
 		    	if (actualReceiverType instanceof ReferenceBinding)
 		    		actualReceiverRefType = (ReferenceBinding) actualReceiverType;
 		    }
-			switch (typeVariable.boundCheck(substitution, substituteForChecks, actualReceiverRefType, scope)) {
+			switch (typeVariable.boundCheck(substitution, substituteForChecks, actualReceiverRefType, scope, null)) {
 /* orig:
-			switch (typeVariable.boundCheck(substitution, substituteForChecks, scope)) {
+			switch (typeVariable.boundCheck(substitution, substituteForChecks, scope, null)) {
   :giro */
 // SH}
-				case TypeConstants.MISMATCH :
+				case MISMATCH :
 			        // incompatible due to bound check
 					int argLength = arguments.length;
 					TypeBinding[] augmentedArguments = new TypeBinding[argLength + 2]; // append offending substitute and typeVariable
@@ -206,9 +207,11 @@ public class ParameterizedGenericMethodBinding extends ParameterizedMethodBindin
 					augmentedArguments[argLength] = substitute;
 					augmentedArguments[argLength+1] = typeVariable;
 			        return new ProblemMethodBinding(methodSubstitute, originalMethod.selector, augmentedArguments, ProblemReasons.ParameterBoundMismatch);
-				case TypeConstants.UNCHECKED :
+				case UNCHECKED :
 					// tolerate unchecked bounds
 					methodSubstitute.tagBits |= TagBits.HasUncheckedTypeArgumentForBoundCheck;
+					break;
+				default:
 					break;
 			}
 		}
@@ -314,12 +317,7 @@ public class ParameterizedGenericMethodBinding extends ParameterizedMethodBindin
 					if (invocationTypeInferred) {
 						if (compilerOptions.isAnnotationBasedNullAnalysisEnabled)
 							NullAnnotationMatching.checkForContradictions(methodSubstitute, invocationSite, scope);
-//{ObjectTeams: 2nd arg added:
-/* orig:
-						MethodBinding problemMethod = methodSubstitute.boundCheck18(scope, arguments);
-  :giro */
-						MethodBinding problemMethod = methodSubstitute.boundCheck18(scope, invocationSite, arguments);
-// SH}
+						MethodBinding problemMethod = methodSubstitute.boundCheck18(scope, arguments, invocationSite);
 						if (problemMethod != null) {
 							return problemMethod;
 						}
@@ -343,12 +341,7 @@ public class ParameterizedGenericMethodBinding extends ParameterizedMethodBindin
 		}
 	}
 	
-//{ObjectTeams: second arg added:
-/*orig:
-	MethodBinding boundCheck18(Scope scope, TypeBinding[] arguments) {
-  :giro */
-	MethodBinding boundCheck18(Scope scope, InvocationSite invocationSite, TypeBinding[] arguments) {
-// SH}
+	MethodBinding boundCheck18(Scope scope, TypeBinding[] arguments, InvocationSite site) {
 		Substitution substitution = this;
 		ParameterizedGenericMethodBinding methodSubstitute = this;
 		TypeVariableBinding[] originalTypeVariables = this.originalMethod.typeVariables;
@@ -369,17 +362,18 @@ public class ParameterizedGenericMethodBinding extends ParameterizedMethodBindin
 		    
 //{ObjectTeams: methods with generic declared lifting need to be checked in knowledge of the actual receiver type:
 		    ReferenceBinding actualReceiverRefType = null;
-		    if (invocationSite instanceof MessageSend) {
-		    	TypeBinding actualReceiverType = ((MessageSend)invocationSite).actualReceiverType;
+		    if (site instanceof MessageSend) {
+		    	TypeBinding actualReceiverType = ((MessageSend)site).actualReceiverType;
 		    	if (actualReceiverType instanceof ReferenceBinding)
 		    		actualReceiverRefType = (ReferenceBinding) actualReceiverType;
 		    }
-			switch (typeVariable.boundCheck(substitution, substituteForChecks, actualReceiverRefType, scope)) {
+			ASTNode location = site instanceof ASTNode ? (ASTNode) site : null;
+			switch (typeVariable.boundCheck(substitution, substituteForChecks, actualReceiverRefType, scope, location)) {
 /* orig:
-			switch (typeVariable.boundCheck(substitution, substituteForChecks, scope)) {
+			switch (typeVariable.boundCheck(substitution, substituteForChecks, scope, location)) {
   :giro */
 // SH}
-				case TypeConstants.MISMATCH :
+				case MISMATCH :
 			        // incompatible due to bound check
 					int argLength = arguments.length;
 					TypeBinding[] augmentedArguments = new TypeBinding[argLength + 2]; // append offending substitute and typeVariable
@@ -387,9 +381,11 @@ public class ParameterizedGenericMethodBinding extends ParameterizedMethodBindin
 					augmentedArguments[argLength] = substitute;
 					augmentedArguments[argLength+1] = typeVariable;
 			        return new ProblemMethodBinding(methodSubstitute, this.originalMethod.selector, augmentedArguments, ProblemReasons.ParameterBoundMismatch);
-				case TypeConstants.UNCHECKED :
+				case UNCHECKED :
 					// tolerate unchecked bounds
 					methodSubstitute.tagBits |= TagBits.HasUncheckedTypeArgumentForBoundCheck;
+					break;
+				default:
 					break;
 			}
 		}

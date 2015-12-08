@@ -1818,6 +1818,8 @@ void setSourceStart(int sourceStart);
 	int ContradictoryNullAnnotationsInferredFunctionType = MethodRelated + 973;
 	/** @since 3.11 */
 	int IllegalReturnNullityRedefinitionFreeTypeVariable = MethodRelated + 974;
+	/** @since 3.12 */
+	int IllegalRedefinitionOfTypeVariable = 975;
 
 
 	// Java 8 work

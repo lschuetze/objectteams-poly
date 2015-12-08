@@ -92,14 +92,11 @@ public class ParameterizedSingleTypeReference extends ArrayTypeReference {
 
 		if (this.resolvedType.leafComponentType() instanceof ParameterizedTypeBinding) {
 			ParameterizedTypeBinding parameterizedType = (ParameterizedTypeBinding) this.resolvedType.leafComponentType();
-			ReferenceBinding currentType = parameterizedType.genericType();
-			TypeVariableBinding[] typeVariables = currentType.typeVariables();
 			TypeBinding[] argTypes = parameterizedType.arguments;
-			if (argTypes != null && typeVariables != null) { // may be null in error cases
+			if (argTypes != null) { // may be null in error cases
 				parameterizedType.boundCheck(scope, this.typeArguments);
 			}
 		}
-		checkNullConstraints(scope, this.typeArguments);
 	}
 	
 	public TypeReference augmentTypeWithAdditionalDimensions(int additionalDimensions, Annotation [][] additionalAnnotations, boolean isVarargs) {
@@ -268,8 +265,6 @@ public class ParameterizedSingleTypeReference extends ArrayTypeReference {
 				// note: handling of arrays differs for role and regular types
 				if (len == 0) {
 					resolveAnnotations(scope, location);
-					if (checkBounds)
-						checkNullConstraints(scope, this.typeArguments);
 					return this.resolvedType; // we're done
 				}
 
@@ -302,21 +297,15 @@ public class ParameterizedSingleTypeReference extends ArrayTypeReference {
 		if (type == null) {
 			this.resolvedType = createArrayType(scope, this.resolvedType);
 			resolveAnnotations(scope, 0); // no defaultNullness for buggy type
-			if (checkBounds)
-				checkNullConstraints(scope, this.typeArguments);
 			return null;							// (1) no useful type, but still captured dimensions into this.resolvedType
 		} else {
 			type = createArrayType(scope, type);
 			if (!this.resolvedType.isValidBinding() && this.resolvedType.dimensions() == type.dimensions()) {
 				resolveAnnotations(scope, 0); // no defaultNullness for buggy type
-				if (checkBounds)
-					checkNullConstraints(scope, this.typeArguments);
 				return type;						// (2) found some error, but could recover useful type (like closestMatch)
 			} else {
 				this.resolvedType = type; 			// (3) no complaint, keep fully resolved type (incl. dimensions)
 				resolveAnnotations(scope, location);
-				if (checkBounds)
-					checkNullConstraints(scope, this.typeArguments);
 				return this.resolvedType; // pick up any annotated type.
 			}
 		}
@@ -458,6 +447,7 @@ public class ParameterizedSingleTypeReference extends ArrayTypeReference {
 				return null;
 			}
 		}
+
 //{ObjectTeams: already done?
 		if (!isDiamond && argLength == 0)
 			return this.resolvedType;
@@ -472,7 +462,7 @@ public class ParameterizedSingleTypeReference extends ArrayTypeReference {
 		}
 		ParameterizedTypeBinding parameterizedType = scope.environment().createParameterizedType(currentOriginal, argTypes, anchor, valParPos, enclosingType,  currentAnnotations);
 /* orig:
-		ParameterizedTypeBinding parameterizedType = scope.environment().createParameterizedType(currentOriginal, argTypes, enclosingType);
+    	ParameterizedTypeBinding parameterizedType = scope.environment().createParameterizedType(currentOriginal, argTypes, enclosingType);
   :giro */
 // SH}
 		// check argument type compatibility for non <> cases - <> case needs no bounds check, we will scream foul if needed during inference.
@@ -486,6 +476,8 @@ public class ParameterizedSingleTypeReference extends ArrayTypeReference {
     	}
 		if (isTypeUseDeprecated(parameterizedType, scope))
 			reportDeprecatedType(parameterizedType, scope);
+
+		checkIllegalNullAnnotations(scope, this.typeArguments);
 
 		if (!this.resolvedType.isValidBinding()) {
 			return parameterizedType;

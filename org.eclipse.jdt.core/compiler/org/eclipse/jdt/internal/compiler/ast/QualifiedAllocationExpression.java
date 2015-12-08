@@ -240,6 +240,7 @@ public static abstract class AbstractQualifiedAllocationExpression extends Alloc
 	}
 
 	public void generateCode(BlockScope currentScope, CodeStream codeStream, boolean valueRequired) {
+		cleanUpInferenceContexts();
 		if (!valueRequired)
 			currentScope.problemReporter().unusedObjectAllocation(this);
 		int pc = codeStream.position;
@@ -372,7 +373,7 @@ public static abstract class AbstractQualifiedAllocationExpression extends Alloc
 					if (this.binding instanceof ParameterizedGenericMethodBinding && this.typeArguments != null) {
 						TypeVariableBinding[] typeVariables = this.binding.original().typeVariables();
 						for (int i = 0; i < this.typeArguments.length; i++)
-							this.typeArguments[i].checkNullConstraints(scope, typeVariables, i);
+							this.typeArguments[i].checkNullConstraints(scope, (ParameterizedGenericMethodBinding) this.binding, typeVariables, i);
 					}
 				}
 			}

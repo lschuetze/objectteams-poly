@@ -17,6 +17,8 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.compiler.lookup;
 
+import java.util.ArrayList;
+
 import org.eclipse.jdt.core.compiler.CharOperation;
 import org.eclipse.jdt.core.compiler.IProblem;
 import org.eclipse.jdt.internal.compiler.ast.*;
@@ -91,6 +93,7 @@ public class CompilationUnitScope extends Scope {
 	private boolean skipCachingImports;
 
 	boolean connectingHierarchy;
+	private ArrayList<Invocation> inferredInvocations;
 //{ObjectTeams: when used as a baseimport scope, remember the original scope during this current lookup
 	public Scope originalScope;
 // SH}
@@ -1295,5 +1298,17 @@ public boolean hasDefaultNullnessFor(int location) {
 	if (this.fPackage != null)
 		return (this.fPackage.defaultNullness & location) != 0;
 	return false;
+}
+public void registerInferredInvocation(Invocation invocation) {
+	if (this.inferredInvocations == null)
+		this.inferredInvocations = new ArrayList<>();
+	this.inferredInvocations.add(invocation);
+}
+public void cleanUpInferenceContexts() {
+	if (this.inferredInvocations == null)
+		return;
+	for (Invocation invocation : this.inferredInvocations)
+		invocation.cleanUpInferenceContexts();
+	this.inferredInvocations = null;
 }
 }

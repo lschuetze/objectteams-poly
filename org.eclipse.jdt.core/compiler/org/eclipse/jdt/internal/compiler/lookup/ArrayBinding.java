@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2014 IBM Corporation and others.
+ * Copyright (c) 2000, 2015 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -414,15 +414,12 @@ public void setTypeAnnotations(AnnotationBinding[] annotations, boolean evalNull
 		for (int i = 0, length = annotations.length; i < length; i++) {
 			AnnotationBinding annotation = annotations[i];
 			if (annotation != null) {
-				switch (annotation.type.id) {
-					case TypeIds.T_ConfiguredAnnotationNullable :
-						nullTagBits  |= TagBits.AnnotationNullable;
-						this.tagBits |= TagBits.HasNullTypeAnnotation;
-						break;
-					case TypeIds.T_ConfiguredAnnotationNonNull :
-						nullTagBits  |= TagBits.AnnotationNonNull;
-						this.tagBits |= TagBits.HasNullTypeAnnotation;
-						break;
+				if (annotation.type.hasNullBit(TypeIds.BitNullableAnnotation)) {
+					nullTagBits  |= TagBits.AnnotationNullable;
+					this.tagBits |= TagBits.HasNullTypeAnnotation;
+				} else if (annotation.type.hasNullBit(TypeIds.BitNonNullAnnotation)) {
+					nullTagBits  |= TagBits.AnnotationNonNull;
+					this.tagBits |= TagBits.HasNullTypeAnnotation;
 				}
 			} else {
 				// null signals end of annotations for the current dimension in the serialized form.
@@ -506,5 +503,11 @@ public TypeBinding uncapture(Scope scope) {
 @Override
 public boolean acceptsNonNullDefault() {
 	return true;
+}
+@Override
+public long updateTagBits() {
+	if (this.leafComponentType != null)
+		this.tagBits |= this.leafComponentType.updateTagBits(); 
+	return super.updateTagBits();
 }
 }

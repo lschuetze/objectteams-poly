@@ -25,8 +25,7 @@ import java.util.Set;
 
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
-import org.eclipse.core.runtime.NullProgressMonitor;
-import org.eclipse.core.runtime.SubProgressMonitor;
+import org.eclipse.core.runtime.SubMonitor;
 import org.eclipse.jdt.core.Flags;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IImportDeclaration;
@@ -36,10 +35,42 @@ import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.Signature;
 import org.eclipse.jdt.core.compiler.CharOperation;
-import org.eclipse.jdt.core.dom.*;
+import org.eclipse.jdt.core.dom.AST;
+import org.eclipse.jdt.core.dom.ASTParser;
+import org.eclipse.jdt.core.dom.AbstractTypeDeclaration;
+import org.eclipse.jdt.core.dom.AnnotatableType;
+import org.eclipse.jdt.core.dom.Annotation;
+import org.eclipse.jdt.core.dom.ArrayInitializer;
+import org.eclipse.jdt.core.dom.ArrayType;
+import org.eclipse.jdt.core.dom.CharacterLiteral;
+import org.eclipse.jdt.core.dom.CompilationUnit;
+import org.eclipse.jdt.core.dom.Dimension;
+import org.eclipse.jdt.core.dom.Expression;
+import org.eclipse.jdt.core.dom.FieldAccess;
+import org.eclipse.jdt.core.dom.IAnnotationBinding;
+import org.eclipse.jdt.core.dom.IBinding;
+import org.eclipse.jdt.core.dom.IMemberValuePairBinding;
+import org.eclipse.jdt.core.dom.IMethodBinding;
+import org.eclipse.jdt.core.dom.ITypeBinding;
+import org.eclipse.jdt.core.dom.IVariableBinding;
+import org.eclipse.jdt.core.dom.ImportDeclaration;
+import org.eclipse.jdt.core.dom.MarkerAnnotation;
+import org.eclipse.jdt.core.dom.MemberValuePair;
+import org.eclipse.jdt.core.dom.Modifier;
+import org.eclipse.jdt.core.dom.Name;
+import org.eclipse.jdt.core.dom.NormalAnnotation;
+import org.eclipse.jdt.core.dom.ParameterizedType;
+import org.eclipse.jdt.core.dom.PrimitiveType;
+import org.eclipse.jdt.core.dom.SimpleName;
+import org.eclipse.jdt.core.dom.SimpleType;
+import org.eclipse.jdt.core.dom.SingleMemberAnnotation;
+import org.eclipse.jdt.core.dom.StringLiteral;
+import org.eclipse.jdt.core.dom.Type;
+import org.eclipse.jdt.core.dom.TypeLiteral;
+import org.eclipse.jdt.core.dom.WildcardType;
 import org.eclipse.jdt.internal.compiler.lookup.ExtraCompilerModifiers;
-import org.eclipse.jdt.internal.core.dom.rewrite.imports.ImportRewriteConfiguration;
 import org.eclipse.jdt.internal.core.dom.rewrite.imports.ImportRewriteAnalyzer;
+import org.eclipse.jdt.internal.core.dom.rewrite.imports.ImportRewriteConfiguration;
 import org.eclipse.jdt.internal.core.dom.rewrite.imports.ImportRewriteConfiguration.ImplicitImportIdentification;
 import org.eclipse.jdt.internal.core.dom.rewrite.imports.ImportRewriteConfiguration.ImportContainerSorting;
 import org.eclipse.jdt.internal.core.util.Messages;
@@ -1157,79 +1188,73 @@ public final class ImportRewrite {
 	 * @throws CoreException the exception is thrown if the rewrite fails.
 	 */
 	public final TextEdit rewriteImports(IProgressMonitor monitor) throws CoreException {
-		if (monitor == null) {
-			monitor= new NullProgressMonitor();
+
+		SubMonitor subMonitor = SubMonitor.convert(monitor,
+				Messages.bind(Messages.importRewrite_processDescription), 2);
+		if (!hasRecordedChanges()) {
+			this.createdImports= CharOperation.NO_STRINGS;
+			this.createdStaticImports= CharOperation.NO_STRINGS;
+//{ObjectTeams: base
+			this.createdBaseImports= CharOperation.NO_STRINGS;
+//SH}
+			return new MultiTextEdit();
 		}
 
-		try {
-			monitor.beginTask(Messages.bind(Messages.importRewrite_processDescription), 2);
-			if (!hasRecordedChanges()) {
-				this.createdImports= CharOperation.NO_STRINGS;
-				this.createdStaticImports= CharOperation.NO_STRINGS;
-//{ObjectTeams: base
-				this.createdBaseImports= CharOperation.NO_STRINGS;
-// SH}
-				return new MultiTextEdit();
-			}
-
-			CompilationUnit usedAstRoot= this.astRoot;
-			if (usedAstRoot == null) {
-				ASTParser parser= ASTParser.newParser(AST.JLS8);
-				parser.setSource(this.compilationUnit);
-				parser.setFocalPosition(0); // reduced AST
-				parser.setResolveBindings(false);
-				usedAstRoot= (CompilationUnit) parser.createAST(new SubProgressMonitor(monitor, 1));
-			}
-
-			ImportRewriteConfiguration config= buildImportRewriteConfiguration();
-
-			ImportRewriteAnalyzer computer=
-				new ImportRewriteAnalyzer(this.compilationUnit, usedAstRoot, config);
-
-			for (String addedImport : this.addedImports) {
-				boolean isStatic = STATIC_PREFIX == addedImport.charAt(0);
-				String qualifiedName = addedImport.substring(1);
-//{ObjectTeams: base
-/* orig:
-				computer.addImport(isStatic, qualifiedName);
-  :giro */
-				boolean isBase = BASE_PREFIX == addedImport.charAt(0);
-				computer.addImport(isStatic, isBase, qualifiedName);
-// SH}
-			}
-
-			for (String removedImport : this.removedImports) {
-				boolean isStatic = STATIC_PREFIX == removedImport.charAt(0);
-				String qualifiedName = removedImport.substring(1);
-//{ObjectTeams: base
-/* orig:
-				computer.removeImport(isStatic, qualifiedName);
-  :giro */
-				boolean isBase = BASE_PREFIX == removedImport.charAt(0);
-				computer.removeImport(isStatic, isBase, qualifiedName);
-// SH}
-			}
-
-			for (String typeExplicitSimpleName : this.typeExplicitSimpleNames) {
-				computer.requireExplicitImport(false, typeExplicitSimpleName);
-			}
-
-			for (String staticExplicitSimpleName : this.staticExplicitSimpleNames) {
-				computer.requireExplicitImport(true, staticExplicitSimpleName);
-			}
-
-			ImportRewriteAnalyzer.RewriteResult result= computer.analyzeRewrite(new SubProgressMonitor(monitor, 1));
-
-			this.createdImports= result.getCreatedImports();
-			this.createdStaticImports= result.getCreatedStaticImports();
-//{ObjectTeams: base
-			this.createdBaseImports= result.getCreatedBaseImports();
-// SH}
-
-			return result.getTextEdit();
-		} finally {
-			monitor.done();
+		CompilationUnit usedAstRoot= this.astRoot;
+		if (usedAstRoot == null) {
+			ASTParser parser= ASTParser.newParser(AST.JLS8);
+			parser.setSource(this.compilationUnit);
+			parser.setFocalPosition(0); // reduced AST
+			parser.setResolveBindings(false);
+			usedAstRoot= (CompilationUnit) parser.createAST(subMonitor.split(1));
 		}
+
+		ImportRewriteConfiguration config= buildImportRewriteConfiguration();
+
+		ImportRewriteAnalyzer computer=
+			new ImportRewriteAnalyzer(this.compilationUnit, usedAstRoot, config);
+
+		for (String addedImport : this.addedImports) {
+			boolean isStatic = STATIC_PREFIX == addedImport.charAt(0);
+			String qualifiedName = addedImport.substring(1);
+//{ObjectTeams: base
+/* orig:
+			computer.addImport(isStatic, qualifiedName);
+  :giro */
+			boolean isBase = BASE_PREFIX == addedImport.charAt(0);
+			computer.addImport(isStatic, isBase, qualifiedName);
+// SH}
+		}
+
+		for (String removedImport : this.removedImports) {
+			boolean isStatic = STATIC_PREFIX == removedImport.charAt(0);
+			String qualifiedName = removedImport.substring(1);
+//{ObjectTeams: base
+/* orig:
+			computer.removeImport(isStatic, qualifiedName);
+  :giro */
+			boolean isBase = BASE_PREFIX == removedImport.charAt(0);
+			computer.removeImport(isStatic, isBase, qualifiedName);
+// SH}
+		}
+
+		for (String typeExplicitSimpleName : this.typeExplicitSimpleNames) {
+			computer.requireExplicitImport(false, typeExplicitSimpleName);
+		}
+
+		for (String staticExplicitSimpleName : this.staticExplicitSimpleNames) {
+			computer.requireExplicitImport(true, staticExplicitSimpleName);
+		}
+
+		ImportRewriteAnalyzer.RewriteResult result= computer.analyzeRewrite(subMonitor.split(1));
+
+		this.createdImports= result.getCreatedImports();
+		this.createdStaticImports= result.getCreatedStaticImports();
+//{ObjectTeams: base
+		this.createdBaseImports= result.getCreatedBaseImports();
+//SH}
+
+		return result.getTextEdit();
 	}
 
 	private ImportRewriteConfiguration buildImportRewriteConfiguration() {

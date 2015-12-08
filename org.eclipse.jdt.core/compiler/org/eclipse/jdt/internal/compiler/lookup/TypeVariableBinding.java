@@ -47,8 +47,10 @@ import org.eclipse.jdt.internal.compiler.ast.NullAnnotationMatching;
 import org.eclipse.jdt.internal.compiler.ast.TypeParameter;
 import org.eclipse.jdt.internal.compiler.ast.TypeReference;
 import org.eclipse.jdt.internal.compiler.ast.Wildcard;
+import org.eclipse.jdt.internal.compiler.ast.NullAnnotationMatching.CheckMode;
 import org.eclipse.jdt.internal.compiler.classfmt.ClassFileConstants;
 import org.eclipse.jdt.internal.compiler.impl.CompilerOptions;
+import org.eclipse.jdt.internal.compiler.lookup.TypeConstants.BoundCheckStatus;
 import org.eclipse.objectteams.otdt.internal.core.compiler.lookup.CallinCalloutBinding;
 import org.eclipse.objectteams.otdt.internal.core.compiler.lookup.DependentTypeBinding;
 import org.eclipse.objectteams.otdt.internal.core.compiler.lookup.ITeamAnchor;
@@ -117,38 +119,39 @@ public class TypeVariableBinding extends ReferenceBinding {
 
 	/**
 	 * Returns true if the argument type satisfies all bounds of the type parameter
+	 * @param location if non-null this may be used for reporting errors relating to null type annotations (if enabled)
 	 */
+	public TypeConstants.BoundCheckStatus boundCheck(Substitution substitution, TypeBinding argumentType, Scope scope, ASTNode location) {
 //{ObjectTeams: added optional argument actualReceiverType:
-	public int boundCheck(Substitution substitution, TypeBinding argumentType, Scope scope) {
-		return boundCheck(substitution, argumentType, null, scope);
+		return boundCheck(substitution, argumentType, null, scope, location);
 	}
-	public int boundCheck(Substitution substitution, TypeBinding argumentType, ReferenceBinding actualReceiverType, Scope scope) {
-		int code = internalBoundCheck(substitution, argumentType, actualReceiverType, scope);
+	public TypeConstants.BoundCheckStatus boundCheck(Substitution substitution, TypeBinding argumentType, ReferenceBinding actualReceiverType, Scope scope, ASTNode location) {
+		TypeConstants.BoundCheckStatus code = internalBoundCheck(substitution, argumentType, actualReceiverType, scope, location);
 // SH}
-		if (code == TypeConstants.MISMATCH) {
+		if (code == BoundCheckStatus.MISMATCH) {
 			if (argumentType instanceof TypeVariableBinding && scope != null) {
 				TypeBinding bound = ((TypeVariableBinding)argumentType).firstBound;
 				if (bound instanceof ParameterizedTypeBinding) {
-					int code2 = boundCheck(substitution, bound.capture(scope, -1, -1), scope); // no position needed as this capture will never escape this context
-					return Math.min(code, code2);
+					BoundCheckStatus code2 = boundCheck(substitution, bound.capture(scope, -1, -1), scope, location); // no capture position needed as this capture will never escape this context
+					return code.betterOf(code2);
 				}
 			}
 		}
 		return code;
 	}
 //{ObjectTeams: added optional argument actualReceiverType:
-	private int internalBoundCheck(Substitution substitution, TypeBinding argumentType, ReferenceBinding actualReceiverType, Scope scope) {
+	private TypeConstants.BoundCheckStatus internalBoundCheck(Substitution substitution, TypeBinding argumentType, ReferenceBinding actualReceiverType, Scope scope, ASTNode location) {
 // SH}
 		if (argumentType == TypeBinding.NULL || TypeBinding.equalsEquals(argumentType, this)) {
-			return TypeConstants.OK;
+			return BoundCheckStatus.OK;
 		}
 		boolean hasSubstitution = substitution != null;
 		if (!(argumentType instanceof ReferenceBinding || argumentType.isArrayType()))
-			return TypeConstants.MISMATCH;
+			return BoundCheckStatus.MISMATCH;
 		// special case for re-entrant source types (selection, code assist, etc)...
 		// can request additional types during hierarchy walk that are found as source types that also 'need' to connect their hierarchy
 		if (this.superclass == null)
-			return TypeConstants.OK;
+			return BoundCheckStatus.OK;
 
 		if (argumentType.kind() == Binding.WILDCARD_TYPE) {
 			WildcardBinding wildcard = (WildcardBinding) argumentType;
@@ -156,30 +159,30 @@ public class TypeVariableBinding extends ReferenceBinding {
 				case Wildcard.EXTENDS :
 					TypeBinding wildcardBound = wildcard.bound;
 					if (TypeBinding.equalsEquals(wildcardBound, this))
-						return TypeConstants.OK;
+						return BoundCheckStatus.OK;
 					boolean isArrayBound = wildcardBound.isArrayType();
 					if (!wildcardBound.isInterface()) {
 						TypeBinding substitutedSuperType = hasSubstitution ? Scope.substitute(substitution, this.superclass) : this.superclass;
 						if (substitutedSuperType.id != TypeIds.T_JavaLangObject) {
 							if (isArrayBound) {
 								if (!wildcardBound.isCompatibleWith(substitutedSuperType, scope))
-									return TypeConstants.MISMATCH;
+									return BoundCheckStatus.MISMATCH;
 							} else {
 								TypeBinding match = wildcardBound.findSuperTypeOriginatingFrom(substitutedSuperType);
 								if (match != null) {
 									if (substitutedSuperType.isProvablyDistinct(match)) {
-										return TypeConstants.MISMATCH;
+										return BoundCheckStatus.MISMATCH;
 									}
 								} else {
 									match =  substitutedSuperType.findSuperTypeOriginatingFrom(wildcardBound);
 									if (match != null) {
 										if (match.isProvablyDistinct(wildcardBound)) {
-											return TypeConstants.MISMATCH;
+											return BoundCheckStatus.MISMATCH;
 										}
 									} else {
 										if (denotesRelevantSuperClass(wildcardBound) && denotesRelevantSuperClass(substitutedSuperType)) {
 											// non-object real superclass should have produced a valid 'match' above
-											return TypeConstants.MISMATCH;
+											return BoundCheckStatus.MISMATCH;
 										}
 									}
 								}
@@ -191,15 +194,15 @@ public class TypeVariableBinding extends ReferenceBinding {
 						TypeBinding substitutedSuperType = hasSubstitution ? Scope.substitute(substitution, this.superInterfaces[i]) : this.superInterfaces[i];
 						if (isArrayBound) {
 							if (!wildcardBound.isCompatibleWith(substitutedSuperType, scope))
-									return TypeConstants.MISMATCH;
+									return BoundCheckStatus.MISMATCH;
 						} else {
 							TypeBinding match = wildcardBound.findSuperTypeOriginatingFrom(substitutedSuperType);
 							if (match != null) {
 								if (substitutedSuperType.isProvablyDistinct(match)) {
-									return TypeConstants.MISMATCH;
+									return BoundCheckStatus.MISMATCH;
 								}
 							} else if (mustImplement) {
-									return TypeConstants.MISMATCH; // cannot be extended further to satisfy missing bounds
+									return BoundCheckStatus.MISMATCH; // cannot be extended further to satisfy missing bounds
 							}
 						}
 
@@ -210,19 +213,21 @@ public class TypeVariableBinding extends ReferenceBinding {
 					// if the wildcard is lower-bounded by a type variable that has no relevant upper bound there's nothing to check here (bug 282152):
 					if (wildcard.bound.isTypeVariable() && ((TypeVariableBinding)wildcard.bound).superclass.id == TypeIds.T_JavaLangObject)
 						break;
-					return boundCheck(substitution, wildcard.bound, scope);
+					return boundCheck(substitution, wildcard.bound, scope, location);
 
 				case Wildcard.UNBOUND :
 					break;
 			}
-			return TypeConstants.OK;
+			return BoundCheckStatus.OK;
 		}
 		boolean unchecked = false;
+		boolean checkNullAnnotations = scope.environment().usesNullTypeAnnotations();
+		boolean haveReportedNullProblem = false;
 		if (this.superclass.id != TypeIds.T_JavaLangObject) {
 			TypeBinding substitutedSuperType = hasSubstitution ? Scope.substitute(substitution, this.superclass) : this.superclass;
 	    	if (TypeBinding.notEquals(substitutedSuperType, argumentType)) {
 				if (!argumentType.isCompatibleWith(substitutedSuperType, scope)) {
-				    return TypeConstants.MISMATCH;
+				    return BoundCheckStatus.MISMATCH;
 				}
 				TypeBinding match = argumentType.findSuperTypeOriginatingFrom(substitutedSuperType);
 				if (match != null){
@@ -231,6 +236,12 @@ public class TypeVariableBinding extends ReferenceBinding {
 						unchecked = true;
 				}
 	    	}
+			if (location != null && checkNullAnnotations) {
+				if (NullAnnotationMatching.analyse(this, argumentType, substitutedSuperType, substitution, -1, CheckMode.BOUND_CHECK).isAnyMismatch()) {
+					scope.problemReporter().nullityMismatchTypeArgument(this, argumentType, location);
+					haveReportedNullProblem = true;
+				}
+			}
 		}
 //{ObjectTeams: type check <B base R>
 		if (this.roletype != null) {
@@ -239,14 +250,14 @@ public class TypeVariableBinding extends ReferenceBinding {
 				TypeVariableBinding argTypeVar = (TypeVariableBinding) argumentType;
 				if (argTypeVar.roletype != null) {
 					if (this.roletype.isCompatibleWith(argTypeVar.roletype))
-						return TypeConstants.OK;
+						return BoundCheckStatus.OK;
 					else
-						return TypeConstants.MISMATCH;
+						return BoundCheckStatus.MISMATCH;
 				}
 			}
 			TypeBinding substitutedRoleType = hasSubstitution ? Scope.substitute(substitution, this.roletype) : this.roletype;
 			if (!substitutedRoleType.isRole())
-				return TypeConstants.MISMATCH; // actually roletype was already checked for role-ness.
+				return BoundCheckStatus.MISMATCH; // actually roletype was already checked for role-ness.
 			// FIXME(SH): handle arrays? enums? nested generics?
 			if (actualReceiverType != null)
 				substitutedRoleType = TeamModel.strengthenRoleType(actualReceiverType, substitutedRoleType);
@@ -254,21 +265,21 @@ public class TypeVariableBinding extends ReferenceBinding {
 			for (ReferenceBinding  aRoletype : roletypes) {
 				ReferenceBinding basetype = aRoletype.baseclass(); // non-null by definition of getBoundDescendants()
 				if (TypeBinding.equalsEquals(basetype, argumentType) || argumentType.isCompatibleWith(basetype)) {
-					return TypeConstants.OK;
+					return BoundCheckStatus.OK;
 				}
 			}
-			return TypeConstants.MISMATCH;
+			return BoundCheckStatus.MISMATCH;
 		}
 		// check value-dependent type-variable:
 		if (this.anchors != null && substitution != null) {
 			ITeamAnchor anchor = substitution.substituteAnchor(this.anchors[0], 0); // TODO(SH): support multiple anchors 
 			if (anchor != null) {
 				if (!(argumentType instanceof DependentTypeBinding)) {
-					return TypeConstants.MISMATCH;
+					return BoundCheckStatus.MISMATCH;
 				} else {
 					ITeamAnchor argAnchor = ((DependentTypeBinding)argumentType).getAnchor();
 					if (!argAnchor.hasSameBestNameAs(anchor))
-						return TypeConstants.MISMATCH;
+						return BoundCheckStatus.MISMATCH;
 				}
 			}
 		}
@@ -277,7 +288,7 @@ public class TypeVariableBinding extends ReferenceBinding {
 			TypeBinding substitutedSuperType = hasSubstitution ? Scope.substitute(substitution, this.superInterfaces[i]) : this.superInterfaces[i];
 	    	if (TypeBinding.notEquals(substitutedSuperType, argumentType)) {
 				if (!argumentType.isCompatibleWith(substitutedSuperType, scope)) {
-				    return TypeConstants.MISMATCH;
+				    return BoundCheckStatus.MISMATCH;
 				}
 				TypeBinding match = argumentType.findSuperTypeOriginatingFrom(substitutedSuperType);
 				if (match != null){
@@ -286,15 +297,21 @@ public class TypeVariableBinding extends ReferenceBinding {
 						unchecked = true;
 				}
 	    	}
+			if (location != null && checkNullAnnotations) {
+				if (NullAnnotationMatching.analyse(this, argumentType, substitutedSuperType, substitution, -1, CheckMode.BOUND_CHECK).isAnyMismatch()) {
+					scope.problemReporter().nullityMismatchTypeArgument(this, argumentType, location);
+					haveReportedNullProblem = true;
+				}
+			}
 	    }
-	    long nullTagBits = NullAnnotationMatching.validNullTagBits(this.tagBits);
-	    if (nullTagBits != 0) {
-	    	long argBits = NullAnnotationMatching.validNullTagBits(argumentType.tagBits);
-	    	if (argBits != nullTagBits) {
-//	    		System.err.println("TODO(stephan): issue proper error: bound conflict at "+String.valueOf(this.declaringElement.readableName()));
-	    	}
+	    if (location != null && checkNullAnnotations && !haveReportedNullProblem) {
+	    	long nullBits = this.tagBits & TagBits.AnnotationNullMASK;
+	    	if (nullBits != 0 && nullBits != (argumentType.tagBits & TagBits.AnnotationNullMASK)) {
+				scope.problemReporter().nullityMismatchTypeArgument(this, argumentType, location);
+				haveReportedNullProblem = true;
+			}
 	    }
-	    return unchecked ? TypeConstants.UNCHECKED : TypeConstants.OK;
+	    return unchecked ? BoundCheckStatus.UNCHECKED : haveReportedNullProblem ? BoundCheckStatus.NULL_PROBLEM : BoundCheckStatus.OK;
 	}
 
 	boolean denotesRelevantSuperClass(TypeBinding type) {
@@ -1132,5 +1149,22 @@ public class TypeVariableBinding extends ReferenceBinding {
 
 	public boolean acceptsNonNullDefault() {
 		return false;
+	}
+
+	@Override
+	public long updateTagBits() {
+		if (!this.inRecursiveFunction) {
+			this.inRecursiveFunction = true;
+			try {
+				if (this.superclass != null)
+					this.tagBits |= this.superclass.updateTagBits();
+				if (this.superInterfaces != null)
+					for (TypeBinding superIfc : this.superInterfaces)
+						this.tagBits |= superIfc.updateTagBits();
+			} finally {
+				this.inRecursiveFunction = false;
+			}
+		}
+		return super.updateTagBits();
 	}
 }

@@ -4,7 +4,6 @@
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
- * $Id: CompilationUnitResolver.java 23404 2010-02-03 14:10:22Z stephan $
  *
  * Contributors:
  *     IBM Corporation - initial API and implementation
@@ -118,7 +117,7 @@ class CompilationUnitResolver extends Compiler {
 	CategorizedProblem abortProblem;
 
 	private IProgressMonitor monitor;
-
+	
 	/**
 	 * Set to <code>true</code> if the receiver was initialized using a java project name environment
 	 */
@@ -183,7 +182,7 @@ class CompilationUnitResolver extends Compiler {
 		SourceTypeElementInfo sourceType = (SourceTypeElementInfo) sourceTypes[0];
 		accept((org.eclipse.jdt.internal.compiler.env.ICompilationUnit) sourceType.getHandle().getCompilationUnit(), accessRestriction);
 	}
-
+	
 	public synchronized void accept(org.eclipse.jdt.internal.compiler.env.ICompilationUnit sourceUnit, AccessRestriction accessRestriction) {
 		super.accept(sourceUnit, accessRestriction);
 	}
@@ -554,7 +553,7 @@ class CompilationUnitResolver extends Compiler {
 			}
 		} else {
 				//fill the methods bodies in order for the code to be generated
-				//real parse of the method....
+				//real parse of the method....			
 				org.eclipse.jdt.internal.compiler.ast.TypeDeclaration[] types = compilationUnitDeclaration.types;
 				if (types != null) {
 					for (int j = 0, typeLength = types.length; j < typeLength; j++) {
@@ -1240,34 +1239,39 @@ class CompilationUnitResolver extends Compiler {
 			}
 
 			if (unit.scope != null) {
+				CompilationUnitDeclaration previousUnit = this.lookupEnvironment.unitBeingCompleted;
+				this.lookupEnvironment.unitBeingCompleted = unit;
+				try {
 //{ObjectTeams: replace single step by Dependencies:
 /* orig:
-				// fault in fields & methods
-				unit.scope.faultInTypes();
-				if (unit.scope != null && verifyMethods) {
-					// http://dev.eclipse.org/bugs/show_bug.cgi?id=23117
- 					// verify inherited methods
-					unit.scope.verifyMethods(this.lookupEnvironment.methodVerifier());
-				}
-				// type checking
-				unit.resolve();
-
-				// flow analysis
-				if (analyzeCode) unit.analyseCode();
-
-				// code generation
-				if (generateCode) unit.generateCode();
+					// fault in fields & methods
+					unit.scope.faultInTypes();
+					if (unit.scope != null && verifyMethods) {
+						// http://dev.eclipse.org/bugs/show_bug.cgi?id=23117
+	 					// verify inherited methods
+						unit.scope.verifyMethods(this.lookupEnvironment.methodVerifier());
+					}
+					// type checking
+					unit.resolve();
+	
+					// flow analysis
+					if (analyzeCode) unit.analyseCode();
+	
+					// code generation
+					if (generateCode) unit.generateCode();
 */
-				if (generateCode)
-					Dependencies.ensureState(unit, ITranslationStates.STATE_BYTE_CODE_GENERATED);
-				else if (analyzeCode)
-					Dependencies.ensureState(unit, ITranslationStates.STATE_CODE_ANALYZED);
-				else
-					Dependencies.ensureState(unit, ITranslationStates.STATE_RESOLVED);
+					if (generateCode)
+						Dependencies.ensureState(unit, ITranslationStates.STATE_BYTE_CODE_GENERATED);
+					else if (analyzeCode)
+						Dependencies.ensureState(unit, ITranslationStates.STATE_CODE_ANALYZED);
+					else
+						Dependencies.ensureState(unit, ITranslationStates.STATE_RESOLVED);
 // SH}
-
-				// finalize problems (suppressWarnings)
-				unit.finalizeProblems();
+					// finalize problems (suppressWarnings)
+					unit.finalizeProblems();
+				} finally {
+					this.lookupEnvironment.unitBeingCompleted = previousUnit; // paranoia, always null in org.eclipse.jdt.core.tests.dom.RunAllTests
+				}
 			}
 			// TODO(SH): release also role file units!
 			if (this.unitsToProcess != null) this.unitsToProcess[0] = null; // release reference to processed unit declaration
@@ -1295,7 +1299,6 @@ class CompilationUnitResolver extends Compiler {
 			// this.reset();
 		}
 	}
-
 	/*
 	 * Internal API used to resolve a given compilation unit. Can run a subset of the compilation process
 	 */

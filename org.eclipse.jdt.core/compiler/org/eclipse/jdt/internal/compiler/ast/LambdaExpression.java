@@ -233,7 +233,7 @@ public class LambdaExpression extends FunctionalExpression implements IPolyExpre
 	 * @see org.eclipse.jdt.internal.compiler.lookup.SourceTypeBinding.resolveTypesFor(MethodBinding)
 	 * @see org.eclipse.jdt.internal.compiler.ast.AbstractMethodDeclaration.resolve(ClassScope)
 	 */
-	public TypeBinding resolveType(BlockScope blockScope) {
+	public TypeBinding resolveType(BlockScope blockScope, boolean skipKosherCheck) {
 		
 		boolean argumentsTypeElided = argumentsTypeElided();
 		int argumentsLength = this.arguments == null ? 0 : this.arguments.length;
@@ -257,11 +257,11 @@ public class LambdaExpression extends FunctionalExpression implements IPolyExpre
 		this.scope = new MethodScope(blockScope, this, methodScope.isStatic, methodScope.lastVisibleFieldID);
 		this.scope.isConstructorCall = methodScope.isConstructorCall;
 
-		super.resolveType(blockScope); // compute & capture interface function descriptor.
+		super.resolveType(blockScope, skipKosherCheck); // compute & capture interface function descriptor.
 		
 		final boolean haveDescriptor = this.descriptor != null;
 		
-		if (!haveDescriptor || this.descriptor.typeVariables != Binding.NO_TYPE_VARIABLES) // already complained in kosher*
+		if (!skipKosherCheck && (!haveDescriptor || this.descriptor.typeVariables != Binding.NO_TYPE_VARIABLES)) // already complained in kosher*
 			return this.resolvedType = null;
 		
 		this.binding = new MethodBinding(ClassFileConstants.AccPrivate | ClassFileConstants.AccSynthetic | ExtraCompilerModifiers.AccUnresolved,
@@ -465,10 +465,14 @@ public class LambdaExpression extends FunctionalExpression implements IPolyExpre
 		if (targetType instanceof ReferenceBinding && targetType.isValidBinding()) {
 			ParameterizedTypeBinding withWildCards = InferenceContext18.parameterizedWithWildcard(targetType);
 			if (withWildCards != null) {
-				if (!argumentTypesElided)
-					return new InferenceContext18(blockScope).inferFunctionalInterfaceParameterization(this, blockScope, withWildCards);
-				else
+				if (!argumentTypesElided) {
+					InferenceContext18 freshInferenceContext = new InferenceContext18(blockScope);
+					ReferenceBinding inferredType = freshInferenceContext.inferFunctionalInterfaceParameterization(this, blockScope, withWildCards);
+					freshInferenceContext.cleanUp();
+					return inferredType;
+				} else {
 					return findGroundTargetTypeForElidedLambda(blockScope, withWildCards);
+				}
 			}
 			return (ReferenceBinding) targetType;
 		}
@@ -577,13 +581,8 @@ public class LambdaExpression extends FunctionalExpression implements IPolyExpre
 					AnnotationBinding [] annotations = descParameters[i].getTypeAnnotations();
 					for (int j = 0, length = annotations.length; j < length; j++) {
 						AnnotationBinding annotation = annotations[j];
-						if (annotation != null) {
-							switch (annotation.getAnnotationType().id) {
-								case TypeIds.T_ConfiguredAnnotationNullable :
-								case TypeIds.T_ConfiguredAnnotationNonNull :
-									ourParameters[i] = env.createAnnotatedType(ourParameters[i], new AnnotationBinding [] { annotation });
-									break;
-							}
+						if (annotation != null && annotation.getAnnotationType().hasNullBit(TypeIds.BitNonNullAnnotation|TypeIds.BitNullableAnnotation)) {
+							ourParameters[i] = env.createAnnotatedType(ourParameters[i], new AnnotationBinding [] { annotation });
 						}
 					}
 				}
@@ -609,7 +608,30 @@ public class LambdaExpression extends FunctionalExpression implements IPolyExpre
 		}
 	}
 
-	public boolean isPertinentToApplicability(TypeBinding targetType, MethodBinding method) {
+	public boolean isPertinentToApplicability(final TypeBinding targetType, final MethodBinding method) {
+
+		class NotPertientToApplicability extends RuntimeException {
+			private static final long serialVersionUID = 1L;
+		}
+		class ResultsAnalyser extends ASTVisitor {
+			public boolean visit(TypeDeclaration type, BlockScope skope) {
+				return false;
+			}
+			public boolean visit(TypeDeclaration type, ClassScope skope) {
+				return false;
+			}
+			public boolean visit(LambdaExpression type, BlockScope skope) {
+				return false;
+			}
+		    public boolean visit(ReturnStatement returnStatement, BlockScope skope) {
+		    	if (returnStatement.expression != null) {
+					if (!returnStatement.expression.isPertinentToApplicability(targetType, method))
+						throw new NotPertientToApplicability();
+		    	}
+		    	return false;
+		    }
+		}
+
 		if (targetType == null) // assumed to signal another primary error
 			return true;
 		
@@ -624,9 +646,18 @@ public class LambdaExpression extends FunctionalExpression implements IPolyExpre
 				return false;
 		} else {
 			Expression [] returnExpressions = this.resultExpressions;
-			for (int i = 0, length = returnExpressions.length; i < length; i++) {
-				if (!returnExpressions[i].isPertinentToApplicability(targetType, method))
+			if (returnExpressions != NO_EXPRESSIONS) {
+				for (int i = 0, length = returnExpressions.length; i < length; i++) {
+					if (!returnExpressions[i].isPertinentToApplicability(targetType, method))
+						return false;
+				}
+			} else {
+				// return expressions not yet discovered by resolveType(), so traverse no looking just for one that's not pertinent
+				try {
+					this.body.traverse(new ResultsAnalyser(), this.scope);
+				} catch (NotPertientToApplicability npta) {
 					return false;
+				}
 			}
 		}
 		
@@ -806,6 +837,10 @@ public class LambdaExpression extends FunctionalExpression implements IPolyExpre
 		if (!isPertinentToApplicability(targetType, null))
 			return true;
 
+		// catch up on one check deferred via skipKosherCheck=true (only if pertinent for applicability)
+		if (!kosherDescriptor(this.enclosingScope, sam, false))
+			return false;
+
 		Expression [] returnExpressions = copy.resultExpressions;
 		for (int i = 0, length = returnExpressions.length; i < length; i++) {
 			if (this.enclosingScope.parameterCompatibilityLevel(returnExpressions[i].resolvedType, sam.returnType) == Scope.NOT_COMPATIBLE) {
@@ -855,7 +890,7 @@ public class LambdaExpression extends FunctionalExpression implements IPolyExpre
 				copy.setExpressionContext(this.expressionContext);
 				copy.setExpectedType(targetType);
 				copy.inferenceContext = context;
-				TypeBinding type = copy.resolveType(this.enclosingScope);
+				TypeBinding type = copy.resolveType(this.enclosingScope, true);
 				if (type == null || !type.isValidBinding())
 					return null;
 
@@ -1035,8 +1070,12 @@ public class LambdaExpression extends FunctionalExpression implements IPolyExpre
 			switch(parent.kind) {
 				case Scope.CLASS_SCOPE:
 				case Scope.METHOD_SCOPE:
-					parent.referenceContext().tagAsHavingErrors();
-					return;
+					ReferenceContext parentAST = parent.referenceContext();
+					if (parentAST != this) {
+						parentAST.tagAsHavingErrors();
+						return;
+					}
+					break;
 				default:
 					parent = parent.parent;
 					break;

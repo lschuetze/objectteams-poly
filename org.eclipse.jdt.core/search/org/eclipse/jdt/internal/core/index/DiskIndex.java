@@ -49,9 +49,9 @@ char separator = Index.DEFAULT_SEPARATOR;
 
 //{ObjectTeams: add a suffix for distinction:
 /* orig:
-public static final String SIGNATURE= "INDEX VERSION 1.128"; //$NON-NLS-1$
+public static final String SIGNATURE= "INDEX VERSION 1.129"; //$NON-NLS-1$
   :giro */
-public static final String SIGNATURE= "INDEX VERSION 1.128 OT2"; //$NON-NLS-1$
+public static final String SIGNATURE= "INDEX VERSION 1.129 OT2"; //$NON-NLS-1$
 // SH}
 private static final char[] SIGNATURE_CHARS = SIGNATURE.toCharArray();
 public static boolean DEBUG = false;

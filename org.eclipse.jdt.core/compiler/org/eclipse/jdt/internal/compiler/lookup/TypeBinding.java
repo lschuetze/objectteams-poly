@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2014 IBM Corporation and others.
+ * Copyright (c) 2000, 2015 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -1599,14 +1599,10 @@ public void setTypeAnnotations(AnnotationBinding[] annotations, boolean evalNull
 		for (int i = 0, length = annotations.length; i < length; i++) {
 			AnnotationBinding annotation = annotations[i];
 			if (annotation != null) {
-				switch (annotation.type.id) {
-					case TypeIds.T_ConfiguredAnnotationNullable :
-						this.tagBits |= TagBits.AnnotationNullable | TagBits.HasNullTypeAnnotation;
-						break;
-					case TypeIds.T_ConfiguredAnnotationNonNull :
-						this.tagBits |= TagBits.AnnotationNonNull  | TagBits.HasNullTypeAnnotation;
-						break;
-				}
+				if (annotation.type.hasNullBit(TypeIds.BitNullableAnnotation))
+					this.tagBits |= TagBits.AnnotationNullable | TagBits.HasNullTypeAnnotation;
+				else if (annotation.type.hasNullBit(TypeIds.BitNonNullAnnotation))
+					this.tagBits |= TagBits.AnnotationNonNull  | TagBits.HasNullTypeAnnotation;
 			}
 		}
 		// we do accept contradictory tagBits here, to support detecting contradictions caused by type substitution
@@ -1777,5 +1773,12 @@ public void exitRecursiveFunction() {
 
 public boolean isFunctionalType() {
 	return false;
+}
+/**
+ * Refresh some tagBits from details into the main type.
+ * Currently handled: TagBits.HasNullTypeAnnotation
+ */
+public long updateTagBits() {
+	return this.tagBits & TagBits.HasNullTypeAnnotation; // subclasses to override
 }
 }
