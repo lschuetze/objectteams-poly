@@ -1,7 +1,7 @@
 /**********************************************************************
  * This file is part of "Object Teams Development Tooling"-Software
  * 
- * Copyright 2008, 2014 Technical University Berlin, Germany and others.
+ * Copyright 2008, 2015 Technical University Berlin, Germany and others.
  *  
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -29,6 +29,7 @@ import static org.eclipse.objectteams.otequinox.Constants.TRANSFORMER_PLUGIN_ID;
 import static org.eclipse.objectteams.otequinox.TransformerPlugin.log;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -70,6 +71,8 @@ public class AspectBindingRegistry {
 
 	private Set<String> selfAdaptingAspects= new HashSet<String>(); // TODO, never read / evaluated
 	
+	private Set<String> allAllBoundBaseClasses = new HashSet<>(1024);
+
 	public static boolean IS_OTDT = false;
 	
 	public boolean isOTDT() {
@@ -250,6 +253,16 @@ public class AspectBindingRegistry {
 	public boolean isAdaptedBasePlugin(@Nullable String symbolicName) {
 		ArrayList<AspectBinding> list = aspectBindingsByBasePlugin.get(symbolicName);
 		return list != null && !list.isEmpty();
+	}
+
+	/** Does className denote a class to which a role is bound via any aspectBinding? */
+	public boolean isBoundBaseClass(String className) {
+		return this.allAllBoundBaseClasses.contains(className);
+	}
+
+	/** Record the given class names as bound base classes. */
+	public void addBoundBaseClasses(Collection<String> boundBaseclassNames) {
+		this.allAllBoundBaseClasses.addAll(boundBaseclassNames);
 	}
 
 	/**

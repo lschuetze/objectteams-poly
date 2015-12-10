@@ -18,6 +18,7 @@ package org.eclipse.objectteams.internal.osgi.weaving;
 import static org.eclipse.objectteams.otequinox.TransformerPlugin.log;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 import java.util.Set;
 
@@ -98,9 +99,10 @@ public class BaseBundleLoadTrigger {
 					assert aspectBundle != null : "Package admin should not return a null array element";
 				}
 				// (2) scan all teams in affecting aspect bindings:
-				if (!aspectBinding.hasScannedTeams)
-					aspectBinding.scanTeamClasses(aspectBundle, DelegatingTransformer.newTransformer(useDynamicWeaver, hook, baseClass.getBundleWiring()));
-					// TODO: record adapted base classes?
+				if (!aspectBinding.hasScannedTeams) {
+					Collection<String> boundBases = aspectBinding.scanTeamClasses(aspectBundle, DelegatingTransformer.newTransformer(useDynamicWeaver, hook, baseClass.getBundleWiring()));
+					aspectBindingRegistry.addBoundBaseClasses(boundBases);
+				}
 				
 				// (3) add dependencies to the base bundle:
 				if (!useDynamicWeaver) // OTDRE access aspects by generic interface in o.o.Team

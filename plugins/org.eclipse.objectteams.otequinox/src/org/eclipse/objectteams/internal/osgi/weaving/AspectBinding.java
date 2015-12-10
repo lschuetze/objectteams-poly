@@ -1,7 +1,7 @@
 /**********************************************************************
  * This file is part of "Object Teams Development Tooling"-Software
  * 
- * Copyright 2009, 2014 Germany and Technical University Berlin, Germany and others.
+ * Copyright 2009, 2015 Germany and Technical University Berlin, Germany and others.
  * 
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -327,8 +327,9 @@ public class AspectBinding {
 	/**
 	 * Read OT attributes of all teams in this aspectBinding 
 	 * and collect affected base classes into the teamBindings.
+	 * @return the names of all base classes bound via this aspect binding
 	 */
-	public synchronized void scanTeamClasses(Bundle bundle, DelegatingTransformer transformer) {
+	public synchronized Collection<String> scanTeamClasses(Bundle bundle, DelegatingTransformer transformer) {
 		long time = 0;
 		if (Util.PROFILE) time= System.nanoTime();
 		ClassScanner scanner = new ClassScanner();
@@ -356,6 +357,7 @@ public class AspectBinding {
 		}
 		this.hasScannedTeams = true;
 		if (Util.PROFILE) Util.profile(time, ProfileKind.Scan, bundle.getSymbolicName());
+		return this.allBaseClassNames;
 	}
 
 	private List<TeamBinding> getAllTeamBindings() {

@@ -306,7 +306,7 @@ System.err.println("OT/Equinox: USE_DYNAMIC_WEAVER="+USE_DYNAMIC_WEAVER);
 		return false;
 	}
 
-	WeavingReason requiresWeaving(BundleWiring bundleWiring, String className, byte[] bytes) {
+	WeavingReason requiresWeaving(BundleWiring bundleWiring, @NonNull String className, byte[] bytes) {
 		
 		// 1. consult the aspect binding registry (for per-bundle info):
 		@SuppressWarnings("null")@NonNull // FIXME: org.eclipse.osgi.internal.resolver.BundleDescriptionImpl.getBundle() can return null!
@@ -314,6 +314,8 @@ System.err.println("OT/Equinox: USE_DYNAMIC_WEAVER="+USE_DYNAMIC_WEAVER);
 		if (aspectBindingRegistry.getAdaptedBasePlugins(bundle) != null)
 			return WeavingReason.Aspect;
 
+		if (aspectBindingRegistry.isBoundBaseClass(className))
+			return WeavingReason.Base;
 		List<AspectBinding> aspectBindings = aspectBindingRegistry.getAdaptingAspectBindings(bundle.getSymbolicName());
 		if (aspectBindings != null && !aspectBindings.isEmpty()) {
 			// potential base class: look deeper:
@@ -387,6 +389,7 @@ System.err.println("OT/Equinox: USE_DYNAMIC_WEAVER="+USE_DYNAMIC_WEAVER);
 	private void recordBaseClasses(DelegatingTransformer transformer, @NonNull String aspectBundle, String className) {
 		Collection<String> adaptedBases = transformer.fetchAdaptedBases();
 		if (adaptedBases == null || adaptedBases.isEmpty()) return;
+		aspectBindingRegistry.addBoundBaseClasses(adaptedBases);
 		List<AspectBinding> aspectBindings = aspectBindingRegistry.getAspectBindings(aspectBundle);
 		if (aspectBindings != null)
 			for (AspectBinding aspectBinding : aspectBindings)
