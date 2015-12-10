@@ -18,6 +18,7 @@ package org.eclipse.objectteams.otredyn.bytecode.asm;
 
 import org.eclipse.objectteams.otredyn.transformer.names.ClassNames;
 import org.eclipse.objectteams.otredyn.transformer.names.ConstantMembers;
+import org.objectweb.asm.Label;
 import org.objectweb.asm.Opcodes;
 import org.objectweb.asm.Type;
 import org.objectweb.asm.tree.AbstractInsnNode;
@@ -26,6 +27,7 @@ import org.objectweb.asm.tree.InsnNode;
 import org.objectweb.asm.tree.IntInsnNode;
 import org.objectweb.asm.tree.JumpInsnNode;
 import org.objectweb.asm.tree.LabelNode;
+import org.objectweb.asm.tree.LocalVariableNode;
 import org.objectweb.asm.tree.MethodInsnNode;
 import org.objectweb.asm.tree.MethodNode;
 import org.objectweb.asm.tree.TypeInsnNode;
@@ -54,10 +56,13 @@ import org.objectweb.asm.tree.TypeInsnNode;
 public abstract class AbstractCreateDispatchCodeAdapter extends
 		AbstractTransformableClassNode {
 
+	final int teamsAndCallinsSlot;
+
 	private boolean isStatic;
 
-	public AbstractCreateDispatchCodeAdapter(boolean isStatic) {
+	public AbstractCreateDispatchCodeAdapter(boolean isStatic, int locals) {
 		this.isStatic = isStatic;
+		this.teamsAndCallinsSlot = locals;
 	}
 
 	private Type[] args;
@@ -66,15 +71,22 @@ public abstract class AbstractCreateDispatchCodeAdapter extends
 			int boundMethodId) {
 		InsnList instructions = new InsnList();
 
-		// teams = TeamManager.getTeams(joinpointId)
+		// teamsAndCallinIds = TeamManager.getTeamsAndCallinIds(joinpointId);
 		instructions.add(createLoadIntConstant(joinPointId));
 
 		instructions.add(new MethodInsnNode(Opcodes.INVOKESTATIC,
-				ClassNames.TEAM_MANAGER_SLASH, ConstantMembers.getTeams.getName(),
-				ConstantMembers.getTeams.getSignature(),
+				ClassNames.TEAM_MANAGER_SLASH, ConstantMembers.getTeamsAndCallinIds.getName(),
+				ConstantMembers.getTeamsAndCallinIds.getSignature(),
 				false));
+		instructions.add(createInstructionsToCheckTeams(method)); // skip the rest if null
+		instructions.add(new IntInsnNode(Opcodes.ASTORE, teamsAndCallinsSlot));
+
+		// teams = teamsAndCallinIds[0]
+		instructions.add(new IntInsnNode(Opcodes.ALOAD, teamsAndCallinsSlot));
+		instructions.add(new InsnNode(Opcodes.ICONST_0));
+		instructions.add(new InsnNode(Opcodes.AALOAD));
+		instructions.add(new TypeInsnNode(Opcodes.CHECKCAST, "[Lorg/objectteams/ITeam;"));
 		
-		instructions.add(createInstructionsToCheackTeams(method));
 		
 		// get the first team
 		instructions.add(new InsnNode(Opcodes.DUP));
@@ -93,15 +105,11 @@ public abstract class AbstractCreateDispatchCodeAdapter extends
 		// start index
 		instructions.add(new InsnNode(Opcodes.ICONST_0));
 
-		// TeamManager.getCallinIds(joinpointId)
-		instructions.add(createLoadIntConstant(joinPointId));
-
-		instructions
-				.add(new MethodInsnNode(Opcodes.INVOKESTATIC,
-						ClassNames.TEAM_MANAGER_SLASH,
-						ConstantMembers.getCallinIds.getName(),
-						ConstantMembers.getCallinIds.getSignature(),
-						false));
+		// callinIds = teamsAndCallinIds[1]
+		instructions.add(new IntInsnNode(Opcodes.ALOAD, teamsAndCallinsSlot));
+		instructions.add(new InsnNode(Opcodes.ICONST_1));
+		instructions.add(new InsnNode(Opcodes.AALOAD));
+		instructions.add(new TypeInsnNode(Opcodes.CHECKCAST, "[I"));
 
 		instructions.add(createLoadIntConstant(boundMethodId));
 		args = Type.getArgumentTypes(method.desc);
@@ -120,8 +128,17 @@ public abstract class AbstractCreateDispatchCodeAdapter extends
 
 		return instructions;
 	}
+
+	protected void addLocals(MethodNode method) {
+		String selector = "teamsAndCallinIds";
+		for (LocalVariableNode lv : method.localVariables) {
+			if (lv.name.equals(selector))
+				return;
+		}
+		method.visitLocalVariable(selector, "[Ljava/lang/Object;", null, new Label(), new Label(), teamsAndCallinsSlot);
+	}
 	
-	protected InsnList createInstructionsToCheackTeams(MethodNode method) {
+	protected InsnList createInstructionsToCheckTeams(MethodNode method) {
 		// if (teams == null) {
 		// 		break;
 		// }
@@ -148,7 +165,7 @@ public abstract class AbstractCreateDispatchCodeAdapter extends
 	protected abstract InsnList getBoxedArguments(Type[] args);
 
 	protected int getMaxLocals() {
-		return args.length + 1;
+		return teamsAndCallinsSlot+1;
 	}
 
 	protected int getMaxStack() {

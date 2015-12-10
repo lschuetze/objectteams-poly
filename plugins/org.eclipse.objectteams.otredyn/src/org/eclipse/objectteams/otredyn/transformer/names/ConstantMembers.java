@@ -90,13 +90,8 @@ public abstract class ConstantMembers {
 							Types.getAsArrayType(ClassNames.OBJECT_SLASH),
 							Types.getAsInternalType(ClassNames.ITEAM_SLASH) }), true, Opcodes.ACC_PUBLIC);
 
-	public static final Method getTeams = new Method("getTeams", Types
-			.getTypeStringForMethod(
-					Types.getAsArrayType(ClassNames.ITEAM_SLASH),
-					new String[] { Types.INT }));
-
-	public static final Method getCallinIds = new Method("getCallinIds", Types
-			.getTypeStringForMethod(Types.getAsArrayType(Types.INT),
+	public static final Method getTeamsAndCallinIds = new Method("getTeamsAndCallinIds", Types
+			.getTypeStringForMethod(Types.getAsArrayType(ClassNames.OBJECT_SLASH),
 					new String[] { Types.INT }));
 
 	public static final Method getMemberId = new Method("getMemberId", Types

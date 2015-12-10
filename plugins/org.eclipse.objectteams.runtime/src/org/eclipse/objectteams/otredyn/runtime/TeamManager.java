@@ -56,53 +56,38 @@ public class TeamManager implements ITeamManager {
 	}
 
 	/**
-	 * Returns all active teams for joinpoint.
-	 * This method is intended to be called by 
-	 * generated client code.
+	 * Returns all active teams and corresponding callin IDs for joinpoint.
+	 * This method is intended to be called by generated client code.
 	 * @param joinpointId
-	 * @return all active teams for the joinpoint or null
-	 * if there are no active teams
+	 * @return a two-element array or null if there are no active teams.
+	 * If non-null the first array element is an array (ITeam[]) of all active teams for the joinpoint,
+	 * and the second array element is an array (int[]) of corresponding callind IDs.
+	 * Both arrays have the same length and elements with equal index correspond between both sub-arrays. 
 	 */
-	public synchronized static ITeam[] getTeams(int joinpointId) {
+	public synchronized static Object[] getTeamsAndCallinIds(int joinpointId) {
 		List<ITeam> teams = _teams.get(joinpointId);
 		int size = teams.size();
 		if (size == 0)
 			return null;
+		List<Integer> callinIds = _callinIds.get(joinpointId);
 		ITeam[] active = new ITeam[size];
+		int[] ids = new int[size];
 		int count = 0;
 		Thread th = Thread.currentThread();
 		for (int i = 0; i < active.length; i++) {
 			ITeam t = teams.get(i);
-			if (t.isActive(th))
-				active[count++] = t;
+			if (t.isActive(th)) {
+				active[count] = t;
+				ids[count++] = callinIds.get(i);
+			}
 		}
 		if (count == 0)
 			return null;
-		if (count != size) 
+		if (count != size) {
 			System.arraycopy(active, 0, active = new ITeam[count], 0, count);
-		return active;
-	}
-
-	/**
-	 * Returns all callin ids for the active teams and the joinpoint.
-	 * This method is intended to be called by 
-	 * generated client code.
-	 * @param joinpointId
-	 * @return the callin ids for the joinpoint or null
-	 * if there are no active teams
-	 */
-	public synchronized static int[] getCallinIds(int joinpointId) {
-		List<Integer> callinIds = _callinIds.get(joinpointId);
-		if (callinIds.size() == 0) {
-			return null;
+			System.arraycopy(ids, 0, ids = new int[count], 0, count);
 		}
-		int[] result = new int[callinIds.size()];
-		int i = 0;
-		for (Integer callinId : callinIds) {
-			result[i] = callinId;
-			i++;
-		}
-		return result;
+		return new Object[] { active, ids };
 	}
 
 	/**

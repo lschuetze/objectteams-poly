@@ -53,10 +53,18 @@ public class CreateDispatchCodeInOrgMethodAdapter extends
 	private int boundMethodId;
 	
 	public CreateDispatchCodeInOrgMethodAdapter(Method method, int joinPointId, int boundMethodId) {
-		super(true);
+		super(true, computeLocals(method.getSignature()));
 		this.method = method;
 		this.joinPointId = joinPointId;
 		this.boundMethodId = boundMethodId;
+	}
+
+	static int computeLocals(String signature) {
+		Type[] params = Type.getArgumentTypes(signature);
+		int locals = 0;
+		for (Type param : params)
+			locals += param.getSize();
+		return locals;
 	}
 
 	@Override
@@ -66,6 +74,7 @@ public class CreateDispatchCodeInOrgMethodAdapter extends
 		
 		orgMethod.instructions.clear();
 		orgMethod.instructions.add(getDispatchCode(orgMethod, joinPointId, boundMethodId));
+		addLocals(orgMethod);
 		orgMethod.maxStack = getMaxStack();
 		orgMethod.maxLocals = getMaxLocals();
 		return true;
@@ -77,7 +86,7 @@ public class CreateDispatchCodeInOrgMethodAdapter extends
 	}
 
 	@Override
-	protected InsnList createInstructionsToCheackTeams(MethodNode method) {
+	protected InsnList createInstructionsToCheckTeams(MethodNode method) {
 		InsnList instructions = new InsnList();
 		instructions.add(new InsnNode(Opcodes.DUP));
 		LabelNode label = new LabelNode();

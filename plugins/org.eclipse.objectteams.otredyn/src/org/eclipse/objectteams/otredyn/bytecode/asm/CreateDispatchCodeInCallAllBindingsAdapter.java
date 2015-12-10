@@ -52,7 +52,7 @@ public class CreateDispatchCodeInCallAllBindingsAdapter extends
 	
 	public CreateDispatchCodeInCallAllBindingsAdapter(int joinpointId,
 			int boundMethodId) {
-		super(false);
+		super(false, 3); // 'this' plus two args (int, Object[])
 		this.joinpointId = joinpointId;
 		this.boundMethodId = boundMethodId;
 	}
@@ -62,6 +62,7 @@ public class CreateDispatchCodeInCallAllBindingsAdapter extends
 		MethodNode callAllBindings = getMethod(ConstantMembers.callAllBindingsClient);
 		InsnList instructions = getDispatchCode(callAllBindings, joinpointId, boundMethodId);  
 		addNewLabelToSwitch(callAllBindings.instructions, instructions, boundMethodId);
+		addLocals(callAllBindings);
 		callAllBindings.maxStack = getMaxStack();
 		callAllBindings.maxLocals = getMaxLocals();
 		return true;
