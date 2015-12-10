@@ -131,8 +131,8 @@ public abstract class AbstractCreateDispatchCodeAdapter extends
 
 	protected void addLocals(MethodNode method) {
 		String selector = "teamsAndCallinIds";
-		for (LocalVariableNode lv : method.localVariables) {
-			if (lv.name.equals(selector))
+		for (Object lv : method.localVariables) {
+			if (((LocalVariableNode)lv).name.equals(selector))
 				return;
 		}
 		method.visitLocalVariable(selector, "[Ljava/lang/Object;", null, new Label(), new Label(), teamsAndCallinsSlot);
