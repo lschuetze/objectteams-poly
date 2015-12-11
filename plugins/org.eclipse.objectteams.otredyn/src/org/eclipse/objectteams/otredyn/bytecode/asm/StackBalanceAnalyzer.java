@@ -1,7 +1,7 @@
 /**********************************************************************
  * This file is part of "Object Teams Dynamic Runtime Environment"
  * 
- * Copyright 2014 Stephan Herrmann.
+ * Copyright 2014, 2015 Stephan Herrmann.
  * 
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -15,8 +15,11 @@
  **********************************************************************/
 package org.eclipse.objectteams.otredyn.bytecode.asm;
 
+import org.objectweb.asm.Opcodes;
 import org.objectweb.asm.Type;
 import org.objectweb.asm.tree.AbstractInsnNode;
+import org.objectweb.asm.tree.FieldInsnNode;
+import org.objectweb.asm.tree.MethodInsnNode;
 
 public class StackBalanceAnalyzer {
 
@@ -54,7 +57,49 @@ public class StackBalanceAnalyzer {
     		current = current.getPrevious();
     		if (current == null)
     			return null;
-    		offset -= SIZE[current.getOpcode()];
+    		int opcode = current.getOpcode();
+    		switch (opcode) {
+
+    		case Opcodes.INVOKESPECIAL:
+    		case Opcodes.INVOKEVIRTUAL:
+    		case Opcodes.INVOKEINTERFACE:
+    			offset++; // stack was larger before consuming the receiver
+				//$FALL-THROUGH$
+			case Opcodes.INVOKESTATIC:
+    			MethodInsnNode mNode = (MethodInsnNode) current;
+    			Type[] types = Type.getArgumentTypes(mNode.desc);
+    			for (Type type : types)
+					offset += type.getSize();
+    			Type returnType = Type.getReturnType(mNode.desc);
+    			if (returnType != Type.VOID_TYPE)
+    				offset -= returnType.getSize();
+    			break;
+
+			case Opcodes.INVOKEDYNAMIC:
+    			mNode = (MethodInsnNode) current;
+				throw new UnsupportedOperationException("Cannot transform a method with invokedynamic: "+mNode.owner+'.'+mNode.name+mNode.desc);
+
+			case Opcodes.GETFIELD:
+    			offset++; // stack was larger before consuming the receiver
+				//$FALL-THROUGH$
+			case Opcodes.GETSTATIC:
+				FieldInsnNode fNode = (FieldInsnNode) current;
+				Type fType = Type.getType(fNode.desc);
+				offset -= fType.getSize();
+				break;
+
+			case Opcodes.PUTFIELD:
+    			offset++; // stack was larger before consuming the receiver
+				//$FALL-THROUGH$
+			case Opcodes.PUTSTATIC:
+				fNode = (FieldInsnNode) current;
+				fType = Type.getType(fNode.desc);
+				offset += fType.getSize();
+				break;
+
+			default:
+    			offset -= SIZE[opcode];
+    		}
     	}
     	return current;
     }
