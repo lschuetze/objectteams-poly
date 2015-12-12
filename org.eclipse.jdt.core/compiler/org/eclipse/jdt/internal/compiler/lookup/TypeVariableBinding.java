@@ -221,7 +221,12 @@ public class TypeVariableBinding extends ReferenceBinding {
 			return BoundCheckStatus.OK;
 		}
 		boolean unchecked = false;
+//{ObjectTeams: be more lazy in asking usesNullTypeAnnotations():
+/* orig:
 		boolean checkNullAnnotations = scope.environment().usesNullTypeAnnotations();
+  :giro */
+		boolean checkNullAnnotations = location != null && scope.environment().usesNullTypeAnnotations();
+// SH}
 		boolean haveReportedNullProblem = false;
 		if (this.superclass.id != TypeIds.T_JavaLangObject) {
 			TypeBinding substitutedSuperType = hasSubstitution ? Scope.substitute(substitution, this.superclass) : this.superclass;
