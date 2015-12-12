@@ -196,6 +196,11 @@
         </team>
         <team
               activation="NONE"
+              class="org.eclipse.objectteams.otdt.internal.corext.DOMAdaptor$LocalVariableIndex"
+              icon="platform:/plugin/org.eclipse.objectteams.otdt.ui/icons/ot/team_obj.gif">
+        </team>
+        <team
+              activation="NONE"
               class="org.eclipse.objectteams.otdt.internal.ui.assist.CreateNewBaseCUProposal"
               icon="platform:/plugin/org.eclipse.objectteams.otdt.ui/icons/ot/team_obj.gif">
         </team>
