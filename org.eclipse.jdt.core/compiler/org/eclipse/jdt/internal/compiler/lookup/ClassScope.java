@@ -922,13 +922,13 @@ public class ClassScope extends Scope {
         		}
         		@Override
         		public Object[] getEmulationPath(ReferenceBinding targetEnclosingType, boolean onlyExactMatch, boolean denyEnclosingArgInConstructorCall) {
-        			Scope parent = this.parent;
+        			Scope parentSave = this.parent;
         			try {
         				this.parent = ClassScope.this;
         				return super.getEmulationPath(targetEnclosingType, onlyExactMatch,
         					denyEnclosingArgInConstructorCall);
         			} finally {
-        				this.parent = parent;
+        				this.parent = parentSave;
         			}
         		}
         	};

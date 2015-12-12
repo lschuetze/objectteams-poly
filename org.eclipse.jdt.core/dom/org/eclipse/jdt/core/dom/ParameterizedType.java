@@ -266,9 +266,9 @@ public class ParameterizedType extends Type {
 	}
 	public String[] getAnchorPath() {
 		if (this.typeArguments.listSize() > 0) {
-			Type type = (Type)this.typeArguments.get(0);
-			if (type.getNodeType() == ASTNode.TYPE_ANCHOR)
-				return ((TypeAnchor)type).getPath().getFullyQualifiedName().split("."); //$NON-NLS-1$
+			Type typeArgument = (Type)this.typeArguments.get(0);
+			if (typeArgument.getNodeType() == ASTNode.TYPE_ANCHOR)
+				return ((TypeAnchor)typeArgument).getPath().getFullyQualifiedName().split("."); //$NON-NLS-1$
 		}
 		return new String[0];
 	}

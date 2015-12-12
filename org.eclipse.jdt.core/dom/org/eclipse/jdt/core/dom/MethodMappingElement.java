@@ -82,7 +82,7 @@ public abstract class MethodMappingElement extends ASTNode {
 	 *
 	 * @return the property descriptor
 	 */
-	static final SimplePropertyDescriptor internalSignaturePropertyFactory(Class nodeClass) {
+	static final SimplePropertyDescriptor internalSignaturePropertyFactory(Class<?> nodeClass) {
 		return new SimplePropertyDescriptor(nodeClass, "signature", boolean.class, MANDATORY); //$NON-NLS-1$
 	}
 
@@ -92,7 +92,7 @@ public abstract class MethodMappingElement extends ASTNode {
 	 *
 	 * @return the property descriptor
 	 */
-	static final ChildPropertyDescriptor internalNamePropertyFactory(Class nodeClass) {
+	static final ChildPropertyDescriptor internalNamePropertyFactory(Class<?> nodeClass) {
 		return new ChildPropertyDescriptor(nodeClass, "name", SimpleName.class, MANDATORY, NO_CYCLE_RISK); //$NON-NLS-1$
 	}
 

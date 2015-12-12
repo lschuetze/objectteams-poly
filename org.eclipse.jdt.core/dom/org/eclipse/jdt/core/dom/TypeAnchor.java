@@ -91,7 +91,6 @@ public class TypeAnchor extends Type {
 		super(ast);
 	}
 
-	@SuppressWarnings("rawtypes")
 	@Override
 	final List internalStructuralPropertiesForType(int apiLevel)
 	{

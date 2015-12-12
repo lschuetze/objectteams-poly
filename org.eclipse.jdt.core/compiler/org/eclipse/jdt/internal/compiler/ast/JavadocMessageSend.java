@@ -110,7 +110,7 @@ public class JavadocMessageSend extends MessageSend {
 		AnchorMapping.removeCurrentMapping(anchorMapping);
 	  }
 	  // only on normal exit of the previous block:
-	  afterMethodLookup(scope, anchorMapping, argumentTypes, this.binding.returnType);
+	  afterMethodLookup(scope, anchorMapping, this.argumentTypes, this.binding.returnType);
 // jwl}
 		if (!this.binding.isValidBinding()) {
 			// Try method in enclosing types

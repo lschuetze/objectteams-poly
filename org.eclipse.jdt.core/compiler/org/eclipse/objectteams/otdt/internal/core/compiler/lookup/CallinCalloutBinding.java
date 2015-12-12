@@ -297,11 +297,11 @@ public class CallinCalloutBinding extends Binding
 
 	/** Answer the name of this callin qualified with the declaring class's name. */
 	public char[] getQualifiedName() {
-		char[] name = this.name;
-		if (name[0] == '<')
-			return name; // synthetic name is already unique.
+		char[] theName = this.name;
+		if (theName[0] == '<')
+			return theName; // synthetic name is already unique.
 		ReferenceBinding currentType = this._declaringRoleClass;
-		return CharOperation.concat(name, currentType.readableName(), '$');
+		return CharOperation.concat(theName, currentType.readableName(), '$');
 	}
 	/**
 	 * Answer the name of the role that introduced this callin mapping 

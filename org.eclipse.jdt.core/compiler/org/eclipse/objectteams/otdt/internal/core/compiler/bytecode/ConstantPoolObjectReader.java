@@ -32,8 +32,8 @@ import java.util.Iterator;
 import org.eclipse.jdt.core.compiler.CharOperation;
 import org.eclipse.jdt.internal.compiler.classfmt.ClassFileConstants;
 import org.eclipse.jdt.internal.compiler.classfmt.ClassFileStruct;
-import org.eclipse.jdt.internal.compiler.classfmt.TypeAnnotationWalker;
 import org.eclipse.jdt.internal.compiler.codegen.ConstantPool;
+import org.eclipse.jdt.internal.compiler.env.ITypeAnnotationWalker;
 import org.eclipse.jdt.internal.compiler.impl.Constant;
 import org.eclipse.jdt.internal.compiler.lookup.ArrayBinding;
 import org.eclipse.jdt.internal.compiler.lookup.BinaryTypeBinding;
@@ -151,10 +151,10 @@ public class ConstantPoolObjectReader extends ClassFileStruct implements ClassFi
         char[] typeName = getUtf8(ref);
         if (useGenerics)
         	return this._environment.getTypeFromTypeSignature(
-        				new SignatureWrapper(typeName), Binding.NO_TYPE_VARIABLES, this._srcModel.getBinding(), null, TypeAnnotationWalker.EMPTY_ANNOTATION_WALKER); // no missing type info available
+        				new SignatureWrapper(typeName), Binding.NO_TYPE_VARIABLES, this._srcModel.getBinding(), null, ITypeAnnotationWalker.EMPTY_ANNOTATION_WALKER); // no missing type info available
         else
         	return this._environment.getTypeFromSignature(
-        				typeName, 0, typeName.length-1, false/*GENERIC*/, this._srcModel.getBinding(), null, TypeAnnotationWalker.EMPTY_ANNOTATION_WALKER); // no missing type info available
+        				typeName, 0, typeName.length-1, false/*GENERIC*/, this._srcModel.getBinding(), null, ITypeAnnotationWalker.EMPTY_ANNOTATION_WALKER); // no missing type info available
     }
 
 	private int getInteger(int index){
@@ -212,7 +212,7 @@ public class ConstantPoolObjectReader extends ClassFileStruct implements ClassFi
 
 		// follows: decoding of array, leaf component type needs 'L' for reference bindings:
 		TypeBinding typeBinding = this._environment.getTypeFromSignature(name_str, 0, -1, false, this._srcModel.getBinding(),
-																			null, TypeAnnotationWalker.EMPTY_ANNOTATION_WALKER);
+																			null, ITypeAnnotationWalker.EMPTY_ANNOTATION_WALKER);
 		if (!typeBinding.leafComponentType().isBaseType()) {
 			ReferenceBinding referenceBinding = (ReferenceBinding)typeBinding.leafComponentType();
 			if (referenceBinding instanceof UnresolvedReferenceBinding) {
@@ -555,7 +555,7 @@ public class ConstantPoolObjectReader extends ClassFileStruct implements ClassFi
 
 				if (i >= startIndex)   // skip the synthetic arg if necessary
 					parameters[i - startIndex] = this._environment.getTypeFromSignature(methodSignature, index, end, false/*GENERIC*/, this._srcModel.getBinding(),
-																						null, TypeAnnotationWalker.EMPTY_ANNOTATION_WALKER); // no missing type info available
+																						null, ITypeAnnotationWalker.EMPTY_ANNOTATION_WALKER); // no missing type info available
 				index = end + 1;
 			}
 		}
@@ -563,7 +563,7 @@ public class ConstantPoolObjectReader extends ClassFileStruct implements ClassFi
 				methodModifiers,
 				methodSelector,
 				this._environment.getTypeFromSignature(methodSignature, index + 1, -1, false/*GENERIC*/, this._srcModel.getBinding(),   // index is currently pointing at the ')'
-														null, TypeAnnotationWalker.EMPTY_ANNOTATION_WALKER),
+														null, ITypeAnnotationWalker.EMPTY_ANNOTATION_WALKER),
 				parameters,
 				Binding.NO_EXCEPTIONS,
 				declaringClass);
@@ -687,9 +687,9 @@ public class ConstantPoolObjectReader extends ClassFileStruct implements ClassFi
 			}
 			if (separatorPosMethod > 0 && separatorPosDescriptor > 0) {
 				TypeBinding type1 = this._environment.getTypeFromSignature(signature, 1, separatorPosMethod, false/*GENERIC*/, this._srcModel.getBinding(),
-																			null, TypeAnnotationWalker.EMPTY_ANNOTATION_WALKER);
+																			null, ITypeAnnotationWalker.EMPTY_ANNOTATION_WALKER);
 				TypeBinding type2 = this._environment.getTypeFromSignature(descriptor, 1, separatorPosDescriptor, false/*GENERIC*/, this._srcModel.getBinding(),
-																			null, TypeAnnotationWalker.EMPTY_ANNOTATION_WALKER);
+																			null, ITypeAnnotationWalker.EMPTY_ANNOTATION_WALKER);
 				if (!type1.isTeam() || !type2.isTeam())
 					return false;
 				if (!type1.isCompatibleWith(type2))

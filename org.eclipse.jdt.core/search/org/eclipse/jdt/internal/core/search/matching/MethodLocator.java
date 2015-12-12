@@ -609,9 +609,9 @@ protected void matchReportReference(ASTNode reference, IJavaElement element, IJa
 		{
 		    MethodSpec methodSpec= (MethodSpec)reference;
 		    int offset = methodSpec.sourceStart ;
-			SearchMatch match = locator.newMethodReferenceMatch(element, elementBinding, accuracy, offset, 
+			SearchMatch newMatch = locator.newMethodReferenceMatch(element, elementBinding, accuracy, offset, 
 					methodSpec.declarationSourceEnd - offset + 1, false/*not constructor*/, false/*not synthetic*/, reference);
-			locator.report(match);
+			locator.report(newMatch);
 //jsv}	
 		} else {
 			if (reference instanceof SingleMemberAnnotation) {

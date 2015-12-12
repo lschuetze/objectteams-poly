@@ -115,7 +115,6 @@ public class WithinStatement extends Statement
         super(ast);
     }
 
-    @SuppressWarnings("rawtypes")
 	List internalStructuralPropertiesForType(int apiLevel)
     {
         return propertyDescriptors(apiLevel);

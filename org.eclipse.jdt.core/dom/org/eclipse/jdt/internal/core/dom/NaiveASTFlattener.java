@@ -2343,9 +2343,9 @@ public class NaiveASTFlattener extends ASTVisitor {
 		}
 		this.buffer.append(" ");//$NON-NLS-1$
 		if (node.getAST().apiLevel() == JLS2) {
-			if (this.getSuperclass(node) != null) {
+			if (getSuperclass(node) != null) {
 				this.buffer.append("extends ");//$NON-NLS-1$
-				this.getSuperclass(node).accept(this);
+				getSuperclass(node).accept(this);
 				this.buffer.append(" ");//$NON-NLS-1$
 			}
 			if (!this.superInterfaces(node).isEmpty()) {

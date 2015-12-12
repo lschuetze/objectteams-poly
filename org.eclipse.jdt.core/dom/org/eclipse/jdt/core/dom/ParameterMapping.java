@@ -41,6 +41,7 @@ import java.util.List;
  *
  * @author ike
  */
+@SuppressWarnings("rawtypes")
 public class ParameterMapping extends Expression
 {
 	/**

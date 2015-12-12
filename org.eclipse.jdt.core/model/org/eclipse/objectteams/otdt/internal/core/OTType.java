@@ -99,10 +99,10 @@ public class OTType extends OTJavaElement implements IOTType
 	 */
 	public IResource getCorrespondingResource() throws JavaModelException
 	{
-		IJavaElement parent = getCorrespondingJavaElement().getParent();
-		if (parent instanceof ICompilationUnit)
+		IJavaElement javaParent = getCorrespondingJavaElement().getParent();
+		if (javaParent instanceof ICompilationUnit)
 		{
-			return ((ICompilationUnit)parent).getCorrespondingResource();
+			return ((ICompilationUnit)javaParent).getCorrespondingResource();
 		}
 		
 		return null;

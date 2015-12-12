@@ -97,10 +97,10 @@ public class AnchorUsageRanksAttribute extends ListValueAttribute {
 
 	/** Retrieve the array of ranks as read from bytecode. */
 	public int[] getRanks() {
-		int[] ranks = new int[this._count];
+		int[] newRanks = new int[this._count];
 		for (int i=0; i<this._count; i++)
-			ranks[i] = this.ranks.get(i);
-		return ranks;
+			newRanks[i] = this.ranks.get(i);
+		return newRanks;
 	}
 
 	String toString(int i) {

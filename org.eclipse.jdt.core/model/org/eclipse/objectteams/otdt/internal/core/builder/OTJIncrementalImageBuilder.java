@@ -39,7 +39,6 @@ public class OTJIncrementalImageBuilder extends IncrementalImageBuilder {
 	 * For each affected source file, guess whether it could be a role
 	 * file and include its team in the compilation process.
 	 */
-	@SuppressWarnings("unchecked") // accessing super field with raw type
 	protected void addAffectedSourceFiles() {
 		super.addAffectedSourceFiles();
 		if (this.sourceFiles != null) {
@@ -66,7 +65,6 @@ public class OTJIncrementalImageBuilder extends IncrementalImageBuilder {
 	}
 	
 	/** Add a file to sourceFiles if it's not already contained. */
-	@SuppressWarnings("unchecked") // accessing super field with raw type
 	void checkAddFile (SourceFile teamFile) {
 		// could use a hashtable, but probably this list won't grow too long.
 		if (!this.sourceFiles.contains(teamFile))

@@ -264,8 +264,8 @@ protected void matchReportReference(ASTNode reference, IJavaElement element, IJa
         FieldAccessSpec fieldSpec = (FieldAccessSpec)reference;
         int offset = fieldSpec.sourceStart;
         int length = fieldSpec.sourceEnd - offset + 1;
-        SearchMatch match = locator.newFieldReferenceMatch(element, null, elementBinding, accuracy, offset, length, fieldSpec);
-        locator.report(match);
+        SearchMatch newMatch = locator.newFieldReferenceMatch(element, null, elementBinding, accuracy, offset, length, fieldSpec);
+        locator.report(newMatch);
     }
 //gbr+km}
 }

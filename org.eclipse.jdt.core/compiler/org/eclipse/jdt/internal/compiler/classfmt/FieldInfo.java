@@ -430,8 +430,8 @@ private void readModifierRelatedAttributes() {
 			char[] attributeName,
 			FieldInfo info,
 			int readOffset,
-			int structOffset,
-			int[] constantPoolOffsets)
+			int aStructOffset,
+			int[] someConstantPoolOffsets)
 	{
         if (CharOperation.equals(attributeName, IOTConstants.MODIFIERS_NAME))
         {
@@ -441,12 +441,12 @@ private void readModifierRelatedAttributes() {
         else if (CharOperation.equals(attributeName, IOTConstants.FIELD_TYPE_ANCHOR))
         {
             this.fieldAttributes.add(SingleValueAttribute.readFieldTypeAnchor(
-            		info, readOffset, structOffset, constantPoolOffsets));
+            		info, readOffset, aStructOffset, someConstantPoolOffsets));
         }
         else if (CharOperation.equals(attributeName, IOTConstants.ANCHOR_USAGE_RANKS))
         {
             this.fieldAttributes.add(new AnchorUsageRanksAttribute(
-            		info, readOffset, structOffset, constantPoolOffsets));
+            		info, readOffset, aStructOffset, someConstantPoolOffsets));
         }
 	}
 	public void evaluateOTAttributes(FieldBinding fieldBinding) {

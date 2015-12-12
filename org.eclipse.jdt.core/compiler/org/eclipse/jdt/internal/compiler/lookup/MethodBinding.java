@@ -1022,11 +1022,11 @@ public char[] genericSignature(boolean retrenchCallin) {
 		sig.append(this.parameters[i].genericTypeSignature());
 	}
   :giro */
-	TypeBinding[] parameters = retrenchCallin
+	TypeBinding[] visibleParameters = retrenchCallin
 								? getSourceParameters()
 								: this.parameters;
-	for (int i = 0, length = parameters.length; i < length; i++) {
-		sig.append(parameters[i].genericTypeSignature());
+	for (int i = 0, length = visibleParameters.length; i < length; i++) {
+		sig.append(visibleParameters[i].genericTypeSignature());
 	}
 // SH}
 	sig.append(')');

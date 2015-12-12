@@ -871,8 +871,7 @@ public class PhantomType implements IPhantomType
     /* (non-Javadoc)
      * @see org.eclipse.core.runtime.IAdaptable#getAdapter(java.lang.Class)
      */
-    @SuppressWarnings("rawtypes")
-	public Object getAdapter(Class adapter)
+	public <T> T getAdapter(Class<T> adapter)
     {
         return this._realType.getAdapter(adapter);
     }

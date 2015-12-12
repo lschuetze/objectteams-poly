@@ -137,7 +137,6 @@ public class TSuperMessageSend extends Expression implements Invocation
 		return ARGUMENTS_PROPERTY;
 	}
 
-	@SuppressWarnings("rawtypes")
 	final List internalStructuralPropertiesForType(int apiLevel)
 	{
 		return propertyDescriptors(apiLevel);
@@ -174,7 +173,6 @@ public class TSuperMessageSend extends Expression implements Invocation
         return super.internalGetSetChildProperty(property, get, child);
     }
 
-    @SuppressWarnings("rawtypes")
 	final List internalGetChildListProperty(ChildListPropertyDescriptor property)
     {
         if (property == ARGUMENTS_PROPERTY)
@@ -255,7 +253,6 @@ public class TSuperMessageSend extends Expression implements Invocation
      * @return the live list of argument expressions
      *    (element type: <code>Expression</code>)
      */
-    @SuppressWarnings("rawtypes")
 	public List getArguments()
     {
         return this.arguments;

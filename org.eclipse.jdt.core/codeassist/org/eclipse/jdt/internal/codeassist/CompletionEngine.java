@@ -9110,7 +9110,7 @@ public final class CompletionEngine
 			int length = method.parameters.length;
   :giro */
 			int length = method.getSourceParamLength();
-			int offset = method.parameters.length - length;
+			int parameterOffset = method.parameters.length - length;
 // SH}
 			char[][] parameterPackageNames = new char[length][];
 			char[][] parameterTypeNames = new char[length][];
@@ -9119,7 +9119,7 @@ public final class CompletionEngine
 /* orig:
 				for (int i = 0; i < length; i++) {
   :giro */
-				for (int i = offset; i < length; i++) {
+				for (int i = parameterOffset; i < length; i++) {
 // SH}
 					TypeBinding type = method.original().parameters[i];
 					parameterPackageNames[i] = type.qualifiedPackageName();
@@ -9129,7 +9129,7 @@ public final class CompletionEngine
 /* orig:
 			char[][] parameterNames = findMethodParameterNames(method,parameterTypeNames);
   :giro */
-			char[][] parameterNames = findMethodParameterNames(method,offset,parameterTypeNames);
+			char[][] parameterNames = findMethodParameterNames(method,parameterOffset,parameterTypeNames);
 // SH}
 
 			char[] completion = CharOperation.NO_CHAR;
@@ -10484,10 +10484,10 @@ public final class CompletionEngine
 	
 	private char[][] findMethodParameterNames(MethodBinding method, char[][] parameterTypeNames){
 //{ObjectTeams: added arg offset:
-		return findMethodParameterNames(method, /*offset*/0, parameterTypeNames);
+		return findMethodParameterNames(method, /*parameterOffset*/0, parameterTypeNames);
 	}
 
-	private char[][] findMethodParameterNames(MethodBinding method, int offset, char[][] parameterTypeNames){
+	private char[][] findMethodParameterNames(MethodBinding method, int parameterOffset, char[][] parameterTypeNames){
 // SH}
 		TypeBinding erasure =  method.declaringClass.erasure();
 		if(!(erasure instanceof ReferenceBinding)) return null;
@@ -10518,7 +10518,7 @@ public final class CompletionEngine
 /* orig:
 							parameterNames[i] = arguments[i].name;
   :giro */
-							parameterNames[i] = stripOTPrefix(arguments[i+offset].name);
+							parameterNames[i] = stripOTPrefix(arguments[i+parameterOffset].name);
 // carp+SH}
 						}
 					}

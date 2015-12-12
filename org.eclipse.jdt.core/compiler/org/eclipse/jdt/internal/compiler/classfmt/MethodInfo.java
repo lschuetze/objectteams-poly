@@ -548,15 +548,15 @@ private void readModifierRelatedAttributes() {
      * @param attributeName
      * @param info         method info to which attribute applies.
      * @param readOffset
-     * @param structOffset (subtract when indexing via constantPoolOffsets)
-     * @param constantPoolOffsets
+     * @param aStructOffset (subtract when indexing via constantPoolOffsets)
+     * @param someConstantPoolOffsets
      */
     void readOTAttribute(
             char[]     attributeName,
             MethodInfo info,
             int        readOffset,
-            int        structOffset,
-            int[]      constantPoolOffsets)
+            int        aStructOffset,
+            int[]      someConstantPoolOffsets)
     {
     	if (CharOperation.equals(attributeName, AttributeNamesConstants.CodeName))
     		return; // optimization only.
@@ -581,11 +581,11 @@ private void readModifierRelatedAttributes() {
         }
         else if (CharOperation.equals(attributeName, TYPE_ANCHOR_LIST))
         {
-            this.methodAttributes.add(new AnchorListAttribute(info, readOffset, structOffset, constantPoolOffsets));
+            this.methodAttributes.add(new AnchorListAttribute(info, readOffset, aStructOffset, someConstantPoolOffsets));
         }
         else if (CharOperation.equals(attributeName, COPY_INHERITANCE_SOURCE_NAME))
         {
-            this.methodAttributes.add(CopyInheritanceSourceAttribute.readcopyInherSrc(info, readOffset, structOffset, constantPoolOffsets));
+            this.methodAttributes.add(CopyInheritanceSourceAttribute.readcopyInherSrc(info, readOffset, aStructOffset, someConstantPoolOffsets));
         }
     }
 

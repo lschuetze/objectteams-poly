@@ -283,7 +283,6 @@ public class RoleTypeDeclaration extends TypeDeclaration {
      * {@link StructuralPropertyDescriptor})
      * @since 3.0
      */
-    @SuppressWarnings("rawtypes")
 	public static List propertyDescriptors(int apiLevel)
     {
         if (apiLevel == AST.JLS2_INTERNAL)
@@ -347,7 +346,6 @@ public class RoleTypeDeclaration extends TypeDeclaration {
      * Method declared on ASTNode.
      * @since 3.0
      */
-    @SuppressWarnings("rawtypes")
 	final List internalStructuralPropertiesForType(int apiLevel)
     {
         return propertyDescriptors(apiLevel);
@@ -528,7 +526,6 @@ public class RoleTypeDeclaration extends TypeDeclaration {
     /* (omit javadoc for this method)
      * Method declared on ASTNode.
      */
-    @SuppressWarnings("rawtypes")
 	final List internalGetChildListProperty(ChildListPropertyDescriptor property)
     {
         if (property == MODIFIERS2_PROPERTY)
@@ -619,7 +616,6 @@ public class RoleTypeDeclaration extends TypeDeclaration {
     /* (omit javadoc for this method)
      * Method declared on ASTNode.
      */
-    @SuppressWarnings("unchecked")
 	ASTNode clone0(AST target)
     {
         RoleTypeDeclaration result = new RoleTypeDeclaration(target);

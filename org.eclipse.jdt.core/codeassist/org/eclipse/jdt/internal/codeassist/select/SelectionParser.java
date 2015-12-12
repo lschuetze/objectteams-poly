@@ -1482,11 +1482,11 @@ private char[] currentIdentifier = null;
 @Override
 protected char[] getIdentifier() {
 	int assistIdentifierPtr = indexOfAssistIdentifier();
-	char[] name= super.getIdentifier();
+	char[] identifier= super.getIdentifier();
 	if (assistIdentifierPtr >= 0) {
-		this.currentIdentifier = name;
+		this.currentIdentifier = identifier;
 	}
-	return name;
+	return identifier;
 }
 // SH}
 public void initializeScanner(){
@@ -1721,12 +1721,12 @@ protected Argument typeElidedArgument() {
 	}
 	/* create specialized node */
 	@Override
-	protected FieldAccessSpec newFieldAccessSpec(char[] ident, long poss, TypeReference type, int modifiers)
+	protected FieldAccessSpec newFieldAccessSpec(char[] ident, long poss, TypeReference type, int accessorModifiers)
 	{
 		/* no need to take action if not inside assist identifiers */
 		if (assistIdentifier() != ident)
-			return super.newFieldAccessSpec(ident, poss, type, modifiers);
-		FieldAccessSpec spec = new SelectionOnFieldAccessSpec(ident, type, poss, modifiers);
+			return super.newFieldAccessSpec(ident, poss, type, accessorModifiers);
+		FieldAccessSpec spec = new SelectionOnFieldAccessSpec(ident, type, poss, accessorModifiers);
 		this.assistNode = spec;
 		return spec;
 	}

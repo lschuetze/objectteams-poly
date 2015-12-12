@@ -267,10 +267,10 @@ public abstract class OTJavaElement extends Member implements IOTJavaElement
         return this.correspondingJavaElem.isStructureKnown();
     }
     
-	@Override @SuppressWarnings("rawtypes")
-    public Object getAdapter(Class adapter)
+    @Override
+    public <T> T getAdapter(Class<T> adapter)
     {
-    	Object result = super.getAdapter(adapter);
+    	T result = super.getAdapter(adapter);
     	if (result == null)
     		result = this.correspondingJavaElem.getAdapter(adapter);
     	

@@ -2088,11 +2088,11 @@ public class CompilerOptions {
 			}
 		}
 		if ((optionValue = optionsMap.get(OPTION_Decapsulation)) != null) {
-			this.decapsulation = (String)optionValue;
+			this.decapsulation = optionValue;
 		}
 		if ((optionValue = optionsMap.get(OPTION_WeavingScheme)) != null) {
 			try {
-				this.weavingScheme = WeavingScheme.valueOf((String)optionValue);
+				this.weavingScheme = WeavingScheme.valueOf(optionValue);
 			} catch (IllegalArgumentException iae) {
 				// ignore illegal value
 			}

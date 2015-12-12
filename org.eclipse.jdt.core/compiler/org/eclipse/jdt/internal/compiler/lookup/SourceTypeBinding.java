@@ -3176,7 +3176,7 @@ public void reduceMethods(HashSet<MethodBinding> toRemove, int len) {
 }
 public void removeMethod(MethodBinding method) {
 	int length = this.methods.length;
-	MethodBinding[] methods = new MethodBinding[length - 1];
+	MethodBinding[] newMethods = new MethodBinding[length - 1];
 	int pos = -1;
 	if (this.methods != null) {
 	    for (int i = 0; i < this.methods.length; i++) {
@@ -3187,12 +3187,12 @@ public void removeMethod(MethodBinding method) {
 		}
 	}
 	if (pos >= 0) {
-	    System.arraycopy(this.methods, 0, methods, 0, pos);
+	    System.arraycopy(this.methods, 0, newMethods, 0, pos);
 	    System.arraycopy(
 	        this.methods, pos + 1,
-	        methods,      pos,
+	        newMethods,      pos,
 	        length - (pos + 1));
-	    this.methods = methods;
+	    this.methods = newMethods;
 	}
 }
 

@@ -99,7 +99,7 @@ public abstract class MethodMappingImplementor {
 	 * @param sourceMethodSpec <ul>
 	 * 			<li>look here for param-positions (see AbstractMethodMappingDeclaration.positions)
 	 * 			<li>and check the need of lifting.</ul>
-	 * @param isFieldAccess
+	 * @param baseFieldSpec
 	 * 			if we don't call a method but access a field
 	 * 			which is emulated by a static base method.
 	 * @param hasResultArgument
