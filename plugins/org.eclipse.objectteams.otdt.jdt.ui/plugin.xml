@@ -205,7 +205,6 @@
               icon="platform:/plugin/org.eclipse.objectteams.otdt.ui/icons/ot/team_obj.gif">
         </team>
      </aspectBinding>
-<!--
      <aspectBinding
            icon="platform:/plugin/org.eclipse.objectteams.otdt.ui/icons/ot/calloutbinding_obj.gif">
         <basePlugin
@@ -223,7 +222,6 @@
               icon="platform:/plugin/org.eclipse.objectteams.otdt.ui/icons/ot/team_obj.gif">
         </team>
      </aspectBinding>
--->
    </extension>
    <extension
          point="org.eclipse.ui.decorators">
