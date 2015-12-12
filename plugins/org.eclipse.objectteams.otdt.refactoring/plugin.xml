@@ -19,6 +19,11 @@
                icon="platform:/plugin/org.eclipse.objectteams.otdt.ui/icons/ot/team_obj.gif">
          </team>
          <team
+               activation="NONE"
+               class="org.eclipse.objectteams.otdt.internal.refactoring.adaptor.RenameAdaptor$ImportsManager"
+               icon="platform:/plugin/org.eclipse.objectteams.otdt.ui/icons/ot/team_obj.gif">
+         </team>
+         <team
                activation="ALL_THREADS"
                class="org.eclipse.objectteams.otdt.internal.refactoring.adaptor.ReorgAdaptor"
                icon="platform:/plugin/org.eclipse.objectteams.otdt.ui/icons/ot/team_obj.gif">
