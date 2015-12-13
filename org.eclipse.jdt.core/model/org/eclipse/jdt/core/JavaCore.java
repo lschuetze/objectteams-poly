@@ -2967,7 +2967,18 @@ public final class JavaCore extends Plugin {
 	public static final String JAVA_SOURCE_CONTENT_TYPE = JavaCore.PLUGIN_ID+".javaSource" ; //$NON-NLS-1$
 
 //{ObjectTeams: additional option for configuring the ASTConverter:
-	/** Set this option to ENABLED if AST creation should include contained role files. */
+	/**
+	 * Core Option ID to control whether AST creation should include contained role files.
+	 * <p>When enabled, ast created from a team with role files will contain the content
+	 * 	of all role files as direct children of the team class.</p>
+	 * <dl>
+	 * <dt>Option id:</dt><dd><code>"org.eclipse.jdt.core.ASTIncludesRoleFiles"</code></dd>
+	 * <dt>Possible values:</dt><dd><code>{ "enabled", "disabled" }</code></dd>
+	 * <dt>Default:</dt><dd><code>"disabled"</code></dd>
+	 * </dl>
+	 * @since 2.0 (OTDT)
+	 * @category CoreOptionID 
+	 */
 	public static final String AST_INCLUDES_ROLE_FILES = JavaCore.PLUGIN_ID+".ASTIncludesRoleFiles"; //$NON-NLS-1$
 // SH}
 

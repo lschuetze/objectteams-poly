@@ -67,6 +67,11 @@
             <param name="sourceUpdatesDir" value="${otdtUpdatesDir}"/>
             <param name="targetEclipseDir" value="${test.eclipseDir}"/>
         </antcall>
+        <antcall target="installFeature">
+            <param name="feature" value="org.eclipse.objectteams.otdt.source.feature.feature.group"/>
+            <param name="sourceUpdatesDir" value="${otdtUpdatesDir}"/>
+            <param name="targetEclipseDir" value="${test.eclipseDir}"/>
+        </antcall>
 		<echo message="Generating accumulating metadata in ${otdtUpdatesDir}" />
 		<!-- existing meta data are pre-loaded from build.xml -->
     </target>

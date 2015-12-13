@@ -2259,6 +2259,9 @@ public class JavaModelManager implements ISaveParticipant, IContentTypeChangeLis
 		defaultOptionsMap.put(JavaCore.CORE_OUTPUT_LOCATION_OVERLAPPING_ANOTHER_SOURCE, JavaCore.ERROR);
 		defaultOptionsMap.put(JavaCore.CORE_ENABLE_CLASSPATH_EXCLUSION_PATTERNS, JavaCore.ENABLED);
 		defaultOptionsMap.put(JavaCore.CORE_ENABLE_CLASSPATH_MULTIPLE_OUTPUT_LOCATIONS, JavaCore.ENABLED);
+//{ObjectTeams: one more setting:
+		defaultOptionsMap.put(JavaCore.AST_INCLUDES_ROLE_FILES, JavaCore.DISABLED);
+// SH}
 
 		// Formatter settings
 		defaultOptionsMap.putAll(DefaultCodeFormatterConstants.getEclipseDefaultSettings());
