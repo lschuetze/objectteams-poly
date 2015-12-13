@@ -129,7 +129,7 @@ public class AbstractOTJLDTest extends AbstractComparableTest {
 	// each subarray defines a set of classes to be compiled together:
 	protected String[][] compileOrder;
 	
-	protected WeavingScheme weavingScheme = WeavingScheme.OTRE;
+	protected WeavingScheme weavingScheme = WeavingScheme.OTDRE;
 	
 	public AbstractOTJLDTest(String name) {
 		super(name);
@@ -152,9 +152,9 @@ public class AbstractOTJLDTest extends AbstractComparableTest {
 	@Override
 	public void initialize(CompilerTestSetup setUp) {
 		super.initialize(setUp);
-		if ("dynamic".equals(System.getProperty("ot.weaving"))
-				||"otdre".equals(System.getProperty("test.ot.weaving")))
-			weavingScheme = WeavingScheme.OTDRE;
+		if ("otre".equals(System.getProperty("ot.weaving"))
+				||"otre".equals(System.getProperty("test.ot.weaving")))
+			weavingScheme = WeavingScheme.OTRE;
 		if (setUp instanceof RegressionTestSetup) {
 			RegressionTestSetup regressionSetTup = (RegressionTestSetup) setUp;
 			if (!(regressionSetTup.verifier instanceof OTTestVerifier)) {
