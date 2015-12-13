@@ -686,11 +686,19 @@ public abstract class AbstractBoundClass implements IBoundClass {
 							if (method.isImplemented()) {
 								// So redefine the method
 								weaveBindingInImplementedMethod(task);
+								if (!method.isStatic() && weavingContext.isWeavable(getSuperClassName())) {
+									AbstractBoundClass superclass = getSuperclass();
+									Method superMethod = superclass.getMethod(method.getName(), method.getSignature(), true, false);
+									if (superMethod.isImplemented()) {
+										// binding affects also the super implementation, need to handle wicked super calls:
+										replaceWickedSuperCalls(getSuperclass(), method);
+									}
+								}
 							} else {
 								//No, so weave this class and delegate to the super class
 								weaveBindingInNotImplementedMethod(task);
-								AbstractBoundClass superclass = getSuperclass();
 								if (weavingContext.isWeavable(getSuperClassName())) {
+									AbstractBoundClass superclass = getSuperclass();
 									Method superMethod = superclass.getMethod(method, task);
 									if (superMethod != null) {
 										WeavingTask newTask = new WeavingTask(WeavingTaskType.WEAVE_BINDING_OF_SUBCLASS, superMethod, task);
@@ -724,10 +732,12 @@ public abstract class AbstractBoundClass implements IBoundClass {
 					case WEAVE_INHERITED_BINDING:
 						if (method.isImplemented()) {
 							weaveBindingInImplementedMethod(task);
+							if (!method.isStatic()) {
+								replaceWickedSuperCalls(getSuperclass(), method);
+							}
 						} else {
 							weaveBindingInNotImplementedMethod(task);
 						}
-						replaceWickedSuperCalls(getSuperclass(), method);
 		
 						// Delegate the WeavingTask to the subclasses
 						for (AbstractBoundClass subclass : getSubclasses()) {

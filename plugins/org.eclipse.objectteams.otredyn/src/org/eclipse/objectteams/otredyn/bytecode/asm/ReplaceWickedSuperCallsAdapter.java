@@ -91,7 +91,9 @@ public class ReplaceWickedSuperCallsAdapter extends AbstractTransformableClassNo
 			@Override
 			public void visitMethodInsn(int opcode, String owner, String name, String desc, boolean itf) {
 				super.visitMethodInsn(opcode, owner, name, desc, itf);
-				if (opcode == Opcodes.INVOKESPECIAL && !enclosingMethodName.equals(name) && owner.equals(superclass.getInternalName())) {
+				if (opcode == Opcodes.INVOKESPECIAL
+						&& !(enclosingMethodName.equals(name) && enclosingMethodDesc.contentEquals(desc))
+						&& owner.equals(superclass.getInternalName())) {
 					// we have a wicked super call ...
 					for (Method tgt: targetMethods) {
 						if (tgt.getName().equals(name) && tgt.getSignature().equals(desc)) {
