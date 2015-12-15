@@ -1,7 +1,7 @@
 /**********************************************************************
  * This file is part of "Object Teams Development Tooling"-Software
  * 
- * Copyright 2005, 2011 Fraunhofer Gesellschaft, Munich, Germany,
+ * Copyright 2005, 2015 Fraunhofer Gesellschaft, Munich, Germany,
  * for its Fraunhofer Institute for Computer Architecture and Software
  * Technology (FIRST), Berlin, Germany and Technical University Berlin,
  * Germany, and others.
@@ -10,7 +10,6 @@
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
- * $Id: CompilerConfigurationBlock.java 23435 2010-02-04 00:14:38Z stephan $
  * 
  * Please visit http://www.eclipse.org/objectteams for updates and contact.
  * 
@@ -37,6 +36,7 @@ import org.eclipse.swt.graphics.Font;
 import org.eclipse.swt.graphics.FontData;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
+import org.eclipse.swt.widgets.Combo;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Label;
@@ -79,7 +79,6 @@ import org.eclipse.ui.preferences.IWorkbenchPreferenceContainer;
  * Created on Sep 11, 2005
  * 
  * @author stephan
- * @version $Id: CompilerConfigurationBlock.java 23435 2010-02-04 00:14:38Z stephan $
  */
 public class CompilerConfigurationBlock extends OptionsConfigurationBlock {
 
@@ -126,6 +125,7 @@ public class CompilerConfigurationBlock extends OptionsConfigurationBlock {
 	private ControlEnableState fBlockEnableState;
 	private FilteredPreferenceTree fFilteredPrefTree;
 	private PixelConverter fPixelConverter;
+	private Combo fWeavingSchemeComboBox;
 	
 	public CompilerConfigurationBlock(IStatusChangeListener context, IProject project, IWorkbenchPreferenceContainer container) {
 		super(context, project, getKeys(), container);
@@ -194,6 +194,9 @@ public class CompilerConfigurationBlock extends OptionsConfigurationBlock {
 				}
 			}
 		}
+		if (fWeavingSchemeComboBox != null && !fWeavingSchemeComboBox.isDisposed()) {
+			fWeavingSchemeComboBox.setEnabled(enable);
+		}
 	}
 	
 
@@ -209,7 +212,7 @@ public class CompilerConfigurationBlock extends OptionsConfigurationBlock {
 		topLayout.marginHeight = fPixelConverter.convertHeightInCharsToPixels(1) / 2;
 		topComposite.setLayout(topLayout);
 
-		addComboBox(topComposite, OTPreferencesMessages.OTCompilerConfigurationBlock_weaving_label, PREF_WEAVING_SCHEME, 
+		fWeavingSchemeComboBox = addComboBox(topComposite, OTPreferencesMessages.OTCompilerConfigurationBlock_weaving_label, PREF_WEAVING_SCHEME, 
 				new String[] { WeavingScheme.OTRE.toString(), WeavingScheme.OTDRE.toString() }, 
 				new String[] { OTPreferencesMessages.OTCompilerConfigurationBlock_weaving_otre_label,
 								OTPreferencesMessages.OTCompilerConfigurationBlock_weaving_otdre_label },
