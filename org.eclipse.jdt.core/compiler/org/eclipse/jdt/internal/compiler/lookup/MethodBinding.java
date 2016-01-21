@@ -102,7 +102,6 @@ import org.eclipse.objectteams.otdt.internal.core.compiler.util.TSuperHelper;
  *   if roleCreatorRequiringRuntimeCheck is set:
  *   -> call Lifting.createDuplicateRoleCheck to create the byte code sequence
  */
-@SuppressWarnings("rawtypes")
 //{ObjectTeams: added IProtectable
 /* orig:
 public class MethodBinding extends Binding {
@@ -671,9 +670,9 @@ public final boolean canBeSeenBy(TypeBinding receiverType, InvocationSite invoca
 		// package could be null for wildcards/intersection types, ignore and recurse in superclass
 //{ObjectTeams: if leaving the package, we still have an alternate plan (below)
     /* orig
-		if (currentPackage != null && currentPackage != declaringPackage) return false;
+		if (!currentType.isCapture() && currentPackage != null && currentPackage != declaringPackage) return false;
      */
-		if (currentPackage != null && currentPackage != declaringPackage) break;
+		if (!currentType.isCapture() && currentPackage != null && currentPackage != declaringPackage) break;
 // orig:
 	} while ((currentType = currentType.superclass()) != null);
 // :giro
@@ -686,7 +685,7 @@ public final boolean canBeSeenBy(TypeBinding receiverType, InvocationSite invoca
 	return false;
 }
 
-public List collectMissingTypes(List missingTypes) {
+public List<TypeBinding> collectMissingTypes(List<TypeBinding> missingTypes) {
 	if ((this.tagBits & TagBits.HasMissingType) != 0) {
 		missingTypes = this.returnType.collectMissingTypes(missingTypes);
 		for (int i = 0, max = this.parameters.length; i < max; i++) {

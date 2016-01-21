@@ -256,6 +256,7 @@ public class CaptureBinding extends TypeVariableBinding {
 					this.tagBits &= ~TagBits.HasTypeVariable;
 				break;
 		}
+		evaluateNullAnnotations(scope, null);
 	}
 
 	/**

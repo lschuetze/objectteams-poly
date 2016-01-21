@@ -81,6 +81,7 @@ public class DefaultCodeFormatter extends CodeFormatter {
 
 	private String sourceString;
 	private char[] sourceArray;
+	private IRegion[] formatRegions;
 
 	private ASTNode astRoot;
 	private List<Token> tokens = new ArrayList<>();
@@ -153,11 +154,12 @@ public class DefaultCodeFormatter extends CodeFormatter {
 		if (!regionsSatisfiesPreconditions(regions, source.length())) {
 			throw new IllegalArgumentException();
 		}
+		this.formatRegions = regions;
 
 		updateWorkingOptions(indentationLevel, lineSeparator, kind);
 
 		if ((kind & K_COMMENTS_MASK) != 0)
-			return formatComments(source, kind & K_COMMENTS_MASK, regions);
+			return formatComments(source, kind & K_COMMENTS_MASK);
 
 		if (prepareFormattedCode(source, kind) == null)
 			return this.tokens.isEmpty() ? new MultiTextEdit() : null;
@@ -219,7 +221,7 @@ public class DefaultCodeFormatter extends CodeFormatter {
 		}
 	}
 
-	private TextEdit formatComments(String source, int kind, IRegion[] regions) {
+	private TextEdit formatComments(String source, int kind) {
 		MultiTextEdit result = new MultiTextEdit();
 		if (!init(source))
 			return result;
@@ -273,7 +275,8 @@ public class DefaultCodeFormatter extends CodeFormatter {
 
 		this.tokenManager.applyFormatOff();
 
-		TextEditsBuilder resultBuilder = new TextEditsBuilder(source, regions, this.tokenManager, this.workingOptions);
+		TextEditsBuilder resultBuilder = new TextEditsBuilder(source, this.formatRegions, this.tokenManager,
+				this.workingOptions);
 		resultBuilder.setAlignChar(DefaultCodeFormatterOptions.SPACE);
 		for (Token token : this.tokens) {
 			List<Token> structure = token.getInternalStructure();
@@ -291,6 +294,7 @@ public class DefaultCodeFormatter extends CodeFormatter {
 		ASTParser parser = ASTParser.newParser(AST.JLS8);
 		Map<String, String> parserOptions = JavaCore.getOptions();
 		parserOptions.put(CompilerOptions.OPTION_Source, this.sourceLevel);
+		parserOptions.put(CompilerOptions.OPTION_DocCommentSupport, CompilerOptions.ENABLED);
 //{ObjectTeams:
 		parserOptions.put(CompilerOptions.OPTION_PureJavaOnly, this.workingOptions.isPureJava ? CompilerOptions.ENABLED : CompilerOptions.DISABLED);
 		parserOptions.put(CompilerOptions.OPTION_AllowScopedKeywords, this.workingOptions.scopedKeywords ? CompilerOptions.ENABLED : CompilerOptions.DISABLED);
@@ -387,7 +391,7 @@ public class DefaultCodeFormatter extends CodeFormatter {
 	private void prepareWraps(int kind) {
 		WrapPreparator wrapPreparator = new WrapPreparator(this.tokenManager, this.workingOptions, kind);
 		this.astRoot.accept(wrapPreparator);
-		wrapPreparator.finishUp(this.astRoot);
+		wrapPreparator.finishUp(this.astRoot, this.formatRegions);
 	}
 
 	/**

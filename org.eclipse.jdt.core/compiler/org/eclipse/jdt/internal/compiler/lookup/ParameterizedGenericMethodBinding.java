@@ -59,6 +59,7 @@ public class ParameterizedGenericMethodBinding extends ParameterizedMethodBindin
     public boolean wasInferred; // only set to true for instances resulting from method invocation inferrence
     public boolean isRaw; // set to true for method behaving as raw for substitution purpose
     private MethodBinding tiebreakMethod;
+	public boolean inferredWithUncheckedConversion;
 
 	/**
 	 * Perform inference of generic method type parameters and/or expected type
@@ -587,6 +588,7 @@ public class ParameterizedGenericMethodBinding extends ParameterizedMethodBindin
      */
 	public ParameterizedGenericMethodBinding(MethodBinding originalMethod, TypeBinding[] typeArguments, LookupEnvironment environment, boolean inferredWithUncheckConversion, boolean hasReturnProblem) {
 	    this.environment = environment;
+		this.inferredWithUncheckedConversion = inferredWithUncheckConversion;
 		this.modifiers = originalMethod.modifiers;
 		this.selector = originalMethod.selector;
 		this.declaringClass = originalMethod.declaringClass;

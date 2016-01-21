@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2014, 2015 Mateusz Matela and others.
+ * Copyright (c) 2014, 2016 Mateusz Matela and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -50,6 +50,7 @@ import org.eclipse.jdt.core.dom.FieldDeclaration;
 import org.eclipse.jdt.core.dom.ForStatement;
 import org.eclipse.jdt.core.dom.GuardPredicateDeclaration;
 import org.eclipse.jdt.core.dom.IfStatement;
+import org.eclipse.jdt.core.dom.ImportDeclaration;
 import org.eclipse.jdt.core.dom.InfixExpression;
 import org.eclipse.jdt.core.dom.InstanceofExpression;
 import org.eclipse.jdt.core.dom.IntersectionType;
@@ -61,6 +62,7 @@ import org.eclipse.jdt.core.dom.MethodDeclaration;
 import org.eclipse.jdt.core.dom.MethodInvocation;
 import org.eclipse.jdt.core.dom.MethodSpec;
 import org.eclipse.jdt.core.dom.NormalAnnotation;
+import org.eclipse.jdt.core.dom.PackageDeclaration;
 import org.eclipse.jdt.core.dom.ParameterMapping;
 import org.eclipse.jdt.core.dom.ParameterizedType;
 import org.eclipse.jdt.core.dom.ParenthesizedExpression;
@@ -110,6 +112,18 @@ public class SpacePreparator extends ASTVisitor {
 	}
 
 	@Override
+	public boolean visit(PackageDeclaration node) {
+		handleSemicolon(node);
+		return true;
+	}
+
+	@Override
+	public boolean visit(ImportDeclaration node) {
+		handleSemicolon(node);
+		return true;
+	}
+
+	@Override
 	public boolean visit(TypeDeclaration node) {
 		if (node.getName().getStartPosition() == -1)
 			return true; // this is a fake type created by parsing in class body mode
@@ -135,6 +149,8 @@ public class SpacePreparator extends ASTVisitor {
 	public boolean visit(EnumDeclaration node) {
 		handleToken(node.getName(), TokenNameLBRACE,
 				this.options.insert_space_before_opening_brace_in_enum_declaration, false);
+		handleCommas(node.superInterfaceTypes(), this.options.insert_space_before_comma_in_superinterfaces,
+				this.options.insert_space_after_comma_in_superinterfaces);
 		handleCommas(node.enumConstants(), this.options.insert_space_before_comma_in_enum_declarations,
 				this.options.insert_space_after_comma_in_enum_declarations);
 		return true;
@@ -202,7 +218,11 @@ public class SpacePreparator extends ASTVisitor {
 			boolean spaceBeforeCloseParen = node.isConstructor()
 					? this.options.insert_space_before_closing_paren_in_constructor_declaration
 					: this.options.insert_space_before_closing_paren_in_method_declaration;
-			handleTokenBefore(node.getBody(), TokenNameRPAREN, spaceBeforeCloseParen, false);
+			if (spaceBeforeCloseParen) {
+				List<SingleVariableDeclaration> params = node.parameters();
+				ASTNode beforeBrace = params.isEmpty() ? node.getName() : params.get(params.size() - 1);
+				handleTokenAfter(beforeBrace, TokenNameRPAREN, true, false);
+			}
 		}
 
 		if ((node.isConstructor() ? this.options.insert_space_before_opening_brace_in_constructor_declaration
@@ -236,6 +256,8 @@ public class SpacePreparator extends ASTVisitor {
 			handleTokenBefore(typeParameters.get(0), TokenNameLESS, true, false);
 			handleTokenAfter(typeParameters.get(typeParameters.size() - 1), TokenNameGREATER, false, true);
 		}
+
+		handleSemicolon(node);
 		return true;
 	}
 
@@ -257,6 +279,7 @@ public class SpacePreparator extends ASTVisitor {
 		handleToken((ASTNode) node.fragments().get(0), TokenNameIdentifier, true, false);
 		handleCommas(node.fragments(), this.options.insert_space_before_comma_in_multiple_field_declarations,
 				this.options.insert_space_after_comma_in_multiple_field_declarations);
+		handleSemicolon(node);
 		return true;
 	}
 
@@ -301,6 +324,7 @@ public class SpacePreparator extends ASTVisitor {
 				this.options.insert_space_before_closing_paren_in_switch, false);
 		handleTokenAfter(node.getExpression(), TokenNameLBRACE,
 				this.options.insert_space_before_opening_brace_in_switch, false);
+		handleSemicolon(node.statements());
 		return true;
 	}
 
@@ -511,6 +535,8 @@ public class SpacePreparator extends ASTVisitor {
 
 	@Override
 	public boolean visit(Block node) {
+		handleSemicolon(node.statements());
+
 		ASTNode parent = node.getParent();
 		if (parent.getLength() == 0)
 			return true; // this is a fake block created by parsing in statements mode
@@ -541,6 +567,8 @@ public class SpacePreparator extends ASTVisitor {
 			handleToken(thenStatement, TokenNameLBRACE, false, true);
 			this.tm.lastTokenIn(node, TokenNameRBRACE).spaceBefore();
 		}
+
+		handleSemicolon(thenStatement);
 		return true;
 	}
 
@@ -838,14 +866,11 @@ public class SpacePreparator extends ASTVisitor {
 
 	@Override
 	public boolean visit(ParameterizedType node) {
-		handleTokenAfter(node.getType(), TokenNameLESS,
-				this.options.insert_space_before_opening_angle_bracket_in_parameterized_type_reference,
-				this.options.insert_space_after_opening_angle_bracket_in_parameterized_type_reference);
 		List<Type> typeArguments = node.typeArguments();
-		if (typeArguments.isEmpty()) {
-			handleTokenAfter(node.getType(), TokenNameGREATER,
-					this.options.insert_space_before_closing_angle_bracket_in_parameterized_type_reference, false);
-		} else {
+		if (!typeArguments.isEmpty()) {
+			handleTokenAfter(node.getType(), TokenNameLESS,
+					this.options.insert_space_before_opening_angle_bracket_in_parameterized_type_reference,
+					this.options.insert_space_after_opening_angle_bracket_in_parameterized_type_reference);
 			handleTokenAfter(typeArguments.get(typeArguments.size() - 1), TokenNameGREATER,
 					this.options.insert_space_before_closing_angle_bracket_in_parameterized_type_reference, false);
 			handleCommas(node.typeArguments(),
@@ -1064,6 +1089,21 @@ public class SpacePreparator extends ASTVisitor {
 			return true;
 		}
 		return false;
+	}
+
+	private void handleSemicolon(ASTNode node) {
+		if (this.options.insert_space_before_semicolon) {
+			Token lastToken = this.tm.lastTokenIn(node, -1);
+			if (lastToken.tokenType == TokenNameSEMICOLON)
+				lastToken.spaceBefore();
+		}
+	}
+
+	private void handleSemicolon(List<ASTNode> nodes) {
+		if (this.options.insert_space_before_semicolon) {
+			for (ASTNode node : nodes)
+				handleSemicolon(node);
+		}
 	}
 
 	public void finishUp() {

@@ -93,7 +93,7 @@ import org.eclipse.objectteams.otdt.core.exceptions.InternalCompilerError;
  * @since 3.0
  * @noinstantiate This class is not intended to be instantiated by clients.
  */
-@SuppressWarnings("rawtypes")
+@SuppressWarnings({"rawtypes"})
 public class ASTParser {
 
 	/**
