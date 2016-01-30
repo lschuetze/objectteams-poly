@@ -168,6 +168,9 @@ public abstract class AbstractNullAnnotationTest extends AbstractComparableTest 
 	void runNegativeTestWithLibs(String[] testFiles, Map customOptions, String expectedErrorLog, boolean skipJavac) {
 		runNegativeTestWithLibs(false /* flush output directory */,	testFiles, customOptions, expectedErrorLog, skipJavac);
 	}
+//{ObjectTeams: make visible to downstream:
+	protected
+// SH}
 	void runConformTestWithLibs(String[] testFiles, Map customOptions, String expectedCompilerLog) {
 		runConformTestWithLibs(false /* flush output directory */, testFiles, customOptions, expectedCompilerLog);
 	}
