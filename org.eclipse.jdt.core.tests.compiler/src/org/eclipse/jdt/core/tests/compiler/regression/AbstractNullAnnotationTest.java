@@ -114,6 +114,15 @@ public abstract class AbstractNullAnnotationTest extends AbstractComparableTest 
 				this.LIBS,
 				false /*shouldFlush*/);
 	}
+	void runNegativeTestWithLibs(boolean skipJavac, String[] testFiles, String expectedErrorLog) {
+		runNegativeTest(
+				skipJavac,
+				null,
+				testFiles,
+				expectedErrorLog,
+				this.LIBS,
+				false /*shouldFlush*/);
+	}
 	void runNegativeTestWithExtraLibs(String[] testFiles, String expectedErrorLog, String [] extraLibs) {
 		String [] libraries = new String [(this.LIBS == null ? 0 : this.LIBS.length) + (extraLibs == null ? 0 : extraLibs.length)];
 		if (this.LIBS != null)
@@ -127,6 +136,16 @@ public abstract class AbstractNullAnnotationTest extends AbstractComparableTest 
 				false /*shouldFlush*/);
 	}
 	void runNegativeTestWithLibs(boolean shouldFlushOutputDirectory, String[] testFiles, Map customOptions, String expectedErrorLog) {
+		runNegativeTestWithLibs(
+				shouldFlushOutputDirectory,
+				testFiles,
+				customOptions,
+				expectedErrorLog,
+				// runtime options
+			    false);
+	}
+	void runNegativeTestWithLibs(boolean shouldFlushOutputDirectory, String[] testFiles, Map customOptions, 
+			String expectedErrorLog, boolean skipJavaC) {
 		runNegativeTest(
 				shouldFlushOutputDirectory,
 				testFiles,
@@ -134,6 +153,7 @@ public abstract class AbstractNullAnnotationTest extends AbstractComparableTest 
 				customOptions,
 				expectedErrorLog,
 				// runtime options
+				skipJavaC ? JavacTestOptions.SKIP :
 			    JavacTestOptions.Excuse.EclipseWarningConfiguredAsError);
 	}
 //{ObjectTeams: make visible to downstream:
@@ -145,6 +165,9 @@ public abstract class AbstractNullAnnotationTest extends AbstractComparableTest 
 //{ObjectTeams: make visible to downstream:
 	protected
 // SH}
+	void runNegativeTestWithLibs(String[] testFiles, Map customOptions, String expectedErrorLog, boolean skipJavac) {
+		runNegativeTestWithLibs(false /* flush output directory */,	testFiles, customOptions, expectedErrorLog, skipJavac);
+	}
 	void runConformTestWithLibs(String[] testFiles, Map customOptions, String expectedCompilerLog) {
 		runConformTestWithLibs(false /* flush output directory */, testFiles, customOptions, expectedCompilerLog);
 	}

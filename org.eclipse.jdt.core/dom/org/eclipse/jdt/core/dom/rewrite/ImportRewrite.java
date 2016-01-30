@@ -1189,72 +1189,78 @@ public final class ImportRewrite {
 	 */
 	public final TextEdit rewriteImports(IProgressMonitor monitor) throws CoreException {
 
-		SubMonitor subMonitor = SubMonitor.convert(monitor,
-				Messages.bind(Messages.importRewrite_processDescription), 2);
-		if (!hasRecordedChanges()) {
-			this.createdImports= CharOperation.NO_STRINGS;
-			this.createdStaticImports= CharOperation.NO_STRINGS;
+		try {
+			SubMonitor subMonitor = SubMonitor.convert(monitor,
+					Messages.bind(Messages.importRewrite_processDescription), 2);
+			if (!hasRecordedChanges()) {
+				this.createdImports= CharOperation.NO_STRINGS;
+				this.createdStaticImports= CharOperation.NO_STRINGS;
 //{ObjectTeams: base
-			this.createdBaseImports= CharOperation.NO_STRINGS;
+				this.createdBaseImports= CharOperation.NO_STRINGS;
 //SH}
-			return new MultiTextEdit();
-		}
-
-		CompilationUnit usedAstRoot= this.astRoot;
-		if (usedAstRoot == null) {
-			ASTParser parser= ASTParser.newParser(AST.JLS8);
-			parser.setSource(this.compilationUnit);
-			parser.setFocalPosition(0); // reduced AST
-			parser.setResolveBindings(false);
-			usedAstRoot= (CompilationUnit) parser.createAST(subMonitor.split(1));
-		}
-
-		ImportRewriteConfiguration config= buildImportRewriteConfiguration();
-
-		ImportRewriteAnalyzer computer=
-			new ImportRewriteAnalyzer(this.compilationUnit, usedAstRoot, config);
-
-		for (String addedImport : this.addedImports) {
-			boolean isStatic = STATIC_PREFIX == addedImport.charAt(0);
-			String qualifiedName = addedImport.substring(1);
+				return new MultiTextEdit();
+			}
+	
+			CompilationUnit usedAstRoot= this.astRoot;
+			if (usedAstRoot == null) {
+				ASTParser parser= ASTParser.newParser(AST.JLS8);
+				parser.setSource(this.compilationUnit);
+				parser.setFocalPosition(0); // reduced AST
+				parser.setResolveBindings(false);
+				usedAstRoot= (CompilationUnit) parser.createAST(subMonitor.split(1));
+			}
+	
+			ImportRewriteConfiguration config= buildImportRewriteConfiguration();
+	
+			ImportRewriteAnalyzer computer=
+				new ImportRewriteAnalyzer(this.compilationUnit, usedAstRoot, config);
+	
+			for (String addedImport : this.addedImports) {
+				boolean isStatic = STATIC_PREFIX == addedImport.charAt(0);
+				String qualifiedName = addedImport.substring(1);
 //{ObjectTeams: base
 /* orig:
-			computer.addImport(isStatic, qualifiedName);
+				computer.addImport(isStatic, qualifiedName);
   :giro */
-			boolean isBase = BASE_PREFIX == addedImport.charAt(0);
-			computer.addImport(isStatic, isBase, qualifiedName);
+				boolean isBase = BASE_PREFIX == addedImport.charAt(0);
+				computer.addImport(isStatic, isBase, qualifiedName);
 // SH}
-		}
-
-		for (String removedImport : this.removedImports) {
-			boolean isStatic = STATIC_PREFIX == removedImport.charAt(0);
-			String qualifiedName = removedImport.substring(1);
+			}
+	
+			for (String removedImport : this.removedImports) {
+				boolean isStatic = STATIC_PREFIX == removedImport.charAt(0);
+				String qualifiedName = removedImport.substring(1);
 //{ObjectTeams: base
 /* orig:
-			computer.removeImport(isStatic, qualifiedName);
+				computer.removeImport(isStatic, qualifiedName);
   :giro */
-			boolean isBase = BASE_PREFIX == removedImport.charAt(0);
-			computer.removeImport(isStatic, isBase, qualifiedName);
+				boolean isBase = BASE_PREFIX == removedImport.charAt(0);
+				computer.removeImport(isStatic, isBase, qualifiedName);
 // SH}
-		}
-
-		for (String typeExplicitSimpleName : this.typeExplicitSimpleNames) {
-			computer.requireExplicitImport(false, typeExplicitSimpleName);
-		}
-
-		for (String staticExplicitSimpleName : this.staticExplicitSimpleNames) {
-			computer.requireExplicitImport(true, staticExplicitSimpleName);
-		}
-
-		ImportRewriteAnalyzer.RewriteResult result= computer.analyzeRewrite(subMonitor.split(1));
-
-		this.createdImports= result.getCreatedImports();
-		this.createdStaticImports= result.getCreatedStaticImports();
+			}
+	
+			for (String typeExplicitSimpleName : this.typeExplicitSimpleNames) {
+				computer.requireExplicitImport(false, typeExplicitSimpleName);
+			}
+	
+			for (String staticExplicitSimpleName : this.staticExplicitSimpleNames) {
+				computer.requireExplicitImport(true, staticExplicitSimpleName);
+			}
+	
+			ImportRewriteAnalyzer.RewriteResult result= computer.analyzeRewrite(subMonitor.split(1));
+	
+			this.createdImports= result.getCreatedImports();
+			this.createdStaticImports= result.getCreatedStaticImports();
 //{ObjectTeams: base
-		this.createdBaseImports= result.getCreatedBaseImports();
+			this.createdBaseImports= result.getCreatedBaseImports();
 //SH}
-
-		return result.getTextEdit();
+	
+			return result.getTextEdit();
+		} finally {
+			if (monitor != null) {
+				monitor.done();
+			}
+		}
 	}
 
 	private ImportRewriteConfiguration buildImportRewriteConfiguration() {
