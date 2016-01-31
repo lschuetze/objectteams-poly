@@ -27,8 +27,6 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-import junit.framework.Test;
-
 import org.eclipse.core.internal.runtime.RuntimeLog;
 import org.eclipse.core.resources.IMarker;
 import org.eclipse.core.resources.IProject;
@@ -41,6 +39,7 @@ import org.eclipse.core.runtime.ILogListener;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Path;
+import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.IJobChangeEvent;
 import org.eclipse.core.runtime.jobs.IJobChangeListener;
 import org.eclipse.core.runtime.jobs.JobChangeAdapter;
@@ -51,9 +50,6 @@ import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.ui.JavaUI;
 import org.eclipse.jface.action.IStatusLineManager;
-import org.eclipse.ui.IEditorPart;
-import org.eclipse.ui.PartInitException;
-import org.eclipse.ui.PlatformUI;
 import org.eclipse.objectteams.otdt.core.IOTJavaElement;
 import org.eclipse.objectteams.otdt.core.IOTType;
 import org.eclipse.objectteams.otdt.core.IRoleType;
@@ -64,6 +60,11 @@ import org.eclipse.objectteams.otdt.internal.ui.callinmarkers.CallinMarker;
 import org.eclipse.objectteams.otdt.internal.ui.callinmarkers.CallinMarkerCreator2;
 import org.eclipse.objectteams.otdt.internal.ui.callinmarkers.CallinMarkerJob;
 import org.eclipse.objectteams.otdt.ui.tests.FileBasedUITest;
+import org.eclipse.ui.IEditorPart;
+import org.eclipse.ui.PartInitException;
+import org.eclipse.ui.PlatformUI;
+
+import junit.framework.Test;
 
 public class CallinMarkerTests extends FileBasedUITest
 {
@@ -132,7 +133,8 @@ public class CallinMarkerTests extends FileBasedUITest
         {
             return new Suite(CallinMarkerTests.class);
         }
-        junit.framework.TestSuite suite = new Suite(CallinMarkerTests.class.getName());
+        @SuppressWarnings("unused") // dead due to above 'if (true)'
+		junit.framework.TestSuite suite = new Suite(CallinMarkerTests.class.getName());
         return suite;
     }
     
@@ -161,7 +163,21 @@ public class CallinMarkerTests extends FileBasedUITest
     	_baseType = null;
     	_baseResource = null;
     }
-    
+
+    class MyLogListener implements ILogListener {
+		List<IStatus> status = new ArrayList<IStatus>();
+		public void logging(IStatus status, String plugin) {
+			if (status.getSeverity() == IStatus.ERROR) {
+				if (status.isMultiStatus())
+					this.status.add(new Status(status.getSeverity(), plugin, status.getCode(), status.getMessage(), status.getException()));
+				else
+					this.status.add(status);
+			}
+			for (IStatus sub : status.getChildren())
+				logging(sub, plugin);
+		}
+	}
+
     void createNonJavaPrj(String projectName) throws IOException, CoreException {
 		// copy files in project from source workspace to target workspace
 		String sourceWorkspacePath = getSourceWorkspacePath();
@@ -349,14 +365,7 @@ public class CallinMarkerTests extends FileBasedUITest
     
     // see http://trac.objectteams.org/ot/ticket/188
     public void testMarkers_NonJavaPrj1() throws CoreException, IOException, InterruptedException
-    {
-    	class MyLogListener implements ILogListener {
-    		List<IStatus> status = new ArrayList<IStatus>();
-    		public void logging(IStatus status, String plugin) {
-    			this.status.add(status);    		
-    		}
-    	}
-    	
+    {    	
     	createNonJavaPrj("NonJavaPrj");
     	MyLogListener myLogListener = new MyLogListener();
     	// can't use startLogListening() because we need to listen to RuntimeLog.
@@ -386,13 +395,6 @@ public class CallinMarkerTests extends FileBasedUITest
     // see http://trac.objectteams.org/ot/ticket/188
     public void testMarkers_NonJavaPrj2() throws CoreException, IOException, InterruptedException
     {
-    	class MyLogListener implements ILogListener {
-    		List<IStatus> status = new ArrayList<IStatus>();
-    		public void logging(IStatus status, String plugin) {
-    			this.status.add(status);    		
-    		}
-    	}
-    	
     	createNonJavaPrj("NonJavaPrj");
     	MyLogListener myLogListener = new MyLogListener();
     	// can't use startLogListening() because we need to listen to RuntimeLog.
@@ -425,14 +427,6 @@ public class CallinMarkerTests extends FileBasedUITest
     // see http://trac.objectteams.org/ot/ticket/188
     public void testMarkers_NonJavaPrj3() throws CoreException, IOException, InterruptedException
     {
-    	class MyLogListener implements ILogListener {
-    		List<IStatus> status = new ArrayList<IStatus>();
-    		public void logging(IStatus status, String plugin) {
-    			if (status.getSeverity() == IStatus.ERROR)
-    				this.status.add(status);    		
-    		}
-    	}
-    	
     	createNonJavaPrj("NonJavaPrj");
     	MyLogListener myLogListener = new MyLogListener();
     	// can't use startLogListening() because we need to listen to RuntimeLog.
@@ -454,7 +448,7 @@ public class CallinMarkerTests extends FileBasedUITest
 	        
 	        assertEquals("Unexpeted number of log entries", 2, myLogListener.status.size());
 	        assertEquals("Unexpected Log[0]", 
-	        			 "Status ERROR: org.eclipse.ui code=4 Unable to create part null",
+	        			 "Status ERROR: org.eclipse.core.runtime code=4 Unable to create part null",
 	        			 myLogListener.status.get(0).toString());
 	        assertEquals("Unexpected Log[1]", 
 	        			 "Status ERROR: org.eclipse.jdt.ui code=995 " +
