@@ -1,7 +1,7 @@
 /**********************************************************************
  * This file is part of "Object Teams Development Tooling"-Software
  * 
- * Copyright 2004, 2010 Fraunhofer Gesellschaft, Munich, Germany,
+ * Copyright 2004, 2016 Fraunhofer Gesellschaft, Munich, Germany,
  * for its Fraunhofer Institute and Computer Architecture and Software
  * Technology (FIRST), Berlin, Germany and Technical University Berlin,
  * Germany.
@@ -32,6 +32,7 @@ import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.internal.ui.text.correction.AssistContext;
+import org.eclipse.jdt.ui.text.java.IJavaCompletionProposal;
 import org.eclipse.jface.text.contentassist.ICompletionProposal;
 import org.eclipse.objectteams.otdt.core.ext.OTDTPlugin;
 
@@ -93,11 +94,11 @@ public class CallinQuickFixTest extends OTQuickFixTest {
 		ICompilationUnit cuteam = pack1.createCompilationUnit("T1.java", buf.toString(), false, null);
 		
 		CompilationUnit astRoot= getASTRoot(cuteam);
-		ArrayList proposals= collectCorrections(cuteam, astRoot);
-		assertNumberOfProposals(proposals, 1);
+		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cuteam, astRoot);
+		assertNumberOfProposals(proposals, 2);
 		assertCorrectLabels(proposals);
 
-		String[] expectedProposals = new String[1];
+		String[] expectedProposals = new String[2];
 		buf= new StringBuffer();
 		buf.append("package test1;\n");	
 		buf.append("public team class T1 {\n");
@@ -142,7 +143,7 @@ public class CallinQuickFixTest extends OTQuickFixTest {
 		ICompilationUnit cuteam = pack1.createCompilationUnit("T1.java", buf.toString(), false, null);
 		
 		CompilationUnit astRoot= getASTRoot(cuteam);
-		ArrayList proposals= collectCorrections(cuteam, astRoot);
+		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cuteam, astRoot);
 		assertNumberOfProposals(proposals, 2);
 		assertCorrectLabels(proposals);
 
@@ -199,7 +200,7 @@ public class CallinQuickFixTest extends OTQuickFixTest {
 		
 		int offset= buf.toString().indexOf("foo() <- after");
 		AssistContext context= getCorrectionContext(cuteam, offset, 0);
-		List proposals= collectAssists(context, false);
+		List<IJavaCompletionProposal> proposals= collectAssists(context, false);
 
 		assertNumberOfProposals(proposals, 1);
 		assertCorrectLabels(proposals);
@@ -246,7 +247,7 @@ public class CallinQuickFixTest extends OTQuickFixTest {
 
             int offset= buf.toString().indexOf("foo() <- after");
             AssistContext context= getCorrectionContext(cuteam, offset, 0);
-            List proposals= collectAssists(context, false);
+            List<IJavaCompletionProposal> proposals= collectAssists(context, false);
 
             assertNumberOfProposals(proposals, 0);
     }
@@ -277,7 +278,7 @@ public class CallinQuickFixTest extends OTQuickFixTest {
 
             int offset= buf.toString().indexOf("foo() <- after");
             AssistContext context= getCorrectionContext(cuteam, offset, 0);
-            List proposals= collectAssists(context, false);
+            List<IJavaCompletionProposal> proposals= collectAssists(context, false);
 
             assertNumberOfProposals(proposals, 1);
             assertCorrectLabels(proposals);
@@ -323,7 +324,7 @@ public class CallinQuickFixTest extends OTQuickFixTest {
 		
 		int offset= buf.toString().indexOf("foo(E2 e) <- after");
 		AssistContext context= getCorrectionContext(cuteam, offset, 0);
-		List proposals= collectAssists(context, false);
+		List<IJavaCompletionProposal> proposals= collectAssists(context, false);
 
 		assertNumberOfProposals(proposals, 1);
 		assertCorrectLabels(proposals);
@@ -372,7 +373,7 @@ public class CallinQuickFixTest extends OTQuickFixTest {
 		
 		int offset= buf.toString().indexOf("foo(int one,//eol");
 		AssistContext context= getCorrectionContext(cuteam, offset, 0);
-		List proposals= collectAssists(context, false);
+		List<IJavaCompletionProposal> proposals= collectAssists(context, false);
 
 		assertNumberOfProposals(proposals, 1);
 		assertCorrectLabels(proposals);
@@ -419,7 +420,7 @@ public class CallinQuickFixTest extends OTQuickFixTest {
 		
 		int offset= buf.toString().indexOf("foo <- after");
 		AssistContext context= getCorrectionContext(cuteam, offset, 0);
-		List proposals= collectAssists(context, false);
+		List<IJavaCompletionProposal> proposals= collectAssists(context, false);
 
 		assertNumberOfProposals(proposals, 1);
 		assertCorrectLabels(proposals);
@@ -464,7 +465,7 @@ public class CallinQuickFixTest extends OTQuickFixTest {
 		
 		int offset= buf.toString().indexOf("foo <- after");
 		AssistContext context= getCorrectionContext(cuteam, offset, 0);
-		List proposals= collectAssists(context, false);
+		List<IJavaCompletionProposal> proposals= collectAssists(context, false);
 
 		assertNumberOfProposals(proposals, 1);
 		assertCorrectLabels(proposals);
@@ -510,7 +511,7 @@ public class CallinQuickFixTest extends OTQuickFixTest {
 		
 		int offset= buf.toString().indexOf("foo <- after");
 		AssistContext context= getCorrectionContext(cuteam, offset, 0);
-		List proposals= collectAssists(context, false);
+		List<IJavaCompletionProposal> proposals= collectAssists(context, false);
 
 		assertNumberOfProposals(proposals, 1);
 		assertCorrectLabels(proposals);
@@ -562,7 +563,7 @@ public class CallinQuickFixTest extends OTQuickFixTest {
 		
 		int offset= buf.toString().indexOf("bar <- after");
 		AssistContext context= getCorrectionContext(cuteam, offset, 0);
-		List proposals= collectAssists(context, false);
+		List<IJavaCompletionProposal> proposals= collectAssists(context, false);
 
 		assertNumberOfProposals(proposals, 1);
 		assertCorrectLabels(proposals);

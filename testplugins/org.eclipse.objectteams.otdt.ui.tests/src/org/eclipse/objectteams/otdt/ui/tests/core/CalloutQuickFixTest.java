@@ -1,7 +1,7 @@
 /**********************************************************************
  * This file is part of "Object Teams Development Tooling"-Software
  * 
- * Copyright 2004, 2010 Fraunhofer Gesellschaft, Munich, Germany,
+ * Copyright 2004, 2016 Fraunhofer Gesellschaft, Munich, Germany,
  * for its Fraunhofer Institute and Computer Architecture and Software
  * Technology (FIRST), Berlin, Germany and Technical University Berlin,
  * Germany.
@@ -10,7 +10,6 @@
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
- * $Id: CalloutQuickFixTest.java 23495 2010-02-05 23:15:16Z stephan $
  * 
  * Please visit http://www.eclipse.org/objectteams for updates and contact.
  * 
@@ -32,6 +31,7 @@ import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.internal.ui.text.correction.AssistContext;
+import org.eclipse.jdt.ui.text.java.IJavaCompletionProposal;
 import org.eclipse.objectteams.otdt.core.ext.OTDTPlugin;
 
 /**
@@ -88,11 +88,11 @@ public class CalloutQuickFixTest extends OTQuickFixTest {
 		ICompilationUnit cuteam = pack1.createCompilationUnit("T.java", buf.toString(), false, null);
 		
 		CompilationUnit astRoot= getASTRoot(cuteam);
-		ArrayList proposals= collectCorrections(cuteam, astRoot);
-		assertNumberOfProposals(proposals, 2);
+		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cuteam, astRoot);
+		assertNumberOfProposals(proposals, 3);
 		assertCorrectLabels(proposals);
 
-		String[] expectedProposals = new String[2];
+		String[] expectedProposals = new String[3];
 		buf= new StringBuffer();
 		buf.append("package test1;\n");	
 		buf.append("public team class T {\n");
@@ -106,6 +106,8 @@ public class CalloutQuickFixTest extends OTQuickFixTest {
 		buf.append("}\n");
 		expectedProposals[0] = buf.toString();
 
+		assertEquals("proposal label", "Configure problem severity", proposals.get(1).getDisplayString());
+		
 		buf= new StringBuffer();
 		buf.append("package test1;\n");	
 		buf.append("public team class T {\n");
@@ -116,7 +118,7 @@ public class CalloutQuickFixTest extends OTQuickFixTest {
 		buf.append("		}\n");
 		buf.append("    }\n");
 		buf.append("}\n");
-		expectedProposals[1] = buf.toString();
+		expectedProposals[2] = buf.toString();
 
 		assertExpectedExistInProposals(proposals, expectedProposals);
 	}
@@ -144,11 +146,11 @@ public class CalloutQuickFixTest extends OTQuickFixTest {
 		ICompilationUnit cuteam = pack1.createCompilationUnit("T.java", buf.toString(), false, null);
 		
 		CompilationUnit astRoot= getASTRoot(cuteam);
-		ArrayList proposals= collectCorrections(cuteam, astRoot);
-		assertNumberOfProposals(proposals, 2);
+		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cuteam, astRoot);
+		assertNumberOfProposals(proposals, 3);
 		assertCorrectLabels(proposals);
 		
-		String[] expectedProposals = new String[2];
+		String[] expectedProposals = new String[3];
 
 		buf= new StringBuffer();
 		buf.append("package test1;\n");	
@@ -163,6 +165,8 @@ public class CalloutQuickFixTest extends OTQuickFixTest {
 		buf.append("}\n");
 		expectedProposals[0] = buf.toString();
 
+		assertEquals("proposal label", "Configure problem severity", proposals.get(1).getDisplayString());
+
 		buf= new StringBuffer();
 		buf.append("package test1;\n");	
 		buf.append("public team class T {\n");
@@ -173,7 +177,7 @@ public class CalloutQuickFixTest extends OTQuickFixTest {
 		buf.append("		}\n");
 		buf.append("    }\n");
 		buf.append("}\n");
-		expectedProposals[1] = buf.toString();
+		expectedProposals[2] = buf.toString();
 
 		assertExpectedExistInProposals(proposals, expectedProposals);
 
@@ -201,11 +205,11 @@ public class CalloutQuickFixTest extends OTQuickFixTest {
 		ICompilationUnit cuteam = pack1.createCompilationUnit("T.java", buf.toString(), false, null);
 		
 		CompilationUnit astRoot= getASTRoot(cuteam);
-		ArrayList proposals= collectCorrections(cuteam, astRoot);
-		assertNumberOfProposals(proposals, 2);
+		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cuteam, astRoot);
+		assertNumberOfProposals(proposals, 3);
 		assertCorrectLabels(proposals);
 		
-		String[] expectedProposals = new String[2];
+		String[] expectedProposals = new String[3];
 
 		buf= new StringBuffer();
 		buf.append("package test1;\n");	
@@ -220,6 +224,8 @@ public class CalloutQuickFixTest extends OTQuickFixTest {
 		buf.append("}\n");
 		expectedProposals[0] = buf.toString();
 
+		assertEquals("proposal label", "Configure problem severity", proposals.get(1).getDisplayString());
+
 		buf= new StringBuffer();
 		buf.append("package test1;\n");	
 		buf.append("public team class T {\n");
@@ -230,7 +236,7 @@ public class CalloutQuickFixTest extends OTQuickFixTest {
 		buf.append("		}\n");
 		buf.append("    }\n");
 		buf.append("}\n");
-		expectedProposals[1] = buf.toString();
+		expectedProposals[2] = buf.toString();
 
 		assertExpectedExistInProposals(proposals, expectedProposals);
 
@@ -258,11 +264,11 @@ public class CalloutQuickFixTest extends OTQuickFixTest {
 		ICompilationUnit cuteam = pack1.createCompilationUnit("T.java", buf.toString(), false, null);
 		
 		CompilationUnit astRoot= getASTRoot(cuteam);
-		ArrayList proposals= collectCorrections(cuteam, astRoot);
-		assertNumberOfProposals(proposals, 2);
+		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cuteam, astRoot);
+		assertNumberOfProposals(proposals, 3);
 		assertCorrectLabels(proposals);
 		
-		String[] expectedProposals = new String[2];
+		String[] expectedProposals = new String[3];
 
 		buf= new StringBuffer();
 		buf.append("package test1;\n");	
@@ -278,6 +284,8 @@ public class CalloutQuickFixTest extends OTQuickFixTest {
 		
 		expectedProposals[0] = buf.toString();
 
+		assertEquals("proposal label", "Configure problem severity", proposals.get(1).getDisplayString());
+
 		buf= new StringBuffer();
 		buf.append("package test1;\n");	
 		buf.append("public team class T {\n");
@@ -288,7 +296,7 @@ public class CalloutQuickFixTest extends OTQuickFixTest {
 		buf.append("		}\n");
 		buf.append("    }\n");
 		buf.append("}\n");
-		expectedProposals[1] = buf.toString();
+		expectedProposals[2] = buf.toString();
 
 		assertExpectedExistInProposals(proposals, expectedProposals);
 	}
@@ -318,11 +326,11 @@ public class CalloutQuickFixTest extends OTQuickFixTest {
 		ICompilationUnit cuteam = pack1.createCompilationUnit("T1.java", buf.toString(), false, null);
 		
 		CompilationUnit astRoot= getASTRoot(cuteam);
-		ArrayList proposals= collectCorrections(cuteam, astRoot);
-		assertNumberOfProposals(proposals, 2);
+		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cuteam, astRoot);
+		assertNumberOfProposals(proposals, 3);
 		assertCorrectLabels(proposals);
 		
-		String[] expectedProposals = new String[2];
+		String[] expectedProposals = new String[3];
 
 
 		buf= new StringBuffer();
@@ -338,6 +346,8 @@ public class CalloutQuickFixTest extends OTQuickFixTest {
 		buf.append("}\n");
 		expectedProposals[0] = buf.toString();
 
+		assertEquals("proposal label", "Configure problem severity", proposals.get(1).getDisplayString());
+
 		buf= new StringBuffer();
 		buf.append("package test1;\n");	
 		buf.append("public team class T1 {\n");
@@ -350,7 +360,7 @@ public class CalloutQuickFixTest extends OTQuickFixTest {
 		buf.append("		}\n");
 		buf.append("    }\n");
 		buf.append("}\n");
-		expectedProposals[1] = buf.toString();
+		expectedProposals[2] = buf.toString();
 
 		assertExpectedExistInProposals(proposals, expectedProposals);
 	}
@@ -379,11 +389,11 @@ public class CalloutQuickFixTest extends OTQuickFixTest {
 		ICompilationUnit cuteam = pack1.createCompilationUnit("T1.java", buf.toString(), false, null);
 		
 		CompilationUnit astRoot= getASTRoot(cuteam);
-		ArrayList proposals= collectCorrections(cuteam, astRoot);
-		assertNumberOfProposals(proposals, 2);
+		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cuteam, astRoot);
+		assertNumberOfProposals(proposals, 3);
 		assertCorrectLabels(proposals);
 		
-		String[] expectedProposals = new String[2];
+		String[] expectedProposals = new String[3];
 
 
 		buf= new StringBuffer();
@@ -399,6 +409,8 @@ public class CalloutQuickFixTest extends OTQuickFixTest {
 		buf.append("}\n");
 		expectedProposals[0] = buf.toString();
 
+		assertEquals("proposal label", "Configure problem severity", proposals.get(1).getDisplayString());
+
 		buf= new StringBuffer();
 		buf.append("package test1;\n");	
 		buf.append("public team class T1 {\n");
@@ -411,7 +423,7 @@ public class CalloutQuickFixTest extends OTQuickFixTest {
 		buf.append("		}\n");
 		buf.append("    }\n");
 		buf.append("}\n");
-		expectedProposals[1] = buf.toString();
+		expectedProposals[2] = buf.toString();
 
 		assertExpectedExistInProposals(proposals, expectedProposals);
 	}
@@ -439,7 +451,7 @@ public class CalloutQuickFixTest extends OTQuickFixTest {
 		
 		int offset= buf.toString().indexOf("getFoo() -> get");
 		AssistContext context= getCorrectionContext(cuteam, offset, 0);
-		List proposals= collectAssists(context, false);
+		List<IJavaCompletionProposal> proposals= collectAssists(context, false);
 
 		assertNumberOfProposals(proposals, 1);
 		assertCorrectLabels(proposals);
@@ -480,7 +492,7 @@ public class CalloutQuickFixTest extends OTQuickFixTest {
 		
 		int offset= buf.toString().indexOf("getFoo -> foo");
 		AssistContext context= getCorrectionContext(cuteam, offset, 0);
-		List proposals= collectAssists(context, false);
+		List<IJavaCompletionProposal> proposals= collectAssists(context, false);
 
 		assertNumberOfProposals(proposals, 1);
 		assertCorrectLabels(proposals);
@@ -521,7 +533,7 @@ public class CalloutQuickFixTest extends OTQuickFixTest {
 		
 		int offset= buf.toString().indexOf("getFoo -> get");
 		AssistContext context= getCorrectionContext(cuteam, offset, 0);
-		List proposals= collectAssists(context, false);
+		List<IJavaCompletionProposal> proposals= collectAssists(context, false);
 
 		assertNumberOfProposals(proposals, 1);
 		assertCorrectLabels(proposals);

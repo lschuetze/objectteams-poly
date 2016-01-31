@@ -1,7 +1,7 @@
 /**********************************************************************
  * This file is part of "Object Teams Development Tooling"-Software
  * 
- * Copyright 2004, 2010 Fraunhofer Gesellschaft, Munich, Germany,
+ * Copyright 2004, 2016 Fraunhofer Gesellschaft, Munich, Germany,
  * for its Fraunhofer Institute and Computer Architecture and Software
  * Technology (FIRST), Berlin, Germany and Technical University Berlin,
  * Germany.
@@ -34,6 +34,7 @@ import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.internal.compiler.lookup.ExtraCompilerModifiers;
 import org.eclipse.jdt.ui.JavaUI;
 import org.eclipse.jdt.ui.tests.core.ProjectTestSetup;
+import org.eclipse.jdt.ui.text.java.IJavaCompletionProposal;
 import org.eclipse.jdt.ui.text.java.correction.CUCorrectionProposal;
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.objectteams.otdt.ui.tests.util.JavaProjectHelper;
@@ -83,13 +84,13 @@ public class AddImportQuickFixTest extends OTQuickFixTest {
 		ICompilationUnit cu= pack1.createCompilationUnit("T.java", buf.toString(), false, null);
 		
 		CompilationUnit astRoot= getASTRoot(cu);
-		ArrayList proposals= collectCorrections(cu, astRoot);
-		assertNumberOfProposals(proposals, 2);
+		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot);
+		assertNumberOfProposals(proposals, 3);
 		assertCorrectLabels(proposals);
 		
 		CUCorrectionProposal proposal= null;
 		for (Object prop : proposals)
-			if (((CUCorrectionProposal)prop).getRelevance() > 0)
+			if (prop instanceof CUCorrectionProposal && ((CUCorrectionProposal)prop).getRelevance() > 0)
 				proposal = (CUCorrectionProposal)prop;
 		assertNotNull("Need proposal with positive relevance", proposal);
 		assertEquals("Wrong quickfix label", "\"Change qualified reference to using 'import base test...Base1;'\"", proposal.getDisplayString());
@@ -135,13 +136,13 @@ public class AddImportQuickFixTest extends OTQuickFixTest {
 		ICompilationUnit cu= teamPack.createCompilationUnit("R2.java", buf.toString(), false, null);
 		
 		CompilationUnit astRoot= getASTRoot(cu);
-		ArrayList proposals= collectCorrections(cu, astRoot);
-		assertNumberOfProposals(proposals, 2);
+		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot);
+		assertNumberOfProposals(proposals, 3);
 		assertCorrectLabels(proposals);
 		
 		CUCorrectionProposal proposal= null;
 		for (Object prop : proposals)
-			if (((CUCorrectionProposal)prop).getRelevance() > 0)
+			if (prop instanceof CUCorrectionProposal && ((CUCorrectionProposal)prop).getRelevance() > 0)
 				proposal = (CUCorrectionProposal)prop;
 		assertNotNull("Need proposal with positive relevance", proposal);
 		assertEquals("Wrong quickfix label", "\"Change qualified reference to using 'import base test...Base1;'\"", proposal.getDisplayString());
@@ -202,11 +203,11 @@ public class AddImportQuickFixTest extends OTQuickFixTest {
                 .toString(), false, null);
 
 		CompilationUnit astRoot= getASTRoot(cu);
-		ArrayList proposals= collectCorrections(cu, astRoot);
-		assertNumberOfProposals(proposals, 2);
+		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot);
+		assertNumberOfProposals(proposals, 3);
 		assertCorrectLabels(proposals);
 
-		CUCorrectionProposal proposal= (CUCorrectionProposal) proposals.get(1);
+		CUCorrectionProposal proposal= (CUCorrectionProposal) proposals.get(2);
 		String preview= getPreviewContent(proposal);
 
 
@@ -249,7 +250,7 @@ public class AddImportQuickFixTest extends OTQuickFixTest {
 
 		
 		CompilationUnit astRoot= getASTRoot(cu);
-		ArrayList proposals= collectCorrections(cu, astRoot);
+		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot);
 		assertNumberOfProposals(proposals, 6);
 		assertCorrectLabels(proposals);
 		
@@ -305,7 +306,7 @@ public class AddImportQuickFixTest extends OTQuickFixTest {
 
 		
 		CompilationUnit astRoot= getASTRoot(cu);
-		ArrayList proposals= collectCorrections(cu, astRoot);
+		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot);
 		assertNumberOfProposals(proposals, 6);
 		assertCorrectLabels(proposals);
 		
@@ -358,7 +359,7 @@ public class AddImportQuickFixTest extends OTQuickFixTest {
 		ICompilationUnit cu = pack2.createCompilationUnit("C.java", buf.toString(), false, null);
 		
 		CompilationUnit astRoot= getASTRoot(cu);
-		ArrayList proposals= collectCorrections(cu, astRoot);
+		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot);
 		assertNumberOfProposals(proposals, 7);
 		assertCorrectLabels(proposals);
 		
@@ -415,7 +416,7 @@ public class AddImportQuickFixTest extends OTQuickFixTest {
 		ICompilationUnit cu = pack2.createCompilationUnit("C.java", buf.toString(), false, null);
 		
 		CompilationUnit astRoot= getASTRoot(cu);
-		ArrayList proposals= collectCorrections(cu, astRoot);
+		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot);
 		assertNumberOfProposals(proposals, 7);
 		assertCorrectLabels(proposals);
 		
