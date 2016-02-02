@@ -1,13 +1,12 @@
 /**********************************************************************
  * This file is part of "Object Teams Development Tooling"-Software
  * 
- * Copyright 2007 Technical University Berlin, Germany and others.
+ * Copyright 2007, 2016 Technical University Berlin, Germany and others.
  * 
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
- * $Id: StubUtility2.java 23438 2010-02-04 20:05:24Z stephan $
  * 
  * Please visit http://www.eclipse.org/objectteams for updates and contact.
  * 
@@ -31,7 +30,7 @@ import org.eclipse.jdt.core.dom.Modifier;
  * @author stephan
  * @since 1.1.2
  */
-@SuppressWarnings({ "unchecked", "rawtypes"/*parameter-less lists from DOM*/, "restriction", "decapsulation"/*final baseclass + callout-decapsulation*/ })
+@SuppressWarnings({ "unchecked", "rawtypes"/*parameter-less lists from DOM*/, "decapsulation"/*final baseclass + callout-decapsulation*/ })
 protected class StubUtility2 playedBy StubUtility2 
 {
 
@@ -126,7 +125,9 @@ protected class StubUtility2 playedBy StubUtility2
 		for (int i= 0; i < typeMethods.length; i++) {
 			IMethodBinding curr= typeMethods[i];
 			int modifiers= curr.getModifiers();
-			if (!curr.isConstructor() && !Modifier.isStatic(modifiers) && !Modifier.isPrivate(modifiers)) {
+			if ((!curr.isConstructor() && !Modifier.isStatic(modifiers) && !Modifier.isPrivate(modifiers))
+					|| Modifier.isAbstract(modifiers)) // account for 'abstract static' (partially virtual ;P )
+			{
 			  if (!curr.isCopied()) // new check for OT
 				if (findMethodBinding(curr, allMethods) == null) {
 					allMethods.add(curr);

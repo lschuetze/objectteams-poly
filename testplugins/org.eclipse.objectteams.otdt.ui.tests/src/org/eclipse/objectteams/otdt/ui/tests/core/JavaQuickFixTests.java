@@ -1,7 +1,7 @@
 /**********************************************************************
  * This file is part of "Object Teams Development Tooling"-Software
  * 
- * Copyright 2010 Stephan Herrmann.
+ * Copyright 2010, 2016 Stephan Herrmann.
  * 
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -26,6 +26,7 @@ import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.internal.ui.text.correction.proposals.NewCUUsingWizardProposal;
+import org.eclipse.jdt.ui.text.java.IJavaCompletionProposal;
 import org.eclipse.jdt.ui.text.java.correction.CUCorrectionProposal;
 
 /**
@@ -67,7 +68,7 @@ public class JavaQuickFixTests extends OTQuickFixTest {
 		ICompilationUnit cu= pack1.createCompilationUnit("T1.java", buf.toString(), false, null);
 		
 		CompilationUnit astRoot= getASTRoot(cu);
-		ArrayList proposals= collectCorrections(cu, astRoot);
+		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot);
 		assertNumberOfProposals(proposals, 6);
 		// create class / interface / enum B
 		// add type parameter B to R / T1
@@ -99,7 +100,7 @@ public class JavaQuickFixTests extends OTQuickFixTest {
 		ICompilationUnit cu= pack1.createCompilationUnit("T1.java", buf.toString(), false, null);
 		
 		CompilationUnit astRoot= getASTRoot(cu);
-		ArrayList proposals= collectCorrections(cu, astRoot);
+		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot);
 		assertNumberOfProposals(proposals, 7);
 		// create class / interface / enum B
 		// add type parameter B to R / Mid / T1
@@ -131,7 +132,7 @@ public class JavaQuickFixTests extends OTQuickFixTest {
 		ICompilationUnit cu= pack1.createCompilationUnit("T1.java", buf.toString(), false, null);
 		
 		CompilationUnit astRoot= getASTRoot(cu);
-		ArrayList proposals= collectCorrections(cu, astRoot, 2, 1, null);
+		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot, 2, 1, null);
 		assertNumberOfProposals(proposals, 5);
 		// create class / interface / enum B
 		// add type parameter B to T1
@@ -170,9 +171,9 @@ public class JavaQuickFixTests extends OTQuickFixTest {
 		pack1.createCompilationUnit("T1.java", buf.toString(), false, null);
 		
 		CompilationUnit astRoot= getASTRoot(cu1);
-		ArrayList proposals1= collectCorrections(cu1, astRoot, 2, 0);
+		ArrayList<IJavaCompletionProposal> proposals1= collectCorrections(cu1, astRoot, 2, 0);
 		assertNumberOfProposals(proposals1, 0);
-		ArrayList proposals2= collectCorrections(cu1, astRoot, 2, 1);
+		ArrayList<IJavaCompletionProposal> proposals2= collectCorrections(cu1, astRoot, 2, 1);
 		assertNumberOfProposals(proposals2, 2);
 		assertCorrectLabels(proposals1);
 
@@ -233,9 +234,9 @@ public class JavaQuickFixTests extends OTQuickFixTest {
 		pack1.createCompilationUnit("T1.java", buf.toString(), false, null);
 		
 		CompilationUnit astRoot= getASTRoot(cu1);
-		ArrayList proposals1= collectCorrections(cu1, astRoot, 2, 0);
+		ArrayList<IJavaCompletionProposal> proposals1= collectCorrections(cu1, astRoot, 2, 0);
 		assertNumberOfProposals(proposals1, 0);
-		ArrayList proposals2= collectCorrections(cu1, astRoot, 2, 1);
+		ArrayList<IJavaCompletionProposal> proposals2= collectCorrections(cu1, astRoot, 2, 1);
 		assertNumberOfProposals(proposals2, 2);
 		assertCorrectLabels(proposals1);
 
@@ -250,6 +251,7 @@ public class JavaQuickFixTests extends OTQuickFixTest {
 		buf.append("    /* (non-Javadoc)\n"); 
 		buf.append("     * @see test1.T1.R#foo()\n"); 
 		buf.append("     */\n");
+		buf.append("    @Override\n");
 		buf.append("    static void foo() {\n");
 		buf.append("        // TODO Auto-generated method stub\n"); 
 		buf.append("        \n");
