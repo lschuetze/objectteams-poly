@@ -1,7 +1,7 @@
 /**********************************************************************
  * This file is part of "Object Teams Development Tooling"-Software
  * 
- * Copyright 2005-2014 Berlin Institute of Technology, Germany.
+ * Copyright 2005-2016 Berlin Institute of Technology, Germany.
  * 
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -6130,5 +6130,63 @@ public class DevelopmentExamples extends AbstractOTJLDTest {
             null/*vmArguments*/,
             customOptions,
             null/*no custom requestor*/);
+    }
+
+    public void testBug487037() {
+    	runConformTest(
+    		new String[] {
+		"Main.java",
+				"public class Main {\n" +
+				"	public static void main(String... args) {\n" +
+				"		new TeamFoo().activate();\n" +
+				"		new b.B1().test();\n" +
+				"		new b.B1b();\n" +
+				"		new b.B2().test();\n" +
+				"	}\n" +
+				"}\n",
+		"b/B1.java",
+    			"package b;\n" +
+    			"public class B1 {\n" +
+    			"	void bm1() {}\n" +
+    			"	void bm2() {}\n" +
+    			"	void bm3() {}\n" +
+    			"	void bm4() {}\n" +
+    			"	void bm5() {}\n" +
+    			"	void bm6() {}\n" +
+    			"	void bm7() {}\n" +
+    			"	void bm8() {}\n" +
+    			"	void bm9() {}\n" +
+    			"	void bmA() {}\n" +
+    			"	private void bm() {\n" +
+    			"		System.out.print(\"bm\");\n" +
+    			"	}\n" +
+    			"	public void test() { bm(); }\n" +
+    			"}\n",
+    	"b/B1b.java",
+    			"package b;\n" +
+    			"public class B1b extends B1 {}\n", // stuffing to test transfer of binding tasks accross multiple anonymous sub classes
+    	"b/B2.java",
+    			"package b;\n" +
+    			"public class B2 extends B1 {\n" +
+    			"	public void test() { super.test(); }\n" +
+    			"}\n",
+    	"TeamFoo.java",
+    			"import base b.B1;\n" +
+    			"public team class TeamFoo {\n" +
+    			"	protected class R playedBy B1 {\n" +
+    			"		void rm() { System.out.print(\"rm\"); }\n" +
+    			"		rm <- after bm1;\n" + // stuffing to create more interesting method & joinpoint ids
+    			"		rm <- after bm2;\n" +
+    			"		rm <- after bm3;\n" +
+    			"		rm <- after bm4;\n" +
+    			"		rm <- after bm5;\n" +
+    			"		rm <- after bm6;\n" +
+    			"		rm <- after bm7;\n" +
+    			"		rm <- after bm8;\n" +
+    			"		rm <- after bm;\n" +
+    			"	}\n" +
+    			"}\n"
+    		},
+    		"bmrmbmrm");
     }
 }

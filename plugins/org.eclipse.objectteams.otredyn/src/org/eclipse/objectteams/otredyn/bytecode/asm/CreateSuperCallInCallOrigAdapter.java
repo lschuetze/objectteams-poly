@@ -1,7 +1,7 @@
 /**********************************************************************
  * This file is part of "Object Teams Dynamic Runtime Environment"
  * 
- * Copyright 2009, 2014 Oliver Frank and others.
+ * Copyright 2009, 2016 Oliver Frank and others.
  * 
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -31,13 +31,13 @@ import org.objectweb.asm.tree.MethodNode;
  */
 public class CreateSuperCallInCallOrigAdapter extends AbstractTransformableClassNode {
 
-	private int joinpointId;
+	private int boundMethodId;
 	private String superClassName;
 
 	public CreateSuperCallInCallOrigAdapter(String superClassName,
-			int joinpointId) {
+			int boundMethodId) {
 		this.superClassName = superClassName;
-		this.joinpointId = joinpointId;
+		this.boundMethodId = boundMethodId;
 	}
 
 	@Override
@@ -52,7 +52,7 @@ public class CreateSuperCallInCallOrigAdapter extends AbstractTransformableClass
 				superClassName, ConstantMembers.callOrig.getName(),
 				ConstantMembers.callOrig.getSignature(), false));
 		instructions.add(new InsnNode(Opcodes.ARETURN));
-		addNewLabelToSwitch(callOrig.instructions, instructions, joinpointId);
+		addNewLabelToSwitch(callOrig.instructions, instructions, boundMethodId);
 		callOrig.maxStack = Math.max(callOrig.maxStack, args.length + 1);
 		return true;
 	}

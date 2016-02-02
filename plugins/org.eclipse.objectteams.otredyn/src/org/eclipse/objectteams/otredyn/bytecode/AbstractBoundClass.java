@@ -1,7 +1,7 @@
 /**********************************************************************
  * This file is part of "Object Teams Dynamic Runtime Environment"
  * 
- * Copyright 2009, 2015 Oliver Frank and others.
+ * Copyright 2009, 2016 Oliver Frank and others.
  * 
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -68,6 +68,7 @@ public abstract class AbstractBoundClass implements IBoundClass {
 		private WeavingTaskType weavingTaskType;
 		private String memberName;
 		private String memberSignature;
+		private String memberPrefixId;
 		private int baseFlags;
 		private boolean doAllTransformations;
 		private boolean isHandleCovariantReturn;
@@ -80,9 +81,13 @@ public abstract class AbstractBoundClass implements IBoundClass {
 			this.baseFlags = baseFlags;
 		}
 		
-		public WeavingTask(WeavingTaskType weavingTaskType, Method method, WeavingTask upstream) {
+		public WeavingTask(WeavingTaskType weavingTaskType, Method method, WeavingTask upstream, AbstractBoundClass upstreamClass) {
 			this(weavingTaskType, method.getName(), method.getSignature(),
 					upstream.getBaseFlags(), upstream.isHandleCovariantReturn());
+			if (weavingTaskType == WeavingTaskType.WEAVE_INHERITED_BINDING
+					&& upstream != null && ((upstream.getBaseFlags() & IBinding.PRIVATE_BASE) != 0)
+					&& upstreamClass != null)
+				this.memberPrefixId = upstreamClass.getId();
 		}
 
 		public WeavingTask(WeavingTaskType type) {
@@ -113,6 +118,11 @@ public abstract class AbstractBoundClass implements IBoundClass {
 			return memberSignature;
 		}
 		
+		public String getMethodIdentifier(AbstractBoundClass clazz) {
+			String prefix = memberPrefixId != null ? memberPrefixId : clazz.getId();
+			return prefix + '.' + this.memberName + this.memberSignature;
+		}
+
 		public int getBaseFlags() {
 			return baseFlags;
 		}
@@ -571,7 +581,7 @@ public abstract class AbstractBoundClass implements IBoundClass {
 
 
 	public String getMethodIdentifier(IMethod method) {
-		return getId() + method.getName() + method.getSignature();
+		return getId() + '.' + method.getName() + method.getSignature();
 	}
 
 	/**
@@ -597,7 +607,7 @@ public abstract class AbstractBoundClass implements IBoundClass {
 	 * @return
 	 */
 	private Collection<AbstractBoundClass> getSubclasses() {
-		return subclasses.keySet();
+		return new ArrayList<AbstractBoundClass>(subclasses.keySet());
 	}
 
 	/**
@@ -701,7 +711,7 @@ public abstract class AbstractBoundClass implements IBoundClass {
 									AbstractBoundClass superclass = getSuperclass();
 									Method superMethod = superclass.getMethod(method, task);
 									if (superMethod != null) {
-										WeavingTask newTask = new WeavingTask(WeavingTaskType.WEAVE_BINDING_OF_SUBCLASS, superMethod, task);
+										WeavingTask newTask = new WeavingTask(WeavingTaskType.WEAVE_BINDING_OF_SUBCLASS, superMethod, task, null);
 										superclass.addWeavingTask(newTask, true/*standBy*/);
 										affectedClasses.add(superclass);
 									}
@@ -719,7 +729,7 @@ public abstract class AbstractBoundClass implements IBoundClass {
 								for (AbstractBoundClass subclass : getSubclasses()) {
 									Method subMethod = subclass.getMethod(method, task);
 									if (subMethod != null) {
-										WeavingTask newTask = new WeavingTask(WeavingTaskType.WEAVE_INHERITED_BINDING, subMethod, task);
+										WeavingTask newTask = new WeavingTask(WeavingTaskType.WEAVE_INHERITED_BINDING, subMethod, task, this);
 										subclass.addWeavingTask(newTask, true/*standBy*/);
 										affectedClasses.add(subclass);
 										TeamManager.mergeJoinpoints(this, subclass, method, subMethod, task.isHandleCovariantReturn());
@@ -742,7 +752,7 @@ public abstract class AbstractBoundClass implements IBoundClass {
 						// Delegate the WeavingTask to the subclasses
 						for (AbstractBoundClass subclass : getSubclasses()) {
 							Method subMethod = subclass.getMethod(method, task);
-							WeavingTask newTask = new WeavingTask(WeavingTaskType.WEAVE_INHERITED_BINDING, subMethod, task);
+							WeavingTask newTask = new WeavingTask(WeavingTaskType.WEAVE_INHERITED_BINDING, subMethod, task, this);
 							subclass.addWeavingTask(newTask, true/*standBy*/);
 							affectedClasses.add(subclass);
 							TeamManager.mergeJoinpoints(this, subclass, method, subMethod, task.isHandleCovariantReturn());
@@ -1040,8 +1050,7 @@ public abstract class AbstractBoundClass implements IBoundClass {
 			prepareForFirstStaticTransformation();
 
 		Method method = getMethod(task);
-		int joinpointId = TeamManager
-				.getJoinpointId(getMethodIdentifier(method));
+		int joinpointId = TeamManager.getJoinpointId(task.getMethodIdentifier(this));
 		int boundMethodId = method.getGlobalId(this);
 		if (task.doAllTransformations()) {
 			createDispatchCodeInCallAllBindings(joinpointId, boundMethodId);
