@@ -45,6 +45,7 @@ import org.eclipse.jdt.internal.compiler.ast.MethodDeclaration;
 import org.eclipse.jdt.internal.compiler.ast.SingleNameReference;
 import org.eclipse.jdt.internal.compiler.ast.TypeDeclaration;
 import org.eclipse.jdt.internal.compiler.classfmt.ClassFileConstants;
+import org.eclipse.jdt.internal.compiler.impl.CompilerOptions.WeavingScheme;
 import org.eclipse.jdt.internal.compiler.lookup.BaseTypeBinding;
 import org.eclipse.jdt.internal.compiler.lookup.Binding;
 import org.eclipse.jdt.internal.compiler.lookup.ClassScope;
@@ -631,7 +632,7 @@ public class CallinMappingDeclaration extends AbstractMethodMappingDeclaration
 	}
 
 	/** Check details that require analyseCode() of methods to be finished: */
-	public void analyseDetails(TypeDeclaration roleClass) 
+	public void analyseDetails(TypeDeclaration roleClass, WeavingScheme weavingScheme) 
 	{		
 		// check validity of base-super call
 		if (   this.roleMethodSpec.isValid()
@@ -642,8 +643,8 @@ public class CallinMappingDeclaration extends AbstractMethodMappingDeclaration
 				if (baseMethod != null) {
 					if (!MethodModel.isOverriding(baseMethod, this.scope.compilationUnitScope()))
 						this.scope.problemReporter().baseSuperCallToNonOverriding(this.baseMethodSpecs[i], this.roleMethodSpec);
-					else
-						// create the special access attribute that signals the need to handle super access:
+					else if (weavingScheme == WeavingScheme.OTRE)
+						// create the special access attribute that signals the need to handle super access (OTRE only):
 						roleClass.getRoleModel().addMethodSuperAccess(baseMethod);
 				}
 			}

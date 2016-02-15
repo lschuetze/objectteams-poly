@@ -23,6 +23,7 @@ import java.util.ListIterator;
 import org.eclipse.objectteams.otredyn.bytecode.AbstractBoundClass;
 import org.eclipse.objectteams.otredyn.bytecode.Method;
 import org.eclipse.objectteams.otredyn.transformer.IWeavingContext;
+import org.eclipse.objectteams.otredyn.transformer.names.ClassNames;
 import org.eclipse.objectteams.otredyn.transformer.names.ConstantMembers;
 import org.objectweb.asm.Opcodes;
 import org.objectweb.asm.Type;
@@ -48,9 +49,10 @@ public class MoveCodeToCallOrigAdapter extends AbstractTransformableClassNode {
 	private int argOffset; // used to skip synth args if the callOrig method itself is a statid role method
 	private Method callOrig;
 	private boolean superIsWeavable = true;
+	private boolean baseSuperRequired;
 	private AbstractBoundClass superclass;
 	
-	public MoveCodeToCallOrigAdapter(AsmWritableBoundClass clazz, Method method, int boundMethodId, IWeavingContext weavingContext) {
+	public MoveCodeToCallOrigAdapter(AsmWritableBoundClass clazz, Method method, int boundMethodId, boolean baseSuperRequired, IWeavingContext weavingContext) {
 		this.method = method;
 		this.boundMethodId = boundMethodId;
 		if (method.isStatic()) {
@@ -65,6 +67,7 @@ public class MoveCodeToCallOrigAdapter extends AbstractTransformableClassNode {
 			superIsWeavable = weavingContext.isWeavable(clazz.getSuperClassName());
 		if (superIsWeavable)
 			superclass = clazz.getSuperclass();
+		this.baseSuperRequired = baseSuperRequired;
 	}
 	
 	public boolean transform() {
@@ -120,13 +123,16 @@ public class MoveCodeToCallOrigAdapter extends AbstractTransformableClassNode {
 		
 		newInstructions.add(orgMethod.instructions);
 		if (orgMethod.tryCatchBlocks != null) {
-			if (callOrig.tryCatchBlocks == null)
-				callOrig.tryCatchBlocks = new ArrayList<TryCatchBlockNode>();
-			callOrig.tryCatchBlocks.addAll(orgMethod.tryCatchBlocks);
+			addTryCatchBlocks(orgMethod, callOrig);
 		}
 		
 		addNewLabelToSwitch(callOrig.instructions, newInstructions, boundMethodId);
 		
+		if (this.baseSuperRequired && !superName.equals(ClassNames.OBJECT_SLASH) && !method.isStatic()) {
+			newInstructions = superOrigCall(method, args);
+			addNewLabelToSwitch(callOrig.instructions, newInstructions, boundMethodId+1);
+		}
+
 		// a minimum stacksize of 3 is needed to box the arguments
 		callOrig.maxStack = Math.max(Math.max(callOrig.maxStack, orgMethod.maxStack), 3);
 		
@@ -137,7 +143,52 @@ public class MoveCodeToCallOrigAdapter extends AbstractTransformableClassNode {
 		callOrig.maxLocals = Math.max(callOrig.maxLocals, orgMethod.maxLocals);
 		return true;
 	}
+
+	@SuppressWarnings("unchecked")
+	private void addTryCatchBlocks(MethodNode orgMethod, MethodNode callOrig) {
+		if (callOrig.tryCatchBlocks == null)
+			callOrig.tryCatchBlocks = new ArrayList<TryCatchBlockNode>();
+		callOrig.tryCatchBlocks.addAll(orgMethod.tryCatchBlocks);
+	}
 	
+	private InsnList superOrigCall(Method method, Type[] args) {
+		InsnList newInstructions = new InsnList();
+
+		newInstructions.add(new IntInsnNode(Opcodes.ALOAD, 0));
+		
+		for (int i = argOffset; i < args.length; i++) {
+			newInstructions.add(new IntInsnNode(Opcodes.ALOAD, firstArgIndex + argOffset + 1));
+			newInstructions.add(createLoadIntConstant(i));
+			newInstructions.add(new InsnNode(Opcodes.AALOAD));
+			Type arg = args[i];
+			if (arg.getSort() != Type.ARRAY && arg.getSort() != Type.OBJECT) {
+				String objectType = AsmTypeHelper.getBoxingType(arg);
+				newInstructions.add(new TypeInsnNode(Opcodes.CHECKCAST, objectType));
+				newInstructions.add(AsmTypeHelper.getUnboxingInstructionForType(arg, objectType));
+			} else {
+				newInstructions.add(new TypeInsnNode(Opcodes.CHECKCAST, arg.getInternalName()));
+			}
+		}
+		
+		newInstructions.add(new MethodInsnNode(Opcodes.INVOKESPECIAL, superName, method.getName(), method.getSignature(), false));
+		
+		Type returnType = Type.getReturnType(method.getSignature());
+		switch (returnType.getSort()) {
+		case Type.VOID:
+			newInstructions.add(new InsnNode(Opcodes.ACONST_NULL));
+			break;
+		case Type.OBJECT:
+		case Type.ARRAY:
+			break;
+		default:
+			newInstructions.add(AsmTypeHelper.getBoxingInstructionForType(returnType));
+			break;
+		}
+		newInstructions.add(new InsnNode(Opcodes.ARETURN));
+
+		return newInstructions;
+	}
+
 	/** To avoid infinite recursion, calls super.m(a1, a2) must be translated to super.callOrig(boundMethodId, new Object[] {a1, a2}). */
 	private void adjustSuperCalls(InsnList instructions, String selector, String descriptor, 
 			Type[] args, Type returnType, final int boundMethodIdSlot) {

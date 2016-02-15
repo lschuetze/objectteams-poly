@@ -84,8 +84,10 @@ public abstract class Member implements IMember {
 		Integer id = idMap.get(key);
 		if (id == null) {
 			synchronized (idMap) {
-				idMap.put(key, currentId);
-				return currentId++;
+				int thisId = currentId;
+				currentId += 2; // 2-increment to keep space for base-super calls
+				idMap.put(key, thisId);
+				return thisId;
 			}
 		}
 

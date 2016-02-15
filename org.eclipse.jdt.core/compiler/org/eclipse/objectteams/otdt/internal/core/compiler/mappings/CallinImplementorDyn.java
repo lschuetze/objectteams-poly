@@ -30,6 +30,7 @@ import org.eclipse.jdt.internal.compiler.ast.Expression;
 import org.eclipse.jdt.internal.compiler.ast.LocalDeclaration;
 import org.eclipse.jdt.internal.compiler.ast.MessageSend;
 import org.eclipse.jdt.internal.compiler.ast.MethodDeclaration;
+import org.eclipse.jdt.internal.compiler.ast.OperatorIds;
 import org.eclipse.jdt.internal.compiler.ast.Reference;
 import org.eclipse.jdt.internal.compiler.ast.SingleNameReference;
 import org.eclipse.jdt.internal.compiler.ast.Statement;
@@ -115,7 +116,7 @@ public class CallinImplementorDyn extends MethodMappingImplementor {
 	
 	// for call next:
 	private static final char[] BASE_CALL_ARGS  = "baseCallArguments".toCharArray();   //$NON-NLS-1$
-	private static final char[] IS_BASE_CALL = "isBaseCall".toCharArray(); //$NON-NLS-1$
+	private static final char[] BASE_CALL_FLAGS = "baseCallFlags".toCharArray(); //$NON-NLS-1$
 
 	// for call{replace,before,after}:
 	static final char[][] REPLACE_ARG_NAMES = new char[][]{_BASE$, TEAMS, INDEX, CALLIN_ID, BOUND_METHOD_ID, ARGUMENTS};
@@ -764,7 +765,7 @@ public class CallinImplementorDyn extends MethodMappingImplementor {
 					for (int idx=0; idx < REPLACE_ARG_NAMES.length; idx++)
 						callArgs[idx] = gen.singleNameReference(REPLACE_ARG_NAMES[idx]);
 					callArgs[callArgs.length-2] = gen.nullLiteral(); // no explicit baseCallArguments
-					callArgs[callArgs.length-1] = gen.booleanLiteral(false); // not a base call  
+					callArgs[callArgs.length-1] = gen.intLiteral(0); // not a base call  
 					statements.add(gen.caseStatement(null)); 													// default:
 					statements.add(gen.returnStatement(															//    return _OT$callNext(..);
 										gen.messageSend(
@@ -853,7 +854,7 @@ public class CallinImplementorDyn extends MethodMappingImplementor {
 				gen.argument(BOUND_METHOD_ID, 	gen.typeReference(TypeBinding.INT)),
 				gen.argument(ARGUMENTS, 		gen.qualifiedArrayTypeReference(TypeConstants.JAVA_LANG_OBJECT, 1)),
 				gen.argument(BASE_CALL_ARGS, 	gen.qualifiedArrayTypeReference(TypeConstants.JAVA_LANG_OBJECT, 1)),
-				gen.argument(IS_BASE_CALL,		gen.typeReference(TypeBinding.BOOLEAN))
+				gen.argument(BASE_CALL_FLAGS,	gen.typeReference(TypeBinding.INT))
 		};
 		// super call directly passes all these args through:
 		Expression[] superArgs = new Expression[args.length];
@@ -944,7 +945,7 @@ public class CallinImplementorDyn extends MethodMappingImplementor {
 						: genTeamThis(gen, returnTypes[0]);
 					resultVar = CharOperation.append(resultVar, '$');
 					caseBlockStats.add(gen.localVariable(resultVar, gen.qualifiedTypeReference(TypeConstants.JAVA_LANG_OBJECT), result));
-					caseBlockStats.add(gen.ifStatement(gen.singleNameReference(IS_BASE_CALL), 
+					caseBlockStats.add(gen.ifStatement(gen.equalExpression(gen.singleNameReference(BASE_CALL_FLAGS), gen.intLiteral(0), OperatorIds.NOT_EQUAL), 
 							gen.assignment(gen.singleNameReference(resultVar), 
 											Lifting.liftCall(mapping.scope,
 											  liftReceiver,
@@ -981,8 +982,9 @@ public class CallinImplementorDyn extends MethodMappingImplementor {
 		if (binding.superclass.isTeam())
 			return gen.messageSend(gen.superReference(), OT_CALL_NEXT, superArgs);
 		// no super-*team* so call the static variant:
-		return gen.messageSend(gen.qualifiedNameReference(IOTConstants.ORG_OBJECTTEAMS_TEAM), OT_TERMINAL_CALL_NEXT, 
-								Arrays.copyOf(superArgs, superArgs.length-1)); // one fewer arguments
+		Expression[] argsCopy = Arrays.copyOf(superArgs, superArgs.length);
+		argsCopy[superArgs.length-1] = gen.intLiteral(0); // not a base call
+		return gen.messageSend(gen.qualifiedNameReference(IOTConstants.ORG_OBJECTTEAMS_TEAM), OT_TERMINAL_CALL_NEXT, argsCopy);
 	}
 
 	Reference genTeamThis(AstGenerator gen, TypeBinding type) {

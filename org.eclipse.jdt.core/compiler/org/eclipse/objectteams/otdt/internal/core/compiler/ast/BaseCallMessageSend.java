@@ -23,7 +23,9 @@ import org.eclipse.jdt.core.compiler.CharOperation;
 import org.eclipse.jdt.internal.compiler.ASTVisitor;
 import org.eclipse.jdt.internal.compiler.ast.ASTNode;
 import org.eclipse.jdt.internal.compiler.ast.AbstractMethodDeclaration;
+import org.eclipse.jdt.internal.compiler.ast.Argument;
 import org.eclipse.jdt.internal.compiler.ast.Expression;
+import org.eclipse.jdt.internal.compiler.ast.IntLiteral;
 import org.eclipse.jdt.internal.compiler.ast.MessageSend;
 import org.eclipse.jdt.internal.compiler.ast.MethodDeclaration;
 import org.eclipse.jdt.internal.compiler.flow.FlowContext;
@@ -40,9 +42,11 @@ import org.eclipse.jdt.internal.compiler.lookup.ReferenceBinding;
 import org.eclipse.jdt.internal.compiler.lookup.Scope;
 import org.eclipse.jdt.internal.compiler.lookup.SourceTypeBinding;
 import org.eclipse.jdt.internal.compiler.lookup.TypeBinding;
+import org.eclipse.jdt.internal.compiler.lookup.TypeConstants;
 import org.eclipse.jdt.internal.compiler.problem.ProblemReporter;
 import org.eclipse.objectteams.otdt.core.compiler.IOTConstants;
 import org.eclipse.objectteams.otdt.core.exceptions.InternalCompilerError;
+import org.eclipse.objectteams.otdt.internal.core.compiler.lifting.Lowering;
 import org.eclipse.objectteams.otdt.internal.core.compiler.lookup.SyntheticBaseCallSurrogate;
 import org.eclipse.objectteams.otdt.internal.core.compiler.mappings.CallinImplementorDyn;
 import org.eclipse.objectteams.otdt.internal.core.compiler.model.MethodModel;
@@ -98,7 +102,7 @@ public class BaseCallMessageSend extends AbstractExpressionWrapper
 		if (isSuperAccess)
 			problemReporter.baseSuperCallDecapsulation(this);
 	}
-	public void prepareSuperAccess(WeavingScheme weavingScheme) {
+	public void prepareSuperAccess(WeavingScheme weavingScheme, MethodDeclaration enclosingMethod, BlockScope scope) {
 		// add a further boolean argument to pass this flag to the runtime.
 		// insert it at front of regular arguments to it will end up between normal enhancement args and regular args.
 		// (note that this arg may be removed again if current callin method is static,
@@ -113,9 +117,45 @@ public class BaseCallMessageSend extends AbstractExpressionWrapper
 			len = args.length;
 			System.arraycopy(args, 0, args=new Expression[len+extra], extra, len);
 		}
-		// insert before regular args:
-		if (weavingScheme == WeavingScheme.OTRE) { // FIXME(OTDYN): base.super calls not supported by dynamic weaver.
+		if (weavingScheme == WeavingScheme.OTRE) {
+			// insert before regular args:
 			args[0] = new AstGenerator(this).booleanLiteral(this.isSuperAccess);
+		} else {
+			// translate & pack arguments and append baseCallFlags:
+			AstGenerator gen = new AstGenerator(this);
+			IntLiteral baseCallFlags = gen.intLiteral(this.isSuperAccess ? 2 : 1);
+			if (args.length == 0) {
+				args = new Expression[] { gen.nullLiteral(), baseCallFlags };
+			} else {
+				int enhLen = MethodSignatureEnhancer.getEnhancingArgLen(weavingScheme);
+				if (enclosingMethod.arguments.length - enhLen != args.length) {
+					scope.problemReporter().baseCallDoesntMatchRoleMethodSignature(this);
+					return;
+				}
+				Expression[] boxedArgs = new Expression[args.length];
+				for (int i = 0; i < args.length; i++) {
+					Argument argument = enclosingMethod.arguments[i+enhLen];
+					TypeBinding argTypeBinding = argument.binding.type;
+					if (argTypeBinding.isBaseType()) {
+						boxedArgs[i] = gen.createBoxing(args[i], (BaseTypeBinding) argTypeBinding);
+						continue;
+					} else if (argument.type.isDeclaredLifting()) {
+						LiftingTypeReference ltr = (LiftingTypeReference)argument.type;
+						if (ltr.roleReference.resolvedType != null) {
+							Expression teamThis = gen.qualifiedThisReference(enclosingMethod.binding.declaringClass.enclosingType());
+							boxedArgs[i] = new Lowering().lowerExpression(scope, args[i],
+											ltr.roleReference.resolvedType, ltr.resolvedType, teamThis, true, true);
+								continue;
+						}
+						// fall through
+					}
+					boxedArgs[i] = args[i];
+				}
+				args = new Expression[] {
+					gen.arrayAllocation(gen.qualifiedTypeReference(TypeConstants.JAVA_LANG_OBJECT), 1, boxedArgs),
+					baseCallFlags
+				};
+			}
 		}
 		this._sendOrig.arguments = args;
 		this._weavingScheme = weavingScheme;

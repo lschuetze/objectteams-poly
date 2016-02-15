@@ -1,7 +1,7 @@
 /**********************************************************************
  * This file is part of "Object Teams Development Tooling"-Software
  *
- * Copyright 2006, 2015 Fraunhofer Gesellschaft, Munich, Germany,
+ * Copyright 2006, 2016 Fraunhofer Gesellschaft, Munich, Germany,
  * for its Fraunhofer Institute for Computer Architecture and Software
  * Technology (FIRST), Berlin, Germany and Technical University Berlin,
  * Germany.
@@ -59,7 +59,6 @@ public class OTSpecialAccessAttribute extends AbstractAttribute {
 	// OTREDyn has one more field in the attribute, use disjoint kinds:
 	private static final int DYN_DECAPSULATION_METHOD_ACCESS= 4;
 	private static final int DYN_CALLOUT_FIELD_ACCESS = 5;
-	private static final int DYN_SUPER_METHOD_ACCESS = 6;
 
 	/**
 	 * For OTREDyn, each attribute of this type maintains a set of locally unique (per team) access IDs.
@@ -231,7 +230,7 @@ public class OTSpecialAccessAttribute extends AbstractAttribute {
 	}
 	List<CalloutToFieldDesc> _calloutToFields = new ArrayList<CalloutToFieldDesc>();
 
-	/** Descriptor for base.super.m() special method access. */
+	/** Descriptor for base.super.m() special method access (OTRE only). */
 	public class SuperMethodDesc
 	{
 		MethodBinding method;
@@ -240,7 +239,7 @@ public class OTSpecialAccessAttribute extends AbstractAttribute {
 		}
 
 		void write() {
-			writeByte((byte)(OTSpecialAccessAttribute.this._weavingScheme == WeavingScheme.OTDRE ? DYN_SUPER_METHOD_ACCESS : SUPER_METHOD_ACCESS));
+			writeByte((byte)(SUPER_METHOD_ACCESS));
 			writeName(this.method.declaringClass.attributeName());
 			writeName(this.method.declaringClass.superclass().attributeName());
 			writeName(this.method.selector);
@@ -390,7 +389,6 @@ public class OTSpecialAccessAttribute extends AbstractAttribute {
 		case CALLOUT_FIELD_ACCESS:
 			this._readOffset += 7;
 			break;
-		case DYN_SUPER_METHOD_ACCESS:
 		case SUPER_METHOD_ACCESS:
 			this._readOffset += 8;
 			break;

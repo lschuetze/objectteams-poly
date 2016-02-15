@@ -122,6 +122,7 @@ public abstract class AbstractTransformableClassNode extends ClassNode {
 	 * @param newInstructions the instructions of the new label
 	 * @param labelIndex the index of the label
 	 */
+	@SuppressWarnings("unchecked")
 	protected void addNewLabelToSwitch(InsnList instructions,
 			InsnList newInstructions, int labelIndex) {
 		ListIterator<AbstractInsnNode> iter = instructions.iterator();

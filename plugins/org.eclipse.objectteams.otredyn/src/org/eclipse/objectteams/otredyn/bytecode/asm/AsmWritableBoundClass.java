@@ -249,10 +249,10 @@ class AsmWritableBoundClass extends AsmBoundClass {
 	 * @see MoveCodeToCallOrigAdapter
 	 */
 	@Override
-	protected void moveCodeToCallOrig(Method boundMethod, int boundMethodId) {
+	protected void moveCodeToCallOrig(Method boundMethod, int boundMethodId, boolean baseSuperRequired) {
 		if (boundMethod.getName().equals("<init>")) return; // don't move constructor code
 		assert (isTransformationActive) : "No transformation active";
-		nodes.add(new MoveCodeToCallOrigAdapter(this, boundMethod, boundMethodId, this.weavingContext));
+		nodes.add(new MoveCodeToCallOrigAdapter(this, boundMethod, boundMethodId, baseSuperRequired, this.weavingContext));
 	}
 	
 	/**

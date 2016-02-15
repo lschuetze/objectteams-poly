@@ -23,6 +23,7 @@ package org.eclipse.jdt.internal.compiler.ast;
 import org.eclipse.jdt.core.compiler.*;
 import org.eclipse.jdt.internal.compiler.*;
 import org.eclipse.jdt.internal.compiler.impl.*;
+import org.eclipse.jdt.internal.compiler.impl.CompilerOptions.WeavingScheme;
 import org.eclipse.jdt.internal.compiler.classfmt.ClassFileConstants;
 import org.eclipse.jdt.internal.compiler.codegen.*;
 import org.eclipse.jdt.internal.compiler.flow.*;
@@ -1323,9 +1324,10 @@ private void internalAnalyseCode(FlowContext flowContext, FlowInfo flowInfo) {
 	mergePrecedences();
 	// now check for replace callin bindings with missing base call result:
 	if (this.callinCallouts != null)  {
+		WeavingScheme weavingScheme = this.initializerScope.compilerOptions().weavingScheme;
 		for (int i = 0; i < this.callinCallouts.length; i++) {
 			if (this.callinCallouts[i].isReplaceCallin())
-				((CallinMappingDeclaration)this.callinCallouts[i]).analyseDetails(this);
+				((CallinMappingDeclaration)this.callinCallouts[i]).analyseDetails(this, weavingScheme);
 		}
 	}
 // SH}

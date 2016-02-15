@@ -36,6 +36,7 @@ import org.eclipse.objectteams.otdt.internal.core.compiler.ast.CallinMappingDecl
 import org.eclipse.objectteams.otdt.internal.core.compiler.ast.MethodSpec;
 import org.eclipse.objectteams.otdt.internal.core.compiler.control.ITranslationStates;
 import org.eclipse.objectteams.otdt.internal.core.compiler.lookup.CallinCalloutBinding;
+import org.eclipse.objectteams.otdt.internal.core.compiler.model.MethodModel;
 import org.eclipse.objectteams.otdt.internal.core.compiler.model.ModelElement;
 import org.eclipse.objectteams.otdt.internal.core.compiler.model.TeamModel;
 
@@ -87,13 +88,16 @@ public class OTDynCallinBindingsAttribute extends ListValueAttribute {
 	public static final short STATIC_ROLE_METHOD = 1;
 	public static final short INHERITED = 4;
 	public static final short COVARIANT_BASE_RETURN = 8;
+	public static final short BASE_SUPER_CALL = 16;
+
 	
 	private class Mapping {
 		char[] roleClassName, declaringRoleName, callinName, roleSelector, roleSignature, callinModifier, baseClassName, fileName;
 		int flags; // STATIC_ROLE_METHOD, INHERITED, COVARIANT_BASE_RETURN
 		int lineNumber, lineOffset;
 		BaseMethod[] baseMethods;
-		Mapping(char[] roleClassName, char[] declaringRoleName, char[] callinName, char[] roleSelector, char[] roleSignature, char[] callinModifer, int flags, char[] baseClassName, int baseMethodCount) 
+		MethodBinding roleMethod;
+		Mapping(char[] roleClassName, char[] declaringRoleName, char[] callinName, char[] roleSelector, char[] roleSignature, char[] callinModifer, int flags, char[] baseClassName, int baseMethodCount, MethodBinding roleMethod) 
 		{
 			this.roleClassName	= roleClassName;
 			this.declaringRoleName = declaringRoleName;
@@ -104,6 +108,7 @@ public class OTDynCallinBindingsAttribute extends ListValueAttribute {
 			this.flags			= flags;
 			this.baseClassName 	= baseClassName;
 			this.baseMethods	= new BaseMethod[baseMethodCount];
+			this.roleMethod		= roleMethod;
 		}
 		void addBaseMethod(int i, char[] baseMethodName, char[] baseMethodSignature, char[] declaringBaseClassName, int callinID, int baseFlags, int translationFlags) {
 			this.baseMethods[i] = new BaseMethod(baseMethodName, baseMethodSignature, declaringBaseClassName, callinID, baseFlags, translationFlags);
@@ -236,17 +241,18 @@ public class OTDynCallinBindingsAttribute extends ListValueAttribute {
 		return s;
 	}
 	void addMappings(char[] baseClassName, CallinMappingDeclaration callinDecl) {
+		MethodSpec roleSpec = callinDecl.roleMethodSpec;
 		int flags = 0; 			
 		if (callinDecl.roleMethodSpec.resolvedMethod.isStatic())
 			flags |= STATIC_ROLE_METHOD;
 		if (callinDecl.hasCovariantReturn())
 			flags |= COVARIANT_BASE_RETURN;
-		MethodSpec roleSpec = callinDecl.roleMethodSpec;
 		MethodSpec[] baseMethodSpecs = callinDecl.getBaseMethodSpecs();
 		Mapping mapping = new Mapping(callinDecl.scope.enclosingSourceType().sourceName(), // indeed: simple name
 									  callinDecl.declaringRoleName(), callinDecl.name, roleSpec.selector, roleSpec.signature(WeavingScheme.OTDRE),
 									  callinDecl.getCallinModifier(), flags, 
-									  baseClassName, baseMethodSpecs.length);
+									  baseClassName, baseMethodSpecs.length,
+									  roleSpec.resolvedMethod);
 		for (int i=0; i<baseMethodSpecs.length; i++) {
 			MethodSpec baseSpec = baseMethodSpecs[i];
 			int baseFlags = 0;
@@ -312,7 +318,11 @@ public class OTDynCallinBindingsAttribute extends ListValueAttribute {
 		writeName(mapping.roleSelector);
 		writeName(mapping.roleSignature);
 		writeName(mapping.callinModifier);
-		writeByte((byte) mapping.flags);
+		int flags = mapping.flags;
+		// if mapping is from binary we already have the base-super flag in flags, for source we had to wait till after analyseCode():
+		if (mapping.roleMethod != null && MethodModel.hasCallinFlag(mapping.roleMethod, IOTConstants.CALLIN_FLAG_BASE_SUPER_CALL))
+			flags |= BASE_SUPER_CALL;
+		writeByte((byte) flags);
 		writeName(mapping.baseClassName);
 		writeName(mapping.fileName);
 		writeUnsignedShort(mapping.lineNumber);
@@ -344,7 +354,7 @@ public class OTDynCallinBindingsAttribute extends ListValueAttribute {
 		int pos = CharOperation.lastIndexOf('.', callinName);
 		char[] declaringRoleName = CharOperation.subarray(callinName, pos+1, -1);
 
-		Mapping result = new Mapping(roleClassName, declaringRoleName, callinName, roleSelector, roleSignature, callinModifer, flags, baseClassName, baseMethodCount); 
+		Mapping result = new Mapping(roleClassName, declaringRoleName, callinName, roleSelector, roleSignature, callinModifer, flags, baseClassName, baseMethodCount, null); 
 		result.setSMAPInfo(fileName, lineNumber, lineOffset);
 		for (int i=0; i<baseMethodCount; i++) {
 			char[] baseMethodName 		= consumeName();

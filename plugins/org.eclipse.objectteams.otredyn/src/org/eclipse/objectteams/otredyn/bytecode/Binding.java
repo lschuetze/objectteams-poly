@@ -1,7 +1,7 @@
 /**********************************************************************
  * This file is part of "Object Teams Dynamic Runtime Environment"
  * 
- * Copyright 2009, 2015 Oliver Frank and others.
+ * Copyright 2009, 2016 Oliver Frank and others.
  * 
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -47,6 +47,7 @@ public class Binding implements Comparable<Binding>, IBinding {
 	private int baseFlags;
 	private IBinding.BindingType type;
 	private boolean isHandleCovariantReturn;
+	private boolean requireBaseSuperCall;
 	
 	public IBinding.BindingType getType() {
 		return type;
@@ -58,7 +59,7 @@ public class Binding implements Comparable<Binding>, IBinding {
 	public Binding(AbstractBoundClass teamClass,
 			String roleClassName, String callinLabel, String boundClassName, 
 			String memberName, String memberSignature, String weavableBaseClassName, 
-			int callinModifier, int callinId, int baseFlags, boolean handleCovariantReturn) 
+			int callinModifier, int callinId, int baseFlags, boolean handleCovariantReturn, boolean requireBaseSuperCall) 
 	{
 		this.teamClass = teamClass;
 		this.callinLabel = callinLabel;
@@ -71,6 +72,7 @@ public class Binding implements Comparable<Binding>, IBinding {
 		this.baseFlags = baseFlags;
 		this.type = IBinding.BindingType.CALLIN_BINDING;
 		this.isHandleCovariantReturn = handleCovariantReturn;
+		this.requireBaseSuperCall = requireBaseSuperCall;
 	}
 
 	/**
@@ -119,6 +121,11 @@ public class Binding implements Comparable<Binding>, IBinding {
 		return this.isHandleCovariantReturn;
 	}
 	
+	@Override
+	public boolean requiresBaseSuperCall() {
+		return this.requireBaseSuperCall;
+	}
+
 	public String getDeclaringBaseClassName() {
 		return this.weavableBaseClassName;
 	}

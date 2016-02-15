@@ -25,30 +25,27 @@ import java.util.Stack;
 import org.eclipse.jdt.core.compiler.CharOperation;
 import org.eclipse.jdt.internal.compiler.ast.ASTNode;
 import org.eclipse.jdt.internal.compiler.ast.AbstractMethodDeclaration;
-import org.eclipse.jdt.internal.compiler.ast.Argument;
+import org.eclipse.jdt.internal.compiler.ast.ArrayAllocationExpression;
 import org.eclipse.jdt.internal.compiler.ast.ExplicitConstructorCall;
 import org.eclipse.jdt.internal.compiler.ast.Expression;
 import org.eclipse.jdt.internal.compiler.ast.MessageSend;
 import org.eclipse.jdt.internal.compiler.ast.MethodDeclaration;
+import org.eclipse.jdt.internal.compiler.ast.NullLiteral;
 import org.eclipse.jdt.internal.compiler.ast.QualifiedThisReference;
 import org.eclipse.jdt.internal.compiler.ast.ReturnStatement;
 import org.eclipse.jdt.internal.compiler.ast.Statement;
 import org.eclipse.jdt.internal.compiler.ast.ThisReference;
 import org.eclipse.jdt.internal.compiler.ast.TypeDeclaration;
 import org.eclipse.jdt.internal.compiler.impl.CompilerOptions.WeavingScheme;
-import org.eclipse.jdt.internal.compiler.lookup.BaseTypeBinding;
 import org.eclipse.jdt.internal.compiler.lookup.BlockScope;
 import org.eclipse.jdt.internal.compiler.lookup.ClassScope;
 import org.eclipse.jdt.internal.compiler.lookup.TypeBinding;
-import org.eclipse.jdt.internal.compiler.lookup.TypeConstants;
 import org.eclipse.objectteams.otdt.core.compiler.IOTConstants;
 import org.eclipse.objectteams.otdt.core.exceptions.InternalCompilerError;
 import org.eclipse.objectteams.otdt.internal.core.compiler.ast.BaseCallMessageSend;
 import org.eclipse.objectteams.otdt.internal.core.compiler.ast.BaseReference;
-import org.eclipse.objectteams.otdt.internal.core.compiler.ast.LiftingTypeReference;
 import org.eclipse.objectteams.otdt.internal.core.compiler.control.ITranslationStates;
 import org.eclipse.objectteams.otdt.internal.core.compiler.control.StateHelper;
-import org.eclipse.objectteams.otdt.internal.core.compiler.lifting.Lowering;
 import org.eclipse.objectteams.otdt.internal.core.compiler.mappings.CallinImplementorDyn;
 import org.eclipse.objectteams.otdt.internal.core.compiler.model.MethodModel;
 import org.eclipse.objectteams.otdt.internal.core.compiler.smap.SourcePosition;
@@ -145,7 +142,8 @@ public class TransformStatementsVisitor
     // === Adjustments following enhancement of callin method signatures:
     @Override
     public boolean visit(BaseCallMessageSend messageSend, BlockScope scope) {
-    	messageSend.prepareSuperAccess(this.weavingScheme);
+    	if (!this._methodDeclarationStack.isEmpty())
+    		messageSend.prepareSuperAccess(this.weavingScheme, this._methodDeclarationStack.peek(), scope);
 		messageSend.bits |= ASTNode.HasBeenTransformed; // only the outer has been transformed so far.
     	return true;
     }
@@ -166,34 +164,6 @@ public class TransformStatementsVisitor
     		if (isBaseCall) {
 	    		switch (this.weavingScheme) {
 	    			case OTDRE:
-		    			AstGenerator gen = new AstGenerator(messageSend);
-		    			if (args == null || args.length == 0) {
-		    				args = new Expression[] { gen.nullLiteral(), gen.booleanLiteral(true) /*isBaseCall*/ };
-		    			} else {
-		    				Expression[] boxedArgs = new Expression[args.length];
-		    				for (int i = 0; i < args.length; i++) {
-		    					Argument argument = methodDecl.arguments[i+MethodSignatureEnhancer.getEnhancingArgLen(this.weavingScheme)];
-								TypeBinding argTypeBinding = argument.binding.type;
-								if (argTypeBinding.isBaseType()) {
-									boxedArgs[i] = gen.createBoxing(args[i], (BaseTypeBinding) argTypeBinding);
-									continue;
-								} else if (argument.type.isDeclaredLifting()) {
-									LiftingTypeReference ltr = (LiftingTypeReference)argument.type;
-									if (ltr.roleReference.resolvedType != null) {
-										Expression teamThis = gen.qualifiedThisReference(methodDecl.binding.declaringClass.enclosingType());
-										boxedArgs[i] = new Lowering().lowerExpression(scope, args[i],
-														ltr.roleReference.resolvedType, ltr.resolvedType, teamThis, true, true);
- 										continue;
-									}
-									// fall through
-								}
-								boxedArgs[i] = args[i];
-		    				}
-		    				args = new Expression[] {
-		    					gen.arrayAllocation(gen.qualifiedTypeReference(TypeConstants.JAVA_LANG_OBJECT), 1, boxedArgs),
-		    					gen.booleanLiteral(true) // isBaseCall
-		    				};	
-		    			}
 		    			break;
 	    			case OTRE:
 		    			if (args != null) {
@@ -220,6 +190,16 @@ public class TransformStatementsVisitor
     	if (callinMethod.arguments == null)
     		return false;
     	int sendArgs = messageSend.arguments == null ? 0 : messageSend.arguments.length;
+    	if (this.weavingScheme == WeavingScheme.OTDRE) {
+    		// is already packed in BCM.prepareSuperAccess(), fetch number of arguments from the packed array in pos [0]
+    		if (sendArgs > 0) {
+    			Expression firstArg = messageSend.arguments[0];
+				if (firstArg instanceof NullLiteral)
+    				sendArgs = 0;
+    			else if (firstArg instanceof ArrayAllocationExpression)
+    				sendArgs = ((ArrayAllocationExpression) firstArg).initializer.expressions.length;
+    		}
+    	}
     	sendArgs += MethodSignatureEnhancer.getEnhancingArgLen(this.weavingScheme);
     	if (isBaseCall && this.weavingScheme == WeavingScheme.OTRE)
     		sendArgs--; // don't count the isSuperAccess flag

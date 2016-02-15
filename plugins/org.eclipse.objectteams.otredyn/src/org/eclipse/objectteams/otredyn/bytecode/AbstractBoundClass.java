@@ -72,18 +72,20 @@ public abstract class AbstractBoundClass implements IBoundClass {
 		private int baseFlags;
 		private boolean doAllTransformations;
 		private boolean isHandleCovariantReturn;
+		private boolean requireBaseSuperCall;
 
-		public WeavingTask(WeavingTaskType weavingTaskType, String memberName, String memberSignature, int baseFlags, boolean handleCovariantReturn) {
+		public WeavingTask(WeavingTaskType weavingTaskType, String memberName, String memberSignature, int baseFlags, boolean handleCovariantReturn, boolean requireBaseSuperCall) {
 			this.weavingTaskType = weavingTaskType;
 			this.memberName = memberName;
 			this.memberSignature = memberSignature;
 			this.isHandleCovariantReturn = handleCovariantReturn;
+			this.requireBaseSuperCall = requireBaseSuperCall;
 			this.baseFlags = baseFlags;
 		}
 		
 		public WeavingTask(WeavingTaskType weavingTaskType, Method method, WeavingTask upstream, AbstractBoundClass upstreamClass) {
 			this(weavingTaskType, method.getName(), method.getSignature(),
-					upstream.getBaseFlags(), upstream.isHandleCovariantReturn());
+					upstream.getBaseFlags(), upstream.isHandleCovariantReturn(), false);
 			if (weavingTaskType == WeavingTaskType.WEAVE_INHERITED_BINDING
 					&& upstream != null && ((upstream.getBaseFlags() & IBinding.PRIVATE_BASE) != 0)
 					&& upstreamClass != null)
@@ -91,7 +93,7 @@ public abstract class AbstractBoundClass implements IBoundClass {
 		}
 
 		public WeavingTask(WeavingTaskType type) {
-			this(type, null, null, 0, false);
+			this(type, null, null, 0, false, false);
 		}
 
 		/**
@@ -142,6 +144,10 @@ public abstract class AbstractBoundClass implements IBoundClass {
 
 		public boolean isHandleCovariantReturn() {
 			return this.isHandleCovariantReturn;
+		}
+
+		public boolean requiresBaseSuperCall() {
+			return this.requireBaseSuperCall;
 		}
 	}
 
@@ -877,7 +883,7 @@ public abstract class AbstractBoundClass implements IBoundClass {
 //			}
 		if (task == null)
 			task = new WeavingTask(type, binding.getMemberName(), binding.getMemberSignature(), 
-											binding.getBaseFlags(), binding.isHandleCovariantReturn());
+											binding.getBaseFlags(), binding.isHandleCovariantReturn(), binding.requiresBaseSuperCall());
 		addWeavingTask(task, false);
 	}
 	
@@ -999,7 +1005,7 @@ public abstract class AbstractBoundClass implements IBoundClass {
 	
 	public void addWeavingOfSubclassTask(String methodName, String signature, boolean isStatic) {
 		int flags = isStatic ? IBinding.STATIC_BASE : 0;
-		addBindingWeavingTask(new WeavingTask(WeavingTaskType.WEAVE_BINDING_OF_SUBCLASS, methodName, signature, flags, isStatic));
+		addBindingWeavingTask(new WeavingTask(WeavingTaskType.WEAVE_BINDING_OF_SUBCLASS, methodName, signature, flags, true, false));
 	}
 
 	/**
@@ -1034,7 +1040,7 @@ public abstract class AbstractBoundClass implements IBoundClass {
 				.getJoinpointId(getMethodIdentifier(method));
 		int boundMethodId = method.getGlobalId(this);
 
-		moveCodeToCallOrig(method, boundMethodId);
+		moveCodeToCallOrig(method, boundMethodId, false);
 		createDispatchCodeInOrgMethod(method, joinpointId, boundMethodId);
 	}
 
@@ -1104,7 +1110,7 @@ public abstract class AbstractBoundClass implements IBoundClass {
 				.getJoinpointId(getMethodIdentifier(method));
 		int boundMethodId = method.getGlobalId(this);
 		if (task.doAllTransformations()) {
-			moveCodeToCallOrig(method, boundMethodId);
+			moveCodeToCallOrig(method, boundMethodId, task.requiresBaseSuperCall());
 			createDispatchCodeInCallAllBindings(joinpointId, boundMethodId);
 			createCallAllBindingsCallInOrgMethod(method, boundMethodId, false);
 		} else {
@@ -1121,7 +1127,7 @@ public abstract class AbstractBoundClass implements IBoundClass {
 		prepareForFirstTransformation();
 		Method method = getMethod(task);
 		int boundMethodId = method.getGlobalId(this);
-		moveCodeToCallOrig(method, boundMethodId);
+		moveCodeToCallOrig(method, boundMethodId, false);
 		createCallAllBindingsCallInOrgMethod(method, boundMethodId, false);
 
 	}
@@ -1156,7 +1162,7 @@ public abstract class AbstractBoundClass implements IBoundClass {
 	protected abstract void createDispatchCodeInCallAllBindings(
 			int joinpointId, int boundMethodId);
 
-	protected abstract void moveCodeToCallOrig(Method boundMethod, int boundMethodId);
+	protected abstract void moveCodeToCallOrig(Method boundMethod, int boundMethodId, boolean baseSuperRequired);
 
 	protected abstract void prepareForFirstTransformation();
 

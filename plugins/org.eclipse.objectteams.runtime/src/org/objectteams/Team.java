@@ -549,8 +549,6 @@ public /* team */ class Team implements ITeam {
 	 */
 	public Object _OT$callAllBindings(IBoundBase2 baze, ITeam[] teams,int idx,int[] callinIds, int boundMethodId, Object[] args)
 	{
-
-
 		this._OT$callBefore(baze, callinIds[idx], boundMethodId, args);
 
 		Object res = this._OT$callReplace(baze, teams, idx, callinIds, boundMethodId, args);
@@ -559,7 +557,10 @@ public /* team */ class Team implements ITeam {
 
 		return res;
 	}
-
+	// FIXME: remove this version (temporary compatibility only)
+	public Object _OT$callNext(IBoundBase2 baze, ITeam[] teams, int idx, int[] callinIds, int boundMethodId, Object[] args, Object[] baseCallArgs, boolean baseCallFlags) {
+		return _OT$terminalCallNext(baze, teams, idx, callinIds, boundMethodId, args, baseCallArgs, baseCallFlags ? 1 : 0);
+	}
 	/**
 	 * This method calls the next team or a base method,
 	 * if there are no more active teams for a joinpoint
@@ -576,11 +577,11 @@ public /* team */ class Team implements ITeam {
 	 * @param isBaseCall true if we are invoked as a base call (vs. dispatch to the next team in the chain).
 	 * @return possibly boxed result
 	 */
-	public Object _OT$callNext(IBoundBase2 baze, ITeam[] teams, int idx, int[] callinIds, int boundMethodId, Object[] args, Object[] baseCallArgs, boolean isBaseCall)
+	public Object _OT$callNext(IBoundBase2 baze, ITeam[] teams, int idx, int[] callinIds, int boundMethodId, Object[] args, Object[] baseCallArgs, int baseCallFlags)
 	{
-		return _OT$terminalCallNext(baze, teams, idx, callinIds, boundMethodId, args, baseCallArgs);
+		return _OT$terminalCallNext(baze, teams, idx, callinIds, boundMethodId, args, baseCallArgs, baseCallFlags);
 	}
-	public static Object _OT$terminalCallNext(IBoundBase2 baze, ITeam[] teams, int idx, int[] callinIds, int boundMethodId, Object[] args, Object[] baseCallArgs)
+	public static Object _OT$terminalCallNext(IBoundBase2 baze, ITeam[] teams, int idx, int[] callinIds, int boundMethodId, Object[] args, Object[] baseCallArgs, int baseCallFlags)
 	{
 		// Are there still active teams?
 		if (idx+1 < teams.length) {
@@ -592,6 +593,8 @@ public /* team */ class Team implements ITeam {
 				//handle base call to a static base method
 				return teams[idx]._OT$callOrigStatic(callinIds[idx], boundMethodId, args);
 			} else {
+				if (baseCallFlags == 2)
+					boundMethodId++;
 				return baze._OT$callOrig(boundMethodId, args);
 			}
 		}

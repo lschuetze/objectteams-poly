@@ -30,10 +30,10 @@ public interface IBinding {
 		ROLE_BASE_BINDING
 	}
 	
-	public final static int CALLIN_BASE = 1;
-	public final static int STATIC_BASE = 2;
-	public final static int FINAL_BASE = 4;
-	public final static int PRIVATE_BASE = 8;
+	public final static short CALLIN_BASE = 1;
+	public final static short STATIC_BASE = 2;
+	public final static short FINAL_BASE = 4;
+	public final static short PRIVATE_BASE = 8;
 
 	BindingType getType();
 
@@ -58,6 +58,9 @@ public interface IBinding {
 	/** Does base method matching include overrides with covariant return type?. */
 	boolean isHandleCovariantReturn();
 
-
-
+	/**
+	 * Does the bound role method issue a base super call (needing to be handled in __OT$callOrig)?
+	 * @since 2.5
+	 */
+	boolean requiresBaseSuperCall();
 }

@@ -71,6 +71,7 @@ abstract class Attributes {
 	
 	protected static class CallinBindingsAttribute extends Attribute {
 		static final short COVARIANT_BASE_RETURN = 8;
+		static final short BASE_SUPER_CALL = 16;
 
 		/** Represents all base method bindings of one callin binding. */
 		protected static class MultiBinding {
@@ -84,10 +85,11 @@ abstract class Attributes {
 			private int[]    callinIds;
 			private int[]    baseFlags;
 			private boolean  isHandleCovariantReturn;
+			private boolean  requireBaseSuperCall;
 			MultiBinding(String roleName, String callinLabel,
 						 String baseClassName, 
 						 String[] baseMethodNames, String[] baseMethodSignatures, String[] declaringBaseClassNames,
-						 int callinModifier, int[] callinIds, int[] baseFlags, boolean handleCovariantReturn) 
+						 int callinModifier, int[] callinIds, int[] baseFlags, int flags) 
 			{
 				this.roleClassName = roleName;
 				this.callinLabel = callinLabel;
@@ -98,7 +100,8 @@ abstract class Attributes {
 				this.callinModifier = callinModifier;
 				this.callinIds = callinIds;
 				this.baseFlags = baseFlags;
-				this.isHandleCovariantReturn = handleCovariantReturn;
+				this.isHandleCovariantReturn = (flags & COVARIANT_BASE_RETURN) != 0;
+				this.requireBaseSuperCall = (flags & BASE_SUPER_CALL) != 0;
 			}
 			protected String getRoleClassName() {
 				return roleClassName;
@@ -134,6 +137,9 @@ abstract class Attributes {
 			public boolean isHandleCovariantReturn() {
 				return this. isHandleCovariantReturn;
 			}
+			public boolean requiresBaseSuperCall() {
+				return this.requireBaseSuperCall;
+			}
 			public String[] getDeclaringBaseClassName() {
 				return this.declaringBaseClassNames;
 			}
@@ -149,7 +155,7 @@ abstract class Attributes {
 		private void addBinding(int i, String roleName, String callinLabel,
 				                String baseClassName, 
 				                String[] baseMethodNames, String[] baseMethodSignatures, String[] declaringBaseClassNames,
-				                String callinModifierName, int[] callinIds, int[] baseFlags, boolean handleCovariantReturn) {
+				                String callinModifierName, int[] callinIds, int[] baseFlags, int flags) {
 			int callinModifier = 0;
 			if ("before".equals(callinModifierName))
 				callinModifier = Binding.BEFORE;
@@ -160,7 +166,7 @@ abstract class Attributes {
 			this.bindings[i] = new MultiBinding(roleName, callinLabel,
 					                            baseClassName, 
 					                            baseMethodNames, baseMethodSignatures, declaringBaseClassNames,
-					                            callinModifier, callinIds, baseFlags, handleCovariantReturn);
+					                            callinModifier, callinIds, baseFlags, flags);
 		}
 		
 		@Override
@@ -194,7 +200,7 @@ abstract class Attributes {
 				attr.addBinding(i, roleName, callinLabel,
 								baseClassName,
 								baseMethodNames, baseMethodSignatures, declaringBaseClassNames,
-								callinModifier, callinIds, baseFlags, ((flags & COVARIANT_BASE_RETURN) != 0));
+								callinModifier, callinIds, baseFlags, flags);
 			}
 			return attr;
 		}
@@ -313,7 +319,6 @@ abstract class Attributes {
 		}
 		private static final int DECAPSULATION_METHOD_ACCESS= 4; // kinds are disjoint from those used by the old OTRE
 		private static final int CALLOUT_FIELD_ACCESS = 5;
-		private static final int SUPER_METHOD_ACCESS = 6;
 
 		List<DecapsMethod> methods = new ArrayList<DecapsMethod>();
 		List<DecapsField> fields = new ArrayList<DecapsField>();
@@ -337,10 +342,6 @@ abstract class Attributes {
 				case CALLOUT_FIELD_ACCESS:
 					attr.readFieldAccess(cr, off, buf); 	off+=9;
 					break;
-				case SUPER_METHOD_ACCESS:
-					throw new IllegalStateException("Not yet handled: OTSpecialAccess for SUPER_METHOD_ACCESS");
-//					off+=8;
-//					break;
 				default:
 					throw new IllegalStateException("Unexpected kind in OTSpecialAccess attribute: "+kind);
 				}

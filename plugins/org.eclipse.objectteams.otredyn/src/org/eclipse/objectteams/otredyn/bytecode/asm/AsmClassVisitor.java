@@ -1,7 +1,7 @@
 /**********************************************************************
  * This file is part of "Object Teams Dynamic Runtime Environment"
  * 
- * Copyright 2009, 2015 Oliver Frank and others.
+ * Copyright 2009, 2016 Oliver Frank and others.
  * 
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -124,12 +124,13 @@ class AsmClassVisitor extends ClassVisitor {
 				int[] callinIds = multiBindings[i].getCallinIds();
 				int[] baseFlags = multiBindings[i].getBaseFlags();
 				boolean handleCovariantReturn = multiBindings[i].isHandleCovariantReturn();
+				boolean requireBaseSuperCall = multiBindings[i].requiresBaseSuperCall();
 				for (int j = 0; j < baseMethodNames.length; j++) {
 					String declaringBaseClassName = declaringBaseClassNames[j];
 					String weavableBaseClass = (baseFlags[j] & (STATIC | FINAL)) != 0 ? declaringBaseClassName : baseClassName;
 					Binding binding = new Binding(clazz, roleClassName, callinLabel, baseClassName, 
 												  baseMethodNames[j], baseMethodSignatures[j], weavableBaseClass,
-												  callinModifier, callinIds[j], baseFlags[j], handleCovariantReturn);
+												  callinModifier, callinIds[j], baseFlags[j], handleCovariantReturn, requireBaseSuperCall);
 					clazz.addBinding(binding);
 					clazz.boundBaseClasses.add(declaringBaseClassName.replace('/', '.'));
 				}
