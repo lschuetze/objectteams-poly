@@ -191,7 +191,7 @@ public class TransformStatementsVisitor
     		return false;
     	int sendArgs = messageSend.arguments == null ? 0 : messageSend.arguments.length;
     	if (this.weavingScheme == WeavingScheme.OTDRE) {
-    		// is already packed in BCM.prepareSuperAccess(), fetch number of arguments from the packed array in pos [0]
+    		// is already packed in BCMS.prepareSuperAccess(), fetch number of arguments from the packed array in pos [0]
     		if (sendArgs > 0) {
     			Expression firstArg = messageSend.arguments[0];
 				if (firstArg instanceof NullLiteral)

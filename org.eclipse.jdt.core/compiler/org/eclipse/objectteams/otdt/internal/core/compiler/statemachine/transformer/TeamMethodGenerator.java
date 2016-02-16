@@ -136,7 +136,7 @@ public class TeamMethodGenerator {
 						gen.argument("boundMethodId".toCharArray(), gen.baseTypeReference(TypeConstants.INT)),
 						gen.argument("args".toCharArray(), 			gen.qualifiedArrayTypeReference(TypeConstants.JAVA_LANG_OBJECT, 1)),
 						gen.argument("baseCallArgs".toCharArray(), 	gen.qualifiedArrayTypeReference(TypeConstants.JAVA_LANG_OBJECT, 1)),
-						gen.argument("isBaseCall".toCharArray(), 	gen.baseTypeReference(TypeConstants.BOOLEAN))
+						gen.argument("baseCallFlags".toCharArray(), gen.baseTypeReference(TypeConstants.INT))
 					};
 				case OTDYNARGS3:
 					return new Argument[] {
@@ -216,7 +216,7 @@ public class TeamMethodGenerator {
 	final MethodDescriptor[] methodDescriptorsDyn = new MethodDescriptor[] {
 		new MethodDescriptor("_OT$callAllBindings",		"(Lorg/objectteams/IBoundBase2;[Lorg/objectteams/ITeam;I[II[Ljava/lang/Object;)Ljava/lang/Object;", 
 																							Type.OTDYNARGS1,		Type.OBJECT,	AccPublic),
-		new MethodDescriptor("_OT$callNext",			"(Lorg/objectteams/IBoundBase2;[Lorg/objectteams/ITeam;I[II[Ljava/lang/Object;[Ljava/lang/Object;Z)Ljava/lang/Object;", 
+		new MethodDescriptor("_OT$callNext",			"(Lorg/objectteams/IBoundBase2;[Lorg/objectteams/ITeam;I[II[Ljava/lang/Object;[Ljava/lang/Object;I)Ljava/lang/Object;", 
 																							Type.OTDYNARGS2,		Type.OBJECT,	AccPublic),
 		new MethodDescriptor("_OT$callReplace",			"(Lorg/objectteams/IBoundBase2;[Lorg/objectteams/ITeam;I[II[Ljava/lang/Object;)Ljava/lang/Object;", 
 																							Type.OTDYNARGS1,		Type.OBJECT,	AccPublic),
