@@ -133,7 +133,8 @@ then
 	rm -rf build-root
 	rm -rf test-root
 	rm -rf updateSite
-	rm -rf updateSiteTests
+    rm -rf updateSiteTests
+    rm -rf updateSiteCompiler
 	rm -rf metadata
 fi
 
