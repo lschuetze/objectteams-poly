@@ -750,6 +750,11 @@ public class TeamModel extends TypeModel {
 			if (TSuperHelper.isMarkerInterface(roleTypes[i]))
 				continue;
 			RoleModel currentRole = roleTypes[i].roleModel;
+			if (currentRole == null) {
+				if (scope.referenceContext().hasErrors())
+					continue;
+				throw new InternalCompilerError("Role model is unexpectedly null"); //$NON-NLS-1$
+			}
 			ReferenceBinding currentRoleIfc = currentRole.getInterfacePartBinding();
 			ReferenceBinding currentBase = currentRole.getBaseTypeBinding();
 
