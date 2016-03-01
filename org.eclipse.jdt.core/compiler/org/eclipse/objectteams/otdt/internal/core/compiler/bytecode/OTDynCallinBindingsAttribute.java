@@ -179,6 +179,13 @@ public class OTDynCallinBindingsAttribute extends ListValueAttribute {
 			this.lineNumber = lineNumber;
 			this.lineOffset = lineOffset;
 		}
+		@Override
+		public String toString() {
+			StringBuilder buf = new StringBuilder("Callin binding for "); //$NON-NLS-1$
+			buf.append(this.declaringRoleName);
+			buf.append('.').append(this.roleSelector).append(this.roleSignature);
+			return buf.toString();
+		}
 	}
 	
 	/* Encodes the binding to one individual base method. */
