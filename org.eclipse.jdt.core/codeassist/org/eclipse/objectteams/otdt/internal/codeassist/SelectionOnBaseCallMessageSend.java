@@ -1,7 +1,7 @@
 /**********************************************************************
  * This file is part of "Object Teams Development Tooling"-Software
  *
- * Copyright 2004, 2006 Fraunhofer Gesellschaft, Munich, Germany,
+ * Copyright 2004, 2016 Fraunhofer Gesellschaft, Munich, Germany,
  * for its Fraunhofer Institute for Computer Architecture and Software
  * Technology (FIRST), Berlin, Germany and Technical University Berlin,
  * Germany.
@@ -81,24 +81,17 @@ public class SelectionOnBaseCallMessageSend extends BaseCallMessageSend
 		else
 		{
 			// wrappee.binding is the base call surrogate, find the proper enclosing method instead:
-			MethodBinding callinMethod = null;
 			MethodScope methodScope = scope.methodScope();
 			if (methodScope == null)
 				throw new SelectionNodeFound();
 
-			MemberTypeBinding role = null;
 		    SourceTypeBinding site = scope.enclosingSourceType();
 
-		    if (site.isLocalType()) {
-		    	MethodDeclaration callinDecl = getOuterCallinMethod(methodScope);
-		    	if (callinDecl == null)
-		    		throw new SelectionNodeFound();
-		    	callinMethod = callinDecl.binding;
-		    	role = (MemberTypeBinding)callinMethod.declaringClass;
-		    } else {
-		    	callinMethod = methodScope.referenceMethod().binding;
-		    	role = (MemberTypeBinding)site;
-		    }
+		    MethodDeclaration callinDecl = findEnclosingCallinMethod(methodScope, null);
+		    if (callinDecl == null)
+		    	throw new SelectionNodeFound();
+		    MethodBinding callinMethod = callinDecl.binding;
+		    MemberTypeBinding role = site.isLocalType() ? (MemberTypeBinding)callinMethod.declaringClass : (MemberTypeBinding)site;
 
 	        // find base methods bound in callin mappings which have callinMethod as their role method:
 	        MethodBinding[] baseBindings = findBaseMethodBindings(role, callinMethod);

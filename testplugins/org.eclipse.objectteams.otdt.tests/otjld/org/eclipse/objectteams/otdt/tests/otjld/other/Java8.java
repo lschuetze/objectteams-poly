@@ -338,4 +338,53 @@ public class Java8 extends AbstractOTJLDTest {
     		"foosub\n" +
     		"subbar");
     }
+
+    // Bug475635
+    public void testBaseCallsInLambdas() {
+    	runConformTest(
+    		new String[] {
+	    		"b/Base.java",
+	    		"package b;\n" +
+	    		"public class Base {\n" +
+	    		"	public void bm() { System.out.print(\"b\"); }\n" +
+	    		"	public static void main(String... args) {\n" +
+	    		"		new t.MyT().activate();\n" +
+	    		"		new Base().bm();\n" +
+	    		"	}\n" + 
+	    		"}\n",
+	    		"t/MyT.java",
+	    		"package t;\n" +
+	    		"import base b.Base;\n" + 
+	    		"\n" + 
+	    		"public team class MyT {\n" + 
+	    		"\n" + 
+	    		"	protected class R playedBy Base {\n" + 
+	    		"		void perform(Runnable r) { r.run(); }\n" +
+	    		"		@SuppressWarnings(\"basecall\")\n" + 
+	    		"		callin void test() {\n" + 
+	    		"			perform(() -> {\n" + 
+	    		"				System.out.print(0);\n" + 
+	    		"				base.test();\n" +
+	    		"				System.out.print(1);\n" + 
+	    		"				perform(() -> base.test());\n" + 
+	    		"			});\n" + 
+	    		"			new Runnable() {\n" + 
+	    		"				@Override\n" + 
+	    		"				public void run() {\n" + 
+	    		"					perform(() -> {\n" +
+	    		"						System.out.print(2);\n" + 
+	    		"						base.test(); \n" + 
+	    		"					});\n" +
+	    		"					System.out.print(3);\n" + 
+	    		"					base.test();\n" + 
+	    		"					System.out.println(4);\n" + 
+	    		"				}\n" + 
+	    		"			}.run();\n" + 
+	    		"		}\n" + 
+	    		"		test <- replace bm;\n" + 
+	    		"	}\n" +
+	    		"}\n"
+    		},
+    		"0b1b2b3b4");
+    }
 }

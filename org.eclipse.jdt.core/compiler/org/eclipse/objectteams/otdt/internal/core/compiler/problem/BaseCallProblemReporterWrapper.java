@@ -107,7 +107,7 @@ public class BaseCallProblemReporterWrapper extends ProblemReporterWrapper
 	}
 	public void invalidMethod(MessageSend messageSend, MethodBinding method, Scope scope) {
 		ProblemMethodBinding problemMethod = (ProblemMethodBinding) method;
-		AbstractMethodDeclaration enclosingMethodDecl = ((AbstractMethodDeclaration)this.referenceContext);
+		AbstractMethodDeclaration enclosingMethodDecl = BaseCallMessageSend.findEnclosingCallinMethod(scope, null);
 		if (enclosingMethodDecl.ignoreFurtherInvestigation)
 			return; // too probable that our error was caused by not resolving the enclosing method.
 		if (   problemMethod.closestMatch != null

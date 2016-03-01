@@ -1154,15 +1154,15 @@ public TypeBinding resolveType(BlockScope scope) {
 //{ObjectTeams: new check (base.m() within m() ?)
     if (this.receiver instanceof BaseReference)
     {
-    	if (weavingScheme == WeavingScheme.OTRE) { // FIXME(OTDYN): need a new strategy to check this for dyn weaving.
-	        AbstractMethodDeclaration enclosingMethod = scope.methodScope().referenceMethod();
-	        if (!enclosingMethod.isCallin())
-	        	enclosingMethod = BaseCallMessageSend.getOuterCallinMethod(scope.methodScope());
-	        MethodBinding basecallSurrogate = null;
-	        if (enclosingMethod.model != null)
-	        	basecallSurrogate = enclosingMethod.model.getBaseCallSurrogate();
-	        if (this.binding != basecallSurrogate)
-	        	scope.problemReporter().baseCallNotSameMethod(enclosingMethod, this);
+    	if (weavingScheme == WeavingScheme.OTRE) {
+	        AbstractMethodDeclaration enclosingMethod = BaseCallMessageSend.findEnclosingCallinMethod(scope, null);
+	        if (enclosingMethod != null) {
+		        MethodBinding basecallSurrogate = null;
+		        if (enclosingMethod.model != null)
+		        	basecallSurrogate = enclosingMethod.model.getBaseCallSurrogate();
+		        if (this.binding != basecallSurrogate)
+		        	scope.problemReporter().baseCallNotSameMethod(enclosingMethod, this);
+	        }
     	}
     }
 // SH}

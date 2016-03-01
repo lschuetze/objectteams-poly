@@ -1,7 +1,7 @@
 /**********************************************************************
  * This file is part of "Object Teams Development Tooling"-Software
  *
- * Copyright 2004, 2015 Fraunhofer Gesellschaft, Munich, Germany,
+ * Copyright 2004, 2016 Fraunhofer Gesellschaft, Munich, Germany,
  * for its Fraunhofer Institute for Computer Architecture and Software
  * Technology (FIRST), Berlin, Germany and Technical University Berlin,
  * Germany.
@@ -86,6 +86,7 @@ public class BaseCallMessageSend extends AbstractExpressionWrapper
 	BaseReference _receiver; // avoid casts like (BaseReference)wrappee.receiver
 	public boolean isSuperAccess; // flag for base.super.m() calls
 	private WeavingScheme _weavingScheme = WeavingScheme.OTRE; // avoid null
+	private MethodDeclaration enclosingCallinMethod;
 
     public BaseCallMessageSend(MessageSend wrappee, int baseEndPos)
     {
@@ -176,7 +177,7 @@ public class BaseCallMessageSend extends AbstractExpressionWrapper
 		// check exceptions thrown by any bound base method:
 		MethodScope methodScope = currentScope.methodScope();
 		if (methodScope != null) {
-			MethodModel methodModel = methodScope.referenceMethod().binding.model;
+			MethodModel methodModel = callinMethod.binding.model;
 			if (   methodModel != null
 				&& methodModel._baseExceptions != null)
 			{
@@ -197,73 +198,33 @@ public class BaseCallMessageSend extends AbstractExpressionWrapper
 		return FlowInfo.UNKNOWN;
 	}
 
-	/*
-	 * Return the innermost callin method enclosing this basecall.
-	 */
-	private MethodDeclaration getEnclosingCallinMethod(BlockScope currentScope) {
-		MethodDeclaration candidate = (MethodDeclaration)currentScope.methodScope().referenceContext;
-		if (candidate.isCallin())
-			return candidate;
-		assert BaseCallMessageSend.nestedInCallin(currentScope.methodScope()) : "Not nested in a callin method"; //$NON-NLS-1$
-		return (MethodDeclaration)currentScope.methodScope().parent.methodScope().referenceMethod();
-	}
-
-	/**
-	 * If this base call resides in a local type retrieve the callin method enclosing that type.
-	 */
-	public static MethodDeclaration getOuterCallinMethod(MethodScope scope) {
-		Scope parent = scope.parent;
-		if (parent != null) {
-			MethodScope outerMethodScope = parent.methodScope();
-			if (outerMethodScope == null)
-				return null;
-			AbstractMethodDeclaration outerMethod = outerMethodScope.referenceMethod();
-			if (outerMethod.isCallin())
-				return (MethodDeclaration)outerMethod;
-		}
-		return null;
-	}
-
-	/**
-	 * Are we in the situation of a base call within a local type within a callin method?
-	 */
-	public static boolean nestedInCallin(MethodScope scope) {
-		return getOuterCallinMethod(scope) != null;
-	}
-
 	public TypeBinding resolveType(BlockScope scope)
 	{
 		WeavingScheme weavingScheme = scope.compilerOptions().weavingScheme;
 		AstGenerator gen = new AstGenerator(this._wrappee.sourceStart, this._wrappee.sourceEnd);
 		MessageSend wrappedSend = this._sendOrig;
-		AbstractMethodDeclaration referenceMethod = scope.methodScope().referenceMethod();
+		MethodDeclaration callinMethodDecl = getEnclosingCallinMethod(scope.methodScope());
+		if (callinMethodDecl == null)
+			return null; // no hope
+		MethodBinding callinMethodBinding = callinMethodDecl.binding;
+		if (callinMethodBinding == null)
+			return null; // no hope
 		boolean isStatic = scope.methodScope().isStatic;
 
 		// === re-wire the message send to the base call surrogate
     	// receiver:
-		MethodDeclaration outerCallinMethod = getOuterCallinMethod(scope.methodScope());
-		MethodBinding enclosingCallinMethod = outerCallinMethod != null ? outerCallinMethod.binding : scope.methodScope().referenceMethodBinding();
-		if (outerCallinMethod != null && outerCallinMethod.binding == null)
-			return null; // no hope
 		ReferenceBinding roleType = scope.enclosingSourceType();
-		this._receiver.adjustReceiver(roleType, isStatic, outerCallinMethod, gen, weavingScheme);
+		this._receiver.adjustReceiver(roleType, isStatic, callinMethodDecl, gen, weavingScheme);
 		
 		// empty base call surrogate is handled using a synthetic base call surrogate:
-		boolean isCallinBound = false;
-		if (enclosingCallinMethod != null) {
-			isCallinBound = SyntheticBaseCallSurrogate.isCallinMethodBoundIn(enclosingCallinMethod, enclosingCallinMethod.declaringClass);
-		} else {
-			isCallinBound = roleType.roleModel.isBound();
-		}
-		
+		boolean isCallinBound = SyntheticBaseCallSurrogate.isCallinMethodBoundIn(callinMethodBinding, callinMethodBinding.declaringClass);
 
 		// who should work, compiler or OTRE?
 		if (!isCallinBound && weavingScheme == WeavingScheme.OTRE) {
-			resolveSyntheticBaseCallSurrogate(outerCallinMethod, scope, weavingScheme);
+			resolveSyntheticBaseCallSurrogate(callinMethodDecl, scope, weavingScheme);
 			return this.resolvedType;
 		}
 		
-
 		// selector:
 		if (weavingScheme == WeavingScheme.OTDRE) {
 			wrappedSend.selector = CallinImplementorDyn.OT_CALL_NEXT;
@@ -271,56 +232,39 @@ public class BaseCallMessageSend extends AbstractExpressionWrapper
 			wrappedSend.selector = SyntheticBaseCallSurrogate.genSurrogateName(wrappedSend.selector, roleType.sourceName(), isStatic);
 		}
 
-		// arguments are enhanced by the TransformStatementsVisitor
+		// arguments are enhanced by the TransformStatementsVisitor(OTRE) or prepareSuperAccess() (OTDRE)
 
     	// return type:
-		TypeBinding returnType = null;
-    	if (referenceMethod != null) {
-			MethodBinding methodBinding = referenceMethod.binding;
-			if (methodBinding != null) {
-				returnType = MethodModel.getReturnType(methodBinding);
-				if (returnType != null && returnType.isBaseType()) {
-					if (returnType != TypeBinding.VOID)
-						this._wrappee = gen.createUnboxing(this._wrappee, (BaseTypeBinding)returnType);
-					else if (outerCallinMethod == null)
-						// store value which is not used locally but has to be chained to the caller.
-						// (cannot set result in outer callin method!)
-						this._wrappee = gen.assignment(
-								gen.singleNameReference(IOTConstants.OT_RESULT), this._wrappee);
-				}
+		TypeBinding returnType = MethodModel.getReturnType(callinMethodBinding);
+		boolean resultTunneling = false;
+		if (returnType != null) {
+			if (returnType.isPrimitiveType()) {
+				this._wrappee = gen.createUnboxing(this._wrappee, (BaseTypeBinding)returnType);
+			} else if (TypeBinding.equalsEquals(returnType, TypeBinding.VOID) && callinMethodDecl == scope.methodScope().referenceMethod()) {
+				// store value which is not used locally but has to be chained to the caller.
+				// (cannot set result in outer callin method!)
+				this._wrappee = gen.assignment(gen.singleNameReference(IOTConstants.OT_RESULT), this._wrappee);
+				resultTunneling = true;
 			}
-		}
-
-    	// check context:
-		if (outerCallinMethod==null) // already found appropriate context?
-		{
-			if (!checkContext(scope))
-					return null;
 		}
 
 		BlockScopeWrapper baseCallScope = new BlockScopeWrapper(scope, this);
 		super.resolveType(baseCallScope);
 		if (weavingScheme == WeavingScheme.OTDRE) {
 			// convert Object result from callNext
-			if (returnType != null && !returnType.isBaseType()) {
+			if (returnType != null && !returnType.isPrimitiveType() && !resultTunneling) {
 				this.resolvedType = returnType;
-				this._sendOrig.valueCast = returnType;
+				if (TypeBinding.notEquals(returnType, TypeBinding.VOID))
+					this._sendOrig.valueCast = returnType;
 			}
 		}
 		return this.resolvedType;
 	}
+
 	/* manual resolve for an empty base call surrogate, which is indeed generated by the compiler, not the OTRE. */
-	private void resolveSyntheticBaseCallSurrogate(MethodDeclaration outerCallinMethod, BlockScope scope, WeavingScheme weavingScheme) 
+	private void resolveSyntheticBaseCallSurrogate(MethodDeclaration callinMethodDecl, BlockScope scope, WeavingScheme weavingScheme) 
 	{		
 		// find the method:
-		AbstractMethodDeclaration callinMethodDecl = outerCallinMethod;
-		if (callinMethodDecl == null) {
-			if (checkContext(scope)) {
-				callinMethodDecl = scope.methodScope().referenceMethod();
-			} else {
-				return; // error reported by checkContext
-			}
-		}
 		MethodBinding callinMethod = callinMethodDecl.binding;
 		if (callinMethod == null) {
 			if (callinMethodDecl.ignoreFurtherInvestigation)
@@ -412,21 +356,31 @@ public class BaseCallMessageSend extends AbstractExpressionWrapper
 		super.computeConversion(scope, runtimeTimeType, compileTimeType);
 	}
 	
-	private boolean checkContext(BlockScope scope) {
-		if (	scope.methodScope() == null
-			|| !(scope.methodScope().referenceContext instanceof AbstractMethodDeclaration)) // initializer
-			{
-				scope.problemReporter().baseCallOutsideMethod(this);
-				return false;
-			}
-
-        AbstractMethodDeclaration methodDecl = (AbstractMethodDeclaration)scope.methodScope().referenceContext;
-        // base call only allowed in callin methods:
-        if ((methodDecl.modifiers & ExtraCompilerModifiers.AccCallin) == 0) {
-       		scope.problemReporter().basecallInRegularMethod(this, methodDecl);
-       		return false;
+	private MethodDeclaration getEnclosingCallinMethod(Scope scope) {
+		if (this.enclosingCallinMethod == null)
+			this.enclosingCallinMethod = findEnclosingCallinMethod(scope, this);
+		return this.enclosingCallinMethod;
+	}
+	
+	public static MethodDeclaration findEnclosingCallinMethod(Scope scope, ASTNode errorLocation) { // errorLocation == null => don't report
+		AbstractMethodDeclaration methodDecl = null;
+		MethodScope methodScope = scope.methodScope();
+        while (methodScope != null) {
+        	if (methodScope.referenceContext() instanceof AbstractMethodDeclaration) {
+        		methodDecl = (AbstractMethodDeclaration) methodScope.referenceContext();
+        		if ((methodDecl.modifiers & ExtraCompilerModifiers.AccCallin) != 0)
+					return (MethodDeclaration) methodDecl;
+        	}
+        	methodScope = methodScope.parent.methodScope();
         }
-		return true;
+        if (errorLocation != null) {
+	        if (methodDecl == null) {
+	        	scope.problemReporter().baseCallOutsideMethod(errorLocation);        	
+	        } else {
+	        	scope.problemReporter().basecallInRegularMethod(errorLocation, methodDecl);
+	        }
+        }
+        return null;
 	}
 
 	public void traverse(ASTVisitor visitor, BlockScope scope)
@@ -471,5 +425,8 @@ public class BaseCallMessageSend extends AbstractExpressionWrapper
 	}
 	private static boolean hasBeenTransformed(Expression expr) {
 		return (expr.bits & ASTNode.HasBeenTransformed) != 0;
+	}
+	public boolean statementExpression() {
+		return ((this.bits & ASTNode.ParenthesizedMASK) == 0);
 	}
 }
