@@ -120,7 +120,7 @@ public class BaseCallRedirection extends ObjectTeamsTransformation {
 
     		//if (mbs.isEmpty()) {
     		if (!roleMethodIsBound) {
-    			if (logging) printLogMessage("callin method " + method_name
+    			if (logging) printLogMessage("callin method " + method_name + method_signature
     						+ " was not bound in this class!!!");
     		}
     		MethodGen baseCallSurrogate = null;

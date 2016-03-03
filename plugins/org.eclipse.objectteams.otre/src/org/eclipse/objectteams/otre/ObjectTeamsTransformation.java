@@ -139,6 +139,8 @@ public abstract class ObjectTeamsTransformation
 	 
 	 protected static boolean IS_COMPILER_14X_PLUS = false;
 
+	 protected static boolean COMPILER_VERSION_READ = false;
+
 	 // ------------------------------------------
 	 // ---------- This flag must currently be true for OT/Equinox: ----------------------
 	 // ------------------------------------------
@@ -1086,22 +1088,25 @@ public abstract class ObjectTeamsTransformation
 					int revision = encodedVersion & 0x1F;
                     if(logging) printLogMessage("**** class file was produced by compiler version "
                             + major + "." + minor + "." + revision + " ****");
-                    IS_COMPILER_GREATER_123 = false; // reset, may be updated below
+
+                    boolean greater_123 = false;
+                    boolean is_13x_plus = false;
+                    boolean is_14x_plus = false;
                     // OTDRE?
                     if ((encodedVersion & 0x8000) != 0)
                     	throw new UnsupportedClassVersionError("OTRE: Class "+class_name+" was compiled for incompatible weaving target OTDRE");
 					// 1.7 stream:
 					if (major == 1 && minor == 7) {
 						// accept all revisions within this stream
-						IS_COMPILER_GREATER_123 = true;
-						IS_COMPILER_13X_PLUS = true;
-						IS_COMPILER_14X_PLUS = true;
+						greater_123 = true;
+						is_13x_plus = true;
+						is_14x_plus = true;
 					// 1.6 stream:
 					} else if (major == 1 && minor == 6) {
 						// accept all revisions within this stream
-						IS_COMPILER_GREATER_123 = true;
-						IS_COMPILER_13X_PLUS = true;
-						IS_COMPILER_14X_PLUS = true;
+						greater_123 = true;
+						is_13x_plus = true;
+						is_14x_plus = true;
 					// 1.5 stream:
 					} else if (major == 1 && minor == 5) {
 						if (revision < OT15_REVISION) {
@@ -1109,9 +1114,9 @@ public abstract class ObjectTeamsTransformation
 								continue; // no specific byte codes in ooTeam and its inner classes.
 							throw new InternalError("OTRE: Class " + class_name + " has unsupported revision " + revision);
 						}
-						IS_COMPILER_GREATER_123 = true;
-						IS_COMPILER_13X_PLUS = true;
-						IS_COMPILER_14X_PLUS = true;
+						greater_123 = true;
+						is_13x_plus = true;
+						is_14x_plus = true;
 					// 1.4 stream:
 					} else if (major == 1 && minor == 4) {
 						if (revision < OT14_REVISION) {
@@ -1119,9 +1124,9 @@ public abstract class ObjectTeamsTransformation
 								continue; // no specific byte codes in ooTeam and its inner classes.
 							throw new InternalError("OTRE: Class " + class_name + " has unsupported revision " + revision);
 						}
-						IS_COMPILER_GREATER_123 = true;
-						IS_COMPILER_13X_PLUS = true;
-						IS_COMPILER_14X_PLUS = true;
+						greater_123 = true;
+						is_13x_plus = true;
+						is_14x_plus = true;
 					// 1.3 stream:
 					} else if (major == 1 && minor == 3) {
 						if (revision < OT13_REVISION) {
@@ -1129,8 +1134,8 @@ public abstract class ObjectTeamsTransformation
 								continue; // no specific byte codes in ooTeam and its inner classes.
 							throw new InternalError("OTRE: Class " + class_name + " has unsupported revision " + revision);
 						}
-						IS_COMPILER_GREATER_123 = true;
-						IS_COMPILER_13X_PLUS = true;
+						greater_123 = true;
+						is_13x_plus = true;
 					// 1.2 stream:
 					} else if (major == 1 && minor == 2) {
 						if (revision < OT12_REVISION) {
@@ -1139,7 +1144,7 @@ public abstract class ObjectTeamsTransformation
 							throw new InternalError("OTRE: Class " + class_name + " has unsupported revision " + revision);
 						}
 						if (revision > 3)
-							IS_COMPILER_GREATER_123 = true;
+							greater_123 = true;
 						// 1.1 stream:
 					} else if (major == 1 && minor == 1) {
 						if (revision < OT11_REVISION) {
@@ -1168,6 +1173,16 @@ public abstract class ObjectTeamsTransformation
 						if (minor != OT_VERSION_MINOR)
 							throw new InternalError("OTRE: Class " + class_name + " has unsupported minor version " + minor);
 						throw new InternalError("OTRE: Class " + class_name + " has unrecognized version " + major+"."+minor+"."+revision);
+					}
+					if (COMPILER_VERSION_READ) {
+						if (IS_COMPILER_GREATER_123 != greater_123 || IS_COMPILER_13X_PLUS != is_13x_plus || IS_COMPILER_14X_PLUS != is_14x_plus)
+							throw new InternalError("OTRE: Illegal mix of class file versions at "+class_name+" "+major+'.'+minor+'.'+revision+'\n'
+									+" previous flags : "+IS_COMPILER_GREATER_123+','+IS_COMPILER_13X_PLUS+','+IS_COMPILER_14X_PLUS);
+					} else {
+						IS_COMPILER_GREATER_123 = greater_123;
+						IS_COMPILER_13X_PLUS = is_13x_plus;
+						IS_COMPILER_14X_PLUS = is_14x_plus;
+						COMPILER_VERSION_READ = true;
 					}
 				} else if (attrName.equals("CallinPrecedence")) {
                     List<String> precedenceList = new LinkedList<String>(); 
