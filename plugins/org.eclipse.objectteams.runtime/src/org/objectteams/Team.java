@@ -646,7 +646,7 @@ public /* team */ class Team implements ITeam {
 	 */
 	public Object _OT$callReplace(IBoundBase2 baze, ITeam[] teams, int idx, int[] callinIds, int boundMethodId, Object[] args) {
 		// default; override with code from replace callin bindings.
-		return _OT$callNext(baze, teams, idx, callinIds, boundMethodId, args, null, false);
+		return _OT$callNext(baze, teams, idx, callinIds, boundMethodId, args, null, 0);
 	}
 
 	/**
