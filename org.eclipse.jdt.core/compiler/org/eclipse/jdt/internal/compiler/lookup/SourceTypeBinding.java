@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2015 IBM Corporation and others.
+ * Copyright (c) 2000, 2016 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -66,12 +66,14 @@ import org.eclipse.jdt.internal.compiler.ast.Argument;
 import org.eclipse.jdt.internal.compiler.ast.FieldDeclaration;
 import org.eclipse.jdt.internal.compiler.ast.LambdaExpression;
 import org.eclipse.jdt.internal.compiler.ast.MethodDeclaration;
+import org.eclipse.jdt.internal.compiler.ast.ReferenceExpression;
 import org.eclipse.jdt.internal.compiler.ast.TypeDeclaration;
 import org.eclipse.jdt.internal.compiler.ast.TypeParameter;
 import org.eclipse.jdt.internal.compiler.ast.TypeReference;
 import org.eclipse.jdt.internal.compiler.ast.TypeReference.AnnotationPosition;
 import org.eclipse.jdt.internal.compiler.ast.Expression.DecapsulationState;
 import org.eclipse.jdt.internal.compiler.classfmt.ClassFileConstants;
+import org.eclipse.jdt.internal.compiler.classfmt.ExternalAnnotationProvider;
 import org.eclipse.jdt.internal.compiler.impl.CompilerOptions;
 import org.eclipse.jdt.internal.compiler.impl.Constant;
 import org.eclipse.jdt.internal.compiler.impl.CompilerOptions.WeavingScheme;
@@ -180,6 +182,8 @@ public class SourceTypeBinding extends ReferenceBinding {
 	private int nullnessDefaultInitialized = 0; // 0: nothing; 1: type; 2: package
 	private int lambdaOrdinal = 0;
 	private ReferenceBinding containerAnnotationType = null;
+	
+	public ExternalAnnotationProvider externalAnnotationProvider;
 	
 public SourceTypeBinding(char[][] compoundName, PackageBinding fPackage, ClassScope scope) {
 //{ObjectTeams:	// share model from TypeDeclaration:
@@ -843,17 +847,47 @@ public SyntheticMethodBinding addSyntheticMethod(LambdaExpression lambda) {
 	
 	// Create a $deserializeLambda$ method if necessary, one is shared amongst all lambdas
 	if (lambda.isSerializable) {
-		SyntheticMethodBinding[] deserializeLambdaMethods = (SyntheticMethodBinding[]) this.synthetics[SourceTypeBinding.METHOD_EMUL].get(TypeConstants.DESERIALIZE_LAMBDA);
-		if (deserializeLambdaMethods == null) {
-			SyntheticMethodBinding deserializeLambdaMethod = new SyntheticMethodBinding(this);
-			this.synthetics[SourceTypeBinding.METHOD_EMUL].put(TypeConstants.DESERIALIZE_LAMBDA,deserializeLambdaMethods = new SyntheticMethodBinding[1]);
-			deserializeLambdaMethods[0] = deserializeLambdaMethod;
-		}
+		addDeserializeLambdaMethod();
 	}
 	
 	return lambdaMethod;
 }
+/*
+ * Add a synthetic method for the reference expression as a place holder for code generation
+ * only if the reference expression's target is serializable 
+ * 
+ */
+public SyntheticMethodBinding addSyntheticMethod(ReferenceExpression ref) {
+	if (!isPrototype()) throw new IllegalStateException();
+	if (!ref.isSerializable)
+		return null;
+	if (this.synthetics == null)
+		this.synthetics = new HashMap[MAX_SYNTHETICS];
+	if (this.synthetics[SourceTypeBinding.METHOD_EMUL] == null)
+		this.synthetics[SourceTypeBinding.METHOD_EMUL] = new HashMap(5);
+	
+	SyntheticMethodBinding lambdaMethod = null;
+	SyntheticMethodBinding[] lambdaMethods = (SyntheticMethodBinding[]) this.synthetics[SourceTypeBinding.METHOD_EMUL].get(ref);
+	if (lambdaMethods == null) {
+		lambdaMethod = new SyntheticMethodBinding(ref, this);
+		this.synthetics[SourceTypeBinding.METHOD_EMUL].put(ref, lambdaMethods = new SyntheticMethodBinding[1]);
+		lambdaMethods[0] = lambdaMethod;
+	} else {
+		lambdaMethod = lambdaMethods[0];
+	}
 
+	// Create a $deserializeLambda$ method, one is shared amongst all lambdas
+	addDeserializeLambdaMethod();	
+	return lambdaMethod;
+}
+private void addDeserializeLambdaMethod() {
+	SyntheticMethodBinding[] deserializeLambdaMethods = (SyntheticMethodBinding[]) this.synthetics[SourceTypeBinding.METHOD_EMUL].get(TypeConstants.DESERIALIZE_LAMBDA);
+	if (deserializeLambdaMethods == null) {
+		SyntheticMethodBinding deserializeLambdaMethod = new SyntheticMethodBinding(this);
+		this.synthetics[SourceTypeBinding.METHOD_EMUL].put(TypeConstants.DESERIALIZE_LAMBDA,deserializeLambdaMethods = new SyntheticMethodBinding[1]);
+		deserializeLambdaMethods[0] = deserializeLambdaMethod;
+	}
+}
 /* Add a new synthetic access method for access to <targetMethod>.
  * Must distinguish access method used for super access from others (need to use invokespecial bytecode)
 	Answer the new method or the existing method if one already existed.
@@ -2335,7 +2369,7 @@ public FieldBinding resolveTypeFor(FieldBinding field) {
 					// enum constants neither have a type declaration nor can they be null
 					field.tagBits |= TagBits.AnnotationNonNull;
 				} else {
-					if (hasNonNullDefaultFor(DefaultLocationField, sourceLevel >= ClassFileConstants.JDK1_8)) {
+					if (hasNonNullDefaultFor(DefaultLocationField, this.environment.usesNullTypeAnnotations())) {
 						field.fillInDefaultNonNullness(fieldDecl, initializationScope);
 					}
 					// validate null annotation:
@@ -2345,6 +2379,9 @@ public FieldBinding resolveTypeFor(FieldBinding field) {
 			}
 		} finally {
 		    initializationScope.initializedField = previousField;
+		}
+		if (this.externalAnnotationProvider != null) {
+			ExternalAnnotationSuperimposer.annotateFieldBinding(field, this.externalAnnotationProvider, this.environment);
 		}
 //{ObjectTeams: copy-inherited fields and anchored types:
 		if (fieldDecls[f].getKind() != AbstractVariableDeclaration.ENUM_CONSTANT) {
@@ -2685,6 +2722,13 @@ public MethodBinding resolveTypesFor(MethodBinding method, boolean fromSynthetic
 					rejectTypeAnnotatedVoidMethod(methodDecl);
 			}
 		}
+	} else {
+		if (sourceLevel >= ClassFileConstants.JDK1_8) {
+			Annotation [] annotations = methodDecl.annotations;
+			if (annotations != null && annotations.length != 0) {
+				ASTNode.copySE8AnnotationsToType(methodDecl.scope, method, methodDecl.annotations, false);
+			}
+		}
 	}
 	if (foundArgProblem) {
 		methodDecl.binding = null;
@@ -2727,6 +2771,9 @@ public MethodBinding resolveTypesFor(MethodBinding method, boolean fromSynthetic
 		return method; // but its still unresolved with a null return type & is still connected to its method declaration
 
 	method.modifiers &= ~ExtraCompilerModifiers.AccUnresolved;
+	if (this.externalAnnotationProvider != null) {
+		ExternalAnnotationSuperimposer.annotateMethodBinding(method, this.externalAnnotationProvider, this.environment);
+	}
 //{ObjectTeams: need role method bridges?
 	int abstractStatic = ClassFileConstants.AccAbstract | ClassFileConstants.AccStatic;
 	if (   isRole() 

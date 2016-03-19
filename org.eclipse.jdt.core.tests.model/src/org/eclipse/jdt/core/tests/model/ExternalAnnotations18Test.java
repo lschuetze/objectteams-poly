@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2014, 2015 GK Software AG, and others.
+ * Copyright (c) 2014, 2016 GK Software AG, and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -56,6 +56,7 @@ import org.eclipse.jdt.core.tests.util.AbstractCompilerTest;
 import org.eclipse.jdt.core.tests.util.Util;
 import org.eclipse.jdt.core.util.ExternalAnnotationUtil;
 import org.eclipse.jdt.core.util.ExternalAnnotationUtil.MergeStrategy;
+import org.eclipse.jdt.internal.compiler.problem.ProblemSeverities;
 import org.eclipse.jdt.internal.core.ClasspathAttribute;
 import org.osgi.framework.Bundle;
 
@@ -249,6 +250,22 @@ public class ExternalAnnotations18Test extends ModifyingResourceTests {
 		addClasspathEntry(this.project, entry);
 	}
 
+	protected void addProjectDependencyWithExternalAnnotations(
+			IJavaProject javaProject,
+			String referencedProjectName,
+			String externalAnnotationPath,
+			Map options) throws CoreException, IOException
+	{
+		IClasspathAttribute[] extraAttributes = new IClasspathAttribute[] { new ClasspathAttribute(IClasspathAttribute.EXTERNAL_ANNOTATION_PATH, externalAnnotationPath) };
+		IClasspathEntry entry = JavaCore.newProjectEntry(
+				new Path(referencedProjectName),
+				null/*access rules*/,
+				false/*combine access rules*/,
+				extraAttributes,
+				false/*exported*/);
+		addClasspathEntry(this.project, entry);
+	}
+
 	protected void createFileInProject(String projectRelativeFolder, String fileName, String content) throws CoreException {
 		String folderPath = this.project.getProject().getName()+'/'+projectRelativeFolder;
 		createFolder(folderPath);
@@ -292,6 +309,43 @@ public class ExternalAnnotations18Test extends ModifyingResourceTests {
 		assertEquals("Number of problems", messages.length, nMatch);
 	}
 
+	protected void assertProblems(IProblem[] problems, String[] messages, int[] lines, int[] severities) throws CoreException {
+		int nMatch = 0;
+		for (int i = 0; i < problems.length; i++) {
+			for (int j = 0; j < messages.length; j++) {
+				if (messages[j] == null) continue;
+				if (problems[i].toString().equals(messages[j])
+						&& problems[i].getSourceLineNumber() == lines[j]) {
+					switch(severities[j] & ProblemSeverities.CoreSeverityMASK ) {
+					case ProblemSeverities.Error:
+						if (!problems[i].isError()) continue;
+						break;
+					case ProblemSeverities.Warning:
+						if (!problems[i].isWarning()) continue;
+						break;
+					case ProblemSeverities.Info:
+						if (!problems[i].isInfo()) continue;
+						break;
+					default:
+						throw new IllegalArgumentException("Bad severity expected: "+severities[j]);
+					}
+					messages[j] = null;
+					problems[i] = null;
+					nMatch++;
+					break;
+				}
+			}
+		}
+		for (int i = 0; i < problems.length; i++) {
+			if (problems[i] != null)
+				fail("Unexpected problem "+problems[i]+" at "+problems[i].getSourceLineNumber());
+		}
+		for (int i = 0; i < messages.length; i++) {
+			if (messages[i] != null)
+				System.err.println("Unmatched problem "+messages[i]);
+		}
+		assertEquals("Number of problems", messages.length, nMatch);
+	}
 	protected boolean hasJRE18() {
 		return ((AbstractCompilerTest.getPossibleComplianceLevels() & AbstractCompilerTest.F_1_8) != 0);
 	}
@@ -466,10 +520,11 @@ public class ExternalAnnotations18Test extends ModifyingResourceTests {
 		CompilationUnit reconciled = unit.reconcile(AST.JLS8, true, null, new NullProgressMonitor());
 		IProblem[] problems = reconciled.getProblems();
 		assertProblems(problems, new String[] {
+				"Pb(980) Unsafe interpretation of method return type as '@NonNull' based on the receiver type 'Iterator<@NonNull capture#of ?>'. Type 'Iterator<E>' doesn't seem to be designed with null type annotations in mind",
 				"Pb(953) Null type mismatch (type annotations): required '@NonNull Object' but this expression has type '@Nullable capture#of ?'",
 				"Pb(953) Null type mismatch (type annotations): required '@NonNull CharSequence' but this expression has type '@Nullable capture#of ? extends CharSequence'",
 				"Pb(953) Null type mismatch (type annotations): required '@NonNull Object' but this expression has type '@Nullable capture#of ? super CharSequence'"
-			}, new int[] { 13, 16, 19 });
+			}, new int[] { 10, 13, 16, 19 });
 	}
 	
 	public void testLibsWithArrays() throws Exception {
@@ -1418,5 +1473,216 @@ public class ExternalAnnotations18Test extends ModifyingResourceTests {
 		} finally {
 			Platform.removeLogListener(listener);
 		}
+	}
+
+	/** Lib exists as workspace project. Perform full build. */
+	public void testProjectDependencyFullBuild() throws Exception {
+		try {
+			setupJavaProject("Lib");
+			this.project.getProject().build(IncrementalProjectBuilder.FULL_BUILD, null);
+	
+			setupJavaProject("Test1");
+			addProjectDependencyWithExternalAnnotations(this.project, "/Lib", "annots", null);
+			this.project.getProject().build(IncrementalProjectBuilder.FULL_BUILD, null);
+			IMarker[] markers = this.project.getProject().findMarkers(IJavaModelMarker.JAVA_MODEL_PROBLEM_MARKER, false, IResource.DEPTH_INFINITE);
+			assertNoMarkers(markers);
+		} finally {
+			deleteProject("Lib");
+		}
+	}
+
+	/** Lib exists as workspace project. Reconcile an individual CU. */
+	public void testProjectDependencyReconcile1() throws Exception {
+		try {
+			setupJavaProject("Lib");
+			this.project.getProject().build(IncrementalProjectBuilder.FULL_BUILD, null);
+			this.root = null; // prepare to get the root from project Test1
+	
+			setupJavaProject("Test1");
+			addProjectDependencyWithExternalAnnotations(this.project, "/Lib", "annots", null);
+			IPackageFragment fragment = this.root.getPackageFragment("test1");
+			ICompilationUnit unit = fragment.getCompilationUnit("Test1.java").getWorkingCopy(new NullProgressMonitor());
+			CompilationUnit reconciled = unit.reconcile(AST.JLS8, true, null, new NullProgressMonitor());
+			IProblem[] problems = reconciled.getProblems();
+			assertNoProblems(problems);
+		} finally {
+			deleteProject("Lib");
+		}
+	}
+
+	/** Lib exists as workspace project. Type-Annotations in zip file. Reconcile an individual CU. */
+	public void testProjectDependencyReconcile2() throws Exception {
+		try {
+			setupJavaProject("Lib");
+			this.project.getProject().build(IncrementalProjectBuilder.FULL_BUILD, null);
+			this.root = null; // prepare to get the root from project Test1
+	
+			setupJavaProject("Test3b");
+			Util.createSourceZip(
+				new String[] {
+					"libs/MyFunction.eea", 
+					"class libs/MyFunction\n" + 
+					" <T:R:>\n" + 
+					"\n" + 
+					"compose\n" + 
+					" <V:Ljava/lang/Object;>(Llibs/MyFunction<-TV;+TT;>;)Llibs/MyFunction<TV;TR;>;\n" + 
+					" <V:Ljava/lang/Object;>(Llibs/MyFunction<-TV;+T0T;>;)Llibs/MyFunction<TV;TR;>;\n" + 
+					"\n",
+					"libs/Arrays.eea", 
+					"class libs/Arrays\n" + 
+					"\n" +
+					"array\n" +
+					" [Ljava/lang/String;\n" +
+					" [1L0java/lang/String;\n" +
+					"\n" + 
+					"getArray\n" +
+					" ()[[Ljava/lang/String;\n" +
+					" ()[0[1L0java/lang/String;\n"
+				},
+				this.project.getProject().getLocation().toString()+"/annots.zip");
+			this.project.getProject().refreshLocal(1, new NullProgressMonitor());
+
+			addProjectDependencyWithExternalAnnotations(this.project, "/Lib", "annots.zip", null);
+			IPackageFragment fragment = this.root.getPackageFragment("test1");
+			ICompilationUnit unit = fragment.getCompilationUnit("Reconcile2.java").getWorkingCopy(new NullProgressMonitor());
+			CompilationUnit reconciled = unit.reconcile(AST.JLS8, true, null, new NullProgressMonitor());
+			IProblem[] problems = reconciled.getProblems();
+			assertNoProblems(problems);
+		} finally {
+			deleteProject("Lib");
+		}
+	}
+
+	/** Lib exists as workspace project. Invocations conflict with type parameter constraints. Reconcile an individual CU. */
+	public void testProjectDependencyReconcile3() throws Exception {
+		try {
+			setupJavaProject("Lib");
+			this.project.getProject().build(IncrementalProjectBuilder.FULL_BUILD, null);
+			this.root = null; // prepare to get the root from project Test1
+	
+			setupJavaProject("Test3b");
+			Util.createSourceZip(
+				new String[] {
+					"libs/MyFunction.eea", 
+					"class libs/MyFunction\n" + 
+					" <T:R:>\n" + 
+					" <T:1R:>\n" + 
+					"\n" + 
+					"compose\n" + 
+					" <V:Ljava/lang/Object;>(Llibs/MyFunction<-TV;+TT;>;)Llibs/MyFunction<TV;TR;>;\n" + 
+					" <1V:Ljava/lang/Object;>(Llibs/MyFunction<-TV;+TT;>;)Llibs/MyFunction<TV;TR;>;\n" + 
+					"\n",
+				},
+				this.project.getProject().getLocation().toString()+"/annots.zip");
+			this.project.getProject().refreshLocal(1, new NullProgressMonitor());
+
+			addProjectDependencyWithExternalAnnotations(this.project, "/Lib", "annots.zip", null);
+			IPackageFragment fragment = this.root.getPackageFragment("test1");
+			ICompilationUnit unit = fragment.getCompilationUnit("Reconcile3.java").getWorkingCopy(new NullProgressMonitor());
+			CompilationUnit reconciled = unit.reconcile(AST.JLS8, true, null, new NullProgressMonitor());
+			assertProblems(reconciled.getProblems(), new String[] {
+					"Pb(964) Null constraint mismatch: The type '@Nullable B' is not a valid substitute for the type parameter '@NonNull R'",
+					"Pb(964) Null constraint mismatch: The type '@Nullable String' is not a valid substitute for the type parameter '@NonNull V'",
+			}, new int[] { 12, 17 });
+		} finally {
+			deleteProject("Lib");
+		}
+	}
+	
+	public void testFreeTypeVariableReturn() throws Exception {
+		myCreateJavaProject("TestLibs");
+		addLibraryWithExternalAnnotations(this.project, "lib1.jar", "annots", new String[] {
+				"/UnannotatedLib/libs/Lib1.java",
+				"package libs;\n" + 
+				"\n" + 
+				"public interface Lib1<T> {\n" + 
+				"	T get();\n" + 
+				"}\n"
+			}, null);
+		IPackageFragment fragment = this.project.getPackageFragmentRoots()[0].createPackageFragment("tests", true, null);
+		ICompilationUnit unit = fragment.createCompilationUnit("Test1.java", 
+				"package tests;\n" + 
+				"import org.eclipse.jdt.annotation.*;\n" + 
+				"\n" + 
+				"import libs.Lib1;\n" + 
+				"\n" + 
+				"public class Test1 {\n" + 
+				"	@NonNull String test0(Lib1<@Nullable String> lib) {\n" + 
+				"		return lib.get();\n" + 
+				"	}\n" + 
+				"	@NonNull String test1(Lib1<@NonNull String> lib) {\n" + 
+				"		return lib.get();\n" + 
+				"	}\n" + 
+				"}\n",
+				true, new NullProgressMonitor()).getWorkingCopy(new NullProgressMonitor());
+		CompilationUnit reconciled = unit.reconcile(AST.JLS8, true, null, new NullProgressMonitor());
+		assertProblems(reconciled.getProblems(), new String[] {
+				"Pb(953) Null type mismatch (type annotations): required '@NonNull String' but this expression has type '@Nullable String'",
+				"Pb(980) Unsafe interpretation of method return type as '@NonNull' based on the receiver type 'Lib1<@NonNull String>'. Type 'Lib1<T>' doesn't seem to be designed with null type annotations in mind",
+		}, new int[] { 8, 11 });
+		// just mark that Lib1 now has null annotations:
+		createFileInProject("annots/libs", "Lib1.eea",
+				"class libs/Lib1\n" +
+				" <T:Ljava/lang/Object;>\n" + 
+				" <T:Ljava/lang/Object;>\n" + 
+				"\n");
+		reconciled = unit.reconcile(AST.JLS8, true, null, new NullProgressMonitor());
+		assertProblems(reconciled.getProblems(), new String[] {
+				"Pb(953) Null type mismatch (type annotations): required '@NonNull String' but this expression has type '@Nullable String'",
+		}, new int[] { 8 });
+	}
+	
+	public void testFreeTypeVariableReturnSeverities() throws Exception {
+		myCreateJavaProject("TestLibs");
+		addLibraryWithExternalAnnotations(this.project, "lib1.jar", "annots", new String[] {
+				"/UnannotatedLib/libs/Lib1.java",
+				"package libs;\n" + 
+				"\n" + 
+				"public interface Lib1<T> {\n" + 
+				"	T get();\n" + 
+				"}\n"
+			}, null);
+		this.currentProject = this.project;
+		addLibrary("lib2.jar", null, new String[] {
+				"/UnanntatedLib2/libs/Lib2.java",
+				"package libs;\n" + 
+				"\n" + 
+				"public interface Lib2<T> {\n" + 
+				"	T get();\n" + 
+				"}\n"				
+		}, "1.8");
+		IPackageFragment fragment = this.project.getPackageFragmentRoots()[0].createPackageFragment("tests", true, null);
+		fragment.createCompilationUnit("Lib3.java", 
+				"package tests;\n" +
+				"public interface Lib3<T> {\n" +
+				"	T get();\n" +
+				"}\n",
+				true, new NullProgressMonitor());
+		this.project.getProject().build(IncrementalProjectBuilder.FULL_BUILD, new NullProgressMonitor());
+		ICompilationUnit unit = fragment.createCompilationUnit("Test1.java", 
+				"package tests;\n" + 
+				"import org.eclipse.jdt.annotation.*;\n" + 
+				"\n" + 
+				"import libs.Lib1;\n" + 
+				"import libs.Lib2;\n" + 
+				"import tests.Lib3;\n" + 
+				"\n" + 
+				"public class Test1 {\n" + 
+				"	@NonNull String test1(Lib1<@NonNull String> lib) {\n" + 
+				"		return lib.get();\n" + // legacy, prepared for .eea but still not annotated (=> Warning)
+				"	}\n" + 
+				"	@NonNull String test2(Lib2<@NonNull String> lib) {\n" + 
+				"		return lib.get();\n" + // legacy, not prepared for .eea (=> Info)
+				"	}\n" + 
+				"	@NonNull String test3(Lib3<@NonNull String> lib) {\n" + 
+				"		return lib.get();\n" + // not legacy, is from the same project
+				"	}\n" + 
+				"}\n",
+				true, new NullProgressMonitor()).getWorkingCopy(new NullProgressMonitor());
+		CompilationUnit reconciled = unit.reconcile(AST.JLS8, true, null, new NullProgressMonitor());
+		assertProblems(reconciled.getProblems(), new String[] {
+				"Pb(980) Unsafe interpretation of method return type as '@NonNull' based on the receiver type 'Lib1<@NonNull String>'. Type 'Lib1<T>' doesn't seem to be designed with null type annotations in mind",
+				"Pb(980) Unsafe interpretation of method return type as '@NonNull' based on the receiver type 'Lib2<@NonNull String>'. Type 'Lib2<T>' doesn't seem to be designed with null type annotations in mind",
+		}, new int[] { 10, 13 }, new int[] { ProblemSeverities.Warning, ProblemSeverities.Info } );
 	}
 }

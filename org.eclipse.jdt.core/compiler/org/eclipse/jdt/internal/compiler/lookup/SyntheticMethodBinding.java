@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2015 IBM Corporation and others.
+ * Copyright (c) 2000, 2016 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -23,6 +23,7 @@ import org.eclipse.jdt.internal.compiler.ast.ASTNode;
 import org.eclipse.jdt.internal.compiler.ast.AbstractMethodDeclaration;
 import org.eclipse.jdt.internal.compiler.ast.FieldDeclaration;
 import org.eclipse.jdt.internal.compiler.ast.LambdaExpression;
+import org.eclipse.jdt.internal.compiler.ast.ReferenceExpression;
 import org.eclipse.jdt.internal.compiler.classfmt.ClassFileConstants;
 import org.eclipse.jdt.internal.compiler.codegen.CodeStream;
 import org.eclipse.jdt.internal.compiler.util.Util;
@@ -43,7 +44,11 @@ public class SyntheticMethodBinding extends MethodBinding {
 	public MethodBinding targetMethod;			// method or constructor
 	public TypeBinding targetEnumType; 			// enum type
 	public LambdaExpression lambda;
-	
+	/**
+	 * Method reference expression whose target FI is Serializable. Should be set when
+	 * purpose is {@link #SerializableMethodReference}
+	 */
+	public ReferenceExpression serializableMethodRef;
 	public int purpose;
 
 	// fields used to generate enum constants when too many
@@ -67,11 +72,16 @@ public class SyntheticMethodBinding extends MethodBinding {
 	public static final int ArrayClone = 15; // X[]::clone
     public static final int FactoryMethod = 16; // for indy call to private constructor.
     public static final int DeserializeLambda = 17; // For supporting lambda deserialization.
+    /**
+     * Serves as a placeholder for a method reference whose target FI is Serializable.
+     * Is never directly materialized in bytecode
+     */
+    public static final int SerializableMethodReference = 18;
 //{ObjectTeams: other purposes:
-	public final static int InferredCalloutToField = 18; // calling an inferred callout-to-field
-	public final static int RoleMethodBridgeOuter = 19; // a team-level bridge method towards a private role method (for callout)
-	public final static int RoleMethodBridgeInner = 20; // a role-level bridge method towards a private role method (for callout)
-	public final static int MethodDecapsulation = 21;
+	public final static int InferredCalloutToField = 19; // calling an inferred callout-to-field
+	public final static int RoleMethodBridgeOuter = 20; // a team-level bridge method towards a private role method (for callout)
+	public final static int RoleMethodBridgeInner = 21; // a role-level bridge method towards a private role method (for callout)
+	public final static int MethodDecapsulation = 22;
 // SH}
 
 	public int sourceStart = 0; // start position of the matching declaration
@@ -486,6 +496,21 @@ public class SyntheticMethodBinding extends MethodBinding {
 	    this.parameters = lambda.binding.parameters;
 	    this.thrownExceptions = lambda.binding.thrownExceptions;
 	    this.purpose = SyntheticMethodBinding.LambdaMethod;
+		SyntheticMethodBinding[] knownAccessMethods = declaringClass.syntheticMethods();
+		int methodId = knownAccessMethods == null ? 0 : knownAccessMethods.length;
+		this.index = methodId;
+	}
+
+	public SyntheticMethodBinding(ReferenceExpression ref, SourceTypeBinding declaringClass) {
+		this.serializableMethodRef = ref;
+	    this.declaringClass = declaringClass;
+	    this.selector = ref.binding.selector;
+	    this.modifiers = ref.binding.modifiers;
+		this.tagBits |= (TagBits.AnnotationResolved | TagBits.DeprecatedAnnotationResolved) | (ref.binding.tagBits & TagBits.HasParameterAnnotations);
+	    this.returnType = ref.binding.returnType;
+	    this.parameters = ref.binding.parameters;
+	    this.thrownExceptions = ref.binding.thrownExceptions;
+	    this.purpose = SyntheticMethodBinding.SerializableMethodReference;
 		SyntheticMethodBinding[] knownAccessMethods = declaringClass.syntheticMethods();
 		int methodId = knownAccessMethods == null ? 0 : knownAccessMethods.length;
 		this.index = methodId;

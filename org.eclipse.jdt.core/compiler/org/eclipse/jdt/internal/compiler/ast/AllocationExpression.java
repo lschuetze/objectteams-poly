@@ -629,6 +629,10 @@ public TypeBinding resolveType(BlockScope scope) {
 			}
 		}
 	}
+	if (compilerOptions.sourceLevel >= ClassFileConstants.JDK1_8 &&
+			this.binding.getTypeAnnotations() != Binding.NO_ANNOTATIONS) {
+		this.resolvedType = scope.environment().createAnnotatedType(this.resolvedType, this.binding.getTypeAnnotations());
+	}
 //{ObjectTeams: may need to wrap the resolved type
     this.resolvedType = RoleTypeCreator.maybeWrapUnqualifiedRoleType(this.resolvedType, scope, this);
 	DependentTypeBinding dependentTypeBinding = this.resolvedType.asPlainDependentType();
@@ -966,6 +970,8 @@ public void cleanUpInferenceContexts() {
 		if (value != null)
 			((InferenceContext18) value).cleanUp();
 	this.inferenceContexts = null;
+	this.outerInferenceContext = null;
+	this.solutionsPerTargetType = null;
 }
 
 //-- interface InvocationSite: --

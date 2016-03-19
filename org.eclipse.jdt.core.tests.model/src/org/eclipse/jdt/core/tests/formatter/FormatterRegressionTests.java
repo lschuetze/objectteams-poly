@@ -8038,6 +8038,7 @@ public class FormatterRegressionTests extends AbstractJavaModelTests {
 	public void test558() {
 		Map options = DefaultCodeFormatterConstants.getJavaConventionsSettings();
 
+		options.put(DefaultCodeFormatterConstants.FORMATTER_INSERT_NEW_LINE_AFTER_ANNOTATION_ON_ENUM_CONSTANT, null);
 		options.put(DefaultCodeFormatterConstants.FORMATTER_INSERT_NEW_LINE_AFTER_ANNOTATION_ON_FIELD, null);
 		options.put(DefaultCodeFormatterConstants.FORMATTER_INSERT_NEW_LINE_AFTER_ANNOTATION_ON_METHOD, null);
 		options.put(DefaultCodeFormatterConstants.FORMATTER_INSERT_NEW_LINE_AFTER_ANNOTATION_ON_PACKAGE, null);
@@ -8078,6 +8079,7 @@ public class FormatterRegressionTests extends AbstractJavaModelTests {
 	 */
 	public void test559() {
 		Map options = DefaultCodeFormatterConstants.getJavaConventionsSettings();
+		options.put(DefaultCodeFormatterConstants.FORMATTER_INSERT_NEW_LINE_AFTER_ANNOTATION_ON_ENUM_CONSTANT, null);
 		options.put(DefaultCodeFormatterConstants.FORMATTER_INSERT_NEW_LINE_AFTER_ANNOTATION_ON_FIELD, null);
 		options.put(DefaultCodeFormatterConstants.FORMATTER_INSERT_NEW_LINE_AFTER_ANNOTATION_ON_METHOD, null);
 		options.put(DefaultCodeFormatterConstants.FORMATTER_INSERT_NEW_LINE_AFTER_ANNOTATION_ON_PACKAGE, null);
@@ -8382,6 +8384,7 @@ public class FormatterRegressionTests extends AbstractJavaModelTests {
 
 	public void test575() {
 		Map options = DefaultCodeFormatterConstants.getEclipseDefaultSettings();
+		options.put(DefaultCodeFormatterConstants.FORMATTER_INSERT_NEW_LINE_AFTER_ANNOTATION_ON_ENUM_CONSTANT, null);
 		options.put(DefaultCodeFormatterConstants.FORMATTER_INSERT_NEW_LINE_AFTER_ANNOTATION_ON_FIELD, null);
 		options.put(DefaultCodeFormatterConstants.FORMATTER_INSERT_NEW_LINE_AFTER_ANNOTATION_ON_METHOD, null);
 		options.put(DefaultCodeFormatterConstants.FORMATTER_INSERT_NEW_LINE_AFTER_ANNOTATION_ON_PACKAGE, null);
@@ -10879,6 +10882,7 @@ public void test727() {
  */
 public void test728() {
 	this.formatterPrefs = null;
+	this.formatterOptions.remove(DefaultCodeFormatterConstants.FORMATTER_INSERT_NEW_LINE_AFTER_ANNOTATION_ON_ENUM_CONSTANT);
 	this.formatterOptions.remove(DefaultCodeFormatterConstants.FORMATTER_INSERT_NEW_LINE_AFTER_ANNOTATION_ON_FIELD);
 	this.formatterOptions.remove(DefaultCodeFormatterConstants.FORMATTER_INSERT_NEW_LINE_AFTER_ANNOTATION_ON_METHOD);
 	this.formatterOptions.remove(DefaultCodeFormatterConstants.FORMATTER_INSERT_NEW_LINE_AFTER_ANNOTATION_ON_PACKAGE);
@@ -13301,5 +13305,562 @@ public void testBug479109d() {
 		"	protected final String field3 = \"333333333\";\n" + 
 		"}"
 	);
+}
+/**
+ * https://bugs.eclipse.org/487375 - [formatter] block comment in front of method signature effects too much indentation
+ */
+public void testBug486719() {
+	this.formatterPrefs.page_width = 80;
+	String source =
+		"public class Example {\n" + 
+		"	int foo(Object a, Object b, Object c) {\n" + 
+		"		if (a == b) return 1;if (a == c) return 2; //$IDENTITY-COMPARISON$\n" + 
+		"		boolean aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa = a == b && a == c; //$IDENTITY-COMPARISON$\n" + 
+		"		return 3;\n" + 
+		"	}\n" + 
+		"}";
+	formatSource(source);
+}
+/**
+ * https://bugs.eclipse.org/432628 - [formatter] Add option "Insert new line after annotations on enum constants"
+ */
+public void testBug432628a() {
+	setComplianceLevel(CompilerOptions.VERSION_1_5);
+	this.formatterPrefs.insert_new_line_after_annotation_on_enum_constant = false;
+	String source =
+		"public enum SomeEnum {\n" + 
+		"	@XmlEnumValue(\"val1\") VAL_1(\"val1\"), @XmlEnumValue(\"val2\") VAL_2(\"val2\");\n" + 
+		"}";
+	formatSource(source);
+}
+/**
+ * https://bugs.eclipse.org/432628 - [formatter] Add option "Insert new line after annotations on enum constants"
+ */
+public void testBug432628b() {
+	setComplianceLevel(CompilerOptions.VERSION_1_5);
+	this.formatterPrefs.insert_new_line_after_annotation_on_enum_constant = true;
+	String source =
+		"public enum SomeEnum {\n" + 
+		"	@XmlEnumValue(\"val1\")\n" + 
+		"	VAL_1(\"val1\"), @XmlEnumValue(\"val2\")\n" + 
+		"	VAL_2(\"val2\");\n" + 
+		"}";
+	formatSource(source);
+}
+/**
+ * https://bugs.eclipse.org/432628 - [formatter] Add option "Insert new line after annotations on enum constants"
+ */
+public void testBug432628c() {
+	setComplianceLevel(CompilerOptions.VERSION_1_5);
+	this.formatterPrefs.insert_new_line_after_annotation_on_enum_constant = true;
+	this.formatterPrefs.alignment_for_enum_constants = Alignment.M_ONE_PER_LINE_SPLIT + Alignment.M_FORCE;
+	String source =
+		"public enum SomeEnum {\n" + 
+		"	@XmlEnumValue(\"val1\")\n" + 
+		"	VAL_1(\"val1\"),\n" + 
+		"	@XmlEnumValue(\"val2\")\n" + 
+		"	VAL_2(\"val2\");\n" + 
+		"}";
+	formatSource(source);
+}
+/**
+ * https://bugs.eclipse.org/432628 - [formatter] Add option "Insert new line after annotations on enum constants"
+ */
+public void testBug432628d() {
+	setComplianceLevel(CompilerOptions.VERSION_1_5);
+	this.formatterPrefs.insert_new_line_after_annotation_on_enum_constant = false;
+	this.formatterPrefs.alignment_for_enum_constants = Alignment.M_ONE_PER_LINE_SPLIT + Alignment.M_FORCE;
+	String source =
+		"public enum SomeEnum {\n" + 
+		"	@XmlEnumValue(\"val1\") VAL_1(\"val1\"),\n" + 
+		"	@XmlEnumValue(\"val2\") VAL_2(\"val2\");\n" + 
+		"}";
+	formatSource(source);
+}
+/**
+ * https://bugs.eclipse.org/118264 - [formatter] Enable wrapping of for loop setup
+ */
+public void testBug118264a() {
+	this.formatterPrefs.page_width = 50;
+	String source =
+		"class Example {\n" + 
+		"	int foo(int argument) {\n" + 
+		"		for (int counter = 0; counter < argument; counter++) {\n" + 
+		"			doSomething(counter);\n" + 
+		"		}\n" + 
+		"	}\n" + 
+		"}";
+	formatSource(source);
+}
+/**
+ * https://bugs.eclipse.org/118264 - [formatter] Enable wrapping of for loop setup
+ */
+public void testBug118264b() {
+	this.formatterPrefs.alignment_for_expressions_in_for_loop_header = Alignment.M_COMPACT_SPLIT;
+	this.formatterPrefs.page_width = 50;
+	String source =
+		"class Example {\n" + 
+		"	int foo(int argument) {\n" + 
+		"		for (int counter = 0; counter < argument; counter++) {\n" + 
+		"			doSomething(counter);\n" + 
+		"		}\n" + 
+		"	}\n" + 
+		"}";
+	formatSource(source,
+		"class Example {\n" + 
+		"	int foo(int argument) {\n" + 
+		"		for (int counter = 0; counter < argument;\n" + 
+		"				counter++) {\n" + 
+		"			doSomething(counter);\n" + 
+		"		}\n" + 
+		"	}\n" + 
+		"}"
+	);
+}
+/**
+ * https://bugs.eclipse.org/118264 - [formatter] Enable wrapping of for loop setup
+ */
+public void testBug118264c() {
+	this.formatterPrefs.alignment_for_expressions_in_for_loop_header = Alignment.M_ONE_PER_LINE_SPLIT + Alignment.M_FORCE;
+	String source =
+		"class Example {\n" + 
+		"	int foo(int argument) {\n" + 
+		"		for (int counter = 0; counter < argument; counter++) {\n" + 
+		"			doSomething(counter);\n" + 
+		"		}\n" + 
+		"	}\n" + 
+		"}";
+	formatSource(source,
+		"class Example {\n" + 
+		"	int foo(int argument) {\n" + 
+		"		for (\n" + 
+		"				int counter = 0;\n" + 
+		"				counter < argument;\n" + 
+		"				counter++) {\n" + 
+		"			doSomething(counter);\n" + 
+		"		}\n" + 
+		"	}\n" + 
+		"}"
+	);
+}
+/**
+ * https://bugs.eclipse.org/118264 - [formatter] Enable wrapping of for loop setup
+ */
+public void testBug118264d() {
+	this.formatterPrefs.alignment_for_expressions_in_for_loop_header = Alignment.M_ONE_PER_LINE_SPLIT + Alignment.M_FORCE;
+	String source =
+		"class Example {\n" + 
+		"	int foo(int argument) {\n" + 
+		"		for (int counter = 0; ; ) {\n" + 
+		"			doSomething(counter);\n" + 
+		"		}\n" + 
+		"	}\n" + 
+		"}";
+	formatSource(source,
+		"class Example {\n" + 
+		"	int foo(int argument) {\n" + 
+		"		for (\n" + 
+		"				int counter = 0;;) {\n" + 
+		"			doSomething(counter);\n" + 
+		"		}\n" + 
+		"	}\n" + 
+		"}"
+	);
+}
+/**
+ * https://bugs.eclipse.org/118264 - [formatter] Enable wrapping of for loop setup
+ */
+public void testBug118264e() {
+	this.formatterPrefs.alignment_for_expressions_in_for_loop_header = Alignment.M_ONE_PER_LINE_SPLIT + Alignment.M_FORCE;
+	String source =
+		"class Example {\n" + 
+		"	int foo(int argument) {\n" + 
+		"		for (;;argument--, argument--) {\n" + 
+		"			doSomething(counter);\n" + 
+		"		}\n" + 
+		"	}\n" + 
+		"}";
+	formatSource(source,
+		"class Example {\n" + 
+		"	int foo(int argument) {\n" + 
+		"		for (;;\n" + 
+		"				argument--, argument--) {\n" + 
+		"			doSomething(counter);\n" + 
+		"		}\n" + 
+		"	}\n" + 
+		"}"
+	);
+}
+/**
+ * https://bugs.eclipse.org/118264 - [formatter] Enable wrapping of for loop setup
+ */
+public void testBug118264f() {
+	this.formatterPrefs.alignment_for_expressions_in_for_loop_header = Alignment.M_ONE_PER_LINE_SPLIT + Alignment.M_FORCE;
+	String source =
+		"class Example {\n" + 
+		"	int foo(int argument) {\n" + 
+		"		for (;;) {\n" + 
+		"			doSomething(counter);\n" + 
+		"		}\n" + 
+		"	}\n" + 
+		"}";
+	formatSource(source);
+}
+/**
+ * https://bugs.eclipse.org/465910 - [formatter] add a 'wrap before operator' option for conditional expressions
+ */
+public void testBug465910() {
+	this.formatterPrefs.alignment_for_conditional_expression = Alignment.M_ONE_PER_LINE_SPLIT + Alignment.M_FORCE;
+	String source =
+		"class Example {\n" + 
+		"	Result foo(boolean argument) {\n" + 
+		"		return argument ? doOneThing() : doOtherThing();\n" + 
+		"	}\n" + 
+		"}";
+	formatSource(source,
+		"class Example {\n" + 
+		"	Result foo(boolean argument) {\n" + 
+		"		return argument\n" + 
+		"				? doOneThing()\n" + 
+		"				: doOtherThing();\n" + 
+		"	}\n" + 
+		"}"
+	);
+	this.formatterPrefs.wrap_before_conditional_operator = false;
+	formatSource(source,
+		"class Example {\n" + 
+		"	Result foo(boolean argument) {\n" + 
+		"		return argument ?\n" + 
+		"				doOneThing() :\n" + 
+		"				doOtherThing();\n" + 
+		"	}\n" + 
+		"}"
+	);
+}
+/**
+ * https://bugs.eclipse.org/325631 - [formatter] Code formatter Expressions > Assignments lacks "Wrap before operator" option
+ */
+public void testBug325631() {
+	this.formatterPrefs.alignment_for_assignment = Alignment.M_ONE_PER_LINE_SPLIT + Alignment.M_FORCE;
+	String source =
+		"class Example {\n" + 
+		"	String value = \"\";\n" + 
+		"	void foo(boolean argument) {\n" + 
+		"		if (\"test\".equals(value = artument))\n" + 
+		"			doSomething();\n" + 
+		"	}\n" + 
+		"}";
+	formatSource(source,
+		"class Example {\n" + 
+		"	String value =\n" + 
+		"			\"\";\n" + 
+		"\n" + 
+		"	void foo(boolean argument) {\n" + 
+		"		if (\"test\".equals(value =\n" + 
+		"				artument))\n" + 
+		"			doSomething();\n" + 
+		"	}\n" + 
+		"}");
+	this.formatterPrefs.wrap_before_assignment_operator = true;
+	formatSource(source,
+		"class Example {\n" + 
+		"	String value\n" + 
+		"			= \"\";\n" + 
+		"\n" + 
+		"	void foo(boolean argument) {\n" + 
+		"		if (\"test\".equals(value\n" + 
+		"				= artument))\n" + 
+		"			doSomething();\n" + 
+		"	}\n" + 
+		"}"
+	);
+}
+/**
+ * https://bugs.eclipse.org/370540 - [Formatter] New settings for parentheses positions
+ */
+public void testBug370540a() throws JavaModelException {
+	setComplianceLevel(CompilerOptions.VERSION_1_8);
+	String input = getCompilationUnit("Formatter", "", "test370540", "Example_in.java").getSource();
+	formatSource(input, getCompilationUnit("Formatter", "", "test370540", "Example_out01.java").getSource());
+}
+/**
+ * https://bugs.eclipse.org/370540 - [Formatter] New settings for parentheses positions
+ */
+public void testBug370540b() throws JavaModelException {
+	setComplianceLevel(CompilerOptions.VERSION_1_8);
+	this.formatterPrefs.parenthesis_positions_in_method_declaration = DefaultCodeFormatterConstants.SEPARATE_LINES_IF_NOT_EMPY;
+	String input = getCompilationUnit("Formatter", "", "test370540", "Example_in.java").getSource();
+	formatSource(input, getCompilationUnit("Formatter", "", "test370540", "Example_out02.java").getSource());
+}
+/**
+ * https://bugs.eclipse.org/370540 - [Formatter] New settings for parentheses positions
+ */
+public void testBug370540c() throws JavaModelException {
+	setComplianceLevel(CompilerOptions.VERSION_1_8);
+	this.formatterPrefs.parenthesis_positions_in_method_declaration = DefaultCodeFormatterConstants.SEPARATE_LINES_IF_WRAPPED;
+	String input = getCompilationUnit("Formatter", "", "test370540", "Example_in.java").getSource();
+	formatSource(input, getCompilationUnit("Formatter", "", "test370540", "Example_out03.java").getSource());
+}
+/**
+ * https://bugs.eclipse.org/370540 - [Formatter] New settings for parentheses positions
+ */
+public void testBug370540d() throws JavaModelException {
+	this.formatterPrefs.parenthesis_positions_in_method_declaration = DefaultCodeFormatterConstants.SEPARATE_LINES;
+	setComplianceLevel(CompilerOptions.VERSION_1_8);
+	String input = getCompilationUnit("Formatter", "", "test370540", "Example_in.java").getSource();
+	formatSource(input, getCompilationUnit("Formatter", "", "test370540", "Example_out04.java").getSource());
+}
+/**
+ * https://bugs.eclipse.org/370540 - [Formatter] New settings for parentheses positions
+ */
+public void testBug370540e() throws JavaModelException {
+	setComplianceLevel(CompilerOptions.VERSION_1_8);
+	this.formatterPrefs.parenthesis_positions_in_method_invocation = DefaultCodeFormatterConstants.SEPARATE_LINES_IF_NOT_EMPY;
+	String input = getCompilationUnit("Formatter", "", "test370540", "Example_in.java").getSource();
+	formatSource(input, getCompilationUnit("Formatter", "", "test370540", "Example_out05.java").getSource());
+}
+/**
+ * https://bugs.eclipse.org/370540 - [Formatter] New settings for parentheses positions
+ */
+public void testBug370540f() throws JavaModelException {
+	setComplianceLevel(CompilerOptions.VERSION_1_8);
+	this.formatterPrefs.parenthesis_positions_in_method_invocation = DefaultCodeFormatterConstants.SEPARATE_LINES_IF_WRAPPED;
+	this.formatterPrefs.parenthesis_positions_in_enum_constant_declaration = DefaultCodeFormatterConstants.SEPARATE_LINES;
+	String input = getCompilationUnit("Formatter", "", "test370540", "Example_in.java").getSource();
+	formatSource(input, getCompilationUnit("Formatter", "", "test370540", "Example_out06.java").getSource());
+}
+/**
+ * https://bugs.eclipse.org/370540 - [Formatter] New settings for parentheses positions
+ */
+public void testBug370540g() throws JavaModelException {
+	setComplianceLevel(CompilerOptions.VERSION_1_8);
+	this.formatterPrefs.parenthesis_positions_in_enum_constant_declaration = DefaultCodeFormatterConstants.SEPARATE_LINES_IF_NOT_EMPY;
+	this.formatterPrefs.parenthesis_positions_in_if_while_statement = DefaultCodeFormatterConstants.SEPARATE_LINES;
+	String input = getCompilationUnit("Formatter", "", "test370540", "Example_in.java").getSource();
+	formatSource(input, getCompilationUnit("Formatter", "", "test370540", "Example_out07.java").getSource());
+}
+/**
+ * https://bugs.eclipse.org/370540 - [Formatter] New settings for parentheses positions
+ */
+public void testBug370540h() throws JavaModelException {
+	setComplianceLevel(CompilerOptions.VERSION_1_8);
+	this.formatterPrefs.parenthesis_positions_in_if_while_statement = DefaultCodeFormatterConstants.SEPARATE_LINES_IF_WRAPPED;
+	this.formatterPrefs.parenthesis_positions_in_lambda_declaration = DefaultCodeFormatterConstants.SEPARATE_LINES_IF_NOT_EMPY;
+	String input = getCompilationUnit("Formatter", "", "test370540", "Example_in.java").getSource();
+	formatSource(input, getCompilationUnit("Formatter", "", "test370540", "Example_out08.java").getSource());
+}
+/**
+ * https://bugs.eclipse.org/370540 - [Formatter] New settings for parentheses positions
+ */
+public void testBug370540i() throws JavaModelException {
+	setComplianceLevel(CompilerOptions.VERSION_1_8);
+	this.formatterPrefs.parenthesis_positions_in_if_while_statement = DefaultCodeFormatterConstants.SEPARATE_LINES_IF_WRAPPED;
+	this.formatterPrefs.parenthesis_positions_in_method_invocation = DefaultCodeFormatterConstants.SEPARATE_LINES_IF_NOT_EMPY;
+	String input = getCompilationUnit("Formatter", "", "test370540", "Example_in.java").getSource();
+	formatSource(input, getCompilationUnit("Formatter", "", "test370540", "Example_out09.java").getSource());
+}
+/**
+ * https://bugs.eclipse.org/370540 - [Formatter] New settings for parentheses positions
+ */
+public void testBug370540j() throws JavaModelException {
+	setComplianceLevel(CompilerOptions.VERSION_1_8);
+	this.formatterPrefs.parenthesis_positions_in_try_clause = DefaultCodeFormatterConstants.SEPARATE_LINES;
+	this.formatterPrefs.parenthesis_positions_in_method_declaration = DefaultCodeFormatterConstants.PRESERVE_POSITIONS;
+	String input = getCompilationUnit("Formatter", "", "test370540", "Example_in.java").getSource();
+	formatSource(input, getCompilationUnit("Formatter", "", "test370540", "Example_out10.java").getSource());
+}
+/**
+ * https://bugs.eclipse.org/370540 - [Formatter] New settings for parentheses positions
+ */
+public void testBug370540k() throws JavaModelException {
+	setComplianceLevel(CompilerOptions.VERSION_1_8);
+	this.formatterPrefs.parenthesis_positions_in_catch_clause = DefaultCodeFormatterConstants.SEPARATE_LINES;
+	this.formatterPrefs.parenthesis_positions_in_if_while_statement = DefaultCodeFormatterConstants.PRESERVE_POSITIONS;
+	String input = getCompilationUnit("Formatter", "", "test370540", "Example_in.java").getSource();
+	formatSource(input, getCompilationUnit("Formatter", "", "test370540", "Example_out11.java").getSource());
+}
+/**
+ * https://bugs.eclipse.org/370540 - [Formatter] New settings for parentheses positions
+ */
+public void testBug370540l() throws JavaModelException {
+	setComplianceLevel(CompilerOptions.VERSION_1_8);
+	this.formatterPrefs.parenthesis_positions_in_for_statement = DefaultCodeFormatterConstants.SEPARATE_LINES_IF_WRAPPED;
+	this.formatterPrefs.parenthesis_positions_in_annotation = DefaultCodeFormatterConstants.SEPARATE_LINES_IF_NOT_EMPY;
+	String input = getCompilationUnit("Formatter", "", "test370540", "Example_in.java").getSource();
+	formatSource(input, getCompilationUnit("Formatter", "", "test370540", "Example_out12.java").getSource());
+}
+/**
+ * https://bugs.eclipse.org/370540 - [Formatter] New settings for parentheses positions
+ */
+public void testBug370540m() throws JavaModelException {
+	setComplianceLevel(CompilerOptions.VERSION_1_8);
+	this.formatterPrefs.parenthesis_positions_in_for_statement = DefaultCodeFormatterConstants.SEPARATE_LINES_IF_WRAPPED;
+	this.formatterPrefs.alignment_for_expressions_in_for_loop_header = Alignment.M_NEXT_PER_LINE_SPLIT + Alignment.M_FORCE;
+	String input = getCompilationUnit("Formatter", "", "test370540", "Example_in.java").getSource();
+	formatSource(input, getCompilationUnit("Formatter", "", "test370540", "Example_out13.java").getSource());
+}
+/**
+ * https://bugs.eclipse.org/370540 - [Formatter] New settings for parentheses positions
+ */
+public void testBug370540n() throws JavaModelException {
+	setComplianceLevel(CompilerOptions.VERSION_1_8);
+	this.formatterPrefs.parenthesis_positions_in_switch_statement = DefaultCodeFormatterConstants.SEPARATE_LINES;
+	this.formatterPrefs.parenthesis_positions_in_annotation = DefaultCodeFormatterConstants.SEPARATE_LINES;
+	String input = getCompilationUnit("Formatter", "", "test370540", "Example_in.java").getSource();
+	formatSource(input, getCompilationUnit("Formatter", "", "test370540", "Example_out14.java").getSource());
+}
+/**
+ * https://bugs.eclipse.org/370540 - [Formatter] New settings for parentheses positions
+ */
+public void testBug370540p() throws JavaModelException {
+	setComplianceLevel(CompilerOptions.VERSION_1_8);
+	this.formatterPrefs.parenthesis_positions_in_annotation = DefaultCodeFormatterConstants.SEPARATE_LINES;
+	this.formatterPrefs.parenthesis_positions_in_catch_clause = DefaultCodeFormatterConstants.SEPARATE_LINES;
+	this.formatterPrefs.parenthesis_positions_in_enum_constant_declaration = DefaultCodeFormatterConstants.SEPARATE_LINES;
+	this.formatterPrefs.parenthesis_positions_in_for_statement = DefaultCodeFormatterConstants.SEPARATE_LINES;
+	this.formatterPrefs.parenthesis_positions_in_if_while_statement = DefaultCodeFormatterConstants.SEPARATE_LINES;
+	this.formatterPrefs.parenthesis_positions_in_lambda_declaration = DefaultCodeFormatterConstants.SEPARATE_LINES;
+	this.formatterPrefs.parenthesis_positions_in_method_declaration = DefaultCodeFormatterConstants.SEPARATE_LINES;
+	this.formatterPrefs.parenthesis_positions_in_method_invocation = DefaultCodeFormatterConstants.SEPARATE_LINES;
+	this.formatterPrefs.parenthesis_positions_in_switch_statement = DefaultCodeFormatterConstants.SEPARATE_LINES;
+	this.formatterPrefs.parenthesis_positions_in_try_clause = DefaultCodeFormatterConstants.SEPARATE_LINES;
+	String input = getCompilationUnit("Formatter", "", "test370540", "Example_in.java").getSource();
+	formatSource(input, getCompilationUnit("Formatter", "", "test370540", "Example_out15.java").getSource());
+}
+/**
+ * https://bugs.eclipse.org/370540 - [Formatter] New settings for parentheses positions
+ */
+public void testBug370540q() throws JavaModelException {
+	this.formatterPrefs.parenthesis_positions_in_for_statement = DefaultCodeFormatterConstants.SEPARATE_LINES;
+	String source = 
+		"public class Test {\n" + 
+		"	void foo() {\n" + 
+		"		for (\n" + 
+		"			String s : Arrays.asList(\"aa\")\n" + 
+		"		) {\n" + 
+		"		}\n" + 
+		"	}\n" + 
+		"}";
+	formatSource(source);
+}
+/**
+ * https://bugs.eclipse.org/370540 - [Formatter] New settings for parentheses positions
+ */
+public void testBug370540r() throws JavaModelException {
+	this.formatterPrefs.parenthesis_positions_in_method_invocation = DefaultCodeFormatterConstants.SEPARATE_LINES;
+	String source = 
+		"public class Test extends Exception {\n" + 
+		"	Test instance = new Test(\n" + 
+		"			1\n" + 
+		"	);\n" + 
+		"\n" + 
+		"	Test(int a) {\n" + 
+		"		this(\n" + 
+		"				a, 0\n" + 
+		"		);\n" + 
+		"	}\n" + 
+		"\n" + 
+		"	Test(int a, int b) {\n" + 
+		"		super(\n" + 
+		"				a + \"=\" + b\n" + 
+		"		);\n" + 
+		"	}\n" + 
+		"\n" + 
+		"	public void printStackTrace() {\n" + 
+		"		super.printStackTrace(\n" + 
+		"		);\n" + 
+		"	}\n" + 
+		"}";
+	formatSource(source);
+}
+/**
+ * https://bugs.eclipse.org/370540 - [Formatter] New settings for parentheses positions
+ */
+public void testBug370540s() throws JavaModelException {
+	this.formatterPrefs.parenthesis_positions_in_method_invocation = DefaultCodeFormatterConstants.SEPARATE_LINES_IF_WRAPPED;
+	String source = 
+		"public class Test extends Exception {\n" + 
+		"	void foo() {\n" + 
+		"		new StringBuilder().append(\"aaaaaaaaa\" + \"bbbbbbbbbbbbbbb\" + \"cccccccccccccc\" + \"dddddddddd\")\n" + 
+		"				.append(\"aaaaaaa\" + \"bbbbbbbbbbbbb\" + \"cccccccccccccc\" + \"ddddddddd\");\n" + 
+		"	}\n" + 
+		"}";
+	formatSource(source);
+}
+/**
+ * https://bugs.eclipse.org/384959 - [formatter] Add line wrapping options for generics
+ */
+public void testBug384959a() throws JavaModelException {
+	setComplianceLevel(CompilerOptions.VERSION_1_8);
+	String input = getCompilationUnit("Formatter", "", "test384959", "A_in.java").getSource();
+	formatSource(input, getCompilationUnit("Formatter", "", "test384959", "A_out1.java").getSource());
+}
+/**
+ * https://bugs.eclipse.org/384959 - [formatter] Add line wrapping options for generics
+ */
+public void testBug384959b() throws JavaModelException {
+	setComplianceLevel(CompilerOptions.VERSION_1_8);
+	this.formatterPrefs.alignment_for_parameterized_type_references = Alignment.M_ONE_PER_LINE_SPLIT + Alignment.M_FORCE;
+	String input = getCompilationUnit("Formatter", "", "test384959", "A_in.java").getSource();
+	formatSource(input, getCompilationUnit("Formatter", "", "test384959", "A_out2.java").getSource());
+}
+/**
+ * https://bugs.eclipse.org/384959 - [formatter] Add line wrapping options for generics
+ */
+public void testBug384959c() throws JavaModelException {
+	setComplianceLevel(CompilerOptions.VERSION_1_8);
+	this.formatterPrefs.alignment_for_type_arguments = Alignment.M_ONE_PER_LINE_SPLIT + Alignment.M_FORCE;
+	String input = getCompilationUnit("Formatter", "", "test384959", "A_in.java").getSource();
+	formatSource(input, getCompilationUnit("Formatter", "", "test384959", "A_out3.java").getSource());
+}
+/**
+ * https://bugs.eclipse.org/384959 - [formatter] Add line wrapping options for generics
+ */
+public void testBug384959d() throws JavaModelException {
+	setComplianceLevel(CompilerOptions.VERSION_1_8);
+	this.formatterPrefs.alignment_for_type_parameters = Alignment.M_ONE_PER_LINE_SPLIT + Alignment.M_FORCE;
+	String input = getCompilationUnit("Formatter", "", "test384959", "A_in.java").getSource();
+	formatSource(input, getCompilationUnit("Formatter", "", "test384959", "A_out4.java").getSource());
+}
+/**
+ * https://bugs.eclipse.org/384959 - [formatter] Add line wrapping options for generics
+ */
+public void testBug384959e() throws JavaModelException {
+	setComplianceLevel(CompilerOptions.VERSION_1_8);
+	int policy = Alignment.M_NEXT_SHIFTED_SPLIT + Alignment.M_FORCE;
+	this.formatterPrefs.alignment_for_parameterized_type_references = policy;
+	this.formatterPrefs.alignment_for_type_arguments = policy;
+	this.formatterPrefs.alignment_for_type_parameters = policy;
+	String input = getCompilationUnit("Formatter", "", "test384959", "A_in.java").getSource();
+	formatSource(input, getCompilationUnit("Formatter", "", "test384959", "A_out5.java").getSource());
+}
+/**
+ * https://bugs.eclipse.org/384959 - [formatter] Add line wrapping options for generics
+ */
+public void testBug384959f() throws JavaModelException {
+	setComplianceLevel(CompilerOptions.VERSION_1_8);
+	this.formatterPrefs.tab_char = DefaultCodeFormatterOptions.SPACE;
+	int policy = Alignment.M_NEXT_PER_LINE_SPLIT + Alignment.M_INDENT_ON_COLUMN + Alignment.M_FORCE;
+	this.formatterPrefs.alignment_for_parameterized_type_references = policy;
+	this.formatterPrefs.alignment_for_type_arguments = policy;
+	this.formatterPrefs.alignment_for_type_parameters = policy;
+	String input = getCompilationUnit("Formatter", "", "test384959", "A_in.java").getSource();
+	formatSource(input, getCompilationUnit("Formatter", "", "test384959", "A_out6.java").getSource());
+}
+/**
+ * https://bugs.eclipse.org/384959 - [formatter] Add line wrapping options for generics
+ */
+public void testBug384959g() throws JavaModelException {
+	setComplianceLevel(CompilerOptions.VERSION_1_8);
+	this.formatterPrefs.alignment_for_type_parameters = Alignment.M_COMPACT_SPLIT;
+	String source = 
+		"public interface IteratedDescribeLinkList<\n" + 
+		"		T extends IteratedDescribeLinkList<T, E, A, B, C, D, F, G, H, I, X, Y, Z, J, K>, E extends IteratedDescribeLink,\n" + 
+		"		A extends Iterated, B extends Iterated, C extends IteratedList<C, A, F, H, Y, J>,\n" + 
+		"		D extends IteratedList<D, B, G, I, Z, K>, F extends MasteredList<F, H, C, A, J, Y>,\n" + 
+		"		G extends MasteredList<G, I, D, B, K, Z>, H extends Mastered, I extends Mastered, X extends T, Y extends C,\n" + 
+		"		Z extends D, J extends F, K extends G> extends ObjectToObjectLinkList<T, E, A, B, C, D, X, Y, Z> {\n" + 
+		"}";
+	formatSource(source);
 }
 }

@@ -785,10 +785,6 @@ class RecoveredTypeBinding implements ITypeBinding {
 		return AnnotationBinding.NoAnnotations;
 	}
 
-	@Override
-	public IAnnotationBinding[][] getTypeAnnotationsOnDimensions() {
-		return AnnotationBinding.NoAnnotationsOnDimensions;
-	}
 //{ObjectTeams: new lookup-functions
 	public org.eclipse.jdt.internal.compiler.lookup.TypeBinding getResolvedBinding() {
 		return this.binding;

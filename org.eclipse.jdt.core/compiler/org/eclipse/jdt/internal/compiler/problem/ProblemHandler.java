@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2015 IBM Corporation and others.
+ * Copyright (c) 2000, 2016 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -49,6 +49,8 @@ public class ProblemHandler {
 	
 	/* When temporarily switching policies, store here the original root policy (for temporary resume). */
 	private IErrorHandlingPolicy rootPolicy;
+
+	protected boolean suppressTagging = false;
 
 //{ObjectTeams: support for passing a rechecker:
 	public IProblemRechecker rechecker;
@@ -323,7 +325,9 @@ private void protectedHandle(
 //{ObjectTeams: problems with a rechecker are considered "optional", don't tag the reference context
 			  if (!requireRecheck)
 // SH}
-				referenceContext.tagAsHavingErrors();
+				if (!this.suppressTagging || this.options.treatOptionalErrorAsFatal) {
+					referenceContext.tagAsHavingErrors();
+				}
 				// should abort ?
 				int abortLevel;
 				if ((abortLevel = this.policy.stopOnFirstError() ? ProblemSeverities.AbortCompilation : severity & ProblemSeverities.Abort) != 0) {

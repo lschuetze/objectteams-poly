@@ -377,6 +377,10 @@ public static abstract class AbstractQualifiedAllocationExpression extends Alloc
 					}
 				}
 			}
+			if (compilerOptions.sourceLevel >= ClassFileConstants.JDK1_8 &&
+					this.binding.getTypeAnnotations() != Binding.NO_ANNOTATIONS) {
+				this.resolvedType = scope.environment().createAnnotatedType(this.resolvedType, this.binding.getTypeAnnotations());
+			}
 		}
 		return result;
 	}

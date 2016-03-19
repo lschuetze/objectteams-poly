@@ -47,6 +47,7 @@ import org.eclipse.jdt.internal.compiler.lookup.ReferenceBinding;
 import org.eclipse.jdt.internal.compiler.lookup.Scope;
 import org.eclipse.jdt.internal.compiler.lookup.TypeBinding;
 import org.eclipse.jdt.internal.compiler.lookup.TypeBindingVisitor;
+import org.eclipse.jdt.internal.compiler.lookup.TypeIds;
 import org.eclipse.jdt.internal.compiler.lookup.TypeVariableBinding;
 
 public abstract class FunctionalExpression extends Expression {
@@ -63,6 +64,7 @@ public abstract class FunctionalExpression extends Expression {
 	public boolean shouldCaptureInstance = false; // Whether the expression needs access to instance data of enclosing type
 	protected static IErrorHandlingPolicy silentErrorHandlingPolicy = DefaultErrorHandlingPolicies.ignoreAllProblems();
 	private boolean hasReportedSamProblem = false;
+	public boolean isSerializable;
 
 	public FunctionalExpression(CompilationResult compilationResult) {
 		this.compilationResult = compilationResult;
@@ -131,7 +133,7 @@ public abstract class FunctionalExpression extends Expression {
 		// we simulate an *invocation* of this functional expression,
 		// where the expected type of the expression is the return type of the sam:
 		MethodBinding sam = this.expectedType.getSingleAbstractMethod(this.enclosingScope, true);
-		if (sam != null) {
+		if (sam != null && sam.problemId() != ProblemReasons.NoSuchSingleAbstractMethod) {
 			if (sam.isConstructor())
 				return sam.declaringClass;
 			else
@@ -185,6 +187,17 @@ public abstract class FunctionalExpression extends Expression {
 		
 		this.descriptor = sam;
 		if (skipKosherCheck || kosherDescriptor(blockScope, sam, true)) {
+			if (this.expectedType instanceof IntersectionTypeBinding18) {
+				ReferenceBinding[] intersectingTypes =  ((IntersectionTypeBinding18)this.expectedType).intersectingTypes;
+				for (int t = 0, max = intersectingTypes.length; t < max; t++) {
+					if (intersectingTypes[t].findSuperTypeOriginatingFrom(TypeIds.T_JavaIoSerializable, false /*Serializable is not a class*/) != null) {
+						this.isSerializable = true;
+						break;
+					}
+				}
+			} else if (this.expectedType.findSuperTypeOriginatingFrom(TypeIds.T_JavaIoSerializable, false /*Serializable is not a class*/) != null) {
+				this.isSerializable = true;
+			}
 			if (blockScope.environment().globalOptions.isAnnotationBasedNullAnalysisEnabled)
 				NullAnnotationMatching.checkForContradictions(sam, this, blockScope);
 			return this.resolvedType = this.expectedType;		
@@ -203,10 +216,6 @@ public abstract class FunctionalExpression extends Expression {
 				break;
 			case ProblemReasons.NotAWellFormedParameterizedType:
 				blockScope.problemReporter().illFormedParameterizationOfFunctionalInterface(this);
-				this.hasReportedSamProblem = true;
-				break;
-			case ProblemReasons.IntersectionHasMultipleFunctionalInterfaces:
-				blockScope.problemReporter().multipleFunctionalInterfaces(this);
 				this.hasReportedSamProblem = true;
 				break;
 		}
