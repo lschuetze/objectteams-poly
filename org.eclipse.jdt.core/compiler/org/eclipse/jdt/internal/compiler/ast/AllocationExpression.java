@@ -561,7 +561,8 @@ public TypeBinding resolveType(BlockScope scope) {
     	AnchorMapping anchorMapping = AnchorMapping.setupNewMapping(null, this.arguments, scope);
 	  try {
 		// ensure allocation type has methods:
-		Dependencies.ensureBindingState((ReferenceBinding) this.resolvedType, ITranslationStates.STATE_LENV_DONE_FIELDS_AND_METHODS);
+		if (this.enumConstant == null)
+			Dependencies.ensureBindingState((ReferenceBinding) this.resolvedType, ITranslationStates.STATE_LENV_DONE_FIELDS_AND_METHODS);
 // orig:
 		this.binding = findConstructorBinding(scope, this, (ReferenceBinding) this.resolvedType, this.argumentTypes);
 //:giro
