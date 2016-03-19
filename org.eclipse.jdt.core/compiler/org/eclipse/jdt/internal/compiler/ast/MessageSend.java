@@ -1007,6 +1007,25 @@ public TypeBinding resolveType(BlockScope scope) {
 // orig:
 
 	TypeBinding methodType = findMethodBinding(scope);
+	// OT moved from below to ensure our tweaks of returnType already contain a @NN from @NNBD
+	{
+		CompilerOptions compilerOptions = scope.compilerOptions();
+		if (compilerOptions.isAnnotationBasedNullAnalysisEnabled) {
+			if ((this.binding.tagBits & TagBits.IsNullnessKnown) == 0) {
+				// not interested in reporting problems against this.binding:
+				new ImplicitNullAnnotationVerifier(scope.environment(), compilerOptions.inheritNullAnnotations)
+						.checkImplicitNullAnnotations(this.binding, null/*srcMethod*/, false, scope);
+			}
+			if (compilerOptions.sourceLevel >= ClassFileConstants.JDK1_8) {
+				if (this.binding instanceof ParameterizedGenericMethodBinding && this.typeArguments != null) {
+					TypeVariableBinding[] typeVariables = this.binding.original().typeVariables();
+					for (int i = 0; i < this.typeArguments.length; i++)
+						this.typeArguments[i].checkNullConstraints(scope, (ParameterizedGenericMethodBinding) this.binding, typeVariables, i);
+				}
+			}
+		}
+	}
+	// :TO
 	if (methodType != null && methodType.isPolyType()) {
 		this.resolvedType = this.binding.returnType.capture(scope, this.sourceStart, this.sourceEnd);
 		return methodType;
@@ -1186,11 +1205,12 @@ public TypeBinding resolveType(BlockScope scope) {
 		return null;
 	}
 
+/*{ObjectTeams: moved up
 	if (compilerOptions.isAnnotationBasedNullAnalysisEnabled) {
 		if ((this.binding.tagBits & TagBits.IsNullnessKnown) == 0) {
 			// not interested in reporting problems against this.binding:
 			new ImplicitNullAnnotationVerifier(scope.environment(), compilerOptions.inheritNullAnnotations)
-					.checkImplicitNullAnnotations(this.binding, null/*srcMethod*/, false, scope);
+					.checkImplicitNullAnnotations(this.binding, null/*srcMethod* /, false, scope);
 		}
 		if (compilerOptions.sourceLevel >= ClassFileConstants.JDK1_8) {
 			if (this.binding instanceof ParameterizedGenericMethodBinding && this.typeArguments != null) {
@@ -1200,6 +1220,7 @@ public TypeBinding resolveType(BlockScope scope) {
 			}
 		}
 	}
+// SH}*/
 	
 	if (((this.bits & ASTNode.InsideExpressionStatement) != 0)
 			&& this.binding.isPolymorphic()) {
