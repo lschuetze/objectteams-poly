@@ -557,10 +557,6 @@ public /* team */ class Team implements ITeam {
 
 		return res;
 	}
-	// FIXME: remove this version (temporary compatibility only)
-	public Object _OT$callNext(IBoundBase2 baze, ITeam[] teams, int idx, int[] callinIds, int boundMethodId, Object[] args, Object[] baseCallArgs, boolean baseCallFlags) {
-		return _OT$terminalCallNext(baze, teams, idx, callinIds, boundMethodId, args, baseCallArgs, baseCallFlags ? 1 : 0);
-	}
 	/**
 	 * This method calls the next team or a base method,
 	 * if there are no more active teams for a joinpoint
