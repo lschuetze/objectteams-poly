@@ -15,9 +15,12 @@
  **********************************************************************/
 package org.eclipse.objectteams.otdt.tests.otjld.other;
 
+import java.util.Map;
+
 import junit.framework.Test;
 
 import org.eclipse.jdt.core.tests.util.CompilerTestSetup;
+import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.objectteams.otdt.core.ext.WeavingScheme;
 import org.eclipse.objectteams.otdt.tests.otjld.AbstractOTJLDNullAnnotationTest;
 
@@ -125,6 +128,8 @@ public class OTNullTypeAnnotationTest extends AbstractOTJLDNullAnnotationTest {
 	// see comment 1
 	public void testImplicitTeamAnchor1() {
 		if (this.weavingScheme == WeavingScheme.OTRE) return;
+		Map<String,String> compilerOptions = getCompilerOptions();
+		compilerOptions.put(JavaCore.COMPILER_PB_NONNULL_TYPEVAR_FROM_LEGACY_INVOCATION, JavaCore.IGNORE);
 		runConformTestWithLibs(
 			new String[] {
 				"MyTeam.java",
@@ -141,7 +146,7 @@ public class OTNullTypeAnnotationTest extends AbstractOTJLDNullAnnotationTest {
 				"	}\n" +
 				"}\n"
 			},
-			getCompilerOptions(),
+			compilerOptions,
 			"");
 	}
 
