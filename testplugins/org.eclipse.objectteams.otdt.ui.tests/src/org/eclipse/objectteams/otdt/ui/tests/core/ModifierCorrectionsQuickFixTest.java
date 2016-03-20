@@ -19,6 +19,7 @@ import junit.framework.TestSuite;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.dom.CompilationUnit;
+import org.eclipse.jdt.ui.text.java.IJavaCompletionProposal;
 import org.eclipse.jdt.ui.text.java.correction.CUCorrectionProposal;
 
 /**
@@ -30,7 +31,7 @@ import org.eclipse.jdt.ui.text.java.correction.CUCorrectionProposal;
 public class ModifierCorrectionsQuickFixTest extends OTQuickFixTest {
 	
 
-	private static final Class THIS= ModifierCorrectionsQuickFixTest.class;
+	private static final Class<ModifierCorrectionsQuickFixTest> THIS= ModifierCorrectionsQuickFixTest.class;
 
 
 	public ModifierCorrectionsQuickFixTest(String name) {
@@ -67,7 +68,7 @@ public class ModifierCorrectionsQuickFixTest extends OTQuickFixTest {
 
 		
 		CompilationUnit astRoot= getASTRoot(cu);
-		ArrayList proposals= collectCorrections(cu, astRoot);
+		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot);
 		assertNumberOfProposals(proposals, 1);
 		assertCorrectLabels(proposals);
 		
@@ -106,7 +107,7 @@ public class ModifierCorrectionsQuickFixTest extends OTQuickFixTest {
 
 		
 		CompilationUnit astRoot= getASTRoot(cu);
-		ArrayList proposals= collectCorrections(cu, astRoot);
+		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot);
 		assertNumberOfProposals(proposals, 1);
 		assertCorrectLabels(proposals);
 		
@@ -152,7 +153,7 @@ public class ModifierCorrectionsQuickFixTest extends OTQuickFixTest {
 
 		
 		CompilationUnit astRoot= getASTRoot(cu);
-		ArrayList proposals= collectCorrections(cu, astRoot);
+		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot);
 		assertNumberOfProposals(proposals, 1);
 		assertCorrectLabels(proposals);
 		
@@ -193,7 +194,7 @@ public class ModifierCorrectionsQuickFixTest extends OTQuickFixTest {
 
 		
 		CompilationUnit astRoot= getASTRoot(cu);
-		ArrayList proposals= collectCorrections(cu, astRoot);
+		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot);
 		assertNumberOfProposals(proposals, 1);
 		assertCorrectLabels(proposals);
 		
@@ -231,7 +232,7 @@ public class ModifierCorrectionsQuickFixTest extends OTQuickFixTest {
 
 		
 		CompilationUnit astRoot= getASTRoot(cu);
-		ArrayList proposals= collectCorrections(cu, astRoot, 2, null);
+		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot, 2, null);
 		assertNumberOfProposals(proposals, 1);
 		assertCorrectLabels(proposals);
 		
@@ -271,7 +272,7 @@ public class ModifierCorrectionsQuickFixTest extends OTQuickFixTest {
 
 		
 		CompilationUnit astRoot= getASTRoot(cu);
-		ArrayList proposals= collectCorrections(cu, astRoot);
+		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot);
 		assertNumberOfProposals(proposals, 1);
 		assertCorrectLabels(proposals);
 		
@@ -312,7 +313,7 @@ public class ModifierCorrectionsQuickFixTest extends OTQuickFixTest {
 
 		
 		CompilationUnit astRoot= getASTRoot(cu);
-		ArrayList proposals= collectCorrections(cu, astRoot);
+		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot);
 		assertNumberOfProposals(proposals, 1);
 		assertCorrectLabels(proposals);
 		
@@ -358,7 +359,7 @@ public class ModifierCorrectionsQuickFixTest extends OTQuickFixTest {
 
 		
 		CompilationUnit astRoot= getASTRoot(cu);
-		ArrayList proposals= collectCorrections(cu, astRoot);
+		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot);
 		assertNumberOfProposals(proposals, 1);
 		assertCorrectLabels(proposals);
 		
@@ -400,8 +401,8 @@ public class ModifierCorrectionsQuickFixTest extends OTQuickFixTest {
 
 		
 		CompilationUnit astRoot= getASTRoot(cu);
-		ArrayList proposals= collectCorrections(cu, astRoot);
-		assertNumberOfProposals(proposals, 2);
+		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot);
+		assertNumberOfProposals(proposals, 3);
 		assertCorrectLabels(proposals);
 		
 		CUCorrectionProposal proposal= (CUCorrectionProposal) proposals.get(0);
@@ -416,5 +417,8 @@ public class ModifierCorrectionsQuickFixTest extends OTQuickFixTest {
 		buf.append("	}\n");
 		buf.append("}\n");
 		assertEqualString(preview, buf.toString());
+		
+		assertEqualString("Configure problem severity", proposals.get(1).getDisplayString());
+		assertEqualString("\"Change import to 'import base test1...BaseBar;'\"", proposals.get(2).getDisplayString());
 	}
 }
