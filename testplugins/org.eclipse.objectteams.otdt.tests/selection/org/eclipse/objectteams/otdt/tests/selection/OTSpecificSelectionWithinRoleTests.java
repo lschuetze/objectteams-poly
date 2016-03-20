@@ -10,7 +10,6 @@
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
- * $Id: OTSpecificSelectionWithinRoleTests.java 23494 2010-02-05 23:06:44Z stephan $
  * 
  * Please visit http://www.eclipse.org/objectteams for updates and contact.
  * 
@@ -35,51 +34,8 @@ public class OTSpecificSelectionWithinRoleTests extends AbstractSelectionTest
 		super(testName);
 	}
 	
-	//type declarations
-	//NOTE(gbr): type declarations are tested differently than type references
-	//(see org.eclipse.objectteams.otdt.tests.selection.codeselect.CodeSelectionTests). 	
+	//for type declarations see org.eclipse.objectteams.otdt.tests.selection.codeselect.CodeSelectionTests. 	
 
-//	/**
-//	 * Select role class name of inlined role class declaration.
-//	 */
-//	public void test01() 
-//	{
-//		String str = 
-//			"public team class T1 {\n" +
-//			"  public class R1 {\n" +
-//			"  }\n" +
-//			"}\n";
-//	
-//		String selectionStartBehind = "public class ";
-//		String selectionEndBehind = "R1";
-//		
-//		String expectedCompletionNodeToString = "<SelectOnType:R1>";
-//		String completionIdentifier = "R1";
-//		String expectedUnitDisplayString =
-//			"public team class T1 {\n" +
-//			"  public role class <SelectOnType:R1> {\n" +
-//			"  }\n" +
-//			"  public T1() {\n" +
-//			"  }\n" +
-//			"}\n";
-//		String expectedReplacedSource = "R1";
-//		String testName = "<select role class name of inlined role class declaration.>";
-//	
-//		int selectionStart = str.indexOf(selectionStartBehind) + selectionStartBehind.length();
-//		int selectionEnd = str.indexOf(selectionEndBehind) + selectionEndBehind.length() - 1;
-//			
-//		this.checkDietParse(
-//			str.toCharArray(),
-//			selectionStart,
-//			selectionEnd,
-//			expectedCompletionNodeToString,
-//			expectedUnitDisplayString,
-//			completionIdentifier,
-//			expectedReplacedSource,
-//			testName);
-//
-//}
-	
 	//type references
 	/**
 	 * Select role class name of externalized role.
@@ -391,9 +347,7 @@ public class OTSpecificSelectionWithinRoleTests extends AbstractSelectionTest
 			testName); 
 	}
 
-	//method declarations
-	//NOTE(gbr): method declarations are tested differently than method references
-	//(see org.eclipse.objectteams.otdt.tests.selection.codeselect.CodeSelectionTests).
+	//for method declarations see org.eclipse.objectteams.otdt.tests.selection.codeselect.CodeSelectionTests.
 	
 	//method references	
 	/**
@@ -471,7 +425,7 @@ public class OTSpecificSelectionWithinRoleTests extends AbstractSelectionTest
 			"  public role class R1 playedBy B1 {\n" +
 			"    public void rm1() {\n" +
 			"    }\n" +
-			"    <<select role method name in a callin bin:5,4>:\n" +
+			"    <<select role method name in a callin binding>:5,4>:\n" +
 			"      <SelectOnMethodSpec:rm1> <- after n1;\n" +
 			"  }\n" +
 			"  public T1() {\n" +
@@ -479,7 +433,7 @@ public class OTSpecificSelectionWithinRoleTests extends AbstractSelectionTest
 			"}\n";
 		
 		String expectedReplacedSource = "rm1";
-		String testName = "<select role method name in a callin binding>";
+		String testName = "<select role method name in a callin binding>.java";
 	
 		int selectionStart = str.indexOf(selectionStartBehind) + selectionStartBehind.length();
 		int selectionEnd = str.indexOf(selectionEndBehind) + selectionEndBehind.length() - 1;
@@ -495,53 +449,7 @@ public class OTSpecificSelectionWithinRoleTests extends AbstractSelectionTest
 			testName); 
 	}
 
-	//TODO(gbr) left method spec of a callout binding is a role method declaration
-	//	         -> move to test class CodeSelectionTests
-//	/**
-//	 * Select role method name in a callout binding.
-//	 */
-//	public void test09()
-//	{
-//		String str = 
-//		    "public team class T1 {\n" +
-//			"  public class R1 playedBy B1 {\n" +
-//			"    public void rm1() {\n" +
-//			"    }\n" +
-//			"    rm1 -> n1;\n" +
-//			"  }\n" +
-//			"}\n"; 
-//	
-//		String selectionStartBehind = "}\n    ";
-//		String selectionEndBehind = "    rm1";
-//		
-//		String expectedCompletionNodeToString = "<SelectOnMessageSend:rm1>";
-//		String completionIdentifier = "rm1";
-//		String expectedUnitDisplayString =
-//		    "public team class T1 {\n" +
-//			"  public class R1 playedBy B1 {\n" +
-//			"    public abstract void rm1();\n" +
-//			"    <SelectOnMessageSend:rm1> -> n1;\n" +
-//			"  }\n" +
-//			"  public T1() {\n" +
-//			"  }\n" +
-//			"}\n";
-//		
-//		String expectedReplacedSource = "rm1";
-//		String testName = "<select role method name in a callout binding>";
-//	
-//		int selectionStart = str.indexOf(selectionStartBehind) + selectionStartBehind.length();
-//		int selectionEnd = str.indexOf(selectionEndBehind) + selectionEndBehind.length() - 1;
-//			
-//		this.checkDietParse(
-//			str.toCharArray(), 
-//			selectionStart,
-//			selectionEnd,
-//			expectedCompletionNodeToString,
-//			expectedUnitDisplayString,
-//			completionIdentifier,
-//			expectedReplacedSource,
-//			testName); 
-//	}
+	//for role method spec of a callout binding see class CodeSelectionTests
 
 	/**
 	 * Select role method name in an expression inside a parameter mapping.
@@ -729,7 +637,7 @@ public class OTSpecificSelectionWithinRoleTests extends AbstractSelectionTest
 			"      rm1();\n" +
 			"      <SelectOnBaseCallMessageSend:base.rm2()>;\n" +
 			"    }\n" +
-			"    <<select base call in a callin me:9,4>:\n" +
+			"    <<select base call in a callin method>:9,4>:\n" +
 			"      rm2 <- replace foo;\n" +
 			"  }\n" +
 			"  public T1() {\n" + 
@@ -737,7 +645,7 @@ public class OTSpecificSelectionWithinRoleTests extends AbstractSelectionTest
 			"}\n"; 
 		
 		String expectedSelectedSource = "base.rm2()";
-		String testName = "<select base call in a callin method>";
+		String testName = "<select base call in a callin method>.java";
 	
 		int selectionStart = str.indexOf(selectionStartBehind) + selectionStartBehind.length();
 		int selectionEnd = str.indexOf(selectionEndBehind) + selectionEndBehind.length() - 1;
@@ -856,9 +764,7 @@ public class OTSpecificSelectionWithinRoleTests extends AbstractSelectionTest
 			testName);
 	}
 
-	//field declarations
-	//NOTE(gbr): field declarations are tested differently than field references
-	//(see org.eclipse.objectteams.otdt.tests.selection.codeselect.CodeSelectionTests).
+	//for field declarations see org.eclipse.objectteams.otdt.tests.selection.codeselect.CodeSelectionTests
 	
 	//field references
 	/**
