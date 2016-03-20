@@ -82,18 +82,18 @@ echo "NAME          = ${NAME}"
 echo "====Step 1: zip and request signing===="
 cd ${BASE}/testrun/updateSite
 JARS=`find . -name \*.jar -type f`
-/bin/rm ${STAGINGBASE}/in/otdt.zip
-zip ${STAGINGBASE}/in/otdt.zip ${JARS}
+/bin/rm ${STAGINGBASE}/in/otdt.jar
+zip ${STAGINGBASE}/in/otdt.jar ${JARS}
 if [ "$2" == "-nosign" ]
 then
     echo "SKIPING SIGNING"
-    /bin/mv ${STAGINGBASE}/in/otdt.zip ${STAGINGBASE}/out/otdt.zip
+    /bin/mv ${STAGINGBASE}/in/otdt.jar ${STAGINGBASE}/out/otdt.jar
     shift
 else
-    /bin/rm ${STAGINGBASE}/out/otdt.zip
-    sign ${STAGINGBASE}/in/otdt.zip nomail ${STAGINGBASE}/out
+    /bin/rm ${STAGINGBASE}/out/otdt.jar
+    sign ${STAGINGBASE}/in/otdt.jar nomail ${STAGINGBASE}/out
 fi
-until [ -r ${STAGINGBASE}/out/otdt.zip ]
+until [ -r ${STAGINGBASE}/out/otdt.jar ]
 do
     sleep 10
     echo -n "."
@@ -118,7 +118,7 @@ else
         mkdir plugins
         cp ${BASE}/testrun/updateSite/plugins/org.apache.bcel* plugins/
 fi
-unzip -n ${STAGINGBASE}/out/otdt.zip
+unzip -n ${STAGINGBASE}/out/otdt.jar
 
 LOCATION=${BASE}/stagingRepo
 echo "LOCATION  = ${LOCATION}"
