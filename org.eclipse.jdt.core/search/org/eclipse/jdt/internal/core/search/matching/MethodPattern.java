@@ -354,8 +354,8 @@ protected boolean mustResolve() {
 }
 public EntryResult[] queryIn(Index index) throws IOException {
 	char[] key = this.selector; // can be null
-//{ObjectTeams: we need a second key to query methodspecs without signature (param count unknown)
-	char[] key2 = this.selector;
+//{ObjectTeams: we may need a second key to query methodspecs without signature (param count unknown)
+	char[] key2 = null;
 //jsv}
 	
 	int matchRule = getMatchRule();
@@ -400,7 +400,7 @@ public EntryResult[] queryIn(Index index) throws IOException {
 	}
 //{ObjectTeams: combine results for both queries
 	EntryResult[] key1Result = index.query(getIndexCategories(), key, matchRule); // match rule is irrelevant when the key is null
-	EntryResult[] key2Result = index.query(getIndexCategories(), key2, matchRule); // match rule is irrelevant when the key is null;
+	EntryResult[] key2Result = key2 == null ? null : index.query(getIndexCategories(), key2, matchRule);
 	
 	// no merging if one or both are null:
 	if (key1Result == null)
