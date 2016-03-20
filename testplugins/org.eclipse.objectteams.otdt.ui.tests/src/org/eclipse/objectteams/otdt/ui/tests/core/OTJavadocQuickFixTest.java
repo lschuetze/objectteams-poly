@@ -35,6 +35,7 @@ import org.eclipse.jdt.core.formatter.DefaultCodeFormatterConstants;
 import org.eclipse.jdt.internal.corext.codemanipulation.StubUtility;
 import org.eclipse.jdt.internal.corext.template.java.CodeTemplateContextType;
 import org.eclipse.jdt.testplugin.TestOptions;
+import org.eclipse.jdt.ui.text.java.IJavaCompletionProposal;
 import org.eclipse.jdt.ui.text.java.correction.CUCorrectionProposal;
 import org.eclipse.objectteams.otdt.ui.tests.util.JavaProjectHelper;
 
@@ -133,11 +134,11 @@ public class OTJavadocQuickFixTest extends OTQuickFixTest {
 		ICompilationUnit cu= pack1.createCompilationUnit("MyTeam.java", buf.toString(), false, null);
 		
 		CompilationUnit astRoot= getASTRoot(cu);
-		ArrayList proposals= collectCorrections(cu, astRoot, 1);
-		assertNumberOfProposals(proposals, 1);
+		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot, 1);
+		assertNumberOfProposals(proposals, 2);
 		assertCorrectLabels(proposals);
 		
-		CUCorrectionProposal proposal= (CUCorrectionProposal) proposals.get(0);
+		CUCorrectionProposal proposal= (CUCorrectionProposal) proposals.get(1);
 		String preview1= getPreviewContent(proposal);
 				
 		buf= new StringBuffer();
@@ -150,6 +151,8 @@ public class OTJavadocQuickFixTest extends OTQuickFixTest {
 		buf.append("}\n");
 		String expected= buf.toString();
 		assertEqualString(preview1, expected);
+		
+		assertEqualString("Configure problem severity", proposals.get(0).getDisplayString());
 	}
 
 }
