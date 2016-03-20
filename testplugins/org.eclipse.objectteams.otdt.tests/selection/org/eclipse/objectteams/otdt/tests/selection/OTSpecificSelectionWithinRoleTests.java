@@ -1,7 +1,7 @@
 /**********************************************************************
  * This file is part of "Object Teams Development Tooling"-Software
  * 
- * Copyright 2004, 2010 Fraunhofer Gesellschaft, Munich, Germany,
+ * Copyright 2004, 2016 Fraunhofer Gesellschaft, Munich, Germany,
  * for its Fraunhofer Institute and Computer Architecture and Software
  * Technology (FIRST), Berlin, Germany and Technical University Berlin,
  * Germany.
@@ -569,7 +569,8 @@ public class OTSpecificSelectionWithinRoleTests extends AbstractSelectionTest
 			"  public role class R1 playedBy B1 {\n" +
 	        "    public abstract int rm1();\n" +
 	        "    int rm1() -> int n1(int x) with {\n" +
-	        "      <SelectOnMessageSend:rm1()> -> <MISSING>\n" +
+	        "      <SelectOnMessageSend:rm1()> -> x,\n" +
+	        "      result <- result\n" +
 	        "    }\n" +
 	        "  }\n" +
 			"  public T1() {\n" +
@@ -725,6 +726,7 @@ public class OTSpecificSelectionWithinRoleTests extends AbstractSelectionTest
 			"    public void rm1() {\n" +
 			"    }\n" +
 			"    public callin void rm2() {\n" +
+			"      rm1();\n" +
 			"      <SelectOnBaseCallMessageSend:base.rm2()>;\n" +
 			"    }\n" +
 			"    <<select base call in a callin me:9,4>:\n" +
