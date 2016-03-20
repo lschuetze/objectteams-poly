@@ -44,16 +44,10 @@ public void tearDownSuite() throws Exception {
 	super.tearDownSuite();
 }
 static {
-//	TESTS_NAMES = new String[] { "testInconsistentHierarchy1"};
+//	TESTS_NAMES = new String[] { "testCompletionCalloutToFieldDeclaration"};
 }
 public static Test suite() {
-	if (true) {
-		return buildModelTestSuite(OTCompletionTests.class);
-	}
-	TestSuite suite = new Suite(OTCompletionTests.class.getName());		
-
-	suite.addTest(new OTCompletionTests("testCompletionParamMapping1"));			
-	return suite;
+	return buildModelTestSuite(OTCompletionTests.class);
 }
 
 public void testCompletionBaseclass1() throws JavaModelException {
@@ -775,6 +769,8 @@ public void testCompletionCalloutToFieldDeclaration() throws JavaModelException 
 	assertResults(
 			"getS[POTENTIAL_METHOD_DECLARATION]{getS, LCompletionTeamCalloutToField$CompletionRole;, ()V, getS, [129, 133], "+
 			+(R_DEFAULT+R_RESOLVED+R_INTERESTING+R_METHOD_OVERIDE)+"}\n"+
+			"get_str[CALLOUT_GET]{String get_str() -> get String _str;, LBaseTrac38;, ()Ljava.lang.String;, get_str, [129, 133], " +
+			(R_DEFAULT+R_RESOLVED+R_INTERESTING+R_SUBSTRING+R_UNQUALIFIED+R_NON_RESTRICTED)+"}\n"+
 			"getStr[CALLOUT_GET]{String getStr() -> get String str;, LBaseTrac38;, ()Ljava.lang.String;, getStr, [129, 133], " +
 			(R_DEFAULT+R_RESOLVED+R_INTERESTING+R_CASE+R_UNQUALIFIED+R_NON_RESTRICTED)+"}",
 			requestor.getResults());	
@@ -907,7 +903,7 @@ public void testCompletionTrac38_3() throws JavaModelException {
 
 	assertResults(
 			"_str[FIELD_SPEC]{String _str;, LBaseTrac38;, Ljava.lang.String;, _str, [225, 225], " +
-			(R_DEFAULT+R_RESOLVED+R_INTERESTING+R_CASE+R_EXACT_EXPECTED_TYPE+R_UNQUALIFIED+R_NON_RESTRICTED)+"}\n"+ // no R_EXACT_NAME !
+			(R_DEFAULT+R_RESOLVED+R_INTERESTING+R_SUBSTRING+R_EXACT_EXPECTED_TYPE+R_UNQUALIFIED+R_NON_RESTRICTED)+"}\n"+ // no R_CASE, R_EXACT_NAME !
 			"str[FIELD_SPEC]{String str;, LBaseTrac38;, Ljava.lang.String;, str, [225, 225], " +
 			(R_DEFAULT+R_RESOLVED+R_INTERESTING+R_CASE+R_EXACT_NAME+R_EXACT_EXPECTED_TYPE+R_UNQUALIFIED+R_NON_RESTRICTED)+"}",
 			requestor.getResults());	
