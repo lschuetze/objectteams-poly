@@ -339,6 +339,10 @@ public class InternalExtendedCompletionContext {
 
 		CompilationUnitDeclaration previousUnitBeingCompleted = this.lookupEnvironment.unitBeingCompleted;
 		this.lookupEnvironment.unitBeingCompleted = this.compilationUnitDeclaration;
+//{ObjectTeams: protect call into the compiler
+		boolean useOwnConfig = !Config.hasConfig();
+		if (useOwnConfig) Dependencies.setup(this, this.parser, this.lookupEnvironment, true, true);
+// orig:
 		try {
 
 			SignatureWrapper wrapper = new SignatureWrapper(replacePackagesDot(typeSignature.toCharArray()));
@@ -349,6 +353,9 @@ public class InternalExtendedCompletionContext {
 			assignableTypeBinding = null;
 		} finally {
 			this.lookupEnvironment.unitBeingCompleted = previousUnitBeingCompleted;
+// :giro
+			if (useOwnConfig) Dependencies.release(this);
+// SH}
 		}
 		return assignableTypeBinding;
 	}
@@ -932,6 +939,12 @@ public class InternalExtendedCompletionContext {
 		} else {
 			ref = new QualifiedTypeReference(cn,new long[cn.length]);
 		}
+//{ObjectTeams: protect call into the compiler
+	  boolean useOwnConfig = !Config.hasConfig();
+	  try {
+		if (useOwnConfig)
+			Dependencies.setup(this, this.parser, this.lookupEnvironment, true, true);
+//orig:
 		switch (scope.kind) {
 			case Scope.METHOD_SCOPE :
 			case Scope.BLOCK_SCOPE :
@@ -941,6 +954,12 @@ public class InternalExtendedCompletionContext {
 				guessedType = ref.resolveType((ClassScope)scope);
 				break;
 		}
+// :giro
+	  } finally {
+		if (useOwnConfig)
+			Dependencies.release(this);
+	  }
+// SH}
 		if (guessedType != null && guessedType.isValidBinding()) {
 			// the erasure must be used because guessedType can be a RawTypeBinding
 			guessedType = guessedType.erasure();

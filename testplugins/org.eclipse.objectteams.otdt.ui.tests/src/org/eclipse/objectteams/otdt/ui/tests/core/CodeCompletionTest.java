@@ -125,7 +125,7 @@ public class CodeCompletionTest extends CoreTests {
 
 	protected void setUp() throws Exception {
 		fJProject1= JavaProjectHelper.createOTJavaProject("OTTestProject1", "bin");
-		JavaProjectHelper.addRTJar(fJProject1);
+		JavaProjectHelper.addRTJar17(fJProject1);
 		JavaProjectHelper.addRequiredProject(fJProject1, ProjectTestSetup.getProject());
 
 		Hashtable<String, String> options= TestOptions.getDefaultOptions();
@@ -1657,6 +1657,36 @@ public class CodeCompletionTest extends CoreTests {
 
 	}
 
+	// propose a regular diamond expression:
+	public void testNewExpression4() throws CoreException {
+		fBeforeImports = "import java.util.Collection;\n" +
+				"import base test2.AClass;\n";
+		fAfterImports = "import java.util.Collection;\n" +
+				"\n" +
+				"import testutil.MyColl;\n" +
+				"\n" +
+				"import base test2.AClass;\n";
+		createBaseClass("testutil", "MyColl", "<T> implements java.util.Collection<T>", 
+				"	public void addAll(Collection<? extends E> other) {}\n" + 
+				"	public E[] toArray() { return null; }\n" + 
+				"	public int size() { return 1; }\n");
+		createBaseClass("test2", "AClass", "public boolean check() { return false; }");
+		assertTypeBodyProposal(
+				"protected class ARole playedBy AClass {\n" +
+				"}\n" +
+				"static void foo() {\n" +
+				"    Collection<String> strings = new My|\n" +
+				"}\n",
+				"MyCol",
+				"protected class ARole playedBy AClass {\n" +
+				"}\n" +
+				"static void foo() {\n" +
+				"    Collection<String> strings = new MyColl<>()|\n" +
+				"}\n",
+				0, false);
+
+	}
+
 	// propose methods invoked via a phantom role, simple case
 	public void testMethodInvocation1() throws CoreException {
 		IPackageFragment pkg = CompletionTestSetup.getTestPackage(this.fJProject1, "p1");
@@ -1934,10 +1964,15 @@ public class CodeCompletionTest extends CoreTests {
 	private void createBaseClass(String basePackage, String className, String classBody) 
 			throws JavaModelException, CoreException 
 	{
+		createBaseClass(basePackage, className, "", classBody);
+	}
+	private void createBaseClass(String basePackage, String className, String classHeaderDetails, String classBody) 
+			throws JavaModelException, CoreException 
+	{
 		// create a base class:
 		StringBuffer buf= new StringBuffer();
 		buf.append("package "+basePackage+";\n");
-		buf.append("public class "+className+" {\n");
+		buf.append("public class "+className+classHeaderDetails+" {\n");
 		buf.append(classBody);
 		buf.append("}\n");
 		String contents= buf.toString();
