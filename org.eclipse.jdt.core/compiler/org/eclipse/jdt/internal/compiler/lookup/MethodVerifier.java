@@ -290,7 +290,7 @@ void checkAgainstInheritedMethods(MethodBinding currentMethod, MethodBinding[] m
 	if (overridden != null) {
 		for (int i = overridden.length; --i >= 0;) {
 			MethodBinding inheritedMethod = overridden[i];
-			if (!inheritedMethod.isStatic() && !inheritedMethod.isFinal())
+			if (areParametersEqual(currentMethod, inheritedMethod, this.environment) && !inheritedMethod.isStatic() && !inheritedMethod.isFinal())
 				checkForBridgeMethod(currentMethod, inheritedMethod, allInheritedMethods);
 		}
 	}
