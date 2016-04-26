@@ -194,6 +194,51 @@ public class FileStructure extends AbstractOTJLDTest {
             "OK");
     }
 
+    // variant with packages
+    public void test152_accessFromExternalRole2b() {
+       this.compileOrder = new String[][] {{"p1/T152afer2b.java"},{"p2/Team152afer2b.java"},{"p2/Team152afer2b/Role152afer2b.java"},{"T152afer2bMain.java"}};
+       runConformTest(
+            new String[] {
+		"T152afer2bMain.java",
+			    "import p2.Team152afer2b;\n" +
+			    "public class T152afer2bMain {\n" +
+			    "    public static void main(String[] args) {\n" +
+			    "        Team152afer2b t = new Team152afer2b();\n" +
+			    "\n" +
+			    "        System.out.print(t.getValue());\n" +
+			    "    }\n" +
+			    "}\n" +
+			    "    \n",
+		"p1/T152afer2b.java",
+			    "package p1;\n" +
+			    "public class T152afer2b {\n" +
+			    "    public static String getValueInternal() {\n" +
+			    "        return \"OK\";\n" +
+			    "    }\n" +
+			    "}\n" +
+			    "    \n",
+		"p2/Team152afer2b/Role152afer2b.java",
+			    "\n" +
+			    "team package p2.Team152afer2b;\n" +
+			    "import p1.T152afer2b;\n" +
+			    "protected class Role152afer2b {\n" +
+			    "    public String getValue() {\n" +
+			    "        return T152afer2b.getValueInternal();\n" +
+			    "    }\n" +
+			    "}\n" +
+			    "    \n",
+		"p2/Team152afer2b.java",
+			    "package p2;\n" +
+			    "public team class Team152afer2b {\n" +
+			    "    public String getValue() {\n" +
+			    "        return new Role152afer2b().getValue();\n" +
+			    "    }\n" +
+			    "}\n" +
+			    "    \n"
+            },
+            "OK");
+    }
+
     // the name of a team equals the name of a subpackage
     // 1.5.3-otjld_testbug-subpackage-name-equals-team-name
     public void _testbug_test153_subpackageNameEqualsTeamName() {

@@ -3618,6 +3618,13 @@ public abstract class Scope {
 			// check if the name is in the current package, skip it if its a sub-package
 			PackageBinding currentPackage = unitScope.fPackage;
 			unitScope.recordReference(currentPackage.compoundName, name);
+//{ObjectTeams: to avoid team / team package conflicts prefer types if suitable:
+			if ((mask & (Binding.TYPE | Binding.PACKAGE)) == Binding.TYPE) {
+				ReferenceBinding type = currentPackage.getType(name);
+				if (type != null && type.isValidBinding())
+					return type; // type is always visible to its own package
+			}
+// SH}
 			Binding binding = currentPackage.getTypeOrPackage(name);
 			if (binding instanceof ReferenceBinding) {
 				ReferenceBinding referenceType = (ReferenceBinding) binding;
