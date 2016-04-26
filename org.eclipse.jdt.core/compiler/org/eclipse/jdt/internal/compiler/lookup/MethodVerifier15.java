@@ -158,6 +158,10 @@ void checkForBridgeMethod(MethodBinding currentMethod, MethodBinding inheritedMe
 	}
 }
 void checkForNameClash(MethodBinding currentMethod, MethodBinding inheritedMethod) {
+//{ObjectTeams: not-visible methods in role ifc are not a name clash
+	if (currentMethod.problemId() == ProblemReasons.NotVisible && this.type.isSynthInterface())
+		return;
+// SH}
 	// sent from checkMethods() to compare a current method and an inherited method that are not 'equal'
 
 	// error cases:

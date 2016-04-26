@@ -3203,6 +3203,7 @@ public void addField(FieldBinding fieldBinding) {
 // base call surrogate could possibly be added very early, store it here first:
 private List<MethodBinding> pendingMethods = null;
 public void addMethod(MethodBinding methodBinding) {
+	// FIXME: this.methods should not be accessed directly, see setMethods()!
 	// adding before methods are set?
 	if (this.methods == Binding.UNINITIALIZED_METHODS) {
 		if (this.pendingMethods == null)
