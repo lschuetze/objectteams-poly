@@ -215,7 +215,7 @@ public class Config {
     	            configStack.push(config); // be defensive, put it back
     	        }
     	        if (configStack.empty())
-    	        	_configs.set(null); // remove entire Stack //TODO (carp): optimization: don't remove
+    	        	_configs.set(null); // remove entire Stack
     	    }
     	}
 	}

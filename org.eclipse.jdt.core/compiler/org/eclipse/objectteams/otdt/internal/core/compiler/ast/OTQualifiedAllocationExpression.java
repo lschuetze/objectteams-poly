@@ -21,8 +21,6 @@ package org.eclipse.objectteams.otdt.internal.core.compiler.ast;
 
 import org.eclipse.jdt.core.compiler.IProblem;
 import org.eclipse.jdt.internal.compiler.ASTVisitor;
-import org.eclipse.jdt.internal.compiler.CompilationResult;
-import org.eclipse.jdt.internal.compiler.CompilationResult.CheckPoint;
 import org.eclipse.jdt.internal.compiler.ast.ASTNode;
 import org.eclipse.jdt.internal.compiler.ast.CastExpression;
 import org.eclipse.jdt.internal.compiler.ast.Expression;
@@ -114,8 +112,6 @@ public abstract class OTQualifiedAllocationExpression extends AbstractQualifiedA
 	    if (this.anonymousType == null && this.creatorCall == null && this.enclosingInstance == null) // special case during code assist
             return super.resolveType(scope);
 
-	    CompilationResult compilationResult = scope.referenceContext().compilationResult();
-		CheckPoint cp = compilationResult.getCheckPoint(scope.referenceContext());
 		this.hasEnclosingInstanceProblem = false;
 	    if (this.anonymousType == null && this.creatorCall == null) { // no double processing
 

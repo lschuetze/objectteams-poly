@@ -400,14 +400,6 @@ public class ConstantPoolObjectMapper implements ClassFileConstants{
 		return newSuperclass.getExactConstructor(new TypeBinding[0]);
 	}
 
-	private static boolean hasMethod(ReferenceBinding clazz, MethodBinding meth) {
-		MethodBinding[] methods = clazz.methods();
-		for (int i = 0; i < methods.length; i++) {
-			if (meth == methods[i])
-				return true;
-		}
-		return false;
-	}
 	/**
 	 * searches for a matching field in the destination Team
 	 * For this the method will compare all roles from destination Team with

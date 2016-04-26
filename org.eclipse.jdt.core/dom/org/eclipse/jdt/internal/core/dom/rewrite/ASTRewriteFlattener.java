@@ -1708,7 +1708,7 @@ public class ASTRewriteFlattener extends ASTVisitor {
 	/* (non-Javadoc)
 	 * @see org.eclipse.jdt.core.dom.ASTVisitor#visit(org.eclipse.jdt.core.dom.CallinMappingDeclaration)
 	 */
-	@SuppressWarnings({ "nls", "rawtypes" })
+	@SuppressWarnings("nls")
 	public boolean visit(CallinMappingDeclaration node)
     {
 		ASTNode javadoc = getChildNode(node, CallinMappingDeclaration.JAVADOC_PROPERTY);

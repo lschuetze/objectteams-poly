@@ -57,13 +57,11 @@ import org.eclipse.jdt.core.dom.Modifier.ModifierKeyword;
  *
  * This class provides helperMethods for the creation of DOMAST-Nodes.
  *
- * @version $Id: ASTNodeCreator.java 22581 2009-09-24 10:26:48Z stephan $
  */
-@SuppressWarnings("unchecked") // assigning from parameterless lists :(
 public class ASTNodeCreator
 {
 
-    public static CompilationUnit createCU(AST ast, PackageDeclaration pack, List importList, List typeList)
+    public static CompilationUnit createCU(AST ast, PackageDeclaration pack, List<ImportDeclaration> importList, List<TypeDeclaration> typeList)
     {
         CompilationUnit newCU = ast.newCompilationUnit();
 
@@ -75,7 +73,7 @@ public class ASTNodeCreator
             List<ImportDeclaration> cuImportList = newCU.imports();
             for (int idx = 0; idx < importList.size(); idx++)
             {
-                ImportDeclaration tmp =  (ImportDeclaration)importList.get(idx);
+                ImportDeclaration tmp =  importList.get(idx);
                 cuImportList.add(tmp);
             }
         }
@@ -85,7 +83,7 @@ public class ASTNodeCreator
             List<TypeDeclaration> cuTypeList = newCU.types();
             for (int idx = 0; idx < typeList.size(); idx++)
             {
-                TypeDeclaration tmp =  (TypeDeclaration)typeList.get(idx);
+                TypeDeclaration tmp =  typeList.get(idx);
                 cuTypeList.add(tmp);
             }
         }

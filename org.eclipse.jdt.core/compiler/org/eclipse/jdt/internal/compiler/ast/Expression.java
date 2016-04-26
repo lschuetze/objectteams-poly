@@ -107,7 +107,6 @@ import org.eclipse.objectteams.otdt.internal.core.compiler.util.TypeAnalyzer;
  *   			 + base method specs (from AbstractMethodMappingDeclaration.resolveMethodSpecs(..))
  *   			 + the message send within a callout wrapper (from MessageSend.resolveType(..))
  */
-@SuppressWarnings({"rawtypes", "unchecked"})
 public abstract class Expression extends Statement {
 
 //{ObjectTeams: baseclass decapsulation support:

@@ -221,7 +221,6 @@ public class SingleVariableDeclaration extends VariableDeclaration {
 	public static final ChildPropertyDescriptor FAKED_ROLE_VARIABLE = 
 			new ChildPropertyDescriptor(SingleVariableDeclaration.class, "fakedRoleVariable", SingleVariableDeclaration.class, OPTIONAL, NO_CYCLE_RISK); //$NON-NLS-1$
 
-	@SuppressWarnings("unchecked")
 	SingleVariableDeclaration newFakedRoleVariable(LiftingType liftingType) {
 		if (this.fakedRoleVariable != null)
 			return null;
