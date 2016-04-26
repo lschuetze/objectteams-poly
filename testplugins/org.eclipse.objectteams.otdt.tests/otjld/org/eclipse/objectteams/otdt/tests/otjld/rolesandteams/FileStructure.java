@@ -2256,4 +2256,28 @@ public class FileStructure extends AbstractOTJLDTest {
     				"}\n"
     		});
     }
+
+    public void testBug492480() {
+    	compileOrder = new String[][] {
+							new String[] { "pt/MyTeam.java" },
+							new String[] { "pt/MyTeam/Role.java" },
+    						new String[] { "Test.java" }
+    					};
+    	runConformTest(
+    		new String[] {
+    			"pt/MyTeam.java",
+    			"package pt;\n" +
+    			"public team class MyTeam {\n" +
+    			"	public static int N = 42;\n" +
+    			"}\n",
+    			"pt/MyTeam/Role.java",
+    			"team package pt.MyTeam;\n" +
+    			"protected class Role {}\n",
+    			"Test.java",
+    			"import pt.MyTeam;\n" +
+    			"public class Test {\n" +
+    			"	public static int MYN = MyTeam.N\n;" +
+    			"}\n"
+    		});
+    }
 }

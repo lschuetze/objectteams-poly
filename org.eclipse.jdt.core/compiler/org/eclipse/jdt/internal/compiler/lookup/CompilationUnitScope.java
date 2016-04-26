@@ -751,6 +751,13 @@ private Binding findImport(char[][] compoundName, int length, boolean allowDecap
 	foundNothingOrType: if (binding != null) {
 		PackageBinding packageBinding = (PackageBinding) binding;
 		while (i < length) {
+//{ObjectTeams: For a team with team package we need to give precedence to the type:
+			if (i == length -1) {
+				ReferenceBinding type = packageBinding.getType(compoundName[i]);
+				if (type != null)
+					return type;
+			}
+// SH}
 			binding = packageBinding.getTypeOrPackage(compoundName[i++]);
 			if (binding == null || !binding.isValidBinding()) {
 				binding = null;
