@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2008, 2015 IBM Corporation and others.
+ * Copyright (c) 2008, 2016 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -62,7 +62,7 @@ public class ProcessTaskManager implements Runnable {
 private synchronized void addNextUnit(CompilationUnitDeclaration newElement) {
 	while (this.units[this.availableIndex] != null) {
 		//System.out.print('a');
-		//if (this.sleepCount < 0) throw new IllegalStateException(new Integer(this.sleepCount).toString());
+		//if (this.sleepCount < 0) throw new IllegalStateException(Integer.valueOf(this.sleepCount).toString());
 		this.sleepCount = 1;
 		try {
 			wait(250);
@@ -96,7 +96,7 @@ public CompilationUnitDeclaration removeNextUnit() throws Error {
 					return null;
 				}
 				//System.out.print('r');
-				//if (this.sleepCount > 0) throw new IllegalStateException(new Integer(this.sleepCount).toString());
+				//if (this.sleepCount > 0) throw new IllegalStateException(Integer.valueOf(this.sleepCount).toString());
 				this.sleepCount = -1;
 				try {
 					wait(100);

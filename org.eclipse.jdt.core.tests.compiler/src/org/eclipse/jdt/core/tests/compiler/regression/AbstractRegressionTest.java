@@ -86,6 +86,7 @@ import org.eclipse.jdt.internal.compiler.problem.AbortCompilation;
 import org.eclipse.jdt.internal.compiler.problem.DefaultProblemFactory;
 import org.eclipse.jdt.internal.core.search.JavaSearchParticipant;
 import org.eclipse.jdt.internal.core.search.indexing.BinaryIndexer;
+import org.eclipse.jdt.internal.core.util.Messages;
 import org.osgi.framework.Bundle;
 
 import java.util.regex.Pattern;
@@ -430,7 +431,7 @@ protected static class JavacTestOptions {
 			EclipseBug236379 = RUN_JAVAC ? // https://bugs.eclipse.org/bugs/show_bug.cgi?id=236379
 				new EclipseHasABug(MismatchType.EclipseWarningsJavacNone) {
 					Excuse excuseFor(JavacCompiler compiler) {
-						return compiler.compliance > ClassFileConstants.JDK1_5 ? this : null;
+						return compiler.compliance > ClassFileConstants.JDK1_5 ? null : this;
 					}
 				}: null,
 			EclipseBug424410 = RUN_JAVAC ? // https://bugs.eclipse.org/bugs/show_bug.cgi?id=424410
@@ -861,6 +862,13 @@ protected static class JavacTestOptions {
 		if (index == -1) {
 			assertEquals("Wrong contents", expectedOutput, result);
 		}
+		index = result.indexOf(Messages.classformat_classformatexception);
+		if (index != -1) {
+			int start = Math.max(0, index - 300);
+			int end = index + Messages.classformat_classformatexception.length();
+			fail("ClassFormatException swallowed in Disassembler:\n..." + result.substring(start, end));
+		}
+		
 		FileInputStream stream = null;
 		try {
 			stream = new FileInputStream(classFile);
@@ -1182,7 +1190,7 @@ protected static class JavacTestOptions {
 			Integer count = (Integer)TESTS_COUNTERS.get(CURRENT_CLASS_NAME);
 			if (count != null) {
 				int newCount = count.intValue()-1;
-				TESTS_COUNTERS.put(CURRENT_CLASS_NAME, new Integer(newCount));
+				TESTS_COUNTERS.put(CURRENT_CLASS_NAME, Integer.valueOf(newCount));
 				if (newCount == 0) {
 					if (DIFF_COUNTERS[0]!=0 || DIFF_COUNTERS[1]!=0 || DIFF_COUNTERS[2]!=0) {
 						dualPrintln("===========================================================================");

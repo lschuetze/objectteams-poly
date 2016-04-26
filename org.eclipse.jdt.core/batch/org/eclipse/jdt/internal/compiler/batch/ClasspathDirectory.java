@@ -4,12 +4,9 @@
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
- * $Id: ClasspathDirectory.java 23404 2010-02-03 14:10:22Z stephan $
- * 
+ *
  * Contributors:
  *     IBM Corporation - initial API and implementation
- *     Fraunhofer FIRST - extended API and implementation
- *     Technical University Berlin - extended API and implementation
  *     Stephan Herrmann - Contribution for
  *								Bug 440687 - [compiler][batch][null] improve command line option for external annotations
  *     Lars Vogel <Lars.Vogel@vogella.com> - Contributions for
@@ -17,12 +14,6 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.compiler.batch;
 
-import java.io.File;
-import java.io.FilenameFilter;
-import java.io.IOException;
-import java.util.Hashtable;
-import java.util.List;
-import java.util.Map;
 import org.eclipse.jdt.core.compiler.CharOperation;
 import org.eclipse.jdt.internal.compiler.CompilationResult;
 import org.eclipse.jdt.internal.compiler.DefaultErrorHandlingPolicies;
@@ -34,12 +25,20 @@ import org.eclipse.jdt.internal.compiler.classfmt.ExternalAnnotationProvider;
 import org.eclipse.jdt.internal.compiler.env.AccessRuleSet;
 import org.eclipse.jdt.internal.compiler.env.NameEnvironmentAnswer;
 import org.eclipse.jdt.internal.compiler.impl.CompilerOptions;
+import org.eclipse.jdt.internal.compiler.lookup.TypeConstants;
 import org.eclipse.jdt.internal.compiler.parser.Parser;
 import org.eclipse.jdt.internal.compiler.parser.ScannerHelper;
 import org.eclipse.jdt.internal.compiler.problem.DefaultProblemFactory;
 import org.eclipse.jdt.internal.compiler.problem.ProblemReporter;
 import org.eclipse.jdt.internal.compiler.util.Util;
 import org.eclipse.objectteams.otdt.internal.core.compiler.control.Config;
+
+import java.io.File;
+import java.io.FilenameFilter;
+import java.io.IOException;
+import java.util.Hashtable;
+import java.util.List;
+import java.util.Map;
 
 /**
  * OTDT changes:
@@ -169,8 +168,14 @@ public NameEnvironmentAnswer findClass(char[] typeName, String qualifiedPackageN
 	return null;
 }
 public NameEnvironmentAnswer findSecondaryInClass(char[] typeName, String qualifiedPackageName, String qualifiedBinaryFileName) {
-	boolean prereqs = this.options != null && isPackage(qualifiedPackageName) && ((this.mode & SOURCE) != 0) && doesFileExist( new String(typeName) + SUFFIX_STRING_java, qualifiedPackageName);
-	return prereqs ? null : findSourceSecondaryType(typeName, qualifiedPackageName, qualifiedBinaryFileName); /* only secondary types */
+	//"package-info" is a reserved class name and can never be a secondary type (it is much faster to stop the search here).
+	if(TypeConstants.PACKAGE_INFO_NAME.equals(typeName)) {
+		return null;
+	}
+
+	String typeNameString = new String(typeName);
+	boolean prereqs = this.options != null && isPackage(qualifiedPackageName) && ((this.mode & SOURCE) != 0) && doesFileExist(typeNameString + SUFFIX_STRING_java, qualifiedPackageName);
+	return prereqs ? null : findSourceSecondaryType(typeNameString, qualifiedPackageName, qualifiedBinaryFileName); /* only secondary types */
 }
 
 @Override
@@ -187,7 +192,7 @@ public boolean hasAnnotationFileFor(String qualifiedTypeName) {
 /**
  *  Add all the secondary types in the package
  */
-private Hashtable<String, String> getPackageTypes(char[] typeName, String qualifiedPackageName) {
+private Hashtable<String, String> getPackageTypes(String qualifiedPackageName) {
 	Hashtable<String, String> packageEntry = new Hashtable<>();
 
 	String[] dirList = (String[]) this.directoryCache.get(qualifiedPackageName);
@@ -225,15 +230,15 @@ private Hashtable<String, String> getPackageTypes(char[] typeName, String qualif
 	}
 	return packageEntry;
 }
-private NameEnvironmentAnswer findSourceSecondaryType(char[] typeName, String qualifiedPackageName, String qualifiedBinaryFileName) {
+private NameEnvironmentAnswer findSourceSecondaryType(String typeName, String qualifiedPackageName, String qualifiedBinaryFileName) {
 	
 	if (this.packageSecondaryTypes == null) this.packageSecondaryTypes = new Hashtable<>();
 	Hashtable<String, String> packageEntry = this.packageSecondaryTypes.get(qualifiedPackageName);
 	if (packageEntry == null) {
-		packageEntry = 	getPackageTypes(typeName, qualifiedPackageName);
+		packageEntry = 	getPackageTypes(qualifiedPackageName);
 		this.packageSecondaryTypes.put(qualifiedPackageName, packageEntry);
 	}
-	String fileName = packageEntry.get(new String(typeName));
+	String fileName = packageEntry.get(typeName);
 	return fileName != null ? new NameEnvironmentAnswer(new CompilationUnit(null,
 			fileName, this.encoding, this.destinationPath),
 			fetchAccessRestriction(qualifiedBinaryFileName)) : null;

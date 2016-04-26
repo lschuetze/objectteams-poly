@@ -1687,6 +1687,8 @@ public final class CompletionEngine
 			if (completionOnQualifiedTypeReference.isConstructorType){
 						context.setTokenLocation(CompletionContext.TL_CONSTRUCTOR_START);
 			}
+		} else if (astNode instanceof CompletionOnKeyword3 && ((CompletionOnKeyword3) astNode).afterTryOrCatch()) {
+				context.setTokenLocation(CompletionContext.TL_STATEMENT_START);
 		} else {
 			ReferenceContext referenceContext = scope.referenceContext();
 			if (referenceContext instanceof AbstractMethodDeclaration) {
@@ -7867,7 +7869,7 @@ public final class CompletionEngine
 							if(proposeMethod && !insideAnnotationAttribute) {
 								MethodBinding methodBinding = (MethodBinding)binding;
 								if ((exactMatch && CharOperation.equals(token, methodBinding.selector)) ||
-										!exactMatch && CharOperation.prefixEquals(token, methodBinding.selector) ||
+										!exactMatch && CharOperation.prefixEquals(token, methodBinding.selector, false) ||
 										(this.options.camelCaseMatch && CharOperation.camelCaseMatch(token, methodBinding.selector))) {
 									findLocalMethodsFromStaticImports(
 											token,
@@ -10428,6 +10430,7 @@ public final class CompletionEngine
 		}
 		
 		boolean hasPotentialDefaultAbstractMethods = true;
+		boolean java8Plus = this.compilerOptions.sourceLevel >= ClassFileConstants.JDK1_8;
 		while (currentType != null) {
 
 			MethodBinding[] methods = currentType.availableMethods();
@@ -10444,11 +10447,11 @@ public final class CompletionEngine
 					receiverType);
 			}
 
-			if (hasPotentialDefaultAbstractMethods &&
+			if (hasPotentialDefaultAbstractMethods && (java8Plus ||
 					(currentType.isAbstract() ||
 							currentType.isTypeVariable() ||
 							currentType.isIntersectionType() ||
-							currentType.isEnum())){
+							currentType.isEnum()))){
 
 				ReferenceBinding[] superInterfaces = currentType.superInterfaces();
 

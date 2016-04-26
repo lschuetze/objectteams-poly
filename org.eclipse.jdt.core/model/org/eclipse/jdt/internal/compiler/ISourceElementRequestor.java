@@ -74,6 +74,7 @@ public interface ISourceElementRequestor {
 	}
 
 	public static class TypeParameterInfo {
+		public boolean typeAnnotated;
 		public int declarationStart;
 		public int declarationEnd;
 		public char[] name;
