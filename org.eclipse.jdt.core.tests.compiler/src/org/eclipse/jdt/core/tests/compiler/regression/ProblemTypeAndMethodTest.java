@@ -4061,10 +4061,18 @@ public void test086() {
 			"zork cannot be resolved to a type\n" + 
 			"----------\n" + 
 			"----------\n" + 
+//{ObjectTeams:
+/* orig:
 			"1. WARNING in p\\Y.java (at line 2)\n" + 
 			"	import p.zork.*;\n" + 
 			"	       ^^^^^^\n" + 
-			"The import p.zork is never used\n" + 
+			"The import p.zork is never used\n" +
+  :giro */
+  			"1. ERROR in p\\Y.java (at line 2)\n" + 
+			"	import p.zork.*;\n" + 
+			"	       ^^^^^^\n" + 
+			"The import p.zork cannot be resolved\n" + 
+// SH} 
 			"----------\n");
 }
 //https://bugs.eclipse.org/bugs/show_bug.cgi?id=239758 - variation
