@@ -160,12 +160,7 @@ public class TypeVariableBinding extends ReferenceBinding {
 			return BoundCheckStatus.OK;
 
 		BoundCheckStatus nullStatus = BoundCheckStatus.OK;
-//{ObjectTeams: be more lazy in asking usesNullTypeAnnotations():
-/* orig:
 		boolean checkNullAnnotations = scope.environment().usesNullTypeAnnotations();
-  :giro */
-		boolean checkNullAnnotations = location != null && scope.environment().usesNullTypeAnnotations();
-// SH}
 
 		if (argumentType.kind() == Binding.WILDCARD_TYPE) {
 			WildcardBinding wildcard = (WildcardBinding) argumentType;
