@@ -12560,6 +12560,41 @@ public void baseCallDoesntMatchRoleMethodSignature(ASTNode baseCallMsgSend) {
 		baseCallMsgSend.sourceStart,
 		baseCallMsgSend.sourceEnd);
 }
+public void baseCallArgumentMismatch(MethodBinding callinMethod, TypeBinding[] argumentTypes, MessageSend messageSend) {
+	if ((callinMethod.tagBits & TagBits.HasMissingType) != 0) {
+		missingTypeInMethod(messageSend, callinMethod);
+		return;
+	}
+	String closestParameterTypeNames = typesAsString(callinMethod, false);
+	String parameterTypeNames = typesAsString(argumentTypes, false);
+	String closestParameterTypeShortNames = typesAsString(callinMethod, true);
+	String parameterTypeShortNames = typesAsString(argumentTypes, true);
+	if (closestParameterTypeNames.equals(parameterTypeNames)) {
+		// include null annotations, maybe they show the difference:
+		closestParameterTypeNames = typesAsString(callinMethod, false, true);
+		parameterTypeNames = typesAsString(argumentTypes, false, true);
+		closestParameterTypeShortNames = typesAsString(callinMethod, true, true);
+		parameterTypeShortNames = typesAsString(argumentTypes, true, true);
+	}
+	if (closestParameterTypeShortNames.equals(parameterTypeShortNames)) {
+		closestParameterTypeShortNames = closestParameterTypeNames;
+		parameterTypeShortNames = parameterTypeNames;
+	}
+	this.handle(
+		IProblem.BaseCallArgumentMismatch,
+		new String[] {
+			new String(callinMethod.selector),
+			closestParameterTypeNames,
+			parameterTypeNames
+		},
+		new String[] {
+			new String(callinMethod.selector),
+			closestParameterTypeShortNames,
+			parameterTypeShortNames
+		},
+		(int) (messageSend.nameSourcePosition >>> 32),
+		(int) messageSend.nameSourcePosition);
+}
 public void potentiallyMissingBasecall (MethodDeclaration method) {
 	this.handle(
 			IProblem.PotentiallyMissingBaseCall,

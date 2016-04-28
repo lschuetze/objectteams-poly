@@ -257,6 +257,26 @@ public class BaseCallMessageSend extends AbstractExpressionWrapper
 				if (TypeBinding.notEquals(returnType, TypeBinding.VOID))
 					this._sendOrig.valueCast = returnType;
 			}
+			// manually check arguments only in OTDRE:
+			Expression[] args = this.sourceArgs;
+			callinMethodBinding.switchToSourceParamters();
+			try {
+				TypeBinding[] parameters = callinMethodBinding.parameters;
+				if (args != null && args.length == parameters.length) {
+					TypeBinding[] argumentTypes = new TypeBinding[args.length];
+					boolean hasArgumentProblem = false;
+					for (int i = 0; i < args.length; i++) {
+						argumentTypes[i] = args[i].resolvedType;
+						if (!hasArgumentProblem && !argumentTypes[i].isBoxingCompatibleWith(parameters[i], scope))
+							hasArgumentProblem = true;
+					}
+					if (hasArgumentProblem)
+						scope.problemReporter().baseCallArgumentMismatch(callinMethodBinding, argumentTypes, this._sendOrig);
+					checkInvocationArguments(scope, this._receiver, roleType, callinMethodBinding, args, argumentTypes, false, this._sendOrig);
+				}
+			} finally {
+				callinMethodBinding.resetParameters();
+			}
 		}
 		return this.resolvedType;
 	}

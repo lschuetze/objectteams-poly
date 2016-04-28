@@ -2152,6 +2152,8 @@ void setSourceStart(int sourceStart);
 	int FragileCallinBindingReferenceType        = CALLIN_RELATED + 3009; // 4.3(e)
 	int BaseSuperCallToNonOverriding             = CALLIN_RELATED + 3010; // 4.3(f)
 	int BaseSuperCallDecapsulation               = CALLIN_RELATED + 3011; // 4.3(f)
+	/** @since 3.12 OT 2.5 */
+	int BaseCallArgumentMismatch				 = CALLIN_RELATED + 3012; // "regular" type checking
 
 
 	int CallinParameterMappingMissingSingatures  = CALLIN_RELATED + 4000; // 4.4(a)

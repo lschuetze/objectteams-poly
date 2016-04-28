@@ -666,6 +666,38 @@ public class BaseCalls extends AbstractOTJLDTest {
     		"----------\n");
     }
 
+    public void test455_illegalBaseCall7() {
+        runNegativeTest(
+            new String[] {
+		"Team455ibc7.java",
+			    "\n" +
+			    "public team class Team455ibc7 {\n" +
+			    "    protected class Role playedBy T455ibc7 {\n" +
+			    "        void rm() {}\n" +
+			    "        callin void rm2(Integer s, boolean b) {\n" +
+			    "           if (b)\n" +
+			    "				base.rm2(1, false);\n" +
+			    "			else\n" +
+			    "				base.rm2(\"wrong\", true);\n" +
+			    "        }\n" +
+			    "    }\n" +
+			    "}   \n" +
+			    "    \n",
+		"T455ibc7.java",
+			    "\n" +
+			    "public class T455ibc7 {\n" +
+			    "    public void foo() { }\n" +
+			    "}   \n" +
+			    "    \n"
+            },
+            "----------\n" + 
+    		"1. ERROR in Team455ibc7.java (at line 9)\n" + 
+    		"	base.rm2(\"wrong\", true);\n" + 
+    		"	     ^^^\n" + 
+    		"Base call rm2(Integer, boolean) is not applicable for the arguments (String, boolean)\n" + 
+    		"----------\n");
+    }
+
     // a role method is callin-bound as 'replace' with multiple base call  -- syntax error missing replace
     // 4.5.6-otjld-multiple-base-calls-1
     public void test456_multipleBaseCalls1() {
