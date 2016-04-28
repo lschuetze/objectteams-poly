@@ -279,4 +279,38 @@ public class OTNullTypeAnnotationTest extends AbstractOTJLDNullAnnotationTest {
     		getCompilerOptions(),
     		"");
     }
+
+    public void _testIllegalBaseCall() {
+    	runNegativeTestWithLibs(
+            new String[] {
+		"TeamIBC.java",
+			    "\n" +
+			    "@org.eclipse.jdt.annotation.NonNullByDefault\n" +
+			    "public team class TeamIBC {\n" +
+			    "    protected class Role playedBy TIBC {\n" +
+			    "        void rm() {}\n" +
+			    "        callin void rm2(Integer s, boolean b) {\n" +
+			    "           if (b)\n" +
+			    "				base.rm2(1, false);\n" +
+			    "			else\n" +
+			    "				base.rm2(null, true);\n" +
+			    "        }\n" +
+			    "    }\n" +
+			    "}   \n" +
+			    "    \n",
+		"TIBC.java",
+			    "\n" +
+			    "public class TIBC {\n" +
+			    "    public void foo() { }\n" +
+			    "}   \n" +
+			    "    \n"
+            },
+            getCompilerOptions(),
+            "----------\n" + 
+    		"1. ERROR in TeamIBC.java (at line 9)\n" + 
+    		"	base.rm2(\"wrong\", true);\n" + 
+    		"	     ^^^\n" + 
+    		"Base call rm2(Integer, boolean) is not applicable for the arguments (String, boolean)\n" + 
+    		"----------\n");
+    }
 }
