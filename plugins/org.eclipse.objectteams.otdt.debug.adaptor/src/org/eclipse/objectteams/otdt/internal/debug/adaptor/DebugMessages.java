@@ -25,6 +25,7 @@ public class DebugMessages extends NLS {
 	public static String OTLaunching_OTRE_group_title;
 	public static String OTLaunching_OTEquinox_checkbox_label;
 	public static String OTLaunching_no_OTJ_project_found;
+	public static String OTLaunching_conflicting_weaving_modes;
 	static {
 		// initialize resource bundle
 		NLS.initializeMessages(BUNDLE_NAME, DebugMessages.class);

@@ -166,6 +166,7 @@ public class TransformerPlugin implements BundleActivator, IAspectRegistry {
 			}
 		}
 		agentURL = bundleContext.getBundle().getEntry("/"+OTEQUINOX_AGENT_JAR_FILENAME);
+		log(IStatus.INFO, "agentURL="+agentURL);
 	}
 
 	@SuppressWarnings("restriction")

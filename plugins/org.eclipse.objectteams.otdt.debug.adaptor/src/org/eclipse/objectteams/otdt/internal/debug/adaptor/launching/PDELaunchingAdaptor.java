@@ -19,7 +19,9 @@ import java.util.Map;
 
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
+import org.eclipse.debug.core.DebugException;
 import org.eclipse.debug.core.ILaunchConfiguration;
 import org.eclipse.debug.core.ILaunchConfigurationWorkingCopy;
 import org.eclipse.debug.core.ILaunchManager;
@@ -31,6 +33,7 @@ import org.eclipse.objectteams.otdt.debug.TeamBreakpointInstaller;
 import org.eclipse.objectteams.otdt.internal.debug.adaptor.DebugMessages;
 import org.eclipse.objectteams.otdt.internal.debug.adaptor.OTDebugAdaptorPlugin;
 import org.eclipse.objectteams.otequinox.TransformerPlugin;
+import org.eclipse.osgi.util.NLS;
 import org.eclipse.pde.core.plugin.IPluginModelBase;
 import org.eclipse.pde.core.plugin.ISharedPluginModel;
 import org.eclipse.swt.widgets.Button;
@@ -58,15 +61,16 @@ public team class PDELaunchingAdaptor {
 	static final String DISABLE_OTEQUINOX     = "-Dot.equinox=false"; //$NON-NLS-1$ // prevents OTWeavingHook installation
 	static final String OT_DEBUG_VMARG        = "-Dot.debug"; //$NON-NLS-1$
 	static final String OTE_AGENT_ARG		  = "-javaagent:" + TransformerPlugin.getOtequinoxAgentPath();
-	// slot [0] to be filled in from the launch config:
+	static final String OT_WEAVING			  = "-Dot.weaving="; // need to append either "otre" or "otdre"
+
 	static final String[] OT_VM_ARGS          = { ENABLE_OTEQUINOX }; // FIXME: revive via bug 480234
-	static final String[] OTDRE_VM_ARGS          = { ENABLE_OTEQUINOX, OTE_AGENT_ARG };
-	static final String[] OT_VM_DEBUG_ARGS    = { ENABLE_OTEQUINOX, OT_DEBUG_VMARG, OTE_AGENT_ARG };
+	static final String[] OTDRE_VM_ARGS          = { ENABLE_OTEQUINOX, OTE_AGENT_ARG, OT_WEAVING };
+	static final String[] OT_VM_DEBUG_ARGS    = { ENABLE_OTEQUINOX, OT_DEBUG_VMARG, OTE_AGENT_ARG, OT_WEAVING };
 	static final String[] VM_ARGS          = { DISABLE_OTEQUINOX };
 	static final String[] VM_DEBUG_ARGS    = { DISABLE_OTEQUINOX, OT_DEBUG_VMARG };
 
 	/** select proper set of arguments for an OT-launch, insert otequinox.hook using it's actual install location. */
-	static String[] getOTArgs(String mode) {
+	static String[] getOTArgs(String mode, String weavingMode) {
 		String[] otArgs = OTDRE_VM_ARGS;
 		if (mode != null && mode.equals(ILaunchManager.DEBUG_MODE))
 			otArgs = OT_VM_DEBUG_ARGS;
@@ -75,8 +79,8 @@ public team class PDELaunchingAdaptor {
 	/** 
 	 * Extend pre-built vm arguments with OT/Equinox specifics (depending on run/debug mode).
 	 */
-	static String[] extendVMArguments(String[] args, String mode) {
-		String[] otArgs = getOTArgs(mode);
+	static String[] extendVMArguments(String[] args, String mode, String weavingMode) {
+		String[] otArgs = getOTArgs(mode, weavingMode);
 		if (otArgs == null)
 			return args;
 		if (args == null || args.length == 0)
@@ -85,6 +89,7 @@ public team class PDELaunchingAdaptor {
 		String[] combinedArgs = new String[args.length + otArgs.length];
 		System.arraycopy(args, 0, combinedArgs, 0, args.length);
 		System.arraycopy(otArgs, 0, combinedArgs, args.length, otArgs.length);
+		combinedArgs[combinedArgs.length-1] += weavingMode; 
 		return combinedArgs;
 	}
 	static String[] addDisableOTEquinoxArgument(String[] args) {
@@ -94,12 +99,13 @@ public team class PDELaunchingAdaptor {
 		return combinedArgs;		
 	}
 	/* alternate version for single string signature. */
-	static String extendVMArguments(String args, ISharedPluginModel hookModel, String mode) {
-		String[] otArgss = getOTArgs(mode);
+	static String extendVMArguments(String args, ISharedPluginModel hookModel, String mode, String weavingMode) {
+		String[] otArgss = getOTArgs(mode, weavingMode);
 		if (otArgss == null)
 			return args;
 						
 		String otArgs = Util.concatWith(otArgss, ' ');
+		otArgs += weavingMode;
 	
 		if (args == null || args.length() == 0)
 			return otArgs;
@@ -144,16 +150,46 @@ public team class PDELaunchingAdaptor {
 			throws CoreException;
 		
 		String mode;
+		String weavingMode;
 		
-		void prepareLaunch(ILaunchConfiguration configuration, String mode) 
+		void prepareLaunch(ILaunchConfiguration configuration, String mode) throws DebugException
 		{
 			this.mode = mode;
 			if (isOTLaunch(configuration) && ILaunchManager.DEBUG_MODE.equals(mode))
 				try {
-					PDELaunchingAdaptor.installOOTBreakpoints(getProjectsForProblemSearch(configuration, mode));
+					IProject[] projects = getProjectsForProblemSearch(configuration, mode);
+					PDELaunchingAdaptor.installOOTBreakpoints(projects);
+					determineWeavingMode(projects);
+				} catch (DebugException dex) {
+					throw dex;
 				} catch (CoreException ex) {
 					logException(ex, Status.WARNING, DebugMessages.OTLaunching_no_OTJ_project_found);
 				}
+		}
+
+		private void determineWeavingMode(IProject[] projects) throws CoreException {
+			this.weavingMode = null;
+			if (projects != null) {
+				IProject otjProject = null;
+				for (IProject project : projects) 
+					// check weaving mode in all relevant OT/J Project:
+					if (project.getNature(JavaCore.OTJ_NATURE_ID) != null) {
+						String wMode = JavaCore.create(project).getOption(JavaCore.COMPILER_OPT_WEAVING_SCHEME, true);
+						if (wMode != null) {
+							if (this.weavingMode != null && !wMode.equals(this.weavingMode))
+								throw new DebugException(new Status(IStatus.ERROR, OTDebugPlugin.PLUGIN_ID,
+										NLS.bind(DebugMessages.OTLaunching_conflicting_weaving_modes,
+												new String[] {
+													otjProject.getName(), this.weavingMode,
+													project.getName(), wMode
+												})));
+							this.weavingMode = wMode;
+							otjProject = project;
+						}
+					}
+			}
+			if (this.weavingMode == null)
+				logException(null, Status.WARNING, DebugMessages.OTLaunching_no_OTJ_project_found);
 		}
 	}
 	
@@ -176,7 +212,7 @@ public team class PDELaunchingAdaptor {
 		{
 			String[] args = base.extendVMArguments(config);
 			if (isOTLaunch(config))
-				return PDELaunchingAdaptor.extendVMArguments(args, this.mode);
+				return PDELaunchingAdaptor.extendVMArguments(args, this.mode, this.weavingMode);
 			else
 				return PDELaunchingAdaptor.addDisableOTEquinoxArgument(args);
 		}
@@ -201,7 +237,7 @@ public team class PDELaunchingAdaptor {
 		{
 			String result = base.extendVMArgument(config);
 			if (isOTLaunch(config))
-				return PDELaunchingAdaptor.extendVMArguments(result, null /*getBundle(OTEQUINOX_HOOK)*/, this.mode);
+				return PDELaunchingAdaptor.extendVMArguments(result, null /*getBundle(OTEQUINOX_HOOK)*/, this.mode, this.weavingMode);
 			else
 				return result+' '+DISABLE_OTEQUINOX;
 		}
