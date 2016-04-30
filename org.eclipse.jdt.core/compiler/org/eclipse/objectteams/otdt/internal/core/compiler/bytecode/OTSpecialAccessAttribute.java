@@ -219,10 +219,10 @@ public class OTSpecialAccessAttribute extends AbstractAttribute {
 		public String toString() {
 			StringBuilder result = new StringBuilder();
 			result.append(this.field.readableName());
-			if ((this.flags & CALLOUT_GET_FIELD) != 0)
-				result.append(" get");
-			else
+			if ((this.flags & CALLOUT_SET_FIELD) != 0)
 				result.append(" set");
+			else
+				result.append(" get");
 			if ((this.flags & CALLOUT_STATIC_FIELD) != 0)
 				result.append(" (static)");
 			return  result.toString();

@@ -1,7 +1,7 @@
 /**********************************************************************
  * This file is part of "Object Teams Development Tooling"-Software
  *
- * Copyright 2004, 2014 Fraunhofer Gesellschaft, Munich, Germany,
+ * Copyright 2004, 2016 Fraunhofer Gesellschaft, Munich, Germany,
  * for its Fraunhofer Institute for Computer Architecture and Software
  * Technology (FIRST), Berlin, Germany and Technical University Berlin,
  * Germany.
@@ -1007,7 +1007,7 @@ public class TeamModel extends TypeModel {
 
 	/** Update all recorded accessIds to stay clear of id ranges used by super teams. */
 	public int updateDecapsAccessIds() {
-		if (this.accessIdOffset > -1 || this.weavingScheme != WeavingScheme.OTDRE) return this.accessIdOffset;
+		if (this.accessIdOffset > -1 || getWeavingScheme() != WeavingScheme.OTDRE) return this.accessIdOffset;
 		
 		this.accessIdOffset = 0;
 

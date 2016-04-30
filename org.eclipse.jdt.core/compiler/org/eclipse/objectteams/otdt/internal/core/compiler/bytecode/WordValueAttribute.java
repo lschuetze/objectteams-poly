@@ -264,6 +264,12 @@ public class WordValueAttribute
 		}
 	}
 
+	private static WeavingScheme weavingSchemeFromCompilerVersion(int version) {
+		if ((version & OTDRE_FLAG) != 0)
+			return WeavingScheme.OTDRE;
+		return WeavingScheme.OTRE;
+	}
+
     // ============== INSTANCE FEATURES ===================
 
 
@@ -357,9 +363,9 @@ public class WordValueAttribute
         	checkBindingMismatch(binding, 0);
             BinaryTypeBinding type = (BinaryTypeBinding)binding;
         	if (type.isRole())
-        		type.roleModel._compilerVersion = this._value;
+        		type.roleModel.setCompilerVersion(this._value, weavingSchemeFromCompilerVersion(this._value));
         	if (type.isTeam())
-        		type.getTeamModel()._compilerVersion = this._value;
+        		type.getTeamModel().setCompilerVersion(this._value, weavingSchemeFromCompilerVersion(this._value));
         	if (this._value < IOTConstants.OTVersion.getCompilerVersionMin())
         		environment.problemReporter.incompatibleOTJByteCodeVersion(((BinaryTypeBinding)binding).getFileName(), getBytecodeVersionString(this._value));
         	if ((type.isRole() || type.isTeam())

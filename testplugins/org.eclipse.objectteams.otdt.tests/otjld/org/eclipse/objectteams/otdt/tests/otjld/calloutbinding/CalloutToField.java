@@ -1,7 +1,7 @@
 /**********************************************************************
  * This file is part of "Object Teams Development Tooling"-Software
  * 
- * Copyright 2010, 2013 Stephan Herrmann
+ * Copyright 2010, 2016 Stephan Herrmann
  * 
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -3843,5 +3843,47 @@ public class CalloutToField extends AbstractOTJLDTest {
     				"}\n"
     		},
     		"OK");
+    }
+
+    public void testBug492691() {
+    	compileOrder = new String[][] {
+    		new String[] { "p0/Base.java", "p1/SuperTeam.java" },
+    		new String[] { "p/SubTeam.java", "p/SubTeam/R2.java"   },
+    	};
+    	runConformTest(
+    		new String[] {
+    			"p/SubTeam.java",
+    			"package p;\n" +
+				"import base p0.Base;\n" +
+    			"public team class SubTeam extends p1.SuperTeam {\n" +
+    			"	void test() {\n" +
+    			"		R2 r2 = new R2(new p0.Base());\n" +
+    			"		System.out.print(r2.getF2());\n" +
+    			"	}\n" +
+    			"	public static void main(String... args) {\n" +
+    			"		new SubTeam().test();\n" +
+    			"	}\n" +
+    			"}\n",
+    			"p/SubTeam/R2.java",
+    			"team package p.SubTeam;\n" +
+    			"public class R2 playedBy Base {\n" +
+				"	protected String getF2() -> get String f2;\n" +
+				"}\n",
+				"p1/SuperTeam.java",
+				"package p1;\n" +
+    			"import base p0.Base;\n" +
+				"public team class SuperTeam {\n" +
+				"	protected class R playedBy Base {\n" +
+				"		protected int getF1() -> get int f1;\n" +
+				"	}\n" +
+				"}\n",
+    			"p0/Base.java",
+    			"package p0;\n" +
+    			"public class Base {\n" +
+    			"	private int f1 = 1;\n" +
+    			"	private String f2 = \"2\";\n" +
+    			"}\n"
+    		},
+    		"2");
     }
 }
