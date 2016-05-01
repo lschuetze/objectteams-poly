@@ -32,9 +32,11 @@ import org.eclipse.jdt.core.dom.Expression;
 import org.eclipse.jdt.core.dom.IBinding;
 import org.eclipse.jdt.core.dom.IMethodBinding;
 import org.eclipse.jdt.core.dom.ITypeBinding;
+import org.eclipse.jdt.core.dom.SimpleName;
 import org.eclipse.jdt.core.dom.SuperConstructorInvocation;
 import org.eclipse.jdt.core.dom.TSuperConstructorInvocation;
 import org.eclipse.jdt.internal.corext.dom.Bindings;
+import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.internal.corext.util.Messages;
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
 import org.eclipse.jdt.internal.ui.text.correction.ASTResolving;
@@ -93,29 +95,45 @@ public team class CorrectionAdaptor {
 					ITypeBinding[] parameterTypes= getParameterTypes(arguments);
 					if (parameterTypes != null) {
 						String sig= ASTResolving.getMethodSignature(methodName, parameterTypes, false);
+						boolean is18OrHigher= JavaModelUtil.is18OrHigher(targetCU.getJavaProject());
 		
+						boolean isSenderBindingInterface= senderDeclBinding.isInterface();
 						if (nodeParentType == senderDeclBinding) {
 							label= Messages.format(CorrectionMessages.UnresolvedElementsSubProcessor_createmethod_description, sig);
-							image= JavaPluginImages.get(JavaPluginImages.IMG_MISC_PRIVATE);
+							if (isSenderBindingInterface) {
+								image= JavaPluginImages.get(JavaPluginImages.IMG_MISC_PUBLIC);
+							} else {
+								image= JavaPluginImages.get(JavaPluginImages.IMG_MISC_PRIVATE);
+							}
 						} else {
 							label= Messages.format(CorrectionMessages.UnresolvedElementsSubProcessor_createmethod_other_description, new Object[] { sig, BasicElementLabels.getJavaElementName(senderDeclBinding.getName()) } );
 							image= JavaPluginImages.get(JavaPluginImages.IMG_MISC_PUBLIC);
 						}
-						proposals.add(new NewMethodCorrectionProposal(label, targetCU, invocationNode, arguments, senderDeclBinding, IProposalRelevance.CREATE_METHOD, image));
+						if (is18OrHigher || !isSenderBindingInterface
+								|| (nodeParentType != senderDeclBinding && (!(sender instanceof SimpleName) || !((SimpleName) sender).getIdentifier().equals(senderDeclBinding.getName())))) {
+							proposals.add(new NewMethodCorrectionProposal(label, targetCU, invocationNode, arguments, senderDeclBinding, IProposalRelevance.CREATE_METHOD, image));
+						}
 
 						if (senderDeclBinding.isNested() && cu.equals(targetCU) && sender == null && Bindings.findMethodInHierarchy(senderDeclBinding, methodName, (ITypeBinding[]) null) == null) { // no covering method
 							ASTNode anonymDecl= astRoot.findDeclaringNode(senderDeclBinding);
 							if (anonymDecl != null) {
 								senderDeclBinding= Bindings.getBindingOfParentType(anonymDecl.getParent());
+								isSenderBindingInterface= senderDeclBinding.isInterface();
 								if (!senderDeclBinding.isAnonymous()) {
-									String[] args= new String[] { sig, ASTResolving.getTypeSignature(senderDeclBinding) };
-									label= Messages.format(CorrectionMessages.UnresolvedElementsSubProcessor_createmethod_other_description, args);
-									image= JavaPluginImages.get(JavaPluginImages.IMG_MISC_PROTECTED);
+									if (is18OrHigher || !isSenderBindingInterface) {
+										String[] args= new String[] { sig, ASTResolving.getTypeSignature(senderDeclBinding) };
+										label= Messages.format(CorrectionMessages.UnresolvedElementsSubProcessor_createmethod_other_description, args);
+										if (isSenderBindingInterface) {
+											image= JavaPluginImages.get(JavaPluginImages.IMG_MISC_PUBLIC);
+										} else {
+											image= JavaPluginImages.get(JavaPluginImages.IMG_MISC_PROTECTED);
+										}
 //{ObjectTeams: the pay-load: when traveling out of a role file, search for the new targetCU:									
-									if (binding.isRole() && astRoot.findDeclaringNode(senderDeclBinding) == null)
-										targetCU= ASTResolving.findCompilationUnitForBinding(cu, astRoot, senderDeclBinding);
+										if (binding.isRole() && astRoot.findDeclaringNode(senderDeclBinding) == null)
+											targetCU= ASTResolving.findCompilationUnitForBinding(cu, astRoot, senderDeclBinding);
 // SH}
-									proposals.add(new NewMethodCorrectionProposal(label, targetCU, invocationNode, arguments, senderDeclBinding, 5, image));
+										proposals.add(new NewMethodCorrectionProposal(label, targetCU, invocationNode, arguments, senderDeclBinding, 5, image));
+									}
 								}
 							}
 						}
