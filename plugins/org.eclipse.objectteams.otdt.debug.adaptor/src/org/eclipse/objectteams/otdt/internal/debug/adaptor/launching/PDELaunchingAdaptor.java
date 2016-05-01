@@ -171,10 +171,10 @@ public team class PDELaunchingAdaptor {
 			this.weavingMode = null;
 			if (projects != null) {
 				IProject otjProject = null;
-				for (IProject project : projects) 
+				for (IProject project : projects) {
 					// check weaving mode in all relevant OT/J Project:
 					if (project.getNature(JavaCore.OTJ_NATURE_ID) != null) {
-						String wMode = JavaCore.create(project).getOption(JavaCore.COMPILER_OPT_WEAVING_SCHEME, true);
+						String wMode = JavaCore.create(project).getOption(JavaCore.COMPILER_OPT_WEAVING_SCHEME, false);
 						if (wMode != null) {
 							if (this.weavingMode != null && !wMode.equals(this.weavingMode))
 								throw new DebugException(new Status(IStatus.ERROR, OTDebugPlugin.PLUGIN_ID,
@@ -187,6 +187,9 @@ public team class PDELaunchingAdaptor {
 							otjProject = project;
 						}
 					}
+				}
+				if (this.weavingMode == null && otjProject != null)
+					this.weavingMode = JavaCore.getDefaultOptions().get(JavaCore.COMPILER_OPT_WEAVING_SCHEME);
 			}
 			if (this.weavingMode == null)
 				logException(null, Status.WARNING, DebugMessages.OTLaunching_no_OTJ_project_found);
