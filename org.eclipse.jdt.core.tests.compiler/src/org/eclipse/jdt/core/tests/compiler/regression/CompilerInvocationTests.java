@@ -1118,6 +1118,7 @@ public void _test011_problem_categories() {
         expectedProblemAttributes.put("AmbiguousLiftingMayBreakClients", new ProblemAttributes(CategorizedProblem.CAT_POTENTIAL_PROGRAMMING_PROBLEM));
         expectedProblemAttributes.put("HiddenLiftingProblem", new ProblemAttributes(CategorizedProblem.CAT_POTENTIAL_PROGRAMMING_PROBLEM));
 
+        expectedProblemAttributes.put("BaseCallArgumentMismatch", new ProblemAttributes(CategorizedProblem.CAT_MEMBER));
         expectedProblemAttributes.put("BaseCallOutsideMethod", new ProblemAttributes(CategorizedProblem.CAT_TYPE));
         // general method binding related issues:
         expectedProblemAttributes.put("CalloutMappingInNonRole", new ProblemAttributes(CategorizedProblem.CAT_MEMBER));
@@ -2163,6 +2164,7 @@ public void test012_compiler_problems_tuning() {
         expectedProblemAttributes.put("UnboundQualifiedBase", SKIP);
         expectedProblemAttributes.put("BasecallInRegularMethod", SKIP);
         expectedProblemAttributes.put("BasecallInMethodMapping", SKIP);
+        expectedProblemAttributes.put("BaseCallArgumentMismatch", SKIP);
         expectedProblemAttributes.put("BaseCallOutsideMethod", SKIP);
         expectedProblemAttributes.put("CALLOUT_RELATED", SKIP);
         expectedProblemAttributes.put("CalloutMappingInNonRole", SKIP);
