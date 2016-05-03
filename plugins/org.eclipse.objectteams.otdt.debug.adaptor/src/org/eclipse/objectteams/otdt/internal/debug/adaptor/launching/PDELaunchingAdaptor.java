@@ -184,8 +184,8 @@ public team class PDELaunchingAdaptor {
 													project.getName(), wMode
 												})));
 							this.weavingMode = wMode;
-							otjProject = project;
 						}
+						otjProject = project;
 					}
 				}
 				if (this.weavingMode == null && otjProject != null)
