@@ -63,7 +63,7 @@ public team class PDELaunchingAdaptor {
 	static final String OTE_AGENT_ARG		  = "-javaagent:" + TransformerPlugin.getOtequinoxAgentPath();
 	static final String OT_WEAVING			  = "-Dot.weaving="; // need to append either "otre" or "otdre"
 
-	static final String[] OT_VM_ARGS          = { ENABLE_OTEQUINOX }; // FIXME: revive via bug 480234
+	static final String[] OT_VM_ARGS          = { ENABLE_OTEQUINOX, OT_WEAVING }; // FIXME: revive via bug 480234
 	static final String[] OTDRE_VM_ARGS          = { ENABLE_OTEQUINOX, OTE_AGENT_ARG, OT_WEAVING };
 	static final String[] OT_VM_DEBUG_ARGS    = { ENABLE_OTEQUINOX, OT_DEBUG_VMARG, OTE_AGENT_ARG, OT_WEAVING };
 	static final String[] VM_ARGS          = { DISABLE_OTEQUINOX };
@@ -71,9 +71,18 @@ public team class PDELaunchingAdaptor {
 
 	/** select proper set of arguments for an OT-launch, insert otequinox.hook using it's actual install location. */
 	static String[] getOTArgs(String mode, String weavingMode) {
-		String[] otArgs = OTDRE_VM_ARGS;
-		if (mode != null && mode.equals(ILaunchManager.DEBUG_MODE))
+		String[] otArgs;
+		if (mode != null && mode.equals(ILaunchManager.DEBUG_MODE)) {
 			otArgs = OT_VM_DEBUG_ARGS;
+		} else {
+			if ("otdre".equals(weavingMode))
+				otArgs = OTDRE_VM_ARGS;
+			else
+				otArgs = OT_VM_ARGS;
+		}
+		int length = otArgs.length;
+		System.arraycopy(otArgs, 0, otArgs = new String[otArgs.length], 0, length);
+		otArgs[length-1] += weavingMode;
 		return otArgs;
 	}
 	/** 
@@ -89,7 +98,6 @@ public team class PDELaunchingAdaptor {
 		String[] combinedArgs = new String[args.length + otArgs.length];
 		System.arraycopy(args, 0, combinedArgs, 0, args.length);
 		System.arraycopy(otArgs, 0, combinedArgs, args.length, otArgs.length);
-		combinedArgs[combinedArgs.length-1] += weavingMode; 
 		return combinedArgs;
 	}
 	static String[] addDisableOTEquinoxArgument(String[] args) {
@@ -105,7 +113,6 @@ public team class PDELaunchingAdaptor {
 			return args;
 						
 		String otArgs = Util.concatWith(otArgss, ' ');
-		otArgs += weavingMode;
 	
 		if (args == null || args.length() == 0)
 			return otArgs;
