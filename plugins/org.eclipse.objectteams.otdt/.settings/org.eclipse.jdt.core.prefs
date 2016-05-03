@@ -74,3 +74,4 @@ org.eclipse.jdt.core.compiler.problem.unusedPrivateMember=warning
 org.eclipse.jdt.core.compiler.problem.unusedWarningToken=warning
 org.eclipse.jdt.core.compiler.problem.varargsArgumentNeedCast=warning
 org.eclipse.jdt.core.compiler.source=1.7
+org.eclipse.objectteams.otdt.compiler.option.weaving_scheme=OTDRE

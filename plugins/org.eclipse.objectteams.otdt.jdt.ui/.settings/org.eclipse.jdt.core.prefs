@@ -80,6 +80,7 @@ org.eclipse.jdt.core.compiler.problem.unusedWarningToken=warning
 org.eclipse.jdt.core.compiler.problem.varargsArgumentNeedCast=warning
 org.eclipse.jdt.core.compiler.source=1.7
 org.eclipse.objectteams.otdt.compiler.option.scoped_keywords=enabled
+org.eclipse.objectteams.otdt.compiler.option.weaving_scheme=OTDRE
 org.eclipse.objectteams.otdt.compiler.problem.abstract_potential_relevant_role=warning
 org.eclipse.objectteams.otdt.compiler.problem.adapting_deprecated=error
 org.eclipse.objectteams.otdt.compiler.problem.ambiguous_lowering=warning
