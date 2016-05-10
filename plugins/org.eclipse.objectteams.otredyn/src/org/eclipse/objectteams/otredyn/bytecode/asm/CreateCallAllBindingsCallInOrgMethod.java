@@ -57,53 +57,57 @@ public class CreateCallAllBindingsCallInOrgMethod extends
 		MethodNode method = getMethod(orgMethod);
 		if ((method.access & Opcodes.ACC_ABSTRACT) != 0) return false;
 
-//		if (method.name.equals("<init>")) {
-//			int size = method.instructions.size();
-//			for (int i = 0; i < size; i++) {
-//				AbstractInsnNode insn = method.instructions.get(i);
-//				System.out.println(insn+" "+insn.getOpcode());
-//			}
-//		}
-//		System.out.println("================");
-
-		AbstractInsnNode insertBefore = null;
-		if (orgMethod.getName().equals("<init>")) {
-			// keep instructions, find insertion point:
-			int last = method.instructions.size();
-			LabelNode callAll = new LabelNode();
-			while (--last >= 0) {
-				if (method.instructions.get(last).getOpcode() == Opcodes.RETURN) {
-					AbstractInsnNode ret = method.instructions.get(last);
-					method.instructions.set(ret, callAll);					
-					insertBefore = callAll;
-					break;
-				}
-			}
-			if (insertBefore == null)
-				throw new IllegalStateException("Insertion point for weaving into ctor not found!!!");
-
-// FIXME: triggers NPE in MethodVisitor.visitMaxs
-//			// replace RETURN with GOTO
-//			for (int i=0; i<last; i++) {
-//				AbstractInsnNode current = method.instructions.get(i);
-//				if (current.getOpcode() == Opcodes.RETURN)
-//					method.instructions.set(current, new JumpInsnNode(Opcodes.GOTO, callAll));
-//			}
-
-		} else {
-			method.instructions.clear();
-		}
-
 		// start of try-block:
 		InsnList newInstructions = new InsnList();
 		LabelNode start = new LabelNode();
 		newInstructions.add(start);
+		Type[] args = Type.getArgumentTypes(method.desc);
 
+		{
+			if (orgMethod.getName().equals("<init>")) {
+				// keep instructions, find insertion points:
+				int last = method.instructions.size();
+				LabelNode callAll = new LabelNode();
+				boolean hasGenerated = true;
+				for (int i=0; i<last; i++) {
+					AbstractInsnNode returnCandidate = method.instructions.get(i);
+					if (returnCandidate.getOpcode() == Opcodes.RETURN) {
+						method.instructions.set(returnCandidate, callAll);
+						generateInvocation(method, args, callAll, newInstructions);
+						hasGenerated = true;
+					}
+				}
+				if (!hasGenerated)
+					throw new IllegalStateException("Insertion point for weaving into ctor not found!!!");
+			} else {
+				method.instructions.clear();
+				generateInvocation(method, args, null, newInstructions);
+			}
+		}
+
+		// catch and unwrap SneakyException:
+		addCatchSneakyException(method, start);
+
+		int localSlots = 0;
+		int maxArgSize = 1;
+		for (Type type : args) {
+			int size = type.getSize();
+			localSlots += size;
+			if (size == 2)
+				maxArgSize = 2;
+		}
+		method.maxStack = args.length > 0 ? 5+maxArgSize : 3;
+		method.maxLocals = localSlots+1;
+		
+		return true;
+	}
+
+	private void generateInvocation(MethodNode method, Type[] args, AbstractInsnNode insertBefore,
+			InsnList newInstructions) {
 		// put this on the stack
 		newInstructions.add(new IntInsnNode(Opcodes.ALOAD, 0));
 		// put boundMethodId on the stack
 		newInstructions.add(createLoadIntConstant(boundMethodId));
-		Type[] args = Type.getArgumentTypes(method.desc);
 		// box the arguments
 		newInstructions.add(getBoxingInstructions(args, false));
 
@@ -121,30 +125,6 @@ public class CreateCallAllBindingsCallInOrgMethod extends
 		} else {
 			method.instructions.add(newInstructions);
 		}
-
-//		if (method.name.equals("<init>")) {
-//			int size = method.instructions.size();
-//			for (int i = 0; i < size; i++) {
-//				AbstractInsnNode insn = method.instructions.get(i);
-//				System.out.println(insn+" "+insn.getOpcode());
-//			}
-//		}
-		
-		// catch and unwrap SneakyException:
-		addCatchSneakyException(method, start);
-
-		int localSlots = 0;
-		int maxArgSize = 1;
-		for (Type type : args) {
-			int size = type.getSize();
-			localSlots += size;
-			if (size == 2)
-				maxArgSize = 2;
-		}
-		method.maxStack = args.length > 0 ? 5+maxArgSize : 3;
-		method.maxLocals = localSlots+1;
-		
-		return true;
 	}
 
 	void addCatchSneakyException(MethodNode method, LabelNode start) {
