@@ -162,10 +162,11 @@ public team class PDELaunchingAdaptor {
 		void prepareLaunch(ILaunchConfiguration configuration, String mode) throws DebugException
 		{
 			this.mode = mode;
-			if (isOTLaunch(configuration) && ILaunchManager.DEBUG_MODE.equals(mode))
+			if (isOTLaunch(configuration))
 				try {
 					IProject[] projects = getProjectsForProblemSearch(configuration, mode);
-					PDELaunchingAdaptor.installOOTBreakpoints(projects);
+					if (ILaunchManager.DEBUG_MODE.equals(mode))
+						PDELaunchingAdaptor.installOOTBreakpoints(projects);
 					determineWeavingMode(projects);
 				} catch (DebugException dex) {
 					throw dex;
