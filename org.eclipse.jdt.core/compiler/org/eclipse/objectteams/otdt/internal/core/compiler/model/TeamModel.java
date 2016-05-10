@@ -753,7 +753,7 @@ public class TeamModel extends TypeModel {
 			if (currentRole == null) {
 				if (scope.referenceContext().hasErrors())
 					continue;
-				throw new InternalCompilerError("Role model is unexpectedly null"); //$NON-NLS-1$
+				throw new InternalCompilerError("Role model of "+String.valueOf(roleTypes[i].readableName())+" is unexpectedly null"); //$NON-NLS-1$ //$NON-NLS-2$
 			}
 			ReferenceBinding currentRoleIfc = currentRole.getInterfacePartBinding();
 			ReferenceBinding currentBase = currentRole.getBaseTypeBinding();
