@@ -1,7 +1,7 @@
 /**********************************************************************
  * This file is part of "Object Teams Development Tooling"-Software
  *
- * Copyright 2004, 2015 Fraunhofer Gesellschaft, Munich, Germany,
+ * Copyright 2004, 2016 Fraunhofer Gesellschaft, Munich, Germany,
  * for its Fraunhofer Institute for Computer Architecture and Software
  * Technology (FIRST), Berlin, Germany and Technical University Berlin,
  * Germany.
@@ -172,6 +172,11 @@ public class AstGenerator extends AstFactory {
 		long[] poss = new long[tokens.length];
 		Arrays.fill(poss, this.pos);
 		return new QualifiedNameReference(tokens, poss, this.sourceStart, this.sourceEnd);
+	}
+	public QualifiedNameReference qualifiedBaseNameReference(char[][] tokens) {
+		QualifiedNameReference ref = qualifiedNameReference(tokens);
+		ref.baseclassDecapsulation = DecapsulationState.REPORTED;
+		return ref;
 	}
 	public QualifiedNameReference qualifiedNameReference(ReferenceBinding type) {
 		char[][] tokens = CharOperation.splitOn('.', type.readableName());

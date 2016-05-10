@@ -1,7 +1,7 @@
 /**********************************************************************
  * This file is part of "Object Teams Development Tooling"-Software
  *
- * Copyright 2003, 2014 Fraunhofer Gesellschaft, Munich, Germany,
+ * Copyright 2003, 2016 Fraunhofer Gesellschaft, Munich, Germany,
  * for its Fraunhofer Institute for Computer Architecture and Software
  * Technology (FIRST), Berlin, Germany and Technical University Berlin,
  * Germany.
@@ -10,7 +10,6 @@
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
- * $Id: CalloutImplementor.java 23416 2010-02-03 19:59:31Z stephan $
  *
  * Please visit http://www.eclipse.org/objectteams for updates and contact.
  *
@@ -592,7 +591,7 @@ public class CalloutImplementor extends MethodMappingImplementor
 						if (baseField.isStatic())
 							baseAccess = gen.qualifiedNameReference(baseField);
 						else
-							baseAccess = gen.qualifiedNameReference(new char[][] {IOTConstants._OT_BASE, baseField.name });
+							baseAccess = gen.qualifiedBaseNameReference(new char[][] {IOTConstants._OT_BASE, baseField.name });
 						if (fieldSpec.isSetter()) {
 							int pos = (fieldSpec.isStatic() | this._role.getWeavingScheme() == WeavingScheme.OTDRE) ? 0 : 1;
 							baseAccess = gen.assignment((NameReference)baseAccess, arguments[pos]);

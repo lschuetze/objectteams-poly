@@ -1,13 +1,12 @@
 /**********************************************************************
  * This file is part of "Object Teams Development Tooling"-Software
  * 
- * Copyright 2004, 2015 IT Service Omikron GmbH and others.
+ * Copyright 2004, 2016 IT Service Omikron GmbH and others.
  * 
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
- * $Id$
  * 
  * Please visit http://www.eclipse.org/objectteams for updates and contact.
  * 
@@ -1713,5 +1712,38 @@ public class OverridingAccessRestrictions extends AbstractOTJLDTest {
     			"}\n"    				
     		},
     		"42true");
+    }
+    
+    // c-t-f to field of protected static inner
+    public void testBug461434() throws Exception {
+    	runConformTest(
+    		new String[] {
+    			"pt461434/MyTeam.java",
+    			"package pt461434;\n" +
+    			"import base pb461434.MyBase.Nested;\n" +
+    			"public team class MyTeam {\n" +
+    			"	protected class R playedBy Nested {\n" +
+    			"		public int getVal() -> get int val;\n" +
+    			"		public int getV2() -> get int v2;\n" +
+    			"		protected R() { base(); }\n" +
+    			"	}\n" +
+    			"	void test() {\n" +
+    			"		System.out.print(new R().getVal()+new R().getV2());\n" +
+    			"	}\n" +
+    			"	public static void main(String... args) {\n" +
+    			"		new MyTeam().test();\n" +
+    			"	}\n" +
+    			"}\n",
+    			"pb461434/MyBase.java",
+    			"package pb461434;\n" +
+    			"public class MyBase {\n" +
+    			"	protected static class Nested {\n" +
+    			"		public int val;\n" +
+    			"		public static int v2 = 13;\n" +
+    			"		Nested() { this.val=42; }\n" +
+    			"	}\n" +
+    			"}\n"
+    		},
+    		"55");
     }
 }
