@@ -866,8 +866,10 @@ public class ClassScope extends Scope {
 
 			if (!memberTypeDeclaration.isRoleFile()) { // otherwise OTClassScope.buildType() did this.
 				// need to actually add:
-				System.arraycopy(sourceType.memberTypes, 0, sourceType.memberTypes = new ReferenceBinding[size+1], 0, size);
-				sourceType.memberTypes[size]= newBinding;
+				ReferenceBinding[] newMembers = new ReferenceBinding[size+1];
+				System.arraycopy(sourceType.memberTypes, 0, newMembers, 0, size);
+				newMembers[size]= newBinding;
+				sourceType.setMemberTypes(newMembers);
 			}
 		}
 	}

@@ -541,7 +541,7 @@ void cachePartsFrom(IBinaryType binaryType, boolean needFieldsAndMethods) {
 			System.arraycopy(oldMembers, 0, newMembers, 0, len);
 			newMembers[len] = this;
 			SourceTypeBinding enclosingSourceTypeBinding = (SourceTypeBinding)this.enclosingType;
-			enclosingSourceTypeBinding.memberTypes = newMembers;
+			enclosingSourceTypeBinding.setMemberTypes(newMembers);
 			if (enclosingSourceTypeBinding.scope != null) {
 				// remember the name of this binary member type:
 				CompilationResult result =

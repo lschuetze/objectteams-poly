@@ -1,7 +1,7 @@
 /**********************************************************************
  * This file is part of "Object Teams Development Tooling"-Software
  *
- * Copyright 2004, 2006 Fraunhofer Gesellschaft, Munich, Germany,
+ * Copyright 2004, 2016 Fraunhofer Gesellschaft, Munich, Germany,
  * for its Fraunhofer Institute for Computer Architecture and Software
  * Technology (FIRST), Berlin, Germany and Technical University Berlin,
  * Germany.
@@ -10,7 +10,6 @@
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
- * $Id: OTClassScope.java 23416 2010-02-03 19:59:31Z stephan $
  *
  * Please visit http://www.eclipse.org/objectteams for updates and contact.
  *
@@ -121,16 +120,18 @@ public class OTClassScope extends ClassScope {
 		}
 		SourceTypeBinding type = super.buildType(enclosingType, packageBinding, accessRestriction);
 		int size = 0;
+		ReferenceBinding[] newMembers;
 		if (enclosingType.memberTypes == null) {
-			enclosingType.memberTypes = new ReferenceBinding[1];
+			newMembers = new ReferenceBinding[1];
 		} else {
 			size = enclosingType.memberTypes.length;
 			//grow Array
 			System.arraycopy(
 					enclosingType.memberTypes, 0,
-					enclosingType.memberTypes = new ReferenceBinding[size+1], 0, size);
+					newMembers = new ReferenceBinding[size+1], 0, size);
 		}
-		enclosingType.memberTypes[size] = type;
+		newMembers[size] = type;
+		enclosingType.setMemberTypes(newMembers);
 		return type;
 	}
 

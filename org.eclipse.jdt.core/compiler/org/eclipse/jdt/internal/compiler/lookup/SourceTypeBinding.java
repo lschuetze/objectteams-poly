@@ -3091,6 +3091,10 @@ public ReferenceBinding [] setMemberTypes(ReferenceBinding[] memberTypes) {
 	
 	if (!isPrototype())
 		return this.prototype.setMemberTypes(memberTypes);
+//{ObjectTeams: for post-hoc addition need to clear this flag:
+	if (memberTypes.length > 0)
+		this.tagBits &= ~TagBits.HasNoMemberTypes;
+// SH}
 
 	this.memberTypes = memberTypes;
 	if ((this.tagBits & TagBits.HasAnnotatedVariants) != 0) {
