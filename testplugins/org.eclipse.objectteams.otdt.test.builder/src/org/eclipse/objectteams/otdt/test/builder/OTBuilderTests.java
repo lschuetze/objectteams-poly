@@ -32,7 +32,7 @@ public class OTBuilderTests extends BuilderTests {
 
 	OTTestingEnvironment otenv;
 
-	WeavingScheme weavingScheme = WeavingScheme.OTRE; // FIXME: test OTDRE, too!
+	WeavingScheme weavingScheme = WeavingScheme.OTDRE; // FIXME: test OTRE, too!
 
 	public OTBuilderTests(String name) {
 		super(name);

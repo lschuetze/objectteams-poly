@@ -63,7 +63,7 @@ public class TestBase extends TestCase
 	public static final String JAVA_HOME = System.getProperty("java.home");
 	public static final String USER_HOME = System.getProperty("user.home");
 
-	private WeavingScheme weavingScheme = WeavingScheme.OTRE; // FIXME: test OTDRE, too!
+	private WeavingScheme weavingScheme = WeavingScheme.OTDRE; // FIXME: test OTRE, too!
 
 	public static final String JRE_JAR_PATH;
 	static {
