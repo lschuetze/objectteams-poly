@@ -176,6 +176,8 @@ class AsmWritableBoundClass extends AsmBoundClass {
 				// It is not the first transformation, so redefine the class
 				try {
 					redefine(definedClass);
+				} catch (ClassNotFoundException cnfe) {
+					throw new RuntimeException("OTDRE: Failed to redefine class: "+this.getName(), cnfe);
 				} catch (Throwable t) {
 	//				t.printStackTrace(System.out);
 					// if redefinition failed (ClassCircularity?) install a runnable for deferred redefinition:
@@ -184,7 +186,11 @@ class AsmWritableBoundClass extends AsmBoundClass {
 						public void run() {
 							if (previousTask != null)
 								previousTask.run();
-							redefine(definedClass);
+							try {
+								redefine(definedClass);
+							} catch (ClassNotFoundException e) {
+								e.printStackTrace(); // should never get here, since we expect CNFE already on the first attempt
+							}
 						}
 						@Override
 						public String toString() {
@@ -357,15 +363,18 @@ class AsmWritableBoundClass extends AsmBoundClass {
 	/**
 	 * Redefines the class
 	 * @param definedClass previously defined class if available
+	 * @throws ClassNotFoundException may signal missing OTEquinoxAgent
 	 */
-	private void redefine(Class<?> definedClass) {
+	private void redefine(Class<?> definedClass) throws ClassNotFoundException {
 		try {
 			Class<?> clazz = definedClass != null ? definedClass : this.loader.loadClass(this.getName()); // boot classes may have null classloader, can't be redefined anyway?
 			byte[] bytecode = allocateAndGetBytecode();
 			dump(bytecode, "redef");
 			RedefineStrategyFactory.getRedefineStrategy().redefine(clazz, bytecode);
+		} catch (ClassNotFoundException cnfe) {
+			throw cnfe;
 		} catch (Throwable t) {
-			throw new RuntimeException("Error occured while dynamically redefining class " + getName()+"\n"+t.getMessage(), t);
+			throw new RuntimeException("OTDRE: Error occured while dynamically redefining class " + getName()+"\n"+t.getMessage(), t);
 		}
 	}
 

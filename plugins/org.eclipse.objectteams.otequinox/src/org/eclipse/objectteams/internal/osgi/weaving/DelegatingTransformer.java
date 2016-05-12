@@ -1,7 +1,7 @@
 /**********************************************************************
  * This file is part of "Object Teams Development Tooling"-Software
  * 
- * Copyright 2015 GK Software AG
+ * Copyright 2015, 2016 GK Software AG
  *  
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -99,7 +99,7 @@ public abstract class DelegatingTransformer {
 			}
 		}
 		
-		static void reflectivelyInvoke(ClassDefinition[] definitions) throws ClassFormatError, UnmodifiableClassException {
+		static void reflectivelyInvoke(ClassDefinition[] definitions) throws ClassNotFoundException, ClassFormatError, UnmodifiableClassException {
 			try {
 				Class<?> agentClass = ClassLoader.getSystemClassLoader().loadClass(OT_EQUINOX_DEBUG_AGENT);
 				java.lang.reflect.Method redefine = agentClass.getMethod("redefine", new Class<?>[]{ClassDefinition[].class});
@@ -110,9 +110,11 @@ public abstract class DelegatingTransformer {
 					throw (ClassFormatError)cause;
 				if (cause instanceof UnmodifiableClassException)
 					throw (UnmodifiableClassException)cause;
-				throw new UnmodifiableClassException(cause.getMessage());
+				throw new UnmodifiableClassException(cause.getClass().getName()+": "+cause.getMessage());
+			} catch (ClassNotFoundException cnfe) {
+				throw cnfe;
 			} catch (Throwable t) {
-				throw new UnmodifiableClassException(t.getMessage());
+				throw new UnmodifiableClassException(t.getClass().getName()+": "+t.getMessage());
 			}
 		}
 	}
