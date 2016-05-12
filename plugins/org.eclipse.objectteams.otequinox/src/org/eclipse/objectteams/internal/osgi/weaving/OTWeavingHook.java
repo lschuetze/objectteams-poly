@@ -76,11 +76,15 @@ public class OTWeavingHook implements WeavingHook, WovenClassListener {
 
 	// TODO: this master-switch, which selects the weaver, should probably be replaced by s.t. else?
 	static final boolean USE_DYNAMIC_WEAVER;
+	static final boolean WEAVE_THREAD_NOTIFICATION_IN_BASE;
+	static final boolean WEAVE_THREAD_NOTIFICATION_ALWAYS;
 	static {
 		String weaving = System.getProperty("ot.weaving");
 System.err.println("OT/Equinox: ot.weaving="+weaving);
 		USE_DYNAMIC_WEAVER = (weaving != null) && weaving.toLowerCase().equals("otdre");
 System.err.println("OT/Equinox: USE_DYNAMIC_WEAVER="+USE_DYNAMIC_WEAVER);
+		WEAVE_THREAD_NOTIFICATION_IN_BASE = !"false".equals(System.getProperty("otequinox.weave.thread.base"));
+		WEAVE_THREAD_NOTIFICATION_ALWAYS = !"false".equals(System.getProperty("otequinox.weave.thread"));
 	}
 	
 	// TODO: temporary switch to fall back to coarse grain checking:
@@ -316,8 +320,10 @@ System.err.println("OT/Equinox: USE_DYNAMIC_WEAVER="+USE_DYNAMIC_WEAVER);
 
 		if (aspectBindingRegistry.isBoundBaseClass(className))
 			return WeavingReason.Base;
+		boolean isBaseBundle = false;
 		List<AspectBinding> aspectBindings = aspectBindingRegistry.getAdaptingAspectBindings(bundle.getSymbolicName());
 		if (aspectBindings != null && !aspectBindings.isEmpty()) {
+			isBaseBundle = true;
 			// potential base class: look deeper:
 			for (AspectBinding aspectBinding : aspectBindings) {
 				if (!aspectBinding.hasScannedTeams && !aspectBinding.hasBeenDenied)
@@ -330,7 +336,7 @@ System.err.println("OT/Equinox: USE_DYNAMIC_WEAVER="+USE_DYNAMIC_WEAVER);
 		// 2. test for implementation of Runnable / Thread (per class):
 		long time = 0;
 		if (Util.PROFILE) time= System.nanoTime();
-		if (needsThreadNotificationCode(className, bytes, bundleWiring.getClassLoader()))
+		if (needsThreadNotificationCode(className, bytes, bundleWiring.getClassLoader(), isBaseBundle))
 			return WeavingReason.Thread;
 		if (Util.PROFILE) Util.profile(time, ProfileKind.SuperClassFetching, "");
 
@@ -482,32 +488,34 @@ System.err.println("OT/Equinox: USE_DYNAMIC_WEAVER="+USE_DYNAMIC_WEAVER);
 	
 	}
 
-	private boolean needsThreadNotificationCode(String className, byte[] bytes, ClassLoader resourceLoader) {
+	private boolean needsThreadNotificationCode(String className, byte[] bytes, ClassLoader resourceLoader, boolean isBaseBundle) {
 
 		if ("java.lang.Object".equals(className))
 			return false; // shortcut, have no super
-		ClassInformation classInfo = null;
-		if (bytes != null) {
-			classInfo = this.byteCodeAnalyzer.getClassInformation(bytes, className);
-		} else {
-			try (InputStream is = resourceLoader.getResourceAsStream(className.replace('.', '/')+".class")) {
-				if (is != null) {
-					classInfo = this.byteCodeAnalyzer.getClassInformation(is, className);
+		if (WEAVE_THREAD_NOTIFICATION_ALWAYS || (WEAVE_THREAD_NOTIFICATION_IN_BASE && isBaseBundle)) {
+			ClassInformation classInfo = null;
+			if (bytes != null) {
+				classInfo = this.byteCodeAnalyzer.getClassInformation(bytes, className);
+			} else {
+				try (InputStream is = resourceLoader.getResourceAsStream(className.replace('.', '/')+".class")) {
+					if (is != null) {
+						classInfo = this.byteCodeAnalyzer.getClassInformation(is, className);
+					}
+				} catch (IOException e) {
+					return false;
 				}
-			} catch (IOException e) {
-				return false;
 			}
-		}
-		if (classInfo != null && !classInfo.isInterface()) {
-			String superClassName = classInfo.getSuperClassName();
-			if ("java.lang.Thread".equals(superClassName))
-				return true; // ensure TeamActivation will weave the calls to TeamThreadManager
-			String[] superInterfaceNames = classInfo.getSuperInterfaceNames();
-			if (superInterfaceNames != null)
-				for (int i = 0; i < superInterfaceNames.length; i++) {
-					if ("java.lang.Runnable".equals(superInterfaceNames[i]))
-						return true; // ensure TeamActivation will weave the calls to TeamThreadManager
-				}
+			if (classInfo != null && !classInfo.isInterface()) {
+				String superClassName = classInfo.getSuperClassName();
+				if ("java.lang.Thread".equals(superClassName))
+					return true; // ensure TeamActivation will weave the calls to TeamThreadManager
+				String[] superInterfaceNames = classInfo.getSuperInterfaceNames();
+				if (superInterfaceNames != null)
+					for (int i = 0; i < superInterfaceNames.length; i++) {
+						if ("java.lang.Runnable".equals(superInterfaceNames[i]))
+							return true; // ensure TeamActivation will weave the calls to TeamThreadManager
+					}
+			}
 		}
 		return false;
 	}
