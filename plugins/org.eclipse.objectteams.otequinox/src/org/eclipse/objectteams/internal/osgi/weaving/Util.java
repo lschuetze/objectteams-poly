@@ -45,7 +45,8 @@ public class Util
 			else
 				WARN_LEVEL = OK;
 		}
-		PROFILE= (System.getProperty("otequinox.profile") != null); //$NON-NLS-1$
+		String profile = System.getProperty("otequinox.profile"); //$NON-NLS-1$
+		PROFILE= profile != null && !"false".equals(profile); //$NON-NLS-1$
 	}
 
 	/** Profiling data: */
