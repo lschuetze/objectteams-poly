@@ -64,7 +64,7 @@ public team class PDELaunchingAdaptor {
 	static final String OTE_AGENT_ARG		  = "-javaagent:" + TransformerPlugin.getOtequinoxAgentPath();
 	static final String OT_WEAVING			  = "-Dot.weaving="; // need to append either "otre" or "otdre"
 
-	static final String[] OT_VM_ARGS          = { ENABLE_OTEQUINOX, OT_WEAVING }; // FIXME: revive via bug 480234
+	static final String[] OT_VM_ARGS          = { ENABLE_OTEQUINOX, OT_WEAVING };
 	static final String[] OTDRE_VM_ARGS          = { ENABLE_OTEQUINOX, OTE_AGENT_ARG, OT_WEAVING };
 	static final String[] OT_VM_DEBUG_ARGS    = { ENABLE_OTEQUINOX, OT_DEBUG_VMARG, OTE_AGENT_ARG, OT_WEAVING };
 	static final String[] VM_ARGS          = { DISABLE_OTEQUINOX };
