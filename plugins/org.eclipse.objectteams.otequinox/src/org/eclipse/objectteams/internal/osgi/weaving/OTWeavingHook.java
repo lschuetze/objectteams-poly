@@ -27,6 +27,7 @@ import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -78,6 +79,7 @@ public class OTWeavingHook implements WeavingHook, WovenClassListener {
 	static final boolean USE_DYNAMIC_WEAVER;
 	static final boolean WEAVE_THREAD_NOTIFICATION_IN_BASE;
 	static final boolean WEAVE_THREAD_NOTIFICATION_ALWAYS;
+	static final Map<String,Set<String>> KNOWN_LOGGING_CLASSES = new HashMap<>();
 	static {
 		String weaving = System.getProperty("ot.weaving");
 System.err.println("OT/Equinox: ot.weaving="+weaving);
@@ -85,6 +87,17 @@ System.err.println("OT/Equinox: ot.weaving="+weaving);
 System.err.println("OT/Equinox: USE_DYNAMIC_WEAVER="+USE_DYNAMIC_WEAVER);
 		WEAVE_THREAD_NOTIFICATION_IN_BASE = !"false".equals(System.getProperty("otequinox.weave.thread.base"));
 		WEAVE_THREAD_NOTIFICATION_ALWAYS = !"false".equals(System.getProperty("otequinox.weave.thread"));
+
+		KNOWN_LOGGING_CLASSES.put("org.eclipse.equinox.common", Collections.singleton(
+										"org.eclipse.core.runtime.ILogListener"));
+		KNOWN_LOGGING_CLASSES.put("org.eclipse.ui.workbench", new HashSet<>(Arrays.asList(
+										"org.eclipse.ui.statushandlers.StatusAdapter",
+										"org.eclipse.ui.internal.misc.StatusUtil",
+										"org.eclipse.ui.statushandlers.WorkbenchStatusDialogManager",
+										"org.eclipse.ui.internal.statushandlers.StatusHandlerRegistry",
+										"org.eclipse.ui.internal.statushandlers.StatusHandlerDescriptorsMap")));
+		KNOWN_LOGGING_CLASSES.put("org.eclipse.ui.ide", Collections.singleton(
+										"org.eclipse.ui.internal.ide.IDEWorkbenchErrorHandler$1"));
 	}
 	
 	// TODO: temporary switch to fall back to coarse grain checking:
@@ -295,18 +308,11 @@ System.err.println("OT/Equinox: USE_DYNAMIC_WEAVER="+USE_DYNAMIC_WEAVER);
 	}
 
 	private boolean isEclipseLoggingClass(String bundleName, String className) {
-		if (bundleName.equals("org.eclipse.ui.workbench")) {
-			if (className.equals("org.eclipse.ui.statushandlers.StatusAdapter"))
-				return true;
-			else if (className.equals("org.eclipse.ui.internal.misc.StatusUtil"))
-				return true;
-			else if (className.equals("org.eclipse.ui.statushandlers.WorkbenchStatusDialogManager"))
-				return true;
+		Set<String> knownClasses = KNOWN_LOGGING_CLASSES.get(bundleName);
+		if (knownClasses != null) {
+			return knownClasses.contains(className);
 		} else if (bundleName.equals("org.eclipse.ui.views.log")) {
 			if (className.startsWith("org.eclipse.ui.internal.views.log.LogView$"))
-				return true;
-		} else if (bundleName.equals("org.eclipse.equinox.common")) {
-			if (className.equals("org.eclipse.core.runtime.ILogListener"))
 				return true;
 		} else if (bundleName.startsWith("org.eclipse.epp.logging.aeri")) { // ".core" & ".ide"
 			return true; // not truly part of Eclipse but dangerously hooks in as a log listener
