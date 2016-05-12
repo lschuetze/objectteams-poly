@@ -306,6 +306,8 @@ System.err.println("OT/Equinox: USE_DYNAMIC_WEAVER="+USE_DYNAMIC_WEAVER);
 		} else if (bundleName.equals("org.eclipse.equinox.common")) {
 			if (className.equals("org.eclipse.core.runtime.ILogListener"))
 				return true;
+		} else if (bundleName.startsWith("org.eclipse.epp.logging.aeri")) { // ".core" & ".ide"
+			return true; // not truly part of Eclipse but dangerously hooks in as a log listener
 		}
 		return false;
 	}
