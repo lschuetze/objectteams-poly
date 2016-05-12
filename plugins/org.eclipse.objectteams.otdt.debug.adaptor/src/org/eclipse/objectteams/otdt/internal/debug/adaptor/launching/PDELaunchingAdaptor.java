@@ -28,6 +28,7 @@ import org.eclipse.debug.core.ILaunchManager;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.internal.core.util.Util;
 import org.eclipse.objectteams.otdt.core.ext.OTREContainer;
+import org.eclipse.objectteams.otdt.core.ext.WeavingScheme;
 import org.eclipse.objectteams.otdt.debug.OTDebugPlugin;
 import org.eclipse.objectteams.otdt.debug.TeamBreakpointInstaller;
 import org.eclipse.objectteams.otdt.internal.debug.adaptor.DebugMessages;
@@ -75,7 +76,7 @@ public team class PDELaunchingAdaptor {
 		if (mode != null && mode.equals(ILaunchManager.DEBUG_MODE)) {
 			otArgs = OT_VM_DEBUG_ARGS;
 		} else {
-			if ("otdre".equals(weavingMode))
+			if (WeavingScheme.OTDRE.name().equals(weavingMode))
 				otArgs = OTDRE_VM_ARGS;
 			else
 				otArgs = OT_VM_ARGS;
