@@ -300,6 +300,8 @@ System.err.println("OT/Equinox: USE_DYNAMIC_WEAVER="+USE_DYNAMIC_WEAVER);
 				return true;
 			else if (className.equals("org.eclipse.ui.internal.misc.StatusUtil"))
 				return true;
+			else if (className.equals("org.eclipse.ui.statushandlers.WorkbenchStatusDialogManager"))
+				return true;
 		} else if (bundleName.equals("org.eclipse.ui.views.log")) {
 			if (className.startsWith("org.eclipse.ui.internal.views.log.LogView$"))
 				return true;
