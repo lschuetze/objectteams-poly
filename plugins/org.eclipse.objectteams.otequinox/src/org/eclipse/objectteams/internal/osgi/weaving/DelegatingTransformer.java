@@ -27,6 +27,7 @@ import java.util.Collection;
 
 import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.objectteams.internal.osgi.weaving.OTWeavingHook.WeavingReason;
+import org.eclipse.objectteams.internal.osgi.weaving.Util.ProfileKind;
 import org.eclipse.objectteams.otredyn.bytecode.IRedefineStrategy;
 import org.eclipse.objectteams.otredyn.bytecode.RedefineStrategyFactory;
 import org.eclipse.objectteams.otredyn.transformer.IWeavingContext;
@@ -90,7 +91,9 @@ public abstract class DelegatingTransformer {
 		public void redefine(Class<?> clazz, byte[] bytecode) throws ClassNotFoundException, UnmodifiableClassException {
 			ClassDefinition arr_cd[] = { new ClassDefinition(clazz, bytecode) };
 			try {
+				long start = System.nanoTime();
 				reflectivelyInvoke(arr_cd);
+				Util.profile(start, ProfileKind.RedefineClasses, clazz.getName());
 			} catch (ClassFormatError|UnmodifiableClassException e) {
 				// error output during redefinition tends to swallow the stack, print it now:
 				System.err.println("Error redefining "+clazz.getName());
