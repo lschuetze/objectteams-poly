@@ -102,7 +102,7 @@ public class TeamManager implements ITeamManager {
 	public static int getMemberId(int accessId, Class<? extends ITeam> teamClass) {
 		List<Integer> teamMap = accessIdMap.get(teamClass);
 		Integer id = -1;
-		if (teamMap == null || (id = teamMap.get(accessId)) == null) {
+		if (teamMap == null || accessId >= teamMap.size() || (id = teamMap.get(accessId)) == null) {
 			Class<?> superClass = teamClass.getSuperclass();
 			if (ITeam.class.isAssignableFrom(superClass)) {
 				@SuppressWarnings("unchecked") Class<? extends ITeam> superTeam = (Class<? extends ITeam>) superClass;
