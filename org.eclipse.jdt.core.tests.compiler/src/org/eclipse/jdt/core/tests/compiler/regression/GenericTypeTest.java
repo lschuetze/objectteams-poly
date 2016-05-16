@@ -52197,4 +52197,36 @@ public void testBug460491() {
 			customOptions);
 	}
 }
+public void testBug492450_comment0() {
+	if (this.complianceLevel >= ClassFileConstants.JDK1_6) {
+		runConformTest(
+			new String[] {
+				"DocumentObject.java",
+				"\n" + 
+				"import java.util.ArrayList;\n" + 
+				"\n" + 
+				"interface IDocumentElementNode {\n" + 
+				"	public ArrayList<?> getChildNodesList();\n" + 
+				"}\n" + 
+				"\n" + 
+				"abstract class DocumentElementNode implements IDocumentElementNode {\n" + 
+				"	@Override\n" + 
+				"	public ArrayList<IDocumentElementNode> getChildNodesList() {\n" + 
+				"		return null;\n" + 
+				"	}\n" + 
+				"}\n" + 
+				"\n" + 
+				"interface IDocumentObject extends IDocumentElementNode {\n" + 
+				"	public ArrayList<?> getChildNodesList(Class<?>[] classes, boolean match);\n" + 
+				"}\n" + 
+				"\n" + 
+				"public abstract class DocumentObject extends DocumentElementNode implements IDocumentObject {\n" + 
+				"	@Override\n" + 
+				"	public ArrayList<IDocumentElementNode> getChildNodesList(Class<?>[] classes, boolean match) {\n" + 
+				"		return null;\n" + 
+				"	}\n" + 
+				"}\n"
+			});
+	}
+}
 }

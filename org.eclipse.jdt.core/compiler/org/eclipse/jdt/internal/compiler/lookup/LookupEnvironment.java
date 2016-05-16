@@ -59,7 +59,6 @@ import org.eclipse.jdt.internal.compiler.problem.AbortCompilation;
 import org.eclipse.jdt.internal.compiler.problem.ProblemReporter;
 import org.eclipse.jdt.internal.compiler.util.HashtableOfPackage;
 import org.eclipse.jdt.internal.compiler.util.SimpleLookupTable;
-import org.eclipse.jdt.internal.core.INameEnvironmentWithProgress;
 import org.eclipse.objectteams.otdt.internal.core.compiler.control.Config;
 import org.eclipse.objectteams.otdt.internal.core.compiler.control.Dependencies;
 import org.eclipse.objectteams.otdt.internal.core.compiler.control.ITranslationStates;
@@ -1016,11 +1015,11 @@ public PackageBinding createPackage(char[][] compoundName) {
 			// catches the case of a package statement of: package java.lang.Object;
 			// since the package can be added after a set of source files have already been compiled,
 			// we need to check whenever a package is created
-			if(this.nameEnvironment instanceof INameEnvironmentWithProgress) {
+			if(this.nameEnvironment instanceof INameEnvironmentExtension) {
 				//When the nameEnvironment is an instance of INameEnvironmentWithProgress, it can get avoided to search for secondaryTypes (see flag).
 				// This is a performance optimization, because it is very expensive to search for secondary types and it isn't necessary to check when creating a package,
 				// because package name can not collide with a secondary type name.
-				if (((INameEnvironmentWithProgress)this.nameEnvironment).findType(compoundName[i], parent.compoundName, false) != null) {
+				if (((INameEnvironmentExtension)this.nameEnvironment).findType(compoundName[i], parent.compoundName, false) != null) {
 					return null;
 				}
 			} else {
