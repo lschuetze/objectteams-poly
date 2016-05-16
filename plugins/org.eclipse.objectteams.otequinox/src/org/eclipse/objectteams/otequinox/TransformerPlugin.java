@@ -30,6 +30,7 @@ import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.equinox.log.ExtendedLogReaderService;
 import org.eclipse.equinox.log.ExtendedLogService;
+import org.eclipse.equinox.log.LogFilter;
 import org.eclipse.equinox.log.Logger;
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
@@ -48,12 +49,15 @@ import org.osgi.framework.ServiceListener;
 import org.osgi.framework.ServiceReference;
 import org.osgi.framework.hooks.weaving.WeavingHook;
 import org.osgi.framework.hooks.weaving.WovenClassListener;
+import org.osgi.service.log.LogEntry;
+import org.osgi.service.log.LogListener;
 import org.osgi.util.tracker.ServiceTracker;
 
 @NonNullByDefault
 public class TransformerPlugin implements BundleActivator, IAspectRegistry {
 
     private static final String OTEQUINOX_AGENT_JAR_FILENAME = "otequinoxAgent.jar"; //$NON-NLS-1$
+	private static final String OTEQUINOX_LOGGER_NAME = "org.eclipse.objectteams.otequinox.logger"; //$NON-NLS-1$
 
 	/**
 	 * State class representing the initialized state, i.e., after {@link start()}
@@ -171,27 +175,37 @@ public class TransformerPlugin implements BundleActivator, IAspectRegistry {
 
 	@SuppressWarnings("restriction")
 	private static ILog acquireLog(BundleContext bundleContext) {
-		try {
-			return org.eclipse.core.internal.runtime.InternalPlatform.getDefault().getLog(bundleContext.getBundle());
-		} catch (NullPointerException npe) {
-			// in case InternalPlatform isn't initialized yet, perform the same tasks manually:
+		ServiceTracker<ExtendedLogService,ExtendedLogService> tracker
+				= new ServiceTracker<ExtendedLogService,ExtendedLogService>(bundleContext, ExtendedLogService.class, null);
+		tracker.open();
+		ExtendedLogService logService = tracker.getService();
+		Bundle bundle = bundleContext.getBundle();
+		Logger logger = logService.getLogger(bundle, OTEQUINOX_LOGGER_NAME);
+		org.eclipse.core.internal.runtime.Log result = new org.eclipse.core.internal.runtime.Log(bundle, logger);
 
-			ServiceTracker<ExtendedLogService,ExtendedLogService> tracker
-					= new ServiceTracker<ExtendedLogService,ExtendedLogService>(bundleContext, ExtendedLogService.class, null);
-			tracker.open();
-			ExtendedLogService logService = tracker.getService();
-			Bundle bundle = bundleContext.getBundle();
-			Logger logger = logService == null ? null 
-					: logService.getLogger(bundle, org.eclipse.core.internal.runtime.PlatformLogWriter.EQUINOX_LOGGER_NAME);
-			org.eclipse.core.internal.runtime.Log result = new org.eclipse.core.internal.runtime.Log(bundle, logger);
+		ServiceTracker<ExtendedLogReaderService, ExtendedLogReaderService> logReaderTracker 
+				= new ServiceTracker<ExtendedLogReaderService,ExtendedLogReaderService>(bundleContext, ExtendedLogReaderService.class.getName(), null);
+		logReaderTracker.open();
+		ExtendedLogReaderService logReader = logReaderTracker.getService();
 
-			ServiceTracker<ExtendedLogReaderService, ExtendedLogReaderService> logReaderTracker 
-					= new ServiceTracker<ExtendedLogReaderService,ExtendedLogReaderService>(bundleContext, ExtendedLogReaderService.class.getName(), null);
-			logReaderTracker.open();
-			ExtendedLogReaderService logReader = logReaderTracker.getService();
-			logReader.addLogListener(result, result);
-			return result;
-		}
+		final Logger equinoxLogger = logService.getLogger(bundle, org.eclipse.core.internal.runtime.PlatformLogWriter.EQUINOX_LOGGER_NAME);
+
+		// listen to log events from our logger and asynchronously dispatch them to the equinox logger
+		logReader.addLogListener(
+			new LogListener() {
+				@Override @NonNullByDefault(false)
+				public void logged(LogEntry entry) {
+					equinoxLogger.log(entry.getLevel(), entry.getMessage(), entry.getException());
+				}
+			},
+			new LogFilter() {
+				@Override @NonNullByDefault(false)
+				public boolean isLoggable(Bundle bundle, String loggerName, int logLevel) {
+					return OTEQUINOX_LOGGER_NAME.equals(loggerName);
+				}
+			}
+		);
+		return result;
 	}
 
 	private void OTREInit() {
