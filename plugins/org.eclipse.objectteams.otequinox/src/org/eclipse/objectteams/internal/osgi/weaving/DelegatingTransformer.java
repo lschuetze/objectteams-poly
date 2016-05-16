@@ -93,7 +93,7 @@ public abstract class DelegatingTransformer {
 			try {
 				long start = System.nanoTime();
 				reflectivelyInvoke(arr_cd);
-				Util.profile(start, ProfileKind.RedefineClasses, clazz.getName());
+				if (Util.PROFILE) Util.profile(start, ProfileKind.RedefineClasses, clazz.getName());
 			} catch (ClassFormatError|UnmodifiableClassException e) {
 				// error output during redefinition tends to swallow the stack, print it now:
 				System.err.println("Error redefining "+clazz.getName());
