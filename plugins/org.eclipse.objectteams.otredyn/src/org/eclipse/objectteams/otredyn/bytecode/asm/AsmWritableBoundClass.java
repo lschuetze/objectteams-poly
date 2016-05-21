@@ -393,8 +393,8 @@ class AsmWritableBoundClass extends AsmBoundClass {
 			methodModifiers |= Opcodes.ACC_ABSTRACT;
 		
 		String superClassName = getSuperClassName();
+		String internalSuperClassName = getInternalSuperClassName();
 		boolean superIsWeavable = weavingContext.isWeavable(superClassName);
-		String internalSuperClassName = superIsWeavable ? getInternalSuperClassName() : null;
 
 		if (!isInterface() && !superIsWeavable)
 			addField(ConstantMembers.roleSet, Opcodes.ACC_PUBLIC);
