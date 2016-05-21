@@ -18,8 +18,10 @@ package org.eclipse.objectteams.otredyn.runtime;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import org.objectteams.ITeam;
 import org.objectteams.ITeamManager;
@@ -236,11 +238,14 @@ public class TeamManager implements ITeamManager {
 		String teamId = provider.getClassIdentifier(teamClass);
 		IBoundTeam teem = classRepository.getTeam(teamClass.getName(), teamId, teamClass.getClassLoader());
 
+		Set<IBoundClass> baseClasses = new HashSet<IBoundClass>();
 		for (IBinding binding : teem.getBindings()) {
 			String boundClassName = binding.getBoundClass();
 			String boundClassIdentifier = provider.getBoundClassIdentifier(teamClass, boundClassName.replace('.', '/'));
 			// FIXME(SH): the following may need adaptation for OT/Equinox or other multi-classloader settings:
 			IBoundClass boundClass = classRepository.getBoundClass(boundClassName.replace('/', '.'), boundClassIdentifier, teamClass.getClassLoader());
+			if (baseClasses.add(boundClass))
+				boundClass.startTransaction();
 
 			switch (binding.getType()) {
 			case FIELD_ACCESS: // fallthrough
@@ -263,6 +268,9 @@ public class TeamManager implements ITeamManager {
 				break;
 			default: // no action for CALLIN_BINDING here
 			}
+		}
+		for (IBoundClass base : baseClasses) {
+			base.commitTransaction();
 		}
 	}
 	/**

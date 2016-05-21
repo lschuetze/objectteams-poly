@@ -169,6 +169,9 @@ public abstract class AbstractBoundClass implements IBoundClass {
 	
 	private List<ISubclassWiringTask> wiringTasks;
 
+	// while > 0 we are batching modifications before executing handleTaskList()
+	protected int transactionCount;
+
 	protected boolean parsed;
 
 	//FQN (e.g. "foo.bar.MyClass")
@@ -887,10 +890,23 @@ public abstract class AbstractBoundClass implements IBoundClass {
 		addWeavingTask(task, false);
 	}
 	
+	@Override
+	public synchronized void startTransaction() {
+		this.transactionCount ++;
+	}
+
+	@Override
+	public synchronized void commitTransaction() {
+		--this.transactionCount;
+		if (this.transactionCount == 0 && this.isLoaded) {
+			handleTaskList(null);
+		}
+	}
+	
 	private void addWeavingTask(WeavingTask task, boolean standBy) {
 		boolean isNewTask = addWeavingTaskLazy(task);
 
-		if (this.isLoaded && isNewTask && !standBy) {
+		if (this.isLoaded && isNewTask && !standBy && this.transactionCount == 0) {
 			handleTaskList(null);
 		}
 	}

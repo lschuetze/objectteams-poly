@@ -77,6 +77,17 @@ public interface IBoundClass {
 	 */
 	void handleAddingOfBinding(IBinding binding);
 
+	/**
+	 * Start a transaction that may contain multiple calls to handleAddingOfBinding,
+	 * without yet triggering redefineClasses (via handleTaskList()).
+	 */
+	void startTransaction();
+
+	/**
+	 * Commit any modifications since the call to startTransaction.
+	 */
+	void commitTransaction();
+
 	/** 
 	 * Add a {@link ISubclassWiringTask wiring task} to be performed when a 
 	 * newly loaded class is linked to this class as its super class.
