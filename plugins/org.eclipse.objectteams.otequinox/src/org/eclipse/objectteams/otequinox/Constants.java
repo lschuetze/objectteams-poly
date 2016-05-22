@@ -49,6 +49,8 @@ public interface Constants {
 	static final String SUPERCLASS = "superclass";
 	/** Attribute of a "team" element denoting the requested activation: one of "NONE", "THREAD", "ALL_THREADS". */
 	static final String ACTIVATION = "activation";
+	/** Activation mode "NONE" */
+	static final String NONE = "NONE";
 	
 	/** Element of EP aspectBindings denoting an adapted base plugin. */
 	static final String BASE_PLUGIN = "basePlugin";
@@ -56,6 +58,11 @@ public interface Constants {
 	static final String REQUIRED_FRAGMENT = "requiredFragment";
 	/** Pseudo ID of a basePlugin specifying that the team(s) adapt base classes from their own plugin. */
 	static final String SELF = "SELF";
+	
+	/** Subelement of a "team" denoting additional base class to consider for weaving (supers of bound bases). */
+	static final String SUPER_BASE = "superBase";
+	static final String SUPER_BASE_CLASS = "class";
+	static final String SUPER_BASE_PLUGIN = "plugin";
 
 	/** Element of EP aspectBinding - child of basePlugin node - requesting exports forced on the given base plug-in. */
 	public static final String FORCED_EXPORTS_ELEMENT = "forcedExports";

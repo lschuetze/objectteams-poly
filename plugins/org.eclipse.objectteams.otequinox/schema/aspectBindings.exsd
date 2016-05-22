@@ -137,6 +137,9 @@ If a nested team shall be used it must be specified using either its binary name
          </documentation>
       </annotation>
       <complexType>
+         <sequence>
+            <element ref="superBase" minOccurs="1" maxOccurs="unbounded"/>
+         </sequence>
          <attribute name="class" type="string" use="required">
             <annotation>
                <documentation>
@@ -211,6 +214,33 @@ Provide comma separated list of package names (as in the OSGi Export-Package: he
                <documentation>
                   Symbolic name of the fragment.
                </documentation>
+            </annotation>
+         </attribute>
+      </complexType>
+   </element>
+
+   <element name="superBase">
+      <annotation>
+         <documentation>
+            Relevant super classes of bound base classes. A super base class is relevant, if it defines a methods, whose override in the exact base is bound by callin or decapsulating callout.
+         </documentation>
+      </annotation>
+      <complexType>
+         <attribute name="plugin" type="string">
+            <annotation>
+               <documentation>
+                  the plugin holding the super base class (can be omitted if same as the basePlugin of the enclosing aspectBinding).
+               </documentation>
+            </annotation>
+         </attribute>
+         <attribute name="class" type="string" use="required">
+            <annotation>
+               <documentation>
+                  Fully qualified dot/dollar-separated base class that is a super class of a bound base class.
+               </documentation>
+               <appInfo>
+                  <meta.attribute kind="java"/>
+               </appInfo>
             </annotation>
          </attribute>
       </complexType>

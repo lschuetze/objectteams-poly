@@ -17,6 +17,7 @@
 package org.eclipse.objectteams.internal.osgi.weaving;
 
 import static org.eclipse.objectteams.otequinox.Constants.ACTIVATION;
+import static org.eclipse.objectteams.otequinox.Constants.NONE;
 import static org.eclipse.objectteams.otequinox.Constants.ASPECT_BINDING_EXTPOINT_ID;
 import static org.eclipse.objectteams.otequinox.Constants.BASE_PLUGIN;
 import static org.eclipse.objectteams.otequinox.Constants.CLASS;
@@ -25,6 +26,9 @@ import static org.eclipse.objectteams.otequinox.Constants.REQUIRED_FRAGMENT;
 import static org.eclipse.objectteams.otequinox.Constants.SELF;
 import static org.eclipse.objectteams.otequinox.Constants.SUPERCLASS;
 import static org.eclipse.objectteams.otequinox.Constants.TEAM;
+import static org.eclipse.objectteams.otequinox.Constants.SUPER_BASE;
+import static org.eclipse.objectteams.otequinox.Constants.SUPER_BASE_CLASS;
+import static org.eclipse.objectteams.otequinox.Constants.SUPER_BASE_PLUGIN;
 import static org.eclipse.objectteams.otequinox.Constants.TRANSFORMER_PLUGIN_ID;
 import static org.eclipse.objectteams.otequinox.TransformerPlugin.log;
 
@@ -39,6 +43,7 @@ import java.util.Set;
 import org.eclipse.core.runtime.IConfigurationElement;
 import org.eclipse.core.runtime.IExtensionRegistry;
 import org.eclipse.core.runtime.IStatus;
+import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
 import org.eclipse.objectteams.internal.osgi.weaving.AspectBinding.BaseBundle;
@@ -146,6 +151,10 @@ public class AspectBindingRegistry {
 					if (teamSet == null)
 						teamLookup.put(teamClass, teamSet = new HashSet<>());
 					teamSet.add(team);
+					
+					for (@NonNull IConfigurationElement superBase : teams[j].getChildren(SUPER_BASE)) {
+						addSuperBases(superBase, aspectBundleId, aspectBundle, baseBundle, team, packageAdmin, hook);
+					}
 				}
 				
 				String realBaseBundleId = baseBundleId.toUpperCase().equals(SELF) ? aspectBundleId : baseBundleId;
@@ -163,7 +172,32 @@ public class AspectBindingRegistry {
 			bindings[i].connect(teamLookup);
 		}
 	}
-	
+
+	private void addSuperBases(IConfigurationElement superBase, String aspectBundleId, @Nullable Bundle aspectBundle,
+			BaseBundle baseBundle, TeamBinding teamBinding,
+			@SuppressWarnings("deprecation") @Nullable org.osgi.service.packageadmin.PackageAdmin packageAdmin,
+			OTWeavingHook hook)
+	{
+		String superBaseClass = superBase.getAttribute(SUPER_BASE_CLASS);
+		String superBasePlugin = superBase.getAttribute(SUPER_BASE_PLUGIN);
+		BaseBundle superBaseBundle;
+		if (superBasePlugin == null) {
+			superBasePlugin = baseBundle.bundleName;
+			superBaseBundle = baseBundle;
+		} else {
+			superBaseBundle = getBaseBundle(superBasePlugin);
+		}
+		AspectBinding superBinding = new AspectBinding(aspectBundleId, aspectBundle, superBaseBundle, new IConfigurationElement[0], 1);
+		TeamBinding team2 = superBinding.createResolvedTeam(0, teamBinding.teamName, NONE, teamBinding.superTeamName);
+		superBinding.allBaseClassNames.add(superBaseClass);
+		team2.baseClassNames.add(superBaseClass);
+		team2.equivalenceSet.add(teamBinding);
+		teamBinding.equivalenceSet.add(team2);
+		addBindingForBaseBundle(superBasePlugin, superBinding);
+		addBindingForAspectBundle(aspectBundleId, superBinding);
+		hook.setBaseTripWire(packageAdmin, superBasePlugin, baseBundle);
+	}
+
 	@SuppressWarnings("deprecation") // multiple uses of deprecated but still recommended class PackageAdmin
 	private boolean checkRequiredFragments(String aspectBundleId, String baseBundleId, IConfigurationElement[] fragments, 
 			@Nullable org.osgi.service.packageadmin.PackageAdmin packageAdmin) 
