@@ -14272,7 +14272,7 @@ public void testBug461529() throws Exception {
 		});
 }
 public void testBug467776_regression() {
-	if (this.complianceLevel < ClassFileConstants.JDK1_5) return;
+	if (this.complianceLevel < ClassFileConstants.JDK1_6) return;
 	Map compilerOptions = getCompilerOptions();
 	compilerOptions.put(JavaCore.COMPILER_PB_UNCHECKED_TYPE_OPERATION, JavaCore.ERROR);
 	runConformTest(
