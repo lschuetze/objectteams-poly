@@ -93,7 +93,7 @@ public class AspectBindingRegistry {
 		IConfigurationElement[] aspectBindingConfigs = extensionRegistry
 				.getConfigurationElementsFor(TRANSFORMER_PLUGIN_ID, ASPECT_BINDING_EXTPOINT_ID);
 		Map<String, Set<TeamBinding>> teamLookup = new HashMap<>();
-		AspectBinding[] bindings = new AspectBinding[aspectBindingConfigs.length];
+		List<AspectBinding> bindings = new ArrayList<>(aspectBindingConfigs.length);
 		
 		for (int i = 0; i < aspectBindingConfigs.length; i++) {
 			IConfigurationElement currentBindingConfig = aspectBindingConfigs[i];
@@ -138,7 +138,7 @@ public class AspectBindingRegistry {
 														baseBundle,
 														basePlugins[0].getChildren(Constants.FORCED_EXPORTS_ELEMENT),
 														teamCount);
-			bindings[i] = binding;
+			bindings.add(binding);
 			// TODO(SH): maybe enforce that every bundle id is given only once?
 
 			//teams:
@@ -153,7 +153,9 @@ public class AspectBindingRegistry {
 					teamSet.add(team);
 					
 					for (@NonNull IConfigurationElement superBase : teams[j].getChildren(SUPER_BASE)) {
-						addSuperBases(superBase, aspectBundleId, aspectBundle, baseBundle, team, packageAdmin, hook);
+						AspectBinding superBaseBinding = addSuperBase(superBase, aspectBundleId, aspectBundle, baseBundle, team, packageAdmin, hook);
+						bindings.add(superBaseBinding);
+						teamSet.add(superBaseBinding.teams[0]);
 					}
 				}
 				
@@ -168,12 +170,12 @@ public class AspectBindingRegistry {
 			}
 		}
 		// second round to connect sub/super teams to aspect bindings:
-		for (int i = 0; i < bindings.length; i++) {
-			bindings[i].connect(teamLookup);
+		for (AspectBinding binding : bindings) {
+			binding.connect(teamLookup);
 		}
 	}
 
-	private void addSuperBases(IConfigurationElement superBase, String aspectBundleId, @Nullable Bundle aspectBundle,
+	private AspectBinding addSuperBase(IConfigurationElement superBase, String aspectBundleId, @Nullable Bundle aspectBundle,
 			BaseBundle baseBundle, TeamBinding teamBinding,
 			@SuppressWarnings("deprecation") @Nullable org.osgi.service.packageadmin.PackageAdmin packageAdmin,
 			OTWeavingHook hook)
@@ -191,11 +193,13 @@ public class AspectBindingRegistry {
 		TeamBinding team2 = superBinding.createResolvedTeam(0, teamBinding.teamName, NONE, teamBinding.superTeamName);
 		superBinding.allBaseClassNames.add(superBaseClass);
 		team2.baseClassNames.add(superBaseClass);
-		team2.equivalenceSet.add(teamBinding);
-		teamBinding.equivalenceSet.add(team2);
 		addBindingForBaseBundle(superBasePlugin, superBinding);
 		addBindingForAspectBundle(aspectBundleId, superBinding);
-		hook.setBaseTripWire(packageAdmin, superBasePlugin, baseBundle);
+		hook.setBaseTripWire(packageAdmin, superBasePlugin, superBaseBundle);
+		
+		teamBinding.superBases.add(superBasePlugin+'/'+superBaseClass);
+
+		return superBinding;
 	}
 
 	@SuppressWarnings("deprecation") // multiple uses of deprecated but still recommended class PackageAdmin

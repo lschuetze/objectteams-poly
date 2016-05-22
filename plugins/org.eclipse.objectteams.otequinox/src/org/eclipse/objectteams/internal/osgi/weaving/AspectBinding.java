@@ -82,6 +82,8 @@ public class AspectBinding {
 		boolean importsAddedToSub;
 
 		final List<String> baseClassNames = new ArrayList<>();
+		
+		public final List<String> superBases = new ArrayList<>(); // logging / debugging only
 
 		public TeamBinding(String teamName, ActivationKind activationKind, @Nullable String superTeamName) {
 			this.teamName = teamName;
@@ -189,7 +191,10 @@ public class AspectBinding {
 
 		@Override
 		public String toString() {
-			return "team "+teamName+"("+(this.activation)+") super "+superTeamName;
+			String result = "team "+teamName+"("+(this.activation)+") super "+superTeamName;
+			for (String superBase : superBases)
+				result += "\n\t\t\tsuperBase "+superBase;
+			return result;
 		}
 
 		/** Get the highest activation kind from this team and its equivalents. */
