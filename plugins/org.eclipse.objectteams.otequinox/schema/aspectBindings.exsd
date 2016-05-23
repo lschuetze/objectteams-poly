@@ -138,7 +138,7 @@ If a nested team shall be used it must be specified using either its binary name
       </annotation>
       <complexType>
          <sequence>
-            <element ref="superBase" minOccurs="1" maxOccurs="unbounded"/>
+            <element ref="superBase" minOccurs="0" maxOccurs="unbounded"/>
          </sequence>
          <attribute name="class" type="string" use="required">
             <annotation>
