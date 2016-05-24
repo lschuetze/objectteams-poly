@@ -108,6 +108,12 @@ public class CreateCallAllBindingsCallInOrgMethod extends
 		newInstructions.add(new IntInsnNode(Opcodes.ALOAD, 0));
 		// put boundMethodId on the stack
 		newInstructions.add(createLoadIntConstant(boundMethodId));
+		if (method.name.equals("<init>")) { // set bit 0x8000000 to signal the ctor
+			newInstructions.add(createLoadIntConstant(0xffffffff));
+			newInstructions.add(createLoadIntConstant(0x7fffffff)); // 0x80000000 causes NPE in ASM :(
+			newInstructions.add(new InsnNode(Opcodes.IXOR)); // indirectly creates the desired 0x80000000
+			newInstructions.add(new InsnNode(Opcodes.IOR));
+		}
 		// box the arguments
 		newInstructions.add(getBoxingInstructions(args, false));
 

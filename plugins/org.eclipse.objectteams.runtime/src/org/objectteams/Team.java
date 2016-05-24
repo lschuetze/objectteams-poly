@@ -549,9 +549,13 @@ public /* team */ class Team implements ITeam {
 	 */
 	public Object _OT$callAllBindings(IBoundBase2 baze, ITeam[] teams,int idx,int[] callinIds, int boundMethodId, Object[] args)
 	{
-		this._OT$callBefore(baze, callinIds[idx], boundMethodId, args);
+		Object res = null;
 
-		Object res = this._OT$callReplace(baze, teams, idx, callinIds, boundMethodId, args);
+		if ((boundMethodId & 0x80000000) == 0) { // bit 0x80000000 signals ctor (which has no before/replace bindings)
+			this._OT$callBefore(baze, callinIds[idx], boundMethodId, args);
+
+			res = this._OT$callReplace(baze, teams, idx, callinIds, boundMethodId, args);
+		}
 
 		this._OT$callAfter(baze, callinIds[idx], boundMethodId, args, res); // make result available to param mappings!
 

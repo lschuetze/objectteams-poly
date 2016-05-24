@@ -67,8 +67,7 @@ public abstract class AbstractCreateDispatchCodeAdapter extends
 
 	private Type[] args;
 
-	protected InsnList getDispatchCode(MethodNode method, int joinPointId,
-			int boundMethodId) {
+	protected InsnList getDispatchCode(MethodNode method, int joinPointId) {
 		InsnList instructions = new InsnList();
 
 		// teamsAndCallinIds = TeamManager.getTeamsAndCallinIds(joinpointId);
@@ -111,7 +110,7 @@ public abstract class AbstractCreateDispatchCodeAdapter extends
 		instructions.add(new InsnNode(Opcodes.AALOAD));
 		instructions.add(new TypeInsnNode(Opcodes.CHECKCAST, "[I"));
 
-		instructions.add(createLoadIntConstant(boundMethodId));
+		instructions.add(new IntInsnNode(Opcodes.ILOAD, 1)); // boundMethodId is arg#1 for both _OT$callOrig and _OT$callAllBindings (base version)
 		args = Type.getArgumentTypes(method.desc);
 
 		// box the arguments

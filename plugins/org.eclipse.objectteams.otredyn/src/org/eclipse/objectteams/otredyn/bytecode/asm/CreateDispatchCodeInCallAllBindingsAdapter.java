@@ -60,7 +60,7 @@ public class CreateDispatchCodeInCallAllBindingsAdapter extends
 	@Override
 	public boolean transform() {
 		MethodNode callAllBindings = getMethod(ConstantMembers.callAllBindingsClient);
-		InsnList instructions = getDispatchCode(callAllBindings, joinpointId, boundMethodId);  
+		InsnList instructions = getDispatchCode(callAllBindings, joinpointId);
 		addNewLabelToSwitch(callAllBindings.instructions, instructions, boundMethodId);
 		addLocals(callAllBindings);
 		callAllBindings.maxStack = getMaxStack();

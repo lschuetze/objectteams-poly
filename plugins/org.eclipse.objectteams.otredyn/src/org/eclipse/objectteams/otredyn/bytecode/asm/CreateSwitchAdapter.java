@@ -100,6 +100,8 @@ public class CreateSwitchAdapter extends AbstractTransformableClassNode {
 	 */
 	protected void addPreSwitchInstructions(MethodNode method) {
 		method.instructions.add(new IntInsnNode(Opcodes.ILOAD, firstArgIndex));
+		method.instructions.add(createLoadIntConstant(0x7fffffff));
+		method.instructions.add(new InsnNode(Opcodes.IAND)); // mask the 0x80000000 bit used for signaling a ctor
 	}
 	
 	/**
