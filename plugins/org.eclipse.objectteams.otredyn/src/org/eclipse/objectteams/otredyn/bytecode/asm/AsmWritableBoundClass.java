@@ -453,8 +453,7 @@ class AsmWritableBoundClass extends AsmBoundClass {
 	@Override
 	protected void prepareForFirstTransformation() {
 		if (!isTransformed && !isInterface()) {
-			String internalSuperClassName = this.weavingContext.isWeavable(getSuperClassName()) ? getInternalSuperClassName() : null;
-			nodes.add(new CreateSwitchAdapter(ConstantMembers.callOrig, internalSuperClassName));
+			nodes.add(new CreateSwitchAdapter(ConstantMembers.callOrig, getInternalSuperClassName()));
 			nodes.add(new CreateSwitchForCallAllBindingsNode());
 			nodes.add(new CreateAddRemoveRoleMethod());
 			isTransformed = true;
