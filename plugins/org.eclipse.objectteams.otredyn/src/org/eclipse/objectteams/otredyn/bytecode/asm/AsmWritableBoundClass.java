@@ -18,6 +18,7 @@ package org.eclipse.objectteams.otredyn.bytecode.asm;
 
 import java.io.File;
 import java.io.FileOutputStream;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -332,11 +333,14 @@ class AsmWritableBoundClass extends AsmBoundClass {
 			String filename = "otdyn/" + name + ".class";
 			fos = new FileOutputStream(filename);
 			fos.write(allocateAndGetBytecode());
-			fos.close();
 		} catch (Exception e) {
-			// TODO (ofra): Log error while dumping
 			e.printStackTrace();
-		} 
+		} finally {
+			if (fos != null)
+				try {
+					fos.close();
+				} catch (IOException e) { /* ignore */}
+		}
 	}
 
 	private int n = 0; // counts dump files for this class
@@ -353,10 +357,13 @@ class AsmWritableBoundClass extends AsmBoundClass {
 			String filename = "otdyn/" + name + postfix+".#"+(n++);
 			fos = new FileOutputStream(filename);
 			fos.write(bytecode);
-			fos.close();
 		} catch (Exception e) {
-			// TODO (ofra): Log error while dumping
 			e.printStackTrace();
+		} finally {
+			if (fos != null)
+				try {
+					fos.close();
+				} catch (IOException e) { /* ignore */}
 		}
 	}
 
