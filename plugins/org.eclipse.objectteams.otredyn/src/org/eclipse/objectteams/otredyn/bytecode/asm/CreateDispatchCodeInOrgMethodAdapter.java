@@ -73,7 +73,7 @@ public class CreateDispatchCodeInOrgMethodAdapter extends
 		if ((orgMethod.access & Opcodes.ACC_ABSTRACT) != 0) return false;
 		
 		orgMethod.instructions.clear();
-		orgMethod.instructions.add(getDispatchCode(orgMethod, joinPointId));
+		orgMethod.instructions.add(getDispatchCode(orgMethod, joinPointId, boundMethodId));
 		addLocals(orgMethod);
 		orgMethod.maxStack = getMaxStack();
 		orgMethod.maxLocals = getMaxLocals();
