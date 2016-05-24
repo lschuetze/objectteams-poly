@@ -569,10 +569,22 @@ class TypeBinding implements ITypeBinding {
 		Scope scope = this.resolver.scope();
 		if (this.binding == null || scope == null)
 			return null;
+//{ObjectTeams: protect with minimally configured Dependencies:
+		Config cfg = null;
+		if (!Dependencies.isSetup())
+			cfg = Dependencies.setup(this, null, this.resolver.lookupEnvironment(), true, false, false, true, false, true);
+	  try {
+// orig:
 		MethodBinding sam = this.binding.getSingleAbstractMethod(scope, true);
 		if (sam == null || !sam.isValidBinding())
 			return null;
 		return this.resolver.getMethodBinding(sam);
+// :giro
+	  } finally {
+		  if (cfg != null)
+			  Dependencies.release(this);
+	  }
+// SH}
 	}
 
 	public synchronized ITypeBinding[] getInterfaces() {
