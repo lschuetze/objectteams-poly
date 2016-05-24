@@ -7,7 +7,6 @@
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
- * $Id: DebugUIDialogAdaptor.java 23456 2010-02-04 20:44:45Z stephan $
  * 
  * Please visit http://www.eclipse.org/objectteams for updates and contact.
  * 
@@ -46,6 +45,7 @@ public team class DebugUIDialogAdaptor {
 		/** Catch the dialog to find out if the current launch is ot-enabled. */
 		void checkProject(LaunchConfigurationsDialog dialog) 
 				<- before void createTabs(ILaunchConfigurationDialog dialog, String mode)
+				base when (dialog instanceof LaunchConfigurationsDialog)
 				with { dialog <- (LaunchConfigurationsDialog)dialog } 
 		void checkProject(LaunchConfigurationsDialog dialog) {
 			isOTJlaunch = dialog != null && dialog.isOTJlaunch();
