@@ -77,6 +77,9 @@ class AsmTypeHelper {
 	}
 	
 	public static AbstractInsnNode getBoxingInstructionForType(Type type) {
+		if (type.getSort() == Type.VOID)
+			return new InsnNode(Opcodes.ACONST_NULL);
+
 		String className = getBoxingType(type);
 		if (className == null)
 			return new InsnNode(Opcodes.NOP);

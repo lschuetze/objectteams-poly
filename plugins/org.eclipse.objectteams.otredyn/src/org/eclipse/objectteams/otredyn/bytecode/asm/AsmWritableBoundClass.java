@@ -287,6 +287,7 @@ class AsmWritableBoundClass extends AsmBoundClass {
 			Type[] args = Type.getArgumentTypes(desc);
 			multiAdapter.addVisitor(new AddEmptyMethodAdapter(writer, boundMethod.getName(),
 					boundMethod.getAccessFlags(), desc, null, boundMethod.getSignature(), args.length+1/*maxLocals*/, null));
+			nodes.add(new CreateSpecificSuperCallInCallOrigAdapter(this, getInternalSuperClassName(), boundMethod, boundMethodId));
 		}
 		nodes.add(new CreateCallAllBindingsCallInOrgMethod(boundMethod,
 				boundMethodId));
