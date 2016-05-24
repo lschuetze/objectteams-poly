@@ -110,13 +110,15 @@ public class AddImplicitActivationAdapter extends ClassVisitor {
 
 	
 	private boolean isCandidateForImplicitActivation(String methName, String methDesc, int accessFlags) {
+		boolean methodIsAccessible = true;
 		if (clazz.isTeam()) {
 			if ((accessFlags & Opcodes.ACC_PRIVATE) != 0)
-				return false;
+				methodIsAccessible = false;
 		} else if (clazz.isRole()) {
-			if (   clazz.isProtected()
-				|| (accessFlags & Opcodes.ACC_PUBLIC) == 0)
+			if (clazz.isProtected())
 				return false;
+			if ((accessFlags & Opcodes.ACC_PUBLIC) == 0)
+				methodIsAccessible = false;
 		} else {
 			return false;
 		}
@@ -124,7 +126,7 @@ public class AddImplicitActivationAdapter extends ClassVisitor {
 		case NEVER:
 			return false;
 		case ANNOTATED:
-			if (!clazz.hasMethodImplicitActivation(methName+methDesc))
+			if (!clazz.hasMethodImplicitActivation(methName+methDesc, methodIsAccessible))
 				return false;
 			//$FALL-THROUGH$
 		case ALWAYS:

@@ -345,8 +345,8 @@ public abstract class AbstractBoundClass implements IBoundClass {
 		this.methodsForImplicitActivation.add(methodNameAndDesc);
 	}
 
-	public boolean hasMethodImplicitActivation(String methodNameAndDesc) {
-		if (this.implicitTeamActivationEnabled) // for all methods
+	public boolean hasMethodImplicitActivation(String methodNameAndDesc, boolean methodIsAccessible) {
+		if (this.implicitTeamActivationEnabled && methodIsAccessible) // for all accessible methods
 			return true;
 		if (this.methodsForImplicitActivation == null)
 			return false;
