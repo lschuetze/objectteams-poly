@@ -31,7 +31,11 @@ import org.objectweb.asm.Opcodes;
  */
 public abstract class Member implements IMember {
 
-	/** Map of globally unique Ids by keys that are constructed from the resolved target member. */
+	/**
+	 * Map of globally unique Ids by keys that are constructed from the resolved target member.
+	 * NOTE that internally we temporarily set bit 0x80000000 to signal that a member is a constructor.
+	 * See https://bugs.eclipse.org/494415
+	 */
 	private static Map<String, Integer> idMap = new HashMap<String, Integer>();
 	private static int currentId = 1; // distinguish from uninitialized 0 (for debugging purposes)
 	
