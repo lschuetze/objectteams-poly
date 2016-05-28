@@ -114,6 +114,7 @@ public class CompilerConfigurationBlock extends OptionsConfigurationBlock {
 	// values
 	private static final String ERROR= JavaCore.ERROR;
 	private static final String WARNING= JavaCore.WARNING;
+	private static final String INFO= JavaCore.INFO;
 	private static final String IGNORE= JavaCore.IGNORE;
 
 //	private static final String ENABLED= JavaCore.ENABLED;
@@ -218,11 +219,12 @@ public class CompilerConfigurationBlock extends OptionsConfigurationBlock {
 								OTPreferencesMessages.OTCompilerConfigurationBlock_weaving_otdre_label },
 				indentStep*2);
 
-		String[] errorWarningIgnore= new String[] { ERROR, WARNING, IGNORE };
+		String[] errorWarningIgnore= new String[] { ERROR, WARNING, INFO, IGNORE };
 		
 		String[] errorWarningIgnoreLabels= new String[] {
 			PreferencesMessages.ProblemSeveritiesConfigurationBlock_error,  
 			PreferencesMessages.ProblemSeveritiesConfigurationBlock_warning, 
+			PreferencesMessages.ProblemSeveritiesConfigurationBlock_info,
 			PreferencesMessages.ProblemSeveritiesConfigurationBlock_ignore
 		};
 
