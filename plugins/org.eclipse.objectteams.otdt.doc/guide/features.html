@@ -12,12 +12,12 @@
     </head>
     <body>
         <div id="head">
-            <h1>Features of the OTDT (version 2.4)</h1>
+            <h1>Features of the OTDT (version 2.5)</h1>
         </div>
 		<div style="margin:10px;margin-top:100px;">
 		 <div style="margin-left:40px;padding:2px;float:left;background-color:#D0D0D0;">
           <div style="padding:4px;background-color:#def4fe;">
-			The release 2.4 is based on Eclipse SDK 4.5 (Mars).<br/>
+			The release 2.5 is based on Eclipse SDK 4.6 (Neon).<br/>
 			The OTDT contains a modified version of the JDT core and several added plugins.
           </div>
          </div>
@@ -47,7 +47,7 @@
 			        </div></div>
 			            
 			The Object Teams Compiler is an incremental compiler, based on the Eclipse Compiler for Java.
-			As of version 2.4 the compiler supports all features of <strong>Java&trade; 8</strong>.
+			As of version 2.5 the compiler supports all features of <strong>Java&trade; 8</strong>.
 			<dl>
 			<dt><strong>Language Definition</strong></dt>
 			<dd>The compiler implements the language as defined in the OT/J
@@ -65,7 +65,7 @@
 				The compiler can be <strong>configured</strong> using global <code>Preferences</code> or project
 				specific <code>Properties</code>.
 				<ul>
-				  <li>Configure OT/J-specific compiler diagnostics as "ignore", "warning" or "error".<br/>
+				  <li>Configure OT/J-specific compiler diagnostics as "ignore", "info", "warning" or "error".<br/>
 				      Any warnings configured on this property sheet can also be suppressed in the
 				      source code using the <code>@SuppressWarnings</code> annotation.</li>
 				  <li>Scoped keywords <a href="otjld/def/sA.html#sA.0.1"><img alt="otjld"  src="../images/ot_paragraph.png"/> OTJLD &#167; A.0.1</a> can be disabled (default is enabled).
@@ -267,10 +267,7 @@
 					The newer Object Teams Dynamic Runtime Environment has been developed to enable even <strong>runtime weaving</strong>.
 				 	To work around limitations of the JVM this weaver has to insert a few general hooks into every weavable class.
 				 	This weaver is also interesting for weaving into <strong>Java 8</strong> class files,
-				 	as it is based on the library <strong>ASM</strong>, for which a Java-8-enabled version already exists.
-					It should be noted, however, that the OTDRE is not as mature as the OTRE, 
-					both in terms of complete coverage of all combinations of language features
-					as well as in terms of performance measurement (we simply have no large-scale experience with the OTDRE, yet).</li>
+				 	as it is based on the library <strong>ASM</strong>, for which a Java-8-enabled version already exists.</li>
 				</ul>
 				</li>
 				</ul></dd>
@@ -292,8 +289,7 @@
 			<dt><strong>Technology used</strong></dt>
 			<dd><ul>
 			<li id="JPLIS">Integrating the weaver into the JVM leverages the Java-agent concept of Java 5 
-			    (<a href="http://java.sun.com/developer/technicalArticles/releases/j2se15/index.html">JPLIS</a>).
-			    (<i>The original implementation using the JMangler framework is no longer maintained</i>).<br/> 
+			    (<a href="http://java.sun.com/developer/technicalArticles/releases/j2se15/index.html">JPLIS</a>).<br/> 
 			    </li>
 			</ul></dd>
 			</dl>
@@ -386,6 +382,8 @@
 			<dd><ul>
 			    <li>Dynamic code evaluation is not supported yet, 
 			    make sure to clear the Expression view.</li>
+			    <li>Stepping through callin bindings under weaving scheme OTDRE is not yet able to always
+			    	show the correct source code location and shows more hops through generated dispatch code.</li>
 			  </ul></dd>
 			</dl>
 			

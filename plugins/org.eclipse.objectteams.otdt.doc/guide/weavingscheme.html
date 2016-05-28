@@ -28,33 +28,24 @@
 			fields or methods, this weaver inserts a few general hooks into every weavable class (at load-time).<br/>
 			This weaver is also interesting for weaving into <strong>Java 8</strong> class
 			files, as it is based on the library <strong>ASM</strong>, for which
-			a Java-8-enabled version already exists. It should be noted, however,
-			that the OTDRE is not as mature as the OTRE, both in terms of
-			complete coverage of all combinations of language features as well as
-			in terms of performance measurement (we simply have no large-scale
-			experience with the OTDRE, yet).</dd>
+			a Java-8-enabled version already exists.</dd>
 	</dl>
-	<p>In short: for the time being the traditional OTRE is still the default weaver,
-		recommended for all productive use. For now the new OTDRE is needed only
-		when working with Java 8. It will be further improved in the near future
-		and may fully replace the OTRE in a future version.</p>
+	<p>In short: For applications using Java 8, OTDRE is the only option.
+		At Java 7 or below, OTRE is still a good option, perhaps with better performance, still.</p>
 		 
 	<h2>Configuration</h2>
+	<h3>Project creation</h3>
 	<p>
 		Initial configuration of the target weaving scheme happens in the
 		<a href="project.html#settings">New Object Teams Project Wizard</a>.
-		The corresponding compiler option is intentionally <em>not</em> yet
-		surfaced in the project preferences, because for productive use
-		it is strongly encouraged to still use the traditional OTRE.
-		For experiments requiring to switch the target weaving scheme, please
-		open the file <code>.settings/org.eclipse.jdt.core.prefs</code>
-		in your project and edit/add the following line:
 	</p>
-		<pre>    org.eclipse.objectteams.otdt.compiler.option.weaving_scheme=OTDRE</pre>
+	<h3>Configuring an existing project</h3>
 	<p>
-		The above line enables the new OTDRE, whereas a value of "OTRE" switches back
-		to the traditional OTRE.
+		For existing projects, this option can be found in the project's properties
+		concerning the OT/J compiler:
 	</p>
+	<a href="images/screenshots/NN25/configure-compiler-weavingScheme.png"><img src="images/screenshots/NN25/configure-compiler-weavingScheme.png" width=519 alt="Selecting the weaving scheme to compile for"/></a>
+	
 	<p>This configuration is evaluated by the compiler and when launching an OT/J application.
 		Since the <strong>OT/J compiler</strong> performs some preparation for the respective weaver,
 		it has to generate different byte code formats, depending on the targeted weaving scheme.
@@ -62,6 +53,10 @@
 		recompilation of all OT/J code involved. The runtime will detect if it encounters
 		any class files compiled for an incompatible weaving scheme, signaled by throwing
 		<code>UnsupportedClassVersionError</code>.
+	</p>
+	<h3>Running</h3>
+	<p>When launching an OT/J-enabled application the suitable weaving scheme will automatically
+	be selected based on the configuration of projects involved in the launch.
 	</p>
 </body>
 </html>

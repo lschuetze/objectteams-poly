@@ -57,6 +57,7 @@
 	 	<topic label="org.eclipse.objectteams.otequinox.liftingParticipant" href="/org.eclipse.objectteams.otdt.doc/reference/extension-points/org_eclipse_objectteams_otequinox_liftingParticipant.html"/>
 	</topic>
 	<topic label="What's new" href="guide/whatsnew.html">
+		<topic label="OTDT 2.5 New&amp;Noteworthy" href="guide/news/new_in_2.5.html"/>
 		<topic label="OTDT 2.3 New&amp;Noteworthy" href="guide/news/new_in_2.3.html"/>
 		<topic label="OTDT 2.2 New&amp;Noteworthy" href="guide/news/new_in_2.2.html"/>
 		<topic label="OTDT 2.1 New&amp;Noteworthy" href="guide/news/new_in_2.1.html"/>
