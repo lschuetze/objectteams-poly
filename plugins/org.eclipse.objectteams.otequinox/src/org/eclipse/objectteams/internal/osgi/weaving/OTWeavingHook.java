@@ -77,15 +77,20 @@ public class OTWeavingHook implements WeavingHook, WovenClassListener {
 
 	// TODO: this master-switch, which selects the weaver, should probably be replaced by s.t. else?
 	static final boolean USE_DYNAMIC_WEAVER;
-	static final boolean WEAVE_THREAD_NOTIFICATION_IN_BASE;
-	static final boolean WEAVE_THREAD_NOTIFICATION_ALWAYS;
+	static final ThreadWeaving WEAVE_THREAD_NOTIFICATION;
+	enum ThreadWeaving { Never, Base, Always }
 	static final Map<String,Set<String>> KNOWN_LOGGING_CLASSES = new HashMap<>();
 	static {
 		String weaving = System.getProperty("ot.weaving");
 System.err.println("OT/Equinox: ot.weaving="+weaving);
 		USE_DYNAMIC_WEAVER = (weaving != null) && weaving.toLowerCase().equals("otdre");
-		WEAVE_THREAD_NOTIFICATION_IN_BASE = !"false".equals(System.getProperty("otequinox.weave.thread.base"));
-		WEAVE_THREAD_NOTIFICATION_ALWAYS = !"false".equals(System.getProperty("otequinox.weave.thread"));
+		String threadWeaving = System.getProperty("otequinox.weave.thread");
+		if ("base".equalsIgnoreCase(threadWeaving))
+			WEAVE_THREAD_NOTIFICATION = ThreadWeaving.Base;
+		else if ("false".equalsIgnoreCase(threadWeaving))
+			WEAVE_THREAD_NOTIFICATION = ThreadWeaving.Never;
+		else
+			WEAVE_THREAD_NOTIFICATION = ThreadWeaving.Always;
 
 		KNOWN_LOGGING_CLASSES.put("org.eclipse.equinox.common", Collections.singleton(
 										"org.eclipse.core.runtime.ILogListener"));
@@ -501,7 +506,15 @@ System.err.println("OT/Equinox: ot.weaving="+weaving);
 
 		if ("java.lang.Object".equals(className))
 			return false; // shortcut, have no super
-		if (WEAVE_THREAD_NOTIFICATION_ALWAYS || (WEAVE_THREAD_NOTIFICATION_IN_BASE && isBaseBundle)) {
+
+		switch (WEAVE_THREAD_NOTIFICATION) {
+		case Never:
+			return false;
+		case Base: 
+			if (!isBaseBundle)
+				return false;
+			break;
+		default:
 			ClassInformation classInfo = null;
 			if (bytes != null) {
 				classInfo = this.byteCodeAnalyzer.getClassInformation(bytes, className);
