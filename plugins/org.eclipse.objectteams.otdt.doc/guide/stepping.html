@@ -37,8 +37,7 @@
     <p>
     Typical stepping paths will be explained using the example <code>OTSample-Flightbonus</code>
     which can be installed using the wizard at 
-    <code><ul><li>New...<ul><li>Other... <ul><li>Code Samples</li></ul></li></ul></li></ul></code>
-    </p>
+    <ul><li class="ui">New...<ul><li class="ui">Other... <ul><li class="ui">Code Samples</li></ul></li></ul></li></ul>
   <p>
     After the example has been installed and configured for running with the team
     <code>GUIConnector</code> activated (see the example's documentation), 
@@ -135,7 +134,7 @@
   	This is relevant mostly if you want to analyze how multiple teams that affect the same base method are scheduled.<br>
   	When enabling the display of OT/J internal variables you may inspect the internal iterator of team instances (an array of teams plus an index into the array).</dd> 
   <dt>Pending call to the original base method</dt>
-  	<dd>This signifies the final iteration of the dispatch code at what point the original method will be entered by the next step-into.</br>
+  	<dd>This signifies the final iteration of the dispatch code at what point the original method will be entered by the next step-into.<br/>
   	This stage can, e.g., be reached when a <code class="keyword">callin</code> method has issued a base-call.<br>
   	Instead of directly entering the base method, the dispatch code needs to take over,
   	because more team instances might be waiting to receive the control.</dd>

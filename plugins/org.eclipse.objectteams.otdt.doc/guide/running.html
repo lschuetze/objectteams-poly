@@ -24,46 +24,46 @@
     from a context menu or use one of the run/debug tool bar buttons.
     From here just select one of the standard launch configuration types: 
     <ul>
-    <li><a href="#JavaApp"><img src="images/java_app.gif" valing="absmiddle"> Java Application</a></li> 
-    <li><a href="#RemoteJavaApp"><img src="images/java_attach.gif" valing="absmiddle"> Remote Java Application</a></li> 
-    <li><a href="#JavaApp"><img src="images/julaunch.gif" valing="absmiddle"> JUnit</a></li>
-    <li><a href="#Plugin"><img src="images/julaunchpgn.gif" valing="absmiddle"> JUnit Plug-in Test</a></li>
-    <li><a href="#Plugin"><img src="images/eclipse_launcher.gif" valing="absmiddle"> Eclipse Application</a></li>
-    <li><a href="#OSGi"><img src="images/bundle_obj.gif" valing="absmiddle"> OSGi Framework</a></li>
+    <li><a href="#JavaApp"><img src="images/java_app.gif" valign="absmiddle"> Java Application</a></li> 
+    <li><a href="#RemoteJavaApp"><img src="images/java_attach.gif" valign="absmiddle"> Remote Java Application</a></li> 
+    <li><a href="#JavaApp"><img src="images/julaunch.gif" valign="absmiddle"> JUnit</a></li>
+    <li><a href="#Plugin"><img src="images/julaunchpgn.gif" valign="absmiddle"> JUnit Plug-in Test</a></li>
+    <li><a href="#Plugin"><img src="images/eclipse_launcher.gif" valign="absmiddle"> Eclipse Application</a></li>
+    <li><a href="#OSGi"><img src="images/bundle_obj.gif" valign="absmiddle"> OSGi Framework</a></li>
     </ul>
+    <p>
     All these launches now consistently provide one additional checkbox, which is shown next to where the Runtime JRE is configured.
     </p>
   
-  <p style="margin-top:30px;"><a name="JavaApp"/>
-    For <strong>Java Applications</strong> (<img src="images/java_app.gif" valing="absmiddle">, <img src="images/julaunch.gif" valing="absmiddle">) this checkbox is found on the <img src="images/library_obj.gif"><code>JRE</code> tab:
+  <p style="margin-top:30px;" id="JavaApp">
+    For <strong>Java Applications</strong> (<img src="images/java_app.gif" valign="absmiddle">, <img src="images/julaunch.gif" valign="absmiddle">) this checkbox is found on the <img src="images/library_obj.gif"><code>JRE</code> tab:
   </p>
     <p><img src="images/screenshots/JRETab.png"></p>
     <ul>
     <li style="margin-bottom:7px;">If the new option is checked the application will be launched with the Object Teams Runtime Environment (OTRE) enabled which is needed to weave callin bindings into base classes. Conversely, disabling the OTRE lets you run an OT/J application with all callin-bindings disabled. But note that a few more OT/J mechanisms will not work either (like decapsulation).</li>
     <li style="margin-bottom:7px;">For OT/J projects this option is enabled by default.</li>
-    <li style="margin-bottom:7px;">If <span class="ui">Enable OTRE</span> is checked an additional <a href="#activation"><img valing="absmiddle" src="../images/team_obj.gif"><code>Team Activation</code> tab</a> will be shown.<br>
+    <li style="margin-bottom:7px;">If <span class="ui">Enable OTRE</span> is checked an additional <a href="#activation"><img valign="absmiddle" src="../images/team_obj.gif"><code>Team Activation</code> tab</a> will be shown.<br>
     <i>(If a launch configuration was opened while the OTRE was disabled, you need to re-open this configuration (e.g., unselect and select) in order for the new tab to show.)</i></li>
     <li style="margin-bottom:7px;">Behind the scenes, when <span class="ui">Enable OTRE</span> is checked, the correct <a href="weavingscheme.html">weaving scheme</a> is selected based on the configuration of projects involved in the launch.</li>
     </ul>
-  </p>
   
-  <p style="margin-top:30px;"><a name="RemoteJavaApp"/>
-    For <strong>Remote Debugging</strong> of a java applications</strong> (<img src="images/java_attach.gif" valing="absmiddle">) this checkbox is found on the <img src="images/disconnect_co.gif"><code>Connect</code> tab:
+  <p style="margin-top:30px;" id="RemoteJavaApp">
+    For <strong>Remote Debugging</strong> of a <strong>java applications</strong> (<img src="images/java_attach.gif" valign="absmiddle">) this checkbox is found on the <img src="images/disconnect_co.gif"><code>Connect</code> tab:
   </p>
     <p><img alt="Remote Debugging" src="images/screenshots/RemoteDebugging.png" /></p>
   
-  <p style="margin-top:30px;"><a name="Plugin">
-    For launching a <strong>Runtime Workbench</strong> (<img src="images/julaunchpgn.gif" valing="absmiddle">, <img src="images/eclipse_launcher.gif" valing="absmiddle">) the new checkbox is right on the main page:
+  <p style="margin-top:30px;" id="Plugin">
+    For launching a <strong>Runtime Workbench</strong> (<img src="images/julaunchpgn.gif" valign="absmiddle">, <img src="images/eclipse_launcher.gif" valign="absmiddle">) the new checkbox is right on the main page:
     </p>
     <p><img src="images/screenshots/RuntimeWorkbenchMainTab.png">
   </p>
-  <p style="margin-top:30px;"><a name="OSGi">
-    For <strong>OSGi Framework</strong> launches (<img src="images/bundle_obj.gif" valing="absmiddle">) the runtime environment is configured on the <code>Settings</code> tab:
+  <p style="margin-top:30px;" id="OSGi">
+    For <strong>OSGi Framework</strong> launches (<img src="images/bundle_obj.gif" valign="absmiddle">) the runtime environment is configured on the <code>Settings</code> tab:
     </p>
-    <p><img src="images/screenshots/OSGiLaunchSettings.png"></p></td></tr>
+    <p><img src="images/screenshots/OSGiLaunchSettings.png"></p>
   
 
-    <h2><a name="activation">Team activation:</a></h2>
+    <h2 id="activation">Team activation:</h2>
     <p>
     I you wish to compose your program from a base application and a number of aspects, 
     you may use a launch configuration to select which aspects should be included.

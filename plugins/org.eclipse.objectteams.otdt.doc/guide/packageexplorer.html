@@ -17,27 +17,27 @@
 	  <li>Showing the <b>Object Teams element hierarchy</b> of the Object Teams projects in the
 	  workbench including
 	  <ul>
-	  <li><u>specific classes:</u><br />
+	  <li><span class="underline">specific classes:</span><br />
 	    	&ndash; <b>team</b> class (<img src="../images/team_obj.gif">).<br>
 	    	&ndash; <b>role</b> class (<img src="../images/role_obj.png">).<br>
 	  	  	&ndash; a <b>nested team</b> (<img src="../images/team_role_obj.gif">) is a role as well as a team.
 	  	  	</li>
-	  <li><u>role class decorations:</u><br>
+	  <li><span class="underline">role class decorations:</span><br>
 	  		&ndash; <b>bound role</b> class (<span><img style="position:relative;left:0px;" src="../images/role_obj.png"><img style="position:relative;left:-2px;top:-4px;" src="../images/boundrole_co.gif"></span>)
 	  		&mdash; <em>has a <code class="keyword">playedBy</code> declaration.</em>
 	  		<br>
 	  		&ndash; <b>overriding role</b> class (<span><img style="position:relative;left:0px;" src="../images/role_obj.png"><img style="position:relative;left:-2px;top:4px;" src="../images/over_co_ovr16.gif"></span>)
 	  		&mdash; <em>overrides a role from the super team</em><br>
-	  <li><u>methods:</u><br />
+	  <li><span class="underline">methods:</span><br />
 	  	    &ndash; <b>callin</b> methods are marked with a decoration <img src="../images/callinmethod_co.gif">.
 	  	    </li>
-	  <li><u>method bindings:</u><br />
+	  <li><span class="underline">method bindings:</span><br />
 	  		&ndash; <b>callin</b>: before(<img src="../images/callinbindingbefore_obj.gif">), 
 	  		after (<img src="../images/callinbindingafter_obj.gif">), replace (<img src="../images/callinbindingreplace_obj.gif">)
 	  		<br />
 	  		&ndash; <b>callout</b>: (<img src="../images/calloutbinding_obj.gif">)
 	  		</li>
-	  <li><u>guard predicates:</u><br>
+	  <li><span class="underline">guard predicates:</span><br>
 	  		&ndash; <b>regular guard</b> (<img src="../images/guard_obj.gif">)<br>
 	  		&ndash; <b>base guard</b> (<img src="../images/baseguard_obj.gif">)<br>
    	  </ul>
@@ -52,25 +52,24 @@
    	     and <b>packages</b> (team package) can be enabled by checking
 		 <span class="ui">Preferences-&gt;General-&gt;Appearance-&gt;Label Decorations-&gt;Java Type Indicator</span>.
 		 <ul>
-		 <li><u>compilation unit:</u><br>
+		 <li><span class="underline">compilation unit:</span><br>
 		 	&ndash; holding a team class (<span><img style="position:relative;left:0px;" src="../images/jcu_obj.gif"><img style="position:relative;left:-7px;top:-5px;" src="../images/team_ovr.gif"></span>)<br>
 		 	&ndash; holding a role class (<span><img style="position:relative;left:0px;" src="../images/jcu_obj.gif"><img style="position:relative;left:-7px;top:-5px;" src="../images/role_ovr.png"></span> or 
 		 	<span><img style="position:relative;left:0px;" src="../images/jcu_obj.gif"><img style="position:relative;left:-7px;top:-5px;" src="../images/team_role_ovr.gif"></span>)</li>
-		 <li><u>package:</u><br>
+		 <li><span class="underline">package:</span><br>
 		 	&ndash; team package  (<span><img style="position:relative;left:0px;" src="../images/package.gif"><img style="position:relative;left:-7px;top:-5px;" src="../images/team_ovr.gif"></span>)
 		 </ul>
    	</ul>
-    </p>
     <table>
     <tr><td>
-    	<p><u><b>Physical view:</b></u><br>
+    	<p><span class="underline"><b>Physical view:</b></span><br>
     		role file <code>FlightBonusDialog</code> is displayed as
     		a child of its team package.
     	</p>
     	  <img src="images/screenshots/packageExplorer.png"
 	  	   alt="Object Teams package explorer view">
     </td><td><span style="width=20px;">&nbsp;</span></td><td>
-		<p><u><b>Logical view:</b></u><br>
+		<p><span class="underline"><b>Logical view:</b></span><br>
 			role <code>FlightBonusDialog</code> is displayed as
 			a child of its enclosing team class.
 		</p>
