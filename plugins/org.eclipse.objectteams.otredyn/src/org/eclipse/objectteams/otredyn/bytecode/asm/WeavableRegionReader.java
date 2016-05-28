@@ -54,7 +54,7 @@ public class WeavableRegionReader {
 	}
 	
 	/**
-	 * @return a list of teams in the team initialization config file
+	 * @return a list of prefixes of class names
 	 */
 	private static List<String> readWeavablePrefixes() {
 		if (WEAVABLE_FILE == null)
