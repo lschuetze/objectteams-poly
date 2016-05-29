@@ -139,10 +139,8 @@ class ASTConverter {
 		this.monitor = monitor;
 		this.insideComments = JavaCore.ENABLED.equals(options.get(JavaCore.COMPILER_DOC_COMMENT_SUPPORT));
 //{ObjectTeams: initialize scanner mode from options
-		Object option = options.get(JavaCore.COMPILER_OPT_SCOPED_KEYWORDS);
-		if (option != null)
-			this.scanner.parseOTJonly = JavaCore.DISABLED.equals(option);
-		option = options.get(JavaCore.COMPILER_OPT_WEAVING_SCHEME);
+		this.scanner.setOTFlags(new CompilerOptions(options));
+		Object option = options.get(JavaCore.COMPILER_OPT_WEAVING_SCHEME);
 		if (option != null)
 			this.weavingScheme = WeavingScheme.valueOf((String) option);
 // SH}

@@ -7,7 +7,6 @@
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
- * $Id$
  * 
  * Please visit http://www.eclipse.org/objectteams for updates and contact.
  * 
@@ -16,18 +15,32 @@
  **********************************************************************/
 package org.eclipse.objectteams.otdt.ui.tests.core;
 
+import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Hashtable;
+
+import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.FileLocator;
+import org.eclipse.core.runtime.Path;
+import org.eclipse.core.runtime.Platform;
+import org.eclipse.jdt.core.ICompilationUnit;
+import org.eclipse.jdt.core.IPackageFragment;
+import org.eclipse.jdt.core.JavaCore;
+import org.eclipse.jdt.core.JavaModelException;
+import org.eclipse.jdt.core.dom.CompilationUnit;
+import org.eclipse.jdt.core.formatter.DefaultCodeFormatterConstants;
+import org.eclipse.jdt.internal.ui.text.correction.proposals.NewCUUsingWizardProposal;
+import org.eclipse.jdt.testplugin.JavaProjectHelper;
+import org.eclipse.jdt.testplugin.TestOptions;
+import org.eclipse.jdt.ui.text.java.IJavaCompletionProposal;
+import org.eclipse.jdt.ui.text.java.correction.CUCorrectionProposal;
+import org.eclipse.jdt.ui.text.java.correction.ChangeCorrectionProposal;
+import org.eclipse.objectteams.otdt.core.ext.OTDTPlugin;
+import org.osgi.framework.Bundle;
 
 import junit.framework.Test;
 import junit.framework.TestSuite;
-
-import org.eclipse.core.runtime.CoreException;
-import org.eclipse.jdt.core.ICompilationUnit;
-import org.eclipse.jdt.core.IPackageFragment;
-import org.eclipse.jdt.core.dom.CompilationUnit;
-import org.eclipse.jdt.internal.ui.text.correction.proposals.NewCUUsingWizardProposal;
-import org.eclipse.jdt.ui.text.java.IJavaCompletionProposal;
-import org.eclipse.jdt.ui.text.java.correction.CUCorrectionProposal;
 
 /**
  * Testing whether standard Java quickfixes work in OT/J code, too.
@@ -54,6 +67,42 @@ public class JavaQuickFixTests extends OTQuickFixTest {
 		return new ProjectTestSetup(test);
 	}
 	
+	private String ANNOTATION_JAR_PATH;
+
+	void setupForNullAnnotations(boolean isPlainJava) throws IOException, JavaModelException {
+		if (this.ANNOTATION_JAR_PATH == null) {
+			String version= "[1.1.0,2.0.0)"; // tests run at 1.5, need the "old" null annotations
+			Bundle[] bundles= Platform.getBundles("org.eclipse.jdt.annotation", version);
+			File bundleFile= FileLocator.getBundleFile(bundles[0]);
+			if (bundleFile.isDirectory())
+				this.ANNOTATION_JAR_PATH= bundleFile.getPath() + "/bin";
+			else
+				this.ANNOTATION_JAR_PATH= bundleFile.getPath();
+		}
+		JavaProjectHelper.addLibrary(fJProject1, new Path(ANNOTATION_JAR_PATH));
+		
+		Hashtable<String, String> options= TestOptions.getDefaultOptions();
+		
+		options.put(OTDTPlugin.OT_COMPILER_PURE_JAVA, isPlainJava ? JavaCore.ENABLED : JavaCore.DISABLED);
+
+		options.put(DefaultCodeFormatterConstants.FORMATTER_TAB_CHAR, JavaCore.SPACE);
+		options.put(DefaultCodeFormatterConstants.FORMATTER_TAB_SIZE, "4");
+		options.put(DefaultCodeFormatterConstants.FORMATTER_NUMBER_OF_EMPTY_LINES_TO_PRESERVE, String.valueOf(99));
+		options.put(JavaCore.COMPILER_PB_STATIC_ACCESS_RECEIVER, JavaCore.ERROR);
+		options.put(JavaCore.COMPILER_PB_UNCHECKED_TYPE_OPERATION, JavaCore.IGNORE);
+		options.put(JavaCore.COMPILER_PB_MISSING_HASHCODE_METHOD, JavaCore.WARNING);
+		options.put(JavaCore.COMPILER_ANNOTATION_NULL_ANALYSIS, JavaCore.ENABLED);
+		options.put(JavaCore.COMPILER_PB_NULL_SPECIFICATION_VIOLATION, JavaCore.ERROR);
+		options.put(JavaCore.COMPILER_PB_NULL_REFERENCE, JavaCore.ERROR);
+		options.put(JavaCore.COMPILER_PB_POTENTIAL_NULL_REFERENCE, JavaCore.WARNING);
+		options.put(JavaCore.COMPILER_PB_NULL_ANNOTATION_INFERENCE_CONFLICT, JavaCore.WARNING);
+		options.put(JavaCore.COMPILER_PB_NULL_UNCHECKED_CONVERSION, JavaCore.WARNING);
+		options.put(JavaCore.COMPILER_PB_REDUNDANT_NULL_CHECK, JavaCore.WARNING);
+		options.put(JavaCore.COMPILER_PB_NULL_UNCHECKED_CONVERSION, JavaCore.WARNING);
+
+		JavaCore.setOptions(options);
+	}
+
 	// the following three test try to reproduce Bug 311890 -  [assist] support "create class" quickfix for OT/J references
 	
 	// create a class for an unresolved playedBy declaration
@@ -273,5 +322,63 @@ public class JavaQuickFixTests extends OTQuickFixTest {
 		String expected2= buf.toString();		
 		
 		assertEqualStringsIgnoreOrder(new String[] { preview1, preview2 }, new String[] { expected1, expected2 });		
+	}
+
+	public void testExtractPotentiallyNullField1() throws Exception {
+		setupForNullAnnotations(true/*plainJava*/);
+		
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("import org.eclipse.jdt.annotation.*;\n");
+		buf.append("class ResolvedTeam {\n");
+		buf.append("   @Nullable ResolvedTeam superTeam;\n");
+		buf.append("   String getDescriptor() { return null; }\n");
+		buf.append("}\n");
+		buf.append("public class E {\n");
+		buf.append("    public String foo(@NonNull ResolvedTeam team) {\n");
+		buf.append("		if (team.superTeam != null)\n");
+		buf.append("        	return team.superTeam.getDescriptor();\n");
+		buf.append("		return null;\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+
+		CompilationUnit astRoot= getASTRoot(cu);
+		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot);
+		assertNumberOfProposals(proposals, 2);
+		assertCorrectLabels(proposals);
+
+		// primary proposal: Extract to checked local variable
+		CUCorrectionProposal proposal= (CUCorrectionProposal) proposals.get(0);
+		assertEquals("Display String", "Extract to checked local variable", proposal.getDisplayString());
+		String preview= getPreviewContent(proposal);
+
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("import org.eclipse.jdt.annotation.*;\n");
+		buf.append("class ResolvedTeam {\n");
+		buf.append("   @Nullable ResolvedTeam superTeam;\n");
+		buf.append("   String getDescriptor() { return null; }\n");
+		buf.append("}\n");
+		buf.append("public class E {\n");
+		buf.append("    public String foo(@NonNull ResolvedTeam team) {\n");
+		buf.append("		if (team.superTeam != null) {\n");
+		buf.append("            final ResolvedTeam superTeam2 = team.superTeam;\n");
+		buf.append("            if (superTeam2 != null) {\n");
+		buf.append("                return superTeam2.getDescriptor();\n");
+		buf.append("            } else {\n");
+		buf.append("                // TODO handle null value\n");
+		buf.append("                return null;\n");
+		buf.append("            }\n");
+		buf.append("        }\n");
+		buf.append("		return null;\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		assertEqualString(preview, buf.toString());
+
+		// secondary
+		ChangeCorrectionProposal otherProposal = (ChangeCorrectionProposal) proposals.get(1);
+		assertEquals("Display String", "Configure problem severity", otherProposal.getDisplayString());
 	}
 }
