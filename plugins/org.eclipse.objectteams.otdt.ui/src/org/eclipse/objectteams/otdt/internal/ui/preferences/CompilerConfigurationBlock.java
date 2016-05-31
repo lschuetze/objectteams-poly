@@ -134,7 +134,7 @@ public class CompilerConfigurationBlock extends OptionsConfigurationBlock {
 		fBlockEnableState= null;
 	}
 	
-	private static Key[] getKeys() {
+	static Key[] getKeys() {
 		return new Key[] {
 				PREF_PB_BASECALL,
 				PREF_PB_BASECLASS_CYCLE,
