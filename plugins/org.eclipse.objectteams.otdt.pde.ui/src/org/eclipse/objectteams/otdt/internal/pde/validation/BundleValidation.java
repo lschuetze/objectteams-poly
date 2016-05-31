@@ -234,7 +234,7 @@ public team class BundleValidation
 						// remove packages provided by this baseBundle from the list of required packages
 						Set<String> providedPackages = new HashSet<String>();
 						for (Capability cap : baseBundle.getCapabilities(PackageNamespace.PACKAGE_NAMESPACE))
-							providedPackages.add(cap.getDirectives().get(PackageNamespace.PACKAGE_NAMESPACE));
+							providedPackages.add((String) cap.getAttributes().get(PackageNamespace.PACKAGE_NAMESPACE));
 						for (String teamName: teamNames) {
 							List<String> basePackagesList = context.requiredBasePackagesPerTeam.get(teamName);
 							if (basePackagesList != null) {
