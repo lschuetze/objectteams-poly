@@ -17,33 +17,33 @@ package org.eclipse.objectteams.otdt.internal.pde.validation;
 
 import static org.eclipse.objectteams.otequinox.Constants.*;
 
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
 
 import org.eclipse.core.resources.IMarker;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.CoreException;
-import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Path;
-import org.eclipse.core.runtime.Status;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaProject;
+import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
-import org.eclipse.objectteams.otdt.internal.migration.OTEquinoxMigration;
+import org.eclipse.objectteams.otdt.core.IRoleType;
+import org.eclipse.objectteams.otdt.core.OTModelManager;
 import org.eclipse.objectteams.otdt.internal.pde.ui.OTPDEUIMessages;
-import org.eclipse.objectteams.otdt.internal.pde.ui.OTPDEUIPlugin;
 import org.eclipse.objectteams.otequinox.ActivationKind;
 import org.eclipse.osgi.service.resolver.BundleDescription;
 import org.eclipse.osgi.service.resolver.State;
 import org.eclipse.osgi.util.ManifestElement;
 import org.eclipse.osgi.util.NLS;
-import org.eclipse.pde.core.IBaseModel;
-import org.eclipse.pde.core.plugin.IExtensions;
-import org.eclipse.pde.core.plugin.IPluginExtension;
 import org.eclipse.pde.core.plugin.IPluginModelBase;
-import org.eclipse.pde.core.plugin.IPluginObject;
-import org.eclipse.pde.core.plugin.IPluginParent;
 import org.eclipse.pde.internal.core.builders.CompilerFlags;
 import org.eclipse.pde.internal.core.builders.IHeader;
 import org.eclipse.pde.internal.core.builders.PDEMarkerFactory;
@@ -57,6 +57,8 @@ import org.eclipse.pde.internal.ui.correction.AbstractXMLMarkerResolution;
 import org.eclipse.pde.internal.ui.correction.AddExportPackageMarkerResolution;
 import org.eclipse.ui.IMarkerResolution;
 import org.osgi.framework.Constants;
+import org.osgi.framework.namespace.PackageNamespace;
+import org.osgi.resource.Capability;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
@@ -99,6 +101,9 @@ public team class BundleValidation
 		protected boolean isAspectBundle = false;
 		protected boolean hasTeamActivation = false;
 		protected Set<String> aspectPackages = new HashSet<String>();
+
+		/** packages containing bound base classes, which require the team to be bound to the corresponding base bundle. */
+		public Map<String,List<String>> requiredBasePackagesPerTeam = new HashMap<String, List<String>>();
 		
 		IProject getProject() -> IProject getProject();  
 
@@ -115,12 +120,21 @@ public team class BundleValidation
 				BundleValidation.this.unregisterRole(this, BundleCheckingContext.class);
 			}
 		}
+		protected void addRequiredBasePackage(String teamName, String baseName) {
+			List<String> bases = requiredBasePackagesPerTeam.get(teamName);
+			if (bases == null)
+				requiredBasePackagesPerTeam.put(teamName, bases = new ArrayList<>());
+			bases.add(baseName);
+		}
 	}
 	
-	/** Super-role for access to one private method. */
+	/** Super-role for access to internal members. */
 	protected class XMLAnalyzer playedBy XMLErrorReporter {
 		@SuppressWarnings("decapsulation")
 		protected String generateLocationPath(Node node, String attrName) -> String generateLocationPath(Node node, String attrName);
+
+		@SuppressWarnings("decapsulation")
+		protected IProject getFProject() -> get IProject fProject;
 	}
 
 	/**
@@ -156,38 +170,96 @@ public team class BundleValidation
 				// it's an aspect bundle
 				context.isAspectBundle = true;
 				
-				// does it have elements with relevant activation?
-				NodeList baseNodes = element.getElementsByTagName(BASE_PLUGIN);
-				if (baseNodes.getLength() > 0) { 
-					String baseId = ((Element)baseNodes.item(0)).getAttribute(ID);
-					if (baseId != null) {
-						checkBasePlugIn(baseId, getLine((Element)baseNodes.item(0)));
-						if (baseId.toUpperCase().equals(SELF))
-							return; // missing bundle activation is not fatal in this case
-					}
-				}
-				
-				// check the teams for activation ALL_THREADS or THREAD:
+				// first collect binding requirements by nested teams of all bound teams:
 				NodeList teamNodes = element.getElementsByTagName(TEAM);
 				for (int t=0; t<teamNodes.getLength(); t++) {
 					// record aspect packages:
-					Element teamNode = (Element)teamNodes.item(t);
-					Object teamClass = teamNode.getAttribute(CLASS);
-					if (teamClass instanceof String) {
-						String teamName = (String) teamClass;
-						String actualPackage = checkActualPackage(context, teamNode, teamName);
-						if (actualPackage == null)
-							report(OTPDEUIMessages.Validation_MissingPackage_error, getLine(teamNode),
-									CompilerFlags.ERROR, PDEMarkerFactory.NO_RESOLUTION, PDEMarkerFactory.CAT_FATAL);
-						else
-							context.aspectPackages.add(actualPackage);
+					Object teamClass = ((Element)teamNodes.item(t)).getAttribute(CLASS);
+					if (teamClass instanceof String)
+						checkNestedTeams((String) teamClass, context);
+				}
+
+				NodeList aspectBindings = element.getChildNodes();
+				int aspectCount = aspectBindings.getLength();
+				for (int i = 0; i < aspectCount; i++) {
+					Node aspectBinding = aspectBindings.item(i);
+					// does it have elements with relevant activation?
+					boolean isSelfAdaptation = false;
+					boolean hasActivation = true;
+					BundleDescription baseBundle = null;
+					List<String> teamNames = new ArrayList<String>();
+
+					NodeList children = aspectBinding.getChildNodes();
+					int childrenCount = children.getLength();
+					for (int j = 0; j < childrenCount; j++) {
+						Node child = children.item(j);
+						if (child instanceof Element) {
+							Element childElement = (Element)child;
+							String tagName = childElement.getTagName();
+							if (BASE_PLUGIN.equals(tagName)) {
+								String baseId = childElement.getAttribute(ID);
+								if (baseId != null) {
+									baseBundle = checkBasePlugIn(baseId, getLine(childElement));
+									if (baseId.toUpperCase().equals(SELF))
+										isSelfAdaptation = true; // missing bundle activation is not fatal in this case
+								}
+
+							} else if (TEAM.equals(tagName)) {
+								// analyze aspect packages:
+								Element teamNode = childElement;
+								Object teamClass = teamNode.getAttribute(CLASS);
+								if (teamClass instanceof String) {
+									String teamName = (String) teamClass;
+									String actualPackage = checkActualPackage(context, teamNode, teamName);
+									if (actualPackage == null)
+										report(OTPDEUIMessages.Validation_MissingPackage_error, getLine(teamNode),
+												CompilerFlags.ERROR, PDEMarkerFactory.NO_RESOLUTION, PDEMarkerFactory.CAT_FATAL);
+									else
+										context.aspectPackages.add(actualPackage);
+									teamNames.add(teamName);
+								}
+								// team activation?
+								Object activation = teamNode.getAttribute(ACTIVATION);
+								if (ActivationKind.ALL_THREADS.toString().equals(activation)) {
+									hasActivation = true;
+								} else if (ActivationKind.THREAD.toString().equals(activation)) {
+									hasActivation = true;
+								}
+							}
+						}
 					}
-					// team activation?
-					Object activation = teamNode.getAttribute(ACTIVATION);
-					if (ActivationKind.ALL_THREADS.toString().equals(activation)) {
+					if (hasActivation && !isSelfAdaptation)
 						context.hasTeamActivation = true;
-					} else if (ActivationKind.THREAD.toString().equals(activation)) {
-						context.hasTeamActivation = true;
+					if (baseBundle != null) {
+						// remove packages provided by this baseBundle from the list of required packages
+						Set<String> providedPackages = new HashSet<String>();
+						for (Capability cap : baseBundle.getCapabilities(PackageNamespace.PACKAGE_NAMESPACE))
+							providedPackages.add(cap.getDirectives().get(PackageNamespace.PACKAGE_NAMESPACE));
+						for (String teamName: teamNames) {
+							List<String> basePackagesList = context.requiredBasePackagesPerTeam.get(teamName);
+							if (basePackagesList != null) {
+								Iterator<String> basePackages = basePackagesList.iterator();
+								while (basePackages.hasNext()) {
+									String basePackage = basePackages.next();
+									if (providedPackages.contains(basePackage))
+										basePackages.remove();
+								}
+							}
+						}
+					}
+				}
+				// complain about remaining requiredBasePackages (i.e., those for which no binding was provided)
+				for (Entry<String, List<String>> entry : context.requiredBasePackagesPerTeam.entrySet()) {
+					List<String> requiredBasePackages = entry.getValue();
+					if (requiredBasePackages != null && !requiredBasePackages.isEmpty()) {
+						for (String requiredBasePackage : requiredBasePackages) {
+							report(NLS.bind(OTPDEUIMessages.Validation_MissingBindingForBasePackage_error, entry.getKey(), requiredBasePackage),
+									getLine(element), 
+									CompilerFlags.ERROR,
+									PDEMarkerFactory.NO_RESOLUTION,
+									PDEMarkerFactory.CAT_FATAL);
+						}
+
 					}
 				}
 			}
@@ -236,14 +308,42 @@ public team class BundleValidation
 			return packageNameCandidate; // be shy about reporting errors in error contexts
 		}
 
-		void checkBasePlugIn(String symbolicName, int lineNo) {
+		BundleDescription checkBasePlugIn(String symbolicName, int lineNo) {
 			BundleDescription[] bundles = getState().getBundles(symbolicName);
-			if (bundles.length == 0)
+			if (bundles.length == 0) {
 				report(NLS.bind(OTPDEUIMessages.Validation_UnresolveBasePlugin_error, symbolicName),
 						   lineNo, 
 						   CompilerFlags.ERROR,
 						   PDEMarkerFactory.NO_RESOLUTION,
 						   PDEMarkerFactory.CAT_OTHER);
+				return null;
+			}
+			return bundles[0];
+		}
+		
+		void checkNestedTeams(String teamName, BundleCheckingContext context) {
+			teamName = teamName.replace('$', '.');
+			IJavaProject jPrj = JavaCore.create(getFProject());
+			if (jPrj.exists()) {
+				try {
+					IType teamType = jPrj.findType(teamName);
+					if (teamType != null) {
+						for (IType member : teamType.getTypes()) {
+							if (OTModelManager.isTeam(member)) {
+								String nestedTeamName = member.getFullyQualifiedName('$'); // name as used in aspectBinding.basePlugin
+								for (IType role : OTModelManager.getOTElement(member).getRoleTypes()) {
+									IType aBase = ((IRoleType) OTModelManager.getOTElement(role)).getBaseClass();
+									if (aBase != null)
+										context.addRequiredBasePackage(nestedTeamName, aBase.getPackageFragment().getElementName());
+								}
+								checkNestedTeams(nestedTeamName, context);
+							}
+						}
+					}
+				} catch (JavaModelException e) {
+					// cannot analyse
+				}
+			}
 		}
 	}
 	

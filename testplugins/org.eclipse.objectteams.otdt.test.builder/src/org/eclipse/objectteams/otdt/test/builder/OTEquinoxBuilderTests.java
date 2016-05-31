@@ -392,6 +392,20 @@ public class OTEquinoxBuilderTests extends OTBuilderTests {
 		expectingNoProblemsFor(aea.getPath());		
 	}
 
+	public void testBug484275() throws CoreException, IOException {
+		IJavaProject basePrj= fileManager.setUpJavaProject("Base484275"); 
+		env.addProject(basePrj.getProject());
+		IJavaProject aspPrj= fileManager.setUpJavaProject("Bug484275"); 
+		env.addProject(aspPrj.getProject());
+		fullBuild();
+		expectingNoProblemsFor(basePrj.getPath());
+		expectingOnlySpecificProblemsFor(aspPrj.getPath(), new Problem[] {
+			new Problem("", "Team 'teams.MyTeam$Middle' lacks a binding for base package 'internal'",
+					aspPrj.getPath().append(new Path("plugin.xml")),
+						-1, -1, -1, IMarker.SEVERITY_ERROR)
+		});		
+	}
+
 	// ---------------- HELPERS: ---------------------------
 	private Problem getDecapsulationProblem(IJavaProject project, String baseclassName, String teamPath, int start, int end) {
 		return new Problem("", "Decapsulating base class "+baseclassName+" by means of a forced export. Note, that additionally a corresponing declaration is needed in config.ini (OTJLD 2.1.2(c) + OT/Equinox).",

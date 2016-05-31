@@ -42,15 +42,13 @@ public class OTPDEUIMessages extends NLS
 	public static String Validation_UnresolveBasePlugin_error;
 
 	public static String ToggleOTSupportAction_configurationError_message;
-
-
 	public static String ToggleOTSupportAction_configurationError_title;
 
-
-	public static String Validation_MissingAspectPackageExport_error;
 	public static String Validation_NotAPackage_error;
 	public static String Validation_MissingPackage_error;
+	public static String Validation_MissingBindingForBasePackage_error;
 
+	public static String Validation_MissingAspectPackageExport_error;
 	public static String Resolution_AddAspectPackageExport_label;
 	public static String Resolution_AddAspectPackageExport_description;
 
