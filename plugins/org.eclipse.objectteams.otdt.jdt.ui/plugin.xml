@@ -158,6 +158,11 @@
               icon="platform:/plugin/org.eclipse.objectteams.otdt.ui/icons/ot/team_obj.gif">
         </team>
         <team
+              activation="NONE"
+              class="org.eclipse.objectteams.otdt.internal.ui.wizards.NewOTProjectWizard$WizardPageOne"
+              icon="platform:/plugin/org.eclipse.objectteams.otdt.ui/icons/ot/team_obj.gif">
+        </team>
+        <team
               activation="ALL_THREADS"
               class="org.eclipse.objectteams.otdt.internal.ui.preferences.Validations"
               icon="platform:/plugin/org.eclipse.objectteams.otdt.ui/icons/ot/team_obj.gif">
@@ -204,6 +209,11 @@
               class="org.eclipse.objectteams.otdt.internal.ui.assist.CreateNewBaseCUProposal"
               icon="platform:/plugin/org.eclipse.objectteams.otdt.ui/icons/ot/team_obj.gif">
         </team>
+        <team
+              activation="NONE"
+              class="org.eclipse.objectteams.otdt.internal.ui.assist.CreateNewBaseCUProposal$WizardProposal"
+              icon="platform:/plugin/org.eclipse.objectteams.otdt.ui/icons/ot/team_obj.gif">
+        </team>
      </aspectBinding>
      <aspectBinding
            icon="platform:/plugin/org.eclipse.objectteams.otdt.ui/icons/ot/calloutbinding_obj.gif">
@@ -218,7 +228,7 @@
         </team>
         <team
               activation="NONE"
-              class="org.eclipse.objectteams.otdt.internal.ui.viewsupport.MarkerViewAdaptor$MarkersViewLifeCycle$MarkersView"
+              class="org.eclipse.objectteams.otdt.internal.ui.viewsupport.MarkerViewAdaptor$MarkersViewLifeCycle"
               icon="platform:/plugin/org.eclipse.objectteams.otdt.ui/icons/ot/team_obj.gif">
         </team>
      </aspectBinding>
