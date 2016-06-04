@@ -7,7 +7,6 @@
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
- * $Id: RoFiBreakpointTests.java 18812 2008-07-27 18:01:43Z stephan $
  * 
  * Please visit http://www.eclipse.org/objectteams for updates and contact.
  * 
@@ -17,10 +16,12 @@
 package org.eclipse.objectteams.otdt.internal.debug.adaptor;
 
 import org.eclipse.core.runtime.CoreException;
+import org.eclipse.debug.core.ILaunch;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IType;
+import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.debug.core.IJavaType;
 import org.eclipse.objectteams.otdt.core.compiler.IOTConstants;
 
@@ -35,9 +36,6 @@ import base org.eclipse.jdt.internal.debug.core.JavaDebugUtils;
 @SuppressWarnings("restriction")
 public team class SourceLookupAdaptor {
 
-	// field stored in the team, because intercepted base method generateSourceName() has static context.
-	Object currentElement;
-
 	/**
 	 * Fix source lookup for "Open Actual Type" action on a phantom role.
 	 * Note that no JSR045 information is available, because the stackframe doesn't
@@ -45,46 +43,65 @@ public team class SourceLookupAdaptor {
 	 */
 	protected class JavaDebugUtils playedBy JavaDebugUtils 
 	{
-		String getSourceName(Object object) -> String getSourceName(Object object);		
+		IJavaElement getJavaElement(Object sourceElement) -> IJavaElement getJavaElement(Object sourceElement);
 
-		IType resolveType(IJavaType type) <- replace IType resolveType(IJavaType type);
+		Object resolveSourceElement(Object object, String stratum, ILaunch launch) -> Object resolveSourceElement(Object object, String stratum, ILaunch launch);
 
-		@SuppressWarnings({ "basecall", "inferredcallout", "decapsulation" })
-		static callin IType resolveType(IJavaType type) throws CoreException {
-			// copied from base method:
-	    	IJavaElement element = resolveJavaElement(type, type.getLaunch());
-	    	if (element != null ) {
-	    		IType result = resolveType(type.getName(), element);
-	    		// start OT-adaptation: check result:
-	    		if (result != null && result.exists())
-	    			return result;
-	    		// the given compilation unit doesn't have a type `type.getName()`
-	    		try {
-		    		ICompilationUnit resolvedCU = (ICompilationUnit) element;
-		    		String typeName = type.getName();
-		    		int lastDollar = typeName.lastIndexOf('$');
-		    		if (lastDollar != -1) {
-		    			// find a type that is (a) superclass of `type` and (b) contained in `resolvedCU`
-		    			String enclosingName = typeName.substring(0, lastDollar);
-		    			IJavaProject javaProject = resolvedCU.getJavaProject();
-						IType enclosingType = javaProject.findType(enclosingName);
-		    			while (enclosingType != null) {
-		    				if (resolvedCU.equals(enclosingType.getAncestor(IJavaElement.COMPILATION_UNIT))) {
-		    					// got the enclosing team, now find the corresponding role:
-		    					String roleName = typeName.substring(lastDollar+1);
-		    					if (roleName.startsWith(IOTConstants.OT_DELIM))
-		    						roleName = roleName.substring(IOTConstants.OT_DELIM_LEN);
-								return enclosingType.getType(roleName);
-		    				}
-		    				String[][] superclassName = enclosingType.resolveType((enclosingType.getSuperclassName()));
-							enclosingType = javaProject.findType(superclassName[0][0], superclassName[0][1]);
-		    			}
-		    		}
-	    		} catch (Exception e) {
-	    			return null;
-	    		}
-	    	}
-	    	return null;
+//		@SuppressWarnings("decapsulation")
+//		IType resolveType(String qualifiedName, IJavaElement javaElement) <- replace IType resolveType(String qualifiedName, IJavaElement javaElement);
+//
+//		static callin IType resolveType(String qualifiedName, IJavaElement javaElement) {
+//    		IType result = base.resolveType(qualifiedName, javaElement);
+//    		// start OT-adaptation: check result:
+//    		if (result != null && result.exists())
+//    			return result;
+//    		// the given compilation unit doesn't have a type `type.getName()`
+//    		try {
+//	    		ICompilationUnit resolvedCU = (ICompilationUnit) javaElement;
+//	    		return findSuperTypeInCU(qualifiedName, resolvedCU);
+//    		} catch (Exception e) {
+//    			// nothing found
+//    		}
+//    		return null;
+//		}
+//		
+//		static IType findSuperTypeInCU(String qualifiedName, ICompilationUnit resolvedCU) throws JavaModelException {
+//    		int lastDollar = qualifiedName.lastIndexOf('$');
+//    		if (lastDollar != -1) {
+//    			// find a type that is (a) superclass of `type` and (b) contained in `resolvedCU`
+//    			String enclosingName = qualifiedName.substring(0, lastDollar);
+//    			IJavaProject javaProject = resolvedCU.getJavaProject();
+//				IType enclosingType = javaProject.findType(enclosingName);
+//    			while (enclosingType != null) {
+//    				if (resolvedCU.equals(enclosingType.getAncestor(IJavaElement.COMPILATION_UNIT))) {
+//    					// got the enclosing team, now find the corresponding role:
+//    					String roleName = qualifiedName.substring(lastDollar+1);
+//    					if (roleName.startsWith(IOTConstants.OT_DELIM))
+//    						roleName = roleName.substring(IOTConstants.OT_DELIM_LEN);
+//						return enclosingType.getType(roleName);
+//    				}
+//    				String[][] superclassName = enclosingType.resolveType((enclosingType.getSuperclassName()));
+//    				try {
+//    					enclosingType = javaProject.findType(superclassName[0][0], superclassName[0][1]);
+//    				} catch (JavaModelException jme) {
+//    					if (jme.isDoesNotExist()) {
+//    						enclosingType = findSuperTypeInCU(enclosingName, resolvedCU);
+//    					}
+//    				}
+//    			}
+//    		}
+//			return null;
+//		}
+
+		IJavaElement resolveJavaElement(Object object, ILaunch launch) <- replace IJavaElement resolveJavaElement(Object object, ILaunch launch);
+
+		static callin IJavaElement resolveJavaElement(Object object, ILaunch launch) throws CoreException {
+			IJavaElement result = base.resolveJavaElement(object, launch);
+			if (result == null) {
+				Object sourceElement = resolveSourceElement(object, null, launch); // if lookup in "JAVA" stratum failed, try default
+				return getJavaElement(sourceElement);
+			}
+			return result;
 		}
 	}
 }
