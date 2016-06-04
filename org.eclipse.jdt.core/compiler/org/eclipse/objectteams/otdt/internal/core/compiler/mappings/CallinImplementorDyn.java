@@ -1086,7 +1086,7 @@ public class CallinImplementorDyn extends MethodMappingImplementor {
 		decl.hasParsedStatements = true;
 		if (teamMethods != null && idxOfExisting > -1) {
 			teamMethods[idxOfExisting] = decl; // directly replace
-			teamDecl.binding.resolveGeneratedMethod(decl, false, null);
+			teamDecl.binding.resolveGeneratedMethod(decl, false, null, false);
 		} else {
 			AstEdit.addMethod(teamDecl, decl);
 		}

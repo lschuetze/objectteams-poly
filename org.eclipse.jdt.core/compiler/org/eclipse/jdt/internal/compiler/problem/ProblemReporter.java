@@ -4476,6 +4476,7 @@ public void invalidMethod(MessageSend messageSend, MethodBinding method, Scope s
 		} else {
 			ProblemMethodBinding problemMethod = new ProblemMethodBinding(
 					constructor, selector, constructor.parameters, method.problemId());
+			problemMethod.declaringClass = declaringClass;
 			invalidConstructor(messageSend, problemMethod);
 		}
 		return;

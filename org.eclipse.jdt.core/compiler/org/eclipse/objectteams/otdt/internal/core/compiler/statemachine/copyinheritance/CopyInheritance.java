@@ -1006,7 +1006,7 @@ public class CopyInheritance implements IOTConstants, ClassFileConstants, ExtraC
 	        	// it would invoke the wrong super().
 	        	ConstructorDeclaration ctor =
 	        		targetRoleDecl.createDefaultConstructor(true, true);
-	       		targetRoleDecl.binding.resolveGeneratedMethod(ctor, false, origin);
+	       		targetRoleDecl.binding.resolveGeneratedMethod(ctor, false, origin, true);
 	        	return;
 	        }
 	    	else if (targetRoleDecl.getRoleModel()._refinesExtends)
@@ -1119,7 +1119,7 @@ public class CopyInheritance implements IOTConstants, ClassFileConstants, ExtraC
 			    }
 		    }
 
-		    AstEdit.addMethod(targetRoleDecl, newMethodDecl, wasSynthetic, false/*addToFront*/, origin);
+		    AstEdit.addMethod(targetRoleDecl, newMethodDecl, wasSynthetic, false/*addToFront*/, origin, true);
 	    }
     	if (method.isPrivate()) {
     		newMethodDecl.binding.modifiers |= ExtraCompilerModifiers.AccLocallyUsed; // don't warn unused copied method
@@ -1507,6 +1507,7 @@ public class CopyInheritance implements IOTConstants, ClassFileConstants, ExtraC
 	    MethodDeclaration newMethod = internalCreateCreationMethod(
 	    		teamDeclaration,
 				roleModel,
+				constructorBinding,
 				modifiers,
 				newArguments,
 				exceptions,
@@ -1546,6 +1547,7 @@ public class CopyInheritance implements IOTConstants, ClassFileConstants, ExtraC
 	private static MethodDeclaration internalCreateCreationMethod(
 			TypeDeclaration teamDeclaration,
 			RoleModel       roleModel,
+			MethodBinding   constructor,
 			int             ctorModifiers,
 			Argument[]      newArguments,
 			TypeReference[] thrownExceptions,
@@ -1623,7 +1625,7 @@ public class CopyInheritance implements IOTConstants, ClassFileConstants, ExtraC
 	    }
 
 	    newMethod.isGenerated = true;
-	    AstEdit.addMethod(teamDeclaration, newMethod);
+	    AstEdit.addMethod(teamDeclaration, newMethod, false, false, constructor, false);
 
 		return newMethod;
 	}

@@ -10,7 +10,6 @@
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
- * $Id: AstEdit.java 23416 2010-02-03 19:59:31Z stephan $
  *
  * Please visit http://www.eclipse.org/objectteams for updates and contact.
  *
@@ -175,15 +174,6 @@ public class AstEdit {
     	}
     	addMethod(classTypeDeclaration, methodDeclaration);
     }
-	/**
-	 * Adds a new Method to TypeDeclaration and resolve its types.
-	 *
-   	 * @param classTypeDeclaration
-	 * @param methodDeclaration
-	 * @param wasSynthetic was the method copied from a synthetic method?
-	 * @param addToFront should the method be added to the front of 'methods'?
-	 * @param copyInheritanceSrc tsuper method from which this method is copied
- 	 */
 	public static void addMethod(
             TypeDeclaration classTypeDeclaration,
             AbstractMethodDeclaration methodDeclaration,
@@ -191,9 +181,29 @@ public class AstEdit {
 			boolean addToFront, 
 			MethodBinding copyInheritanceSrc)
     {
+		addMethod(classTypeDeclaration, methodDeclaration, wasSynthetic, addToFront, copyInheritanceSrc, true);
+    }
+	/**
+	 * Adds a new Method to TypeDeclaration and resolve its types.
+	 *
+   	 * @param classTypeDeclaration
+	 * @param methodDeclaration
+	 * @param wasSynthetic was the method copied from a synthetic method?
+	 * @param addToFront should the method be added to the front of 'methods'?
+	 * @param original tsuper method or original ctor from which this method is copied
+	 * @param isCopyInheritance
+ 	 */
+	public static void addMethod(
+            TypeDeclaration classTypeDeclaration,
+            AbstractMethodDeclaration methodDeclaration,
+			boolean wasSynthetic,
+			boolean addToFront, 
+			MethodBinding original,
+			boolean isCopyInheritance)
+    {
         boolean modifiersAdjusted = addMethodDeclOnly(classTypeDeclaration, methodDeclaration, addToFront);
 		if (classTypeDeclaration.binding != null) {
-			classTypeDeclaration.binding.resolveGeneratedMethod(methodDeclaration, wasSynthetic, copyInheritanceSrc);
+			classTypeDeclaration.binding.resolveGeneratedMethod(methodDeclaration, wasSynthetic, original, isCopyInheritance);
 			if (modifiersAdjusted)
 				methodDeclaration.binding.tagBits |= TagBits.ClearPrivateModifier;
 		}

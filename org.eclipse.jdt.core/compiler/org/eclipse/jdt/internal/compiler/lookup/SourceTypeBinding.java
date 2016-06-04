@@ -3267,12 +3267,23 @@ public MethodBinding resolveGeneratedMethod(MethodBinding mb) {
  * Create and link binding for a generated method.
  * @param methodDeclaration
  * @param wasSynthetic
- * @param copyInheritanceSrc
+ * @param original copyInheritanceSource or original ctor
+ * @param isCopyInheritance whether or not original is copyInheritanceSource
  */
-public void resolveGeneratedMethod(AbstractMethodDeclaration methodDeclaration, boolean wasSynthetic, MethodBinding copyInheritanceSrc) {
+public void resolveGeneratedMethod(AbstractMethodDeclaration methodDeclaration, boolean wasSynthetic, MethodBinding original, boolean isCopyInheritance) {
     if (this.scope != null) {
 		MethodBinding binding = this.scope.createMethod(methodDeclaration);
-		binding.setCopyInheritanceSrc(copyInheritanceSrc);
+		if (isCopyInheritance)
+			binding.setCopyInheritanceSrc(original);
+		if (original != null && original.parameterNonNullness != null && methodDeclaration.arguments != null) {
+			int len = Math.min(methodDeclaration.arguments.length, original.parameterNonNullness.length);
+			AstGenerator gen = new AstGenerator(methodDeclaration);
+			for (int i=0; i<len; i++) {
+				Boolean nonNull = original.parameterNonNullness[i];
+				if (nonNull != null)
+					gen.addNullAnnotation(methodDeclaration.arguments[i], this.scope.environment(), nonNull);
+			}
+		}
 	} else {
     	// in STATE_FINAL we can only fake this method:
     	// (this way, dependent classes can already be fully translated).
@@ -3284,7 +3295,7 @@ public void resolveGeneratedMethod(AbstractMethodDeclaration methodDeclaration, 
 					methodDeclaration.selector,
 					null, null, null,
 					this);
-		binding.setCopyInheritanceSrc(copyInheritanceSrc);
+		binding.setCopyInheritanceSrc(original);
     	methodDeclaration.binding = binding;
     	resolveTypesFor(binding);
     	return;

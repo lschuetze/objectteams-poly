@@ -1492,14 +1492,19 @@ public class AstGenerator extends AstFactory {
 	}
 
 	public void addNonNullAnnotation(Argument argument, LookupEnvironment environment) {
+		addNullAnnotation(argument, environment, true);
+	}
+
+	public void addNullAnnotation(Argument argument, LookupEnvironment environment, boolean nonNull) {
 		CompilerOptions compilerOptions = environment.globalOptions;
 		if (compilerOptions.isAnnotationBasedNullAnalysisEnabled) {
+			char[][] annotationName = nonNull ? environment.getNonNullAnnotationName() : environment.getNullableAnnotationName();
 			if (compilerOptions.sourceLevel < ClassFileConstants.JDK1_8) {
-				argument.annotations = new Annotation[]{ markerAnnotation(environment.getNonNullAnnotationName()) };
+				argument.annotations = new Annotation[]{ markerAnnotation(annotationName) };
 			} else {
 				int levels = argument.type.getAnnotatableLevels();
 				argument.type.annotations = new Annotation[levels][];
-				argument.type.annotations[levels-1] = new Annotation[] { markerAnnotation(environment.getNonNullAnnotationName()) };
+				argument.type.annotations[levels-1] = new Annotation[] { markerAnnotation(annotationName) };
 			}
 		}
 	}
