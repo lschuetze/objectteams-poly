@@ -371,7 +371,8 @@ public class WordValueAttribute
         	if ((type.isRole() || type.isTeam())
         			&& !CharOperation.equals(type.getPackage().compoundName, IOTConstants.ORG_OBJECTTEAMS)
         			&& !TypeAnalyzer.isPredefinedRole(type)
-        			&& !TSuperHelper.isMarkerInterface(type))
+        			&& !TSuperHelper.isMarkerInterface(type)
+        			&& !environment.globalOptions.isPureJava)
         	{
 				switch (environment.globalOptions.weavingScheme) {
 	        		case OTRE: 

@@ -21,6 +21,7 @@ import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.tests.util.Util;
 import org.eclipse.jdt.internal.compiler.classfmt.ClassFileConstants;
 import org.eclipse.jdt.internal.compiler.impl.CompilerOptions;
+import org.eclipse.objectteams.otdt.core.ext.OTDTPlugin;
 import org.eclipse.objectteams.otdt.core.ext.WeavingScheme;
 import org.eclipse.objectteams.otdt.tests.otjld.AbstractOTJLDTest;
 
@@ -5452,5 +5453,37 @@ public class ReportedBugs extends AbstractOTJLDTest {
 			"	      ^^^\n" + 
 			"arg cannot be resolved to a type\n" + 
 			"----------\n");
+    }
+    public void testBug495462() {
+    	Map<String,String> options = getCompilerOptions();
+    	options.put(OTDTPlugin.OT_COMPILER_WEAVING_SCHEME, WeavingScheme.OTDRE.name());
+    	runConformTest(
+    		new String[] {
+    			"pt/MyTeam.java",
+    			"package pt;\n" +
+    			"public team class MyTeam {\n" +
+    			"	public static String val = \"OK\";\n" + // not final  :)
+    			"}\n"
+    		},
+    		options);
+    	options.put(OTDTPlugin.OT_COMPILER_WEAVING_SCHEME, WeavingScheme.OTRE.name()); // incompatible ...
+    	options.put(OTDTPlugin.OT_COMPILER_PURE_JAVA, JavaCore.ENABLED); // ... but irrelevant
+    	runConformTest(
+    		new String[] {
+    			"pj/MyClass.java",
+    			"package pj;\n" +
+    			"public class MyClass {\n" +
+    			"	pt.MyTeam t;\n" +
+    			"	public static void main(String... args) {\n" +
+    			"		System.out.println(pt.MyTeam.val);\n" +
+    			"	}\n" +
+    			"}\n"	
+    		},
+    		"OK",
+    		null,
+    		false,
+    		null,
+    		options,
+    		null);
     }
 }
