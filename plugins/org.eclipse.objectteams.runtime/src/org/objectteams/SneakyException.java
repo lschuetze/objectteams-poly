@@ -36,6 +36,7 @@ public class SneakyException extends RuntimeException {
 
 	/** Wrap a given exception in an unchecked SneakyException. */
 	public SneakyException(Exception cause) {
+		super(cause);
 		this.cause = cause;
 	}
 
@@ -57,5 +58,10 @@ public class SneakyException extends RuntimeException {
 	@Override
 	public void printStackTrace(PrintStream s) {
 		this.cause.printStackTrace(s);
+	}
+	
+	@Override
+	public StackTraceElement[] getStackTrace() {
+		return this.cause.getStackTrace();
 	}
 }
