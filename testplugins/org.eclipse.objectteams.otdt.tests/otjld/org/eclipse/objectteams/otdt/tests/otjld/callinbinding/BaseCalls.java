@@ -2642,4 +2642,43 @@ public class BaseCalls extends AbstractOTJLDTest {
     		true/*skipJava*/);
     }
 
+    public void testBug495463() {
+    	runNegativeTest(
+    		new String[] {
+    			"MyTeam.java",
+    			"public team class MyTeam {\n" +
+    			"	protected class R {\n" +
+    			" 		callin void foo(int arga, int arg2) {\n" +
+    			"			base.foo(missing, false);\n" +
+    			"		}\n" +
+    			"	}\n" +
+    			"}\n"
+    		},
+    		"----------\n" + 
+			"1. ERROR in MyTeam.java (at line 4)\n" + 
+			"	base.foo(missing, false);\n" + 
+			"	         ^^^^^^^\n" + 
+			"missing cannot be resolved to a variable\n" + 
+			"----------\n");
+    }
+
+    public void testBug495463_b() {
+    	runNegativeTest(
+    		new String[] {
+    			"MyTeam.java",
+    			"public team class MyTeam {\n" +
+    			"	protected class R {\n" +
+    			" 		callin void foo(int arga, int arg2) {\n" +
+    			"			base.foo(1, false);\n" +
+    			"		}\n" +
+    			"	}\n" +
+    			"}\n"
+    		},
+    		"----------\n" + 
+			"1. ERROR in MyTeam.java (at line 4)\n" + 
+			"	base.foo(1, false);\n" + 
+			"	     ^^^\n" + 
+			"Base call foo(int, int) is not applicable for the arguments (int, boolean)\n" + 
+			"----------\n");
+    }
 }

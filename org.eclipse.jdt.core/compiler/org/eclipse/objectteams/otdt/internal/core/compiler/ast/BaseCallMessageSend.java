@@ -267,6 +267,9 @@ public class BaseCallMessageSend extends AbstractExpressionWrapper
 					boolean hasArgumentProblem = false;
 					for (int i = 0; i < args.length; i++) {
 						argumentTypes[i] = args[i].resolvedType;
+						if (argumentTypes[i] == null) {
+							return this.resolvedType;
+						}
 						if (!hasArgumentProblem && !argumentTypes[i].isBoxingCompatibleWith(parameters[i], scope))
 							hasArgumentProblem = true;
 					}

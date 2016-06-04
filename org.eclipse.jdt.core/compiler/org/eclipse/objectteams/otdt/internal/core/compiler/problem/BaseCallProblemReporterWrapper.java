@@ -25,6 +25,7 @@ import org.eclipse.jdt.core.compiler.IProblem;
 import org.eclipse.jdt.internal.compiler.CompilationResult;
 import org.eclipse.jdt.internal.compiler.ast.AbstractMethodDeclaration;
 import org.eclipse.jdt.internal.compiler.ast.MessageSend;
+import org.eclipse.jdt.internal.compiler.ast.Statement;
 import org.eclipse.jdt.internal.compiler.impl.ReferenceContext;
 import org.eclipse.jdt.internal.compiler.lookup.MethodBinding;
 import org.eclipse.jdt.internal.compiler.lookup.ProblemMethodBinding;
@@ -119,5 +120,10 @@ public class BaseCallProblemReporterWrapper extends ProblemReporterWrapper
 		} else {
 			this._wrappee.baseCallNotSameMethod(enclosingMethodDecl, messageSend);
 		}
+	}
+
+	public void invalidConstructor(Statement statement, MethodBinding targetConstructor) {
+		if (!statement.isGenerated()) // suppress error against generated boxing constructor (in case of type mismatch)
+			super.invalidConstructor(statement, targetConstructor);
 	}
 }
