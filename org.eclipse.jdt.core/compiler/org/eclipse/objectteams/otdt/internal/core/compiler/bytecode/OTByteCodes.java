@@ -217,6 +217,15 @@ public class OTByteCodes implements Opcodes {
         code[offset++] = (byte)value;
     }
 
+    public static byte[] insertWord(byte[] code, int idx, int value) {
+		byte[] result = new byte[code.length+2];
+		System.arraycopy(code, 0, result, 0, idx);
+		result[idx]   = (byte)(value >> 8);
+		result[idx+1] = (byte)value;
+		System.arraycopy(code, idx, result, idx+2, code.length-idx);
+		return result;
+	}
+
     /**
      * Reference in big endian order.
      **/

@@ -17,6 +17,9 @@ package org.eclipse.objectteams.otdt.tests.otjld.other;
 
 import junit.framework.Test;
 
+import java.util.Map;
+
+import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.internal.compiler.classfmt.ClassFileConstants;
 import org.eclipse.objectteams.otdt.tests.otjld.AbstractOTJLDNullAnnotationTest;
 
@@ -72,7 +75,9 @@ public class OTNullAnnotationTest extends AbstractOTJLDNullAnnotationTest {
 	
 	public void testBug444231() {
 		if (this.complianceLevel >= ClassFileConstants.JDK1_8) return; // not ready for type annotations, yet
-		runNegativeTestWithLibs(
+		Map<String,String> options = getCompilerOptions();
+		options.put(JavaCore.COMPILER_PB_FATAL_OPTIONAL_ERROR, JavaCore.DISABLED);
+		runConformTestWithLibs(
 			new String[] {
 				"b/Base444231.java",
 				"package b;\n" +
@@ -89,6 +94,16 @@ public class OTNullAnnotationTest extends AbstractOTJLDNullAnnotationTest {
 				"p/Team444231Sub.java",
 				"package p;\n" +
 				"public team class Team444231Sub extends Team444231Super {\n" +
+				"}\n"
+			},
+			options,
+			"");
+		runNegativeTestWithLibs(
+			new String[] {
+				"p/Team444231SubSub.java",
+				"package p;\n" +
+				"import p.Team444231Sub;\n" +
+				"public team class Team444231SubSub extends Team444231Sub {\n" +
 				"	void test() {\n" +
 				"		String val = null;\n" +
 				"		new R(val);\n" +

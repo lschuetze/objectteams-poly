@@ -230,19 +230,32 @@ public class BytecodeTransformer
     	// keep this offset for updating the stored value after adjustTail():
     	int copyInhSrcLineOffsetOffset;
     	// first phase of adjustment (method prefix and attributes except code):
+		ConstantPoolSimpleConverter conv = constantPoolOffsets == null 
+								? ConstantPoolSimpleConverter.create(srcRole, srcMethodBinding, methodCode, classFile)
+								: new ConstantPoolSimpleConverter(srcConstantPool, constantPoolOffsets, offset, methodCode, classFile);
+
+		conv.updateName(codeAttributeOffset-offset);
+
+    	byte[][] varDest = new byte[][]{methodCode};
+		boolean isAddingMarkerArg = !TSuperHelper.isTSuper(srcMethodBinding) && dstMethod.isTSuper;
 		copyInhSrcLineOffsetOffset = copyAdjustStructure(
 				classFile,
-				constantPoolOffsets == null 
-				? ConstantPoolSimpleConverter.create(srcRole, srcMethodBinding, methodCode, classFile)
-				: new ConstantPoolSimpleConverter(srcConstantPool, constantPoolOffsets, offset, methodCode, classFile),
-				srcConstantPool, offset, methodCode,
+				conv,
+				srcConstantPool, offset, varDest,
 				dstMethod.binding,
-				totalLen);
+				totalLen,
+				isAddingMarkerArg);
+		int inc = varDest[0].length - methodCode.length;
+		tailOffset 			+= inc;
+		totalLen 			+= inc;
+		codeAttributeOffset += inc;
+		methodCode = varDest[0];
 
         codeAttributeOffset -= offset; // now relative to methodCode
         tailOffset          -= offset;
 
         if (copyInhSrcLineOffsetOffset == -1) {
+        	// TODO: consider inserting this attribute during copyAdjustStructure()
 	        // CopyInheritanceSrc added when copying a method for the first time
         	byte[] extraAttr = generateCpInhSrc(dstMethod.model, classFile);
 
@@ -346,7 +359,7 @@ public class BytecodeTransformer
      * @param conv            converter for mapping strings to the new constantpool
      * @param src             bytes to copy from
      * @param srcOffset       offset into src
-     * @param dest            bytes to copy into
+     * @param varDest         bytes to copy into  -- 0-cell array of byte[] to mimic an in-out param
      * @param dstMethod
      * @param expectedLen     number of bytes to be adjusted (for sanity checking only)
      * @return if a CopyInheritanceSrc Attribute is already present return the offset where the lineOffset is stored, -1 otherwise
@@ -354,15 +367,18 @@ public class BytecodeTransformer
     private int copyAdjustStructure(
     		ClassFile classFile,
     		ConstantPoolSimpleConverter conv,
-			byte[] src, int srcOffset, byte[] dest,
+			byte[] src, int srcOffset, byte[][] varDest,
 			MethodBinding dstMethod,
-			int expectedLen)
+			int expectedLen,
+			boolean isAddingMarkerArg)
     {
+    	byte[] dest = varDest[0];
     	conv.updateName(2); // method name
     	conv.writeName(4, dstMethod.signature(classFile)); // method signature
     	int attributesCount = OTByteCodes.getWord(dest, 6);
 
     	int offset = METHOD_PREFIX_LEN;
+    	int destOff = 0; // additional offset when inserting more bytes into dest
 
     	int copyInhSrcLineOffsetOffset = -1;
 
@@ -381,7 +397,7 @@ public class BytecodeTransformer
 					int ref = OTByteCodes.getWord(src, srcOffset+offset);
             		ConstantPoolObject cpo = this._reader.readConstantPoolObject(ref, 2);
             		cpo = this._mapper.mapConstantPoolObject(cpo);
-            		this._writer.writeConstantPoolObject(dest, offset, 2, cpo);
+            		this._writer.writeConstantPoolObject(dest, offset+destOff, 2, cpo);
             		offset+=2;
             	}
             }
@@ -416,7 +432,29 @@ public class BytecodeTransformer
             	int annotCount = OTByteCodes.getWord(src, srcOffset+offset);
             	offset+=2;
             	for (int j=0; j<annotCount; j++)
-            		offset = adjustAnnotation(conv, src, srcOffset, offset);	             	
+            		offset = adjustAnnotation(conv, src, srcOffset, offset);
+            } else if (CharOperation.equals(attrName, RuntimeInvisibleParameterAnnotationsName)
+            		|| CharOperation.equals(attrName, RuntimeVisibleParameterAnnotationsName))
+            {
+            	if (isAddingMarkerArg) {
+	            	OTByteCodes.setInt(dest, offset+destOff-4, attrLen+2);				// grow attr by 2
+	            	
+	            	int paramCount = OTByteCodes.getUnsignedByte(src, srcOffset+offset);
+	            	dest[offset+destOff] = (byte)(paramCount+1);						// grow paramCount by 1
+	            	offset++;
+
+	            	for (int p=0; p<paramCount; p++) {									// copy-adjust annotations
+	                	int annotCount = OTByteCodes.getWord(src, srcOffset+offset);
+	                	offset+=2;
+	                	for (int j=0; j<annotCount; j++)
+	                		offset = adjustAnnotation(conv, src, srcOffset, offset+destOff);
+	            	}
+	            	dest = OTByteCodes.insertWord(dest, offset+destOff, 0);				// add a "0" entry
+	            	varDest[0] = dest;
+	            	destOff += 2;
+            	} else {
+            		offset += attrLen;
+            	}
             } else {
             	offset += attrLen;
             }
