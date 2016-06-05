@@ -170,13 +170,22 @@ public team class BundleValidation
 				// it's an aspect bundle
 				context.isAspectBundle = true;
 				
-				// first collect binding requirements by nested teams of all bound teams:
+				boolean hasSelfAdaptation = false;
+				NodeList baseNodes = element.getElementsByTagName(BASE_PLUGIN);
+				for (int b=0; b<baseNodes.getLength(); b++) {
+					if (SELF.equalsIgnoreCase(((Element)baseNodes.item(b)).getAttribute(ID))) {
+						hasSelfAdaptation = true;
+						break;
+					}
+				}
+
+				// collect binding requirements by nested teams of all bound teams:
 				NodeList teamNodes = element.getElementsByTagName(TEAM);
 				for (int t=0; t<teamNodes.getLength(); t++) {
 					// record aspect packages:
 					Object teamClass = ((Element)teamNodes.item(t)).getAttribute(CLASS);
 					if (teamClass instanceof String)
-						checkNestedTeams((String) teamClass, context);
+						checkNestedTeams((String) teamClass, context, hasSelfAdaptation);
 				}
 
 				NodeList aspectBindings = element.getChildNodes();
@@ -199,9 +208,10 @@ public team class BundleValidation
 							if (BASE_PLUGIN.equals(tagName)) {
 								String baseId = childElement.getAttribute(ID);
 								if (baseId != null) {
-									baseBundle = checkBasePlugIn(baseId, getLine(childElement));
 									if (baseId.toUpperCase().equals(SELF))
 										isSelfAdaptation = true; // missing bundle activation is not fatal in this case
+									else
+										baseBundle = checkBasePlugIn(baseId, getLine(childElement));
 								}
 
 							} else if (TEAM.equals(tagName)) {
@@ -233,6 +243,8 @@ public team class BundleValidation
 					if (baseBundle != null) {
 						// remove packages provided by this baseBundle from the list of required packages
 						Set<String> providedPackages = new HashSet<String>();
+						// for SELF-adaptation we don't need a package export, that's why we include those 
+						// requirements from this check (see checkNestedTeams(..hasSelfAdaptation)).
 						for (Capability cap : baseBundle.getCapabilities(PackageNamespace.PACKAGE_NAMESPACE))
 							providedPackages.add((String) cap.getAttributes().get(PackageNamespace.PACKAGE_NAMESPACE));
 						for (String teamName: teamNames) {
@@ -321,7 +333,7 @@ public team class BundleValidation
 			return bundles[0];
 		}
 		
-		void checkNestedTeams(String teamName, BundleCheckingContext context) {
+		void checkNestedTeams(String teamName, BundleCheckingContext context, boolean hasSelfAdaptation) {
 			teamName = teamName.replace('$', '.');
 			IJavaProject jPrj = JavaCore.create(getFProject());
 			if (jPrj.exists()) {
@@ -333,10 +345,11 @@ public team class BundleValidation
 								String nestedTeamName = member.getFullyQualifiedName('$'); // name as used in aspectBinding.basePlugin
 								for (IType role : OTModelManager.getOTElement(member).getRoleTypes()) {
 									IType aBase = ((IRoleType) OTModelManager.getOTElement(role)).getBaseClass();
-									if (aBase != null)
+									if (aBase != null
+											&& !(hasSelfAdaptation && aBase.getJavaProject().equals(jPrj)))
 										context.addRequiredBasePackage(nestedTeamName, aBase.getPackageFragment().getElementName());
 								}
-								checkNestedTeams(nestedTeamName, context);
+								checkNestedTeams(nestedTeamName, context, hasSelfAdaptation);
 							}
 						}
 					}

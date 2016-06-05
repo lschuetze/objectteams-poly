@@ -406,6 +406,13 @@ public class OTEquinoxBuilderTests extends OTBuilderTests {
 		});		
 	}
 
+	public void testBug495489() throws CoreException, IOException {
+		IJavaProject aspPrj= fileManager.setUpJavaProject("Bug495489"); 
+		env.addProject(aspPrj.getProject());
+		fullBuild();
+		expectingNoProblemsFor(aspPrj.getPath());
+	}
+
 	// ---------------- HELPERS: ---------------------------
 	private Problem getDecapsulationProblem(IJavaProject project, String baseclassName, String teamPath, int start, int end) {
 		return new Problem("", "Decapsulating base class "+baseclassName+" by means of a forced export. Note, that additionally a corresponing declaration is needed in config.ini (OTJLD 2.1.2(c) + OT/Equinox).",
