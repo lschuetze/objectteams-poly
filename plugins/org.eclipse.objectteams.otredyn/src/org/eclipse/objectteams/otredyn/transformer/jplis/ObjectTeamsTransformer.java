@@ -89,26 +89,29 @@ public class ObjectTeamsTransformer implements ClassFileTransformer {
 
 		if (clazz == null)
 			clazz = classRepo.getBoundClass(sourceClassName, classId, loader);
-		if (classBeingRedefined == null && !clazz.isFirstTransformation()) {
-			return clazz.getBytecode(); // FIXME: re-loading existing class?? Investigate classloader, check classId strategy etc.pp.
-		}
-		try {
-			if (clazz.isTransformationActive()) {
-				return null;
+
+		synchronized(clazz) { // all modifications done in this critical section
+			if (classBeingRedefined == null && !clazz.isFirstTransformation()) {
+				return clazz.getBytecode();
 			}
-			clazz = classRepo.getBoundClass(
-					className, classId, classfileBuffer, loader);
-			clazz.setWeavingContext(this.weavingContext);
-			if (!clazz.isInterface())
-				classRepo.linkClassWithSuperclass(clazz);
-			if (!clazz.isInterface() || clazz.isRole())
-				clazz.transformAtLoadTime();
-			
-			classfileBuffer = clazz.getBytecode();
-			clazz.dump(classfileBuffer, "initial");
-		} catch(Throwable t) {
-			t.printStackTrace();
+			try {
+				if (clazz.isTransformationActive()) {
+					return null;
+				}
+				clazz = classRepo.getBoundClass(
+						className, classId, classfileBuffer, loader);
+				clazz.setWeavingContext(this.weavingContext);
+				if (!clazz.isInterface())
+					classRepo.linkClassWithSuperclass(clazz);
+				if (!clazz.isInterface() || clazz.isRole())
+					clazz.transformAtLoadTime();
+				
+				classfileBuffer = clazz.getBytecode();
+			} catch(Throwable t) {
+				t.printStackTrace();
+			}
 		}
+		clazz.dump(classfileBuffer, "initial");
 		
 		Collection<String> boundBaseClasses = clazz.getBoundBaseClasses();
 		if (boundBaseClasses != null)
