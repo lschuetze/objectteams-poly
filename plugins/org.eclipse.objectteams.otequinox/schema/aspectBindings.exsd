@@ -222,7 +222,7 @@ Provide comma separated list of package names (as in the OSGi Export-Package: he
    <element name="superBase">
       <annotation>
          <documentation>
-            Relevant super classes of bound base classes. A super base class is relevant, if it defines a methods, whose override in the exact base is bound by callin or decapsulating callout.
+            Relevant super classes of bound base classes. A super base class is relevant, if it defines a method, whose override in the exact base is bound by callin or decapsulating callout.
          </documentation>
       </annotation>
       <complexType>
