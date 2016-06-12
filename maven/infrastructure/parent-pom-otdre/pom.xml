@@ -1,0 +1,114 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+  
+  	<parent>
+		<groupId>org.eclipse.objectteams</groupId>
+		<artifactId>objectteams-parent-pom</artifactId>
+		<version>2.5.0</version>
+  	</parent>
+  
+	<artifactId>objectteams-otdre-parent-pom</artifactId>
+	<packaging>pom</packaging>
+	<name>Object Teams parent pom for OTDRE</name>
+  
+
+	<url>http://download.eclipse.org/objectteams/maven/3/sites/${project.artifactId}</url>
+
+	<description>
+	This is the parent pom for Object Teams projects using Maven3.
+	It specifies the core dependencies and configurations for building and
+	executing Object Teams code using Maven.
+	This variant uses the OTDRE weaving scheme.
+	</description>
+
+	<licenses>
+		<license>
+			<name>Eclipse Public License Version 1.0</name>
+			<comments>
+				This file is part of "Object Teams Development Tooling"-Software.
+
+				Copyright 2016 GK Software AG and others.
+				All rights reserved. This program and the accompanying materials
+				are made available under the terms of the Eclipse Public License v1.0
+				which accompanies this distribution, and is available at
+				http://www.eclipse.org/legal/epl-v10.html
+
+				Please visit http://www.eclipse.org/objectteams for updates and contact.
+
+				Contributors:
+					Stephan Herrmann - Initial API and implementation.
+			</comments>
+		</license>
+	</licenses>
+
+	<organization>
+		<name>Eclipse Object Teams Project</name>
+		<url>http://www.eclipse.org/objectteams</url>
+	</organization>
+	
+	<developers>
+		<developer><name>Stephan Herrmann</name><organization>GK Software AG</organization></developer>
+	</developers>
+    
+	<mailingLists>
+		<mailingList><name>Object Teams Forum</name><archive>http://www.eclipse.org/forums/eclipse.objectteams</archive></mailingList>
+	</mailingLists>
+	
+	<issueManagement>
+		<system>Bugzilla</system>
+		<url>http://bugs.eclipse.org/bugs</url>
+	</issueManagement>
+  
+    
+    <!-- Required property from settings.xml: 								-->
+    <!-- 	settings.localRepository	path to the local Maven repository.	-->
+    <properties>
+    	<!-- Repository path of this module within the Object Teams git: -->
+    	<project-repository-path>maven/infrastructure/parent-pom-otdre</project-repository-path>
+
+		<!-- Select OTDRE: -->
+		<otj.weaving.scheme>otdre</otj.weaving.scheme>
+		<objectteams-otre.version>${otdre.version}</objectteams-otre.version>
+		
+		<!-- Select ASM: -->
+		<asm.version>5.0.1</asm.version>
+		<otj.bytecode.lib.groupId>org.ow2.asm</otj.bytecode.lib.groupId>
+		<otj.bytecode.lib.artifactId>asm-all</otj.bytecode.lib.artifactId>
+		<otj.bytecode.lib.version>${asm.version}</otj.bytecode.lib.version>
+    </properties>
+
+	<scm>
+		<!--  WTF: release will "improve" the connection to using svn+ssh and advertize this for anonymous access !@#!%$ -->
+	    <connection>scm:git:git://git.eclipse.org/gitroot/objectteams/org.eclipse.objectteams.git/${project-repository-path}</connection>
+	    <developerConnection>scm:git:ssh://${username}@git.eclipse.org/gitroot/objectteams/org.eclipse.objectteams.git/${project-repository-path}</developerConnection>
+		<!--  WTF: release will "improve" the connection to using svn+ssh and advertize this for web access !@#!%$ -->
+	    <url>http://git.eclipse.org/c/objectteams/org.eclipse.objectteams.git</url>
+	</scm>
+
+	<!-- for deployment of this pom: -->
+	<distributionManagement>
+		<site>
+			<id>otSiteRepo</id>
+			<name>Object Teams sites repository for Maven 3</name>
+			<!--
+				for unclear reason when deploying dependent sites we need to first install this
+			    parent with the following URL:
+			    	scpexe://objectteams/maven/3/sites/${project.artifactId}
+			    otherwise the variables from the below URL will be pasted verbatim for references
+			    to the parent pom =:-0
+			-->
+			<url>scpexe://${ot.host}:${ot.maven.repository.basepath}/sites/${project.artifactId}</url>
+		</site>
+		<repository>
+			<id>ObjectTeamsRepository</id>
+			<uniqueVersion>false</uniqueVersion>
+			<name>Public Object Teams distribution repository</name>
+			<!--
+				most values are fed from settings.xml
+			-->
+			<url>scpexe://${ot.host}:${ot.maven.repository.basepath}/repository</url>
+			<layout>default</layout>
+		</repository>
+	</distributionManagement>
+
+</project>

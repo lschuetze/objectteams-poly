@@ -1,7 +1,7 @@
 public team class TestTeam {
     protected class R playedBy TheBase {
 		void foo() {
-			System.out.println("foos");
+			TheBase.print("foos\n");
 		}
 		foo <- after bar;
 	}

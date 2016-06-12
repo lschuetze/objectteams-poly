@@ -1,20 +1,20 @@
 	------
-	Using the Object Teams Parent POM
+	Using the Object Teams OTDRE Parent POM
 	------
 	Olaf Otto & Stephan Herrmann
 	------
 	2016-06-12
 	------
 
-Using the Object Teams Parent POM
+Using the Object Teams OTDRE Parent POM
 
  Declaring this module as the parent of your project will add basic capabilities
  for using OT/J in your sources.
  
 * Weaving schemes OTRE vs. OTDRE
  
- This pom supports the traditional {{{http://help.eclipse.org/topic/org.eclipse.objectteams.otdt.doc/guide/weavingscheme.html}weaving scheme OTRE}}.
- For OTDRE please use {{{../objectteams-otdre-parent-pom}org.eclipse.objectteams:objectteams-otdre-parent-pom}} instead.
+ This pom supports the dynamic {{{http://help.eclipse.org/topic/org.eclipse.objectteams.otdt.doc/guide/weavingscheme.html}weaving scheme OTDRE}}.
+ For the traditional OTRE please use {{{../objectteams-parent-pom}org.eclipse.objectteams:objectteams-parent-pom}} instead.
 
 * Include the parent pom
 
@@ -37,7 +37,7 @@ Using the Object Teams Parent POM
 +-----
 	<parent>
 		<groupId>org.eclipse.objectteams</groupId>
-		<artifactId>objectteams-parent-pom</artifactId>
+		<artifactId>objectteams-otdre-parent-pom</artifactId>
 		<version>2.5.0</version>
 	</parent>
 +-----
@@ -52,14 +52,14 @@ Using the Object Teams Parent POM
  
 ** Standard OT/J dependencies documented
 
-  All OT/J projects using the <<<objectteams-parent-pom>>> implicitly depend on the following artifacts which are developed 
+  All OT/J projects using the <<<objectteams-otdre-parent-pom>>> implicitly depend on the following artifacts which are developed 
   independent of maven and simply repackaged using the {{{../objectteams-artifact-deployer}org.eclipse.objectteams:objectteams-artifact-deployer}} module:
   
   [org.eclipse.objectteams:objectteams-runtime] the Object Teams runtime (minimal OT/J API) repackaged from the <<<org.eclipse.objectteams.runtime>>> OSGi bundle.
   
-  [org.eclipse.objectteams:objectteams-otre] the Object Teams Runtime Environment (the bytecode weaver) repackaged from the <<<org.eclipse.objectteams.otre>>> OSGi bundle.
+  [org.eclipse.objectteams:objectteams-otdre] the Object Teams Dynamic Runtime Environment (the bytecode weaver) repackaged from the <<<org.eclipse.objectteams.otredyn>>> OSGi bundle.
   
-  [org.eclipse.objectteams:objectteams-otre-agent] the Java agent that hooks the Object Teams runtime into the JVM (repackaged from file <<<otre_agent.jar>>>
+  [org.eclipse.objectteams:objectteams-otdre-agent] the Java agent that hooks the Object Teams runtime into the JVM (repackaged from file <<<otredyn_agent.jar>>>
   from the <<<org.eclipse.objectteams.otdt>>> project).
   
   [org.eclipse.objectteams:objectteams-otj-compiler] a compatible replacement for <<<org.eclipse.tycho:org.eclipse.jdt.core>>> that enables the 
@@ -69,4 +69,4 @@ Using the Object Teams Parent POM
   
   The following module is indirectly used:
 
-  [org.apache.bcel:bcel] the original {{{http://jakarta.apache.org/bcel}apache bcel}} Byte Code Engineering Library.
+  [org.ow2.asm:asm-all] the original {{{http://asm.ow2.org/}ASM}} byte code library.

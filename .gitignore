@@ -6,6 +6,7 @@
 /othersrc/otdt-examples/*/bin/
 /testplugins/*/bin/
 /testplugins/*/jplis_dump/
+/maven/**/target/
 *~
 *.rej
 *.bak

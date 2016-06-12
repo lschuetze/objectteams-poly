@@ -3,7 +3,7 @@
 	------
 	Olaf Otto & Stephan Herrmann
 	------
-	2014-06-15
+	2016-06-12
 	------
 
 Using Object Teams with Maven3
@@ -32,10 +32,13 @@ Using Object Teams with Maven3
 +-----
 	<parent>
 		<groupId>org.eclipse.objectteams</groupId>
-		<artifactId>objectteams-parent-pom</artifactId>
-		<version>2.3.0</version>
+		<artifactId>objectteams-otdre-parent-pom</artifactId>
+		<version>2.5.0</version>
 	</parent>
 +-----
+
+  This variant will use the new {{{objectteams-otdre-parent-pom}weaving scheme OTDRE}}. 
+  Simply changing the above from <<<objectteams-otdre-parent-pom>>> to <<<objectteams-parent-pom>>> will select the traditional OTRE.
 
 * Effect
  

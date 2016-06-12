@@ -1,5 +1,10 @@
 public class TheBase {
 	public void bar() {
-		System.out.print("bar");
+		print("bar");
+	}
+	public static String result = "";
+	public static void print(String s) {
+		result += s;
+		System.out.print(s);
 	}
 }

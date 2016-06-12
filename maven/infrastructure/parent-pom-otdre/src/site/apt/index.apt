@@ -1,0 +1,6 @@
+Object Teams parent pom for OTDRE
+
+ This is the parent pom for Object Teams projects using Maven3.
+ It specifies the core dependencies and configurations for building and executing Object Teams code using Maven.
+
+ This variant uses the dynamic {{{http://help.eclipse.org/topic/org.eclipse.objectteams.otdt.doc/guide/weavingscheme.html}OTDRE weaving scheme}}.

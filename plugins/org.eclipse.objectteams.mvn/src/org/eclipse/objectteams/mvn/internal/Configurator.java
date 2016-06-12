@@ -77,6 +77,7 @@ public team class Configurator {
 			ICommand[] buildSpecs = prjDesc.getBuildSpec();
 			prjDesc.setBuildSpec(replaceOrAddOTBuilder(prjDesc, buildSpecs));
 			project.setDescription(prjDesc, null);
+			org.eclipse.objectteams.otdt.core.ext.OTREContainer.initializeOTJProject(project);
 		}
 
 		private static ICommand[] replaceOrAddOTBuilder(
