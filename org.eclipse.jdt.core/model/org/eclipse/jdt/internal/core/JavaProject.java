@@ -1194,6 +1194,11 @@ public class JavaProject
 		elementFinder.parse();
 		if (elementFinder.exception != null)
 			throw elementFinder.exception;
+		if (elementFinder.element instanceof IType) {
+			String fqn = ((IType) elementFinder.element).getFullyQualifiedName();
+			if (fqn.indexOf('$') != -1 && !elementFinder.element.exists())
+				return findType(fqn.replace('$', '.'));
+		}
 		return elementFinder.element;
 	}
 

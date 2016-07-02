@@ -21,11 +21,13 @@ package org.eclipse.objectteams.otdt.core;
 
 import org.eclipse.jdt.annotation.Nullable;
 import org.eclipse.jdt.core.ElementChangedEvent;
+import org.eclipse.jdt.core.Flags;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IMember;
 import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaCore;
+import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.internal.core.ExternalJavaProject;
 import org.eclipse.objectteams.otdt.internal.core.BinaryRoleType;
 import org.eclipse.objectteams.otdt.internal.core.CallinMapping;
@@ -342,7 +344,7 @@ public class OTModelManager
 	/**
 	 * Utility function.
 	 * @param type
-	 * @return true if an OT-Type is registered for type that is a team
+	 * @return true if an OT-Type is registered for type that is a team, or has flag TEAM set
 	 */
 	public static boolean isTeam(IType type) {
 		if (hasOTElementFor(type))
@@ -350,7 +352,11 @@ public class OTModelManager
 			IOTType ottype = getOTElement(type);
 			return ottype.isTeam();
 		}
-		return false;
+		try {
+			return type.exists() && Flags.isTeam(type.getFlags());
+		} catch (JavaModelException e) {
+			return false;
+		}
 	}
 	
 	/**
