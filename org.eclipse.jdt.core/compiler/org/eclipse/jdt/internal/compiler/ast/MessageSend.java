@@ -84,6 +84,7 @@ import org.eclipse.jdt.internal.compiler.impl.Constant;
 import org.eclipse.jdt.internal.compiler.impl.ReferenceContext;
 import org.eclipse.jdt.internal.compiler.impl.CompilerOptions.WeavingScheme;
 import org.eclipse.jdt.internal.compiler.lookup.AnnotationBinding;
+import org.eclipse.jdt.internal.compiler.lookup.ArrayBinding;
 import org.eclipse.jdt.internal.compiler.lookup.Binding;
 import org.eclipse.jdt.internal.compiler.lookup.BlockScope;
 import org.eclipse.jdt.internal.compiler.lookup.ExtraCompilerModifiers;
@@ -199,7 +200,7 @@ public class MessageSend extends Expression implements IPolyExpression, Invocati
 	public TypeBinding valueCast; // extra reference type cast to perform on method returned value
 	public TypeReference[] typeArguments;
 	public TypeBinding[] genericTypeArguments;
-	private ExpressionContext expressionContext = VANILLA_CONTEXT;
+	public ExpressionContext expressionContext = VANILLA_CONTEXT;
 
 	 // hold on to this context from invocation applicability inference until invocation type inference (per method candidate):
 	private SimpleLookupTable/*<PGMB,InferenceContext18>*/ inferenceContexts;
@@ -526,7 +527,12 @@ public void computeConversion(Scope scope, TypeBinding runtimeTimeType, TypeBind
 		MethodBinding originalBinding = this.binding.original();
 		TypeBinding originalType = originalBinding.returnType;
 	    // extra cast needed if method return type is type variable
-		if (originalType.leafComponentType().isTypeVariable()) {
+		if (ArrayBinding.isArrayClone(this.actualReceiverType, this.binding)
+				&& runtimeTimeType.id != TypeIds.T_JavaLangObject
+				&& scope.compilerOptions().sourceLevel >= ClassFileConstants.JDK1_5) {
+			// from 1.5 source level on, array#clone() resolves to array type, but codegen to #clone()Object - thus require extra inserted cast
+			this.valueCast = runtimeTimeType;
+		} else if (originalType.leafComponentType().isTypeVariable()) {
 	    	TypeBinding targetType = (!compileTimeType.isBaseType() && runtimeTimeType.isBaseType())
 	    		? compileTimeType  // unboxing: checkcast before conversion
 	    		: runtimeTimeType;
@@ -538,11 +544,6 @@ public void computeConversion(Scope scope, TypeBinding runtimeTimeType, TypeBind
 	        		&& ((ReferenceBinding)leafCompile).isCompatibleViaLowering((ReferenceBinding) leafRuntime))
 	        	this.valueCast = originalType.genericCast(compileTimeType);	        	
 // SH}
-		} 	else if (this.binding == scope.environment().arrayClone
-				&& runtimeTimeType.id != TypeIds.T_JavaLangObject
-				&& scope.compilerOptions().sourceLevel >= ClassFileConstants.JDK1_5) {
-					// from 1.5 source level on, array#clone() resolves to array type, but codegen to #clone()Object - thus require extra inserted cast
-			this.valueCast = runtimeTimeType;
 		}
         if (this.valueCast instanceof ReferenceBinding) {
 			ReferenceBinding referenceCast = (ReferenceBinding) this.valueCast;
@@ -1280,46 +1281,41 @@ public TypeBinding resolveType(BlockScope scope) {
 				this, (ReferenceBinding)this.binding.returnType);
 	}
 // SH}
-	// from 1.5 source level on, array#clone() returns the array type (but binding still shows Object)
-	if (this.binding == scope.environment().arrayClone && compilerOptions.sourceLevel >= ClassFileConstants.JDK1_5) {
-		this.resolvedType = this.actualReceiverType;
-	} else {
 //{ObjectTeams: use (adjusted) type from above and further adjust
 /* orig:
-		TypeBinding returnType;
+	TypeBinding returnType;
  */
-		if ((this.bits & ASTNode.Unchecked) != 0 && this.genericTypeArguments == null) {
-			// TODO(SH): 3.5: should this branch be affected by the checks below, too?
-			// https://bugs.eclipse.org/bugs/show_bug.cgi?id=277643, align with javac on JLS 15.12.2.6
-			returnType = this.binding.returnType;
-			if (returnType != null) {
-				returnType = scope.environment().convertToRawType(returnType.erasure(), true);
-			}
-		} else {
-/*
-			returnType = this.binding.returnType;
- :giro */
-			// check role-type return type in non-generated methods:
-			if (  !scope.isGeneratedScope()
-				&& returnType instanceof ReferenceBinding)
-			{
-				if (StandardElementGenerator.isCastToMethod(this.selector)) {
-					this.resolvedType = this.binding.returnType; // pre-set to avoid wrapping this type // FIXME(SH): redundant?!
-				} else {
-					// signature weakening might have produced the wrong returnType.
-					// check if we must cast this expression to the strengthened version:
-					returnType = checkStrengthenReturnType(returnType, scope);
-				}
-			}
-// orig:
-			if (returnType != null) {
-				returnType = returnType.capture(scope, this.sourceStart, this.sourceEnd);
-			}
-// :giro
+	if ((this.bits & ASTNode.Unchecked) != 0 && this.genericTypeArguments == null) {
+		// TODO(SH): 3.5: should this branch be affected by the checks below, too?
+		// https://bugs.eclipse.org/bugs/show_bug.cgi?id=277643, align with javac on JLS 15.12.2.6
+		returnType = this.binding.returnType;
+		if (returnType != null) {
+			returnType = scope.environment().convertToRawType(returnType.erasure(), true);
 		}
-// SH}
-		this.resolvedType = returnType;
+	} else {
+/*
+		returnType = this.binding.returnType;
+ :giro */
+		// check role-type return type in non-generated methods:
+		if (  !scope.isGeneratedScope()
+			&& returnType instanceof ReferenceBinding)
+		{
+			if (StandardElementGenerator.isCastToMethod(this.selector)) {
+				this.resolvedType = this.binding.returnType; // pre-set to avoid wrapping this type // FIXME(SH): redundant?!
+			} else {
+				// signature weakening might have produced the wrong returnType.
+				// check if we must cast this expression to the strengthened version:
+				returnType = checkStrengthenReturnType(returnType, scope);
+			}
+		}
+// orig:
+		if (returnType != null) {
+			returnType = returnType.capture(scope, this.sourceStart, this.sourceEnd);
+		}
+// :giro
 	}
+// SH}
+	this.resolvedType = returnType;
 	if (this.receiver.isSuper() && compilerOptions.getSeverity(CompilerOptions.OverridingMethodWithoutSuperInvocation) != ProblemSeverities.Ignore) {
 		final ReferenceContext referenceContext = scope.methodScope().referenceContext;
 		if (referenceContext instanceof AbstractMethodDeclaration) {
@@ -1604,9 +1600,7 @@ public boolean isCompatibleWith(TypeBinding targetType, final Scope scope) {
 // SH}
 		if (method == null || !method.isValidBinding() || (returnType = method.returnType) == null || !returnType.isValidBinding())
 			return false;
-		if (method == scope.environment().arrayClone)
-			returnType = this.actualReceiverType;
-		return returnType != null && returnType.capture(scope, this.sourceStart, this.sourceEnd).isCompatibleWith(targetType, scope);
+		return returnType.capture(scope, this.sourceStart, this.sourceEnd).isCompatibleWith(targetType, scope);
 	} finally {
 		this.expectedType = originalExpectedType;
 	}

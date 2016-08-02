@@ -1633,7 +1633,7 @@ public final char[] signature(boolean retrenchRoleMethod) {
  *
  * See https://bugs.eclipse.org/bugs/show_bug.cgi?id=171184
  */
-public final char[] signature(ClassFile classFile) {
+public char[] signature(ClassFile classFile) {
 //Note(SH): this method is not used by completion et al, therefor we don't need
 //          the retrenchRoleMethod arg here.
 	if (this.signature != null) {

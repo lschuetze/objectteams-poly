@@ -39,6 +39,7 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.OperationCanceledException;
 import org.eclipse.core.runtime.Status;
+import org.eclipse.core.runtime.SubMonitor;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
@@ -822,6 +823,7 @@ public void resolve(Openable[] openables, HashSet localTypes, IProgressMonitor m
 //{ObjectTeams: conditional setup
     boolean dependenciesSetup = false;
 //carp}
+	SubMonitor subMonitor = SubMonitor.convert(monitor, 3);
 	try {
 		int openablesLength = openables.length;
 		CompilationUnitDeclaration[] parsedUnits = new CompilationUnitDeclaration[openablesLength];
@@ -841,6 +843,7 @@ public void resolve(Openable[] openables, HashSet localTypes, IProgressMonitor m
 			}
 		}
 
+		subMonitor.split(1);
 		// build type bindings
 		Parser parser = new Parser(this.lookupEnvironment.problemReporter, true);
 		final boolean isJava8 = this.options.sourceLevel >= ClassFileConstants.JDK1_8;
@@ -972,14 +975,14 @@ public void resolve(Openable[] openables, HashSet localTypes, IProgressMonitor m
 			}
 		}
 
+		SubMonitor unitLoopMonitor = subMonitor.split(1).setWorkRemaining(unitsIndex);
 		// complete type bindings (i.e. connect super types)
 		for (int i = 0; i < unitsIndex; i++) {
+			unitLoopMonitor.split(1);
 			CompilationUnitDeclaration parsedUnit = parsedUnits[i];
 			if (parsedUnit != null) {
 				try {
 					if (hasLocalType[i]) { // NB: no-op if method bodies have been already parsed
-						if (monitor != null && monitor.isCanceled())
-							throw new OperationCanceledException();
 //{ObjectTeams: process via Dependencies
 						Dependencies.ensureState(parsedUnit, ITranslationStates.STATE_METHODS_PARSED);
 /* orig:
@@ -997,17 +1000,17 @@ public void resolve(Openable[] openables, HashSet localTypes, IProgressMonitor m
 		// (in this case the constructor is needed when resolving local types)
 		// (see https://bugs.eclipse.org/bugs/show_bug.cgi?id=145333)
 		try {
+			SubMonitor completeLoopMonitor = subMonitor.split(1).setWorkRemaining(unitsIndex);
 			this.lookupEnvironment.completeTypeBindings(parsedUnits, hasLocalType, unitsIndex);
 			// remember type bindings
 			for (int i = 0; i < unitsIndex; i++) {
+				completeLoopMonitor.split(1);
 				CompilationUnitDeclaration parsedUnit = parsedUnits[i];
 				// https://bugs.eclipse.org/bugs/show_bug.cgi?id=462158
 				// Certain assist features require type hierarchy even with code with compiler errors.
 				if (parsedUnit != null) {
 					boolean containsLocalType = hasLocalType[i];
 					if (containsLocalType) {
-						if (monitor != null && monitor.isCanceled())
-							throw new OperationCanceledException();
 //{ObjectTeams: process via Dependencies
 // faultInTypes is ensured by Dependencies
 /* orig:
@@ -1024,7 +1027,6 @@ public void resolve(Openable[] openables, HashSet localTypes, IProgressMonitor m
 		} catch (AbortCompilation e) {
 			// skip it silently
 		}
-		worked(monitor, 1);
 
 		// if no potential subtype was a real subtype of the binary focus type, no need to go further
 		// (see https://bugs.eclipse.org/bugs/show_bug.cgi?id=54043)

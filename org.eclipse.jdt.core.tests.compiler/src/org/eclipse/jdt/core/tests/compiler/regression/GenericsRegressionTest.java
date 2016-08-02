@@ -1953,7 +1953,7 @@ public void test339478h() {
 		"1. ERROR in X.java (at line 2)\n" + 
 		"	public void foo(Object x) throws X.Y<>.LException {\n" + 
 		"	                                 ^^^\n" + 
-		"Incorrect number of arguments for type X.Y; it cannot be parameterized with arguments <>\n" + 
+		"Incorrect number of arguments for type X.Y<T>; it cannot be parameterized with arguments <>\n" + 
 		"----------\n" + 
 		"2. WARNING in X.java (at line 5)\n" + 
 		"	static class LException extends Throwable {}\n" + 
@@ -5783,6 +5783,143 @@ public void test489636() {
 			"	}\n" + 
 			"}"
 	});
+}
+
+public void testBug498057() {
+	runConformTest(
+		new String[] {
+			"scanner/AbstractScanner.java",
+			"package scanner;\n" +
+			"import scanner.AbstractScanner.ScannerModel;\n" +
+			"public abstract class AbstractScanner<E, M extends ScannerModel<E>> implements Scanner<E> {\n" +
+			"	public void scan(ScanListener<E> listener) {\n" +
+			"	}\n" +
+			"\n" +
+			"	public static interface ScannerModel<E> extends ScanListener<E> {\n" +
+			"	}\n" +
+			"}\n" +
+			"",
+			"scanner/AbstractSubScanner.java",
+			"package scanner;\n" +
+			"import scanner.AbstractScanner.ScannerModel;\n" +
+			"public abstract class AbstractSubScanner<E> extends AbstractScanner<E, ScannerModel<E>> {\n" +
+			"	@Override\n" +
+			"	public void scan(ScanListener<E> listener) {\n" +
+			"	}\n" +
+			"}\n" +
+			"\n" +
+			"",
+			"scanner/ScanListener.java",
+			"package scanner;\n" +
+			"public interface ScanListener<E> {\n" +
+			"}\n" +
+			"\n" +
+			"",
+			"scanner/Scanner.java",
+			"package scanner;\n" +
+			"\n" +
+			"public interface Scanner<E> {\n" +
+			"	void scan(ScanListener<E> listener);\n" +
+			"}\n" +
+			"",
+			"scanner/StringScanner.java",
+			"package scanner;\n" +
+			"\n" +
+			"public interface StringScanner extends Scanner<String> {\n" +
+			"}\n" +
+			"",
+		}
+	);
+	runConformTest(
+		false,
+		new String[] {
+			"scanner/ModifyMe.java",
+			"package scanner;\n" +
+			"\n" +
+			"public class ModifyMe extends AbstractSubScanner<String> implements StringScanner {\n" +
+			"}\n" +
+			"",
+		},
+		"",
+		"",
+		"",
+		null
+	);
+}
+public void testBug460491_comment23() {
+	runConformTest(
+		new String[] {
+			"PM.java",
+			"public class PM<E extends Enum<E>> {\n" + 
+			"	public PM(Class<E> clazz) {\n" + 
+			"	}\n" + 
+			"\n" + 
+			"	enum MyEnum {\n" + 
+			"	}\n" + 
+			"\n" + 
+			"	public static void main(String[] args) {\n" + 
+			"		new PM<MyEnum>(MyEnum.class);\n" + 
+			"	}\n" + 
+			"}\n"
+		});
+}
+public void testBug498486() {
+	runConformTest(
+			new String[] {
+				"t/Ab.java",
+				"package t;\n" +
+				"public interface Ab<T, O extends Ob<? extends Ob.Id, ?>> {}\n" +
+				"",
+				"t/At.java",
+				"package t;\n" +
+				"public interface At<I extends Ob.Id & Comparable<I>, O extends Ob<I, O>> {\n" +
+				"}\n" +
+				"",
+				"t/Ob.java",
+				"package t;\n" +
+				"public interface Ob<I extends Ob.Id & Comparable<I>, O extends Ob<I, O>> extends At<I, O> {\n" +
+				"  interface Id {}\n" +
+				"}\n" +
+				"",
+			}
+		);
+	runConformTest(
+			false,
+			new String[] {
+				"i/Test.java",
+				"package i;\n" +
+				"\n" +
+				"import t.Ab;\n" +
+				"import t.Ob;\n" +
+				"\n" +
+				"\n" +
+				"public class Test {\n" +
+				"	<T, I extends Ob.Id & Comparable<I>, O extends Ob<I, O>, A extends Ab<T, O>> A // Erroneous compiler error here on the last O\n" +
+				"			m() {\n" +
+				"		return null;\n" +
+				"	}\n" +
+				"}\n" +
+				"",
+			},
+			null,
+			null,
+			null,
+			null
+		);
+}
+public void testBug499048() {
+	runConformTest(
+		new String[] {
+			"p/Outer.java",
+			"package p;\n" +
+			"public class Outer<S> {\n" +
+			"	private static class Inner<T> {}\n" +
+			"	Inner<S> test() {\n" +
+			"		Outer.Inner<S> inner = new Outer.Inner<S>();\n" +
+			"		return inner;\n" +
+			"	}\n" +
+			"}\n"
+		});
 }
 }
 

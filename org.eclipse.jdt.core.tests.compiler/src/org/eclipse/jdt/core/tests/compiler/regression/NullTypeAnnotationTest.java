@@ -4,7 +4,7 @@
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
- * 
+ *
  * Contributors:
  *     Stephan Herrmann - initial API and implementation
  *     IBM Corporation
@@ -12282,6 +12282,368 @@ public void testBug488495collector() {
 			"        List<String> list = stream.collect(toList());\n" +
 			"        return list;\n" +
 			"    }\n" +
+			"}\n" +
+			"",
+		}, 
+		getCompilerOptions(),
+		""
+	);
+}
+public void testBug496591() {
+	runConformTestWithLibs(
+		new String[] {
+			"test2/Descriptors.java",
+			"package test2;\n" +
+			"\n" +
+			"public final class Descriptors {\n" +
+			"	public static final class FieldDescriptor implements FieldSet.FieldDescriptorLite<FieldDescriptor> { }\n" +
+			"}\n" +
+			"",
+			"test2/FieldSet.java",
+			"package test2;\n" +
+			"\n" +
+			"public final class FieldSet<F1 extends FieldSet.FieldDescriptorLite<F1>> {\n" +
+			"	public interface FieldDescriptorLite<F2 extends FieldDescriptorLite<F2>> { }\n" +
+			"\n" +
+			"	void f(final Map.Entry<F1> entry) { }\n" +
+			"}\n" +
+			"",
+			"test2/Map.java",
+			"package test2;\n" +
+			"\n" +
+			"public class Map<K> {\n" +
+			"	interface Entry<K1> { }\n" +
+			"}\n" +
+			"",
+			"test2/MessageOrBuilder.java",
+			"package test2;\n" +
+			"\n" +
+			"public interface MessageOrBuilder {\n" +
+			"	Map<Descriptors.FieldDescriptor> getAllFields();\n" +
+			"}\n" +
+			"",
+		}, 
+		getCompilerOptions(),
+		""
+	);
+	runConformTestWithLibs(
+		new String[] {
+			"test1/GeneratedMessage.java",
+			"package test1;\n" +
+			"\n" +
+			"import test2.Descriptors.FieldDescriptor;\n" +
+			"import test2.Map;\n" +
+			"import test2.MessageOrBuilder;\n" +
+			"\n" +
+			"public abstract class GeneratedMessage implements MessageOrBuilder {\n" +
+			"	@Override\n" +
+			"	public abstract Map<FieldDescriptor> getAllFields();\n" +
+			"}\n" +
+			"",
+		}, 
+		getCompilerOptions(),
+		""
+	);
+}	
+public void testBug497698() {
+	runNegativeTestWithLibs(
+		new String[] {
+			"test/And.java",
+			"package test;\n" +
+			"\n" +
+			"import org.eclipse.jdt.annotation.NonNullByDefault;\n" +
+			"\n" +
+			"@NonNullByDefault\n" +
+			"public class And {\n" +
+			"	public static void createAnd() {\n" +
+			"		Or.create();\n" +
+			"	}\n" +
+			"}\n" +
+			"",
+			"test/Or.java",
+			"package test;\n" +
+			"\n" +
+			"import org.eclipse.jdt.annotation.NonNullByDefault;\n" +
+			"\n" +
+			"@NonNullByDefault\n" +
+			"public class Or<D, V> {\n" +
+			"	public static <V> Or<V> create() {\n" +
+			"		return new Or<V, V>();\n" +
+			"	}\n" +
+			"}\n" +
+			"",
+		}, 
+		getCompilerOptions(),
+		"----------\n" + 
+		"1. ERROR in test\\Or.java (at line 7)\n" + 
+		"	public static <V> Or<V> create() {\n" + 
+		"	                  ^^\n" + 
+		"Incorrect number of arguments for type Or<D,V>; it cannot be parameterized with arguments <V>\n" + 
+		"----------\n"
+	);
+}
+public void testBug497698raw() {
+	runNegativeTestWithLibs(
+		new String[] {
+			"test/And.java",
+			"package test;\n" +
+			"\n" +
+			"import org.eclipse.jdt.annotation.NonNullByDefault;\n" +
+			"\n" +
+			"@NonNullByDefault\n" +
+			"public class And {\n" +
+			"	public static void createAnd() {\n" +
+			"		new Or().create();\n" +
+			"	}\n" +
+			"}\n" +
+			"",
+			"test/Or.java",
+			"package test;\n" +
+			"\n" +
+			"import org.eclipse.jdt.annotation.NonNullByDefault;\n" +
+			"\n" +
+			"@NonNullByDefault\n" +
+			"public class Or<D, V> {\n" +
+			"	public <V1> Or<V1> create() {\n" +
+			"		return new Or<V1, V1>();\n" +
+			"	}\n" +
+			"}\n" +
+			"",
+		}, 
+		getCompilerOptions(),
+		"----------\n" + 
+		"1. WARNING in test\\And.java (at line 8)\n" + 
+		"	new Or().create();\n" + 
+		"	    ^^\n" + 
+		"Or is a raw type. References to generic type Or<D,V> should be parameterized\n" + 
+		"----------\n" + 
+		"----------\n" + 
+		"1. ERROR in test\\Or.java (at line 7)\n" + 
+		"	public <V1> Or<V1> create() {\n" + 
+		"	            ^^\n" + 
+		"Incorrect number of arguments for type Or<D,V>; it cannot be parameterized with arguments <V1>\n" + 
+		"----------\n"
+	);
+}
+public void testBug497698nestedinraw() {
+	runNegativeTestWithLibs(
+		new String[] {
+			"test/And.java",
+			"package test;\n" +
+			"\n" +
+			"import org.eclipse.jdt.annotation.NonNullByDefault;\n" +
+			"\n" +
+			"@NonNullByDefault\n" +
+			"public class And {\n" +
+			"	public static void createAnd(X.Or x) {\n" +
+			"		x.create();\n" +
+			"	}\n" +
+			"}\n" +
+			"",
+			"test/X.java",
+			"package test;\n" +
+			"\n" +
+			"import org.eclipse.jdt.annotation.NonNullByDefault;\n" +
+			"\n" +
+			"@NonNullByDefault\n" +
+			"public class X<Z> {\n" +
+			"	public class Or<D, V> {\n" +
+			"		public <V1> Or<V1> create() {\n" +
+			"			return new Or<V1,V1>();\n" +
+			"		}\n" +
+			"	}\n" +
+			"}\n" +
+			"",
+		}, 
+		getCompilerOptions(),
+		"----------\n" + 
+		"1. WARNING in test\\And.java (at line 7)\n" + 
+		"	public static void createAnd(X.Or x) {\n" + 
+		"	                             ^^^^\n" + 
+		"X.Or is a raw type. References to generic type X<Z>.Or<D,V> should be parameterized\n" + 
+		"----------\n" + 
+		"----------\n" + 
+		"1. ERROR in test\\X.java (at line 8)\n" + 
+		"	public <V1> Or<V1> create() {\n" + 
+		"	            ^^\n" + 
+		"Incorrect number of arguments for type X<Z>.Or<D,V>; it cannot be parameterized with arguments <V1>\n" + 
+		"----------\n"
+	);
+}
+public void testBug492322() {
+	runConformTestWithLibs(
+		new String[] {
+			"test1/Base.java",
+			"package test1;\n" +
+			"\n" +
+			"import org.eclipse.jdt.annotation.DefaultLocation;\n" +
+			"import org.eclipse.jdt.annotation.NonNullByDefault;\n" +
+			"import org.eclipse.jdt.annotation.Nullable;\n" +
+			"\n" +
+			"public abstract class Base {\n" +
+			"  public class GenericInner<T> {\n" +
+			"  }\n" +
+			"\n" +
+			"  @NonNullByDefault(DefaultLocation.PARAMETER)\n" +
+			"  public Object method(@Nullable GenericInner<Object> nullable) {\n" +
+			"    return new Object();\n" +
+			"  }\n" +
+			"}\n" +
+			"",
+		}, 
+		getCompilerOptions(),
+		""
+	);
+	runConformTestWithLibs(
+		new String[] {
+			"test2/Derived.java",
+			"package test2;\n" +
+			"\n" +
+			"import test1.Base;\n" +
+			"\n" +
+			"class Derived extends Base {\n" +
+			"  void test() {\n" +
+			"    method(null);\n" +
+			"  }\n" +
+			"}\n" +
+			"",
+		}, 
+		getCompilerOptions(),
+		""
+	);
+}
+public void testBug492322field() {
+	runConformTestWithLibs(
+		new String[] {
+			"test1/Base.java",
+			"package test1;\n" +
+			"\n" +
+			"import org.eclipse.jdt.annotation.NonNullByDefault;\n" +
+			"import org.eclipse.jdt.annotation.Nullable;\n" +
+			"\n" +
+			"@NonNullByDefault\n" +
+			"public abstract class Base {\n" +
+			"  public class GenericInner<T> {\n" +
+			"  }\n" +
+			"\n" +
+			"  protected @Nullable GenericInner<Object> field;\n" +
+			"}\n" +
+			"",
+		}, 
+		getCompilerOptions(),
+		""
+	);
+	runConformTestWithLibs(
+			new String[] {
+				"test2/Derived.java",
+				"package test2;\n" +
+				"\n" +
+				"import test1.Base;\n" +
+				"\n" +
+				"class Derived extends Base {\n" +
+				"  void test() {\n" +
+				"    field = null;\n" +
+				"  }\n" +
+				"}\n" +
+				"",
+			}, 
+			getCompilerOptions(),
+			""
+		);
+}
+public void testBug492322deep() {
+	runConformTestWithLibs(
+		new String[] {
+			"test1/Base.java",
+			"package test1;\n" +
+			"\n" +
+			"import org.eclipse.jdt.annotation.DefaultLocation;\n" +
+			"import org.eclipse.jdt.annotation.NonNullByDefault;\n" +
+			"import org.eclipse.jdt.annotation.Nullable;\n" +
+			"\n" +
+			"public abstract class Base {\n" +
+			"  public static class Static {\n" +
+			"   public class Middle1 {\n" +
+			"     public class Middle2<M> {\n" +
+			"       public class Middle3 {\n" +
+			"        public class GenericInner<T> {\n" +
+			"        }\n" +
+			"       }\n" +
+			"     }\n" +
+			"   }\n" +
+			"  }\n" +
+			"\n" +
+			"  @NonNullByDefault(DefaultLocation.PARAMETER)\n" +
+			"  public Object method( Static.Middle1.Middle2<Object>.Middle3.@Nullable GenericInner<String> nullable) {\n" +
+			"    return new Object();\n" +
+			"  }\n" +
+			"}\n" +
+			"",
+		}, 
+		getCompilerOptions(),
+		""
+	);
+	runConformTestWithLibs(
+		new String[] {
+			"test2/Derived.java",
+			"package test2;\n" +
+			"\n" +
+			"import test1.Base;\n" +
+			"\n" +
+			"class Derived extends Base {\n" +
+			"  void test() {\n" +
+			"    method(null);\n" +
+			"  }\n" +
+			"}\n" +
+			"",
+		}, 
+		getCompilerOptions(),
+		""
+	);
+}
+public void testBug492322withGenericBase() {
+	runConformTestWithLibs(
+		new String[] {
+			"test1/Base.java",
+			"package test1;\n" +
+			"\n" +
+			"import org.eclipse.jdt.annotation.DefaultLocation;\n" +
+			"import org.eclipse.jdt.annotation.NonNullByDefault;\n" +
+			"import org.eclipse.jdt.annotation.Nullable;\n" +
+			"\n" +
+			"public abstract class Base<B> {\n" +
+			"   static public class Static {\n" +
+			"    public class Middle1 {\n" +
+			"     public class Middle2<M> {\n" +
+			"       public class Middle3 {\n" +
+			"        public class GenericInner<T> {\n" +
+			"        }\n" +
+			"       }\n" +
+			"     }\n" +
+			"   }\n" +
+			"  }\n" +
+			"\n" +
+			"  @NonNullByDefault(DefaultLocation.PARAMETER)\n" +
+			"  public Object method( Static.Middle1.Middle2<Object>.Middle3.@Nullable GenericInner<String> nullable) {\n" +
+			"    return new Object();\n" +
+			"  }\n" +
+			"}\n" +
+			"",
+		}, 
+		getCompilerOptions(),
+		""
+	);
+	runConformTestWithLibs(
+		new String[] {
+			"test2/Derived.java",
+			"package test2;\n" +
+			"\n" +
+			"import test1.Base;\n" +
+			"\n" +
+			"class Derived extends Base<Number> {\n" +
+			"  void test() {\n" +
+			"    method(null);\n" +
+			"  }\n" +
 			"}\n" +
 			"",
 		}, 

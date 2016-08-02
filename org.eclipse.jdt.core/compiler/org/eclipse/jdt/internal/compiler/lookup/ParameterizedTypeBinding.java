@@ -91,6 +91,8 @@ public class ParameterizedTypeBinding extends ReferenceBinding implements Substi
 	public ParameterizedTypeBinding(ReferenceBinding type, TypeBinding[] arguments,  ReferenceBinding enclosingType, LookupEnvironment environment){
 		this.environment = environment;
 		this.enclosingType = enclosingType; // never unresolved, never lazy per construction
+		if (type.isStatic() && arguments == null && !(this instanceof RawTypeBinding))
+			throw new IllegalStateException();
 		initialize(type, arguments);
 		if (type instanceof UnresolvedReferenceBinding)
 			((UnresolvedReferenceBinding) type).addWrapper(this, environment);
@@ -324,9 +326,6 @@ public class ParameterizedTypeBinding extends ReferenceBinding implements Substi
         	default :
         		return;
         }
-        if (formalArguments == null || actualArguments == null) { // band-aid for https://bugs.eclipse.org/460491 TODO: remove once really fixed
-        	return;
-        }
         inferenceContext.depth++;
         for (int i = 0, length = formalArguments.length; i < length; i++) {
         	TypeBinding formalArgument = formalArguments[i];
@@ -533,7 +532,7 @@ public class ParameterizedTypeBinding extends ReferenceBinding implements Substi
 		    	this.genericTypeSignature = this.type.signature();
 			} else {
 			    StringBuffer sig = new StringBuffer(10);
-			    if (isMemberType()) {
+			    if (isMemberType() && !isStatic()) {
 			    	ReferenceBinding enclosing = enclosingType();
 					char[] typeSig = enclosing.genericTypeSignature();
 					sig.append(typeSig, 0, typeSig.length-1);// copy all but trailing semicolon
@@ -1015,11 +1014,12 @@ public class ParameterizedTypeBinding extends ReferenceBinding implements Substi
 				int length = originalMemberTypes.length;
 				ReferenceBinding[] parameterizedMemberTypes = new ReferenceBinding[length];
 				// boolean isRaw = this.isRawType();
-				for (int i = 0; i < length; i++)
+				for (int i = 0; i < length; i++) {
 					// substitute all member types, so as to get updated enclosing types
-					parameterizedMemberTypes[i] = /*isRaw && originalMemberTypes[i].isGenericType()
-						? this.environment.createRawType(originalMemberTypes[i], this)
-						: */ this.environment.createParameterizedType(originalMemberTypes[i], null, this);
+					parameterizedMemberTypes[i] = originalMemberTypes[i].isStatic()
+							? originalMemberTypes[i]
+							: this.environment.createParameterizedType(originalMemberTypes[i], null, this);
+				}
 				this.memberTypes = parameterizedMemberTypes;
 			} finally {
 				// if the original fields cannot be retrieved (ex. AbortCompilation), then assume we do not have any fields
@@ -1142,25 +1142,30 @@ public class ParameterizedTypeBinding extends ReferenceBinding implements Substi
 	 * @see org.eclipse.jdt.internal.compiler.lookup.Binding#readableName()
 	 */
 	public char[] readableName() {
+		return readableName(true);
+	}
+	public char[] readableName(boolean showGenerics) {
 	    StringBuffer nameBuffer = new StringBuffer(10);
 		if (isMemberType()) {
-			nameBuffer.append(CharOperation.concat(enclosingType().readableName(), this.sourceName, '.'));
+			nameBuffer.append(CharOperation.concat(enclosingType().readableName(showGenerics && !isStatic()), this.sourceName, '.'));
 		} else {
 			nameBuffer.append(CharOperation.concatWith(this.type.compoundName, '.'));
 		}
+		if (showGenerics) {
 //{ObjectTeams
 /* orig:
-		if (this.arguments != null && this.arguments.length > 0) { // empty arguments array happens when PTB has been created just to capture type annotations
-			nameBuffer.append('<');
-		    for (int i = 0, length = this.arguments.length; i < length; i++) {
-		        if (i > 0) nameBuffer.append(',');
-		        nameBuffer.append(this.arguments[i].readableName());
-		    }
-		    nameBuffer.append('>');
-		}
+			if (this.arguments != null && this.arguments.length > 0) { // empty arguments array happens when PTB has been created just to capture type annotations
+				nameBuffer.append('<');
+			    for (int i = 0, length = this.arguments.length; i < length; i++) {
+		    	    if (i > 0) nameBuffer.append(',');
+		        	nameBuffer.append(this.arguments[i].readableName());
+		    	}
+		    	nameBuffer.append('>');
+			}
   :giro */
-		nameBuffer = appendValueAndTypeParameters(nameBuffer, false/*short*/);
+			nameBuffer = appendValueAndTypeParameters(nameBuffer, false/*short*/);
 // SH}
+		}
 		int nameLength = nameBuffer.length();
 		char[] readableName = new char[nameLength];
 		nameBuffer.getChars(0, nameLength, readableName, 0);
@@ -1253,25 +1258,30 @@ public class ParameterizedTypeBinding extends ReferenceBinding implements Substi
 	 * @see org.eclipse.jdt.internal.compiler.lookup.Binding#shortReadableName()
 	 */
 	public char[] shortReadableName() {
+		return shortReadableName(true);
+	}
+	public char[] shortReadableName(boolean showGenerics) {
 	    StringBuffer nameBuffer = new StringBuffer(10);
 		if (isMemberType()) {
-			nameBuffer.append(CharOperation.concat(enclosingType().shortReadableName(), this.sourceName, '.'));
+			nameBuffer.append(CharOperation.concat(enclosingType().shortReadableName(showGenerics && !isStatic()), this.sourceName, '.'));
 		} else {
 			nameBuffer.append(this.type.sourceName);
 		}
+		if (showGenerics) {
 //{ObjectTeams:
 /* orig:
-		if (this.arguments != null && this.arguments.length > 0) { // empty arguments array happens when PTB has been created just to capture type annotations
-			nameBuffer.append('<');
-		    for (int i = 0, length = this.arguments.length; i < length; i++) {
-		        if (i > 0) nameBuffer.append(',');
-		        nameBuffer.append(this.arguments[i].shortReadableName());
-		    }
-		    nameBuffer.append('>');
-		}
+			if (this.arguments != null && this.arguments.length > 0) { // empty arguments array happens when PTB has been created just to capture type annotations
+				nameBuffer.append('<');
+			    for (int i = 0, length = this.arguments.length; i < length; i++) {
+		    	    if (i > 0) nameBuffer.append(',');
+		        	nameBuffer.append(this.arguments[i].shortReadableName());
+		    	}
+		    	nameBuffer.append('>');
+			}
   :giro */
-		nameBuffer = appendValueAndTypeParameters(nameBuffer, true/*short*/);
+			nameBuffer = appendValueAndTypeParameters(nameBuffer, true/*short*/);
 // SH}
+		}
 		int nameLength = nameBuffer.length();
 		char[] shortReadableName = new char[nameLength];
 		nameBuffer.getChars(0, nameLength, shortReadableName, 0);

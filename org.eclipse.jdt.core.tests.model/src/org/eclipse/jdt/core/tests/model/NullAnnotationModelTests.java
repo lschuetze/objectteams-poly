@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2015 GK Software AG and others.
+ * Copyright (c) 2011, 2016 GK Software AG and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -27,6 +27,7 @@ import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.FileLocator;
 import org.eclipse.core.runtime.Platform;
 import org.eclipse.jdt.core.ICompilationUnit;
+import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaModelMarker;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.JavaCore;
@@ -757,4 +758,184 @@ public class NullAnnotationModelTests extends ReconcilerTests {
 				deleteProject(project);
 		}
 	}
+	
+	public void testBug495635() throws CoreException, IOException, InterruptedException {
+		IJavaProject project = null;
+		try {
+			project = createJavaProject("Bug495635", new String[] {"src"}, new String[] {"JCL18_LIB", this.ANNOTATION_LIB}, "bin", "1.8");
+			project.setOption(JavaCore.COMPILER_ANNOTATION_NULL_ANALYSIS, JavaCore.ENABLED);
+			project.setOption(JavaCore.COMPILER_PB_NULL_SPECIFICATION_VIOLATION, JavaCore.ERROR);
+
+			createFile("/Bug495635/src/AURegObject.java",
+					"public interface AURegObject {}\n"
+					);
+			createFile("/Bug495635/src/AURegKey.java",
+					"public interface AURegKey<O extends AURegObject> {}\n"
+					);
+			createFile("/Bug495635/src/Person.java",
+					"public interface Person<O extends Person<O>> extends AURegObject, PersonKey<O> {}\n"
+				);
+			createFile("/Bug495635/src/PersonKey.java",
+					"public interface PersonKey<O extends Person<?>> extends AURegKey<O> {}\n"
+					);
+
+			setUpWorkingCopy("/Bug495635/src/Person.java",
+					"public interface Person<O extends Person<O>> extends AURegObject, PersonKey<O> {}\n"
+				);
+			assertProblems(
+					"Unexpected problems",
+					"----------\n" +
+					"----------\n"
+					);
+
+			String str = this.workingCopy.getSource();
+			
+			int start = str.indexOf("PersonKey");
+			int length = "PersonKey".length();
+
+			IJavaElement[] elements = this.workingCopy.codeSelect(start, length);
+			assertElementsEqual(
+				"Unexpected elements",
+				"PersonKey [in PersonKey.java [in <default> [in src [in Bug495635]]]]",
+				elements
+			);
+
+		} finally {
+			if (project != null)
+				deleteProject(project);
+		}
+	}
+	
+	public void testBug460491WithOldBinary() throws CoreException, InterruptedException, IOException {
+		IJavaProject project = null;
+    	try {
+			project = createJavaProject("Bug460491", new String[] {"src"}, new String[] {"JCL18_LIB", this.ANNOTATION_LIB, testJarPath("bug460491-compiled-with-4.6.jar")}, "bin", "1.8");
+			project.setOption(JavaCore.COMPILER_ANNOTATION_NULL_ANALYSIS, JavaCore.ENABLED);
+
+			// bug460491-compiled-with-4.6.jar contains classes compiled with eclipse 4.6:
+			/*-
+				package test1;
+				
+				import org.eclipse.jdt.annotation.DefaultLocation;
+				import org.eclipse.jdt.annotation.NonNullByDefault;
+				import org.eclipse.jdt.annotation.Nullable;
+				
+				public abstract class Base<B> {
+				   static public class Static {
+				    public class Middle1 {
+				     public class Middle2<M> {
+				       public class Middle3 {
+				        public class GenericInner<T> {
+				        }
+				       }
+				     }
+				   }
+				  }
+				
+				  @NonNullByDefault(DefaultLocation.PARAMETER)
+				  public Object method( Static.Middle1.Middle2<Object>.Middle3.@Nullable GenericInner<String> nullable) {
+				    return new Object();
+				  }
+				}
+			 */
+
+			this.createFolder("/Bug460491/src/test2");
+			String c2SourceString =
+					"package test2;\n" +
+					"\n" +
+					"import test1.Base;\n" +
+					"\n" +
+					"class Derived extends Base<Object> {\n" +
+					"  void test() {\n" +
+					"    method(null);\n" +
+					"  }\n" +
+					"}\n";
+			this.createFile(
+				"/Bug460491/src/test2/Derived.java",
+	    			c2SourceString);
+
+			char[] c2SourceChars = c2SourceString.toCharArray();
+			this.problemRequestor.initialize(c2SourceChars);
+
+			getCompilationUnit("/Bug460491/src/test2/Derived.java").getWorkingCopy(this.wcOwner, null);
+			assertProblems(
+					"Unexpected problems",
+					"----------\n" +
+					"----------\n"
+					);
+		} finally {
+			if (project != null)
+				deleteProject(project);
+		}
+}
+
+	public void testBug460491WithOldBinary_b() throws CoreException, InterruptedException, IOException {
+		IJavaProject project = null;
+    	try {
+			project = createJavaProject("Bug460491", new String[] {"src"}, new String[] {"JCL18_LIB", this.ANNOTATION_LIB, testJarPath("bug460491b-compiled-with-4.6.jar")}, "bin", "1.8");
+			project.setOption(JavaCore.COMPILER_ANNOTATION_NULL_ANALYSIS, JavaCore.ENABLED);
+
+			// bug460491b-compiled-with-4.6.jar contains classes compiled with eclipse 4.6:
+			/*-
+				package test1;
+				
+				import org.eclipse.jdt.annotation.DefaultLocation;
+				import org.eclipse.jdt.annotation.NonNullByDefault;
+				import org.eclipse.jdt.annotation.Nullable;
+				
+				public abstract class Base<B> {
+				    static public class Static1 {
+				        public static class Static2<X> {
+				            public class Middle1<M> {
+				                public class Middle2 {
+				                    public class GenericInner<T> {
+				                    }
+				                }
+				            }
+				        }
+				    }
+				
+				    @NonNullByDefault(DefaultLocation.PARAMETER)
+				    public Object method( Static1.Static2<Exception>.Middle1<Object>.Middle2.@Nullable GenericInner<String> nullable) {
+				        return new Object();
+				    }
+				}
+			 */
+
+			this.createFolder("/Bug460491/src/test2");
+			String c2SourceString =
+					"package test2;\n" +
+					"\n" +
+					"import test1.Base;\n" +
+					"\n" +
+					"class Derived extends Base<Object> {\n" + 
+					"  void testOK(Static1.Static2<Exception>.Middle1<Object>.Middle2.GenericInner<String> gi) {\n" + 
+					"    method(gi);\n" + 
+					"  }\n" + 
+					"  void testNOK(Static1.Static2<String>.Middle1<Object>.Middle2.GenericInner<String> gi) {\n" + 
+					"    method(gi);\n" + 
+					"  }\n" + 
+					"}\n";
+			this.createFile(
+				"/Bug460491/src/test2/Derived.java",
+	    			c2SourceString);
+
+			char[] c2SourceChars = c2SourceString.toCharArray();
+			this.problemRequestor.initialize(c2SourceChars);
+
+			getCompilationUnit("/Bug460491/src/test2/Derived.java").getWorkingCopy(this.wcOwner, null);
+			assertProblems(
+					"Unexpected problems",
+					"----------\n" + 
+					"1. ERROR in /Bug460491/src/test2/Derived.java (at line 10)\n" + 
+					"	method(gi);\n" + 
+					"	^^^^^^\n" + 
+					"The method method(Base.Static1.Static2<Exception>.Middle1<Object>.Middle2.GenericInner<String>) in the type Base<Object> is not applicable for the arguments (Base.Static1.Static2<String>.Middle1<Object>.Middle2.GenericInner<String>)\n" + 
+					"----------\n"
+					);
+		} finally {
+			if (project != null)
+				deleteProject(project);
+		}
+}
 }

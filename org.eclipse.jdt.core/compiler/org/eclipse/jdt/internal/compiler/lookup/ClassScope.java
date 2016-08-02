@@ -960,7 +960,9 @@ public class ClassScope extends Scope {
 			problemReporter().readonlyNotYetSupported(this.referenceContext);
 // SH}
 		if (isMemberType) {
-			modifiers |= (enclosingType.modifiers & (ExtraCompilerModifiers.AccGenericSignature|ClassFileConstants.AccStrictfp));
+			if (!sourceType.isStatic())
+				modifiers |= (enclosingType.modifiers & ExtraCompilerModifiers.AccGenericSignature);
+			modifiers |= (enclosingType.modifiers & ClassFileConstants.AccStrictfp);
 			// checks for member types before local types to catch local members
 			if (enclosingType.isInterface())
 				modifiers |= ClassFileConstants.AccPublic;

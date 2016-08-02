@@ -421,6 +421,9 @@ public boolean canBeSeenBy(PackageBinding invocationPackage) {
 public boolean canBeSeenBy(ReferenceBinding receiverType, ReferenceBinding invocationType) {
 	if (isPublic()) return true;
 
+	if (isStatic() && (receiverType.isRawType() || receiverType.isParameterizedType()))
+		receiverType = receiverType.actualType(); // outer generics are irrelevant
+
 	if (TypeBinding.equalsEquals(invocationType, this) && TypeBinding.equalsEquals(invocationType, receiverType)) return true;
 
 	if (isProtected()) {
@@ -555,7 +558,7 @@ public boolean canBeSeenBy(Scope scope) {
 
 public char[] computeGenericTypeSignature(TypeVariableBinding[] typeVariables) {
 
-	boolean isMemberOfGeneric = isMemberType() && (enclosingType().modifiers & ExtraCompilerModifiers.AccGenericSignature) != 0;
+	boolean isMemberOfGeneric = isMemberType() && !isStatic() && (enclosingType().modifiers & ExtraCompilerModifiers.AccGenericSignature) != 0;
 	if (typeVariables == Binding.NO_TYPE_VARIABLES && !isMemberOfGeneric) {
 		return signature();
 	}
@@ -2031,38 +2034,43 @@ public char[] qualifiedSourceName() {
  * NOTE: This method should only be used during/after code gen.
  */
 public char[] readableName() /*java.lang.Object,  p.X<T> */ {
+	return readableName(true);
+}
+public char[] readableName(boolean showGenerics) /*java.lang.Object,  p.X<T> */ {
     char[] readableName;
 	if (isMemberType()) {
-		readableName = CharOperation.concat(enclosingType().readableName(), sourceName(), '.'); // OT: was sourceName
+		readableName = CharOperation.concat(enclosingType().readableName(showGenerics && !isStatic()), sourceName(), '.'); // OT: was sourceName
 	} else {
 		readableName = CharOperation.concatWith(this.compoundName, '.');
 	}
-	TypeVariableBinding[] typeVars;
+	if (showGenerics) {
+		TypeVariableBinding[] typeVars;
 //{ObjectTeams: include value parameters:
-	SyntheticArgumentBinding[] valueParams = valueParamSynthArgs();
+		SyntheticArgumentBinding[] valueParams = valueParamSynthArgs();
 /* orig:
-	if ((typeVars = typeVariables()) != Binding.NO_TYPE_VARIABLES) {
+		if ((typeVars = typeVariables()) != Binding.NO_TYPE_VARIABLES) {
   :giro */
-	if ((typeVars = typeVariables()) != Binding.NO_TYPE_VARIABLES || valueParams != Binding.NO_SYNTH_ARGUMENTS) {
-// orig:		
-	    StringBuffer nameBuffer = new StringBuffer(10);
-	    nameBuffer.append(readableName).append('<');
+		if ((typeVars = typeVariables()) != Binding.NO_TYPE_VARIABLES || valueParams != Binding.NO_SYNTH_ARGUMENTS) {
+// orig:
+	    	StringBuffer nameBuffer = new StringBuffer(10);
+	    	nameBuffer.append(readableName).append('<');
 // :giro
-	    for (int i = 0; i < valueParams.length; i++) {
-	    	nameBuffer.append('@');
-			nameBuffer.append(valueParams[i].readableName());
-			if (typeVars.length > 0)
-				nameBuffer.append(',');
-		}
+		    for (int i = 0; i < valueParams.length; i++) {
+		    	nameBuffer.append('@');
+				nameBuffer.append(valueParams[i].readableName());
+				if (typeVars.length > 0)
+					nameBuffer.append(',');
+			}
 // SH}
-	    for (int i = 0, length = typeVars.length; i < length; i++) {
-	        if (i > 0) nameBuffer.append(',');
-	        nameBuffer.append(typeVars[i].readableName());
-	    }
-	    nameBuffer.append('>');
-		int nameLength = nameBuffer.length();
-		readableName = new char[nameLength];
-		nameBuffer.getChars(0, nameLength, readableName, 0);
+		    for (int i = 0, length = typeVars.length; i < length; i++) {
+		        if (i > 0) nameBuffer.append(',');
+	    	    nameBuffer.append(typeVars[i].readableName());
+		    }
+	    	nameBuffer.append('>');
+			int nameLength = nameBuffer.length();
+			readableName = new char[nameLength];
+			nameBuffer.getChars(0, nameLength, readableName, 0);
+		}
 	}
 	return readableName;
 }
@@ -2191,38 +2199,43 @@ char[] nullAnnotatedShortReadableName(CompilerOptions options) {
 }
 
 public char[] shortReadableName() /*Object*/ {
+	return shortReadableName(true);
+}
+public char[] shortReadableName(boolean showGenerics) /*Object*/ {
 	char[] shortReadableName;
 	if (isMemberType()) {
-		shortReadableName = CharOperation.concat(enclosingType().shortReadableName(), sourceName(), '.'); // OT: was sourceName
+		shortReadableName = CharOperation.concat(enclosingType().shortReadableName(showGenerics && !isStatic()), sourceName(), '.'); // OT: was sourceName
 	} else {
 		shortReadableName = sourceName(); // OT: was sourceName
 	}
-	TypeVariableBinding[] typeVars;
+	if (showGenerics) {
+		TypeVariableBinding[] typeVars;
 //{ObjectTeams: include value parameters:
-	SyntheticArgumentBinding[] valueParams = valueParamSynthArgs();
+		SyntheticArgumentBinding[] valueParams = valueParamSynthArgs();
 /* orig:
-	if ((typeVars = typeVariables()) != Binding.NO_TYPE_VARIABLES) {
+		if ((typeVars = typeVariables()) != Binding.NO_TYPE_VARIABLES) {
   :giro */
-	if ((typeVars = typeVariables()) != Binding.NO_TYPE_VARIABLES || valueParams != Binding.NO_SYNTH_ARGUMENTS) {
+		if ((typeVars = typeVariables()) != Binding.NO_TYPE_VARIABLES || valueParams != Binding.NO_SYNTH_ARGUMENTS) {
 // orig:		
-	    StringBuffer nameBuffer = new StringBuffer(10);
-	    nameBuffer.append(shortReadableName).append('<');
+		    StringBuffer nameBuffer = new StringBuffer(10);
+		    nameBuffer.append(shortReadableName).append('<');
 // :giro
-	    for (int i = 0; i < valueParams.length; i++) {
-	    	nameBuffer.append('@');
-			nameBuffer.append(valueParams[i].shortReadableName());
-			if (typeVars.length > 0)
-				nameBuffer.append(',');
-		}
+		    for (int i = 0; i < valueParams.length; i++) {
+		    	nameBuffer.append('@');
+				nameBuffer.append(valueParams[i].shortReadableName());
+				if (typeVars.length > 0)
+					nameBuffer.append(',');
+			}
 // SH}
-	    for (int i = 0, length = typeVars.length; i < length; i++) {
-	        if (i > 0) nameBuffer.append(',');
-	        nameBuffer.append(typeVars[i].shortReadableName());
-	    }
-	    nameBuffer.append('>');
-		int nameLength = nameBuffer.length();
-		shortReadableName = new char[nameLength];
-		nameBuffer.getChars(0, nameLength, shortReadableName, 0);
+		    for (int i = 0, length = typeVars.length; i < length; i++) {
+	    	    if (i > 0) nameBuffer.append(',');
+	        	nameBuffer.append(typeVars[i].shortReadableName());
+		    }
+		    nameBuffer.append('>');
+			int nameLength = nameBuffer.length();
+			shortReadableName = new char[nameLength];
+			nameBuffer.getChars(0, nameLength, shortReadableName, 0);
+		}
 	}
 	return shortReadableName;
 }
