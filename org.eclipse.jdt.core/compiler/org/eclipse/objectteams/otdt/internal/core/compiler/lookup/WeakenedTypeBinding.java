@@ -44,7 +44,7 @@ public class WeakenedTypeBinding extends DependentTypeBinding {
 
 	public WeakenedTypeBinding(DependentTypeBinding declaredType, ReferenceBinding weakenedType, LookupEnvironment environment)
 	{
-		super(declaredType, declaredType.arguments, declaredType.enclosingType(), environment);
+		super(declaredType, declaredType.arguments, declaredType._teamAnchor, declaredType.enclosingType(), environment);
 		this.weakenedType = weakenedType;
 		this.roleModel = declaredType.roleModel;
 		if (this.type instanceof WeakenedTypeBinding)

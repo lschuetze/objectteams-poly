@@ -92,15 +92,15 @@ public class DependentTypeBinding extends ParameterizedTypeBinding {
 	/** Public constructor for clients (FIXME: let only environment create us) */
 	public DependentTypeBinding(ReferenceBinding type, TypeBinding[] typeArguments, ITeamAnchor teamAnchor, int paramPosition, ReferenceBinding enclosingType, LookupEnvironment lookupEnvironment) 
 	{
-		super(type, typeArguments, enclosingType, lookupEnvironment);
+		super(type, typeArguments, teamAnchor, enclosingType, lookupEnvironment);
 		initializeFromType(type);
 		initializeDependentType(teamAnchor, paramPosition);		
 	}
 
 	/** For subclasses. Still need to call initializeDependentType afterwards. */
-	DependentTypeBinding(ReferenceBinding type, TypeBinding[] arguments, ReferenceBinding enclosingType, LookupEnvironment environment)
+	DependentTypeBinding(ReferenceBinding type, TypeBinding[] arguments, ITeamAnchor teamAnchor, ReferenceBinding enclosingType, LookupEnvironment environment)
 	{
-		super(type, arguments, enclosingType, environment);
+		super(type, arguments, teamAnchor, enclosingType, environment);
 		initializeFromType(type);
 	}
 	private void initializeFromType(ReferenceBinding givenType) {

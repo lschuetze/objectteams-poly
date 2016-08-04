@@ -155,7 +155,7 @@ public class RoleTypeBinding extends DependentTypeBinding
     // ============= CREATION AND INSTANCE REGISTRY: ===================
     public RoleTypeBinding(ReferenceBinding genericType, TypeBinding[] typeArguments, ITeamAnchor teamAnchor, ReferenceBinding enclosingType, LookupEnvironment lookupEnvironment) 
     {
-		super(genericType.getRealType(), typeArguments, enclosingType, lookupEnvironment);
+		super(genericType.getRealType(), typeArguments, teamAnchor, enclosingType, lookupEnvironment);
 		initialize(genericType, teamAnchor);
 	}
 

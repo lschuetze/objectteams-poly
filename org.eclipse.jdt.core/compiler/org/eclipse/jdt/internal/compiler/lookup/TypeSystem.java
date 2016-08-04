@@ -79,9 +79,10 @@ public class TypeSystem {
 					ReferenceBinding enclosingType, LookupEnvironment environment) {
 /* orig:
 			public InternalParameterizedTypeBinding(ReferenceBinding genericType, TypeBinding[] typeArguments, ReferenceBinding enclosingType, LookupEnvironment environment) {
- */
 				super(genericType, typeArguments, enclosingType, environment);
+ */
 // :giro
+				super(genericType, typeArguments, teamAnchor, enclosingType, environment);
 				this.teamAnchor = teamAnchor;
 				this.valueParamPosition = valueParamPosition;
 // SH}
