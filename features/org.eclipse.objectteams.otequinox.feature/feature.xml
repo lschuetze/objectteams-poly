@@ -17,13 +17,17 @@ Author: Stephan Herrmann.
    </copyright>
 
    <license url="%licenseURL">
-   		%license
+      %license
    </license>
 
    <url>
       <update label="Object Teams Updates" url="http://download.eclipse.org/objectteams/updates/ot2.5"/>
       <discovery label="Orbit Repository" url="http://download.eclipse.org/tools/orbit/downloads/drops/R20100519200754/repository"/>
    </url>
+
+   <requires>
+      <import plugin="org.objectweb.asm.util" version="5.0.1"/>
+   </requires>
 
    <plugin
          id="org.eclipse.objectteams.runtime"
@@ -78,8 +82,7 @@ Author: Stephan Herrmann.
          id="org.eclipse.objectteams.otequinox"
          download-size="27"
          install-size="52"
-         version="0.0.0"
-         unpack="true"/>
+         version="0.0.0"/>
 
    <plugin
          id="org.eclipse.objectteams.otequinox.branding"
