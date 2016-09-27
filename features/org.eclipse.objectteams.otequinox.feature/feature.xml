@@ -82,6 +82,13 @@ Author: Stephan Herrmann.
          unpack="false"/>
 
    <plugin
+         id="org.objectweb.asm.analysis"
+         download-size="0"
+         install-size="0"
+         version="0.0.0"
+         unpack="false"/>
+
+   <plugin
          id="org.eclipse.objectteams.otequinox"
          download-size="27"
          install-size="52"
