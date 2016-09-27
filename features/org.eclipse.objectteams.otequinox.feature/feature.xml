@@ -25,10 +25,6 @@ Author: Stephan Herrmann.
       <discovery label="Orbit Repository" url="http://download.eclipse.org/tools/orbit/downloads/drops/R20100519200754/repository"/>
    </url>
 
-   <requires>
-      <import plugin="org.objectweb.asm.util" version="5.0.1"/>
-   </requires>
-
    <plugin
          id="org.eclipse.objectteams.runtime"
          download-size="89"
