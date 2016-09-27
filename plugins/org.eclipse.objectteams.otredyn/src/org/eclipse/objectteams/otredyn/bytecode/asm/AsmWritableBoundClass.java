@@ -16,9 +16,11 @@
  **********************************************************************/
 package org.eclipse.objectteams.otredyn.bytecode.asm;
 
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -35,6 +37,7 @@ import org.objectweb.asm.ClassReader;
 import org.objectweb.asm.ClassWriter;
 import org.objectweb.asm.Opcodes;
 import org.objectweb.asm.Type;
+import org.objectweb.asm.util.CheckClassAdapter;
 
 /**
  * This class implements the bytecode manipulating part of {@link AbstractBoundClass}.
@@ -43,10 +46,13 @@ import org.objectweb.asm.Type;
  */
 class AsmWritableBoundClass extends AsmBoundClass {
 	private static boolean dumping = false;
+	private static boolean verifying = false;
 
     static {
         if(System.getProperty("ot.dump")!=null)
             dumping = true;
+        if (System.getProperty("objectteams.otdre.verify") != null)
+        	verifying = true;
     }
     
 	private ClassWriter writer;
@@ -163,7 +169,27 @@ class AsmWritableBoundClass extends AsmBoundClass {
 				if (node.transform()) {
 					writer = getClassWriter();
 					node.accept(writer);
-					setBytecode(writer.toByteArray());
+					byte[] bytes = writer.toByteArray();
+					setBytecode(bytes);
+					if (verifying) {
+						final String [] prints = new String[1];
+						ByteArrayOutputStream out = new ByteArrayOutputStream(); 
+						CheckClassAdapter.verify(new ClassReader(bytes), false, new PrintWriter(out) {
+							public void println(String x) {
+								super.println(x);
+								prints[0] = x;
+							}
+						});
+						if (prints[0] != null) {
+							StringBuilder message = new StringBuilder();
+							message.append(node.getClass().getSimpleName());
+							message.append(" caused a verify error on ");
+							message.append(this.getName()).append('.').append(prints[0]);
+							message.append('\n');
+							message.append(out.toString());
+							throw new VerifyError(message.toString());
+						}
+					}
 				}
 			}
 			

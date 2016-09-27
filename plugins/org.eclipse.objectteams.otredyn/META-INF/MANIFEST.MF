@@ -16,4 +16,5 @@ Bundle-ClassPath: .
 Require-Bundle: org.eclipse.objectteams.runtime;bundle-version="[2.5.0,3.0.0)",
  org.objectweb.asm;bundle-version="5.0.1",
  org.objectweb.asm.tree;bundle-version="5.0.1",
- org.objectweb.asm.commons;bundle-version="5.0.1"
+ org.objectweb.asm.commons;bundle-version="5.0.1",
+ org.objectweb.asm.util;bundle-version="5.0.1";resolution:="optional"
