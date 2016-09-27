@@ -174,7 +174,7 @@ class AsmWritableBoundClass extends AsmBoundClass {
 					if (verifying) {
 						final String [] prints = new String[1];
 						ByteArrayOutputStream out = new ByteArrayOutputStream(); 
-						CheckClassAdapter.verify(new ClassReader(bytes), false, new PrintWriter(out) {
+						CheckClassAdapter.verify(new ClassReader(bytes), this.loader, false, new PrintWriter(out) {
 							public void println(String x) {
 								super.println(x);
 								prints[0] = x;

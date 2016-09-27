@@ -115,15 +115,22 @@ public class MoveCodeToCallOrigAdapter extends AbstractTransformableClassNode {
 			}
 		}
 
+		InsnList orgInstructions = orgMethod.instructions;
+
 		if (superIsWeavable)
-			adjustSuperCalls(orgMethod.instructions, orgMethod.name, orgMethod.desc, args, returnType, boundMethodIdSlot);
+			adjustSuperCalls(orgInstructions, orgMethod.name, orgMethod.desc, args, returnType, boundMethodIdSlot);
 		
 		// replace return of the original method with areturn and box the result value if needed
-		replaceReturn(orgMethod.instructions, returnType);
+		replaceReturn(orgInstructions, returnType);
 		
-		newInstructions.add(orgMethod.instructions);
+		newInstructions.add(orgInstructions); // this wipes orgInstructions
+		addReturn(orgMethod.instructions,Type.getReturnType(orgMethod.desc)); // restores minimal code
 		if (orgMethod.tryCatchBlocks != null) {
 			addTryCatchBlocks(orgMethod, callOrig);
+			orgMethod.tryCatchBlocks.clear();
+		}
+		if (orgMethod.localVariables != null) {
+			orgMethod.localVariables.clear();
 		}
 		
 		addNewLabelToSwitch(callOrig.instructions, newInstructions, boundMethodId);

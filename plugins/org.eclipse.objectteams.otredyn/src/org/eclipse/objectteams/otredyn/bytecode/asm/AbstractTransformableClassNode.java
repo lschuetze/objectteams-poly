@@ -277,6 +277,41 @@ public abstract class AbstractTransformableClassNode extends ClassNode {
 		}
 	}
 
+	protected void addReturn(InsnList instructions, Type returnType) {
+		switch (returnType.getSort()) {
+		case Type.VOID:
+			instructions.add(new InsnNode(Opcodes.RETURN));
+			break;
+		case Type.OBJECT:
+		case Type.ARRAY:
+			instructions.add(new InsnNode(Opcodes.ACONST_NULL));
+			instructions.add(new InsnNode(Opcodes.ARETURN));
+			break;
+		case Type.INT:
+		case Type.BOOLEAN:
+		case Type.BYTE:
+		case Type.CHAR:
+		case Type.SHORT:
+			instructions.add(new InsnNode(Opcodes.ICONST_0));
+			instructions.add(new InsnNode(Opcodes.IRETURN));
+			break;
+		case Type.LONG:
+			instructions.add(new InsnNode(Opcodes.LCONST_0));
+			instructions.add(new InsnNode(Opcodes.LRETURN));
+			break;
+		case Type.FLOAT:
+			instructions.add(new InsnNode(Opcodes.FCONST_0));
+			instructions.add(new InsnNode(Opcodes.FRETURN));
+			break;
+		case Type.DOUBLE:
+			instructions.add(new InsnNode(Opcodes.DCONST_0));
+			instructions.add(new InsnNode(Opcodes.DRETURN));
+			break;
+		default:
+			throw new IllegalArgumentException("Unexpected type "+returnType);
+		}
+	}
+
 	/**
 	 * Create an instruction for loading an integer constant,
 	 * using the most compact possible format. 
