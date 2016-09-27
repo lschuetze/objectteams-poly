@@ -46,7 +46,7 @@ plugin@org.eclipse.objectteams.otdt.samples=GIT,repo=git://git.eclipse.org/gitro
 plugin@org.apache.bcel,5.2.0=p2IU,id=org.apache.bcel,version=5.2.0.v201005080400,repository=http://download.eclipse.org/tools/orbit/downloads/drops/R20160520211859/repository
 !** ASM from Orbit: **!
 plugin@org.objectweb.asm,5.0.1=p2IU,id=org.objectweb.asm,version=5.0.1.v201404251740,repository=http://download.eclipse.org/tools/orbit/downloads/drops/R20160520211859/repository/
-plugin@org.objectweb.asm.tree,5.0.1=p2IU,id=org.objectweb.asm.tree,version=5.0.1.v201404251740,repository=http://download.eclipse.org/tools/orbit/downloads/drops/R20160520211859/repository/
+plugin@org.objectweb.asm.tree,5.0.1=p2IU,id=org.objectweb.asm.tree,version=5.0.1.v201505121915,repository=http://download.eclipse.org/tools/orbit/downloads/drops/R20160520211859/repository/
 plugin@org.objectweb.asm.commons,5.0.1=p2IU,id=org.objectweb.asm.commons,version=5.0.1.v201404251740,repository=http://download.eclipse.org/tools/orbit/downloads/drops/R20160520211859/repository/
 plugin@org.objectweb.asm.util,5.0.1=p2IU,id=org.objectweb.asm.util,version=5.0.1.v201404251740,repository=http://download.eclipse.org/tools/orbit/downloads/drops/R20160520211859/repository/
 plugin@org.objectweb.asm.analysis,5.0.1=p2IU,id=org.objectweb.asm.analysis,version=5.0.1.v201404251740,repository=http://download.eclipse.org/tools/orbit/downloads/drops/R20160520211859/repository/
