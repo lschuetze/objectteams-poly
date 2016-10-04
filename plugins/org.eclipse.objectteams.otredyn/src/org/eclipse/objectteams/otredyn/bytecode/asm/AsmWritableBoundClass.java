@@ -16,11 +16,9 @@
  **********************************************************************/
 package org.eclipse.objectteams.otredyn.bytecode.asm;
 
-import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -30,6 +28,7 @@ import org.eclipse.objectteams.otredyn.bytecode.Field;
 import org.eclipse.objectteams.otredyn.bytecode.IBytecodeProvider;
 import org.eclipse.objectteams.otredyn.bytecode.Method;
 import org.eclipse.objectteams.otredyn.bytecode.RedefineStrategyFactory;
+import org.eclipse.objectteams.otredyn.bytecode.asm.verify.OTCheckClassAdapter;
 import org.eclipse.objectteams.otredyn.runtime.TeamManager;
 import org.eclipse.objectteams.otredyn.transformer.names.ClassNames;
 import org.eclipse.objectteams.otredyn.transformer.names.ConstantMembers;
@@ -37,7 +36,6 @@ import org.objectweb.asm.ClassReader;
 import org.objectweb.asm.ClassWriter;
 import org.objectweb.asm.Opcodes;
 import org.objectweb.asm.Type;
-import org.objectweb.asm.util.CheckClassAdapter;
 
 /**
  * This class implements the bytecode manipulating part of {@link AbstractBoundClass}.
@@ -172,23 +170,7 @@ class AsmWritableBoundClass extends AsmBoundClass {
 					byte[] bytes = writer.toByteArray();
 					setBytecode(bytes);
 					if (verifying) {
-						final String [] prints = new String[1];
-						ByteArrayOutputStream out = new ByteArrayOutputStream(); 
-						CheckClassAdapter.verify(new ClassReader(bytes), this.loader, false, new PrintWriter(out) {
-							public void println(String x) {
-								super.println(x);
-								prints[0] = x;
-							}
-						});
-						if (prints[0] != null) {
-							StringBuilder message = new StringBuilder();
-							message.append(node.getClass().getSimpleName());
-							message.append(" caused a verify error on ");
-							message.append(this.getName()).append('.').append(prints[0]);
-							message.append('\n');
-							message.append(out.toString());
-							throw new VerifyError(message.toString());
-						}
+						OTCheckClassAdapter.verify(node, bytes, this.loader);
 					}
 				}
 			}

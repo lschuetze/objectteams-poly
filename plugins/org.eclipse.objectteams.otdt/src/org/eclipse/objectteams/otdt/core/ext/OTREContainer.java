@@ -255,7 +255,8 @@ public class OTREContainer implements IClasspathContainer
 		}
 		ASM : {
 			int asm = WeavingScheme.OTDRE.ordinal();
-			BYTECODE_WEAVER_PATHS[asm] = new IPath[ASM_BUNDLE_NAMES.length+1];
+			int numBundles = ASM_BUNDLE_NAMES.length+1;
+			BYTECODE_WEAVER_PATHS[asm] = new IPath[numBundles];
 			int i = 0;
 			BYTECODE_WEAVER_PATHS[asm][i++] = new Path(OTVariableInitializer.getInstallatedPath(OTDTPlugin.getDefault(), OTDRE_PLUGIN_NAME, "bin")); //$NON-NLS-1$
 			for (String bundleName : ASM_BUNDLE_NAMES) {
@@ -267,7 +268,7 @@ public class OTREContainer implements IClasspathContainer
 					break;
 				}
 			}
-			if (i == 4)
+			if (i == numBundles)
 				break ASM;
 			throw new RuntimeException("bytecode libarary for OTDRE not found"); //$NON-NLS-1$
 		}

@@ -1,7 +1,7 @@
 /**********************************************************************
  * This file is part of "Object Teams Dynamic Runtime Environment"
  * 
- * Copyright 2009, 2015 Oliver Frank and others.
+ * Copyright 2009, 2016 Oliver Frank and others.
  * 
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -31,6 +31,7 @@ import org.objectweb.asm.tree.AbstractInsnNode;
 import org.objectweb.asm.tree.InsnList;
 import org.objectweb.asm.tree.InsnNode;
 import org.objectweb.asm.tree.IntInsnNode;
+import org.objectweb.asm.tree.LabelNode;
 import org.objectweb.asm.tree.MethodInsnNode;
 import org.objectweb.asm.tree.MethodNode;
 import org.objectweb.asm.tree.TryCatchBlockNode;
@@ -43,6 +44,9 @@ import org.objectweb.asm.tree.TypeInsnNode;
  * @author Oliver Frank
  */
 public class MoveCodeToCallOrigAdapter extends AbstractTransformableClassNode {
+
+	private static final String BOUND_METHOD_ID = "boundMethodId";
+
 	private Method method;
 	private int boundMethodId;
 	private int firstArgIndex; // slot index of the first argument (0 (static) or 1 (non-static))
@@ -84,12 +88,15 @@ public class MoveCodeToCallOrigAdapter extends AbstractTransformableClassNode {
 		//Unboxing arguments
 		Type[] args = Type.getArgumentTypes(orgMethod.desc);
 		
+		LabelNode start = new LabelNode(), end = new LabelNode(); // range for new local variables
+		newInstructions.add(start);
 		int boundMethodIdSlot = firstArgIndex;
 		
 		if (args.length > 0) {
 			// move boundMethodId to a higher slot, to make lower slots available for original locals
 			newInstructions.add(new IntInsnNode(Opcodes.ILOAD, boundMethodIdSlot));
 			boundMethodIdSlot = orgMethod.maxLocals+1;
+			addLocal(callOrig, BOUND_METHOD_ID, "I", start, end, boundMethodIdSlot);
 			newInstructions.add(new IntInsnNode(Opcodes.ISTORE, boundMethodIdSlot));
 			
 			newInstructions.add(new IntInsnNode(Opcodes.ALOAD, firstArgIndex + argOffset + 1));
@@ -132,6 +139,7 @@ public class MoveCodeToCallOrigAdapter extends AbstractTransformableClassNode {
 		if (orgMethod.localVariables != null) {
 			orgMethod.localVariables.clear();
 		}
+		newInstructions.add(end);
 		
 		addNewLabelToSwitch(callOrig.instructions, newInstructions, boundMethodId);
 		

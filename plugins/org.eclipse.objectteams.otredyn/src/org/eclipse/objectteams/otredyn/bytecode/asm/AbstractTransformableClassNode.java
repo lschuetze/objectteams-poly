@@ -32,6 +32,7 @@ import org.objectweb.asm.tree.InsnNode;
 import org.objectweb.asm.tree.IntInsnNode;
 import org.objectweb.asm.tree.LabelNode;
 import org.objectweb.asm.tree.LdcInsnNode;
+import org.objectweb.asm.tree.LocalVariableNode;
 import org.objectweb.asm.tree.LookupSwitchInsnNode;
 import org.objectweb.asm.tree.MethodInsnNode;
 import org.objectweb.asm.tree.MethodNode;
@@ -386,6 +387,45 @@ public abstract class AbstractTransformableClassNode extends ClassNode {
 			if (nextIsGeneralizedReturn && next != null && next.getOpcode() != Opcodes.ARETURN)
 				instructions.set(next, new InsnNode(Opcodes.ARETURN)); // prevent further manipulation by replaceReturn()
 		}
+	}
+
+	/**
+	 * Add a local variable to be visible throughout the all of the instruction list.
+	 * Side effect: may add labels at beginning and end, unless labels are already present at these locations.
+	 */
+	protected void addLocal(MethodNode method, String selector, String desc, int slot) {
+		InsnList instructions = method.instructions;
+		LabelNode start, end;
+		if (instructions.getFirst() instanceof LabelNode) {
+			start = (LabelNode) instructions.getFirst();
+		} else {
+			start = new LabelNode();
+			instructions.insert(start);
+		}
+		if (instructions.getLast() instanceof LabelNode) {
+			end = (LabelNode) instructions.getLast();
+		} else {
+			end = new LabelNode();
+			instructions.add(end);
+		}
+		addLocal(method, selector, desc, start, end, slot);
+	}
+
+	/**
+	 * Add a local variable to be visible from 'start' to 'end'.
+	 * Checks whether a local variable of that name already exists, in which case we don't change anything.
+	 * TODO: should check if ranges of both variables overlap!
+	 */
+	protected void addLocal(MethodNode method, String selector, String desc, LabelNode start, LabelNode end, int slot) {
+		for (Object lv : method.localVariables) {
+			if (((LocalVariableNode)lv).name.equals(selector))
+				return;
+		}
+        method.localVariables.add(new LocalVariableNode(selector, desc, null, start, end, slot));
+	}
+
+	protected void addThisVariable(MethodNode method) {
+		addLocal(method, "this", "L"+this.name+";", 0);
 	}
 
 	/**
