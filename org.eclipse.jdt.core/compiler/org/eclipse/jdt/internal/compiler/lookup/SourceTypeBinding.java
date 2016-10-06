@@ -182,7 +182,7 @@ public class SourceTypeBinding extends ReferenceBinding {
 	private int nullnessDefaultInitialized = 0; // 0: nothing; 1: type; 2: package
 	private int lambdaOrdinal = 0;
 	private ReferenceBinding containerAnnotationType = null;
-	
+
 	public ExternalAnnotationProvider externalAnnotationProvider;
 	
 public SourceTypeBinding(char[][] compoundName, PackageBinding fPackage, ClassScope scope) {
@@ -2430,7 +2430,7 @@ public MethodBinding resolveTypesFor(MethodBinding method) {
 }
 public MethodBinding resolveTypesFor(MethodBinding method, boolean fromSynthetic) {
 // SH}
-
+	
 	if (!isPrototype())
 		return this.prototype.resolveTypesFor(method);
 	

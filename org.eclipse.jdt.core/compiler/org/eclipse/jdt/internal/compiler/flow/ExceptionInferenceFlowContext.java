@@ -19,7 +19,7 @@ import org.eclipse.jdt.internal.compiler.lookup.ReferenceBinding;
  * try statements, exception handlers, etc...
  */
 
-public class ExceptionInferenceFlowContext extends ExceptionHandlingFlowContext {
+public class ExceptionInferenceFlowContext extends FieldInitsFakingFlowContext {
 	public ExceptionInferenceFlowContext(
 			FlowContext parent,
 			ASTNode associatedNode,

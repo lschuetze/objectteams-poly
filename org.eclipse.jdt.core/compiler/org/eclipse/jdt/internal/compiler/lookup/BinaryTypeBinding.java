@@ -1648,8 +1648,7 @@ public MethodBinding[] getMethods(char[] selector, int suggestedParameterLength)
 		int length = end - start + 1;
 		int count = 0;
 		for (int i = start; i <= end; i++) {
-			int len = this.methods[i].parameters.length;
-			if (len <= suggestedParameterLength || (this.methods[i].isVarargs() && len == suggestedParameterLength + 1))
+			if (this.methods[i].doesParameterLengthMatch(suggestedParameterLength))
 				count++;
 		}
 		if (count == 0) {
@@ -1662,8 +1661,7 @@ public MethodBinding[] getMethods(char[] selector, int suggestedParameterLength)
 			MethodBinding[] result = new MethodBinding[count];
 			// iterate methods to resolve them
 			for (int i = start, index = 0; i <= end; i++) {
-				int len = this.methods[i].parameters.length;
-				if (len <= suggestedParameterLength || (this.methods[i].isVarargs() && len == suggestedParameterLength + 1))
+				if (this.methods[i].doesParameterLengthMatch(suggestedParameterLength))
 					result[index++] = resolveTypesFor(this.methods[i]);
 			}
 			return result;
@@ -1671,6 +1669,7 @@ public MethodBinding[] getMethods(char[] selector, int suggestedParameterLength)
 	}
 	return Binding.NO_METHODS;
 }
+
 public boolean hasMemberTypes() {
 	if (!isPrototype())
 		return this.prototype.hasMemberTypes();
@@ -2126,7 +2125,9 @@ private void scanMethodForNullAnnotation(IBinaryMethod method, MethodBinding met
 		}
 	}
 	if (useNullTypeAnnotations && this.externalAnnotationStatus.isPotentiallyUnannotatedLib()) {
-		if (methodBinding.returnType.hasNullTypeAnnotations()) {
+		if (methodBinding.returnType.hasNullTypeAnnotations() 
+				|| (methodBinding.tagBits & TagBits.AnnotationNullMASK) != 0 
+				|| methodBinding.parameterNonNullness != null) {
 			this.externalAnnotationStatus = ExternalAnnotationStatus.TYPE_IS_ANNOTATED;
 		} else {
 			for (TypeBinding parameter : parameters) {

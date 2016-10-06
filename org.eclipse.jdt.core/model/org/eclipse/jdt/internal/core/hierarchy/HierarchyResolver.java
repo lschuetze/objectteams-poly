@@ -87,6 +87,7 @@ public class HierarchyResolver implements ITypeRequestor {
 	private CompilerOptions options;
 	HierarchyBuilder builder;
 	private ReferenceBinding[] typeBindings;
+	private BindingMap<IGenericType> bindingMap = new BindingMap<>();
 
 	private int typeIndex;
 	private IGenericType[] typeModels;
@@ -230,10 +231,9 @@ private IType findSuperClass(IGenericType type, ReferenceBinding typeBinding) {
 				}
 			}
 		}
-		for (int t = this.typeIndex; t >= 0; t--) {
-			if (TypeBinding.equalsEquals(this.typeBindings[t], superBinding)) {
-				return this.builder.getHandle(this.typeModels[t], superBinding);
-			}
+		IGenericType typeModel = this.bindingMap.get(superBinding);
+		if (typeModel != null) {
+			return this.builder.getHandle(typeModel, superBinding);
 		}
 	}
 	return null;
@@ -336,13 +336,12 @@ private IType[] findSuperInterfaces(IGenericType type, ReferenceBinding typeBind
 			// ensure that the binding corresponds to the interface defined by the user
 			if (CharOperation.equals(simpleName, interfaceBinding.sourceName)) {
 				bindingIndex++;
-				for (int t = this.typeIndex; t >= 0; t--) {
-					if (TypeBinding.equalsEquals(this.typeBindings[t], interfaceBinding)) {
-						IType handle = this.builder.getHandle(this.typeModels[t], interfaceBinding);
-						if (handle != null) {
-							superinterfaces[index++] = handle;
-							continue next;
-						}
+				IGenericType genericType = this.bindingMap.get(interfaceBinding);
+				if (genericType != null) {
+					IType handle = this.builder.getHandle(genericType, interfaceBinding);
+					if (handle != null) {
+						superinterfaces[index++] = handle;
+						continue next;
 					}
 				}
 			}
@@ -438,6 +437,7 @@ private void remember(IGenericType suppliedType, ReferenceBinding typeBinding) {
 	}
 	this.typeModels[this.typeIndex] = suppliedType;
 	this.typeBindings[this.typeIndex] = typeBinding;
+	this.bindingMap.put(typeBinding, suppliedType);
 }
 private void remember(IType type, ReferenceBinding typeBinding) {
 //{ObjectTeams: for phantom roles avoid hitting the JME (phantom has no info) but proceed into else as to record what we have
@@ -740,6 +740,7 @@ private void reset(){
 	this.typeIndex = -1;
 	this.typeModels = new IGenericType[5];
 	this.typeBindings = new ReferenceBinding[5];
+	this.bindingMap.clear();
 }
 
 /**
@@ -1062,6 +1063,7 @@ private void setEnvironment(LookupEnvironment lookupEnvironment, HierarchyBuilde
 	this.typeIndex = -1;
 	this.typeModels = new IGenericType[5];
 	this.typeBindings = new ReferenceBinding[5];
+	this.bindingMap.clear();
 }
 
 /*

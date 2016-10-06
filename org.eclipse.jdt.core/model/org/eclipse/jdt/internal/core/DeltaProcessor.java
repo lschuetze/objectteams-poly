@@ -502,8 +502,24 @@ public class DeltaProcessor {
 
 				break;
 			case IResource.FOLDER:
-				if (delta.getKind() == IResourceDelta.CHANGED) { // look for .jar file change to update classpath
-					children = delta.getAffectedChildren();
+				switch (delta.getKind()) {
+					case IResourceDelta.ADDED:
+					case IResourceDelta.REMOVED:
+						// Close the containing package fragment root to reset its cached children.
+						// See http://bugs.eclipse.org/500714
+						IPackageFragmentRoot root = findContainingPackageFragmentRoot(resource);
+						if (root != null && root.isOpen()) {
+							try {
+								root.close();
+							} catch (JavaModelException e) {
+								Util.log(e);
+							}
+						}
+						break;
+
+					case IResourceDelta.CHANGED: // look for .jar file change to update classpath
+						children = delta.getAffectedChildren();
+						break;
 				}
 				break;
 			case IResource.FILE :
@@ -546,6 +562,27 @@ public class DeltaProcessor {
 				checkProjectsAndClasspathChanges(children[i]);
 			}
 		}
+	}
+
+	private IPackageFragmentRoot findContainingPackageFragmentRoot(IResource resource) {
+		IProject project = resource.getProject();
+		if (JavaProject.hasJavaNature(project)) {
+			IJavaProject javaProject = JavaCore.create(project);
+			try {
+				IPath path = resource.getProjectRelativePath();
+				IPackageFragmentRoot[] roots = javaProject.getPackageFragmentRoots();
+				for (IPackageFragmentRoot root : roots) {
+					IResource rootResource = root.getUnderlyingResource();
+					if (rootResource != null && !resource.equals(rootResource) &&
+							rootResource.getProjectRelativePath().isPrefixOf(path)) {
+						return root;
+					}
+				}
+			} catch (JavaModelException e) {
+				Util.log(e);
+			}
+		}
+		return null;
 	}
 
 	private void checkExternalFolderChange(IProject project, JavaProject javaProject) {
@@ -1020,6 +1057,9 @@ public class DeltaProcessor {
 							if (VERBOSE){
 								System.out.println("- External JAR CHANGED, affecting root: "+root.getElementName()); //$NON-NLS-1$
 							}
+							// TODO(sxenos): this is causing each change event for an external jar file to be fired twice.
+							// We need to preserve the clearing of cached information in the jar but defer the actual firing of
+							// the event until after the indexer has processed the jar.
 							contentChanged(root);
 							deltaContainsModifiedJar = true;
 							hasDelta = true;
@@ -1908,7 +1948,7 @@ public class DeltaProcessor {
 	 * caches and their dependents
 	 */
 	public void resetProjectCaches() {
-		if (this.projectCachesToReset.size() == 0)
+		if (this.projectCachesToReset.isEmpty())
 			return;
 
 		JavaModelManager.getJavaModelManager().resetJarTypeCache();
@@ -2064,14 +2104,7 @@ public class DeltaProcessor {
 							this.sourceElementParserCache = null; // don't hold onto parser longer than necessary
 							startDeltas();
 						}
-						IElementChangedListener[] listeners;
-						int listenerCount;
-						synchronized (this.state) {
-							listeners = this.state.elementChangedListeners;
-							listenerCount = this.state.elementChangedListenerCount;
-						}
-						notifyTypeHierarchies(listeners, listenerCount);
-						fire(null, ElementChangedEvent.POST_CHANGE);
+						notifyAndFire(null);
 					} finally {
 						// workaround for bug 15168 circular errors not reported
 						this.state.resetOldJavaProjectNames();
@@ -2178,6 +2211,17 @@ public class DeltaProcessor {
 				JavaBuilder.buildFinished();
 				return;
 		}
+	}
+
+	public void notifyAndFire(IJavaElementDelta delta) {
+		IElementChangedListener[] listeners;
+		int listenerCount;
+		synchronized (this.state) {
+			listeners = this.state.elementChangedListeners;
+			listenerCount = this.state.elementChangedListenerCount;
+		}
+		notifyTypeHierarchies(listeners, listenerCount);
+		fire(delta, ElementChangedEvent.POST_CHANGE);
 	}
 
 	/*

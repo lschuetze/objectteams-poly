@@ -5921,5 +5921,97 @@ public void testBug499048() {
 			"}\n"
 		});
 }
+public void testBug499126() {
+	runConformTest(
+		new String[] {
+			"bug_ise_immutablelist/$Immutable.java",
+			"package bug_ise_immutablelist;\n" +
+			"\n" +
+			"public class $Immutable<T> {\n" +
+			"}\n" +
+			"",
+			"bug_ise_immutablelist/Test.java",
+			"package bug_ise_immutablelist;\n" +
+			"\n" +
+			"public class Test {\n" +
+			"	public static $Immutable<Object> f;\n" +
+			"}\n" +
+			"",
+		}
+	);
+	runConformTest(
+			false,
+			new String[] {
+				"Usage.java",
+				"public class Usage {\n" +
+				"	Object f() {return bug_ise_immutablelist.Test.f;}\n" +
+				"}\n" +
+				"",
+			}, 
+			null,
+			null,
+			null,
+			null
+	);
+}
+public void testBug441905() {
+	runConformTest(
+		new String[] {
+			"EclipseJava8Generics.java",
+			"import java.util.List;\n" + 
+			"\n" + 
+			"public class EclipseJava8Generics {\n" + 
+			"\n" + 
+			"  public interface Foo<V> {\n" + 
+			"  }\n" + 
+			"\n" + 
+			"  public static class FooBar<V, T extends Foo<V>> {\n" + 
+			"  }\n" + 
+			"\n" + 
+			"  protected void doFoos(List<FooBar<?, ? extends Foo<?>>> fooBars) {\n" + 
+			"    FooBar<?, ? extends Foo<?>> fooBar = fooBars.iterator().next();\n" + 
+			"    doFoo(fooBar);\n" + 
+			"  }\n" + 
+			"\n" + 
+			"  protected static <F> void doFoo(FooBar<F, ? extends Foo<F>> fooBar) {\n" + 
+			"  }\n" + 
+			"\n" + 
+			"}\n"
+		});
+}
+public void testBug469297() {
+	String source = "    import java.util.List;\n" + 
+			"    \n" + 
+			"    public class Test {\n" + 
+			"    \n" + 
+			"        static final void a(Class<? extends List<?>> type) {\n" + 
+			"            b(newList(type));\n" + 
+			"        }\n" + 
+			"    \n" + 
+			"        static final <T> List<T> b(List<T> list) {\n" + 
+			"            return list;\n" + 
+			"        }\n" + 
+			"    \n" + 
+			"        static final <L extends List<?>> L newList(Class<L> type) {\n" + 
+			"            try {\n" + 
+			"                return type.newInstance();\n" + 
+			"            }\n" + 
+			"            catch (Exception e) {\n" + 
+			"                throw new RuntimeException(e);\n" + 
+			"            }\n" + 
+			"        }\n" + 
+			"    }\n";
+	if (this.complianceLevel < ClassFileConstants.JDK1_8) {
+		runConformTest(new String[] { "Test.java", source });
+	} else {
+		runNegativeTest(new String[] { "Test.java", source },
+			"----------\n" + 
+			"1. ERROR in Test.java (at line 6)\n" + 
+			"	b(newList(type));\n" + 
+			"	^\n" + 
+			"The method b(List<T>) in the type Test is not applicable for the arguments (capture#1-of ? extends List<?>)\n" + 
+			"----------\n");
+	}
+}
 }
 

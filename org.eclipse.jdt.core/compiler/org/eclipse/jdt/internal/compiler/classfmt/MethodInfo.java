@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2015 IBM Corporation and others.
+ * Copyright (c) 2000, 2016 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -36,7 +36,7 @@ import org.eclipse.jdt.internal.compiler.env.IBinaryTypeAnnotation;
 import org.eclipse.jdt.internal.compiler.lookup.BinaryTypeBinding;
 import org.eclipse.jdt.internal.compiler.lookup.LookupEnvironment;
 import org.eclipse.jdt.internal.compiler.lookup.MethodBinding;
-import org.eclipse.jdt.internal.compiler.util.Util;
+import org.eclipse.jdt.internal.core.nd.java.JavaNames;
 import org.eclipse.objectteams.otdt.internal.core.compiler.bytecode.AbstractAttribute;
 import org.eclipse.objectteams.otdt.internal.core.compiler.bytecode.AnchorListAttribute;
 import org.eclipse.objectteams.otdt.internal.core.compiler.bytecode.CopyInheritanceSourceAttribute;
@@ -326,6 +326,7 @@ public int compareTo(Object o) {
 	if (result != 0) return result;
 	return new String(getMethodDescriptor()).compareTo(new String(otherMethod.getMethodDescriptor()));
 }
+@Override
 public boolean equals(Object o) {
 	if (!(o instanceof MethodInfo)) {
 		return false;
@@ -334,6 +335,7 @@ public boolean equals(Object o) {
 	return CharOperation.equals(getSelector(), otherMethod.getSelector())
 			&& CharOperation.equals(getMethodDescriptor(), otherMethod.getMethodDescriptor());
 }
+@Override
 public int hashCode() {
 	return CharOperation.hashCode(getSelector()) + CharOperation.hashCode(getMethodDescriptor());
 }
@@ -457,16 +459,14 @@ protected void initialize() {
  * @return boolean
  */
 public boolean isClinit() {
-	char[] selector = getSelector();
-	return selector[0] == '<' && selector.length == 8; // Can only match <clinit>
+	return JavaNames.isClinit(getSelector());
 }
 /**
  * Answer true if the method is a constructor, false otherwise.
  * @return boolean
  */
 public boolean isConstructor() {
-	char[] selector = getSelector();
-	return selector[0] == '<' && selector.length == 6; // Can only match <init>
+	return JavaNames.isConstructor(getSelector());
 }
 /**
  * Return true if the field is a synthetic method, false otherwise.
@@ -599,6 +599,7 @@ public int sizeInBytes() {
 	return this.attributeBytes;
 }
 
+@Override
 public String toString() {
 	StringBuffer buffer = new StringBuffer();
 	toString(buffer);
@@ -609,24 +610,7 @@ void toString(StringBuffer buffer) {
 	toStringContent(buffer);
 }
 protected void toStringContent(StringBuffer buffer) {
-	int modifiers = getModifiers();
-	char[] desc = getGenericSignature();
-	if (desc == null)
-		desc = getMethodDescriptor();
-	buffer
-	.append('{')
-	.append(
-		((modifiers & ClassFileConstants.AccDeprecated) != 0 ? "deprecated " : Util.EMPTY_STRING) //$NON-NLS-1$
-			+ ((modifiers & 0x0001) == 1 ? "public " : Util.EMPTY_STRING) //$NON-NLS-1$
-			+ ((modifiers & 0x0002) == 0x0002 ? "private " : Util.EMPTY_STRING) //$NON-NLS-1$
-			+ ((modifiers & 0x0004) == 0x0004 ? "protected " : Util.EMPTY_STRING) //$NON-NLS-1$
-			+ ((modifiers & 0x0008) == 0x000008 ? "static " : Util.EMPTY_STRING) //$NON-NLS-1$
-			+ ((modifiers & 0x0010) == 0x0010 ? "final " : Util.EMPTY_STRING) //$NON-NLS-1$
-			+ ((modifiers & 0x0040) == 0x0040 ? "bridge " : Util.EMPTY_STRING) //$NON-NLS-1$
-			+ ((modifiers & 0x0080) == 0x0080 ? "varargs " : Util.EMPTY_STRING)) //$NON-NLS-1$
-	.append(getSelector())
-	.append(desc)
-	.append('}');
+	BinaryTypeFormatter.methodToStringContent(buffer, this);
 }
 private void readCodeAttribute() {
 	int attributesCount = u2At(6);

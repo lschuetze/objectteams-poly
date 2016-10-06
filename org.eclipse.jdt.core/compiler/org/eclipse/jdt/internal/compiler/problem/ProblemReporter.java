@@ -4,7 +4,7 @@
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
- * 
+ *
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *     Benjamin Muskalla - Contribution for bug 239066
@@ -10090,7 +10090,11 @@ public void nullityMismatch(Expression expression, TypeBinding providedType, Typ
 					nullityMismatchSpecdNullable(expression, requiredType, annotationName);
 					return;
 				}
-		nullityMismatchPotentiallyNull(expression, requiredType, annotationName);
+			if (expression instanceof ArrayReference && expression.resolvedType.isFreeTypeVariable()) {
+				nullityMismatchingTypeAnnotation(expression, providedType, requiredType, NullAnnotationMatching.NULL_ANNOTATIONS_MISMATCH);
+				return;
+			}
+			nullityMismatchPotentiallyNull(expression, requiredType, annotationName);
 		return;
 	}
 	if (this.options.usesNullTypeAnnotations())
