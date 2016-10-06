@@ -408,18 +408,22 @@ public abstract class AbstractTransformableClassNode extends ClassNode {
 			end = new LabelNode();
 			instructions.add(end);
 		}
-		addLocal(method, selector, desc, start, end, slot);
+		addLocal(method, selector, desc, slot, start, end, true);
 	}
 
 	/**
 	 * Add a local variable to be visible from 'start' to 'end'.
 	 * Checks whether a local variable of that name already exists, in which case we don't change anything.
 	 * TODO: should check if ranges of both variables overlap!
+	 * @param fullRange TODO
 	 */
-	protected void addLocal(MethodNode method, String selector, String desc, LabelNode start, LabelNode end, int slot) {
-		for (Object lv : method.localVariables) {
-			if (((LocalVariableNode)lv).name.equals(selector))
-				return;
+	protected void addLocal(MethodNode method, String selector, String desc, int slot, LabelNode start, LabelNode end, boolean fullRange) {
+		if (fullRange) {
+			for (Object lv : method.localVariables) {
+				if (((LocalVariableNode)lv).name.equals(selector)) {
+					return;
+				}
+			}
 		}
         method.localVariables.add(new LocalVariableNode(selector, desc, null, start, end, slot));
 	}

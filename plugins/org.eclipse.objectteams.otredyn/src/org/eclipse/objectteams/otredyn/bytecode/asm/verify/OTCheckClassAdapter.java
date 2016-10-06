@@ -18,6 +18,7 @@ package org.eclipse.objectteams.otredyn.bytecode.asm.verify;
 import java.io.ByteArrayOutputStream;
 import java.io.OutputStream;
 import java.io.PrintWriter;
+import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -25,21 +26,20 @@ import java.util.List;
 
 import org.objectweb.asm.ClassReader;
 import org.objectweb.asm.ClassVisitor;
+import org.objectweb.asm.FieldVisitor;
 import org.objectweb.asm.Opcodes;
 import org.objectweb.asm.Type;
 import org.objectweb.asm.tree.ClassNode;
 import org.objectweb.asm.tree.MethodNode;
 import org.objectweb.asm.tree.analysis.Analyzer;
 import org.objectweb.asm.tree.analysis.BasicValue;
-import org.objectweb.asm.tree.analysis.Frame;
 import org.objectweb.asm.tree.analysis.SimpleVerifier;
 import org.objectweb.asm.util.CheckClassAdapter;
-import org.objectweb.asm.util.Textifier;
-import org.objectweb.asm.util.TraceMethodVisitor;
 
 public class OTCheckClassAdapter extends org.objectweb.asm.util.CheckClassAdapter {
 
 	static final int AccTeam = 0x8000;
+	static final int AccValueParam = 0x8000;
 
 	/**
 	 * A print writer that captures the last argument to {@link PrintWriter#println(String)}.
@@ -137,6 +137,19 @@ public class OTCheckClassAdapter extends org.objectweb.asm.util.CheckClassAdapte
 	    }
 	}
 
+	private static Method printAnalyzerResult;
+	static {
+		try {
+			Class<?> checkClass = CheckClassAdapter.class;
+			printAnalyzerResult = checkClass.getDeclaredMethod("printAnalyzerResult", MethodNode.class, Analyzer.class, PrintWriter.class);
+			printAnalyzerResult.setAccessible(true);
+		} catch (NoSuchMethodException e) {
+			throw new VerifyError(e.getMessage());
+		} catch (SecurityException e) {
+			throw new VerifyError(e.getMessage());
+		}		
+	}
+
 	public OTCheckClassAdapter(ClassVisitor cv, boolean checkDataFlow) {
 		super(Opcodes.ASM5, cv, checkDataFlow);
 	}
@@ -204,49 +217,11 @@ public class OTCheckClassAdapter extends org.objectweb.asm.util.CheckClassAdapte
     
 
     static void printAnalyzerResult(MethodNode method, Analyzer<BasicValue> a, final PrintWriter pw) {
-        Frame<BasicValue>[] frames = a.getFrames();
-        Textifier t = new Textifier();
-        TraceMethodVisitor mv = new TraceMethodVisitor(t);
-
-        pw.println(method.name + method.desc);
-        for (int j = 0; j < method.instructions.size(); ++j) {
-            method.instructions.get(j).accept(mv);
-
-            StringBuilder sb = new StringBuilder();
-            Frame<BasicValue> f = frames[j];
-            if (f == null) {
-                sb.append('?');
-            } else {
-                for (int k = 0; k < f.getLocals(); ++k) {
-                    sb.append(getShortName(f.getLocal(k).toString()))
-                            .append(' ');
-                }
-                sb.append(" : ");
-                for (int k = 0; k < f.getStackSize(); ++k) {
-                    sb.append(getShortName(f.getStack(k).toString()))
-                            .append(' ');
-                }
-            }
-            while (sb.length() < method.maxStack + method.maxLocals + 1) {
-                sb.append(' ');
-            }
-            pw.print(Integer.toString(j + 100000).substring(1));
-            pw.print(" " + sb + " : " + t.text.get(t.text.size() - 1));
-        }
-        for (int j = 0; j < method.tryCatchBlocks.size(); ++j) {
-            method.tryCatchBlocks.get(j).accept(mv);
-            pw.print(" " + t.text.get(t.text.size() - 1));
-        }
-        pw.println();
-    }
-
-    private static String getShortName(final String name) {
-        int n = name.lastIndexOf('/');
-        int k = name.length();
-        if (name.charAt(k - 1) == ';') {
-            k--;
-        }
-        return n == -1 ? name : name.substring(n + 1, k);
+    	try {
+    		printAnalyzerResult.invoke(null, method, a, pw);
+    	} catch (IllegalAccessException | IllegalArgumentException | InvocationTargetException e) {
+    		throw new VerifyError(e.getMessage());
+    	}
     }
 
 	@Override
@@ -263,5 +238,15 @@ public class OTCheckClassAdapter extends org.objectweb.asm.util.CheckClassAdapte
 
 	protected int adjustClassFlags(int access) {
 		return access & ~AccTeam;
+	}
+
+	@Override
+    public FieldVisitor visitField(final int access, final String name,
+            final String desc, final String signature, final Object value) {
+    	return super.visitField(adjustFieldFlags(access), name, desc, signature, value);
+    }
+
+	private int adjustFieldFlags(int access) {
+		return access & ~AccValueParam;
 	}
 }
