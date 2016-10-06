@@ -97,7 +97,8 @@ public class AbstractOTJLDTest extends AbstractComparableTest {
 		return new String[] {
 				"-javaagent:"+OTAGENT_JAR_PATH,
 				"-Xbootclasspath/a:"+OTRE_MIN_JAR_PATH,
-				"-Dot.dump=1"
+				"-Dot.dump=1",
+				"-Dobjectteams.otdre.verify=1"
 		};
 	}
 	
