@@ -99,7 +99,7 @@
       </category>
       <wizard
             category="org.eclipse.ui.Examples/org.eclipse.objectteams.otdt.samples"
-            class="org.eclipse.pde.internal.ui.samples.SampleWizard:org.eclipse.objectteams.otdt.samples.flightbooking"
+            class="org.eclipse.objectteams.otdt.internal.samples.SampleWizard:org.eclipse.objectteams.otdt.samples.flightbooking"
             icon="graphics/icons/newprj_wiz.gif"
             id="org.eclipse.objectteams.otdt.samples.samples.flightbooking"
             name="%sample.flightbooking.name"
@@ -109,7 +109,7 @@
       </wizard>      
       <wizard
             category="org.eclipse.ui.Examples/org.eclipse.objectteams.otdt.samples"
-            class="org.eclipse.pde.internal.ui.samples.SampleWizard:org.eclipse.objectteams.otdt.samples.observer"
+            class="org.eclipse.objectteams.otdt.internal.samples.SampleWizard:org.eclipse.objectteams.otdt.samples.observer"
             icon="graphics/icons/newprj_wiz.gif"
             id="org.eclipse.objectteams.otdt.samples.samples.observer"
             name="%sample.observer.name"
@@ -119,7 +119,7 @@
       </wizard>      
       <wizard
             category="org.eclipse.ui.Examples/org.eclipse.objectteams.otdt.samples"
-            class="org.eclipse.pde.internal.ui.samples.SampleWizard:org.eclipse.objectteams.otdt.samples.stopwatch"
+            class="org.eclipse.objectteams.otdt.internal.samples.SampleWizard:org.eclipse.objectteams.otdt.samples.stopwatch"
             icon="graphics/icons/newprj_wiz.gif"
             id="org.eclipse.objectteams.otdt.samples.samples.stopwatch"
             name="%sample.stopwatch.name"
@@ -129,7 +129,7 @@
       </wizard>      
       <wizard
             category="org.eclipse.ui.Examples/org.eclipse.objectteams.otdt.samples"
-            class="org.eclipse.pde.internal.ui.samples.SampleWizard:org.eclipse.objectteams.otdt.samples.ordersystem"
+            class="org.eclipse.objectteams.otdt.internal.samples.SampleWizard:org.eclipse.objectteams.otdt.samples.ordersystem"
             icon="graphics/icons/newprj_wiz.gif"
             id="org.eclipse.objectteams.otdt.samples.samples.ordersystem"
             name="%sample.ordersystem.name"
@@ -139,7 +139,7 @@
       </wizard>
       <wizard
             category="org.eclipse.ui.Examples/org.eclipse.objectteams.otdt.samples"
-            class="org.eclipse.pde.internal.ui.samples.SampleWizard:org.eclipse.objectteams.otdt.samples.atm"
+            class="org.eclipse.objectteams.otdt.internal.samples.SampleWizard:org.eclipse.objectteams.otdt.samples.atm"
             icon="graphics/icons/newprj_wiz.gif"
             id="org.eclipse.objectteams.otdt.samples.samples.atm"
             name="%sample.atm.name"
@@ -147,6 +147,18 @@
          <description>%sample.atm.desc
          </description>
       </wizard>
+   </extension>
+   
+   <extension
+         point="org.eclipse.ui.editors">
+      <editor
+            name="%editors.sample.name"
+            default="true"
+            icon="$nl$/icons/obj16/build_exec.png"
+            filenames="sample.properties"
+            class="org.eclipse.objectteams.otdt.internal.samples.SampleEditor"
+            id="org.eclipse.objectteams.otdt.sampleEditor">
+      </editor>
    </extension>
 
    <extension
@@ -157,20 +169,5 @@
    </extension>
 
 <!--  -->
-   <extension
-         point="org.eclipse.objectteams.otequinox.aspectBindings">
-      <aspectBinding
-            icon="platform:/plugin/org.eclipse.objectteams.otdt.ui/icons/ot/calloutbinding_obj.gif">
-         <basePlugin 
-               icon="platform:/plugin/org.eclipse.pde.ui/icons/obj16/plugin_obj.png"
-               id="org.eclipse.pde.ui"/>
-         <team class="org.eclipse.objectteams.otdt.internal.samples.SamplesAdapter"
-               icon="platform:/plugin/org.eclipse.objectteams.otdt.ui/icons/ot/team_obj.gif"
-               activation="ALL_THREADS"/>
-         <team class="org.eclipse.objectteams.otdt.internal.samples.SamplesAdapter$SampleWizardAdapter"
-               icon="platform:/plugin/org.eclipse.objectteams.otdt.ui/icons/ot/team_obj.gif"
-               activation="NONE"/>
-      </aspectBinding>
-   </extension>
 <!-- -->
 </plugin>
