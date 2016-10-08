@@ -14,7 +14,6 @@ import org.eclipse.core.runtime.IConfigurationElement;
 import org.eclipse.jface.viewers.*;
 import org.eclipse.jface.wizard.WizardPage;
 import org.eclipse.pde.internal.ui.*;
-import org.eclipse.pde.internal.ui.parts.TablePart;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.layout.GridData;
@@ -28,9 +27,10 @@ public class SelectionPage extends WizardPage {
 	private SelectionPart part;
 	private Text desc;
 	private SampleWizard wizard;
+	private PDEImages pdeImages;
 
 	@SuppressWarnings("restriction")
-	class SelectionPart extends TablePart {
+	class SelectionPart extends org.eclipse.pde.internal.ui.parts.TablePart {
 		public SelectionPart() {
 			super(new String[] {"More Info"}); //$NON-NLS-1$
 		}
@@ -68,7 +68,7 @@ public class SelectionPage extends WizardPage {
 		private Image image;
 
 		public SampleLabelProvider() {
-			image = PDEPlugin.getDefault().getLabelProvider().get(PDEPluginImages.DESC_NEWEXP_TOOL);
+			image = pdeImages.get(PDEImages.DESC_NEWEXP_TOOL);
 		}
 
 		@Override
@@ -92,6 +92,7 @@ public class SelectionPage extends WizardPage {
 		setTitle(Messages.SelectionPage_title);
 		setDescription(Messages.SelectionPage_desc);
 		part = new SelectionPart();
+		pdeImages = PDEImages.connect(this);
 	}
 
 	@Override
@@ -113,6 +114,12 @@ public class SelectionPage extends WizardPage {
 		setControl(container);
 
 		PlatformUI.getWorkbench().getHelpSystem().setHelp(container, IHelpContextIds.SELECTION);
+	}
+	
+	@Override
+	public void dispose() {
+		pdeImages.disconnect(this);
+		super.dispose();
 	}
 
 	private void doMoreInfo() {

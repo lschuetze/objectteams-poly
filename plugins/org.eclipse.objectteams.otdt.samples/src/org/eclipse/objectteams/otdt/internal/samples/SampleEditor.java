@@ -13,15 +13,16 @@ package org.eclipse.objectteams.otdt.internal.samples;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Properties;
+
 import org.eclipse.core.resources.*;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.osgi.util.NLS;
-import org.eclipse.pde.internal.ui.*;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.ui.*;
+import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.forms.events.HyperlinkAdapter;
 import org.eclipse.ui.forms.events.HyperlinkEvent;
 import org.eclipse.ui.forms.widgets.*;
@@ -34,6 +35,7 @@ public class SampleEditor extends EditorPart {
 	private FormText descText;
 	private FormText instText;
 	private InputFileListener inputFileListener;
+	private PDEImages pdeImages;
 
 	class InputFileListener implements IResourceChangeListener, IResourceDeltaVisitor {
 		@Override
@@ -64,7 +66,7 @@ public class SampleEditor extends EditorPart {
 	}
 
 	public SampleEditor() {
-		PDEPlugin.getDefault().getLabelProvider().connect(this);
+		pdeImages = PDEImages.connect(this);
 	}
 
 	/**
@@ -107,7 +109,7 @@ public class SampleEditor extends EditorPart {
 		StringBuffer buf = new StringBuffer();
 		buf.append(Messages.SampleEditor_content);
 		instText.setText(buf.toString(), true, false);
-		final SampleRunner runner = new SampleRunner(properties.getProperty("id"));
+		final SampleRunner runner = new SampleRunner(properties.getProperty("id")); //$NON-NLS-1$
 		instText.addHyperlinkListener(new HyperlinkAdapter() {
 			@Override
 			public void linkActivated(HyperlinkEvent e) {
@@ -121,8 +123,8 @@ public class SampleEditor extends EditorPart {
 				}
 			}
 		});
-		instText.setImage("run", PDEPlugin.getDefault().getLabelProvider().get(PDEPluginImages.DESC_RUN_EXC)); //$NON-NLS-1$
-		instText.setImage("debug", PDEPlugin.getDefault().getLabelProvider().get(PDEPluginImages.DESC_DEBUG_EXC)); //$NON-NLS-1$
+		instText.setImage("run", pdeImages.get(PDEImages.DESC_RUN_EXC)); //$NON-NLS-1$
+		instText.setImage("debug", pdeImages.get(PDEImages.DESC_DEBUG_EXC)); //$NON-NLS-1$
 		instText.setImage("help", PlatformUI.getWorkbench().getSharedImages().getImage(ISharedImages.IMG_OBJS_INFO_TSK)); //$NON-NLS-1$
 	}
 
@@ -149,7 +151,7 @@ public class SampleEditor extends EditorPart {
 			inputFileListener = null;
 		}
 		toolkit.dispose();
-		PDEPlugin.getDefault().getLabelProvider().disconnect(this);
+		pdeImages.disconnect(this);
 		super.dispose();
 	}
 
@@ -199,7 +201,7 @@ public class SampleEditor extends EditorPart {
 		setSite(site);
 		setInput(input);
 		inputFileListener = new InputFileListener();
-		PDEPlugin.getWorkspace().addResourceChangeListener(inputFileListener);
+		ResourcesPlugin.getWorkspace().addResourceChangeListener(inputFileListener);
 	}
 
 	public void close() {

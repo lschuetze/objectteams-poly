@@ -18,7 +18,6 @@ import org.eclipse.core.resources.*;
 import org.eclipse.core.runtime.*;
 import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.osgi.util.NLS;
-import org.eclipse.pde.internal.ui.*;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
@@ -42,6 +41,7 @@ public class SampleStandbyContent implements IStandbyContentPart {
 	private IConfigurationElement sample;
 	// cached input.
 	private String input;
+	private PDEImages pdeImages;
 
 	private static String MEMENTO_SAMPLE_ID_ATT = "sampleId"; //$NON-NLS-1$
 
@@ -49,7 +49,7 @@ public class SampleStandbyContent implements IStandbyContentPart {
 	 *
 	 */
 	public SampleStandbyContent() {
-		PDEPlugin.getDefault().getLabelProvider().connect(this);
+		this.pdeImages = PDEImages.connect(this);
 	}
 
 	@Override
@@ -82,7 +82,7 @@ public class SampleStandbyContent implements IStandbyContentPart {
 		buf.append(Messages.SampleStandbyContent_content);
 		instText.setText(buf.toString(), true, false);
 		
-		final SampleRunner runner = new SampleRunner(sample.getAttribute("id"));
+		final SampleRunner runner = new SampleRunner(sample.getAttribute("id")); //$NON-NLS-1$
 		instText.addHyperlinkListener(new HyperlinkAdapter() {
 			@Override
 			public void linkActivated(HyperlinkEvent e) {
@@ -98,10 +98,8 @@ public class SampleStandbyContent implements IStandbyContentPart {
 				}
 			}
 		});
-		instText.setImage("run", PDEPlugin.getDefault().getLabelProvider().get( //$NON-NLS-1$
-				PDEPluginImages.DESC_RUN_EXC));
-		instText.setImage("debug", PDEPlugin.getDefault().getLabelProvider() //$NON-NLS-1$
-				.get(PDEPluginImages.DESC_DEBUG_EXC));
+		instText.setImage("run", pdeImages.get( PDEImages.DESC_RUN_EXC)); //$NON-NLS-1$
+		instText.setImage("debug", pdeImages.get(PDEImages.DESC_DEBUG_EXC)); //$NON-NLS-1$
 		instText.setImage("help", PlatformUI.getWorkbench().getSharedImages() //$NON-NLS-1$
 				.getImage(ISharedImages.IMG_OBJS_INFO_TSK));
 	}
@@ -230,7 +228,7 @@ public class SampleStandbyContent implements IStandbyContentPart {
 
 	@Override
 	public void dispose() {
-		PDEPlugin.getDefault().getLabelProvider().disconnect(this);
+		pdeImages.disconnect(this);
 	}
 
 	@Override

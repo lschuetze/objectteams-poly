@@ -27,7 +27,6 @@ import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.jface.wizard.Wizard;
 import org.eclipse.objectteams.otdt.ui.help.OTHelpPlugin;
 import org.eclipse.osgi.util.NLS;
-import org.eclipse.pde.internal.ui.*;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.ui.*;
 import org.eclipse.ui.activities.IWorkbenchActivitySupport;
@@ -46,6 +45,7 @@ public class SampleWizard extends Wizard implements INewWizard, IExecutableExten
 	private boolean selectRevealEnabled = true;
 	private boolean activitiesEnabled = true;
 	private IProject[] createdProjects;
+	private PDEImages pdeImages;
 
 	private class ImportOverwriteQuery implements IOverwriteQuery {
 		@Override
@@ -72,8 +72,8 @@ public class SampleWizard extends Wizard implements INewWizard, IExecutableExten
 	}
 
 	public SampleWizard() {
-		PDEPlugin.getDefault().getLabelProvider().connect(this);
-		setDefaultPageImageDescriptor(PDEPluginImages.DESC_NEWEXP_WIZ);
+		pdeImages = PDEImages.connect(this);
+		setDefaultPageImageDescriptor(PDEImages.DESC_NEWEXP_WIZ);
 		samples = Platform.getExtensionRegistry().getConfigurationElementsFor("org.eclipse.pde.ui.samples"); //$NON-NLS-1$ //FIXME
 		namesPage = new ProjectNamesPage(this);
 		lastPage = new ReviewPage(this);
@@ -83,7 +83,7 @@ public class SampleWizard extends Wizard implements INewWizard, IExecutableExten
 
 	@Override
 	public void dispose() {
-		PDEPlugin.getDefault().getLabelProvider().disconnect(this);
+		pdeImages.disconnect(this);
 		super.dispose();
 	}
 
