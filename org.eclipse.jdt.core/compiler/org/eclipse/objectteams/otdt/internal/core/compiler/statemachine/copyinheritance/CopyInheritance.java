@@ -605,29 +605,34 @@ public class CopyInheritance implements IOTConstants, ClassFileConstants, ExtraC
 		    				superRoleName = CharOperation.subarray(superConstantPoolName, lastDollar+1, -1);
 		    		}
 		    	}
-		        subRoleDecl = AstConverter.createNestedType(
-		                superRoleName,
-		                superRole.modifiers,
-						isNestedType,
-		                true, // purely copied
-						subTeamDecl,
-						superRole);
-		        if (subRoleDecl.isInterface()) {
-		        	// purely copied interface now copies superinterfaces (not handled in connectRolesFromTeam()):
-			        ReferenceBinding[] tsuperSupers = superRole.superInterfaces();
-			        subRoleDecl.binding.superInterfaces = new ReferenceBinding[tsuperSupers.length];
-			        int j=0;
-			        for (int i = 0; i < tsuperSupers.length; i++) {
-						char[] tsuperSuperName = tsuperSupers[i].internalName();
-						if (!CharOperation.equals(tsuperSuperName, superRoleName)) {
-							ReferenceBinding tsubRole = subTeamDecl.binding.getMemberType(tsuperSuperName);
-							if (tsubRole != null)
-								subRoleDecl.binding.superInterfaces[j++] = tsubRole;
+	   			try {
+	   				// test for local class belonging to the team rather than the role (Team$1 ...)
+	   				Integer.parseInt(String.valueOf(superRoleName));
+	   			} catch (NumberFormatException nfe) {
+			        subRoleDecl = AstConverter.createNestedType(
+			                superRoleName,
+			                superRole.modifiers,
+							isNestedType,
+			                true, // purely copied
+							subTeamDecl,
+							superRole);
+			        if (subRoleDecl.isInterface()) {
+			        	// purely copied interface now copies superinterfaces (not handled in connectRolesFromTeam()):
+				        ReferenceBinding[] tsuperSupers = superRole.superInterfaces();
+				        subRoleDecl.binding.superInterfaces = new ReferenceBinding[tsuperSupers.length];
+				        int j=0;
+				        for (int i = 0; i < tsuperSupers.length; i++) {
+							char[] tsuperSuperName = tsuperSupers[i].internalName();
+							if (!CharOperation.equals(tsuperSuperName, superRoleName)) {
+								ReferenceBinding tsubRole = subTeamDecl.binding.getMemberType(tsuperSuperName);
+								if (tsubRole != null)
+									subRoleDecl.binding.superInterfaces[j++] = tsubRole;
+							}
 						}
-					}
-					if (j<tsuperSupers.length)
-						System.arraycopy(subRoleDecl.binding.superInterfaces, 0, subRoleDecl.binding.superInterfaces = new ReferenceBinding[j], 0, j);
-		        }
+						if (j<tsuperSupers.length)
+							System.arraycopy(subRoleDecl.binding.superInterfaces, 0, subRoleDecl.binding.superInterfaces = new ReferenceBinding[j], 0, j);
+			        }
+	   			}
 		    } else {
 		    	if (subRoleDecl.isRegularInterface() != superRole.isRegularInterface()) {
 					subRoleDecl.scope.problemReporter().roleClassIfcConflict(subRoleDecl);

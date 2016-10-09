@@ -65,6 +65,8 @@ import org.eclipse.jdt.internal.compiler.parser.Parser;
 import org.eclipse.jdt.internal.compiler.problem.AbortCompilation;
 import org.eclipse.jdt.internal.compiler.util.SimpleLookupTable;
 import org.eclipse.jdt.internal.compiler.util.Util;
+import org.eclipse.jdt.internal.core.nd.java.model.IndexBinaryMethod;
+import org.eclipse.jdt.internal.core.nd.java.model.IndexBinaryType;
 import org.eclipse.objectteams.otdt.core.compiler.IOTConstants;
 import org.eclipse.objectteams.otdt.internal.core.compiler.bytecode.AbstractAttribute;
 import org.eclipse.objectteams.otdt.internal.core.compiler.control.Config;
@@ -81,6 +83,7 @@ import org.eclipse.objectteams.otdt.internal.core.compiler.model.RoleModel;
 import org.eclipse.objectteams.otdt.internal.core.compiler.model.TeamModel;
 import org.eclipse.objectteams.otdt.internal.core.compiler.model.MethodModel.FakeKind;
 import org.eclipse.objectteams.otdt.internal.core.compiler.statemachine.copyinheritance.CopyInheritance;
+import org.eclipse.objectteams.otdt.internal.core.compiler.statemachine.transformer.TeamMethodGenerator;
 import org.eclipse.objectteams.otdt.internal.core.compiler.util.RoleTypeCreator;
 import org.eclipse.objectteams.otdt.internal.core.compiler.util.TSuperHelper;
 import org.eclipse.objectteams.otdt.internal.core.compiler.util.TypeAnalyzer;
@@ -752,6 +755,11 @@ void cachePartsFrom(IBinaryType binaryType, boolean needFieldsAndMethods) {
 				this.environment.getTeamMethodGenerator().maybeRegisterTeamClassBytes(reader, this);
 			// store class file version
 			this.version = reader.getVersion();
+		} else if (binaryType instanceof IndexBinaryType && needFieldsAndMethods && TypeAnalyzer.isOrgObjectteamsTeam(this)) {
+			// FIXME: do we need to attach attributes to IndexBinaryType (see above)???? 
+			TeamMethodGenerator teamMethodGenerator = this.environment.getTeamMethodGenerator();
+			if (teamMethodGenerator.classBytes == null)
+				this.version = teamMethodGenerator.registerTeamClassWithoutBytes(binaryType, this);
 		}
 // SH}
 		if (this.environment.globalOptions.storeAnnotations)
@@ -1151,11 +1159,16 @@ private MethodBinding createMethod(IBinaryMethod method, IBinaryType binaryType,
 	}
 	// register byte code, evaluate attributes:
   } finally {
-	if (result != null && (method instanceof MethodInfo)) {
-		if (TypeAnalyzer.isOrgObjectteamsTeam(this))
-			this.environment.getTeamMethodGenerator().registerTeamMethod(method, result);
-		// Note, that maybeRegister() may reset the MethodInfo (nulling MethodInfo.reference):
-		((MethodInfo)method).maybeRegister(this, result, this.environment);
+	if (result != null) {
+		if (method instanceof MethodInfo) {
+			if (TypeAnalyzer.isOrgObjectteamsTeam(this))
+				this.environment.getTeamMethodGenerator().registerTeamMethod(method, result);
+			// Note, that maybeRegister() may reset the MethodInfo (nulling MethodInfo.reference):
+			((MethodInfo)method).maybeRegister(this, result, this.environment);
+		} else if (method instanceof IndexBinaryMethod) {
+			if (TypeAnalyzer.isOrgObjectteamsTeam(this))
+				this.environment.getTeamMethodGenerator().registerTeamMethodWithoutBytes(binaryType, method, result, this.environment);
+		}
 	}
   }
 // SH}

@@ -24,6 +24,9 @@ import static org.eclipse.jdt.internal.compiler.classfmt.ClassFileConstants.AccS
 import static org.eclipse.jdt.internal.compiler.lookup.ExtraCompilerModifiers.AccVisibilityMASK;
 import static org.eclipse.objectteams.otdt.internal.core.compiler.mappings.CallinImplementorDyn.*;
 
+import java.io.File;
+import java.io.IOException;
+
 import org.eclipse.jdt.core.compiler.CharOperation;
 import org.eclipse.jdt.internal.compiler.ClassFile;
 import org.eclipse.jdt.internal.compiler.CompilationResult;
@@ -36,8 +39,10 @@ import org.eclipse.jdt.internal.compiler.ast.Statement;
 import org.eclipse.jdt.internal.compiler.ast.TypeDeclaration;
 import org.eclipse.jdt.internal.compiler.ast.TypeReference;
 import org.eclipse.jdt.internal.compiler.classfmt.ClassFileReader;
+import org.eclipse.jdt.internal.compiler.classfmt.ClassFormatException;
 import org.eclipse.jdt.internal.compiler.classfmt.MethodInfo;
 import org.eclipse.jdt.internal.compiler.env.IBinaryMethod;
+import org.eclipse.jdt.internal.compiler.env.IBinaryType;
 import org.eclipse.jdt.internal.compiler.flow.FlowContext;
 import org.eclipse.jdt.internal.compiler.flow.FlowInfo;
 import org.eclipse.jdt.internal.compiler.impl.CompilerOptions.WeavingScheme;
@@ -45,6 +50,7 @@ import org.eclipse.jdt.internal.compiler.lookup.Binding;
 import org.eclipse.jdt.internal.compiler.lookup.ClassScope;
 import org.eclipse.jdt.internal.compiler.lookup.ExtraCompilerModifiers;
 import org.eclipse.jdt.internal.compiler.lookup.FieldBinding;
+import org.eclipse.jdt.internal.compiler.lookup.LookupEnvironment;
 import org.eclipse.jdt.internal.compiler.lookup.MethodBinding;
 import org.eclipse.jdt.internal.compiler.lookup.ReferenceBinding;
 import org.eclipse.jdt.internal.compiler.lookup.SourceTypeBinding;
@@ -246,12 +252,45 @@ public class TeamMethodGenerator {
 		}
 	}
 
+	public void registerTeamMethodWithoutBytes(IBinaryType binaryType, IBinaryMethod method, MethodBinding methodBinding,
+			LookupEnvironment environment) {
+		try {
+			char[] selector = method.getSelector();
+			char[] descriptor = method.getMethodDescriptor();
+			File file = new File(String.valueOf(binaryType.getFileName()));					
+			ClassFileReader reader = ClassFileReader.read(file, true);
+			for (IBinaryMethod binMethod : reader.getMethods()) {
+				if (CharOperation.equals(selector, binMethod.getSelector())
+						&& CharOperation.equals(descriptor, binMethod.getMethodDescriptor()))
+				{
+					registerTeamMethod(binMethod, methodBinding);
+					break;
+				}
+			}
+		} catch (IOException | ClassFormatException e) {
+			// TODO: handle exception
+		}
+	}
+
     /** When binary methods for o.o.Team are created record the relevant method bindings. */
     public void registerTeamMethod(IBinaryMethod method, MethodBinding methodBinding) {
     	String selector = String.valueOf(method.getSelector());
     	String descriptor = String.valueOf(method.getMethodDescriptor());
 		registerTeamMethod(methodBinding.declaringClass, methodBinding, selector, descriptor, -1/*structOffset not yet known*/);    	
     }
+    
+    public long registerTeamClassWithoutBytes(IBinaryType binaryType, ReferenceBinding referenceBinding) {
+    	try {
+    		File file = new File(String.valueOf(binaryType.getFileName()));
+    		ClassFileReader reader = ClassFileReader.read(file, true);
+    		maybeRegisterTeamClassBytes(reader, referenceBinding);
+    		return reader.getVersion();
+    	} catch (IOException | ClassFormatException e) {
+    		// TODO: handle exception
+    		return 0;
+    	}
+    }
+   
 	/** When o.o.Team is read from .class file, record the byte code here. */
     public synchronized void maybeRegisterTeamClassBytes(ClassFileReader teamClass, ReferenceBinding teamClassBinding) {
     	if (this.classBytes != null)
