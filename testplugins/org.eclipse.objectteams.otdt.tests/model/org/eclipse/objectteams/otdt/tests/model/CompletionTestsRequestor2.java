@@ -5,7 +5,7 @@
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
  * $Id: CompletionTestsRequestor2.java 23494 2010-02-05 23:06:44Z stephan $
- * 
+ *
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *     Fraunhofer FIRST - extended API and implementation
@@ -19,33 +19,38 @@ import java.util.Comparator;
 import org.eclipse.jdt.core.CompletionContext;
 import org.eclipse.jdt.core.CompletionProposal;
 import org.eclipse.jdt.core.CompletionRequestor;
+import org.eclipse.jdt.core.Flags;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.Signature;
 import org.eclipse.jdt.core.compiler.IProblem;
+import org.eclipse.jdt.internal.codeassist.InternalCompletionContext;
+import org.eclipse.jdt.internal.compiler.ast.ASTNode;
+import org.eclipse.jdt.internal.compiler.util.ObjectVector;
 import org.eclipse.jdt.internal.core.JavaElement;
 
 // OT_COPY_PASTE with modifications (SH)
 public class CompletionTestsRequestor2 extends CompletionRequestor {
 	private final char[] NULL_LITERAL = "null".toCharArray();//$NON-NLS-1$
-	
+
 	private CompletionContext context;
 	public int proposalsPtr = -1;
 	private final static int PROPOSALS_INCREMENT = 10;
 	private CompletionProposal[] proposals = new CompletionProposal[PROPOSALS_INCREMENT];
 	private IProblem problem;
-	
+
 	private boolean showParameterNames;
 	private boolean showUniqueKeys;
 	private boolean showPositions;
 	private boolean showTokenPositions;
 	private boolean shortContext;
 	private boolean showMissingTypes;
-	
+	private boolean showModifiers;
+
 	private boolean computeVisibleElements;
 	private boolean computeEnclosingElement;
 	private String assignableType;
-	
-	public boolean fDebug = false;
+
+	public boolean debug = false;
 
 	public CompletionTestsRequestor2() {
 		this(false, false);
@@ -59,7 +64,7 @@ public class CompletionTestsRequestor2 extends CompletionRequestor {
 	public CompletionTestsRequestor2(boolean showParamNames, boolean showUniqueKeys, boolean showPositions) {
 		this(showParamNames, showUniqueKeys, showPositions, true, false);
 	}
-	
+
 	public CompletionTestsRequestor2(boolean showParamNames, boolean showUniqueKeys, boolean showPositions, boolean shortContext) {
 		this(showParamNames, showUniqueKeys, showPositions, shortContext, false);
 	}
@@ -67,9 +72,17 @@ public class CompletionTestsRequestor2 extends CompletionRequestor {
 		this(showParamNames, showUniqueKeys, showPositions, shortContext, showMissingTypes, false);
 	}
 	public CompletionTestsRequestor2(boolean showParamNames, boolean showUniqueKeys, boolean showPositions, boolean shortContext, boolean showMissingTypes, boolean showTokenPositions) {
-		this(false, showParamNames, showUniqueKeys, showPositions, shortContext, showMissingTypes, showTokenPositions);
+		this(false, showParamNames, showUniqueKeys, showPositions, shortContext, showMissingTypes, showTokenPositions, false);
 	}
-	public CompletionTestsRequestor2(boolean ignoreAll, boolean showParamNames, boolean showUniqueKeys, boolean showPositions, boolean shortContext, boolean showMissingTypes, boolean showTokenPositions) {
+	public CompletionTestsRequestor2(
+			boolean ignoreAll,
+			boolean showParamNames,
+			boolean showUniqueKeys,
+			boolean showPositions,
+			boolean shortContext,
+			boolean showMissingTypes,
+			boolean showTokenPositions,
+			boolean showModifiers) {
 		super(ignoreAll);
 		this.showParameterNames = showParamNames;
 		this.showUniqueKeys = showUniqueKeys;
@@ -77,7 +90,7 @@ public class CompletionTestsRequestor2 extends CompletionRequestor {
 		this.showTokenPositions =  showTokenPositions;
 		this.shortContext = shortContext;
 		this.showMissingTypes = showMissingTypes;
-		
+		this.showModifiers = showModifiers;
 	}
 	public void acceptContext(CompletionContext cc) {
 		this.context = cc;
@@ -89,11 +102,11 @@ public class CompletionTestsRequestor2 extends CompletionRequestor {
 		}
 		this.proposals[this.proposalsPtr] = proposal;
 	}
-	
+
 	public void allowAllRequiredProposals() {
-		for (int i = CompletionProposal.ANONYMOUS_CLASS_DECLARATION; i <= CompletionProposal.TYPE_IMPORT; i++) {
-			for (int j = CompletionProposal.ANONYMOUS_CLASS_DECLARATION; j <= CompletionProposal.FIELD_REF_WITH_CASTED_RECEIVER; j++) {
-				this.setAllowsRequiredProposals(i, j, true);
+		for (int i = CompletionProposal.ANONYMOUS_CLASS_DECLARATION; i <= CompletionProposal.ANONYMOUS_CLASS_CONSTRUCTOR_INVOCATION; i++) {
+			for (int j = CompletionProposal.ANONYMOUS_CLASS_DECLARATION; j <= CompletionProposal.ANONYMOUS_CLASS_CONSTRUCTOR_INVOCATION; j++) {
+				setAllowsRequiredProposals(i, j, true);
 			}
 		}
 	}
@@ -101,24 +114,24 @@ public class CompletionTestsRequestor2 extends CompletionRequestor {
 	public void completionFailure(IProblem p) {
 		this.problem = p;
 	}
-	
+
 	public String getContext() {
 		if(this.context == null) return "";
-		
+
 		StringBuffer buffer = new StringBuffer();
-		
+
 		if(!this.shortContext) {
 			buffer.append("completion offset=");
-			buffer.append(context.getOffset());
+			buffer.append(this.context.getOffset());
 			buffer.append('\n');
-			
+
 			buffer.append("completion range=[");
-			buffer.append(context.getTokenStart());
+			buffer.append(this.context.getTokenStart());
 			buffer.append(", ");
-			buffer.append(context.getTokenEnd());
+			buffer.append(this.context.getTokenEnd());
 			buffer.append("]\n");
-			
-			char[] token = context.getToken();
+
+			char[] token = this.context.getToken();
 			buffer.append("completion token=");
 			if(token == null) {
 				buffer.append("null");
@@ -128,9 +141,9 @@ public class CompletionTestsRequestor2 extends CompletionRequestor {
 				buffer.append('\"');
 			}
 			buffer.append('\n');
-			
+
 			buffer.append("completion token kind=");
-			int tokenKind = context.getTokenKind();
+			int tokenKind = this.context.getTokenKind();
 			if(tokenKind == CompletionContext.TOKEN_KIND_STRING_LITERAL) {
 				buffer.append("TOKEN_KIND_STRING_LITERAL");
 			} else if(tokenKind == CompletionContext.TOKEN_KIND_NAME) {
@@ -143,35 +156,35 @@ public class CompletionTestsRequestor2 extends CompletionRequestor {
 		char[][] expectedTypesSignatures = this.context.getExpectedTypesSignatures();
 		buffer.append("expectedTypesSignatures=");
 		if(expectedTypesSignatures == null) {
-			buffer.append(NULL_LITERAL);
+			buffer.append(this.NULL_LITERAL);
 		} else {
 			buffer.append('{');
 			for (int i = 0; i < expectedTypesSignatures.length; i++) {
 				if(i > 0) buffer.append(',');
 				buffer.append(expectedTypesSignatures[i]);
-				
+
 			}
 			buffer.append('}');
 		}
 		buffer.append('\n');
-		
+
 		char[][] expectedTypesKeys = this.context.getExpectedTypesKeys();
 		buffer.append("expectedTypesKeys=");
 		if(expectedTypesSignatures == null) {
-			buffer.append(NULL_LITERAL);
+			buffer.append(this.NULL_LITERAL);
 		} else {
 			buffer.append('{');
 			for (int i = 0; i < expectedTypesKeys.length; i++) {
 				if(i > 0) buffer.append(',');
 				buffer.append(expectedTypesKeys[i]);
-				
+
 			}
 			buffer.append('}');
 		}
-		
+
 		if(!this.shortContext) {
 			buffer.append('\n');
-			
+
 			int locationType = this.context.getTokenLocation();
 			if (locationType == 0) {
 				buffer.append("completion token location=UNKNOWN"); //$NON-NLS-1$
@@ -188,10 +201,15 @@ public class CompletionTestsRequestor2 extends CompletionRequestor {
 					buffer.append("STATEMENT_START"); //$NON-NLS-1$
 					first = false;
 				}
+				if ((locationType & CompletionContext.TL_CONSTRUCTOR_START) != 0) {
+					if (!first) buffer.append(',');
+					buffer.append("CONSTRUCTOR_START"); //$NON-NLS-1$
+					first = false;
+				}
 				buffer.append('}');
 			}
 		}
-		
+
 		if (this.computeEnclosingElement) {
 			buffer.append('\n');
 			buffer.append("enclosingElement="); //$NON-NLS-1$
@@ -202,10 +220,10 @@ public class CompletionTestsRequestor2 extends CompletionRequestor {
 				buffer.append(enclosingElement.toStringWithAncestors(true /*show resolved info*/));
 			}
 		}
-		
+
 		if (this.computeVisibleElements) {
 			buffer.append('\n');
-			
+
 			IJavaElement[] visibleElements = this.context.getVisibleElements(this.assignableType);
 			buffer.append("visibleElements="); //$NON-NLS-1$
 			if (visibleElements == null) {
@@ -224,10 +242,10 @@ public class CompletionTestsRequestor2 extends CompletionRequestor {
 				buffer.append('}');
 			}
 		}
-		
+
 		//buffer.append('\n');
-		
-		
+
+
 		return buffer.toString();
 	}
 	public String getProblem() {
@@ -251,7 +269,7 @@ public class CompletionTestsRequestor2 extends CompletionRequestor {
 		if(this.proposalsPtr < 0) return "";
 		Arrays.sort(this.proposals, new Comparator() {
 			public int compare(Object o1, Object o2) {
-				if (o1 == o2) 
+				if (o1 == o2)
 					return 0;
 				if (o1 == null)
 					return 1;
@@ -268,7 +286,7 @@ public class CompletionTestsRequestor2 extends CompletionRequestor {
 		});
 		return getResultsWithoutSorting();
 	}
-	
+
 	/*
 	 * Get unsorted results (ie. same order as they were accepted by requestor)
 	 */
@@ -296,7 +314,7 @@ public class CompletionTestsRequestor2 extends CompletionRequestor {
 		StringBuffer buffer = new StringBuffer();
 		return printProposal(proposal, 0, buffer);
 	}
-	
+
 	protected StringBuffer printProposal(CompletionProposal proposal, int tab, StringBuffer buffer) {
 		for (int i = 0; i < tab; i++) {
 			buffer.append("   "); //$NON-NLS-1$
@@ -353,11 +371,11 @@ public class CompletionTestsRequestor2 extends CompletionRequestor {
 				buffer.append("POTENTIAL_METHOD_DECLARATION"); //$NON-NLS-1$
 				break;
 			case CompletionProposal.METHOD_NAME_REFERENCE :
-//{ObjectTeams: original "METHOD_IMPORT" is now misleading (used for rhs short method spec, too)				
+//{ObjectTeams: original "METHOD_IMPORT" is now misleading (used for rhs short method spec, too)
 				buffer.append("METHOD_NAME_REF"); //$NON-NLS-1$
-// SH}				
+// SH}
 				break;
-//{ObjectTeams: new kinds:				
+//{ObjectTeams: new kinds:
 			case CompletionProposal.OT_METHOD_SPEC :
 				buffer.append("METHOD_SPEC"); //$NON-NLS-1$
 				break;
@@ -372,13 +390,13 @@ public class CompletionTestsRequestor2 extends CompletionRequestor {
 				break;
 			case CompletionProposal.OT_CALLOUT_DECLARATION:
 				buffer.append("CALLOUT_DECLARATION"); //$NON-NLS-1$
-				break;				
+				break;
 			case CompletionProposal.OT_CALLOUT_OVERRIDE_DECLARATION:
 				buffer.append("CALLOUT_OVERRIDE_DECLARATION"); //$NON-NLS-1$
-				break;				
+				break;
 			case CompletionProposal.OT_CALLIN_DECLARATION:
 				buffer.append("CALLIN_DECLARATION"); //$NON-NLS-1$
-				break;				
+				break;
 // SH}
 			case CompletionProposal.ANNOTATION_ATTRIBUTE_REF :
 				buffer.append("ANNOTATION_ATTRIBUTE_REF"); //$NON-NLS-1$
@@ -413,37 +431,43 @@ public class CompletionTestsRequestor2 extends CompletionRequestor {
 			case CompletionProposal.TYPE_IMPORT :
 				buffer.append("TYPE_IMPORT"); //$NON-NLS-1$
 				break;
+			case CompletionProposal.CONSTRUCTOR_INVOCATION :
+				buffer.append("CONSTRUCTOR_INVOCATION"); //$NON-NLS-1$
+				break;
+			case CompletionProposal.ANONYMOUS_CLASS_CONSTRUCTOR_INVOCATION :
+				buffer.append("ANONYMOUS_CLASS_CONSTRUCTOR_INVOCATION"); //$NON-NLS-1$
+				break;
 			default :
 				buffer.append("PROPOSAL"); //$NON-NLS-1$
 				break;
-				
+
 		}
 		buffer.append("]{");
-		buffer.append(proposal.getCompletion() == null ? NULL_LITERAL : proposal.getCompletion());
+		buffer.append(proposal.getCompletion() == null ? this.NULL_LITERAL : proposal.getCompletion());
 		buffer.append(", ");
-		buffer.append(proposal.getDeclarationSignature() == null ? NULL_LITERAL : proposal.getDeclarationSignature());  
+		buffer.append(proposal.getDeclarationSignature() == null ? this.NULL_LITERAL : proposal.getDeclarationSignature());
 		buffer.append(", ");
-		buffer.append(proposal.getSignature() == null ? NULL_LITERAL : proposal.getSignature());
-		
+		buffer.append(proposal.getSignature() == null ? this.NULL_LITERAL : proposal.getSignature());
+
 		char[] receiverSignature = proposal.getReceiverSignature();
 		if (receiverSignature != null) {
 			buffer.append(", ");
 			buffer.append(receiverSignature);
 		}
-		
+
 		if(this.showUniqueKeys) {
 			buffer.append(", ");
-			buffer.append(proposal.getDeclarationKey() == null ? NULL_LITERAL : proposal.getDeclarationKey());
+			buffer.append(proposal.getDeclarationKey() == null ? this.NULL_LITERAL : proposal.getDeclarationKey());
 			buffer.append(", ");
-			buffer.append(proposal.getKey() == null ? NULL_LITERAL : proposal.getKey());
+			buffer.append(proposal.getKey() == null ? this.NULL_LITERAL : proposal.getKey());
 		}
 		buffer.append(", ");
-		buffer.append(proposal.getName() == null ? NULL_LITERAL : proposal.getName());
+		buffer.append(proposal.getName() == null ? this.NULL_LITERAL : proposal.getName());
 		if(this.showParameterNames) {
 			char[][] parameterNames = proposal.findParameterNames(null);
 			buffer.append(", ");
 			if(parameterNames == null || parameterNames.length <= 0) {
-				buffer.append(NULL_LITERAL);
+				buffer.append(this.NULL_LITERAL);
 			} else {
 				buffer.append("(");
 				for (int i = 0; i < parameterNames.length; i++) {
@@ -453,7 +477,7 @@ public class CompletionTestsRequestor2 extends CompletionRequestor {
 				buffer.append(")");
 			}
 		}
-		
+
 		if(this.showPositions) {
 			buffer.append(", ");
 			if(this.showTokenPositions || receiverSignature != null) buffer.append("replace");
@@ -477,6 +501,14 @@ public class CompletionTestsRequestor2 extends CompletionRequestor {
 			buffer.append(proposal.getReceiverEnd());
 			buffer.append("]");
 		}
+		if(this.showModifiers) {
+			int flags = proposal.getFlags();
+			buffer.append(", ");
+			buffer.append(Flags.toString(flags));
+			if (Flags.isDeprecated(flags)) {
+				buffer.append(" deprecated"); //$NON-NLS-1$
+			}
+		}
 		buffer.append(", ");
 		buffer.append(proposal.getRelevance());
 		buffer.append('}');
@@ -498,7 +530,7 @@ public class CompletionTestsRequestor2 extends CompletionRequestor {
 	protected CompletionProposal[] quickSort(CompletionProposal[] collection, int left, int right) {
 		int original_left = left;
 		int original_right = right;
-		CompletionProposal mid = collection[ (left + right) / 2];
+		CompletionProposal mid = collection[left + ((right - left)/2)];
 		do {
 			while (compare(mid, collection[left]) > 0)
 				// s[left] >= mid
@@ -520,7 +552,7 @@ public class CompletionTestsRequestor2 extends CompletionRequestor {
 			collection = quickSort(collection, left, original_right);
 		return collection;
 	}
-	
+
 	protected int compare(CompletionProposal proposal1, CompletionProposal proposal2) {
 		int relDif = proposal1.getRelevance() - proposal2.getRelevance();
 		if(relDif != 0) return relDif;
@@ -554,7 +586,7 @@ public class CompletionTestsRequestor2 extends CompletionRequestor {
 		if(declarationSignatureDif != 0) return declarationSignatureDif;
 		return 0;
 	}
-	
+
 	protected String getElementName(CompletionProposal proposal) {
 		switch(proposal.getKind()) {
 			case CompletionProposal.ANONYMOUS_CLASS_DECLARATION :
@@ -592,6 +624,8 @@ public class CompletionTestsRequestor2 extends CompletionRequestor {
 			case CompletionProposal.JAVADOC_VALUE_REF :
 			case CompletionProposal.FIELD_IMPORT :
 			case CompletionProposal.METHOD_IMPORT :
+			case CompletionProposal.CONSTRUCTOR_INVOCATION :
+			case CompletionProposal.ANONYMOUS_CLASS_CONSTRUCTOR_INVOCATION :
 				return new String(proposal.getName());
 			case CompletionProposal.PACKAGE_REF:
 				return new String(proposal.getDeclarationSignature());
@@ -609,5 +643,62 @@ public class CompletionTestsRequestor2 extends CompletionRequestor {
 	}
 	public void setComputeEnclosingElement(boolean computeEnclosingElement) {
 		this.computeEnclosingElement = computeEnclosingElement;
+	}
+	
+	public boolean canUseDiamond(int proposalNo) {
+		if (proposalNo < this.proposals.length && this.proposals[proposalNo] != null) {
+			return this.proposals[proposalNo].canUseDiamond(this.context);
+		}
+		return false;
+	}
+	
+	public String getCompletionNode() {
+		if (this.context instanceof InternalCompletionContext) {
+			InternalCompletionContext internalCompletionContext = (InternalCompletionContext) this.context;
+			ASTNode astNode = internalCompletionContext.getCompletionNode();
+			if (astNode != null) return astNode.toString();
+			
+		}
+		return null;
+	}
+	
+	public String getCompletionNodeParent() {
+		if (this.context instanceof InternalCompletionContext) {
+			InternalCompletionContext internalCompletionContext = (InternalCompletionContext) this.context;
+			ASTNode astNode = internalCompletionContext.getCompletionNodeParent();
+			if (astNode != null) return astNode.toString();
+			
+		}
+		return null;
+	}
+	
+	public String getVisibleLocalVariables() {
+		if (this.context instanceof InternalCompletionContext) {
+			InternalCompletionContext internalCompletionContext = (InternalCompletionContext) this.context;
+			ObjectVector locals = internalCompletionContext.getVisibleLocalVariables();
+			if (locals != null) return locals.toString();
+			
+		}
+		return null;
+	}
+	
+	public String getVisibleFields() {
+		if (this.context instanceof InternalCompletionContext) {
+			InternalCompletionContext internalCompletionContext = (InternalCompletionContext) this.context;
+			ObjectVector fields = internalCompletionContext.getVisibleFields();
+			if (fields != null) return fields.toString();
+			
+		}
+		return null;
+	}
+	
+	public String getVisibleMethods() {
+		if (this.context instanceof InternalCompletionContext) {
+			InternalCompletionContext internalCompletionContext = (InternalCompletionContext) this.context;
+			ObjectVector methods = internalCompletionContext.getVisibleMethods();
+			if (methods != null) return methods.toString();
+			
+		}
+		return null;
 	}
 }
