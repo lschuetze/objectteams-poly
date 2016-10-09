@@ -3127,8 +3127,10 @@ public MethodBinding [] setMethods(MethodBinding[] methods) {
 		assert (this.tagBits & TagBits.AreMethodsSorted) == 0 : "setMethods after sorting"; //$NON-NLS-1$
 		int len1 = this.pendingMethods.size();
 		int len2 = methods.length;
-		System.arraycopy(methods, 0, methods=new MethodBinding[len1+len2], len1, len2);
-		this.pendingMethods.toArray(this.methods);
+		MethodBinding[] combined = new MethodBinding[len1+len2];
+		this.pendingMethods.toArray(combined);
+		System.arraycopy(methods, 0, combined, len1, len2);
+		methods = combined;
 		this.pendingMethods = null;
 	}
 // SH}
