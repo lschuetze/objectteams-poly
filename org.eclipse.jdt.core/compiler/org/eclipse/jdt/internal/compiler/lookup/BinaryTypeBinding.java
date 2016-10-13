@@ -44,6 +44,8 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.compiler.lookup;
 
+import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
 
 import org.eclipse.jdt.core.compiler.CharOperation;
@@ -52,6 +54,7 @@ import org.eclipse.jdt.internal.compiler.ast.Annotation;
 import org.eclipse.jdt.internal.compiler.ast.TypeDeclaration;
 import org.eclipse.jdt.internal.compiler.classfmt.ClassFileConstants;
 import org.eclipse.jdt.internal.compiler.classfmt.ClassFileReader;
+import org.eclipse.jdt.internal.compiler.classfmt.ClassFormatException;
 import org.eclipse.jdt.internal.compiler.classfmt.FieldInfo;
 import org.eclipse.jdt.internal.compiler.classfmt.MethodInfo;
 import org.eclipse.jdt.internal.compiler.classfmt.ExternalAnnotationProvider.IMethodAnnotationWalker;
@@ -83,7 +86,6 @@ import org.eclipse.objectteams.otdt.internal.core.compiler.model.RoleModel;
 import org.eclipse.objectteams.otdt.internal.core.compiler.model.TeamModel;
 import org.eclipse.objectteams.otdt.internal.core.compiler.model.MethodModel.FakeKind;
 import org.eclipse.objectteams.otdt.internal.core.compiler.statemachine.copyinheritance.CopyInheritance;
-import org.eclipse.objectteams.otdt.internal.core.compiler.statemachine.transformer.TeamMethodGenerator;
 import org.eclipse.objectteams.otdt.internal.core.compiler.util.RoleTypeCreator;
 import org.eclipse.objectteams.otdt.internal.core.compiler.util.TSuperHelper;
 import org.eclipse.objectteams.otdt.internal.core.compiler.util.TypeAnalyzer;
@@ -569,6 +571,21 @@ void cachePartsFrom(IBinaryType binaryType, boolean needFieldsAndMethods) {
 		if ((this.modifiers & ClassFileConstants.AccTeam) != 0)
 		    this._teamModel = new TeamModel(this);
 		// Note, 'model' is already set in ctor of superclass ReferenceBinding.
+
+		if (binaryType instanceof IndexBinaryType) {
+			// for roles and teams we need the bytes, retrieve them now:
+			if ((this.modifiers & (ExtraCompilerModifiers.AccRole|ClassFileConstants.AccTeam)) != 0) {
+	    		File file = new File(String.valueOf(binaryType.getFileName()));
+	    		try {
+					binaryType = ClassFileReader.read(file, true);
+				} catch (ClassFormatException | IOException e) {
+					if (this.environment.problemReporter != null) {
+						String errorMessage = "Cannot read class file for "+String.valueOf(binaryType.getName())+": "; //$NON-NLS-1$ //$NON-NLS-2$
+						this.environment.problemReporter.abortDueToInternalError(errorMessage+e.getMessage());
+					}
+				}
+			}
+		}
 //SH}
 
 		// must retrieve member types in case superclass/interfaces need them
@@ -755,11 +772,6 @@ void cachePartsFrom(IBinaryType binaryType, boolean needFieldsAndMethods) {
 				this.environment.getTeamMethodGenerator().maybeRegisterTeamClassBytes(reader, this);
 			// store class file version
 			this.version = reader.getVersion();
-		} else if (binaryType instanceof IndexBinaryType && needFieldsAndMethods && TypeAnalyzer.isOrgObjectteamsTeam(this)) {
-			// FIXME: do we need to attach attributes to IndexBinaryType (see above)???? 
-			TeamMethodGenerator teamMethodGenerator = this.environment.getTeamMethodGenerator();
-			if (teamMethodGenerator.classBytes == null)
-				this.version = teamMethodGenerator.registerTeamClassWithoutBytes(binaryType, this);
 		}
 // SH}
 		if (this.environment.globalOptions.storeAnnotations)

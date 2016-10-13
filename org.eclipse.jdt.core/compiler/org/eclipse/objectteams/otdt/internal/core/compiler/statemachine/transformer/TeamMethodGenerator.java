@@ -278,18 +278,6 @@ public class TeamMethodGenerator {
     	String descriptor = String.valueOf(method.getMethodDescriptor());
 		registerTeamMethod(methodBinding.declaringClass, methodBinding, selector, descriptor, -1/*structOffset not yet known*/);    	
     }
-    
-    public long registerTeamClassWithoutBytes(IBinaryType binaryType, ReferenceBinding referenceBinding) {
-    	try {
-    		File file = new File(String.valueOf(binaryType.getFileName()));
-    		ClassFileReader reader = ClassFileReader.read(file, true);
-    		maybeRegisterTeamClassBytes(reader, referenceBinding);
-    		return reader.getVersion();
-    	} catch (IOException | ClassFormatException e) {
-    		// TODO: handle exception
-    		return 0;
-    	}
-    }
    
 	/** When o.o.Team is read from .class file, record the byte code here. */
     public synchronized void maybeRegisterTeamClassBytes(ClassFileReader teamClass, ReferenceBinding teamClassBinding) {
