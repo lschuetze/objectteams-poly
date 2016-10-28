@@ -36,7 +36,6 @@ import org.eclipse.jdt.internal.compiler.env.IBinaryTypeAnnotation;
 import org.eclipse.jdt.internal.compiler.lookup.BinaryTypeBinding;
 import org.eclipse.jdt.internal.compiler.lookup.LookupEnvironment;
 import org.eclipse.jdt.internal.compiler.lookup.MethodBinding;
-import org.eclipse.jdt.internal.core.nd.java.JavaNames;
 import org.eclipse.objectteams.otdt.internal.core.compiler.bytecode.AbstractAttribute;
 import org.eclipse.objectteams.otdt.internal.core.compiler.bytecode.AnchorListAttribute;
 import org.eclipse.objectteams.otdt.internal.core.compiler.bytecode.CopyInheritanceSourceAttribute;
@@ -459,14 +458,14 @@ protected void initialize() {
  * @return boolean
  */
 public boolean isClinit() {
-	return JavaNames.isClinit(getSelector());
+	return org.eclipse.jdt.internal.compiler.classfmt.JavaBinaryNames.isClinit(getSelector());
 }
 /**
  * Answer true if the method is a constructor, false otherwise.
  * @return boolean
  */
 public boolean isConstructor() {
-	return JavaNames.isConstructor(getSelector());
+	return org.eclipse.jdt.internal.compiler.classfmt.JavaBinaryNames.isConstructor(getSelector());
 }
 /**
  * Return true if the field is a synthetic method, false otherwise.
