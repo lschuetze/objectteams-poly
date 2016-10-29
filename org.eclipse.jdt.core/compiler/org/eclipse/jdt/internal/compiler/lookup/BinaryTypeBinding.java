@@ -44,8 +44,6 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.compiler.lookup;
 
-import java.io.File;
-import java.io.IOException;
 import java.util.ArrayList;
 
 import org.eclipse.jdt.core.compiler.CharOperation;
@@ -54,7 +52,6 @@ import org.eclipse.jdt.internal.compiler.ast.Annotation;
 import org.eclipse.jdt.internal.compiler.ast.TypeDeclaration;
 import org.eclipse.jdt.internal.compiler.classfmt.ClassFileConstants;
 import org.eclipse.jdt.internal.compiler.classfmt.ClassFileReader;
-import org.eclipse.jdt.internal.compiler.classfmt.ClassFormatException;
 import org.eclipse.jdt.internal.compiler.classfmt.FieldInfo;
 import org.eclipse.jdt.internal.compiler.classfmt.MethodInfo;
 import org.eclipse.jdt.internal.compiler.classfmt.ExternalAnnotationProvider.IMethodAnnotationWalker;
@@ -68,8 +65,6 @@ import org.eclipse.jdt.internal.compiler.parser.Parser;
 import org.eclipse.jdt.internal.compiler.problem.AbortCompilation;
 import org.eclipse.jdt.internal.compiler.util.SimpleLookupTable;
 import org.eclipse.jdt.internal.compiler.util.Util;
-import org.eclipse.jdt.internal.core.nd.java.model.IndexBinaryMethod;
-import org.eclipse.jdt.internal.core.nd.java.model.IndexBinaryType;
 import org.eclipse.objectteams.otdt.core.compiler.IOTConstants;
 import org.eclipse.objectteams.otdt.internal.core.compiler.bytecode.AbstractAttribute;
 import org.eclipse.objectteams.otdt.internal.core.compiler.control.Config;
@@ -572,17 +567,14 @@ void cachePartsFrom(IBinaryType binaryType, boolean needFieldsAndMethods) {
 		    this._teamModel = new TeamModel(this);
 		// Note, 'model' is already set in ctor of superclass ReferenceBinding.
 
-		if (binaryType instanceof IndexBinaryType) {
-			// for roles and teams we need the bytes, retrieve them now:
-			if ((this.modifiers & (ExtraCompilerModifiers.AccRole|ClassFileConstants.AccTeam)) != 0) {
-	    		File file = new File(String.valueOf(binaryType.getFileName()));
-	    		try {
-					binaryType = ClassFileReader.read(file, true);
-				} catch (ClassFormatException | IOException e) {
-					if (this.environment.problemReporter != null) {
-						String errorMessage = "Cannot read class file for "+String.valueOf(binaryType.getName())+": "; //$NON-NLS-1$ //$NON-NLS-2$
-						this.environment.problemReporter.abortDueToInternalError(errorMessage+e.getMessage());
-					}
+		// for roles and teams we need the bytes, retrieve them now, if not already present:
+		if ((this.modifiers & (ExtraCompilerModifiers.AccRole|ClassFileConstants.AccTeam)) != 0) {
+    		try {
+    			binaryType = binaryType.withClassBytes();
+			} catch (Exception e) {
+				if (this.environment.problemReporter != null) {
+					String errorMessage = "Cannot read class file for "+String.valueOf(binaryType.getName())+": "; //$NON-NLS-1$ //$NON-NLS-2$
+					this.environment.problemReporter.abortDueToInternalError(errorMessage+e.getMessage());
 				}
 			}
 		}
@@ -1177,9 +1169,6 @@ private MethodBinding createMethod(IBinaryMethod method, IBinaryType binaryType,
 				this.environment.getTeamMethodGenerator().registerTeamMethod(method, result);
 			// Note, that maybeRegister() may reset the MethodInfo (nulling MethodInfo.reference):
 			((MethodInfo)method).maybeRegister(this, result, this.environment);
-		} else if (method instanceof IndexBinaryMethod) {
-			if (TypeAnalyzer.isOrgObjectteamsTeam(this))
-				this.environment.getTeamMethodGenerator().registerTeamMethodWithoutBytes(binaryType, method, result, this.environment);
 		}
 	}
   }

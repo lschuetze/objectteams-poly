@@ -10,11 +10,19 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.core.nd.java.model;
 
+import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.zip.ZipFile;
 
+import org.eclipse.core.runtime.CoreException;
+import org.eclipse.jdt.core.IJavaElement;
+import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.compiler.CharOperation;
 import org.eclipse.jdt.internal.compiler.classfmt.BinaryTypeFormatter;
+import org.eclipse.jdt.internal.compiler.classfmt.ClassFileReader;
+import org.eclipse.jdt.internal.compiler.classfmt.ClassFormatException;
 import org.eclipse.jdt.internal.compiler.classfmt.ElementValuePairInfo;
 import org.eclipse.jdt.internal.compiler.codegen.AnnotationTargetTypeConstants;
 import org.eclipse.jdt.internal.compiler.env.ClassSignature;
@@ -26,10 +34,12 @@ import org.eclipse.jdt.internal.compiler.env.IBinaryMethod;
 import org.eclipse.jdt.internal.compiler.env.IBinaryNestedType;
 import org.eclipse.jdt.internal.compiler.env.IBinaryType;
 import org.eclipse.jdt.internal.compiler.env.IBinaryTypeAnnotation;
+import org.eclipse.jdt.internal.compiler.env.IDependent;
 import org.eclipse.jdt.internal.compiler.env.ITypeAnnotationWalker;
 import org.eclipse.jdt.internal.compiler.impl.Constant;
 import org.eclipse.jdt.internal.compiler.lookup.BinaryTypeBinding.ExternalAnnotationStatus;
 import org.eclipse.jdt.internal.compiler.lookup.LookupEnvironment;
+import org.eclipse.jdt.internal.core.JarPackageFragmentRoot;
 import org.eclipse.jdt.internal.core.nd.IReader;
 import org.eclipse.jdt.internal.core.nd.db.IString;
 import org.eclipse.jdt.internal.core.nd.java.JavaNames;
@@ -669,4 +679,23 @@ public class IndexBinaryType implements IBinaryType {
 	public ExternalAnnotationStatus getExternalAnnotationStatus() {
 		return ExternalAnnotationStatus.NOT_EEA_CONFIGURED;
 	}
+//{ObjectTeams: retrieve class file in workspace:
+	@Override
+	public IBinaryType withClassBytes() throws ClassFormatException, IOException, CoreException {
+		File file = new File(String.valueOf(this.fileName));
+		if (file.exists())
+			return ClassFileReader.read(file);
+		int pos = CharOperation.indexOf(IDependent.JAR_FILE_ENTRY_SEPARATOR, this.fileName);
+		if (pos != -1) {
+			String jarIdentifier = String.valueOf(CharOperation.subarray(this.fileName, 0, pos));
+			String fileInJarName = String.valueOf(CharOperation.subarray(this.fileName, pos+1, -1));
+			IJavaElement jJar = JavaCore.create(jarIdentifier);
+			if (jJar.exists()) {
+				ZipFile jarZip = ((JarPackageFragmentRoot) jJar).getJar();
+				return ClassFileReader.read(jarZip, fileInJarName);
+			}
+		}
+		return this; // could not improve
+	}
+// SH}
 }

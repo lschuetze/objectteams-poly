@@ -30,6 +30,7 @@ import org.eclipse.core.resources.IProjectDescription;
 import org.eclipse.core.resources.IncrementalProjectBuilder;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.FileLocator;
+import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.Platform;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaProject;
@@ -40,6 +41,7 @@ import org.eclipse.jdt.core.compiler.CategorizedProblem;
 import org.eclipse.jdt.core.compiler.IProblem;
 import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.tests.model.ReconcilerTests;
+import org.eclipse.jdt.core.tests.util.AbstractCompilerTest;
 import org.eclipse.jdt.internal.compiler.CompilationResult;
 import org.eclipse.jdt.internal.compiler.Compiler;
 import org.eclipse.jdt.internal.compiler.DefaultErrorHandlingPolicies;
@@ -184,13 +186,48 @@ public class OTReconcilerTests extends ReconcilerTests {
 	}
 	
 // ===== End COPY_AND_PASTE
+	// --- support OT libraries: ---
+	boolean addOTtoLibrary = false;
+	protected void addOTLibrary(IJavaProject javaProject, String jarName, String sourceZipName, String[] pathAndContents, String compliance) throws CoreException, IOException {
+		boolean prev = this.addOTtoLibrary;
+		try {
+			this.addOTtoLibrary = true;
+			addLibrary(javaProject, jarName, sourceZipName, pathAndContents, compliance);
+		} finally {
+			this.addOTtoLibrary = prev;
+		}
+	}
+	@Override
+	protected String[] getJCL15PlusLibraryIfNeeded(String compliance) throws JavaModelException, IOException {
+		if (compliance.charAt(compliance.length()-1) >= '8' && (AbstractCompilerTest.getPossibleComplianceLevels() & AbstractCompilerTest.F_1_8) != 0) {
+			// ensure that the JCL 18 lib is setup (i.e. that the jclMin18.jar is copied)
+			setUpJCLClasspathVariables("1.8");
+			if (addOTtoLibrary) {
+				IPath otreMinJarPath = OTREContainer.getOtreMinJarPath();
+				return new String[] {getExternalJCLPathString("1.8"), otreMinJarPath.toString() };
+			}
+			return new String[] {getExternalJCLPathString("1.8")};
+		}
+		if (compliance.charAt(compliance.length()-1) >= '5' && (AbstractCompilerTest.getPossibleComplianceLevels() & AbstractCompilerTest.F_1_5) != 0) {
+			// ensure that the JCL 15 lib is setup (i.e. that the jclMin15.jar is copied)
+			setUpJCLClasspathVariables("1.5");
+			if (addOTtoLibrary)
+				return new String[] {getExternalJCLPathString("1.5"), "OTRE" };
+			return new String[] {getExternalJCLPathString("1.5")};
+		}
+		return null;
+	}
+	// ---
 	
 	protected IJavaProject createOTJavaProject(String projectName, String[] sourceFolders, String[] libraries, String output) throws CoreException {
 		return createOTJavaProject(projectName, sourceFolders, libraries, "1.5", output);
 	}
 
 	protected IJavaProject createOTJavaProject(String projectName, String[] sourceFolders, String[] libraries, String compliance, String output) throws CoreException {
-		IJavaProject javaProject = createJavaProject(projectName, sourceFolders, libraries, output, compliance);
+		return createOTJavaProject(projectName, sourceFolders, libraries, compliance, output, false);
+	}
+	protected IJavaProject createOTJavaProject(String projectName, String[] sourceFolders, String[] libraries, String compliance, String output, boolean useFullJcl) throws CoreException {
+		IJavaProject javaProject = createJavaProject(projectName, sourceFolders, libraries, output, compliance, useFullJcl);
 		IProjectDescription description = javaProject.getProject().getDescription();
 		description.setNatureIds(OTDTPlugin.createProjectNatures(description));
 		javaProject.getProject().setDescription(description, null);
@@ -2039,6 +2076,54 @@ public class OTReconcilerTests extends ReconcilerTests {
     				"The method m2() from the role type MyTeam2.R is not visible (OTJLD 1.2.1(e)).\n" + 
     				"----------\n",
 					this.problemRequestor);
+    	} finally {
+    		deleteProject("P");
+    	}
+    }
+
+    public void testTeamInJar1() throws CoreException, InterruptedException, IOException {
+    	try {
+			// Resources creation
+			IJavaProject p = createOTJavaProject("P", new String[] {"src"}, new String[] {"JCL18_FULL"}, "1.8", "bin", true/*fullJCL*/);
+			IProject project = p.getProject();
+			IProjectDescription prjDesc = project.getDescription();
+			prjDesc.setBuildSpec(OTDTPlugin.createProjectBuildCommands(prjDesc));
+			project.setDescription(prjDesc, null);
+
+			OTREContainer.initializeOTJProject(project);
+
+			addOTLibrary(p, "teams.jar", "teamsSrc.zip", new String[] {
+				"p/MyTeam.java",
+				"package p;\n" +
+				"public team class MyTeam {\n" +
+				"	protected class MyR {\n" +
+				"		void test() {}\n" +
+				"	}\n" +
+				"}\n"
+			}, "1.8");
+
+			this.createFolder("/P/src/p2");
+			String subTeamSourceString =	
+				"package p2;\n" +
+				"public team class SubTeam extends p.MyTeam {\n" +
+    			"	@Override\n" +
+    			"	protected class MyR {\n" +
+    			"		void test2() {\n" +
+    			"			test();\n" +
+    			"		}\n" +
+    			"	}\n" +
+				"}\n";
+			String teamFileName = "P/src/p2/SubTeam.java";
+			this.createFile(teamFileName, subTeamSourceString);
+
+			waitUntilIndexesReady();
+			this.workingCopies = new ICompilationUnit[1];
+
+			// Get first working copy and verify that there's no error
+			this.problemRequestor.initialize(subTeamSourceString.toCharArray());
+			this.workingCopies[0] = getCompilationUnit(teamFileName).getWorkingCopy(this.wcOwner, null);
+			assertNoProblem(subTeamSourceString.toCharArray(), this.workingCopies[0]);
+
     	} finally {
     		deleteProject("P");
     	}

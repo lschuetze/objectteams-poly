@@ -167,4 +167,15 @@ ITypeAnnotationWalker enrichWithExternalAnnotationsFor(ITypeAnnotationWalker wal
  */
 ExternalAnnotationStatus getExternalAnnotationStatus();
 
+//{ObjectTeams:
+/**
+ * Answers the "real" binary type for the given binary type.
+ * By default this is an identity transformation.
+ * Only IndexBinaryType will retrieve the bytes from disk to answer a fresh ClassFileReader.
+ * @throws Exception 
+ */
+default IBinaryType withClassBytes() throws Exception {
+	return this;
+}
+// SH}
 }
