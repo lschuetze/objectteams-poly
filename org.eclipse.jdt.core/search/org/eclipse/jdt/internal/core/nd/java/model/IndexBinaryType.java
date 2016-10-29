@@ -40,6 +40,7 @@ import org.eclipse.jdt.internal.compiler.impl.Constant;
 import org.eclipse.jdt.internal.compiler.lookup.BinaryTypeBinding.ExternalAnnotationStatus;
 import org.eclipse.jdt.internal.compiler.lookup.LookupEnvironment;
 import org.eclipse.jdt.internal.core.JarPackageFragmentRoot;
+import org.eclipse.jdt.internal.core.JavaModelManager;
 import org.eclipse.jdt.internal.core.nd.IReader;
 import org.eclipse.jdt.internal.core.nd.db.IString;
 import org.eclipse.jdt.internal.core.nd.java.JavaNames;
@@ -692,7 +693,11 @@ public class IndexBinaryType implements IBinaryType {
 			IJavaElement jJar = JavaCore.create(jarIdentifier);
 			if (jJar.exists()) {
 				ZipFile jarZip = ((JarPackageFragmentRoot) jJar).getJar();
-				return ClassFileReader.read(jarZip, fileInJarName);
+				try {
+					return ClassFileReader.read(jarZip, fileInJarName);
+				} finally {
+					JavaModelManager.getJavaModelManager().closeZipFile(jarZip);
+				}
 			}
 		}
 		return this; // could not improve
