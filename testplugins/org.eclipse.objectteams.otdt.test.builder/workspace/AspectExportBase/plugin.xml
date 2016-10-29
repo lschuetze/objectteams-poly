@@ -17,7 +17,7 @@
          </menu>
          <action
                label="&amp;Sample Action"
-               class="aeb"
+               class="aeb.actions.SampleAction"
                tooltip="Hello, Eclipse world"
                menubarPath="sampleMenu/sampleGroup"
                toolbarPath="sampleGroup"
