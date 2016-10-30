@@ -642,7 +642,11 @@ private void reportHierarchy(IType focus, TypeDeclaration focusLocalType, Refere
 				    fullyQualifiedName = TypeHelper.getQualifiedRoleSplitName(focus).toCharArray();
 				}
 				catch (JavaModelException ex) {
-				    Util.log(ex, "Error getting role-split name of type"); //$NON-NLS-1$
+					Util.log(new Status(
+							IStatus.WARNING,
+							JavaCore.PLUGIN_ID,
+							"Error getting role-split name of type", //$NON-NLS-1$
+							ex));
 				}
 //carp}
 				setFocusType(CharOperation.splitOn('.', fullyQualifiedName));
