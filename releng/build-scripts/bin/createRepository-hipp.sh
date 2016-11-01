@@ -205,9 +205,10 @@ then
 	echo "====Step 11: promote to ${DEST}===="
 	if [ -d ${UPDATES_BASE}/${2} ]
 	then
-		mkdir ${DEST}
-		cp -pr ${UPDATES_BASE}/${1}/* ${DEST}/ && cp -pr * ${DEST}/
-		find -type d ${DEST} -exec /bin/ls -ld {} \;
+		mkdir ${DEST} && \
+			cp -pr ${UPDATES_BASE}/${1}/* ${DEST}/ && \
+			cp -pr * ${DEST}/ && \
+		find ${DEST} -type d -exec /bin/ls -ld {} \;
 	else
 		echo "DEST NOT FOUND"
 	fi
