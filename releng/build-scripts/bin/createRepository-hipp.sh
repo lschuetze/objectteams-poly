@@ -1,14 +1,20 @@
 #!/bin/sh
 
-# TO BE SUPPLIED VIA ENV:
-# JAVA5
-# SIGN (unset or nosign)
-# PROMOTE (unset or true)
+# OPTIONAL VARIABLES TO BE SUPPLIED VIA ENV:
+# 	SIGN (unset or nosign)
+# 	PROMOTE (unset or true)
+
 BASE=`pwd`
-STAGINGBASE=/opt/public/download-staging.priv/tools/objectteams
-UPDATES_BASE=/home/data/httpd/download.eclipse.org/objectteams/updates
+
+# ABSOLUTE PATHS:
+export STAGINGBASE=/opt/public/download-staging.priv/tools/objectteams
+export UPDATES_BASE=/home/data/httpd/download.eclipse.org/objectteams/updates
+export JAVA5=${JAVA_HOME}/../jdk1.5.0-latest
+
+# RELATIVE PATHS:
 BUILD=${BASE}/releng/build-scripts/build
 METADATA=${BASE}/metadata
+
 export JAR_PROCESSOR_JAVA=java8
 
 # Find the master repository to build upon:
@@ -166,7 +172,7 @@ xsltproc  -o content.xml --stringparam version ${JDTVERSION} \
 ls -ltr *\.*
 
 echo "====Step 6: archive raw meta data===="
-mkdir ${METADATA}/$OTDTVERSION
+mkdir -p ${METADATA}/$OTDTVERSION
 cp *.xml ${METADATA}/$OTDTVERSION
 ls -ltr ${METADATA}/$OTDTVERSION/*.xml
 
