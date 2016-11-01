@@ -189,7 +189,7 @@ ls -ltr *\.*
 echo "====Step 10: cleanup: remove symbolic links===="
 find . -type l -exec /bin/rm {} \;
 
-if [ ${PROMOTE} == "true" ]
+if [ "${PROMOTE}" == "true" ]
 then
 	if [ -d ${UPDATES_BASE}/${2} ]
 	then
