@@ -89,22 +89,25 @@ echo "NAME          = ${NAME}"
 echo "====Step 1: zip and request signing===="
 cd ${BASE}/testrun/updateSite
 JARS=`find . -name \*.jar -type f`
-/bin/rm ${STAGINGBASE}/in/otdt.jar
-zip ${STAGINGBASE}/in/otdt.jar ${JARS}
 if [ "${SIGN}" == "nosign" ]
 then
+	OTDTJAR=../otdt.jar
+	/bin/rm ${OTDTJAR}
+	zip ${OTDTJAR} ${JARS}
     echo "SKIPING SIGNING"
-    /bin/mv ${STAGINGBASE}/in/otdt.jar ${STAGINGBASE}/out/otdt.jar
 else
-    /bin/rm ${STAGINGBASE}/out/otdt.jar
+	/bin/rm ${STAGINGBASE}/in/otdt.jar
+	zip ${STAGINGBASE}/in/otdt.jar ${JARS}
+    OTDTJAR=${STAGINGBASE}/out/otdt.jar
+    /bin/rm ${OTDTJAR}
     sign ${STAGINGBASE}/in/otdt.jar nomail ${STAGINGBASE}/out
+	until [ -r ${OTDTJAR} ]
+	do
+    	sleep 10
+    	echo -n "."
+	done
+	echo "Signing completed"
 fi
-until [ -r ${STAGINGBASE}/out/otdt.jar ]
-do
-    sleep 10
-    echo -n "."
-done
-echo "Signing completed"
 
 
 echo "====Step 2: fill new repository===="
@@ -124,7 +127,8 @@ else
         mkdir plugins
         cp ${BASE}/testrun/updateSite/plugins/org.apache.bcel* plugins/
 fi
-unzip -n ${STAGINGBASE}/out/otdt.jar
+unzip -n ${OTDTJAR}
+/bin/rm ${OTDTJAR}
 
 LOCATION=${BASE}/stagingRepo
 echo "LOCATION  = ${LOCATION}"
