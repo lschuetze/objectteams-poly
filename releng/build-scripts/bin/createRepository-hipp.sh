@@ -94,7 +94,7 @@ then
 	OTDTJAR=../otdt.jar
 	/bin/rm ${OTDTJAR}
 	zip ${OTDTJAR} ${JARS}
-    echo "SKIPING SIGNING"
+    echo "SKIPPING SIGNING"
 else
 	/bin/rm ${STAGINGBASE}/in/otdt.jar
 	zip ${STAGINGBASE}/in/otdt.jar ${JARS}
