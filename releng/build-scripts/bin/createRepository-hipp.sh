@@ -73,6 +73,11 @@ then
     exit 2
 fi
 OTDTVERSION=`cat ${BASE}/testrun/build-root/src/finalFeaturesVersions.properties|grep "objectteams.otdt="|cut -d '=' -f 2`
+if [ "${OTDTVERSION}" == "" ]
+then
+	echo "finalFeaturesVersions.properties not found, maybe build hasn't run successfully?"
+	exit 3
+fi 
 echo "OTDTVERSION is $OTDTVERSION"
 
 # Configure for calling various p2 applications:
@@ -200,8 +205,9 @@ then
 	echo "====Step 11: promote to ${DEST}===="
 	if [ -d ${UPDATES_BASE}/${2} ]
 	then
-		cp -pr ${UPDATES_BASE}/${1} ${DEST} && cp -pr * ${DEST}/
-		ls -lR ${DEST}
+		mkdir ${DEST}
+		cp -pr ${UPDATES_BASE}/${1}/* ${DEST}/ && cp -pr * ${DEST}/
+		find -type d ${DEST} -exec /bin/ls -ld {} \;
 	else
 		echo "DEST NOT FOUND"
 	fi
