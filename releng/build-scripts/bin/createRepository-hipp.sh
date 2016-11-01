@@ -195,13 +195,15 @@ find . -type l -exec /bin/rm {} \;
 
 if [ "${PROMOTE}" == "true" ]
 then
+	BUILDID=`echo $OTDTVERSION | cut -d '.' -f 4`
+	DEST=${UPDATES_BASE}/${2}/${BUILDID}
+	echo "====Step 11: promote to ${DEST}===="
 	if [ -d ${UPDATES_BASE}/${2} ]
 	then
-		BUILDID=`echo $OTDTVERSION | cut -d '.' -f 4`
-		DEST=${UPDATES_BASE}/${2}/${BUILDID}
-		cp -pr ${UPDATES_BASE}/${1} ${DEST}
-		cp -pr * ${DEST}/
+		cp -pr ${UPDATES_BASE}/${1} ${DEST} && cp -pr * ${DEST}/
 		ls -lR ${DEST}
+	else
+		echo "DEST NOT FOUND"
 	fi
 fi
 echo "====DONE===="
