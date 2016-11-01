@@ -1,5 +1,9 @@
 #!/bin/sh
 
+# TO BE SUPPLIED VIA ENV:
+# JAVA5
+# SIGN (unset or nosign)
+# PROMOTE (unset or true)
 BASE=`pwd`
 STAGINGBASE=/opt/public/download-staging.priv/tools/objectteams
 UPDATES_BASE=/home/data/httpd/download.eclipse.org/objectteams/updates
@@ -87,11 +91,10 @@ cd ${BASE}/testrun/updateSite
 JARS=`find . -name \*.jar -type f`
 /bin/rm ${STAGINGBASE}/in/otdt.jar
 zip ${STAGINGBASE}/in/otdt.jar ${JARS}
-if [ "$2" == "-nosign" ]
+if [ "${SIGN}" == "nosign" ]
 then
     echo "SKIPING SIGNING"
     /bin/mv ${STAGINGBASE}/in/otdt.jar ${STAGINGBASE}/out/otdt.jar
-    shift
 else
     /bin/rm ${STAGINGBASE}/out/otdt.jar
     sign ${STAGINGBASE}/in/otdt.jar nomail ${STAGINGBASE}/out
@@ -186,4 +189,15 @@ ls -ltr *\.*
 echo "====Step 10: cleanup: remove symbolic links===="
 find . -type l -exec /bin/rm {} \;
 
+if [ ${PROMOTE} == "true" ]
+then
+	if [ -d ${UPDATES_BASE}/${2} ]
+	then
+		BUILDID=`echo $OTDTVERSION | cut -d '.' -f 4`
+		DEST=${UPDATES_BASE}/${2}/${BUILDID}
+		cp -pr ${UPDATES_BASE}/${1} ${DEST}
+		cp -pr * ${DEST}/
+		ls -lR ${DEST}
+	fi
+fi
 echo "====DONE===="
