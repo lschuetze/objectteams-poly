@@ -91,7 +91,7 @@ cd ${BASE}/testrun/updateSite
 JARS=`find . -name \*.jar -type f`
 if [ "${SIGN}" == "nosign" ]
 then
-	OTDTJAR=../otdt.jar
+	OTDTJAR=${BASE}/testrun/otdt.jar
 	/bin/rm ${OTDTJAR}
 	zip ${OTDTJAR} ${JARS}
     echo "SKIPPING SIGNING"
