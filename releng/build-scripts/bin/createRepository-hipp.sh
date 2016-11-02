@@ -214,9 +214,11 @@ then
 		mkdir ${DEST} && \
 			cp -pr ${UPDATES_BASE}/${1}/* ${DEST}/ && \
 			cp -pr * ${DEST}/ && \
-		find ${DEST} -type d -exec /bin/ls -ld {} \;
+			chmod -R g+w ${DEST} && \
+			find ${DEST} -type d -exec /bin/ls -ld {} \;
+		ls -latr ${UPDATES_BASE}/${2}
 	else
-		echo "DEST NOT FOUND"
+		echo "${UPDATES_BASE}/${2} not found or not a directory"
 	fi
 fi
 echo "====DONE===="
