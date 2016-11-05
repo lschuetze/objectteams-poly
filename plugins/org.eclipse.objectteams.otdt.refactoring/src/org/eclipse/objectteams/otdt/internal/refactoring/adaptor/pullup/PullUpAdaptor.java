@@ -627,7 +627,7 @@ public team class PullUpAdaptor {
 		}
 
 		/** during createChangeManager we add callouts to the declaration nodes to be removed. */
-		protected team class HierarchyProcRole playedBy HierarchyProcessor {
+		protected class HierarchyProcRole playedBy HierarchyProcessor {
 			// Note: when defined in role PullUpRefactoringProcessorRole this currently triggers a VerifyError
 			
 			// === for removal of old callout declarations: ===

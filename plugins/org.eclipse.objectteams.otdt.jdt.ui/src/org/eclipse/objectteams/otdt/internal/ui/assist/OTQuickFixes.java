@@ -302,6 +302,7 @@ public team class OTQuickFixes  {
 	/** 
 	 * This role helps the MappingProposalSubProcessor for unresolved method specs.
 	 * Its behavior is initiated by calling {@link OTQuickFixes#registerNewMethodCorrectionProposal}.
+	 * No aspectBinding needed because no inner bound roles.
 	 */
 	protected team class NewMethodCompletionProposal
 		extends AbstractMethodCompletionProposal

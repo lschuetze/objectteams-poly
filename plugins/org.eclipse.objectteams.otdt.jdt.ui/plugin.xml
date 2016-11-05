@@ -50,6 +50,14 @@
                class="org.eclipse.objectteams.otdt.internal.ui.assist.CompletionAdaptor"
                icon="platform:/plugin/org.eclipse.objectteams.otdt.ui/icons/ot/team_obj.gif"/>
          <team
+               activation="NONE"
+               class="org.eclipse.objectteams.otdt.internal.ui.assist.CompletionAdaptor$CreateMethodMappingCompletionProposal"
+               icon="platform:/plugin/org.eclipse.objectteams.otdt.ui/icons/ot/team_obj.gif"/>
+         <team
+               activation="NONE"
+               class="org.eclipse.objectteams.otdt.internal.ui.assist.CompletionAdaptor$CalloutToFieldCompletionProposal"
+               icon="platform:/plugin/org.eclipse.objectteams.otdt.ui/icons/ot/team_obj.gif"/>
+         <team
                activation="ALL_THREADS"
                class="org.eclipse.objectteams.otdt.internal.ui.search.FindActionAdaptor"
                icon="platform:/plugin/org.eclipse.objectteams.otdt.ui/icons/ot/team_obj.gif"/>
@@ -135,11 +143,6 @@
         <team
               activation="NONE"
               class="org.eclipse.objectteams.otdt.internal.ui.util.OTStubUtility"
-              icon="platform:/plugin/org.eclipse.objectteams.otdt.ui/icons/ot/team_obj.gif">
-        </team>
-        <team
-              activation="NONE"
-              class="org.eclipse.objectteams.otdt.internal.ui.assist.CompletionAdaptor$CreateMethodMappingCompletionProposal"
               icon="platform:/plugin/org.eclipse.objectteams.otdt.ui/icons/ot/team_obj.gif">
         </team>
         <team
