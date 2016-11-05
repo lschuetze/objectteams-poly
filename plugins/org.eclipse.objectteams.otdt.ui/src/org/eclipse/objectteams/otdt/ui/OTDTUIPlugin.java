@@ -39,6 +39,7 @@ import org.eclipse.objectteams.otdt.internal.ui.callinmarkers.RoleBindingChanged
 import org.eclipse.objectteams.otdt.internal.ui.preferences.GeneralPreferences;
 import org.eclipse.ui.IWorkbenchPage;
 import org.eclipse.ui.IWorkbenchWindow;
+import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.plugin.AbstractUIPlugin;
 import org.osgi.framework.BundleContext;
 
@@ -121,9 +122,10 @@ public class OTDTUIPlugin extends AbstractUIPlugin implements OTDTUIPluginConsta
         
         registerAdapter();
 
-        addJavaElementChangedListeners();
-
-        getCallinMarkerCreator(); // initialize
+        if (PlatformUI.isWorkbenchRunning()) { // not running during headless tests, e.g.
+        	addJavaElementChangedListeners();
+        	getCallinMarkerCreator(); // initialize
+        }
     }
     
     public void stop(BundleContext context) throws Exception
