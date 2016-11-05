@@ -52,7 +52,6 @@ import org.eclipse.osgi.util.NLS;
  * IRoleType implementation
  * 
  * @author jwloka
- * @version $Id: RoleType.java 23417 2010-02-03 20:13:55Z stephan $
  */
 public class RoleType extends OTType implements IRoleType
 {
@@ -185,7 +184,6 @@ public class RoleType extends OTType implements IRoleType
 							new Object[] { getTypeQualifiedName('.') }),
 						jex
             			);
-            	JavaCore.getJavaCore().getLog().log(status);
             	throw new JavaModelException(new CoreException(status));
             }
 		}
