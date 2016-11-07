@@ -156,7 +156,7 @@ public abstract class AbstractCreateDispatchCodeAdapter extends
 	}
 
 	private LabelNode findBreakLabel(InsnList instructions) {
-		for (int i = instructions.size() - 1; i >= 0; i--) {
+		for (int i = instructions.size() - 2; i >= 0; i--) { // skip terminating label (for local variable range)
 			AbstractInsnNode node = instructions.get(i);
 			if (node.getType() == AbstractInsnNode.LABEL) {
 				return (LabelNode) node;

@@ -83,6 +83,10 @@ public class CreateSwitchAdapter extends AbstractTransformableClassNode {
 		addInstructionForDefaultLabel(methodNode);
 		
 		addPostSwitchInstructions(methodNode);
+
+		if ((methodNode.access & Opcodes.ACC_STATIC) == 0)
+			addThisVariable(methodNode);
+
 		methodNode.maxStack = getMaxStack();
 		return true;
 	}

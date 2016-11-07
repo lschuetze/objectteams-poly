@@ -162,6 +162,7 @@ public abstract class AbstractTransformableClassNode extends ClassNode {
 				}
 				instructions.insert(prevNode, label);
 				instructions.insert(label, newInstructions);
+				break;
 			}	
 		}
 		if (lSwitch == null) {
