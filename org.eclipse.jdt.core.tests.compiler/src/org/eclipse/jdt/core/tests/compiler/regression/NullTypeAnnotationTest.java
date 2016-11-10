@@ -35,7 +35,7 @@ public class NullTypeAnnotationTest extends AbstractNullAnnotationTest {
 	// Static initializer to specify tests subset using TESTS_* static variables
 	// All specified tests which do not belong to the class are skipped...
 	static {
-//			TESTS_NAMES = new String[] { "testBug456497" };
+			TESTS_NAMES = new String[] { "testBug497698" };
 //			TESTS_NUMBERS = new int[] { 561 };
 //			TESTS_RANGE = new int[] { 1, 2049 };
 	}
@@ -12469,6 +12469,14 @@ public void testBug497698() {
 			"",
 		}, 
 		getCompilerOptions(),
+//{ObjectTeams: different compile order causes method to be removed from STB
+		"----------\n" + 
+		"1. ERROR in test\\And.java (at line 8)\n" + 
+		"	Or.create();\n" + 
+		"	   ^^^^^^\n" + 
+		"The method create() is undefined for the type Or\n" + 
+		"----------\n" + 
+// SH}
 		"----------\n" + 
 		"1. ERROR in test\\Or.java (at line 7)\n" + 
 		"	public static <V> Or<V> create() {\n" + 
@@ -12512,6 +12520,13 @@ public void testBug497698raw() {
 		"	    ^^\n" + 
 		"Or is a raw type. References to generic type Or<D,V> should be parameterized\n" + 
 		"----------\n" + 
+//{ObjectTeams: different compile order causes method to be removed from STB
+		"2. ERROR in test\\And.java (at line 8)\n" + 
+		"	new Or().create();\n" + 
+		"	         ^^^^^^\n" + 
+		"The method create() is undefined for the type Or\n" + 
+		"----------\n" + 
+// SH}
 		"----------\n" + 
 		"1. ERROR in test\\Or.java (at line 7)\n" + 
 		"	public <V1> Or<V1> create() {\n" + 
@@ -12557,6 +12572,13 @@ public void testBug497698nestedinraw() {
 		"	                             ^^^^\n" + 
 		"X.Or is a raw type. References to generic type X<Z>.Or<D,V> should be parameterized\n" + 
 		"----------\n" + 
+//{ObjectTeams: different compile order causes method to be removed from STB
+		"2. ERROR in test\\And.java (at line 8)\n" + 
+		"	x.create();\n" + 
+		"	  ^^^^^^\n" + 
+		"The method create() is undefined for the type X.Or\n" + 
+		"----------\n" +
+// SH}
 		"----------\n" + 
 		"1. ERROR in test\\X.java (at line 8)\n" + 
 		"	public <V1> Or<V1> create() {\n" + 
