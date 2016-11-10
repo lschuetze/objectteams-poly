@@ -165,7 +165,7 @@ public class SourceTypeConverter extends TypeConverter {
 		/* convert package and imports */
 		String[] packageName = ((PackageFragment) cuHandle.getParent()).names;
 //{ObjectTeams: try resilience (see https://bugs.eclipse.org/407223)
-		if (packageName.length == 0) {
+		if (packageName.length == 0 && isOTJ) { // see also https://bugs.eclipse.org/452039
 			IPackageDeclaration[] pDecls = cuHandle.getPackageDeclarations();
 			if (pDecls != null && pDecls.length > 0)
 				packageName = pDecls[0].getElementName().split("\\."); //$NON-NLS-1$
