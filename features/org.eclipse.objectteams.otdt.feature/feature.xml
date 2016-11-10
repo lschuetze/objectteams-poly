@@ -162,7 +162,7 @@ Project Leader:
          id="org.eclipse.jdt.compiler.apt"
          download-size="0"
          install-size="0"
-         version="0.0.0"
+         version="1.3.0.qualifier"
          fragment="true"
          unpack="false"/>
 
@@ -170,7 +170,7 @@ Project Leader:
          id="org.eclipse.jdt.compiler.tool"
          download-size="0"
          install-size="0"
-         version="0.0.0"
+         version="1.2.0.qualifier"
          fragment="true"
          unpack="false"/>
 

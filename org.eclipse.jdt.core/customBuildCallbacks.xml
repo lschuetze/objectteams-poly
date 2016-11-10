@@ -36,13 +36,7 @@
 	<!-- Available parameters :                                                -->
 	<!--   build.result.folder - folder to contain the build results           -->
 	<!-- ===================================================================== -->
-	<target name="post.build.jars">		<!-- SH for OT: if we are running within a full build, fetch the build labels: --> 		<property file="${basedir}/../../label.properties"/>		<!-- HS -->		<property name="buildLabel" value="global" />
-		<property name="build.result.folder" value="${basedir}" />
-		<property name="postingDirectory" value="${build.result.folder}/ecj" />
-		<property name="dest" value="${postingDirectory}/${buildLabel}" />
-		<echo message="bundleVersion=${bundleVersion}"/>
-		<ant antfile="${basedir}/scripts/export-ecj.xml" target="export"/>
-	</target>
+	<target name="post.build.jars">	</target>
 	
 	<!-- ===================================================================== -->
 	<!-- Steps to do before the target build.sources                           -->
@@ -89,9 +83,6 @@
 	</target>
 
 	<target name="post.compile.@dot">
-		<ant antfile="${basedir}/scripts/export-ecj.xml" target="extract-batch-compiler"/>
-		<ant antfile="${basedir}/scripts/export-ecj.xml" target="extract-_jsr199"/>
-		<ant antfile="${basedir}/scripts/export-ecj.xml" target="extract-_jsr269"/>
 	</target>
 	
 	<!-- ===================================================================== -->
@@ -115,6 +106,19 @@
 	<!--   target.folder - destination folder                                  -->
 	<!-- ===================================================================== -->
 	<target name="pre.gather.bin.parts">
+		<ant antfile="${basedir}/scripts/export-ecj.xml" target="extract-batch-compiler"/>
+		<ant antfile="${basedir}/scripts/export-ecj.xml" target="extract-_jsr199"/>
+		<ant antfile="${basedir}/scripts/export-ecj.xml" target="extract-_jsr269"/>
+		
+		<!-- SH for OT: if we are running within a full build, fetch the build labels: --> 
+		<property file="${basedir}/../../label.properties"/>
+		<!-- HS -->
+		<property name="buildLabel" value="global" />
+		<property name="build.result.folder" value="${basedir}" />
+		<property name="postingDirectory" value="${build.result.folder}/ecj" />
+		<property name="dest" value="${postingDirectory}/${buildLabel}" />
+		<echo message="bundleVersion=${bundleVersion}"/>
+		<ant antfile="${basedir}/scripts/export-ecj.xml" target="export"/>
 	</target>
 		
 	<!-- ===================================================================== -->
