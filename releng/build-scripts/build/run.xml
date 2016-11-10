@@ -253,7 +253,8 @@ path to map file (with substitutions):
 		    	<arg value="-DfetchCacheLocation=${fetchCacheLocation}"/>
 	            <arg value="-Declipse-app.tgz=${eclipse-app.tgz}"/>
 	            <arg value="-Declipse.tests.zip=${eclipse.tests.zip}"/>
-				<arg value="-Declipse.sdk.qualifier=${eclipse.sdk.qualifier}"/>
+				<arg value="-Djdt.compiler.apt=${eclipse.compiler.apt}"/>
+				<arg value="-Djdt.compiler.tool=${eclipse.compiler.tool}"/>
 	            <!--arg value="-verbose" /-->
 	            <jvmarg value="${vm.args}"/>
         </java>
@@ -337,7 +338,8 @@ path to map file (with substitutions):
 				<arg value="-Ddo.build.all=${do.build.all}"/>
 				<arg value="-Declipse-app.tgz=${eclipse-app.tgz}"/>
 				<arg value="-Declipse.tests.zip=${eclipse.tests.zip}"/>
-				<arg value="-Declipse.sdk.qualifier=${eclipse.sdk.qualifier}"/>
+				<arg value="-Djdt.compiler.apt=${eclipse.compiler.apt}"/>
+				<arg value="-Djdt.compiler.tool=${eclipse.compiler.tool}"/>
 				<!--arg value="-verbose" /-->
 				<jvmarg value="${vm.args}"/>
 				<!-- arg value="${verboseAnt}"/ -->
