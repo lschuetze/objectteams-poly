@@ -77,7 +77,8 @@
 			</fileset>
 		</copy>
 <!-- {ObjectTeams: add apt and tool: -->
-		<property name="compiler.apt" value="${basedir}/../../../eclipse/plugins/org.eclipse.jdt.compiler.apt_${eclipse.sdk.qualifier}.jar"/>
+		<property name="version.compiler.apt" value="1.3.0.${eclipse.sdk.qualifier}"/>
+		<property name="compiler.apt" value="${build.root.dir}/eclipse/plugins/org.eclipse.jdt.compiler.apt_${version.compiler.apt}.jar"/>
 		<echo message="compiler.apt=${compiler.apt}"/>
 		<unzip src="${compiler.apt}" dest="${ecj-temp-folder}">
 		    <patternset>
@@ -85,7 +86,8 @@
 		        <include name="**/*.properties"/>
 		    </patternset>
 		</unzip>
-		<property name="compiler.tool" value="${build.root.dir}/eclipse/plugins/org.eclipse.jdt.compiler.tool_${eclipse.sdk.qualifier}.jar"/>
+		<property name="version.compiler.tool" value="1.2.0.${eclipse.sdk.qualifier}"/>
+		<property name="compiler.tool" value="${build.root.dir}/eclipse/plugins/org.eclipse.jdt.compiler.tool_${version.compiler.tool}.jar"/>
 		<echo message="compiler.tool=${compiler.tool}"/>
 		<unzip src="${compiler.tool}" dest="${ecj-temp-folder}">
 		    <patternset>
