@@ -16,12 +16,20 @@ fi
 PDEBUILD=eclipse/plugins/org.eclipse.pde.build_.*/about.html
 LAUNCHER=eclipse/plugins/org.eclipse.equinox.launcher_
 JDTFEATURE=eclipse/features/org.eclipse.jdt_.*/feature.xml
+JDT_COMPILER_APT=eclipse/plugins/org.eclipse.jdt.compiler.apt_
+JDT_COMPILER_TOOL=eclipse/plugins/org.eclipse.jdt.compiler.tool_
 
-for VERSION in `tar tzvf $SDK | egrep "${PDEBUILD}|${LAUNCHER}|${JDTFEATURE}" | sed -e "s#.*eclipse/[^/]*/\([^/]*\).*#\1#"`
+for VERSION in `tar tzvf $SDK | egrep "${PDEBUILD}|${LAUNCHER}|${JDTFEATURE}|${JDT_COMPILER_APT}|${JDT_COMPILER_TOOL}" | sed -e "s#.*eclipse/[^/]*/\([^/]*\).*#\1#"`
 do
 	case $VERSION in
 		org.eclipse.pde.build*)
 			PDEBUILD_VERSION=$VERSION
+			;;
+		org.eclipse.jdt.compiler.apt*)
+			JDT_COMPILER_APT_VERSION=$VERSION
+			;;
+		org.eclipse.jdt.compiler.tool*)
+			JDT_COMPILER_TOOL_VERSION=$VERSION
 			;;
 		org.eclipse.jdt*)
 			JDT_VERSION_ALL=`echo $VERSION|grep jdt | sed -e 's/org.eclipse.jdt_\(.*\)/\1/'`
@@ -44,6 +52,11 @@ echo
 echo "# for patching our patch feature to match this version with any suffix:"
 echo "jdt.feature.version=${JDT_VERSIONA}${JDT_VERSIONB}"
 echo "jdt.feature.version.next=${JDT_VERSIONA}${JDT_VERSIONB_NEXT}"
+echo
+echo "# jdt.core fragments for extracting pre-built classes and properties:"
+echo "jdt.compiler.apt=${JDT_COMPILER_APT_VERSION}"
+echo "jdt.compiler.tool=${JDT_COMPILER_TOOL_VERSION}"
+echo "============================"
 
 echo
 echo "Version for org.eclipse.objectteams.otdt.core.patch.feature:"
