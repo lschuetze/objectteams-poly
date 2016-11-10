@@ -45,13 +45,9 @@
 	</target>
 	
 	<target name="extract-batch-compiler" depends="init">
-		<echo message="basedir=${basedir}"/>
-		<echo message="target.folder=${target.folder}"/>
 		<property name="target.folder" value="${basedir}/bin"/>
-		<echo message="target.folder=${target.folder} bundleVersionQualifier=${bundleVersionQualifier}"/>
 		<replace file="${target.folder}/org/eclipse/jdt/internal/compiler/batch/messages.properties" token="bundle_qualifier" value="${bundleVersionQualifer}"/>
 <!-- {ObjectTeams: more replacement (strategy no longer maintained in JDT?) -->
-		<echo message="next: replace #2"/>
 		<replace file="${target.folder}/org/eclipse/jdt/internal/compiler/batch/messages.properties" token="bundle_version" value="${bundleVersionMajor}.${bundleVersionMinor}.${bundleVersionService}"/>
 <!-- SH}-->
 		<echo message="Extract .class file and properties for the batch compiler" />
@@ -80,11 +76,29 @@
 				<exclude name="org/eclipse/jdt/internal/compiler/parser/SourceTypeConverter*.class"/>
 			</fileset>
 		</copy>
+<!-- {ObjectTeams: add apt and tool: -->
+		<property name="compiler.apt" value="${basedir}/../../eclipse/plugins/org.eclipse.jdt.compiler.apt_${eclipse.sdk.qualifier}.jar"/>
+		<echo message="compiler.apt=${compiler.apt}"/>
+		<unzip src="${compiler.apt}" dest="${ecj-temp-folder}">
+		    <patternset>
+		        <include name="**/*.class"/>
+		        <include name="**/*.properties"/>
+		    </patternset>
+		</unzip>
+		<property name="compiler.tool" value="${basedir}/../../eclipse/plugins/org.eclipse.jdt.compiler.tool_${eclipse.sdk.qualifier}.jar"/>
+		<echo message="compiler.tool=${compiler.tool}"/>
+		<unzip src="${compiler.tool}" dest="${ecj-temp-folder}">
+		    <patternset>
+		        <include name="**/*.class"/>
+		        <include name="**/*.properties"/>
+		    </patternset>
+		</unzip>
+<!-- SH} -->
 	</target>
 
 	<target name="extract-_jsr199" depends="init">
 		<property name="target.folder" value="${basedir}/../org.eclipse.jdt.compiler.tool/bin"/>
-		<echo message="Extract .class file and properties for the jsr199 from ${target.folder}" />
+		<echo message="Extract .class file and properties for the jsr199" />
 		<copy todir="${ecj-temp-folder}" failonerror="false">
 			<fileset dir="${target.folder}"/>
 		</copy>
@@ -93,7 +107,7 @@
 	<target name="extract-_jsr269" depends="init">
 		<property name="jsr_project" value="org.eclipse.jdt.compiler.apt"/>
 		<property name="target.folder" value="${basedir}/../org.eclipse.jdt.compiler.apt/bin"/>
-		<echo message="Extract .class file and properties for the jsr269 from ${target.folder}" />
+		<echo message="Extract .class file and properties for the jsr269" />
 		<copy todir="${ecj-temp-folder}" failonerror="false">
 			<fileset dir="${target.folder}"/>
 		</copy>
