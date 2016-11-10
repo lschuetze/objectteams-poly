@@ -83,3 +83,7 @@ plugin@org.eclipse.core.filebuffers.tests=GIT,tag=@SDK_QUALIFIER@,repo=git://git
 !-- jdt.annotation: --!
 plugin@org.eclipse.jdt.annotation,2.1.0=GIT,tag=@SDK_QUALIFIER@,repo=git://git.eclipse.org/gitroot/jdt/eclipse.jdt.core.git,path=org.eclipse.jdt.annotation
 plugin@org.eclipse.jdt.annotation,1.1.100=GIT,tag=@SDK_QUALIFIER@,repo=git://git.eclipse.org/gitroot/jdt/eclipse.jdt.core.git,path=org.eclipse.jdt.annotation_v1
+
+!-- jdt.core fragments contributing to ecotj.jar: --!
+fragment@org.eclipse.jdt.compiler.apt=GIT,tag=@SDK_QUALIFIER@,repo=git://git.eclipse.org/gitroot/jdt/eclipse.jdt.core.git,path=org.eclipse.jdt.compiler.apt
+fragment@org.eclipse.jdt.compiler.tool=GIT,tag=@SDK_QUALIFIER@,repo=git://git.eclipse.org/gitroot/jdt/eclipse.jdt.core.git,path=org.eclipse.jdt.compiler.tool

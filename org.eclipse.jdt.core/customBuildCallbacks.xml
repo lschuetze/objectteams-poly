@@ -90,6 +90,8 @@
 
 	<target name="post.compile.@dot">
 		<ant antfile="${basedir}/scripts/export-ecj.xml" target="extract-batch-compiler"/>
+		<ant antfile="${basedir}/scripts/export-ecj.xml" target="extract-_jsr199"/>
+		<ant antfile="${basedir}/scripts/export-ecj.xml" target="extract-_jsr269"/>
 	</target>
 	
 	<!-- ===================================================================== -->

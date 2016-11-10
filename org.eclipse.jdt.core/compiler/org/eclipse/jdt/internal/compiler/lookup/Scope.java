@@ -4812,7 +4812,7 @@ public abstract class Scope {
 		} else {
 
 			// JLS7 implementation  
-			
+	
 			InvocationSite tieBreakInvocationSite = new InvocationSite() {
 				public TypeBinding[] genericTypeArguments() { return null; } // ignore genericTypeArgs
 				public boolean isSuperAccess() { return invocationSite.isSuperAccess(); }
