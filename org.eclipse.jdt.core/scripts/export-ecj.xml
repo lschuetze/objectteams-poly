@@ -45,9 +45,13 @@
 	</target>
 	
 	<target name="extract-batch-compiler" depends="init">
+		<echo message="basedir=${basedir}"/>
+		<echo message="target.folder=${target.folder}"/>
 		<property name="target.folder" value="${basedir}/bin"/>
+		<echo message="target.folder=${target.folder} bundleVersionQualifier=${bundleVersionQualifier}"/>
 		<replace file="${target.folder}/org/eclipse/jdt/internal/compiler/batch/messages.properties" token="bundle_qualifier" value="${bundleVersionQualifer}"/>
 <!-- {ObjectTeams: more replacement (strategy no longer maintained in JDT?) -->
+		<echo message="next: replace #2"/>
 		<replace file="${target.folder}/org/eclipse/jdt/internal/compiler/batch/messages.properties" token="bundle_version" value="${bundleVersionMajor}.${bundleVersionMinor}.${bundleVersionService}"/>
 <!-- SH}-->
 		<echo message="Extract .class file and properties for the batch compiler" />
