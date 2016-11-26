@@ -860,6 +860,7 @@ public void _test011_problem_categories() {
 		expectedProblemAttributes.put("NotVisibleMethod", new ProblemAttributes(CategorizedProblem.CAT_MEMBER));
 		expectedProblemAttributes.put("NotVisibleType", new ProblemAttributes(CategorizedProblem.CAT_TYPE));
 		expectedProblemAttributes.put("NullableFieldReference", new ProblemAttributes(CategorizedProblem.CAT_POTENTIAL_PROGRAMMING_PROBLEM));
+		expectedProblemAttributes.put("NullAnnotationAtQualifyingType", new ProblemAttributes(CategorizedProblem.CAT_SYNTAX));
 		expectedProblemAttributes.put("NullAnnotationUnsupportedLocation", new ProblemAttributes(CategorizedProblem.CAT_INTERNAL));
 		expectedProblemAttributes.put("NullAnnotationUnsupportedLocationAtType", new ProblemAttributes(CategorizedProblem.CAT_INTERNAL));
 		expectedProblemAttributes.put("NullExpressionReference", new ProblemAttributes(CategorizedProblem.CAT_POTENTIAL_PROGRAMMING_PROBLEM));
@@ -1004,6 +1005,7 @@ public void _test011_problem_categories() {
 		expectedProblemAttributes.put("TooManyMethods", new ProblemAttributes(CategorizedProblem.CAT_INTERNAL));
 		expectedProblemAttributes.put("TooManyParametersForSyntheticMethod", new ProblemAttributes(CategorizedProblem.CAT_INTERNAL));
 		expectedProblemAttributes.put("TooManySyntheticArgumentSlots", new ProblemAttributes(CategorizedProblem.CAT_INTERNAL));
+		expectedProblemAttributes.put("TypeAnnotationAtQualifiedName", new ProblemAttributes(CategorizedProblem.CAT_SYNTAX));
 		expectedProblemAttributes.put("TypeArgumentMismatch", new ProblemAttributes(CategorizedProblem.CAT_TYPE));
 		expectedProblemAttributes.put("TypeArgumentsForRawGenericConstructor", new ProblemAttributes(CategorizedProblem.CAT_TYPE));
 		expectedProblemAttributes.put("TypeArgumentsForRawGenericMethod", new ProblemAttributes(CategorizedProblem.CAT_TYPE));
@@ -1102,6 +1104,7 @@ public void _test011_problem_categories() {
 		expectedProblemAttributes.put("lambdaSignatureMismatched", new ProblemAttributes(CategorizedProblem.CAT_TYPE));
 		expectedProblemAttributes.put("IllegalArrayOfUnionType", new ProblemAttributes(CategorizedProblem.CAT_TYPE));
 		expectedProblemAttributes.put("IllegalArrayTypeInIntersectionCast", new ProblemAttributes(CategorizedProblem.CAT_TYPE));
+		expectedProblemAttributes.put("ProblemNotAnalysed", new ProblemAttributes(CategorizedProblem.CAT_INTERNAL));
 //{ObjectTeams: new problems (incomplete list):
         //expectedProblemAttributes.put("", new ProblemAttributes(CategorizedProblem.CAT_UNSPECIFIED));
         expectedProblemAttributes.put("OTJ_RELATED", new ProblemAttributes(CategorizedProblem.CAT_INTERNAL));
@@ -1781,6 +1784,7 @@ public void test012_compiler_problems_tuning() {
 		expectedProblemAttributes.put("NotVisibleMethod", SKIP);
 		expectedProblemAttributes.put("NotVisibleType", SKIP);
 		expectedProblemAttributes.put("NullableFieldReference", new ProblemAttributes(JavaCore.COMPILER_PB_NULL_REFERENCE));
+		expectedProblemAttributes.put("NullAnnotationAtQualifyingType", SKIP);
 		expectedProblemAttributes.put("NullAnnotationUnsupportedLocation", SKIP);
 		expectedProblemAttributes.put("NullAnnotationUnsupportedLocationAtType", SKIP);
 		expectedProblemAttributes.put("NullityMismatchAgainstFreeTypeVariable", new ProblemAttributes(JavaCore.COMPILER_PB_PESSIMISTIC_NULL_ANALYSIS_FOR_FREE_TYPE_VARIABLES));
@@ -1925,6 +1929,7 @@ public void test012_compiler_problems_tuning() {
 		expectedProblemAttributes.put("TooManyMethods", SKIP);
 		expectedProblemAttributes.put("TooManyParametersForSyntheticMethod", SKIP);
 		expectedProblemAttributes.put("TooManySyntheticArgumentSlots", SKIP);
+		expectedProblemAttributes.put("TypeAnnotationAtQualifiedName", SKIP);
 		expectedProblemAttributes.put("TypeArgumentMismatch", SKIP);
 		expectedProblemAttributes.put("TypeArgumentsForRawGenericConstructor", SKIP);
 		expectedProblemAttributes.put("TypeArgumentsForRawGenericMethod", SKIP);
@@ -2024,6 +2029,7 @@ public void test012_compiler_problems_tuning() {
 		expectedProblemAttributes.put("DisallowedExplicitThisParameter", SKIP);
 		expectedProblemAttributes.put("IllegalArrayOfUnionType", SKIP);
 		expectedProblemAttributes.put("IllegalArrayTypeInIntersectionCast", SKIP);
+		expectedProblemAttributes.put("ProblemNotAnalysed", SKIP);
 //{ObjectTeams: new constants:
         expectedProblemAttributes.put("OTJ_RELATED", SKIP);
         expectedProblemAttributes.put("OTCHAP", SKIP);

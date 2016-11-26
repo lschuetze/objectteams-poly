@@ -867,8 +867,11 @@ public TypeBinding resolveType(BlockScope scope) {
 // MW,JH,SH}
 		if (receiverCast && this.actualReceiverType != null) {
 			// due to change of declaring class with receiver type, only identity cast should be notified
-			if (TypeBinding.equalsEquals(((CastExpression)this.receiver).expression.resolvedType, this.actualReceiverType)) {
-				scope.problemReporter().unnecessaryCast((CastExpression)this.receiver);
+			TypeBinding resolvedType2 = ((CastExpression)this.receiver).expression.resolvedType;
+			if (TypeBinding.equalsEquals(resolvedType2, this.actualReceiverType)) {
+				if (!scope.environment().usesNullTypeAnnotations() || !NullAnnotationMatching.analyse(this.actualReceiverType, resolvedType2, -1).isAnyMismatch()) {
+					scope.problemReporter().unnecessaryCast((CastExpression) this.receiver);
+				}
 			}
 		}
 		// resolve type arguments (for generic constructor call)
