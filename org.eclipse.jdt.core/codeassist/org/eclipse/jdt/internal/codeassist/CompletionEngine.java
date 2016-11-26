@@ -5268,6 +5268,12 @@ public final class CompletionEngine
 		boolean isQualified,
 		int relevance) {
 
+//{ObjectTeams: other parts of completion prefer role interfaces, but here we need to go back to the role class:
+		if (currentType.isSynthInterface()) {
+			currentType = currentType.roleModel.getClassPartBinding();
+			if (currentType == null) return;
+		}
+// SH}
 		if (currentType.isInterface()) {
 			char[] completion = CharOperation.NO_CHAR;
 			char[] typeCompletion = null;
@@ -6031,6 +6037,10 @@ public final class CompletionEngine
 					relevance);
 		}
 		
+//{ObjectTeams: no anonymous classes from roles:
+		if (currentType.isRole())
+			return;
+// SH}
 		// This code is disabled because there is too much proposals when constructors and anonymous are proposed
 		if (!isIgnored(CompletionProposal.ANONYMOUS_CLASS_CONSTRUCTOR_INVOCATION, CompletionProposal.TYPE_REF)
 				&& !currentType.isFinal()
@@ -13516,6 +13526,11 @@ public final class CompletionEngine
 				
 				if (isInterface || (typeModifiers & ClassFileConstants.AccAbstract) != 0) {
 					this.noProposal = false;
+//{ObjectTeams: no anonymous roles:
+					if ((typeModifiers & ExtraCompilerModifiers.AccRole) != 0) {
+						break;
+					}
+// SH}
 					if(!isIgnored(CompletionProposal.ANONYMOUS_CLASS_CONSTRUCTOR_INVOCATION, CompletionProposal.TYPE_REF)) {
 						InternalCompletionProposal proposal = createProposal(CompletionProposal.ANONYMOUS_CLASS_CONSTRUCTOR_INVOCATION, this.actualCompletionPosition);
 						proposal.setDeclarationSignature(createNonGenericTypeSignature(packageName, typeName));
@@ -13568,6 +13583,11 @@ public final class CompletionEngine
 			case 0: // constructor with no parameter
 				
 				if ((typeModifiers & ClassFileConstants.AccAbstract) != 0) {
+//{ObjectTeams: no anonymous roles:
+					if ((typeModifiers & ExtraCompilerModifiers.AccRole) != 0) {
+						break;
+					}
+// SH}
 					this.noProposal = false;
 					if(!isIgnored(CompletionProposal.ANONYMOUS_CLASS_CONSTRUCTOR_INVOCATION, CompletionProposal.TYPE_REF)) {
 						InternalCompletionProposal proposal = createProposal(CompletionProposal.ANONYMOUS_CLASS_CONSTRUCTOR_INVOCATION, this.actualCompletionPosition);

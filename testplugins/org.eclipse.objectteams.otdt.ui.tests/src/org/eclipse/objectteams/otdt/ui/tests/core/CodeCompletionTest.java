@@ -40,6 +40,7 @@ import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.javaeditor.EditorUtility;
 import org.eclipse.jdt.internal.ui.javaeditor.JavaEditor;
 import org.eclipse.jdt.internal.ui.text.java.JavaCompletionProcessor;
+import org.eclipse.jdt.internal.ui.text.java.JavaMethodCompletionProposal;
 import org.eclipse.jdt.internal.ui.text.java.ParameterGuessingProposal;
 import org.eclipse.jdt.internal.ui.text.template.contentassist.TemplateProposal;
 import org.eclipse.jdt.testplugin.TestOptions;
@@ -1951,6 +1952,49 @@ public class CodeCompletionTest extends CoreTests {
 		ICompletionProposal proposal = assertProposal("add", null, null, subTeamContent, new Region(pos, 0), expectedContent, new Region(posAfter, 4), 0);
 		assertTrue("Should be a parameter guessing proposal", proposal instanceof ParameterGuessingProposal);
 		assertChoices(proposal, new String[][]{new String[]{"arg0", "rarg", "null"}}); // <- this is key: expect "rarg" next to "arg0"!
+	}
+
+	public void testBug416779a() throws CoreException {
+		StringBuffer teamContent = new StringBuffer(
+				"public team class Completion_testBug416779 {\n" +
+				"	protecte abstract class R {\n" +
+				"	}\n" +
+				"	R test() {\n" +
+				"		return new R\n" +
+				"	}\n" +
+				"}\n");
+		String completeBehind = "new R";
+		int pos = teamContent.indexOf(completeBehind)+completeBehind.length();
+
+		assertNosuchProposal("R()", teamContent, new Region(pos, 0),  0);
+		assertNosuchProposal("Completion_testBug416779.R()", teamContent, new Region(pos, 0),  0);
+	}
+
+	public void testBug416779b() throws CoreException {
+		StringBuffer teamContent = new StringBuffer(
+				"public team class Completion_testBug416779 {\n" +
+				"	protecte class R {\n" +
+				"	}\n" +
+				"	R test() {\n" +
+				"		return new R\n" +
+				"	}\n" +
+				"}\n");
+		String completeBehind = "new R";
+		int pos = teamContent.indexOf(completeBehind)+completeBehind.length();
+
+		StringBuffer expectedContent = new StringBuffer(
+				"public team class Completion_testBug416779 {\n" +
+				"	protecte class R {\n" +
+				"	}\n" +
+				"	R test() {\n" +
+				"		return new R()\n" +
+				"	}\n" +
+				"}\n");
+
+		int posAfter = expectedContent.indexOf("new R()") + "new R()".length();
+		
+		ICompletionProposal proposal = assertProposal("R()", null, null, teamContent, new Region(pos, 0), expectedContent, new Region(posAfter, 0), 0);
+		assertTrue("Should be a java method proposal", proposal instanceof JavaMethodCompletionProposal);
 	}
 
 	// == Below: Helper methods/fields. ==
