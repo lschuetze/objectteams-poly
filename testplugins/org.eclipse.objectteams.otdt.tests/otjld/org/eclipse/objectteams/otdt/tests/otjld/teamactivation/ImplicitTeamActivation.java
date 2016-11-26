@@ -1884,18 +1884,18 @@ public class ImplicitTeamActivation extends AbstractOTJLDTest {
 			    "    T5317ca1_2 o2 = new T5317ca1_2();\n" +
 			    "    class Run5317ca1_1 implements Runnable {\n" +
 			    "        public void run() {\n" +
-			    "            if( sleep( 1200 )) return;\n" +
+			    "            if( sleep( 1600 )) return;\n" +
 			    "            final Team5317ca1_1 t1 = new Team5317ca1_1();\n" +
 			    "            print(t1.call(o1, o2));\n" +
 			    "        }\n" +
 			    "    }\n" +
 			    "    class Run5317ca1_2 implements Runnable {\n" +
 			    "        public void run() {\n" +
-			    "            if( sleep(100) ) return;\n" +
+			    "            if( sleep(200) ) return;\n" +
 			    "            final Team5317ca1_2 t2 = new Team5317ca1_2();\n" +
 			    "            t2.activate(org.objectteams.Team.ALL_THREADS);\n" +
 			    "            for(int i = 5; i>0; i--) {\n" +
-			    "                if( sleep(200) ) return;\n" +
+			    "                if( sleep(400) ) return;\n" +
 			    "                print(t2.test3(o2));\n" +
 			    "            }\n" +
 			    "        }\n" +
@@ -1931,6 +1931,6 @@ public class ImplicitTeamActivation extends AbstractOTJLDTest {
 			    "}\n" +
 			    "    \n"
             },
-            ".....!!");
+            "...!!..");
     }
 }
