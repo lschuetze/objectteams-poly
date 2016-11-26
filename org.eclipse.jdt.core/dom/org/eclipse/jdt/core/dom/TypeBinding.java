@@ -133,18 +133,15 @@ class TypeBinding implements ITypeBinding {
 		}
 		if (refType != null) {
 //{ObjectTeams: calling getAnnotations() requires Dependencies control:
-/* orig:
-			org.eclipse.jdt.internal.compiler.lookup.AnnotationBinding[] internalAnnotations = refType.getAnnotations();
-  :giro */
-			org.eclipse.jdt.internal.compiler.lookup.AnnotationBinding[] internalAnnotations = null;
-			Dependencies.setup(this, null, this.resolver.lookupEnvironment(), true, true); // TODO(SH): parser, flags?
-			try {
-				internalAnnotations = refType.getAnnotations();
-			} finally {
-				Dependencies.release(this);
-			}
-// SH}
+		  Dependencies.setup(this, null, this.resolver.lookupEnvironment(), true, true); // TODO(SH): parser, flags?
+		  try {
+// orig:
 			return this.annotations = resolveAnnotationBindings(refType.getAnnotations(), false);
+// :giro
+		  } finally {
+			Dependencies.release(this);
+		  }
+// SH}
 		}
 		return this.annotations = AnnotationBinding.NoAnnotations;
 	}
