@@ -20,7 +20,9 @@
  **********************************************************************/
 package org.eclipse.objectteams.otdt.internal.core.compiler.control;
 
+import java.lang.ref.WeakReference;
 import java.util.Stack;
+import java.util.WeakHashMap;
 
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
@@ -62,7 +64,7 @@ public class Config {
 		}
 	}
 
-    Object            client;
+    WeakReference<Object> client;
     Parser            parser;
     Parser            plainParser; // alternate parser when client is a MatchLocator
     LookupEnvironment lookupEnvironment;
@@ -116,6 +118,8 @@ public class Config {
 	// (entries are removed explicitly using release)
 	private static final ThreadLocal<Stack<Config>> _configs = new ThreadLocal<Stack<Config>>();
 
+	static final WeakHashMap<Object, Config> configsByClient = new WeakHashMap<>();
+
 	public static void addConfig(Config config)
 	{
 	    synchronized (_configs) {
@@ -134,6 +138,8 @@ public class Config {
 
 	        configStack.push(config);
 	    }
+	    if (config.client != null && config.client.get() != null)
+	    	configsByClient.put(config.client.get(), config);
 	}
 
 	/**
@@ -157,7 +163,7 @@ public class Config {
 		        _configs.set(configStack);
 
 		        Config config = new Config();
-		    	config.client = client;
+		    	config.client = new WeakReference<>(client);
 		    	configStack.push(config);
 		    	return null; // no old config
 		    } else {
@@ -167,6 +173,7 @@ public class Config {
 		    	clone.castRequired = existing.castRequired;
 		    	clone.loweringRequired = existing.loweringRequired;
 		    	clone.loweringPossible = existing.loweringPossible;
+		    	clone.client = new WeakReference<>(null);
 		    	existing.castRequired = null;
 		    	existing.loweringRequired = false;
 		    	existing.loweringPossible = false;
@@ -209,7 +216,8 @@ public class Config {
     	    {
     	        Config config = configStack.pop(); // remove Config
     		    assert(config != null);
-    	        if (config.client != client && config.client != null) // bad balance of addConfig and removeConfig calls
+    		    Object theClient = config.client.get();
+    	        if (theClient != client && theClient != null) // bad balance of addConfig and removeConfig calls
     	        {
     	            assert(false);
     	            configStack.push(config); // be defensive, put it back
@@ -395,12 +403,13 @@ public class Config {
 	public static void delegateGetMethodBodies(CompilationUnitDeclaration unit) {
 		Config config = getConfig();
 		Parser parser = config.parser();
-		if (config.client instanceof ITypeRequestor) {
+		Object theClient = config.client.get();
+		if (theClient instanceof ITypeRequestor) {
 			// MatchLocator.getMethodBodies and MatchLocatorParser.getMethodBodies
 			// both contribute to locating matches. Unit parser on behalf of
 			// Dependencies should however be parsed using a plain Parser:
 			if (config.plainParser == null)
-				config.plainParser = ((ITypeRequestor)config.client).getPlainParser();
+				config.plainParser = ((ITypeRequestor)theClient).getPlainParser();
 			if (config.plainParser != null)
 				parser = config.plainParser;
 		}
@@ -433,14 +442,16 @@ public class Config {
 	 */
 	public static boolean clientIsCompiler() {
 		Config config = getConfig();
-		return (config != null && config.client instanceof Compiler);
+		return (config != null && config.client.get() instanceof Compiler);
 	}
 
 	public static boolean clientIsBatchCompiler() {
 		Config config = safeGetConfig();
-		return (   config != null
-				&& config.client instanceof Compiler
-				&& ((Compiler)config.client).isBatchCompiler);
+		if (config == null)
+			return false;
+		Object client = config.client.get();
+		return (   client instanceof Compiler
+				&& ((Compiler)client).isBatchCompiler);
 	}
 
 	/**
@@ -472,6 +483,11 @@ public class Config {
 		else
 			System.err.println("OT/J: "+message); //$NON-NLS-1$
 			exception.printStackTrace(System.err);
+	}
+
+	public boolean clientHasExactClass(Class<?> clazz) {
+		Object theClient = this.client.get();
+		return theClient != null && theClient.getClass() == clazz;
 	}
 
 }

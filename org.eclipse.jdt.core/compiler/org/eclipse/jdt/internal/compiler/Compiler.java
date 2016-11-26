@@ -433,6 +433,8 @@ public class Compiler implements ITypeRequestor, ProblemSeverities {
 				this.totalUnits);
 //{ObjectTeams: record 'place' for external invocation of getMethodBodies:
         parsedUnit.place = this.totalUnits;
+        if (parsedUnit.scope != null)
+        	parsedUnit.scope.parser = this.parser;
 // SH}
 		this.unitsToProcess[this.totalUnits++] = parsedUnit;
 	}

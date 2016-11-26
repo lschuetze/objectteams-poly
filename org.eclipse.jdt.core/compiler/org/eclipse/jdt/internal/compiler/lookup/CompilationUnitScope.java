@@ -96,6 +96,8 @@ public class CompilationUnitScope extends Scope {
 	private ArrayList<Invocation> inferredInvocations;
 //{ObjectTeams: when used as a baseimport scope, remember the original scope during this current lookup
 	public Scope originalScope;
+	// store parser for on-demand Dependencies.setup() lateron:
+	public Parser parser;
 // SH}
 
 public CompilationUnitScope(CompilationUnitDeclaration unit, LookupEnvironment environment) {
@@ -902,7 +904,7 @@ public final Binding getImport(char[][] compoundName, boolean onDemand, boolean 
   boolean createdConfig = false;
   if (!Config.hasLookupEnvironment()) {
 	  createdConfig = true;
-	  Dependencies.setup(this, null, environment(), false, true);
+	  Dependencies.setup(this, this.parser, environment(), false, true);
   }
   try {
 //SH}

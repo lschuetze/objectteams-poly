@@ -41,6 +41,7 @@ import org.eclipse.jdt.internal.compiler.lookup.TypeConstants;
 import org.eclipse.jdt.internal.compiler.lookup.TypeIds;
 import org.eclipse.jdt.internal.compiler.lookup.TypeVariableBinding;
 import org.eclipse.jdt.internal.compiler.lookup.WildcardBinding;
+import org.eclipse.jdt.internal.compiler.parser.Parser;
 import org.eclipse.jdt.internal.compiler.problem.AbortCompilation;
 import org.eclipse.jdt.internal.compiler.util.SuffixConstants;
 import org.eclipse.jdt.internal.core.JavaElement;
@@ -133,18 +134,36 @@ class TypeBinding implements ITypeBinding {
 		}
 		if (refType != null) {
 //{ObjectTeams: calling getAnnotations() requires Dependencies control:
-		  Dependencies.setup(this, null, this.resolver.lookupEnvironment(), true, true); // TODO(SH): parser, flags?
+		  setupDependencies();
 		  try {
 // orig:
 			return this.annotations = resolveAnnotationBindings(refType.getAnnotations(), false);
 // :giro
 		  } finally {
-			Dependencies.release(this);
+			Dependencies.release(this.resolver);
 		  }
 // SH}
 		}
 		return this.annotations = AnnotationBinding.NoAnnotations;
 	}
+
+//{ObjectTeams: utilities for methods needing configured Dependencies:
+	void setupDependencies() {
+		setupDependencies(true, true, true, true, false, true);
+	}
+
+	Config setupDependencies(boolean	          verifyMethods,
+			boolean           analyzeCode,
+			boolean           generateCode,
+			boolean           buildFieldsAndMethods,
+			boolean           bundledCompleteTypeBindings,
+			boolean           strictDiet) {
+		Parser parser = (this.resolver.scope() != null) ? this.resolver.scope().parser : null;
+		return Dependencies.setup(this.resolver, parser, this.resolver.lookupEnvironment(),
+				verifyMethods, analyzeCode, generateCode, buildFieldsAndMethods, bundledCompleteTypeBindings, strictDiet);
+	}
+// SH}
+
 	private IAnnotationBinding[] resolveAnnotationBindings(org.eclipse.jdt.internal.compiler.lookup.AnnotationBinding[] internalAnnotations, boolean isTypeUse) {
 		int length = internalAnnotations == null ? 0 : internalAnnotations.length;
 		if (length != 0) {
@@ -284,7 +303,7 @@ class TypeBinding implements ITypeBinding {
 		try {
 			if (isClass() || isInterface() || isEnum()) {
 //{ObjectTeams: calling methods() requires Dependencies control:
-				Dependencies.setup(this, null, this.resolver.lookupEnvironment(), true, true); // TODO(SH): parser, flags?
+				setupDependencies();
 				usesDependencies = true;
 // SH}
 				ReferenceBinding referenceBinding = (ReferenceBinding) this.binding;
@@ -325,7 +344,7 @@ class TypeBinding implements ITypeBinding {
 //{ObjectTeams: cleanup:
 		finally {
 			if (usesDependencies)
-				Dependencies.release(this);
+				Dependencies.release(this.resolver);
 		}
 // SH}
 		return this.fields = NO_VARIABLE_BINDINGS;
@@ -347,7 +366,7 @@ class TypeBinding implements ITypeBinding {
 		try {
 			if (isClass() || isInterface() || isEnum()) {
 //{ObjectTeams: calling methods() requires Dependencies control:
-				Dependencies.setup(this, null, this.resolver.lookupEnvironment(), true, true); // TODO(SH): parser, flags?
+				setupDependencies();
 				usesDependencies = true;
 // SH}
 				ReferenceBinding referenceBinding = (ReferenceBinding) this.binding;
@@ -391,7 +410,7 @@ class TypeBinding implements ITypeBinding {
 //{ObjectTeams: cleanup:
 		finally {
 			if (usesDependencies)
-				Dependencies.release(this);
+				Dependencies.release(this.resolver);
 		}
 // SH}
 		return this.methods = NO_METHOD_BINDINGS;
@@ -569,7 +588,7 @@ class TypeBinding implements ITypeBinding {
 //{ObjectTeams: protect with minimally configured Dependencies:
 		Config cfg = null;
 		if (!Dependencies.isSetup())
-			cfg = Dependencies.setup(this, null, this.resolver.lookupEnvironment(), true, false, false, true, false, true);
+			cfg = setupDependencies(true, false, false, true, false, true);
 	  try {
 // orig:
 		MethodBinding sam = this.binding.getSingleAbstractMethod(scope, true);
@@ -579,7 +598,7 @@ class TypeBinding implements ITypeBinding {
 // :giro
 	  } finally {
 		  if (cfg != null)
-			  Dependencies.release(this);
+			  Dependencies.release(this.resolver);
 	  }
 // SH}
 	}
@@ -604,7 +623,7 @@ class TypeBinding implements ITypeBinding {
 // see Bug 352605 - Eclipse is reporting "Could not retrieve superclass" every few minutes
 		Config cfg = null;
 		if (!Dependencies.isSetup())
-			cfg = Dependencies.setup(this, null, this.resolver.lookupEnvironment(), false, false, false, false, false, true);
+			cfg = setupDependencies(false, false, false, false, false, true);
 	  try {
 // - continued at bottom of method - SH}
 		try {
@@ -671,7 +690,7 @@ class TypeBinding implements ITypeBinding {
 //{ObjectTeams: conclude try-finally from above
 	  } finally {
 		if (cfg != null)
-			Dependencies.release(this);
+			Dependencies.release(this.resolver);
 	  }
 // SH}	
 	}
@@ -1038,14 +1057,14 @@ class TypeBinding implements ITypeBinding {
 // see Bug 352605 - Eclipse is reporting "Could not retrieve superclass" every few minutes
 		  Config cfg = null;
 		  if (!Dependencies.isSetup())
-			cfg = Dependencies.setup(this, null, this.resolver.lookupEnvironment(), false, false, false, false, false, true);
+			cfg = setupDependencies(false, false, false, false, false, true);
 		  try {
 // orig:
 			superclass = ((ReferenceBinding)this.binding).superclass();
 // :giro
 		  } finally {
 			if (cfg != null)
-				Dependencies.release(this);
+				Dependencies.release(this.resolver);
 		  }
 // SH}
 		} catch (RuntimeException e) {
@@ -1480,7 +1499,7 @@ class TypeBinding implements ITypeBinding {
 	    ReferenceBinding roleBinding = (ReferenceBinding) this.binding;
 	    Config cfg = null;
 	    if (!Dependencies.isSetup())
-	    	cfg = Dependencies.setup(this, null, this.resolver.lookupEnvironment(), false, false, false, false, false, true);
+	    	cfg = setupDependencies(false, false, false, false, false, true);
 	    try {
 		    ReferenceBinding baseclass = roleBinding.baseclass();
 		    if (baseclass == null) {
@@ -1489,7 +1508,7 @@ class TypeBinding implements ITypeBinding {
 		    return this.resolver.getTypeBinding(baseclass);
 	    } finally {
 	    	if (cfg != null)
-	    		Dependencies.release(this);
+	    		Dependencies.release(this.resolver);
 	    }
 	}
 //	ira+SH}

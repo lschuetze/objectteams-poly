@@ -20,8 +20,10 @@
 package org.eclipse.objectteams.otdt.internal.core.compiler.control;
 
 
+import java.lang.ref.WeakReference;
 import java.util.Iterator;
 
+import org.eclipse.jdt.internal.compiler.Compiler;
 import org.eclipse.jdt.internal.compiler.ast.ASTNode;
 import org.eclipse.jdt.internal.compiler.ast.AbstractMethodDeclaration;
 import org.eclipse.jdt.internal.compiler.ast.CompilationUnitDeclaration;
@@ -127,8 +129,11 @@ public class Dependencies implements ITranslationStates {
 			boolean           bundledCompleteTypeBindings,
 			boolean           strictDiet)
     {
-    	Config config = new Config();
-    	config.client = client;
+    	Config config = Config.configsByClient.get(client);
+    	if (config != null && (config.parser != null || parser == null))
+    		return config;
+    	config = new Config();
+    	config.client = new WeakReference<>(client);
     	config.parser = parser;
     	config.lookupEnvironment = lookupEnvironment;
     	config.verifyMethods = verifyMethods;
@@ -1108,7 +1113,7 @@ public class Dependencies implements ITranslationStates {
 		for (int j = 0; j < unit.types.length; j++) {
 			if (unit.types[j].isRole()) {
 				if (unit.types.length != 1) {
-					if (Config.getConfig().client.getClass() == Compiler.class) // exact match.
+					if (Config.getConfig().clientHasExactClass(Compiler.class))
 					{
 						environment.problemReporter.roleFileMustDeclareOneType(unit);
 						return;

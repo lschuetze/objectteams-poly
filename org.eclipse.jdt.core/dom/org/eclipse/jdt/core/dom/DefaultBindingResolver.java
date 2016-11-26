@@ -818,7 +818,7 @@ class DefaultBindingResolver extends BindingResolver {
 					BlockScope blockScope = (BlockScope) this.astNodesToBlockScope.get(expression);
 					if (blockScope != null) {
 //{ObjectTeams: calling into the compiler needs dependencies configured:
-					  Dependencies.setup(this, null, lookupEnvironment(), false, false, false, true, true, false);
+					  Dependencies.setup(this, blockScope.compilationUnitScope().parser, lookupEnvironment(), false, false, false, true, true, false);
 					  try {
 // orig:
 						return this.getTypeBinding(thisReference.resolveType(blockScope));

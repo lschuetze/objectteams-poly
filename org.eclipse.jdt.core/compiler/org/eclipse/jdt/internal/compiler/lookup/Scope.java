@@ -3736,7 +3736,7 @@ public abstract class Scope {
 	  boolean createdConfig = false;
 	  if (!Config.hasLookupEnvironment()) {
 		  createdConfig = true;
-		  Dependencies.setup(this, null, environment(), false, true);
+		  Dependencies.setup(this, compilationUnitScope().parser, environment(), false, true);
 	  }
 	  try {
 // SH}
