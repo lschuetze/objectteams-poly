@@ -18,6 +18,7 @@ package org.eclipse.objectteams.otdt.internal.ui.assist;
 
 import static org.eclipse.objectteams.otdt.ui.ImageConstants.CALLINMETHOD_IMG;
 
+import java.io.Closeable;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Hashtable;
@@ -278,12 +279,9 @@ public team class OTQuickFixes  {
 	 */
 	protected class JavaCorrectionProcessor playedBy JavaCorrectionProcessor {
 		callin static IStatus guardDependencies() {
-			boolean hasConfig = ConfigHelper.checkCreateStubConfig(OTQuickFixes.this);
-			try {
+			try (ConfigHelper.IConfig config = ConfigHelper.checkCreateStubConfig2(OTQuickFixes.this))
+			{
 				return base.guardDependencies();
-			} finally {
-				if (hasConfig)
-					ConfigHelper.removeConfig(OTQuickFixes.this);
 			}
 		}
 		guardDependencies <- replace collectProposals;

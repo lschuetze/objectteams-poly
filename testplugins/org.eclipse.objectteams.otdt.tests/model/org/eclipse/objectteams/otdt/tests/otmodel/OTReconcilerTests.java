@@ -66,6 +66,7 @@ import org.eclipse.objectteams.otdt.core.IRoleType;
 import org.eclipse.objectteams.otdt.core.OTModelManager;
 import org.eclipse.objectteams.otdt.core.ext.OTDTPlugin;
 import org.eclipse.objectteams.otdt.core.ext.OTREContainer;
+import org.eclipse.objectteams.otdt.internal.core.compiler.control.Config;
 import org.eclipse.objectteams.otdt.internal.core.compiler.control.Dependencies;
 import org.eclipse.objectteams.otdt.internal.core.compiler.control.ITranslationStates;
 import org.eclipse.text.edits.DeleteEdit;
@@ -829,18 +830,13 @@ public class OTReconcilerTests extends ReconcilerTests {
 
 			if (unit != null) {
 	//{ObjectTeams: controlled by Dependencies:
-			  boolean newDependencySetup= false;
-			  try {
-				if (!Dependencies.isSetup()) {
-					newDependencySetup= true;
-					Dependencies.setup(this, this.parser, this.lookupEnvironment, true, false);
-				}
+			  try (Config config = Dependencies.setup(this, this.parser, this.lookupEnvironment, true, false))
+			  {
 				// Note(SH): this will redirect:
+// orig:
 				this.lookupEnvironment.buildTypeBindings(unit, accessRestriction);
 				this.lookupEnvironment.completeTypeBindings(unit);
-			  } finally {
-				if (newDependencySetup)
-					Dependencies.release(this);
+// :giro
 			  }
 	// SH}
 			}
@@ -857,8 +853,10 @@ public class OTReconcilerTests extends ReconcilerTests {
 					compilerOptions, 
 					problemReporter.problemFactory);
 		
-		Dependencies.setup(this, parser, compiler.lookupEnvironment, true, false);
-		Dependencies.ensureState(parsedUnit, state);
+		try (Config config = Dependencies.setup(this, parser, compiler.lookupEnvironment, true, false))
+		{
+			Dependencies.ensureState(parsedUnit, state);
+		}
 	}
 	
 	public void testAnchoredType03() throws CoreException, InterruptedException {

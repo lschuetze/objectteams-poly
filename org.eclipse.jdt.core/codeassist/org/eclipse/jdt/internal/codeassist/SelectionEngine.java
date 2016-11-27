@@ -115,6 +115,7 @@ import org.eclipse.objectteams.otdt.internal.codeassist.SelectionNodesFound;
 import org.eclipse.objectteams.otdt.internal.core.compiler.ast.AbstractMethodMappingDeclaration;
 import org.eclipse.objectteams.otdt.internal.core.compiler.ast.MethodSpec;
 import org.eclipse.objectteams.otdt.internal.core.compiler.ast.ParameterMapping;
+import org.eclipse.objectteams.otdt.internal.core.compiler.control.Config;
 import org.eclipse.objectteams.otdt.internal.core.compiler.control.Dependencies;
 import org.eclipse.objectteams.otdt.internal.core.compiler.control.ITranslationStates;
 import org.eclipse.objectteams.otdt.internal.core.compiler.control.StateHelper;
@@ -981,16 +982,19 @@ public final class SelectionEngine extends Engine implements ISearchRequestor {
 		if (!checkSelection(source, selectionSourceStart, selectionSourceEnd)) {
 			return;
 		}
-//{ObjectTeams
-		Dependencies.setup(this, this.parser, this.lookupEnvironment, true, false);
-		// is "no strictDiet" correct here (SH)? see dietParse below.
-//SH}
 		if (DEBUG) {
 			System.out.print("SELECTION - Checked : \""); //$NON-NLS-1$
 			System.out.print(new String(source, this.actualSelectionStart, this.actualSelectionEnd-this.actualSelectionStart+1));
 			System.out.println('"');
 		}
+//{ObjectTeams
+/* orig:
 		try {
+  :giro */
+		try (Config config = Dependencies.setup(this, this.parser, this.lookupEnvironment, true, false))
+		{
+			// is "no strictDiet" correct here (SH)? see dietParse below.
+//SH}
 			this.acceptedAnswer = false;
 			CompilationResult result = new CompilationResult(sourceUnit, 1, 1, this.compilerOptions.maxProblemsPerUnit);
 			CompilationUnitDeclaration parsedUnit =
@@ -1195,9 +1199,6 @@ public final class SelectionEngine extends Engine implements ISearchRequestor {
 			Util.log(ex);
 //haebor}
 		} finally {
-//{ObjectTeams
-			Dependencies.release(this);
-// SH}
 			reset(true);
 		}
 	}
@@ -1766,9 +1767,9 @@ public final class SelectionEngine extends Engine implements ISearchRequestor {
 				typeDeclaration.fields = new FieldDeclaration[] { field };
 
 //{ObjectTeams: rely on Dependencies for intermediate steps:
-				Dependencies.setup(this, this.parser, this.lookupEnvironment, true, false);
+			  try (Config config = Dependencies.setup(this, this.parser, this.lookupEnvironment, true, false))
 				// is no strictDiet correct here (SH)?
-			  try {
+			  {
 // orig:
 				// build bindings
 				this.lookupEnvironment.buildTypeBindings(parsedUnit, null /*no access restriction*/);
@@ -1798,9 +1799,6 @@ public final class SelectionEngine extends Engine implements ISearchRequestor {
 					}
 				}
 //{ObjectTeams:
-			  }
-			  finally {
-			    Dependencies.release(this);
 			  }
 // SH}
 			}

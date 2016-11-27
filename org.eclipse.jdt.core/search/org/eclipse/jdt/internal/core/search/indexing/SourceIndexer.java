@@ -55,6 +55,7 @@ import org.eclipse.jdt.internal.core.jdom.CompilationUnit;
 import org.eclipse.jdt.internal.core.search.matching.IndexBasedJavaSearchEnvironment;
 import org.eclipse.jdt.internal.core.search.matching.MethodPattern;
 import org.eclipse.jdt.internal.core.search.processing.JobManager;
+import org.eclipse.objectteams.otdt.internal.core.compiler.control.Config;
 import org.eclipse.objectteams.otdt.internal.core.compiler.control.Dependencies;
 
 /**
@@ -172,19 +173,14 @@ public class SourceIndexer extends AbstractIndexer implements ITypeRequestor, Su
 			this.lookupEnvironment = new LookupEnvironment(this, this.options, problemReporter, nameEnvironment);
 			reduceParseTree(this.cud);
 //{ObjectTeams: need Dependencies configured:
-		  boolean depsConfigured = Dependencies.isSetup();
-		  try {
-			if (!depsConfigured)
-				Dependencies.setup(this, this.basicParser, this.lookupEnvironment, true, false);
+		  try (Config config = Dependencies.setup(this, this.basicParser, this.lookupEnvironment, true, false))
+		  {
 // orig:
 			this.lookupEnvironment.buildTypeBindings(this.cud, null);
 			this.lookupEnvironment.completeTypeBindings();
 			this.cud.scope.faultInTypes();
 			this.cud.resolve();
 // :giro
-		  } finally {
-			  if (!depsConfigured)
-				  Dependencies.release(this);
 		  }
 // SH}
 		} catch (Exception e) {

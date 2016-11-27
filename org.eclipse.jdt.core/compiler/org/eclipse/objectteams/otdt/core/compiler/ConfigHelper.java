@@ -29,14 +29,31 @@ import org.eclipse.objectteams.otdt.internal.core.compiler.control.Config;
 public class ConfigHelper {
 
 	/**
+	 * A resources that doesn't throw on {@link #close()}
+	 * @since 3.13 (OTDT 2.6)
+	 */
+	public interface IConfig extends AutoCloseable {
+		void close();
+	}
+
+	/**
+	 * @deprecated use {@link #checkCreateStubConfig2(Object)}
+	 */
+	@Deprecated
+	public static boolean checkCreateStubConfig(Object client) {
+		return checkCreateStubConfig2(client) != null;
+	}
+
+	/**
 	 * When no config has been prepared, create a stub config, which can
 	 * handle all boolean queries but throws InternalCompilerError when
 	 * attempting to access the lookupEnvironment or the parser.
+	 * @since 3.13 (OTDT 2.6)
 	 */
-	public static boolean checkCreateStubConfig(Object client) {
-		if (Config.hasConfig())
-			return false; // no need to create a stub.
-		Config newConfig = new Config() {
+	public static IConfig checkCreateStubConfig2(Object client) {
+		if (Config.hasConfig(client))
+			return null; // no need to create a stub.
+		Config newConfig = new Config(client, null, null) {
 			@Override
 			protected LookupEnvironment lookupEnvironment() {
 				throw new InternalCompilerError("Lookup Environment not configured"); //$NON-NLS-1$
@@ -47,13 +64,15 @@ public class ConfigHelper {
 			}
 		};
 		Config.addConfig(newConfig);
-		return true;
+		return newConfig;
 	}
 
 	/**
 	 * Remove the config that has been registered for 'client'
 	 * @param client
+	 * @deprecated please use try-with-resources instead of manual removal of Configs
 	 */
+	@Deprecated
 	public static void removeConfig(Object client) {
 		Config.removeConfig(client);
 	}

@@ -134,13 +134,11 @@ class TypeBinding implements ITypeBinding {
 		}
 		if (refType != null) {
 //{ObjectTeams: calling getAnnotations() requires Dependencies control:
-		  setupDependencies();
-		  try {
+		  try (Config config = setupDependencies())
+		  {
 // orig:
 			return this.annotations = resolveAnnotationBindings(refType.getAnnotations(), false);
 // :giro
-		  } finally {
-			Dependencies.release(this.resolver);
 		  }
 // SH}
 		}
@@ -148,8 +146,8 @@ class TypeBinding implements ITypeBinding {
 	}
 
 //{ObjectTeams: utilities for methods needing configured Dependencies:
-	void setupDependencies() {
-		setupDependencies(true, true, true, true, false, true);
+	Config setupDependencies() {
+		return setupDependencies(true, true, true, true, false, true);
 	}
 
 	Config setupDependencies(boolean	          verifyMethods,
@@ -297,15 +295,13 @@ class TypeBinding implements ITypeBinding {
 		if (this.fields != null) {
 			return this.fields;
 		}
-//{ObjectTeams: may need Dependencies:
-		boolean usesDependencies = false;
-// SH}
+//{ObjectTeams: may need Dependencies (when calling methods()):
+/* orig:
 		try {
-			if (isClass() || isInterface() || isEnum()) {
-//{ObjectTeams: calling methods() requires Dependencies control:
-				setupDependencies();
-				usesDependencies = true;
+  :giro */
+		try (Config config = setupDependencies()) {
 // SH}
+			if (isClass() || isInterface() || isEnum()) {
 				ReferenceBinding referenceBinding = (ReferenceBinding) this.binding;
 				FieldBinding[] fieldBindings = referenceBinding.availableFields(); // resilience
 				int length = fieldBindings.length;
@@ -341,12 +337,6 @@ class TypeBinding implements ITypeBinding {
 			 */
 			org.eclipse.jdt.internal.core.util.Util.log(e, "Could not retrieve declared fields"); //$NON-NLS-1$
 		}
-//{ObjectTeams: cleanup:
-		finally {
-			if (usesDependencies)
-				Dependencies.release(this.resolver);
-		}
-// SH}
 		return this.fields = NO_VARIABLE_BINDINGS;
 	}
 
@@ -360,15 +350,13 @@ class TypeBinding implements ITypeBinding {
 		if (this.methods != null) {
 			return this.methods;
 		}
-//{ObjectTeams: may need Dependencies:
-		boolean usesDependencies = false;
-// SH}
+//{ObjectTeams: may need Dependencies (when calling methods()):
+/* orig:
 		try {
-			if (isClass() || isInterface() || isEnum()) {
-//{ObjectTeams: calling methods() requires Dependencies control:
-				setupDependencies();
-				usesDependencies = true;
+  :giro */
+		try (Config config = setupDependencies()) {
 // SH}
+			if (isClass() || isInterface() || isEnum()) {
 				ReferenceBinding referenceBinding = (ReferenceBinding) this.binding;
 				org.eclipse.jdt.internal.compiler.lookup.MethodBinding[] internalMethods = referenceBinding.availableMethods(); // be resilient
 				int length = internalMethods.length;
@@ -407,12 +395,6 @@ class TypeBinding implements ITypeBinding {
 			 */
 			org.eclipse.jdt.internal.core.util.Util.log(e, "Could not retrieve declared methods"); //$NON-NLS-1$
 		}
-//{ObjectTeams: cleanup:
-		finally {
-			if (usesDependencies)
-				Dependencies.release(this.resolver);
-		}
-// SH}
 		return this.methods = NO_METHOD_BINDINGS;
 	}
 
@@ -586,19 +568,13 @@ class TypeBinding implements ITypeBinding {
 		if (this.binding == null || scope == null)
 			return null;
 //{ObjectTeams: protect with minimally configured Dependencies:
-		Config cfg = null;
-		if (!Dependencies.isSetup())
-			cfg = setupDependencies(true, false, false, true, false, true);
-	  try {
+	  try (Config cfg = setupDependencies(true, false, false, true, false, true)) {
 // orig:
 		MethodBinding sam = this.binding.getSingleAbstractMethod(scope, true);
 		if (sam == null || !sam.isValidBinding())
 			return null;
 		return this.resolver.getMethodBinding(sam);
 // :giro
-	  } finally {
-		  if (cfg != null)
-			  Dependencies.release(this.resolver);
 	  }
 // SH}
 	}
@@ -621,10 +597,8 @@ class TypeBinding implements ITypeBinding {
 		ReferenceBinding[] internalInterfaces = null;
 //{ObjectTeams: protect with minimally configured Dependencies:
 // see Bug 352605 - Eclipse is reporting "Could not retrieve superclass" every few minutes
-		Config cfg = null;
-		if (!Dependencies.isSetup())
-			cfg = setupDependencies(false, false, false, false, false, true);
-	  try {
+	  try (Config cfg = setupDependencies(false, false, false, false, false, true))
+	  {
 // - continued at bottom of method - SH}
 		try {
 			internalInterfaces = referenceBinding.superInterfaces();
@@ -687,10 +661,7 @@ class TypeBinding implements ITypeBinding {
 			return this.interfaces = newInterfaces;
 		}
 		return this.interfaces = NO_TYPE_BINDINGS;
-//{ObjectTeams: conclude try-finally from above
-	  } finally {
-		if (cfg != null)
-			Dependencies.release(this.resolver);
+//{ObjectTeams: conclude try-with-resources from above
 	  }
 // SH}	
 	}
@@ -1055,16 +1026,11 @@ class TypeBinding implements ITypeBinding {
 		try {
 //{ObjectTeams: protect with minimally configured Dependencies:
 // see Bug 352605 - Eclipse is reporting "Could not retrieve superclass" every few minutes
-		  Config cfg = null;
-		  if (!Dependencies.isSetup())
-			cfg = setupDependencies(false, false, false, false, false, true);
-		  try {
+		  try (Config cfg = setupDependencies(false, false, false, false, false, true))
+		  {
 // orig:
 			superclass = ((ReferenceBinding)this.binding).superclass();
 // :giro
-		  } finally {
-			if (cfg != null)
-				Dependencies.release(this.resolver);
 		  }
 // SH}
 		} catch (RuntimeException e) {
@@ -1497,18 +1463,12 @@ class TypeBinding implements ITypeBinding {
 	    if (! this.binding.isRole())
 			return null;
 	    ReferenceBinding roleBinding = (ReferenceBinding) this.binding;
-	    Config cfg = null;
-	    if (!Dependencies.isSetup())
-	    	cfg = setupDependencies(false, false, false, false, false, true);
-	    try {
+	    try (Config cfg = setupDependencies(false, false, false, false, false, true)) {
 		    ReferenceBinding baseclass = roleBinding.baseclass();
 		    if (baseclass == null) {
 				return null;
 			}
 		    return this.resolver.getTypeBinding(baseclass);
-	    } finally {
-	    	if (cfg != null)
-	    		Dependencies.release(this.resolver);
 	    }
 	}
 //	ira+SH}

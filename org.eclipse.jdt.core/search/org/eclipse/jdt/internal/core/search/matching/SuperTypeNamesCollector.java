@@ -31,6 +31,7 @@ import org.eclipse.jdt.internal.core.search.indexing.IIndexConstants;
 import org.eclipse.jdt.internal.core.search.indexing.IndexManager;
 import org.eclipse.jdt.internal.core.util.ASTNodeFinder;
 import org.eclipse.jdt.internal.core.util.Util;
+import org.eclipse.objectteams.otdt.internal.core.compiler.control.Config;
 import org.eclipse.objectteams.otdt.internal.core.compiler.control.Dependencies;
 import org.eclipse.objectteams.otdt.internal.core.compiler.control.ITranslationStates;
 
@@ -144,9 +145,9 @@ protected CompilationUnitDeclaration buildBindings(ICompilationUnit compilationU
 			this.locator.basicParser().parse(sourceUnit, compilationResult);
 	if (unit != null) {
 //{ObjectTeams: let Dependencies control the processing
-		Dependencies.setup(this, this.locator.basicParser(), this.locator.lookupEnvironment,
-				 /*buildFieldsAndMethods*/!isTopLevelOrMember, isTopLevelOrMember);
-		try {
+	  try (Config config = Dependencies.setup(this, this.locator.basicParser(), this.locator.lookupEnvironment,
+				 /*buildFieldsAndMethods*/!isTopLevelOrMember, isTopLevelOrMember))
+	  {
 // orig:
 		this.locator.lookupEnvironment.buildTypeBindings(unit, null /*no access restriction*/);
 		this.locator.lookupEnvironment.completeTypeBindings(unit, !isTopLevelOrMember);
@@ -156,11 +157,8 @@ protected CompilationUnitDeclaration buildBindings(ICompilationUnit compilationU
 //			unit.resolve();
 // :giro			
 				Dependencies.ensureState(unit, ITranslationStates.STATE_RESOLVED);
-			} 
-		} finally {
-				Dependencies.release(this);
-	
 		}
+	  }
 // SH}			
 	}
 	return unit;

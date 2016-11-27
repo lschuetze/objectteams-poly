@@ -36,6 +36,8 @@ import org.eclipse.objectteams.otdt.internal.core.compiler.ast.AbstractMethodMap
 import org.eclipse.objectteams.otdt.internal.core.compiler.ast.CallinMappingDeclaration;
 import org.eclipse.objectteams.otdt.internal.core.compiler.ast.CalloutMappingDeclaration;
 import org.eclipse.objectteams.otdt.internal.core.compiler.ast.ParameterMapping;
+import org.eclipse.objectteams.otdt.internal.core.compiler.control.Config;
+import org.eclipse.objectteams.otdt.internal.core.compiler.control.Dependencies;
 
 public abstract class Engine implements ITypeRequestor {
 
@@ -95,6 +97,10 @@ public abstract class Engine implements ITypeRequestor {
 	 * secondary types defined in the same compilation unit).
 	 */
 	public void accept(ISourceType[] sourceTypes, PackageBinding packageBinding, AccessRestriction accessRestriction) {
+//{ObjectTeams:
+	  try (Config config = Dependencies.setup(this, getParser(), this.lookupEnvironment, true, false))
+	  {
+// SH}
 		// https://bugs.eclipse.org/bugs/show_bug.cgi?id=479656
 		// In case of the requested type not being a member type (i.e. not being a top level type)
 		// we need to find the top level ones and use them for resolution
@@ -138,6 +144,9 @@ public abstract class Engine implements ITypeRequestor {
 			this.lookupEnvironment.buildTypeBindings(unit, accessRestriction);
 			this.lookupEnvironment.completeTypeBindings(unit, true);
 		}
+//{ObjectTeams: cleanup:
+	  }
+// SH}
 	}
 
 	public abstract AssistParser getParser();

@@ -36,6 +36,7 @@ import org.eclipse.jdt.internal.compiler.lookup.ReferenceBinding;
 import org.eclipse.jdt.internal.compiler.lookup.SourceTypeBinding;
 import org.eclipse.jdt.internal.compiler.parser.Parser;
 import org.eclipse.jdt.internal.compiler.problem.ProblemReporter;
+import org.eclipse.objectteams.otdt.core.compiler.ConfigHelper;
 import org.eclipse.objectteams.otdt.core.exceptions.InternalCompilerError;
 
 
@@ -47,7 +48,7 @@ import org.eclipse.objectteams.otdt.core.exceptions.InternalCompilerError;
  *
  * We don't use ThreadLocal, since we do cleanup manually using release().
  */
-public class Config {
+public class Config implements ConfigHelper.IConfig {
 	
 	@SuppressWarnings("serial")
 	public static class NotConfiguredException extends RuntimeException {
@@ -64,10 +65,10 @@ public class Config {
 		}
 	}
 
-    WeakReference<Object> client;
-    Parser            parser;
-    Parser            plainParser; // alternate parser when client is a MatchLocator
-    LookupEnvironment lookupEnvironment;
+    WeakReference<Object> 	client;
+    public Parser         	parser;
+    Parser            		plainParser; // alternate parser when client is a MatchLocator
+    LookupEnvironment 		lookupEnvironment;
     public boolean verifyMethods;
     boolean analyzeCode;
     boolean generateCode;
@@ -120,6 +121,12 @@ public class Config {
 
 	static final WeakHashMap<Object, Config> configsByClient = new WeakHashMap<>();
 
+	public Config(Object client, Parser parser, LookupEnvironment environment) {
+		this.client = new WeakReference<>(client);
+		this.parser = parser;
+		this.lookupEnvironment = environment;
+	}
+
 	public static void addConfig(Config config)
 	{
 	    synchronized (_configs) {
@@ -138,8 +145,6 @@ public class Config {
 
 	        configStack.push(config);
 	    }
-	    if (config.client != null && config.client.get() != null)
-	    	configsByClient.put(config.client.get(), config);
 	}
 
 	/**
@@ -162,14 +167,13 @@ public class Config {
 		        configStack = new Stack<Config>();
 		        _configs.set(configStack);
 
-		        Config config = new Config();
-		    	config.client = new WeakReference<>(client);
+		        Config config = new Config(client, null, null);
 		    	configStack.push(config);
 		    	return null; // no old config
 		    } else {
 		        assert(!configStack.empty());
 		        Config existing = configStack.peek();
-		    	Config clone = new Config();
+		    	Config clone = new Config(client, existing.parser, existing.lookupEnvironment);
 		    	clone.castRequired = existing.castRequired;
 		    	clone.loweringRequired = existing.loweringRequired;
 		    	clone.loweringPossible = existing.loweringPossible;
@@ -229,7 +233,7 @@ public class Config {
 	public static Config getConfig() {
 		return getConfig(true);
 	}
-	public static Config getConfig(boolean logError)
+	private static Config getConfig(boolean logError)
 	{
 		if (_configs == null) {
 			InternalCompilerError.log("Dependencies has no _configs"); //$NON-NLS-1$
@@ -246,7 +250,7 @@ public class Config {
     	}
 	}
 	/** get the current config or null if not configured. */
-	public static Config safeGetConfig() {
+	private static Config safeGetConfig() {
 		if (_configs == null)
 			return null;
     	synchronized (_configs) {
@@ -262,28 +266,70 @@ public class Config {
 		if (_configs == null)
 			return false;
 	    synchronized(_configs) {
-	        return _configs.get() != null;
+	        Stack<Config> configStack = _configs.get();
+	        if (configStack == null)
+	        	return false;
+	        return !configStack.isEmpty();
 	    }
 	}
 
-	public static void addToThread(Config config) {
-		if (_configs == null) {
-			InternalCompilerError.log("Dependencies has no _configs"); //$NON-NLS-1$
-			return;
+	public static boolean hasConfig(Object client) {
+		Config config = safeGetConfig();
+		if (config == null)
+			return false;
+		return config.client.get() == client;
+	}
+	
+	static Config getOrCreateMatchingConfig(Object client, Parser parser, LookupEnvironment environment) {
+		Config config = safeGetConfig();
+		if (configMatchesRequest(config, client, parser, environment)) {
+			parser = config.parser;
+			environment = config.lookupEnvironment;
 		}
-    	synchronized (_configs) {
-    	    Stack<Config> configStack = _configs.get();
-			if (configStack != null) {
-				if (!configStack.isEmpty() && configStack.peek() == config)
-					return;
-			} else {
-				configStack = new Stack<>();
-				_configs.set(configStack);
+		if (parser == null || environment == null) {
+			config = configsByClient.get(client);
+			if (configMatchesRequest(config, client, parser, environment)) {
+				parser = config.parser;
+				environment = config.lookupEnvironment;
 			}
-			configStack.add(config);
-    	}
+		}
+		config = new Config(client, parser, environment);
+		configsByClient.put(client, config);
+		addConfig(config);
+		return config;
 	}
 
+	private static boolean configMatchesRequest(Config config, Object client, Parser parser,
+			LookupEnvironment environment) {
+		if (config == null)
+			return false;
+		if (config.client.get() != client)
+			return false;
+		if (config.parser != parser && parser != null)
+			return false;
+		if (config.lookupEnvironment != environment && environment != null)
+			return false;
+		return true;
+	}
+
+	@Override
+	public void close() {
+    	synchronized (_configs) {
+    	    Stack<Config> configStack = _configs.get();
+    	    assert(configStack != null);
+    	    if (configStack != null)
+    	    {
+    	        Config config = configStack.pop(); // remove Config
+    		    assert(config != null);
+    	        if (config != this) // bad balance of addConfig and removeConfig calls
+    	        {
+    	            assert(false);
+    	            configStack.push(config); // be defensive, put it back
+    	        }
+    	    }
+		}
+	}
+	
 	static boolean getVerifyMethods() {
 		return getConfig().verifyMethods;
 	}
@@ -379,7 +425,7 @@ public class Config {
 		synchronized(_configs) {
 			if (!hasConfig())
 				return false;
-			Config config = getConfig();
+			Config config = getConfig(false);
 			return (config != null) && (config.lookupEnvironment != null);
 		}
 	}

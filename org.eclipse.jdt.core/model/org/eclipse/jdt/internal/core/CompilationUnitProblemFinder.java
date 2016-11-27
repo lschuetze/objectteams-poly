@@ -131,19 +131,12 @@ public class CompilationUnitProblemFinder extends Compiler {
 
 			if (unit != null) {
 //{ObjectTeams: controlled by Dependencies:
-			  boolean newDependencySetup= false;
-			  try {
-				if (!Dependencies.isSetup()) {
-					newDependencySetup= true;
-					Dependencies.setup(this, this.parser, this.lookupEnvironment, true, false);
-				}
+			  try (Config config = Dependencies.setup(this, this.parser, this.lookupEnvironment, true, false))
+			  {
 // orig:  Note(SH): this will redirect:
 				this.lookupEnvironment.buildTypeBindings(unit, accessRestriction);
 				this.lookupEnvironment.completeTypeBindings(unit);
 // :giro
-			  } finally {
-				if (newDependencySetup)
-					Dependencies.release(this);
 			  }
 // SH}
 			}

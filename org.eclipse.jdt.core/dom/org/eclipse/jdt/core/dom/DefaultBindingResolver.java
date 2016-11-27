@@ -80,6 +80,7 @@ import org.eclipse.objectteams.otdt.internal.core.compiler.ast.FieldAccessSpec;
 import org.eclipse.objectteams.otdt.internal.core.compiler.ast.LiftingTypeReference;
 import org.eclipse.objectteams.otdt.internal.core.compiler.ast.MethodSpec;
 import org.eclipse.objectteams.otdt.internal.core.compiler.ast.TSuperMessageSend;
+import org.eclipse.objectteams.otdt.internal.core.compiler.control.Config;
 import org.eclipse.objectteams.otdt.internal.core.compiler.control.Dependencies;
 import org.eclipse.objectteams.otdt.internal.core.compiler.lookup.CallinCalloutBinding;
 import org.eclipse.objectteams.otdt.internal.core.compiler.lookup.CallinCalloutScope;
@@ -818,13 +819,11 @@ class DefaultBindingResolver extends BindingResolver {
 					BlockScope blockScope = (BlockScope) this.astNodesToBlockScope.get(expression);
 					if (blockScope != null) {
 //{ObjectTeams: calling into the compiler needs dependencies configured:
-					  Dependencies.setup(this, blockScope.compilationUnitScope().parser, lookupEnvironment(), false, false, false, true, true, false);
-					  try {
+					  try (Config config = Dependencies.setup(this, blockScope.compilationUnitScope().parser, lookupEnvironment(), false, false, false, true, true, false))
+					  {
 // orig:
 						return this.getTypeBinding(thisReference.resolveType(blockScope));
 // :giro
-					  } finally {
-						  Dependencies.release(this);
 					  }
 // SH}
 					}

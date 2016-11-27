@@ -99,6 +99,7 @@ import org.eclipse.objectteams.otdt.internal.core.compiler.ast.AbstractMethodMap
 import org.eclipse.objectteams.otdt.internal.core.compiler.ast.CallinMappingDeclaration;
 import org.eclipse.objectteams.otdt.internal.core.compiler.ast.CalloutMappingDeclaration;
 import org.eclipse.objectteams.otdt.internal.core.compiler.ast.PrecedenceDeclaration;
+import org.eclipse.objectteams.otdt.internal.core.compiler.control.Config;
 import org.eclipse.objectteams.otdt.internal.core.compiler.control.Dependencies;
 import org.eclipse.objectteams.otdt.internal.core.compiler.control.ITranslationStates;
 import org.eclipse.objectteams.otdt.internal.core.compiler.control.StateHelper;
@@ -395,10 +396,13 @@ public void accept(IBinaryType binaryType, PackageBinding packageBinding, Access
 public void accept(ICompilationUnit sourceUnit, AccessRestriction accessRestriction) {
 	// Switch the current policy and compilation result for this unit to the requested one.
 	CompilationResult unitResult = new CompilationResult(sourceUnit, 1, 1, this.options.maxProblemsPerUnit);
-	try {
 //{ObjectTeams: setup Dependencies for the other parser etc.
-	    Dependencies.setup(this, basicParser(), this.lookupEnvironment, true, true);
-	    // strictDiet since we will only dietParse and not even go beyond STATE_BINDINGS_COMPLETED
+/* orig:
+	try {
+:giro */
+	try (Config config = Dependencies.setup(this, basicParser(), this.lookupEnvironment, true, true))
+	{
+	// strictDiet since we will only dietParse and not even go beyond STATE_BINDINGS_COMPLETED
 //carp}
 		CompilationUnitDeclaration parsedUnit = basicParser().dietParse(sourceUnit, unitResult);
 //{ObjectTeams: never try to get this unit's method bodies:
@@ -415,11 +419,6 @@ public void accept(ICompilationUnit sourceUnit, AccessRestriction accessRestrict
 			throw e; // want to abort enclosing request to compile
 		}
 	}
-//{ObjectTeams:
-	finally {
-		Dependencies.release(this);
-	}
-//carp}
 	// Display unit error in debug mode
 	if (BasicSearchEngine.VERBOSE) {
 		if (unitResult.problemCount > 0) {
@@ -1318,11 +1317,13 @@ protected void locateMatches(JavaProject javaProject, PossibleMatch[] possibleMa
 	boolean bindingsWereCreated = mustResolve;
 
 //{ObjectTeams: setup Dependencies
-    Dependencies.setup(this, this.parser, this.lookupEnvironment, true, true, true);
-    // is strictDiet correct here? (SH).
+/* orig:
+	try {
+:giro */
+	try (Config config = Dependencies.setup(this, this.parser, this.lookupEnvironment, true, true, true)) // is strictDiet correct here? (SH).
+	{
 //carp}
 
-	try {
 //{ObjectTeams: by sorting short compound names to the front we force to
 //              analyze teams before their role files, thus avoiding to #accept()
 //              these role files which could later case duplicate type errors
@@ -1398,11 +1399,6 @@ protected void locateMatches(JavaProject javaProject, PossibleMatch[] possibleMa
 	} catch (AbortCompilation e) {
 		bindingsWereCreated = false;
 	}
-//{ObjectTeams:
-	finally {
-	    Dependencies.release(this);
-	}
-//carp}
 
 	if (!mustResolve) {
 		return;
@@ -1922,16 +1918,16 @@ protected boolean parseAndBuildBindings(PossibleMatch possibleMatch, boolean mus
 		throw new OperationCanceledException();
 
 //{ObjectTeams: LookupEnvironment.buildTypeBindings needs this context:
-	boolean useDependencies = false;
-	if (   mustResolve 
-	    || (this.patternLocator.mayBeGeneric && possibleMatch.nodeSet.mustResolve))
+/* orig:
+	try {
+:giro */
+	try (Config config = (   mustResolve 
+						  || (this.patternLocator.mayBeGeneric && possibleMatch.nodeSet.mustResolve))
+		? Dependencies.setup(this, this.parser, this.lookupEnvironment, true, true)
+		: null) 
 	{
-		Dependencies.setup(this, this.parser, this.lookupEnvironment, true, true);
-		useDependencies = true;
-	}
 //SH}
 	
-	try {
 		if (BasicSearchEngine.VERBOSE)
 			System.out.println("Parsing " + possibleMatch.openable.toStringWithAncestors()); //$NON-NLS-1$
 
@@ -1966,10 +1962,6 @@ protected boolean parseAndBuildBindings(PossibleMatch possibleMatch, boolean mus
 		}
 	} finally {
 		this.parser.nodeSet = null;
-//{ObjectTeams:
-		if (useDependencies)
-			Dependencies.release(this);
-// SH}	
 	}
 	return true;
 }
@@ -1979,9 +1971,12 @@ protected boolean parseAndBuildBindings(PossibleMatch possibleMatch, boolean mus
 protected void process(PossibleMatch possibleMatch, boolean bindingsWereCreated) throws CoreException {
 	this.currentPossibleMatch = possibleMatch;
 	CompilationUnitDeclaration unit = possibleMatch.parsedUnit;
-	try {
 //{ObjectTeams: guard with setup/release
-		Dependencies.setup(this, this.parser, this.lookupEnvironment, true, true);
+/* orig:
+	try {
+  :giro */
+	try (Config config = Dependencies.setup(this, this.parser, this.lookupEnvironment, true, true))
+	{
 		// is strictDiet correct here?
 		if (bindingsWereCreated && unit.state.getState() < ITranslationStates.STATE_BINDINGS_BUILT)
 		    StateHelper.setStateRecursive(unit, ITranslationStates.STATE_BINDINGS_BUILT, true);
@@ -2058,9 +2053,6 @@ protected void process(PossibleMatch possibleMatch, boolean bindingsWereCreated)
 	} finally {
 		this.lookupEnvironment.unitBeingCompleted = null;
 		this.currentPossibleMatch = null;
-//{ObjectTeams
-		Dependencies.release(this);
-//carp}
 	}
 }
 protected void purgeMethodStatements(TypeDeclaration type, boolean checkEachMethod) {

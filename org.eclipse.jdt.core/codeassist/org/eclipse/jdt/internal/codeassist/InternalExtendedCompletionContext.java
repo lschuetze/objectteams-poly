@@ -340,10 +340,12 @@ public class InternalExtendedCompletionContext {
 		CompilationUnitDeclaration previousUnitBeingCompleted = this.lookupEnvironment.unitBeingCompleted;
 		this.lookupEnvironment.unitBeingCompleted = this.compilationUnitDeclaration;
 //{ObjectTeams: protect call into the compiler
-		boolean useOwnConfig = !Config.hasConfig();
-		if (useOwnConfig) Dependencies.setup(this, this.parser, this.lookupEnvironment, true, true);
-// orig:
+/* orig:
 		try {
+  :giro */
+		try (Config config = Dependencies.setup(this, this.parser, this.lookupEnvironment, true, true))
+		{
+// orig:
 
 			SignatureWrapper wrapper = new SignatureWrapper(replacePackagesDot(typeSignature.toCharArray()));
 			// FIXME(stephan): do we interpret type annotations here?
@@ -353,9 +355,6 @@ public class InternalExtendedCompletionContext {
 			assignableTypeBinding = null;
 		} finally {
 			this.lookupEnvironment.unitBeingCompleted = previousUnitBeingCompleted;
-// :giro
-			if (useOwnConfig) Dependencies.release(this);
-// SH}
 		}
 		return assignableTypeBinding;
 	}
@@ -381,10 +380,8 @@ public class InternalExtendedCompletionContext {
 
 	public IJavaElement[] getVisibleElements(String typeSignature) {
 //{ObjectTeams: might call into the compiler (e.g., isCompatibleWith), so give at least minimal protection:
-	  boolean useOwnConfig = !Config.hasConfig();
-	  try {
-		if (useOwnConfig)
-			Dependencies.setup(this, this.parser, this.lookupEnvironment, true, true);
+	  try (Config config = Dependencies.setup(this, this.parser, this.lookupEnvironment, true, true))
+	  {
 // SH}
 		if (this.assistScope == null) return new IJavaElement[0];
 
@@ -466,9 +463,6 @@ public class InternalExtendedCompletionContext {
 
 		return result;
 //{ObjectTeams: cleanup:
-	  } finally {
-		  if (useOwnConfig)
-			  Dependencies.release(this);
 	  }
 // SH}
 	}
@@ -940,10 +934,8 @@ public class InternalExtendedCompletionContext {
 			ref = new QualifiedTypeReference(cn,new long[cn.length]);
 		}
 //{ObjectTeams: protect call into the compiler
-	  boolean useOwnConfig = !Config.hasConfig();
-	  try {
-		if (useOwnConfig)
-			Dependencies.setup(this, this.parser, this.lookupEnvironment, true, true);
+	  try (Config config = Dependencies.setup(this, this.parser, this.lookupEnvironment, true, true))
+	  {
 //orig:
 		switch (scope.kind) {
 			case Scope.METHOD_SCOPE :
@@ -955,9 +947,6 @@ public class InternalExtendedCompletionContext {
 				break;
 		}
 // :giro
-	  } finally {
-		if (useOwnConfig)
-			Dependencies.release(this);
 	  }
 // SH}
 		if (guessedType != null && guessedType.isValidBinding()) {

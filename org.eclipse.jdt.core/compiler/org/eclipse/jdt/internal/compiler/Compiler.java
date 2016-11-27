@@ -489,13 +489,16 @@ public class Compiler implements ITypeRequestor, ProblemSeverities {
 	 */
 	private void compile(ICompilationUnit[] sourceUnits, boolean lastRound) {
 		this.stats.startTime = System.currentTimeMillis();
+//{ObjectTeams:
+/* orig:
 		try {
+  :giro */
+		try (Config config = Dependencies.setup(this, this.parser, this.lookupEnvironment, true, true, false))
+		{
+//carp}
 			// build and record parsed units
 			reportProgress(Messages.compilation_beginningToCompile);
 
-//{ObjectTeams:
-			Dependencies.setup(this, this.parser, this.lookupEnvironment, true, true, false);
-//carp}
 			if (this.annotationProcessorManager == null) {
 				beginToCompile(sourceUnits);
 			} else {
@@ -1075,9 +1078,6 @@ public class Compiler implements ITypeRequestor, ProblemSeverities {
 		this.unitsToProcess = null;
 		if (DebugRequestor != null) DebugRequestor.reset();
 		this.problemReporter.reset();
-//{ObjectTeams: free some references to enable garbage collection
-		Dependencies.release(this);
-// carp}
 	}
 
 	/**
@@ -1090,9 +1090,12 @@ public class Compiler implements ITypeRequestor, ProblemSeverities {
 			boolean analyzeCode,
 			boolean generateCode) {
 
-		try {
 //{ObjectTeams:
-	        setupDependencies(verifyMethods, analyzeCode, generateCode);
+/* orig:
+		try {
+  :giro */
+	    try (Config config = setupDependencies(verifyMethods, analyzeCode, generateCode))
+	    {
 //SH}
 			if (unit == null) {
 				// build and record parsed units
@@ -1166,9 +1169,6 @@ public class Compiler implements ITypeRequestor, ProblemSeverities {
 			this.handleInternalException(e, unit, null);
 			throw e; // rethrow
 		} finally {
-//{ObjectTeams:
-			Dependencies.release(this);
-// SH}
 			// leave this.lookupEnvironment.unitBeingCompleted set to the unit, until another unit is resolved
 			// other calls to dom can cause classpath errors to be detected, resulting in AbortCompilation exceptions
 

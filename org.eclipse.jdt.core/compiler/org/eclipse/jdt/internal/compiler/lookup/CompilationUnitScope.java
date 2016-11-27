@@ -905,20 +905,13 @@ ImportBinding[] getDefaultImports() {
 // NOT Public API
 public final Binding getImport(char[][] compoundName, boolean onDemand, boolean isStaticImport) {
 //{ObjectTeams: this method may be called in a Config-unaware context:
-  boolean createdConfig = false;
-  if (!Config.hasLookupEnvironment()) {
-	  createdConfig = true;
-	  Dependencies.setup(this, this.parser, environment(), false, true);
-  }
-  try {
-//SH}
+  try (Config config = Dependencies.setup(this, this.parser, environment(), false, true))
+  {
+// orig:
 	if (onDemand)
 		return findImport(compoundName, compoundName.length);
 	return findSingleImport(compoundName, Binding.TYPE | Binding.FIELD | Binding.METHOD, isStaticImport);
-//{ObjectTeams: cleanup:
-  } finally {
-	  if (createdConfig)
-		  Dependencies.release(this);
+// :giro
   }
 //SH}
 }

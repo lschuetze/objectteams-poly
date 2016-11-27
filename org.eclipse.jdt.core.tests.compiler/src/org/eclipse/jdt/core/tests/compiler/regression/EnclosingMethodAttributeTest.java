@@ -22,6 +22,7 @@ import org.eclipse.jdt.internal.compiler.Compiler;
 import org.eclipse.jdt.internal.compiler.env.INameEnvironment;
 import org.eclipse.jdt.internal.compiler.impl.CompilerOptions;
 import org.eclipse.jdt.internal.compiler.lookup.ReferenceBinding;
+import org.eclipse.objectteams.otdt.internal.core.compiler.control.Config;
 import org.eclipse.objectteams.otdt.internal.core.compiler.control.Dependencies;
 
 @SuppressWarnings({ "rawtypes" })
@@ -253,14 +254,12 @@ public class EnclosingMethodAttributeTest extends AbstractComparableTest {
 				requestor,
 				getProblemFactory());
 //{ObjectTeams: avoid exceptions:
-	  Dependencies.setup(batchCompiler, batchCompiler.parser, batchCompiler.lookupEnvironment, true, false);
-	  try {
+	  try (Config config = Dependencies.setup(batchCompiler, batchCompiler.parser, batchCompiler.lookupEnvironment, true, false))
+	  {
 // orig:
 		ReferenceBinding binaryType = batchCompiler.lookupEnvironment.askForType(new char[][] {new char[0], "X$1".toCharArray()});
 		assertNotNull("Should not be null", binaryType);
 // :giro		
-	  } finally {
-		  Dependencies.release(batchCompiler);
 	  }
 // SH}
 	}

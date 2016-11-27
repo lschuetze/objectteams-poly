@@ -3733,12 +3733,8 @@ public abstract class Scope {
 	// use CompilationUnitScope.getImport(char[][]) instead
 	public final Binding getTypeOrPackage(char[][] compoundName) {
 //{ObjectTeams: this method may be called in a Config-unaware context:
-	  boolean createdConfig = false;
-	  if (!Config.hasLookupEnvironment()) {
-		  createdConfig = true;
-		  Dependencies.setup(this, compilationUnitScope().parser, environment(), false, true);
-	  }
-	  try {
+	  try (Config config = Dependencies.setup(this, compilationUnitScope().parser, environment(), false, true))
+	  {
 // SH}
 		int nameLength = compoundName.length;
 		if (nameLength == 1) {
@@ -3800,9 +3796,6 @@ public abstract class Scope {
 		}
 		return qualifiedType;
 //{ObjectTeams: cleanup:
-	  } finally {
-		  if (createdConfig)
-			  Dependencies.release(this);
 	  }
 // SH}
 	}

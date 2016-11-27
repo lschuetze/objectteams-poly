@@ -20,7 +20,6 @@
 package org.eclipse.objectteams.otdt.internal.core.compiler.control;
 
 
-import java.lang.ref.WeakReference;
 import java.util.Iterator;
 
 import org.eclipse.jdt.internal.compiler.Compiler;
@@ -110,7 +109,7 @@ public class Dependencies implements ITranslationStates {
      * Configure the Dependencies module for use by a specific client.
 	 * @param client  the object invoking setup
 	 * @param parser
-	 * @param lookupEnvironment
+	 * @param environment
 	 * @param verifyMethods
 	 * @param analyzeCode
 	 * @param generateCode
@@ -121,7 +120,7 @@ public class Dependencies implements ITranslationStates {
     public static Config setup(
     		Object            client,
 			Parser			  parser,
-			LookupEnvironment lookupEnvironment,
+			LookupEnvironment environment,
 			boolean	          verifyMethods,
 			boolean           analyzeCode,
 			boolean           generateCode,
@@ -129,15 +128,7 @@ public class Dependencies implements ITranslationStates {
 			boolean           bundledCompleteTypeBindings,
 			boolean           strictDiet)
     {
-    	Config config = Config.configsByClient.get(client);
-    	if (config != null && (config.parser != null || parser == null)) {
-    		Config.addToThread(config);
-			return config;
-		}
-    	config = new Config();
-    	config.client = new WeakReference<>(client);
-    	config.parser = parser;
-    	config.lookupEnvironment = lookupEnvironment;
+    	Config config = Config.getOrCreateMatchingConfig(client, parser, environment);
     	config.verifyMethods = verifyMethods;
     	config.analyzeCode = analyzeCode;
     	config.generateCode = generateCode;
@@ -149,7 +140,6 @@ public class Dependencies implements ITranslationStates {
 //    	config.ex = new Exception("Dependencies.setup()");
 //    	config.ex.getStackTrace();
 
-    	Config.addConfig(config);
     	return config;
     }
 
@@ -161,14 +151,14 @@ public class Dependencies implements ITranslationStates {
      * @param buildFieldsAndMethods should bindings for fields and methods be built?
      * @param strictDiet are statements ever parsed or are we on a strict diet?
      */
-    public static void setup(
+    public static Config setup(
     		Object            client,
 			Parser			  parser,
 			LookupEnvironment lookupEnvironment,
 			boolean           buildFieldsAndMethods,
 			boolean           strictDiet)
     {
-    	Dependencies.setup(client, parser, lookupEnvironment, true, true, true,
+    	return Dependencies.setup(client, parser, lookupEnvironment, true, true, true,
     			buildFieldsAndMethods, false, strictDiet);
     }
 
@@ -181,7 +171,7 @@ public class Dependencies implements ITranslationStates {
      * @param bundledCompleteTypeBindings should completeTypeBindings try to treat all units at once?
      * @param strictDiet are statements ever parsed or are we on a strict diet?
      */
-    public static void setup(
+    public static Config setup(
     		Object            client,
 			Parser			  parser,
 			LookupEnvironment lookupEnvironment,
@@ -189,19 +179,9 @@ public class Dependencies implements ITranslationStates {
 			boolean           bundledCompleteTypeBindings,
 			boolean           strictDiet)
     {
-    	Dependencies.setup(client, parser, lookupEnvironment, true, true, true,
+    	return Dependencies.setup(client, parser, lookupEnvironment, true, true, true,
     			buildFieldsAndMethods, bundledCompleteTypeBindings, strictDiet);
     }
-
-
-	/**
-     * Release Dependencies configuration from a specific client.
-	 * @param client ensure that client actually configured the
-	 *   module from the same thread as currently executing.
-	 */
-	public static void release(Object client) {
-	    Config.removeConfig(client);
-	}
 
 	public static boolean isSetup() {
 	    return Config.hasConfig();

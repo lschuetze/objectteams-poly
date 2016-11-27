@@ -221,6 +221,7 @@ import org.eclipse.objectteams.otdt.internal.core.compiler.ast.AbstractMethodMap
 import org.eclipse.objectteams.otdt.internal.core.compiler.ast.CallinMappingDeclaration;
 import org.eclipse.objectteams.otdt.internal.core.compiler.ast.CalloutMappingDeclaration;
 import org.eclipse.objectteams.otdt.internal.core.compiler.ast.MethodSpec;
+import org.eclipse.objectteams.otdt.internal.core.compiler.control.Config;
 import org.eclipse.objectteams.otdt.internal.core.compiler.control.Dependencies;
 import org.eclipse.objectteams.otdt.internal.core.compiler.control.ITranslationStates;
 import org.eclipse.objectteams.otdt.internal.core.compiler.control.StateHelper;
@@ -2036,8 +2037,8 @@ public final class CompletionEngine
 						ImportReference importReference = imports[i];
 						if (importReference instanceof CompletionOnImportReference) {
 //{ObjectTeams: guard with setup/release, rely on Dependencies instead of manually invoking three steps:
-  						  try {
-							Dependencies.setup(this, this.parser, this.lookupEnvironment, true, true);
+  						  try (Config config = Dependencies.setup(this, this.parser, this.lookupEnvironment, true, true))
+  						  {
 // km(merge) }
 							this.lookupEnvironment.buildTypeBindings(parsedUnit, null /*no access restriction*/);
 							if ((this.unitScope = parsedUnit.scope) != null) {
@@ -2088,8 +2089,6 @@ public final class CompletionEngine
 								}
 							}
 //{ObjectTeams:
-						  } finally {
-							Dependencies.release(this);
 						  }
 // km(merge) }
 							return;
@@ -2114,11 +2113,14 @@ public final class CompletionEngine
 
 				if (parsedUnit.types != null) {
 //{ObjectTeams: guard this block by setup/release:
-					Dependencies.setup(this, this.parser, this.lookupEnvironment, true, true);
+/* orig:
+					try {
+  :giro */
+					try (Config config = Dependencies.setup(this, this.parser, this.lookupEnvironment, true, true))
+					{
 					// statements are explicitly requested for the completion position, other statements are not needed
 // orig:
 
-					try {
 						this.lookupEnvironment.buildTypeBindings(parsedUnit, null /*no access restriction*/);
 
 						if ((this.unitScope = parsedUnit.scope) != null) {
@@ -2174,11 +2176,6 @@ public final class CompletionEngine
 									e.insideTypeAnnotation);
 						}
 					}
-//{ObjectTeams:
-				  finally {
-					Dependencies.release(this);
-				  }
-//SH}
 				}
 			}
 
@@ -2300,9 +2297,12 @@ public final class CompletionEngine
 				}
 
 				if (compilationUnit.types != null) {
-					try {
 	//{ObjectTeams: guard with setup/release, rely on Dependencies instead of manually invoking three steps:
-							Dependencies.setup(this, this.parser, this.lookupEnvironment, true, true);
+	/* orig:
+					try {
+	  :giro */
+					try (Config config = Dependencies.setup(this, this.parser, this.lookupEnvironment, true, true))
+					{
 	//orig:
 						this.lookupEnvironment.buildTypeBindings(compilationUnit, null /*no access restriction*/);
 
@@ -2332,11 +2332,6 @@ public final class CompletionEngine
 									e.insideTypeAnnotation);
 						}
 					}
-	//{ObjectTeams: moved here
-						finally {
-							Dependencies.release(this);
-						}
-	//km}
 				}
 				if(this.noProposal && this.problem != null) {
 					if(!contextAccepted) {

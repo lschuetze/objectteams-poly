@@ -70,6 +70,7 @@ import org.eclipse.jdt.internal.core.SourceTypeElementInfo;
 import org.eclipse.jdt.internal.core.util.BindingKeyResolver;
 import org.eclipse.jdt.internal.core.util.CommentRecorderParser;
 import org.eclipse.jdt.internal.core.util.DOMFinder;
+import org.eclipse.objectteams.otdt.internal.core.compiler.control.Config;
 import org.eclipse.objectteams.otdt.internal.core.compiler.control.Dependencies;
 import org.eclipse.objectteams.otdt.internal.core.compiler.control.ITranslationStates;
 
@@ -861,15 +862,18 @@ class CompilationUnitResolver extends Compiler {
 		astRequestor.compilationUnitResolver = this;
 		this.bindingTables = new DefaultBindingResolver.BindingTables();
 		CompilationUnitDeclaration unit = null;
+//{ObjectTeams:
+/* orig:
 		try {
+  :giro */
+		try (Config config = Dependencies.setup(this, this.parser, this.lookupEnvironment,
+				true/*verify*/, !this.options.ignoreMethodBodies/*analyze*/, !this.options.ignoreMethodBodies/*generate*/,
+				true, true, false))
+		{
+// SH+KM}
 			int length = compilationUnits.length;
 			org.eclipse.jdt.internal.compiler.env.ICompilationUnit[] sourceUnits = new org.eclipse.jdt.internal.compiler.env.ICompilationUnit[length];
 			System.arraycopy(compilationUnits, 0, sourceUnits, 0, length);
-//{ObjectTeams:
-			Dependencies.setup(this, this.parser, this.lookupEnvironment,
-								true/*verify*/, !this.options.ignoreMethodBodies/*analyze*/, !this.options.ignoreMethodBodies/*generate*/,
-								true, true, false);
-// SH+KM}
 
 			beginToCompile(sourceUnits, bindingKeys);
 			// process all units (some more could be injected in the loop by the lookup environment)
@@ -968,9 +972,6 @@ class CompilationUnitResolver extends Compiler {
 		} finally {
 			// disconnect ourselves from ast requestor
 			astRequestor.compilationUnitResolver = null;
-//{ObjectTeams: restore:
-            Dependencies.release(this);
-// SH+KM}
 		}
 	}
 
@@ -987,7 +988,15 @@ class CompilationUnitResolver extends Compiler {
 		astRequestor.compilationUnitResolver = this;
 		this.bindingTables = new DefaultBindingResolver.BindingTables();
 		CompilationUnitDeclaration unit = null;
+//{ObjectTeams:
+/* orig:
 		try {
+  :giro */
+		try (Config config = Dependencies.setup(this, this.parser, this.lookupEnvironment,
+							true/*verify*/, !this.options.ignoreMethodBodies/*analyze*/, !this.options.ignoreMethodBodies/*generate*/,
+							true, true, false))
+		{
+//SH}
 			int length = sourceCompilationUnits.length;
 			org.eclipse.jdt.internal.compiler.env.ICompilationUnit[] sourceUnits = new org.eclipse.jdt.internal.compiler.env.ICompilationUnit[length];
 			int count = 0;
@@ -1007,11 +1016,6 @@ class CompilationUnitResolver extends Compiler {
 				}
 				sourceUnits[count++] = new org.eclipse.jdt.internal.compiler.batch.CompilationUnit(contents, sourceUnitPath, encoding);
 			}
-//{ObjectTeams:
-			Dependencies.setup(this, this.parser, this.lookupEnvironment,
-								true/*verify*/, !this.options.ignoreMethodBodies/*analyze*/, !this.options.ignoreMethodBodies/*generate*/,
-								true, true, false);
-// SH}
 			beginToCompile(sourceUnits, bindingKeys);
 			// process all units (some more could be injected in the loop by the lookup environment)
 			for (int i = 0; i < this.totalUnits; i++) {
@@ -1109,9 +1113,6 @@ class CompilationUnitResolver extends Compiler {
 		} finally {
 			// disconnect ourselves from ast requestor
 			astRequestor.compilationUnitResolver = null;
-//{ObjectTeams: restore:
-            Dependencies.release(this);
-// SH}
 		}
 	}
 
@@ -1157,11 +1158,14 @@ class CompilationUnitResolver extends Compiler {
 			boolean analyzeCode,
 			boolean generateCode) {
 
+//{ObjectTeams:
+/* orig:
 		try {
 
-//{ObjectTeams:
-			Dependencies.setup(this, this.parser, this.lookupEnvironment,
-					verifyMethods, analyzeCode, generateCode, true, true, false);
+  :giro */
+		try (Config config = Dependencies.setup(this, this.parser, this.lookupEnvironment,
+				verifyMethods, analyzeCode, generateCode, true, true, false))
+		{
 // SH}
 			if (unit == null) {
 				// build and record parsed units
@@ -1277,9 +1281,6 @@ class CompilationUnitResolver extends Compiler {
 			this.handleInternalException(e, unit, null);
 			throw e; // rethrow
 		} finally {
-//{ObjectTeams:
-			Dependencies.release(this);
-// SH}
 			// No reset is performed there anymore since,
 			// within the CodeAssist (or related tools),
 			// the compiler may be called *after* a call

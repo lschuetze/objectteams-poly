@@ -74,6 +74,7 @@ import org.eclipse.jdt.internal.core.util.Util;
 import org.eclipse.objectteams.otdt.core.OTModelManager;
 import org.eclipse.objectteams.otdt.core.TypeHelper;
 import org.eclipse.objectteams.otdt.core.compiler.IOTConstants;
+import org.eclipse.objectteams.otdt.internal.core.compiler.control.Config;
 import org.eclipse.objectteams.otdt.internal.core.compiler.control.Dependencies;
 import org.eclipse.objectteams.otdt.internal.core.compiler.control.ITranslationStates;
 
@@ -755,16 +756,12 @@ private void reset(){
  */
 public void resolve(IGenericType suppliedType) {
 //{ObjectTeams: conditional setup
-    boolean dependenciesSetup = false;
-//carp}
-
+/* orig:    
 	try {
+  :giro */
+	try (Config config = Dependencies.setup(this, null, this.lookupEnvironment, true, false))
+	{
 		if (suppliedType.isBinaryType()) {
-//{ObjectTeams: setup here, other branch does it in resolve(Openable[]..)
-			// for binary types we need little processing only ...
-			Dependencies.setup(this, null, this.lookupEnvironment, true, false);
-			dependenciesSetup = true;
-// SH}
 			BinaryTypeBinding binaryTypeBinding = this.lookupEnvironment.cacheBinaryType((IBinaryType) suppliedType, false/*don't need field and method (bug 125067)*/, null /*no access restriction*/);
 			remember(suppliedType, binaryTypeBinding);
 			// We still need to add superclasses and superinterfaces bindings (see https://bugs.eclipse.org/bugs/show_bug.cgi?id=53095)
@@ -803,10 +800,6 @@ public void resolve(IGenericType suppliedType) {
 		}
 	} catch (AbortCompilation e) { // ignore this exception for now since it typically means we cannot find java.lang.Object
 	} finally {
-//{ObjectTeams: cleanup
-	    if (dependenciesSetup)
-	        Dependencies.release(this);
-//SH}
 		reset();
 	}
 }
@@ -825,11 +818,14 @@ public void resolve(IGenericType suppliedType) {
  * @param monitor
  */
 public void resolve(Openable[] openables, HashSet localTypes, IProgressMonitor monitor) {
-//{ObjectTeams: conditional setup
-    boolean dependenciesSetup = false;
-//carp}
 	SubMonitor subMonitor = SubMonitor.convert(monitor, 3);
+//{ObjectTeams: setup Dependencies
+/* orig:
 	try {
+  :giro */
+	try (Config config = Dependencies.setup(this, null, this.lookupEnvironment, true/*build constructor only*/, true))
+	{
+//carp}
 		int openablesLength = openables.length;
 		CompilationUnitDeclaration[] parsedUnits = new CompilationUnitDeclaration[openablesLength];
 		boolean[] hasLocalType = new boolean[openablesLength];
@@ -851,11 +847,10 @@ public void resolve(Openable[] openables, HashSet localTypes, IProgressMonitor m
 		subMonitor.split(1);
 		// build type bindings
 		Parser parser = new Parser(this.lookupEnvironment.problemReporter, true);
+//{ObjectTeams: complete the configuration:
+		config.parser = parser;
+// SH}
 		final boolean isJava8 = this.options.sourceLevel >= ClassFileConstants.JDK1_8;
-//{ObjectTeams: setup Dependencies
-		Dependencies.setup(this, parser, this.lookupEnvironment, true/*build constructor only*/, true);
-		dependenciesSetup = true;
-//carp}
 
 		for (int i = 0; i < openablesLength; i++) {
 			Openable openable = openables[i];
@@ -1053,10 +1048,6 @@ public void resolve(Openable[] openables, HashSet localTypes, IProgressMonitor m
 		if (TypeHierarchy.DEBUG)
 			e.printStackTrace();
 	} finally {
-//{ObjectTeams: cleanup
-	    if (dependenciesSetup)
-	        Dependencies.release(this);
-//SH}
 		reset();
 	}
 }
