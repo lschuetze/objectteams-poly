@@ -222,8 +222,6 @@ public class Config {
     	            assert(false);
     	            configStack.push(config); // be defensive, put it back
     	        }
-    	        if (configStack.empty())
-    	        	_configs.set(null); // remove entire Stack
     	    }
     	}
 	}
@@ -239,7 +237,7 @@ public class Config {
 		}
     	synchronized (_configs) {
     	    Stack<Config> configStack = _configs.get();
-			if (configStack == null) {
+			if (configStack == null || configStack.isEmpty()) {
 				if (logError)
 					InternalCompilerError.log("Dependencies not configured"); //$NON-NLS-1$
 				return null;
@@ -253,7 +251,7 @@ public class Config {
 			return null;
     	synchronized (_configs) {
     	    Stack<Config> configStack = _configs.get();
-			if (configStack == null)
+			if (configStack == null || configStack.isEmpty())
 				return null;
     	    return configStack.peek();
     	}
@@ -266,6 +264,24 @@ public class Config {
 	    synchronized(_configs) {
 	        return _configs.get() != null;
 	    }
+	}
+
+	public static void addToThread(Config config) {
+		if (_configs == null) {
+			InternalCompilerError.log("Dependencies has no _configs"); //$NON-NLS-1$
+			return;
+		}
+    	synchronized (_configs) {
+    	    Stack<Config> configStack = _configs.get();
+			if (configStack != null) {
+				if (!configStack.isEmpty() && configStack.peek() == config)
+					return;
+			} else {
+				configStack = new Stack<>();
+				_configs.set(configStack);
+			}
+			configStack.add(config);
+    	}
 	}
 
 	static boolean getVerifyMethods() {

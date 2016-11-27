@@ -130,8 +130,10 @@ public class Dependencies implements ITranslationStates {
 			boolean           strictDiet)
     {
     	Config config = Config.configsByClient.get(client);
-    	if (config != null && (config.parser != null || parser == null))
-    		return config;
+    	if (config != null && (config.parser != null || parser == null)) {
+    		Config.addToThread(config);
+			return config;
+		}
     	config = new Config();
     	config.client = new WeakReference<>(client);
     	config.parser = parser;
