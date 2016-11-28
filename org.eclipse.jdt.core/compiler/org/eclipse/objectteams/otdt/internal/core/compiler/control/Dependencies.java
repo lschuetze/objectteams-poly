@@ -125,7 +125,7 @@ public class Dependencies implements ITranslationStates {
 			boolean           analyzeCode,
 			boolean           generateCode,
 			boolean           buildFieldsAndMethods,
-			boolean           bundledCompleteTypeBindings,
+			Boolean           bundledCompleteTypeBindings,
 			boolean           strictDiet)
     {
     	Config config = Config.getOrCreateMatchingConfig(client, parser, environment);
@@ -133,7 +133,8 @@ public class Dependencies implements ITranslationStates {
     	config.analyzeCode = analyzeCode;
     	config.generateCode = generateCode;
     	config.buildFieldsAndMethods = buildFieldsAndMethods;
-    	config.bundledCompleteTypeBindings = bundledCompleteTypeBindings;
+    	if (bundledCompleteTypeBindings != null)
+    		config.bundledCompleteTypeBindings = bundledCompleteTypeBindings;
     	config.strictDiet = strictDiet;
 
     	// Debugging
@@ -159,7 +160,7 @@ public class Dependencies implements ITranslationStates {
 			boolean           strictDiet)
     {
     	return Dependencies.setup(client, parser, lookupEnvironment, true, true, true,
-    			buildFieldsAndMethods, false, strictDiet);
+    			buildFieldsAndMethods, null, strictDiet);
     }
 
     /**

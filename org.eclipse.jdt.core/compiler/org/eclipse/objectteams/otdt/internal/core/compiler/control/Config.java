@@ -282,18 +282,23 @@ public class Config implements ConfigHelper.IConfig {
 	
 	static Config getOrCreateMatchingConfig(Object client, Parser parser, LookupEnvironment environment) {
 		Config config = safeGetConfig();
+		Boolean bundledCompleteBindings = null;
 		if (configMatchesRequest(config, client, parser, environment)) {
 			parser = config.parser;
 			environment = config.lookupEnvironment;
+			bundledCompleteBindings = config.bundledCompleteTypeBindings;
 		}
 		if (parser == null || environment == null) {
 			config = configsByClient.get(client);
 			if (configMatchesRequest(config, client, parser, environment)) {
 				parser = config.parser;
 				environment = config.lookupEnvironment;
+				bundledCompleteBindings = config.bundledCompleteTypeBindings;
 			}
 		}
 		config = new Config(client, parser, environment);
+		if (bundledCompleteBindings != null)
+			config.bundledCompleteTypeBindings = bundledCompleteBindings;
 		configsByClient.put(client, config);
 		addConfig(config);
 		return config;
