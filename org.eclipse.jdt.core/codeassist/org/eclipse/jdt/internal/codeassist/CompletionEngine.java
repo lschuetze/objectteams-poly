@@ -2112,15 +2112,12 @@ public final class CompletionEngine
 				}
 
 				if (parsedUnit.types != null) {
-//{ObjectTeams: guard this block by setup/release:
-/* orig:
-					try {
-  :giro */
-					try (Config config = Dependencies.setup(this, this.parser, this.lookupEnvironment, true, true))
-					{
-					// statements are explicitly requested for the completion position, other statements are not needed
+//{ObjectTeams: guard this block by setup/release (don't merge with existing try, since catch still needs the Config):
+				  try (Config config = Dependencies.setup(this, this.parser, this.lookupEnvironment, true, true))
+				  	// statements are explicitly requested for the completion position, other statements are not needed
+				  {
 // orig:
-
+					try {
 						this.lookupEnvironment.buildTypeBindings(parsedUnit, null /*no access restriction*/);
 
 						if ((this.unitScope = parsedUnit.scope) != null) {
@@ -2130,7 +2127,6 @@ public final class CompletionEngine
 							parsedUnit.scope.faultInTypes();
   :giro */
 							Dependencies.ensureState(parsedUnit, ITranslationStates.STATE_METHODS_PARSED-1);
-
 // orig:
 							parseBlockStatements(parsedUnit, this.actualCompletionPosition);
 // :giro
@@ -2146,13 +2142,13 @@ public final class CompletionEngine
   :giro */
 							Dependencies.ensureState(parsedUnit, ITranslationStates.STATE_LATE_ELEMENTS_COPIED);
 							// generateStatements also resolves some, notably parameter mappings as inserted into mapping wrappers.
-// SH}
+// orig:
 						}
 					} catch (CompletionNodeFound e) {
-//{ObjectTeams: Dependencies might drive to CompletionNodeFound already during buildTypeBindings:
+	// OT: Dependencies might drive to CompletionNodeFound already during buildTypeBindings:
 						if (this.unitScope == null)
 							this.unitScope = parsedUnit.scope;
-// SH}
+	// :TO
 						//					completionNodeFound = true;
 						if (e.astNode != null) {
 							// if null then we found a problem in the completion node
@@ -2176,6 +2172,9 @@ public final class CompletionEngine
 									e.insideTypeAnnotation);
 						}
 					}
+// :giro
+				  }
+// SH}
 				}
 			}
 
@@ -2297,25 +2296,23 @@ public final class CompletionEngine
 				}
 
 				if (compilationUnit.types != null) {
-	//{ObjectTeams: guard with setup/release, rely on Dependencies instead of manually invoking three steps:
-	/* orig:
+//{ObjectTeams: guard with setup/release, rely on Dependencies instead of manually invoking three steps:
+				  try (Config config = Dependencies.setup(this, this.parser, this.lookupEnvironment, true, true))
+				  {
+//orig:
 					try {
-	  :giro */
-					try (Config config = Dependencies.setup(this, this.parser, this.lookupEnvironment, true, true))
-					{
-	//orig:
 						this.lookupEnvironment.buildTypeBindings(compilationUnit, null /*no access restriction*/);
 
 						if ((this.unitScope = compilationUnit.scope) != null) {
 							this.lookupEnvironment.completeTypeBindings(compilationUnit, true);
-	//:giro
-	/* orig:
+//:giro
+/* orig:
 							compilationUnit.scope.faultInTypes();
 							compilationUnit.resolve();
-	  :giro */
-								Dependencies.ensureState(compilationUnit, ITranslationStates.STATE_LATE_ELEMENTS_COPIED);
-								// generateStatements also resolves some, notably parameter mappings as inserted into mapping wrappers.
-	// SH}
+  :giro */
+							Dependencies.ensureState(compilationUnit, ITranslationStates.STATE_LATE_ELEMENTS_COPIED);
+							// generateStatements also resolves some, notably parameter mappings as inserted into mapping wrappers.
+// orig:
 						}
 					} catch (CompletionNodeFound e) {
 						//					completionNodeFound = true;
@@ -2332,6 +2329,9 @@ public final class CompletionEngine
 									e.insideTypeAnnotation);
 						}
 					}
+// :giro
+				  }
+// SH}
 				}
 				if(this.noProposal && this.problem != null) {
 					if(!contextAccepted) {
