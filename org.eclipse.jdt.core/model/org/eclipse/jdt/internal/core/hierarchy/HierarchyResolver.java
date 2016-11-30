@@ -848,7 +848,7 @@ public void resolve(Openable[] openables, HashSet localTypes, IProgressMonitor m
 		// build type bindings
 		Parser parser = new Parser(this.lookupEnvironment.problemReporter, true);
 //{ObjectTeams: complete the configuration:
-		config.parser = parser;
+		config.setParser(parser);
 // SH}
 		final boolean isJava8 = this.options.sourceLevel >= ClassFileConstants.JDK1_8;
 

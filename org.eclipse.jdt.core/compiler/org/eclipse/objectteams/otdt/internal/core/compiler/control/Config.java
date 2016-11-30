@@ -20,6 +20,7 @@
  **********************************************************************/
 package org.eclipse.objectteams.otdt.internal.core.compiler.control;
 
+import java.lang.ref.SoftReference;
 import java.lang.ref.WeakReference;
 import java.util.Stack;
 import java.util.WeakHashMap;
@@ -65,10 +66,10 @@ public class Config implements ConfigHelper.IConfig {
 		}
 	}
 
-    WeakReference<Object> 	client;
-    public Parser         	parser;
-    Parser            		plainParser; // alternate parser when client is a MatchLocator
-    LookupEnvironment 		lookupEnvironment;
+    WeakReference<Object> 				client;
+    public SoftReference<Parser>		parser;			// SoftReference to keep parsers a little longer to avoid NPE in #delegateGetMethodBodies()
+    SoftReference<Parser>				plainParser; 	// alternate parser when client is a MatchLocator
+    WeakReference<LookupEnvironment> 	lookupEnvironment; // @NonNull WeakReferece<@Nullable LookupEnvironment>
     public boolean verifyMethods;
     boolean analyzeCode;
     boolean generateCode;
@@ -78,7 +79,6 @@ public class Config implements ConfigHelper.IConfig {
     boolean strictDiet;
     /** is it sound to ignore missing byte code during copy-inheritance? */
     public boolean ignoreMissingBytecode = false;
-//	    Exception ex;
 
     // the following two are set from RoleTypeBinding.isCompatibleWith():
     /** Here we signal the need to insert casts at the end of resolve(). */
@@ -123,8 +123,18 @@ public class Config implements ConfigHelper.IConfig {
 
 	public Config(Object client, Parser parser, LookupEnvironment environment) {
 		this.client = new WeakReference<>(client);
+		this.parser = new SoftReference<>(parser);
+		this.lookupEnvironment = new WeakReference<>(environment);
+	}
+
+	Config(Object client, SoftReference<Parser> parser, WeakReference<LookupEnvironment> lookupEnvironment) {
+		this.client = new WeakReference<>(client);
 		this.parser = parser;
-		this.lookupEnvironment = environment;
+		this.lookupEnvironment = lookupEnvironment;
+	}
+
+	public void setParser(Parser parser) {
+		this.parser = new SoftReference<>(parser);
 	}
 
 	public static void addConfig(Config config)
@@ -135,12 +145,6 @@ public class Config implements ConfigHelper.IConfig {
 		    {
 		        configStack = new Stack<Config>();
 		        _configs.set(configStack);
-		    }
-		    else
-		    {
-		        assert(!configStack.empty());
-		        // apparently, this is not really the case
-		        // assert(config.isAlmostIdentical((Config) configStack.peek()));
 		    }
 
 	        configStack.push(config);
@@ -167,7 +171,7 @@ public class Config implements ConfigHelper.IConfig {
 		        configStack = new Stack<Config>();
 		        _configs.set(configStack);
 
-		        Config config = new Config(client, null, null);
+		        Config config = new Config(client, (Parser)null, (LookupEnvironment)null);
 		    	configStack.push(config);
 		    	return null; // no old config
 		    } else {
@@ -281,22 +285,28 @@ public class Config implements ConfigHelper.IConfig {
 	}
 	
 	static Config getOrCreateMatchingConfig(Object client, Parser parser, LookupEnvironment environment) {
+		WeakReference<LookupEnvironment> environmentWeak = null;
+		SoftReference<Parser> parserSoft = null;
 		Config config = safeGetConfig();
 		Boolean bundledCompleteBindings = null;
 		if (configMatchesRequest(config, client, parser, environment)) {
-			parser = config.parser;
-			environment = config.lookupEnvironment;
+			parserSoft = config.parser;
+			environmentWeak = config.lookupEnvironment;
 			bundledCompleteBindings = config.bundledCompleteTypeBindings;
 		}
 		if (parser == null || environment == null) {
 			config = configsByClient.get(client);
 			if (configMatchesRequest(config, client, parser, environment)) {
-				parser = config.parser;
-				environment = config.lookupEnvironment;
+				parserSoft = config.parser;
+				environmentWeak = config.lookupEnvironment;
 				bundledCompleteBindings = config.bundledCompleteTypeBindings;
 			}
 		}
-		config = new Config(client, parser, environment);
+		if (parserSoft == null)
+			parserSoft = new SoftReference<Parser>(parser);
+		if (environmentWeak == null)
+			environmentWeak = new WeakReference<LookupEnvironment>(environment);
+		config = new Config(client, parserSoft, environmentWeak);
 		if (bundledCompleteBindings != null)
 			config.bundledCompleteTypeBindings = bundledCompleteBindings;
 		configsByClient.put(client, config);
@@ -310,9 +320,9 @@ public class Config implements ConfigHelper.IConfig {
 			return false;
 		if (config.client.get() != client)
 			return false;
-		if (config.parser != parser && parser != null)
+		if (config.parser.get() != parser && parser != null)
 			return false;
-		if (config.lookupEnvironment != environment && environment != null)
+		if (config.lookupEnvironment.get() != environment && environment != null)
 			return false;
 		return true;
 	}
@@ -421,7 +431,7 @@ public class Config implements ConfigHelper.IConfig {
 	}
 
 	protected LookupEnvironment lookupEnvironment() {
-		return this.lookupEnvironment;
+		return this.lookupEnvironment.get();
 	}
 
 	public static boolean hasLookupEnvironment() {
@@ -431,7 +441,7 @@ public class Config implements ConfigHelper.IConfig {
 			if (!hasConfig())
 				return false;
 			Config config = getConfig(false);
-			return (config != null) && (config.lookupEnvironment != null);
+			return (config != null) && (config.lookupEnvironment.get() != null);
 		}
 	}
 	static boolean getBuildFieldsAndMethods() {
@@ -453,7 +463,7 @@ public class Config implements ConfigHelper.IConfig {
 		return getConfig().parser();
 	}
 	protected Parser parser() {
-		return this.parser;
+		return this.parser.get();
 	}
 
 	public static boolean isUsingAssistParser() {
@@ -475,10 +485,16 @@ public class Config implements ConfigHelper.IConfig {
 			// MatchLocator.getMethodBodies and MatchLocatorParser.getMethodBodies
 			// both contribute to locating matches. Unit parser on behalf of
 			// Dependencies should however be parsed using a plain Parser:
-			if (config.plainParser == null)
-				config.plainParser = ((ITypeRequestor)theClient).getPlainParser();
-			if (config.plainParser != null)
-				parser = config.plainParser;
+			Parser plainParser = config.plainParser != null ? config.plainParser.get() : null;
+			if (plainParser != null) {
+				parser = plainParser;
+			} else {
+				plainParser = ((ITypeRequestor)theClient).getPlainParser();
+				if (plainParser != null) {
+					parser = plainParser;
+					config.plainParser = new SoftReference<>(plainParser);
+				}
+			}
 		}
 		parser.getMethodBodies(unit);
 	}
