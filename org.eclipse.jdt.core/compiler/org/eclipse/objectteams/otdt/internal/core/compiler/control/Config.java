@@ -167,7 +167,7 @@ public class Config implements ConfigHelper.IConfig {
 	public static Config createOrResetConfig(Object client) {
 	    synchronized (_configs) {
 		    Stack<Config> configStack = _configs.get();
-		    if (configStack == null) {
+		    if (configStack == null || configStack.empty()) {
 		        configStack = new Stack<Config>();
 		        _configs.set(configStack);
 
@@ -175,7 +175,6 @@ public class Config implements ConfigHelper.IConfig {
 		    	configStack.push(config);
 		    	return null; // no old config
 		    } else {
-		        assert(!configStack.empty());
 		        Config existing = configStack.peek();
 		    	Config clone = new Config(client, existing.parser, existing.lookupEnvironment);
 		    	clone.castRequired = existing.castRequired;
