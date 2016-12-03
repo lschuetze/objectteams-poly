@@ -1093,15 +1093,20 @@ public class Dependencies implements ITranslationStates {
 	{
 	    if (unit.types == null)
 	        return;
+	    if (Config.getConfig().clientHasExactClass(Compiler.class)) {
+		    int nRoleTypes = 0;
+			for (int j = 0; j < unit.types.length; j++) {
+				TypeDeclaration type = unit.types[j];
+				if (type.isRole() && !RoleSplitter.isClassPartName(type.name))
+					nRoleTypes++;
+			}
+			if (nRoleTypes > 1) {
+				environment.problemReporter.roleFileMustDeclareOneType(unit);
+				return;
+			}
+		}
 		for (int j = 0; j < unit.types.length; j++) {
 			if (unit.types[j].isRole()) {
-				if (unit.types.length != 1) {
-					if (Config.getConfig().clientHasExactClass(Compiler.class))
-					{
-						environment.problemReporter.roleFileMustDeclareOneType(unit);
-						return;
-					}
-				}
 				if (unit.types[j].enclosingType == null)
 					RoleFileHelper.getTeamOfRoleFile(unit, unit.types[j], environment);
 			}
