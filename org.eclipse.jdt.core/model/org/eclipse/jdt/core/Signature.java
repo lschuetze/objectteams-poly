@@ -1520,7 +1520,7 @@ public static int getArrayCount(char[] typeSignature) throws IllegalArgumentExce
 		}
 		return count;
 	} catch (ArrayIndexOutOfBoundsException e) { // signature is syntactically incorrect if last character is C_ARRAY
-		throw new IllegalArgumentException();
+		throw new IllegalArgumentException(e);
 	}
 }
 
@@ -1663,7 +1663,7 @@ public static int getParameterCount(char[] methodSignature) throws IllegalArgume
 			count++;
 		}
 	} catch (ArrayIndexOutOfBoundsException e) {
-		throw new IllegalArgumentException();
+		throw new IllegalArgumentException(e);
 	}
 }
 
@@ -1717,7 +1717,7 @@ public static char[][] getParameterTypes(char[] methodSignature) throws IllegalA
 			i = e + 1;
 		}
 	} catch (ArrayIndexOutOfBoundsException e) {
-		throw new IllegalArgumentException();
+		throw new IllegalArgumentException(e);
 	}
 }
 /**

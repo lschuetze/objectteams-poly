@@ -1330,7 +1330,7 @@ public class ParameterizedTypeBinding extends ReferenceBinding implements Substi
 			else // WildcardBinding, CaptureBinding have no sourceName
 				nameBuffer.append(this.type.readableName());
 		}
-		if (this.arguments != null && this.arguments.length > 0) { // empty arguments array happens when PTB has been created just to capture type annotations
+		if (this.arguments != null && this.arguments.length > 0 && !isRawType()) { // empty arguments array happens when PTB has been created just to capture type annotations
 			nameBuffer.append('<');
 		    for (int i = 0, length = this.arguments.length; i < length; i++) {
 		        if (i > 0) nameBuffer.append(',');
@@ -1358,7 +1358,7 @@ public class ParameterizedTypeBinding extends ReferenceBinding implements Substi
 			else // WildcardBinding, CaptureBinding have no sourceName
 				nameBuffer.append(this.type.shortReadableName());
 		}
-		if (this.arguments != null && this.arguments.length > 0) { // empty arguments array happens when PTB has been created just to capture type annotations
+		if (this.arguments != null && this.arguments.length > 0 && !isRawType()) { // empty arguments array happens when PTB has been created just to capture type annotations
 			nameBuffer.append('<');
 		    for (int i = 0, length = this.arguments.length; i < length; i++) {
 		        if (i > 0) nameBuffer.append(',');

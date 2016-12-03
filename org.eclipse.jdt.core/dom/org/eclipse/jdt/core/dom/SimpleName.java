@@ -208,10 +208,8 @@ public class SimpleName extends Name {
 					// this is the case when there is only one identifier see 87849
 					throw new IllegalArgumentException("Invalid identifier : >" + identifier + "<");  //$NON-NLS-1$//$NON-NLS-2$
 				}
-			} catch(InvalidInputException e) {
-				IllegalArgumentException iae = new IllegalArgumentException("Invalid identifier : >" + identifier + "<"); //$NON-NLS-1$//$NON-NLS-2$
-				iae.initCause(e);
-				throw iae; 
+			} catch (InvalidInputException e) {
+				throw new IllegalArgumentException("Invalid identifier : >" + identifier + "<", e); //$NON-NLS-1$//$NON-NLS-2$
 			}
 		} finally {
 			this.ast.scanner.sourceLevel = sourceLevel;
