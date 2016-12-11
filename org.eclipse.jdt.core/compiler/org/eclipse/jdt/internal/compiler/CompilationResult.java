@@ -612,7 +612,7 @@ public int requestSyntheticSourcePosition(int syntheticLineNumber) {
 	if (this.sourceEndPos == Integer.MAX_VALUE)
 		this.sourceEndPos = oldEndPos;
 	int oldLen = this.lineSeparatorPositions.length;
-	assert oldLen < syntheticLineNumber : "Synthetic line numbers must be higher than existing ones."; //$NON-NLS-1$
+	assert oldLen <= syntheticLineNumber : "Synthetic line numbers must be higher than existing ones."; //$NON-NLS-1$
 	int newStartPos = oldEndPos;
 	System.arraycopy(this.lineSeparatorPositions, 0, 
 					 this.lineSeparatorPositions = new int[syntheticLineNumber], 0, oldLen);
