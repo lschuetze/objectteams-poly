@@ -25,7 +25,7 @@ APP_NAME_P2DIRECTOR=org.eclipse.equinox.p2.director
 IU_AGG_PRODUCT=org.eclipse.cbi.p2repo.cli.product
 URL_AGG_UPDATES=http://download.eclipse.org/cbi/updates/aggregator/headless/4.6/
 
-FILE_SDK_AGGR=/shared/tools/objectteams/sdk_aggr/SDK4Mvn.aggr
+FILE_SDK_AGGR=${WORKSPACE}/SDK4Mvn.aggr
 
 # ENRICH POMS tool:
 ENRICH_POMS_JAR=${WORKSPACE}/../../pomEnricher/workspace/EnrichPoms.jar
@@ -49,6 +49,13 @@ function require_executable() {
 		exit 1
 	fi
 }
+
+# -------- fetch .aggr file **TEMP** will eventually move to the releng git: ------------
+git archive --remote=file://localhost/gitroot/objectteams/org.eclipse.objectteams.git \
+	master releng/EnrichPoms/SDK4Mvn.aggr \
+	| tar xv
+/bin/mv releng/EnrichPoms/SDK4Mvn.aggr ${WORKSPACE}/
+/bin/rmdir -p releng/EnrichPoms
 
 #================================================================================
 #   (1) Install and run the CBI aggregator

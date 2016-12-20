@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<aggregator:Aggregation xmi:version="2.0" xmlns:xmi="http://www.omg.org/XMI" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:aggregator="http://www.eclipse.org/cbi/p2repo/2011/aggregator/1.1.0" label="SDK4Mvn" packedStrategy="UNPACK_AS_SIBLING" type="R" mavenResult="true" versionFormat="MavenRelease">
+  <validationSets label="main">
+    <contributions enabled="true" label="sdk">
+      <repositories location="/home/data/httpd/download.eclipse.org/eclipse/updates/4.6-M-builds/M-4.6.2RC3-201611241400/">
+        <mapRules xsi:type="aggregator:ExclusionRule" name="org.eclipse.e4.core.tools.feature.feature.group"/>
+        <mapRules xsi:type="aggregator:ExclusionRule" name="org.eclipse.e4.core.tools.feature.source.feature.group"/>
+      </repositories>
+      <repositories location="/home/data/httpd/download.eclipse.org/rt/ecf/3.13.2/site.p2/">
+        <features name="org.eclipse.ecf.remoteservice.sdk.feature.feature.group"/>
+        <features name="org.eclipse.ecf.remoteservice.sdk.source.feature.feature.group"/>
+        <features name="org.eclipse.ecf.core.feature.group"/>
+        <features name="org.eclipse.ecf.core.source.feature.group"/>
+      </repositories>
+    </contributions>
+    <contributions enabled="false" label="sdk_http">
+      <repositories location="http://download.eclipse.org/eclipse/updates/4.6-M-builds/M-4.6.2RC3-201611241400/">
+        <mapRules xsi:type="aggregator:ExclusionRule" name="org.eclipse.e4.core.tools.feature.feature.group"/>
+        <mapRules xsi:type="aggregator:ExclusionRule" name="org.eclipse.e4.core.tools.feature.source.feature.group"/>
+      </repositories>
+      <repositories location="http://download.eclipse.org/rt/ecf/3.13.2/site.p2/">
+        <features name="org.eclipse.ecf.remoteservice.sdk.feature.feature.group"/>
+        <features name="org.eclipse.ecf.remoteservice.sdk.source.feature.feature.group"/>
+        <features name="org.eclipse.ecf.core.feature.group"/>
+        <features name="org.eclipse.ecf.core.source.feature.group"/>
+      </repositories>
+    </contributions>
+    <validationRepositories location="/home/data/httpd/download.eclipse.org/modeling/emf/emf/updates/2.12"/>
+  </validationSets>
+  <configurations operatingSystem="aix" windowSystem="gtk" architecture="ppc"/>
+  <configurations operatingSystem="aix" windowSystem="gtk" architecture="ppc64"/>
+  <configurations operatingSystem="hpux" windowSystem="gtk" architecture="ia64"/>
+  <configurations operatingSystem="linux" windowSystem="gtk" architecture="ppc"/>
+  <configurations operatingSystem="linux" windowSystem="gtk" architecture="ppc64"/>
+  <configurations operatingSystem="linux" windowSystem="gtk" architecture="ppc64le"/>
+  <configurations operatingSystem="linux" windowSystem="gtk" architecture="s390"/>
+  <configurations operatingSystem="linux" windowSystem="gtk" architecture="s390x"/>
+  <configurations operatingSystem="linux" windowSystem="gtk"/>
+  <configurations operatingSystem="linux" windowSystem="gtk" architecture="x86_64"/>
+  <configurations operatingSystem="macosx" windowSystem="cocoa" architecture="x86_64"/>
+  <configurations operatingSystem="solaris" windowSystem="gtk" architecture="x86_64"/>
+  <configurations operatingSystem="solaris" windowSystem="gtk" architecture="sparcv9"/>
+  <configurations architecture="x86_64"/>
+  <configurations/>
+  <mavenMappings namePattern="(org\.eclipse\.jdt)(.*)" groupId="$1" artifactId="$1$2"/>
+  <mavenMappings namePattern="(org\.eclipse\.pde)(.*)" groupId="$1" artifactId="$1$2"/>
+  <mavenMappings namePattern="(org.eclipse.jetty)(.*)" groupId="$1" artifactId="$1$2"/>
+  <mavenMappings namePattern="(org.eclipse.ecf)(.*)" groupId="$1" artifactId="$1$2"/>
+  <mavenMappings namePattern="(org.eclipse.emf)(.*)" groupId="$1" artifactId="$1$2"/>
+  <mavenMappings namePattern="(org\.eclipse)(.*)$" groupId="$1.platform" artifactId="$1$2"/>
+  <mavenMappings namePattern="com\.ibm\.icu(\.source)?" groupId="com.ibm.icu" artifactId="icu4j$1"/>
+  <mavenMappings namePattern="(com\.jcraft)\.(.*)" groupId="$1" artifactId="$2"/>
+  <mavenMappings namePattern="com\.sun\.el(\.source)?" groupId="org.eclipse.jetty.orbit" artifactId="com.sun.el$1"/>
+  <mavenMappings namePattern="javax\.annotation(\.source)?" groupId="javax.annotation" artifactId="javax.annotation-api$1"/>
+  <mavenMappings namePattern="javax\.el(\.source)?" groupId="javax.el" artifactId="el-api$1"/>
+  <mavenMappings namePattern="javax\.servlet(\.source)?$" groupId="javax.servlet" artifactId="javax.servlet-api$1"/>
+  <mavenMappings namePattern="javax\.servlet\.jsp(\.source)?" groupId="javax.servlet.jsp" artifactId="javax.servlet.jsp-api$1"/>
+  <mavenMappings namePattern="org\.apache\.(commons)\.([^.]+)" groupId="$1-$2" artifactId="$1-$2"/>
+  <mavenMappings namePattern="(org\.apache\.httpcomponents)\.([^.]+)$" groupId="$1" artifactId="$2"/>
+  <mavenMappings namePattern="org\.apache\.lucene\.core" groupId="org.apache.lucene" artifactId="lucene-core"/>
+  <mavenMappings namePattern="org\.apache\.lucene\.analysis" groupId="org.apache.lucene" artifactId="lucene-analyzers"/>
+  <mavenMappings namePattern="(org\.apache\.felix)(\.gogo\.[^.]+)" groupId="$1" artifactId="$1$2"/>
+  <mavenMappings namePattern="org\.apache\.ant$" groupId="org.apache.ant" artifactId="ant"/>
+  <mavenMappings namePattern="(org.apache)\.(sshd)\.(core)" groupId="$1.$2" artifactId="$2-$3"/>
+  <mavenMappings namePattern="(org\.objectweb)\.([^.]+)$" groupId="org.ow2.asm" artifactId="$2"/>
+  <mavenMappings namePattern="(org\.objectweb)\.([^.]+)\.([^.]+)" groupId="org.ow2.asm" artifactId="$2-$3"/>
+  <mavenMappings namePattern="org.tukaani.xz" groupId="org.tukaani" artifactId="xz"/>
+  <mavenMappings namePattern="org.hamcrest.core" groupId="org.hamcrest" artifactId="hamcrest-core"/>
+  <mavenMappings namePattern="org.junit(\.source)?" groupId="junit" artifactId="junit$1"/>
+  <mavenMappings namePattern="org\.(sat4j)\.(.*)" groupId="org.ow2.$1" artifactId="org.ow2.$1.$2"/>
+  <mavenMappings namePattern="org.w3c.css.sac" groupId="org.eclipse.birt.runtime" artifactId="org.w3c.css.sac"/>
+  <mavenMappings namePattern="org.apache.batik.css" groupId="org.apache.xmlgraphics" artifactId="batik-css"/>
+  <mavenMappings namePattern="^(([^.]+(?:\.[^.]+(?:\.[^.]+)?)?)(?:\.[^.]+)*)$" groupId="$2" artifactId="$1"/>
+  <mavenMappings namePattern="(.*)" groupId="p2.osgi.bundle" artifactId="$1"/>
+</aggregator:Aggregation>
