@@ -28,7 +28,7 @@ URL_AGG_UPDATES=http://download.eclipse.org/cbi/updates/aggregator/headless/4.6/
 FILE_SDK_AGGR=/shared/tools/objectteams/sdk_aggr/SDK4Mvn.aggr
 
 # ENRICH POMS tool:
-ENRICH_POMS_JAR=/shared/tools/objectteams/sdk_aggr/enrichPoms.jar
+ENRICH_POMS_JAR=${WORKSPACE}/../../pomEnricher/workspace/EnrichPoms.jar
 
 # LOCAL TOOLS:
 LOCAL_TOOLS=${WORKSPACE}/tools
