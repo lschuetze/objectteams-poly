@@ -1,0 +1,147 @@
+/********************************************************************************
+ * Copyright (c) 2016 GK Software AG and others.
+ * All rights reserved. This program and the accompanying materials
+ * are made available under the terms of the Eclipse Public License v1.0
+ * which accompanies this distribution, and is available at
+ * http://www.eclipse.org/legal/epl-v10.html
+ *
+ * Contributors:
+ *     Stephan Herrmann - initial implementation
+ ********************************************************************************/
+package org.eclipse.cbi.p2repo.aggregator.maven.pom;
+
+public class ArtifactInfo {
+
+	private static final String SCM_TAG_START = ";tag=\""; // git tag inside Eclipse-SourceReference
+
+	private static final String INDENT = "  ";
+	
+	private static final String FRONT_MATTER =
+			"  <licenses>\n" + 
+			"    <license>\n" + 
+			"      <name>Eclipse Public License</name>\n" + 
+			"      <url>http://www.eclipse.org/legal/epl-v10.html</url>\n" + 
+			"      <distribution>repo</distribution>\n" + 
+			"    </license>\n" + 
+			"  </licenses>\n" + 
+			"  <organization>\n" + 
+			"    <name>Eclipse Foundation</name>\n" + 
+			"    <url>http://www.eclipse.org/</url>\n" + 
+			"  </organization>\n" + 
+			"  <issueManagement>\n" + 
+			"    <system>Bugzilla</system>\n" + 
+			"    <url>https://bugs.eclipse.org/</url>\n" + 
+			"  </issueManagement>\n";
+	
+	public static final String COPYRIGHT =
+			"<!--\n" +
+			"  Copyright (c) 2016 GK Software AG and others.\n" + 
+			"  All rights reserved. This program and the accompanying materials\n" + 
+			"  are made available under the terms of the Eclipse Public License v1.0\n" + 
+			"  which accompanies this distribution, and is available at\n" + 
+			"  http://www.eclipse.org/legal/epl-v10.html\n" + 
+			"\n" + 
+			"  Contributors:\n" + 
+			"      Stephan Herrmann - initial implementation\n" + 
+			"-->\n";
+
+	public String bsn;
+	public String name;
+	public String scmUrl;
+	
+	@Override
+	public String toString() {
+		return "ArtifactInfo [bsn=" + bsn + ", name=" + name + ", scmUrl=" + scmUrl + "]";
+	}
+
+	public String toPomFragment() {
+		try {
+			fixData();
+			StringBuilder buf = new StringBuilder();
+			String indent = INDENT;
+			element("name", indent, buf, this.name);
+			element("url", indent, buf, "http://www.eclipse.org/"+getProject());
+			buf.append(FRONT_MATTER);
+			if (this.scmUrl == null) {
+				System.err.println("No scm info for "+this.bsn);
+			} else {
+				element("scm", indent, buf,
+					subElement("connection", extractScmUrl()),
+					subElement("tag", extractScmTag()));
+			}
+			return buf.toString();
+		} catch (RuntimeException e) {
+			System.err.println("Failed for "+this);
+			throw e;
+		}
+	}
+	
+	private void fixData() {
+		if (this.scmUrl == null) {
+			if (this.bsn.startsWith("org.eclipse.emf")) {
+				this.scmUrl = "scm:git:https://git.eclipse.org/r/emf/org.eclipse.emf";
+				System.out.println("Fixed scmUrl for "+this.bsn);
+			} else if (this.bsn.startsWith("org.eclipse.ecf")) {
+				this.scmUrl = "scm:git:https://git.eclipse.org/r/ecf/org.eclipse.ecf;tag=\"R-Release_HEAD-sdk_feature-279_279\"";
+				System.out.println("Fixed scmUrl for "+this.bsn);
+			}
+		}
+		if (this.name == null || this.name.charAt(0) == '%') {
+			if (this.bsn.equals("org.eclipse.core.resources.win32.x86")
+					|| this.bsn.equals("org.eclipse.core.resources.win32.x86_64")) {
+				this.name = "Core Resource Management Win32 Fragment";
+				System.out.println("Fixed name for "+this.bsn);
+			}
+		}
+	}
+
+	String getProject() {
+		if (this.bsn.startsWith("org.eclipse.jdt"))
+			return "jdt";
+		if (this.bsn.startsWith("org.eclipse.pde"))
+			return "pde";
+		if (this.bsn.startsWith("org.eclipse.ecf"))
+			return "ecf";
+		return "platform";
+	}
+	
+	String extractScmUrl() {
+		int semi = this.scmUrl.indexOf(';');
+		if (semi == -1)
+			return this.scmUrl;
+		return this.scmUrl.substring(0, semi);
+	}
+	
+	String extractScmTag() {
+		int tagStart = this.scmUrl.indexOf(SCM_TAG_START);
+		if (tagStart == -1)
+			return null;
+		int next = this.scmUrl.indexOf("\"", tagStart+SCM_TAG_START.length());
+		if (next == -1)
+			next = this.scmUrl.length();
+		return this.scmUrl.substring(tagStart+SCM_TAG_START.length(), next);
+	}
+
+	void element(String tag, String indent, StringBuilder buf, String... contents) {
+		buf.append(indent).append('<').append(tag).append('>');
+		if (contents.length == 1 && !contents[0].contains("\n")) {
+			buf.append(contents[0]);
+		} else {
+			buf.append("\n");
+			for (String content : contents)
+				if (content != null)
+					for (String line: content.split("\\n")) 
+						buf.append(indent).append(INDENT).append(line).append('\n');
+			buf.append(indent);
+		}
+		buf.append("</").append(tag).append(">\n");
+	}
+
+	String subElement(String tag, String content) {
+		if (content == null)
+			return null;
+		StringBuilder buf = new StringBuilder();
+		element(tag, "", buf, content);
+		return buf.toString();
+	}
+}
