@@ -48,7 +48,7 @@ public class ManifestReader {
 
 			ArtifactInfo info = new ArtifactInfo();
 			info.bsn = getSymbolicName(mainAttributes);
-			info.scmUrl = mainAttributes.getValue(ECLIPSE_SOURCE_REFERENCES);
+			info.scmConnection = mainAttributes.getValue(ECLIPSE_SOURCE_REFERENCES);
 			info.name = getBundleName(mainAttributes, translations, isFragment);
 			return info;
 		}

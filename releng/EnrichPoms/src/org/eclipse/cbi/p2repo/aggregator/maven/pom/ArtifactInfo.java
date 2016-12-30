@@ -47,11 +47,11 @@ public class ArtifactInfo {
 
 	public String bsn;
 	public String name;
-	public String scmUrl;
+	public String scmConnection;
 	
 	@Override
 	public String toString() {
-		return "ArtifactInfo [bsn=" + bsn + ", name=" + name + ", scmUrl=" + scmUrl + "]";
+		return "ArtifactInfo [bsn=" + bsn + ", name=" + name + ", scmConnection=" + scmConnection + "]";
 	}
 
 	public String toPomFragment() {
@@ -62,12 +62,15 @@ public class ArtifactInfo {
 			element("name", indent, buf, this.name);
 			element("url", indent, buf, "http://www.eclipse.org/"+getProject());
 			buf.append(FRONT_MATTER);
-			if (this.scmUrl == null) {
+			if (this.scmConnection == null) {
 				System.err.println("No scm info for "+this.bsn);
 			} else {
+				String connectionUrl = extractScmConnection();
+				String url = connectionUrl.replace("eclipse.org/r", "eclipse.org/c");
 				element("scm", indent, buf,
-					subElement("connection", extractScmUrl()),
-					subElement("tag", extractScmTag()));
+					subElement("connection", connectionUrl),
+					subElement("tag", extractScmTag()),
+					subElement("url", url));
 			}
 			return buf.toString();
 		} catch (RuntimeException e) {
@@ -77,12 +80,12 @@ public class ArtifactInfo {
 	}
 	
 	private void fixData() {
-		if (this.scmUrl == null) {
+		if (this.scmConnection == null) {
 			if (this.bsn.startsWith("org.eclipse.emf")) {
-				this.scmUrl = "scm:git:https://git.eclipse.org/r/emf/org.eclipse.emf";
+				this.scmConnection = "scm:git:https://git.eclipse.org/r/emf/org.eclipse.emf";
 				System.out.println("Fixed scmUrl for "+this.bsn);
 			} else if (this.bsn.startsWith("org.eclipse.ecf")) {
-				this.scmUrl = "scm:git:https://git.eclipse.org/r/ecf/org.eclipse.ecf;tag=\"R-Release_HEAD-sdk_feature-279_279\"";
+				this.scmConnection = "scm:git:https://git.eclipse.org/r/ecf/org.eclipse.ecf;tag=\"R-Release_HEAD-sdk_feature-279_279\"";
 				System.out.println("Fixed scmUrl for "+this.bsn);
 			}
 		}
@@ -105,21 +108,21 @@ public class ArtifactInfo {
 		return "platform";
 	}
 	
-	String extractScmUrl() {
-		int semi = this.scmUrl.indexOf(';');
+	String extractScmConnection() {
+		int semi = this.scmConnection.indexOf(';');
 		if (semi == -1)
-			return this.scmUrl;
-		return this.scmUrl.substring(0, semi);
+			return this.scmConnection;
+		return this.scmConnection.substring(0, semi);
 	}
 	
 	String extractScmTag() {
-		int tagStart = this.scmUrl.indexOf(SCM_TAG_START);
+		int tagStart = this.scmConnection.indexOf(SCM_TAG_START);
 		if (tagStart == -1)
 			return null;
-		int next = this.scmUrl.indexOf("\"", tagStart+SCM_TAG_START.length());
+		int next = this.scmConnection.indexOf("\"", tagStart+SCM_TAG_START.length());
 		if (next == -1)
-			next = this.scmUrl.length();
-		return this.scmUrl.substring(tagStart+SCM_TAG_START.length(), next);
+			next = this.scmConnection.length();
+		return this.scmConnection.substring(tagStart+SCM_TAG_START.length(), next);
 	}
 
 	void element(String tag, String indent, StringBuilder buf, String... contents) {
