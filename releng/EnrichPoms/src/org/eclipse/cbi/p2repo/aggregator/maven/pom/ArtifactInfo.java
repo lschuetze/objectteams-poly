@@ -12,6 +12,9 @@ package org.eclipse.cbi.p2repo.aggregator.maven.pom;
 
 public class ArtifactInfo {
 
+	private static final String SCM_GITROOT = "scm:git:git://git.eclipse.org/gitroot/";
+	private static final String SCM_CGIT = "https://git.eclipse.org/c/";
+
 	private static final String SCM_TAG_START = ";tag=\""; // git tag inside Eclipse-SourceReference
 
 	private static final String INDENT = "  ";
@@ -66,7 +69,7 @@ public class ArtifactInfo {
 				System.err.println("No scm info for "+this.bsn);
 			} else {
 				String connectionUrl = extractScmConnection();
-				String url = connectionUrl.replace("eclipse.org/r", "eclipse.org/c");
+				String url = extractScmUrl(connectionUrl);
 				element("scm", indent, buf,
 					subElement("connection", connectionUrl),
 					subElement("tag", extractScmTag()),
@@ -123,6 +126,12 @@ public class ArtifactInfo {
 		if (next == -1)
 			next = this.scmConnection.length();
 		return this.scmConnection.substring(tagStart+SCM_TAG_START.length(), next);
+	}
+
+	String extractScmUrl(String connection) {
+		if (connection.startsWith(SCM_GITROOT))
+			return SCM_CGIT+connection.substring(SCM_GITROOT.length());
+		return connection.replace("eclipse.org/r", "eclipse.org/c");
 	}
 
 	void element(String tag, String indent, StringBuilder buf, String... contents) {
