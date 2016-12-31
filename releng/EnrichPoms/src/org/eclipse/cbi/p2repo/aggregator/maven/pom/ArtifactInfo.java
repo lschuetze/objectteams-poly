@@ -10,6 +10,8 @@
  ********************************************************************************/
 package org.eclipse.cbi.p2repo.aggregator.maven.pom;
 
+import java.util.List;
+
 public class ArtifactInfo {
 
 	private static final String SCM_GITROOT = "scm:git:git://git.eclipse.org/gitroot/";
@@ -74,6 +76,14 @@ public class ArtifactInfo {
 					subElement("connection", connectionUrl),
 					subElement("tag", extractScmTag()),
 					subElement("url", url));
+				String projRepo = extractProjectRepo(url);
+				if (projRepo != null) {
+					List<Developer> devs = Developer.developersPerRepo.get(projRepo);
+					if (devs == null)
+						System.err.println("No developers for project repo "+projRepo+" ("+this.bsn+")");
+					else
+						element("developers", indent, buf, Developer.pomSubElements(devs));
+				}
 			}
 			return buf.toString();
 		} catch (RuntimeException e) {
@@ -134,7 +144,17 @@ public class ArtifactInfo {
 		return connection.replace("eclipse.org/r", "eclipse.org/c");
 	}
 
-	void element(String tag, String indent, StringBuilder buf, String... contents) {
+	String extractProjectRepo(String url) {
+		int pos = 0;
+		for (int i=0; i<5; i++) {
+			pos = url.indexOf('/', pos+1);
+			if (pos == -1)
+				return null;
+		}
+		return url.substring(0, pos);
+	}
+
+	public static void element(String tag, String indent, StringBuilder buf, String... contents) {
 		buf.append(indent).append('<').append(tag).append('>');
 		if (contents.length == 1 && !contents[0].contains("\n")) {
 			buf.append(contents[0]);
@@ -149,7 +169,7 @@ public class ArtifactInfo {
 		buf.append("</").append(tag).append(">\n");
 	}
 
-	String subElement(String tag, String content) {
+	public static String subElement(String tag, String content) {
 		if (content == null)
 			return null;
 		StringBuilder buf = new StringBuilder();
