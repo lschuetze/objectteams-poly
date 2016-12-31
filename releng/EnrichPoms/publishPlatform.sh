@@ -48,13 +48,13 @@ do
      -Dfile=${file} -DpomFile=${pomFile} \
      >> .log/artifact-upload.txt
      
-  echo "\t${sourcesFile}"
+  echo -e "\t${sourcesFile}"
   ${MVN} -f platform-pom.xml -s ${SETTINGS} gpg:sign-and-deploy-file \
      -Durl=${URL} -DrepositoryId=${REPO} \
      -Dfile=${sourcesFile} -DpomFile=${pomFile} -Dclassifier=sources \
      >> .log/sources-upload.txt
   
-  echo "\t${javadocFile}"
+  echo -e "\t${javadocFile}"
   ${MVN} -f platform-pom.xml -s ${SETTINGS} gpg:sign-and-deploy-file \
      -Durl=${URL} -DrepositoryId=${REPO} \
      -Dfile=${javadocFile} -DpomFile=${pomFile} -Dclassifier=javadoc \

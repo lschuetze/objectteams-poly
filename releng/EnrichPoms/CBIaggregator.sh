@@ -316,7 +316,7 @@ function createJavadocs() {
 	then
 		/bin/rm ${jar}
 	fi
-	echo "Corresponding javadoc can be found in artifact ${artifact}\n" > README.txt
+	echo -e "Corresponding javadoc can be found in artifact ${artifact}\n" > README.txt
 	jar cf ${jar} README.txt
 	for pom in org/eclipse/${group}/*/*/*.pom
 	do
