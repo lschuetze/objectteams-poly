@@ -305,6 +305,29 @@ do
         updateCheckSums ${pom}
 done
 
+echo "==== Add Javadoc Stubs ===="
+
+# (groupSimpleName, javadocArtifactGA)
+function createJavadocs() {
+	group=${1}
+	jar="${1}-javadoc.jar"
+	artifact=${2}
+	if [ -r ${jar} ]
+	then
+		/bin/rm ${jar}
+	fi
+	echo "Corresponding javadoc can be found in artifact ${artifact}\n" > README.txt
+	jar cf ${jar} README.txt
+	for pom in org/eclipse/${group}/*/*/*.pom
+	do
+		javadoc=`echo ${pom} | sed -e "s|\(.*\)\.pom|\1-javadoc.jar|"`
+		/bin/cp ${jar} ${javadoc}
+	done	
+}
+
+createJavadocs platform org.eclipse.platform:org.eclipse.platform.doc.isv
+createJavadocs jdt org.eclipse.jdt:org.eclipse.jdt.doc.isv
+createJavadocs pde org.eclipse.pde:org.eclipse.pde.doc.user
 
 echo "========== Repo completed ========="
 
