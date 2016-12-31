@@ -10,8 +10,6 @@
  ********************************************************************************/
 package org.eclipse.cbi.p2repo.aggregator.maven.pom;
 
-import java.util.List;
-
 public class ArtifactInfo {
 
 	private static final String SCM_GITROOT = "scm:git:git://git.eclipse.org/gitroot/";
@@ -78,11 +76,9 @@ public class ArtifactInfo {
 					subElement("url", url));
 				String projRepo = extractProjectRepo(url);
 				if (projRepo != null) {
-					List<Developer> devs = Developer.developersPerRepo.get(projRepo);
-					if (devs == null)
-						System.err.println("No developers for project repo "+projRepo+" ("+this.bsn+")");
-					else
-						element("developers", indent, buf, Developer.pomSubElements(devs));
+					Developer.addDevelopers(projRepo, this.bsn, indent, buf);
+				} else {
+					System.err.println("Could not determine git repo for "+this.bsn+" from "+url);
 				}
 			}
 			return buf.toString();
