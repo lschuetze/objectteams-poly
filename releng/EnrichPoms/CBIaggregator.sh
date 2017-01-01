@@ -166,7 +166,7 @@ function hasPomButNoJar() {
 		other=`ls -d [!0-9]* 2> /dev/null`
         if `echo "${other}" | tr "\n" " " | egrep "^maven-metadata.xml maven-metadata.xml.md5 maven-metadata.xml.sha1 \$"`
         then
-        	; # clean -> proceed below
+        	: # clean -> proceed below
         else
         	exit 1 # unexpected content found, don't remove
         fi
