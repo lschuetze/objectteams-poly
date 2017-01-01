@@ -350,7 +350,7 @@ function buildSourceJar() {
 		/bin/rm -r assemble
 	fi
 	/bin/mkdir assemble
-	giturl=${1}
+	giturl=file://localhost/gitroot/${1}
 	gitpath=${2}
 	gittag=${3}
 	group=${4}
@@ -366,32 +366,66 @@ function buildSourceJar() {
 		/bin/mv ${gitpath}/OSGI-INF assemble/
 	fi
 	/bin/mv ${gitpath}/about.html assemble/
+	if [ $# > 6 ]
+	then
+		shift 6
+		for src in "$@"
+		do
+			/bin/mv "${gitpath}/${src}" assemble/ 
+		done
+	fi
 	/bin/rm -rf ${gitpath}
 	cd assemble
 	jar cf ../${group}/${artifact}/${version}/${artifact}-${version}-sources.jar *
 	cd -
 }
 
-buildSourceJar file://localhost/gitroot/platform/eclipse.platform.team.git \
+buildSourceJar platform/eclipse.platform.team.git \
 	bundles/org.eclipse.core.net/fragments/org.eclipse.core.net.win32.x86_64 \
 	I20160329-0800 \
 	org/eclipse/platform org.eclipse.core.net.win32.x86_64 1.1.0
 
-buildSourceJar file://localhost/gitroot/platform/eclipse.platform.team.git \
+buildSourceJar platform/eclipse.platform.team.git \
 	bundles/org.eclipse.core.net/fragments/org.eclipse.core.net.win32.x86 \
 	I20160329-0800 \
 	org/eclipse/platform org.eclipse.core.net.win32.x86 1.1.0
 
-buildSourceJar file://localhost/gitroot/platform/eclipse.platform.team.git \
+buildSourceJar platform/eclipse.platform.team.git \
 	bundles/org.eclipse.core.net/fragments/org.eclipse.core.net.linux.x86_64 \
 	I20160329-0800 \
 	org/eclipse/platform org.eclipse.core.net.linux.x86_64 1.2.0
 
-buildSourceJar file://localhost/gitroot/platform/eclipse.platform.team.git \
+buildSourceJar platform/eclipse.platform.team.git \
 	bundles/org.eclipse.core.net/fragments/org.eclipse.core.net.linux.x86 \
 	I20160329-0800 \
 	org/eclipse/platform org.eclipse.core.net.linux.x86 1.2.0
 
+buildSourceJar platform/eclipse.platform.swt.git \
+	bundles/org.eclipse.swt.tools \
+	M20161109-0400 \
+	org/eclipse/platform org.eclipse.swt.tools 3.105.2 \
+	"JNI Generation" \
+  	"Mac Generation" \
+    "Icon Exe" \
+    "NativeStats" \
+	"Mozilla Generation" \
+	"JavadocBasher"
+
+buildSourceJar platform/eclipse.platform.releng.git \
+	bundles/org.eclipse.releng.tools \
+	I20160416-2227 \
+	org/eclipse/platform org.eclipse.releng.tools 3.9.0
+
+buildSourceJar platform/eclipse.platform.git \
+	update/org.eclipse.update.core \
+	I20160416-2227 \
+	org/eclipse/platform org.eclipse.update.core 3.2.800 \
+	schema
+
+buildSourceJar equinox/rt.equinox.framework.git \
+	bundles/org.eclipse.osgi.compatibility.plugins \
+	I20131023-2000 \
+	org/eclipse/platform org.eclipse.osgi.compatibility.plugins 1.0.0
 
 echo "========== Repo completed ========="
 
