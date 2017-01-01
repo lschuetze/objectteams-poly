@@ -316,6 +316,8 @@ done
 
 echo "==== Add Javadoc stubs ===="
 
+cd ${Repo}
+
 # (groupSimpleName, javadocArtifactGA)
 function createJavadocs() {
 	group=${1}
@@ -337,6 +339,59 @@ function createJavadocs() {
 createJavadocs platform org.eclipse.platform:org.eclipse.platform.doc.isv
 createJavadocs jdt org.eclipse.jdt:org.eclipse.jdt.doc.isv
 createJavadocs pde org.eclipse.pde:org.eclipse.pde.doc.user
+
+echo "==== Create missing sources artifacts ===="
+
+cd ${Repo}
+
+function buildSourceJar() {
+	if [ -d assemble ]
+	then
+		/bin/rm -r assemble
+	fi
+	/bin/mkdir assemble
+	giturl=${1}
+	gitpath=${2}
+	gittag=${3}
+	group=${4}
+	artifact=${5}
+	version=${6}
+	git archive --remote=${giturl} \
+		${gittag} ${gitpath} \
+		| tar xv
+	/bin/mv ${gitpath}/src/* assemble/
+	/bin/mv ${gitpath}/META-INF assemble/
+	if [ -d ${gitpath}/OSGI-INF ]
+	then
+		/bin/mv ${gitpath}/OSGI-INF assemble/
+	fi
+	/bin/mv ${gitpath}/about.html assemble/
+	/bin/rm -rf ${gitpath}
+	cd assemble
+	jar cf ../${group}/${artifact}/${version}/${artifact}-${version}-sources.jar *
+	cd -
+}
+
+buildSourceJar file://localhost/gitroot/platform/eclipse.platform.team.git \
+	bundles/org.eclipse.core.net/fragments/org.eclipse.core.net.win32.x86_64 \
+	I20160329-0800 \
+	org/eclipse/platform org.eclipse.core.net.win32.x86_64 1.1.0
+
+buildSourceJar file://localhost/gitroot/platform/eclipse.platform.team.git \
+	bundles/org.eclipse.core.net/fragments/org.eclipse.core.net.win32.x86 \
+	I20160329-0800 \
+	org/eclipse/platform org.eclipse.core.net.win32.x86 1.1.0
+
+buildSourceJar file://localhost/gitroot/platform/eclipse.platform.team.git \
+	bundles/org.eclipse.core.net/fragments/org.eclipse.core.net.linux.x86_64 \
+	I20160329-0800 \
+	org/eclipse/platform org.eclipse.core.net.linux.x86_64 1.2.0
+
+buildSourceJar file://localhost/gitroot/platform/eclipse.platform.team.git \
+	bundles/org.eclipse.core.net/fragments/org.eclipse.core.net.linux.x86 \
+	I20160329-0800 \
+	org/eclipse/platform org.eclipse.core.net.linux.x86 1.2.0
+
 
 echo "========== Repo completed ========="
 
