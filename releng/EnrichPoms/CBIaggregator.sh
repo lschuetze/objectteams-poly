@@ -164,7 +164,7 @@ function hasPomButNoJar() {
 		cd ${1}
 		# expect only one sub-directory, starting with a digit, plus maven-metadata.xml*:
 		other=`ls -d [!0-9]* 2> /dev/null`
-        if `echo "${other}" | tr "\n" " " | egrep "^maven-metadata.xml maven-metadata.xml.md5 maven-metadata.xml.sha1 \$"`
+        if echo "${other}" | tr "\n" " " | egrep "^maven-metadata.xml maven-metadata.xml.md5 maven-metadata.xml.sha1 \$"
         then
         	: # clean -> proceed below
         else
@@ -413,12 +413,12 @@ buildSourceJar platform/eclipse.platform.swt.git \
 
 buildSourceJar platform/eclipse.platform.releng.git \
 	bundles/org.eclipse.releng.tools \
-	I20160416-2227 \
+	R4_5_2 \
 	org/eclipse/platform org.eclipse.releng.tools 3.9.0
 
 buildSourceJar platform/eclipse.platform.git \
 	update/org.eclipse.update.core \
-	I20160416-2227 \
+	R4_5_2 \
 	org/eclipse/platform org.eclipse.update.core 3.2.800 \
 	schema
 
