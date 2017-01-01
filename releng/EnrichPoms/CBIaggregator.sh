@@ -50,6 +50,11 @@ function require_executable() {
 	fi
 }
 
+#================================================================================
+#   (1) Install and run the CBI aggregator
+#================================================================================
+echo "==== CBI aggregator ===="
+
 # -------- fetch .aggr file **TEMP** will eventually move to the releng git: ------------
 git archive --remote=file://localhost/gitroot/objectteams/org.eclipse.objectteams.git \
 	master releng/EnrichPoms/SDK4Mvn.aggr \
@@ -57,9 +62,6 @@ git archive --remote=file://localhost/gitroot/objectteams/org.eclipse.objectteam
 /bin/mv releng/EnrichPoms/SDK4Mvn.aggr ${WORKSPACE}/
 /bin/rmdir -p releng/EnrichPoms
 
-#================================================================================
-#   (1) Install and run the CBI aggregator
-#================================================================================
 if [ ! -d ${LOCAL_TOOLS} ]
 then
 	/bin/mkdir ${LOCAL_TOOLS}
@@ -68,6 +70,7 @@ fi
 if [ ! -x ${ECLIPSE} ]
 then
 	cd ${LOCAL_TOOLS}
+	echo "Extracting Eclipse from ${FILE_ECLIPSE} ..."
 	tar xf ${FILE_ECLIPSE}
 	cd ${WORKSPACE}
 fi
@@ -75,6 +78,7 @@ require_executable ${ECLIPSE}
 
 if [ ! -x ${AGGREGATOR} ]
 then
+	echo "Installing the CBI aggregator into ${LOCAL_TOOLS}/${DIR_AGGREGATOR} ..."
 	${ECLIPSE} -application ${APP_NAME_P2DIRECTOR} \
 		-r ${URL_AGG_UPDATES} \
 		-d ${LOCAL_TOOLS}/${DIR_AGGREGATOR} -p CBIProfile \
@@ -86,6 +90,7 @@ RepoRaw=${WORKSPACE}/reporaw-${BUILD_NUMBER}
 Repo=${WORKSPACE}/repo-${BUILD_NUMBER}
 /bin/mkdir ${RepoRaw}
 
+echo "Running the aggregator with build model ${FILE_SDK_AGGR} ..."
 ${AGGREGATOR} aggregate --buildModel ${FILE_SDK_AGGR} --action CLEAN_BUILD --buildRoot ${RepoRaw}
 if [ "$?" != "0" ]
 then
@@ -159,9 +164,11 @@ function hasPomButNoJar() {
 		cd ${1}
 		# expect only one sub-directory, starting with a digit, plus maven-metadata.xml*:
 		other=`ls -d [!0-9]* 2> /dev/null`
-        if `echo "${other}" | egrep "^maven-metadata.xml\s*maven-metadata.xml.md5\s*maven-metadata.xml.sha1$"`
+        if `echo "${other}" | tr "\n" " " | egrep "^maven-metadata.xml maven-metadata.xml.md5 maven-metadata.xml.sha1 \$"`
         then
-        	exit 1
+        	; # clean -> proceed below
+        else
+        	exit 1 # unexpected content found, don't remove
         fi
         # scan all *.pom inside the version sub-directory
         r=1
@@ -275,7 +282,9 @@ cd ${WORKSPACE}
 # - dynamic content (retrieved mostly from MANIFEST.MF):
 #   - name
 #   - url
-#   - scm connection and tag
+#   - scm connection, tag and url
+# - semi dynamic
+#   - developers (based on static map git-repo-base -> project leads)
 # - static content
 #   - license
 #   - organization
@@ -305,7 +314,7 @@ do
         updateCheckSums ${pom}
 done
 
-echo "==== Add Javadoc Stubs ===="
+echo "==== Add Javadoc stubs ===="
 
 # (groupSimpleName, javadocArtifactGA)
 function createJavadocs() {
