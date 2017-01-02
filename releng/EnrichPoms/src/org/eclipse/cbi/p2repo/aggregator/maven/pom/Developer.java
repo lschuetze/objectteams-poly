@@ -11,32 +11,51 @@
 package org.eclipse.cbi.p2repo.aggregator.maven.pom;
 
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import static org.eclipse.cbi.p2repo.aggregator.maven.pom.ArtifactInfo.element;
 import static org.eclipse.cbi.p2repo.aggregator.maven.pom.ArtifactInfo.subElement;
 
-public class Developer {
+public abstract class Developer {
 
 	static final String PLATFORM_GIT_REPO = "https://git.eclipse.org/c/platform";
 
 	static final String[] ROLE_LEAD = { "Project Lead" };
 	
-	public static final HashMap<String, List<Developer>> developersPerRepo = new HashMap<String, List<Developer>>();
+	public static final HashMap<String, List<Developer>> developersPerRepo = new HashMap<>();
+	public static final Set<String> projects = new HashSet<>();
 	static {
-		Developer dani = new Developer("Dani Megert", null);
+		// currently unused:
+		Developer dani = new IndividualDeveloper("Dani Megert");
 		developersPerRepo.put(PLATFORM_GIT_REPO,
 				Arrays.asList(dani));
 		developersPerRepo.put("https://git.eclipse.org/c/equinox",
-				Arrays.asList(new Developer("Ian Bull", null), new Developer("Pascal Rapicault", null), new Developer("Thomas Watson", null)));
+				Arrays.asList(new IndividualDeveloper("Ian Bull"), new IndividualDeveloper("Pascal Rapicault"), new IndividualDeveloper("Thomas Watson")));
 		developersPerRepo.put("https://git.eclipse.org/c/jdt",
 				Arrays.asList(dani));
 		developersPerRepo.put("https://git.eclipse.org/c/pde",
-				Arrays.asList(new Developer("Curtis Windatt", null), new Developer("Vikas Chandra", null)));
+				Arrays.asList(new IndividualDeveloper("Curtis Windatt"), new IndividualDeveloper("Vikas Chandra")));
+		//
+
+		projects.add("eclipse.platform");
+		projects.add("eclipse.platform.debug");
+		projects.add("eclipse.platform.ui");
+		projects.add("eclipse.platform.releng");
+		projects.add("eclipse.platform.resources");
+		projects.add("eclipse.platform.swt");
+		projects.add("eclipse.jdt");
+		projects.add("eclipse.jdt.core");
+		projects.add("eclipse.jdt.debug");
+		projects.add("eclipse.jdt.ls");
+		projects.add("eclipse.jdt.ui");
+		projects.add("eclipse.pde");
 	}
 
-	public static void addDevelopers(String projRepo, String bsn, String indent, StringBuilder buf) {
+	public static void addIndividualDevelopers(String projRepo, String bsn, String indent, StringBuilder buf) {
 		List<Developer> devs = getDevelopers(projRepo, bsn);
 		if (devs == null)
 			System.err.println("No developers for project repo "+projRepo+" ("+bsn+")");
@@ -45,26 +64,26 @@ public class Developer {
 		
 	}
 
-	public static void addDevelopers2(String gitUrl, String bsn, String indent, StringBuilder buf) {
+	public static void addUrlDevelopers(String gitUrl, String bsn, String indent, StringBuilder buf) {
 		String whoSInvolved = gitRepoToWhoSInvolved(gitUrl);
-		if (whoSInvolved == null) {
+		if (whoSInvolved == null)
 			System.err.println("No developers for project repo "+gitUrl+" ("+bsn+")");
-		} else {
-			StringBuilder sub = new StringBuilder();
-			new Developer(null, whoSInvolved).toPom(sub, "");
-			element("developers", indent, buf, sub.toString());
-		}
-		
+		else
+			element("developers", indent, buf, Developer.pomSubElements(Collections.singletonList(new UrlDeveloper(whoSInvolved))));
 	}
 
 	private static String gitRepoToWhoSInvolved(String gitUrl) {
 		String[] tokens = gitUrl.split("/");
 		if (tokens.length >= 6) {
-			String token = tokens[5];
+			String token = tokens[5]; // https://git.eclipse.org/c/equinox/rt.equinox.framework.git => start with rt.equinox.framework
 			int end = token.endsWith(".git") ? token.length()-".git".length() : token.length();
 			String project = token.substring(0, end);
-			if (project.startsWith("rt.equinox"))
-				project = "rt.equinox";
+			while (!projects.contains(project)) {
+				end = project.lastIndexOf('.');
+				if (end == -1)
+					return null;
+				project = project.substring(0, end); // cut off non-matching tail segment
+			}
 			return "https://projects.eclipse.org/projects/"+project+"/who";
 		}
 		return null;
@@ -86,41 +105,51 @@ public class Developer {
 			developer.toPom(buf, "");
 		return buf.toString();
 	}
-
-	String name;
-	String[] roles;
-	String url;
-
-	Developer(String name, String url) {
-		this.name = name;
-		this.url = url;
-		this.roles = ROLE_LEAD;
-	}
 	
-	void toPom(StringBuilder buf, String indent) {
-		if (this.name != null) {
+	protected abstract void toPom(StringBuilder buf, String string);
+
+	/** Represent project leads as individual developers. */
+	static class IndividualDeveloper extends Developer {
+		String name;
+		String[] roles;
+		public IndividualDeveloper(String name) {
+			this.name = name;
+			this.roles = ROLE_LEAD;
+		}
+		
+		protected void toPom(StringBuilder buf, String indent) {
 			element("developer", indent, buf,
-				subElement("name", this.name),
-				getRolesElement());
-		} else if (this.url != null) {
-			element("developer", indent, buf,
-				subElement("url", this.url));
+					subElement("name", this.name),
+					getRolesElement());
+		}
+
+		String getRolesElement() {
+			StringBuilder rolesElement = new StringBuilder();
+			element("roles", "", rolesElement, String.join("\n", getRoleElements()));
+			return rolesElement.toString();
+		}
+
+		String[] getRoleElements() {
+			String[] roleElements = new String[this.roles.length];
+			for (int i = 0; i < this.roles.length; i++) {
+				StringBuilder subBuf = new StringBuilder();
+				element("role", "", subBuf, this.roles[i]);
+				roleElements[i] = subBuf.toString();
+			}
+			return roleElements;
 		}
 	}
-	
-	String getRolesElement() {
-		StringBuilder rolesElement = new StringBuilder();
-		element("roles", "", rolesElement, String.join("\n", getRoleElements()));
-		return rolesElement.toString();
-	}
 
-	String[] getRoleElements() {
-		String[] roleElements = new String[this.roles.length];
-		for (int i = 0; i < this.roles.length; i++) {
-			StringBuilder subBuf = new StringBuilder();
-			element("role", "", subBuf, this.roles[i]);
-			roleElements[i] = subBuf.toString();
+	/** Represent developers using the "Who's Involved" web page. */
+	static class UrlDeveloper extends Developer {
+		String url;
+		public UrlDeveloper(String url) {
+			this.url = url;
 		}
-		return roleElements;
+		
+		protected void toPom(StringBuilder buf, String indent) {
+			element("developer", indent, buf,
+					subElement("url", this.url));
+		}
 	}
 }

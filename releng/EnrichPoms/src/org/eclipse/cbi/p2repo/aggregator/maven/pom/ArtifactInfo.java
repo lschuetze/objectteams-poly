@@ -74,7 +74,7 @@ public class ArtifactInfo {
 					subElement("connection", connectionUrl),
 					subElement("tag", extractScmTag()),
 					subElement("url", url));
-				Developer.addDevelopers2(url, this.bsn, indent, buf);
+				Developer.addUrlDevelopers(url, this.bsn, indent, buf);
 //				String projRepo = extractProjectRepo(url);
 //				if (projRepo != null) {
 //					Developer.addDevelopers(projRepo, this.bsn, indent, buf);
