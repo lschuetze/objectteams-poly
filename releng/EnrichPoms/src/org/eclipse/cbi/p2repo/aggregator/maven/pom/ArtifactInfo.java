@@ -74,12 +74,13 @@ public class ArtifactInfo {
 					subElement("connection", connectionUrl),
 					subElement("tag", extractScmTag()),
 					subElement("url", url));
-				String projRepo = extractProjectRepo(url);
-				if (projRepo != null) {
-					Developer.addDevelopers(projRepo, this.bsn, indent, buf);
-				} else {
-					System.err.println("Could not determine git repo for "+this.bsn+" from "+url);
-				}
+				Developer.addDevelopers2(url, this.bsn, indent, buf);
+//				String projRepo = extractProjectRepo(url);
+//				if (projRepo != null) {
+//					Developer.addDevelopers(projRepo, this.bsn, indent, buf);
+//				} else {
+//					System.err.println("Could not determine git repo for "+this.bsn+" from "+url);
+//				}
 			}
 			return buf.toString();
 		} catch (RuntimeException e) {
@@ -149,7 +150,7 @@ public class ArtifactInfo {
 		}
 		return url.substring(0, pos);
 	}
-
+	
 	public static void element(String tag, String indent, StringBuilder buf, String... contents) {
 		buf.append(indent).append('<').append(tag).append('>');
 		if (contents.length == 1 && !contents[0].contains("\n")) {
