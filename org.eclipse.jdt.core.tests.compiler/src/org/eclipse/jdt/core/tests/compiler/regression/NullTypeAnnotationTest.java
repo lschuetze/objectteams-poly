@@ -13440,4 +13440,70 @@ public void testBug508497() {
 		"----------\n"
 	);
 }
+public void testBug509025() {
+	runConformTestWithLibs(
+		new String[] {
+			"MyAnno.java",
+			"import java.lang.annotation.Retention;\n" +
+			"import java.lang.annotation.RetentionPolicy;\n" +
+			"\n" +
+			"import org.eclipse.jdt.annotation.NonNull;\n" +
+			"import org.eclipse.jdt.annotation.NonNullByDefault;\n" +
+			"\n" +
+			"@Retention(RetentionPolicy.RUNTIME)\n" +
+			"@NonNullByDefault\n" +
+			"public @interface MyAnno {\n" +
+			"	@NonNull String[] items();\n" +
+			"\n" +
+			"}\n" +
+			"",
+		}, 
+		getCompilerOptions(),
+		""
+	);
+	runConformTestWithLibs(
+		new String[] {
+			"AnnoLoop.java",
+			"import org.eclipse.jdt.annotation.NonNull;\n" +
+			"import org.eclipse.jdt.annotation.NonNullByDefault;\n" +
+			"\n" +
+			"@NonNullByDefault\n" +
+			"public class AnnoLoop {\n" +
+			"	@NonNull\n" +
+			"	String[] test(MyAnno anno) {\n" +
+			"		return anno.items();\n" +
+			"	}\n" +
+			"}\n" +
+			"",
+		}, 
+		getCompilerOptions(),
+		""
+	);
+}
+public void testBug501598() {
+	runNegativeTestWithLibs(
+		new String[] {
+			"Foo.java",
+			"import java.util.List;\n" +
+			"\n" +
+			"import org.eclipse.jdt.annotation.NonNull;\n" +
+			"import org.eclipse.jdt.annotation.NonNullByDefault;\n" +
+			"\n" +
+			"@NonNullByDefault\n" +
+			"class Foo {\n" +
+			"	static <T> @NonNull List<?> f() {\n" +
+			"		throw new Error();\n" +
+			"	}\n" +
+			"}\n" +
+			"",
+		}, 
+		getCompilerOptions(),
+		"----------\n" + 
+		"1. WARNING in Foo.java (at line 8)\n" + 
+		"	static <T> @NonNull List<?> f() {\n" + 
+		"	           ^^^^^^^^^^^^^\n" + 
+		"The nullness annotation is redundant with a default that applies to this location\n" + 
+		"----------\n"
+	);
+}
 }
