@@ -53,6 +53,7 @@ public abstract class Developer {
 		projects.add("eclipse.jdt.ls");
 		projects.add("eclipse.jdt.ui");
 		projects.add("eclipse.pde");
+		projects.add("rt.equinox");
 	}
 
 	public static void addIndividualDevelopers(String projRepo, String bsn, String indent, StringBuilder buf) {
