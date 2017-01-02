@@ -219,7 +219,7 @@ public class RoleTypeBinding extends DependentTypeBinding
         this.roleModel        = this._declaredRoleType.roleModel;
         this._teamModel       = this._declaredRoleType.getTeamModel();
 
-        assert TypeBinding.equalsEquals(this._staticallyKnownTeam.getRealClass(), roleType.enclosingType()): "weakening not using WeakenedTypeBinding"; //$NON-NLS-1$
+        assert TypeBinding.equalsEquals(this._staticallyKnownTeam.getRealClass().original(), roleType.enclosingType().original()): "weakening not using WeakenedTypeBinding"; //$NON-NLS-1$
         // some adjustments after all fields are known:
         if (TypeBinding.notEquals(this._staticallyKnownTeam, roleType.enclosingType()))
             this._staticallyKnownRoleType = this._staticallyKnownTeam.getMemberType(roleType.sourceName);
