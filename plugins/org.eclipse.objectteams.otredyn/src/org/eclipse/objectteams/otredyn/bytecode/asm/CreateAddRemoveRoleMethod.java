@@ -28,6 +28,7 @@ import org.objectweb.asm.tree.LabelNode;
 import org.objectweb.asm.tree.MethodInsnNode;
 import org.objectweb.asm.tree.MethodNode;
 import org.objectweb.asm.tree.TypeInsnNode;
+import org.objectweb.asm.tree.VarInsnNode;
 
 /**
  * Implements the method <code>void _OT$addOrRemoveRole(Object role, boolean isAdding)</code>
@@ -53,13 +54,13 @@ public class CreateAddRemoveRoleMethod extends AbstractTransformableClassNode {
 			genGetInitializedRoleSet(method.instructions, SET_SLOT);
 						
 			// if (isAdding) {
-			method.instructions.add(new IntInsnNode(Opcodes.ILOAD, IS_ADDING_SLOT));
+			method.instructions.add(new VarInsnNode(Opcodes.ILOAD, IS_ADDING_SLOT));
 			LabelNode jumpToRemove = new LabelNode();
 			method.instructions.add(new JumpInsnNode(Opcodes.IFEQ, jumpToRemove));
 			
 				// set.add(role);
-				method.instructions.add(new IntInsnNode(Opcodes.ALOAD, SET_SLOT));
-				method.instructions.add(new IntInsnNode(Opcodes.ALOAD, ROLE_SLOT));
+				method.instructions.add(new VarInsnNode(Opcodes.ALOAD, SET_SLOT));
+				method.instructions.add(new VarInsnNode(Opcodes.ALOAD, ROLE_SLOT));
 				method.instructions.add(new MethodInsnNode(Opcodes.INVOKEVIRTUAL, ClassNames.HASH_SET_SLASH, "add", "(Ljava/lang/Object;)Z", false));
 				method.instructions.add(new InsnNode(Opcodes.POP));
 				
@@ -68,8 +69,8 @@ public class CreateAddRemoveRoleMethod extends AbstractTransformableClassNode {
 			// } else {
 			method.instructions.add(jumpToRemove);
 				// set.remove(role);
-				method.instructions.add(new IntInsnNode(Opcodes.ALOAD, SET_SLOT));
-				method.instructions.add(new IntInsnNode(Opcodes.ALOAD, ROLE_SLOT));
+				method.instructions.add(new VarInsnNode(Opcodes.ALOAD, SET_SLOT));
+				method.instructions.add(new VarInsnNode(Opcodes.ALOAD, ROLE_SLOT));
 				method.instructions.add(new MethodInsnNode(Opcodes.INVOKEVIRTUAL, ClassNames.HASH_SET_SLASH, "remove", "(Ljava/lang/Object;)Z", false));
 				method.instructions.add(new InsnNode(Opcodes.POP));
 	
@@ -85,24 +86,24 @@ public class CreateAddRemoveRoleMethod extends AbstractTransformableClassNode {
 
 	void genGetInitializedRoleSet(InsnList instructions, int targetLocal) {
 		// x = this._OT$roleSet 
-		instructions.add(new IntInsnNode(Opcodes.ALOAD, 0));
+		instructions.add(new VarInsnNode(Opcodes.ALOAD, 0));
 		instructions.add(new FieldInsnNode(Opcodes.GETFIELD, name, ConstantMembers.OT_ROLE_SET, ConstantMembers.HASH_SET_FIELD_TYPE));
 		
 		instructions.add(new IntInsnNode(Opcodes.ASTORE, targetLocal));
-		instructions.add(new IntInsnNode(Opcodes.ALOAD, targetLocal));
+		instructions.add(new VarInsnNode(Opcodes.ALOAD, targetLocal));
 		
 		// if (x == null) {
 		LabelNode skipInstantiation = new LabelNode();
 		instructions.add(new JumpInsnNode(Opcodes.IFNONNULL, skipInstantiation));
 				
 			// this._OT$roleSet = new HashSet();
-			instructions.add(new IntInsnNode(Opcodes.ALOAD, 0));
+			instructions.add(new VarInsnNode(Opcodes.ALOAD, 0));
 			instructions.add(new TypeInsnNode(Opcodes.NEW, ClassNames.HASH_SET_SLASH));
 			instructions.add(new InsnNode(Opcodes.DUP));
 			instructions.add(new MethodInsnNode(Opcodes.INVOKESPECIAL, ClassNames.HASH_SET_SLASH, "<init>", "()V", false));
 			
 			instructions.add(new IntInsnNode(Opcodes.ASTORE, targetLocal));
-			instructions.add(new IntInsnNode(Opcodes.ALOAD, targetLocal));
+			instructions.add(new VarInsnNode(Opcodes.ALOAD, targetLocal));
 			instructions.add(new FieldInsnNode(Opcodes.PUTFIELD, name, ConstantMembers.OT_ROLE_SET, ConstantMembers.HASH_SET_FIELD_TYPE));
 			
 		instructions.add(skipInstantiation);

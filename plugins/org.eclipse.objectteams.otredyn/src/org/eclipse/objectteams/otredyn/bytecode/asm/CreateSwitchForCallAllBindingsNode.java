@@ -20,11 +20,11 @@ import org.eclipse.objectteams.otredyn.transformer.names.ConstantMembers;
 import org.objectweb.asm.Opcodes;
 import org.objectweb.asm.Type;
 import org.objectweb.asm.tree.InsnNode;
-import org.objectweb.asm.tree.IntInsnNode;
 import org.objectweb.asm.tree.JumpInsnNode;
 import org.objectweb.asm.tree.LabelNode;
 import org.objectweb.asm.tree.MethodInsnNode;
 import org.objectweb.asm.tree.MethodNode;
+import org.objectweb.asm.tree.VarInsnNode;
 
 /**
  * Initially prepares the method callAllBindings as follows: <br/><br/>
@@ -55,13 +55,13 @@ public class CreateSwitchForCallAllBindingsNode extends CreateSwitchAdapter {
 	@Override
 	protected void addPostSwitchInstructions(MethodNode method) {
 		method.instructions.add(gotoLabel);
-		method.instructions.add(new IntInsnNode(Opcodes.ALOAD, 0));
+		method.instructions.add(new VarInsnNode(Opcodes.ALOAD, 0));
 		
 		args = Type.getArgumentTypes(method.desc);
 		int length = args.length;
 		for (int i = 0; i < length; i++) {
 			Type arg = args[i]; 
-			method.instructions.add(new IntInsnNode(arg.getOpcode(Opcodes.ILOAD), i + 1));
+			method.instructions.add(new VarInsnNode(arg.getOpcode(Opcodes.ILOAD), i + 1));
 		}
 		
 		// return callOrig(boundMethodId, args);

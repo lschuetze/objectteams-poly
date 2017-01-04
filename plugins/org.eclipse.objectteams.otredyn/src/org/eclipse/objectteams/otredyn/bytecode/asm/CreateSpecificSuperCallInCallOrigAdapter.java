@@ -22,10 +22,10 @@ import org.objectweb.asm.Opcodes;
 import org.objectweb.asm.Type;
 import org.objectweb.asm.tree.InsnList;
 import org.objectweb.asm.tree.InsnNode;
-import org.objectweb.asm.tree.IntInsnNode;
 import org.objectweb.asm.tree.MethodInsnNode;
 import org.objectweb.asm.tree.MethodNode;
 import org.objectweb.asm.tree.TypeInsnNode;
+import org.objectweb.asm.tree.VarInsnNode;
 
 /**
  * When weaving into a method inherited from an unweavable superclass (j.l.Object?),
@@ -65,14 +65,14 @@ public class CreateSpecificSuperCallInCallOrigAdapter extends AbstractTransforma
 
 		InsnList newInstructions = new InsnList();
 		if (!method.isStatic())
-			newInstructions.add(new IntInsnNode(Opcodes.ALOAD, 0));
+			newInstructions.add(new VarInsnNode(Opcodes.ALOAD, 0));
 
 		// Unpacking & unboxing arguments
 		Type[] args = Type.getArgumentTypes(methodSignature);
 		int size = 0;
 		if (args.length > 0) {
 			for (int i = argOffset; i < args.length; i++) {
-				newInstructions.add(new IntInsnNode(Opcodes.ALOAD, firstArgIndex + argOffset + 1));
+				newInstructions.add(new VarInsnNode(Opcodes.ALOAD, firstArgIndex + argOffset + 1));
 				newInstructions.add(createLoadIntConstant(i));
 				newInstructions.add(new InsnNode(Opcodes.AALOAD));
 				Type arg = args[i];

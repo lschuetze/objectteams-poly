@@ -22,10 +22,10 @@ import org.objectweb.asm.Opcodes;
 import org.objectweb.asm.Type;
 import org.objectweb.asm.tree.InsnList;
 import org.objectweb.asm.tree.InsnNode;
-import org.objectweb.asm.tree.IntInsnNode;
 import org.objectweb.asm.tree.MethodInsnNode;
 import org.objectweb.asm.tree.MethodNode;
 import org.objectweb.asm.tree.TypeInsnNode;
+import org.objectweb.asm.tree.VarInsnNode;
 
 /**
  * Creates and adds the instructions,
@@ -68,7 +68,7 @@ public class CreateMethodAccessAdapter extends AbstractTransformableClassNode {
 			instructions.add(new InsnNode(Opcodes.DUP));
 		} else if (!method.isStatic()) {
 			//put "this" on the stack for a non-static method
-			instructions.add(new IntInsnNode(Opcodes.ALOAD, 0));
+			instructions.add(new VarInsnNode(Opcodes.ALOAD, 0));
 		}
 		
 		//Unbox arguments
@@ -78,7 +78,7 @@ public class CreateMethodAccessAdapter extends AbstractTransformableClassNode {
 			
 			
 			for (int i = 0; i < args.length; i++) {
-				instructions.add(new IntInsnNode(Opcodes.ALOAD, firstArgIndex + 2));
+				instructions.add(new VarInsnNode(Opcodes.ALOAD, firstArgIndex + 2));
 				instructions.add(createLoadIntConstant(i));
 				instructions.add(new InsnNode(Opcodes.AALOAD));
 				Type arg = args[i];

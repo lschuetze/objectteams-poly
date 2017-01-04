@@ -24,11 +24,11 @@ import org.objectweb.asm.Type;
 import org.objectweb.asm.tree.AbstractInsnNode;
 import org.objectweb.asm.tree.InsnList;
 import org.objectweb.asm.tree.InsnNode;
-import org.objectweb.asm.tree.IntInsnNode;
 import org.objectweb.asm.tree.LabelNode;
 import org.objectweb.asm.tree.MethodInsnNode;
 import org.objectweb.asm.tree.MethodNode;
 import org.objectweb.asm.tree.TryCatchBlockNode;
+import org.objectweb.asm.tree.VarInsnNode;
 
 /**
  * This class creates and adds the instructions, that are needed 
@@ -105,7 +105,7 @@ public class CreateCallAllBindingsCallInOrgMethod extends
 	private void generateInvocation(MethodNode method, Type[] args, AbstractInsnNode insertBefore,
 			InsnList newInstructions) {
 		// put this on the stack
-		newInstructions.add(new IntInsnNode(Opcodes.ALOAD, 0));
+		newInstructions.add(new VarInsnNode(Opcodes.ALOAD, 0));
 		// put boundMethodId on the stack
 		newInstructions.add(createLoadIntConstant(boundMethodId));
 		if (method.name.equals("<init>")) { // set bit 0x8000000 to signal the ctor

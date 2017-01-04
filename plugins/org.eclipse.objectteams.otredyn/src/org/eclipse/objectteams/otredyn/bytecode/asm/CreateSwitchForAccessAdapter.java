@@ -23,11 +23,11 @@ import org.eclipse.objectteams.otredyn.transformer.names.ConstantMembers;
 import org.objectweb.asm.Opcodes;
 import org.objectweb.asm.Type;
 import org.objectweb.asm.tree.InsnNode;
-import org.objectweb.asm.tree.IntInsnNode;
 import org.objectweb.asm.tree.LdcInsnNode;
 import org.objectweb.asm.tree.MethodInsnNode;
 import org.objectweb.asm.tree.MethodNode;
 import org.objectweb.asm.tree.TypeInsnNode;
+import org.objectweb.asm.tree.VarInsnNode;
 
 /**
  * Initially prepares the method access or accessStatic as follows: <br/><br/>
@@ -53,9 +53,9 @@ public class CreateSwitchForAccessAdapter extends CreateSwitchAdapter {
 	@Override
 	protected void addPreSwitchInstructions(MethodNode method) {
 		// put "accessId" on the stack
-		method.instructions.add(new IntInsnNode(Opcodes.ILOAD, getFirstArgIndex()));
+		method.instructions.add(new VarInsnNode(Opcodes.ILOAD, getFirstArgIndex()));
 		// put "caller".getClass() on the stack
-		method.instructions.add(new IntInsnNode(Opcodes.ALOAD, getFirstArgIndex() + 3));
+		method.instructions.add(new VarInsnNode(Opcodes.ALOAD, getFirstArgIndex() + 3));
 		method.instructions.add(new MethodInsnNode(Opcodes.INVOKEVIRTUAL, "java/lang/Object", "getClass", "()Ljava/lang/Class;", false));
 		// call "getMemberId(accessId, callerClass)
 		method.instructions
@@ -71,7 +71,7 @@ public class CreateSwitchForAccessAdapter extends CreateSwitchAdapter {
 		if (superClassName == null || superClassName.equals("java/lang/Object")) {
 			method.instructions.add(new TypeInsnNode(Opcodes.NEW, "org/objectteams/NoSuchMethodError"));
 			method.instructions.add(new InsnNode(Opcodes.DUP));
-			method.instructions.add(new IntInsnNode(Opcodes.ILOAD, getFirstArgIndex())); // accessId
+			method.instructions.add(new VarInsnNode(Opcodes.ILOAD, getFirstArgIndex())); // accessId
 			method.instructions.add(new LdcInsnNode(clazz.getName()));					 // current class
 			method.instructions.add(new LdcInsnNode("decapsulating access"));			 // access reason
 			method.instructions.add(new MethodInsnNode(Opcodes.INVOKESPECIAL, "org/objectteams/NoSuchMethodError", "<init>", "(ILjava/lang/String;Ljava/lang/String;)V", false));

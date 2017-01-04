@@ -19,11 +19,11 @@ package org.eclipse.objectteams.otredyn.bytecode.asm;
 import org.eclipse.objectteams.otredyn.bytecode.Method;
 import org.objectweb.asm.Opcodes;
 import org.objectweb.asm.tree.InsnNode;
-import org.objectweb.asm.tree.IntInsnNode;
 import org.objectweb.asm.tree.LabelNode;
 import org.objectweb.asm.tree.LookupSwitchInsnNode;
 import org.objectweb.asm.tree.MethodInsnNode;
 import org.objectweb.asm.tree.MethodNode;
+import org.objectweb.asm.tree.VarInsnNode;
 
 /**
  * This class creates an empty switch statement in a method.
@@ -103,7 +103,7 @@ public class CreateSwitchAdapter extends AbstractTransformableClassNode {
 	 * @param method
 	 */
 	protected void addPreSwitchInstructions(MethodNode method) {
-		method.instructions.add(new IntInsnNode(Opcodes.ILOAD, firstArgIndex));
+		method.instructions.add(new VarInsnNode(Opcodes.ILOAD, firstArgIndex));
 		method.instructions.add(createLoadIntConstant(0x7fffffff));
 		method.instructions.add(new InsnNode(Opcodes.IAND)); // mask the 0x80000000 bit used for signaling a ctor
 	}
@@ -114,9 +114,9 @@ public class CreateSwitchAdapter extends AbstractTransformableClassNode {
 	 */
 	protected void addInstructionForDefaultLabel(MethodNode method) {
 		if (superToCall != null) {
-			method.instructions.add(new IntInsnNode(Opcodes.ALOAD, 0));
-			method.instructions.add(new IntInsnNode(Opcodes.ILOAD, 1));
-			method.instructions.add(new IntInsnNode(Opcodes.ALOAD, 2));
+			method.instructions.add(new VarInsnNode(Opcodes.ALOAD, 0));
+			method.instructions.add(new VarInsnNode(Opcodes.ILOAD, 1));
+			method.instructions.add(new VarInsnNode(Opcodes.ALOAD, 2));
 			method.instructions.add(new MethodInsnNode(Opcodes.INVOKESPECIAL, superToCall, this.method.getName(), this.method.getSignature(), false));
 		} else {
 			method.instructions.add(new InsnNode(Opcodes.ACONST_NULL));

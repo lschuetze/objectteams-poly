@@ -36,6 +36,7 @@ import org.objectweb.asm.tree.MethodInsnNode;
 import org.objectweb.asm.tree.MethodNode;
 import org.objectweb.asm.tree.TryCatchBlockNode;
 import org.objectweb.asm.tree.TypeInsnNode;
+import org.objectweb.asm.tree.VarInsnNode;
 
 
 
@@ -94,12 +95,12 @@ public class MoveCodeToCallOrigAdapter extends AbstractTransformableClassNode {
 		
 		if (args.length > 0) {
 			// move boundMethodId to a higher slot, to make lower slots available for original locals
-			newInstructions.add(new IntInsnNode(Opcodes.ILOAD, boundMethodIdSlot));
+			newInstructions.add(new VarInsnNode(Opcodes.ILOAD, boundMethodIdSlot));
 			boundMethodIdSlot = orgMethod.maxLocals+1;
 			addLocal(callOrig, BOUND_METHOD_ID, "I", boundMethodIdSlot, start, end, false);
 			newInstructions.add(new IntInsnNode(Opcodes.ISTORE, boundMethodIdSlot));
 			
-			newInstructions.add(new IntInsnNode(Opcodes.ALOAD, firstArgIndex + argOffset + 1));
+			newInstructions.add(new VarInsnNode(Opcodes.ALOAD, firstArgIndex + argOffset + 1));
 			
 			int slot = firstArgIndex + argOffset;
 			for (int i = argOffset; i < args.length; i++) {
@@ -171,10 +172,10 @@ public class MoveCodeToCallOrigAdapter extends AbstractTransformableClassNode {
 	private InsnList superOrigCall(Method method, Type[] args) {
 		InsnList newInstructions = new InsnList();
 
-		newInstructions.add(new IntInsnNode(Opcodes.ALOAD, 0));
+		newInstructions.add(new VarInsnNode(Opcodes.ALOAD, 0));
 		
 		for (int i = argOffset; i < args.length; i++) {
-			newInstructions.add(new IntInsnNode(Opcodes.ALOAD, firstArgIndex + argOffset + 1));
+			newInstructions.add(new VarInsnNode(Opcodes.ALOAD, firstArgIndex + argOffset + 1));
 			newInstructions.add(createLoadIntConstant(i));
 			newInstructions.add(new InsnNode(Opcodes.AALOAD));
 			Type arg = args[i];
@@ -225,7 +226,7 @@ public class MoveCodeToCallOrigAdapter extends AbstractTransformableClassNode {
 		// replace:
 		replaceSuperCallsWithCallToCallOrig(instructions, toReplace, true, superclass, new IBoundMethodIdInsnProvider() {
 			@Override public AbstractInsnNode getLoadBoundMethodIdInsn(MethodInsnNode methodInsn) {
-				return new IntInsnNode(Opcodes.ILOAD, boundMethodIdSlot);
+				return new VarInsnNode(Opcodes.ILOAD, boundMethodIdSlot);
 			}
 		});
 	}

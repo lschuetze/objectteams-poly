@@ -20,8 +20,8 @@ import org.eclipse.objectteams.otredyn.transformer.names.ConstantMembers;
 import org.objectweb.asm.Opcodes;
 import org.objectweb.asm.Type;
 import org.objectweb.asm.tree.InsnList;
-import org.objectweb.asm.tree.IntInsnNode;
 import org.objectweb.asm.tree.MethodNode;
+import org.objectweb.asm.tree.VarInsnNode;
 
 /**
  * Create the code for the dispatch from a base class to the teams 
@@ -71,7 +71,7 @@ public class CreateDispatchCodeInCallAllBindingsAdapter extends
 	@Override
 	protected InsnList getBoxedArguments(Type[] args) {
 		InsnList instructions = new InsnList();
-		instructions.add(new IntInsnNode(Opcodes.ALOAD, 2));
+		instructions.add(new VarInsnNode(Opcodes.ALOAD, 2));
 		return instructions;
 	}
 

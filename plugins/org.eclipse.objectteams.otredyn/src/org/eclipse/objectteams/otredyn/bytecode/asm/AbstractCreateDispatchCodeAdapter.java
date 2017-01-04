@@ -31,6 +31,7 @@ import org.objectweb.asm.tree.LocalVariableNode;
 import org.objectweb.asm.tree.MethodInsnNode;
 import org.objectweb.asm.tree.MethodNode;
 import org.objectweb.asm.tree.TypeInsnNode;
+import org.objectweb.asm.tree.VarInsnNode;
 
 /**
  * Create the code for the dispatch from a base class to the teams. <br/> <br/>
@@ -82,7 +83,7 @@ public abstract class AbstractCreateDispatchCodeAdapter extends
 		instructions.add(new IntInsnNode(Opcodes.ASTORE, teamsAndCallinsSlot));
 
 		// teams = teamsAndCallinIds[0]
-		instructions.add(new IntInsnNode(Opcodes.ALOAD, teamsAndCallinsSlot));
+		instructions.add(new VarInsnNode(Opcodes.ALOAD, teamsAndCallinsSlot));
 		instructions.add(new InsnNode(Opcodes.ICONST_0));
 		instructions.add(new InsnNode(Opcodes.AALOAD));
 		instructions.add(new TypeInsnNode(Opcodes.CHECKCAST, "[Lorg/objectteams/ITeam;"));
@@ -97,7 +98,7 @@ public abstract class AbstractCreateDispatchCodeAdapter extends
 			instructions.add(new InsnNode(Opcodes.ACONST_NULL));
 		} else {
 			// put "this" on the stack and cast it to IBoundBase2
-			instructions.add(new IntInsnNode(Opcodes.ALOAD, 0));
+			instructions.add(new VarInsnNode(Opcodes.ALOAD, 0));
 			instructions.add(new TypeInsnNode(Opcodes.CHECKCAST,
 					ClassNames.I_BOUND_BASE_SLASH));
 		}
@@ -106,13 +107,13 @@ public abstract class AbstractCreateDispatchCodeAdapter extends
 		instructions.add(new InsnNode(Opcodes.ICONST_0));
 
 		// callinIds = teamsAndCallinIds[1]
-		instructions.add(new IntInsnNode(Opcodes.ALOAD, teamsAndCallinsSlot));
+		instructions.add(new VarInsnNode(Opcodes.ALOAD, teamsAndCallinsSlot));
 		instructions.add(new InsnNode(Opcodes.ICONST_1));
 		instructions.add(new InsnNode(Opcodes.AALOAD));
 		instructions.add(new TypeInsnNode(Opcodes.CHECKCAST, "[I"));
 
 		if (boundMethodId == -1)
-			instructions.add(new IntInsnNode(Opcodes.ILOAD, 1)); // boundMethodId is arg#1 inside _OT$callAllBindings (base version)
+			instructions.add(new VarInsnNode(Opcodes.ILOAD, 1)); // boundMethodId is arg#1 inside _OT$callAllBindings (base version)
 		else
 			instructions.add(createLoadIntConstant(boundMethodId));
 		args = Type.getArgumentTypes(method.desc);

@@ -24,11 +24,11 @@ import org.objectweb.asm.Type;
 import org.objectweb.asm.tree.FieldInsnNode;
 import org.objectweb.asm.tree.InsnList;
 import org.objectweb.asm.tree.InsnNode;
-import org.objectweb.asm.tree.IntInsnNode;
 import org.objectweb.asm.tree.JumpInsnNode;
 import org.objectweb.asm.tree.LabelNode;
 import org.objectweb.asm.tree.MethodNode;
 import org.objectweb.asm.tree.TypeInsnNode;
+import org.objectweb.asm.tree.VarInsnNode;
 
 /**
  * Creates and adds the instructions,
@@ -69,7 +69,7 @@ public class CreateFieldAccessAdapter extends AbstractTransformableClassNode {
 
 		InsnList instructions = new InsnList();
 		// put accessId on the stack
-		instructions.add(new IntInsnNode(Opcodes.ILOAD, firstArgIndex + 1));
+		instructions.add(new VarInsnNode(Opcodes.ILOAD, firstArgIndex + 1));
 		// read or write access
 		LabelNode writeAccess = new LabelNode();
 		instructions.add(new JumpInsnNode(Opcodes.IFNE, writeAccess));
@@ -80,7 +80,7 @@ public class CreateFieldAccessAdapter extends AbstractTransformableClassNode {
 					.getName(), field.getSignature()));
 		} else {
 			// put "this" on the stack
-			instructions.add(new IntInsnNode(Opcodes.ALOAD, 0));
+			instructions.add(new VarInsnNode(Opcodes.ALOAD, 0));
 			// get value of field
 			instructions.add(new FieldInsnNode(Opcodes.GETFIELD, name, field
 					.getName(), field.getSignature()));
@@ -95,10 +95,10 @@ public class CreateFieldAccessAdapter extends AbstractTransformableClassNode {
 		instructions.add(writeAccess);
 		//put "this" on the stack
 		if (!field.isStatic())
-			instructions.add(new IntInsnNode(Opcodes.ALOAD, 0));
+			instructions.add(new VarInsnNode(Opcodes.ALOAD, 0));
 			
 		//put "args" on the stack 
-		instructions.add(new IntInsnNode(Opcodes.ALOAD, firstArgIndex + 2));
+		instructions.add(new VarInsnNode(Opcodes.ALOAD, firstArgIndex + 2));
 		//get the first element of "args"
 		instructions.add(new InsnNode(Opcodes.ICONST_0));
 		instructions.add(new InsnNode(Opcodes.AALOAD));

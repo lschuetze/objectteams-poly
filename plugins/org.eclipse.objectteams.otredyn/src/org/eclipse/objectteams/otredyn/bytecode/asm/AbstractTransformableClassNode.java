@@ -37,6 +37,7 @@ import org.objectweb.asm.tree.LookupSwitchInsnNode;
 import org.objectweb.asm.tree.MethodInsnNode;
 import org.objectweb.asm.tree.MethodNode;
 import org.objectweb.asm.tree.TypeInsnNode;
+import org.objectweb.asm.tree.VarInsnNode;
 
 import static org.eclipse.objectteams.otredyn.bytecode.asm.AsmBoundClass.ASM_API;
 import static org.eclipse.objectteams.otredyn.transformer.names.ConstantMembers.callOrig;
@@ -238,7 +239,7 @@ public abstract class AbstractTransformableClassNode extends ClassNode {
 		}
 		// put "this" on the stack for an non-static method
 		if (!isStatic) {
-			instructions.add(new IntInsnNode(Opcodes.ALOAD, 0));
+			instructions.add(new VarInsnNode(Opcodes.ALOAD, 0));
 		}
 		for (int i=0, slot=firstArgIndex; i < args.length; slot+=args[i++].getSize()) {
 			instructions.add(new IntInsnNode(args[i].getOpcode(Opcodes.ILOAD),
