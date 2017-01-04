@@ -91,6 +91,7 @@ import org.eclipse.text.edits.TextEdit;
  *
  * @author kaschja
  */
+@SuppressWarnings("restriction") // uses internal classes from org.eclipse.jdt.internal.corext
 public abstract class TypeCreator
 {
 

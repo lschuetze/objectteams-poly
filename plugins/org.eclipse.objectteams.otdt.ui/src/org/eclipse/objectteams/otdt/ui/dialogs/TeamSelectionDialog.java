@@ -33,8 +33,6 @@ import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.search.IJavaSearchConstants;
 import org.eclipse.jdt.core.search.IJavaSearchScope;
 import org.eclipse.jdt.core.search.SearchPattern;
-import org.eclipse.jdt.internal.corext.util.Strings;
-import org.eclipse.jdt.internal.ui.util.StringMatcher;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.operation.IRunnableContext;
 import org.eclipse.objectteams.otdt.core.IOTType;
@@ -190,6 +188,7 @@ public class TeamSelectionDialog extends TwoPaneElementSelector
 
 //------------------------------------------------------------------------------
 
+	@SuppressWarnings("restriction") // using internal class org.eclipse.jdt.internal.ui.util.StringMatcher
     private static class TypeFilterMatcher
         implements FilteredList.FilterMatcher
     {
@@ -197,8 +196,8 @@ public class TeamSelectionDialog extends TwoPaneElementSelector
         private static final char END_SYMBOL = '<';
         private static final char ANY_STRING = '*';
 
-		private StringMatcher fMatcher;
-        private StringMatcher fQualifierMatcher;
+		private org.eclipse.jdt.internal.ui.util.StringMatcher fMatcher;
+		private org.eclipse.jdt.internal.ui.util.StringMatcher fQualifierMatcher;
 
         /*
          * @see FilteredList.FilterMatcher#setFilter(String, boolean)
@@ -214,7 +213,7 @@ public class TeamSelectionDialog extends TwoPaneElementSelector
             {
                 fQualifierMatcher = null;
                 fMatcher =
-                    new StringMatcher(
+                    new org.eclipse.jdt.internal.ui.util.StringMatcher(
                         adjustPattern(pattern),
                         ignoreCase,
                         igoreWildCards);
@@ -224,12 +223,12 @@ public class TeamSelectionDialog extends TwoPaneElementSelector
             else
             {
                 fQualifierMatcher =
-                    new StringMatcher(
+                    new org.eclipse.jdt.internal.ui.util.StringMatcher(
                         pattern.substring(0, qualifierIndex),
                         ignoreCase,
                         igoreWildCards);
                 fMatcher =
-                    new StringMatcher(
+                    new org.eclipse.jdt.internal.ui.util.StringMatcher(
                         adjustPattern(pattern.substring(qualifierIndex + 1)),
                         ignoreCase,
                         igoreWildCards);
@@ -308,14 +307,14 @@ public class TeamSelectionDialog extends TwoPaneElementSelector
             String leftString = (String) left;
             String rightString = (String) right;
 
-            if (Strings.isLowerCase(leftString.charAt(0))
-                && !Strings.isLowerCase(rightString.charAt(0)))
+            if (Character.isLowerCase(leftString.charAt(0))
+                && !Character.isLowerCase(rightString.charAt(0)))
             {
                 return +1;
             }
 
-            if (Strings.isLowerCase(rightString.charAt(0))
-                && !Strings.isLowerCase(leftString.charAt(0)))
+            if (Character.isLowerCase(rightString.charAt(0))
+                && !Character.isLowerCase(leftString.charAt(0)))
             {
                 return -1;
             }

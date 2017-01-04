@@ -56,6 +56,7 @@ import org.eclipse.osgi.util.NLS;
  * @author stephan
  * @since 1.2.8
  */
+@SuppressWarnings("restriction") // uses internal classes below org.eclipse.jdt.internal.ui
 public class RoleOverrideIndicatorManager implements IJavaReconcilingListener {
 
 	/**
