@@ -413,12 +413,12 @@ buildSourceJar platform/eclipse.platform.swt.git \
 
 buildSourceJar platform/eclipse.platform.releng.git \
 	bundles/org.eclipse.releng.tools \
-	R4_5_2 \
+	R4_6_2 \
 	org/eclipse/platform org.eclipse.releng.tools 3.9.0
 
 buildSourceJar platform/eclipse.platform.git \
 	update/org.eclipse.update.core \
-	R4_5_2 \
+	R4_6_2 \
 	org/eclipse/platform org.eclipse.update.core 3.2.800 \
 	schema
 
@@ -426,6 +426,11 @@ buildSourceJar equinox/rt.equinox.framework.git \
 	bundles/org.eclipse.osgi.compatibility.plugins \
 	I20131023-2000 \
 	org/eclipse/platform org.eclipse.osgi.compatibility.plugins 1.0.0
+
+buildSourceJar platform/eclipse.platform.releng.git \
+	bundles/org.eclipse.pde.tools.versioning \
+	I20140518-2000 \
+	org/eclipse/pde org.eclipse.pde.tools.versioning 1.0.200
 
 echo "========== Repo completed ========="
 
