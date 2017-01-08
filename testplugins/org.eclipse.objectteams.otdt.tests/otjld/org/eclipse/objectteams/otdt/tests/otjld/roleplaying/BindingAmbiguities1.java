@@ -1119,7 +1119,7 @@ public class BindingAmbiguities1 extends AbstractOTJLDTest {
 				"2. ERROR in Team731ab8e_3.java (at line 1)\n" + 
 				"	public team class Team731ab8e_3 extends Team731ab8e_2 {\n" + 
 				"	                  ^^^^^^^^^^^^^\n" + 
-				"Team introduces binding ambiguity for role Role731ab8e_1<@tthis[Team731ab8e_3]>, which may break clients of the super team (OTJLD 2.3.5(d)).\n" + 
+				"Team introduces binding ambiguity for role Role731ab8e_3<@tthis[Team731ab8e_3]>, which may break clients of the super team (OTJLD 2.3.5(d)).\n" + 
 				"----------\n" + 
 				"3. ERROR in Team731ab8e_3.java (at line 1)\n" + 
 				"	public team class Team731ab8e_3 extends Team731ab8e_2 {\n" + 
@@ -1129,7 +1129,7 @@ public class BindingAmbiguities1 extends AbstractOTJLDTest {
 				"4. ERROR in Team731ab8e_3.java (at line 1)\n" + 
 				"	public team class Team731ab8e_3 extends Team731ab8e_2 {\n" + 
 				"	                  ^^^^^^^^^^^^^\n" + 
-				"Team introduces binding ambiguity for role Role731ab8e_3<@tthis[Team731ab8e_3]>, which may break clients of the super team (OTJLD 2.3.5(d)).\n"  +
+				"Team introduces binding ambiguity for role Role731ab8e_1<@tthis[Team731ab8e_3]>, which may break clients of the super team (OTJLD 2.3.5(d)).\n"  +
 				"----------\n",
 	     		"----------\n" + 
 				"1. WARNING in Team731ab8e_3.java (at line 1)\n" + 
