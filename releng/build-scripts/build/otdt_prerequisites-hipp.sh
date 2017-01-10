@@ -44,7 +44,7 @@ ANT_HOME=/shared/common/apache-ant-1.7.1/
 PATH=${ANT_HOME}/bin:${PATH}
 
 # EXPORT: additional arguments to pass to Ant:
-ANT_PROFILE="-verbose -logger org.apache.tools.ant.listener.ProfileLogger"
+ANT_PROFILE="-verbose"
 #ANT_PROFILE=""
 
 # EXPORT: Nice-level for the Ant process:
