@@ -32,6 +32,7 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.net.URL;
+import java.text.MessageFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
@@ -2630,6 +2631,11 @@ protected void runNegativeTest(boolean skipJavac, JavacTestOptions javacTestOpti
 			fail("odd number of strings in testFiles");
 		}
 
+//{ObjectTeams: test profiling:
+		long now = System.currentTimeMillis();
+		System.out.println(new MessageFormat("{0,time}:{1,number,000}: {2}.{3}",
+				Locale.GERMANY).format(new Object[] {now, now%1000, this.getClass().getName(), testName()}));
+// SH}
 		Requestor requestor =
 			customRequestor instanceof Requestor ?
 					(Requestor) customRequestor :
