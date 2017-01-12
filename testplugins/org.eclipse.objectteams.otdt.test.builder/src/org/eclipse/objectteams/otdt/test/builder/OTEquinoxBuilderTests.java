@@ -125,18 +125,18 @@ public class OTEquinoxBuilderTests extends OTBuilderTests {
 	public void testForcedExportsMissing() throws CoreException, IOException {
 		IJavaProject trac18b= fileManager.setUpJavaProject("Trac18b"); 
 		env.addProject(trac18b.getProject());
-		IJavaProject trac18a= fileManager.setUpJavaProject("Trac18a2"); 
-		env.addProject(trac18a.getProject());
+		IJavaProject trac18a2= fileManager.setUpJavaProject("Trac18a2"); 
+		env.addProject(trac18a2.getProject());
 		fullBuild();
 		expectingNoProblemsFor(trac18b.getPath());
-		expectAccessRestriction(trac18a, "src/trac18a/Team18.java", 42, 70);
+		expectAccessRestriction(trac18a2, "src/trac18a/Team18.java", 42, 70);
 		// fix the error
-		fileManager.replaceWorkspaceFile("Trac18a/plugin.xml", trac18a, "plugin.xml");
+		fileManager.replaceWorkspaceFile("Trac18a/plugin.xml", trac18a2, "plugin.xml");
 		incrementalBuild();
 		expectingNoProblemsFor(trac18b.getPath());
-		expectingOnlySpecificProblemsFor(trac18a.getPath(), new Problem[] {
-			getDecapsulationProblem(trac18a, "trac18b.actions.SampleAction", "trac18a/Team18.java", 42, 70),
-			getDecapsulationProblem(trac18a, "trac18b.actions.SampleAction", "trac18a/Team18.java", 163, 175),
+		expectingOnlySpecificProblemsFor(trac18a2.getPath(), new Problem[] {
+			getDecapsulationProblem(trac18a2, "trac18b.actions.SampleAction", "trac18a/Team18.java", 42, 70),
+			getDecapsulationProblem(trac18a2, "trac18b.actions.SampleAction", "trac18a/Team18.java", 163, 175),
 		});
 	}
 	
@@ -145,13 +145,13 @@ public class OTEquinoxBuilderTests extends OTBuilderTests {
 	public void testForcedExportsGeneratedMethodRefs() throws CoreException, IOException {
 		IJavaProject trac18b= fileManager.setUpJavaProject("Trac18b"); 
 		env.addProject(trac18b.getProject());
-		IJavaProject trac18a= fileManager.setUpJavaProject("Trac18a3"); 
-		env.addProject(trac18a.getProject());
+		IJavaProject trac18a3= fileManager.setUpJavaProject("Trac18a3"); 
+		env.addProject(trac18a3.getProject());
 		fullBuild();
 		expectingNoProblemsFor(trac18b.getPath());
-		expectingOnlySpecificProblemsFor(trac18a.getPath(), new Problem[] {
-			getDecapsulationProblem(trac18a, "trac18b.actions.SampleAction", "trac18a/Team18.java", 42, 70),
-			getDecapsulationProblem(trac18a, "trac18b.actions.SampleAction", "trac18a/Team18.java", 163, 175)
+		expectingOnlySpecificProblemsFor(trac18a3.getPath(), new Problem[] {
+			getDecapsulationProblem(trac18a3, "trac18b.actions.SampleAction", "trac18a/Team18.java", 42, 70),
+			getDecapsulationProblem(trac18a3, "trac18b.actions.SampleAction", "trac18a/Team18.java", 163, 175)
 			// base-ctor call no longer flagged
 		});
 	}

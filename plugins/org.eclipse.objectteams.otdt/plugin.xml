@@ -34,6 +34,7 @@
 	    <builder hasNature="true">
 	       <run class="org.eclipse.objectteams.otdt.internal.core.builder.OTJBuilder">
 	       </run>
+		   <dynamicReference class="org.eclipse.jdt.internal.core.DynamicProjectReferences"/>
 	    </builder>
 	</extension>
 
