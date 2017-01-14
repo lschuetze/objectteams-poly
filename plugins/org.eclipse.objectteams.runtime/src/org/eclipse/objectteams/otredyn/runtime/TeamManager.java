@@ -196,9 +196,6 @@ public class TeamManager implements ITeamManager {
 			IBoundClass boundClass, IMethod method, int joinpointId) {
 		changeTeamsForJoinpoint(t, binding.getPerTeamId(), joinpointId, stateChange);
 		List<Integer> subJoinpoints = joinpointToSubJoinpoints.get(joinpointId);
-		if (t.getClass().getName().contains("CodeManipulationAdaptor")) {
-			System.out.println("Activate:"+joinpointId+"->"+subJoinpoints+"("+boundClass.getMethodIdentifier(method)+")");
-		}
 		if (subJoinpoints != null)
 			for (Integer subJoinpoint : subJoinpoints)
 				stateChangeForJoinpoint(t, stateChange, binding, boundClass, method, subJoinpoint);
