@@ -50,7 +50,7 @@
  		<!-- :motsuc -->
  	</target>
  
-    <target name="testElements" if="really.run.tests">
+    <target name="testElements">
         <ant antfile="${genericTargets}" target="${target}" >
             <property name="type" value="feature" />
             <property name="id" value="org.eclipse.objectteams.otdt-tests" />
