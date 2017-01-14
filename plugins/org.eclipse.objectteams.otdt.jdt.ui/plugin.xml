@@ -179,6 +179,10 @@
                activation="NONE"
                class="org.eclipse.objectteams.otdt.internal.ui.assist.OTQuickFixes"
                icon="platform:/plugin/org.eclipse.objectteams.otdt.ui/icons/ot/team_obj.gif"/>
+         <team
+               activation="ALL_THREADS"
+               class="org.eclipse.objectteams.otdt.internal.corext.CodeManipulationAdaptor"
+               icon="platform:/plugin/org.eclipse.objectteams.otdt.ui/icons/ot/team_obj.gif"/>
      </aspectBinding>
      <aspectBinding icon="platform:/plugin/org.eclipse.objectteams.otdt.ui/icons/ot/calloutbinding_obj.gif">
 	     <basePlugin 
@@ -201,6 +205,10 @@
         <team
               activation="ALL_THREADS"
               class="org.eclipse.objectteams.otdt.internal.ui.assist.BaseImportRewriting"
+              icon="platform:/plugin/org.eclipse.objectteams.otdt.ui/icons/ot/team_obj.gif"/>
+        <team
+              activation="ALL_THREADS"
+              class="org.eclipse.objectteams.otdt.internal.corext.CodeManipulationAdaptor"
               icon="platform:/plugin/org.eclipse.objectteams.otdt.ui/icons/ot/team_obj.gif"/>
         <team
               activation="NONE"

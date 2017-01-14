@@ -40,6 +40,7 @@ import org.eclipse.jdt.internal.corext.dom.ASTNodes;
 import org.eclipse.jdt.internal.corext.dom.Bindings;
 import org.eclipse.objectteams.otdt.core.compiler.IOTConstants;
 
+import base org.eclipse.jdt.core.dom.ASTVisitor;
 import base org.eclipse.jdt.internal.corext.codemanipulation.GetterSetterUtil;
 import base org.eclipse.jdt.internal.corext.codemanipulation.ImportReferencesCollector;
 import base org.eclipse.jdt.internal.corext.codemanipulation.OrganizeImportsOperation;
@@ -155,11 +156,11 @@ public team class CodeManipulationAdaptor
 		int getTYPES()            -> get int TYPES;
 		int getCHECK_VISIBILITY() -> get int CHECK_VISIBILITY;
 	}
+
 	/**
-	 * Make sure that method specs never trigger static imports of their
-	 * references methods/fields. 
+	 * Weave into class from org.eclipse.jdt.core
 	 */
-	protected class ImportReferencesCollector playedBy ImportReferencesCollector {
+	protected class MethodSpecRecordingCoreVisitor playedBy ASTVisitor {
 		boolean inMethodSpec= false;
 		void setMethodSpec(boolean in) {
 			this.inMethodSpec= in;
@@ -172,6 +173,12 @@ public team class CodeManipulationAdaptor
 			with { in <- true }
 		void setMethodSpec(boolean in) <- before void endVisit(FieldAccessSpec spec)
 			with { in <- false}
+	}
+	/**
+	 * Make sure that method specs never trigger static imports of their
+	 * references methods/fields. 
+	 */
+	protected class ImportReferencesCollector extends MethodSpecRecordingCoreVisitor playedBy ImportReferencesCollector {
 		
 		@SuppressWarnings("basecall")
 		callin void possibleStaticImportFound() {
