@@ -3,8 +3,9 @@
   <validationSets label="main">
     <contributions enabled="true" label="sdk">
       <repositories location="/home/data/httpd/download.eclipse.org/eclipse/updates/4.6-M-builds/M-4.6.2RC3-201611241400/">
-        <mapRules xsi:type="aggregator:ExclusionRule" name="org.eclipse.e4.core.tools.feature.feature.group"/>
-        <mapRules xsi:type="aggregator:ExclusionRule" name="org.eclipse.e4.core.tools.feature.source.feature.group"/>
+      </repositories>
+      <repositories location="/home/data/httpd/download.eclipse.org/eclipse/updates/4.6-M-builds/M-4.6.2RC3-201611241400/">
+        <bundles name="org.eclipse.jdt.core.compiler.batch"/>
       </repositories>
     </contributions>
     <contributions enabled="false" label="sdk_http">
@@ -30,6 +31,7 @@
   <configurations operatingSystem="solaris" windowSystem="gtk" architecture="sparcv9"/>
   <configurations architecture="x86_64"/>
   <configurations/>
+  <mavenMappings namePattern="(org\.eclipse\.jdt)\.core\.compiler\.batch" groupId="$1" artifactId="ecj"/>
   <mavenMappings namePattern="(org\.eclipse\.jdt)(.*)" groupId="$1" artifactId="$1$2"/>
   <mavenMappings namePattern="(org\.eclipse\.pde)(.*)" groupId="$1" artifactId="$1$2"/>
   <mavenMappings namePattern="(org.eclipse.jetty)(.*)" groupId="$1" artifactId="$1$2"/>
