@@ -38,13 +38,13 @@
   <mavenMappings namePattern="(org.eclipse.ecf)(.*)" groupId="$1" artifactId="$1$2"/>
   <mavenMappings namePattern="(org.eclipse.emf)(.*)" groupId="$1" artifactId="$1$2"/>
   <mavenMappings namePattern="(org\.eclipse)(.*)$" groupId="$1.platform" artifactId="$1$2"/>
-  <mavenMappings namePattern="com\.ibm\.icu(\.source)?" groupId="com.ibm.icu" artifactId="icu4j$1"/>
+  <mavenMappings namePattern="com\.ibm\.icu" groupId="com.ibm.icu" artifactId="icu4j"/>
   <mavenMappings namePattern="(com\.jcraft)\.(.*)" groupId="$1" artifactId="$2"/>
-  <mavenMappings namePattern="com\.sun\.el(\.source)?" groupId="org.eclipse.jetty.orbit" artifactId="com.sun.el$1"/>
-  <mavenMappings namePattern="javax\.annotation(\.source)?" groupId="javax.annotation" artifactId="javax.annotation-api$1"/>
-  <mavenMappings namePattern="javax\.el(\.source)?" groupId="javax.el" artifactId="el-api$1"/>
-  <mavenMappings namePattern="javax\.servlet(\.source)?$" groupId="javax.servlet" artifactId="javax.servlet-api$1"/>
-  <mavenMappings namePattern="javax\.servlet\.jsp(\.source)?" groupId="javax.servlet.jsp" artifactId="javax.servlet.jsp-api$1"/>
+  <mavenMappings namePattern="com\.sun\.el" groupId="org.eclipse.jetty.orbit" artifactId="com.sun.el"/>
+  <mavenMappings namePattern="javax\.annotation" groupId="javax.annotation" artifactId="javax.annotation-api"/>
+  <mavenMappings namePattern="javax\.el" groupId="javax.el" artifactId="el-api"/>
+  <mavenMappings namePattern="javax\.servlet$" groupId="javax.servlet" artifactId="javax.servlet-api"/>
+  <mavenMappings namePattern="javax\.servlet\.jsp" groupId="javax.servlet.jsp" artifactId="javax.servlet.jsp-api"/>
   <mavenMappings namePattern="org\.apache\.(commons)\.([^.]+)" groupId="$1-$2" artifactId="$1-$2"/>
   <mavenMappings namePattern="(org\.apache\.httpcomponents)\.([^.]+)$" groupId="$1" artifactId="$2"/>
   <mavenMappings namePattern="org\.apache\.lucene\.core" groupId="org.apache.lucene" artifactId="lucene-core"/>
@@ -56,7 +56,7 @@
   <mavenMappings namePattern="(org\.objectweb)\.([^.]+)\.([^.]+)" groupId="org.ow2.asm" artifactId="$2-$3"/>
   <mavenMappings namePattern="org.tukaani.xz" groupId="org.tukaani" artifactId="xz"/>
   <mavenMappings namePattern="org.hamcrest.core" groupId="org.hamcrest" artifactId="hamcrest-core"/>
-  <mavenMappings namePattern="org.junit(\.source)?" groupId="junit" artifactId="junit$1"/>
+  <mavenMappings namePattern="org.junit" groupId="junit" artifactId="junit"/>
   <mavenMappings namePattern="org\.(sat4j)\.(.*)" groupId="org.ow2.$1" artifactId="org.ow2.$1.$2"/>
   <mavenMappings namePattern="org.w3c.css.sac" groupId="org.eclipse.birt.runtime" artifactId="org.w3c.css.sac"/>
   <mavenMappings namePattern="org.apache.batik.css" groupId="org.apache.xmlgraphics" artifactId="batik-css"/>
