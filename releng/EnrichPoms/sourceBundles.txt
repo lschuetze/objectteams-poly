@@ -1,0 +1,33 @@
+platform/eclipse.platform.team.git \
+	bundles/org.eclipse.core.net/fragments/org.eclipse.core.net.win32.x86_64 \
+	I20160329-0800 \
+	org/eclipse/platform org.eclipse.core.net.win32.x86_64 1.1.0
+platform/eclipse.platform.team.git \
+	bundles/org.eclipse.core.net/fragments/org.eclipse.core.net.win32.x86 \
+	I20160329-0800 \
+	org/eclipse/platform org.eclipse.core.net.win32.x86 1.1.0
+platform/eclipse.platform.team.git \
+	bundles/org.eclipse.core.net/fragments/org.eclipse.core.net.linux.x86_64 \
+	I20160329-0800 \
+	org/eclipse/platform org.eclipse.core.net.linux.x86_64 1.2.0
+platform/eclipse.platform.team.git \
+	bundles/org.eclipse.core.net/fragments/org.eclipse.core.net.linux.x86 \
+	I20160329-0800 \
+	org/eclipse/platform org.eclipse.core.net.linux.x86 1.2.0
+platform/eclipse.platform.releng.git \
+	bundles/org.eclipse.releng.tools \
+	R4_6_2 \
+	org/eclipse/platform org.eclipse.releng.tools 3.9.0
+platform/eclipse.platform.git \
+	update/org.eclipse.update.core \
+	R4_6_2 \
+	org/eclipse/platform org.eclipse.update.core 3.2.800 \
+	schema
+equinox/rt.equinox.framework.git \
+	bundles/org.eclipse.osgi.compatibility.plugins \
+	I20131023-2000 \
+	org/eclipse/platform org.eclipse.osgi.compatibility.plugins 1.0.0
+platform/eclipse.platform.releng.git \
+	bundles/org.eclipse.pde.tools.versioning \
+	I20140518-2000 \
+	org/eclipse/pde org.eclipse.pde.tools.versioning 1.0.200

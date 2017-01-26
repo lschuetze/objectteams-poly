@@ -14,27 +14,8 @@
 #   Parameters we might want to externalize into a properties file
 #================================================================================
 
-# ECLIPSE:
-DROPS4=/home/data/httpd/archive.eclipse.org/eclipse/downloads/drops4
-FILE_ECLIPSE=${DROPS4}/R-4.6.1-201609071200/eclipse-SDK-4.6.1-linux-gtk-x86_64.tar.gz
-APP_NAME_P2DIRECTOR=org.eclipse.equinox.p2.director
+source `dirname ${0}`/properties.sh
 
-# QUESTION: set tmpdir? (-vmargs not accepted by director application?)
-
-# AGGREGATOR:
-IU_AGG_PRODUCT=org.eclipse.cbi.p2repo.cli.product
-URL_AGG_UPDATES=http://download.eclipse.org/cbi/updates/aggregator/headless/4.6/
-
-FILE_SDK_AGGR=${WORKSPACE}/SDK4Mvn.aggr
-
-# ENRICH POMS tool:
-ENRICH_POMS_JAR=${WORKSPACE}/../../pomEnricher/workspace/EnrichPoms.jar
-
-# LOCAL TOOLS:
-LOCAL_TOOLS=${WORKSPACE}/tools
-DIR_AGGREGATOR=aggregator
-AGGREGATOR=${LOCAL_TOOLS}/${DIR_AGGREGATOR}/cbiAggr
-ECLIPSE=${LOCAL_TOOLS}/eclipse/eclipse
 
 #================================================================================
 # Util functions
@@ -380,26 +361,12 @@ function buildSourceJar() {
 	cd -
 }
 
-buildSourceJar platform/eclipse.platform.team.git \
-	bundles/org.eclipse.core.net/fragments/org.eclipse.core.net.win32.x86_64 \
-	I20160329-0800 \
-	org/eclipse/platform org.eclipse.core.net.win32.x86_64 1.1.0
+while read line
+do
+    buildSourceJar $line 
+done < `dirname $0`/sourceBundles.txt
 
-buildSourceJar platform/eclipse.platform.team.git \
-	bundles/org.eclipse.core.net/fragments/org.eclipse.core.net.win32.x86 \
-	I20160329-0800 \
-	org/eclipse/platform org.eclipse.core.net.win32.x86 1.1.0
-
-buildSourceJar platform/eclipse.platform.team.git \
-	bundles/org.eclipse.core.net/fragments/org.eclipse.core.net.linux.x86_64 \
-	I20160329-0800 \
-	org/eclipse/platform org.eclipse.core.net.linux.x86_64 1.2.0
-
-buildSourceJar platform/eclipse.platform.team.git \
-	bundles/org.eclipse.core.net/fragments/org.eclipse.core.net.linux.x86 \
-	I20160329-0800 \
-	org/eclipse/platform org.eclipse.core.net.linux.x86 1.2.0
-
+# special hack for missing source bundle with several source folders with blanks:
 buildSourceJar platform/eclipse.platform.swt.git \
 	bundles/org.eclipse.swt.tools \
 	M20161109-0400 \
@@ -410,27 +377,6 @@ buildSourceJar platform/eclipse.platform.swt.git \
     "NativeStats" \
 	"Mozilla Generation" \
 	"JavadocBasher"
-
-buildSourceJar platform/eclipse.platform.releng.git \
-	bundles/org.eclipse.releng.tools \
-	R4_6_2 \
-	org/eclipse/platform org.eclipse.releng.tools 3.9.0
-
-buildSourceJar platform/eclipse.platform.git \
-	update/org.eclipse.update.core \
-	R4_6_2 \
-	org/eclipse/platform org.eclipse.update.core 3.2.800 \
-	schema
-
-buildSourceJar equinox/rt.equinox.framework.git \
-	bundles/org.eclipse.osgi.compatibility.plugins \
-	I20131023-2000 \
-	org/eclipse/platform org.eclipse.osgi.compatibility.plugins 1.0.0
-
-buildSourceJar platform/eclipse.platform.releng.git \
-	bundles/org.eclipse.pde.tools.versioning \
-	I20140518-2000 \
-	org/eclipse/pde org.eclipse.pde.tools.versioning 1.0.200
 
 echo "========== Repo completed ========="
 
