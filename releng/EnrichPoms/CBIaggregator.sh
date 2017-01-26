@@ -274,17 +274,6 @@ java -jar ${ENRICH_POMS_JAR} `pwd`/org/eclipse/jdt &> .logs/enrich-jdt.txt
 echo "pde"
 java -jar ${ENRICH_POMS_JAR} `pwd`/org/eclipse/pde &> .logs/enrich-pde.txt
 
-echo "== updated checksums =="
-
-function updateCheckSums() {
-        /usr/bin/md5sum ${1} | cut -d " " -f 1 > ${1}.md5
-        /usr/bin/sha1sum ${1} | cut -d " " -f 1 > ${1}.sha1
-}
-
-for pom in org/eclipse/{platform,jdt,pde}/*/*/*.pom
-do
-        updateCheckSums ${pom}
-done
 
 echo "==== Add Javadoc stubs ===="
 
