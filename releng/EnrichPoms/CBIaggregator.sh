@@ -110,15 +110,6 @@ fi
 
 /bin/rm -r p2.index p2.packed content.jar artifacts.jar
 
-#==== remove -sources artifacts, misplaced due to quirk from https://bugs.eclipse.org/508910: ====
-
-echo "== Misplaced -sources artifacts: ==" | tee >> .logs/removed.txt
-
-# works only outside org/eclipse/{platform,jdt,pde}:
-
-/usr/bin/find -type d -name platform -prune -o -name jdt -prune -o -name pde -prune -o \
-	-name \*-sources.jar\* -print -exec /bin/rm {} \; >> .logs/removed.txt
-
 #==== remove features: ====
 
 echo "== Features: ==" | tee >> .logs/removed.txt
