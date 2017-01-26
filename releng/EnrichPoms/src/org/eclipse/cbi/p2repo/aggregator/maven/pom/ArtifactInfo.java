@@ -91,7 +91,11 @@ public class ArtifactInfo {
 	
 	private void fixData() {
 		if (this.scmConnection == null) {
-			if (this.bsn.startsWith("org.eclipse.emf")) {
+			if (this.bsn.equals("org.eclipse.jdt.core.compiler.batch")) {
+				// not a regular OSGi bundle, scm info missing:
+				this.scmConnection = "scm:git:git://git.eclipse.org/gitroot/jdt/eclipse.jdt.core.git;path=\"org.eclipse.jdt.core\"";
+				System.out.println("Fixed scmUrl for "+this.bsn);
+			} else if (this.bsn.startsWith("org.eclipse.emf")) {
 				this.scmConnection = "scm:git:https://git.eclipse.org/r/emf/org.eclipse.emf";
 				System.out.println("Fixed scmUrl for "+this.bsn);
 			} else if (this.bsn.startsWith("org.eclipse.ecf")) {

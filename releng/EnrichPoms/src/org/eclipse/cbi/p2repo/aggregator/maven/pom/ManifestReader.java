@@ -11,7 +11,6 @@
 package org.eclipse.cbi.p2repo.aggregator.maven.pom;
 
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.nio.file.Path;
@@ -19,12 +18,13 @@ import java.util.Map.Entry;
 import java.util.Properties;
 import java.util.jar.Attributes;
 import java.util.jar.JarFile;
-import java.util.jar.JarInputStream;
 import java.util.jar.Manifest;
 import java.util.zip.ZipEntry;
+import java.util.zip.ZipFile;
 
 public class ManifestReader {
 
+	private static final String MANIFEST_MF = "META-INF/MANIFEST.MF";
 	// Eclipse headers in MANIFEST.MF:
 	private static final String BUNDLE_SYMBOLIC_NAME 		= "Bundle-SymbolicName";
 	private static final String BUNDLE_NAME 				= "Bundle-Name";
@@ -37,8 +37,9 @@ public class ManifestReader {
 
 	public static ArtifactInfo read(Path path) throws FileNotFoundException, IOException {
 		File file = path.toFile();
-		try (JarInputStream jInput = new JarInputStream(new FileInputStream(file))) {
-			Manifest mf = jInput.getManifest();
+		try (ZipFile zip = new ZipFile(file)) {
+			ZipEntry entry = zip.getEntry(MANIFEST_MF);
+			Manifest mf = new Manifest(zip.getInputStream(entry));
 			Attributes mainAttributes = mf.getMainAttributes();
 //			printAllMainAttributes(mainAttributes);
 
