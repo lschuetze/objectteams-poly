@@ -235,7 +235,7 @@ cat gc-*.log | sort --unique > .logs/gc.log
 /bin/rm gc-*.log
 
 #==== remove all directories that have become empty: ====
-for iteration in 1 2 3 4 5 ; do find -type d -empty -print \
+for iteration in 1 2 3 4 5 6 ; do find -type d -empty -print \
  	-exec /bin/rmdir {} \; -prune; done \
  	>> .logs/empty-dirs.txt
 
@@ -355,7 +355,7 @@ function buildSourceJar() {
 while read line
 do
     buildSourceJar $line 
-done < `dirname $0`/sourceBundles.txt
+done < ${WORKSPACE}/sourceBundles.txt
 
 # special hack for missing source bundle with several source folders with blanks:
 buildSourceJar platform/eclipse.platform.swt.git \
