@@ -16,7 +16,7 @@ FILE_ECLIPSE=${DROPS4}/R-4.6.1-201609071200/eclipse-SDK-4.6.1-linux-gtk-x86_64.t
 
 # AGGREGATOR:
 IU_AGG_PRODUCT=org.eclipse.cbi.p2repo.cli.product
-URL_AGG_UPDATES=http://download.eclipse.org/cbi/updates/aggregator/headless/4.6/
+URL_AGG_UPDATES=http://download.eclipse.org/cbi/updates/aggregator/headless/4.6/I20170126-1951
 
 # LOCAL TOOLS:
 LOCAL_TOOLS=${WORKSPACE}/tools
