@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2014, 2016 GoPivotal, Inc. and others.
+ * Copyright (c) 2014, 2017 GoPivotal, Inc. and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -896,10 +896,10 @@ public class SerializableLambdaTest extends AbstractRegressionTest {
 					true,
 					new String [] { "-Ddummy" }); // Not sure, unless we force the VM to not be reused by passing dummy vm argument, the generated program aborts midway through its execution.
 		String expectedOutput =
-				"static lambda$0()I\n"+
-				"static lambda$1()I\n"+
 				"static lambda$2()I\n"+
 				"static lambda$3()I\n"+
+				"static lambda$0()I\n"+
+				"static lambda$1()I\n"+
 				"static lambda$4(I)I\n"+
 				"static lambda$5(I)I\n"+
 				"static lambda$6()I\n"+
@@ -1587,12 +1587,12 @@ public class SerializableLambdaTest extends AbstractRegressionTest {
 				"1: invokestatic java/lang/invoke/LambdaMetafactory.metafactory:(Ljava/lang/invoke/MethodHandles$Lookup;Ljava/lang/String;Ljava/lang/invoke/MethodType;Ljava/lang/invoke/MethodType;Ljava/lang/invoke/MethodHandle;Ljava/lang/invoke/MethodType;)Ljava/lang/invoke/CallSite;\n"+
 				"  Method arguments:\n"+
 				"    (Ljava/lang/Object;)Z\n"+
-				"    invokestatic Testbed.lambda$0:(Ljava/lang/invoke/SerializedLambda;Ljava/lang/reflect/Method;)Z\n"+
+				"    invokestatic Testbed.lambda$2:(Ljava/lang/invoke/SerializedLambda;Ljava/lang/reflect/Method;)Z\n"+
 				"    (Ljava/lang/reflect/Method;)Z\n"+
 				"2: invokestatic java/lang/invoke/LambdaMetafactory.metafactory:(Ljava/lang/invoke/MethodHandles$Lookup;Ljava/lang/String;Ljava/lang/invoke/MethodType;Ljava/lang/invoke/MethodType;Ljava/lang/invoke/MethodHandle;Ljava/lang/invoke/MethodType;)Ljava/lang/invoke/CallSite;\n"+
 				"  Method arguments:\n"+
 				"    (I)Ljava/lang/Object;\n"+
-				"    invokestatic Testbed.lambda$1:(I)[Ljava/lang/reflect/Method;\n"+
+				"    invokestatic Testbed.lambda$3:(I)[Ljava/lang/reflect/Method;\n"+
 				"    (I)[Ljava/lang/reflect/Method;\n";
 
 		checkExpected(expectedOutput, bootstrapEntries);
@@ -2223,6 +2223,44 @@ public class SerializableLambdaTest extends AbstractRegressionTest {
 				"}\n"
 		},
 		"hello world",
+		null,true,
+		new String[]{"-Ddummy"});
+	}
+	public void testbug509782() {
+		this.runConformTest(
+			new String[]{
+				"compilertest/BaseType.java",
+				"package compilertest;\n" + 
+				"import java.io.ByteArrayInputStream;\n" + 
+				"import java.io.ByteArrayOutputStream;\n" + 
+				"import java.io.ObjectInputStream;\n" + 
+				"import java.io.ObjectOutputStream;\n" + 
+				"import java.io.Serializable;\n" + 
+				"import compilertest.sub.SubType;\n" + 
+				"public class BaseType implements Serializable {\n" + 
+				"    protected void doSomething() {\n" + 
+				"    }\n" + 
+				"    public static void main(String[] args) throws Exception {\n" + 
+				"        SubType instance = new SubType();\n" + 
+				"        ByteArrayOutputStream bs = new ByteArrayOutputStream();\n" + 
+				"        ObjectOutputStream out = new ObjectOutputStream(bs);\n" + 
+				"        out.writeObject(instance);\n" + 
+				"        byte[] data = bs.toByteArray();\n" + 
+				"        ObjectInputStream in = new ObjectInputStream(\n" + 
+				"                new ByteArrayInputStream(data));\n" + 
+				"        in.readObject();\n" + 
+				"        System.out.println(\"Done\");\n" + 
+				"    }\n" + 
+				"}",
+				"compilertest/sub/SubType.java",
+				"package compilertest.sub;\n" + 
+				"import java.io.Serializable;\n" + 
+				"import compilertest.BaseType;\n" + 
+				"public class SubType extends BaseType {\n" + 
+				"    Runnable task = (Runnable & Serializable) this::doSomething;\n" + 
+				"}\n"
+		},
+		"Done",
 		null,true,
 		new String[]{"-Ddummy"});
 	}

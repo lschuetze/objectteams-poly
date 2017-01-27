@@ -81,10 +81,11 @@ Export-Package: org.eclipse.jdt.core,
  org.eclipse.objectteams.otdt.internal.core.compiler.statemachine.transformer;x-internal:=true,
  org.eclipse.objectteams.otdt.internal.core.compiler.util;x-internal:=true,
  org.eclipse.objectteams.otdt.internal.core.util;x-internal:=true
-Require-Bundle: org.eclipse.core.resources;bundle-version="[3.3.0,4.0.0)",
- org.eclipse.core.runtime;bundle-version="[3.3.0,4.0.0)",
- org.eclipse.core.filesystem;bundle-version="[1.0.0,2.0.0)",
- org.eclipse.text;bundle-version="[3.1.0,4.0.0)",
+Require-Bundle: org.eclipse.core.resources;bundle-version="[3.12.0,4.0.0)",
+ org.eclipse.core.runtime;bundle-version="[3.13.0,4.0.0)",
+ org.eclipse.core.filesystem;bundle-version="[1.7.0,2.0.0)",
+ org.eclipse.text;bundle-version="[3.6.0,4.0.0)",
+ org.eclipse.team.core;bundle-version="[3.1.0,4.0.0)";resolution:=optional,
  org.eclipse.jdt.annotation;bundle-version="[1.1.0,2.0.0)"
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Eclipse-ExtensibleAPI: true

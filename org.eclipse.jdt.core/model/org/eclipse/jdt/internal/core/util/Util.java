@@ -1925,7 +1925,7 @@ public class Util {
 	}
 
 	public static void log(Throwable e) {
-		log(new Status(IStatus.ERROR, JavaCore.PLUGIN_ID, Messages.code_assist_internal_error, e));
+		log(new Status(IStatus.ERROR, JavaCore.PLUGIN_ID, Messages.internal_error, e));
 	}
 
 	public static ClassFileReader newClassFileReader(IResource resource) throws CoreException, ClassFormatException, IOException {
