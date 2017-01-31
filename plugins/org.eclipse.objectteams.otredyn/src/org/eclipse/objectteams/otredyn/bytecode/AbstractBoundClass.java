@@ -123,7 +123,8 @@ public abstract class AbstractBoundClass implements IBoundClass {
 		
 		public String getMethodIdentifier(AbstractBoundClass clazz) {
 			String prefix = memberPrefixId != null ? memberPrefixId : clazz.getId();
-			return prefix + '.' + this.memberName + this.memberSignature;
+			int close = this.memberSignature.lastIndexOf(')');
+			return prefix + '.' + this.memberName + this.memberSignature.substring(0, close+1);
 		}
 
 		public int getBaseFlags() {
@@ -592,7 +593,9 @@ public abstract class AbstractBoundClass implements IBoundClass {
 
 
 	public String getMethodIdentifier(IMethod method) {
-		return getId() + '.' + method.getName() + method.getSignature();
+		String signature = method.getSignature();
+		int close = signature.lastIndexOf(')'); // admit covariant return
+		return getId() + '.' + method.getName() + signature.substring(0, close+1);
 	}
 
 	/**

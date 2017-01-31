@@ -351,20 +351,23 @@ public class TeamManager implements ITeamManager {
 			return;
 		}
 		synchronized (subClass) {
-			Integer superJoinpointId = getJoinpointId(superClass.getMethodIdentifier(superMethod));
-			if (superJoinpointId != null) {
-				int subJoinpointId = getJoinpointId(subClass.getMethodIdentifier(subMethod));
-				
-				List<Integer> subJoinpoints = joinpointToSubJoinpoints.get(superJoinpointId);
-				if (subJoinpoints == null) {
-					subJoinpoints = new ArrayList<Integer>();
-					joinpointToSubJoinpoints.put(superJoinpointId, subJoinpoints);
+			while (superClass != null && !superClass.isJavaLangObject()) {
+				Integer superJoinpointId = getJoinpointId(superClass.getMethodIdentifier(superMethod));
+				if (superJoinpointId != null) {
+					int subJoinpointId = getJoinpointId(subClass.getMethodIdentifier(subMethod));
+					
+					List<Integer> subJoinpoints = joinpointToSubJoinpoints.get(superJoinpointId);
+					if (subJoinpoints == null) {
+						subJoinpoints = new ArrayList<Integer>();
+						joinpointToSubJoinpoints.put(superJoinpointId, subJoinpoints);
+					}
+					// already processed?
+					if (!subJoinpoints.contains(subJoinpointId)) {
+						subJoinpoints.add(subJoinpointId);
+						applyJoinpointMerge(superJoinpointId, subJoinpointId);
+					}
 				}
-				// already processed?
-				if (!subJoinpoints.contains(subJoinpointId)) {
-					subJoinpoints.add(subJoinpointId);
-					applyJoinpointMerge(superJoinpointId, subJoinpointId);
-				}
+				superClass = superClass.getSuperclass();
 			}
 		}
 	}

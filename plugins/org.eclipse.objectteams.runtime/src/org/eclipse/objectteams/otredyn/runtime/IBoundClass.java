@@ -99,4 +99,16 @@ public interface IBoundClass {
 	 */
 	List<IBoundClass> getTSubsOfThis(IClassRepository classRepository, IClassIdentifierProvider idProvider);
 
+	/**
+	 * Super class of this class.
+	 * @since 2.6
+	 */
+	IBoundClass getSuperclass();
+	
+	/**
+	 * Does this instance represent class java.lang.Object?
+	 * @since 2.6
+	 * @return
+	 */
+	boolean isJavaLangObject();
 }
