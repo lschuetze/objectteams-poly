@@ -1,7 +1,7 @@
 /**********************************************************************
  * This file is part of "Object Teams Development Tooling"-Software
  *
- * Copyright 2003, 2014 Fraunhofer Gesellschaft, Munich, Germany,
+ * Copyright 2003, 2017 Fraunhofer Gesellschaft, Munich, Germany,
  * for its Fraunhofer Institute for Computer Architecture and Software
  * Technology (FIRST), Berlin, Germany and Technical University Berlin,
  * Germany.
@@ -927,8 +927,15 @@ public class Dependencies implements ITranslationStates {
 //		CopyInheritance.sortRoles(teamModel.getBinding());
 		ReferenceBinding[] memberTypes = teamModel.getBinding().memberTypes();
 		int startState = StateHelper.minimalState(memberTypes)+1;
+		int endState = teamModel._state.getProcessingState();
+		if (endState >= ITranslationStates.STATE_LENV_BUILD_TYPE_HIERARCHY && endState <= ITranslationStates.STATE_LENV_DONE_FIELDS_AND_METHODS) {
+			if (Config.getConfig().bundledCompleteTypeBindings)
+				endState = ITranslationStates.STATE_BINDINGS_BUILT;
+			else
+				endState--;
+		}
 		// loop over all relevant states, to ensure consistent processing of class and ifc part:
-		for (int nextState = startState; nextState<=teamModel._state.getProcessingState(); nextState++) {
+		for (int nextState = startState; nextState<=endState; nextState++) {
 			if (nextState == ITranslationStates.STATE_FINAL)
 				break; // don't try to reach STATE_FINAL via ensureRoleState.
 			for (int i = 0; i < memberTypes.length; i++) {
