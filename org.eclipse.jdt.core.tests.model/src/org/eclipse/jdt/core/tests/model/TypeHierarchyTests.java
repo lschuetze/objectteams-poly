@@ -3006,7 +3006,12 @@ public void testBug507954_0001() throws JavaModelException, CoreException {
 				"a.D$1$1\n" + 
 				"a.D$1$1\n",
 				allSubTypes,
+//{ObjectTeams: robustness
+/* orig:
 				false);
+ */
+				true);
+// SH}
 	}
 	finally{
 		if (javaProject != null) deleteProject(javaProject);
