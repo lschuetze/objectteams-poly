@@ -32,6 +32,7 @@ import org.objectweb.asm.tree.InsnList;
 import org.objectweb.asm.tree.InsnNode;
 import org.objectweb.asm.tree.IntInsnNode;
 import org.objectweb.asm.tree.LabelNode;
+import org.objectweb.asm.tree.LocalVariableNode;
 import org.objectweb.asm.tree.MethodInsnNode;
 import org.objectweb.asm.tree.MethodNode;
 import org.objectweb.asm.tree.TryCatchBlockNode;
@@ -46,7 +47,7 @@ import org.objectweb.asm.tree.VarInsnNode;
  */
 public class MoveCodeToCallOrigAdapter extends AbstractTransformableClassNode {
 
-	private static final String BOUND_METHOD_ID = "boundMethodId";
+	private static final String BOUND_METHOD_ID = "_OT$boundMethodId";
 
 	private Method method;
 	private int boundMethodId;
@@ -98,11 +99,12 @@ public class MoveCodeToCallOrigAdapter extends AbstractTransformableClassNode {
 			newInstructions.add(new VarInsnNode(Opcodes.ILOAD, boundMethodIdSlot));
 			boundMethodIdSlot = orgMethod.maxLocals+1;
 			addLocal(callOrig, BOUND_METHOD_ID, "I", boundMethodIdSlot, start, end, false);
-			newInstructions.add(new IntInsnNode(Opcodes.ISTORE, boundMethodIdSlot));
+			newInstructions.add(new VarInsnNode(Opcodes.ISTORE, boundMethodIdSlot));
 			
 			newInstructions.add(new VarInsnNode(Opcodes.ALOAD, firstArgIndex + argOffset + 1));
 			
 			int slot = firstArgIndex + argOffset;
+			List<LocalVariableNode> origLocals = orgMethod.localVariables;
 			for (int i = argOffset; i < args.length; i++) {
 				if (i < args.length - 1) {
 					newInstructions.add(new InsnNode(Opcodes.DUP));
@@ -118,7 +120,10 @@ public class MoveCodeToCallOrigAdapter extends AbstractTransformableClassNode {
 					newInstructions.add(new TypeInsnNode(Opcodes.CHECKCAST, arg.getInternalName()));
 				}
 				
-				newInstructions.add(new IntInsnNode(args[i].getOpcode(Opcodes.ISTORE), slot));
+				newInstructions.add(new VarInsnNode(args[i].getOpcode(Opcodes.ISTORE), slot));
+				int origLocalIdx = i+firstArgIndex;
+				if (origLocals != null && origLocalIdx < origLocals.size())
+					addLocal(callOrig, origLocals.get(origLocalIdx).name, arg.getDescriptor(), slot, start, end, false);
 				slot += arg.getSize();
 			}
 		} else {

@@ -134,7 +134,7 @@ public abstract class AbstractCreateDispatchCodeAdapter extends
 	}
 
 	protected void addLocals(MethodNode method) {
-		String selector = "teamsAndCallinIds";
+		String selector = "_OT$teamsAndCallinIds";
 		for (Object lv : method.localVariables) {
 			if (((LocalVariableNode)lv).name.equals(selector))
 				return;
