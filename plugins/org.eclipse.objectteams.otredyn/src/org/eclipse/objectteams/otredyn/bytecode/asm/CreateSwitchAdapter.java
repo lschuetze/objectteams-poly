@@ -73,6 +73,7 @@ public class CreateSwitchAdapter extends AbstractTransformableClassNode {
 		if (methodNode == null) return false; // doesn't exist, don't transform
 		methodNode.instructions.clear();
 		
+		addLineNumber(methodNode.instructions, 1);
 		addPreSwitchInstructions(methodNode);
 		
 		LabelNode def = new LabelNode();

@@ -32,6 +32,7 @@ import org.objectweb.asm.tree.InsnNode;
 import org.objectweb.asm.tree.IntInsnNode;
 import org.objectweb.asm.tree.LabelNode;
 import org.objectweb.asm.tree.LdcInsnNode;
+import org.objectweb.asm.tree.LineNumberNode;
 import org.objectweb.asm.tree.LocalVariableNode;
 import org.objectweb.asm.tree.LookupSwitchInsnNode;
 import org.objectweb.asm.tree.MethodInsnNode;
@@ -52,6 +53,8 @@ import static org.eclipse.objectteams.otredyn.transformer.names.ConstantMembers.
  */
 public abstract class AbstractTransformableClassNode extends ClassNode {
 	
+	static final boolean IS_DEBUG = System.getProperty("ot.debug") != null;
+
 	public AbstractTransformableClassNode() {
 		super(ASM_API);
 	}
@@ -396,6 +399,7 @@ public abstract class AbstractTransformableClassNode extends ClassNode {
 	 * Side effect: may add labels at beginning and end, unless labels are already present at these locations.
 	 */
 	protected void addLocal(MethodNode method, String selector, String desc, int slot) {
+		if (!IS_DEBUG) return;
 		InsnList instructions = method.instructions;
 		LabelNode start, end;
 		if (instructions.getFirst() instanceof LabelNode) {
@@ -420,6 +424,7 @@ public abstract class AbstractTransformableClassNode extends ClassNode {
 	 * @param fullRange TODO
 	 */
 	protected void addLocal(MethodNode method, String selector, String desc, int slot, LabelNode start, LabelNode end, boolean fullRange) {
+		if (!IS_DEBUG) return;
 		if (fullRange) {
 			for (Object lv : method.localVariables) {
 				if (((LocalVariableNode)lv).name.equals(selector)) {
@@ -434,6 +439,23 @@ public abstract class AbstractTransformableClassNode extends ClassNode {
 		addLocal(method, "this", "L"+this.name+";", 0);
 	}
 
+	protected void addLineNumber(InsnList instructions, int line) {
+		if (!IS_DEBUG) return;
+		LabelNode position = new LabelNode();
+		instructions.add(position);
+		instructions.add(new LineNumberNode(line, position));
+	}
+
+	protected int peekFirstLineNumber(InsnList instructions) {
+		if (!IS_DEBUG) return -1;
+		ListIterator<AbstractInsnNode> iterator = instructions.iterator();
+		while (iterator.hasNext()) {
+			Object insn = iterator.next();
+			if (insn instanceof LineNumberNode)
+				return ((LineNumberNode) insn).line;
+		}
+		return -1;
+	}
 	/**
 	 * In this method, concrete Implementations of this class
 	 * can manipulate the bytecode

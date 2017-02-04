@@ -92,6 +92,9 @@ public class MoveCodeToCallOrigAdapter extends AbstractTransformableClassNode {
 		
 		LabelNode start = new LabelNode(), end = new LabelNode(); // range for new local variables
 		newInstructions.add(start);
+		int line = peekFirstLineNumber(orgMethod.instructions);
+		if (line != -1)
+			addLineNumber(newInstructions, line);
 		int boundMethodIdSlot = firstArgIndex;
 		
 		if (args.length > 0) {
