@@ -42,7 +42,7 @@ import org.eclipse.jdt.debug.core.IJavaType;
 import org.eclipse.jdt.debug.core.IJavaValue;
 import org.eclipse.jdt.debug.core.JDIDebugModel;
 import org.eclipse.objectteams.otdt.core.ext.WeavingScheme;
-import org.eclipse.objectteams.otdt.debug.internal.breakpoints.ClassRedefinitionBreakpoint;
+import org.eclipse.objectteams.otdt.debug.internal.breakpoints.OTBreakpoints;
 import org.eclipse.objectteams.otdt.internal.debug.adaptor.OTDebugAdaptorPlugin;
 
 import com.sun.jdi.VirtualMachine;
@@ -74,7 +74,7 @@ public team class RedefineClassesBPListener implements IJavaBreakpointListener {
 	    if (!breakpoint.getMarker().exists())
 	    	return DONT_CARE;
 	    try {
-		    if (ClassRedefinitionBreakpoint.isRedefineClassesBreakpoint(breakpoint)) {
+		    if (OTBreakpoints.Descriptor.RedefineClasses.matches(breakpoint)) {
 		    	handleClassRedefinition(thread);
 				return IJavaBreakpointListener.DONT_SUSPEND;
 		    }

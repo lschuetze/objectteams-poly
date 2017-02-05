@@ -38,10 +38,15 @@ import org.eclipse.objectteams.otdt.debug.IOTDebugEventListener;
 import org.eclipse.objectteams.otdt.debug.OTDebugElementsContainer;
 import org.eclipse.objectteams.otdt.debug.OTDebugPlugin;
 import org.eclipse.objectteams.otdt.debug.TeamInstance;
-import org.eclipse.objectteams.otdt.debug.internal.breakpoints.OOTBreakpoints;
+import org.eclipse.objectteams.otdt.debug.internal.breakpoints.OTBreakpoints;
 
 public class TeamBreakpointListener implements IJavaBreakpointListener
 {
+	static final String FIELD_THIS = "this"; //$NON-NLS-1$
+	static final String LOCAL_THREAD_ACT_DEACT = "thread"; //$NON-NLS-1$
+	static final String LOCAL_THREAD_IMPLICIT_ACT_DEACT = "currentThread"; //$NON-NLS-1$
+	static final String FIELD_ALL_THREADS = "ALL_THREADS"; //$NON-NLS-1$
+	
 	private static TeamBreakpointListener _singleton;
 
 	public static TeamBreakpointListener getInstance()
@@ -64,10 +69,10 @@ public class TeamBreakpointListener implements IJavaBreakpointListener
 
 		try
 		{
-			if (OOTBreakpoints.isOOTConstructorBreakpoint(breakpoint))
+			if (OTBreakpoints.Descriptor.TeamConstructor.matches(breakpoint))
 			{
 			  // A team is being instantiated!
-              JDIThisVariable teamVariable = (JDIThisVariable) thread.findVariable(OOTBreakpoints.FIELD_THIS);
+              JDIThisVariable teamVariable = (JDIThisVariable) thread.findVariable(FIELD_THIS);
               if (otDebugElementsContainer.getTeamInstance(teamVariable) == null) {
 	              TeamInstance newTeam= otDebugElementsContainer.addTeamInstance(teamVariable);
 	              notifyTeamInstantiation(otDebugElementsContainer, newTeam);
@@ -75,27 +80,27 @@ public class TeamBreakpointListener implements IJavaBreakpointListener
               return IJavaBreakpointListener.DONT_SUSPEND;
 			}
 			
-			if (OOTBreakpoints.isOOTFinalizeBreakpoint(breakpoint))
+			if (OTBreakpoints.Descriptor.TeamFinalize.matches(breakpoint))
 			{
 			  // A team is being disposed!
-              IJavaVariable teamVariable = thread.findVariable(OOTBreakpoints.FIELD_THIS);
+              IJavaVariable teamVariable = thread.findVariable(FIELD_THIS);
               int idx= otDebugElementsContainer.removeTeamInstance(teamVariable);
               if (idx != -1)
             	  notifyTeamFinalize(otDebugElementsContainer, idx);
               return IJavaBreakpointListener.DONT_SUSPEND;
 			}
 			
-			if (OOTBreakpoints.isOOTActiveMethodBreakpoint(breakpoint))
+			if (OTBreakpoints.Descriptor.TeamActivate.matches(breakpoint))
 			{
-				IJavaVariable teamVariable = thread.findVariable(OOTBreakpoints.FIELD_THIS);
+				IJavaVariable teamVariable = thread.findVariable(FIELD_THIS);
 				TeamInstance teamInstance = otDebugElementsContainer.getTeamInstance(teamVariable);
 
-				IJavaVariable teamActiveThread = thread.findVariable(OOTBreakpoints.LOCAL_THREAD_ACT_DEACT);
+				IJavaVariable teamActiveThread = thread.findVariable(LOCAL_THREAD_ACT_DEACT);
 				IValue threadValue = teamActiveThread.getValue();
 				long threadID = ((JDIObjectValue)threadValue).getUniqueId();
 				teamInstance.setActiveForThreadID(threadID);
 				
-				IJavaVariable teamGlobalThread = thread.findVariable(OOTBreakpoints.FIELD_ALL_THREADS);
+				IJavaVariable teamGlobalThread = thread.findVariable(FIELD_ALL_THREADS);
 				IValue globalThreadValue = teamGlobalThread.getValue();
 				long globalThreadID = ((JDIObjectValue)globalThreadValue).getUniqueId();
 				teamInstance.setGlobalThreadID(globalThreadID);
@@ -104,12 +109,12 @@ public class TeamBreakpointListener implements IJavaBreakpointListener
 				return IJavaBreakpointListener.DONT_SUSPEND;
 			}
 
-			if (OOTBreakpoints.isOOTDeactiveMethodBreakpoint(breakpoint))
+			if (OTBreakpoints.Descriptor.TeamDeactivate.matches(breakpoint))
 			{
-				IJavaVariable teamVariable = thread.findVariable(OOTBreakpoints.FIELD_THIS);
+				IJavaVariable teamVariable = thread.findVariable(FIELD_THIS);
 				TeamInstance teamInstance = otDebugElementsContainer.getTeamInstance(teamVariable);
 				
-				IJavaVariable teamDeactiveThread= thread.findVariable(OOTBreakpoints.LOCAL_THREAD_ACT_DEACT);
+				IJavaVariable teamDeactiveThread= thread.findVariable(LOCAL_THREAD_ACT_DEACT);
 				IValue threadValue = teamDeactiveThread.getValue();
 				long threadID = ((JDIObjectValue)threadValue).getUniqueId();
 				teamInstance.setInactiveForThreadID(new Long(threadID));
@@ -118,9 +123,9 @@ public class TeamBreakpointListener implements IJavaBreakpointListener
 				return IJavaBreakpointListener.DONT_SUSPEND;
 			}
 			
-			if (OOTBreakpoints.isOOTImplicitActiveMethodBreakpoint(breakpoint))
+			if (OTBreakpoints.Descriptor.TeamImplicitActivate.matches(breakpoint))
 			{
-				IJavaVariable teamVariable = thread.findVariable(OOTBreakpoints.FIELD_THIS);
+				IJavaVariable teamVariable = thread.findVariable(FIELD_THIS);
 				TeamInstance teamInstance = otDebugElementsContainer.getTeamInstance(teamVariable);
 				
 				// don't use fragile access to local variable 
@@ -132,9 +137,9 @@ public class TeamBreakpointListener implements IJavaBreakpointListener
 				return IJavaBreakpointListener.DONT_SUSPEND;
 			}
 
-			if (OOTBreakpoints.isOOTImplicitDeactiveMethodBreakpoint(breakpoint))
+			if (OTBreakpoints.Descriptor.TeamImplicitDeactivate.matches(breakpoint))
 			{
-				IJavaVariable teamVariable = thread.findVariable(OOTBreakpoints.FIELD_THIS);
+				IJavaVariable teamVariable = thread.findVariable(FIELD_THIS);
 				TeamInstance teamInstance = otDebugElementsContainer.getTeamInstance(teamVariable);
 				
 				// don't use fragile access to local variable 

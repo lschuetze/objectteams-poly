@@ -37,8 +37,7 @@ import org.eclipse.jdt.debug.core.IJavaBreakpointListener;
 import org.eclipse.jdt.debug.core.IJavaDebugTarget;
 import org.eclipse.jdt.debug.core.JDIDebugModel;
 import org.eclipse.objectteams.otdt.core.compiler.IOTConstants;
-import org.eclipse.objectteams.otdt.debug.internal.breakpoints.ClassRedefinitionBreakpoint;
-import org.eclipse.objectteams.otdt.debug.internal.breakpoints.OOTBreakpoints;
+import org.eclipse.objectteams.otdt.debug.internal.breakpoints.OTBreakpoints;
 
 /**
  * This class un/installs support for breakpoints in certain well-known methods in class {@link org.objectteams.Team}.
@@ -49,7 +48,7 @@ import org.eclipse.objectteams.otdt.debug.internal.breakpoints.OOTBreakpoints;
  * <li>for each detected new java debug target install the actual breakpoints.
  * </ul>
  */
-public class TeamBreakpointInstaller
+public class OTBreakpointInstaller
 {
     private static Hashtable<String, IBreakpoint> OT_BREAKPOINTS = new Hashtable<String, IBreakpoint>(5);
 
@@ -61,12 +60,13 @@ public class TeamBreakpointInstaller
      * @param project used for lookup of org.objectteams.Team, i.e., this class must be in the projects classpath.
      * @throws CoreException various reasons, like could not find class org.objectteams.Team or could not create a breakpoint.
      */
-    public static void installTeamBreakpoints(IJavaProject project, /*Nullable*/IJavaBreakpointListener dynListener)
+    public static void installOTBreakpoints(IJavaProject project, /*Nullable*/IJavaBreakpointListener dynListener)
     		throws CoreException
     {       
-    	TeamBreakpointInstaller.dynListener = dynListener;
+    	OTBreakpointInstaller.dynListener = dynListener;
     	if (dynListener != null)
         	JDIDebugModel.addJavaBreakpointListener(dynListener);
+    
         DebugPlugin.getDefault().addDebugEventListener(new IDebugEventSetListener() {
         	// since we want to avoid using the breakpoint manager (thus hiding synthetic breakpoints from the UI),
         	// we have to track creation of the debug target in order to manually install our breakpoints into the target:
@@ -91,34 +91,19 @@ public class TeamBreakpointInstaller
 					DebugPlugin.getDefault().removeDebugEventListener(this);					
 			}
 		});
-        try
-        {
-        	if (dynListener != null && !OT_BREAKPOINTS.containsKey(ClassRedefinitionBreakpoint.BREAKPOINT_REDEFINE_CLASSES))
-        		OT_BREAKPOINTS.put(ClassRedefinitionBreakpoint.BREAKPOINT_REDEFINE_CLASSES,
-        				ClassRedefinitionBreakpoint.createRedefineClassesBreakpoint(project));
-            IType oot = project.findType(new String(IOTConstants.STR_ORG_OBJECTTEAMS_TEAM));
-            if (oot != null)
-            {            	
-                // Breakpoints in class org.objectteams.Team:
-                // bp on ctor, finalize()-, activate()-, deactivate(), -methods
-            	if(!OT_BREAKPOINTS.containsKey(OOTBreakpoints.ATTR_OT_BREAKPOINT_CTOR))
-            		OT_BREAKPOINTS.put(OOTBreakpoints.ATTR_OT_BREAKPOINT_CTOR, OOTBreakpoints.createOOTConstructorBreakpoint(oot));
-            	
-            	if(!OT_BREAKPOINTS.containsKey(OOTBreakpoints.ATTR_OT_BREAKPOINT_FINALIZE))
-            		OT_BREAKPOINTS.put(OOTBreakpoints.ATTR_OT_BREAKPOINT_FINALIZE, OOTBreakpoints.createOOTFinalizeBreakpoint(oot));
-          		
-            	if(!OT_BREAKPOINTS.containsKey(OOTBreakpoints.ATTR_OT_BREAKPOINT_ACT))
-            		OT_BREAKPOINTS.put(OOTBreakpoints.ATTR_OT_BREAKPOINT_ACT, OOTBreakpoints.createOOTActivateBreakpoint(oot));
-            		
-       			if(!OT_BREAKPOINTS.containsKey(OOTBreakpoints.ATTR_OT_BREAKPOINT_DEACT))
-       				OT_BREAKPOINTS.put(OOTBreakpoints.ATTR_OT_BREAKPOINT_DEACT, OOTBreakpoints.createOOTDeactivateBreakpoint(oot));
-                
-            	if(!OT_BREAKPOINTS.containsKey(OOTBreakpoints.ATTR_OT_BREAKPOINT_IMPLICIT_ACT))
-            		OT_BREAKPOINTS.put(OOTBreakpoints.ATTR_OT_BREAKPOINT_IMPLICIT_ACT, OOTBreakpoints.createOOTImplicitActivateBreakpoint(oot));
-            		
-       			if(!OT_BREAKPOINTS.containsKey(OOTBreakpoints.ATTR_OT_BREAKPOINT_IMPLICIT_DEACT))
-       				OT_BREAKPOINTS.put(OOTBreakpoints.ATTR_OT_BREAKPOINT_IMPLICIT_DEACT, OOTBreakpoints.createOOTImplicitDeactivateBreakpoint(oot));
-            }
+        try {
+            IType oot = project.findType(String.valueOf(IOTConstants.STR_ORG_OBJECTTEAMS_TEAM));
+            for (OTBreakpoints.Descriptor bpDescriptor : OTBreakpoints.Descriptor.values()) {
+				if (bpDescriptor.isOOTBreakPoint()) {
+					if (oot != null)
+						bpDescriptor.insertInto(oot, OT_BREAKPOINTS);
+				} else if (dynListener != null) {
+					// other breakpoint only under OTDRE
+		            IType instrumentation = project.findType(bpDescriptor.getTypeName());
+		            if (instrumentation != null)
+						bpDescriptor.insertInto(instrumentation, OT_BREAKPOINTS);
+				}
+			}
         }
         catch (JavaModelException ex)
         {

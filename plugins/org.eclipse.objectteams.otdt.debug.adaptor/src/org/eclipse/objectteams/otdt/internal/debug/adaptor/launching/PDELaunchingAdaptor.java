@@ -31,7 +31,7 @@ import org.eclipse.jdt.internal.core.util.Util;
 import org.eclipse.objectteams.otdt.core.ext.OTREContainer;
 import org.eclipse.objectteams.otdt.core.ext.WeavingScheme;
 import org.eclipse.objectteams.otdt.debug.OTDebugPlugin;
-import org.eclipse.objectteams.otdt.debug.TeamBreakpointInstaller;
+import org.eclipse.objectteams.otdt.debug.OTBreakpointInstaller;
 import org.eclipse.objectteams.otdt.internal.debug.adaptor.DebugMessages;
 import org.eclipse.objectteams.otdt.internal.debug.adaptor.OTDebugAdaptorPlugin;
 import org.eclipse.objectteams.otdt.internal.debug.adaptor.dynamic.RedefineClassesBPListener;
@@ -134,7 +134,7 @@ public team class PDELaunchingAdaptor {
 				// find org.objectteams.Team in any OT/J Project:
 				if (project.getNature(JavaCore.OTJ_NATURE_ID) != null) {
 					IJavaProject javaProject = JavaCore.create(project);
-					TeamBreakpointInstaller.installTeamBreakpoints(javaProject,
+					OTBreakpointInstaller.installOTBreakpoints(javaProject,
 							RedefineClassesBPListener.get(WeavingScheme.valueOf(weavingMode)));
 					return; // good, done.
 				}

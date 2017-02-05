@@ -360,7 +360,7 @@ public class OTDebugPlugin extends Plugin
 			JDIDebugPlugin.getDefault().removeJavaBreakpointListener(_otRoleBreakpointListener);
 			try
             {
-                TeamBreakpointInstaller.uninstallTeamBreakpoints();
+                OTBreakpointInstaller.uninstallTeamBreakpoints();
             }
             catch (CoreException e)
             {
