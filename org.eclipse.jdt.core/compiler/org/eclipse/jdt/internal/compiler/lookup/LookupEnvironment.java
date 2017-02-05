@@ -217,7 +217,7 @@ public ReferenceBinding askForType(char[][] compoundName) {
 	if (answer == null) return null;
 
 //{ObjectTeams: if we were looking specifically for a source type, and if this is satisfied now, reset to normal:
-	if (!answer.isBinaryType())
+	if (!answer.isBinaryType() && Config.hasConfig())
 		Config.setSourceTypeRequired(false);
 // SH}
 	if (answer.isBinaryType()) {
@@ -245,7 +245,7 @@ ReferenceBinding askForType(PackageBinding packageBinding, char[] name) {
 		return null;
 
 //{ObjectTeams: if we were looking specifically for a source type, and if this is satisfied now, reset to normal:
-	if (!answer.isBinaryType())
+	if (!answer.isBinaryType() && Config.hasConfig())
 		Config.setSourceTypeRequired(false);
 // SH}
 	if (answer.isBinaryType()) {
