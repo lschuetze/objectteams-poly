@@ -214,7 +214,7 @@ public class CompilerConfigurationBlock extends OptionsConfigurationBlock {
 		topComposite.setLayout(topLayout);
 
 		fWeavingSchemeComboBox = addComboBox(topComposite, OTPreferencesMessages.OTCompilerConfigurationBlock_weaving_label, PREF_WEAVING_SCHEME, 
-				new String[] { WeavingScheme.OTRE.toString(), WeavingScheme.OTDRE.toString() }, 
+				new String[] { WeavingScheme.OTRE.name(), WeavingScheme.OTDRE.name() }, 
 				new String[] { OTPreferencesMessages.OTCompilerConfigurationBlock_weaving_otre_label,
 								OTPreferencesMessages.OTCompilerConfigurationBlock_weaving_otdre_label },
 				indentStep*2);

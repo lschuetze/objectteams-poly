@@ -1553,7 +1553,7 @@ public class CompilerOptions {
 
 		optionsMap.put(OPTION_AllowScopedKeywords, this.allowScopedKeywords? ENABLED : DISABLED);
 		optionsMap.put(OPTION_PureJavaOnly, this.isPureJava ? ENABLED : DISABLED);
-		optionsMap.put(OPTION_WeavingScheme, this.weavingScheme.toString());
+		optionsMap.put(OPTION_WeavingScheme, this.weavingScheme.name());
 // SH}
 		optionsMap.put(OPTION_AnnotationBasedNullAnalysis, this.isAnnotationBasedNullAnalysisEnabled ? ENABLED : DISABLED);
 		optionsMap.put(OPTION_ReportNullSpecViolation, getSeverityString(NullSpecViolation));
