@@ -42,4 +42,9 @@ public class OTDebugAdaptorPlugin extends AbstractUIPlugin {
 	public static void logError(String msg) {
 		instance.getLog().log(new Status(IStatus.ERROR, PLUGIN_ID, msg));
 	}
+	
+	
+	public static void logException(String msg, Exception ex) {
+		instance.getLog().log(new Status(IStatus.ERROR, PLUGIN_ID, msg, ex));
+	}
 }

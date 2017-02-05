@@ -56,6 +56,8 @@ public class OOTBreakpoints
 	public static final String ATTR_OT_BREAKPOINT_IMPLICIT_ACT   = OTDebugPlugin.PLUGIN_ID + ".TeamBreakpoint.ImplicitActivateMethod";
 	public static final String ATTR_OT_BREAKPOINT_IMPLICIT_DEACT = OTDebugPlugin.PLUGIN_ID + ".TeamBreakpoint.ImplicitDeactivateMethod";
 
+	private static final String FINALIZE = "finalize";
+	private static final String EMPTY_SIGNATURE = "()V";
 	
 	//associated with "public Team() {}"
     public static int getTeamConstructorLineNumber()
@@ -112,7 +114,8 @@ public class OOTBreakpoints
     {
     	Map<String, Boolean> finalizeMethodAttributes = getBreakpointAttributes();
     	finalizeMethodAttributes.put(OOTBreakpoints.ATTR_OT_BREAKPOINT_FINALIZE, Boolean.TRUE);
-    	return createOOTMethodBreakpoint(oot, getFinalizeMethodLineNumber(), finalizeMethodAttributes);    	
+    	return createMethodBreakpoint(oot, FINALIZE, EMPTY_SIGNATURE, true,
+    			getFinalizeMethodLineNumber(), finalizeMethodAttributes);    	
     }
         
     public static IBreakpoint createOOTActivateBreakpoint(IType oot)throws CoreException
@@ -158,16 +161,17 @@ public class OOTBreakpoints
 		return breakpoint;
 	}
     
-	public static IBreakpoint createOOTMethodBreakpoint(IType oot, int linenumber, Map attributes)
+	public static IJavaBreakpoint createMethodBreakpoint(IType type, String selector, String signature,
+			boolean entry, int linenumber, Map attributes)
 			throws CoreException
 	{
-		IResource teamResource = oot.getJavaProject().getResource();
+		IResource resource = type.getJavaProject().getResource();
 		IJavaBreakpoint breakpoint = JDIDebugModel.createMethodBreakpoint(
-				teamResource, 
-				oot.getFullyQualifiedName(), 
-				"finalize", 
-				"()V",
-				true /*entry*/, false /*exit*/, false /*native*/,
+				resource, 
+				type.getFullyQualifiedName(), 
+				selector, 
+				signature,
+				entry, !entry, false /*native*/,
 				linenumber, 
 				-1, -1, 0, 
 				false /*register*/, 

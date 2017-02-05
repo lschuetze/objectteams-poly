@@ -33,8 +33,11 @@ import org.eclipse.debug.core.model.IDebugTarget;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaModelException;
+import org.eclipse.jdt.debug.core.IJavaBreakpointListener;
 import org.eclipse.jdt.debug.core.IJavaDebugTarget;
+import org.eclipse.jdt.debug.core.JDIDebugModel;
 import org.eclipse.objectteams.otdt.core.compiler.IOTConstants;
+import org.eclipse.objectteams.otdt.debug.internal.breakpoints.ClassRedefinitionBreakpoint;
 import org.eclipse.objectteams.otdt.debug.internal.breakpoints.OOTBreakpoints;
 
 /**
@@ -50,13 +53,20 @@ public class TeamBreakpointInstaller
 {
     private static Hashtable<String, IBreakpoint> OT_BREAKPOINTS = new Hashtable<String, IBreakpoint>(5);
 
+    /** Optional listener for Instrumentation.redefineClasses (when running under OTDRE). */
+    private static IJavaBreakpointListener dynListener;
+
     /**
      * Request breakpoints to be installed once a new launch fires.
      * @param project used for lookup of org.objectteams.Team, i.e., this class must be in the projects classpath.
      * @throws CoreException various reasons, like could not find class org.objectteams.Team or could not create a breakpoint.
      */
-    public static void installTeamBreakpoints(IJavaProject project) throws CoreException
+    public static void installTeamBreakpoints(IJavaProject project, /*Nullable*/IJavaBreakpointListener dynListener)
+    		throws CoreException
     {       
+    	TeamBreakpointInstaller.dynListener = dynListener;
+    	if (dynListener != null)
+        	JDIDebugModel.addJavaBreakpointListener(dynListener);
         DebugPlugin.getDefault().addDebugEventListener(new IDebugEventSetListener() {
         	// since we want to avoid using the breakpoint manager (thus hiding synthetic breakpoints from the UI),
         	// we have to track creation of the debug target in order to manually install our breakpoints into the target:
@@ -83,6 +93,9 @@ public class TeamBreakpointInstaller
 		});
         try
         {
+        	if (dynListener != null && !OT_BREAKPOINTS.containsKey(ClassRedefinitionBreakpoint.BREAKPOINT_REDEFINE_CLASSES))
+        		OT_BREAKPOINTS.put(ClassRedefinitionBreakpoint.BREAKPOINT_REDEFINE_CLASSES,
+        				ClassRedefinitionBreakpoint.createRedefineClassesBreakpoint(project));
             IType oot = project.findType(new String(IOTConstants.STR_ORG_OBJECTTEAMS_TEAM));
             if (oot != null)
             {            	
@@ -116,6 +129,10 @@ public class TeamBreakpointInstaller
     /** Unregister any previously installed breakpoints, so that the next launch will be without. */
     public static void uninstallTeamBreakpoints() throws CoreException
     {
+    	if (dynListener != null) {
+    		JDIDebugModel.removeJavaBreakpointListener(dynListener);
+    		dynListener = null;
+    	}
         OT_BREAKPOINTS.clear();
     }
 }

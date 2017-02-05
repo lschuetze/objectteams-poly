@@ -25,6 +25,7 @@ import org.eclipse.debug.core.DebugException;
 import org.eclipse.debug.core.ILaunchConfiguration;
 import org.eclipse.debug.core.ILaunchConfigurationWorkingCopy;
 import org.eclipse.debug.core.ILaunchManager;
+import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.internal.core.util.Util;
 import org.eclipse.objectteams.otdt.core.ext.OTREContainer;
@@ -33,6 +34,7 @@ import org.eclipse.objectteams.otdt.debug.OTDebugPlugin;
 import org.eclipse.objectteams.otdt.debug.TeamBreakpointInstaller;
 import org.eclipse.objectteams.otdt.internal.debug.adaptor.DebugMessages;
 import org.eclipse.objectteams.otdt.internal.debug.adaptor.OTDebugAdaptorPlugin;
+import org.eclipse.objectteams.otdt.internal.debug.adaptor.dynamic.RedefineClassesBPListener;
 import org.eclipse.objectteams.otequinox.TransformerPlugin;
 import org.eclipse.osgi.util.NLS;
 import org.eclipse.pde.core.plugin.IPluginModelBase;
@@ -125,13 +127,15 @@ public team class PDELaunchingAdaptor {
 	 * Installs breakpoints needed for the TeamMonitor into org.objectteams.Team.
 	 * Needs to find a project with OTJavaNature to do this.
 	 */
-	static void installOOTBreakpoints(IProject[] projects) throws CoreException
+	static void installOOTBreakpoints(IProject[] projects, String weavingMode) throws CoreException
 	{
 		if (projects != null)
 			for (IProject project : projects) 
 				// find org.objectteams.Team in any OT/J Project:
 				if (project.getNature(JavaCore.OTJ_NATURE_ID) != null) {
-					TeamBreakpointInstaller.installTeamBreakpoints(JavaCore.create(project));
+					IJavaProject javaProject = JavaCore.create(project);
+					TeamBreakpointInstaller.installTeamBreakpoints(javaProject,
+							RedefineClassesBPListener.get(WeavingScheme.valueOf(weavingMode)));
 					return; // good, done.
 				}
 		logException(null, Status.WARNING, DebugMessages.OTLaunching_no_OTJ_project_found);
@@ -166,9 +170,9 @@ public team class PDELaunchingAdaptor {
 			if (isOTLaunch(configuration))
 				try {
 					IProject[] projects = getProjectsForProblemSearch(configuration, mode);
-					if (ILaunchManager.DEBUG_MODE.equals(mode))
-						PDELaunchingAdaptor.installOOTBreakpoints(projects);
 					determineWeavingMode(projects);
+					if (ILaunchManager.DEBUG_MODE.equals(mode))
+						PDELaunchingAdaptor.installOOTBreakpoints(projects, weavingMode);
 				} catch (DebugException dex) {
 					throw dex;
 				} catch (CoreException ex) {

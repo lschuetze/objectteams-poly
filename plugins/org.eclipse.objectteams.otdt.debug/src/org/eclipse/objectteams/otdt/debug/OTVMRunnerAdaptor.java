@@ -66,6 +66,10 @@ public class OTVMRunnerAdaptor
 		this.weavingScheme = OTJavaNature.getWeavingScheme(javaProject);
 	}
 	
+	public WeavingScheme getWeavingScheme() {
+		return this.weavingScheme;
+	}
+
 	/**
 	 * Store the original arguments as passed to {@link ILaunchConfigurationDelegate#launch(ILaunchConfiguration, String, ILaunch, org.eclipse.core.runtime.IProgressMonitor)}
 	 * @param configuration see first argument of {@link ILaunchConfigurationDelegate#launch(ILaunchConfiguration, String, ILaunch, org.eclipse.core.runtime.IProgressMonitor) launch(..)}

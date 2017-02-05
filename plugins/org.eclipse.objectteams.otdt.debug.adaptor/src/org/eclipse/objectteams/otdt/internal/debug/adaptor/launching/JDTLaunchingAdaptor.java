@@ -34,6 +34,7 @@ import org.eclipse.objectteams.otdt.core.ext.WeavingScheme;
 import org.eclipse.objectteams.otdt.debug.OTDebugPlugin;
 import org.eclipse.objectteams.otdt.debug.OTVMRunnerAdaptor;
 import org.eclipse.objectteams.otdt.debug.TeamBreakpointInstaller;
+import org.eclipse.objectteams.otdt.internal.debug.adaptor.dynamic.RedefineClassesBPListener;
 import org.eclipse.pde.internal.ui.IPDEUIConstants;
 
 import base org.eclipse.jdt.launching.AbstractJavaLaunchConfigurationDelegate;
@@ -147,11 +148,14 @@ public team class JDTLaunchingAdaptor {
 				this.fAdaptor = null;
 				return;
 			}
-			this.fAdaptor = new OTVMRunnerAdaptor(getJavaProject(config));
+			IJavaProject javaProject = getJavaProject(config);
+			this.fAdaptor = new OTVMRunnerAdaptor(javaProject);
 			this.fAdaptor.setAdaptationArgs(config, mode, launch);
 			// install OT-breakpoints
-			if (ILaunchManager.DEBUG_MODE.equals(mode))
-				TeamBreakpointInstaller.installTeamBreakpoints(getJavaProject(config));
+			if (ILaunchManager.DEBUG_MODE.equals(mode)) {
+				TeamBreakpointInstaller.installTeamBreakpoints(javaProject,
+						RedefineClassesBPListener.get(this.fAdaptor.getWeavingScheme()));
+			}
 		}
 
 		// --- VM Arguments: ---
