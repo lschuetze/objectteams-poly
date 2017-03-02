@@ -490,7 +490,7 @@ public /* team */ class Team implements ITeam {
 	protected void finalize() throws Throwable {
 		// nop, hook for the debugger
 		@SuppressWarnings("unused")
-		int i= 2+3; // Note: body must not be empty for debuggger to be able to stop.
+		int i= 2+3; // Note: body must not be empty for debugger to be able to stop.
 	} // $Debug(FinalizeMethod)
 
 	/**

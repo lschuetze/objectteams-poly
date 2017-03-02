@@ -89,20 +89,16 @@ public team class RedefineClassesBPListener implements IJavaBreakpointListener {
 	}
 
 	private void handleClassRedefinition(IJavaThread thread) throws DebugException {
+		// assumption: arg#1 (after 'this') is a qualified className (JLS binary format, i.e., '.' and '$' separators).
 		IStackFrame frame = thread.getTopStackFrame();
-		IVariable[] variables = frame.getVariables(); 
-		IValue values = variables[2].getValue();
-		if (values instanceof IJavaArray) {
-			IJavaValue[] arrayValues = ((IJavaArray) values).getValues();
-			for (IJavaValue value : arrayValues) {
-				if (value instanceof IJavaObject) {
-					IJavaValue clazz = ((IJavaObject) value).sendMessage("getDefinitionClass", "()Ljava/lang/Class;", null, thread, false);
-					IJavaValue name = ((IJavaObject) clazz).sendMessage("getName", "()Ljava/lang/String;", null, thread, false);
-					String className = name.getValueString();
-					VirtualMachine vm = ((org.eclipse.jdt.internal.debug.core.model.JDIDebugTarget) thread.getDebugTarget()).getVM();
-					removeTypeFromCache((org.eclipse.jdi.internal.VirtualMachineImpl) vm, className);
-					updateBreakpoints(thread.getDebugTarget(), className);
-				}
+		IVariable[] variables = frame.getVariables();
+		if (variables.length > 1) {
+			IValue value = variables[1].getValue();
+			if (value instanceof IJavaObject) {
+				String className = value.getValueString();
+				VirtualMachine vm = ((org.eclipse.jdt.internal.debug.core.model.JDIDebugTarget) thread.getDebugTarget()).getVM();
+				removeTypeFromCache((org.eclipse.jdi.internal.VirtualMachineImpl) vm, className);
+				updateBreakpoints(thread.getDebugTarget(), className);
 			}
 		}
 	}

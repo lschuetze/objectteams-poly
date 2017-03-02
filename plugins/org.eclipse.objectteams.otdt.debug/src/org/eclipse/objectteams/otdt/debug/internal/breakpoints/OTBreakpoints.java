@@ -1,16 +1,15 @@
 /**********************************************************************
  * This file is part of "Object Teams Development Tooling"-Software
  * 
- * Copyright 2004, 2006 Fraunhofer Gesellschaft, Munich, Germany,
+ * Copyright 2004, 2017 Fraunhofer Gesellschaft, Munich, Germany,
  * for its Fraunhofer Institute for Computer Architecture and Software
  * Technology (FIRST), Berlin, Germany and Technical University Berlin,
- * Germany.
+ * Germany, and others.
  * 
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
- * $Id: OOTBreakpoints.java 23427 2010-02-03 22:23:59Z stephan $
  * 
  * Please visit http://www.eclipse.org/objectteams for updates and contact.
  * 
@@ -43,12 +42,8 @@ import static org.eclipse.objectteams.otdt.debug.internal.breakpoints.IOOTBreakP
 @SuppressWarnings("nls")
 public class OTBreakpoints {
 
-	private static final String FINALIZE = "finalize";
-	private static final String FINALIZE_SIGNATURE = "()V";
-	
-	private static final String INSTRUMENTATION_IMPL = "sun.instrument.InstrumentationImpl";
-	private static final String REDEFINE_CLASSSES = "redefineClasses";
-	private static final String REDEFINE_CLASSSES_SIGNATURE = "([Ljava/lang/instrument/ClassDefinition;)V";
+	private static final String DEBUG_HOOKS = "org.eclipse.objectteams.runtime.DebugHooks";
+	private static final int LINE_afterRedefineClasses = 30;
 	
 	public enum Descriptor {
 		/** associated with "public Team() {}" */
@@ -62,25 +57,12 @@ public class OTBreakpoints {
 	    /** associated with "implicitActivationsPerThread.set(Integer.valueOf(implActCount - 1));" */
 		TeamImplicitDeactivate(	".TeamBreakpoint.ImplicitDeactivateMethod", LINE_ImplicitDeactivateMethod),
 		/** associated with implicit "return;" */
-		TeamFinalize(			".TeamBreakpoint.FinalizeMethod",			LINE_FinalizeMethod) {
-			@Override
-			IBreakpoint createBreakpoint(IType oot) throws CoreException {
-		    	Map<String, Boolean> attributes = getBreakpointAttributes();
-		    	attributes.put(BP_ID, Boolean.TRUE);
-		    	return createMethodBreakpoint(oot, FINALIZE, FINALIZE_SIGNATURE, true, this.lineNumber, attributes);
-			}
-		},
+		TeamFinalize(			".TeamBreakpoint.FinalizeMethod",			LINE_FinalizeMethod),
 
-		/** on InstrumentationImpl.redefineClasses(). */
-		RedefineClasses(		".InstrumentationBreakpoint.redefineClasses", 	-1) {
+		/** after InstrumentationImpl.redefineClasses() via DebugHook.afterRedefineClasses(). */
+		RedefineClasses(		".InstrumentationBreakpoint.redefineClasses", LINE_afterRedefineClasses) {
 			@Override public boolean isOOTBreakPoint() { return false; }
-			@Override public String getTypeName() { return INSTRUMENTATION_IMPL; }
-			@Override
-			IBreakpoint createBreakpoint(IType type) throws CoreException {
-    			Map<String, Boolean> attributes = getBreakpointAttributes();
-    			attributes.put(BP_ID, Boolean.TRUE);
-    			return createMethodBreakpoint(type, REDEFINE_CLASSSES, REDEFINE_CLASSSES_SIGNATURE, false, -1, attributes);
-			}
+			@Override public String getTypeName() { return DEBUG_HOOKS; }
 		};
 
 		String BP_ID;
@@ -134,25 +116,6 @@ public class OTBreakpoints {
 					attributes);
 			breakpoint.setPersisted(false);
 			
-			return breakpoint;
-		}
-    
-		IJavaBreakpoint createMethodBreakpoint(IType type, String selector, String signature,
-				boolean entry, int linenumber, Map attributes)
-						throws CoreException
-		{
-			IResource resource = type.getJavaProject().getResource();
-			IJavaBreakpoint breakpoint = JDIDebugModel.createMethodBreakpoint(
-					resource, 
-					type.getFullyQualifiedName(), 
-					selector, 
-					signature,
-					entry, !entry, false /*native*/,
-					linenumber, 
-					-1, -1, 0, 
-					false /*register*/, 
-					attributes);
-			breakpoint.setPersisted(false);
 			return breakpoint;
 		}
 	}

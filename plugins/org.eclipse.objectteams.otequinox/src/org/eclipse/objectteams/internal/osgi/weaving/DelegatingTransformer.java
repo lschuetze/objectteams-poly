@@ -32,6 +32,7 @@ import org.eclipse.objectteams.internal.osgi.weaving.Util.ProfileKind;
 import org.eclipse.objectteams.otredyn.bytecode.IRedefineStrategy;
 import org.eclipse.objectteams.otredyn.bytecode.RedefineStrategyFactory;
 import org.eclipse.objectteams.otredyn.transformer.IWeavingContext;
+import org.eclipse.objectteams.runtime.DebugHooks;
 import org.eclipse.objectteams.runtime.IReweavingTask;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.wiring.BundleWiring;
@@ -99,6 +100,7 @@ public abstract class DelegatingTransformer {
 				long start = System.nanoTime();
 				reflectivelyInvoke(arr_cd);
 				if (Util.PROFILE) Util.profile(start, ProfileKind.RedefineClasses, clazz.getName());
+				DebugHooks.afterRedefineClasses(clazz.getName());
 			} catch (ClassFormatError|UnmodifiableClassException e) {
 				// error output during redefinition tends to swallow the stack, print it now:
 				System.err.println("Error redefining "+clazz.getName());
