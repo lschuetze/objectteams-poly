@@ -38,7 +38,7 @@ public class ArtifactInfo {
 	
 	public static final String COPYRIGHT =
 			"<!--\n" +
-			"  Copyright (c) 2016 GK Software AG and others.\n" + 
+			"  Copyright (c) 2016, 2017 GK Software AG and others.\n" + 
 			"  All rights reserved. This program and the accompanying materials\n" + 
 			"  are made available under the terms of the Eclipse Public License v1.0\n" + 
 			"  which accompanies this distribution, and is available at\n" + 

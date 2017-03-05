@@ -1,6 +1,6 @@
 #!/bin/bash
 #*******************************************************************************
-# Copyright (c) 2016 GK Software AG and others.
+# Copyright (c) 2016, 2017 GK Software AG and others.
 # All rights reserved. This program and the accompanying materials
 # are made available under the terms of the Eclipse Public License v1.0
 # which accompanies this distribution, and is available at
@@ -346,11 +346,14 @@ do
     buildSourceJar $line 
 done < ${WORKSPACE}/sourceBundles.txt
 
+# copy ecj-src from build output (NB: we are mapping from SDK version (4.x) back to ECJ version (3.x)):
+/bin/cp ${DROPS4}/${SDK_BUILD_DIR}/ecjsrc-${SDK_VERSION}.jar org/eclipse/jdt/ecj/${SDK_VERSION}/ecj-${ECJ_VERSION}-sources.jar
+
 # special hack for missing source bundle with several source folders with blanks:
 buildSourceJar platform/eclipse.platform.swt.git \
 	bundles/org.eclipse.swt.tools \
-	M20161109-0400 \
-	org/eclipse/platform org.eclipse.swt.tools 3.105.2 \
+	S4_6_3_RC4 \
+	org/eclipse/platform org.eclipse.swt.tools 3.105.3 \
 	"JNI Generation" \
   	"Mac Generation" \
     "Icon Exe" \

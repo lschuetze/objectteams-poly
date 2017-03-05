@@ -2,15 +2,15 @@
 <aggregator:Aggregation xmi:version="2.0" xmlns:xmi="http://www.omg.org/XMI" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:aggregator="http://www.eclipse.org/cbi/p2repo/2011/aggregator/1.1.0" label="SDK4Mvn" packedStrategy="UNPACK_AS_SIBLING" type="R" mavenResult="true" versionFormat="MavenRelease">
   <validationSets label="main">
     <contributions enabled="true" label="sdk">
-      <repositories location="/home/data/httpd/download.eclipse.org/eclipse/updates/4.6-M-builds/M-4.6.2RC3-201611241400/">
+      <repositories location="/home/data/httpd/download.eclipse.org/eclipse/updates/4.6-M-builds/M-4.6.3RC4-201703010400/">
       </repositories>
-      <repositories location="/home/data/httpd/download.eclipse.org/eclipse/updates/4.6-M-builds/M-4.6.2RC3-201611241400/">
+      <repositories location="/home/data/httpd/download.eclipse.org/eclipse/updates/4.6-M-builds/M-4.6.3RC4-201703010400/">
         <bundles name="org.eclipse.jdt.core.compiler.batch"/>
       </repositories>
     </contributions>
     <contributions enabled="false" label="sdk_http">
-      <repositories location="http://download.eclipse.org/eclipse/updates/4.6-M-builds/M-4.6.2RC3-201611241400/"/>
-      <repositories location="http://download.eclipse.org/eclipse/updates/4.6-M-builds/M-4.6.2RC3-201611241400/">
+      <repositories location="http://download.eclipse.org/eclipse/updates/4.6-M-builds/M-4.6.3RC4-201703010400/"/>
+      <repositories location="http://download.eclipse.org/eclipse/updates/4.6-M-builds/M-4.6.3RC4-201703010400/">
         <bundles name="org.eclipse.jdt.core.compiler.batch"/>
       </repositories>
     </contributions>

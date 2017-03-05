@@ -1,5 +1,5 @@
 #*******************************************************************************
-# Copyright (c) 2016 GK Software AG and others.
+# Copyright (c) 2016, 2017 GK Software AG and others.
 # All rights reserved. This program and the accompanying materials
 # are made available under the terms of the Eclipse Public License v1.0
 # which accompanies this distribution, and is available at
@@ -11,12 +11,17 @@
 
 # ECLIPSE:
 APP_NAME_P2DIRECTOR=org.eclipse.equinox.p2.director
-DROPS4=/home/data/httpd/archive.eclipse.org/eclipse/downloads/drops4
-FILE_ECLIPSE=${DROPS4}/R-4.6.1-201609071200/eclipse-SDK-4.6.1-linux-gtk-x86_64.tar.gz
+DROPS4=/home/data/httpd/download.eclipse.org/eclipse/downloads/drops4
+SDK_BUILD_DIR=M-4.6.3RC4-201703010400
+SDK_VERSION=4.6.3RC4
+FILE_ECLIPSE=${DROPS4}/${SDK_BUILD_DIR}/eclipse-SDK-${SDK_VERSION}-linux-gtk-x86_64.tar.gz
+
+# JDT / ECJ:
+ECJ_VERSION=3.12.3
 
 # AGGREGATOR:
 IU_AGG_PRODUCT=org.eclipse.cbi.p2repo.cli.product
-URL_AGG_UPDATES=http://download.eclipse.org/cbi/updates/aggregator/headless/4.6/I20170126-1951
+URL_AGG_UPDATES=http://download.eclipse.org/cbi/updates/aggregator/headless/4.6/I20170127-0443
 
 # LOCAL TOOLS:
 LOCAL_TOOLS=${WORKSPACE}/tools
