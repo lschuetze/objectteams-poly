@@ -347,7 +347,7 @@ do
 done < ${WORKSPACE}/sourceBundles.txt
 
 # copy ecj-src from build output (NB: we are mapping from SDK version (4.x) back to ECJ version (3.x)):
-/bin/cp ${DROPS4}/${SDK_BUILD_DIR}/ecjsrc-${SDK_VERSION}.jar org/eclipse/jdt/ecj/${SDK_VERSION}/ecj-${ECJ_VERSION}-sources.jar
+/bin/cp ${DROPS4}/${SDK_BUILD_DIR}/ecjsrc-${SDK_VERSION}.jar org/eclipse/jdt/ecj/${ECJ_VERSION}/ecj-${ECJ_VERSION}-sources.jar
 
 # special hack for missing source bundle with several source folders with blanks:
 buildSourceJar platform/eclipse.platform.swt.git \
