@@ -22,7 +22,13 @@ fi
 
 echo "==== Copy artifacts from ${REPO}/${PLATFORM} ===="
 
-mkdir -p ${PLATFORM}
+
+if [ -d ${PLATFORM} ]
+then
+	/bin/rm -r ${PLATFORM}/*
+else
+	mkdir -p ${PLATFORM}
+fi
 cp -r ${REPO}/${PLATFORM}/* ${PLATFORM}/
 
 

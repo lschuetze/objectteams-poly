@@ -22,7 +22,12 @@ fi
 
 echo "==== Copy artifacts from ${REPO}/${JDT} ===="
 
-mkdir -p ${JDT}
+if [ -d ${JDT} ]
+then
+	/bin/rm -r ${JDT}/*
+else
+	mkdir -p ${JDT}
+fi
 cp -r ${REPO}/${JDT}/* ${JDT}/
 
 
