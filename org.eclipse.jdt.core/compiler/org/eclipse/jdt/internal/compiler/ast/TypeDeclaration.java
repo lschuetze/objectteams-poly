@@ -1811,7 +1811,7 @@ public void resolve() {
 		}
 //{ObjectTeams:	should we work at all?
 	    Config config = Config.getConfig();
-	    boolean fieldsAndMethods = config.verifyMethods;
+	    boolean fieldsAndMethods = config != null && config.verifyMethods;
 	  if (fieldsAndMethods) {
 // SH}
 		if (this.fields != null) {
