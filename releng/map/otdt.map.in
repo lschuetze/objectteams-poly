@@ -5,6 +5,7 @@ feature@org.eclipse.objectteams.otdt=GIT,repo=git://git.eclipse.org/gitroot/obje
 feature@org.eclipse.objectteams.otdt.source.feature=GIT,repo=git://git.eclipse.org/gitroot/objectteams/org.eclipse.objectteams.git,path=features/org.eclipse.objectteams.otdt.source.feature
 feature@org.eclipse.objectteams.otdt.core.patch=GIT,repo=git://git.eclipse.org/gitroot/objectteams/org.eclipse.objectteams.git,path=features/org.eclipse.objectteams.otdt.core.patch
 feature@org.eclipse.objectteams.otequinox=GIT,repo=git://git.eclipse.org/gitroot/objectteams/org.eclipse.objectteams.git,path=features/org.eclipse.objectteams.otequinox.feature
+feature@org.eclipse.objectteams.otequinox.otre=GIT,repo=git://git.eclipse.org/gitroot/objectteams/org.eclipse.objectteams.git,path=features/org.eclipse.objectteams.otequinox.otre.feature
 feature@org.eclipse.objectteams.otequinox.turbo=GIT,repo=git://git.eclipse.org/gitroot/objectteams/org.eclipse.objectteams.git,path=features/org.eclipse.objectteams.otequinox.turbo.feature,tag=builds/201506091717
 
 !-- Also don't use version numbers for those plugins that hold the various otre jars: --
