@@ -499,26 +499,19 @@ public team class ViewAdaptor extends JFaceDecapsulator
 		drawTopRight <- replace drawTopRight
 			base when ((base.getAdronments() & (BOUND_ROLE|CALLIN)) != 0);
 		callin void drawTopRight() {
-			int currentX = getSize().x;
 			int flags = getAdornments();
 			// when drawing right-to-left start with our adornments:
+			ImageDescriptor adornment = null;
+			
 			if ((flags & BOUND_ROLE) != 0)
-				currentX -= drawRightToLeft(BOUNDROLE_IMG, currentX);
-			if ((flags & CALLIN) != 0)
-				currentX -= drawRightToLeft(CALLINMETHOD_IMG, currentX);
+				adornment = ImageManager.getSharedInstance().getDescriptor(BOUNDROLE_IMG);
+			else if ((flags & CALLIN) != 0)
+				adornment = ImageManager.getSharedInstance().getDescriptor(CALLINMETHOD_IMG);
+
+			if (adornment != null)
+				addTopRightImage(adornment, new Point(getSize().x, 0));
+			
 			base.drawTopRight(); // during this call adjustX<-addTopRightImage is still active.
-		}
-		/**
-		 * Draw an image from right to left.
-		 * @param imageKey	identification of the image to draw
-		 * @param x			x position for right-alignment
-		 * @return width drawn
-		 */
-		private int drawRightToLeft(String imageKey, int x) {
-			ImageData data= getImageData(ImageManager.getSharedInstance().getDescriptor(imageKey));
-			drawImage(data, x-data.width, 0);
-			deltaX += data.width;
-			return data.width;
 		}
 
 		void adjustX(ImageDescriptor desc, Point pos) <- before void addTopRightImage(ImageDescriptor desc, Point pos)
@@ -531,9 +524,9 @@ public team class ViewAdaptor extends JFaceDecapsulator
 		}
 		
 		// ===== callout interface: =====
-		int getAdornments()                                -> int getAdronments(); // note: typo in jdt.ui
-		Point getSize()           						   -> Point getSize();
-		ImageData getImageData(ImageDescriptor descriptor) -> ImageData getImageData(ImageDescriptor descriptor);
+		int getAdornments()                                    -> int getAdronments(); // note: typo in jdt.ui
+		Point getSize()           						       -> Point getSize();
+		void addTopRightImage(ImageDescriptor desc, Point pos) -> void addTopRightImage(ImageDescriptor desc, Point pos);
 	}
 	
 	/** Add error/warning decorations to OT elements: */
