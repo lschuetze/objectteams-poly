@@ -220,6 +220,7 @@ public class PotentialLiftExpression extends PotentialTranslationExpression {
         liftCall.constant = Constant.NotAConstant;
         liftCall.resolvedType =
       	    this.resolvedType = RoleTypeCreator.maybeWrapUnqualifiedRoleType(this.expectedType, scope, this);
+        liftCall.argumentTypes = new TypeBinding[] { providedType };
 		return liftCall;
 	}
 
