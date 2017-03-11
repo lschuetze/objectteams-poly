@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2006, 2016 IBM Corporation and others.
+ * Copyright (c) 2006, 2017 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -941,6 +941,8 @@ public void _test011_problem_categories() {
 		expectedProblemAttributes.put("RedundantNullDefaultAnnotationPackage", new ProblemAttributes(CategorizedProblem.CAT_UNNECESSARY_CODE));
 		expectedProblemAttributes.put("RedundantNullDefaultAnnotationType", new ProblemAttributes(CategorizedProblem.CAT_UNNECESSARY_CODE));
 		expectedProblemAttributes.put("RedundantNullDefaultAnnotationMethod", new ProblemAttributes(CategorizedProblem.CAT_UNNECESSARY_CODE));
+		expectedProblemAttributes.put("RedundantNullDefaultAnnotationLocal", new ProblemAttributes(CategorizedProblem.CAT_UNNECESSARY_CODE));
+		expectedProblemAttributes.put("RedundantNullDefaultAnnotationField", new ProblemAttributes(CategorizedProblem.CAT_UNNECESSARY_CODE));
 		expectedProblemAttributes.put("RedundantSuperinterface", new ProblemAttributes(CategorizedProblem.CAT_UNNECESSARY_CODE));
 		expectedProblemAttributes.put("ReferenceExpressionParameterNullityMismatch", new ProblemAttributes(CategorizedProblem.CAT_POTENTIAL_PROGRAMMING_PROBLEM));
 		expectedProblemAttributes.put("ReferenceExpressionParameterNullityUnchecked", new ProblemAttributes(CategorizedProblem.CAT_POTENTIAL_PROGRAMMING_PROBLEM));
@@ -1048,6 +1050,8 @@ public void _test011_problem_categories() {
 		expectedProblemAttributes.put("UninitializedNonNullField", new ProblemAttributes(CategorizedProblem.CAT_POTENTIAL_PROGRAMMING_PROBLEM));
 		expectedProblemAttributes.put("UninitializedNonNullFieldHintMissingDefault", new ProblemAttributes(CategorizedProblem.CAT_POTENTIAL_PROGRAMMING_PROBLEM));
 		expectedProblemAttributes.put("UninternedIdentityComparison", new ProblemAttributes(CategorizedProblem.CAT_SYNTAX));
+		expectedProblemAttributes.put("UnlikelyCollectionMethodArgumentType", new ProblemAttributes(CategorizedProblem.CAT_POTENTIAL_PROGRAMMING_PROBLEM));
+		expectedProblemAttributes.put("UnlikelyEqualsArgumentType", new ProblemAttributes(CategorizedProblem.CAT_POTENTIAL_PROGRAMMING_PROBLEM));
 		expectedProblemAttributes.put("UnmatchedBracket", new ProblemAttributes(CategorizedProblem.CAT_SYNTAX));
 		expectedProblemAttributes.put("UnnecessaryArgumentCast", DEPRECATED);
 		expectedProblemAttributes.put("UnnecessaryCast", new ProblemAttributes(CategorizedProblem.CAT_UNNECESSARY_CODE));
@@ -1865,6 +1869,8 @@ public void test012_compiler_problems_tuning() {
 		expectedProblemAttributes.put("RedundantNullDefaultAnnotationPackage", new ProblemAttributes(JavaCore.COMPILER_PB_REDUNDANT_NULL_ANNOTATION));
 		expectedProblemAttributes.put("RedundantNullDefaultAnnotationType", new ProblemAttributes(JavaCore.COMPILER_PB_REDUNDANT_NULL_ANNOTATION));
 		expectedProblemAttributes.put("RedundantNullDefaultAnnotationMethod", new ProblemAttributes(JavaCore.COMPILER_PB_REDUNDANT_NULL_ANNOTATION));
+		expectedProblemAttributes.put("RedundantNullDefaultAnnotationLocal", new ProblemAttributes(JavaCore.COMPILER_PB_REDUNDANT_NULL_ANNOTATION));
+		expectedProblemAttributes.put("RedundantNullDefaultAnnotationField", new ProblemAttributes(JavaCore.COMPILER_PB_REDUNDANT_NULL_ANNOTATION));
 		expectedProblemAttributes.put("RedundantSuperinterface", new ProblemAttributes(JavaCore.COMPILER_PB_REDUNDANT_SUPERINTERFACE));
 		expectedProblemAttributes.put("ReferenceExpressionParameterNullityMismatch", new ProblemAttributes(JavaCore.COMPILER_PB_NULL_SPECIFICATION_VIOLATION));
 		expectedProblemAttributes.put("ReferenceExpressionParameterNullityUnchecked", new ProblemAttributes(JavaCore.COMPILER_PB_NULL_UNCHECKED_CONVERSION));
@@ -1972,6 +1978,8 @@ public void test012_compiler_problems_tuning() {
 		expectedProblemAttributes.put("UninitializedNonNullField", SKIP);
 		expectedProblemAttributes.put("UninitializedNonNullFieldHintMissingDefault", SKIP);
 		expectedProblemAttributes.put("UninternedIdentityComparison", SKIP);
+		expectedProblemAttributes.put("UnlikelyCollectionMethodArgumentType", new ProblemAttributes(JavaCore.COMPILER_PB_UNLIKELY_COLLECTION_METHOD_ARGUMENT_TYPE));
+		expectedProblemAttributes.put("UnlikelyEqualsArgumentType", new ProblemAttributes(JavaCore.COMPILER_PB_UNLIKELY_EQUALS_ARGUMENT_TYPE));
 		expectedProblemAttributes.put("UnmatchedBracket", SKIP);
 		expectedProblemAttributes.put("UnnecessaryArgumentCast", SKIP);
 		expectedProblemAttributes.put("UnnecessaryCast", new ProblemAttributes(JavaCore.COMPILER_PB_UNNECESSARY_TYPE_CHECK));

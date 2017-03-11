@@ -7540,4 +7540,63 @@ public void testBug93459() {
 		"}"
 	);
 }
+/**
+ * https://bugs.eclipse.org/510995 - NPE at CommentsPreparator.translateFormattedTokens when using $NON-NLS-1$ in Javadoc
+ */
+public void testBug510995() {
+	String source = 
+		"/**\n" + 
+		" * <pre>\n" + 
+		" * NAME = &quot;org.test....&quot; //$NON-NLS-1$\n" + 
+		" * </pre>\n" + 
+		" */\n" + 
+		"class Test {\n" + 
+		"}";
+	formatSource(source);
+}
+/**
+ * https://bugs.eclipse.org/510995 - NPE at CommentsPreparator.translateFormattedTokens when using $NON-NLS-1$ in Javadoc
+ */
+public void testBug510995b() {
+	String source = 
+		"/**\n" + 
+		" * <pre>\n" + 
+		" * NAME = \"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa\" + \"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa\"; //$NON-NLS-1$ //$NON-NLS-2$\n" + 
+		" * </pre>\n" + 
+		" */\n" + 
+		"class Test {\n" + 
+		"}";
+	formatSource(source,
+		"/**\n" + 
+		" * <pre>\n" + 
+		" * NAME = \"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa\" //$NON-NLS-1$\n" + 
+		" * 		+ \"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa\"; //$NON-NLS-1$\n" + 
+		" * </pre>\n" + 
+		" */\n" + 
+		"class Test {\n" + 
+		"}"
+	);
+}
+/**
+ * https://bugs.eclipse.org/512095 - [formatter] Unstable wrap on a line with wrapped code and wrapped block comment
+ */
+public void testBug512095() {
+	String source = 
+		"class Test1 {\n" + 
+		"	void f() {\n" + 
+		"		String c = \"aaaaaaaaaaaaaaaa\" + \"aaaaaaaaaaaaaaa\"; /* 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 */\n" + 
+		"	}\n" + 
+		"}";
+	formatSource(source,
+		"class Test1 {\n" + 
+		"	void f() {\n" + 
+		"		String c = \"aaaaaaaaaaaaaaaa\"\n" + 
+		"				+ \"aaaaaaaaaaaaaaa\"; /*\n" + 
+		"										 * 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15\n" + 
+		"										 * 16 17\n" + 
+		"										 */\n" + 
+		"	}\n" + 
+		"}"
+	);
+}
 }
