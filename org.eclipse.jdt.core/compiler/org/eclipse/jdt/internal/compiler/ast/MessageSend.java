@@ -564,7 +564,7 @@ public void computeConversion(Scope scope, TypeBinding runtimeTimeType, TypeBind
 //{ObjectTeams: don't try to let casting do the job of lowering:
 	        TypeBinding leafCompile = compileTimeType.leafComponentType();
 	        TypeBinding leafRuntime = runtimeTimeType.leafComponentType();
-	        if (!leafCompile.isBaseType() && !leafRuntime.isBaseType()
+	        if ((leafCompile instanceof ReferenceBinding) && (leafRuntime instanceof ReferenceBinding)
 	        		&& ((ReferenceBinding)leafCompile).isCompatibleViaLowering((ReferenceBinding) leafRuntime))
 	        	this.valueCast = originalType.genericCast(compileTimeType);	        	
 // SH}
