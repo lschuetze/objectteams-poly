@@ -3240,7 +3240,7 @@ public void addMethod(MethodBinding methodBinding) {
 	}
 	// differentiate between sorted and unsorted state:
 	int size = this.methods.length;
-	if ((this.tagBits & TagBits.AreMethodsComplete) != 0) {
+	if ((this.tagBits & TagBits.AreMethodsComplete) != 0 && this.scope != null) { // assume: after scope has been nulled, resolveTypesFor is no longer needed
 		if (resolveTypesFor(methodBinding) == null)
 			return; // don't add erroenous method
 	}
