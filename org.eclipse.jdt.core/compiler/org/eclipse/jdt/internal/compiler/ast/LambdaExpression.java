@@ -56,7 +56,6 @@ import org.eclipse.jdt.core.compiler.IProblem;
 import org.eclipse.jdt.internal.compiler.ASTVisitor;
 import org.eclipse.jdt.internal.compiler.ClassFile;
 import org.eclipse.jdt.internal.compiler.CompilationResult;
-import org.eclipse.jdt.internal.compiler.IErrorHandlingPolicy;
 import org.eclipse.jdt.internal.compiler.classfmt.ClassFileConstants;
 import org.eclipse.jdt.internal.compiler.codegen.CodeStream;
 import org.eclipse.jdt.internal.compiler.env.ICompilationUnit;
@@ -97,6 +96,7 @@ import org.eclipse.jdt.internal.compiler.problem.AbortCompilation;
 import org.eclipse.jdt.internal.compiler.problem.AbortCompilationUnit;
 import org.eclipse.jdt.internal.compiler.problem.AbortMethod;
 import org.eclipse.jdt.internal.compiler.problem.AbortType;
+import org.eclipse.jdt.internal.compiler.problem.ProblemReporter;
 import org.eclipse.jdt.internal.compiler.problem.ProblemSeverities;
 
 @SuppressWarnings({"rawtypes", "unchecked"})
@@ -868,7 +868,14 @@ public class LambdaExpression extends FunctionalExpression implements IPolyExpre
 					copy = this.copiesPerTargetType.values().iterator().next();
 			}
 		}
+//{ObjectTeams: avoid tmp error policy to spill into transitive operations:
+/* orig:
 		IErrorHandlingPolicy oldPolicy = this.enclosingScope.problemReporter().switchErrorHandlingPolicy(silentErrorHandlingPolicy);
+  :giro */
+		CompilationUnitDeclaration cud = this.enclosingScope.referenceCompilationUnit();
+		ProblemReporter oldReporter = cud.problemReporter;
+		cud.problemReporter = new ProblemReporter(silentErrorHandlingPolicy, oldReporter.options, oldReporter.problemFactory);
+// SH}
 		try {
 			if (copy == null) {
 				copy = copy();
@@ -893,7 +900,12 @@ public class LambdaExpression extends FunctionalExpression implements IPolyExpre
 					copy.analyzeExceptions();
 			return copy;
 		} finally {
+//{ObjectTeams: see above:
+/* orig:
 			this.enclosingScope.problemReporter().switchErrorHandlingPolicy(oldPolicy);
+  :giro */
+			cud.problemReporter = oldReporter;
+// SH}
 		}
 	}
 	
