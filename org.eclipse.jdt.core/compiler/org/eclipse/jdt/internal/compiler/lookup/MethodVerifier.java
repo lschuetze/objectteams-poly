@@ -1204,7 +1204,7 @@ boolean mustImplementThisAbstractMethod(MethodBinding abstractMethod) {
 
 	// don't expect generated methods to be implemented. if they're left abstract,
 	// some other problem must already exist.
-	if (CharOperation.prefixEquals(IOTConstants.OT_DOLLAR_NAME, abstractMethod.selector))
+	if (CharOperation.prefixEquals(IOTConstants.OT_DOLLAR_NAME, abstractMethod.selector) && !CharOperation.equals(this.type.getPackage().compoundName, IOTConstants.ORG_OBJECTTEAMS))
 		return false;
 
 	// a non-copied method from our ifc-part poses no original obligation.

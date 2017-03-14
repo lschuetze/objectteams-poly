@@ -574,7 +574,7 @@ public /* team */ class Team implements ITeam {
 	 *                      This id is needed for a base call.
 	 * @param args original packed arguments.
 	 * @param baseCallArgs packed arguments as provided to the base call.
-	 * @param isBaseCall true if we are invoked as a base call (vs. dispatch to the next team in the chain).
+	 * @param baseCallFlags flags to signal a base call / a base super call
 	 * @return possibly boxed result
 	 */
 	public Object _OT$callNext(IBoundBase2 baze, ITeam[] teams, int idx, int[] callinIds, int boundMethodId, Object[] args, Object[] baseCallArgs, int baseCallFlags)
