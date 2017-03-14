@@ -874,7 +874,8 @@ public class LambdaExpression extends FunctionalExpression implements IPolyExpre
   :giro */
 		CompilationUnitDeclaration cud = this.enclosingScope.referenceCompilationUnit();
 		ProblemReporter oldReporter = cud.problemReporter;
-		cud.problemReporter = new ProblemReporter(silentErrorHandlingPolicy, oldReporter.options, oldReporter.problemFactory);
+		cud.problemReporter = new ProblemReporter(oldReporter.policy, oldReporter.options, oldReporter.problemFactory);
+		cud.problemReporter.switchErrorHandlingPolicy(silentErrorHandlingPolicy);
 // SH}
 		try {
 			if (copy == null) {
