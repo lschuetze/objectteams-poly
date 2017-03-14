@@ -351,6 +351,10 @@ public class DefaultCodeFormatter extends CodeFormatter {
 		this.tokens.clear();
 		Scanner scanner = new Scanner(true, false, false/* nls */, CompilerOptions.versionToJdkLevel(this.sourceLevel),
 				null/* taskTags */, null/* taskPriorities */, false/* taskCaseSensitive */);
+//{ObjectTeams: allow scoped keywords:
+		scanner.parseOTJonly = false;
+		scanner.parsePureJavaOnly = false;
+// SH}
 		scanner.setSource(this.sourceArray);
 		while (true) {
 			try {
