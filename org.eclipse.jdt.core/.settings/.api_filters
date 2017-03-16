@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<component id="org.eclipse.jdt.core" version="2">
+    <resource path="model/org/eclipse/jdt/core/JavaCore.java" type="org.eclipse.jdt.core.JavaCore">
+        <filter comment="since is using OT version instead of JDT version" id="1141899266">
+            <message_arguments>
+                <message_argument value="2.0 (OTDT)"/>
+                <message_argument value="3.13 (OTDT)"/>
+                <message_argument value="AST_INCLUDES_ROLE_FILES"/>
+            </message_arguments>
+        </filter>
+    </resource>
+</component>
