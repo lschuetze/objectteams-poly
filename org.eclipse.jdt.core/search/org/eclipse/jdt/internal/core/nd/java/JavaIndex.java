@@ -19,8 +19,6 @@ import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.Path;
-import org.eclipse.core.runtime.Platform;
-import org.eclipse.core.runtime.preferences.IPreferencesService;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.internal.core.JavaModelManager;
@@ -237,12 +235,17 @@ public class JavaIndex {
 	}
 
 	public static boolean isEnabled() {
+//{ObjectTeams: disable new index until performance and deadlock issues have been sorted out:
+		return true;
+/* orig:
 		IPreferencesService preferenceService = Platform.getPreferencesService();
 		if (preferenceService == null) {
 			return true;
 		}
 		return !preferenceService.getBoolean(JavaCore.PLUGIN_ID, "disableNewJavaIndex", false, //$NON-NLS-1$
 				null);
+  :giro */
+// SH}
 	}
 
 	public static Nd createNd(File databaseFile, ChunkCache chunkCache) {

@@ -173,6 +173,8 @@ public final class Indexer {
 			}
 		}
 
+//{ObjectTeams: disable new index until performance and deadlock issues have been sorted out:
+/* orig:
 		if (runRescan) {
 			// Force a rescan when re-enabling automatic indexing since we may have missed an update
 			this.rescanJob.schedule();
@@ -187,6 +189,8 @@ public final class Indexer {
 				// Don't care
 			}
 		}
+  :giro */
+// SH}
 	}
 
 	/**
@@ -935,7 +939,11 @@ public final class Indexer {
 				return;
 			}
 		}
+//{ObjectTeams: disable new index until performance and deadlock issues have been sorted out:
+/* orig:
 		this.rescanJob.schedule();
+  :giro */
+// SH}
 	}
 
 	/**
@@ -975,6 +983,8 @@ public final class Indexer {
 	}
 
 	public void waitForIndex(IProgressMonitor monitor) {
+//{ObjectTeams: disable new index until performance and deadlock issues have been sorted out:
+/* orig:
 		try {
 			boolean shouldRescan = false;
 			synchronized (this.automaticIndexingMutex) {
@@ -989,6 +999,8 @@ public final class Indexer {
 		} catch (InterruptedException e) {
 			throw new OperationCanceledException();
 		}
+  :giro */
+// SH}
 	}
 
 	public void waitForIndex(int waitingPolicy, IProgressMonitor monitor) {
