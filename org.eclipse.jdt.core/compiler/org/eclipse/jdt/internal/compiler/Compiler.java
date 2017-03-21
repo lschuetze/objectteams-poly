@@ -898,6 +898,9 @@ public class Compiler implements ITypeRequestor, ProblemSeverities {
 				} else {
 					parsedUnit = this.parser.dietParse(sourceUnits[i], unitResult);
 				}
+//{ObjectTeams: new backpointer needed as "client" for Config:
+				parsedUnit.compiler = this;
+// SH}
 				long resolveStart = System.currentTimeMillis();
 				this.stats.parseTime += resolveStart - parseStart;
 				// initial type binding creation

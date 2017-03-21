@@ -1,7 +1,7 @@
 /**********************************************************************
  * This file is part of "Object Teams Development Tooling"-Software
  *
- * Copyright 2005, 2006 Fraunhofer Gesellschaft, Munich, Germany,
+ * Copyright 2005, 2017 Fraunhofer Gesellschaft, Munich, Germany,
  * for its Fraunhofer Institute for Computer Architecture and Software
  * Technology (FIRST), Berlin, Germany and Technical University Berlin,
  * Germany.
@@ -22,6 +22,8 @@ package org.eclipse.objectteams.otdt.internal.core.compiler.control;
 
 import java.lang.ref.SoftReference;
 import java.lang.ref.WeakReference;
+import java.util.Map.Entry;
+import java.util.Arrays;
 import java.util.Stack;
 import java.util.WeakHashMap;
 
@@ -49,7 +51,7 @@ import org.eclipse.objectteams.otdt.core.exceptions.InternalCompilerError;
  *
  * We don't use ThreadLocal, since we do cleanup manually using release().
  */
-public class Config implements ConfigHelper.IConfig {
+public class Config implements ConfigHelper.IConfig, Comparable<Config> {
 	
 	@SuppressWarnings("serial")
 	public static class NotConfiguredException extends RuntimeException {
@@ -89,6 +91,10 @@ public class Config implements ConfigHelper.IConfig {
     boolean loweringPossible = false;
     /** Does current type lookup require a source type? */
     boolean sourceTypeRequired = false;
+
+
+	private int useCount = 0;
+	private long timestamp = System.currentTimeMillis();
 
     // end data
 
@@ -146,8 +152,8 @@ public class Config implements ConfigHelper.IConfig {
 		        configStack = new Stack<Config>();
 		        _configs.set(configStack);
 		    }
-
 	        configStack.push(config);
+	        config.useCount++;
 	    }
 	}
 
@@ -223,6 +229,8 @@ public class Config implements ConfigHelper.IConfig {
     	    {
     	        Config config = configStack.pop(); // remove Config
     		    assert(config != null);
+    		    if (--config.useCount > 0)
+    		    	return;
     		    Object theClient = config.client.get();
     	        if (theClient != client && theClient != null) // bad balance of addConfig and removeConfig calls
     	        {
@@ -284,33 +292,69 @@ public class Config implements ConfigHelper.IConfig {
 	}
 	
 	static Config getOrCreateMatchingConfig(Object client, Parser parser, LookupEnvironment environment) {
-		WeakReference<LookupEnvironment> environmentWeak = null;
-		SoftReference<Parser> parserSoft = null;
 		Config config = safeGetConfig();
-		Boolean bundledCompleteBindings = null;
 		if (configMatchesRequest(config, client, parser, environment)) {
-			parserSoft = config.parser;
-			environmentWeak = config.lookupEnvironment;
-			bundledCompleteBindings = config.bundledCompleteTypeBindings;
+			config.useCount++;
+			// assume already present in configsByClient, too.
+			return config;
 		}
 		if (parser == null || environment == null) {
 			config = configsByClient.get(client);
 			if (configMatchesRequest(config, client, parser, environment)) {
-				parserSoft = config.parser;
-				environmentWeak = config.lookupEnvironment;
-				bundledCompleteBindings = config.bundledCompleteTypeBindings;
+				addConfig(config);
+				return config;
 			}
 		}
-		if (parserSoft == null)
-			parserSoft = new SoftReference<Parser>(parser);
-		if (environmentWeak == null)
-			environmentWeak = new WeakReference<LookupEnvironment>(environment);
-		config = new Config(client, parserSoft, environmentWeak);
-		if (bundledCompleteBindings != null)
-			config.bundledCompleteTypeBindings = bundledCompleteBindings;
+		config = new Config(client, new SoftReference<>(parser), new WeakReference<>(environment));
 		configsByClient.put(client, config);
 		addConfig(config);
+		cleanupIfNecessary();
 		return config;
+	}
+
+	@Override
+	public int compareTo(Config o) {
+		return Long.compare(this.timestamp, o.timestamp);
+	}
+
+	static final int UPPER_THRESHOLD = 30;
+	static final int LOWER_THRESHOLD = 25;
+	static final boolean DEBUG = false;
+
+	private static void cleanupIfNecessary() {
+		if (configsByClient.size() > UPPER_THRESHOLD) {
+			if (DEBUG) {
+				System.out.println("============ #clients: "+configsByClient.size()); //$NON-NLS-1$
+				for (Entry<Object, Config> entry : configsByClient.entrySet()) {
+					Object key = entry.getKey();
+					if (key != null && !(key instanceof Compiler))
+						System.out.println("Client "+key.getClass()); //$NON-NLS-1$
+				}
+			}
+			synchronized (configsByClient) {				
+				Object[] keys = configsByClient.values().toArray();
+				Arrays.sort(keys);
+				int threshold = keys.length-LOWER_THRESHOLD;
+				for (int i=0; i<threshold; i++) {
+					if (keys[i] instanceof Config) {
+						Config config = (Config)keys[i];
+						if (config.client != null) {
+							Object key = config.client.get();
+							if (key != null)
+								configsByClient.remove(key);
+						}
+					}
+				}
+			}
+			if (DEBUG) {
+				System.out.println("============ #clients: "+configsByClient.size()); //$NON-NLS-1$
+				for (Object client : configsByClient.keySet()) {
+					if (client != null && !(client instanceof Compiler))
+						System.out.println("Client "+client.getClass()); //$NON-NLS-1$
+				}
+				System.out.println("========================"); //$NON-NLS-1$
+			}
+		}
 	}
 
 	private static boolean configMatchesRequest(Config config, Object client, Parser parser,
@@ -335,6 +379,10 @@ public class Config implements ConfigHelper.IConfig {
     	    {
     	        Config config = configStack.pop(); // remove Config
     		    assert(config != null);
+    		    if (--config.useCount > 0) {
+    	            configStack.push(config); // still used
+					return;
+				}
     	        if (config != this) // bad balance of addConfig and removeConfig calls
     	        {
     	            assert(false);
@@ -571,5 +619,4 @@ public class Config implements ConfigHelper.IConfig {
 		Object theClient = this.client.get();
 		return theClient != null && theClient.getClass() == clazz;
 	}
-
 }

@@ -23,6 +23,7 @@ import org.eclipse.jdt.core.compiler.CharOperation;
 import org.eclipse.jdt.internal.compiler.ASTVisitor;
 import org.eclipse.jdt.internal.compiler.ClassFile;
 import org.eclipse.jdt.internal.compiler.CompilationResult;
+import org.eclipse.jdt.internal.compiler.Compiler;
 import org.eclipse.jdt.internal.compiler.classfmt.ClassFileConstants;
 import org.eclipse.jdt.internal.compiler.impl.CompilerOptions;
 import org.eclipse.jdt.internal.compiler.impl.Constant;
@@ -95,6 +96,8 @@ public class CompilationUnitDeclaration extends ASTNode implements ProblemSeveri
 	// because the latter seems to relate to syntax errors, whereas this flag is set for
 	// a CUD that created by the SourceTypeConverter (and is seemingly needed only indirectly)
 	public boolean parseMethodBodies = true;
+	// back reference needed as 'client' for Config:
+	public Compiler compiler;
 // SH}
 
 	public boolean isPropagatingInnerClassEmulation;
@@ -166,6 +169,9 @@ public void analyseCode() {
  * to compiler structures.
  */
 public void cleanUp() {
+//{ObjectTeams: cleanup additional field:
+	this.compiler = null;
+// SH}
 	if (this.types != null) {
 		for (int i = 0, max = this.types.length; i < max; i++) {
 			cleanUp(this.types[i]);

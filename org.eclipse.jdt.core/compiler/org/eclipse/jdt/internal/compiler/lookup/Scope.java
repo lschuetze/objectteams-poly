@@ -3761,7 +3761,7 @@ public abstract class Scope {
 	// use CompilationUnitScope.getImport(char[][]) instead
 	public final Binding getTypeOrPackage(char[][] compoundName) {
 //{ObjectTeams: this method may be called in a Config-unaware context:
-	  try (Config config = Dependencies.setup(this, compilationUnitScope().parser, environment(), false, true))
+	  try (Config config = Dependencies.setup(referenceCompilationUnit().compiler, compilationUnitScope().parser, environment(), false, true))
 	  {
 // SH}
 		int nameLength = compoundName.length;
