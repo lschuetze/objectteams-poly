@@ -204,10 +204,16 @@ ls -ltr *\.*
 echo "====Step 10: cleanup: remove symbolic links===="
 find . -type l -exec /bin/rm {} \;
 
-if [ "${PROMOTE}" == "true" ]
+if [ "${PROMOTE}" != "false" ]
 then
 	BUILDID=`echo $OTDTVERSION | cut -d '.' -f 4`
-	DEST=${UPDATES_BASE}/${2}/${BUILDID}
+	if [ "${PROMOTE}" == "staging" ]
+	then
+            DEST=${UPDATES_BASE}/${2}/staging
+            /bin/rm -rf ${DEST}
+        else
+            DEST=${UPDATES_BASE}/${2}/${BUILDID}
+        fi
 	echo "====Step 11: promote to ${DEST}===="
 	if [ -d ${UPDATES_BASE}/${2} ]
 	then
