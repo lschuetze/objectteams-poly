@@ -236,7 +236,7 @@ public class JavaIndex {
 
 	public static boolean isEnabled() {
 //{ObjectTeams: disable new index until performance and deadlock issues have been sorted out:
-		return true;
+		return false;
 /* orig:
 		IPreferencesService preferenceService = Platform.getPreferencesService();
 		if (preferenceService == null) {
