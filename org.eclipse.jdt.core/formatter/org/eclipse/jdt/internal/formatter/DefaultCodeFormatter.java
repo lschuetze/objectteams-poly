@@ -86,6 +86,9 @@ public class DefaultCodeFormatter extends CodeFormatter {
 	private ASTNode astRoot;
 	private List<Token> tokens = new ArrayList<>();
 	private TokenManager tokenManager;
+//{ObjectTeams: flag recovered from option set in org.eclipse.jdt.internal.core.dom.rewrite.ASTRewriteFormatter.formatNode(ASTNode, String, int):
+	private boolean isOTJCode;
+// SH}
 
 	public DefaultCodeFormatter() {
 		this(new DefaultCodeFormatterOptions(DefaultCodeFormatterConstants.getJavaConventionsSettings()), null);
@@ -121,6 +124,9 @@ public class DefaultCodeFormatter extends CodeFormatter {
 			this.originalOptions.set(defaultCodeFormatterOptions.getMap());
 			this.workingOptions.set(defaultCodeFormatterOptions.getMap());
 		}
+//{ObjectTeams: see ASTRewriteFormatter.formatNode(ASTNode, String, int):
+		this.isOTJCode = options != null && JavaCore.DISABLED.equals(options.get(JavaCore.COMPILER_OPT_SCOPED_KEYWORDS));
+// SH}
 	}
 
 	@Deprecated
@@ -352,8 +358,8 @@ public class DefaultCodeFormatter extends CodeFormatter {
 		Scanner scanner = new Scanner(true, false, false/* nls */, CompilerOptions.versionToJdkLevel(this.sourceLevel),
 				null/* taskTags */, null/* taskPriorities */, false/* taskCaseSensitive */);
 //{ObjectTeams: allow scoped keywords:
-		scanner.parseOTJonly = false;
-		scanner.parsePureJavaOnly = false;
+		scanner.parsePureJavaOnly = this.workingOptions.isPureJava;
+		scanner.parseOTJonly = this.isOTJCode;
 // SH}
 		scanner.setSource(this.sourceArray);
 		while (true) {
