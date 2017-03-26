@@ -4123,6 +4123,8 @@ public class NullTypeAnnotationTest extends AbstractNullAnnotationTest {
 	}
 	// https://bugs.eclipse.org/bugs/show_bug.cgi?id=420456, [1.8][null] AIOOB in null analysis code.
 	public void test420456() {
+		final Map compilerOptions = getCompilerOptions();
+		compilerOptions.put(JavaCore.COMPILER_PB_NULL_UNCHECKED_CONVERSION, JavaCore.IGNORE);
 		runConformTestWithLibs(
 			new String[] {
 				"X.java",
@@ -4135,7 +4137,7 @@ public class NullTypeAnnotationTest extends AbstractNullAnnotationTest {
 				"	}\n" +
 				"}\n"
 			}, 
-			getCompilerOptions(),
+			compilerOptions,
 			"",
 			"78912345678");		
 	}
@@ -15052,6 +15054,209 @@ public void testBug511723() {
 		"	           ^^^^^^^^\n" + 
 		"Null type safety: required \'@NonNull\' but this expression has type \'T\', a free type variable that may represent a \'@Nullable\' type\n" + 
 		"----------\n"
+	);
+}
+public void testBug498084() {
+	runConformTestWithLibs(
+		new String[] {
+			"test/Test.java",
+			"package test;\n" +
+			"\n" +
+			"import java.util.HashMap;\n" +
+			"import java.util.Map;\n" +
+			"import java.util.function.Function;\n" +
+			"\n" +
+			"import org.eclipse.jdt.annotation.NonNullByDefault;\n" +
+			"\n" +
+			"@NonNullByDefault\n" +
+			"public class Test {\n" +
+			"\n" +
+			"	protected static final <K, V> V cache(final Map<K, V> cache, final V value, final Function<V, K> keyFunction) {\n" +
+			"		cache.put(keyFunction.apply(value), value);\n" +
+			"		return value;\n" +
+			"	}\n" +
+			"\n" +
+			"	public static final void main(final String[] args) {\n" +
+			"		Map<Integer, String> cache = new HashMap<>();\n" +
+			"		cache(cache, \"test\", String::length); // Warning: Null type safety at\n" +
+			"											// method return type: Method\n" +
+			"											// descriptor\n" +
+			"											// Function<String,Integer>.apply(String)\n" +
+			"											// promises '@NonNull Integer'\n" +
+			"											// but referenced method\n" +
+			"											// provides 'int'\n" +
+			"	}\n" +
+			"}\n" +
+			"",
+		}, 
+		getCompilerOptions(),
+		""
+	);
+}
+public void testBug498084b() {
+	runNegativeTestWithLibs(
+		new String[] {
+			"test/Test2.java",
+			"package test;\n" +
+			"\n" +
+			"import java.util.function.Consumer;\n" +
+			"\n" +
+			"import org.eclipse.jdt.annotation.Nullable;\n" +
+			"\n" +
+			"public class Test2 {\n" +
+			"	static void f(int i) {\n" +
+			"	}\n" +
+			"\n" +
+			"	public static void main(String[] args) {\n" +
+			"		Consumer<@Nullable Integer> sam = Test2::f;\n" +
+			"		sam.accept(null); // <- NullPointerExpection when run\n" +
+			"		Consumer<Integer> sam2 = Test2::f;\n" +
+			"		sam2.accept(null); // variation: unchecked \n" +
+			"	}\n" +
+			"}\n" +
+			"",
+		}, 
+		getCompilerOptions(),
+		"----------\n" + 
+		"1. ERROR in test\\Test2.java (at line 12)\n" + 
+		"	Consumer<@Nullable Integer> sam = Test2::f;\n" + 
+		"	                                  ^^^^^^^^\n" + 
+		"Null type mismatch at parameter 1: required \'int\' but provided \'@Nullable Integer\' via method descriptor Consumer<Integer>.accept(Integer)\n" + 
+		"----------\n" + 
+		"2. WARNING in test\\Test2.java (at line 14)\n" + 
+		"	Consumer<Integer> sam2 = Test2::f;\n" + 
+		"	                         ^^^^^^^^\n" + 
+		"Null type safety: parameter 1 provided via method descriptor Consumer<Integer>.accept(Integer) needs unchecked conversion to conform to \'int\'\n" + 
+		"----------\n"
+	);
+}
+public void testBug513495() {
+	runNegativeTestWithLibs(
+		new String[] {
+			"test/Test3.java",
+			"package test;\n" +
+			"\n" +
+			"import java.util.function.Function;\n" +
+			"\n" +
+			"import org.eclipse.jdt.annotation.Nullable;\n" +
+			"\n" +
+			"public class Test3 {\n" +
+			"	public static void main(String[] args) {\n" +
+			"		Function<@Nullable Integer, Object> sam = Integer::intValue;\n" +
+			"		sam.apply(null); // <- NullPointerExpection\n" +
+			"		Function<Integer, Object> sam2 = Integer::intValue;\n" +
+			"		sam2.apply(null); // variation: unchecked, so intentionally no warning reported, but would give NPE too \n" +
+			"	}\n" +
+			"	void wildcards(Class<?>[] params) { // unchecked case with wildcards\n" +
+			"		java.util.Arrays.stream(params).map(Class::getName).toArray(String[]::new);\n" +
+			"	}\n" +
+			"}\n" +
+			"",
+		}, 
+		getCompilerOptions(),
+		"----------\n" + 
+		"1. ERROR in test\\Test3.java (at line 9)\n" + 
+		"	Function<@Nullable Integer, Object> sam = Integer::intValue;\n" + 
+		"	                                          ^^^^^^^^^^^^^^^^^\n" + 
+		"Null type mismatch at parameter 'this': required \'@NonNull Integer\' but provided \'@Nullable Integer\' via method descriptor Function<Integer,Object>.apply(Integer)\n" + 
+		"----------\n"
+	);
+}
+public void testBug513855() {
+	runConformTestWithLibs(
+		new String[] {
+			"test1/X.java",
+			"package test1;\n" +
+			"\n" +
+			"import java.math.BigDecimal;\n" +
+			"\n" +
+			"import org.eclipse.jdt.annotation.*;\n" +
+			"\n" +
+			"@NonNullByDefault\n" +
+			"public class X {\n" +
+			"	interface Sink<T extends Number> {\n" +
+			"		void receive(T t);\n" +
+			"	}\n" +
+			"\n" +
+			"	interface Source<U extends BigDecimal> {\n" +
+			"		U get();\n" +
+			"	}\n" +
+			"\n" +
+			"	void nn(Object x) {\n" +
+			"	}\n" +
+			"\n" +
+			"	void f(Source<?> source) {\n" +
+			"		nn(source.get());\n" +
+			"	}\n" +
+			"}\n" +
+			"",
+		}, 
+		getCompilerOptions(),
+		""
+	);
+}
+public void testBug513855lambda() {
+	runConformTestWithLibs(
+		new String[] {
+			"test1/Lambda3.java",
+			"package test1;\n" +
+			"\n" +
+			"import java.math.BigDecimal;\n" +
+			"\n" +
+			"import org.eclipse.jdt.annotation.*;\n" +
+			"\n" +
+			"@NonNullByDefault\n" +
+			"public class Lambda3 {\n" +
+			"	interface Sink<T extends Number> {\n" +
+			"		void receive(T t);\n" +
+			"	}\n" +
+			"\n" +
+			"	interface Source<U extends BigDecimal> {\n" +
+			"		void sendTo(Sink<? super U> c);\n" +
+			"	}\n" +
+			"\n" +
+			"	void f(Source<?> source) {\n" +
+			"		source.sendTo(a -> a.scale());\n" +
+			"	}\n" +
+			"}\n" +
+			"",
+		}, 
+		getCompilerOptions(),
+		""
+	);
+}
+public void testBug514091() {
+	runConformTestWithLibs(
+		new String[] {
+			"test1/SAM.java",
+			"package test1;\n" +
+			"\n" +
+			"@org.eclipse.jdt.annotation.NonNullByDefault\n" +
+			"interface SAM<A> {\n" +
+			"	void f(A[] a);\n" +
+			"}\n" +
+			""
+		}, 
+		getCompilerOptions(),
+		""
+	);
+	runConformTestWithLibs(
+		new String[] {
+			"test1/LambdaNN.java",
+			"package test1;\n" +
+			"\n" +
+			"import org.eclipse.jdt.annotation.*;\n" +
+			"\n" +
+			"public class LambdaNN {\n" +
+			"	void g1() {\n" +
+			"		SAM<? super Number> sam = (Number @NonNull [] a) -> {};\n" +
+			"		sam.f(new Number[0]);\n" +
+			"	}\n" +
+			"}\n" +
+			"",
+		}, 
+		getCompilerOptions(),
+		""
 	);
 }
 }

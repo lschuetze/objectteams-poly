@@ -12001,7 +12001,7 @@ public void testBug317264b() throws CoreException {
 	IJavaProject project = null;
 	try
 	{
-		project = createJavaProject("P");
+		project = createJavaProject("P", new String[] {""}, new String[] {"JCL_LIB"}, "", "1.4");
 		addClasspathEntry(project, JavaCore.newLibraryEntry(new Path("/JavaSearchBugs/lib/b317264/org.apache.commons.lang_2.modified.jar"), null, null));
 		int mask = IJavaSearchScope.APPLICATION_LIBRARIES | IJavaSearchScope.SOURCES | IJavaSearchScope.REFERENCED_PROJECTS;
 		IJavaSearchScope scope = SearchEngine.createJavaSearchScope(new IJavaElement[] { project }, mask);
@@ -12045,7 +12045,7 @@ public void testBug317264c() throws CoreException {
 public void testBug317264d() throws CoreException {
 	try
 	{
-		IJavaProject project = createJavaProject("P");
+		IJavaProject project = createJavaProject("P", new String[] {""}, new String[] {"JCL_LIB"}, "", "1.4");
 		addClasspathEntry(project, JavaCore.newLibraryEntry(new Path("/JavaSearchBugs/lib/b317264/org.apache.commons.lang_2.modified.jar"), null, null));
 		int mask = IJavaSearchScope.APPLICATION_LIBRARIES | IJavaSearchScope.SOURCES ;
 		IJavaSearchScope scope = SearchEngine.createJavaSearchScope(new IJavaElement[] { project }, mask);
@@ -12077,7 +12077,7 @@ public void testBug317264e() throws CoreException {
 public void testBug317264f() throws CoreException {
 	try
 	{
-		IJavaProject project = createJavaProject("P");
+		IJavaProject project = createJavaProject("P", new String[] {""}, new String[] {"JCL_LIB"}, "", "1.4");
 		addClasspathEntry(project, JavaCore.newLibraryEntry(new Path("/JavaSearchBugs/lib/b317264/org.apache.commons.lang_2.modified.jar"), null, null));
 		int mask = IJavaSearchScope.APPLICATION_LIBRARIES | IJavaSearchScope.SOURCES ;
 		IJavaSearchScope scope = SearchEngine.createJavaSearchScope(new IJavaElement[] { project }, mask);

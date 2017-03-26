@@ -89,6 +89,7 @@ import org.eclipse.jdt.internal.compiler.lookup.TypeBinding;
 import org.eclipse.jdt.internal.compiler.lookup.TypeConstants;
 import org.eclipse.jdt.internal.compiler.lookup.TypeIds;
 import org.eclipse.jdt.internal.compiler.parser.Parser;
+import org.eclipse.jdt.internal.compiler.parser.Scanner;
 
 public class ReferenceExpression extends FunctionalExpression implements IPolyExpression, InvocationSite {
 	// secret variable name
@@ -118,10 +119,15 @@ public class ReferenceExpression extends FunctionalExpression implements IPolyEx
 	private HashMap<TypeBinding, ReferenceExpression> copiesPerTargetType;
 	public char[] text; // source representation of the expression.
 	private HashMap<ParameterizedGenericMethodBinding, InferenceContext18> inferenceContexts;
+
+	// the scanner used when creating this expression, may be a RecoveryScanner (with proper RecoveryScannerData),
+	// need to keep it so copy() can parse in the same mode (normal/recovery):
+	private Scanner scanner; 
 	
-	public ReferenceExpression() {
+	public ReferenceExpression(Scanner scanner) {
 		super();
 		this.original = this;
+		this.scanner = scanner;
 	}
 	
 	public void initialize(CompilationResult result, Expression expression, TypeReference [] optionalTypeArguments, char [] identifierOrNew, int sourceEndPosition) {
@@ -137,6 +143,7 @@ public class ReferenceExpression extends FunctionalExpression implements IPolyEx
 		final Parser parser = new Parser(this.enclosingScope.problemReporter(), false);
 		final ICompilationUnit compilationUnit = this.compilationResult.getCompilationUnit();
 		final char[] source = compilationUnit != null ? compilationUnit.getContents() : this.text;
+		parser.scanner = this.scanner;
 		ReferenceExpression copy =  (ReferenceExpression) parser.parseExpression(source, compilationUnit != null ? this.sourceStart : 0, this.sourceEnd - this.sourceStart + 1, 
 										this.enclosingScope.referenceCompilationUnit(), false /* record line separators */);
 		copy.original = this;
@@ -790,8 +797,16 @@ public class ReferenceExpression extends FunctionalExpression implements IPolyEx
 	        	int len;
 	        	int expectedlen = this.binding.parameters.length;
 	        	int providedLen = this.descriptor.parameters.length;
-	        	if (this.receiverPrecedesParameters)
+	        	if (this.receiverPrecedesParameters) {
 	        		providedLen--; // one parameter is 'consumed' as the receiver
+
+	        		TypeBinding descriptorParameter = this.descriptor.parameters[0];
+	    			if((descriptorParameter.tagBits & TagBits.AnnotationNullable) != 0) { // Note: normal dereferencing of 'unchecked' values is not reported, either
+		    			final TypeBinding receiver = scope.environment().createAnnotatedType(this.binding.declaringClass,
+								new AnnotationBinding[] { scope.environment().getNonNullAnnotation() });
+    					scope.problemReporter().referenceExpressionArgumentNullityMismatch(this, receiver, descriptorParameter, this.descriptor, -1, NullAnnotationMatching.NULL_ANNOTATIONS_MISMATCH);
+	    			}	        		
+	        	}
 	        	boolean isVarArgs = false;
 	        	if (this.binding.isVarargs()) {
 	        		isVarArgs = (providedLen == expectedlen)
@@ -804,20 +819,30 @@ public class ReferenceExpression extends FunctionalExpression implements IPolyEx
 	    		for (int i = 0; i < len; i++) {
 	    			TypeBinding descriptorParameter = this.descriptor.parameters[i + (this.receiverPrecedesParameters ? 1 : 0)];
 	    			TypeBinding bindingParameter = InferenceContext18.getParameter(this.binding.parameters, i, isVarArgs);
-	    			NullAnnotationMatching annotationStatus = NullAnnotationMatching.analyse(bindingParameter, descriptorParameter, FlowInfo.UNKNOWN);
+					TypeBinding bindingParameterToCheck;
+					if (bindingParameter.isPrimitiveType() && !descriptorParameter.isPrimitiveType()) {
+						// replace primitive types by boxed equivalent for checking, e.g. int -> @NonNull Integer
+						bindingParameterToCheck = scope.environment().createAnnotatedType(scope.boxing(bindingParameter),
+								new AnnotationBinding[] { scope.environment().getNonNullAnnotation() });
+					} else {
+						bindingParameterToCheck = bindingParameter;
+					}
+	    			NullAnnotationMatching annotationStatus = NullAnnotationMatching.analyse(bindingParameterToCheck, descriptorParameter, FlowInfo.UNKNOWN);
 	    			if (annotationStatus.isAnyMismatch()) {
 	    				// immediate reporting:
 	    				scope.problemReporter().referenceExpressionArgumentNullityMismatch(this, bindingParameter, descriptorParameter, this.descriptor, i, annotationStatus);
 	    			}
 	    		}
 	    		TypeBinding returnType = this.binding.returnType;
-	    		if (this.binding.isConstructor()) {
-	    			returnType = scope.environment().createAnnotatedType(this.receiverType, new AnnotationBinding[]{ scope.environment().getNonNullAnnotation() });
+	    		if(!returnType.isPrimitiveType()) {
+		    		if (this.binding.isConstructor()) {
+		    			returnType = scope.environment().createAnnotatedType(this.receiverType, new AnnotationBinding[]{ scope.environment().getNonNullAnnotation() });
+		    		}
+		    		NullAnnotationMatching annotationStatus = NullAnnotationMatching.analyse(this.descriptor.returnType, returnType, FlowInfo.UNKNOWN);
+		        	if (annotationStatus.isAnyMismatch()) {
+	        			scope.problemReporter().illegalReturnRedefinition(this, this.descriptor, annotationStatus.isUnchecked(), returnType);
+		        	}
 	    		}
-	    		NullAnnotationMatching annotationStatus = NullAnnotationMatching.analyse(this.descriptor.returnType, returnType, FlowInfo.UNKNOWN);
-	        	if (annotationStatus.isAnyMismatch()) {
-        			scope.problemReporter().illegalReturnRedefinition(this, this.descriptor, annotationStatus.isUnchecked(), returnType);
-	        	}
         	}
         }
 	}
