@@ -21,7 +21,7 @@ ECJ_VERSION=3.12.3
 
 # AGGREGATOR:
 IU_AGG_PRODUCT=org.eclipse.cbi.p2repo.cli.product
-URL_AGG_UPDATES=http://download.eclipse.org/cbi/updates/aggregator/headless/4.6/I20170127-0443
+URL_AGG_UPDATES=http://download.eclipse.org/cbi/updates/aggregator/headless/4.6/I20170329-0008
 
 # LOCAL TOOLS:
 LOCAL_TOOLS=${WORKSPACE}/tools
