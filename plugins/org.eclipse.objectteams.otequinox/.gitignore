@@ -1,2 +1,4 @@
 agent
 /otequinoxAgent.jar
+/AGENT_MANIFEST.MF
+/agent.jardesc
