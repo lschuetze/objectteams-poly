@@ -394,7 +394,10 @@ public class CallinImplementorDyn extends MethodMappingImplementor {
 				// one case block per callin mapping:
 				for (CallinMappingDeclaration callinDecl : callinDecls) 
 				{
-					if (callinDecl.ignoreFurtherInvestigation || RoleModel.isRoleWithBaseProblem(callinDecl.scope.referenceType()))
+					if (callinDecl.ignoreFurtherInvestigation)
+						continue;
+					TypeDeclaration roleDecl = callinDecl.scope.referenceType();
+					if (roleDecl.ignoreFurtherInvestigation || RoleModel.isRoleWithBaseProblem(roleDecl))
 						continue;
 					if (!callinDecl.hasParsedParamMappings) // during reconcile we may not be interested in this level of detail (e.g., of a role file)
 						continue;

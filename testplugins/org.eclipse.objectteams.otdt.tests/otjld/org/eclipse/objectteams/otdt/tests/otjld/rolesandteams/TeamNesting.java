@@ -3804,4 +3804,35 @@ public class TeamNesting extends AbstractOTJLDTest {
     			"}"
     		});
     }
+    public void testBug513525() {
+    	runNegativeTest(
+    		new String[] {
+    			"T1.java",
+    			"public team class T1 {\n" +
+    			"	protected team class T11 playedBy B1 {\n" +
+    			"	}\n" +
+    			"}\n",
+    			"T2.java",
+    			"public team class T2 extends T1 {\n" +
+    			"	protected class R extends T11 playedBy B2 {\n" +
+    			"		callin void rm() {}\n" +
+    			"		void rm() <- replace void m()\n" +
+    			"			base when(base.pred());\n" +
+    			"	}\n" +
+    			"}\n",
+    			"B1.java",
+    			"public class B1 {}\n",
+    			"B2.java",
+    			"public class B2 extends B1 {\n" +
+    			"	public void m() {}\n" +
+    			"	public boolean pred() { return true; }\n" +
+    			"}\n"
+    		},
+    		"----------\n" + 
+			"1. ERROR in T2.java (at line 2)\n" + 
+			"	protected class R extends T11 playedBy B2 {\n" + 
+			"	                          ^^^\n" + 
+			"Illegal \'extends\' for a regular class: superclass T1.T11 is a team (OTJLD 1.3).\n" + 
+			"----------\n");
+    }
 }
