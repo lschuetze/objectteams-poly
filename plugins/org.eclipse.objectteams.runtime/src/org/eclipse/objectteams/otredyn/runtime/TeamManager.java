@@ -194,11 +194,18 @@ public class TeamManager implements ITeamManager {
 
 	private void stateChangeForJoinpoint(ITeam t, ITeamManager.TeamStateChange stateChange, IBinding binding,
 			IBoundClass boundClass, IMethod method, int joinpointId) {
-		changeTeamsForJoinpoint(t, binding.getPerTeamId(), joinpointId, stateChange);
+		Set<Integer> joinpointIds = new HashSet<Integer>();
+		collectSubJoinpoints(joinpointId, joinpointIds);
+		for (Integer id : joinpointIds) {
+			changeTeamsForJoinpoint(t, binding.getPerTeamId(), id, stateChange);
+		}
+	}
+	private void collectSubJoinpoints(int joinpointId, Set<Integer> joinpointIds) {
+		joinpointIds.add(joinpointId);
 		List<Integer> subJoinpoints = joinpointToSubJoinpoints.get(joinpointId);
 		if (subJoinpoints != null)
 			for (Integer subJoinpoint : subJoinpoints)
-				stateChangeForJoinpoint(t, stateChange, binding, boundClass, method, subJoinpoint);
+				collectSubJoinpoints(subJoinpoint, joinpointIds);
 	}
 	
 	/**
@@ -379,8 +386,15 @@ public class TeamManager implements ITeamManager {
 		List<Integer> srcCallins = _callinIds.get(srcJoinpointId);
 		for (int s=0; s<srcTeams.size(); s++) {
 			int d = 0; // FIXME(SH): find insertion index based on activation priority!!
-			teams.add(d, srcTeams.get(s));
-			callinIds.add(0, srcCallins.get(s));
+			ITeam srcTeam = srcTeams.get(s);
+			Integer srcCallin = srcCallins.get(s);
+			int idx = teams.indexOf(srcTeam);
+			if (idx != -1 && idx < callinIds.size()) {
+				if (callinIds.get(idx) == srcCallin)
+					continue;
+			}
+			teams.add(d, srcTeam);
+			callinIds.add(0, srcCallin);
 		}
 		// transitively pass the new information down the tree of subJoinpoints:
 		List<Integer> destDests = joinpointToSubJoinpoints.get(destJoinpointId);

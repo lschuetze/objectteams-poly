@@ -362,7 +362,12 @@ public class InheritanceHierarchyOfTeams extends AbstractOTJLDTest {
 			    "        t.activate();\n" +
 			    "        t.hello();\n" +
 			    "        t.world();\n" +
-			    "        System.out.print(t.getAllRoles().length);\n" +
+			    "        System.out.println(t.getAllRoles().length);\n" +
+			    "		 t.deactivate();\n" +
+			    "		 t.hello();\n" +
+			    "        t.activate();\n" +
+			    "        t.hello();\n" +
+			    "        t.world();\n" +
 			    "    }\n" +
 			    "}\n" +
 			    "    \n",
@@ -386,7 +391,8 @@ public class InheritanceHierarchyOfTeams extends AbstractOTJLDTest {
 			    "}\n" +
 			    "    \n"
             },
-            "hello world1");
+            "hello world1\n" +
+            "hellohello world");
     }
 
     // replace callin:
