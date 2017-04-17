@@ -107,7 +107,11 @@ public class RoleSmapGenerator extends AbstractSmapGenerator
 
         Hashtable<ReferenceBinding, Vector<LineInfo>> allLineInfos = provider.getLineInfos();
 		if (!allLineInfos.isEmpty()) {
-	        Set<ReferenceBinding> typesSet = allLineInfos.keySet();
+			// ensure main type (if it exists in source) is first:
+			if (!this._type.isPurelyCopied)
+				getOrCreateFileInfoForType(stratum, getCUType(this._type.binding));
+
+			Set<ReferenceBinding> typesSet = allLineInfos.keySet();
 	        // for testability ensure stable order:
 	        ReferenceBinding[] types = typesSet.toArray(new ReferenceBinding[typesSet.size()]);
 	        Arrays.sort(types, new Comparator<ReferenceBinding>() {

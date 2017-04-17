@@ -106,6 +106,8 @@ public class OTJStratumFlightbonusTest extends AbstractSourceMapGeneratorTest {
         _enclosingTypename = "GUIConnector";
 
     	SmapStratum stratum_role1 = new SmapStratum(ISMAPConstants.OTJ_STRATUM_NAME);
+    	FileInfo fileInfo = stratum_role1.getOrCreateFileInfo("FlightBonusDialog.java", "org/eclipse/objectteams/example/fbapplication/GUIConnector/FlightBonusDialog.java");
+
     	FileInfo fileInfoTSuper = stratum_role1.getOrCreateFileInfo("FlightBonusDialog.java", "org/eclipse/objectteams/example/fbapplication/BonusGUI/FlightBonusDialog.java");
     	LineInfo lineInfo4 = new LineInfo(16, 41); // accessor for field "message"
     	LineInfo lineInfo5 = new LineInfo(11, 42); // class header
@@ -119,7 +121,6 @@ public class OTJStratumFlightbonusTest extends AbstractSourceMapGeneratorTest {
     	fileInfoTSuper.addLineInfo(lineInfo6);
     	fileInfoTSuper.addLineInfo(lineInfo7);
     	
-        FileInfo fileInfo = stratum_role1.getOrCreateFileInfo("FlightBonusDialog.java", "org/eclipse/objectteams/example/fbapplication/GUIConnector/FlightBonusDialog.java");
         LineInfo lineInfo1 = new LineInfo(15,15);
         lineInfo1.setRepeatCount(26);
         LineInfo lineInfo2 = new LineInfo(ISMAPConstants.STEP_INTO_LINENUMBER,ISMAPConstants.STEP_INTO_LINENUMBER);
@@ -245,7 +246,9 @@ public class OTJStratumFlightbonusTest extends AbstractSourceMapGeneratorTest {
 
     	SmapStratum stratum_role1 = new SmapStratum(ISMAPConstants.OTJ_STRATUM_NAME);
         
-        // copy-inherited methods
+    	FileInfo fileInfo1 = stratum_role1.getOrCreateFileInfo("Subscriber.java", "org/eclipse/objectteams/example/fbapplication/FlightBonus/Subscriber.java");
+
+    	// copy-inherited methods
         FileInfo fileInfo2 = stratum_role1.getOrCreateFileInfo("Bonus.java", "org/eclipse/objectteams/example/bonussystem/Bonus.java");
         
         LineInfo lineInfo4 = new LineInfo(39,17); // class header (e.g., _OT$getTeam())
@@ -263,7 +266,6 @@ public class OTJStratumFlightbonusTest extends AbstractSourceMapGeneratorTest {
         fileInfo2.addLineInfo(lineInfo7);
         fileInfo2.addLineInfo(lineInfo8);
 
-        FileInfo fileInfo1 = stratum_role1.getOrCreateFileInfo("Subscriber.java", "org/eclipse/objectteams/example/fbapplication/FlightBonus/Subscriber.java");
         LineInfo lineInfo1 = new LineInfo(7,7); 	// all lines of class Subscriber
         lineInfo1.setRepeatCount(10);
 

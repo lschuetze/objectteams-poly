@@ -124,12 +124,14 @@ public class OTJStratumGenerationTest002 extends AbstractSourceMapGeneratorTest
 		int eleven = fullSource ? 11 : 12;
 
 		SmapStratum stratum_role = new SmapStratum(ISMAPConstants.OTJ_STRATUM_NAME);
+		FileInfo fileInfo2 = stratum_role.getOrCreateFileInfo("SubTeam.java", "copyInheritance/SubTeam.java");
  
         // letters (a) ... indicate the order in which lines are assigned
         // class position is used by ctor, initFields and getTeam
         
         FileInfo fileInfo0 = stratum_role.getOrCreateFileInfo("SuperSuperTeam.java", "copyInheritance/SuperSuperTeam.java");
-		LineInfo lineInfo1_role0 = new LineInfo(4,twelve); // (c) class position (4) mapped to synthetic line 12
+
+        LineInfo lineInfo1_role0 = new LineInfo(4,twelve); // (c) class position (4) mapped to synthetic line 12
         LineInfo lineInfo2_role0 = new LineInfo(8,16); // (e) method roleMethod0 (8..) mapped to synthetic lines 16-17  
         lineInfo2_role0.setRepeatCount(2);
         LineInfo lineInfo3_role0 = new LineInfo(12,18); // (f) method roleMethod1 (12,14,15) mapped to synthetic lines 18,20,21
@@ -151,7 +153,6 @@ public class OTJStratumGenerationTest002 extends AbstractSourceMapGeneratorTest
         fileInfo1.addLineInfo(lineInfo3_role1);
 
         
-        FileInfo fileInfo2 = stratum_role.getOrCreateFileInfo("SubTeam.java", "copyInheritance/SubTeam.java");
         
         LineInfo lineInfo1_role2 = new LineInfo(5,5); // (a) all original lines from SubTeam.RoleA
         lineInfo1_role2.setRepeatCount(6);

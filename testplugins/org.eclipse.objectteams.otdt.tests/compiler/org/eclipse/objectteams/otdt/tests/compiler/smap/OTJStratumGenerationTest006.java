@@ -145,7 +145,9 @@ public class OTJStratumGenerationTest006 extends AbstractSourceMapGeneratorTest
         _enclosingTypename = "SubTeam";
 
     	SmapStratum stratum_role1 = new SmapStratum(ISMAPConstants.OTJ_STRATUM_NAME);
-        FileInfo fileInfo1 = stratum_role1.getOrCreateFileInfo("SuperTeam.java", "calloutOverride/SuperTeam.java");
+    	FileInfo fileInfo2 = stratum_role1.getOrCreateFileInfo("SubTeam.java", "calloutOverride/SubTeam.java");
+
+    	FileInfo fileInfo1 = stratum_role1.getOrCreateFileInfo("SuperTeam.java", "calloutOverride/SuperTeam.java");
         LineInfo lineInfo1 = new LineInfo(4,8);
         LineInfo lineInfo2 = new LineInfo(8,11);
         lineInfo2.setRepeatCount(2);
@@ -156,7 +158,6 @@ public class OTJStratumGenerationTest006 extends AbstractSourceMapGeneratorTest
         fileInfo1.addLineInfo(lineInfo2);
         fileInfo1.addLineInfo(lineInfo3);
 
-        FileInfo fileInfo2 = stratum_role1.getOrCreateFileInfo("SubTeam.java", "calloutOverride/SubTeam.java");
         LineInfo lineInfo4 = new LineInfo(4,4); // RoleA is l4-7
         lineInfo4.setRepeatCount(4);
         LineInfo lineInfo7 = new LineInfo(ISMAPConstants.STEP_INTO_LINENUMBER,ISMAPConstants.STEP_INTO_LINENUMBER);
