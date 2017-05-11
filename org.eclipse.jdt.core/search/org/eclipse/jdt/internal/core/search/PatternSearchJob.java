@@ -89,7 +89,12 @@ public Index[] getIndexes(IProgressMonitor progressMonitor) {
 	Index[] indexes = JavaModelManager.getIndexManager().getIndexes(indexLocations, progressMonitor);
 	this.areIndexesReady = indexes.length == length;
 	return indexes;
-}	
+}
+
+@Override
+public boolean waitNeeded() {
+	return true;
+}
 public String getJobFamily() {
 	return ""; //$NON-NLS-1$
 }

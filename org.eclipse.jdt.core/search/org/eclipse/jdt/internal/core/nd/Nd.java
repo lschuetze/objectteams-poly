@@ -650,7 +650,7 @@ public final class Nd {
 	/**
 	 * Returns the type ID for the given class
 	 */
-	public short getNodeType(Class<? extends NdNode> toQuery) {
+	public short getNodeType(Class<?> toQuery) {
 		return this.fNodeTypeRegistry.getTypeForClass(toQuery);
 	}
 
@@ -705,5 +705,13 @@ public final class Nd {
 
 	public boolean isValidAddress(long address) {
 		return address > 0 && address < (long) getDB().getChunkCount() * Database.CHUNK_SIZE;
+	}
+
+	/**
+	 * Creates a {@link IndexExceptionBuilder} object that collects information about database corruption after it is 
+	 * detected.
+	 */
+	public IndexExceptionBuilder describeProblem() {
+		return this.db.describeProblem();
 	}
 }

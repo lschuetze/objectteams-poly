@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2015 IBM Corporation and others.
+ * Copyright (c) 2000, 2017 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -428,6 +428,8 @@ protected void consumeEnumConstantHeader() {
 		pushOnElementStack(K_TYPE_DELIMITER);
 	}
 	super.consumeEnumConstantHeader();
+	if (triggerRecoveryUponLambdaClosure((Statement) this.astStack[this.astPtr], true) && this.currentElement != null)
+		this.restartRecovery = true;
 }
 protected void consumeEnumConstantHeaderName() {
 	super.consumeEnumConstantHeaderName();
@@ -1574,6 +1576,15 @@ protected boolean isIndirectlyInsideFieldInitialization(){
 	}
 	return false;
 }
+protected boolean isIndirectlyInsideEnumConstantnitialization(){
+	int i = this.elementPtr;
+	while(i > -1) {
+		if(this.elementKindStack[i] == K_ENUM_CONSTANT_DELIMITER)
+			return true;
+		i--;
+	}
+	return false;
+}
 protected boolean isIndirectlyInsideMethod(){
 	int i = this.elementPtr;
 	while(i > -1) {
@@ -1629,7 +1640,9 @@ protected boolean isInsideFieldInitialization(){
 		switch (this.elementKindStack[i]) {
 			case K_TYPE_DELIMITER : return false;
 			case K_METHOD_DELIMITER : return false;
-			case K_FIELD_INITIALIZER_DELIMITER : return true;
+			case K_FIELD_INITIALIZER_DELIMITER : 
+			case K_ENUM_CONSTANT_DELIMITER :
+				return true;
 		}
 		i--;
 	}

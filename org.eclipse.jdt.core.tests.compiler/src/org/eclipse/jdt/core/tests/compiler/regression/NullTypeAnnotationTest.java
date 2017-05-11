@@ -9323,6 +9323,16 @@ public void test483952 () {
 		"	Function function = x -> x;\n" + 
 		"	^^^^^^^^\n" + 
 		"Function is a raw type. References to generic type Function<T,R> should be parameterized\n" + 
+		"----------\n" + 
+		"2. WARNING in test\\Test.java (at line 7)\n" + 
+		"	String @Nullable [] z = test2(function, \"\");\n" + 
+		"	                        ^^^^^^^^^^^^^^^^^^^\n" + 
+		"Type safety: Unchecked invocation test2(Function, String) of the generic method test2(Function<T,T>, T) of type Test\n" + 
+		"----------\n" + 
+		"3. WARNING in test\\Test.java (at line 7)\n" + 
+		"	String @Nullable [] z = test2(function, \"\");\n" + 
+		"	                              ^^^^^^^^\n" + 
+		"Type safety: The expression of type Function needs unchecked conversion to conform to Function<String,String>\n" + 
 		"----------\n");
 }
 public void test484055() {
@@ -15251,6 +15261,134 @@ public void testBug514091() {
 			"	void g1() {\n" +
 			"		SAM<? super Number> sam = (Number @NonNull [] a) -> {};\n" +
 			"		sam.f(new Number[0]);\n" +
+			"	}\n" +
+			"}\n" +
+			"",
+		}, 
+		getCompilerOptions(),
+		""
+	);
+}
+public void testBug514570() {
+	final Map compilerOptions = getCompilerOptions();
+	compilerOptions.put(JavaCore.COMPILER_DOC_COMMENT_SUPPORT, JavaCore.ENABLED);
+	runConformTestWithLibs(
+		new String[] {
+			"test/Test.java",
+			"package test;\n" +
+			"\n" +
+			"import java.util.List;\n" +
+			"\n" +
+			"import org.eclipse.jdt.annotation.NonNull;\n" +
+			"\n" +
+			"public class Test {\n" +
+			"	/**\n" +
+			"	 * {@link #bug()}\n" +
+			"	 */\n" +
+			"	<E, T extends List<@NonNull E>> void bug() {\n" +
+			"	}\n" +
+			"}\n" +
+			"",
+		}, 
+		compilerOptions,
+		""
+	);
+}
+public void testBug514977() {
+	runNegativeTestWithLibs(
+		new String[] {
+			"test/Test.java",
+			"package test;\n" +
+			"\n" +
+			"import org.eclipse.jdt.annotation.DefaultLocation;\n" +
+			"import org.eclipse.jdt.annotation.NonNull;\n" +
+			"import org.eclipse.jdt.annotation.NonNullByDefault;\n" +
+			"\n" +
+			"public class Test {\n" +
+			"	static void nn(@NonNull Object i) {\n" +
+			"		i.hashCode();\n" +
+			"	}\n" +
+			"\n" +
+			"	static void f(@NonNull Integer @NonNull... args) {\n" +
+			"		nn(args);\n" +
+			"		for (Integer s : args) {\n" +
+			"			nn(s);\n" +
+			"		}\n" +
+			"	}\n" +
+			"\n" +
+			"	@NonNullByDefault({ DefaultLocation.ARRAY_CONTENTS, DefaultLocation.PARAMETER })\n" +
+			"	static void g(Integer... args) {\n" +
+			"		nn(args);\n" +
+			"		for (Integer s : args) {\n" +
+			"			nn(s);\n" +
+			"		}\n" +
+			"	}\n" +
+			"\n" +
+			"	public static void main(String[] args) {\n" +
+			"		Integer i = args.length == 0 ? null : 1;\n" +
+			"		Integer[] array = i == null ? null : new Integer[] {i};\n" +
+			"		f(array);\n" +
+			"		f(i);\n" +
+			"		f(1, i);\n" +
+			"		g(array);\n" +
+			"		g(i);\n" +
+			"		g(1, i);\n" +
+			"	}\n" +
+			"}\n" +
+			"",
+		}, 
+		getCompilerOptions(),
+		"----------\n" + 
+		"1. ERROR in test\\Test.java (at line 30)\n" + 
+		"	f(array);\n" + 
+		"	  ^^^^^\n" + 
+		"Null type mismatch: required \'@NonNull Integer @NonNull[]\' but the provided value is inferred as @Nullable\n" + 
+		"----------\n" + 
+		"2. ERROR in test\\Test.java (at line 31)\n" + 
+		"	f(i);\n" + 
+		"	  ^\n" + 
+		"Null type mismatch: required \'@NonNull Integer\' but the provided value is inferred as @Nullable\n" + 
+		"----------\n" + 
+		"3. ERROR in test\\Test.java (at line 32)\n" + 
+		"	f(1, i);\n" + 
+		"	     ^\n" + 
+		"Null type mismatch: required \'@NonNull Integer\' but the provided value is inferred as @Nullable\n" + 
+		"----------\n" + 
+		"4. ERROR in test\\Test.java (at line 33)\n" + 
+		"	g(array);\n" + 
+		"	  ^^^^^\n" + 
+		"Null type mismatch: required \'@NonNull Integer @NonNull[]\' but the provided value is inferred as @Nullable\n" + 
+		"----------\n" + 
+		"5. ERROR in test\\Test.java (at line 34)\n" + 
+		"	g(i);\n" + 
+		"	  ^\n" + 
+		"Null type mismatch: required \'@NonNull Integer\' but the provided value is inferred as @Nullable\n" + 
+		"----------\n" + 
+		"6. ERROR in test\\Test.java (at line 35)\n" + 
+		"	g(1, i);\n" + 
+		"	     ^\n" + 
+		"Null type mismatch: required \'@NonNull Integer\' but the provided value is inferred as @Nullable\n" + 
+		"----------\n"
+	);
+}
+public void testBug515292() {
+	runConformTestWithLibs(
+		new String[] {
+			"test/BoundedByFinal.java",
+			"package test;\n" +
+			"import org.eclipse.jdt.annotation.NonNull;\n" +
+			"import org.eclipse.jdt.annotation.Nullable;\n" +
+			"\n" +
+			"public abstract class BoundedByFinal {\n" +
+			"	abstract <T extends @Nullable String> void setSelection(T[] selectedObjects);\n" +
+			"\n" +
+			"	abstract @NonNull String @NonNull [] toArray1();\n" +
+			"\n" +
+			"	abstract @Nullable String @NonNull [] toArray2();\n" +
+			"\n" +
+			"	void test() {\n" +
+			"		setSelection(toArray1());\n" +
+			"		setSelection(toArray2());\n" +
 			"	}\n" +
 			"}\n" +
 			"",

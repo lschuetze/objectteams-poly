@@ -983,7 +983,9 @@ public abstract class Scope {
 //{ObjectTeams: role type may indeed be final:
 							  if (!typeParameter.hasBaseBound())
 // SH}
-								problemReporter().finalVariableBound(typeVariable, typeRef);
+								if (!environment().usesNullTypeAnnotations() || (superType.tagBits & TagBits.AnnotationNullable) == 0) {
+									problemReporter().finalVariableBound(typeVariable, typeRef);
+								}
 							}
 							break;
 					}

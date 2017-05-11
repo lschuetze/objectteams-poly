@@ -1108,7 +1108,7 @@ public void _test011_problem_categories() {
 		expectedProblemAttributes.put("lambdaSignatureMismatched", new ProblemAttributes(CategorizedProblem.CAT_TYPE));
 		expectedProblemAttributes.put("IllegalArrayOfUnionType", new ProblemAttributes(CategorizedProblem.CAT_TYPE));
 		expectedProblemAttributes.put("IllegalArrayTypeInIntersectionCast", new ProblemAttributes(CategorizedProblem.CAT_TYPE));
-		expectedProblemAttributes.put("ProblemNotAnalysed", new ProblemAttributes(CategorizedProblem.CAT_INTERNAL));
+		expectedProblemAttributes.put("ProblemNotAnalysed", new ProblemAttributes(CategorizedProblem.CAT_UNNECESSARY_CODE));
 //{ObjectTeams: new problems (incomplete list):
         //expectedProblemAttributes.put("", new ProblemAttributes(CategorizedProblem.CAT_UNSPECIFIED));
         expectedProblemAttributes.put("OTJ_RELATED", new ProblemAttributes(CategorizedProblem.CAT_INTERNAL));
