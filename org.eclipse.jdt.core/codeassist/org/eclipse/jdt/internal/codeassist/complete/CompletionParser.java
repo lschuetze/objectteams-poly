@@ -3894,7 +3894,7 @@ protected void consumeToken(int token) {
 	int previous = this.previousToken;
 	int prevIdentifierPtr = this.previousIdentifierPtr;
 
-	if (isInsideMethod() || isInsideFieldInitialization() || isInsideAnnotation()) {
+	if (isInsideMethod() || isInsideFieldInitialization() || isInsideAnnotation() || isInsideEnumConstantnitialization()) {
 		switch(token) {
 			case TokenNameLPAREN:
 				if(previous == TokenNameIdentifier &&
@@ -3954,7 +3954,7 @@ protected void consumeToken(int token) {
 	}
 
 	// if in a method or if in a field initializer
-	if (isInsideMethod() || isInsideFieldInitialization() || isInsideAttributeValue()) {
+	if (isInsideMethod() || isInsideFieldInitialization() || isInsideAttributeValue() || isInsideEnumConstantnitialization()) {
 		switch (token) {
 			case TokenNameDOT:
 				switch (previous) {
