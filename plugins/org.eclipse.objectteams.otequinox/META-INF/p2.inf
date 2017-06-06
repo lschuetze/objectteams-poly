@@ -41,7 +41,8 @@ units.0.instructions.uninstall=\
 	
 instructions.install = \
 	removeJvmArg(jvmArg:-Dot.weaving=otdre); \
-	addJvmArg(jvmArg:-javaagent:${artifact.location}/otequinoxAgent.jar);
+	addJvmArg(jvmArg:-javaagent:${artifact.location}/otequinoxAgent.jar); \
+	addJvmArg(jvmArg:-Dotequinox.weave.thread=base);
 instructions.uninstall = \
-	removeJvmArg(jvmArg:-javaagent:${artifact.location}/otequinoxAgent.jar);
-	
+	removeJvmArg(jvmArg:-javaagent:${artifact.location}/otequinoxAgent.jar); \
+	removeJvmArg(jvmArg:-Dotequinox.weave.thread=base);
