@@ -1,33 +1,33 @@
 platform/eclipse.platform.team.git \
 	bundles/org.eclipse.core.net/fragments/org.eclipse.core.net.win32.x86_64 \
-	S4_6_3_RC4 \
+	R4_7 \
 	org/eclipse/platform org.eclipse.core.net.win32.x86_64 1.1.0
 platform/eclipse.platform.team.git \
 	bundles/org.eclipse.core.net/fragments/org.eclipse.core.net.win32.x86 \
-	S4_6_3_RC4 \
+	R4_7 \
 	org/eclipse/platform org.eclipse.core.net.win32.x86 1.1.0
 platform/eclipse.platform.team.git \
 	bundles/org.eclipse.core.net/fragments/org.eclipse.core.net.linux.x86_64 \
-	S4_6_3_RC4 \
+	R4_7 \
 	org/eclipse/platform org.eclipse.core.net.linux.x86_64 1.2.0
 platform/eclipse.platform.team.git \
 	bundles/org.eclipse.core.net/fragments/org.eclipse.core.net.linux.x86 \
-	S4_6_3_RC4 \
+	R4_7 \
 	org/eclipse/platform org.eclipse.core.net.linux.x86 1.2.0
 platform/eclipse.platform.releng.git \
 	bundles/org.eclipse.releng.tools \
-	S4_6_3_RC4 \
+	R4_7 \
 	org/eclipse/platform org.eclipse.releng.tools 3.9.0
 platform/eclipse.platform.releng.git \
 	bundles/org.eclipse.pde.tools.versioning \
-	S4_6_3_RC4 \
+	R4_7 \
 	org/eclipse/pde org.eclipse.pde.tools.versioning 1.0.200
 platform/eclipse.platform.git \
 	update/org.eclipse.update.core \
-	S4_6_3_RC4 \
+	R4_7 \
 	org/eclipse/platform org.eclipse.update.core 3.2.800 \
 	schema
 equinox/rt.equinox.framework.git \
 	bundles/org.eclipse.osgi.compatibility.plugins \
-	S4_6_3_RC4 \
+	R4_7 \
 	org/eclipse/platform org.eclipse.osgi.compatibility.plugins 1.0.0
