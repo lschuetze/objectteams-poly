@@ -28,6 +28,7 @@
             <arg>--default-key</arg>
             <arg>${gpg.key.id}</arg>
           </gpgArguments>
+          <retryFailedDeploymentCount>5</retryFailedDeploymentCount>
         </configuration>
       </plugin>
       <plugin>
