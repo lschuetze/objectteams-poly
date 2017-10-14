@@ -130,7 +130,12 @@ public class Parser implements TerminalTokens, ParserBasicInformation, Conflicte
 
 	public static String readableName[] = null;
 
+//{ObjectTeams: changed byte to char to support larger grammar:
+/* orig:
 	public static byte rhs[] = null;
+  :giro */
+	public static char rhs[] = null;
+// SH}
 
 	public static int[] reverse_index = null;
 	public static char[] recovery_templates_index = null;
@@ -573,12 +578,13 @@ public class Parser implements TerminalTokens, ParserBasicInformation, Conflicte
 		buildFileOfIntFor(prefix + (++i) + ".rsc", "scope_state", tokens); //$NON-NLS-2$ //$NON-NLS-1$
 		buildFileOfIntFor(prefix + (++i) + ".rsc", "in_symb", tokens); //$NON-NLS-2$ //$NON-NLS-1$
 	
-		byte[] newRhs = buildFileOfByteFor(prefix + (++i) + ".rsc", "rhs", tokens); //$NON-NLS-2$ //$NON-NLS-1$
 //{ObjectTeams: changed byte to char to support larger grammar:
 /* orig:
+		byte[] newRhs = buildFileOfByteFor(prefix + (++i) + ".rsc", "rhs", tokens); //$NON-NLS-2$ //$NON-NLS-1$
 		buildFileOfByteFor(prefix + (++i) + ".rsc", "term_check", tokens); //$NON-NLS-2$ //$NON-NLS-1$
 		buildFileOfByteFor(prefix + (++i) + ".rsc", "scope_la", tokens); //$NON-NLS-2$ //$NON-NLS-1$
   :giro */
+		char[] newRhs = buildFileOfIntFor(prefix + (++i) + ".rsc", "rhs", tokens); //$NON-NLS-2$ //$NON-NLS-1$
 		buildFileOfIntFor(prefix + (++i) + ".rsc", "term_check", tokens); //$NON-NLS-2$ //$NON-NLS-1$
 		buildFileOfIntFor(prefix + (++i) + ".rsc", "scope_la", tokens); //$NON-NLS-2$ //$NON-NLS-1$
 // SH}
@@ -678,12 +684,13 @@ public class Parser implements TerminalTokens, ParserBasicInformation, Conflicte
 		scope_state = readTable(prefix + (++i) + ".rsc"); //$NON-NLS-1$
 		in_symb = readTable(prefix + (++i) + ".rsc"); //$NON-NLS-1$
 	
-		rhs = readByteTable(prefix + (++i) + ".rsc"); //$NON-NLS-1$
 //{ObjectTeams: changed byte to char to support larger grammar:
 /* orig:
+		rhs = readByteTable(prefix + (++i) + ".rsc"); //$NON-NLS-1$
 		term_check = readByteTable(prefix + (++i) + ".rsc"); //$NON-NLS-1$
 		scope_la = readByteTable(prefix + (++i) + ".rsc"); //$NON-NLS-1$
   :giro */
+		rhs = readTable(prefix + (++i) + ".rsc"); //$NON-NLS-1$
 		term_check = readTable(prefix + (++i) + ".rsc"); //$NON-NLS-1$
 		scope_la = readTable(prefix + (++i) + ".rsc"); //$NON-NLS-1$
 // SH}
