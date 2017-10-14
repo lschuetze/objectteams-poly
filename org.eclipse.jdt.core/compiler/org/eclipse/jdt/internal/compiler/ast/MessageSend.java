@@ -72,6 +72,7 @@ import static org.eclipse.objectteams.otdt.internal.core.compiler.lookup.Synthet
 import java.util.HashMap;
 
 import org.eclipse.jdt.core.compiler.CharOperation;
+import org.eclipse.jdt.core.compiler.IProblem;
 import org.eclipse.jdt.internal.compiler.ASTVisitor;
 import org.eclipse.jdt.internal.compiler.ast.AbstractMethodDeclaration.WrapperKind;
 import org.eclipse.jdt.internal.compiler.classfmt.ClassFileConstants;
@@ -878,6 +879,7 @@ public TypeBinding resolveType(BlockScope scope) {
 	  }
   // orig:
 		if (this.actualReceiverType instanceof InferenceVariable) {
+			scope.referenceContext().tagAsHavingIgnoredMandatoryErrors(IProblem.UndefinedMethod);
 			return null; // not yet ready for resolving
 		}
   /*
@@ -1261,8 +1263,10 @@ public TypeBinding resolveType(BlockScope scope) {
 		}
 	} else {
 		// static message invoked through receiver? legal but unoptimal (optional warning).
-		if (!(this.receiver.isImplicitThis() || this.receiver.isSuper() || this.receiverIsType)) {
-			scope.problemReporter().nonStaticAccessToStaticMethod(this, this.binding);
+		if (this.binding.declaringClass.isInterface() && !((isTypeAccess() || this.receiver.isImplicitThis()) && TypeBinding.equalsEquals(this.binding.declaringClass, this.actualReceiverType))) {
+			scope.problemReporter().nonStaticOrAlienTypeReceiver(this, this.binding);
+		} else if (!(this.receiver.isImplicitThis() || this.receiver.isSuper() || this.receiverIsType)) {
+		 	scope.problemReporter().nonStaticAccessToStaticMethod(this, this.binding);
 		}
 		if (!this.receiver.isImplicitThis() && TypeBinding.notEquals(this.binding.declaringClass, this.actualReceiverType)) {
 			scope.problemReporter().indirectAccessToStaticMethod(this, this.binding);
