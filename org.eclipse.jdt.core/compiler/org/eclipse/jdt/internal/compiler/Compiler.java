@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2016 IBM Corporation and others.
+ * Copyright (c) 2000, 2017 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -26,27 +26,13 @@ import org.eclipse.jdt.core.compiler.CategorizedProblem;
 import org.eclipse.jdt.core.compiler.CharOperation;
 import org.eclipse.jdt.core.compiler.CompilationProgress;
 import org.eclipse.jdt.core.compiler.IProblem;
-import org.eclipse.jdt.internal.compiler.ast.CompilationUnitDeclaration;
-import org.eclipse.jdt.internal.compiler.ast.ImportReference;
-import org.eclipse.jdt.internal.compiler.env.AccessRestriction;
-import org.eclipse.jdt.internal.compiler.env.IBinaryType;
-import org.eclipse.jdt.internal.compiler.env.ICompilationUnit;
-import org.eclipse.jdt.internal.compiler.env.INameEnvironment;
-import org.eclipse.jdt.internal.compiler.env.ISourceType;
-import org.eclipse.jdt.internal.compiler.impl.CompilerOptions;
-import org.eclipse.jdt.internal.compiler.impl.CompilerStats;
-import org.eclipse.jdt.internal.compiler.impl.ITypeRequestor;
-import org.eclipse.jdt.internal.compiler.impl.ReferenceContext;
-import org.eclipse.jdt.internal.compiler.lookup.LookupEnvironment;
-import org.eclipse.jdt.internal.compiler.lookup.PackageBinding;
-import org.eclipse.jdt.internal.compiler.lookup.ReferenceBinding;
-import org.eclipse.jdt.internal.compiler.lookup.SourceTypeCollisionException;
-import org.eclipse.jdt.internal.compiler.parser.Parser;
-import org.eclipse.jdt.internal.compiler.problem.AbortCompilation;
-import org.eclipse.jdt.internal.compiler.problem.AbortCompilationUnit;
-import org.eclipse.jdt.internal.compiler.problem.DefaultProblem;
-import org.eclipse.jdt.internal.compiler.problem.ProblemReporter;
-import org.eclipse.jdt.internal.compiler.problem.ProblemSeverities;
+import org.eclipse.jdt.internal.compiler.env.*;
+import org.eclipse.jdt.internal.compiler.impl.*;
+import org.eclipse.jdt.internal.compiler.ast.*;
+import org.eclipse.jdt.internal.compiler.classfmt.ClassFileConstants;
+import org.eclipse.jdt.internal.compiler.lookup.*;
+import org.eclipse.jdt.internal.compiler.parser.*;
+import org.eclipse.jdt.internal.compiler.problem.*;
 import org.eclipse.jdt.internal.compiler.util.Messages;
 import org.eclipse.jdt.internal.compiler.util.Util;
 import org.eclipse.objectteams.otdt.internal.core.compiler.control.Config;
@@ -357,7 +343,8 @@ public class Compiler implements ITypeRequestor, ProblemSeverities {
 //			new Exception("TRACE BINARY").printStackTrace(System.out);
 //		    System.out.println();
 		}
-		this.lookupEnvironment.createBinaryTypeFrom(binaryType, packageBinding, accessRestriction);
+		LookupEnvironment env = packageBinding.environment;
+		env.createBinaryTypeFrom(binaryType, packageBinding, accessRestriction);
 	}
 
 	/**
@@ -499,6 +486,10 @@ public class Compiler implements ITypeRequestor, ProblemSeverities {
 			// build and record parsed units
 			reportProgress(Messages.compilation_beginningToCompile);
 
+			if (this.options.complianceLevel >= ClassFileConstants.JDK9) {
+				// in Java 9 the compiler must never ask the oracle for a module that is contained in the input units:
+				sortModuleDeclarationsFirst(sourceUnits);
+			}
 			if (this.annotationProcessorManager == null) {
 				beginToCompile(sourceUnits);
 			} else {
@@ -544,6 +535,18 @@ public class Compiler implements ITypeRequestor, ProblemSeverities {
 					Messages.bind(Messages.compilation_unit, String.valueOf(this.totalUnits)));
 			}
 		}
+	}
+
+	private void sortModuleDeclarationsFirst(ICompilationUnit[] sourceUnits) {
+		Arrays.sort(sourceUnits, (u1, u2) -> {
+			char[] fn1 = u1.getFileName();
+			char[] fn2 = u2.getFileName();
+			boolean isMod1 = CharOperation.endsWith(fn1, TypeConstants.MODULE_INFO_FILE_NAME) || CharOperation.endsWith(fn1, TypeConstants.MODULE_INFO_CLASS_NAME);
+			boolean isMod2 = CharOperation.endsWith(fn2, TypeConstants.MODULE_INFO_FILE_NAME) || CharOperation.endsWith(fn2, TypeConstants.MODULE_INFO_CLASS_NAME);
+			if (isMod1 == isMod2)
+				return 0;
+			return isMod1 ? -1 : 1;
+		});
 	}
 
 	class APTProblem {
