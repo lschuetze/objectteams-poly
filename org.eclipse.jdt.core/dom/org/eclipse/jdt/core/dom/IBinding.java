@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2014 IBM Corporation and others.
+ * Copyright (c) 2000, 2017 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -90,6 +90,16 @@ public interface IBinding {
 	 */
 	public static final int MEMBER_VALUE_PAIR = 6;
 
+	/**
+	 * Kind constant (value 7) indicating a module binding (added in JLS9 API).
+	 * Bindings of this kind can be safely cast to <code>IModuleBinding</code>.
+	 *
+	 * @see #getKind()
+	 * @see IModuleBinding
+	 * @since 3.14
+	 */
+	public static final int MODULE = 7;
+
 //{ObjectTeams: Binding for method mappings.
 	/**
 	 * Kind constant (value 7) indicating a callin/callout method mapping.
@@ -98,7 +108,7 @@ public interface IBinding {
 	 * @see #getKind()
 	 * @see IMethodMappingBinding
 	 */
-	public static final int METHOD_MAPPING = 7;
+	public static final int METHOD_MAPPING = 8;
 //mkr}
 
 	/**
@@ -136,7 +146,8 @@ public interface IBinding {
 	 * 	<code>VARIABLE</code>,
 	 * 	<code>METHOD</code>,
 	 * 	<code>ANNOTATION</code>,
-	 * or <code>MEMBER_VALUE_PAIR</code>.
+	 *  <code>MEMBER_VALUE_PAIR</code>, or
+	 * <code>MODULE</code>.
 	 * <p>
 	 * Note that additional kinds might be added in the
 	 * future, so clients should not assume this list is exhaustive and

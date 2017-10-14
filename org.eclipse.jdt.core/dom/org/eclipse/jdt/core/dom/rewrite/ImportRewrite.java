@@ -317,6 +317,9 @@ public final class ImportRewrite {
 	private static final char BASE_PREFIX= 'b';
 // SH}
 
+	/** @deprecated using deprecated code */
+	private static final int JLS8_INTERNAL = AST.JLS8;
+
 	private final ImportRewriteContext defaultContext;
 
 	private final ICompilationUnit compilationUnit;
@@ -1369,7 +1372,7 @@ public final class ImportRewrite {
 
 		CompilationUnit usedAstRoot= this.astRoot;
 		if (usedAstRoot == null) {
-			ASTParser parser= ASTParser.newParser(AST.JLS8);
+			ASTParser parser= ASTParser.newParser(AST.JLS9);
 			parser.setSource(this.compilationUnit);
 			parser.setFocalPosition(0); // reduced AST
 			parser.setResolveBindings(false);
@@ -1392,7 +1395,7 @@ public final class ImportRewrite {
 			computer.addImport(isStatic, isBase, qualifiedName);
 // SH}
 		}
-
+	
 		for (String removedImport : this.removedImports) {
 			boolean isStatic = STATIC_PREFIX == removedImport.charAt(0);
 			String qualifiedName = removedImport.substring(1);
@@ -1647,7 +1650,7 @@ public final class ImportRewrite {
 	private Type getArrayType(Type elementType, AST ast, ImportRewriteContext context, ITypeBinding normalizedBinding, TypeLocation location) {
 		int noDimensions = normalizedBinding.getDimensions();
 		ArrayType arrayType = ast.newArrayType(elementType, noDimensions);
-		if (ast.apiLevel() >= AST.JLS8) {
+		if (ast.apiLevel() >= JLS8_INTERNAL) {
 			for (int i = 0; i < noDimensions; i++) {
 				IAnnotationBinding[] typeAnnotations = normalizedBinding.getTypeAnnotations();
 				if (typeAnnotations.length > 0) {

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2016 IBM Corporation and others.
+ * Copyright (c) 2000, 2017 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -898,6 +898,62 @@ public abstract class ASTNode {
 	 */
 	public static final int TYPE_METHOD_REFERENCE = 92;
 
+	/**
+	 * Node type constant indicating a node of type
+	 * <code>ModuleDeclaration</code>.
+	 * @see ModuleDeclaration
+	 * @since 3.14
+	 */
+	public static final int MODULE_DECLARATION = 93;
+
+	/**
+	 * Node type constant indicating a node of type
+	 * <code>RequiresDirective</code>.
+	 * @see RequiresDirective
+	 * @since 3.14
+	 */
+	public static final int REQUIRES_DIRECTIVE = 94;
+	
+	/**
+	 * Node type constant indicating a node of type
+	 * <code>ExportsDirective</code>.
+	 * @see ExportsDirective
+	 * @since 3.14
+	 */
+	public static final int EXPORTS_DIRECTIVE = 95;
+
+	/**
+	 * Node type constant indicating a node of type
+	 * <code>OpensDirective</code>.
+	 * @see OpensDirective
+	 * @since 3.14
+	 */
+	public static final int OPENS_DIRECTIVE = 96;
+	
+	/**
+	 * Node type constant indicating a node of type
+	 * <code>UsesDirective</code>.
+	 * @see UsesDirective
+	 * @since 3.14
+	 */
+	public static final int USES_DIRECTIVE = 97;
+
+	/**
+	 * Node type constant indicating a node of type
+	 * <code>ProvidesDirective</code>.
+	 * @see ProvidesDirective
+	 * @since 3.14
+	 */
+	public static final int PROVIDES_DIRECTIVE = 98;
+
+	/**
+	 * Node type constant indicating a node of type
+	 * <code>ModuleModifier</code>.
+	 * @see ModuleModifier
+	 * @since 3.14
+	 */
+	public static final int MODULE_MODIFIER = 99;
+
 //{ObjectTeams: required OT specific node type constants added
 
 	/**
@@ -905,93 +961,93 @@ public abstract class ASTNode {
 	 * <code>MethodSpec</code>.
 	 * @see MethodSpec
 	 */
-	public static final int METHOD_SPEC = 93;
+	public static final int METHOD_SPEC = 100;
 
 	/**
 	 * Node type constant indicating a node of type
 	 * <code>CallinMappingDeclaration</code>.
 	 * @see CallinMappingDeclaration
 	 */
-	public static final int CALLIN_MAPPING_DECLARATION = 94;
+	public static final int CALLIN_MAPPING_DECLARATION = 101;
 
 	/**
 	 * Node type constant indicating a node of type
 	 * <code>CalloutMappingDeclaration</code>.
 	 * @see CalloutMappingDeclaration
 	 */
-	public static final int CALLOUT_MAPPING_DECLARATION = 95;
+	public static final int CALLOUT_MAPPING_DECLARATION = 102;
 
 	/**
 	 * Node type constant indicating a node of type
 	 * <code>LiftingType</code>.
 	 * @see LiftingType
 	 */
-	public static final int LIFTING_TYPE = 96;
+	public static final int LIFTING_TYPE = 103;
 
 	/**
 	 * Node type constant indicating a node of type
 	 * <code>WithinStatement</code>.
 	 * @see WithinStatement
 	 */
-	public static final int WITHIN_STATEMENT = 97;
+	public static final int WITHIN_STATEMENT = 104;
 
 	/**
 	 * Node type constant indicating a node of type
 	 * <code>BaseConstructorMessageSend</code>.
 	 * @see BaseConstructorInvocation
 	 */
-	public static final int BASE_CONSTRUCTOR_INVOCATION = 98;
+	public static final int BASE_CONSTRUCTOR_INVOCATION = 105;
 
     /**
      * Node type constant indicating a node of type
      * <code>ParameterMapping</code>.
      * @see ParameterMapping
      */
-    public static final int PARAMETER_MAPPING = 99;
+    public static final int PARAMETER_MAPPING = 106;
 
     /**
      * Node type constant indicating a node of type
      * <code>BaseCallMessageSend</code>.
      * @see BaseCallMessageSend
      */
-     public static final int BASE_CALL_MESSAGE_SEND = 100;
+     public static final int BASE_CALL_MESSAGE_SEND = 107;
 
      /**
  	 * Node type constant indicating a node of type
  	 * <code>FieldAccessSpec</code>.
  	 * @see FieldAccessSpec
  	 */
- 	public static final int FIELD_ACCESS_SPEC = 101;
+ 	public static final int FIELD_ACCESS_SPEC = 108;
 
     /**
      * Node type constant indicating a node of type
      * <code>RoleTypeDelaration</code>.
      * @see RoleTypeDeclaration
      */
-    public static final int ROLE_TYPE_DECLARATION = 102;
+    public static final int ROLE_TYPE_DECLARATION = 109;
 
     /**
      * Node type constant indicating a node of type
      * <code>TSuperMessageSend</code>.
      * @see TSuperMessageSend
      */
-     public static final int TSUPER_MESSAGE_SEND = 103;
+     public static final int TSUPER_MESSAGE_SEND = 110;
 
      /**
       * Node type constant indicating a node of type
       * <code>TSuperCallMessageSend</code>.
       * @see TSuperMessageSend
       */
-      public static final int TSUPER_CONSTRUCTOR_INVOCATION = 104;
+      public static final int TSUPER_CONSTRUCTOR_INVOCATION = 111;
 
-      public static final int TYPE_ANCHOR = 105;
+      public static final int TYPE_ANCHOR = 112;
 
-      public static final int PRECEDENCE_DECLARATION = 106;
+      public static final int PRECEDENCE_DECLARATION = 113;
 
-      public static final int GUARD_PREDICATE_DECLARATION = 107;
+      public static final int GUARD_PREDICATE_DECLARATION = 114;
 
       /** @since 1.3.1 */
-      public static final int METHOD_BINDING_OPERATOR = 108;
+      public static final int METHOD_BINDING_OPERATOR = 115;
 //gbr}
 
 	/**
@@ -1062,6 +1118,8 @@ public abstract class ASTNode {
 				return EnumConstantDeclaration.class;
 			case ENUM_DECLARATION :
 				return EnumDeclaration.class;
+			case EXPORTS_DIRECTIVE :
+				return ExportsDirective.class;
 			case EXPRESSION_METHOD_REFERENCE :
 				return ExpressionMethodReference.class;
 			case EXPRESSION_STATEMENT :
@@ -1108,6 +1166,10 @@ public abstract class ASTNode {
 				return MethodRefParameter.class;
 			case MODIFIER :
 				return Modifier.class;
+			case MODULE_DECLARATION :
+				return ModuleDeclaration.class;
+			case MODULE_MODIFIER :
+				return ModuleModifier.class;
 			case NAME_QUALIFIED_TYPE :
 				return NameQualifiedType.class;
 			case NORMAL_ANNOTATION :
@@ -1116,6 +1178,8 @@ public abstract class ASTNode {
 				return NullLiteral.class;
 			case NUMBER_LITERAL :
 				return NumberLiteral.class;
+			case OPENS_DIRECTIVE :
+				return OpensDirective.class;
 			case PACKAGE_DECLARATION :
 				return PackageDeclaration.class;
 			case PARAMETERIZED_TYPE :
@@ -1128,10 +1192,14 @@ public abstract class ASTNode {
 				return PrefixExpression.class;
 			case PRIMITIVE_TYPE :
 				return PrimitiveType.class;
+			case PROVIDES_DIRECTIVE :
+				return ProvidesDirective.class;
 			case QUALIFIED_NAME :
 				return QualifiedName.class;
 			case QUALIFIED_TYPE :
 				return QualifiedType.class;
+			case REQUIRES_DIRECTIVE :
+				return RequiresDirective.class;
 			case RETURN_STATEMENT :
 				return ReturnStatement.class;
 			case SIMPLE_NAME :
@@ -1180,6 +1248,8 @@ public abstract class ASTNode {
 				return TypeParameter.class;
 			case UNION_TYPE :
 				return UnionType.class;
+			case USES_DIRECTIVE :
+				return UsesDirective.class;
 			case VARIABLE_DECLARATION_EXPRESSION :
 				return VariableDeclarationExpression.class;
 			case VARIABLE_DECLARATION_FRAGMENT :
@@ -2096,18 +2166,33 @@ public abstract class ASTNode {
 	 * @since 3.10
 	 */
 	final void unsupportedIn2_3_4() {
-		if (this.ast.apiLevel < AST.JLS8) {
+		if (this.ast.apiLevel < AST.JLS8_INTERNAL) {
 			throw new UnsupportedOperationException("Operation only supported in JLS8 and later AST"); //$NON-NLS-1$
 		}
 	}
-	
+
+	/**
+     * Checks that this AST operation is not used when
+     * building JLS2, JLS3, JLS4 or JLS8 level ASTs.
+     * <p>
+     * Use this method to prevent access to new properties that have been added in JLS9.
+     * </p>
+     *
+	 * @exception UnsupportedOperationException if this operation is used below JLS9
+	 * @since 3.14
+	 */
+	final void unsupportedBelow9() {
+		if (this.ast.apiLevel < AST.JLS9_INTERNAL) {
+			throw new UnsupportedOperationException("Operation only supported in JLS9 and later AST"); //$NON-NLS-1$
+		}
+	}
 	/**
      * Checks that this AST operation is only used when
      * building JLS2 level ASTs.
      * <p>
      * Use this method to prevent access to deprecated properties (deprecated in JLS3).
      * </p>
-     * 
+     *
 	 * @exception UnsupportedOperationException if this operation is used in an AST later than JLS2
 	 * @since 3.0
      */
@@ -2130,7 +2215,7 @@ public abstract class ASTNode {
      */
 	// In API Javadocs, add: * @deprecated In the JLS8 API, this method is replaced by {@link #replacement()}.
 	final void supportedOnlyIn2_3_4() {
-	  if (this.ast.apiLevel >= AST.JLS8) {
+	  if (this.ast.apiLevel >= AST.JLS8_INTERNAL) {
 	  	throw new UnsupportedOperationException("Operation only supported in JLS2, JLS3 and JLS4 ASTs"); //$NON-NLS-1$
 	  }
 	}
