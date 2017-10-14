@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2016 IBM Corporation and others.
+ * Copyright (c) 2000, 2017 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -14,6 +14,7 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.core.search.matching;
 
+import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -37,11 +38,14 @@ import org.eclipse.jdt.core.IJavaModelStatusConstants;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IMember;
 import org.eclipse.jdt.core.IMethod;
+import org.eclipse.jdt.core.IModuleDescription;
 import org.eclipse.jdt.core.IOpenable;
+import org.eclipse.jdt.core.IOrdinaryClassFile;
 import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.ISourceRange;
 import org.eclipse.jdt.core.IType;
+import org.eclipse.jdt.core.ITypeRoot;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.Signature;
 import org.eclipse.jdt.core.compiler.*;
@@ -75,6 +79,7 @@ import org.eclipse.jdt.internal.core.JavaModelManager;
 import org.eclipse.jdt.internal.core.JavaProject;
 import org.eclipse.jdt.internal.core.LambdaFactory;
 import org.eclipse.jdt.internal.core.LocalVariable;
+import org.eclipse.jdt.internal.core.ModularClassFile;
 import org.eclipse.jdt.internal.core.NameLookup;
 import org.eclipse.jdt.internal.core.Openable;
 import org.eclipse.jdt.internal.core.PackageFragment;
@@ -307,24 +312,27 @@ public static IBinaryType classFileReader(IType type) {
 		if (!root.isArchive())
 			return Util.newClassFileReader(((JavaElement) type).resource());
 
-		ZipFile zipFile = null;
-		try {
-			IPath zipPath = root.getPath();
-			if (JavaModelManager.ZIP_ACCESS_VERBOSE)
-				System.out.println("(" + Thread.currentThread() + ") [MatchLocator.classFileReader()] Creating ZipFile on " + zipPath); //$NON-NLS-1$	//$NON-NLS-2$
-			zipFile = manager.getZipFile(zipPath);
+		String rootPath = root.getPath().toOSString();
+		if (org.eclipse.jdt.internal.compiler.util.Util.isJrt(rootPath)) {
 			String classFileName = classFile.getElementName();
 			String path = Util.concatWith(pkg.names, classFileName, '/');
-			return ClassFileReader.read(zipFile, path);
-		} finally {
-			manager.closeZipFile(zipFile);
+			return ClassFileReader.readFromJrt(new File(rootPath), null, path);
+		} else {
+			ZipFile zipFile = null;
+			try {
+				IPath zipPath = root.getPath();
+				if (JavaModelManager.ZIP_ACCESS_VERBOSE)
+					System.out.println("(" + Thread.currentThread() + ") [MatchLocator.classFileReader()] Creating ZipFile on " + zipPath); //$NON-NLS-1$	//$NON-NLS-2$
+				zipFile = manager.getZipFile(zipPath);
+				String classFileName = classFile.getElementName();
+				String path = Util.concatWith(pkg.names, classFileName, '/');
+				return ClassFileReader.read(zipFile, path);
+			} finally {
+				manager.closeZipFile(zipFile);
+			}
 		}
-	} catch (ClassFormatException e) {
+	} catch (ClassFormatException | CoreException | IOException e) {
 		// invalid class file: return null
-	} catch (CoreException e) {
-		// cannot read class file: return null
-	} catch (IOException e) {
-		// cannot read class file: return null
 	}
 	return null;
 }
@@ -820,6 +828,8 @@ protected IJavaElement createImportHandle(ImportReference importRef) {
 	if (openable instanceof CompilationUnit)
 		return ((CompilationUnit) openable).getImport(new String(importName));
 
+	if (openable instanceof ModularClassFile)
+		return openable;
 	// binary types do not contain import statements so just answer the top-level type as the element
 	IType binaryType = ((ClassFile) openable).getType();
 	String typeName = binaryType.getElementName();
@@ -855,7 +865,7 @@ protected IType createTypeHandle(String simpleTypeName) {
 
 	// type name may be null for anonymous (see bug https://bugs.eclipse.org/bugs/show_bug.cgi?id=164791)
 	String classFileName = simpleTypeName.length() == 0 ? binaryTypeQualifiedName : simpleTypeName;
-	IClassFile classFile = binaryType.getPackageFragment().getClassFile(classFileName + SuffixConstants.SUFFIX_STRING_class);
+	IOrdinaryClassFile classFile = binaryType.getPackageFragment().getOrdinaryClassFile(classFileName + SuffixConstants.SUFFIX_STRING_class);
 	return classFile.getType();
 }
 //{ObjectTeams: accessible for ReferenceToTeamLocator:
@@ -1012,7 +1022,7 @@ protected TypeBinding getType(Object typeKey, char[] typeName) {
 	TypeBinding typeBinding = this.unitScope.getType(compoundName, compoundName.length);
 	this.unitScopeTypeBinding = typeBinding; //cache.
 	if (typeBinding == null || !typeBinding.isValidBinding()) {
-		typeBinding = this.lookupEnvironment.getType(compoundName);
+		typeBinding = this.lookupEnvironment.getType(compoundName, this.unitScope.module());
 	}
 	this.bindings.put(typeKey, typeBinding);
 	return typeBinding != null && typeBinding.isValidBinding() ? typeBinding : null;
@@ -1194,6 +1204,13 @@ private MethodBinding getMethodBinding0(MethodPattern methodPattern) {
 	this.bindings.put(methodPattern, result != null ? result : new ProblemMethodBinding(methodPattern.selector, null, ProblemReasons.NotFound));
 	return result;
 }
+private boolean matchParams(MethodPattern methodPattern, int index, TypeBinding binding) {
+	char[] qualifier = CharOperation.concat(methodPattern.parameterQualifications[index], methodPattern.parameterSimpleNames[index], '.');
+	int offset = (qualifier.length > 0 && qualifier[0] == '*') ? 1 : 0;
+	String s1 = new String(qualifier, offset, qualifier.length - offset);
+	char[] s2 = CharOperation.concat(binding.qualifiedPackageName(), binding.qualifiedSourceName(), '.');
+	return new String(s2).endsWith(s1);
+}
 
 private MethodBinding getMethodBinding(MethodPattern methodPattern, TypeBinding declaringTypeBinding) {
 	MethodBinding result;
@@ -1214,7 +1231,8 @@ private MethodBinding getMethodBinding(MethodPattern methodPattern, TypeBinding 
 		boolean found = false;
 		if (methodParameters != null && paramLength == paramTypeslength) {
 			for (int p=0; p<paramLength; p++) {
-				if (CharOperation.equals(methodParameters[p].sourceName(), parameterTypes[p])) {
+				TypeBinding parameter = methodParameters[p];
+				if (matchParams(methodPattern, p, parameter)) {
 					// param erasure match
 					found = true;
 				} else {
@@ -1763,6 +1781,8 @@ public SearchMatch newDeclarationMatch(
 			return new PackageDeclarationMatch(element, accuracy, offset, length, participant, resource);
 		case IJavaElement.TYPE_PARAMETER:
 			return new TypeParameterDeclarationMatch(element, accuracy, offset, length, participant, resource);
+		case IJavaElement.JAVA_MODULE:
+			return new ModuleDeclarationMatch(binding == null ? element : ((JavaElement) element).resolved(binding), accuracy, offset, length, participant, resource);
 		default:
 			return null;
 	}
@@ -1869,7 +1889,7 @@ public PackageReferenceMatch newPackageReferenceMatch(
 		ASTNode reference) {
 	SearchParticipant participant = getParticipant();
 	IResource resource = this.currentPossibleMatch.resource;
-	boolean insideDocComment = (reference.bits & ASTNode.InsideJavadoc) != 0;
+	boolean insideDocComment = reference != null && (reference.bits & ASTNode.InsideJavadoc) != 0;
 	return new PackageReferenceMatch(enclosingElement, accuracy, offset, length, insideDocComment, participant, resource);
 }
 
@@ -1895,7 +1915,7 @@ public TypeReferenceMatch newTypeReferenceMatch(
 		ASTNode reference) {
 	SearchParticipant participant = getParticipant();
 	IResource resource = this.currentPossibleMatch.resource;
-	boolean insideDocComment = (reference.bits & ASTNode.InsideJavadoc) != 0;
+	boolean insideDocComment = reference != null && (reference.bits & ASTNode.InsideJavadoc) != 0;
 	if (enclosingBinding != null)
 		enclosingElement = ((JavaElement) enclosingElement).resolved(enclosingBinding);
 	return new TypeReferenceMatch(enclosingElement, accuracy, offset, length, insideDocComment, participant, resource);
@@ -1909,6 +1929,28 @@ public TypeReferenceMatch newTypeReferenceMatch(
 	return newTypeReferenceMatch(enclosingElement, enclosingBinding, accuracy, reference.sourceStart, reference.sourceEnd-reference.sourceStart+1, reference);
 }
 
+public ModuleReferenceMatch newModuleReferenceMatch(
+		IJavaElement enclosingElement,
+		Binding enclosingBinding,
+		int accuracy,
+		int offset,
+		int length,
+		ASTNode reference) {
+	SearchParticipant participant = getParticipant();
+	IResource resource = this.currentPossibleMatch.resource;
+	boolean insideDocComment = reference != null ? (reference.bits & ASTNode.InsideJavadoc) != 0 : false;
+	if (enclosingBinding != null)
+		enclosingElement = ((JavaElement) enclosingElement).resolved(enclosingBinding);
+	return new ModuleReferenceMatch(enclosingElement, accuracy, offset, length, insideDocComment, participant, resource);
+}
+
+public ModuleReferenceMatch newModuleReferenceMatch(
+		IJavaElement enclosingElement,
+		Binding enclosingBinding,
+		int accuracy,
+		ASTNode reference) {
+	return newModuleReferenceMatch(enclosingElement, enclosingBinding, accuracy, reference.sourceStart, reference.sourceEnd-reference.sourceStart+1, reference);
+}
 /**
  * Add the possibleMatch to the loop
  *  ->  build compilation unit declarations, their bindings and record their results.
@@ -1935,7 +1977,11 @@ protected boolean parseAndBuildBindings(PossibleMatch possibleMatch, boolean mus
 		CompilationResult unitResult = new CompilationResult(possibleMatch, 1, 1, this.options.maxProblemsPerUnit);
 		CompilationUnitDeclaration parsedUnit = this.parser.dietParse(possibleMatch, unitResult);
 		if (parsedUnit != null) {
-			if (!parsedUnit.isEmpty()) {
+			if (parsedUnit.isModuleInfo()) {
+				if (mustResolve) {
+					this.lookupEnvironment.buildTypeBindings(parsedUnit, null /*no access restriction*/);
+				}				
+			} else if (!parsedUnit.isEmpty()) {
 				if (mustResolve) {
 					this.lookupEnvironment.buildTypeBindings(parsedUnit, null /*no access restriction*/);
 				}
@@ -2001,8 +2047,20 @@ protected void process(PossibleMatch possibleMatch, boolean bindingsWereCreated)
 						this.patternLocator.mayBeGeneric = mayBeGeneric;
 					}
 				}
+			} else if (this.currentPossibleMatch.openable instanceof ModularClassFile &&
+					unit.moduleDeclaration == null) { // no source
+				boolean mayBeGeneric = this.patternLocator.mayBeGeneric;
+				this.patternLocator.mayBeGeneric = false; // there's no longer generic in class files
+				try {
+					new ModularClassFileMatchLocator().locateMatches(this, (ModularClassFile) this.currentPossibleMatch.openable);
+				}
+				finally {
+					this.patternLocator.mayBeGeneric = mayBeGeneric;
+				}
+				return;
 			}
-			return;
+			if (!unit.isModuleInfo())
+				return;
 		}
 		if (hasAlreadyDefinedType(unit)) return; // skip type has it is hidden so not visible
 
@@ -2036,6 +2094,13 @@ protected void process(PossibleMatch possibleMatch, boolean bindingsWereCreated)
   :giro */
 				Dependencies.ensureState(unit, ITranslationStates.STATE_LATE_ELEMENTS_COPIED);
 // km (based on SH,carp)}
+			} else if (unit.isModuleInfo()) {
+				if (BasicSearchEngine.VERBOSE)
+					System.out.println("Resolving " + this.currentPossibleMatch.openable.toStringWithAncestors()); //$NON-NLS-1$
+				this.lookupEnvironment.unitBeingCompleted = unit;
+				if (unit.scope != null && unit.moduleDeclaration != null) {
+					unit.moduleDeclaration.resolveTypeDirectives(unit.scope);
+				}
 			}
 		}
 		reportMatching(unit, mustResolve);
@@ -2498,7 +2563,6 @@ protected void reportBinaryMemberDeclaration(IResource resource, IMember binaryM
 	SearchMatch match = newDeclarationMatch(binaryMember, binaryMemberBinding, accuracy, range.getOffset(), range.getLength(), getParticipant(), resource);
 	report(match);
 }
-
 protected void reportMatching(LambdaExpression lambdaExpression,  IJavaElement parent, int accuracy, MatchingNodeSet nodeSet, boolean typeInHierarchy) throws CoreException {
 	IJavaElement enclosingElement = null;
 	// Report the lambda declaration itself.
@@ -2794,10 +2858,16 @@ protected void reportMatching(CompilationUnitDeclaration unit, boolean mustResol
 				if (this.hierarchyResolver != null) continue;
 
 				ImportReference importRef = (ImportReference) node;
-				Binding binding = (importRef.bits & ASTNode.OnDemand) != 0
+				boolean inModule = (importRef.bits & ASTNode.inModule) != 0;
+				boolean getOnDemand = (importRef.bits & ASTNode.OnDemand) != 0 || inModule;
+				Binding binding = getOnDemand
 					? this.unitScope.getImport(CharOperation.subarray(importRef.tokens, 0, importRef.tokens.length), true, importRef.isStatic())
 					: this.unitScope.getImport(importRef.tokens, false, importRef.isStatic());
-				this.patternLocator.matchLevelAndReportImportRef(importRef, binding, this);
+				if (inModule) {
+					nodeSet.addMatch(node, this.patternLocator.resolveLevel(binding)); // report all module-info together
+				} else {
+					this.patternLocator.matchLevelAndReportImportRef(importRef, binding, this);
+				}
 			} else {
 				nodeSet.addMatch(node, this.patternLocator.resolveLevel(node));
 			}
@@ -2876,6 +2946,11 @@ protected void reportMatching(CompilationUnitDeclaration unit, boolean mustResol
 			this.inTypeOccurrencesCounts = new HashtableOfIntValues();
 			reportMatching(type, null, accuracy, nodeSet, 1);
 		}
+	} else if (unit.moduleDeclaration != null) {
+		ModuleDeclaration mod = unit.moduleDeclaration;
+		Integer level = (Integer) nodeSet.matchingNodes.removeKey(mod);
+		int accuracy = (level != null && matchedUnitContainer) ? level.intValue() : -1;
+		reportMatching(mod, null, accuracy, nodeSet, 1);
 	}
 
 	// Clear handle cache
@@ -3012,6 +3087,109 @@ protected void reportMatching(FieldDeclaration field, FieldDeclaration[] otherFi
 	}
 }
 /**
+ * Visit the given module declaration and report the nodes that match exactly the
+ * search pattern (i.e. the ones in the matching nodes set)
+ */
+protected void reportMatching(ModuleDeclaration module, IJavaElement parent, int accuracy, MatchingNodeSet nodeSet, int occurrenceCount) throws CoreException {
+	IModuleDescription moduleDesc =  null;
+	Openable openable = this.currentPossibleMatch.openable;
+	if (openable instanceof ITypeRoot) {
+		ITypeRoot typeRoot = (ITypeRoot) openable;
+		try {
+			moduleDesc =  typeRoot.getModule();
+		} catch (JavaModelException e) {
+			// do nothing
+		}
+	}
+	if (moduleDesc == null) // could theoretically happen if openable is ICompilationUnit, but logically having a module should prevent this from happening
+		return;
+	if (accuracy > -1) { // report module declaration
+		SearchMatch match = this.patternLocator.newDeclarationMatch(module, moduleDesc, module.binding, accuracy, module.moduleName.length, this);
+		report(match);
+	}
+	reportMatching(module.requires, module,  nodeSet, moduleDesc);
+	reportMatching(module.exports, nodeSet, moduleDesc);
+	reportMatching(module.opens, nodeSet, moduleDesc);
+	reportMatching(module.services, module, nodeSet, moduleDesc);
+	reportMatching(module.uses, module, nodeSet, moduleDesc);
+}
+
+private void reportMatching(RequiresStatement[] reqs, ModuleDeclaration module, MatchingNodeSet nodeSet, IModuleDescription moduleDesc) {
+	if (reqs == null || reqs.length == 0)
+		return;
+	try {
+		for (RequiresStatement req : reqs) {
+			Integer level = (Integer) nodeSet.matchingNodes.removeKey(req.module);
+			if (level != null) {
+				this.patternLocator.matchReportReference(req.module, moduleDesc, req.resolvedBinding, level.intValue(), this);
+			}
+		}
+	} catch (CoreException e) {
+		// do nothing
+	}
+}
+
+private void reportMatching(PackageVisibilityStatement[] psvs, MatchingNodeSet nodeSet, IModuleDescription moduleDesc)
+		throws JavaModelException, CoreException {
+	if (psvs != null && psvs.length > 0) {
+		for (PackageVisibilityStatement psv : psvs) {
+			ImportReference importRef = psv.pkgRef;
+			Integer level = (Integer) nodeSet.matchingNodes.removeKey(importRef);
+			if (level != null) {
+				Binding binding = this.unitScope.getImport(CharOperation.subarray(importRef.tokens, 0, importRef.tokens.length), true, false);
+				this.patternLocator.matchReportImportRef(importRef, binding, moduleDesc, level.intValue(), this);
+			}
+			ModuleReference[] tgts = psv.targets;
+			if (tgts == null || tgts.length == 0) continue;
+			for (ModuleReference tgt : tgts) {
+				level = (Integer) nodeSet.matchingNodes.removeKey(tgt);
+				if (level != null) {
+					this.patternLocator.matchReportReference(tgt, moduleDesc, tgt.resolve(this.unitScope), level.intValue(), this);
+				}
+			}
+		}
+	}
+}
+private void reportMatching(ProvidesStatement[] provides, ModuleDeclaration module, MatchingNodeSet nodeSet, IModuleDescription moduleDesc) throws JavaModelException, CoreException {
+	if (provides != null && provides.length > 0) {
+		for (ProvidesStatement service : provides) {
+			TypeReference intf = service.serviceInterface;
+			if (intf != null) {
+				Integer level = (Integer) nodeSet.matchingNodes.removeKey(intf);
+				if (level != null)
+					this.patternLocator.matchReportReference(intf, moduleDesc, null, null, module.binding, level.intValue(), this);
+			}
+			TypeReference[] impls = service.implementations;
+			for (TypeReference impl : impls) {
+				if (impl != null) {
+					Integer level = (Integer) nodeSet.matchingNodes.removeKey(impl);
+					if (level != null)
+						this.patternLocator.matchReportReference(impl, moduleDesc, null, null, module.binding, level.intValue(), this);
+				}
+			}
+		}
+	}
+}
+private void reportMatching(UsesStatement[] uses, ModuleDeclaration module, MatchingNodeSet nodeSet, IModuleDescription moduleDesc) {
+	if (uses != null && uses.length > 0) {
+		try {
+			for (UsesStatement service : uses) {
+				TypeReference intf = service.serviceInterface;
+				if (intf != null) {
+					Integer level = (Integer) nodeSet.matchingNodes.removeKey(intf);
+					if (level != null) {
+						this.patternLocator.matchReportReference(intf, moduleDesc, null, null, module.binding, level.intValue(), this);
+					}
+				}
+			}
+		} catch (CoreException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+	}
+}
+
+/**
  * Visit the given type declaration and report the nodes that match exactly the
  * search pattern (i.e. the ones in the matching nodes set)
  */
@@ -3056,7 +3234,7 @@ protected void reportMatching(TypeDeclaration type, IJavaElement parent, int acc
 				if ((type.bits & ASTNode.IsAnonymousType) != 0) {
 					if (fileName != null) {
 						if (fileName.endsWith("jar") || fileName.endsWith(SuffixConstants.SUFFIX_STRING_class)) { //$NON-NLS-1$
-							IClassFile classFile= binaryType.getPackageFragment().getClassFile(binaryType.getTypeQualifiedName() + 
+							IOrdinaryClassFile classFile= binaryType.getPackageFragment().getOrdinaryClassFile(binaryType.getTypeQualifiedName() + 
 									"$" + Integer.toString(occurrenceCount) + SuffixConstants.SUFFIX_STRING_class);//$NON-NLS-1$
 							anonType =  classFile.getType();
 						}
@@ -3065,7 +3243,7 @@ protected void reportMatching(TypeDeclaration type, IJavaElement parent, int acc
 					}
 				}
 			}
-			enclosingElement = anonType != null ? anonType : ((IClassFile)this.currentPossibleMatch.openable).getType() ;
+			enclosingElement = anonType != null ? anonType : ((IOrdinaryClassFile)this.currentPossibleMatch.openable).getType() ;
 		} else {
 			enclosingElement = member.getType(new String(type.name), occurrenceCount);
 		}

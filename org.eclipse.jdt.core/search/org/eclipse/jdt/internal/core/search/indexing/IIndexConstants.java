@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2015 IBM Corporation and others.
+ * Copyright (c) 2000, 2017 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -28,7 +28,10 @@ public interface IIndexConstants {
 	char[] METHOD_DECL_PLUS= "methodDeclPlus".toCharArray(); //$NON-NLS-1$
 	char[] CONSTRUCTOR_DECL= "constructorDecl".toCharArray(); //$NON-NLS-1$
 	char[] FIELD_DECL= "fieldDecl".toCharArray(); //$NON-NLS-1$
+	char[] MODULE_DECL= "moduleDecl".toCharArray(); //$NON-NLS-1$
+	char[] MODULE_REF= "moduleRef".toCharArray(); //$NON-NLS-1$
 	char[] OBJECT = "Object".toCharArray(); //$NON-NLS-1$
+	char[] MODULE_INFO = "module-info".toCharArray(); ////$NON-NLS-1$
 //{ObjectTeams: needed for indexing Team and Role types
 	// OT index categories
 	char [] TEAM_DECL = "teamDecl".toCharArray(); //$NON-NLS-1$
@@ -87,6 +90,7 @@ public interface IIndexConstants {
 	int TYPE_PARAM_PATTERN = 0x0400;
 	int AND_PATTERN = 0x0800;
 	int ANNOT_REF_PATTERN = 0x1000;
+	int MODULE_PATTERN = 0x2000;
 //{ObjectTeams
 	// leave some room to Eclipse so we don't clash upon the next release
 	int TEAM_DECL_PATTERN          = 0x10000;
