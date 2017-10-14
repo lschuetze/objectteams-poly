@@ -425,7 +425,7 @@ public BinaryTypeBinding(PackageBinding packageBinding, IBinaryType binaryType, 
 	if (needFieldsAndMethods)
 		cachePartsFrom(binaryType, true);
 //{ObjectTeams: ROFI if this is a team, record the package that contains its role files.
-	maybeSetTeamPackage(this.compoundName, this.fPackage, environment);
+	maybeSetTeamPackage(this.compoundName, this.fPackage, environment, this.fPackage.enclosingModule);
 // SH}
 }
 public boolean canBeSeenBy(Scope sco) {

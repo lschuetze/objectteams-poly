@@ -739,19 +739,34 @@ public static abstract class AbstractQualifiedAllocationExpression extends Alloc
 
 			public boolean visit(IntersectionTypeBinding18 intersectionTypeBinding18) {
 				Arrays.sort(intersectionTypeBinding18.intersectingTypes, (t1, t2) -> t1.id - t2.id);
+//{ObjectTeams: respect intermediate class:
+/* orig:
 				scope.problemReporter().anonymousDiamondWithNonDenotableTypeArguments(QualifiedAllocationExpression.this.type, allocationType);
+  :giro */
+				scope.problemReporter().anonymousDiamondWithNonDenotableTypeArguments(AbstractQualifiedAllocationExpression.this.type, allocationType);
+// SH}
 				return this.noErrors = false;  // stop traversal
 			}
 			public boolean visit(TypeVariableBinding typeVariable) {
 				if (typeVariable.isCapture()) {
+//{ObjectTeams: respect intermediate class:
+/* orig:
 					scope.problemReporter().anonymousDiamondWithNonDenotableTypeArguments(QualifiedAllocationExpression.this.type, allocationType);
+  :giro */
+					scope.problemReporter().anonymousDiamondWithNonDenotableTypeArguments(AbstractQualifiedAllocationExpression.this.type, allocationType);
+// SH}
 					return this.noErrors = false;  // stop traversal
 				}
 				return true; // continue traversal
 			}
 			public boolean visit(ReferenceBinding ref) {
 				if (!ref.canBeSeenBy(scope)) {
+//{ObjectTeams: respect intermediate class:
+/* orig:
 					scope.problemReporter().invalidType(QualifiedAllocationExpression.this.anonymousType, new ProblemReferenceBinding(ref.compoundName, ref, ProblemReasons.NotVisible));
+  :giro */
+					scope.problemReporter().invalidType(AbstractQualifiedAllocationExpression.this.anonymousType, new ProblemReferenceBinding(ref.compoundName, ref, ProblemReasons.NotVisible));
+// SH}
 					return this.noErrors = false;
 				}
 				return true;

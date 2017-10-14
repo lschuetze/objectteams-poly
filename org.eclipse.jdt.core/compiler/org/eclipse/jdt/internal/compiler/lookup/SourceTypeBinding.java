@@ -204,7 +204,7 @@ public SourceTypeBinding(char[][] compoundName, PackageBinding fPackage, ClassSc
 	this.scope = scope;
 	this.environment = scope.environment();
 //{ObjectTeams: ROFI create a package binding for our role files (if any):
-	maybeSetTeamPackage(compoundName, fPackage, scope.environment());
+	maybeSetTeamPackage(compoundName, fPackage, scope.environment(), scope.compilationUnitScope().module());
 // SH}
 
 	// expect the fields & methods to be initialized correctly later

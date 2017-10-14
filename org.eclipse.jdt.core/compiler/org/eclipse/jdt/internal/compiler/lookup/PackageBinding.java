@@ -397,11 +397,12 @@ public String toString() {
 		public TeamPackageBinding(
 				char[][] compoundName,
 				PackageBinding parent,
-				LookupEnvironment environment)
+				LookupEnvironment environment,
+				ModuleBinding enclosingModule)
 		{
-			super(adjustTeamPackageName(compoundName), parent, environment);
+			super(adjustTeamPackageName(compoundName), parent, environment, enclosingModule);
 			if (parent != null && parent.isValidBinding())
-				parent.addPackage(this);
+				parent.addPackage(this, enclosingModule, false); // TODO(SHMODOT): split siblings??
 		}
 	
 		/** For nested role files the compoundName may contain '$' and '__OT__' delimitors.
@@ -454,9 +455,9 @@ public String toString() {
 						name);
 				char[][] roleCompoundName = CharOperation.arrayConcat(this.compoundName, name);
 				// TODO(SH): are all three attempts needed?
-				if (   (binding = this.environment.askForType(this.parent, roleName)) == null
-					&& (binding = this.environment.askForType(this, name)) == null
-					&& (binding = this.environment.askForType(roleCompoundName)) == null)
+				if (   (binding = this.environment.askForType(this.parent, roleName, this.enclosingModule)) == null
+					&& (binding = this.environment.askForType(this, name, this.enclosingModule)) == null
+					&& (binding = this.environment.askForType(roleCompoundName, this.enclosingModule)) == null)
 				{
 					// not found so remember a problem type binding in the cache for future lookups
 					addNotFoundType(name);

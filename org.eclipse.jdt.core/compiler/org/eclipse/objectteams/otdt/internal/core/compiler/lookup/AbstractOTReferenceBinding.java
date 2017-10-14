@@ -31,6 +31,7 @@ import org.eclipse.jdt.internal.compiler.lookup.LookupEnvironment;
 import org.eclipse.jdt.internal.compiler.lookup.PackageBinding;
 import org.eclipse.jdt.internal.compiler.lookup.PackageBinding.TeamPackageBinding;
 import org.eclipse.jdt.internal.compiler.lookup.MethodBinding;
+import org.eclipse.jdt.internal.compiler.lookup.ModuleBinding;
 import org.eclipse.jdt.internal.compiler.lookup.ReferenceBinding;
 import org.eclipse.jdt.internal.compiler.lookup.SourceTypeBinding;
 import org.eclipse.jdt.internal.compiler.lookup.TagBits;
@@ -173,7 +174,7 @@ public abstract class AbstractOTReferenceBinding extends TypeBinding
 	 *  Do not use a specific sub class because several subclasses of ReferenceBinding need this feature!
 	 */
 	public TeamPackageBinding teamPackage;
-	protected void maybeSetTeamPackage(char[][] compoundName, PackageBinding parentPackage, LookupEnvironment environment) {
+	protected void maybeSetTeamPackage(char[][] compoundName, PackageBinding parentPackage, LookupEnvironment environment, ModuleBinding enclosingModule) {
 		if (isTeam()) {
 			char[][] packageName;
 			char[][] segments = CharOperation.splitOn('$', compoundName[compoundName.length-1]);
@@ -187,7 +188,7 @@ public abstract class AbstractOTReferenceBinding extends TypeBinding
 				packageName = parentPackage.compoundName;
 			}
 			if (environment.nameEnvironment.isPackage(packageName, sourceName()))
-				this.teamPackage = new TeamPackageBinding(compoundName, parentPackage, environment);
+				this.teamPackage = new TeamPackageBinding(compoundName, parentPackage, environment, enclosingModule);
 		}
 	}
 	/**

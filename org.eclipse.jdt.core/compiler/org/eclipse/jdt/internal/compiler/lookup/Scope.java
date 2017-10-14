@@ -3669,7 +3669,7 @@ public abstract class Scope {
 			unitScope.recordReference(currentPackage.compoundName, name);
 //{ObjectTeams: to avoid team / team package conflicts prefer types if suitable:
 			if ((mask & (Binding.TYPE | Binding.PACKAGE)) == Binding.TYPE) {
-				ReferenceBinding type = currentPackage.getType(name);
+				ReferenceBinding type = currentPackage.getType(name, module());
 				if (type != null && type.isValidBinding())
 					return type; // type is always visible to its own package
 			}

@@ -365,13 +365,13 @@ ReferenceBinding askForType(PackageBinding packageBinding, char[] name, ModuleBi
 	if (answers == null)
 		return null;
 
-//{ObjectTeams: if we were looking specifically for a source type, and if this is satisfied now, reset to normal:
-	if (!answer.isBinaryType() && Config.hasConfig())
-		Config.setSourceTypeRequired(false);
-// SH}
 	ReferenceBinding candidate = null;
 	for (NameEnvironmentAnswer answer : answers) {
 		if (answer == null) continue;
+//{ObjectTeams: if we were looking specifically for a source type, and if this is satisfied now, reset to normal:
+		if (!answer.isBinaryType() && Config.hasConfig())
+			Config.setSourceTypeRequired(false);
+// SH}
 		ModuleBinding answerModule = answer.moduleBinding != null ? answer.moduleBinding : this.UnNamedModule;
 		PackageBinding answerPackage = packageBinding;
 		
@@ -674,8 +674,7 @@ public void completeTypeBindings(CompilationUnitDeclaration parsedUnit) {
 // for use by Dependiencies only:
 public int internalCompleteTypeBindings(CompilationUnitDeclaration parsedUnit) {
 	if (this != this.root) {
-		this.root.internalCompleteTypeBindings(parsedUnit);
-		return;
+		return this.root.internalCompleteTypeBindings(parsedUnit);
 	}
 	if (this.unitBeingCompleted == parsedUnit) 
 		return 0; // avoid re-entrance
