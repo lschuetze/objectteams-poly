@@ -2618,4 +2618,10 @@ public class DiagnoseParser implements ParserBasicInformation, TerminalTokens, C
 		*/ 
 		return (token == TokenNameLPAREN || token == TokenNameAT || (token == TokenNameLESS && !this.lexStream.awaitingColonColon()));
 	}
+
+	@Override
+	public boolean isParsingModuleDeclaration() {
+		//
+		return this.parser.isParsingModuleDeclaration();
+	}
 }
