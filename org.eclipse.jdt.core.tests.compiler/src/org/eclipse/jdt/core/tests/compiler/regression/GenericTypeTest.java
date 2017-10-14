@@ -1,10 +1,9 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2016 IBM Corporation and others.
+ * Copyright (c) 2000, 2017 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
- * 
  * 
  * Contributors:
  *     IBM Corporation - initial API and implementation
@@ -6590,7 +6589,7 @@ public class GenericTypeTest extends AbstractComparableTest {
 				"public class X {\n" +
 				"	void foo() {\n" +
 				"		ArrayList<? super Integer> al = new ArrayList<Object>();\n" +
-				"		al.add(new Integer(1)); // (1)\n" +
+				"		al.add(Integer.valueOf(1)); // (1)\n" +
 				"		Integer i = al.get(0);  // (2)\n" +
 				"	}\n" +
 				"}\n",
@@ -6612,13 +6611,13 @@ public class GenericTypeTest extends AbstractComparableTest {
 				"public class X {\n" +
 				"	void foo() {\n" +
 				"		ArrayList<? extends Integer> al = new ArrayList<Integer>();\n" +
-				"		al.add(new Integer(1)); // (1)\n" +
+				"		al.add(Integer.valueOf(1)); // (1)\n" +
 				"	}\n" +
 				"}\n",
 			},
 			"----------\n" +
 			"1. ERROR in X.java (at line 6)\n" +
-			"	al.add(new Integer(1)); // (1)\n" +
+			"	al.add(Integer.valueOf(1)); // (1)\n" +
 			"	   ^^^\n" +
 			"The method add(capture#1-of ? extends Integer) in the type ArrayList<capture#1-of ? extends Integer> is not applicable for the arguments (Integer)\n" +
 			"----------\n");
@@ -6631,7 +6630,7 @@ public class GenericTypeTest extends AbstractComparableTest {
 				"public class X {\n" +
 				"	public static void main(String[] args) {\n" +
 				"		XList<? super Integer> lx = new XList<Integer>();\n" +
-				"		lx.slot = new Integer(1);\n" +
+				"		lx.slot = Integer.valueOf(1);\n" +
 				"		Integer i = lx.slot;\n" +
 				"    }    	\n" +
 				"}\n" +
@@ -7286,13 +7285,15 @@ public class GenericTypeTest extends AbstractComparableTest {
 	}
 	// 69776 - variation
 	public void test0242() {
+		Map<String,String> options = getCompilerOptions();
+		options.put(CompilerOptions.OPTION_ReportDeprecation, CompilerOptions.IGNORE);
 		this.runNegativeTest(
 			new String[] {
 				"X.java",
 				"import java.util.HashMap;\n" +
 				"import java.util.Map;\n" +
+				"@SuppressWarnings({\"rawtypes\"})\n" +
 				"public class X {\n" +
-				"    @SuppressWarnings(\"rawtypes\")\n" +
 				"    private static final Map<String, Class> classes = new HashMap<String, Class>();\n" +
 				"    public static void main(String[] args) throws Exception {\n" +
 				"    	classes.put(\"test\", X.class);\n" +
@@ -7333,7 +7334,8 @@ public class GenericTypeTest extends AbstractComparableTest {
 			"	final Class<String> clazz3 = (Class<String>) classes.get(\"test\");\n" +
 			"	                             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n" +
 			"Unnecessary cast from Class to Class<String>\n" +
-			"----------\n");
+			"----------\n", 
+			null, true, options );
 	}
 	public void test0243() {
 		this.runConformTest(
@@ -7699,6 +7701,7 @@ public class GenericTypeTest extends AbstractComparableTest {
 		this.runNegativeTest(
 			new String[] {
 				"X.java",
+				"@SuppressWarnings(\"deprecation\")\n" +
 				"public class X { \n" +
 				"    static class A {\n" +
 				"    }\n" +
@@ -7709,7 +7712,7 @@ public class GenericTypeTest extends AbstractComparableTest {
 				"}\n"
 			},
 			"----------\n" +
-			"1. ERROR in X.java (at line 6)\n" +
+			"1. ERROR in X.java (at line 7)\n" +
 			"	return clazz.newInstance(); // ? extends Object\n" +
 			"	       ^^^^^^^^^^^^^^^^^^^\n" +
 			"Type mismatch: cannot convert from capture#1-of ? extends Object to X.A\n" +
@@ -7757,7 +7760,7 @@ public class GenericTypeTest extends AbstractComparableTest {
 				"        List<Integer> li= new ArrayList<Integer>();\n" +
 				"        List<? extends Number> ls= li;       \n" +
 				"        List<Number> x2= (List<Number>)ls;//unsafe\n" +
-				"        x2.add(new Float(1.0));\n" +
+				"        x2.add(Float.valueOf(1.0f));\n" +
 				"        \n" +
 				"        Integer i= li.get(0);//ClassCastException!\n" +
 				"        \n" +
@@ -12942,7 +12945,7 @@ public class GenericTypeTest extends AbstractComparableTest {
 				"		A<Long> a = new A<Long>() {\n" +
 				"			@Override\n" +
 				"			Long get() {\n" +
-				"				return new Long(5);\n" +
+				"				return Long.valueOf(5);\n" +
 				"			}\n" +
 				"		};\n" +
 				"	}\n" +
@@ -13278,21 +13281,21 @@ public class GenericTypeTest extends AbstractComparableTest {
 				"    }\n" +
 				"\n" +
 				"    public void test01() { // works\n" +
-				"        new IntegerOrder().next(new Integer(0)); // works\n" +
+				"        new IntegerOrder().next(Integer.valueOf(0)); // works\n" +
 				"    }\n" +
 				"\n" +
 				"    public void test02() { // doesn\'t work\n" +
 				"        final DiscreteOrder<Integer> order = new IntegerOrder();\n" +
-				"        order.next(new Integer(0));\n" +
+				"        order.next(Integer.valueOf(0));\n" +
 				"    }\n" +
 				"\n" +
 				"    public void test03() { // works\n" +
-				"        new IntegerOrder2().next(new Integer(0)); // works\n" +
+				"        new IntegerOrder2().next(Integer.valueOf(0)); // works\n" +
 				"    }\n" +
 				"\n" +
 				"    public void test04() { // doesn\'t work\n" +
 				"        final DiscreteOrder<Integer> order = new IntegerOrder2();\n" +
-				"        order.next(new Integer(0));\n" +
+				"        order.next(Integer.valueOf(0));\n" +
 				"    }\n" +
 				"}\n",
 				"orders/DiscreteOrder.java",//===============================
@@ -13320,11 +13323,11 @@ public class GenericTypeTest extends AbstractComparableTest {
 				"    }\n" +
 				"\n" +
 				"    public Integer previous(Integer arg0) {\n" +
-				"        return new Integer(arg0.intValue() - 1);\n" +
+				"        return Integer.valueOf(arg0.intValue() - 1);\n" +
 				"    }\n" +
 				"\n" +
 				"    public Integer next(Integer arg0) {\n" +
-				"        return new Integer(arg0.intValue() + 1);\n" +
+				"        return Integer.valueOf(arg0.intValue() + 1);\n" +
 				"    }\n" +
 				"}\n",
 				"orders/impl/IntegerOrder2.java",//===============================
@@ -14105,7 +14108,7 @@ public class GenericTypeTest extends AbstractComparableTest {
 				"  \n" +
 				"  public ITest<C> get()\n" +
 				"  {\n" +
-				"    return m_manager.getById(getClass(), new Integer(1));\n" +
+				"    return m_manager.getById(getClass(), Integer.valueOf(1));\n" +
 				"  }\n" +
 				"    \n" +
 				"  public static class Manager<C extends X>\n" +
@@ -14124,13 +14127,13 @@ public class GenericTypeTest extends AbstractComparableTest {
 			"Zork cannot be resolved to a type\n" + 
 			"----------\n" + 
 			"2. WARNING in X.java (at line 16)\n" + 
-			"	return m_manager.getById(getClass(), new Integer(1));\n" + 
-			"	       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n" + 
+			"	return m_manager.getById(getClass(), Integer.valueOf(1));\n" + 
+			"	       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n" + 
 			"Type safety: Unchecked invocation getById(Class<capture#1-of ? extends Test>, Integer) of the generic method getById(Class<T>, Integer) of type Test.Manager<C>\n" + 
 			"----------\n" + 
 			"3. WARNING in X.java (at line 16)\n" + 
-			"	return m_manager.getById(getClass(), new Integer(1));\n" + 
-			"	       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n" + 
+			"	return m_manager.getById(getClass(), Integer.valueOf(1));\n" + 
+			"	       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n" + 
 			"Type safety: The expression of type Test needs unchecked conversion to conform to ITest<C>\n" + 
 			"----------\n");
 	}
@@ -14427,33 +14430,33 @@ public class GenericTypeTest extends AbstractComparableTest {
 				"	}\n" +
 				"\n" +
 				"	public static void foo() {\n" +
-				"		Comparable s1 = choose(true, \"string\", new Integer(1));\n" +
-				"		Number s2 = choose(true, new Integer(1), new Float(2));\n" +
-				"		Comparable s3 = choose(true, new Integer(1), new Float(2));\n" +
-				"		Cloneable s4 = choose(true, new Integer(1), new Float(2));\n" +
-				"		Cloneable s5 = choose(true, \"string\", new Integer(1));\n" +
+				"		Comparable s1 = choose(true, \"string\", Integer.valueOf(1));\n" +
+				"		Number s2 = choose(true, Integer.valueOf(1), Float.valueOf(2));\n" +
+				"		Comparable s3 = choose(true, Integer.valueOf(1), Float.valueOf(2));\n" +
+				"		Cloneable s4 = choose(true, Integer.valueOf(1), Float.valueOf(2));\n" +
+				"		Cloneable s5 = choose(true, \"string\", Integer.valueOf(1));\n" +
 				"	}\n" +
 				"}\n"
 			},
 			"----------\n" +
 			"1. WARNING in X.java (at line 9)\n" +
-			"	Comparable s1 = choose(true, \"string\", new Integer(1));\n" +
+			"	Comparable s1 = choose(true, \"string\", Integer.valueOf(1));\n" +
 			"	^^^^^^^^^^\n" +
 			"Comparable is a raw type. References to generic type Comparable<T> should be parameterized\n" +
 			"----------\n" +
 			"2. WARNING in X.java (at line 11)\n" +
-			"	Comparable s3 = choose(true, new Integer(1), new Float(2));\n" +
+			"	Comparable s3 = choose(true, Integer.valueOf(1), Float.valueOf(2));\n" +
 			"	^^^^^^^^^^\n" +
 			"Comparable is a raw type. References to generic type Comparable<T> should be parameterized\n" +
 			"----------\n" +
 			"3. ERROR in X.java (at line 12)\n" +
-			"	Cloneable s4 = choose(true, new Integer(1), new Float(2));\n" +
-			"	               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n" +
+			"	Cloneable s4 = choose(true, Integer.valueOf(1), Float.valueOf(2));\n" +
+			"	               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n" +
 			"Type mismatch: cannot convert from Number&Comparable<?> to Cloneable\n" +
 			"----------\n" +
 			"4. ERROR in X.java (at line 13)\n" +
-			"	Cloneable s5 = choose(true, \"string\", new Integer(1));\n" +
-			"	               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n" +
+			"	Cloneable s5 = choose(true, \"string\", Integer.valueOf(1));\n" +
+			"	               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n" +
 			"Type mismatch: cannot convert from Object&Serializable&Comparable<?> to Cloneable\n" +
 			"----------\n");
 	}
@@ -14627,7 +14630,7 @@ public class GenericTypeTest extends AbstractComparableTest {
 				"public class X {\n" +
 				"    void method(List<? super Number> list) {\n" +
 				"        list.add(new Object());   // should fail\n" +
-				"        list.add(new Integer(3)); // correct\n" +
+				"        list.add(Integer.valueOf(3)); // correct\n" +
 				"    }\n" +
 				"}\n"
 			},
@@ -17948,7 +17951,7 @@ X.java:4: method foo in class X cannot be applied to given types
 				"\n" +
 				"class Bar implements IFoo<Integer> {\n" +
 				"    public Integer get(Class<Integer> arg0) {\n" +
-				"        return new Integer(3);\n" +
+				"        return Integer.valueOf(3);\n" +
 				"    }\n" +
 				"}\n" +
 				"}\n",
@@ -20930,7 +20933,7 @@ public void test0659() {
 			"	}\n" +
 			"\n" +
 			"	public static void main(String[] arg) throws Exception {\n" +
-			"		X<String, Integer> ref = new X<String, Integer>(\"Dummy Key\", new Integer(5), queue);\n" +
+			"		X<String, Integer> ref = new X<String, Integer>(\"Dummy Key\", Integer.valueOf(5), queue);\n" +
 			"		new Thread() {\n" +
 			"			@Override\n" +
 			"			public void run() {\n" +
@@ -21875,6 +21878,11 @@ public void test0675() {
 		"	Store<? extends Key<T>> store1;\n" +
 		"	                    ^\n" +
 		"Bound mismatch: The type T is not a valid substitute for the bounded parameter <E extends Key<E>> of the type Key<E>\n" +
+		"----------\n" + 
+		"2. ERROR in X.java (at line 6)\n" + 
+		"	Store<? extends Key<? extends T>> store2;\n" + 
+		"	                    ^^^^^^^^^^^\n" + 
+		"Bound mismatch: The type ? extends T is not a valid substitute for the bounded parameter <E extends Key<E>> of the type Key<E>\n" + 
 		"----------\n",
 		// javac options
 		JavacTestOptions.JavacHasABug.JavacBugFixed_6_10 /* javac test options */);
@@ -34424,11 +34432,16 @@ public void test1021b() { // should this case be allowed?
 			"	}\n" +
 			"}\n",
 		},
-		"----------\n" +
-		"1. ERROR in p\\SomeClass2.java (at line 3)\n" +
-		"	public abstract class SomeClass2<T> extends M {\n" +
-		"	                                            ^\n" +
-		"Cycle detected: the type SomeClass2<T> cannot extend/implement itself or one of its own member types\n" +
+		"----------\n" + 
+		"1. ERROR in p\\SomeClass2.java (at line 3)\n" + 
+		"	public abstract class SomeClass2<T> extends M {\n" + 
+		"	                                            ^\n" + 
+		"M cannot be resolved to a type\n" + 
+		"----------\n" + 
+		"2. ERROR in p\\SomeClass2.java (at line 4)\n" + 
+		"	public static class M1 extends M2 {}\n" + 
+		"	                               ^^\n" + 
+		"Cycle detected: a cycle exists in the type hierarchy between SomeClass2.M1 and SomeClass2<T>\n" + 
 		"----------\n"
 	);
 }
@@ -39418,7 +39431,7 @@ public void test1132() {
 			"\n" +
 			"	public List<Integer> getList() {\n" +
 			"		ArrayList<Integer> l = new ArrayList<Integer>();\n" +
-			"		l.add(new Integer(0));\n" +
+			"		l.add(Integer.valueOf(0));\n" +
 			"		return l;\n" +
 			"	}\n" +
 			"\n" +
@@ -40282,7 +40295,9 @@ public void test1151() throws Exception {
 			"}\n"
 		},
 		//"java.lang.ref.Reference<X<java.lang.String>.Other<java.lang.Thread>.Deeply>##java.lang.ref.Reference<X<java.lang.String>.Other<java.lang.Thread>.Deeply$Inside<java.lang.Number>>"
-		"java.lang.ref.Reference<X<java.lang.String>.Other<java.lang.Thread>.Deeply>"
+		(isJRE9 
+		? "java.lang.ref.Reference<X<java.lang.String>$Other<java.lang.Thread>$Deeply>"
+		: "java.lang.ref.Reference<X<java.lang.String>.Other<java.lang.Thread>.Deeply>")
 	);
 	String expectedOutput =
 		"  // Field descriptor #6 Ljava/lang/ref/Reference;\n" +
@@ -40395,7 +40410,10 @@ public void test1153() {
 			"	}\n" +
 			"}\n"
 		},
-		"java.lang.ref.Reference<p.X$Rather$Deeply>##java.lang.ref.Reference<p.X$Rather>##java.lang.ref.Reference<p.X$Rather$Deeply$Inside>##java.lang.ref.Reference<p.X<java.lang.String>.Other<java.lang.Thread>.Deeply>",
+		"java.lang.ref.Reference<p.X$Rather$Deeply>##java.lang.ref.Reference<p.X$Rather>##java.lang.ref.Reference<p.X$Rather$Deeply$Inside>##"+
+		(isJRE9 
+		? "java.lang.ref.Reference<p.X<java.lang.String>$Other<java.lang.Thread>$Deeply>"
+		: "java.lang.ref.Reference<p.X<java.lang.String>.Other<java.lang.Thread>.Deeply>"),
 		null,
 		false, // do not flush output
 		null);
@@ -40475,7 +40493,9 @@ public void test1155() throws Exception {
 			"	}\n" +
 			"}\n"
 		},
-		"java.lang.ref.Reference<X<java.lang.String>.Other<java.lang.Thread>.Deeply>"	);
+		(isJRE9
+		? "java.lang.ref.Reference<X<java.lang.String>$Other<java.lang.Thread>$Deeply>"
+		: "java.lang.ref.Reference<X<java.lang.String>.Other<java.lang.Thread>.Deeply>")	);
 
 	String expectedOutput =
 		"  // Field descriptor #6 Ljava/lang/ref/Reference;\n" +
@@ -40809,9 +40829,8 @@ public void test1166() {
 		"");
 }
 //https://bugs.eclipse.org/bugs/show_bug.cgi?id=179902
-// FIXME javac8 rejects
 public void test1167() {
-	this.runConformTest(
+	this.runNegativeTest(
 		new String[] {
 			"Foo.java",
 			"public class Foo<F extends Enum<F>> {\n" +
@@ -40820,7 +40839,12 @@ public void test1167() {
 			"  }\n" +
 			"}\n", // =================
 		},
-		"");
+		"----------\n" + 
+	"1. ERROR in Foo.java (at line 3)\n" + 
+	"	Bar(Foo<? extends B> bar) {}\n" + 
+	"	        ^^^^^^^^^^^\n" + 
+	"Bound mismatch: The type ? extends B is not a valid substitute for the bounded parameter <F extends Enum<F>> of the type Foo<F>\n" + 
+	"----------\n");
 }
 //https://bugs.eclipse.org/bugs/show_bug.cgi?id=169049
 public void test1168() {
@@ -49361,7 +49385,6 @@ public void test1405()  throws Exception {
 		"Zork cannot be resolved to a type\n" + 
 		"----------\n");
 }
-// FIXME javac8 rejects
 public void test1406() {
 	this.runNegativeTest(
 			new String[] {
@@ -49378,6 +49401,7 @@ public void test1406() {
 				"    }\n" + 
 				"}\n",//-----------------------------------------------------------------------
 			},
+			this.complianceLevel < ClassFileConstants.JDK1_8 ?
 			"----------\n" + 
 			"1. WARNING in GenericTest.java (at line 5)\n" + 
 			"	Set testList = GenericTest.method1(new Class[] { ArrayList.class });\n" + 
@@ -49398,9 +49422,24 @@ public void test1406() {
 			"	public static <I> I method1(Class<List>[] params) {\n" + 
 			"	                                  ^^^^\n" + 
 			"List is a raw type. References to generic type List<E> should be parameterized\n" + 
-			"----------\n");
+			"----------\n" :
+				"----------\n" + 
+				"1. WARNING in GenericTest.java (at line 5)\n" + 
+				"	Set testList = GenericTest.method1(new Class[] { ArrayList.class });\n" + 
+				"	^^^\n" + 
+				"Set is a raw type. References to generic type Set<E> should be parameterized\n" + 
+				"----------\n" + 
+				"2. ERROR in GenericTest.java (at line 5)\n" + 
+				"	Set testList = GenericTest.method1(new Class[] { ArrayList.class });\n" + 
+				"	               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n" + 
+				"Type mismatch: cannot convert from Object to Set\n" + 
+				"----------\n" +
+				"3. WARNING in GenericTest.java (at line 8)\n" + 
+				"	public static <I> I method1(Class<List>[] params) {\n" + 
+				"	                                  ^^^^\n" + 
+				"List is a raw type. References to generic type List<E> should be parameterized\n" + 
+				"----------\n");
 }
-// FIXME javac8 rejects
 public void test1407() {
 	this.runNegativeTest(
 			new String[] {
@@ -49412,6 +49451,7 @@ public void test1407() {
 				"	}\n" + 
 				"}\n",//-----------------------------------------------------------------------
 			},
+			this.complianceLevel < ClassFileConstants.JDK1_8 ?
 			"----------\n" + 
 			"1. WARNING in Foo.java (at line 4)\n" + 
 			"	Foo l1 = m1((Class)Foo.class);\n" + 
@@ -49427,7 +49467,18 @@ public void test1407() {
 			"	Foo l1 = m1((Class)Foo.class);\n" + 
 			"	             ^^^^^\n" + 
 			"Class is a raw type. References to generic type Class<T> should be parameterized\n" + 
-			"----------\n");
+			"----------\n" : 
+				"----------\n" + 
+				"1. WARNING in Foo.java (at line 4)\n" + 
+				"	Foo l1 = m1((Class)Foo.class);\n" + 
+				"	             ^^^^^\n" + 
+				"Class is a raw type. References to generic type Class<T> should be parameterized\n" + 
+				"----------\n" + 
+				"2. ERROR in Foo.java (at line 4)\n" + 
+				"	Foo l1 = m1((Class)Foo.class);\n" + 
+				"	         ^^^^^^^^^^^^^^^^^^^^\n" + 
+				"Type mismatch: cannot convert from Object to Foo\n" + 
+				"----------\n");
 }
 public void test1408() {
 	this.runNegativeTest(
@@ -50130,7 +50181,7 @@ public void test1429() {
 				"1. ERROR in X.java (at line 4)\n" + 
 				"	Integer i = m(new Foo<Foo<Integer>>(), new Foo());\n" + 
 				"	            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n" + 
-				"Type mismatch: cannot convert from Foo<Integer> to Integer\n" + 
+				"Type mismatch: cannot convert from Foo to Integer\n" + 
 				"----------\n" + 
 				"2. WARNING in X.java (at line 4)\n" + 
 				"	Integer i = m(new Foo<Foo<Integer>>(), new Foo());\n" + 
@@ -51253,6 +51304,7 @@ public void test1458() {
 	this.runNegativeTest(
 			new String[] {
 					"CompilerBug.java",
+					"@SuppressWarnings(\"deprecation\")\n" +
 					"public class CompilerBug {\n" +
 					"	public <T> T newInstance( Class<T> c ) throws InstantiationException, IllegalAccessException {\n" +
 					"	      return c.newInstance();\n" +
@@ -51280,7 +51332,7 @@ public void test1458() {
 			},
 			this.complianceLevel <= ClassFileConstants.JDK1_6 ?
 			"----------\n" + 
-			"1. ERROR in CompilerBug.java (at line 22)\n" + 
+			"1. ERROR in CompilerBug.java (at line 23)\n" + 
 			"	Zork z;\n" + 
 			"	^^^^\n" + 
 			"Zork cannot be resolved to a type\n" + 
@@ -51288,17 +51340,17 @@ public void test1458() {
 				
 			// see https://bugs.eclipse.org/bugs/show_bug.cgi?id=334622
 			"----------\n" + 
-			"1. ERROR in CompilerBug.java (at line 17)\n" + 
+			"1. ERROR in CompilerBug.java (at line 18)\n" + 
 			"	getClass().newInstance().privateMethod();\n" + 
 			"	                         ^^^^^^^^^^^^^\n" + 
 			"The method privateMethod() from the type CompilerBug is not visible\n" + 
 			"----------\n" + 
-			"2. ERROR in CompilerBug.java (at line 19)\n" + 
+			"2. ERROR in CompilerBug.java (at line 20)\n" + 
 			"	getClass().newInstance().privateInt = 10;\n" + 
 			"	                         ^^^^^^^^^^\n" + 
 			"The field CompilerBug.privateInt is not visible\n" + 
 			"----------\n" + 
-			"3. ERROR in CompilerBug.java (at line 22)\n" + 
+			"3. ERROR in CompilerBug.java (at line 23)\n" + 
 			"	Zork z;\n" + 
 			"	^^^^\n" + 
 			"Zork cannot be resolved to a type\n" + 

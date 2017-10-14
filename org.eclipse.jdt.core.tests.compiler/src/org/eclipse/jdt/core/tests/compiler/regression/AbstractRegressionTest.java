@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2016 IBM Corporation and others.
+ * Copyright (c) 2000, 2017 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -79,6 +79,7 @@ import org.eclipse.jdt.internal.compiler.apt.dispatch.BaseAnnotationProcessorMan
 import org.eclipse.jdt.internal.compiler.apt.dispatch.BaseProcessingEnvImpl;
 import org.eclipse.jdt.internal.compiler.apt.dispatch.ProcessorInfo;
 import org.eclipse.jdt.internal.compiler.ast.CompilationUnitDeclaration;
+import org.eclipse.jdt.internal.compiler.batch.CompilationUnit;
 import org.eclipse.jdt.internal.compiler.batch.FileSystem;
 import org.eclipse.jdt.internal.compiler.classfmt.ClassFileConstants;
 import org.eclipse.jdt.internal.compiler.classfmt.ClassFileReader;
@@ -118,27 +119,7 @@ static class JavacCompiler {
 				+ "bin" + File.separator + JAVAC_NAME).getCanonicalPath();
 		// WORK don't need JAVAC_NAME any more; suppress this as we work towards code cleanup
 		if (rawVersion == null) {
-			Process fetchVersionProcess = null;
-			try {
-				fetchVersionProcess = Runtime.getRuntime().exec(this.javacPathName
-						+ " -version", null, null);
-		        Logger versionLogger = new Logger(fetchVersionProcess.getErrorStream(), "");
-		        versionLogger.start();
-				fetchVersionProcess.waitFor();
-				versionLogger.join();  // make sure we get the whole output
-				rawVersion = versionLogger.buffer.toString();
-				int eol = rawVersion.indexOf('\n');
-				if (eol != -1) {
-					rawVersion = rawVersion.substring(0, eol);
-				}
-				if (rawVersion.startsWith("javac ")) {
-					rawVersion = rawVersion.substring(6, rawVersion.length());
-				}
-			} finally {
-				if (fetchVersionProcess != null) {
-					fetchVersionProcess.destroy(); // closes process streams
-				}
-			}
+			rawVersion = getVersion(this.javacPathName);
 		}
 		if (rawVersion.indexOf("1.4") != -1 ||
 				this.javacPathName.indexOf("1.4") != -1
@@ -153,6 +134,8 @@ static class JavacCompiler {
 			this.version = JavaCore.VERSION_1_7;
 		} else if (rawVersion.indexOf("1.8") != -1) {
 			this.version = JavaCore.VERSION_1_8;
+		} else if(rawVersion.startsWith("9")) {
+			this.version = JavaCore.VERSION_9;
 		} else {
 			throw new RuntimeException("unknown javac version: " + rawVersion);
 		}
@@ -161,6 +144,35 @@ static class JavacCompiler {
 		this.rawVersion = rawVersion;
 		StringBuffer classpathBuffer = new StringBuffer(" -classpath ");
 		this.classpath = classpathBuffer.toString();
+	}
+	static String getVersion(String javacPathName) throws IOException, InterruptedException {
+		Process fetchVersionProcess = null;
+		try {
+			fetchVersionProcess = Runtime.getRuntime().exec(javacPathName + " -version", null, null);
+		    Logger versionStdErrLogger = new Logger(fetchVersionProcess.getErrorStream(), ""); // for javac <= 1.8
+		    Logger versionStdOutLogger = new Logger(fetchVersionProcess.getInputStream(), ""); // for javac >= 9
+		    versionStdErrLogger.start();
+		    versionStdOutLogger.start();
+			fetchVersionProcess.waitFor();
+			// make sure we get the whole output
+			versionStdErrLogger.join();
+			versionStdOutLogger.join();
+			String loggedVersion = versionStdErrLogger.buffer.toString();
+			if (loggedVersion.isEmpty())
+				loggedVersion = versionStdOutLogger.buffer.toString();
+			int eol = loggedVersion.indexOf('\n');
+			if (eol != -1) {
+				loggedVersion = loggedVersion.substring(0, eol);
+			}
+			if (loggedVersion.startsWith("javac ")) {
+				loggedVersion = loggedVersion.substring(6, loggedVersion.length());
+			}
+			return loggedVersion;
+		} finally {
+			if (fetchVersionProcess != null) {
+				fetchVersionProcess.destroy(); // closes process streams
+			}
+		}
 	}
 	// projects known raw versions to minors; minors should grow with time, so
 	// that before and after relationships be easy to implement upon compilers
@@ -182,6 +194,9 @@ static class JavacCompiler {
 			if ("1.6.0_10-beta".equals(rawVersion)) { // b24
 				return 1010;
 			}
+			if ("1.6.0_45".equals(rawVersion)) {
+				return 1045;
+			}
 		}
 		if (version == JavaCore.VERSION_1_7) {
 			if ("1.7.0-ea".equals(rawVersion)) {
@@ -192,6 +207,9 @@ static class JavacCompiler {
 			}
 			if ("1.7.0_25".equals(rawVersion)) {
 				return 2500;
+			}
+			if ("1.7.0_80".equals(rawVersion)) {
+				return 8000;
 			}
 		}
 		if (version == JavaCore.VERSION_1_8) {
@@ -208,6 +226,9 @@ static class JavacCompiler {
 				return 1500;
 			}
 		}
+		if (version == JavaCore.VERSION_9) {
+			return 0000; // We are still in EA
+		}
 		throw new RuntimeException("unknown raw javac version: " + rawVersion);
 	}
 	// returns 0L if everything went fine; else the lower word contains the
@@ -217,6 +238,9 @@ static class JavacCompiler {
 		long result = 0L;
 		// WORK classpath should depend on the compiler, not on the default runtime
 		try {
+			if (!directory.exists()) {
+				directory.mkdir();
+			}
 			StringBuffer cmdLine = new StringBuffer(this.javacPathName);
 			cmdLine.append(this.classpath);
 			cmdLine.append(". ");
@@ -752,6 +776,7 @@ protected static class JavacTestOptions {
 	public static final String LIB_DIR = Util.getOutputDirectory() + File.separator + "lib";
 
 	public final static String PACKAGE_INFO_NAME = new String(TypeConstants.PACKAGE_INFO_NAME);
+	public final static String MODULE_INFO_NAME = new String(TypeConstants.MODULE_INFO_NAME);
 
 	public static boolean SHIFT = false;
 
@@ -934,6 +959,8 @@ protected static class JavacTestOptions {
 			buffer.append("\" -1.7 " + processAnnot);
 		} else if (this.complianceLevel == ClassFileConstants.JDK1_8) {
 			buffer.append("\" -1.8 " + processAnnot);
+		} else if (this.complianceLevel == ClassFileConstants.JDK9) {
+			buffer.append("\" -9 " + processAnnot);
 		}
 		buffer
 			.append(" -preserveAllLocals -proceedOnError -nowarn -g -classpath \"")
@@ -1128,7 +1155,7 @@ protected static class JavacTestOptions {
 	}
 
 	protected INameEnvironment[] getClassLibs(boolean useDefaultClasspaths) {
-		String encoding = (String)getCompilerOptions().get(CompilerOptions.OPTION_Encoding);
+		String encoding = getCompilerOptions().get(CompilerOptions.OPTION_Encoding);
 		if ("".equals(encoding))
 			encoding = null;
 		if (useDefaultClasspaths && encoding == null)
@@ -1140,8 +1167,8 @@ protected static class JavacTestOptions {
 		);
 		return classLibs;
 	}
-	protected Map getCompilerOptions() {
-		Map defaultOptions = super.getCompilerOptions();
+	protected Map<String, String> getCompilerOptions() {
+		Map<String, String> defaultOptions = super.getCompilerOptions();
 		defaultOptions.put(CompilerOptions.OPTION_LocalVariableAttribute, CompilerOptions.GENERATE);
 		defaultOptions.put(CompilerOptions.OPTION_ReportUnusedPrivateMember, CompilerOptions.WARNING);
 		defaultOptions.put(CompilerOptions.OPTION_ReportUnusedImport, CompilerOptions.WARNING);
@@ -1215,6 +1242,10 @@ protected static class JavacTestOptions {
 	}
 	protected IProblemFactory getProblemFactory() {
 		return new DefaultProblemFactory(Locale.getDefault());
+	}
+	// overridden in AbstractRegressionTests9
+	protected CompilationUnit[] getCompilationUnits(String[] testFiles) {
+		return Util.compilationUnits(testFiles);
 	}
 
 	public void initialize(CompilerTestSetup setUp) {
@@ -2677,7 +2708,7 @@ protected void runNegativeTest(boolean skipJavac, JavacTestOptions javacTestOpti
 		try {
 //{ObjectTeams: extracted as new hook:
 /* orig:
-			batchCompiler.compile(Util.compilationUnits(testFiles)); // compile all files together
+			batchCompiler.compile(getCompilationUnits(testFiles)); // compile all files together
   :giro */
 			batchCompiler.sortCompilationUnits = false; // maintain original order for JDT/Core tests
 			compileTestFiles(batchCompiler, testFiles);
@@ -2723,6 +2754,7 @@ protected void runNegativeTest(boolean skipJavac, JavacTestOptions javacTestOpti
 			// Compute class name by removing ".java" and replacing slashes with dots
 			String className = sourceFile.substring(0, sourceFile.length() - 5).replace('/', '.').replace('\\', '.');
 			if (className.endsWith(PACKAGE_INFO_NAME)) return;
+			if (className.endsWith(MODULE_INFO_NAME)) return;
 
 //{ObjectTeams: also reuse if same set of vmArguments:
 /* orig:
@@ -2766,6 +2798,8 @@ protected void runNegativeTest(boolean skipJavac, JavacTestOptions javacTestOpti
 					System.out.println(testFiles[i + 1]);
 					System.out.println("]"); //$NON-NLS-1$
 				}
+				assertEquals(this.verifier.failureReason, expectedErrorString == null ? "" : expectedErrorString, execErrorString);
+				assertEquals(this.verifier.failureReason, expectedOutputString == null ? "" : expectedOutputString, execOutputString);
 			}
 			assertTrue(this.verifier.failureReason, // computed by verifyClassFiles(...) action
 					passed);
@@ -2855,7 +2889,7 @@ protected void runNegativeTest(boolean skipJavac, JavacTestOptions javacTestOpti
 		return new TestVerifier(reuseVM);
 	}
 	protected void compileTestFiles(Compiler batchCompiler, String[] testFiles) {
-		batchCompiler.compile(Util.compilationUnits(testFiles)); // compile all files together
+		batchCompiler.compile(getCompilationUnits(testFiles)); // compile all files together
 	}
 // SH}
 
@@ -3210,7 +3244,7 @@ protected void runNegativeTest(
 					// WORK simplify jdk.root out
 					String jdkRootDirectory = System.getProperty("jdk.root");
 					if (jdkRootDirectory == null)
-					  jdkRootDirPath = (new Path(Util.getJREDirectory())).removeLastSegments(1);
+						jdkRootDirPath = (new Path(Util.getJREDirectory())).removeLastSegments(1);
 					else
 						jdkRootDirPath = new Path(jdkRootDirectory);
 
@@ -3221,16 +3255,7 @@ protected void runNegativeTest(
 							append("bin").append(JAVAC_NAME).toString());
 					cmdLineHeader.append(" -classpath . ");
 					  // start with the current directory which contains the source files
-					Process compileProcess = Runtime.getRuntime().exec(
-						cmdLineHeader.toString() + " -version", null, null);
-			        Logger versionLogger = new Logger(compileProcess.getErrorStream(), "");
-			        // PREMATURE implement consistent error policy
-			        versionLogger.start();
-			        compileProcess.waitFor();
-					versionLogger.join(); // make sure we get the whole output
-					String version = versionLogger.buffer.toString();
-					int eol = version.indexOf('\n');
-					version = version.substring(0, eol);
+					String version = JavacCompiler.getVersion(cmdLineHeader.toString());
 					cmdLineHeader.append(" -d ");
 					cmdLineHeader.append(JAVAC_OUTPUT_DIR_NAME.indexOf(" ") != -1 ? "\"" + JAVAC_OUTPUT_DIR_NAME + "\"" : JAVAC_OUTPUT_DIR_NAME);
 					cmdLineHeader.append(" -source 1.5 -deprecation -Xlint "); // enable recommended warnings
