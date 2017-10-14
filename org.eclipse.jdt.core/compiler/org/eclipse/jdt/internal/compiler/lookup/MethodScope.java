@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2017 IBM Corporation and others.
+ *  * Copyright (c) 2000, 2017 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -23,6 +23,7 @@
 package org.eclipse.jdt.internal.compiler.lookup;
 
 import org.eclipse.jdt.core.compiler.CharOperation;
+import org.eclipse.jdt.internal.compiler.ASTVisitor;
 import org.eclipse.jdt.internal.compiler.ast.*;
 import org.eclipse.jdt.internal.compiler.classfmt.ClassFileConstants;
 import org.eclipse.jdt.internal.compiler.codegen.CodeStream;
@@ -119,6 +120,7 @@ String basicToString(int tab) {
 
 /**
  * Spec : 8.4.3 & 9.4
+ * TODO: Add the spec section number for private interface methods from jls 9
  */
 private void checkAndSetModifiersForConstructor(MethodBinding methodBinding) {
 	int modifiers = methodBinding.modifiers;
@@ -204,7 +206,7 @@ private void checkAndSetModifiersForMethod(final MethodBinding methodBinding) {
 
 	// after this point, tests on the 16 bits reserved.
 	int realModifiers = modifiers & ExtraCompilerModifiers.AccJustFlag;
-
+	long sourceLevel = compilerOptions().sourceLevel;
 //{ObjectTeams: push the callin flag to a CallinFlags attribute:
 	if ((modifiers & ExtraCompilerModifiers.AccCallin) != 0)
 		MethodModel.getModel(methodBinding.sourceMethod())
@@ -224,11 +226,10 @@ private void checkAndSetModifiersForMethod(final MethodBinding methodBinding) {
 		int expectedModifiers = ClassFileConstants.AccPublic | ClassFileConstants.AccAbstract;
 		boolean isDefaultMethod = (modifiers & ExtraCompilerModifiers.AccDefaultMethod) != 0; // no need to check validity, is done by the parser
 		boolean reportIllegalModifierCombination = false;
-		boolean isJDK18orGreater = false;
-		if (compilerOptions().sourceLevel >= ClassFileConstants.JDK1_8 && !declaringClass.isAnnotationType()) {
+		if (sourceLevel >= ClassFileConstants.JDK1_8 && !declaringClass.isAnnotationType()) {
 			expectedModifiers |= ClassFileConstants.AccStrictfp
 					| ExtraCompilerModifiers.AccDefaultMethod | ClassFileConstants.AccStatic;
-			isJDK18orGreater = true;
+			expectedModifiers |= sourceLevel >= ClassFileConstants.JDK9 ? ClassFileConstants.AccPrivate : 0;
 			if (!methodBinding.isAbstract()) {
 				reportIllegalModifierCombination = isDefaultMethod && methodBinding.isStatic();
 			} else {
@@ -239,6 +240,14 @@ private void checkAndSetModifiersForMethod(final MethodBinding methodBinding) {
 			}
 			if (reportIllegalModifierCombination) {
 				problemReporter().illegalModifierCombinationForInterfaceMethod((AbstractMethodDeclaration) this.referenceContext);
+			} 
+			if (sourceLevel >= ClassFileConstants.JDK9 && (methodBinding.modifiers & ClassFileConstants.AccPrivate) != 0) {
+				int remaining = realModifiers & ~expectedModifiers;
+				if (remaining == 0) { // check for the combination of allowed modifiers with private
+					remaining = realModifiers & ~(ClassFileConstants.AccPrivate | ClassFileConstants.AccStatic | ClassFileConstants.AccStrictfp);
+					if (isDefaultMethod || remaining != 0)
+						problemReporter().illegalModifierCombinationForPrivateInterfaceMethod((AbstractMethodDeclaration) this.referenceContext);
+				}
 			}
 			// Kludge - The AccDefaultMethod bit is outside the lower 16 bits and got removed earlier. Putting it back.
 			if (isDefaultMethod) {
@@ -249,10 +258,22 @@ private void checkAndSetModifiersForMethod(final MethodBinding methodBinding) {
 			if ((declaringClass.modifiers & ClassFileConstants.AccAnnotation) != 0)
 				problemReporter().illegalModifierForAnnotationMember((AbstractMethodDeclaration) this.referenceContext);
 			else
-				problemReporter().illegalModifierForInterfaceMethod((AbstractMethodDeclaration) this.referenceContext, isJDK18orGreater);
+				problemReporter().illegalModifierForInterfaceMethod((AbstractMethodDeclaration) this.referenceContext, sourceLevel);
 			methodBinding.modifiers &= (expectedModifiers | ~ExtraCompilerModifiers.AccJustFlag);
 		}
 		return;
+	} else if (declaringClass.isAnonymousType() && sourceLevel >= ClassFileConstants.JDK9) {
+		// If the class instance creation expression elides the supertype's type arguments using '<>',
+		// then for all non-private methods declared in the class body, it is as if the method declaration
+		// is annotated with @Override - https://bugs.openjdk.java.net/browse/JDK-8073593
+		LocalTypeBinding local = (LocalTypeBinding) declaringClass;
+		TypeReference ref = local.scope.referenceContext.allocation.type;
+		if (ref != null && (ref.bits & ASTNode.IsDiamond) != 0) {
+			// 
+			if ((realModifiers & (ClassFileConstants.AccPrivate | ClassFileConstants.AccStatic )) == 0) {
+				methodBinding.tagBits |= TagBits.AnnotationOverride;
+			}
+		}
 	}
 
 	// check for abnormal modifiers
@@ -426,6 +447,7 @@ MethodBinding createMethod(AbstractMethodDeclaration method) {
 	// is necessary to ensure error reporting
 	this.referenceContext = method;
 	method.scope = this;
+	long sourceLevel = compilerOptions().sourceLevel;
 	SourceTypeBinding declaringClass = referenceType().binding;
 	int modifiers = method.modifiers | ExtraCompilerModifiers.AccUnresolved;
 	if (method.isConstructor()) {
@@ -440,7 +462,9 @@ MethodBinding createMethod(AbstractMethodDeclaration method) {
  :giro */
 		if (declaringClass.isRegularInterface()) {
 // SH}
-			if (method.isDefaultMethod() || method.isStatic()) {
+			if (sourceLevel >= ClassFileConstants.JDK9 && ((method.modifiers & ClassFileConstants.AccPrivate) != 0)) { // private method
+				// do nothing
+			} else if (method.isDefaultMethod() || method.isStatic()) {
 				modifiers |= ClassFileConstants.AccPublic; // default method is not abstract
 			} else {
 				modifiers |= ClassFileConstants.AccPublic | ClassFileConstants.AccAbstract;
@@ -462,7 +486,6 @@ MethodBinding createMethod(AbstractMethodDeclaration method) {
 
 	Argument[] argTypes = method.arguments;
 	int argLength = argTypes == null ? 0 : argTypes.length;
-	long sourceLevel = compilerOptions().sourceLevel;
 	if (argLength > 0) {
 		Argument argument = argTypes[--argLength];
 		if (argument.isVarArgs() && sourceLevel >= ClassFileConstants.JDK1_5)
@@ -736,4 +759,65 @@ public Binding checkRedundantDefaultNullness(int nullBits, int sourceStart) {
 		return null;
 	}
 // SH}
+public boolean shouldCheckAPILeaks(ReferenceBinding declaringClass, boolean memberIsPublic) {
+	if (environment().useModuleSystem)
+		return memberIsPublic && declaringClass.isPublic() && declaringClass.fPackage.isExported();
+	return false;
+}
+public void detectAPILeaks(ASTNode typeNode, TypeBinding type) {
+	if (environment().useModuleSystem) {
+		// NB: using an ASTVisitor yields more precise locations than a TypeBindingVisitor would
+		ASTVisitor visitor = new ASTVisitor() {
+			@Override
+			public boolean visit(SingleTypeReference typeReference, BlockScope scope) {
+				if (typeReference.resolvedType instanceof ReferenceBinding)
+					checkType((ReferenceBinding) typeReference.resolvedType, typeReference.sourceStart, typeReference.sourceEnd);
+				return true;
+			}
+			@Override
+			public boolean visit(QualifiedTypeReference typeReference, BlockScope scope) {
+				if (typeReference.resolvedType instanceof ReferenceBinding)
+					checkType((ReferenceBinding) typeReference.resolvedType, typeReference.sourceStart, typeReference.sourceEnd);
+				return true;
+			}
+			@Override
+			public boolean visit(ArrayTypeReference typeReference, BlockScope scope) {
+				TypeBinding leafComponentType = typeReference.resolvedType.leafComponentType();
+				if (leafComponentType instanceof ReferenceBinding)
+					checkType((ReferenceBinding) leafComponentType, typeReference.sourceStart, typeReference.originalSourceEnd);
+				return true;
+			}
+			private void checkType(ReferenceBinding referenceBinding, int sourceStart, int sourceEnd) {
+				if (!referenceBinding.isValidBinding())
+					return;
+				ModuleBinding otherModule = referenceBinding.module();
+				if (otherModule == otherModule.environment.javaBaseModule())
+					return; // always accessible
+				if (!isFullyPublic(referenceBinding)) {
+					problemReporter().nonPublicTypeInAPI(referenceBinding, sourceStart, sourceEnd);
+				} else if (!referenceBinding.fPackage.isExported()) {
+					problemReporter().notExportedTypeInAPI(referenceBinding, sourceStart, sourceEnd);
+				} else if (isUnrelatedModule(referenceBinding.fPackage)) {
+					problemReporter().missingRequiresTransitiveForTypeInAPI(referenceBinding, sourceStart, sourceEnd);
+				}
+			}
+			private boolean isFullyPublic(ReferenceBinding referenceBinding) {
+				if (!referenceBinding.isPublic())
+					return false;
+				if (referenceBinding instanceof NestedTypeBinding)
+					return isFullyPublic(((NestedTypeBinding) referenceBinding).enclosingType);
+				return true;
+			}
+			private boolean isUnrelatedModule(PackageBinding fPackage) {
+				ModuleBinding otherModule = fPackage.enclosingModule;
+				ModuleBinding thisModule = module();
+				if (thisModule != otherModule) {
+					return !thisModule.isTransitivelyRequired(otherModule);
+				}
+				return false;
+			}
+		};
+		typeNode.traverse(visitor, this);
+	}
+}
 }

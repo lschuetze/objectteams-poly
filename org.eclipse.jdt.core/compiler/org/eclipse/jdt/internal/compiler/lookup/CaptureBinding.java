@@ -249,6 +249,8 @@ public class CaptureBinding extends TypeVariableBinding {
 						if (this.superclass.isSuperclassOf(substitutedVariableSuperclass)) {
 							this.setSuperClass(substitutedVariableSuperclass);
 						}
+						// TODO: there are cases were we need to compute glb(capturedWildcardBound, substitutedVariableSuperclass)
+						//       but then when glb (perhaps triggered inside setFirstBound()) fails, how to report the error??
 					}
 					this.setSuperInterfaces(substitutedVariableInterfaces);
 				}

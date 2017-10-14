@@ -2011,8 +2011,13 @@ public final boolean isUsed() {
  * Answer true if the receiver is deprecated (or any of its enclosing types)
  */
 public final boolean isViewedAsDeprecated() {
-	return (this.modifiers & (ClassFileConstants.AccDeprecated | ExtraCompilerModifiers.AccDeprecatedImplicitly)) != 0
-			|| getPackage().isViewedAsDeprecated();
+	if ((this.modifiers & (ClassFileConstants.AccDeprecated | ExtraCompilerModifiers.AccDeprecatedImplicitly)) != 0)
+		return true;
+	if (getPackage().isViewedAsDeprecated()) {
+		this.tagBits |= (getPackage().tagBits & TagBits.AnnotationTerminallyDeprecated);
+		return true;
+	}
+	return false;
 }
 
 public ReferenceBinding[] memberTypes() {
@@ -2448,7 +2453,7 @@ protected MethodBinding [] getInterfaceAbstractContracts(Scope scope, boolean re
 	LookupEnvironment environment = scope.environment();
 	for (int i = 0, length = methods == null ? 0 : methods.length; i < length; i++) {
 		final MethodBinding method = methods[i];
-		if (method == null || method.isStatic() || method.redeclaresPublicObjectMethod(scope)) 
+		if (method == null || method.isStatic() || method.redeclaresPublicObjectMethod(scope) || method.isPrivate()) 
 			continue;
 		if (!method.isValidBinding()) 
 			throw new InvalidInputException("Not a functional interface"); //$NON-NLS-1$
@@ -2670,5 +2675,10 @@ public static boolean isConsistentIntersection(TypeBinding[] intersectingTypes) 
 			return false;
 	}
 	return true;
+}
+public ModuleBinding module() {
+	if (this.fPackage != null)
+		return this.fPackage.enclosingModule;
+	return null;
 }
 }
