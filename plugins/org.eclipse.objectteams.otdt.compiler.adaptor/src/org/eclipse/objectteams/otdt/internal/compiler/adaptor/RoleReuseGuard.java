@@ -20,6 +20,7 @@ import org.eclipse.jdt.core.compiler.CharOperation;
 import org.eclipse.jdt.internal.compiler.classfmt.ClassFileStruct;
 import org.eclipse.jdt.internal.compiler.env.AccessRestriction;
 import org.eclipse.jdt.internal.compiler.env.IBinaryType;
+import org.eclipse.jdt.internal.compiler.lookup.ModuleBinding;
 import org.eclipse.jdt.internal.compiler.lookup.PackageBinding;
 import org.eclipse.jdt.internal.compiler.lookup.ReferenceBinding;
 import org.eclipse.objectteams.otdt.core.compiler.IOTConstants;
@@ -119,7 +120,7 @@ public team class RoleReuseGuard
 	
 	protected class SafeEnvironment playedBy LookupEnvironment {
 		ReferenceBinding askForType(char[][] typeName) 
-			<- replace ReferenceBinding askForType(char[][] typeName);
+			<- replace ReferenceBinding askForType(char[][] typeName, ModuleBinding module);
 		@SuppressWarnings("basecall")
 		callin ReferenceBinding askForType(char[][] typeName) {
 			try {
