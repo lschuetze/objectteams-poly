@@ -53,7 +53,7 @@ public abstract class OTJavaElement extends Member implements IOTJavaElement
     // -  org.eclipse.objectteams.otdt.metrics.core.internal.OTCore (unused!)
 
 	// Used for handle identifier
-    public static final char OTEM_METHODMAPPING = '`';
+    public static final char OTEM_METHODMAPPING = '§';
     public static final String METHODMAPPING = Character.toString(OTEM_METHODMAPPING);
 
 	private int          type;

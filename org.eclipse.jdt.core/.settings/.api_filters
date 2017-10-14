@@ -1,14 +1,5 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <component id="org.eclipse.jdt.core" version="2">
-    <resource path="model/org/eclipse/jdt/core/JavaCore.java" type="org.eclipse.jdt.core.JavaCore">
-        <filter comment="since is using OT version instead of JDT version" id="1141899266">
-            <message_arguments>
-                <message_argument value="2.0 (OTDT)"/>
-                <message_argument value="3.13 (OTDT)"/>
-                <message_argument value="AST_INCLUDES_ROLE_FILES"/>
-            </message_arguments>
-        </filter>
-    </resource>
     <resource path="META-INF/MANIFEST.MF">
         <filter id="923795461">
             <message_arguments>
@@ -665,93 +656,12 @@
             </message_arguments>
         </filter>
     </resource>
-    <resource path="dom/org/eclipse/jdt/core/dom/ExportsDirective.java" type="org.eclipse.jdt.core.dom.ExportsDirective">
-        <filter id="1108344834">
-            <message_arguments>
-                <message_argument value="3.14"/>
-                <message_argument value="3.13"/>
-                <message_argument value="org.eclipse.jdt.core.dom.ExportsDirective"/>
-            </message_arguments>
-        </filter>
-    </resource>
     <resource path="dom/org/eclipse/jdt/core/dom/IBinding.java" type="org.eclipse.jdt.core.dom.IBinding">
         <filter id="1209008130">
             <message_arguments>
                 <message_argument value="3.14"/>
                 <message_argument value="3.13"/>
                 <message_argument value="MODULE"/>
-            </message_arguments>
-        </filter>
-    </resource>
-    <resource path="dom/org/eclipse/jdt/core/dom/IModuleBinding.java" type="org.eclipse.jdt.core.dom.IModuleBinding">
-        <filter id="1108344834">
-            <message_arguments>
-                <message_argument value="3.14"/>
-                <message_argument value="3.13"/>
-                <message_argument value="org.eclipse.jdt.core.dom.IModuleBinding"/>
-            </message_arguments>
-        </filter>
-    </resource>
-    <resource path="dom/org/eclipse/jdt/core/dom/ModuleDeclaration.java" type="org.eclipse.jdt.core.dom.ModuleDeclaration">
-        <filter id="1108344834">
-            <message_arguments>
-                <message_argument value="3.14"/>
-                <message_argument value="3.13"/>
-                <message_argument value="org.eclipse.jdt.core.dom.ModuleDeclaration"/>
-            </message_arguments>
-        </filter>
-    </resource>
-    <resource path="dom/org/eclipse/jdt/core/dom/ModuleDirective.java" type="org.eclipse.jdt.core.dom.ModuleDirective">
-        <filter id="1108344834">
-            <message_arguments>
-                <message_argument value="3.14"/>
-                <message_argument value="3.13"/>
-                <message_argument value="org.eclipse.jdt.core.dom.ModuleDirective"/>
-            </message_arguments>
-        </filter>
-    </resource>
-    <resource path="dom/org/eclipse/jdt/core/dom/ModuleModifier.java" type="org.eclipse.jdt.core.dom.ModuleModifier">
-        <filter id="1108344834">
-            <message_arguments>
-                <message_argument value="3.14"/>
-                <message_argument value="3.13"/>
-                <message_argument value="org.eclipse.jdt.core.dom.ModuleModifier"/>
-            </message_arguments>
-        </filter>
-    </resource>
-    <resource path="dom/org/eclipse/jdt/core/dom/ModulePackageAccess.java" type="org.eclipse.jdt.core.dom.ModulePackageAccess">
-        <filter id="1108344834">
-            <message_arguments>
-                <message_argument value="3.14"/>
-                <message_argument value="3.13"/>
-                <message_argument value="org.eclipse.jdt.core.dom.ModulePackageAccess"/>
-            </message_arguments>
-        </filter>
-    </resource>
-    <resource path="dom/org/eclipse/jdt/core/dom/OpensDirective.java" type="org.eclipse.jdt.core.dom.OpensDirective">
-        <filter id="1108344834">
-            <message_arguments>
-                <message_argument value="3.14"/>
-                <message_argument value="3.13"/>
-                <message_argument value="org.eclipse.jdt.core.dom.OpensDirective"/>
-            </message_arguments>
-        </filter>
-    </resource>
-    <resource path="dom/org/eclipse/jdt/core/dom/ProvidesDirective.java" type="org.eclipse.jdt.core.dom.ProvidesDirective">
-        <filter id="1108344834">
-            <message_arguments>
-                <message_argument value="3.14"/>
-                <message_argument value="3.13"/>
-                <message_argument value="org.eclipse.jdt.core.dom.ProvidesDirective"/>
-            </message_arguments>
-        </filter>
-    </resource>
-    <resource path="dom/org/eclipse/jdt/core/dom/RequiresDirective.java" type="org.eclipse.jdt.core.dom.RequiresDirective">
-        <filter id="1108344834">
-            <message_arguments>
-                <message_argument value="3.14"/>
-                <message_argument value="3.13"/>
-                <message_argument value="org.eclipse.jdt.core.dom.RequiresDirective"/>
             </message_arguments>
         </filter>
     </resource>
@@ -766,15 +676,6 @@
                 <message_argument value="3.14"/>
                 <message_argument value="3.13"/>
                 <message_argument value="RESOURCES2_PROPERTY"/>
-            </message_arguments>
-        </filter>
-    </resource>
-    <resource path="dom/org/eclipse/jdt/core/dom/UsesDirective.java" type="org.eclipse.jdt.core.dom.UsesDirective">
-        <filter id="1108344834">
-            <message_arguments>
-                <message_argument value="3.14"/>
-                <message_argument value="3.13"/>
-                <message_argument value="org.eclipse.jdt.core.dom.UsesDirective"/>
             </message_arguments>
         </filter>
     </resource>
@@ -803,6 +704,13 @@
         </filter>
     </resource>
     <resource path="model/org/eclipse/jdt/core/CompletionProposal.java" type="org.eclipse.jdt.core.CompletionProposal">
+        <filter comment="make room for new JDT constants" id="388194388">
+            <message_arguments>
+                <message_argument value="org.eclipse.jdt.core.CompletionProposal"/>
+                <message_argument value="OVERRIDE_ROLE_DECLARATION"/>
+                <message_argument value="28"/>
+            </message_arguments>
+        </filter>
         <filter id="1141899266">
             <message_arguments>
                 <message_argument value="3.14"/>
@@ -903,33 +811,6 @@
             </message_arguments>
         </filter>
     </resource>
-    <resource path="model/org/eclipse/jdt/core/IModularClassFile.java" type="org.eclipse.jdt.core.IModularClassFile">
-        <filter id="1108344834">
-            <message_arguments>
-                <message_argument value="3.14"/>
-                <message_argument value="3.13"/>
-                <message_argument value="org.eclipse.jdt.core.IModularClassFile"/>
-            </message_arguments>
-        </filter>
-    </resource>
-    <resource path="model/org/eclipse/jdt/core/IModuleDescription.java" type="org.eclipse.jdt.core.IModuleDescription">
-        <filter id="1108344834">
-            <message_arguments>
-                <message_argument value="3.14"/>
-                <message_argument value="3.13"/>
-                <message_argument value="org.eclipse.jdt.core.IModuleDescription"/>
-            </message_arguments>
-        </filter>
-    </resource>
-    <resource path="model/org/eclipse/jdt/core/IOrdinaryClassFile.java" type="org.eclipse.jdt.core.IOrdinaryClassFile">
-        <filter id="1108344834">
-            <message_arguments>
-                <message_argument value="3.14"/>
-                <message_argument value="3.13"/>
-                <message_argument value="org.eclipse.jdt.core.IOrdinaryClassFile"/>
-            </message_arguments>
-        </filter>
-    </resource>
     <resource path="model/org/eclipse/jdt/core/IPackageFragment.java" type="org.eclipse.jdt.core.IPackageFragment">
         <filter id="1209008130">
             <message_arguments>
@@ -988,6 +869,13 @@
         </filter>
     </resource>
     <resource path="model/org/eclipse/jdt/core/JavaCore.java" type="org.eclipse.jdt.core.JavaCore">
+        <filter comment="since is using OT version instead of JDT version" id="1141899266">
+            <message_arguments>
+                <message_argument value="2.0 (OTDT)"/>
+                <message_argument value="3.13 (OTDT)"/>
+                <message_argument value="AST_INCLUDES_ROLE_FILES"/>
+            </message_arguments>
+        </filter>
         <filter id="1141899266">
             <message_arguments>
                 <message_argument value="3.14"/>
@@ -1095,15 +983,6 @@
             </message_arguments>
         </filter>
     </resource>
-    <resource path="model/org/eclipse/jdt/core/util/IConstantPoolEntry3.java" type="org.eclipse.jdt.core.util.IConstantPoolEntry3">
-        <filter id="1108344834">
-            <message_arguments>
-                <message_argument value="3.14"/>
-                <message_argument value="3.13"/>
-                <message_argument value="org.eclipse.jdt.core.util.IConstantPoolEntry3"/>
-            </message_arguments>
-        </filter>
-    </resource>
     <resource path="model/org/eclipse/jdt/core/util/IModifierConstants.java" type="org.eclipse.jdt.core.util.IModifierConstants">
         <filter id="1209008130">
             <message_arguments>
@@ -1134,75 +1013,12 @@
             </message_arguments>
         </filter>
     </resource>
-    <resource path="model/org/eclipse/jdt/core/util/IModuleAttribute.java" type="org.eclipse.jdt.core.util.IModuleAttribute">
-        <filter id="1108344834">
-            <message_arguments>
-                <message_argument value="3.14"/>
-                <message_argument value="3.13"/>
-                <message_argument value="org.eclipse.jdt.core.util.IModuleAttribute"/>
-            </message_arguments>
-        </filter>
-    </resource>
-    <resource path="model/org/eclipse/jdt/core/util/IModuleMainClassAttribute.java" type="org.eclipse.jdt.core.util.IModuleMainClassAttribute">
-        <filter id="1108344834">
-            <message_arguments>
-                <message_argument value="3.14"/>
-                <message_argument value="3.13"/>
-                <message_argument value="org.eclipse.jdt.core.util.IModuleMainClassAttribute"/>
-            </message_arguments>
-        </filter>
-    </resource>
-    <resource path="model/org/eclipse/jdt/core/util/IModulePackagesAttribute.java" type="org.eclipse.jdt.core.util.IModulePackagesAttribute">
-        <filter id="1108344834">
-            <message_arguments>
-                <message_argument value="3.14"/>
-                <message_argument value="3.13"/>
-                <message_argument value="org.eclipse.jdt.core.util.IModulePackagesAttribute"/>
-            </message_arguments>
-        </filter>
-    </resource>
-    <resource path="model/org/eclipse/jdt/core/util/IPackageVisibilityInfo.java" type="org.eclipse.jdt.core.util.IPackageVisibilityInfo">
-        <filter id="1108344834">
-            <message_arguments>
-                <message_argument value="3.14"/>
-                <message_argument value="3.13"/>
-                <message_argument value="org.eclipse.jdt.core.util.IPackageVisibilityInfo"/>
-            </message_arguments>
-        </filter>
-    </resource>
-    <resource path="model/org/eclipse/jdt/core/util/IProvidesInfo.java" type="org.eclipse.jdt.core.util.IProvidesInfo">
-        <filter id="1108344834">
-            <message_arguments>
-                <message_argument value="3.14"/>
-                <message_argument value="3.13"/>
-                <message_argument value="org.eclipse.jdt.core.util.IProvidesInfo"/>
-            </message_arguments>
-        </filter>
-    </resource>
-    <resource path="model/org/eclipse/jdt/core/util/IRequiresInfo.java" type="org.eclipse.jdt.core.util.IRequiresInfo">
-        <filter id="1108344834">
-            <message_arguments>
-                <message_argument value="3.14"/>
-                <message_argument value="3.13"/>
-                <message_argument value="org.eclipse.jdt.core.util.IRequiresInfo"/>
-            </message_arguments>
-        </filter>
-    </resource>
     <resource path="search/org/eclipse/jdt/core/search/IJavaSearchConstants.java" type="org.eclipse.jdt.core.search.IJavaSearchConstants">
         <filter id="1209008130">
             <message_arguments>
                 <message_argument value="3.14"/>
                 <message_argument value="3.13"/>
                 <message_argument value="MODULE"/>
-            </message_arguments>
-        </filter>
-    </resource>
-    <resource path="search/org/eclipse/jdt/core/search/ModuleReferenceMatch.java" type="org.eclipse.jdt.core.search.ModuleReferenceMatch">
-        <filter id="1108344834">
-            <message_arguments>
-                <message_argument value="3.14"/>
-                <message_argument value="3.13"/>
-                <message_argument value="org.eclipse.jdt.core.search.ModuleReferenceMatch"/>
             </message_arguments>
         </filter>
     </resource>

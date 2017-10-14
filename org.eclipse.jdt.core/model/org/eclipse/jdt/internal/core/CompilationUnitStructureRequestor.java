@@ -559,7 +559,7 @@ public void enterType(TypeInfo typeInfo) {
 
  	String strBaseClassAnchor =
  		(typeInfo.baseclassAnchor == null) ? null : String.valueOf(typeInfo.baseclassAnchor);
-	OTModelManager.getSharedInstance().addType(handle,
+	OTModelManager.getSharedInstance().addType((IType) handle,
 											   typeInfo.modifiers,
 											   strBaseClassName,
 											   strBaseClassAnchor,
