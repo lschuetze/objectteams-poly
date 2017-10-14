@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2016 IBM Corporation and others.
+ * Copyright (c) 2000, 2017 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -45,6 +45,8 @@ private static Class[] getAllTestClasses() {
 
 		// Project & Root API unit tests
 		JavaProjectTests.class,
+		// Modularity tests (Java 9)
+		ModuleBuilderTests.class,
 
 		// Compilation unit tests
 		CompilationUnitTests.class,
@@ -202,9 +204,13 @@ private static Class[] getAllTestClasses() {
 		NullAnnotationModelTests.class,
 		ExternalAnnotations17Test.class,
 		ExternalAnnotations18Test.class,
+		ExternalAnnotations9Test.class,
 
 		// Java model changes related to Java 8
 		JavaElement8Tests.class,
+
+		Java9ElementTests.class,
+		ResolveTests9.class,
 	};
 
 	Class[] deprecatedClasses = getDeprecatedJDOMTestClasses();

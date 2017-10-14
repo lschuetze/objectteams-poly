@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2004, 2015 IBM Corporation and others.
+ * Copyright (c) 2004, 2017 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -77,6 +77,13 @@ public class ASTModelBridgeTests extends AbstractASTTests {
 			expectedElement,
 			element
 		);
+	}
+
+	/**
+	 * @deprecated
+	 */
+	static int getJLS8() {
+		return AST.JLS8;
 	}
 
 	/*
@@ -378,7 +385,7 @@ public class ASTModelBridgeTests extends AbstractASTTests {
 	 * Ensures that the IJavaElement of an IBinding representing an annotation of a binary member type is correct.
 	 */
 	public void testAnnotation8() throws Exception {
-		IClassFile classFile = getClassFile("P", "/P/lib.jar", "p", "Q.class");
+		IOrdinaryClassFile classFile = getClassFile("P", "/P/lib.jar", "p", "Q.class");
 		ASTNode node = buildAST(classFile);
 		IBinding binding = ((Annotation) node).resolveAnnotationBinding();
 		IJavaElement element = binding.getJavaElement();
@@ -532,7 +539,7 @@ public class ASTModelBridgeTests extends AbstractASTTests {
 		this.workingCopies = new ICompilationUnit[2];
 		this.workingCopies[1] = getWorkingCopy("/P/src/Bar.java", barSource, this.wcOwner);
 		
-		ASTParser parser = ASTParser.newParser(AST.JLS8);
+		ASTParser parser = ASTParser.newParser(getJLS8());
 		parser.setProject(getJavaProject("P"));
 		parser.setSource(this.workingCopies[1]);
 		parser.setResolveBindings(true);
@@ -634,7 +641,7 @@ public class ASTModelBridgeTests extends AbstractASTTests {
 	 * (regression test for bug 91445 IMethodBinding.getJavaElement() returns an "unopen" IMethod)
 	 */
 	public void testBinaryMethod() throws JavaModelException {
-		IClassFile classFile = getClassFile("P", getExternalJCLPathString("1.5"), "java.lang", "Enum.class");
+		IOrdinaryClassFile classFile = getClassFile("P", getExternalJCLPathString("1.5"), "java.lang", "Enum.class");
 		String source = classFile.getSource();
 		MarkerInfo markerInfo = new MarkerInfo(source);
 		markerInfo.astStarts = new int[] {source.indexOf("protected Enum")};
@@ -654,7 +661,7 @@ public class ASTModelBridgeTests extends AbstractASTTests {
 	 * (regression test for bug 119249 codeResolve, search, etc. don't work on constructor of binary inner class)
 	 */
 	public void testBinaryMemberTypeConstructor() throws JavaModelException {
-		IClassFile classFile = getClassFile("P", "/P/lib.jar", "p", "W$Member.class");
+		IOrdinaryClassFile classFile = getClassFile("P", "/P/lib.jar", "p", "W$Member.class");
 		ASTNode node = buildAST(classFile);
 		IBinding binding = ((MethodDeclaration) node).resolveBinding();
 		IJavaElement element = binding.getJavaElement();
@@ -669,7 +676,7 @@ public class ASTModelBridgeTests extends AbstractASTTests {
 	 * Ensures that the IJavaElement of an IBinding representing a type coming from a class file is correct.
 	 */
 	public void testBinaryType() throws JavaModelException {
-		IClassFile classFile = getClassFile("P", getExternalJCLPathString("1.5"), "java.lang", "String.class");
+		IOrdinaryClassFile classFile = getClassFile("P", getExternalJCLPathString("1.5"), "java.lang", "String.class");
 		String source = classFile.getSource();
 		MarkerInfo markerInfo = new MarkerInfo(source);
 		markerInfo.astStarts = new int[] {source.indexOf("public")};
@@ -690,7 +697,7 @@ public class ASTModelBridgeTests extends AbstractASTTests {
 	 * (regression test for bug 136016 [refactoring] CCE during Use Supertype refactoring)
 	 */
 	public void testBinaryType2() throws CoreException {
-		IClassFile classFile = getClassFile("P", "lib.jar", "p", "ABC.class"); // class with no references
+		IOrdinaryClassFile classFile = getClassFile("P", "lib.jar", "p", "ABC.class"); // class with no references
 
 		// ensure classfile is open
 		classFile.open(null);
@@ -763,7 +770,7 @@ public class ASTModelBridgeTests extends AbstractASTTests {
 	 * (regression test for bug 100636 [model] Can't find overriden methods of protected nonstatic inner class.)
 	 */
 	public void testBinaryMemberTypeFromAnonymousClassFile1() throws JavaModelException {
-		IClassFile classFile = getClassFile("P", "/P/lib.jar", "p", "Z$1.class");
+		IOrdinaryClassFile classFile = getClassFile("P", "/P/lib.jar", "p", "Z$1.class");
 		ASTNode node = buildAST(classFile);
 		IBinding binding = ((TypeDeclaration) node).resolveBinding();
 		IJavaElement element = binding.getJavaElement();
@@ -779,7 +786,7 @@ public class ASTModelBridgeTests extends AbstractASTTests {
 	 * (regression test for bug 100636 [model] Can't find overriden methods of protected nonstatic inner class.)
 	 */
 	public void testBinaryMemberTypeFromAnonymousClassFile2() throws JavaModelException {
-		IClassFile classFile = getClassFile("P", "/P/lib.jar", "", "Z$1.class");
+		IOrdinaryClassFile classFile = getClassFile("P", "/P/lib.jar", "", "Z$1.class");
 		ASTNode node = buildAST(classFile);
 		IBinding binding = ((TypeDeclaration) node).resolveBinding();
 		IJavaElement element = binding.getJavaElement();
@@ -1284,7 +1291,7 @@ public class ASTModelBridgeTests extends AbstractASTTests {
 			"package pack;");
 		IJavaProject javaProject = getJavaProject("P");
 		IPackageFragment pack = javaProject.findPackageFragment(new Path("/P/lib/pack"));
-		IType type = pack.getClassFile("package-info.class").getType();
+		IType type = pack.getOrdinaryClassFile("package-info.class").getType();
 		ASTParser parser = ASTParser.newParser(JLS3_INTERNAL);
 		parser.setProject(javaProject);
 		IJavaElement[] elements = new IJavaElement[] {type};
@@ -1309,7 +1316,7 @@ public class ASTModelBridgeTests extends AbstractASTTests {
 				"}");
 		this.workingCopy.makeConsistent(null);
 		IMethod method = this.workingCopy.getType("X").getMethod("foo", new String[]{"QString;", "I"});
-		ASTParser parser = ASTParser.newParser(AST.JLS8);
+		ASTParser parser = ASTParser.newParser(getJLS8());
 		parser.setProject(getJavaProject("P"));
 		IBinding[] bindings = parser.createBindings(method.getParameters(), null);
 		assertBindingsEqual(
@@ -1328,7 +1335,7 @@ public class ASTModelBridgeTests extends AbstractASTTests {
 				"  void foo(String str, int i) {}\n" +
 				"}");
 		IMethod method = getClassFile("/P/lib/A.class").getType().getMethod("foo", new String[] {"Ljava.lang.String;", "I"});
-		ASTParser parser = ASTParser.newParser(AST.JLS8);
+		ASTParser parser = ASTParser.newParser(getJLS8());
 		parser.setProject(getJavaProject("P"));
 		IBinding[] bindings = parser.createBindings(method.getParameters(), null);
 		assertBindingsEqual(
@@ -1360,7 +1367,7 @@ public class ASTModelBridgeTests extends AbstractASTTests {
 		);
 
 		IJavaElement elem= this.workingCopies[0].codeSelect(xSource.indexOf("foo"), 0)[0];
-		ASTParser parser = ASTParser.newParser(AST.JLS8);
+		ASTParser parser = ASTParser.newParser(getJLS8());
 		parser.setProject(getJavaProject("P"));
 		IBinding[] bindings = parser.createBindings(new IJavaElement[]{ elem }, null);
 		assertBindingsEqual(
@@ -1392,7 +1399,7 @@ public class ASTModelBridgeTests extends AbstractASTTests {
 			IType typeA = javaProject.findType("p.A");
 			
 			IJavaElement[] elems= typeA.getMethod("foo", new String[]{"I", "Z"}).getParameters();
-			ASTParser parser = ASTParser.newParser(AST.JLS8);
+			ASTParser parser = ASTParser.newParser(getJLS8());
 			parser.setProject(javaProject);
 			IBinding[] bindings = parser.createBindings(elems, null);
 			assertBindingsEqual(
@@ -2622,7 +2629,7 @@ public class ASTModelBridgeTests extends AbstractASTTests {
 					javaProject.findType("lib.A").getTypeParameters()[0],
 					javaProject.findType("lib.A").getTypeParameters()[1]
 				};
-			ASTParser parser = ASTParser.newParser(AST.JLS8);
+			ASTParser parser = ASTParser.newParser(getJLS8());
 			parser.setProject(javaProject);
 			IBinding[] bindings = parser.createBindings(elements, null);
 			assertBindingsEqual(
@@ -2655,7 +2662,7 @@ public class ASTModelBridgeTests extends AbstractASTTests {
 					method.getTypeParameters()[0],
 					method.getTypeParameters()[1]
 				};
-			ASTParser parser = ASTParser.newParser(AST.JLS8);
+			ASTParser parser = ASTParser.newParser(getJLS8());
 			parser.setProject(javaProject);
 			IBinding[] bindings = parser.createBindings(elements, null);
 			assertBindingsEqual(

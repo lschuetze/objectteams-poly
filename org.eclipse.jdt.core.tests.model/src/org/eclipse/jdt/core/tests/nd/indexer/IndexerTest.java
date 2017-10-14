@@ -26,6 +26,7 @@ import org.eclipse.core.runtime.SubMonitor;
 import org.eclipse.jdt.core.IClassFile;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaProject;
+import org.eclipse.jdt.core.IOrdinaryClassFile;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.IParent;
 import org.eclipse.jdt.core.tests.model.AbstractJavaModelTests;
@@ -199,6 +200,7 @@ public class IndexerTest extends AbstractJavaModelTests {
 					collectAllClassFiles(result, next);
 					iterationMon.setWorkRemaining(result.size());
 					for (IClassFile nextClass : result) {
+						if (!(nextClass instanceof IOrdinaryClassFile)) continue;
 						SubMonitor classMon = iterationMon.split(1);
 						BinaryTypeDescriptor descriptor = BinaryTypeFactory.createDescriptor(nextClass);
 						IndexBinaryType indexedBinaryType = (IndexBinaryType)BinaryTypeFactory.readFromIndex(localIndex, descriptor, classMon);

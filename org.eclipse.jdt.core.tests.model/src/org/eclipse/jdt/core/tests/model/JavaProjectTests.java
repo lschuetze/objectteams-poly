@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2016 IBM Corporation and others.
+ * Copyright (c) 2000, 2017 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -52,13 +52,13 @@ import org.eclipse.jdt.core.IJavaModelMarker;
 import org.eclipse.jdt.core.IJavaModelStatusConstants;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IMethod;
+import org.eclipse.jdt.core.IOrdinaryClassFile;
 import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.WorkingCopyOwner;
-import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.ASTParser;
 import org.eclipse.jdt.internal.compiler.classfmt.ClassFileConstants;
@@ -516,7 +516,7 @@ public void testArchiveClassFileCorrespondingResource() throws JavaModelExceptio
  * has a corresponding resource.
  */
 public void testBinaryTypeCorrespondingResource() throws CoreException {
-	IClassFile element= getClassFile("/JavaProjectLibTests/lib/p/Y.class");
+	IOrdinaryClassFile element= getClassFile("/JavaProjectLibTests/lib/p/Y.class");
 	IType type= element.getType();
 	IResource corr= type.getCorrespondingResource();
 	assertTrue("incorrect corresponding resource", corr == null);
@@ -2633,7 +2633,7 @@ public void testBug351697() throws Exception {
 		proj.getProject().build(IncrementalProjectBuilder.FULL_BUILD, null);
 
 		try {
-			ASTParser parser= ASTParser.newParser(AST.JLS8);
+			ASTParser parser= ASTParser.newParser(AST_INTERNAL_JLS9);
 			parser.setSource(unit);
 			parser.setResolveBindings(true);
 			ASTNode node = parser.createAST(null);

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2015 IBM Corporation and others.
+ * Copyright (c) 2000, 2017 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -38,6 +38,9 @@ import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IMember;
 import org.eclipse.jdt.core.IMethod;
+import org.eclipse.jdt.core.IModularClassFile;
+import org.eclipse.jdt.core.IModuleDescription;
+import org.eclipse.jdt.core.IOrdinaryClassFile;
 import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.ISourceRange;
@@ -49,6 +52,7 @@ import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.ASTParser;
 import org.eclipse.jdt.internal.compiler.classfmt.ClassFileConstants;
+import org.eclipse.jdt.internal.compiler.impl.CompilerOptions;
 import org.eclipse.jdt.internal.core.ExternalFoldersManager;
 import org.eclipse.jdt.internal.core.JarPackageFragmentRoot;
 import org.eclipse.jdt.internal.core.JavaModelManager;
@@ -69,6 +73,14 @@ public class AttachSourceTests extends ModifyingResourceTests {
 	}
 
 	public static Test suite() {
+		String javaVersion = System.getProperty("java.version");
+		if (javaVersion.length() > 3) {
+			javaVersion = javaVersion.substring(0, 3);
+		}
+		long jdkLevel = CompilerOptions.versionToJdkLevel(javaVersion);
+		if (jdkLevel >= ClassFileConstants.JDK9) {
+			isJRE9 = true;
+		}
 		return buildModelTestSuite(AttachSourceTests.class);
 	}
 
@@ -229,11 +241,11 @@ public void tearDownSuite() throws Exception {
  */
 public void testASTParsing() throws JavaModelException {
 	attachSource(this.pkgFragmentRoot, "/AttachSourceTests/attachsrc.zip", "");
-	IClassFile classFile = this.pkgFragmentRoot.getPackageFragment("x.y").getClassFile("A.class");
+	IClassFile classFile = this.pkgFragmentRoot.getPackageFragment("x.y").getOrdinaryClassFile("A.class");
 	ASTNode node = runConversion(classFile, true);
 	assertNotNull("No node", node);
 	attachSource(this.pkgFragmentRoot, null, null);
-	IClassFile cf = this.pkgFragmentRoot.getPackageFragment("x.y").getClassFile("A.class");
+	IOrdinaryClassFile cf = this.pkgFragmentRoot.getPackageFragment("x.y").getOrdinaryClassFile("A.class");
 	assertTrue("source code should no longer exist for A", cf.getSource() == null);
 	try {
 		node = runConversion(classFile, true);
@@ -248,11 +260,11 @@ public void testASTParsing() throws JavaModelException {
  */
 public void testASTParsing2() throws JavaModelException {
 	attachSource(this.pkgFragmentRoot, "/AttachSourceTests/attachsrc.zip", "");
-	IClassFile classFile = this.pkgFragmentRoot.getPackageFragment("x.y").getClassFile("A.class");
+	IClassFile classFile = this.pkgFragmentRoot.getPackageFragment("x.y").getOrdinaryClassFile("A.class");
 	ASTNode node = runConversion(classFile, false);
 	assertNotNull("No node", node);
 	attachSource(this.pkgFragmentRoot, null, null);
-	IClassFile cf = this.pkgFragmentRoot.getPackageFragment("x.y").getClassFile("A.class");
+	IOrdinaryClassFile cf = this.pkgFragmentRoot.getPackageFragment("x.y").getOrdinaryClassFile("A.class");
 	assertTrue("source code should no longer exist for A", cf.getSource() == null);
 	try {
 		node = runConversion(classFile, false);
@@ -266,7 +278,7 @@ public void testASTParsing2() throws JavaModelException {
  * (regression test for bug 23292 Must restart Eclipse after debug of source in .zip is updated)
  */
 public void testChangeSourceAttachmentFile() throws CoreException {
-	IClassFile cf = this.pkgFragmentRoot.getPackageFragment("x.y").getClassFile("A.class");
+	IOrdinaryClassFile cf = this.pkgFragmentRoot.getPackageFragment("x.y").getOrdinaryClassFile("A.class");
 	IMethod method = cf.getType().getMethod("foo", new String[] {});
 
 	// check initial source
@@ -305,7 +317,7 @@ public void testChangeSourceAttachmentFile() throws CoreException {
  * Ensure that a class file with an attached source can retrieve its children given a source index.
  */
 public void testClassFileGetElementAt01() throws JavaModelException {
-	IClassFile classFile = this.pkgFragmentRoot.getPackageFragment("x.y").getClassFile("A.class");
+	IClassFile classFile = this.pkgFragmentRoot.getPackageFragment("x.y").getOrdinaryClassFile("A.class");
 	String source = classFile.getSource();
 	IJavaElement element = classFile.getElementAt(source.indexOf("class A"));
 	assertElementExists(
@@ -317,7 +329,7 @@ public void testClassFileGetElementAt01() throws JavaModelException {
  * Ensure that a class file with an attached source can retrieve its children given a source index.
  */
 public void testClassFileGetElementAt02() throws JavaModelException {
-	IClassFile classFile = this.pkgFragmentRoot.getPackageFragment("x.y").getClassFile("A.class");
+	IClassFile classFile = this.pkgFragmentRoot.getPackageFragment("x.y").getOrdinaryClassFile("A.class");
 	String source = classFile.getSource();
 	IJavaElement element = classFile.getElementAt(source.indexOf("public A"));
 	assertElementExists(
@@ -329,7 +341,7 @@ public void testClassFileGetElementAt02() throws JavaModelException {
  * Ensure that a class file with an attached source can retrieve its children given a source index.
  */
 public void testClassFileGetElementAt03() throws JavaModelException {
-	IClassFile classFile = this.pkgFragmentRoot.getPackageFragment("x.y").getClassFile("A.class");
+	IClassFile classFile = this.pkgFragmentRoot.getPackageFragment("x.y").getOrdinaryClassFile("A.class");
 	String source = classFile.getSource();
 	IJavaElement element = classFile.getElementAt(source.indexOf("void foo"));
 	assertElementExists(
@@ -347,7 +359,7 @@ public void testClassFileGetElementAt04() throws JavaModelException {
 	attachSource(root, "/AttachSourceTests/innerClassessrc.zip", null);
 	IPackageFragment fragment = root.getPackageFragment("inner");
 
-	IClassFile classFile = fragment.getClassFile("X$V.class");
+	IClassFile classFile = fragment.getOrdinaryClassFile("X$V.class");
 	String source = classFile.getSource();
 	IJavaElement element = classFile.getElementAt(source.indexOf("V(String s)"));
 	assertElementExists(
@@ -373,7 +385,7 @@ public void testClassFileInOutput() throws CoreException {
  * the entire CU for "A.java".
  */
 public void testClassRetrieval() throws JavaModelException {
-	IClassFile objectCF = this.pkgFragmentRoot.getPackageFragment("x.y").getClassFile("A.class");
+	IClassFile objectCF = this.pkgFragmentRoot.getPackageFragment("x.y").getOrdinaryClassFile("A.class");
 	assertTrue("source code does not exist for the entire attached compilation unit", objectCF.getSource() != null);
 }
 /**
@@ -381,7 +393,7 @@ public void testClassRetrieval() throws JavaModelException {
  */
 public void testDetachSource() throws JavaModelException {
 	attachSource(this.pkgFragmentRoot, null, null);
-	IClassFile cf = this.pkgFragmentRoot.getPackageFragment("x.y").getClassFile("A.class");
+	IOrdinaryClassFile cf = this.pkgFragmentRoot.getPackageFragment("x.y").getOrdinaryClassFile("A.class");
 	assertTrue("source code should no longer exist for A", cf.getSource() == null);
 	assertTrue("name range should no longer exist for A", cf.getType().getNameRange().getOffset() == -1);
 	assertTrue("source range should no longer exist for A", cf.getType().getSourceRange().getOffset() == -1);
@@ -399,7 +411,7 @@ public void testExternalFolder1() throws CoreException {
 		IJavaProject javaProject = createJavaProject("P2", new String[0], new String[] {"/P1/lib"}, "");
 		IPackageFragmentRoot root = javaProject.getPackageFragmentRoot(lib);
 		attachSource(root, getExternalFolder() + "/src", "");
-		IType type = root.getPackageFragment("p").getClassFile("X.class").getType();
+		IType type = root.getPackageFragment("p").getOrdinaryClassFile("X.class").getType();
 		assertSourceEquals(
 			"Unexpected source",
 			"public class X {\n" +
@@ -422,7 +434,7 @@ public void testExternalFolder2() throws CoreException {
 		IJavaProject javaProject = createJavaProject("P2", new String[0], new String[] {externalLib}, "");
 		IPackageFragmentRoot root = javaProject.getPackageFragmentRoot(externalLib);
 		attachSource(root, "/P1/src", "");
-		IType type = root.getPackageFragment("p").getClassFile("X.class").getType();
+		IType type = root.getPackageFragment("p").getOrdinaryClassFile("X.class").getType();
 		assertSourceEquals(
 			"Unexpected source",
 			"public class X {\n" +
@@ -442,7 +454,7 @@ public void testExternalFolder3() throws CoreException {
 		IJavaProject javaProject = createJavaProject("P", new String[0], new String[] {externalLib}, "");
 		IPackageFragmentRoot root = javaProject.getPackageFragmentRoot(externalLib);
 		attachSource(root, getExternalFolder() + "/src", "");
-		IType type = root.getPackageFragment("p").getClassFile("X.class").getType();
+		IType type = root.getPackageFragment("p").getOrdinaryClassFile("X.class").getType();
 		assertSourceEquals(
 			"Unexpected source",
 			"public class X {\n" +
@@ -480,7 +492,7 @@ public void testExternalFolder4() throws Exception {
 		IJavaProject javaProject = createJavaProject("P", new String[0], new String[] {externalLib}, "");
 		IPackageFragmentRoot root = javaProject.getPackageFragmentRoot(externalLib);
 		attachSource(root, externalFolder + "/src227813", "");
-		IType type = root.getPackageFragment("p").getClassFile("X.class").getType();
+		IType type = root.getPackageFragment("p").getOrdinaryClassFile("X.class").getType();
 		assertSourceEquals(
 			"Unexpected source",
 			"public class X {\n" +
@@ -541,7 +553,7 @@ public void testExternalFolder5() throws Exception {
 		}
 		IPackageFragmentRoot root = javaProject.getPackageFragmentRoot(externalLib);
 		attachSource(root, externalFolder + "/src228639", "");
-		IType type = root.getPackageFragment("p").getClassFile("X.class").getType();
+		IType type = root.getPackageFragment("p").getOrdinaryClassFile("X.class").getType();
 		assertSourceEquals(
 			"Unexpected source",
 			"public class X {\n" +
@@ -564,7 +576,7 @@ public void testZIPArchive1() throws CoreException {
 		IJavaProject javaProject = createJavaProject("P2", new String[0], new String[] {"/P1/lib"}, "");
 		IPackageFragmentRoot root = javaProject.getPackageFragmentRoot(lib);
 		attachSource(root, getExternalFolder() + "/src.abc", "");
-		IType type = root.getPackageFragment("p").getClassFile("X.class").getType();
+		IType type = root.getPackageFragment("p").getOrdinaryClassFile("X.class").getType();
 		assertSourceEquals(
 			"Unexpected source",
 			"public class X {\n" +
@@ -587,7 +599,7 @@ public void testZIPArchive2() throws CoreException {
 		IJavaProject javaProject = createJavaProject("P2", new String[0], new String[] {externalLib}, "");
 		IPackageFragmentRoot root = javaProject.getPackageFragmentRoot(externalLib);
 		attachSource(root, "/P1/src", "");
-		IType type = root.getPackageFragment("p").getClassFile("X.class").getType();
+		IType type = root.getPackageFragment("p").getOrdinaryClassFile("X.class").getType();
 		assertSourceEquals(
 			"Unexpected source",
 			"public class X {\n" +
@@ -607,7 +619,7 @@ public void testZIPArchive3() throws CoreException {
 		IJavaProject javaProject = createJavaProject("P", new String[0], new String[] {externalLib}, "");
 		IPackageFragmentRoot root = javaProject.getPackageFragmentRoot(externalLib);
 		attachSource(root, getExternalFolder() + "/src.abc", "");
-		IType type = root.getPackageFragment("p").getClassFile("X.class").getType();
+		IType type = root.getPackageFragment("p").getOrdinaryClassFile("X.class").getType();
 		assertSourceEquals(
 			"Unexpected source",
 			"public class X {\n" +
@@ -630,7 +642,7 @@ public void testZIPArchive4() throws CoreException {
 		IJavaProject javaProject = createJavaProject("P2", new String[0], new String[] {"/P1/lib.abc"}, "");
 		IPackageFragmentRoot root = javaProject.getPackageFragmentRoot(lib);
 		attachSource(root, "/P1/src.abc", "");
-		IType type = root.getPackageFragment("p").getClassFile("X.class").getType();
+		IType type = root.getPackageFragment("p").getOrdinaryClassFile("X.class").getType();
 		assertSourceEquals(
 			"Unexpected source",
 			"public class X {\n" +
@@ -679,7 +691,7 @@ public void testGeneric1() throws JavaModelException {
 	IJavaProject project = this.getJavaProject("/AttachSourceTests");
 	IPackageFragmentRoot root = project.getPackageFragmentRoot(getFile("/AttachSourceTests/generic.jar"));
 	attachSource(root, "/AttachSourceTests/genericsrc.zip", null);
-	IType type = root.getPackageFragment("generic").getClassFile("X.class").getType();
+	IType type = root.getPackageFragment("generic").getOrdinaryClassFile("X.class").getType();
 	IMethod method = type.getMethod("foo", new String[] {"QX<QT;>;"});
 	assertSourceEquals(
 		"Unexpected source",
@@ -695,7 +707,7 @@ public void testGeneric2() throws JavaModelException {
 	IJavaProject project = this.getJavaProject("/AttachSourceTests");
 	IPackageFragmentRoot root = project.getPackageFragmentRoot(getFile("/AttachSourceTests/generic.jar"));
 	attachSource(root, "/AttachSourceTests/genericsrc.zip", null);
-	IType type = root.getPackageFragment("generic").getClassFile("X.class").getType();
+	IType type = root.getPackageFragment("generic").getOrdinaryClassFile("X.class").getType();
 	IMethod method = type.getMethod("foo", new String[] {"QK;", "QV;"});
 	assertSourceEquals(
 		"Unexpected source",
@@ -713,7 +725,7 @@ public void testGeneric3() throws JavaModelException {
 	IJavaProject project = this.getJavaProject("/AttachSourceTests");
 	IPackageFragmentRoot root = project.getPackageFragmentRoot(getFile("/AttachSourceTests/generic.jar"));
 	attachSource(root, "/AttachSourceTests/genericsrc.zip", null);
-	IType type = root.getPackageFragment("generic").getClassFile("X.class").getType();
+	IType type = root.getPackageFragment("generic").getOrdinaryClassFile("X.class").getType();
 	IMethod method = type.getMethod("foo", new String[] {"I", "Lgeneric.X<[Ljava.lang.Object;>;"});
 	assertSourceEquals(
 		"Unexpected source",
@@ -726,7 +738,7 @@ public void testGeneric4() throws JavaModelException {
 	IJavaProject project = this.getJavaProject("/AttachSourceTests");
 	IPackageFragmentRoot root = project.getPackageFragmentRoot(getFile("/AttachSourceTests/generic.jar"));
 	attachSource(root, "/AttachSourceTests/genericsrc.zip", null);
-	IType type = root.getPackageFragment("generic").getClassFile("X.class").getType();
+	IType type = root.getPackageFragment("generic").getOrdinaryClassFile("X.class").getType();
 	IMethod method = type.getMethod("foo", new String[] {"Z", "Lgeneric.X<+Lgeneric.X;>;"});
 	assertSourceEquals(
 		"Unexpected source",
@@ -739,7 +751,7 @@ public void testGeneric5() throws JavaModelException {
 	IJavaProject project = this.getJavaProject("/AttachSourceTests");
 	IPackageFragmentRoot root = project.getPackageFragmentRoot(getFile("/AttachSourceTests/generic.jar"));
 	attachSource(root, "/AttachSourceTests/genericsrc.zip", null);
-	IType type = root.getPackageFragment("generic").getClassFile("X.class").getType();
+	IType type = root.getPackageFragment("generic").getOrdinaryClassFile("X.class").getType();
 	IMethod method = type.getMethod("foo", new String[] {"F", "Lgeneric.X<*>;"});
 	assertSourceEquals(
 		"Unexpected source",
@@ -752,7 +764,7 @@ public void testGeneric6() throws JavaModelException {
 	IJavaProject project = this.getJavaProject("/AttachSourceTests");
 	IPackageFragmentRoot root = project.getPackageFragmentRoot(getFile("/AttachSourceTests/generic.jar"));
 	attachSource(root, "/AttachSourceTests/genericsrc.zip", null);
-	IType type = root.getPackageFragment("generic").getClassFile("X.class").getType();
+	IType type = root.getPackageFragment("generic").getOrdinaryClassFile("X.class").getType();
 	IMethod method = type.getMethod("foo", new String[] {"Lgeneric.Y<+Ljava.lang.Integer;+Ljava.lang.Object;>;"});
 	assertSourceEquals(
 		"Unexpected source",
@@ -765,7 +777,7 @@ public void testGeneric7() throws JavaModelException {
 	IJavaProject project = this.getJavaProject("/AttachSourceTests");
 	IPackageFragmentRoot root = project.getPackageFragmentRoot(getFile("/AttachSourceTests/generic.jar"));
 	attachSource(root, "/AttachSourceTests/genericsrc.zip", null);
-	IType type = root.getPackageFragment("generic").getClassFile("X.class").getType();
+	IType type = root.getPackageFragment("generic").getOrdinaryClassFile("X.class").getType();
 	IMethod method = type.getMethod("foo", new String[] {"Lgeneric.Z.Inner<Ljava.lang.Object;>;"});
 	assertSourceEquals(
 		"Unexpected source",
@@ -778,7 +790,7 @@ public void testGeneric8() throws JavaModelException {
 	IJavaProject project = this.getJavaProject("/AttachSourceTests");
 	IPackageFragmentRoot root = project.getPackageFragmentRoot(getFile("/AttachSourceTests/generic.jar"));
 	attachSource(root, "/AttachSourceTests/genericsrc.zip", null);
-	IType type = root.getPackageFragment("generic").getClassFile("X.class").getType();
+	IType type = root.getPackageFragment("generic").getOrdinaryClassFile("X.class").getType();
 	IMethod method = type.getMethod("foo", new String[] {"Lgeneric.AType<Ljava.lang.Object;>;"});
 	assertSourceEquals(
 		"Unexpected source",
@@ -792,7 +804,7 @@ public void testGeneric8() throws JavaModelException {
  * mapped source.
  */
 public void testGetNameRange01() throws JavaModelException {
-	IClassFile classFile = this.pkgFragmentRoot.getPackageFragment("x.y").getClassFile("A.class");
+	IOrdinaryClassFile classFile = this.pkgFragmentRoot.getPackageFragment("x.y").getOrdinaryClassFile("A.class");
 	IMethod method = classFile.getType().getMethod("foo", null);
 	assertSourceEquals("Unexpected name source", "foo", getNameSource(classFile.getSource(), method));
 }
@@ -801,7 +813,7 @@ public void testGetNameRange01() throws JavaModelException {
  * mapped source.
  */
 public void testGetNameRange02() throws JavaModelException {
-	IClassFile classFile = this.pkgFragmentRoot.getPackageFragment("x.y").getClassFile("A.class");
+	IOrdinaryClassFile classFile = this.pkgFragmentRoot.getPackageFragment("x.y").getOrdinaryClassFile("A.class");
 	assertSourceEquals("Unexpected name source", "A", getNameSource(classFile.getSource(), classFile.getType()));
 }
 /*
@@ -814,7 +826,7 @@ public void testGetNameRange03() throws JavaModelException {
 	attachSource(root, "/AttachSourceTests/innerClassessrc.zip", null);
 	IPackageFragment fragment = root.getPackageFragment("inner");
 
-	IClassFile classFile = fragment.getClassFile("X$V.class");
+	IOrdinaryClassFile classFile = fragment.getOrdinaryClassFile("X$V.class");
 	IMethod constructor = classFile.getType().getMethod("V", new String[] {"Linner.X;", "Ljava.lang.String;"});
 	assertSourceEquals("Unexpected name source", "V", getNameSource(classFile.getSource(), constructor));
 
@@ -827,7 +839,7 @@ public void testGetNameRange04() throws JavaModelException {
 	attachSource(root, "/AttachSourceTests/innerClassessrc.zip", null);
 	IPackageFragment fragment = root.getPackageFragment("inner");
 
-	IClassFile classFile = fragment.getClassFile("X$Inner.class");
+	IOrdinaryClassFile classFile = fragment.getOrdinaryClassFile("X$Inner.class");
 	IMethod[] methods = classFile.getType().getMethods();
 	for (int i = 0; i < methods.length; i++) {
 		IMethod iMethod = methods[i];
@@ -851,7 +863,7 @@ public void testGetSourceAttachmentPath() throws JavaModelException {
  * mapped source.
  */
 public void testGetSourceRange() throws JavaModelException {
-	IClassFile cf = this.pkgFragmentRoot.getPackageFragment("x.y").getClassFile("A.class");
+	IOrdinaryClassFile cf = this.pkgFragmentRoot.getPackageFragment("x.y").getOrdinaryClassFile("A.class");
 	ISourceRange sourceRange = cf.getSourceRange();
 	assertTrue("Class file should have associated source range", sourceRange != null);
 	assertEquals("Unexpected offset", 0, sourceRange.getOffset());
@@ -862,7 +874,7 @@ public void testGetSourceRange() throws JavaModelException {
  * mapped source.
  */
 public void testGetSourceRangeInnerClass() throws JavaModelException {
-	IClassFile cf = this.pkgFragmentRoot.getPackageFragment("x.y").getClassFile("A$Inner.class");
+	IOrdinaryClassFile cf = this.pkgFragmentRoot.getPackageFragment("x.y").getOrdinaryClassFile("A$Inner.class");
 	ISourceRange sourceRange = cf.getSourceRange();
 	assertTrue("Inner class file should have associated source range", sourceRange != null);
 	assertEquals("Unexpected offset", 0, sourceRange.getOffset());
@@ -877,7 +889,7 @@ public void testInnerClass1() throws JavaModelException {
 	attachSource(root, "/AttachSourceTests/innerClassessrc.zip", null);
 	IPackageFragment fragment = root.getPackageFragment("inner");
 
-	IType type = fragment.getClassFile("X.class").getType();
+	IType type = fragment.getOrdinaryClassFile("X.class").getType();
 	assertSourceEquals(
 		"Unexpected source",
 		"public class X {\n" +
@@ -926,7 +938,7 @@ public void testInnerClass2() throws JavaModelException {
 	attachSource(root, "/AttachSourceTests/innerClassessrc.zip", null);
 	IPackageFragment fragment = root.getPackageFragment("inner");
 
-	IType type = fragment.getClassFile("X$1.class").getType();
+	IType type = fragment.getOrdinaryClassFile("X$1.class").getType();
 	assertSourceEquals(
 		"Unexpected source",
 		"new X() {}",
@@ -942,7 +954,7 @@ public void testInnerClass3() throws JavaModelException {
 	attachSource(root, "/AttachSourceTests/innerClassessrc.zip", null);
 	IPackageFragment fragment = root.getPackageFragment("inner");
 
-	IType type = fragment.getClassFile("X$2.class").getType();
+	IType type = fragment.getOrdinaryClassFile("X$2.class").getType();
 	assertSourceEquals(
 		"Unexpected source",
 		"new Y() {\n" +
@@ -960,7 +972,7 @@ public void testInnerClass4() throws JavaModelException {
 	attachSource(root, "/AttachSourceTests/innerClassessrc.zip", null);
 	IPackageFragment fragment = root.getPackageFragment("inner");
 
-	IType type = fragment.getClassFile("X$3.class").getType();
+	IType type = fragment.getOrdinaryClassFile("X$3.class").getType();
 	assertSourceEquals(
 		"Unexpected source",
 		"new W() {}",
@@ -976,7 +988,7 @@ public void testInnerClass5() throws JavaModelException {
 	attachSource(root, "/AttachSourceTests/innerClassessrc.zip", null);
 	IPackageFragment fragment = root.getPackageFragment("inner");
 
-	IType type = fragment.getClassFile("X$1$Y.class").getType();
+	IType type = fragment.getOrdinaryClassFile("X$1$Y.class").getType();
 	assertSourceEquals(
 		"Unexpected source",
 		"class Y {}",
@@ -992,7 +1004,7 @@ public void testInnerClass6() throws JavaModelException {
 	attachSource(root, "/AttachSourceTests/innerClassessrc.zip", null);
 	IPackageFragment fragment = root.getPackageFragment("inner");
 
-	IType type = fragment.getClassFile("X$1$W.class").getType();
+	IType type = fragment.getOrdinaryClassFile("X$1$W.class").getType();
 	assertSourceEquals(
 		"Unexpected source",
 		"class W {\n" +
@@ -1012,7 +1024,7 @@ public void testInnerClass7() throws JavaModelException {
 	attachSource(root, "/AttachSourceTests/innerClassessrc.zip", null);
 	IPackageFragment fragment = root.getPackageFragment("inner");
 
-	IType type = fragment.getClassFile("X$2$Z.class").getType();
+	IType type = fragment.getOrdinaryClassFile("X$2$Z.class").getType();
 	assertSourceEquals(
 		"Unexpected source",
 		"class Z {}",
@@ -1028,7 +1040,7 @@ public void testInnerClass8() throws JavaModelException {
 	attachSource(root, "/AttachSourceTests/innerClassessrc.zip", null);
 	IPackageFragment fragment = root.getPackageFragment("inner");
 
-	IType type = fragment.getClassFile("X$V.class").getType();
+	IType type = fragment.getOrdinaryClassFile("X$V.class").getType();
 	assertSourceEquals(
 		"Unexpected source",
 		"class V {\n" +
@@ -1048,7 +1060,7 @@ public void testInnerClass9() throws JavaModelException {
 	attachSource(root, "/AttachSourceTests/innerClassessrc.zip", null);
 	IPackageFragment fragment = root.getPackageFragment("inner");
 
-	IType type = fragment.getClassFile("X$4$U.class").getType();
+	IType type = fragment.getOrdinaryClassFile("X$4$U.class").getType();
 	assertSourceEquals(
 		"Unexpected source",
 		"class U {\n" +
@@ -1065,7 +1077,7 @@ public void testInnerClass10() throws JavaModelException {
 	attachSource(root, "/AttachSourceTests/innerClassessrc.zip", null);
 	IPackageFragment fragment = root.getPackageFragment("inner");
 
-	IType type = fragment.getClassFile("X$Inner$WW.class").getType();
+	IType type = fragment.getOrdinaryClassFile("X$Inner$WW.class").getType();
 	assertSourceEquals(
 		"Unexpected source",
 		"class WW {\n" + 
@@ -1075,7 +1087,7 @@ public void testInnerClass10() throws JavaModelException {
 		"      }\n" + 
 		"    }",
 		type.getSource());
-	type = fragment.getClassFile("X$Inner$WW$WWW.class").getType();
+	type = fragment.getOrdinaryClassFile("X$Inner$WW$WWW.class").getType();
 	assertSourceEquals(
 		"Unexpected source",
 		"class WWW {\n" + 
@@ -1091,7 +1103,7 @@ public void testLibFolder() throws JavaModelException {
 	IPackageFragmentRoot root = this.getPackageFragmentRoot("/AttachSourceTests/lib");
 	attachSource(root, "/AttachSourceTests/srcLib", "");
 
-	IClassFile cf = root.getPackageFragment("p").getClassFile("X.class");
+	IOrdinaryClassFile cf = root.getPackageFragment("p").getOrdinaryClassFile("X.class");
 	assertSourceEquals(
 		"Unexpected source for class file",
 		"package p;\n" +
@@ -1105,7 +1117,7 @@ public void testLibFolder() throws JavaModelException {
  * Retrieves the source code for methods of class A.
  */
 public void testMethodRetrieval() throws JavaModelException {
-	IClassFile cf = this.pkgFragmentRoot.getPackageFragment("x.y").getClassFile("A.class");
+	IOrdinaryClassFile cf = this.pkgFragmentRoot.getPackageFragment("x.y").getOrdinaryClassFile("A.class");
 	IMethod[] methods = cf.getType().getMethods();
 	for (int i = 0; i < methods.length; i++) {
 		IMethod method = methods[i];
@@ -1143,7 +1155,7 @@ public void testProjectAsClassFolder1() throws CoreException {
 		IJavaProject javaProject = createJavaProject("P2", new String[]{""}, new String[]{"/P1"}, "");
 		IPackageFragmentRoot root = javaProject.getPackageFragmentRoot(p1);
 		attachSource(root, "/P1", null);
-		IClassFile cf = root.getPackageFragment("p").getClassFile("X.class");
+		IOrdinaryClassFile cf = root.getPackageFragment("p").getOrdinaryClassFile("X.class");
 		assertSourceEquals(
 			"Unexpected source for class file P1/p/X.class",
 			"package p;\n" +
@@ -1174,7 +1186,7 @@ public void testProjectAsClassFolder2() throws CoreException {
 		IJavaProject javaProject = createJavaProject("P2", new String[]{""}, new String[]{"/P1"}, "");
 		IPackageFragmentRoot root = javaProject.getPackageFragmentRoot(p1);
 		attachSource(root, "/P1", null);
-		IClassFile cf = root.getPackageFragment("").getClassFile("X.class");
+		IOrdinaryClassFile cf = root.getPackageFragment("").getOrdinaryClassFile("X.class");
 		assertSourceEquals(
 			"Unexpected source for class file P1/X.class",
 			"public class X {\n" +
@@ -1200,7 +1212,7 @@ public void testProjectAsSourceAttachment() throws CoreException {
 			"public class Test {}");
 		IPackageFragmentRoot root = javaProject.getPackageFragmentRoot(getFile("/AttachSourceTests/test.jar"));
 		attachSource(root, "/Test", null);
-		IClassFile cf = root.getPackageFragment("test1").getClassFile("Test.class");
+		IOrdinaryClassFile cf = root.getPackageFragment("test1").getOrdinaryClassFile("Test.class");
 		assertSourceEquals(
 			"Unexpected source for class file test1/Test.class",
 			"package test1;\n" +
@@ -1225,7 +1237,7 @@ public void testRestart() throws Exception {
 		JavaCore.initializeAfterLoad(null);
 
 		// ensure source is correct
-		IClassFile cf = this.pkgFragmentRoot.getPackageFragment("x.y").getClassFile("A.class");
+		IOrdinaryClassFile cf = this.pkgFragmentRoot.getPackageFragment("x.y").getOrdinaryClassFile("A.class");
 		IMethod method = cf.getType().getMethod("foo", new String[] {});
 		assertSourceEquals(
 			"unexpected source for foo()",
@@ -1249,10 +1261,10 @@ public void testRootPath() throws JavaModelException {
 	JarPackageFragmentRoot root = (JarPackageFragmentRoot) project.getPackageFragmentRoot(jar);
 	root.attachSource(srcZip.getFullPath(), new Path("src/nested"), null);
 
-	IClassFile cf = root.getPackageFragment("x.y").getClassFile("B.class");
+	IOrdinaryClassFile cf = root.getPackageFragment("x.y").getOrdinaryClassFile("B.class");
 	assertTrue("source code does not exist for the entire attached compilation unit", cf.getSource() != null);
 	root.close();
-	cf = root.getPackageFragment("x.y").getClassFile("B.class");
+	cf = root.getPackageFragment("x.y").getOrdinaryClassFile("B.class");
 	assertTrue("source code does not exist for the entire attached compilation unit", cf.getSource() != null);
 
 	IPath rootSAPath= root.getSourceAttachmentRootPath();
@@ -1274,7 +1286,7 @@ public void testRootPath2() throws JavaModelException {
 	JarPackageFragmentRoot root = (JarPackageFragmentRoot) project.getPackageFragmentRoot(jar);
 	root.attachSource(srcZip.getFullPath(), new Path(""), null);
 
-	IClassFile cf = root.getPackageFragment("x.y").getClassFile("B.class");
+	IOrdinaryClassFile cf = root.getPackageFragment("x.y").getOrdinaryClassFile("B.class");
 	assertTrue("source code does not exist for the entire attached compilation unit", cf.getSource() != null);
 	root.close();
 }
@@ -1286,7 +1298,7 @@ public void testRootPath3() throws JavaModelException {
 	IPackageFragmentRoot root = this.getPackageFragmentRoot("/AttachSourceTests/lib");
 	attachSource(root, "/AttachSourceTests/srcLib", "invalid");
 
-	IClassFile cf = root.getPackageFragment("p").getClassFile("X.class");
+	IOrdinaryClassFile cf = root.getPackageFragment("p").getOrdinaryClassFile("X.class");
 	assertSourceEquals(
 		"Unexpected source for class file",
 		"package p;\n" +
@@ -1305,7 +1317,7 @@ public void testRootPath4() throws JavaModelException {
 	IPackageFragmentRoot root = project.getPackageFragmentRoot(getFile("/AttachSourceTests/test.jar"));
 	attachSource(root, "/AttachSourceTests/src.zip", "invalid");
 
-	IClassFile cf = root.getPackageFragment("test1").getClassFile("Test.class");
+	IOrdinaryClassFile cf = root.getPackageFragment("test1").getOrdinaryClassFile("Test.class");
 	assertSourceEquals(
 		"Unexpected source for class file",
 		"package test1;\n" +
@@ -1322,7 +1334,7 @@ public void testRootPath5() throws JavaModelException {
 	IPackageFragmentRoot root = project.getPackageFragmentRoot(getFile("/AttachSourceTests/update.jar"));
 	attachSource(root, "/AttachSourceTests/src.zip", "invalid");
 
-	IClassFile cf = root.getPackageFragment("p1.p2").getClassFile("A.class");
+	IOrdinaryClassFile cf = root.getPackageFragment("p1.p2").getOrdinaryClassFile("A.class");
 	assertSourceEquals(
 		"Unexpected source for class file",
 		"package p1.p2;\n" +
@@ -1330,7 +1342,7 @@ public void testRootPath5() throws JavaModelException {
 		"public class A {}",
 		cf.getSource());
 
-	cf = root.getPackageFragment("").getClassFile("B.class");
+	cf = root.getPackageFragment("").getOrdinaryClassFile("B.class");
 	assertSourceEquals(
 		"Unexpected source for class file",
 		"public class B {}",
@@ -1346,7 +1358,7 @@ public void testRootPath6() throws JavaModelException {
 	IPackageFragmentRoot root = project.getPackageFragmentRoot(getFile("/AttachSourceTests/update.jar"));
 	attachSource(root, "/AttachSourceTests/src.zip", null);
 
-	IClassFile cf = root.getPackageFragment("p1.p2").getClassFile("A.class");
+	IOrdinaryClassFile cf = root.getPackageFragment("p1.p2").getOrdinaryClassFile("A.class");
 	assertSourceEquals(
 		"Unexpected source for class file",
 		"package p1.p2;\n" +
@@ -1354,7 +1366,7 @@ public void testRootPath6() throws JavaModelException {
 		"public class A {}",
 		cf.getSource());
 
-	cf = root.getPackageFragment("").getClassFile("B.class");
+	cf = root.getPackageFragment("").getOrdinaryClassFile("B.class");
 	assertSourceEquals(
 		"Unexpected source for class file",
 		"public class B {}",
@@ -1370,7 +1382,7 @@ public void testRootPath7() throws JavaModelException {
 	IPackageFragmentRoot root = project.getPackageFragmentRoot(getFile("/AttachSourceTests/full.jar"));
 	attachSource(root, "/AttachSourceTests/src.zip", null);
 
-	IClassFile cf = root.getPackageFragment("p1.p2").getClassFile("A.class");
+	IOrdinaryClassFile cf = root.getPackageFragment("p1.p2").getOrdinaryClassFile("A.class");
 	assertSourceEquals(
 		"Unexpected source for class file",
 		"package p1.p2;\n" +
@@ -1378,13 +1390,13 @@ public void testRootPath7() throws JavaModelException {
 		"public class A {}",
 		cf.getSource());
 
-	cf = root.getPackageFragment("").getClassFile("B.class");
+	cf = root.getPackageFragment("").getOrdinaryClassFile("B.class");
 	assertSourceEquals(
 		"Unexpected source for class file",
 		"public class B {}",
 		cf.getSource());
 
-	cf = root.getPackageFragment("test1").getClassFile("Test.class");
+	cf = root.getPackageFragment("test1").getOrdinaryClassFile("Test.class");
 	assertSourceEquals(
 		"Unexpected source for class file",
 		"package test1;\n" +
@@ -1402,7 +1414,7 @@ public void testRootPath8() throws JavaModelException {
 	IPackageFragmentRoot root = project.getPackageFragmentRoot(getFile("/AttachSourceTests/full.jar"));
 	attachSource(root, "/AttachSourceTests/fullsrc.zip", null);
 
-	IClassFile cf = root.getPackageFragment("p1.p2").getClassFile("A.class");
+	IOrdinaryClassFile cf = root.getPackageFragment("p1.p2").getOrdinaryClassFile("A.class");
 	assertSourceEquals(
 		"Unexpected source for class file",
 		"package p1.p2;\n" +
@@ -1410,13 +1422,13 @@ public void testRootPath8() throws JavaModelException {
 		"public class A {}",
 		cf.getSource());
 
-	cf = root.getPackageFragment("").getClassFile("B.class");
+	cf = root.getPackageFragment("").getOrdinaryClassFile("B.class");
 	assertSourceEquals(
 		"Unexpected source for class file",
 		"public class B {}",
 		cf.getSource());
 
-	cf = root.getPackageFragment("test1").getClassFile("Test.class");
+	cf = root.getPackageFragment("test1").getOrdinaryClassFile("Test.class");
 	assertSourceEquals(
 		"Unexpected source for class file",
 		"package test1;\n" +
@@ -1434,7 +1446,7 @@ public void testRootPath9() throws JavaModelException {
 	IPackageFragmentRoot root = project.getPackageFragmentRoot(getFile("/AttachSourceTests/full.jar"));
 	attachSource(root, "/AttachSourceTests/fullsrc.zip", "invalid");
 
-	IClassFile cf = root.getPackageFragment("p1.p2").getClassFile("A.class");
+	IOrdinaryClassFile cf = root.getPackageFragment("p1.p2").getOrdinaryClassFile("A.class");
 	assertSourceEquals(
 		"Unexpected source for class file",
 		"package p1.p2;\n" +
@@ -1442,13 +1454,13 @@ public void testRootPath9() throws JavaModelException {
 		"public class A {}",
 		cf.getSource());
 
-	cf = root.getPackageFragment("").getClassFile("B.class");
+	cf = root.getPackageFragment("").getOrdinaryClassFile("B.class");
 	assertSourceEquals(
 		"Unexpected source for class file",
 		"public class B {}",
 		cf.getSource());
 
-	cf = root.getPackageFragment("test1").getClassFile("Test.class");
+	cf = root.getPackageFragment("test1").getOrdinaryClassFile("Test.class");
 	assertSourceEquals(
 		"Unexpected source for class file",
 		"package test1;\n" +
@@ -1466,7 +1478,7 @@ public void testRootPath10() throws JavaModelException {
 	IPackageFragmentRoot root = project.getPackageFragmentRoot(getFile("/AttachSourceTests/test2.jar"));
 	attachSource(root, "/AttachSourceTests/test2.jar", null);
 
-	IClassFile cf = root.getPackageFragment("p").getClassFile("X.class");
+	IOrdinaryClassFile cf = root.getPackageFragment("p").getOrdinaryClassFile("X.class");
 	assertSourceEquals(
 		"Unexpected source for class file",
 		"package p;\n" +
@@ -1487,7 +1499,7 @@ public void testRootPath11() throws JavaModelException {
 	IPackageFragmentRoot root = project.getPackageFragmentRoot(getFile("/AttachSourceTests/test4.jar"));
 	attachSource(root, "/AttachSourceTests/test4_src.zip", null);
 
-	IClassFile cf = root.getPackageFragment("P1").getClassFile("D.class");
+	IOrdinaryClassFile cf = root.getPackageFragment("P1").getOrdinaryClassFile("D.class");
 	assertSourceEquals(
 		"Unexpected source for class file P1.D",
 		"package P1;\n" +
@@ -1495,7 +1507,7 @@ public void testRootPath11() throws JavaModelException {
 		"public class D {}",
 		cf.getSource());
 
-	cf = root.getPackageFragment("P1.p2").getClassFile("A.class");
+	cf = root.getPackageFragment("P1.p2").getOrdinaryClassFile("A.class");
 	assertSourceEquals(
 		"Unexpected source for class file P1.p2.A",
 		"package P1.p2;\n" +
@@ -1516,7 +1528,7 @@ public void testRootPath12() throws JavaModelException {
 	IPackageFragmentRoot root = project.getPackageFragmentRoot(getFile("/AttachSourceTests/test5.jar"));
 	attachSource(root, "/AttachSourceTests/test5.jar", null);
 
-	IClassFile cf = root.getPackageFragment("p1.p2").getClassFile("X.class");
+	IOrdinaryClassFile cf = root.getPackageFragment("p1.p2").getOrdinaryClassFile("X.class");
 	assertSourceEquals(
 		"Unexpected source for class file",
 		"package p1.p2;\n" +
@@ -1536,7 +1548,7 @@ public void testBug110172() throws JavaModelException {
 
 	try {
 		// check the javadoc source range in a class file
-		IClassFile cf = root.getPackageFragment("p1.p2").getClassFile("X.class");
+		IOrdinaryClassFile cf = root.getPackageFragment("p1.p2").getOrdinaryClassFile("X.class");
 		assertNotNull(cf);
 		final String source = cf.getSource();
 		assertNotNull("No source", source);
@@ -1612,14 +1624,14 @@ public void testRootPath13() throws JavaModelException {
 	IPackageFragmentRoot root = project.getPackageFragmentRoot(this.getFile("/AttachSourceTests/test7.jar"));
 	attachSource(root, "/AttachSourceTests/test7src/", null);
 	
-	IClassFile cf = root.getPackageFragment("p1.p2").getClassFile("X.class");
+	IOrdinaryClassFile cf = root.getPackageFragment("p1.p2").getOrdinaryClassFile("X.class");
 	assertSourceEquals(
 		"Unexpected source for class file",
 		"package p1.p2;\n" +
 		"public class X {\n" +
 		"}",
 		cf.getSource());
-	cf = root.getPackageFragment("tests.p1").getClassFile("TestforX.class");
+	cf = root.getPackageFragment("tests.p1").getOrdinaryClassFile("TestforX.class");
 	assertSourceEquals(
 		"Unexpected source for class file",
 		"package tests.p1;\n" +
@@ -1638,7 +1650,7 @@ public void testBug153133() throws JavaModelException {
 
 	try {
 		// Get class file type from jar
-		IClassFile cf = root.getPackageFragment("test").getClassFile("Test.class");
+		IOrdinaryClassFile cf = root.getPackageFragment("test").getOrdinaryClassFile("Test.class");
 		assertNotNull(cf);
 		final String source = cf.getSource();
 		assertNotNull("No source", source);
@@ -1677,7 +1689,7 @@ public void test267046() throws JavaModelException {
 	IPackageFragmentRoot root = project.getPackageFragmentRoot(getFile("/AttachSourceTests/267046.jar"));
 	attachSource(root, "/AttachSourceTests/267046_src.zip", null);
 
-	IClassFile cf = root.getPackageFragment("test").getClassFile("Foo.class");
+	IOrdinaryClassFile cf = root.getPackageFragment("test").getOrdinaryClassFile("Foo.class");
 	assertSourceEquals(
 		"Unexpected source for class file",
 		"package test;\n" + 
@@ -1737,9 +1749,9 @@ public void testClassFileBuffer() throws JavaModelException {
 	attachSource(root, "/AttachSourceTests/innerClassessrc.zip", null);
 	IPackageFragment fragment = root.getPackageFragment("inner");
 
-	IClassFile classFile = fragment.getClassFile("X$V.class");
+	IClassFile classFile = fragment.getOrdinaryClassFile("X$V.class");
 	IBuffer buffer = classFile.getBuffer();
-	classFile = fragment.getClassFile("X.class");
+	classFile = fragment.getOrdinaryClassFile("X.class");
 	IBuffer buffer2 = classFile.getBuffer();
 	assertTrue("Same buffer is not reused", buffer2 == buffer);
 	attachSource(root, null, null); // detach source
@@ -1752,7 +1764,7 @@ public void testConstructorAccess() throws JavaModelException {
 	IPackageFragmentRoot root = project.getPackageFragmentRoot(getFile("/AttachSourceTests/generic.jar"));
 	attachSource(root, "/AttachSourceTests/genericsrc.zip", null);
 	
-	IClassFile cf = root.getPackageFragment("").getClassFile("Container$Inner.class");
+	IOrdinaryClassFile cf = root.getPackageFragment("").getOrdinaryClassFile("Container$Inner.class");
 	final IType type = cf.getType();
 	final IMethod[] methods = type.getMethods();
 	assertEquals("wrong size", 1, methods.length);
@@ -1828,6 +1840,56 @@ public void testBug336046() throws Exception {
 			importedProject.getProject().delete(true, true, null);
 		project.getProject().open(null);
 		JavaCore.setOptions(javaCoreOptions);
+	}
+}
+public void testModule1() throws CoreException, IOException {
+	if (!isJRE9) {
+		System.err.println(this.getClass().getName()+'.'+getName()+" needs a Java 9 JRE - skipped");
+		return;
+	}
+	try {
+		IJavaProject javaProject = createJavaProject("Test", new String[]{"src"}, null, "bin", JavaCore.VERSION_9);
+		createFolder("/Test/src/test1");
+		createFile("/Test/src/test1/Test.java",
+			"package test1;\n" +
+			"\n" +
+			"public class Test {}");
+		createFile("/Test/src/module-info.java",
+			"module test {\n" +
+			"	requires mod.one;\n" +
+			"	exports test1;\n" +
+			"}\n");
+
+		String modOneSrc = 
+			"\n" +
+			"/** The no. one module. */\n" +
+			"module mod.one {\n" +
+			"  exports m.o.p;\n" +
+			"}\n";
+		String[] pathAndContents = new String[] {
+			"module-info.java",
+			modOneSrc,
+			"m/o/p/C.java",
+			"package m.o.p;\n" +
+			"public class C {\n" + 
+			"}"
+		};
+		addLibrary(javaProject, "mod.one.jar", "mod.onesrc.zip", pathAndContents, JavaCore.VERSION_9);
+		IPackageFragmentRoot root = javaProject.getPackageFragmentRoot(getFile("/Test/mod.one.jar"));
+		IModularClassFile cf = root.getPackageFragment("").getModularClassFile();
+		assertSourceEquals(
+			"Unexpected source for class file mod.one/module-info.class",
+			modOneSrc,
+			cf.getSource());
+		IModuleDescription module = cf.getModule();
+		ISourceRange javadocRange = module.getJavadocRange();
+		String srcJavadoc = modOneSrc.substring(javadocRange.getOffset(), javadocRange.getOffset()+javadocRange.getLength());
+		assertEquals("javadoc from source", "/** The no. one module. */", srcJavadoc);
+		ISourceRange sourceRange = module.getSourceRange();
+		assertEquals("source start", 1, sourceRange.getOffset()); // start after initial '\n'
+		assertEquals("source end", modOneSrc.length()-2, sourceRange.getLength()); // end before terminal '\n'
+	} finally {
+		deleteProject("Test");
 	}
 }
 }

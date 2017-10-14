@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2015 IBM Corporation and others.
+ * Copyright (c) 2000, 2017 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -42,6 +42,13 @@ public abstract class ConverterTestSetup extends AbstractASTTests {
 	 */
 	/*package*/ static final int JLS4_INTERNAL = AST.JLS4;
 
+	/**
+	 * Internal synonym for deprecated constant AST.JSL8
+	 * to alleviate deprecation warnings.
+	 * @deprecated
+	 */
+	/*package*/ static final int JLS8_INTERNAL = AST.JLS8;
+
 	static int getJLS3() {
 		return JLS3_INTERNAL;
 	}
@@ -49,7 +56,10 @@ public abstract class ConverterTestSetup extends AbstractASTTests {
 	static int getJLS4() {
 		return JLS4_INTERNAL;
 	}
-	
+
+	static int getJLS8() {
+		return JLS8_INTERNAL;
+	}	
 	protected AST ast;
 	public static List TEST_SUITES = null;
 	public static boolean PROJECT_SETUP = false;
@@ -89,6 +99,7 @@ public abstract class ConverterTestSetup extends AbstractASTTests {
 			this.deleteProject("Converter16"); //$NON-NLS-1$
 			this.deleteProject("Converter17"); //$NON-NLS-1$
 			this.deleteProject("Converter18"); //$NON-NLS-1$
+			this.deleteProject("Converter9"); //$NON-NLS-1$
 			PROJECT_SETUP = false;
 		} else {
 			TEST_SUITES.remove(getClass());
@@ -98,6 +109,7 @@ public abstract class ConverterTestSetup extends AbstractASTTests {
 				this.deleteProject("Converter16"); //$NON-NLS-1$
 				this.deleteProject("Converter17"); //$NON-NLS-1$
 				this.deleteProject("Converter18"); //$NON-NLS-1$
+				this.deleteProject("Converter9"); //$NON-NLS-1$
 				PROJECT_SETUP = false;
 			}
 		}
@@ -106,6 +118,10 @@ public abstract class ConverterTestSetup extends AbstractASTTests {
 	}
 
 	public void setUpJCLClasspathVariables(String compliance, boolean useFullJCL) throws JavaModelException, IOException {
+		if (useFullJCL) {
+			 super.setUpJCLClasspathVariables(compliance, useFullJCL);
+			 return;
+		}
 		if ("1.5".equals(compliance)
 				|| "1.6".equals(compliance)) {
 			if (JavaCore.getClasspathVariable("CONVERTER_JCL15_LIB") == null) {
@@ -131,6 +147,14 @@ public abstract class ConverterTestSetup extends AbstractASTTests {
 					new IPath[] {getConverterJCLPath("1.8"), getConverterJCLSourcePath("1.8"), getConverterJCLRootSourcePath()},
 					null);
 			}
+		} else if ("9".equals(compliance)) {
+			if (JavaCore.getClasspathVariable("CONVERTER_JCL9_LIB") == null) {
+				setupExternalJCL("converterJclMin9");
+				JavaCore.setClasspathVariables(
+						new String[] {"CONVERTER_JCL9_LIB", "CONVERTER_JCL9_SRC", "CONVERTER_JCL9_SRCROOT"},
+						new IPath[] {getConverterJCLPath("9"), getConverterJCLSourcePath("9"), getConverterJCLRootSourcePath()},
+						null);
+			}
 		} else if (JavaCore.getClasspathVariable("CONVERTER_JCL_LIB") == null) {
 			setupExternalJCL("converterJclMin");
 			JavaCore.setClasspathVariables(
@@ -152,6 +176,7 @@ public abstract class ConverterTestSetup extends AbstractASTTests {
 			setUpJavaProject("Converter16", "1.6"); //$NON-NLS-1$ //$NON-NLS-2$
 			setUpJavaProject("Converter17", "1.7"); //$NON-NLS-1$ //$NON-NLS-2$
 			setUpJavaProject("Converter18", "1.8"); //$NON-NLS-1$ //$NON-NLS-2$
+			setUpJavaProject("Converter9", "9"); //$NON-NLS-1$ //$NON-NLS-2$
 			waitUntilIndexesReady(); // needed to find secondary types
 			PROJECT_SETUP = true;
 		}
@@ -407,6 +432,10 @@ public abstract class ConverterTestSetup extends AbstractASTTests {
 			super.endVisit(node);
 		}
 
+		public void endVisit(ModuleDeclaration node) {
+			assertNotNull(node+" should have a binding", node.resolveBinding());
+			super.endVisit(node);
+		}
 		public void endVisit(MethodRef node) {
 			assertNotNull(node+" should have a binding", node.resolveBinding());
 			super.endVisit(node);
@@ -548,6 +577,9 @@ public abstract class ConverterTestSetup extends AbstractASTTests {
 		return runJLS8Conversion(unit, resolveBindings, checkJLS2, false);
 	}
 
+	/**
+	 * @deprecated references deprecated old AST level
+	 */
 	public ASTNode runJLS8Conversion(ICompilationUnit unit, boolean resolveBindings, boolean checkJLS2, boolean bindingRecovery) {
 
 		// Create parser

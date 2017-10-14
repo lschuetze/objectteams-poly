@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2010, 2015 IBM Corporation and others.
+ * Copyright (c) 2010, 2016 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -113,8 +113,10 @@ public void test5() {
 	assertTrue(JavaCore.compareJavaVersions("cldc1.1", "1.1") > 0);
 	assertTrue(JavaCore.compareJavaVersions("1.1", "cldc1.1") < 0);
 	assertTrue(JavaCore.compareJavaVersions("1.8", "1.8") == 0);
-	assertTrue(JavaCore.compareJavaVersions("1.8", "1.9") < 0);
-	assertTrue(JavaCore.compareJavaVersions("1.9", "1.8") > 0);
+	assertTrue(JavaCore.compareJavaVersions("1.8", "9") < 0);
+	assertTrue(JavaCore.compareJavaVersions("9", "1.8") > 0);
+	assertTrue(JavaCore.compareJavaVersions("9.0.1", "9.1.2") == 0);
+	assertTrue(JavaCore.compareJavaVersions("9", "9.1.2") == 0);
 }
 }
 
