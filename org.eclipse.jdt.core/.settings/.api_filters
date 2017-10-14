@@ -478,6 +478,118 @@
         </filter>
     </resource>
     <resource path="dom/org/eclipse/jdt/core/dom/ASTNode.java" type="org.eclipse.jdt.core.dom.ASTNode">
+        <filter comment="make room for new JDT constants" id="388194388">
+            <message_arguments>
+                <message_argument value="org.eclipse.jdt.core.dom.ASTNode"/>
+                <message_argument value="BASE_CALL_MESSAGE_SEND"/>
+                <message_argument value="100"/>
+            </message_arguments>
+        </filter>
+        <filter comment="make room for new JDT constants" id="388194388">
+            <message_arguments>
+                <message_argument value="org.eclipse.jdt.core.dom.ASTNode"/>
+                <message_argument value="BASE_CONSTRUCTOR_INVOCATION"/>
+                <message_argument value="98"/>
+            </message_arguments>
+        </filter>
+        <filter comment="make room for new JDT constants" id="388194388">
+            <message_arguments>
+                <message_argument value="org.eclipse.jdt.core.dom.ASTNode"/>
+                <message_argument value="CALLIN_MAPPING_DECLARATION"/>
+                <message_argument value="94"/>
+            </message_arguments>
+        </filter>
+        <filter comment="make room for new JDT constants" id="388194388">
+            <message_arguments>
+                <message_argument value="org.eclipse.jdt.core.dom.ASTNode"/>
+                <message_argument value="CALLOUT_MAPPING_DECLARATION"/>
+                <message_argument value="95"/>
+            </message_arguments>
+        </filter>
+        <filter comment="make room for new JDT constants" id="388194388">
+            <message_arguments>
+                <message_argument value="org.eclipse.jdt.core.dom.ASTNode"/>
+                <message_argument value="FIELD_ACCESS_SPEC"/>
+                <message_argument value="101"/>
+            </message_arguments>
+        </filter>
+        <filter comment="make room for new JDT constants" id="388194388">
+            <message_arguments>
+                <message_argument value="org.eclipse.jdt.core.dom.ASTNode"/>
+                <message_argument value="GUARD_PREDICATE_DECLARATION"/>
+                <message_argument value="107"/>
+            </message_arguments>
+        </filter>
+        <filter comment="make room for new JDT constants" id="388194388">
+            <message_arguments>
+                <message_argument value="org.eclipse.jdt.core.dom.ASTNode"/>
+                <message_argument value="LIFTING_TYPE"/>
+                <message_argument value="96"/>
+            </message_arguments>
+        </filter>
+        <filter comment="make room for new JDT constants" id="388194388">
+            <message_arguments>
+                <message_argument value="org.eclipse.jdt.core.dom.ASTNode"/>
+                <message_argument value="METHOD_BINDING_OPERATOR"/>
+                <message_argument value="108"/>
+            </message_arguments>
+        </filter>
+        <filter comment="make room for new JDT constants" id="388194388">
+            <message_arguments>
+                <message_argument value="org.eclipse.jdt.core.dom.ASTNode"/>
+                <message_argument value="METHOD_SPEC"/>
+                <message_argument value="93"/>
+            </message_arguments>
+        </filter>
+        <filter comment="make room for new JDT constants" id="388194388">
+            <message_arguments>
+                <message_argument value="org.eclipse.jdt.core.dom.ASTNode"/>
+                <message_argument value="PARAMETER_MAPPING"/>
+                <message_argument value="99"/>
+            </message_arguments>
+        </filter>
+        <filter comment="make room for new JDT constants" id="388194388">
+            <message_arguments>
+                <message_argument value="org.eclipse.jdt.core.dom.ASTNode"/>
+                <message_argument value="PRECEDENCE_DECLARATION"/>
+                <message_argument value="106"/>
+            </message_arguments>
+        </filter>
+        <filter comment="make room for new JDT constants" id="388194388">
+            <message_arguments>
+                <message_argument value="org.eclipse.jdt.core.dom.ASTNode"/>
+                <message_argument value="ROLE_TYPE_DECLARATION"/>
+                <message_argument value="102"/>
+            </message_arguments>
+        </filter>
+        <filter comment="make room for new JDT constants" id="388194388">
+            <message_arguments>
+                <message_argument value="org.eclipse.jdt.core.dom.ASTNode"/>
+                <message_argument value="TSUPER_CONSTRUCTOR_INVOCATION"/>
+                <message_argument value="104"/>
+            </message_arguments>
+        </filter>
+        <filter comment="make room for new JDT constants" id="388194388">
+            <message_arguments>
+                <message_argument value="org.eclipse.jdt.core.dom.ASTNode"/>
+                <message_argument value="TSUPER_MESSAGE_SEND"/>
+                <message_argument value="103"/>
+            </message_arguments>
+        </filter>
+        <filter comment="make room for new JDT constants" id="388194388">
+            <message_arguments>
+                <message_argument value="org.eclipse.jdt.core.dom.ASTNode"/>
+                <message_argument value="TYPE_ANCHOR"/>
+                <message_argument value="105"/>
+            </message_arguments>
+        </filter>
+        <filter comment="make room for new JDT constants" id="388194388">
+            <message_arguments>
+                <message_argument value="org.eclipse.jdt.core.dom.ASTNode"/>
+                <message_argument value="WITHIN_STATEMENT"/>
+                <message_argument value="97"/>
+            </message_arguments>
+        </filter>
         <filter id="1141899266">
             <message_arguments>
                 <message_argument value="3.14"/>
@@ -657,6 +769,13 @@
         </filter>
     </resource>
     <resource path="dom/org/eclipse/jdt/core/dom/IBinding.java" type="org.eclipse.jdt.core.dom.IBinding">
+        <filter comment="make room for new JDT constants" id="388194388">
+            <message_arguments>
+                <message_argument value="org.eclipse.jdt.core.dom.IBinding"/>
+                <message_argument value="METHOD_MAPPING"/>
+                <message_argument value="7"/>
+            </message_arguments>
+        </filter>
         <filter id="1209008130">
             <message_arguments>
                 <message_argument value="3.14"/>

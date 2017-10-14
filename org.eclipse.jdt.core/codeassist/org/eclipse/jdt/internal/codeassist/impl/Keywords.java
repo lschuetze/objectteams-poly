@@ -15,7 +15,7 @@ package org.eclipse.jdt.internal.codeassist.impl;
 
 public interface Keywords {
 //{ObjectTeams: adapted count
-	int COUNT = 63;
+	int COUNT = 62;
 //carp}
 
 	char[] ABSTRACT = "abstract".toCharArray(); //$NON-NLS-1$
@@ -76,7 +76,6 @@ public interface Keywords {
 	char[] BEFORE = "before".toCharArray(); //$NON-NLS-1$
 	char[] AFTER = "after".toCharArray(); //$NON-NLS-1$
 	char[] REPLACE = "replace".toCharArray(); //$NON-NLS-1$
-	char[] WITH = "with".toCharArray(); //$NON-NLS-1$
 	char[] WITHIN = "within".toCharArray(); //$NON-NLS-1$
 	char[] BASE = "base".toCharArray(); //$NON-NLS-1$
 	char[] TSUPER = "tsuper".toCharArray(); //$NON-NLS-1$

@@ -1153,21 +1153,17 @@ public final class SelectionEngine extends Engine implements ISearchRequestor {
 						selectFrom(e.binding, parsedUnit, sourceUnit, e.isDeclaration);
 					}
 //{ObjectTeams :
-				} catch(SelectionNodesFound exc)
-					{
-					    if(exc._bindings != null)
-					    {
-							if(DEBUG) {
-								System.out.println("SELECTION - Selection binding:"); //$NON-NLS-1$
-								System.out.println(exc._bindings.toString());
-							}
-							// if null then we found a problem in the selection node
-						    for(int idx = 0; idx < exc._bindings.length; idx++)
-						    {
-						        selectFrom(exc._bindings[idx], parsedUnit, exc._isDeclaration);
-						    }
+				} catch(SelectionNodesFound exc) {
+				    if(exc._bindings != null) {
+						if(DEBUG) {
+							System.out.println("SELECTION - Selection binding:"); //$NON-NLS-1$
+							System.out.println(exc._bindings.toString());
+						}
+						// if null then we found a problem in the selection node
+					    for(int idx = 0; idx < exc._bindings.length; idx++) {
+					        selectFrom(exc._bindings[idx], parsedUnit, exc._isDeclaration);
 					    }
-					}
+				    }
 //haebor}
 				}
 			}

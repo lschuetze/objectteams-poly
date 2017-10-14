@@ -231,8 +231,9 @@ public class Scanner implements TerminalTokens {
     	case TokenNameprecedence:
     	case TokenNametsuper:
     	case TokenNamewhen:
-    	case TokenNamewith:
     		return this._isOTSource;
+    	case TokenNamewith:
+    		return this._isOTSource || this.insideModuleInfo;
     	}
     	return true;
     }
