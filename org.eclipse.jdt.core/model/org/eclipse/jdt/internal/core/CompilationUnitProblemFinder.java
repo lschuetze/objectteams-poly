@@ -1,11 +1,10 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2013 IBM Corporation and others.
+ * Copyright (c) 2000, 2017 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
- * $Id$
- *
+ * 
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *     Fraunhofer FIRST - extended API and implementation
@@ -30,6 +29,7 @@ import org.eclipse.jdt.internal.compiler.env.INameEnvironment;
 import org.eclipse.jdt.internal.compiler.env.ISourceType;
 import org.eclipse.jdt.internal.compiler.impl.CompilerOptions;
 import org.eclipse.jdt.internal.compiler.impl.ReferenceContext;
+import org.eclipse.jdt.internal.compiler.lookup.LookupEnvironment;
 import org.eclipse.jdt.internal.compiler.lookup.PackageBinding;
 import org.eclipse.jdt.internal.compiler.parser.SourceTypeConverter;
 import org.eclipse.jdt.internal.compiler.problem.AbortCompilation;
@@ -114,6 +114,10 @@ public class CompilationUnitProblemFinder extends Compiler {
 		final long savedComplianceLevel = this.options.complianceLevel;
 		final long savedSourceLevel = this.options.sourceLevel;
 		
+		LookupEnvironment environment = packageBinding.environment;
+		if (environment == null)
+			environment = this.lookupEnvironment;
+		
 		try {
 			IJavaProject project = ((SourceTypeElementInfo) sourceTypes[0]).getHandle().getJavaProject();
 			this.options.complianceLevel = CompilerOptions.versionToJdkLevel(project.getOption(JavaCore.COMPILER_COMPLIANCE, true));
@@ -126,7 +130,7 @@ public class CompilationUnitProblemFinder extends Compiler {
 						SourceTypeConverter.FIELD_AND_METHOD // need field and methods
 						| SourceTypeConverter.MEMBER_TYPE // need member types
 						| SourceTypeConverter.FIELD_INITIALIZATION, // need field initialization
-						this.lookupEnvironment.problemReporter,
+						environment.problemReporter,
 						result);
 
 			if (unit != null) {
@@ -134,8 +138,8 @@ public class CompilationUnitProblemFinder extends Compiler {
 			  try (Config config = Dependencies.setup(this, this.parser, this.lookupEnvironment, true, false))
 			  {
 // orig:  Note(SH): this will redirect:
-				this.lookupEnvironment.buildTypeBindings(unit, accessRestriction);
-				this.lookupEnvironment.completeTypeBindings(unit);
+				environment.buildTypeBindings(unit, accessRestriction);
+				environment.completeTypeBindings(unit);
 // :giro
 			  }
 // SH}

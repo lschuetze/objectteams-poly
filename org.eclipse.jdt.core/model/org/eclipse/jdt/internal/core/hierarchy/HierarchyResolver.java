@@ -1020,7 +1020,6 @@ public void resolve(Openable[] openables, HashSet localTypes, IProgressMonitor m
 					    Dependencies.ensureState(parsedUnit, ITranslationStates.STATE_RESOLVED);
 //SH}
 					}
-					
 					rememberAllTypes(parsedUnit, cus[i], containsLocalType);
 				}
 			}

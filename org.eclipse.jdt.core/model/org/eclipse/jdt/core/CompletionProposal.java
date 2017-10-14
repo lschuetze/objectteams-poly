@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2004, 2011 IBM Corporation and others.
+ * Copyright (c) 2004, 2016 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -873,6 +873,31 @@ public class CompletionProposal {
 	 */
 	public static final int ANONYMOUS_CLASS_CONSTRUCTOR_INVOCATION = 27;
 
+	/**
+	 * Completion is a declaration of a module.
+	 * This kind of completion might occur in a module-info.java file
+	 * after the keyword <code> "module" </code> as shown below:
+	 * <code>"module co^"</code> and complete it to
+	 * <code>"module com.greetings"</code>.
+	 *
+	 * @see #getKind()
+	 * @since 3.14
+	 */
+	public static final int MODULE_DECLARATION = 28;
+
+	/**
+	/**
+	 * Completion is a reference to a module.
+	 * This kind of completion might occur in a context like
+	 * <code>"requires com.g^"</code> and complete it to
+	 * <code>"requires com.greetings"</code> or in
+	 * <code> "to com.g^"</code> to <code>"to com.greetings</code>
+	 *
+	 * @see #getKind()
+	 * @since 3.14
+	 */
+	public static final int MODULE_REF = 29;
+
 //{ObjectTeams: new completion kinds
 	// when forming bitsets of completion kinds we need to fold multiple of our OT constants into the same slot.
 	// therefore we let them differ only by a offsets that are multiples of 32, which will be ignored during bitset operations
@@ -924,7 +949,7 @@ public class CompletionProposal {
 	/**
 	 * Generate a role type declaration overriding an implicitly inherited role from the super team.
 	 */
-	public static final int OVERRIDE_ROLE_DECLARATION= 28;
+	public static final int OVERRIDE_ROLE_DECLARATION= 30;
 // SH}
 
 	/**
@@ -941,7 +966,7 @@ public class CompletionProposal {
 	 */
 //{ObjectTeams: include OT completion kinds
 /* orig:
-	protected static final int LAST_KIND = ANONYMOUS_CLASS_CONSTRUCTOR_INVOCATION;
+	protected static final int LAST_KIND = MODULE_REF;
   :giro */
 	protected static final int LAST_KIND = OVERRIDE_ROLE_DECLARATION;
 // SH}
@@ -1216,7 +1241,7 @@ public class CompletionProposal {
 	}
 
 	/**
-	 * Returns the type signature or package name of the relevant
+	 * Returns the type signature or package name or module name (1.9) of the relevant
 	 * declaration in the context, or <code>null</code> if none.
 	 * <p>
 	 * This field is available for the following kinds of
@@ -1241,6 +1266,8 @@ public class CompletionProposal {
 	 * 	<li><code>METHOD_DECLARATION</code> - type signature
 	 * of the type that declares the method that is being
 	 * implemented or overridden</li>
+	 * 	<li><code>MODULE_REF</code> - 
+	 * name of the module that is referenced</li>
 	 * 	<li><code>PACKAGE_REF</code> - dot-based package
 	 * name of the package that is referenced</li>
 	 * 	<li><code>TYPE_IMPORT</code> - dot-based package
@@ -1255,7 +1282,7 @@ public class CompletionProposal {
 	 * returned.
 	 * </p>
 	 *
-	 * @return a type signature or a package name (depending
+	 * @return a type signature or a package name or module name (1.9) (depending
 	 * on the kind of completion), or <code>null</code> if none
 	 * @see Signature
 	 */
@@ -1291,7 +1318,7 @@ public class CompletionProposal {
 	}
 
 	/**
-	 * Sets the type or package signature of the relevant
+	 * Sets the type or package or module(1.9) signature of the relevant
 	 * declaration in the context, or <code>null</code> if none.
 	 * <p>
 	 * If not set, defaults to none.
@@ -1301,7 +1328,7 @@ public class CompletionProposal {
 	 * its properties; this method is not intended to be used by other clients.
 	 * </p>
 	 *
-	 * @param signature the type or package signature, or
+	 * @param signature the type or package  or module(1.9) signature, or
 	 * <code>null</code> if none
 	 */
 	public void setDeclarationSignature(char[] signature) {

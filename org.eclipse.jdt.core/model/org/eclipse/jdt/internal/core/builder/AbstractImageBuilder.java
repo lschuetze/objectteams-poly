@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2016 IBM Corporation and others.
+ * Copyright (c) 2000, 2017 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -215,7 +215,6 @@ public void acceptResult(CompilationResult result) {
 protected void acceptSecondaryType(ClassFile classFile) {
 	// noop
 }
-
 protected void addAllSourceFiles(final ArrayList sourceFiles) throws CoreException {
 	for (int i = 0, l = this.sourceLocations.length; i < l; i++) {
 		final ClasspathMultiDirectory sourceLocation = this.sourceLocations[i];
@@ -235,7 +234,8 @@ protected void addAllSourceFiles(final ArrayList sourceFiles) throws CoreExcepti
 								if (exclusionPatterns != null || inclusionPatterns != null)
 									if (Util.isExcluded(resource.getFullPath(), inclusionPatterns, exclusionPatterns, false))
 										return false;
-								sourceFiles.add(new SourceFile((IFile) resource, sourceLocation));
+								SourceFile unit = new SourceFile((IFile) resource, sourceLocation);
+								sourceFiles.add(unit);
 							}
 							return false;
 						case IResource.FOLDER :
@@ -397,8 +397,12 @@ protected void compile(SourceFile[] units, SourceFile[] additionalUnits, boolean
 			additionalUnits[length + i] = (SourceFile) this.problemSourceFiles.get(i);
 	}
 	String[] initialTypeNames = new String[units.length];
-	for (int i = 0, l = units.length; i < l; i++)
-		initialTypeNames[i] = units[i].initialTypeName;
+	for (int i = 0, l = units.length; i < l; i++) {
+		char[] moduleName = units[i].getModuleName();
+		initialTypeNames[i] = (moduleName == null)
+				? units[i].initialTypeName
+				: new StringBuilder(60).append(moduleName).append(':').append(units[i].initialTypeName).toString();
+	}
 	this.nameEnvironment.setNames(initialTypeNames, additionalUnits);
 	this.notifier.checkCancel();
 	try {

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2014 IBM Corporation and others.
+ * Copyright (c) 2000, 2017 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -21,6 +21,7 @@ import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IField;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IMethod;
+import org.eclipse.jdt.core.IModuleDescription;
 import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.ISourceRange;
 import org.eclipse.jdt.core.IType;
@@ -45,6 +46,7 @@ import org.eclipse.jdt.internal.compiler.lookup.SourceTypeBinding;
 import org.eclipse.jdt.internal.compiler.lookup.TypeBinding;
 import org.eclipse.jdt.internal.compiler.lookup.TypeConstants;
 import org.eclipse.jdt.internal.compiler.lookup.TypeVariableBinding;
+import org.eclipse.jdt.internal.core.NameLookup.Answer;
 import org.eclipse.jdt.internal.core.util.HandleFactory;
 import org.eclipse.jdt.internal.core.util.Util;
 import org.eclipse.objectteams.otdt.core.IMethodMapping;
@@ -176,6 +178,11 @@ protected void acceptBinaryMethod(
 		}
 		acceptBinaryMethod(type, method, uniqueKey, isConstructor);
 	}
+}
+@Override
+public void acceptModule(char[] moduleName, char[] uniqueKey, int start, int end) {
+	IModuleDescription module = resolveModule(moduleName);
+	addElement(module);
 }
 /**
  * Resolve the type.
@@ -973,6 +980,13 @@ public IJavaElement[] getElements() {
 		System.arraycopy(this.elements, 0, this.elements = new IJavaElement[elementLength], 0, elementLength);
 	}
 	return this.elements;
+}
+protected IModuleDescription resolveModule(char[] moduleName) {
+	Answer answer = this.nameLookup.findModule(moduleName);
+	if (answer != null) {
+		return answer.module;
+	}
+	return null;
 }
 /**
  * Resolve the type
