@@ -212,6 +212,8 @@ void buildTypeBindings(AccessRestriction accessRestriction) {
 							this.referenceContext.getFileName(),
 							this.referenceContext.currentPackage.sourceStart,
 							this.referenceContext.currentPackage.sourceEnd);
+					// ensure fPackage is not null
+					this.fPackage = this.environment.defaultPackage;
 					hasPackageError = true;
 					return;
 				}

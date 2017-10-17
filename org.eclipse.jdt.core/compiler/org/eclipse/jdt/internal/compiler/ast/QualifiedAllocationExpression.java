@@ -674,8 +674,8 @@ public static abstract class AbstractQualifiedAllocationExpression extends Alloc
 				return null;
 			}
 //{ObjectTeams: decapsulating base constructor call?
-		  if (this.type.getBaseclassDecapsulation().isAllowed()) {
-			  this.binding = ((ProblemMethodBinding)this.binding).closestMatch;
+		  if (this.type != null && this.type.getBaseclassDecapsulation().isAllowed()) {
+			this.binding = ((ProblemMethodBinding)this.binding).closestMatch;
 			int accessId = scope.enclosingSourceType().roleModel.addInaccessibleBaseMethod(this.binding);
 			scope.problemReporter().decapsulation(this, scope);
 			if (scope.compilerOptions().weavingScheme == WeavingScheme.OTDRE) {

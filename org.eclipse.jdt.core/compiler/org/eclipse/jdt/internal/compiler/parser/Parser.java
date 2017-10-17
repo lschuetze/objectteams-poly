@@ -4761,6 +4761,7 @@ protected void consumeEnumHeaderName() {
 	{
 		problemReporter().roleFileCantBeEnum(enumDeclaration, currentPackage.tokens);
 		enumDeclaration.modifiers &= ~ExtraCompilerModifiers.AccRole;
+		this.compilationUnit.currentPackage = null;
 	}
 // SH}
 
