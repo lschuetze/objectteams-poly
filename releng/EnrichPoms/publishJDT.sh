@@ -48,7 +48,7 @@ function same_as_baseline() {
 	name=`echo $simple | sed -e "s|\(.*\)-.*|\1|" | tr '.' '_'`
 	version=`echo $simple | sed -e "s|.*-\(.*\).pom|\1|"`
 	base_version=`eval echo \\${VERSION_$name}`
-	if [[ $base_version =~ $version ]
+	if [[ $base_version =~ $version ]]
 	then
 		return 0
 	else
