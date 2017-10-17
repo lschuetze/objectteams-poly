@@ -33,11 +33,11 @@ function require_executable() {
 
 function create_baseline() {
 	cd ${Repo}
-	for line in `find org/eclipse -name \*.jar`
+	for line in `find org/eclipse -name \*[0-9].jar`
 	do
 		file=`basename $line`
 		name=`echo $file | sed -e 's/\(.*\)_.*/\1/' | tr '.' '_'`
-		version=`echo $file | sed -e 's/.*_\(.*\)\.v[0-9-]*\.jar/\1/'`
+		version=`echo $file | sed -e 's/.*_\(.*\)\.v\?[0-9-]*\.jar/\1/'`
 		previous=`eval echo \\${VERSION_$name}`
 		if [ "$previous$" != "" ]
 		then
