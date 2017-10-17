@@ -47,10 +47,12 @@ function same_as_baseline() {
 	simple=`basename $1`
 	name=`echo $simple | sed -e "s|\(.*\)-.*|\1|" | tr '.' '_'`
 	version=`echo $simple | sed -e "s|.*-\(.*\).pom|\1|"`
-	if [ "`eval echo \\${VERSION_$name}`" == "$version" ]
+	base_version=`eval echo \\${VERSION_$name}`
+	if [[ $base_version =~ $version ]]
 	then
 		return 0
 	else
+		echo "different versions for ${name}: ${version} is not in ${base_version}"
 		return 1
 	fi
 }

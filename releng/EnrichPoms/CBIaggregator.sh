@@ -38,6 +38,12 @@ function create_baseline() {
 		file=`basename $line`
 		name=`echo $file | sed -e 's/\(.*\)_.*/\1/' | tr '.' '_'`
 		version=`echo $file | sed -e 's/.*_\(.*\)\.v[0-9-]*\.jar/\1/'`
+		previous=`eval echo \\${VERSION_$name}`
+		if [ "$previous$" != "" ]
+		then
+			version=${previous},${version}
+		fi
+		eval VERSION_$name=$version
 		echo VERSION_$name=$version
 	done > ${WORKSPACE}/baseline.txt 
 	cd -
