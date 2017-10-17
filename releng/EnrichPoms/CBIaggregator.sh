@@ -33,7 +33,7 @@ function require_executable() {
 
 function create_baseline() {
 	cd ${Repo}
-	for line in `find org/eclipse -name \*[0-9].jar`
+	for line in `find org/eclipse -name \*[0-9].jar | sort`
 	do
 		file=`basename $line`
 		name=`echo $file | sed -e 's/\(.*\)-.*/\1/' | tr '.' '_'`
