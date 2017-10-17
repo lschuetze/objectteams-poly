@@ -52,7 +52,7 @@ NICE="10"
 
 # VERSIONS:
 # Eclipse SDK build identifier (used for substitution in otdt.map.in etc.):
-SDK_QUALIFIER=${SDK_QUALIFIER:="I20171009-0410"}
+SDK_QUALIFIER=${SDK_QUALIFIER:="M20171009-0410"}
 
 # Architecture (as used by OSGi):
 ARCH=`arch`
