@@ -51,6 +51,9 @@ function same_as_baseline() {
 	then
 		return 0
 	else
+		echo -n "different versions for ${name}: ${version} vs."
+		eval echo \\${VERSION_$name}
+		echo
 		return 1
 	fi
 }
