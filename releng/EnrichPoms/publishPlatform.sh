@@ -14,6 +14,9 @@ REPO_BASE=${WORKSPACE}/../../CBIaggregator/workspace
 REPO=${REPO_BASE}/repo-${REPO_ID}
 PLATFORM=org/eclipse/platform
 
+# load versions from the baseline (to avoid illegal double-upload):
+source ${WORKSPACE}/baseline.txt
+
 if [ ! -d ${REPO} ]
 then
 	echo "No repo at ${REPO}"
@@ -41,31 +44,47 @@ MVN=/shared/common/apache-maven-latest/bin/mvn
 
 /bin/mkdir .log
 
+function same_as_baseline() {
+	simple=`basename $1`
+	name=`echo $simple | sed -e "s|\(.*\)-.*|\1|" | tr '.' '_'`
+	version=`echo $simple | sed -e "s|.*-\(.*\).pom|\1|"`
+	if [ "`eval echo \\${VERSION_$name}`" == "$version" ]
+	then
+		return 1
+	else
+		return 0
+	fi
+}
+
 for pomFile in org/eclipse/platform/*/*/*.pom
 do
-  file=`echo $pomFile | sed -e "s|\(.*\)\.pom|\1.jar|"`
-  sourcesFile=`echo $pomFile | sed -e "s|\(.*\)\.pom|\1-sources.jar|"`
-  javadocFile=`echo $pomFile | sed -e "s|\(.*\)\.pom|\1-javadoc.jar|"`
-
-  echo "${MVN} -f platform-pom.xml -s ${SETTINGS} gpg:sign-and-deploy-file -Durl=${URL} -DrepositoryId=${REPO} -Dfile=${file} -DpomFile=${pomFile}"
-  
-  ${MVN} -f platform-pom.xml -s ${SETTINGS} gpg:sign-and-deploy-file \
-     -Durl=${URL} -DrepositoryId=${REPO} \
-     -Dfile=${file} -DpomFile=${pomFile} \
-     >> .log/artifact-upload.txt
-     
-  echo -e "\t${sourcesFile}"
-  ${MVN} -f platform-pom.xml -s ${SETTINGS} gpg:sign-and-deploy-file \
-     -Durl=${URL} -DrepositoryId=${REPO} \
-     -Dfile=${sourcesFile} -DpomFile=${pomFile} -Dclassifier=sources \
-     >> .log/sources-upload.txt
-  
-  echo -e "\t${javadocFile}"
-  ${MVN} -f platform-pom.xml -s ${SETTINGS} gpg:sign-and-deploy-file \
-     -Durl=${URL} -DrepositoryId=${REPO} \
-     -Dfile=${javadocFile} -DpomFile=${pomFile} -Dclassifier=javadoc \
-     >> .log/javadoc-upload.txt
-
+  if same_as_baseline $pomFile
+  then
+	echo "Skipping file $pomFile which is already present in the baseline"
+  else
+	file=`echo $pomFile | sed -e "s|\(.*\)\.pom|\1.jar|"`
+	sourcesFile=`echo $pomFile | sed -e "s|\(.*\)\.pom|\1-sources.jar|"`
+	javadocFile=`echo $pomFile | sed -e "s|\(.*\)\.pom|\1-javadoc.jar|"`
+	
+	echo "${MVN} -f platform-pom.xml -s ${SETTINGS} gpg:sign-and-deploy-file -Durl=${URL} -DrepositoryId=${REPO} -Dfile=${file} -DpomFile=${pomFile}"
+	
+	${MVN} -f platform-pom.xml -s ${SETTINGS} gpg:sign-and-deploy-file \
+	   -Durl=${URL} -DrepositoryId=${REPO} \
+	   -Dfile=${file} -DpomFile=${pomFile} \
+	   >> .log/artifact-upload.txt
+	   
+	echo -e "\t${sourcesFile}"
+	${MVN} -f platform-pom.xml -s ${SETTINGS} gpg:sign-and-deploy-file \
+	   -Durl=${URL} -DrepositoryId=${REPO} \
+	   -Dfile=${sourcesFile} -DpomFile=${pomFile} -Dclassifier=sources \
+	   >> .log/sources-upload.txt
+	
+	echo -e "\t${javadocFile}"
+	${MVN} -f platform-pom.xml -s ${SETTINGS} gpg:sign-and-deploy-file \
+	   -Durl=${URL} -DrepositoryId=${REPO} \
+	   -Dfile=${javadocFile} -DpomFile=${pomFile} -Dclassifier=javadoc \
+	   >> .log/javadoc-upload.txt
+  fi
 done
 
 /bin/ls -la .log
