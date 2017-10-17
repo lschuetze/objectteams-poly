@@ -31,6 +31,18 @@ function require_executable() {
 	fi
 }
 
+function create_baseline() {
+	cd ${Repo}
+	for line in `find -name org/eclipse \*.jar`
+	do
+		file=`basename $line`
+		name=`echo $file | sed -e 's/\(.*\)_.*/\1/' | tr '.' '_'`
+		version=`echo $file | sed -e 's/.*_\(.*\)\.v[0-9-]*\.jar/\1/'`
+		echo VERSION_$name=$version
+	done > ${WORKSPACE}/baseline.txt 
+	cd -
+}	
+
 #================================================================================
 #   (1) Install and run the CBI aggregator
 #================================================================================
@@ -362,5 +374,9 @@ buildSourceJar platform/eclipse.platform.swt.git \
 	"JavadocBasher"
 
 echo "========== Repo completed ========="
+
+create_baseline
+
+echo "========== Next baseline created ========="
 
 cd ${WORKSPACE}
