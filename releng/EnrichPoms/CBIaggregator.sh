@@ -36,10 +36,10 @@ function create_baseline() {
 	for line in `find org/eclipse -name \*[0-9].jar`
 	do
 		file=`basename $line`
-		name=`echo $file | sed -e 's/\(.*\)_.*/\1/' | tr '.' '_'`
-		version=`echo $file | sed -e 's/.*_\(.*\)\.v\?[0-9-]*\.jar/\1/'`
+		name=`echo $file | sed -e 's/\(.*\)-.*/\1/' | tr '.' '_'`
+		version=`echo $file | sed -e 's/.*-\(.*\)\.jar/\1/'`
 		previous=`eval echo \\${VERSION_$name}`
-		if [ "$previous$" != "" ]
+		if [ "$previous" != "" ]
 		then
 			version=${previous},${version}
 		fi
