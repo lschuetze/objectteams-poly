@@ -50,9 +50,9 @@ function same_as_baseline() {
 	version=`echo $simple | sed -e "s|.*-\(.*\).pom|\1|"`
 	if [ "`eval echo \\${VERSION_$name}`" == "$version" ]
 	then
-		return 1
-	else
 		return 0
+	else
+		return 1
 	fi
 }
 
