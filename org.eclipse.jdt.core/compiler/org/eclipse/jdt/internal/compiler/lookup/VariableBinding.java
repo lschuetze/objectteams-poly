@@ -44,6 +44,7 @@ public abstract class VariableBinding
 	public int modifiers;
 //{ObjectTeams: pulled up to TeamAnchor:
 	//public TypeBinding type;
+	public int otBits;
 // SH}
 	public char[] name;
 	protected Constant constant;

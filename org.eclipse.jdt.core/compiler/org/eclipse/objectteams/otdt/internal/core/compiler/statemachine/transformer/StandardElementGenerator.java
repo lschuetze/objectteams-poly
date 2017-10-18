@@ -572,7 +572,7 @@ public class StandardElementGenerator {
 													AccPublic|AccFinal|AccSynthetic,
 													roleClass,
 													Constant.NotAConstant);
-		fakeStrongBaseField.tagBits |= TagBits.IsFakedField;
+		fakeStrongBaseField.otBits |= IOTConstants.IsFakedField;
 		SourceTypeBinding roleSourceClass = (SourceTypeBinding) roleClass;
 		FieldModel model = FieldModel.getModel(fakeStrongBaseField);
 		model.actualDeclaringClass = superRole;

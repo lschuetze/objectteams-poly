@@ -1381,7 +1381,7 @@ public class CopyInheritance implements IOTConstants, ClassFileConstants, ExtraC
         	roleDeclaration.binding.addCopiedSyntheticFied(field);
         	return;
         }
-        if ((field.tagBits & TagBits.IsFakedField) != 0)
+        if ((field.otBits & IOTConstants.IsFakedField) != 0)
         	return; // don't copy fakes.
 
         if (roleDeclaration.fields != null) {

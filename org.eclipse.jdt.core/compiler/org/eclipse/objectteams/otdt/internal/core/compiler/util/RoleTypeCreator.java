@@ -184,8 +184,8 @@ public class RoleTypeCreator implements TagBits {
         if (typedNode instanceof Expression)
         	decapsulationAllowed = ((Expression)typedNode).getBaseclassDecapsulation().isAllowed();
         	
-        if (   (variableBinding instanceof LocalVariableBinding) // note that for FieldBinding Bit63L has a different meaning!
-			&& (((LocalVariableBinding)variableBinding).tagBits & TagBits.IsFreshTeamInstance) != 0) 
+        if (   (variableBinding instanceof VariableBinding)
+			&& (((VariableBinding)variableBinding).otBits & IOTConstants.IsFreshTeamInstance) != 0) 
         {
         	if (!refBinding.isRoleType())
         		return variableBinding.getDependentTypeBinding(refBinding, -1, null, dimensions);
@@ -644,10 +644,10 @@ public class RoleTypeCreator implements TagBits {
 			|| method == null
 			|| method.isSynthetic()) // don't wrap role field accessors
 			return;
-		if ((method.tagBits & TagBits.HasWrappedSignature) != 0) // no double wrapping
+		if ((method.otBits & IOTConstants.HasWrappedSignature) != 0) // no double wrapping
 			return;
 	    doingSignatures = true;
-	    method.tagBits |= TagBits.HasWrappedSignature;
+	    method.otBits |= IOTConstants.HasWrappedSignature;
 	    ReferenceBinding site = method.declaringClass;
 	    assert !(site instanceof BinaryTypeBinding);
 	    TypeReference typedExpr = null;
@@ -749,11 +749,11 @@ public class RoleTypeCreator implements TagBits {
 	public static void wrapTypesInMethodBindingSignature (
 			MethodBinding method, LookupEnvironment environment)
 	{
-		if ((method.tagBits & TagBits.HasWrappedSignature) != 0) // no double wrapping
+		if ((method.otBits & IOTConstants.HasWrappedSignature) != 0) // no double wrapping
 			return;
 	    doingSignatures = true;
 	    try {
-	    	method.tagBits |= TagBits.HasWrappedSignature;
+	    	method.otBits |= IOTConstants.HasWrappedSignature;
 		    ReferenceBinding site = method.declaringClass;
 		    if (method.anchorList != null)
 		        method.anchorList.wrapTypes(environment);
@@ -934,7 +934,7 @@ public class RoleTypeCreator implements TagBits {
 		    	// this anchor matches nothing
 		    	String displayName = "fresh-instance-of-"+((AllocationExpression)anchorExpr).type.toString(); //$NON-NLS-1$
 				LocalVariableBinding fakeVariable = new LocalVariableBinding(displayName.toCharArray(), roleType.enclosingType(), ClassFileConstants.AccFinal, false);
-				fakeVariable.tagBits |= TagBits.IsFreshTeamInstance;
+				fakeVariable.otBits |= IOTConstants.IsFreshTeamInstance;
 				return fakeVariable;
 		    }
 		    else if (anchorBinding == null)

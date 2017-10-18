@@ -9085,7 +9085,7 @@ public void unhandledWarningToken(Expression token) {
 }
 public void uninitializedBlankFinalField(FieldBinding field, ASTNode location) {
 //{ObjectTeams
-	if ((field.tagBits & TagBits.IsFakedField) != 0)
+	if ((field.otBits & IOTConstants.IsFakedField) != 0)
 		return;
 // SH}
 	String[] arguments = new String[] {new String(field.readableName())};

@@ -36,6 +36,7 @@ import org.eclipse.jdt.internal.compiler.lookup.ReferenceBinding;
 import org.eclipse.jdt.internal.compiler.lookup.Scope;
 import org.eclipse.jdt.internal.compiler.lookup.TagBits;
 import org.eclipse.jdt.internal.compiler.lookup.TypeBinding;
+import org.eclipse.objectteams.otdt.core.compiler.IOTConstants;
 import org.eclipse.objectteams.otdt.core.exceptions.InternalCompilerError;
 import org.eclipse.objectteams.otdt.internal.core.compiler.ast.CalloutMappingDeclaration;
 import org.eclipse.objectteams.otdt.internal.core.compiler.ast.MethodSpec.ImplementationStrategy;
@@ -116,7 +117,7 @@ public class FieldModel extends ModelElement {
 	 * considering whether f is a faked covariant _OT$base field.
 	 */
 	public static ReferenceBinding getActualDeclaringClass(FieldBinding f) {
-		if ((f.tagBits & TagBits.IsFakedField) != 0)
+		if ((f.otBits & IOTConstants.IsFakedField) != 0)
 			if (f.model != null)
 				return f.model.actualDeclaringClass;
 		return f.declaringClass;

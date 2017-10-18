@@ -200,18 +200,9 @@ public interface TagBits {
 	// set when type binding has a captured wildcard somewhere
 	long HasCapturedWildcard = ASTNode.Bit62L;
 //{ObjectTeams:
-    // is a _OT$base field faked to compensate for weakening?
-    long IsFakedField = ASTNode.Bit63L;						// for field binding
-    // have types been wrapped in the signature
-    long HasWrappedSignature = ASTNode.Bit63L;				// for method bindings    
-    // "new SomeTeam()" expression, unmatchable anchor
-    long IsFreshTeamInstance = ASTNode.Bit63L; 				// for LocalVariableBinding
 
     // parameter/return incompatibility btw base-role?
     long HasMappingIncompatibility = ASTNode.Bit64L; 		// for method mapping bindings
-    long IsCopyOfParameterized = ASTNode.Bit64L;			// for method bindings
-    // is a role field needing a cast to the role class:
-    long IsRoleClassField = ASTNode.Bit64L;					// for field binding (role)
     
 // SH}
 }

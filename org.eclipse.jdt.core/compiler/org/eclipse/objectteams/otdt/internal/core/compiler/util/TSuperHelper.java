@@ -42,8 +42,8 @@ import org.eclipse.jdt.internal.compiler.lookup.MethodBinding;
 import org.eclipse.jdt.internal.compiler.lookup.ReferenceBinding;
 import org.eclipse.jdt.internal.compiler.lookup.Scope;
 import org.eclipse.jdt.internal.compiler.lookup.SourceTypeBinding;
-import org.eclipse.jdt.internal.compiler.lookup.TagBits;
 import org.eclipse.jdt.internal.compiler.lookup.TypeBinding;
+import org.eclipse.objectteams.otdt.core.compiler.IOTConstants;
 import org.eclipse.objectteams.otdt.core.compiler.OTNameUtils;
 import org.eclipse.objectteams.otdt.internal.core.compiler.ast.TSuperMessageSend;
 import org.eclipse.objectteams.otdt.internal.core.compiler.control.ITranslationStates;
@@ -297,7 +297,7 @@ public class TSuperHelper {
 			return false;
 		if (currentField.declaringClass.isCompatibleWith(tsuperField.declaringClass))
 			// different fields means one should be a faked strong copy of the other:
-			return (currentField.tagBits & TagBits.IsFakedField) != 0;
+			return (currentField.otBits & IOTConstants.IsFakedField) != 0;
 		if (isTSubOf(currentField.declaringClass, tsuperField.declaringClass))
 			return true;
 		return false;

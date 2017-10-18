@@ -1162,7 +1162,7 @@ public int fieldCount() {
 	if (isRole()) {
 		int count = 0;
 		for (FieldBinding field : fields()) {
-			if ((field.tagBits & TagBits.IsFakedField) ==0)
+			if ((field.otBits & IOTConstants.IsFakedField) ==0)
 				count++;
 		}
 		return count;

@@ -311,4 +311,32 @@ public interface IOTConstants
 	public static final char[] QUERY_MODULE_SUFFIX = "_Queries__OT__".toCharArray();
 	// decapsulation accessor prefix:
 	public static final char[] OT_DECAPS = "_OT$decaps$".toCharArray();
+	
+	// --------- for MethodBinding.otBits: --------------------------
+	/**
+	 * have types been wrapped in the signature?
+	 * @since 3.13
+	 */
+	int HasWrappedSignature = 0x0001;
+	/**
+	 * @since 3.13
+	 */
+	int IsCopyOfParameterized = 0x0002;
+
+	// --------- for VariableBinding.otBits: --------------------------
+	/**
+	 * is a _OT$base field faked to compensate for weakening?
+	 * @since 3.13
+	 */
+    int IsFakedField = 0x0001;								// for field binding
+	/**
+     * "new SomeTeam()" expression, unmatchable anchor
+	 * @since 3.13
+	 */
+    int IsFreshTeamInstance = 0x0002;		 				// for LocalVariableBinding
+	/**
+	 * is a role field needing a cast to the role class:
+	 * @since 3.13
+	 */
+    int IsRoleClassField = 0x0004;							// for field binding (role)
 }

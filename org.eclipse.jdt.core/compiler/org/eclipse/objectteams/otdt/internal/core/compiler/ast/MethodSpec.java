@@ -693,7 +693,7 @@ public class MethodSpec extends ASTNode implements InvocationSite
 				? MethodModel.getReturnType(method)
 				: method.returnType;
 		// 'weaken' to that erasure that was used in the tsuper version:
-		MethodBinding tsuperOriginal = (method.tagBits & TagBits.IsCopyOfParameterized) != 0 
+		MethodBinding tsuperOriginal = (method.otBits & IOTConstants.IsCopyOfParameterized) != 0 
 				? method.copyInheritanceSrc.original() 
 				: null;
 		TypeBinding returnType = (tsuperOriginal != null && tsuperOriginal.returnType.isTypeVariable() && !sourceReturnType.isTypeVariable())

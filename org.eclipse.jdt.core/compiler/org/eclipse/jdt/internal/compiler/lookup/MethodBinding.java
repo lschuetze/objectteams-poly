@@ -123,6 +123,7 @@ public class MethodBinding extends Binding implements IProtectable {
 	protected AnnotationBinding [] typeAnnotations = Binding.NO_ANNOTATIONS;
 
 //{ObjectTeams:
+	public int otBits;
 	public MethodModel model = null;
 
     // back references for byte code adjustment
@@ -140,7 +141,7 @@ public class MethodBinding extends Binding implements IProtectable {
     		}
     	}
     	if (tsuperMethod != null && tsuperMethod.declaringClass.isRole() && tsuperMethod instanceof ParameterizedMethodBinding)
-    		this.tagBits |= TagBits.IsCopyOfParameterized;
+    		this.otBits |= IOTConstants.IsCopyOfParameterized;
     }
 
     // set of tsuper methods being overridden by this method
@@ -878,7 +879,7 @@ public void resetParameters() {
  * @return the 'weakened' type at the specified position.
  */
 public TypeBinding getCodeGenType(int pos) {
-	MethodBinding tsuperOriginal = (this.tagBits & TagBits.IsCopyOfParameterized) != 0 ? this.copyInheritanceSrc.original() : null;
+	MethodBinding tsuperOriginal = (this.otBits & IOTConstants.IsCopyOfParameterized) != 0 ? this.copyInheritanceSrc.original() : null;
 	TypeBinding currentType, tsuperType;
 	checkTsuper: {
 		if (pos == -1) {

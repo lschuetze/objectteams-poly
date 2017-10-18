@@ -2749,8 +2749,8 @@ public abstract class Scope {
 					// try again with role class:
 					field = findField(roleClass, fieldName, invocationSite, true /*resolve*/);
 					if (field != null && field.isValidBinding()) {
-						field = new FieldBinding(field, roleClass); // make a copy which we can mark specifically...
-						field.tagBits |= TagBits.IsRoleClassField;  // ...tell CodeStream to add a cast.
+						field = new FieldBinding(field, roleClass);	    // make a copy which we can mark specifically...
+						field.otBits |= IOTConstants.IsRoleClassField;  // ...tell CodeStream to add a cast.
 						return field;
 					}
 				}

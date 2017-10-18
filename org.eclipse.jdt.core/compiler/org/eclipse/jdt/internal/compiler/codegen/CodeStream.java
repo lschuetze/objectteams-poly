@@ -1297,10 +1297,10 @@ public void fieldAccess(byte opcode, FieldBinding fieldBinding, TypeBinding decl
 //{ObjectTeams: account for getting faked base field compensating for weakening/refined playedBy:
 	TypeBinding origType = null;
 	if (opcode == Opcodes.OPC_getfield) {
-		if ((fieldBinding.tagBits & TagBits.IsFakedField) != 0) {
+		if ((fieldBinding.otBits & IOTConstants.IsFakedField) != 0) {
 			origType = fieldBinding.type;
 			fieldBinding = fieldBinding.model.getOriginalFromFake();
-		} else if ((fieldBinding.tagBits & TagBits.IsRoleClassField) != 0) {
+		} else if ((fieldBinding.otBits & IOTConstants.IsRoleClassField) != 0) {
 			checkcast(fieldBinding.declaringClass); // don't try to access via the interface part
 		}
 	}
@@ -4526,7 +4526,7 @@ public void invoke(byte opcode, MethodBinding methodBinding, TypeBinding declari
 			methodBinding.selector, 
 			methodBinding.signature(this.classFile));
 //{ObjectTeams: if signature is weakened to conform to tsuper erasure, we need a cast to make the result compatible to the expected type
-	if ((methodBinding.tagBits & TagBits.IsCopyOfParameterized) != 0 &&
+	if ((methodBinding.otBits & IOTConstants.IsCopyOfParameterized) != 0 &&
 		TypeBinding.notEquals(methodBinding.returnType.erasure(), methodBinding.copyInheritanceSrc.original().returnType.erasure()))
 		checkcast(methodBinding.returnType.erasure());
 // SH}
