@@ -2335,12 +2335,7 @@ public class ClassScope extends Scope {
 		if (superType.isMemberType()) {
 			ReferenceBinding current = superType.enclosingType();
 			do {
-//{ObjectTeams:  problematic fix for bug 520874:
-/* orig: 
 				if (current.isHierarchyBeingActivelyConnected()) {
-  :giro */
-				if (current.isHierarchyBeingActivelyConnected() && ((TypeBinding.equalsEquals(current, superType) || !current.isStatic()))) {
-// SH}
 					problemReporter().hierarchyCircularity(sourceType, current, reference);
 					sourceType.tagBits |= TagBits.HierarchyHasProblems;
 					current.tagBits |= TagBits.HierarchyHasProblems;
