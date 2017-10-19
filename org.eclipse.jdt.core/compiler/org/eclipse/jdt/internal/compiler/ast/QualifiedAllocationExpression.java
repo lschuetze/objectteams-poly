@@ -40,6 +40,7 @@ import static org.eclipse.jdt.internal.compiler.ast.ExpressionContext.INVOCATION
 
 import java.util.Arrays;
 
+import org.eclipse.jdt.core.compiler.IProblem;
 import org.eclipse.jdt.internal.compiler.ASTVisitor;
 import org.eclipse.jdt.internal.compiler.classfmt.ClassFileConstants;
 import org.eclipse.jdt.internal.compiler.codegen.CodeStream;
@@ -52,9 +53,11 @@ import org.eclipse.jdt.internal.compiler.impl.Constant;
 import org.eclipse.jdt.internal.compiler.lookup.Binding;
 import org.eclipse.jdt.internal.compiler.lookup.BlockScope;
 import org.eclipse.jdt.internal.compiler.lookup.ExtraCompilerModifiers;
+import org.eclipse.jdt.internal.compiler.lookup.FieldBinding;
 import org.eclipse.jdt.internal.compiler.lookup.ImplicitNullAnnotationVerifier;
 import org.eclipse.jdt.internal.compiler.lookup.IntersectionTypeBinding18;
 import org.eclipse.jdt.internal.compiler.lookup.LocalTypeBinding;
+import org.eclipse.jdt.internal.compiler.lookup.LocalVariableBinding;
 import org.eclipse.jdt.internal.compiler.lookup.LookupEnvironment;
 import org.eclipse.jdt.internal.compiler.lookup.MethodBinding;
 import org.eclipse.jdt.internal.compiler.lookup.ParameterizedGenericMethodBinding;
@@ -72,42 +75,19 @@ import org.eclipse.jdt.internal.compiler.lookup.TypeBindingVisitor;
 import org.eclipse.jdt.internal.compiler.lookup.TypeConstants;
 import org.eclipse.jdt.internal.compiler.lookup.TypeIds;
 import org.eclipse.jdt.internal.compiler.lookup.TypeVariableBinding;
+import org.eclipse.jdt.internal.compiler.lookup.VariableBinding;
+import org.eclipse.objectteams.otdt.core.exceptions.InternalCompilerError;
 import org.eclipse.objectteams.otdt.internal.core.compiler.ast.ConstructorDecapsulationException;
-import org.eclipse.objectteams.otdt.internal.core.compiler.ast.OTQualifiedAllocationExpression;
 import org.eclipse.objectteams.otdt.internal.core.compiler.control.Dependencies;
 import org.eclipse.objectteams.otdt.internal.core.compiler.control.ITranslationStates;
+import org.eclipse.objectteams.otdt.internal.core.compiler.lifting.Lifting;
 import org.eclipse.objectteams.otdt.internal.core.compiler.lookup.AnchorMapping;
+import org.eclipse.objectteams.otdt.internal.core.compiler.lookup.RoleTypeBinding;
+import org.eclipse.objectteams.otdt.internal.core.compiler.statemachine.copyinheritance.CopyInheritance;
 import org.eclipse.objectteams.otdt.internal.core.compiler.util.RoleTypeCreator;
 
 
-//{ObjectTeams: renamed class (replaced by OT-variant
-/**
- * This class wraps a qualified allocation in order to defer the decision
- * whether or not to translate it into a role creator call.
- * This decision can only be made after the receiver (lhs of dot) is resolved.
- * Double inheritance as to keep the facade but outsource our modifications
- *
- * @author stephan
- */
-public class QualifiedAllocationExpression
-    extends OTQualifiedAllocationExpression
-{
-    /**
-     * Wrap a given allocation expression.
-     */
-    public QualifiedAllocationExpression(TypeDeclaration anonymousType) {
-    	super(anonymousType);
-    }
-
-    public QualifiedAllocationExpression() {
-    	super();
-    }
-
-	// access this by the concrete class:
-	protected QualifiedAllocationExpression _this() {
-		return this;
-	}
-	
+//{ObjectTeams:
 /**
  * OTDT changes:
  *
@@ -123,6 +103,12 @@ public class QualifiedAllocationExpression
  * 			+ anchor mapping
  *
  * What: wrap resolvedType if it's a role.
+ * 
+ * This class adds an alternative implementation using a creator call.
+ * It is in-lined in the original class in order to defer the decision
+ * whether or not to translate it into a role creator call.
+ * This decision can only be made after the receiver (lhs of dot) is resolved.
+ * Double inheritance as to keep the facade but outsource our modifications
  *
  * ----
  *
@@ -131,8 +117,7 @@ public class QualifiedAllocationExpression
  * - trailing anonymous type
  * - generic type arguments for generic constructor invocation
  */
-public static abstract class AbstractQualifiedAllocationExpression extends AllocationExpression {
-// km}
+public class QualifiedAllocationExpression extends AllocationExpression {
 
 	//qualification may be on both side
 	public Expression enclosingInstance;
@@ -141,30 +126,28 @@ public static abstract class AbstractQualifiedAllocationExpression extends Alloc
 	protected ReferenceBinding enclosingInstanceCast = null;
 
 	protected boolean hasEnclosingInstanceProblem;
+
+    /** if this is set, we are using the translated version. */
+    private MessageSend creatorCall = null;
+
+    private Runnable preGenerateTask = null; // an optional task to be performed at the start of generateCode.
 // SH}
 	public TypeDeclaration anonymousType;
 
-//{ObjectTeams: renamed:
-	public AbstractQualifiedAllocationExpression() {
-// km}
+	public QualifiedAllocationExpression() {
 		// for subtypes
 	}
 
-
-//{ObjectTeams: renamed
-	public AbstractQualifiedAllocationExpression(TypeDeclaration anonymousType) {
-//km}
+	public QualifiedAllocationExpression(TypeDeclaration anonymousType) {
 		this.anonymousType = anonymousType;
-//{ObjectTeams: use the concrete class for this:
-		anonymousType.allocation = _this();
-// SH}
+		anonymousType.allocation = this;
 	}
 
-//{ObjectTeams: access this by the concrete class:
-	abstract protected QualifiedAllocationExpression _this();
-// SH}
-
 	public FlowInfo analyseCode(BlockScope currentScope, FlowContext flowContext, FlowInfo flowInfo) {
+//{ObjectTeams: dispatch:
+        if (this.creatorCall != null)
+			return this.creatorCall.analyseCode(currentScope, flowContext, flowInfo);
+// SH}
 		// analyse the enclosing instance
 		if (this.enclosingInstance != null) {
 			flowInfo = this.enclosingInstance.analyseCode(currentScope, flowContext, flowInfo);
@@ -246,6 +229,14 @@ public static abstract class AbstractQualifiedAllocationExpression extends Alloc
 	}
 
 	public void generateCode(BlockScope currentScope, CodeStream codeStream, boolean valueRequired) {
+//{ObjectTeams: dispatch:
+    	if (this.preGenerateTask != null)
+    		this.preGenerateTask.run(); // transfer a local variable's resolvedPosition just before it is used for generating code
+        if (this.creatorCall != null) {
+       		this.creatorCall.generateCode(currentScope, codeStream, valueRequired);
+       		return;
+        }
+// SH}
 		cleanUpInferenceContexts();
 		if (!valueRequired)
 			currentScope.problemReporter().unusedObjectAllocation(this);
@@ -353,6 +344,10 @@ public static abstract class AbstractQualifiedAllocationExpression extends Alloc
 	}
 
 	public StringBuffer printExpression(int indent, StringBuffer output) {
+//{ObjectTeams: dispatch
+        if (this.creatorCall != null)
+            return this.creatorCall.printExpression(indent, output);
+// SH}
 		if (this.enclosingInstance != null)
 			this.enclosingInstance.printExpression(0, output).append('.');
 		super.printExpression(0, output);
@@ -363,6 +358,126 @@ public static abstract class AbstractQualifiedAllocationExpression extends Alloc
 	}
 
 	public TypeBinding resolveType(BlockScope scope) {
+//{ObjectTeams: special casing
+	    if (this.anonymousType == null && this.creatorCall == null && this.enclosingInstance == null) // special case during code assist
+            return origResolveType(scope);
+
+		this.hasEnclosingInstanceProblem = false;
+	    if (this.anonymousType == null && this.creatorCall == null) { // no double processing
+
+        	if (this.enclosingInstance instanceof CastExpression)
+				this.enclosingInstance.bits |= DisableUnnecessaryCastCheck; // will check later on (within super.resolveType())
+
+        	TypeBinding enclosingInstanceType = this.enclosingInstance.resolveType(scope);
+       		this.hasEnclosingInstanceProblem = enclosingInstanceType == null;
+
+	        if (   !scope.isGeneratedScope()
+	        	&& enclosingInstanceType != null
+	        	&& enclosingInstanceType.isTeam())  // non reference types will trigger error reporting via super.resolveType()
+	        {
+	        	if (this.enclosingInstance instanceof NameReference) {
+	        		final NameReference anchorRef = (NameReference)this.enclosingInstance;
+	        		if (!((VariableBinding)anchorRef.binding).isFinal()) {
+
+	        			// replace non-final anchor with fake-binding,
+	        			// so that this type is not compatibly to anything else:
+	        			char[] variableName = ((VariableBinding)anchorRef.binding).name;
+	        			switch (anchorRef.bits & ASTNode.RestrictiveFlagMASK) {
+	        			case Binding.LOCAL:
+	        				final LocalVariableBinding localOrig = (LocalVariableBinding)anchorRef.binding;
+	        				// mark the original as used before we procede with a fake copy:
+							localOrig.useFlag = LocalVariableBinding.USED;
+							anchorRef.binding = new LocalVariableBinding(variableName, enclosingInstanceType, ClassFileConstants.AccFinal, false)
+							{
+		        				@Override public int problemId() { return IProblem.AnchorNotFinal; }
+		        			};
+		        			this.preGenerateTask = new Runnable() { public void run() {
+		        				// need to transfer this info from the real local to the fake one (don't have that info yet):
+		        				((LocalVariableBinding)anchorRef.binding).resolvedPosition = localOrig.resolvedPosition;
+		        			}};
+		        			break;
+	        			case Binding.FIELD:
+	        				anchorRef.binding = new FieldBinding(variableName, enclosingInstanceType, ClassFileConstants.AccFinal, scope.referenceType().binding, Constant.NotAConstant)
+	        				{
+		        				@Override public int problemId() { return IProblem.AnchorNotFinal; }
+		        			};
+		        			break;
+		        		default:
+		        			throw new InternalCompilerError("Unexpected bits, neither local nor field "+anchorRef.bits+": "+anchorRef); //$NON-NLS-1$ //$NON-NLS-2$
+	        			}
+	        		}
+	        	}
+
+	            if (this.type.getTypeName().length > 1) {
+	            	scope.problemReporter().roleCreationNotRelativeToEnclosingTeam(this);
+	            	return null;
+	            }
+
+	            // now it's finally time to create the alternate version:
+	            this.creatorCall = CopyInheritance.createConstructorMethodInvocationExpression(scope, this);
+	            if (this.creatorCall == null)
+	            	return null;
+	        }
+	    }
+	    if (this.creatorCall == null) {
+	    	TypeBinding typ = origResolveType(scope);
+	    	if (typ == null || typ instanceof PolyTypeBinding)
+	    		return typ;
+
+	    	if (!this.hasEnclosingInstanceProblem) { // more checks only if no error already
+		        // if enclosing is a role request a cast to the class part as required by the inner constructor
+		        if (this.enclosingInstance != null) {
+		        	TypeBinding enclosingType = this.enclosingInstance.resolvedType;
+					if (enclosingType instanceof ReferenceBinding && ((ReferenceBinding)enclosingType).isDirectRole())
+		        		this.enclosingInstanceCast = ((ReferenceBinding)enclosingType).getRealClass();
+		        }
+		        ReferenceBinding superType = null;
+		        if (this.resolvedType instanceof ReferenceBinding)
+		        	superType= ((ReferenceBinding)this.resolvedType).superclass();
+		    	if (   superType != null
+		    		&& (superType instanceof RoleTypeBinding))
+		    	{
+		    		RoleTypeBinding superRole = (RoleTypeBinding)superType;
+			        if (superRole.hasExplicitAnchor())
+			        	scope.problemReporter().extendingExternalizedRole(superRole, this.type);
+		    	}
+	    	}
+	    } else {  // === with creatorCall ===
+
+	    	this.constant = Constant.NotAConstant;
+
+	    	this.resolvedType = this.creatorCall.resolveType(scope);
+	    	// when creating role nested instance, no cast of enclosing role needed in this branch,
+	    	// because creator call is routed via the interface of the enclosing role.
+	        if (this.resolvedType != null) {
+	        	if (((ReferenceBinding)this.resolvedType).isAbstract())
+	        	{
+	        		if (!((ReferenceBinding)enclosingInstance().resolvedType).isAbstract())
+	        			scope.problemReporter().abstractRoleIsRelevant(this, (ReferenceBinding) this.creatorCall.resolvedType);
+	        	}
+	        	if (this.resolvedType.isValidBinding()) {
+	        		// FIXME(SH): remove cast unwrapping
+	        		Expression createExpr = this.creatorCall;
+	        		while (createExpr instanceof CastExpression) // may have been wrapped using CollectedReplacementsTransformer
+	        			createExpr = ((CastExpression)createExpr).expression;
+
+	        		this.binding = ((MessageSend)createExpr).binding; // store the method binding
+
+	        		// using lift-ctor in a qualified way? (OTJDL 2.4.1(a))
+	        		ReferenceBinding role = (ReferenceBinding)this.resolvedType;
+	        		MethodBinding creator = this.binding;
+	        		if (creator != null) {
+	        			MethodBinding ctor = role.getExactConstructor(creator.parameters);
+	        			if (Lifting.isLiftToConstructor(ctor, role))
+	        				scope.problemReporter().qualifiedUseOfLiftingConstructor(ctor, this.creatorCall);
+	        		}
+	        	}
+	        }
+	    }
+	    return this.resolvedType;
+	}
+	public TypeBinding origResolveType(BlockScope scope) {
+// SH}
 		// added for code assist...cannot occur with 'normal' code
 		if (this.anonymousType == null && this.enclosingInstance == null) {
 			return super.resolveType(scope);
@@ -739,34 +854,19 @@ public static abstract class AbstractQualifiedAllocationExpression extends Alloc
 
 			public boolean visit(IntersectionTypeBinding18 intersectionTypeBinding18) {
 				Arrays.sort(intersectionTypeBinding18.intersectingTypes, (t1, t2) -> t1.id - t2.id);
-//{ObjectTeams: respect intermediate class:
-/* orig:
 				scope.problemReporter().anonymousDiamondWithNonDenotableTypeArguments(QualifiedAllocationExpression.this.type, allocationType);
-  :giro */
-				scope.problemReporter().anonymousDiamondWithNonDenotableTypeArguments(AbstractQualifiedAllocationExpression.this.type, allocationType);
-// SH}
 				return this.noErrors = false;  // stop traversal
 			}
 			public boolean visit(TypeVariableBinding typeVariable) {
 				if (typeVariable.isCapture()) {
-//{ObjectTeams: respect intermediate class:
-/* orig:
 					scope.problemReporter().anonymousDiamondWithNonDenotableTypeArguments(QualifiedAllocationExpression.this.type, allocationType);
-  :giro */
-					scope.problemReporter().anonymousDiamondWithNonDenotableTypeArguments(AbstractQualifiedAllocationExpression.this.type, allocationType);
-// SH}
 					return this.noErrors = false;  // stop traversal
 				}
 				return true; // continue traversal
 			}
 			public boolean visit(ReferenceBinding ref) {
 				if (!ref.canBeSeenBy(scope)) {
-//{ObjectTeams: respect intermediate class:
-/* orig:
 					scope.problemReporter().invalidType(QualifiedAllocationExpression.this.anonymousType, new ProblemReferenceBinding(ref.compoundName, ref, ProblemReasons.NotVisible));
-  :giro */
-					scope.problemReporter().invalidType(AbstractQualifiedAllocationExpression.this.anonymousType, new ProblemReferenceBinding(ref.compoundName, ref, ProblemReasons.NotVisible));
-// SH}
 					return this.noErrors = false;
 				}
 				return true;
@@ -796,9 +896,13 @@ public static abstract class AbstractQualifiedAllocationExpression extends Alloc
 		return findConstructorBinding(scope, this, anonymousSuperclass, this.argumentTypes);
 	}
 	public void traverse(ASTVisitor visitor, BlockScope scope) {
-//{ObjectTeams: use the concrete class for this:
-		if (visitor.visit(_this(), scope)) {
+//{ObjectTeams: creator?
+		if (this.creatorCall != null) {
+			this.creatorCall.traverse(visitor, scope);
+			return;
+		}
 // SH}
+		if (visitor.visit(this, scope)) {
 			if (this.enclosingInstance != null)
 				this.enclosingInstance.traverse(visitor, scope);
 			if (this.typeArguments != null) {
@@ -816,11 +920,6 @@ public static abstract class AbstractQualifiedAllocationExpression extends Alloc
 			if (this.anonymousType != null)
 				this.anonymousType.traverse(visitor, scope);
 		}
-//{ObjectTeams: use the concrete class for this:
-		visitor.endVisit(_this(), scope);
-// SH}
+		visitor.endVisit(this, scope);
 	}
 }
-//{ObjectTeams: end enclosing wrapper class
-}
-// SH}
