@@ -43,6 +43,7 @@ This software is based on Eclipse and the Java Development Tooling
       <import plugin="org.eclipse.text"/>
       <import plugin="org.eclipse.test.performance"/>
       <import plugin="org.eclipse.ant.optional.junit"/>
+	  <import plugin="org.hamcrest.core"/>
    </requires>
 
    <plugin
@@ -152,11 +153,5 @@ This software is based on Eclipse and the Java Development Tooling
     	 download-size="0"
     	 install-size="0"
     	 version="2.1.100.qualifier"/>
-
-	<plugin
-		 id="org.hamcrest.core"
-		 download-size="0"
-		 install-size="0"
-		 version="1.3.0"/>
 
 </feature>
