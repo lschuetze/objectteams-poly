@@ -153,4 +153,10 @@ This software is based on Eclipse and the Java Development Tooling
     	 install-size="0"
     	 version="2.1.100.qualifier"/>
 
+	<plugin
+		 id="org.hamcrest.core"
+		 download-size="0"
+		 install-size="0"
+		 version="1.3.0"/>
+
 </feature>
