@@ -28,6 +28,8 @@
 JIKESPG_HOME=${JIKESPG_HOME:-/usr/bin}
 export JIKESPG_HOME
 
+JAVAC=${JAVAC:-java}
+
 if test $# -ne 2
 then
 	echo "Achtung: JIKESPG_HOME muss KORREKT gesetzt sein!"
@@ -265,7 +267,7 @@ cd output
 cp  ../UpdateParserFiles.java .
 
 echo "UpdateParserFiles kompilieren"
-javac -classpath ${pluginDir}/bin UpdateParserFiles.java
+$JAVAC -classpath ${pluginDir}/bin UpdateParserFiles.java
 echo "Ressourcendateien erzeugen (*.rsc)"
 java -classpath ${pluginDir}/bin:. UpdateParserFiles javadcl.java javahdr.java
 
