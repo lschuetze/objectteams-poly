@@ -8867,6 +8867,13 @@ public class ASTTest extends org.eclipse.jdt.core.tests.junit.extension.TestCase
 			ASTNode.EXPRESSION_METHOD_REFERENCE,
 			ASTNode.SUPER_METHOD_REFERENCE,
 			ASTNode.TYPE_METHOD_REFERENCE,
+			ASTNode.MODULE_DECLARATION,
+			ASTNode.REQUIRES_DIRECTIVE,
+			ASTNode.EXPORTS_DIRECTIVE,
+			ASTNode.OPENS_DIRECTIVE,
+			ASTNode.USES_DIRECTIVE,
+			ASTNode.PROVIDES_DIRECTIVE,
+			ASTNode.MODULE_MODIFIER,
 //{ObjectTeams:
 			ASTNode.METHOD_SPEC,
 			ASTNode.CALLIN_MAPPING_DECLARATION,
@@ -8885,14 +8892,6 @@ public class ASTTest extends org.eclipse.jdt.core.tests.junit.extension.TestCase
 			ASTNode.GUARD_PREDICATE_DECLARATION,
 			ASTNode.METHOD_BINDING_OPERATOR,
 // SH}
-			ASTNode.MODULE_DECLARATION,
-			ASTNode.REQUIRES_DIRECTIVE,
-			ASTNode.EXPORTS_DIRECTIVE,
-			ASTNode.OPENS_DIRECTIVE,
-			ASTNode.USES_DIRECTIVE,
-			ASTNode.PROVIDES_DIRECTIVE,
-			ASTNode.MODULE_MODIFIER,
-
 		};
 
 		// assert that nodeType values are correct:
