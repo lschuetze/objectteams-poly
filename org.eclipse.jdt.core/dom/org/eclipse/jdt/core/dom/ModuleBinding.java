@@ -15,9 +15,12 @@ import java.util.Arrays;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.compiler.CharOperation;
 import org.eclipse.jdt.internal.compiler.env.INameEnvironment;
+import org.eclipse.jdt.internal.compiler.parser.Parser;
 import org.eclipse.jdt.internal.compiler.util.Util;
 import org.eclipse.jdt.internal.core.NameLookup;
 import org.eclipse.jdt.internal.core.NameLookup.Answer;
+import org.eclipse.objectteams.otdt.internal.core.compiler.control.Config;
+import org.eclipse.objectteams.otdt.internal.core.compiler.control.Dependencies;
 import org.eclipse.jdt.internal.core.SearchableEnvironment;
 
 /**
@@ -213,20 +216,56 @@ class ModuleBinding implements IModuleBinding {
 	@Override
 	public ITypeBinding[] getUses() {
 		if (this.uses == null)
+//{ObjectTeams: calling getUses() requires Dependencies control:
+		  try (Config config = setupDependencies()) {
+// orig:
 			this.uses = getTypes(this.binding.getUses());
+// :giro
+		  }
+// SH}
 		return this.uses;
 	}
 
 	@Override
 	public ITypeBinding[] getServices() {
 		if (this.services == null)
+//{ObjectTeams: calling getServices() requires Dependencies control:
+		  try (Config config = setupDependencies()) {
+// orig:
 			this.services = getTypes(this.binding.getServices());
+// :giro
+		  }
+// SH}
 		return this.services;
 	}
 	@Override
 	public ITypeBinding[] getImplementations(ITypeBinding service) {
+//{ObjectTeams: calling getImplementations() requires Dependencies control:
+	  try (Config config = setupDependencies()) {
+//orig:
 		return getTypes(this.binding.getImplementations(((TypeBinding) service).binding));
+// :giro
+	  }
+// SH}
 	}
+
+//{ObjectTeams: utilities for methods needing configured Dependencies:
+	Config setupDependencies() {
+		return setupDependencies(true, true, true, true, false, true);
+	}
+
+	Config setupDependencies(boolean	          verifyMethods,
+			boolean           analyzeCode,
+			boolean           generateCode,
+			boolean           buildFieldsAndMethods,
+			boolean           bundledCompleteTypeBindings,
+			boolean           strictDiet) {
+		Parser parser = (this.resolver.scope() != null) ? this.resolver.scope().parser : null;
+		return Dependencies.setup(this.resolver, parser, this.resolver.lookupEnvironment(),
+				verifyMethods, analyzeCode, generateCode, buildFieldsAndMethods, bundledCompleteTypeBindings, strictDiet);
+	}
+// SH}
+
 	/**
 	 * For debugging purpose only.
 	 * @see java.lang.Object#toString()

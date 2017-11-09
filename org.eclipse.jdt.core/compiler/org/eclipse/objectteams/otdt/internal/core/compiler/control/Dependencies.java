@@ -226,7 +226,7 @@ public class Dependencies implements ITranslationStates {
         if (unit.ignoreFurtherInvestigation)
 			success = Success.Fail; // but KEEPGOING to generate also problem class files.
 
-		if (oldState >= STATE_BINDINGS_BUILT && unit.types == null)
+		if (oldState >= STATE_BINDINGS_BUILT && unit.types == null && unit.moduleDeclaration == null)
 			return Success.OK; // nothing to do for empty CUD after building bindings (which analyzes some package issues)
 
 		if (oldState >= STATE_BINDINGS_BUILT && unit.scope == null)
@@ -337,6 +337,12 @@ public class Dependencies implements ITranslationStates {
 		            unit.state.setState(STATE_METHODS_PARSED);
 		            done = false;
 		            break;
+		        case STATE_FAULT_IN_TYPES:
+		        	if (unit.moduleDeclaration != null)
+		        		unit.scope.faultInTypes(); // no types
+		        	else
+		        		done = false; // types will take care of this
+		        	break;
 		        case STATE_METHODS_VERIFIED:
 					if (Config.getVerifyMethods())
 		            	unit.scope.verifyMethods(Config.getLookupEnvironment().methodVerifier());
