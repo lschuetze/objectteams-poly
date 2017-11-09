@@ -1157,7 +1157,7 @@ public class RoleTypeCreator implements TagBits {
 		// get class-part scope:
 		Scope classPartScope = scope;
 		TypeDeclaration type = scope.referenceType();
-		if (type.isRole() && type.isInterface()) {
+		if (type != null && type.isRole() && type.isInterface()) { // type is null inside ModuleDeclaration
 			TypeDeclaration classPartAst = type.getRoleModel().getClassPartAst();
 			if (classPartAst != null)
 				classPartScope = classPartAst.scope;

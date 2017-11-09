@@ -125,9 +125,11 @@ public class ResolveTests9 extends AbstractJavaModelTests {
 			testFolder = createFolder("/Resolve/src/test");
 			createFile(
 					"/Resolve/src/test/ITest.java",
+					"package test;\n" + // OT: missing in JDT
 					"public interface ITest {}\n");
 			createFile(
 					"/Resolve/src/test/TestClass.java",
+					"package test;\n" + // OT: missing in JDT
 					"public class TestClass implements ITest {}\n");
 		
 			this.wc = getWorkingCopy(
