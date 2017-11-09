@@ -801,12 +801,12 @@ public class QualifiedAllocationExpression extends AllocationExpression {
 // orig:
 			scope.problemReporter().invalidConstructor(this, constructorBinding);
 			return this.resolvedType;
-		}
-		if ((constructorBinding.tagBits & TagBits.HasMissingType) != 0) {
-			scope.problemReporter().missingTypeInConstructor(this, constructorBinding);
 // :giro
 		  }
 // SH}
+		}
+		if ((constructorBinding.tagBits & TagBits.HasMissingType) != 0) {
+			scope.problemReporter().missingTypeInConstructor(this, constructorBinding);
 		}
 		if (this.enclosingInstance != null) {
 			ReferenceBinding targetEnclosing = constructorBinding.declaringClass.enclosingType();
