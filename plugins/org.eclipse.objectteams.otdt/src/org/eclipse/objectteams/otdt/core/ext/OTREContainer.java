@@ -77,7 +77,7 @@ public class OTREContainer implements IClasspathContainer
 
     // data for initializing the ASM_PATH:
 	private static final String[] ASM_BUNDLE_NAMES = { "org.objectweb.asm", "org.objectweb.asm.tree", "org.objectweb.asm.commons", "org.objectweb.asm.util", "org.objectweb.asm.analysis" }; //$NON-NLS-1$
-	private static final String ASM_VERSION_RANGE = "[5.0.1,6.0.0)"; //$NON-NLS-1$
+	private static final String ASM_VERSION_RANGE = "[5.0.1,7.0.0)"; //$NON-NLS-1$
 
 
     private IClasspathEntry[] _cpEntries;
