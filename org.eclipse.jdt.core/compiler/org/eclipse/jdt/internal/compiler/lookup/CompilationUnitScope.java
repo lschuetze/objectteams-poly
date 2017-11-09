@@ -816,7 +816,7 @@ private Binding findImport(char[][] compoundName, int length, boolean allowDecap
 		PackageBinding packageBinding = (PackageBinding) binding;
 		while (i < length) {
 //{ObjectTeams: For a team with team package we need to give precedence to the type:
-			if (i == length -1) {
+			if (i == length -1 && module.canAccess(packageBinding)) {
 				ReferenceBinding type = packageBinding.getType(compoundName[i], module);
 				if (type != null) {
 					if (!type.canBeSeenBy(this.fPackage))
