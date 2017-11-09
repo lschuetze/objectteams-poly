@@ -167,6 +167,13 @@ void initialize() {
 	if (this.pairs == null)
 		decodeAnnotation();
 }
+//{ObjectTeams: avoid reset before decode():
+@Override
+protected void reset() {
+	if (this.pairs != null)
+		super.reset();
+}
+// SH}
 private int readRetentionPolicy(int offset) {
 	int currentOffset = offset;
 	int tag = u1At(currentOffset);
