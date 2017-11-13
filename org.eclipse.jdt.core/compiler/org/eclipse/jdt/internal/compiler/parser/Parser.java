@@ -7367,6 +7367,10 @@ protected void consumePackageDeclaration() {
 	// flush comments defined prior to import statements
 	impt.declarationEnd = this.endStatementPosition;
 	impt.declarationSourceEnd = flushCommentsDefinedPriorTo(impt.declarationSourceEnd);
+// JDT bug 526940
+	if (this.firstToken == TerminalTokens.TokenNameQUESTION)
+		this.unstackedAct = ACCEPT_ACTION;
+// TDJ
 }
 protected void consumePackageDeclarationName() {
 	// PackageDeclarationName ::= PackageComment 'package' Name RejectTypeAnnotations
@@ -14524,6 +14528,11 @@ try {
 			this.unstackedAct = ntAction(this.stack[this.stateStackTop], lhs[act]);
 			consumeRule(act);
 			act = this.unstackedAct;
+
+// JDT bug 526940
+			if (act == ACCEPT_ACTION) {
+				break ProcessTerminals;
+			}
 
 			if (DEBUG_AUTOMATON) {
 				if (act <= NUM_RULES) {
