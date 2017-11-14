@@ -4,7 +4,7 @@
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
- * 
+ *
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *     Fraunhofer FIRST - extended API and implementation
@@ -3313,17 +3313,6 @@ private void parseTags() {
 		System.arraycopy(this.validIdentityComparisonLines, 0, this.validIdentityComparisonLines = new boolean[currentLine + 1], 0, length);
 		this.validIdentityComparisonLines[currentLine] = true;
 	}
-	
-	if (this.checkUninternedIdentityComparison &&
-			(pos = CharOperation.indexOf(IDENTITY_COMPARISON_TAG, s, true, sourceStart, sourceEnd)) != -1) {
-		if (this.validIdentityComparisonLines == null) {
-			this.validIdentityComparisonLines = new boolean[0];
-		}
-		int currentLine = currentLinePtr + 1;
-		int length = this.validIdentityComparisonLines.length;
-		System.arraycopy(this.validIdentityComparisonLines, 0, this.validIdentityComparisonLines = new boolean[currentLine + 1], 0, length);
-		this.validIdentityComparisonLines[currentLine] = true;
-	}
 }
 private int extractInt(char[] array, int start, int end) {
 	int value = 0;
@@ -3849,7 +3838,6 @@ private int internalScanIdentifierOrKeyword(int index, int length, char[] data) 
 						return TokenNamebreak;
 					else
 						return TokenNameIdentifier;
-
 //{ObjectTeams: 'before' (only if after "<-"):
 				case 6:
 					if (callinSeen) {
@@ -4153,6 +4141,7 @@ private int internalScanIdentifierOrKeyword(int index, int length, char[] data) 
 				default :
 					return TokenNameIdentifier;
 			}
+
 		case 'l' : //long
 			if (length == 4) {
 				if ((data[++index] == 'o')
@@ -4312,6 +4301,7 @@ private int internalScanIdentifierOrKeyword(int index, int length, char[] data) 
 				default :
 					return TokenNameIdentifier;
 			}
+
 		case 'r' : //return requires
 			switch (length) {
 				case 6:
@@ -4359,8 +4349,8 @@ private int internalScanIdentifierOrKeyword(int index, int length, char[] data) 
 							return TokenNamereplace;
 					}
 // SH}
+			}
 			return TokenNameIdentifier;
-		}
 
 		case 's' : //short static super switch synchronized strictfp
 			switch (length) {
