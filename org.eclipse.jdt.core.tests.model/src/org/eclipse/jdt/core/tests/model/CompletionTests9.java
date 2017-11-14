@@ -323,6 +323,40 @@ public void test486988_0009() throws Exception {
 	}
 }
 
+public void test522604_0001() throws Exception {
+	IJavaProject project1 = createJavaProject("Completion9_1", new String[] {"src"}, new String[] {"JCL18_LIB"}, "bin", "9");
+	IJavaProject project2 = createJavaProject("Completion9_2", new String[] {"src"}, new String[] {"JCL18_LIB"}, "bin", "9");
+	IJavaProject project3 = createJavaProject("Completion9_3", new String[] {"src"}, new String[] {"JCL18_LIB"}, "bin", "9");
+	try {
+		project3.open(null);
+		String fileContent =  "module j.s.r {}\n";
+		String filePath = "/Completion9_3/src/module-info.java";
+		createFile(filePath, fileContent);
+
+		project2.open(null);
+		fileContent =  "module j.s {}\n";
+		filePath = "/Completion9_2/src/module-info.java";
+		createFile(filePath, fileContent);
+
+		project1.open(null);
+		filePath = "/Completion9_1/src/module-info.java";
+		fileContent =  "module first {requires j.s. }\n";
+		createFile(filePath, fileContent);
+		String completeBehind = "requires j.s.";
+		int cursorLocation = fileContent.lastIndexOf(completeBehind) + completeBehind.length();
+		CompletionTestsRequestor2 requestor = new CompletionTestsRequestor2();
+
+		ICompilationUnit unit = getCompilationUnit(filePath);
+		unit.codeComplete(cursorLocation, requestor);
+
+		String expected = "[PROPOSAL]{j.s.r, j.s.r, null, null, 49}";
+		assertResults(expected,	requestor.getResults());
+	} finally {
+		deleteProject(project1);
+		deleteProject(project2);
+	}
+}
+
 public void test486988_0010() throws Exception {
 	IJavaProject project1 = createJavaProject("Completion9_1", new String[] {"src"}, new String[] {"JCL18_LIB"}, "bin", "9");
 	IJavaProject project2 = createJavaProject("Completion9_2", new String[] {"src"}, new String[] {"JCL18_LIB"}, "bin", "9");
@@ -340,7 +374,7 @@ public void test486988_0010() throws Exception {
 		String pack = "/Completion9_2/src/mypack1";
 		createFolder(pack);
 		filePath = pack + "/Y.java";
-		fileContent = "package pack1;\n" +
+		fileContent = "package pack1;\n" + 	
 		"public class Y {}\n";
 		createFile(filePath, fileContent);
 
@@ -753,6 +787,36 @@ public void testBug522164_jar() throws Exception {
 		String expected = "test[METHOD_REF]{test(), Lp.a.Ifc;, ()V, test, 60}";
 		assertResults(expected,	requestor.getResults());
 
+	} finally {
+		deleteProject(project1);
+	}
+}
+public void test522613_001() throws Exception {
+	IJavaProject project1 = createJavaProject("Completion9_1", new String[] {"src"}, new String[] {"JCL18_LIB"}, "bin", "9");
+	try {
+		project1.open(null);
+		createTypePlus("/Completion9_1/src/", "pack11", "Driver", "", false /* isClass */, true /* createFolder */);
+		createTypePlus("/Completion9_1/src/", "pack11", "CCC", "implements pack11.Driver", true /* isClass */, false /* createFolder */);
+		String filePath1 = "/Completion9_1/src/module-info.java";
+		String completeBehind = "with C";
+		String fileContent1 =  "module first {\n"
+				+ "provides pack11.Driver " + completeBehind
+				+ "}\n";
+		createFile(filePath1, fileContent1);
+		addClasspathEntry(project1, JavaCore.newContainerEntry(new Path("org.eclipse.jdt.MODULE_PATH")));
+
+		project1.close(); // sync
+		project1.open(null);
+
+		int cursorLocation = fileContent1.lastIndexOf(completeBehind) + completeBehind.length();
+		CompletionTestsRequestor2 requestor = new CompletionTestsRequestor2();
+
+		ICompilationUnit unit = getCompilationUnit(filePath1);
+		unit.codeComplete(cursorLocation, requestor);
+
+		String expected = "CCC[TYPE_REF]{pack11.CCC, pack11, Lpack11.CCC;, null, 49}"
+			;
+		assertResults(expected,	requestor.getResults());
 	} finally {
 		deleteProject(project1);
 	}

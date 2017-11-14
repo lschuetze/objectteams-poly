@@ -18,6 +18,8 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.compiler.lookup;
 
+import java.util.Set;
+
 import org.eclipse.jdt.core.compiler.CharOperation;
 
 /**
@@ -286,5 +288,12 @@ public class RawTypeBinding extends ParameterizedTypeBinding {
 			shortReadableName = actualType().sourceName;
 		}
 		return shortReadableName;
+	}
+	
+//{ObjectTeams:
+	protected
+// SH}
+	void collectInferenceVariables(Set<InferenceVariable> variables) {
+		// nothing to collect for a raw type.
 	}
 }

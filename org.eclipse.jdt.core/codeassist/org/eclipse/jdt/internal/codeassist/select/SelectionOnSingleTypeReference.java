@@ -57,7 +57,10 @@ protected TypeBinding getTypeBinding(Scope scope) {
 	}
 // SH}
 	if (!binding.isValidBinding()) {
-		if (binding instanceof TypeBinding) {
+		if(binding instanceof ProblemReferenceBinding && binding.problemId() == ProblemReasons.NotVisible) {
+			ProblemReferenceBinding problemReferenceBinding = (ProblemReferenceBinding) binding;
+			throw new SelectionNodeFound(problemReferenceBinding.closestMatch());
+		} else if (binding instanceof TypeBinding) {
 			scope.problemReporter().invalidType(this, (TypeBinding) binding);
 		} else if (binding instanceof PackageBinding) {
 			ProblemReferenceBinding problemBinding = new ProblemReferenceBinding(((PackageBinding)binding).compoundName, null, binding.problemId());
