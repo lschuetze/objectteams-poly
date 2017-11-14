@@ -18,7 +18,6 @@ package org.eclipse.jdt.internal.compiler;
 
 import java.io.PrintWriter;
 import java.util.Arrays;
-import java.util.Comparator;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -544,7 +543,15 @@ public class Compiler implements ITypeRequestor, ProblemSeverities {
 			boolean isMod1 = CharOperation.endsWith(fn1, TypeConstants.MODULE_INFO_FILE_NAME) || CharOperation.endsWith(fn1, TypeConstants.MODULE_INFO_CLASS_NAME);
 			boolean isMod2 = CharOperation.endsWith(fn2, TypeConstants.MODULE_INFO_FILE_NAME) || CharOperation.endsWith(fn2, TypeConstants.MODULE_INFO_CLASS_NAME);
 			if (isMod1 == isMod2)
+//{ObjectTeams: ensure teams (short file name) come before their role files (longer file name):
+			{
+				if (this.sortCompilationUnits)
+					return Integer.compare(fn1.length, fn2.length);
+// orig:
 				return 0;
+// :giro
+			}
+// SH}
 			return isMod1 ? -1 : 1;
 		});
 	}
@@ -866,18 +873,6 @@ public class Compiler implements ITypeRequestor, ProblemSeverities {
 	protected void internalBeginToCompile(ICompilationUnit[] sourceUnits, int maxUnits) {
 		if (!this.useSingleThread && maxUnits >= ReadManager.THRESHOLD)
 			this.parser.readManager = new ReadManager(sourceUnits, maxUnits);
-//{ObjectTeams: ensure teams (short file name) come before their role files (longer file name):
-		if (this.sortCompilationUnits) {
-			Arrays.sort(sourceUnits, new Comparator<ICompilationUnit>() {
-				@Override public int compare(ICompilationUnit cu1, ICompilationUnit cu2) {
-					int relation = Integer.compare(cu1.getFileName().length, cu2.getFileName().length);
-					if (relation != 0)
-						return relation;
-					return CharOperation.compareTo(cu1.getFileName(), cu2.getFileName());
-				}
-			});
-		}
-// SH}
 
 		// Switch the current policy and compilation result for this unit to the requested one.
 		for (int i = 0; i < maxUnits; i++) {
