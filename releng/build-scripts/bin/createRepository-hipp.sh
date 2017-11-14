@@ -107,10 +107,20 @@ then
 	zip ${OTDTJAR} ${JARS}
     echo "SKIPPING SIGNING"
 else
-	/bin/rm ${STAGINGBASE}/in/otdt.jar
-	zip ${STAGINGBASE}/in/otdt.jar ${JARS}
+	if [ ! -d ${STAGINGBASE}/in ]
+	then
+		mkdir ${STAGINGBASE}/in
+	else
+		/bin/rm ${STAGINGBASE}/in/otdt.jar
+	fi
     OTDTJAR=${STAGINGBASE}/out/otdt.jar
-    /bin/rm ${OTDTJAR}
+	if [ ! -d ${STAGINGBASE}/out ]
+	then
+		mkdir ${STAGINGBASE}/out
+	else
+	    /bin/rm ${OTDTJAR}
+	fi
+	zip ${STAGINGBASE}/in/otdt.jar ${JARS}
     sign ${STAGINGBASE}/in/otdt.jar nomail ${STAGINGBASE}/out
 	until [ -r ${OTDTJAR} ]
 	do
