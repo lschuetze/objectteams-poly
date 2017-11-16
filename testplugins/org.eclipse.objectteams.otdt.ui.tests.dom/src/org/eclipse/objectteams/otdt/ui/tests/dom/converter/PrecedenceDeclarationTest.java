@@ -41,7 +41,7 @@ public class PrecedenceDeclarationTest extends FileBasedDOMTest
 {
 	    public static final String TEST_PROJECT = "DOM_AST";
 	    
-		private static final int JAVA_LANGUAGE_SPEC_LEVEL = AST.JLS4;
+		private static final int JAVA_LANGUAGE_SPEC_LEVEL = AST.JLS9;
 
 		private ASTParser _parser;
 		private ICompilationUnit _simpleTeam;
@@ -87,13 +87,13 @@ public class PrecedenceDeclarationTest extends FileBasedDOMTest
 		public void testPrecedencesInRole() {
 			TypeDeclaration[] types = _typeDecl.getTypes();
 	        TypeDeclaration role1 = types[0];
-	        List precedences = role1.precedences();
+	        List<?> precedences = role1.precedences();
 	        assertFalse("precedences are non-null", precedences == null);
 	        assertTrue("Role1 has 3 precedence lists", precedences.size() == 3);
 	        
 	        PrecedenceDeclaration prec;
 	        prec = (PrecedenceDeclaration)precedences.get(0);
-	        List elements = prec.elements();
+	        List<?> elements = prec.elements();
 	        assertFalse("1. list is non-null", elements == null);
 			assertTrue("1. list has 2 elements", elements.size() == 2);
 			assertEquals("expecting element", elements.get(0).toString(), "callin1");
@@ -118,13 +118,13 @@ public class PrecedenceDeclarationTest extends FileBasedDOMTest
 		}
 
 		public void testPrecedencesInTeam() {
-	        List precedences = _typeDecl.precedences();
+	        List<?> precedences = _typeDecl.precedences();
 	        assertFalse("precedences are non-null", precedences == null);
 	        assertTrue("Team2 has 2 precedence lists", precedences.size() == 2);
 	        
 	        PrecedenceDeclaration prec;
 	        prec = (PrecedenceDeclaration)precedences.get(0);
-	        List elements = prec.elements();
+	        List<?> elements = prec.elements();
 	        assertFalse("1. list is non-null", elements == null);
 			assertTrue("1. list has 2 elements", elements.size() == 2);
 			assertEquals("expecting element", elements.get(0).toString(), "Role1.callin2");
@@ -132,13 +132,13 @@ public class PrecedenceDeclarationTest extends FileBasedDOMTest
 		}
 
 		public void testRolePrecedences() {
-	        List precedences = _typeDecl.precedences();
+	        List<?> precedences = _typeDecl.precedences();
 	        assertFalse("precedences are non-null", precedences == null);
 	        assertTrue("Team2 has 2 precedence lists", precedences.size() == 2);
 	        
 	        PrecedenceDeclaration prec;
 	        prec = (PrecedenceDeclaration)precedences.get(1);
-	        List elements = prec.elements();
+	        List<?> elements = prec.elements();
 	        assertFalse("2. list is non-null", elements == null);
 			assertTrue("2. list has 2 elements", elements.size() == 2);
 			assertEquals("expecting element", elements.get(0).toString(), "Role2");
