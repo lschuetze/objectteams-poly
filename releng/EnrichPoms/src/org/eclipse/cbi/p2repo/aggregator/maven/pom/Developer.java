@@ -42,16 +42,7 @@ public abstract class Developer {
 		//
 
 		projects.add("eclipse.platform");
-		projects.add("eclipse.platform.debug");
-		projects.add("eclipse.platform.ui");
-		projects.add("eclipse.platform.releng");
-		projects.add("eclipse.platform.resources");
-		projects.add("eclipse.platform.swt");
 		projects.add("eclipse.jdt");
-		projects.add("eclipse.jdt.core");
-		projects.add("eclipse.jdt.debug");
-		projects.add("eclipse.jdt.ls");
-		projects.add("eclipse.jdt.ui");
 		projects.add("eclipse.pde");
 		projects.add("rt.equinox");
 	}
