@@ -1,37 +1,37 @@
 platform/eclipse.platform.team.git \
 	bundles/org.eclipse.core.net/fragments/org.eclipse.core.net.win32.x86_64 \
-	R4_7 \
+	R4_7_1a \
 	org/eclipse/platform org.eclipse.core.net.win32.x86_64 1.1.0
 platform/eclipse.platform.team.git \
 	bundles/org.eclipse.core.net/fragments/org.eclipse.core.net.win32.x86 \
-	R4_7 \
+	R4_7_1a \
 	org/eclipse/platform org.eclipse.core.net.win32.x86 1.1.0
 platform/eclipse.platform.team.git \
 	bundles/org.eclipse.core.net/fragments/org.eclipse.core.net.linux.x86_64 \
-	R4_7 \
+	R4_7_1a \
 	org/eclipse/platform org.eclipse.core.net.linux.x86_64 1.2.0
 platform/eclipse.platform.team.git \
 	bundles/org.eclipse.core.net/fragments/org.eclipse.core.net.linux.x86 \
-	R4_7 \
+	R4_7_1a \
 	org/eclipse/platform org.eclipse.core.net.linux.x86 1.2.0
 platform/eclipse.platform.releng.git \
 	bundles/org.eclipse.releng.tools \
-	R4_7 \
+	R4_7_1a \
 	org/eclipse/platform org.eclipse.releng.tools 3.9.100
 platform/eclipse.platform.releng.git \
 	bundles/org.eclipse.pde.tools.versioning \
-	R4_7 \
+	R4_7_1a \
 	org/eclipse/pde org.eclipse.pde.tools.versioning 1.0.200
 platform/eclipse.platform.git \
 	update/org.eclipse.update.core \
-	R4_7 \
+	R4_7_1a \
 	org/eclipse/platform org.eclipse.update.core 3.2.800 \
 	schema
 platform/eclipse.platform.swt.git \
 	bundles/org.eclipse.swt.tools.spies \
-	R4_7 \
+	R4_7_1a \
 	org/eclipse/platform org.eclipse.swt.tools.spies 3.106.0
 equinox/rt.equinox.framework.git \
 	bundles/org.eclipse.osgi.compatibility.plugins \
-	R4_7 \
+	R4_7_1a \
 	org/eclipse/platform org.eclipse.osgi.compatibility.plugins 1.1.0
