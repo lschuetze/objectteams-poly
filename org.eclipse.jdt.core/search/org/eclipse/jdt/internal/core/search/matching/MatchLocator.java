@@ -1325,6 +1325,14 @@ public void initialize(JavaProject project, int possibleMatchSize) throws JavaMo
 
 	this.lookupEnvironment.addResolutionListener(this.patternLocator);
 }
+private boolean skipMatch(JavaProject javaProject, PossibleMatch possibleMatch) {
+	if (this.options.sourceLevel >= ClassFileConstants.JDK9) {
+		char[] pModuleName = possibleMatch.getModuleName();
+		if (pModuleName != null && this.lookupEnvironment.getModule(pModuleName) == null)
+			return true;
+	}
+	return false;
+}
 protected void locateMatches(JavaProject javaProject, PossibleMatch[] possibleMatches, int start, int length) throws CoreException {
 	initialize(javaProject, length);
 
@@ -1364,6 +1372,7 @@ protected void locateMatches(JavaProject javaProject, PossibleMatch[] possibleMa
 // SH}
 		for (int i = start, maxUnits = start + length; i < maxUnits; i++) {
 			PossibleMatch possibleMatch = possibleMatches[i];
+			if (skipMatch(javaProject, possibleMatch)) continue;
 			try {
 				if (!parseAndBuildBindings(possibleMatch, mustResolvePattern)) continue;
 				// Currently we only need to resolve over pattern flag if there's potential parameterized types

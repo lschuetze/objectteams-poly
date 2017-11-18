@@ -90,7 +90,7 @@ private MethodBinding getMethodClone(MethodBinding givenClosestMatch) {
 // SH}
 
 @Override
-MethodBinding computeSubstitutedMethod(MethodBinding method, LookupEnvironment env) {
+public MethodBinding computeSubstitutedMethod(MethodBinding method, LookupEnvironment env) {
 	return this.closestMatch == null ? this : this.closestMatch.computeSubstitutedMethod(method, env);
 }
 @Override
