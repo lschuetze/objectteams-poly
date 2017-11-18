@@ -53,6 +53,7 @@ import org.eclipse.jdt.internal.compiler.env.AccessRestriction;
 import org.eclipse.jdt.internal.compiler.env.INameEnvironment;
 import org.eclipse.jdt.internal.compiler.env.ISourceType;
 import org.eclipse.jdt.internal.compiler.impl.CompilerOptions;
+import org.eclipse.jdt.internal.compiler.lookup.LookupEnvironment;
 import org.eclipse.jdt.internal.compiler.lookup.PackageBinding;
 import org.eclipse.jdt.internal.compiler.parser.Parser;
 import org.eclipse.jdt.internal.compiler.parser.SourceTypeConverter;
@@ -61,6 +62,7 @@ import org.eclipse.jdt.internal.compiler.problem.ProblemReporter;
 import org.eclipse.jdt.internal.core.JavaProject;
 import org.eclipse.jdt.internal.core.SearchableEnvironment;
 import org.eclipse.jdt.internal.core.SourceType;
+import org.eclipse.jdt.internal.core.SourceTypeElementInfo;
 import org.eclipse.objectteams.otdt.core.IOTType;
 import org.eclipse.objectteams.otdt.core.IRoleType;
 import org.eclipse.objectteams.otdt.core.OTModelManager;
@@ -812,33 +814,50 @@ public class OTReconcilerTests extends ReconcilerTests {
 		// from CompilationUnitProblemFinder:
 		public void accept(ISourceType[] sourceTypes, PackageBinding packageBinding, AccessRestriction accessRestriction) {
 			// ensure to jump back to toplevel type for first one (could be a member)
-//				while (sourceTypes[0].getEnclosingType() != null)
-//					sourceTypes[0] = sourceTypes[0].getEnclosingType();
+			while (sourceTypes[0].getEnclosingType() != null) {
+				sourceTypes[0] = sourceTypes[0].getEnclosingType();
+			}
 
 			CompilationResult result =
 				new CompilationResult(sourceTypes[0].getFileName(), 1, 1, this.options.maxProblemsPerUnit);
+			
+			// https://bugs.eclipse.org/bugs/show_bug.cgi?id=305259, build the compilation unit in its own sand box.
+			final long savedComplianceLevel = this.options.complianceLevel;
+			final long savedSourceLevel = this.options.sourceLevel;
+			
+			LookupEnvironment environment = packageBinding.environment;
+			if (environment == null)
+				environment = this.lookupEnvironment;
+			
+			try {
+				IJavaProject project = ((SourceTypeElementInfo) sourceTypes[0]).getHandle().getJavaProject();
+				this.options.complianceLevel = CompilerOptions.versionToJdkLevel(project.getOption(JavaCore.COMPILER_COMPLIANCE, true));
+				this.options.sourceLevel = CompilerOptions.versionToJdkLevel(project.getOption(JavaCore.COMPILER_SOURCE, true));
 
-			// need to hold onto this
-			CompilationUnitDeclaration unit =
-				SourceTypeConverter.buildCompilationUnit(
-					sourceTypes,//sourceTypes[0] is always toplevel here
-					SourceTypeConverter.FIELD_AND_METHOD // need field and methods
-					| SourceTypeConverter.MEMBER_TYPE // need member types
-					| SourceTypeConverter.FIELD_INITIALIZATION, // need field initialization
-					this.lookupEnvironment.problemReporter,
-					result);
+				// need to hold onto this
+				CompilationUnitDeclaration unit =
+					SourceTypeConverter.buildCompilationUnit(
+							sourceTypes,//sourceTypes[0] is always toplevel here
+							SourceTypeConverter.FIELD_AND_METHOD // need field and methods
+							| SourceTypeConverter.MEMBER_TYPE // need member types
+							| SourceTypeConverter.FIELD_INITIALIZATION, // need field initialization
+							environment.problemReporter,
+							result);
 
-			if (unit != null) {
+				if (unit != null) {
 	//{ObjectTeams: controlled by Dependencies:
-			  try (Config config = Dependencies.setup(this, this.parser, this.lookupEnvironment, true, false))
-			  {
-				// Note(SH): this will redirect:
-// orig:
-				this.lookupEnvironment.buildTypeBindings(unit, accessRestriction);
-				this.lookupEnvironment.completeTypeBindings(unit);
-// :giro
-			  }
+				  try (Config config = Dependencies.setup(this, this.parser, environment, true, false))
+				  {
+	// orig:  Note(SH): this will redirect:
+					environment.buildTypeBindings(unit, accessRestriction);
+					environment.completeTypeBindings(unit);
+	// :giro
+				  }
 	// SH}
+				}
+			} finally {
+				this.options.complianceLevel = savedComplianceLevel;
+				this.options.sourceLevel = savedSourceLevel;
 			}
 		}
 	}

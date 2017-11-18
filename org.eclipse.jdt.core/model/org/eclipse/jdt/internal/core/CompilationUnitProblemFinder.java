@@ -135,7 +135,7 @@ public class CompilationUnitProblemFinder extends Compiler {
 
 			if (unit != null) {
 //{ObjectTeams: controlled by Dependencies:
-			  try (Config config = Dependencies.setup(this, this.parser, this.lookupEnvironment, true, false))
+			  try (Config config = Dependencies.setup(this, this.parser, environment, true, false))
 			  {
 // orig:  Note(SH): this will redirect:
 				environment.buildTypeBindings(unit, accessRestriction);
