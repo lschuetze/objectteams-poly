@@ -18,7 +18,6 @@
 # TEST_TMPDIR           for temp test files
 # OT_TESTSUITE_DIR      root directory for building and testing
 # METADATA				directory for metadata from previous builds
-# OT_RECIPIENT          mail address for failure messages
 # SDK_QUALIFIER			build qualifier of the base eclipse SDK
 # ECLIPSE_SDK_TGZ       archive file of the base eclipse SDK build (full path)
 # ECLIPSE_TESTLIB_ZIP   archive file of the eclipse test framework (full path)
@@ -51,20 +50,6 @@ usage()
 	echo "$0 [-b|-nobuild]"
         echo "  -b:         build OTDT only, no testing."
         echo "  -nobuild:   don't build OTDT, directly invoke testing."
-}
-
-notifyTestRunFailure()
-{
-	echo "Running the test-cases failed!"; 
-	local subject="OT Testsuite: Failure!"
-	local message="See the attached log to fix the problems."
-	local cmdLogfiles="-a ${OT_SUITE_LOG}-tail.gz"
-	
-	grep -q "\[java\] BUILD FAILED" "$OT_SUITE_LOG" && { subject="OT Testsuite: Compile/Build Failure!"; }
-	tail -1000 "$OT_SUITE_LOG" | gzip -f - > "${OT_SUITE_LOG}-tail.gz"
-	echo -e "$message" | mutt -s "$subject" $cmdLogfiles $OT_RECIPIENT
-	cleanup
-	exit 1;
 }
 
 cleanup()

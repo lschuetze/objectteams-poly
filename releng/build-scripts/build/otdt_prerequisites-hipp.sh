@@ -36,9 +36,6 @@ MAP_FILE_PATH=${BASEDIR}/releng/map/otdt.map
 # Base dir for finding previous platform build:
 DROPS4=/home/data/httpd/download.eclipse.org/eclipse/downloads/drops4
 
-# EXPORT: mail address to receive notification about build result (currently only build failures):
-OT_RECIPIENT="nobody@nowhere.net"
-
 # Configure ANT:
 ANT_HOME=/shared/common/apache-ant-1.7.1/
 PATH=${ANT_HOME}/bin:${PATH}
