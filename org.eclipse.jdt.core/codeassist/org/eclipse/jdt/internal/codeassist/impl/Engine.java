@@ -98,7 +98,10 @@ public abstract class Engine implements ITypeRequestor {
 	 */
 	public void accept(ISourceType[] sourceTypes, PackageBinding packageBinding, AccessRestriction accessRestriction) {
 //{ObjectTeams:
-	  try (Config config = Dependencies.setup(this, getParser(), this.lookupEnvironment, true, false))
+	  LookupEnvironment environment = packageBinding.environment;
+	  if (environment == null)
+		  environment = this.lookupEnvironment;
+	  try (Config config = Dependencies.setup(this, getParser(), environment, true, false))
 	  {
 // SH}
 		// https://bugs.eclipse.org/bugs/show_bug.cgi?id=479656
@@ -131,9 +134,11 @@ public abstract class Engine implements ITypeRequestor {
 		} else {
 			result = new CompilationResult(sourceTypes[0].getFileName(), 1, 1, this.compilerOptions.maxProblemsPerUnit);
 		}
+/*{ObjectTeams: moved to top of method:
 		LookupEnvironment environment = packageBinding.environment;
 		if (environment == null)
 			environment = this.lookupEnvironment;
+  SH}*/
 		CompilationUnitDeclaration unit =
 			SourceTypeConverter.buildCompilationUnit(
 				sourceTypes,//sourceTypes[0] is always toplevel here
