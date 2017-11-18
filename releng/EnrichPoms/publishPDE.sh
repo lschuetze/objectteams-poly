@@ -61,7 +61,7 @@ for pomFile in org/eclipse/pde/*/*/*.pom
 do
   if same_as_baseline $pomFile
   then
-	echo "Skipping file $pomFile which is already present in the baseline"
+	  echo "Skipping file $pomFile which is already present in the baseline"
   else
 	  file=`echo $pomFile | sed -e "s|\(.*\)\.pom|\1.jar|"`
 	  sourcesFile=`echo $pomFile | sed -e "s|\(.*\)\.pom|\1-sources.jar|"`
@@ -69,19 +69,19 @@ do
 	
 	  echo "${MVN} -f pde-pom.xml -s ${SETTINGS} gpg:sign-and-deploy-file -Durl=${URL} -DrepositoryId=${REPO} -Dfile=${file} -DpomFile=${pomFile}"
 	  
-	  ${MVN} -V -X -e -f pde-pom.xml -s ${SETTINGS} gpg:sign-and-deploy-file \
+	  ${MVN} -f pde-pom.xml -s ${SETTINGS} gpg:sign-and-deploy-file \
 	     -Durl=${URL} -DrepositoryId=${REPO} \
 	     -Dfile=${file} -DpomFile=${pomFile} \
 	     >> .log/artifact-upload.txt
 	     
 	  echo -e "\t${sourcesFile}"
-	  ${MVN} -V -X -e -f pde-pom.xml -s ${SETTINGS} gpg:sign-and-deploy-file \
+	  ${MVN} -f pde-pom.xml -s ${SETTINGS} gpg:sign-and-deploy-file \
 	     -Durl=${URL} -DrepositoryId=${REPO} \
 	     -Dfile=${sourcesFile} -DpomFile=${pomFile} -Dclassifier=sources \
 	     >> .log/sources-upload.txt
 	  
 	  echo -e "\t${javadocFile}"
-	  ${MVN} -V -X -e -f pde-pom.xml -s ${SETTINGS} gpg:sign-and-deploy-file \
+	  ${MVN} -f pde-pom.xml -s ${SETTINGS} gpg:sign-and-deploy-file \
 	     -Durl=${URL} -DrepositoryId=${REPO} \
 	     -Dfile=${javadocFile} -DpomFile=${pomFile} -Dclassifier=javadoc \
 	     >> .log/javadoc-upload.txt
