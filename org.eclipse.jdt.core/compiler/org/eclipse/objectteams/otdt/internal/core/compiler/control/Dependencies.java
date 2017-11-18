@@ -35,6 +35,7 @@ import org.eclipse.jdt.internal.compiler.impl.CompilerOptions.WeavingScheme;
 import org.eclipse.jdt.internal.compiler.lookup.BinaryTypeBinding;
 import org.eclipse.jdt.internal.compiler.lookup.Binding;
 import org.eclipse.jdt.internal.compiler.lookup.ClassScope;
+import org.eclipse.jdt.internal.compiler.lookup.CompilationUnitScope;
 import org.eclipse.jdt.internal.compiler.lookup.LookupEnvironment;
 import org.eclipse.jdt.internal.compiler.lookup.MemberTypeBinding;
 import org.eclipse.jdt.internal.compiler.lookup.MethodBinding;
@@ -1531,7 +1532,10 @@ public class Dependencies implements ITranslationStates {
 	private static boolean establishFaultInTypes(TypeModel clazz) {
 		TypeDeclaration ast = clazz.getAst();
 		if (ast != null && ast.scope != null) {
-			ast.scope.compilationUnitScope().faultInImports();
+			CompilationUnitScope cuScope = ast.scope.compilationUnitScope();
+			cuScope.faultInImports();
+			if (cuScope.referenceContext.currentPackage != null)
+				cuScope.referenceContext.currentPackage.checkPackageConflict(cuScope);
 			SourceTypeBinding typeBinding = ast.binding;
 			typeBinding.faultInTypesForFieldsAndMethods();
 			faultInRoleImports(ast);
