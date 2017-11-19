@@ -38,7 +38,9 @@ import junit.textui.TestRunner;
 
 import org.eclipse.core.runtime.Path;
 import org.eclipse.jdt.core.compiler.IProblem;
+import org.eclipse.jdt.core.tests.util.Util;
 import org.eclipse.jdt.internal.compiler.batch.Main;
+import org.eclipse.jdt.internal.compiler.classfmt.ClassFileConstants;
 import org.eclipse.jdt.internal.compiler.impl.CompilerOptions;
 import org.eclipse.objectteams.otdt.core.ext.WeavingScheme;
 import org.eclipse.objectteams.otdt.tests.ClasspathUtil;
@@ -67,12 +69,22 @@ public class TestBase extends TestCase
 
 	public static final String JRE_JAR_PATH;
 	static {
-		String path = JAVA_HOME+File.separator+"lib"+File.separator+"rt.jar";
-		if ((new File(path).exists())) {
-			JRE_JAR_PATH = path;
+		String javaVersion = System.getProperty("java.version");
+		if (javaVersion.length() > 3) {
+			javaVersion = javaVersion.substring(0, 3);
+		}
+		long jdkLevel = CompilerOptions.versionToJdkLevel(javaVersion);
+		if (jdkLevel >= ClassFileConstants.JDK9) {
+			String jreDir = Util.getJREDirectory();
+			JRE_JAR_PATH = Util.toNativePath(jreDir + "/lib/jrt-fs.jar");
 		} else {
-			JRE_JAR_PATH = JAVA_HOME+File.separator+"lib"+File.separator+"vm.jar";
-			System.err.println("TestBase: using alternate jre "+JRE_JAR_PATH);
+			String path = JAVA_HOME+File.separator+"lib"+File.separator+"rt.jar";
+			if ((new File(path).exists())) {
+				JRE_JAR_PATH = path;
+			} else {
+				JRE_JAR_PATH = JAVA_HOME+File.separator+"lib"+File.separator+"vm.jar";
+				System.err.println("TestBase: using alternate jre "+JRE_JAR_PATH);
+			}
 		}
 	}
 
