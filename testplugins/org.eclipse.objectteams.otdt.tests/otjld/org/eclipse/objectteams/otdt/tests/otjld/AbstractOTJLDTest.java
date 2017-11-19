@@ -94,6 +94,19 @@ public class AbstractOTJLDTest extends AbstractComparableTest {
 		default:
 			throw new IllegalStateException("Unsupported weavingScheme "+this.weavingScheme);
 		}
+		if (isJRE9)
+			return new String[] {
+				"-javaagent:"+OTAGENT_JAR_PATH,
+				"-Xbootclasspath/a:"+OTRE_MIN_JAR_PATH,
+				"-Dot.dump=1",
+				"-Dobjectteams.otdre.verify=1",
+				"--add-reads",
+				"java.base=ALL-UNNAMED",
+				"--add-reads",
+				"jdk.net=ALL-UNNAMED",
+				"--add-opens",
+				"java.base/java.lang=ALL-UNNAMED"
+			};
 		return new String[] {
 				"-javaagent:"+OTAGENT_JAR_PATH,
 				"-Xbootclasspath/a:"+OTRE_MIN_JAR_PATH,
