@@ -3970,7 +3970,7 @@ public class Java5 extends AbstractOTJLDTest {
 			    "}\n" +
 			    "    \n"
             },
-            "@IA117cfa4(left=one, right=two)");
+            isJRE9 ? "@IA117cfa4(left=\"one\", right=\"two\")" : "@IA117cfa4(left=one, right=two)");
     }
 
     // a role method has a nested custom annotation, so should its tsub  -  testing at runtime via reflection
@@ -4034,7 +4034,7 @@ public class Java5 extends AbstractOTJLDTest {
             },
 		    (this.weavingScheme == WeavingScheme.OTRE
 		    ? ""
-		    : "@IA117cfa5_2(left=one, right=@IA117cfa5_1(value=two))"));
+		    : (isJRE9 ? "@IA117cfa5_2(left=\"one\", right=@IA117cfa5_1(value=\"two\"))": "@IA117cfa5_2(left=one, right=@IA117cfa5_1(value=two))")));
     }
 
     // a role method has a custom annotation with enum values, annotation was in conflict with implicit activation annotation
@@ -4199,7 +4199,7 @@ public class Java5 extends AbstractOTJLDTest {
             },
 		    (this.weavingScheme == WeavingScheme.OTRE && IS_JRE_8
 		    ? ""
-		    : "@IA117cfa7(value=[one, two])"));
+		    : isJRE9 ? "@IA117cfa7(value={\"one\", \"two\"})" : "@IA117cfa7(value=[one, two])"));
     }
 
     // a role field has a custom annotation (scalar arg), so should its tsub  -  testing at runtime via reflection
@@ -4254,7 +4254,7 @@ public class Java5 extends AbstractOTJLDTest {
             },
 		    (this.weavingScheme == WeavingScheme.OTRE && IS_JRE_8
 		    ? ""
-    		: "@IA117cfa8(value=val)"));
+    		: isJRE9 ? "@IA117cfa8(value=\"val\")" : "@IA117cfa8(value=val)"));
     }
 
     // a role field has a custom annotation (enum typed arg), so should its tsub  -  testing at runtime via reflection
@@ -4365,7 +4365,7 @@ public class Java5 extends AbstractOTJLDTest {
             },
 		    (this.weavingScheme == WeavingScheme.OTRE && IS_JRE_8
 		    ? ""
-    		: "@IA117cfa9(value=[1, 2])"));
+    		: isJRE9 ? "@IA117cfa9(value={1, 2})" : "@IA117cfa9(value=[1, 2])"));
     }
 
     // a role class extends a generic class providing type parameters

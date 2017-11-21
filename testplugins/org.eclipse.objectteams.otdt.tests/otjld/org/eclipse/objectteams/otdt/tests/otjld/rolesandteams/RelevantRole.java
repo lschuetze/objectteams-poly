@@ -151,16 +151,16 @@ public class RelevantRole extends AbstractOTJLDTest {
     			"public class T182par1 {}"
     		},
     		"----------\n" + 
-			"1. ERROR in Team182par1_1.java (at line 2)\n" + 
-			"	protected abstract class R playedBy T182par1 {}\n" + 
-			"	                         ^\n" + 
-			"Team Team182par1_1 must be declared abstract, because abstract role R is relevant (OTJLD 2.5(b)).\n" + 
+			"1. ERROR in Team182par1_2.java (at line 1)\n" + 
+			"	public team class Team182par1_2 extends Team182par1_1 {\n" + 
+			"	                                        ^^^^^^^^^^^^^\n" + 
+			"Team Team182par1_2 must be declared abstract, because abstract role R is relevant (OTJLD 2.5(b)).\n" + 
     		"----------\n" + 
     		"----------\n" + 
-    		"1. ERROR in Team182par1_2.java (at line 1)\n" + 
-    		"	public team class Team182par1_2 extends Team182par1_1 {\n" + 
-    		"	                                        ^^^^^^^^^^^^^\n" + 
-    		"Team Team182par1_2 must be declared abstract, because abstract role R is relevant (OTJLD 2.5(b)).\n" + 
+    		"1. ERROR in Team182par1_1.java (at line 2)\n" + 
+    		"	protected abstract class R playedBy T182par1 {}\n" + 
+    		"	                         ^\n" + 
+    		"Team Team182par1_1 must be declared abstract, because abstract role R is relevant (OTJLD 2.5(b)).\n" + 
     		"----------\n",
     		null, // classLibraries
     		true, // shouldFlushOutputDirectory
@@ -211,16 +211,16 @@ public class RelevantRole extends AbstractOTJLDTest {
     			"public abstract class T182par2 {}"
     		},
     		"----------\n" + 
-			"1. WARNING in Team182par2_1.java (at line 2)\n" + 
-			"	protected abstract class R playedBy T182par2 {}\n" + 
-			"	                         ^\n" + 
-			"[@sup:abstractrelevantrole] Team Team182par2_1 may need to be declared abstract, because irrelevance for abstract role R could not be shown (OTJLD 2.5(b)).\n" + 
+			"1. WARNING in Team182par2_2.java (at line 1)\n" + 
+			"	public team class Team182par2_2 extends Team182par2_1 {\n" + 
+			"	                                        ^^^^^^^^^^^^^\n" + 
+			"[@sup:abstractrelevantrole] Team Team182par2_2 may need to be declared abstract, because irrelevance for abstract role R could not be shown (OTJLD 2.5(b)).\n" + 
     		"----------\n" + 
     		"----------\n" + 
-    		"1. WARNING in Team182par2_2.java (at line 1)\n" + 
-    		"	public team class Team182par2_2 extends Team182par2_1 {\n" + 
-    		"	                                        ^^^^^^^^^^^^^\n" + 
-    		"[@sup:abstractrelevantrole] Team Team182par2_2 may need to be declared abstract, because irrelevance for abstract role R could not be shown (OTJLD 2.5(b)).\n" + 
+    		"1. WARNING in Team182par2_1.java (at line 2)\n" + 
+    		"	protected abstract class R playedBy T182par2 {}\n" + 
+    		"	                         ^\n" + 
+    		"[@sup:abstractrelevantrole] Team Team182par2_1 may need to be declared abstract, because irrelevance for abstract role R could not be shown (OTJLD 2.5(b)).\n" + 
     		"----------\n",
     		null, // classLibraries
     		true, // shouldFlushOutputDirectory

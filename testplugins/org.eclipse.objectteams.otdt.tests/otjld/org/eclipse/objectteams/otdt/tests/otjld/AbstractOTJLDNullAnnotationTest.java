@@ -90,10 +90,24 @@ public class AbstractOTJLDNullAnnotationTest extends AbstractNullAnnotationTest 
 		default:
 			throw new IllegalStateException("Unsupported weavingScheme "+this.weavingScheme);
 		}
+		if (isJRE9)
+			return new String[] {
+				"-javaagent:"+OTAGENT_JAR_PATH,
+				"-Xbootclasspath/a:"+OTRE_MIN_JAR_PATH,
+				"-Dot.dump=1",
+				"-Dobjectteams.otdre.verify=1",
+				"--add-reads",
+				"java.base=ALL-UNNAMED",
+				"--add-reads",
+				"jdk.net=ALL-UNNAMED",
+				"--add-opens",
+				"java.base/java.lang=ALL-UNNAMED"
+			};
 		return new String[] {
 				"-javaagent:"+OTAGENT_JAR_PATH,
 				"-Xbootclasspath/a:"+OTRE_MIN_JAR_PATH,
-				"-Dot.dump=1"
+				"-Dot.dump=1",
+				"-Dobjectteams.otdre.verify=1"
 		};
 	}
 	
@@ -125,7 +139,7 @@ public class AbstractOTJLDNullAnnotationTest extends AbstractNullAnnotationTest 
 	// each subarray defines a set of classes to be compiled together:
 	protected String[][] compileOrder;
 	
-	protected WeavingScheme weavingScheme = WeavingScheme.OTRE;
+	protected WeavingScheme weavingScheme = WeavingScheme.OTDRE;
 	
 	public AbstractOTJLDNullAnnotationTest(String name) {
 		super(name);
@@ -148,9 +162,9 @@ public class AbstractOTJLDNullAnnotationTest extends AbstractNullAnnotationTest 
 	@Override
 	public void initialize(CompilerTestSetup setUp) {
 		super.initialize(setUp);
-		if ("otdre".equals(System.getProperty("ot.weaving"))
-				||"otdre".equals(System.getProperty("test.ot.weaving")))
-			weavingScheme = WeavingScheme.OTDRE;
+		if ("otre".equals(System.getProperty("ot.weaving"))
+				||"otre".equals(System.getProperty("test.ot.weaving")))
+			weavingScheme = WeavingScheme.OTRE;
 		if (setUp instanceof RegressionTestSetup) {
 			RegressionTestSetup regressionSetTup = (RegressionTestSetup) setUp;
 			if (!(regressionSetTup.verifier instanceof OTTestVerifier)) {
