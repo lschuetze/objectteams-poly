@@ -20,10 +20,10 @@
 package org.eclipse.objectteams.otdt.internal.core.compiler.bytecode;
 
 import org.eclipse.jdt.internal.compiler.ClassFile;
-import org.eclipse.jdt.internal.compiler.classfmt.ClassFileConstants;
 import org.eclipse.jdt.internal.compiler.classfmt.ClassFileStruct;
 import org.eclipse.jdt.internal.compiler.impl.CompilerOptions.WeavingScheme;
 import org.eclipse.jdt.internal.compiler.lookup.Binding;
+import org.eclipse.jdt.internal.compiler.lookup.ExtraCompilerModifiers;
 import org.eclipse.jdt.internal.compiler.lookup.LookupEnvironment;
 import org.eclipse.jdt.internal.compiler.lookup.ReferenceBinding;
 import org.eclipse.objectteams.otdt.core.compiler.IOTConstants;
@@ -408,7 +408,7 @@ public class StaticReplaceBindingsAttribute extends AbstractAttribute {
 	 * @see org.eclipse.objectteams.otdt.internal.core.compiler.bytecode.AbstractAttribute#evaluate(org.eclipse.jdt.internal.compiler.lookup.Binding, org.eclipse.jdt.internal.compiler.lookup.LookupEnvironment)
 	 */
 	public void evaluate(Binding binding, LookupEnvironment environment, char[][][] missingTypeNames) {
-		checkBindingMismatch(binding, ClassFileConstants.AccTeam);
+		checkBindingMismatch(binding, ExtraCompilerModifiers.AccTeam);
 		((ReferenceBinding)binding).getTeamModel().addAttribute(this);
 	}
 	// Evaluate CallinMethodMappingAttribute late, because we need our methods to be in place.

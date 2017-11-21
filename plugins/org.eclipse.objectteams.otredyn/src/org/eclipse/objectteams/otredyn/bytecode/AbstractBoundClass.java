@@ -303,7 +303,7 @@ public abstract class AbstractBoundClass implements IBoundClass {
 	 */
 	public boolean isTeam() {
 		parseBytecode();
-		return (this.modifiers & Types.TEAM) != 0;
+		return (this.otClassFlags & Types.TEAM_FLAG) != 0;
 	}
 	
 	/**

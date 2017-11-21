@@ -556,7 +556,7 @@ public StringBuffer print(int indent, StringBuffer output) {
 		printIndent(indent, output).append("package "); //$NON-NLS-1$
   :giro */
 		printIndent(indent, output);
-		if ((this.currentPackage.modifiers & ClassFileConstants.AccTeam) != 0)
+		if ((this.currentPackage.modifiers & ExtraCompilerModifiers.AccTeam) != 0)
 			output.append("team ");      //$NON-NLS-1$
 		output.append("package ");       //$NON-NLS-1$
 // SH}

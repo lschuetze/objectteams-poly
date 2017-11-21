@@ -96,7 +96,7 @@ public class AstConverter implements ClassFileConstants, ExtraCompilerModifiers,
 		// (there is no use in marking an interface as team: it has no member types!)
 	    typeDeclaration.modifiers     = (roleClassDeclaration.modifiers
 											| AccSynthIfc | AccRole)
-										& ~(AccTeam|AccFinal);
+										& ~(ExtraCompilerModifiers.AccTeam|AccFinal);
 	    typeDeclaration.isGenerated   = true;
 		typeDeclaration.name          = roleClassDeclaration.name;
 		typeDeclaration.sourceStart   = roleClassDeclaration.sourceStart;
@@ -367,7 +367,7 @@ public class AstConverter implements ClassFileConstants, ExtraCompilerModifiers,
 			char[][] tokens= CharOperation.arrayConcat(enclosingName, nestedType.name);
         	long[] positions= new long[tokens.length];
         	Arrays.fill(positions, 0L);
-        	cud.currentPackage= new ImportReference(enclosingName, positions, false, ClassFileConstants.AccTeam);
+        	cud.currentPackage= new ImportReference(enclosingName, positions, false, ExtraCompilerModifiers.AccTeam);
         }
 
         // Create TypeBindings for this type

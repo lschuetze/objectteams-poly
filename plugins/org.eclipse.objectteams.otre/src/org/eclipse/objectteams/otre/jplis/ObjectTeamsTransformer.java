@@ -167,7 +167,7 @@ public class ObjectTeamsTransformer implements ClassFileTransformer {
 			adaptedBases= setFirstTransformation(subBoundBaseMethodRedefinition);
 			// [OT/Equinox] if class has previously been transformed fetch the list of
 			// adapted bases from the CallinBindingManager instead of reading it now.
-			if (   (cg.getAccessFlags() & OTConstants.TEAM) != 0
+			if (   ObjectTeamsTransformation.peekIsteam(cg)
 				&& !AttributeReadingGuard.getInstanceForLoader(loader).iAmTheFirst(cg.getClassName())) 
 			{
 				List<String> basesOfTeam = CallinBindingManager.getBasesPerTeam(cg.getClassName());

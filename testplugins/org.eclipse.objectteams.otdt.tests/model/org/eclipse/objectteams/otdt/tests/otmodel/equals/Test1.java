@@ -107,7 +107,7 @@ public class Test1 extends FileBasedModelTest
 		            	OTELEMENT_TYPE, 
 		            	type1, 
 		            	null, // root element in OTModel
-		            	ClassFileConstants.AccPublic | ClassFileConstants.AccTeam);
+		            	ClassFileConstants.AccPublic | ExtraCompilerModifiers.AccTeam);
     }
     
     private IRoleType createRoleClass(String qualName,

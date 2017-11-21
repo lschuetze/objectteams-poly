@@ -1043,7 +1043,12 @@ public class ClassScope extends Scope {
 		}
 
 		// after this point, tests on the 16 bits reserved.
+//{ObjectTeams: also include _some_ extra modifiers like AccTeam / AccRole:
+/* orig:
 		int realModifiers = modifiers & ExtraCompilerModifiers.AccJustFlag;
+  :giro */
+		int realModifiers = modifiers & ExtraCompilerModifiers.AccOTTypeJustFlag;
+// SH}
 
 		if ((realModifiers & ClassFileConstants.AccInterface) != 0) { // interface and annotation type
 			// detect abnormal cases for interfaces
@@ -1060,8 +1065,8 @@ public class ClassScope extends Scope {
 					else
 						problemReporter().illegalModifierForMemberInterface(sourceType);
 //{ObjectTeams: prevent downstream problems with types illegally marked as team:
-					modifiers &= ~ClassFileConstants.AccTeam;
-					this.referenceContext.modifiers &= ~ClassFileConstants.AccTeam;
+					modifiers &= ~ExtraCompilerModifiers.AccTeam;
+					this.referenceContext.modifiers &= ~ExtraCompilerModifiers.AccTeam;
 // SH}
 				}
 				/*
@@ -1095,7 +1100,7 @@ public class ClassScope extends Scope {
 			if (isMemberType) { // includes member types defined inside local types
 				final int UNEXPECTED_MODIFIERS = ~(ClassFileConstants.AccPublic | ClassFileConstants.AccPrivate | ClassFileConstants.AccProtected | ClassFileConstants.AccStatic | ClassFileConstants.AccStrictfp | ClassFileConstants.AccEnum
 //{ObjectTeams more flags allowed for types:
-					                      | ExtraCompilerModifiers.AccRole | ClassFileConstants.AccTeam | ClassFileConstants.AccSynthetic
+					                      | ExtraCompilerModifiers.AccRole | ExtraCompilerModifiers.AccTeam | ClassFileConstants.AccSynthetic
 										  );
 // Markus Witte}
 				if ((realModifiers & UNEXPECTED_MODIFIERS) != 0) {
@@ -1110,7 +1115,7 @@ public class ClassScope extends Scope {
 			} else {
 				int UNEXPECTED_MODIFIERS = ~(ClassFileConstants.AccPublic | ClassFileConstants.AccStrictfp | ClassFileConstants.AccEnum
 //{ObjectTeams more flags allowed for types
-								           | ClassFileConstants.AccTeam | ExtraCompilerModifiers.AccRole);
+								           | ExtraCompilerModifiers.AccTeam | ExtraCompilerModifiers.AccRole);
 				if ((realModifiers & ExtraCompilerModifiers.AccRole) != 0)
 					UNEXPECTED_MODIFIERS ^= ClassFileConstants.AccProtected; // even toplevel roles may be protected.
 // Markus Witte+SH}
@@ -1176,7 +1181,7 @@ public class ClassScope extends Scope {
 			if (isMemberType) { // includes member types defined inside local types
 				final int UNEXPECTED_MODIFIERS = ~(ClassFileConstants.AccPublic | ClassFileConstants.AccPrivate | ClassFileConstants.AccProtected | ClassFileConstants.AccStatic | ClassFileConstants.AccAbstract | ClassFileConstants.AccFinal | ClassFileConstants.AccStrictfp
 //{ObjectTeams more flags allowed for types:
-										    | ExtraCompilerModifiers.AccRole | ClassFileConstants.AccTeam | ClassFileConstants.AccSynthetic
+										    | ExtraCompilerModifiers.AccRole | ExtraCompilerModifiers.AccTeam | ClassFileConstants.AccSynthetic
 					                        );
 //SH}
 				if ((realModifiers & UNEXPECTED_MODIFIERS) != 0)
@@ -1188,7 +1193,7 @@ public class ClassScope extends Scope {
 			} else {
 				final int UNEXPECTED_MODIFIERS = ~(ClassFileConstants.AccPublic | ClassFileConstants.AccAbstract | ClassFileConstants.AccFinal | ClassFileConstants.AccStrictfp
 //{ObjectTeams more flags allowed for types:
-											| ExtraCompilerModifiers.AccRole | ClassFileConstants.AccTeam | ClassFileConstants.AccSynthetic
+											| ExtraCompilerModifiers.AccRole | ExtraCompilerModifiers.AccTeam | ClassFileConstants.AccSynthetic
 				  							);
 // SH}
 				if ((realModifiers & UNEXPECTED_MODIFIERS) != 0)
@@ -1948,7 +1953,7 @@ public class ClassScope extends Scope {
 		SourceTypeBinding sourceType = this.referenceContext.binding;
 // team: handle o.o.Team vaguely similar to j.l.Object:
 		if (isOrgObjectteamsTeam(sourceType)) { // handle the case of redefining org.objectteams.Team up front
-			this.referenceContext.modifiers |= ClassFileConstants.AccTeam;
+			this.referenceContext.modifiers |= ExtraCompilerModifiers.AccTeam;
 			sourceType.superclass = getJavaLangObject();
 			if (   this.referenceContext.superclass != null)
 				problemReporter().teamCannotHaveSuperTypes(sourceType);

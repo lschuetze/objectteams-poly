@@ -22,7 +22,7 @@ package org.eclipse.objectteams.otredyn.bytecode;
  */
 public abstract class Types {
 
-	public final static int TEAM  = 0x8000;
+	public final static int TEAM_FLAG  = 1; // within OTClassFlags attribute
 	public final static int ROLE_FLAG = 2; // within OTClassFlags attribute
     
 	public static final String VOID = "V";

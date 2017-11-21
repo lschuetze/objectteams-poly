@@ -853,7 +853,7 @@ protected void consumePackageDeclarationName() {
 	ImportReference reference = createAssistPackageReference(subset, positions);
  :giro */
 	ImportReference reference = createAssistPackageReference(subset, positions, this.modifiers);
-	boolean isTeamPackage = (this.modifiers & ClassFileConstants.AccTeam) != 0;
+	boolean isTeamPackage = (this.modifiers & ExtraCompilerModifiers.AccTeam) != 0;
 	resetModifiers();
 	this.currentIsRole = isTeamPackage; // the type declaration to follow a team package must be a role.
 //carp}

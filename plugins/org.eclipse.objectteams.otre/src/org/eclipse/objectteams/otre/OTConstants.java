@@ -106,7 +106,7 @@ public interface OTConstants {
 	// ---------- Flags and Modifiers: ----------
 	// ------------------------------------------
 	/** Bytecode encoding of modifier <tt>team</tt> */
-    final static int TEAM  = 0x8000;
+    final static int TEAM  = 1; // bit in OTClassFlags attribute
 
 	// 'CallinFlags':
 	final static int OVERRIDING =1; // this role method is inherited from the super role

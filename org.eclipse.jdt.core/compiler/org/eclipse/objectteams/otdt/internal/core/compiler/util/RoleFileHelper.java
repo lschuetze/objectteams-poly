@@ -23,7 +23,6 @@ package org.eclipse.objectteams.otdt.internal.core.compiler.util;
 import org.eclipse.jdt.core.compiler.CharOperation;
 import org.eclipse.jdt.internal.compiler.ast.CompilationUnitDeclaration;
 import org.eclipse.jdt.internal.compiler.ast.TypeDeclaration;
-import org.eclipse.jdt.internal.compiler.classfmt.ClassFileConstants;
 import org.eclipse.jdt.internal.compiler.lookup.ClassScope;
 import org.eclipse.jdt.internal.compiler.lookup.CompilationUnitScope;
 import org.eclipse.jdt.internal.compiler.lookup.ExtraCompilerModifiers;
@@ -153,7 +152,7 @@ public class RoleFileHelper {
 			// Should this be done by the compiler.adaptor? How then would we determine fatal error?
 			environment.problemReporter.noEnclosingTeamForRoleFile(roleUnit, roleType);
 			// reset flags because we can't process it as a role without a team:
-			roleUnit.currentPackage.modifiers &= ~ClassFileConstants.AccTeam;
+			roleUnit.currentPackage.modifiers &= ~ExtraCompilerModifiers.AccTeam;
 			roleType.modifiers &= ~ExtraCompilerModifiers.AccRole;
 			roleType.tagAsHavingErrors(); // CUD is already marked, nor can the type be translated successfully
 		}

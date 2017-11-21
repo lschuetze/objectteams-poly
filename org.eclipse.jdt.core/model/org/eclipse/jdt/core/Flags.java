@@ -161,7 +161,7 @@ public final class Flags {
 	 /**
 	  * Team property flag. See The ObjectTeams Specification for more details.
 	  */
-	 public static final int AccTeam = ClassFileConstants.AccTeam;
+	 public static final int AccTeam = ExtraCompilerModifiers.AccTeam;
 
 	 /**
 	  * Role property flag. See the ObjectTeams Specification for more details.

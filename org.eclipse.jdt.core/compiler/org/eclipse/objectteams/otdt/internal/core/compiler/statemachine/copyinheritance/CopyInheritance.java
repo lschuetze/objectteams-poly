@@ -653,9 +653,9 @@ public class CopyInheritance implements IOTConstants, ClassFileConstants, ExtraC
 		    	{
 		    		if (!Protections.hasClassKindProblem(subRoleDecl.binding))
 		    			subRoleDecl.scope.problemReporter().regularOverridesTeam(subRoleDecl, superRole);
-		    		subRoleDecl.modifiers |= ClassFileConstants.AccTeam;
+		    		subRoleDecl.modifiers |= ExtraCompilerModifiers.AccTeam;
 		    		if (subRoleBinding != null)
-		    			subRoleBinding.modifiers |= ClassFileConstants.AccTeam;
+		    			subRoleBinding.modifiers |= ExtraCompilerModifiers.AccTeam;
 		    	}
 		    	if (!isTsuperTeam) {
 		    		if (CharOperation.equals(subRoleDecl.name, OTCONFINED)) {

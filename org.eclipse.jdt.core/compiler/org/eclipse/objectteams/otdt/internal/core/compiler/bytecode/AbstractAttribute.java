@@ -21,7 +21,6 @@ package org.eclipse.objectteams.otdt.internal.core.compiler.bytecode;
 
 import org.eclipse.jdt.core.compiler.CharOperation;
 import org.eclipse.jdt.internal.compiler.ClassFile;
-import org.eclipse.jdt.internal.compiler.classfmt.ClassFileConstants;
 import org.eclipse.jdt.internal.compiler.classfmt.ClassFileReader;
 import org.eclipse.jdt.internal.compiler.classfmt.ClassFileStruct;
 import org.eclipse.jdt.internal.compiler.classfmt.MethodInfo;
@@ -154,7 +153,7 @@ public abstract class AbstractAttribute
 					if (!((ReferenceBinding)binding).isRole())
 						ex = new Exception("Need a role for this attribute, found "+className); //$NON-NLS-1$
 					break;
-			case ClassFileConstants.AccTeam :
+			case ExtraCompilerModifiers.AccTeam :
 				if (!((ReferenceBinding)binding).isTeam())
 					ex = new Exception("Need a team for this attribute, found "+className); //$NON-NLS-1$
 				break;

@@ -177,7 +177,7 @@ public class SourceTypeConverter extends TypeConverter {
 		    int modifiers = ClassFileConstants.AccDefault;
 		    IOTType otType = OTModelManager.getOTElement(topLevelTypeInfo.getHandle());
 		    if (otType != null && otType.isRole() && ((IRoleType) otType).isRoleFile())
-		        modifiers |= ClassFileConstants.AccTeam;
+		        modifiers |= ExtraCompilerModifiers.AccTeam;
 /* orig:
 			this.unit.currentPackage =
 				createImportReference(packageName, start, end, false, ClassFileConstants.AccDefault);

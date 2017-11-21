@@ -28,6 +28,7 @@ import org.eclipse.jdt.internal.compiler.flow.FlowInfo;
 import org.eclipse.jdt.internal.compiler.impl.Constant;
 import org.eclipse.jdt.internal.compiler.lookup.BlockScope;
 import org.eclipse.jdt.internal.compiler.lookup.ClassScope;
+import org.eclipse.jdt.internal.compiler.lookup.ExtraCompilerModifiers;
 import org.eclipse.jdt.internal.compiler.lookup.FieldBinding;
 import org.eclipse.jdt.internal.compiler.util.HashtableOfObject;
 import org.eclipse.objectteams.otdt.internal.core.compiler.bytecode.AnchorUsageRanksAttribute;
@@ -132,7 +133,7 @@ public class TypeValueParameter extends TypeParameter {
 		this.fieldBinding = new FieldBinding(
 				this.name,
 				this.type.resolvedType,
-				ClassFileConstants.AccFinal | ClassFileConstants.AccPublic | ClassFileConstants.AccValueParam,
+				ClassFileConstants.AccFinal | ClassFileConstants.AccPublic | ExtraCompilerModifiers.AccValueParam,
 				scope.enclosingSourceType(),
 				Constant.NotAConstant);
 		FieldModel.getModel(this.fieldBinding).addAttribute(new AnchorUsageRanksAttribute(this.fieldBinding));

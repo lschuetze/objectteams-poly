@@ -21,9 +21,9 @@
 package org.eclipse.objectteams.otdt.internal.core.compiler.bytecode;
 
 import org.eclipse.jdt.core.compiler.CharOperation;
-import org.eclipse.jdt.internal.compiler.classfmt.ClassFileConstants;
 import org.eclipse.jdt.internal.compiler.classfmt.ClassFileStruct;
 import org.eclipse.jdt.internal.compiler.lookup.Binding;
+import org.eclipse.jdt.internal.compiler.lookup.ExtraCompilerModifiers;
 import org.eclipse.jdt.internal.compiler.lookup.LookupEnvironment;
 import org.eclipse.jdt.internal.compiler.lookup.ReferenceBinding;
 import org.eclipse.jdt.internal.compiler.lookup.TypeBinding;
@@ -107,7 +107,7 @@ public class CallinPrecedenceAttribute extends ListValueAttribute {
 	 * @see org.eclipse.objectteams.otdt.internal.core.compiler.bytecode.AbstractAttribute#evaluate(org.eclipse.jdt.internal.compiler.lookup.Binding, org.eclipse.jdt.internal.compiler.lookup.LookupEnvironment)
 	 */
 	public void evaluate(Binding binding, LookupEnvironment environment, char[][][] missingTypeNames) {
-		checkBindingMismatch(binding, ClassFileConstants.AccTeam);
+		checkBindingMismatch(binding, ExtraCompilerModifiers.AccTeam);
 		if (((ReferenceBinding)binding).isTeam())
 			((ReferenceBinding)binding).getTeamModel().addAttribute(this);
 	}

@@ -328,7 +328,7 @@ public ClassFileReader(byte[] classFileBytes, char[] fileName, boolean fullyInit
 		readOffset += 2;
 //{ObjectTeams: org.objectteams.Team requires a phantom flag:
 		if (CharOperation.equals(this.className, "org/objectteams/Team".toCharArray())) //$NON-NLS-1$
-			this.accessFlags |= ClassFileConstants.AccTeam;
+			this.accessFlags |= ExtraCompilerModifiers.AccTeam;
 // SH}
 
 		// Read the superclass name, can be null for java.lang.Object
@@ -620,10 +620,16 @@ public String getBaseclassName(String roleName) {
 		return null;
 	return this.roleBaseBindings.get(roleName);
 }
-
-public void evaluateOTAttributes(BinaryTypeBinding binaryTypeBinding, LookupEnvironment environment, char[][][] missingTypeNames) {
+public void evaluateOTClassFlagsAttribute(BinaryTypeBinding binaryTypeBinding, LookupEnvironment environment, char[][][] missingTypeNames) {
 	for (AbstractAttribute attr : this.classAttributes)
-		attr.evaluate(binaryTypeBinding, environment, missingTypeNames);
+		if (attr.nameEquals(IOTConstants.OT_CLASS_FLAGS))
+			attr.evaluate(binaryTypeBinding, environment, missingTypeNames);
+}
+
+public void evaluateOtherOTAttributes(BinaryTypeBinding binaryTypeBinding, LookupEnvironment environment, char[][][] missingTypeNames) {
+	for (AbstractAttribute attr : this.classAttributes)
+		if (!attr.nameEquals(IOTConstants.OT_CLASS_FLAGS))
+			attr.evaluate(binaryTypeBinding, environment, missingTypeNames);
 }
 public Collection<AbstractAttribute> getOTAttributes() {
 	return this.classAttributes;
@@ -1539,7 +1545,7 @@ public boolean isNestedType() {
 //{ObjectTeams
 public boolean isTeam()
 {
-	return (this.accessFlags & ClassFileConstants.AccTeam) != 0;
+	return (this.accessFlags & ExtraCompilerModifiers.AccTeam) != 0;
 }
 
 public boolean isRole()

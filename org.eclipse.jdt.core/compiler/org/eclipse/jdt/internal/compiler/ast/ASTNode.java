@@ -704,7 +704,7 @@ public abstract class ASTNode implements TypeConstants, TypeIds {
 	public static StringBuffer printTypeKind(int modifiers, StringBuffer output) {
 		if ((modifiers & ExtraCompilerModifiers.AccRole) != 0)
 			output.append("role "); //$NON-NLS-1$
-		if ((modifiers & ClassFileConstants.AccTeam) != 0)
+		if ((modifiers & ExtraCompilerModifiers.AccTeam) != 0)
 			output.append("team "); //$NON-NLS-1$
 		return output;
 	}

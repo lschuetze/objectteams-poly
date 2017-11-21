@@ -64,6 +64,12 @@ public interface ExtraCompilerModifiers { // modifier constant
      * also: AccSemicolonBody (no conflict, class flag vs. method flag).
      */
  	int AccRole = 0x1000000; // bit 25
+ 	
+ 	/**
+ 	 * Encoding for the "team" class modifier.
+ 	 * also AccDefaultMethod
+ 	 */
+ 	int AccTeam = ASTNode.Bit17;
 
  	/** Flag for base imports. */
  	int AccBase = 0x1000000; // bit 25
@@ -78,7 +84,12 @@ public interface ExtraCompilerModifiers { // modifier constant
 	int AccReadonly = ASTNode.Bit27; // shared with blank final / default ctor
 
 
-	final int AccOTTypeJustFlag = AccJustFlag | AccRole | AccOverriding;
+	final int AccOTTypeJustFlag = AccJustFlag | AccRole | AccTeam | AccOverriding;
+
+	/**
+ 	 * A field encoding a value paramter (not a conflict with class-modifier AccTeam, method modifier AccDefaultMethod).
+ 	 */
+ 	int AccValueParam = ASTNode.Bit17;
 // SH}
 
 }

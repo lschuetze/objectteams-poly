@@ -9105,7 +9105,7 @@ public final class CompletionEngine
 
 			if(canBeType) {
 //{ObjectTeams: OT specific modifier
-				if((modifiers & ClassFileConstants.AccTeam) == 0) {
+				if((modifiers & ExtraCompilerModifiers.AccTeam) == 0) {
 				    keywords[count++] = Keywords.TEAM;
 				}
 //gbr}
@@ -9119,7 +9119,7 @@ public final class CompletionEngine
 		} else {
 			// class
 //{ObjectTeams: OT specific modifier
-			if((modifiers & ClassFileConstants.AccTeam) == 0) {
+			if((modifiers & ExtraCompilerModifiers.AccTeam) == 0) {
 			    keywords[count++] = Keywords.TEAM;
 			}
 //gbr}

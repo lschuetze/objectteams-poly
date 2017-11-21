@@ -23,7 +23,7 @@ import org.eclipse.jdt.internal.compiler.ast.AbstractMethodDeclaration;
 import org.eclipse.jdt.internal.compiler.ast.Expression;
 import org.eclipse.jdt.internal.compiler.ast.ImportReference;
 import org.eclipse.jdt.internal.compiler.ast.TypeDeclaration;
-import org.eclipse.jdt.internal.compiler.classfmt.ClassFileConstants;
+import org.eclipse.jdt.internal.compiler.lookup.ExtraCompilerModifiers;
 import org.eclipse.jdt.internal.compiler.lookup.TypeConstants;
 import org.eclipse.jdt.internal.core.search.processing.JobManager;
 
@@ -103,7 +103,7 @@ public void acceptMethodReference(char[] methodName, int argCount, int sourcePos
  */
 public void acceptPackage(ImportReference importReference) {
 //{ObjectTeams:	for team package (do we want to store this info?)
-    if ((importReference.modifiers & ClassFileConstants.AccTeam) != 0)
+    if ((importReference.modifiers & ExtraCompilerModifiers.AccTeam) != 0)
     {
     	int len = importReference.tokens.length;
         char[] typeName = importReference.tokens[len-1];

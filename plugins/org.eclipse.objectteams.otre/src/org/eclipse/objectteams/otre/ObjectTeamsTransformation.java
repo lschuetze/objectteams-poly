@@ -825,6 +825,19 @@ public abstract class ObjectTeamsTransformation
 			return parameterPositions;
 		}
 	}
+	 
+	public static boolean peekIsteam(ClassGen cg) {
+		for (Attribute attribute : cg.getAttributes()) {
+            Unknown attr = isOTAttribute(attribute);
+            if (attr != null) {
+                if ("OTClassFlags".equals(attr.getName())) {
+					int classFlags = combineTwoBytes(attr.getBytes(), 0);
+					return (classFlags & OTConstants.TEAM) != 0;
+                }
+            }
+		}
+		return false;
+	}
 	
 	/**
 	 * Scan the Attributes found in the class class_name for binding attributes
@@ -1642,7 +1655,7 @@ public abstract class ObjectTeamsTransformation
 	 * @return true if this is a team which has to be extended
 	 */
 	protected static boolean classNeedsTeamExtensions(ClassGen cg) {
-		return     ((cg.getAccessFlags() & OTConstants.TEAM) != 0)			// must be a team
+		return     peekIsteam(cg)											// must be a team
 				&& ((cg.getAccessFlags() & Constants.ACC_ABSTRACT) == 0)	// and non-abstract
 				&& !(cg.getClassName().equals(OTConstants.teamClassName));	// and not o.o.Team itself.
 	}

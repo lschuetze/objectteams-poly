@@ -7438,7 +7438,7 @@ protected void consumePackageDeclarationNameWithModifiers() {
 	int packageModifiers = this.intStack[this.intPtr--];
 
 //{ObjectTeams: ROFI: handle role files within a  team package
-	if ((packageModifiers & ClassFileConstants.AccTeam) != 0) {
+	if ((packageModifiers & ExtraCompilerModifiers.AccTeam) != 0) {
 		this.currentIsRole = true; // the type declaration to follow a team package must be a role.
 	}
 // SH}
@@ -7464,7 +7464,7 @@ protected void consumePackageDeclarationNameWithModifiers() {
 	}
 
 //{ObjectTeams: hide team modifier:
-	packageModifiers &= ~ClassFileConstants.AccTeam;
+	packageModifiers &= ~ExtraCompilerModifiers.AccTeam;
 // SH}
 	if (packageModifiers != 0) {
 		problemReporter().illegalModifiers(packageModifiersSourceStart, packageModifiersSourceEnd);
@@ -7729,7 +7729,7 @@ private boolean getCurrentTypeIsRole() {
 
 	boolean isRoFi = false;
 	if (this.compilationUnit.currentPackage != null)
-		isRoFi = (this.compilationUnit.currentPackage.modifiers & ClassFileConstants.AccTeam) != 0;
+		isRoFi = (this.compilationUnit.currentPackage.modifiers & ExtraCompilerModifiers.AccTeam) != 0;
 	return isRoFi;
 }
 /** Look for nearest uncompleted TypeDecl on stack (strictly below stack top). */
@@ -11257,7 +11257,7 @@ protected void consumeNameContainingTeam() {
 	System.arraycopy(this.identifierPositionStack, pos, this.identifierPositionStack, pos+1, len1);
 	this.identifierStack[pos] = "team".toCharArray(); //$NON-NLS-1$
 	this.identifierPtr++;
-	this.modifiers &= ~ClassFileConstants.AccTeam;
+	this.modifiers &= ~ExtraCompilerModifiers.AccTeam;
 }
 // SH}
 protected void consumeStatementBreak() {
@@ -11774,7 +11774,7 @@ protected void consumeToken(int type) {
 			break;
 //{ObjectTeams: new modifiers:
 		case TokenNameteam :
-			checkAndSetModifiers(ClassFileConstants.AccTeam);
+			checkAndSetModifiers(ExtraCompilerModifiers.AccTeam);
 			pushOnExpressionStackLengthStack(0);
 			break;
 		case TokenNamecallin :

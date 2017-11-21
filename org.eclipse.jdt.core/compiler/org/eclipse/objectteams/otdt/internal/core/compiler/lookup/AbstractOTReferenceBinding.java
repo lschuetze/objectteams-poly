@@ -209,7 +209,7 @@ public abstract class AbstractOTReferenceBinding extends TypeBinding
 	}
 	public final boolean isTeam() {
 
-		if ((this.modifiers & ClassFileConstants.AccTeam) != 0)
+		if ((this.modifiers & ExtraCompilerModifiers.AccTeam) != 0)
 			return true;
 		if(TypeAnalyzer.isOrgObjectteamsTeam(_this())) {
 			// only now detect that type is a team?
@@ -229,7 +229,7 @@ public abstract class AbstractOTReferenceBinding extends TypeBinding
 		assert !isBinaryBinding(); // binary type org.objectteams.Team is detected by the ClassFileReader.
 
 		TypeDeclaration teamDecl = ((SourceTypeBinding)this).scope.referenceContext;
-		teamDecl.modifiers |= ClassFileConstants.AccTeam;
+		teamDecl.modifiers |= ExtraCompilerModifiers.AccTeam;
 		this._teamModel = teamDecl.getTeamModel();
 		this._teamModel.setBinding(_this());
 		if (this.model != null)
@@ -257,6 +257,8 @@ public abstract class AbstractOTReferenceBinding extends TypeBinding
 	public boolean isRole() {
 		if (isEnum())
 			return false;
+		if ((this.modifiers & ExtraCompilerModifiers.AccRole) != 0)
+			return true;
 		if (this.isRolish)
 			return true;
 		ReferenceBinding enclosingTeam = TeamModel.getEnclosingTeam(_this());

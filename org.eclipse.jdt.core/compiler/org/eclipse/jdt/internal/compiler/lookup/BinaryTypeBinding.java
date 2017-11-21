@@ -562,18 +562,21 @@ void cachePartsFrom(IBinaryType binaryType, boolean needFieldsAndMethods) {
 			}
 		}
 // SH}
-//{ObjectTeams: set role modifier and create models
-		if (this.enclosingType != null && this.enclosingType.isTeam())
-			// it's a genuine role, aka source role
-			this.modifiers |= ExtraCompilerModifiers.AccRole;
+//{ObjectTeams: set team/role modifiers and create models
+		maybeSetRoleModel(); // determined by presence of enclosing team
 
-		maybeSetRoleModel();
-		if ((this.modifiers & ClassFileConstants.AccTeam) != 0)
+		if (binaryType instanceof ClassFileReader) {
+			// set AccTeam/AccRole to modifiers:
+			ClassFileReader reader = (ClassFileReader)binaryType;
+			reader.evaluateOTClassFlagsAttribute(this, this.environment, binaryType.getMissingTypeNames());
+		}
+
+		if ((this.modifiers & ExtraCompilerModifiers.AccTeam) != 0)
 		    this._teamModel = new TeamModel(this);
 		// Note, 'model' is already set in ctor of superclass ReferenceBinding.
 
 		// for roles and teams we need the bytes, retrieve them now, if not already present:
-		if ((this.modifiers & (ExtraCompilerModifiers.AccRole|ClassFileConstants.AccTeam)) != 0) {
+		if ((this.modifiers & (ExtraCompilerModifiers.AccRole|ExtraCompilerModifiers.AccTeam)) != 0) {
     		try {
     			binaryType = binaryType.withClassBytes();
 			} catch (Exception e) {
@@ -765,7 +768,7 @@ void cachePartsFrom(IBinaryType binaryType, boolean needFieldsAndMethods) {
 //{ObjectTeams: now this type is setup enough to evaluate attributes
 		if (binaryType instanceof ClassFileReader) {
 			ClassFileReader reader = (ClassFileReader)binaryType;
-			reader.evaluateOTAttributes(this, this.environment, missingTypeNames);
+			reader.evaluateOtherOTAttributes(this, this.environment, missingTypeNames);
 			// remember o.o.Team:
 			if (needFieldsAndMethods && TypeAnalyzer.isOrgObjectteamsTeam(this))
 				this.environment.getTeamMethodGenerator().maybeRegisterTeamClassBytes(reader, this);
@@ -870,7 +873,7 @@ private void createFields(IBinaryField[] iFields, IBinaryType binaryType, long s
 				if (binaryField instanceof FieldInfo)
 					((FieldInfo)binaryField).evaluateOTAttributes(field);
 				// field as value parameter?
-				if ((field.modifiers & ClassFileConstants.AccValueParam) != 0)
+				if ((field.modifiers & ExtraCompilerModifiers.AccValueParam) != 0)
 					addValueParameter(field);
 // SH}
 			}

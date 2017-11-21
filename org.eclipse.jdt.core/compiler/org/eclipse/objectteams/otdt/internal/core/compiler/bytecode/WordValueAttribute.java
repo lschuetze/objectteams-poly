@@ -26,7 +26,6 @@ import org.eclipse.jdt.internal.compiler.classfmt.ClassFileReader;
 import org.eclipse.jdt.internal.compiler.classfmt.ClassFileStruct;
 import org.eclipse.jdt.internal.compiler.classfmt.FieldInfo;
 import org.eclipse.jdt.internal.compiler.classfmt.MethodInfo;
-import org.eclipse.jdt.internal.compiler.classfmt.ClassFileConstants;
 import org.eclipse.jdt.internal.compiler.impl.CompilerOptions.WeavingScheme;
 import org.eclipse.jdt.internal.compiler.lookup.BinaryTypeBinding;
 import org.eclipse.jdt.internal.compiler.lookup.Binding;
@@ -335,7 +334,7 @@ public class WordValueAttribute
             if ((this._value & OT_CLASS_ROLE) != 0)
             	type.modifiers |= ExtraCompilerModifiers.AccRole;
             if ((this._value & OT_CLASS_TEAM) != 0)
-            	type.modifiers |= ClassFileConstants.AccTeam;
+            	type.modifiers |= ExtraCompilerModifiers.AccTeam;
             if ((this._value & OT_CLASS_FLAG_HAS_TSUPER) != 0)
             	type.modifiers |= ExtraCompilerModifiers.AccOverriding;
             if ((this._value & OT_CLASS_ROLE_LOCAL) != 0)

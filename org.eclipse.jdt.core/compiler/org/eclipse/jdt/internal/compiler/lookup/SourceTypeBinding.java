@@ -196,8 +196,8 @@ public SourceTypeBinding(char[][] compoundName, PackageBinding fPackage, ClassSc
 	this.modifiers = scope.referenceContext.modifiers;
 //{ObjectTeams: when compiling org.objectteams.Team: set flag 'team'
 	if (CharOperation.equals(compoundName, IOTConstants.ORG_OBJECTTEAMS_TEAM)) {
-		this.modifiers |= ClassFileConstants.AccTeam;
-		scope.referenceContext.modifiers |= ClassFileConstants.AccTeam;
+		this.modifiers |= ExtraCompilerModifiers.AccTeam;
+		scope.referenceContext.modifiers |= ExtraCompilerModifiers.AccTeam;
 	}
 // SH}
 	this.sourceName = scope.referenceContext.name;

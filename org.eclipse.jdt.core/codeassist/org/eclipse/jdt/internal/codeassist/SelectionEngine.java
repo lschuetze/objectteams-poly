@@ -75,6 +75,7 @@ import org.eclipse.jdt.internal.compiler.lookup.Binding;
 import org.eclipse.jdt.internal.compiler.lookup.BlockScope;
 import org.eclipse.jdt.internal.compiler.lookup.ClassScope;
 import org.eclipse.jdt.internal.compiler.lookup.CompilationUnitScope;
+import org.eclipse.jdt.internal.compiler.lookup.ExtraCompilerModifiers;
 import org.eclipse.jdt.internal.compiler.lookup.FieldBinding;
 import org.eclipse.jdt.internal.compiler.lookup.LocalTypeBinding;
 import org.eclipse.jdt.internal.compiler.lookup.LocalVariableBinding;
@@ -1031,7 +1032,7 @@ public final class SelectionEngine extends Engine implements ISearchRequestor {
 							this.requestor.acceptType(
 									CharOperation.concatWith(teamsPackage, '.'),
 									CharOperation.concatWith(teamsName, '.'),
-									ClassFileConstants.AccTeam,
+									ExtraCompilerModifiers.AccTeam,
 									false, // not a declaration
 									null,  // genericTypeSignature
 									this.actualSelectionStart,

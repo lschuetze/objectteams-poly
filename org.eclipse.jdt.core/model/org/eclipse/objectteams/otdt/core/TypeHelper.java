@@ -41,7 +41,6 @@ import org.eclipse.jdt.core.Signature;
 import org.eclipse.jdt.core.compiler.CharOperation;
 import org.eclipse.jdt.core.dom.MethodDeclaration;
 import org.eclipse.jdt.core.dom.SingleVariableDeclaration;
-import org.eclipse.jdt.internal.compiler.classfmt.ClassFileConstants;
 import org.eclipse.jdt.internal.compiler.lookup.ExtraCompilerModifiers;
 import org.eclipse.jdt.internal.core.util.Util;
 import org.eclipse.objectteams.otdt.core.compiler.IOTConstants;
@@ -67,7 +66,7 @@ public class TypeHelper
      */
     public static boolean isTeam(int flags)
     {
-        return (flags & ClassFileConstants.AccTeam) != 0;
+        return (flags & ExtraCompilerModifiers.AccTeam) != 0;
     }
 
     /**

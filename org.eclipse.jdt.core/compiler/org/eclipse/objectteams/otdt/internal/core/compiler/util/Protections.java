@@ -75,7 +75,7 @@ public class Protections implements ClassFileConstants, ExtraCompilerModifiers {
             	scope.problemReporter().illegalModifierForRole(type.binding);
         }
         // TODO (SH): can we avoid AccTeam here?
-        if ((modifiers & AccTeam) == 0)
+        if ((modifiers & ExtraCompilerModifiers.AccTeam) == 0)
         {
         	if (   type.memberTypes != null
         		&& type.memberTypes.length > 0)
@@ -84,8 +84,8 @@ public class Protections implements ClassFileConstants, ExtraCompilerModifiers {
                 	scope.problemReporter().missingTeamForRoleWithMembers(type.binding, type.memberTypes[0]);
         		// avoid secondary errors
                 if (!type.isInterface()) { // setting AccTeam for interface would aggravate the situation
-                	modifiers |= AccTeam;
-                	type.modifiers |= AccTeam;
+                	modifiers |= ExtraCompilerModifiers.AccTeam;
+                	type.modifiers |= ExtraCompilerModifiers.AccTeam;
                 }
         		type.getTeamModel().tagBits |= TeamModel.HasClassKindProblem; // initialize
         		for (int i = 0; i < type.memberTypes.length; i++) {

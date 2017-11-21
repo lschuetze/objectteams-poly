@@ -2937,7 +2937,7 @@ protected void reportMatching(CompilationUnitDeclaration unit, boolean mustResol
 			}
 		}
 //{ObjectTeams: ROFI: special node: the package declaration interpreted as a type reference 		
-		if (pkg != null  && (pkg.modifiers & ClassFileConstants.AccTeam) != 0) {
+		if (pkg != null  && (pkg.modifiers & ExtraCompilerModifiers.AccTeam) != 0) {
 			Integer level = (Integer) nodeSet.matchingNodes.removeKey(pkg);
 			if (level != null)
 				this.patternLocator.matchReportImportRef(pkg, null/*no binding*/, createImportHandle(pkg), level.intValue(), this);

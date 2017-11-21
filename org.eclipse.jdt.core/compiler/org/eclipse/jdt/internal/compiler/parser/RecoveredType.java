@@ -134,7 +134,7 @@ public RecoveredElement add(AbstractMethodDeclaration methodDeclaration, int bra
 /* orig:
 				this.pendingModifiers,
   :giro */
-				this.pendingModifiers & ~ClassFileConstants.AccTeam,
+				this.pendingModifiers & ~ExtraCompilerModifiers.AccTeam,
 // SH}
 				this.pendingModifersSourceStart);
 	}

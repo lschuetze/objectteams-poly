@@ -48,21 +48,7 @@ public interface ClassFileConstants {
 	int AccEnum         = 0x4000;
 	int AccModule		= 0x8000;
 
-//{ObjectTeams: modifiers/flags
-	/**
-	 * Encoding for the "team" class modifier.
-	 * We currently rely on storing this in byte code. Let's hope, we will never conflict
-	 * with new uses in the JVM!
-	 */
- 	int AccTeam = 0x8000;
-
- 	/**
- 	 * A field encoding a value paramter (not a conflict with class-modifier AccTeam).
- 	 */
- 	int AccValueParam = 0x8000;
-// SH}
-
-	/**
+/**
 	 * From classfile version 52 (compliance 1.8 up), meaning that a formal parameter is mandated
 	 * by a language specification, so all compilers for the language must emit it.
 	 */

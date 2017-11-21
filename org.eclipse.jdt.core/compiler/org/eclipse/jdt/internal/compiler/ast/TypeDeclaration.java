@@ -310,7 +310,7 @@ public class TypeDeclaration extends Statement implements ProblemSeverities, Ref
      * adjust it and its roles now.
      */
 	public void adjustOrgObjectteamsTeam() {
-		this.modifiers |= AccTeam;
+		this.modifiers |= ExtraCompilerModifiers.AccTeam;
 		TypeDeclaration confined = null;
 		TypeDeclaration otconfined = null;
 		if (this.memberTypes != null) {
@@ -348,7 +348,7 @@ public class TypeDeclaration extends Statement implements ProblemSeverities, Ref
 	public boolean willCatchAbort = false;
 
 	public final boolean isTeam() {
-		return (this.modifiers & AccTeam) != 0;
+		return (this.modifiers & ExtraCompilerModifiers.AccTeam) != 0;
 	}
 
     /** Is this an actual role (not a generated interface)? */

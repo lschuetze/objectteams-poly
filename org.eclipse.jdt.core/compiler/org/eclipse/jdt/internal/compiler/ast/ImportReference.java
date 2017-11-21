@@ -43,7 +43,7 @@ public class ImportReference extends ASTNode {
 
 //{ObjectTeams: new queries:
 	public boolean isTeam() {
-		return (this.modifiers & ClassFileConstants.AccTeam) != 0;
+		return (this.modifiers & ExtraCompilerModifiers.AccTeam) != 0;
 	}
 	public boolean isBase() {
 		return (this.modifiers & ExtraCompilerModifiers.AccBase) != 0;
