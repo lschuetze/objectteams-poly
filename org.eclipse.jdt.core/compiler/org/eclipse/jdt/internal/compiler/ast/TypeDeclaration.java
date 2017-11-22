@@ -1603,7 +1603,12 @@ public StringBuffer printBody(int indent, StringBuffer output) {
 }
 
 public StringBuffer printHeader(int indent, StringBuffer output) {
+//{ObjectTeams: workaround conflict wrt AccDefaultMethod vs. AccTeam:
+/* orig:
 	printModifiers(this.modifiers, output);
+  :giro */
+	printModifiers(this.modifiers & ExtraCompilerModifiers.AccJustFlag, output);
+// SH}
 	if (this.annotations != null) {
 		printAnnotations(this.annotations, output);
 		output.append(' ');
