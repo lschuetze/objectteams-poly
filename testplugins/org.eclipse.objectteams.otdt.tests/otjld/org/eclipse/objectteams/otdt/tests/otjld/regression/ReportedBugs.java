@@ -1506,12 +1506,11 @@ public class ReportedBugs extends AbstractOTJLDTest {
             "OK");
     }
 
-    // copy inheritance for subclass of JFrame: coulnd't deal with type variables in signatures to copy
+    // copy inheritance for subclass of JFrame: couldn't deal with type variables in signatures to copy
     // B.1.1-otjld-sh-39
     public void testB11_sh39() {
        
-       runConformTest(
-            new String[] {
+       String[] files = {
 		"TeamB11sh39_2.java",
 			    "\n" +
 			    "public team class TeamB11sh39_2 extends TeamB11sh39_1 {\n" +
@@ -1539,8 +1538,9 @@ public class ReportedBugs extends AbstractOTJLDTest {
 			    "    }\n" +
 			    "}\n" +
 			    "    \n"
-            },
-            "OK");
+            };
+       String[] vmArgs = isJRE9 ? new String[]{ "--add-reads", "java.datatransfer=ALL-UNNAMED" } : new String[0];
+       runTest(files, false, "", "OK", "", false, null, true, vmArgs, getCompilerOptions(), null, true);
     }
 
     // multiple anonymous classes, implicitely inherited
