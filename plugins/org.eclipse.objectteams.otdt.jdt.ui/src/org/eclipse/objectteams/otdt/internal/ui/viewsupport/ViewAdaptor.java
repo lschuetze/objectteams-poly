@@ -226,7 +226,7 @@ public team class ViewAdaptor extends JFaceDecapsulator
 		 */
 		static callin boolean confirmAbstract(IMember element) throws JavaModelException
 		{
-			// never show the abstract symbol on interfaces or members in interfaces
+			// never show the abstract symbol on interfaces
 			int elementType = element.getElementType();
 			if (elementType == IJavaElement.TYPE
 // {OTDTUI :
@@ -235,11 +235,7 @@ public team class ViewAdaptor extends JFaceDecapsulator
 // haebor}
 				return ! JavaModelUtil.isInterfaceOrAnnotation((IType) element);
 			}
-			
-			return ! JavaModelUtil.isInterfaceOrAnnotation(element.getDeclaringType())
-// {OTDTUI:
-			|| OTModelManager.belongsToRole(element);
-// carp}
+			return true;
 		}
 		/** Overriding. */
 		confirmAbstract <- replace confirmAbstract;
