@@ -56,7 +56,9 @@
                 value="org.eclipse.jdt.core.tests.compiler.regression.TestAll"/>
     </ant>
 
+<!--
 	<antcall target="evaluation_tests"/>
+-->
   </target>
 
  <target name="evaluation_tests">
