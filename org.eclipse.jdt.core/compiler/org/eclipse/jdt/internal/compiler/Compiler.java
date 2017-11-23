@@ -485,7 +485,12 @@ public class Compiler implements ITypeRequestor, ProblemSeverities {
 			// build and record parsed units
 			reportProgress(Messages.compilation_beginningToCompile);
 
+//{ObjectTeams: OT/J code always needs CU sorting:
+/* orig:
 			if (this.options.complianceLevel >= ClassFileConstants.JDK9) {
+  :giro */
+			if (this.options.complianceLevel >= ClassFileConstants.JDK9 || !this.options.isPureJava) {
+// SH}
 				// in Java 9 the compiler must never ask the oracle for a module that is contained in the input units:
 				sortModuleDeclarationsFirst(sourceUnits);
 			}
