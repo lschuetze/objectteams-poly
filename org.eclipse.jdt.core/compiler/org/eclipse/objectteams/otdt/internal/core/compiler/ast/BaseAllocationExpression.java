@@ -334,11 +334,13 @@ public class BaseAllocationExpression extends Assignment {
 				Expression argument = arguments[i];
 				if (argument.resolvedType.isPrimitiveType()) {
 					BaseTypeBinding baseType = (BaseTypeBinding) argument.resolvedType;
-					MessageSend boxingAllocation = gen.createBoxing(argument, baseType);
-					boxingAllocation.resolvedType = scope.environment().computeBoxingType(baseType);
-					boxingAllocation.binding = scope.getConstructor((ReferenceBinding) boxingAllocation.resolvedType, new TypeBinding[]{baseType}, boxingAllocation);
-					boxingAllocation.constant = Constant.NotAConstant;
-					argument = boxingAllocation;
+					MessageSend boxingSend = gen.createBoxing(argument, baseType);
+					boxingSend.resolvedType = scope.environment().computeBoxingType(baseType);
+					boxingSend.binding = scope.getMethod(boxingSend.resolvedType, TypeConstants.VALUEOF, new TypeBinding[]{baseType}, boxingSend);
+					boxingSend.actualReceiverType = boxingSend.resolvedType;
+					boxingSend.argumentTypes = new TypeBinding[] { baseType };
+					boxingSend.constant = Constant.NotAConstant;
+					argument = boxingSend;
 				}
 				boxedArgs[i] = argument;
 			}
