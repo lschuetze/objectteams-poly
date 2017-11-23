@@ -78,7 +78,7 @@ public class Config implements ConfigHelper.IConfig, Comparable<Config> {
     boolean buildFieldsAndMethods;
     boolean bundledCompleteTypeBindings = false;
     /** are statements ever parsed or are we on a strict diet? */
-    boolean strictDiet;
+    boolean strictDiet					= true; // unless false requested at least once
     /** is it sound to ignore missing byte code during copy-inheritance? */
     public boolean ignoreMissingBytecode = false;
 

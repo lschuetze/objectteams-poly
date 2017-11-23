@@ -130,13 +130,13 @@ public class Dependencies implements ITranslationStates {
 			boolean           strictDiet)
     {
     	Config config = Config.getOrCreateMatchingConfig(client, parser, environment);
-    	config.verifyMethods = verifyMethods;
-    	config.analyzeCode = analyzeCode;
-    	config.generateCode = generateCode;
-    	config.buildFieldsAndMethods = buildFieldsAndMethods;
+    	config.verifyMethods |= verifyMethods;
+    	config.analyzeCode |= analyzeCode;
+    	config.generateCode |= generateCode;
+    	config.buildFieldsAndMethods |= buildFieldsAndMethods;
     	if (bundledCompleteTypeBindings != null)
     		config.bundledCompleteTypeBindings = bundledCompleteTypeBindings;
-    	config.strictDiet = strictDiet;
+    	config.strictDiet &= strictDiet;
 
     	// Debugging
 //    	config.ex = new Exception("Dependencies.setup()");
