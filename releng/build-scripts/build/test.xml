@@ -67,7 +67,18 @@
 		<ant antfile="plugins/${testPlugin}/test.xml" dir="${test.eclipseDir}">
 			<property name="eclipse-home" value="${test.eclipseDir}" />
 			<property name="library-file" value="${test.root.dir}/library.xml"/>
-            <property name="extraVMargs" value="-XX:+HeapDumpOnOutOfMemoryError -ea --add-modules ALL-SYSTEM --add-opens java.base/jdk.internal.loader=ALL-UNNAMED -Djava.io.tmpdir=${test.tmpDir} -Dot.weaving=otdre -javaagent:${otequinox.agent.jar}"/>
+            <property name="extraVMargs" value="-XX:+HeapDumpOnOutOfMemoryError -ea --add-modules ALL-SYSTEM \n
+            	--add-opens java.base/jdk.internal.loader=ALL-UNNAMED \n
+            	--add-opens jdk.localedata/sun.util.resources.cldr.provider=ALL-UNNAMED \n
+            	--add-opens jdk.localedata/sun.util.resources.provider=ALL-UNNAMED \n
+            	--add-opens java.security.jgss/sun.security.krb5.internal.ssl=ALL-UNNAMED \n
+            	--add-opens java.base/jdk.internal.module=ALL-UNNAMED \n
+            	--add-opens java.base/java.lang.module=ALL-UNNAMED \n
+            	--add-opens java.base/jdk.internal.reflect=ALL-UNNAMED \n
+            	--add-opens java.base/jdk.internal.ref=ALL-UNNAMED \n
+            	--add-opens java.base/jdk.internal.math=ALL-UNNAMED \n
+            	--add-opens java.base/jdk.internal.misc=ALL-UNNAMED \n
+            	-Djava.io.tmpdir=${test.tmpDir} -Dot.weaving=otdre -javaagent:${otequinox.agent.jar}"/>
 		</ant>
 	</target>
 
