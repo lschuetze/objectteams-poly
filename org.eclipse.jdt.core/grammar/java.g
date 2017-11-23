@@ -1168,6 +1168,11 @@ CalloutParameterMappingList ::= CalloutParameterMappingList ',' ParameterMapping
 /.$putCase consumeParameterMappingList(); $break ./
 /:$readableName CalloutParameterMappingList:/
 
+-- Syntax error to be detected by consumeParameterMappingIn/Out():
+CalloutParameterMappingList ::= CalloutParameterMappingList ';' ParameterMapping
+/.$putCase consumeParameterMappingList(); $break ./
+/:$readableName CalloutParameterMappingList:/
+
 
 ParameterMapping ::= Expression SYNTHBINDOUT 'Identifier'
 /.$putCase consumeParameterMappingOut(); $break ./
@@ -1280,7 +1285,12 @@ CallinParameterMappingList ::= $empty
 CallinParameterMappingList -> ParameterMapping
 CallinParameterMappingList ::= CallinParameterMappingList ',' ParameterMapping
 /.$putCase consumeParameterMappingList(); $break ./
-/:$readableName ParameterMappingList:/ 
+/:$readableName CallinParameterMappingList:/
+
+-- Syntax error to be detected by consumeParameterMappingIn/Out():
+CallinParameterMappingList ::= CallinParameterMappingList ';' ParameterMapping
+/.$putCase consumeParameterMappingList(); $break ./
+/:$readableName CallinParameterMappingList:/
 
 -- ==== METHOD_SPEC: ====
 
