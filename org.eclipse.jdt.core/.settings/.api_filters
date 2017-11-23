@@ -846,6 +846,13 @@
         </filter>
     </resource>
     <resource path="model/org/eclipse/jdt/core/Flags.java" type="org.eclipse.jdt.core.Flags">
+        <filter comment="Necessary flag change after adopting Java 9 in OTDT" id="388194388">
+            <message_arguments>
+                <message_argument value="org.eclipse.jdt.core.Flags"/>
+                <message_argument value="AccTeam"/>
+                <message_argument value="32768"/>
+            </message_arguments>
+        </filter>
         <filter id="1141899266">
             <message_arguments>
                 <message_argument value="3.14"/>
