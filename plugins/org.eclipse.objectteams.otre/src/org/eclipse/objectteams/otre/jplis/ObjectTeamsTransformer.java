@@ -52,6 +52,8 @@ import org.eclipse.objectteams.otre.util.CallinBindingManager;
  */
 public class ObjectTeamsTransformer implements ClassFileTransformer {
 	
+	static boolean SUPPRESS_CFE_STDERR = System.getProperty("otre.suppress.classformaterror.stderr", null) != null;
+
 	// force loading all transformer classes to reduce risk of deadlock in class loading.
 	static Class<?>[] transformerClasses = new Class<?>[] {	
 		BaseCallRedirection.class, 
@@ -147,7 +149,8 @@ public class ObjectTeamsTransformer implements ClassFileTransformer {
 				java_class = new ClassParser(is, className).parse();
 			} catch (ClassFormatException e) {
 				// CFE doesn't show the class name, so at least print it to console:
-				System.err.println(e.getMessage()+", offending className: "+className);
+				if (!SUPPRESS_CFE_STDERR)
+					System.err.println(e.getMessage()+", offending className: "+className);
 				throw new IllegalClassFormatException("BCEL cannot parse class "+className+": "+e.getMessage());
 			} finally {
 				if (is != null)

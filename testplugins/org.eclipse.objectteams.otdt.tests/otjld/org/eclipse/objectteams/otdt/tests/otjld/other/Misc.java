@@ -524,7 +524,7 @@ public class Misc extends AbstractOTJLDTest {
 	    			"	public static void main(String[] args) {}\n" +
 	    			"}\n"
 	    		}, 
-	    		"", null, false, new String[] {"-Dotre2"}, options, null); // force starting a new vm
+	    		"", null, false, new String[] {"-Dotre2", "-Dotre.suppress.classformaterror.stderr=true"}, options, null); // force starting a new vm
 	    	 options.put(JavaCore.COMPILER_OPT_WEAVING_SCHEME, WeavingScheme.OTDRE.name());
 	    	 this.weavingScheme = WeavingScheme.OTDRE;
 	    	 runConformTest(
@@ -558,7 +558,7 @@ public class Misc extends AbstractOTJLDTest {
 	    			"	public static void main(String[] args) {}\n" +
 	    			"}\n"
 	    		}, 
-	    		"", null, false, new String[] {"-Dotre3"}, options, null);
+	    		"", null, false, new String[] {"-Dotre3", "-Dotre.suppress.classformaterror.stderr=true"}, options, null);
 	    	 options.put(JavaCore.COMPILER_OPT_WEAVING_SCHEME, WeavingScheme.OTDRE.name());
 	    	 this.weavingScheme = WeavingScheme.OTDRE;
 	    	 runNegativeTest(
