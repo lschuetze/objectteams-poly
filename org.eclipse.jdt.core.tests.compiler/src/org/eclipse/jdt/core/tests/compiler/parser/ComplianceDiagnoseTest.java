@@ -197,7 +197,7 @@ public void test0003() {
 /* orig:
 		"Syntax error on token \"enum\", interface expected\n" +
   :giro */
-		"Syntax error on token \"enum\", module expected\n" + // JDT bug?
+		"Syntax error on token \"enum\", class expected\n" +
 // SH}
 		"----------\n";
 	String expected14ProblemLog =
