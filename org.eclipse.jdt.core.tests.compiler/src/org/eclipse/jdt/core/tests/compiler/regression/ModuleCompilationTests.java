@@ -3665,7 +3665,8 @@ public void testBug521362_emptyFile() {
 	 * Test that when module-info is the only file being compiled, the class is still
 	 * generated inside the module's sub folder.
 	 */
-	public void testBug500170a() {
+	// JDT accident https://bugs.eclipse.org/527260#c34
+	public void _testBug500170a() {
 		File outputDirectory = new File(OUTPUT_DIR);
 		Util.flushDirectoryContent(outputDirectory);
 		String out = "bin";
@@ -3702,7 +3703,8 @@ public void testBug521362_emptyFile() {
 	/*
 	 * Test that no NPE is thrown when the module-info is compiled at a level below 9
 	 */
-	public void testBug500170b() {
+	// JDT accident https://bugs.eclipse.org/527260#c34
+	public void _testBug500170b() {
 		File outputDirectory = new File(OUTPUT_DIR);
 		Util.flushDirectoryContent(outputDirectory);
 		String out = "bin";
