@@ -379,7 +379,7 @@ public class Config implements ConfigHelper.IConfig, Comparable<Config> {
     	    {
     	        Config config = configStack.pop(); // remove Config
     		    assert(config != null);
-    		    if (--config.useCount > 0) {
+    		    if (--config.useCount > 0 && !configStack.contains(config)) {
     	            configStack.push(config); // still used
 					return;
 				}

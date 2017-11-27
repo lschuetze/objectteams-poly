@@ -2411,6 +2411,9 @@ public final class CompletionEngine
 	}
 
 	private boolean checkForCNF(TypeReference ref, CompilationUnitDeclaration parsedUnit, boolean showAll) {
+//{ObjectTeams: protect:
+	  try (Config cfg = Dependencies.setup(this, this.parser, this.lookupEnvironment, true, true)) {
+// orig:
 		this.lookupEnvironment.buildTypeBindings(parsedUnit, null);
 		this.lookupEnvironment.completeTypeBindings(parsedUnit, true);
 		parsedUnit.resolve();
@@ -2428,6 +2431,9 @@ public final class CompletionEngine
 			parsedUnit.scope.faultInTypes();
 		}
 		return false; // should not come here - will throw exception
+// :giro
+	  }
+// SH}
 	}
 
 	private boolean completeOnPackageVisibilityStatements(boolean contextAccepted,
