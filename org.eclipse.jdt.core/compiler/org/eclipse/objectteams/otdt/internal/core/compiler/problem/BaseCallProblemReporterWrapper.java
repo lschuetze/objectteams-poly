@@ -107,6 +107,8 @@ public class BaseCallProblemReporterWrapper extends ProblemReporterWrapper
 
 	}
 	public void invalidMethod(MessageSend messageSend, MethodBinding method, Scope scope) {
+		if (messageSend.isGenerated) // boxing invocation?
+			return;
 		ProblemMethodBinding problemMethod = (ProblemMethodBinding) method;
 		AbstractMethodDeclaration enclosingMethodDecl = BaseCallMessageSend.findEnclosingCallinMethod(scope, null);
 		if (enclosingMethodDecl.ignoreFurtherInvestigation)
