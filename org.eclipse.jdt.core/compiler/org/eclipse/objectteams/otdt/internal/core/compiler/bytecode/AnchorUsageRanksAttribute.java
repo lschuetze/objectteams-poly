@@ -21,6 +21,7 @@ import java.util.List;
 
 import org.eclipse.jdt.internal.compiler.classfmt.FieldInfo;
 import org.eclipse.jdt.internal.compiler.lookup.Binding;
+import org.eclipse.jdt.internal.compiler.lookup.ExtraCompilerModifiers;
 import org.eclipse.jdt.internal.compiler.lookup.FieldBinding;
 import org.eclipse.jdt.internal.compiler.lookup.LookupEnvironment;
 import org.eclipse.objectteams.otdt.core.compiler.IOTConstants;
@@ -90,6 +91,7 @@ public class AnchorUsageRanksAttribute extends ListValueAttribute {
 	
 	@Override
 	public boolean evaluate(FieldBinding binding) {
+		binding.modifiers |= ExtraCompilerModifiers.AccValueParam;
 		this.field = binding;
 		FieldModel.getModel(binding).addAttribute(this);
 		return true;
