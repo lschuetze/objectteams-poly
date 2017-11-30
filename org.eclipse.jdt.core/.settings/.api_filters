@@ -368,6 +368,14 @@
             </message_arguments>
         </filter>
     </resource>
+    <resource path="compiler/org/eclipse/objectteams/otdt/core/compiler/IOTConstants.java" type="org.eclipse.objectteams.otdt.core.compiler.IOTConstants">
+        <filter comment="_OT$InitField can not be supported on Java 9" id="405864542">
+            <message_arguments>
+                <message_argument value="org.eclipse.objectteams.otdt.core.compiler.IOTConstants"/>
+                <message_argument value="INIT_METHOD_NAME"/>
+            </message_arguments>
+        </filter>
+    </resource>
     <resource path="dom/org/eclipse/jdt/core/dom/AST.java" type="org.eclipse.jdt.core.dom.AST">
         <filter id="1141899266">
             <message_arguments>

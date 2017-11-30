@@ -63,7 +63,6 @@ import org.eclipse.objectteams.otdt.internal.core.compiler.ast.MethodSpec;
 import org.eclipse.objectteams.otdt.internal.core.compiler.ast.PotentialLiftExpression;
 import org.eclipse.objectteams.otdt.internal.core.compiler.ast.QualifiedBaseReference;
 import org.eclipse.objectteams.otdt.internal.core.compiler.ast.ResultReference;
-import org.eclipse.objectteams.otdt.internal.core.compiler.ast.RoleInitializationMethod;
 import org.eclipse.objectteams.otdt.internal.core.compiler.ast.TSuperMessageSend;
 import org.eclipse.objectteams.otdt.internal.core.compiler.ast.TsuperReference;
 import org.eclipse.objectteams.otdt.internal.core.compiler.ast.TypeAnchorReference;
@@ -1272,13 +1271,6 @@ public class AstGenerator extends AstFactory {
 				expectedType);
 		lifter.requireReverseOperation = reversible;
 		return lifter;
-	}
-
-	public RoleInitializationMethod roleInitializationMethod(CompilationResult compilationResult)
-	{
-	    RoleInitializationMethod roleInit = new RoleInitializationMethod(compilationResult);
-	    setMethodPositions(roleInit);
-	    return roleInit;
 	}
 
 	public ThisReference thisReference() {

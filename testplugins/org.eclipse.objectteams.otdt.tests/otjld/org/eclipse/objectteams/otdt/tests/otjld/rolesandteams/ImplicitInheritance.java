@@ -1158,7 +1158,7 @@ public class ImplicitInheritance extends AbstractOTJLDTest {
     	"Team0c14iiif1_2.java",
     			"public team class Team0c14iiif1_2 extends Team0c14iiif1_1 {\n" +
     			"	protected class R {\n" +
-    			"		protected R() { super(); }\n" + // triggers blank final analysis
+    			"		protected R() { tsuper(); }\n" + // triggers blank final analysis
     			"		protected void test() {\n" +
     			"			System.out.print(val);\n" +
     			"		}\n" +

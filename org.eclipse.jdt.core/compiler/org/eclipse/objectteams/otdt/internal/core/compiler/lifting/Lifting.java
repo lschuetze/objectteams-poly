@@ -44,7 +44,6 @@ import org.eclipse.jdt.internal.compiler.lookup.TypeIds;
 import org.eclipse.jdt.internal.compiler.lookup.TypeVariableBinding;
 import org.eclipse.objectteams.otdt.core.compiler.IOTConstants;
 import org.eclipse.objectteams.otdt.core.exceptions.InternalCompilerError;
-import org.eclipse.objectteams.otdt.internal.core.compiler.ast.RoleInitializationMethod;
 import org.eclipse.objectteams.otdt.internal.core.compiler.control.ITranslationStates;
 import org.eclipse.objectteams.otdt.internal.core.compiler.lookup.ITeamAnchor;
 import org.eclipse.objectteams.otdt.internal.core.compiler.lookup.RoleTypeBinding;
@@ -225,20 +224,21 @@ public class Lifting extends SwitchOnBaseTypeGenerator
         TreeNode instantiableBoundRootRoleNode = roleNode.getTopmostBoundParent(false);
         if (instantiableBoundRootRoleNode == null) return null;
 
-        TypeDeclaration roleDecl = roleNode.getTreeObject().getAst();
+        RoleModel roleModel = roleNode.getTreeObject();
+		TypeDeclaration roleDecl = roleModel.getAst();
         ClassScope scope = roleDecl.scope;
 		if (instantiableBoundRootRoleNode == TreeNode.ProblemNode) {
             scope.problemReporter().
                     overlappingRoleHierarchies(roleDecl, TreeNode.ProblemNode.toString());
             return null;
         }
-        TypeDeclaration roleType = roleNode.getTreeObject().getAst();
+        TypeDeclaration roleType = roleModel.getAst();
         ConstructorDeclaration existingConstructor = findLiftToConstructor(roleType);
         if (   existingConstructor == null
         	&& !roleNode.hasBoundParent(false)
-        	&& !roleNode.getTreeObject().isIgnoreFurtherInvestigation())
+        	&& !roleModel.isIgnoreFurtherInvestigation())
         {
-            ReferenceBinding parent = roleNode.getTreeObject().getBinding().superclass();
+            ReferenceBinding parent = roleModel.getBinding().superclass();
             MethodBinding defCtor = parent.getExactConstructor(Binding.NO_PARAMETERS);
             boolean hasEmptyCtor = (defCtor != null)
 					            	? defCtor.isValidBinding()
@@ -253,7 +253,7 @@ public class Lifting extends SwitchOnBaseTypeGenerator
         // for determining the cache interfaces are allowed:
         this._boundRootRoleModel = roleNode.getTopmostBoundParent(true).getTreeObject();
         if (this._boundRootRoleModel != null)
-        	roleNode.getTreeObject()._boundRootRole = this._boundRootRoleModel;
+        	roleModel._boundRootRole = this._boundRootRoleModel;
 
         TypeDeclaration       teamTypeDeclaration = roleType.enclosingType;
         ReferenceBinding      baseClassBinding    = roleType.binding.baseclass();
@@ -280,12 +280,13 @@ public class Lifting extends SwitchOnBaseTypeGenerator
             );
         gen.addNonNullAnnotation(arg, scope.environment());
         
+        RoleModel implicitSuperRole = roleModel.getImplicitSuperRole();
 
 		// default arg name is base.
         char[] baseArgName = BASE;
         if (existingConstructor != null) {
             if (existingConstructor.isCopied) {
-                if (roleNode.getTreeObject().getImplicitSuperRole().isBound()) // parent must be class.
+				if (implicitSuperRole.isBound()) // parent must be class.
                     return null; // copied constructor has everything we need.
             }
             // use the argument name of the existing constructor
@@ -293,12 +294,14 @@ public class Lifting extends SwitchOnBaseTypeGenerator
         }
 
         if (needMethodBodies) {
+        	boolean shouldCallTSuper = implicitSuperRole != null && implicitSuperRole.isBound() && !roleModel._refinesExtends;
 	        if (instantiableBoundRootRoleNode == roleNode)
-	            genLiftToConstructorStatements(
+				genLiftToConstructorStatements(
 	            		baseClassBinding,
 	            		roleType,
 	                    generatedConstructor,
 	                    baseArgName,
+	                    shouldCallTSuper,
 	                    gen);
 	        else
 	            genLiftToConstructorSuperCall(
@@ -306,6 +309,7 @@ public class Lifting extends SwitchOnBaseTypeGenerator
 	                    roleType,
 	                    generatedConstructor,
 	                    baseArgName,
+	                    shouldCallTSuper,
 						gen);
         }
 
@@ -367,6 +371,7 @@ public class Lifting extends SwitchOnBaseTypeGenerator
      * @param baseClassBinding
      * @param liftToConstructorDeclaration generated constructor
      * @param baseArgName name of the base argument, either generated or from source
+     * @param hasBoundTSuper 
 	 * @param gen for generating AST nodes
      */
     private static void genLiftToConstructorSuperCall(
@@ -374,22 +379,18 @@ public class Lifting extends SwitchOnBaseTypeGenerator
             TypeDeclaration        roleType,
             ConstructorDeclaration liftToConstructorDeclaration,
             char[]                 baseArgName,
+			boolean 			   shouldCallTSuper,
 			AstGenerator           gen)
     {
         liftToConstructorDeclaration.constructorCall =
-                gen.explicitConstructorCall(ExplicitConstructorCall.Super);
+                gen.explicitConstructorCall(shouldCallTSuper ? ExplicitConstructorCall.Tsuper : ExplicitConstructorCall.Super);
         		// mode maybe refined in ExplicitConstructorCall.resolve()->updateFromTSuper()
         liftToConstructorDeclaration.constructorCall.arguments =
                 new Expression[] {
                     gen.singleNameReference(baseArgName)
                 };
-        // start with an empty statements list, except for this._OT$InitFields();
-        liftToConstructorDeclaration.setStatements(new Statement[] {
-        		RoleInitializationMethod.genInvokeInitMethod(
-					    					gen.thisReference(),
-					    					roleType.binding,
-					    					gen)
-        });
+        // start with an empty statements list
+        liftToConstructorDeclaration.setStatements(new Statement[0]);
     }
 
     private void genLiftToConstructorStatements(
@@ -397,35 +398,33 @@ public class Lifting extends SwitchOnBaseTypeGenerator
     	TypeDeclaration        roleType,
         ConstructorDeclaration liftToConstructorDeclaration,
         char[]                 baseArgName,
+        boolean                shouldCallTSuper,
         AstGenerator           gen)
     {
-        liftToConstructorDeclaration.constructorCall =
-        		gen.explicitConstructorCall(ExplicitConstructorCall.Super);
-        boolean useRoleCache = RoleModel.getInstantiationPolicy(roleType.binding).isOndemand();
-    	Statement[] statements = new Statement[useRoleCache ? 4 : 2];
-        // _OT$base = <baseArgName>;
-        SingleNameReference lhs = gen.singleNameReference(_OT_BASE);
-        statements[0] = gen.assignment(lhs, gen.singleNameReference(baseArgName));
+    	Statement[] statements;
+    	boolean useRoleCache = RoleModel.getInstantiationPolicy(roleType.binding).isOndemand();
+    	int idx = 0;
+    	if (shouldCallTSuper) {
+    		liftToConstructorDeclaration.constructorCall = gen.explicitConstructorCall(ExplicitConstructorCall.Tsuper);
+    		liftToConstructorDeclaration.constructorCall.arguments = new Expression[] { gen.singleNameReference(baseArgName) };
+    		statements = new Statement[0];
+    	} else {
+    		liftToConstructorDeclaration.constructorCall = gen.explicitConstructorCall(ExplicitConstructorCall.Super);
+    		statements = new Statement[useRoleCache ? 3 : 1];
+    		// _OT$base = <baseArgName>;
+    		SingleNameReference lhs = gen.singleNameReference(_OT_BASE);
+    		statements[idx++] = gen.assignment(lhs, gen.singleNameReference(baseArgName));
+    		if (useRoleCache) {
+    			Statement[] regStats = genRoleRegistrationStatements(
+    					this._boundRootRoleModel.getAst().scope,
+    					this._boundRootRoleModel,
+    					baseClassBinding,
+    					liftToConstructorDeclaration,
+    					gen);
+    			System.arraycopy(regStats, 0, statements, idx, regStats.length);
+    		}
+    	}
 
-        int idx = 1;
-		if (useRoleCache) {
-	    	Statement[] regStats = genRoleRegistrationStatements(
-	    								  this._boundRootRoleModel.getAst().scope,
-	    								  this._boundRootRoleModel,
-	    								  baseClassBinding,
-	    								  liftToConstructorDeclaration,
-	    								  gen);
-	    	System.arraycopy(regStats, 0, statements, idx, regStats.length);
-	    	idx += 2;
-        }
-
-        // after initializing _OT$base and storing in the cache we are ready to execute field initializers:
-
-        // this._OT$InitFields();
-    	statements[idx] = RoleInitializationMethod.genInvokeInitMethod(
-									    					gen.thisReference(),
-									    					roleType.binding,
-									    					gen);
     	liftToConstructorDeclaration.setStatements(statements);
     }
 

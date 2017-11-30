@@ -94,8 +94,6 @@ public interface IOTConstants
 	public static final char[] OT_SETFIELD         = (OT_DOLLAR+"set$").toCharArray();
 	public static final String OT_DOLLAR_ARG       = OT_DOLLAR + "arg";
 
-	public static final char[] INIT_METHOD_NAME    = (OT_DOLLAR + "InitFields").toCharArray();
-
     // bytecode attributes:
     public static final String PLAYEDBY               = "PlayedBy";
     public static final char[] PLAYEDBY_NAME          = PLAYEDBY.toCharArray();

@@ -49,7 +49,6 @@ import org.eclipse.objectteams.otdt.internal.core.compiler.control.Config;
 import org.eclipse.objectteams.otdt.internal.core.compiler.lifting.Lifting;
 import org.eclipse.objectteams.otdt.internal.core.compiler.model.MethodModel;
 import org.eclipse.objectteams.otdt.internal.core.compiler.model.RoleModel;
-import org.eclipse.objectteams.otdt.internal.core.compiler.model.TypeModel;
 import org.eclipse.objectteams.otdt.internal.core.compiler.model.MethodModel.ProblemDetail;
 import org.eclipse.objectteams.otdt.internal.core.compiler.statemachine.transformer.InsertTypeAdjustmentsVisitor;
 import org.eclipse.objectteams.otdt.internal.core.compiler.util.AstGenerator;
@@ -593,9 +592,6 @@ private void internalGenerateCode(ClassScope classScope, ClassFile classFile) {
 
 		boolean needFieldInitializations = this.constructorCall == null || this.constructorCall.accessMode != ExplicitConstructorCall.This;
 //{ObjectTeams: some more constructors do not initialize fields:
-		// if constructorCall is tsuper() the called ctor contains field initializations already.
-		if (this.constructorCall != null)
-			needFieldInitializations &= this.constructorCall.accessMode != ExplicitConstructorCall.Tsuper;
 		// copied team constructors (due to arg lifting) do not initialize fields
 		if (   !needFieldInitializations
 			&& this.constructorCall != null
@@ -625,12 +621,6 @@ private void internalGenerateCode(ClassScope classScope, ClassFile classFile) {
 			if (!preInitSyntheticFields){
 				generateSyntheticFieldInitializationsIfNecessary(this.scope, codeStream, declaringClass);
 			}
-//{ObjectTeams: only non-role types have standard field initialization:
-		  if (   !declaringType.isRole()
-			  || (   declaringClass.enclosingType() != null // also accept roles of o.o.Team
-				  && declaringClass.enclosingType().id == IOTConstants.T_OrgObjectTeamsTeam))
-		  {
-// orig:
 			// generate user field initialization
 			if (declaringType.fields != null) {
 				for (int i = 0, max = declaringType.fields.length; i < max; i++) {
@@ -640,29 +630,6 @@ private void internalGenerateCode(ClassScope classScope, ClassFile classFile) {
 					}
 				}
 			}
-// :giro
-		  } else
-			callInit: if (!Lifting.isLiftingCtor(this.binding))
-		  {
-				// lifting ctor already contains the invoke statement
-				MethodBinding[] initMethods = declaringType.binding.getMethods(IOTConstants.INIT_METHOD_NAME);
-				if (initMethods.length >= 1)
-				{
-					int argCount = TSuperHelper.isTSuper(this.binding) ?  1 : 0;
-					for (int i = 0; i < initMethods.length; i++) {
-						if (initMethods[i].parameters.length == argCount) {
-							codeStream.aload_0(); // this
-							codeStream.invoke(Opcodes.OPC_invokevirtual, initMethods[i], declaringType.binding);
-							break callInit;
-						}
-					}
-				}
-				// no matching role init method should mean we had errors.
-				assert    TypeModel.isIgnoreFurtherInvestigation(classScope.referenceContext)
-				       || RoleModel.hasTagBit(declaringClass, RoleModel.BaseclassHasProblems)
-				       || declaringClass.isTeam(); // might be the "turning constructor" of a nested team (see 2.1.11-otjld-*-1f)
-		  }
-// SH}
 		}
 		// generate statements
 		if (this.statements != null) {

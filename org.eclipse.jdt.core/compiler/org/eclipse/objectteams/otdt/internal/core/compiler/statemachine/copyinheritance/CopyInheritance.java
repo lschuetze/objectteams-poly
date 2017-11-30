@@ -879,6 +879,8 @@ public class CopyInheritance implements IOTConstants, ClassFileConstants, ExtraC
 	 */
 	public static void copyFeatures(RoleModel role, ReferenceBinding tsuperRoleBinding) {
 		TypeDeclaration rt = role.getAst();
+		Dependencies.ensureBindingState(tsuperRoleBinding, ITranslationStates.STATE_ROLE_HIERARCHY_ANALYZED); // e.g.: lifting constructors
+
 		// fields first (may be needed by synthetic methods below).
 		FieldBinding[] fields = tsuperRoleBinding.fields();
 		if(fields != null)
@@ -2236,9 +2238,6 @@ public class CopyInheritance implements IOTConstants, ClassFileConstants, ExtraC
                 }
             }
         }
-        if (    !binding.declaringClass.isDirectRole()
-        	&& CharOperation.equals(binding.selector, IOTConstants.INIT_METHOD_NAME))
-        	return changed; // no statements, not casted locals.
         if (!newLocalStats.isEmpty())
         {
         	if (StateHelper.hasState(binding.declaringClass, ITranslationStates.STATE_RESOLVED))
