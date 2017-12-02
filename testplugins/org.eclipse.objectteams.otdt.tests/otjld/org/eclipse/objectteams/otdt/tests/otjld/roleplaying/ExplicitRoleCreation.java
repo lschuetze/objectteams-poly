@@ -719,9 +719,9 @@ public class ExplicitRoleCreation extends AbstractOTJLDTest {
 			    "        public Role234brwnc5_2() {\n" +
 			    "            this(\"OK\");\n" +
 			    "        }\n" +
-			    "	public Role234brwnc5_2(String val) { \n" +
-			    "	    super(val);\n" +
-			    "	}\n" +
+			    "        public Role234brwnc5_2(String val) { \n" +
+			    "            super(val);\n" +
+			    "        }\n" +
 			    "    }\n" +
 			    "}\n" +
 			    "    \n",

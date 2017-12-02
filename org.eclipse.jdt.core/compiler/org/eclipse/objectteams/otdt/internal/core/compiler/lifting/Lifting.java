@@ -239,11 +239,7 @@ public class Lifting extends SwitchOnBaseTypeGenerator
         	&& !roleModel.isIgnoreFurtherInvestigation())
         {
             ReferenceBinding parent = roleModel.getBinding().superclass();
-            MethodBinding defCtor = parent.getExactConstructor(Binding.NO_PARAMETERS);
-            boolean hasEmptyCtor = (defCtor != null)
-					            	? defCtor.isValidBinding()
-					            	: (parent.getMethods(TypeConstants.INIT) == Binding.NO_METHODS);
-            if (!hasEmptyCtor) {
+            if (!hasEmptyConstructor(parent)) {
                 scope.problemReporter().
                         missingEmptyCtorForLiftingCtor(roleDecl, parent);
                 return null;
@@ -349,6 +345,28 @@ public class Lifting extends SwitchOnBaseTypeGenerator
             return generatedConstructor;
         }
     }
+
+    private boolean hasEmptyConstructor(ReferenceBinding role) {
+		MethodBinding defCtor = role.getExactConstructor(Binding.NO_PARAMETERS);
+		if (defCtor != null)
+			return defCtor.isValidBinding();
+
+		if (role.getMethods(TypeConstants.INIT) != Binding.NO_METHODS)
+			return false; // has a non-empty constructor
+
+		// ctor from tsuper may not yet be copied, to avoid over-eager processing manually inspect tsupers:
+		boolean hasExplicitConstructor = false;
+		if (role.roleModel != null) {
+			for (ReferenceBinding tsuper : role.roleModel.getTSuperRoleBindings()) {
+				for (MethodBinding ctor : tsuper.getMethods(TypeConstants.INIT))
+					if (ctor.isValidBinding() && ctor.parameters == Binding.NO_PARAMETERS)
+						return true;
+					else
+						hasExplicitConstructor = true;
+			}
+		}
+		return !hasExplicitConstructor; // no explicit ctor => default ctor
+	}
 
     private static ConstructorDeclaration findLiftToConstructor(
             TypeDeclaration  roleType)
