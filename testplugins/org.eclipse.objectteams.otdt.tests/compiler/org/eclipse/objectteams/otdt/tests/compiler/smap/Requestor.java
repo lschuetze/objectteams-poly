@@ -104,7 +104,7 @@ protected void outputClassFiles(CompilationResult unitResult) {
 						int[][] table = lineNumberAttribute.getLineNumberTable();
 						Assert.assertEquals("wrong number of line numbers", expectedNumbers.length, table.length);
 						for (int n=0; n<expectedNumbers.length; n++)
-							Assert.assertEquals("wrong line numeber", expectedNumbers[n], table[n][1]);
+							Assert.assertEquals("wrong line number", expectedNumbers[n], table[n][1]);
 					}					
 				}
 			}

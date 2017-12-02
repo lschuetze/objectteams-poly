@@ -252,16 +252,13 @@ public class OTJStratumFlightbonusTest extends AbstractSourceMapGeneratorTest {
         FileInfo fileInfo2 = stratum_role1.getOrCreateFileInfo("Bonus.java", "org/eclipse/objectteams/example/bonussystem/Bonus.java");
         
         LineInfo lineInfo4 = new LineInfo(39,17); // class header (e.g., _OT$getTeam())
-        LineInfo lineInfo5 = new LineInfo(39,18); // method _OT$InitFields (class header and field decl)
-        lineInfo5.setRepeatCount(3);
-        LineInfo lineInfo6 = new LineInfo(44,29); // method getCollectedCredits
-        LineInfo lineInfo7 = new LineInfo(49,27); // method collectCredits
+        LineInfo lineInfo6 = new LineInfo(44,26); // method getCollectedCredits
+        LineInfo lineInfo7 = new LineInfo(49,24); // method collectCredits
         lineInfo7.setRepeatCount(2);
-        LineInfo lineInfo8 = new LineInfo(58,21); // method buy
+        LineInfo lineInfo8 = new LineInfo(58,18); // method buy
         lineInfo8.setRepeatCount(6);
 
         fileInfo2.addLineInfo(lineInfo4);
-        fileInfo2.addLineInfo(lineInfo5);
         fileInfo2.addLineInfo(lineInfo6);
         fileInfo2.addLineInfo(lineInfo7);
         fileInfo2.addLineInfo(lineInfo8);

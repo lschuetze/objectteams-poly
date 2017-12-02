@@ -148,11 +148,11 @@ public class OTJStratumGenerationTest006 extends AbstractSourceMapGeneratorTest
     	FileInfo fileInfo2 = stratum_role1.getOrCreateFileInfo("SubTeam.java", "calloutOverride/SubTeam.java");
 
     	FileInfo fileInfo1 = stratum_role1.getOrCreateFileInfo("SuperTeam.java", "calloutOverride/SuperTeam.java");
-        LineInfo lineInfo1 = new LineInfo(4,8);
-        LineInfo lineInfo2 = new LineInfo(8,11);
+    	LineInfo lineInfo1 = new LineInfo(13,8); // roleMethod at synth line 8
+    	lineInfo1.setRepeatCount(2);
+        LineInfo lineInfo2 = new LineInfo(8,10); // anotherRoleMethod at synth line 10
         lineInfo2.setRepeatCount(2);
-        LineInfo lineInfo3 = new LineInfo(13,9);
-        lineInfo3.setRepeatCount(2);
+        LineInfo lineInfo3 = new LineInfo(4,12); // role ctor at synth line 12
         
         fileInfo1.addLineInfo(lineInfo1);
         fileInfo1.addLineInfo(lineInfo2);
