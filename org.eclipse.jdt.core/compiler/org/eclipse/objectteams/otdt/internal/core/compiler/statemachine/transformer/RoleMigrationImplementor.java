@@ -209,7 +209,7 @@ public class RoleMigrationImplementor
 				return;
 		} else {
 			// this test is cheaper than checking compatibility with IBaseMigratable (which has been checked before):
-			FieldBinding baseField = roleClassDecl.scope.getField(roleClassDecl.binding, IOTConstants._OT_BASE, gen.singleNameReference(IOTConstants._OT_BASE));
+			FieldBinding baseField = roleClassDecl.scope.findField(roleClassDecl.binding, IOTConstants._OT_BASE, gen.singleNameReference(IOTConstants._OT_BASE), true);
 			if (baseField == null) {
 				assert !node.getTreeObject().isBound() : "bound role must have base field added"; //$NON-NLS-1$
 				return;
