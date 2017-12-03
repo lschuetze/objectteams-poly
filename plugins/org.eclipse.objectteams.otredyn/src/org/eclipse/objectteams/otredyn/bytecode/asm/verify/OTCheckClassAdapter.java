@@ -24,6 +24,7 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
+import org.eclipse.objectteams.otredyn.bytecode.asm.AsmBoundClass;
 import org.objectweb.asm.ClassReader;
 import org.objectweb.asm.ClassVisitor;
 import org.objectweb.asm.FieldVisitor;
@@ -151,7 +152,7 @@ public class OTCheckClassAdapter extends org.objectweb.asm.util.CheckClassAdapte
 	}
 
 	public OTCheckClassAdapter(ClassVisitor cv, boolean checkDataFlow) {
-		super(Opcodes.ASM5, cv, checkDataFlow);
+		super(AsmBoundClass.ASM_API, cv, checkDataFlow);
 	}
 
 	/**

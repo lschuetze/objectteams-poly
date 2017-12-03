@@ -34,7 +34,7 @@ import org.objectweb.asm.Opcodes;
  */
 public abstract class AsmBoundClass extends AbstractTeam {
 	
-	public static final int ASM_API = Opcodes.ASM5;
+	public static final int ASM_API = Opcodes.ASM6;
 
 	private IBytecodeProvider bytecodeProvider;
 	
