@@ -53,6 +53,7 @@ import org.eclipse.jdt.internal.compiler.env.AccessRestriction;
 import org.eclipse.jdt.internal.compiler.env.INameEnvironment;
 import org.eclipse.jdt.internal.compiler.env.ISourceType;
 import org.eclipse.jdt.internal.compiler.impl.CompilerOptions;
+import org.eclipse.jdt.internal.compiler.impl.CompilerOptions.WeavingScheme;
 import org.eclipse.jdt.internal.compiler.lookup.LookupEnvironment;
 import org.eclipse.jdt.internal.compiler.lookup.PackageBinding;
 import org.eclipse.jdt.internal.compiler.parser.Parser;
@@ -243,6 +244,8 @@ public class OTReconcilerTests extends ReconcilerTests {
 		try {
 			// Resources creation
 			IJavaProject p = createOTJavaProject("P", new String[] {""}, new String[] {"JCL15_LIB"}, "bin");
+			p.setOption(CompilerOptions.OPTION_WeavingScheme, WeavingScheme.OTDRE.name());
+
 			IProject project = p.getProject();
 			IProjectDescription prjDesc = project.getDescription();
 			//prjDesc.setNatureIds(OTDTPlugin.createProjectNatures(prjDesc));
@@ -291,6 +294,8 @@ public class OTReconcilerTests extends ReconcilerTests {
 		try {
 			// Resources creation
 			IJavaProject p = createOTJavaProject("P", new String[] {""}, new String[] {"JCL15_LIB"}, "bin");
+			p.setOption(CompilerOptions.OPTION_WeavingScheme, WeavingScheme.OTDRE.name());
+
 			IProject project = p.getProject();
 			IProjectDescription prjDesc = project.getDescription();
 			prjDesc.setNatureIds(OTDTPlugin.createProjectNatures(prjDesc));
