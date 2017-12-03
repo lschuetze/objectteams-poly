@@ -676,6 +676,7 @@ public class IndexBinaryType implements IBinaryType {
 		return ExternalAnnotationStatus.NOT_EEA_CONFIGURED;
 	}
 //{ObjectTeams: retrieve class file in workspace:
+	// FIXME: sync this with (a) reading EEA, (b) fileName manipulation for JRT
 	@Override
 	public IBinaryType withClassBytes() throws ClassFormatException, IOException, CoreException {
 		File file = new File(String.valueOf(this.fileName));

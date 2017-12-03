@@ -219,8 +219,10 @@ public void maybeRegister(
     // hack re preserving byte code (see #initialize()): now may be the time to release it:
 	// (Note(SH): TeamMethodGenerator depends on any team method containing valid bytecodes and offsets,
     //            given the ClassFileReader.initialize() nulls "reference")
-    if (!needByteCode)
-    	reset();
+    if (!needByteCode) {
+    	initialize(); // ensure this info can be queried without lookup in reference
+		reset();
+	}
 
     // evaluate method attributes.
     for (AbstractAttribute attr : this.methodAttributes)
