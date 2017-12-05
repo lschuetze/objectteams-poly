@@ -53,7 +53,7 @@ protected BuildNotifier notifier;
 
 protected Compiler compiler;
 protected WorkQueue workQueue;
-protected ArrayList problemSourceFiles;
+protected LinkedHashSet<SourceFile> problemSourceFiles;
 protected boolean compiledAllAtOnce;
 
 private boolean inCompiler;
@@ -102,7 +102,7 @@ protected AbstractImageBuilder(JavaBuilder javaBuilder, boolean buildStarting, S
 		this.newState = newState == null ? new State(javaBuilder) : newState;
 		this.compiler = newCompiler();
 		this.workQueue = new WorkQueue();
-		this.problemSourceFiles = new ArrayList(3);
+		this.problemSourceFiles = new LinkedHashSet(3);
 
 		if (this.javaBuilder.participants != null) {
 			for (int i = 0, l = this.javaBuilder.participants.length; i < l; i++) {
@@ -140,8 +140,7 @@ public void acceptResult(CompilationResult result) {
 
 		if (result.hasInconsistentToplevelHierarchies)
 			// ensure that this file is always retrieved from source for the rest of the build
-			if (!this.problemSourceFiles.contains(compilationUnit))
-				this.problemSourceFiles.add(compilationUnit);
+			this.problemSourceFiles.add(compilationUnit);
 
 		IType mainType = null;
 		String mainTypeName = null;
@@ -215,7 +214,7 @@ public void acceptResult(CompilationResult result) {
 protected void acceptSecondaryType(ClassFile classFile) {
 	// noop
 }
-protected void addAllSourceFiles(final ArrayList sourceFiles) throws CoreException {
+protected void addAllSourceFiles(final LinkedHashSet<SourceFile> sourceFiles) throws CoreException {
 	for (int i = 0, l = this.sourceLocations.length; i < l; i++) {
 		final ClasspathMultiDirectory sourceLocation = this.sourceLocations[i];
 		final char[][] exclusionPatterns = sourceLocation.exclusionPatterns;
@@ -393,8 +392,9 @@ protected void compile(SourceFile[] units, SourceFile[] additionalUnits, boolean
 			additionalUnits = new SourceFile[toAdd];
 		else
 			System.arraycopy(additionalUnits, 0, additionalUnits = new SourceFile[length + toAdd], 0, length);
+		Iterator<SourceFile> iterator = this.problemSourceFiles.iterator();
 		for (int i = 0; i < toAdd; i++)
-			additionalUnits[length + i] = (SourceFile) this.problemSourceFiles.get(i);
+			additionalUnits[length + i] = iterator.next();
 	}
 	String[] initialTypeNames = new String[units.length];
 	for (int i = 0, l = units.length; i < l; i++) {

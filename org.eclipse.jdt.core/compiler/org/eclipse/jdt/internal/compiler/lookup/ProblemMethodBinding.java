@@ -75,7 +75,7 @@ public ProblemMethodBinding(MethodBinding closestMatch, char[] selector, TypeBin
 private MethodBinding getMethodClone(MethodBinding givenClosestMatch) {
 	if(givenClosestMatch instanceof ParameterizedGenericMethodBinding) {
 		ParameterizedGenericMethodBinding pgmb = (ParameterizedGenericMethodBinding)givenClosestMatch;
-		MethodBinding clone = new ParameterizedGenericMethodBinding(givenClosestMatch, pgmb.typeArguments, pgmb.environment(), false, false);
+		MethodBinding clone = new ParameterizedGenericMethodBinding(givenClosestMatch, pgmb.typeArguments, pgmb.environment(), false, false, pgmb.targetType);
 		clone.declaringClass = givenClosestMatch.declaringClass;
 		return clone;
 	} else if(givenClosestMatch instanceof ParameterizedMethodBinding) {

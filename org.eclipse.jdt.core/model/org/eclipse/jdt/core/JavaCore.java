@@ -257,7 +257,7 @@ public final class JavaCore extends Plugin {
 	public static final String USER_LIBRARY_CONTAINER_ID= "org.eclipse.jdt.USER_LIBRARY"; //$NON-NLS-1$
 
 	/**
-	 * @since 3.13
+	 * @since 3.14
 	 */
 	public static final String MODULE_PATH_CONTAINER_ID = "org.eclipse.jdt.MODULE_PATH"; //$NON-NLS-1$
 

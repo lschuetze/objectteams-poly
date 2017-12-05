@@ -2188,7 +2188,7 @@ public final class ASTRewriteAnalyzer extends ASTVisitor {
 			return doVisitUnchangedChildren(node);
 		}
 		int pos = getPosAfterToken(node.getStartPosition(), TerminalTokens.TokenNamerequires);
-		rewriteNodeList(node, RequiresDirective.MODIFIERS_PROPERTY, pos, String.valueOf(' '), String.valueOf(' '), String.valueOf(' '));
+		rewriteNodeList(node, RequiresDirective.MODIFIERS_PROPERTY, pos, String.valueOf(' '), String.valueOf(' '));
 		rewriteRequiredNode(node, RequiresDirective.NAME_PROPERTY);
 		return false;
 	}

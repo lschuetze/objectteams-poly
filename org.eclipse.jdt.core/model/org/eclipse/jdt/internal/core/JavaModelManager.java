@@ -41,7 +41,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Hashtable;
 import java.util.Iterator;
-import java.util.List;
+import java.util.LinkedHashSet;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
@@ -85,6 +85,7 @@ import org.eclipse.core.runtime.QualifiedName;
 import org.eclipse.core.runtime.SafeRunner;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.SubMonitor;
+import org.eclipse.core.runtime.content.IContentTypeManager;
 import org.eclipse.core.runtime.content.IContentTypeManager.ContentTypeChangeEvent;
 import org.eclipse.core.runtime.content.IContentTypeManager.IContentTypeChangeListener;
 import org.eclipse.core.runtime.jobs.Job;
@@ -198,36 +199,45 @@ public class JavaModelManager implements ISaveParticipant, IContentTypeChangeLis
 	 * Define a zip cache object.
 	 */
 	static class ZipCache {
-		private Map map;
+		private Map<Object, ZipFile> map;
 		Object owner;
 
 		ZipCache(Object owner) {
-			this.map = new HashMap();
+			this.map = new HashMap<>();
 			this.owner = owner;
 		}
 
 		public void flush() {
 			Thread currentThread = Thread.currentThread();
-			Iterator iterator = this.map.values().iterator();
+			Iterator<ZipFile> iterator = this.map.values().iterator();
 			while (iterator.hasNext()) {
+				ZipFile zipFile = iterator.next();
 				try {
-					ZipFile zipFile = (ZipFile)iterator.next();
 					if (JavaModelManager.ZIP_ACCESS_VERBOSE) {
-						System.out.println("(" + currentThread + ") [JavaModelManager.flushZipFiles()] Closing ZipFile on " +zipFile.getName()); //$NON-NLS-1$//$NON-NLS-2$
+						System.out.println("(" + currentThread + ") [ZipCache[" + this.owner //$NON-NLS-1$//$NON-NLS-2$
+								+ "].flush()] Closing ZipFile on " + zipFile.getName()); //$NON-NLS-1$
 					}
 					zipFile.close();
 				} catch (IOException e) {
 					// problem occured closing zip file: cannot do much more
+					JavaCore.getPlugin().getLog().log(new Status(IStatus.ERROR, JavaCore.PLUGIN_ID, "Error closing " + zipFile.getName(), e)); //$NON-NLS-1$
 				}
 			}
 		}
 
 		public ZipFile getCache(IPath path) {
-			return (ZipFile) this.map.get(path);
+			return this.map.get(path);
 		}
 
 		public void setCache(IPath path, ZipFile zipFile) {
-			this.map.put(path, zipFile);
+			ZipFile old = this.map.put(path, zipFile);
+			if(old != null) {
+				if (JavaModelManager.ZIP_ACCESS_VERBOSE) {
+					Thread currentThread = Thread.currentThread();
+					System.out.println("(" + currentThread + ") [ZipCache[" + this.owner //$NON-NLS-1$//$NON-NLS-2$
+							+ "].setCache()] leaked ZipFile on " + old.getName() + " for path: " + path); //$NON-NLS-1$ //$NON-NLS-2$
+				}
+			}
 		}
 	}
 	/**
@@ -1814,6 +1824,9 @@ public class JavaModelManager implements ISaveParticipant, IContentTypeChangeLis
 	public void closeZipFile(ZipFile zipFile) {
 		if (zipFile == null) return;
 		if (this.zipFiles.get() != null) {
+			if (JavaModelManager.ZIP_ACCESS_VERBOSE) {
+				System.out.println("(" + Thread.currentThread() + ") [JavaModelManager.closeZipFile(ZipFile)] NOT closed ZipFile (cache exist!) on " +zipFile.getName()); //$NON-NLS-1$	//$NON-NLS-2$
+			}
 			return; // zip file will be closed by call to flushZipFiles
 		}
 		try {
@@ -1823,6 +1836,7 @@ public class JavaModelManager implements ISaveParticipant, IContentTypeChangeLis
 			zipFile.close();
 		} catch (IOException e) {
 			// problem occured closing zip file: cannot do much more
+			JavaCore.getPlugin().getLog().log(new Status(IStatus.ERROR, JavaCore.PLUGIN_ID, "Error closing " + zipFile.getName(), e)); //$NON-NLS-1$
 		}
 	}
 
@@ -2007,6 +2021,9 @@ public class JavaModelManager implements ISaveParticipant, IContentTypeChangeLis
 	public void flushZipFiles(Object owner) {
 		ZipCache zipCache = (ZipCache)this.zipFiles.get();
 		if (zipCache == null) {
+			if (JavaModelManager.ZIP_ACCESS_VERBOSE) {
+				System.out.println("(" + Thread.currentThread() + ") [JavaModelManager.flushZipFiles(String)] NOT found cache for " + owner); //$NON-NLS-1$	//$NON-NLS-2$
+			}
 			return;
 		}
 		// the owner will be responsible for flushing the cache
@@ -2014,6 +2031,12 @@ public class JavaModelManager implements ISaveParticipant, IContentTypeChangeLis
 		if (zipCache.owner == owner) {
 			this.zipFiles.set(null);
 			zipCache.flush();
+		} else {
+			if (JavaModelManager.ZIP_ACCESS_VERBOSE) {
+				System.out.println("(" + Thread.currentThread() //$NON-NLS-1$
+						+ ") [JavaModelManager.flushZipFiles(String)] NOT closed cache, wrong owner, expected: " //$NON-NLS-1$
+						+ zipCache.owner + ", got: " + owner); //$NON-NLS-1$
+			}
 		}
 	}
 
@@ -2084,7 +2107,7 @@ public class JavaModelManager implements ISaveParticipant, IContentTypeChangeLis
 		if(perProjectInfo == null) 
 			return referencedEntries;
 		
-		List pathToReferencedEntries = new ArrayList(referencedEntries.length);
+		LinkedHashSet<IPath> pathToReferencedEntries = new LinkedHashSet<>(referencedEntries.length);
 		for (int index = 0; index < referencedEntries.length; index++) {
 
 			if (pathToReferencedEntries.contains(referencedEntries[index].getPath()))
@@ -3322,7 +3345,9 @@ public class JavaModelManager implements ISaveParticipant, IContentTypeChangeLis
 					if (JavaBuilder.DEBUG) {
 						System.out.println("Touching project " + iProject.getName()); //$NON-NLS-1$
 					}
-					iProject.touch(subMonitor.split(1));
+					if (iProject.isAccessible()) {
+						iProject.touch(subMonitor.split(1));
+					}
 				}
 				return Status.OK_STATUS;
 			}
@@ -5398,7 +5423,10 @@ public class JavaModelManager implements ISaveParticipant, IContentTypeChangeLis
 		ExternalAnnotationTracker.shutdown(workspace);
 
 		// Stop listening to content-type changes
-		Platform.getContentTypeManager().removeContentTypeChangeListener(this);
+		IContentTypeManager contentTypeManager = Platform.getContentTypeManager();
+		if (contentTypeManager != null) {
+			contentTypeManager.removeContentTypeChangeListener(this);
+		}
 
 		// Stop indexing
 		if (this.indexManager != null) {

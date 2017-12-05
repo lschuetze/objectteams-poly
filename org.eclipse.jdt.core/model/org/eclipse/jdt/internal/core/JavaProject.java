@@ -2973,7 +2973,7 @@ public class JavaProject
 		Map knownDrives = new HashMap();
 
 		Map referencedEntriesMap = new HashMap();
-		List rawLibrariesPath = new ArrayList();
+		Set<IPath> rawLibrariesPath = new LinkedHashSet<>();
 		LinkedHashSet resolvedEntries = new LinkedHashSet();
 		
 		if(resolveChainedLibraries) {

@@ -831,12 +831,21 @@ public class SearchableEnvironment
 			case AnyNamed:
 				char[][] names = CharOperation.NO_CHAR_CHAR;
 				IPackageFragmentRoot[] packageRoots = this.nameLookup.packageFragmentRoots;
+				boolean containsUnnamed = false;
 				for (IPackageFragmentRoot packageRoot : packageRoots) {
 					IPackageFragmentRoot[] singleton = { packageRoot };
 					if (strategy.matches(singleton, locs -> locs[0] instanceof JrtPackageFragmentRoot || getModuleDescription(locs) != null)) {
 						if (this.nameLookup.isPackage(pkgName, singleton)) {
 							IModuleDescription moduleDescription = getModuleDescription(singleton);
-							char[] aName = moduleDescription != null ? moduleDescription.getElementName().toCharArray() : ModuleBinding.UNNAMED;
+							char[] aName;
+							if (moduleDescription != null) {
+								aName = moduleDescription.getElementName().toCharArray();
+							} else {
+								if (containsUnnamed)
+									continue;
+								containsUnnamed = true;
+								aName = ModuleBinding.UNNAMED;
+							}
 							names = CharOperation.arrayConcat(names, aName);
 						}
 					}
@@ -907,7 +916,7 @@ public class SearchableEnvironment
 					while (moduleContext == null && current != null) {
 						switch (current.getElementType()) {
 							case IJavaElement.PACKAGE_FRAGMENT_ROOT:
-								if (!((IPackageFragmentRoot) current).isExternal()) {
+								if (!((IPackageFragmentRoot) current).isExternal() && !(current instanceof JarPackageFragmentRoot)) {
 									current = current.getJavaProject();
 								} else {
 									moduleContext = new IPackageFragmentRoot[] { (IPackageFragmentRoot) current }; // TODO: validate
@@ -1025,6 +1034,10 @@ public class SearchableEnvironment
 		for (int i = 0; i < allRoots.length; i++) {
 			IPackageFragmentRoot root = allRoots[i];
 			if (root.getKind() == IPackageFragmentRoot.K_BINARY) {
+				if(root instanceof JarPackageFragmentRoot) {
+					// don't treat jars in a project as part of the project's module
+					continue;
+				}
 				IResource resource = root.getResource();
 				if (resource == null || !resource.getProject().equals(javaProject.getProject()))
 					continue; // outside this project

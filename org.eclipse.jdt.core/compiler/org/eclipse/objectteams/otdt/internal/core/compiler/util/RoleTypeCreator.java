@@ -1512,7 +1512,7 @@ public class RoleTypeCreator implements TagBits {
 		char[][] prefixTokens = tokens;
 		TypeBinding typePrefix = null;
 		while (prefixTokens.length > 0) {
-			typePrefix = environment.askForType(prefixTokens);
+			typePrefix = environment.askForType(prefixTokens, site.fPackage.enclosingModule);
 			if (typePrefix != null)
 				break;
 			prefixTokens = CharOperation.subarray(prefixTokens, 0, prefixTokens.length-1);

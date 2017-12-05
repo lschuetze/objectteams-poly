@@ -1301,9 +1301,10 @@ public class Java9ElementTests extends AbstractJavaModelTests {
 			IJavaElement element2 = JavaCore.create(id);
 			assertEquals("incorrect element type", IJavaElement.PACKAGE_FRAGMENT_ROOT, element2.getElementType());
 			assertEquals("roots should be same", element, element2);
-		} finally {
+		}
+		finally {
 			deleteProject("Java9Elements");
-		}	
+		}
 	}
 	private IJavaProject createJavaProjectWithBaseSql() throws CoreException {
 		IJavaProject project1 = createJava9Project("Java9Elements", new String[] {"src"});

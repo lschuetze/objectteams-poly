@@ -183,9 +183,11 @@ public class AnnotatableTypeSystem extends TypeSystem {
 // SH}
 
 	public RawTypeBinding getRawType(ReferenceBinding genericType, ReferenceBinding enclosingType, AnnotationBinding [] annotations) {
-		
 		if (genericType.hasTypeAnnotations())
 			throw new IllegalStateException();
+		if (genericType.isStatic() && enclosingType != null) {
+			enclosingType = (ReferenceBinding) enclosingType.original();
+		}
 		
 		RawTypeBinding nakedType = null;
 		TypeBinding[] derivedTypes = getDerivedTypes(genericType);
@@ -226,7 +228,8 @@ public class AnnotatableTypeSystem extends TypeSystem {
 			throw new IllegalStateException();
 		
 		WildcardBinding nakedType = null;
-		TypeBinding[] derivedTypes = getDerivedTypes(genericType);
+		boolean useDerivedTypesOfBound = bound instanceof TypeVariableBinding || bound instanceof ParameterizedTypeBinding;
+		TypeBinding[] derivedTypes = getDerivedTypes(useDerivedTypesOfBound ? bound : genericType);
 		for (int i = 0, length = derivedTypes.length; i < length; i++) {
 			TypeBinding derivedType = derivedTypes[i];
 			if (derivedType == null) 
@@ -250,7 +253,7 @@ public class AnnotatableTypeSystem extends TypeSystem {
 		WildcardBinding wildcard = new WildcardBinding(genericType, rank, bound, otherBounds, boundKind, this.environment);
 		wildcard.id = nakedType.id;
 		wildcard.setTypeAnnotations(annotations, this.isAnnotationBasedNullAnalysisEnabled);
-		return (WildcardBinding) cacheDerivedType(genericType, nakedType, wildcard);
+		return (WildcardBinding) cacheDerivedType(useDerivedTypesOfBound ? bound : genericType, nakedType, wildcard);
 	}
 
 	public WildcardBinding getWildcard(ReferenceBinding genericType, int rank, TypeBinding bound, TypeBinding[] otherBounds, int boundKind) {

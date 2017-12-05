@@ -134,7 +134,7 @@ public class RoleFileCache {
 		System.arraycopy(this.teamDecl.binding.compoundName, 0, compoundName, 0, len);
 		compoundName[len-1] = CharOperation.concat(compoundName[len-1], IOTConstants.ROFI_CACHE, '$');
 		try {
-			this.binaryCache = environment.askForType(compoundName);
+			this.binaryCache = environment.askForType(compoundName, this.teamDecl.binding.fPackage.enclosingModule);
 			if (this.binaryCache == null)
 				this.isValid = false;
 		} catch (AbortCompilation e) {

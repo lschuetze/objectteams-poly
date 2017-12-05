@@ -22,6 +22,7 @@ team package org.eclipse.objectteams.otdt.internal.compiler.adaptor.BuildManager
 
 import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.LinkedHashSet;
 
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IWorkspace;
@@ -71,7 +72,7 @@ protected class ImageBuilder playedBy IncrementalImageBuilder
 			for (int i = 0; i < problems.length; i++) {
 				if (problems[i].couldBeFixedByRecompile()) {
 					// record the source file for recompilation:
-					ArrayList<SourceFile> sourceFiles = sourceFiles();
+					LinkedHashSet<SourceFile> sourceFiles = sourceFiles();
 					if (!sourceFiles.contains(sourceFile)) {
 						sourceFiles.add(sourceFile);
 						if (DEBUG>0)
@@ -221,7 +222,7 @@ protected class ImageBuilder playedBy IncrementalImageBuilder
 		// fetch sets of teams:
 		Set<String> teamFiles = fetchTeamsToRecompile();
 		
-		ArrayList<SourceFile> sourceFiles = sourceFiles();
+		LinkedHashSet<SourceFile> sourceFiles = sourceFiles();
 		
 		// add all relevant teams to sourceFiles:
 		for (String teamName : teamFiles) {
@@ -245,14 +246,14 @@ protected class ImageBuilder playedBy IncrementalImageBuilder
 	// ==== GENERAL ACCESS TO BASE ELEMENTS: ====
 	
 	@SuppressWarnings("decapsulation")
-	SourceFile findSourceFile(IFile file) -> SourceFile findSourceFile(IFile file, boolean mustExist)
+	SourceFile findSourceFile(IFile file)   -> SourceFile findSourceFile(IFile file, boolean mustExist)
 		with { file -> file, true -> mustExist, result <- result }
 
 	@SuppressWarnings({"decapsulation", "unchecked"})
-	ArrayList<SourceFile> sourceFiles() -> get ArrayList<SourceFile> sourceFiles;
+	LinkedHashSet<SourceFile> sourceFiles() -> get LinkedHashSet<SourceFile> sourceFiles;
 	
 	@SuppressWarnings("decapsulation")
-	WorkQueue   getWorkQueue()          -> get WorkQueue workQueue;
+	WorkQueue   getWorkQueue()              -> get WorkQueue workQueue;
 		
 	// ==== LOGGING ====
 	void logCompile(String msg) <- before void compile(SourceFile[] units)

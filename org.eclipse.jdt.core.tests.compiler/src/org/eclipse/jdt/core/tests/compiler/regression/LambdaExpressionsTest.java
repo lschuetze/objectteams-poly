@@ -6463,6 +6463,82 @@ public void testBug515473() {
 		}
 	);
 }
+public void testBug517299() {
+	runConformTest(
+		new String[] {
+			"example/FooTest.java",
+			"package example;\n" + 
+			"import java.util.function.Consumer;\n" + 
+			"import foo.Foo;\n" + 
+			"public class FooTest {\n" + 
+			"	public void test() {\n" + 
+			"		Foo.Bar foo = new Foo.Bar();\n" + 
+			"		foo.print(\"direct\");\n" + 
+			"		invoke(foo::print, \"methodReference\");\n" + 
+			"	}\n" + 
+			"	private static void invoke(Consumer<String> method, String name) {\n" + 
+			"		method.accept(name);\n" + 
+			"	}\n" + 
+			"	public static void main(String[] args) {\n" + 
+			"		new FooTest().test();\n" + 
+			"	}\n" + 
+			"}",
+			"foo/Foo.java",
+			"package foo;\n" + 
+			"public abstract class Foo {\n" + 
+			"	public static class Bar extends Baz {}\n" + 
+			"	static class Baz {\n" + 
+			"		public final void print(String name) {\n" + 
+			"			System.out.println(\"Baz.print called - \"+name);\n" + 
+			"		}\n" + 
+			"	}\n" + 
+			"}"
+		},
+		"Baz.print called - direct\n" + 
+		"Baz.print called - methodReference"
+	);
+}
+public void testBug521808() {
+	runConformTest(
+		new String[] {
+			"Z.java",
+			"interface FI1 {\n" + 
+			"	Object m(Integer... s);\n" + 
+			"}\n" + 
+			"interface FI2<T> {\n" + 
+			"	Object m(T... arg);\n" + 
+			"}\n" + 
+			"public class Z {\n" + 
+			"	static Object m(FI1 fi, Integer v1, Integer v2) {\n" + 
+			"		return fi.m(v1, v2);\n" + 
+			"	}\n" + 
+			"	static <V extends Integer> Object m(FI2<V> fi, V v1, V v2) {\n" + 
+			"		return null;\n" + 
+			"	}\n" + 
+			"	public static void main(String argv[]) {\n" + 
+			"		Object obj = m((FI1) (Integer... is) -> is[0] + is[1], 3, 4);\n" + 
+			"		obj = m((Integer... is) -> is[0] + is[1], 3, 4); // Javac compiles, ECJ won't\n" + 
+			"	}\n" + 
+			"}",
+		}
+	);
+}
+public void testBug522469() {
+	runConformTest(
+		new String[] {
+			"X.java",
+			"public class X<R> {\n" + 
+			"\n" + 
+			"	public static void main(String[] args) {\n" + 
+			"		I<?> i = (X<?> x) -> \"\";\n" + 
+			"	}\n" + 
+			"}\n" + 
+			"interface I<T> {\n" + 
+			"	String m(X<? extends T> x);\n" + 
+			"}\n"
+		}
+	);
+}
 public void testBug517951() {
 	runConformTest(
 		new String[] {
@@ -6572,31 +6648,6 @@ public void testBug517951c() {
 		}
 	);
 }
-public void testBug521808() {
-	runConformTest(
-		new String[] {
-			"Z.java",
-			"interface FI1 {\n" + 
-			"	Object m(Integer... s);\n" + 
-			"}\n" + 
-			"interface FI2<T> {\n" + 
-			"	Object m(T... arg);\n" + 
-			"}\n" + 
-			"public class Z {\n" + 
-			"	static Object m(FI1 fi, Integer v1, Integer v2) {\n" + 
-			"		return fi.m(v1, v2);\n" + 
-			"	}\n" + 
-			"	static <V extends Integer> Object m(FI2<V> fi, V v1, V v2) {\n" + 
-			"		return null;\n" + 
-			"	}\n" + 
-			"	public static void main(String argv[]) {\n" + 
-			"		Object obj = m((FI1) (Integer... is) -> is[0] + is[1], 3, 4);\n" + 
-			"		obj = m((Integer... is) -> is[0] + is[1], 3, 4); // Javac compiles, ECJ won't\n" + 
-			"	}\n" + 
-			"}",
-		}
-	);
-}
 public void testBug521818() {
 	runConformTest(
 		new String[] {
@@ -6639,22 +6690,6 @@ public void testBug521818() {
 		"D\n" +
 		"Bar"
 		
-	);
-}
-public void testBug522469() {
-	runConformTest(
-		new String[] {
-			"X.java",
-			"public class X<R> {\n" + 
-			"\n" + 
-			"	public static void main(String[] args) {\n" + 
-			"		I<?> i = (X<?> x) -> \"\";\n" + 
-			"	}\n" + 
-			"}\n" + 
-			"interface I<T> {\n" + 
-			"	String m(X<? extends T> x);\n" + 
-			"}\n"
-		}
 	);
 }
 public void testBug522469a() {

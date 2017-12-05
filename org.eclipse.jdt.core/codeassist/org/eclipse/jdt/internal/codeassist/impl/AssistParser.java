@@ -2037,8 +2037,6 @@ public void parseBlockStatements(MethodDeclaration md, CompilationUnitDeclaratio
 
 	//convert bugs into parse error
 
-	if (md.isAbstract())
-		return;
 	if (md.isNative())
 		return;
 	if ((md.modifiers & ExtraCompilerModifiers.AccSemicolonBody) != 0)

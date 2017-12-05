@@ -189,7 +189,7 @@ public class SingleValueAttribute
             	ReferenceBinding staticPart = null;
             	int i;
             	for (i=0; i<anchorPath.length-1; i++) {
-            		ReferenceBinding envType = environment.askForType(CharOperation.subarray(anchorPath, 0, i+1));
+            		ReferenceBinding envType = environment.askForType(CharOperation.subarray(anchorPath, 0, i+1), roleType.fPackage.enclosingModule);
             		if (envType != null)
             			staticPart = envType;
             		else if (staticPart != null)

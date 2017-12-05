@@ -5813,106 +5813,177 @@ public class ModuleBuilderTests extends ModifyingResourceTests {
 			deleteProject("mod.two");			
 		}
 	}
-
-	public void testBug526054() throws Exception {
+	public void testBug522671() throws Exception {
 		if (!isJRE9) return;
-		String save = System.getProperty("modules.to.load");
-		System.setProperty("modules.to.load", ""); // load all
-		JRTUtil.reset();
-		ClasspathJrt.resetCaches();
 		try {
-			IJavaProject javaProject = createJava9Project("mod1", new String[] {"src"});
+		IJavaProject p1 = setupModuleProject("util",
+			new String[] {
+				"src/module-info.java",
+				"module util {\n" +
+				"	exports my.util;\n" +
+				"}\n" +
+				"",
+				"src/my/util/Data.java",
+				"package my.util;\n" +
+				"public class Data {\n" +
+				"}\n" +
+				"",
+				"src/my/util/AnnotatedInModule.java",
+				"package my.util;\n" +
+				"public abstract class AnnotatedInModule {\n" +
+				"	abstract public Data getTime();\n" +
+				"}\n" +
+				"",
+			});
+		IJavaProject p2 = setupModuleProject("util2",
+			new String[] {
+				"src/module-info.java",
+				"module util2 {\n" +
+				"	exports my.util.nested;\n" +
+				"}\n" +
+				"",
+				"src/my/util/nested/Unrelated.java",
+				"package my.util.nested;\n" +
+				"class Unrelated {\n" +
+				"}\n" +
+				"",
+			});
+		String[] sources3 = {
+			"src/a/other/AnnotatedInOtherNonModule.java",
+			"package a.other;\n" +
+			"import my.util.Data;\n" +
+			"public class AnnotatedInOtherNonModule {\n" +
+			"	Data generationDate;\n" +
+			"}\n" +
+			"",
+		};
+		IClasspathAttribute[] attr = { JavaCore.newClasspathAttribute(IClasspathAttribute.MODULE, "true") };
+		// modulepath
+		IClasspathEntry[] deps3 = { JavaCore.newProjectEntry(p1.getPath(), null, false, attr, false) };
+		IJavaProject p3 = setupModuleProject("other", sources3, deps3);
 
-			String srcMod =
-				"module mod1 {\n" + 
-				"	exports com.mod1.pack1;\n" + 
-				"	requires java.xml.ws.annotation;\n" + 
-				"}";
-			createFile("/mod1/src/module-info.java", 
-				srcMod);
-			createFolder("/mod1/src/com/mod1/pack1");
-			String srcX =
-				"package com.mod1.pack1;\n" +
-				"@javax.annotation.Generated(\"com.acme.generator.CodeGen\")\n" +
-				"public class Dummy {\n" +
-				"}";
-			createFile("/mod1/src/com/mod1/pack1/Dummy.java", srcX);
+		String[] sources4 = {
+			"src/test/Test.java",
+			"package test;\n" +
+			"\n" +
+			"import a.other.AnnotatedInOtherNonModule;\n" +
+			"import my.util.AnnotatedInModule;\n" +
+			"import my.util.Data;\n" +
+			"\n" +
+			"public class Test extends AnnotatedInOtherNonModule {\n" +
+			"	public Data f(AnnotatedInModule calendar) {\n" +
+			"		return calendar.getTime();\n" +
+			"	}\n" +
+			"}\n" +
+			"",
+		};
+		IClasspathEntry[] deps4 = { //
+				// modulepath (with split package my.util)
+				JavaCore.newProjectEntry(p1.getPath(), null, false, attr, false), //
+				JavaCore.newProjectEntry(p2.getPath(), null, false, attr, false), //
+				// classpath
+				JavaCore.newProjectEntry(p3.getPath()) //
+		};
+		IJavaProject p4 = setupModuleProject("test", sources4, deps4);
+		p4.getProject().getWorkspace().build(IncrementalProjectBuilder.FULL_BUILD, null);
 
-			this.problemRequestor.initialize(srcMod.toCharArray());
-			getWorkingCopy("/mod1/src/module-info.java", srcMod, true);
-			assertProblems("module-info should have no problems",
-					"----------\n" + 
-					"----------\n",
-					this.problemRequestor);
+		assertNoErrors();
 
-			this.problemRequestor.initialize(srcX.toCharArray());
-			getWorkingCopy("/mod1/src/com/mod1/pack1/Dummy.java", srcX, true);
-			assertProblems("Dummy should have no problems",
-					"----------\n" + 
-					"----------\n",
-					this.problemRequestor);
-
-			javaProject.getProject().build(IncrementalProjectBuilder.FULL_BUILD, null);
-			assertNoErrors();
+		this.problemRequestor.reset();
+		ICompilationUnit cu = getCompilationUnit("/test/src/test/Test.java");
+		cu.getWorkingCopy(this.wcOwner, null);
+		assertProblems(
+			"Unexpected problems",
+			"----------\n" + 
+			"----------\n",
+			this.problemRequestor);
 		} finally {
-			System.setProperty("modules.to.load", save);
-			JRTUtil.reset();
-			ClasspathJrt.resetCaches();
-			deleteProject("mod1");
+			deleteProject("util");
+			deleteProject("util2");
+			deleteProject("other");
+			deleteProject("test");
 		}
 	}
-
-	public void testBug525603() throws Exception {
+	public void testBug522671b() throws CoreException {
 		if (!isJRE9) return;
-		IJavaProject javaProject = null;
 		try {
-			String[] sources = {
-				"com/automod1/pack/DummyA.java",
-				"package com.automod1.pack;\n" +
-				"public class DummyA {}\n;"
+			String[] sources = new String[] {
+				"src/nonmodular1/HasConstructorWithProperties.java",
+				"package nonmodular1;\n" +
+				"\n" +
+				"import java.util.Properties;\n" +
+				"\n" +
+				"public class HasConstructorWithProperties {\n" +
+				"\n" +
+				"	public HasConstructorWithProperties(Properties loadedProperties) {\n" +
+				"	}\n" +
+				"\n" +
+				"	protected Properties method() {\n" +
+				"		return null;\n" +
+				"	}\n" +
+				"\n" +
+				"}\n" +
+				"",
+				"src/nonmodular1/HasPropertiesField.java",
+				"package nonmodular1;\n" +
+				"\n" +
+				"import java.util.Properties;\n" +
+				"\n" +
+				"public class HasPropertiesField {\n" +
+				"	Properties properties;\n" +
+				"}\n" +
+				"",
 			};
-			String outputDirectory = Util.getOutputDirectory();
-	
-			String jarPath = outputDirectory + File.separator + "automod.jar";
-			Util.createJar(sources, jarPath, "1.8");
-			
-			javaProject = createJava9Project("mod1", new String[] {"src"});
-			IClasspathAttribute[] attributes = { JavaCore.newClasspathAttribute(IClasspathAttribute.MODULE, "true") };
-			addClasspathEntry(javaProject, JavaCore.newLibraryEntry(new Path(jarPath), null, null, null, attributes, false));
+			IJavaProject p1 = setupModuleProject("nonmodular1", sources);
 
-			String srcMod =
-				"module mod1 {\n" + 
-				"	exports com.mod1.pack1;\n" + 
-				"	requires automod;\n" + 
-				"}";
-			createFile("/mod1/src/module-info.java", 
-				srcMod);
-			createFolder("/mod1/src/com/mod1/pack1");
-			String srcX =
-				"package com.mod1.pack1;\n" +
-				"public class Dummy {\n" +
-				"}";
-			createFile("/mod1/src/com/mod1/pack1/Dummy.java", srcX);
-			
-			this.problemRequestor.initialize(srcMod.toCharArray());
-			getWorkingCopy("/mod1/src/module-info.java", srcMod, true);
-			assertProblems("module-info should have no problems",
-					"----------\n" + 
-					"----------\n",
-					this.problemRequestor);
+			String[] sources2 = new String[] {
+					"src/java/util/dummy/Dummy.java",
+					"package java.util.dummy;\n" +
+					"\n" +
+					"public class Dummy {\n" +
+					"}\n" +
+					"\n" +
+					"",
+				};
+			IJavaProject p2 = setupModuleProject("nonmodular2", sources2);
+			p2.setOption(JavaCore.COMPILER_COMPLIANCE, "1.8"); // compile with 1.8 compliance to avoid error about package conflict
 
-			this.problemRequestor.initialize(srcX.toCharArray());
-			getWorkingCopy("/mod1/src/com/mod1/pack1/Dummy.java", srcX, true);
-			assertProblems("X should have no problems",
-					"----------\n" + 
-					"----------\n",
-					this.problemRequestor);
-
-			javaProject.getProject().build(IncrementalProjectBuilder.FULL_BUILD, null);
+			IClasspathEntry dep1 = JavaCore.newProjectEntry(p1.getPath(), null, false,
+					new IClasspathAttribute[] {},
+					false/*not exported*/);
+			IClasspathEntry dep2 = JavaCore.newProjectEntry(p2.getPath(), null, false,
+					new IClasspathAttribute[] {},
+					false/*not exported*/);
+			String[] src = new String[] {
+				"src/test/a/UsesHasPropertiesField.java",
+				"package test.a;\n" +
+				"\n" +
+				"import nonmodular1.HasPropertiesField;\n" +
+				"\n" +
+				"public class UsesHasPropertiesField extends HasPropertiesField {\n" +
+				"}\n" +
+				"",
+				"src/test/b/Test.java",
+				"package test.b;\n" +
+				"\n" +
+				"import java.util.Properties;\n" +
+				"\n" +
+				"import nonmodular1.HasConstructorWithProperties;\n" +
+				"\n" +
+				"public final class Test {\n" +
+				"	public static Object test(Properties cassandraConf) {\n" +
+				"		return new HasConstructorWithProperties(cassandraConf);\n" +
+				"	}\n" +
+				"}\n" +
+				"",
+			};
+			IJavaProject p3 = setupModuleProject("nonmodular3", src, new IClasspathEntry[] { dep1, dep2 });
+			p3.getProject().getWorkspace().build(IncrementalProjectBuilder.FULL_BUILD, null);
 			assertNoErrors();
 		} finally {
-			if (javaProject != null)
-				deleteProject(javaProject);
+			deleteProject("nonmodular1");
+			deleteProject("nonmodular2");
+			deleteProject("nonmodular3");
 		}
 	}
 
@@ -5977,6 +6048,324 @@ public class ModuleBuilderTests extends ModifyingResourceTests {
 			ClasspathJrt.resetCaches();
 			deleteProject("jnlp");
 			deleteProject("nonmod1");
+		}
+	}
+
+	public void testBug525603() throws Exception {
+		if (!isJRE9) return;
+		IJavaProject javaProject = null;
+		try {
+			String[] sources = {
+				"com/automod1/pack/DummyA.java",
+				"package com.automod1.pack;\n" +
+				"public class DummyA {}\n;"
+			};
+			String outputDirectory = Util.getOutputDirectory();
+	
+			String jarPath = outputDirectory + File.separator + "automod.jar";
+			Util.createJar(sources, jarPath, "1.8");
+			
+			javaProject = createJava9Project("mod1", new String[] {"src"});
+			IClasspathAttribute[] attributes = { JavaCore.newClasspathAttribute(IClasspathAttribute.MODULE, "true") };
+			addClasspathEntry(javaProject, JavaCore.newLibraryEntry(new Path(jarPath), null, null, null, attributes, false));
+
+			String srcMod =
+				"module mod1 {\n" + 
+				"	exports com.mod1.pack1;\n" + 
+				"	requires automod;\n" + 
+				"}";
+			createFile("/mod1/src/module-info.java", 
+				srcMod);
+			createFolder("/mod1/src/com/mod1/pack1");
+			String srcX =
+				"package com.mod1.pack1;\n" +
+				"public class Dummy {\n" +
+				"}";
+			createFile("/mod1/src/com/mod1/pack1/Dummy.java", srcX);
+			
+			this.problemRequestor.initialize(srcMod.toCharArray());
+			getWorkingCopy("/mod1/src/module-info.java", srcMod, true);
+			assertProblems("module-info should have no problems",
+					"----------\n" + 
+					"----------\n",
+					this.problemRequestor);
+
+			this.problemRequestor.initialize(srcX.toCharArray());
+			getWorkingCopy("/mod1/src/com/mod1/pack1/Dummy.java", srcX, true);
+			assertProblems("X should have no problems",
+					"----------\n" + 
+					"----------\n",
+					this.problemRequestor);
+
+			javaProject.getProject().build(IncrementalProjectBuilder.FULL_BUILD, null);
+			assertNoErrors();
+		} finally {
+			if (javaProject != null)
+				deleteProject(javaProject);
+		}
+	}
+
+	public void testBug522670() throws Exception {
+		if (!isJRE9) return;
+		Hashtable<String, String> javaCoreOptions = JavaCore.getOptions();
+		try {
+			Hashtable<String, String> newOptions=new Hashtable<>(javaCoreOptions);
+			newOptions.put(CompilerOptions.OPTION_Store_Annotations, JavaCore.ENABLED);
+			JavaCore.setOptions(newOptions);
+			IJavaProject p1 = setupModuleProject("util",
+				new String[] {
+					"src/module-info.java",
+					"module util {\n" +
+					"	exports my.util;\n" +
+					"}\n" +
+					"",
+					"src/my/util/Data.java",
+					"package my.util;\n" +
+					"public class Data {\n" +
+					"}\n" +
+					"",
+					"src/my/util/AnnotatedInModule.java",
+					"package my.util;\n" +
+					"import static java.lang.annotation.ElementType.TYPE_USE;\n" +
+					"import java.lang.annotation.Target;\n" +
+					"@Target(TYPE_USE)\n" +
+					"@interface Y {\n" +
+					"}\n" +
+					"public abstract class AnnotatedInModule {\n" +
+					"	abstract public @Y Data getTime();\n" +
+					"}\n" +
+					"",
+				});
+			IJavaProject p2 = setupModuleProject("util2",
+				new String[] {
+					"src/module-info.java",
+					"module util2 {\n" +
+					"	exports my.util.nested;\n" +
+					"}\n" +
+					"",
+					"src/my/util/nested/Unrelated.java",
+					"package my.util.nested;\n" +
+					"class Unrelated {\n" +
+					"}\n" +
+					"",
+				});
+			String[] sources3 = {
+				"src/a/other/AnnotatedInOtherNonModule.java",
+				"package a.other;\n" +
+				"import static java.lang.annotation.ElementType.TYPE_USE;\n" +
+				"import java.lang.annotation.Target;\n" +
+				"import my.util.Data;\n" +
+				"@Target(TYPE_USE)\n" +
+				"@interface X {\n" +
+				"}\n" +
+				"public class AnnotatedInOtherNonModule {\n" +
+				"	@X\n" +
+				"	Data generationDate;\n" +
+				"}\n" +
+				"",
+			};
+			IClasspathAttribute[] attr = { JavaCore.newClasspathAttribute(IClasspathAttribute.MODULE, "true") };
+			// modulepath
+			IClasspathEntry[] deps3 = { JavaCore.newProjectEntry(p1.getPath(), null, false, attr, false) };
+			IJavaProject p3 = setupModuleProject("other", sources3, deps3);
+	
+			String[] sources4 = {
+				"src/test/Test.java",
+				"package test;\n" +
+				"\n" +
+				"import a.other.AnnotatedInOtherNonModule;\n" +
+				"import my.util.AnnotatedInModule;\n" +
+				"import my.util.Data;\n" +
+				"\n" +
+				"public class Test extends AnnotatedInOtherNonModule {\n" +
+				"	public Data f(AnnotatedInModule calendar) {\n" +
+				"		return calendar.getTime();\n" +
+				"	}\n" +
+				"}\n" +
+				"",
+			};
+			IClasspathEntry[] deps4 = { //
+					// modulepath (with split package my.util)
+					JavaCore.newProjectEntry(p1.getPath(), null, false, attr, false), //
+					JavaCore.newProjectEntry(p2.getPath(), null, false, attr, false), //
+					// classpath
+					JavaCore.newProjectEntry(p3.getPath()) //
+			};
+			IJavaProject p4 = setupModuleProject("test", sources4, deps4);
+			p4.getProject().getWorkspace().build(IncrementalProjectBuilder.FULL_BUILD, null);
+	
+			assertNoErrors();
+		} finally {
+			JavaCore.setOptions(javaCoreOptions);
+			deleteProject("util");
+			deleteProject("util2");
+			deleteProject("other");
+			deleteProject("test");
+		}
+	}
+
+	public void testBug526054() throws Exception {
+		if (!isJRE9) return;
+		String save = System.getProperty("modules.to.load");
+		System.setProperty("modules.to.load", ""); // load all
+		JRTUtil.reset();
+		ClasspathJrt.resetCaches();
+		try {
+			IJavaProject javaProject = createJava9Project("mod1", new String[] {"src"});
+
+			String srcMod =
+				"module mod1 {\n" + 
+				"	exports com.mod1.pack1;\n" + 
+				"	requires java.xml.ws.annotation;\n" + 
+				"}";
+			createFile("/mod1/src/module-info.java", 
+				srcMod);
+			createFolder("/mod1/src/com/mod1/pack1");
+			String srcX =
+				"package com.mod1.pack1;\n" +
+				"@javax.annotation.Generated(\"com.acme.generator.CodeGen\")\n" +
+				"public class Dummy {\n" +
+				"}";
+			createFile("/mod1/src/com/mod1/pack1/Dummy.java", srcX);
+
+			this.problemRequestor.initialize(srcMod.toCharArray());
+			getWorkingCopy("/mod1/src/module-info.java", srcMod, true);
+			assertProblems("module-info should have no problems",
+					"----------\n" + 
+					"----------\n",
+					this.problemRequestor);
+
+			this.problemRequestor.initialize(srcX.toCharArray());
+			getWorkingCopy("/mod1/src/com/mod1/pack1/Dummy.java", srcX, true);
+			assertProblems("Dummy should have no problems",
+					"----------\n" + 
+					"----------\n",
+					this.problemRequestor);
+
+			javaProject.getProject().build(IncrementalProjectBuilder.FULL_BUILD, null);
+			assertNoErrors();
+		} finally {
+			System.setProperty("modules.to.load", save);
+			JRTUtil.reset();
+			ClasspathJrt.resetCaches();
+			deleteProject("mod1");
+		}
+	}
+
+	public void testBug525918() throws CoreException {
+		if (!isJRE9) return;
+		try {
+			String[] sources = new String[] { 
+				"src/module-info.java",
+				"import p.MyAbstractDriver;\n" + 
+				"import p.MyAbstractDriverWithProvider;\n" + 
+				"import p.MyDriverInf;\n" + 
+				"import p.MyInfWithProvider;\n" + 
+				"module test {\n" +
+				"	requires java.sql;\n" +
+				"	provides java.sql.Driver with MyDriverInf, MyAbstractDriver, MyInfWithProvider, MyAbstractDriverWithProvider;" +
+				"}",
+				"src/p/MyDriverInf.java",
+				"package p;\n" +
+				"public interface MyDriverInf extends java.sql.Driver { }",
+				"src/p/MyAbstractDriver.java",
+				"package p;\n" +
+				"public abstract class MyAbstractDriver {\n" + 
+				"	public MyAbstractDriver() { }\n" + 
+				"}",
+				"src/p/MyInfWithProvider.java",
+				"package p;\n" +
+				"public interface MyInfWithProvider {\n" + 
+				"	public static java.sql.Driver provider() {\n" + 
+				"		return null;\n" + 
+				"	}\n" + 
+				"}\n",
+				"src/p/MyAbstractDriverWithProvider.java",
+				"package p;\n" +
+				"public abstract class MyAbstractDriverWithProvider {\n" + 
+				"	public static java.sql.Driver provider() {\n" + 
+				"		return null;\n" + 
+				"	}\n" + 
+				"}"
+			};
+			IJavaProject p1 = setupModuleProject("test", sources);
+			p1.getProject().getWorkspace().build(IncrementalProjectBuilder.FULL_BUILD, null);
+			IMarker[] markers = p1.getProject().findMarkers(null, true, IResource.DEPTH_INFINITE);
+			super.sortMarkers(markers);
+			assertMarkers("Unexpected markers",
+				"Invalid service implementation, the type p.MyAbstractDriver is abstract\n" +
+				"Invalid service implementation, the type p.MyDriverInf is abstract\n" +
+				"Type mismatch: cannot convert from MyAbstractDriver to Driver"
+				, markers);
+		} finally {
+			deleteProject("test");
+		}
+	}
+
+	public void testBug527576() throws Exception {
+		if (!isJRE9) return;
+		IJavaProject javaProject = null;
+		try {
+			
+			javaProject = createJava9Project("mod1", new String[] {"src"});
+			String[] sources = {
+					"org/junit/Assert.java",
+					"package org.junit;\n" +
+					"public class Assert {}\n;"
+				};
+		
+			Path jarPath = new Path('/' + javaProject.getProject().getName() + '/' + "localjunit.jar");
+			Util.createJar(sources, javaProject.getProject().getWorkspace().getRoot().getFile(jarPath).getRawLocation().toOSString(), "1.8");
+			javaProject.getProject().refreshLocal(IResource.DEPTH_INFINITE, null);
+
+			addClasspathEntry(javaProject, JavaCore.newLibraryEntry(jarPath, null, null, null, null, false));
+
+			String srcMod =
+				"module mod1 {\n" +
+				"}";
+			createFile("/mod1/src/module-info.java", 
+				srcMod);
+			createFolder("/mod1/src/com/mod1/pack1");
+			String srcX =
+				"package com.mod1.pack1;\n" +
+				"import org.junit.Assert;\n" +
+				"public class Dummy extends Assert {\n" +
+				"}";
+			createFile("/mod1/src/com/mod1/pack1/Dummy.java", srcX);
+			
+			this.problemRequestor.initialize(srcMod.toCharArray());
+			getWorkingCopy("/mod1/src/module-info.java", srcMod, true);
+			assertProblems("module-info should have no problems",
+					"----------\n" + 
+					"----------\n",
+					this.problemRequestor);
+
+			this.problemRequestor.initialize(srcX.toCharArray());
+			getWorkingCopy("/mod1/src/com/mod1/pack1/Dummy.java", srcX, true);
+			assertProblems("X should have errors because Assert should not be visible",
+					"----------\n" + 
+					"1. ERROR in /mod1/src/com/mod1/pack1/Dummy.java (at line 2)\n" + 
+					"	import org.junit.Assert;\n" + 
+					"	       ^^^\n" + 
+					"The import org cannot be resolved\n" + 
+					"----------\n" + 
+					"2. ERROR in /mod1/src/com/mod1/pack1/Dummy.java (at line 3)\n" + 
+					"	public class Dummy extends Assert {\n" + 
+					"	                           ^^^^^^\n" + 
+					"Assert cannot be resolved to a type\n" + 
+					"----------\n",
+					this.problemRequestor);
+
+			javaProject.getProject().build(IncrementalProjectBuilder.FULL_BUILD, null);
+			IMarker[] markers = javaProject.getProject().findMarkers(null, true, IResource.DEPTH_INFINITE);
+			sortMarkers(markers);
+			assertMarkers("Unexpected markers", 
+					"The import org cannot be resolved\n" + 
+					"Assert cannot be resolved to a type", 
+					markers);
+		} finally {
+			if (javaProject != null)
+				deleteProject(javaProject);
 		}
 	}
 

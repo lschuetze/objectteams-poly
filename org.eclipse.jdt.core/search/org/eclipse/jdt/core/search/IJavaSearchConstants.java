@@ -197,6 +197,16 @@ public interface IJavaSearchConstants {
 	 * @category limitTo
 	 */
 	int WRITE_ACCESSES = 5;
+
+	/**
+	 * When searching for Type Declaration matches, and if a module is given, this
+	 * will find type declaration matches in this module as well as the dependent
+	 * module graph of the given module.
+	 *
+	 * @since 3.14
+	 * @category limitTo
+	 */
+	int MODULE_GRAPH = 6;
 	
 //{ObjectTeams: search for playedBy references only:
 	/**
@@ -205,7 +215,7 @@ public interface IJavaSearchConstants {
 	 * @since OTDT_1.2.5
 	 * @category limitTo
 	 */
-	int PLAYEDBY_REFERENCES = 6;
+	int PLAYEDBY_REFERENCES = 7;
 // SH}
 
 	/**
@@ -560,6 +570,14 @@ public interface IJavaSearchConstants {
 	 * the workspace before starting the search.
 	 */
 	int WAIT_UNTIL_READY_TO_SEARCH = IJob.WaitUntilReady;
-	
-	
+
+	/* Special Constant for module search */
+
+	/**
+	 * The unnamed module is represented by this constant for making the intent explicit
+	 * in searches involving modules
+	 * @since 3.14
+	 */
+	char[] ALL_UNNAMED = "ALL-UNNAMED".toCharArray(); ////$NON-NLS-1$
+
 }

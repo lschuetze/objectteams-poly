@@ -60,6 +60,7 @@ public class ParameterizedGenericMethodBinding extends ParameterizedMethodBindin
     public boolean isRaw; // set to true for method behaving as raw for substitution purpose
     private MethodBinding tiebreakMethod;
 	public boolean inferredWithUncheckedConversion;
+	public TypeBinding targetType; // used to distinguish different PGMB created for different target types (needed because inference contexts are remembered per PGMB)
 
 	/**
 	 * Perform inference of generic method type parameters and/or expected type
@@ -312,7 +313,7 @@ public class ParameterizedGenericMethodBinding extends ParameterizedMethodBindin
 							return null; // illegal due to mismatching team anchors
 					}
 //SH}
-					methodSubstitute = scope.environment().createParameterizedGenericMethod(originalMethod, solutions, infCtx18.usesUncheckedConversion, hasReturnProblem);
+					methodSubstitute = scope.environment().createParameterizedGenericMethod(originalMethod, solutions, infCtx18.usesUncheckedConversion, hasReturnProblem, expectedType);
 					if (invocationSite instanceof Invocation && allArgumentsAreProper)
 						infCtx18.forwardResults(result, (Invocation) invocationSite, methodSubstitute, expectedType);
 					try {
@@ -597,9 +598,10 @@ public class ParameterizedGenericMethodBinding extends ParameterizedMethodBindin
     /**
      * Create method of parameterized type, substituting original parameters with type arguments.
      */
-	public ParameterizedGenericMethodBinding(MethodBinding originalMethod, TypeBinding[] typeArguments, LookupEnvironment environment, boolean inferredWithUncheckConversion, boolean hasReturnProblem) {
+	public ParameterizedGenericMethodBinding(MethodBinding originalMethod, TypeBinding[] typeArguments, LookupEnvironment environment, boolean inferredWithUncheckConversion, boolean hasReturnProblem, TypeBinding targetType) {
 	    this.environment = environment;
 		this.inferredWithUncheckedConversion = inferredWithUncheckConversion;
+		this.targetType = targetType;
 		this.modifiers = originalMethod.modifiers;
 		this.selector = originalMethod.selector;
 		this.declaringClass = originalMethod.declaringClass;

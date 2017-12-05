@@ -201,6 +201,7 @@ public int numberOfMatches; // (numberOfMatches - 1) is the last unit in matches
 public PossibleMatch[] matchesToProcess;
 public PossibleMatch currentPossibleMatch;
 
+/* package */HashMap<SearchMatch, Binding> matchBinding = new HashMap<>();
 /*
  * Time spent in the IJavaSearchResultCollector
  */
@@ -1791,7 +1792,9 @@ public SearchMatch newDeclarationMatch(
 		case IJavaElement.TYPE_PARAMETER:
 			return new TypeParameterDeclarationMatch(element, accuracy, offset, length, participant, resource);
 		case IJavaElement.JAVA_MODULE:
-			return new ModuleDeclarationMatch(binding == null ? element : ((JavaElement) element).resolved(binding), accuracy, offset, length, participant, resource);
+			ModuleDeclarationMatch match = new ModuleDeclarationMatch(binding == null ? element : ((JavaElement) element).resolved(binding), accuracy, offset, length, participant, resource);
+			this.matchBinding.put(match, binding);
+			return match;
 		default:
 			return null;
 	}
@@ -3112,6 +3115,7 @@ protected void reportMatching(ModuleDeclaration module, IJavaElement parent, int
 	}
 	if (moduleDesc == null) // could theoretically happen if openable is ICompilationUnit, but logically having a module should prevent this from happening
 		return;
+	reportMatching(module.annotations, moduleDesc, null, module.binding, nodeSet, true, true);
 	if (accuracy > -1) { // report module declaration
 		SearchMatch match = this.patternLocator.newDeclarationMatch(module, moduleDesc, module.binding, accuracy, module.moduleName.length, this);
 		report(match);

@@ -59,15 +59,8 @@ public class OTJIncrementalImageBuilder extends IncrementalImageBuilder {
 			if (teamFile != null) {
 				if (JavaBuilder.DEBUG)
 					System.out.println("Adding team file: "+teamPath); //$NON-NLS-1$
-				checkAddFile(teamFile);
+				this.sourceFiles.add(teamFile);
 			}
 		}
-	}
-	
-	/** Add a file to sourceFiles if it's not already contained. */
-	void checkAddFile (SourceFile teamFile) {
-		// could use a hashtable, but probably this list won't grow too long.
-		if (!this.sourceFiles.contains(teamFile))
-			this.sourceFiles.add(0, teamFile); // put to front: compile teams first.
 	}
 }
