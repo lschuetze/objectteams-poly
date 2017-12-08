@@ -126,6 +126,9 @@ public ReferenceBinding resolve(LookupEnvironment environment, boolean convertGe
 			// create a proxy for the missing BinaryType
 			targetType = environment.createMissingType(null, this.compoundName);
 		}
+		if (targetType.id != TypeIds.NoId) {
+			this.id = targetType.id;
+		}
 		setResolvedType(targetType, environment);
 	}
 	if (convertGenericToRawType) {
