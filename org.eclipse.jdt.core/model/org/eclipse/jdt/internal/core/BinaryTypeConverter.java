@@ -385,7 +385,7 @@ public class BinaryTypeConverter extends TypeConverter {
 //{ObjectTeams: could have refused to create it
 			if (typeDeclaration.methods[0] == null) {
 				neededCount = 0;
-				typeDeclaration.methods = new AbstractMethodDeclaration[methodCount];
+				typeDeclaration.methods = methodCount == 0 ? null : new AbstractMethodDeclaration[methodCount];
 			}
 // SH}
 		}

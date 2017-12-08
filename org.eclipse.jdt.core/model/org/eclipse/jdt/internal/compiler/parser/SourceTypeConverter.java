@@ -702,7 +702,7 @@ public class SourceTypeConverter extends TypeConverter {
 //{ObjectTeams: could have refused to create it
 				if (type.methods[0] == null) {
 					extraConstructor = 0;
-					type.methods = new AbstractMethodDeclaration[methodCount];
+					type.methods = methodCount == 0 ? null : new AbstractMethodDeclaration[methodCount];
 				}
 // SH}
 			}

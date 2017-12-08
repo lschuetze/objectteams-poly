@@ -1909,8 +1909,12 @@ public class CopyInheritance implements IOTConstants, ClassFileConstants, ExtraC
         int declarationLen = oldMethods.length - foundMethodDecls.size();
 
         // remove matching declarations:
-        subRoleIfcDecl.methods = new AbstractMethodDeclaration[declarationLen];
-        reduceArray(oldMethods, subRoleIfcDecl.methods, foundMethodDecls);
+        if (declarationLen == 0) {
+        	subRoleIfcDecl.methods = null;
+        } else {
+        	subRoleIfcDecl.methods = new AbstractMethodDeclaration[declarationLen];
+        	reduceArray(oldMethods, subRoleIfcDecl.methods, foundMethodDecls);
+        }
 
     	//invalid method-bindings has been removed from methods-binding-array in faultInTypes
 		int bindingLen = subRoleIfcDecl.binding.methods().length - foundMethodBinds.size();

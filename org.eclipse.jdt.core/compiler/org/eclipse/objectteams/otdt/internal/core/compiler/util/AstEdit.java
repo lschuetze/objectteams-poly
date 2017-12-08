@@ -258,24 +258,28 @@ public class AstEdit {
         int length;
         {   // AST:
             length = decl.methods.length;
-            AbstractMethodDeclaration[] methods = new AbstractMethodDeclaration[length - 1];
-
-            if (decl.methods != null) {
-                for (int i = 0; i < decl.methods.length; i++) {
-                    if (method == decl.methods[i].binding) {
-                        pos = i;
-                        break;
-                    }
-                }
-            }
-
-            if (pos >= 0) {
-                System.arraycopy(decl.methods, 0, methods, 0, pos);
-                System.arraycopy(
-                    decl.methods, pos + 1,
-                    methods,      pos,
-                    length - (pos + 1));
-                decl.methods = methods;
+            if (length == 1) {
+            	decl.methods = null;
+            } else {
+	            AbstractMethodDeclaration[] methods = new AbstractMethodDeclaration[length - 1];
+	
+	            if (decl.methods != null) {
+	                for (int i = 0; i < decl.methods.length; i++) {
+	                    if (method == decl.methods[i].binding) {
+	                        pos = i;
+	                        break;
+	                    }
+	                }
+	            }
+	
+	            if (pos >= 0) {
+	                System.arraycopy(decl.methods, 0, methods, 0, pos);
+	                System.arraycopy(
+	                    decl.methods, pos + 1,
+	                    methods,      pos,
+	                    length - (pos + 1));
+	                decl.methods = methods;
+	            }
             }
         }
         {   // and now the binding:
