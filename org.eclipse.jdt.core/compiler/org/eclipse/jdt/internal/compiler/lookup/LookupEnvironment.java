@@ -492,7 +492,6 @@ private static NameEnvironmentAnswer fromSplitPackageOrOracle(IModuleAwareNameEn
 			if (binding instanceof UnresolvedReferenceBinding)
 				binding = ((UnresolvedReferenceBinding) binding).resolve(module.environment, false);
 			return new NameEnvironmentAnswer(binding, module);
-
 		}
 	}
 	return moduleEnv.findType(name, packageBinding.compoundName, module.nameForLookup());
