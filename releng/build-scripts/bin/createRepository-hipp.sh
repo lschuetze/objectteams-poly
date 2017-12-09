@@ -10,6 +10,7 @@ BASE=`pwd`
 export STAGINGBASE=/opt/public/download-staging.priv/tools/objectteams
 export UPDATES_BASE=/home/data/httpd/download.eclipse.org/objectteams/updates
 export JAVA5=${JAVA_HOME}/../jdk1.5.0-latest
+export JAVA8=${JAVA_HOME}/../jdk1.8.0-latest
 
 # RELATIVE PATHS:
 BUILD=${BASE}/releng/build-scripts/build
@@ -159,7 +160,7 @@ echo "====Step 3: pack jars ===="
 for dir in ${LOCATION}/features ${LOCATION}/plugins
 do
         find ${dir} -type f -name \*.jar -exec \
-                ${JAVA5}/bin/java -jar ${JARPROCESSOR} -verbose -pack -outputDir ${dir} {} \;
+                ${JAVA8}/bin/java -jar ${JARPROCESSOR} -verbose -pack -outputDir ${dir} {} \;
 done
 
 
