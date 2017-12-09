@@ -1450,11 +1450,13 @@ public class JavaProject
 		elementFinder.parse();
 		if (elementFinder.exception != null)
 			throw elementFinder.exception;
+//{ObjectTeams: robustness for std. phantom roles:
 		if (elementFinder.element instanceof IType) {
 			String fqn = ((IType) elementFinder.element).getFullyQualifiedName();
 			if (fqn.indexOf('$') != -1 && !elementFinder.element.exists())
 				return findType(fqn.replace('$', '.'));
 		}
+// SH}
 		return elementFinder.element;
 	}
 
@@ -1818,7 +1820,6 @@ public class JavaProject
 			eclipseParentPreferences.addNodeChangeListener(this.preferencesNodeListener);
 		}
 
-
 		// Listen to preferences changes
 		if (this.preferencesChangeListener != null) {
 			eclipsePreferences.removePreferenceChangeListener(this.preferencesChangeListener);
@@ -2051,6 +2052,7 @@ public class JavaProject
 			// not a recognizable project, could be ExternalJavaProject
 		}
 // SH}
+
 		// Inherit from JavaCore options if specified
 		if (inheritJavaCoreOptions) {
 			Iterator propertyNames = projectOptions.entrySet().iterator();
