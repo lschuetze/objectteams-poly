@@ -50,8 +50,9 @@ public class StratumTests extends AbstractOTDTDebugTest {
 			assertNotNull("Breakpoint not hit within timeout period", thread);
 			IJavaReferenceType type = ((IJavaStackFrame)thread.getTopStackFrame()).getReferenceType();
 			String[] strata = type.getAvailableStrata();
-			assertEquals("Wrong number of available strata", 1, strata.length);
-			assertEquals("Wrong strata", "Java", strata[0]);
+			assertEquals("Wrong number of available strata", 2, strata.length);
+			assertEquals("Wrong strata", "jdt", strata[0]);
+			assertEquals("Wrong strata", "Java", strata[1]);
 		} finally {
 			terminateAndRemove(thread);
 			removeAllBreakpoints();
