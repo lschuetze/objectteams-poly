@@ -47,6 +47,7 @@ public CompletionOnPackageReference(char[][] tokens , long[] positions, int modi
 	super(tokens, positions, false, modifiers);
 // SH}
 }
+@Override
 public StringBuffer print(int indent, StringBuffer output, boolean withOnDemand) {
 
 	printIndent(indent, output).append("<CompleteOnPackage:"); //$NON-NLS-1$

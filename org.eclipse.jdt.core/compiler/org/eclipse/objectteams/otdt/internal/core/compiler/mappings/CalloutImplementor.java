@@ -298,7 +298,8 @@ public class CalloutImplementor extends MethodMappingImplementor
             		methodModel._inferredCallout = mappingDeclaration;
 				methodModel.setStatementsGenerator(
             		new AbstractStatementsGenerator() {
-            			public boolean generateStatements(AbstractMethodDeclaration methodDecl) {
+            			@Override
+						public boolean generateStatements(AbstractMethodDeclaration methodDecl) {
             				createCalloutMethodBody((MethodDeclaration)methodDecl, mappingDeclaration);
             				return true;
             			}
@@ -881,6 +882,7 @@ public class CalloutImplementor extends MethodMappingImplementor
 	 * @param sourceMethodSpec this signature defines the provided args
 	 * @return a mapped argument expression or null
 	 */
+	@Override
 	Expression getArgument(
 					AbstractMethodMappingDeclaration methodMapping,
 					MethodDeclaration                wrapperDeclaration,

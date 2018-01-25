@@ -94,6 +94,7 @@ public class ImportReference extends ASTNode {
 		}
 	}
 
+	@Override
 	public StringBuffer print(int indent, StringBuffer output) {
 
 		return print(indent, output, true);

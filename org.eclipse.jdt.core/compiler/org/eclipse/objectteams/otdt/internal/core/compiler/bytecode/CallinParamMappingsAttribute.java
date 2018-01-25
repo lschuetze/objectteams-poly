@@ -55,6 +55,7 @@ public class CallinParamMappingsAttribute extends ListValueAttribute {
 	/* (non-Javadoc)
 	 * @see org.eclipse.objectteams.otdt.internal.core.compiler.bytecode.ListValueAttribute#writeElementValue(int)
 	 */
+	@Override
 	void writeElementValue(int i) {
 		writeUnsignedShort(this.positions[i]);
 	}
@@ -62,6 +63,7 @@ public class CallinParamMappingsAttribute extends ListValueAttribute {
 	/* (non-Javadoc)
 	 * @see org.eclipse.objectteams.otdt.internal.core.compiler.bytecode.AbstractAttribute#evaluate(org.eclipse.jdt.internal.compiler.lookup.Binding, org.eclipse.jdt.internal.compiler.lookup.LookupEnvironment)
 	 */
+	@Override
 	public void evaluate(Binding binding, LookupEnvironment environment, char[][][] missingTypeNames) {
 		// TODO Auto-generated method stub
 
@@ -70,6 +72,7 @@ public class CallinParamMappingsAttribute extends ListValueAttribute {
 	/* (non-Javadoc)
 	 * @see org.eclipse.objectteams.otdt.internal.core.compiler.bytecode.ListValueAttribute#toString(int)
 	 */
+	@Override
 	@SuppressWarnings("nls")
 	String toString(int i) {
 		String result = new String(this._name)+"(";

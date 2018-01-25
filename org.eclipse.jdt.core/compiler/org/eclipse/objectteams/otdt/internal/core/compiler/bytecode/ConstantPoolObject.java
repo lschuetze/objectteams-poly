@@ -195,6 +195,7 @@ public class ConstantPoolObject implements ClassFileConstants {
 			return false;
 		return this._methodBinding.model.problemDetail == ProblemDetail.IllegalDefaultCtor;
 	}
+	@Override
 	@SuppressWarnings("nls")
 	public String toString(){
 		String str="";

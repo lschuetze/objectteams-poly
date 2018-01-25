@@ -98,6 +98,7 @@ public class CallinCalloutScope extends MethodScope {
 		return super.connectTypeVariables(typeParameters, checkForErasedCandidateCollisions);
 	}
 
+	@Override
 	public TypeBinding getType(char[] name) {
 		AbstractMethodMappingDeclaration mapping = (AbstractMethodMappingDeclaration)this.referenceContext;
 		if (mapping != null && mapping.binding != null && mapping.binding.isValidBinding()) {

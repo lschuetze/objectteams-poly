@@ -33,6 +33,7 @@ public abstract class AbstractStatementsGenerator implements IStatementsGenerato
 	private List<Statement> prefixStats = null;
 
 	/** Register statements for the front of this method. */
+	@Override
 	public void prepend(List<Statement> newStatements) {
 		this.prefixStats = newStatements;
 	}
@@ -42,6 +43,7 @@ public abstract class AbstractStatementsGenerator implements IStatementsGenerato
 
 
 	/** Generate statements and merge them with registered prefixStats, if any. */
+	@Override
 	public boolean generateAllStatements(AbstractMethodDeclaration methodDecl) {
 		if (!generateStatements(methodDecl))
 			return false;

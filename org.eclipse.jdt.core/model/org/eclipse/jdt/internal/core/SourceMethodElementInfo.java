@@ -47,14 +47,18 @@ public abstract class SourceMethodElementInfo extends AnnotatableInfo implements
 	 */
 	protected ITypeParameter[] typeParameters = TypeParameter.NO_TYPE_PARAMETERS;
 
+@Override
 public char[][] getArgumentNames() {
 	return this.argumentNames;
 }
+@Override
 public char[][] getExceptionTypeNames() {
 	return this.exceptionTypes;
 }
+@Override
 public abstract char[] getReturnTypeName();
 
+@Override
 public char[][][] getTypeParameterBounds() {
 	int length = this.typeParameters.length;
 	char[][][] typeParameterBounds = new char[length][][];
@@ -75,6 +79,7 @@ public boolean hasBaseBoundAt(int i) {
 	return false;
 }
 // SH}
+@Override
 public char[][] getTypeParameterNames() {
 	int length = this.typeParameters.length;
 	if (length == 0) return CharOperation.NO_CHAR_CHAR;
@@ -84,6 +89,7 @@ public char[][] getTypeParameterNames() {
 	}
 	return typeParameterNames;
 }
+@Override
 public abstract boolean isConstructor();
 public abstract boolean isAnnotationMethod();
 protected void setArgumentNames(char[][] names) {

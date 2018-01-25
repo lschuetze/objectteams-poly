@@ -493,6 +493,7 @@ public LocalDeclaration[] findLocalVariableDeclarations(int position) {
 	return null;
 }
 
+@Override
 public LocalVariableBinding findVariable(char[] variableName) {
 	int varLength = variableName.length;
 	for (int i = this.localIndex-1; i >= 0; i--) { // lookup backward to reach latest additions first
@@ -1135,6 +1136,7 @@ public final boolean needBlankFinalFieldInitializationCheck(FieldBinding binding
  * (unit, type or method) in case the problem handler decides it is necessary
  * to abort.
  */
+@Override
 public ProblemReporter problemReporter() {
 	return methodScope().problemReporter();
 }
@@ -1163,6 +1165,7 @@ public void propagateInnerEmulation(ReferenceBinding targetType, boolean isEnclo
  *
  * It is the nearest enclosing type of this scope.
  */
+@Override
 public TypeDeclaration referenceType() {
 	return methodScope().referenceType();
 }
@@ -1182,10 +1185,12 @@ public int scopeIndex() {
 }
 
 // start position in this scope - for ordering scopes vs. variables
+@Override
 int startIndex() {
 	return this.startIndex;
 }
 
+@Override
 public String toString() {
 	return toString(0);
 }

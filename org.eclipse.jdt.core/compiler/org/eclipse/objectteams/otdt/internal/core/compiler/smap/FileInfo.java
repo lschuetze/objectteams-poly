@@ -111,7 +111,8 @@ public class FileInfo
     /**
      * @see java.lang.Object#equals(java.lang.Object)
      */
-    public boolean equals(Object object)
+    @Override
+	public boolean equals(Object object)
     {
         if (!(object instanceof FileInfo))
         {
@@ -212,7 +213,8 @@ public class FileInfo
         return out.toString();
     }
 
-    public String toString()
+    @Override
+	public String toString()
     {
         return getFileInfoDataAsString();
     }

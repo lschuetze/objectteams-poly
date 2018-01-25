@@ -74,7 +74,8 @@ public class ReferencedTeamsAttribute extends ListValueAttribute {
     /* (non-Javadoc)
      * @see org.eclipse.objectteams.otdt.internal.core.compiler.bytecode.ListValueAttribute#writeElementValue(int)
      */
-    protected void writeElementValue(int i) {
+    @Override
+	protected void writeElementValue(int i) {
         ReferenceBinding teamBinding = this._teams[i];
         writeName(teamBinding.attributeName());
     }
@@ -82,14 +83,16 @@ public class ReferencedTeamsAttribute extends ListValueAttribute {
     /* (non-Javadoc)
      * @see org.eclipse.objectteams.otdt.internal.core.compiler.bytecode.AbstractAttribute#evaluate(org.eclipse.jdt.internal.compiler.lookup.Binding, org.eclipse.jdt.internal.compiler.lookup.LookupEnvironment)
      */
-    public void evaluate(Binding binding, LookupEnvironment environment, char[][][] missingTypeNames) {
+    @Override
+	public void evaluate(Binding binding, LookupEnvironment environment, char[][][] missingTypeNames) {
         // nop: this is a one-way attribute: not read from byte code.
     }
 
     /* (non-Javadoc)
      * @see org.eclipse.objectteams.otdt.internal.core.compiler.bytecode.ListValueAttribute#toString(int)
      */
-    protected String toString(int i) {
+    @Override
+	protected String toString(int i) {
         return new String(this._teams[i].attributeName());
     }
 

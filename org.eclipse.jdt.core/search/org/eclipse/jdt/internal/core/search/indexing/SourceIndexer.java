@@ -94,6 +94,7 @@ public class SourceIndexer extends AbstractIndexer implements ITypeRequestor, Su
 	}
 // SH}
 
+	@Override
 	public void indexDocument() {
 		// Create a new Parser
 		String documentPath = this.document.getPath();
@@ -127,10 +128,12 @@ public class SourceIndexer extends AbstractIndexer implements ITypeRequestor, Su
 		}
 	}
 	
+	@Override
 	public void accept(IBinaryType binaryType, PackageBinding packageBinding, AccessRestriction accessRestriction) {
 		this.lookupEnvironment.createBinaryTypeFrom(binaryType, packageBinding, accessRestriction);
 	}
 
+	@Override
 	public void accept(ICompilationUnit unit, AccessRestriction accessRestriction) {
 		CompilationResult unitResult = new CompilationResult(unit, 1, 1, this.options.maxProblemsPerUnit);
 		CompilationUnitDeclaration parsedUnit = this.basicParser.dietParse(unit, unitResult);
@@ -138,6 +141,7 @@ public class SourceIndexer extends AbstractIndexer implements ITypeRequestor, Su
 		this.lookupEnvironment.completeTypeBindings(parsedUnit, true);
 	}
 
+	@Override
 	public void accept(ISourceType[] sourceTypes, PackageBinding packageBinding, AccessRestriction accessRestriction) {
 		ISourceType sourceType = sourceTypes[0];
 		while (sourceType.getEnclosingType() != null)
@@ -218,6 +222,7 @@ public class SourceIndexer extends AbstractIndexer implements ITypeRequestor, Su
 				purgeMethodStatements(memberTypes[i]);
 	}
 
+	@Override
 	public void indexResolvedDocument() {
 		try {
 			if (DEBUG) System.out.println(new String(this.cud.compilationResult.fileName) + ':');

@@ -32,6 +32,7 @@ import org.eclipse.objectteams.otdt.core.compiler.InferenceKind;
 public interface IMethodMappingBinding extends IBinding
 {
 
+	@Override
 	public String getName();
 
 	/**

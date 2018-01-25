@@ -678,6 +678,7 @@ public class MethodModel extends ModelElement {
 		return binding.isAbstract();
 	}
 
+	@Override
 	public String toString() {
 		if (this._binding != null)
 			return new String(this._binding.readableName());

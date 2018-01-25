@@ -267,6 +267,7 @@ public class SyntheticRoleFieldAccess extends SyntheticOTTargetMethod {
 	 *
 	 * @param codeStream
 	 */
+	@Override
 	public byte prepareOrGenerateInvocation(CodeStream codeStream, byte opcode) {
 		ReferenceBinding roleType = (ReferenceBinding)this.parameters[0];
 		if (roleType instanceof UnresolvedReferenceBinding) {

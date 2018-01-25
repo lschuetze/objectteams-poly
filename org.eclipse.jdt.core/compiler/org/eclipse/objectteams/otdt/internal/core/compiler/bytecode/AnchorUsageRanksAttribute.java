@@ -74,6 +74,7 @@ public class AnchorUsageRanksAttribute extends ListValueAttribute {
 		this.ranks.add(rank);
 	}
 
+	@Override
 	void writeElementValue(int i) {
 		writeUnsignedShort(this.ranks.get(i));
 	}
@@ -85,6 +86,7 @@ public class AnchorUsageRanksAttribute extends ListValueAttribute {
 		this.ranks.add(consumeShort());
 	}
 
+	@Override
 	public void evaluate(Binding binding, LookupEnvironment environment, char[][][] missingTypeNames) {
 		// nop / not used
 	}
@@ -105,6 +107,7 @@ public class AnchorUsageRanksAttribute extends ListValueAttribute {
 		return newRanks;
 	}
 
+	@Override
 	String toString(int i) {
 		return this.ranks.get(i).toString();
 	}

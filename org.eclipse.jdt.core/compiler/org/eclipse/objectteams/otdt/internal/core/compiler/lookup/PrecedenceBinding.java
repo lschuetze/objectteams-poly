@@ -82,6 +82,7 @@ public class PrecedenceBinding extends Binding {
 		this.elements = mappings;
 	}
 
+	@Override
 	public int kind() {
 		return PRECEDENCE;
 	}
@@ -382,6 +383,7 @@ public class PrecedenceBinding extends Binding {
 	/* (non-Javadoc)
 	 * @see org.eclipse.jdt.internal.compiler.lookup.Binding#readableName()
 	 */
+	@Override
 	public char[] readableName() {
 		char[][] names = new char[this.elements.length][];
 		for (int i = 0; i < this.elements.length; i++) {
@@ -395,6 +397,7 @@ public class PrecedenceBinding extends Binding {
 		return CharOperation.concatWith(names, ',');
 	}
 
+	@Override
 	public String toString() {
 		return new String(readableName());
 	}

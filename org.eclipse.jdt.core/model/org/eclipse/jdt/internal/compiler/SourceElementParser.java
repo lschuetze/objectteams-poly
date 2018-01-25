@@ -91,6 +91,7 @@ public SourceElementParser(
 		DefaultErrorHandlingPolicies.exitAfterAllProblems(),
 		options,
 		problemFactory) {
+		@Override
 		public void record(CategorizedProblem problem, CompilationResult unitResult, ReferenceContext context, boolean mandatoryError) {
 //{ObjectTeams: filter recording (cf. CompilationUnitProblemFinder):
 			if (context instanceof AbstractMethodDeclaration) {
@@ -142,6 +143,7 @@ public void addUnknownRef(NameReference nameRef) {
 		this.requestor.acceptUnknownReference(((QualifiedNameReference) nameRef).tokens, nameRef.sourceStart, nameRef.sourceEnd);
 	}
 }
+@Override
 public void checkComment() {
 	int lastComment = getCommentPtr();
 	// discard obsolete comments while inside methods or fields initializer (see bug 74369)
@@ -249,6 +251,7 @@ public void checkComment() {
 		}
 	}
 }
+@Override
 protected void classInstanceCreation(boolean alwaysQualified) {
 
 	boolean previousFlag = this.reportReferenceInfo;
@@ -266,6 +269,7 @@ protected void classInstanceCreation(boolean alwaysQualified) {
 			alloc.sourceStart);
 	}
 }
+@Override
 protected void consumeAnnotationAsModifier() {
 	super.consumeAnnotationAsModifier();
 	Annotation annotation = (Annotation)this.expressionStack[this.expressionPtr];
@@ -273,6 +277,7 @@ protected void consumeAnnotationAsModifier() {
 		this.requestor.acceptAnnotationTypeReference(annotation.type.getTypeName(), annotation.sourceStart, annotation.sourceEnd);
 	}
 }
+@Override
 protected void consumeClassInstanceCreationExpressionQualifiedWithTypeArguments() {
 	boolean previousFlag = this.reportReferenceInfo;
 	this.reportReferenceInfo = false; // not to see the type reference reported in super call to getTypeReference(...)
@@ -289,18 +294,21 @@ protected void consumeClassInstanceCreationExpressionQualifiedWithTypeArguments(
 			alloc.sourceStart);
 	}
 }
+@Override
 protected void consumeAnnotationTypeDeclarationHeaderName() {
 	int currentAstPtr = this.astPtr;
 	super.consumeAnnotationTypeDeclarationHeaderName();
 	if (this.astPtr > currentAstPtr) // if ast node was pushed on the ast stack
 		rememberCategories();
 }
+@Override
 protected void consumeAnnotationTypeDeclarationHeaderNameWithTypeParameters() {
 	int currentAstPtr = this.astPtr;
 	super.consumeAnnotationTypeDeclarationHeaderNameWithTypeParameters();
 	if (this.astPtr > currentAstPtr) // if ast node was pushed on the ast stack
 		rememberCategories();
 }
+@Override
 protected void consumeCatchFormalParameter() {
 	super.consumeCatchFormalParameter();
 
@@ -310,12 +318,14 @@ protected void consumeCatchFormalParameter() {
 	// the declarationSourceStart to be set
 	flushCommentsDefinedPriorTo(this.scanner.currentPosition);
 }
+@Override
 protected void consumeClassHeaderName1() {
 	int currentAstPtr = this.astPtr;
 	super.consumeClassHeaderName1();
 	if (this.astPtr > currentAstPtr) // if ast node was pushed on the ast stack
 		rememberCategories();
 }
+@Override
 protected void consumeClassInstanceCreationExpressionWithTypeArguments() {
 	boolean previousFlag = this.reportReferenceInfo;
 	this.reportReferenceInfo = false; // not to see the type reference reported in super call to getTypeReference(...)
@@ -332,6 +342,7 @@ protected void consumeClassInstanceCreationExpressionWithTypeArguments() {
 			alloc.sourceStart);
 	}
 }
+@Override
 protected void consumeConstructorHeaderName() {
 	long selectorSourcePositions = this.identifierPositionStack[this.identifierPtr];
 	int selectorSourceEnd = (int) selectorSourcePositions;
@@ -342,6 +353,7 @@ protected void consumeConstructorHeaderName() {
 		rememberCategories();
 	}
 }
+@Override
 protected void consumeConstructorHeaderNameWithTypeParameters() {
 	long selectorSourcePositions = this.identifierPositionStack[this.identifierPtr];
 	int selectorSourceEnd = (int) selectorSourcePositions;
@@ -352,6 +364,7 @@ protected void consumeConstructorHeaderNameWithTypeParameters() {
 		rememberCategories();
 	}
 }
+@Override
 protected void consumeEnumConstantWithClassBody() {
 	super.consumeEnumConstantWithClassBody();
 	if ((this.currentToken == TokenNameCOMMA || this.currentToken == TokenNameSEMICOLON)
@@ -360,6 +373,7 @@ protected void consumeEnumConstantWithClassBody() {
 		rememberCategories();
 	}
 }
+@Override
 protected void consumeEnumConstantNoClassBody() {
 	super.consumeEnumConstantNoClassBody();
 	if ((this.currentToken == TokenNameCOMMA || this.currentToken == TokenNameSEMICOLON)
@@ -368,18 +382,21 @@ protected void consumeEnumConstantNoClassBody() {
 		rememberCategories();
 	}
 }
+@Override
 protected void consumeEnumHeaderName() {
 	int currentAstPtr = this.astPtr;
 	super.consumeEnumHeaderName();
 	if (this.astPtr > currentAstPtr) // if ast node was pushed on the ast stack
 		rememberCategories();
 }
+@Override
 protected void consumeEnumHeaderNameWithTypeParameters() {
 	int currentAstPtr = this.astPtr;
 	super.consumeEnumHeaderNameWithTypeParameters();
 	if (this.astPtr > currentAstPtr) // if ast node was pushed on the ast stack
 		rememberCategories();
 }
+@Override
 protected void consumeExitVariableWithInitialization() {
 	// ExitVariableWithInitialization ::= $empty
 	// the scanner is located after the comma or the semi-colon.
@@ -391,6 +408,7 @@ protected void consumeExitVariableWithInitialization() {
 		rememberCategories();
 	}
 }
+@Override
 protected void consumeExitVariableWithoutInitialization() {
 	// ExitVariableWithoutInitialization ::= $empty
 	// do nothing by default
@@ -405,6 +423,7 @@ protected void consumeExitVariableWithoutInitialization() {
  *
  * INTERNAL USE-ONLY
  */
+@Override
 protected void consumeFieldAccess(boolean isSuperAccess) {
 	// FieldAccess ::= Primary '.' 'Identifier'
 	// FieldAccess ::= 'super' '.' 'Identifier'
@@ -414,6 +433,7 @@ protected void consumeFieldAccess(boolean isSuperAccess) {
 		this.requestor.acceptFieldReference(fr.token, fr.sourceStart);
 	}
 }
+@Override
 protected void consumeFormalParameter(boolean isVarArgs) {
 	super.consumeFormalParameter(isVarArgs);
 
@@ -423,16 +443,19 @@ protected void consumeFormalParameter(boolean isVarArgs) {
 	// the declarationSourceStart to be set
 	flushCommentsDefinedPriorTo(this.scanner.currentPosition);
 }
+@Override
 protected void consumeTypeElidedLambdaParameter(boolean parenthesized) {
 	super.consumeTypeElidedLambdaParameter(parenthesized);
 	flushCommentsDefinedPriorTo(this.scanner.currentPosition);
 }
+@Override
 protected void consumeInterfaceHeaderName1() {
 	int currentAstPtr = this.astPtr;
 	super.consumeInterfaceHeaderName1();
 	if (this.astPtr > currentAstPtr) // if ast node was pushed on the ast stack
 		rememberCategories();
 }
+@Override
 protected void consumeMemberValuePair() {
 	super.consumeMemberValuePair();
 	MemberValuePair memberValuepair = (MemberValuePair) this.astStack[this.astPtr];
@@ -440,6 +463,7 @@ protected void consumeMemberValuePair() {
 		this.requestor.acceptMethodReference(memberValuepair.name, 0, memberValuepair.sourceStart);
 	}
 }
+@Override
 protected void consumeMarkerAnnotation(boolean isTypeAnnotation) {
 	super.consumeMarkerAnnotation(isTypeAnnotation);
 	Annotation annotation = (Annotation) (isTypeAnnotation ? this.typeAnnotationStack[this.typeAnnotationPtr] : this.expressionStack[this.expressionPtr]);
@@ -448,6 +472,7 @@ protected void consumeMarkerAnnotation(boolean isTypeAnnotation) {
 	}
 }
 //{ObjectTeams: new hook that also creates annotations:
+@Override
 protected void convertTypeAnchor(int annotationKind) {
 	// consumeMarkerAnnotation, consumeSingleMemberAnnotation, consumeNormalAnnotation:
 	super.convertTypeAnchor(annotationKind);
@@ -460,6 +485,7 @@ protected void convertTypeAnchor(int annotationKind) {
 	}
 }
 // SH}
+@Override
 protected void consumeMethodHeaderName(boolean isAnnotationMethod) {
 	long selectorSourcePositions = this.identifierPositionStack[this.identifierPtr];
 	int selectorSourceEnd = (int) selectorSourcePositions;
@@ -472,6 +498,7 @@ protected void consumeMethodHeaderName(boolean isAnnotationMethod) {
 	flushCommentsDefinedPriorTo(this.scanner.currentPosition);
 }
 
+@Override
 protected void consumeMethodHeaderNameWithTypeParameters(boolean isAnnotationMethod) {
 	long selectorSourcePositions = this.identifierPositionStack[this.identifierPtr];
 	int selectorSourceEnd = (int) selectorSourcePositions;
@@ -485,6 +512,7 @@ protected void consumeMethodHeaderNameWithTypeParameters(boolean isAnnotationMet
  *
  * INTERNAL USE-ONLY
  */
+@Override
 protected void consumeMethodInvocationName() {
 	// MethodInvocation ::= Name '(' ArgumentListopt ')'
 	super.consumeMethodInvocationName();
@@ -499,6 +527,7 @@ protected void consumeMethodInvocationName() {
 			(int)(messageSend.nameSourcePosition >>> 32));
 	}
 }
+@Override
 protected void consumeMethodInvocationNameWithTypeArguments() {
 	// MethodInvocation ::= Name '.' TypeArguments 'Identifier' '(' ArgumentListopt ')'
 	super.consumeMethodInvocationNameWithTypeArguments();
@@ -517,6 +546,7 @@ protected void consumeMethodInvocationNameWithTypeArguments() {
  *
  * INTERNAL USE-ONLY
  */
+@Override
 protected void consumeMethodInvocationPrimary() {
 	super.consumeMethodInvocationPrimary();
 	MessageSend messageSend = (MessageSend) this.expressionStack[this.expressionPtr];
@@ -532,6 +562,7 @@ protected void consumeMethodInvocationPrimary() {
  *
  * INTERNAL USE-ONLY
  */
+@Override
 protected void consumeMethodInvocationPrimaryWithTypeArguments() {
 	super.consumeMethodInvocationPrimaryWithTypeArguments();
 	MessageSend messageSend = (MessageSend) this.expressionStack[this.expressionPtr];
@@ -547,6 +578,7 @@ protected void consumeMethodInvocationPrimaryWithTypeArguments() {
  *
  * INTERNAL USE-ONLY
  */
+@Override
 protected void consumeMethodInvocationSuper() {
 	// MethodInvocation ::= 'super' '.' 'Identifier' '(' ArgumentListopt ')'
 	super.consumeMethodInvocationSuper();
@@ -559,6 +591,7 @@ protected void consumeMethodInvocationSuper() {
 			(int)(messageSend.nameSourcePosition >>> 32));
 	}
 }
+@Override
 protected void consumeMethodInvocationSuperWithTypeArguments() {
 	// MethodInvocation ::= 'super' '.' TypeArguments 'Identifier' '(' ArgumentListopt ')'
 	super.consumeMethodInvocationSuperWithTypeArguments();
@@ -581,6 +614,7 @@ private void handleMessageSend(MessageSend messageSend) {
 			(int)(messageSend.nameSourcePosition >>> 32));
 	}
 }
+@Override
 protected void consumeMethodInvocationTSuper(int kind) {
 	// MethodInvocation ::= 'tsuper' '.' 'Identifier' '(' ArgumentListopt ')'
 	// => kind = UNQUALIFIED
@@ -589,6 +623,7 @@ protected void consumeMethodInvocationTSuper(int kind) {
 	super.consumeMethodInvocationTSuper(kind);
 	handleMessageSend((MessageSend) this.expressionStack[this.expressionPtr]);
 }
+@Override
 protected void consumeMethodInvocationTSuperWithTypeArguments(int kind) {
 	// MethodInvocation ::= 'tsuper' '.' OnlyTypeArguments 'Identifier' '(' ArgumentListopt ')'
 	// => kind = UNQUALIFIED
@@ -597,12 +632,14 @@ protected void consumeMethodInvocationTSuperWithTypeArguments(int kind) {
 	super.consumeMethodInvocationTSuperWithTypeArguments(kind);
 	handleMessageSend((MessageSend) this.expressionStack[this.expressionPtr]);
 }
+@Override
 protected void consumeMethodInvocationBase(boolean isSuperAccess) {
 	// MethodInvocation ::= 'base' '.' 'Identifier' '(' ArgumentListopt ')'
 	// MethodInvocation ::= 'base' '.' 'super' '.' 'Identifier' '(' ArgumentListopt ')'
 	super.consumeMethodInvocationBase(isSuperAccess);
 	handleMessageSend(((BaseCallMessageSend) this.expressionStack[this.expressionPtr]).getMessageSend());
 }
+@Override
 protected void consumeMethodInvocationBaseWithTypeArguments(boolean isSuperAccess) {
 	// MethodInvocation ::= 'base' '.' OnlyTypeArguments 'Identifier' '(' ArgumentListopt ')'
 	// MethodInvocation ::= 'base' '.' 'super' '.' OnlyTypeArguments 'Identifier' '(' ArgumentListopt ')'
@@ -610,6 +647,7 @@ protected void consumeMethodInvocationBaseWithTypeArguments(boolean isSuperAcces
 	handleMessageSend(((BaseCallMessageSend) this.expressionStack[this.expressionPtr]).getMessageSend());
 }
 //SH}
+@Override
 protected void consumeNormalAnnotation(boolean isTypeAnnotation) {
 	super.consumeNormalAnnotation(isTypeAnnotation);
 	Annotation annotation = (Annotation) (isTypeAnnotation ? this.typeAnnotationStack[this.typeAnnotationPtr] : this.expressionStack[this.expressionPtr]);
@@ -617,12 +655,14 @@ protected void consumeNormalAnnotation(boolean isTypeAnnotation) {
 		this.requestor.acceptAnnotationTypeReference(annotation.type.getTypeName(), annotation.sourceStart, annotation.sourceEnd);
 	}
 }
+@Override
 protected void consumeProvidesStatement() {
 	super.consumeProvidesStatement();
 	ProvidesStatement service = (ProvidesStatement) this.astStack[this.astPtr];
 	TypeReference ref = service.serviceInterface;
 	this.requestor.acceptTypeReference(ref.getTypeName(), ref.sourceStart, ref.sourceEnd);
 }
+@Override
 protected void consumeSingleMemberAnnotation(boolean isTypeAnnotation) {
 	super.consumeSingleMemberAnnotation(isTypeAnnotation);
 	SingleMemberAnnotation member = (SingleMemberAnnotation) (isTypeAnnotation ? this.typeAnnotationStack[this.typeAnnotationPtr] : this.expressionStack[this.expressionPtr]);
@@ -631,6 +671,7 @@ protected void consumeSingleMemberAnnotation(boolean isTypeAnnotation) {
 		this.requestor.acceptMethodReference(TypeConstants.VALUE, 0, member.sourceStart);
 	}
 }
+@Override
 protected void consumeSingleStaticImportDeclarationName() {
 	// SingleTypeImportDeclarationName ::= 'import' 'static' Name
 	ImportReference impt;
@@ -689,6 +730,7 @@ protected void consumeSingleStaticImportDeclarationName() {
 	}
 }
 //{ObjectTeams: base import
+@Override
 protected void consumeSingleBaseImportDeclarationName() {
 	// SingleTypeImportDeclarationName ::= 'import' 'base' Name
 	ImportReference impt;
@@ -750,6 +792,7 @@ protected void consumeSingleBaseImportDeclarationName() {
 	}
 }
 // SH}
+@Override
 protected void consumeSingleTypeImportDeclarationName() {
 	// SingleTypeImportDeclarationName ::= 'import' Name
 	/* push an ImportRef build from the last name
@@ -784,6 +827,7 @@ protected void consumeSingleTypeImportDeclarationName() {
 		this.requestor.acceptTypeReference(impt.tokens, impt.sourceStart, impt.sourceEnd);
 	}
 }
+@Override
 protected void consumeStaticImportOnDemandDeclarationName() {
 	// TypeImportOnDemandDeclarationName ::= 'import' 'static' Name '.' '*'
 	/* push an ImportRef build from the last name
@@ -830,6 +874,7 @@ protected void consumeStaticImportOnDemandDeclarationName() {
 		this.requestor.acceptTypeReference(impt.tokens, impt.sourceStart, impt.sourceEnd);
 	}
 }
+@Override
 protected void consumeTypeImportOnDemandDeclarationName() {
 	// TypeImportOnDemandDeclarationName ::= 'import' Name '.' '*'
 	/* push an ImportRef build from the last name
@@ -866,11 +911,13 @@ protected void consumeTypeImportOnDemandDeclarationName() {
 		this.requestor.acceptUnknownReference(impt.tokens, impt.sourceStart, impt.sourceEnd);
 	}
 }
+@Override
 protected void consumeUsesStatement() {
 	super.consumeUsesStatement();
 	UsesStatement ref = (UsesStatement) this.astStack[this.astPtr];
 	this.requestor.acceptTypeReference(ref.serviceInterface.getTypeName(), ref.sourceStart, ref.sourceEnd);
 }
+@Override
 protected void consumeWithClause() {
 	super.consumeWithClause();
 	ProvidesStatement service = (ProvidesStatement) this.astStack[this.astPtr];
@@ -879,6 +926,7 @@ protected void consumeWithClause() {
 			this.requestor.acceptTypeReference(ref.getTypeName(), ref.sourceStart, ref.sourceEnd);
 		}
 }
+@Override
 public MethodDeclaration convertToMethodDeclaration(ConstructorDeclaration c, CompilationResult compilationResult) {
 	MethodDeclaration methodDeclaration = super.convertToMethodDeclaration(c, compilationResult);
 	int selectorSourceEnd = this.sourceEnds.removeKey(c);
@@ -890,6 +938,7 @@ public MethodDeclaration convertToMethodDeclaration(ConstructorDeclaration c, Co
 
 	return methodDeclaration;
 }
+@Override
 protected CompilationUnitDeclaration endParse(int act) {
 	if (this.scanner.recordLineSeparator) {
 		this.requestor.acceptLineSeparatorPositions(this.scanner.getLineEnds());
@@ -901,6 +950,7 @@ protected CompilationUnitDeclaration endParse(int act) {
 		return null;
 	}
 }
+@Override
 public TypeReference getTypeReference(int dim) {
 	/* build a Reference on a variable that may be qualified or not
 	 * This variable is a type reference and dim will be its dimensions
@@ -909,6 +959,7 @@ public TypeReference getTypeReference(int dim) {
 //{ObjectTeams: wrap to introduce 2nd parameter
 	return getTypeReference(dim, false);  
 }
+@Override
 protected TypeReference getTypeReference(int dim, boolean liftingTypeAllowed) {
 	if (this.astPtr > -1 && this.astStack[this.astPtr] instanceof LiftingTypeReference) {
 		LiftingTypeReference ltr = completeLiftingTypeReference(dim);
@@ -1026,6 +1077,7 @@ protected TypeReference getTypeReference(int dim, boolean liftingTypeAllowed) {
 	}
 	return ref;
 }
+@Override
 public NameReference getUnspecifiedReference(boolean rejectTypeAnnotations) {
 	/* build a (unspecified) NameReference which may be qualified*/
     if (rejectTypeAnnotations) {
@@ -1061,6 +1113,7 @@ public NameReference getUnspecifiedReference(boolean rejectTypeAnnotations) {
 		return ref;
 	}
 }
+@Override
 public NameReference getUnspecifiedReferenceOptimized() {
 	/* build a (unspecified) NameReference which may be qualified
 	The optimization occurs for qualified reference while we are
@@ -1182,6 +1235,7 @@ public void setRequestor(ISourceElementRequestor requestor) {
 
 
 //{ObjectTeams : added accept method for a baseclass reference via playedBy
+@Override
 protected void consumeClassHeaderPlayedBy() {
     super.consumeClassHeaderPlayedBy();
 	TypeDeclaration typeDecl = (TypeDeclaration) this.astStack[this.astPtr];

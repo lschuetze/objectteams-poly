@@ -209,29 +209,35 @@ public class CallinMappingDeclaration extends AbstractMethodMappingDeclaration
 			return PROPERTY_DESCRIPTORS_2_0;
 	}
 
+	@Override
 	final SimplePropertyDescriptor internalModifiersProperty()
 	{
 		throw new UnsupportedOperationException("JLS2 not supported"); //$NON-NLS-1$
 	}
 
+	@Override
 	final ChildListPropertyDescriptor internalModifiers2Property()
 	{
 		return MODIFIERS2_PROPERTY;
 	}
 
+	@Override
 	public ChildPropertyDescriptor getRoleElementProperty() {
 		return ROLE_MAPPING_ELEMENT_PROPERTY;
 	}
 
+	@Override
 	protected ChildPropertyDescriptor internalGetBindingOperatorProperty() {
 		return BINDING_OPERATOR_PROPERTY;
 	}
 
+	@Override
 	final ChildListPropertyDescriptor internalParameterMappingsProperty()
 	{
 	    return PARAMETER_MAPPINGS_PROPERTY;
 	}
 
+	@Override
 	final ASTNode internalGetSetChildProperty(ChildPropertyDescriptor property, boolean get, ASTNode child)
 	{
 		if (property == JAVADOC_PROPERTY)
@@ -276,6 +282,7 @@ public class CallinMappingDeclaration extends AbstractMethodMappingDeclaration
 		return super.internalGetSetChildProperty(property, get, child);
 	}
 
+	@Override
 	final List internalGetChildListProperty(ChildListPropertyDescriptor property)
 	{
         if(property == MODIFIERS2_PROPERTY)
@@ -291,22 +298,26 @@ public class CallinMappingDeclaration extends AbstractMethodMappingDeclaration
 		return super.internalGetChildListProperty(property);
 	}
 
+	@Override
 	ChildPropertyDescriptor internalJavadocProperty()
     {
 		return JAVADOC_PROPERTY;
     }
 
-    List internalStructuralPropertiesForType(int apiLevel)
+    @Override
+	List internalStructuralPropertiesForType(int apiLevel)
     {
 		return propertyDescriptors(apiLevel);
     }
 
-    int getNodeType0()
+    @Override
+	int getNodeType0()
     {
         return CALLIN_MAPPING_DECLARATION;
     }
 
-    @SuppressWarnings("unchecked")
+    @Override
+	@SuppressWarnings("unchecked")
 	ASTNode clone0(AST target)
     {
 		CallinMappingDeclaration result = new CallinMappingDeclaration(target);
@@ -329,13 +340,15 @@ public class CallinMappingDeclaration extends AbstractMethodMappingDeclaration
 
 
 
-    boolean subtreeMatch0(ASTMatcher matcher, Object other)
+    @Override
+	boolean subtreeMatch0(ASTMatcher matcher, Object other)
     {
 		// dispatch to correct overloaded match method
 		return matcher.match(this, other);
     }
 
-    void accept0(ASTVisitor visitor)
+    @Override
+	void accept0(ASTVisitor visitor)
     {
 		boolean visitChildren = visitor.visit(this);
 		if (visitChildren)
@@ -354,7 +367,8 @@ public class CallinMappingDeclaration extends AbstractMethodMappingDeclaration
 		visitor.endVisit(this);
     }
 
-    void appendDebugString(StringBuffer buffer) {
+    @Override
+	void appendDebugString(StringBuffer buffer) {
     	if (getName() != null) {
 	        buffer.append(getName().getIdentifier());
 	        buffer.append(':');
@@ -362,7 +376,8 @@ public class CallinMappingDeclaration extends AbstractMethodMappingDeclaration
         super.appendDebugString(buffer);
     }
 
-    int treeSize()
+    @Override
+	int treeSize()
     {
 		return memSize() + (super.optionalDocComment == null
                                 ? 0
@@ -403,7 +418,8 @@ public class CallinMappingDeclaration extends AbstractMethodMappingDeclaration
 	 * <li>the node already has a parent</li>
 	 * </ul>
 	 */
-    public void setRoleMappingElement(MethodMappingElement roleMappingElement)
+    @Override
+	public void setRoleMappingElement(MethodMappingElement roleMappingElement)
     {
 		if (roleMappingElement == null)
 		{

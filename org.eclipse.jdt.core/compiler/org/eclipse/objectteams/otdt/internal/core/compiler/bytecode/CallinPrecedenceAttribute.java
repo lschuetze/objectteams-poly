@@ -92,11 +92,13 @@ public class CallinPrecedenceAttribute extends ListValueAttribute {
 	/* (non-Javadoc)
 	 * @see org.eclipse.objectteams.otdt.internal.core.compiler.bytecode.ListValueAttribute#writeElementValue(int)
 	 */
+	@Override
 	void writeElementValue(int i) {
 		writeName(this.callinNames[i]);
 	}
 
-    void read(int i)
+    @Override
+	void read(int i)
     {
         if (i==0)
             this.callinNames = new char[this._count][];
@@ -106,12 +108,14 @@ public class CallinPrecedenceAttribute extends ListValueAttribute {
 	/* (non-Javadoc)
 	 * @see org.eclipse.objectteams.otdt.internal.core.compiler.bytecode.AbstractAttribute#evaluate(org.eclipse.jdt.internal.compiler.lookup.Binding, org.eclipse.jdt.internal.compiler.lookup.LookupEnvironment)
 	 */
+	@Override
 	public void evaluate(Binding binding, LookupEnvironment environment, char[][][] missingTypeNames) {
 		checkBindingMismatch(binding, ExtraCompilerModifiers.AccTeam);
 		if (((ReferenceBinding)binding).isTeam())
 			((ReferenceBinding)binding).getTeamModel().addAttribute(this);
 	}
 	// Evaluate Precedence late, because we need our methods and mappings to be in place.
+	@Override
 	public void evaluateLateAttribute(ReferenceBinding enclosingType, int state)
 	{
 		if (state != ITranslationStates.STATE_LATE_ATTRIBUTES_EVALUATED)
@@ -154,6 +158,7 @@ public class CallinPrecedenceAttribute extends ListValueAttribute {
 	/* (non-Javadoc)
 	 * @see org.eclipse.objectteams.otdt.internal.core.compiler.bytecode.ListValueAttribute#toString(int)
 	 */
+	@Override
 	String toString(int i) {
 		return new String(this.callinNames[i]);
 	}

@@ -63,6 +63,7 @@ public class ReplaceSingleNameVisitor
     {
     	final int start = node.sourceStart;
     	IExpressionProvider provider = new IExpressionProvider() {
+			@Override
 			public Expression newExpression() {
                 return new SingleNameReference(newName, start);
 			}
@@ -82,7 +83,8 @@ public class ReplaceSingleNameVisitor
     /* (non-Javadoc)
      * @see org.eclipse.objectteams.otdt.internal.core.compiler.statemachine.transformer.AbstractTransformStatementsVisitor#pushExpression(org.eclipse.jdt.internal.compiler.ast.Expression, org.eclipse.jdt.internal.compiler.ast.Expression)
      */
-    protected void enterExpression(Expression oldExpr, Expression newExpr, Statement node) {
+    @Override
+	protected void enterExpression(Expression oldExpr, Expression newExpr, Statement node) {
         throw new InternalCompilerError("Method not applicable"); //$NON-NLS-1$
     }
     /* (non-Javadoc)
@@ -94,7 +96,8 @@ public class ReplaceSingleNameVisitor
         return CharOperation.equals(((SingleNameReference)oldExpr).token, this._name);
     }
 
-    protected void assertAllConsumed(ASTNode node) {/* replacement is not dynamically entered nor consumed */}
+    @Override
+	protected void assertAllConsumed(ASTNode node) {/* replacement is not dynamically entered nor consumed */}
 
     /* (non-Javadoc)
      * @see org.eclipse.objectteams.otdt.internal.core.compiler.statemachine.transformer.AbstractTransformStatementsVisitor#consumeExpression()
@@ -106,7 +109,8 @@ public class ReplaceSingleNameVisitor
     /* (non-Javadoc)
      * @see org.eclipse.objectteams.otdt.internal.core.compiler.statemachine.transformer.AbstractTransformStatementsVisitor#checkConsumeExpression(org.eclipse.jdt.internal.compiler.ast.Expression)
      */
-    protected Expression checkConsumeExpression(Expression oldExpr, BlockScope scope) {
+    @Override
+	protected Expression checkConsumeExpression(Expression oldExpr, BlockScope scope) {
         if (testExpression(oldExpr)) {
         	this._hasChanges = true;
             return this._provider.newExpression();
@@ -116,7 +120,8 @@ public class ReplaceSingleNameVisitor
     /* (non-Javadoc)
      * @see org.eclipse.objectteams.otdt.internal.core.compiler.statemachine.transformer.AbstractTransformStatementsVisitor#checkConsumeStatement(org.eclipse.jdt.internal.compiler.ast.Statement)
      */
-    protected Statement checkConsumeStatement(Statement oldStat, BlockScope scope) {
+    @Override
+	protected Statement checkConsumeStatement(Statement oldStat, BlockScope scope) {
         if (testExpression(oldStat)) {
         	this._hasChanges = true;
             return this._provider.newExpression();

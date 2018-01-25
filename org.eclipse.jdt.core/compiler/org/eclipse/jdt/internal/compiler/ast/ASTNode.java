@@ -1328,6 +1328,7 @@ public static void resolveDeprecatedAnnotations(BlockScope scope, Annotation[] a
 	public int sourceEnd() {
 		return this.sourceEnd;
 	}
+	@Override
 	public String toString() {
 
 		return print(0, new StringBuffer(30)).toString();

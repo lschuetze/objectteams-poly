@@ -102,10 +102,12 @@ public class CalloutMapping extends AbstractCalloutMapping implements ICalloutMa
 		this.declaredModifiers = declaredModifiers;
 	}
 
-    public boolean isOverride() {
+    @Override
+	public boolean isOverride() {
     	return this.isOverride;
     }
     
+	@Override
 	@SuppressWarnings("nls")
 	public String getElementName()
 	{
@@ -131,11 +133,13 @@ public class CalloutMapping extends AbstractCalloutMapping implements ICalloutMa
 	    return name.toString();
 	}
 
+	@Override
 	public int getMappingKind()
 	{
 		return CALLOUT_MAPPING;
 	}	
 		
+	@Override
 	public int getDeclaredModifiers() {
 		return this.declaredModifiers;
 	}
@@ -145,6 +149,7 @@ public class CalloutMapping extends AbstractCalloutMapping implements ICalloutMa
 		return this.declaredModifiers;
 	}
 
+	@Override
 	public IMethod getBoundBaseMethod() throws JavaModelException
 	{
 		// TODO (carp/jwl): does reconciling throw away the cached _baseMethod or will this stay forever?
@@ -156,6 +161,7 @@ public class CalloutMapping extends AbstractCalloutMapping implements ICalloutMa
 		return this.baseMethod;
 	}
 
+	@Override
 	public boolean equals(Object obj)
     {
 		if(!(obj instanceof CalloutMapping))
@@ -166,7 +172,8 @@ public class CalloutMapping extends AbstractCalloutMapping implements ICalloutMa
 		return super.equals(obj);
     }
 	
-    @SuppressWarnings("nls")
+    @Override
+	@SuppressWarnings("nls")
 	public String toString()
 	{
 		return "callout " + super.toString();
@@ -188,7 +195,8 @@ public class CalloutMapping extends AbstractCalloutMapping implements ICalloutMa
     }
     
 	// added for the SourceTypeConverter
-    public IMethodSpec getBaseMethodHandle()
+    @Override
+	public IMethodSpec getBaseMethodHandle()
     {
     	return this.baseMethodHandle;
     }
@@ -207,6 +215,7 @@ public class CalloutMapping extends AbstractCalloutMapping implements ICalloutMa
     // ====
     	
 	// implementation and alternate API of resolved(Binding)
+	@Override
 	public OTJavaElement resolved(char[] uniqueKey) {
 		ResolvedCalloutMapping resolvedHandle = 
 			new ResolvedCalloutMapping(
@@ -227,6 +236,7 @@ public class CalloutMapping extends AbstractCalloutMapping implements ICalloutMa
 		return resolvedHandle;
 	}
 
+	@Override
 	public String[] getExceptionTypes() throws JavaModelException
 	{
 		if (   this.roleMethodHandle != null
@@ -241,6 +251,7 @@ public class CalloutMapping extends AbstractCalloutMapping implements ICalloutMa
 	    return getIMethod().getExceptionTypes();
 	}
 
+	@Override
 	public ILocalVariable[] getParameters() throws JavaModelException {
 		// TODO Auto-generated method stub
 		// see Bug 338593 - [otmodel] Add new API to ease the retrieval of the parameter annotations for an IMethodMapping

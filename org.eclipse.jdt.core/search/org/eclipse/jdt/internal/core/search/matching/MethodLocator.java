@@ -107,9 +107,11 @@ public MethodLocator(MethodPattern pattern) {
 /*
  * Clear caches
  */
+@Override
 protected void clear() {
 	this.methodDeclarationsWithInvalidParam = new HashMap();
 }
+@Override
 protected int fineGrain() {
 	return this.pattern.fineGrain;
 }
@@ -154,6 +156,7 @@ private MethodBinding getMethodBinding(ReferenceBinding type, char[] methodName,
 	return null;
 }
 
+@Override
 public void initializePolymorphicSearch(MatchLocator locator) {
 	long start = 0;
 	if (BasicSearchEngine.VERBOSE) {
@@ -228,6 +231,7 @@ protected ReferenceBinding checkMethodRef(MethodBinding method, ReferenceExpress
 	
 	return null;
 }
+@Override
 public int match(ASTNode node, MatchingNodeSet nodeSet) {
 	int declarationsLevel = IMPOSSIBLE_MATCH;
 	if (this.pattern.findReferences) {
@@ -248,6 +252,7 @@ public int match(ASTNode node, MatchingNodeSet nodeSet) {
 	return nodeSet.addMatch(node, declarationsLevel);
 }
 
+@Override
 public int match(LambdaExpression node, MatchingNodeSet nodeSet) {
 	if (!this.pattern.findDeclarations) return IMPOSSIBLE_MATCH;
 	if (this.pattern.parameterSimpleNames != null && this.pattern.parameterSimpleNames.length != node.arguments().length) return IMPOSSIBLE_MATCH;
@@ -259,6 +264,7 @@ public int match(LambdaExpression node, MatchingNodeSet nodeSet) {
 //public int match(ConstructorDeclaration node, MatchingNodeSet nodeSet) - SKIP IT
 //public int match(Expression node, MatchingNodeSet nodeSet) - SKIP IT
 //public int match(FieldDeclaration node, MatchingNodeSet nodeSet) - SKIP IT
+@Override
 public int match(MethodDeclaration node, MatchingNodeSet nodeSet) {
 	if (!this.pattern.findDeclarations) return IMPOSSIBLE_MATCH;
 
@@ -303,6 +309,7 @@ public int match(MethodDeclaration node, MatchingNodeSet nodeSet) {
 	// Method declaration may match pattern
 	return nodeSet.addMatch(node, resolve ? POSSIBLE_MATCH : ACCURATE_MATCH);
 }
+@Override
 public int match(MemberValuePair node, MatchingNodeSet nodeSet) {
 	if (!this.pattern.findReferences) return IMPOSSIBLE_MATCH;
 
@@ -313,6 +320,7 @@ public int match(MemberValuePair node, MatchingNodeSet nodeSet) {
 //{ObjectTeams: consider role and base method specs
 // public int match(CalloutMappingDeclaration node, MatchingNodeSet nodeSet) - SKIP IT
 // public int match(CallinMappingDeclaration node, MatchingNodeSet nodeSet) - SKIP IT
+@Override
 public int match(MethodSpec methodSpec, MatchingNodeSet nodeSet) 
 {
     if (!matchesName(this.pattern.selector, methodSpec.selector)) return IMPOSSIBLE_MATCH;
@@ -342,6 +350,7 @@ public int match(MethodSpec methodSpec, MatchingNodeSet nodeSet)
     
     return nodeSet.addMatch(methodSpec, this.pattern.mustResolve ? POSSIBLE_MATCH : ACCURATE_MATCH);
 }
+@Override
 public int match(BaseCallMessageSend node, MatchingNodeSet nodeSet) {
 	if (!this.pattern.findReferences) return IMPOSSIBLE_MATCH;
 
@@ -356,6 +365,7 @@ public int match(BaseCallMessageSend node, MatchingNodeSet nodeSet) {
 	return nodeSet.addMatch(node._wrappee, this.pattern.mustResolve ? POSSIBLE_MATCH : ACCURATE_MATCH);
 }
 //gbr,carp}
+@Override
 public int match(MessageSend node, MatchingNodeSet nodeSet) {
 	if (!this.pattern.findReferences) return IMPOSSIBLE_MATCH;
 
@@ -370,6 +380,7 @@ public int match(MessageSend node, MatchingNodeSet nodeSet) {
 	return nodeSet.addMatch(node, this.pattern.mustResolve ? POSSIBLE_MATCH : ACCURATE_MATCH);
 }
 
+@Override
 public int match(ReferenceExpression node, MatchingNodeSet nodeSet) {
 	if (!this.pattern.findReferences) return IMPOSSIBLE_MATCH;
 	if (!matchesName(this.pattern.selector, node.selector)) return IMPOSSIBLE_MATCH;
@@ -379,6 +390,7 @@ public int match(ReferenceExpression node, MatchingNodeSet nodeSet) {
 	return nodeSet.addMatch(node, this.pattern.mustResolve ? POSSIBLE_MATCH : ACCURATE_MATCH);
 }
 
+@Override
 public int match(Annotation node, MatchingNodeSet nodeSet) {
 	if (!this.pattern.findReferences) return IMPOSSIBLE_MATCH;
 	MemberValuePair[] pairs = node.memberValuePairs();
@@ -398,6 +410,7 @@ public int match(Annotation node, MatchingNodeSet nodeSet) {
 //public int match(TypeDeclaration node, MatchingNodeSet nodeSet) - SKIP IT
 //public int match(TypeReference node, MatchingNodeSet nodeSet) - SKIP IT
 
+@Override
 protected int matchContainer() {
 	if (this.pattern.findReferences) {
 		// need to look almost everywhere to find in javadocs and static import
@@ -409,6 +422,7 @@ protected int matchContainer() {
  * @see org.eclipse.jdt.internal.core.search.matching.PatternLocator#matchLevelAndReportImportRef(org.eclipse.jdt.internal.compiler.ast.ImportReference, org.eclipse.jdt.internal.compiler.lookup.Binding, org.eclipse.jdt.internal.core.search.matching.MatchLocator)
  * Accept to report match of static field on static import
  */
+@Override
 protected void matchLevelAndReportImportRef(ImportReference importRef, Binding binding, MatchLocator locator) throws CoreException {
 	if (importRef.isStatic() && binding instanceof MethodBinding) {
 		super.matchLevelAndReportImportRef(importRef, binding, locator);
@@ -562,12 +576,14 @@ private boolean matchOverriddenMethod(ReferenceBinding type, MethodBinding metho
 	}
 	return false;
 }
+@Override
 protected void matchReportReference(ASTNode reference, IJavaElement element, Binding elementBinding, int accuracy, MatchLocator locator) throws CoreException {
 	matchReportReference(reference, element, null, null, elementBinding, accuracy, locator);
 }
 /**
  * @see org.eclipse.jdt.internal.core.search.matching.PatternLocator#matchReportReference(org.eclipse.jdt.internal.compiler.ast.ASTNode, org.eclipse.jdt.core.IJavaElement, Binding, int, org.eclipse.jdt.internal.core.search.matching.MatchLocator)
  */
+@Override
 protected void matchReportReference(ASTNode reference, IJavaElement element, IJavaElement localElement, IJavaElement[] otherElements, Binding elementBinding, int accuracy, MatchLocator locator) throws CoreException {
 	MethodBinding methodBinding = (reference instanceof MessageSend) ? ((MessageSend)reference).binding: ((elementBinding instanceof MethodBinding) ? (MethodBinding) elementBinding : null);
 //{ObjectTeams: one more chance:
@@ -749,6 +765,7 @@ private boolean methodParametersEqualsPattern(MethodBinding method) {
 	}
 	return true;
 }
+@Override
 public SearchMatch newDeclarationMatch(ASTNode reference, IJavaElement element, Binding elementBinding, int accuracy, int length, MatchLocator locator) {
 	if (elementBinding != null) {
 		MethodBinding methodBinding = (MethodBinding) elementBinding;
@@ -783,6 +800,7 @@ public SearchMatch newDeclarationMatch(ASTNode reference, IJavaElement element, 
 	}
 	return super.newDeclarationMatch(reference, element, elementBinding, accuracy, length, locator);
 }
+@Override
 protected int referenceType() {
 	return IJavaElement.METHOD;
 }
@@ -848,6 +866,7 @@ protected void reportDeclaration(MethodBinding methodBinding, MatchLocator locat
 		}
 	}
 }
+@Override
 public int resolveLevel(ASTNode possibleMatchingNode) {
 	if (this.pattern.findReferences) {
 		if (possibleMatchingNode instanceof MessageSend) {
@@ -884,6 +903,7 @@ public int resolveLevel(ASTNode possibleMatchingNode) {
 	}
 	return IMPOSSIBLE_MATCH;
 }
+@Override
 public int resolveLevel(Binding binding) {
 	if (binding == null) return INACCURATE_MATCH;
 	if (!(binding instanceof MethodBinding)) return IMPOSSIBLE_MATCH;
@@ -1217,6 +1237,7 @@ private boolean resolveLevelAsSuperInvocation(ReferenceBinding type, TypeBinding
 	}
 	return false;
 }
+@Override
 public String toString() {
 	return "Locator for " + this.pattern.toString(); //$NON-NLS-1$
 }

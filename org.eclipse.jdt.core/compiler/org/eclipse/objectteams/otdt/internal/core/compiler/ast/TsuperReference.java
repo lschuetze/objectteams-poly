@@ -52,9 +52,11 @@ public TsuperReference(int pos, int sourceEnd) {
 	this.sourceEnd = sourceEnd;
 }
 
+@Override
 public boolean isSuper() {
 	return false;
 }
+@Override
 public boolean isThis() {
 	return true;
 }
@@ -67,6 +69,7 @@ public boolean checkAccess(MethodScope methodScope) {
 	return roleType.isDirectRole(); // error will be reported in addMarkerArg (invoked from TSuperMessageSend)
 }
 
+@Override
 public TypeBinding resolveType(BlockScope scope) {
 	if (this.resolvedType != null)
 		return this.resolvedType;
@@ -133,6 +136,7 @@ private boolean contains(ReferenceBinding outer, ReferenceBinding inner) {
 }
 
 
+@Override
 public StringBuffer printExpression(int indent, StringBuffer output){
 	if (this.qualification != null) {
 		this.qualification.printExpression(indent, output);
@@ -142,6 +146,7 @@ public StringBuffer printExpression(int indent, StringBuffer output){
     return output;
 }
 
+@Override
 public void traverse(ASTVisitor visitor, BlockScope blockScope) {
 	visitor.visit(this, blockScope);
 	visitor.endVisit(this, blockScope);

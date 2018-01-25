@@ -87,6 +87,7 @@ public class BaseReference extends ThisReference {
 	}
 
 
+	@Override
 	public TypeBinding resolveType(BlockScope scope) {
 		if (this._wrappee != null) {
 			this.resolvedType = this._wrappee.resolveType(scope);
@@ -104,6 +105,7 @@ public class BaseReference extends ThisReference {
 		return this.resolvedType;
 	}
 
+	@Override
 	public void generateCode(BlockScope scope, CodeStream codeStream) {
 		if (this._wrappee != null)
 			this._wrappee.generateCode(scope, codeStream);
@@ -111,6 +113,7 @@ public class BaseReference extends ThisReference {
 			super.generateCode(scope, codeStream);
 	}
 
+	@Override
 	public void generateCode(BlockScope scope, CodeStream codeStream, boolean valueRequired) {
 		if (this._wrappee != null)
 			this._wrappee.generateCode(scope, codeStream, valueRequired);
@@ -118,6 +121,7 @@ public class BaseReference extends ThisReference {
 			super.generateCode(scope, codeStream, valueRequired);
 	}
 
+	@Override
 	public StringBuffer printExpression(int indent, StringBuffer output)
 	{
 
@@ -125,6 +129,7 @@ public class BaseReference extends ThisReference {
 	    return output;
 	}
 
+	@Override
 	public void traverse(
 		ASTVisitor visitor,
 		BlockScope blockScope) {

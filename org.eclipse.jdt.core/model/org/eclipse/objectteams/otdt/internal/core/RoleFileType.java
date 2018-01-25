@@ -40,7 +40,8 @@ public class RoleFileType extends RoleType implements IRoleFileType
 	    super(correspondingJavaType, parent, flags, baseClassName, baseClassAnchor);
 	}
 
-    public IType getTeamJavaType() {
+    @Override
+	public IType getTeamJavaType() {
         // a role file's team is not its parent (which is an ICompilationUnit)!
         try {
             return getJavaProject().findType(getPackageFragment().getElementName());
@@ -53,7 +54,8 @@ public class RoleFileType extends RoleType implements IRoleFileType
     	return null;    	
     }
     
-    public boolean isRoleFile()
+    @Override
+	public boolean isRoleFile()
     {
         return true;
     }

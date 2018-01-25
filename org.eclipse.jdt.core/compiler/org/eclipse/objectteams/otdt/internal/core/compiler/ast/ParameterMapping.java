@@ -59,6 +59,7 @@ public class ParameterMapping extends Expression {
 		}
 	}
 
+	@Override
 	public StringBuffer printExpression(int indent, StringBuffer output) {
 		if((this.direction==TerminalTokens.TokenNameBINDIN))// == CharOperation.equals(ident, IOTConstants.RESULT))
 		{
@@ -87,6 +88,7 @@ public class ParameterMapping extends Expression {
 	/* (non-Javadoc)
 	 * @see org.eclipse.jdt.internal.compiler.ast.AstNode#traverse(org.eclipse.jdt.internal.compiler.ASTVisitor, org.eclipse.jdt.internal.compiler.lookup.BlockScope)
 	 */
+	@Override
 	public void traverse(
 		ASTVisitor visitor,
 		BlockScope scope)

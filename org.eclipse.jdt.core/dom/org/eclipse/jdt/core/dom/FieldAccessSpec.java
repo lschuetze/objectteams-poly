@@ -122,11 +122,13 @@ public class FieldAccessSpec extends MethodMappingElement
 		super(ast);
 	}
 
+	@Override
 	final List internalStructuralPropertiesForType(int apiLevel)
 	{
 		return propertyDescriptors(apiLevel);
 	}
 
+	@Override
 	final boolean internalGetSetBooleanProperty(SimplePropertyDescriptor property, boolean isGetRequest, boolean value)
 	{
 		if (property == SIGNATURE_PROPERTY)
@@ -144,6 +146,7 @@ public class FieldAccessSpec extends MethodMappingElement
 		return super.internalGetSetBooleanProperty(property, isGetRequest, value);
 	}
 
+	@Override
 	final ASTNode internalGetSetChildProperty(ChildPropertyDescriptor property, boolean isGetRequest, ASTNode child)
 	{
 		if (property == NAME_PROPERTY)
@@ -174,19 +177,23 @@ public class FieldAccessSpec extends MethodMappingElement
 		return super.internalGetSetChildProperty(property, isGetRequest, child);
 	}
 
+	@Override
 	public SimplePropertyDescriptor signatureProperty() {
 		return SIGNATURE_PROPERTY;
 	}
 
+	@Override
 	ChildPropertyDescriptor internalNameProperty() {
 		return NAME_PROPERTY;
 	}
 
+	@Override
 	final int getNodeType0()
 	{
 		return FIELD_ACCESS_SPEC;
 	}
 
+	@Override
 	ASTNode clone0(AST target)
 	{
 		FieldAccessSpec result = new FieldAccessSpec(target);
@@ -198,6 +205,7 @@ public class FieldAccessSpec extends MethodMappingElement
 		return result;
 	}
 
+	@Override
 	void accept0(ASTVisitor visitor)
 	{
 		boolean visitChildren = visitor.visit(this);
@@ -210,12 +218,14 @@ public class FieldAccessSpec extends MethodMappingElement
 		visitor.endVisit(this);
 	}
 
+	@Override
 	final boolean subtreeMatch0(ASTMatcher matcher, Object other)
 	{
 		// dispatch to correct overloaded match method
 		return matcher.match(this, other);
 	}
 
+	@Override
 	int treeSize()
 	{
 		return memSize()
@@ -223,6 +233,7 @@ public class FieldAccessSpec extends MethodMappingElement
 					+ (this.getFieldType() == null ? 0 : getFieldType().treeSize());
 	}
 
+	@Override
 	int memSize()
 	{
 		return BASE_NODE_SIZE + 3 * 4;

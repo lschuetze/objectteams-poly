@@ -118,6 +118,7 @@ public class GuardPredicateDeclaration extends MethodDeclaration {
 			PredicateGenerator.linkPredicates(this);
 	}
 
+	@Override
 	public boolean isBasePredicate() {
 		return this.isBasePredicate;
 	}

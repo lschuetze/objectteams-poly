@@ -123,10 +123,12 @@ public class ParameterizedTypeBinding extends ReferenceBinding implements Substi
 	 * May return an UnresolvedReferenceBinding.
 	 * @see ParameterizedTypeBinding#genericType()
 	 */
+	@Override
 	public ReferenceBinding actualType() {
 		return this.type;
 	}
 
+	@Override
 	public boolean isParameterizedType() {
 		return true;
 	}
@@ -177,6 +179,7 @@ public class ParameterizedTypeBinding extends ReferenceBinding implements Substi
 	/**
 	 * @see org.eclipse.jdt.internal.compiler.lookup.ReferenceBinding#canBeInstantiated()
 	 */
+	@Override
 	public boolean canBeInstantiated() {
 		return ((this.tagBits & TagBits.HasDirectWildcard) == 0) && super.canBeInstantiated(); // cannot instantiate param type with wildcard arguments
 	}
@@ -185,6 +188,7 @@ public class ParameterizedTypeBinding extends ReferenceBinding implements Substi
 	 * Perform capture conversion for a parameterized type with wildcard arguments
 	 * @see org.eclipse.jdt.internal.compiler.lookup.TypeBinding#capture(Scope,int, int)
 	 */
+	@Override
 	public ParameterizedTypeBinding capture(Scope scope, int start, int end) {
 		if ((this.tagBits & TagBits.HasDirectWildcard) == 0)
 			return this;
@@ -230,6 +234,7 @@ public class ParameterizedTypeBinding extends ReferenceBinding implements Substi
 	 * Perform capture deconversion for a parameterized type with captured wildcard arguments
 	 * @see org.eclipse.jdt.internal.compiler.lookup.TypeBinding#uncapture(Scope)
 	 */
+	@Override
 	public TypeBinding uncapture(Scope scope) {
 		if ((this.tagBits & TagBits.HasCapturedWildcard) == 0)
 			return this;
@@ -246,6 +251,7 @@ public class ParameterizedTypeBinding extends ReferenceBinding implements Substi
 	/**
 	 * @see org.eclipse.jdt.internal.compiler.lookup.TypeBinding#collectMissingTypes(java.util.List)
 	 */
+	@Override
 	public List<TypeBinding> collectMissingTypes(List<TypeBinding> missingTypes) {
 		if ((this.tagBits & TagBits.HasMissingType) != 0) {
 			if (this.enclosingType != null) {
@@ -269,6 +275,7 @@ public class ParameterizedTypeBinding extends ReferenceBinding implements Substi
 	 *   A = F   corresponds to:      F.collectSubstitutes(..., A, ..., CONSTRAINT_EQUAL (0))
 	 *   A >> F   corresponds to:   F.collectSubstitutes(..., A, ..., CONSTRAINT_SUPER (2))
 	 */
+	@Override
 	public void collectSubstitutes(Scope scope, TypeBinding actualType, InferenceContext inferenceContext, int constraint) {
 		if ((this.tagBits & TagBits.HasTypeVariable) == 0) {
 			TypeBinding actualEquivalent = actualType.findSuperTypeOriginatingFrom(this.type);
@@ -371,10 +378,12 @@ public class ParameterizedTypeBinding extends ReferenceBinding implements Substi
 	/**
 	 * @see org.eclipse.jdt.internal.compiler.lookup.ReferenceBinding#computeId()
 	 */
+	@Override
 	public void computeId() {
 		this.id = TypeIds.NoId;
 	}
 
+	@Override
 	public char[] computeUniqueKey(boolean isLeaf) {
 	    StringBuffer sig = new StringBuffer(10);
 	    ReferenceBinding enclosing;
@@ -423,10 +432,12 @@ public class ParameterizedTypeBinding extends ReferenceBinding implements Substi
 	/**
 	 * @see org.eclipse.jdt.internal.compiler.lookup.TypeBinding#constantPoolName()
 	 */
+	@Override
 	public char[] constantPoolName() {
 		return this.type.constantPoolName(); // erasure
 	}
 	
+	@Override
 	public TypeBinding clone(TypeBinding outerType) {
 		return new ParameterizedTypeBinding(this.type, this.arguments, (ReferenceBinding) outerType, this.environment);
 	}
@@ -437,6 +448,7 @@ public class ParameterizedTypeBinding extends ReferenceBinding implements Substi
 	/**
 	 * @see org.eclipse.jdt.internal.compiler.lookup.TypeBinding#debugName()
 	 */
+	@Override
 	public String debugName() {
 	    if (this.hasTypeAnnotations())
 	    	return annotatedDebugName();
@@ -457,6 +469,7 @@ public class ParameterizedTypeBinding extends ReferenceBinding implements Substi
 	    return nameBuffer.toString();
 	}
 	
+	@Override
 	public String annotatedDebugName() {
 		StringBuffer nameBuffer = new StringBuffer(super.annotatedDebugName());
 		if (this.arguments != null && this.arguments.length > 0) {
@@ -473,6 +486,7 @@ public class ParameterizedTypeBinding extends ReferenceBinding implements Substi
 	/**
 	 * @see org.eclipse.jdt.internal.compiler.lookup.ReferenceBinding#enclosingType()
 	 */
+	@Override
 	public ReferenceBinding enclosingType() {
 	    return this.enclosingType;
 	}
@@ -480,6 +494,7 @@ public class ParameterizedTypeBinding extends ReferenceBinding implements Substi
 	/**
 	 * @see org.eclipse.jdt.internal.compiler.lookup.Substitution#environment()
 	 */
+	@Override
 	public LookupEnvironment environment() {
 		return this.environment;
 	}
@@ -487,12 +502,14 @@ public class ParameterizedTypeBinding extends ReferenceBinding implements Substi
 	/**
      * @see org.eclipse.jdt.internal.compiler.lookup.TypeBinding#erasure()
      */
-    public TypeBinding erasure() {
+    @Override
+	public TypeBinding erasure() {
         return this.type.erasure(); // erasure
     }
 	/**
 	 * @see org.eclipse.jdt.internal.compiler.lookup.ReferenceBinding#fieldCount()
 	 */
+	@Override
 	public int fieldCount() {
 		return this.type.fieldCount(); // same as erasure (lazy)
 	}
@@ -500,6 +517,7 @@ public class ParameterizedTypeBinding extends ReferenceBinding implements Substi
 	/**
 	 * @see org.eclipse.jdt.internal.compiler.lookup.ReferenceBinding#fields()
 	 */
+	@Override
 	public FieldBinding[] fields() {
 		if ((this.tagBits & TagBits.AreFieldsComplete) != 0)
 			return this.fields;
@@ -536,6 +554,7 @@ public class ParameterizedTypeBinding extends ReferenceBinding implements Substi
 	 * Ltype<param1 ... paramN>;
 	 * LY<TT;>;
 	 */
+	@Override
 	public char[] genericTypeSignature() {
 		if (this.genericTypeSignature == null) {
 			if ((this.modifiers & ExtraCompilerModifiers.AccGenericSignature) == 0) {
@@ -579,10 +598,12 @@ public class ParameterizedTypeBinding extends ReferenceBinding implements Substi
 	/**
 	 * @see org.eclipse.jdt.internal.compiler.lookup.ReferenceBinding#getAnnotationTagBits()
 	 */
+	@Override
 	public long getAnnotationTagBits() {
 		return this.type.getAnnotationTagBits();
 	}
 
+	@Override
 	public int getEnclosingInstancesSlotSize() {
 		return genericType().getEnclosingInstancesSlotSize();
 	}
@@ -590,6 +611,7 @@ public class ParameterizedTypeBinding extends ReferenceBinding implements Substi
 	/**
 	 * @see org.eclipse.jdt.internal.compiler.lookup.ReferenceBinding#getExactConstructor(TypeBinding[])
 	 */
+	@Override
 	public MethodBinding getExactConstructor(TypeBinding[] argumentTypes) {
 		int argCount = argumentTypes.length;
 		MethodBinding match = null;
@@ -629,6 +651,7 @@ public class ParameterizedTypeBinding extends ReferenceBinding implements Substi
 	 /**
 	 * @see org.eclipse.jdt.internal.compiler.lookup.ReferenceBinding#getExactMethod(char[], TypeBinding[],CompilationUnitScope)
 	 */
+	@Override
 	public MethodBinding getExactMethod(char[] selector, TypeBinding[] argumentTypes, CompilationUnitScope refScope) {
 		// sender from refScope calls recordTypeReference(this)
 		int argCount = argumentTypes.length;
@@ -693,6 +716,7 @@ public class ParameterizedTypeBinding extends ReferenceBinding implements Substi
 	 /**
 	 * @see org.eclipse.jdt.internal.compiler.lookup.ReferenceBinding#getField(char[], boolean)
 	 */
+	@Override
 	public FieldBinding getField(char[] fieldName, boolean needResolve) {
 		fields(); // ensure fields have been initialized... must create all at once unlike methods
 		return ReferenceBinding.binarySearch(fieldName, this.fields);
@@ -701,6 +725,7 @@ public class ParameterizedTypeBinding extends ReferenceBinding implements Substi
  	/**
 	 * @see org.eclipse.jdt.internal.compiler.lookup.ReferenceBinding#getMemberType(char[])
 	 */
+	@Override
 	public ReferenceBinding getMemberType(char[] typeName) {
 		memberTypes(); // ensure memberTypes have been initialized... must create all at once unlike methods
 		int typeLength = typeName.length;
@@ -715,6 +740,7 @@ public class ParameterizedTypeBinding extends ReferenceBinding implements Substi
 	/**
 	 * @see org.eclipse.jdt.internal.compiler.lookup.ReferenceBinding#getMethods(char[])
 	 */
+	@Override
 	public MethodBinding[] getMethods(char[] selector) {
 		if (this.methods != null) {
 			long range;
@@ -767,14 +793,17 @@ public class ParameterizedTypeBinding extends ReferenceBinding implements Substi
 		}
 	}
 
+	@Override
 	public int getOuterLocalVariablesSlotSize() {
 		return genericType().getOuterLocalVariablesSlotSize();
 	}
 
+	@Override
 	public boolean hasMemberTypes() {
 	    return this.type.hasMemberTypes();
 	}
 
+	@Override
 	public boolean hasTypeBit(int bit) {
 		TypeBinding erasure = erasure();
 		if (erasure instanceof ReferenceBinding)
@@ -785,6 +814,7 @@ public class ParameterizedTypeBinding extends ReferenceBinding implements Substi
 	/**
 	 * @see org.eclipse.jdt.internal.compiler.lookup.ReferenceBinding#implementsMethod(MethodBinding)
 	 */
+	@Override
 	public boolean implementsMethod(MethodBinding method) {
 		return this.type.implementsMethod(method); // erasure
 	}
@@ -845,6 +875,7 @@ public class ParameterizedTypeBinding extends ReferenceBinding implements Substi
 	}
 
 //{ObjectTeams: accessible across AbstractOTReferenceBinding (sitting in a different package):
+	@Override
 	protected
 // SH}
 	void initializeForStaticImports() {
@@ -894,10 +925,12 @@ public class ParameterizedTypeBinding extends ReferenceBinding implements Substi
 	/**
 	 *  Returns true if parameterized type AND not of the form List<?>
 	 */
+	@Override
 	public boolean isBoundParameterizedType() {
 		return (this.tagBits & TagBits.IsBoundParameterizedType) != 0;
 	}
 
+	@Override
 	public boolean isEquivalentTo(TypeBinding otherType) {
 		if (equalsEquals(this, otherType))
 		    return true;
@@ -955,10 +988,12 @@ public class ParameterizedTypeBinding extends ReferenceBinding implements Substi
 	    return false;
 	}
 
+	@Override
 	public boolean isHierarchyConnected() {
 		return this.superclass != null && this.superInterfaces != null;
 	}
 
+	@Override
 	public boolean isProperType(boolean admitCapture18) {
 		if (this.arguments != null) {
 			for (int i = 0; i < this.arguments.length; i++)
@@ -969,6 +1004,7 @@ public class ParameterizedTypeBinding extends ReferenceBinding implements Substi
 	}
 
 //{ObjectTeams:
+	@Override
 	protected
 // SH}
 	TypeBinding substituteInferenceVariable(InferenceVariable var, TypeBinding substituteType) {
@@ -993,10 +1029,12 @@ public class ParameterizedTypeBinding extends ReferenceBinding implements Substi
 	/**
 	 * @see org.eclipse.jdt.internal.compiler.lookup.Substitution#isRawSubstitution()
 	 */
+	@Override
 	public boolean isRawSubstitution() {
 		return isRawType();
 	}
 
+	@Override
 	public TypeBinding unannotated() {
 		return this.hasTypeAnnotations() ? this.environment.getUnannotatedType(this) : this;
 	}
@@ -1010,6 +1048,7 @@ public class ParameterizedTypeBinding extends ReferenceBinding implements Substi
 		return this.environment.createParameterizedType(unannotatedGenericType, this.arguments, this.enclosingType, newAnnotations);
 	}
 
+	@Override
 	public int kind() {
 		return PARAMETERIZED_TYPE;
 	}
@@ -1017,6 +1056,7 @@ public class ParameterizedTypeBinding extends ReferenceBinding implements Substi
 	/**
 	 * @see org.eclipse.jdt.internal.compiler.lookup.ReferenceBinding#memberTypes()
 	 */
+	@Override
 	public ReferenceBinding[] memberTypes() {
 		if (this.memberTypes == null) {
 			try {
@@ -1040,6 +1080,7 @@ public class ParameterizedTypeBinding extends ReferenceBinding implements Substi
 		return this.memberTypes;
 	}
 
+	@Override
 	public boolean mentionsAny(TypeBinding[] parameters, int idx) {
 		if (super.mentionsAny(parameters, idx))
 			return true;
@@ -1054,6 +1095,7 @@ public class ParameterizedTypeBinding extends ReferenceBinding implements Substi
 	}
 
 //{ObjectTeams:
+	@Override
 	protected
 // SH}
 	void collectInferenceVariables(Set<InferenceVariable> variables) {
@@ -1069,6 +1111,7 @@ public class ParameterizedTypeBinding extends ReferenceBinding implements Substi
 	/**
 	 * @see org.eclipse.jdt.internal.compiler.lookup.ReferenceBinding#methods()
 	 */
+	@Override
 	public MethodBinding[] methods() {
 //{ObjectTeams: need to check whether 'type' got any methods added since last call:
 /* orig:
@@ -1113,6 +1156,7 @@ public class ParameterizedTypeBinding extends ReferenceBinding implements Substi
 		return this.methods;
 	}
 //{ObjectTeams: adding methods to generic roles (see A.1.14-otjld-generic-role-1)
+	@Override
 	public void addMethod(MethodBinding methodBinding)
 	{
 		this.type.addMethod(methodBinding);
@@ -1131,12 +1175,14 @@ public class ParameterizedTypeBinding extends ReferenceBinding implements Substi
 	 *
 	 * @see org.eclipse.jdt.internal.compiler.lookup.Binding#problemId()
 	 */
+	@Override
 	public int problemId() {
 		return this.type.problemId();
 	}
 	/**
 	 * @see org.eclipse.jdt.internal.compiler.lookup.TypeBinding#qualifiedPackageName()
 	 */
+	@Override
 	public char[] qualifiedPackageName() {
 		return this.type.qualifiedPackageName();
 	}
@@ -1144,6 +1190,7 @@ public class ParameterizedTypeBinding extends ReferenceBinding implements Substi
 	/**
 	 * @see org.eclipse.jdt.internal.compiler.lookup.TypeBinding#qualifiedSourceName()
 	 */
+	@Override
 	public char[] qualifiedSourceName() {
 		return this.type.qualifiedSourceName();
 	}
@@ -1151,9 +1198,11 @@ public class ParameterizedTypeBinding extends ReferenceBinding implements Substi
 	/**
 	 * @see org.eclipse.jdt.internal.compiler.lookup.Binding#readableName()
 	 */
+	@Override
 	public char[] readableName() {
 		return readableName(true);
 	}
+	@Override
 	public char[] readableName(boolean showGenerics) {
 	    StringBuffer nameBuffer = new StringBuffer(10);
 		if (isMemberType()) {
@@ -1267,9 +1316,11 @@ public class ParameterizedTypeBinding extends ReferenceBinding implements Substi
 	/**
 	 * @see org.eclipse.jdt.internal.compiler.lookup.Binding#shortReadableName()
 	 */
+	@Override
 	public char[] shortReadableName() {
 		return shortReadableName(true);
 	}
+	@Override
 	public char[] shortReadableName(boolean showGenerics) {
 	    StringBuffer nameBuffer = new StringBuffer(10);
 		if (isMemberType()) {
@@ -1301,12 +1352,14 @@ public class ParameterizedTypeBinding extends ReferenceBinding implements Substi
 	/**
 	 * @see org.eclipse.jdt.internal.compiler.lookup.TypeBinding#nullAnnotatedReadableName(CompilerOptions,boolean)
 	 */
+	@Override
 	public char[] nullAnnotatedReadableName(CompilerOptions options, boolean shortNames) {
 		if (shortNames)
 			return nullAnnotatedShortReadableName(options);
 		return nullAnnotatedReadableName(options);
 	}
 
+	@Override
 	char[] nullAnnotatedReadableName(CompilerOptions options) {
 	    StringBuffer nameBuffer = new StringBuffer(10);
 		if (isMemberType()) {
@@ -1345,6 +1398,7 @@ public class ParameterizedTypeBinding extends ReferenceBinding implements Substi
 	    return readableName;
 	}
 
+	@Override
 	char[] nullAnnotatedShortReadableName(CompilerOptions options) {
 	    StringBuffer nameBuffer = new StringBuffer(10);
 		if (isMemberType()) {
@@ -1377,6 +1431,7 @@ public class ParameterizedTypeBinding extends ReferenceBinding implements Substi
 	/**
 	 * @see org.eclipse.jdt.internal.compiler.lookup.TypeBinding#signature()
 	 */
+	@Override
 	public char[] signature() {
 	    if (this.signature == null) {
 	        this.signature = this.type.signature();  // erasure
@@ -1387,6 +1442,7 @@ public class ParameterizedTypeBinding extends ReferenceBinding implements Substi
 	/**
 	 * @see org.eclipse.jdt.internal.compiler.lookup.TypeBinding#sourceName()
 	 */
+	@Override
 	public char[] sourceName() {
 		return this.type.sourceName();
 	}
@@ -1394,6 +1450,7 @@ public class ParameterizedTypeBinding extends ReferenceBinding implements Substi
 	/**
 	 * @see org.eclipse.jdt.internal.compiler.lookup.Substitution#substitute(org.eclipse.jdt.internal.compiler.lookup.TypeVariableBinding)
 	 */
+	@Override
 	public TypeBinding substitute(TypeVariableBinding originalVariable) {
 
 		ParameterizedTypeBinding currentType = this;
@@ -1424,6 +1481,7 @@ public class ParameterizedTypeBinding extends ReferenceBinding implements Substi
 	}
 
 //{ObjectTeams: implement new method from Substitution
+	@Override
 	public ITeamAnchor substituteAnchor(ITeamAnchor anchor, int rank) {
 		return null;
 	}
@@ -1432,6 +1490,7 @@ public class ParameterizedTypeBinding extends ReferenceBinding implements Substi
 	/**
 	 * @see org.eclipse.jdt.internal.compiler.lookup.ReferenceBinding#superclass()
 	 */
+	@Override
 	public ReferenceBinding superclass() {
 	    if (this.superclass == null) {
 	        // note: Object cannot be generic
@@ -1448,6 +1507,7 @@ public class ParameterizedTypeBinding extends ReferenceBinding implements Substi
 	/**
 	 * @see org.eclipse.jdt.internal.compiler.lookup.ReferenceBinding#superInterfaces()
 	 */
+	@Override
 	public ReferenceBinding[] superInterfaces() {
 	    if (this.superInterfaces == null) {
     		if (this.type.isHierarchyBeingConnected())
@@ -1464,6 +1524,7 @@ public class ParameterizedTypeBinding extends ReferenceBinding implements Substi
 		return this.superInterfaces;
 	}
 
+	@Override
 	public void swapUnresolved(UnresolvedReferenceBinding unresolvedType, ReferenceBinding resolvedType, LookupEnvironment env) {
 		boolean update = false;
 		if (this.type == unresolvedType) { //$IDENTITY-COMPARISON$
@@ -1489,6 +1550,7 @@ public class ParameterizedTypeBinding extends ReferenceBinding implements Substi
 	/**
 	 * @see org.eclipse.jdt.internal.compiler.lookup.ReferenceBinding#syntheticEnclosingInstanceTypes()
 	 */
+	@Override
 	public ReferenceBinding[] syntheticEnclosingInstanceTypes() {
 		return genericType().syntheticEnclosingInstanceTypes();
 	}
@@ -1496,6 +1558,7 @@ public class ParameterizedTypeBinding extends ReferenceBinding implements Substi
 	/**
 	 * @see org.eclipse.jdt.internal.compiler.lookup.ReferenceBinding#syntheticOuterLocalVariables()
 	 */
+	@Override
 	public SyntheticArgumentBinding[] syntheticOuterLocalVariables() {
 		return genericType().syntheticOuterLocalVariables();
 	}
@@ -1503,6 +1566,7 @@ public class ParameterizedTypeBinding extends ReferenceBinding implements Substi
 	/**
 	 * @see java.lang.Object#toString()
 	 */
+	@Override
 	public String toString() {
 		if (this.hasTypeAnnotations()) {
 			return annotatedDebugName();
@@ -1582,6 +1646,7 @@ public class ParameterizedTypeBinding extends ReferenceBinding implements Substi
 
 	}
 
+	@Override
 	public TypeVariableBinding[] typeVariables() {
 		if (this.arguments == null) {
 			// retain original type variables if not substituted (member type of parameterized type)
@@ -1590,10 +1655,12 @@ public class ParameterizedTypeBinding extends ReferenceBinding implements Substi
 		return Binding.NO_TYPE_VARIABLES;
 	}
 	
+	@Override
 	public TypeBinding[] typeArguments() {
 		return this.arguments;
 	}
 	
+	@Override
 	public FieldBinding[] unResolvedFields() {
 		return this.fields;
 	}
@@ -1618,6 +1685,7 @@ public class ParameterizedTypeBinding extends ReferenceBinding implements Substi
 		}
 		return super.getInterfaceAbstractContracts(scope, replaceWildcards, filterDefaultMethods);
 	}
+	@Override
 	public MethodBinding getSingleAbstractMethod(final Scope scope, boolean replaceWildcards) {
 		return getSingleAbstractMethod(scope, replaceWildcards, -1, -1 /* do not capture */);
 	}	

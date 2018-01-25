@@ -46,12 +46,14 @@ public class ReplaceResultReferenceVisitor
     	this._methodMapping = mapping;
     }
 
-    public boolean visit(ParameterMapping mapping, BlockScope scope)
+    @Override
+	public boolean visit(ParameterMapping mapping, BlockScope scope)
     {
         this._bindingDirection = mapping.direction;
         return true;
     }
-    public void endVisit(ParameterMapping mapping, BlockScope scope)
+    @Override
+	public void endVisit(ParameterMapping mapping, BlockScope scope)
     {
         this._bindingDirection = 0;
         super.endVisit(mapping, scope);
@@ -60,7 +62,8 @@ public class ReplaceResultReferenceVisitor
      * Translate "result" in the expression of a parameter mapping.
      * Upgrade the SingleNameReference to a ResultReference.
      */
-    public boolean visit(SingleNameReference ref, BlockScope scope)
+    @Override
+	public boolean visit(SingleNameReference ref, BlockScope scope)
     {
         if (CharOperation.equals(ref.token, IOTConstants.RESULT))
         {

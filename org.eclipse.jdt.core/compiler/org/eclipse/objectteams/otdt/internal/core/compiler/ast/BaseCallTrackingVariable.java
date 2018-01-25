@@ -59,6 +59,7 @@ public class BaseCallTrackingVariable extends LocalDeclaration {
 		this.isGenerated = true;
 	}
 
+	@Override
 	public void generateCode(BlockScope currentScope, CodeStream codeStream)
 	{ /* NOP - this variable is completely dummy, ie. for analysis only. */ }
 
@@ -67,6 +68,7 @@ public class BaseCallTrackingVariable extends LocalDeclaration {
 	 * the callin method has been resolved, because we need to know the number
 	 * of (real) allocated local variables.
 	 */
+	@Override
 	public void resolve (BlockScope scope) {
 		// only need the binding, which is used as reference in FlowInfo methods.
 		this.binding = new LocalVariableBinding(

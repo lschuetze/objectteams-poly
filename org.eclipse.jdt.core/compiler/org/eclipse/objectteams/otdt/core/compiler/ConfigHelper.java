@@ -33,6 +33,7 @@ public class ConfigHelper {
 	 * @since 3.13 (OTDT 2.6)
 	 */
 	public interface IConfig extends AutoCloseable {
+		@Override
 		void close();
 	}
 

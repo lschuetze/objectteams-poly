@@ -49,6 +49,7 @@ public interface IAlienScopeTypeReference {
 			super(source, pos);
 			this.alienScope = alienScope;
 		}
+		@Override
 		public Scope getAlienScope() { return this.alienScope; }
 		@Override
 		public TypeBinding checkResolveUsingBaseImportScope(Scope scope, int location, boolean tolerate) {
@@ -85,6 +86,7 @@ public interface IAlienScopeTypeReference {
 			super(source, dim, pos);
 			this.alienScope = alienScope;
 		}
+		@Override
 		public Scope getAlienScope() { return this.alienScope; }
 		@Override
 		public TypeBinding checkResolveUsingBaseImportScope(Scope scope, int location, boolean tolerate) {
@@ -122,6 +124,7 @@ public interface IAlienScopeTypeReference {
 			super(source, typeArguments, dimensions, pos);
 			this.alienScope = alienScope;
 		}
+		@Override
 		public Scope getAlienScope() { return this.alienScope; }
 		@Override
 		public TypeBinding checkResolveUsingBaseImportScope(Scope scope, int location, boolean tolerate) {
@@ -166,6 +169,7 @@ public interface IAlienScopeTypeReference {
 			this.alienScope = alienScope;
 			this.isGenerated = true; // allow qualified reference to role
 		}
+		@Override
 		public Scope getAlienScope() { return this.alienScope; }
 		@Override
 		public TypeBinding checkResolveUsingBaseImportScope(Scope scope, int location, boolean tolerate) {
@@ -206,6 +210,7 @@ public interface IAlienScopeTypeReference {
 			this.alienScope = alienScope;
 			this.isGenerated = true; // allow qualified reference to role
 		}
+		@Override
 		public Scope getAlienScope() { return this.alienScope; }
 		@Override
 		public TypeBinding checkResolveUsingBaseImportScope(Scope scope, int location, boolean tolerate) {
@@ -246,6 +251,7 @@ public interface IAlienScopeTypeReference {
 			this.alienScope = alienScope;
 			this.isGenerated = true; // allow qualified reference to role
 		}
+		@Override
 		public Scope getAlienScope() { return this.alienScope; }
 		@Override
 		public TypeBinding checkResolveUsingBaseImportScope(Scope scope, int location, boolean tolerate) {

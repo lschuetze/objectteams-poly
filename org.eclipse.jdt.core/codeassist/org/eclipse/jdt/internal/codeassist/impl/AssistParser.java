@@ -137,6 +137,7 @@ public AssistParser(ProblemReporter problemReporter) {
 
 public abstract char[] assistIdentifier();
 
+@Override
 public void copyState(Parser from) {
 	
 	super.copyState(from);
@@ -191,6 +192,7 @@ public int bodyEnd(Initializer initializer){
  * Build initial recovery state.
  * Recovery state is inferred from the current state of the parser (reduced node stack).
  */
+@Override
 public RecoveredElement buildInitialRecoveryState(){
 	/* recovery in unit structure */
 	if (this.referenceContext instanceof CompilationUnitDeclaration){
@@ -401,30 +403,37 @@ private void initModuleInfo(RecoveredElement element) {
 		}
 	}
 }
+@Override
 protected void consumeAnnotationTypeDeclarationHeader() {
 	super.consumeAnnotationTypeDeclarationHeader();
 	pushOnElementStack(K_TYPE_DELIMITER);
 }
+@Override
 protected void consumeClassBodyDeclaration() {
 	popElement(K_METHOD_DELIMITER);
 	super.consumeClassBodyDeclaration();
 }
+@Override
 protected void consumeClassBodyopt() {
 	super.consumeClassBodyopt();
 	popElement(K_SELECTOR);
 }
+@Override
 protected void consumeClassHeader() {
 	super.consumeClassHeader();
 	pushOnElementStack(K_TYPE_DELIMITER);
 }
+@Override
 protected void consumeConstructorBody() {
 	super.consumeConstructorBody();
 	popElement(K_METHOD_DELIMITER);
 }
+@Override
 protected void consumeConstructorHeader() {
 	super.consumeConstructorHeader();
 	pushOnElementStack(K_METHOD_DELIMITER);
 }
+@Override
 protected void consumeEnhancedForStatementHeaderInit(boolean hasModifiers) {
 	super.consumeEnhancedForStatementHeaderInit(hasModifiers);
 
@@ -434,15 +443,18 @@ protected void consumeEnhancedForStatementHeaderInit(boolean hasModifiers) {
 		this.currentElement = this.currentElement.add(localDecl, 0);
 	}
 }
+@Override
 protected void consumeEnterAnonymousClassBody(boolean qualified) {
 	super.consumeEnterAnonymousClassBody(qualified);
 	popElement(K_SELECTOR);
 	pushOnElementStack(K_TYPE_DELIMITER);
 }
+@Override
 protected void consumeEnterMemberValue() {
 	super.consumeEnterMemberValue();
 	pushOnElementStack(K_ATTRIBUTE_VALUE_DELIMITER, this.identifierPtr);
 }
+@Override
 protected void consumeEnumConstantHeader() {
 	if(this.currentToken == TokenNameLBRACE) {
 		popElement(K_ENUM_CONSTANT_DELIMITER);
@@ -454,29 +466,35 @@ protected void consumeEnumConstantHeader() {
 	if (triggerRecoveryUponLambdaClosure((Statement) this.astStack[this.astPtr], true) && this.currentElement != null)
 		this.restartRecovery = true;
 }
+@Override
 protected void consumeEnumConstantHeaderName() {
 	super.consumeEnumConstantHeaderName();
 	pushOnElementStack(K_ENUM_CONSTANT_DELIMITER);
 }
+@Override
 protected void consumeEnumConstantWithClassBody() {
 	popElement(K_TYPE_DELIMITER);
 	popElement(K_FIELD_INITIALIZER_DELIMITER);
 	popElement(K_ENUM_CONSTANT_DELIMITER);
 	super.consumeEnumConstantWithClassBody();
 }
+@Override
 protected void consumeEnumConstantNoClassBody() {
 	popElement(K_ENUM_CONSTANT_DELIMITER);
 	super.consumeEnumConstantNoClassBody();
 }
+@Override
 protected void consumeEnumHeader() {
 	super.consumeEnumHeader();
 	pushOnElementStack(K_TYPE_DELIMITER);
 }
+@Override
 protected void consumeExitMemberValue() {
 	super.consumeExitMemberValue();
 	popElement(K_ATTRIBUTE_VALUE_DELIMITER);
 }
 
+@Override
 protected void consumeExplicitConstructorInvocation(int flag, int recFlag) {
 	super.consumeExplicitConstructorInvocation(flag, recFlag);
 	popElement(K_SELECTOR);
@@ -610,21 +628,25 @@ protected ASTNode enclosingNode() {
 }
 
 //{ObjectTeams: make public (was protected)
+@Override
 public boolean isAssistParser() {
 //SH}
 	return true;
 }
+@Override
 protected void consumeBlockStatement() {
 	super.consumeBlockStatement();
 	if (triggerRecoveryUponLambdaClosure((Statement) this.astStack[this.astPtr], true) && this.currentElement != null)
 		this.restartRecovery = true;
 }
+@Override
 protected void consumeBlockStatements() {
 	super.consumeBlockStatements();
 	if (triggerRecoveryUponLambdaClosure((Statement) this.astStack[this.astPtr], true) && this.currentElement != null) {
 		this.restartRecovery = true;
 	}
 }
+@Override
 protected void consumeFieldDeclaration() {
 	super.consumeFieldDeclaration();
 	if (triggerRecoveryUponLambdaClosure((Statement) this.astStack[this.astPtr], true)) {
@@ -634,6 +656,7 @@ protected void consumeFieldDeclaration() {
 			this.restartRecovery = true;
 	}
 }
+@Override
 protected void consumeForceNoDiet() {
 	super.consumeForceNoDiet();
 	// if we are not in a method (i.e. we are not in a local variable initializer)
@@ -652,6 +675,7 @@ protected void consumeForceNoDiet() {
 
 	}
 }
+@Override
 protected void consumeInterfaceHeader() {
 	super.consumeInterfaceHeader();
 	pushOnElementStack(K_TYPE_DELIMITER);
@@ -662,20 +686,24 @@ protected void consumeNestedLambda() {
 	LambdaExpression lexp = (LambdaExpression) this.astStack[this.astPtr];
 	pushOnElementStack(K_LAMBDA_EXPRESSION_DELIMITER, EXPRESSION_BODY, lexp);
 }
+@Override
 protected void consumeMethodBody() {
 	super.consumeMethodBody();
 	popElement(K_METHOD_DELIMITER);
 }
+@Override
 protected void consumeMethodDeclaration(boolean isNotAbstract, boolean isDefaultMethod) {
 	if (!isNotAbstract) {
 		popElement(K_METHOD_DELIMITER);
 	}
 	super.consumeMethodDeclaration(isNotAbstract, isDefaultMethod);
 }
+@Override
 protected void consumeMethodHeader() {
 	super.consumeMethodHeader();
 	pushOnElementStack(K_METHOD_DELIMITER);
 }
+@Override
 protected void consumeMethodInvocationName() {
 	super.consumeMethodInvocationName();
 	popElement(K_SELECTOR);
@@ -684,6 +712,7 @@ protected void consumeMethodInvocationName() {
 		this.lastCheckPoint = messageSend.sourceEnd + 1;
 	}
 }
+@Override
 protected void consumeMethodInvocationNameWithTypeArguments() {
 	super.consumeMethodInvocationNameWithTypeArguments();
 	popElement(K_SELECTOR);
@@ -692,6 +721,7 @@ protected void consumeMethodInvocationNameWithTypeArguments() {
 		this.lastCheckPoint = messageSend.sourceEnd + 1;
 	}
 }
+@Override
 protected void consumeMethodInvocationPrimary() {
 	super.consumeMethodInvocationPrimary();
 	popElement(K_SELECTOR);
@@ -700,6 +730,7 @@ protected void consumeMethodInvocationPrimary() {
 		this.lastCheckPoint = messageSend.sourceEnd + 1;
 	}
 }
+@Override
 protected void consumeMethodInvocationPrimaryWithTypeArguments() {
 	super.consumeMethodInvocationPrimaryWithTypeArguments();
 	popElement(K_SELECTOR);
@@ -708,6 +739,7 @@ protected void consumeMethodInvocationPrimaryWithTypeArguments() {
 		this.lastCheckPoint = messageSend.sourceEnd + 1;
 	}
 }
+@Override
 protected void consumeMethodInvocationSuper() {
 	super.consumeMethodInvocationSuper();
 	popElement(K_SELECTOR);
@@ -716,6 +748,7 @@ protected void consumeMethodInvocationSuper() {
 		this.lastCheckPoint = messageSend.sourceEnd + 1;
 	}
 }
+@Override
 protected void consumeMethodInvocationSuperWithTypeArguments() {
 	super.consumeMethodInvocationSuperWithTypeArguments();
 	popElement(K_SELECTOR);
@@ -724,6 +757,7 @@ protected void consumeMethodInvocationSuperWithTypeArguments() {
 		this.lastCheckPoint = messageSend.sourceEnd + 1;
 	}
 }
+@Override
 protected void consumeModuleHeader() {
 	pushOnElementStack(K_MODULE_INFO_DELIMITER);
 	// ModuleHeader ::= 'module' Name
@@ -771,14 +805,17 @@ protected void consumeModuleHeader() {
 	}
 }
 
+@Override
 protected void consumeModuleDeclaration() {
 	super.consumeModuleDeclaration();
 	popElement(K_MODULE_INFO_DELIMITER);
 }
+@Override
 protected void consumeNestedMethod() {
 	super.consumeNestedMethod();
 	if(!isInsideMethod()) pushOnElementStack(K_METHOD_DELIMITER);
 }
+@Override
 protected void consumeOpenBlock() {
 	// OpenBlock ::= $empty
 	super.consumeOpenBlock();
@@ -821,6 +858,7 @@ protected void consumeOpenFakeBlock() {
 	}
 	this.blockStarts[this.realBlockPtr] = -this.scanner.startPosition;
 }
+@Override
 protected void consumePackageDeclarationName() {
 	// PackageDeclarationName ::= 'package' Name
 	/* build an ImportRef build from the last name
@@ -878,6 +916,7 @@ protected void consumePackageDeclarationName() {
 		this.restartRecovery = true; // used to avoid branching back into the regular automaton
 	}
 }
+@Override
 protected void consumePackageDeclarationNameWithModifiers() {
 	// PackageDeclarationName ::= Modifiers 'package' PushRealModifiers Name
 	/* build an ImportRef build from the last name
@@ -942,6 +981,7 @@ protected void consumePackageDeclarationNameWithModifiers() {
 		this.restartRecovery = true; // used to avoid branching back into the regular automaton
 	}
 }
+@Override
 protected void consumeRestoreDiet() {
 	super.consumeRestoreDiet();
 	// if we are not in a method (i.e. we were not in a local variable initializer)
@@ -951,6 +991,7 @@ protected void consumeRestoreDiet() {
 		popElement(K_FIELD_INITIALIZER_DELIMITER);
 	}
 }
+@Override
 protected void consumeSingleStaticImportDeclarationName() {
 	// SingleTypeImportDeclarationName ::= 'import' 'static' Name
 	/* push an ImportRef build from the last name
@@ -1002,6 +1043,7 @@ protected void consumeSingleStaticImportDeclarationName() {
 		this.restartRecovery = true; // used to avoid branching back into the regular automaton
 	}
 }
+@Override
 protected void consumeSinglePkgName() {
 	int index;
 	/* no need to take action if not inside assist identifiers */
@@ -1036,6 +1078,7 @@ protected void consumeSinglePkgName() {
 		reference.declarationSourceEnd = (int) positions[length-1];
 	}
 }
+@Override
 protected void consumeSingleTargetModuleName() {
 	int index;
 	/* no need to take action if not inside assist identifiers */
@@ -1060,6 +1103,7 @@ protected void consumeSingleTargetModuleName() {
 	}
 
 }
+@Override
 protected void consumeSingleRequiresModuleName() {
 
 	int index = indexOfAssistIdentifier();
@@ -1100,6 +1144,7 @@ protected void consumeSingleRequiresModuleName() {
 
 }
 
+@Override
 protected void consumeSingleTypeImportDeclarationName() {
 	// SingleTypeImportDeclarationName ::= 'import' Name
 	/* push an ImportRef build from the last name
@@ -1208,6 +1253,7 @@ protected void consumeSingleBaseImportDeclarationName() {
 	}
 }
 // SH}
+@Override
 protected void consumeStaticImportOnDemandDeclarationName() {
 	// TypeImportOnDemandDeclarationName ::= 'import' 'static' Name '.' '*'
 	/* push an ImportRef build from the last name
@@ -1262,10 +1308,12 @@ protected void consumeStaticImportOnDemandDeclarationName() {
 		this.restartRecovery = true; // used to avoid branching back into the regular automaton
 	}
 }
+@Override
 protected void consumeStaticInitializer() {
 	super.consumeStaticInitializer();
 	popElement(K_METHOD_DELIMITER);
 }
+@Override
 protected void consumeStaticOnly() {
 	super.consumeStaticOnly();
 	pushOnElementStack(K_METHOD_DELIMITER);
@@ -1284,6 +1332,7 @@ private void adjustBracket(int token) {
 			break;
 	}
 }
+@Override
 protected void consumeToken(int token) {
 	super.consumeToken(token);
 
@@ -1339,6 +1388,7 @@ protected void consumeToken(int token) {
 		this.previousIdentifierPtr = this.identifierPtr;
 	}
 }
+@Override
 protected void consumeTypeImportOnDemandDeclarationName() {
 	// TypeImportOnDemandDeclarationName ::= 'import' Name '.' '*'
 	/* push an ImportRef build from the last name
@@ -1429,10 +1479,12 @@ protected void flushElementStack() {
 /*
  * Build specific type reference nodes in case the cursor is located inside the type reference
  */
+@Override
 protected TypeReference getTypeReference(int dim) {
 //{ObjectTeams: wrap to introduce 2nd parameter
 	return getTypeReference(dim, false);  
 }
+@Override
 protected TypeReference getTypeReference(int dim, boolean liftingTypeAllowed) {
 // orig:
 
@@ -1594,6 +1646,7 @@ protected TypeReference getAssistTypeReferenceForGenericType(int dim, int identi
  * qualified name reference, then create a CompletionOnQualifiedNameReference
  * instead.
  */
+@Override
 protected NameReference getUnspecifiedReferenceOptimized() {
 
 	int completionIndex;
@@ -1635,18 +1688,22 @@ protected NameReference getUnspecifiedReferenceOptimized() {
 	this.lastCheckPoint = reference.sourceEnd + 1;
 	return reference;
 }
+@Override
 public void goForBlockStatementsopt() {
 	super.goForBlockStatementsopt();
 	this.isFirst = true;
 }
+@Override
 public void goForHeaders(){
 	super.goForHeaders();
 	this.isFirst = true;
 }
+@Override
 public void goForCompilationUnit(){
 	super.goForCompilationUnit();
 	this.isFirst = true;
 }
+@Override
 public void goForBlockStatementsOrCatchHeader() {
 	super.goForBlockStatementsOrCatchHeader();
 	this.isFirst = true;
@@ -1732,6 +1789,7 @@ protected int indexOfAssistIdentifier(boolean useGenericsStack){
 	// none of the awaiting identifiers is the completion one
 	return -1;
 }
+@Override
 public void initialize() {
 	super.initialize();
 	flushAssistState();
@@ -1739,6 +1797,7 @@ public void initialize() {
 	this.previousIdentifierPtr = -1;
 	this.bracketDepth = 0;
 }
+@Override
 public void initialize(boolean parsingCompilationUnit) {
 	super.initialize(parsingCompilationUnit);
 	flushAssistState();
@@ -1746,6 +1805,7 @@ public void initialize(boolean parsingCompilationUnit) {
 	this.previousIdentifierPtr = -1;
 	this.bracketDepth = 0;
 }
+@Override
 public abstract void initializeScanner();
 protected boolean isIndirectlyInsideFieldInitialization(){
 	int i = this.elementPtr;
@@ -1774,6 +1834,7 @@ protected boolean isIndirectlyInsideMethod(){
 	}
 	return false;
 }
+@Override
 protected boolean isIndirectlyInsideLambdaExpression(){
 	int i = this.elementPtr;
 	while (i > -1) {
@@ -2211,6 +2272,7 @@ protected void popUntilElement(int kind){
 /*
  * Prepares the state of the parser to go for BlockStatements.
  */
+@Override
 protected void prepareForBlockStatements() {
 	this.nestedMethod[this.nestedType = 0] = 1;
 	this.variablesCounter[this.nestedType] = 0;
@@ -2281,6 +2343,7 @@ protected void pushOnElementStack(int kind, int info, Object objectInfo){
 	this.elementInfoStack[this.elementPtr] = info;
 	this.elementObjectInfoStack[this.elementPtr] = objectInfo;
 }
+@Override
 public void recoveryExitFromVariable() {
 	if(this.currentElement != null && this.currentElement instanceof RecoveredField
 		&& !(this.currentElement instanceof RecoveredInitializer)) {
@@ -2293,6 +2356,7 @@ public void recoveryExitFromVariable() {
 		super.recoveryExitFromVariable();
 	}
 }
+@Override
 public void recoveryTokenCheck() {
 	RecoveredElement oldElement = this.currentElement;
 	switch (this.currentToken) {
@@ -2415,6 +2479,7 @@ protected int fallBackToSpringForward(Statement unused) {
  * Move checkpoint location, reset internal stacks and
  * decide which grammar goal is activated.
  */
+@Override
 protected int resumeAfterRecovery() {
 	if (requireExtendedRecovery()) {
 		if (this.unstackedAct == ERROR_ACTION) {

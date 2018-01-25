@@ -60,6 +60,7 @@ public static IMethod createHandle(JavaElement parent, IMethodSpec methodData) {
 	};
 }
 // SH}
+@Override
 protected void closing(Object info) throws JavaModelException {
 	super.closing(info);
 	SourceMethodElementInfo elementInfo = (SourceMethodElementInfo) info;
@@ -68,10 +69,12 @@ protected void closing(Object info) throws JavaModelException {
 		((TypeParameter) typeParameters[i]).close();
 	}
 }
+@Override
 public boolean equals(Object o) {
 	if (!(o instanceof SourceMethod)) return false;
 	return super.equals(o) && Util.equalArraysOrNull(this.parameterTypes, ((SourceMethod)o).parameterTypes);
 }
+@Override
 public IMemberValuePair getDefaultValue() throws JavaModelException {
 	SourceMethodElementInfo sourceMethodInfo = (SourceMethodElementInfo) getElementInfo();
 	if (sourceMethodInfo.isAnnotationMethod()) {
@@ -82,12 +85,14 @@ public IMemberValuePair getDefaultValue() throws JavaModelException {
 /**
  * @see IJavaElement
  */
+@Override
 public int getElementType() {
 	return METHOD;
 }
 /**
  * @see IMethod
  */
+@Override
 public String[] getExceptionTypes() throws JavaModelException {
 	SourceMethodElementInfo info = (SourceMethodElementInfo) getElementInfo();
 	char[][] exs= info.getExceptionTypeNames();
@@ -96,6 +101,7 @@ public String[] getExceptionTypes() throws JavaModelException {
 /**
  * @see JavaElement#getHandleMemento(StringBuffer)
  */
+@Override
 protected void getHandleMemento(StringBuffer buff) {
 	((JavaElement) getParent()).getHandleMemento(buff);
 	char delimiter = getHandleMementoDelimiter();
@@ -113,12 +119,14 @@ protected void getHandleMemento(StringBuffer buff) {
 /**
  * @see JavaElement#getHandleMemento()
  */
+@Override
 protected char getHandleMementoDelimiter() {
 	return JavaElement.JEM_METHOD;
 }
 /* (non-Javadoc)
  * @see org.eclipse.jdt.core.IMethod#getKey()
  */
+@Override
 public String getKey() {
 	try {
 		return getKey(this, false/*don't open*/);
@@ -130,12 +138,14 @@ public String getKey() {
 /**
  * @see IMethod
  */
+@Override
 public int getNumberOfParameters() {
 	return this.parameterTypes == null ? 0 : this.parameterTypes.length;
 }
 /**
  * @see IMethod
  */
+@Override
 public String[] getParameterNames() throws JavaModelException {
 	SourceMethodElementInfo info = (SourceMethodElementInfo) getElementInfo();
 	char[][] names= info.getArgumentNames();
@@ -144,18 +154,22 @@ public String[] getParameterNames() throws JavaModelException {
 /**
  * @see IMethod
  */
+@Override
 public String[] getParameterTypes() {
 	return this.parameterTypes;
 }
 
+@Override
 public ITypeParameter getTypeParameter(String typeParameterName) {
 	return new TypeParameter(this, typeParameterName);
 }
 
+@Override
 public ITypeParameter[] getTypeParameters() throws JavaModelException {
 	SourceMethodElementInfo info = (SourceMethodElementInfo) getElementInfo();
 	return info.typeParameters;
 }
+@Override
 public ILocalVariable[] getParameters() throws JavaModelException {
 	ILocalVariable[] arguments = ((SourceMethodElementInfo) getElementInfo()).arguments;
 	if (arguments == null)
@@ -167,6 +181,7 @@ public ILocalVariable[] getParameters() throws JavaModelException {
  * @since 3.0
  * @deprecated
  */
+@Override
 public String[] getTypeParameterSignatures() throws JavaModelException {
 	ITypeParameter[] typeParameters = getTypeParameters();
 	int length = typeParameters.length;
@@ -192,6 +207,7 @@ public String[] getTypeParameterSignatures() throws JavaModelException {
 /*
  * @see JavaElement#getPrimaryElement(boolean)
  */
+@Override
 public IJavaElement getPrimaryElement(boolean checkOwner) {
 	if (checkOwner) {
 		CompilationUnit cu = (CompilationUnit)getAncestor(COMPILATION_UNIT);
@@ -200,12 +216,14 @@ public IJavaElement getPrimaryElement(boolean checkOwner) {
 	IJavaElement primaryParent = this.parent.getPrimaryElement(false);
 	return ((IType)primaryParent).getMethod(this.name, this.parameterTypes);
 }
+@Override
 public String[] getRawParameterNames() throws JavaModelException {
 	return getParameterNames();
 }
 /**
  * @see IMethod
  */
+@Override
 public String getReturnType() throws JavaModelException {
 	SourceMethodElementInfo info = (SourceMethodElementInfo) getElementInfo();
 	return Signature.createTypeSignature(info.getReturnTypeName(), false);
@@ -213,6 +231,7 @@ public String getReturnType() throws JavaModelException {
 /**
  * @see IMethod
  */
+@Override
 public String getSignature() throws JavaModelException {
 	SourceMethodElementInfo info = (SourceMethodElementInfo) getElementInfo();
 	return Signature.createMethodSignature(this.parameterTypes, Signature.createTypeSignature(info.getReturnTypeName(), false));
@@ -220,6 +239,7 @@ public String getSignature() throws JavaModelException {
 /**
  * @see org.eclipse.jdt.internal.core.JavaElement#hashCode()
  */
+@Override
 public int hashCode() {
    int hash = super.hashCode();
 	for (int i = 0, length = this.parameterTypes.length; i < length; i++) {
@@ -230,6 +250,7 @@ public int hashCode() {
 /**
  * @see IMethod
  */
+@Override
 public boolean isConstructor() throws JavaModelException {
 	if (!getElementName().equals(this.parent.getElementName())) {
 		// faster than reaching the info
@@ -241,24 +262,28 @@ public boolean isConstructor() throws JavaModelException {
 /**
  * @see IMethod#isMainMethod()
  */
+@Override
 public boolean isMainMethod() throws JavaModelException {
 	return this.isMainMethod(this);
 }
 /**
  * @see IMethod#isLambdaMethod()
  */
+@Override
 public boolean isLambdaMethod() {
 	return false;
 }
 /* (non-Javadoc)
  * @see org.eclipse.jdt.core.IMethod#isResolved()
  */
+@Override
 public boolean isResolved() {
 	return false;
 }
 /**
  * @see IMethod#isSimilar(IMethod)
  */
+@Override
 public boolean isSimilar(IMethod method) {
 	return
 		areSimilarMethods(
@@ -269,6 +294,7 @@ public boolean isSimilar(IMethod method) {
 
 /**
  */
+@Override
 public String readableName() {
 
 	StringBuffer buffer = new StringBuffer(super.readableName());
@@ -285,6 +311,7 @@ public String readableName() {
 	buffer.append(')');
 	return buffer.toString();
 }
+@Override
 public JavaElement resolved(Binding binding) {
 	SourceRefElement resolvedHandle = new ResolvedSourceMethod(this.parent, this.name, this.parameterTypes, new String(binding.computeUniqueKey()));
 //{ObjectTeams: propagate this flag array:
@@ -296,6 +323,7 @@ public JavaElement resolved(Binding binding) {
 /**
  * @private Debugging purposes
  */
+@Override
 protected void toStringInfo(int tab, StringBuffer buffer, Object info, boolean showResolvedInfo) {
 	buffer.append(tabString(tab));
 	if (info == null) {
@@ -316,6 +344,7 @@ protected void toStringInfo(int tab, StringBuffer buffer, Object info, boolean s
 		toStringName(buffer, flags);
 	}
 }
+@Override
 protected void toStringName(StringBuffer buffer) {
 	toStringName(buffer, 0);
 }

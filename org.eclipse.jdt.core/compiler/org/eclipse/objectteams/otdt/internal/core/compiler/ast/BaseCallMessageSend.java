@@ -162,6 +162,7 @@ public class BaseCallMessageSend extends AbstractExpressionWrapper
 		this._weavingScheme = weavingScheme;
 	}
 
+	@Override
 	public FlowInfo analyseCode(BlockScope currentScope, FlowContext flowContext, FlowInfo flowInfo)
 	{
 		flowInfo = super.analyseCode(currentScope, flowContext, flowInfo);
@@ -198,6 +199,7 @@ public class BaseCallMessageSend extends AbstractExpressionWrapper
 		return FlowInfo.UNKNOWN;
 	}
 
+	@Override
 	public TypeBinding resolveType(BlockScope scope)
 	{
 		WeavingScheme weavingScheme = scope.compilerOptions().weavingScheme;
@@ -406,6 +408,7 @@ public class BaseCallMessageSend extends AbstractExpressionWrapper
         return null;
 	}
 
+	@Override
 	public void traverse(ASTVisitor visitor, BlockScope scope)
 	{
 		if(visitor.visit(this, scope))
@@ -420,6 +423,7 @@ public class BaseCallMessageSend extends AbstractExpressionWrapper
 		return this._sendOrig;
 	}
 
+	@Override
 	public ProblemReporterWrapper create(ProblemReporter wrappee)
 	{
 		return new BaseCallProblemReporterWrapper(wrappee, this);
@@ -449,6 +453,7 @@ public class BaseCallMessageSend extends AbstractExpressionWrapper
 	private static boolean hasBeenTransformed(Expression expr) {
 		return (expr.bits & ASTNode.HasBeenTransformed) != 0;
 	}
+	@Override
 	public boolean statementExpression() {
 		return ((this.bits & ASTNode.ParenthesizedMASK) == 0);
 	}

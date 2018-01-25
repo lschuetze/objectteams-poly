@@ -46,6 +46,7 @@ public class InternalCompilerError extends Error
     		"Please consider filing a bug including this stacktrace and a description how to reproduce at https://bugs.eclipse.org/bugs/enter_bug.cgi?product=Objectteams" + (char)Character.LINE_SEPARATOR + //$NON-NLS-1$
     		"Thank you -- the OTDT Development Team." + (char)Character.LINE_SEPARATOR); //$NON-NLS-1$
     
+	@Override
 	public String getMessage()
     {
         return INTRO + super.getMessage();

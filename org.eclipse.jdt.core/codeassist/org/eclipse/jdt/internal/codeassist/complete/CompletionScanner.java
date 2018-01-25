@@ -54,6 +54,7 @@ public CompletionScanner(long sourceLevel) {
 		null/*taskPriorities*/,
 		true/*taskCaseSensitive*/);
 }
+@Override
 protected boolean isAtAssistIdentifier() {
 	if (this.cursorLocation < this.startPosition && this.currentPosition == this.startPosition) { // fake empty identifier got issued
 		return true;
@@ -68,6 +69,7 @@ protected boolean isAtAssistIdentifier() {
  * on an identifier prefix.
  *
  */
+@Override
 public char[] getCurrentIdentifierSource() {
 
 	if (this.completionIdentifier == null){
@@ -95,6 +97,7 @@ public char[] getCurrentIdentifierSource() {
 	return super.getCurrentIdentifierSource();
 }
 
+@Override
 public char[] getCurrentTokenSourceString() {
 	if (this.completionIdentifier == null){
 		if (this.cursorLocation+1 >= this.startPosition && this.cursorLocation < this.currentPosition){
@@ -114,6 +117,7 @@ public char[] getCurrentTokenSourceString() {
 	}
 	return super.getCurrentTokenSourceString();
 }
+@Override
 protected int getNextToken0() throws InvalidInputException {
 //{ObjectTeams: support '.' 'team':
 	if (this._dotSeen > 0)
@@ -912,6 +916,7 @@ protected int getNextToken0() throws InvalidInputException {
 	}
 	return TokenNameEOF;
 }
+@Override
 public final void getNextUnicodeChar() throws InvalidInputException {
 	int temp = this.currentPosition; // the \ is already read
 	super.getNextUnicodeChar();
@@ -922,6 +927,7 @@ public final void getNextUnicodeChar() throws InvalidInputException {
 		throw new InvalidCursorLocation(InvalidCursorLocation.NO_COMPLETION_INSIDE_UNICODE);
 	}
 }
+@Override
 protected boolean isFirstTag() {
 	return
 		getNextChar('d') &&
@@ -942,6 +948,7 @@ public final void jumpOverBlock() {
 // * In case we actually read a keyword, but the cursor is located inside,
 // * we pretend we read an identifier.
 // */
+@Override
 public int scanIdentifierOrKeyword() {
 
 	int id = super.scanIdentifierOrKeyword();
@@ -962,6 +969,7 @@ public int scanIdentifierOrKeyword() {
 	return id;
 }
 
+@Override
 public int scanNumber(boolean dotPrefix) throws InvalidInputException {
 
 	int token = super.scanNumber(dotPrefix);

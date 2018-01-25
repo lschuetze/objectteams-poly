@@ -65,6 +65,7 @@ public class ForStatement extends Statement {
 		}
 	}
 
+	@Override
 	public FlowInfo analyseCode(BlockScope currentScope, FlowContext flowContext, FlowInfo flowInfo) {
 		this.breakLabel = new BranchLabel();
 		this.continueLabel = new BranchLabel();
@@ -243,6 +244,7 @@ public class ForStatement extends Statement {
 	 * @param currentScope org.eclipse.jdt.internal.compiler.lookup.BlockScope
 	 * @param codeStream org.eclipse.jdt.internal.compiler.codegen.CodeStream
 	 */
+	@Override
 	public void generateCode(BlockScope currentScope, CodeStream codeStream) {
 
 		if ((this.bits & IsReachable) == 0) {
@@ -354,6 +356,7 @@ public class ForStatement extends Statement {
 		codeStream.recordPositionsFrom(pc, this.sourceStart);
 	}
 
+	@Override
 	public StringBuffer printStatement(int tab, StringBuffer output) {
 
 		printIndent(tab, output).append("for ("); //$NON-NLS-1$
@@ -387,6 +390,7 @@ public class ForStatement extends Statement {
 		return output;
 	}
 
+	@Override
 	public void resolve(BlockScope upperScope) {
 //{ObjectTeams: don't discard scope from previous attempt:
 	  if (this.scope == null)
@@ -407,6 +411,7 @@ public class ForStatement extends Statement {
 			this.action.resolve(this.scope);
 	}
 
+	@Override
 	public void traverse(
 		ASTVisitor visitor,
 		BlockScope blockScope) {

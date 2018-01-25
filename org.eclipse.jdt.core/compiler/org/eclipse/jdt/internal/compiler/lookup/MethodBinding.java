@@ -236,10 +236,12 @@ public class MethodBinding extends Binding implements IProtectable {
     	return declaringClass.isRole();
     }
     /** Implement {@link IProtectable#getDeclaringClass} */
+	@Override
 	public ReferenceBinding getDeclaringClass() {
 		return this.declaringClass;
 	}
 	/** Implement {@link IProtectable#modifiers} */
+	@Override
 	public int modifiers() {
 		return this.modifiers;
 	}
@@ -736,6 +738,7 @@ public MethodBinding computeSubstitutedMethod(MethodBinding method, LookupEnviro
  * declaringUniqueKey dot selector genericSignature
  * p.X { <T> void bar(X<T> t) } --> Lp/X;.bar<T:Ljava/lang/Object;>(LX<TT;>;)V
  */
+@Override
 public char[] computeUniqueKey(boolean isLeaf) {
 	// declaring class
 	char[] declaringKey = this.declaringClass.computeUniqueKey(false/*not a leaf*/);
@@ -1081,6 +1084,7 @@ public final int getAccessFlags() {
 // SH}
 }
 
+@Override
 public AnnotationBinding[] getAnnotations() {
 	MethodBinding originalMethod = original();
 	return originalMethod.declaringClass.retrieveAnnotations(originalMethod);
@@ -1091,6 +1095,7 @@ public AnnotationBinding[] getAnnotations() {
  * lazily resolving corresponding annotation nodes, in case of forward references.
  * @see org.eclipse.jdt.internal.compiler.lookup.Binding#getAnnotationTagBits()
  */
+@Override
 public long getAnnotationTagBits() {
 	MethodBinding originalMethod = original();
 	if ((originalMethod.tagBits & TagBits.AnnotationResolved) == 0 && originalMethod.declaringClass instanceof SourceTypeBinding) {
@@ -1247,6 +1252,7 @@ public final boolean isConstructor() {
 
 /* Answer true if the receiver has default visibility
 */
+@Override
 public final boolean isDefault() {
 	return !isPublic() && !isProtected() && !isPrivate();
 }
@@ -1312,6 +1318,7 @@ public final boolean isOverriding() {
 }
 /* Answer true if the receiver has private visibility
 */
+@Override
 public final boolean isPrivate() {
 	return (this.modifiers & ClassFileConstants.AccPrivate) != 0;
 }
@@ -1326,18 +1333,21 @@ public final boolean isOrEnclosedByPrivateType() {
 
 /* Answer true if the receiver has protected visibility
 */
+@Override
 public final boolean isProtected() {
 	return (this.modifiers & ClassFileConstants.AccProtected) != 0;
 }
 
 /* Answer true if the receiver has public visibility
 */
+@Override
 public final boolean isPublic() {
 	return (this.modifiers & ClassFileConstants.AccPublic) != 0;
 }
 
 /* Answer true if the receiver is a static method
 */
+@Override
 public final boolean isStatic() {
 	return (this.modifiers & ClassFileConstants.AccStatic) != 0;
 }
@@ -1383,6 +1393,7 @@ public final boolean isViewedAsDeprecated() {
 	return (this.modifiers & (ClassFileConstants.AccDeprecated | ExtraCompilerModifiers.AccDeprecatedImplicitly)) != 0;
 }
 
+@Override
 public final int kind() {
 	return Binding.METHOD;
 }
@@ -1408,6 +1419,7 @@ public MethodBinding genericMethod() {
 	return this;
 }
 
+@Override
 public char[] readableName() /* foo(int, Thread) */ {
 	StringBuffer buffer = new StringBuffer(this.parameters.length + 1 * 20);
 	if (isConstructor())
@@ -1450,6 +1462,7 @@ final public AnnotationBinding[] getTypeAnnotations() {
 public void setTypeAnnotations(AnnotationBinding[] annotations) {
 	this.typeAnnotations = annotations;
 }
+@Override
 public void setAnnotations(AnnotationBinding[] annotations) {
 	this.declaringClass.storeAnnotations(this, annotations);
 }
@@ -1481,6 +1494,7 @@ protected final void setSelector(char[] selector) {
 /**
  * @see org.eclipse.jdt.internal.compiler.lookup.Binding#shortReadableName()
  */
+@Override
 public char[] shortReadableName() {
 	StringBuffer buffer = new StringBuffer(this.parameters.length + 1 * 20);
 	if (isConstructor())
@@ -1862,6 +1876,7 @@ public MethodBinding tiebreakMethod() {
 	return this;
 }
 //{ObjectTeams: for printing method mappings allow to suppress the modifiers:
+@Override
 public String toString() {
 	return toString(true);
 }

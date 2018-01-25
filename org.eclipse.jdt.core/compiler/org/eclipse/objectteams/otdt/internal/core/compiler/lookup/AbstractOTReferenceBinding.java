@@ -64,8 +64,10 @@ public abstract class AbstractOTReferenceBinding extends TypeBinding
 	public int modifiers;
 	// "forward declarations":
 	public abstract ReferenceBinding[] memberTypes();
+	@Override
 	public abstract ReferenceBinding superclass();
 	public abstract boolean isBinaryBinding();
+	@Override
 	public abstract int depth();
 
 	// allow to see this as a ReferenceBinding:
@@ -207,6 +209,7 @@ public abstract class AbstractOTReferenceBinding extends TypeBinding
 			this.callinCallouts = newMappings;
 		}
 	}
+	@Override
 	public final boolean isTeam() {
 
 		if ((this.modifiers & ExtraCompilerModifiers.AccTeam) != 0)
@@ -254,6 +257,7 @@ public abstract class AbstractOTReferenceBinding extends TypeBinding
 		confinedIfc.getRoleModel()._classPart = confinedClass;
 	}
 	/** Any form: (1) source/generated, (2) class/interface, (3) direct/nested */
+	@Override
 	public boolean isRole() {
 		if (isEnum())
 			return false;

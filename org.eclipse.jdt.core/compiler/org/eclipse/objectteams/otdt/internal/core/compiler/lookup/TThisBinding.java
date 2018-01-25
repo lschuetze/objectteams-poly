@@ -50,7 +50,8 @@ public class TThisBinding extends FieldBinding
     }
 
     // support for assembly of bestNamePath:
-    protected TeamAnchor getClone() {
+    @Override
+	protected TeamAnchor getClone() {
     	return new TThisBinding((ReferenceBinding)this.type);
     }
 
@@ -80,10 +81,12 @@ public class TThisBinding extends FieldBinding
         return getTThisForRole(role);
     }
 
-    public String toString() {
+    @Override
+	public String toString() {
         return new String(readableName());
     }
-    public char[] readableName() {
+    @Override
+	public char[] readableName() {
     	if (this.name != IOTConstants.TTHIS)
     		return this.name;
         char[] tmp = CharOperation.concat(this.name, this.type.sourceName(), '[');

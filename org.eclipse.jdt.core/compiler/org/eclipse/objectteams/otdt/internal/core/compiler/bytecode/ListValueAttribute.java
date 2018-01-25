@@ -62,7 +62,8 @@ public abstract class ListValueAttribute
     /* (non-Javadoc)
      * @see org.eclipse.objectteams.otdt.internal.core.compiler.bytecode.AbstractAttribute#write(org.eclipse.jdt.internal.compiler.ClassFile)
      */
-    public void write(ClassFile classFile)
+    @Override
+	public void write(ClassFile classFile)
     {
         // this code is mainly stolen from ClassFile.addAttributes().
         super.write(classFile);
@@ -117,9 +118,11 @@ public abstract class ListValueAttribute
     /* (non-Javadoc)
      * @see org.eclipse.objectteams.otdt.internal.core.compiler.bytecode.AbstractAttribute#evaluate(org.eclipse.jdt.internal.compiler.lookup.Binding)
      */
-    public abstract void evaluate(Binding binding, LookupEnvironment environment, char[][][] missingTypeNames);
+    @Override
+	public abstract void evaluate(Binding binding, LookupEnvironment environment, char[][][] missingTypeNames);
 
-    @SuppressWarnings("nls")
+    @Override
+	@SuppressWarnings("nls")
 	public String toString()
     {
         String str = "OT-Attribute "+new String(this._name)+": [";

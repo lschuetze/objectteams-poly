@@ -33,6 +33,7 @@ public class SelectionOnParameterMapping extends ParameterMapping
 		if (this.ident.binding != null)
 			throw new SelectionNodeFound(this.ident.binding);
 	}
+	@Override
 	public StringBuffer printExpression(int indent, StringBuffer output) {
 		output.append("<SelectOnParameterMapping:"); //$NON-NLS-1$
 		return super.printExpression(0, output).append('>');

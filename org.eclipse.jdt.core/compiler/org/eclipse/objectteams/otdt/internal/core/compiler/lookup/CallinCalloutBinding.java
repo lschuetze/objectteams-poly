@@ -131,7 +131,8 @@ public class CallinCalloutBinding extends Binding
 	/* (non-Javadoc)
      * @see org.eclipse.jdt.internal.compiler.lookup.Binding#bindingType()
      */
-    public int kind()
+    @Override
+	public int kind()
     {
         return BINDING;
     }
@@ -145,7 +146,8 @@ public class CallinCalloutBinding extends Binding
     /* (non-Javadoc)
      * @see org.eclipse.jdt.internal.compiler.lookup.Binding#readableName()
      */
-    public char[] readableName()
+    @Override
+	public char[] readableName()
     {
         StringBuffer buffer = new StringBuffer();
         buffer.append(toString());
@@ -198,7 +200,8 @@ public class CallinCalloutBinding extends Binding
     }
 
     /** Get the problemId of the first erroneous method binding or NoError. */
-    public int problemId() {
+    @Override
+	public int problemId() {
     	if (this._roleMethodBinding != null && !this._roleMethodBinding.isValidBinding())
     		return this._roleMethodBinding.problemId();
     	if (this._baseMethods != null)
@@ -230,7 +233,8 @@ public class CallinCalloutBinding extends Binding
 		return null;
 	}
 
-    @SuppressWarnings("nls")
+    @Override
+	@SuppressWarnings("nls")
 	public char[] computeUniqueKey(boolean isLeaf) {
     	// callin mappings have a name:
     	if (this.name != null)
@@ -253,16 +257,19 @@ public class CallinCalloutBinding extends Binding
 				"->".toCharArray());
     }
 
-    public void setAnnotations(AnnotationBinding[] annotations) {
+    @Override
+	public void setAnnotations(AnnotationBinding[] annotations) {
     	this._declaringRoleClass.storeAnnotations(this, annotations);
     }
 
-    public AnnotationBinding[] getAnnotations() {
+    @Override
+	public AnnotationBinding[] getAnnotations() {
       return this._declaringRoleClass.retrieveAnnotations(this);
     }
 
 
-    @SuppressWarnings("nls")
+    @Override
+	@SuppressWarnings("nls")
 	public String toString()
     {
         String result = (this.name == null) ? "" : new String(this.name)+": ";

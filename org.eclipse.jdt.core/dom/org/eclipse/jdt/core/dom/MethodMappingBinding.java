@@ -60,6 +60,7 @@ class MethodMappingBinding implements IMethodMappingBinding
 	/*
 	 * @see IBinding#getName()
 	 */
+	@Override
 	public String getName()
     {
 		if (this.name == null)
@@ -73,6 +74,7 @@ class MethodMappingBinding implements IMethodMappingBinding
 	/*
 	 * @see IMethodMappingBinding#getDeclaringRoleClass()
 	 */
+	@Override
 	public ITypeBinding getDeclaringRoleClass()
     {
 		if (this.declaringClass == null)
@@ -86,7 +88,8 @@ class MethodMappingBinding implements IMethodMappingBinding
     /*
      * @see IMethodMappingBinding#getReferencedBaseClass()
      */
-    public ITypeBinding getReferencedBaseClass()
+    @Override
+	public ITypeBinding getReferencedBaseClass()
     {
         if (this.baseClass == null)
         {
@@ -101,7 +104,8 @@ class MethodMappingBinding implements IMethodMappingBinding
     /*
      * @see IMethodMappingBinding#getRoleMethod()
      */
-    public IMethodBinding getRoleMethod()
+    @Override
+	public IMethodBinding getRoleMethod()
     {
         if (this.roleMethod == null)
         {
@@ -114,7 +118,8 @@ class MethodMappingBinding implements IMethodMappingBinding
     /*
      * @see IMethodMappingBinding#getBaseMethods()
      */
-    public IMethodBinding[] getBaseMethods()
+    @Override
+	public IMethodBinding[] getBaseMethods()
     {
         if (this.baseMethods == null)
         {
@@ -129,7 +134,8 @@ class MethodMappingBinding implements IMethodMappingBinding
         return this.baseMethods;
     }
     
-    public IVariableBinding getBaseField()
+    @Override
+	public IVariableBinding getBaseField()
     {
         if (this.baseField == null)
         {
@@ -141,7 +147,8 @@ class MethodMappingBinding implements IMethodMappingBinding
         return this.baseField;
     }
 
-    public String[] getBaseArgumentNames() {
+    @Override
+	public String[] getBaseArgumentNames() {
     	MethodBinding[] methodBindings = this.binding._baseMethods;
 		if (methodBindings != null && methodBindings.length > 0)
 		{
@@ -166,6 +173,7 @@ class MethodMappingBinding implements IMethodMappingBinding
 	/*
 	 * @see IBinding#getKind()
 	 */
+	@Override
 	public int getKind()
     {
 		return IBinding.METHOD_MAPPING;
@@ -174,6 +182,7 @@ class MethodMappingBinding implements IMethodMappingBinding
 	/*
 	 * @see IBinding#getModifiers()
 	 */
+	@Override
 	public int getModifiers()
     {
         if (this.binding.type == org.eclipse.objectteams.otdt.internal.core.compiler.lookup.CallinCalloutBinding.CALLIN)
@@ -202,6 +211,7 @@ class MethodMappingBinding implements IMethodMappingBinding
 	/*
 	 * @see IBinding#isDeprecated()
 	 */
+	@Override
 	public boolean isDeprecated()
     {
 		return false;
@@ -210,11 +220,13 @@ class MethodMappingBinding implements IMethodMappingBinding
 	/**
 	 * @see IBinding#isSynthetic()
 	 */
+	@Override
 	public boolean isSynthetic()
     {
 		return false;
 	}
 
+	@Override
 	public boolean isCallin() {
 		return this.binding.isCallin();
 	}
@@ -222,7 +234,8 @@ class MethodMappingBinding implements IMethodMappingBinding
 	/*
 	 * @see IBinding#getKey()
 	 */
-    public String getKey()
+    @Override
+	public String getKey()
     {
 		StringBuffer buffer = new StringBuffer();
 		buffer.append(this.getDeclaringRoleClass().getKey());
@@ -237,16 +250,19 @@ class MethodMappingBinding implements IMethodMappingBinding
 	 * For debugging purpose only.
 	 * @see java.lang.Object#toString()
 	 */
+	@Override
 	public String toString()
     {
 		return this.binding.toString();
 	}
 
+	@Override
 	public IJavaElement getJavaElement() {
 		// SH: could not find a path that could possibly call this method [26.2.07]
 		return null;
 	}
 
+	@Override
 	public boolean isEqualTo(IBinding other) {
 		if (this == other)
 			return true;
@@ -267,7 +283,8 @@ class MethodMappingBinding implements IMethodMappingBinding
 	}
 
 // (svenk: implement method from IBinding
-  public IAnnotationBinding[] getAnnotations() {
+  @Override
+public IAnnotationBinding[] getAnnotations() {
     if (this.annotations != null) {
       return this.annotations;
     }
@@ -288,6 +305,7 @@ class MethodMappingBinding implements IMethodMappingBinding
   }
 // svenk)
 
+	@Override
 	public boolean isRecovered() {
 		// method mappings are not (yet) recovered (cf. e.g., DefaultBindingResolver.getVariableBinding())
 		return false;
@@ -295,6 +313,7 @@ class MethodMappingBinding implements IMethodMappingBinding
 
 
 
+	@Override
 	public InferenceKind getInferenceKind() {
 		if (this.binding != null)
 			return this.binding.inferred;

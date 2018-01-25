@@ -102,6 +102,7 @@ public class PotentialLiftExpression extends PotentialTranslationExpression {
 		this.teamExpr = teamExpr;
 	}
 
+	@Override
 	public TypeBinding resolveType(BlockScope scope)
     {
     	this.constant = Constant.NotAConstant;

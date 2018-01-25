@@ -72,6 +72,7 @@ public class BaseCallProblemReporterWrapper extends ProblemReporterWrapper
     		super.handle(problemId, problemArguments, elaborationId, messageArguments, severity,
     				problemStartPosition, problemEndPosition, context, unitResult);
     }
+	@Override
 	public void handle(
 		int problemId,
 		String[] problemArguments,
@@ -106,6 +107,7 @@ public class BaseCallProblemReporterWrapper extends ProblemReporterWrapper
 		}
 
 	}
+	@Override
 	public void invalidMethod(MessageSend messageSend, MethodBinding method, Scope scope) {
 		if (messageSend.isGenerated) // boxing invocation?
 			return;
@@ -124,6 +126,7 @@ public class BaseCallProblemReporterWrapper extends ProblemReporterWrapper
 		}
 	}
 
+	@Override
 	public void invalidConstructor(Statement statement, MethodBinding targetConstructor) {
 		if (!statement.isGenerated()) // suppress error against generated boxing constructor (in case of type mismatch)
 			super.invalidConstructor(statement, targetConstructor);

@@ -61,6 +61,7 @@ public CodeSnippetMessageSend(EvaluationContext evaluationContext) {
  * @param codeStream org.eclipse.jdt.internal.compiler.codegen.CodeStream
  * @param valueRequired boolean
  */
+@Override
 public void generateCode(BlockScope currentScope, CodeStream codeStream, boolean valueRequired) {
 	int pc = codeStream.position;
 	MethodBinding codegenBinding = this.binding.original();
@@ -178,6 +179,7 @@ public void generateCode(BlockScope currentScope, CodeStream codeStream, boolean
 	}
 	codeStream.recordPositionsFrom(pc, (int)(this.nameSourcePosition >>> 32)); // highlight selector
 }
+@Override
 public void manageSyntheticAccessIfNecessary(BlockScope currentScope, FlowInfo flowInfo) {
 
 	if ((flowInfo.tagBits & FlowInfo.UNREACHABLE_OR_DEAD) == 0) {
@@ -194,6 +196,7 @@ public void manageSyntheticAccessIfNecessary(BlockScope currentScope, FlowInfo f
 		}
 	}
 }
+@Override
 public TypeBinding resolveType(BlockScope scope) {
 	// Answer the signature return type
 	// Base type promotion

@@ -94,6 +94,7 @@ public class CalloutMappingDeclaration extends AbstractMethodMappingDeclaration
 	 * @param roleParams
 	 * @param baseParams
 	 */
+	@Override
 	public boolean internalCheckParametersCompatibility(
 			MethodSpec methodSpec,
 			TypeBinding[] roleParams,
@@ -152,6 +153,7 @@ public class CalloutMappingDeclaration extends AbstractMethodMappingDeclaration
 	}
 
 
+	@Override
 	public void checkReturnCompatibility(MethodSpec methodSpec)
 	{
 		TypeBinding roleReturn = this.roleMethodSpec.resolvedType();
@@ -343,6 +345,7 @@ public class CalloutMappingDeclaration extends AbstractMethodMappingDeclaration
 		return false;
 	}
 
+	@Override
 	protected void checkThrownExceptions(MethodSpec baseSpec) {
 		if (   this.hasSignature
 			&& !this.roleMethodSpec.resolvedMethod.isValidBinding()
@@ -352,6 +355,7 @@ public class CalloutMappingDeclaration extends AbstractMethodMappingDeclaration
 		checkThrownExceptions(baseSpec.resolvedMethod, this.roleMethodSpec.resolvedMethod);
 	}
 
+	@Override
 	public StringBuffer print(int indent, StringBuffer output)
 	{
 		printIndent(indent,output);
@@ -396,6 +400,7 @@ public class CalloutMappingDeclaration extends AbstractMethodMappingDeclaration
         return output;
     }
 
+	@Override
 	public void traverse(ASTVisitor visitor, ClassScope classScope)
 	{
 		if(visitor.visit(this, classScope))
@@ -416,16 +421,19 @@ public class CalloutMappingDeclaration extends AbstractMethodMappingDeclaration
 		visitor.endVisit(this, classScope);
 	}
 
+	@Override
 	public boolean isCallin()
 	{
 		return false;
 	}
 
+	@Override
 	public boolean isCallout()
 	{
 		return true;
 	}
 
+	@Override
 	public boolean isCalloutOverride()
 	{
 		return this.calloutKind==TokenNameCALLOUT_OVERRIDE;
@@ -436,6 +444,7 @@ public class CalloutMappingDeclaration extends AbstractMethodMappingDeclaration
         return this.baseMethodSpec instanceof FieldAccessSpec;
     }
 
+	@Override
 	public boolean canAccessInvisibleBase() {
 		return ALLOW_DECAPSULATION;
 	}
@@ -456,6 +465,7 @@ public class CalloutMappingDeclaration extends AbstractMethodMappingDeclaration
 	/* (non-Javadoc)
 	 * @see org.eclipse.jdt.internal.compiler.ast.AbstractMethodMappingDeclaration#getImpementationMethodSpec()
 	 */
+	@Override
 	public MethodSpec getImplementationMethodSpec() {
 		return this.baseMethodSpec;
 	}
@@ -463,6 +473,7 @@ public class CalloutMappingDeclaration extends AbstractMethodMappingDeclaration
 	/* (non-Javadoc)
 	 * @see org.eclipse.jdt.internal.compiler.ast.AbstractMethodMappingDeclaration#getBaseMethodSpecs()
 	 */
+	@Override
 	public MethodSpec[] getBaseMethodSpecs() {
 		if (this.baseMethodSpec != null) {
 		return new MethodSpec[] { this.baseMethodSpec };

@@ -58,14 +58,16 @@ public class SelectionOnTSuperReference extends TsuperReference
     	super(pos, sourceEnd);
     }
 
-    public StringBuffer printExpression(int indent, StringBuffer output)
+    @Override
+	public StringBuffer printExpression(int indent, StringBuffer output)
     {
 
     	output.append("<SelectOnTSuper:"); //$NON-NLS-1$
     	return super.printExpression(0, output).append('>');
     }
 
-    public TypeBinding resolveType(BlockScope scope)
+    @Override
+	public TypeBinding resolveType(BlockScope scope)
     {
     	TypeBinding tSuperRole = super.resolveType(scope);
 

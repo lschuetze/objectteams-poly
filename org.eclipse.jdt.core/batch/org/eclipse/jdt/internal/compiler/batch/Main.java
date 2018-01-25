@@ -782,6 +782,7 @@ public class Main implements ProblemSeverities, SuffixConstants {
 				final Set<Map.Entry<String, String>> entriesSet = options.entrySet();
 				Map.Entry<String, String>[] entries = entriesSet.toArray(new Map.Entry[entriesSet.size()]);
 				Arrays.sort(entries, new Comparator<Map.Entry<String, String>>() {
+					@Override
 					public int compare(Map.Entry<String, String> o1, Map.Entry<String, String> o2) {
 						Map.Entry<String, String> entry1 = o1;
 						Map.Entry<String, String> entry2 = o2;
@@ -1514,6 +1515,7 @@ public static boolean compile(String[] commandLineArguments, PrintWriter outWrit
 }
 public static File[][] getLibrariesFiles(File[] files) {
 	FilenameFilter filter = new FilenameFilter() {
+		@Override
 		public boolean accept(File dir, String name) {
 			return Util.archiveFormat(name) > -1;
 		}
@@ -3501,12 +3503,15 @@ public IErrorHandlingPolicy getHandlingPolicy() {
 
 	// passes the initial set of files to the batch oracle (to avoid finding more than once the same units when case insensitive match)
 	return new IErrorHandlingPolicy() {
+		@Override
 		public boolean proceedOnErrors() {
 			return Main.this.proceedOnError; // stop if there are some errors
 		}
+		@Override
 		public boolean stopOnFirstError() {
 			return false;
 		}
+		@Override
 		public boolean ignoreAllErrors() {
 			return false;
 		}
@@ -3712,9 +3717,11 @@ protected ArrayList<FileSystem.Classpath> handleClasspath(ArrayList<String> clas
 	HashMap<String, Classpath> knownNames = new HashMap<>();
 	FileSystem.ClasspathSectionProblemReporter problemReporter =
 		new FileSystem.ClasspathSectionProblemReporter() {
+			@Override
 			public void invalidClasspathSection(String jarFilePath) {
 				addPendingErrors(bind("configure.invalidClasspathSection", jarFilePath)); //$NON-NLS-1$
 			}
+			@Override
 			public void multipleClasspathSections(String jarFilePath) {
 				addPendingErrors(bind("configure.multipleClasspathSections", jarFilePath)); //$NON-NLS-1$
 			}

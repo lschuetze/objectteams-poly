@@ -82,6 +82,7 @@ public abstract class TeamAnchor extends Binding implements ITeamAnchor {
 	// pulled up from VariableBinding:
 	public TypeBinding type;
 
+	@Override
 	public boolean isTeam() {
 		return this.type.isTeam();
 	}
@@ -109,10 +110,12 @@ public abstract class TeamAnchor extends Binding implements ITeamAnchor {
 	 */
 	protected ITeamAnchor[] bestNamePath = new ITeamAnchor[]{this};
 
+	@Override
 	public ITeamAnchor[] getBestNamePath() {
 		return getBestNamePath(true);
 	}
 
+	@Override
 	public ITeamAnchor[] getBestNamePath(boolean needResolve) {
 		if (needResolve)
 			resolveInitIfNeeded();  // may set bestNamePath
@@ -126,6 +129,7 @@ public abstract class TeamAnchor extends Binding implements ITeamAnchor {
 		return ((TeamAnchor)this.bestNamePath[0]).kind() == Binding.FIELD;
 	}
 
+	@Override
 	public boolean isValidAnchor() {
 		if (!isValidBinding())
 			return false;
@@ -159,6 +163,7 @@ public abstract class TeamAnchor extends Binding implements ITeamAnchor {
 		return result;
 	}
 
+	@Override
 	public char[][] tokens()
 	{
 		char[][] tokens = new char[this.bestNamePath.length][];
@@ -171,6 +176,7 @@ public abstract class TeamAnchor extends Binding implements ITeamAnchor {
 	 * Check whether the given expression determines a proper bestName for this binding.
 	 * @param rhs expression being assigned to this variable (Expression or Argument)
 	 */
+	@Override
 	public void setBestNameFromStat(Statement rhs)
 	{
 		if (   isFinal()
@@ -206,6 +212,7 @@ public abstract class TeamAnchor extends Binding implements ITeamAnchor {
 		}
 	}
 
+	@Override
 	public void shareBestName(ITeamAnchor other) {
 		this.bestNamePath = other.getBestNamePath();
 	}
@@ -304,12 +311,14 @@ public abstract class TeamAnchor extends Binding implements ITeamAnchor {
 	 * Do two variables provably denote the same instance?
 	 * Shown by shallow-equal bestNamePaths.
 	 */
+	@Override
 	public boolean hasSameBestNameAs(ITeamAnchor other) {
 		if (other == this) return true;
 		ITeamAnchor[] otherBestName = other.getBestNamePath();
 		return hasSameBestNameAs(otherBestName, other);
 	}
 	/** Variant if path of other is directly known. */
+	@Override
 	public boolean hasSameBestNameAs(ITeamAnchor[] otherBestName, ITeamAnchor other) {
 		ITeamAnchor[] thisBestName  = getBestNamePath();
 
@@ -363,6 +372,7 @@ public abstract class TeamAnchor extends Binding implements ITeamAnchor {
 	 *  can directly find the type).
 	 * @return a flat ('.'-seperated) representation of this variable's best name.
 	 */
+	@Override
 	public char[] getBestName() {
 		int len = this.bestNamePath.length;
 		int prefixLen = 0;
@@ -389,6 +399,7 @@ public abstract class TeamAnchor extends Binding implements ITeamAnchor {
 	 * If roleType already has a significant anchor, and this anchor is TThis
 	 * use the more specific anchor from roleType.
 	 */
+	@Override
 	public ITeamAnchor asAnchorFor (ReferenceBinding roleType) {
 		if (! (this.type instanceof ReferenceBinding))
 			return null;
@@ -408,6 +419,7 @@ public abstract class TeamAnchor extends Binding implements ITeamAnchor {
 		return null;
 	}
 
+	@Override
 	public ITeamAnchor retrieveAnchorFromAnchorRoleTypeFor(ReferenceBinding roleType) {
 		// TODO (SH) copied and not yet validated!
 		// in contrast to the above, this method will never return 'this'
@@ -435,6 +447,7 @@ public abstract class TeamAnchor extends Binding implements ITeamAnchor {
 	 * Create a VariableBinding with a bestNamePath constructed from
 	 * the bestNamePath of `prefix' plus this as last element.
 	 */
+	@Override
 	public ITeamAnchor setPathPrefix (ITeamAnchor prefix) {
 		TeamAnchor result = getClone();
 		ITeamAnchor[] prefixBestName = prefix.getBestNamePath();
@@ -448,12 +461,14 @@ public abstract class TeamAnchor extends Binding implements ITeamAnchor {
 	}
 
 
+	@Override
 	public ITeamAnchor replaceFirst(ITeamAnchor anchor) {
 		TeamAnchor result = getClone();
 		result.bestNamePath[0] = anchor;
 		return result;
 	}
 
+	@Override
 	public boolean isPrefixLegal(ReferenceBinding site, ITeamAnchor prefix) {
 	   	ITeamAnchor firstField = this.bestNamePath[0];
 	   	if (firstField instanceof FieldBinding) {
@@ -502,15 +517,19 @@ public abstract class TeamAnchor extends Binding implements ITeamAnchor {
 	}
 	// ====== encapsulate all access to type:
 
+	@Override
 	public boolean hasValidReferenceType() {
 		return this.type != null && (this.type instanceof ReferenceBinding) && this.type.isValidBinding();
 	}
+	@Override
 	public boolean hasSameTypeAs(ITeamAnchor other) {
 		return TypeBinding.equalsEquals(leafReferenceType(), ((TeamAnchor)other).leafReferenceType());
 	}
+	@Override
 	public TeamModel getTeamModelOfType() {
 		return leafReferenceType().getTeamModel();
 	}
+	@Override
 	public boolean isTypeCompatibleWith(ReferenceBinding other) {
 		if (! (this.type instanceof ReferenceBinding))
 			return false;
@@ -518,6 +537,7 @@ public abstract class TeamAnchor extends Binding implements ITeamAnchor {
 			return (((ReferenceBinding)this.type).getRealClass().isCompatibleWith(other));
 		return this.type.isCompatibleWith(other);
 	}
+	@Override
 	public boolean isTypeCompatibleWithTypeOf(ITeamAnchor other) {
         ReferenceBinding otherAnchorType = (ReferenceBinding)((TeamAnchor)other).type;
         if (    otherAnchorType.isRole()
@@ -529,6 +549,7 @@ public abstract class TeamAnchor extends Binding implements ITeamAnchor {
 		return this.type.isCompatibleWith(otherAnchorType);
 	}
 
+	@Override
 	public void setStaticallyKnownTeam(RoleTypeBinding rtb) {
 		ReferenceBinding teamBinding = leafReferenceType();
 
@@ -543,6 +564,7 @@ public abstract class TeamAnchor extends Binding implements ITeamAnchor {
 		rtb._staticallyKnownTeam = teamBinding;
 	}
 
+	@Override
 	public boolean isTeamContainingRole(ReferenceBinding roleType) {
 		return TeamModel.isTeamContainingRole(leafReferenceType(), roleType);
 	}
@@ -550,6 +572,7 @@ public abstract class TeamAnchor extends Binding implements ITeamAnchor {
 	/**
 	 * Get a field from this anchor's type.
 	 */
+	@Override
 	public FieldBinding getFieldOfType(char[] token, boolean isStatic, boolean allowOuter) {
 		return TypeAnalyzer.findField(
 				leafReferenceType(),
@@ -558,6 +581,7 @@ public abstract class TeamAnchor extends Binding implements ITeamAnchor {
 				allowOuter);
 	}
 
+	@Override
 	public ReferenceBinding getMemberTypeOfType(char[] name) {
 		// safe if type is a class-part
 		ReferenceBinding roleType = leafReferenceType().getMemberType(name);
@@ -565,6 +589,7 @@ public abstract class TeamAnchor extends Binding implements ITeamAnchor {
 			return null;
 		return (RoleTypeBinding)getRoleTypeBinding(roleType, 0);
 	}
+	@Override
 	public RoleModel getStrengthenedRole (ReferenceBinding role) {
         if (TypeBinding.notEquals(role.roleModel.getTeamModel().getBinding(), leafReferenceType()))
         	return leafReferenceType().getMemberType(role.internalName()).roleModel;
@@ -658,6 +683,7 @@ public abstract class TeamAnchor extends Binding implements ITeamAnchor {
 		return null;
 	}
 
+	@Override
 	public TypeBinding getResolvedType() {
 		if (leafReferenceType() != null && leafReferenceType().isRole()) {
 			ReferenceBinding roleIfc = leafReferenceType().roleModel.getInterfacePartBinding();
@@ -689,6 +715,7 @@ public abstract class TeamAnchor extends Binding implements ITeamAnchor {
 	/** Answer the declaring class of the first path element, if it
       * is either a field or tthis.
       */
+	@Override
 	public ReferenceBinding getFirstDeclaringClass() {
 		if (this.bestNamePath[0] instanceof FieldBinding)
 			return ((FieldBinding)this.bestNamePath[0]).declaringClass;
@@ -709,6 +736,7 @@ public abstract class TeamAnchor extends Binding implements ITeamAnchor {
 	 * @param dimensions  if > 0 we request an array of roles.
 	 * @return either RoleTypeBinding or ArrayBinding.
 	 */
+	@Override
 	public TypeBinding getRoleTypeBinding(
 			ReferenceBinding 		roleBinding,
 			int              		dimensions)
@@ -716,6 +744,7 @@ public abstract class TeamAnchor extends Binding implements ITeamAnchor {
 		TypeBinding[] typeArguments = roleBinding.isParameterizedType() ? ((ParameterizedTypeBinding)roleBinding).arguments : null;
 		return getRoleTypeBinding(roleBinding, typeArguments, dimensions);
 	}
+	@Override
 	public TypeBinding getRoleTypeBinding(
 			ReferenceBinding	roleBinding,
 			TypeBinding[] 		arguments,
@@ -784,6 +813,7 @@ public abstract class TeamAnchor extends Binding implements ITeamAnchor {
 	 * @param dimensions  if > 0 we request an array of roles.
 	 * @return either RoleTypeBinding or ArrayBinding.
 	 */
+	@Override
 	public TypeBinding getDependentTypeBinding(
 			ReferenceBinding 	typeBinding,
 			int	            	paramPosition,
@@ -796,6 +826,7 @@ public abstract class TeamAnchor extends Binding implements ITeamAnchor {
 			throw new AbortCompilation(false, e);
 		}
 	}
+	@Override
 	public TypeBinding getDependentTypeBinding(
 			ReferenceBinding 	typeBinding,
 			int	            	paramPosition,
@@ -810,6 +841,7 @@ public abstract class TeamAnchor extends Binding implements ITeamAnchor {
 	    	: dependentTypeBinding;
 	}
 
+	@Override
 	public TypeBinding resolveRoleType(char[] roleName, int dims) {
 		if (!this.type.isTeam())
 			return null;

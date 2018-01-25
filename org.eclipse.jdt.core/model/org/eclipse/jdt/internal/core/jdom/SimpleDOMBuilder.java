@@ -38,10 +38,12 @@ public class SimpleDOMBuilder extends AbstractDOMBuilder implements ISourceEleme
 /**
  * Does nothing.
  */
+@Override
 public void acceptProblem(CategorizedProblem problem) {
 	// nothing to do
 }
 
+@Override
 public void acceptImport(int declarationStart, int declarationEnd, int nameStart, int nameEnd, char[][] tokens, boolean onDemand, int modifiers) {
 	int[] sourceRange = {declarationStart, declarationEnd};
 	String importName = new String(CharOperation.concatWith(tokens, '.'));
@@ -52,6 +54,7 @@ public void acceptImport(int declarationStart, int declarationEnd, int nameStart
 	this.fNode= new DOMImport(this.fDocument, sourceRange, importName, onDemand, modifiers);
 	addChild(this.fNode);
 }
+@Override
 public void acceptPackage(ImportReference importReference) {
 	int[] sourceRange= new int[] {importReference.declarationSourceStart, importReference.declarationSourceEnd};
 	char[] name = CharOperation.concatWith(importReference.getImportName(), '.');
@@ -67,6 +70,7 @@ public IDOMCompilationUnit createCompilationUnit(String sourceCode, String name)
 /**
  * @see IDOMFactory#createCompilationUnit(String, String)
  */
+@Override
 public IDOMCompilationUnit createCompilationUnit(ICompilationUnit compilationUnit) {
 	initializeBuild(compilationUnit.getContents(), true, true);
 	getParser(JavaCore.getOptions()).parseCompilationUnit(compilationUnit, false/*diet parse*/, null/*no progress*/);
@@ -91,6 +95,7 @@ protected void enterAbstractMethod(MethodInfo methodInfo) {
 }
 /**
  */
+@Override
 public void enterConstructor(MethodInfo methodInfo) {
 	/* see 1FVIIQZ */
 	String nameString = new String(this.fDocument, methodInfo.nameSourceStart, methodInfo.nameSourceEnd - methodInfo.nameSourceStart);
@@ -102,6 +107,7 @@ public void enterConstructor(MethodInfo methodInfo) {
 }
 /**
  */
+@Override
 public void enterField(FieldInfo fieldInfo) {
 
 	int[] sourceRange = {fieldInfo.declarationStart, -1};
@@ -118,6 +124,7 @@ public void enterField(FieldInfo fieldInfo) {
 /**
 
  */
+@Override
 public void enterInitializer(int declarationSourceStart, int modifiers) {
 	int[] sourceRange = {declarationSourceStart, -1};
 	this.fNode = new DOMInitializer(this.fDocument, sourceRange, modifiers);
@@ -126,11 +133,13 @@ public void enterInitializer(int declarationSourceStart, int modifiers) {
 }
 /**
  */
+@Override
 public void enterMethod(MethodInfo methodInfo) {
 	enterAbstractMethod(methodInfo);
 }
 /**
  */
+@Override
 public void enterType(TypeInfo typeInfo) {
 	if (this.fBuildingType) {
 		int[] sourceRange = {typeInfo.declarationStart, -1}; // will be fixed in the exit
@@ -149,16 +158,19 @@ public void enterType(TypeInfo typeInfo) {
  *
  * @see ISourceElementRequestor#exitConstructor(int)
  */
+@Override
 public void exitConstructor(int declarationEnd) {
 	exitMember(declarationEnd);
 }
 /**
  */
+@Override
 public void exitField(int initializationStart, int declarationEnd, int declarationSourceEnd) {
 	exitMember(declarationEnd);
 }
 /**
  */
+@Override
 public void exitInitializer(int declarationEnd) {
 	exitMember(declarationEnd);
 }
@@ -175,6 +187,7 @@ protected void exitMember(int declarationEnd) {
 }
 /**
  */
+@Override
 public void exitMethod(int declarationEnd, Expression defaultValue) {
 	exitMember(declarationEnd);
 }
@@ -184,6 +197,7 @@ public void exitMethod(int declarationEnd, Expression defaultValue) {
  * @param declarationEnd - a source position corresponding to the end of the class
  *		declaration.  This can include whitespace and comments following the closing bracket.
  */
+@Override
 public void exitType(int declarationEnd) {
 	exitType(declarationEnd, declarationEnd);
 }
@@ -195,32 +209,39 @@ protected SourceElementParser getParser(Map<String, String> settings) {
 }
 
 //{OTDTUI: added default implementation to corresponding extension in ISourceElementRequestor
+@Override
 public void enterCalloutMapping(CalloutInfo calloutInfo)
 {
     // TODO(jwl): Not implemented yet
 }
+@Override
 public void enterCalloutToFieldMapping(CalloutToFieldInfo calloutInfo)
 {
     // TODO Auto-generated method stub
 }
+@Override
 public void enterCallinMapping(CallinInfo callinInfo)
 {
     // TODO(jwl): Not implemented yet
 }
+@Override
 public void exitCallinMapping(int sourceEnd, int declarationSourceEnd)
 {
     // TODO(jwl): Not implemented yet
 }
+@Override
 public void exitCalloutMapping(int sourceEnd, int declarationSourceEnd)
 {
     // TODO(jwl): Not implemented yet
 }
+@Override
 public void exitCalloutToFieldMapping(int sourceEnd, int declarationSourceEnd)
 {
     // TODO Auto-generated method stub
 }
 //(ak)}
 //{ObjectTeams: default implementation
+@Override
 public void acceptBaseReference(char[][] typeName, int sourceStart, int sourceEnd){ /* empty stub */ }
 //haebor}
 

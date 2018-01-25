@@ -103,7 +103,8 @@ public abstract class ArrayTranslations {
         // if expression is resolved but teamExpression is unresolved schedule special resolving:
         IRunInScope hook = null;
         if (!isLifting && deferredResolve && expression.resolvedType != null && this._teamExpr.resolvedType == null) {
-        	hook = new IRunInScope() { public void run(BlockScope blockScope) {
+        	hook = new IRunInScope() { @Override
+			public void run(BlockScope blockScope) {
         		// resolving this expression was deferred:
         		ArrayTranslations.this._teamExpr.resolve(blockScope);
         	}};

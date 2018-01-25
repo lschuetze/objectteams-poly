@@ -77,6 +77,7 @@ void checkSyntheticArgsAndFields() {
 * NOTE: This method should only be used during/after code gen.
 */
 
+@Override
 public char[] constantPoolName() /* java/lang/Object */ {
 	
 	if (this.constantPoolName != null)
@@ -89,6 +90,7 @@ public char[] constantPoolName() /* java/lang/Object */ {
 	return this.constantPoolName = CharOperation.concat(enclosingType().constantPoolName(), this.sourceName, '$');
 }
 
+@Override
 public TypeBinding clone(TypeBinding outerType) {
 	MemberTypeBinding copy = new MemberTypeBinding(this);
 	copy.enclosingType = (SourceTypeBinding) outerType;
@@ -98,6 +100,7 @@ public TypeBinding clone(TypeBinding outerType) {
 /**
  * @see org.eclipse.jdt.internal.compiler.lookup.Binding#initializeDeprecatedAnnotationTagBits()
  */
+@Override
 public void initializeDeprecatedAnnotationTagBits() {
 	if (!isPrototype()) {
 		this.prototype.initializeDeprecatedAnnotationTagBits();
@@ -132,6 +135,7 @@ static {
 }
 
 private boolean hasCheckedBaseclassCircularity = false; // TODO(SH): convert to a tagbit?
+@Override
 public ReferenceBinding baseclass() {
 	if (!isDirectRole())
 		return null;
@@ -180,6 +184,7 @@ public ReferenceBinding baseclass() {
     return rawBaseclass();
 }
 // do not perform any lookup/analysis but filter out NobBaseclass/ProblemBaseClass
+@Override
 public ReferenceBinding rawBaseclass() {
     return ((this.baseclass == NoBaseclass) || (this.baseclass == ProblemBaseClass)) //$IDENTITY-COMPARISON$
     ? null: this.baseclass;
@@ -308,6 +313,7 @@ private ReferenceBinding checkRefineBase(
     return ProblemBaseClass;
 }
 //SH}
+@Override
 public String toString() {
 	if (this.hasTypeAnnotations()) {
 		return annotatedDebugName();
@@ -315,6 +321,7 @@ public String toString() {
     	return "Member type : " + new String(sourceName()) + " " + super.toString(); //$NON-NLS-2$ //$NON-NLS-1$
     }
 }
+@Override
 public ModuleBinding module() {
 	return this.enclosingType.module();
 }

@@ -72,6 +72,7 @@ public class TypeHierarchyConnector extends TypeHierarchy
     	return this.typeFlags;
     }
     
+	@Override
 	public IType[] getRootClasses()
     {
 		// This is a workaround.

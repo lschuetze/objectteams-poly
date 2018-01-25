@@ -132,7 +132,8 @@ public class CalloutMappingsAttribute extends ListValueAttribute {
 		default					: return 0;
 		}
 	}
-    void read(int i)
+    @Override
+	void read(int i)
     {
     	if (this._methodNames== null) {
     		this._methodNames          = new char[this._count][];
@@ -177,6 +178,7 @@ public class CalloutMappingsAttribute extends ListValueAttribute {
     /* (non-Javadoc)
      * @see org.eclipse.objectteams.otdt.internal.core.compiler.bytecode.ListValueAttribute#writeElementValue(int)
      */
+	@Override
 	void writeElementValue(int i) {
         CallinCalloutBinding mapping = this._mappings[i];
         writeName(mapping._roleMethodBinding.constantPoolName());
@@ -201,11 +203,13 @@ public class CalloutMappingsAttribute extends ListValueAttribute {
 	/* (non-Javadoc)
 	 * @see org.eclipse.objectteams.otdt.internal.core.compiler.bytecode.AbstractAttribute#evaluate(org.eclipse.jdt.internal.compiler.lookup.Binding, org.eclipse.jdt.internal.compiler.lookup.LookupEnvironment)
 	 */
+	@Override
 	public void evaluate(Binding binding, LookupEnvironment environment, char[][][] missingTypeNames) {
 		checkBindingMismatch(binding, ExtraCompilerModifiers.AccRole);
 		((ReferenceBinding)binding).roleModel.addAttribute(this);
 	}
 	// Evaluate CalloutMethodMappingAttribute late, because we need our methods to be in place.
+	@Override
 	public void evaluateLateAttribute(ReferenceBinding type, int state)
 	{
     	if (state != ITranslationStates.STATE_FAULT_IN_TYPES)
@@ -329,6 +333,7 @@ public class CalloutMappingsAttribute extends ListValueAttribute {
 	/* (non-Javadoc)
 	 * @see org.eclipse.objectteams.otdt.internal.core.compiler.bytecode.ListValueAttribute#toString(int)
 	 */
+	@Override
 	String toString(int i) {
 		if (this._mappings != null)
 			return this._mappings[i].toString();

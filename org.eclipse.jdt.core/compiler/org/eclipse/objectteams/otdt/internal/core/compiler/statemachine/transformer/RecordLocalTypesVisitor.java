@@ -51,7 +51,8 @@ public class RecordLocalTypesVisitor
 
 
     // visit member type
-    public boolean visit (TypeDeclaration type, ClassScope scope)
+    @Override
+	public boolean visit (TypeDeclaration type, ClassScope scope)
     {
         if (type.isTeam())
             if (StateHelper.hasState(type.binding, ITranslationStates.STATE_STATEMENTS_TRANSFORMED))
@@ -104,7 +105,8 @@ public class RecordLocalTypesVisitor
     /**
      * This is the pay-load of this visitor: add local types to the model of the enclosing role
      */
-    public boolean visit(TypeDeclaration td, BlockScope scope) {
+    @Override
+	public boolean visit(TypeDeclaration td, BlockScope scope) {
     	if((td.bits & ASTNode.IsLocalType)!=0)
     	{
 			SourceTypeBinding enclosingType = null;

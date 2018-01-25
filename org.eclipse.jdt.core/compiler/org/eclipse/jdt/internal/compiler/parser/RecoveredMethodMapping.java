@@ -68,6 +68,7 @@ public RecoveredMethodMapping(AbstractMethodMappingDeclaration methodMapping, Re
 /*
  * Record a nested block declaration
  */
+@Override
 public RecoveredElement add(Block nestedBlockDeclaration, int bracketBalanceValue) {
 
 	// TODO(SH): should param mapping be treated as block?
@@ -138,6 +139,7 @@ public RecoveredElement add(Statement statement, int bracketBalanceValue)
  * This method records a base method spec as part of the method mapping.
  * (Note that the inherited method must be overridden and 'this' must be returned instead of 'parent').
  */
+@Override
 public RecoveredElement add(AbstractMethodDeclaration methodDeclaration, int bracketBalanceValue)
 {
 	// check whether methodDeclaration is the start of a new member rather than an encoding for a base method spec:
@@ -226,15 +228,18 @@ public RecoveredElement add(FieldDeclaration fieldDeclaration, int bracketBalanc
 /*
  * Answer the associated parsed structure
  */
+@Override
 public ASTNode parseTree(){
 	return this.methodMappingDeclaration;
 }
 /*
  * Answer the very source end of the corresponding parse node
  */
+@Override
 public int sourceEnd(){
 	return this.methodMappingDeclaration.declarationSourceEnd;
 }
+@Override
 public String toString(int tab) {
 	StringBuffer result = new StringBuffer(tabString(tab));
 	result.append("Recovered method mapping:\n"); //$NON-NLS-1$
@@ -246,10 +251,12 @@ public String toString(int tab) {
 /*
  * Update the bodyStart of the corresponding parse node
  */
+@Override
 public void updateBodyStart(int bodyStart){
 	this.foundOpeningBrace = true;
 	this.methodMappingDeclaration.bodyStart = bodyStart;
 }
+@Override
 public void updateFromParserState() {
 	Parser parser = parser();
 	if (this.predicateExpression == null && parser.expressionPtr > -1) {
@@ -302,6 +309,7 @@ public AbstractMethodMappingDeclaration updatedMethodMappingDeclaration(int body
  * An opening brace got consumed, might be the expected opening one of the current element,
  * in which case the bodyStart is updated.
  */
+@Override
 public RecoveredElement updateOnOpeningBrace(int braceStart, int braceEnd){
 
 	/* in case the opening brace is close enough to the signature */
@@ -320,6 +328,7 @@ public RecoveredElement updateOnOpeningBrace(int braceStart, int braceEnd){
 	}
 	return super.updateOnOpeningBrace(braceStart, braceEnd);
 }
+@Override
 public void updateParseTree(){
 	updatedMethodMappingDeclaration(-1);
 }
@@ -366,6 +375,7 @@ public RecoveredElement updateOnClosingBrace(int braceStart, int braceEnd) {
 /*
  * Update the declarationSourceEnd of the corresponding parse node
  */
+@Override
 public void updateSourceEndIfNecessary(int braceStart, int braceEnd){
 	if (this.methodMappingDeclaration.declarationSourceEnd == 0) {
 		if(parser().rBraceSuccessorStart >= braceEnd) {

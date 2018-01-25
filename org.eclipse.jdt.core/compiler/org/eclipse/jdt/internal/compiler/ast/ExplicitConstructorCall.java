@@ -139,6 +139,7 @@ public class ExplicitConstructorCall extends Statement implements Invocation {
 		this.accessMode = accessMode;
 	}
 
+	@Override
 	public FlowInfo analyseCode(BlockScope currentScope, FlowContext flowContext, FlowInfo flowInfo) {
 		// must verify that exceptions potentially thrown by this expression are caught in the method.
 
@@ -198,6 +199,7 @@ public class ExplicitConstructorCall extends Statement implements Invocation {
 	 * @param currentScope org.eclipse.jdt.internal.compiler.lookup.BlockScope
 	 * @param codeStream org.eclipse.jdt.internal.compiler.codegen.CodeStream
 	 */
+	@Override
 	public void generateCode(BlockScope currentScope, CodeStream codeStream) {
 		if ((this.bits & ASTNode.IsReachable) == 0) {
 			return;
@@ -262,6 +264,7 @@ public class ExplicitConstructorCall extends Statement implements Invocation {
 	/**
 	 * @see org.eclipse.jdt.internal.compiler.lookup.InvocationSite#genericTypeArguments()
 	 */
+	@Override
 	public TypeBinding[] genericTypeArguments() {
 		return this.genericTypeArguments;
 	}
@@ -275,6 +278,7 @@ public class ExplicitConstructorCall extends Statement implements Invocation {
 		return this.accessMode == Tsuper;
 	}
 // Markus Witte}
+	@Override
 	public boolean isSuperAccess() {
 // {ObjectTeams
 /* orig:
@@ -284,6 +288,7 @@ public class ExplicitConstructorCall extends Statement implements Invocation {
 // Markus Witte}
 	}
 
+	@Override
 	public boolean isTypeAccess() {
 		return true;
 	}
@@ -333,6 +338,7 @@ public class ExplicitConstructorCall extends Statement implements Invocation {
 		}
 	}
 
+	@Override
 	public StringBuffer printStatement(int indent, StringBuffer output) {
 		printIndent(indent, output);
 		if (this.qualification != null) this.qualification.printExpression(0, output).append('.');
@@ -374,6 +380,7 @@ public class ExplicitConstructorCall extends Statement implements Invocation {
 		return output.append(");"); //$NON-NLS-1$
 	}
 
+	@Override
 	public void resolve(BlockScope scope) {
 		// the return type should be void for a constructor.
 		// the test is made into getConstructor
@@ -839,18 +846,22 @@ public class ExplicitConstructorCall extends Statement implements Invocation {
 	}
 // SH}
 
+	@Override
 	public void setActualReceiverType(ReferenceBinding receiverType) {
 		// ignored
 	}
 
+	@Override
 	public void setDepth(int depth) {
 		// ignore for here
 	}
 
+	@Override
 	public void setFieldIndex(int depth) {
 		// ignore for here
 	}
 	
+	@Override
 	public void traverse(ASTVisitor visitor, BlockScope scope) {
 		if (visitor.visit(this, scope)) {
 			if (this.qualification != null) {
@@ -870,10 +881,12 @@ public class ExplicitConstructorCall extends Statement implements Invocation {
 	}
 
 	// -- interface Invocation
+	@Override
 	public MethodBinding binding() {
 		return this.binding;
 	}
 
+	@Override
 	public void registerInferenceContext(ParameterizedGenericMethodBinding method, InferenceContext18 infCtx18) {
 		// Nothing to do.
 	}
@@ -883,6 +896,7 @@ public class ExplicitConstructorCall extends Statement implements Invocation {
 		// Nothing to do.
 	}
 	
+	@Override
 	public InferenceContext18 getInferenceContext(ParameterizedMethodBinding method) {
 		return null;
 	}
@@ -892,10 +906,12 @@ public class ExplicitConstructorCall extends Statement implements Invocation {
 		// Nothing to do.
 	}
 
+	@Override
 	public Expression[] arguments() {
 		return this.arguments;
 	}
 	// -- interface InvocationSite: --
+	@Override
 	public InferenceContext18 freshInferenceContext(Scope scope) {
 		return new InferenceContext18(scope, this.arguments, this, null);
 	}

@@ -702,7 +702,8 @@ public class Lifting extends SwitchOnBaseTypeGenerator
 	        	final AstGenerator gen = this._gen;
 	        	final RoleModel boundRootRole = this._boundRootRoleModel;
 	            MethodModel.getModel(newMethod).setStatementsGenerator(new AbstractStatementsGenerator() {
-	      			@SuppressWarnings("synthetic-access")
+	      			@Override
+					@SuppressWarnings("synthetic-access")
 					public boolean generateStatements(AbstractMethodDeclaration methodDecl) {
 	      				try {
 		      		        Lifting.this._gen = gen;
@@ -924,6 +925,7 @@ public class Lifting extends SwitchOnBaseTypeGenerator
 	/*
 	 * see SwitchOnBaseTypeGenerator.createCaseStatement(RoleModel,AstGenerator).
 	 */
+	@Override
 	protected Statement createCaseStatement(RoleModel role, AstGenerator gen)
 	{
         /* case 4:
@@ -963,6 +965,7 @@ public class Lifting extends SwitchOnBaseTypeGenerator
     /*
 	 * see SwitchOnBaseTypeGenerator.createDefaultStatement(ReferenceBinding,AstGenerator).
 	 */
+	@Override
 	protected Statement createDefaultStatement(ReferenceBinding roleType, int problemId, AstGenerator gen)
 	{
         /*

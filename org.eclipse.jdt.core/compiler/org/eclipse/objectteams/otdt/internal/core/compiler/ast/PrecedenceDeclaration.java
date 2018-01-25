@@ -366,6 +366,7 @@ public class PrecedenceDeclaration extends ASTNode {
 	/* (non-Javadoc)
 	 * @see org.eclipse.jdt.internal.compiler.ast.ASTNode#print(int, java.lang.StringBuffer)
 	 */
+	@Override
 	public StringBuffer print(int indent, StringBuffer output) {
 		printIndent(indent, output);
 		output.append("precedence "); //$NON-NLS-1$

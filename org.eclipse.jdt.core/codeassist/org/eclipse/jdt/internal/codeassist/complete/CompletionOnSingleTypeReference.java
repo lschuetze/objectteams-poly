@@ -49,15 +49,18 @@ public CompletionOnSingleTypeReference(char[] source, long pos, int kind) {
 	this.isCompletionNode = true;
 	this.kind = kind;
 }
+@Override
 public void aboutToResolve(Scope scope) {
 	getTypeBinding(scope);
 }
 /*
  * No expansion of the completion reference into an array one
  */
+@Override
 public TypeReference augmentTypeWithAdditionalDimensions(int additionalDimensions, Annotation[][] additionalAnnotations, boolean isVarargs) {
 	return this;
 }
+@Override
 protected TypeBinding getTypeBinding(Scope scope) {
     if (this.fieldTypeCompletionNode != null) {
 		throw new CompletionNodeFound(this.fieldTypeCompletionNode, scope);
@@ -80,6 +83,7 @@ public boolean isException(){
 public boolean isSuperType(){
 	return this.kind == K_CLASS || this.kind == K_INTERFACE;
 }
+@Override
 public StringBuffer printExpression(int indent, StringBuffer output){
 	switch (this.kind) {
 		case K_CLASS :
@@ -97,6 +101,7 @@ public StringBuffer printExpression(int indent, StringBuffer output){
 	}
 	return output.append(this.token).append('>');
 }
+@Override
 public TypeBinding resolveTypeEnclosing(BlockScope scope, ReferenceBinding enclosingType) {
     if (this.fieldTypeCompletionNode != null) {
 		throw new CompletionNodeFound(this.fieldTypeCompletionNode, scope);

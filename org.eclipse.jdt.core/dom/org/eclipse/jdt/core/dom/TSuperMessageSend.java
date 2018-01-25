@@ -133,16 +133,19 @@ public class TSuperMessageSend extends Expression implements Invocation
 		super(ast);
 	}
 
+	@Override
 	public ChildListPropertyDescriptor getArgumentsProperty() {
 		return ARGUMENTS_PROPERTY;
 	}
 
+	@Override
 	final List internalStructuralPropertiesForType(int apiLevel)
 	{
 		return propertyDescriptors(apiLevel);
 	}
 
-    final ASTNode internalGetSetChildProperty(ChildPropertyDescriptor property,
+    @Override
+	final ASTNode internalGetSetChildProperty(ChildPropertyDescriptor property,
                                               boolean get,
                                               ASTNode child)
     {
@@ -173,6 +176,7 @@ public class TSuperMessageSend extends Expression implements Invocation
         return super.internalGetSetChildProperty(property, get, child);
     }
 
+	@Override
 	final List internalGetChildListProperty(ChildListPropertyDescriptor property)
     {
         if (property == ARGUMENTS_PROPERTY)
@@ -184,11 +188,13 @@ public class TSuperMessageSend extends Expression implements Invocation
         return super.internalGetChildListProperty(property);
     }
 
+	@Override
 	final int getNodeType0()
 	{
 		return TSUPER_MESSAGE_SEND;
 	}
 
+	@Override
 	@SuppressWarnings("unchecked")
 	ASTNode clone0(AST target)
 	{
@@ -253,6 +259,7 @@ public class TSuperMessageSend extends Expression implements Invocation
      * @return the live list of argument expressions
      *    (element type: <code>Expression</code>)
      */
+	@Override
 	public List getArguments()
     {
         return this.arguments;
@@ -293,13 +300,15 @@ public class TSuperMessageSend extends Expression implements Invocation
     }
 
 
-    final boolean subtreeMatch0(ASTMatcher matcher, Object other)
+    @Override
+	final boolean subtreeMatch0(ASTMatcher matcher, Object other)
 	{
 		// dispatch to correct overloaded match method
 		return matcher.match(this, other);
 	}
 
-    void accept0(ASTVisitor visitor)
+    @Override
+	void accept0(ASTVisitor visitor)
     {
         boolean visitChildren = visitor.visit(this);
         if (visitChildren)
@@ -312,6 +321,7 @@ public class TSuperMessageSend extends Expression implements Invocation
         visitor.endVisit(this);
     }
 
+	@Override
 	int memSize()
 	{
 		// treat Operator as free
@@ -321,7 +331,8 @@ public class TSuperMessageSend extends Expression implements Invocation
     /* (omit javadoc for this method)
      * Method declared on ASTNode.
      */
-    int treeSize()
+    @Override
+	int treeSize()
     {
         return
             memSize()
@@ -329,7 +340,8 @@ public class TSuperMessageSend extends Expression implements Invocation
             + (this.arguments  == null ? 0 : this.arguments.listSize());
     }
 
-    public IMethodBinding resolveMethodBinding() {
+    @Override
+	public IMethodBinding resolveMethodBinding() {
         return this.ast.getBindingResolver().resolveMethod(this);
     }
 }

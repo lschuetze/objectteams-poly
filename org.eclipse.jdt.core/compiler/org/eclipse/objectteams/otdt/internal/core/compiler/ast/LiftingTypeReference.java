@@ -79,6 +79,7 @@ public class LiftingTypeReference extends TypeReference {
     public LocalDeclaration fakedArgument = null;
 	public boolean hasIncompatibleArrayDimensions = false;
 
+	@Override
 	public boolean isDeclaredLifting() {
 	  return true;
 	}
@@ -111,6 +112,7 @@ public class LiftingTypeReference extends TypeReference {
 	}
 
 	// The binding is basically the baseReference's binding.
+	@Override
 	public TypeBinding getTypeBinding(Scope scope) {
 	    if (this.resolvedType != null)
 	        return this.resolvedType;
@@ -289,16 +291,19 @@ public class LiftingTypeReference extends TypeReference {
 	/* (non-Javadoc)
 	 * @see org.eclipse.jdt.internal.compiler.ast.Expression#printExpression(int, java.lang.StringBuffer)
 	 */
+	@Override
 	public StringBuffer printExpression(int indent, StringBuffer output) {
 		output = this.baseReference.printExpression(indent, output);
 		output.append(" as "); //$NON-NLS-1$
 		output = this.roleReference.printExpression(indent, output);
 		return output;
 	}
+	@Override
 	public void traverse(ASTVisitor visitor, BlockScope scope) {
 		visitor.visit(this, scope);
 		visitor.endVisit(this, scope);
 	}
+	@Override
 	public void traverse(ASTVisitor visitor, ClassScope scope) {
 		visitor.visit(this, scope);
 		visitor.endVisit(this, scope);

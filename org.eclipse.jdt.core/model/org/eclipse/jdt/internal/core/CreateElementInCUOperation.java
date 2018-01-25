@@ -94,6 +94,7 @@ public abstract class CreateElementInCUOperation extends JavaModelOperation {
 	/**
 	 * Only allow cancelling if this operation is not nested.
 	 */
+	@Override
 	protected void checkCanceled() {
 		if (!this.isNested) {
 			super.checkCanceled();
@@ -121,6 +122,7 @@ public abstract class CreateElementInCUOperation extends JavaModelOperation {
 	 *
 	 * @exception JavaModelException if the operation is unable to complete
 	 */
+	@Override
 	protected void executeOperation() throws JavaModelException {
 		try {
 			beginTask(getMainTaskName(), getMainAmountOfWork());
@@ -207,6 +209,7 @@ public abstract class CreateElementInCUOperation extends JavaModelOperation {
 	 */
 	public abstract String getMainTaskName();
 
+	@Override
 	protected ISchedulingRule getSchedulingRule() {
 		IResource resource = getCompilationUnit().getResource();
 		IWorkspace workspace = resource.getWorkspace();
@@ -307,6 +310,7 @@ public abstract class CreateElementInCUOperation extends JavaModelOperation {
 	 * @see IJavaModelStatus
 	 * @see org.eclipse.jdt.core.JavaConventions
 	 */
+	@Override
 	public IJavaModelStatus verify() {
 		if (getParentElement() == null) {
 			return new JavaModelStatus(IJavaModelStatusConstants.NO_ELEMENTS_TO_PROCESS);

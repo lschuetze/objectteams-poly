@@ -116,6 +116,7 @@ public class RoleClassLiteralAccess extends ClassLiteralAccess {
 				);
 	}
 
+	@Override
 	public FlowInfo analyseCode(
 			BlockScope currentScope,
 			FlowContext flowContext,
@@ -127,6 +128,7 @@ public class RoleClassLiteralAccess extends ClassLiteralAccess {
 		return flowInfo;
 	}
 
+	@Override
 	public void generateCode(
 			BlockScope currentScope,
 			CodeStream codeStream,
@@ -139,6 +141,7 @@ public class RoleClassLiteralAccess extends ClassLiteralAccess {
 			codeStream.aconst_null();
 	}
 
+	@Override
 	public TypeBinding resolveType(BlockScope scope) {
 		if (this.type instanceof ParameterizedSingleTypeReference) {
 			// directly created from parsing R<@t>.class

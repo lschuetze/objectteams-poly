@@ -106,6 +106,7 @@ public class MethodBindingOperator extends ASTNode {
 	}
 
 
+	@Override
 	final ASTNode internalGetSetChildProperty(ChildPropertyDescriptor property, boolean get, ASTNode child)
 	{
 		if (property == BINDING_MODIFIER_PROPERTY)
@@ -205,6 +206,7 @@ public class MethodBindingOperator extends ASTNode {
 			   || Modifier.isSet(modifier);
 	}
 
+	@Override
 	void accept0(ASTVisitor visitor) {
 		boolean visitChildren = visitor.visit(this);
 		if (visitChildren) {
@@ -213,6 +215,7 @@ public class MethodBindingOperator extends ASTNode {
 		visitor.endVisit(this);
 	}
 
+	@Override
 	ASTNode clone0(AST target) {
 		MethodBindingOperator result = new MethodBindingOperator(target);
 		result.setSourceRange(getStartPosition(), getLength());
@@ -221,19 +224,23 @@ public class MethodBindingOperator extends ASTNode {
 		return result;
 	}
 
+	@Override
 	int getNodeType0() {
 		return METHOD_BINDING_OPERATOR;
 	}
 
+	@Override
 	List internalStructuralPropertiesForType(int apiLevel) {
 		return propertyDescriptors(apiLevel);
 	}
 
+	@Override
 	int memSize() {
 		// TODO Auto-generated method stub
 		return 0;
 	}
 
+	@Override
 	boolean subtreeMatch0(ASTMatcher matcher, Object other) {
 		if (!(other instanceof MethodBindingOperator))
 			return false;
@@ -242,6 +249,7 @@ public class MethodBindingOperator extends ASTNode {
 		       && (otherOp.getBindingModifier() == this.getBindingModifier());
 	}
 
+	@Override
 	int treeSize() {
 		// TODO Auto-generated method stub
 		return 0;

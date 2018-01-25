@@ -25,11 +25,13 @@ public class SelectionOnParameterizedSingleTypeReference extends ParameterizedSi
 		super(name, typeArguments, 0, pos);
 	}
 
+	@Override
 	public TypeBinding resolveType(BlockScope scope, boolean checkBounds, int location) {
 		super.resolveType(scope, checkBounds, location);
 		throw new SelectionNodeFound(this.resolvedType);
 	}
 
+	@Override
 	public TypeBinding resolveType(ClassScope scope, int location) {
 		super.resolveType(scope, location);
 		throw new SelectionNodeFound(this.resolvedType);
@@ -44,6 +46,7 @@ public class SelectionOnParameterizedSingleTypeReference extends ParameterizedSi
 	}
 // SH}
 
+	@Override
 	public StringBuffer printExpression(int indent, StringBuffer output){
 		output.append("<SelectOnType:");//$NON-NLS-1$
 		output.append(this.token);

@@ -55,16 +55,19 @@ public abstract class AbstractExpressionWrapper extends Expression implements IP
 		this.constant = Constant.NotAConstant;
 	}
 
+	@Override
 	public StringBuffer printExpression(int indent, StringBuffer output)
 	{
 		return this._wrappee.printExpression(indent, output);
 	}
 
+	@Override
 	public FlowInfo analyseCode(BlockScope currentScope, FlowContext flowContext, FlowInfo flowInfo)
 	{
 		return this._wrappee.analyseCode(currentScope, flowContext, flowInfo);
 	}
 
+	@Override
 	public void computeConversion(Scope scope, TypeBinding runtimeTimeType, TypeBinding compileTimeType)
 	{
 		super.computeConversion(scope, runtimeTimeType, compileTimeType);
@@ -72,11 +75,13 @@ public abstract class AbstractExpressionWrapper extends Expression implements IP
 		this._wrappee.implicitConversion = this.implicitConversion;
 	}
 
+	@Override
 	public void generateCode(BlockScope currentScope, CodeStream codeStream, boolean valueRequired)
 	{
 		this._wrappee.generateCode(currentScope, codeStream, valueRequired);
 	}
 
+	@Override
 	public TypeBinding resolveType(BlockScope scope)
 	{
 		if (this.constant == null)
@@ -87,5 +92,6 @@ public abstract class AbstractExpressionWrapper extends Expression implements IP
 	/**
 	 * Implement this using your concrete _wrappee.
 	 */
+	@Override
 	public abstract void traverse(ASTVisitor visitor, BlockScope scope);
 }

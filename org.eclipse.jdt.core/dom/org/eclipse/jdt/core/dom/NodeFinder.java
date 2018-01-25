@@ -38,11 +38,13 @@ public final class NodeFinder {
 //{ObjectTeams: Do not descend into role files:
 		// The topmost type found during traversal
 		private TypeDeclaration topType= null;
+		@Override
 		public boolean visit(TypeDeclaration type) {
 			if (this.topType == null)
 				this.topType= type;
 			return super.visit(type);
 		}
+		@Override
 		public boolean visit(RoleTypeDeclaration roleType) {
 			if (this.topType != null && roleType.isRoleFile())
 				return false;
@@ -58,6 +60,7 @@ public final class NodeFinder {
 			this.fEnd= offset + length;
 		}
 
+		@Override
 		public boolean preVisit2(ASTNode node) {
 			int nodeStart= node.getStartPosition();
 			int nodeEnd= nodeStart + node.getLength();

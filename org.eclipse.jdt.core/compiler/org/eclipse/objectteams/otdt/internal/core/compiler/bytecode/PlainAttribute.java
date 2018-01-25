@@ -41,11 +41,13 @@ public class PlainAttribute extends AbstractAttribute {
         super(name);
     }
 
-    int size() {
+    @Override
+	int size() {
     	return 6;
     }
 
-    public void write (ClassFile classFile) {
+    @Override
+	public void write (ClassFile classFile) {
         super.write(classFile);
         if (this._contentsOffset + 6 > this._contents.length) {
         	this._contents = classFile.getResizedContents(8);
@@ -65,6 +67,7 @@ public class PlainAttribute extends AbstractAttribute {
     /* (non-Javadoc)
      * @see org.eclipse.objectteams.otdt.internal.core.compiler.bytecode.AbstractAttribute#evaluate(org.eclipse.jdt.internal.compiler.lookup.Binding, org.eclipse.jdt.internal.compiler.lookup.LookupEnvironment)
      */
-    public void evaluate(Binding binding, LookupEnvironment environment, char[][][] missingTypeNames) { /* noop */ }
+    @Override
+	public void evaluate(Binding binding, LookupEnvironment environment, char[][][] missingTypeNames) { /* noop */ }
 
 }

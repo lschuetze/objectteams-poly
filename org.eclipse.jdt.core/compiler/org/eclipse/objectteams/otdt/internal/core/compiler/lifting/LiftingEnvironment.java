@@ -608,7 +608,8 @@ public class LiftingEnvironment
         return rootNodeTrees;
     }
 
-    public String toString()
+    @Override
+	public String toString()
     {
         String str = ""; //$NON-NLS-1$
         if (this._boundRootRoles == null)

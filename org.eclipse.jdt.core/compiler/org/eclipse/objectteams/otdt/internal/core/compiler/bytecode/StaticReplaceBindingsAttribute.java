@@ -79,7 +79,8 @@ public class StaticReplaceBindingsAttribute extends AbstractAttribute {
     		this._liftMethodSignature = liftMethodSignature;
     	}
 
-    	@SuppressWarnings("nls")
+    	@Override
+		@SuppressWarnings("nls")
 		public String toString() {
     		String result =
     			new String(this._roleClass)+"."+new String(this._roleSelector) + new String(this._roleSignature)+" <- ";
@@ -119,6 +120,7 @@ public class StaticReplaceBindingsAttribute extends AbstractAttribute {
     		this._positions = positions;
     		this._translationFlags = translations;
 		}
+		@Override
 		@SuppressWarnings("nls")
 		public String toString() {
 			String result = (this._isCallin ?     "callin " : "")+
@@ -348,7 +350,8 @@ public class StaticReplaceBindingsAttribute extends AbstractAttribute {
 	/* (non-Javadoc)
      * @see org.eclipse.objectteams.otdt.internal.core.compiler.bytecode.AbstractAttribute#write(org.eclipse.jdt.internal.compiler.ClassFile)
      */
-    public void write(ClassFile classFile) {
+    @Override
+	public void write(ClassFile classFile) {
 		checkTranslateMappings();
 
         super.write(classFile);
@@ -407,17 +410,20 @@ public class StaticReplaceBindingsAttribute extends AbstractAttribute {
 	/* (non-Javadoc)
 	 * @see org.eclipse.objectteams.otdt.internal.core.compiler.bytecode.AbstractAttribute#evaluate(org.eclipse.jdt.internal.compiler.lookup.Binding, org.eclipse.jdt.internal.compiler.lookup.LookupEnvironment)
 	 */
+	@Override
 	public void evaluate(Binding binding, LookupEnvironment environment, char[][][] missingTypeNames) {
 		checkBindingMismatch(binding, ExtraCompilerModifiers.AccTeam);
 		((ReferenceBinding)binding).getTeamModel().addAttribute(this);
 	}
 	// Evaluate CallinMethodMappingAttribute late, because we need our methods to be in place.
-    public void evaluateLateAttribute(ReferenceBinding roleBinding, int state)
+    @Override
+	public void evaluateLateAttribute(ReferenceBinding roleBinding, int state)
     {
     	// currently nothing to evaluate, just keep the attribute in the team model.
     }
 
 	// ==== public accessors for use by org.eclipse.jdt.internal.core.ClassFileInfo ====
+	@Override
 	@SuppressWarnings("nls")
 	public String toString() {
 		String result = new String(this._name);

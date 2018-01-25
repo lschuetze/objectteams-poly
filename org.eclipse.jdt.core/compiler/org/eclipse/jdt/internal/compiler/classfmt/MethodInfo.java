@@ -321,6 +321,7 @@ protected MethodInfo (byte classFileBytes[], int offsets[], int offset) {
 	this.accessFlags = -1;
 	this.signatureUtf8Offset = -1;
 }
+@Override
 public int compareTo(Object o) {
 	MethodInfo otherMethod = (MethodInfo) o;
 	int result = new String(getSelector()).compareTo(new String(otherMethod.getSelector()));
@@ -343,18 +344,21 @@ public int hashCode() {
 /**
  * @return the annotations or null if there is none.
  */
+@Override
 public IBinaryAnnotation[] getAnnotations() {
 	return null;
 }
 /**
  * @see org.eclipse.jdt.internal.compiler.env.IGenericMethod#getArgumentNames()
  */
+@Override
 public char[][] getArgumentNames() {
 	if (this.argumentNames == null) {
 		readCodeAttribute();
 	}
 	return this.argumentNames;
 }
+@Override
 public Object getDefaultValue() {
 	return null;
 }
@@ -366,12 +370,14 @@ public Object getDefaultValue() {
  * For example, java.lang.String is java/lang/String.
  * @return char[][]
  */
+@Override
 public char[][] getExceptionTypeNames() {
 	if (this.exceptionNames == null) {
 		readExceptionAttributes();
 	}
 	return this.exceptionNames;
 }
+@Override
 public char[] getGenericSignature() {
 	if (this.signatureUtf8Offset != -1) {
 		if (this.signature == null) {
@@ -391,6 +397,7 @@ public char[] getGenericSignature() {
  *   - void foo(Object[]) is (I)[Ljava/lang/Object;
  * @return char[]
  */
+@Override
 public char[] getMethodDescriptor() {
 	if (this.descriptor == null) {
 		// read the name
@@ -405,6 +412,7 @@ public char[] getMethodDescriptor() {
  * Set the AccDeprecated and AccSynthetic bits if necessary
  * @return int
  */
+@Override
 public int getModifiers() {
 	if (this.accessFlags == -1) {
 		// compute the accessflag. Don't forget the deprecated attribute
@@ -413,12 +421,15 @@ public int getModifiers() {
 	}
 	return this.accessFlags;
 }
+@Override
 public IBinaryAnnotation[] getParameterAnnotations(int index, char[] classFileName) {
 	return null;
 }
+@Override
 public int getAnnotatedParametersCount() {
 	return 0;
 }
+@Override
 public IBinaryTypeAnnotation[] getTypeAnnotations() {
 	return null;
 }
@@ -428,6 +439,7 @@ public IBinaryTypeAnnotation[] getTypeAnnotations() {
  * For a constructor, answer <init> & <clinit> for a clinit method.
  * @return char[]
  */
+@Override
 public char[] getSelector() {
 	if (this.name == null) {
 		// read the name
@@ -436,6 +448,7 @@ public char[] getSelector() {
 	}
 	return this.name;
 }
+@Override
 public long getTagBits() {
 	return this.tagBits;
 }
@@ -459,6 +472,7 @@ protected void initialize() {
  * Answer true if the method is a class initializer, false otherwise.
  * @return boolean
  */
+@Override
 public boolean isClinit() {
 	return org.eclipse.jdt.internal.compiler.classfmt.JavaBinaryNames.isClinit(getSelector());
 }
@@ -466,6 +480,7 @@ public boolean isClinit() {
  * Answer true if the method is a constructor, false otherwise.
  * @return boolean
  */
+@Override
 public boolean isConstructor() {
 	return org.eclipse.jdt.internal.compiler.classfmt.JavaBinaryNames.isConstructor(getSelector());
 }

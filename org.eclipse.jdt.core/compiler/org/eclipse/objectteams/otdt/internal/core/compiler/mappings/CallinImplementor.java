@@ -415,6 +415,7 @@ public class CallinImplementor extends MethodMappingImplementor
         final RoleModel   finalRole              = this._role;
 
         MethodModel.getModel(newMethod).setStatementsGenerator(new AbstractStatementsGenerator() {
+			@Override
 			public boolean generateStatements(AbstractMethodDeclaration methodDecl) {
 				return generateCallinStatements(
 							(MethodDeclaration)methodDecl,
@@ -975,6 +976,7 @@ public class CallinImplementor extends MethodMappingImplementor
 	 * Do this by extracting the relevant slice of parameters from the
 	 * wrapper's parameters.
 	 */
+	@Override
 	TypeBinding[] getImplementationParamters(
 			AbstractMethodMappingDeclaration methodMapping, MethodDeclaration wrapperMethod)
 	{
@@ -1004,6 +1006,7 @@ public class CallinImplementor extends MethodMappingImplementor
 	 * @param sourceMethodSpec   this signature defines the provided args
 	 * @return the expression to pass to the implemented method.
 	 */
+	@Override
 	Expression getArgument(
 			AbstractMethodMappingDeclaration methodMapping,
 			MethodDeclaration       		 wrapperDeclaration,
@@ -1090,7 +1093,8 @@ public class CallinImplementor extends MethodMappingImplementor
 			// (CallinMethodMappingsAttribute needs to know whether lifting is actually needed.)
 			if (methodMapping.mappings != null && liftExpr instanceof PotentialLiftExpression) {
 				final int srcPos = pos;
-				((PotentialLiftExpression)liftExpr).onLiftingRequired(new Runnable() {public void run() {
+				((PotentialLiftExpression)liftExpr).onLiftingRequired(new Runnable() {@Override
+				public void run() {
 					if (srcPos != -1)
 						sourceMethodSpec.argNeedsTranslation[srcPos] = true;
 					implementationMethodSpec.argNeedsTranslation[srcIdx] = true; 

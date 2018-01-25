@@ -119,6 +119,7 @@ public class RoleTypeCreator implements TagBits {
 
     	TypeBinding wrappedRoleType = internalWrapQualifiedRoleType(scope, anchorExpr, originalType, typedNode, refBinding, dimensions);
 		return wrappedRoleType.maybeWrapRoleType(typedNode, new TypeArgumentUpdater() {
+						@Override
 						public TypeBinding updateArg(ReferenceBinding arg) {
 			        		if (arg instanceof WildcardBinding)
 					        	return ((WildcardBinding) arg).maybeWrapQualifiedRoleType(scope, anchorExpr, typedNode);
@@ -145,6 +146,7 @@ public class RoleTypeCreator implements TagBits {
         if (existingAnchor == null) {
         	if (!refBinding.isDirectRole())
         		return originalType.maybeWrapRoleType(typedNode, new TypeArgumentUpdater() {
+					@Override
 					public TypeBinding updateArg(ReferenceBinding arg) {
 						return maybeWrapQualifiedRoleType(scope, anchorExpr, arg, typedNode);
 					}
@@ -576,6 +578,7 @@ public class RoleTypeCreator implements TagBits {
 	        if (  !refBinding.isDirectRole()) {
 	        	final ProblemReporter reporter = problemReporter;
 	            return originalType.maybeWrapRoleType(typedNode, new TypeArgumentUpdater() {
+					@Override
 					public TypeBinding updateArg(ReferenceBinding arg) {
 						return maybeWrapUnqualifiedRoleType(scope, site, arg, typedNode, reporter);
 					}
@@ -1383,7 +1386,8 @@ public class RoleTypeCreator implements TagBits {
 				leafRoleType._argumentPosition = argPos;
 				final AbstractMethodDeclaration methodDecl = scope.referenceMethod();
 		        leafRoleType._declaringMethod = new DependentTypeBinding.IMethodProvider() {
-		        	public MethodBinding getMethod() {
+		        	@Override
+					public MethodBinding getMethod() {
 		        		return methodDecl.binding;
 		        	}
 		        };
@@ -1553,6 +1557,7 @@ public class RoleTypeCreator implements TagBits {
 											ReferenceBinding baseSideType)
 	{
 		TypeArgumentUpdater typeArgumentUpdater = new TypeArgumentUpdater () {
+			@Override
 			public TypeBinding updateArg(ReferenceBinding arg) {
 				return maybeInstantiateFromPlayedBy(scope, arg);
 			}

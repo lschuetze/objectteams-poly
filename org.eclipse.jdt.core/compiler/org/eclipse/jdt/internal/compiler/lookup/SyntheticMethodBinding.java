@@ -709,6 +709,7 @@ public class SyntheticMethodBinding extends MethodBinding {
 		return this.purpose == SyntheticMethodBinding.ConstructorAccess;
 	}
 	
+	@Override
 	public LambdaExpression sourceLambda() {
 		return this.lambda;
 	}

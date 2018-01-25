@@ -40,9 +40,11 @@ public SelectionOnQualifiedTypeReference(char[][] previousIdentifiers, char[] se
 		CharOperation.arrayConcat(previousIdentifiers, selectionIdentifier),
 		positions);
 }
+@Override
 public void aboutToResolve(Scope scope) {
 	getTypeBinding(scope.parent); // step up from the ClassScope
 }
+@Override
 protected TypeBinding getTypeBinding(Scope scope) {
 	// it can be a package, type or member type
 	Binding binding = scope.getTypeOrPackage(this.tokens);
@@ -69,6 +71,7 @@ protected TypeBinding getTypeBinding(Scope scope) {
 
 	throw new SelectionNodeFound(binding);
 }
+@Override
 public StringBuffer printExpression(int indent, StringBuffer output) {
 
 	output.append("<SelectOnType:"); //$NON-NLS-1$

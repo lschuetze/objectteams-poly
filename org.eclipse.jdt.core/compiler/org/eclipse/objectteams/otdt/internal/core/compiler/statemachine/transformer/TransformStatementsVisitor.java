@@ -121,7 +121,8 @@ public class TransformStatementsVisitor
 	}
 
     // visit member type
-    public boolean visit (TypeDeclaration type, ClassScope scope)
+    @Override
+	public boolean visit (TypeDeclaration type, ClassScope scope)
     {
         if (type.isTeam())
             if (StateHelper.hasState(type.binding, ITranslationStates.STATE_STATEMENTS_TRANSFORMED))
@@ -132,7 +133,8 @@ public class TransformStatementsVisitor
     /**
      * Within a tsuper constructor call -> add marker argument
      */
-    public boolean visit (ExplicitConstructorCall call, BlockScope scope)
+    @Override
+	public boolean visit (ExplicitConstructorCall call, BlockScope scope)
     {
         if (call.isTsuperAccess())
         {
@@ -298,7 +300,8 @@ public class TransformStatementsVisitor
     /**
      * Cut traversal for types without a scope.
      */
-    public boolean visit(TypeDeclaration td, BlockScope scope) {
+    @Override
+	public boolean visit(TypeDeclaration td, BlockScope scope) {
     	if((td.bits & ASTNode.IsLocalType)!=0)
     		if (td.scope == null)
     			return false; // don't descend further, local type is not in a useful state yet.

@@ -169,7 +169,8 @@ public class WithinStatement extends Block implements IOTConstants
     }
 
     // modified version of Block.resolve(BlockScope)
-    public void resolve(BlockScope upperScope)
+    @Override
+	public void resolve(BlockScope upperScope)
     {
         this.scope = new BlockScope(upperScope, this.explicitDeclarations);
         // special treatment of type errors for teamExpr:
@@ -213,6 +214,7 @@ public class WithinStatement extends Block implements IOTConstants
     	return null;
     }
 
+	@Override
 	public void traverse(ASTVisitor visitor, BlockScope blockScope) 
 	{
 		if (visitor.visit(this, blockScope)) {
@@ -224,6 +226,7 @@ public class WithinStatement extends Block implements IOTConstants
 		visitor.endVisit(this, blockScope);
 	}
 
+	@Override
 	public StringBuffer print(int indent, StringBuffer output)
 	{
 		printIndent(indent, output);

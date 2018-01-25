@@ -309,6 +309,7 @@ public class AstGenerator extends AstFactory {
 				value,
 				nullLiteral(),
 				OperatorIds.EQUAL_EQUAL) {
+			@Override
 			protected void checkVariableComparison(BlockScope scope, FlowContext flowContext, FlowInfo flowInfo, FlowInfo initsWhenTrue, FlowInfo initsWhenFalse, LocalVariableBinding local, int nullStatus, Expression reference) {
 				// similar to super version: do mark flowInfo but avoid reporting any problems
 				switch (nullStatus) {
@@ -1075,26 +1076,33 @@ public class AstGenerator extends AstFactory {
 	public IfStatement stealthIfNotStatement(final Expression condition, Statement thenStatement) {
 		// mark step-over after the condition:
 		Expression recordingCondition = new Expression() {
+			@Override
 			public StringBuffer printExpression(int indent, StringBuffer output) { return condition.print(indent, output); }
+			@Override
 			public TypeBinding resolveType(BlockScope scope) {
 				return condition.resolveType(scope); 
 			}
+			@Override
 			public void computeConversion(Scope scope, TypeBinding runtimeType, TypeBinding compileTimeType) {
 				condition.computeConversion(scope, runtimeType, compileTimeType);
 				this.constant = condition.constant;
 				this.bits = condition.bits;
 			}
+			@Override
 			public Constant optimizedBooleanConstant() { 
 				this.constant = condition.optimizedBooleanConstant();
 				this.bits = condition.bits;
 				return this.constant; 
 			}
+			@Override
 			public FlowInfo analyseCode(BlockScope currentScope, FlowContext flowContext, FlowInfo flowInfo, boolean valueRequired) {
 				return condition.analyseCode(currentScope, flowContext, flowInfo, valueRequired);
 			}
+			@Override
 			public FlowInfo analyseCode(BlockScope currentScope, FlowContext flowContext, FlowInfo flowInfo) {
 				return condition.analyseCode(currentScope, flowContext, flowInfo);
 			}
+			@Override
 			public void generateCode(BlockScope currentScope, CodeStream codeStream, boolean valueRequired) {
 				condition.generateCode(currentScope, codeStream, valueRequired);
 				// payload:

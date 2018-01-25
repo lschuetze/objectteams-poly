@@ -81,6 +81,7 @@ public class TypeValueParameter extends TypeParameter {
 	/**
 	 * @see org.eclipse.jdt.internal.compiler.ast.AbstractVariableDeclaration#getKind()
 	 */
+	@Override
 	public int getKind() {
 		return TYPE_VALUE_PARAMETER;
 	}

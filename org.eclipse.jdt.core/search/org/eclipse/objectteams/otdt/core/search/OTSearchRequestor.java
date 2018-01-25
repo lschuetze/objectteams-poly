@@ -46,7 +46,8 @@ public class OTSearchRequestor extends SearchRequestor
         this.otTypes = new ArrayList<IOTType>();
     }
 
-    public void acceptSearchMatch(SearchMatch match) throws CoreException
+    @Override
+	public void acceptSearchMatch(SearchMatch match) throws CoreException
     {
         IType javaType = null;
         Object element = match.getElement();

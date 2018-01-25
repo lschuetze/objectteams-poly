@@ -130,11 +130,13 @@ public class LiftingType extends Type
 		super(ast);
 	}
 
+	@Override
 	final List internalStructuralPropertiesForType(int apiLevel)
 	{
 		return propertyDescriptors(apiLevel);
 	}
 
+	@Override
 	final ASTNode internalGetSetChildProperty(ChildPropertyDescriptor property, boolean get, ASTNode child)
 	{
 		if (property == NAME_PROPERTY)
@@ -179,11 +181,13 @@ public class LiftingType extends Type
 		return super.internalGetSetChildProperty(property, get, child);
 	}
 
+	@Override
 	final int getNodeType0()
 	{
 		return LIFTING_TYPE;
 	}
 
+	@Override
 	ASTNode clone0(AST target)
 	{
 		LiftingType result = new LiftingType(target);
@@ -195,12 +199,14 @@ public class LiftingType extends Type
 		return result;
 	}
 
+	@Override
 	final boolean subtreeMatch0(ASTMatcher matcher, Object other)
 	{
 		// dispatch to correct overloaded match method
 		return matcher.match(this, other);
 	}
 
+	@Override
 	void accept0(ASTVisitor visitor)
 	{
 		boolean visitChildren = visitor.visit(this);
@@ -327,12 +333,14 @@ public class LiftingType extends Type
 		postReplaceChild(oldChild, type, ROLE_TYPE_PROPERTY);
 	}
 
+	@Override
 	int memSize()
 	{
 		// treat Code as free
 		return BASE_NODE_SIZE + 3 * 4;
 	}
 
+	@Override
 	int treeSize()
 	{
 		return memSize()

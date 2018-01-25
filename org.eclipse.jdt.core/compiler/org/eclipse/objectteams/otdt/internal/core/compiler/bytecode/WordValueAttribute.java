@@ -294,14 +294,16 @@ public class WordValueAttribute
     	this._reader = reader;
     }
 
-    int size() {
+    @Override
+	int size() {
     	return 8;
     }
 
     /* (non-Javadoc)
      * @see org.eclipse.objectteams.otdt.internal.core.compiler.bytecode.AbstractAttribute#write(org.eclipse.jdt.internal.compiler.ClassFile)
      */
-    public void write(ClassFile classFile)
+    @Override
+	public void write(ClassFile classFile)
     {
     	super.write(classFile);
         if (this._contentsOffset + 8 > this._contents.length) {
@@ -326,7 +328,8 @@ public class WordValueAttribute
     /**
      * Evaluate class level attribute(s).
      */
-    public void evaluate(Binding binding, LookupEnvironment environment, char[][][] missingTypeNames) {
+    @Override
+	public void evaluate(Binding binding, LookupEnvironment environment, char[][][] missingTypeNames) {
 		if (CharOperation.equals(this._name, OT_CLASS_FLAGS))
         {
             checkBindingMismatch(binding, 0);
@@ -389,7 +392,8 @@ public class WordValueAttribute
 
 
     /** can only transfer some flags once we have the method binding */
-    public boolean evaluate(MethodInfo info, MethodBinding method, LookupEnvironment environment) {
+    @Override
+	public boolean evaluate(MethodInfo info, MethodBinding method, LookupEnvironment environment) {
     	if (this._methodInfo != info) return false;
     	// MODIFIERS and ROLECLASS_METHOD_MODIFIERS_NAME and CALLS_BASE_CTOR are already evaluated at the MethodInfo level.
     	if (CharOperation.equals(this._name, IOTConstants.CALLIN_FLAGS)) {
@@ -417,7 +421,8 @@ public class WordValueAttribute
         return false; // not handled, keep it.
     }
 
-    @SuppressWarnings("nls")
+    @Override
+	@SuppressWarnings("nls")
 	public String toString()
     {
         return "OT-Attribute "+

@@ -59,6 +59,7 @@ public interface IOTJavaElement extends IJavaElement
 	 * returns "MyRole" 
 	 * @return simple name (unqualified by package or enclosing type)
 	 */
+	@Override
 	public String getElementName();
 
 	/**
@@ -66,6 +67,7 @@ public interface IOTJavaElement extends IJavaElement
 	 * checking.
 	 * @return possible values defined above
 	 */
+	@Override
 	public int getElementType();
 	
 	/**

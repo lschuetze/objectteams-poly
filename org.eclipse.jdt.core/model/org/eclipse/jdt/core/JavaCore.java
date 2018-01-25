@@ -3177,6 +3177,7 @@ public final class JavaCore extends Plugin {
 		JAVA_CORE_PLUGIN = this;
 //{ObjectTeams: provide logging to Config:
 		Config.setLogger(new ILogger() {
+			@Override
 			public void logException(String message, Throwable exception) {
 				JavaCore.this.getLog().log(new Status(IStatus.ERROR, JavaCore.PLUGIN_ID, 0, message, exception));
 			}
@@ -4453,6 +4454,7 @@ public final class JavaCore extends Plugin {
 			if (JavaBuilder.DEBUG)
 				System.out.println("Build state version number has changed"); //$NON-NLS-1$
 			IWorkspaceRunnable runnable = new IWorkspaceRunnable() {
+				@Override
 				public void run(IProgressMonitor progressMonitor2) throws CoreException {
 					for (int i = 0, length = projects.length; i < length; i++) {
 						IJavaProject project = projects[i];
@@ -4493,6 +4495,7 @@ public final class JavaCore extends Plugin {
 				IJavaSearchConstants.CLASS,
 				scope,
 				new TypeNameRequestor() {
+					@Override
 					public void acceptType(
 						int modifiers,
 						char[] packageName,
@@ -6056,6 +6059,7 @@ public final class JavaCore extends Plugin {
 	 * </p>
 	 * @see org.eclipse.core.runtime.Plugin#stop(BundleContext)
 	 */
+	@Override
 	public void stop(BundleContext context) throws Exception {
 		try {
 			JavaModelManager.unregisterDebugOptionsListener();
@@ -6075,6 +6079,7 @@ public final class JavaCore extends Plugin {
 	 * @throws Exception
 	 * @see org.eclipse.core.runtime.Plugin#start(BundleContext)
 	 */
+	@Override
 	public void start(BundleContext context) throws Exception {
 		super.start(context);
 		JavaModelManager.registerDebugOptionsListener(context);

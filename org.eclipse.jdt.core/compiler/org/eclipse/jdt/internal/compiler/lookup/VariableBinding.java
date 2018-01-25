@@ -73,6 +73,7 @@ public abstract class VariableBinding
 		return constant();
 	}
 
+	@Override
 	public abstract AnnotationBinding[] getAnnotations();
 
 	public final boolean isBlankFinal(){
@@ -83,6 +84,7 @@ public abstract class VariableBinding
 	 * and cannot be changed. Resources on try and multi catch variables are
 	 * marked as implicitly final.
 	*/
+	@Override
 	public final boolean isFinal() {
 		return (this.modifiers & ClassFileConstants.AccFinal) != 0;
 	}
@@ -105,6 +107,7 @@ public abstract class VariableBinding
 				&& (this.type.tagBits & TagBits.AnnotationNullable) != 0);
 	}
 
+	@Override
 	public char[] readableName() {
 //{ObjectTeams: pretty printing for generated names:
 	if (CharOperation.prefixEquals(IOTConstants.OT_DOLLAR_NAME, this.name))
@@ -113,6 +116,7 @@ public abstract class VariableBinding
 		return this.name;
 	}
 //{ObjectTeams: un-pretty-printed (original) version:
+@Override
 public char[] internalName() {
 		return this.name;
 	}
@@ -120,6 +124,7 @@ public char[] internalName() {
 	public void setConstant(Constant constant) {
 		this.constant = constant;
 	}
+	@Override
 	public String toString() {
 		StringBuffer output = new StringBuffer(10);
 		ASTNode.printModifiers(this.modifiers, output);

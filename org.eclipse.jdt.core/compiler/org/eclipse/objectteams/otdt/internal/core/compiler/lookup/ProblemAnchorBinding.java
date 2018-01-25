@@ -39,26 +39,32 @@ public class ProblemAnchorBinding extends TeamAnchor {
 		this.problemId = problemId;
 	}
 
+	@Override
 	protected TeamAnchor getClone() {
 		return new ProblemAnchorBinding(this.closestMatch, this.problemId);
 	}
 
+	@Override
 	public int kind() {
 		return this.closestMatch.kind();
 	}
 
+	@Override
 	public char[] readableName() {
 		return this.closestMatch.readableName();
 	}
 
+	@Override
 	public char[] internalName() {
 		return this.closestMatch.internalName();
 	}
 
+	@Override
 	public boolean isBaseAnchor() {
 		return this.closestMatch.isBaseAnchor();
 	}
 
+	@Override
 	public boolean isFinal() {
 		return this.closestMatch.isFinal();
 	}

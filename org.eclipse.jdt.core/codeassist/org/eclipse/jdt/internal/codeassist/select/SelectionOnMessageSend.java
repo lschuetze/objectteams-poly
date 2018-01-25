@@ -79,6 +79,7 @@ public class SelectionOnMessageSend extends MessageSend {
 		return methodBinding;
 	}
 
+	@Override
 	public StringBuffer printExpression(int indent, StringBuffer output) {
 
 		output.append("<SelectOnMessageSend:"); //$NON-NLS-1$
@@ -93,6 +94,7 @@ public class SelectionOnMessageSend extends MessageSend {
 		return output.append(")>"); //$NON-NLS-1$
 	}
 
+	@Override
 	public TypeBinding resolveType(BlockScope scope) {
 
 		TypeBinding type = super.resolveType(scope);

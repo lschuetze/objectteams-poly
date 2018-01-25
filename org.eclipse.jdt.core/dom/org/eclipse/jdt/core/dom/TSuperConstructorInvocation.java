@@ -101,6 +101,7 @@ public class TSuperConstructorInvocation extends Statement implements Invocation
 		super(ast);
 	}
 	
+	@Override
 	public ChildListPropertyDescriptor getArgumentsProperty() {
 		return ARGUMENTS_PROPERTY;
 	}
@@ -112,16 +113,19 @@ public class TSuperConstructorInvocation extends Statement implements Invocation
      * @return the live list of argument expressions
      *    (element type: <code>Expression</code>)
      */
+	@Override
 	public List getArguments()
     {
         return this.arguments;
     }
 
+	@Override
 	final List internalStructuralPropertiesForType(int apiLevel)
     {
         return propertyDescriptors(apiLevel);
     }
 
+	@Override
 	final List internalGetChildListProperty(ChildListPropertyDescriptor property)
     {
         if (property == ARGUMENTS_PROPERTY)
@@ -133,12 +137,14 @@ public class TSuperConstructorInvocation extends Statement implements Invocation
         return super.internalGetChildListProperty(property);
     }
 
-    final int getNodeType0()
+    @Override
+	final int getNodeType0()
     {
         return TSUPER_CONSTRUCTOR_INVOCATION;
     }
 
-    @SuppressWarnings("unchecked")
+    @Override
+	@SuppressWarnings("unchecked")
 	ASTNode clone0(AST target)
     {
         TSuperConstructorInvocation result = new TSuperConstructorInvocation(target);
@@ -148,13 +154,15 @@ public class TSuperConstructorInvocation extends Statement implements Invocation
         return result;
     }
 
-    final boolean subtreeMatch0(ASTMatcher matcher, Object other)
+    @Override
+	final boolean subtreeMatch0(ASTMatcher matcher, Object other)
     {
         // dispatch to correct overloaded match method
         return matcher.match(this, other);
     }
 
-    void accept0(ASTVisitor visitor)
+    @Override
+	void accept0(ASTVisitor visitor)
     {
         boolean visitChildren = visitor.visit(this);
 
@@ -166,13 +174,15 @@ public class TSuperConstructorInvocation extends Statement implements Invocation
         visitor.endVisit(this);
     }
 
-    int memSize()
+    @Override
+	int memSize()
     {
         // treat Operator as free
         return BASE_NODE_SIZE + 1 * 4;
     }
 
-    int treeSize()
+    @Override
+	int treeSize()
     {
         return memSize() + (this.arguments == null
                                 ? 0
@@ -183,6 +193,7 @@ public class TSuperConstructorInvocation extends Statement implements Invocation
 		return this.ast.getBindingResolver().resolveConstructor(this);
 	}
 
+	@Override
 	public IMethodBinding resolveMethodBinding() {
 		return resolveConstructorBinding();
 	}

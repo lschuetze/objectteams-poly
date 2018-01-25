@@ -90,7 +90,8 @@ public class LineInfo
         return this._repeatCount;
     }
 
-    public boolean equals(Object obj)
+    @Override
+	public boolean equals(Object obj)
     {
         if (!(obj instanceof LineInfo))
         {
@@ -158,6 +159,7 @@ public class LineInfo
 		return false;
 	}
 
+	@Override
 	public LineInfo clone()
 	{
 		LineInfo copiedLineInfo = new LineInfo(this._inputStartLine, this._outputStartLine);

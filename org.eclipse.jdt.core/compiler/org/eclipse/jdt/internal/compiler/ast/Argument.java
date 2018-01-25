@@ -170,10 +170,12 @@ public class Argument extends LocalDeclaration {
 	/**
 	 * @see org.eclipse.jdt.internal.compiler.ast.AbstractVariableDeclaration#getKind()
 	 */
+	@Override
 	public int getKind() {
 		return (this.bits & ASTNode.IsArgument) != 0 ? PARAMETER : LOCAL_VARIABLE;
 	}
 
+	@Override
 	public boolean isArgument() {
 		return true;
 	}
@@ -192,6 +194,7 @@ public class Argument extends LocalDeclaration {
 				(this.type != null && this.type.hasNullTypeAnnotation(position)); // just in case
 	}
 
+	@Override
 	public StringBuffer print(int indent, StringBuffer output) {
 
 		printIndent(indent, output);
@@ -209,6 +212,7 @@ public class Argument extends LocalDeclaration {
 		return output.append(this.name);
 	}
 
+	@Override
 	public StringBuffer printStatement(int indent, StringBuffer output) {
 
 		return print(indent, output).append(';');
@@ -274,6 +278,7 @@ public class Argument extends LocalDeclaration {
 		return exceptionType;
 	}
 
+	@Override
 	public void traverse(ASTVisitor visitor, BlockScope scope) {
 
 		if (visitor.visit(this, scope)) {

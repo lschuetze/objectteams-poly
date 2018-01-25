@@ -158,17 +158,21 @@ public class JavadocAllocationExpression extends AllocationExpression {
 		return allocationType;
 	}
 
+	@Override
 	public boolean isSuperAccess() {
 		return (this.bits & ASTNode.SuperAccess) != 0;
 	}
 
+	@Override
 	public TypeBinding resolveType(BlockScope scope) {
 		return internalResolveType(scope);
 	}
 
+	@Override
 	public TypeBinding resolveType(ClassScope scope) {
 		return internalResolveType(scope);
 	}
+	@Override
 	public void traverse(ASTVisitor visitor, BlockScope scope) {
 		if (visitor.visit(this, scope)) {
 			if (this.typeArguments != null) {
@@ -186,6 +190,7 @@ public class JavadocAllocationExpression extends AllocationExpression {
 		}
 		visitor.endVisit(this, scope);
 	}
+	@Override
 	public void traverse(ASTVisitor visitor, ClassScope scope) {
 		if (visitor.visit(this, scope)) {
 			if (this.typeArguments != null) {

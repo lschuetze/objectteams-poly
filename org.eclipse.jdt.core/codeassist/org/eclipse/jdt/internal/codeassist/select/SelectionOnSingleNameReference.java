@@ -49,6 +49,7 @@ public class SelectionOnSingleNameReference extends SingleNameReference {
 public SelectionOnSingleNameReference(char[] source, long pos) {
 	super(source, pos);
 }
+@Override
 public TypeBinding resolveType(BlockScope scope) {
 	if (this.actualReceiverType != null) {
 		this.binding = scope.getField(this.actualReceiverType, this.token, this);
@@ -101,6 +102,7 @@ public void resolveFinished() {
 	throw new SelectionNodeFound(this.binding); // other anchors have a real field
 }
 // SH}
+@Override
 public StringBuffer printExpression(int indent, StringBuffer output) {
 	output.append("<SelectOnName:"); //$NON-NLS-1$
 	return super.printExpression(0, output).append('>');

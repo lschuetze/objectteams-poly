@@ -121,6 +121,7 @@ public CompilationUnitDeclaration removeNextUnit() throws Error {
 	return next;
 }
 
+@Override
 public void run() {
 //{ObjectTeams:
 	Config.addConfig(this.sharedConfig);

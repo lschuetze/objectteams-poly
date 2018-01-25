@@ -191,6 +191,7 @@ public class MethodSpec extends ASTNode implements InvocationSite
 	/* (non-Javadoc)
 	 * @see org.eclipse.jdt.internal.compiler.ast.ASTNode#print(int, java.lang.StringBuffer)
 	 */
+	@Override
 	public StringBuffer print(int indent, StringBuffer output) {
 		printIndent(indent,output);
 		if (this.hasSignature) {
@@ -417,6 +418,7 @@ public class MethodSpec extends ASTNode implements InvocationSite
 	/* (non-Javadoc)
 	 * @see org.eclipse.jdt.internal.compiler.ast.AstNode#traverse(org.eclipse.jdt.internal.compiler.ASTVisitor, org.eclipse.jdt.internal.compiler.lookup.BlockScope)
 	 */
+	@Override
 	public void traverse(
 		ASTVisitor visitor,
 		BlockScope scope) {
@@ -758,25 +760,31 @@ public class MethodSpec extends ASTNode implements InvocationSite
 
 
 	// implement InvocationSite
+	@Override
 	public TypeBinding[] genericTypeArguments() {
 		return null;
 	}
+	@Override
 	public boolean isSuperAccess() {
 		return true; // grant access to inherited methods
 	}
 	
+	@Override
 	public boolean isTypeAccess() {
 		return this.resolvedMethod != null && this.resolvedMethod.isStatic();
 	}
 
+	@Override
 	public void setActualReceiverType(ReferenceBinding receiverType) {
 		// ignored		
 	}
 
+	@Override
 	public void setDepth(int depth) {
 		// ignored
 	}
 
+	@Override
 	public void setFieldIndex(int depth) {
 		// ignored		
 	}
@@ -784,10 +792,12 @@ public class MethodSpec extends ASTNode implements InvocationSite
 	/**
 	 * Used for generic method resolving.
 	 */
+	@Override
 	public TypeBinding invocationTargetType() {
 		return null;
 	}
 	
+	@Override
 	public InferenceContext18 freshInferenceContext(Scope scope) {
 		int nArgs = this.arguments.length;
 		final Expression[] expressions = new Expression[nArgs];
@@ -801,6 +811,7 @@ public class MethodSpec extends ASTNode implements InvocationSite
 		return new InferenceContext18(scope, expressions, this, null);
 	}
 	
+	@Override
 	public ExpressionContext getExpressionContext() {
 		return ExpressionContext.ASSIGNMENT_CONTEXT;
 	}

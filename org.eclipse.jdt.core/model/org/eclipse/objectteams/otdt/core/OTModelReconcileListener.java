@@ -46,7 +46,8 @@ public class OTModelReconcileListener implements IElementChangedListener
 	 * require additional changes within the OTM 
 	 * @param event - event describing changes
 	 */
-    public void elementChanged(ElementChangedEvent event)
+    @Override
+	public void elementChanged(ElementChangedEvent event)
     {    	
     	removeAffectedModelElements( new IJavaElementDelta[] { event.getDelta() } );
     }

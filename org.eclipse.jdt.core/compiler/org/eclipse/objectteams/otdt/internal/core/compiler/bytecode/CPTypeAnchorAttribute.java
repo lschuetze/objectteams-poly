@@ -101,12 +101,14 @@ public class CPTypeAnchorAttribute extends ListValueAttribute {
 		this._count++;
 	}
 
+	@Override
 	void writeElementValue(int i) {
 		TypeAnchor ta = this.anchors.get(i);
 		writeUnsignedShort(ta.idx);
 		writeName(ta.path);
 	}
-    void read(int i)
+    @Override
+	void read(int i)
     {
     	int idx = consumeShort();
     	char[] name = consumeName();
@@ -116,6 +118,7 @@ public class CPTypeAnchorAttribute extends ListValueAttribute {
 	/* (non-Javadoc)
 	 * @see org.eclipse.objectteams.otdt.internal.core.compiler.bytecode.AbstractAttribute#evaluate(org.eclipse.jdt.internal.compiler.lookup.Binding, org.eclipse.jdt.internal.compiler.lookup.LookupEnvironment)
 	 */
+	@Override
 	public void evaluate(Binding binding, LookupEnvironment environment, char[][][] missingTypeNames) {
 		checkBindingMismatch(binding, 0);
 		if (binding instanceof ReferenceBinding) {
@@ -135,6 +138,7 @@ public class CPTypeAnchorAttribute extends ListValueAttribute {
 	/* (non-Javadoc)
 	 * @see org.eclipse.objectteams.otdt.internal.core.compiler.bytecode.ListValueAttribute#toString(int)
 	 */
+	@Override
 	String toString(int i) {
 		TypeAnchor ta = this.anchors.get(i);
 		return '['+ta.idx+']'+new String(ta.path);

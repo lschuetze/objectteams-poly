@@ -231,6 +231,7 @@ public static class WorkingCopyDocument extends JavaSearchDocument {
 		this.charContents = ((CompilationUnit)workingCopy).getContents();
 		this.workingCopy = workingCopy;
 	}
+	@Override
 	public String toString() {
 		return "WorkingCopyDocument for " + getPath(); //$NON-NLS-1$
 	}
@@ -395,6 +396,7 @@ public MatchLocator(
 /**
  * Add an additional binary type
  */
+@Override
 public void accept(IBinaryType binaryType, PackageBinding packageBinding, AccessRestriction accessRestriction) {
 	this.lookupEnvironment.createBinaryTypeFrom(binaryType, packageBinding, accessRestriction);
 }
@@ -402,6 +404,7 @@ public void accept(IBinaryType binaryType, PackageBinding packageBinding, Access
  * Add an additional compilation unit into the loop
  *  ->  build compilation unit declarations, their bindings and record their results.
  */
+@Override
 public void accept(ICompilationUnit sourceUnit, AccessRestriction accessRestriction) {
 	// Switch the current policy and compilation result for this unit to the requested one.
 	CompilationResult unitResult = new CompilationResult(sourceUnit, 1, 1, this.options.maxProblemsPerUnit);
@@ -438,6 +441,7 @@ public void accept(ICompilationUnit sourceUnit, AccessRestriction accessRestrict
 /**
  * Add additional source types
  */
+@Override
 public void accept(ISourceType[] sourceTypes, PackageBinding packageBinding, AccessRestriction accessRestriction) {
 	// case of SearchableEnvironment of an IJavaProject is used
 	ISourceType sourceType = sourceTypes[0];
@@ -1356,6 +1360,7 @@ protected void locateMatches(JavaProject javaProject, PossibleMatch[] possibleMa
 //              these role files which could later case duplicate type errors
 //              (see Trac #92).
 		Arrays.sort(possibleMatches, new Comparator<PossibleMatch> () {
+			@Override
 			public int compare(PossibleMatch o1, PossibleMatch o2) {
 				// prefer source types over class files:
 				boolean source1 = o1.openable instanceof CompilationUnit;
@@ -1541,6 +1546,7 @@ public void locateMatches(SearchDocument[] searchDocuments) throws CoreException
 		JavaProject previousJavaProject = null;
 		PossibleMatchSet matchSet = new PossibleMatchSet();
 		Util.sort(searchDocuments, new Util.Comparer() {
+			@Override
 			public int compare(Object a, Object b) {
 				return ((SearchDocument)a).getPath().compareTo(((SearchDocument)b).getPath());
 			}
@@ -3802,6 +3808,7 @@ protected boolean typeInHierarchy(ReferenceBinding binding) {
 	return false;
 }
 //{ObjectTeams: function needed by Config:
+@Override
 public Parser getPlainParser() {
 	return new Parser(this.parser.internalGetProblemReporter(), true);
 }

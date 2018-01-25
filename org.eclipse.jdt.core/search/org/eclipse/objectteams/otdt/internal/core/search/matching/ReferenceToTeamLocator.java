@@ -91,7 +91,8 @@ public class ReferenceToTeamLocator extends PatternLocator
     	}
     }
     
-    protected int matchContainer() 
+    @Override
+	protected int matchContainer() 
     {
     	return COMPILATION_UNIT_CONTAINER;
     }

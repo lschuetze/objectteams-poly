@@ -45,7 +45,8 @@ public class RoleSmapGenerator extends AbstractSmapGenerator
         super(type);
     }
 
-    public char[] generate()
+    @Override
+	public char[] generate()
     {
         for (Iterator<SmapStratum> iter = this._strata.iterator(); iter.hasNext();)
         {
@@ -115,7 +116,8 @@ public class RoleSmapGenerator extends AbstractSmapGenerator
 	        // for testability ensure stable order:
 	        ReferenceBinding[] types = typesSet.toArray(new ReferenceBinding[typesSet.size()]);
 	        Arrays.sort(types, new Comparator<ReferenceBinding>() {
-	        	public int compare(ReferenceBinding o1, ReferenceBinding o2) { return CharOperation.compareTo(o1.constantPoolName(), o2.constantPoolName()); }
+	        	@Override
+				public int compare(ReferenceBinding o1, ReferenceBinding o2) { return CharOperation.compareTo(o1.constantPoolName(), o2.constantPoolName()); }
 			});
 			for (ReferenceBinding copySrc : types)
 	        {

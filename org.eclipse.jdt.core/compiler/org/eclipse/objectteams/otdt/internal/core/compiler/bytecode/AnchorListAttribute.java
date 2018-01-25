@@ -84,7 +84,8 @@ public class AnchorListAttribute extends ListValueAttribute {
     /* (non-Javadoc)
      * @see org.eclipse.objectteams.otdt.internal.core.compiler.bytecode.ListValueAttribute#writeElementValue(int)
      */
-    void writeElementValue(int i) {
+    @Override
+	void writeElementValue(int i) {
         if (i==0) {
             writeElement(this._method.returnType);
         } else {
@@ -128,7 +129,8 @@ public class AnchorListAttribute extends ListValueAttribute {
      *     .. -> <init>(MethodInfo,int,int,int[]) -> ListValueAttribute.readList()
      * )
      */
-    void read(int i)
+    @Override
+	void read(int i)
     {
         if (i==0)
             this._anchors = new char[this._count][];
@@ -141,7 +143,8 @@ public class AnchorListAttribute extends ListValueAttribute {
     /* (non-Javadoc)
      * @see org.eclipse.objectteams.otdt.internal.core.compiler.bytecode.AbstractAttribute#evaluate(org.eclipse.jdt.internal.compiler.lookup.Binding, org.eclipse.jdt.internal.compiler.lookup.LookupEnvironment)
      */
-    public void evaluate(Binding binding, LookupEnvironment environment, char[][][] missingTypeNames) {
+    @Override
+	public void evaluate(Binding binding, LookupEnvironment environment, char[][][] missingTypeNames) {
         assert(false);
     }
 
@@ -149,7 +152,8 @@ public class AnchorListAttribute extends ListValueAttribute {
      * PHASE 2 or reading:
      * Once the method binding is created, store the anchor list into the method binding.
      */
-    public boolean evaluate(MethodInfo info, MethodBinding methodBinding, LookupEnvironment environment)
+    @Override
+	public boolean evaluate(MethodInfo info, MethodBinding methodBinding, LookupEnvironment environment)
     {
         if (info != this._methodInfo) return false;
         this._method = methodBinding;
@@ -199,7 +203,8 @@ public class AnchorListAttribute extends ListValueAttribute {
                     anchorName, type.enclosingType(), 0, true); // name is irrelevant.
             // make sure this anchor can answer `anchor.declaringScope.referenceMethodBinding()`:
             anchor.declaringScope = new CallinCalloutScope(null, null) {
-            	public MethodBinding referenceMethodBinding() {
+            	@Override
+				public MethodBinding referenceMethodBinding() {
             		return declaringMethod;
             	}
             };
@@ -210,6 +215,7 @@ public class AnchorListAttribute extends ListValueAttribute {
             RoleTypeBinding wrappedRole = (RoleTypeBinding)wrappedType.leafComponentType();
 			wrappedRole._argumentPosition = Integer.parseInt(String.valueOf(tail));
 			wrappedRole._declaringMethod = new IMethodProvider() {
+				@Override
 				public MethodBinding getMethod() { return declaringMethod; }
 			};
 
@@ -262,7 +268,8 @@ public class AnchorListAttribute extends ListValueAttribute {
     /* (non-Javadoc)
      * @see org.eclipse.objectteams.otdt.internal.core.compiler.bytecode.ListValueAttribute#toString(int)
      */
-    String toString(int i) {
+    @Override
+	String toString(int i) {
         if (this._anchors != null) {
             if (this._anchors[i] == null)
                 return "<>";             //$NON-NLS-1$

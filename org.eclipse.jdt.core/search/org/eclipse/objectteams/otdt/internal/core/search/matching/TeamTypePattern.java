@@ -49,7 +49,8 @@ public class TeamTypePattern extends TypeDeclarationPattern
         this.kind = TEAM_DECL_PATTERN;
     }
     
-    public SearchPattern getBlankPattern() 
+    @Override
+	public SearchPattern getBlankPattern() 
     {
     	return new TeamTypePattern(null, null, null, TYPE_SUFFIX, R_EXACT_MATCH | R_CASE_SENSITIVE);
     }
@@ -68,7 +69,8 @@ public class TeamTypePattern extends TypeDeclarationPattern
 //        return super.matchesDecodedKey(decodedPattern);
 //    }
     
-    public char[][] getIndexCategories()
+    @Override
+	public char[][] getIndexCategories()
     {
         return TEAM_CATEGORIES;
         //return CATEGORIES; 

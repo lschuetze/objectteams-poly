@@ -84,11 +84,13 @@ public class OTType extends OTJavaElement implements IOTType
 		this.flags                  = flags;
 	}
 
+	@Override
 	public boolean isRole()
 	{
 		return TypeHelper.isRole(this.flags);
 	}
 
+	@Override
 	public boolean isTeam()
 	{
 		return TypeHelper.isTeam(this.flags);
@@ -97,6 +99,7 @@ public class OTType extends OTJavaElement implements IOTType
 	/**
 	 * Returns the corresponding resource, if this is a toplevel type, otherwise null.
 	 */
+	@Override
 	public IResource getCorrespondingResource() throws JavaModelException
 	{
 		IJavaElement javaParent = getCorrespondingJavaElement().getParent();
@@ -112,6 +115,7 @@ public class OTType extends OTJavaElement implements IOTType
 	 * Inner types are represented (like in the JavaModel) as children. This
 	 * methods filters IType children and returns them.
 	 */
+	@Override
 	public IType[] getInnerTypes()
 	{
 		List<IType> result = new LinkedList<IType>();
@@ -131,6 +135,7 @@ public class OTType extends OTJavaElement implements IOTType
 	/**
 	 * {@inheritDoc}.
 	 */
+	@Override
 	public IType[] getRoleTypes(int which) throws JavaModelException 
 	{
 	    return getRoleTypes(which, null);
@@ -139,6 +144,7 @@ public class OTType extends OTJavaElement implements IOTType
 	/**
 	 * {@inheritDoc}
 	 */
+	@Override
 	public IType[] getRoleTypes(int which, String roleName) throws JavaModelException 
 	{
 	    ArrayList<IType> result = new ArrayList<IType>();
@@ -228,7 +234,8 @@ public class OTType extends OTJavaElement implements IOTType
 	        OTSearchEngine searchEngine = new OTSearchEngine();
             IJavaSearchScope scope = SearchEngine.createJavaSearchScope(new IJavaElement[]{this.getAncestor(IJavaElement.JAVA_PROJECT)});
             SearchRequestor requestor = new SearchRequestor() {
-                public void acceptSearchMatch(SearchMatch match) throws CoreException
+                @Override
+				public void acceptSearchMatch(SearchMatch match) throws CoreException
                 {
                     searchResult.add((IType)match.getElement());
                 }
@@ -258,16 +265,19 @@ public class OTType extends OTJavaElement implements IOTType
 	 * Returns all role types (inlined and role files) contained in this team.
 	 * @throws JavaModelException
 	 */
+	@Override
 	public IType[] getRoleTypes() throws JavaModelException
 	{
 	    return getRoleTypes(IOTType.INLINED | IOTType.ROLEFILE);
 	}
 	
+	@Override
 	public int getFlags()
 	{
 		return this.flags;
 	}
 	
+	@Override
 	public IType getRoleType(String simpleName)
 	{
 	    if (isTeam() && exists())
@@ -289,6 +299,7 @@ public class OTType extends OTJavaElement implements IOTType
 	    return null;
 	}
 	
+	@Override
 	public IType searchRoleType(String simpleName) {
 		try
 		{
@@ -309,6 +320,7 @@ public class OTType extends OTJavaElement implements IOTType
 		return null;
 	}
 	
+	@Override
 	public boolean equals(Object obj)
 	{
 		if (obj == this.getCorrespondingJavaElement())
@@ -325,6 +337,7 @@ public class OTType extends OTJavaElement implements IOTType
 				&& getFlags() == other.getFlags();
 	}
 
+	@Override
 	@SuppressWarnings("nls")
 	public String toString()
 	{
@@ -339,181 +352,217 @@ public class OTType extends OTJavaElement implements IOTType
 	/**
 	 * @deprecated Use {@link #codeComplete(char[],int,int,char[][],char[][],int[],boolean,CompletionRequestor)} instead.
 	 */
-    public void codeComplete(char[] snippet, int insertion, int position, char[][] localVariableTypeNames, char[][] localVariableNames, int[] localVariableModifiers, boolean isStatic, org.eclipse.jdt.core.ICompletionRequestor requestor) throws JavaModelException
+    @Override
+	public void codeComplete(char[] snippet, int insertion, int position, char[][] localVariableTypeNames, char[][] localVariableNames, int[] localVariableModifiers, boolean isStatic, org.eclipse.jdt.core.ICompletionRequestor requestor) throws JavaModelException
     {
         getIType().codeComplete(snippet, insertion, position, localVariableTypeNames, localVariableNames, localVariableModifiers, isStatic, requestor);
     }
     /**
 	 * @deprecated Use {@link #codeComplete(char[],int,int,char[][],char[][],int[],boolean,CompletionRequestor,WorkingCopyOwner)} instead.
      */
-    public void codeComplete(char[] snippet, int insertion, int position, char[][] localVariableTypeNames, char[][] localVariableNames, int[] localVariableModifiers, boolean isStatic, org.eclipse.jdt.core.ICompletionRequestor requestor, WorkingCopyOwner owner) throws JavaModelException
+    @Override
+	public void codeComplete(char[] snippet, int insertion, int position, char[][] localVariableTypeNames, char[][] localVariableNames, int[] localVariableModifiers, boolean isStatic, org.eclipse.jdt.core.ICompletionRequestor requestor, WorkingCopyOwner owner) throws JavaModelException
     {
         getIType().codeComplete(snippet, insertion, position, localVariableTypeNames, localVariableNames, localVariableModifiers, isStatic, requestor, owner);
     }
-    public void codeComplete(char[] snippet, int insertion, int position, char[][] localVariableTypeNames, char[][] localVariableNames, int[] localVariableModifiers, boolean isStatic, CompletionRequestor requestor, IProgressMonitor monitor)
+    @Override
+	public void codeComplete(char[] snippet, int insertion, int position, char[][] localVariableTypeNames, char[][] localVariableNames, int[] localVariableModifiers, boolean isStatic, CompletionRequestor requestor, IProgressMonitor monitor)
     		throws JavaModelException 
     {
     	getIType().codeComplete(snippet, insertion, position, localVariableTypeNames, localVariableNames, localVariableModifiers, isStatic, requestor, monitor);	
     }
-    public void codeComplete(char[] snippet, int insertion, int position, char[][] localVariableTypeNames, char[][] localVariableNames, int[] localVariableModifiers, boolean isStatic, CompletionRequestor requestor, WorkingCopyOwner owner, IProgressMonitor monitor)
+    @Override
+	public void codeComplete(char[] snippet, int insertion, int position, char[][] localVariableTypeNames, char[][] localVariableNames, int[] localVariableModifiers, boolean isStatic, CompletionRequestor requestor, WorkingCopyOwner owner, IProgressMonitor monitor)
     		throws JavaModelException 
     {
     	getIType().codeComplete(snippet, insertion, position, localVariableTypeNames, localVariableNames, localVariableModifiers, isStatic, requestor, owner, monitor);
     }
-    public IField createField(String contents, IJavaElement sibling, boolean force, IProgressMonitor monitor) throws JavaModelException
+    @Override
+	public IField createField(String contents, IJavaElement sibling, boolean force, IProgressMonitor monitor) throws JavaModelException
     {
         return getIType().createField(contents, sibling, force, monitor);
     }
 
-    public IInitializer createInitializer(String contents, IJavaElement sibling, IProgressMonitor monitor) throws JavaModelException
+    @Override
+	public IInitializer createInitializer(String contents, IJavaElement sibling, IProgressMonitor monitor) throws JavaModelException
     {
         return getIType().createInitializer(contents, sibling, monitor);
     }
 
-    public IMethod createMethod(String contents, IJavaElement sibling, boolean force, IProgressMonitor monitor) throws JavaModelException
+    @Override
+	public IMethod createMethod(String contents, IJavaElement sibling, boolean force, IProgressMonitor monitor) throws JavaModelException
     {
         return getIType().createMethod(contents, sibling, force, monitor);
     }
 
-    public IType createType(String contents, IJavaElement sibling, boolean force, IProgressMonitor monitor) throws JavaModelException
+    @Override
+	public IType createType(String contents, IJavaElement sibling, boolean force, IProgressMonitor monitor) throws JavaModelException
     {
         return getIType().createType(contents, sibling, force, monitor);
     }
 
-    public IMethod[] findMethods(IMethod method)
+    @Override
+	public IMethod[] findMethods(IMethod method)
     {
         return getIType().findMethods(method);
     }
 
-    public IField getField(String name)
+    @Override
+	public IField getField(String name)
     {
         return getIType().getField(name);
     }
 
-    public IField[] getFields() throws JavaModelException
+    @Override
+	public IField[] getFields() throws JavaModelException
     {
         return getIType().getFields();
     }
 
-    public String getFullyQualifiedName()
+    @Override
+	public String getFullyQualifiedName()
     {
         return getIType().getFullyQualifiedName();
     }
 
-    public String getFullyQualifiedName(char enclosingTypeSeparator)
+    @Override
+	public String getFullyQualifiedName(char enclosingTypeSeparator)
     {
         return getIType().getFullyQualifiedName(enclosingTypeSeparator);
     }
 
-    public IInitializer getInitializer(int occurrenceCount)
+    @Override
+	public IInitializer getInitializer(int occurrenceCount)
     {
         return getIType().getInitializer(occurrenceCount);
     }
 
-    public IInitializer[] getInitializers() throws JavaModelException
+    @Override
+	public IInitializer[] getInitializers() throws JavaModelException
     {
         return getIType().getInitializers();
     }
 
-    public IMethod getMethod(String name, String[] parameterTypeSignatures)
+    @Override
+	public IMethod getMethod(String name, String[] parameterTypeSignatures)
     {
         return getIType().getMethod(name, parameterTypeSignatures);
     }
 
-    public IMethod[] getMethods() throws JavaModelException
+    @Override
+	public IMethod[] getMethods() throws JavaModelException
     {
         return getIType().getMethods();
     }
 
-    public IAnnotation getAnnotation(String name) {
+    @Override
+	public IAnnotation getAnnotation(String name) {
     	return getIType().getAnnotation(name);
     }
 
-    public IAnnotation[] getAnnotations() throws JavaModelException {
+    @Override
+	public IAnnotation[] getAnnotations() throws JavaModelException {
     	return getIType().getAnnotations();
     }
     
-    public IPackageFragment getPackageFragment()
+    @Override
+	public IPackageFragment getPackageFragment()
     {
         return getIType().getPackageFragment();
     }
 
-    public String getSuperclassName() throws JavaModelException
+    @Override
+	public String getSuperclassName() throws JavaModelException
     {
         return getIType().getSuperclassName();
     }
 
-    public String getSuperclassTypeSignature() throws JavaModelException
+    @Override
+	public String getSuperclassTypeSignature() throws JavaModelException
     {
         return getIType().getSuperclassTypeSignature();
     }
 
-    public String[] getSuperInterfaceTypeSignatures() throws JavaModelException
+    @Override
+	public String[] getSuperInterfaceTypeSignatures() throws JavaModelException
     {
         return getIType().getSuperInterfaceTypeSignatures();
     }
 
-    public String[] getSuperInterfaceNames() throws JavaModelException
+    @Override
+	public String[] getSuperInterfaceNames() throws JavaModelException
     {
         return getIType().getSuperInterfaceNames();
     }
 
-    public String[] getTypeParameterSignatures() throws JavaModelException
+    @Override
+	public String[] getTypeParameterSignatures() throws JavaModelException
     {
         return getIType().getTypeParameterSignatures();
     }
 
-    public IType getType(String name)
+    @Override
+	public IType getType(String name)
     {
         return getIType().getType(name);
     }
 
-    public String getTypeQualifiedName()
+    @Override
+	public String getTypeQualifiedName()
     {
         return getIType().getTypeQualifiedName();
     }
 
-    public String getTypeQualifiedName(char enclosingTypeSeparator)
+    @Override
+	public String getTypeQualifiedName(char enclosingTypeSeparator)
     {
         return getIType().getTypeQualifiedName(enclosingTypeSeparator);
     }
 
-    public IType[] getTypes() throws JavaModelException
+    @Override
+	public IType[] getTypes() throws JavaModelException
     {
 		return getIType().getTypes();
     }
 
-    public boolean isAnonymous() throws JavaModelException
+    @Override
+	public boolean isAnonymous() throws JavaModelException
     {
         return getIType().isAnonymous();
     }
 
-    public boolean isClass() throws JavaModelException
+    @Override
+	public boolean isClass() throws JavaModelException
     {
         return getIType().isClass();
     }
 
-    public boolean isEnum() throws JavaModelException
+    @Override
+	public boolean isEnum() throws JavaModelException
     {
         return getIType().isEnum();
     }
 
-    public boolean isInterface() throws JavaModelException
+    @Override
+	public boolean isInterface() throws JavaModelException
     {
         return getIType().isInterface();
     }
 
-    public boolean isAnnotation() throws JavaModelException
+    @Override
+	public boolean isAnnotation() throws JavaModelException
     {
         return getIType().isAnnotation();
     }
 
-    public boolean isLocal() throws JavaModelException
+    @Override
+	public boolean isLocal() throws JavaModelException
     {
         return getIType().isLocal();
     }
 
-    public boolean isMember() throws JavaModelException
+    @Override
+	public boolean isMember() throws JavaModelException
     {
         return getIType().isMember();
     }
@@ -523,183 +572,221 @@ public class OTType extends OTJavaElement implements IOTType
 		return false;
 	}
 
+	@Override
 	public ITypeHierarchy loadTypeHierachy(InputStream input, IProgressMonitor monitor) throws JavaModelException
     {
         return getIType().loadTypeHierachy(input, monitor);
     }
 
-    public ITypeHierarchy newSupertypeHierarchy(IProgressMonitor monitor) throws JavaModelException
+    @Override
+	public ITypeHierarchy newSupertypeHierarchy(IProgressMonitor monitor) throws JavaModelException
     {
         return getIType().newSupertypeHierarchy(monitor);
     }
 
-    public ITypeHierarchy newSupertypeHierarchy(ICompilationUnit[] workingCopies, IProgressMonitor monitor) throws JavaModelException
+    @Override
+	public ITypeHierarchy newSupertypeHierarchy(ICompilationUnit[] workingCopies, IProgressMonitor monitor) throws JavaModelException
     {
         return getIType().newSupertypeHierarchy(workingCopies, monitor);
     }
     /**
 	 * @deprecated Use {@link #newSupertypeHierarchy(ICompilationUnit[], IProgressMonitor)} instead
      */
-    public ITypeHierarchy newSupertypeHierarchy(org.eclipse.jdt.core.IWorkingCopy[] workingCopies, IProgressMonitor monitor) throws JavaModelException
+    @Override
+	public ITypeHierarchy newSupertypeHierarchy(org.eclipse.jdt.core.IWorkingCopy[] workingCopies, IProgressMonitor monitor) throws JavaModelException
     {
         return getIType().newSupertypeHierarchy(workingCopies, monitor);
     }
 
-    public ITypeHierarchy newSupertypeHierarchy(WorkingCopyOwner owner, IProgressMonitor monitor) throws JavaModelException
+    @Override
+	public ITypeHierarchy newSupertypeHierarchy(WorkingCopyOwner owner, IProgressMonitor monitor) throws JavaModelException
     {
         return getIType().newSupertypeHierarchy(owner, monitor);
     }
 
-    public ITypeHierarchy newTypeHierarchy(IJavaProject project, IProgressMonitor monitor) throws JavaModelException
+    @Override
+	public ITypeHierarchy newTypeHierarchy(IJavaProject project, IProgressMonitor monitor) throws JavaModelException
     {
         return getIType().newTypeHierarchy(project, monitor);
     }
 
-    public ITypeHierarchy newTypeHierarchy(IJavaProject project, WorkingCopyOwner owner, IProgressMonitor monitor) throws JavaModelException
+    @Override
+	public ITypeHierarchy newTypeHierarchy(IJavaProject project, WorkingCopyOwner owner, IProgressMonitor monitor) throws JavaModelException
     {
         return getIType().newTypeHierarchy(project, owner, monitor);
     }
 
-    public ITypeHierarchy newTypeHierarchy(IProgressMonitor monitor) throws JavaModelException
+    @Override
+	public ITypeHierarchy newTypeHierarchy(IProgressMonitor monitor) throws JavaModelException
     {
         return getIType().newTypeHierarchy(monitor);
     }
 
-    public ITypeHierarchy newTypeHierarchy(ICompilationUnit[] workingCopies, IProgressMonitor monitor) throws JavaModelException
+    @Override
+	public ITypeHierarchy newTypeHierarchy(ICompilationUnit[] workingCopies, IProgressMonitor monitor) throws JavaModelException
     {
         return getIType().newTypeHierarchy(workingCopies, monitor);
     }
     /**
 	 * @deprecated Use {@link #newTypeHierarchy(ICompilationUnit[], IProgressMonitor)} instead
      */
-    public ITypeHierarchy newTypeHierarchy(org.eclipse.jdt.core.IWorkingCopy[] workingCopies, IProgressMonitor monitor) throws JavaModelException
+    @Override
+	public ITypeHierarchy newTypeHierarchy(org.eclipse.jdt.core.IWorkingCopy[] workingCopies, IProgressMonitor monitor) throws JavaModelException
     {
         return getIType().newTypeHierarchy(workingCopies, monitor);
     }
 
-    public ITypeHierarchy newTypeHierarchy(WorkingCopyOwner owner, IProgressMonitor monitor) throws JavaModelException
+    @Override
+	public ITypeHierarchy newTypeHierarchy(WorkingCopyOwner owner, IProgressMonitor monitor) throws JavaModelException
     {
         return getIType().newTypeHierarchy(owner, monitor);
     }
 
-    public String[][] resolveType(String typeName) throws JavaModelException
+    @Override
+	public String[][] resolveType(String typeName) throws JavaModelException
     {
         return getIType().resolveType(typeName);
     }
 
-    public String[][] resolveType(String typeName, WorkingCopyOwner owner) throws JavaModelException
+    @Override
+	public String[][] resolveType(String typeName, WorkingCopyOwner owner) throws JavaModelException
     {
         return getIType().resolveType(typeName, owner);
     }
 
-    public IClassFile getClassFile()
+    @Override
+	public IClassFile getClassFile()
     {
         return getIType().getClassFile();
     }
 
-    public ICompilationUnit getCompilationUnit()
+    @Override
+	public ICompilationUnit getCompilationUnit()
     {
         return getIType().getCompilationUnit();
     }
 
-    public ITypeRoot getTypeRoot() {
+    @Override
+	public ITypeRoot getTypeRoot() {
     	return getIType().getTypeRoot();
     }
     
-    public IType getDeclaringType()
+    @Override
+	public IType getDeclaringType()
     {
         return getIType().getDeclaringType();
     }
 
-    public ISourceRange getNameRange() throws JavaModelException
+    @Override
+	public ISourceRange getNameRange() throws JavaModelException
     {
         return getIType().getNameRange();
     }
 
-    public IType getType(String name, int occurrenceCount)
+    @Override
+	public IType getType(String name, int occurrenceCount)
     {
         return getIType().getType(name, occurrenceCount);
     }
 
-    public boolean isBinary()
+    @Override
+	public boolean isBinary()
     {
         return getIType().isBinary();
     }
 
-    public String getSource() throws JavaModelException
+    @Override
+	public String getSource() throws JavaModelException
     {
         return getIType().getSource();
     }
 
-    public ISourceRange getSourceRange() throws JavaModelException
+    @Override
+	public ISourceRange getSourceRange() throws JavaModelException
     {
         return getIType().getSourceRange();
     }
 
-    public void copy(IJavaElement container, IJavaElement sibling, String rename, boolean replace, IProgressMonitor monitor) throws JavaModelException
+    @Override
+	public void copy(IJavaElement container, IJavaElement sibling, String rename, boolean replace, IProgressMonitor monitor) throws JavaModelException
     {
         getIType().copy(container, sibling, rename, replace, monitor);
     }
 
-    public void delete(boolean force, IProgressMonitor monitor) throws JavaModelException
+    @Override
+	public void delete(boolean force, IProgressMonitor monitor) throws JavaModelException
     {
         getIType().delete(force, monitor);
     }
 
-    public void move(IJavaElement container, IJavaElement sibling, String rename, boolean replace, IProgressMonitor monitor) throws JavaModelException
+    @Override
+	public void move(IJavaElement container, IJavaElement sibling, String rename, boolean replace, IProgressMonitor monitor) throws JavaModelException
     {
         getIType().move(container, sibling, rename, replace, monitor);
     }
 
-    public void rename(String name, boolean replace, IProgressMonitor monitor) throws JavaModelException
+    @Override
+	public void rename(String name, boolean replace, IProgressMonitor monitor) throws JavaModelException
     {
         getIType().rename(name, replace, monitor);
     }
 
+	@Override
 	public void codeComplete(char[] snippet, int insertion, int position, char[][] localVariableTypeNames, char[][] localVariableNames, int[] localVariableModifiers, boolean isStatic, CompletionRequestor requestor) throws JavaModelException {
 		getIType().codeComplete(snippet, insertion, position, localVariableTypeNames, localVariableNames, localVariableModifiers, isStatic, requestor);
 	}
 
+	@Override
 	public void codeComplete(char[] snippet, int insertion, int position, char[][] localVariableTypeNames, char[][] localVariableNames, int[] localVariableModifiers, boolean isStatic, CompletionRequestor requestor, WorkingCopyOwner owner) throws JavaModelException {
 		getIType().codeComplete(snippet, insertion, position, localVariableTypeNames, localVariableNames, localVariableModifiers, isStatic, requestor, owner);
 	}
 
+	@Override
 	public IJavaElement[] getChildrenForCategory(String category) throws JavaModelException {
 		return getIType().getChildrenForCategory(category);
 	}
 
+	@Override
 	public String getFullyQualifiedParameterizedName() throws JavaModelException {
 		return getIType().getFullyQualifiedParameterizedName();
 	}
 
+	@Override
 	public String getKey() {
 		return getIType().getKey();
 	}
 
+	@Override
 	public ITypeParameter[] getTypeParameters() throws JavaModelException {
 		return getIType().getTypeParameters();
 	}
 
+	@Override
 	public ITypeParameter getTypeParameter(String name) {
 		return getIType().getTypeParameter(name);
 	}
 
+	@Override
 	public boolean isResolved() {
 		return getIType().isResolved();
 	}
 
+	@Override
 	public String[] getCategories() throws JavaModelException {
 		return getIType().getCategories();
 	}
 
+	@Override
 	public ISourceRange getJavadocRange() throws JavaModelException {
 		return getIType().getJavadocRange();
 	}
 
+	@Override
 	public int getOccurrenceCount() {
 		return getIType().getOccurrenceCount();
 	}
 
+	@Override
 	public String getAttachedJavadoc(IProgressMonitor monitor) throws JavaModelException {
 		return getIType().getAttachedJavadoc(monitor);
 	}

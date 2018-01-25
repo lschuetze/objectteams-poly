@@ -84,6 +84,7 @@ public class ParameterizedQualifiedTypeReference extends ArrayQualifiedTypeRefer
 			this.bits |= ASTNode.HasTypeAnnotations;
 		}
 	}
+	@Override
 	public void checkBounds(Scope scope) {
 		if (this.resolvedType == null || !this.resolvedType.isValidBinding()) return;
 
@@ -108,6 +109,7 @@ public class ParameterizedQualifiedTypeReference extends ArrayQualifiedTypeRefer
 			}
 		}
 	}
+	@Override
 	public TypeReference augmentTypeWithAdditionalDimensions(int additionalDimensions, Annotation[][] additionalAnnotations, boolean isVarargs) {
 		int totalDimensions = this.dimensions() + additionalDimensions;
 		Annotation [][] allAnnotations = getMergedAnnotationsOnDimensions(additionalDimensions, additionalAnnotations);
@@ -118,6 +120,7 @@ public class ParameterizedQualifiedTypeReference extends ArrayQualifiedTypeRefer
 			pqtr.extendedDimensions = additionalDimensions;
 		return pqtr;
 	}
+	@Override
 	public boolean isParameterizedTypeReference() {
 		return true;
 	}
@@ -147,6 +150,7 @@ public class ParameterizedQualifiedTypeReference extends ArrayQualifiedTypeRefer
 	/**
 	 * @return char[][]
 	 */
+	@Override
 	public char [][] getParameterizedTypeName(){
 		int length = this.tokens.length;
 		char[][] qParamName = new char[length][];
@@ -181,6 +185,7 @@ public class ParameterizedQualifiedTypeReference extends ArrayQualifiedTypeRefer
 		return qParamName;
 	}
 
+	@Override
 	public TypeReference[][] getTypeArguments() {
 		return this.typeArguments;
 	}
@@ -188,7 +193,8 @@ public class ParameterizedQualifiedTypeReference extends ArrayQualifiedTypeRefer
 	/* (non-Javadoc)
      * @see org.eclipse.jdt.internal.compiler.ast.ArrayQualifiedTypeReference#getTypeBinding(org.eclipse.jdt.internal.compiler.lookup.Scope)
      */
-    protected TypeBinding getTypeBinding(Scope scope) {
+    @Override
+	protected TypeBinding getTypeBinding(Scope scope) {
         return null; // not supported here - combined with resolveType(...)
     }
 
@@ -413,6 +419,7 @@ public class ParameterizedQualifiedTypeReference extends ArrayQualifiedTypeRefer
 		}
 	}
 
+	@Override
 	public StringBuffer printExpression(int indent, StringBuffer output) {
 		int length = this.tokens.length;
 		for (int i = 0; i < length - 1; i++) {
@@ -486,12 +493,15 @@ public class ParameterizedQualifiedTypeReference extends ArrayQualifiedTypeRefer
 		return output;
 	}
 
+	@Override
 	public TypeBinding resolveType(BlockScope scope, boolean checkBounds, int location) {
 	    return internalResolveType(scope, checkBounds, location);
 	}
+	@Override
 	public TypeBinding resolveType(ClassScope scope, int location) {
 	    return internalResolveType(scope, false, location);
 	}
+	@Override
 	public void traverse(ASTVisitor visitor, BlockScope scope) {
 		if (visitor.visit(this, scope)) {
 			if (this.annotations != null) {
@@ -523,6 +533,7 @@ public class ParameterizedQualifiedTypeReference extends ArrayQualifiedTypeRefer
 		visitor.endVisit(this, scope);
 	}
 
+	@Override
 	public void traverse(ASTVisitor visitor, ClassScope scope) {
 		if (visitor.visit(this, scope)) {
 			if (this.annotations != null) {

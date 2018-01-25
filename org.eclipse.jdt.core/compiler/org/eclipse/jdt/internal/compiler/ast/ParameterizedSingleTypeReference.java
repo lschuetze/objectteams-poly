@@ -87,6 +87,7 @@ public class ParameterizedSingleTypeReference extends ArrayTypeReference {
 			this.bits |= ASTNode.HasTypeAnnotations;
 		}
 	}
+	@Override
 	public void checkBounds(Scope scope) {
 		if (this.resolvedType == null) return;
 
@@ -99,6 +100,7 @@ public class ParameterizedSingleTypeReference extends ArrayTypeReference {
 		}
 	}
 	
+	@Override
 	public TypeReference augmentTypeWithAdditionalDimensions(int additionalDimensions, Annotation [][] additionalAnnotations, boolean isVarargs) {
 		int totalDimensions = this.dimensions() + additionalDimensions;
 		Annotation [][] allAnnotations = getMergedAnnotationsOnDimensions(additionalDimensions, additionalAnnotations);
@@ -113,6 +115,7 @@ public class ParameterizedSingleTypeReference extends ArrayTypeReference {
 	/**
 	 * @return char[][]
 	 */
+	@Override
 	public char [][] getParameterizedTypeName(){
 		StringBuffer buffer = new StringBuffer(5);
 		buffer.append(this.token).append('<');
@@ -152,6 +155,7 @@ public class ParameterizedSingleTypeReference extends ArrayTypeReference {
 		return new char[][]{ name };
 	}
 	
+	@Override
 	public TypeReference[][] getTypeArguments() {
 		return new TypeReference[][] { this.typeArguments };
 	}
@@ -159,11 +163,13 @@ public class ParameterizedSingleTypeReference extends ArrayTypeReference {
 	/**
      * @see org.eclipse.jdt.internal.compiler.ast.ArrayQualifiedTypeReference#getTypeBinding(org.eclipse.jdt.internal.compiler.lookup.Scope)
      */
-    protected TypeBinding getTypeBinding(Scope scope) {
+    @Override
+	protected TypeBinding getTypeBinding(Scope scope) {
         return null; // not supported here - combined with resolveType(...)
     }
     
-    public boolean isParameterizedTypeReference() {
+    @Override
+	public boolean isParameterizedTypeReference() {
     	return true;
     }
 
@@ -494,6 +500,7 @@ public class ParameterizedSingleTypeReference extends ArrayTypeReference {
 		return type;
 	}
 
+	@Override
 	public StringBuffer printExpression(int indent, StringBuffer output){
 		if (this.annotations != null && this.annotations[0] != null) {
 			printAnnotations(this.annotations[0], output);
@@ -550,14 +557,17 @@ public class ParameterizedSingleTypeReference extends ArrayTypeReference {
 		return output;
 	}
 
+	@Override
 	public TypeBinding resolveType(BlockScope scope, boolean checkBounds, int location) {
 	    return internalResolveType(scope, null, checkBounds, location);
 	}
 
+	@Override
 	public TypeBinding resolveType(ClassScope scope, int location) {
 	    return internalResolveType(scope, null, false /*no bounds check in classScope*/, location);
 	}
 
+	@Override
 	public TypeBinding resolveTypeEnclosing(BlockScope scope, ReferenceBinding enclosingType) {
 	    return internalResolveType(scope, enclosingType, true/*check bounds*/, 0);
 	}
@@ -632,6 +642,7 @@ public class ParameterizedSingleTypeReference extends ArrayTypeReference {
 		return true;
 	}
 // SH}
+	@Override
 	public void traverse(ASTVisitor visitor, BlockScope scope) {
 		if (visitor.visit(this, scope)) {
 			if (this.annotations != null) {
@@ -659,6 +670,7 @@ public class ParameterizedSingleTypeReference extends ArrayTypeReference {
 		visitor.endVisit(this, scope);
 	}
 
+	@Override
 	public void traverse(ASTVisitor visitor, ClassScope scope) {
 		if (visitor.visit(this, scope)) {
 			if (this.annotations != null) {

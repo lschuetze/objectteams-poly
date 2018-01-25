@@ -40,7 +40,8 @@ public class TeamDeclarationLocator extends TypeDeclarationLocator
         super(pattern);
     }
 
-    public int match(TypeDeclaration type, MatchingNodeSet nodeSet)
+    @Override
+	public int match(TypeDeclaration type, MatchingNodeSet nodeSet)
     {
         if (!Flags.isTeam(type.modifiers))
             return IMPOSSIBLE_MATCH;
@@ -48,7 +49,8 @@ public class TeamDeclarationLocator extends TypeDeclarationLocator
         return super.match(type, nodeSet);
     }
 
-    protected int resolveLevelForType(char[] qualifiedPattern, TypeBinding type)
+    @Override
+	protected int resolveLevelForType(char[] qualifiedPattern, TypeBinding type)
     {
         if (type.leafComponentType().isBaseType())
             return IMPOSSIBLE_MATCH;

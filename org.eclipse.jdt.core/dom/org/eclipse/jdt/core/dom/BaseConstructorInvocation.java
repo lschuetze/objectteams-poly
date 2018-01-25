@@ -108,21 +108,25 @@ public class BaseConstructorInvocation extends Statement implements Invocation
      * @return the live list of argument expressions
      *    (element type: <code>Expression</code>)
      */
-    public List getArguments()
+    @Override
+	public List getArguments()
     {
         return this.arguments;
     }
 
-    public ChildListPropertyDescriptor getArgumentsProperty() {
+    @Override
+	public ChildListPropertyDescriptor getArgumentsProperty() {
     	return ARGUMENTS_PROPERTY;
     }
 
+	@Override
 	final List internalStructuralPropertiesForType(int apiLevel)
 	{
 		return propertyDescriptors(apiLevel);
 	}
 
-    final List internalGetChildListProperty(ChildListPropertyDescriptor property)
+    @Override
+	final List internalGetChildListProperty(ChildListPropertyDescriptor property)
     {
         if (property == ARGUMENTS_PROPERTY)
         {
@@ -133,11 +137,13 @@ public class BaseConstructorInvocation extends Statement implements Invocation
         return super.internalGetChildListProperty(property);
     }
 
+	@Override
 	final int getNodeType0()
 	{
 		return BASE_CONSTRUCTOR_INVOCATION;
 	}
 
+	@Override
 	@SuppressWarnings("unchecked")
 	ASTNode clone0(AST target)
 	{
@@ -148,13 +154,15 @@ public class BaseConstructorInvocation extends Statement implements Invocation
 		return result;
 	}
 
+	@Override
 	final boolean subtreeMatch0(ASTMatcher matcher, Object other)
 	{
 		// dispatch to correct overloaded match method
 		return matcher.match(this, other);
 	}
 
-    void accept0(ASTVisitor visitor)
+    @Override
+	void accept0(ASTVisitor visitor)
     {
         boolean visitChildren = visitor.visit(this);
 
@@ -167,12 +175,14 @@ public class BaseConstructorInvocation extends Statement implements Invocation
     }
 
 
+	@Override
 	int memSize()
 	{
 		// treat Operator as free
 		return BASE_NODE_SIZE + 1 * 4;
 	}
 
+	@Override
 	int treeSize()
 	{
 		return memSize() + (this.arguments == null
@@ -184,6 +194,7 @@ public class BaseConstructorInvocation extends Statement implements Invocation
         return this.ast.getBindingResolver().resolveConstructor(this);
     }
 
+	@Override
 	public IMethodBinding resolveMethodBinding() {
 		return resolveConstructorBinding();
 	}

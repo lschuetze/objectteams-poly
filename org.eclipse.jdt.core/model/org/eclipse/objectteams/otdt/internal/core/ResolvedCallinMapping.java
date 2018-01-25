@@ -51,10 +51,12 @@ public class ResolvedCallinMapping extends CallinMapping {
 		this.uniqueKey = uniqueKey;
 	}
 	
+	@Override
 	public String getKey() {
 		return this.uniqueKey;
 	}
 
+	@Override
 	public boolean isResolved() {
 		return true;
 	}

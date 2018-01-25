@@ -70,6 +70,7 @@ public abstract class Engine implements ITypeRequestor {
 	/**
 	 * Add an additional binary type
 	 */
+	@Override
 	public void accept(IBinaryType binaryType, PackageBinding packageBinding, AccessRestriction accessRestriction) {
 		this.lookupEnvironment.createBinaryTypeFrom(binaryType, packageBinding, accessRestriction);
 	}
@@ -77,6 +78,7 @@ public abstract class Engine implements ITypeRequestor {
 	/**
 	 * Add an additional compilation unit.
 	 */
+	@Override
 	public void accept(ICompilationUnit sourceUnit, AccessRestriction accessRestriction) {
 		CompilationResult result = new CompilationResult(sourceUnit, 1, 1, this.compilerOptions.maxProblemsPerUnit);
 		
@@ -96,6 +98,7 @@ public abstract class Engine implements ITypeRequestor {
 	 * Add additional source types (the first one is the requested type, the rest is formed by the
 	 * secondary types defined in the same compilation unit).
 	 */
+	@Override
 	public void accept(ISourceType[] sourceTypes, PackageBinding packageBinding, AccessRestriction accessRestriction) {
 //{ObjectTeams:
 	  LookupEnvironment environment = packageBinding.environment;
@@ -522,6 +525,7 @@ public abstract class Engine implements ITypeRequestor {
 	}
 
 //{ObjectTeams: new function in ITypeRequester for use by Config:
+	@Override
 	public Parser getPlainParser() {
 		return null;
 	}

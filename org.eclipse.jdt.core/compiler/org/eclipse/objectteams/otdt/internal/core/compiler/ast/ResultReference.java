@@ -58,7 +58,8 @@ public class ResultReference extends SingleNameReference {
     /**
      * "result" is resolved by lookup in the (hopefully resolved) mapping.
      */
-    public TypeBinding resolveType(BlockScope scope) {
+    @Override
+	public TypeBinding resolveType(BlockScope scope) {
     	if (this._mapping.resultVar == null) {
     		// TODO (SH): check what was the reason for non-existent resultVar.
     		scope.problemReporter().resultMappingForVoidMethod(this._mapping, this);

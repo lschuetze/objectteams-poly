@@ -583,22 +583,27 @@ public class TypeAnchorReference extends TypeReference implements InvocationSite
 
 	// === implement InvocationSite: ===
 
+	@Override
 	public TypeBinding[] genericTypeArguments() {
 		return Binding.NO_TYPES;
 	}
 
+	@Override
 	public boolean isSuperAccess() {
 		return false;
 	}
 
+	@Override
 	public boolean isTypeAccess() {
 		return false;
 	}
 
+	@Override
 	public void setActualReceiverType(ReferenceBinding receiverType) {
 		// TODO Auto-generated method stub
 	}
 
+	@Override
 	public void setDepth(int depth) {
 		this.bits &= ~DepthMASK; // flush previous depth if any
 		if (depth > 0) {
@@ -606,10 +611,12 @@ public class TypeAnchorReference extends TypeReference implements InvocationSite
 		}
 	}
 
+	@Override
 	public void setFieldIndex(int depth) {
 		// ignored
 	}
 	
+	@Override
 	public InferenceContext18 freshInferenceContext(Scope scope) {
 		throw new InternalCompilerError("Method not applicable"); //$NON-NLS-1$
 	}

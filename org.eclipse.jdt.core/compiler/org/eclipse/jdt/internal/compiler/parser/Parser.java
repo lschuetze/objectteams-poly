@@ -2338,6 +2338,7 @@ protected static class CallinLabel extends ASTNode {
 		this.sourceStart = start;
 		this.sourceEnd   = end;
 	}
+	@Override
 	public StringBuffer print(int indent, StringBuffer output) {
 		output.append(new String(this.token)+':');
 		return output;
@@ -14353,6 +14354,7 @@ protected void optimizedConcatNodeLists() {
 
 	this.astLengthStack[--this.astLengthPtr]++;
 }
+@Override
 public boolean atConflictScenario(int token) {
 	
 	/* Answer true if the parser is at a configuration where the scanner must look ahead and help disambiguate between (a) '<' as an operator and '<' as the
@@ -15134,6 +15136,7 @@ public ASTNode[] parseClassBodyDeclarations(char[] source, int offset, int lengt
 		// collect all body declaration inside the compilation unit except the default constructor
 		final List bodyDeclarations = new ArrayList();
 		ASTVisitor visitor = new ASTVisitor() {
+			@Override
 			public boolean visit(MethodDeclaration methodDeclaration, ClassScope scope) {
 				if (!methodDeclaration.isDefaultConstructor()) {
 					bodyDeclarations.add(methodDeclaration);
@@ -15141,19 +15144,23 @@ public ASTNode[] parseClassBodyDeclarations(char[] source, int offset, int lengt
 				return false;
 			}
 //{ObjectTeams: collect methodMappings:
+			@Override
 			public boolean visit(CalloutMappingDeclaration calloutBindingDeclaration, ClassScope scope) {
 				bodyDeclarations.add(calloutBindingDeclaration);
 				return false;
 			}
+			@Override
 			public boolean visit(CallinMappingDeclaration callinBindingDeclaration, ClassScope scope) {
 				bodyDeclarations.add(callinBindingDeclaration);
 				return false;
 			}
 // SH}
+			@Override
 			public boolean visit(FieldDeclaration fieldDeclaration, MethodScope scope) {
 				bodyDeclarations.add(fieldDeclaration);
 				return false;
 			}
+			@Override
 			public boolean visit(TypeDeclaration memberTypeDeclaration, ClassScope scope) {
 				bodyDeclarations.add(memberTypeDeclaration);
 				return false;
@@ -15681,9 +15688,11 @@ protected void recoverStatements() {
 
 		TypeDeclaration[] types = new TypeDeclaration[0];
 		int typePtr = -1;
+		@Override
 		public void endVisit(ConstructorDeclaration constructorDeclaration, ClassScope scope) {
 			endVisitMethod(constructorDeclaration, scope);
 		}
+		@Override
 		public void endVisit(Initializer initializer, MethodScope scope) {
 			if (initializer.block == null) return;
 			TypeDeclaration[] foundTypes = null;
@@ -15710,6 +15719,7 @@ protected void recoverStatements() {
 				foundTypes[i].traverse(this.typeVisitor, scope);
 			}
 		}
+		@Override
 		public void endVisit(MethodDeclaration methodDeclaration, ClassScope scope) {
 			endVisitMethod(methodDeclaration, scope);
 		}
@@ -15738,15 +15748,18 @@ protected void recoverStatements() {
 				foundTypes[i].traverse(this.typeVisitor, scope);
 			}
 		}
+		@Override
 		public boolean visit(ConstructorDeclaration constructorDeclaration, ClassScope scope) {
 			this.typePtr = -1;
 			return true;
 		}
+		@Override
 		public boolean visit(Initializer initializer, MethodScope scope) {
 			this.typePtr = -1;
 			if (initializer.block == null) return false;
 			return true;
 		}
+		@Override
 		public boolean visit(MethodDeclaration methodDeclaration,ClassScope scope) {
 			this.typePtr = -1;
 			return true;
@@ -15759,9 +15772,11 @@ protected void recoverStatements() {
 			this.types[this.typePtr] = typeDeclaration;
 			return false;
 		}
+		@Override
 		public boolean visit(TypeDeclaration typeDeclaration, BlockScope scope) {
 			return this.visit(typeDeclaration);
 		}
+		@Override
 		public boolean visit(TypeDeclaration typeDeclaration, ClassScope scope) {
 			return this.visit(typeDeclaration);
 		}
@@ -15772,27 +15787,32 @@ protected void recoverStatements() {
 		TypeDeclaration[] types = new TypeDeclaration[0];
 		int typePtr = -1;
 
+		@Override
 		public void endVisit(TypeDeclaration typeDeclaration, BlockScope scope) {
 			endVisitType();
 		}
+		@Override
 		public void endVisit(TypeDeclaration typeDeclaration, ClassScope scope) {
 			endVisitType();
 		}
 		private void endVisitType() {
 			this.typePtr--;
 		}
+		@Override
 		public boolean visit(ConstructorDeclaration constructorDeclaration, ClassScope scope) {
 			if(constructorDeclaration.isDefaultConstructor()) return false;
 
 			constructorDeclaration.traverse(this.methodVisitor, scope);
 			return false;
 		}
+		@Override
 		public boolean visit(Initializer initializer, MethodScope scope) {
 			if (initializer.block == null) return false;
 			this.methodVisitor.enclosingType = this.types[this.typePtr];
 			initializer.traverse(this.methodVisitor, scope);
 			return false;
 		}
+		@Override
 		public boolean visit(MethodDeclaration methodDeclaration, ClassScope scope) {
 			methodDeclaration.traverse(this.methodVisitor, scope);
 			return false;
@@ -15805,9 +15825,11 @@ protected void recoverStatements() {
 			this.types[this.typePtr] = typeDeclaration;
 			return true;
 		}
+		@Override
 		public boolean visit(TypeDeclaration typeDeclaration, BlockScope scope) {
 			return this.visit(typeDeclaration);
 		}
+		@Override
 		public boolean visit(TypeDeclaration typeDeclaration, ClassScope scope) {
 			return this.visit(typeDeclaration);
 		}
@@ -16231,6 +16253,7 @@ public void setStatementsRecovery(boolean enabled) {
 	if(enabled) this.options.performMethodsFullRecovery = true;
 	this.options.performStatementsRecovery = enabled;
 }
+@Override
 public String toString() {
 
 

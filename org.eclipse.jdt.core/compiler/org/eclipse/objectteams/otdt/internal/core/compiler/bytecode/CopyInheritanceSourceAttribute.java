@@ -111,12 +111,14 @@ public class CopyInheritanceSourceAttribute extends AbstractAttribute {
 	    return result;
 	}
 
+	@Override
 	public void evaluate(Binding binding, LookupEnvironment environment, char[][][] missingTypeNames) {
 		/* noop */
 	}
 
     /** Evaluate method level attributes */
-    public boolean evaluate(MethodInfo info, MethodBinding method, LookupEnvironment environment) {
+    @Override
+	public boolean evaluate(MethodInfo info, MethodBinding method, LookupEnvironment environment) {
     	if (this._methodInfo != info) return false;
 		MethodModel.getModel(method)._lineOffset = this.lineOffset;
 		TypeModel model = null;
@@ -137,7 +139,8 @@ public class CopyInheritanceSourceAttribute extends AbstractAttribute {
 		return true;
     }
 
-    public void evaluateLateAttribute(ReferenceBinding roleBinding, int state)
+    @Override
+	public void evaluateLateAttribute(ReferenceBinding roleBinding, int state)
     {
 		switch (state) {
 		case ITranslationStates.STATE_ROLE_FEATURES_COPIED:

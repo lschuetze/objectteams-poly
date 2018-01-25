@@ -21,11 +21,13 @@ public abstract class  MagicLiteral extends Literal {
 		super(start,end);
 	}
 
+	@Override
 	public boolean isValidJavaStatement(){
 
 		return false ;
 	}
 
+	@Override
 	public char[] source() {
 
 		return null;

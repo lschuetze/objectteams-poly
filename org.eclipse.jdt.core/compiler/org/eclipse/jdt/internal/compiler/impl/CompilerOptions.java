@@ -2426,6 +2426,7 @@ public class CompilerOptions {
 		return buf.toString();
 	}
 
+	@Override
 	public String toString() {
 		StringBuffer buf = new StringBuffer("CompilerOptions:"); //$NON-NLS-1$
 		buf.append("\n\t- local variables debug attributes: ").append((this.produceDebugAttributes & ClassFileConstants.ATTR_VARS) != 0 ? "ON" : " OFF"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$

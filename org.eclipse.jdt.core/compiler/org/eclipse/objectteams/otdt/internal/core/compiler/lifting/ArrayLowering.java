@@ -58,6 +58,7 @@ public class ArrayLowering extends ArrayTranslations {
 		return translateArray(scope, expression, providedType, requiredType, /*isLifting*/false, deferredResolve);
 	}
 	
+	@Override
 	public MethodBinding ensureTransformMethod(BlockScope scope, Expression teamExpr, TypeBinding providedType, TypeBinding requiredType, boolean isLifting) {
 		TypeBinding providedLeaf = providedType.leafComponentType();
 		TypeBinding matchingBase = ((ReferenceBinding)providedLeaf).baseclass();
@@ -69,6 +70,7 @@ public class ArrayLowering extends ArrayTranslations {
 	}
 
 	/* implement hook. */
+	@Override
 	Expression translation(Expression rhs, TypeBinding providedType, TypeBinding requiredType, AstGenerator gen) {
 		return new Lowering().lowerExpression(this._scope, rhs, providedType, requiredType, this._teamExpr, false, true);
 	}

@@ -46,6 +46,7 @@ public ParameterizedFieldBinding(ParameterizedTypeBinding parameterizedDeclaring
 /**
  * @see org.eclipse.jdt.internal.compiler.lookup.VariableBinding#constant()
  */
+@Override
 public Constant constant() {
 	return this.originalField.constant();
 }
@@ -53,6 +54,7 @@ public Constant constant() {
 /**
  * @see org.eclipse.jdt.internal.compiler.lookup.FieldBinding#original()
  */
+@Override
 public FieldBinding original() {
 	return this.originalField.original();
 }
@@ -60,6 +62,7 @@ public FieldBinding original() {
 /**
  * @see org.eclipse.jdt.internal.compiler.lookup.VariableBinding#constant()
  */
+@Override
 public void setConstant(Constant constant) {
 	this.originalField.setConstant(constant);
 }

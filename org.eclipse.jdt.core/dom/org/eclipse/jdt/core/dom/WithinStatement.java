@@ -115,6 +115,7 @@ public class WithinStatement extends Statement
         super(ast);
     }
 
+	@Override
 	List internalStructuralPropertiesForType(int apiLevel)
     {
         return propertyDescriptors(apiLevel);
@@ -123,6 +124,7 @@ public class WithinStatement extends Statement
 	/* (omit javadoc for this method)
 	 * Method declared on ASTNode.
 	 */
+	@Override
 	final ASTNode internalGetSetChildProperty(ChildPropertyDescriptor property, boolean isGet, ASTNode child)
     {
         if (property == BODY_PROPERTY)
@@ -154,17 +156,20 @@ public class WithinStatement extends Statement
 		return super.internalGetSetChildProperty(property, isGet, child);
 	}
 
-    int getNodeType0()
+    @Override
+	int getNodeType0()
     {
         return WITHIN_STATEMENT;
     }
 
-    boolean subtreeMatch0(ASTMatcher matcher, Object other)
+    @Override
+	boolean subtreeMatch0(ASTMatcher matcher, Object other)
     {
 		// dispatch to correct overloaded match method
         return matcher.match(this, other);
     }
 
+	@Override
 	ASTNode clone0(AST target)
 	{
 		WithinStatement result = new WithinStatement(target);
@@ -176,7 +181,8 @@ public class WithinStatement extends Statement
 		return result;
 	}
 
-    void accept0(ASTVisitor visitor)
+    @Override
+	void accept0(ASTVisitor visitor)
     {
 		boolean visitChildren = visitor.visit(this);
 		if (visitChildren)
@@ -187,13 +193,15 @@ public class WithinStatement extends Statement
 		visitor.endVisit(this);
     }
 
+	@Override
 	int memSize()
 	{
 	    // 3 * 4 == Number of single properties * 4
         return super.memSize() + 3 * 4 + this.body.memSize();
 	}
 
-    int treeSize()
+    @Override
+	int treeSize()
     {
 		return memSize() + this.body.treeSize();
     }

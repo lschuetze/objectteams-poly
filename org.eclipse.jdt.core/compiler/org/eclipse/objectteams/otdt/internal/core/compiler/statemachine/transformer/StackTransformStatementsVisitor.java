@@ -49,7 +49,8 @@ public class StackTransformStatementsVisitor
      * Verify that all replacements entered for and below node have been consumed by now.
      * @param node the statement/expression .. for which treatment is finished
      */
-    protected void assertAllConsumed(ASTNode node)
+    @Override
+	protected void assertAllConsumed(ASTNode node)
     {
         Integer stackSize = this.stackSizes.get(node);
         if (stackSize == null)
@@ -59,14 +60,16 @@ public class StackTransformStatementsVisitor
         this.stackSizes.remove(node);
     }
 
-    protected void enterExpression(Expression oldExpr, Expression newExpr, Statement node)
+    @Override
+	protected void enterExpression(Expression oldExpr, Expression newExpr, Statement node)
     {
         this.toReplace.push(oldExpr);
         this.replacements.push(newExpr);
         this.stackSizes.put(node, new Integer(this.replacements.size()));
     }
 
-    public Expression checkConsumeExpression(Expression oldExpr, BlockScope scope)
+    @Override
+	public Expression checkConsumeExpression(Expression oldExpr, BlockScope scope)
     {
         if (!this.toReplace.isEmpty())
         {
@@ -79,7 +82,8 @@ public class StackTransformStatementsVisitor
         }
         return oldExpr;
     }
-    protected Statement checkConsumeStatement(Statement oldStat, BlockScope scope)
+    @Override
+	protected Statement checkConsumeStatement(Statement oldStat, BlockScope scope)
     {
         if (!this.toReplace.isEmpty())
         {

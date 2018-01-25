@@ -84,6 +84,7 @@ public SelectionParser(ProblemReporter problemReporter) {
 	super(problemReporter);
 	this.javadocParser.checkDocComment = true;
 }
+@Override
 public char[] assistIdentifier(){
 	return ((SelectionScanner)this.scanner).selectionIdentifier;
 }
@@ -211,6 +212,7 @@ private boolean checkRecoveredType() {
 	}
 	return false;
 }
+@Override
 protected void classInstanceCreation(boolean hasClassBody) {
 
 	// ClassInstanceCreationExpression ::= 'new' ClassType '(' ArgumentListopt ')' ClassBodyopt
@@ -272,6 +274,7 @@ protected void classInstanceCreation(boolean hasClassBody) {
 		super.classInstanceCreation(hasClassBody);
 	}
 }
+@Override
 protected void consumeArrayCreationExpressionWithoutInitializer() {
 	// ArrayCreationWithoutArrayInitializer ::= 'new' PrimitiveType DimWithOrWithOutExprs
 	// ArrayCreationWithoutArrayInitializer ::= 'new' ClassOrInterfaceType DimWithOrWithOutExprs
@@ -287,6 +290,7 @@ protected void consumeArrayCreationExpressionWithoutInitializer() {
 		this.isOrphanCompletionNode = true;
 	}
 }
+@Override
 protected void consumeArrayCreationExpressionWithInitializer() {
 	// ArrayCreationWithArrayInitializer ::= 'new' ClassOrInterfaceType DimWithOrWithOutExprs ArrayInitializer
 
@@ -301,30 +305,37 @@ protected void consumeArrayCreationExpressionWithInitializer() {
 		this.isOrphanCompletionNode = true;
 	}
 }
+@Override
 protected void consumeCastExpressionLL1() {
 	popElement(K_CAST_STATEMENT);
 	super.consumeCastExpressionLL1();
 }
+@Override
 protected void consumeCastExpressionLL1WithBounds() {
 	popElement(K_CAST_STATEMENT);
 	super.consumeCastExpressionLL1WithBounds();
 }
+@Override
 protected void consumeCastExpressionWithGenericsArray() {
 	popElement(K_CAST_STATEMENT);
 	super.consumeCastExpressionWithGenericsArray();
 }
+@Override
 protected void consumeCastExpressionWithNameArray() {
 	popElement(K_CAST_STATEMENT);
 	super.consumeCastExpressionWithNameArray();
 }
+@Override
 protected void consumeCastExpressionWithPrimitiveType() {
 	popElement(K_CAST_STATEMENT);
 	super.consumeCastExpressionWithPrimitiveType();
 }
+@Override
 protected void consumeCastExpressionWithQualifiedGenericsArray() {
 	popElement(K_CAST_STATEMENT);
 	super.consumeCastExpressionWithQualifiedGenericsArray();
 }
+@Override
 protected void consumeCatchFormalParameter() {
 	if (this.indexOfAssistIdentifier() < 0) {
 		super.consumeCatchFormalParameter();
@@ -386,6 +397,7 @@ protected void consumeCatchFormalParameter() {
 		this.listLength++;
 	}
 }
+@Override
 protected void consumeClassInstanceCreationExpressionQualifiedWithTypeArguments() {
 	// ClassInstanceCreationExpression ::= Primary '.' 'new' TypeArguments SimpleName '(' ArgumentListopt ')' ClassBodyopt
 	// ClassInstanceCreationExpression ::= ClassInstanceCreationExpressionName 'new' TypeArguments SimpleName '(' ArgumentListopt ')' ClassBodyopt
@@ -451,6 +463,7 @@ protected void consumeClassInstanceCreationExpressionQualifiedWithTypeArguments(
 	this.expressionStack[this.expressionPtr] = qae;
 	qae.sourceStart = qae.enclosingInstance.sourceStart;
 }
+@Override
 protected void consumeClassInstanceCreationExpressionWithTypeArguments() {
 	// ClassInstanceCreationExpression ::= 'new' TypeArguments ClassType '(' ArgumentListopt ')' ClassBodyopt
 	AllocationExpression alloc;
@@ -508,6 +521,7 @@ protected void consumeClassInstanceCreationExpressionWithTypeArguments() {
 		super.consumeClassInstanceCreationExpressionWithTypeArguments();
 	}
 }
+@Override
 protected void consumeEnterAnonymousClassBody(boolean qualified) {
 	// EnterAnonymousClassBody ::= $empty
 
@@ -579,6 +593,7 @@ protected void consumeEnterAnonymousClassBody(boolean qualified) {
 		this.lastIgnoredToken = -1;
 	}
 }
+@Override
 protected void consumeEnterVariable() {
 	// EnterVariable ::= $empty
 	// do nothing by default
@@ -595,6 +610,7 @@ protected void consumeEnterVariable() {
 	}
 }
 
+@Override
 protected void consumeExitVariableWithInitialization() {
 	super.consumeExitVariableWithInitialization();
 
@@ -609,6 +625,7 @@ protected void consumeExitVariableWithInitialization() {
 	triggerRecoveryUponLambdaClosure(variable, false);
 }
 
+@Override
 protected void consumeFieldAccess(boolean isSuperAccess) {
 	// FieldAccess ::= Primary '.' 'Identifier'
 	// FieldAccess ::= 'super' '.' 'Identifier'
@@ -640,6 +657,7 @@ protected void consumeFieldAccess(boolean isSuperAccess) {
 	}
 	this.isOrphanCompletionNode = true;
 }
+@Override
 protected void consumeFormalParameter(boolean isVarArgs) {
 	if (this.indexOfAssistIdentifier() < 0) {
 		super.consumeFormalParameter(isVarArgs);
@@ -747,22 +765,27 @@ private boolean hasAssistNode(TypeReference type) {
 	return false;
 }
 // SH}
+@Override
 protected void consumeInsideCastExpression() {
 	super.consumeInsideCastExpression();
 	pushOnElementStack(K_CAST_STATEMENT);
 }
+@Override
 protected void consumeInsideCastExpressionLL1() {
 	super.consumeInsideCastExpressionLL1();
 	pushOnElementStack(K_CAST_STATEMENT);
 }
+@Override
 protected void consumeInsideCastExpressionLL1WithBounds() {
 	super.consumeInsideCastExpressionLL1WithBounds();
 	pushOnElementStack(K_CAST_STATEMENT);
 }
+@Override
 protected void consumeInsideCastExpressionWithQualifiedGenerics() {
 	super.consumeInsideCastExpressionWithQualifiedGenerics();
 	pushOnElementStack(K_CAST_STATEMENT);
 }
+@Override
 protected void consumeInstanceOfExpression() {
 	if (indexOfAssistIdentifier() < 0) {
 		super.consumeInstanceOfExpression();
@@ -773,6 +796,7 @@ protected void consumeInstanceOfExpression() {
 		this.lastIgnoredToken = -1;
 	}
 }
+@Override
 protected void consumeInstanceOfExpressionWithName() {
 	if (indexOfAssistIdentifier() < 0) {
 		super.consumeInstanceOfExpressionWithName();
@@ -810,6 +834,7 @@ protected void consumeReferenceExpression(ReferenceExpression referenceExpressio
 	super.consumeReferenceExpression(referenceExpression);
 }
 
+@Override
 protected void consumeLocalVariableDeclarationStatement() {
 	super.consumeLocalVariableDeclarationStatement();
 
@@ -826,18 +851,21 @@ protected void consumeLocalVariableDeclarationStatement() {
 		this.restartRecovery = true;
 	}
 }
+@Override
 protected void consumeAssignment() {
 	super.consumeAssignment();
 	if (this.selectionNodeFound) {
 		this.restartRecovery = true;
 	}
 }
+@Override
 protected void consumeBlockStatement() {
 	super.consumeBlockStatement();
 	if (this.selectionNodeFound) {
 		this.restartRecovery = true;
 	}
 }
+@Override
 protected void consumeMarkerAnnotation(boolean isTypeAnnotation) {
 	int index;
 
@@ -889,6 +917,7 @@ protected void consumeMarkerAnnotation(boolean isTypeAnnotation) {
 		pushOnExpressionStack(markerAnnotation);
 	}
 }
+@Override
 protected void consumeMemberValuePair() {
 	if (this.indexOfAssistIdentifier() < 0) {
 		super.consumeMemberValuePair();
@@ -910,6 +939,7 @@ protected void consumeMemberValuePair() {
 
 
 }
+@Override
 protected void consumeMethodInvocationName() {
 	// MethodInvocation ::= Name '(' ArgumentListopt ')'
 
@@ -967,10 +997,12 @@ protected void consumeMethodInvocationName() {
 		this.lastIgnoredToken = -1;
 	} else {
 		pushOnExpressionStack(new Expression(){
+			@Override
 			public TypeBinding resolveType(BlockScope scope) {
 				constructorCall.resolve(scope);
 				return null;
 			}
+			@Override
 			public StringBuffer printExpression(int indent, StringBuffer output) {
 				return output;
 			}
@@ -980,6 +1012,7 @@ protected void consumeMethodInvocationName() {
 	this.lastCheckPoint = constructorCall.sourceEnd + 1;
 	this.isOrphanCompletionNode = true;
 }
+@Override
 protected void consumeMethodInvocationPrimary() {
 	//optimize the push/pop
 	//MethodInvocation ::= Primary '.' 'Identifier' '(' ArgumentListopt ')'
@@ -1025,10 +1058,12 @@ protected void consumeMethodInvocationPrimary() {
 		this.lastIgnoredToken = -1;
 	} else {
 		pushOnExpressionStack(new Expression(){
+			@Override
 			public TypeBinding resolveType(BlockScope scope) {
 				constructorCall.resolve(scope);
 				return null;
 			}
+			@Override
 			public StringBuffer printExpression(int indent, StringBuffer output) {
 				return output;
 			}
@@ -1039,6 +1074,7 @@ protected void consumeMethodInvocationPrimary() {
 	this.lastCheckPoint = constructorCall.sourceEnd + 1;
 	this.isOrphanCompletionNode = true;
 }
+@Override
 protected void consumeNormalAnnotation(boolean isTypeAnnotation) {
 	int index;
 
@@ -1098,6 +1134,7 @@ protected void consumeNormalAnnotation(boolean isTypeAnnotation) {
 		pushOnExpressionStack(normalAnnotation);
 	}
 }
+@Override
 protected void consumeSingleMemberAnnotation(boolean isTypeAnnotation) {
 	int index;
 
@@ -1151,6 +1188,7 @@ protected void consumeSingleMemberAnnotation(boolean isTypeAnnotation) {
 		pushOnExpressionStack(singleMemberAnnotation);
 	}
 }
+@Override
 protected void consumeStaticImportOnDemandDeclarationName() {
 	// TypeImportOnDemandDeclarationName ::= 'import' 'static' Name '.' '*'
 	/* push an ImportRef build from the last name
@@ -1205,6 +1243,7 @@ protected void consumeStaticImportOnDemandDeclarationName() {
 		this.restartRecovery = true; // used to avoid branching back into the regular automaton
 	}
 }
+@Override
 protected void consumeToken(int token) {
 	super.consumeToken(token);
 
@@ -1234,6 +1273,7 @@ protected void consumeToken(int token) {
 		}
 	}
 }
+@Override
 protected void consumeTypeImportOnDemandDeclarationName() {
 	// TypeImportOnDemandDeclarationName ::= 'import' Name '.' '*'
 	/* push an ImportRef build from the last name
@@ -1288,12 +1328,15 @@ protected void consumeTypeImportOnDemandDeclarationName() {
 		this.restartRecovery = true; // used to avoid branching back into the regular automaton
 	}
 }
+@Override
 protected SelectionParser createSnapShotParser() {
 	return new SelectionParser(this.problemReporter);
 }
+@Override
 public ImportReference createAssistPackageVisibilityReference(char[][] tokens, long[] positions){
 	return new SelectionOnPackageVisibilityReference(tokens, positions);
 }
+@Override
 public ImportReference createAssistImportReference(char[][] tokens, long[] positions, int mod){
 	return new SelectionOnImportReference(tokens, positions, mod);
 }
@@ -1303,13 +1346,16 @@ public ModuleDeclaration createAssistModuleDeclaration(CompilationResult compila
 	return new SelectionOnModuleDeclaration(compilationResult, tokens, positions);
 }
 //{ObjectTeams: modifiers added:
+@Override
 public ImportReference createAssistPackageReference(char[][] tokens, long[] positions, int modifiers){
 	return new SelectionOnPackageReference(tokens, positions, modifiers);
 // SH}
 }
+@Override
 protected JavadocParser createJavadocParser() {
 	return new SelectionJavadocParser(this);
 }
+@Override
 protected LocalDeclaration createLocalDeclaration(char[] assistName,int sourceStart,int sourceEnd) {
 	if (this.indexOfAssistIdentifier() < 0) {
 		return super.createLocalDeclaration(assistName, sourceStart, sourceEnd);
@@ -1320,29 +1366,35 @@ protected LocalDeclaration createLocalDeclaration(char[] assistName,int sourceSt
 		return local;
 	}
 }
+@Override
 public NameReference createQualifiedAssistNameReference(char[][] previousIdentifiers, char[] assistName, long[] positions){
 	return new SelectionOnQualifiedNameReference(
 					previousIdentifiers,
 					assistName,
 					positions);
 }
+@Override
 public TypeReference createQualifiedAssistTypeReference(char[][] previousIdentifiers, char[] assistName, long[] positions){
 	return new SelectionOnQualifiedTypeReference(
 					previousIdentifiers,
 					assistName,
 					positions);
 }
+@Override
 public TypeReference createParameterizedQualifiedAssistTypeReference(
 		char[][] tokens, TypeReference[][] typeArguments, char[] assistname, TypeReference[] assistTypeArguments, long[] positions) {
 	return new SelectionOnParameterizedQualifiedTypeReference(tokens, assistname, typeArguments, assistTypeArguments, positions);
 
 }
+@Override
 public NameReference createSingleAssistNameReference(char[] assistName, long position) {
 	return new SelectionOnSingleNameReference(assistName, position);
 }
+@Override
 public TypeReference createSingleAssistTypeReference(char[] assistName, long position) {
 	return new SelectionOnSingleTypeReference(assistName, position);
 }
+@Override
 public TypeReference createParameterizedSingleAssistTypeReference(TypeReference[] typeArguments, char[] assistName, long position) {
 	return new SelectionOnParameterizedSingleTypeReference(assistName, typeArguments, position);
 }
@@ -1356,6 +1408,7 @@ public CompilationUnitDeclaration dietParse(ICompilationUnit sourceUnit, Compila
 	selectionScanner.selectionEnd = end;
 	return this.dietParse(sourceUnit, compilationResult);
 }
+@Override
 protected NameReference getUnspecifiedReference(boolean rejectTypeAnnotations) {
 	/* build a (unspecified) NameReference which may be qualified*/
 
@@ -1485,6 +1538,7 @@ protected NameReference getUnspecifiedReference(boolean rejectTypeAnnotations) {
  * qualified name reference, then create a CompletionOnQualifiedNameReference
  * instead.
  */
+@Override
 protected NameReference getUnspecifiedReferenceOptimized() {
 
 	int index = indexOfAssistIdentifier();
@@ -1513,12 +1567,14 @@ protected char[] getIdentifier() {
 	return identifier;
 }
 // SH}
+@Override
 public void initializeScanner(){
 	this.scanner = new SelectionScanner(this.options.sourceLevel);
 //{ObjectTeams: allow to configure OT/J features:
 	this.scanner.setOTFlags(this.options);
 // SH}
 }
+@Override
 public ReferenceExpression newReferenceExpression() {
 	char[] selector = this.identifierStack[this.identifierPtr];
 	if (selector != assistIdentifier()){
@@ -1528,6 +1584,7 @@ public ReferenceExpression newReferenceExpression() {
 	this.assistNode = referenceExpression;
 	return referenceExpression;
 }
+@Override
 protected MessageSend newMessageSend() {
 	// '(' ArgumentListopt ')'
 	// the arguments are on the expression stack
@@ -1559,6 +1616,7 @@ protected MessageSend newMessageSend() {
 	return messageSend;
 }
 //{ObjectTeams: just ike the above but for tsuper.m(args)
+@Override
 protected TSuperMessageSend newTSuperMessageSend() {
 	// '(' ArgumentListopt ')'
 	// the arguments are on the expression stack
@@ -1590,6 +1648,7 @@ protected TSuperMessageSend newTSuperMessageSend() {
 	return messageSend;
 }
 // SH}
+@Override
 protected MessageSend newMessageSendWithTypeArguments() {
 	char[] selector = this.identifierStack[this.identifierPtr];
 	if (selector != assistIdentifier()){
@@ -1615,6 +1674,7 @@ protected MessageSend newMessageSendWithTypeArguments() {
 	this.isOrphanCompletionNode = true;
 	return messageSend;
 }
+@Override
 public CompilationUnitDeclaration parse(ICompilationUnit sourceUnit, CompilationResult compilationResult, int start, int end) {
 
 	if (end == -1) return super.parse(sourceUnit, compilationResult, start, end);
@@ -1635,6 +1695,7 @@ public CompilationUnitDeclaration parse(ICompilationUnit sourceUnit, Compilation
  * Move checkpoint location, reset internal stacks and
  * decide which grammar goal is activated.
  */
+@Override
 protected int resumeAfterRecovery() {
 
 	/* if reached assist node inside method body, but still inside nested type,
@@ -1667,12 +1728,14 @@ protected int resumeAfterRecovery() {
 public void selectionIdentifierCheck(){
 	if (checkRecoveredType()) return;
 }
+@Override
 public void setAssistIdentifier(char[] assistIdent){
 	((SelectionScanner)this.scanner).selectionIdentifier = assistIdent;
 }
 /*
  * Update recovery state based on current parser/scanner state
  */
+@Override
 protected void updateRecoveryState() {
 
 	/* expose parser state to recovery state */
@@ -1694,6 +1757,7 @@ protected void updateRecoveryState() {
 	*/
 	recoveryTokenCheck();
 }
+@Override
 protected Argument typeElidedArgument() {
 	char[] selector = this.identifierStack[this.identifierPtr];
 	if (selector != assistIdentifier()){
@@ -1730,6 +1794,7 @@ protected Argument typeElidedArgument() {
 	}
 
 	/* create specialized node */
+	@Override
 	protected MethodSpec convertToMethodSpec(AbstractMethodDeclaration methodDeclaration) {
 		/* no need to take action if not inside assist identifiers */
 		if (indexOfAssistIdentifier() < 0)
@@ -1739,6 +1804,7 @@ protected Argument typeElidedArgument() {
 		return spec;
 	}
 	/* create specialized node */
+	@Override
 	protected MethodSpec newMethodSpec(char[] ident, long pos) {
 		/* no need to take action if not inside assist identifiers */
 		if (indexOfAssistIdentifier() < 0)
@@ -1759,6 +1825,7 @@ protected Argument typeElidedArgument() {
 		return spec;
 	}
 	/* create specialized node */
+	@Override
 	protected BaseCallMessageSend convertToBaseCallMessageSend(MessageSend send, int baseEndPosition) {
 		if (indexOfAssistIdentifier() < 0)
 			return super.convertToBaseCallMessageSend(send, baseEndPosition);
@@ -1814,6 +1881,7 @@ protected Argument typeElidedArgument() {
 	}
 //haebor}
 
+@Override
 public  String toString() {
 	String s = Util.EMPTY_STRING;
 	s = s + "elementKindStack : int[] = {"; //$NON-NLS-1$

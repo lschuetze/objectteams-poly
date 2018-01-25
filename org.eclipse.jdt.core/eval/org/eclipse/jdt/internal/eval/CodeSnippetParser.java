@@ -42,6 +42,7 @@ public CodeSnippetParser(ProblemReporter problemReporter, EvaluationContext eval
 	this.reportOnlyOneSyntaxError = true;
 	this.javadocParser.checkDocComment = false;
 }
+@Override
 protected void classInstanceCreation(boolean alwaysQualified) {
 	// ClassInstanceCreationExpression ::= 'new' ClassType '(' ArgumentListopt ')' ClassBodyopt
 
@@ -88,6 +89,7 @@ protected void classInstanceCreation(boolean alwaysQualified) {
 		this.astLengthPtr--;
 	}
 }
+@Override
 protected void consumeClassInstanceCreationExpressionWithTypeArguments() {
 	// ClassInstanceCreationExpression ::= 'new' TypeArguments ClassType '(' ArgumentListopt ')' ClassBodyopt
 	AllocationExpression alloc;
@@ -141,11 +143,13 @@ protected void consumeClassInstanceCreationExpressionWithTypeArguments() {
 		}
 	}
 }
+@Override
 protected void consumeClassDeclaration() {
 	super.consumeClassDeclaration();
 	/* recovery */
 	recordLastStatementIfNeeded();
 }
+@Override
 protected void consumeClassHeaderName1() {
 	// ClassHeaderName ::= Modifiersopt 'class' 'Identifier'
 	TypeDeclaration typeDecl;
@@ -194,21 +198,25 @@ protected void consumeClassHeaderName1() {
 	typeDecl.javadoc = this.javadoc;
 	this.javadoc = null;
 }
+@Override
 protected void consumeEmptyStatement() {
 	super.consumeEmptyStatement();
 	/* recovery */
 	recordLastStatementIfNeeded();
 }
+@Override
 protected void consumeEnhancedForStatement() {
 	super.consumeEnhancedForStatement();
 	/* recovery */
 	recordLastStatementIfNeeded();
 }
+@Override
 protected void consumeExpressionStatement() {
 	super.consumeExpressionStatement();
 	/* recovery */
 	recordLastStatementIfNeeded();
 }
+@Override
 protected void consumeFieldAccess(boolean isSuperAccess) {
 	// FieldAccess ::= Primary '.' 'Identifier'
 	// FieldAccess ::= 'super' '.' 'Identifier'
@@ -234,11 +242,13 @@ protected void consumeFieldAccess(boolean isSuperAccess) {
 		this.expressionStack[this.expressionPtr] = fr;
 	}
 }
+@Override
 protected void consumeInternalCompilationUnit() {
 	// InternalCompilationUnit ::= PackageDeclaration
 	// InternalCompilationUnit ::= PackageDeclaration ImportDeclarations ReduceImports
 	// InternalCompilationUnit ::= ImportDeclarations ReduceImports
 }
+@Override
 protected void consumeInternalCompilationUnitWithTypes() {
 	// InternalCompilationUnit ::= PackageDeclaration ImportDeclarations ReduceImports TypeDeclarations
 	// InternalCompilationUnit ::= PackageDeclaration TypeDeclarations
@@ -252,6 +262,7 @@ protected void consumeInternalCompilationUnitWithTypes() {
 		System.arraycopy(this.astStack, this.astPtr + 1, this.compilationUnit.types, 0, length);
 	}
 }
+@Override
 protected void consumeLocalVariableDeclarationStatement() {
 	super.consumeLocalVariableDeclarationStatement();
 	/* recovery */
@@ -264,6 +275,7 @@ protected void consumeLocalVariableDeclarationStatement() {
  * The CSToCuMapper could not be used, since it could have interfered with
  * the syntax recovery specific to code snippets.
  */
+@Override
 protected void consumeMethodDeclaration(boolean isNotAbstract, boolean isDefaultMethod) {
 	// MethodDeclaration ::= MethodHeader MethodBody
 	// AbstractMethodDeclaration ::= MethodHeader ';'
@@ -357,6 +369,7 @@ protected void consumeMethodDeclaration(boolean isNotAbstract, boolean isDefault
 	}
 }
 
+@Override
 protected void consumeMethodInvocationName() {
 	// MethodInvocation ::= Name '(' ArgumentListopt ')'
 
@@ -395,6 +408,7 @@ protected void consumeMethodInvocationName() {
 		super.consumeMethodInvocationName();
 	}
 }
+@Override
 protected void consumeMethodInvocationNameWithTypeArguments() {
 	// MethodInvocation ::= Name '.' TypeArguments 'Identifier' '(' ArgumentListopt ')'
 
@@ -424,6 +438,7 @@ protected void consumeMethodInvocationNameWithTypeArguments() {
 		super.consumeMethodInvocationNameWithTypeArguments();
 	}
 }
+@Override
 protected void consumeMethodInvocationSuper() {
 	// MethodInvocation ::= 'super' '.' 'Identifier' '(' ArgumentListopt ')'
 
@@ -436,6 +451,7 @@ protected void consumeMethodInvocationSuper() {
 	m.receiver = new CodeSnippetSuperReference(m.sourceStart, this.endPosition);
 	pushOnExpressionStack(m);
 }
+@Override
 protected void consumeMethodInvocationSuperWithTypeArguments() {
 	// MethodInvocation ::= 'super' '.' TypeArguments 'Identifier' '(' ArgumentListopt ')'
 
@@ -455,6 +471,7 @@ protected void consumeMethodInvocationSuperWithTypeArguments() {
 	m.receiver = new CodeSnippetSuperReference(m.sourceStart, this.endPosition);
 	pushOnExpressionStack(m);
 }
+@Override
 protected void consumePrimaryNoNewArrayThis() {
 	// PrimaryNoNewArray ::= 'this'
 
@@ -467,56 +484,67 @@ protected void consumePrimaryNoNewArrayThis() {
 		super.consumePrimaryNoNewArrayThis();
 	}
 }
+@Override
 protected void consumeStatementBreak() {
 	super.consumeStatementBreak();
 	/* recovery */
 	recordLastStatementIfNeeded();
 }
+@Override
 protected void consumeStatementBreakWithLabel() {
 	super.consumeStatementBreakWithLabel();
 	/* recovery */
 	recordLastStatementIfNeeded();
 }
+@Override
 protected void consumeStatementCatch() {
 	super.consumeStatementCatch();
 	/* recovery */
 	recordLastStatementIfNeeded();
 }
+@Override
 protected void consumeStatementContinue() {
 	super.consumeStatementContinue();
 	/* recovery */
 	recordLastStatementIfNeeded();
 }
+@Override
 protected void consumeStatementContinueWithLabel() {
 	super.consumeStatementContinueWithLabel();
 	/* recovery */
 	recordLastStatementIfNeeded();
 }
+@Override
 protected void consumeStatementDo() {
 	super.consumeStatementDo();
 	/* recovery */
 	recordLastStatementIfNeeded();
 }
+@Override
 protected void consumeStatementFor() {
 	super.consumeStatementFor();
 	/* recovery */
 	recordLastStatementIfNeeded();
 }
+@Override
 protected void consumeStatementIfNoElse() {
 	super.consumeStatementIfNoElse();
 	/* recovery */
 	recordLastStatementIfNeeded();
 }
+@Override
 protected void consumeStatementIfWithElse() {
 	super.consumeStatementIfWithElse();
 	/* recovery */
 	recordLastStatementIfNeeded();
 }
+@Override
 protected void consumeStatementLabel() {
 	super.consumeStatementLabel();
 	/* recovery */
 	recordLastStatementIfNeeded();
 }
+@Override
 protected void consumeStatementReturn() {
 	// ReturnStatement ::= 'return' Expressionopt ';'
 
@@ -539,31 +567,37 @@ protected void consumeStatementReturn() {
 	/* recovery */
 	recordLastStatementIfNeeded();
 }
+@Override
 protected void consumeStatementSwitch() {
 	super.consumeStatementSwitch();
 	/* recovery */
 	recordLastStatementIfNeeded();
 }
+@Override
 protected void consumeStatementSynchronized() {
 	super.consumeStatementSynchronized();
 	/* recovery */
 	recordLastStatementIfNeeded();
 }
+@Override
 protected void consumeStatementThrow() {
 	super.consumeStatementThrow();
 	/* recovery */
 	recordLastStatementIfNeeded();
 }
+@Override
 protected void consumeStatementTry(boolean arg_0, boolean arg_1) {
 	super.consumeStatementTry(arg_0, arg_1);
 	/* recovery */
 	recordLastStatementIfNeeded();
 }
+@Override
 protected void consumeStatementWhile() {
 	super.consumeStatementWhile();
 	/* recovery */
 	recordLastStatementIfNeeded();
 }
+@Override
 protected CompilationUnitDeclaration endParse(int act) {
 	if (this.hasRecoveredOnExpression) {
 		CompilationResult unitResult = this.compilationUnit.compilationResult;
@@ -642,6 +676,7 @@ protected CompilationUnitDeclaration endParse(int act) {
 	}
 	return super.endParse(act);
 }
+@Override
 protected NameReference getUnspecifiedReference(boolean rejectTypeAnnotations) {
 	/* build a (unspecified) NameReference which may be qualified*/
 	if (rejectTypeAnnotations) {
@@ -678,6 +713,7 @@ protected NameReference getUnspecifiedReference(boolean rejectTypeAnnotations) {
 		return super.getUnspecifiedReference(rejectTypeAnnotations);
 	}
 }
+@Override
 protected NameReference getUnspecifiedReferenceOptimized() {
 	/* build a (unspecified) NameReference which may be qualified
 	The optimization occurs for qualified reference while we are
@@ -727,6 +763,7 @@ protected NameReference getUnspecifiedReferenceOptimized() {
 		return super.getUnspecifiedReferenceOptimized();
 	}
 }
+@Override
 protected void ignoreExpressionAssignment() {
 	super.ignoreExpressionAssignment();
 	/* recovery */
@@ -738,6 +775,7 @@ protected void ignoreExpressionAssignment() {
 private boolean isTopLevelType() {
 	return this.nestedType == (this.diet ? 0 : 1);
 }
+@Override
 protected MessageSend newMessageSend() {
 	// '(' ArgumentListopt ')'
 	// the arguments are on the expression stack
@@ -755,6 +793,7 @@ protected MessageSend newMessageSend() {
 	}
 	return m;
 }
+@Override
 protected MessageSend newMessageSendWithTypeArguments() {
 	// '(' ArgumentListopt ')'
 	// the arguments are on the expression stack
@@ -780,6 +819,7 @@ private void recordLastStatementIfNeeded() {
 	}
 }
 
+@Override
 protected void reportSyntaxErrors(boolean isDietParse, int oldFirstToken) {
 	if (!isDietParse) {
 		this.scanner.initialPosition = this.lastStatement;
@@ -792,6 +832,7 @@ protected void reportSyntaxErrors(boolean isDietParse, int oldFirstToken) {
  * A syntax error was detected. If a method is being parsed, records the number of errors and
  * attempts to restart from the last statement by going for an expression.
  */
+@Override
 protected int resumeOnSyntaxError() {
 	if (this.diet || this.hasRecoveredOnExpression) { // no reentering inside expression recovery
 		return HALT;

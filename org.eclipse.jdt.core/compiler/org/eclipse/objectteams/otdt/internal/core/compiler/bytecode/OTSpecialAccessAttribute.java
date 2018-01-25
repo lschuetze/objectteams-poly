@@ -149,6 +149,7 @@ public class OTSpecialAccessAttribute extends AbstractAttribute {
 				writeUnsignedShort(this.accessId + OTSpecialAccessAttribute.this.accessIdOffset);
 		}
 
+		@Override
 		public String toString() {
 			return new String(this.method.readableName());
 		}
@@ -215,6 +216,7 @@ public class OTSpecialAccessAttribute extends AbstractAttribute {
 			return this.accessId + OTSpecialAccessAttribute.this.accessIdOffset;
 		}
 
+		@Override
 		@SuppressWarnings("nls")
 		public String toString() {
 			StringBuilder result = new StringBuilder();
@@ -246,6 +248,7 @@ public class OTSpecialAccessAttribute extends AbstractAttribute {
 			writeName(this.method.signature());
 		}
 
+		@Override
 		public String toString() {
 			return "superaccess for "+new String(this.method.readableName()); //$NON-NLS-1$
 		}

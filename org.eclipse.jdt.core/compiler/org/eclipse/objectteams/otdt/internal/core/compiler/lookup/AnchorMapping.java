@@ -161,6 +161,7 @@ public class AnchorMapping {
    {
 	   return RoleTypeCreator.deepSubstitute(parameter, scope.environment(), 
 			   	new IDependentTypeSubstitution() {
+					@Override
 					@SuppressWarnings("synthetic-access")
 					public TypeBinding substitute(DependentTypeBinding paramDependentType, TypeBinding[] typeArguments, int dimensions) {
 						int srcIdx = isMethodEnhanced ? (i - AnchorMapping.this._methodSignatureEnhancer.ENHANCING_ARG_LEN) : i;
@@ -397,6 +398,7 @@ public class AnchorMapping {
 		return Binding.NO_PARAMETERS;
 	}
 
+	@Override
 	@SuppressWarnings("nls")
 	public String toString()
 	{

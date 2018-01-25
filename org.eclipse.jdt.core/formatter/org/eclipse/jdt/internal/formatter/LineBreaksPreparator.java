@@ -145,6 +145,7 @@ public class LineBreaksPreparator extends ASTVisitor {
 		return true;
 	}
 
+	@Override
 	public boolean visit(TypeDeclaration node) {
 //{ObjectTeams:
 		GuardPredicateDeclaration predicate = node.getGuardPredicate();

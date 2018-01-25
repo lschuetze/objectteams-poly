@@ -135,6 +135,7 @@ public abstract class AbstractMethodMappingDeclaration
 	 */
 	public abstract boolean canAccessInvisibleBase ();
 
+	@Override
 	public CompilationUnitDeclaration getCompilationUnitDeclaration() {
 		if (this.scope != null) {
 			return this.scope.compilationUnitScope().referenceContext;
@@ -163,29 +164,35 @@ public abstract class AbstractMethodMappingDeclaration
 
 	// ==== implement ReferenceContext: ====
 
+	@Override
 	public CompilationResult compilationResult()
 	{
 		return this.compilationResult;
 	}
 
+	@Override
 	public boolean hasErrors()
 	{
 		return this.ignoreFurtherInvestigation;
 	}
 
+	@Override
 	public void tagAsHavingErrors()
 	{
 		this.ignoreFurtherInvestigation = true;
 	}
 	
+	@Override
 	public void tagAsHavingIgnoredMandatoryErrors(int problemId) {
 		// nothing here
 	}
 
+	@Override
 	public void resetErrorFlag() {
 		this.ignoreFurtherInvestigation = false;
 	}
 
+	@Override
 	public void abort(int abortLevel, CategorizedProblem problem)
 	{
 		switch (abortLevel)
@@ -709,6 +716,7 @@ public abstract class AbstractMethodMappingDeclaration
 		}
 
 		ASTVisitor visitor = new ASTVisitor() {
+			@Override
 			public void endVisit(SingleNameReference nameRef, BlockScope blockScope2) {
 				for (int i = 0; i < arguments.length; i++) {
 					if (CharOperation.equals(arguments[i].name, nameRef.token))

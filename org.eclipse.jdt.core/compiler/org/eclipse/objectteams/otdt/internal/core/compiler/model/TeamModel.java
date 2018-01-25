@@ -136,7 +136,8 @@ public class TeamModel extends TypeModel {
 		// cf. getTThis().
 	}
 
-    public void setBinding (ReferenceBinding binding) {
+    @Override
+	public void setBinding (ReferenceBinding binding) {
         this._binding = binding;
         binding.setTeamModel(this);
 		if (!binding.isSynthInterface())
@@ -186,7 +187,8 @@ public class TeamModel extends TypeModel {
 	/**
      * Set the given state for all contained roles.
      */
-    public void setMemberState(int state)
+    @Override
+	public void setMemberState(int state)
     {
         RoleModel[] roles = getRoles(true);
         if (roles != null)
@@ -308,7 +310,8 @@ public class TeamModel extends TypeModel {
 		return this._binding.roleModel;
 	}
 
-    public boolean isTeam() {
+    @Override
+	public boolean isTeam() {
         return true;
     }
 
@@ -351,7 +354,8 @@ public class TeamModel extends TypeModel {
 		return (typeBinding._teamModel.tagBits & tagBit) != 0;
 	}
 
-    protected String getKindString()
+    @Override
+	protected String getKindString()
     {
         return "Team"; //$NON-NLS-1$
     }

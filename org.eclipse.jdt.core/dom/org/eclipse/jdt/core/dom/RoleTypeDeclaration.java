@@ -346,6 +346,7 @@ public class RoleTypeDeclaration extends TypeDeclaration {
      * Method declared on ASTNode.
      * @since 3.0
      */
+	@Override
 	final List internalStructuralPropertiesForType(int apiLevel)
     {
         return propertyDescriptors(apiLevel);
@@ -354,7 +355,8 @@ public class RoleTypeDeclaration extends TypeDeclaration {
     /* (omit javadoc for this method)
      * Method declared on ASTNode.
      */
-    final int internalGetSetIntProperty(SimplePropertyDescriptor property, boolean get, int value)
+    @Override
+	final int internalGetSetIntProperty(SimplePropertyDescriptor property, boolean get, int value)
     {
         if (property == MODIFIERS_PROPERTY)
         {
@@ -372,7 +374,8 @@ public class RoleTypeDeclaration extends TypeDeclaration {
     /* (omit javadoc for this method)
      * Method declared on ASTNode.
      */
-    final boolean internalGetSetBooleanProperty(SimplePropertyDescriptor property, boolean get, boolean value)
+    @Override
+	final boolean internalGetSetBooleanProperty(SimplePropertyDescriptor property, boolean get, boolean value)
     {
         if (property == INTERFACE_PROPERTY)
         {
@@ -526,6 +529,7 @@ public class RoleTypeDeclaration extends TypeDeclaration {
     /* (omit javadoc for this method)
      * Method declared on ASTNode.
      */
+	@Override
 	final List internalGetChildListProperty(ChildListPropertyDescriptor property)
     {
         if (property == MODIFIERS2_PROPERTY)
@@ -560,7 +564,8 @@ public class RoleTypeDeclaration extends TypeDeclaration {
     /* (omit javadoc for this method)
      * Method declared on BodyDeclaration.
      */
-    final ChildPropertyDescriptor internalJavadocProperty()
+    @Override
+	final ChildPropertyDescriptor internalJavadocProperty()
     {
         return JAVADOC_PROPERTY;
     }
@@ -568,7 +573,8 @@ public class RoleTypeDeclaration extends TypeDeclaration {
     /* (omit javadoc for this method)
      * Method declared on BodyDeclaration.
      */
-    final ChildListPropertyDescriptor internalModifiers2Property()
+    @Override
+	final ChildListPropertyDescriptor internalModifiers2Property()
     {
         return MODIFIERS2_PROPERTY;
     }
@@ -576,7 +582,8 @@ public class RoleTypeDeclaration extends TypeDeclaration {
     /* (omit javadoc for this method)
      * Method declared on BodyDeclaration.
      */
-    final SimplePropertyDescriptor internalModifiersProperty()
+    @Override
+	final SimplePropertyDescriptor internalModifiersProperty()
     {
         return MODIFIERS_PROPERTY;
     }
@@ -584,7 +591,8 @@ public class RoleTypeDeclaration extends TypeDeclaration {
     /* (omit javadoc for this method)
      * Method declared on AbstractTypeDeclaration.
      */
-    final ChildPropertyDescriptor internalNameProperty()
+    @Override
+	final ChildPropertyDescriptor internalNameProperty()
     {
         return NAME_PROPERTY;
     }
@@ -592,23 +600,27 @@ public class RoleTypeDeclaration extends TypeDeclaration {
     /* (omit javadoc for this method)
      * Method declared on AbstractTypeDeclaration.
      */
-    final ChildListPropertyDescriptor internalBodyDeclarationsProperty()
+    @Override
+	final ChildListPropertyDescriptor internalBodyDeclarationsProperty()
     {
         return BODY_DECLARATIONS_PROPERTY;
     }
 
-    ChildPropertyDescriptor internalGuardPredicateProperty() {
+    @Override
+	ChildPropertyDescriptor internalGuardPredicateProperty() {
     	return GUARD_PROPERTY;
     }
 
-    ChildListPropertyDescriptor internalPrecedenceProperty() {
+    @Override
+	ChildListPropertyDescriptor internalPrecedenceProperty() {
     	return PRECEDENCE_PROPERTY;
     }
 
     /* (omit javadoc for this method)
      * Method declared on ASTNode.
      */
-    final int getNodeType0()
+    @Override
+	final int getNodeType0()
     {
         return ROLE_TYPE_DECLARATION;
     }
@@ -616,6 +628,7 @@ public class RoleTypeDeclaration extends TypeDeclaration {
     /* (omit javadoc for this method)
      * Method declared on ASTNode.
      */
+	@Override
 	ASTNode clone0(AST target)
     {
         RoleTypeDeclaration result = new RoleTypeDeclaration(target);
@@ -666,7 +679,8 @@ public class RoleTypeDeclaration extends TypeDeclaration {
 	/* (omit javadoc for this method)
      * Method declared on ASTNode.
      */
-    final boolean subtreeMatch0(ASTMatcher matcher, Object other)
+    @Override
+	final boolean subtreeMatch0(ASTMatcher matcher, Object other)
     {
         // dispatch to correct overloaded match method
         return matcher.match(this, other);
@@ -675,7 +689,8 @@ public class RoleTypeDeclaration extends TypeDeclaration {
     /* (omit javadoc for this method)
      * Method declared on ASTNode.
      */
-    void accept0(ASTVisitor visitor)
+    @Override
+	void accept0(ASTVisitor visitor)
     {
         boolean visitChildren = visitor.visit(this);
         if (visitChildren) {
@@ -709,6 +724,7 @@ public class RoleTypeDeclaration extends TypeDeclaration {
 	 * @param isTeam <code>true</code> if this is a team class
 	 *    declaration, and <code>false</code> if this is a class declaration
 	 */
+	@Override
 	public void setTeam(boolean isTeam)
 	{
 		preValueChange(TEAM_PROPERTY);
@@ -722,6 +738,7 @@ public class RoleTypeDeclaration extends TypeDeclaration {
 	 * @param isRole <code>true</code> if this is a role class
 	 *    declaration, and <code>false</code> if this is a class declaration
 	 */
+	@Override
 	public void setRole(boolean isRole)
 	{
 		preValueChange(ROLE_PROPERTY);
@@ -863,7 +880,8 @@ public class RoleTypeDeclaration extends TypeDeclaration {
      * an AST later than JLS2
      * @deprecated In the JLS3 API, this method is replaced by <code>getSuperclassType</code>, which returns a <code>Type</code> instead of a <code>Name</code>.
      */
-    public Name getSuperclass() {
+    @Override
+	public Name getSuperclass() {
         supportedOnlyIn2();
         return this.optionalSuperclassName;
     }
@@ -883,7 +901,8 @@ public class RoleTypeDeclaration extends TypeDeclaration {
     * a JLS2 AST
     * @since 3.0
     */
-    public Type getSuperclassType() {
+    @Override
+	public Type getSuperclassType() {
         unsupportedIn2();
         return this.optionalSuperclassType;
     }
@@ -908,7 +927,8 @@ public class RoleTypeDeclaration extends TypeDeclaration {
      * an AST later than JLS2
      * @deprecated In the JLS3 API, this method is replaced by <code>setType</code>, which expects a <code>Type</code> instead of a <code>Name</code>.
      */
-    public void setSuperclass(Name superclassName) {
+    @Override
+	public void setSuperclass(Name superclassName) {
         supportedOnlyIn2();
         ASTNode oldChild = this.optionalSuperclassName;
         preReplaceChild(oldChild, superclassName, SUPERCLASS_PROPERTY);
@@ -935,7 +955,8 @@ public class RoleTypeDeclaration extends TypeDeclaration {
      * a JLS2 AST
      * @since 3.0
      */
-    public void setSuperclassType(Type superclassType) {
+    @Override
+	public void setSuperclassType(Type superclassType) {
         unsupportedIn2();
         ASTNode oldChild = this.optionalSuperclassType;
         preReplaceChild(oldChild, superclassType, SUPERCLASS_TYPE_PROPERTY);
@@ -1022,7 +1043,8 @@ public class RoleTypeDeclaration extends TypeDeclaration {
     /* (omit javadoc for this method)
      * Method declared on ASTNode.
      */
-    @SuppressWarnings({ "nls", "rawtypes" })
+    @Override
+	@SuppressWarnings({ "nls", "rawtypes" })
 	void appendDebugString(StringBuffer buffer)
     {
         buffer.append("RoleTypeDeclaration[\n");
@@ -1046,7 +1068,8 @@ public class RoleTypeDeclaration extends TypeDeclaration {
     /* (omit javadoc for this method)
      * Method declared on ASTNode.
      */
-    int memSize()
+    @Override
+	int memSize()
     {
         return super.memSize() + 12 * 4;
     }
@@ -1054,7 +1077,8 @@ public class RoleTypeDeclaration extends TypeDeclaration {
     /* (omit javadoc for this method)
      * Method declared on ASTNode.
      */
-    int treeSize()
+    @Override
+	int treeSize()
     {
         return memSize()
             + (this.optionalDocComment == null ? 0 : getJavadoc().treeSize())

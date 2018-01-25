@@ -48,6 +48,7 @@ public class ArrayAllocationExpression extends Expression {
 	public Annotation [][] annotationsOnDimensions; // jsr308 style annotations.
 	public ArrayInitializer initializer;
 
+	@Override
 	public FlowInfo analyseCode(BlockScope currentScope, FlowContext flowContext, FlowInfo flowInfo) {
 		for (int i = 0, max = this.dimensions.length; i < max; i++) {
 			Expression dim;
@@ -67,6 +68,7 @@ public class ArrayAllocationExpression extends Expression {
 	/**
 	 * Code generation for a array allocation expression
 	 */
+	@Override
 	public void generateCode(BlockScope currentScope, 	CodeStream codeStream, boolean valueRequired) {
 
 		int pc = codeStream.position;
@@ -101,6 +103,7 @@ public class ArrayAllocationExpression extends Expression {
 	}
 
 
+	@Override
 	public StringBuffer printExpression(int indent, StringBuffer output) {
 		output.append("new "); //$NON-NLS-1$
 		this.type.print(0, output);
@@ -122,6 +125,7 @@ public class ArrayAllocationExpression extends Expression {
 		return output;
 	}
 
+	@Override
 	public TypeBinding resolveType(BlockScope scope) {
 		// Build an array type reference using the current dimensions
 		// The parser does not check for the fact that dimension may be null
@@ -215,6 +219,7 @@ public class ArrayAllocationExpression extends Expression {
 		return this.resolvedType;
 	}
 
+	@Override
 	public void traverse(ASTVisitor visitor, BlockScope scope) {
 		if (visitor.visit(this, scope)) {
 			int dimensionsLength = this.dimensions.length;

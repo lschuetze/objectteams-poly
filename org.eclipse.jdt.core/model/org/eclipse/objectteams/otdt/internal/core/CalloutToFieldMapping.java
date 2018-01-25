@@ -110,7 +110,8 @@ public class CalloutToFieldMapping extends AbstractCalloutMapping implements ICa
         this.declaredModifiers = declaredModifiers;
 	}
     
-    public boolean isOverride() {
+    @Override
+	public boolean isOverride() {
     	return this.isOverride;
     }
     
@@ -119,7 +120,8 @@ public class CalloutToFieldMapping extends AbstractCalloutMapping implements ICa
     	return this.declaredModifiers;
     }
 
-    @SuppressWarnings("nls")
+    @Override
+	@SuppressWarnings("nls")
 	public String getElementName()
     {
 		
@@ -138,11 +140,13 @@ public class CalloutToFieldMapping extends AbstractCalloutMapping implements ICa
         return name.toString();
     }
 
-    public int getMappingKind()
+    @Override
+	public int getMappingKind()
     {
         return CALLOUT_TO_FIELD_MAPPING;
     }   
 
+	@Override
 	public IField getBoundBaseField() throws JavaModelException
 	{
         if (this.baseField == null)
@@ -154,12 +158,14 @@ public class CalloutToFieldMapping extends AbstractCalloutMapping implements ICa
     }
 
     //added for the SourceTypeConverter
-    public IFieldAccessSpec getBaseFieldHandle()
+    @Override
+	public IFieldAccessSpec getBaseFieldHandle()
     {
         return this.baseFieldHandle;
     }
 
-    public boolean equals(Object obj)
+    @Override
+	public boolean equals(Object obj)
     {
         if(!(obj instanceof CalloutToFieldMapping))
         {
@@ -169,7 +175,8 @@ public class CalloutToFieldMapping extends AbstractCalloutMapping implements ICa
         return super.equals(obj);
     }
     
-    @SuppressWarnings("nls")
+    @Override
+	@SuppressWarnings("nls")
 	public String toString()
     {
         return "callout to field" + super.toString();
@@ -255,6 +262,7 @@ public class CalloutToFieldMapping extends AbstractCalloutMapping implements ICa
     // ====
     
 	// implementation and alternate API of resolved(Binding)	
+	@Override
 	public OTJavaElement resolved(char[] uniqueKey) {
 		ResolvedCalloutToFieldMapping resolvedHandle = 
 			new ResolvedCalloutToFieldMapping(
@@ -281,6 +289,7 @@ public class CalloutToFieldMapping extends AbstractCalloutMapping implements ICa
 		return new String[0];
 	}
 
+	@Override
 	public ILocalVariable[] getParameters() throws JavaModelException {
 		// TODO Auto-generated method stub
 		// see Bug 338593 - [otmodel] Add new API to ease the retrieval of the parameter annotations for an IMethodMapping

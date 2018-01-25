@@ -51,13 +51,15 @@ public class RoleTypePattern extends TypeDeclarationPattern
         this.kind = ROLE_DECL_PATTERN;
     }
     
-    public SearchPattern getBlankPattern() 
+    @Override
+	public SearchPattern getBlankPattern() 
     {
     	return new RoleTypePattern(null, null, null, TYPE_SUFFIX, R_EXACT_MATCH | R_CASE_SENSITIVE);
     }
     
 // Reimplement those when we need special index handling apart from the category
-    public void decodeIndexKey(char[] key)
+    @Override
+	public void decodeIndexKey(char[] key)
     {
         this.modifiers = 0;
 
@@ -83,13 +85,15 @@ public class RoleTypePattern extends TypeDeclarationPattern
 //        return super.getIndexKey();
 //    }
     
-    public boolean matchesDecodedKey(SearchPattern decodedPattern)
+    @Override
+	public boolean matchesDecodedKey(SearchPattern decodedPattern)
     {
         RoleTypePattern pattern = (RoleTypePattern) decodedPattern;
         return Flags.isRole(pattern.modifiers) && super.matchesDecodedKey(decodedPattern);
     }
     
-    public char[][] getIndexCategories()
+    @Override
+	public char[][] getIndexCategories()
     {
         return ROLE_CATEGORIES;
         //return CATEGORIES; 

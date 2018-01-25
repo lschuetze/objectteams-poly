@@ -66,11 +66,13 @@ public class FieldBinding extends VariableBinding implements IProtectable {
 	/** For implicitly inheritd fields, this refers to the original declared field. */
 	public FieldBinding copyInheritanceSrc = null;
 	// support assembly of bestNamePath:
+	@Override
 	protected TeamAnchor getClone() {
 		return new FieldBinding(this, this.declaringClass);
 	}
 	/** If this field is a candidate for a team anchor, ensure that its initialization
 	 *  is resolved such that the best name is set. */
+	@Override
 	protected void resolveInitIfNeeded() {
 		if (this.model != null) {
 			FieldDeclaration decl = this.model.getAST();
@@ -83,14 +85,17 @@ public class FieldBinding extends VariableBinding implements IProtectable {
 		}
 	}
 
+	@Override
 	public boolean isBaseAnchor() {
 		return CharOperation.equals(this.name, IOTConstants._OT_BASE);
 	}
     /** Implement {@link IProtectable#getDeclaringClass} */
+	@Override
 	public ReferenceBinding getDeclaringClass() {
 		return this.declaringClass;
 	}
 	/** Implement {@link IProtectable#modifiers} */
+	@Override
 	public int modifiers() {
 		return this.modifiers;
 	}
@@ -246,6 +251,7 @@ public final boolean canBeSeenBy(TypeBinding receiverType, InvocationSite invoca
  * declaringUniqueKey dot fieldName ) returnTypeUniqueKey
  * p.X { X<T> x} --> Lp/X;.x)p/X<TT;>;
  */
+@Override
 public char[] computeUniqueKey(boolean isLeaf) {
 	// declaring key
 	char[] declaringKey =
@@ -272,6 +278,7 @@ public char[] computeUniqueKey(boolean isLeaf) {
 	System.arraycopy(returnTypeKey, 0, uniqueKey, index, returnTypeLength);
 	return uniqueKey;
 }
+@Override
 public Constant constant() {
 	Constant fieldConstant = this.constant;
 	if (fieldConstant == null) {
@@ -309,6 +316,7 @@ public Constant constant() {
 	return fieldConstant;
 }
 
+@Override
 public Constant constant(Scope scope) {
 	if (this.constant != null)
 		return this.constant;
@@ -353,6 +361,7 @@ public final int getAccessFlags() {
 	return this.modifiers & ExtraCompilerModifiers.AccJustFlag;
 }
 
+@Override
 public AnnotationBinding[] getAnnotations() {
 	FieldBinding originalField = original();
 	ReferenceBinding declaringClassBinding = originalField.declaringClass;
@@ -367,6 +376,7 @@ public AnnotationBinding[] getAnnotations() {
  * lazily resolving corresponding annotation nodes, in case of forward references.
  * @see org.eclipse.jdt.internal.compiler.lookup.Binding#getAnnotationTagBits()
  */
+@Override
 public long getAnnotationTagBits() {
 	FieldBinding originalField = original();
 	if ((originalField.tagBits & TagBits.AnnotationResolved) == 0 && originalField.declaringClass instanceof SourceTypeBinding) {
@@ -394,6 +404,7 @@ public long getAnnotationTagBits() {
 	return originalField.tagBits;
 }
 
+@Override
 public final boolean isDefault() {
 	return !isPublic() && !isProtected() && !isPrivate();
 }
@@ -409,6 +420,7 @@ public final boolean isDeprecated() {
 /* Answer true if the receiver has private visibility
 */
 
+@Override
 public final boolean isPrivate() {
 	return (this.modifiers & ClassFileConstants.AccPrivate) != 0;
 }
@@ -423,18 +435,21 @@ public final boolean isOrEnclosedByPrivateType() {
 /* Answer true if the receiver has private visibility and is used locally
 */
 
+@Override
 public final boolean isProtected() {
 	return (this.modifiers & ClassFileConstants.AccProtected) != 0;
 }
 /* Answer true if the receiver has public visibility
 */
 
+@Override
 public final boolean isPublic() {
 	return (this.modifiers & ClassFileConstants.AccPublic) != 0;
 }
 /* Answer true if the receiver is a static field
 */
 
+@Override
 public final boolean isStatic() {
 	return (this.modifiers & ClassFileConstants.AccStatic) != 0;
 }
@@ -471,10 +486,12 @@ public final boolean isViewedAsDeprecated() {
 /* Answer true if the receiver is a volatile field
 */
 
+@Override
 public final boolean isVolatile() {
 	return (this.modifiers & ClassFileConstants.AccVolatile) != 0;
 }
 
+@Override
 public final int kind() {
 	return FIELD;
 }
@@ -486,6 +503,7 @@ public final int kind() {
 public FieldBinding original() {
 	return this;
 }
+@Override
 public void setAnnotations(AnnotationBinding[] annotations) {
 	this.declaringClass.storeAnnotations(this, annotations);
 }

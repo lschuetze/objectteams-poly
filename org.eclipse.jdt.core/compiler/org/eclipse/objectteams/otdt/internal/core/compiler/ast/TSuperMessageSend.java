@@ -65,6 +65,7 @@ public class TSuperMessageSend extends MessageSend {
 	public  TsuperReference tsuperReference;
 
 	/** Check whether this message send contributes to base call analysis */
+	@Override
 	public FlowInfo analyseCode(BlockScope currentScope, FlowContext flowContext, FlowInfo flowInfo) {
 		flowInfo = super.analyseCode(currentScope, flowContext, flowInfo);
 		if (this.binding.isCallin())
@@ -246,6 +247,7 @@ public class TSuperMessageSend extends MessageSend {
 		return null;
 	}
 
+	@Override
 	protected boolean isAnySuperAccess() {
 		return true;
 	}
@@ -267,6 +269,7 @@ public class TSuperMessageSend extends MessageSend {
 		return answer;
 	}
 
+	@Override
 	public StringBuffer printExpression(int indent, StringBuffer output){
 		if (this.tsuperReference != null && this.tsuperReference.qualification != null) {
 			this.tsuperReference.qualification.printExpression(indent, output);

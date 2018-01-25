@@ -116,7 +116,8 @@ public class CallinMethodMappingsAttribute extends AbstractAttribute {
     		     +(this._baseMethods.length
     		       * BASE_METHOD_PART_LENGTH);
     	}
-    	@SuppressWarnings("nls")
+    	@Override
+		@SuppressWarnings("nls")
 		public String toString() {
     		String result =
     			new String(this._mappingName)+":\n"+
@@ -245,6 +246,7 @@ public class CallinMethodMappingsAttribute extends AbstractAttribute {
     		this._isStatic = isStatic;
     		this._translationFlags = translationFlags;
 		}
+		@Override
 		@SuppressWarnings("nls")
 		public String toString() {
 			return (this._isCallin ? "callin " : "") + (this._isStatic ? "static " : "") + new String(this._selector)+new String(this._signature);
@@ -417,7 +419,8 @@ public class CallinMethodMappingsAttribute extends AbstractAttribute {
 	/* (non-Javadoc)
      * @see org.eclipse.objectteams.otdt.internal.core.compiler.bytecode.AbstractAttribute#write(org.eclipse.jdt.internal.compiler.ClassFile)
      */
-    public void write(ClassFile classFile) {
+    @Override
+	public void write(ClassFile classFile) {
         super.write(classFile);
 
        	writeValues(classFile);
@@ -472,13 +475,15 @@ public class CallinMethodMappingsAttribute extends AbstractAttribute {
 	/* (non-Javadoc)
 	 * @see org.eclipse.objectteams.otdt.internal.core.compiler.bytecode.AbstractAttribute#evaluate(org.eclipse.jdt.internal.compiler.lookup.Binding, org.eclipse.jdt.internal.compiler.lookup.LookupEnvironment)
 	 */
+	@Override
 	public void evaluate(Binding binding, LookupEnvironment environment, char[][][] missingTypeNames) {
 		checkBindingMismatch(binding, ExtraCompilerModifiers.AccRole);
 		if (((ReferenceBinding)binding).isRole())
 			((ReferenceBinding)binding).roleModel.addAttribute(this);
 	}
 	// Evaluate CallinMethodMappingAttribute late, because we need our methods to be in place.
-    public void evaluateLateAttribute(ReferenceBinding roleBinding, int state)
+    @Override
+	public void evaluateLateAttribute(ReferenceBinding roleBinding, int state)
     {
     	if (state != ITranslationStates.STATE_FAULT_IN_TYPES)
     		return;
@@ -643,6 +648,7 @@ public class CallinMethodMappingsAttribute extends AbstractAttribute {
 		return (this._mappings[i]._flags & COVARIANT_BASE_RETURN) != 0;
 	}
 
+	@Override
 	public String toString() {
 		String result = new String(this._name);
 		for (int i = 0; i < this._mappings.length; i++) {

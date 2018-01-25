@@ -35,9 +35,11 @@ public FieldLocator(FieldPattern pattern) {
 
 	this.isDeclarationOfAccessedFieldsPattern = this.pattern instanceof DeclarationOfAccessedFieldsPattern;
 }
+@Override
 protected int fineGrain() {
 	return this.pattern.fineGrain;
 }
+@Override
 public int match(ASTNode node, MatchingNodeSet nodeSet) {
 	int declarationsLevel = IMPOSSIBLE_MATCH;
 	if (this.pattern.findReferences) {
@@ -59,6 +61,7 @@ public int match(ASTNode node, MatchingNodeSet nodeSet) {
 	return nodeSet.addMatch(node, declarationsLevel);
 }
 //public int match(ConstructorDeclaration node, MatchingNodeSet nodeSet) - SKIP IT
+@Override
 public int match(FieldDeclaration node, MatchingNodeSet nodeSet) {
 	int referencesLevel = IMPOSSIBLE_MATCH;
 	if (this.pattern.findReferences)
@@ -87,6 +90,7 @@ public int match(FieldDeclaration node, MatchingNodeSet nodeSet) {
 
 //{ObjectTeams: consider field access specs
 //public int match(CalloutMappingDeclaration node, MatchingNodeSet nodeSet) - SKIP IT
+@Override
 public int match(MethodSpec node, MatchingNodeSet nodeSet)
 {
     int level = IMPOSSIBLE_MATCH;
@@ -103,6 +107,7 @@ public int match(MethodSpec node, MatchingNodeSet nodeSet)
     return level;
 }
 //gbr}
+@Override
 protected int matchContainer() {
 	if (this.pattern.findReferences || this.pattern.fineGrain != 0) {
 		// need to look everywhere to find in javadocs and static import
@@ -146,11 +151,13 @@ protected int matchField(FieldBinding field, boolean matchName) {
  * @see org.eclipse.jdt.internal.core.search.matching.PatternLocator#matchLevelAndReportImportRef(org.eclipse.jdt.internal.compiler.ast.ImportReference, org.eclipse.jdt.internal.compiler.lookup.Binding, org.eclipse.jdt.internal.core.search.matching.MatchLocator)
  * Accept to report match of static field on static import
  */
+@Override
 protected void matchLevelAndReportImportRef(ImportReference importRef, Binding binding, MatchLocator locator) throws CoreException {
 	if (importRef.isStatic() && binding instanceof FieldBinding) {
 		super.matchLevelAndReportImportRef(importRef, binding, locator);
 	}
 }
+@Override
 protected int matchReference(Reference node, MatchingNodeSet nodeSet, boolean writeOnlyAccess) {
 	if (node instanceof FieldReference) {
 		if (matchesName(this.pattern.name, ((FieldReference) node).token))
@@ -159,9 +166,11 @@ protected int matchReference(Reference node, MatchingNodeSet nodeSet, boolean wr
 	}
 	return super.matchReference(node, nodeSet, writeOnlyAccess);
 }
+@Override
 protected void matchReportReference(ASTNode reference, IJavaElement element, Binding elementBinding, int accuracy, MatchLocator locator) throws CoreException {
 	matchReportReference(reference, element, null, null, elementBinding, accuracy, locator);
 }
+@Override
 protected void matchReportReference(ASTNode reference, IJavaElement element, IJavaElement localElement, IJavaElement[] otherElements,Binding elementBinding, int accuracy, MatchLocator locator) throws CoreException {
 	if (this.isDeclarationOfAccessedFieldsPattern) {
 		// need exact match to be able to open on type ref
@@ -274,6 +283,7 @@ protected void matchReportReference(ASTNode reference, IJavaElement element, IJa
  * @see org.eclipse.jdt.internal.core.search.matching.PatternLocator#updateMatch(org.eclipse.jdt.internal.compiler.lookup.ParameterizedTypeBinding, char[][][], org.eclipse.jdt.internal.core.search.matching.MatchLocator)
  *
  */
+@Override
 protected void updateMatch(ParameterizedTypeBinding parameterizedBinding, char[][][] patternTypeArguments, MatchLocator locator) {
 	// We can only refine if locator has an unit scope.
 	if (locator.unitScope == null) return;
@@ -326,9 +336,11 @@ protected void reportDeclaration(FieldBinding fieldBinding, MatchLocator locator
 		}
 	}
 }
+@Override
 protected int referenceType() {
 	return IJavaElement.FIELD;
 }
+@Override
 public int resolveLevel(ASTNode possiblelMatchingNode) {
 	if (this.pattern.findReferences || this.pattern.fineGrain != 0) {
 		if (possiblelMatchingNode instanceof FieldReference)
@@ -346,6 +358,7 @@ public int resolveLevel(ASTNode possiblelMatchingNode) {
 		return matchField(((FieldDeclaration) possiblelMatchingNode).binding, true);
 	return IMPOSSIBLE_MATCH;
 }
+@Override
 public int resolveLevel(Binding binding) {
 	if (binding == null) return INACCURATE_MATCH;
 	if (!(binding instanceof FieldBinding)) return IMPOSSIBLE_MATCH;

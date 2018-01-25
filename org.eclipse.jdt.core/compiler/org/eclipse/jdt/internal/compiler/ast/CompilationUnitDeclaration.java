@@ -68,6 +68,7 @@ import org.eclipse.objectteams.otdt.internal.core.compiler.control.StateMemento;
 public class CompilationUnitDeclaration extends ASTNode implements ProblemSeverities, ReferenceContext {
 
 	private static final Comparator STRING_LITERAL_COMPARATOR = new Comparator() {
+		@Override
 		public int compare(Object o1, Object o2) {
 			StringLiteral literal1 = (StringLiteral) o1;
 			StringLiteral literal2 = (StringLiteral) o2;
@@ -133,6 +134,7 @@ public CompilationUnitDeclaration(ProblemReporter problemReporter, CompilationRe
 /*
  *	We cause the compilation task to abort to a given extent.
  */
+@Override
 public void abort(int abortLevel, CategorizedProblem problem) {
 	switch (abortLevel) {
 		case AbortType :
@@ -251,6 +253,7 @@ public void checkUnusedImports(){
 	}
 }
 
+@Override
 public CompilationResult compilationResult() {
 	return this.compilationResult;
 }
@@ -485,6 +488,7 @@ public void generateCode() {
 	}
 }
 
+@Override
 public CompilationUnitDeclaration getCompilationUnitDeclaration() {
 	return this;
 }
@@ -545,10 +549,12 @@ public boolean hasFunctionalTypes() {
 	return this.compilationResult.hasFunctionalTypes;
 }
 
+@Override
 public boolean hasErrors() {
 	return this.ignoreFurtherInvestigation;
 }
 
+@Override
 public StringBuffer print(int indent, StringBuffer output) {
 	if (this.currentPackage != null) {
 //{ObjectTeams: package can have "team" modifier:
@@ -870,15 +876,18 @@ void reportNLSProblems() {
 	}
 }
 
+@Override
 public void tagAsHavingErrors() {
 	this.ignoreFurtherInvestigation = true;
 }
 
+@Override
 public void tagAsHavingIgnoredMandatoryErrors(int problemId) {
 	// Nothing to do for this context;
 }
 
 //{ObjectTeams: and let us remove it again:
+@Override
 public void resetErrorFlag() {
 	this.ignoreFurtherInvestigation = false;
 }

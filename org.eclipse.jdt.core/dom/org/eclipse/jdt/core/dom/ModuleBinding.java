@@ -270,6 +270,7 @@ class ModuleBinding implements IModuleBinding {
 	 * For debugging purpose only.
 	 * @see java.lang.Object#toString()
 	 */
+	@Override
 	public String toString() {
 		return this.binding.toString();
 	}

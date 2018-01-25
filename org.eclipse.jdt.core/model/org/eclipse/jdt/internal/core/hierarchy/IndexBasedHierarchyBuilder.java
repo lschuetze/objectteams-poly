@@ -122,6 +122,7 @@ public class IndexBasedHierarchyBuilder extends HierarchyBuilder implements Suff
 			}
 			return name;
 		}
+		@Override
 		public String toString(){
 			StringBuffer buffer = new StringBuffer("Queue:\n"); //$NON-NLS-1$
 			for (int i = this.start; i <= this.end; i++){
@@ -136,6 +137,7 @@ public IndexBasedHierarchyBuilder(TypeHierarchy hierarchy, IJavaSearchScope scop
 	this.binariesFromIndexMatches = new HashMap(10);
 	this.scope = scope;
 }
+@Override
 public void build(boolean computeSubtypes) {
 	JavaModelManager manager = JavaModelManager.getJavaModelManager();
 	try {
@@ -196,6 +198,7 @@ private void buildForProject(JavaProject project, ArrayList potentialSubtypes, o
 		}
 		subMonitor.split(1);
 		Arrays.sort(openables, new Comparator() {
+			@Override
 			public int compare(Object a, Object b) {
 				int aIndex = indexes.get(a);
 				int bIndex = indexes.get(b);
@@ -395,11 +398,13 @@ private void buildFromPotentialSubtypes(String[] allPotentialSubTypes, HashSet l
 		SubMonitor.done(monitor);
 	}
 }
+@Override
 protected ICompilationUnit createCompilationUnitFromPath(Openable handle, IFile file) {
 	ICompilationUnit unit = super.createCompilationUnitFromPath(handle, file);
 	this.cuToHandle.put(unit, handle);
 	return unit;
 }
+@Override
 protected IBinaryType createInfoFromClassFile(Openable classFile, IResource file) {
 	String documentPath = classFile.getPath().toString();
 	IBinaryType binaryType = (IBinaryType)this.binariesFromIndexMatches.get(documentPath);
@@ -410,6 +415,7 @@ protected IBinaryType createInfoFromClassFile(Openable classFile, IResource file
 		return super.createInfoFromClassFile(classFile, file);
 	}
 }
+@Override
 protected IBinaryType createInfoFromClassFileInJar(Openable classFile) {
 	String filePath = (((ClassFile)classFile).getType().getFullyQualifiedName('$')).replace('.', '/') + SuffixConstants.SUFFIX_STRING_class;
 	IPackageFragmentRoot root = classFile.getPackageFragmentRoot();
@@ -432,6 +438,7 @@ protected IBinaryType createInfoFromClassFileInJar(Openable classFile) {
 private String[] determinePossibleSubTypes(final HashSet localTypes, IProgressMonitor monitor) {
 	class PathCollector implements IPathRequestor {
 		HashSet paths = new HashSet(10);
+		@Override
 		public void acceptPath(String path, boolean containsLocalTypes) {
 			this.paths.add(path);
 			if (containsLocalTypes) {
@@ -587,6 +594,7 @@ private static void legacySearchAllPossibleSubTypes(
 
 	/* use a special collector to collect paths and queue new subtype names */
 	IndexQueryRequestor searchRequestor = new IndexQueryRequestor() {
+		@Override
 		public boolean acceptIndexMatch(String documentPath, SearchPattern indexRecord, SearchParticipant participant, AccessRuleSet access) {
 			SuperTypeReferencePattern record = (SuperTypeReferencePattern)indexRecord;
 			boolean isLocalOrAnonymous = record.enclosingTypeName == IIndexConstants.ONE_ZERO;

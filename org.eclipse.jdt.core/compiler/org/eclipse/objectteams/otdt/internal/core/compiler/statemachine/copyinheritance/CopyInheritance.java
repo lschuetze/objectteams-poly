@@ -1161,7 +1161,8 @@ public class CopyInheritance implements IOTConstants, ClassFileConstants, ExtraC
 	    	// more checking: abstract method in non-abstract class?
 	    	if (newMethodDecl.isAbstract() && (targetRoleDecl.modifiers & ClassFileConstants.AccAbstract) == 0) {
 	    		targetRoleDecl.scope.problemReporter()
-	    			.setRechecker(new IProblemRechecker() {	public boolean shouldBeReported(IrritantSet[] foundIrritants) {
+	    			.setRechecker(new IProblemRechecker() {	@Override
+					public boolean shouldBeReported(IrritantSet[] foundIrritants) {
 						if (newMethodDecl.isAbstract()) // implemented by callout?
 							return true;
 						return false; // false alarm
@@ -2231,7 +2232,8 @@ public class CopyInheritance implements IOTConstants, ClassFileConstants, ExtraC
                     ReplaceSingleNameVisitor.IExpressionProvider provider =
                         new ReplaceSingleNameVisitor.IExpressionProvider()
                     {
-                        public Expression newExpression() {
+                        @Override
+						public Expression newExpression() {
                             return new SingleNameReference(argument.name, argument.sourceStart);
                         }
                     };

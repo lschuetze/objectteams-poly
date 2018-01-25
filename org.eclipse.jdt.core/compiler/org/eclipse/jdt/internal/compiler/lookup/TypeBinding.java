@@ -73,7 +73,9 @@ abstract public class TypeBinding extends Binding {
 	// jsr 308
 	public static final ReferenceBinding TYPE_USE_BINDING = new ReferenceBinding() { /* used for type annotation resolution. */
 		{ this.id = TypeIds.T_undefined; }
+		@Override
 		public int kind() { return Binding.TYPE_USE; }
+		@Override
 		public boolean hasTypeBit(int bit) { return false; }
 	};
 	
@@ -1476,6 +1478,7 @@ public boolean isWildcard() {
 /* API
  * Answer the receiver's binding type from Binding.BindingID.
  */
+@Override
 public int kind() {
 	return Binding.TYPE;
 }

@@ -69,6 +69,7 @@ public InstanceOfExpression(Expression expression, TypeReference type) {
 	this.sourceEnd = type.sourceEnd;
 }
 
+@Override
 public FlowInfo analyseCode(BlockScope currentScope, FlowContext flowContext, FlowInfo flowInfo) {
 //{ObjectTeams: is it a role type check?
 		if (this.roleCheckExpr != null)
@@ -128,6 +129,7 @@ public FlowInfo analyseCode(BlockScope currentScope, FlowContext flowContext, Fl
  * @param codeStream org.eclipse.jdt.internal.compiler.codegen.CodeStream
  * @param valueRequired boolean
 */
+@Override
 public void generateCode(BlockScope currentScope, CodeStream codeStream, boolean valueRequired) {
 //{ObjectTeams: is it a role type check?
 	if (this.roleCheckExpr != null) {
@@ -146,11 +148,13 @@ public void generateCode(BlockScope currentScope, CodeStream codeStream, boolean
 	codeStream.recordPositionsFrom(pc, this.sourceStart);
 }
 
+@Override
 public StringBuffer printExpressionNoParenthesis(int indent, StringBuffer output) {
 	this.expression.printExpression(indent, output).append(" instanceof "); //$NON-NLS-1$
 	return this.type.print(0, output);
 }
 
+@Override
 public TypeBinding resolveType(BlockScope scope) {
 	this.constant = Constant.NotAConstant;
 	TypeBinding expressionType = this.expression.resolveType(scope);
@@ -178,12 +182,14 @@ public TypeBinding resolveType(BlockScope scope) {
 /**
  * @see org.eclipse.jdt.internal.compiler.ast.Expression#tagAsUnnecessaryCast(Scope,TypeBinding)
  */
+@Override
 public void tagAsUnnecessaryCast(Scope scope, TypeBinding castType) {
 	// null is not instanceof Type, recognize direct scenario
 	if (this.expression.resolvedType != TypeBinding.NULL)
 		scope.problemReporter().unnecessaryInstanceof(this, castType);
 }
 
+@Override
 public void traverse(ASTVisitor visitor, BlockScope scope) {
 	if (visitor.visit(this, scope)) {
 		this.expression.traverse(visitor, scope);

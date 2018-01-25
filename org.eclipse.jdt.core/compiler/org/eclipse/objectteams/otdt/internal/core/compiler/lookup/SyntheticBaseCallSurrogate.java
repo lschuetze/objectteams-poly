@@ -84,6 +84,7 @@ public class SyntheticBaseCallSurrogate extends SyntheticOTMethodBinding
 	}
 
 	/** Directly generate the instruction for this method's body (no AST available). */
+	@Override
 	public void generateInstructions(CodeStream codeStream) {
 		codeStream.new_(this.errorType);
 		codeStream.dup();

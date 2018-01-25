@@ -218,6 +218,7 @@ public abstract class AbstractMethodDeclaration
 	/*
 	 *	We cause the compilation task to abort to a given extent.
 	 */
+	@Override
 	public void abort(int abortLevel, CategorizedProblem problem) {
 
 		switch (abortLevel) {
@@ -386,6 +387,7 @@ public abstract class AbstractMethodDeclaration
 		}
 	}
 
+	@Override
 	public CompilationResult compilationResult() {
 
 		return this.compilationResult;
@@ -435,7 +437,8 @@ public abstract class AbstractMethodDeclaration
                 this.binding.bytecodeMissing = true;
             // similarly for contained local types:
             traverse(new ASTVisitor() {
-            	public boolean visit(TypeDeclaration type, BlockScope blockScope) {
+            	@Override
+				public boolean visit(TypeDeclaration type, BlockScope blockScope) {
             		type.tagAsHavingErrors();
             		return true;
             	}
@@ -659,6 +662,7 @@ public abstract class AbstractMethodDeclaration
 		}
 	}
 
+	@Override
 	public CompilationUnitDeclaration getCompilationUnitDeclaration() {
 		if (this.scope != null) {
 			return this.scope.compilationUnitScope().referenceContext;
@@ -666,6 +670,7 @@ public abstract class AbstractMethodDeclaration
 		return null;
 	}
 
+	@Override
 	public boolean hasErrors() {
 		return this.ignoreFurtherInvestigation;
 	}
@@ -732,6 +737,7 @@ public abstract class AbstractMethodDeclaration
 	 */
 	public abstract void parseStatements(Parser parser, CompilationUnitDeclaration unit);
 
+	@Override
 	public StringBuffer print(int tab, StringBuffer output) {
 
 		if (this.javadoc != null) {
@@ -968,6 +974,7 @@ public abstract class AbstractMethodDeclaration
 // SH}
 	}
 
+	@Override
 	public void tagAsHavingErrors() {
 		this.ignoreFurtherInvestigation = true;
 //{ObjectTeams: avoid attempts to copy the bytecode of this method:
@@ -983,11 +990,13 @@ public abstract class AbstractMethodDeclaration
 // SH}
 	}
 	
+	@Override
 	public void tagAsHavingIgnoredMandatoryErrors(int problemId) {
 		// Nothing to do for this context;
 	}
 
 //{ObjectTeams: and remove it again:
+	@Override
 	public void resetErrorFlag() {
 		this.ignoreFurtherInvestigation = false;
 	}

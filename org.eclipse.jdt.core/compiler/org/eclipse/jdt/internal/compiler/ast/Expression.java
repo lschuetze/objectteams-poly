@@ -120,16 +120,21 @@ public abstract class Expression extends Statement {
 	 */
 	public enum DecapsulationState {
 		/** Decapsulation is not allowed. */
-		NONE      { public boolean isAllowed() { return false; }},
+		NONE      { @Override
+		public boolean isAllowed() { return false; }},
 		/** This node refers to a confined role, decapsulation is not allowed. */
-		CONFINED  { public boolean isAllowed() { return false; }},
+		CONFINED  { @Override
+		public boolean isAllowed() { return false; }},
 		/** This node is a playedBy reference, decapsulation is allowed, and not yet reported. */
-		ALLOWED   { public boolean isAllowed() { return true;  }},
+		ALLOWED   { @Override
+		public boolean isAllowed() { return true;  }},
 		/** This node is either a playedBy reference for which decapsulation has been reported,
 		 *  or some other (generated) base reference for which decapsulation shall not be reported. */
-		REPORTED  { public boolean isAllowed() { return true;  }},
+		REPORTED  { @Override
+		public boolean isAllowed() { return true;  }},
 		/** This mode is for team method return types: prefer local resolution, but tolerate base class as a fallback. */
-		TOLERATED { public boolean isAllowed() { return false; }};
+		TOLERATED { @Override
+		public boolean isAllowed() { return false; }};
 		abstract public boolean isAllowed();
 	}
 	public DecapsulationState getBaseclassDecapsulation() {return DecapsulationState.NONE;}
@@ -351,6 +356,7 @@ public Expression() {
 	super();
 }
 
+@Override
 public FlowInfo analyseCode(BlockScope currentScope, FlowContext flowContext, FlowInfo flowInfo) {
 	return flowInfo;
 }
@@ -903,6 +909,7 @@ public void computeConversion(Scope scope, TypeBinding runtimeType, TypeBinding 
  * @param currentScope org.eclipse.jdt.internal.compiler.lookup.BlockScope
  * @param codeStream org.eclipse.jdt.internal.compiler.codegen.CodeStream
  */
+@Override
 public void generateCode(BlockScope currentScope, CodeStream codeStream) {
 	if ((this.bits & ASTNode.IsReachable) == 0) {
 		return;
@@ -1201,6 +1208,7 @@ public TypeBinding postConversionType(Scope scope) {
 	return convertedType;
 }
 
+@Override
 public StringBuffer print(int indent, StringBuffer output) {
 	printIndent(indent, output);
 	return printExpression(indent, output);
@@ -1208,10 +1216,12 @@ public StringBuffer print(int indent, StringBuffer output) {
 
 public abstract StringBuffer printExpression(int indent, StringBuffer output);
 
+@Override
 public StringBuffer printStatement(int indent, StringBuffer output) {
 	return print(indent, output).append(";"); //$NON-NLS-1$
 }
 
+@Override
 public void resolve(BlockScope scope) {
 	// drops the returning expression's type whatever the type is.
 	this.resolveType(scope);
@@ -1413,6 +1423,7 @@ public Expression toTypeReference() {
  * @param visitor
  * @param scope
  */
+@Override
 public void traverse(ASTVisitor visitor, BlockScope scope) {
 	// nothing to do
 }

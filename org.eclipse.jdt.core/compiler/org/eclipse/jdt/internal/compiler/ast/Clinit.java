@@ -115,6 +115,7 @@ public class Clinit extends AbstractMethodDeclaration {
 	 * @param classScope org.eclipse.jdt.internal.compiler.lookup.ClassScope
 	 * @param classFile org.eclipse.jdt.internal.compiler.codegen.ClassFile
 	 */
+	@Override
 	public void generateCode(ClassScope classScope, ClassFile classFile) {
 
 		int clinitOffset = 0;
@@ -385,25 +386,30 @@ public class Clinit extends AbstractMethodDeclaration {
 		}
 	}
 
+	@Override
 	public boolean isClinit() {
 
 		return true;
 	}
 
+	@Override
 	public boolean isInitializationMethod() {
 
 		return true;
 	}
 
+	@Override
 	public boolean isStatic() {
 
 		return true;
 	}
 
+	@Override
 	public void parseStatements(Parser parser, CompilationUnitDeclaration unit) {
 		//the clinit is filled by hand ....
 	}
 
+	@Override
 	public StringBuffer print(int tab, StringBuffer output) {
 
 		printIndent(tab, output).append("<clinit>()"); //$NON-NLS-1$
@@ -411,11 +417,13 @@ public class Clinit extends AbstractMethodDeclaration {
 		return output;
 	}
 
+	@Override
 	public void resolve(ClassScope classScope) {
 
 		this.scope = new MethodScope(classScope, classScope.referenceContext, true);
 	}
 
+	@Override
 	public void traverse(
 		ASTVisitor visitor,
 		ClassScope classScope) {

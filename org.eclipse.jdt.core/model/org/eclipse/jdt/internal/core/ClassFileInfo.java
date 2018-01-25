@@ -187,12 +187,15 @@ private IMemberValuePair[] getTargetElementTypes(long tagBits) {
 	}
 	return new IMemberValuePair[] {
 		new IMemberValuePair() {
+			@Override
 			public int getValueKind() {
 				return IMemberValuePair.K_QUALIFIED_NAME;
 			}
+			@Override
 			public Object getValue() {
 				return value;
 			}
+			@Override
 			public String getMemberName() {
 				return new String(TypeConstants.VALUE);
 			}
@@ -216,12 +219,15 @@ private IMemberValuePair[] getRetentionPolicy(long tagBits) {
 	return 
 		new IMemberValuePair[] {
 			new IMemberValuePair() {
+				@Override
 				public int getValueKind() {
 					return IMemberValuePair.K_QUALIFIED_NAME;
 				}
+				@Override
 				public Object getValue() {
 					return value;
 				}
+				@Override
 				public String getMemberName() {
 					return new String(TypeConstants.VALUE);
 				}

@@ -65,6 +65,7 @@ public class CompletionJavadocParser extends JavadocParser {
 	/*
 	 * Do not parse comment if completion location is not included.
 	 */
+	@Override
 	public boolean checkDeprecation(int commentPtr) {
 		boolean isDeprecated = false;
 
@@ -94,6 +95,7 @@ public class CompletionJavadocParser extends JavadocParser {
 	/*
 	 * Replace stored Javadoc node with specific completion one.
 	 */
+	@Override
 	protected boolean commentParse() {
 		this.docComment = new CompletionJavadoc(this.javadocStart, this.javadocEnd);
 		this.firstTagPosition = 1; // bug 429340: completion parser needs to parse the whole comment
@@ -103,6 +105,7 @@ public class CompletionJavadocParser extends JavadocParser {
 	/*
 	 * Create argument expression. If it includes completion location, create and store completion node.
 	 */
+	@Override
 	protected Object createArgumentReference(char[] name, int dim, boolean isVarargs, Object typeRef, long[] dimPositions, long argNamePos) throws InvalidInputException {
 		// Create argument as we may need it after
 		char[] argName = name==null ? CharOperation.NO_CHAR : name;
@@ -131,6 +134,7 @@ public class CompletionJavadocParser extends JavadocParser {
 	/*
 	 * Create field reference. If it includes completion location, create and store completion node.
 	 */
+	@Override
 	protected Object createFieldReference(Object receiver) throws InvalidInputException {
 		int refStart = (int) (this.identifierPositionStack[0] >>> 32);
 		int refEnd = (int) this.identifierPositionStack[0];
@@ -158,6 +162,7 @@ public class CompletionJavadocParser extends JavadocParser {
 	 * If so, create method reference and store it.
 	 * Otherwise return null as we do not need this reference.
 	 */
+	@Override
 	protected Object createMethodReference(Object receiver, List arguments) throws InvalidInputException {
 		int memberPtr = this.identifierLengthStack[0] - 1; // may be > 0 for inner class constructor reference
 		int refStart = (int) (this.identifierPositionStack[memberPtr] >>> 32);
@@ -190,6 +195,7 @@ public class CompletionJavadocParser extends JavadocParser {
 	/*
 	 * Create type reference. If it includes completion location, create and store completion node.
 	 */
+	@Override
 	protected Object createTypeReference(int primitiveToken) {
 		// Need to create type ref in case it was needed by members
 		int nbIdentifiers = this.identifierLengthStack[this.identifierLengthPtr];
@@ -313,6 +319,7 @@ public class CompletionJavadocParser extends JavadocParser {
 	/*
 	 * Parse argument in @see tag method reference
 	 */
+	@Override
 	protected Object parseArguments(Object receiver) throws InvalidInputException {
 
 		if (this.tagSourceStart>this.cursorLocation) {
@@ -459,6 +466,7 @@ public class CompletionJavadocParser extends JavadocParser {
 		throw new InvalidInputException();
 	}
 
+		@Override
 		protected boolean parseParam() throws InvalidInputException {
 			int startPosition = this.index;
 			int endPosition = this.index;
@@ -539,6 +547,7 @@ public class CompletionJavadocParser extends JavadocParser {
 	/* (non-Javadoc)
 		 * @see org.eclipse.jdt.internal.compiler.parser.AbstractCommentParser#parseReference()
 		 */
+		@Override
 		protected boolean parseReference() throws InvalidInputException {
 			boolean completed = this.completionNode != null;
 			boolean valid = super.parseReference();
@@ -551,6 +560,7 @@ public class CompletionJavadocParser extends JavadocParser {
 	/*(non-Javadoc)
 	 * @see org.eclipse.jdt.internal.compiler.parser.AbstractCommentParser#parseTag(int)
 	 */
+	@Override
 	protected boolean parseTag(int previousPosition) throws InvalidInputException {
 		int startPosition = this.inlineTagStarted ? this.inlineTagStart : previousPosition;
 		boolean newLine = !this.lineStarted;
@@ -577,6 +587,7 @@ public class CompletionJavadocParser extends JavadocParser {
 	/* (non-Javadoc)
 	 * @see org.eclipse.jdt.internal.compiler.parser.AbstractCommentParser#parseThrows()
 	 */
+	@Override
 	protected boolean parseThrows() {
 		try {
 			Object typeRef = parseQualifiedName(true);
@@ -602,6 +613,7 @@ public class CompletionJavadocParser extends JavadocParser {
 	/*
 	 * Push param name reference. If it includes completion location, create and store completion node.
 	 */
+	@Override
 	protected boolean pushParamName(boolean isTypeParam) {
 		if (super.pushParamName(isTypeParam)) {
 			Expression expression = (Expression) this.astStack[this.astPtr];
@@ -627,6 +639,7 @@ public class CompletionJavadocParser extends JavadocParser {
 	 *
 	 * @see org.eclipse.jdt.internal.compiler.parser.AbstractCommentParser#pushText(int, int)
 	 */
+	@Override
 	protected void pushText(int start, int end) {
 		if (start <= this.cursorLocation && this.cursorLocation <= end) {
 			this.scanner.resetTo(start, end);
@@ -795,6 +808,7 @@ public class CompletionJavadocParser extends JavadocParser {
 	/* (non-Javadoc)
 	 * @see org.eclipse.jdt.internal.compiler.parser.AbstractCommentParser#readToken()
 	 */
+	@Override
 	protected int readToken() throws InvalidInputException {
 		int token = super.readToken();
 		if (token == TerminalTokens.TokenNameIdentifier && this.scanner.currentPosition == this.scanner.startPosition) {
@@ -807,6 +821,7 @@ public class CompletionJavadocParser extends JavadocParser {
 	/*
 	 * Recover syntax on invalid qualified name.
 	 */
+	@Override
 	protected Object syntaxRecoverQualifiedName(int primitiveToken) throws InvalidInputException {
 		if (this.cursorLocation == ((int)this.identifierPositionStack[this.identifierPtr])) {
 			// special case of completion just before the dot.
@@ -908,6 +923,7 @@ public class CompletionJavadocParser extends JavadocParser {
 	/*
 	 * Store completion node into doc comment.
 	 */
+	@Override
 	protected void updateDocComment() {
 		super.updateDocComment();
 		if (this.completionNode instanceof Expression) {
@@ -920,6 +936,7 @@ public class CompletionJavadocParser extends JavadocParser {
 	/* (non-Javadoc)
 	 * @see org.eclipse.jdt.internal.compiler.parser.AbstractCommentParser#verifySpaceOrEndComment()
 	 */
+	@Override
 	protected boolean verifySpaceOrEndComment() {
 		CompletionScanner completionScanner = (CompletionScanner) this.scanner;
 		if (completionScanner.completionIdentifier != null && completionScanner.completedIdentifierStart <= this.cursorLocation && this.cursorLocation <= completionScanner.completedIdentifierEnd) {

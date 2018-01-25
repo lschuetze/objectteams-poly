@@ -2601,6 +2601,7 @@ public class DiagnoseParser implements ParserBasicInformation, TerminalTokens, C
     	}
 	}
 
+	@Override
 	public String toString() {
 		StringBuffer res = new StringBuffer();
 
@@ -2609,6 +2610,7 @@ public class DiagnoseParser implements ParserBasicInformation, TerminalTokens, C
 		return res.toString();
 	}
 
+	@Override
 	public boolean atConflictScenario(int token) {
 		/* There is too much voodoo that goes on here in DiagnoseParser (multiple machines, lexer stream reset etc.)
 		   So we take a simple minded view that we will always ask for disambiguation, except there is one scenario 

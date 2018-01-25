@@ -96,7 +96,8 @@ public class CallinMappingDeclaration extends AbstractMethodMappingDeclaration
 	 */
 	public Map<ReferenceBinding, Integer> rolesWithLiftingProblem;
 
-    public MethodSpec[] getBaseMethodSpecs () {
+    @Override
+	public MethodSpec[] getBaseMethodSpecs () {
     	return this.baseMethodSpecs;
     }
 	public int baseDeclarationSourceStart() {
@@ -109,6 +110,7 @@ public class CallinMappingDeclaration extends AbstractMethodMappingDeclaration
 	}
 
 	/** add a base method spec, iff none has been given yet. */
+	@Override
 	public void checkAddBasemethodSpec(MethodSpec baseSpec) {
 		if (this.baseMethodSpecs == null || this.baseMethodSpecs.length == 0)
 			this.baseMethodSpecs = new MethodSpec[] {baseSpec};
@@ -131,7 +133,8 @@ public class CallinMappingDeclaration extends AbstractMethodMappingDeclaration
      * because MethodBinding.canBeSeenBy(..) implements a shortcut for
      * MessageSends within the scope of a  callin wrapper.
      */
-    public boolean canAccessInvisibleBase () {
+    @Override
+	public boolean canAccessInvisibleBase () {
     	return true;
     }
 
@@ -153,6 +156,7 @@ public class CallinMappingDeclaration extends AbstractMethodMappingDeclaration
         super(compilationResult);
     }
 
+	@Override
 	public void resolveMethodSpecs(RoleModel role,
 								   ReferenceBinding baseType,
 								   boolean resolveBaseMethods)
@@ -273,6 +277,7 @@ public class CallinMappingDeclaration extends AbstractMethodMappingDeclaration
 	 * Pre: not called if parameter mappings are present.
 	 * @param methodSpec
 	 */
+	@Override
 	protected boolean internalCheckParametersCompatibility(
 			MethodSpec methodSpec,
 			TypeBinding[] roleParams,
@@ -407,6 +412,7 @@ public class CallinMappingDeclaration extends AbstractMethodMappingDeclaration
 			this.rolesWithLiftingProblem = new HashMap<ReferenceBinding,Integer>();
 		this.rolesWithLiftingProblem.put(roleRef, iProblem);
 	}
+	@Override
 	protected void checkReturnCompatibility(MethodSpec methodSpec)
 	{
 		Config.requireTypeAdjustment(); // reset flags
@@ -616,11 +622,13 @@ public class CallinMappingDeclaration extends AbstractMethodMappingDeclaration
 		return false;
 	}
 
+	@Override
 	protected void checkResult(MethodSpec baseSpec) {
 		if (isReplaceCallin())
 			checkResultForReplace(baseSpec);
 	}
 
+	@Override
 	protected void checkThrownExceptions(MethodSpec baseSpec) {
 		checkThrownExceptions(this.roleMethodSpec.resolvedMethod, baseSpec.resolvedMethod);
 		// transfer all exceptions of base methods to the role method (model):
@@ -667,14 +675,17 @@ public class CallinMappingDeclaration extends AbstractMethodMappingDeclaration
 		}
 	}
 
+	@Override
 	public boolean isCallin()
 	{
 		return true;
 	}
 
+	@Override
 	public boolean isReplaceCallin() {
 		return this.callinModifier == TokenNamereplace;
 	}
+	@Override
 	public boolean isStaticReplace() {
 		return isReplaceCallin() && this.roleMethodSpec.resolvedMethod.isStatic();
 	}
@@ -684,6 +695,7 @@ public class CallinMappingDeclaration extends AbstractMethodMappingDeclaration
 				return true;
 		return false;
 	}
+	@Override
 	public boolean isCallout()
 	{
 		return false;
@@ -715,6 +727,7 @@ public class CallinMappingDeclaration extends AbstractMethodMappingDeclaration
 	/**
 	 * For callins the role method is the implemented method to be invoked.
 	 */
+	@Override
 	public MethodSpec getImplementationMethodSpec() {
 		return this.roleMethodSpec;
 	}
@@ -811,7 +824,8 @@ public class CallinMappingDeclaration extends AbstractMethodMappingDeclaration
 		return false;
 	}
 
-    public void traverse(ASTVisitor visitor, ClassScope classScope)
+    @Override
+	public void traverse(ASTVisitor visitor, ClassScope classScope)
 	{
 		if(visitor.visit(this, classScope))
 		{
@@ -849,7 +863,8 @@ public class CallinMappingDeclaration extends AbstractMethodMappingDeclaration
         return "<unknown>"; //$NON-NLS-1$
     }
 
-    public StringBuffer print(int indent, StringBuffer output)
+    @Override
+	public StringBuffer print(int indent, StringBuffer output)
     {
         printIndent(indent,output);
 

@@ -71,7 +71,8 @@ public class PotentialLowerExpression extends PotentialTranslationExpression {
         this.teamExpression = teamExpression;
     }
 
-    public TypeBinding resolveType(BlockScope scope)
+    @Override
+	public TypeBinding resolveType(BlockScope scope)
     {
     	if (this.expectedType != null)
     		this.expression.setExpectedType(this.expectedType);

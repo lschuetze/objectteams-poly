@@ -501,6 +501,7 @@ public class InternalCompletionProposal extends CompletionProposal {
 	 *
 	 * @since 3.3
 	 */
+	@Override
 	public int getAdditionalFlags() {
 		return this.additionalFlags;
 	}
@@ -520,6 +521,7 @@ public class InternalCompletionProposal extends CompletionProposal {
 	 *
 	 * @since 3.3
 	 */
+	@Override
 	public void setAdditionalFlags(int additionalFlags) {
 		this.additionalFlags = additionalFlags;
 	}
@@ -538,6 +540,7 @@ public class InternalCompletionProposal extends CompletionProposal {
 	 * declared on this class, or possibly a kind unknown
 	 * to the caller
 	 */
+	@Override
 	public int getKind() {
 		return this.completionKind;
 	}
@@ -552,6 +555,7 @@ public class InternalCompletionProposal extends CompletionProposal {
 	 * @see ICodeAssist#codeComplete(int,CompletionRequestor)
 	 */
 	// TODO (david) https://bugs.eclipse.org/bugs/show_bug.cgi?id=132558
+	@Override
 	public int getCompletionLocation() {
 		return this.completionLocation;
 	}
@@ -569,6 +573,7 @@ public class InternalCompletionProposal extends CompletionProposal {
 	 *
 	 * @return character index of token start position (inclusive)
 	 */
+	@Override
 	public int getTokenStart() {
 		return this.tokenStart;
 	}
@@ -582,6 +587,7 @@ public class InternalCompletionProposal extends CompletionProposal {
 	 *
 	 * @return character index of token end position (exclusive)
 	 */
+	@Override
 	public int getTokenEnd() {
 		return this.tokenEnd;
 	}
@@ -602,6 +608,7 @@ public class InternalCompletionProposal extends CompletionProposal {
 	 * @param startIndex character index of token start position (inclusive)
 	 * @param endIndex character index of token end position (exclusive)
 	 */
+	@Override
 	public void setTokenRange(int startIndex, int endIndex) {
 		if (startIndex < 0 || endIndex < startIndex) {
 			throw new IllegalArgumentException();
@@ -621,6 +628,7 @@ public class InternalCompletionProposal extends CompletionProposal {
 	 *
 	 * @return the completion string
 	 */
+	@Override
 	public char[] getCompletion() {
 //{ObjectTeams: callouts:
 /* orig:
@@ -686,6 +694,7 @@ public class InternalCompletionProposal extends CompletionProposal {
 	 *
 	 * @param completion the completion string
 	 */
+	@Override
 	public void setCompletion(char[] completion) {
 		this.completion = completion;
 	}
@@ -711,6 +720,7 @@ public class InternalCompletionProposal extends CompletionProposal {
 	 *
 	 * @return replacement start position (inclusive)
 	 */
+	@Override
 	public int getReplaceStart() {
 		return this.replaceStart;
 	}
@@ -725,6 +735,7 @@ public class InternalCompletionProposal extends CompletionProposal {
 	 *
 	 * @return replacement end position (exclusive)
 	 */
+	@Override
 	public int getReplaceEnd() {
 		return this.replaceEnd;
 	}
@@ -747,6 +758,7 @@ public class InternalCompletionProposal extends CompletionProposal {
 	 * @param startIndex character index of replacement start position (inclusive)
 	 * @param endIndex character index of replacement end position (exclusive)
 	 */
+	@Override
 	public void setReplaceRange(int startIndex, int endIndex) {
 		if (startIndex < 0 || endIndex < startIndex) {
 			throw new IllegalArgumentException();
@@ -760,6 +772,7 @@ public class InternalCompletionProposal extends CompletionProposal {
 	 *
 	 * @return relevance rating of this proposal; ratings are positive; higher means better
 	 */
+	@Override
 	public int getRelevance() {
 		return this.relevance;
 	}
@@ -776,6 +789,7 @@ public class InternalCompletionProposal extends CompletionProposal {
 	 *
 	 * @param rating relevance rating of this proposal; ratings are positive; higher means better
 	 */
+	@Override
 	public void setRelevance(int rating) {
 		if (rating <= 0) {
 			throw new IllegalArgumentException();
@@ -827,6 +841,7 @@ public class InternalCompletionProposal extends CompletionProposal {
 	 * on the kind of completion), or <code>null</code> if none
 	 * @see Signature
 	 */
+	@Override
 	public char[] getDeclarationSignature() {
 		return this.declarationSignature;
 	}
@@ -853,6 +868,7 @@ public class InternalCompletionProposal extends CompletionProposal {
 	 * @see org.eclipse.jdt.core.dom.ASTParser#createASTs(ICompilationUnit[], String[], org.eclipse.jdt.core.dom.ASTRequestor, IProgressMonitor)
      * @since 3.1
 	 */
+	@Override
 	public char[] getDeclarationKey() {
 		return this.declarationKey;
 	}
@@ -871,6 +887,7 @@ public class InternalCompletionProposal extends CompletionProposal {
 	 * @param signature the type or package or module(1.9) signature, or
 	 * <code>null</code> if none
 	 */
+	@Override
 	public void setDeclarationSignature(char[] signature) {
 		this.declarationSignature = signature;
 	}
@@ -890,6 +907,7 @@ public class InternalCompletionProposal extends CompletionProposal {
 	 * <code>null</code> if none
      * @since 3.1
 	 */
+	@Override
 	public void setDeclarationKey(char[] key) {
 		this.declarationKey = key;
 	}
@@ -924,6 +942,7 @@ public class InternalCompletionProposal extends CompletionProposal {
 	 * @return the keyword, field, method, local variable, or member
 	 * name, or <code>null</code> if none
 	 */
+	@Override
 	public char[] getName() {
 		return this.name;
 	}
@@ -944,6 +963,7 @@ public class InternalCompletionProposal extends CompletionProposal {
 	 * @param name the keyword, field, method, local variable,
 	 * or member name, or <code>null</code> if none
 	 */
+	@Override
 	public void setName(char[] name) {
 		this.name = name;
 	}
@@ -1031,6 +1051,7 @@ public class InternalCompletionProposal extends CompletionProposal {
 	 * @return the signature, or <code>null</code> if none
 	 * @see Signature
 	 */
+	@Override
 	public char[] getSignature() {
 		return this.signature;
 	}
@@ -1057,6 +1078,7 @@ public class InternalCompletionProposal extends CompletionProposal {
 	 * @see org.eclipse.jdt.core.dom.ASTParser#createASTs(ICompilationUnit[], String[], org.eclipse.jdt.core.dom.ASTRequestor, IProgressMonitor)
      * @since 3.1
 	 */
+	@Override
 	public char[] getKey() {
 		return this.key;
 	}
@@ -1279,6 +1301,7 @@ public class InternalCompletionProposal extends CompletionProposal {
 	 *
 	 * @param signature the signature, or <code>null</code> if none
 	 */
+	@Override
 	public void setSignature(char[] signature) {
 		this.signature = signature;
 	}
@@ -1297,6 +1320,7 @@ public class InternalCompletionProposal extends CompletionProposal {
 	 * @param key the key, or <code>null</code> if none
      * @since 3.1
 	 */
+	@Override
 	public void setKey(char[] key) {
 		this.key = key;
 	}
@@ -1363,6 +1387,7 @@ public class InternalCompletionProposal extends CompletionProposal {
 	 * <code>Flags.AccDefault</code> if none
 	 * @see Flags
 	 */
+	@Override
 	public int getFlags() {
 		return this.flags;
 	}
@@ -1380,6 +1405,7 @@ public class InternalCompletionProposal extends CompletionProposal {
 	 * @param flags the modifier flags, or
 	 * <code>Flags.AccDefault</code> if none
 	 */
+	@Override
 	public void setFlags(int flags) {
 		this.flags = flags;
 	}
@@ -1438,6 +1464,7 @@ public class InternalCompletionProposal extends CompletionProposal {
 	 *
 	 * @since 3.3
 	 */
+	@Override
 	public CompletionProposal[] getRequiredProposals() {
 		return this.requiredProposals;
 	}
@@ -1457,6 +1484,7 @@ public class InternalCompletionProposal extends CompletionProposal {
 	 * <code>null</code> if none
      * @since 3.3
 	 */
+	@Override
 	public void setRequiredProposals(CompletionProposal[] proposals) {
 		this.requiredProposals = proposals;
 	}
@@ -1478,6 +1506,7 @@ public class InternalCompletionProposal extends CompletionProposal {
 	 * @return the parameter names, or <code>null</code> if none
 	 * or not available or not relevant
 	 */
+	@Override
 	public char[][] findParameterNames(IProgressMonitor monitor) {
 		if (!this.parameterNamesComputed) {
 			this.parameterNamesComputed = true;
@@ -1588,6 +1617,7 @@ public class InternalCompletionProposal extends CompletionProposal {
 	 *
 	 * @param parameterNames the parameter names, or <code>null</code> if none
 	 */
+	@Override
 	public void setParameterNames(char[][] parameterNames) {
 		this.parameterNames = parameterNames;
 		this.parameterNamesComputed = true;
@@ -1613,6 +1643,7 @@ public class InternalCompletionProposal extends CompletionProposal {
 	 *
 	 * @since 3.1
 	 */
+	@Override
 	public int getAccessibility() {
 		return this.accessibility;
 	}
@@ -1635,6 +1666,7 @@ public class InternalCompletionProposal extends CompletionProposal {
 	 * @return <code>true</code> if the proposal is a constructor.
 	 * @since 3.1
 	 */
+	@Override
 	public boolean isConstructor() {
 		return this.isConstructor;
 	}
@@ -1666,6 +1698,7 @@ public class InternalCompletionProposal extends CompletionProposal {
 	 *
 	 * @since 3.4
 	 */
+	@Override
 	public char[] getReceiverSignature() {
 		return this.receiverSignature;
 	}
@@ -1690,6 +1723,7 @@ public class InternalCompletionProposal extends CompletionProposal {
 	 *
 	 * @since 3.4
 	 */
+	@Override
 	public int getReceiverStart() {
 		return this.receiverStart;
 	}
@@ -1713,6 +1747,7 @@ public class InternalCompletionProposal extends CompletionProposal {
 	 *
 	 * @since 3.4
 	 */
+	@Override
 	public int getReceiverEnd() {
 		return this.receiverEnd;
 	}
@@ -1733,6 +1768,7 @@ public class InternalCompletionProposal extends CompletionProposal {
 	 *
 	 * @since 3.4
 	 */
+	@Override
 	public void setReceiverSignature(char[] signature) {
 		this.receiverSignature = signature;
 	}
@@ -1751,11 +1787,13 @@ public class InternalCompletionProposal extends CompletionProposal {
 	 *
 	 * @since 3.4
 	 */
+	@Override
 	public void setReceiverRange(int startIndex, int endIndex) {
 		this.receiverStart = startIndex;
 		this.receiverEnd = endIndex;
 	}
 
+	@Override
 	public String toString() {
 		StringBuffer buffer = new StringBuffer();
 		buffer.append('[');
@@ -1878,6 +1916,7 @@ public class InternalCompletionProposal extends CompletionProposal {
 		return buffer.toString();
 	}
 
+	@Override
 	public boolean canUseDiamond(CompletionContext coreContext) {
 		if (this.getKind() != CONSTRUCTOR_INVOCATION) return false;
 		if (coreContext instanceof InternalCompletionContext) {

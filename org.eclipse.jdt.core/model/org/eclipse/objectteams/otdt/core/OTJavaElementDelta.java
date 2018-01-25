@@ -51,56 +51,69 @@ public class OTJavaElementDelta implements IJavaElementDelta
 		this.otElemMapping = otElemMapping;
 	}
 
+	@Override
 	public IJavaElement getElement() {
 		return maybeTransformElement(this.delegate.getElement());
 	}
 	
+	@Override
 	public IJavaElementDelta[] getAddedChildren() {
 		return wrapChildren(this.delegate.getAddedChildren());
 	}
 	
+	@Override
 	public IJavaElementDelta[] getAffectedChildren() {
 		return wrapChildren(this.delegate.getAffectedChildren());
 	}
 	
+	@Override
 	public IJavaElementDelta[] getChangedChildren() {
 		return wrapChildren(this.delegate.getChangedChildren());
 	}
 	
 	
+	@Override
 	public IJavaElement getMovedFromElement() {
 		return maybeTransformElement(this.delegate.getMovedFromElement());
 	}
 	
+	@Override
 	public IJavaElement getMovedToElement() {
 		return maybeTransformElement(this.delegate.getMovedToElement());
 	}
 	
+	@Override
 	public IJavaElementDelta[] getRemovedChildren() {
 		return wrapChildren(this.delegate.getRemovedChildren());
 	}
 	
+	@Override
 	public IJavaElementDelta[] getAnnotationDeltas() {
 		return wrapChildren(this.delegate.getAnnotationDeltas());
 	}
 
 //pure delegates	
+	@Override
 	public IResourceDelta[] getResourceDeltas() {
 		return this.delegate.getResourceDeltas();
 	}
 	
+	@Override
 	public String toString() {
 		return this.delegate.toString();
 	}
 	
+	@Override
 	public int getFlags() {
 		return this.delegate.getFlags();
 	}
 	
+	@Override
 	public int getKind() {
 		return this.delegate.getKind();
 	}
 
+	@Override
 	public CompilationUnit getCompilationUnitAST() {
 		return this.delegate.getCompilationUnitAST();
 	}

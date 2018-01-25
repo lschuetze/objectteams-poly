@@ -108,6 +108,7 @@ public class OTClassScope extends ClassScope {
 	 * + Recover the enclosingType (role files call this with a null enclosingType)
 	 * + Add the new type to the members of the enclosing type
 	 */
+	@Override
 	protected SourceTypeBinding buildType(SourceTypeBinding enclosingType, PackageBinding packageBinding, AccessRestriction accessRestriction)
 	{
 		if (!this.referenceContext.isRole())
@@ -170,6 +171,7 @@ public class OTClassScope extends ClassScope {
 		return foundInParent;
 	}
 
+	@Override
 	public TypeBinding getType(char[][] compoundName, int typeNameLength) {
 		TypeBinding foundHere = super.getType(compoundName, typeNameLength);     // valid or Problem
 		if (this.roleUnitImportScope != null) {
@@ -184,9 +186,11 @@ public class OTClassScope extends ClassScope {
 		return maybeWrap(foundHere);
 	}
 
+	@Override
 	public TypeBinding getType(char[] token) {
 		return getType(token, null);
 	}
+	@Override
 	public TypeBinding getType(char[] token, PackageBinding packageBinding) {
 		TypeBinding foundHere = packageBinding != null ?
 				super.getType(token, packageBinding) :
@@ -268,6 +272,7 @@ public class OTClassScope extends ClassScope {
 		return foundHere;
 	}
 
+	@Override
 	public CompilationUnitDeclaration referenceCompilationUnit() {
 		if (this.referenceContext.isRole() && !this.referenceContext.isPurelyCopied) {
 			CompilationUnitDeclaration result = this.referenceContext.compilationUnit;

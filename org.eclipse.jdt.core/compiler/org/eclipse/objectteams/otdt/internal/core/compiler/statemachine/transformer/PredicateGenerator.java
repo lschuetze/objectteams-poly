@@ -424,6 +424,7 @@ public class PredicateGenerator extends SwitchOnBaseTypeGenerator
 	/**
 	 * Add a base predicate check for the selected role:
 	 */
+	@Override
 	protected Statement createCaseStatement(RoleModel role, AstGenerator gen)
 	{
 		TypeDeclaration roleType = role.getClassPartAst();
@@ -446,6 +447,7 @@ public class PredicateGenerator extends SwitchOnBaseTypeGenerator
 	/**
 	 * If a team level base predicate exists, this is the default for unmatched base objects.
 	 */
+	@Override
 	protected Statement createDefaultStatement(ReferenceBinding staticRoleType, int problemId, AstGenerator gen)
 	{
 		if (staticRoleType.isAbstract()) {

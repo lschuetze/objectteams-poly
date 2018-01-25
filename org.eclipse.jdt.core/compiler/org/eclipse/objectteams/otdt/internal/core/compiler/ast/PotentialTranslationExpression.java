@@ -68,11 +68,13 @@ public abstract class PotentialTranslationExpression extends Expression  impleme
     }
 
 	/** Simply forward. */
+	@Override
 	public void traverse(ASTVisitor visitor, BlockScope scope) {
 	    this.expression.traverse(visitor, scope);
 	}
 
 	/** Simply forward. */
+	@Override
 	public FlowInfo analyseCode(BlockScope  currentScope, FlowContext flowContext, FlowInfo    flowInfo) {
 	    return this.expression.analyseCode(currentScope, flowContext, flowInfo);
 	}
@@ -84,6 +86,7 @@ public abstract class PotentialTranslationExpression extends Expression  impleme
 	}
 
 	/** Simply forward. */
+	@Override
 	public void generateCode(BlockScope currentScope, CodeStream codeStream, boolean valueRequired) {
 	    this.expression.generateCode(currentScope, codeStream, valueRequired);
 	}
@@ -145,6 +148,7 @@ public abstract class PotentialTranslationExpression extends Expression  impleme
 	    return thisType.isCompatibleWith(thatType);
 	}
 
+	@Override
 	public StringBuffer printExpression(int indent, StringBuffer output) {
 	    if (this.checked && this.rawExpression != null)
 	    {

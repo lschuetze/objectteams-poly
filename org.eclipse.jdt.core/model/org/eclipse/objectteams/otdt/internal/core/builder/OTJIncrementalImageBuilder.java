@@ -39,6 +39,7 @@ public class OTJIncrementalImageBuilder extends IncrementalImageBuilder {
 	 * For each affected source file, guess whether it could be a role
 	 * file and include its team in the compilation process.
 	 */
+	@Override
 	protected void addAffectedSourceFiles() {
 		super.addAffectedSourceFiles();
 		if (this.sourceFiles != null) {

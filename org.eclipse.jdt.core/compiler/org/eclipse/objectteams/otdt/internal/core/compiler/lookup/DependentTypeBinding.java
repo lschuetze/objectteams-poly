@@ -124,7 +124,8 @@ public class DependentTypeBinding extends ParameterizedTypeBinding {
 				final LocalVariableBinding anchor = (LocalVariableBinding) anchors[0];
 				if ((anchor.tagBits & TagBits.IsArgument) != 0) {		// ... but known to be anchored to an argument
 					this._argumentPosition = anchor.resolvedPosition;
-					this._declaringMethod = new IMethodProvider() { public MethodBinding getMethod() {
+					this._declaringMethod = new IMethodProvider() { @Override
+					public MethodBinding getMethod() {
 						return ((MethodScope)anchor.declaringScope).referenceMethodBinding();
 					}};
 				}
@@ -242,6 +243,7 @@ public class DependentTypeBinding extends ParameterizedTypeBinding {
 		return anchor.getRoleTypeBinding(this, dimensions); // TODO(SH): use a shared type instead of this?
 	}
 
+	@Override
 	public void collectSubstitutes(Scope scope, TypeBinding actualType, InferenceContext inferenceContext, int constraint) {
 		this.transferTypeArguments(this.type).collectSubstitutes(scope, actualType, inferenceContext, constraint);
 	}
@@ -419,7 +421,8 @@ public class DependentTypeBinding extends ParameterizedTypeBinding {
 	}
 	// delegating methods <<<===
 
-    @SuppressWarnings("nls")
+    @Override
+	@SuppressWarnings("nls")
 	public String toString() {
     	String anchorStr = "";
     	ITeamAnchor[] bestNamePath = this._teamAnchor.getBestNamePath(false);

@@ -179,7 +179,8 @@ public class RoleTypeBinding extends DependentTypeBinding
         		// if scope is a callout, role method may not yet be resolved, defer:
         		this._declaringMethod = new IMethodProvider() {
         			private MethodBinding binding;
-        			public MethodBinding getMethod() {
+        			@Override
+					public MethodBinding getMethod() {
         				if (this.binding == null)
         					this.binding = methodScope.referenceMethodBinding();
         				return this.binding;
@@ -237,19 +238,22 @@ public class RoleTypeBinding extends DependentTypeBinding
         registerAnchor();
     }
     
-    public TypeBinding clone(TypeBinding outerType) {
+    @Override
+	public TypeBinding clone(TypeBinding outerType) {
     	RoleTypeBinding clone = new RoleTypeBinding(this.type, typeArguments(), this._teamAnchor, (ReferenceBinding) outerType, this.environment);
     	return clone;
     }
 
     // hook of maybeInstantiate
-    TypeBinding forAnchor(ITeamAnchor anchor, int dimensions) {
+    @Override
+	TypeBinding forAnchor(ITeamAnchor anchor, int dimensions) {
     	return anchor.getRoleTypeBinding(this._staticallyKnownRoleType, dimensions);
     }
 
     // cache field for use only by the following method
     HashMap<ReferenceBinding, DependentTypeBinding> weakenedTypes;
-    public ReferenceBinding weakenFrom(ReferenceBinding other) {
+    @Override
+	public ReferenceBinding weakenFrom(ReferenceBinding other) {
     	if (other instanceof RoleTypeBinding) {
     		if (this.weakenedTypes == null) 
     			this.weakenedTypes = new HashMap<ReferenceBinding, DependentTypeBinding>();
@@ -408,13 +412,15 @@ public class RoleTypeBinding extends DependentTypeBinding
 	}
 
     // ============= Begin Instance Methods ===============
+	@Override
 	public ITeamAnchor[] getAnchorBestName() {
 		return this._teamAnchor.getBestNamePath();
 	}
     /**
      * For field lookup we give the real role class "__OT__Role".
      */
-    public ReferenceBinding getRealClass()
+    @Override
+	public ReferenceBinding getRealClass()
     {
     	if (this._staticallyKnownRoleClass != null)
     		return this._staticallyKnownRoleClass;
@@ -425,13 +431,15 @@ public class RoleTypeBinding extends DependentTypeBinding
     /**
      * For type comparison we give the real role type "Role".
      */
-    public ReferenceBinding getRealType()
+    @Override
+	public ReferenceBinding getRealType()
     {
         return this._staticallyKnownRoleType;
     }
 
 	/** Answer the type that will be used in the class file: */
-    public TypeBinding erasure() {
+    @Override
+	public TypeBinding erasure() {
     	return this.type.erasure();
     }
     
@@ -470,22 +478,26 @@ public class RoleTypeBinding extends DependentTypeBinding
     // ============== forward most queries to the _staticallyKnownRoleType. ====================
 
 	// --------- Find fields in the class:
-    public FieldBinding[] availableFields() {
+    @Override
+	public FieldBinding[] availableFields() {
     	if (this._staticallyKnownRoleClass == null)
     		return Binding.NO_FIELDS;
         return this._staticallyKnownRoleClass.availableFields();
     }
-    public int fieldCount() {
+    @Override
+	public int fieldCount() {
     	if (this._staticallyKnownRoleClass == null)
     		return 0;
         return this._staticallyKnownRoleClass.fieldCount();
     }
-    public FieldBinding[] fields() {
+    @Override
+	public FieldBinding[] fields() {
     	if (this._staticallyKnownRoleClass == null)
     		return Binding.NO_FIELDS;
         return this._staticallyKnownRoleClass.fields();
     }
-    public FieldBinding getField(char[] fieldName, boolean needResolve) {
+    @Override
+	public FieldBinding getField(char[] fieldName, boolean needResolve) {
         // normal case first:
         FieldBinding result = null;
         if (this._staticallyKnownRoleClass != null) {
@@ -505,11 +517,13 @@ public class RoleTypeBinding extends DependentTypeBinding
     	return super.getMethods(selector);
     }
     
-    public MethodBinding[] availableMethods() {
+    @Override
+	public MethodBinding[] availableMethods() {
         return this._staticallyKnownRoleType.availableMethods();
     }
     /* well, constructors are actually in the class: */
-    public MethodBinding getExactConstructor(TypeBinding[] argumentTypes) {
+    @Override
+	public MethodBinding getExactConstructor(TypeBinding[] argumentTypes) {
     	if (this._staticallyKnownRoleClass == null) {
     		// try self-healing:
     		this._staticallyKnownRoleClass = this.roleModel.getClassPartBinding();
@@ -519,11 +533,13 @@ public class RoleTypeBinding extends DependentTypeBinding
     	}
         return this._staticallyKnownRoleClass.getExactConstructor(argumentTypes);
     }
-    public MethodBinding getExactMethod(char[] selector, TypeBinding[] argumentTypes, CompilationUnitScope refScope) {
+    @Override
+	public MethodBinding getExactMethod(char[] selector, TypeBinding[] argumentTypes, CompilationUnitScope refScope) {
         return this._staticallyKnownRoleType.getExactMethod(selector, argumentTypes, refScope);
     }
 
 	/* Implement OT-specific addition to ReferenceBinding. */
+	@Override
 	public void addMethod(MethodBinding method) {
 		if (this._staticallyKnownRoleClass != null) {
 			this._staticallyKnownRoleClass.addMethod(method);
@@ -534,7 +550,8 @@ public class RoleTypeBinding extends DependentTypeBinding
 	}
 
 
-    public boolean canBeInstantiated() {
+    @Override
+	public boolean canBeInstantiated() {
         return this._staticallyKnownRoleType.canBeInstantiated();
     }
 
@@ -569,7 +586,8 @@ public class RoleTypeBinding extends DependentTypeBinding
 //    public final boolean isStatic() {
 //    public final boolean isStrictfp() {
 
-    public TeamModel getTeamModel() {
+    @Override
+	public TeamModel getTeamModel() {
     	if (this._teamModel != null)
     		return this._teamModel;
     	if (this._staticallyKnownRoleClass != null)
@@ -580,31 +598,39 @@ public class RoleTypeBinding extends DependentTypeBinding
     	return this._teamModel;
 
     }
-    public final boolean isClass() {
+    @Override
+	public final boolean isClass() {
         return this._staticallyKnownRoleClass != null;
     }
-    public boolean isRole() {
+    @Override
+	public boolean isRole() {
     	return true;
     }
-    public boolean isSourceRole() {
+    @Override
+	public boolean isSourceRole() {
     	return true;
     }
-    public boolean isDirectRole() {
+    @Override
+	public boolean isDirectRole() {
     	return true;
     }
 
-    public void computeId() {
+    @Override
+	public void computeId() {
         this._staticallyKnownRoleType.computeId();
     }
 
-    public char[] getFileName() {
+    @Override
+	public char[] getFileName() {
         return this._staticallyKnownRoleType.getFileName();
     }
 
-    public ReferenceBinding[] memberTypes() {
+    @Override
+	public ReferenceBinding[] memberTypes() {
         return this._staticallyKnownRoleType.memberTypes();
     }
-    public ReferenceBinding getMemberType(char[] typeName) {
+    @Override
+	public ReferenceBinding getMemberType(char[] typeName) {
         ReferenceBinding result = this._staticallyKnownRoleType.getMemberType(typeName);
         if (result != null)
         	return result;
@@ -620,11 +646,13 @@ public class RoleTypeBinding extends DependentTypeBinding
     	return NO_SYNTH_ARGUMENTS;
 	}
 
-    public PackageBinding getPackage() {
+    @Override
+	public PackageBinding getPackage() {
         return this._staticallyKnownRoleType.getPackage();
     }
 
-    public ReferenceBinding superclass() {
+    @Override
+	public ReferenceBinding superclass() {
     	// 0. a stored superclass:
         if (this._superClass != null)
             return this._superClass;
@@ -670,10 +698,12 @@ public class RoleTypeBinding extends DependentTypeBinding
     	return this.type.isHierarchyConnected();
     }
 
-    public ReferenceBinding[] syntheticEnclosingInstanceTypes() {
+    @Override
+	public ReferenceBinding[] syntheticEnclosingInstanceTypes() {
         return this._staticallyKnownRoleType.syntheticEnclosingInstanceTypes();
     }
-    public SyntheticArgumentBinding[] syntheticOuterLocalVariables() {
+    @Override
+	public SyntheticArgumentBinding[] syntheticOuterLocalVariables() {
         return this._staticallyKnownRoleType.syntheticOuterLocalVariables();
     }
 
@@ -682,7 +712,8 @@ public class RoleTypeBinding extends DependentTypeBinding
      * we need to take our role CLASS and the other side's INTERFACE,
      * extracting this from a RoleTypeBinding if needed.
      */
-    public boolean implementsInterface(ReferenceBinding anInterface, boolean searchHierarchy) {
+    @Override
+	public boolean implementsInterface(ReferenceBinding anInterface, boolean searchHierarchy) {
         if (anInterface instanceof RoleTypeBinding)
         {
             // TODO (SH): check Team equivalence
@@ -690,14 +721,16 @@ public class RoleTypeBinding extends DependentTypeBinding
         }
         return this._staticallyKnownRoleType.implementsInterface(anInterface, searchHierarchy);
     }
-    public boolean implementsMethod(MethodBinding method) {
+    @Override
+	public boolean implementsMethod(MethodBinding method) {
         return ((AbstractOTReferenceBinding)this._staticallyKnownRoleType).implementsMethod(method);
     }
 
     /*
      * For superclass test, take the role CLASSES on both sides.
      */
-    public boolean isSuperclassOf(ReferenceBinding otherType) {
+    @Override
+	public boolean isSuperclassOf(ReferenceBinding otherType) {
         if (otherType instanceof RoleTypeBinding)
         {
             // TODO (SH): check Team equivalence?
@@ -779,7 +812,8 @@ public class RoleTypeBinding extends DependentTypeBinding
      * The former is relevant for type-checking. the latter serves mainly for code generation
      * and for determining overriding.
      */
-    public boolean isCompatibleWith(TypeBinding right, /*@Nullable*/ Scope captureScope) {
+    @Override
+	public boolean isCompatibleWith(TypeBinding right, /*@Nullable*/ Scope captureScope) {
         if (TypeBinding.equalsEquals(right, this))
             return true;
         if (!(right instanceof ReferenceBinding))
@@ -863,7 +897,8 @@ public class RoleTypeBinding extends DependentTypeBinding
     		Config.setLoweringPossible(true);
     }
 
-    public boolean isCompatibleViaLowering(ReferenceBinding otherType) {
+    @Override
+	public boolean isCompatibleViaLowering(ReferenceBinding otherType) {
 		// <B base R>?
 		if (otherType instanceof TypeVariableBinding) {
 			ReferenceBinding otherRole = ((TypeVariableBinding)otherType).roletype;
@@ -912,11 +947,13 @@ public class RoleTypeBinding extends DependentTypeBinding
 
     // =========== VARIOUS NAMES: =============
 
-    public char[] qualifiedSourceName() {
+    @Override
+	public char[] qualifiedSourceName() {
         return this._staticallyKnownRoleType.qualifiedSourceName();
     }
 
-    public char[] optimalName() /*var.RoleType or java.lang.Object */
+    @Override
+	public char[] optimalName() /*var.RoleType or java.lang.Object */
     {
     	if (this._teamAnchor instanceof TThisBinding)
     		return super.readableName();
@@ -953,12 +990,14 @@ public class RoleTypeBinding extends DependentTypeBinding
 
     // don't override: need original version in classfile:
     // public char[] signature() /* Ljava/lang/Object; */ {
-    public char[] sourceName() {
+    @Override
+	public char[] sourceName() {
         return this._staticallyKnownRoleType.sourceName();
     }
 
     // Note: this uses the original name (respects signature weakening):
-    public char[] constantPoolName() /* java/lang/Object */ {
+    @Override
+	public char[] constantPoolName() /* java/lang/Object */ {
         return this._declaredRoleType.constantPoolName();
     }
     @Override
@@ -967,7 +1006,8 @@ public class RoleTypeBinding extends DependentTypeBinding
     		return this._staticallyKnownRoleClass.attributeName();
     	return super.attributeName();
     }
-    public String toString() {
+    @Override
+	public String toString() {
     	StringBuilder sb = new StringBuilder();
     	sb.append(annotatedDebugName());
     	sb.append('<').append('@');

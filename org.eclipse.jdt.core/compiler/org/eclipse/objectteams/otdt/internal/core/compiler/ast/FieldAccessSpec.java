@@ -263,6 +263,7 @@ public class FieldAccessSpec extends MethodSpec {
     	}
 	}
 
+	@Override
 	public TypeBinding resolvedType() {
     	if (this.fieldType != null)
     		return this.fieldType;  // may contain more precise team anchor than the field.
@@ -280,7 +281,8 @@ public class FieldAccessSpec extends MethodSpec {
      * Chop of first argument, which actually is the receiver
      * (only staticness of the method makes it look differently.)
      */
-    public TypeBinding[] resolvedParameters() {
+    @Override
+	public TypeBinding[] resolvedParameters() {
     	if (this.resolvedMethod == null)
     		return this.parameters;
     	TypeBinding[] methodParams = super.resolvedParameters();
@@ -291,12 +293,14 @@ public class FieldAccessSpec extends MethodSpec {
     	return result;
     }
 
+	@Override
 	public ReferenceBinding getDeclaringClass() {
 		if (this.resolvedField != null)
 			return this.resolvedField.declaringClass;
 		return null;
 	}
 
+	@Override
 	public void checkResolutionSuccess(ReferenceBinding type, CallinCalloutScope scope)
 	{
 		if (this.resolvedField== null)
@@ -315,6 +319,7 @@ public class FieldAccessSpec extends MethodSpec {
 		}
 	}
 
+	@Override
 	public boolean checkBaseReturnType(CallinCalloutScope scope, int bindDir)
 	{
 		TypeBinding accessorReturnType;
@@ -377,25 +382,31 @@ public class FieldAccessSpec extends MethodSpec {
 	public boolean isSetter() {
 		return this.calloutModifier == TerminalTokens.TokenNameset;
 	}
+	@Override
 	public boolean isPrivate() {
 		return this.resolvedField != null && this.resolvedField.isPrivate();
 	}
+	@Override
 	public boolean isStatic() {
 		return this.resolvedField != null && this.resolvedField.isStatic();
 	}
+	@Override
 	public boolean isValid() {
 		return this.resolvedField.isValidBinding();
 	}
+	@Override
 	public int problemId() {
 		return this.resolvedField.problemId();
 	}
 
+	@Override
 	public char[] readableName() {
 		return this.resolvedField.readableName();
 	}
 	/* (non-Javadoc)
 	 * @see org.eclipse.jdt.internal.compiler.ast.ASTNode#print(int, java.lang.StringBuffer)
 	 */
+	@Override
 	public StringBuffer print(int indent, StringBuffer output) {
 		printIndent(indent,output);
 		output.append(this.calloutModifier == TerminalTokens.TokenNameget? "get " : "set "); //$NON-NLS-1$ //$NON-NLS-2$
@@ -406,16 +417,19 @@ public class FieldAccessSpec extends MethodSpec {
 	}
 
 	// implement InvocationSite (override method from MethodSpec):
+	@Override
 	public boolean isTypeAccess() {
 		return this.resolvedField != null && this.resolvedField.isStatic();
 	}
 
+	@Override
 	public boolean canBeeSeenBy(ReferenceBinding receiverType, Scope scope) {
 		if (this.resolvedField == null)
 			return false;
 		return this.resolvedField.canBeSeenBy(receiverType, this, scope);
 	}
 
+	@Override
 	public int createAccessAttribute(RoleModel roleModel) {		
 		return roleModel.addAccessedBaseField(this.resolvedField, this.calloutModifier, null);
 	}

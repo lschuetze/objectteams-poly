@@ -1165,12 +1165,15 @@ public class InferenceContext18 {
 						zs[j] = freshCapture(variables[j]);
 					final BoundSet kurrentBoundSet = tmpBoundSet;
 					Substitution theta = new Substitution() {
+						@Override
 						public LookupEnvironment environment() { 
 							return InferenceContext18.this.environment;
 						}
+						@Override
 						public boolean isRawSubstitution() {
 							return false;
 						}
+						@Override
 						public TypeBinding substitute(TypeVariableBinding typeVariable) {
 							for (int j = 0; j < numVars; j++)
 								if (TypeBinding.equalsEquals(variables[j], typeVariable))
@@ -1188,6 +1191,7 @@ public class InferenceContext18 {
 							return typeVariable;
 						}
 //{ObjectTeams:
+						@Override
 						public ITeamAnchor substituteAnchor(ITeamAnchor anchor, int rank) {
 							return null;
 						}
@@ -1279,6 +1283,7 @@ public class InferenceContext18 {
 
 	static void sortTypes(TypeBinding[] types) {
 		Arrays.sort(types, new Comparator<TypeBinding>() {
+			@Override
 			public int compare(TypeBinding o1, TypeBinding o2) {
 				int i1 = o1.id, i2 = o2.id; 
 				return (i1<i2 ? -1 : (i1==i2 ? 0 : 1));
@@ -1613,12 +1618,15 @@ public class InferenceContext18 {
 
 	private Substitution getResultSubstitution(final BoundSet result) {
 		return new Substitution() {
+			@Override
 			public LookupEnvironment environment() { 
 				return InferenceContext18.this.environment;
 			}
+			@Override
 			public boolean isRawSubstitution() {
 				return false;
 			}
+			@Override
 			public TypeBinding substitute(TypeVariableBinding typeVariable) {
 				if (typeVariable instanceof InferenceVariable) {
 					TypeBinding instantiation = result.getInstantiation((InferenceVariable) typeVariable, InferenceContext18.this.environment);
@@ -1628,6 +1636,7 @@ public class InferenceContext18 {
 				return typeVariable;
 			}
 //{ObjectTeams:
+			@Override
 			public ITeamAnchor substituteAnchor(ITeamAnchor anchor, int rank) {
 				return null;
 			}
@@ -1675,6 +1684,7 @@ public class InferenceContext18 {
 	}
 
 	// debugging:
+	@Override
 	public String toString() {
 		StringBuffer buf = new StringBuffer("Inference Context"); //$NON-NLS-1$
 		switch (this.stepCompleted) {

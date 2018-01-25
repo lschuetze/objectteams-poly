@@ -95,7 +95,8 @@ public class PhantomType implements IPhantomType
      * @see org.eclipse.jdt.core.IType#codeComplete(char[], int, int, char[][], char[][], int[], boolean, org.eclipse.jdt.core.ICompletionRequestor)
 	 * @deprecated Use {@link #codeComplete(char[],int,int,char[][],char[][],int[],boolean,CompletionRequestor)} instead.
      */
-    public void codeComplete(char[] snippet, int insertion, int position,
+    @Override
+	public void codeComplete(char[] snippet, int insertion, int position,
             char[][] localVariableTypeNames, char[][] localVariableNames,
             int[] localVariableModifiers, boolean isStatic,
             org.eclipse.jdt.core.ICompletionRequestor requestor) throws JavaModelException
@@ -107,7 +108,8 @@ public class PhantomType implements IPhantomType
      * @see org.eclipse.jdt.core.IType#codeComplete(char[], int, int, char[][], char[][], int[], boolean, org.eclipse.jdt.core.ICompletionRequestor, org.eclipse.jdt.core.WorkingCopyOwner)
 	 * @deprecated Use {@link #codeComplete(char[],int,int,char[][],char[][],int[],boolean,CompletionRequestor,WorkingCopyOwner)} instead.
      */
-    public void codeComplete(char[] snippet, int insertion, int position,
+    @Override
+	public void codeComplete(char[] snippet, int insertion, int position,
             char[][] localVariableTypeNames, char[][] localVariableNames,
             int[] localVariableModifiers, boolean isStatic,
             org.eclipse.jdt.core.ICompletionRequestor requestor, WorkingCopyOwner owner)
@@ -116,6 +118,7 @@ public class PhantomType implements IPhantomType
         handleUnsupported();
     }
 
+	@Override
 	public void codeComplete(char[] snippet, int insertion, int position,
 			char[][] localVariableTypeNames, char[][] localVariableNames,
 			int[] localVariableModifiers, boolean isStatic,
@@ -125,6 +128,7 @@ public class PhantomType implements IPhantomType
 		handleUnsupported();
 	}
 
+	@Override
 	public void codeComplete(char[] snippet, int insertion, int position,
 			char[][] localVariableTypeNames, char[][] localVariableNames,
 			int[] localVariableModifiers, boolean isStatic,
@@ -134,10 +138,12 @@ public class PhantomType implements IPhantomType
 		handleUnsupported();
 	}
 	
+	@Override
 	public void codeComplete(char[] snippet, int insertion, int position, char[][] localVariableTypeNames, char[][] localVariableNames, int[] localVariableModifiers, boolean isStatic, CompletionRequestor requestor) throws JavaModelException {
         handleUnsupported();
 	}
 
+	@Override
 	public void codeComplete(char[] snippet, int insertion, int position, char[][] localVariableTypeNames, char[][] localVariableNames, int[] localVariableModifiers, boolean isStatic, CompletionRequestor requestor, WorkingCopyOwner owner) throws JavaModelException {
         handleUnsupported();
 	}
@@ -146,7 +152,8 @@ public class PhantomType implements IPhantomType
     /* (non-Javadoc)
      * @see org.eclipse.jdt.core.IType#createField(java.lang.String, org.eclipse.jdt.core.IJavaElement, boolean, org.eclipse.core.runtime.IProgressMonitor)
      */
-    public IField createField(String contents, IJavaElement sibling,
+    @Override
+	public IField createField(String contents, IJavaElement sibling,
             boolean force, IProgressMonitor monitor) throws JavaModelException
     {
         return this._realType.createField(contents, sibling, force, monitor);
@@ -155,7 +162,8 @@ public class PhantomType implements IPhantomType
     /* (non-Javadoc)
      * @see org.eclipse.jdt.core.IType#createInitializer(java.lang.String, org.eclipse.jdt.core.IJavaElement, org.eclipse.core.runtime.IProgressMonitor)
      */
-    public IInitializer createInitializer(String contents,
+    @Override
+	public IInitializer createInitializer(String contents,
             IJavaElement sibling, IProgressMonitor monitor)
             throws JavaModelException
     {
@@ -165,7 +173,8 @@ public class PhantomType implements IPhantomType
     /* (non-Javadoc)
      * @see org.eclipse.jdt.core.IType#createMethod(java.lang.String, org.eclipse.jdt.core.IJavaElement, boolean, org.eclipse.core.runtime.IProgressMonitor)
      */
-    public IMethod createMethod(String contents, IJavaElement sibling,
+    @Override
+	public IMethod createMethod(String contents, IJavaElement sibling,
             boolean force, IProgressMonitor monitor) throws JavaModelException
     {
         return this._realType.createMethod(contents, sibling, force, monitor);
@@ -174,7 +183,8 @@ public class PhantomType implements IPhantomType
     /* (non-Javadoc)
      * @see org.eclipse.jdt.core.IType#createType(java.lang.String, org.eclipse.jdt.core.IJavaElement, boolean, org.eclipse.core.runtime.IProgressMonitor)
      */
-    public IType createType(String contents, IJavaElement sibling,
+    @Override
+	public IType createType(String contents, IJavaElement sibling,
             boolean force, IProgressMonitor monitor) throws JavaModelException
     {
         return this._realType.createType(contents, sibling, force, monitor);
@@ -183,7 +193,8 @@ public class PhantomType implements IPhantomType
     /* (non-Javadoc)
      * @see org.eclipse.jdt.core.IType#findMethods(org.eclipse.jdt.core.IMethod)
      */
-    public IMethod[] findMethods(IMethod method)
+    @Override
+	public IMethod[] findMethods(IMethod method)
     {
     	if (this._allRealTypes == null)
     		return this._realType.findMethods(method);
@@ -195,7 +206,8 @@ public class PhantomType implements IPhantomType
     	return null;
     }
 
-    public String getElementName()
+    @Override
+	public String getElementName()
     {
         return this._realType.getElementName();
     }
@@ -203,7 +215,8 @@ public class PhantomType implements IPhantomType
     /* (non-Javadoc)
      * @see org.eclipse.jdt.core.IType#getField(java.lang.String)
      */
-    public IField getField(String name)
+    @Override
+	public IField getField(String name)
     {
     	if (this._allRealTypes == null)
     		return this._realType.getField(name);
@@ -218,7 +231,8 @@ public class PhantomType implements IPhantomType
     /* (non-Javadoc)
      * @see org.eclipse.jdt.core.IType#getFields()
      */
-    public IField[] getFields() throws JavaModelException
+    @Override
+	public IField[] getFields() throws JavaModelException
     {
         if (this._allRealTypes == null)
         	return this._realType.getFields();
@@ -231,12 +245,14 @@ public class PhantomType implements IPhantomType
     	return uniqueFields.toArray(new IField[uniqueFields.size()]);
     }
 
-    public String getFullyQualifiedName()
+    @Override
+	public String getFullyQualifiedName()
     {
         return getFullyQualifiedName('$');
     }
 
-    public String getFullyQualifiedName(char enclosingTypeSeparator)
+    @Override
+	public String getFullyQualifiedName(char enclosingTypeSeparator)
     {
         return this._enclosingTeam.getFullyQualifiedName(enclosingTypeSeparator)
                + enclosingTypeSeparator
@@ -246,7 +262,8 @@ public class PhantomType implements IPhantomType
     /* (non-Javadoc)
      * @see org.eclipse.jdt.core.IType#getInitializer(int)
      */
-    public IInitializer getInitializer(int occurrenceCount)
+    @Override
+	public IInitializer getInitializer(int occurrenceCount)
     {
         return this._realType.getInitializer(occurrenceCount);
     }
@@ -254,7 +271,8 @@ public class PhantomType implements IPhantomType
     /* (non-Javadoc)
      * @see org.eclipse.jdt.core.IType#getInitializers()
      */
-    public IInitializer[] getInitializers() throws JavaModelException
+    @Override
+	public IInitializer[] getInitializers() throws JavaModelException
     {
         return this._realType.getInitializers();
     }
@@ -262,7 +280,8 @@ public class PhantomType implements IPhantomType
     /* (non-Javadoc)
      * @see org.eclipse.jdt.core.IType#getMethod(java.lang.String, java.lang.String[])
      */
-    public IMethod getMethod(String name, String[] parameterTypeSignatures)
+    @Override
+	public IMethod getMethod(String name, String[] parameterTypeSignatures)
     {
     	if (this._allRealTypes == null)
     		return this._realType.getMethod(name, parameterTypeSignatures);
@@ -277,7 +296,8 @@ public class PhantomType implements IPhantomType
     /* (non-Javadoc)
      * @see org.eclipse.jdt.core.IType#getMethods()
      */
-    public IMethod[] getMethods() throws JavaModelException
+    @Override
+	public IMethod[] getMethods() throws JavaModelException
     {
         if (this._allRealTypes == null)
         	return this._realType.getMethods();
@@ -305,7 +325,8 @@ public class PhantomType implements IPhantomType
     /* (non-Javadoc)
      * @see org.eclipse.jdt.core.IType#getPackageFragment()
      */
-    public IPackageFragment getPackageFragment()
+    @Override
+	public IPackageFragment getPackageFragment()
     {
         return this._enclosingTeam.getPackageFragment();
     }
@@ -314,7 +335,8 @@ public class PhantomType implements IPhantomType
      * If the type is a role file decide for the role files CU.
      * @see IMember#getTypeRoot()
      */
-    public ITypeRoot getTypeRoot() {
+    @Override
+	public ITypeRoot getTypeRoot() {
     	return this._realType.getTypeRoot();
     }
 
@@ -322,7 +344,8 @@ public class PhantomType implements IPhantomType
     /* (non-Javadoc)
      * @see org.eclipse.jdt.core.IType#getSuperclassName()
      */
-    public String getSuperclassName() throws JavaModelException
+    @Override
+	public String getSuperclassName() throws JavaModelException
     {
         return this._realType.getSuperclassName();
     }
@@ -330,7 +353,8 @@ public class PhantomType implements IPhantomType
     /* (non-Javadoc)
      * @see org.eclipse.jdt.core.IType#getSuperclassTypeSignature()
      */
-    public String getSuperclassTypeSignature() throws JavaModelException
+    @Override
+	public String getSuperclassTypeSignature() throws JavaModelException
     {
         return this._realType.getSuperclassTypeSignature();
     }
@@ -338,7 +362,8 @@ public class PhantomType implements IPhantomType
     /* (non-Javadoc)
      * @see org.eclipse.jdt.core.IType#getSuperInterfaceTypeSignatures()
      */
-    public String[] getSuperInterfaceTypeSignatures() throws JavaModelException
+    @Override
+	public String[] getSuperInterfaceTypeSignatures() throws JavaModelException
     {
         return this._realType.getSuperInterfaceTypeSignatures();
     }
@@ -346,7 +371,8 @@ public class PhantomType implements IPhantomType
     /* (non-Javadoc)
      * @see org.eclipse.jdt.core.IType#getSuperInterfaceNames()
      */
-    public String[] getSuperInterfaceNames() throws JavaModelException
+    @Override
+	public String[] getSuperInterfaceNames() throws JavaModelException
     {
         return this._realType.getSuperInterfaceNames();
     }
@@ -354,7 +380,8 @@ public class PhantomType implements IPhantomType
     /* (non-Javadoc)
      * @see org.eclipse.jdt.core.IType#getTypeParameterSignatures()
      */
-    public String[] getTypeParameterSignatures() throws JavaModelException
+    @Override
+	public String[] getTypeParameterSignatures() throws JavaModelException
     {
         return this._realType.getTypeParameterSignatures();
     }
@@ -362,7 +389,8 @@ public class PhantomType implements IPhantomType
     /* (non-Javadoc)
      * @see org.eclipse.jdt.core.IType#getType(java.lang.String)
      */
-    public IType getType(String name)
+    @Override
+	public IType getType(String name)
     {
    		IType inner = this._realType.getType(name);
    		return new PhantomType(this, inner);
@@ -371,7 +399,8 @@ public class PhantomType implements IPhantomType
     /* (non-Javadoc)
      * @see org.eclipse.jdt.core.IType#getTypeQualifiedName()
      */
-    public String getTypeQualifiedName()
+    @Override
+	public String getTypeQualifiedName()
     {
         return getTypeQualifiedName('$');
     }
@@ -379,7 +408,8 @@ public class PhantomType implements IPhantomType
     /* (non-Javadoc)
      * @see org.eclipse.jdt.core.IType#getTypeQualifiedName(char)
      */
-    public String getTypeQualifiedName(char enclosingTypeSeparator)
+    @Override
+	public String getTypeQualifiedName(char enclosingTypeSeparator)
     {
         if (isBinary())
         {
@@ -395,7 +425,8 @@ public class PhantomType implements IPhantomType
     /* (non-Javadoc)
      * @see org.eclipse.jdt.core.IType#getTypes()
      */
-    public IType[] getTypes() throws JavaModelException
+    @Override
+	public IType[] getTypes() throws JavaModelException
     {
         if (this._allRealTypes == null)
         	return this._realType.getTypes();
@@ -411,7 +442,8 @@ public class PhantomType implements IPhantomType
     /* (non-Javadoc)
      * @see org.eclipse.jdt.core.IType#isAnonymous()
      */
-    public boolean isAnonymous() throws JavaModelException
+    @Override
+	public boolean isAnonymous() throws JavaModelException
     {
         return false; // implicit inheritance is by name, thus phantom roles cannot be anoymous
     }
@@ -419,7 +451,8 @@ public class PhantomType implements IPhantomType
     /* (non-Javadoc)
      * @see org.eclipse.jdt.core.IType#isClass()
      */
-    public boolean isClass() throws JavaModelException
+    @Override
+	public boolean isClass() throws JavaModelException
     {
         return this._realType.isClass();
     }
@@ -427,7 +460,8 @@ public class PhantomType implements IPhantomType
     /* (non-Javadoc)
      * @see org.eclipse.jdt.core.IType#isEnum()
      */
-    public boolean isEnum() throws JavaModelException
+    @Override
+	public boolean isEnum() throws JavaModelException
     {
         return this._realType.isEnum();
     }
@@ -435,7 +469,8 @@ public class PhantomType implements IPhantomType
     /* (non-Javadoc)
      * @see org.eclipse.jdt.core.IType#isInterface()
      */
-    public boolean isInterface() throws JavaModelException
+    @Override
+	public boolean isInterface() throws JavaModelException
     {
         return this._realType.isInterface();
     }
@@ -443,7 +478,8 @@ public class PhantomType implements IPhantomType
     /* (non-Javadoc)
      * @see org.eclipse.jdt.core.IType#isAnnotation()
      */
-    public boolean isAnnotation() throws JavaModelException
+    @Override
+	public boolean isAnnotation() throws JavaModelException
     {
         return this._realType.isAnnotation();
     }
@@ -451,7 +487,8 @@ public class PhantomType implements IPhantomType
     /* (non-Javadoc)
      * @see org.eclipse.jdt.core.IType#isLocal()
      */
-    public boolean isLocal() throws JavaModelException
+    @Override
+	public boolean isLocal() throws JavaModelException
     {
         return this._realType.isLocal();
     }
@@ -459,7 +496,8 @@ public class PhantomType implements IPhantomType
     /* (non-Javadoc)
      * @see org.eclipse.jdt.core.IType#isMember()
      */
-    public boolean isMember() throws JavaModelException
+    @Override
+	public boolean isMember() throws JavaModelException
     {
         return true;
     }
@@ -472,7 +510,8 @@ public class PhantomType implements IPhantomType
     /* (non-Javadoc)
      * @see org.eclipse.jdt.core.IType#loadTypeHierachy(java.io.InputStream, org.eclipse.core.runtime.IProgressMonitor)
      */
-    public ITypeHierarchy loadTypeHierachy(InputStream input,
+    @Override
+	public ITypeHierarchy loadTypeHierachy(InputStream input,
             IProgressMonitor monitor) throws JavaModelException
     {
         return this._realType.loadTypeHierachy(input, monitor);
@@ -481,7 +520,8 @@ public class PhantomType implements IPhantomType
     /* (non-Javadoc)
      * @see org.eclipse.jdt.core.IType#newSupertypeHierarchy(org.eclipse.core.runtime.IProgressMonitor)
      */
-    public ITypeHierarchy newSupertypeHierarchy(IProgressMonitor monitor)
+    @Override
+	public ITypeHierarchy newSupertypeHierarchy(IProgressMonitor monitor)
             throws JavaModelException
     {
         return this._realType.newSupertypeHierarchy(monitor);
@@ -490,7 +530,8 @@ public class PhantomType implements IPhantomType
     /* (non-Javadoc)
      * @see org.eclipse.jdt.core.IType#newSupertypeHierarchy(org.eclipse.jdt.core.ICompilationUnit[], org.eclipse.core.runtime.IProgressMonitor)
      */
-    public ITypeHierarchy newSupertypeHierarchy(
+    @Override
+	public ITypeHierarchy newSupertypeHierarchy(
             ICompilationUnit[] workingCopies, IProgressMonitor monitor)
             throws JavaModelException
     {
@@ -501,7 +542,8 @@ public class PhantomType implements IPhantomType
      * @see org.eclipse.jdt.core.IType#newSupertypeHierarchy(org.eclipse.jdt.core.IWorkingCopy[], org.eclipse.core.runtime.IProgressMonitor)
      * @deprecated Use {@link #newSupertypeHierarchy(ICompilationUnit[], IProgressMonitor)} instead
      */
-    public ITypeHierarchy newSupertypeHierarchy(org.eclipse.jdt.core.IWorkingCopy[] workingCopies,
+    @Override
+	public ITypeHierarchy newSupertypeHierarchy(org.eclipse.jdt.core.IWorkingCopy[] workingCopies,
             IProgressMonitor monitor) throws JavaModelException
     {
         return this._realType.newSupertypeHierarchy(workingCopies, monitor);
@@ -510,7 +552,8 @@ public class PhantomType implements IPhantomType
     /* (non-Javadoc)
      * @see org.eclipse.jdt.core.IType#newSupertypeHierarchy(org.eclipse.jdt.core.WorkingCopyOwner, org.eclipse.core.runtime.IProgressMonitor)
      */
-    public ITypeHierarchy newSupertypeHierarchy(WorkingCopyOwner owner,
+    @Override
+	public ITypeHierarchy newSupertypeHierarchy(WorkingCopyOwner owner,
             IProgressMonitor monitor) throws JavaModelException
     {
         return this._realType.newSupertypeHierarchy(owner, monitor);
@@ -519,7 +562,8 @@ public class PhantomType implements IPhantomType
     /* (non-Javadoc)
      * @see org.eclipse.jdt.core.IType#newTypeHierarchy(org.eclipse.jdt.core.IJavaProject, org.eclipse.core.runtime.IProgressMonitor)
      */
-    public ITypeHierarchy newTypeHierarchy(IJavaProject project,
+    @Override
+	public ITypeHierarchy newTypeHierarchy(IJavaProject project,
             IProgressMonitor monitor) throws JavaModelException
     {
         return this._realType.newTypeHierarchy(project, monitor);
@@ -528,7 +572,8 @@ public class PhantomType implements IPhantomType
     /* (non-Javadoc)
      * @see org.eclipse.jdt.core.IType#newTypeHierarchy(org.eclipse.jdt.core.IJavaProject, org.eclipse.jdt.core.WorkingCopyOwner, org.eclipse.core.runtime.IProgressMonitor)
      */
-    public ITypeHierarchy newTypeHierarchy(IJavaProject project,
+    @Override
+	public ITypeHierarchy newTypeHierarchy(IJavaProject project,
             WorkingCopyOwner owner, IProgressMonitor monitor)
             throws JavaModelException
     {
@@ -538,7 +583,8 @@ public class PhantomType implements IPhantomType
     /* (non-Javadoc)
      * @see org.eclipse.jdt.core.IType#newTypeHierarchy(org.eclipse.core.runtime.IProgressMonitor)
      */
-    public ITypeHierarchy newTypeHierarchy(IProgressMonitor monitor)
+    @Override
+	public ITypeHierarchy newTypeHierarchy(IProgressMonitor monitor)
             throws JavaModelException
     {
         return this._realType.newTypeHierarchy(monitor);
@@ -547,7 +593,8 @@ public class PhantomType implements IPhantomType
     /* (non-Javadoc)
      * @see org.eclipse.jdt.core.IType#newTypeHierarchy(org.eclipse.jdt.core.ICompilationUnit[], org.eclipse.core.runtime.IProgressMonitor)
      */
-    public ITypeHierarchy newTypeHierarchy(ICompilationUnit[] workingCopies,
+    @Override
+	public ITypeHierarchy newTypeHierarchy(ICompilationUnit[] workingCopies,
             IProgressMonitor monitor) throws JavaModelException
     {
         return this._realType.newTypeHierarchy(workingCopies, monitor);
@@ -557,7 +604,8 @@ public class PhantomType implements IPhantomType
      * @see org.eclipse.jdt.core.IType#newTypeHierarchy(org.eclipse.jdt.core.IWorkingCopy[], org.eclipse.core.runtime.IProgressMonitor)
 	 * @deprecated Use {@link #newTypeHierarchy(ICompilationUnit[], IProgressMonitor)} instead
      */
-    public ITypeHierarchy newTypeHierarchy(org.eclipse.jdt.core.IWorkingCopy[] workingCopies,
+    @Override
+	public ITypeHierarchy newTypeHierarchy(org.eclipse.jdt.core.IWorkingCopy[] workingCopies,
             IProgressMonitor monitor) throws JavaModelException
     {
         return this._realType.newTypeHierarchy(workingCopies, monitor);
@@ -566,7 +614,8 @@ public class PhantomType implements IPhantomType
     /* (non-Javadoc)
      * @see org.eclipse.jdt.core.IType#newTypeHierarchy(org.eclipse.jdt.core.WorkingCopyOwner, org.eclipse.core.runtime.IProgressMonitor)
      */
-    public ITypeHierarchy newTypeHierarchy(WorkingCopyOwner owner,
+    @Override
+	public ITypeHierarchy newTypeHierarchy(WorkingCopyOwner owner,
             IProgressMonitor monitor) throws JavaModelException
     {
         return this._realType.newTypeHierarchy(owner, monitor);
@@ -575,7 +624,8 @@ public class PhantomType implements IPhantomType
     /* (non-Javadoc)
      * @see org.eclipse.jdt.core.IType#resolveType(java.lang.String)
      */
-    public String[][] resolveType(String typeName) throws JavaModelException
+    @Override
+	public String[][] resolveType(String typeName) throws JavaModelException
     {
         return this._realType.resolveType(typeName);
     }
@@ -583,7 +633,8 @@ public class PhantomType implements IPhantomType
     /* (non-Javadoc)
      * @see org.eclipse.jdt.core.IType#resolveType(java.lang.String, org.eclipse.jdt.core.WorkingCopyOwner)
      */
-    public String[][] resolveType(String typeName, WorkingCopyOwner owner)
+    @Override
+	public String[][] resolveType(String typeName, WorkingCopyOwner owner)
             throws JavaModelException
     {
         return this._realType.resolveType(typeName, owner);
@@ -592,7 +643,8 @@ public class PhantomType implements IPhantomType
     /* (non-Javadoc)
      * @see org.eclipse.jdt.core.IMember#getClassFile()
      */
-    public IClassFile getClassFile()
+    @Override
+	public IClassFile getClassFile()
     {
         return this._enclosingTeam.getClassFile();
     }
@@ -600,7 +652,8 @@ public class PhantomType implements IPhantomType
     /* (non-Javadoc)
      * @see org.eclipse.jdt.core.IMember#getCompilationUnit()
      */
-    public ICompilationUnit getCompilationUnit()
+    @Override
+	public ICompilationUnit getCompilationUnit()
     {
         return this._enclosingTeam.getCompilationUnit();
     }
@@ -608,7 +661,8 @@ public class PhantomType implements IPhantomType
     /* (non-Javadoc)
      * @see org.eclipse.jdt.core.IMember#getDeclaringType()
      */
-    public IType getDeclaringType()
+    @Override
+	public IType getDeclaringType()
     {
     	return this._enclosingTeam;
     }
@@ -616,7 +670,8 @@ public class PhantomType implements IPhantomType
     /* (non-Javadoc)
      * @see org.eclipse.jdt.core.IMember#getFlags()
      */
-    public int getFlags() throws JavaModelException
+    @Override
+	public int getFlags() throws JavaModelException
     {        
         return this._realType.getFlags();
     }
@@ -624,7 +679,8 @@ public class PhantomType implements IPhantomType
     /* (non-Javadoc)
      * @see org.eclipse.jdt.core.IMember#getNameRange()
      */
-    public ISourceRange getNameRange() throws JavaModelException
+    @Override
+	public ISourceRange getNameRange() throws JavaModelException
     {
         return this._realType.getNameRange();
     }
@@ -632,7 +688,8 @@ public class PhantomType implements IPhantomType
     /* (non-Javadoc)
      * @see org.eclipse.jdt.core.IMember#getType(java.lang.String, int)
      */
-    public IType getType(String name, int occurrenceCount)
+    @Override
+	public IType getType(String name, int occurrenceCount)
     {
         return this._realType.getType(name, occurrenceCount);
     }
@@ -640,7 +697,8 @@ public class PhantomType implements IPhantomType
     /* (non-Javadoc)
      * @see org.eclipse.jdt.core.IMember#isBinary()
      */
-    public boolean isBinary()
+    @Override
+	public boolean isBinary()
     {
         return this._enclosingTeam.isBinary();
     }
@@ -648,7 +706,8 @@ public class PhantomType implements IPhantomType
     /* (non-Javadoc)
      * @see org.eclipse.jdt.core.ISourceReference#exists()
      */
-    public boolean exists()
+    @Override
+	public boolean exists()
     {
         return this._enclosingTeam.exists() && this._realType.exists();
     }
@@ -656,7 +715,8 @@ public class PhantomType implements IPhantomType
     /* (non-Javadoc)
      * @see org.eclipse.jdt.core.IJavaElement#getAncestor(int)
      */
-    public IJavaElement getAncestor(int ancestorType)
+    @Override
+	public IJavaElement getAncestor(int ancestorType)
     {
         return this._enclosingTeam.getAncestor(ancestorType);
     }
@@ -664,7 +724,8 @@ public class PhantomType implements IPhantomType
     /* (non-Javadoc)
      * @see org.eclipse.jdt.core.IJavaElement#getCorrespondingResource()
      */
-    public IResource getCorrespondingResource() throws JavaModelException
+    @Override
+	public IResource getCorrespondingResource() throws JavaModelException
     {
         return this._enclosingTeam.getCorrespondingResource();
     }
@@ -672,7 +733,8 @@ public class PhantomType implements IPhantomType
     /* (non-Javadoc)
      * @see org.eclipse.jdt.core.IJavaElement#getElementType()
      */
-    public int getElementType()
+    @Override
+	public int getElementType()
     {
         return TYPE;
     }
@@ -680,7 +742,8 @@ public class PhantomType implements IPhantomType
     /* (non-Javadoc)
      * @see org.eclipse.jdt.core.IJavaElement#getHandleIdentifier()
      */
-    public String getHandleIdentifier()
+    @Override
+	public String getHandleIdentifier()
     {
         return this._realType.getHandleIdentifier();
     }
@@ -688,7 +751,8 @@ public class PhantomType implements IPhantomType
     /* (non-Javadoc)
      * @see org.eclipse.jdt.core.IJavaElement#getJavaModel()
      */
-    public IJavaModel getJavaModel()
+    @Override
+	public IJavaModel getJavaModel()
     {
         return this._realType.getJavaModel();
     }
@@ -696,7 +760,8 @@ public class PhantomType implements IPhantomType
     /* (non-Javadoc)
      * @see org.eclipse.jdt.core.IJavaElement#getJavaProject()
      */
-    public IJavaProject getJavaProject()
+    @Override
+	public IJavaProject getJavaProject()
     {
         return this._enclosingTeam.getJavaProject();
     }
@@ -704,7 +769,8 @@ public class PhantomType implements IPhantomType
     /* (non-Javadoc)
      * @see org.eclipse.jdt.core.IJavaElement#getOpenable()
      */
-    public IOpenable getOpenable()
+    @Override
+	public IOpenable getOpenable()
     {
         return this._enclosingTeam.getOpenable();
     }
@@ -712,7 +778,8 @@ public class PhantomType implements IPhantomType
     /* (non-Javadoc)
      * @see org.eclipse.jdt.core.IJavaElement#getParent()
      */
-    public IJavaElement getParent()
+    @Override
+	public IJavaElement getParent()
     {
         return this._enclosingTeam;
     }
@@ -720,7 +787,8 @@ public class PhantomType implements IPhantomType
     /* (non-Javadoc)
      * @see org.eclipse.jdt.core.IJavaElement#getPath()
      */
-    public IPath getPath()
+    @Override
+	public IPath getPath()
     {
         String lastSegment = this._realType.getPath().lastSegment();
         if (lastSegment != null)
@@ -736,7 +804,8 @@ public class PhantomType implements IPhantomType
     /* (non-Javadoc)
      * @see org.eclipse.jdt.core.IJavaElement#getPrimaryElement()
      */
-    public IJavaElement getPrimaryElement()
+    @Override
+	public IJavaElement getPrimaryElement()
     {
         return this._enclosingTeam.getPrimaryElement();
     }
@@ -744,7 +813,8 @@ public class PhantomType implements IPhantomType
     /* (non-Javadoc)
      * @see org.eclipse.jdt.core.IJavaElement#getResource()
      */
-    public IResource getResource()
+    @Override
+	public IResource getResource()
     {
         return this._enclosingTeam.getResource();
     }
@@ -752,7 +822,8 @@ public class PhantomType implements IPhantomType
     /* (non-Javadoc)
      * @see org.eclipse.jdt.core.IJavaElement#getSchedulingRule()
      */
-    public ISchedulingRule getSchedulingRule()
+    @Override
+	public ISchedulingRule getSchedulingRule()
     {
         return this._enclosingTeam.getSchedulingRule();
     }
@@ -760,7 +831,8 @@ public class PhantomType implements IPhantomType
     /* (non-Javadoc)
      * @see org.eclipse.jdt.core.IJavaElement#getUnderlyingResource()
      */
-    public IResource getUnderlyingResource() throws JavaModelException
+    @Override
+	public IResource getUnderlyingResource() throws JavaModelException
     {
         return this._enclosingTeam.getUnderlyingResource();
     }
@@ -768,7 +840,8 @@ public class PhantomType implements IPhantomType
     /* (non-Javadoc)
      * @see org.eclipse.jdt.core.IJavaElement#isReadOnly()
      */
-    public boolean isReadOnly()
+    @Override
+	public boolean isReadOnly()
     {
         return true;
     }
@@ -776,7 +849,8 @@ public class PhantomType implements IPhantomType
     /* (non-Javadoc)
      * @see org.eclipse.jdt.core.IJavaElement#isStructureKnown()
      */
-    public boolean isStructureKnown() throws JavaModelException
+    @Override
+	public boolean isStructureKnown() throws JavaModelException
     {
         return this._enclosingTeam.isStructureKnown() && this._realType.isStructureKnown();
     }
@@ -784,7 +858,8 @@ public class PhantomType implements IPhantomType
     /* (non-Javadoc)
      * @see org.eclipse.jdt.core.ISourceReference#getSource()
      */
-    public String getSource() throws JavaModelException
+    @Override
+	public String getSource() throws JavaModelException
     {
         return this._realType.getSource();
     }
@@ -792,15 +867,18 @@ public class PhantomType implements IPhantomType
     /* (non-Javadoc)
      * @see org.eclipse.jdt.core.ISourceReference#getSourceRange()
      */
-    public ISourceRange getSourceRange() throws JavaModelException
+    @Override
+	public ISourceRange getSourceRange() throws JavaModelException
     {
         return this._realType.getSourceRange();
     }
 
+	@Override
 	public IAnnotation getAnnotation(String name) {
 		return this._realType.getAnnotation(name);
 	}
 
+	@Override
 	public IAnnotation[] getAnnotations() throws JavaModelException {
         if (this._allRealTypes == null)
         	return this._realType.getAnnotations();
@@ -816,7 +894,8 @@ public class PhantomType implements IPhantomType
     /* (non-Javadoc)
      * @see org.eclipse.jdt.core.ISourceManipulation#copy(org.eclipse.jdt.core.IJavaElement, org.eclipse.jdt.core.IJavaElement, java.lang.String, boolean, org.eclipse.core.runtime.IProgressMonitor)
      */
-    public void copy(IJavaElement container, IJavaElement sibling,
+    @Override
+	public void copy(IJavaElement container, IJavaElement sibling,
             String rename, boolean replace, IProgressMonitor monitor)
             throws JavaModelException
     {
@@ -826,7 +905,8 @@ public class PhantomType implements IPhantomType
     /* (non-Javadoc)
      * @see org.eclipse.jdt.core.ISourceManipulation#delete(boolean, org.eclipse.core.runtime.IProgressMonitor)
      */
-    public void delete(boolean force, IProgressMonitor monitor)
+    @Override
+	public void delete(boolean force, IProgressMonitor monitor)
             throws JavaModelException
     {
         this._realType.delete(force, monitor);
@@ -835,7 +915,8 @@ public class PhantomType implements IPhantomType
     /* (non-Javadoc)
      * @see org.eclipse.jdt.core.ISourceManipulation#move(org.eclipse.jdt.core.IJavaElement, org.eclipse.jdt.core.IJavaElement, java.lang.String, boolean, org.eclipse.core.runtime.IProgressMonitor)
      */
-    public void move(IJavaElement container, IJavaElement sibling,
+    @Override
+	public void move(IJavaElement container, IJavaElement sibling,
             String rename, boolean replace, IProgressMonitor monitor)
             throws JavaModelException
     {
@@ -845,7 +926,8 @@ public class PhantomType implements IPhantomType
     /* (non-Javadoc)
      * @see org.eclipse.jdt.core.ISourceManipulation#rename(java.lang.String, boolean, org.eclipse.core.runtime.IProgressMonitor)
      */
-    public void rename(String name, boolean replace, IProgressMonitor monitor)
+    @Override
+	public void rename(String name, boolean replace, IProgressMonitor monitor)
             throws JavaModelException
     {
         this._realType.rename(name, replace, monitor);
@@ -855,7 +937,8 @@ public class PhantomType implements IPhantomType
     /* (non-Javadoc)
      * @see org.eclipse.jdt.core.IParent#getChildren()
      */
-    public IJavaElement[] getChildren() throws JavaModelException
+    @Override
+	public IJavaElement[] getChildren() throws JavaModelException
     {
         return this._realType.getChildren();
     }
@@ -863,7 +946,8 @@ public class PhantomType implements IPhantomType
     /* (non-Javadoc)
      * @see org.eclipse.jdt.core.IParent#hasChildren()
      */
-    public boolean hasChildren() throws JavaModelException
+    @Override
+	public boolean hasChildren() throws JavaModelException
     {
         return this._realType.hasChildren();
     }
@@ -871,12 +955,14 @@ public class PhantomType implements IPhantomType
     /* (non-Javadoc)
      * @see org.eclipse.core.runtime.IAdaptable#getAdapter(java.lang.Class)
      */
+	@Override
 	public <T> T getAdapter(Class<T> adapter)
     {
         return this._realType.getAdapter(adapter);
     }
  
-    @SuppressWarnings("nls")
+    @Override
+	@SuppressWarnings("nls")
 	public String toString()
     {
         return "(" + getFullyQualifiedName() + "|" + this._realType.getFullyQualifiedName('.') + ")";
@@ -895,11 +981,13 @@ public class PhantomType implements IPhantomType
 			this._realType = type;
     }
     
+	@Override
 	public int hashCode()
     {		
 		return getFullyQualifiedName().hashCode();
 	}
     
+	@Override
 	public boolean equals(Object arg0)
     {
         if (arg0 == null || !(arg0 instanceof PhantomType) )
@@ -918,50 +1006,60 @@ public class PhantomType implements IPhantomType
                                                 + getFullyQualifiedName());
     }
 	
+	@Override
 	public ITypeParameter[] getTypeParameters() throws JavaModelException {
 		return this._realType.getTypeParameters();
 	}
 	
+	@Override
 	public boolean isResolved() {
 		return this._realType.isResolved() && this._enclosingTeam.isResolved();
 	}
  
 	// TODO: check whether we need to support any of those methods
 
+	@Override
 	public IJavaElement[] getChildrenForCategory(String category) throws JavaModelException {
         handleUnsupported();
 		return null;
 	}
 
+	@Override
 	public String getFullyQualifiedParameterizedName() throws JavaModelException {
         handleUnsupported();
 		return null;
 	}
 
+	@Override
 	public String getKey() {
         handleUnsupported();
 		return null;
 	}
 
+	@Override
 	public ITypeParameter getTypeParameter(String name) {
         handleUnsupported();
 		return null;
 	}
 
+	@Override
 	public String[] getCategories() throws JavaModelException {
         handleUnsupported();
 		return null;
 	}
 
+	@Override
 	public ISourceRange getJavadocRange() throws JavaModelException {
         return this._realType.getJavadocRange();
 	}
 
+	@Override
 	public int getOccurrenceCount() {
         handleUnsupported();
 		return 0;
 	}
 
+	@Override
 	public String getAttachedJavadoc(IProgressMonitor monitor) throws JavaModelException {
         return this._realType.getAttachedJavadoc(monitor);
 	}

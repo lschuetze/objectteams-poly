@@ -45,7 +45,8 @@ public class FieldData implements IFieldAccessSpec
     /* (non-Javadoc)
 	 * @see org.eclipse.objectteams.otdt.core.util.IFieldAccessSpec#getSelector()
 	 */
-    public String getSelector()
+    @Override
+	public String getSelector()
     {
         return this.selector;
     }
@@ -53,7 +54,8 @@ public class FieldData implements IFieldAccessSpec
     /* (non-Javadoc)
 	 * @see org.eclipse.objectteams.otdt.core.util.IFieldAccessSpec#getFieldType()
 	 */
-    public String getFieldType()
+    @Override
+	public String getFieldType()
     {
         return this.fieldType;
     }
@@ -61,12 +63,14 @@ public class FieldData implements IFieldAccessSpec
     /* (non-Javadoc)
 	 * @see org.eclipse.objectteams.otdt.core.util.IFieldAccessSpec#isSetter()
 	 */
-    public boolean isSetter() 
+    @Override
+	public boolean isSetter() 
     {
     	return this.isSetter;
     }
     
-    public String toString()
+    @Override
+	public String toString()
     {
         return Signature.getSimpleName(Signature.toString(this.fieldType)) + " " + this.selector; //$NON-NLS-1$
     }

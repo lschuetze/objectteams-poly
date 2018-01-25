@@ -289,6 +289,7 @@ public class OTDynCallinBindingsAttribute extends ListValueAttribute {
 			theAttr.addMappings(baseClassName, callinDecl);
 	}
 
+	@Override
 	String toString(int i) {
 		Mapping mapping = this.mappings.get(i);
 		StringBuffer buf = new StringBuffer();
@@ -318,6 +319,7 @@ public class OTDynCallinBindingsAttribute extends ListValueAttribute {
 		return buf.toString();
 	}
 	
+	@Override
 	void writeElementValue(int i) {
 		Mapping mapping = this.mappings.get(i);
 		writeName(mapping.roleClassName);
@@ -378,6 +380,7 @@ public class OTDynCallinBindingsAttribute extends ListValueAttribute {
 	/* (non-Javadoc)
 	 * @see org.eclipse.objectteams.otdt.internal.core.compiler.bytecode.AbstractAttribute#evaluate(org.eclipse.jdt.internal.compiler.lookup.Binding, org.eclipse.jdt.internal.compiler.lookup.LookupEnvironment)
 	 */
+	@Override
 	public void evaluate(Binding binding, LookupEnvironment environment, char[][][] missingTypeNames) {
 		checkBindingMismatch(binding, ExtraCompilerModifiers.AccTeam);
 		if (((ReferenceBinding)binding).isTeam())
@@ -385,7 +388,8 @@ public class OTDynCallinBindingsAttribute extends ListValueAttribute {
 	}
 	
 	// Evaluate CallinMethodMappingAttribute late, because we need our methods to be in place.
-    public void evaluateLateAttribute(ReferenceBinding teamBinding, int state)
+    @Override
+	public void evaluateLateAttribute(ReferenceBinding teamBinding, int state)
     {
     	if (state != ITranslationStates.STATE_FAULT_IN_TYPES)
     		return;

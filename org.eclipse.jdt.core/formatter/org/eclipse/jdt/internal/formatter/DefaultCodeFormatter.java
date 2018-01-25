@@ -152,6 +152,7 @@ public class DefaultCodeFormatter extends CodeFormatter {
 		return options.get(DefaultCodeFormatterConstants.FORMATTER_COMMENT_FORMAT);
 	}
 
+	@Override
 	public String createIndentationString(final int indentationLevel) {
 		if (indentationLevel < 0) {
 			throw new IllegalArgumentException();
@@ -167,6 +168,7 @@ public class DefaultCodeFormatter extends CodeFormatter {
 	/**
 	 * @see org.eclipse.jdt.core.formatter.CodeFormatter#format(int, java.lang.String, int, int, int, java.lang.String)
 	 */
+	@Override
 	public TextEdit format(int kind, String source, int offset, int length, int indentationLevel, String lineSeparator) {
 		return format(kind, source, new IRegion[] { new Region(offset, length) }, indentationLevel, lineSeparator);
 	}
@@ -174,6 +176,7 @@ public class DefaultCodeFormatter extends CodeFormatter {
 	/**
 	 * {@inheritDoc}
 	 */
+	@Override
 	public TextEdit format(int kind, String source, IRegion[] regions, int indentationLevel, String lineSeparator) {
 		if (!regionsSatisfiesPreconditions(regions, source.length())) {
 			throw new IllegalArgumentException();

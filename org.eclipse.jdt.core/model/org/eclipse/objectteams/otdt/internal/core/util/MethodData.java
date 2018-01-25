@@ -113,6 +113,7 @@ public class MethodData implements IMethodSpec
 	/* (non-Javadoc)
 	 * @see org.eclipse.objectteams.otdt.core.util.IMethodSpec#hasSignature()
 	 */
+	@Override
 	public boolean hasSignature()
 	{
 		return this.argumentsTypes != EMPTY_STRING_ARRAY;
@@ -121,7 +122,8 @@ public class MethodData implements IMethodSpec
     /* (non-Javadoc)
 	 * @see org.eclipse.objectteams.otdt.core.util.IMethodSpec#getArgumentTypes()
 	 */
-    public String[] getArgumentTypes()
+    @Override
+	public String[] getArgumentTypes()
     {
         return this.argumentsTypes;
     }
@@ -129,7 +131,8 @@ public class MethodData implements IMethodSpec
     /* (non-Javadoc)
 	 * @see org.eclipse.objectteams.otdt.core.util.IMethodSpec#getArgumentNames()
 	 */
-    public String[] getArgumentNames()
+    @Override
+	public String[] getArgumentNames()
     {
     	return this.argumentsNames;
     }
@@ -137,7 +140,8 @@ public class MethodData implements IMethodSpec
     /* (non-Javadoc)
 	 * @see org.eclipse.objectteams.otdt.core.util.IMethodSpec#getSelector()
 	 */
-    public String getSelector()
+    @Override
+	public String getSelector()
     {
         return this.selector;
     }
@@ -145,7 +149,8 @@ public class MethodData implements IMethodSpec
     /* (non-Javadoc)
 	 * @see org.eclipse.objectteams.otdt.core.util.IMethodSpec#getReturnType()
 	 */
-    public String getReturnType()
+    @Override
+	public String getReturnType()
     {
     	return this.returnType;
     }
@@ -153,6 +158,7 @@ public class MethodData implements IMethodSpec
     /* (non-Javadoc)
 	 * @see org.eclipse.objectteams.otdt.core.util.IMethodSpec#getSignature()
 	 */
+	@Override
 	public String getSignature() {
 		return Signature.createMethodSignature(this.argumentsTypes, this.returnType);
 	}
@@ -160,18 +166,21 @@ public class MethodData implements IMethodSpec
     /* (non-Javadoc)
 	 * @see org.eclipse.objectteams.otdt.core.util.IMethodSpec#isDeclaration()
 	 */
-    public boolean isDeclaration() {
+    @Override
+	public boolean isDeclaration() {
     	return this.isDeclaration;
     }
     
     /* (non-Javadoc)
 	 * @see org.eclipse.objectteams.otdt.core.util.IMethodSpec#hasCovariantReturn()
 	 */
-    public boolean hasCovariantReturn() {
+    @Override
+	public boolean hasCovariantReturn() {
     	return this.covariantReturn;
     }
     
-    public ITypeParameter[] getTypeParameters() {
+    @Override
+	public ITypeParameter[] getTypeParameters() {
     	return this.typeParameters;
     }
     /* (non-Javadoc)
@@ -188,7 +197,8 @@ public class MethodData implements IMethodSpec
     	return typeParameterNames;
     }
 
-    public String toString()
+    @Override
+	public String toString()
     {
     	String signature = this.selector + "("; //$NON-NLS-1$
     	
@@ -208,6 +218,7 @@ public class MethodData implements IMethodSpec
 	/* (non-Javadoc)
 	 * @see org.eclipse.objectteams.otdt.core.util.IMethodSpec#getSourceStart()
 	 */
+	@Override
 	public int getSourceStart() {
 		return this.sourceStart;
 	}
@@ -215,6 +226,7 @@ public class MethodData implements IMethodSpec
 	/* (non-Javadoc)
 	 * @see org.eclipse.objectteams.otdt.core.util.IMethodSpec#getSourceEnd()
 	 */
+	@Override
 	public int getSourceEnd() {
 		return this.sourceEnd;
 	}

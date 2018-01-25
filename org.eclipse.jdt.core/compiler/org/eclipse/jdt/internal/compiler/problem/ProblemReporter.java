@@ -1760,6 +1760,7 @@ public void comparingIdenticalExpressions(Expression comparison){
  * when different from Ignore, severity can be coupled with ProblemSeverities.Optional
  * to indicate that this problem is configurable through options
  */
+@Override
 public int computeSeverity(int problemID){
 
 	switch (problemID) {
@@ -10367,6 +10368,7 @@ private final class CharArrayComparator implements Comparator<char[]> {
 	public CharArrayComparator() {
 		// explicit public ctor to avoid synthetic access
 	}
+	@Override
 	public int compare(char[] o1, char[] o2) {
 		for (int i=0; i<o1.length && i<o2.length; i++) {
 			if (o1[i] < o2[i]) return -1;
@@ -12101,7 +12103,8 @@ public void duplicateCalloutBinding(ReferenceContext context, MethodSpec methodS
 	);
 }
 public void addingInferredCalloutForInherited(TypeDeclaration type, MethodBinding abstractMethod, final MethodDeclaration calloutWrapper) {
-	setRechecker(new IProblemRechecker() { public boolean shouldBeReported(IrritantSet[] foundIrritants) {
+	setRechecker(new IProblemRechecker() { @Override
+	public boolean shouldBeReported(IrritantSet[] foundIrritants) {
 		return !calloutWrapper.isCopied; // inferred callout replaced by a copy-inherited method?
 	}});
 	String[] args = { new String(abstractMethod.shortReadableName()) };

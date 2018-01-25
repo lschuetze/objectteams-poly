@@ -77,6 +77,7 @@ public interface IOTType extends IOTJavaElement, IType
 	 * information about the type's modifiers e.g. IConstants.AccTeam
 	 * @see Flags
 	 */	
+	@Override
 	public int getFlags();
 
 	/**

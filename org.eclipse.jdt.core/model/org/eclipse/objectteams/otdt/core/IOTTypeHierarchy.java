@@ -68,7 +68,8 @@ public interface IOTTypeHierarchy extends ITypeHierarchy
      * @return the direct resolved subtypes of the given type limited to the
      * types in this type hierarchy's graph
      */
-    public IType[] getSubtypes(IType type);
+    @Override
+	public IType[] getSubtypes(IType type);
 
     /**
      * @see ITypeHierarchy
@@ -109,7 +110,9 @@ public interface IOTTypeHierarchy extends ITypeHierarchy
      */
     public IType getExplicitSuperclass(IType type);
 
-    public IType[] getExtendingInterfaces(IType type);
+    @Override
+	public IType[] getExtendingInterfaces(IType type);
 
-    public IType[] getImplementingClasses(IType type);
+    @Override
+	public IType[] getImplementingClasses(IType type);
 }

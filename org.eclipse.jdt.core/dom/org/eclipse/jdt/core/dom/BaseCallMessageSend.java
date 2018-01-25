@@ -116,15 +116,18 @@ public class BaseCallMessageSend extends Expression implements Invocation
 		super(ast);
 	}
 
+	@Override
 	public ChildListPropertyDescriptor getArgumentsProperty() {
 		return ARGUMENTS_PROPERTY;
 	}
 	
+	@Override
 	final List internalStructuralPropertiesForType(int apiLevel)
 	{
 		return propertyDescriptors(apiLevel);
 	}
 
+	@Override
 	final ASTNode internalGetSetChildProperty(ChildPropertyDescriptor property,
                                               boolean get,
                                               ASTNode child)
@@ -146,7 +149,8 @@ public class BaseCallMessageSend extends Expression implements Invocation
 		return super.internalGetSetChildProperty(property, get, child);
 	}
 
-    final List internalGetChildListProperty(ChildListPropertyDescriptor property)
+    @Override
+	final List internalGetChildListProperty(ChildListPropertyDescriptor property)
     {
         if (property == ARGUMENTS_PROPERTY)
         {
@@ -157,11 +161,13 @@ public class BaseCallMessageSend extends Expression implements Invocation
         return super.internalGetChildListProperty(property);
     }
 
+	@Override
 	final int getNodeType0()
 	{
 		return BASE_CALL_MESSAGE_SEND;
 	}
 
+	@Override
 	@SuppressWarnings("unchecked")
 	ASTNode clone0(AST target)
 	{
@@ -172,12 +178,14 @@ public class BaseCallMessageSend extends Expression implements Invocation
         return result;
 	}
 
+	@Override
 	final boolean subtreeMatch0(ASTMatcher matcher, Object other)
 	{
 		// dispatch to correct overloaded match method
 		return matcher.match(this, other);
 	}
 
+	@Override
 	void accept0(ASTVisitor visitor)
 	{
         boolean visitChildren = visitor.visit(this);
@@ -243,7 +251,8 @@ public class BaseCallMessageSend extends Expression implements Invocation
      * @return the live list of argument expressions
      *    (element type: <code>Expression</code>)
      */
-    public List getArguments()
+    @Override
+	public List getArguments()
     {
         return this.arguments;
     }
@@ -251,7 +260,8 @@ public class BaseCallMessageSend extends Expression implements Invocation
     /* (omit javadoc for this method)
      * Method declared on ASTNode.
      */
-    int memSize()
+    @Override
+	int memSize()
     {
         return BASE_NODE_SIZE + 4 * 4;
     }
@@ -259,7 +269,8 @@ public class BaseCallMessageSend extends Expression implements Invocation
     /* (omit javadoc for this method)
      * Method declared on ASTNode.
      */
-    int treeSize()
+    @Override
+	int treeSize()
     {
         return
             memSize()
@@ -267,7 +278,8 @@ public class BaseCallMessageSend extends Expression implements Invocation
             + (this.arguments  == null ? 0 : this.arguments.listSize());
     }
 
-    public IMethodBinding resolveMethodBinding()
+    @Override
+	public IMethodBinding resolveMethodBinding()
     {
         return this.ast.getBindingResolver().resolveMethod(this);
     }

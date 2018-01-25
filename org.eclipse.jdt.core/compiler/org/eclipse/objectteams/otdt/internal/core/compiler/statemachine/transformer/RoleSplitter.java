@@ -176,7 +176,8 @@ public class RoleSplitter
 						final MethodDeclaration newmethod = AstConverter.genRoleIfcMethod(teamDecl, method);
 						AstEdit.addMethod(roleIfcDecl, newmethod);
 						roleIfcDecl.getRoleModel()._state.addJob(ITranslationStates.STATE_ROLE_HIERARCHY_ANALYZED, // calls methods(); 
-							new Runnable() { public void run() {
+							new Runnable() { @Override
+							public void run() {
 								if (   method.binding != null 
 									&& (method.binding.modifiers & ClassFileConstants.AccDeprecated) != 0 
 									&& newmethod.binding != null)

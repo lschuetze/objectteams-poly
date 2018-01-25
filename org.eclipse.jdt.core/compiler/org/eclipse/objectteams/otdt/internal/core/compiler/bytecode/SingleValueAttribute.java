@@ -144,13 +144,15 @@ public class SingleValueAttribute
     	return this._value;
     }
 
-    int size() {
+    @Override
+	int size() {
     	return 8;
     }
     /* (non-Javadoc)
      * @see org.eclipse.objectteams.otdt.internal.core.compiler.bytecode.AbstractAttribute#write(org.eclipse.jdt.internal.compiler.ClassFile)
      */
-    public void write(ClassFile classFile)
+    @Override
+	public void write(ClassFile classFile)
     {
     	super.write(classFile);
 
@@ -177,7 +179,8 @@ public class SingleValueAttribute
     /**
      * Evaluate class level attribute(s).
      */
-    public void evaluate(Binding binding, LookupEnvironment environment, char[][][] missingTypeNames) {
+    @Override
+	public void evaluate(Binding binding, LookupEnvironment environment, char[][][] missingTypeNames) {
 		if (CharOperation.equals(this._name, PLAYEDBY_NAME))
         {
 			checkBindingMismatch(binding, ExtraCompilerModifiers.AccRole);
@@ -242,7 +245,8 @@ public class SingleValueAttribute
     /**
      * Evaluate field level attribute.
      */
-    public boolean evaluate (FieldBinding binding) {
+    @Override
+	public boolean evaluate (FieldBinding binding) {
     	if (CharOperation.equals(this._name, FIELD_TYPE_ANCHOR)) {
     		FieldModel model = FieldModel.getModel(binding);
     		// store for further processing from BinaryTypeBinding.resolveTypesFor(FieldBinding)
@@ -252,7 +256,8 @@ public class SingleValueAttribute
     	return false;
     }
 
-    public String toString()
+    @Override
+	public String toString()
     {
         return "OT-Attribute "+ //$NON-NLS-1$
             new String(this._name)+": "+ //$NON-NLS-1$

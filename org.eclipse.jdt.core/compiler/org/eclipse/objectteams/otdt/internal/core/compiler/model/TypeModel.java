@@ -304,6 +304,7 @@ public class TypeModel extends ModelElement {
         return "Class "; //$NON-NLS-1$
 	}
 
+	@Override
 	@SuppressWarnings("nls")
 	public String toString() {
 		String name = (this._ast != null) ?

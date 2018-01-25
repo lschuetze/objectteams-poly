@@ -96,7 +96,8 @@ public class OTSearchHelper {
 	                        pattern, 
 	                        searchScope, 
 	                        new SearchRequestor() {
-			                    public void acceptSearchMatch(SearchMatch match)
+			                    @Override
+								public void acceptSearchMatch(SearchMatch match)
 			                            throws CoreException
 			                    {
 			                        Object element = match.getElement();

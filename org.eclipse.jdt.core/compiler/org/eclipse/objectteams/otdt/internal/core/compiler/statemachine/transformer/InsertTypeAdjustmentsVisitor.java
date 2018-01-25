@@ -73,6 +73,7 @@ public class InsertTypeAdjustmentsVisitor extends ASTVisitor {
 	/** while visiting a specific generated local variable, lowering is not allowed. */
     private boolean disallowLower;
 
+	@Override
 	public void endVisit(Assignment assignment, BlockScope scope) {
         assignment.expression = maybeWrap(
                 scope,
@@ -80,11 +81,13 @@ public class InsertTypeAdjustmentsVisitor extends ASTVisitor {
                 assignment.lhs.resolvedType);
     }
 
-    public void endVisit(FieldDeclaration fieldDeclaration, MethodScope scope) {
+    @Override
+	public void endVisit(FieldDeclaration fieldDeclaration, MethodScope scope) {
         endVisit((AbstractVariableDeclaration)fieldDeclaration, scope);
     }
 
-    public void endVisit(LocalDeclaration localDeclaration, BlockScope scope) {
+    @Override
+	public void endVisit(LocalDeclaration localDeclaration, BlockScope scope) {
         endVisit((AbstractVariableDeclaration)localDeclaration, scope);
     }
 
@@ -121,7 +124,8 @@ public class InsertTypeAdjustmentsVisitor extends ASTVisitor {
     	}
     }
 
-    public void endVisit(MessageSend messageSend, BlockScope scope) {
+    @Override
+	public void endVisit(MessageSend messageSend, BlockScope scope) {
         if (messageSend.arguments != null) {
         	boolean saveLower = this.disallowLower;
         	// no lowering for arg of _OT$addRole() (invoked in lifting constructor).
@@ -159,7 +163,8 @@ public class InsertTypeAdjustmentsVisitor extends ASTVisitor {
     	}
     }
 
-    public void endVisit(AllocationExpression alloc, BlockScope scope) {
+    @Override
+	public void endVisit(AllocationExpression alloc, BlockScope scope) {
         if (alloc.arguments != null) {
             TypeBinding[] params = alloc.binding.parameters;
             for (int i=0; i<alloc.arguments.length; i++) {
@@ -171,7 +176,8 @@ public class InsertTypeAdjustmentsVisitor extends ASTVisitor {
         }
     }
 
-    public void endVisit(QualifiedAllocationExpression alloc, BlockScope scope) {
+    @Override
+	public void endVisit(QualifiedAllocationExpression alloc, BlockScope scope) {
         if (alloc.arguments != null) {
             TypeBinding[] params = alloc.binding.parameters;
             for (int i=0; i<alloc.arguments.length; i++) {
@@ -193,7 +199,8 @@ public class InsertTypeAdjustmentsVisitor extends ASTVisitor {
     	}    	
     }
 
-    public void endVisit(ReturnStatement returnStatement, BlockScope scope) {
+    @Override
+	public void endVisit(ReturnStatement returnStatement, BlockScope scope) {
         MethodScope methodScope = scope.methodScope();
         MethodBinding methodBinding;
         // this nasty statement stolen from ReturnStatement.resolve(..)
@@ -220,7 +227,8 @@ public class InsertTypeAdjustmentsVisitor extends ASTVisitor {
         }
     }
 
-    public void endVisit(EqualExpression eqExpr, BlockScope scope) {
+    @Override
+	public void endVisit(EqualExpression eqExpr, BlockScope scope) {
         TypeBinding leftType = eqExpr.left.resolvedType;
         TypeBinding rightType = eqExpr.right.resolvedType;
 
@@ -236,7 +244,8 @@ public class InsertTypeAdjustmentsVisitor extends ASTVisitor {
         }
     }
 
-    public void endVisit(InstanceOfExpression ioExpr, BlockScope scope) {
+    @Override
+	public void endVisit(InstanceOfExpression ioExpr, BlockScope scope) {
         TypeBinding leftType = ioExpr.type.resolvedType;
         TypeBinding rightType = ioExpr.expression.resolvedType;
 
@@ -251,7 +260,8 @@ public class InsertTypeAdjustmentsVisitor extends ASTVisitor {
         }
     }
 
-    public void endVisit(CastExpression castExpr, BlockScope scope) {
+    @Override
+	public void endVisit(CastExpression castExpr, BlockScope scope) {
         if (castExpr.isGenerated)
         	return; // don't adjust again!
 
@@ -269,7 +279,8 @@ public class InsertTypeAdjustmentsVisitor extends ASTVisitor {
         }
     }
 
-    public void endVisit(ThrowStatement throwStat, BlockScope scope) {
+    @Override
+	public void endVisit(ThrowStatement throwStat, BlockScope scope) {
     	ReferenceBinding excType = (ReferenceBinding)throwStat.exceptionType;
     	ReferenceBinding expectedType = null;
     	if (excType.isSynthInterface())

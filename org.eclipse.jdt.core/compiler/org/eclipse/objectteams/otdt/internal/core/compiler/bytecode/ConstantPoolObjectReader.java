@@ -710,6 +710,7 @@ public class ConstantPoolObjectReader extends ClassFileStruct implements ClassFi
 	public Iterator<ConstantPoolObject> getNonWideConstantIterator(final int nConstants) {
 		return new Iterator<ConstantPoolObject> () {
 			int cur = Math.min(256, nConstants);
+			@Override
 			public boolean hasNext() {
 				while (--this.cur >= 0) {
 					int entryType = getConstantPoolEntryType(this.cur);
@@ -726,9 +727,11 @@ public class ConstantPoolObjectReader extends ClassFileStruct implements ClassFi
 				}
 				return false;
 			}
+			@Override
 			public ConstantPoolObject next() {
 				return readConstantPoolObject(this.cur, 2);
 			}
+			@Override
 			public void remove() {
 				throw new InternalCompilerError("method not meant to be invoked."); //$NON-NLS-1$
 			}

@@ -42,6 +42,7 @@ public class IntersectionCastTypeReference extends TypeReference {
 		}
 	}
 
+	@Override
 	public TypeReference augmentTypeWithAdditionalDimensions(int additionalDimensions, Annotation[][] additionalAnnotations, boolean isVarargs) {
 		throw new UnsupportedOperationException(); // no syntax for this.
 	}
@@ -49,6 +50,7 @@ public class IntersectionCastTypeReference extends TypeReference {
 	/* (non-Javadoc)
 	 * @see org.eclipse.jdt.internal.compiler.ast.TypeReference#getLastToken()
 	 */
+	@Override
 	public char[] getLastToken() {
 		return null;
 	}
@@ -56,10 +58,12 @@ public class IntersectionCastTypeReference extends TypeReference {
 	/**
 	 * @see org.eclipse.jdt.internal.compiler.ast.ArrayQualifiedTypeReference#getTypeBinding(org.eclipse.jdt.internal.compiler.lookup.Scope)
 	 */
+	@Override
 	protected TypeBinding getTypeBinding(Scope scope) {
 		return null; // not supported here - combined with resolveType(...)
 	}
 
+	@Override
 	public TypeReference[] getTypeReferences() {
 		return this.typeReferences;
 	}
@@ -67,6 +71,7 @@ public class IntersectionCastTypeReference extends TypeReference {
 	/* (non-Javadoc)
 	 * @see org.eclipse.jdt.internal.compiler.ast.TypeReference#getTypeBinding(org.eclipse.jdt.internal.compiler.lookup.Scope)
 	 */
+	@Override
 	public TypeBinding resolveType(BlockScope scope, boolean checkBounds, int location) {
 
 		int length = this.typeReferences.length;
@@ -158,6 +163,7 @@ public class IntersectionCastTypeReference extends TypeReference {
 	/* (non-Javadoc)
 	 * @see org.eclipse.jdt.internal.compiler.ast.TypeReference#getTypeName()
 	 */
+	@Override
 	public char[][] getTypeName() {
 		// we need to keep a return value that is a char[][]
 		return this.typeReferences[0].getTypeName();
@@ -166,6 +172,7 @@ public class IntersectionCastTypeReference extends TypeReference {
 	/* (non-Javadoc)
 	 * @see org.eclipse.jdt.internal.compiler.ast.TypeReference#traverse(org.eclipse.jdt.internal.compiler.ASTVisitor, org.eclipse.jdt.internal.compiler.lookup.BlockScope)
 	 */
+	@Override
 	public void traverse(ASTVisitor visitor, BlockScope scope) {
 		if (visitor.visit(this, scope)) {
 			int length = this.typeReferences == null ? 0 : this.typeReferences.length;
@@ -179,6 +186,7 @@ public class IntersectionCastTypeReference extends TypeReference {
 	/* (non-Javadoc)
 	 * @see org.eclipse.jdt.internal.compiler.ast.TypeReference#traverse(org.eclipse.jdt.internal.compiler.ASTVisitor, org.eclipse.jdt.internal.compiler.lookup.ClassScope)
 	 */
+	@Override
 	public void traverse(ASTVisitor visitor, ClassScope scope) {
 		throw new UnsupportedOperationException("Unexpected traversal request: IntersectionTypeReference in class scope"); //$NON-NLS-1$
 	}
@@ -186,6 +194,7 @@ public class IntersectionCastTypeReference extends TypeReference {
 	/* (non-Javadoc)
 	 * @see org.eclipse.jdt.internal.compiler.ast.Expression#printExpression(int, java.lang.StringBuffer)
 	 */
+	@Override
 	public StringBuffer printExpression(int indent, StringBuffer output) {
 		int length = this.typeReferences == null ? 0 : this.typeReferences.length;
 		printIndent(indent, output);

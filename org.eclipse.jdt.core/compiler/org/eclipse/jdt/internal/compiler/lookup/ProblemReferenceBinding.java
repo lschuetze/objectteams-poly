@@ -40,12 +40,14 @@ public ProblemReferenceBinding(char[][] compoundName, ReferenceBinding closestMa
 	this.problemReason = problemReason;
 }
 
+@Override
 public TypeBinding clone(TypeBinding enclosingType) {
 	throw new IllegalStateException(); // shouldn't get here.
 }
 /**
  * @see org.eclipse.jdt.internal.compiler.lookup.TypeBinding#closestMatch()
  */
+@Override
 public TypeBinding closestMatch() {
 	return this.closestMatch;
 }
@@ -70,6 +72,7 @@ public ReferenceBinding closestReferenceMatch() {
 	return this.closestMatch;
 }
 
+@Override
 public boolean hasTypeBit(int bit) {
 	if (this.closestMatch != null)
 		return this.closestMatch.hasTypeBit(bit);
@@ -80,6 +83,7 @@ public boolean hasTypeBit(int bit) {
 * Answer the problem id associated with the receiver.
 * NoError if the receiver is a valid binding.
 */
+@Override
 public int problemId() {
 	return this.problemReason;
 }
@@ -106,6 +110,7 @@ public static String problemReasonString(int problemReason) {
 	return "unknown"; //$NON-NLS-1$
 }
 
+@Override
 public void setTypeAnnotations(AnnotationBinding[] annotations, boolean evalNullAnnotations) {
 	return; // reject misguided attempts.
 }
@@ -113,6 +118,7 @@ public void setTypeAnnotations(AnnotationBinding[] annotations, boolean evalNull
 /**
  * @see org.eclipse.jdt.internal.compiler.lookup.ReferenceBinding#readableName()
  */
+@Override
 public char[] readableName() {
 	if (this.closestMatch != null && !(this.closestMatch instanceof MissingTypeBinding))
 		return this.closestMatch.readableName();
@@ -136,6 +142,7 @@ public boolean isCompatibleWith(TypeBinding otherType) {
 /**
  * @see org.eclipse.jdt.internal.compiler.lookup.ReferenceBinding#shortReadableName()
  */
+@Override
 public char[] shortReadableName() {
 //{ObjectTeams: keep original behavior here:
 /* orig:
@@ -145,10 +152,12 @@ public char[] shortReadableName() {
 // SH}
 }
 
+@Override
 public char[] sourceName() {
 	return this.compoundName.length == 0 ? null : this.compoundName[this.compoundName.length - 1]; // last segment of [java][util][Map$Entry]
 }
 
+@Override
 public String toString() {
 	StringBuffer buffer = new StringBuffer(10);
 	buffer.append("ProblemType:[compoundName="); //$NON-NLS-1$

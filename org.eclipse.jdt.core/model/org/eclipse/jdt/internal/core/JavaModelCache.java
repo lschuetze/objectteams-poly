@@ -315,6 +315,7 @@ protected void resetJarTypeCache() {
 protected void removeFromJarTypeCache(BinaryType type) {
 	this.jarTypeCache.flush(type);
 }
+@Override
 public String toString() {
 	return toStringFillingRation(""); //$NON-NLS-1$
 }

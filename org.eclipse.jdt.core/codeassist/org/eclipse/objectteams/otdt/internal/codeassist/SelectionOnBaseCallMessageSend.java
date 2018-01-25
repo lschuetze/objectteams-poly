@@ -53,6 +53,7 @@ public class SelectionOnBaseCallMessageSend extends BaseCallMessageSend
         super(wrappee, baseEndPosition);
     }
 
+	@Override
 	public TypeBinding resolveType(BlockScope scope)
 	{
 		try {
@@ -160,7 +161,8 @@ public class SelectionOnBaseCallMessageSend extends BaseCallMessageSend
         return foundMappings;
     }
 
-    public StringBuffer printExpression(int indent, StringBuffer output)
+    @Override
+	public StringBuffer printExpression(int indent, StringBuffer output)
 	{
 		MessageSend wrappee = (MessageSend) this._wrappee;
 

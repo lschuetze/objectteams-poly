@@ -506,6 +506,7 @@ private void removed(IJavaElement element) {
 private void removeElementInfo(IJavaElement element) {
 	this.infos.remove(element);
 }
+@Override
 public String toString() {
 	StringBuffer buffer = new StringBuffer();
 	buffer.append("Built delta:\n"); //$NON-NLS-1$

@@ -221,6 +221,7 @@ public class RoleModel extends TypeModel
 	}
 
 	/**  @return old state */
+	@Override
 	public int setState(int state) {
 // FIXME(SH): should perhaps also set state of role-CUDs??
 //            their state seems to skip many stages...
@@ -248,6 +249,7 @@ public class RoleModel extends TypeModel
      * Override method from TypeModel:
      * Also recurse into role local types.
      */
+	@Override
 	public void setMemberState(int state) {
 		super.setMemberState(state);
 		if (   state <= ITranslationStates.STATE_ROLES_SPLIT
@@ -279,6 +281,7 @@ public class RoleModel extends TypeModel
 		return true;
 	}
 
+	@Override
 	public boolean isTeam() {
 		if (this._ast != null)
 			return this._ast.isTeam();
@@ -701,6 +704,7 @@ public class RoleModel extends TypeModel
 		return false;
 	}
 
+	@Override
 	public void setBinding (ReferenceBinding binding) {
         this._binding = binding;
         binding.roleModel = this;
@@ -807,6 +811,7 @@ public class RoleModel extends TypeModel
 	 * @param compoundName
 	 * @return type specified by compoundName
 	 */
+	@Override
 	public ReferenceBinding findType(LookupEnvironment environment, char[][] compoundName)
 	{
 		char[][] myName = CharOperation.splitOn('/', this._binding.constantPoolName());
@@ -1132,6 +1137,7 @@ public class RoleModel extends TypeModel
         this._state.inititalize(ITranslationStates.STATE_ROLES_SPLIT);
     }
 
+	@Override
 	protected String getKindString() {
         return "Role"; //$NON-NLS-1$
     }
@@ -1245,7 +1251,8 @@ public class RoleModel extends TypeModel
 	}
 
 	/** Hook into attribute writing in order to insert callout mappings attribute. */
-    public int writeAttributes(ClassFile file) {
+    @Override
+	public int writeAttributes(ClassFile file) {
     	if (this._binding.callinCallouts != null) {
     		for (int i = 0; i < this._binding.callinCallouts.length; i++) {
 				if (this._binding.callinCallouts[i].type != CallinCalloutBinding.CALLIN) // callout or -override
@@ -1258,6 +1265,7 @@ public class RoleModel extends TypeModel
     	return super.writeAttributes(file);
     }
 
+	@Override
 	public CPTypeAnchorAttribute getTypeAnchors() {
 		return this._binding.model.getTypeAnchors();
 	}
@@ -1295,7 +1303,8 @@ public class RoleModel extends TypeModel
 	/* (non-Javadoc)
      * @see org.eclipse.objectteams.otdt.internal.core.compiler.model.TypeModel#cleanup()
      */
-    public void cleanup()
+    @Override
+	public void cleanup()
     {
         super.cleanup();
         this._copiedFeatureBindings = null;

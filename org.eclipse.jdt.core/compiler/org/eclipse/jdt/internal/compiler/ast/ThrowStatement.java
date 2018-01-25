@@ -46,6 +46,7 @@ public ThrowStatement(Expression exception, int sourceStart, int sourceEnd) {
 	this.sourceEnd = sourceEnd;
 }
 
+@Override
 public FlowInfo analyseCode(BlockScope currentScope, FlowContext flowContext, FlowInfo flowInfo) {
 	this.exception.analyseCode(currentScope, flowContext, flowInfo);
 	this.exception.checkNPE(currentScope, flowContext, flowInfo);
@@ -62,6 +63,7 @@ public FlowInfo analyseCode(BlockScope currentScope, FlowContext flowContext, Fl
  * @param currentScope org.eclipse.jdt.internal.compiler.lookup.BlockScope
  * @param codeStream org.eclipse.jdt.internal.compiler.codegen.CodeStream
  */
+@Override
 public void generateCode(BlockScope currentScope, CodeStream codeStream) {
 	if ((this.bits & ASTNode.IsReachable) == 0)
 		return;
@@ -71,12 +73,14 @@ public void generateCode(BlockScope currentScope, CodeStream codeStream) {
 	codeStream.recordPositionsFrom(pc, this.sourceStart);
 }
 
+@Override
 public StringBuffer printStatement(int indent, StringBuffer output) {
 	printIndent(indent, output).append("throw "); //$NON-NLS-1$
 	this.exception.printExpression(0, output);
 	return output.append(';');
 }
 
+@Override
 public void resolve(BlockScope scope) {
 	this.exceptionType = this.exception.resolveType(scope);
 	if (this.exceptionType != null && this.exceptionType.isValidBinding()) {
@@ -116,6 +120,7 @@ public void resolve(BlockScope scope) {
 	}
 }
 
+@Override
 public void traverse(ASTVisitor visitor, BlockScope blockScope) {
 	if (visitor.visit(this, blockScope))
 		this.exception.traverse(visitor, blockScope);

@@ -50,10 +50,12 @@ public class ResolvedCalloutToFieldMapping extends CalloutToFieldMapping {
 		this.uniqueKey = uniqueKey;
 	}
 	
+	@Override
 	public String getKey() {
 		return this.uniqueKey;
 	}
 
+	@Override
 	public boolean isResolved() {
 		return true;
 	}

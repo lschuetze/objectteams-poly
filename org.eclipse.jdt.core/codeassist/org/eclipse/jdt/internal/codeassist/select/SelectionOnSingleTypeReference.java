@@ -39,9 +39,11 @@ public class SelectionOnSingleTypeReference extends SingleTypeReference {
 public SelectionOnSingleTypeReference(char[] source, long pos) {
 	super(source, pos);
 }
+@Override
 public void aboutToResolve(Scope scope) {
 	getTypeBinding(scope.parent); // step up from the ClassScope
 }
+@Override
 protected TypeBinding getTypeBinding(Scope scope) {
 //{ObjectTeams: re-use binding if already found a valid one:
 	// (lookup may happen using different scopes,
@@ -70,10 +72,12 @@ protected TypeBinding getTypeBinding(Scope scope) {
 	}
 	throw new SelectionNodeFound(binding);
 }
+@Override
 public StringBuffer printExpression(int indent, StringBuffer output) {
 
 	return output.append("<SelectOnType:").append(this.token).append('>');//$NON-NLS-1$
 }
+@Override
 public TypeBinding resolveTypeEnclosing(BlockScope scope, ReferenceBinding enclosingType) {
 	super.resolveTypeEnclosing(scope, enclosingType);
 

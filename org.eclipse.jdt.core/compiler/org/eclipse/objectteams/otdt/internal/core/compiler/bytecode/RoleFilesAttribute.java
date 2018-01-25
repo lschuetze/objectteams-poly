@@ -55,11 +55,13 @@ public class RoleFilesAttribute extends ListValueAttribute {
 		return this.roleNames;
 	}
 
-    protected void writeElementValue(int i) {
+    @Override
+	protected void writeElementValue(int i) {
         writeName(this.roleNames[i]);
     }
 
-    void read(int i) {
+    @Override
+	void read(int i) {
         if (i==0)
             this.roleNames = new char[this._count][];
     	this.roleNames[i] = consumeName();
@@ -68,13 +70,15 @@ public class RoleFilesAttribute extends ListValueAttribute {
     /* (non-Javadoc)
      * @see org.eclipse.objectteams.otdt.internal.core.compiler.bytecode.ListValueAttribute#toString(int)
      */
-    protected String toString(int i) {
+    @Override
+	protected String toString(int i) {
         return new String(this.roleNames[i]);
     }
 
 	/* (non-Javadoc)
 	 * @see org.eclipse.objectteams.otdt.internal.core.compiler.bytecode.ListValueAttribute#evaluate(org.eclipse.jdt.internal.compiler.lookup.Binding, org.eclipse.jdt.internal.compiler.lookup.LookupEnvironment)
 	 */
+	@Override
 	public void evaluate(Binding binding, LookupEnvironment environment, char[][][] missingTypeNames) {
 		checkBindingMismatch(binding, 0);
 		((ReferenceBinding)binding).model._roleFilesAttribute = this;

@@ -43,7 +43,8 @@ public class TeamSmapGenerator extends AbstractSmapGenerator
         super(type);
     }
 
-    public char[] generate()
+    @Override
+	public char[] generate()
     {
         for (Iterator<SmapStratum> iter = this._strata.iterator(); iter.hasNext();)
         {

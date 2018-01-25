@@ -97,11 +97,13 @@ public class OTTypeList
     	
 		return new OTTypeIterator()
 		{
+			@Override
 			public boolean hasNext()
 			{
     			return _rawIter.hasNext();
 			}
 			
+			@Override
 			public OTType getNext()
 			{
 				return (OTType)_rawIter.next();

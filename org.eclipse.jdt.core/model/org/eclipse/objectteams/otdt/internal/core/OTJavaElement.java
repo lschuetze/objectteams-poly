@@ -79,11 +79,13 @@ public abstract class OTJavaElement extends Member implements IOTJavaElement
 			((OTJavaElement)parent).addChild(this);
 	}
 
+	@Override
 	public boolean hasChildren()
 	{
 	    return this.children.size() > 0;
 	}
 	
+	@Override
 	public IJavaElement[] getChildren()
 	{
 		synchronized(this.children) {
@@ -103,6 +105,7 @@ public abstract class OTJavaElement extends Member implements IOTJavaElement
 			this.children.add(child);
 	}
 	
+	@Override
 	public IJavaElement getParent()
 	{
 //{OTModelUpdate : if null return the parent of the wrapped java element
@@ -116,11 +119,13 @@ public abstract class OTJavaElement extends Member implements IOTJavaElement
 //jwl}	    
 	}	
 
+	@Override
 	public String getElementName()
 	{
 		return getCorrespondingJavaElement().getElementName();
 	}
 
+	@Override
 	public int getElementType()
 	{
 		return this.type;
@@ -129,6 +134,7 @@ public abstract class OTJavaElement extends Member implements IOTJavaElement
 	/**
 	 * Assumes instanceof check is done in subclasses!
 	 */
+	@Override
 	public boolean equals(Object obj)
 	{
 		if (this == obj) 
@@ -155,23 +161,27 @@ public abstract class OTJavaElement extends Member implements IOTJavaElement
 	 * and parent's hash code. Elements with other requirements must
 	 * override this method.
 	 */
+	@Override
 	public int hashCode() {
 		IJavaElement myParent = this.getParent();
 		if (myParent == null) return super.hashCode();
 		return Util.combineHashCodes(getElementName().hashCode(), myParent.hashCode());
 	}
 
-    @SuppressWarnings("nls")
+    @Override
+	@SuppressWarnings("nls")
 	public String toString()
 	{
 		return "OTJavaElement " + getElementName();	
 	}
 	
-    public IJavaElement getCorrespondingJavaElement()
+    @Override
+	public IJavaElement getCorrespondingJavaElement()
     {
         return this.correspondingJavaElem;
     }
     
+	@Override
 	public OTJavaElement resolved(Binding binding) {
 		return this;
 	}
@@ -182,7 +192,8 @@ public abstract class OTJavaElement extends Member implements IOTJavaElement
     }
 
 // delegated IJavaElement methods
-    public boolean exists()
+    @Override
+	public boolean exists()
     {
         return this.correspondingJavaElem.exists();
     }
@@ -193,7 +204,8 @@ public abstract class OTJavaElement extends Member implements IOTJavaElement
     	((JavaElement) this.correspondingJavaElem).close();
     }
     
-    public IJavaElement getAncestor(int ancestorType)
+    @Override
+	public IJavaElement getAncestor(int ancestorType)
     {
     	// first see if an OT element was requested (COPY&PASTE from JavaElement):
 		IJavaElement element = this;
@@ -205,64 +217,76 @@ public abstract class OTJavaElement extends Member implements IOTJavaElement
         return this.correspondingJavaElem.getAncestor(ancestorType);
     }
 
-    public IResource getCorrespondingResource() throws JavaModelException
+    @Override
+	public IResource getCorrespondingResource() throws JavaModelException
     {
     	// see SourceRefElement
     	if (!exists()) throw newNotPresentException();
     	return null;
     }
 
-    public String getHandleIdentifier()
+    @Override
+	public String getHandleIdentifier()
     {
         return this.correspondingJavaElem.getHandleIdentifier();
     }
 
-    public IJavaModel getJavaModel()
+    @Override
+	public IJavaModel getJavaModel()
     {
         return this.correspondingJavaElem.getJavaModel();
     }
 
-    public IJavaProject getJavaProject()
+    @Override
+	public IJavaProject getJavaProject()
     {
         return this.correspondingJavaElem.getJavaProject();
     }
 
-    public IOpenable getOpenable()
+    @Override
+	public IOpenable getOpenable()
     {
         return this.correspondingJavaElem.getOpenable();
     }
 
-    public IPath getPath()
+    @Override
+	public IPath getPath()
     {
         return this.correspondingJavaElem.getPath();
     }
 
-    public IJavaElement getPrimaryElement()
+    @Override
+	public IJavaElement getPrimaryElement()
     {
         return this.correspondingJavaElem.getPrimaryElement();
     }
 
-    public IResource getResource()
+    @Override
+	public IResource getResource()
     {
         return this.correspondingJavaElem.getResource();
     }
 
-    public ISchedulingRule getSchedulingRule()
+    @Override
+	public ISchedulingRule getSchedulingRule()
     {
         return this.correspondingJavaElem.getSchedulingRule();
     }
 
-    public IResource getUnderlyingResource() throws JavaModelException
+    @Override
+	public IResource getUnderlyingResource() throws JavaModelException
     {
         return this.correspondingJavaElem.getUnderlyingResource();
     }
 
-    public boolean isReadOnly()
+    @Override
+	public boolean isReadOnly()
     {
         return this.correspondingJavaElem.isReadOnly();
     }
 
-    public boolean isStructureKnown() throws JavaModelException
+    @Override
+	public boolean isStructureKnown() throws JavaModelException
     {
         return this.correspondingJavaElem.isStructureKnown();
     }
@@ -277,6 +301,7 @@ public abstract class OTJavaElement extends Member implements IOTJavaElement
     	return result;
     }
 	
+	@Override
 	public void toString(int tab, StringBuffer buffer) {
 		for (int i = tab; i > 0; i--)
 			buffer.append("  "); //$NON-NLS-1$

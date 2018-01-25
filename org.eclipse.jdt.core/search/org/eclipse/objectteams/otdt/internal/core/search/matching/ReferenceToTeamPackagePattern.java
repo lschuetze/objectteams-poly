@@ -102,16 +102,19 @@ public class ReferenceToTeamPackagePattern extends JavaSearchPattern
         this.mustResolve = false;
     }
 
-    public SearchPattern getBlankPattern() 
+    @Override
+	public SearchPattern getBlankPattern() 
     {
     	return new ReferenceToTeamPackagePattern(IIndexConstants.REF_TO_TEAMPACKAGE_PATTERN, R_EXACT_MATCH | R_CASE_SENSITIVE);
     }
 
-    public char[][] getIndexCategories()
+    @Override
+	public char[][] getIndexCategories()
     {
     	return CATEGORIES;
     }
     
+	@Override
 	public boolean matchesDecodedKey(SearchPattern decodedPattern)
 	{
 		ReferenceToTeamPackagePattern pattern = (ReferenceToTeamPackagePattern) decodedPattern;
@@ -137,7 +140,8 @@ public class ReferenceToTeamPackagePattern extends JavaSearchPattern
     // contrary to what our SearchPattern.getIndexKey() says, we can't return null here (leads to NPE).
     // so we need to return either the team index or the full team+role index, depending on the search
     // criteria. To make this work, we need to have both index entries, as well! (carp)
-    public char[] getIndexKey()
+    @Override
+	public char[] getIndexKey()
     {
         // If this assertion ever fails, then decodeIndexKey() probably needs to call createIndexKey().
         assert(this._indexKey != null);
@@ -145,7 +149,8 @@ public class ReferenceToTeamPackagePattern extends JavaSearchPattern
         return this._indexKey;
     }
     
-    public void decodeIndexKey(char[] key)
+    @Override
+	public void decodeIndexKey(char[] key)
     {
         int slash = CharOperation.indexOf('/', key);
         this.teamQualifiedName = CharOperation.subarray(key, 0, slash);

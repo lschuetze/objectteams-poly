@@ -591,7 +591,8 @@ public class ClassScope extends Scope {
 			{
 			  if (sourceType.isDirectRole())
 				problemReporter()
-					.setRechecker(new IProblemRechecker() {		public boolean shouldBeReported(IrritantSet[] foundIrritants) {
+					.setRechecker(new IProblemRechecker() {		@Override
+					public boolean shouldBeReported(IrritantSet[] foundIrritants) {
 						for (MethodBinding methodBinding : ClassScope.this.referenceContext.binding.methods())
 							if (methodBinding.isAbstract())
 								return true;
@@ -942,6 +943,7 @@ public class ClassScope extends Scope {
 	}
 //Markus Witte}
 
+	@Override
 	void resolveTypeParameter(TypeParameter typeParameter) {
 		typeParameter.resolve(this);
 	}
@@ -1862,6 +1864,7 @@ public class ClassScope extends Scope {
 
 					RoleModel roleModel = sourceType.roleModel;
 					roleModel._state.addJob(ITranslationStates.STATE_ROLES_LINKED, new Runnable() {
+						@Override
 						public void run() {
 							checkBaseClassRedefinition(ClassScope.this.referenceContext);
 						}
@@ -2554,6 +2557,7 @@ public class ClassScope extends Scope {
 	* (unit, type or method) in case the problem handler decides it is necessary
 	* to abort.
 	*/
+	@Override
 	public ProblemReporter problemReporter() {
 		MethodScope outerMethodScope;
 		if ((outerMethodScope = outerMostMethodScope()) == null) {
@@ -2567,6 +2571,7 @@ public class ClassScope extends Scope {
 	/* Answer the reference type of this scope.
 	* It is the nearest enclosing type of this scope.
 	*/
+	@Override
 	public TypeDeclaration referenceType() {
 		return this.referenceContext;
 	}
@@ -2603,6 +2608,7 @@ public class ClassScope extends Scope {
 		return this.parent.checkRedundantDefaultNullness(nullBits, sourceStart);
 	}
 	
+	@Override
 	public String toString() {
 		if (this.referenceContext != null)
 			return "--- Class Scope ---\n\n"  //$NON-NLS-1$

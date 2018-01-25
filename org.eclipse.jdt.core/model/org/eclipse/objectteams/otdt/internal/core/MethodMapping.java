@@ -197,6 +197,7 @@ public abstract class MethodMapping extends OTJavaElement implements IMethodMapp
     }
     // ====
     
+	@Override
 	public IMethod getRoleMethod()
     {
     	if (!this.hasSearchedRoleMethod) {
@@ -213,7 +214,8 @@ public abstract class MethodMapping extends OTJavaElement implements IMethodMapp
     }
 
 	// added for the SourceTypeConverter
-    public MethodData getRoleMethodHandle()
+    @Override
+	public MethodData getRoleMethodHandle()
     {
     	return this.roleMethodHandle;
     }
@@ -240,6 +242,7 @@ public abstract class MethodMapping extends OTJavaElement implements IMethodMapp
      * Only returns the role-methods part -- subclasses must override and 
      * construct the whole element name!
      */
+	@Override
 	public String getElementName()
 	{
 	    if (this.hasSignature)
@@ -250,26 +253,31 @@ public abstract class MethodMapping extends OTJavaElement implements IMethodMapp
 	    return this.roleMethodHandle.getSelector();
 	}
 
+	@Override
 	public int getDeclarationSourceStart()
     {
         return this.declarationSourceStart;
     }
 	
+	@Override
 	public int getSourceStart()
 	{
 		return this.sourceStart;
 	}
 	
+	@Override
 	public int getSourceEnd()
 	{
 		return this.sourceEnd;
 	}
 	
+	@Override
 	public int getDeclarationSourceEnd()
 	{
 		return this.declarationSourceEnd;
 	}
 
+	@Override
 	public boolean equals(Object obj)
 	{
 		MethodMapping other = (MethodMapping)obj;
@@ -280,7 +288,8 @@ public abstract class MethodMapping extends OTJavaElement implements IMethodMapp
 				&& getElementName().equals(other.getElementName());
 	}
 	
-    @SuppressWarnings("nls")
+    @Override
+	@SuppressWarnings("nls")
 	public String toString()
 	{
 		return "methodmapping: " + getElementName();
@@ -381,6 +390,7 @@ public abstract class MethodMapping extends OTJavaElement implements IMethodMapp
 	 * Return the first instance of IOpenable in the hierarchy of this
 	 * type (going up the hierarchy from this type);
 	 */
+	@Override
 	public IOpenable getOpenableParent() 
 	{
 		IJavaElement current = getParent();
@@ -421,6 +431,7 @@ public abstract class MethodMapping extends OTJavaElement implements IMethodMapp
 	/**
 	 * @see ISourceReference
 	 */
+	@Override
 	public String getSource() throws JavaModelException 
 	{
 		IOpenable openable = getOpenableParent();
@@ -448,6 +459,7 @@ public abstract class MethodMapping extends OTJavaElement implements IMethodMapp
 	/**
 	 * @see ISourceReference
 	 */
+	@Override
 	public ISourceRange getSourceRange() throws JavaModelException 
 	{
 //{ObjectTeams: we don't have an ElementInfo but we know sourcestart, sourceend
@@ -459,6 +471,7 @@ public abstract class MethodMapping extends OTJavaElement implements IMethodMapp
 	}
 	
 //haebor}
+	@Override
 	public ISourceRange getNameRange() throws JavaModelException
 	{
 		ISourceRange range = new SourceRange(this.sourceStart, this.sourceEnd-this.sourceStart+1);
@@ -538,60 +551,72 @@ public abstract class MethodMapping extends OTJavaElement implements IMethodMapp
 	    return getIMethod().isSimilar(method);
 	}
 	
+	@Override
 	public IClassFile getClassFile()
 	{
 	    return getIMethod().getClassFile();
 	}
 	
+	@Override
 	public ICompilationUnit getCompilationUnit()
 	{
 	    return getIMethod().getCompilationUnit();
 	}
 	
+	@Override
 	public IType getDeclaringType()
 	{
 	    return getIMethod().getDeclaringType();
 	}
 	
+	@Override
 	public int getFlags() throws JavaModelException
 	{
 	    return 0; // SH: method mappings have no regular flags. orig: getIMethod().getFlags();
 	}
 	
+	@Override
 	public IType getType(String name, int count)
 	{
 	    return getIMethod().getType(name, count);
 	}
 	
+	@Override
 	public boolean isBinary()
 	{
 	    return getIMethod().isBinary();
 	}
+	@Override
 	public void copy(IJavaElement container, IJavaElement sibling, String rename, boolean replace, IProgressMonitor monitor) throws JavaModelException
 	{
 	    getIMethod().copy(container, sibling, rename, replace, monitor);
 	}
 	
+	@Override
 	public void delete(boolean force, IProgressMonitor monitor) throws JavaModelException
 	{
 	    getIMethod().delete(force, monitor);
 	}
 	
+	@Override
 	public void move(IJavaElement container, IJavaElement sibling, String rename, boolean replace, IProgressMonitor monitor) throws JavaModelException
 	{
 	    getIMethod().move(container, sibling, rename, replace, monitor);
 	}
 	
+	@Override
 	public void rename(String name, boolean replace, IProgressMonitor monitor) throws JavaModelException
 	{
 	    getIMethod().rename(name, replace, monitor);
 	}
 	
-    public boolean hasSignature()
+    @Override
+	public boolean hasSignature()
     {
         return this.hasSignature;
     }
     
+	@Override
 	public boolean exists()
 	{
 		IJavaElement myParent = getParent();
@@ -614,6 +639,7 @@ public abstract class MethodMapping extends OTJavaElement implements IMethodMapp
 		return false;
 	}
 
+	@Override
 	public boolean isStructureKnown() throws JavaModelException
 	{
         // See exists()
@@ -641,11 +667,13 @@ public abstract class MethodMapping extends OTJavaElement implements IMethodMapp
 		return false;
 	}
 	
+	@Override
 	public String getAttachedJavadoc(IProgressMonitor monitor) throws JavaModelException {
 		return null;
 	}
 
 	//OT_COPY_PASTE from Member.getCategories(). STATE: 3.4 M7, checked at 3.5 M7
+	@Override
 	@SuppressWarnings("rawtypes")
 	public String[] getCategories() throws JavaModelException {
 		IType type = (IType) getAncestor(IJavaElement.TYPE);
@@ -663,6 +691,7 @@ public abstract class MethodMapping extends OTJavaElement implements IMethodMapp
 	}
 	
 	//OT_COPY_PASTE from Member.getJavadocRange(). STATE: 3.4 M7
+	@Override
 	public ISourceRange getJavadocRange() throws JavaModelException {
 		ISourceRange range= this.getSourceRange();
 		if (range == null) return null;
@@ -712,6 +741,7 @@ public abstract class MethodMapping extends OTJavaElement implements IMethodMapp
 	}
 
 //{CRIPPLE:
+	@Override
 	public int getOccurrenceCount() {
 		// TODO Auto-generated method stub
 		return 0;
@@ -722,6 +752,7 @@ public abstract class MethodMapping extends OTJavaElement implements IMethodMapp
 	 * Copied from Member.
 	 * @see IMember#getTypeRoot()
 	 */
+	@Override
 	public ITypeRoot getTypeRoot() {
 		IJavaElement element = getParent();
 		while (element instanceof IMember) {
@@ -730,6 +761,7 @@ public abstract class MethodMapping extends OTJavaElement implements IMethodMapp
 		return (ITypeRoot) element;
 	}
 
+	@Override
 	public OTJavaElement resolved(Binding binding) {
 		char[] uniqueKey = binding.computeUniqueKey();
 		if (uniqueKey == null)

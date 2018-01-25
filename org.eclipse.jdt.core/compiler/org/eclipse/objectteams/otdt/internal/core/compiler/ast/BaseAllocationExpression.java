@@ -96,6 +96,7 @@ public class BaseAllocationExpression extends Assignment {
         this.sourceStart = start;
     }
 
+	@Override
 	public FlowInfo analyseCode(
 			BlockScope currentScope,
 			FlowContext flowContext,
@@ -446,7 +447,8 @@ public class BaseAllocationExpression extends Assignment {
 		return false;
     }
 
-    public void traverse(ASTVisitor visitor, BlockScope scope) {
+    @Override
+	public void traverse(ASTVisitor visitor, BlockScope scope) {
         // we might be the first to analyse this expression:
         // (Actually triggered by TransformStatementsVisitor
     	//  - but don't do it before STATE_LENV_DONE_FIELDS_AND_METHODS,
@@ -469,7 +471,8 @@ public class BaseAllocationExpression extends Assignment {
     	}
     }
 
-    public TypeBinding resolveType(BlockScope scope) {
+    @Override
+	public TypeBinding resolveType(BlockScope scope) {
     	TypeDeclaration roleDecl = scope.referenceType();
     	if (roleDecl != null && roleDecl.isRole() && roleDecl.getRoleModel()._playedByEnclosing) {
     		scope.problemReporter().baseAllocationDespiteBaseclassCycle(this, roleDecl);
@@ -501,18 +504,21 @@ public class BaseAllocationExpression extends Assignment {
 			super.generateCode(currentScope, codeStream, valueRequired);
     }
     
-    public String toString() {
+    @Override
+	public String toString() {
         if (this.expression == null)
             return "unresolved base() call"; //$NON-NLS-1$
         return this.expression.toString();
     }
 
-    public StringBuffer printExpression (int indent, StringBuffer output) {
+    @Override
+	public StringBuffer printExpression (int indent, StringBuffer output) {
     	if (this.expression != null)
     		return super.printExpression(indent, output);
     	return output.append("<no expression yet>"); //$NON-NLS-1$
     }
 
+	@Override
 	public StringBuffer printExpressionNoParenthesis(int indent, StringBuffer output) {
     	if (this.expression != null)
     		return super.printExpressionNoParenthesis(indent, output);

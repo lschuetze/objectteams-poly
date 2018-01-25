@@ -84,6 +84,7 @@ public abstract class AbstractMethodMappingDeclaration extends BodyDeclaration
 		return new ChildListPropertyDescriptor(nodeClass, "parameterMappings", ParameterMapping.class, CYCLE_RISK); //$NON-NLS-1$
 	}
 
+	@Override
 	ASTNode internalGetSetChildProperty(ChildPropertyDescriptor property, boolean get, ASTNode child)
 	{
    	    if (property == getRoleElementProperty())

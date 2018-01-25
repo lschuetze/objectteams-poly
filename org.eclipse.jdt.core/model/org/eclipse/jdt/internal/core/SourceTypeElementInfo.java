@@ -95,6 +95,7 @@ public HashMap getCategories() {
 	return this.categories;
 }
 
+@Override
 public IJavaElement[] getChildren() {
 	return this.children;
 }
@@ -103,6 +104,7 @@ public IJavaElement[] getChildren() {
  * Returns the ISourceType that is the enclosing type for this
  * type, or <code>null</code> if this type is a top level type.
  */
+@Override
 public ISourceType getEnclosingType() {
 	IJavaElement parent= this.handle.getParent();
 	if (parent != null && parent.getElementType() == IJavaElement.TYPE) {
@@ -118,6 +120,7 @@ public ISourceType getEnclosingType() {
 /**
  * @see ISourceType
  */
+@Override
 public ISourceField[] getFields() {
 	SourceField[] fieldHandles = getFieldHandles();
 	int length = fieldHandles.length;
@@ -150,6 +153,7 @@ public SourceField[] getFieldHandles() {
 /**
  * @see org.eclipse.jdt.internal.compiler.env.IDependent#getFileName()
  */
+@Override
 public char[] getFileName() {
 	return this.handle.getPath().toString().toCharArray();
 }
@@ -186,6 +190,7 @@ public InitializerElementInfo[] getInitializers() {
 /**
  * @see ISourceType
  */
+@Override
 public char[][] getInterfaceNames() {
 	if (isAnonymous()) { // if anonymous type
 		return null;
@@ -196,6 +201,7 @@ public char[][] getInterfaceNames() {
 /**
  * @see ISourceType
  */
+@Override
 public ISourceType[] getMemberTypes() {
 	SourceType[] memberTypeHandles = getMemberTypeHandles();
 	int length = memberTypeHandles.length;
@@ -232,6 +238,7 @@ public SourceType[] getMemberTypeHandles() {
 /**
  * @see ISourceType
  */
+@Override
 public ISourceMethod[] getMethods() {
 	SourceMethod[] methodHandles = getMethodHandles();
 	int length = methodHandles.length;
@@ -265,12 +272,14 @@ public SourceMethod[] getMethodHandles() {
 /**
  * @see org.eclipse.jdt.internal.compiler.env.ISourceType#getName()
  */
+@Override
 public char[] getName() {
 	return this.handle.getElementName().toCharArray();
 }
 /**
  * @see ISourceType
  */
+@Override
 public char[] getSuperclassName() {
 	if (isAnonymous()) { // if anonymous type
 		char[][] interfaceNames = this.superInterfaceNames;
@@ -280,6 +289,7 @@ public char[] getSuperclassName() {
 	}
 	return this.superclassName;
 }
+@Override
 public char[][][] getTypeParameterBounds() {
 	int length = this.typeParameters.length;
 	char[][][] typeParameterBounds = new char[length][][];
@@ -293,6 +303,7 @@ public char[][][] getTypeParameterBounds() {
 	}
 	return typeParameterBounds;
 }
+@Override
 public char[][] getTypeParameterNames() {
 	int length = this.typeParameters.length;
 	if (length == 0) return CharOperation.NO_CHAR_CHAR;
@@ -312,6 +323,7 @@ public boolean isValueParameterAt(int i) {
 /**
  * @see ISourceType
  */
+@Override
 public boolean isBinaryType() {
 	return false;
 }
@@ -348,6 +360,7 @@ protected void setSuperclassName(char[] superclassName) {
 protected void setSuperInterfaceNames(char[][] superInterfaceNames) {
 	this.superInterfaceNames = superInterfaceNames;
 }
+@Override
 public String toString() {
 	return "Info for " + this.handle.toString(); //$NON-NLS-1$
 }

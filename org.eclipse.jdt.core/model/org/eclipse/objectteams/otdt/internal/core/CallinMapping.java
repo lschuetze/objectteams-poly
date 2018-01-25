@@ -100,7 +100,8 @@ public class CallinMapping extends MethodMapping implements ICallinMapping
    		escapeMementoName(buff, this.name);
    		buff.append(OTJavaElement.OTEM_METHODMAPPING);
     }
-    protected char getMappingKindChar() {
+    @Override
+	protected char getMappingKindChar() {
     	switch (this.callinKind) {
     	case ICallinMapping.KIND_AFTER:   return 'a';
     	case ICallinMapping.KIND_BEFORE:  return 'b';
@@ -108,7 +109,8 @@ public class CallinMapping extends MethodMapping implements ICallinMapping
     	default: throw new InternalCompilerError("Unexpected callin kind"); //$NON-NLS-1$
     	}
     }
-    protected void getBaseMethodsForHandle(StringBuffer buff) {
+    @Override
+	protected void getBaseMethodsForHandle(StringBuffer buff) {
     	for (IMethodSpec baseMethod : this.baseMethodHandles)
     		getMethodForHandle(baseMethod, buff);
     }    
@@ -123,7 +125,8 @@ public class CallinMapping extends MethodMapping implements ICallinMapping
 		return OTModelManager.getOTElement((IType)myParent);
 	}
 
-    protected IRoleType getDeclaringRole() {
+    @Override
+	protected IRoleType getDeclaringRole() {
     	return (IRoleType)getParent();
     }
 
@@ -181,15 +184,18 @@ public class CallinMapping extends MethodMapping implements ICallinMapping
 	/**
 	 * @return Does this mapping have a name (aka callin label) in the source code?
 	 */
+	@Override
 	public boolean hasName() {
 		return this.name != null && !this.name.startsWith("<"); // generated names start with '<'. //$NON-NLS-1$
 	}
 	
+	@Override
 	public String getName() {
 		return this.name;
 	}
 
-    public int getMappingKind()
+    @Override
+	public int getMappingKind()
     {
         return CALLIN_MAPPING;
     }
@@ -197,12 +203,14 @@ public class CallinMapping extends MethodMapping implements ICallinMapping
     /**
      * ICallinMapping.KIND_BEFORE,AFTER,REPLACE
      */
-    public int getCallinKind()
+    @Override
+	public int getCallinKind()
     {
         return this.callinKind;
     }
     
-    public boolean hasCovariantReturn() {
+    @Override
+	public boolean hasCovariantReturn() {
     	if (this.baseMethodHandles != null)
     		for (IMethodSpec baseMethod : this.baseMethodHandles) 
 				if (baseMethod.hasCovariantReturn())
@@ -210,12 +218,14 @@ public class CallinMapping extends MethodMapping implements ICallinMapping
 		return false;
     }
 
-    public IMethod[] getBoundBaseMethods() throws JavaModelException
+    @Override
+	public IMethod[] getBoundBaseMethods() throws JavaModelException
     {
         return findBaseMethods();
     }
     
-    public boolean equals(Object obj)
+    @Override
+	public boolean equals(Object obj)
     {
 		if(!(obj instanceof CallinMapping))
 		{
@@ -283,6 +293,7 @@ public class CallinMapping extends MethodMapping implements ICallinMapping
 	}
 	
 	// added for the SourceTypeConverter
+	@Override
 	public IMethodSpec[] getBaseMethodHandles()
 	{
 		return this.baseMethodHandles;
@@ -320,6 +331,7 @@ public class CallinMapping extends MethodMapping implements ICallinMapping
 	}
 
 	// implementation and alternate API of resolved(Binding)
+	@Override
 	public OTJavaElement resolved(char[] uniqueKey) {
 		ResolvedCallinMapping resolvedHandle = 
 			new ResolvedCallinMapping(

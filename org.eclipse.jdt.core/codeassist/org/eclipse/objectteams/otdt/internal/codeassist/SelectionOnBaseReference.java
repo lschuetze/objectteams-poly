@@ -59,13 +59,15 @@ public class SelectionOnBaseReference extends BaseReference
     	super(pos, sourceEnd);
     }
 
-    public StringBuffer printExpression(int indent, StringBuffer output)
+    @Override
+	public StringBuffer printExpression(int indent, StringBuffer output)
     {
     	output.append("<SelectOnBase:"); //$NON-NLS-1$
     	return super.printExpression(0, output).append('>');
     }
 
-    public TypeBinding resolveType(BlockScope scope)
+    @Override
+	public TypeBinding resolveType(BlockScope scope)
     {
     	ReferenceBinding binding = (ReferenceBinding) super.resolveType(scope);
 

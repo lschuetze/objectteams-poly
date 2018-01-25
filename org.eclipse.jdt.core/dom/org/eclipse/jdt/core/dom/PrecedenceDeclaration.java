@@ -75,7 +75,8 @@ public class PrecedenceDeclaration extends ASTNode {
 		super(ast);
 	}
 
-     List internalGetChildListProperty(ChildListPropertyDescriptor property)
+     @Override
+	List internalGetChildListProperty(ChildListPropertyDescriptor property)
      {
     	 if (property == ELEMENTS_PROPERTY) {
     		 return this._elements;

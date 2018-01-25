@@ -191,35 +191,42 @@ public class CalloutMappingDeclaration extends AbstractMethodMappingDeclaration
 			return PROPERTY_DESCRIPTORS_2_0;
 	}
 
+	@Override
 	final SimplePropertyDescriptor internalModifiersProperty()
 	{
 		return MODIFIERS_PROPERTY;
 	}
 
-    final ChildListPropertyDescriptor internalModifiers2Property()
+    @Override
+	final ChildListPropertyDescriptor internalModifiers2Property()
     {
         return MODIFIERS2_PROPERTY;
     }
 
-    final ChildListPropertyDescriptor internalParameterMappingsProperty()
+    @Override
+	final ChildListPropertyDescriptor internalParameterMappingsProperty()
     {
         return PARAMETER_MAPPINGS_PROPERTY;
     }
 
+	@Override
 	ChildPropertyDescriptor internalJavadocProperty()
     {
 		return JAVADOC_PROPERTY;
     }
 
+	@Override
 	public ChildPropertyDescriptor getRoleElementProperty() {
 		return ROLE_MAPPING_ELEMENT_PROPERTY;
 	}
 
+	@Override
 	ChildPropertyDescriptor internalGetBindingOperatorProperty() {
 		return BINDING_OPERATOR_PROPERTY;
 	}
 
-    final int internalGetSetIntProperty(SimplePropertyDescriptor property, boolean isGetRequest, int value)
+    @Override
+	final int internalGetSetIntProperty(SimplePropertyDescriptor property, boolean isGetRequest, int value)
 	{
 		if (property == MODIFIERS_PROPERTY)
 		{
@@ -237,7 +244,8 @@ public class CalloutMappingDeclaration extends AbstractMethodMappingDeclaration
 		return super.internalGetSetIntProperty(property, isGetRequest, value);
 	}
 
-    final ASTNode internalGetSetChildProperty(ChildPropertyDescriptor property, boolean isGet, ASTNode child)
+    @Override
+	final ASTNode internalGetSetChildProperty(ChildPropertyDescriptor property, boolean isGet, ASTNode child)
 	{
    	    if (property == JAVADOC_PROPERTY)
 		{
@@ -268,7 +276,8 @@ public class CalloutMappingDeclaration extends AbstractMethodMappingDeclaration
 		return super.internalGetSetChildProperty(property, isGet, child);
 	}
 
-    final boolean internalGetSetBooleanProperty(SimplePropertyDescriptor property, boolean get, boolean value)
+    @Override
+	final boolean internalGetSetBooleanProperty(SimplePropertyDescriptor property, boolean get, boolean value)
 	{
 		if (property == SIGNATURE_PROPERTY)
 		{
@@ -285,7 +294,8 @@ public class CalloutMappingDeclaration extends AbstractMethodMappingDeclaration
 		return super.internalGetSetBooleanProperty(property, get, value);
 	}
 
-    final List internalGetChildListProperty(ChildListPropertyDescriptor property)
+    @Override
+	final List internalGetChildListProperty(ChildListPropertyDescriptor property)
 	{
 		if (property == PARAMETER_MAPPINGS_PROPERTY)
 		{
@@ -300,16 +310,19 @@ public class CalloutMappingDeclaration extends AbstractMethodMappingDeclaration
 		return super.internalGetChildListProperty(property);
 	}
 
-    List internalStructuralPropertiesForType(int apiLevel)
+    @Override
+	List internalStructuralPropertiesForType(int apiLevel)
     {
 		return propertyDescriptors(apiLevel);
     }
 
-    int getNodeType0()
+    @Override
+	int getNodeType0()
     {
         return CALLOUT_MAPPING_DECLARATION;
     }
 
+	@Override
 	ASTNode clone0(AST target)
     {
         CalloutMappingDeclaration result = new CalloutMappingDeclaration(target);
@@ -330,13 +343,15 @@ public class CalloutMappingDeclaration extends AbstractMethodMappingDeclaration
 		return result;
     }
 
-    boolean subtreeMatch0(ASTMatcher matcher, Object other)
+    @Override
+	boolean subtreeMatch0(ASTMatcher matcher, Object other)
     {
 		// dispatch to correct overloaded match method
 		return matcher.match(this, other);
     }
 
-    void accept0(ASTVisitor visitor)
+    @Override
+	void accept0(ASTVisitor visitor)
     {
 		boolean visitChildren = visitor.visit(this);
 		if (visitChildren)
@@ -353,7 +368,8 @@ public class CalloutMappingDeclaration extends AbstractMethodMappingDeclaration
 		visitor.endVisit(this);
     }
 
-    int treeSize()
+    @Override
+	int treeSize()
     {
 		return memSize() + (super.optionalDocComment == null
                 ? 0
@@ -423,6 +439,7 @@ public class CalloutMappingDeclaration extends AbstractMethodMappingDeclaration
 		return this.bindingOperator().getBindingKind() == MethodBindingOperator.KIND_CALLOUT_OVERRIDE;
 	}
 
+	@Override
 	public boolean hasSignature()
 	{
 		return this.hasSignature;

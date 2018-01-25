@@ -351,7 +351,8 @@ public class TypeDeclaration extends AbstractTypeDeclaration {
 	 * @since 3.0
 	 */
 //{ObjectTeams: RoleTypeDeclaration can not inherit all methods, so final modifier removed
-    /*final*/ List internalStructuralPropertiesForType(int apiLevel) {
+    /*final*/ @Override
+	List internalStructuralPropertiesForType(int apiLevel) {
 		return propertyDescriptors(apiLevel);
 	}
 //ike}
@@ -360,7 +361,8 @@ public class TypeDeclaration extends AbstractTypeDeclaration {
 	 * Method declared on ASTNode.
 	 */
 //  {ObjectTeams: RoleTypeDeclaration can not inherit all methods, so final modifier removed
-    /*final*/ int internalGetSetIntProperty(SimplePropertyDescriptor property, boolean get, int value) {
+    /*final*/ @Override
+	int internalGetSetIntProperty(SimplePropertyDescriptor property, boolean get, int value) {
 //      ike}
 		if (property == MODIFIERS_PROPERTY) {
 			if (get) {
@@ -378,7 +380,8 @@ public class TypeDeclaration extends AbstractTypeDeclaration {
 	 * Method declared on ASTNode.
 	 */
 //  {ObjectTeams: RoleTypeDeclaration can not inherit all methods, so final modifier removed
-    /*final*/ boolean internalGetSetBooleanProperty(SimplePropertyDescriptor property, boolean get, boolean value) {
+    /*final*/ @Override
+	boolean internalGetSetBooleanProperty(SimplePropertyDescriptor property, boolean get, boolean value) {
 //  ike}
 		if (property == INTERFACE_PROPERTY) {
 			if (get) {
@@ -422,7 +425,8 @@ public class TypeDeclaration extends AbstractTypeDeclaration {
 	 * Method declared on ASTNode.
 	 */
 //  {ObjectTeams: RoleTypeDeclaration can not inherit all methods, so final modifier removed
-    /*final*/ ASTNode internalGetSetChildProperty(ChildPropertyDescriptor property, boolean get, ASTNode child) {
+    /*final*/ @Override
+	ASTNode internalGetSetChildProperty(ChildPropertyDescriptor property, boolean get, ASTNode child) {
 //      ike}
 		if (property == JAVADOC_PROPERTY) {
 			if (get) {
@@ -475,7 +479,8 @@ public class TypeDeclaration extends AbstractTypeDeclaration {
 	 * Method declared on ASTNode.
 	 */
 //  {ObjectTeams: RoleTypeDeclaration can not inherit all methods, so final modifier removed
-    /*final*/ List internalGetChildListProperty(ChildListPropertyDescriptor property)
+    /*final*/ @Override
+	List internalGetChildListProperty(ChildListPropertyDescriptor property)
 //  ike}
     {
 		if (property == MODIFIERS2_PROPERTY) {
@@ -506,7 +511,8 @@ public class TypeDeclaration extends AbstractTypeDeclaration {
 	 * Method declared on BodyDeclaration.
 	 */
 //{ObjectTeams: RoleTypeDeclaration can not inherit all methods, so final modifier removed
-    /*final*/  ChildPropertyDescriptor internalJavadocProperty()
+    /*final*/  @Override
+	ChildPropertyDescriptor internalJavadocProperty()
     {
 //ike}
 		return JAVADOC_PROPERTY;
@@ -516,7 +522,8 @@ public class TypeDeclaration extends AbstractTypeDeclaration {
 	 * Method declared on BodyDeclaration.
 	 */
 //{ObjectTeams: RoleTypeDeclaration can not inherit all methods, so final modifier removed
-    /*final*/  ChildListPropertyDescriptor internalModifiers2Property()
+    /*final*/  @Override
+	ChildListPropertyDescriptor internalModifiers2Property()
     {
 //ike}
 		return MODIFIERS2_PROPERTY;
@@ -526,7 +533,8 @@ public class TypeDeclaration extends AbstractTypeDeclaration {
 	 * Method declared on BodyDeclaration.
 	 */
 //{ObjectTeams: RoleTypeDeclaration can not inherit all methods, so final modifier removed
-    /*final*/  SimplePropertyDescriptor internalModifiersProperty()
+    /*final*/  @Override
+	SimplePropertyDescriptor internalModifiersProperty()
     {
 //ike}
 		return MODIFIERS_PROPERTY;
@@ -536,7 +544,8 @@ public class TypeDeclaration extends AbstractTypeDeclaration {
 	 * Method declared on AbstractTypeDeclaration.
 	 */
 //{ObjectTeams: RoleTypeDeclaration can not inherit all methods, so final modifier removed
-    /*final*/  ChildPropertyDescriptor internalNameProperty()
+    /*final*/  @Override
+	ChildPropertyDescriptor internalNameProperty()
     {
 //ike}
 		return NAME_PROPERTY;
@@ -555,7 +564,8 @@ public class TypeDeclaration extends AbstractTypeDeclaration {
 	 * Method declared on AbstractTypeDeclaration.
 	 */
 //{ObjectTeams: RoleTypeDeclaration can not inherit all methods, so final modifier removed
-    /*final*/  ChildListPropertyDescriptor internalBodyDeclarationsProperty()
+    /*final*/  @Override
+	ChildListPropertyDescriptor internalBodyDeclarationsProperty()
     {
 //ike}
 		return BODY_DECLARATIONS_PROPERTY;
@@ -566,7 +576,8 @@ public class TypeDeclaration extends AbstractTypeDeclaration {
 	 * Method declared on ASTNode.
 	 */
 //{ObjectTeams: RoleTypeDeclaration can not inherit all methods, so final modifier removed
-    /*final*/ int getNodeType0()
+    /*final*/ @Override
+	int getNodeType0()
     {
 //ike}
 		return TYPE_DECLARATION;
@@ -575,6 +586,7 @@ public class TypeDeclaration extends AbstractTypeDeclaration {
 	/* (omit javadoc for this method)
 	 * Method declared on ASTNode.
 	 */
+	@Override
 	ASTNode clone0(AST target) {
 		TypeDeclaration result = new TypeDeclaration(target);
 		result.setSourceRange(getStartPosition(), getLength());
@@ -613,7 +625,8 @@ public class TypeDeclaration extends AbstractTypeDeclaration {
 	 * Method declared on ASTNode.
 	 */
 //  {ObjectTeams: RoleTypeDeclaration can not inherit all methods, so final modifier removed
-    /*final*/ boolean subtreeMatch0(ASTMatcher matcher, Object other) {
+    /*final*/ @Override
+	boolean subtreeMatch0(ASTMatcher matcher, Object other) {
 //ike}
 		// dispatch to correct overloaded match method
 		return matcher.match(this, other);
@@ -622,6 +635,7 @@ public class TypeDeclaration extends AbstractTypeDeclaration {
 	/* (omit javadoc for this method)
 	 * Method declared on ASTNode.
 	 */
+	@Override
 	void accept0(ASTVisitor visitor) {
 		boolean visitChildren = visitor.visit(this);
 		if (visitChildren) {
@@ -1057,6 +1071,7 @@ public class TypeDeclaration extends AbstractTypeDeclaration {
 	/* (omit javadoc for this method)
 	 * Method declared on AsbtractTypeDeclaration.
 	 */
+	@Override
 	ITypeBinding internalResolveBinding() {
 		return this.ast.getBindingResolver().resolveType(this);
 	}
@@ -1064,6 +1079,7 @@ public class TypeDeclaration extends AbstractTypeDeclaration {
 	/* (omit javadoc for this method)
 	 * Method declared on ASTNode.
 	 */
+	@Override
 	int memSize() {
 		return super.memSize() + 6 * 4;
 	}
@@ -1071,6 +1087,7 @@ public class TypeDeclaration extends AbstractTypeDeclaration {
 	/* (omit javadoc for this method)
 	 * Method declared on ASTNode.
 	 */
+	@Override
 	int treeSize() {
 		return memSize()
 			+ (this.optionalDocComment == null ? 0 : getJavadoc().treeSize())

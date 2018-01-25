@@ -94,6 +94,7 @@ public class CaptureBinding extends TypeVariableBinding {
 	}
 	
 	// Captures may get cloned and annotated during type inference.
+	@Override
 	public TypeBinding clone(TypeBinding enclosingType) {
 		return new CaptureBinding(this);
 	}
@@ -103,6 +104,7 @@ public class CaptureBinding extends TypeVariableBinding {
 	 * p.X { capture of ? } --> !*123; (Lp/X; in declaring type except if leaf)
 	 * p.X { capture of ? extends p.Y } --> !+Lp/Y;123; (Lp/X; in declaring type except if leaf)
 	 */
+	@Override
 	public char[] computeUniqueKey(boolean isLeaf) {
 		StringBuffer buffer = new StringBuffer();
 		if (isLeaf) {
@@ -119,6 +121,7 @@ public class CaptureBinding extends TypeVariableBinding {
 		return uniqueKey;
 	}
 
+	@Override
 	public String debugName() {
 
 		if (this.wildcard != null) {
@@ -138,6 +141,7 @@ public class CaptureBinding extends TypeVariableBinding {
 		return super.debugName();
 	}
 
+	@Override
 	public char[] genericTypeSignature() {
 		// captures have no signature per JVMS 4.7.9.1, approximate one by erasure:
 		if (this.inRecursiveFunction) {
@@ -282,6 +286,7 @@ public class CaptureBinding extends TypeVariableBinding {
 	/**
 	 * @see org.eclipse.jdt.internal.compiler.lookup.TypeBinding#isCapture()
 	 */
+	@Override
 	public boolean isCapture() {
 		return true;
 	}
@@ -289,6 +294,7 @@ public class CaptureBinding extends TypeVariableBinding {
 	/**
 	 * @see TypeBinding#isEquivalentTo(TypeBinding)
 	 */
+	@Override
 	public boolean isEquivalentTo(TypeBinding otherType) {
 	    if (equalsEquals(this, otherType)) return true;
 	    if (otherType == null) return false;
@@ -314,6 +320,7 @@ public class CaptureBinding extends TypeVariableBinding {
 		return super.isProperType(admitCapture18);
 	}
 
+	@Override
 	public char[] readableName() {
 		if (this.wildcard != null) {
 			StringBuffer buffer = new StringBuffer(10);
@@ -330,6 +337,7 @@ public class CaptureBinding extends TypeVariableBinding {
 		return super.readableName();
 	}
 	
+	@Override
 	public char[] signableName() {
 		if (this.wildcard != null) {
 			StringBuffer buffer = new StringBuffer(10);
@@ -344,6 +352,7 @@ public class CaptureBinding extends TypeVariableBinding {
 		return super.readableName();
 	}
 
+	@Override
 	public char[] shortReadableName() {
 		if (this.wildcard != null) {
 			StringBuffer buffer = new StringBuffer(10);
@@ -482,6 +491,7 @@ public class CaptureBinding extends TypeVariableBinding {
 		return derived;
 	}
 
+	@Override
 	public String toString() {
 		if (this.wildcard != null) {
 			StringBuffer buffer = new StringBuffer(10);

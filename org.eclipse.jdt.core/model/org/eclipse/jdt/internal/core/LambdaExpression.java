@@ -144,10 +144,12 @@ public class LambdaExpression extends SourceType {
 		return elementInfo;
 	}
 	
+	@Override
 	protected void closing(Object info) throws JavaModelException {
 		// nothing to do, not backed by model ATM.
 	}
 	
+	@Override
 	public boolean equals(Object o) {
 		if (this == o)
 			return true;
@@ -166,14 +168,17 @@ public class LambdaExpression extends SourceType {
 		return false;
 	}
 	
+	@Override
 	public int hashCode() {
 		return Util.combineHashCodes(super.hashCode(), this.sourceStart);
 	}
 	
+	@Override
 	public Object getElementInfo(IProgressMonitor monitor) throws JavaModelException {
 		return this.elementInfo;
 	}
 
+	@Override
 	protected char getHandleMementoDelimiter() {
 		return JavaElement.JEM_LAMBDA_EXPRESSION;
 	}
@@ -181,6 +186,7 @@ public class LambdaExpression extends SourceType {
 	/*
 	 * @see JavaElement#getHandleMemento(StringBuffer)
 	 */
+	@Override
 	protected void getHandleMemento(StringBuffer buff) {
 		getHandleMemento(buff, true, true);
 		// lambda method and lambda expression cannot share the same memento - add a trailing discriminator.
@@ -203,6 +209,7 @@ public class LambdaExpression extends SourceType {
 			this.lambdaMethod.getHandleMemento(buff, false);
 	}
 	
+	@Override
 	public IJavaElement getHandleFromMemento(String token, MementoTokenizer memento, WorkingCopyOwner workingCopyOwner) {
 
 		if (token.charAt(0) != JEM_LAMBDA_METHOD)
@@ -246,14 +253,17 @@ public class LambdaExpression extends SourceType {
 		}
 	}
 
+	@Override
 	public IJavaElement[] getChildren() throws JavaModelException {
 		return new IJavaElement[] { this.lambdaMethod };
 	}
 
+	@Override
 	public boolean isLocal() {
 		return true;
 	}
 	
+	@Override
 	public JavaElement resolved(Binding binding) {
 		ResolvedLambdaExpression resolvedHandle = new ResolvedLambdaExpression(this.parent, this, new String(binding.computeUniqueKey()));
 		return resolvedHandle;
@@ -273,6 +283,7 @@ public class LambdaExpression extends SourceType {
 		return false;
 	}
 
+	@Override
 	public void toStringName(StringBuffer buffer) {
 		super.toStringName(buffer);
 		buffer.append("<lambda #"); //$NON-NLS-1$
@@ -297,6 +308,7 @@ public class LambdaExpression extends SourceType {
 		return this;
 	}
 
+	@Override
 	public String[] getSuperInterfaceTypeSignatures() throws JavaModelException {
 		return new String[] { this.interphase };
 	}

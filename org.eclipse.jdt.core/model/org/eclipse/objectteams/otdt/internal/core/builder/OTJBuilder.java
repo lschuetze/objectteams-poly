@@ -43,6 +43,7 @@ public class OTJBuilder extends JavaBuilder {
 	/** 
 	 * Create and initialize a matching IncrementalImageBuilder.
 	 */
+	@Override
 	protected IncrementalImageBuilder makeImageBuilder(SimpleLookupTable deltas) {
 		return new OTJIncrementalImageBuilder(this);
 	}

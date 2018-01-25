@@ -286,6 +286,7 @@ public MethodPattern(
 	this.methodArguments = arguments;
 	if (hasMethodArguments())  this.mustResolve = true;
 }
+@Override
 public void decodeIndexKey(char[] key) {
 	int last = key.length - 1;
 	this.parameterCount = 0;
@@ -304,9 +305,11 @@ public void decodeIndexKey(char[] key) {
 		}
 	}
 }
+@Override
 public SearchPattern getBlankPattern() {
 	return new MethodPattern(R_EXACT_MATCH | R_CASE_SENSITIVE);
 }
+@Override
 public char[][] getIndexCategories() {
 	if (this.findReferences)
 		return this.findDeclarations ? REF_AND_DECL_CATEGORIES : REF_CATEGORIES;
@@ -320,9 +323,11 @@ boolean hasMethodArguments() {
 boolean hasMethodParameters() {
 	return this.methodParameters;
 }
+@Override
 public boolean isPolymorphicSearch() {
 	return this.findReferences;
 }
+@Override
 public boolean matchesDecodedKey(SearchPattern decodedPattern) {
 	MethodPattern pattern = (MethodPattern) decodedPattern;
 
@@ -352,6 +357,7 @@ protected boolean mustResolve() {
 			if (this.parameterQualifications[i] != null) return true;
 	return false;
 }
+@Override
 public EntryResult[] queryIn(Index index) throws IOException {
 	char[] key = this.selector; // can be null
 //{ObjectTeams: we may need a second key to query methodspecs without signature (param count unknown)
@@ -419,6 +425,7 @@ public EntryResult[] queryIn(Index index) throws IOException {
 //jsv}
 
 }
+@Override
 protected StringBuffer print(StringBuffer output) {
 	if (this.findDeclarations) {
 		output.append(this.findReferences

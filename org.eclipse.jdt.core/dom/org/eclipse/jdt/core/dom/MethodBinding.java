@@ -61,6 +61,7 @@ class MethodBinding implements IMethodBinding {
 		this.binding = binding;
 	}
 
+	@Override
 	public boolean isAnnotationMember() {
 		return getDeclaringClass().isAnnotation();
 	}
@@ -68,6 +69,7 @@ class MethodBinding implements IMethodBinding {
 	/**
 	 * @see IMethodBinding#isConstructor()
 	 */
+	@Override
 	public boolean isConstructor() {
 		return this.binding.isConstructor();
 	}
@@ -76,6 +78,7 @@ class MethodBinding implements IMethodBinding {
 	 * @see IMethodBinding#isDefaultConstructor()
 	 * @since 3.0
 	 */
+	@Override
 	public boolean isDefaultConstructor() {
 		final ReferenceBinding declaringClassBinding = this.binding.declaringClass;
 		if (declaringClassBinding.isRawType()) {
@@ -99,6 +102,7 @@ class MethodBinding implements IMethodBinding {
 	/**
 	 * @see IBinding#getName()
 	 */
+	@Override
 	public String getName() {
 		if (this.name == null) {
 			if (this.binding.isConstructor()) {
@@ -110,6 +114,7 @@ class MethodBinding implements IMethodBinding {
 		return this.name;
 	}
 
+	@Override
 	public IAnnotationBinding[] getAnnotations() {
 		if (this.annotations != null) {
 			return this.annotations;
@@ -121,6 +126,7 @@ class MethodBinding implements IMethodBinding {
 	/**
 	 * @see IMethodBinding#getDeclaringClass()
 	 */
+	@Override
 	public ITypeBinding getDeclaringClass() {
 		if (this.declaringClass == null) {
 //{ObjectTeams: a role-ifc-method representing a one that is inherited from a non-role?
@@ -141,6 +147,7 @@ class MethodBinding implements IMethodBinding {
 		return null;
 	}
 
+	@Override
 	public IAnnotationBinding[] getParameterAnnotations(int index) {
 		if (getParameterTypes() == NO_TYPE_BINDINGS) {
 			return AnnotationBinding.NoAnnotations;
@@ -174,6 +181,7 @@ class MethodBinding implements IMethodBinding {
 	/**
 	 * @see IMethodBinding#getParameterTypes()
 	 */
+	@Override
 	public ITypeBinding[] getParameterTypes() {
 		if (this.parameterTypes != null) {
 			return this.parameterTypes;
@@ -212,12 +220,14 @@ class MethodBinding implements IMethodBinding {
 	/**
 	 * @see IMethodBinding#getDeclaredReceiverType()
 	 */
+	@Override
 	public ITypeBinding getDeclaredReceiverType() {
 		return this.resolver.getTypeBinding(this.binding.receiver);
 	}
 	/**
 	 * @see IMethodBinding#getReturnType()
 	 */
+	@Override
 	public ITypeBinding getReturnType() {
 		if (this.returnType == null) {
 //{ObjectTeams: retrench callin method:
@@ -263,6 +273,7 @@ class MethodBinding implements IMethodBinding {
 		return AnnotationBinding.NoAnnotations;
 	}
 
+	@Override
 	public Object getDefaultValue() {
 		if (isAnnotationMember())
 			return MemberValuePairBinding.buildDOMValue(this.binding.getDefaultValue(), this.resolver);
@@ -272,6 +283,7 @@ class MethodBinding implements IMethodBinding {
 	/**
 	 * @see IMethodBinding#getExceptionTypes()
 	 */
+	@Override
 	public ITypeBinding[] getExceptionTypes() {
 		if (this.exceptionTypes != null) {
 			return this.exceptionTypes;
@@ -292,6 +304,7 @@ class MethodBinding implements IMethodBinding {
 		return this.exceptionTypes = exTypes;
 	}
 
+	@Override
 	public IJavaElement getJavaElement() {
 		JavaElement element = getUnresolvedJavaElement();
 		if (element == null)
@@ -316,6 +329,7 @@ class MethodBinding implements IMethodBinding {
 	/**
 	 * @see IBinding#getKind()
 	 */
+	@Override
 	public int getKind() {
 		return IBinding.METHOD;
 	}
@@ -323,6 +337,7 @@ class MethodBinding implements IMethodBinding {
 	/**
 	 * @see IBinding#getModifiers()
 	 */
+	@Override
 	public int getModifiers() {
 		return this.binding.getAccessFlags() & VALID_MODIFIERS;
 	}
@@ -330,6 +345,7 @@ class MethodBinding implements IMethodBinding {
 	/**
 	 * @see IBinding#isDeprecated()
 	 */
+	@Override
 	public boolean isDeprecated() {
 		return this.binding.isDeprecated();
 	}
@@ -337,6 +353,7 @@ class MethodBinding implements IMethodBinding {
 	/**
 	 * @see IBinding#isRecovered()
 	 */
+	@Override
 	public boolean isRecovered() {
 		return false;
 	}
@@ -344,6 +361,7 @@ class MethodBinding implements IMethodBinding {
 	/**
 	 * @see IBinding#isSynthetic()
 	 */
+	@Override
 	public boolean isSynthetic() {
 		return this.binding.isSynthetic();
 	}
@@ -352,6 +370,7 @@ class MethodBinding implements IMethodBinding {
 	 * @see org.eclipse.jdt.core.dom.IMethodBinding#isVarargs()
 	 * @since 3.1
 	 */
+	@Override
 	public boolean isVarargs() {
 		return this.binding.isVarargs();
 	}
@@ -359,6 +378,7 @@ class MethodBinding implements IMethodBinding {
 	/**
 	 * @see IBinding#getKey()
 	 */
+	@Override
 	public String getKey() {
 		if (this.key == null) {
 			this.key = new String(this.binding.computeUniqueKey());
@@ -370,6 +390,7 @@ class MethodBinding implements IMethodBinding {
 	 * @see IBinding#isEqualTo(IBinding)
 	 * @since 3.1
 	 */
+	@Override
 	public boolean isEqualTo(IBinding other) {
 		if (other == this) {
 			// identical binding - equal (key or no key)
@@ -389,6 +410,7 @@ class MethodBinding implements IMethodBinding {
 	/**
 	 * @see org.eclipse.jdt.core.dom.IMethodBinding#getTypeParameters()
 	 */
+	@Override
 	public ITypeBinding[] getTypeParameters() {
 		if (this.typeParameters != null) {
 			return this.typeParameters;
@@ -413,6 +435,7 @@ class MethodBinding implements IMethodBinding {
 	 * @see org.eclipse.jdt.core.dom.IMethodBinding#isGenericMethod()
 	 * @since 3.1
 	 */
+	@Override
 	public boolean isGenericMethod() {
 		// equivalent to return getTypeParameters().length > 0;
 		if (this.typeParameters != null) {
@@ -425,6 +448,7 @@ class MethodBinding implements IMethodBinding {
 	/**
 	 * @see org.eclipse.jdt.core.dom.IMethodBinding#getTypeArguments()
 	 */
+	@Override
 	public ITypeBinding[] getTypeArguments() {
 		if (this.typeArguments != null) {
 			return this.typeArguments;
@@ -452,6 +476,7 @@ class MethodBinding implements IMethodBinding {
 	/**
 	 * @see org.eclipse.jdt.core.dom.IMethodBinding#isParameterizedMethod()
 	 */
+	@Override
 	public boolean isParameterizedMethod() {
 		return (this.binding instanceof ParameterizedGenericMethodBinding)
 			&& !((ParameterizedGenericMethodBinding) this.binding).isRaw;
@@ -460,11 +485,13 @@ class MethodBinding implements IMethodBinding {
 	/**
 	 * @see org.eclipse.jdt.core.dom.IMethodBinding#isRawMethod()
 	 */
+	@Override
 	public boolean isRawMethod() {
 		return (this.binding instanceof ParameterizedGenericMethodBinding)
 			&& ((ParameterizedGenericMethodBinding) this.binding).isRaw;
 	}
 
+	@Override
 	public boolean isSubsignature(IMethodBinding otherMethod) {
 		try {
 			LookupEnvironment lookupEnvironment = this.resolver.lookupEnvironment();
@@ -480,6 +507,7 @@ class MethodBinding implements IMethodBinding {
 	/**
 	 * @see org.eclipse.jdt.core.dom.IMethodBinding#getMethodDeclaration()
 	 */
+	@Override
 	public IMethodBinding getMethodDeclaration() {
 		return this.resolver.getMethodBinding(this.binding.original());
 	}
@@ -487,6 +515,7 @@ class MethodBinding implements IMethodBinding {
 	/**
 	 * @see IMethodBinding#overrides(IMethodBinding)
 	 */
+	@Override
 	public boolean overrides(IMethodBinding otherMethod) {
 			LookupEnvironment lookupEnvironment = this.resolver.lookupEnvironment();
 			return lookupEnvironment != null
@@ -497,10 +526,12 @@ class MethodBinding implements IMethodBinding {
 	 * For debugging purpose only.
 	 * @see java.lang.Object#toString()
 	 */
+	@Override
 	public String toString() {
 		return this.binding.toString();
 	}
 //{ObjectTeams: new query:
+	@Override
 	public boolean isCopied() {
 		return this.binding.copyInheritanceSrc != null;
 	}
@@ -530,6 +561,7 @@ class MethodBinding implements IMethodBinding {
 		/**
 		 * @see IBinding#getModifiers()
 		 */
+		@Override
 		public int getModifiers() {
 			return super.getModifiers() & ~ClassFileConstants.AccAbstract;
 		}
@@ -537,6 +569,7 @@ class MethodBinding implements IMethodBinding {
 		/**
 		 * @see IBinding#getKey()
 		 */
+		@Override
 		public String getKey() {
 			return this.implementation.getKey();
 		}
@@ -551,6 +584,7 @@ class MethodBinding implements IMethodBinding {
 			return this.implementation.getParameterAnnotations(paramIndex);
 		}
 
+		@Override
 		public IAnnotationBinding[] getAnnotations() {
 			return this.implementation.getAnnotations();
 		}

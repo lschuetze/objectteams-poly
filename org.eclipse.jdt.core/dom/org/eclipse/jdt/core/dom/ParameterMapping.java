@@ -132,12 +132,14 @@ public class ParameterMapping extends Expression
 	 * @return a list of property descriptors (element type:
 	 * {@link StructuralPropertyDescriptor})
 	 */
+	@Override
 	List internalStructuralPropertiesForType(int apiLevel)
 	{
 		return PROPERTY_DESCRIPTORS_2_0;
 	}
 
-    final ASTNode internalGetSetChildProperty(
+    @Override
+	final ASTNode internalGetSetChildProperty(
         				ChildPropertyDescriptor property,
         				boolean isGet,
         				ASTNode child)
@@ -171,6 +173,7 @@ public class ParameterMapping extends Expression
 		return super.internalGetSetChildProperty(property, isGet, child);
 	}
 
+	@Override
 	final boolean internalGetSetBooleanProperty(
 	    				SimplePropertyDescriptor property,
 	    				boolean isGet,
@@ -194,6 +197,7 @@ public class ParameterMapping extends Expression
 	/* (non-Javadoc)
 	 * @see org.eclipse.jdt.core.dom.ASTNode#internalGetSetObjectProperty(org.eclipse.jdt.core.dom.SimplePropertyDescriptor, boolean, java.lang.Object)
 	 */
+	@Override
 	final Object internalGetSetObjectProperty(
 	        			SimplePropertyDescriptor property,
 	        			boolean isGet,
@@ -318,6 +322,7 @@ public class ParameterMapping extends Expression
 	/* (non-Javadoc)
 	 * @see org.eclipse.jdt.core.dom.ASTNode#getNodeType0()
 	 */
+	@Override
 	int getNodeType0()
 	{
 		return ASTNode.PARAMETER_MAPPING;
@@ -326,6 +331,7 @@ public class ParameterMapping extends Expression
 	/* (non-Javadoc)
 	 * @see org.eclipse.jdt.core.dom.ASTNode#subtreeMatch0(org.eclipse.jdt.core.dom.ASTMatcher, java.lang.Object)
 	 */
+	@Override
 	boolean subtreeMatch0(ASTMatcher matcher, Object other)
 	{
 		// dispatch to correct overloaded match method
@@ -335,6 +341,7 @@ public class ParameterMapping extends Expression
 	/* (non-Javadoc)
 	 * @see org.eclipse.jdt.core.dom.ASTNode#clone0(org.eclipse.jdt.core.dom.AST)
 	 */
+	@Override
 	ASTNode clone0(AST target)
 	{
 		ParameterMapping result = new ParameterMapping(target);
@@ -350,6 +357,7 @@ public class ParameterMapping extends Expression
 	/* (non-Javadoc)
 	 * @see org.eclipse.jdt.core.dom.ASTNode#accept0(org.eclipse.jdt.core.dom.ASTVisitor)
 	 */
+	@Override
 	void accept0(ASTVisitor visitor)
 	{
 		boolean visitChildren = visitor.visit(this);
@@ -371,6 +379,7 @@ public class ParameterMapping extends Expression
 	/* (non-Javadoc)
 	 * @see org.eclipse.jdt.core.dom.ASTNode#treeSize()
 	 */
+	@Override
 	int treeSize()
 	{
 		return memSize() + getExpression().treeSize();
@@ -379,6 +388,7 @@ public class ParameterMapping extends Expression
 	/* (non-Javadoc)
 	 * @see org.eclipse.jdt.core.dom.ASTNode#memSize()
 	 */
+	@Override
 	int memSize()
 	{
 		return BASE_NODE_SIZE + 4 * 4;

@@ -137,12 +137,14 @@ public class SmapStratum
         return out.toString();
     }
 
-    public String toString()
+    @Override
+	public String toString()
     {
         return getSmapAsString();
     }
 
-    public boolean equals(Object obj)
+    @Override
+	public boolean equals(Object obj)
     {
         if (!(obj instanceof SmapStratum))
         {

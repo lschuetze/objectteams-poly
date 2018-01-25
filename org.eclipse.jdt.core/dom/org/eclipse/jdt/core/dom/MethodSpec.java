@@ -214,11 +214,13 @@ public class MethodSpec extends MethodMappingElement implements IMethodNode
 		postValueChange(COVARIANT_RETURN_PROPERTY);
 	}
 
+	@Override
 	final List internalStructuralPropertiesForType(int apiLevel)
 	{
 		return propertyDescriptors(apiLevel);
 	}
 
+	@Override
 	final boolean internalGetSetBooleanProperty(SimplePropertyDescriptor property, boolean get, boolean value)
 	{
 		if (property == SIGNATURE_PROPERTY)
@@ -243,6 +245,7 @@ public class MethodSpec extends MethodMappingElement implements IMethodNode
 		return super.internalGetSetBooleanProperty(property, get, value);
 	}
 
+	@Override
 	final ASTNode internalGetSetChildProperty(ChildPropertyDescriptor property, boolean get, ASTNode child)
 	{
 		if (property == NAME_PROPERTY)
@@ -283,6 +286,7 @@ public class MethodSpec extends MethodMappingElement implements IMethodNode
 		return super.internalGetSetChildProperty(property, get, child);
 	}
 
+	@Override
 	final List internalGetChildListProperty(ChildListPropertyDescriptor property)
 	{
 		if (property == TYPE_PARAMETERS_PROPERTY) {
@@ -301,19 +305,23 @@ public class MethodSpec extends MethodMappingElement implements IMethodNode
         return null;
     }
 
-    public SimplePropertyDescriptor signatureProperty() {
+    @Override
+	public SimplePropertyDescriptor signatureProperty() {
 		return SIGNATURE_PROPERTY;
 	}
 
+	@Override
 	ChildPropertyDescriptor internalNameProperty() {
 		return NAME_PROPERTY;
 	}
 
+	@Override
 	final int getNodeType0()
 	{
 		return METHOD_SPEC;
 	}
 
+	@Override
 	@SuppressWarnings("unchecked")
 	ASTNode clone0(AST target)
 	{
@@ -339,12 +347,14 @@ public class MethodSpec extends MethodMappingElement implements IMethodNode
 		return result;
 	}
 
+	@Override
 	final boolean subtreeMatch0(ASTMatcher matcher, Object other)
 	{
 		// dispatch to correct overloaded match method
 		return matcher.match(this, other);
 	}
 
+	@Override
 	void accept0(ASTVisitor visitor)
 	{
 		boolean visitChildren = visitor.visit(this);
@@ -374,6 +384,7 @@ public class MethodSpec extends MethodMappingElement implements IMethodNode
 	 * @return the live list of method parameter declarations
 	 *    (element type: <code>SingleVariableDeclaration</code>)
 	 */
+	@Override
 	public List parameters() {
 		return this.parameters;
 	}
@@ -388,6 +399,7 @@ public class MethodSpec extends MethodMappingElement implements IMethodNode
 	 * a JLS2 AST
 	 * @since OTDT 1.1.3
 	 */
+	@Override
 	public List typeParameters() {
 		// more efficient than just calling unsupportedIn2() to check
 		if (this.typeParameters == null) {
@@ -485,6 +497,7 @@ public class MethodSpec extends MethodMappingElement implements IMethodNode
 	 * a JLS2 AST
 	 * @since 3.1
 	 */
+	@Override
 	public Type getReturnType2() {
 	    unsupportedIn2();
 		return this.returnType;
@@ -512,6 +525,7 @@ public class MethodSpec extends MethodMappingElement implements IMethodNode
 	 * </ul>
 	 * @since 3.1
 	 */
+	@Override
 	public void setReturnType2(Type type) {
 	    unsupportedIn2();
 		ASTNode oldChild = this.returnType;
@@ -521,11 +535,13 @@ public class MethodSpec extends MethodMappingElement implements IMethodNode
 	}
 
 
+	@Override
 	int memSize()
 	{
 		return BASE_NODE_SIZE + 3 * 4;
 	}
 
+	@Override
 	int treeSize()
 	{
 		return memSize()

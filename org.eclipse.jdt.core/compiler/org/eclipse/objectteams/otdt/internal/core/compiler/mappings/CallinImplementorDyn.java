@@ -258,7 +258,8 @@ public class CallinImplementorDyn extends MethodMappingImplementor {
 			// (CallinMethodMappingsAttribute needs to know whether lifting is actually needed.)
 			if (methodMapping.mappings != null && pos != -1 && liftExpr instanceof PotentialLiftExpression) {
 				final int srcPos = pos;
-				((PotentialLiftExpression)liftExpr).onLiftingRequired(new Runnable() {public void run() {
+				((PotentialLiftExpression)liftExpr).onLiftingRequired(new Runnable() {@Override
+				public void run() {
 					sourceMethodSpec.argNeedsTranslation[srcPos] = true;
 					implementationMethodSpec.argNeedsTranslation[srcIdx] = true; 
 				}});
@@ -368,6 +369,7 @@ public class CallinImplementorDyn extends MethodMappingImplementor {
 		
 		MethodModel.getModel(callMethod).setStatementsGenerator(new AbstractStatementsGenerator() {
 
+			@Override
 			protected boolean generateStatements(AbstractMethodDeclaration methodDecl) {
 				
 				// into head of tryStats we generate local vars to be shared by case statements:

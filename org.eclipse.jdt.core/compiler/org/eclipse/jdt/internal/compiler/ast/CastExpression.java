@@ -160,6 +160,7 @@ public CastExpression(Expression expression, TypeReference type) {
 	type.bits |= ASTNode.IgnoreRawTypeCheck; // no need to worry about raw type usage
 }
 
+@Override
 public FlowInfo analyseCode(BlockScope currentScope, FlowContext flowContext, FlowInfo flowInfo) {
 	FlowInfo result = this.expression
 		.analyseCode(currentScope, flowContext, flowInfo)
@@ -360,6 +361,7 @@ public static void checkNeedForArgumentCasts(BlockScope scope, int operator, int
 	}
 }
 
+@Override
 public boolean checkNPE(BlockScope scope, FlowContext flowContext, FlowInfo flowInfo, int ttlForFieldCheck) {
 	if((this.resolvedType.tagBits & TagBits.AnnotationNonNull) != 0) {
 		return true;
@@ -370,20 +372,35 @@ public boolean checkNPE(BlockScope scope, FlowContext flowContext, FlowInfo flow
 
 private static void checkAlternateBinding(BlockScope scope, Expression receiver, TypeBinding receiverType, MethodBinding binding, Expression[] arguments, TypeBinding[] originalArgumentTypes, TypeBinding[] alternateArgumentTypes, final InvocationSite invocationSite) {
 		InvocationSite fakeInvocationSite = new InvocationSite(){
+			@Override
 			public TypeBinding[] genericTypeArguments() { return null; }
+			@Override
 			public boolean isSuperAccess(){ return invocationSite.isSuperAccess(); }
+			@Override
 			public boolean isTypeAccess() { return invocationSite.isTypeAccess(); }
+			@Override
 			public void setActualReceiverType(ReferenceBinding actualReceiverType) { /* ignore */}
+			@Override
 			public void setDepth(int depth) { /* ignore */}
+			@Override
 			public void setFieldIndex(int depth){ /* ignore */}
+			@Override
 			public int sourceStart() { return 0; }
+			@Override
 			public int sourceEnd() { return 0; }
+			@Override
 			public TypeBinding invocationTargetType() { return invocationSite.invocationTargetType(); }
+			@Override
 			public boolean receiverIsImplicitThis() { return invocationSite.receiverIsImplicitThis();}
+			@Override
 			public InferenceContext18 freshInferenceContext(Scope someScope) { return invocationSite.freshInferenceContext(someScope); }
+			@Override
 			public ExpressionContext getExpressionContext() { return invocationSite.getExpressionContext(); }
+			@Override
 			public boolean isQualifiedSuper() { return invocationSite.isQualifiedSuper(); }
+			@Override
 			public boolean checkingPotentialCompatibility() { return false; }
+			@Override
 			public void acceptPotentiallyCompatibleMethods(MethodBinding[] methods) {/* ignore */}
 		};
 		MethodBinding bindingIfNoCast;
@@ -441,6 +458,7 @@ private static boolean preventsUnlikelyTypeWarning(TypeBinding castedType, TypeB
 	return false;
 }
 
+@Override
 public boolean checkUnsafeCast(Scope scope, TypeBinding castType, TypeBinding expressionType, TypeBinding match, boolean isNarrowing) {
 //{ObjectTeams: for weakened types use all available source level information:
 	if (match instanceof WeakenedTypeBinding)
@@ -561,6 +579,7 @@ public boolean checkUnsafeCast(Scope scope, TypeBinding castType, TypeBinding ex
  * @param codeStream org.eclipse.jdt.internal.compiler.codegen.CodeStream
  * @param valueRequired boolean
  */
+@Override
 public void generateCode(BlockScope currentScope, CodeStream codeStream, boolean valueRequired) {
 	int pc = codeStream.position;
 	boolean annotatedCast = (this.type.bits & ASTNode.HasTypeAnnotations) != 0;
@@ -610,10 +629,12 @@ public Expression innermostCastedExpression(){
 /**
  * @see org.eclipse.jdt.internal.compiler.ast.Expression#localVariableBinding()
  */
+@Override
 public LocalVariableBinding localVariableBinding() {
 	return this.expression.localVariableBinding();
 }
 
+@Override
 public int nullStatus(FlowInfo flowInfo, FlowContext flowContext) {
 	if ((this.implicitConversion & TypeIds.BOXING) != 0)
 		return FlowInfo.NON_NULL;
@@ -623,6 +644,7 @@ public int nullStatus(FlowInfo flowInfo, FlowContext flowContext) {
 /**
  * @see org.eclipse.jdt.internal.compiler.ast.Expression#optimizedBooleanConstant()
  */
+@Override
 public Constant optimizedBooleanConstant() {
 	switch(this.resolvedType.id) {
 		case T_boolean :
@@ -632,6 +654,7 @@ public Constant optimizedBooleanConstant() {
 	return Constant.NotAConstant;
 }
 
+@Override
 public StringBuffer printExpression(int indent, StringBuffer output) {
 	int parenthesesCount = (this.bits & ASTNode.ParenthesizedMASK) >> ASTNode.ParenthesizedSHIFT;
 	String suffix = ""; //$NON-NLS-1$
@@ -644,6 +667,7 @@ public StringBuffer printExpression(int indent, StringBuffer output) {
 	return this.expression.printExpression(0, output).append(suffix);
 }
 
+@Override
 public TypeBinding resolveType(BlockScope scope) {
 	// compute a new constant if the cast is effective
 
@@ -790,6 +814,7 @@ private boolean shouldUnwrapExpressionType(TypeBinding expressionType) {
 /**
  * @see org.eclipse.jdt.internal.compiler.ast.Expression#setExpectedType(org.eclipse.jdt.internal.compiler.lookup.TypeBinding)
  */
+@Override
 public void setExpectedType(TypeBinding expectedType) {
 	this.expectedType = expectedType;
 }
@@ -819,6 +844,7 @@ private boolean isIndirectlyUsed() {
 /**
  * @see org.eclipse.jdt.internal.compiler.ast.Expression#tagAsNeedCheckCast()
  */
+@Override
 public void tagAsNeedCheckCast() {
 	this.bits |= ASTNode.GenerateCheckcast;
 }
@@ -826,10 +852,12 @@ public void tagAsNeedCheckCast() {
 /**
  * @see org.eclipse.jdt.internal.compiler.ast.Expression#tagAsUnnecessaryCast(Scope, TypeBinding)
  */
+@Override
 public void tagAsUnnecessaryCast(Scope scope, TypeBinding castType) {
 	this.bits |= ASTNode.UnnecessaryCast;
 }
 
+@Override
 public void traverse(ASTVisitor visitor, BlockScope blockScope) {
 	if (visitor.visit(this, blockScope)) {
 		this.type.traverse(visitor, blockScope);

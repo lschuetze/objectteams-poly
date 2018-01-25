@@ -199,6 +199,7 @@ class ASTConverter {
 		// members were sorted by inheritance, restore lexical order:
 		if (typeDeclaration.isTeam() && members != null)
 			Arrays.sort(members, new Comparator<org.eclipse.jdt.internal.compiler.ast.TypeDeclaration>() {
+				@Override
 				public int compare(org.eclipse.jdt.internal.compiler.ast.TypeDeclaration t1,
 								   org.eclipse.jdt.internal.compiler.ast.TypeDeclaration t2) {
 					return (t1.sourceStart < t2.sourceStart) ? -1 : 1;
@@ -3686,6 +3687,7 @@ class ASTConverter {
 
 		List<ModuleDirective> stmts = moduleDecl.moduleStatements();
 		TreeSet<ModuleDirective> tSet = new TreeSet<> (new Comparator() {
+			@Override
 			public int compare(Object o1, Object o2) {
 				int p1 = ((ModuleDirective) o1).getStartPosition();
 				int p2 = ((ModuleDirective) o2).getStartPosition();

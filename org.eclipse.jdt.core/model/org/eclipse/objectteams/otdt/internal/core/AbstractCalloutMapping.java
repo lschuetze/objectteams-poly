@@ -76,10 +76,12 @@ public abstract class AbstractCalloutMapping extends MethodMapping implements IM
         return this;
     }
 
-    protected IRoleType getDeclaringRole() {
+    @Override
+	protected IRoleType getDeclaringRole() {
  	   return (IRoleType) OTModelManager.getOTElement((IType) getParent());
     }
 
+	@Override
 	public IMemberValuePair getDefaultValue() throws JavaModelException {
 		// callout mappings are not used in annotation types ;-)
 		return null;

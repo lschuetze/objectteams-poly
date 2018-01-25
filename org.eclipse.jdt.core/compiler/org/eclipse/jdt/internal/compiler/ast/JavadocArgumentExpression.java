@@ -83,6 +83,7 @@ public class JavadocArgumentExpression extends Expression {
 		return null;
 	}
 
+	@Override
 	public StringBuffer printExpression(int indent, StringBuffer output) {
 		if (this.argument == null) {
 			if (this.token != null) {
@@ -95,16 +96,19 @@ public class JavadocArgumentExpression extends Expression {
 		return output;
 	}
 
+	@Override
 	public void resolve(BlockScope scope) {
 		if (this.argument != null) {
 			this.argument.resolve(scope);
 		}
 	}
 
+	@Override
 	public TypeBinding resolveType(BlockScope scope) {
 		return internalResolveType(scope);
 	}
 
+	@Override
 	public TypeBinding resolveType(ClassScope scope) {
 		return internalResolveType(scope);
 	}
@@ -113,6 +117,7 @@ public class JavadocArgumentExpression extends Expression {
 	 * Redefine to capture javadoc specific signatures
 	 * @see org.eclipse.jdt.internal.compiler.ast.ASTNode#traverse(org.eclipse.jdt.internal.compiler.ASTVisitor, org.eclipse.jdt.internal.compiler.lookup.BlockScope)
 	 */
+	@Override
 	public void traverse(ASTVisitor visitor, BlockScope blockScope) {
 		if (visitor.visit(this, blockScope)) {
 			if (this.argument != null) {
@@ -121,6 +126,7 @@ public class JavadocArgumentExpression extends Expression {
 		}
 		visitor.endVisit(this, blockScope);
 	}
+	@Override
 	public void traverse(ASTVisitor visitor, ClassScope blockScope) {
 		if (visitor.visit(this, blockScope)) {
 			if (this.argument != null) {

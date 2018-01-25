@@ -45,6 +45,7 @@ public class ArrayLifting extends ArrayTranslations {
 	}
 
 	/* implement hook. */
+	@Override
 	Expression translation(
 			Expression rhs,
 			TypeBinding providedType,

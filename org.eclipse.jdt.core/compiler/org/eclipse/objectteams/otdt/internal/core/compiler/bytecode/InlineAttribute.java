@@ -57,14 +57,16 @@ public class InlineAttribute extends AbstractAttribute {
 		this._value = value;
 	}
 
-    int size() {
+    @Override
+	int size() {
     	return 6 + this._value.length;
     }
 
     /* (non-Javadoc)
      * @see org.eclipse.objectteams.otdt.internal.core.compiler.bytecode.AbstractAttribute#write(org.eclipse.jdt.internal.compiler.ClassFile)
      */
-    public void write(ClassFile classFile)
+    @Override
+	public void write(ClassFile classFile)
     {
     	super.write(classFile);
 
@@ -93,6 +95,7 @@ public class InlineAttribute extends AbstractAttribute {
 	/* (non-Javadoc)
 	 * @see org.eclipse.objectteams.otdt.internal.core.compiler.bytecode.AbstractAttribute#evaluate(org.eclipse.jdt.internal.compiler.lookup.Binding, org.eclipse.jdt.internal.compiler.lookup.LookupEnvironment)
 	 */
+	@Override
 	public void evaluate(Binding binding, LookupEnvironment environment, char[][][] missingTypeNames) {
 		// nothing to evaluate yet. SourceDebugExtension is not read from byte code.
 	}

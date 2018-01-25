@@ -67,20 +67,24 @@ public class CaptureBinding18 extends CaptureBinding {
 		return true;
 	}
 
+	@Override
 	public void initializeBounds(Scope scope, ParameterizedTypeBinding capturedParameterizedType) {
 		// nothing to initialize here (and cannot use super methods which requires wildcard to be set).
 	}
 
+	@Override
 	public TypeBinding clone(TypeBinding enclosingType) {
 		return new CaptureBinding18(this);
 	}
 
+	@Override
 	public MethodBinding[] getMethods(char[] selector) {
 		if (this.upperBounds.length == 1 && this.upperBounds[0] instanceof ReferenceBinding)
 			return ((ReferenceBinding)this.upperBounds[0]).getMethods(selector);
 		return super.getMethods(selector);
 	}
 
+	@Override
 	public TypeBinding erasure() {
 		if (this.upperBounds != null && this.upperBounds.length > 1) {
 			ReferenceBinding[] erasures = new ReferenceBinding[this.upperBounds.length];
@@ -102,6 +106,7 @@ public class CaptureBinding18 extends CaptureBinding {
 	/**
 	 * @see TypeBinding#isEquivalentTo(TypeBinding)
 	 */
+	@Override
 	public boolean isEquivalentTo(TypeBinding otherType) {
 		// from CaptureBinding:
 		if (equalsEquals(this, otherType)) return true;
@@ -126,6 +131,7 @@ public class CaptureBinding18 extends CaptureBinding {
 		return false;
 	}
 
+	@Override
 	public boolean isCompatibleWith(TypeBinding otherType, Scope captureScope) {
 		if (TypeBinding.equalsEquals(this, otherType))
 			return true;
@@ -176,6 +182,7 @@ public class CaptureBinding18 extends CaptureBinding {
 		}
 	}
 
+	@Override
 	public TypeBinding findSuperTypeOriginatingFrom(TypeBinding otherType) {
 		if (this.upperBounds != null && this.upperBounds.length > 1) {
 			for (int i = 0; i < this.upperBounds.length; i++) {
@@ -190,6 +197,7 @@ public class CaptureBinding18 extends CaptureBinding {
 	}
 
 //{ObjectTeams: cross the OT package, make protected:
+	@Override
 	protected
 // SH}
 	TypeBinding substituteInferenceVariable(InferenceVariable var, TypeBinding substituteType) {
@@ -279,6 +287,7 @@ public class CaptureBinding18 extends CaptureBinding {
 		}
 	}
 
+	@Override
 	public boolean isProperType(boolean admitCapture18) {
 		if (!admitCapture18) 
 			return false;
@@ -302,6 +311,7 @@ public class CaptureBinding18 extends CaptureBinding {
 
 	int recursionLevel = 0; // used to give a hint at recursive types without going into infinity
 
+	@Override
 	public char[] readableName() {
 		if (this.lowerBound == null && this.firstBound != null) {
 			if (this.prototype.recursionLevel < 2) {
@@ -328,6 +338,7 @@ public class CaptureBinding18 extends CaptureBinding {
 		return super.readableName();
 	}
 
+	@Override
 	public char[] shortReadableName() {
 		if (this.lowerBound == null && this.firstBound != null) {
 			if (this.prototype.recursionLevel < 2) {

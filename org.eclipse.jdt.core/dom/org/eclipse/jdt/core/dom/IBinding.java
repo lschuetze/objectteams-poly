@@ -339,6 +339,7 @@ public interface IBinding {
 	 * @return {@inheritDoc}
 	 * @see ITypeBinding#getTypeDeclaration()
 	 */
+	@Override
 	public boolean equals(Object obj);
 
 	/**
@@ -374,5 +375,6 @@ public interface IBinding {
 	 *
 	 * @return a debug string
 	 */
+	@Override
 	public String toString();
 }

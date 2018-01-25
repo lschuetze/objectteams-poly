@@ -52,6 +52,7 @@ public class TypeParameter extends AbstractVariableDeclaration {
 	/**
 	 * @see org.eclipse.jdt.internal.compiler.ast.AbstractVariableDeclaration#getKind()
 	 */
+	@Override
 	public int getKind() {
 		return TYPE_PARAMETER;
 	}
@@ -130,6 +131,7 @@ public class TypeParameter extends AbstractVariableDeclaration {
 		}
 	}
 
+	@Override
 	public void resolve(BlockScope scope) {
 		internalResolve(scope, scope.methodScope().isStatic);
 	}
@@ -179,6 +181,7 @@ public class TypeParameter extends AbstractVariableDeclaration {
 	/* (non-Javadoc)
 	 * @see org.eclipse.jdt.internal.compiler.ast.AstNode#print(int, java.lang.StringBuffer)
 	 */
+	@Override
 	public StringBuffer printStatement(int indent, StringBuffer output) {
 		if (this.annotations != null) {
 			printAnnotations(this.annotations, output);
@@ -203,10 +206,12 @@ public class TypeParameter extends AbstractVariableDeclaration {
 		return output;
 	}
 
+	@Override
 	public void generateCode(BlockScope currentScope, CodeStream codeStream) {
 	    // nothing to do
 	}
 
+	@Override
 	public void traverse(ASTVisitor visitor, BlockScope scope) {
 		if (visitor.visit(this, scope)) {
 			if (this.annotations != null) {

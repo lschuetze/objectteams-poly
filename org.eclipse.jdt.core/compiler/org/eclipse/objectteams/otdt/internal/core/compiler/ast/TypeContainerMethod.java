@@ -65,6 +65,7 @@ public class TypeContainerMethod extends MethodDeclaration {
 		this.returnType = TypeReference.baseTypeReference(TypeIds.T_void, 0, null);
 	}
 
+	@Override
 	public void parseStatements(Parser parser, CompilationUnitDeclaration unit) {
 		// NO-OP. (there is no source at all)
 	}
@@ -73,12 +74,14 @@ public class TypeContainerMethod extends MethodDeclaration {
 	 * Override method from AbstractMethodDeclaration: only generate code
 	 * for the wrapped type, not for the method itself.
 	 */
+	@Override
 	public void generateCode(ClassScope classScope, ClassFile classFile) {
 		CodeStream codeStream = classFile.codeStream;
 		codeStream.reset(this, classFile);
 		this.statements[0].generateCode(this.scope, codeStream);
 	}
 
+	@Override
 	public void traverse(
 			ASTVisitor visitor,
 			ClassScope classScope)
@@ -88,6 +91,7 @@ public class TypeContainerMethod extends MethodDeclaration {
 		// again add the type to RoleModel._localTypes, where it is already contained.
 	}
 
+	@Override
 	public void resolve(ClassScope upperScope) {
 		// NO-OP
 	}

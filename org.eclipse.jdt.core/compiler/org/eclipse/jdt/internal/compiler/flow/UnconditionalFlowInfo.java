@@ -133,9 +133,11 @@ public static UnconditionalFlowInfo fakeInitializedFlowInfo(int localsCount, int
 		return flowInfo;
 }
 
+@Override
 public FlowInfo addInitializationsFrom(FlowInfo inits) {
 	return addInfoFrom(inits, true);
 }
+@Override
 public FlowInfo addNullInfoFrom(FlowInfo inits) {
 	return addInfoFrom(inits, false);
 }
@@ -402,6 +404,7 @@ private FlowInfo addInfoFrom(FlowInfo inits, boolean handleInits) {
 	return this;
 }
 
+@Override
 public FlowInfo addPotentialInitializationsFrom(FlowInfo inits) {
 	if (this == DEAD_END){
 		return this;
@@ -613,6 +616,7 @@ public UnconditionalFlowInfo addPotentialNullInfoFrom(
 	return this;
 }
 
+@Override
 final public boolean cannotBeDefinitelyNullOrNonNull(LocalVariableBinding local) {
 	if ((this.tagBits & NULL_FLAG_MASK) == 0 ||
 			(local.type.tagBits & TagBits.IsBaseType) != 0) {
@@ -644,6 +648,7 @@ final public boolean cannotBeDefinitelyNullOrNonNull(LocalVariableBinding local)
 		    & (1L << (position % BitCacheSize))) != 0;
 }
 
+@Override
 final public boolean cannotBeNull(LocalVariableBinding local) {
 	if ((this.tagBits & NULL_FLAG_MASK) == 0 ||
 			(local.type.tagBits & TagBits.IsBaseType) != 0) {
@@ -671,6 +676,7 @@ final public boolean cannotBeNull(LocalVariableBinding local) {
 		    & (1L << (position % BitCacheSize))) != 0;
 }
 
+@Override
 final public boolean canOnlyBeNull(LocalVariableBinding local) {
 	if ((this.tagBits & NULL_FLAG_MASK) == 0 ||
 			(local.type.tagBits & TagBits.IsBaseType) != 0) {
@@ -697,6 +703,7 @@ final public boolean canOnlyBeNull(LocalVariableBinding local) {
 		    & (1L << (position % BitCacheSize))) != 0;
 }
 
+@Override
 public FlowInfo copy() {
 	// do not clone the DeadEnd
 	if (this == DEAD_END) {
@@ -801,10 +808,12 @@ public UnconditionalFlowInfo discardNonFieldInitializations() {
 	return this;
 }
 
+@Override
 public FlowInfo initsWhenFalse() {
 	return this;
 }
 
+@Override
 public FlowInfo initsWhenTrue() {
 	return this;
 }
@@ -831,6 +840,7 @@ final private boolean isDefinitelyAssigned(int position) {
 				(1L << (position % BitCacheSize))) != 0;
 }
 
+@Override
 final public boolean isDefinitelyAssigned(FieldBinding field) {
 	// Mirrored in CodeStream.isDefinitelyAssigned(..)
 	// do not want to complain in unreachable code
@@ -844,6 +854,7 @@ final public boolean isDefinitelyAssigned(FieldBinding field) {
 	return isDefinitelyAssigned(field.id);
 }
 
+@Override
 final public boolean isDefinitelyAssigned(LocalVariableBinding local) {
 	// do not want to complain in unreachable code if local declared in reachable code
 	if ((this.tagBits & UNREACHABLE_OR_DEAD) != 0 && (local.declaration.bits & ASTNode.IsLocalDeclarationReachable) != 0) {
@@ -852,6 +863,7 @@ final public boolean isDefinitelyAssigned(LocalVariableBinding local) {
 	return isDefinitelyAssigned(local.id + this.maxFieldCount);
 }
 
+@Override
 final public boolean isDefinitelyNonNull(LocalVariableBinding local) {
 	// do not want to complain in unreachable code
 	if ((this.tagBits & UNREACHABLE) != 0 ||
@@ -881,6 +893,7 @@ final public boolean isDefinitelyNonNull(LocalVariableBinding local) {
 		    & (1L << (position % BitCacheSize))) != 0;
 }
 
+@Override
 final public boolean isDefinitelyNull(LocalVariableBinding local) {
 	// do not want to complain in unreachable code
 	if ((this.tagBits & UNREACHABLE) != 0 ||
@@ -908,6 +921,7 @@ final public boolean isDefinitelyNull(LocalVariableBinding local) {
 		    & (1L << (position % BitCacheSize))) != 0;
 }
 
+@Override
 final public boolean isDefinitelyUnknown(LocalVariableBinding local) {
 	// do not want to complain in unreachable code
 	if ((this.tagBits & UNREACHABLE) != 0 ||
@@ -934,12 +948,14 @@ final public boolean isDefinitelyUnknown(LocalVariableBinding local) {
 }
 
 //{ObjectTeams: variant for BaseCallTrackingVariable:
-      public boolean isDefinitelyAssigned(BaseCallTrackingVariable local) {
+      @Override
+	public boolean isDefinitelyAssigned(BaseCallTrackingVariable local) {
               // don't check reachability!
               return isDefinitelyAssigned(local.binding.id + this.maxFieldCount);
       }
 //SH}
 
+@Override
 final public boolean hasNullInfoFor(LocalVariableBinding local) {
 	// do not want to complain in unreachable code
 	if ((this.tagBits & UNREACHABLE) != 0 ||
@@ -987,10 +1003,12 @@ final private boolean isPotentiallyAssigned(int position) {
 			(1L << (position % BitCacheSize))) != 0;
 }
 
+@Override
 final public boolean isPotentiallyAssigned(FieldBinding field) {
 	return isPotentiallyAssigned(field.id);
 }
 
+@Override
 final public boolean isPotentiallyAssigned(LocalVariableBinding local) {
 	// final constants are inlined, and thus considered as always initialized
 	if (local.constant() != Constant.NotAConstant) {
@@ -1000,6 +1018,7 @@ final public boolean isPotentiallyAssigned(LocalVariableBinding local) {
 }
 
 // TODO (Ayush) Check why this method does not return true for protected non null (1111)
+@Override
 final public boolean isPotentiallyNonNull(LocalVariableBinding local) {
 	if ((this.tagBits & NULL_FLAG_MASK) == 0 ||
 			(local.type.tagBits & TagBits.IsBaseType) != 0) {
@@ -1026,6 +1045,7 @@ final public boolean isPotentiallyNonNull(LocalVariableBinding local) {
 }
 
 // TODO (Ayush) Check why this method does not return true for protected null
+@Override
 final public boolean isPotentiallyNull(LocalVariableBinding local) {
 	if ((this.tagBits & NULL_FLAG_MASK) == 0 ||
 			(local.type.tagBits & TagBits.IsBaseType) != 0) {
@@ -1051,6 +1071,7 @@ final public boolean isPotentiallyNull(LocalVariableBinding local) {
 		    & (1L << (position % BitCacheSize))) != 0;
 }
 
+@Override
 final public boolean isPotentiallyUnknown(LocalVariableBinding local) {
 	// do not want to complain in unreachable code
 	if ((this.tagBits & UNREACHABLE) != 0 ||
@@ -1078,6 +1099,7 @@ final public boolean isPotentiallyUnknown(LocalVariableBinding local) {
 		    & (1L << (position % BitCacheSize))) != 0;
 }
 
+@Override
 final public boolean isProtectedNonNull(LocalVariableBinding local) {
 	if ((this.tagBits & NULL_FLAG_MASK) == 0 ||
 			(local.type.tagBits & TagBits.IsBaseType) != 0) {
@@ -1103,6 +1125,7 @@ final public boolean isProtectedNonNull(LocalVariableBinding local) {
 		    & (1L << (position % BitCacheSize))) != 0;
 }
 
+@Override
 final public boolean isProtectedNull(LocalVariableBinding local) {
 	if ((this.tagBits & NULL_FLAG_MASK) == 0 ||
 			(local.type.tagBits & TagBits.IsBaseType) != 0) {
@@ -1142,6 +1165,7 @@ protected static boolean isTrue(boolean expression, String message) {
 		throw new AssertionFailedException("assertion failed: " + message); //$NON-NLS-1$
 	return expression;
 }
+@Override
 public void markAsComparedEqualToNonNull(LocalVariableBinding local) {
 	// protected from non-object locals in calling methods
 	if (this != DEAD_END) {
@@ -1240,6 +1264,7 @@ public void markAsComparedEqualToNonNull(LocalVariableBinding local) {
 	}
 }
 
+@Override
 public void markAsComparedEqualToNull(LocalVariableBinding local) {
 	// protected from non-object locals in calling methods
 	if (this != DEAD_END) {
@@ -1366,16 +1391,19 @@ final private void markAsDefinitelyAssigned(int position) {
 	}
 }
 
+@Override
 public void markAsDefinitelyAssigned(FieldBinding field) {
 	if (this != DEAD_END)
 		markAsDefinitelyAssigned(field.id);
 }
 
+@Override
 public void markAsDefinitelyAssigned(LocalVariableBinding local) {
 	if (this != DEAD_END)
 		markAsDefinitelyAssigned(local.id + this.maxFieldCount);
 }
 
+@Override
 public void markAsDefinitelyNonNull(LocalVariableBinding local) {
 	// protected from non-object locals in calling methods
 	if (this != DEAD_END) {
@@ -1433,6 +1461,7 @@ public void markAsDefinitelyNonNull(LocalVariableBinding local) {
 	}
 }
 
+@Override
 public void markAsDefinitelyNull(LocalVariableBinding local) {
 	// protected from non-object locals in calling methods
 	if (this != DEAD_END) {
@@ -1496,6 +1525,7 @@ public void markAsDefinitelyNull(LocalVariableBinding local) {
  */
 // PREMATURE may try to get closer to markAsDefinitelyAssigned, but not
 //			 obvious
+@Override
 public void markAsDefinitelyUnknown(LocalVariableBinding local) {
 	// protected from non-object locals in calling methods
 	if (this != DEAD_END) {
@@ -1554,6 +1584,7 @@ public void markAsDefinitelyUnknown(LocalVariableBinding local) {
 	}
 }
 
+@Override
 public void resetNullInfo(LocalVariableBinding local) {
 	if (this != DEAD_END) {
 		this.tagBits |= NULL_FLAG_MASK;
@@ -1590,6 +1621,7 @@ public void resetNullInfo(LocalVariableBinding local) {
  * Mark a local as potentially having been assigned to an unknown value.
  * @param local the local to mark
  */
+@Override
 public void markPotentiallyUnknownBit(LocalVariableBinding local) {
 	// protected from non-object locals in calling methods
 	if (this != DEAD_END) {
@@ -1638,6 +1670,7 @@ public void markPotentiallyUnknownBit(LocalVariableBinding local) {
 	}
 }
 
+@Override
 public void markPotentiallyNullBit(LocalVariableBinding local) {
 	if (this != DEAD_END) {
 		this.tagBits |= NULL_FLAG_MASK;
@@ -1682,6 +1715,7 @@ public void markPotentiallyNullBit(LocalVariableBinding local) {
 	}
 }
 
+@Override
 public void markPotentiallyNonNullBit(LocalVariableBinding local) {
 	if (this != DEAD_END) {
 		this.tagBits |= NULL_FLAG_MASK;
@@ -1732,6 +1766,7 @@ public void markPotentiallyNonNullBit(LocalVariableBinding local) {
 	}
 }
 
+@Override
 public UnconditionalFlowInfo mergedWith(UnconditionalFlowInfo otherInits) {
 	if ((otherInits.tagBits & UNREACHABLE_OR_DEAD) != 0 && this != DEAD_END) {
 		if (COVERAGE_TEST_FLAG) {
@@ -2014,6 +2049,7 @@ static int numberOfEnclosingFields(ReferenceBinding type){
 	return count;
 }
 
+@Override
 public UnconditionalFlowInfo nullInfoLessUnconditionalCopy() {
 	if (this == DEAD_END) {
 		return this;
@@ -2045,10 +2081,12 @@ public UnconditionalFlowInfo nullInfoLessUnconditionalCopy() {
 	return copy;
 }
 
+@Override
 public FlowInfo safeInitsWhenTrue() {
 	return copy();
 }
 
+@Override
 public FlowInfo setReachMode(int reachMode) {
 	if (this == DEAD_END) {// cannot modify DEAD_END
 		return this;
@@ -2074,6 +2112,7 @@ public FlowInfo setReachMode(int reachMode) {
 	return this;
 }
 
+@Override
 public String toString(){
 	// PREMATURE consider printing bit fields as 0001 0001 1000 0001...
 	if (this == DEAD_END){
@@ -2145,10 +2184,12 @@ public String toString(){
 	}
 }
 
+@Override
 public UnconditionalFlowInfo unconditionalCopy() {
 	return (UnconditionalFlowInfo) copy();
 }
 
+@Override
 public UnconditionalFlowInfo unconditionalFieldLessCopy() {
 	// TODO (maxime) may consider leveraging null contribution verification as it is done in copy
 	UnconditionalFlowInfo copy = new UnconditionalFlowInfo();
@@ -2198,14 +2239,17 @@ public UnconditionalFlowInfo unconditionalFieldLessCopy() {
 	return copy;
 }
 
+@Override
 public UnconditionalFlowInfo unconditionalInits() {
 	// also see conditional inits, where it requests them to merge
 	return this;
 }
 
+@Override
 public UnconditionalFlowInfo unconditionalInitsWithoutSideEffect() {
 	return this;
 }
+@Override
 public UnconditionalFlowInfo mergeDefiniteInitsWith(UnconditionalFlowInfo otherInits) {
 	if ((otherInits.tagBits & UNREACHABLE_OR_DEAD) != 0 && this != DEAD_END) {
 		return this;
@@ -2254,6 +2298,7 @@ public UnconditionalFlowInfo mergeDefiniteInitsWith(UnconditionalFlowInfo otherI
 	}
 	return this;
 }
+@Override
 public void resetAssignmentInfo(LocalVariableBinding local) {
 	resetAssignmentInfo(local.id + this.maxFieldCount);
 }

@@ -108,6 +108,7 @@ public class Sorting {
 		// also consider the base hierarchy, but for roles bound to
 		// the same base keep the existing order.
 		Arrays.sort(sorted, new Comparator<RoleModel>() {
+			@Override
 			public int compare(RoleModel o1, RoleModel o2) {
 				ReferenceBinding b1 = o1.getBaseTypeBinding();
 				ReferenceBinding b2 = o2.getBaseTypeBinding();

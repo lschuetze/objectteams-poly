@@ -48,6 +48,7 @@ public class BlockScopeWrapper extends BlockScope
 	 * create a special problem reporter
 	 * @return a problem-reporter wrapper
 	 */
+	@Override
 	public ProblemReporter problemReporter()
 	{
 		// a new instance for each problem for setting referenceContext.

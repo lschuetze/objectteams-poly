@@ -85,6 +85,7 @@ class RecoveredTypeBinding implements ITypeBinding {
 	/* (non-Javadoc)
 	 * @see org.eclipse.jdt.core.dom.ITypeBinding#createArrayType(int)
 	 */
+	@Override
 	public ITypeBinding createArrayType(int dims) {
 		return this.resolver.getTypeBinding(this, dims);
 	}
@@ -92,6 +93,7 @@ class RecoveredTypeBinding implements ITypeBinding {
 	/* (non-Javadoc)
 	 * @see org.eclipse.jdt.core.dom.ITypeBinding#getBinaryName()
 	 */
+	@Override
 	public String getBinaryName() {
 		return null;
 	}
@@ -99,6 +101,7 @@ class RecoveredTypeBinding implements ITypeBinding {
 	/* (non-Javadoc)
 	 * @see org.eclipse.jdt.core.dom.ITypeBinding#getBound()
 	 */
+	@Override
 	public ITypeBinding getBound() {
 		return null;
 	}
@@ -106,6 +109,7 @@ class RecoveredTypeBinding implements ITypeBinding {
 	/* (non-Javadoc)
 	 * @see org.eclipse.jdt.core.dom.ITypeBinding#getGenericTypeOfWildcardType()
 	 */
+	@Override
 	public ITypeBinding getGenericTypeOfWildcardType() {
 		return null;
 	}
@@ -113,6 +117,7 @@ class RecoveredTypeBinding implements ITypeBinding {
 	/* (non-Javadoc)
 	 * @see org.eclipse.jdt.core.dom.ITypeBinding#getRank()
 	 */
+	@Override
 	public int getRank() {
 		return -1;
 	}
@@ -120,6 +125,7 @@ class RecoveredTypeBinding implements ITypeBinding {
 	/* (non-Javadoc)
 	 * @see org.eclipse.jdt.core.dom.ITypeBinding#getComponentType()
 	 */
+	@Override
 	public ITypeBinding getComponentType() {
 		if (this.dimensions == 0) return null;
 		return this.resolver.getTypeBinding(this, -1);
@@ -128,6 +134,7 @@ class RecoveredTypeBinding implements ITypeBinding {
 	/* (non-Javadoc)
 	 * @see org.eclipse.jdt.core.dom.ITypeBinding#getDeclaredFields()
 	 */
+	@Override
 	public IVariableBinding[] getDeclaredFields() {
 		return TypeBinding.NO_VARIABLE_BINDINGS;
 	}
@@ -135,6 +142,7 @@ class RecoveredTypeBinding implements ITypeBinding {
 	/* (non-Javadoc)
 	 * @see org.eclipse.jdt.core.dom.ITypeBinding#getDeclaredMethods()
 	 */
+	@Override
 	public IMethodBinding[] getDeclaredMethods() {
 		return TypeBinding.NO_METHOD_BINDINGS;
 	}
@@ -143,6 +151,7 @@ class RecoveredTypeBinding implements ITypeBinding {
 	 * @see org.eclipse.jdt.core.dom.ITypeBinding#getDeclaredModifiers()
 	 * @deprecated Use ITypeBinding#getModifiers() instead
 	 */
+	@Override
 	public int getDeclaredModifiers() {
 		return 0;
 	}
@@ -150,6 +159,7 @@ class RecoveredTypeBinding implements ITypeBinding {
 	/* (non-Javadoc)
 	 * @see org.eclipse.jdt.core.dom.ITypeBinding#getDeclaredTypes()
 	 */
+	@Override
 	public ITypeBinding[] getDeclaredTypes() {
 		return TypeBinding.NO_TYPE_BINDINGS;
 	}
@@ -157,6 +167,7 @@ class RecoveredTypeBinding implements ITypeBinding {
 	/* (non-Javadoc)
 	 * @see org.eclipse.jdt.core.dom.ITypeBinding#getDeclaringClass()
 	 */
+	@Override
 	public ITypeBinding getDeclaringClass() {
 		return null;
 	}
@@ -164,6 +175,7 @@ class RecoveredTypeBinding implements ITypeBinding {
 	/* (non-Javadoc)
 	 * @see org.eclipse.jdt.core.dom.ITypeBinding#getDeclaringMethod()
 	 */
+	@Override
 	public IMethodBinding getDeclaringMethod() {
 		return null;
 	}
@@ -179,6 +191,7 @@ class RecoveredTypeBinding implements ITypeBinding {
 	/* (non-Javadoc)
 	 * @see org.eclipse.jdt.core.dom.ITypeBinding#getDimensions()
 	 */
+	@Override
 	public int getDimensions() {
 		return this.dimensions;
 	}
@@ -186,6 +199,7 @@ class RecoveredTypeBinding implements ITypeBinding {
 	/* (non-Javadoc)
 	 * @see org.eclipse.jdt.core.dom.ITypeBinding#getElementType()
 	 */
+	@Override
 	public ITypeBinding getElementType() {
 		if (this.binding != null) {
 			if (this.binding.isArrayType()) {
@@ -210,6 +224,7 @@ class RecoveredTypeBinding implements ITypeBinding {
 	/* (non-Javadoc)
 	 * @see org.eclipse.jdt.core.dom.ITypeBinding#getErasure()
 	 */
+	@Override
 	public ITypeBinding getErasure() {
 		return this;
 	}
@@ -225,6 +240,7 @@ class RecoveredTypeBinding implements ITypeBinding {
 	/* (non-Javadoc)
 	 * @see org.eclipse.jdt.core.dom.ITypeBinding#getInterfaces()
 	 */
+	@Override
 	public ITypeBinding[] getInterfaces() {
 		return TypeBinding.NO_TYPE_BINDINGS;
 	}
@@ -232,6 +248,7 @@ class RecoveredTypeBinding implements ITypeBinding {
 	/* (non-Javadoc)
 	 * @see org.eclipse.jdt.core.dom.ITypeBinding#getModifiers()
 	 */
+	@Override
 	public int getModifiers() {
 		return Modifier.NONE;
 	}
@@ -239,6 +256,7 @@ class RecoveredTypeBinding implements ITypeBinding {
 	/* (non-Javadoc)
 	 * @see org.eclipse.jdt.core.dom.ITypeBinding#getName()
 	 */
+	@Override
 	public String getName() {
 		char[] brackets = new char[this.dimensions * 2];
 		for (int i = this.dimensions * 2 - 1; i >= 0; i -= 2) {
@@ -286,6 +304,7 @@ class RecoveredTypeBinding implements ITypeBinding {
 	/* (non-Javadoc)
 	 * @see org.eclipse.jdt.core.dom.ITypeBinding#getPackage()
 	 */
+	@Override
 	public IPackageBinding getPackage() {
 		if (this.binding != null) {
 			switch (this.binding.kind()) {
@@ -312,6 +331,7 @@ class RecoveredTypeBinding implements ITypeBinding {
 	/* (non-Javadoc)
 	 * @see org.eclipse.jdt.core.dom.ITypeBinding#getQualifiedName()
 	 */
+	@Override
 	public String getQualifiedName() {
 		ReferenceBinding referenceBinding = getReferenceBinding();
 		if (referenceBinding != null) {
@@ -348,6 +368,7 @@ class RecoveredTypeBinding implements ITypeBinding {
 	/* (non-Javadoc)
 	 * @see org.eclipse.jdt.core.dom.ITypeBinding#getSuperclass()
 	 */
+	@Override
 	public ITypeBinding getSuperclass() {
 		if (getQualifiedName().equals("java.lang.Object")) {	//$NON-NLS-1$
 			return null;
@@ -358,6 +379,7 @@ class RecoveredTypeBinding implements ITypeBinding {
 	/* (non-Javadoc)
 	 * @see org.eclipse.jdt.core.dom.ITypeBinding#getTypeArguments()
 	 */
+	@Override
 	public ITypeBinding[] getTypeArguments() {
 		if (this.binding != null) {
 			return this.typeArguments = TypeBinding.NO_TYPE_BINDINGS;
@@ -390,6 +412,7 @@ class RecoveredTypeBinding implements ITypeBinding {
 	/* (non-Javadoc)
 	 * @see org.eclipse.jdt.core.dom.ITypeBinding#getTypeBounds()
 	 */
+	@Override
 	public ITypeBinding[] getTypeBounds() {
 		return TypeBinding.NO_TYPE_BINDINGS;
 	}
@@ -397,6 +420,7 @@ class RecoveredTypeBinding implements ITypeBinding {
 	/* (non-Javadoc)
 	 * @see org.eclipse.jdt.core.dom.ITypeBinding#getTypeDeclaration()
 	 */
+	@Override
 	public ITypeBinding getTypeDeclaration() {
 		return this;
 	}
@@ -404,6 +428,7 @@ class RecoveredTypeBinding implements ITypeBinding {
 	/* (non-Javadoc)
 	 * @see org.eclipse.jdt.core.dom.ITypeBinding#getTypeParameters()
 	 */
+	@Override
 	public ITypeBinding[] getTypeParameters() {
 		return TypeBinding.NO_TYPE_BINDINGS;
 	}
@@ -411,6 +436,7 @@ class RecoveredTypeBinding implements ITypeBinding {
 	/* (non-Javadoc)
 	 * @see org.eclipse.jdt.core.dom.ITypeBinding#getWildcard()
 	 */
+	@Override
 	public ITypeBinding getWildcard() {
 		return null;
 	}
@@ -418,6 +444,7 @@ class RecoveredTypeBinding implements ITypeBinding {
 	/* (non-Javadoc)
 	 * @see org.eclipse.jdt.core.dom.ITypeBinding#isAnnotation()
 	 */
+	@Override
 	public boolean isAnnotation() {
 		return false;
 	}
@@ -425,6 +452,7 @@ class RecoveredTypeBinding implements ITypeBinding {
 	/* (non-Javadoc)
 	 * @see org.eclipse.jdt.core.dom.ITypeBinding#isAnonymous()
 	 */
+	@Override
 	public boolean isAnonymous() {
 		return false;
 	}
@@ -432,6 +460,7 @@ class RecoveredTypeBinding implements ITypeBinding {
 	/* (non-Javadoc)
 	 * @see org.eclipse.jdt.core.dom.ITypeBinding#isArray()
 	 */
+	@Override
 	public boolean isArray() {
 		return false;
 	}
@@ -439,6 +468,7 @@ class RecoveredTypeBinding implements ITypeBinding {
 	/* (non-Javadoc)
 	 * @see org.eclipse.jdt.core.dom.ITypeBinding#isAssignmentCompatible(org.eclipse.jdt.core.dom.ITypeBinding)
 	 */
+	@Override
 	public boolean isAssignmentCompatible(ITypeBinding typeBinding) {
 		if ("java.lang.Object".equals(typeBinding.getQualifiedName())) { //$NON-NLS-1$
 			return true;
@@ -450,6 +480,7 @@ class RecoveredTypeBinding implements ITypeBinding {
 	/* (non-Javadoc)
 	 * @see org.eclipse.jdt.core.dom.ITypeBinding#isCapture()
 	 */
+	@Override
 	public boolean isCapture() {
 		return false;
 	}
@@ -457,6 +488,7 @@ class RecoveredTypeBinding implements ITypeBinding {
 	/* (non-Javadoc)
 	 * @see org.eclipse.jdt.core.dom.ITypeBinding#isCastCompatible(org.eclipse.jdt.core.dom.ITypeBinding)
 	 */
+	@Override
 	public boolean isCastCompatible(ITypeBinding typeBinding) {
 		if ("java.lang.Object".equals(typeBinding.getQualifiedName())) { //$NON-NLS-1$
 			return true;
@@ -468,6 +500,7 @@ class RecoveredTypeBinding implements ITypeBinding {
 	/* (non-Javadoc)
 	 * @see org.eclipse.jdt.core.dom.ITypeBinding#isClass()
 	 */
+	@Override
 	public boolean isClass() {
 		return true;
 	}
@@ -475,6 +508,7 @@ class RecoveredTypeBinding implements ITypeBinding {
 	/* (non-Javadoc)
 	 * @see org.eclipse.jdt.core.dom.ITypeBinding#isEnum()
 	 */
+	@Override
 	public boolean isEnum() {
 		return false;
 	}
@@ -482,6 +516,7 @@ class RecoveredTypeBinding implements ITypeBinding {
 	/* (non-Javadoc)
 	 * @see org.eclipse.jdt.core.dom.ITypeBinding#isFromSource()
 	 */
+	@Override
 	public boolean isFromSource() {
 		return false;
 	}
@@ -489,6 +524,7 @@ class RecoveredTypeBinding implements ITypeBinding {
 	/* (non-Javadoc)
 	 * @see org.eclipse.jdt.core.dom.ITypeBinding#isGenericType()
 	 */
+	@Override
 	public boolean isGenericType() {
 		return false;
 	}
@@ -496,6 +532,7 @@ class RecoveredTypeBinding implements ITypeBinding {
 	/* (non-Javadoc)
 	 * @see org.eclipse.jdt.core.dom.ITypeBinding#isInterface()
 	 */
+	@Override
 	public boolean isInterface() {
 		return false;
 	}
@@ -503,6 +540,7 @@ class RecoveredTypeBinding implements ITypeBinding {
 	/* (non-Javadoc)
 	 * @see org.eclipse.jdt.core.dom.ITypeBinding#isIntersectionType18()
 	 */
+	@Override
 	public boolean isIntersectionType() {
 		return false;
 	}
@@ -510,6 +548,7 @@ class RecoveredTypeBinding implements ITypeBinding {
 	/* (non-Javadoc)
 	 * @see org.eclipse.jdt.core.dom.ITypeBinding#isLocal()
 	 */
+	@Override
 	public boolean isLocal() {
 		return false;
 	}
@@ -517,6 +556,7 @@ class RecoveredTypeBinding implements ITypeBinding {
 	/* (non-Javadoc)
 	 * @see org.eclipse.jdt.core.dom.ITypeBinding#isMember()
 	 */
+	@Override
 	public boolean isMember() {
 		return false;
 	}
@@ -524,6 +564,7 @@ class RecoveredTypeBinding implements ITypeBinding {
 	/* (non-Javadoc)
 	 * @see org.eclipse.jdt.core.dom.ITypeBinding#isNested()
 	 */
+	@Override
 	public boolean isNested() {
 		return false;
 	}
@@ -531,6 +572,7 @@ class RecoveredTypeBinding implements ITypeBinding {
 	/* (non-Javadoc)
 	 * @see org.eclipse.jdt.core.dom.ITypeBinding#isNullType()
 	 */
+	@Override
 	public boolean isNullType() {
 		return false;
 	}
@@ -538,6 +580,7 @@ class RecoveredTypeBinding implements ITypeBinding {
 	/* (non-Javadoc)
 	 * @see org.eclipse.jdt.core.dom.ITypeBinding#isParameterizedType()
 	 */
+	@Override
 	public boolean isParameterizedType() {
 		if (this.innerTypeBinding != null) {
 			return this.innerTypeBinding.isParameterizedType();
@@ -551,6 +594,7 @@ class RecoveredTypeBinding implements ITypeBinding {
 	/* (non-Javadoc)
 	 * @see org.eclipse.jdt.core.dom.ITypeBinding#isPrimitive()
 	 */
+	@Override
 	public boolean isPrimitive() {
 		return false;
 	}
@@ -558,6 +602,7 @@ class RecoveredTypeBinding implements ITypeBinding {
 	/* (non-Javadoc)
 	 * @see org.eclipse.jdt.core.dom.ITypeBinding#isRawType()
 	 */
+	@Override
 	public boolean isRawType() {
 		return false;
 	}
@@ -565,6 +610,7 @@ class RecoveredTypeBinding implements ITypeBinding {
 	/* (non-Javadoc)
 	 * @see org.eclipse.jdt.core.dom.ITypeBinding#isSubTypeCompatible(org.eclipse.jdt.core.dom.ITypeBinding)
 	 */
+	@Override
 	public boolean isSubTypeCompatible(ITypeBinding typeBinding) {
 		if ("java.lang.Object".equals(typeBinding.getQualifiedName())) { //$NON-NLS-1$
 			return true;
@@ -576,6 +622,7 @@ class RecoveredTypeBinding implements ITypeBinding {
 	/* (non-Javadoc)
 	 * @see org.eclipse.jdt.core.dom.ITypeBinding#isTopLevel()
 	 */
+	@Override
 	public boolean isTopLevel() {
 		return true;
 	}
@@ -583,6 +630,7 @@ class RecoveredTypeBinding implements ITypeBinding {
 	/* (non-Javadoc)
 	 * @see org.eclipse.jdt.core.dom.ITypeBinding#isTypeVariable()
 	 */
+	@Override
 	public boolean isTypeVariable() {
 		return false;
 	}
@@ -590,6 +638,7 @@ class RecoveredTypeBinding implements ITypeBinding {
 	/* (non-Javadoc)
 	 * @see org.eclipse.jdt.core.dom.ITypeBinding#isUpperbound()
 	 */
+	@Override
 	public boolean isUpperbound() {
 		return false;
 	}
@@ -597,43 +646,53 @@ class RecoveredTypeBinding implements ITypeBinding {
 	/* (non-Javadoc)
 	 * @see org.eclipse.jdt.core.dom.ITypeBinding#isWildcardType()
 	 */
+	@Override
 	public boolean isWildcardType() {
 		return false;
 	}
 
 //{ObjectTeams: implement OT method from ITypeBinding:
+	@Override
 	public boolean isTeam() {
 		if (this.currentType != null)
 			return Flags.isTeam(this.currentType.getFlags());
 	    return false;
 	}
+	@Override
 	public boolean isRole() {
 		if (this.currentType != null)
 			return Flags.isRole(this.currentType.getFlags());
 	    return false;
 	}
+	@Override
 	public boolean isClassPartOf (ITypeBinding other) {
 		return false;
 	}
+	@Override
 	public boolean isSynthRoleIfc() {
 		return false;
 	}
+	@Override
 	public ITypeBinding getIfcPart() {
 		if (isInterface())
 			return this;
 		return null;
 	}
+	@Override
 	public ITypeBinding getClassPart() {
 		if (!isInterface())
 			return this;
 		return null;
 	}
+	@Override
 	public ITypeBinding getBaseClass() {
 		return null;
 	}
+	@Override
 	public ITypeBinding[] getSuperRoles() {
 		return TypeBinding.NO_TYPE_BINDINGS;
 	}
+	@Override
 	public String getOptimalName() {
 		return this.getQualifiedName();
 	}
@@ -642,6 +701,7 @@ class RecoveredTypeBinding implements ITypeBinding {
 	/* (non-Javadoc)
 	 * @see org.eclipse.jdt.core.dom.IBinding#getAnnotations()
 	 */
+	@Override
 	public IAnnotationBinding[] getAnnotations() {
 		return AnnotationBinding.NoAnnotations;
 	}
@@ -649,6 +709,7 @@ class RecoveredTypeBinding implements ITypeBinding {
 	/* (non-Javadoc)
 	 * @see org.eclipse.jdt.core.dom.IBinding#getJavaElement()
 	 */
+	@Override
 	public IJavaElement getJavaElement() {
 		IPackageBinding packageBinding = getPackage();
 		if (packageBinding != null) {
@@ -664,6 +725,7 @@ class RecoveredTypeBinding implements ITypeBinding {
 	/* (non-Javadoc)
 	 * @see org.eclipse.jdt.core.dom.IBinding#getKey()
 	 */
+	@Override
 	public String getKey() {
 		StringBuffer buffer = new StringBuffer();
 		buffer.append("Recovered#"); //$NON-NLS-1$
@@ -700,6 +762,7 @@ class RecoveredTypeBinding implements ITypeBinding {
 	/* (non-Javadoc)
 	 * @see org.eclipse.jdt.core.dom.IBinding#getKind()
 	 */
+	@Override
 	public int getKind() {
 		return IBinding.TYPE;
 	}
@@ -707,6 +770,7 @@ class RecoveredTypeBinding implements ITypeBinding {
 	/* (non-Javadoc)
 	 * @see org.eclipse.jdt.core.dom.IBinding#isDeprecated()
 	 */
+	@Override
 	public boolean isDeprecated() {
 		return false;
 	}
@@ -714,6 +778,7 @@ class RecoveredTypeBinding implements ITypeBinding {
 	/* (non-Javadoc)
 	 * @see org.eclipse.jdt.core.dom.IBinding#isEqualTo(org.eclipse.jdt.core.dom.IBinding)
 	 */
+	@Override
 	public boolean isEqualTo(IBinding other) {
 		if (!other.isRecovered() || other.getKind() != IBinding.TYPE) return false;
 		return getKey().equals(other.getKey());
@@ -722,6 +787,7 @@ class RecoveredTypeBinding implements ITypeBinding {
 	/* (non-Javadoc)
 	 * @see org.eclipse.jdt.core.dom.IBinding#isRecovered()
 	 */
+	@Override
 	public boolean isRecovered() {
 		return true;
 	}
@@ -729,6 +795,7 @@ class RecoveredTypeBinding implements ITypeBinding {
 	/* (non-Javadoc)
 	 * @see org.eclipse.jdt.core.dom.IBinding#isSynthetic()
 	 */
+	@Override
 	public boolean isSynthetic() {
 		return false;
 	}
@@ -804,6 +871,7 @@ class RecoveredTypeBinding implements ITypeBinding {
 		return null; // should not happen
 	}
 
+	@Override
 	public IAnnotationBinding[] getTypeAnnotations() {
 		return AnnotationBinding.NoAnnotations;
 	}
@@ -814,6 +882,7 @@ class RecoveredTypeBinding implements ITypeBinding {
 	}
 
 	/* implement method from ITypeBinding. */
+	@Override
 	public boolean isDependentType(boolean onlyRelevant) {
 		if (this.binding != null) {
 			if (onlyRelevant)
@@ -827,6 +896,7 @@ class RecoveredTypeBinding implements ITypeBinding {
 	}
 
 	/* implement method from ITypeBinding. */
+	@Override
 	public String[] getAnchorPath() {
 		if (this.binding != null) {
 			if (this.binding instanceof DependentTypeBinding)
@@ -839,6 +909,7 @@ class RecoveredTypeBinding implements ITypeBinding {
 		return new String[0];
 	}
 
+	@Override
 	public IMethodMappingBinding[] getResolvedMethodMappings() {
 		// copy of TypeBinding.getResolvedMethodMappings:
 		List<IMethodMappingBinding> mappings = new ArrayList<IMethodMappingBinding>();

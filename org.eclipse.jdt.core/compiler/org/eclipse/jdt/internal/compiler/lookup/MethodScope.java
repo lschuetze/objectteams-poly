@@ -100,6 +100,7 @@ public MethodScope(Scope parent, ReferenceContext context, boolean isStatic, int
 	this.lastVisibleFieldID = lastVisibleFieldID;
 }
 
+@Override
 String basicToString(int tab) {
 	String newLine = "\n"; //$NON-NLS-1$
 	for (int i = tab; --i >= 0;)
@@ -317,7 +318,8 @@ private void checkAndSetModifiersForMethod(final MethodBinding methodBinding) {
 /* orig:
 			problemReporter().abstractMethodInAbstractClass((SourceTypeBinding) declaringClass, (AbstractMethodDeclaration) this.referenceContext); 
   :giro */
-			problemReporter().setRechecker(new IProblemRechecker() { public boolean shouldBeReported(IrritantSet[] foundIrritants) {
+			problemReporter().setRechecker(new IProblemRechecker() { @Override
+			public boolean shouldBeReported(IrritantSet[] foundIrritants) {
 								return methodBinding.isAbstract();
 							  }})
 							 .abstractMethodInAbstractClass((SourceTypeBinding) declaringClass, (AbstractMethodDeclaration) this.referenceContext); 
@@ -532,6 +534,7 @@ class X {
 	}
 }
  */
+@Override
 public FieldBinding findField(TypeBinding receiverType, char[] fieldName, InvocationSite invocationSite, boolean needResolve) {
 
 	FieldBinding field = super.findField(receiverType, fieldName, invocationSite, needResolve);
@@ -581,6 +584,7 @@ public boolean isInsideInitializer() {
 	return (this.referenceContext instanceof TypeDeclaration);
 }
 
+@Override
 public boolean isLambdaScope() {
 	return this.referenceContext instanceof LambdaExpression;
 }
@@ -597,6 +601,7 @@ public boolean isInsideInitializerOrConstructor() {
  * (unit, type or method) in case the problem handler decides it is necessary
  * to abort.
  */
+@Override
 public ProblemReporter problemReporter() {
 	ProblemReporter problemReporter = referenceCompilationUnit().problemReporter;
 	problemReporter.referenceContext = this.referenceContext;
@@ -682,11 +687,13 @@ public MethodBinding referenceMethodBinding() {
  *  Answer the reference type of this scope.
  * It is the nearest enclosing type of this scope.
  */
+@Override
 public TypeDeclaration referenceType() {
 	ClassScope scope = enclosingClassScope();
 	return scope == null ? null : scope.referenceContext;
 }
 
+@Override
 void resolveTypeParameter(TypeParameter typeParameter) {
 	typeParameter.resolve(this);
 }

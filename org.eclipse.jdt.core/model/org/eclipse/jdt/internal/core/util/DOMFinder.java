@@ -91,18 +91,21 @@ public class DOMFinder extends ASTVisitor {
 		return this.foundNode;
 	}
 
+	@Override
 	public boolean visit(AnnotationTypeDeclaration node) {
 		if (found(node, node.getName()) && this.resolveBinding)
 			this.foundBinding = node.resolveBinding();
 		return true;
 	}
 
+	@Override
 	public boolean visit(AnnotationTypeMemberDeclaration node) {
 		if (found(node, node.getName()) && this.resolveBinding)
 			this.foundBinding = node.resolveBinding();
 		return true;
 	}
 
+	@Override
 	public boolean visit(AnonymousClassDeclaration node) {
 		ASTNode name;
 		ASTNode parent = node.getParent();
@@ -124,66 +127,77 @@ public class DOMFinder extends ASTVisitor {
 		return true;
 	}
 
+	@Override
 	public boolean visit(EnumConstantDeclaration node) {
 		if (found(node, node.getName()) && this.resolveBinding)
 			this.foundBinding = node.resolveVariable();
 		return true;
 	}
 
+	@Override
 	public boolean visit(EnumDeclaration node) {
 		if (found(node, node.getName()) && this.resolveBinding)
 			this.foundBinding = node.resolveBinding();
 		return true;
 	}
 
+	@Override
 	public boolean visit(ImportDeclaration node) {
 		if (found(node, node) && this.resolveBinding)
 			this.foundBinding = node.resolveBinding();
 		return true;
 	}
 
+	@Override
 	public boolean visit(Initializer node) {
 		// note that no binding exists for an Initializer
 		found(node, node);
 		return true;
 	}
 
+	@Override
 	public boolean visit(MarkerAnnotation node) {
 		if (found(node, node) && this.resolveBinding)
 			this.foundBinding = node.resolveAnnotationBinding();
 		return true;
 	}
 
+	@Override
 	public boolean visit(MethodDeclaration node) {
 		if (found(node, node.getName()) && this.resolveBinding)
 			this.foundBinding = node.resolveBinding();
 		return true;
 	}
 
+	@Override
 	public boolean visit(ModuleDeclaration node) {
 		if (found(node, node.getName()) && this.resolveBinding) {
 			this.foundBinding = node.resolveBinding();
 		}
 		return true;
 	}
+	@Override
 	public boolean visit(NormalAnnotation node) {
 		if (found(node, node) && this.resolveBinding)
 			this.foundBinding = node.resolveAnnotationBinding();
 		return true;
 	}
 
+	@Override
 	public boolean visit(PackageDeclaration node) {
 		if (found(node, node) && this.resolveBinding)
 			this.foundBinding = node.resolveBinding();
 		return true;
 	}
 
+	@Override
 	public boolean visit(SingleMemberAnnotation node) {
 		if (found(node, node) && this.resolveBinding)
 			this.foundBinding = node.resolveAnnotationBinding();
 		return true;
 	}
 
+	@Override
 	public boolean visit(TypeDeclaration node) {
 		if (found(node, node.getName()) && this.resolveBinding)
 			this.foundBinding = node.resolveBinding();
@@ -215,24 +229,28 @@ public class DOMFinder extends ASTVisitor {
     }
 // SH}
 
+	@Override
 	public boolean visit(TypeParameter node) {
 		if (found(node, node.getName()) && this.resolveBinding)
 			this.foundBinding = node.resolveBinding();
 		return true;
 	}
 
+	@Override
 	public boolean visit(VariableDeclarationFragment node) {
 		if (found(node, node.getName()) && this.resolveBinding)
 			this.foundBinding = node.resolveBinding();
 		return true;
 	}
 
+	@Override
 	public boolean visit(SingleVariableDeclaration node) {
 		if (found(node, node.getName()) && this.resolveBinding)
 			this.foundBinding = node.resolveBinding();
 		return true;		
 	}
 
+	@Override
 	public boolean visit(LambdaExpression node) {
 		if (found(node, node) && this.resolveBinding)
 			this.foundBinding = node.resolveMethodBinding();

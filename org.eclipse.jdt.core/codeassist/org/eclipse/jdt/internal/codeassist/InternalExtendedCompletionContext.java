@@ -73,6 +73,7 @@ import org.eclipse.objectteams.otdt.internal.core.compiler.control.Dependencies;
 @SuppressWarnings({"rawtypes", "unchecked"})
 public class InternalExtendedCompletionContext {
 	private static Util.BindingsToNodesMap EmptyNodeMap = new Util.BindingsToNodesMap() {
+		@Override
 		public ASTNode get(Binding binding) {
 			return null;
 		}

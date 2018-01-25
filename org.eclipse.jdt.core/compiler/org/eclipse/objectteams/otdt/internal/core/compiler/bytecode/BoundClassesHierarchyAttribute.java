@@ -86,7 +86,8 @@ public class BoundClassesHierarchyAttribute extends ListValueAttribute {
     /* (non-Javadoc)
      * @see org.eclipse.objectteams.otdt.internal.core.compiler.bytecode.ListValueAttribute#writeElementValue(int)
      */
-    protected void writeElementValue(int i) {
+    @Override
+	protected void writeElementValue(int i) {
         writeName(this.subNames[i]);
         writeName(this.superNames[i]);
     }
@@ -94,14 +95,16 @@ public class BoundClassesHierarchyAttribute extends ListValueAttribute {
     /* (non-Javadoc)
      * @see org.eclipse.objectteams.otdt.internal.core.compiler.bytecode.AbstractAttribute#evaluate(org.eclipse.jdt.internal.compiler.lookup.Binding, org.eclipse.jdt.internal.compiler.lookup.LookupEnvironment)
      */
-    public void evaluate(Binding binding, LookupEnvironment environment, char[][][] missingTypeNames) {
+    @Override
+	public void evaluate(Binding binding, LookupEnvironment environment, char[][][] missingTypeNames) {
         // nothing, don't read from classfile
     }
 
     /* (non-Javadoc)
      * @see org.eclipse.objectteams.otdt.internal.core.compiler.bytecode.ListValueAttribute#toString(int)
      */
-    @SuppressWarnings("nls")
+    @Override
+	@SuppressWarnings("nls")
 	protected String toString(int i) {
     	if (this.subNames != null)
     		return String.valueOf(this.subNames[i])+"->"+String.valueOf(this.superNames[i]);

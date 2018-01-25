@@ -87,6 +87,7 @@ public FlowInfo analyseCode(BlockScope currentScope, FlowContext flowContext, Fl
 }
 // SH}
 
+@Override
 public FlowInfo analyseCode(BlockScope currentScope, FlowContext flowContext, FlowInfo flowInfo) {
 	// record setting a variable: various scenarii are possible, setting an array reference,
 // a field reference, a blank final field reference, a field of an enclosing instance or
@@ -160,6 +161,7 @@ void checkAssignment(BlockScope scope, TypeBinding lhsType, TypeBinding rhsType)
 	}
 }
 
+@Override
 public void generateCode(BlockScope currentScope, CodeStream codeStream, boolean valueRequired) {
 	// various scenarii are possible, setting an array reference,
 	// a field reference, a blank final field reference, a field of an enclosing instance or
@@ -192,17 +194,20 @@ FieldBinding getLastField(Expression someExpression) {
     return null;
 }
 
+@Override
 public int nullStatus(FlowInfo flowInfo, FlowContext flowContext) {
 	if ((this.implicitConversion & TypeIds.BOXING) != 0)
 		return FlowInfo.NON_NULL;
 	return this.expression.nullStatus(flowInfo, flowContext);
 }
 
+@Override
 public StringBuffer print(int indent, StringBuffer output) {
 	//no () when used as a statement
 	printIndent(indent, output);
 	return printExpressionNoParenthesis(indent, output);
 }
+@Override
 public StringBuffer printExpression(int indent, StringBuffer output) {
 	//subclass redefine printExpressionNoParenthesis()
 	output.append('(');
@@ -214,11 +219,13 @@ public StringBuffer printExpressionNoParenthesis(int indent, StringBuffer output
 	return this.expression.printExpression(0, output);
 }
 
+@Override
 public StringBuffer printStatement(int indent, StringBuffer output) {
 	//no () when used as a statement
 	return print(indent, output).append(';');
 }
 
+@Override
 public TypeBinding resolveType(BlockScope scope) {
 	// due to syntax lhs may be only a NameReference, a FieldReference or an ArrayReference
 	this.constant = Constant.NotAConstant;
@@ -310,6 +317,7 @@ public TypeBinding resolveType(BlockScope scope) {
 /**
  * @see org.eclipse.jdt.internal.compiler.ast.Expression#resolveTypeExpecting(org.eclipse.jdt.internal.compiler.lookup.BlockScope, org.eclipse.jdt.internal.compiler.lookup.TypeBinding)
  */
+@Override
 public TypeBinding resolveTypeExpecting(BlockScope scope, TypeBinding expectedType) {
 
 	TypeBinding type = super.resolveTypeExpecting(scope, expectedType);
@@ -326,6 +334,7 @@ public TypeBinding resolveTypeExpecting(BlockScope scope, TypeBinding expectedTy
 	return type;
 }
 
+@Override
 public void traverse(ASTVisitor visitor, BlockScope scope) {
 	if (visitor.visit(this, scope)) {
 		this.lhs.traverse(visitor, scope);
@@ -333,9 +342,11 @@ public void traverse(ASTVisitor visitor, BlockScope scope) {
 	}
 	visitor.endVisit(this, scope);
 }
+@Override
 public LocalVariableBinding localVariableBinding() {
 	return this.lhs.localVariableBinding();
 }
+@Override
 public boolean statementExpression() {
 	return ((this.bits & ASTNode.ParenthesizedMASK) == 0);
 }

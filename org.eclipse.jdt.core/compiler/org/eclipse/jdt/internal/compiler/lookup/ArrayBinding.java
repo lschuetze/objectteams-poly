@@ -74,6 +74,7 @@ public ArrayBinding(TypeBinding type, int dimensions, LookupEnvironment environm
 	}
 }
 
+@Override
 public TypeBinding closestMatch() {
 	if (isValidBinding()) {
 		return this;
@@ -88,6 +89,7 @@ public TypeBinding closestMatch() {
 /**
  * @see org.eclipse.jdt.internal.compiler.lookup.TypeBinding#collectMissingTypes(java.util.List)
  */
+@Override
 public List<TypeBinding> collectMissingTypes(List<TypeBinding> missingTypes) {
 	if ((this.tagBits & TagBits.HasMissingType) != 0) {
 		missingTypes = this.leafComponentType.collectMissingTypes(missingTypes);
@@ -103,6 +105,7 @@ public List<TypeBinding> collectMissingTypes(List<TypeBinding> missingTypes) {
  *   A = F   corresponds to:      F.collectSubstitutes(..., A, ..., CONSTRAINT_EQUAL (0))
  *   A >> F   corresponds to:   F.collectSubstitutes(..., A, ..., CONSTRAINT_SUPER (2))
 */
+@Override
 public void collectSubstitutes(Scope scope, TypeBinding actualType, InferenceContext inferenceContext, int constraint) {
 
 	if ((this.tagBits & TagBits.HasTypeVariable) == 0) return;
@@ -131,6 +134,7 @@ public boolean mentionsAny(TypeBinding[] parameters, int idx) {
 }
 
 //{ObjectTeams: cross the OT package, make protected:
+@Override
 protected
 //SH}
 void collectInferenceVariables(Set variables) {
@@ -138,6 +142,7 @@ void collectInferenceVariables(Set variables) {
 }
 
 //{ObjectTeams: cross the OT package, make protected:
+@Override
 protected
 //SH}
 TypeBinding substituteInferenceVariable(InferenceVariable var, TypeBinding substituteType) {
@@ -151,6 +156,7 @@ TypeBinding substituteInferenceVariable(InferenceVariable var, TypeBinding subst
  * brakets leafUniqueKey
  * p.X[][] --> [[Lp/X;
  */
+@Override
 public char[] computeUniqueKey(boolean isLeaf) {
 	char[] brackets = new char[this.dimensions];
 	for (int i = this.dimensions - 1; i >= 0; i--) brackets[i] = '[';
@@ -162,6 +168,7 @@ public char[] computeUniqueKey(boolean isLeaf) {
  * NOTE: This method should only be used during/after code gen.
  * e.g. '[Ljava/lang/Object;'
  */
+@Override
 public char[] constantPoolName() {
 	if (this.constantPoolName != null)
 		return this.constantPoolName;
@@ -170,6 +177,7 @@ public char[] constantPoolName() {
 	for (int i = this.dimensions - 1; i >= 0; i--) brackets[i] = '[';
 	return this.constantPoolName = CharOperation.concat(brackets, this.leafComponentType.signature());
 }
+@Override
 public String debugName() {
 	if (this.hasTypeAnnotations())
 		return annotatedDebugName();
@@ -179,6 +187,7 @@ public String debugName() {
 	return this.leafComponentType.debugName() + brackets.toString();
 }
 
+@Override
 public String annotatedDebugName() {
 	StringBuffer brackets = new StringBuffer(this.dimensions * 2);
 	brackets.append(this.leafComponentType.annotatedDebugName());
@@ -198,6 +207,7 @@ public String annotatedDebugName() {
 	return brackets.toString();
 }
 
+@Override
 public int dimensions() {
 	return this.dimensions;
 }
@@ -227,6 +237,7 @@ public TypeBinding elementsType() {
 /**
  * @see org.eclipse.jdt.internal.compiler.lookup.TypeBinding#erasure()
  */
+@Override
 public TypeBinding erasure() {
     TypeBinding erasedType = this.leafComponentType.erasure();
     if (TypeBinding.notEquals(this.leafComponentType, erasedType))
@@ -237,6 +248,7 @@ public LookupEnvironment environment() {
     return this.environment;
 }
 
+@Override
 public char[] genericTypeSignature() {
 
     if (this.genericTypeSignature == null) {
@@ -247,16 +259,19 @@ public char[] genericTypeSignature() {
     return this.genericTypeSignature;
 }
 
+@Override
 public PackageBinding getPackage() {
 	return this.leafComponentType.getPackage();
 }
 
+@Override
 public int hashCode() {
 	return this.leafComponentType == null ? super.hashCode() : this.leafComponentType.hashCode();
 }
 
 /* Answer true if the receiver type can be assigned to the argument type (right)
 */
+@Override
 public boolean isCompatibleWith(TypeBinding otherType, Scope captureScope) {
 	if (equalsEquals(this, otherType))
 		return true;
@@ -332,18 +347,22 @@ public boolean isSubtypeOf(TypeBinding otherType) {
 	return false;
 }
 
+@Override
 public boolean isProperType(boolean admitCapture18) {
 	return this.leafComponentType.isProperType(admitCapture18);
 }
 
+@Override
 public int kind() {
 	return ARRAY_TYPE;
 }
 
+@Override
 public TypeBinding leafComponentType(){
 	return this.leafComponentType;
 }
 
+@Override
 public char[] nullAnnotatedReadableName(CompilerOptions options, boolean shortNames) /* java.lang.Object @o.e.j.a.NonNull[] */ {
 	if (this.nullTagBitsPerDimension == null)
 		return shortNames ? shortReadableName() : readableName();
@@ -376,6 +395,7 @@ public char[] nullAnnotatedReadableName(CompilerOptions options, boolean shortNa
 * Answer the problem id associated with the receiver.
 * NoError if the receiver is a valid binding.
 */
+@Override
 public int problemId() {
 	return this.leafComponentType.problemId();
 }
@@ -385,6 +405,7 @@ public int problemId() {
 * For example, for a member type N defined inside M & A: "A.M.N".
 */
 
+@Override
 public char[] qualifiedSourceName() {
 	char[] brackets = new char[this.dimensions * 2];
 	for (int i = this.dimensions * 2 - 1; i >= 0; i -= 2) {
@@ -393,6 +414,7 @@ public char[] qualifiedSourceName() {
 	}
 	return CharOperation.concat(this.leafComponentType.qualifiedSourceName(), brackets);
 }
+@Override
 public char[] readableName() /* java.lang.Object[] */ {
 	char[] brackets = new char[this.dimensions * 2];
 	for (int i = this.dimensions * 2 - 1; i >= 0; i -= 2) {
@@ -402,6 +424,7 @@ public char[] readableName() /* java.lang.Object[] */ {
 	return CharOperation.concat(this.leafComponentType.readableName(), brackets);
 }
 
+@Override
 public void setTypeAnnotations(AnnotationBinding[] annotations, boolean evalNullAnnotations) {
 	this.tagBits |= TagBits.HasTypeAnnotations;
 	if (annotations == null || annotations.length == 0)
@@ -436,6 +459,7 @@ public void setTypeAnnotations(AnnotationBinding[] annotations, boolean evalNull
 		this.tagBits |= this.nullTagBitsPerDimension[0]; // outer-most dimension
 	}
 }
+@Override
 public char[] shortReadableName(){
 	char[] brackets = new char[this.dimensions * 2];
 	for (int i = this.dimensions * 2 - 1; i >= 0; i -= 2) {
@@ -444,6 +468,7 @@ public char[] shortReadableName(){
 	}
 	return CharOperation.concat(this.leafComponentType.shortReadableName(), brackets);
 }
+@Override
 public char[] sourceName() {
 	char[] brackets = new char[this.dimensions * 2];
 	for (int i = this.dimensions * 2 - 1; i >= 0; i -= 2) {
@@ -452,6 +477,7 @@ public char[] sourceName() {
 	}
 	return CharOperation.concat(this.leafComponentType.sourceName(), brackets);
 }
+@Override
 public void swapUnresolved(UnresolvedReferenceBinding unresolvedType, ReferenceBinding resolvedType, LookupEnvironment env) {
 	if (this.leafComponentType == unresolvedType) { //$IDENTITY-COMPARISON$
 		this.leafComponentType = env.convertUnresolvedBinaryToRawType(resolvedType);
@@ -483,9 +509,11 @@ public TypeBinding maybeWrapRoleType(ASTNode typedNode, TypeArgumentUpdater upda
 	return this;
 }
 // SH}
+@Override
 public String toString() {
 	return this.leafComponentType != null ? debugName() : "NULL TYPE ARRAY"; //$NON-NLS-1$
 }
+@Override
 public TypeBinding unannotated() {
 	return this.hasTypeAnnotations() ? this.environment.getUnannotatedType(this) : this;
 }

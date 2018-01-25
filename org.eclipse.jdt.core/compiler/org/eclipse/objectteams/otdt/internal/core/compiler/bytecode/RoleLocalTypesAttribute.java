@@ -88,12 +88,14 @@ public class RoleLocalTypesAttribute extends ListValueAttribute {
     /* (non-Javadoc)
      * @see org.eclipse.objectteams.otdt.internal.core.compiler.bytecode.ListValueAttribute#writeElementValue(int)
      */
-    protected void writeElementValue(int i) {
+    @Override
+	protected void writeElementValue(int i) {
         ReferenceBinding typeBinding = this._localTypes[i];
         writeName(typeBinding.constantPoolName()); // don't use attribute name here (has $Local$ prefix ...)
     }
 
-    void read(int i)
+    @Override
+	void read(int i)
     {
         if (i==0)
             this._names = new char[this._count][];
@@ -104,7 +106,8 @@ public class RoleLocalTypesAttribute extends ListValueAttribute {
     /* (non-Javadoc)
      * @see org.eclipse.objectteams.otdt.internal.core.compiler.bytecode.AbstractAttribute#evaluate(org.eclipse.jdt.internal.compiler.lookup.Binding, org.eclipse.jdt.internal.compiler.lookup.LookupEnvironment)
      */
-    public void evaluate(Binding binding, LookupEnvironment environment, char[][][] missingTypeNames) {
+    @Override
+	public void evaluate(Binding binding, LookupEnvironment environment, char[][][] missingTypeNames) {
     	checkBindingMismatch(binding, ExtraCompilerModifiers.AccRole);
     	this._localTypes = new ReferenceBinding[this._count];
 
@@ -123,7 +126,8 @@ public class RoleLocalTypesAttribute extends ListValueAttribute {
     /* (non-Javadoc)
      * @see org.eclipse.objectteams.otdt.internal.core.compiler.bytecode.ListValueAttribute#toString(int)
      */
-    protected String toString(int i) {
+    @Override
+	protected String toString(int i) {
         return new String(this._localTypes[i].constantPoolName());
     }
 
