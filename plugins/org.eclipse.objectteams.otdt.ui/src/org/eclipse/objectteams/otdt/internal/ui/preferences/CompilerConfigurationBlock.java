@@ -22,8 +22,8 @@ package org.eclipse.objectteams.otdt.internal.ui.preferences;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
+import org.eclipse.jdt.internal.ui.preferences.FilteredPreferenceTree.PreferenceTreeNode;
 import org.eclipse.jdt.internal.ui.preferences.OptionsConfigurationBlock;
-import org.eclipse.jdt.internal.ui.preferences.FilteredPreferenceTree;
 import org.eclipse.jdt.internal.ui.preferences.PreferencesMessages;
 import org.eclipse.jdt.internal.ui.preferences.ScrolledPageContent;
 import org.eclipse.jdt.internal.ui.wizards.IStatusChangeListener;
@@ -125,7 +125,7 @@ public class CompilerConfigurationBlock extends OptionsConfigurationBlock {
 	
 	private Composite fControlsComposite;
 	private ControlEnableState fBlockEnableState;
-	private FilteredPreferenceTree fFilteredPrefTree;
+	private PreferenceTree fFilteredPrefTree;
 	private PixelConverter fPixelConverter;
 	private Combo fWeavingSchemeComboBox;
 	
@@ -233,7 +233,7 @@ public class CompilerConfigurationBlock extends OptionsConfigurationBlock {
 
 	
 		// widget layout mainly copied from ProblemSeveritiesConfigurationBlock:
-		fFilteredPrefTree= new FilteredPreferenceTree(this, folder, OTPreferencesMessages.OTCompilerConfigurationBlock_common_description);
+		fFilteredPrefTree= new PreferenceTree(this, folder, OTPreferencesMessages.OTCompilerConfigurationBlock_common_description);
 		final ScrolledPageContent sc1= fFilteredPrefTree.getScrolledPageContent();
 
 		Composite composite= sc1.getBody();
