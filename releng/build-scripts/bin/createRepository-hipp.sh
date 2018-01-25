@@ -209,7 +209,7 @@ fi
 echo "====Step 9: jar-up metadata===="
 jar cf content.jar content.xml
 jar cf artifacts.jar artifacts.xml
-/bin/rm *.xml*
+#/bin/rm *.xml*
 ls -ltr *\.*
 
 echo "====Step 10: cleanup: remove symbolic links===="
