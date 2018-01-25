@@ -97,14 +97,6 @@ public List<TypeBinding> collectMissingTypes(List<TypeBinding> missingTypes) {
 	return missingTypes;
 }
 
-/**
- * Collect the substitutes into a map for certain type variables inside the receiver type
- * e.g.   Collection<T>.collectSubstitutes(Collection<List<X>>, Map), will populate Map with: T --> List<X>
- * Constraints:
- *   A << F   corresponds to:   F.collectSubstitutes(..., A, ..., CONSTRAINT_EXTENDS (1))
- *   A = F   corresponds to:      F.collectSubstitutes(..., A, ..., CONSTRAINT_EQUAL (0))
- *   A >> F   corresponds to:   F.collectSubstitutes(..., A, ..., CONSTRAINT_SUPER (2))
-*/
 @Override
 public void collectSubstitutes(Scope scope, TypeBinding actualType, InferenceContext inferenceContext, int constraint) {
 
@@ -163,11 +155,6 @@ public char[] computeUniqueKey(boolean isLeaf) {
 	return CharOperation.concat(brackets, this.leafComponentType.computeUniqueKey(isLeaf));
  }
 
-/**
- * Answer the receiver's constant pool name.
- * NOTE: This method should only be used during/after code gen.
- * e.g. '[Ljava/lang/Object;'
- */
 @Override
 public char[] constantPoolName() {
 	if (this.constantPoolName != null)
@@ -321,7 +308,7 @@ public boolean isCompatibleWith(TypeBinding otherType, Scope captureScope) {
 }
 
 @Override
-public boolean isSubtypeOf(TypeBinding otherType) {
+public boolean isSubtypeOf(TypeBinding otherType, boolean simulatingBugJDK8026527) {
 	if (equalsEquals(this, otherType))
 		return true;
 
@@ -331,7 +318,7 @@ public boolean isSubtypeOf(TypeBinding otherType) {
 			if (otherArray.leafComponentType.isBaseType())
 				return false; // relying on the fact that all equal arrays are identical
 			if (this.dimensions == otherArray.dimensions)
-				return this.leafComponentType.isSubtypeOf(otherArray.leafComponentType);
+				return this.leafComponentType.isSubtypeOf(otherArray.leafComponentType, simulatingBugJDK8026527);
 			if (this.dimensions < otherArray.dimensions)
 				return false; // cannot assign 'String[]' into 'Object[][]' but can assign 'byte[][]' into 'Object[]'
 			break;
@@ -399,11 +386,6 @@ public char[] nullAnnotatedReadableName(CompilerOptions options, boolean shortNa
 public int problemId() {
 	return this.leafComponentType.problemId();
 }
-/**
-* Answer the source name for the type.
-* In the case of member types, as the qualified name from its top level type.
-* For example, for a member type N defined inside M & A: "A.M.N".
-*/
 
 @Override
 public char[] qualifiedSourceName() {

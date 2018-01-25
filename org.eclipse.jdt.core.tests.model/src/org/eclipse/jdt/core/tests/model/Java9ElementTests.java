@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2017 IBM Corporation and others.
+ * Copyright (c) 2017, 2018 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -30,6 +30,7 @@ import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IModuleDescription;
 import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
+import org.eclipse.jdt.core.ISourceRange;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.ITypeRoot;
 import org.eclipse.jdt.core.JavaCore;
@@ -37,6 +38,8 @@ import org.eclipse.jdt.core.ToolFactory;
 import org.eclipse.jdt.core.compiler.CharOperation;
 import org.eclipse.jdt.core.provisional.JavaModelAccess;
 import org.eclipse.jdt.core.tests.util.AbstractCompilerTest;
+import org.eclipse.jdt.core.tests.util.Util;
+import org.eclipse.jdt.core.util.ClassFileBytesDisassembler;
 import org.eclipse.jdt.core.util.IAttributeNamesConstants;
 import org.eclipse.jdt.core.util.IClassFileAttribute;
 import org.eclipse.jdt.core.util.IClassFileReader;
@@ -1225,6 +1228,86 @@ public class Java9ElementTests extends AbstractJavaModelTests {
 			deleteProject("mod.zero");
 		}
 	}
+	public void testModuleAttributes_disassembler_508889_001() throws Exception {
+		try {
+			IJavaProject javaProject = createJava9Project("mod.zero");
+
+			createFolder("/mod.zero/src/test0");
+			createFile("/mod.zero/src/test0/SPQR.java",
+							"package test0;\n" +
+							"\n" +
+							"public class SPQR {}");
+
+			createFolder("/mod.zero/src/test1");
+			createFile("/mod.zero/src/test1/Service.java",
+							"package test1;\n" +
+							"\n" +
+							"public interface Service {}");
+
+			createFolder("/mod.zero/src/test2");
+			createFile("/mod.zero/src/test2/Impl.java",
+							"package test2;\n" +
+							"\n" +
+							"public class Impl implements test1.Service {}");
+
+			createFolder("/mod.zero/src/testDont");
+			createFile("/mod.zero/src/testDont/Show.java",
+							"package testDont;\n" +
+							"\n" +
+							"public class Show {}");
+
+			String content = 	"module mod.zero {\n" +
+								"	exports test0;\n" +
+								"	opens test1;\n" +
+								"	provides test1.Service with test2.Impl;\n" +
+								"}\n";
+			createFile("/mod.zero/src/module-info.java", content);
+
+			javaProject.getProject().build(IncrementalProjectBuilder.FULL_BUILD, null);
+
+			ICompilationUnit unit = getCompilationUnit("/mod.zero/src/module-info.java");
+			IModuleDescription module = unit.getModule();
+
+			Map<String,String> attributes = new HashMap<>();
+			attributes.put(String.valueOf(IAttributeNamesConstants.MODULE_MAIN_CLASS), "test0.SPQR");
+			attributes.put(String.valueOf(IAttributeNamesConstants.MODULE_PACKAGES), "");
+
+			byte[] bytes = JavaCore.compileWithAttributes(module, attributes);
+
+			ClassFileBytesDisassembler disassembler = ToolFactory.createDefaultClassFileBytesDisassembler();
+			String result = disassembler.disassemble(bytes, "\n", ClassFileBytesDisassembler.DETAILED);
+			String expectedOutput = "// Compiled from module-info.java (version 9 : 53.0, no super bit)\n" +
+					" module mod.zero  {\n" +
+					"  // Version: \n" +
+					"\n" +
+					"  requires java.base;\n" +
+					"\n" +
+					"  exports test0;\n" +
+					"\n" +
+					"  opens test1;\n" +
+					"\n" +
+					"  provides test1.Service with test2.Impl;\n" +
+					"  \n" +
+					"  Module packages:\n" +
+					"    test0\n" +
+					"    test1\n" +
+					"    test2\n" +
+					"\n" +
+					"  Module main class:\n" +
+					"    test0.SPQR\n" +
+					"\n" +
+					"}";
+			int index = result.indexOf(expectedOutput);
+			if (index == -1 || expectedOutput.length() == 0) {
+				System.out.println(Util.displayString(result, 2));
+			}
+			if (index == -1) {
+				assertEquals("Wrong contents", expectedOutput, result);
+			}
+		} finally {
+			deleteProject("mod.zero");
+		}
+	}
 	public void testAutoModule1() throws Exception {
 		try {
 			IJavaProject project1 = createJavaProject("my_mod", new String[] {"src"}, new String[] {"JCL19_LIB"}, "bin", "9");
@@ -1301,6 +1384,19 @@ public class Java9ElementTests extends AbstractJavaModelTests {
 			IJavaElement element2 = JavaCore.create(id);
 			assertEquals("incorrect element type", IJavaElement.PACKAGE_FRAGMENT_ROOT, element2.getElementType());
 			assertEquals("roots should be same", element, element2);
+		}
+		finally {
+			deleteProject("Java9Elements");
+		}
+	}
+	public void test528058() throws Exception {
+		try {
+			IJavaProject project1 = createJava9Project("Java9Elements", new String[] {"work/src/java"});
+			project1.open(null);
+			IJavaElement object = project1.findElement(new Path("java/lang/Object.class"));
+			String id = object.getHandleIdentifier();
+			IJavaElement object2 = JavaCore.create(id);
+			assertEquals("elements should be the same", object, object2);
 		}
 		finally {
 			deleteProject("Java9Elements");
@@ -1470,6 +1566,46 @@ public class Java9ElementTests extends AbstractJavaModelTests {
 				assertEquals("Incorrect element type", IJavaElement.TYPE, elements[0].getElementType());
 				assertElementEquals("Incorrect Java element", 
 						"Main [in Main.java [in p.q [in src [in Java9Elements]]]]", elements[0]);
+		}
+		finally {
+			deleteProject("Java9Elements");
+		}
+	}
+	public void test530024_001() throws Exception {
+		try {
+			IJavaProject project1 = createJava9Project("Java9Elements", new String[] {"src"});
+			project1.open(null);
+			IClasspathEntry[] rawClasspath = project1.getRawClasspath();
+			IPath jdkRootPath = null;
+			for (int i = 0; i < rawClasspath.length; i++) {
+				IPath path = rawClasspath[i].getPath();
+				if (path.lastSegment().equals("jrt-fs.jar")) {
+					jdkRootPath = path.removeLastSegments(2);
+					path = jdkRootPath.append("jmods").append("java.base.jmod");
+					IClasspathEntry newEntry = JavaCore.newLibraryEntry(path, rawClasspath[i].getSourceAttachmentPath(), new Path("java.base"));
+					rawClasspath[i] = newEntry;
+				}
+			}
+			project1.setRawClasspath(rawClasspath, null);
+			String fileContent =
+					"module first {\n" +
+							"    requires java.base;\n" +
+							"    uses pack11.X11;\n" +
+							"}\n";
+			createFile("/Java9Elements/src/module-info.java", fileContent);
+
+			ICompilationUnit unit = getCompilationUnit("/Java9Elements/src/module-info.java");
+			String selection = "java.base";
+			int start = fileContent.lastIndexOf(selection);
+			IJavaElement[] elements = unit.codeSelect(start, selection.length());
+			assertEquals("Incorrect no of elements", 1, elements.length);
+			assertTrue("Invalid selection result", (elements[0] instanceof BinaryModule));
+			IModuleDescription mod = (IModuleDescription) elements[0];
+			String id = mod.getHandleIdentifier();
+			assertEquals("identifier", "=Java9Elements/"+jdkRootPath.toString().replace("/", "\\/")+"\\/jmods\\/java.base.jmod<'`java.base", id);
+			ISourceRange ir =mod.getNameRange();
+			assertTrue("positive offset", ir.getOffset() > 0);
+			assertEquals("length", 9, ir.getLength());
 		}
 		finally {
 			deleteProject("Java9Elements");

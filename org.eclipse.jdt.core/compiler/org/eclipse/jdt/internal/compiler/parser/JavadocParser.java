@@ -147,9 +147,6 @@ public class JavadocParser extends AbstractCommentParser {
 		return this.deprecated;
 	}
 
-	/* (non-Javadoc)
-	 * @see org.eclipse.jdt.internal.compiler.parser.AbstractCommentParser#createArgumentReference(char[], java.lang.Object, int)
-	 */
 	@Override
 	protected Object createArgumentReference(char[] name, int dim, boolean isVarargs, Object typeRef, long[] dimPositions, long argNamePos) throws InvalidInputException {
 		try {
@@ -178,9 +175,7 @@ public class JavadocParser extends AbstractCommentParser {
 			throw new InvalidInputException();
 		}
 	}
-	/* (non-Javadoc)
-	 * @see org.eclipse.jdt.internal.compiler.parser.AbstractCommentParser#createFieldReference()
-	 */
+
 	@Override
 	protected Object createFieldReference(Object receiver) throws InvalidInputException {
 		try {
@@ -202,9 +197,7 @@ public class JavadocParser extends AbstractCommentParser {
 			throw new InvalidInputException();
 		}
 	}
-	/* (non-Javadoc)
-	 * @see org.eclipse.jdt.internal.compiler.parser.AbstractCommentParser#createMethodReference(java.lang.Object[])
-	 */
+
 	@Override
 	protected Object createMethodReference(Object receiver, List arguments) throws InvalidInputException {
 		try {
@@ -299,26 +292,18 @@ public class JavadocParser extends AbstractCommentParser {
 			throw new InvalidInputException();
 		}
 	}
-	/* (non-Javadoc)
-	 * @see org.eclipse.jdt.internal.compiler.parser.AbstractCommentParser#createReturnStatement()
-	 */
+
 	@Override
 	protected Object createReturnStatement() {
 		return new JavadocReturnStatement(this.scanner.getCurrentTokenStartPosition(),
 					this.scanner.getCurrentTokenEndPosition());
 	}
 
-	/* (non-Javadoc)
-	 * @see org.eclipse.jdt.internal.compiler.parser.AbstractCommentParser#parseTagName()
-	 */
 	@Override
 	protected void createTag() {
 		this.tagValue = TAG_OTHERS_VALUE;
 	}
 
-	/* (non-Javadoc)
-	 * @see org.eclipse.jdt.internal.compiler.parser.AbstractCommentParser#createTypeReference()
-	 */
 	@Override
 	protected Object createTypeReference(int primitiveToken) {
 		TypeReference typeRef = null;
@@ -846,9 +831,6 @@ public class JavadocParser extends AbstractCommentParser {
 		return true;
 	}
 
-	/* (non-Javadoc)
-	 * @see org.eclipse.jdt.internal.compiler.parser.AbstractCommentParser#pushText(int, int)
-	 */
 	@Override
 	protected void pushText(int start, int end) {
 		// The tag gets its description => clear the flag
@@ -928,9 +910,6 @@ public class JavadocParser extends AbstractCommentParser {
 		return true;
 	}
 
-	/* (non-Javadoc)
-	 * @see org.eclipse.jdt.internal.compiler.parser.AbstractCommentParser#refreshInlineTagPosition(int)
-	 */
 	@Override
 	protected void refreshInlineTagPosition(int previousPosition) {
 

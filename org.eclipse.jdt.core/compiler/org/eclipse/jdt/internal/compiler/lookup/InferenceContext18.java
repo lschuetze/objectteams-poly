@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2013, 2017 GK Software AG, and others.
+ * Copyright (c) 2013, 2018 GK Software AG, and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -1583,7 +1583,6 @@ public class InferenceContext18 {
 		SuspendedInferenceRecord record = new SuspendedInferenceRecord(this.currentInvocation, this.invocationArguments, this.inferenceVariables, this.inferenceKind, this.usesUncheckedConversion);
 		this.inferenceVariables = null;
 		this.invocationArguments = null;
-		this.currentInvocation = null;
 		this.usesUncheckedConversion = false;
 		return record;
 	}
@@ -1668,9 +1667,12 @@ public class InferenceContext18 {
 	 * unless the given candidate is tolerable to be compatible with buggy javac.
 	 */
 	public MethodBinding getReturnProblemMethodIfNeeded(TypeBinding expectedType, MethodBinding method) {
-		if (InferenceContext18.SIMULATE_BUG_JDK_8026527 && expectedType != null 
+		if (InferenceContext18.SIMULATE_BUG_JDK_8026527 && expectedType != null
+				&& !(method.original() instanceof SyntheticFactoryMethodBinding)
 				&& (method.returnType instanceof ReferenceBinding || method.returnType instanceof ArrayBinding)) {
-			if (method.returnType.erasure().isCompatibleWith(expectedType))
+			if (!expectedType.isProperType(true))
+				return null; // not ready
+			if (this.environment.convertToRawType(method.returnType.erasure(), false).isCompatibleWith(expectedType))
 				return method; // don't count as problem.
 		}
 		/* We used to check if expected type is null and if so return method, but that is wrong - it injects an incompatible method into overload resolution.

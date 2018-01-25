@@ -265,7 +265,8 @@ public ModuleBinding getModule(char[] name) {
 		if (this.useModuleSystem) {
 			IModule mod = ((IModuleAwareNameEnvironment) this.nameEnvironment).getModule(name);
 			if (mod != null) {
-				moduleBinding = BinaryModuleBinding.create(mod, this);
+				this.typeRequestor.accept(mod, this);
+				moduleBinding = this.root.knownModules.get(name);
 			}
 		} else 
 			return this.UnNamedModule;
@@ -1222,7 +1223,7 @@ public TypeBinding createIntersectionType18(ReferenceBinding[] intersectingTypes
 			@Override
 			public int compare(TypeBinding o1, TypeBinding o2) {
 				//
-				return o1.isClass() ? -1 : (o2.isClass() ? 1 : 0);
+				return o1.isClass() ? -1 : (o2.isClass() ? 1 : CharOperation.compareTo(o1.readableName(), o2.readableName()));
 			}
 		});
 	}

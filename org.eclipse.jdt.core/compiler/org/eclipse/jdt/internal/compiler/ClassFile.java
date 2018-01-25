@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2017 IBM Corporation and others.
+ * Copyright (c) 2000, 2018 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -3981,10 +3981,6 @@ public class ClassFile implements TypeConstants, TypeIds {
 				.referenceCompilationUnit()
 				.compilationResult
 				.getLineSeparatorPositions());
-		// update the number of attributes
-		if ((this.produceAttributes & ClassFileConstants.ATTR_METHOD_PARAMETERS) != 0) {
-			attributeNumber += generateMethodParameters(methodBinding);
-		}
 		this.contents[methodAttributeOffset++] = (byte) (attributeNumber >> 8);
 		this.contents[methodAttributeOffset] = (byte) attributeNumber;
 	}	
@@ -4492,6 +4488,8 @@ public class ClassFile implements TypeConstants, TypeIds {
 	 */
 	private int generateMethodParameters(final MethodBinding binding) {
 		
+		if (binding.sourceLambda() != null)
+			return 0;
 		int initialContentsOffset = this.contentsOffset;
 		int length = 0; // count of actual parameters
 		
@@ -4543,8 +4541,6 @@ public class ClassFile implements TypeConstants, TypeIds {
 			Argument[] arguments = null;
 			if (methodDeclaration != null && methodDeclaration.arguments != null) {
 				arguments = methodDeclaration.arguments;
-			} else if (binding.sourceLambda() != null) { // SyntheticMethodBinding, purpose : LambdaMethod.
-				arguments = binding.sourceLambda().arguments;
 			}
 			for (int i = 0, max = targetParameters.length, argumentsLength = arguments != null ? arguments.length : 0; i < max; i++) {
 				if (argumentsLength > i && arguments[i] != null) {

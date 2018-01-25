@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2017 IBM Corporation and others.
+ * Copyright (c) 2000, 2018 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -54,6 +54,7 @@ import org.eclipse.jdt.internal.compiler.ast.TypeReference.AnnotationPosition;
 import org.eclipse.jdt.internal.compiler.classfmt.ClassFileConstants;
 import org.eclipse.jdt.internal.compiler.codegen.CodeStream;
 import org.eclipse.jdt.internal.compiler.codegen.ConstantPool;
+import org.eclipse.jdt.internal.compiler.codegen.Opcodes;
 import org.eclipse.jdt.internal.compiler.env.ICompilationUnit;
 import org.eclipse.jdt.internal.compiler.flow.FieldInitsFakingFlowContext;
 import org.eclipse.jdt.internal.compiler.flow.FlowContext;
@@ -283,10 +284,10 @@ public class ReferenceExpression extends FunctionalExpression implements IPolyEx
 				if (TypeBinding.notEquals(this.binding.declaringClass, this.lhs.resolvedType.erasure())) {
 					// reference to a method declared by an inaccessible type accessed via a
 					// subtype - normally a bridge method would be present to facilitate
-					// this access, unless the method is final, in which case, direct access to
+					// this access, unless the method is final/static, in which case, direct access to
 					// the method is not possible, an implicit lambda is needed
 					if (!this.binding.declaringClass.canBeSeenBy(this.enclosingScope)) {
-						return !this.binding.isFinal();
+						return !(this.binding.isFinal() || this.binding.isStatic());
 					}
 				}
 			}
@@ -339,6 +340,13 @@ public class ReferenceExpression extends FunctionalExpression implements IPolyEx
 		buffer.append('(');
 		if (this.haveReceiver) {
 			this.lhs.generateCode(currentScope, codeStream, true);
+			if (isMethodReference() && !this.lhs.isThis() && !this.lhs.isSuper()) {
+				MethodBinding mb = currentScope.getJavaLangObject().getExactMethod(TypeConstants.GETCLASS,
+						Binding.NO_PARAMETERS, currentScope.compilationUnitScope());
+				codeStream.dup();
+				codeStream.invoke(Opcodes.OPC_invokevirtual, mb, mb.declaringClass);
+				codeStream.pop();
+			}
 			if (this.lhs.isSuper() && !this.actualMethodBinding.isPrivate()) {
 				if (this.lhs instanceof QualifiedSuperReference) {
 					QualifiedSuperReference qualifiedSuperReference = (QualifiedSuperReference) this.lhs;
@@ -385,7 +393,11 @@ public class ReferenceExpression extends FunctionalExpression implements IPolyEx
 		}
 		buffer.append(')');
 		buffer.append('L');
-		buffer.append(this.resolvedType.constantPoolName());
+		if (this.resolvedType.isIntersectionType18()) {
+			buffer.append(this.descriptor.declaringClass.constantPoolName());
+		} else {
+			buffer.append(this.resolvedType.constantPoolName());
+		}
 		buffer.append(';');
 		if (this.isSerializable) {
 			sourceType.addSyntheticMethod(this);

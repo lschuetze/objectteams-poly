@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2017 IBM Corporation and others.
+ * Copyright (c) 2000, 2018 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -16,7 +16,10 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.Hashtable;
+import java.util.List;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
 
@@ -2940,6 +2943,29 @@ public void testBug522554_1() throws CoreException {
 			deleteProject(prj);
 	}
 }
+// unnamed module observes all default modules per JEP 261
+// - use any failures in this test case for adjusting DEFAULT_MODULES for the given java.version. 
+public void testBug522554_2_unlimited() throws CoreException {
+	if (!isJRE9) return;
+	IJavaProject prj = null;
+	try {
+		prj = createJava9Project("unnamed", new String[] { "src" });
+		prj.getProject().getWorkspace().build(IncrementalProjectBuilder.AUTO_BUILD, null);
+		IMarker[] markers = prj.getProject().findMarkers(null, true, IResource.DEPTH_INFINITE);
+		assertMarkers("Unexpected markers", "",  markers);
+
+		IClasspathEntry systemLibrary = prj.getRawClasspath()[1];
+		assertEquals("Should be system library", getJRE9Path(), systemLibrary.getPath());
+		List<String> defaultRootModules = JavaModelAccess.defaultRootModules(Arrays.asList(prj.findPackageFragmentRoots(systemLibrary)));
+		Collections.sort(defaultRootModules);
+		assertEquals("Unexpected default modules",
+				DEFAULT_MODULES,
+				String.join(",", defaultRootModules.toArray(new String[defaultRootModules.size()])));
+	} finally {
+		if (prj != null)
+			deleteProject(prj);
+	}
+}
 // unnamed module adds without limiting
 public void testBug522554_2() throws CoreException {
 	if (!isJRE9) return;
@@ -2947,12 +2973,7 @@ public void testBug522554_2() throws CoreException {
 	try {
 		IClasspathAttribute[] jreAttributes = {
 			JavaCore.newClasspathAttribute(IClasspathAttribute.ADD_EXPORTS, "java.activation/com.sun.activation.registries=ALL-UNNAMED"),
-			JavaCore.newClasspathAttribute(IClasspathAttribute.LIMIT_MODULES,
-					"java.se,javafx.base,javafx.controls,javafx.fxml,javafx.graphics,javafx.media,javafx.swing,javafx.web,jdk.accessibility," +
-					"jdk.attach,jdk.compiler,jdk.httpserver,jdk.jartool,jdk.javadoc,jdk.jconsole,jdk.jdi,jdk.management,jdk.packager," +
-					"jdk.plugin.dom,jdk.sctp,jdk.security.auth,jdk.security.jgss,jdk.unsupported,oracle.desktop,oracle.net,jdk.dynalink," +
-					"jdk.incubator.httpclient,jdk.jfr,jdk.jshell,jdk.jsobject,jdk.net,jdk.packager.services,jdk.scripting.nashorn,jdk.xml.dom," +
-					"java.activation")
+			JavaCore.newClasspathAttribute(IClasspathAttribute.LIMIT_MODULES, DEFAULT_MODULES + ",java.activation")
 		};
 		prj = createJava9ProjectWithJREAttributes("unnamed", new String[] {"src" }, jreAttributes);
 		createFolder("/unnamed/src/modify");
@@ -3018,43 +3039,5 @@ public void testBug522554_3() throws CoreException {
 		if (prj != null)
 			deleteProject(prj);
 	}
-}
-// module patching
-public void testBug522554_4() throws CoreException {
-	if (!isJRE9) return;
-	IJavaProject prj = null;
-	try {
-		IClasspathAttribute[] jreAttributes = {
-			JavaCore.newClasspathAttribute(IClasspathAttribute.PATCH_MODULE, "java.activation"),
-			JavaCore.newClasspathAttribute(IClasspathAttribute.LIMIT_MODULES, "java.se,jdk.security.auth,jdk.security.jgss,jdk.net,java.activation")
-		};
-		prj = createJava9ProjectWithJREAttributes("mod1", new String[] {"src" }, jreAttributes);
-		createFolder("/mod1/src/modify");
-		createFile("/mod1/src/modify/Test.java",
-				"package modify;\n" + 
-				"\n" + 
-				"import com.sun.activation.registries.*; \n" + 
-				"\n" + 
-				"public class Test {\n" + 
-				"	LogSupport logger;\n" + 
-				"}\n");
-		prj.getProject().getWorkspace().build(IncrementalProjectBuilder.AUTO_BUILD, null);
-		IMarker[] markers = prj.getProject().findMarkers(null, true, IResource.DEPTH_INFINITE);
-		assertMarkers("Unexpected markers", "",  markers);
-
-		IClasspathEntry systemLibrary = prj.getRawClasspath()[1];
-		assertEquals("Should be system library", getJRE9Path(), systemLibrary.getPath());
-		String argLine = JavaModelAccess.getModuleCLIOptions(prj, systemLibrary);
-		assertEquals("Unexpected CLI options",
-				"--patch-module java.activation " +
-				"--limit-modules java.activation,java.se,jdk.net,jdk.security.auth,jdk.security.jgss",
-				argLine);
-	} finally {
-		if (prj != null)
-			deleteProject(prj);
-	}
-}
-private IPath getJRE9Path() {
-	return new Path(System.getProperty("java.home") + "/lib/jrt-fs.jar");
 }
 }

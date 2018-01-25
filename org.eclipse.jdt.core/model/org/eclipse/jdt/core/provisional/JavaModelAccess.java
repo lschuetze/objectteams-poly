@@ -12,6 +12,7 @@ package org.eclipse.jdt.core.provisional;
 
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -22,10 +23,12 @@ import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IModuleDescription;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
+import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.internal.compiler.env.IModule.IModuleReference;
 import org.eclipse.jdt.internal.core.AbstractModule;
 import org.eclipse.jdt.internal.core.JavaProject;
+import org.eclipse.jdt.internal.core.ModuleUpdater;
 import org.eclipse.jdt.internal.core.PackageFragmentRoot;
 
 /**
@@ -34,8 +37,8 @@ import org.eclipse.jdt.internal.core.PackageFragmentRoot;
  */
 public class JavaModelAccess {
 
-	private static final String BLANK = " "; //$NON-NLS-1$
-	private static final String COMMA = ","; //$NON-NLS-1$
+	private static final String BLANK  = " "; //$NON-NLS-1$
+	private static final String COMMA  = ","; //$NON-NLS-1$
 	private static final String OPTION_START  = "--"; //$NON-NLS-1$
 	private static final String ADD_MODULES   = "--add-modules "; //$NON-NLS-1$
 	private static final String LIMIT_MODULES = "--limit-modules "; //$NON-NLS-1$
@@ -115,7 +118,6 @@ public class JavaModelAccess {
 	 * <li>{@link IClasspathAttribute#ADD_EXPORTS}</li>
 	 * <li>{@link IClasspathAttribute#ADD_READS}</li>
 	 * <li>{@link IClasspathAttribute#LIMIT_MODULES}</li>
-	 * <li>{@link IClasspathAttribute#PATCH_MODULE}</li>
 	 * </ul>
 	 * <p>Note that the {@link IClasspathAttribute#LIMIT_MODULES} value may be split into
 	 * an {@code --add-modules} part and a {@code --limit-modules} part.</p>
@@ -131,10 +133,11 @@ public class JavaModelAccess {
 			for (IClasspathAttribute classpathAttribute : classpathEntry.getExtraAttributes()) {
 				String optName = classpathAttribute.getName();
 				switch (optName) {
-					case IClasspathAttribute.PATCH_MODULE:
 					case IClasspathAttribute.ADD_EXPORTS:
 					case IClasspathAttribute.ADD_READS:
-						buf.append(OPTION_START).append(optName).append(BLANK).append(classpathAttribute.getValue()).append(BLANK);
+						for (String value : classpathAttribute.getValue().split(COMMA)) {
+							buf.append(OPTION_START).append(optName).append(BLANK).append(value).append(BLANK);
+						}
 						break;
 					case IClasspathAttribute.LIMIT_MODULES:
 						addLimitModules(buf, project, systemLibrary, classpathAttribute.getValue());
@@ -176,5 +179,38 @@ public class JavaModelAccess {
 		String[] limitArray = list.toArray(new String[list.size()]);
 		Arrays.sort(limitArray);
 		return String.join(COMMA, limitArray);
+	}
+
+	/**
+	 * Returns the module names that are compiled in projects which are built with a non-empty classpath and are on the build path of <code>project</code>
+	 * @param project the project whose build path is examined
+	 * @return set of module names
+	 * @throws JavaModelException when access to the classpath or module description of the given project fails.
+	 */
+	public static Set<String> determineModulesOfProjectsWithNonEmptyClasspath(IJavaProject project) throws JavaModelException {
+		if(project instanceof JavaProject) {
+			// this should always be true, as IJavaProject is @noimplement
+			JavaProject javaProject = (JavaProject) project;
+			return ModuleUpdater.determineModulesOfProjectsWithNonEmptyClasspath(javaProject, javaProject.getExpandedClasspath());
+		} 
+		return Collections.emptySet();
+	}
+
+	/**
+	 * Test if a type is from a location marked as test code (from the perspective of the project where it is defined.) 
+	 * @param type the type that is examined
+	 * @return false, if the corresponding class path entry is found and is not marked as test, otherwise true
+	 * @throws JavaModelException when access to the classpath entry corresponding to the given type fails.
+	 */
+	public static boolean isTestCode(IType type) throws JavaModelException {
+		IPackageFragmentRoot packageFragmentRoot = (IPackageFragmentRoot) type.getPackageFragment().getParent();
+		if (packageFragmentRoot.getJavaProject() instanceof JavaProject) {
+			JavaProject javaProject = (JavaProject) packageFragmentRoot.getJavaProject();
+			IClasspathEntry entry = javaProject.getClasspathEntryFor(packageFragmentRoot.getPath());
+			if (entry != null && !entry.isTest()) {
+				return false;
+			}
+		}
+		return true;
 	}
 }

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2017 IBM Corporation and others.
+ * Copyright (c) 2000, 2018 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -71,14 +71,35 @@ public abstract class AbstractJavaModelTests extends SuiteOfTestCases {
 	protected String endChar = ",";
 
 	protected static boolean isJRE9 = false;
+	protected static String DEFAULT_MODULES = null;
 	static {
 		String javaVersion = System.getProperty("java.version");
-		if (javaVersion.length() > 3) {
-			javaVersion = javaVersion.substring(0, 3);
-		}
-		long jdkLevel = CompilerOptions.versionToJdkLevel(javaVersion);
+		long jdkLevel = CompilerOptions.versionToJdkLevel(javaVersion.length() > 3 ? javaVersion.substring(0, 3) : javaVersion);
 		if (jdkLevel >= ClassFileConstants.JDK9) {
 			isJRE9 = true;
+			if (javaVersion.equals("9")) {
+				DEFAULT_MODULES = "java.se," +
+						"javafx.base,javafx.controls,javafx.fxml,javafx.graphics,javafx.media,javafx.swing,javafx.web," + 	// removed in 9.0.1
+						"jdk.accessibility,jdk.attach,jdk.compiler,jdk.dynalink,jdk.httpserver," +
+						"jdk.incubator.httpclient,jdk.jartool,jdk.javadoc,jdk.jconsole,jdk.jdi," +
+						"jdk.jfr," +																						// removed in 9.0.1
+						"jdk.jshell,jdk.jsobject,jdk.management," +
+						"jdk.management.cmm,jdk.management.jfr,jdk.management.resource," +									// removed in 9.0.1
+						"jdk.net," +
+						"jdk.packager,jdk.packager.services,jdk.plugin.dom," +												// removed in 9.0.1
+						"jdk.scripting.nashorn,jdk.sctp,jdk.security.auth,jdk.security.jgss,jdk.unsupported,jdk.xml.dom," +
+						"oracle.desktop,oracle.net";																		// removed in 9.0.1
+			} else if (javaVersion.equals("9.0.1")) {
+				DEFAULT_MODULES = "java.se," +
+						"jdk.accessibility,jdk.attach,jdk.compiler,jdk.dynalink,jdk.httpserver," +
+						"jdk.incubator.httpclient,jdk.jartool,jdk.javadoc,jdk.jconsole,jdk.jdi," +
+						"jdk.jshell,jdk.jsobject,jdk.management,jdk.net," +
+						"jdk.scripting.nashorn,jdk.sctp,jdk.security.auth,jdk.security.jgss,jdk.unsupported,jdk.xml.dom";
+			} else {
+				System.out.println(System.getProperties());
+				fail("Unexpected java version "+javaVersion);
+			}
+			System.out.println("Recognized Java 9 version '"+javaVersion+"'");
 		}
 	}
 
@@ -3255,6 +3276,10 @@ public abstract class AbstractJavaModelTests extends SuiteOfTestCases {
 			"Workspace options should be back to their default",
 			new CompilerOptions(defaultOptions).toString(),
 			new CompilerOptions(options).toString());
+	}
+
+	protected IPath getJRE9Path() {
+		return new Path(System.getProperty("java.home") + "/lib/jrt-fs.jar");
 	}
 
 	/**

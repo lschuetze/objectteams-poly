@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2017 IBM Corporation and others.
+ * Copyright (c) 2000, 2018 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -25,7 +25,6 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
-
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.OperationCanceledException;
@@ -232,6 +231,7 @@ import org.eclipse.jdt.internal.core.BasicCompilationUnit;
 import org.eclipse.jdt.internal.core.BinaryTypeConverter;
 import org.eclipse.jdt.internal.core.INamingRequestor;
 import org.eclipse.jdt.internal.core.InternalNamingConventions;
+import org.eclipse.jdt.internal.core.JarPackageFragmentRoot;
 import org.eclipse.jdt.internal.core.JavaElementRequestor;
 import org.eclipse.jdt.internal.core.JavaModelManager;
 import org.eclipse.jdt.internal.core.ModuleSourcePathManager;
@@ -1378,13 +1378,6 @@ public final class CompletionEngine
 		
 	}
 
-	/**
-	 * One result of the search consists of a new package.
-	 *
-	 * NOTE - All package names are presented in their readable form:
-	 *    Package names are in the form "a.b.c".
-	 *    The default package is represented by an empty array.
-	 */
 	@Override
 	public void acceptPackage(char[] packageName) {
 
@@ -1434,14 +1427,6 @@ public final class CompletionEngine
 		}
 	}
 
-	/**
-	 * One result of the search consists of a new type.
-	 *
-	 * NOTE - All package and type names are presented in their readable form:
-	 *    Package names are in the form "a.b.c".
-	 *    Nested type names are in the qualified form "A.I".
-	 *    The default package is represented by an empty array.
-	 */
 	@Override
 	public void acceptType(
 		char[] packageName,
@@ -2133,7 +2118,7 @@ public final class CompletionEngine
 						buildContext(parsedUnit.moduleDeclaration, null, parsedUnit, null, null);
 						//this.requestor.setIgnored(CompletionProposal.MODULE_DECLARATION, false); //TODO: Hack until ui fixes this issue.
 						if(!this.requestor.isIgnored(CompletionProposal.MODULE_DECLARATION)) {
-							findModuleName(parsedUnit);
+							proposeModuleName(parsedUnit);
 						}
 						debugPrintf(); 
 						return;
@@ -2446,6 +2431,8 @@ public final class CompletionEngine
 		this.lookupEnvironment.buildTypeBindings(parsedUnit, null);
 		this.lookupEnvironment.completeTypeBindings(parsedUnit, true);
 		parsedUnit.resolve();
+		this.startPosition = ref.sourceStart;
+		this.endPosition = ref.sourceEnd > ref.sourceStart ? ref.sourceEnd : ref.sourceStart;
 		if ((this.unitScope = parsedUnit.scope) != null) {
 			if (showAll) {
 				char[][] tokens = ref.getTypeName();
@@ -7023,7 +7010,7 @@ public final class CompletionEngine
 			// https://bugs.eclipse.org/bugs/show_bug.cgi?id=195346
 			// https://bugs.eclipse.org/bugs/show_bug.cgi?id=343342
 			if (this.assistNodeIsInsideCase) {
-				if (field.isFinal() && field.isStatic()) {
+				if (field.isFinal()) {
 					if (this.assistNodeIsString){
 						if (field.type == null || field.type.id != TypeIds.T_JavaLangString)
 							continue next;
@@ -10670,7 +10657,8 @@ public final class CompletionEngine
 				if (TypeBinding.equalsEquals(memberType, otherType))
 					continue next;
 
-				if (CharOperation.equals(memberType.sourceName, otherType.sourceName, true)) {
+				if (CharOperation.equals(memberType.sourceName, otherType.sourceName, true)
+						&& otherType.isNestedType()) {
 
 					if (memberType.enclosingType().isSuperclassOf(otherType.enclosingType()))
 						continue next;
@@ -11486,20 +11474,23 @@ public final class CompletionEngine
 		createOverrideRoleProposal(superTeam, superRoleName, roleTypeSignature, superRole.getFlags());
 	}
 // SH}
-	private void findModuleName(CompilationUnitDeclaration parsedUnit) {
-		char[] fileName1 = parsedUnit.getFileName();
-		if (fileName1 == null || !CharOperation.endsWith(fileName1, MODULE_INFO_FILE_NAME)) return;
-		int lastFileSeparatorIndex = fileName1.length - (MODULE_INFO_FILE_NAME.length + 1);
-		if (lastFileSeparatorIndex  <= 0) return;
-		int prevFileSeparatorIndex = CharOperation.lastIndexOf(fileName1[lastFileSeparatorIndex], fileName1, 0, lastFileSeparatorIndex - 1);
-		prevFileSeparatorIndex = prevFileSeparatorIndex < 0 ? 0 : prevFileSeparatorIndex + 1;
-		char[] moduleName = CharOperation.subarray(fileName1, prevFileSeparatorIndex, lastFileSeparatorIndex);
-		if (moduleName == null || moduleName.length == 0) return;
+
+	private void proposeModuleName(CompilationUnitDeclaration parsedUnit) {
+		String projectName = this.javaProject.getElementName();
+		char[] moduleName = projectName.toCharArray();
+		if (moduleName.length > 0) {// do not propose invalid names
+			if (!Character.isJavaIdentifierStart(moduleName[0])) return;
+			for (char c : moduleName) {
+				if (!Character.isJavaIdentifierPart(c) && c != '.') return; 
+			}
+		}
 		this.completionToken = CharOperation.concatWith(this.moduleDeclaration.tokens, '.');
+		setSourceRange(this.moduleDeclaration.sourceStart, this.moduleDeclaration.bodyStart);
 		if (this.completionToken.length > 0 && !CharOperation.prefixEquals(this.completionToken, moduleName)) return;
 
 		InternalCompletionProposal proposal =  createProposal(CompletionProposal.MODULE_DECLARATION, this.actualCompletionPosition);
 		proposal.setName(moduleName);
+		proposal.setDeclarationSignature(moduleName);
 		proposal.setCompletion(moduleName);
 		proposal.setReplaceRange((this.startPosition < 0) ? 0 : this.startPosition - this.offset, this.endPosition - this.offset);
 		proposal.setTokenRange((this.tokenStart < 0) ? 0 : this.tokenStart - this.offset, this.tokenEnd - this.offset);
@@ -11510,7 +11501,25 @@ public final class CompletionEngine
 		}
 	}
 
+	private HashSet<String> getAllJarModuleNames(IJavaProject javaProject2) {
+		HashSet<String> modules = new HashSet<>();
+		try {
+			for (IPackageFragmentRoot root : javaProject2.getAllPackageFragmentRoots()) {
+				if (root instanceof JarPackageFragmentRoot) {
+					IModuleDescription desc = root.getModuleDescription();
+					desc = desc == null ? ((JarPackageFragmentRoot) root).getAutomaticModuleDescription() : desc;
+					String name = desc != null ? desc.getElementName() : null;
+					if (name != null && name.length() > 0)
+						modules.add(name);
+				}
+			}
+		} catch (JavaModelException e) {
+			// do nothing
+		}
+		return modules;
+	}
 	private void findTargettedModules(char[] prefix, HashSet<String> skipSet) {
+		HashSet<String> probableModules = new HashSet<>();
 		ModuleSourcePathManager mManager = JavaModelManager.getModulePathManager();
 		JavaElementRequestor javaElementRequestor = new JavaElementRequestor();
 		try {
@@ -11518,12 +11527,20 @@ public final class CompletionEngine
 			IModuleDescription[] modules = javaElementRequestor.getModules();
 			for (IModuleDescription module : modules) {
 				String name = module.getElementName();
-				if (name == null || name.equals("") || skipSet.contains(name)) //$NON-NLS-1$
+				if (name == null || name.equals("")) //$NON-NLS-1$
 					continue;
-				this.acceptModule(name.toCharArray());
+				probableModules.add(name);
 			}
 		} catch (JavaModelException e) {
 			// TODO ignore for now
+		}
+		probableModules.addAll(getAllJarModuleNames(this.javaProject));
+		if (prefix != CharOperation.ALL_PREFIX && prefix != null && prefix.length > 0) {
+			probableModules.removeIf(e -> isFailedMatch(prefix, e.toCharArray()));
+		}
+		for (String s : probableModules) {
+			if (!skipSet.contains(s))
+				this.acceptModule(s.toCharArray());
 		}
 	}
 	private void findTargettedModules(CompletionOnModuleReference moduleReference, HashSet<String> skipSet) {
@@ -13849,6 +13866,12 @@ public final class CompletionEngine
 				break;
 			case CompletionProposal.METHOD_REF_WITH_CASTED_RECEIVER :
 				buffer.append("METHOD_REF_WITH_CASTED_RECEIVER"); //$NON-NLS-1$
+				break;
+			case CompletionProposal.MODULE_DECLARATION :
+				buffer.append("MODULE_DECLARATION"); //$NON-NLS-1$
+				break;
+			case CompletionProposal.MODULE_REF :
+				buffer.append("MODULE_REF"); //$NON-NLS-1$
 				break;
 			case CompletionProposal.PACKAGE_REF :
 				buffer.append("PACKAGE_REF"); //$NON-NLS-1$

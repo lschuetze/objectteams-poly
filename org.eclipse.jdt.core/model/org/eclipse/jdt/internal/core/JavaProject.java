@@ -501,9 +501,6 @@ public class JavaProject
 		return true;
 	}
 
-	/* (non-Javadoc)
-	 * @see org.eclipse.jdt.internal.core.JavaElement#close()
-	 */
 	@Override
 	public void close() throws JavaModelException {
 		if (JavaProject.hasJavaNature(this.project)) {
@@ -527,11 +524,12 @@ public class JavaProject
 	/**
 	 * Internal computation of an expanded classpath. It will eliminate duplicates, and produce copies
 	 * of exported or restricted classpath entries to avoid possible side-effects ever after.
+	 * @param excludeTestCode 
 	 */
 	private void computeExpandedClasspath(
 		ClasspathEntry referringEntry,
 		HashSet rootIDs,
-		ObjectVector accumulatedEntries) throws JavaModelException {
+		ObjectVector accumulatedEntries, boolean excludeTestCode) throws JavaModelException {
 
 		String projectRootId = rootID();
 		if (rootIDs.contains(projectRootId)){
@@ -545,6 +543,9 @@ public class JavaProject
 		boolean isInitialProject = referringEntry == null;
 		for (int i = 0, length = resolvedClasspath.length; i < length; i++){
 			ClasspathEntry entry = (ClasspathEntry) resolvedClasspath[i];
+			if (excludeTestCode && entry.isTest()) {
+				continue;
+			}
 			if (isInitialProject || entry.isExported()){
 				String rootID = entry.rootID();
 				if (rootIDs.contains(rootID)) {
@@ -564,7 +565,7 @@ public class JavaProject
 							javaProject.computeExpandedClasspath(
 								combinedEntry,
 								rootIDs,
-								accumulatedEntries);
+								accumulatedEntries, excludeTestCode || entry.isWithoutTestCode());
 						}
 					}
 				} else {
@@ -592,6 +593,18 @@ public class JavaProject
 		} catch (JavaModelException e) {
 			return new IPackageFragmentRoot[] {};
 		}
+	}
+
+	public void computePackageFragmentRoots(
+			IClasspathEntry resolvedEntry,
+			ObjectVector accumulatedRoots,
+			HashSet rootIDs,
+			IClasspathEntry referringEntry,
+			boolean retrieveExportedRoots,
+			boolean filterModuleRoots,
+			Map rootToResolvedEntries) throws JavaModelException {
+		computePackageFragmentRoots(resolvedEntry, accumulatedRoots, rootIDs, referringEntry, retrieveExportedRoots, filterModuleRoots,
+				rootToResolvedEntries, false);
 	}
 
 	/**
@@ -639,10 +652,14 @@ public class JavaProject
 		IClasspathEntry referringEntry,
 		boolean retrieveExportedRoots,
 		boolean filterModuleRoots,
-		Map rootToResolvedEntries) throws JavaModelException {
+		Map rootToResolvedEntries,
+		boolean excludeTestCode) throws JavaModelException {
 
 		String rootID = ((ClasspathEntry)resolvedEntry).rootID();
 		if (rootIDs.contains(rootID)) return;
+		if(excludeTestCode && ((ClasspathEntry)resolvedEntry).isTest()) {
+			return;
+		}
 
 		IPath projectPath = this.project.getFullPath();
 		IPath entryPath = resolvedEntry.getPath();
@@ -650,7 +667,6 @@ public class JavaProject
 		IPackageFragmentRoot root = null;
 
 		switch(resolvedEntry.getEntryKind()){
-
 			// source folder
 			case IClasspathEntry.CPE_SOURCE :
 
@@ -733,7 +749,8 @@ public class JavaProject
 							rootToResolvedEntries == null ? resolvedEntry : ((ClasspathEntry)resolvedEntry).combineWith((ClasspathEntry) referringEntry), // only combine if need to build the reverse map
 							retrieveExportedRoots,
 							filterModuleRoots,
-							rootToResolvedEntries);
+							rootToResolvedEntries,
+							excludeTestCode);
 					}
 				break;
 			}
@@ -908,6 +925,13 @@ public class JavaProject
 		}
 	}
 
+	public IPackageFragmentRoot[] computePackageFragmentRoots(
+			IClasspathEntry[] resolvedClasspath,
+			boolean retrieveExportedRoots,
+			boolean filterModuleRoots,
+			Map rootToResolvedEntries) throws JavaModelException {
+		return computePackageFragmentRoots(resolvedClasspath, retrieveExportedRoots, filterModuleRoots, rootToResolvedEntries, false);
+	}
 	/**
 	 * Returns (local/all) the package fragment roots identified by the given project's classpath.
 	 * Note: this follows project classpath references to find required project contributions,
@@ -925,7 +949,8 @@ public class JavaProject
 					IClasspathEntry[] resolvedClasspath,
 					boolean retrieveExportedRoots,
 					boolean filterModuleRoots,
-					Map rootToResolvedEntries) throws JavaModelException {
+					Map rootToResolvedEntries,
+					boolean excludeTestCode) throws JavaModelException {
 
 		ObjectVector accumulatedRoots = new ObjectVector();
 		computePackageFragmentRoots(
@@ -935,12 +960,25 @@ public class JavaProject
 			null, // inside original project
 			retrieveExportedRoots,
 			filterModuleRoots,
-			rootToResolvedEntries);
+			rootToResolvedEntries,
+			excludeTestCode);
 		IPackageFragmentRoot[] rootArray = new IPackageFragmentRoot[accumulatedRoots.size()];
 		accumulatedRoots.copyInto(rootArray);
 		return rootArray;
 	}
 
+	@Deprecated
+	public void computePackageFragmentRoots(
+			IClasspathEntry[] resolvedClasspath,
+			ObjectVector accumulatedRoots,
+			HashSet rootIDs,
+			IClasspathEntry referringEntry,
+			boolean retrieveExportedRoots,
+			boolean filterModuleRoots,
+			Map rootToResolvedEntries) throws JavaModelException {
+		computePackageFragmentRoots(resolvedClasspath, accumulatedRoots, rootIDs, referringEntry, retrieveExportedRoots,
+				filterModuleRoots, rootToResolvedEntries, false);
+	}
 	/**
 	 * Returns (local/all) the package fragment roots identified by the given project's classpath.
 	 * Note: this follows project classpath references to find required project contributions,
@@ -963,7 +1001,8 @@ public class JavaProject
 		IClasspathEntry referringEntry,
 		boolean retrieveExportedRoots,
 		boolean filterModuleRoots,
-		Map rootToResolvedEntries) throws JavaModelException {
+		Map rootToResolvedEntries,
+		boolean excludeTestCode) throws JavaModelException {
 
 		if (referringEntry == null){
 			rootIDs.add(rootID());
@@ -976,7 +1015,8 @@ public class JavaProject
 				referringEntry,
 				retrieveExportedRoots,
 				filterModuleRoots,
-				rootToResolvedEntries);
+				rootToResolvedEntries,
+				excludeTestCode);
 		}
 	}
 	/**
@@ -1533,7 +1573,7 @@ public class JavaProject
 						computePackageFragmentRoots(
 							resolveClasspath(new IClasspathEntry[] {entry}),
 							false, // don't retrieve exported roots
-							true, // respect limit-modules
+							true, // filterModuleRoots
 							null); /*no reverse map*/
 				}
 			}
@@ -1758,13 +1798,16 @@ public class JavaProject
 	@Override
 	public IPackageFragmentRoot[] getAllPackageFragmentRoots()
 		throws JavaModelException {
-
-		return getAllPackageFragmentRoots(null /*no reverse map*/);
+		return getAllPackageFragmentRoots(null /*no reverse map*/, false);
 	}
 
+	@Deprecated
 	public IPackageFragmentRoot[] getAllPackageFragmentRoots(Map rootToResolvedEntries) throws JavaModelException {
+		return getAllPackageFragmentRoots(rootToResolvedEntries, false);
+	}
+	public IPackageFragmentRoot[] getAllPackageFragmentRoots(Map rootToResolvedEntries, boolean excludeTestCode) throws JavaModelException {
 
-		return computePackageFragmentRoots(getResolvedClasspath(), true/*retrieveExportedRoots*/, true/*respectLimitModules*/, rootToResolvedEntries);
+		return computePackageFragmentRoots(getResolvedClasspath(), true/*retrieveExportedRoots*/, true/*filterModuleRoots*/, rootToResolvedEntries, excludeTestCode);
 	}
 
 	/**
@@ -1910,9 +1953,12 @@ public class JavaProject
 	 * @throws JavaModelException
 	 */
 	public IClasspathEntry[] getExpandedClasspath()	throws JavaModelException {
+		return getExpandedClasspath(false);
+	}
+	public IClasspathEntry[] getExpandedClasspath(boolean excludeTestCode)	throws JavaModelException {
 
 			ObjectVector accumulatedEntries = new ObjectVector();
-			computeExpandedClasspath(null, new HashSet(5), accumulatedEntries);
+			computeExpandedClasspath(null, new HashSet(5), accumulatedEntries, excludeTestCode);
 
 			IClasspathEntry[] expandedPath = new IClasspathEntry[accumulatedEntries.size()];
 			accumulatedEntries.copyInto(expandedPath);
@@ -2317,8 +2363,13 @@ public class JavaProject
 		return this.project;
 	}
 
+	@Deprecated
 	public ProjectCache getProjectCache() throws JavaModelException {
-		return ((JavaProjectElementInfo) getElementInfo()).getProjectCache(this);
+		return getProjectCache(false);
+	}
+
+	public ProjectCache getProjectCache(boolean excludeTestCode) throws JavaModelException {
+		return ((JavaProjectElementInfo) getElementInfo()).getProjectCache(this, excludeTestCode);
 	}
 
 	/**
@@ -2732,28 +2783,36 @@ public class JavaProject
 		return new EvaluationContextWrapper(context, this);
 	}
 
+	public NameLookup newNameLookup(ICompilationUnit[] workingCopies) throws JavaModelException {
+		return newNameLookup(workingCopies, false);
+	}
 	/*
 	 * Returns a new name lookup. This name lookup first looks in the given working copies.
 	 */
-	public NameLookup newNameLookup(ICompilationUnit[] workingCopies) throws JavaModelException {
-		return getJavaProjectElementInfo().newNameLookup(this, workingCopies);
+	public NameLookup newNameLookup(ICompilationUnit[] workingCopies, boolean excludeTestCode) throws JavaModelException {
+		return getJavaProjectElementInfo().newNameLookup(this, workingCopies, excludeTestCode);
 	}
 
+	public NameLookup newNameLookup(WorkingCopyOwner owner) throws JavaModelException {
+		return newNameLookup(owner, false);
+	}
 	/*
 	 * Returns a new name lookup. This name lookup first looks in the working copies of the given owner.
 	 */
-	public NameLookup newNameLookup(WorkingCopyOwner owner) throws JavaModelException {
-
+	public NameLookup newNameLookup(WorkingCopyOwner owner, boolean excludeTestCode) throws JavaModelException {
 		JavaModelManager manager = JavaModelManager.getJavaModelManager();
 		ICompilationUnit[] workingCopies = owner == null ? null : manager.getWorkingCopies(owner, true/*add primary WCs*/);
 		return newNameLookup(workingCopies);
 	}
 
+	public SearchableEnvironment newSearchableNameEnvironment(ICompilationUnit[] workingCopies) throws JavaModelException {
+		return newSearchableNameEnvironment(workingCopies, false);
+	}
 	/*
 	 * Returns a new search name environment for this project. This name environment first looks in the given working copies.
 	 */
-	public SearchableEnvironment newSearchableNameEnvironment(ICompilationUnit[] workingCopies) throws JavaModelException {
-		return new SearchableEnvironment(this, workingCopies);
+	public SearchableEnvironment newSearchableNameEnvironment(ICompilationUnit[] workingCopies, boolean excludeTestCode) throws JavaModelException {
+		return new SearchableEnvironment(this, workingCopies, excludeTestCode);
 	}
 
 	/*
@@ -2761,7 +2820,10 @@ public class JavaProject
 	 * of the given owner.
 	 */
 	public SearchableEnvironment newSearchableNameEnvironment(WorkingCopyOwner owner) throws JavaModelException {
-		return new SearchableEnvironment(this, owner);
+		return newSearchableNameEnvironment(owner, false);
+	}
+	public SearchableEnvironment newSearchableNameEnvironment(WorkingCopyOwner owner, boolean excludeTestCode) throws JavaModelException {
+		return new SearchableEnvironment(this, owner, excludeTestCode);
 	}
 
 	/*

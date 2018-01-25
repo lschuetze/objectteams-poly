@@ -191,10 +191,6 @@ class TypeBinding implements ITypeBinding {
 		return AnnotationBinding.NoAnnotations;
 	}
 
-	/*
-	 * @see ITypeBinding#getBinaryName()
-	 * @since 3.0
-	 */
 	@Override
 	public String getBinaryName() {
 		if (this.binding.isCapture()) {
@@ -232,9 +228,6 @@ class TypeBinding implements ITypeBinding {
 		return new String(dotSeparated);
 	}
 
-	/* (non-Javadoc)
-	 * @see org.eclipse.jdt.core.dom.ITypeBinding#getBound()
-	 */
 	@Override
 	public ITypeBinding getBound() {
 		switch (this.binding.kind()) {
@@ -249,9 +242,6 @@ class TypeBinding implements ITypeBinding {
 		return null;
 	}
 	
-	/* (non-Javadoc)
-	 * @see org.eclipse.jdt.core.dom.ITypeBinding#getGenericTypeOfWildcardType()
-	 */
 	@Override
 	public ITypeBinding getGenericTypeOfWildcardType() {
 		switch (this.binding.kind()) {
@@ -265,9 +255,6 @@ class TypeBinding implements ITypeBinding {
 		return null;
 	}
 	
-	/* (non-Javadoc)
-	 * @see org.eclipse.jdt.core.dom.ITypeBinding#getRank()
-	 */
 	@Override
 	public int getRank() {
 		switch (this.binding.kind()) {
@@ -280,9 +267,6 @@ class TypeBinding implements ITypeBinding {
 		}
 	}
 	
-	/*
-	 * @see ITypeBinding#getComponentType()
-	 */
 	@Override
 	public ITypeBinding getComponentType() {
 		if (!isArray()) {
@@ -292,9 +276,6 @@ class TypeBinding implements ITypeBinding {
 		return this.resolver.getTypeBinding(arrayBinding.elementsType());
 	}
 
-	/*
-	 * @see ITypeBinding#getDeclaredFields()
-	 */
 	@Override
 	public synchronized IVariableBinding[] getDeclaredFields() {
 		if (this.prototype != null) {
@@ -348,9 +329,6 @@ class TypeBinding implements ITypeBinding {
 		return this.fields = NO_VARIABLE_BINDINGS;
 	}
 
-	/*
-	 * @see ITypeBinding#getDeclaredMethods()
-	 */
 	@Override
 	public synchronized IMethodBinding[] getDeclaredMethods() {
 		if (this.prototype != null) {
@@ -416,9 +394,6 @@ class TypeBinding implements ITypeBinding {
 		return getModifiers();
 	}
 
-	/*
-	 * @see ITypeBinding#getDeclaredTypes()
-	 */
 	@Override
 	public synchronized ITypeBinding[] getDeclaredTypes() { // should not deflect to prototype.
 		if (this.members != null) {
@@ -452,9 +427,6 @@ class TypeBinding implements ITypeBinding {
 		return this.members = NO_TYPE_BINDINGS;
 	}
 
-	/*
-	 * @see ITypeBinding#getDeclaringMethod()
-	 */
 	@Override
 	public synchronized IMethodBinding getDeclaringMethod() {
 		if (this.binding instanceof org.eclipse.jdt.internal.compiler.lookup.LocalTypeBinding) {
@@ -491,9 +463,6 @@ class TypeBinding implements ITypeBinding {
 		return null;
 	}
 
-	/*
-	 * @see ITypeBinding#getDeclaringClass()
-	 */
 	@Override
 	public synchronized ITypeBinding getDeclaringClass() {
 		if (isClass() || isInterface() || isEnum()) {
@@ -541,9 +510,6 @@ class TypeBinding implements ITypeBinding {
 		return null;
 	}
 
-	/*
-	 * @see ITypeBinding#getDimensions()
-	 */
 	@Override
 	public int getDimensions() {
 		if (!isArray()) {
@@ -553,9 +519,6 @@ class TypeBinding implements ITypeBinding {
 		return arrayBinding.dimensions;
 	}
 
-	/*
-	 * @see ITypeBinding#getElementType()
-	 */
 	@Override
 	public ITypeBinding getElementType() {
 		if (!isArray()) {
@@ -565,9 +528,6 @@ class TypeBinding implements ITypeBinding {
 		return this.resolver.getTypeBinding(arrayBinding.leafComponentType);
 	}
 
-	/* (non-Javadoc)
-	 * @see org.eclipse.jdt.core.dom.ITypeBinding#getTypeDeclaration()
-	 */
 	@Override
 	public ITypeBinding getTypeDeclaration() {
 		if (this.binding instanceof ParameterizedTypeBinding)
@@ -575,17 +535,11 @@ class TypeBinding implements ITypeBinding {
 		return this.resolver.getTypeBinding(this.binding.unannotated());
 	}
 	
-	/* (non-Javadoc)
-	 * @see org.eclipse.jdt.core.dom.ITypeBinding#getErasure()
-	 */
 	@Override
 	public ITypeBinding getErasure() {
 		return this.resolver.getTypeBinding(this.binding.erasure());
 	}
 	
-	/* (non-Javadoc)
-	 * @see org.eclipse.jdt.core.dom.ITypeBinding#getFunctionalInterfaceMethod
-	 */
 	@Override
 	public IMethodBinding getFunctionalInterfaceMethod() {
 		Scope scope = this.resolver.scope();
@@ -741,9 +695,6 @@ class TypeBinding implements ITypeBinding {
 		return null;
 	}
 
-	/*
-	 * @see IBinding#getKey()
-	 */
 	@Override
 	public String getKey() {
 		if (this.key == null) {
@@ -752,17 +703,11 @@ class TypeBinding implements ITypeBinding {
 		return this.key;
 	}
 
-	/*
-	 * @see IBinding#getKind()
-	 */
 	@Override
 	public int getKind() {
 		return IBinding.TYPE;
 	}
 
-	/*
-	 * @see IBinding#getModifiers()
-	 */
 	@Override
 	public int getModifiers() {
 		if (isClass()) {
@@ -873,9 +818,6 @@ class TypeBinding implements ITypeBinding {
 		}
 	}
 
-	/*
-	 * @see ITypeBinding#getPackage()
-	 */
 	@Override
 	public IPackageBinding getPackage() {
 		switch (this.binding.kind()) {
@@ -1041,9 +983,6 @@ class TypeBinding implements ITypeBinding {
 	    }
 //	 mkr}
 
-	/*
-	 * @see ITypeBinding#getSuperclass()
-	 */
 	@Override
 	public synchronized ITypeBinding getSuperclass() {
 		if (this.binding == null)
@@ -1083,9 +1022,6 @@ class TypeBinding implements ITypeBinding {
 		return this.resolver.getTypeBinding(superclass);
 	}
 
-	/* (non-Javadoc)
-	 * @see org.eclipse.jdt.core.dom.ITypeBinding#getTypeArguments()
-	 */
 	@Override
 	public ITypeBinding[] getTypeArguments() {
 		if (this.prototype != null) {
@@ -1111,9 +1047,6 @@ class TypeBinding implements ITypeBinding {
 		return this.typeArguments = NO_TYPE_BINDINGS;
 	}
 
-	/* (non-Javadoc)
-	 * @see org.eclipse.jdt.core.dom.ITypeBinding#getTypeBounds()
-	 */
 	@Override
 	public ITypeBinding[] getTypeBounds() {
 		if (this.prototype != null) {
@@ -1180,9 +1113,6 @@ class TypeBinding implements ITypeBinding {
 		return this.bounds = NO_TYPE_BINDINGS;
 	}
 
-	/* (non-Javadoc)
-	 * @see org.eclipse.jdt.core.dom.ITypeBinding#getTypeParameters()
-	 */
 	@Override
 	public ITypeBinding[] getTypeParameters() {
 		if (this.prototype != null) {
@@ -1212,10 +1142,6 @@ class TypeBinding implements ITypeBinding {
 		return this.typeParameters = NO_TYPE_BINDINGS;
 	}
 
-	/* (non-Javadoc)
-	 * @see org.eclipse.jdt.core.dom.ITypeBinding#getWildcard()
-	 * @since 3.1
-	 */
 	@Override
 	public ITypeBinding getWildcard() {
 		if (this.binding instanceof CaptureBinding) {
@@ -1225,10 +1151,6 @@ class TypeBinding implements ITypeBinding {
 		return null;
 	}
 
-	/* (non-Javadoc)
-	 * @see org.eclipse.jdt.core.dom.ITypeBinding#isGenericType()
-	 * @since 3.1
-	 */
 	@Override
 	public boolean isGenericType() {
 		// equivalent to return getTypeParameters().length > 0;
@@ -1239,17 +1161,11 @@ class TypeBinding implements ITypeBinding {
 		return (typeVariableBindings != null && typeVariableBindings.length > 0);
 	}
 
-	/* (non-Javadoc)
-	 * @see org.eclipse.jdt.core.dom.ITypeBinding#isAnnotation()
-	 */
 	@Override
 	public boolean isAnnotation() {
 		return this.binding.isAnnotationType();
 	}
 
-	/*
-	 * @see ITypeBinding#isAnonymous()
-	 */
 	@Override
 	public boolean isAnonymous() {
 		if (isClass() || isInterface() || isEnum()) {
@@ -1259,17 +1175,11 @@ class TypeBinding implements ITypeBinding {
 		return false;
 	}
 
-	/*
-	 * @see ITypeBinding#isArray()
-	 */
 	@Override
 	public boolean isArray() {
 		return this.binding.isArrayType();
 	}
 
-	/* (non-Javadoc)
-	 * @see ITypeBinding#isAssignmentCompatible(ITypeBinding)
-	 */
 	@Override
 	public boolean isAssignmentCompatible(ITypeBinding type) {
 //{ObjectTeams: prepare for calling into the compiler (isCompatibleWith(..)) 
@@ -1295,17 +1205,11 @@ class TypeBinding implements ITypeBinding {
 		}
 	}
 
-	/* (non-Javadoc)
-	 * @see ITypeBinding#isCapture()
-	 */
 	@Override
 	public boolean isCapture() {
 		return this.binding.isCapture();
 	}
 
-	/* (non-Javadoc)
-	 * @see ITypeBinding#isCastCompatible(ITypeBinding)
-	 */
 	@Override
 	public boolean isCastCompatible(ITypeBinding type) {
 		try {
@@ -1323,9 +1227,6 @@ class TypeBinding implements ITypeBinding {
 		}
 	}
 
-	/*
-	 * @see ITypeBinding#isClass()
-	 */
 	@Override
 	public boolean isClass() {
 		switch (this.binding.kind()) {
@@ -1337,9 +1238,6 @@ class TypeBinding implements ITypeBinding {
 		return this.binding.isClass();
 	}
 
-	/*
-	 * @see IBinding#isDeprecated()
-	 */
 	@Override
 	public boolean isDeprecated() {
 		if (isClass() || isInterface() || isEnum()) {
@@ -1349,18 +1247,11 @@ class TypeBinding implements ITypeBinding {
 		return false;
 	}
 
-	/* (non-Javadoc)
-	 * @see ITypeBinding#isEnum()
-	 */
 	@Override
 	public boolean isEnum() {
 		return this.binding.isEnum();
 	}
 
-	/*
-	 * @see IBinding#isEqualTo(Binding)
-	 * @since 3.1
-	 */
 	@Override
 	public boolean isEqualTo(IBinding other) {
 		if (other == this) {
@@ -1382,9 +1273,6 @@ class TypeBinding implements ITypeBinding {
 		return BindingComparator.isEqual(this.binding, otherBinding);
 	}
 
-	/*
-	 * @see ITypeBinding#isFromSource()
-	 */
 	@Override
 	public boolean isFromSource() {
 		if (isClass() || isInterface() || isEnum()) {
@@ -1432,9 +1320,6 @@ class TypeBinding implements ITypeBinding {
 		return false;
 	}
 
-	/*
-	 * @see ITypeBinding#isInterface()
-	 */
 	@Override
 	public boolean isInterface() {
 		switch (this.binding.kind()) {
@@ -1532,18 +1417,12 @@ class TypeBinding implements ITypeBinding {
 	}
 //	ira+SH}
 
-	/*
-	 * @see ITypeBinding#isIntersectionType18
-	 */
 	@Override
 	public boolean isIntersectionType() {
 		int kind = this.binding.kind();
 		return kind == Binding.INTERSECTION_TYPE18 || kind == Binding.INTERSECTION_TYPE;
 	}
 
-	/*
-	 * @see ITypeBinding#isLocal()
-	 */
 	@Override
 	public boolean isLocal() {
 		if (isClass() || isInterface() || isEnum()) {
@@ -1553,9 +1432,6 @@ class TypeBinding implements ITypeBinding {
 		return false;
 	}
 
-	/*
-	 * @see ITypeBinding#isMember()
-	 */
 	@Override
 	public boolean isMember() {
 		if (isClass() || isInterface() || isEnum()) {
@@ -1565,9 +1441,6 @@ class TypeBinding implements ITypeBinding {
 		return false;
 	}
 
-	/*
-	 * @see ITypeBinding#isNested()
-	 */
 	@Override
 	public boolean isNested() {
 		if (isClass() || isInterface() || isEnum()) {
@@ -1585,9 +1458,6 @@ class TypeBinding implements ITypeBinding {
 		return this.binding == org.eclipse.jdt.internal.compiler.lookup.TypeBinding.NULL;
 	}
 
-	/* (non-Javadoc)
-	 * @see org.eclipse.jdt.core.dom.ITypeBinding#isParameterizedType()
-	 */
 	@Override
 	public boolean isParameterizedType() {
 		return this.binding.isParameterizedTypeWithActualArguments();
@@ -1618,33 +1488,21 @@ class TypeBinding implements ITypeBinding {
 		return segments;
 	}
 // SH}
-	/*
-	 * @see ITypeBinding#isPrimitive()
-	 */
 	@Override
 	public boolean isPrimitive() {
 		return !isNullType() && this.binding.isBaseType();
 	}
 
-	/* (non-Javadoc)
-	 * @see org.eclipse.jdt.core.dom.ITypeBinding#isRawType()
-	 */
 	@Override
 	public boolean isRawType() {
 		return this.binding.isRawType();
 	}
 
-	/* (non-Javadoc)
-	 * @see IBinding#isRecovered()
-	 */
 	@Override
 	public boolean isRecovered() {
 		return (this.binding.tagBits & TagBits.HasMissingType) != 0;
 	}
 
-	/* (non-Javadoc)
-	 * @see ITypeBinding#isSubTypeCompatible(ITypeBinding)
-	 */
 	@Override
 	public boolean isSubTypeCompatible(ITypeBinding type) {
 		try {
@@ -1669,9 +1527,6 @@ class TypeBinding implements ITypeBinding {
 		return false;
 	}
 
-	/*
-	 * @see ITypeBinding#isTopLevel()
-	 */
 	@Override
 	public boolean isTopLevel() {
 		if (isClass() || isInterface() || isEnum()) {
@@ -1681,17 +1536,11 @@ class TypeBinding implements ITypeBinding {
 		return false;
 	}
 
-	/*
-	 * @see ITypeBinding#isTypeVariable()
-	 */
 	@Override
 	public boolean isTypeVariable() {
 		return this.binding.isTypeVariable() && !this.binding.isCapture();
 	}
 
-	/* (non-Javadoc)
-	 * @see org.eclipse.jdt.core.dom.ITypeBinding#isUpperbound()
-	 */
 	@Override
 	public boolean isUpperbound() {
 		switch (this.binding.kind()) {
@@ -1703,9 +1552,6 @@ class TypeBinding implements ITypeBinding {
 		return false;
 	}
 
-	/* (non-Javadoc)
-	 * @see org.eclipse.jdt.core.dom.ITypeBinding#isWildcardType()
-	 */
 	@Override
 	public boolean isWildcardType() {
 		return this.binding.isWildcard();
@@ -1739,9 +1585,6 @@ class TypeBinding implements ITypeBinding {
 		return this.binding.toString();
 	}
 
-	/*
-	 * @see ITypeBinding#getTypeUseAnnotations()
-	 */
 	@Override
 	public IAnnotationBinding[] getTypeAnnotations() {
 		if (this.typeAnnotations != null) {

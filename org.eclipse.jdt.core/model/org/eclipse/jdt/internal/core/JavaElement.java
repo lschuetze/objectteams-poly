@@ -455,9 +455,7 @@ public abstract class JavaElement extends PlatformObject implements IJavaElement
 		} while ((current = current.getParent()) != null);
 		return null;
 	}
-	/*
-	 * @see IJavaElement
-	 */
+
 	@Override
 	public IOpenable getOpenable() {
 		return getOpenableParent();
@@ -478,9 +476,7 @@ public abstract class JavaElement extends PlatformObject implements IJavaElement
 	public IJavaElement getParent() {
 		return this.parent;
 	}
-	/*
-	 * @see IJavaElement#getPrimaryElement()
-	 */
+
 	@Override
 	public IJavaElement getPrimaryElement() {
 		return getPrimaryElement(true);
@@ -553,9 +549,7 @@ public abstract class JavaElement extends PlatformObject implements IJavaElement
 	public SourceMapper getSourceMapper() {
 		return ((JavaElement)getParent()).getSourceMapper();
 	}
-	/* (non-Javadoc)
-	 * @see org.eclipse.jdt.core.IJavaElement#getSchedulingRule()
-	 */
+
 	@Override
 	public ISchedulingRule getSchedulingRule() {
 		IResource resource = resource();
@@ -658,7 +652,7 @@ public abstract class JavaElement extends PlatformObject implements IJavaElement
 		JavaModelManager manager = JavaModelManager.getJavaModelManager();
 		boolean hadTemporaryCache = manager.hasTemporaryCache();
 		try {
-			HashMap newElements = manager.getTemporaryCache();
+			HashMap<IJavaElement, Object> newElements = manager.getTemporaryCache();
 			generateInfos(info, newElements, monitor);
 			if (info == null) {
 				info = newElements.get(this);
@@ -845,9 +839,6 @@ public abstract class JavaElement extends PlatformObject implements IJavaElement
 		return null;
 	}
 
-	/*
-	 * @see IJavaElement#getAttachedJavadoc(IProgressMonitor)
-	 */
 	@Override
 	public String getAttachedJavadoc(IProgressMonitor monitor) throws JavaModelException {
 		return null;

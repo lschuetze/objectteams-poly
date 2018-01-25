@@ -221,6 +221,9 @@ class CompilationUnitResolver extends Compiler {
 							new String(sourceUnit.getFileName())
 						}));
 				}
+				if (this.parser instanceof CommentRecorderParser) {
+					((CommentRecorderParser) this.parser).resetComments();
+				}
 				// diet parsing for large collection of units
 				if (this.totalUnits < this.parseThreshold) {
 					parsedUnit = this.parser.parse(sourceUnit, unitResult);
@@ -359,9 +362,6 @@ class CompilationUnitResolver extends Compiler {
 		};
 	}
 
-	/* (non-Javadoc)
-	 * @see org.eclipse.jdt.internal.compiler.Compiler#initializeParser()
-	 */
 	@Override
 	public void initializeParser() {
 		this.parser = new CommentRecorderParser(this.problemReporter, false);

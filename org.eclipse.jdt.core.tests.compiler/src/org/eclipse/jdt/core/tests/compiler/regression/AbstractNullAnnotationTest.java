@@ -11,6 +11,7 @@
 package org.eclipse.jdt.core.tests.compiler.regression;
 
 import java.io.File;
+import java.io.IOException;
 import java.util.Map;
 
 import org.eclipse.core.runtime.FileLocator;
@@ -63,11 +64,15 @@ public abstract class AbstractNullAnnotationTest extends AbstractComparableTest 
 		super(name);
 	}
 
+	protected void setUp() throws Exception {
+		super.setUp();
+		setUpAnnotationLib();
+	}
+
 	/**
 	 * @deprecated indirectly uses deprecated class PackageAdmin
 	 */
-	protected void setUp() throws Exception {
-		super.setUp();
+	protected void setUpAnnotationLib() throws IOException {
 		if (this.LIBS == null) {
 			String[] defaultLibs = getDefaultClassPaths();
 			int len = defaultLibs.length;
@@ -112,34 +117,27 @@ public abstract class AbstractNullAnnotationTest extends AbstractComparableTest 
 	    }
 	    return defaultOptions;
 	}
+	/** Test expecting a null-error from ecj, none from javac. */
+	protected void runNegativeNullTest(String[] sourceFiles, String expectedCompileError, String[] libs, boolean shouldFlush, Map options) {
+		runNegativeTest(
+				sourceFiles,
+				expectedCompileError,
+				libs,
+				shouldFlush,
+				options,
+				null /* do not check error string */,
+				JavacTestOptions.Excuse.EclipseWarningConfiguredAsError);
+	}
+	/** Test with JDT null annotations, expecting a null-error from ecj, none from javac. */
 	void runNegativeTestWithLibs(String[] testFiles, String expectedErrorLog) {
-		runNegativeTest(
+		runNegativeTestWithLibs(
+				false /*shouldFlush*/,
 				testFiles,
+				getCompilerOptions(),
 				expectedErrorLog,
-				this.LIBS,
-				false /*shouldFlush*/);
+				false /*skipJavac*/);
 	}
-	void runNegativeTestWithLibs(boolean skipJavac, String[] testFiles, String expectedErrorLog) {
-		runNegativeTest(
-				skipJavac,
-				null,
-				testFiles,
-				expectedErrorLog,
-				this.LIBS,
-				false /*shouldFlush*/);
-	}
-	void runNegativeTestWithExtraLibs(String[] testFiles, String expectedErrorLog, String [] extraLibs) {
-		String [] libraries = new String [(this.LIBS == null ? 0 : this.LIBS.length) + (extraLibs == null ? 0 : extraLibs.length)];
-		if (this.LIBS != null)
-			System.arraycopy(this.LIBS,  0,  libraries, 0, this.LIBS.length);
-		if (extraLibs != null)
-			System.arraycopy(extraLibs, 0, libraries, (this.LIBS == null ? 0 : this.LIBS.length), extraLibs.length);
-		runNegativeTest(
-				testFiles,
-				expectedErrorLog,
-				libraries,
-				false /*shouldFlush*/);
-	}
+	/** Test with JDT null annotations, expecting a null-error from ecj, none from javac. */
 	void runNegativeTestWithLibs(boolean shouldFlushOutputDirectory, String[] testFiles, Map customOptions, String expectedErrorLog) {
 		runNegativeTestWithLibs(
 				shouldFlushOutputDirectory,
@@ -149,6 +147,7 @@ public abstract class AbstractNullAnnotationTest extends AbstractComparableTest 
 				// runtime options
 			    false);
 	}
+	/** Test with JDT null annotations, expecting a null-error from ecj, none from javac. */
 	void runNegativeTestWithLibs(boolean shouldFlushOutputDirectory, String[] testFiles, Map customOptions, 
 			String expectedErrorLog, boolean skipJavaC) {
 		runNegativeTest(
@@ -177,21 +176,25 @@ public abstract class AbstractNullAnnotationTest extends AbstractComparableTest 
 	protected
 // SH}
 	void runConformTestWithLibs(String[] testFiles, Map customOptions, String expectedCompilerLog) {
-		runConformTestWithLibs(false /* flush output directory */, testFiles, customOptions, expectedCompilerLog);
+		runConformTestWithLibs(true /* flush output directory */, testFiles, customOptions, expectedCompilerLog);
 	}
 //{ObjectTeams: make visible to downstream:
 	protected
 // SH}
 	void runConformTestWithLibs(String[] testFiles, Map customOptions, String expectedCompilerLog, String expectedOutput) {
+		runConformTestWithLibs(true/* flush output directory */, testFiles, customOptions, expectedCompilerLog, expectedOutput);
+	}
+	void runConformTestWithLibs(boolean shouldFlushOutputDirectory, String[] testFiles, Map customOptions,
+								String expectedCompilerLog, String expectedOutput) {
 		runConformTest(
-				false, /* flush output directory */
+				shouldFlushOutputDirectory,
 				testFiles,
 				this.LIBS,
 				customOptions,
 				expectedCompilerLog,
 				expectedOutput,
 				"",/* expected error */
-			    JavacTestOptions.Excuse.EclipseWarningConfiguredAsError);
+			    JavacTestOptions.DEFAULT);
 	}
 	void runConformTestWithLibs(boolean shouldFlushOutputDirectory, String[] testFiles, Map customOptions, String expectedCompilerLog) {
 		runConformTest(
@@ -202,7 +205,26 @@ public abstract class AbstractNullAnnotationTest extends AbstractComparableTest 
 				expectedCompilerLog,
 				"",/* expected output */
 				"",/* expected error */
-			    JavacTestOptions.Excuse.EclipseWarningConfiguredAsError);
+			    JavacTestOptions.DEFAULT);
+	}
+	/** Test with JDT null annotations, expecting a null-warning from ecj, none from javac. */
+	void runWarningTestWithLibs(boolean shouldFlushOutputDirectory, String[] testFiles,
+				Map customOptions, String expectedCompilerLog)
+	{
+		runWarningTestWithLibs(shouldFlushOutputDirectory, testFiles, customOptions, expectedCompilerLog, "");
+	}
+	void runWarningTestWithLibs(boolean shouldFlushOutputDirectory, String[] testFiles,
+				Map customOptions, String expectedCompilerLog, String expectedOutput)
+	{
+		runConformTest(
+				shouldFlushOutputDirectory,
+				testFiles,
+				this.LIBS,
+				customOptions,
+				expectedCompilerLog,
+				expectedOutput,
+				"",/* expected error */
+				JavacTestOptions.Excuse.EclipseHasSomeMoreWarnings);
 	}
 	void runConformTest(String[] testFiles, Map customOptions, String expectedOutputString) {
 		runConformTest(

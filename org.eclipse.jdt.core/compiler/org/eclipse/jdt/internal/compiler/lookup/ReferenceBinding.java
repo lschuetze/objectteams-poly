@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2017 IBM Corporation and others.
+ * Copyright (c) 2000, 2018 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -1461,9 +1461,9 @@ boolean hasNonNullDefaultFor(int location, boolean useTypeAnnotations, int sourc
 	}
 	// package
 	if (useTypeAnnotations)
-		return (this.getPackage().defaultNullness & location) != 0;
+		return (this.getPackage().getDefaultNullness() & location) != 0;
 	else
-		return this.getPackage().defaultNullness == NONNULL_BY_DEFAULT;
+		return this.getPackage().getDefaultNullness() == NONNULL_BY_DEFAULT;
 }
 
 int getNullDefault() {
@@ -1808,7 +1808,7 @@ public boolean isCompatibleViaLowering(ReferenceBinding other) {
 // SH}
 
 @Override
-public boolean isSubtypeOf(TypeBinding other) {
+public boolean isSubtypeOf(TypeBinding other, boolean simulatingBugJDK8026527) {
 	if (isSubTypeOfRTL(other))
 		return true;
 	// TODO: if this has wildcards, perform capture before the next call:
@@ -1841,13 +1841,13 @@ protected boolean isSubTypeOfRTL(TypeBinding other) {
 	if (other instanceof CaptureBinding) {
 		// for this one kind we must first unwrap the rhs:
 		TypeBinding lower = ((CaptureBinding) other).lowerBound;
-		return (lower != null && isSubtypeOf(lower));
+		return (lower != null && isSubtypeOf(lower, false));
 	}
 	if (other instanceof ReferenceBinding) {
 		TypeBinding[] intersecting = ((ReferenceBinding) other).getIntersectingTypes();
 		if (intersecting != null) {
 			for (int i = 0; i < intersecting.length; i++) {
-				if (!isSubtypeOf(intersecting[i]))
+				if (!isSubtypeOf(intersecting[i], false))
 					return false;
 			}
 			return true;
@@ -2154,7 +2154,7 @@ protected void appendNullAnnotation(StringBuffer nameBuffer, CompilerOptions opt
 }
 
 public AnnotationHolder retrieveAnnotationHolder(Binding binding, boolean forceInitialization) {
-	SimpleLookupTable store = storedAnnotations(forceInitialization);
+	SimpleLookupTable store = storedAnnotations(forceInitialization, false);
 	return store == null ? null : (AnnotationHolder) store.get(binding);
 }
 
@@ -2167,8 +2167,8 @@ AnnotationBinding[] retrieveAnnotations(Binding binding) {
 }
 
 @Override
-public void setAnnotations(AnnotationBinding[] annotations) {
-	storeAnnotations(this, annotations);
+public void setAnnotations(AnnotationBinding[] annotations, boolean forceStore) {
+	storeAnnotations(this, annotations, forceStore);
 }
 public void setContainerAnnotationType(ReferenceBinding value) {
 	// Leave this to subclasses
@@ -2337,11 +2337,11 @@ public char[] internalName() {
 
 void storeAnnotationHolder(Binding binding, AnnotationHolder holder) {
 	if (holder == null) {
-		SimpleLookupTable store = storedAnnotations(false);
+		SimpleLookupTable store = storedAnnotations(false, false);
 		if (store != null)
 			store.removeKey(binding);
 	} else {
-		SimpleLookupTable store = storedAnnotations(true);
+		SimpleLookupTable store = storedAnnotations(true, false);
 		if (store != null)
 			store.put(binding, holder);
 	}
@@ -2350,15 +2350,15 @@ void storeAnnotationHolder(Binding binding, AnnotationHolder holder) {
 //{ObjectTeams: accessible to classes in org.eclipse.objectteams...:
 public
 // SH}
-void storeAnnotations(Binding binding, AnnotationBinding[] annotations) {
+void storeAnnotations(Binding binding, AnnotationBinding[] annotations, boolean forceStore) {
 	AnnotationHolder holder = null;
 	if (annotations == null || annotations.length == 0) {
-		SimpleLookupTable store = storedAnnotations(false);
+		SimpleLookupTable store = storedAnnotations(false, forceStore);
 		if (store != null)
 			holder = (AnnotationHolder) store.get(binding);
 		if (holder == null) return; // nothing to delete
 	} else {
-		SimpleLookupTable store = storedAnnotations(true);
+		SimpleLookupTable store = storedAnnotations(true, forceStore);
 		if (store == null) return; // not supported
 		holder = (AnnotationHolder) store.get(binding);
 		if (holder == null)
@@ -2367,7 +2367,7 @@ void storeAnnotations(Binding binding, AnnotationBinding[] annotations) {
 	storeAnnotationHolder(binding, holder.setAnnotations(annotations));
 }
 
-SimpleLookupTable storedAnnotations(boolean forceInitialize) {
+SimpleLookupTable storedAnnotations(boolean forceInitialize, boolean forceStore) {
 	return null; // overrride if interested in storing annotations for the receiver, its fields and methods
 }
 
@@ -2712,9 +2712,9 @@ public static boolean isConsistentIntersection(TypeBinding[] intersectingTypes) 
 		// when invoked during type inference we only want to check inconsistency among real types:
 		if (current.isTypeVariable() || current.isWildcard() || !current.isProperType(true))
 			continue;
-		if (mostSpecific.isSubtypeOf(current))
+		if (mostSpecific.isSubtypeOf(current, false))
 			continue;
-		else if (current.isSubtypeOf(mostSpecific))
+		else if (current.isSubtypeOf(mostSpecific, false))
 			mostSpecific = current;
 		else
 			return false;

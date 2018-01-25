@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2016, 2017 IBM Corporation and others.
+ * Copyright (c) 2016, 2018 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -28,6 +28,7 @@ import org.eclipse.jdt.core.compiler.CharOperation;
 import org.eclipse.jdt.internal.compiler.classfmt.ClassFileReader;
 import org.eclipse.jdt.internal.compiler.classfmt.ClassFormatException;
 import org.eclipse.jdt.internal.compiler.classfmt.ExternalAnnotationDecorator;
+import org.eclipse.jdt.internal.compiler.env.AccessRuleSet;
 import org.eclipse.jdt.internal.compiler.env.IBinaryType;
 import org.eclipse.jdt.internal.compiler.env.IModule;
 import org.eclipse.jdt.internal.compiler.env.IModule.IModuleReference;
@@ -46,11 +47,13 @@ private static HashMap<String, Set<IModule>> ModulesCache = new HashMap<>();
 private String externalAnnotationPath;
 private ZipFile annotationZipFile;
 String zipFilename; // keep for equals
+AccessRuleSet accessRuleSet;
 
 static final Set<String> NO_LIMIT_MODULES = new HashSet<>();
 
-public ClasspathJrt(String zipFilename, IPath externalAnnotationPath) {
+public ClasspathJrt(String zipFilename, AccessRuleSet accessRuleSet, IPath externalAnnotationPath) {
 	this.zipFilename = zipFilename;
+	this.accessRuleSet = accessRuleSet;
 	if (externalAnnotationPath != null)
 		this.externalAnnotationPath = externalAnnotationPath.toString();
 	loadModules(this);
@@ -183,7 +186,10 @@ public boolean equals(Object o) {
 	if (this == o) return true;
 	if (!(o instanceof ClasspathJrt)) return false;
 	ClasspathJrt jar = (ClasspathJrt) o;
-	return this.zipFilename.endsWith(jar.zipFilename);
+	if (this.accessRuleSet != jar.accessRuleSet)
+		if (this.accessRuleSet == null || !this.accessRuleSet.equals(jar.accessRuleSet))
+			return false;
+	return this.zipFilename.endsWith(jar.zipFilename) && areAllModuleOptionsEqual(jar);
 }
 
 @Override
@@ -193,8 +199,8 @@ public NameEnvironmentAnswer findClass(String binaryFileName, String qualifiedPa
 	try {
 		IBinaryType reader = ClassFileReader.readFromModule(new File(this.zipFilename), moduleName, qualifiedBinaryFileName);
 		if (reader != null) {
+			String fileNameWithoutExtension = qualifiedBinaryFileName.substring(0, qualifiedBinaryFileName.length() - SuffixConstants.SUFFIX_CLASS.length);
 			if (this.externalAnnotationPath != null) {
-				String fileNameWithoutExtension = qualifiedBinaryFileName.substring(0, qualifiedBinaryFileName.length() - SuffixConstants.SUFFIX_CLASS.length);
 				try {
 					if (this.annotationZipFile == null) {
 						this.annotationZipFile = ExternalAnnotationDecorator.getAnnotationZipFile(this.externalAnnotationPath, null);
@@ -204,7 +210,11 @@ public NameEnvironmentAnswer findClass(String binaryFileName, String qualifiedPa
 					// don't let error on annotations fail class reading
 				}
 			}
-			return new NameEnvironmentAnswer(reader, null, reader.getModule());
+			if (this.accessRuleSet == null)
+				return new NameEnvironmentAnswer(reader, null, reader.getModule());
+			return new NameEnvironmentAnswer(reader, 
+					this.accessRuleSet.getViolatedRestriction(fileNameWithoutExtension.toCharArray()), 
+					reader.getModule());
 		}
 	} catch (IOException e) { // treat as if class file is missing
 	} catch (ClassFormatException e) { // treat as if class file is missing

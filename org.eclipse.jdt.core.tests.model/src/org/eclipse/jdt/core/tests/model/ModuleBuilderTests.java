@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2016, 2017 IBM Corporation and others.
+ * Copyright (c) 2016, 2018 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -27,6 +27,7 @@ import org.eclipse.core.resources.IncrementalProjectBuilder;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.Path;
+import org.eclipse.jdt.core.IAccessRule;
 import org.eclipse.jdt.core.IClasspathAttribute;
 import org.eclipse.jdt.core.IClasspathEntry;
 import org.eclipse.jdt.core.ICompilationUnit;
@@ -56,7 +57,7 @@ public class ModuleBuilderTests extends ModifyingResourceTests {
 	}
 
 	static {
-//		 TESTS_NAMES = new String[] { "test_conflicting_packages" };
+		// TESTS_NAMES = new String[] { "testBug528467" };
 	}
 	private String sourceWorkspacePath = null;
 	protected ProblemRequestor problemRequestor;
@@ -2664,6 +2665,59 @@ public class ModuleBuilderTests extends ModifyingResourceTests {
 			deleteProject("Test01");
 		}
 	}
+	public void testSystemLibAsJMod_2() throws CoreException {
+		if (!isJRE9) return;
+		try {
+			IJavaProject project = createJava9Project("Test01", new String[]{"src"});
+			IClasspathEntry[] rawClasspath = project.getRawClasspath();
+			IClasspathEntry[] newClasspath = new IClasspathEntry[rawClasspath.length + 1];
+			IClasspathEntry desktop = null;
+			for (int i = 0; i < rawClasspath.length; i++) {
+				IPath path = rawClasspath[i].getPath();
+				if (path.lastSegment().equals("jrt-fs.jar")) {
+					path = path.removeLastSegments(2).append("jmods").append("java.base.jmod");
+					IClasspathAttribute[] attributes = {
+							JavaCore.newClasspathAttribute(IClasspathAttribute.MODULE, "true") };
+					IClasspathEntry newEntry = JavaCore.newLibraryEntry(path, rawClasspath[i].getSourceAttachmentPath(),
+							new Path("java.base"), null, attributes, rawClasspath[i].isExported());
+					newClasspath[i] = newEntry;
+					path = path.removeLastSegments(2).append("jmods").append("java.desktop.jmod");
+					desktop = JavaCore.newLibraryEntry(path, rawClasspath[i].getSourceAttachmentPath(),
+							new Path("java.desktop"), null, attributes, rawClasspath[i].isExported());
+				} else {
+					newClasspath[i] = rawClasspath[i];
+				}
+			}
+			newClasspath[rawClasspath.length] = desktop;
+			project.setRawClasspath(newClasspath, null);
+			this.createFile("Test01/src/module-info.java", 
+					"module org.eclipse {\n" + 
+					"	requires java.desktop;\n" + 
+					"	requires java.base;\n" + 
+					"}");
+			waitForManualRefresh();
+			waitForAutoBuild();
+			project.getProject().build(IncrementalProjectBuilder.FULL_BUILD, null);
+			IMarker[] markers = project.getProject().findMarkers(IJavaModelMarker.JAVA_MODEL_PROBLEM_MARKER, true, IResource.DEPTH_INFINITE);
+			assertMarkers("unexpected markers", "", markers);
+
+			// Check the reconciler
+			ICompilationUnit cu = getCompilationUnit("/Test01/src/module-info.java");
+			cu.getWorkingCopy(this.wcOwner, null);
+			markers = project.getProject().findMarkers(IJavaModelMarker.JAVA_MODEL_PROBLEM_MARKER, true, IResource.DEPTH_INFINITE);
+			editFile("Test01/src/module-info.java", 
+					"//Just touching \n" +
+					"module org.eclipse {\n" + 
+					"	requires java.desktop;\n" + 
+					"	requires java.base;\n" + 
+					"}");
+			project.getProject().build(IncrementalProjectBuilder.INCREMENTAL_BUILD, null);
+			markers = project.getProject().findMarkers(IJavaModelMarker.JAVA_MODEL_PROBLEM_MARKER, true, IResource.DEPTH_INFINITE);
+			assertMarkers("unexpected markers", "", markers);
+		} finally {
+			deleteProject("Test01");
+		}
+	}
 	public void testBug510617() throws CoreException {
 		if (!isJRE9) return;
 		try {
@@ -3818,7 +3872,6 @@ public class ModuleBuilderTests extends ModifyingResourceTests {
 					false/*not exported*/);
 			IJavaProject p2 = setupModuleProject("com.greetings", src, new IClasspathEntry[] { dep });
 
-			getWorkspace().build(IncrementalProjectBuilder.FULL_BUILD, null);
 			getWorkspace().build(IncrementalProjectBuilder.FULL_BUILD, null);
 			IMarker[] markers = p2.getProject().findMarkers(null, true, IResource.DEPTH_INFINITE);
 			assertMarkers("Unexpected markers", "", markers);
@@ -6366,6 +6419,288 @@ public class ModuleBuilderTests extends ModifyingResourceTests {
 		} finally {
 			if (javaProject != null)
 				deleteProject(javaProject);
+		}
+	}
+	public void testBug528467a() throws CoreException {
+		if (!isJRE9) return;
+		IJavaProject p1 = createJava9Project("mod.one");
+		try {
+			IClasspathEntry[] rawClasspath = p1.getRawClasspath();
+			String jrtPath = null;
+			for (int i = 0; i < rawClasspath.length; i++) {
+				IClasspathEntry iClasspathEntry = rawClasspath[i];
+				if (iClasspathEntry.getEntryKind() == IClasspathEntry.CPE_LIBRARY &&
+						iClasspathEntry.getPath().toString().endsWith("jrt-fs.jar")) {
+					jrtPath = iClasspathEntry.getPath().toOSString();
+					IAccessRule[] pathRules = new IAccessRule[1];
+					pathRules[0] = JavaCore.newAccessRule(new Path("java/awt/**"), IAccessRule.K_NON_ACCESSIBLE);
+					IClasspathEntry newEntry = JavaCore.newLibraryEntry(iClasspathEntry.getPath(), 
+							iClasspathEntry.getSourceAttachmentPath(), 
+							iClasspathEntry.getSourceAttachmentRootPath(), 
+								pathRules, 
+								iClasspathEntry.getExtraAttributes(), 
+								iClasspathEntry.isExported());
+					rawClasspath[i] = newEntry;
+					break;
+				}
+			}
+			p1.setRawClasspath(rawClasspath, null);
+			createFolder("/mod.one/src/p1");
+			createFile("/mod.one/src/module-info.java",
+					"module mod.one {\n" +
+					"	exports p1;\n" +
+					"	requires java.desktop;\n" +
+					"}\n");
+			createFile("/mod.one/src/p1/X.java",
+					"package p1;\n" +
+							"public class X {\n"
+							+ "    java.awt.Image im = null;\n"
+							+ "}\n");
+
+			waitForManualRefresh();
+			waitForAutoBuild();
+			p1.getProject().build(IncrementalProjectBuilder.FULL_BUILD, null);
+			IMarker[] markers = p1.getProject().findMarkers(null, true, IResource.DEPTH_INFINITE);
+			
+			assertMarkers("Unexpected markers", "Access restriction: The type 'Image' is not API (restriction on required library '"+ 
+																							jrtPath + "')", markers);
+		} finally {
+			deleteProject(p1);
+		}
+	}
+	public void testBug528467b() throws CoreException {
+		if (!isJRE9) return;
+		IJavaProject p1 = createJava9Project("mod.one");
+		try {
+			IClasspathEntry[] rawClasspath = p1.getRawClasspath();
+			String jrtPath = null;
+			for (int i = 0; i < rawClasspath.length; i++) {
+				IClasspathEntry iClasspathEntry = rawClasspath[i];
+				if (iClasspathEntry.getEntryKind() == IClasspathEntry.CPE_LIBRARY &&
+						iClasspathEntry.getPath().toString().endsWith("jrt-fs.jar")) {
+					jrtPath = iClasspathEntry.getPath().toOSString();
+					IAccessRule[] pathRules = new IAccessRule[1];
+					pathRules[0] = JavaCore.newAccessRule(new Path("java/awt/Image"), IAccessRule.K_NON_ACCESSIBLE);
+					IClasspathEntry newEntry = JavaCore.newLibraryEntry(iClasspathEntry.getPath(), 
+							iClasspathEntry.getSourceAttachmentPath(), 
+							iClasspathEntry.getSourceAttachmentRootPath(), 
+								pathRules, 
+								iClasspathEntry.getExtraAttributes(), 
+								iClasspathEntry.isExported());
+					rawClasspath[i] = newEntry;
+					break;
+				}
+			}
+			p1.setRawClasspath(rawClasspath, null);
+			createFolder("/mod.one/src/p1");
+			createFile("/mod.one/src/module-info.java",
+					"module mod.one {\n" +
+					"	exports p1;\n" +
+					"	requires java.desktop;\n" +
+					"}\n");
+			createFile("/mod.one/src/p1/X.java",
+					"package p1;\n" +
+					"import java.awt.*;\n" +
+					"public abstract class X extends Image {\n" +
+					"	public Graphics foo() {\n" +
+					"		return getGraphics();\n" +
+					"	}\n"
+					+ "}\n");
+
+			waitForManualRefresh();
+			waitForAutoBuild();
+			p1.getProject().build(IncrementalProjectBuilder.FULL_BUILD, null);
+			IMarker[] markers = p1.getProject().findMarkers(null, true, IResource.DEPTH_INFINITE);
+			sortMarkers(markers);
+
+			assertMarkers("Unexpected markers", 
+					"Access restriction: The type \'Image\' is not API (restriction on required library '"+ jrtPath + "')\n" + 
+					"The type Graphics from module java.desktop may not be accessible to clients due to missing \'requires transitive\'\n" + 
+					"Access restriction: The method \'Image.getGraphics()\' is not API (restriction on required library '"+ jrtPath + "')", markers);
+		} finally {
+			deleteProject(p1);
+		}
+	}
+	public void testBug528467c() throws CoreException {
+		if (!isJRE9) return;
+		IJavaProject p1 = createJava9Project("unnamed");
+		try {
+			IClasspathEntry[] rawClasspath = p1.getRawClasspath();
+			String jrtPath = null;
+			for (int i = 0; i < rawClasspath.length; i++) {
+				IClasspathEntry iClasspathEntry = rawClasspath[i];
+				if (iClasspathEntry.getEntryKind() == IClasspathEntry.CPE_LIBRARY &&
+						iClasspathEntry.getPath().toString().endsWith("jrt-fs.jar")) {
+					jrtPath = iClasspathEntry.getPath().toOSString();
+					IAccessRule[] pathRules = new IAccessRule[1];
+					pathRules[0] = JavaCore.newAccessRule(new Path("java/awt/**"), IAccessRule.K_NON_ACCESSIBLE);
+					IClasspathEntry newEntry = JavaCore.newLibraryEntry(iClasspathEntry.getPath(), 
+							iClasspathEntry.getSourceAttachmentPath(), 
+							iClasspathEntry.getSourceAttachmentRootPath(), 
+								pathRules, 
+								iClasspathEntry.getExtraAttributes(), 
+								iClasspathEntry.isExported());
+					rawClasspath[i] = newEntry;
+					break;
+				}
+			}
+			p1.setRawClasspath(rawClasspath, null);
+			createFolder("/unnamed/src/p1");
+			createFile("/unnamed/src/p1/X.java",
+					"package p1;\n" +
+							"public class X {\n"
+							+ "    java.awt.Image im = null;\n"
+							+ "}\n");
+
+			waitForManualRefresh();
+			waitForAutoBuild();
+			p1.getProject().build(IncrementalProjectBuilder.FULL_BUILD, null);
+			IMarker[] markers = p1.getProject().findMarkers(null, true, IResource.DEPTH_INFINITE);
+
+			assertMarkers("Unexpected markers", "Access restriction: The type 'Image' is not API (restriction on required library '"+ 
+																							jrtPath + "')", markers);
+		} finally {
+			deleteProject(p1);
+		}
+	}
+	// Bug 520713: allow test code to access code on the classpath
+	public void testWithTestAttributeAndTestDependencyOnClassPath() throws CoreException, IOException {
+		if (!isJRE9) return;
+		String outputDirectory = Util.getOutputDirectory();
+		
+		String jarPath = outputDirectory + File.separator + "mytestlib.jar";
+		IJavaProject project1 = null;
+		IJavaProject project2 = null;
+		try {
+			String[] sources = {
+				"my/test/Test.java",
+				"package my.test;\n" +
+				"public class Test {}\n;"
+			};
+			Util.createJar(sources, jarPath, "1.8");
+			
+			project1 = createJava9Project("Project1", new String[] {"src"});
+			addClasspathEntry(project1, JavaCore.newSourceEntry(new Path("/Project1/src-tests"), null, null, new Path("/Project1/bin-tests"), new IClasspathAttribute[] { JavaCore.newClasspathAttribute(IClasspathAttribute.TEST, "true") }));
+			addClasspathEntry(project1, JavaCore.newLibraryEntry(new Path(jarPath), null, null, null, new IClasspathAttribute[] { JavaCore.newClasspathAttribute(IClasspathAttribute.TEST, "true") }, false));
+
+			createFolder("/Project1/src/p1");
+			createFolder("/Project1/src-tests/p1");
+			createFile("/Project1/src/module-info.java",
+					"module m1 {\n" +
+					"	exports p1;\n" +
+					"}");
+			createFile("/Project1/src/p1/P1Class.java", 
+					"package p1;\n" + 
+					"\n" + 
+					"public class P1Class {\n"+ 
+					"}\n" 
+					);
+			createFile("/Project1/src/p1/Production1.java",
+					"package p1;\n" + 
+					"\n" + 
+					"public class Production1 {\n" + 
+					"	void p1() {\n" + 
+					"		new P1Class(); // ok\n" + 
+					"		new T1Class(); // forbidden\n" + 
+					"	}\n" + 
+					"}\n" + 
+					""
+					);
+			createFile("/Project1/src-tests/p1/T1Class.java", 
+					"package p1;\n" + 
+					"\n" + 
+					"public class T1Class {\n"+ 
+					"}\n" 
+					);
+			createFile("/Project1/src-tests/p1/Test1.java", 
+					"package p1;\n" + 
+					"\n" + 
+					"public class Test1 extends my.test.Test {\n" + 
+					"	void test1() {\n" + 
+					"		new P1Class(); // ok\n" + 
+					"		new T1Class(); // ok\n" + 
+					"	}\n" + 
+					"}\n" + 
+					"" 
+					);
+			project1.getProject().getWorkspace().build(IncrementalProjectBuilder.FULL_BUILD, null);
+	
+			IMarker[] markers = project1.getProject().findMarkers(null, true, IResource.DEPTH_INFINITE);
+			sortMarkers(markers);
+			assertMarkers("Unexpected markers", 
+					"T1Class cannot be resolved to a type" + 
+					"", 
+					markers);
+			
+			project2 = createJava9Project("Project2", new String[] {"src"});
+			addClasspathEntry(project2, JavaCore.newProjectEntry(new Path("/Project1"), null, false, new IClasspathAttribute[] { JavaCore.newClasspathAttribute(IClasspathAttribute.MODULE, "true") }, false));
+			addClasspathEntry(project2, JavaCore.newSourceEntry(new Path("/Project2/src-tests"), null, null, new Path("/Project2/bin-tests"), new IClasspathAttribute[] { JavaCore.newClasspathAttribute(IClasspathAttribute.TEST, "true") }));
+			addClasspathEntry(project2, JavaCore.newLibraryEntry(new Path(jarPath), null, null, null, new IClasspathAttribute[] { JavaCore.newClasspathAttribute(IClasspathAttribute.TEST, "true") }, false));
+			createFolder("/Project2/src/p2");
+			createFolder("/Project2/src-tests/p2");
+			createFile("/Project2/src/module-info.java",
+					"module m2 {\n" +
+					"	requires m1;\n" +
+					"}");
+			createFile("/Project2/src/p2/P2Class.java", 
+					"package p2;\n" + 
+					"\n" + 
+					"public class P2Class {\n"+ 
+					"}\n" 
+					);
+			createFile("/Project2/src/p2/Production2.java",
+					"package p2;\n" + 
+					"\n" + 
+					"import p1.P1Class;\n" + 
+					"import p1.T1Class;\n" + 
+					"\n" + 
+					"public class Production2 {\n" + 
+					"	void p2() {\n" + 
+					"		new P1Class(); // ok\n" + 
+					"		new P2Class(); // ok\n" + 
+					"		new T1Class(); // forbidden\n" + 
+					"		new T2Class(); // forbidden\n" + 
+					"	}\n" + 
+					"}\n" + 
+					""
+					);
+			createFile("/Project2/src-tests/p2/T2Class.java", 
+					"package p2;\n" + 
+					"\n" + 
+					"public class T2Class {\n"+ 
+					"}\n" 
+					);
+			createFile("/Project2/src-tests/p2/Test2.java", 
+					"package p2;\n" + 
+					"\n" + 
+					"import p1.P1Class;\n" + 
+					"import p1.T1Class;\n" + 
+					"\n" + 
+					"public class Test2 extends p1.Test1 {\n" + 
+					"	void test2() {\n" + 
+					"		new P1Class(); // ok\n" + 
+					"		new P2Class(); // ok\n" + 
+					"		new T1Class(); // ok\n" + 
+					"		new T2Class(); // ok\n" + 
+					"	}\n" + 
+					"}\n" + 
+					"" 
+					);
+			project1.getProject().getWorkspace().build(IncrementalProjectBuilder.FULL_BUILD, null);
+	
+			IMarker[] markers2 = project2.getProject().findMarkers(null, true, IResource.DEPTH_INFINITE);
+			sortMarkers(markers2);
+			assertMarkers("Unexpected markers", 
+					"The import p1.T1Class cannot be resolved\n" + 
+					"T1Class cannot be resolved to a type\n" + 
+					"T2Class cannot be resolved to a type", 
+					markers2);
+		} finally {
+			if (project1 != null)
+				deleteProject(project1);
+			if (project2 != null)
+				deleteProject(project2);
+			new File(jarPath).delete();
 		}
 	}
 

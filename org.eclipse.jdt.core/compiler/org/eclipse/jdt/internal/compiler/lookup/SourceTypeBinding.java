@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2017 IBM Corporation and others.
+ * Copyright (c) 2000, 2018 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -2927,38 +2927,42 @@ public void evaluateNullAnnotations() {
 	boolean isInDefaultPkg = (pkg.compoundName == CharOperation.NO_CHAR_CHAR);
 	if (!isPackageInfo) {
 		boolean isInNullnessAnnotationPackage = this.scope.environment().isNullnessAnnotationPackage(pkg);
-		if (pkg.defaultNullness == NO_NULL_DEFAULT && !isInDefaultPkg && !isInNullnessAnnotationPackage && !(this instanceof NestedTypeBinding)) {
+		if (pkg.getDefaultNullness() == NO_NULL_DEFAULT && !isInDefaultPkg && !isInNullnessAnnotationPackage && !(this instanceof NestedTypeBinding)) {
 			ReferenceBinding packageInfo = pkg.getType(TypeConstants.PACKAGE_INFO_NAME, this.module);
 			if (packageInfo == null) {
 				// no pkgInfo - complain
 				this.scope.problemReporter().missingNonNullByDefaultAnnotation(this.scope.referenceContext);
-				pkg.defaultNullness = NULL_UNSPECIFIED_BY_DEFAULT;
+				pkg.setDefaultNullness(NULL_UNSPECIFIED_BY_DEFAULT);
 			} else {
 				// if pkgInfo has no default annot. - complain
-					if (packageInfo instanceof SourceTypeBinding
-							&& (packageInfo.tagBits & TagBits.EndHierarchyCheck) == 0) {
-						CompilationUnitScope pkgCUS = ((SourceTypeBinding) packageInfo).scope.compilationUnitScope();
-						boolean current = pkgCUS.connectingHierarchy;
-						pkgCUS.connectingHierarchy = true;
-						try {
-							packageInfo.getAnnotationTagBits();
-						} finally {
-							pkgCUS.connectingHierarchy = current;
-						}
-					} else {
+				if (packageInfo instanceof SourceTypeBinding
+						&& (packageInfo.tagBits & TagBits.EndHierarchyCheck) == 0) {
+					CompilationUnitScope pkgCUS = ((SourceTypeBinding) packageInfo).scope.compilationUnitScope();
+					boolean current = pkgCUS.connectingHierarchy;
+					pkgCUS.connectingHierarchy = true;
+					try {
 						packageInfo.getAnnotationTagBits();
+					} finally {
+						pkgCUS.connectingHierarchy = current;
 					}
+				} else {
+					packageInfo.getAnnotationTagBits();
 				}
+			}
 		}
 	}
 	this.nullnessDefaultInitialized = 1;
 	boolean usesNullTypeAnnotations = this.scope.environment().usesNullTypeAnnotations();
 	if (usesNullTypeAnnotations) {
 		if (this.defaultNullness != 0) {
+			TypeDeclaration typeDecl = this.scope.referenceContext;
 			if (isPackageInfo) {
-				pkg.defaultNullness = this.defaultNullness;
+				if (pkg.enclosingModule.getDefaultNullness() == this.defaultNullness) {
+					this.scope.problemReporter().nullDefaultAnnotationIsRedundant(typeDecl, typeDecl.annotations, pkg.enclosingModule);
+				} else {
+					pkg.setDefaultNullness(this.defaultNullness);
+				}
 			} else {
-				TypeDeclaration typeDecl = this.scope.referenceContext;
 				Binding target = this.scope.parent.checkRedundantDefaultNullness(this.defaultNullness, typeDecl.declarationSourceStart);
 				if(target != null) {
 					this.scope.problemReporter().nullDefaultAnnotationIsRedundant(typeDecl, typeDecl.annotations, target);
@@ -2967,7 +2971,7 @@ public void evaluateNullAnnotations() {
 		} else if (isPackageInfo || (isInDefaultPkg && !(this instanceof NestedTypeBinding))) {
 			this.scope.problemReporter().missingNonNullByDefaultAnnotation(this.scope.referenceContext);
 			if (!isInDefaultPkg)
-				pkg.defaultNullness = NULL_UNSPECIFIED_BY_DEFAULT;
+				pkg.setDefaultNullness(NULL_UNSPECIFIED_BY_DEFAULT);
 		}
 	} else {
 		// transfer nullness info from tagBits to this.defaultNullness
@@ -2988,18 +2992,22 @@ public void evaluateNullAnnotations() {
 			}
 		}
 		if (newDefaultNullness != NO_NULL_DEFAULT) {
+			TypeDeclaration typeDecl = this.scope.referenceContext;
 			if (isPackageInfo) {
-				pkg.defaultNullness = newDefaultNullness;
+				if (pkg.enclosingModule.getDefaultNullness() == newDefaultNullness) {
+					this.scope.problemReporter().nullDefaultAnnotationIsRedundant(typeDecl, typeDecl.annotations, pkg.enclosingModule);
+				} else {
+					pkg.setDefaultNullness(newDefaultNullness);
+				}
 			} else {
 				this.defaultNullness = newDefaultNullness;
-				TypeDeclaration typeDecl = this.scope.referenceContext;
 				long nullDefaultBits = annotationTagBits & (TagBits.AnnotationNullUnspecifiedByDefault|TagBits.AnnotationNonNullByDefault);
 				checkRedundantNullnessDefaultRecurse(typeDecl, typeDecl.annotations, nullDefaultBits, false);
 			}
 		} else if (isPackageInfo || (isInDefaultPkg && !(this instanceof NestedTypeBinding))) {
 			this.scope.problemReporter().missingNonNullByDefaultAnnotation(this.scope.referenceContext);
 			if (!isInDefaultPkg)
-				pkg.defaultNullness = NULL_UNSPECIFIED_BY_DEFAULT;
+				pkg.setDefaultNullness(NULL_UNSPECIFIED_BY_DEFAULT);
 		}
 	}
 	maybeMarkTypeParametersNonNull();
@@ -3032,15 +3040,11 @@ protected void checkRedundantNullnessDefaultRecurse(ASTNode location, Annotation
 	
 	if (!isPrototype()) throw new IllegalStateException();
 	
-	if (this.fPackage.defaultNullness != NO_NULL_DEFAULT) {
-		boolean isRedundant = useNullTypeAnnotations
-				? this.fPackage.defaultNullness == nullBits
-				: (this.fPackage.defaultNullness == NONNULL_BY_DEFAULT
-						&& ((nullBits & TagBits.AnnotationNonNullByDefault) != 0));
-		if (isRedundant) {
-			this.scope.problemReporter().nullDefaultAnnotationIsRedundant(location, annotations, this.fPackage);
-		}
-		return;
+	Binding target = this.fPackage.findDefaultNullnessTarget(useNullTypeAnnotations
+									? n -> n == nullBits
+									: n -> (n == NONNULL_BY_DEFAULT && ((nullBits & TagBits.AnnotationNonNullByDefault) != 0)));
+	if (target != null) {
+		this.scope.problemReporter().nullDefaultAnnotationIsRedundant(location, annotations, target);
 	}
 }
 
@@ -3112,7 +3116,7 @@ boolean hasNonNullDefaultFor(int location, boolean useTypeAnnotations, int sourc
 
 	// package
 	if (currentType != null) {
-		return currentType.getPackage().defaultNullness == NONNULL_BY_DEFAULT;
+		return currentType.getPackage().getDefaultNullness() == NONNULL_BY_DEFAULT;
 	}
 
 	return false;
@@ -3475,9 +3479,9 @@ public final int sourceStart() {
 	return this.scope.referenceContext.sourceStart;
 }
 @Override
-SimpleLookupTable storedAnnotations(boolean forceInitialize) {
+SimpleLookupTable storedAnnotations(boolean forceInitialize, boolean forceStore) {
 	if (!isPrototype())
-		return this.prototype.storedAnnotations(forceInitialize);
+		return this.prototype.storedAnnotations(forceInitialize, forceStore);
 
 	if (forceInitialize && this.storedAnnotations == null && this.scope != null) { // scope null when no annotation cached, and type got processed fully (159631)
 		this.scope.referenceCompilationUnit().compilationResult.hasAnnotations = true;
@@ -3485,7 +3489,7 @@ SimpleLookupTable storedAnnotations(boolean forceInitialize) {
 //{ObjectTeams: do support annotations for roles for the sake of copying:
 	  if (!this.isRole())
 // SH}
-		if (!globalOptions.storeAnnotations)
+		if (!globalOptions.storeAnnotations && !forceStore)
 			return null; // not supported during this compile
 		this.storedAnnotations = new SimpleLookupTable(3);
 	}

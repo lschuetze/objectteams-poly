@@ -481,8 +481,10 @@ public abstract class ASTNode implements TypeConstants, TypeIds {
 		}
 
 		if ((field.modifiers & ExtraCompilerModifiers.AccRestrictedAccess) != 0) {
+			ModuleBinding module = field.declaringClass.module();
+			LookupEnvironment env = (module == null) ? scope.environment() : module.environment;
 			AccessRestriction restriction =
-				scope.environment().getAccessRestriction(field.declaringClass.erasure());
+				env.getAccessRestriction(field.declaringClass.erasure());
 			if (restriction != null) {
 				scope.problemReporter().forbiddenReference(field, this,
 //{ObjectTeams: pass the whole restriction object (for use by the compiler.adaptor):
@@ -535,8 +537,10 @@ public abstract class ASTNode implements TypeConstants, TypeIds {
 		if (isExplicitUse && (method.modifiers & ExtraCompilerModifiers.AccRestrictedAccess) != 0) {
 			// note: explicit constructors calls warnings are kept despite the 'new C1()' case (two
 			//       warnings, one on type, the other on constructor), because of the 'super()' case.
+			ModuleBinding module = method.declaringClass.module();
+			LookupEnvironment env = (module == null) ? scope.environment() : module.environment;
 			AccessRestriction restriction =
-				scope.environment().getAccessRestriction(method.declaringClass.erasure());
+				env.getAccessRestriction(method.declaringClass.erasure());
 			if (restriction != null) {
 				scope.problemReporter().forbiddenReference(method, this,
 //{ObjectTeams: pass the whole restriction object (for use by the compiler.adaptor):
@@ -608,7 +612,9 @@ public abstract class ASTNode implements TypeConstants, TypeIds {
 		}
 
 		if (refType.hasRestrictedAccess()) {
-			AccessRestriction restriction = scope.environment().getAccessRestriction(type.erasure());
+			ModuleBinding module = refType.module();
+			LookupEnvironment env = (module == null) ? scope.environment() : module.environment;
+			AccessRestriction restriction = env.getAccessRestriction(type.erasure());
 			if (restriction != null) {
 //{ObjectTeams: pass the whole access restriction object (for use by the compiler.adaptor):
 /* orig:
@@ -793,7 +799,7 @@ public abstract class ASTNode implements TypeConstants, TypeIds {
 					type.tagBits |= (TagBits.AnnotationResolved | TagBits.DeprecatedAnnotationResolved);
 					if (length > 0) {
 						annotations = new AnnotationBinding[length];
-						type.setAnnotations(annotations);
+						type.setAnnotations(annotations, false);
 					}
 					break;
 				case Binding.METHOD :
@@ -802,7 +808,7 @@ public abstract class ASTNode implements TypeConstants, TypeIds {
 					method.tagBits |= (TagBits.AnnotationResolved | TagBits.DeprecatedAnnotationResolved);
 					if (length > 0) {
 						annotations = new AnnotationBinding[length];
-						method.setAnnotations(annotations);
+						method.setAnnotations(annotations, false);
 					}
 					break;
 //{ObjectTeams:	method mappings
@@ -823,7 +829,7 @@ public abstract class ASTNode implements TypeConstants, TypeIds {
 					field.tagBits |= (TagBits.AnnotationResolved | TagBits.DeprecatedAnnotationResolved);
 					if (length > 0) {
 						annotations = new AnnotationBinding[length];
-						field.setAnnotations(annotations);
+						field.setAnnotations(annotations, false);
 					}
 					break;
 				case Binding.LOCAL :
@@ -832,7 +838,7 @@ public abstract class ASTNode implements TypeConstants, TypeIds {
 					local.tagBits |= (TagBits.AnnotationResolved | TagBits.DeprecatedAnnotationResolved);
 					if (length > 0) {
 						annotations = new AnnotationBinding[length];
-						local.setAnnotations(annotations, scope);
+						local.setAnnotations(annotations, scope, false);
 					}
 					break;
 				case Binding.TYPE_PARAMETER :
@@ -846,7 +852,7 @@ public abstract class ASTNode implements TypeConstants, TypeIds {
 					module.tagBits |= (TagBits.AnnotationResolved | TagBits.DeprecatedAnnotationResolved);
 					if (length > 0) {
 						annotations = new AnnotationBinding[length];
-						module.setAnnotations(annotations, scope);
+						module.setAnnotations(annotations, scope, false);
 					}
 					break;
 				default :
@@ -1152,7 +1158,7 @@ public abstract class ASTNode implements TypeConstants, TypeIds {
 			}
 			if (newLength != length) {
 				System.arraycopy(recipientAnnotations, 0, recipientAnnotations = new AnnotationBinding[newLength],  0, newLength);
-				recipient.setAnnotations(recipientAnnotations, scope);
+				recipient.setAnnotations(recipientAnnotations, scope, false);
 			}
 		}
 	}

@@ -98,6 +98,114 @@ import org.osgi.framework.Bundle;
 @SuppressWarnings({ "unchecked", "rawtypes" })
 public abstract class AbstractRegressionTest extends AbstractCompilerTest implements StopableTestCase {
 
+	protected class Runner {
+		boolean shouldFlushOutputDirectory = true;
+		// input:
+		String[] testFiles;
+		String[] dependantFiles;
+		String[] classLibraries;
+		boolean  libsOnModulePath;
+		// control compilation:
+		Map<String,String> customOptions;
+		boolean performStatementsRecovery;
+		boolean generateOutput;
+		ICompilerRequestor customRequestor;
+		// compiler result:
+		String expectedCompilerLog;
+		String[] alternateCompilerLogs;
+		boolean showCategory;
+		boolean showWarningToken;
+		// javac:
+		boolean skipJavac;
+		public String expectedJavacOutputString;
+		JavacTestOptions javacTestOptions;
+		// execution:
+		boolean forceExecution;
+		String[] vmArguments;
+		String expectedOutputString;
+		String expectedErrorString;
+
+		ASTVisitor visitor;
+
+		@SuppressWarnings("synthetic-access")
+		protected void runConformTest() {
+			runTest(this.shouldFlushOutputDirectory,
+					this.testFiles,
+					this.dependantFiles != null ? this.dependantFiles : new String[] {},
+					this.classLibraries,
+					this.libsOnModulePath,
+					this.customOptions,
+					this.performStatementsRecovery,
+					new Requestor(
+							this.generateOutput,
+							this.customRequestor,
+							this.showCategory,
+							this.showWarningToken),
+					false,
+					this.expectedCompilerLog,
+					this.alternateCompilerLogs,
+					this.forceExecution,
+					this.vmArguments,
+					this.expectedOutputString,
+					this.expectedErrorString,
+					this.visitor,
+					this.expectedJavacOutputString != null ? this.expectedJavacOutputString : this.expectedOutputString,
+					this.skipJavac ? JavacTestOptions.SKIP : this.javacTestOptions);
+		}
+
+		@SuppressWarnings("synthetic-access")
+		protected void runNegativeTest() {
+			runTest(this.shouldFlushOutputDirectory,
+					this.testFiles,
+					this.dependantFiles != null ? this.dependantFiles : new String[] {},
+					this.classLibraries,
+					this.libsOnModulePath,
+					this.customOptions,
+					this.performStatementsRecovery,
+					new Requestor(
+							this.generateOutput,
+							this.customRequestor,
+							this.showCategory,
+							this.showWarningToken),
+					true,
+					this.expectedCompilerLog,
+					this.alternateCompilerLogs,
+					this.forceExecution,
+					this.vmArguments,
+					this.expectedOutputString,
+					this.expectedErrorString,
+					this.visitor,
+					this.expectedJavacOutputString != null ? this.expectedJavacOutputString : this.expectedOutputString,
+					this.skipJavac ? JavacTestOptions.SKIP : this.javacTestOptions);
+		}
+
+		@SuppressWarnings("synthetic-access")
+		protected void runWarningTest() {
+			runTest(this.shouldFlushOutputDirectory,
+					this.testFiles,
+					this.dependantFiles != null ? this.dependantFiles : new String[] {},
+					this.classLibraries,
+					this.libsOnModulePath,
+					this.customOptions,
+					this.performStatementsRecovery,
+					new Requestor(
+							this.generateOutput,
+							this.customRequestor,
+							this.showCategory,
+							this.showWarningToken),
+					false,
+					this.expectedCompilerLog,
+					this.alternateCompilerLogs,
+					this.forceExecution,
+					this.vmArguments,
+					this.expectedOutputString,
+					this.expectedErrorString,
+					this.visitor,
+					this.expectedJavacOutputString != null ? this.expectedJavacOutputString : this.expectedOutputString,
+					this.skipJavac ? JavacTestOptions.SKIP : this.javacTestOptions);
+		}
+	}
+
 	// javac comparison related types, fields and methods - see runJavac for
 	// details
 static class JavacCompiler {
@@ -225,9 +333,20 @@ static class JavacCompiler {
 			if ("1.8.0_60".equals(rawVersion)) {
 				return 1500;
 			}
+			if ("1.8.0_131".equals(rawVersion)) {
+				return 1700;
+			}
+			if ("1.8.0_152".equals(rawVersion)) {
+				return 1900;
+			}
 		}
 		if (version == JavaCore.VERSION_9) {
-			return 0000; // We are still in EA
+			if ("9".equals(rawVersion)) {
+				return 0000;
+			}
+			if ("9.0.1".equals(rawVersion)) {
+				return 0100;
+			}
 		}
 		throw new RuntimeException("unknown raw javac version: " + rawVersion);
 	}
@@ -1365,6 +1484,7 @@ protected static class JavacTestOptions {
 			new String[] {},
 			// compiler options
 			null /* no class libraries */,
+			false,
 			null /* no custom options */,
 			false /* do not perform statements recovery */,
 			null /* no custom requestor */,
@@ -1380,6 +1500,7 @@ protected static class JavacTestOptions {
 			null /* do not check error string */,
 			visitor,
 			// javac options
+			null /* do not check javac output string */,
 			JavacTestOptions.DEFAULT /* default javac test options */);
 	}
 
@@ -1462,6 +1583,7 @@ protected static class JavacTestOptions {
 				testFiles,
 				dependantFiles,
 				null,
+				false,
 				null,
 				false,
 				null,
@@ -1473,6 +1595,7 @@ protected static class JavacTestOptions {
 				expectedSuccessOutputString,
 				null,
 				null,
+				expectedSuccessOutputString,
 				JavacTestOptions.DEFAULT);
 	}
 
@@ -1863,7 +1986,9 @@ protected void runJavac(
 		String expectedErrorString,
 		boolean shouldFlushOutputDirectory,
 		JavacTestOptions options,
-		String[] vmArguments) {
+		String[] vmArguments,
+		String[] classLibraries,
+		boolean libsOnModulePath) {
 	// WORK we're probably doing too much around class libraries in general - java should be able to fetch its own runtime libs
 	// WORK reorder parameters
 	if (options == JavacTestOptions.SKIP) {
@@ -1874,10 +1999,25 @@ protected void runJavac(
 	}
 	String newOptions = options.getCompilerOptions();
 	if (newOptions.indexOf(" -d ") < 0) {
-		options.setCompilerOptions(newOptions.concat(" -d ."));
+		newOptions = newOptions.concat(" -d .");
 	}
 	if (newOptions.indexOf(" -Xlint") < 0) {
-		options.setCompilerOptions(newOptions.concat(" -Xlint"));
+		newOptions = newOptions.concat(" -Xlint");
+	}
+	if (newOptions.indexOf(" -implicit") < 0) {
+		newOptions = newOptions.concat(" -implicit:none");
+	}
+	if (classLibraries != null) {
+		List<String> filteredLibs = new ArrayList<>();
+		for (String lib : classLibraries) {
+			if (!lib.startsWith(jdkRootDirPath.toString())) // this can fail if jdkRootDirPath is a symlink
+				filteredLibs.add(lib);
+		}
+		if (!filteredLibs.isEmpty()) {
+			newOptions = newOptions
+					.concat(libsOnModulePath ? " --module-path " : " -classpath ")
+					.concat(String.join(File.pathSeparator, filteredLibs.toArray(new String[filteredLibs.size()])));
+		}
 	}
 	String testName = testName();
 	Iterator compilers = javacCompilers.iterator();
@@ -1919,8 +2059,9 @@ protected void runJavac(
 				for (int i = 0, j = 0; i < testFilesLength; i += 2, j++) {
 					sourceFileNames[j] = testFiles[i];
 				}
+
 				// compile
-				long compilerResult = compiler.compile(javacOutputDirectory, options.getCompilerOptions() /* options */, sourceFileNames, compilerLog);
+				long compilerResult = compiler.compile(javacOutputDirectory, newOptions /* options */, sourceFileNames, compilerLog);
 				// check cumulative javac results
 				// WORK need to use a per compiler approach
 				if (! testName.equals(javacTestName)) {
@@ -1966,8 +2107,10 @@ protected void runJavac(
 			String output = null;
 			String err = null;
 			try {
+				String className = testFiles[0].substring(0, testFiles[0].length() - 5);
 				if ((expectedOutputString != null || expectedErrorString != null) &&
-						!javacTestErrorFlag && mismatch == 0 && sourceFileNames != null) {
+						!javacTestErrorFlag && mismatch == 0 && sourceFileNames != null &&
+						!className.endsWith(PACKAGE_INFO_NAME) && !className.endsWith(MODULE_INFO_NAME)) {
 					JavaRuntime runtime = JavaRuntime.runtimeFor(compiler);
 					StringBuffer stderr = new StringBuffer();
 					StringBuffer stdout = new StringBuffer();
@@ -1983,7 +2126,7 @@ protected void runJavac(
 							vmOptions = buffer.toString();
 						}
 					}
-					runtime.execute(javacOutputDirectory, vmOptions, testFiles[0].substring(0, testFiles[0].length() - 5), stdout, stderr);
+					runtime.execute(javacOutputDirectory, vmOptions, className, stdout, stderr);
 					if (expectedOutputString != null /* null skips output test */) {
 						output = stdout.toString().trim();
 						if (!expectedOutputString.equals(output)) {
@@ -2522,6 +2665,7 @@ protected void runNegativeTest(boolean skipJavac, JavacTestOptions javacTestOpti
 			testFiles,
 			new String[] {},
 			classLibraries,
+			false,
 			customOptions,
 			performStatementsRecovery,
 			customRequestor,
@@ -2533,6 +2677,7 @@ protected void runNegativeTest(boolean skipJavac, JavacTestOptions javacTestOpti
 			expectedOutputString,
 			expectedErrorString,
 			null,
+			expectedOutputString,
 			javacTestOptions);
 	}
 	/** Call this if the compiler randomly produces different error logs. */
@@ -2542,6 +2687,7 @@ protected void runNegativeTest(boolean skipJavac, JavacTestOptions javacTestOpti
 			testFiles,
 			new String[] {},
 			null,
+			false,
 			options,
 			false,
 			new Requestor( /* custom requestor */
@@ -2553,6 +2699,7 @@ protected void runNegativeTest(boolean skipJavac, JavacTestOptions javacTestOpti
 			null,
 			alternateCompilerErrorLogs,
 			false,
+			null,
 			null,
 			null,
 			null,
@@ -2638,6 +2785,7 @@ protected void runNegativeTest(boolean skipJavac, JavacTestOptions javacTestOpti
 			String[] dependantFiles,
 			// compiler options
 			String[] classLibraries,
+			boolean libsOnModulePath,
 			Map customOptions,
 			boolean performStatementsRecovery,
 			ICompilerRequestor customRequestor,
@@ -2653,6 +2801,7 @@ protected void runNegativeTest(boolean skipJavac, JavacTestOptions javacTestOpti
 			String expectedErrorString,
 			final ASTVisitor visitor,
 			// javac options
+			String expectedJavacOutputString,
 			JavacTestOptions javacTestOptions) {
 		// non-javac part
 		if (shouldFlushOutputDirectory)
@@ -2753,69 +2902,69 @@ protected void runNegativeTest(boolean skipJavac, JavacTestOptions javacTestOpti
 
 			// Compute class name by removing ".java" and replacing slashes with dots
 			String className = sourceFile.substring(0, sourceFile.length() - 5).replace('/', '.').replace('\\', '.');
-			if (className.endsWith(PACKAGE_INFO_NAME)) return;
-			if (className.endsWith(MODULE_INFO_NAME)) return;
+			if (!className.endsWith(PACKAGE_INFO_NAME) && !className.endsWith(MODULE_INFO_NAME)) {
 
 //{ObjectTeams: also reuse if same set of vmArguments:
 /* orig:
-			if (vmArguments != null) {
+				if (vmArguments != null) {
   :giro */
-			if (this.verifier != null && !this.verifier.vmArgsEqual(vmArguments)) {
+				if (this.verifier != null && !this.verifier.vmArgsEqual(vmArguments)) {
 // SH}
-				if (this.verifier != null) {
-					this.verifier.shutDown();
-				}
+					if (this.verifier != null) {
+						this.verifier.shutDown();
+					}
 //{ObjectTeams: make configurable:
 /* orig:
-				this.verifier = new TestVerifier(false);
+					this.verifier = new TestVerifier(false);
   :giro */
-				this.verifier = getTestVerifier(false);
+					this.verifier = getTestVerifier(false);
 // SH}
-				this.createdVerifier = true;
-			}
-			boolean passed =
-				this.verifier.verifyClassFiles(
-					sourceFile,
-					className,
-					expectedOutputString,
-					expectedErrorString,
-					this.classpaths,
-					null,
-					vmArguments);
-			if (!passed) {
-				System.out.println(getClass().getName() + '#' + getName());
-				String execErrorString = this.verifier.getExecutionError();
-				if (execErrorString != null && execErrorString.length() > 0) {
-					System.out.println("[ERR]:"+execErrorString); //$NON-NLS-1$
+					this.createdVerifier = true;
 				}
-				String execOutputString = this.verifier.getExecutionOutput();
-				if (execOutputString != null && execOutputString.length() > 0) {
-					System.out.println("[OUT]:"+execOutputString); //$NON-NLS-1$
+				boolean passed =
+					this.verifier.verifyClassFiles(
+						sourceFile,
+						className,
+						expectedOutputString,
+						expectedErrorString,
+						this.classpaths,
+						null,
+						vmArguments);
+				if (!passed) {
+					System.out.println(getClass().getName() + '#' + getName());
+					String execErrorString = this.verifier.getExecutionError();
+					if (execErrorString != null && execErrorString.length() > 0) {
+						System.out.println("[ERR]:"+execErrorString); //$NON-NLS-1$
+					}
+					String execOutputString = this.verifier.getExecutionOutput();
+					if (execOutputString != null && execOutputString.length() > 0) {
+						System.out.println("[OUT]:"+execOutputString); //$NON-NLS-1$
+					}
+					for (int i = 0; i < testFiles.length; i += 2) {
+						System.out.print(testFiles[i]);
+						System.out.println(" ["); //$NON-NLS-1$
+						System.out.println(testFiles[i + 1]);
+						System.out.println("]"); //$NON-NLS-1$
+					}
+					assertEquals(this.verifier.failureReason, expectedErrorString == null ? "" : expectedErrorString, execErrorString);
+					assertEquals(this.verifier.failureReason, expectedOutputString == null ? "" : expectedOutputString, execOutputString);
 				}
-				for (int i = 0; i < testFiles.length; i += 2) {
-					System.out.print(testFiles[i]);
-					System.out.println(" ["); //$NON-NLS-1$
-					System.out.println(testFiles[i + 1]);
-					System.out.println("]"); //$NON-NLS-1$
+				assertTrue(this.verifier.failureReason, // computed by verifyClassFiles(...) action
+						passed);
+				if (vmArguments != null) {
+					if (this.verifier != null) {
+						this.verifier.shutDown();
+					}
+					this.verifier = new TestVerifier(false);
+					this.createdVerifier = true;
 				}
-				assertEquals(this.verifier.failureReason, expectedErrorString == null ? "" : expectedErrorString, execErrorString);
-				assertEquals(this.verifier.failureReason, expectedOutputString == null ? "" : expectedOutputString, execOutputString);
-			}
-			assertTrue(this.verifier.failureReason, // computed by verifyClassFiles(...) action
-					passed);
-			if (vmArguments != null) {
-				if (this.verifier != null) {
-					this.verifier.shutDown();
-				}
-				this.verifier = new TestVerifier(false);
-				this.createdVerifier = true;
 			}
 		}
 		// javac part
 		if (RUN_JAVAC && javacTestOptions != JavacTestOptions.SKIP) {
 			runJavac(testFiles, expectingCompilerErrors, expectedCompilerLog,
-					expectedOutputString, expectedErrorString, shouldFlushOutputDirectory,
-					javacTestOptions, vmArguments);
+					expectedJavacOutputString, expectedErrorString, shouldFlushOutputDirectory,
+					javacTestOptions, vmArguments, classLibraries, libsOnModulePath);
 		}
 	}
 

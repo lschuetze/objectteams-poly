@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2015, 2017 IBM Corporation and others.
+ * Copyright (c) 2015, 2018 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -45,7 +45,6 @@ import org.eclipse.jdt.internal.compiler.problem.AbortType;
 import org.eclipse.jdt.internal.compiler.problem.ProblemReporter;
 import org.eclipse.jdt.internal.compiler.util.HashtableOfObject;
 
-//{ObjectTeams: implement ReferenceContext to fix omission in JDT/Core: SH}
 public class ModuleDeclaration extends ASTNode implements ReferenceContext {
 
 	public ExportsStatement[] exports;
@@ -114,12 +113,10 @@ public class ModuleDeclaration extends ASTNode implements ReferenceContext {
 				// this method scope has no reference context so we better deletegate to the 'real' cuScope:
 				return parentScope.problemReporter();
 			}
-//{ObjectTeams: fix omission in JDT/Core:
 			@Override
 			public ReferenceContext referenceContext() {
 				return ModuleDeclaration.this;
 			}
-// SH}
 		};
 	}
 
@@ -394,7 +391,6 @@ public class ModuleDeclaration extends ASTNode implements ReferenceContext {
 		return printBody(indent, output);
 	}
 
-//{ObjectTeams: fix omission in JDT/Core:
 	@Override
 	public void abort(int abortLevel, CategorizedProblem problem) {
 		switch (abortLevel) {
@@ -438,5 +434,4 @@ public class ModuleDeclaration extends ASTNode implements ReferenceContext {
 	public void resetErrorFlag() {
 		this.ignoreFurtherInvestigation = false;
 	}
-// SH}
 }

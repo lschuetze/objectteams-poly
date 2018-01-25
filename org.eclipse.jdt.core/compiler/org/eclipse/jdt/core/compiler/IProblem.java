@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2017 IBM Corporation and others.
+ * Copyright (c) 2000, 2018 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -1787,7 +1787,9 @@ void setSourceStart(int sourceStart);
 	int RedundantNullCheckOnField = Internal + 941;
 	/** @since 3.10 */
 	int FieldComparisonYieldsFalse = Internal + 942;
-	
+	/** @since 3.14 */
+	int RedundantNullDefaultAnnotationModule = Internal + 943;
+
 	/** @since 3.10 */
 	int ArrayReferencePotentialNullReference = Internal + 951;
 	/** @since 3.10 */
@@ -1940,6 +1942,7 @@ void setSourceStart(int sourceStart);
 	/** @since 3.14 */
 	int DuplicateResource = Internal + 1251;
 
+	// terminally
 	/** @since 3.14 */
 	int UsingTerminallyDeprecatedType = TypeRelated + 1400;
 	/** @since 3.14 */
@@ -1950,7 +1953,30 @@ void setSourceStart(int sourceStart);
 	int UsingTerminallyDeprecatedField = FieldRelated + 1403;
 	/** @since 3.14 */
 	int OverridingTerminallyDeprecatedMethod = MethodRelated + 1404;
+	// with since
+	/** @since 3.14 */
+	int UsingDeprecatedSinceVersionType = TypeRelated + 1405;
+	/** @since 3.14 */
+	int UsingDeprecatedSinceVersionMethod = MethodRelated + 1406;
+	/** @since 3.14 */
+	int UsingDeprecatedSinceVersionConstructor = MethodRelated + 1407;
+	/** @since 3.14 */
+	int UsingDeprecatedSinceVersionField = FieldRelated + 1408;
+	/** @since 3.14 */
+	int OverridingDeprecatedSinceVersionMethod = MethodRelated + 1409;
+	// terminally with since
+	/** @since 3.14 */
+	int UsingTerminallyDeprecatedSinceVersionType = TypeRelated + 1410;
+	/** @since 3.14 */
+	int UsingTerminallyDeprecatedSinceVersionMethod = MethodRelated + 1411;
+	/** @since 3.14 */
+	int UsingTerminallyDeprecatedSinceVersionConstructor = MethodRelated + 1412;
+	/** @since 3.14 */
+	int UsingTerminallyDeprecatedSinceVersionField = FieldRelated + 1413;
+	/** @since 3.14 */
+	int OverridingTerminallyDeprecatedSinceVersionMethod = MethodRelated + 1414;
 
+	
 	/** @since 3.14 */
 	int NotAccessibleType = TypeRelated + 1450;
 	/** @since 3.14 */

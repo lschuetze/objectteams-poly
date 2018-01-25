@@ -1374,7 +1374,7 @@ public boolean hasDefaultNullnessFor(int location, int sourceStart) {
 		return (nonNullByDefaultValue & location) != 0;
 	}
 	if (this.fPackage != null)
-		return (this.fPackage.defaultNullness & location) != 0;
+		return (this.fPackage.getDefaultNullness() & location) != 0;
 	return false;
 }
 
@@ -1385,7 +1385,7 @@ public /* @Nullable */ Binding checkRedundantDefaultNullness(int nullBits, int s
 		return target;
 	}
 	if (this.fPackage != null) {
-		return (this.fPackage.defaultNullness == nullBits) ? this.fPackage : null;
+		return this.fPackage.findDefaultNullnessTarget(n -> n == nullBits);
 	}
 
 	return null;

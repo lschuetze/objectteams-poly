@@ -130,7 +130,7 @@ public void codeComplete(
 	}
 
 	JavaProject project = (JavaProject) getJavaProject();
-	SearchableEnvironment environment = project.newSearchableNameEnvironment(owner);
+	SearchableEnvironment environment = project.newSearchableNameEnvironment(owner, requestor.isTestCodeExcluded());
 	CompletionEngine engine = new CompletionEngine(environment, requestor, project.getOptions(true), project, owner, monitor);
 
 	String source = getCompilationUnit().getSource();
@@ -313,9 +313,7 @@ public String getFullyQualifiedName(char enclosingTypeSeparator) {
 		return null;
 	}
 }
-/*
- * @see IType#getFullyQualifiedParameterizedName()
- */
+
 @Override
 public String getFullyQualifiedParameterizedName() throws JavaModelException {
 	return getFullyQualifiedName('.', true/*show parameters*/);
@@ -510,9 +508,7 @@ public IInitializer[] getInitializers() throws JavaModelException {
 	list.toArray(array);
 	return array;
 }
-/* (non-Javadoc)
- * @see org.eclipse.jdt.core.IType#getKey()
- */
+
 @Override
 public String getKey() {
 	try {
@@ -556,9 +552,7 @@ public IPackageFragment getPackageFragment() {
 	Assert.isTrue(false);  // should not happen
 	return null;
 }
-/*
- * @see JavaElement#getPrimaryElement(boolean)
- */
+
 @Override
 public IJavaElement getPrimaryElement(boolean checkOwner) {
 	if (checkOwner) {
@@ -779,9 +773,7 @@ public boolean isLocal() {
 public boolean isMember() {
 	return getDeclaringType() != null;
 }
-/* (non-Javadoc)
- * @see org.eclipse.jdt.core.IType#isResolved()
- */
+
 @Override
 public boolean isResolved() {
 	return false;
@@ -834,9 +826,7 @@ public ITypeHierarchy loadTypeHierachy(InputStream input, WorkingCopyOwner owner
 public ITypeHierarchy newSupertypeHierarchy(IProgressMonitor monitor) throws JavaModelException {
 	return this.newSupertypeHierarchy(DefaultWorkingCopyOwner.PRIMARY, monitor);
 }
-/*
- * @see IType#newSupertypeHierarchy(ICompilationUnit[], IProgressMonitor)
- */
+
 @Override
 public ITypeHierarchy newSupertypeHierarchy(
 	ICompilationUnit[] workingCopies,
@@ -934,9 +924,7 @@ public ITypeHierarchy newTypeHierarchy(IProgressMonitor monitor) throws JavaMode
 	// working copy. 
 	return newTypeHierarchy(DefaultWorkingCopyOwner.PRIMARY, monitor);
 }
-/*
- * @see IType#newTypeHierarchy(ICompilationUnit[], IProgressMonitor)
- */
+
 @Override
 public ITypeHierarchy newTypeHierarchy(
 	ICompilationUnit[] workingCopies,

@@ -83,10 +83,6 @@ class VariableBinding implements IVariableBinding {
 		return this.annotations = AnnotationBinding.NoAnnotations;
 	}
 
-	/* (non-Javadoc)
-	 * @see IVariableBinding#getConstantValue()
-	 * @since 3.0
-	 */
 	@Override
 	public Object getConstantValue() {
 		Constant c = this.binding.constant();
@@ -114,9 +110,6 @@ class VariableBinding implements IVariableBinding {
 		return null;
 	}
 
-	/*
-	 * @see IVariableBinding#getDeclaringClass()
-	 */
 	@Override
 	public ITypeBinding getDeclaringClass() {
 		if (isField()) {
@@ -130,9 +123,6 @@ class VariableBinding implements IVariableBinding {
 		}
 	}
 
-	/*
-	 * @see IVariableBinding#getDeclaringMethod()
-	 */
 	@Override
 	public IMethodBinding getDeclaringMethod() {
 		if (!isField()) {
@@ -181,9 +171,6 @@ class VariableBinding implements IVariableBinding {
 	}
 // SH}
 
-	/*
-	 * @see IBinding#getJavaElement()
-	 */
 	@Override
 	public IJavaElement getJavaElement() {
 		JavaElement element = getUnresolvedJavaElement();
@@ -192,9 +179,6 @@ class VariableBinding implements IVariableBinding {
 		return element.resolved(this.binding);
 	}
 
-	/*
-	 * @see IBinding#getKey()
-	 */
 	@Override
 	public String getKey() {
 		if (this.key == null) {
@@ -203,17 +187,11 @@ class VariableBinding implements IVariableBinding {
 		return this.key;
 	}
 
-	/*
-	 * @see IBinding#getKind()
-	 */
 	@Override
 	public int getKind() {
 		return IBinding.VARIABLE;
 	}
 
-	/*
-	 * @see IBinding#getModifiers()
-	 */
 	@Override
 	public int getModifiers() {
 		if (isField()) {
@@ -225,9 +203,6 @@ class VariableBinding implements IVariableBinding {
 		return Modifier.NONE;
 	}
 
-	/*
-	 * @see IBinding#getName()
-	 */
 	@Override
 	public String getName() {
 		if (this.name == null) {
@@ -236,9 +211,6 @@ class VariableBinding implements IVariableBinding {
 		return this.name;
 	}
 
-	/*
-	 * @see IVariableBinding#getType()
-	 */
 	@Override
 	public ITypeBinding getType() {
 		if (this.type == null) {
@@ -336,10 +308,6 @@ class VariableBinding implements IVariableBinding {
 				(localVariableBinding.tagBits & TagBits.IsArgument) != 0);
 	}
 
-	/*
-	 * @see IVariableBinding#getVariableDeclaration()
-	 * @since 3.1
-	 */
 	@Override
 	public IVariableBinding getVariableDeclaration() {
 		if (isField()) {
@@ -369,16 +337,11 @@ class VariableBinding implements IVariableBinding {
 	}
 // SH}
 
-	/*
-	 * @see IVariableBinding#isParameter()
-	 */
 	@Override
 	public boolean isParameter() {
 		return (this.binding.tagBits & TagBits.IsArgument) != 0;
 	}
-	/*
-	 * @see IBinding#isDeprecated()
-	 */
+
 	@Override
 	public boolean isDeprecated() {
 		if (isField()) {
@@ -387,19 +350,11 @@ class VariableBinding implements IVariableBinding {
 		return false;
 	}
 
-	/*
-	 * @see IVariableBinding#isEnumConstant()
-	 * @since 3.1
-	 */
 	@Override
 	public boolean isEnumConstant() {
 		return (this.binding.modifiers & ClassFileConstants.AccEnum) != 0;
 	}
 
-	/*
-	 * @see IBinding#isEqualTo(Binding)
-	 * @since 3.1
-	 */
 	@Override
 	public boolean isEqualTo(IBinding other) {
 		if (other == this) {
@@ -445,17 +400,11 @@ class VariableBinding implements IVariableBinding {
 		}
 	}
 
-	/*
-	 * @see IVariableBinding#isField()
-	 */
 	@Override
 	public boolean isField() {
 		return this.binding instanceof FieldBinding;
 	}
 
-	/*
-	 * @see IBinding#isSynthetic()
-	 */
 	@Override
 	public boolean isSynthetic() {
 		if (isField()) {
@@ -464,19 +413,11 @@ class VariableBinding implements IVariableBinding {
 		return false;
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * @see org.eclipse.jdt.core.dom.IBinding#isRecovered()
-	 */
 	@Override
 	public boolean isRecovered() {
 		return false;
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * @see org.eclipse.jdt.core.dom.IVariableBinding.isEffectivelyFinal()
-	 */
 	@Override
 	public boolean isEffectivelyFinal() {
 		return (!this.binding.isFinal() && this.binding.isEffectivelyFinal());

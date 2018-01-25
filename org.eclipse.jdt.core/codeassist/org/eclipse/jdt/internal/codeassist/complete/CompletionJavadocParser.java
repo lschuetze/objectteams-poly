@@ -544,9 +544,6 @@ public class CompletionJavadocParser extends JavadocParser {
 			return valid;
 		}
 
-	/* (non-Javadoc)
-		 * @see org.eclipse.jdt.internal.compiler.parser.AbstractCommentParser#parseReference()
-		 */
 		@Override
 		protected boolean parseReference() throws InvalidInputException {
 			boolean completed = this.completionNode != null;
@@ -557,9 +554,6 @@ public class CompletionJavadocParser extends JavadocParser {
 			return valid;
 		}
 
-	/*(non-Javadoc)
-	 * @see org.eclipse.jdt.internal.compiler.parser.AbstractCommentParser#parseTag(int)
-	 */
 	@Override
 	protected boolean parseTag(int previousPosition) throws InvalidInputException {
 		int startPosition = this.inlineTagStarted ? this.inlineTagStart : previousPosition;
@@ -584,9 +578,6 @@ public class CompletionJavadocParser extends JavadocParser {
 		return valid;
 	}
 
-	/* (non-Javadoc)
-	 * @see org.eclipse.jdt.internal.compiler.parser.AbstractCommentParser#parseThrows()
-	 */
 	@Override
 	protected boolean parseThrows() {
 		try {
@@ -805,9 +796,6 @@ public class CompletionJavadocParser extends JavadocParser {
 		}
 	}
 
-	/* (non-Javadoc)
-	 * @see org.eclipse.jdt.internal.compiler.parser.AbstractCommentParser#readToken()
-	 */
 	@Override
 	protected int readToken() throws InvalidInputException {
 		int token = super.readToken();
@@ -933,9 +921,6 @@ public class CompletionJavadocParser extends JavadocParser {
 		}
 	}
 
-	/* (non-Javadoc)
-	 * @see org.eclipse.jdt.internal.compiler.parser.AbstractCommentParser#verifySpaceOrEndComment()
-	 */
 	@Override
 	protected boolean verifySpaceOrEndComment() {
 		CompletionScanner completionScanner = (CompletionScanner) this.scanner;

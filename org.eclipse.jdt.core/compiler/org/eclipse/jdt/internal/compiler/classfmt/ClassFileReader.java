@@ -72,7 +72,7 @@ public class ClassFileReader extends ClassFileStruct implements IBinaryType {
 	private AnnotationInfo[] annotations;
 	private TypeAnnotationInfo[] typeAnnotations;
 	private FieldInfo[] fields;
-	private IBinaryModule moduleDeclaration;
+	private ModuleInfo moduleDeclaration;
 	public char[] moduleName;
 	private int fieldsCount;
 
@@ -357,7 +357,7 @@ public ClassFileReader(byte[] classFileBytes, char[] fileName, boolean fullyInit
 			FieldInfo field;
 			this.fields = new FieldInfo[this.fieldsCount];
 			for (int i = 0; i < this.fieldsCount; i++) {
-				field = FieldInfo.createField(this.reference, this.constantPoolOffsets, readOffset);
+				field = FieldInfo.createField(this.reference, this.constantPoolOffsets, readOffset, this.version);
 				this.fields[i] = field;
 				readOffset += field.sizeInBytes();
 			}
@@ -370,8 +370,8 @@ public ClassFileReader(byte[] classFileBytes, char[] fileName, boolean fullyInit
 			boolean isAnnotationType = (this.accessFlags & ClassFileConstants.AccAnnotation) != 0;
 			for (int i = 0; i < this.methodsCount; i++) {
 				this.methods[i] = isAnnotationType
-					? AnnotationMethodInfo.createAnnotationMethod(this.reference, this.constantPoolOffsets, readOffset)
-					: MethodInfo.createMethod(this.reference, this.constantPoolOffsets, readOffset);
+					? AnnotationMethodInfo.createAnnotationMethod(this.reference, this.constantPoolOffsets, readOffset, this.version)
+					: MethodInfo.createMethod(this.reference, this.constantPoolOffsets, readOffset, this.version);
 				readOffset += this.methods[i].sizeInBytes();
 			}
 		}
@@ -550,12 +550,16 @@ public ClassFileReader(byte[] classFileBytes, char[] fileName, boolean fullyInit
 							}
 						}
 					} else if (CharOperation.equals(attributeName, AttributeNamesConstants.ModuleName)) {
-						this.moduleDeclaration = ModuleInfo.createModule(this.className, this.reference, this.constantPoolOffsets, readOffset);
+						this.moduleDeclaration = ModuleInfo.createModule(this.reference, this.constantPoolOffsets, readOffset);
 						this.moduleName = this.moduleDeclaration.name();
 					}
 			}
 // SH}
 			readOffset += (6 + u4At(readOffset + 2));
+		}
+		if (this.moduleDeclaration != null && this.annotations != null) {
+			this.moduleDeclaration.setAnnotations(this.annotations, fullyInitialize);
+			this.annotations = null;
 		}
 		if (fullyInitialize) {
 			initialize();
@@ -658,11 +662,12 @@ private void decodeAnnotations(int offset, boolean runtimeVisible) {
 			long standardTagBits = newInfo.standardAnnotationTagBits;
 			if (standardTagBits != 0) {
 				this.tagBits |= standardTagBits;
-			} else {
-				if (newInfos == null)
-					newInfos = new AnnotationInfo[numberOfAnnotations - i];
-				newInfos[newInfoCount++] = newInfo;
+				if (this.version < ClassFileConstants.JDK9 || (standardTagBits & TagBits.AnnotationDeprecated) == 0)
+					continue;
 			}
+			if (newInfos == null)
+				newInfos = new AnnotationInfo[numberOfAnnotations - i];
+			newInfos[newInfoCount++] = newInfo;
 		}
 		if (newInfos == null)
 			return; // nothing to record in this.annotations
@@ -837,27 +842,11 @@ public char[] getInnerSourceName() {
 	return null;
 }
 
-/**
- * Answer the resolved names of the receiver's interfaces in the
- * class file format as specified in section 4.2 of the Java 2 VM spec
- * or null if the array is empty.
- *
- * For example, java.lang.String is java/lang/String.
- * @return char[][]
- */
 @Override
 public char[][] getInterfaceNames() {
 	return this.interfaceNames;
 }
 
-/**
- * Answer the receiver's nested types or null if the array is empty.
- *
- * This nested type info is extracted from the inner class attributes. Ask the
- * name environment to find a member type using its compound name
- *
- * @return org.eclipse.jdt.internal.compiler.api.IBinaryNestedType[]
- */
 @Override
 public IBinaryNestedType[] getMemberTypes() {
 	// we might have some member types of the current type
@@ -989,13 +978,6 @@ public int getModifiers() {
 	return modifiers;
 }
 
-/**
- * Answer the resolved name of the type in the
- * class file format as specified in section 4.2 of the Java 2 VM spec.
- *
- * For example, java.lang.String is java/lang/String.
- * @return char[]
- */
 @Override
 public char[] getName() {
 	return this.className;
@@ -1024,14 +1006,6 @@ public char[] getSourceName() {
 	return this.sourceName = name;
 }
 
-/**
- * Answer the resolved name of the receiver's superclass in the
- * class file format as specified in section 4.2 of the Java 2 VM spec
- * or null if it does not have one.
- *
- * For example, java.lang.String is java/lang/String.
- * @return char[]
- */
 @Override
 public char[] getSuperclassName() {
 	return this.superclassName;
@@ -1506,12 +1480,6 @@ private void initialize() throws ClassFormatException {
 		throw exception;
 	}
 }
-
-/**
- * Answer true if the receiver is an anonymous type, false otherwise
- *
- * @return <CODE>boolean</CODE>
- */
 @Override
 public boolean isAnonymous() {
 	if (this.innerInfo == null) return false;
@@ -1519,21 +1487,11 @@ public boolean isAnonymous() {
 	return (innerSourceName == null || innerSourceName.length == 0);
 }
 
-/**
- * Answer whether the receiver contains the resolved binary form
- * or the unresolved source form of the type.
- * @return boolean
- */
 @Override
 public boolean isBinaryType() {
 	return true;
 }
 
-/**
- * Answer true if the receiver is a local type, false otherwise
- *
- * @return <CODE>boolean</CODE>
- */
 @Override
 public boolean isLocal() {
 	if (this.innerInfo == null) return false;
@@ -1542,11 +1500,6 @@ public boolean isLocal() {
 	return (innerSourceName != null && innerSourceName.length > 0);
 }
 
-/**
- * Answer true if the receiver is a member type, false otherwise
- *
- * @return <CODE>boolean</CODE>
- */
 @Override
 public boolean isMember() {
 	if (this.innerInfo == null) return false;

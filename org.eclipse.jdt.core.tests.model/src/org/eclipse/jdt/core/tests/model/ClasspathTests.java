@@ -63,9 +63,11 @@ import org.eclipse.jdt.core.IJavaModelStatus;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
+import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaConventions;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
+import org.eclipse.jdt.core.provisional.JavaModelAccess;
 import org.eclipse.jdt.core.tests.model.ClasspathInitializerTests.DefaultVariableInitializer;
 import org.eclipse.jdt.core.tests.util.Util;
 import org.eclipse.jdt.internal.core.ClasspathEntry;
@@ -7293,6 +7295,138 @@ public void testBug411423() throws Exception {
 		deleteExternalResource("external-src.jar");
 		deleteExternalResource("externalFolder");
 		deleteExternalResource("externalSrcFolder");
+	}
+}
+
+public void testClasspathTestSourceValidation1() throws CoreException {
+	try {
+		IJavaProject proj = this.createJavaProject("P", new String[] {}, "bin");
+		IClasspathEntry[] originalCP = proj.getRawClasspath();
+
+		IClasspathEntry[] newCP = new IClasspathEntry[originalCP.length + 2];
+		System.arraycopy(originalCP, 0, newCP, 0, originalCP.length);
+		newCP[originalCP.length] = JavaCore.newSourceEntry(new Path("/P/src"), null, null, null,
+				new IClasspathAttribute[] {});
+		newCP[originalCP.length + 1] = JavaCore.newSourceEntry(new Path("/P/src-tests"), null, null,
+				new Path("/P/bin-tests"),
+				new IClasspathAttribute[] { JavaCore.newClasspathAttribute(IClasspathAttribute.TEST, "true") });
+
+		IJavaModelStatus status = JavaConventions.validateClasspath(proj, newCP, proj.getOutputLocation());
+
+		assertStatus("should not complain", "OK", status);
+	} finally {
+		this.deleteProject("P");
+	}
+}
+public void testClasspathTestSourceValidation2() throws CoreException {
+	try {
+		IJavaProject proj = this.createJavaProject("P", new String[] {}, "bin");
+		IClasspathEntry[] originalCP = proj.getRawClasspath();
+
+		IClasspathEntry[] newCP = new IClasspathEntry[originalCP.length + 2];
+		System.arraycopy(originalCP, 0, newCP, 0, originalCP.length);
+		newCP[originalCP.length] = JavaCore.newSourceEntry(new Path("/P/src"), null, null, null,
+				new IClasspathAttribute[] {});
+		newCP[originalCP.length + 1] = JavaCore.newSourceEntry(new Path("/P/src-tests"), null, null, null,
+				new IClasspathAttribute[] { JavaCore.newClasspathAttribute(IClasspathAttribute.TEST, "true") });
+
+		IJavaModelStatus status = JavaConventions.validateClasspath(proj, newCP, proj.getOutputLocation());
+
+		assertStatus("should complain because tests have no output folder", "Test source folder 'src-tests' in project 'P' must have a separate output folder", status);
+	} finally {
+		this.deleteProject("P");
+	}
+}
+public void testClasspathTestSourceValidation3() throws CoreException {
+	try {
+		IJavaProject proj = this.createJavaProject("P", new String[] {}, "bin");
+		IClasspathEntry[] originalCP = proj.getRawClasspath();
+
+		IClasspathEntry[] newCP = new IClasspathEntry[originalCP.length + 1];
+		System.arraycopy(originalCP, 0, newCP, 0, originalCP.length);
+		newCP[originalCP.length] = JavaCore.newSourceEntry(new Path("/P/src-tests"), null, null, null,
+				new IClasspathAttribute[] { JavaCore.newClasspathAttribute(IClasspathAttribute.TEST, "true") });
+
+		IJavaModelStatus status = JavaConventions.validateClasspath(proj, newCP, proj.getOutputLocation());
+
+		assertStatus("should not complain because no main sources are present", "OK", status);
+	} finally {
+		this.deleteProject("P");
+	}
+}
+public void testClasspathTestSourceValidation4() throws CoreException {
+	try {
+		IJavaProject proj = this.createJavaProject("P", new String[] {}, "");
+		IClasspathEntry[] originalCP = proj.getRawClasspath();
+
+		IClasspathEntry[] newCP = new IClasspathEntry[originalCP.length + 2];
+		System.arraycopy(originalCP, 0, newCP, 0, originalCP.length);
+		newCP[originalCP.length] = JavaCore.newSourceEntry(new Path("/P/src"), null, null, new Path("/P/bin"),
+				new IClasspathAttribute[] {});
+		newCP[originalCP.length + 1] = JavaCore.newSourceEntry(new Path("/P/src-tests"), null, null, new Path("/P/bin-tests"),
+				new IClasspathAttribute[] { JavaCore.newClasspathAttribute(IClasspathAttribute.TEST, "true") });
+
+		IJavaModelStatus status = JavaConventions.validateClasspath(proj, newCP, proj.getOutputLocation());
+
+		assertStatus("should not complain because main sources have their own output folder", "OK", status);
+	} finally {
+		this.deleteProject("P");
+	}
+}
+public void testClasspathTestSourceValidation5() throws CoreException {
+	try {
+		IJavaProject proj = this.createJavaProject("P", new String[] {}, "bin");
+		IClasspathEntry[] originalCP = proj.getRawClasspath();
+
+		IClasspathEntry[] newCP = new IClasspathEntry[originalCP.length + 2];
+		System.arraycopy(originalCP, 0, newCP, 0, originalCP.length);
+		newCP[originalCP.length] = JavaCore.newSourceEntry(new Path("/P/src"), null, null, new Path("/P/bin"),
+				new IClasspathAttribute[] {});
+		newCP[originalCP.length + 1] = JavaCore.newSourceEntry(new Path("/P/src-tests"), null, null, new Path("/P/bin"),
+				new IClasspathAttribute[] { JavaCore.newClasspathAttribute(IClasspathAttribute.TEST, "true") });
+
+		IJavaModelStatus status = JavaConventions.validateClasspath(proj, newCP, proj.getOutputLocation());
+
+		assertStatus("should complain because main sources have the same own output folder", "Test source folder 'src-tests' in project 'P' must have an output folder that is not also used for main sources", status);
+	} finally {
+		this.deleteProject("P");
+	}
+}
+public void testIsTestCode() throws CoreException, IOException {
+	IJavaProject project1 = null;
+	try {
+		
+		project1 = createJava9Project("Project1", new String[] {"src"});
+		addClasspathEntry(project1, JavaCore.newSourceEntry(new Path("/Project1/src-tests"), null, null, new Path("/Project1/bin-tests"), new IClasspathAttribute[] { JavaCore.newClasspathAttribute(IClasspathAttribute.TEST, "true") }));
+
+		createFolder("/Project1/src/p1");
+		createFolder("/Project1/src-tests/p1");
+		IFile p1File = createFile("/Project1/src/p1/P1Class.java", 
+				"package p1;\n" + 
+				"\n" + 
+				"public class P1Class {\n"+ 
+				"}\n" 
+				);
+		IFile t1File = createFile("/Project1/src-tests/p1/T1Class.java", 
+				"package p1;\n" + 
+				"\n" + 
+				"public class T1Class {\n"+ 
+				"}\n" 
+				);
+		
+
+		// project1.getProject().getWorkspace().build(IncrementalProjectBuilder.FULL_BUILD, null);
+		IType p1Type = ((ICompilationUnit)JavaCore.create(p1File)).getTypes()[0];
+		assertEquals("P1Class", p1Type.getElementName());
+		assertTrue(!JavaModelAccess.isTestCode(p1Type));
+
+		IType t1Type = ((ICompilationUnit)JavaCore.create(t1File)).getTypes()[0];
+		assertEquals("T1Class", t1Type.getElementName());
+
+		assertTrue(JavaModelAccess.isTestCode(t1Type));		
+	} finally {
+		if (project1 != null)
+			deleteProject(project1);
 	}
 }
 }

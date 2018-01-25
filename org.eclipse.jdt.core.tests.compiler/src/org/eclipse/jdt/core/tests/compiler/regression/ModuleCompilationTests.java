@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2016, 2017 IBM Corporation and others.
+ * Copyright (c) 2016, 2018 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -217,7 +217,12 @@ public class ModuleCompilationTests extends AbstractBatchCompilerTest {
 	String adjustForJavac(String commandLine) {
 		String[] tokens = commandLine.split(" ");
 		StringBuffer buf = new StringBuffer();
+		boolean skipNext = false;
 		for (int i = 0; i < tokens.length; i++) {
+			if (skipNext) {
+				skipNext = false;
+				continue;
+			}
 			if (tokens[i].trim().equals("-9")) {
 				buf.append(" -source 9 ");
 				continue;
@@ -225,6 +230,10 @@ public class ModuleCompilationTests extends AbstractBatchCompilerTest {
 			if (tokens[i].startsWith("-warn") || tokens[i].startsWith("-err") || tokens[i].startsWith("-info")) {
 				if (tokens[i].contains("exports") && !tokens[i].contains("-exports"))
 					buf.append(" -Xlint:exports ");
+				continue;
+			}
+			if (tokens[i].trim().equals("-classNames")) {
+				skipNext = true;
 				continue;
 			}
 			buf.append(tokens[i]).append(' ');
@@ -2746,7 +2755,8 @@ public class ModuleCompilationTests extends AbstractBatchCompilerTest {
 				"",
 				"The package pm is accessible from more than one module: mod.y, mod.x\n",
 				false,
-				"package conflict");
+				"package conflict",
+				OUTPUT_DIR);
 	}
 	public void testPackageTypeConflict1() {
 		File outputDirectory = new File(OUTPUT_DIR);
@@ -3534,6 +3544,7 @@ public void testBug521362_emptyFile() {
 			"----------\n" + 
 			"2 problems (1 error, 1 warning)\n",
 			false,
+			"empty",
 			OUTPUT_DIR + File.separator + out);
 	}
 	public void testBug521362_mismatchingdeclaration() {
@@ -3569,6 +3580,7 @@ public void testBug521362_emptyFile() {
 			"----------\n" + 
 			"1 problem (1 error)\n",
 			false,
+			"package is empty",
 			OUTPUT_DIR + File.separator + out);
 	}
 	public void testBug521362_multiplePackages() {
@@ -3614,6 +3626,7 @@ public void testBug521362_emptyFile() {
 			"----------\n" + 
 			"2 problems (2 errors)\n",
 			false,
+			"package is empty",
 			OUTPUT_DIR + File.separator + out);
 	}
 	public void testBug521362_multiplePackages2() {
@@ -3659,6 +3672,7 @@ public void testBug521362_emptyFile() {
 			"----------\n" + 
 			"2 problems (2 errors)\n",
 			false,
+			"package is empty",
 			OUTPUT_DIR + File.separator + out);
 	}
 	/*
@@ -4120,7 +4134,7 @@ public void testBug521362_emptyFile() {
 	        "",
     		"",
 	        true,
-	        /*not tested with javac*/"");
+	        OUTPUT_DIR);
 	}
 	// Test from https://bugs.eclipse.org/bugs/show_bug.cgi?id=526997
 	public void testReleaseOption16() {
@@ -4404,5 +4418,137 @@ public void testBug521362_emptyFile() {
 				"",
 				"",
 				false);
+	}
+	public void testBug508889_001() throws Exception {
+		this.runConformTest(
+			new String[] {
+				"module-info.java",
+				"module mymodule {\n" +
+				"}",
+			},
+			"\"" + OUTPUT_DIR +  File.separator + "module-info.java\""
+			+ " -9 -source 9 -target 9 -d \"" + OUTPUT_DIR + "\"",
+			"",
+			"",
+			true);
+		String expectedOutput = "// Compiled from module-info.java (version 9 : 53.0, no super bit)\n" + 
+				" module mymodule  {\n" + 
+				"  // Version: \n" + 
+				"\n" + 
+				"  requires java.base;\n" + 
+				"\n" + 
+				"}";
+		checkDisassembledClassFile(OUTPUT_DIR + File.separator + "module-info.class", "module-info", expectedOutput);
+	}
+	public void testBug508889_002() throws Exception {
+		File outputDirectory = new File(OUTPUT_DIR);
+		Util.flushDirectoryContent(outputDirectory);
+		String out = "bin";
+		String directory = OUTPUT_DIR + File.separator + "src";
+		String moduleLoc = directory + File.separator + "mod.one";
+		List<String> files = new ArrayList<>(); 
+		writeFileCollecting(files, moduleLoc, "module-info.java", 
+						"module mod.one { \n" +
+								"    exports pack1;\n" +
+						"}");
+		writeFileCollecting(files, moduleLoc + File.separator + "pack1", "X11.java", 
+						"package pack1;\n" +
+						"public class X11 {\n" +
+						"}");
+		StringBuffer buffer = new StringBuffer();
+		buffer.append("-d " + OUTPUT_DIR + File.separator + out )
+			.append(" -9 ")
+			.append(" -classpath \"")
+			.append(Util.getJavaClassLibsAsString())
+			.append("\" ");
+
+		runConformModuleTest(files,
+				buffer, 
+				"",
+				"",
+				false);
+		String expectedOutput = "// Compiled from module-info.java (version 9 : 53.0, no super bit)\n" + 
+				" module mod.one  {\n" + 
+				"  // Version: \n" + 
+				"\n" + 
+				"  requires java.base;\n" + 
+				"\n" + 
+				"  exports pack1;\n" + 
+				"\n" + 
+				"}";
+		checkDisassembledClassFile(OUTPUT_DIR + File.separator + out + File.separator + "module-info.class", "module-info", expectedOutput);
+	}
+	public void testBug508889_003() throws Exception {
+		File outputDirectory = new File(OUTPUT_DIR);
+		Util.flushDirectoryContent(outputDirectory);
+		String out = "bin";
+		String directory = OUTPUT_DIR + File.separator + "src";
+		String moduleLoc = directory + File.separator + "mod.one";
+		List<String> files = new ArrayList<>(); 
+		writeFileCollecting(files, moduleLoc, "module-info.java", 
+						"module mod.one { \n" +
+								"    exports pack1;\n" +
+								"    exports pack2 to second;\n" +
+								"    opens pack3;\n" +
+								"    opens pack4 to third;\n" +
+								"    uses pack5.X51;\n" +
+								"    provides pack1.I11 with pack1.X11;\n" +
+								"    requires transitive java.sql;\n" +
+						"}");
+		writeFileCollecting(files, moduleLoc + File.separator + "pack1", "I11.java", 
+				"package pack1;\n" +
+						"public interface I11 {\n" +
+				"}");
+		writeFileCollecting(files, moduleLoc + File.separator + "pack1", "X11.java", 
+						"package pack1;\n" +
+						"public class X11 implements I11{\n" +
+						"}");
+		writeFileCollecting(files, moduleLoc + File.separator + "pack2", "X21.java", 
+				"package pack2;\n" +
+				"public class X21 {\n" +
+				"}");
+		writeFileCollecting(files, moduleLoc + File.separator + "pack3", "X31.java", 
+				"package pack3;\n" +
+				"public class X31 {\n" +
+				"}");
+		writeFileCollecting(files, moduleLoc + File.separator + "pack4", "X41.java", 
+				"package pack4;\n" +
+				"public class X41 {\n" +
+				"}");
+		writeFileCollecting(files, moduleLoc + File.separator + "pack5", "X51.java", 
+				"package pack5;\n" +
+				"public class X51 {\n" +
+				"}");
+		StringBuffer buffer = new StringBuffer();
+		buffer.append("-d " + OUTPUT_DIR + File.separator + out )
+			.append(" -9 ")
+			.append(" -classpath \"")
+			.append(Util.getJavaClassLibsAsString())
+			.append("\" ");
+
+		runConformModuleTest(files,
+				buffer, 
+				"",
+				"",
+				false);
+		String expectedOutput = "// Compiled from module-info.java (version 9 : 53.0, no super bit)\n" + 
+				" module mod.one  {\n" + 
+				"  // Version: \n" + 
+				"\n" + 
+				"  requires transitive java.sql;\n" + 
+				"  requires java.base;\n" + 
+				"\n" + 
+				"  exports pack1;\n" + 
+				"  exports pack2 to second;\n" + 
+				"\n" + 
+				"  opens pack3;\n" + 
+				"  opens pack4 to third;\n" + 
+				"\n" + 
+				"  uses pack5.X51\n" + 
+				"\n" + 
+				"  provides pack1.I11 with pack1.X11;\n" + 
+				"\n" + 
+				"}";
+		checkDisassembledClassFile(OUTPUT_DIR + File.separator + out + File.separator + "module-info.class", "module-info", expectedOutput);
 	}
 }
