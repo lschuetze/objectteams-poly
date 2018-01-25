@@ -819,7 +819,7 @@ public abstract class ASTNode implements TypeConstants, TypeIds {
 					mapping.tagBits |= TagBits.AnnotationResolved;
 					if (length > 0) {
 						annotations = new AnnotationBinding[length];
-						mapping.setAnnotations(annotations);
+						mapping.setAnnotations(annotations, true);
 					}
 					break;
 // SH}

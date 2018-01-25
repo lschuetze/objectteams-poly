@@ -20,7 +20,6 @@
  **********************************************************************/
 team package org.eclipse.objectteams.otdt.internal.compiler.adaptor.BuildManager;
 
-import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.LinkedHashSet;
 
@@ -249,7 +248,7 @@ protected class ImageBuilder playedBy IncrementalImageBuilder
 	SourceFile findSourceFile(IFile file)   -> SourceFile findSourceFile(IFile file, boolean mustExist)
 		with { file -> file, true -> mustExist, result <- result }
 
-	@SuppressWarnings({"decapsulation", "unchecked"})
+	@SuppressWarnings("decapsulation")
 	LinkedHashSet<SourceFile> sourceFiles() -> get LinkedHashSet<SourceFile> sourceFiles;
 	
 	@SuppressWarnings("decapsulation")

@@ -258,8 +258,8 @@ public class CallinCalloutBinding extends Binding
     }
 
     @Override
-	public void setAnnotations(AnnotationBinding[] annotations) {
-    	this._declaringRoleClass.storeAnnotations(this, annotations);
+	public void setAnnotations(AnnotationBinding[] annotations, boolean forceStore) {
+    	this._declaringRoleClass.storeAnnotations(this, annotations, forceStore);
     }
 
     @Override

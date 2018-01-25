@@ -200,7 +200,8 @@ public team class AdaptorActivator
 		void enhanceCPEntries(IClasspathEntry[] resolvedEntries) 
 			<- before void computePackageFragmentRoots(IClasspathEntry[] resolvedEntries, ObjectVector accumulatedRoots,
 													   HashSet rootIDs, IClasspathEntry referringEntry,
-													   boolean retrieveExportedRoots, boolean filterModuleRoots, Map rootToResolvedEntries);
+													   boolean retrieveExportedRoots, boolean filterModuleRoots,
+													   Map rootToResolvedEntries, boolean excludeTestCode);
 
 		/**
 		 * @param entries the entries whose access rules to enhance
