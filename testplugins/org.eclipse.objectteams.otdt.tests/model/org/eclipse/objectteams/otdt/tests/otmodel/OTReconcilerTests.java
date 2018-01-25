@@ -870,7 +870,7 @@ public class OTReconcilerTests extends ReconcilerTests {
 			CompilerOptions compilerOptions, ProblemReporter problemReporter, int state)
 			throws JavaModelException {
 		Parser parser = new Parser(problemReporter, false);
-		INameEnvironment nameEnvironment = new SearchableEnvironment((JavaProject)p, this.wcOwner);
+		INameEnvironment nameEnvironment = new SearchableEnvironment((JavaProject)p, this.wcOwner, false);
 		Compiler compiler = new SourceTypeCompiler(
 					nameEnvironment, 
 					DefaultErrorHandlingPolicies.proceedWithAllProblems(), 
