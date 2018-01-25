@@ -23,6 +23,7 @@ import org.eclipse.core.resources.IProject;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.preferences.OptionsConfigurationBlock;
+import org.eclipse.jdt.internal.ui.preferences.FilteredPreferenceTree;
 import org.eclipse.jdt.internal.ui.preferences.PreferencesMessages;
 import org.eclipse.jdt.internal.ui.preferences.ScrolledPageContent;
 import org.eclipse.jdt.internal.ui.wizards.IStatusChangeListener;
