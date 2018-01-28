@@ -9,8 +9,8 @@ BASE=`pwd`
 # ABSOLUTE PATHS:
 export STAGINGBASE=/opt/public/download-staging.priv/tools/objectteams
 export UPDATES_BASE=/home/data/httpd/download.eclipse.org/objectteams/updates
-export JAVA5=${JAVA_HOME}/../jdk1.5.0-latest
-export JAVA8=${JAVA_HOME}/../jdk1.8.0-latest
+export JAVA5=/shared/common/jdk1.5.0-latest
+export JAVA8=/shared/common/jdk1.8.0_x64-latest
 
 # RELATIVE PATHS:
 BUILD=${BASE}/releng/build-scripts/build
