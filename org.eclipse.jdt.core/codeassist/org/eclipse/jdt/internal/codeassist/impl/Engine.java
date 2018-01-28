@@ -159,6 +159,15 @@ public abstract class Engine implements ITypeRequestor {
 	  }
 // SH}
 	}
+	
+//{ObjectTeams: with dependencies configured for fieldAndMethods:
+	@Override
+	public void accept(IModule module, LookupEnvironment environment) {
+		try (Config config = Dependencies.setup(this, getParser(), environment, true, false)) {
+			ITypeRequestor.super.accept(module, environment);
+		}
+	}
+// SH}		
 
 	public abstract AssistParser getParser();
 
