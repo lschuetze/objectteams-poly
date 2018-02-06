@@ -89,6 +89,7 @@ public class Util {
      * Static initializer to clean directories created while running previous test suites.
      */
     static {
+System.out.println("Util @1");
         // Get delay for cleaning sub-directories
         long millisecondsPerHour = 1000L * 3600L;
         long delay = millisecondsPerHour * 2; // default is to keep previous run directories for 2 hours
@@ -101,6 +102,7 @@ public class Util {
         catch (NumberFormatException nfe) {
             // use default
         }
+System.out.println("Util @2");
 
         // Get output directory root from system properties
         String container = System.getProperty("jdt.test.output_directory");
@@ -110,6 +112,7 @@ public class Util {
         if (container == null) {
             container = "."; // use current directory
         }
+System.out.println("Util @3 "+container);
 
         // Get file for root directory
         if (Character.isLowerCase(container.charAt(0)) && container.charAt(1) == ':') {
@@ -135,6 +138,7 @@ public class Util {
                 }
             }
         }
+System.out.println("Util @4");
 
         // Computed test run directory name based on current time
         File dateDir = new File(dir, "run."+System.currentTimeMillis());
@@ -145,6 +149,7 @@ public class Util {
 			pathDir = dateDir.getAbsolutePath();
 		}
 		OUTPUT_DIRECTORY = pathDir;
+System.out.println("Util @5 "+Util.class);
    }
 
 public static void appendProblem(StringBuffer problems, IProblem problem, char[] source, int problemCount) {
