@@ -119,13 +119,13 @@ public class BasicSearchEngine {
 		return new HierarchyScope(project, type, owner, onlySubtypes, true, includeFocusType);
 	}
 
+	/**
+	 * @see SearchEngine#createJavaSearchScope(IJavaElement[]) for detailed comment.
+	 */
 	public static IJavaSearchScope createJavaSearchScope(IJavaElement[] elements) {
 		return createJavaSearchScope(false, elements, true);
 	}
 
-	/**
-	 * @see SearchEngine#createJavaSearchScope(IJavaElement[]) for detailed comment.
-	 */
 	public static IJavaSearchScope createJavaSearchScope(boolean excludeTestCode, IJavaElement[] elements) {
 		return createJavaSearchScope(excludeTestCode, elements, true);
 	}
@@ -134,7 +134,7 @@ public class BasicSearchEngine {
 		return createJavaSearchScope(false, elements, includeReferencedProjects);
 	}
 	/**
-	 * @see SearchEngine#createJavaSearchScope(IJavaElement[], boolean) for detailed comment.
+	 * @see SearchEngine#createJavaSearchScope(boolean, IJavaElement[], boolean) for detailed comment.
 	 */
 	public static IJavaSearchScope createJavaSearchScope(boolean excludeTestCode, IJavaElement[] elements, boolean includeReferencedProjects) {
 		int includeMask = IJavaSearchScope.SOURCES | IJavaSearchScope.APPLICATION_LIBRARIES | IJavaSearchScope.SYSTEM_LIBRARIES;
@@ -148,7 +148,7 @@ public class BasicSearchEngine {
 		return createJavaSearchScope(false, elements, includeMask);
 	}
 	/**
-	 * @see SearchEngine#createJavaSearchScope(IJavaElement[], int) for detailed comment.
+	 * @see SearchEngine#createJavaSearchScope(boolean, IJavaElement[], int) for detailed comment.
 	 */
 	public static IJavaSearchScope createJavaSearchScope(boolean excludeTestCode, IJavaElement[] elements, int includeMask) {
 		HashSet projectsToBeAdded = new HashSet(2);

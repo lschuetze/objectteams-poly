@@ -22,6 +22,7 @@ import org.eclipse.core.resources.IncrementalProjectBuilder;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.Path;
+import org.eclipse.jdt.core.IAnnotation;
 import org.eclipse.jdt.core.IClasspathAttribute;
 import org.eclipse.jdt.core.IClasspathEntry;
 import org.eclipse.jdt.core.ICompilationUnit;
@@ -1606,6 +1607,102 @@ public class Java9ElementTests extends AbstractJavaModelTests {
 			ISourceRange ir =mod.getNameRange();
 			assertTrue("positive offset", ir.getOffset() > 0);
 			assertEquals("length", 9, ir.getLength());
+		}
+		finally {
+			deleteProject("Java9Elements");
+		}
+	}
+	public void testBug530402() throws CoreException {
+		try {
+			IJavaProject project = createJavaProject("Java9Elements", new String[] {"src"}, new String[] {"JCL19_LIB"}, "bin", "9");
+			project.open(null);
+				String fileContent =  "module my.mod{\n" +
+						 "	requires java.base;\n" +
+						 "}";
+				createFile(	"/Java9Elements/src/module-info.java",	fileContent);
+
+				ICompilationUnit unit = getCompilationUnit("/Java9Elements/src/module-info.java");
+				int offsetToSql = fileContent.indexOf("base");
+				IJavaElement[] selectedElements = unit.codeSelect(offsetToSql, "base".length());
+				IModuleDescription module = (IModuleDescription) selectedElements[0];
+				IAnnotation[] annotations = module.getAnnotations();
+				assertEquals("should be empty array of annotations", 0, annotations.length);
+		}
+		finally {
+			deleteProject("Java9Elements");
+		}
+	}
+	public void testBug530402b() throws CoreException, IOException {
+		try {
+			IJavaProject project = createJavaProject("Java9Elements",
+					new String[] {"src"},
+					new String[] {"JCL19_LIB", "/Java9Elements/lib530402.jar"},
+					"bin",
+					"9");
+			createJar(new String[] {
+					"module-info.java",
+					"@Deprecated module M {}\n"
+				},
+				project.getProject().getLocation().append("lib530402.jar").toOSString(),
+				new String[] {},
+				"9");
+			project.getProject().refreshLocal(2, null);
+			project.open(null);
+				String fileContent =
+						"module my.mod {\n" +
+						"	requires M;\n" +
+						"}";
+				createFile(	"/Java9Elements/src/module-info.java",	fileContent);
+
+				ICompilationUnit unit = getCompilationUnit("/Java9Elements/src/module-info.java");
+				int offsetToSql = fileContent.indexOf("M");
+				IJavaElement[] selectedElements = unit.codeSelect(offsetToSql, "M".length());
+				IModuleDescription module = (IModuleDescription) selectedElements[0];
+				IAnnotation[] annotations = module.getAnnotations();
+				assertEquals("should have one annotation", 1, annotations.length);
+				assertEquals("annotation name", "java.lang.Deprecated", annotations[0].getElementName());
+		}
+		finally {
+			deleteProject("Java9Elements");
+		}
+	}
+	public void test530653() throws CoreException, IOException {
+		try {
+			IJavaProject project = createJava9Project("Java9Elements");
+			addLibrary(project, "lib530653.jar", "lib530653src.zip", new String[] {
+					"module-info.java",
+					"/** @category library */\n" +
+					"module M {}\n"
+				},
+				"9");
+			project.getProject().refreshLocal(2, null);
+			project.open(null);
+
+			createFile(	"/Java9Elements/src/module-info.java",
+					"/**\n" +
+					" @category application\n" +
+					" @category underTest" +
+					" */\n" +
+					"module my.mod {\n" +
+					"	requires M;\n" +
+					"}");
+
+			// binary JRT module without categories:
+			IModuleDescription mod = project.findModule("java.base", this.wcOwner);
+			assertNotNull("Should find module java.base", mod);
+			String[] categories = mod.getCategories();
+			assertEquals("Should have empty array of categories", 0, categories.length);
+
+			// binary module with category (via source attachement):
+			mod = project.findModule("M", this.wcOwner);
+			assertNotNull("Should find module M", mod);
+			categories = mod.getCategories();
+			assertEquals("Expect category", "[library]", Arrays.toString(categories));
+			
+			// source module with categories:
+			mod = project.getModuleDescription();
+			categories = mod.getCategories();
+			assertEquals("Expect category", "[application, underTest]", Arrays.toString(categories));
 		}
 		finally {
 			deleteProject("Java9Elements");

@@ -270,6 +270,10 @@ public IType getDeclaringType() {
 	}
 	return null;
 }
+@Override
+public IOrdinaryClassFile getClassFile() {
+	return null;
+}
 /**
  * @see IJavaElement
  */
