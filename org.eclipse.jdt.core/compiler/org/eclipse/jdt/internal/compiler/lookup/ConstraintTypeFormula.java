@@ -228,6 +228,11 @@ class ConstraintTypeFormula extends ConstraintFormula {
 		if (subCandidate.isProperType(true) && superCandidate.isProperType(true)) {
 			if (subCandidate.isSubtypeOf(superCandidate, InferenceContext18.SIMULATE_BUG_JDK_8026527))
 				return TRUE;
+//{ObjectTeams: one more kind of "sub-typing":
+			if (subCandidate instanceof ReferenceBinding && superCandidate instanceof ReferenceBinding 
+					&& ((ReferenceBinding) subCandidate).isCompatibleViaLowering((ReferenceBinding) superCandidate))
+				return TRUE; 
+// SH}
 			return FALSE;
 		}
 		if (subCandidate.id == TypeIds.T_null)
