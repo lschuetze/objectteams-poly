@@ -7643,6 +7643,7 @@ private void consumePredicate(boolean isBase) {
 	int     kind 	   = GuardPredicateDeclaration.UNKNOWN_PREDICATE;
 	ASTNode parentDecl = null;
 	boolean typeIsRole = false;
+	TypeParameter[] typeParamters = null;
 
 	if (this.astStack[this.astPtr] instanceof TypeDeclaration) {
 		typeDecl    = (TypeDeclaration)         this.astStack[this.astPtr];
@@ -7666,6 +7667,9 @@ private void consumePredicate(boolean isBase) {
 		else
 			arguments = makePredicateArguments(
 						null, MethodSignatureEnhancer.maybeRetrenchArguments(methodDecl, this.options.weavingScheme), null, poss);
+
+		if (methodDecl.typeParameters != null)
+			typeParamters = AstClone.copyTypeParameters(methodDecl.typeParameters);
 	} else if (this.astStack[this.astPtr] instanceof MethodSpec) {
 		bmSpec = (MethodSpec)this.astStack[this.astPtr];
 		mappingDecl = (CallinMappingDeclaration)this.astStack[this.astPtr-this.astLengthStack[this.astLengthPtr]];
@@ -7689,6 +7693,9 @@ private void consumePredicate(boolean isBase) {
 		else
 			arguments = makePredicateArguments(
 						null, mappingDecl.roleMethodSpec.arguments, resultType, poss);
+
+		if (mappingDecl.roleMethodSpec.typeParameters != null)
+			typeParamters = AstClone.copyTypeParameters(mappingDecl.roleMethodSpec.typeParameters);
 	}
 	typeIsRole |= (typeDecl != null && typeDecl.isRole());
 
@@ -7700,6 +7707,7 @@ private void consumePredicate(boolean isBase) {
 		predicateMethod.sourceStart = start; // make 'when' act as the method's selector.
 
 	predicateMethod.arguments = arguments;
+	predicateMethod.typeParameters = typeParamters;
 
 	switch (kind) {
 	case GuardPredicateDeclaration.TYPE_PREDICATE:
