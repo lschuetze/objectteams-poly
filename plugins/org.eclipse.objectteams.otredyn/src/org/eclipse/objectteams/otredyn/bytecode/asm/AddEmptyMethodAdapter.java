@@ -111,4 +111,9 @@ class AddEmptyMethodAdapter extends ClassVisitor {
 	public MethodVisitor visitMethod(int arg0, String arg1, String arg2, String arg3, String[] arg4) {
 		return null; // also consider other visitors
 	}
+
+	@Override
+	public String toString() {
+		return "AddEmptyMethod "+this.name+this.desc+" call super: "+this.superToCall;
+	}
 }

@@ -99,4 +99,12 @@ public abstract class Member implements IMember {
 	}
 	
 	public abstract int getGlobalId(IBoundClass clazz);
+
+	@Override
+	public String toString() {
+		StringBuilder buf = new StringBuilder();
+		buf.append("0x").append(Integer.toHexString(this.accessFlags)).append(' ');
+		buf.append(this.name).append(this.signature);
+		return buf.toString();
+	}
 }

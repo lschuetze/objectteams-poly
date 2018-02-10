@@ -61,4 +61,9 @@ public class Method extends Member implements IMethod {
 		
 		return getId(key);
 	}
+
+	@Override
+	public String toString() {
+		return super.toString() + (this.isImplemented() ? " - implemented" : " - not implemented");
+	}
 }

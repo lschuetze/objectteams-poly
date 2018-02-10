@@ -179,6 +179,9 @@ public class Binding implements Comparable<Binding>, IBinding {
 		case CALLIN_BINDING: buf.append("callin: ");break;
 		case METHOD_ACCESS: buf.append("callout: ");break;
 		case FIELD_ACCESS: buf.append("callout-to-field: ");break;
+		case ROLE_BASE_BINDING: 
+			buf.append("playedBy: ").append(this.boundClass);
+			return buf.toString();
 		}
 		buf.append('{');
 		buf.append(this.perTeamId);

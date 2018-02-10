@@ -151,6 +151,16 @@ public abstract class AbstractBoundClass implements IBoundClass {
 		public boolean requiresBaseSuperCall() {
 			return this.requireBaseSuperCall;
 		}
+
+		@Override
+		public String toString() {
+			StringBuilder buf = new StringBuilder();
+			buf.append(this.weavingTaskType).append(": ");
+			if (this.memberPrefixId != null)
+				buf.append(this.memberPrefixId).append('-');
+			buf.append(this.memberName).append(this.memberSignature);
+			return buf.toString();
+		}
 	}
 
 	// completed WeavingTasks for callin bindings mapped by the method,
@@ -1246,4 +1256,6 @@ public abstract class AbstractBoundClass implements IBoundClass {
 	public void markAsUnweavable() {
 		this.isUnweavable = true;
 	}
+
+	public abstract void toDebugString(StringBuilder buf, String indent);
 }
