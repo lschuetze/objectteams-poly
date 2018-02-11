@@ -369,6 +369,11 @@ public class TypeDeclaration extends Statement implements ProblemSeverities, Ref
   			return true;
   		if ((this.modifiers & ClassFileConstants.AccEnum) != 0)
   			return false;
+  		if (this.enclosingType != null && this.enclosingType.isTeam()) {
+  			// resilience:
+  			this.modifiers |= ExtraCompilerModifiers.AccRole;
+  			return true;
+  		}
   		if (   this.enclosingType == null
   			&& this.scope != null
   			&& this.scope.parent != null)
