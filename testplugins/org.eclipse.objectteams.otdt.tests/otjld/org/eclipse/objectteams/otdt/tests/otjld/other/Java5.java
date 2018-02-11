@@ -403,7 +403,7 @@ public class Java5 extends AbstractOTJLDTest {
 			    "public team class TeamA11gfib3ci {\n" +
 			    "  protected class R playedBy TA11gfib3ci {\n" +
 			    "    <T> T getIt(Object it, Class<T> c) <- replace T getIt(Object it, Class<T> c)\n" +
-			    "			base when (c.isInstance(it));" +
+			    "			base when (c.isInstance(it));\n" +
 			    "    callin <T> T getIt(Object it, Class<T> c) {\n" +
 			    "      System.out.print(\">>\");\n" +
 			    "      return base.getIt(it, c);\n" +
@@ -435,7 +435,7 @@ public class Java5 extends AbstractOTJLDTest {
 			    "public team class TeamA11gfib3ci {\n" +
 			    "  protected class R playedBy TA11gfib3ci {\n" +
 			    "    <T> T getIt(Object it, Class<T> c) <- replace T getIt(Object it, Class c)\n" +
-			    "			base when (c.isInstance(it));" +
+			    "			base when (c.isInstance(it));\n" +
 			    "    callin <T> T getIt(Object it, Class<T> c) {\n" +
 			    "      System.out.print(\">>\");\n" +
 			    "      return base.getIt(it, c);\n" +
@@ -477,7 +477,7 @@ public class Java5 extends AbstractOTJLDTest {
 			    "public team class TeamA11gfib3ci {\n" +
 			    "  protected class R playedBy TA11gfib3ci {\n" +
 			    "    <T> T getIt(Object it, Class<T> c) <- replace T getIt(Object it, Class<Object> c)\n" +
-			    "			base when (c.isInstance(it));" +
+			    "			base when (c.isInstance(it));\n" +
 			    "    callin <T> T getIt(Object it, Class<T> c) {\n" +
 			    "      System.out.print(\">>\");\n" +
 			    "      return base.getIt(it, c);\n" +
@@ -502,6 +502,43 @@ public class Java5 extends AbstractOTJLDTest {
     		"	                                ^\n" + 
     		"When mapping the 2. argument of getIt(Object, Class): cannot convert from java.lang.Class<java.lang.Object> to java.lang.Class<T> (OTJLD 4.5(d)).\n" + 
     		"----------\n");
+    }
+
+    // a base has a parameterized method, type variable used as type argument -  which is bound via callin with parameter mapping
+    public void _testA11_genericFeatureInBase3cik() {
+       
+       runConformTest(
+            new String[] {
+		"TeamA11gfib3ci.java",
+			    "\n" +
+			    "public team class TeamA11gfib3ci {\n" +
+			    "  protected class R playedBy TA11gfib3ci {\n" +
+			    "    <T> T getIt(R it, Class<T> c) <- replace T getIt(Object it, Class<T> c)\n" +
+			    "			base when (it instanceof TA11gfib3ci)\n" +
+			    "			with {\n" +
+			    "				it <- (TA11gfib3ci) it,\n" +
+			    "				c <- c,\n" +
+			    "				result -> result\n" +
+			    "			}\n" +
+			    "    callin <T> T getIt(R it, Class<T> c) {\n" +
+			    "      System.out.print(\">>\");\n" +
+			    "      return base.getIt(it, c);\n" +
+			    "    }\n" +
+			    "  }\n" +
+			    "  public static void main(String[] args) {\n" +
+			    "    new TeamA11gfib3ci().activate();\n" +
+			    "    System.out.print(new TA11gfib3ci().getIt(\"OK\", String.class));\n" +
+			    "  }\n" +
+			    "}\n" +
+			    "  \n",
+		"TA11gfib3ci.java",
+			    "\n" +
+			    "public class TA11gfib3ci {\n" +
+			    "  <T> T getIt(Object it, Class<T> c) { return c.cast(it); }\n" +
+			    "}\n" +
+			    "  \n"
+            },
+            ">>OK");
     }
 
     // a base has a parameterized method  which is bound via callout
