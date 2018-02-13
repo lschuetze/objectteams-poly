@@ -473,14 +473,14 @@ public abstract class AbstractBoundClass implements IBoundClass {
 	 * It parses the bytecode, if that has not already been done
 	 * @return
 	 */
-	public String getInternalWeavableSuperClassName() {
-		if (!isSuperWeavable())
+	public String getInternalWeavableSuperClassName(boolean considerSupers) {
+		if (!isSuperWeavable(considerSupers))
 			return null;
 		parseBytecode();
 		return internalSuperClassName;
 	}
 
-	protected abstract boolean isSuperWeavable();
+	protected abstract boolean isSuperWeavable(boolean considerSupers);
 
 	/**
 	 * Returns the internal name of this class
@@ -736,7 +736,7 @@ public abstract class AbstractBoundClass implements IBoundClass {
 							if (method.isImplemented()) {
 								// So redefine the method
 								weaveBindingInImplementedMethod(task);
-								if (!method.isStatic() && weavingContext.isWeavable(getSuperClassName())) {
+								if (!method.isStatic() && weavingContext.isWeavable(getSuperClassName(), false)) {
 									AbstractBoundClass superclass = getSuperclass();
 									Method superMethod = superclass.getMethod(method.getName(), method.getSignature(), true, false);
 									if (superMethod.isImplemented()) {
@@ -745,16 +745,20 @@ public abstract class AbstractBoundClass implements IBoundClass {
 									}
 								}
 							} else {
-								//No, so weave this class and delegate to the super class
+								// No, so weave this class and delegate to the implementing super class
 								weaveBindingInNotImplementedMethod(task);
-								if (weavingContext.isWeavable(getSuperClassName())) {
-									AbstractBoundClass superclass = getSuperclass();
-									Method superMethod = superclass.getMethod(method, task);
-									if (superMethod != null) {
-										WeavingTask newTask = new WeavingTask(WeavingTaskType.WEAVE_BINDING_OF_SUBCLASS, superMethod, task, null);
-										superclass.addWeavingTask(newTask, true/*standBy*/);
-										affectedClasses.add(superclass);
+								AbstractBoundClass superclass = getSuperclass();
+								while (superclass != null && !superclass.isJavaLangObject()) {
+									if (weavingContext.isWeavable(superclass.getName(), false)) { // explicitly traversing supers
+										Method superMethod = superclass.getMethod(method, task);
+										if (superMethod != null) {
+											WeavingTask newTask = new WeavingTask(WeavingTaskType.WEAVE_BINDING_OF_SUBCLASS, superMethod, task, null);
+											superclass.addWeavingTask(newTask, true/*standBy*/);
+											affectedClasses.add(superclass);
+											break;
+										}
 									}
+									superclass = superclass.getSuperclass();
 								}
 							}
 		
@@ -1125,7 +1129,7 @@ public abstract class AbstractBoundClass implements IBoundClass {
 				}
 				Method superMethod = superClass.getMethod(task);
 				if (superMethod.isImplemented()) {
-					isWeavable = weavingContext.isWeavable(superClass.getName());
+					isWeavable = weavingContext.isWeavable(superClass.getName(), false); // explicitly traversing supers
 					break;
 				}
 				superClass = superClass.getSuperclass();
