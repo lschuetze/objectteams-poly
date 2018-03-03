@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2017 IBM Corporation and others.
+ * Copyright (c) 2000, 2018 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -50,9 +50,9 @@ char separator = Index.DEFAULT_SEPARATOR;
 
 //{ObjectTeams: add a suffix for distinction:
 /* orig:
-public static final String SIGNATURE= "INDEX VERSION 1.130"; //$NON-NLS-1$
+public static final String SIGNATURE= "INDEX VERSION 1.131"; //$NON-NLS-1$
   :giro */
-public static final String SIGNATURE= "INDEX VERSION 1.130 OT2"; //$NON-NLS-1$
+public static final String SIGNATURE= "INDEX VERSION 1.131 OT2"; //$NON-NLS-1$
 // SH}
 private static final char[] SIGNATURE_CHARS = SIGNATURE.toCharArray();
 public static boolean DEBUG = false;

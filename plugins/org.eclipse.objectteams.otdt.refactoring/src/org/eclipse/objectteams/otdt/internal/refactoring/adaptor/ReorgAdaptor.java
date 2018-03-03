@@ -44,7 +44,6 @@ import org.eclipse.jdt.core.dom.StructuralPropertyDescriptor;
 import org.eclipse.jdt.core.dom.Type;
 import org.eclipse.jdt.core.dom.rewrite.ImportRewrite;
 import org.eclipse.jdt.core.dom.rewrite.ImportRewrite.ImportRewriteContext;
-import base org.eclipse.jdt.internal.corext.codemanipulation.ImportReferencesCollector;
 import org.eclipse.jdt.internal.corext.refactoring.structure.CompilationUnitRewrite;
 import org.eclipse.objectteams.otdt.core.ICallinMapping;
 import org.eclipse.objectteams.otdt.core.ICalloutMapping;
@@ -54,6 +53,9 @@ import org.eclipse.objectteams.otdt.core.IOTType;
 import org.eclipse.objectteams.otdt.internal.refactoring.corext.OTRefactoringCoreMessages;
 import org.eclipse.objectteams.otdt.internal.ui.assist.BaseImportRewriting;
 
+// org.eclipse.jdt.core.manipulation:
+import base org.eclipse.jdt.core.manipulation.ImportReferencesCollector;
+// org.eclipse.jdt.ui
 import base org.eclipse.jdt.internal.corext.refactoring.reorg.ReorgPolicyFactory.SubCuElementReorgPolicy;
 import base org.eclipse.jdt.internal.corext.refactoring.reorg.ReadOnlyResourceFinder;
 import base org.eclipse.jdt.internal.corext.refactoring.reorg.ReorgUtils;

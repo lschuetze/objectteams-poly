@@ -40,11 +40,14 @@ import org.eclipse.jdt.internal.corext.dom.ASTNodes;
 import org.eclipse.jdt.internal.corext.dom.Bindings;
 import org.eclipse.objectteams.otdt.core.compiler.IOTConstants;
 
+// org.eclipse.jdt.core:
 import base org.eclipse.jdt.core.dom.ASTVisitor;
+//org.eclipse.jdt.ui:
 import base org.eclipse.jdt.internal.corext.codemanipulation.GetterSetterUtil;
-import base org.eclipse.jdt.internal.corext.codemanipulation.ImportReferencesCollector;
-import base org.eclipse.jdt.internal.corext.codemanipulation.OrganizeImportsOperation;
-import base org.eclipse.jdt.internal.corext.codemanipulation.OrganizeImportsOperation.TypeReferenceProcessor;
+// org.eclipse.jdt.core.manipulation:
+import base org.eclipse.jdt.core.manipulation.ImportReferencesCollector;
+import base org.eclipse.jdt.core.manipulation.OrganizeImportsOperation;
+import base org.eclipse.jdt.core.manipulation.OrganizeImportsOperation.TypeReferenceProcessor;
 import base org.eclipse.jdt.internal.corext.dom.ScopeAnalyzer;
 
 

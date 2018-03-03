@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2017 IBM Corporation and others.
+ * Copyright (c) 2000, 2018 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -172,6 +172,7 @@ import org.eclipse.jdt.internal.core.JavaCorePreferenceInitializer;
 import org.eclipse.jdt.internal.core.JavaModel;
 import org.eclipse.jdt.internal.core.JavaModelManager;
 import org.eclipse.jdt.internal.core.JavaProject;
+import org.eclipse.jdt.internal.core.PackageFragmentRoot;
 import org.eclipse.jdt.internal.core.Region;
 import org.eclipse.jdt.internal.core.SetContainerOperation;
 import org.eclipse.jdt.internal.core.SetVariablesOperation;
@@ -1639,6 +1640,27 @@ public final class JavaCore extends Plugin {
 	 * @category CompilerOptionID
 	 */
 	public static final String COMPILER_PB_API_LEAKS = PLUGIN_ID + ".compiler.problem.APILeak"; //$NON-NLS-1$
+	
+	/**
+	 * Compiler option ID: Reporting when a module requires an auto module with an unstable name.
+	 * <p>
+	 * The name of an auto module name is considered unstable when it is derived from a file name rather than
+	 * being declared in the module's MANIFEST.MF.
+	 * <p>
+	 * When enabled, the compiler will issue an error or warning when a module references an auto module
+	 * with an unstable name in its 'requires' clause.
+	 * <dl>
+	 * <dt>Option id:</dt><dd><code>"org.eclipse.jdt.core.compiler.problem.unstableAutoModuleName"</code></dd>
+	 * <dt>Possible values:</dt>
+	 * <dd><code>{ "error", "warning", "info", "ignore" }</code></dd>
+	 * <dt>Default:</dt><dd><code>"warning"</code></dd>
+	 * </dl>
+	 * 
+	 * @since 3.14
+	 * @category CompilerOptionID
+	 */
+	public static final String COMPILER_PB_UNSTABLE_AUTO_MODULE_NAME = PLUGIN_ID + ".compiler.problem.unstableAutoModuleName"; //$NON-NLS-1$
+
 	
 	/**
 	 * Compiler option ID: Annotation-based Null Analysis.
@@ -6030,6 +6052,43 @@ public final class JavaCore extends Plugin {
 	 */
 	public static String[] getReferencedModules(IJavaProject project) throws CoreException {
 		return ModuleUtil.getReferencedModules(project);
+	}
+
+	/**
+	 * Returns the <code>IModuleDescription</code> that the given java element contains 
+	 * when regarded as an automatic module. The element must be an <code>IPackageFragmentRoot</code>
+	 * or an <code>IJavaProject</code>.
+	 * 
+	 * <p>The returned module descriptor has a name (<code>getElementName()</code>) following
+	 * the specification of <code>java.lang.module.ModuleFinder.of(Path...)</code>, but it
+	 * contains no other useful information.</p>
+	 * 
+	 * @return the <code>IModuleDescription</code> representing this java element as an automatic module,
+	 * 		never <code>null</code>.
+	 * @throws JavaModelException
+	 * @throws IllegalArgumentException if the provided element is neither <code>IPackageFragmentRoot</code>
+	 * 	nor <code>IJavaProject</code>
+	 * @since 3.14
+	 */
+	public static IModuleDescription getAutomaticModuleDescription(IJavaElement element) throws JavaModelException, IllegalArgumentException {
+		switch (element.getElementType()) {
+			case IJavaElement.JAVA_PROJECT:
+				return ((JavaProject) element).getAutomaticModuleDescription();
+			case IJavaElement.PACKAGE_FRAGMENT_ROOT:
+				return ((PackageFragmentRoot) element).getAutomaticModuleDescription();
+			default:
+				throw new IllegalArgumentException("Illegal kind of java element: "+element.getElementType()); //$NON-NLS-1$
+		}
+	}
+
+	/**
+	 * Filter the given set of system roots by the rules for root modules from JEP 261.
+	 * @param allSystemRoots all physically available system modules, represented by their package fragment roots
+	 * @return the list of names of default root modules
+	 * @since 3.14
+	 */
+	public static List<String> defaultRootModules(Iterable<IPackageFragmentRoot> allSystemRoots) {
+		return JavaProject.defaultRootModules(allSystemRoots);
 	}
 
 	/**

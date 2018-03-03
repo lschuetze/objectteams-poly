@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2017 IBM Corporation and others.
+ * Copyright (c) 2000, 2018 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -285,6 +285,7 @@ public class CompilerOptions {
 	public static final String OPTION_ReportUnlikelyEqualsArgumentType = "org.eclipse.jdt.core.compiler.problem.unlikelyEqualsArgumentType"; //$NON-NLS-1$
 
 	public static final String OPTION_ReportAPILeak = "org.eclipse.jdt.core.compiler.problem.APILeak"; //$NON-NLS-1$
+	public static final String OPTION_ReportUnstableAutoModuleName = "org.eclipse.jdt.core.compiler.problem.unstableAutoModuleName";   //$NON-NLS-1$
 
 	/**
 	 * Possible values for configurable options
@@ -412,6 +413,7 @@ public class CompilerOptions {
 	public static final int UnlikelyEqualsArgumentType = IrritantSet.GROUP2 | ASTNode.Bit23;
 	public static final int UsingTerminallyDeprecatedAPI = IrritantSet.GROUP2 | ASTNode.Bit24;
 	public static final int APILeak = IrritantSet.GROUP2 | ASTNode.Bit25;
+	public static final int UnstableAutoModuleName = IrritantSet.GROUP2 | ASTNode.Bit26;
 
 
 //{ObjectTeams: OT/J specific problems/irritants:
@@ -647,6 +649,7 @@ public class CompilerOptions {
 		"hiding", //$NON-NLS-1$
 		"incomplete-switch", //$NON-NLS-1$
 		"javadoc", //$NON-NLS-1$
+		"module", //$NON-NLS-1$
 		"nls", //$NON-NLS-1$
 		"null", //$NON-NLS-1$
 		"rawtypes", //$NON-NLS-1$
@@ -933,6 +936,8 @@ public class CompilerOptions {
 				return OPTION_ReportUnlikelyEqualsArgumentType;
 			case APILeak:
 				return OPTION_ReportAPILeak;
+			case UnstableAutoModuleName:
+				return OPTION_ReportUnstableAutoModuleName;
 		}
 		return null;
 	}
@@ -1315,6 +1320,8 @@ public class CompilerOptions {
 // SH}
 			case APILeak:
 				return "exports"; //$NON-NLS-1$
+			case UnstableAutoModuleName:
+				return "module"; //$NON-NLS-1$
 		}
 		return null;
 	}
@@ -1362,6 +1369,10 @@ public class CompilerOptions {
 			case 'j' :
 				if ("javadoc".equals(warningToken)) //$NON-NLS-1$
 					return IrritantSet.JAVADOC;
+				break;
+			case 'm' :
+				if ("module".equals(warningToken)) //$NON-NLS-1$
+					return IrritantSet.MODULE;
 				break;
 			case 'n' :
 				if ("nls".equals(warningToken)) //$NON-NLS-1$
@@ -1645,6 +1656,7 @@ public class CompilerOptions {
 		optionsMap.put(OPTION_ReportUnlikelyCollectionMethodArgumentTypeStrict, this.reportUnlikelyCollectionMethodArgumentTypeStrict ? ENABLED : DISABLED);
 		optionsMap.put(OPTION_ReportUnlikelyEqualsArgumentType, getSeverityString(UnlikelyEqualsArgumentType));
 		optionsMap.put(OPTION_ReportAPILeak, getSeverityString(APILeak));
+		optionsMap.put(OPTION_ReportUnstableAutoModuleName, getSeverityString(UnstableAutoModuleName));
 		return optionsMap;
 	}
 
@@ -2218,6 +2230,7 @@ public class CompilerOptions {
 // SH}
 
 		if ((optionValue = optionsMap.get(OPTION_ReportAPILeak)) != null) updateSeverity(APILeak, optionValue);
+		if ((optionValue = optionsMap.get(OPTION_ReportUnstableAutoModuleName)) != null) updateSeverity(UnstableAutoModuleName, optionValue);
 		if ((optionValue = optionsMap.get(OPTION_AnnotationBasedNullAnalysis)) != null) {
 			this.isAnnotationBasedNullAnalysisEnabled = ENABLED.equals(optionValue);
 		}
@@ -2544,6 +2557,7 @@ public class CompilerOptions {
 		buf.append("\n\t- unlikely argument type for collection methods, strict check against expected type: ").append(this.reportUnlikelyCollectionMethodArgumentTypeStrict ? ENABLED : DISABLED); //$NON-NLS-1$
 		buf.append("\n\t- unlikely argument types for equals(): ").append(getSeverityString(UnlikelyEqualsArgumentType)); //$NON-NLS-1$
 		buf.append("\n\t- API leak: ").append(getSeverityString(APILeak)); //$NON-NLS-1$
+		buf.append("\n\t- unstable auto module name: ").append(getSeverityString(UnstableAutoModuleName)); //$NON-NLS-1$
 //{ObjectTeams
 		buf.append("\n\t- decapsulation : ").append(this.decapsulation); //$NON-NLS-1$
 		buf.append("\n\t- report if not exactly one basecall in callin method : ").append(getSeverityString(NotExactlyOneBasecall)); //$NON-NLS-1$

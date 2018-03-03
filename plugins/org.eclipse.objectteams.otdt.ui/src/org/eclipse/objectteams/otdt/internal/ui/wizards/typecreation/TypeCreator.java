@@ -58,7 +58,6 @@ import org.eclipse.jdt.internal.corext.dom.ASTNodes;
 import org.eclipse.jdt.internal.corext.dom.TokenScanner;
 import org.eclipse.jdt.internal.corext.refactoring.StubTypeContext;
 import org.eclipse.jdt.internal.corext.refactoring.TypeContextChecker;
-import org.eclipse.jdt.internal.corext.refactoring.util.JavaElementUtil;
 import org.eclipse.jdt.internal.corext.template.java.CodeTemplateContext;
 import org.eclipse.jdt.internal.corext.template.java.CodeTemplateContextType;
 import org.eclipse.jdt.internal.corext.util.CodeFormatterUtil;
@@ -343,7 +342,7 @@ public abstract class TypeCreator
 	}	
 	
 	private CompilationUnit createASTForImports(ICompilationUnit cu) {
-		ASTParser parser= ASTParser.newParser(AST.JLS8);
+		ASTParser parser= ASTParser.newParser(AST.JLS9);
 		parser.setSource(cu);
 		parser.setResolveBindings(false);
 		parser.setFocalPosition(0);
@@ -432,7 +431,7 @@ public abstract class TypeCreator
 	}
 	
 	private void removeUnusedImports(ICompilationUnit cu, Set<String> existingImports, boolean needsSave) throws CoreException {
-		ASTParser parser= ASTParser.newParser(AST.JLS8);
+		ASTParser parser= ASTParser.newParser(AST.JLS9);
 		parser.setSource(cu);
 		parser.setResolveBindings(true);
 
@@ -886,7 +885,7 @@ public abstract class TypeCreator
 		String content= getCompilationUnitContent(cu, fileComment, typeComment, typeContent, lineDelimiter);
 //carp}		
 		if (content != null) {
-			ASTParser parser= ASTParser.newParser(AST.JLS8);
+			ASTParser parser= ASTParser.newParser(AST.JLS9);
 //OTDTUI: set unit name and project for role-file handling in parser -- probably obsolete!
 			parser.setUnitName(cu.getPath().toString());
 //carp}
@@ -947,7 +946,7 @@ public abstract class TypeCreator
 		ArrayList<IMethod> newMethods= new ArrayList<IMethod>();
 		CodeGenerationSettings settings= JavaPreferencesSettings.getCodeGenerationSettings(type.getJavaProject());
 		settings.createComments= this._addComments;
-		ASTParser parser= ASTParser.newParser(AST.JLS8);
+		ASTParser parser= ASTParser.newParser(AST.JLS9);
 		parser.setResolveBindings(true);
 		parser.setSource(cu);
 		CompilationUnit unit= (CompilationUnit) parser.createAST(new SubProgressMonitor(monitor, 1));
@@ -1039,12 +1038,12 @@ public abstract class TypeCreator
 		
 		/* package */ void create(boolean needsSave, IProgressMonitor monitor) throws CoreException {
 			TextEdit edit= fImportsRewrite.rewriteImports(monitor);
-			JavaElementUtil.applyEdit(fImportsRewrite.getCompilationUnit(), edit, needsSave, null);
+			JavaModelUtil.applyEdit(fImportsRewrite.getCompilationUnit(), edit, needsSave, null);
 
 			if (fTeamImportsRewrite != null) {
 				edit= fTeamImportsRewrite.rewriteImports(monitor);
 				fHasAddedBaseImportsForRofi = edit.hasChildren();
-				JavaElementUtil.applyEdit(fTeamImportsRewrite.getCompilationUnit(), edit, needsSave, null);
+				JavaModelUtil.applyEdit(fTeamImportsRewrite.getCompilationUnit(), edit, needsSave, null);
 			}
 		}
 		

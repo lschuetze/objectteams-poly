@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2012 IBM Corporation and others.
+ * Copyright (c) 2000, 2018 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -24,6 +24,9 @@ import org.eclipse.jdt.internal.compiler.parser.TerminalTokens;
 import org.eclipse.jdt.internal.compiler.util.Util;
 
 public class PublicScanner implements IScanner, ITerminalSymbols {
+
+	@SuppressWarnings("deprecation")
+	private static final int InternalTokenNameIdentifier = TokenNameIdentifier;
 
 	//public int newIdentCount = 0;
 
@@ -3014,13 +3017,13 @@ public int scanIdentifierOrKeywordWithBoundCheck() {
 		//have a length which is <= 12...but there are lots of identifier with
 		//only one char....
 		if ((length = this.currentPosition - this.startPosition) == 1) {
-			return TokenNameIdentifier;
+			return InternalTokenNameIdentifier;
 		}
 		data = this.source;
 		index = this.startPosition;
 	} else {
 		if ((length = this.withoutUnicodePtr) == 1)
-			return TokenNameIdentifier;
+			return InternalTokenNameIdentifier;
 		data = this.withoutUnicodeBuffer;
 		index = 1;
 	}
@@ -3076,13 +3079,13 @@ public int scanIdentifierOrKeyword() {
 		//have a length which is <= 12...but there are lots of identifier with
 		//only one char....
 		if ((length = this.currentPosition - this.startPosition) == 1) {
-			return TokenNameIdentifier;
+			return InternalTokenNameIdentifier;
 		}
 		data = this.source;
 		index = this.startPosition;
 	} else {
 		if ((length = this.withoutUnicodePtr) == 1)
-			return TokenNameIdentifier;
+			return InternalTokenNameIdentifier;
 		data = this.withoutUnicodeBuffer;
 		index = 1;
 	}
@@ -3109,7 +3112,7 @@ private int internalScanIdentifierOrKeyword(int index, int length, char[] data) 
 						&& (data[++index] == 's')) {
 						return TokenNameas;
 					} else {
-						return TokenNameIdentifier;
+						return InternalTokenNameIdentifier;
 					}
 // MW}
 				case 8: //abstract
@@ -3122,7 +3125,7 @@ private int internalScanIdentifierOrKeyword(int index, int length, char[] data) 
 						&& (data[++index] == 't')) {
 							return TokenNameabstract;
 						} else {
-							return TokenNameIdentifier;
+							return InternalTokenNameIdentifier;
 						}
 //{ObjectTeams: 'after' (only if after "<-" or "precedence"):
 				case 5:
@@ -3133,7 +3136,7 @@ private int internalScanIdentifierOrKeyword(int index, int length, char[] data) 
 							&& (data[++index] == 'r'))
 							return TokenNameafter;
 					}
-					return TokenNameIdentifier;
+					return InternalTokenNameIdentifier;
 // SH}
 				case 6: // assert
 					if ((data[++index] == 's')
@@ -3146,13 +3149,13 @@ private int internalScanIdentifierOrKeyword(int index, int length, char[] data) 
 								return TokenNameassert;
 							} else {
 								this.useAssertAsAnIndentifier = true;
-								return TokenNameIdentifier;
+								return InternalTokenNameIdentifier;
 							}
 						} else {
-							return TokenNameIdentifier;
+							return InternalTokenNameIdentifier;
 						}
 				default:
-					return TokenNameIdentifier;
+					return InternalTokenNameIdentifier;
 			}
 		case 'b' : //boolean break byte (before)
 			switch (length) {
@@ -3162,7 +3165,7 @@ private int internalScanIdentifierOrKeyword(int index, int length, char[] data) 
 					else
 //{ObjectTeams: check for base keyword
 						/*@original
-						return TokenNameIdentifier;
+						return InternalTokenNameIdentifier;
 						 */
 						{
 						if (   baseIsKeyword(atStartOfImport)
@@ -3171,7 +3174,7 @@ private int internalScanIdentifierOrKeyword(int index, int length, char[] data) 
 							&& (data[++index] == 'e'))
 									return TokenNamebase;
 							else
-								return TokenNameIdentifier;
+								return InternalTokenNameIdentifier;
 						}
 //Markus Witte}
 				case 5 :
@@ -3181,7 +3184,7 @@ private int internalScanIdentifierOrKeyword(int index, int length, char[] data) 
 						&& (data[++index] == 'k'))
 						return TokenNamebreak;
 					else
-						return TokenNameIdentifier;
+						return InternalTokenNameIdentifier;
 
 //{ObjectTeams: 'before' (only if after "<-"):
 				case 6:
@@ -3193,7 +3196,7 @@ private int internalScanIdentifierOrKeyword(int index, int length, char[] data) 
 							&& (data[++index] == 'e'))
 							return TokenNamebefore;
 					}
-					return TokenNameIdentifier;
+					return InternalTokenNameIdentifier;
 // SH}
 				case 7 :
 					if ((data[++index] == 'o')
@@ -3204,9 +3207,9 @@ private int internalScanIdentifierOrKeyword(int index, int length, char[] data) 
 						&& (data[++index] == 'n'))
 						return TokenNameboolean;
 					else
-						return TokenNameIdentifier;
+						return InternalTokenNameIdentifier;
 				default :
-					return TokenNameIdentifier;
+					return InternalTokenNameIdentifier;
 			}
 
 		case 'c' : //case char catch const class continue
@@ -3216,18 +3219,18 @@ private int internalScanIdentifierOrKeyword(int index, int length, char[] data) 
 						if ((data[++index] == 's') && (data[++index] == 'e'))
 							return TokenNamecase;
 						else
-							return TokenNameIdentifier;
+							return InternalTokenNameIdentifier;
 					else
 						if ((data[index] == 'h') && (data[++index] == 'a') && (data[++index] == 'r'))
 							return TokenNamechar;
 						else
-							return TokenNameIdentifier;
+							return InternalTokenNameIdentifier;
 				case 5 :
 					if (data[++index] == 'a')
 						if ((data[++index] == 't') && (data[++index] == 'c') && (data[++index] == 'h'))
 							return TokenNamecatch;
 						else
-							return TokenNameIdentifier;
+							return InternalTokenNameIdentifier;
 					else
 						if (data[index] == 'l')
 							if ((data[++index] == 'a')
@@ -3243,14 +3246,14 @@ private int internalScanIdentifierOrKeyword(int index, int length, char[] data) 
 							}
 // SH}
 							else
-								return TokenNameIdentifier;
+								return InternalTokenNameIdentifier;
 						else if ((data[index] == 'o')
 							&& (data[++index] == 'n')
 							&& (data[++index] == 's')
 							&& (data[++index] == 't'))
 							return TokenNameconst; //const is not used in java ???????
 						else
-							return TokenNameIdentifier;
+							return InternalTokenNameIdentifier;
 //{ObjectTeams: check for callin keyword
 				case 6: //callin
 					if (   this._isOTSource
@@ -3261,7 +3264,7 @@ private int internalScanIdentifierOrKeyword(int index, int length, char[] data) 
 						&& (data[++index] == 'n'))
 						return TokenNamecallin;
 					else
-						return TokenNameIdentifier;
+						return InternalTokenNameIdentifier;
 
 //Markus Witte}
 				case 8 :
@@ -3274,9 +3277,9 @@ private int internalScanIdentifierOrKeyword(int index, int length, char[] data) 
 						&& (data[++index] == 'e'))
 						return TokenNamecontinue;
 					else
-						return TokenNameIdentifier;
+						return InternalTokenNameIdentifier;
 				default :
-					return TokenNameIdentifier;
+					return InternalTokenNameIdentifier;
 			}
 
 		case 'd' : //default do double
@@ -3285,7 +3288,7 @@ private int internalScanIdentifierOrKeyword(int index, int length, char[] data) 
 					if ((data[++index] == 'o'))
 						return TokenNamedo;
 					else
-						return TokenNameIdentifier;
+						return InternalTokenNameIdentifier;
 				case 6 :
 					if ((data[++index] == 'o')
 						&& (data[++index] == 'u')
@@ -3294,7 +3297,7 @@ private int internalScanIdentifierOrKeyword(int index, int length, char[] data) 
 						&& (data[++index] == 'e'))
 						return TokenNamedouble;
 					else
-						return TokenNameIdentifier;
+						return InternalTokenNameIdentifier;
 				case 7 :
 					if ((data[++index] == 'e')
 						&& (data[++index] == 'f')
@@ -3304,9 +3307,9 @@ private int internalScanIdentifierOrKeyword(int index, int length, char[] data) 
 						&& (data[++index] == 't'))
 						return TokenNamedefault;
 					else
-						return TokenNameIdentifier;
+						return InternalTokenNameIdentifier;
 				default :
-					return TokenNameIdentifier;
+					return InternalTokenNameIdentifier;
 			}
 		case 'e' : //else extends
 			switch (length) {
@@ -3315,7 +3318,7 @@ private int internalScanIdentifierOrKeyword(int index, int length, char[] data) 
 						if ((data[++index] == 's') && (data[++index] == 'e')) {
 							return TokenNameelse;
 						} else {
-							return TokenNameIdentifier;
+							return InternalTokenNameIdentifier;
 						}
 					} else if ((data[index] == 'n')
 							&& (data[++index] == 'u')
@@ -3324,10 +3327,10 @@ private int internalScanIdentifierOrKeyword(int index, int length, char[] data) 
 							return TokenNameenum;
 						} else {
 							this.useEnumAsAnIndentifier = true;
-							return TokenNameIdentifier;
+							return InternalTokenNameIdentifier;
 						}
 					}
-					return TokenNameIdentifier;
+					return InternalTokenNameIdentifier;
 				case 7 :
 					if ((data[++index] == 'x')
 						&& (data[++index] == 't')
@@ -3337,9 +3340,9 @@ private int internalScanIdentifierOrKeyword(int index, int length, char[] data) 
 						&& (data[++index] == 's'))
 						return TokenNameextends;
 					else
-						return TokenNameIdentifier;
+						return InternalTokenNameIdentifier;
 				default :
-					return TokenNameIdentifier;
+					return InternalTokenNameIdentifier;
 			}
 
 		case 'f' : //final finally float for false
@@ -3348,7 +3351,7 @@ private int internalScanIdentifierOrKeyword(int index, int length, char[] data) 
 					if ((data[++index] == 'o') && (data[++index] == 'r'))
 						return TokenNamefor;
 					else
-						return TokenNameIdentifier;
+						return InternalTokenNameIdentifier;
 				case 5 :
 					if (data[++index] == 'i')
 						if ((data[++index] == 'n')
@@ -3356,7 +3359,7 @@ private int internalScanIdentifierOrKeyword(int index, int length, char[] data) 
 							&& (data[++index] == 'l')) {
 							return TokenNamefinal;
 						} else
-							return TokenNameIdentifier;
+							return InternalTokenNameIdentifier;
 					else
 						if (data[index] == 'l')
 							if ((data[++index] == 'o')
@@ -3364,7 +3367,7 @@ private int internalScanIdentifierOrKeyword(int index, int length, char[] data) 
 								&& (data[++index] == 't'))
 								return TokenNamefloat;
 							else
-								return TokenNameIdentifier;
+								return InternalTokenNameIdentifier;
 						else
 							if ((data[index] == 'a')
 								&& (data[++index] == 'l')
@@ -3372,7 +3375,7 @@ private int internalScanIdentifierOrKeyword(int index, int length, char[] data) 
 								&& (data[++index] == 'e'))
 								return TokenNamefalse;
 							else
-								return TokenNameIdentifier;
+								return InternalTokenNameIdentifier;
 				case 7 :
 					if ((data[++index] == 'i')
 						&& (data[++index] == 'n')
@@ -3382,10 +3385,10 @@ private int internalScanIdentifierOrKeyword(int index, int length, char[] data) 
 						&& (data[++index] == 'y'))
 						return TokenNamefinally;
 					else
-						return TokenNameIdentifier;
+						return InternalTokenNameIdentifier;
 
 				default :
-					return TokenNameIdentifier;
+					return InternalTokenNameIdentifier;
 			}
 		case 'g' :
 //{ObjectTeams: 'get':
@@ -3403,7 +3406,7 @@ private int internalScanIdentifierOrKeyword(int index, int length, char[] data) 
 					return TokenNamegoto;
 				}
 			} //no goto in java are allowed, so why java removes this keyword ???
-			return TokenNameIdentifier;
+			return InternalTokenNameIdentifier;
 
 		case 'i' : //if implements import instanceof int interface
 			switch (length) {
@@ -3411,12 +3414,12 @@ private int internalScanIdentifierOrKeyword(int index, int length, char[] data) 
 					if (data[++index] == 'f')
 						return TokenNameif;
 					else
-						return TokenNameIdentifier;
+						return InternalTokenNameIdentifier;
 				case 3 :
 					if ((data[++index] == 'n') && (data[++index] == 't'))
 						return TokenNameint;
 					else
-						return TokenNameIdentifier;
+						return InternalTokenNameIdentifier;
 				case 6 :
 					if ((data[++index] == 'm')
 						&& (data[++index] == 'p')
@@ -3432,7 +3435,7 @@ private int internalScanIdentifierOrKeyword(int index, int length, char[] data) 
 					}
 // SH}
 					else
-						return TokenNameIdentifier;
+						return InternalTokenNameIdentifier;
 				case 9 :
 					if ((data[++index] == 'n')
 						&& (data[++index] == 't')
@@ -3452,7 +3455,7 @@ private int internalScanIdentifierOrKeyword(int index, int length, char[] data) 
 					}
 // SH}
 					else
-						return TokenNameIdentifier;
+						return InternalTokenNameIdentifier;
 				case 10 :
 					if (data[++index] == 'm')
 						if ((data[++index] == 'p')
@@ -3465,7 +3468,7 @@ private int internalScanIdentifierOrKeyword(int index, int length, char[] data) 
 							&& (data[++index] == 's'))
 							return TokenNameimplements;
 						else
-							return TokenNameIdentifier;
+							return InternalTokenNameIdentifier;
 					else
 						if ((data[index] == 'n')
 							&& (data[++index] == 's')
@@ -3478,10 +3481,10 @@ private int internalScanIdentifierOrKeyword(int index, int length, char[] data) 
 							&& (data[++index] == 'f'))
 							return TokenNameinstanceof;
 						else
-							return TokenNameIdentifier;
+							return InternalTokenNameIdentifier;
 
 				default :
-					return TokenNameIdentifier;
+					return InternalTokenNameIdentifier;
 			}
 		case 'l' : //long
 			if (length == 4) {
@@ -3491,7 +3494,7 @@ private int internalScanIdentifierOrKeyword(int index, int length, char[] data) 
 					return TokenNamelong;
 				}
 			}
-			return TokenNameIdentifier;
+			return InternalTokenNameIdentifier;
 
 		case 'n' : //native new null
 			switch (length) {
@@ -3499,12 +3502,12 @@ private int internalScanIdentifierOrKeyword(int index, int length, char[] data) 
 					if ((data[++index] == 'e') && (data[++index] == 'w'))
 						return TokenNamenew;
 					else
-						return TokenNameIdentifier;
+						return InternalTokenNameIdentifier;
 				case 4 :
 					if ((data[++index] == 'u') && (data[++index] == 'l') && (data[++index] == 'l'))
 						return TokenNamenull;
 					else
-						return TokenNameIdentifier;
+						return InternalTokenNameIdentifier;
 				case 6 :
 					if ((data[++index] == 'a')
 						&& (data[++index] == 't')
@@ -3513,9 +3516,9 @@ private int internalScanIdentifierOrKeyword(int index, int length, char[] data) 
 						&& (data[++index] == 'e')) {
 						return TokenNamenative;
 					} else
-						return TokenNameIdentifier;
+						return InternalTokenNameIdentifier;
 				default :
-					return TokenNameIdentifier;
+					return InternalTokenNameIdentifier;
 			}
 
 		case 'p' : //package private protected public
@@ -3528,7 +3531,7 @@ private int internalScanIdentifierOrKeyword(int index, int length, char[] data) 
 						&& (data[++index] == 'c')) {
 						return TokenNamepublic;
 					} else
-						return TokenNameIdentifier;
+						return InternalTokenNameIdentifier;
 				case 7 :
 					if (data[++index] == 'a')
 						if ((data[++index] == 'c')
@@ -3538,7 +3541,7 @@ private int internalScanIdentifierOrKeyword(int index, int length, char[] data) 
 							&& (data[++index] == 'e'))
 							return TokenNamepackage;
 						else
-							return TokenNameIdentifier;
+							return InternalTokenNameIdentifier;
 					else
 						if ((data[index] == 'r')
 							&& (data[++index] == 'i')
@@ -3548,7 +3551,7 @@ private int internalScanIdentifierOrKeyword(int index, int length, char[] data) 
 							&& (data[++index] == 'e')) {
 							return TokenNameprivate;
 						} else
-							return TokenNameIdentifier;
+							return InternalTokenNameIdentifier;
 //{ObjectTeams: check for playedBy/precedence keywords
 				case 8 :
 					if (   this._isOTSource
@@ -3561,7 +3564,7 @@ private int internalScanIdentifierOrKeyword(int index, int length, char[] data) 
 						&& (data[++index] == 'y')) {
 						return TokenNameplayedBy;
 					} else
-						return TokenNameIdentifier;
+						return InternalTokenNameIdentifier;
 				case 10 :
 					if (   this._isOTSource
 						&& (data[++index] == 'r')
@@ -3576,7 +3579,7 @@ private int internalScanIdentifierOrKeyword(int index, int length, char[] data) 
 						this._precedenceSeen = true;
 						return TokenNameprecedence;
 					} else
-						return TokenNameIdentifier;
+						return InternalTokenNameIdentifier;
 //Markus Witte/SH}
 				case 9 :
 					if ((data[++index] == 'r')
@@ -3589,10 +3592,10 @@ private int internalScanIdentifierOrKeyword(int index, int length, char[] data) 
 						&& (data[++index] == 'd')) {
 						return TokenNameprotected;
 					} else
-						return TokenNameIdentifier;
+						return InternalTokenNameIdentifier;
 
 				default :
-					return TokenNameIdentifier;
+					return InternalTokenNameIdentifier;
 			}
 		case 'r' : //return
 			if (length == 6) {
@@ -3629,7 +3632,7 @@ private int internalScanIdentifierOrKeyword(int index, int length, char[] data) 
                 }
             }
 // SH}
-			return TokenNameIdentifier;
+			return InternalTokenNameIdentifier;
 
 		case 's' : //short static super switch synchronized strictfp
 			switch (length) {
@@ -3640,14 +3643,14 @@ private int internalScanIdentifierOrKeyword(int index, int length, char[] data) 
 					        && (data[++index] == 't'))
 								return TokenNameset;
 					}
-					return TokenNameIdentifier;
+					return InternalTokenNameIdentifier;
 // SH}
 				case 5 :
 					if (data[++index] == 'h')
 						if ((data[++index] == 'o') && (data[++index] == 'r') && (data[++index] == 't'))
 							return TokenNameshort;
 						else
-							return TokenNameIdentifier;
+							return InternalTokenNameIdentifier;
 					else
 						if ((data[index] == 'u')
 							&& (data[++index] == 'p')
@@ -3655,7 +3658,7 @@ private int internalScanIdentifierOrKeyword(int index, int length, char[] data) 
 							&& (data[++index] == 'r'))
 							return TokenNamesuper;
 						else
-							return TokenNameIdentifier;
+							return InternalTokenNameIdentifier;
 
 				case 6 :
 					if (data[++index] == 't')
@@ -3665,7 +3668,7 @@ private int internalScanIdentifierOrKeyword(int index, int length, char[] data) 
 							&& (data[++index] == 'c')) {
 							return TokenNamestatic;
 						} else
-							return TokenNameIdentifier;
+							return InternalTokenNameIdentifier;
 					else
 						if ((data[index] == 'w')
 							&& (data[++index] == 'i')
@@ -3674,7 +3677,7 @@ private int internalScanIdentifierOrKeyword(int index, int length, char[] data) 
 							&& (data[++index] == 'h'))
 							return TokenNameswitch;
 						else
-							return TokenNameIdentifier;
+							return InternalTokenNameIdentifier;
 				case 8 :
 					if ((data[++index] == 't')
 						&& (data[++index] == 'r')
@@ -3685,7 +3688,7 @@ private int internalScanIdentifierOrKeyword(int index, int length, char[] data) 
 						&& (data[++index] == 'p'))
 						return TokenNamestrictfp;
 					else
-						return TokenNameIdentifier;
+						return InternalTokenNameIdentifier;
 				case 12 :
 					if ((data[++index] == 'y')
 						&& (data[++index] == 'n')
@@ -3700,9 +3703,9 @@ private int internalScanIdentifierOrKeyword(int index, int length, char[] data) 
 						&& (data[++index] == 'd')) {
 						return TokenNamesynchronized;
 					} else
-						return TokenNameIdentifier;
+						return InternalTokenNameIdentifier;
 				default :
-					return TokenNameIdentifier;
+					return InternalTokenNameIdentifier;
 			}
 
 		case 't' : //try throw throws transient this true
@@ -3711,13 +3714,13 @@ private int internalScanIdentifierOrKeyword(int index, int length, char[] data) 
 					if ((data[++index] == 'r') && (data[++index] == 'y'))
 						return TokenNametry;
 					else
-						return TokenNameIdentifier;
+						return InternalTokenNameIdentifier;
 				case 4 :
 					if (data[++index] == 'h')
 						if ((data[++index] == 'i') && (data[++index] == 's'))
 							return TokenNamethis;
 						else
-							return TokenNameIdentifier;
+							return InternalTokenNameIdentifier;
 					else
 						if ((data[index] == 'r') && (data[++index] == 'u') && (data[++index] == 'e'))
 							return TokenNametrue;
@@ -3733,7 +3736,7 @@ private int internalScanIdentifierOrKeyword(int index, int length, char[] data) 
 								return TokenNameteam;
 							} else
 //Markus Witte}
-							return TokenNameIdentifier;
+							return InternalTokenNameIdentifier;
 				case 5 :
 					if ((data[++index] == 'h')
 						&& (data[++index] == 'r')
@@ -3741,7 +3744,7 @@ private int internalScanIdentifierOrKeyword(int index, int length, char[] data) 
 						&& (data[++index] == 'w'))
 						return TokenNamethrow;
 					else
-						return TokenNameIdentifier;
+						return InternalTokenNameIdentifier;
 				case 6 :
 //{ObjectTeams: check for tsuper keyword
 /* orig:
@@ -3756,7 +3759,7 @@ private int internalScanIdentifierOrKeyword(int index, int length, char[] data) 
 						&& (data[++index] == 's'))
 						return TokenNamethrows;
 					else
-						return TokenNameIdentifier;
+						return InternalTokenNameIdentifier;
 // :giro
 				  } else {
 					if (   this._isOTSource
@@ -3767,7 +3770,7 @@ private int internalScanIdentifierOrKeyword(int index, int length, char[] data) 
 						&& (data[++index] == 'r'))
 							return TokenNametsuper;
 					else
-						return TokenNameIdentifier;
+						return InternalTokenNameIdentifier;
 				  }
 //Markus Witte}
 				case 9 :
@@ -3781,10 +3784,10 @@ private int internalScanIdentifierOrKeyword(int index, int length, char[] data) 
 						&& (data[++index] == 't')) {
 						return TokenNametransient;
 					} else
-						return TokenNameIdentifier;
+						return InternalTokenNameIdentifier;
 
 				default :
-					return TokenNameIdentifier;
+					return InternalTokenNameIdentifier;
 			}
 
 		case 'v' : //void volatile
@@ -3793,7 +3796,7 @@ private int internalScanIdentifierOrKeyword(int index, int length, char[] data) 
 					if ((data[++index] == 'o') && (data[++index] == 'i') && (data[++index] == 'd'))
 						return TokenNamevoid;
 					else
-						return TokenNameIdentifier;
+						return InternalTokenNameIdentifier;
 				case 8 :
 					if ((data[++index] == 'o')
 						&& (data[++index] == 'l')
@@ -3804,10 +3807,10 @@ private int internalScanIdentifierOrKeyword(int index, int length, char[] data) 
 						&& (data[++index] == 'e')) {
 						return TokenNamevolatile;
 					} else
-						return TokenNameIdentifier;
+						return InternalTokenNameIdentifier;
 
 				default :
-					return TokenNameIdentifier;
+					return InternalTokenNameIdentifier;
 			}
 
 		case 'w' : //while widefp
@@ -3828,7 +3831,7 @@ private int internalScanIdentifierOrKeyword(int index, int length, char[] data) 
 						    && (data[++index] == 'n'))
 							return TokenNamewhen;
 					}
-					return TokenNameIdentifier;
+					return InternalTokenNameIdentifier;
 
 //Markus Witte}
 				case 5 :
@@ -3838,7 +3841,7 @@ private int internalScanIdentifierOrKeyword(int index, int length, char[] data) 
 						&& (data[++index] == 'e'))
 						return TokenNamewhile;
 					else
-						return TokenNameIdentifier;
+						return InternalTokenNameIdentifier;
 					//case 6:if ( (data[++index] =='i') && (data[++index]=='d') && (data[++index]=='e') && (data[++index]=='f')&& (data[++index]=='p'))
 					//return TokenNamewidefp ;
 					//else
@@ -3853,15 +3856,15 @@ private int internalScanIdentifierOrKeyword(int index, int length, char[] data) 
 						&& !this.parsePureJavaOnly)
 						return TokenNamewithin;
 					else
-						return TokenNameIdentifier;
+						return InternalTokenNameIdentifier;
 
 //Markus Witte}
 				default :
-					return TokenNameIdentifier;
+					return InternalTokenNameIdentifier;
 			}
 
 		default :
-			return TokenNameIdentifier;
+			return InternalTokenNameIdentifier;
 	}
 }
 
@@ -4255,7 +4258,7 @@ public String toString() {
 }
 public String toStringAction(int act) {
 	switch (act) {
-		case TokenNameIdentifier :
+		case InternalTokenNameIdentifier :
 			return "Identifier(" + new String(getCurrentTokenSource()) + ")"; //$NON-NLS-1$ //$NON-NLS-2$
 		case TokenNameabstract :
 			return "abstract"; //$NON-NLS-1$

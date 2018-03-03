@@ -1985,6 +1985,7 @@ public class ModuleCompilationTests extends AbstractBatchCompilerTest {
 			.append(Util.getJavaClassLibsAsString()).append("\" ")
 			.append("-p \"")
 			.append(LIB_DIR).append("\" ")
+			.append(" -warn:-module ")
 			.append(" --module-source-path " + "\"" + directory + "\"");
 		runConformModuleTest(files, 
 				buffer,
@@ -3432,12 +3433,19 @@ public class ModuleCompilationTests extends AbstractBatchCompilerTest {
 			.append(" -classpath \"")
 			.append(Util.getJavaClassLibsAsString())
 			.append("\" ")
+			.append(" -info:+module ")
 			.append(" --module-path " + "\"" + jarPath + "\"");
 
 		runConformModuleTest(files, 
 			buffer,
 			"",
-			"",
+			"----------\n" + 
+			"1. INFO in ---OUTPUT_DIR_PLACEHOLDER---/src/mod.one/module-info.java (at line 2)\n" + 
+			"	requires lib.x;\n" + 
+			"	         ^^^^^\n" + 
+			"Name of automatic module \'lib.x\' is unstable, it is derived from the module\'s file name.\n" + 
+			"----------\n" + 
+			"1 problem (1 info)\n",
 			false,
 			OUTPUT_DIR + File.separator + out);
 	}
@@ -4770,7 +4778,7 @@ public void testBug521362_emptyFile() {
 			false,
 			"not in a module on the module source path");
 	}
-	public void _testBug530575() {
+	public void testBug530575() {
 		File outputDirectory = new File(OUTPUT_DIR);
 		Util.flushDirectoryContent(outputDirectory);
 		String out = "bin";
@@ -4830,7 +4838,7 @@ public void testBug521362_emptyFile() {
 			.append(" -classpath \"")
 			.append(Util.getJavaClassLibsAsString())
 			.append("\" ")
-			.append(" --module-path " + "\"" + OUTPUT_DIR + File.separator + out + File.separator + "mod.x;" + OUTPUT_DIR + File.separator + out + File.separator + "mod.y" + "\"");
+			.append(" --module-path " + "\"" + OUTPUT_DIR + File.separator + out + File.separator + "mod.x" + File.pathSeparator + OUTPUT_DIR + File.separator + out + File.separator + "mod.y" + "\"");
 		runConformModuleTest(files, 
 				buffer,
 				"",

@@ -51,6 +51,7 @@ import org.eclipse.jdt.core.formatter.IndentManipulation;
 import org.eclipse.jdt.internal.codeassist.InternalCompletionProposal;
 import org.eclipse.jdt.internal.codeassist.impl.Keywords;
 import org.eclipse.jdt.internal.compiler.parser.TerminalTokens;
+import org.eclipse.jdt.internal.core.manipulation.dom.ASTResolving;
 import org.eclipse.jdt.internal.corext.codemanipulation.CodeGenerationSettings;
 import org.eclipse.jdt.internal.corext.codemanipulation.ContextSensitiveImportRewriteContext;
 import org.eclipse.jdt.internal.corext.codemanipulation.StubUtility;
@@ -599,9 +600,12 @@ public team class CompletionAdaptor
 			Document recoveredDocument= new Document();
 			CompilationUnit unit= getRecoveredAST(document, offset, recoveredDocument);
 			ImportRewriteContext context;
+			ASTNode astNode;
 			if (importRewrite != null) {
-				context= new ContextSensitiveImportRewriteContext(unit, offset, importRewrite);
+				astNode= new NodeFinder(unit, offset, 0).getCoveringNode();
+				context= new ContextSensitiveImportRewriteContext(astNode, importRewrite);
 			} else {
+				astNode= null;
 				importRewrite= StubUtility.createImportRewrite(unit, true); // create a dummy import rewriter to have one
 				context= new ImportRewriteContext() { // forces that all imports are fully qualified
 					@Override
@@ -614,6 +618,7 @@ public team class CompletionAdaptor
 			ITypeBinding declaringType= null;
 			ChildListPropertyDescriptor descriptor= null;
 			ASTNode node= NodeFinder.perform(unit, offset, 1);
+			node= ASTResolving.findParentType(node);
 			if (node instanceof AnonymousClassDeclaration) {
 				declaringType= ((AnonymousClassDeclaration) node).resolveBinding();
 				descriptor= AnonymousClassDeclaration.BODY_DECLARATIONS_PROPERTY;
@@ -636,7 +641,7 @@ public team class CompletionAdaptor
 						CompletionAdaptor.enableSuperCallAdjustor.set(Boolean.TRUE);
 // orig:
 					CodeGenerationSettings settings= JavaPreferencesSettings.getCodeGenerationSettings(fJavaProject);
-					MethodDeclaration stub= org.eclipse.jdt.internal.corext.codemanipulation.StubUtility2.createImplementationStub(fCompilationUnit, rewrite, importRewrite, context, methodToOverride, declaringType, settings, declaringType.isInterface(), declaringType);
+					MethodDeclaration stub= StubUtility2.createImplementationStub(fCompilationUnit, rewrite, importRewrite, context, methodToOverride, declaringType, settings, declaringType.isInterface(), astNode);
 					ListRewrite rewriter= rewrite.getListRewrite(node, descriptor);
 					rewriter.insertFirst(stub, null);
 
@@ -649,6 +654,11 @@ public team class CompletionAdaptor
 
 						String indent= getIndentAt(document, getReplacementOffset(), settings);
 						setReplacementString(IndentManipulation.changeIndent(generatedCode, generatedIndent, settings.tabWidth, settings.indentWidth, indent, TextUtilities.getDefaultLineDelimiter(document)));
+
+						int replacementLength= getReplacementLength();
+						if (document.get(getReplacementOffset() + replacementLength, 1).equals(")")) { //$NON-NLS-1$
+							setReplacementLength(replacementLength + 1);
+						}
 
 					} catch (MalformedTreeException exception) {
 						JavaPlugin.log(exception);

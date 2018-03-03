@@ -3608,8 +3608,8 @@ protected ArrayList<FileSystem.Classpath> handleModulepath(String arg) {
 		for (String path : modulePaths) {
 			File file = new File(path);
 			if (file.isDirectory()) {
-				result =
-					(ArrayList<Classpath>) ModuleFinder.findModules(file, null, getNewParser(), this.options, true);
+				result.addAll(
+					ModuleFinder.findModules(file, null, getNewParser(), this.options, true));
 			} else {
 				Classpath modulePath = ModuleFinder.findModule(file, null, getNewParser(), this.options, true);
 				if (modulePath != null)
@@ -4298,6 +4298,9 @@ private void handleErrorOrWarningToken(String token, boolean isEnabling, int sev
 				} else {
 					throw new IllegalArgumentException(this.bind("configure.missingJavadocCommentsVisibility", token)); //$NON-NLS-1$
 				}
+			} else if (token.equals("module")) { //$NON-NLS-1$
+				setSeverity(CompilerOptions.OPTION_ReportUnstableAutoModuleName, severity, isEnabling);
+				return;
 			}
 			break;
 		case 'n' :

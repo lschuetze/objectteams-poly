@@ -256,9 +256,7 @@ public FlowInfo analyseCode(BlockScope currentScope, FlowContext flowContext, Fl
 	public void resolve(BlockScope scope) {
 
 		// prescan NNBD
-		if (scope.environment().usesNullTypeAnnotations()) {
-			handleNonNullByDefault(scope, this.annotations, this);
-		}
+		handleNonNullByDefault(scope, this.annotations, this);
 
 //{ObjectTeams: avoid duplicate resolving:
 	  TypeBinding variableType = null;

@@ -161,7 +161,7 @@ public class SourceTypeBinding extends ReferenceBinding {
 	private final static int CLASS_LITERAL_EMUL = 2;
 //{ObjectTeams: these bridges are not to be found by addSyntheticMethod(MethodBinding,boolean), use only from callout:
 	private final static int ROLE_BRIDGE = 3;
-	
+
 	private final static int MAX_SYNTHETICS = 4;
 /* orig:
 	private final static int MAX_SYNTHETICS = 3;
@@ -2420,7 +2420,7 @@ public FieldBinding resolveTypeFor(FieldBinding field) {
 					// enum constants neither have a type declaration nor can they be null
 					field.tagBits |= TagBits.AnnotationNonNull;
 				} else {
-					if (hasNonNullDefaultFor(DefaultLocationField, this.environment.usesNullTypeAnnotations(), fieldDecl.sourceStart)) {
+					if (hasNonNullDefaultFor(DefaultLocationField, fieldDecl.sourceStart)) {
 						field.fillInDefaultNonNullness(fieldDecl, initializationScope);
 					}
 					// validate null annotation:
@@ -2477,6 +2477,7 @@ public FieldBinding resolveTypeFor(FieldBinding field) {
 	}
 	return null; // should never reach this point
 }
+
 public MethodBinding resolveTypesFor(MethodBinding method) {
 //{ObjectTeams: overload with one more parameter:
 	return resolveTypesFor(method, false);
@@ -2487,7 +2488,7 @@ public MethodBinding resolveTypesFor(MethodBinding method, boolean fromSynthetic
 	IErrorHandlingPolicy suspendedPolicy = problemReporter.suspendTempErrorHandlingPolicy();
 	try {
   /* orig:
- 		return resolveTypesWithSuspendedTempErrorHandlingPolicy(method);
+		return resolveTypesWithSuspendedTempErrorHandlingPolicy(method);
     OT:*/
 		return resolveTypesWithSuspendedTempErrorHandlingPolicy(method, fromSynthetic);
   //:TO
@@ -2641,6 +2642,7 @@ private MethodBinding resolveTypesWithSuspendedTempErrorHandlingPolicy(MethodBin
 			DecapsulationState previousDecapsulation = arg.type.getBaseclassDecapsulation();
 			// check if this argument was checked early as a type anchor for another argument:
 			try {
+				ASTNode.handleNonNullByDefault(methodDecl.scope, arg.annotations, arg);
 				parameterType = 
 					 (anchorFlags[i] && arg.type.resolvedType.isValidBinding()) ? 
 				 				arg.type.resolvedType :
@@ -2952,63 +2954,24 @@ public void evaluateNullAnnotations() {
 		}
 	}
 	this.nullnessDefaultInitialized = 1;
-	boolean usesNullTypeAnnotations = this.scope.environment().usesNullTypeAnnotations();
-	if (usesNullTypeAnnotations) {
-		if (this.defaultNullness != 0) {
-			TypeDeclaration typeDecl = this.scope.referenceContext;
-			if (isPackageInfo) {
-				if (pkg.enclosingModule.getDefaultNullness() == this.defaultNullness) {
-					this.scope.problemReporter().nullDefaultAnnotationIsRedundant(typeDecl, typeDecl.annotations, pkg.enclosingModule);
-				} else {
-					pkg.setDefaultNullness(this.defaultNullness);
-				}
+	if (this.defaultNullness != 0) {
+		TypeDeclaration typeDecl = this.scope.referenceContext;
+		if (isPackageInfo) {
+			if (pkg.enclosingModule.getDefaultNullness() == this.defaultNullness) {
+				this.scope.problemReporter().nullDefaultAnnotationIsRedundant(typeDecl, typeDecl.annotations, pkg.enclosingModule);
 			} else {
-				Binding target = this.scope.parent.checkRedundantDefaultNullness(this.defaultNullness, typeDecl.declarationSourceStart);
-				if(target != null) {
-					this.scope.problemReporter().nullDefaultAnnotationIsRedundant(typeDecl, typeDecl.annotations, target);
-				}
+				pkg.setDefaultNullness(this.defaultNullness);
 			}
-		} else if (isPackageInfo || (isInDefaultPkg && !(this instanceof NestedTypeBinding))) {
-			this.scope.problemReporter().missingNonNullByDefaultAnnotation(this.scope.referenceContext);
-			if (!isInDefaultPkg)
-				pkg.setDefaultNullness(NULL_UNSPECIFIED_BY_DEFAULT);
-		}
-	} else {
-		// transfer nullness info from tagBits to this.defaultNullness
-		long annotationTagBits = this.tagBits;
-		int newDefaultNullness = NO_NULL_DEFAULT;
-		if ((annotationTagBits & TagBits.AnnotationNullUnspecifiedByDefault) != 0) {
-			newDefaultNullness = NULL_UNSPECIFIED_BY_DEFAULT;
-		} else if ((annotationTagBits & TagBits.AnnotationNonNullByDefault) != 0) {
-			newDefaultNullness = NONNULL_BY_DEFAULT;
-		} else if (this.defaultNullness != 0) {
-			 // NNBD with argument while NN & NU are SE5 annotations, revert to old default & encoding.
-			if (this.defaultNullness == NULL_UNSPECIFIED_BY_DEFAULT) {
-				annotationTagBits = TagBits.AnnotationNullUnspecifiedByDefault;
-				newDefaultNullness = NULL_UNSPECIFIED_BY_DEFAULT;
-			} else {
-				annotationTagBits = TagBits.AnnotationNonNullByDefault;
-				newDefaultNullness = NONNULL_BY_DEFAULT;
+		} else {
+			Binding target = this.scope.parent.checkRedundantDefaultNullness(this.defaultNullness, typeDecl.declarationSourceStart);
+			if(target != null) {
+				this.scope.problemReporter().nullDefaultAnnotationIsRedundant(typeDecl, typeDecl.annotations, target);
 			}
 		}
-		if (newDefaultNullness != NO_NULL_DEFAULT) {
-			TypeDeclaration typeDecl = this.scope.referenceContext;
-			if (isPackageInfo) {
-				if (pkg.enclosingModule.getDefaultNullness() == newDefaultNullness) {
-					this.scope.problemReporter().nullDefaultAnnotationIsRedundant(typeDecl, typeDecl.annotations, pkg.enclosingModule);
-				} else {
-					pkg.setDefaultNullness(newDefaultNullness);
-				}
-			} else {
-				this.defaultNullness = newDefaultNullness;
-				long nullDefaultBits = annotationTagBits & (TagBits.AnnotationNullUnspecifiedByDefault|TagBits.AnnotationNonNullByDefault);
-				checkRedundantNullnessDefaultRecurse(typeDecl, typeDecl.annotations, nullDefaultBits, false);
-			}
-		} else if (isPackageInfo || (isInDefaultPkg && !(this instanceof NestedTypeBinding))) {
-			this.scope.problemReporter().missingNonNullByDefaultAnnotation(this.scope.referenceContext);
-			if (!isInDefaultPkg)
-				pkg.setDefaultNullness(NULL_UNSPECIFIED_BY_DEFAULT);
-		}
+	} else if (isPackageInfo || (isInDefaultPkg && !(this instanceof NestedTypeBinding))) {
+		this.scope.problemReporter().missingNonNullByDefaultAnnotation(this.scope.referenceContext);
+		if (!isInDefaultPkg)
+			pkg.setDefaultNullness(NULL_UNSPECIFIED_BY_DEFAULT);
 	}
 	maybeMarkTypeParametersNonNull();
 }
@@ -3027,99 +2990,18 @@ private void maybeMarkTypeParametersNonNull() {
 	}
 }
 
-/**
- * Recursively check if the given annotations are redundant with equal annotations at an enclosing level.
- * @param location fallback location to report the warning against (if we can't blame a specific annotation)
- * @param annotations search these for the annotation that should be blamed in warning messages
- * @param nullBits when using declaration annotations these are the annotationTagBits, for type annotations the bitvector from {@link Binding#NullnessDefaultMASK}
- * @param useNullTypeAnnotations toggles the interpretation of 'nullBits'
- * 
- * @pre null annotation analysis is enabled
- */
-protected void checkRedundantNullnessDefaultRecurse(ASTNode location, Annotation[] annotations, long nullBits, boolean useNullTypeAnnotations) {
-	
-	if (!isPrototype()) throw new IllegalStateException();
-	
-	Binding target = this.fPackage.findDefaultNullnessTarget(useNullTypeAnnotations
-									? n -> n == nullBits
-									: n -> (n == NONNULL_BY_DEFAULT && ((nullBits & TagBits.AnnotationNonNullByDefault) != 0)));
-	if (target != null) {
-		this.scope.problemReporter().nullDefaultAnnotationIsRedundant(location, annotations, target);
-	}
-}
-
-// return: should caller continue searching?
-protected boolean checkRedundantNullnessDefaultOne(ASTNode location, Annotation[] annotations, long nullBits, boolean useNullTypeAnnotations) {
-	
-	if (!isPrototype()) throw new IllegalStateException();
-	
-	int thisDefault = getNullDefault();
-	if (thisDefault != NO_NULL_DEFAULT) {
-		boolean isRedundant = useNullTypeAnnotations
-				? thisDefault == nullBits
-				: (nullBits & TagBits.AnnotationNonNullByDefault) != 0;
-		if (isRedundant) {
-			this.scope.problemReporter().nullDefaultAnnotationIsRedundant(location, annotations, this);
-		}
-		return false; // different default means inner default is not redundant -> we're done
-	}
-	return true;
-}
-
 @Override
-boolean hasNonNullDefaultFor(int location, boolean useTypeAnnotations, int sourceStart) {
+boolean hasNonNullDefaultFor(int location, int sourceStart) {
 	
 	if (!isPrototype()) throw new IllegalStateException();
 	
-	// 1.8:
-	if (useTypeAnnotations) {
-		if (this.scope == null) {
-			return (this.defaultNullness & location) != 0;
-		}
-		Scope skope = this.scope.referenceContext.initializerScope; // for @NNBD on a field
-		if (skope == null)
-			skope = this.scope;
-		return skope.hasDefaultNullnessFor(location, sourceStart);
+	if (this.scope == null) {
+		return (this.defaultNullness & location) != 0;
 	}
-
-	// find the applicable default inside->out:
-
-	SourceTypeBinding currentType = null;
-	Scope currentScope = this.scope;
-	while (currentScope != null) {
-		switch (currentScope.kind) {
-			case Scope.METHOD_SCOPE:
-				AbstractMethodDeclaration referenceMethod = ((MethodScope)currentScope).referenceMethod();
-				if (referenceMethod != null && referenceMethod.binding != null) {
-					long methodTagBits = referenceMethod.binding.tagBits;
-					if ((methodTagBits & TagBits.AnnotationNonNullByDefault) != 0)
-						return true;
-					if ((methodTagBits & TagBits.AnnotationNullUnspecifiedByDefault) != 0)
-						return false;
-				}
-				break;
-			case Scope.CLASS_SCOPE:
-				currentType = ((ClassScope)currentScope).referenceContext.binding;
-				if (currentType != null) {
-					int foundDefaultNullness = currentType.getNullDefault();
-					if ((foundDefaultNullness & NullnessDefaultMASK) > NULL_UNSPECIFIED_BY_DEFAULT) {
-						return true;
-					}
-					if (foundDefaultNullness != NO_NULL_DEFAULT) {
-						return foundDefaultNullness == NONNULL_BY_DEFAULT;
-					}
-				}
-				break;
-		}
-		currentScope = currentScope.parent;
-	}
-
-	// package
-	if (currentType != null) {
-		return currentType.getPackage().getDefaultNullness() == NONNULL_BY_DEFAULT;
-	}
-
-	return false;
+	Scope skope = this.scope.referenceContext.initializerScope; // for @NNBD on a field
+	if (skope == null)
+		skope = this.scope;
+	return skope.hasDefaultNullnessFor(location, sourceStart);
 }
 
 //{ObjectTeams: helper to find args allowing baseclass decapsulation:
