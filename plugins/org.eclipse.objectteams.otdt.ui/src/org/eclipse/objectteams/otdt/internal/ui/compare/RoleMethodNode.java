@@ -170,9 +170,9 @@ class RoleMethodNode extends DocumentRangeNode implements ITypedElement {
 		/* (non-Javadoc)
 		 * @see org.eclipse.compare.structuremergeviewer.DocumentRangeNode#getAdapter(java.lang.Class)
 		 */
-		public Object getAdapter(Class adapter) {
+		public <T> T getAdapter(Class<T> adapter) {
 			if (adapter == ISharedDocumentAdapter.class) {
-				return fAdapter;
+				return adapter.cast(fAdapter);
 			}
 			return super.getAdapter(adapter);
 		}

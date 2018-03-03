@@ -242,12 +242,12 @@ public class CompareBoundMethodsEditorInput extends SaveableCompareEditorInput {
 	/* (non-Javadoc)
 	 * @see org.eclipse.compare.CompareEditorInput#getAdapter(java.lang.Class)
 	 */
-	public Object getAdapter(Class adapter) {
+	public <T> T getAdapter(Class<T> adapter) {
 		if (adapter == IFile.class || adapter == IResource.class) {
-			return getResource();
+			return adapter.cast(getResource());
 		}
 		if (adapter == ISharedDocumentAdapter.class) {
-			return getSharedDocumentAdapter();
+			return adapter.cast(getSharedDocumentAdapter());
 		}
 		return super.getAdapter(adapter);
 	}
@@ -297,5 +297,7 @@ public class CompareBoundMethodsEditorInput extends SaveableCompareEditorInput {
 		IEditorInput input = this.sharedDocumentAdapter.getDocumentKey(getResource());
 		if (input != null)
 			this.sharedDocumentAdapter.disconnect(input);
+		this.sharedDocumentAdapter.releaseBuffer();
+		this.sharedDocumentAdapter = null;
 	}	
 }
