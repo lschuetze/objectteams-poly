@@ -557,19 +557,7 @@ public class RoleTypeCreator implements TagBits {
 	        
 	        if (typeToWrap instanceof UnresolvedReferenceBinding) {
 	        	// defer wrapping until resolve():
-	        	final UnresolvedReferenceBinding rawUnresolved = (UnresolvedReferenceBinding) typeToWrap;
-	        	final ProblemReporter originalReporter = problemReporter; 
-	        	return new UnresolvedReferenceBinding(rawUnresolved.compoundName, rawUnresolved.getPackage()) {
-	        		@Override
-	        		public ReferenceBinding resolve(LookupEnvironment environment, boolean convertGenericToRawType) {
-	        			ReferenceBinding type = rawUnresolved.resolve(environment, convertGenericToRawType);
-	        			return (ReferenceBinding) maybeWrapUnqualifiedRoleType(scope, site, type, typedNode, originalReporter);
-	        		}
-	        		@Override public boolean hasTypeAnnotations() 			{ return rawUnresolved.hasTypeAnnotations(); }
-	        		@Override public boolean hasNullTypeAnnotations() 		{ return rawUnresolved.hasNullTypeAnnotations(); }
-	        		@Override public AnnotationBinding[] getAnnotations() 	{ return rawUnresolved.getAnnotations(); }
-	        		{ this.tagBits = rawUnresolved.tagBits; }
-	        	};
+	        	return ((UnresolvedReferenceBinding) typeToWrap).deferredWrappableType(scope, site, typedNode, problemReporter);
 	        }
 	        if (typeToWrap instanceof IntersectionTypeBinding18) { // FIXME (recurse?)
 	        	return originalType;
@@ -1419,11 +1407,11 @@ public class RoleTypeCreator implements TagBits {
 		for (int i = 0; i <= anchorArgPos; i++)
 			arguments[i].bind(scope, arguments[i].type.resolvedType, /*used*/i==anchorArgPos);
 		TeamAnchor anchor = arguments[anchorArgPos].binding; // SH: bounds check?
+		if (anchor == null)
+			return null;
 		((LocalVariableBinding)anchor).resolvedPosition = anchorArgPos;
 
 		// check anchor for error
-		if (anchor == null)
-			return null;
 	    if (   !anchor.isFinal()
 	    	&& !isConvertedArgument(anchor, scope))
 	    {

@@ -42,7 +42,7 @@ public class ReportedBugs extends AbstractOTJLDTest {
 	// Static initializer to specify tests subset using TESTS_* static variables
 	// All specified tests which does not belong to the class are skipped...
 	static {
-//		TESTS_NAMES = new String[] { "testBug433146"};
+		TESTS_NAMES = new String[] { "testBug529685"};
 //		TESTS_NUMBERS = new int[] { 1459 };
 //		TESTS_RANGE = new int[] { 1097, -1 };
 	}
@@ -5507,5 +5507,52 @@ public class ReportedBugs extends AbstractOTJLDTest {
 			"	^^\n" + 
 			"The type C1 is not generic; it cannot be parameterized with arguments <String>\n" + 
 			"----------\n");
+    }
+    
+    // Bug 529685 - ECJ creates class with java.lang.ClassFormatError when overriding method from Generic class
+    public void testBug529685() {
+    	runConformTest(
+    		new String[] {
+    			"pack1/C.java",
+    			"package pack1;\n" +
+    			"public class C {}\n",
+    			"pack1/GC.java",
+    			"package pack1;\n" +
+    			"public abstract class GC<T extends pack1.C> {\n" +
+    			"	public void doit(T c) {}\n" +
+    			"}\n",
+    			"pack1/GAC.java",
+    			"package pack1;\n" +
+    			"public abstract class GAC<T extends pack1.C> extends GC<T> {\n" +
+    			"	public void doit(T c) {}\n" +
+    			"}\n",
+    			"pack1/GFC.java",
+    			"package pack1;\n" +
+    			"public abstract class GFC<T extends pack1.C> extends GAC<T> {\n" +
+    			"	public void doit(T c) {}\n" +
+    			"}\n",
+	    	});
+    	runConformTest(
+    		new String[] {
+				"pack1/AC.java",
+				"package pack1;\n" +
+				"public class AC extends ALFC {\n" +
+				"	public void doit(pack1.C c) {\n" +
+				"		System.out.print(\"OK\");" +
+				"	}\n" +
+				"	public static void main(String... args) {\n" +
+				"		pack1.GFC<pack1.C> p = new AC();\n" +
+				"		p.doit(new pack1.C());\n" +
+				"	}\n" +
+				"}\n",
+				"pack1/ALFC.java",
+				"package pack1;\n" +
+				"public class ALFC extends GFC<pack1.C> {\n" +
+				"}\n",
+    		},
+    		"OK",
+    		null/*libs*/,
+    		false/*shouldFlush*/,
+    		null/*vmArgs*/);
     }
 }

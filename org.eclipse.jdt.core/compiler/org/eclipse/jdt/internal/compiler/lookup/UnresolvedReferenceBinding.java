@@ -17,7 +17,13 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.compiler.lookup;
 
+import java.util.HashMap;
+import java.util.Map;
+
 import org.eclipse.jdt.core.compiler.CharOperation;
+import org.eclipse.jdt.internal.compiler.ast.ASTNode;
+import org.eclipse.jdt.internal.compiler.problem.ProblemReporter;
+import org.eclipse.objectteams.otdt.internal.core.compiler.util.RoleTypeCreator;
 
 public class UnresolvedReferenceBinding extends ReferenceBinding {
 
@@ -174,4 +180,73 @@ public String toString() {
 		return super.annotatedDebugName() + "(unresolved)"; //$NON-NLS-1$
 	return "Unresolved type " + ((this.compoundName != null) ? CharOperation.toString(this.compoundName) : "UNNAMED"); //$NON-NLS-1$ //$NON-NLS-2$
 }
+//{ObjectTeams: interning of deferred types awaiting possible wrapping as a role type:
+Map<WrapInfo,UnresolvedReferenceBinding> deferredWrappableTypes;
+/** Key for interning, capturing all context information from when a deferred type is being created. */
+static class WrapInfo {
+	Scope scope;
+	ReferenceBinding site;
+	ASTNode typedNode;
+	ProblemReporter originalReporter;
+	WrapInfo(Scope scope, ReferenceBinding site, ASTNode typedNode, ProblemReporter originalReporter) {
+		super();
+		this.scope = scope;
+		this.site = site;
+		this.typedNode = typedNode;
+		this.originalReporter = originalReporter;
+	}
+	@Override
+	public int hashCode() {
+		final int prime = 31;
+		int result = 1;
+		result = prime * result + ((this.originalReporter == null) ? 0 : this.originalReporter.hashCode());
+		result = prime * result + ((this.scope == null) ? 0 : this.scope.hashCode());
+		result = prime * result + ((this.site == null) ? 0 : this.site.hashCode());
+		result = prime * result + ((this.typedNode == null) ? 0 : this.typedNode.hashCode());
+		return result;
+	}
+	@Override
+	public boolean equals(Object obj) {
+		if (this == obj)
+			return true;
+		if (obj == null)
+			return false;
+		if (getClass() != obj.getClass())
+			return false;
+		WrapInfo other = (WrapInfo) obj;
+		if (this.originalReporter != other.originalReporter)
+			return false;
+		if (this.scope != other.scope)
+			return false;
+		if (TypeBinding.notEquals(this.site, other.site))
+			return false;
+		if (this.typedNode != other.typedNode)
+			return false;
+		return true;
+	}
+}
+public TypeBinding deferredWrappableType(Scope scope, ReferenceBinding site, ASTNode typedNode, ProblemReporter originalReporter) {
+	WrapInfo key = new WrapInfo(scope, site, typedNode, originalReporter);
+	if (this.deferredWrappableTypes != null) {
+		UnresolvedReferenceBinding existing = this.deferredWrappableTypes.get(key);
+		if (existing != null)
+			return existing;
+	} else {
+		this.deferredWrappableTypes = new HashMap<>();
+	}
+	UnresolvedReferenceBinding deferred = new UnresolvedReferenceBinding(this.compoundName, getPackage()) {
+		@Override
+		public ReferenceBinding resolve(LookupEnvironment environment, boolean convertGenericToRawType) {
+			ReferenceBinding type = UnresolvedReferenceBinding.this.resolve(environment, convertGenericToRawType);
+			return (ReferenceBinding) RoleTypeCreator.maybeWrapUnqualifiedRoleType(scope, site, type, typedNode, originalReporter);
+		}
+		@Override public boolean hasTypeAnnotations() 			{ return UnresolvedReferenceBinding.this.hasTypeAnnotations(); }
+		@Override public boolean hasNullTypeAnnotations() 		{ return UnresolvedReferenceBinding.this.hasNullTypeAnnotations(); }
+		@Override public AnnotationBinding[] getAnnotations() 	{ return UnresolvedReferenceBinding.this.getAnnotations(); }
+	};
+	deferred.tagBits = this.tagBits;
+	this.deferredWrappableTypes.put(key, deferred);
+	return deferred;
+}
+// SH}
 }
