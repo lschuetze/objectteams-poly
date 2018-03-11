@@ -28,6 +28,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.function.Predicate;
 import java.util.zip.ZipFile;
 
 import org.eclipse.core.runtime.IPath;
@@ -69,9 +70,9 @@ public ClasspathJrt(String zipFilename, AccessRuleSet accessRuleSet, IPath exter
 	this.accessRuleSet = accessRuleSet;
 	if (externalAnnotationPath != null)
 		this.externalAnnotationPath = externalAnnotationPath.toString();
-	if (compliance.length() == 0) {
+	if (compliance != null && compliance.length() == 0) {
 		this.compliance = null;
-	} else { 
+	} else {
 		this.compliance = compliance;
 	}
 	initialize();
@@ -92,7 +93,7 @@ static HashMap<String, SimpleSet> findPackagesInModules(final ClasspathJrt jrt) 
 	PackageCache.put(zipFileName, packagesInModule);
 	try {
 		final File imageFile = new File(zipFileName);
-		org.eclipse.jdt.internal.compiler.util.JRTUtil.walkModuleImage(imageFile, 
+		org.eclipse.jdt.internal.compiler.util.JRTUtil.walkModuleImage(imageFile,
 				new org.eclipse.jdt.internal.compiler.util.JRTUtil.JrtFileVisitor<Path>() {
 			SimpleSet packageSet = null;
 			@Override
@@ -180,7 +181,7 @@ public void initialize() {
 	if (!Files.exists(filePath)) {
 		return;
 	}
-	URI uri = URI.create("jar:file:" + t.getPath()); //$NON-NLS-1$
+	URI uri = URI.create("jar:file:" + t.getRawPath()); //$NON-NLS-1$
 	try {
 		this.fs = FileSystems.getFileSystem(uri);
 	} catch(FileSystemNotFoundException fne) {
@@ -195,7 +196,7 @@ public void initialize() {
 			return;
 		}
 	}
-	this.releasePath = this.fs.getPath(""); //$NON-NLS-1$
+	this.releasePath = this.fs.getPath("/"); //$NON-NLS-1$
 	if (!Files.exists(this.fs.getPath(this.compliance))
 			|| Files.exists(this.fs.getPath(this.compliance, "system-modules"))) { //$NON-NLS-1$
 		this.compliance = null;
@@ -231,7 +232,7 @@ private String getReleaseOptionFromCompliance(String comp) {
 	}
 }
 void acceptModule(byte[] content) {
-	if (content == null) 
+	if (content == null)
 		return;
 	ClassFileReader reader = null;
 	try {
@@ -276,13 +277,14 @@ public boolean equals(Object o) {
 }
 
 @Override
-public NameEnvironmentAnswer findClass(String binaryFileName, String qualifiedPackageName, String moduleName, String qualifiedBinaryFileName, boolean asBinaryOnly) {
+public NameEnvironmentAnswer findClass(String binaryFileName, String qualifiedPackageName, String moduleName, String qualifiedBinaryFileName,
+										boolean asBinaryOnly, Predicate<String> moduleNameFilter) {
 	if (!isPackage(qualifiedPackageName, moduleName)) return null; // most common case
 
 	try {
 		IBinaryType reader = null;
 		byte[] content = null;
-		String fileNameWithoutExtension = qualifiedBinaryFileName.substring(0, qualifiedBinaryFileName.length() - SuffixConstants.SUFFIX_CLASS.length);		
+		String fileNameWithoutExtension = qualifiedBinaryFileName.substring(0, qualifiedBinaryFileName.length() - SuffixConstants.SUFFIX_CLASS.length);
 		if (this.subReleases != null && this.subReleases.length > 0) {
 			qualifiedBinaryFileName = qualifiedBinaryFileName.replace(".class", ".sig"); //$NON-NLS-1$ //$NON-NLS-2$
 			for (String rel : this.subReleases) {
@@ -296,7 +298,7 @@ public NameEnvironmentAnswer findClass(String binaryFileName, String qualifiedPa
 				}
 			}
 		} else {
-			reader = ClassFileReader.readFromModule(new File(this.zipFilename), moduleName, qualifiedBinaryFileName);
+			reader = ClassFileReader.readFromModule(new File(this.zipFilename), moduleName, qualifiedBinaryFileName, moduleNameFilter);
 		}
 		if (reader != null) {
 			if (this.externalAnnotationPath != null) {
@@ -311,8 +313,8 @@ public NameEnvironmentAnswer findClass(String binaryFileName, String qualifiedPa
 			}
 			if (this.accessRuleSet == null)
 				return new NameEnvironmentAnswer(reader, null, reader.getModule());
-			return new NameEnvironmentAnswer(reader, 
-					this.accessRuleSet.getViolatedRestriction(fileNameWithoutExtension.toCharArray()), 
+			return new NameEnvironmentAnswer(reader,
+					this.accessRuleSet.getViolatedRestriction(fileNameWithoutExtension.toCharArray()),
 					reader.getModule());
 		}
 	} catch (ClassFormatException e) { // treat as if class file is missing
@@ -333,7 +335,7 @@ public int hashCode() {
 @Override
 public char[][] getModulesDeclaringPackage(String qualifiedPackageName, String moduleName) {
 	List<String> moduleNames = JRTUtil.getModulesDeclaringPackage(new File(this.zipFilename), qualifiedPackageName, moduleName);
-	return CharOperation.toCharArrays(moduleNames); 
+	return CharOperation.toCharArrays(moduleNames);
 }
 @Override
 public boolean hasCompilationUnit(String qualifiedPackageName, String moduleName) {
@@ -355,9 +357,10 @@ public String debugPathString() {
 	return this.zipFilename;
 }
 @Override
-public NameEnvironmentAnswer findClass(char[] typeName, String qualifiedPackageName, String moduleName, String qualifiedBinaryFileName, boolean asBinaryOnly) {
+public NameEnvironmentAnswer findClass(char[] typeName, String qualifiedPackageName, String moduleName, String qualifiedBinaryFileName,
+		boolean asBinaryOnly, Predicate<String> moduleNameFilter) {
 	String fileName = new String(typeName);
-	return findClass(fileName, qualifiedPackageName, moduleName, qualifiedBinaryFileName, asBinaryOnly);
+	return findClass(fileName, qualifiedPackageName, moduleName, qualifiedBinaryFileName, asBinaryOnly, moduleNameFilter);
 }
 @Override
 public boolean hasModule() {
@@ -412,8 +415,8 @@ private void addRequired(String mod, Set<String> allModules) {
 }
 @Override
 public NameEnvironmentAnswer findClass(String typeName, String qualifiedPackageName, String moduleName, String qualifiedBinaryFileName) {
-	// 
-	return findClass(typeName, qualifiedPackageName, moduleName, qualifiedBinaryFileName, false);
+	//
+	return findClass(typeName, qualifiedPackageName, moduleName, qualifiedBinaryFileName, false, null);
 }
 /** TEST ONLY */
 public static void resetCaches() {

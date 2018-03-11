@@ -112,13 +112,21 @@
 
 package org.eclipse.jdt.core;
 
+import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Hashtable;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
+import java.util.zip.ZipFile;
 
 import org.eclipse.core.resources.IContainer;
 import org.eclipse.core.resources.IFile;
@@ -157,6 +165,11 @@ import org.eclipse.jdt.core.search.SearchPattern;
 import org.eclipse.jdt.core.search.TypeNameRequestor;
 import org.eclipse.jdt.core.util.IAttributeNamesConstants;
 import org.eclipse.jdt.internal.compiler.classfmt.ClassFileConstants;
+import org.eclipse.jdt.internal.compiler.classfmt.ClassFileReader;
+import org.eclipse.jdt.internal.compiler.classfmt.ClassFormatException;
+import org.eclipse.jdt.internal.compiler.env.AutomaticModuleNaming;
+import org.eclipse.jdt.internal.compiler.env.IModule;
+import org.eclipse.jdt.internal.compiler.env.IModule.IModuleReference;
 import org.eclipse.jdt.internal.compiler.impl.CompilerOptions;
 import org.eclipse.jdt.internal.compiler.problem.ProblemReporter;
 import org.eclipse.jdt.internal.core.BatchOperation;
@@ -2095,6 +2108,22 @@ public final class JavaCore extends Plugin {
 	 * @see #setComplianceOptions(String, Map)
 	 */
 	public static final String COMPILER_COMPLIANCE = PLUGIN_ID + ".compiler.compliance"; //$NON-NLS-1$
+	/**
+	 * Compiler option ID: Use system libraries from release.
+	 * <p>When enabled, the compiler will compile against the system libraries from release
+	 * of the specified compliance level</p>
+	 * <p>Setting this option sets the {@link #COMPILER_CODEGEN_TARGET_PLATFORM}) and {@link #COMPILER_SOURCE} to
+	 * the same level as the compiler compliance. This option is available to a project only when a supporting 
+	 * JDK is found in the project's build path</p>
+	 * <dl>
+	 * <dt>Option id:</dt><dd><code>"org.eclipse.jdt.core.compiler.release"</code></dd>
+	 * <dt>Possible values:</dt><dd><code>{ "enabled", "disabled" }</code></dd>
+	 * <dt>Default:</dt><dd><code>"disabled"</code></dd>
+	 * </dl>
+	 * @since 3.14
+	 * @category CompilerOptionID
+	 */
+	public static final String COMPILER_RELEASE = PLUGIN_ID + ".compiler.release"; //$NON-NLS-1$
 	/**
 	 * Compiler option ID: Defining the Automatic Task Priorities.
 	 * <p>In parallel with the Automatic Task Tags, this list defines the priorities (high, normal or low)
@@ -6124,6 +6153,71 @@ public final class JavaCore extends Plugin {
 	{
 		return new ModuleInfoBuilder().compileWithAttributes(module, classFileAttributes);
 	}
+
+	/**
+	 * Returns the module name computed for a jar. If the file is a jar and contains a module-info.class, the name
+	 * specified in it is used, otherwise, the algorithm for automatic module naming is used, which first looks for a
+	 * module name in the Manifest.MF and as last resort computes it from the file name.
+	 * 
+	 * @param file the jar to examine
+	 * @return null if file is not a file, otherwise the module name.
+	 * @since 3.14
+	 */
+	public static String getModuleNameFromJar(File file) {
+		if (!file.isFile()) {
+			return null;
+		}
+
+		char[] moduleName = null;
+		try (ZipFile zipFile = new ZipFile(file)) {
+			IModule module = null;
+			ClassFileReader reader = ClassFileReader.read(zipFile, IModule.MODULE_INFO_CLASS);
+			if (reader != null) {
+				module = reader.getModuleDeclaration();
+				if (module != null) {
+					moduleName = module.name();
+				}
+			}
+		} catch (ClassFormatException | IOException ex) {
+			Util.log(ex);
+		}
+		if (moduleName == null) {
+			moduleName = AutomaticModuleNaming.determineAutomaticModuleName(file.getAbsolutePath());
+		}
+		return new String(moduleName);
+	}
+	
+	/**
+	 * Returns the names of the modules required by the module-info.class in the jar. If the file is not jar or a jar
+	 * that has no module-info.class is present, the empty set is returned.
+	 * 
+	 * @param file the jar to examine
+	 * @return set of module names.
+	 * @since 3.14
+	 */
+	public static Set<String> getRequiredModulesFromJar(File file) {
+		if (!file.isFile()) {
+			return Collections.emptySet();
+		}
+		try (ZipFile zipFile = new ZipFile(file)) {
+			IModule module = null;
+			ClassFileReader reader = ClassFileReader.read(zipFile, IModule.MODULE_INFO_CLASS);
+			if (reader != null) {
+				module = reader.getModuleDeclaration();
+				if (module != null) {
+					IModuleReference[] moduleRefs = module.requires();
+					if (moduleRefs != null) {
+						return Stream.of(moduleRefs).map(m -> new String(m.name()))
+								.collect(Collectors.toCollection(LinkedHashSet::new));
+					}
+				}
+			}
+		} catch (ClassFormatException | IOException ex) {
+			Util.log(ex);
+		}
+		return Collections.emptySet();
+	}
+
 
 	/* (non-Javadoc)
 	 * Shutdown the JavaCore plug-in.
