@@ -151,7 +151,7 @@ This software is based on Eclipse and the Java Development Tooling
     	 id="org.eclipse.jdt.annotation"
     	 download-size="0"
     	 install-size="0"
-    	 version="2.1.200.qualifier"/>
+    	 version="2.2.0.qualifier"/>
 
 	<plugin
 		 id="org.hamcrest.core"
