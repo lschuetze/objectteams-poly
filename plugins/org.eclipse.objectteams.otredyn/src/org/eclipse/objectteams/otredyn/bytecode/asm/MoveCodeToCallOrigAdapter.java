@@ -30,7 +30,6 @@ import org.objectweb.asm.Type;
 import org.objectweb.asm.tree.AbstractInsnNode;
 import org.objectweb.asm.tree.InsnList;
 import org.objectweb.asm.tree.InsnNode;
-import org.objectweb.asm.tree.IntInsnNode;
 import org.objectweb.asm.tree.LabelNode;
 import org.objectweb.asm.tree.LocalVariableNode;
 import org.objectweb.asm.tree.MethodInsnNode;
@@ -170,7 +169,6 @@ public class MoveCodeToCallOrigAdapter extends AbstractTransformableClassNode {
 		return true;
 	}
 
-	@SuppressWarnings("unchecked")
 	private void addTryCatchBlocks(MethodNode orgMethod, MethodNode callOrig) {
 		if (callOrig.tryCatchBlocks == null)
 			callOrig.tryCatchBlocks = new ArrayList<TryCatchBlockNode>();

@@ -45,6 +45,7 @@ import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IMember;
 import org.eclipse.jdt.core.IMethod;
+import org.eclipse.jdt.core.IOrdinaryClassFile;
 import org.eclipse.jdt.core.ISourceRange;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaModelException;
@@ -513,8 +514,10 @@ public class CallinMarkerCreator2 extends JavaEditorActivationListener
 			}
 			case IJavaElement.CLASS_FILE:
 			{
-				IClassFile classFile = (IClassFile)javaElement;
-				members.addAll(getAllMethodsAndFields(classFile.getType()));
+				if (javaElement instanceof IOrdinaryClassFile) {
+					IOrdinaryClassFile classFile = (IOrdinaryClassFile)javaElement;
+					members.addAll(getAllMethodsAndFields(classFile.getType()));
+				}
 				break;
 			}
 			case IJavaElement.TYPE:

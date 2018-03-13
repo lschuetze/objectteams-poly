@@ -822,7 +822,7 @@ public class BindingConfiguration extends Composite
 			
 			if (variable.getType().isArrayType())
 			{
-				Type arrayType = ((ArrayType)variable.getType()).getComponentType();
+				Type arrayType = ((ArrayType)variable.getType()).getElementType();
 				if (arrayType.isPrimitiveType())
 				{
 					paramTypeNameFromMethodSpec = ((PrimitiveType)arrayType).getPrimitiveTypeCode().toString();
@@ -840,7 +840,10 @@ public class BindingConfiguration extends Composite
 						paramTypeNameFromMethodSpec = typeBinding.getQualifiedName();
 					}
 				}
-				paramTypeNameFromMethodSpec += "[]"; //$NON-NLS-1$
+				int dimensions = ((ArrayType)variable.getType()).getDimensions();
+				for (int i = 0; i < dimensions; i++) {
+					paramTypeNameFromMethodSpec += "[]"; //$NON-NLS-1$					
+				}
 			}
 			
 			//TODO(ike): Find a way to resolved parameters of methodSpecs to get fully qualified names
