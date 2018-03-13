@@ -2,6 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: %pluginName
 Bundle-SymbolicName: org.eclipse.objectteams.runtime
+Automatic-Module-Name: org.eclipse.objectteams.runtime
 Bundle-Version: 2.6.0.qualifier
 Bundle-Vendor: %providerName
 Bundle-Localization: plugin

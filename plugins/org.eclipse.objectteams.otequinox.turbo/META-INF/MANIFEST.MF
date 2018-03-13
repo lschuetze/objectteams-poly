@@ -2,6 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: OT/Equinox Turbo
 Bundle-SymbolicName: org.eclipse.objectteams.otequinox.turbo
+Automatic-Module-Name: org.eclipse.objectteams.otequinox.turbo
 Bundle-Version: 2.4.0.qualifier
 Bundle-Vendor: Eclipse.org - Object Teams
 Fragment-Host: org.eclipse.osgi;bundle-version="[3.10.0,4.0.0)"

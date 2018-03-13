@@ -2,6 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: %pluginName
 Bundle-SymbolicName: org.eclipse.objectteams.eclipse.monitor;singleton:=true
+Automatic-Module-Name: org.eclipse.objectteams.eclipse.monitor
 Bundle-Version: 2.5.0.qualifier
 Bundle-Vendor: %providerName
 Bundle-Activator: org.eclipse.objectteams.eclipse.monitor.internal.Activator
