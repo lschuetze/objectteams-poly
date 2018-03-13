@@ -212,9 +212,6 @@ private void checkAndSetModifiersForMethod(final MethodBinding methodBinding) {
 	if ((modifiers & ExtraCompilerModifiers.AccCallin) != 0)
 		MethodModel.getModel(methodBinding.sourceMethod())
 					.addAttribute(WordValueAttribute.callinFlagsAttribute(0));
-	// one more modifier to check (outside the 16-bit range):
-	if ((modifiers & ExtraCompilerModifiers.AccReadonly) != 0)
-		problemReporter().illegalModifierForMethod((AbstractMethodDeclaration) this.referenceContext);
 //SH}
 
 	// set the requested modifiers for a method in an interface/annotation

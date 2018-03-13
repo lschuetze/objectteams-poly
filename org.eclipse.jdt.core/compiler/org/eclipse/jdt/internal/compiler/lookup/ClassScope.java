@@ -957,10 +957,6 @@ public class ClassScope extends Scope {
 		boolean isMemberType = sourceType.isMemberType();
 //{ObjectTeams: OT_CLASS_FLAGS attribute:
 		WordValueAttribute.maybeCreateClassFlagsAttribute(this.referenceContext);
-		// future modifier 'readonly':
-		if (   (modifiers & ExtraCompilerModifiers.AccReadonly) != 0
-			&& !sourceType.isSynthInterface())
-			problemReporter().readonlyNotYetSupported(this.referenceContext);
 // SH}
 		if (isMemberType) {
 			if (!sourceType.isStatic())
@@ -1274,10 +1270,7 @@ public class ClassScope extends Scope {
 		if ((modifiers & ExtraCompilerModifiers.AccAlternateModifierProblem) != 0)
 			problemReporter().duplicateModifierForField(declaringClass, fieldDecl);
 
-//{ObjectTeams: one more modifier to check (outside 16-bit range)
-		if ((modifiers & ExtraCompilerModifiers.AccReadonly) != 0)
-			problemReporter().illegalModifierForField(declaringClass, fieldDecl);
-	// synthetic role interfaces may have any access modifier.
+//{ObjectTeams: synthetic role interfaces may have any access modifier.
 	/*@original
 		if (declaringClass.isInterface()) {
 	 */

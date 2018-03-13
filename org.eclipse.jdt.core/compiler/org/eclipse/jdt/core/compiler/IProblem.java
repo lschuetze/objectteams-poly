@@ -2456,6 +2456,10 @@ void setSourceStart(int sourceStart);
 	int StaticRoleFieldMustBeFinal               = LIMITATIONS +     22;
 	// move to regular errors:?
 	int IllegallyCopiedDefaultCtor 				 = LIMITATIONS +     23;
+	/**
+	 * @deprecated no longer raised, since 'readonly' is no longer recognized by the grammar
+	 */
+	@Deprecated
 	int ReadonlyNotYetSupported                  = LIMITATIONS +     24;
 
 	int MissingImplementation 					 = LIMITATIONS +     25;

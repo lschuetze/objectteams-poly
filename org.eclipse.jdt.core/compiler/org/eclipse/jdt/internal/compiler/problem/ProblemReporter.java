@@ -14064,14 +14064,6 @@ public void illegallyCopiedDefaultCtor(AbstractMethodDeclaration newMethodDecl, 
 			newMethodDecl.sourceEnd);
 }
 
-public void readonlyNotYetSupported(TypeDeclaration type) {
-	this.handle(
-			IProblem.ReadonlyNotYetSupported,
-			NoArgument,
-			NoArgument,
-			type.sourceStart,
-			type.sourceEnd);
-}
 public void missingImplementation(ASTNode node, String detail) {
 	String[] args = new String[] {detail};
 	this.handle(IProblem.MissingImplementation, args, args, node.sourceStart, node.sourceEnd);

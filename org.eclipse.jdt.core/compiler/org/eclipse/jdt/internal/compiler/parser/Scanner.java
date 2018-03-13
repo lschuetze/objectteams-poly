@@ -28,7 +28,7 @@ import org.eclipse.jdt.internal.compiler.util.Util;
 /**
  * OTDT changes:
  *
- * Added keywords: base tsuper callin within playedBy precedence readonly with team as when
+ * Added keywords: base tsuper callin within playedBy precedence with team as when
  *
  * Contextual keywords: replace after before get set
  * 		These are recognized as keywords only after the corresponding symbol <- or ->.
@@ -210,16 +210,13 @@ public class Scanner implements TerminalTokens {
      * Only within a join point query:
      *    # .. elementof
      * Some keyworkds can only be disabled by parsePureJavaOnly:
-     *    team readonly(?) within
+     *    team within
      */
     public boolean isTokenEnabled(int sym) {
     	switch (sym) {
     	case TokenNameteam:
     	case TokenNamewithin:
     		return !this.parsePureJavaOnly;
-    		// since the 'readonly' keyword is not yet supported don't enforce it in non-OT code:
-    	case TokenNamereadonly:
-    		return this._isOTSource;
 
     	case TokenNamebase:
     		return baseIsKeyword(false);
@@ -4324,18 +4321,6 @@ private int internalScanIdentifierOrKeyword(int index, int length, char[] data) 
 						&& (data[++index] == 's')) {
 						return TokenNamerequires;
 					} else 
-//{ObjectTeams:  'readonly' (may appear in interfaces outside a team(?)
-	                if (  this._isOTSource
-    	               && (data[++index] == 'e')
-        	           && (data[++index] == 'a')
-	                   && (data[++index] == 'd')
-	                   && (data[++index] == 'o')
-	                   && (data[++index] == 'n')
-	                   && (data[++index] == 'l')
-	                   && (data[++index] == 'y')) {
-	                   return TokenNamereadonly;
-	                } else
-// SH}
 						return TokenNameIdentifier;
 //{ObjectTeams: 'replace' (only if after "<-"):
 				case 7: 

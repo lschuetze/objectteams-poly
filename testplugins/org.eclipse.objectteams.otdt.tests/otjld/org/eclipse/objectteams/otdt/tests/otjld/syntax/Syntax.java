@@ -1414,11 +1414,16 @@ public class Syntax extends AbstractOTJLDTest {
     			"}\n"
     		},
     		"----------\n" + 
-    		"1. ERROR in Team8132im1.java (at line 2)\n" + 
-    		"	public readonly String val = \"V\";\n" + 
-    		"	                       ^^^\n" + 
-    		"Illegal modifier for the field val; only public, protected, private, static, final, transient & volatile are permitted\n" + 
-    		"----------\n");
+			"1. ERROR in Team8132im1.java (at line 2)\n" +
+			"	public readonly String val = \"V\";\n" +
+			"	       ^^^^^^^^\n" +
+			"readonly cannot be resolved to a type\n" +
+			"----------\n" +
+			"2. ERROR in Team8132im1.java (at line 2)\n" +
+			"	public readonly String val = \"V\";\n" +
+			"	                       ^^^\n" +
+			"Syntax error on token \"val\", delete this token\n" +
+			"----------\n");
     }
     
     // illegal order of callin label and annotation (long)

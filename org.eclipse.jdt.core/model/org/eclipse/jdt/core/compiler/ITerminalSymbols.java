@@ -202,10 +202,14 @@ public interface ITerminalSymbols {
     TokenNameBINDIN = 5012,
     TokenNameBINDOUT = 5013,
     TokenNameCALLOUT_OVERRIDE = 5014,
-	TokenNamereadonly = 5015,
 	TokenNameget = 5016,
 	TokenNameset = 5017,
 	TokenNamewhen = 5018,
     TokenNameprecedence = 5019;
+    /**
+     * @deprecated Modifier 'readonly' is no longer recognized. It was never truly supported. 
+     */
+    @Deprecated
+	int TokenNamereadonly = 5015;
 // carp}
 }

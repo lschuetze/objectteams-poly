@@ -109,16 +109,13 @@ public class PublicScanner implements IScanner, ITerminalSymbols {
      * Only within a join point query:
      *    # .. elementof
      * Some keyworkds can only be disabled by parsePureJavaOnly:
-     *    team readonly(?) within
+     *    team within
      */
     public boolean isTokenEnabled(int sym) {
     	switch (sym) {
     	case TokenNameteam:
     	case TokenNamewithin:
     		return !this.parsePureJavaOnly;
-    		// since the 'readonly' keyword is not yet supported don't enforce it in non-OT code:
-    	case TokenNamereadonly:
-    		return this._isOTSource;
 
     	case TokenNamebase:
     		return baseIsKeyword(false);
@@ -3617,20 +3614,6 @@ private int internalScanIdentifierOrKeyword(int index, int length, char[] data) 
 					&& (data[++index] == 'e'))
 					return TokenNamereplace;
 			}
-// SH}
-//{ObjectTeams:  'readonly' (may appear in interfaces outside a team(?)
-            else if (length == 8) {
-                if (  this._isOTSource
-                   && (data[++index] == 'e')
-                   && (data[++index] == 'a')
-                   && (data[++index] == 'd')
-                   && (data[++index] == 'o')
-                   && (data[++index] == 'n')
-                   && (data[++index] == 'l')
-                   && (data[++index] == 'y')) {
-                   return TokenNamereadonly;
-                }
-            }
 // SH}
 			return InternalTokenNameIdentifier;
 

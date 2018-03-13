@@ -81,7 +81,7 @@ public class Modifiers extends AbstractOTJLDTest {
 			    "}\n" +
 			    "    \n"
             },
-            "not yet supported");
+            "Syntax error");
     }
 
     // a role not marked as abstract has an abstract method

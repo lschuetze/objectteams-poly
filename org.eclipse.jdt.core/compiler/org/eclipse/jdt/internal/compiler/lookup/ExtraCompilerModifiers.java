@@ -80,9 +80,6 @@ public interface ExtraCompilerModifiers { // modifier constant
 	 */
 	int AccCallin = 0x80000000; // bit 32
 
-	// future:
-	int AccReadonly = ASTNode.Bit27; // shared with blank final / default ctor
-
 
 	final int AccOTTypeJustFlag = AccJustFlag | AccRole | AccTeam | AccOverriding;
 

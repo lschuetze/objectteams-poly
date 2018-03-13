@@ -51,7 +51,7 @@ $Terminals
 	volatile while module open requires transitive exports opens to uses provides with
 
 -- {ObjectTeams: keywords
-	as base callin playedBy precedence readonly team tsuper when with within
+	as base callin playedBy precedence team tsuper when with within
 
 -- The following symbols are recognized as keywords only in specific contexts:
 -- After "<-":
@@ -748,7 +748,6 @@ Modifier ::= Annotation
 -- {ObjectTeams
 Modifier -> 'team'
 Modifier -> 'callin'
-Modifier -> 'readonly'
 -- Markus Witte}
 /:$readableName Modifier:/
 
