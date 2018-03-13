@@ -67,9 +67,8 @@ public interface ExtraCompilerModifiers { // modifier constant
  	
  	/**
  	 * Encoding for the "team" class modifier.
- 	 * also AccDefaultMethod
  	 */
- 	int AccTeam = ASTNode.Bit17;
+ 	int AccTeam = ASTNode.Bit27;
 
  	/** Flag for base imports. */
  	int AccBase = 0x1000000; // bit 25
