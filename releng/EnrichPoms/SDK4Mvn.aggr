@@ -63,6 +63,10 @@
   <mavenMappings namePattern="(org\.objectweb)\.([^.]+)\.([^.]+)" groupId="org.ow2.asm" artifactId="$2-$3"/>
   <mavenMappings namePattern="org.tukaani.xz" groupId="org.tukaani" artifactId="xz" versionPattern="([^.]+)\.([^.]+)\.0(?:\..*)?" versionTemplate="$1.$2"/>
   <mavenMappings namePattern="org.hamcrest.core" groupId="org.hamcrest" artifactId="hamcrest-core"/>
+  <mavenMappings namePattern="(org\.junit)\.([^.]+)\.([^.]+)" groupId="\1.\2" artifactId="junit-\2-\3"/>
+  <mavenMappings namePattern="(org\.junit)\.([^.]+)\.([^.]+)\.([^.]+)" groupId="\1.\2" artifactId="junit-\2-\3-\4"/>
+  <mavenMappings namePattern="(org)\.(opentest4j)" groupId="\1.\2" artifactId="\2"/>
+  <mavenMappings namePattern="(org)\.(apiguardian)" groupId="\1.\2" artifactId="\2-api"/>
   <mavenMappings namePattern="org.junit" groupId="junit" artifactId="junit" versionPattern="([^.]+)\.([^.]+)\.0(?:\..*)?" versionTemplate="$1.$2"/>
   <mavenMappings namePattern="org\.(sat4j)\.(.*)" groupId="org.ow2.$1" artifactId="org.ow2.$1.$2"/>
   <mavenMappings namePattern="org.w3c.css.sac" groupId="org.eclipse.birt.runtime" artifactId="org.w3c.css.sac"/>
