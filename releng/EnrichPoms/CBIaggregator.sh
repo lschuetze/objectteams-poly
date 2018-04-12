@@ -370,7 +370,7 @@ done < ${WORKSPACE}/sourceBundles.txt
 # special hack for missing source bundle with several source folders with blanks:
 buildSourceJar platform/eclipse.platform.swt.git \
 	bundles/org.eclipse.swt.tools \
-	R4_7_3 \
+	R4_7_3a \
 	org/eclipse/platform org.eclipse.swt.tools 3.106.0 \
 	"JNI Generation" \
   	"Mac Generation" \
