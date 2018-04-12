@@ -1447,7 +1447,7 @@ public class ASTTest extends org.eclipse.jdt.core.tests.junit.extension.TestCase
 						"abstract", "default", "if", "private", //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
 						// more keywords:
 						"as", "callin", "playedBy", "precedence", //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
-						"readonly", "team", "tsuper", "with", "within", //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$ //$NON-NLS-5$ 
+						"team", "tsuper", "with", "within", //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$ //$NON-NLS-5$ 
 						// treated as identifier: "base", "when" (predicate method name)
 // SH}						
 						"boolean", "do", "implements", "protected", "throw", //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$ //$NON-NLS-5$
