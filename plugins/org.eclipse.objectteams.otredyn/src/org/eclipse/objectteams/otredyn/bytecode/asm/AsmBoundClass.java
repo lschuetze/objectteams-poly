@@ -16,6 +16,8 @@
  **********************************************************************/
 package org.eclipse.objectteams.otredyn.bytecode.asm;
 
+import java.io.IOException;
+import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -24,6 +26,7 @@ import java.util.Set;
 import org.eclipse.objectteams.otredyn.bytecode.AbstractBoundClass;
 import org.eclipse.objectteams.otredyn.bytecode.AbstractTeam;
 import org.eclipse.objectteams.otredyn.bytecode.IBytecodeProvider;
+import org.eclipse.objectteams.otredyn.bytecode.asm.ASMByteCodeAnalyzer.ClassInformation;
 import org.objectweb.asm.ClassReader;
 import org.objectweb.asm.Opcodes;
 
@@ -72,6 +75,17 @@ public abstract class AsmBoundClass extends AbstractTeam {
 		
 		bytecode = bytecodeProvider.getBytecode(getId());
 		if (bytecode == null) {
+			if (this.loader != null) {
+				try (InputStream stream = this.loader.getResourceAsStream(this.getInternalName()+".class")) {
+					if (stream != null) {
+						ASMByteCodeAnalyzer codeAnalyzer = new ASMByteCodeAnalyzer(true);
+						ClassInformation classInformation = codeAnalyzer.getClassInformation(stream, this.getName());
+						this.setSuperClassName(classInformation.getSuperClassName());
+					}
+				} catch (IOException e) {
+					// silent (from automatic close()).
+				}
+			}
 			//Class is not loaded yet.
 			return;
 		}
