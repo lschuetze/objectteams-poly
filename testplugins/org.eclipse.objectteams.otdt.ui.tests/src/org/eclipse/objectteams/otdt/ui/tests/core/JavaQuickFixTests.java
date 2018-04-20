@@ -346,7 +346,7 @@ public class JavaQuickFixTests extends OTQuickFixTest {
 
 		CompilationUnit astRoot= getASTRoot(cu);
 		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot);
-		assertNumberOfProposals(proposals, 2);
+		assertNumberOfProposals(proposals, 3);
 		assertCorrectLabels(proposals);
 
 		// primary proposal: Extract to checked local variable
@@ -379,6 +379,9 @@ public class JavaQuickFixTests extends OTQuickFixTest {
 
 		// secondary
 		ChangeCorrectionProposal otherProposal = (ChangeCorrectionProposal) proposals.get(1);
-		assertEquals("Display String", "Configure problem severity", otherProposal.getDisplayString());
+		assertEquals("Display String 2", "Add @SuppressWarnings 'null' to 'foo()'", otherProposal.getDisplayString());
+		
+		otherProposal = (ChangeCorrectionProposal) proposals.get(2);
+		assertEquals("Display String 3", "Configure problem severity", otherProposal.getDisplayString());
 	}
 }
