@@ -115,12 +115,12 @@ else
 	else
 		/bin/rm -rf ${SIGNED}/*
 	fi
-	for jar in ${JARS}
+	for JAR in ${JARS}
 	do
-		dir=`dirname $jar`
-		if [ ! -d ${SIGNED}/${dir} ]
+		DIR=`dirname $JAR`
+		if [ ! -d ${SIGNED}/${DIR} ]
 		then
-			mkdir -p ${SIGNED}/${dir}
+			mkdir -p ${SIGNED}/${DIR}
 		fi
 		curl -o ${SIGNED}/${JAR} -F file=@${JAR} http://build.eclipse.org:31338/sign
 	done
