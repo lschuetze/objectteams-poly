@@ -102,7 +102,7 @@ echo "====Step 1: pack jars ===="
 for dir in ${BASE}/testrun/updateSite/features ${BASE}/testrun/updateSite/plugins
 do
         find ${dir} -type f -name \*.jar -exec \
-                ${JAVA8}/bin/java -jar ${JARPROCESSOR} -verbose -pack -outputDir ${dir} {} \;
+                ${JAVA8}/bin/java -jar ${JARPROCESSOR} -verbose -processAll -pack -outputDir ${dir} {} \;
 done
 
 echo "====Step 2: request signing and zip===="
