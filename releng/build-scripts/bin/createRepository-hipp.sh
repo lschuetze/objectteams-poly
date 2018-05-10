@@ -98,36 +98,38 @@ NAME="Object Teams"
 echo "LAUNCHER_PATH = ${LAUNCHER_PATH}"
 echo "NAME          = ${NAME}"
 
-echo "====Step 1: zip and request signing===="
+echo "====Step 1: request signing and zip===="
 cd ${BASE}/testrun/updateSite
 JARS=`find . -name \*.jar -type f`
+OTDTJAR=${BASE}/testrun/otdt.jar
 if [ "${SIGN}" == "nosign" ]
 then
-	OTDTJAR=${BASE}/testrun/otdt.jar
 	/bin/rm ${OTDTJAR}
 	zip ${OTDTJAR} ${JARS}
     echo "SKIPPING SIGNING"
 else
-	if [ ! -d ${STAGINGBASE}/in ]
+    SIGNED=${BASE}/testrun/updateSiteSigned
+	if [ ! -d ${SIGNED} ]
 	then
-		mkdir ${STAGINGBASE}/in
+		mkdir ${SIGNED}
 	else
-		/bin/rm ${STAGINGBASE}/in/otdt.jar
+		/bin/rm -rf ${SIGNED}/*
 	fi
-    OTDTJAR=${STAGINGBASE}/out/otdt.jar
-	if [ ! -d ${STAGINGBASE}/out ]
+	for jar in ${JARS}
+	do
+		dir=`dirname $jar`
+		if [ ! -d ${SIGNED}/${dir} ]
+		then
+			mkdir -p ${SIGNED}/${dir}
+		fi
+		curl -o ${SIGNED}/${JAR} -F file=@${JAR} http://build.eclipse.org:31338/sign
+	done
+	if [ -f ${OTDTJAR} ]
 	then
-		mkdir ${STAGINGBASE}/out
-	else
 	    /bin/rm ${OTDTJAR}
 	fi
-	zip ${STAGINGBASE}/in/otdt.jar ${JARS}
-    sign ${STAGINGBASE}/in/otdt.jar nomail ${STAGINGBASE}/out
-	until [ -r ${OTDTJAR} ]
-	do
-    	sleep 10
-    	echo -n "."
-	done
+	cd ${SIGNED}
+	zip ${OTDTJAR} ${JARS}
 	echo "Signing completed"
 fi
 
@@ -150,7 +152,7 @@ else
         cp ${BASE}/testrun/updateSite/plugins/org.apache.bcel* plugins/
 fi
 unzip -n ${OTDTJAR}
-/bin/rm ${OTDTJAR}
+#/bin/rm ${OTDTJAR}
 
 LOCATION=${BASE}/stagingRepo
 echo "LOCATION  = ${LOCATION}"
