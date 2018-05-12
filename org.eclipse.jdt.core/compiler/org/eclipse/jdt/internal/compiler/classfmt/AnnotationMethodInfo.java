@@ -102,6 +102,9 @@ AnnotationMethodInfo(MethodInfo methodInfo, Object defaultValue) {
 	this.defaultValue = defaultValue;
 
 	this.accessFlags = methodInfo.accessFlags;
+//{ObjectTeams:
+	this.callBaseCtor = methodInfo.callBaseCtor;
+// SH}
 	this.attributeBytes = methodInfo.attributeBytes;
 	this.descriptor = methodInfo.descriptor;
 	this.exceptionNames = methodInfo.exceptionNames;

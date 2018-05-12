@@ -27,13 +27,13 @@ import static org.eclipse.objectteams.otdt.internal.core.compiler.lookup.Synthet
 import java.util.LinkedList;
 
 import org.eclipse.jdt.core.compiler.CharOperation;
-import org.eclipse.jdt.internal.compiler.ast.ASTNode;
 import org.eclipse.jdt.internal.compiler.codegen.AttributeNamesConstants;
 import org.eclipse.jdt.internal.compiler.codegen.ConstantPool;
 import org.eclipse.jdt.internal.compiler.env.IBinaryAnnotation;
 import org.eclipse.jdt.internal.compiler.env.IBinaryMethod;
 import org.eclipse.jdt.internal.compiler.env.IBinaryTypeAnnotation;
 import org.eclipse.jdt.internal.compiler.lookup.BinaryTypeBinding;
+import org.eclipse.jdt.internal.compiler.lookup.ExtraCompilerModifiers;
 import org.eclipse.jdt.internal.compiler.lookup.LookupEnvironment;
 import org.eclipse.jdt.internal.compiler.lookup.MethodBinding;
 import org.eclipse.jdt.internal.compiler.lookup.TagBits;
@@ -75,9 +75,7 @@ public class MethodInfo extends ClassFileStruct implements IBinaryMethod, Compar
     /* After reading a method its attributes are stored here. */
     private LinkedList<AbstractAttribute> methodAttributes = new LinkedList<AbstractAttribute>();
     // more bits decoded from attributes:
-    protected int otModifiers;
-	// constants for the above:
-	static final int AccCallsBaseCtor = ASTNode.Bit1;
+    protected boolean callBaseCtor;
 // SH}
 
 public static MethodInfo createMethod(byte classFileBytes[], int offsets[], int offset, long version) {
@@ -177,15 +175,12 @@ public static MethodInfo createMethod(byte classFileBytes[], int offsets[], int 
 }
 
 //{ObjectTeams
-public void setAccessFlags (int flags) {
-	this.accessFlags = flags;
-}
 // special flag which needs to be added to the regular access flags:
 public void setCallsBaseCtor() {
-	this.otModifiers |= AccCallsBaseCtor;
+	this.callBaseCtor = true;
 }
 public boolean callsBaseCtor() {
-	return (this.otModifiers & AccCallsBaseCtor) != 0;
+	return this.callBaseCtor;
 }
 public void maybeRegister(
         BinaryTypeBinding clazz,
@@ -512,6 +507,9 @@ private synchronized void readExceptionAttributes() {
 }
 private synchronized void readModifierRelatedAttributes() {
 	int flags = u2At(0);
+//{ObjectTeams:
+	int otFlags = 0;
+// SH}
 	int attributesCount = u2At(6);
 	int readOffset = 8;
 	for (int i = 0; i < attributesCount; i++) {
@@ -538,12 +536,20 @@ private synchronized void readModifierRelatedAttributes() {
 //{ObjectTeams: read method attributes
 					break;
 				default:
-					readOTAttribute(attributeName, this, readOffset+6, this.structOffset, this.constantPoolOffsets);
+					otFlags |= readOTAttribute(attributeName, this, readOffset+6, this.structOffset, this.constantPoolOffsets);
 // SH}
 			}
 		}
 		readOffset += (6 + u4At(readOffset + 2));
 	}
+//{ObjectTeams: combine sets of modifiers
+	if (otFlags != 0) {
+		if ((otFlags & ExtraCompilerModifiers.AccVisibilityMASK) != 0) {
+			flags &= ~ExtraCompilerModifiers.AccVisibilityMASK; // replace those bits
+		}
+		flags |= otFlags;
+	}
+// SH}
 	this.accessFlags = flags;
 }
 //{ObjectTeams: OT method attributes:
@@ -556,7 +562,7 @@ private synchronized void readModifierRelatedAttributes() {
      * @param aStructOffset (subtract when indexing via constantPoolOffsets)
      * @param someConstantPoolOffsets
      */
-    void readOTAttribute(
+    int readOTAttribute(
             char[]     attributeName,
             MethodInfo info,
             int        readOffset,
@@ -564,15 +570,15 @@ private synchronized void readModifierRelatedAttributes() {
             int[]      someConstantPoolOffsets)
     {
     	if (CharOperation.equals(attributeName, AttributeNamesConstants.CodeName))
-    		return; // optimization only.
+    		return 0; // optimization only.
         if (CharOperation.equals(attributeName, MODIFIERS_NAME))
         {
-            WordValueAttribute.readModifiers(info, readOffset);
+            return WordValueAttribute.readModifiers(info, readOffset);
             // not added to _readAttributes because evaluated immediately.
         }
         else if (CharOperation.equals(attributeName, ROLECLASS_METHOD_MODIFIERS_NAME))
         {
-        	WordValueAttribute.readRoleClassMethodModifiersAttribute(info, readOffset);
+        	return WordValueAttribute.readModifiers(info, readOffset);
             // not added to _readAttributes because evaluated immediately.
         }
         else if (CharOperation.equals(attributeName, CALLS_BASE_CTOR))
@@ -583,6 +589,7 @@ private synchronized void readModifierRelatedAttributes() {
         else if (CharOperation.equals(attributeName, CALLIN_FLAGS))
         {
             this.methodAttributes.add(WordValueAttribute.readCallinFlags(info, readOffset));
+            return ExtraCompilerModifiers.AccCallin;
         }
         else if (CharOperation.equals(attributeName, TYPE_ANCHOR_LIST))
         {
@@ -592,6 +599,7 @@ private synchronized void readModifierRelatedAttributes() {
         {
             this.methodAttributes.add(CopyInheritanceSourceAttribute.readcopyInherSrc(info, readOffset, aStructOffset, someConstantPoolOffsets));
         }
+        return 0;
     }
 
 // SH}

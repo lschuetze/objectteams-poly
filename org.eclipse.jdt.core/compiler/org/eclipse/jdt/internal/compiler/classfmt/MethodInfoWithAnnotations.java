@@ -20,6 +20,9 @@ MethodInfoWithAnnotations(MethodInfo methodInfo, AnnotationInfo[] annotations) {
 	this.annotations = annotations;
 
 	this.accessFlags = methodInfo.accessFlags;
+//{ObjectTeams:
+	this.callBaseCtor = methodInfo.callBaseCtor;
+// SH}
 	this.attributeBytes = methodInfo.attributeBytes;
 	this.descriptor = methodInfo.descriptor;
 	this.exceptionNames = methodInfo.exceptionNames;

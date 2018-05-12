@@ -1,7 +1,7 @@
 /**********************************************************************
  * This file is part of "Object Teams Development Tooling"-Software
  *
- * Copyright 2004, 2014 Fraunhofer Gesellschaft, Munich, Germany,
+ * Copyright 2004, 2018 Fraunhofer Gesellschaft, Munich, Germany,
  * for its Fraunhofer Institute for Computer Architecture and Software
  * Technology (FIRST), Berlin, Germany and Technical University Berlin,
  * Germany.
@@ -180,16 +180,16 @@ public class WordValueAttribute
     }
 
     /**
-     * Read and evaluate a "Modifiers" attribute from byte code.
-     * @param method  this method shall be modified.
+     * Read the value of a "Modifiers" or "RoleClassMethodModifiers" attribute from byte code.
+     * @param method  method to read from
      * @param readOffset where to read
+     * @return the modifier flags
      */
-    public static void readModifiers(
+    public static int readModifiers(
             MethodInfo      method,
             int             readOffset)
     {
-        int  value = method.u2At(readOffset);
-        method.setAccessFlags(value);
+        return method.u2At(readOffset);
     }
 
     /**
@@ -209,12 +209,6 @@ public class WordValueAttribute
         return new WordValueAttribute(ROLECLASS_METHOD_MODIFIERS_NAME, modifiers);
     }
 
-    public static void readRoleClassMethodModifiersAttribute(MethodInfo info, int readOffset) {
-		int binaryFlags = info.getModifiers() & ~ExtraCompilerModifiers.AccVisibilityMASK; // reset these bits first
-		int newFlags = info.u2At(readOffset);
-    	info.setAccessFlags(binaryFlags | newFlags);
-	}
-
     /**
      * Read and evaluate a "CallinFlags" attribute from byte code.
      * @param method  this method shall be modified.
@@ -225,7 +219,6 @@ public class WordValueAttribute
             int             readOffset)
     {
         int  value = method.u2At(readOffset);
-        method.setAccessFlags(method.getModifiers()|ExtraCompilerModifiers.AccCallin);
         // create and store an attribute anyway, in order to store the actual bits.
         WordValueAttribute result = callinFlagsAttribute(value);
         result._methodInfo = method;
