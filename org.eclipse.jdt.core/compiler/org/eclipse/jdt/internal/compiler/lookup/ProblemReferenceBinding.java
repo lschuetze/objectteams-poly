@@ -54,7 +54,7 @@ public TypeBinding closestMatch() {
 
 //{ObjectTeams: special uses:
 // for role types
-public ProblemReferenceBinding(char[] name, ReferenceBinding closestMatch, int problemReason) {
+public ProblemReferenceBinding(char[] name, int problemReason, ReferenceBinding closestMatch) {
 	this(new char[][] {name}, closestMatch, problemReason);
 }
 // for anchored types:

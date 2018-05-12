@@ -1949,8 +1949,8 @@ public class ParameterizedTypeBinding extends ReferenceBinding implements Substi
 			// must avoid nulls in arguments (no longer observed in otjld-tests):
 			if (newArguments[i] == null) {
 				newArguments[i] = new ProblemReferenceBinding(arg.internalName(),
-								   (arg instanceof ReferenceBinding) ? (ReferenceBinding)arg: null,
-								   ProblemReasons.NotFound);
+								   ProblemReasons.NotFound,
+								   (arg instanceof ReferenceBinding) ? (ReferenceBinding)arg: null);
 				continue; // not a good modification
 			}
 			modified |= (newArguments[i] != arg); //$IDENTITY-COMPARISON$
