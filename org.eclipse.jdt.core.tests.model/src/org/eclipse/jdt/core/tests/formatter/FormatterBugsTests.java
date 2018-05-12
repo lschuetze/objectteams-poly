@@ -12786,4 +12786,80 @@ public void testBug530066() {
 		"}";
 	formatSource(source);
 }
+/**
+ * https://bugs.eclipse.org/531981 - [formatter] Error on &lt;code&gt;
+ * spanning multiple Javadoc tags
+ */
+public void testBug531981() {
+	this.formatterPrefs.comment_indent_parameter_description = true;
+	String source =
+		"/**\n" + 
+		" * <code>a<code>\n" + 
+		" *\n" + 
+		" * @param   b\n" + 
+		" *               c\n" + 
+		" *            d</code>\n" + 
+		" */\n" + 
+		"class Test {\n" + 
+		"}";
+	formatSource(source,
+		"/**\n" + 
+		" * <code>a<code>\n" + 
+		" *\n" + 
+		" * &#64;param   b\n" + 
+		" *               c\n" + 
+		" *            d</code>\n" + 
+		" */\n" + 
+		"class Test {\n" + 
+		"}"
+	);
+}
+/**
+ * https://bugs.eclipse.org/373625 - [formatter] preserve whitespace between
+ * code and comments fails when aligning fields in columns
+ */
+public void testBug373625a() {
+	this.formatterPrefs.align_type_members_on_columns = true;
+	this.formatterPrefs.comment_preserve_white_space_between_code_and_line_comments = true;
+	String source =
+		"class C {\n" + 
+		"	int		a	= 1; // comment1\n" + 
+		"	String	bb	= null;   // comment2\n" + 
+		"}";
+	formatSource(source);
+}
+/**
+ * https://bugs.eclipse.org/373625 - [formatter] preserve whitespace between
+ * code and comments fails when aligning fields in columns
+ */
+public void testBug373625b() {
+	this.formatterPrefs.align_type_members_on_columns = true;
+	this.formatterPrefs.comment_preserve_white_space_between_code_and_line_comments = true;
+	String source =
+		"class C {\n" + 
+		"	int		a	= 1; /* comment1 */\n" + 
+		"	String	bb	= \"\";   //$NON-NLS-1$\n" + 
+		"}";
+	formatSource(source,
+		"class C {\n" + 
+		"	int		a	= 1;	/* comment1 */\n" + 
+		"	String	bb	= \"\";   //$NON-NLS-1$\n" + 
+		"}"
+	);
+}
+/**
+ * https://bugs.eclipse.org/534225 - [formatter] Align Javadoc tags in
+ * columns option causes extra spaces
+ */
+public void testBug534225() {
+	this.formatterPrefs.comment_align_tags_descriptions_grouped = true;
+	this.formatterPrefs.comment_indent_parameter_description = true;
+	String source =
+		"/**\n" + 
+		" * @param args a b c d e f\n" + 
+		" */\n" + 
+		"public class C {\n" + 
+		"}";
+	formatSource(source);
+}
 }

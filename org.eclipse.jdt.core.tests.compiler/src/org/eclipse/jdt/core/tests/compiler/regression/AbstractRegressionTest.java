@@ -35,6 +35,7 @@ import java.net.URL;
 import java.text.MessageFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -249,6 +250,8 @@ static class JavacCompiler {
 			this.version = JavaCore.VERSION_1_8;
 		} else if(rawVersion.startsWith("9")) {
 			this.version = JavaCore.VERSION_9;
+		} else if(rawVersion.startsWith("10")) {
+			this.version = JavaCore.VERSION_10;
 		} else {
 			throw new RuntimeException("unknown javac version: " + rawVersion);
 		}
@@ -344,6 +347,9 @@ static class JavacCompiler {
 			if ("1.8.0_152".equals(rawVersion)) {
 				return 1900;
 			}
+			if ("1.8.0_162".equals(rawVersion)) {
+				return 2100;
+			}
 		}
 		if (version == JavaCore.VERSION_9) {
 			if ("9".equals(rawVersion)) {
@@ -352,6 +358,9 @@ static class JavacCompiler {
 			if ("9.0.1".equals(rawVersion)) {
 				return 0100;
 			}
+		}
+		if (version == JavaCore.VERSION_10) {
+			return 0000; // We are still in EA
 		}
 		throw new RuntimeException("unknown raw javac version: " + rawVersion);
 	}
@@ -428,7 +437,10 @@ static class JavaRuntime {
 		Process executionProcess = null;
 		try {
 			StringBuffer cmdLine = new StringBuffer(this.javaPathName);
-			cmdLine.append(" -classpath . "); // default classpath
+			if (options.contains("-cp "))
+				cmdLine.append(' '); // i.e., -cp will be appended below, just ensure separation from javaPathname
+			else
+				cmdLine.append(" -classpath . "); // default classpath
 			cmdLine.append(options);
 			cmdLine.append(' ');
 			cmdLine.append(className);
@@ -457,6 +469,15 @@ protected static class JavacTestOptions {
 			return true;
 		}
 	};
+	@java.lang.SuppressWarnings("synthetic-access")
+	static JavacTestOptions forRelease(String release) {
+		JavacTestOptions options = new JavacTestOptions();
+		if (isJRE9Plus)
+			options.setCompilerOptions("-release "+release);
+		else
+			options.setCompilerOptions("-source 1."+release+" -target 1."+release);
+		return options;
+	}
 	public static class SuppressWarnings extends JavacTestOptions {
 		public SuppressWarnings(String token) {
 			setCompilerOptions("-Xlint:-"+token);
@@ -1104,6 +1125,8 @@ protected static class JavacTestOptions {
 			buffer.append("\" -1.8 " + processAnnot);
 		} else if (this.complianceLevel == ClassFileConstants.JDK9) {
 			buffer.append("\" -9 " + processAnnot);
+		} else if (this.complianceLevel == ClassFileConstants.JDK10) {
+			buffer.append("\" -10 " + processAnnot);
 		}
 		buffer
 			.append(" -preserveAllLocals -proceedOnError -nowarn -g -classpath \"")
@@ -1375,6 +1398,12 @@ protected static class JavacTestOptions {
 				return false;
 			}
 		};
+	}
+	static class CustomFileSystem extends FileSystem {
+		// make protected constructor accessible
+		CustomFileSystem(Collection<String> limitModules) {
+			super(Util.getJavaClassLibs(), new String[0], null, limitModules);
+		}
 	}
 	/*
 	 * Will consider first the source units passed as arguments, then investigate the classpath: jdklib + output dir
@@ -2173,7 +2202,7 @@ protected void runJavac(
 					//      it should have had contents, stderr is leveraged as
 					//      potentially holding indications regarding the failure
 					if (expectedErrorString != null /* null skips error test */ && mismatch == 0) {
-						err = stderr.toString().trim();
+						err = adjustErrorOutput(stderr.toString().trim());
 						if (!expectedErrorString.equals(err) && // special case: command-line java does not like missing main methods
 								!(expectedErrorString.length() == 0 &&
 									(err.indexOf("java.lang.NoSuchMethodError: main") != -1)
@@ -2248,6 +2277,15 @@ protected void runJavac(
 			}
 		}
 	}
+}
+
+private String adjustErrorOutput(String error) {
+	// VerifyTests performs an explicit e.printStackTrace() which has slightly different format
+	// from a stack trace written directly by a dying JVM (during javac testing), adjust if needed:
+	final String excPrefix = "Exception in thread \"main\" ";
+	if (error.startsWith(excPrefix))
+		return error.substring(excPrefix.length())+'\n';
+	return error;
 }
 
 //runNegativeTest(

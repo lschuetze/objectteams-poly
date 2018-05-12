@@ -233,8 +233,8 @@ private void computeClasspathLocations(
 					try {
 						IModuleDescription mod;
 						if ((mod = prereqJavaProject.getModuleDescription()) != null) {
-							SourceModule sourceModule = (SourceModule) mod;
-							info = (IModule) sourceModule.getElementInfo();
+							AbstractModule aModule = (AbstractModule) mod;
+							info = aModule.getModuleInfo();
 						}
 					} catch (JavaModelException jme) {
 						// do nothing, probably a non module project
@@ -268,7 +268,7 @@ private void computeClasspathLocations(
 							&& JavaCore.IGNORE.equals(javaProject.getOption(JavaCore.COMPILER_PB_DISCOURAGED_REFERENCE, true)))
 								? null
 								: entry.getAccessRuleSet();
-						bLocation = ClasspathLocation.forLibrary((IFile) resource, accessRuleSet, externalAnnotationPath, isOnModulePath);
+						bLocation = ClasspathLocation.forLibrary((IFile) resource, accessRuleSet, externalAnnotationPath, isOnModulePath, compliance);
 					} else if (resource instanceof IContainer) {
 						AccessRuleSet accessRuleSet =
 							(JavaCore.IGNORE.equals(javaProject.getOption(JavaCore.COMPILER_PB_FORBIDDEN_REFERENCE, true))
@@ -302,10 +302,14 @@ private void computeClasspathLocations(
 							&& JavaCore.IGNORE.equals(javaProject.getOption(JavaCore.COMPILER_PB_DISCOURAGED_REFERENCE, true)))
 								? null
 								: entry.getAccessRuleSet();
-					if (JavaCore.DISABLED.equals(javaProject.getOption(JavaCore.COMPILER_RELEASE, true))) {
-						compliance = null;
+					String release = JavaCore.DISABLED.equals(javaProject.getOption(JavaCore.COMPILER_RELEASE, true)) ? null : compliance;
+					ClasspathLocation bLocation = null;
+					String libPath = path.toOSString();
+					if (Util.isJrt(libPath)) {
+						bLocation = ClasspathLocation.forJrtSystem(path.toOSString(), accessRuleSet, externalAnnotationPath, release);
+					} else {
+						bLocation = ClasspathLocation.forLibrary(path.toOSString(), accessRuleSet, externalAnnotationPath, isOnModulePath, compliance);
 					}
-					ClasspathLocation bLocation = ClasspathLocation.forLibrary(path.toOSString(), accessRuleSet, externalAnnotationPath, isOnModulePath, compliance);
 					bLocations.add(bLocation);
 					if (moduleEntries != null) {
 						Set<String> libraryLimitModules = (limitModules == null && projectModule != null) ? ClasspathJrt.NO_LIMIT_MODULES : limitModules;
@@ -517,6 +521,11 @@ private NameEnvironmentAnswer findClass(String qualifiedTypeName, char[] typeNam
 		NameEnvironmentAnswer answer = classpathLocation.findClass(binaryFileName, qPackageName, moduleName, qBinaryFileName, false,
 																	this.modulePathEntries != null ? this.modulePathEntries::containsKey : null);
 		if (answer != null) {
+			char[] answerMod = answer.moduleName();
+			if (answerMod != null && this.modulePathEntries != null) {
+				if (!this.modulePathEntries.containsKey(String.valueOf(answerMod)))
+					continue; // assumed to be filtered out by --limit-modules
+			}
 			if (!answer.ignoreIfBetter()) {
 				if (answer.isBetter(suggestedAnswer))
 					return answer;

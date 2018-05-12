@@ -48,9 +48,10 @@ import org.eclipse.jdt.core.util.IMethodInfo;
 import org.eclipse.jdt.internal.compiler.ast.AbstractMethodDeclaration;
 import org.eclipse.jdt.internal.compiler.ast.AnnotationMethodDeclaration;
 import org.eclipse.jdt.internal.compiler.ast.Argument;
-import org.eclipse.jdt.internal.compiler.ast.UnionTypeReference;
+import org.eclipse.jdt.internal.compiler.ast.IntersectionCastTypeReference;
 import org.eclipse.jdt.internal.compiler.ast.MethodDeclaration;
 import org.eclipse.jdt.internal.compiler.ast.TypeReference;
+import org.eclipse.jdt.internal.compiler.ast.UnionTypeReference;
 import org.eclipse.jdt.internal.compiler.classfmt.ClassFileConstants;
 import org.eclipse.jdt.internal.compiler.classfmt.ClassFileReader;
 import org.eclipse.jdt.internal.compiler.classfmt.ClassFormatException;
@@ -796,15 +797,23 @@ public class Util {
 		if (pkgEnd == -1)
 			return null;
 		IPackageFragment pkg = getPackageFragment(slashSeparatedFileName, pkgEnd, -1/*no jar separator for .java files*/);
-		if (pkg == null) return null;
-		int start;
-		ICompilationUnit cu = pkg.getCompilationUnit(new String(slashSeparatedFileName, start =  pkgEnd+1, slashSeparatedFileName.length - start));
-		if (workingCopyOwner != null) {
-			ICompilationUnit workingCopy = cu.findWorkingCopy(workingCopyOwner);
-			if (workingCopy != null)
-				return workingCopy;
+		if (pkg != null) {
+			int start;
+			ICompilationUnit cu = pkg.getCompilationUnit(new String(slashSeparatedFileName, start =  pkgEnd+1, slashSeparatedFileName.length - start));
+			if (workingCopyOwner != null) {
+				ICompilationUnit workingCopy = cu.findWorkingCopy(workingCopyOwner);
+				if (workingCopy != null)
+					return workingCopy;
+			}
+			return cu;
 		}
-		return cu;
+		IWorkspaceRoot wsRoot = ResourcesPlugin.getWorkspace().getRoot();
+		IFile file = wsRoot.getFile(new Path(String.valueOf(fileName)));
+		if (file.exists()) {
+			// this approach works if file exists but is not on the project's build path:
+			return JavaCore.createCompilationUnitFrom(file);
+		}
+		return null;
 	}
 
 	/**
@@ -2755,14 +2764,13 @@ public class Util {
 			// special treatment for union type reference
 			UnionTypeReference unionTypeReference = (UnionTypeReference) type;
 			TypeReference[] typeReferences = unionTypeReference.typeReferences;
-			int length = typeReferences.length;
-			String[] typeSignatures = new String[length];
-			for(int i = 0; i < length; i++) {
-				char[][] compoundName = typeReferences[i].getParameterizedTypeName();
-				char[] typeName = CharOperation.concatWith(compoundName, '.');
-				typeSignatures[i] = Signature.createTypeSignature(typeName, false/*don't resolve*/);
-			}
+			String[] typeSignatures = typeSignatures(typeReferences);
 			signature = Signature.createIntersectionTypeSignature(typeSignatures);
+		} else if (type instanceof IntersectionCastTypeReference) {
+			IntersectionCastTypeReference intersection = (IntersectionCastTypeReference) type;
+			TypeReference[] typeReferences = intersection.typeReferences;
+			String[] typeSignatures = typeSignatures(typeReferences);
+			signature = Signature.createUnionTypeSignature(typeSignatures);
 		} else {
 			char[][] compoundName = type.getParameterizedTypeName();
 			char[] typeName =CharOperation.concatWith(compoundName, '.');
@@ -2770,7 +2778,17 @@ public class Util {
 		}
 		return signature;
 	}
-
+	
+	private static String[] typeSignatures(TypeReference[] types) {
+		int length = types.length;
+		String[] typeSignatures = new String[length];
+		for(int i = 0; i < length; i++) {
+			char[][] compoundName = types[i].getParameterizedTypeName();
+			char[] typeName = CharOperation.concatWith(compoundName, '.');
+			typeSignatures[i] = Signature.createTypeSignature(typeName, false/*don't resolve*/);
+		}
+		return typeSignatures;
+	}
 	/**
 	 * Asserts that the given method signature is valid.
 	 */

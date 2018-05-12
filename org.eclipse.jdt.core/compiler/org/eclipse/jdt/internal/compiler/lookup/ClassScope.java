@@ -959,7 +959,7 @@ public class ClassScope extends Scope {
 		WordValueAttribute.maybeCreateClassFlagsAttribute(this.referenceContext);
 // SH}
 		if (isMemberType) {
-			if (!sourceType.isStatic())
+			if (sourceType.hasEnclosingInstanceContext())
 				modifiers |= (enclosingType.modifiers & ExtraCompilerModifiers.AccGenericSignature);
 			modifiers |= (enclosingType.modifiers & ClassFileConstants.AccStrictfp);
 			// checks for member types before local types to catch local members

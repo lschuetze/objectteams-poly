@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2014, 2017 IBM Corporation and others.
+ * Copyright (c) 2014, 2018 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -10,11 +10,14 @@
  *******************************************************************************/
 package org.eclipse.jdt.core.tests.model;
 
+import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.util.HashMap;
 
 import junit.framework.Test;
 
+import org.eclipse.core.resources.IFile;
+import org.eclipse.core.resources.IFolder;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.jdt.core.IClassFile;
 import org.eclipse.jdt.core.ICompilationUnit;
@@ -26,9 +29,16 @@ import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.ITypeHierarchy;
 import org.eclipse.jdt.core.JavaCore;
+import org.eclipse.jdt.core.dom.AST;
+import org.eclipse.jdt.core.dom.ASTParser;
+import org.eclipse.jdt.core.dom.IBinding;
+import org.eclipse.jdt.core.dom.IMethodBinding;
+import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.tests.util.AbstractCompilerTest;
 import org.eclipse.jdt.internal.compiler.impl.CompilerOptions;
 import org.eclipse.jdt.internal.core.LambdaExpression;
+import org.eclipse.jdt.internal.core.LambdaMethod;
+import org.eclipse.jdt.internal.core.SourceMethod;
 
 @SuppressWarnings({"rawtypes", "unchecked"})
 public class JavaElement8Tests extends AbstractJavaModelTests { 
@@ -43,6 +53,10 @@ public class JavaElement8Tests extends AbstractJavaModelTests {
 	}
 	public static Test suite() {
 		return buildModelTestSuite(AbstractCompilerTest.F_1_8, JavaElement8Tests.class);
+	}
+	@Deprecated
+	static int getJSL9() {
+		return AST.JLS9;
 	}
 	public void testBug428178() throws Exception {
 		try {
@@ -550,12 +564,36 @@ public class JavaElement8Tests extends AbstractJavaModelTests {
 			IJavaElement[] elements = unit.codeSelect(start, 1);
 			assertEquals("Incorrect java element", IJavaElement.LOCAL_VARIABLE, elements[0].getElementType());
 			String mem = elements[0].getHandleIdentifier();
-			String expected = "=Bug431716/src<{X.java[X~asIntStream@l!72!77!77!77!J!0!true";
+			String expected = "=Bug431716/src<{X.java[X~asIntStream" +
+					"=)=\"LX$ToIntFunction\\<TT;>;!71!89!81=&" +
+					"applyAsInt!1=\"TT;=\"l=\"I=\"LX$ToIntFunction\\<LX;:TT;>;." +
+					"applyAsInt\\(TT;)I@l!72!77!77!77!Ljava\\/lang\\/Object;!0!true=&" +
+					"@l!72!77!77!77!J!0!true";
 			assertEquals("Incorrect memento", expected, mem);
-			IMethod parent = (IMethod) elements[0].getParent();
+
+			IJavaElement parent = elements[0].getParent();
+			mem = parent.getHandleIdentifier();
+			expected = "=Bug431716/src<{X.java[X~asIntStream" +
+					"=)=\"LX$ToIntFunction\\<TT;>;!71!89!81=&" +
+					"applyAsInt!1=\"TT;=\"l=\"I=\"LX$ToIntFunction\\<LX;:TT;>;." +
+					"applyAsInt\\(TT;)I@l!72!77!77!77!Ljava\\/lang\\/Object;!0!true=&";
+			assertEquals("Incorrect memento", expected, mem);
+			assertTrue("Parent should be LambdaMethod", parent instanceof LambdaMethod);
+
+			parent = parent.getParent();
+			mem = parent.getHandleIdentifier();
+			expected = "=Bug431716/src<{X.java[X~asIntStream" +
+					"=)=\"LX$ToIntFunction\\<TT;>;!71!89!81=&" +
+					"applyAsInt!1=\"TT;=\"l=\"I=\"LX$ToIntFunction\\<LX;:TT;>;." +
+					"applyAsInt\\(TT;)I@l!72!77!77!77!Ljava\\/lang\\/Object;!0!true=)";
+			assertEquals("Incorrect memento", expected, mem);
+			assertTrue("Grand-parent should be LambdaExpression", parent instanceof LambdaExpression);
+
+			parent = parent.getParent();
 			mem = parent.getHandleIdentifier();
 			expected = "=Bug431716/src<{X.java[X~asIntStream";
 			assertEquals("Incorrect memento", expected, mem);
+			assertTrue("Great-grand-parent should be SourceMethod", parent instanceof SourceMethod);
 		}
 		finally {
 			deleteProject(projectName);
@@ -585,6 +623,46 @@ public class JavaElement8Tests extends AbstractJavaModelTests {
 			assertEquals("Incorrect qualified type name", "MyFunction$1", lambda.getTypeQualifiedName());
 		}
 		finally {
+			deleteProject(projectName);
+		}
+	}
+
+	public void testBug485080() throws Exception {
+		String projectName = "Bug485080";
+		try {
+			IJavaProject project = createJavaProject(projectName, new String[] {"src"}, new String[] {"JCL18_LIB"}, "bin", "1.8");
+			project.open(null);
+
+			// create a .java file in a folder that's not on the build path:
+			IFolder folder= project.getProject().getFolder("nosrc");
+			folder.create(0, true, null);
+			IFile file= folder.getFile("X.java");
+			StringBuilder buf= new StringBuilder();
+			buf.append("public class X {\n");
+			buf.append("	public <T> void meth(T s) {\n");
+			buf.append("	}\n");
+			buf.append("}\n");
+			String content= buf.toString();
+			file.create(new ByteArrayInputStream(content.getBytes("UTF-8")), 0, null);
+
+			// create a CU from that file:
+			ICompilationUnit cu = JavaCore.createCompilationUnitFrom(file);
+			cu.becomeWorkingCopy(null);
+
+			// create the binding for the CU's main type, and drill down to details:
+			ASTParser parser= ASTParser.newParser(getJSL9());
+			parser.setProject(project);
+			IBinding[] bindings = parser.createBindings(new IJavaElement[] { cu.findPrimaryType() }, null);
+			IMethodBinding methodBinding= ((ITypeBinding) bindings[0]).getDeclaredMethods()[1];
+			assertEquals("method name", "meth", methodBinding.getName());
+			ITypeBinding typeParameter = methodBinding.getTypeParameters()[0];
+
+			// fetch and inspect the corresponding java element:
+			IJavaElement javaElement = typeParameter.getJavaElement();
+			assertNotNull("java element", javaElement);
+			assertEquals("element kind", IJavaElement.TYPE_PARAMETER, javaElement.getElementType());
+			assertEquals("element name", "T", javaElement.getElementName());
+		} finally {
 			deleteProject(projectName);
 		}
 	}

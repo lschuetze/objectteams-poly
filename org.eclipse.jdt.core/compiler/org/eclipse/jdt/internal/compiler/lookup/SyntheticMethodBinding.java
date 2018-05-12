@@ -18,6 +18,8 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.compiler.lookup;
 
+import java.util.stream.Stream;
+
 import org.eclipse.jdt.core.compiler.CharOperation;
 import org.eclipse.jdt.internal.compiler.ast.ASTNode;
 import org.eclipse.jdt.internal.compiler.ast.AbstractMethodDeclaration;
@@ -494,6 +496,9 @@ public class SyntheticMethodBinding extends MethodBinding {
 		this.tagBits |= (TagBits.AnnotationResolved | TagBits.DeprecatedAnnotationResolved) | (lambda.binding.tagBits & TagBits.HasParameterAnnotations);
 	    this.returnType = lambda.binding.returnType;
 	    this.parameters = lambda.binding.parameters;
+	    TypeVariableBinding[] vars = Stream.of(this.parameters).filter(param -> param.isTypeVariable()).toArray(TypeVariableBinding[]::new);
+	    if (vars != null && vars.length > 0)
+	    	this.typeVariables = vars;
 	    this.thrownExceptions = lambda.binding.thrownExceptions;
 	    this.purpose = SyntheticMethodBinding.LambdaMethod;
 		SyntheticMethodBinding[] knownAccessMethods = declaringClass.syntheticMethods();

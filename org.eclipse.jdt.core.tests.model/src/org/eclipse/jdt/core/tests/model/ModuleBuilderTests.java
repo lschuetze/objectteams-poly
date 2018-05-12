@@ -13,6 +13,7 @@ package org.eclipse.jdt.core.tests.model;
 import java.io.File;
 import java.io.IOException;
 import java.util.Arrays;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.Hashtable;
 import java.util.Map;
@@ -43,7 +44,6 @@ import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.tests.util.Util;
 import org.eclipse.jdt.internal.compiler.impl.CompilerOptions;
 import org.eclipse.jdt.internal.compiler.lookup.TypeConstants;
-import org.eclipse.jdt.internal.compiler.util.JRTUtil;
 import org.eclipse.jdt.internal.core.ClasspathAttribute;
 import org.eclipse.jdt.internal.core.ClasspathEntry;
 import org.eclipse.jdt.internal.core.builder.ClasspathJrt;
@@ -78,7 +78,6 @@ public class ModuleBuilderTests extends ModifyingResourceTests {
 	}
 	public void setUpSuite() throws Exception {
 		super.setUpSuite();
-		System.setProperty("modules.to.load", "java.base;java.desktop;java.rmi;java.sql;");
 		this.currentProject = createJava9Project("P1");
 		this.createFile("P1/src/module-info.java", "");
 		this.createFolder("P1/src/com/greetings");
@@ -90,7 +89,6 @@ public class ModuleBuilderTests extends ModifyingResourceTests {
 	public void tearDownSuite() throws Exception {
 		super.tearDownSuite();
 		deleteProject("P1");
-		System.setProperty("modules.to.load", "");
 	}
 	
 	// Test that the java.base found as a module package fragment root in the project 
@@ -708,9 +706,7 @@ public class ModuleBuilderTests extends ModifyingResourceTests {
 		Hashtable<String, String> javaCoreOptions = JavaCore.getOptions();
 		try {
 			IJavaProject project = setUpJavaProject("ConvertToModule", "9");
-			if (!project.getOption("org.eclipse.jdt.core.compiler.compliance", true).equals("9")) {
-				return;
-			}
+			assertEquals(project.getOption("org.eclipse.jdt.core.compiler.compliance", true), "9");
 			project.getProject().build(IncrementalProjectBuilder.FULL_BUILD, null);
 			IPackageFragmentRoot[] roots = project.getPackageFragmentRoots();
 			IPackageFragmentRoot theRoot = null;
@@ -4885,6 +4881,7 @@ public class ModuleBuilderTests extends ModifyingResourceTests {
 			JavaCore.setOptions(javaCoreOptions);
 		}
 	}
+	@Deprecated
 	public void testBug519935() throws CoreException, IOException {
 		if (!isJRE9) return;
 		Hashtable<String, String> javaCoreOptions = JavaCore.getOptions();
@@ -4953,6 +4950,7 @@ public class ModuleBuilderTests extends ModifyingResourceTests {
 			JavaCore.setOptions(javaCoreOptions);
 		}
 	}
+	@Deprecated
 	public void testBug520310() throws CoreException, IOException {
 		if (!isJRE9) return;
 		try {
@@ -5581,11 +5579,6 @@ public class ModuleBuilderTests extends ModifyingResourceTests {
 	}
 	public void testLimitModules1() throws CoreException, IOException {
 		if (!isJRE9) return;
-		String save = System.getProperty("modules.to.load");
-		// allow for a few more than we are using via limit-modules:
-		System.setProperty("modules.to.load", "java.base,java.desktop,java.datatransfer,java.rmi,java.sql,java.prefs,java.xml");
-		JRTUtil.reset();
-		ClasspathJrt.resetCaches();
 		try {
 			IClasspathAttribute[] attributes = {
 					JavaCore.newClasspathAttribute(IClasspathAttribute.MODULE, "true"),
@@ -5651,18 +5644,10 @@ public class ModuleBuilderTests extends ModifyingResourceTests {
 
 		} finally {
 			this.deleteProject("org.astro");
-			System.setProperty("modules.to.load", save);
-			JRTUtil.reset();
-			ClasspathJrt.resetCaches();
 		}
 	}
 	public void testLimitModules2() throws CoreException, IOException {
 		if (!isJRE9) return;
-		String save = System.getProperty("modules.to.load");
-		// allow all
-		System.setProperty("modules.to.load", "");
-		JRTUtil.reset();
-		ClasspathJrt.resetCaches();
 		try {
 			IClasspathAttribute[] attributes = {
 					JavaCore.newClasspathAttribute(IClasspathAttribute.MODULE, "true"),
@@ -5726,18 +5711,10 @@ public class ModuleBuilderTests extends ModifyingResourceTests {
 
 		} finally {
 			this.deleteProject("org.astro");
-			System.setProperty("modules.to.load", save);
-			JRTUtil.reset();
-			ClasspathJrt.resetCaches();
 		}
 	}
 	public void testDefaultRootModules() throws CoreException, IOException {
 		if (!isJRE9) return;
-		String save = System.getProperty("modules.to.load");
-		// need to see all modules:
-		System.setProperty("modules.to.load", "");
-		JRTUtil.reset();
-		ClasspathJrt.resetCaches();
 		try {
 
 			IJavaProject project = createJava9Project("org.astro", new String[]{"src"});
@@ -5776,17 +5753,10 @@ public class ModuleBuilderTests extends ModifyingResourceTests {
 				this.problemRequestor);
 		} finally {
 			this.deleteProject("org.astro");
-			System.setProperty("modules.to.load", save);
-			JRTUtil.reset();
-			ClasspathJrt.resetCaches();
 		}
 	}
 	public void testBug522398() throws CoreException {
 		if (!isJRE9) return;
-		String save = System.getProperty("modules.to.load");
-		System.setProperty("modules.to.load", "java.base;java.desktop;java.rmi;java.sql;java.xml");
-		JRTUtil.reset();
-		ClasspathJrt.resetCaches();
 		try {
 
 			String[] sources = new String[] {
@@ -5828,9 +5798,6 @@ public class ModuleBuilderTests extends ModifyingResourceTests {
 			p2.getProject().getWorkspace().build(IncrementalProjectBuilder.FULL_BUILD, null);
 			assertNoErrors();
 		} finally {
-			System.setProperty("modules.to.load", save);
-			JRTUtil.reset();
-			ClasspathJrt.resetCaches();
 			deleteProject("nonmodular1");
 			deleteProject("nonmodular2");
 		}
@@ -6093,10 +6060,6 @@ public class ModuleBuilderTests extends ModifyingResourceTests {
 
 	public void testBug525522() throws Exception {
 		if (!isJRE9) return;
-		String save = System.getProperty("modules.to.load");
-		System.setProperty("modules.to.load", "java.base;java.desktop;java.rmi;java.sql;java.jnlp");
-		JRTUtil.reset();
-		ClasspathJrt.resetCaches();
 		try {
 			// non-modular substitute for java.jnlp:
 			IClasspathAttribute[] jreAttribs = { JavaCore.newClasspathAttribute(IClasspathAttribute.LIMIT_MODULES, "java.base,java.desktop,java.rmi,java.sql") };
@@ -6147,9 +6110,6 @@ public class ModuleBuilderTests extends ModifyingResourceTests {
 				this.problemRequestor);
 
 		} finally {
-			System.setProperty("modules.to.load", save);
-			JRTUtil.reset();
-			ClasspathJrt.resetCaches();
 			deleteProject("jnlp");
 			deleteProject("nonmod1");
 		}
@@ -6314,14 +6274,12 @@ public class ModuleBuilderTests extends ModifyingResourceTests {
 
 	public void testBug526054() throws Exception {
 		if (!isJRE9) return;
-		String save = System.getProperty("modules.to.load");
-		System.setProperty("modules.to.load", ""); // load all
-		JRTUtil.reset();
 		ClasspathJrt.resetCaches();
 		try {
 			IJavaProject javaProject = createJava9Project("mod1", new String[] {"src"});
 
 			String srcMod =
+				"@SuppressWarnings(\"deprecation\")\n" + // javax.xml.ws.annotation is deprecated
 				"module mod1 {\n" + 
 				"	exports com.mod1.pack1;\n" + 
 				"	requires java.xml.ws.annotation;\n" + 
@@ -6353,9 +6311,6 @@ public class ModuleBuilderTests extends ModifyingResourceTests {
 			javaProject.getProject().build(IncrementalProjectBuilder.FULL_BUILD, null);
 			assertNoErrors();
 		} finally {
-			System.setProperty("modules.to.load", save);
-			JRTUtil.reset();
-			ClasspathJrt.resetCaches();
 			deleteProject("mod1");
 		}
 	}
@@ -6938,6 +6893,23 @@ public class ModuleBuilderTests extends ModifyingResourceTests {
 			deleteProject(p1);
 		}
 	}
+	public void testBug522601() throws CoreException {
+		if (!isJRE9) return;
+		IJavaProject p1 = createJava9Project("Bug522601", "9");
+		try {
+			IFile file = createFile("/Bug522601/test.txt", "not a jar");
+			IClasspathAttribute modAttr = JavaCore.newClasspathAttribute(IClasspathAttribute.MODULE, "true");
+			addLibraryEntry(p1, file.getFullPath(), null, null, null, null, new IClasspathAttribute[] { modAttr }, false);
+			p1.getProject().build(IncrementalProjectBuilder.FULL_BUILD, null);
+			IMarker[] markers = p1.getProject().findMarkers(null, true, IResource.DEPTH_INFINITE);
+			sortMarkers(markers);
+			assertMarkers("Unexpected markers", 
+					"Archive for required library: \'test.txt\' in project \'Bug522601\' cannot be read or is not a valid ZIP file\n" + 
+					"The project cannot be built until build path errors are resolved", markers);
+		} finally {
+			deleteProject(p1);
+		}
+	}
 	protected void assertNoErrors() throws CoreException {
 		for (IProject p : getWorkspace().getRoot().getProjects()) {
 			int maxSeverity = p.findMaxProblemSeverity(null, true, IResource.DEPTH_INFINITE);
@@ -6948,8 +6920,9 @@ public class ModuleBuilderTests extends ModifyingResourceTests {
 			assertFalse("Unexpected errors in project " + p.getName(), maxSeverity == IMarker.SEVERITY_ERROR);
 		}
 	}
-	// sort by CHAR_START
+	// sort by CHAR_START then MESSAGE
 	protected void sortMarkers(IMarker[] markers) {
-		Arrays.sort(markers, (a,b) -> a.getAttribute(IMarker.CHAR_START, 0) - b.getAttribute(IMarker.CHAR_START, 0)); 
+		Arrays.sort(markers, Comparator.comparingInt((IMarker a) -> a.getAttribute(IMarker.CHAR_START, 0))
+									   .thenComparing((IMarker a) -> a.getAttribute(IMarker.MESSAGE, ""))); 
 	}
 }

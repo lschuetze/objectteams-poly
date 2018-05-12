@@ -9,6 +9,8 @@
  *     IBM Corporation - initial API and implementation
  *     Fraunhofer FIRST - extended API and implementation
  *     Technical University Berlin - extended API and implementation
+ *     Jesper Steen Møller <jesper@selskabet.org> - contributions for:	
+ *         Bug 531046: [10] ICodeAssist#codeSelect support for 'var'
  *******************************************************************************/
 package org.eclipse.jdt.internal.codeassist;
 
@@ -59,9 +61,11 @@ import org.eclipse.jdt.internal.compiler.ast.ConstructorDeclaration;
 import org.eclipse.jdt.internal.compiler.ast.Expression.DecapsulationState;
 import org.eclipse.jdt.internal.compiler.ast.FieldDeclaration;
 import org.eclipse.jdt.internal.compiler.ast.ImportReference;
+import org.eclipse.jdt.internal.compiler.ast.LocalDeclaration;
 import org.eclipse.jdt.internal.compiler.ast.MethodDeclaration;
 import org.eclipse.jdt.internal.compiler.ast.ModuleDeclaration;
 import org.eclipse.jdt.internal.compiler.ast.PackageVisibilityStatement;
+import org.eclipse.jdt.internal.compiler.ast.SingleTypeReference;
 import org.eclipse.jdt.internal.compiler.ast.TypeDeclaration;
 import org.eclipse.jdt.internal.compiler.ast.TypeParameter;
 import org.eclipse.jdt.internal.compiler.classfmt.ClassFileConstants;
@@ -78,6 +82,7 @@ import org.eclipse.jdt.internal.compiler.lookup.ClassScope;
 import org.eclipse.jdt.internal.compiler.lookup.CompilationUnitScope;
 import org.eclipse.jdt.internal.compiler.lookup.ExtraCompilerModifiers;
 import org.eclipse.jdt.internal.compiler.lookup.FieldBinding;
+import org.eclipse.jdt.internal.compiler.lookup.IntersectionTypeBinding18;
 import org.eclipse.jdt.internal.compiler.lookup.LocalTypeBinding;
 import org.eclipse.jdt.internal.compiler.lookup.LocalVariableBinding;
 import org.eclipse.jdt.internal.compiler.lookup.LookupEnvironment;
@@ -1370,6 +1375,12 @@ public final class SelectionEngine extends Engine implements ISearchRequestor {
 			if (isLocal(typeBinding) && this.requestor instanceof SelectionRequestor) {
 				this.noProposal = false;
 				((SelectionRequestor)this.requestor).acceptLocalType(typeBinding);
+			} else if (binding instanceof IntersectionTypeBinding18) {
+				IntersectionTypeBinding18 intersection = (IntersectionTypeBinding18) binding;
+				ReferenceBinding[] intersectingTypes = intersection.intersectingTypes;
+				for (ReferenceBinding referenceBinding : intersectingTypes) {
+					selectFrom(referenceBinding, parsedUnit, isDeclaration);
+				}
 			} else {
 				this.noProposal = false;
 //{ObjectTeams: handle role files and interface parts
@@ -1627,6 +1638,13 @@ public final class SelectionEngine extends Engine implements ISearchRequestor {
 					}
 				}
 				return true;
+			}
+			@Override
+			public boolean visit(
+		    		LocalDeclaration localDeclaration, BlockScope scope) {
+				if (localDeclaration.type instanceof SingleTypeReference && ((SingleTypeReference)localDeclaration.type).token == assistIdentifier)
+					throw new SelectionNodeFound(localDeclaration.binding.type);
+				return true; // do nothing by default, keep traversing
 			}
 			@Override
 			public boolean visit(FieldDeclaration fieldDeclaration, MethodScope scope) {
