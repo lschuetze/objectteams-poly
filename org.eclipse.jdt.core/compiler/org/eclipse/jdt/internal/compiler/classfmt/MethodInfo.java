@@ -72,6 +72,7 @@ public class MethodInfo extends ClassFileStruct implements IBinaryMethod, Compar
 	protected long version;
 
 //{ObjectTeams: method level attributes:
+	private static final long HAVE_OT_MODIFIERS = 1l << 32;
     /* After reading a method its attributes are stored here. */
     private LinkedList<AbstractAttribute> methodAttributes = new LinkedList<AbstractAttribute>();
     // more bits decoded from attributes:
@@ -508,7 +509,7 @@ private synchronized void readExceptionAttributes() {
 private synchronized void readModifierRelatedAttributes() {
 	int flags = u2At(0);
 //{ObjectTeams:
-	int otFlags = 0;
+	long otFlags = 0;
 // SH}
 	int attributesCount = u2At(6);
 	int readOffset = 8;
@@ -544,10 +545,10 @@ private synchronized void readModifierRelatedAttributes() {
 	}
 //{ObjectTeams: combine sets of modifiers
 	if (otFlags != 0) {
-		if ((otFlags & ExtraCompilerModifiers.AccVisibilityMASK) != 0) {
+		if ((otFlags & HAVE_OT_MODIFIERS) != 0) {
 			flags &= ~ExtraCompilerModifiers.AccVisibilityMASK; // replace those bits
 		}
-		flags |= otFlags;
+		flags |= (otFlags & 0xffffffff);
 	}
 // SH}
 	this.accessFlags = flags;
@@ -562,7 +563,7 @@ private synchronized void readModifierRelatedAttributes() {
      * @param aStructOffset (subtract when indexing via constantPoolOffsets)
      * @param someConstantPoolOffsets
      */
-    int readOTAttribute(
+    long readOTAttribute(
             char[]     attributeName,
             MethodInfo info,
             int        readOffset,
@@ -573,12 +574,12 @@ private synchronized void readModifierRelatedAttributes() {
     		return 0; // optimization only.
         if (CharOperation.equals(attributeName, MODIFIERS_NAME))
         {
-            return WordValueAttribute.readModifiers(info, readOffset);
+            return readOTModifiers(info, readOffset);
             // not added to _readAttributes because evaluated immediately.
         }
         else if (CharOperation.equals(attributeName, ROLECLASS_METHOD_MODIFIERS_NAME))
         {
-        	return WordValueAttribute.readModifiers(info, readOffset);
+        	return readOTModifiers(info, readOffset);
             // not added to _readAttributes because evaluated immediately.
         }
         else if (CharOperation.equals(attributeName, CALLS_BASE_CTOR))
@@ -602,6 +603,9 @@ private synchronized void readModifierRelatedAttributes() {
         return 0;
     }
 
+    long readOTModifiers(MethodInfo info, int readOffset) {
+    	return info.u2At(readOffset) | HAVE_OT_MODIFIERS;
+    }
 // SH}
 /**
  * Answer the size of the receiver in bytes.

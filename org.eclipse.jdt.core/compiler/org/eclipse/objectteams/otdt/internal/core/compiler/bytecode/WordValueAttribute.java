@@ -180,19 +180,6 @@ public class WordValueAttribute
     }
 
     /**
-     * Read the value of a "Modifiers" or "RoleClassMethodModifiers" attribute from byte code.
-     * @param method  method to read from
-     * @param readOffset where to read
-     * @return the modifier flags
-     */
-    public static int readModifiers(
-            MethodInfo      method,
-            int             readOffset)
-    {
-        return method.u2At(readOffset);
-    }
-
-    /**
 	 * just like readModifiers(MethodInfo,int)
 	 */
 	public static void readModifiers(FieldInfo field, int readOffset) {
