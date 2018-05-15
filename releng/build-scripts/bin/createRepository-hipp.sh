@@ -99,15 +99,23 @@ echo "LAUNCHER_PATH = ${LAUNCHER_PATH}"
 echo "NAME          = ${NAME}"
 
 echo "====Step 0: condition jars ===="
-for dir in ${BASE}/testrun/updateSite/features ${BASE}/testrun/updateSite/plugins
+CONDITIONED=${BASE}/testrun/updateSiteRepack
+if [ ! -d  ${CONDITIONED} ]
+then
+	mkdir ${CONDITIONED} 
+else
+	/bin/rm -r ${CONDITIONED}/*
+fi
+
+for dir in features plugins
 do
-        find ${dir} -type f -name \*.jar -exec \
-                ${JAVA8}/bin/java -jar ${JARPROCESSOR} -verbose -processAll -repack -outputDir ${dir} {} \;
+        find ${BASE}/testrun/updateSite/${dir} -type f -name \*.jar -exec \
+                ${JAVA8}/bin/java -jar ${JARPROCESSOR} -verbose -processAll -repack -outputDir ${CONDITIONED}/${dir} {} \;
 done
 
 echo "====Step 1: request signing and zip===="
-cd ${BASE}/testrun/updateSite
-JARS=`find . -type f -name \*.jar -o -name \*.jar.pack.gz`
+cd ${CONDITIONED}
+JARS=`find . -type f -name \*.jar
 OTDTJAR=${BASE}/testrun/otdt.jar
 if [ "${SIGN}" == "nosign" ]
 then
@@ -120,7 +128,7 @@ else
 	then
 		mkdir ${SIGNED}
 	else
-		/bin/rm -rf ${SIGNED}/*
+		/bin/rm -r ${SIGNED}/*
 	fi
 	for JAR in ${JARS}
 	do
