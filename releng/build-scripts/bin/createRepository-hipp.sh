@@ -112,6 +112,8 @@ do
         find ${BASE}/testrun/updateSite/${dir} -type f -name \*.jar -exec \
                 ${JAVA8}/bin/java -jar ${JARPROCESSOR} -verbose -processAll -repack -outputDir ${CONDITIONED}/${dir} {} \;
 done
+# not conditioned, but must not be skipped!
+cp ${BASE}/testrun/updateSite/plugins/org.eclipse.jdt.core_* ${CONDITIONED}/plugins/
 
 echo "====Step 1: request signing and zip===="
 cd ${CONDITIONED}
