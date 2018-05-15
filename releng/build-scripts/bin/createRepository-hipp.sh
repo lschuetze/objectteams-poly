@@ -174,7 +174,7 @@ echo "LOCATION  = ${LOCATION}"
 cd ${LOCATION}
 
 echo "====Step 3: pack jars (again) ===="
-for dir in ${BASE}/testrun/updateSite/features ${BASE}/testrun/updateSite/plugins
+for dir in ${LOCATION}/features ${LOCATION}/plugins
 do
         find ${dir} -type f -name \*.jar -exec \
                 ${JAVA8}/bin/java -jar ${JARPROCESSOR} -verbose -pack -outputDir ${dir} {} \;
