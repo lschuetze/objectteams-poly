@@ -1355,40 +1355,32 @@ public void testBug426048() {
 			"  }\n" + 
 			"}\n"
 		},
-//{ObjectTeams: our error recovery drops the 'default' modifier:
 		"----------\n" + 
-		"1. ERROR in MyFunction.java (at line 16)\n" + 
-		"	@FunctionalInterface public interface MyFunction<T, @Returns R> {\n" + 
-		"	                                      ^^^^^^^^^^\n" + 
-		"Invalid \'@FunctionalInterface\' annotation; MyFunction<T,R> is not a functional interface\n" + 
-// orig (except for numbering):
-		"----------\n" + 
-		"2. ERROR in MyFunction.java (at line 19)\n" + 
+		"1. ERROR in MyFunction.java (at line 19)\n" + 
 		"	default <V> @Throws(((MyFunction<? super V, ? extends T>) before::apply) @Returns MyFunction<V, @Returns R>\n" + 
 		"	          ^\n" + 
 		"Syntax error, insert \"Type Identifier (\" to complete MethodHeaderName\n" + 
 		"----------\n" + 
-		"3. ERROR in MyFunction.java (at line 19)\n" + 
+		"2. ERROR in MyFunction.java (at line 19)\n" + 
 		"	default <V> @Throws(((MyFunction<? super V, ? extends T>) before::apply) @Returns MyFunction<V, @Returns R>\n" + 
 		"	                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n" + 
 		"Type mismatch: cannot convert from MyFunction<capture#1-of ? super V,capture#2-of ? extends T> to Class<? extends Throwable>[]\n" + 
 		"----------\n" + 
-		"4. ERROR in MyFunction.java (at line 19)\n" + 
+		"3. ERROR in MyFunction.java (at line 19)\n" + 
 		"	default <V> @Throws(((MyFunction<? super V, ? extends T>) before::apply) @Returns MyFunction<V, @Returns R>\n" + 
 		"	                                                          ^^^^^^\n" + 
 		"before cannot be resolved\n" + 
 		"----------\n" + 
-		"5. ERROR in MyFunction.java (at line 19)\n" + 
+		"4. ERROR in MyFunction.java (at line 19)\n" + 
 		"	default <V> @Throws(((MyFunction<? super V, ? extends T>) before::apply) @Returns MyFunction<V, @Returns R>\n" + 
 		"	                                                                       ^\n" + 
 		"Syntax error, insert \")\" to complete Modifiers\n" + 
 		"----------\n" + 
-		"6. ERROR in MyFunction.java (at line 20)\n" + 
+		"5. ERROR in MyFunction.java (at line 20)\n" + 
 		"	compose(MyFunction<? super V, ? extends T> before) {\n" + 
 		"	       ^\n" + 
 		"Syntax error on token \"(\", , expected\n" + 
 		"----------\n");
-// SH}
 }
 public void testBug426540() {
 	runConformTest(
