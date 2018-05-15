@@ -98,14 +98,14 @@ NAME="Object Teams"
 echo "LAUNCHER_PATH = ${LAUNCHER_PATH}"
 echo "NAME          = ${NAME}"
 
-echo "====Step 1: pack jars ===="
+echo "====Step 0: condition jars ===="
 for dir in ${BASE}/testrun/updateSite/features ${BASE}/testrun/updateSite/plugins
 do
         find ${dir} -type f -name \*.jar -exec \
-                ${JAVA8}/bin/java -jar ${JARPROCESSOR} -verbose -processAll -pack -outputDir ${dir} {} \;
+                ${JAVA8}/bin/java -jar ${JARPROCESSOR} -verbose -processAll -repack -outputDir ${dir} {} \;
 done
 
-echo "====Step 2: request signing and zip===="
+echo "====Step 1: request signing and zip===="
 cd ${BASE}/testrun/updateSite
 JARS=`find . -type f -name \*.jar -o -name \*.jar.pack.gz`
 OTDTJAR=${BASE}/testrun/otdt.jar
@@ -141,7 +141,7 @@ else
 fi
 
 
-echo "====Step 3: fill new repository===="
+echo "====Step 2: fill new repository===="
 if [ -r ${BASE}/stagingRepo ]
 then
     /bin/rm -rf ${BASE}/stagingRepo
@@ -164,6 +164,13 @@ unzip -n ${OTDTJAR}
 LOCATION=${BASE}/stagingRepo
 echo "LOCATION  = ${LOCATION}"
 cd ${LOCATION}
+
+echo "====Step 3: pack jars (again) ===="
+for dir in ${BASE}/testrun/updateSite/features ${BASE}/testrun/updateSite/plugins
+do
+        find ${dir} -type f -name \*.jar -exec \
+                ${JAVA8}/bin/java -jar ${JARPROCESSOR} -verbose -pack -outputDir ${dir} {} \;
+done
 
 
 echo "====Step 4: generate metadata===="
