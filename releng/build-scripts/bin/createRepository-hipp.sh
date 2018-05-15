@@ -115,7 +115,7 @@ done
 
 echo "====Step 1: request signing and zip===="
 cd ${CONDITIONED}
-JARS=`find . -type f -name \*.jar
+JARS=`find . -type f -name \*.jar`
 OTDTJAR=${BASE}/testrun/otdt.jar
 if [ "${SIGN}" == "nosign" ]
 then
