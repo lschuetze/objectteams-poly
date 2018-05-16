@@ -6,7 +6,7 @@
 	<classpathentry kind="src" path="boundtorole"/>
 	<classpathentry kind="src" path="ordinaryclasses"/>			
     <classpathentry kind="var" path="CONVERTER_JCL_LIB" sourcepath="CONVERTER_JCL_SRC" rootpath="CONVERTER_JCL_SRCROOT"/>    
-	<classpathentry kind="var" path="JCL_LIB" sourcepath="JCL_SRC" rootpath="JCL_SRCROOT"/>
+	<classpathentry kind="var" path="JCL17_LIB" sourcepath="JCL17_SRC" rootpath="JCL_SRCROOT"/>
     <classpathentry kind="output" path="bin"/>
     <classpathentry kind="lib" sourcepath="src" path="bins"/>
 
