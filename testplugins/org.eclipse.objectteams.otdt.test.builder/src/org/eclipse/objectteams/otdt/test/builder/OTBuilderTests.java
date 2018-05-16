@@ -60,6 +60,8 @@ public class OTBuilderTests extends BuilderTests {
 					// some plugin.xml have a deprecated 'action' extension, just ignore those: 
 					if (allProblems[i].getMessage().contains("deprecated"))
 						continue;
+					if (allProblems[i].getMessage().startsWith("The compiler compliance specified is")) // new warning from bug 533880
+						continue;
 					filteredProblems[j++] = allProblems[i];
 				}
 				if (j < allProblems.length)

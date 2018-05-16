@@ -224,7 +224,12 @@ public void test0008_not_in_class_scope() throws JavaModelException {
             "expectedTypesKeys=null",
             result.context);
 
+//{ObjectTeams: additional proposals "callin" and "team":
+/* orig:
 	assertProposalCount("var[KEYWORD]", 0, 21, result);
+  :giro */
+	assertProposalCount("var[KEYWORD]", 0, 23, result);
+// SH}
 }
 	public void test0009_in_formal_param_lists() throws JavaModelException {
 		CompletionResult result = complete(
@@ -241,7 +246,12 @@ public void test0008_not_in_class_scope() throws JavaModelException {
 	            "expectedTypesSignatures=null\n" +
 	            "expectedTypesKeys=null",
 	            result.context);
+//{ObjectTeams: additional proposals "callin" and "team":
+/* orig:
 		assertProposalCount("var[KEYWORD]", 0, 15, result);
+  :giro */
+		assertProposalCount("var[KEYWORD]", 0, 17, result);
+// SH}
 	}
 
 public void testbug_529556_missing_type_info_on_vars() throws JavaModelException {

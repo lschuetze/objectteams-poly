@@ -2629,7 +2629,7 @@ public abstract class AbstractJavaModelTests extends SuiteOfTestCases {
 	}
 	protected IJavaProject setUpJavaProject(final String projectName) throws CoreException, IOException {
 //{ObjectTeams: OT/J needs at least 1.5 (was 1.4):
-		IJavaProject javaProject = setUpJavaProject(projectName, "1.5");
+		IJavaProject javaProject = setUpJavaProject(projectName, "1.7");
 
         // add OTJavaNature
 		IProjectDescription description = javaProject.getProject().getDescription();
@@ -2722,6 +2722,14 @@ public abstract class AbstractJavaModelTests extends SuiteOfTestCases {
 					new IPath[] {getExternalJCLPath(compliance), getExternalJCLSourcePath(compliance), getExternalJCLRootSourcePath()},
 					null);
 			}
+		} else if ("1.7".equals(compliance)) {
+				if (JavaCore.getClasspathVariable("JCL17_LIB") == null) {
+					setupExternalJCL("jclMin1.7");
+					JavaCore.setClasspathVariables(
+						new String[] {"JCL17_LIB", "JCL17_SRC", "JCL_SRCROOT"},
+						new IPath[] {getExternalJCLPath(compliance), getExternalJCLSourcePath(compliance), getExternalJCLRootSourcePath()},
+						null);
+				}
 		} else {
 			if (JavaCore.getClasspathVariable("JCL_LIB") == null) {
 				setupExternalJCL("jclMin");
