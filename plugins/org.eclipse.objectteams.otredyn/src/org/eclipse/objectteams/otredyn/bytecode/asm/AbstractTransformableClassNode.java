@@ -322,11 +322,11 @@ public abstract class AbstractTransformableClassNode extends ClassNode {
 	 * using the most compact possible format. 
 	 */
 	protected AbstractInsnNode createLoadIntConstant(int constant) {
-		if (constant <= 5)
+		if (constant >= 0 && constant <= 5)
 			return new InsnNode(Opcodes.ICONST_0+constant);
-		else if (constant < Byte.MAX_VALUE)
+		else if (constant > Byte.MIN_VALUE && constant < Byte.MAX_VALUE)
 			return new IntInsnNode(Opcodes.BIPUSH, constant);
-		else if (constant < Short.MAX_VALUE)
+		else if (constant > Short.MIN_VALUE && constant < Short.MAX_VALUE)
 			return new IntInsnNode(Opcodes.SIPUSH, constant);		
 		else
 			return new LdcInsnNode(constant);
