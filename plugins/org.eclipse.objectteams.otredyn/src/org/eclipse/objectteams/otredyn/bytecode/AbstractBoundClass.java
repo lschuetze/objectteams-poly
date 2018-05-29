@@ -601,7 +601,10 @@ public abstract class AbstractBoundClass implements IBoundClass {
 			method.setStatic(isStatic);
 			methods.put(methodKey, method);
 		}
-		assert method.isStatic() == isStatic : "Mismatching static/non-static methods "+getName()+'.'+name+desc;
+		boolean actualStatic = method.isStatic();
+		if (name.equals("<init>"))
+			actualStatic = true; // see OTSpecialAccessAttribute.readMethodAccess(..) re static accessor
+		assert actualStatic == isStatic : "Mismatching static/non-static methods "+getName()+'.'+name+desc;
 		return method;
 	}
 
