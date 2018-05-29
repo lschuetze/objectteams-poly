@@ -32,6 +32,7 @@ import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.internal.ui.typehierarchy.SubTypeHierarchyViewer;
 import org.eclipse.jdt.internal.ui.typehierarchy.TypeHierarchyLifeCycle;
 import org.eclipse.jface.viewers.ITreeContentProvider;
+import org.eclipse.objectteams.otdt.core.OTModelManager;
 import org.eclipse.objectteams.otdt.ui.tests.FileBasedUITest;
 
 /**
@@ -278,19 +279,11 @@ public class OTSubHierarchyContentProviderTests extends FileBasedUITest
         _testObject = 
             new SubTypeHierarchyViewer.SubTypeHierarchyContentProvider(
                     _lifeCycle);
+        _lifeCycle.doHierarchyRefresh(new IType[]{_T1_R1}, new NullProgressMonitor());
     }
 
     public void testHierarchyCreated()
     {
-        try
-        {
-            _lifeCycle.doHierarchyRefresh(new IType[]{_T1_R1}, new NullProgressMonitor());
-        }
-        catch (JavaModelException exc)
-        {
-            exc.printStackTrace();
-        }
-
         ITypeHierarchy hierarchy = _lifeCycle.getHierarchy();
         assertNotNull(hierarchy);
     }
@@ -303,7 +296,7 @@ public class OTSubHierarchyContentProviderTests extends FileBasedUITest
         for (int idx = 0; idx < _allTypesInProject.length; idx++)
         {
             IType cur = _allTypesInProject[idx];
-            if (cur == _T2_R2) continue; // skip, cur's parent is outside the visible cone
+            if (cur == _T2_R2 || OTModelManager.isTeam(cur)) continue; // skip, cur's parent is outside the visible cone
 	        actual = _testObject.getParent(cur);
 	        assertEquals("Unexpected parent for " + cur.getFullyQualifiedName() + " ", parents.get(cur), actual);
         }
@@ -330,15 +323,6 @@ public class OTSubHierarchyContentProviderTests extends FileBasedUITest
     
     public void testRecursiveGetChildren_T1R1()
     {
-        try
-        {
-            _lifeCycle.doHierarchyRefresh(new IType[]{_T1_R1}, new NullProgressMonitor());
-        }
-        catch (JavaModelException exc)
-        {
-            exc.printStackTrace();
-        }
-        
         TreeNode actualRoot;
         TreeNode expectedRoot;
         
@@ -376,15 +360,6 @@ public class OTSubHierarchyContentProviderTests extends FileBasedUITest
     // this test indirectly asserts symmetry between getChildren() and getParent()
     public void testRecursiveGetChildren_againstParentMap_T1R1()
     {
-        try
-        {
-            _lifeCycle.doHierarchyRefresh(new IType[]{_T1_R1}, new NullProgressMonitor());
-        }
-        catch (JavaModelException exc)
-        {
-            exc.printStackTrace();
-        }
-        
         TreeNode actualRoot;
         TreeNode expectedRoot;
         
