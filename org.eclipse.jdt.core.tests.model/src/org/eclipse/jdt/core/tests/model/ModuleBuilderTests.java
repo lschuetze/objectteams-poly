@@ -6279,7 +6279,7 @@ public class ModuleBuilderTests extends ModifyingResourceTests {
 			IJavaProject javaProject = createJava9Project("mod1", new String[] {"src"});
 
 			String srcMod =
-				"@SuppressWarnings(\"deprecation\")\n" + // javax.xml.ws.annotation is deprecated
+				"@SuppressWarnings(\"removal\")\n" + // javax.xml.ws.annotation is deprecated for removal
 				"module mod1 {\n" + 
 				"	exports com.mod1.pack1;\n" + 
 				"	requires java.xml.ws.annotation;\n" + 
@@ -6908,6 +6908,54 @@ public class ModuleBuilderTests extends ModifyingResourceTests {
 					"The project cannot be built until build path errors are resolved", markers);
 		} finally {
 			deleteProject(p1);
+		}
+	}
+	// automatic modules export all their packages
+	public void testBug532724() throws CoreException, IOException {
+		if (!isJRE9) return;
+		try {
+			String libPath = "externalLib/test.jar";
+			Util.createJar(
+					new String[] {
+						"test/src/org/astro/World.java", //$NON-NLS-1$
+						"package org.astro;\n" +
+						"public interface World {\n" +
+						"	public String name();\n" +
+						"}",
+					},
+					null,
+					new HashMap<>(),
+					null,
+					getExternalResourcePath(libPath));
+			String[] src = new String[] { 
+					"src/module-info.java",
+					"module com.greetings {\n" +
+					"	requires transitive test;\n" +
+					"	exports com.greetings;\n" +
+					"}",
+					"src/com/greetings/MyWorld.java",
+					"package com.greetings;\n" +
+					"import org.astro.World;\n"	+
+					"public class MyWorld {\n" +
+					"	public World name() {\n" +
+					"		return null;\n" +
+					"	}\n" +
+					"}"
+			};
+			IClasspathAttribute modAttr = new ClasspathAttribute("module", "true");
+			IClasspathEntry dep = JavaCore.newLibraryEntry(new Path(getExternalResourcePath(libPath)), null, null, ClasspathEntry.NO_ACCESS_RULES,
+					new IClasspathAttribute[] {modAttr},
+					false/*not exported*/);
+			IJavaProject p2 = setupModuleProject("com.greetings", src, new IClasspathEntry[] { dep });
+			p2.setOption(JavaCore.COMPILER_PB_UNSTABLE_AUTO_MODULE_NAME, JavaCore.IGNORE);
+			p2.setOption(JavaCore.COMPILER_PB_API_LEAKS, JavaCore.ERROR);
+
+			getWorkspace().build(IncrementalProjectBuilder.FULL_BUILD, null);
+			IMarker[] markers = p2.getProject().findMarkers(null, true, IResource.DEPTH_INFINITE);
+			assertMarkers("Unexpected markers", "", markers);
+		} finally {
+			deleteExternalResource("externalLib");
+			this.deleteProject("com.greetings");
 		}
 	}
 	protected void assertNoErrors() throws CoreException {
