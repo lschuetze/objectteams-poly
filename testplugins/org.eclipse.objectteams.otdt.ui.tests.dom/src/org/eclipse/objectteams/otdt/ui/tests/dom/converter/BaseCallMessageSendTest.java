@@ -57,7 +57,7 @@ public class BaseCallMessageSendTest extends FileBasedDOMTest
 {
     
     public static final String TEST_PROJECT = "DOM_AST";
-    private static final int JAVA_LANGUAGE_SPEC_LEVEL = AST.JLS4;
+    private static final int JAVA_LANGUAGE_SPEC_LEVEL = AST.JLS10;
 
     // Java class used for all within tests
     private TypeDeclaration _role;
@@ -163,7 +163,7 @@ public class BaseCallMessageSendTest extends FileBasedDOMTest
             (ExpressionStatement)method.getBody().statements().get(0);
         _testObj = (BaseCallMessageSend)exprStatement.getExpression();
         
-        List actual = _testObj.getArguments();
+        List<?> actual = _testObj.getArguments();
         
         assertEquals("Base call has wrong number of arguments",
                      2,
@@ -177,7 +177,7 @@ public class BaseCallMessageSendTest extends FileBasedDOMTest
             (ExpressionStatement)method.getBody().statements().get(0);
         _testObj = (BaseCallMessageSend)exprStatement.getExpression();
         
-        List actual = _testObj.getArguments();
+        List<?> actual = _testObj.getArguments();
         
         assertEquals("Base call has wrong number of arguments",
                      0,
@@ -192,9 +192,9 @@ public class BaseCallMessageSendTest extends FileBasedDOMTest
             (ExpressionStatement)constructor.getBody().statements().get(0);
         _testObj = (BaseCallMessageSend)statement.getExpression();
         
-        List childNodes = _testObj.getArguments();
+        List<Expression> childNodes = _testObj.getArguments();
 
-        for (Iterator iter = childNodes.iterator(); iter.hasNext();) 
+        for (Iterator<Expression> iter = childNodes.iterator(); iter.hasNext();) 
         {
             Expression curChild = (Expression) iter.next();
             assertEquals("Base call arguments have wrong parent node",
