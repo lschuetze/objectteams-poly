@@ -1706,6 +1706,51 @@ public class DevelopmentExamples extends AbstractOTJLDTest {
             "OK");
     }
 
+    // modeled after a situation in PullUpAdaptor, that could cause StackOverflowError
+    // (bug not reproduced, though, due to different loading sequence).
+    public void testX11_bindingInheritance15() {
+        
+        runConformTest(
+             new String[] {
+ 		"TeamX11bi15.java",
+ 				"import base b.X11bi15_1;\n" +
+ 			    "import base b.X11bi15_2;\n" +
+ 			    "public team class TeamX11bi15 {\n" +
+ 			    "    protected class R1 playedBy X11bi15_1 {\n" +
+ 			    "        void no() { System.out.print(\"NO\"); }\n" +
+ 			    "        no <- before test;\n" +
+ 			    "    }\n" +
+ 			    "    protected class R2 playedBy X11bi15_2 {\n" +
+ 			    "        callin void ask() {\n" +
+ 			    "			System.out.print(\"?\");\n" +
+ 			    "			base.ask();\n" +
+ 			    "		 }\n" +
+ 			    "        ask <- replace callTest;\n" +
+ 			    "    }\n" +
+ 			    "    public static void main(String[] args) {\n" +
+ 			    "        new TeamX11bi15().activate();\n" +
+ 			    "        new b.X11bi15_2().callTest();\n" +
+ 			    "    }\n" +
+ 			    "}\n" +
+ 			    "    \n",
+ 		"b/X11bi15_1.java",
+ 			    "package b;\n" +
+ 			    "public class X11bi15_1 {\n" +
+ 			    "    void test() { System.out.print('!'); }\n" +
+ 			    "}\n" +
+ 			    "    \n",
+ 		"b/X11bi15_2.java",
+ 			    "package b;\n" +
+ 			    "public class X11bi15_2 extends X11bi15_1 {\n" +
+ 			    "    public void callTest() {\n" +
+ 			    "        test();\n" +
+ 			    "    }\n" +
+ 			    "}\n" +
+ 			    "    \n"
+             },
+             "?NO!");
+    }
+
     public void testBug480257() {
     	runConformTest(
     		new String[] {

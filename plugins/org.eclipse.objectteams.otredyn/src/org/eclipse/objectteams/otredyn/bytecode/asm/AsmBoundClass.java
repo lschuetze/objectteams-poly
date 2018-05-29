@@ -19,6 +19,7 @@ package org.eclipse.objectteams.otredyn.bytecode.asm;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 import java.util.Set;
@@ -26,7 +27,6 @@ import java.util.Set;
 import org.eclipse.objectteams.otredyn.bytecode.AbstractBoundClass;
 import org.eclipse.objectteams.otredyn.bytecode.AbstractTeam;
 import org.eclipse.objectteams.otredyn.bytecode.IBytecodeProvider;
-import org.eclipse.objectteams.otredyn.bytecode.asm.ASMByteCodeAnalyzer.ClassInformation;
 import org.objectweb.asm.ClassReader;
 import org.objectweb.asm.Opcodes;
 
@@ -38,6 +38,9 @@ import org.objectweb.asm.Opcodes;
 public abstract class AsmBoundClass extends AbstractTeam {
 	
 	public static final int ASM_API = Opcodes.ASM6;
+
+	private static final int DEFAULT_BUFFER_SIZE = 8192;
+    private static final int MAX_BUFFER_SIZE = Integer.MAX_VALUE - 8;
 
 	private IBytecodeProvider bytecodeProvider;
 	
@@ -78,14 +81,15 @@ public abstract class AsmBoundClass extends AbstractTeam {
 			if (this.loader != null) {
 				try (InputStream stream = this.loader.getResourceAsStream(this.getInternalName()+".class")) {
 					if (stream != null) {
-						ASMByteCodeAnalyzer codeAnalyzer = new ASMByteCodeAnalyzer(true);
-						ClassInformation classInformation = codeAnalyzer.getClassInformation(stream, this.getName());
-						this.setSuperClassName(classInformation.getSuperClassName());
+						bytecode = readAllBytes(stream);
+						bytecodeProvider.setBytecode(getId(), bytecode);
 					}
 				} catch (IOException e) {
 					// silent (from automatic close()).
 				}
 			}
+		}
+		if (bytecode == null) {
 			//Class is not loaded yet.
 			return;
 		}
@@ -102,6 +106,28 @@ public abstract class AsmBoundClass extends AbstractTeam {
 		bytecode = null;
 	}
 	
+    public byte[] readAllBytes(InputStream is) throws IOException {
+        byte[] buf = new byte[DEFAULT_BUFFER_SIZE];
+        int capacity = buf.length;
+        int nread = 0;
+        int n;
+        for (;;) {
+            while ((n = is.read(buf, nread, capacity - nread)) > 0)
+                nread += n;
+            if (n < 0)
+                break;
+            if (capacity <= MAX_BUFFER_SIZE - capacity) {
+                capacity = capacity << 1;
+            } else {
+                if (capacity == MAX_BUFFER_SIZE)
+                    throw new OutOfMemoryError("Requested size too large");
+                capacity = MAX_BUFFER_SIZE;
+            }
+            buf = Arrays.copyOf(buf, capacity);
+        }
+        return (capacity == nread) ? buf : Arrays.copyOf(buf, nread);
+    }
+
 	@Override
 	public Collection<String> getBoundBaseClasses() {
 		return this.boundBaseClasses;
