@@ -148,7 +148,7 @@ public class OTSpecificSelectionWithinTeamTests extends AbstractSelectionTest
 			"public team class T1 {\n" +
 			"  public role class R1 {\n" +
 			"  }\n" +
-			"  <SelectOnType:T1> t1;\n" +
+			"  <SelectOnType:T1> t1 = new T1();\n" +
 			"  t1.R1 r1;\n" +
 			"  public T1() {\n" +
 			"  }\n" +			

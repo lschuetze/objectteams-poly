@@ -872,7 +872,7 @@ public void testCompletionTrac38_2() throws JavaModelException {
     this.wc.codeComplete(cursorLocation, requestor, this.wcOwner);
 
 	assertResults(
-			"getClass[METHOD_SPEC]{java.lang.Class<?> getClass();, Ljava.lang.Object;, ()Ljava.lang.Class<*>;, getClass, [218, 221], "+
+			"getClass[METHOD_SPEC]{java.lang.Class<? extends Object> getClass();, Ljava.lang.Object;, ()Ljava.lang.Class<+Ljava.lang.Object;>;, getClass, [218, 221], "+
 			(R_DEFAULT+R_RESOLVED+R_INTERESTING+R_CASE+R_UNQUALIFIED+R_NON_RESTRICTED)+"}\n"+
 			"_str[FIELD_SPEC]{ String _str;, LBaseTrac38;, Ljava.lang.String;, _str, [221, 221], " +  // yes, proposal starts with blank
 			(R_DEFAULT+R_RESOLVED+R_INTERESTING+R_CASE+R_EXACT_EXPECTED_TYPE+R_UNQUALIFIED+R_NON_RESTRICTED)+"}\n"+
