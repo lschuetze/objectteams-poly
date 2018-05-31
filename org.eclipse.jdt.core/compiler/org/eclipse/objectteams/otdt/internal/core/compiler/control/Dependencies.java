@@ -203,7 +203,7 @@ public class Dependencies implements ITranslationStates {
      * @return success?
      */
 	public static boolean ensureState (CompilationUnitDeclaration unit, int state) {
-		return ensureState(unit, null, state) == Success.OK;
+		return ensureState(unit, null, null, state) == Success.OK;
 	}
 
 	/**
@@ -213,11 +213,12 @@ public class Dependencies implements ITranslationStates {
      * When used: MAIN ENTRY of the statemachine.
      *
      * @param unit
+     * @param environment if non-null this environment represents the current module for resolving
      * @param accessRestriction (optional) access restriction for STATE_BINDINGS_BUILT
      * @param state required state
      * @return success?
      */
-	public static Success ensureState (CompilationUnitDeclaration unit, AccessRestriction accessRestriction, int state)
+	public static Success ensureState (CompilationUnitDeclaration unit, LookupEnvironment environment, AccessRestriction accessRestriction, int state)
 	{
         boolean done = true;
         Success success = Success.OK;
@@ -240,7 +241,7 @@ public class Dependencies implements ITranslationStates {
         	unit.state.startProcessing(state, 0);
 
         	if (state > 1)
-                success = ensureState(unit, null, state -1);
+                success = ensureState(unit, environment, null, state -1);
 
     		if (success == Success.NotReady)
     			return success;
@@ -248,7 +249,7 @@ public class Dependencies implements ITranslationStates {
     		if (   (success == Success.OK)
    				|| StateHelper.isRequiredState(state)) // KEEPGOING generate problem class in any case
    			{
-    			Pair<Boolean,Success> result = establishUnitState(unit, state, success,	accessRestriction);
+    			Pair<Boolean,Success> result = establishUnitState(unit, environment, state, success, accessRestriction);
     			done = result.first;
     			success = result.second;
     		}
@@ -274,21 +275,28 @@ public class Dependencies implements ITranslationStates {
 
 	/* Core of above method without the recursion. */
 	private static Pair<Boolean,Success> establishUnitState(CompilationUnitDeclaration unit,
-			int state, Success success, AccessRestriction accessRestriction)
+			LookupEnvironment environment, int state, Success success, AccessRestriction accessRestriction)
 	{
 		boolean done = true;
 		if (StateHelper.unitHasState(unit, state))
 			return new Pair<Boolean,Success>(done, Success.OK);
+		
+		if (environment == null) {
+			if (unit.scope != null && unit.scope.environment != null)
+				environment = unit.scope.environment;
+			else
+				environment = Config.getLookupEnvironment();
+		}
 
 	    // original calls stolen from Compiler.process are handled here:
 		try {
 		    switch (state)
 		    {
 		    	case STATE_ROLE_FILES_LINKED:
-		    		establishRoleFilesLinked(unit, Config.getLookupEnvironment());
+		    		establishRoleFilesLinked(unit, environment);
 		    		break;
 		    	case STATE_BINDINGS_BUILT:
-		    		Config.getLookupEnvironment().internalBuildTypeBindings(unit, accessRestriction);
+		    		environment.internalBuildTypeBindings(unit, accessRestriction);
 		    		break;
 		    	case STATE_LENV_BUILD_TYPE_HIERARCHY:
 		    	case STATE_LENV_CHECK_AND_SET_IMPORTS:
@@ -296,9 +304,8 @@ public class Dependencies implements ITranslationStates {
 		    	case STATE_LENV_DONE_FIELDS_AND_METHODS:
 		    	case STATE_ROLES_LINKED:
 		    		checkReadKnownRoles(unit);
-		    		LookupEnvironment lookupEnvironment= Config.getLookupEnvironment();
 		    		if (Config.getBundledCompleteTypeBindingsMode()) {
-		    			int stateReached = Config.getLookupEnvironment().internalCompleteTypeBindings(unit);
+		    			int stateReached = environment.internalCompleteTypeBindings(unit);
 		            	StateHelper.setStateRecursive(unit, stateReached, true);
 		            	if (stateReached >= state)
 		            		return new Pair<Boolean,Success>(done,
@@ -313,12 +320,12 @@ public class Dependencies implements ITranslationStates {
 	            		unit.scope.checkAndSetImports();
 	            		break;
 	            	case STATE_LENV_CONNECT_TYPE_HIERARCHY:
-	            		CompilationUnitDeclaration previousUnit = lookupEnvironment.unitBeingCompleted;
-	            		lookupEnvironment.unitBeingCompleted = unit;
+	            		CompilationUnitDeclaration previousUnit = environment.root.unitBeingCompleted;
+	            		environment.root.unitBeingCompleted = unit;
 	            		try {
 	            			unit.scope.connectTypeHierarchy();
 	            		} finally {
-	            			lookupEnvironment.unitBeingCompleted = previousUnit;
+	            			environment.root.unitBeingCompleted = previousUnit;
 	            		}
 	            		break;
 	            	case STATE_LENV_DONE_FIELDS_AND_METHODS:
@@ -345,7 +352,7 @@ public class Dependencies implements ITranslationStates {
 		        	break;
 		        case STATE_METHODS_VERIFIED:
 					if (Config.getVerifyMethods())
-		            	unit.scope.verifyMethods(Config.getLookupEnvironment().methodVerifier());
+		            	unit.scope.verifyMethods(environment.methodVerifier());
 		            break;
 		        case STATE_RESOLVED:
 		           	unit.resolve();
@@ -413,7 +420,7 @@ public class Dependencies implements ITranslationStates {
             CompilationUnitDeclaration unit = getCUD(model);
             if (unit == null)
             	return false;
-            boolean success = (ensureState(unit, null, state) == Success.OK);
+            boolean success = (ensureState(unit, null, null, state) == Success.OK);
             if (success)
             	unit.state.assertState(state, "Inconsistent unit state, expected "+state); //$NON-NLS-1$
             	// ... but might still need to descend into types for role units.
@@ -833,7 +840,7 @@ public class Dependencies implements ITranslationStates {
                 		// always start from the unit (possibly: role unit):
                 		TypeDeclaration roleDecl = model.getAst();
                     	if (roleDecl != null && roleDecl.isRoleFile()) {
-                    		success &= (ensureState(roleDecl.compilationUnit, null, nextState) == Success.OK);
+                    		success &= (ensureState(roleDecl.compilationUnit, null, null, nextState) == Success.OK);
                     		model.setState(nextState);
                     		model.setMemberState(nextState);
                     		break;
@@ -894,7 +901,7 @@ public class Dependencies implements ITranslationStates {
 			default:
 				if (roleDecl.isRoleFile()) {
 					CompilationUnitDeclaration unit = roleDecl.compilationUnit;
-					Pair<Boolean,Success> result = establishUnitState(unit, nextState, Success.OK, null);
+					Pair<Boolean,Success> result = establishUnitState(unit, null, nextState, Success.OK, null);
 					Success success = result.second;
 					if (success != Success.NotReady)
 						StateHelper.setStateRecursive(unit, nextState, false);

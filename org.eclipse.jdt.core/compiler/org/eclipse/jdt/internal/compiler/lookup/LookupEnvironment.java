@@ -535,7 +535,7 @@ public boolean canTypeBeAccessed(SourceTypeBinding binding, Scope scope) {
 */
 public void buildTypeBindings(CompilationUnitDeclaration unit, AccessRestriction accessRestriction) {
 //{ObjectTeams: wrap to redirect control through dependencies:
-	Dependencies.ensureState(unit, accessRestriction, ITranslationStates.STATE_BINDINGS_BUILT);
+	Dependencies.ensureState(unit, this, accessRestriction, ITranslationStates.STATE_BINDINGS_BUILT);
 }
 // for use by Dependencies only:
 // PRE: ROLE_FILES_LINKED, because roles files need team to be set.
