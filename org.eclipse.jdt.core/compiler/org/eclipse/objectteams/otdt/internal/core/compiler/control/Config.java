@@ -298,17 +298,21 @@ public class Config implements ConfigHelper.IConfig, Comparable<Config> {
 			// assume already present in configsByClient, too.
 			return config;
 		}
-		if (parser == null || environment == null) {
-			config = configsByClient.get(client);
-			if (configMatchesRequest(config, client, parser, environment)) {
-				addConfig(config);
-				return config;
+		boolean shouldCleanUp = false;
+		criticalSection: synchronized (configsByClient) {			
+			if (parser == null || environment == null) {
+				config = configsByClient.get(client);
+				if (configMatchesRequest(config, client, parser, environment)) {
+					break criticalSection;
+				}
 			}
+			config = new Config(client, new SoftReference<>(parser), new WeakReference<>(environment));
+			configsByClient.put(client, config);
+			shouldCleanUp = true;
 		}
-		config = new Config(client, new SoftReference<>(parser), new WeakReference<>(environment));
-		configsByClient.put(client, config);
 		addConfig(config);
-		cleanupIfNecessary();
+		if (shouldCleanUp)
+			cleanupIfNecessary();
 		return config;
 	}
 
