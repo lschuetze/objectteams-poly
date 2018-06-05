@@ -72,7 +72,7 @@ public team class CorrectionAdaptor {
 		
 		@SuppressWarnings("basecall")
 		callin static void addNewMethodProposals(ICompilationUnit cu, CompilationUnit astRoot, Expression sender, List<Expression> arguments, boolean isSuperInvocation, ASTNode invocationNode, String methodName, Collection<ICommandAccess> proposals) 
-				throws JavaModelException 
+				throws JavaModelException
 		{
 			// OT_COPY_PASTE:
 			ITypeBinding nodeParentType= Bindings.getBindingOfParentType(invocationNode);
@@ -86,7 +86,7 @@ public team class CorrectionAdaptor {
 				}
 			}
 			if (binding != null && binding.isFromSource()) {
-				ITypeBinding senderDeclBinding= binding.getTypeDeclaration();
+				ITypeBinding senderDeclBinding= binding.getErasure().getTypeDeclaration();
 
 				ICompilationUnit targetCU= ASTResolving.findCompilationUnitForBinding(cu, astRoot, senderDeclBinding);
 				if (targetCU != null) {
@@ -94,7 +94,7 @@ public team class CorrectionAdaptor {
 					Image image;
 					ITypeBinding[] parameterTypes= getParameterTypes(arguments);
 					if (parameterTypes != null) {
-						String sig= ASTResolving.getMethodSignature(methodName, parameterTypes, false);
+						String sig= org.eclipse.jdt.internal.ui.text.correction.ASTResolving.getMethodSignature(methodName, parameterTypes, false);
 						boolean is18OrHigher= JavaModelUtil.is18OrHigher(targetCU.getJavaProject());
 		
 						boolean isSenderBindingInterface= senderDeclBinding.isInterface();
@@ -121,18 +121,18 @@ public team class CorrectionAdaptor {
 								isSenderBindingInterface= senderDeclBinding.isInterface();
 								if (!senderDeclBinding.isAnonymous()) {
 									if (is18OrHigher || !isSenderBindingInterface) {
-										String[] args= new String[] { sig, ASTResolving.getTypeSignature(senderDeclBinding) };
+										String[] args= new String[] { sig, org.eclipse.jdt.internal.ui.text.correction.ASTResolving.getTypeSignature(senderDeclBinding) };
 										label= Messages.format(CorrectionMessages.UnresolvedElementsSubProcessor_createmethod_other_description, args);
 										if (isSenderBindingInterface) {
 											image= JavaPluginImages.get(JavaPluginImages.IMG_MISC_PUBLIC);
 										} else {
 											image= JavaPluginImages.get(JavaPluginImages.IMG_MISC_PROTECTED);
 										}
-//{ObjectTeams: the pay-load: when traveling out of a role file, search for the new targetCU:									
+//{ObjectTeams: the pay-load: when traveling out of a role file, search for the new targetCU:
 										if (binding.isRole() && astRoot.findDeclaringNode(senderDeclBinding) == null)
 											targetCU= ASTResolving.findCompilationUnitForBinding(cu, astRoot, senderDeclBinding);
 // SH}
-										proposals.add(new NewMethodCorrectionProposal(label, targetCU, invocationNode, arguments, senderDeclBinding, 5, image));
+										proposals.add(new NewMethodCorrectionProposal(label, targetCU, invocationNode, arguments, senderDeclBinding, IProposalRelevance.CREATE_METHOD, image));
 									}
 								}
 							}
