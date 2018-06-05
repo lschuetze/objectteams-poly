@@ -87,6 +87,11 @@ public team class CorrectionAdaptor {
 			}
 			if (binding != null && binding.isFromSource()) {
 				ITypeBinding senderDeclBinding= binding.getErasure().getTypeDeclaration();
+//{ObjectTeams: don't erase a RoleTypeBinding:
+				if (binding.isRole()) {
+					senderDeclBinding = binding.getTypeDeclaration();
+				}
+// SH}
 
 				ICompilationUnit targetCU= ASTResolving.findCompilationUnitForBinding(cu, astRoot, senderDeclBinding);
 				if (targetCU != null) {
