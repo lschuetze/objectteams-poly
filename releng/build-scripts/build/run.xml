@@ -65,7 +65,7 @@ path to map file (with substitutions):
 
 		<!--	directories for update sites: -->
 		<property name="compilerUpdatesDir"		value="${user.dir}/updateSiteCompiler"/>
-		<property name="previousPublishedUpdatesDir"		value="${user.dir}/updateSiteSigned"/>
+		<property name="previousPublishedUpdatesDir"		value="http://download.eclipse.org/objectteams/updates/ot2.7/201806051508"/>
 		<property name="otdtUpdatesDir" 		value="${user.dir}/updateSite"/>
 		<property name="testsUpdatesDirBase" 	value="${user.dir}/updateSiteTests"/>
 			<!-- will have sub directories "eclipse" and "otdt" -->
@@ -262,9 +262,9 @@ path to map file (with substitutions):
         </java>
 .. by try to re-use the compiler from the previous published build: -->
 		<!-- Now we should have an update site with the patch feature, time to install it into base: -->
-        <ant antfile="${OTScriptDir}/p2helper.xml" target="installFeature" dir="${baseLocation}">
+        <ant antfile="${OTScriptDir}/p2helper.xml" target="installFeatureFromUrl" dir="${baseLocation}">
             <property name="feature" value="org.eclipse.objectteams.otdt.core.patch.feature.group"/>
-            <property name="sourceUpdatesDir" value="${previousPublishedUpdatesDir}"/>
+            <property name="sourceUpdatesUrl" value="${previousPublishedUpdatesDir}"/>
             <property name="targetEclipseDir" value="${baseLocation}"/>
         </ant>
     </target>

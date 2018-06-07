@@ -49,6 +49,27 @@
         </java>
     </target>
 
+    <target name="installFeatureFromUrl">
+        <echo message="Installing ${feature} from ${sourceUpdatesUrl} to ${targetEclipseDir}"/>
+        <java
+                inputstring=""
+                dir="${targetEclipseDir}"
+                fork="true"
+                classname="org.eclipse.equinox.launcher.Main"
+                classpath="${targetEclipseDir}/plugins/${org.eclipse.equinox.launcher_jar}">
+            <jvmarg value="-Declipse.p2.MD5Check=false" />
+            <arg value="-consoleLog"/>
+            <arg value="-application"/>
+            <arg value="org.eclipse.equinox.p2.director"/>
+            <arg value="-metadataRepository" />
+            <arg value="${sourceUpdatesUrl}" />
+            <arg value="-artifactRepository" />
+            <arg value="${sourceUpdatesUrl}" />
+            <arg value="-installIU" />
+            <arg value="${feature}" />
+        </java>
+    </target>
+
     <target name="installOTDT">
     	<echo message="Installing the OTDT from ${otdtUpdatesDir} into ${test.eclipseDir}"/>
         <antcall target="installFeature">
