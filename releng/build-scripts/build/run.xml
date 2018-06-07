@@ -267,6 +267,9 @@ path to map file (with substitutions):
             <property name="sourceUpdatesUrl" value="${previousPublishedUpdatesDir}"/>
             <property name="targetEclipseDir" value="${baseLocation}"/>
         </ant>
+		<delete>
+		    <fileset dir="${baseLocation}/plugins/" includes="org.eclipse.jdt.core_3.14.0.v2018*" />
+		</delete>
     </target>
 
 	<!-- ==== BUILD STAGE 2: ==== -->
