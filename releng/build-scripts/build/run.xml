@@ -65,6 +65,7 @@ path to map file (with substitutions):
 
 		<!--	directories for update sites: -->
 		<property name="compilerUpdatesDir"		value="${user.dir}/updateSiteCompiler"/>
+		<property name="previousPublishedUpdatesDir"		value="${user.dir}/updateSiteSigned"/>
 		<property name="otdtUpdatesDir" 		value="${user.dir}/updateSite"/>
 		<property name="testsUpdatesDirBase" 	value="${user.dir}/updateSiteTests"/>
 			<!-- will have sub directories "eclipse" and "otdt" -->
@@ -221,6 +222,7 @@ path to map file (with substitutions):
 	<!-- setting an empty inputstring is a workaround for http://issues.apache.org/bugzilla/show_bug.cgi?id=34461 -->
 	<target name="createOTCompilerEclipse" depends="setupForCompile" description="create the bootstrapping Eclipse with OT/J compiler">
 		<echo message="Invoke pdebuild for creating the OT-Compiler"/>
+<!-- don't build it ...
         <java
 	        inputstring=""
 	        dir="${baseLocation}" 
@@ -239,7 +241,7 @@ path to map file (with substitutions):
 	            <arg value="-DOTScriptDir=${OTScriptDir}"/>
 	            <arg value="-Drun.eclipseScriptDir=${run.eclipseScriptDir}"/>
 	            <arg value="-Dbuilder=${builder-otcompiler}"/>
-	            <arg value="-D${installmode}=true"/> <!-- <- obsolete? -->
+	            <arg value="-D${installmode}=true"/> <! - - <- obsolete? - - >
 		    	<arg value="-Dcomponent.short=OT-Compiler"/>
 				<arg value="-DotdtUpdatesDir=${compilerUpdatesDir}"/>
 	            <arg value="-Dconfigs=*,*,*"/>
@@ -255,13 +257,14 @@ path to map file (with substitutions):
 	            <arg value="-Declipse.tests.zip=${eclipse.tests.zip}"/>
 				<arg value="-Djdt.compiler.apt=${jdt.compiler.apt}"/>
 				<arg value="-Djdt.compiler.tool=${jdt.compiler.tool}"/>
-	            <!--arg value="-verbose" /-->
+	            < ! - -arg value="-verbose" / - ->
 	            <jvmarg value="${vm.args}"/>
         </java>
+.. by try to re-use the compiler from the previous published build: -->
 		<!-- Now we should have an update site with the patch feature, time to install it into base: -->
         <ant antfile="${OTScriptDir}/p2helper.xml" target="installFeature" dir="${baseLocation}">
             <property name="feature" value="org.eclipse.objectteams.otdt.core.patch.feature.group"/>
-            <property name="sourceUpdatesDir" value="${compilerUpdatesDir}"/>
+            <property name="sourceUpdatesDir" value="${previousPublishedUpdatesDir}"/>
             <property name="targetEclipseDir" value="${baseLocation}"/>
         </ant>
     </target>
