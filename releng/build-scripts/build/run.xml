@@ -65,7 +65,7 @@ path to map file (with substitutions):
 
 		<!--	directories for update sites: -->
 		<property name="compilerUpdatesDir"		value="${user.dir}/updateSiteCompiler"/>
-		<property name="previousPublishedUpdatesDir"		value="http://download.eclipse.org/objectteams/updates/ot2.7/201806051508"/>
+		<property name="previousPublishedUpdatesDir"		value="http://download.eclipse.org/objectteams/updates/ot2.7/previous"/>
 		<property name="otdtUpdatesDir" 		value="${user.dir}/updateSite"/>
 		<property name="testsUpdatesDirBase" 	value="${user.dir}/updateSiteTests"/>
 			<!-- will have sub directories "eclipse" and "otdt" -->
