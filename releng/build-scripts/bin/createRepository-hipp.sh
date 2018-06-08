@@ -2,7 +2,7 @@
 
 # OPTIONAL VARIABLES TO BE SUPPLIED VIA ENV:
 # 	SIGN (unset or nosign)
-# 	PROMOTE (unset or true)
+# 	PROMOTE (unset or false or target directory)
 
 BASE=`pwd`
 
@@ -237,13 +237,13 @@ find . -type l -exec /bin/rm {} \;
 if [ "${PROMOTE}" != "false" ]
 then
 	BUILDID=`echo $OTDTVERSION | cut -d '.' -f 4`
-	if [ "${PROMOTE}" == "staging" ]
+	if [ "${PROMOTE}" != "" ]
 	then
-            DEST=${UPDATES_BASE}/${2}/staging
-            /bin/rm -rf ${DEST}
-        else
-            DEST=${UPDATES_BASE}/${2}/${BUILDID}
-        fi
+        DEST=${UPDATES_BASE}/${2}/${PROMOTE}
+        /bin/rm -rf ${DEST}
+    else
+        DEST=${UPDATES_BASE}/${2}/${BUILDID}
+    fi
 	echo "====Step 11: promote to ${DEST}===="
 	if [ -d ${UPDATES_BASE}/${2} ]
 	then

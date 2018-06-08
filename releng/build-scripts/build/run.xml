@@ -65,7 +65,8 @@ path to map file (with substitutions):
 
 		<!--	directories for update sites: -->
 		<property name="compilerUpdatesDir"		value="${user.dir}/updateSiteCompiler"/>
-		<property name="previousPublishedUpdatesDir"		value="http://download.eclipse.org/objectteams/updates/ot2.7/previous"/>
+		<!-- TODO: extract to prerequisistes? -->
+		<property name="compilerUpdatesDir"     value="http://download.eclipse.org/objectteams/updates/ot2.7/compiler"/>
 		<property name="otdtUpdatesDir" 		value="${user.dir}/updateSite"/>
 		<property name="testsUpdatesDirBase" 	value="${user.dir}/updateSiteTests"/>
 			<!-- will have sub directories "eclipse" and "otdt" -->
@@ -264,11 +265,11 @@ path to map file (with substitutions):
 		<!-- Now we should have an update site with the patch feature, time to install it into base: -->
         <ant antfile="${OTScriptDir}/p2helper.xml" target="installFeatureFromUrl" dir="${baseLocation}">
             <property name="feature" value="org.eclipse.objectteams.otdt.core.patch.feature.group"/>
-            <property name="sourceUpdatesUrl" value="${previousPublishedUpdatesDir}"/>
+            <property name="sourceUpdatesUrl" value="${compilerUpdatesDir}"/>
             <property name="targetEclipseDir" value="${baseLocation}"/>
         </ant>
 		<delete>
-		    <fileset dir="${baseLocation}/plugins/" includes="org.eclipse.jdt.core_3.14.0.v2018*" />
+		    <fileset dir="${baseLocation}/plugins/" includes="org.eclipse.jdt.core_*.v* org.eclipse.jdt.core.source_*.v*" />
 		</delete>
     </target>
 
