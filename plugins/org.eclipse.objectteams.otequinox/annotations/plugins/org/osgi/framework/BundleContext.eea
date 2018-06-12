@@ -3,3 +3,7 @@ class org/osgi/framework/BundleContext
 getBundle
  ()Lorg/osgi/framework/Bundle;
  ()L1org/osgi/framework/Bundle;
+
+registerService
+ ([Ljava/lang/String;Ljava/lang/Object;Ljava/util/Dictionary<Ljava/lang/String;*>;)Lorg/osgi/framework/ServiceRegistration<*>;
+ ([Ljava/lang/String;Ljava/lang/Object;Ljava/util/Dictionary<Ljava/lang/String;*>;)L1org/osgi/framework/ServiceRegistration<*>;

@@ -42,6 +42,26 @@ import org.osgi.framework.wiring.BundleWiring;
  */
 public abstract class DelegatingTransformer {
 
+	static final String OT_EQUINOX_DEBUG_AGENT = "org.eclipse.objectteams.otequinox.OTEquinoxAgent";
+
+	@SuppressWarnings("serial")
+	public static class OTAgentNotInstalled extends Exception {
+		OTAgentNotInstalled() {
+			super("Agent class "+DelegatingTransformer.OT_EQUINOX_DEBUG_AGENT+" was not installed. OT/Equinox will be desabled.\n" +
+					"If this happens during the restart after installing OT/Equinox, please exit Eclipse and perform a fresh start.");
+		}
+	}
+
+	static void checkAgentAvailability(WeavingScheme weavingScheme) throws OTAgentNotInstalled {
+		if (weavingScheme == WeavingScheme.OTDRE) {
+			try {
+				ClassLoader.getSystemClassLoader().loadClass(DelegatingTransformer.OT_EQUINOX_DEBUG_AGENT);
+			} catch (ClassNotFoundException cnfe) {
+				throw new OTAgentNotInstalled();
+			}
+		}
+	}
+
 	/** Factory method for a fresh transformer. */
 	static @NonNull DelegatingTransformer newTransformer(WeavingScheme weavingScheme, OTWeavingHook hook, BundleWiring wiring) {
 		switch (weavingScheme) {
@@ -90,9 +110,8 @@ public abstract class DelegatingTransformer {
 		}
 	}
 
-	/** Enable OTDRE to use the OTEquinoxDebugAgent, if present, for class redefinition. */
+	/** Enable OTDRE to use the OTEquinoxAgent, if present, for class redefinition. */
 	private static class OTEquinoxRedefineStrategy implements IRedefineStrategy {
-		private static final String OT_EQUINOX_DEBUG_AGENT = "org.eclipse.objectteams.otequinox.OTEquinoxAgent";
 
 		public void redefine(Class<?> clazz, byte[] bytecode) throws ClassNotFoundException, UnmodifiableClassException {
 			ClassDefinition arr_cd[] = { new ClassDefinition(clazz, bytecode) };

@@ -44,6 +44,7 @@ import org.eclipse.objectteams.internal.osgi.weaving.AspectBinding.BaseBundle;
 import org.eclipse.objectteams.internal.osgi.weaving.AspectBinding.TeamBinding;
 import org.eclipse.objectteams.internal.osgi.weaving.Util.ProfileKind;
 import org.eclipse.objectteams.internal.osgi.weaving.AspectPermissionManager;
+import org.eclipse.objectteams.internal.osgi.weaving.DelegatingTransformer.OTAgentNotInstalled;
 import org.eclipse.objectteams.otequinox.Constants;
 import org.eclipse.objectteams.otequinox.TransformerPlugin;
 import org.eclipse.objectteams.runtime.IReweavingTask;
@@ -143,7 +144,7 @@ public class OTWeavingHook implements WeavingHook, WovenClassListener {
 	private @Nullable Class<?> ooTeam;
 
 	/** Call-back once the extension registry is up and running. */
-	public void activate(@NonNull BundleContext bundleContext, ServiceReference<IExtensionRegistry> serviceReference) {
+	public void activate(@NonNull BundleContext bundleContext, ServiceReference<IExtensionRegistry> serviceReference) throws OTAgentNotInstalled {
 		loadAspectBindingRegistry(bundleContext, serviceReference);
 		TransformerPlugin.initialize(bundleContext, this.aspectBindingRegistry, this.permissionManager);
 	}
@@ -151,7 +152,7 @@ public class OTWeavingHook implements WeavingHook, WovenClassListener {
 	// ====== Aspect Bindings & Permissions: ======
 
 	@SuppressWarnings("deprecation")
-	private void loadAspectBindingRegistry(BundleContext context, ServiceReference<IExtensionRegistry> serviceReference) {
+	private void loadAspectBindingRegistry(BundleContext context, ServiceReference<IExtensionRegistry> serviceReference) throws OTAgentNotInstalled {
 		org.osgi.service.packageadmin.PackageAdmin packageAdmin = null;
 		
 		ServiceReference<?> ref= context.getServiceReference(org.osgi.service.packageadmin.PackageAdmin.class.getName());

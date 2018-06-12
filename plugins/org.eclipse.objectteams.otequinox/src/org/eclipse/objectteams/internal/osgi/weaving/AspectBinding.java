@@ -33,6 +33,7 @@ import org.eclipse.core.runtime.IStatus;
 import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
+import org.eclipse.objectteams.internal.osgi.weaving.DelegatingTransformer.OTAgentNotInstalled;
 import org.eclipse.objectteams.internal.osgi.weaving.OTWeavingHook.WeavingScheme;
 import org.eclipse.objectteams.internal.osgi.weaving.Util.ProfileKind;
 import org.eclipse.objectteams.otequinox.ActivationKind;
@@ -296,7 +297,7 @@ public class AspectBinding {
 	}
 
 	/** Create an initial (unconnected) resolved team binding. */
-	public TeamBinding createResolvedTeam(int count, String teamName, @Nullable String activationSpecifier, @Nullable String superTeamName) {
+	public TeamBinding createResolvedTeam(int count, String teamName, @Nullable String activationSpecifier, @Nullable String superTeamName) throws OTAgentNotInstalled {
 		@NonNull ActivationKind kind = ActivationKind.NONE;
 		try {
 			if (activationSpecifier != null)
@@ -308,7 +309,7 @@ public class AspectBinding {
 		return this.teams[count] = new TeamBinding(teamName, kind, superTeamName);
 	}
 
-	private void checkWeavingScheme(String className) {
+	private void checkWeavingScheme(String className) throws OTAgentNotInstalled {
 		if (this.weavingScheme != WeavingScheme.Unknown)
 			return;
 		Bundle bundle = this.aspectBundle;
@@ -319,7 +320,8 @@ public class AspectBinding {
 			this.weavingScheme = ASMByteCodeAnalyzer.determineWeavingScheme(classStream, className);
 			if (OTWeavingHook.DEFAULT_WEAVING_SCHEME == WeavingScheme.Unknown) {
 				OTWeavingHook.DEFAULT_WEAVING_SCHEME = this.weavingScheme;
-				TransformerPlugin.doLog(IStatus.INFO, "Using weaving scheme "+this.weavingScheme+" as detected from class "+className);				
+				TransformerPlugin.doLog(IStatus.INFO, "Using weaving scheme "+this.weavingScheme+" as detected from class "+className);	
+				DelegatingTransformer.checkAgentAvailability(this.weavingScheme);
 			}
 			TransformerPlugin.log(IStatus.INFO, "use weaving scheme "+this.weavingScheme+" for aspectBinding "+this.aspectPlugin+"<-"+this.basePluginName);
 		} catch (IOException e) {

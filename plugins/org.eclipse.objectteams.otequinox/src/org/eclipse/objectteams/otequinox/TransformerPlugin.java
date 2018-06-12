@@ -32,11 +32,13 @@ import org.eclipse.equinox.log.ExtendedLogReaderService;
 import org.eclipse.equinox.log.ExtendedLogService;
 import org.eclipse.equinox.log.LogFilter;
 import org.eclipse.equinox.log.Logger;
+import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
 import org.eclipse.objectteams.internal.osgi.weaving.AspectBinding;
 import org.eclipse.objectteams.internal.osgi.weaving.AspectBindingRegistry;
 import org.eclipse.objectteams.internal.osgi.weaving.AspectPermissionManager;
+import org.eclipse.objectteams.internal.osgi.weaving.DelegatingTransformer.OTAgentNotInstalled;
 import org.eclipse.objectteams.internal.osgi.weaving.OTWeavingHook;
 import org.eclipse.objectteams.otre.ClassLoaderAccess;
 import org.objectteams.Team;
@@ -47,6 +49,7 @@ import org.osgi.framework.InvalidSyntaxException;
 import org.osgi.framework.ServiceEvent;
 import org.osgi.framework.ServiceListener;
 import org.osgi.framework.ServiceReference;
+import org.osgi.framework.ServiceRegistration;
 import org.osgi.framework.hooks.weaving.WeavingHook;
 import org.osgi.framework.hooks.weaving.WovenClassListener;
 import org.osgi.service.log.LogEntry;
@@ -146,20 +149,22 @@ public class TransformerPlugin implements BundleActivator, IAspectRegistry {
 			
 			// register our weaving service:
 			final OTWeavingHook otWeavingHook = new OTWeavingHook();
-			bundleContext.registerService(new String[] { WeavingHook.class.getName(), WovenClassListener.class.getName() },
+			final ServiceRegistration<?> registration = bundleContext.registerService(new String[] { WeavingHook.class.getName(), WovenClassListener.class.getName() },
 					otWeavingHook, null);
 			
 			// but wait until the extension registry is available for reading aspectBindings:
 			try {
 				ServiceReference<IExtensionRegistry> reference = bundleContext.getServiceReference(IExtensionRegistry.class);
 				if (reference != null) {
-					otWeavingHook.activate(bundleContext, reference);
+					safeActivateHook(otWeavingHook, bundleContext, reference, registration);
 				} else {
 					bundleContext.addServiceListener(
-						new ServiceListener() { 
+						new ServiceListener() {
 							public void serviceChanged(ServiceEvent event) {
-								if(event.getType() == ServiceEvent.REGISTERED)
-									otWeavingHook.activate(bundleContext, bundleContext.getServiceReference(IExtensionRegistry.class));
+								if(event.getType() == ServiceEvent.REGISTERED) {
+									ServiceReference<IExtensionRegistry> extensionService = bundleContext.getServiceReference(IExtensionRegistry.class);
+									safeActivateHook(otWeavingHook, bundleContext, extensionService, registration);
+								}
 							}
 						},
 						"(objectclass="+IExtensionRegistry.class.getName()+")"); //$NON-NLS-1$ //$NON-NLS-2$
@@ -171,6 +176,19 @@ public class TransformerPlugin implements BundleActivator, IAspectRegistry {
 		}
 		agentURL = bundleContext.getBundle().getEntry("/"+OTEQUINOX_AGENT_JAR_FILENAME);
 		log(IStatus.INFO, "agentURL="+agentURL);
+	}
+
+	private void safeActivateHook(OTWeavingHook otWeavingHook, BundleContext bundleContext,
+			@Nullable ServiceReference<IExtensionRegistry> extensionService, ServiceRegistration<?> registration) {
+		try {
+			otWeavingHook.activate(bundleContext, extensionService);
+		} catch (OTAgentNotInstalled e) {
+			registration.unregister();
+			ILog log = acquireLog(bundleContext);
+			log.log(new Status(IStatus.ERROR,
+					bundleContext.getBundle().getSymbolicName(), 
+					"Error activating OT/Equinox: "+e.getMessage()));
+		}
 	}
 
 	@SuppressWarnings("restriction")

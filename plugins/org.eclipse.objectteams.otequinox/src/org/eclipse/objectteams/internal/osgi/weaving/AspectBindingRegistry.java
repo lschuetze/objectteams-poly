@@ -48,6 +48,7 @@ import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
 import org.eclipse.objectteams.internal.osgi.weaving.AspectBinding.BaseBundle;
 import org.eclipse.objectteams.internal.osgi.weaving.AspectBinding.TeamBinding;
+import org.eclipse.objectteams.internal.osgi.weaving.DelegatingTransformer.OTAgentNotInstalled;
 import org.eclipse.objectteams.otequinox.Constants;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.wiring.BundleWiring;
@@ -89,7 +90,7 @@ public class AspectBindingRegistry {
 	public void loadAspectBindings(
 			IExtensionRegistry extensionRegistry,
 			@SuppressWarnings("deprecation") @Nullable org.osgi.service.packageadmin.PackageAdmin packageAdmin,
-			OTWeavingHook hook) 
+			OTWeavingHook hook) throws OTAgentNotInstalled 
 	{
 		IConfigurationElement[] aspectBindingConfigs = extensionRegistry
 				.getConfigurationElementsFor(TRANSFORMER_PLUGIN_ID, ASPECT_BINDING_EXTPOINT_ID);
@@ -167,6 +168,8 @@ public class AspectBindingRegistry {
 				hook.setBaseTripWire(packageAdmin, realBaseBundleId, baseBundle);
 
 				log(IStatus.INFO, "registered:\n"+binding);
+			} catch (OTAgentNotInstalled otani) {
+				throw otani;
 			} catch (Throwable t) {
 				log(t, "Invalid aspectBinding extension");
 			}
@@ -191,7 +194,7 @@ public class AspectBindingRegistry {
 	private AspectBinding addSuperBase(IConfigurationElement superBase, String aspectBundleId, @Nullable Bundle aspectBundle,
 			BaseBundle baseBundle, TeamBinding teamBinding,
 			@SuppressWarnings("deprecation") @Nullable org.osgi.service.packageadmin.PackageAdmin packageAdmin,
-			OTWeavingHook hook)
+			OTWeavingHook hook) throws OTAgentNotInstalled
 	{
 		String superBaseClass = superBase.getAttribute(SUPER_BASE_CLASS);
 		String superBasePlugin = superBase.getAttribute(SUPER_BASE_PLUGIN);
