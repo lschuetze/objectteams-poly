@@ -367,18 +367,6 @@ done < ${WORKSPACE}/sourceBundles.txt
 # copy ecj-src from build output (NB: we are mapping from SDK version (4.x) back to ECJ version (3.x)):
 /bin/cp ${DROPS4}/${SDK_BUILD_DIR}/ecjsrc-${SDK_VERSION}.jar org/eclipse/jdt/ecj/${ECJ_VERSION}/ecj-${ECJ_VERSION}-sources.jar
 
-# special hack for missing source bundle with several source folders with blanks:
-buildSourceJar platform/eclipse.platform.swt.git \
-	bundles/org.eclipse.swt.tools \
-	R4_7_3_a \
-	org/eclipse/platform org.eclipse.swt.tools 3.106.0 \
-	"JNI Generation" \
-  	"Mac Generation" \
-    "Icon Exe" \
-    "NativeStats" \
-	"Mozilla Generation" \
-	"JavadocBasher"
-
 echo "========== Repo completed ========="
 
 create_baseline

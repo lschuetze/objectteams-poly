@@ -2,25 +2,25 @@
 <aggregator:Aggregation xmi:version="2.0" xmlns:xmi="http://www.omg.org/XMI" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:aggregator="http://www.eclipse.org/cbi/p2repo/2011/aggregator/1.1.0" label="SDK4Mvn" packedStrategy="UNPACK_AS_SIBLING" type="R" mavenResult="true" versionFormat="MavenRelease">
   <validationSets label="main">
     <contributions enabled="true" label="sdk">
-      <repositories location="/home/data/httpd/download.eclipse.org/eclipse/updates/4.7/R-4.7.3a-201803300640/">
+      <repositories location="/home/data/httpd/download.eclipse.org/eclipse/updates/4.8milestones/S-4.8RC4a-201806110500/">
         <mapRules xsi:type="aggregator:ExclusionRule" name="org.eclipse.e4.core.tools.feature.feature.group"/>
         <mapRules xsi:type="aggregator:ExclusionRule" name="org.eclipse.e4.core.tools.feature.source.feature.group"/>
       </repositories>
-      <repositories location="/home/data/httpd/download.eclipse.org/eclipse/updates/4.7/R-4.7.3a-201803300640/">
+      <repositories location="/home/data/httpd/download.eclipse.org/eclipse/updates/4.8milestones/S-4.8RC4a-201806110500/">
         <bundles name="org.eclipse.jdt.core.compiler.batch"/>
       </repositories>
     </contributions>
     <contributions enabled="false" label="sdk_http">
-      <repositories location="http://download.eclipse.org/eclipse/updates/4.7/R-4.7.3a-201803300640/">
+      <repositories location="http://download.eclipse.org/eclipse/updates/4.8milestones/S-4.8RC4a-201806110500/">
         <mapRules xsi:type="aggregator:ExclusionRule" name="org.eclipse.e4.core.tools.feature.feature.group"/>
         <mapRules xsi:type="aggregator:ExclusionRule" name="org.eclipse.e4.core.tools.feature.source.feature.group"/>
       </repositories>
-      <repositories location="http://download.eclipse.org/eclipse/updates/4.7/R-4.7.3a-201803300640/">
+      <repositories location="http://download.eclipse.org/eclipse/updates/4.8milestones/S-4.8RC4a-201806110500/">
         <bundles name="org.eclipse.jdt.core.compiler.batch"/>
       </repositories>
     </contributions>
-    <validationRepositories enabled="true" location="/home/data/httpd/download.eclipse.org/modeling/emf/emf/updates/2.13"/>
-    <validationRepositories enabled="false" location="http://download.eclipse.org/modeling/emf/emf/updates/2.13"/>
+    <validationRepositories enabled="true" location="/home/data/httpd/download.eclipse.org/modeling/emf/emf/builds/milestone/S201805310718"/>
+    <validationRepositories enabled="false" location="http://download.eclipse.org/modeling/emf/emf/builds/milestone/S201805310718"/>
   </validationSets>
   <configurations operatingSystem="aix" windowSystem="gtk" architecture="ppc"/>
   <configurations operatingSystem="aix" windowSystem="gtk" architecture="ppc64"/>
