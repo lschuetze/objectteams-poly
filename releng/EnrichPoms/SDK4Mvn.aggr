@@ -20,7 +20,9 @@
       </repositories>
     </contributions>
     <validationRepositories enabled="true" location="/home/data/httpd/download.eclipse.org/modeling/emf/emf/builds/milestone/S201805310718"/>
-    <validationRepositories enabled="false" location="http://download.eclipse.org/modeling/emf/emf/builds/milestone/S201805310718"/>
+    <validationRepositories enabled="false" location="/home/data/httpd/download.eclipse.org/modeling/emf/emf/builds/milestone/S201805310718"/>
+    <validationRepositories enabled="true" location="http://download.eclipse.org/tools/orbit/downloads/drops/R20180606145124/"/>
+    <validationRepositories enabled="false" location="http://download.eclipse.org/tools/orbit/downloads/drops/R20180606145124/"/>
   </validationSets>
   <configurations operatingSystem="aix" windowSystem="gtk" architecture="ppc"/>
   <configurations operatingSystem="aix" windowSystem="gtk" architecture="ppc64"/>
@@ -71,6 +73,7 @@
   <mavenMappings namePattern="org\.(sat4j)\.(.*)" groupId="org.ow2.$1" artifactId="org.ow2.$1.$2"/>
   <mavenMappings namePattern="org.w3c.css.sac" groupId="org.eclipse.birt.runtime" artifactId="org.w3c.css.sac"/>
   <mavenMappings namePattern="org.apache.batik.css" groupId="org.apache.xmlgraphics" artifactId="batik-css" versionPattern="([^.]+)\.([^.]+)\.0(?:\..*)?" versionTemplate="$1.$2"/>
+  <mavenMappings namePattern="com.google.gson" groupId="com.google.code.gson" artifactId="gson"/>
   <mavenMappings namePattern="^(([^.]+(?:\.[^.]+(?:\.[^.]+)?)?)(?:\.[^.]+)*)$" groupId="$2" artifactId="$1"/>
   <mavenMappings namePattern="(.*)" groupId="p2.osgi.bundle" artifactId="$1"/>
 </aggregator:Aggregation>
