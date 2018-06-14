@@ -21,8 +21,8 @@
     </contributions>
     <validationRepositories enabled="true" location="/home/data/httpd/download.eclipse.org/modeling/emf/emf/builds/milestone/S201805310718"/>
     <validationRepositories enabled="false" location="/home/data/httpd/download.eclipse.org/modeling/emf/emf/builds/milestone/S201805310718"/>
-    <validationRepositories enabled="true" location="http://download.eclipse.org/tools/orbit/downloads/drops/R20180606145124/"/>
-    <validationRepositories enabled="false" location="http://download.eclipse.org/tools/orbit/downloads/drops/R20180606145124/"/>
+    <validationRepositories enabled="true" location="http://download.eclipse.org/tools/orbit/downloads/drops/R20180606145124/repository"/>
+    <validationRepositories enabled="false" location="http://download.eclipse.org/tools/orbit/downloads/drops/R20180606145124/repository"/>
   </validationSets>
   <configurations operatingSystem="aix" windowSystem="gtk" architecture="ppc"/>
   <configurations operatingSystem="aix" windowSystem="gtk" architecture="ppc64"/>
