@@ -7,16 +7,12 @@
 BASE=`pwd`
 
 # ABSOLUTE PATHS:
-export STAGINGBASE=/opt/public/download-staging.priv/tools/objectteams
 export UPDATES_BASE=/home/data/httpd/download.eclipse.org/objectteams/updates
-export JAVA5=/shared/common/jdk1.5.0-latest
 export JAVA8=/shared/common/jdk1.8.0_x64-latest
 
 # RELATIVE PATHS:
 BUILD=${BASE}/releng/build-scripts/build
 METADATA=${BASE}/metadata
-
-export JAR_PROCESSOR_JAVA=java8
 
 # Find the master repository to build upon:
 if [ "$1" == "none" ]
