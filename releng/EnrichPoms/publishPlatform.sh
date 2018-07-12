@@ -54,11 +54,13 @@ function same_as_baseline() {
 		local base_single
 		while read -d "," base_single
 		do
-			if [ $base_single == $version ]
-			then
+			if [ $base_single == $version ]; then
 				return 0
 			fi
 		done <<< "$base_versions"
+		if [ $base_single == $version ]; then
+			return 0
+		fi
 	else
 		echo "Plug-in ${name}: ${version} seems to be new"
 		return 1
