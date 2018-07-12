@@ -47,14 +47,25 @@ function same_as_baseline() {
 	simple=`basename $1`
 	name=`echo $simple | sed -e "s|\(.*\)-.*|\1|" | tr '.' '_'`
 	version=`echo $simple | sed -e "s|.*-\(.*\).pom|\1|"`
-	base_version=`eval echo \\${VERSION_$name}`
-	if [[ $base_version =~ $version ]]
+	base_versions=`eval echo \\${VERSION_$name}`
+	if [ -n $base_versions ]
 	then
-		return 0
+		local base_single
+		while read -d "," base_single
+		do
+			if [ $base_single == $version ]; then
+				return 0
+			fi
+		done <<< "$base_versions"
+		if [ $base_single == $version ]; then
+			return 0
+		fi
 	else
-		echo "different versions for ${name}: ${version} is not in ${base_version}"
+		echo "Plug-in ${name}: ${version} seems to be new"
 		return 1
 	fi
+	echo "different versions for ${name}: ${version} is not in ${base_versions}"
+	return 1
 }
 
 for pomFile in org/eclipse/pde/*/*/*.pom

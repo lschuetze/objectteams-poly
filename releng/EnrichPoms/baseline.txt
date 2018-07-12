@@ -303,6 +303,3 @@ VERSION_org_eclipse_ui_win32=3.4.0
 VERSION_org_eclipse_ui_workbench=3.111.0
 VERSION_org_eclipse_ui_workbench_texteditor=3.11.0
 VERSION_org_eclipse_update_configurator=3.4.0
-# temporarily reset to previous to force upload these two missing artifacts:
-VERSION_org_eclipse_equinox_console=1.1.300
-VERSION_org_eclipse_update_configurator=3.3.400
