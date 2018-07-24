@@ -1,7 +1,7 @@
 /**********************************************************************
  * This file is part of "Object Teams Development Tooling"-Software
  * 
- * Copyright 2015, 2016 GK Software AG
+ * Copyright 2015, 2018 GK Software SE
  *  
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -24,6 +24,7 @@ import java.lang.reflect.InvocationTargetException;
 import java.net.URL;
 import java.security.ProtectionDomain;
 import java.util.Collection;
+import java.util.EnumSet;
 
 import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.objectteams.internal.osgi.weaving.OTWeavingHook.WeavingReason;
@@ -164,12 +165,11 @@ public abstract class DelegatingTransformer {
 	static IWeavingContext getWeavingContext(final OTWeavingHook hook, final BundleWiring bundleWiring) {
 		return new IWeavingContext() {
 			@Override
-			public boolean isWeavable(String className) {
-				return isWeavable(className, false);
-			}
-			@Override
 			public boolean isWeavable(String className, boolean considerSupers) {
-				return className != null && hook.requiresWeaving(bundleWiring, className, null, considerSupers) != WeavingReason.None;
+				if (className == null)
+					return false;
+				WeavingReason reason = hook.requiresWeaving(bundleWiring, className, null, considerSupers, EnumSet.of(WeavingReason.Base));
+				return reason != WeavingReason.None;
 			}
 			
 			@Override

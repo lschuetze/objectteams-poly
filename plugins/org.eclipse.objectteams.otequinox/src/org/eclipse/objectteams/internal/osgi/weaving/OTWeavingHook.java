@@ -1,7 +1,7 @@
 /**********************************************************************
  * This file is part of "Object Teams Development Tooling"-Software
  * 
- * Copyright 2013, 2015 GK Software AG
+ * Copyright 2013, 2018 GK Software SE
  *  
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -28,6 +28,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.EnumSet;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -266,7 +267,7 @@ public class OTWeavingHook implements WeavingHook, WovenClassListener {
 			}
 
 			byte[] bytes = wovenClass.getBytes();
-			WeavingReason reason = requiresWeaving(bundleWiring, className, bytes, true);
+			WeavingReason reason = requiresWeaving(bundleWiring, className, bytes, true, EnumSet.allOf(WeavingReason.class));
 			if (reason != WeavingReason.None) {
 				// do whatever is needed *before* loading this class:
 				boolean allAspectsAreDenied = triggerBaseTripWires(bundleName, wovenClass);
@@ -336,37 +337,48 @@ public class OTWeavingHook implements WeavingHook, WovenClassListener {
 		return false;
 	}
 
-	WeavingReason requiresWeaving(BundleWiring bundleWiring, @NonNull String className, byte[] bytes, boolean considerSupers) {
+	WeavingReason requiresWeaving(BundleWiring bundleWiring, @NonNull String className, byte[] bytes,
+			boolean considerSupers, EnumSet<WeavingReason> considerReasons) {
 		
 		// 1. consult the aspect binding registry (for per-bundle info):
 		@SuppressWarnings("null")@NonNull // FIXME: org.eclipse.osgi.internal.resolver.BundleDescriptionImpl.getBundle() can return null!
 		Bundle bundle = bundleWiring.getBundle();
-		if (aspectBindingRegistry.getAdaptedBasePlugins(bundle) != null)
-			return WeavingReason.Aspect;
+		if (considerReasons.contains(WeavingReason.Aspect)) {
+			if (aspectBindingRegistry.getAdaptedBasePlugins(bundle) != null)
+				return WeavingReason.Aspect;
+		}
 
-		if (aspectBindingRegistry.isBoundBaseClass(className))
-			return WeavingReason.Base;
 		boolean isBaseBundle = false;
-		List<AspectBinding> aspectBindings = aspectBindingRegistry.getAdaptingAspectBindings(bundle.getSymbolicName());
-		if (aspectBindings != null && !aspectBindings.isEmpty()) {
-			isBaseBundle = true;
-			if (bytes != null) { // with bytes == null we are invoked from OTDRE's IWeavingContext.isWeavable(), must not prematurely answer yes
-				// potential base class: look deeper:
-				for (AspectBinding aspectBinding : aspectBindings) {
-					if (!aspectBinding.hasScannedTeams && !aspectBinding.hasBeenDenied)
-						return WeavingReason.Base; // we may be first, go ahead and trigger the trip wire
+		if (considerReasons.contains(WeavingReason.Base) || considerReasons.contains(WeavingReason.Thread)) {
+			if (considerReasons.contains(WeavingReason.Base)) {
+				if (aspectBindingRegistry.isBoundBaseClass(className))
+					return WeavingReason.Base;
+			}
+			List<AspectBinding> aspectBindings = aspectBindingRegistry.getAdaptingAspectBindings(bundle.getSymbolicName());
+			if (aspectBindings != null && !aspectBindings.isEmpty()) {
+				isBaseBundle = true;
+				if (considerReasons.contains(WeavingReason.Base)) {
+					if (bytes != null) { // with bytes == null we are invoked from OTDRE's IWeavingContext.isWeavable(), must not prematurely answer yes
+						// potential base class: look deeper:
+						for (AspectBinding aspectBinding : aspectBindings) {
+							if (!aspectBinding.hasScannedTeams && !aspectBinding.hasBeenDenied)
+								return WeavingReason.Base; // we may be first, go ahead and trigger the trip wire
+						}
+					}
+					if (isAdaptedBaseClass(aspectBindings, className, considerSupers, bytes, bundleWiring.getClassLoader()))
+						return WeavingReason.Base;
 				}
 			}
-			if (isAdaptedBaseClass(aspectBindings, className, considerSupers, bytes, bundleWiring.getClassLoader()))
-				return WeavingReason.Base;					
 		}
 			
 		// 2. test for implementation of Runnable / Thread (per class):
-		long time = 0;
-		if (Util.PROFILE) time= System.nanoTime();
-		if (needsThreadNotificationCode(className, bytes, bundleWiring.getClassLoader(), isBaseBundle))
-			return WeavingReason.Thread;
-		if (Util.PROFILE) Util.profile(time, ProfileKind.SuperClassFetching, "");
+		if (considerReasons.contains(WeavingReason.Thread)) {
+			long time = 0;
+			if (Util.PROFILE) time= System.nanoTime();
+			if (needsThreadNotificationCode(className, bytes, bundleWiring.getClassLoader(), isBaseBundle))
+				return WeavingReason.Thread;
+			if (Util.PROFILE) Util.profile(time, ProfileKind.SuperClassFetching, "");
+		}
 
 		return WeavingReason.None;
 	}
