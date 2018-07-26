@@ -422,10 +422,15 @@ public FlowInfo analyseCode(BlockScope currentScope, FlowContext flowContext, Fl
 			return;
 		}
 
-		boolean mayRequireTypeInference = scope.environment().usesNullTypeAnnotations() 
-				&& variableType.isValidBinding()
-				&& (this.initialization instanceof Invocation || this.initialization instanceof ConditionalExpression);
-		if (mayRequireTypeInference) {
+		boolean resolveAnnotationsEarly = false;
+		if (scope.environment().usesNullTypeAnnotations() 
+				&& !isTypeNameVar // 'var' does not provide a target type
+				&& variableType.isValidBinding()) { 
+			resolveAnnotationsEarly = this.initialization instanceof Invocation
+					|| this.initialization instanceof ConditionalExpression
+					|| this.initialization instanceof ArrayInitializer;
+		}
+		if (resolveAnnotationsEarly) {
 			// these are definitely no constants, so resolving annotations early should be safe
 			resolveAnnotations(scope, this.annotations, this.binding, true);
 			// for type inference having null annotations upfront gives better results
@@ -492,9 +497,13 @@ public FlowInfo analyseCode(BlockScope currentScope, FlowContext flowContext, Fl
 // SH}
 		}
 		// if init could be a constant only resolve annotation at the end, for constant to be positioned before (96991)
-		if (!mayRequireTypeInference)
+		if (!resolveAnnotationsEarly)
 			resolveAnnotations(scope, this.annotations, this.binding, true);
 		Annotation.isTypeUseCompatible(this.type, scope, this.annotations);
+		validateNullAnnotations(scope);
+	}
+
+	void validateNullAnnotations(BlockScope scope) {
 		if (!scope.validateNullAnnotation(this.binding.tagBits, this.type, this.annotations))
 			this.binding.tagBits &= ~TagBits.AnnotationNullMASK;
 	}

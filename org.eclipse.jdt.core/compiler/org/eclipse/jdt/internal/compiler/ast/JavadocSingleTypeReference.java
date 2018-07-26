@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2014 IBM Corporation and others.
+ * Copyright (c) 2000, 2018 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -19,8 +19,11 @@ import org.eclipse.jdt.internal.compiler.lookup.Binding;
 import org.eclipse.jdt.internal.compiler.lookup.BlockScope;
 import org.eclipse.jdt.internal.compiler.lookup.ClassScope;
 import org.eclipse.jdt.internal.compiler.lookup.CompilationUnitScope;
+import org.eclipse.jdt.internal.compiler.lookup.LocalTypeBinding;
 import org.eclipse.jdt.internal.compiler.lookup.PackageBinding;
 import org.eclipse.jdt.internal.compiler.lookup.ProblemReasons;
+import org.eclipse.jdt.internal.compiler.lookup.ProblemReferenceBinding;
+import org.eclipse.jdt.internal.compiler.lookup.ReferenceBinding;
 import org.eclipse.jdt.internal.compiler.lookup.Scope;
 import org.eclipse.jdt.internal.compiler.lookup.TypeBinding;
 import org.eclipse.objectteams.otdt.internal.core.compiler.lookup.OTClassScope;
@@ -61,6 +64,14 @@ public class JavadocSingleTypeReference extends SingleTypeReference {
 			}
 		}
 		this.resolvedType = getTypeBinding(scope);
+		if (this.resolvedType instanceof LocalTypeBinding) {
+			// scope grants access to local types within this method, which, however, are illegal in javadoc
+			LocalTypeBinding localType = (LocalTypeBinding) this.resolvedType;
+			if (localType.scope != null && localType.scope.parent == scope) {
+				this.resolvedType = new ProblemReferenceBinding(new char[][] { localType.sourceName },
+						(ReferenceBinding) this.resolvedType, ProblemReasons.NotFound);
+			}
+		}
 		// End resolution when getTypeBinding(scope) returns null. This may happen in
 		// certain circumstances, typically when an illegal access is done on a type
 		// variable (see bug https://bugs.eclipse.org/bugs/show_bug.cgi?id=204749)

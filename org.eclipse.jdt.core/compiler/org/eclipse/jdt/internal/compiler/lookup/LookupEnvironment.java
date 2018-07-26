@@ -911,6 +911,7 @@ public TypeBinding computeBoxingType(TypeBinding type) {
 		case Binding.WILDCARD_TYPE :
 		case Binding.INTERSECTION_TYPE :
 		case Binding.TYPE_PARAMETER :
+		case Binding.INTERSECTION_TYPE18:
 			switch (type.erasure().id) {
 				case TypeIds.T_JavaLangBoolean :
 					return TypeBinding.BOOLEAN;
@@ -932,8 +933,6 @@ public TypeBinding computeBoxingType(TypeBinding type) {
 			break;
 		case Binding.POLY_TYPE:
 			return ((PolyTypeBinding) type).computeBoxingType();
-		case Binding.INTERSECTION_TYPE18:
-			return computeBoxingType(type.getIntersectingTypes()[0]);
 	}
 	return type;
 }

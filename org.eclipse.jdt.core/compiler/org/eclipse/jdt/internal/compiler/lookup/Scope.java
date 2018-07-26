@@ -61,6 +61,7 @@
 package org.eclipse.jdt.internal.compiler.lookup;
 
 import java.util.*;
+import java.util.function.Function;
 
 import org.eclipse.jdt.core.compiler.CharOperation;
 import org.eclipse.jdt.internal.compiler.ast.*;
@@ -410,6 +411,7 @@ public abstract class Scope {
 	// 5.1.10
 	public static ReferenceBinding[] greaterLowerBound(ReferenceBinding[] types) {
 		if (types == null) return null;
+		types = filterValidTypes(types, ReferenceBinding[]::new);
 		int length = types.length;
 		if (length == 0) return null;
 		ReferenceBinding[] result = types;
@@ -448,6 +450,7 @@ public abstract class Scope {
 	// 5.1.10
 	public static TypeBinding[] greaterLowerBound(TypeBinding[] types, /*@Nullable*/ Scope scope, LookupEnvironment environment) {
 		if (types == null) return null;
+		types = filterValidTypes(types, TypeBinding[]::new);
 		int length = types.length;
 		if (length == 0) return null;
 		TypeBinding[] result = types;
@@ -520,6 +523,20 @@ public abstract class Scope {
 			}
 		}
 		return trimmedResult;
+	}
+
+	static <T extends TypeBinding> T[] filterValidTypes(T[] allTypes, Function<Integer,T[]> ctor) {
+		T[] valid = ctor.apply(allTypes.length);
+		int count = 0;
+		for (int i = 0; i < allTypes.length; i++) {
+			if (allTypes[i].isValidBinding())
+				valid[count++] = allTypes[i];
+		}
+		if (count == allTypes.length)
+			return allTypes;
+		if (count == 0 && allTypes.length > 0)
+			return Arrays.copyOf(allTypes, 1); // if all are invalid pick the first as a placeholder to prevent general glb failure
+		return Arrays.copyOf(valid, count);
 	}
 
 	static boolean isMalformedPair(TypeBinding t1, TypeBinding t2, Scope scope) {
@@ -822,6 +839,10 @@ public abstract class Scope {
 					return false;
 			}
 		}
+		return false;
+	}
+
+	public boolean isModuleScope() {
 		return false;
 	}
 
@@ -4387,7 +4408,18 @@ public abstract class Scope {
 				otherBounds[rank++] = mec;
 			}
 		}
-		TypeBinding intersectionType = environment().createWildcard(null, 0, firstBound, otherBounds, Wildcard.EXTENDS);  // pass common null annotations by synthesized annotation bindings.
+		TypeBinding intersectionType;
+		if (environment().globalOptions.complianceLevel < ClassFileConstants.JDK1_8) {
+			intersectionType = environment().createWildcard(null, 0, firstBound, otherBounds, Wildcard.EXTENDS);
+		} else {
+			// It _should_ be safe to assume only ReferenceBindings at this point, because
+			// - base types are rejected in minimalErasedCandidates
+			// - arrays are peeled, different dims are rejected above ("not all types have same dimension")
+			ReferenceBinding[] intersectingTypes = new ReferenceBinding[otherBounds.length+1];
+			intersectingTypes[0] = (ReferenceBinding) firstBound;
+			System.arraycopy(otherBounds, 0, intersectingTypes, 1, otherBounds.length);
+			intersectionType = environment().createIntersectionType18(intersectingTypes);
+		}
 		return commonDim == 0 ? intersectionType : environment().createArrayType(intersectionType, commonDim);
 	}
 
@@ -5646,7 +5678,7 @@ public abstract class Scope {
 	}
 
 	public boolean validateNullAnnotation(long tagBits, TypeReference typeRef, Annotation[] annotations) {
-		if (typeRef == null)
+		if (typeRef == null || typeRef.resolvedType == null)
 			return true;
 		TypeBinding type = typeRef.resolvedType;
 

@@ -17551,4 +17551,103 @@ public void testBug533339() {
 	runner.javacTestOptions = JavacTestOptions.Excuse.EclipseHasSomeMoreWarnings;
 	runner.runWarningTest();
 }
+public void testBug534516() {
+	runConformTestWithLibs(
+			new String[] {
+				"testbug/nullannotations/Utility.java",
+				"package testbug.nullannotations;\n" +
+				"\n" +
+				"import org.eclipse.jdt.annotation.NonNullByDefault;\n" +
+				"\n" +
+				"@NonNullByDefault\n" +
+				"public class Utility {\n" +
+				"\n" +
+				"	public static String massageString(final String input) {\n" +
+				"		return input + \" .\";\n" +
+				"	}\n" +
+				"\n" +
+				"	private Utility() {\n" +
+				"\n" +
+				"	}\n" +
+				"\n" +
+				"}\n" +
+				"",
+			}, 
+			getCompilerOptions(),
+			""
+		);
+	runConformTestWithLibs(
+			false,
+			new String[] {
+				"testbug/nullannotations/ApplyIfNonNullElseGetBugDemo.java",
+				"package testbug.nullannotations;\n" +
+				"\n" +
+				"import java.util.function.Function;\n" +
+				"import org.eclipse.jdt.annotation.NonNull;\n" +
+				"import org.eclipse.jdt.annotation.Nullable;\n" +
+				"\n" +
+				"public class ApplyIfNonNullElseGetBugDemo {\n" +
+				"\n" +
+				"	public static <T, U> U applyIfNonNullElse(@Nullable T value, @NonNull Function<@NonNull ? super T, ? extends U> function, U fallbackValue) {\n" + 
+				"		if (value != null)\n" + 
+				"			return function.apply(value);\n" + 
+				"		return fallbackValue;\n" + 
+				"	}\n" + 
+				"\n" +
+				"	public static void main(final @Nullable String[] args) {\n" +
+				"		final @Nullable String arg = args.length == 0 ? null : args[0];\n" +
+				"		System.out.println(applyIfNonNullElse(arg, Utility::massageString, \"\")); // incorrect warning here\n" +
+				"	}\n" +
+				"\n" +
+				"}\n" +
+				"",
+			}, 
+			getCompilerOptions(),
+			""
+		);
+}
+public void testBug536459() {
+	runConformTestWithLibs(
+			new String[] {
+				"X.java",
+				"import org.eclipse.jdt.annotation.Nullable;\n" + 
+				"\n" + 
+				"public class X {\n" + 
+				"    static void x() {\n" + 
+				"        @Nullable String x1 = \"\";\n" + 
+				"        @Nullable String[] x2 = { \"\" };\n" + 
+				"    }\n" + 
+				"}\n"
+			},
+			getCompilerOptions(),
+			"");
+}
+public void testBug536555() {
+	Runner runner = new Runner();
+	runner.customOptions = getCompilerOptions();
+	runner.customOptions.put(JavaCore.COMPILER_DOC_COMMENT_SUPPORT, JavaCore.ENABLED);
+	runner.testFiles =
+			new String[] {
+				"Foo.java",
+				"public class Foo\n" + 
+				"{\n" + 
+				"	/** Test {@link #foo(boolean)}. */\n" + 
+				"	public static final String TEST = \"foo\";\n" + 
+				"\n" + 
+				"	public void foo(@SuppressWarnings(TEST) final boolean test)\n" + 
+				"	{\n" + 
+				"		System.out.println(test);\n" + 
+				"	}\n" + 
+				"}\n"
+			};
+	runner.expectedCompilerLog =
+			"----------\n" + 
+			"1. WARNING in Foo.java (at line 6)\n" + 
+			"	public void foo(@SuppressWarnings(TEST) final boolean test)\n" + 
+			"	                                  ^^^^\n" + 
+			"Unsupported @SuppressWarnings(\"foo\")\n" + 
+			"----------\n";
+	runner.javacTestOptions = JavacTestOptions.Excuse.EclipseHasSomeMoreWarnings;
+	runner.runWarningTest();
+}
 }

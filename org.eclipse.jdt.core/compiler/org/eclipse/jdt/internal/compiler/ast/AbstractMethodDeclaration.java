@@ -837,7 +837,6 @@ public abstract class AbstractMethodDeclaration
 //{ObjectTeams: no javadoc in generated / copied methods
 		  if (!(this.isGenerated || this.isCopied))
 // SH}
-			resolveJavadoc();
 			resolveAnnotations(this.scope, this.annotations, this.binding, this.isConstructor());
 			
 			long sourceLevel = this.scope.compilerOptions().sourceLevel;

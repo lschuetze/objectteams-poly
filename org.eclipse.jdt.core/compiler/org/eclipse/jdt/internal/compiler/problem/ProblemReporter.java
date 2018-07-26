@@ -2084,14 +2084,19 @@ public void deprecatedModule(ModuleReference moduleReference, ModuleBinding requ
 }
 String deprecatedSinceValue(Supplier<AnnotationBinding[]> annotations) {
 	if (this.options != null && this.options.complianceLevel >= ClassFileConstants.JDK9) {
-		for (AnnotationBinding annotationBinding : annotations.get()) {
-			if (annotationBinding.getAnnotationType().id == TypeIds.T_JavaLangDeprecated) {
-				for (ElementValuePair elementValuePair : annotationBinding.getElementValuePairs()) {
-					if (CharOperation.equals(elementValuePair.getName(), TypeConstants.SINCE) && elementValuePair.value instanceof StringConstant)
-						return ((StringConstant) elementValuePair.value).stringValue();
+		ReferenceContext contextSave = this.referenceContext;
+		try {
+			for (AnnotationBinding annotationBinding : annotations.get()) {
+				if (annotationBinding.getAnnotationType().id == TypeIds.T_JavaLangDeprecated) {
+					for (ElementValuePair elementValuePair : annotationBinding.getElementValuePairs()) {
+						if (CharOperation.equals(elementValuePair.getName(), TypeConstants.SINCE) && elementValuePair.value instanceof StringConstant)
+							return ((StringConstant) elementValuePair.value).stringValue();
+					}
+					break;
 				}
-				break;
 			}
+		} finally {
+			this.referenceContext = contextSave;
 		}
 	}
 	return null;
@@ -9253,8 +9258,8 @@ public void uninitializedNonNullField(FieldBinding field, ASTNode location) {
 		nodeSourceStart(field, location),
 		nodeSourceEnd(field, location));
 }
-public void uninitializedLocalVariable(LocalVariableBinding binding, ASTNode location) {
-	binding.tagBits |= TagBits.NotInitialized;
+public void uninitializedLocalVariable(LocalVariableBinding binding, ASTNode location, Scope scope) {
+	binding.markAsUninitializedIn(scope);
 	String[] arguments = new String[] {new String(binding.readableName())};
 	this.handle(
 		methodHasMissingSwitchDefault() ? IProblem.UninitializedLocalVariableHintMissingDefault : IProblem.UninitializedLocalVariable,
@@ -14644,7 +14649,8 @@ public void illegalAnnotationForBaseType(TypeReference type, Annotation[] annota
 	char[][] annotationNames = (nullAnnotationTagBit == TagBits.AnnotationNonNull)
 			? this.options.nonNullAnnotationName
 			: this.options.nullableAnnotationName;
-	String[] args = new String[] { new String(annotationNames[annotationNames.length-1]), new String(type.getLastToken()) };
+	String typeName = new String(type.resolvedType.leafComponentType().readableName()); // use the actual name (accounting for 'var')
+	String[] args = new String[] { new String(annotationNames[annotationNames.length-1]), typeName };
 	Annotation annotation = findAnnotation(annotations, typeBit);
 	int start = annotation != null ? annotation.sourceStart : type.sourceStart;
 	int end = annotation != null ? annotation.sourceEnd : type.sourceEnd;
@@ -15378,7 +15384,6 @@ public void unnamedPackageInNamedModule(ModuleBinding module) {
 	handle(IProblem.UnnamedPackageInNamedModule,
 			args,
 			args,
-			ProblemSeverities.Warning,
 			0,
 			0);
 }
