@@ -65,6 +65,7 @@ import static org.eclipse.objectteams.otdt.internal.ui.viewsupport.DummyDecorato
 import static org.eclipse.objectteams.otdt.ui.ImageConstants.*;
 
 import org.eclipse.jdt.internal.compiler.lookup.ExtraCompilerModifiers;
+import org.eclipse.jdt.internal.core.manipulation.JavaElementLabelComposerCore.FlexibleBufferCore;
 import org.eclipse.jdt.internal.corext.refactoring.util.JavaElementUtil;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
@@ -360,7 +361,7 @@ public team class ViewAdaptor extends JFaceDecapsulator
 	
 	protected class JavaElementLabelComposer playedBy JavaElementLabelComposer {
 
-		FlexibleBuffer getFBuffer() -> get FlexibleBuffer fBuffer;
+		FlexibleBufferCore getFBuffer() -> get FlexibleBufferCore fBuffer;
 		
 		void beautifyGuardLabel(IMethod method, long flags) <- replace void appendMethodLabel(IMethod method, long flags);
 
@@ -377,21 +378,25 @@ public team class ViewAdaptor extends JFaceDecapsulator
 			}
 			if (displayName != null) {
 				// displayName as keyword:
-				FlexibleBuffer buffer = this.getFBuffer();
+				FlexibleBufferCore buffer = this.getFBuffer();
 				final Color keywordColor = ViewAdaptor.this.getKeywordColor();
 				int offset = buffer.length();
-				buffer.append(displayName); 
-				buffer.setStyle(offset, displayName.length(), new StyledString.Styler() {
-					@Override public void applyStyles(TextStyle textStyle) {
-						textStyle.foreground = keywordColor;
-					}
-				});
+				buffer.append(displayName);
+				if (buffer instanceof FlexibleBuffer) {
+					((FlexibleBuffer) buffer).setStyle(offset, displayName.length(), new StyledString.Styler() {
+						@Override public void applyStyles(TextStyle textStyle) {
+							textStyle.foreground = keywordColor;
+						}
+					});
+				}
 				// append explanation:
 				offset = buffer.length();
 				String qualifier = NLS.bind(Messages.ViewAdaptor_guard_predicate_postfix,
 					    			new Object[]{guardedElement});
 				buffer.append(qualifier);
-				buffer.setStyle(offset, qualifier.length(), StyledString.QUALIFIER_STYLER);
+				if (buffer instanceof FlexibleBuffer) {
+					((FlexibleBuffer) buffer).setStyle(offset, qualifier.length(), StyledString.QUALIFIER_STYLER);
+				}
 			} else {
 				base.beautifyGuardLabel(method, flags);
 			}
