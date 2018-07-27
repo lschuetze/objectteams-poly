@@ -44,7 +44,7 @@ public class ObjectTeamsTransformer implements ClassFileTransformer {
 
 	public ObjectTeamsTransformer() {
 		this.weavingContext = new IWeavingContext() {
-			@Override public boolean isWeavable(String className, boolean considerSupers) {
+			@Override public boolean isWeavable(String className, boolean considerSupers, boolean allWeavingReasons) {
 				return ObjectTeamsTransformer.isWeavable(className.replace('.', '/'))
 						&& WeavableRegionReader.isWeavable(className);
 			}
@@ -84,7 +84,7 @@ public class ObjectTeamsTransformer implements ClassFileTransformer {
 		AbstractBoundClass clazz = classRepo.peekBoundClass(classId);
 		String sourceClassName = className.replace('/','.');
 
-		if (!weavingContext.isWeavable(sourceClassName, false) || loader == null) {
+		if (!weavingContext.isWeavable(sourceClassName, false, true) || loader == null) {
 			if (clazz != null) {
 				if (isWeavable(className) && clazz.needsWeaving()) {
 					// only print out for now, exceptions thrown by us are silently caught by TransformerManager.

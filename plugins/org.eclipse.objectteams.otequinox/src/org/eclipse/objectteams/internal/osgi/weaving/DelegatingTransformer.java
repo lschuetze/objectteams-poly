@@ -165,10 +165,12 @@ public abstract class DelegatingTransformer {
 	static IWeavingContext getWeavingContext(final OTWeavingHook hook, final BundleWiring bundleWiring) {
 		return new IWeavingContext() {
 			@Override
-			public boolean isWeavable(String className, boolean considerSupers) {
+			public boolean isWeavable(String className, boolean considerSupers, boolean allWeavingReasons) {
 				if (className == null)
 					return false;
-				WeavingReason reason = hook.requiresWeaving(bundleWiring, className, null, considerSupers, EnumSet.of(WeavingReason.Base));
+				// boolean allWeavingReasons is used in the signature, because IWeavingContext cannot see WeavingReaons:
+				EnumSet<WeavingReason> reasons = allWeavingReasons ? EnumSet.allOf(WeavingReason.class) : EnumSet.of(WeavingReason.Base);
+				WeavingReason reason = hook.requiresWeaving(bundleWiring, className, null, considerSupers, reasons);
 				return reason != WeavingReason.None;
 			}
 			

@@ -739,7 +739,7 @@ public abstract class AbstractBoundClass implements IBoundClass {
 							if (method.isImplemented()) {
 								// So redefine the method
 								weaveBindingInImplementedMethod(task);
-								if (!method.isStatic() && weavingContext.isWeavable(getSuperClassName(), false)) {
+								if (!method.isStatic() && weavingContext.isWeavable(getSuperClassName(), false, false)) {
 									AbstractBoundClass superclass = getSuperclass();
 									Method superMethod = superclass.getMethod(method.getName(), method.getSignature(), true, false);
 									if (superMethod.isImplemented()) {
@@ -752,7 +752,7 @@ public abstract class AbstractBoundClass implements IBoundClass {
 								weaveBindingInNotImplementedMethod(task);
 								AbstractBoundClass superclass = getSuperclass();
 								while (superclass != null && !superclass.isJavaLangObject()) {
-									if (weavingContext.isWeavable(superclass.getName(), false)) { // explicitly traversing supers
+									if (weavingContext.isWeavable(superclass.getName(), false, false)) { // explicitly traversing supers
 										Method superMethod = superclass.getMethod(method, task);
 										if (superMethod != null) {
 											WeavingTask newTask = new WeavingTask(WeavingTaskType.WEAVE_BINDING_OF_SUBCLASS, superMethod, task, null);
@@ -1132,7 +1132,7 @@ public abstract class AbstractBoundClass implements IBoundClass {
 				}
 				Method superMethod = superClass.getMethod(task);
 				if (superMethod.isImplemented()) {
-					isWeavable = weavingContext.isWeavable(superClass.getName(), false); // explicitly traversing supers
+					isWeavable = weavingContext.isWeavable(superClass.getName(), false, false); // explicitly traversing supers
 					break;
 				}
 				superClass = superClass.getSuperclass();

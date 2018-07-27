@@ -495,7 +495,7 @@ class AsmWritableBoundClass extends AsmBoundClass {
 	@Override
 	protected boolean isSuperWeavable(boolean considerSupers) {
 		if (this.superIsWeavable == null)
-			this.superIsWeavable = weavingContext.isWeavable(getSuperClassName(), considerSupers);
+			this.superIsWeavable = weavingContext.isWeavable(getSuperClassName(), considerSupers, false);
 		return this.superIsWeavable;
 	}
 

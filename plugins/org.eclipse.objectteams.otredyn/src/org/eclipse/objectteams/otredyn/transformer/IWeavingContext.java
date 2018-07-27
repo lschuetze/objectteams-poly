@@ -24,16 +24,25 @@ import org.eclipse.objectteams.runtime.IReweavingTask;
 public interface IWeavingContext {
 
 	/**
+	 * @deprecated please use {@link #isWeavable(String, boolean, boolean)}.
+	 */
+	@Deprecated
+	default boolean isWeavable(String className, boolean considerSupers) {
+		return isWeavable(className, considerSupers, true);
+	}
+
+	/**
 	 * Is the given class included in load-time weaving, i.e., will
 	 * the weaving context pass the class to the transformer during
 	 * initial loading?
 	 * @param className full qualified classname, dot-separated for packages 
 	 * 		and dollar-separated for nested classes.
-	 * @param considerSupers controls whether super classes should be searched, too. 
+	 * @param considerSupers controls whether super classes should be searched, too.
+	 * @param allWeavingReasons should all weaving reasons be considered during this check?
 	 * @return true if the given class is included in load-time weaving.
 	 * @since 1.3.2
 	 */
-	boolean isWeavable(String className, boolean considerSupers);
+	boolean isWeavable(String className, boolean considerSupers, boolean allWeavingReasons);
 	
 	/**
 	 * When reweaving for className is required, check if this needs to
