@@ -110,7 +110,7 @@ public class OTCheckClassAdapter extends org.objectweb.asm.util.CheckClassAdapte
 		ClassLoader loader;
 		
 		public OTVerifier(Type objectType, Type syperType, List<Type> interfaces, boolean isInterface, ClassLoader loader) {
-			super(objectType, syperType, interfaces, isInterface);
+			super(ASM6, objectType, syperType, interfaces, isInterface);
 			this.loader = new ShyLoader(loader);
 		}
 
