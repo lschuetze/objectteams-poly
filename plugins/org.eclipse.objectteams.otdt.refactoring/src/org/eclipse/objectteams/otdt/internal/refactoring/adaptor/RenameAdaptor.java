@@ -31,6 +31,7 @@ import org.eclipse.jdt.core.Flags;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IImportDeclaration;
 import org.eclipse.jdt.core.IJavaElement;
+import org.eclipse.jdt.core.IMember;
 import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
@@ -73,6 +74,7 @@ import base org.eclipse.jdt.internal.corext.refactoring.rename.RenameAnalyzeUtil
 import base org.eclipse.jdt.internal.corext.refactoring.rename.RenamePackageProcessor.ImportsManager;
 import base org.eclipse.jdt.internal.corext.refactoring.rename.RenamePackageProcessor.PackageRenamer;
 import base org.eclipse.jdt.internal.corext.refactoring.rename.RenamePackageProcessor.ImportsManager.ImportChange;
+import base org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 
 /**
  * @author stephan
@@ -277,6 +279,22 @@ public team class RenameAdaptor
 		String  getNewElementName()       -> String  getNewElementName();
 		Set<IMethod> getMethodsToRename() -> Set<IMethod> getMethodsToRename();
 		IMethod getMethod() 		      -> IMethod getMethod();
+	}
+	
+	@SuppressWarnings("decapsulation") // base class is final
+	protected class JMUtil playedBy JavaModelUtil {
+
+		isVisibleInHierarchy <- replace isVisibleInHierarchy;
+
+		@SuppressWarnings("basecall")
+		static callin boolean isVisibleInHierarchy(IMember member, IPackageFragment pack) throws JavaModelException {
+			if (Flags.isPrivate(member.getFlags())) {
+				IType declaringType = member.getDeclaringType();
+				if (OTModelManager.isRole(declaringType) && pack.equals(declaringType.getPackageFragment()))
+					return true;
+			}
+			return base.isVisibleInHierarchy(member, pack);
+		}
 	}
 	
 	/** Detect when trying to rename a team package. */
