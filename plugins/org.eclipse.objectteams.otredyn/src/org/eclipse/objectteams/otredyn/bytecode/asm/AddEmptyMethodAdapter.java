@@ -1,7 +1,7 @@
 /**********************************************************************
  * This file is part of "Object Teams Dynamic Runtime Environment"
  * 
- * Copyright 2009, 2015 Oliver Frank and others.
+ * Copyright 2009, 2018 Oliver Frank and others.
  * 
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -37,10 +37,11 @@ class AddEmptyMethodAdapter extends ClassVisitor {
 	private String[] exceptions;
 	private int maxLocals;
 	private String superToCall;
+	private boolean addThrow;
 
 	public AddEmptyMethodAdapter(ClassVisitor cv, String name, int access,
 			String desc, String[] exceptions, String signature,
-			int maxLocals, String superToCall) {
+			int maxLocals, String superToCall, boolean addThrow) {
 		super(ASM_API, cv);
 		this.access = access;
 		this.desc = desc;
@@ -49,6 +50,7 @@ class AddEmptyMethodAdapter extends ClassVisitor {
 		this.signature = signature;
 		this.maxLocals = maxLocals;
 		this.superToCall = superToCall;
+		this.addThrow = addThrow;
 	}
 
 	@Override
@@ -70,6 +72,12 @@ class AddEmptyMethodAdapter extends ClassVisitor {
 			for (int i=0, slot=firstArgIndex; i < args.length; slot+=args[i++].getSize())
 				mv.visitVarInsn(args[i].getOpcode(Opcodes.ILOAD), slot);
 			mv.visitMethodInsn(Opcodes.INVOKESPECIAL, superToCall, name, desc, false);
+		} else if (this.addThrow) {
+			mv.visitTypeInsn(Opcodes.NEW, "java/lang/IllegalStateException");
+			mv.visitInsn(Opcodes.DUP);
+			mv.visitLdcInsn("Empty method "+name+"() called");
+			mv.visitMethodInsn(Opcodes.INVOKESPECIAL, "java/lang/IllegalStateException", "<init>", "(Ljava/lang/String;)V", false);
+			mv.visitInsn(Opcodes.ATHROW);
 		}
 		Type returnType = Type.getReturnType(this.desc);
 		switch (returnType.getSort()) {

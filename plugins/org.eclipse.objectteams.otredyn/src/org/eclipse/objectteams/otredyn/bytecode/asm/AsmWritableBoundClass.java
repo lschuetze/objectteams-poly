@@ -1,7 +1,7 @@
 /**********************************************************************
  * This file is part of "Object Teams Dynamic Runtime Environment"
  * 
- * Copyright 2009, 2016 Oliver Frank and others.
+ * Copyright 2009, 2018 Oliver Frank and others.
  * 
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -89,14 +89,15 @@ class AsmWritableBoundClass extends AsmBoundClass {
 	 * @param signature
 	 * @param exceptions
 	 * @param superToCall may be null, else the super class to which a super-call should be inserted
+	 * @param addThrow if true the empty method will throw an IllegalStateException.
 	 * @see AddEmptyMethodAdapter
 	 */
-	private void addEmptyMethod(Method method, int access, String signature, String[] exceptions, String superToCall) {
+	private void addEmptyMethod(Method method, int access, String signature, String[] exceptions, String superToCall, boolean addThrow) {
 		assert (isTransformationActive) : "No transformation active";
 		String desc = method.getSignature();
 		Type[] args = Type.getArgumentTypes(desc);
 		multiAdapter.addVisitor(new AddEmptyMethodAdapter(writer, method.getName(),
-				access, desc, exceptions, signature, args.length + 1, superToCall));
+				access, desc, exceptions, signature, args.length + 1, superToCall, addThrow));
 	}
 
 	/**
@@ -294,12 +295,11 @@ class AsmWritableBoundClass extends AsmBoundClass {
 			String desc = boundMethod.getSignature();
 			Type[] args = Type.getArgumentTypes(desc);
 			multiAdapter.addVisitor(new AddEmptyMethodAdapter(writer, boundMethod.getName(),
-					boundMethod.getAccessFlags(), desc, null, boundMethod.getSignature(), args.length+1/*maxLocals*/, null));
+					boundMethod.getAccessFlags(), desc, null, boundMethod.getSignature(), args.length+1/*maxLocals*/, null, false));
 			nodes.add(new CreateSpecificSuperCallInCallOrigAdapter(this, getInternalSuperClassName(), boundMethod, boundMethodId));
 		}
 		nodes.add(new CreateCallAllBindingsCallInOrgMethod(boundMethod,
 				boundMethodId));
-
 	}
 
 	@Override
@@ -397,16 +397,17 @@ class AsmWritableBoundClass extends AsmBoundClass {
 		if (!isInterface() && !isSuperWeavable(true))
 			addField(ConstantMembers.roleSet, Opcodes.ACC_PUBLIC);
 
-		addEmptyMethod(ConstantMembers.callOrig, methodModifiers, null, null, getInternalWeavableSuperClassName(false));
-		addEmptyMethod(ConstantMembers.callAllBindingsClient, methodModifiers, null, null, getInternalWeavableSuperClassName(false));
+		String internalWeavableDirectSuperClassName = getInternalWeavableSuperClassName(false);
+		addEmptyMethod(ConstantMembers.callOrig, methodModifiers, null, null, internalWeavableDirectSuperClassName, true);
+		addEmptyMethod(ConstantMembers.callAllBindingsClient, methodModifiers, null, null, internalWeavableDirectSuperClassName, true);
 		
 		// the methods callOrigStatic and accessStatic have to already exist to call it in a concrete team
 		if (!isInterface()) {
-			addEmptyMethod(getCallOrigStatic(), Opcodes.ACC_PUBLIC + Opcodes.ACC_STATIC, null, null, null);
-			addEmptyMethod(ConstantMembers.accessStatic, Opcodes.ACC_PUBLIC + Opcodes.ACC_STATIC, null, null, null);
+			addEmptyMethod(getCallOrigStatic(), Opcodes.ACC_PUBLIC + Opcodes.ACC_STATIC, null, null, null, false);
+			addEmptyMethod(ConstantMembers.accessStatic, Opcodes.ACC_PUBLIC + Opcodes.ACC_STATIC, null, null, null, false);
 		}
-		addEmptyMethod(ConstantMembers.access, methodModifiers, null, null, getInternalWeavableSuperClassName(true));
-		addEmptyMethod(ConstantMembers.addOrRemoveRole, methodModifiers, null, null, getInternalWeavableSuperClassName(true));
+		addEmptyMethod(ConstantMembers.access, methodModifiers, null, null, getInternalWeavableSuperClassName(true), true);
+		addEmptyMethod(ConstantMembers.addOrRemoveRole, methodModifiers, null, null, getInternalWeavableSuperClassName(true), true);
 		
 		if (!isInterface())
 			multiAdapter.addVisitor(new AddAfterClassLoadingHook(this.writer, this));
