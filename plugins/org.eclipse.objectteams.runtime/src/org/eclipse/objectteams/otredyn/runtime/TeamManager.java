@@ -281,7 +281,7 @@ public class TeamManager implements ITeamManager {
 			}
 		}
 		for (IBoundClass base : baseClasses) {
-			base.commitTransaction();
+			base.commitTransaction(null);
 		}
 	}
 	/**

@@ -32,6 +32,7 @@ import org.eclipse.objectteams.otredyn.bytecode.asm.verify.OTCheckClassAdapter;
 import org.eclipse.objectteams.otredyn.runtime.TeamManager;
 import org.eclipse.objectteams.otredyn.transformer.names.ClassNames;
 import org.eclipse.objectteams.otredyn.transformer.names.ConstantMembers;
+import org.eclipse.objectteams.runtime.IReweavingTask;
 import org.objectweb.asm.ClassReader;
 import org.objectweb.asm.ClassWriter;
 import org.objectweb.asm.Opcodes;
@@ -455,6 +456,27 @@ class AsmWritableBoundClass extends AsmBoundClass {
 			nodes.add(new CreateSwitchForCallAllBindingsNode());
 			nodes.add(new CreateAddRemoveRoleMethod());
 			isTransformed = true;
+
+			hierarchyIsCallinAffected = true;
+			propagateCallinInfraToSubclasses();
+		}
+	}
+
+	/**
+	 * If subclasses have previously added emtpy methods (callOrig,callAllBindings,access),
+	 * those need to be change to a super call, so they don't interfere with real callin dispatch in super
+	 * (likely on behalf of a different sub class).
+	 */
+	protected void propagateCallinInfraToSubclasses() {
+		for (AbstractBoundClass sub : subclasses.keySet()) {
+			if (sub instanceof AsmWritableBoundClass && !sub.isAnonymous()) {
+				AsmWritableBoundClass writableSub = (AsmWritableBoundClass) sub;
+				if (!writableSub.hierarchyIsCallinAffected) {
+					writableSub.hierarchyIsCallinAffected = true;
+					writableSub.createSuperCalls();
+					writableSub.propagateCallinInfraToSubclasses();
+				}
+			}
 		}
 	}
 
@@ -467,6 +489,39 @@ class AsmWritableBoundClass extends AsmBoundClass {
 		if (!isTransformedStatic && !isInterface()) {
 			nodes.add(new CreateSwitchAdapter(getCallOrigStatic(), isRole()));
 			isTransformedStatic = true;
+		}
+	}
+
+	@Override
+	protected void createSuperCalls() {
+		final String internalSuperClassName = getInternalSuperClassName();
+		final Runnable operation = () -> {
+			nodes.add(new CreateSuperCallAdapter(internalSuperClassName, ConstantMembers.callAllBindingsClient));
+			nodes.add(new CreateSuperCallAdapter(internalSuperClassName, ConstantMembers.callOrig));
+			nodes.add(new CreateSuperCallAdapter(internalSuperClassName, ConstantMembers.access));			
+		};
+		if (isTransformationActive) {
+			operation.run();
+		} else if (this.weavingContext != null) {
+			IReweavingTask task = new IReweavingTask() {
+				@Override public void reweave(Class<?> definedClass) throws IllegalClassFormatException {
+					startTransaction();
+					if (!isTransformationActive) {
+						startTransformation();
+					}
+					operation.run();
+					commitTransaction(definedClass);
+				}
+			};
+			if (!weavingContext.scheduleReweaving(this.getName(), task))
+				try {
+					handleTaskList(null);
+				} catch (IllegalClassFormatException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+		} else {
+			new IllegalStateException("weavingContext unexpectedly null").printStackTrace();
 		}
 	}
 

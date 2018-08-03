@@ -207,6 +207,9 @@ public abstract class AbstractBoundClass implements IBoundClass {
 	// already loaded by a class loader or not
 	private boolean isLoaded;
 	protected boolean isUnweavable;
+
+	/** Within one base hierarchy, callOrig and callAllBindings may need to propagate to supers. */
+	protected boolean hierarchyIsCallinAffected = false;
 	
 	private int modifiers;
 
@@ -700,6 +703,9 @@ public abstract class AbstractBoundClass implements IBoundClass {
 					// at load time
 					startTransformation();
 					prepareAsPossibleBaseClass();
+					if (hierarchyIsCallinAffected()) {
+						createSuperCalls();
+					}
 					prepareTeamActivation();
 					prepareLiftingParticipant();
 					endTransformation(definedClass);
@@ -884,6 +890,20 @@ public abstract class AbstractBoundClass implements IBoundClass {
 		superTransformation(definedClass);
 	}
 
+	protected abstract void createSuperCalls();
+	protected abstract void propagateCallinInfraToSubclasses();
+
+	private boolean hierarchyIsCallinAffected() {
+		if (this.hierarchyIsCallinAffected)
+			return true;
+		AbstractBoundClass zuper = getSuperclass();
+		if (!zuper.isJavaLangObject()) {
+			if (zuper.hierarchyIsCallinAffected())
+				return this.hierarchyIsCallinAffected = true;
+		}
+		return false;
+	}
+
 	<K,V> Set<Entry<K, V>> copyEntrySet(Map<K,V> map) {
 		if (map.isEmpty()) return Collections.emptySet();
 		Map<K, V> bindingMap = new HashMap<K, V>();
@@ -938,11 +958,11 @@ public abstract class AbstractBoundClass implements IBoundClass {
 	}
 
 	@Override
-	public synchronized void commitTransaction() {
+	public synchronized void commitTransaction(Class<?> definedClass) {
 		--this.transactionCount;
 		if (this.transactionCount == 0 && this.isLoaded) {
 			try {
-				handleTaskList(null);
+				handleTaskList(definedClass);
 			} catch (IllegalClassFormatException e) {
 				e.printStackTrace(); // we're called from TeamManager, which can neither log nor handle exceptions
 			}

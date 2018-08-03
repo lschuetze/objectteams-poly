@@ -86,7 +86,7 @@ public interface IBoundClass {
 	/**
 	 * Commit any modifications since the call to startTransaction.
 	 */
-	void commitTransaction();
+	void commitTransaction(Class<?> definedClass);
 
 	/** 
 	 * Add a {@link ISubclassWiringTask wiring task} to be performed when a 

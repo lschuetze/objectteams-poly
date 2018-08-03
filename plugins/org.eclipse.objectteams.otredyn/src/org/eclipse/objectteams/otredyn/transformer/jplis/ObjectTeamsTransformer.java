@@ -103,10 +103,11 @@ public class ObjectTeamsTransformer implements ClassFileTransformer {
 			if (classBeingRedefined == null && !clazz.isFirstTransformation()) {
 				return clazz.getBytecode();
 			}
+			if (clazz.isTransformationActive()) {
+				return null;
+			}
 			try {
-				if (clazz.isTransformationActive()) {
-					return null;
-				}
+				clazz.startTransaction();
 				clazz = classRepo.getBoundClass(
 						className, classId, classfileBuffer, loader);
 				clazz.setWeavingContext(this.weavingContext);
@@ -120,6 +121,8 @@ public class ObjectTeamsTransformer implements ClassFileTransformer {
 				throw e; // expected, propagate to caller (OT/Equinox?)
 			} catch(Throwable t) {
 				t.printStackTrace();
+			} finally {
+				clazz.commitTransaction(classBeingRedefined);
 			}
 		}
 		clazz.dump(classfileBuffer, "initial");
