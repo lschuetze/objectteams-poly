@@ -59,6 +59,7 @@ public class CreateCallAllBindingsCallInOrgMethod extends
 
 		// start of try-block:
 		InsnList newInstructions = new InsnList();
+
 		LabelNode start = new LabelNode();
 		newInstructions.add(start);
 		Type[] args = Type.getArgumentTypes(method.desc);

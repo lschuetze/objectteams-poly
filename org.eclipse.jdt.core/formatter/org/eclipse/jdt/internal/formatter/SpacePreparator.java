@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2014, 2016 Mateusz Matela and others.
+ * Copyright (c) 2014, 2018 Mateusz Matela and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -41,6 +41,7 @@ import org.eclipse.jdt.core.dom.ConstructorInvocation;
 import org.eclipse.jdt.core.dom.CreationReference;
 import org.eclipse.jdt.core.dom.Dimension;
 import org.eclipse.jdt.core.dom.DoStatement;
+import org.eclipse.jdt.core.dom.EmptyStatement;
 import org.eclipse.jdt.core.dom.EnhancedForStatement;
 import org.eclipse.jdt.core.dom.EnumConstantDeclaration;
 import org.eclipse.jdt.core.dom.EnumDeclaration;
@@ -371,6 +372,7 @@ public class SpacePreparator extends ASTVisitor {
 				this.options.insert_space_after_opening_paren_in_while);
 		handleTokenBefore(node.getBody(), TokenNameRPAREN, this.options.insert_space_before_closing_paren_in_while,
 				false);
+		handleLoopBody(node.getBody());
 		return true;
 	}
 
@@ -572,16 +574,14 @@ public class SpacePreparator extends ASTVisitor {
 				this.options.insert_space_after_opening_paren_in_if);
 
 		Statement thenStatement = node.getThenStatement();
-		int closingParenIndex = this.tm.firstIndexBefore(thenStatement, TokenNameRPAREN);
-		handleToken(this.tm.get(closingParenIndex), this.options.insert_space_before_closing_paren_in_if,
-				/* space before then statement may be needed if it will stay on the same line */
-				!(thenStatement instanceof Block) && !this.tm.get(closingParenIndex + 1).isComment());
+		handleTokenBefore(thenStatement, TokenNameRPAREN, this.options.insert_space_before_closing_paren_in_if, false);
 
 		if (thenStatement instanceof Block && this.tm.isGuardClause((Block) thenStatement)) {
 			handleToken(thenStatement, TokenNameLBRACE, false, true);
 			this.tm.lastTokenIn(node, TokenNameRBRACE).spaceBefore();
 		}
 
+		handleLoopBody(thenStatement);
 		handleSemicolon(thenStatement);
 		return true;
 	}
@@ -605,6 +605,8 @@ public class SpacePreparator extends ASTVisitor {
 		handleTokenBefore(node.getBody(), TokenNameSEMICOLON,
 				this.options.insert_space_before_semicolon_in_for && !part2Empty,
 				this.options.insert_space_after_semicolon_in_for && !part3Empty);
+
+		handleLoopBody(node.getBody());
 		return true;
 	}
 
@@ -630,6 +632,7 @@ public class SpacePreparator extends ASTVisitor {
 				this.options.insert_space_before_closing_paren_in_for, false);
 		handleTokenAfter(node.getParameter(), TokenNameCOLON, this.options.insert_space_before_colon_in_for,
 				this.options.insert_space_after_colon_in_for);
+		handleLoopBody(node.getBody());
 		return true;
 	}
 
@@ -1149,6 +1152,15 @@ public class SpacePreparator extends ASTVisitor {
 		if (this.options.insert_space_before_semicolon) {
 			for (ASTNode node : nodes)
 				handleSemicolon(node);
+		}
+	}
+
+	private void handleLoopBody(Statement loopBody) {
+		/* space before body statement may be needed if it will stay on the same line */
+		int firstTokenIndex = this.tm.firstIndexIn(loopBody, -1);
+		if (!(loopBody instanceof Block) && !(loopBody instanceof EmptyStatement)
+				&& !this.tm.get(firstTokenIndex - 1).isComment()) {
+			this.tm.get(firstTokenIndex).spaceBefore();
 		}
 	}
 

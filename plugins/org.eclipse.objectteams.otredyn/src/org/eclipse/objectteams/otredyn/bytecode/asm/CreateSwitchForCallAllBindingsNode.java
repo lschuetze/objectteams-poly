@@ -19,6 +19,7 @@ package org.eclipse.objectteams.otredyn.bytecode.asm;
 import org.eclipse.objectteams.otredyn.transformer.names.ConstantMembers;
 import org.objectweb.asm.Opcodes;
 import org.objectweb.asm.Type;
+import org.objectweb.asm.tree.AbstractInsnNode;
 import org.objectweb.asm.tree.InsnNode;
 import org.objectweb.asm.tree.JumpInsnNode;
 import org.objectweb.asm.tree.LabelNode;
@@ -44,6 +45,11 @@ public class CreateSwitchForCallAllBindingsNode extends CreateSwitchAdapter {
 	
 	public CreateSwitchForCallAllBindingsNode() {
 		super(ConstantMembers.callAllBindingsClient);
+	}
+	
+	@Override
+	protected void addPreSwitchInstructions(MethodNode method) {
+		super.addPreSwitchInstructions(method);
 	}
 	
 	@Override
