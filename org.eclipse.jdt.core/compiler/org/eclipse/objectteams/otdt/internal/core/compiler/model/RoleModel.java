@@ -211,7 +211,8 @@ public class RoleModel extends TypeModel
     public RoleModel (TypeDeclaration roleAst)
     {
         super(roleAst);
-        addAttribute(WordValueAttribute.compilerVersionAttribute());
+        if (!TeamModel.isOrgObjectteamsTeam(roleAst.enclosingType))
+        	addAttribute(WordValueAttribute.compilerVersionAttribute());
         if (roleAst.scope != null && roleAst.scope.parent instanceof MethodScope)
         	this._isLocalType = true;
     }

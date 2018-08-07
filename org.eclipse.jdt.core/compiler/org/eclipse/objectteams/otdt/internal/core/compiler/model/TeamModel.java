@@ -36,7 +36,6 @@ import org.eclipse.jdt.internal.compiler.classfmt.ClassFileConstants;
 import org.eclipse.jdt.internal.compiler.impl.CompilerOptions.WeavingScheme;
 import org.eclipse.jdt.internal.compiler.impl.IntConstant;
 import org.eclipse.jdt.internal.compiler.lookup.Binding;
-import org.eclipse.jdt.internal.compiler.lookup.ClassScope;
 import org.eclipse.jdt.internal.compiler.lookup.LookupEnvironment;
 import org.eclipse.jdt.internal.compiler.lookup.MethodBinding;
 import org.eclipse.jdt.internal.compiler.lookup.PackageBinding;
@@ -128,10 +127,9 @@ public class TeamModel extends TypeModel {
 		if (Config.clientIsBatchCompiler())
 			this.knownRoleFiles = new RoleFileCache(teamAst);
 	}
-	private static boolean isOrgObjectteamsTeam(TypeDeclaration teamAst) {
-		ClassScope scope = teamAst.scope;
-		if (scope != null) {
-			return TypeAnalyzer.isOrgObjectteamsTeam(scope.referenceCompilationUnit());
+	static boolean isOrgObjectteamsTeam(TypeDeclaration typeAst) {
+		if (typeAst != null && typeAst.scope != null) {
+			return TypeAnalyzer.isOrgObjectteamsTeam(typeAst.scope.referenceCompilationUnit());
 		}
 		return false;
 	}
