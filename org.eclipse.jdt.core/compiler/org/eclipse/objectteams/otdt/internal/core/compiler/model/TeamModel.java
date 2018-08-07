@@ -1016,7 +1016,7 @@ public class TeamModel extends TypeModel {
 
 	/** Update all recorded accessIds to stay clear of id ranges used by super teams. */
 	public int updateDecapsAccessIds() {
-		if (this.accessIdOffset > -1 || getWeavingScheme() != WeavingScheme.OTDRE) return this.accessIdOffset;
+		if (this.accessIdOffset > -1 || getWeavingScheme() == WeavingScheme.OTRE) return this.accessIdOffset;
 		
 		this.accessIdOffset = 0;
 
