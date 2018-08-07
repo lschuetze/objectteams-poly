@@ -1,7 +1,7 @@
 /**********************************************************************
  * This file is part of "Object Teams Development Tooling"-Software
  * 
- * Copyright 2004, 2010 Fraunhofer Gesellschaft, Munich, Germany,
+ * Copyright 2004, 2018 Fraunhofer Gesellschaft, Munich, Germany,
  * for its Fraunhofer Institute and Computer Architecture and Software
  * Technology (FIRST), Berlin, Germany and Technical University Berlin,
  * Germany.
@@ -39,6 +39,7 @@ public class AllTests
 		suite.addTest(org.eclipse.objectteams.otdt.tests.compiler.errorreporting.TestAll.suite());
 		suite.addTest(org.eclipse.objectteams.otdt.tests.compiler.ast.TypeDeclarationTest.suite());
 		suite.addTest(org.eclipse.objectteams.otdt.tests.compiler.smap.AllTests.suite());
+		suite.addTest(org.eclipse.objectteams.otdt.tests.compiler.AttributesTest.suite());
 		
 		//hierarchy
 		suite.addTest(org.eclipse.objectteams.otdt.tests.hierarchy.AllTests.suite());

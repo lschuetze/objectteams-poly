@@ -1,7 +1,7 @@
 /**********************************************************************
  * This file is part of "Object Teams Development Tooling"-Software
  *
- * Copyright 2004, 2016 Fraunhofer Gesellschaft, Munich, Germany,
+ * Copyright 2004, 2018 Fraunhofer Gesellschaft, Munich, Germany,
  * for its Fraunhofer Institute for Computer Architecture and Software
  * Technology (FIRST), Berlin, Germany and Technical University Berlin,
  * Germany.
@@ -36,6 +36,7 @@ import org.eclipse.jdt.internal.compiler.classfmt.ClassFileConstants;
 import org.eclipse.jdt.internal.compiler.impl.CompilerOptions.WeavingScheme;
 import org.eclipse.jdt.internal.compiler.impl.IntConstant;
 import org.eclipse.jdt.internal.compiler.lookup.Binding;
+import org.eclipse.jdt.internal.compiler.lookup.ClassScope;
 import org.eclipse.jdt.internal.compiler.lookup.LookupEnvironment;
 import org.eclipse.jdt.internal.compiler.lookup.MethodBinding;
 import org.eclipse.jdt.internal.compiler.lookup.PackageBinding;
@@ -63,6 +64,7 @@ import org.eclipse.objectteams.otdt.internal.core.compiler.lookup.TThisBinding;
 import org.eclipse.objectteams.otdt.internal.core.compiler.util.Protections;
 import org.eclipse.objectteams.otdt.internal.core.compiler.util.RoleTypeCreator;
 import org.eclipse.objectteams.otdt.internal.core.compiler.util.TSuperHelper;
+import org.eclipse.objectteams.otdt.internal.core.compiler.util.TypeAnalyzer;
 
 /**
  * This class models properties of Teams.
@@ -121,10 +123,17 @@ public class TeamModel extends TypeModel {
 	public TeamModel(TypeDeclaration teamAst)
 	{
 		super(teamAst);
-		if (teamAst.enclosingType == null)
+		if (teamAst.enclosingType == null && !isOrgObjectteamsTeam(teamAst))
 			addAttribute(WordValueAttribute.compilerVersionAttribute());
 		if (Config.clientIsBatchCompiler())
 			this.knownRoleFiles = new RoleFileCache(teamAst);
+	}
+	private static boolean isOrgObjectteamsTeam(TypeDeclaration teamAst) {
+		ClassScope scope = teamAst.scope;
+		if (scope != null) {
+			return TypeAnalyzer.isOrgObjectteamsTeam(scope.referenceCompilationUnit());
+		}
+		return false;
 	}
 	public TeamModel(ReferenceBinding teamBinding)
 	{
