@@ -123,7 +123,8 @@ class AsmWritableBoundClass extends AsmBoundClass {
 
 		writer = getClassWriter();
 		multiAdapter = new MultiClassAdapter(writer);
-		nodes = new ArrayList<AbstractTransformableClassNode>();
+		if (nodes == null)
+			nodes = new ArrayList<AbstractTransformableClassNode>();
 		isTransformationActive = true;
 	}
 
@@ -500,8 +501,13 @@ class AsmWritableBoundClass extends AsmBoundClass {
 			nodes.add(new CreateSuperCallAdapter(internalSuperClassName, ConstantMembers.callOrig));
 			nodes.add(new CreateSuperCallAdapter(internalSuperClassName, ConstantMembers.access));			
 		};
-		if (isTransformationActive) {
+		if (isTransformationActive || !isTransformed) {
+			// either include in the current transformation or schedule for an upcoming transformation.
+			if (nodes == null) 
+				nodes = new ArrayList<AbstractTransformableClassNode>();
 			operation.run();
+			// note: order of adapters in nodes is not relevant, because the methods to be augmented
+			// are created by visitors of the multiAdapter, see prepareAsPossibleBaseClass().
 		} else if (this.weavingContext != null) {
 			IReweavingTask task = new IReweavingTask() {
 				@Override public void reweave(Class<?> definedClass) throws IllegalClassFormatException {
