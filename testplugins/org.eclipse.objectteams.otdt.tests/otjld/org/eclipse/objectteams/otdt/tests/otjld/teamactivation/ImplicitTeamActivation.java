@@ -1901,6 +1901,8 @@ public class ImplicitTeamActivation extends AbstractOTJLDTest {
 			    "        }\n" +
 			    "    }\n" +
 			    "    void run() {\n" +
+			    "		 if ( Team5317ca1_2.class == null || Team5317ca1_1.class == null) return;\n" + // warm-up
+			    "		 if ( sleep(1000) ) return;\n" +
 			    "        Thread[] threads = new Thread[] {\n" +
 			    "            new Thread(new Run5317ca1_1()),\n" +
 			    "            new Thread(new Run5317ca1_1()),\n" +
