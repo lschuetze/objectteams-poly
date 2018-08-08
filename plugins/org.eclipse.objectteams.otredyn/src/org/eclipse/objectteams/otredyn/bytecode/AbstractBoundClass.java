@@ -755,7 +755,7 @@ public abstract class AbstractBoundClass implements IBoundClass {
 								}
 							} else {
 								// No, so weave this class and delegate to the implementing super class
-								weaveBindingInNotImplementedMethod(task);
+								weaveBindingInNotImplementedMethod(task, true);
 								AbstractBoundClass superclass = getSuperclass();
 								while (superclass != null && !superclass.isJavaLangObject()) {
 									if (weavingContext.isWeavable(superclass.getName(), false, false)) { // explicitly traversing supers
@@ -799,7 +799,7 @@ public abstract class AbstractBoundClass implements IBoundClass {
 								replaceWickedSuperCalls(getSuperclass(), method);
 							}
 						} else {
-							weaveBindingInNotImplementedMethod(task);
+							weaveBindingInNotImplementedMethod(task, false);
 						}
 		
 						// Delegate the WeavingTask to the subclasses
@@ -1131,7 +1131,7 @@ public abstract class AbstractBoundClass implements IBoundClass {
 	 * in this class
 	 * @param task
 	 */
-	private void weaveBindingInNotImplementedMethod(WeavingTask task) {
+	private void weaveBindingInNotImplementedMethod(WeavingTask task, boolean needToAddMethod) {
 		if ((task.getBaseFlags() & IBinding.STATIC_BASE) == 0)
 			prepareForFirstTransformation();
 		else
@@ -1161,7 +1161,7 @@ public abstract class AbstractBoundClass implements IBoundClass {
 				createSuperCallInCallOrig(boundMethodId);
 			else
 				// can't weave into the declaring class, add an override here:
-				createCallAllBindingsCallInOrgMethod(method, boundMethodId, true/*needToAddMethod*/);
+				createCallAllBindingsCallInOrgMethod(method, boundMethodId, needToAddMethod);
 		} else {
 			createDispatchCodeInCallAllBindings(joinpointId, boundMethodId);
 		}

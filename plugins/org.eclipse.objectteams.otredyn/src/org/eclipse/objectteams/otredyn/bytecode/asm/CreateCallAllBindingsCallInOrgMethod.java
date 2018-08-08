@@ -55,7 +55,7 @@ public class CreateCallAllBindingsCallInOrgMethod extends
 	@Override
 	public boolean transform() {
 		MethodNode method = getMethod(orgMethod);
-		if ((method.access & Opcodes.ACC_ABSTRACT) != 0) return false;
+		if (method == null || (method.access & Opcodes.ACC_ABSTRACT) != 0) return false;
 
 		// start of try-block:
 		InsnList newInstructions = new InsnList();

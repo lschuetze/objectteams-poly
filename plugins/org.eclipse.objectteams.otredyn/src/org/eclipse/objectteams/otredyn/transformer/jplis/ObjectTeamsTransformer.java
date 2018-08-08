@@ -84,7 +84,7 @@ public class ObjectTeamsTransformer implements ClassFileTransformer {
 		AbstractBoundClass clazz = classRepo.peekBoundClass(classId);
 		String sourceClassName = className.replace('/','.');
 
-		if (!weavingContext.isWeavable(sourceClassName, false, true) || loader == null) {
+		if (!weavingContext.isWeavable(sourceClassName, true, true) || loader == null) {
 			if (clazz != null) {
 				if (isWeavable(className) && clazz.needsWeaving()) {
 					// only print out for now, exceptions thrown by us are silently caught by TransformerManager.
