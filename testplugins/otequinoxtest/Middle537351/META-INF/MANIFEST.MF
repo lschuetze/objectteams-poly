@@ -1,0 +1,13 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: Middle1
+Bundle-SymbolicName: Middle537351;singleton:=true
+Bundle-Version: 1.0.0.qualifier
+Bundle-ActivationPolicy: lazy
+Automatic-Module-Name: Middle1
+Bundle-RequiredExecutionEnvironment: JavaSE-1.8
+Require-Bundle: Base537351;bundle-version="1.0.0",
+ org.eclipse.objectteams.otequinox,
+ org.junit;bundle-version="4.12.0"
+Export-Package: middle537351;ot-aspect-host=Middle1,
+ test537351

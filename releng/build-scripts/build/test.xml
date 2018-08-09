@@ -128,6 +128,12 @@
 		</antcall>
 	</target>
 
+	<target name="otequinox_tests" description="Runs the OTEquinoxTests test.xml">
+		<antcall target="runtests">
+			<param name="testPlugin" value="OTEquinoxTests_${OTEquinoxTests}" />
+		</antcall>
+	</target>
+
 	<target name="jdt_ui_tests" description="Runs the org.eclipse.jdt.ui.tests test.xml">
 		<property name="library-file"
 		            value="${test.root.dir}/library.xml"/>
@@ -179,6 +185,7 @@
                 <antcall target="otdt_ref_tests" />
                 <antcall target="otdt_dom_tests" />
                 <antcall target="otdt_tests" />
+		        <antcall target="otequinox_tests" />
        			<antcall target="jdt_builder_tests" />
                 <antcall target="jdtcore_compiler_tests" />
                 <antcall target="jdtcore_model_tests" />
@@ -208,7 +215,7 @@
 	</target>
 	
 	<target name="onlyone">
-		<antcall target="otdt_ui_tests" />
+		<antcall target="otequinox_tests" />
 	</target>
 
 </project>

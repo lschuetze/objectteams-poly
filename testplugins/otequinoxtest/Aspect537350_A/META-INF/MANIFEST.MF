@@ -1,0 +1,13 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: Aspect537350_A
+Bundle-SymbolicName: Aspect537350_A;singleton:=true
+Automatic-Module-Name: Aspect537350_A
+Bundle-Version: 1.0.0.qualifier
+Bundle-ActivationPolicy: lazy
+Bundle-RequiredExecutionEnvironment: JavaSE-1.8
+Require-Bundle: Base537350_A;bundle-version="1.0.0",
+ org.eclipse.objectteams.otequinox;bundle-version="2.7.1",
+ org.junit
+Export-Package: aspect;ot-aspect-host=Aspect537350_A,
+ test537350_a

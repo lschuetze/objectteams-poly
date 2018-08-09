@@ -1,0 +1,15 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: Aspect537533
+Bundle-SymbolicName: Aspect537533;singleton:=true
+Bundle-Version: 1.0.0.qualifier
+Automatic-Module-Name: Aspect537533
+Bundle-RequiredExecutionEnvironment: JavaSE-1.8
+Require-Bundle: org.eclipse.objectteams.otequinox;bundle-version="2.7.1",
+ org.eclipse.osgi;bundle-version="3.13.0",
+ Base537533;bundle-version="1.0.0",
+ org.junit;bundle-version="4.12.0"
+Bundle-ActivationPolicy: lazy
+Export-Package: aspect;ot-aspect-host=Aspect537533,
+ test537533
+Bundle-Activator: aspect.Activator

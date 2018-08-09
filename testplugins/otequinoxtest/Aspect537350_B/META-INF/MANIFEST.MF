@@ -1,0 +1,11 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: Aspect537350_B
+Bundle-SymbolicName: Aspect537350_B;singleton:=true
+Bundle-Version: 1.0.0.qualifier
+Require-Bundle: org.eclipse.objectteams.otequinox,
+ Base537350_B;bundle-version="1.0.0"
+Automatic-Module-Name: AspectD
+Bundle-RequiredExecutionEnvironment: JavaSE-1.8
+Bundle-ActivationPolicy: lazy
+Export-Package: aspect;ot-aspect-host=Aspect537350_B

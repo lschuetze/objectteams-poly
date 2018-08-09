@@ -163,6 +163,11 @@ path to map file (with substitutions):
 		<antcall target="runOTDTTests" />
 	</target>
 
+	<target name="ot-junit-run-onlyone" depends="setupProperties,checkOS" description="Run OT tests without building">
+		<echo message="Starting Testrun ${test.root.dir}"/>
+		<antcall target="runOnlyoneTests" />
+	</target>
+
 	<!-- =================== END Public Targets ==================== -->
 
 	<!-- === Setup Targets: === -->
@@ -353,6 +358,21 @@ path to map file (with substitutions):
 
 	<target name="runOTDTTests" description="Delegate to the next level script to perform the actual testing.">
 		<ant antfile="${OTScriptDir}/test.xml" target="otdt-tests" dir="${build.root.dir}">
+			<property name="os" value="${os}" />
+			<property name="ws" value="${ws}" />
+			<property name="arch" value="${arch}" />
+			<property name="baseos" value="${os}" />
+			<property name="basews" value="${ws}" />
+			<property name="basearch" value="${arch}" />
+			<property name="otdtUpdatesDir" value="${otdtUpdatesDir}" />
+			<property name="testsUpdatesDirBase" value="${testsUpdatesDirBase}" />
+			<property name="test.tmpDir" value="${test.tmpDir}"/>
+			<property name="vmargs" value="${vmargs}" />
+		</ant>
+	</target>
+
+	<target name="runOnlyoneTests" description="Delegate to the next level script to perform the actual testing.">
+		<ant antfile="${OTScriptDir}/test.xml" target="onlyone" dir="${build.root.dir}">
 			<property name="os" value="${os}" />
 			<property name="ws" value="${ws}" />
 			<property name="arch" value="${arch}" />

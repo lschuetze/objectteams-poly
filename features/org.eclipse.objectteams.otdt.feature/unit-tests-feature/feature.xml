@@ -6,7 +6,7 @@
       provider-name="Eclipse Object Teams Project">
 
    <description>
-This is a build-time-only feature for testing the Object Teams Development Tooling.
+      This is a build-time-only feature for testing the Object Teams Development Tooling.
    </description>
 
    <copyright>
@@ -30,7 +30,7 @@ This software is based on Eclipse and the Java Development Tooling
    </copyright>
 
    <license url="%licenseURL">
-   		%license
+      %license
    </license>
 
    <requires>
@@ -86,7 +86,7 @@ This software is based on Eclipse and the Java Development Tooling
          download-size="0"
          install-size="0"
          version="0.0.0"/>
-    
+
    <plugin
          id="org.eclipse.objectteams.otdt.debug.tests"
          download-size="0"
@@ -111,58 +111,128 @@ This software is based on Eclipse and the Java Development Tooling
          install-size="0"
          version="0.0.0"/>
 
-    <plugin
+   <plugin
          id="org.eclipse.objectteams.otdt.test.builder"
          download-size="0"
          install-size="0"
          version="0.0.0"/>
-         
-    <plugin
-    	 id="org.eclipse.jdt.text.tests"
-    	 download-size="0"
-    	 install-size="0"
-    	 version="0.0.0"/>
 
-    <plugin
-    	 id="org.eclipse.jface.text.tests"
-    	 download-size="0"
-    	 install-size="0"
-    	 version="0.0.0"/>
+   <plugin
+         id="org.eclipse.jdt.text.tests"
+         download-size="0"
+         install-size="0"
+         version="0.0.0"/>
 
-    <plugin
-    	 id="org.eclipse.text.tests"
-    	 download-size="0"
-    	 install-size="0"
-    	 version="0.0.0"/>
+   <plugin
+         id="org.eclipse.jface.text.tests"
+         download-size="0"
+         install-size="0"
+         version="0.0.0"/>
 
-    <plugin
-    	 id="org.eclipse.core.filebuffers.tests"
-    	 download-size="0"
-    	 install-size="0"
-    	 version="0.0.0"/>
+   <plugin
+         id="org.eclipse.text.tests"
+         download-size="0"
+         install-size="0"
+         version="0.0.0"/>
 
-    <plugin
-    	 id="org.eclipse.jdt.annotation"
-    	 download-size="0"
-    	 install-size="0"
-    	 version="1.1.300.qualifier"/>
+   <plugin
+         id="org.eclipse.core.filebuffers.tests"
+         download-size="0"
+         install-size="0"
+         version="0.0.0"/>
 
-    <plugin
-    	 id="org.eclipse.jdt.annotation"
-    	 download-size="0"
-    	 install-size="0"
-    	 version="2.2.100.qualifier"/>
+   <plugin
+         id="org.eclipse.jdt.annotation"
+         download-size="0"
+         install-size="0"
+         version="1.1.300.qualifier"/>
 
-	<plugin
-		 id="org.hamcrest.core"
-		 download-size="0"
-		 install-size="0"
-		 version="0.0.0"/>
+   <plugin
+         id="org.eclipse.jdt.annotation"
+         download-size="0"
+         install-size="0"
+         version="2.2.100.qualifier"/>
 
-	<plugin
-		 id="org.hamcrest.library"
-		 download-size="0"
-		 install-size="0"
-		 version="0.0.0"/>
+   <plugin
+         id="org.hamcrest.core"
+         download-size="0"
+         install-size="0"
+         version="0.0.0"/>
+
+   <plugin
+         id="org.hamcrest.library"
+         download-size="0"
+         install-size="0"
+         version="0.0.0"/>
+
+   <plugin
+         id="Aspect537350_A"
+         download-size="0"
+         install-size="0"
+         version="0.0.0"
+         unpack="false"/>
+
+   <plugin
+         id="Aspect537350_B"
+         download-size="0"
+         install-size="0"
+         version="0.0.0"
+         unpack="false"/>
+
+   <plugin
+         id="Aspect537351"
+         download-size="0"
+         install-size="0"
+         version="0.0.0"
+         unpack="false"/>
+
+   <plugin
+         id="Aspect537533"
+         download-size="0"
+         install-size="0"
+         version="0.0.0"
+         unpack="false"/>
+
+   <plugin
+         id="Base537350_A"
+         download-size="0"
+         install-size="0"
+         version="0.0.0"
+         unpack="false"/>
+
+   <plugin
+         id="Base537350_B"
+         download-size="0"
+         install-size="0"
+         version="0.0.0"
+         unpack="false"/>
+
+   <plugin
+         id="Base537351"
+         download-size="0"
+         install-size="0"
+         version="0.0.0"
+         unpack="false"/>
+
+   <plugin
+         id="Base537533"
+         download-size="0"
+         install-size="0"
+         version="0.0.0"
+         unpack="false"/>
+
+   <plugin
+         id="Middle537351"
+         download-size="0"
+         install-size="0"
+         version="0.0.0"
+         unpack="false"/>
+
+   <plugin
+         id="OTEquinoxTests"
+         download-size="0"
+         install-size="0"
+         version="0.0.0"
+         unpack="false"/>
 
 </feature>
