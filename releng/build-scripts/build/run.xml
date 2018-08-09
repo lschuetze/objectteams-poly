@@ -165,6 +165,7 @@ path to map file (with substitutions):
 
 	<target name="ot-junit-run-onlyone" depends="setupProperties,checkOS" description="Run OT tests without building">
 		<echo message="Starting Testrun ${test.root.dir}"/>
+		<antcall target="setupTests" />
 		<antcall target="runOnlyoneTests" />
 	</target>
 
