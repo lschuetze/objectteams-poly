@@ -228,14 +228,21 @@ public class OTReconcilerTests extends ReconcilerTests {
 	}
 
 	protected IJavaProject createOTJavaProject(String projectName, String[] sourceFolders, String[] libraries, String compliance, String output) throws CoreException {
-		return createOTJavaProject(projectName, sourceFolders, libraries, compliance, output, false);
+		return createOTJavaProject(projectName, sourceFolders, libraries, compliance, output, false, null);
 	}
-	protected IJavaProject createOTJavaProject(String projectName, String[] sourceFolders, String[] libraries, String compliance, String output, boolean useFullJcl) throws CoreException {
+	protected IJavaProject createOTJavaProject(String projectName, String[] sourceFolders, String[] libraries, String compliance, String output, boolean useFullJcl, String weaving) throws CoreException {
 		IJavaProject javaProject = createJavaProject(projectName, sourceFolders, libraries, output, compliance, useFullJcl);
 		IProjectDescription description = javaProject.getProject().getDescription();
 		description.setNatureIds(OTDTPlugin.createProjectNatures(description));
 		javaProject.getProject().setDescription(description, null);
 		javaProject.setOption(CompilerOptions.OPTION_ReportWeaveIntoSystemClass, CompilerOptions.IGNORE);
+		if (weaving == null) {
+			weaving = System.getProperty("ot.weaving", null);
+			if (weaving != null)
+				javaProject.setOption(CompilerOptions.OPTION_WeavingScheme, weaving);
+			else
+				javaProject.setOption(CompilerOptions.OPTION_WeavingScheme, CompilerOptions.WeavingScheme.OTDRE.toString());
+		}
 		return javaProject;
 	}
 
@@ -582,7 +589,7 @@ public class OTReconcilerTests extends ReconcilerTests {
 		
 			
 			ICompilationUnit wc = getCompilationUnit("/P/Foo/Role2.java").getWorkingCopy(this.wcOwner, null);
-			wc.reconcile(AST.JLS8, 
+			wc.reconcile(AST.JLS10, 
 						 ICompilationUnit.FORCE_PROBLEM_DETECTION|ICompilationUnit.ENABLE_STATEMENTS_RECOVERY|ICompilationUnit.ENABLE_BINDINGS_RECOVERY,
 						 wc.getOwner(), null);
 			
@@ -650,7 +657,7 @@ public class OTReconcilerTests extends ReconcilerTests {
 							"		String s1, s2, s3, s4, s5, s6;\n" +
 					"	}\n").length()), 
 					null);
-			wc.reconcile(AST.JLS8, 
+			wc.reconcile(AST.JLS10,
 					ICompilationUnit.FORCE_PROBLEM_DETECTION|ICompilationUnit.ENABLE_STATEMENTS_RECOVERY|ICompilationUnit.ENABLE_BINDINGS_RECOVERY,
 					wc.getOwner(), null);
 			
@@ -2106,7 +2113,9 @@ public class OTReconcilerTests extends ReconcilerTests {
     public void testTeamInJar1() throws CoreException, InterruptedException, IOException {
     	try {
 			// Resources creation
-			IJavaProject p = createOTJavaProject("P", new String[] {"src"}, new String[] {"JCL18_FULL"}, "1.8", "bin", true/*fullJCL*/);
+			IJavaProject p = createOTJavaProject("P", new String[] {"src"}, 
+					new String[] {"JCL18_FULL"}, "1.8", "bin", true/*fullJCL*/, 
+					CompilerOptions.WeavingScheme.OTRE.toString());
 			IProject project = p.getProject();
 			IProjectDescription prjDesc = project.getDescription();
 			prjDesc.setBuildSpec(OTDTPlugin.createProjectBuildCommands(prjDesc));
@@ -2150,4 +2159,94 @@ public class OTReconcilerTests extends ReconcilerTests {
     		deleteProject("P");
     	}
     }
+    // Bug 501655 - [reconcile] base call in role file is marked as illegal
+    public void testBaseCallinRoFi1() throws CoreException {
+    	try {
+			// Resources creation
+			IJavaProject p = createOTJavaProject("P", new String[] {""}, new String[] {"JCL15_LIB"}, "bin");
+			IProject project = p.getProject();
+			IProjectDescription prjDesc = project.getDescription();
+			prjDesc.setBuildSpec(OTDTPlugin.createProjectBuildCommands(prjDesc));
+			project.setDescription(prjDesc, null);
+			p.setOption(JavaCore.COMPILER_PB_NON_NLS_STRING_LITERAL, JavaCore.ERROR);
+			p.setOption(JavaCore.COMPILER_PB_UNUSED_LOCAL, JavaCore.IGNORE);
+
+			createRuntimeStubs();
+			project.build(IncrementalProjectBuilder.FULL_BUILD, null);
+
+			createFolder("/P/b");
+			createFile("/P/b/MyBase.java",
+				"public class MyBase {\n" +
+				"	void m(Object o, String[] vals) throws Exception {}\n" +
+				"}\n");
+			createFolder("/P/MyTeam");
+			String roleSourceString =	
+				"team package MyTeam;\n" +
+				"public class Role playedBy MyBase {\n" +
+				"	@SuppressWarnings(\"decapsulation\")\n" +
+				"	foo <- replace m;\n" +
+				"	callin void foo(Object o, String[] vals) throws Exception {\n" +
+				"		base.foo(o, vals);\n" +
+				"	}\n" +
+				"}\n";
+
+			createFile(
+				"/P/MyTeam/Role.java",
+	    			roleSourceString);
+			
+			String teamSourceString =
+				"import base b.MyBase;\n" +
+				"public team class  MyTeam {\n" +
+				"	Role r;\n" +
+				"}\n";
+			createFile(
+				"/P/MyTeam.java",
+	    			teamSourceString);
+
+			char[] roleSourceChars = roleSourceString.toCharArray();
+			this.problemRequestor.initialize(roleSourceChars);
+			
+			getCompilationUnit("/P/MyTeam/Role.java").getWorkingCopy(this.wcOwner, null);
+			
+			assertProblems(
+				"Unexpected problems",
+				"----------\n" + 
+				"----------\n");
+
+    	} finally {
+    		deleteProject("P");
+    	}
+    }
+
+	private void createRuntimeStubs() throws CoreException {
+		createFolder("/P/org/objectteams");
+		createFile("/P/org/objectteams/ITeam.java",
+				"package org.objectteams;\n" + 
+				"public interface ITeam {\n" +
+				"}\n");
+		createFile("/P/org/objectteams/Team.java",
+				"package org.objectteams;\n" + 
+				"public class Team implements ITeam {\n" +
+				"	public Object _OT$callNext(IBoundBase2 baze, ITeam[] teams, int idx, int[] callinIds, int boundMethodId, Object[] args, Object[] baseCallArgs, int baseCallFlags)\n" + 
+				"		return null;\n" +
+				"	}\n" +
+				"}\n");
+		createFile("/P/org/objectteams/ITeamMigratable.java",
+				"package org.objectteams;\n" + 
+				"\n" + 
+				"public interface ITeamMigratable {\n" + 
+				"	<R> R migrateToTeam(final ITeam otherTeam);\n" + 
+				"}"
+				);
+		createFile("/P/org/objectteams/IBaseMigratable.java",
+				"package org.objectteams;\n" + 
+				"public interface IBaseMigratable {\n" + 
+				"	<B> void migrateToBase(B otherBase);\n" + 
+				"}\n" + 
+				"");
+		createFile("/P/org/objectteams/IBoundBase2.java",
+				"package org.objectteams;\n" + 
+				"public interface IBoundBase2 {}\n");
+	}
+
 }

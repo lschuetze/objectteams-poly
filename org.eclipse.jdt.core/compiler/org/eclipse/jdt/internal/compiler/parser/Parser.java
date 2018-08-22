@@ -6143,10 +6143,6 @@ protected void consumeMethodHeaderName(boolean isAnnotationMethod) {
 
 	//name
 	md.selector = this.identifierStack[this.identifierPtr];
-//{ObjectTeams: special case _OT$-methods in org.objectteams.Team:
-	if (CharOperation.prefixEquals(IOTConstants.OT_DOLLAR_NAME, md.selector))
-		md.isGenerated = true;
-// SH}
 	long selectorSource = this.identifierPositionStack[this.identifierPtr--];
 	this.identifierLengthPtr--;
 	//type
