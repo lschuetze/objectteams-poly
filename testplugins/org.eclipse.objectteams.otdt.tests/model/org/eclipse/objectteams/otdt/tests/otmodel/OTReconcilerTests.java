@@ -239,7 +239,7 @@ public class OTReconcilerTests extends ReconcilerTests {
 		if (weaving == null) {
 			weaving = System.getProperty("ot.weaving", null);
 			if (weaving != null)
-				javaProject.setOption(CompilerOptions.OPTION_WeavingScheme, weaving);
+				javaProject.setOption(CompilerOptions.OPTION_WeavingScheme, weaving.toUpperCase());
 			else
 				javaProject.setOption(CompilerOptions.OPTION_WeavingScheme, CompilerOptions.WeavingScheme.OTDRE.toString());
 		}
