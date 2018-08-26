@@ -2552,6 +2552,7 @@ public void test012_compiler_problems_tuning() {
         expectedProblemAttributes.put("InstantiationAnnotationInNonRole", SKIP);
         expectedProblemAttributes.put("FieldInRoleWithInstantiationPolicy", SKIP);
         expectedProblemAttributes.put("MissingEqualsHashCodeWithInstantation", SKIP);
+        expectedProblemAttributes.put("RoleConstructorNeedingTSuperCall", SKIP);
         expectedProblemAttributes.put("DeclaredLiftingInStaticMethod", SKIP);
         expectedProblemAttributes.put("QualifiedLiftingType", SKIP);
         expectedProblemAttributes.put("LiftingTypeNotAllowedHere", SKIP);

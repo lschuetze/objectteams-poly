@@ -13,4 +13,8 @@ public class Subscriber playedBy Passenger
 
 	// Callout method binding
 	String getName() -> String getName();
+
+	public Subscriber(Passenger pass) {
+		tsuper();
+	}
 }

@@ -251,11 +251,11 @@ public class OTJStratumFlightbonusTest extends AbstractSourceMapGeneratorTest {
     	// copy-inherited methods
         FileInfo fileInfo2 = stratum_role1.getOrCreateFileInfo("Bonus.java", "org/eclipse/objectteams/example/bonussystem/Bonus.java");
         
-        LineInfo lineInfo4 = new LineInfo(39,17); // class header (e.g., _OT$getTeam())
-        LineInfo lineInfo6 = new LineInfo(44,26); // method getCollectedCredits
-        LineInfo lineInfo7 = new LineInfo(49,24); // method collectCredits
+        LineInfo lineInfo4 = new LineInfo(39,21); // class header (e.g., _OT$getTeam())
+        LineInfo lineInfo6 = new LineInfo(44,30); // method getCollectedCredits
+        LineInfo lineInfo7 = new LineInfo(49,28); // method collectCredits
         lineInfo7.setRepeatCount(2);
-        LineInfo lineInfo8 = new LineInfo(58,18); // method buy
+        LineInfo lineInfo8 = new LineInfo(58,22); // method buy
         lineInfo8.setRepeatCount(6);
 
         fileInfo2.addLineInfo(lineInfo4);
@@ -264,7 +264,7 @@ public class OTJStratumFlightbonusTest extends AbstractSourceMapGeneratorTest {
         fileInfo2.addLineInfo(lineInfo8);
 
         LineInfo lineInfo1 = new LineInfo(7,7); 	// all lines of class Subscriber
-        lineInfo1.setRepeatCount(10);
+        lineInfo1.setRepeatCount(14);
 
         LineInfo lineInfo2 = new LineInfo(ISMAPConstants.STEP_INTO_LINENUMBER,ISMAPConstants.STEP_INTO_LINENUMBER);
         LineInfo lineInfo3 = new LineInfo(ISMAPConstants.STEP_OVER_LINENUMBER,ISMAPConstants.STEP_OVER_LINENUMBER);
