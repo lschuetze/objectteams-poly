@@ -1,7 +1,7 @@
 /**********************************************************************
  * This file is part of "Object Teams Development Tooling"-Software
  *
- * Copyright 2004, 2010 Fraunhofer Gesellschaft, Munich, Germany,
+ * Copyright 2004, 2018 Fraunhofer Gesellschaft, Munich, Germany,
  * for its Fraunhofer Institute for Computer Architecture and Software
  * Technology (FIRST), Berlin, Germany and Technical University Berlin,
  * Germany.
@@ -1138,7 +1138,15 @@ public class RoleModel extends TypeModel
         this._state.inititalize(ITranslationStates.STATE_ROLES_SPLIT);
     }
 
-	@Override
+    public boolean hasFieldInit() {
+    	AbstractAttribute attribute = getAttribute(IOTConstants.OT_CLASS_FLAGS);
+    	if (attribute instanceof WordValueAttribute) {
+    		return (((WordValueAttribute) attribute).getValue() & IOTConstants.OT_CLASS_HAS_FIELD_INITS) != 0;
+    	}
+    	return false;
+    }
+
+    @Override
 	protected String getKindString() {
         return "Role"; //$NON-NLS-1$
     }

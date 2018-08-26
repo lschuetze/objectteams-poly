@@ -2179,6 +2179,7 @@ void setSourceStart(int sourceStart);
 	int FieldInRoleWithInstantiationPolicy		 = ROLE_RELATED + 3105; // 2.3.1(d)
 	/** @since 3.7 (OT 2.0) */
 	int MissingEqualsHashCodeWithInstantation	 = ROLE_RELATED + 3106; // 2.3.1(d)
+	int RoleConstructorNeedingTSuperCall		 = ROLE_RELATED + 3107; // FIXME
 
 	int DeclaredLiftingInStaticMethod            = ROLE_RELATED + 3201; // 2.3.2(a)
 	int QualifiedLiftingType 					 = ROLE_RELATED + 3202; // 2.3.2(a)

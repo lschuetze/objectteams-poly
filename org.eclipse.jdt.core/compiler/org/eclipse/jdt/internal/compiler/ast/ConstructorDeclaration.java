@@ -160,7 +160,7 @@ public void analyseCode(ClassScope classScope, InitializationFlowContext initial
             if (calledHere || calledIndirectly)
                 this.scope.problemReporter().baseConstructorCallInLiftingConstructor(this);
         } else {
-            if (!calledHere && !calledIndirectly) {
+            if (!calledHere && !calledIndirectly && !Lifting.isLiftingCtor(selfCall)) {
             	if (!(isDefaultConstructor() && roleType.roleModel != null && roleType.roleModel.hasBaseclassProblem())) // ignore if wrong def.ctor was created 
             		this.scope.problemReporter().missingCallToBaseConstructor(
             				this, this.binding.declaringClass);
@@ -349,6 +349,19 @@ public void analyseCode(ClassScope classScope, InitializationFlowContext initial
 					}
 				}
 			}
+//{ObjectTeams: mandatory tsuper() call?
+			if (roleType.isRole()
+					&& !TSuperHelper.isTSuper(this.binding)
+					&& this.constructorCall.accessMode != ExplicitConstructorCall.Tsuper) {
+				for (ReferenceBinding tsuperRole : roleType.roleModel.getTSuperRoleBindings()) {
+					RoleModel tsuperModel = tsuperRole.roleModel;
+					if (tsuperModel != null && tsuperModel.hasFieldInit()) {
+						classScope.problemReporter().needToCallTSuper(this.constructorCall, tsuperRole);
+						break;
+					}
+				}
+			}
+// SH}
 		}
 		// check unreachable catch blocks
 		constructorContext.complainIfUnusedExceptionHandlers(this);
@@ -488,12 +501,14 @@ public void generateCode(ClassScope classScope, ClassFile classFile) {
 public void generateSyntheticFieldInitializationsIfNecessary(MethodScope methodScope, CodeStream codeStream, ReferenceBinding declaringClass) {
 //{ObjectTeams: new kind of synthetics, may occur in non-nested types, too:
 	SyntheticArgumentBinding[] syntheticArgs = declaringClass.valueParamSynthArgs();
-	for (int i = 0, max = syntheticArgs == null ? 0 : syntheticArgs.length; i < max; i++) {
-		SyntheticArgumentBinding syntheticArg;
-		if ((syntheticArg = syntheticArgs[i]).matchingField != null) {
-			codeStream.aload_0();
-			codeStream.load(syntheticArg);
-			codeStream.fieldAccess(Opcodes.OPC_putfield, syntheticArg.matchingField, declaringClass);
+	if (syntheticArgs != null) {
+		for (int i = 0, max = syntheticArgs.length; i < max; i++) {
+			SyntheticArgumentBinding syntheticArg;
+			if ((syntheticArg = syntheticArgs[i]).matchingField != null) {
+				codeStream.aload_0();
+				codeStream.load(syntheticArg);
+				codeStream.fieldAccess(Opcodes.OPC_putfield, syntheticArg.matchingField, declaringClass);
+			}
 		}
 	}
 // SH}

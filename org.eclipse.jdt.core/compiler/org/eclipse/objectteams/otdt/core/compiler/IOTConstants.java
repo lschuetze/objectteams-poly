@@ -1,7 +1,7 @@
 /**********************************************************************
  * This file is part of "Object Teams Development Tooling"-Software
  *
- * Copyright 2003, 2014 Fraunhofer Gesellschaft, Munich, Germany,
+ * Copyright 2003, 2018 Fraunhofer Gesellschaft, Munich, Germany,
  * for its Fraunhofer Institute for Computer Architecture and Software
  * Technology (FIRST), Berlin, Germany and Technical University Berlin,
  * Germany.
@@ -127,6 +127,7 @@ public interface IOTConstants
     public static final int    OT_CLASS_ROLE_FILE       = 16;
     public static final int    OT_CLASS_FLAG_HAS_TSUPER = 32;
     public static final int    OT_CLASS_CONFINED        = 64; // means: superclass Object should be removed on loading
+    public static final int    OT_CLASS_HAS_FIELD_INITS = 128;
 
     public static final char[] CALLIN_FLAGS           = "CallinFlags".toCharArray();
       // possible values for CALLIN_FLAGS:

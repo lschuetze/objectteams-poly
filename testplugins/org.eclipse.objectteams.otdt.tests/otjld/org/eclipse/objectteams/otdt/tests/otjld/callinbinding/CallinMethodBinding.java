@@ -2363,7 +2363,7 @@ public class CallinMethodBinding extends AbstractOTJLDTest {
 		"Team4112cbmbm2_1.java",
 			    "\n" +
 			    "public team class Team4112cbmbm2_1 {\n" +
-			    "    public class Role4112cbmbm2 {\n" +
+			    "    public class Role4112cbmbm2 playedBy T4112cbmbm2_4 {\n" +
 			    "        private int counter = 0;\n" +
 			    "        Object test(String arg) {\n" +
 			    "            T4112cbmbm2_1.addValue(String.valueOf(++counter)+\":\"+arg);\n" +

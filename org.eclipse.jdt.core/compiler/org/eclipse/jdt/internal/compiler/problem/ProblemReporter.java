@@ -11458,6 +11458,13 @@ public void explicitSuperInLiftConstructor(
         constructor.constructorCall.sourceStart,
         constructor.constructorCall.sourceEnd);
 }
+public void needToCallTSuper(ASTNode location, ReferenceBinding tsuperRole) {
+	handle(IProblem.RoleConstructorNeedingTSuperCall,
+			new String[] { String.valueOf(tsuperRole.readableName()) },
+			new String[] { String.valueOf(tsuperRole.shortReadableName()) },
+			location.sourceStart,
+			location.sourceEnd);
+}
 public void instantiationAnnotationInNonRole(TypeDeclaration typeDecl) {
 	int start=0, end=0;
 	String[] args = {new String(IOTConstants.INSTANTIATION)};

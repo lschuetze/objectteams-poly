@@ -1,7 +1,7 @@
 /**********************************************************************
  * This file is part of "Object Teams Development Tooling"-Software
  *
- * Copyright 2003, 2013 Fraunhofer Gesellschaft, Munich, Germany,
+ * Copyright 2003, 2018 Fraunhofer Gesellschaft, Munich, Germany,
  * for its Fraunhofer Institute for Computer Architecture and Software
  * Technology (FIRST), Berlin, Germany and Technical University Berlin,
  * Germany.
@@ -56,6 +56,7 @@ import org.eclipse.objectteams.otdt.internal.core.compiler.statemachine.transfor
 import org.eclipse.objectteams.otdt.internal.core.compiler.util.AstConverter;
 import org.eclipse.objectteams.otdt.internal.core.compiler.util.AstEdit;
 import org.eclipse.objectteams.otdt.internal.core.compiler.util.AstGenerator;
+import org.eclipse.objectteams.otdt.internal.core.compiler.util.TSuperHelper;
 import org.eclipse.objectteams.otdt.internal.core.compiler.util.TypeAnalyzer;
 
 
@@ -291,6 +292,8 @@ public class Lifting extends SwitchOnBaseTypeGenerator
 
         if (needMethodBodies) {
         	boolean shouldCallTSuper = implicitSuperRole != null && implicitSuperRole.isBound() && !roleModel._refinesExtends;
+        	if (existingConstructor != null)
+        		shouldCallTSuper &= existingConstructor.constructorCall.isImplicitSuper();
 	        if (instantiableBoundRootRoleNode == roleNode)
 				genLiftToConstructorStatements(
 	            		baseClassBinding,
@@ -387,9 +390,10 @@ public class Lifting extends SwitchOnBaseTypeGenerator
 
     /**
      * @param baseClassBinding
+     * @param roleType type to generate into
      * @param liftToConstructorDeclaration generated constructor
      * @param baseArgName name of the base argument, either generated or from source
-     * @param hasBoundTSuper 
+     * @param shouldCallTSuper signals whether a tsuper() call should be generated
 	 * @param gen for generating AST nodes
      */
     private static void genLiftToConstructorSuperCall(
@@ -516,7 +520,8 @@ public class Lifting extends SwitchOnBaseTypeGenerator
 	public static boolean isLiftingCtor(MethodBinding binding) {
 		if (!binding.isConstructor())
 			return false;
-		if (binding.parameters.length != 1)
+		int expectedParams = TSuperHelper.isTSuper(binding) ? 2 : 1;
+		if (binding.parameters.length != expectedParams)
 			return false;
 		return TypeBinding.equalsEquals(binding.parameters[0], binding.declaringClass.baseclass());
 	}

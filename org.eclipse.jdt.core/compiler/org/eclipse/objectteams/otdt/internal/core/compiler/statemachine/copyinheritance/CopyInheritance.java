@@ -1,7 +1,7 @@
 /**********************************************************************
  * This file is part of "Object Teams Development Tooling"-Software
  *
- * Copyright 2003, 2014 Fraunhofer Gesellschaft, Munich, Germany,
+ * Copyright 2003, 2018 Fraunhofer Gesellschaft, Munich, Germany,
  * for its Fraunhofer Institute for Computer Architecture and Software
  * Technology (FIRST), Berlin, Germany and Technical University Berlin,
  * Germany.
@@ -2343,4 +2343,12 @@ public class CopyInheritance implements IOTConstants, ClassFileConstants, ExtraC
 		return CharOperation.prefixEquals(CREATOR_PREFIX_NAME, selector);
 	}
 
+	public static boolean needsSuperCtorCall(RoleModel role) {
+		for (ReferenceBinding tsuperRole : role.getTSuperRoleBindings()) {
+			RoleModel tsuperModel = tsuperRole.roleModel;
+			if (tsuperModel != null && tsuperModel.hasFieldInit())
+				return true;
+		}
+		return false;
+	}
 }

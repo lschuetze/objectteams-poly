@@ -43,6 +43,7 @@ import org.eclipse.objectteams.otdt.internal.core.compiler.ast.TypeValueParamete
 import org.eclipse.objectteams.otdt.internal.core.compiler.bytecode.BytecodeTransformer;
 import org.eclipse.objectteams.otdt.internal.core.compiler.bytecode.CallinPrecedenceAttribute;
 import org.eclipse.objectteams.otdt.internal.core.compiler.bytecode.InlineAttribute;
+import org.eclipse.objectteams.otdt.internal.core.compiler.bytecode.WordValueAttribute;
 import org.eclipse.objectteams.otdt.internal.core.compiler.control.Config;
 import org.eclipse.objectteams.otdt.internal.core.compiler.control.Dependencies;
 import org.eclipse.objectteams.otdt.internal.core.compiler.control.ITranslationStates;
@@ -1860,6 +1861,7 @@ public void resolve() {
 //{ObjectTeams:	should we work at all?
 	    Config config = Config.getConfig();
 	    boolean fieldsAndMethods = config != null && config.verifyMethods;
+	    boolean hasFieldInit = false;
 	  if (fieldsAndMethods) {
 // SH}
 		if (this.fields != null) {
@@ -1890,6 +1892,10 @@ public void resolve() {
 						}
 						localMaxFieldCount++;
 						lastVisibleFieldID = field.binding.id;
+//{ObjectTeams: has init?
+						if (field.initialization != null)
+							hasFieldInit = true;
+// SH}
 						break;
 
 					case AbstractVariableDeclaration.INITIALIZER:
@@ -1902,6 +1908,8 @@ public void resolve() {
 //{ObjectTeams: also count type value parameters into maxFieldCount
 		if (this.typeParameters != null)
 			TypeValueParameter.updateMaxFieldCount(this);
+		if (hasFieldInit && isRole())
+	        WordValueAttribute.addClassFlags(getRoleModel(), IOTConstants.OT_CLASS_HAS_FIELD_INITS);
 	  }
 // SH}
 		if (this.maxFieldCount < localMaxFieldCount) {

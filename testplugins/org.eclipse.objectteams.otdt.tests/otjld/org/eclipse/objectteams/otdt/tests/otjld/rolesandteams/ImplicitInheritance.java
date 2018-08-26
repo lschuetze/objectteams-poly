@@ -1428,4 +1428,267 @@ public class ImplicitInheritance extends AbstractOTJLDTest {
     		},
     		"M");
     }
+
+    public void testMissingExplicitConstructor() throws Exception {
+    	runNegativeTest(
+    		new String[] {
+    			"SubTeam.java",
+    			"public team class SubTeam extends SuperTeamFI4 {\n" +
+    			"	@Override\n" +
+    			"	protected class R1 {\n" +
+    			"		protected R1() {\n" +
+    			"			tsuper();\n" +
+    			"		}\n" +
+    			"	}\n" +
+				"}\n",
+    			"SuperTeamFI4.java",
+    			"public team class SuperTeamFI4 {\n" +
+    			"	protected class R1 {\n" +
+    			"		protected String s1 = \"s1\";\n" +
+    			"		protected R1(int i) {}\n" +
+    			"	}\n" +
+    			"}\n",
+    		},
+    		"----------\n" + 
+			"1. ERROR in SubTeam.java (at line 5)\n" + 
+			"	tsuper();\n" + 
+			"	^^^^^^^^^\n" + 
+			"The constructor SuperTeamFI4.R1() is undefined\n" + 
+			"----------\n");
+    }
+
+    public void testFieldInitialization1_OK() throws Exception {
+    	runConformTest(
+    		new String[] {
+    			"SubTeamFI1.java",
+    			"public team class SubTeamFI1 extends SuperTeamFI4FI1 {\n" +
+    			"	@Override\n" +
+    			"	protected class R1 {\n" +
+    			"		protected R1() {\n" +
+    			"			tsuper();\n" +
+    			"		}\n" +
+    			"	}\n" +
+    			"	@Override\n" +
+    			"	protected class R3 {\n" +
+    			"	}\n" +
+    			"	public static void main(String... args) {\n" +
+    			"		new SubTeamFI1().test();\n" +
+    			"	}\n" +
+    			"	void test() {\n" +
+    			"		System.out.print(new R1().s1);\n" + // OK: has explicit tsuper() call
+    			"		System.out.print(new R2().s2);\n" + // OK: fully inherited, all members are copied
+    			"		System.out.print(new R3().s3);\n" + // OK: constructor is copied
+    			"	}\n" +
+				"}\n",
+    			"SuperTeamFI4FI1.java",
+    			"public team class SuperTeamFI4FI1 {\n" +
+    			"	protected class R1 {\n" +
+    			"		protected String s1 = \"s1\";\n" +
+    			"	}\n" +
+    			"	protected class R2 {\n" +
+    			"		protected String s2 = \"s2\";\n" +
+    			"	}\n" +
+    			"	protected class R3 {\n" +
+    			"		protected String s3 = \"s3\";\n" +
+    			"	}\n" +
+    			"}\n",
+    		},
+    		"s1s2s3");
+    }
+
+    public void testFieldInitialization2_bound_OK() throws Exception {
+    	runConformTest(
+    		new String[] {
+    			"SubTeamFI2.java",
+    			"public team class SubTeamFI2 extends SuperTeamFI4FI2 {\n" +
+    			"	@Override\n" +
+    			"	protected class R1 {\n" +
+    			"		protected R1(Base1 b) {\n" +
+    			"			tsuper(b);\n" +
+    			"		}\n" +
+    			"	}\n" +
+    			"	@Override\n" +
+    			"	protected class R2 {\n" +
+    			"	}\n" +
+    			"	@Override\n" +
+    			"	protected class R3 {\n" +
+    			"		protected R3() {\n" +
+    			"			tsuper(base());\n" +
+    			"		}\n" +
+    			"	}\n" +
+    			"	public static void main(String... args) {\n" +
+    			"		new SubTeamFI2().test();\n" +
+    			"	}\n" +
+    			"	void test() {\n" +
+    			"		System.out.print(new R1(new Base1()).s1);\n" + // OK: explicit tsuper() call (delegating lifting constructor)
+    			"		System.out.print(new R2(new Base2()).s2);\n" + // OK: copied lifting constructor
+    			"		System.out.print(new R3(new Base3()).s3);\n" + // OK: explicit tsuper() call (delegation from creating to lifting constructor)
+    			"	}\n" +
+				"}\n",
+    			"SuperTeamFI4FI2.java",
+    			"public team class SuperTeamFI4FI2 {\n" +
+    			"	protected class R1 playedBy Base1 {\n" +
+    			"		protected String s1 = \"s1\";\n" +
+    			"	}\n" +
+    			"	protected class R2 playedBy Base2 {\n" +
+    			"		protected String s2 = \"s2\";\n" +
+    			"	}\n" +
+    			"	protected class R3 playedBy Base3 {\n" +
+    			"		protected String s3 = \"s3\";\n" +
+    			"	}\n" +
+    			"}\n",
+    			"Base1.java",
+    			"public class Base1 {}\n",
+    			"Base2.java",
+    			"public class Base2 {}\n",
+    			"Base3.java",
+    			"public class Base3 {}\n",
+    		},
+    		"s1s2s3");
+    }
+
+    public void testFieldInitialization3_NOK() throws Exception {
+    	runNegativeTest(
+    		new String[] {
+    			"SubTeamFI3a.java",
+    			"public team class SubTeamFI3a extends SuperTeamFI4FI3 {\n" +
+    			"	@Override\n" +
+    			"	protected class R1 {\n" +
+    			"		protected R1() {\n" +
+    			"			super();\n" +
+    			"		}\n" +
+    			"	}\n" +
+    			"	@Override\n" +
+    			"	protected class R2 {\n" +
+    			"		protected R2() {\n" +
+    			"			super();\n" +
+    			"		}\n" +
+    			"		protected R2(int i) {\n" + // implicit super() is not acceptable
+    			"		}\n" +
+    			"	}\n" +
+				"}\n",
+				"SuperTeamFI4FI3.java",
+				"public team class SuperTeamFI4FI3 {\n" +
+				"	protected class R1 {\n" +
+				"		String s1 = \"s1\";\n" +
+				"	}\n" +
+				"	protected class R2 extends R1 {\n" +
+				"		String s2 = \"s2\";\n" +
+				"	}\n" +
+				"}\n"
+    		},
+    		"----------\n" + 
+			"1. ERROR in SubTeamFI3a.java (at line 5)\n" + 
+			"	super();\n" + 
+			"	^^^^^^^^\n" + 
+			"Need to invoke a tsuper constructor because tsuper role \'SuperTeamFI4FI3.R1\' has field initializations.\n" + 
+			"----------\n" + 
+			"2. ERROR in SubTeamFI3a.java (at line 11)\n" + 
+			"	super();\n" + 
+			"	^^^^^^^^\n" + 
+			"Need to invoke a tsuper constructor because tsuper role \'SuperTeamFI4FI3.R2\' has field initializations.\n" + 
+			"----------\n" + 
+			"3. ERROR in SubTeamFI3a.java (at line 13)\n" + 
+			"	protected R2(int i) {\n" + 
+			"	          ^^^^^^^^^\n" + 
+			"Need to invoke a tsuper constructor because tsuper role \'SuperTeamFI4FI3.R2\' has field initializations.\n" + 
+			"----------\n");
+    }
+
+    public void testFieldInitialization4_bound_NOK() throws Exception {
+    	// variants with regular constructors
+    	runNegativeTest(
+    		new String[] {
+    			"SubTeamFI4.java",
+    			"public team class SubTeamFI4 extends SuperTeamFI4 {\n" +
+    			"	@Override\n" +
+    			"	protected class R1 {\n" +
+    			"		protected R1() {\n" +
+    			"			tsuper();\n" +
+    			"		}\n" +
+    			"	}\n" +
+    			"	@Override\n" +
+    			"	protected class R2 {\n" +
+    			"		protected R2() {\n" +
+    			"			base();\n" +
+    			"		}\n" +
+    			"	}\n" +
+    			"	public static void main(String... args) {\n" +
+    			"		new SubTeamFI4().test();\n" +
+    			"	}\n" +
+    			"	void test() {\n" +
+    			"		System.out.print(new R1().s1);\n" +
+    			"		System.out.print(new R2().s2);\n" +
+    			"	}\n" +
+				"}\n",
+    			"SuperTeamFI4.java",
+    			"public team class SuperTeamFI4 {\n" +
+    			"	protected class R1 playedBy Base1 {\n" +
+    			"		protected String s1 = \"s1\";\n" +
+    			"	}\n" +
+    			"	protected class R2 playedBy Base2 {\n" +
+    			"		protected String s2 = \"s2\";\n" +
+    			"	}\n" +
+    			"}\n",
+    			"Base1.java",
+    			"public class Base1 {}\n",
+    			"Base2.java",
+    			"public class Base2 {}\n",
+    		},
+    		"----------\n" + 
+			"1. ERROR in SubTeamFI4.java (at line 5)\n" + 
+			"	tsuper();\n" + 
+			"	^^^^^^^^^\n" + 
+			"The constructor SuperTeamFI4.R1() is undefined\n" + 
+			"----------\n" + 
+			"2. ERROR in SubTeamFI4.java (at line 10)\n" + 
+			"	protected R2() {\n" + 
+			"	          ^^^^\n" + 
+			"Need to invoke a tsuper constructor because tsuper role \'SuperTeamFI4.R2\' has field initializations.\n" + 
+			"----------\n");
+    }
+
+    public void testFieldInitialization5_bound_NOK() throws Exception {
+    	// variants with lifting constructors
+    	runNegativeTest(
+    		new String[] {
+    			"SubTeamFI5.java",
+    			"public team class SubTeamFI5 extends SuperTeamFI5 {\n" +
+    			"	@Override\n" +
+    			"	protected class R1 {\n" +
+    			"		protected R1(Base1 b) {\n" +
+    			"			super();\n" +
+    			"		}\n" +
+    			"	}\n" +
+    			"	@Override\n" +
+    			"	protected class R2 {\n" +
+    			"		protected R2(Base1 b) {\n" +
+    			"			super(b);\n" +
+    			"		}\n" +
+    			"	}\n" +
+				"}\n",
+    			"SuperTeamFI5.java",
+    			"public team class SuperTeamFI5 {\n" +
+    			"	protected class R1 playedBy Base1 {\n" +
+    			"		String s1 = \"s1\";\n" +
+    			"	}\n" +
+    			"	protected class R2 extends R1 {\n" +
+    			"		String s2 = \"s2\";\n" +
+    			"	}\n" +
+    			"}\n",
+    			"Base1.java",
+    			"public class Base1 {}\n",
+    		},
+    		"----------\n" + 
+			"1. ERROR in SubTeamFI5.java (at line 5)\n" + 
+			"	super();\n" + 
+			"	^^^^^^^^\n" + 
+			"Need to invoke a tsuper constructor because tsuper role \'SuperTeamFI5.R1\' has field initializations.\n" + 
+			"----------\n" + 
+			"2. ERROR in SubTeamFI5.java (at line 11)\n" + 
+			"	super(b);\n" + 
+			"	^^^^^^^^^\n" + 
+			"Need to invoke a tsuper constructor because tsuper role \'SuperTeamFI5.R2\' has field initializations.\n" + 
+			"----------\n");
+    }
 }
