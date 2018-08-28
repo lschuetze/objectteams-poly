@@ -3202,7 +3202,10 @@ public void testBug473654() throws Exception {
 
 	assertResults(
 			"[POTENTIAL_METHOD_DECLARATION]{, LObject;, ()V, , null, "+(R_DEFAULT + R_RESOLVED + R_INTERESTING + R_NON_RESTRICTED)+"}\n" + 
-			"abstract[KEYWORD]{abstract, null, null, abstract, null, "+keywordRelevance+"}\n" + 
+			"abstract[KEYWORD]{abstract, null, null, abstract, null, "+keywordRelevance+"}\n" +
+//{ObjectTeams:
+			"callin[KEYWORD]{callin, null, null, callin, null, "+keywordRelevance+"}\n" +
+// SH}
 			"class[KEYWORD]{class, null, null, class, null, "+keywordRelevance+"}\n" + 
 			"enum[KEYWORD]{enum, null, null, enum, null, "+keywordRelevance+"}\n" + 
 			"final[KEYWORD]{final, null, null, final, null, "+keywordRelevance+"}\n" + 
@@ -3214,6 +3217,7 @@ public void testBug473654() throws Exception {
 			"static[KEYWORD]{static, null, null, static, null, "+keywordRelevance+"}\n" + 
 			"strictfp[KEYWORD]{strictfp, null, null, strictfp, null, "+keywordRelevance+"}\n" + 
 			"synchronized[KEYWORD]{synchronized, null, null, synchronized, null, "+keywordRelevance+"}\n" + 
+			"team[KEYWORD]{team, null, null, team, null, "+keywordRelevance+"}\n" + 
 			"transient[KEYWORD]{transient, null, null, transient, null, "+keywordRelevance+"}\n" + 
 			"volatile[KEYWORD]{volatile, null, null, volatile, null, "+keywordRelevance+"}\n" + 
 			"Foo[TYPE_REF]{Foo, , LFoo;, null, null, "+(R_DEFAULT + R_RESOLVED + R_INTERESTING + R_NON_RESTRICTED + R_CASE + R_UNQUALIFIED)+"}\n" + 
@@ -3251,7 +3255,10 @@ public void testBug537679() throws JavaModelException {
 	int overrideRelevance = R_DEFAULT + R_RESOLVED + R_INTERESTING + R_NON_RESTRICTED + R_CASE + R_METHOD_OVERIDE;
 	assertResults(
 			"[POTENTIAL_METHOD_DECLARATION]{, LObject;, ()V, , null, "+(R_DEFAULT + R_RESOLVED + R_INTERESTING + R_NON_RESTRICTED)+"}\n" + 
-			"abstract[KEYWORD]{abstract, null, null, abstract, null, "+keywordRelevance+"}\n" + 
+			"abstract[KEYWORD]{abstract, null, null, abstract, null, "+keywordRelevance+"}\n" +
+//{ObjectTeams:
+			"callin[KEYWORD]{callin, null, null, callin, null, "+keywordRelevance+"}\n" + 
+// SH}
 			"class[KEYWORD]{class, null, null, class, null, "+keywordRelevance+"}\n" + 
 			"enum[KEYWORD]{enum, null, null, enum, null, "+keywordRelevance+"}\n" + 
 			"final[KEYWORD]{final, null, null, final, null, "+keywordRelevance+"}\n" + 
@@ -3263,6 +3270,9 @@ public void testBug537679() throws JavaModelException {
 			"static[KEYWORD]{static, null, null, static, null, "+keywordRelevance+"}\n" + 
 			"strictfp[KEYWORD]{strictfp, null, null, strictfp, null, "+keywordRelevance+"}\n" + 
 			"synchronized[KEYWORD]{synchronized, null, null, synchronized, null, "+keywordRelevance+"}\n" + 
+//{ObjectTeams:
+			"team[KEYWORD]{team, null, null, team, null, "+keywordRelevance+"}\n" + 
+// SH}
 			"transient[KEYWORD]{transient, null, null, transient, null, "+keywordRelevance+"}\n" + 
 			"volatile[KEYWORD]{volatile, null, null, volatile, null, "+keywordRelevance+"}\n" + 
 			"Test[TYPE_REF]{Test, p, Lp.Test;, null, null, "+(R_DEFAULT + R_RESOLVED + R_INTERESTING + R_NON_RESTRICTED + R_CASE + R_UNQUALIFIED)+"}\n" + 
