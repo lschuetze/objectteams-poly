@@ -554,7 +554,7 @@ public String getSuperclassTypeSignature() throws JavaModelException {
 		if (superclassName == null) {
 			return null;
 		}
-		return new String(Signature.createTypeSignature(ClassFile.translatedName(superclassName), true));
+		return Signature.createTypeSignature(ClassFile.translatedName(superclassName), true);
 	}
 }
 
@@ -650,7 +650,7 @@ public String[] getSuperInterfaceTypeSignatures() throws JavaModelException {
 		names= ClassFile.translatedNames(names);
 		String[] strings= new String[length];
 		for (int i= 0; i < length; i++) {
-			strings[i]= new String(Signature.createTypeSignature(names[i], true));
+			strings[i]= Signature.createTypeSignature(names[i], true);
 		}
 		return strings;
 	}
@@ -1053,7 +1053,7 @@ public JavadocContents getJavadocContents(IProgressMonitor monitor) throws JavaM
 				typeName.insert(0, '.');
 			}
 		}
-		typeQualifiedName = new String(typeName.toString());
+		typeQualifiedName = typeName.toString();
 	} else {
 		typeQualifiedName = getElementName();
 	}

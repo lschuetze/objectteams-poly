@@ -467,8 +467,10 @@ public void accept(ISourceType[] sourceTypes, PackageBinding packageBinding, Acc
 				this.lookupEnvironment.problemReporter,
 				result);
 //{ObjectTeams: Unchanged, but note, that this is controlled by Dependencies:
-		this.lookupEnvironment.buildTypeBindings(unit, accessRestriction);
-		this.lookupEnvironment.completeTypeBindings(unit, true);
+		if(unit != null) {
+			this.lookupEnvironment.buildTypeBindings(unit, accessRestriction);
+			this.lookupEnvironment.completeTypeBindings(unit, true);
+		}
 // SH}
 	}
 }
