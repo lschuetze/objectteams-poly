@@ -16,26 +16,18 @@
  **********************************************************************/
 package org.eclipse.objectteams.otdt.internal.pde.ui;
 
-import static org.eclipse.objectteams.otequinox.Constants.TRANSFORMER_PLUGIN_ID;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IProjectDescription;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IAdaptable;
+import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.Status;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jface.action.IAction;
 import org.eclipse.jface.dialogs.ErrorDialog;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.IStructuredSelection;
-import org.eclipse.objectteams.otdt.core.ext.OTREContainer;
 import org.eclipse.osgi.util.NLS;
-import org.eclipse.pde.core.plugin.IPluginBase;
-import org.eclipse.pde.core.plugin.IPluginImport;
-import org.eclipse.pde.core.plugin.IPluginReference;
-import org.eclipse.pde.internal.core.ICoreConstants;
-import org.eclipse.pde.internal.core.bundle.WorkspaceBundlePluginModel;
-import org.eclipse.pde.internal.core.natures.PDE;
-import org.eclipse.pde.internal.core.plugin.WorkspacePluginModelBase;
-import org.eclipse.pde.ui.templates.PluginReference;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.ui.IObjectActionDelegate;
 import org.eclipse.ui.IWorkbenchPart;
@@ -46,7 +38,6 @@ import org.eclipse.ui.IWorkbenchPart;
  * @author mosconi
  * @since 1.3.2
  */
-@SuppressWarnings("restriction")
 public class ToggleOTSupportAction implements IObjectActionDelegate {
 
 	private Shell shell;
@@ -93,7 +84,7 @@ public class ToggleOTSupportAction implements IObjectActionDelegate {
 				removeOTSupport(project);
 			}
 			else {
-				addOTSupport(project);
+				OTPluginProject.makeOTPlugin(project);
 			}
 		}
 		catch (CoreException e) {
@@ -106,34 +97,10 @@ public class ToggleOTSupportAction implements IObjectActionDelegate {
 	}
 
 	/**
-	 * Adds OT/J nature, builder, and dependencies to the given project
-	 */
-	private void addOTSupport(IProject project) throws CoreException {
-		OTPluginProject.addOTNatureAndBuilder(project);
-		if (PDE.hasPluginNature(project)) {
-			// add plug-in dependency to org.eclipse.objectteams.otequinox:
-			WorkspacePluginModelBase fModel = new WorkspaceBundlePluginModel(
-					project.getFile(ICoreConstants.BUNDLE_FILENAME_DESCRIPTOR),
-					project.getFile(ICoreConstants.PLUGIN_FILENAME_DESCRIPTOR));
-			IPluginBase pluginBase = fModel.getPluginBase();
-			IPluginReference ref = new PluginReference(TRANSFORMER_PLUGIN_ID, null, 0);
-			IPluginImport iimport = fModel.getPluginFactory().createImport();
-			iimport.setId(ref.getId());
-			iimport.setVersion(ref.getVersion());
-			iimport.setMatch(ref.getMatch());
-			pluginBase.add(iimport);
-			fModel.save();
-		}
-		OTREContainer.initializeOTJProject(project);
-		if (PDE.hasPluginNature(project)) {
-			ClasspathComputerAdapter.sortClasspathEntries(project);
-		}
-	}
-
-	/**
 	 * Removes OT/J nature, builder, and dependencies from the given project
 	 */
 	private void removeOTSupport(IProject project) throws CoreException {
+		OTPDEUIPlugin.getDefault().getLog().log(new Status(IStatus.ERROR, OTPDEUIPlugin.PLUGIN_ID, "Removing OT configuration from a plug-in project is not yet implemented")); //$NON-NLS-1$
 		//TODO: yet to be implemented (also needs additional hooking in plugin.xml)
 	}
 

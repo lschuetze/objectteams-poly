@@ -66,7 +66,6 @@ public class OTNewPluginProjectWizard extends NewPluginProjectWizard {
 			try
 			{
 				OTPluginProject.makeOTPlugin(project);
-				ClasspathComputerAdapter.sortClasspathEntries(project);
 				return true;
 			}
 			catch (CoreException ex)
