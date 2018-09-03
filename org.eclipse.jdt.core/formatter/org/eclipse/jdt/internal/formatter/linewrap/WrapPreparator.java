@@ -179,7 +179,7 @@ public class WrapPreparator extends ASTVisitor {
 	final DefaultCodeFormatterOptions options;
 	final int kind;
 
-	final FieldAligner fieldAligner;
+	final Aligner aligner;
 
 	int importsStart = -1, importsEnd = -1;
 
@@ -201,7 +201,7 @@ public class WrapPreparator extends ASTVisitor {
 		this.options = options;
 		this.kind = kind;
 
-		this.fieldAligner = new FieldAligner(this.tm, this.options);
+		this.aligner = new Aligner(this.tm, this.options);
 	}
 
 	@Override
@@ -262,20 +262,20 @@ public class WrapPreparator extends ASTVisitor {
 		prepareElementsList(node.typeParameters(), TokenNameCOMMA, TokenNameLESS);
 		handleWrap(this.options.alignment_for_type_parameters);
 
-		this.fieldAligner.handleAlign(node.bodyDeclarations());
+		this.aligner.handleAlign(node.bodyDeclarations());
 
 		return true;
 	}
 
 	@Override
 	public boolean visit(AnnotationTypeDeclaration node) {
-		this.fieldAligner.handleAlign(node.bodyDeclarations());
+		this.aligner.handleAlign(node.bodyDeclarations());
 		return true;
 	}
 
 	@Override
 	public boolean visit(AnonymousClassDeclaration node) {
-		this.fieldAligner.handleAlign(node.bodyDeclarations());
+		this.aligner.handleAlign(node.bodyDeclarations());
 		return true;
 	}
 
@@ -371,7 +371,7 @@ public class WrapPreparator extends ASTVisitor {
 			handleWrap(this.options.alignment_for_superinterfaces_in_enum_declaration, PREFERRED);
 		}
 
-		this.fieldAligner.handleAlign(node.bodyDeclarations());
+		this.aligner.handleAlign(node.bodyDeclarations());
 
 		return true;
 	}
@@ -383,6 +383,12 @@ public class WrapPreparator extends ASTVisitor {
 		if (anonymousClass != null) {
 			forceContinuousWrapping(anonymousClass, this.tm.firstIndexIn(node.getName(), -1));
 		}
+		return true;
+	}
+
+	@Override
+	public boolean visit(Block node) {
+		this.aligner.handleAlign(node);
 		return true;
 	}
 
@@ -1110,7 +1116,7 @@ public class WrapPreparator extends ASTVisitor {
 		preserveExistingLineBreaks();
 		applyBreaksOutsideRegions(regions);
 		new WrapExecutor(this.tm, this.options).executeWraps();
-		this.fieldAligner.alignComments();
+		this.aligner.alignComments();
 		wrapComments();
 		fixEnumConstantIndents(astRoot);
 	}
