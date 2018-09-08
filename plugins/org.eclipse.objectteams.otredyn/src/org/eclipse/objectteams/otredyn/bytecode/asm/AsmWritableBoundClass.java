@@ -152,78 +152,78 @@ class AsmWritableBoundClass extends AsmBoundClass {
 	protected void endTransformation(final Class<?> definedClass) throws IllegalClassFormatException {
 		assert (isTransformationActive) : "No transformation active";
 		
-		if (multiAdapter == null || nodes == null)
-			return;
-		if (multiAdapter.hasVisitors() || !nodes.isEmpty()) {
-			// //TODO (ofra): Do everything in one transformation
-			// Do all transformation with the Core API of ASM
-			try {
-				reader.accept(multiAdapter, ClassReader.SKIP_FRAMES);
-			} catch (RuntimeException e) {
-				throw new IllegalClassFormatException("Cannot transform class "+this+":"+e.getMessage());
-			}
-			setBytecode(writer.toByteArray());
-			//Do all transformations with the Tree API of ASM
-			for (AbstractTransformableClassNode node : nodes) {
-				reader = new ClassReader(allocateAndGetBytecode());
-				reader.accept(node, ClassReader.SKIP_FRAMES);
-				if (node.transform()) {
-					writer = getClassWriter();
-					node.accept(writer);
-					byte[] bytes = writer.toByteArray();
-					setBytecode(bytes);
-					if (verifying) {
-						OTCheckClassAdapter.verify(node, bytes, this.loader);
+		try {
+			if (multiAdapter == null || nodes == null)
+				return;
+			if (multiAdapter.hasVisitors() || !nodes.isEmpty()) {
+				// //TODO (ofra): Do everything in one transformation
+				// Do all transformation with the Core API of ASM
+				try {
+					reader.accept(multiAdapter, ClassReader.SKIP_FRAMES);
+				} catch (RuntimeException e) {
+					throw new IllegalClassFormatException("Cannot transform class "+this+":"+e.getMessage());
+				}
+				setBytecode(writer.toByteArray());
+				//Do all transformations with the Tree API of ASM
+				for (AbstractTransformableClassNode node : nodes) {
+					reader = new ClassReader(allocateAndGetBytecode());
+					reader.accept(node, ClassReader.SKIP_FRAMES);
+					if (node.transform()) {
+						writer = getClassWriter();
+						node.accept(writer);
+						byte[] bytes = writer.toByteArray();
+						setBytecode(bytes);
+						if (verifying) {
+							OTCheckClassAdapter.verify(node, bytes, this.loader);
+						}
 					}
 				}
-			}
-			
-			dump();
-			reader = null;
-			writer = null;
-			multiAdapter = null;
-			nodes = null;
-			//Check, if this is the first transformation for this class
-			if (!this.isFirstTransformation) {
-				// It is not the first transformation, so redefine the class
-				try {
-					redefine(definedClass);
-				} catch (ClassNotFoundException cnfe) {
-					throw new RuntimeException("OTDRE: Failed to redefine class: "+this.getName(), cnfe);
-				} catch (Throwable t) {
-	//				t.printStackTrace(System.out);
-					// if redefinition failed (ClassCircularity?) install a runnable for deferred redefinition:
-					final Runnable previousTask = TeamManager.pendingTasks.get();
-					TeamManager.pendingTasks.set(new Runnable() {
-						public void run() {
-							if (previousTask != null)
-								previousTask.run();
-							try {
-								redefine(definedClass);
-							} catch (ClassNotFoundException e) {
-								e.printStackTrace(); // should never get here, since we expect CNFE already on the first attempt
+				
+				dump();
+				reader = null;
+				writer = null;
+				multiAdapter = null;
+				nodes = null;
+				//Check, if this is the first transformation for this class
+				if (!this.isFirstTransformation) {
+					// It is not the first transformation, so redefine the class
+					try {
+						redefine(definedClass);
+					} catch (ClassNotFoundException cnfe) {
+						throw new RuntimeException("OTDRE: Failed to redefine class: "+this.getName(), cnfe);
+					} catch (Throwable t) {
+		//				t.printStackTrace(System.out);
+						// if redefinition failed (ClassCircularity?) install a runnable for deferred redefinition:
+						final Runnable previousTask = TeamManager.pendingTasks.get();
+						TeamManager.pendingTasks.set(new Runnable() {
+							public void run() {
+								if (previousTask != null)
+									previousTask.run();
+								try {
+									redefine(definedClass);
+								} catch (ClassNotFoundException e) {
+									e.printStackTrace(); // should never get here, since we expect CNFE already on the first attempt
+								}
 							}
-						}
-						@Override
-						public String toString() {
-							return "Retry "+AsmWritableBoundClass.this.toString();
-						}
-					});
-					// not done, only partial cleanup:
-					isTransformationActive = false;
-					isFirstTransformation = false;
-					return;
+							@Override
+							public String toString() {
+								return "Retry "+AsmWritableBoundClass.this.toString();
+							}
+						});
+						return;
+					}
 				}
+			} else {
+				reader = null;
+				writer = null;
+				multiAdapter = null;
+				nodes = null;
 			}
-		} else {
-			reader = null;
-			writer = null;
-			multiAdapter = null;
-			nodes = null;
+			releaseBytecode();
+		} finally {
+			isTransformationActive = false;
+			isFirstTransformation = false;
 		}
-		isTransformationActive = false;
-		isFirstTransformation = false;
-		releaseBytecode();
 	}
 
 	protected void superTransformation(Class<?> definedClass) throws IllegalClassFormatException {		
