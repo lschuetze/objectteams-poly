@@ -20,6 +20,7 @@ import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.internal.core.CompilationUnit;
+import org.eclipse.jface.viewers.TreePath;
 import org.eclipse.objectteams.otdt.core.IOTType;
 import org.eclipse.objectteams.otdt.core.OTModelManager;
 import org.eclipse.objectteams.otdt.internal.ui.Messages;
@@ -48,15 +49,16 @@ public team class OutlineAdaptor
 	
 	protected class OutlineContentProvider playedBy OutlineContentProvider
 	{
-		callin Object[] getChildren(Object element) 
+		callin Object[] getChildren(TreePath path) 
 		{
 			boolean processingTeam = false;
 			IOTType otElement = null;
 
 			// start with result from base call:
-			Object[] children = base.getChildren(element);
+			Object[] children = base.getChildren(path);
 			
 			// inspect element
+			Object element = path.getFirstSegment();
 			if (element instanceof IType) {
 				IType type = (IType)element;
 				processingTeam = OTModelManager.isTeam(type);
@@ -82,7 +84,7 @@ public team class OutlineAdaptor
 			}					
 			return children;
 		}
-		Object[] getChildren(Object element) <- replace Object[] getChildren(Object element);
+		Object[] getChildren(TreePath element) <- replace Object[] getChildren(TreePath element);
 		
 		boolean showRoleFiles() -> boolean isShowingInheritedMembers();  
 	
