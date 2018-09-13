@@ -1,3 +1,5 @@
+# MANDATORY VARIABLE:
+#   BUILDID
 # OPTIONAL VARIABLES TO BE SUPPLIED VIA ENV:
 # 	SIGN (unset or nosign)
 # 	PROMOTE (unset or false or target directory)
@@ -16,8 +18,7 @@ then
 fi 
 echo "OTDTVERSION is $OTDTVERSION"
 
-# FIXME:
-ECOTJ_DIR=${BASE}/testrun/ecj/I-2.6.0-201806120848
+ECOTJ_DIR=${BASE}/testrun/ecj/${BUILDID}
 
 echo "====Step 1: request signing ===="
 cd ${ECOTJ_DIR}
