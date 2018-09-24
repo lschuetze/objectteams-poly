@@ -2,42 +2,34 @@
 <aggregator:Aggregation xmi:version="2.0" xmlns:xmi="http://www.omg.org/XMI" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:aggregator="http://www.eclipse.org/cbi/p2repo/2011/aggregator/1.1.0" label="SDK4Mvn" packedStrategy="UNPACK_AS_SIBLING" type="R" mavenResult="true" versionFormat="MavenRelease">
   <validationSets label="main">
     <contributions enabled="true" label="sdk">
-      <repositories location="/home/data/httpd/download.eclipse.org/eclipse/updates/4.8milestones/S-4.8RC4a-201806110500/">
+      <repositories location="/home/data/httpd/download.eclipse.org/eclipse/updates/4.9/R-4.9-201809060745/">
         <mapRules xsi:type="aggregator:ExclusionRule" name="org.eclipse.e4.core.tools.feature.feature.group"/>
         <mapRules xsi:type="aggregator:ExclusionRule" name="org.eclipse.e4.core.tools.feature.source.feature.group"/>
       </repositories>
-      <repositories location="/home/data/httpd/download.eclipse.org/eclipse/updates/4.8milestones/S-4.8RC4a-201806110500/">
+      <repositories location="/home/data/httpd/download.eclipse.org/eclipse/updates/4.9/R-4.9-201809060745/">
         <bundles name="org.eclipse.jdt.core.compiler.batch"/>
       </repositories>
     </contributions>
     <contributions enabled="false" label="sdk_http">
-      <repositories location="http://download.eclipse.org/eclipse/updates/4.8milestones/S-4.8RC4a-201806110500/">
+      <repositories location="http://download.eclipse.org/eclipse/updates/4.9/R-4.9-201809060745/">
         <mapRules xsi:type="aggregator:ExclusionRule" name="org.eclipse.e4.core.tools.feature.feature.group"/>
         <mapRules xsi:type="aggregator:ExclusionRule" name="org.eclipse.e4.core.tools.feature.source.feature.group"/>
       </repositories>
-      <repositories location="http://download.eclipse.org/eclipse/updates/4.8milestones/S-4.8RC4a-201806110500/">
+      <repositories location="http://download.eclipse.org/eclipse/updates/4.9/R-4.9-201809060745/">
         <bundles name="org.eclipse.jdt.core.compiler.batch"/>
       </repositories>
     </contributions>
-    <validationRepositories enabled="true" location="/home/data/httpd/download.eclipse.org/modeling/emf/emf/builds/milestone/S201805310718"/>
-    <validationRepositories enabled="false" location="/home/data/httpd/download.eclipse.org/modeling/emf/emf/builds/milestone/S201805310718"/>
-    <validationRepositories enabled="true" location="http://download.eclipse.org/tools/orbit/downloads/drops/R20180606145124/repository"/>
-    <validationRepositories enabled="false" location="http://download.eclipse.org/tools/orbit/downloads/drops/R20180606145124/repository"/>
+    <validationRepositories enabled="true" location="/home/data/httpd/download.eclipse.org/modeling/emf/emf/builds/milestone/S201808030618"/>
+    <validationRepositories enabled="false" location="/home/data/httpd/download.eclipse.org/modeling/emf/emf/builds/milestone/S201808030618"/>
+    <validationRepositories enabled="true" location="http://download.eclipse.org/tools/orbit/downloads/drops/S20180829155938/repository"/>
+    <validationRepositories enabled="false" location="http://download.eclipse.org/tools/orbit/downloads/drops/S20180829155938/repository"/>
   </validationSets>
-  <configurations operatingSystem="aix" windowSystem="gtk" architecture="ppc"/>
-  <configurations operatingSystem="aix" windowSystem="gtk" architecture="ppc64"/>
-  <configurations operatingSystem="hpux" windowSystem="gtk" architecture="ia64"/>
-  <configurations operatingSystem="linux" windowSystem="gtk" architecture="ppc"/>
-  <configurations operatingSystem="linux" windowSystem="gtk" architecture="ppc64"/>
   <configurations operatingSystem="linux" windowSystem="gtk" architecture="ppc64le"/>
-  <configurations operatingSystem="linux" windowSystem="gtk" architecture="s390"/>
-  <configurations operatingSystem="linux" windowSystem="gtk" architecture="s390x"/>
-  <configurations operatingSystem="linux" windowSystem="gtk"/>
+  <configurations operatingSystem="linux" windowSystem="gtk" architecture="x86"/>
   <configurations operatingSystem="linux" windowSystem="gtk" architecture="x86_64"/>
   <configurations operatingSystem="macosx" windowSystem="cocoa" architecture="x86_64"/>
-  <configurations operatingSystem="solaris" windowSystem="gtk" architecture="x86_64"/>
-  <configurations operatingSystem="solaris" windowSystem="gtk" architecture="sparcv9"/>
-  <configurations architecture="x86_64"/>
+  <configurations operatingSystem="win32" windowSystem="win32" architecture="x86"/>
+  <configurations operatingSystem="win32" windowSystem="win32" architecture="x86_64"/>
   <configurations/>
   <mavenMappings namePattern="(org\.eclipse\.jdt)\.core\.compiler\.batch" groupId="$1" artifactId="ecj"/>
   <mavenMappings namePattern="(org\.eclipse\.jdt)(.*)" groupId="$1" artifactId="$1$2"/>

@@ -1,32 +1,16 @@
 platform/eclipse.platform.team.git \
 	bundles/org.eclipse.core.net/fragments/org.eclipse.core.net.win32.x86_64 \
-	S4_8_0_RC4a \
-	org/eclipse/platform org.eclipse.core.net.win32.x86_64 1.1.100
+	R4_9 \
+	org/eclipse/platform org.eclipse.core.net.win32.x86_64 1.1.200
 platform/eclipse.platform.team.git \
 	bundles/org.eclipse.core.net/fragments/org.eclipse.core.net.win32.x86 \
-	S4_8_0_RC4a \
-	org/eclipse/platform org.eclipse.core.net.win32.x86 1.1.100
+	R4_9 \
+	org/eclipse/platform org.eclipse.core.net.win32.x86 1.1.200
 platform/eclipse.platform.team.git \
 	bundles/org.eclipse.core.net/fragments/org.eclipse.core.net.linux.x86_64 \
-	S4_8_0_RC4a \
-	org/eclipse/platform org.eclipse.core.net.linux.x86_64 1.2.100
+	R4_9 \
+	org/eclipse/platform org.eclipse.core.net.linux.x86_64 1.2.200
 platform/eclipse.platform.team.git \
 	bundles/org.eclipse.core.net/fragments/org.eclipse.core.net.linux.x86 \
-	S4_8_0_RC4a \
-	org/eclipse/platform org.eclipse.core.net.linux.x86 1.2.100
-platform/eclipse.platform.ua.git \
-	org.eclipse.tips.core \
-	S4_8_0_RC4a \
-	org/eclipse/platform org.eclipse.tips.core 0.1.0
-platform/eclipse.platform.ua.git \
-	org.eclipse.tips.ide \
-	S4_8_0_RC4a \
-	org/eclipse/platform org.eclipse.tips.ide 0.1.0
-platform/eclipse.platform.ua.git \
-	org.eclipse.tips.json \
-	S4_8_0_RC4a \
-	org/eclipse/platform org.eclipse.tips.json 0.1.0
-platform/eclipse.platform.ua.git \
-	org.eclipse.tips.ui \
-	S4_8_0_RC4a \
-	org/eclipse/platform org.eclipse.tips.ui 0.1.0
+	R4_9 \
+	org/eclipse/platform org.eclipse.core.net.linux.x86 1.2.200
