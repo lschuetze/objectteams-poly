@@ -5555,4 +5555,50 @@ public class ReportedBugs extends AbstractOTJLDTest {
     		false/*shouldFlush*/,
     		null/*vmArgs*/);
     }
+    public void testBug539934() {
+    	runConformTest(
+    		new String[] {
+    			"Main.java",
+    			"public class Main {\n" +
+    			"	public static void main(String... args) {\n" +
+    			"		new MyTeam().activate();\n" +
+    			"		p1.IBase b = new p5.Base1();\n" +
+    			"		b.run();\n" +
+    			"	}\n" +
+    			"}\n",
+    			"p1/IBase.java",
+    			"package p1;\n" +
+    			"public interface IBase {\n" +
+    			"	void run();" +
+    			"}\n",
+    			"p2/IBase1.java",
+    			"package p2;\n" +
+    			"public interface IBase1 extends p1.IBase {}\n",
+    			"p3/Base0.java",
+    			"package p3;\n" +
+    			"public abstract class Base0 implements p2.IBase1 {}\n",
+    			"p4/AbstractBase.java",
+    			"package p4;\n" +
+    			"public abstract class AbstractBase extends p3.Base0 {}\n",
+    			"p5/Base1.java",
+    			"package p5;\n" +
+    			"public class Base1 extends p4.AbstractBase {\n" +
+    			"	public void run() {\n" +
+    			"		System.out.print(\"run\");\n" +
+    			"	}\n" +
+    			"}\n",
+    			"MyTeam.java",
+    			"import base p4.AbstractBase;\n" +
+    			"public team class MyTeam {\n" +
+    			"	protected class R playedBy AbstractBase {\n" +
+    			"		run <- replace run;\n" +
+    			"		callin void run() {\n" +
+    			"			System.out.print(\"ci\");\n" +
+    			"			base.run();\n" +
+    			"		}\n" +
+    			"	}\n" +
+    			"}\n"
+    		},
+    		"cirun");
+    }
 }

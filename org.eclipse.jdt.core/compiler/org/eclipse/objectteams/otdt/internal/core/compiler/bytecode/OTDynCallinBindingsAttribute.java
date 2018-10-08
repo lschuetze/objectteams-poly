@@ -194,6 +194,7 @@ public class OTDynCallinBindingsAttribute extends ListValueAttribute {
     	static final int STATIC = 2;
     	static final int FINAL = 4;
     	static final int PRIVATE = 8;
+    	static final int PUBLIC = 16;
 		char[] baseMethodName, baseMethodSignature, declaringBaseClassName;
 		int callinID, baseFlags, translationFlags;
 		BaseMethod(char[] baseMethodName, char[] baseMethodSignature, char[] declaringBaseClassName, int callinID, int baseFlags, int translationFlags) {
@@ -271,6 +272,8 @@ public class OTDynCallinBindingsAttribute extends ListValueAttribute {
 				baseFlags |= BaseMethod.FINAL;
 			if (baseSpec.isPrivate())
 				baseFlags |= BaseMethod.PRIVATE;
+			if (baseSpec.isPublic())
+				baseFlags |= BaseMethod.PUBLIC;
 			mapping.addBaseMethod(i, baseSpec.codegenSeletor(), baseSpec.signature(WeavingScheme.OTDRE), 
 									baseSpec.resolvedMethod.declaringClass.constantPoolName(),
 									baseSpec.getCallinId(this.theTeam), baseFlags, baseSpec.getTranslationFlags());

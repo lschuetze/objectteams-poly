@@ -715,6 +715,10 @@ public class MethodSpec extends ASTNode implements InvocationSite
 		return this.resolvedMethod != null && this.resolvedMethod.isPrivate();
 	}
 
+	public boolean isPublic() {
+		return this.resolvedMethod != null && this.resolvedMethod.isPublic();
+	}
+
 	public ReferenceBinding getDeclaringClass() {
 		if (this.resolvedMethod != null)
 			return this.resolvedMethod.declaringClass;

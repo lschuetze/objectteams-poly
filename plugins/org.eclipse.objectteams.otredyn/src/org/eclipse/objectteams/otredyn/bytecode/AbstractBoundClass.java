@@ -1,7 +1,7 @@
 /**********************************************************************
  * This file is part of "Object Teams Dynamic Runtime Environment"
  * 
- * Copyright 2009, 2016 Oliver Frank and others.
+ * Copyright 2009, 2018 Oliver Frank and others.
  * 
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -576,7 +576,12 @@ public abstract class AbstractBoundClass implements IBoundClass {
 				return null; // don't use this
 			if (method == null) {
 				// class was not yet loaded
-				method = new Method(name, desc, ((flags&IBinding.STATIC_BASE) != 0), 0/*accessFlags*/);
+				int access = 0;
+				if ((flags&IBinding.PRIVATE_BASE) != 0)
+					access |= Opcodes.ACC_PRIVATE;
+				else if ((flags&IBinding.PUBLIC_BASE) != 0)
+					access |= Opcodes.ACC_PUBLIC;
+				method = new Method(name, desc, ((flags&IBinding.STATIC_BASE) != 0), access);
 				methods.put(methodKey, method);
 			}
 			return method;
