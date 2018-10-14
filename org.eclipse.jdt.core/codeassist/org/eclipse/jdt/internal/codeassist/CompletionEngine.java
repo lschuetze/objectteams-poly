@@ -4200,6 +4200,7 @@ public final class CompletionEngine
 				BinaryExpression binaryExpression = (BinaryExpression) parent;
 				switch(operator) {
 					case OperatorIds.EQUAL_EQUAL :
+					case OperatorIds.NOT_EQUAL :
 						// expected type is not relevant in this case
 						TypeBinding binding = binaryExpression.left.resolvedType;
 						if (binding != null) {

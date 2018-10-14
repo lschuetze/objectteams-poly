@@ -1,9 +1,12 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2014 IBM Corporation.
- * All rights reserved. This program and the accompanying materials
- * are made available under the terms of the Eclipse Public License v1.0
+ * Copyright (c) 2011, 2018 IBM Corporation.
+ *
+ * This program and the accompanying materials
+ * are made available under the terms of the Eclipse Public License 2.0
  * which accompanies this distribution, and is available at
- * http://www.eclipse.org/legal/epl-v10.html
+ * https://www.eclipse.org/legal/epl-2.0/
+ *
+ * SPDX-License-Identifier: EPL-2.0
  * 
  * Contributors:
  *     IBM Corporation - initial API and implementation
@@ -79,6 +82,24 @@ public class PolymorphicSignatureTest extends AbstractRegressionTest {
 				"		mh.invoke(null, Collections.emptyList());  // This triggers UOE\n" + 
 				"		\n" + 
 				"	}\n" + 
+				"}\n"
+			});
+	}
+	public void testBug475996() {
+		if (!isJRE9Plus)
+			return; // VarHandle is @since 9
+		runConformTest(
+			new String[] {
+				"X.java",
+				"import java.lang.invoke.VarHandle;\n" +
+				"public class X<T> {\n" +
+				"	static class Token {}\n" +
+				"	Token NIL = new Token();\n" +
+				"	VarHandle RESULT;\n" +
+				"	void call(T t) {\n" +
+				"		RESULT.compareAndSet(this, null, (t==null) ? NIL : t);\n" +
+				"	}\n" +
+				"" +
 				"}\n"
 			});
 	}

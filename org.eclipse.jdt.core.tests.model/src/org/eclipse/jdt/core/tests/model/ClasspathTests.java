@@ -1,9 +1,12 @@
 /*******************************************************************************
  * Copyright (c) 2000, 2017 IBM Corporation and others.
- * All rights reserved. This program and the accompanying materials
- * are made available under the terms of the Eclipse Public License v1.0
+ *
+ * This program and the accompanying materials
+ * are made available under the terms of the Eclipse Public License 2.0
  * which accompanies this distribution, and is available at
- * http://www.eclipse.org/legal/epl-v10.html
+ * https://www.eclipse.org/legal/epl-2.0/
+ *
+ * SPDX-License-Identifier: EPL-2.0
  *
  * Contributors:
  *     IBM Corporation - initial API and implementation
@@ -21,6 +24,7 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.net.URI;
+import java.nio.file.InvalidPathException;
 import java.util.Hashtable;
 import java.util.Map;
 
@@ -2929,7 +2933,13 @@ public void testEmptyClasspath() throws CoreException {
  */
 public void testEncoding1() throws CoreException {
 	try {
-		createJavaProject("P", new String[] {"src\u3400"}, "bin");
+		try {
+			createJavaProject("P", new String[] {"src\u3400"}, "bin");
+		} catch (InvalidPathException e) {
+			System.err.println("File system cannot handle UTF-8 path: "+e.getMessage());
+			System.err.println("Skipping ClasspathTests.testEncoding1");
+			return;
+		}
 		IFile file = getFile("/P/.classpath");
 		String encodedContents = new String (org.eclipse.jdt.internal.core.util.Util.getResourceContentsAsCharArray(file, "UTF-8"));
 		encodedContents = Util.convertToIndependantLineDelimiter(encodedContents);

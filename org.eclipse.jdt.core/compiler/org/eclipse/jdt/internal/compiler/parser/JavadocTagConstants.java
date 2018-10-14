@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2016 IBM Corporation and others.
+ * Copyright (c) 2000, 2018 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -177,6 +177,8 @@ public interface JavadocTagConstants {
 		// since 9
 		{},
 		// since 10
+		{},
+		// since 11
 		{}
 	};
 	public static final char[][][] INLINE_TAGS = {
@@ -201,6 +203,8 @@ public interface JavadocTagConstants {
 		// since 9
 		{},
 		// since 10
+		{},
+		// since 11
 		{}
 	};
 	public final static int INLINE_TAGS_LENGTH = INLINE_TAGS.length;

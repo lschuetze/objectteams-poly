@@ -1,13 +1,12 @@
 /*******************************************************************************
  * Copyright (c) 2018 IBM Corporation and others.
- * All rights reserved. This program and the accompanying materials
- * are made available under the terms of the Eclipse Public License v1.0
- * which accompanies this distribution, and is available at
- * http://www.eclipse.org/legal/epl-v10.html
  *
- * This is an implementation of an early-draft specification developed under the Java
- * Community Process (JCP) and is made available for testing and evaluation purposes
- * only. The code is not compatible with any specification of the JCP.
+ * This program and the accompanying materials
+ * are made available under the terms of the Eclipse Public License 2.0
+ * which accompanies this distribution, and is available at
+ * https://www.eclipse.org/legal/epl-2.0/
+ *
+ * SPDX-License-Identifier: EPL-2.0
  *
  * Contributors:
  *     IBM Corporation - initial API and implementation
@@ -37,7 +36,7 @@ public class ASTConverter10Test extends ConverterTestSetup {
 
 	public void setUpSuite() throws Exception {
 		super.setUpSuite();
-		this.ast = AST.newAST(AST_INTERNAL_JLS10);
+		this.ast = AST.newAST(AST_INTERNAL_JLS11);
 	}
 
 	public ASTConverter10Test(String name) {
@@ -210,6 +209,7 @@ public class ASTConverter10Test extends ConverterTestSetup {
 			ITypeBinding typeBinding = (ITypeBinding) binding;
 			assertTrue("wrong type binding", typeBinding.getName().equals("int"));
 	}
+	@SuppressWarnings("deprecation")
 	public void testBug525580_comment38() throws CoreException, IOException {
 		// not really using Java 10, but apiLevel JLS10 as per bug report
 		String jarPath = null;

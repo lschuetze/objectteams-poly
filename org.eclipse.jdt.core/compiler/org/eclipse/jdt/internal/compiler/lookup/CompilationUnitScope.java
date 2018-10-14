@@ -265,7 +265,7 @@ void buildTypeBindings(AccessRestriction accessRestriction) {
 	int count = 0;
 	nextType: for (int i = 0; i < typeLength; i++) {
 		TypeDeclaration typeDecl = types[i];
-		if (this.environment.isProcessingAnnotations && this.environment.isMissingType(typeDecl.name))
+		if (this.environment.root.isProcessingAnnotations && this.environment.isMissingType(typeDecl.name))
 			throw new SourceTypeCollisionException(); // resolved a type ref before APT generated the type
 		ReferenceBinding typeBinding = this.fPackage.getType0(typeDecl.name);
 		if (Binding.isValid(typeBinding) && this.fPackage instanceof SplitPackageBinding && !this.environment.module.canAccess(typeBinding.fPackage))
@@ -281,7 +281,7 @@ void buildTypeBindings(AccessRestriction accessRestriction) {
 		{
 // SH}
 			// if its an unresolved binding - its fixed up whenever its needed, see UnresolvedReferenceBinding.resolve()
-			if (this.environment.isProcessingAnnotations)
+			if (this.environment.root.isProcessingAnnotations)
 				throw new SourceTypeCollisionException(); // resolved a type ref before APT generated the type
 			// if a type exists, check that its a valid type
 			// it can be a NotFound problem type if its a secondary type referenced before its primary type found in additional units

@@ -940,7 +940,7 @@ public abstract class Scope {
 		if ((parameterCompatibilityLevel(method, arguments, tiebreakingVarargsMethods)) > NOT_COMPATIBLE) {
 			if ((method.tagBits & TagBits.AnnotationPolymorphicSignature) != 0) {
 				// generate polymorphic method
-				return this.environment().createPolymorphicMethod(method, arguments);
+				return this.environment().createPolymorphicMethod(method, arguments, this);
 			}
 			return method;
 		}
@@ -1244,6 +1244,15 @@ public abstract class Scope {
 		return null; // may answer null if no type around
 	}
 
+	public final ClassScope enclosingTopMostClassScope() {
+		Scope scope = this;
+		while (scope != null) {
+			Scope t = scope.parent;
+			if (t instanceof CompilationUnitScope) break;
+			scope = t;
+		}
+		return scope instanceof ClassScope ? ((ClassScope) scope) : null;
+	}
 	public final MethodScope enclosingMethodScope() {
 		Scope scope = this;
 		while ((scope = scope.parent) != null) {
@@ -1471,7 +1480,7 @@ public abstract class Scope {
 					exactMethod = computeCompatibleMethod(exactMethod, argumentTypes, invocationSite);
 				} else if ((exactMethod.tagBits & TagBits.AnnotationPolymorphicSignature) != 0) {
 					// generate polymorphic method
-					return this.environment().createPolymorphicMethod(exactMethod, argumentTypes);
+					return this.environment().createPolymorphicMethod(exactMethod, argumentTypes, this);
 				}
 				return exactMethod;
 			}

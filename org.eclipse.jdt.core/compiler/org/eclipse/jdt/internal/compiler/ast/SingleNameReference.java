@@ -965,7 +965,8 @@ public void manageSyntheticAccessIfNecessary(BlockScope currentScope, FlowInfo f
 //{ObjectTeams: references to the enclosing team need accessor, too:
 /* orig:
 		if (((this.bits & ASTNode.DepthMASK) != 0)
-			&& (codegenField.isPrivate() // private access
+			&& ((codegenField.isPrivate() // private access
+					&& !currentScope.enclosingSourceType().isNestmateOf(codegenField.declaringClass) )
 				|| (codegenField.isProtected() // implicit protected access
 						&& codegenField.declaringClass.getPackage() != currentScope.enclosingSourceType().getPackage()))) {
 			if (this.syntheticAccessors == null)
@@ -977,7 +978,7 @@ public void manageSyntheticAccessIfNecessary(BlockScope currentScope, FlowInfo f
 		SourceTypeBinding enclosingSourceType = currentScope.enclosingSourceType();
 		int depth = getDepthForSynthFieldAccess(fieldBinding, enclosingSourceType);
 
-		if (depth > 0) {
+		if (depth > 0 && !currentScope.enclosingSourceType().isNestmateOf(codegenField.declaringClass)) {
 			if (this.syntheticAccessors == null)
 				this.syntheticAccessors = new MethodBinding[2];
 			// check pre-set accessor (inferred callout-to-field)

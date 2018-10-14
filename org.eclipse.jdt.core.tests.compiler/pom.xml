@@ -15,12 +15,12 @@
   <parent>
     <artifactId>tests-pom</artifactId>
     <groupId>eclipse.jdt.core</groupId>
-    <version>4.9.0-SNAPSHOT</version>
+    <version>4.10.0-SNAPSHOT</version>
     <relativePath>../tests-pom/</relativePath>
   </parent>
   <groupId>org.eclipse.jdt</groupId>
   <artifactId>org.eclipse.jdt.core.tests.compiler</artifactId>
-  <version>3.12.600-SNAPSHOT</version>
+  <version>3.12.700-SNAPSHOT</version>
   <packaging>eclipse-test-plugin</packaging>
 
   <properties>
@@ -104,6 +104,37 @@
 		<properties>
 			<!-- Overridden in https://ci.eclipse.org/jdt/job/eclipse.jdt.core-run.javac-10/configure  -->
 			<tycho.surefire.argLine>--add-modules ALL-SYSTEM -Dcompliance=1.4,1.7,1.8,10</tycho.surefire.argLine>
+		</properties>
+	</profile>
+	<profile>
+		<id>test-on-javase-11</id>
+		<build>
+			<plugins>
+				<plugin>
+					<groupId>org.apache.maven.plugins</groupId>
+					<artifactId>maven-toolchains-plugin</artifactId>
+					<version>1.1</version>
+					<executions>
+						<execution>
+							<phase>validate</phase>
+							<goals>
+								<goal>toolchain</goal>
+							</goals>
+						</execution>
+					</executions>
+					<configuration>
+						<toolchains>
+							<jdk>
+								<id>JavaSE-11</id>
+							</jdk>
+						</toolchains>
+					</configuration>
+				</plugin>
+			</plugins>
+		</build>
+		<properties>
+			<!-- Overridden in https://ci.eclipse.org/jdt/job/eclipse.jdt.core-run.javac-11/configure  -->
+			<tycho.surefire.argLine>--add-modules ALL-SYSTEM -Dcompliance=1.4,1.7,1.8,11</tycho.surefire.argLine>
 		</properties>
 	</profile>
   </profiles>
