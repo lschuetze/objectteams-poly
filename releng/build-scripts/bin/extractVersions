@@ -6,7 +6,7 @@ then
 	exit 1
 fi
 
-SDK=`ls $1/eclipse-SDK*linux-gtk.tar.gz`
+SDK=`ls $1/eclipse-SDK*linux-gtk-x86_64.tar.gz`
 if [ ! -r $SDK ]
 then
         echo "Can't read SDK from $SDK"
