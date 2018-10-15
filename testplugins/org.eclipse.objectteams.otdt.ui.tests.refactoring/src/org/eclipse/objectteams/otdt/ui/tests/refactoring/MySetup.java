@@ -30,12 +30,13 @@ import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.formatter.DefaultCodeFormatterConstants;
-import org.eclipse.jdt.internal.corext.codemanipulation.StubUtility;
-import org.eclipse.jdt.internal.corext.template.java.CodeTemplateContextType;
+import org.eclipse.jdt.internal.core.manipulation.StubUtility;
+import org.eclipse.jdt.internal.core.manipulation.CodeTemplateContextType;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.objectteams.otdt.ui.tests.util.JavaProjectHelper;
 import org.eclipse.objectteams.otdt.ui.tests.util.TestOptions;
 
+@SuppressWarnings("restriction")
 public class MySetup extends TestSetup
 {
     private static IPackageFragmentRoot _root;
@@ -92,7 +93,7 @@ public class MySetup extends TestSetup
                 CONTAINER);
         _packageP = _root.createPackageFragment("p", true, null);
 
-        Hashtable options = TestOptions.getFormatterOptions();
+        Hashtable<String, String> options = TestOptions.getFormatterOptions();
         options.put(DefaultCodeFormatterConstants.FORMATTER_TAB_CHAR, JavaCore.TAB);
         options.put(DefaultCodeFormatterConstants.FORMATTER_NUMBER_OF_EMPTY_LINES_TO_PRESERVE, "0");
         options.put(DefaultCodeFormatterConstants.FORMATTER_TAB_SIZE, "4");

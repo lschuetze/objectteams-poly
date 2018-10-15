@@ -54,7 +54,7 @@ import org.eclipse.jdt.internal.compiler.parser.TerminalTokens;
 import org.eclipse.jdt.internal.core.manipulation.dom.ASTResolving;
 import org.eclipse.jdt.internal.corext.codemanipulation.CodeGenerationSettings;
 import org.eclipse.jdt.internal.corext.codemanipulation.ContextSensitiveImportRewriteContext;
-import org.eclipse.jdt.internal.corext.codemanipulation.StubUtility;
+import org.eclipse.jdt.internal.core.manipulation.StubUtility;
 import org.eclipse.jdt.internal.corext.dom.Bindings;
 import org.eclipse.jdt.core.dom.NodeFinder;
 import org.eclipse.jdt.internal.corext.template.java.SignatureUtil;
@@ -92,7 +92,7 @@ import base org.eclipse.jdt.internal.ui.text.java.LazyJavaTypeCompletionProposal
 import base org.eclipse.jdt.internal.ui.text.java.MethodDeclarationCompletionProposal;
 import base org.eclipse.jdt.internal.ui.text.java.MethodProposalInfo;
 import base org.eclipse.jdt.internal.ui.text.java.OverrideCompletionProposal;
-import base org.eclipse.jdt.ui.CodeGeneration;
+import base org.eclipse.jdt.core.manipulation.CodeGeneration;
 import base org.eclipse.jdt.ui.text.java.CompletionProposalCollector;
 import base org.eclipse.jdt.ui.text.java.CompletionProposalLabelProvider;
 import base org.eclipse.jdt.ui.text.java.JavaTextMessages;

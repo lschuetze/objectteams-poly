@@ -30,10 +30,9 @@ import org.eclipse.jface.preference.IPreferenceStore;
 
 public class TestOptions {
 	
-	@SuppressWarnings("unchecked")
-	public static Hashtable getFormatterOptions()
+	public static Hashtable<String,String> getFormatterOptions()
 	{
-		Hashtable result= JavaCore.getDefaultOptions();
+		Hashtable<String, String> result= JavaCore.getDefaultOptions();
 		result.putAll(TestFormatterOptions.getSettings());
 		return result;
 	}
@@ -53,7 +52,7 @@ public class TestOptions {
 
 class TestFormatterOptions
 {
-	public static Hashtable getSettings()
+	public static Hashtable<String,String> getSettings()
 	{
 		TestFormatterOptions options = new TestFormatterOptions();
 		options.setDefaultSettings();
@@ -252,10 +251,9 @@ class TestFormatterOptions
 		return Integer.toString(alignment);
 	}
 
-	@SuppressWarnings("unchecked")
-	private Hashtable getMap()
+	private Hashtable<String,String> getMap()
 	{
-		Hashtable options = new Hashtable();
+		Hashtable<String,String> options = new Hashtable<String,String>();
 		options.put(DefaultCodeFormatterConstants.FORMATTER_ALIGNMENT_FOR_ARGUMENTS_IN_ALLOCATION_EXPRESSION, getAlignment(this.alignment_for_arguments_in_allocation_expression));
 		options.put(DefaultCodeFormatterConstants.FORMATTER_ALIGNMENT_FOR_ARGUMENTS_IN_EXPLICIT_CONSTRUCTOR_CALL, getAlignment(this.alignment_for_arguments_in_explicit_constructor_call));
 		options.put(DefaultCodeFormatterConstants.FORMATTER_ALIGNMENT_FOR_ARGUMENTS_IN_METHOD_INVOCATION, getAlignment(this.alignment_for_arguments_in_method_invocation));
