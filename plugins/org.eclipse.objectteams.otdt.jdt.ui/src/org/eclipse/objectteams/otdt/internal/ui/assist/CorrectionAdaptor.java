@@ -32,6 +32,7 @@ import org.eclipse.jdt.core.dom.Expression;
 import org.eclipse.jdt.core.dom.IBinding;
 import org.eclipse.jdt.core.dom.IMethodBinding;
 import org.eclipse.jdt.core.dom.ITypeBinding;
+import org.eclipse.jdt.core.dom.Modifier;
 import org.eclipse.jdt.core.dom.SimpleName;
 import org.eclipse.jdt.core.dom.SuperConstructorInvocation;
 import org.eclipse.jdt.core.dom.TSuperConstructorInvocation;
@@ -42,6 +43,7 @@ import org.eclipse.jdt.internal.ui.JavaPluginImages;
 import org.eclipse.jdt.internal.ui.text.correction.ASTResolving;
 import org.eclipse.jdt.internal.ui.text.correction.CorrectionMessages;
 import org.eclipse.jdt.internal.ui.text.correction.IProposalRelevance;
+import org.eclipse.jdt.internal.ui.text.correction.proposals.NewAbstractMethodCorrectionProposal;
 import org.eclipse.jdt.internal.ui.text.correction.proposals.NewMethodCorrectionProposal;
 import org.eclipse.jdt.internal.ui.viewsupport.BasicElementLabels;
 import org.eclipse.jdt.internal.ui.viewsupport.JavaElementImageProvider;
@@ -96,15 +98,17 @@ public team class CorrectionAdaptor {
 				ICompilationUnit targetCU= ASTResolving.findCompilationUnitForBinding(cu, astRoot, senderDeclBinding);
 				if (targetCU != null) {
 					String label;
+					String labelAbstract;
 					Image image;
 					ITypeBinding[] parameterTypes= getParameterTypes(arguments);
 					if (parameterTypes != null) {
 						String sig= org.eclipse.jdt.internal.ui.text.correction.ASTResolving.getMethodSignature(methodName, parameterTypes, false);
 						boolean is18OrHigher= JavaModelUtil.is18OrHigher(targetCU.getJavaProject());
-		
+						boolean isSenderTypeAbstractClass = (senderDeclBinding.getModifiers() &  Modifier.ABSTRACT) > 0; 
 						boolean isSenderBindingInterface= senderDeclBinding.isInterface();
 						if (nodeParentType == senderDeclBinding) {
 							label= Messages.format(CorrectionMessages.UnresolvedElementsSubProcessor_createmethod_description, sig);
+							labelAbstract= Messages.format(CorrectionMessages.UnresolvedElementsSubProcessor_createmethod_abstract_description, sig);
 							if (isSenderBindingInterface) {
 								image= JavaPluginImages.get(JavaPluginImages.IMG_MISC_PUBLIC);
 							} else {
@@ -112,11 +116,15 @@ public team class CorrectionAdaptor {
 							}
 						} else {
 							label= Messages.format(CorrectionMessages.UnresolvedElementsSubProcessor_createmethod_other_description, new Object[] { sig, BasicElementLabels.getJavaElementName(senderDeclBinding.getName()) } );
+							labelAbstract= Messages.format(CorrectionMessages.UnresolvedElementsSubProcessor_createmethod_abstract_other_description, new Object[] { sig, BasicElementLabels.getJavaElementName(senderDeclBinding.getName()) } );
 							image= JavaPluginImages.get(JavaPluginImages.IMG_MISC_PUBLIC);
 						}
 						if (is18OrHigher || !isSenderBindingInterface
 								|| (nodeParentType != senderDeclBinding && (!(sender instanceof SimpleName) || !((SimpleName) sender).getIdentifier().equals(senderDeclBinding.getName())))) {
 							proposals.add(new NewMethodCorrectionProposal(label, targetCU, invocationNode, arguments, senderDeclBinding, IProposalRelevance.CREATE_METHOD, image));
+							if ( isSenderTypeAbstractClass ) {
+								proposals.add(new NewAbstractMethodCorrectionProposal(labelAbstract, targetCU, invocationNode, arguments, senderDeclBinding, IProposalRelevance.CREATE_METHOD, JavaPluginImages.get(JavaPluginImages.IMG_MISC_PROTECTED)));
+							}
 						}
 
 						if (senderDeclBinding.isNested() && cu.equals(targetCU) && sender == null && Bindings.findMethodInHierarchy(senderDeclBinding, methodName, (ITypeBinding[]) null) == null) { // no covering method
@@ -124,10 +132,12 @@ public team class CorrectionAdaptor {
 							if (anonymDecl != null) {
 								senderDeclBinding= Bindings.getBindingOfParentType(anonymDecl.getParent());
 								isSenderBindingInterface= senderDeclBinding.isInterface();
+								isSenderTypeAbstractClass = (senderDeclBinding.getModifiers() &  Modifier.ABSTRACT) > 0;
 								if (!senderDeclBinding.isAnonymous()) {
 									if (is18OrHigher || !isSenderBindingInterface) {
 										String[] args= new String[] { sig, org.eclipse.jdt.internal.ui.text.correction.ASTResolving.getTypeSignature(senderDeclBinding) };
 										label= Messages.format(CorrectionMessages.UnresolvedElementsSubProcessor_createmethod_other_description, args);
+										labelAbstract= Messages.format(CorrectionMessages.UnresolvedElementsSubProcessor_createmethod_abstract_other_description, args);
 										if (isSenderBindingInterface) {
 											image= JavaPluginImages.get(JavaPluginImages.IMG_MISC_PUBLIC);
 										} else {
@@ -138,6 +148,9 @@ public team class CorrectionAdaptor {
 											targetCU= ASTResolving.findCompilationUnitForBinding(cu, astRoot, senderDeclBinding);
 // SH}
 										proposals.add(new NewMethodCorrectionProposal(label, targetCU, invocationNode, arguments, senderDeclBinding, IProposalRelevance.CREATE_METHOD, image));
+										if ( isSenderTypeAbstractClass ) {
+											proposals.add(new NewAbstractMethodCorrectionProposal(labelAbstract, targetCU, invocationNode, arguments, senderDeclBinding, IProposalRelevance.CREATE_METHOD, JavaPluginImages.get(JavaPluginImages.IMG_MISC_PROTECTED)));
+										}
 									}
 								}
 							}
