@@ -1,6 +1,6 @@
 #!/bin/bash
 #*******************************************************************************
-# Copyright (c) 2016, 2017 GK Software AG and others.
+# Copyright (c) 2016, 2018 GK Software AG and others.
 # All rights reserved. This program and the accompanying materials
 # are made available under the terms of the Eclipse Public License v1.0
 # which accompanies this distribution, and is available at
@@ -53,13 +53,6 @@ function create_baseline() {
 #   (1) Install and run the CBI aggregator
 #================================================================================
 echo "==== CBI aggregator ===="
-
-# -------- fetch .aggr file **TEMP** will eventually move to the releng git: ------------
-git archive --remote=file://localhost/gitroot/objectteams/org.eclipse.objectteams.git \
-	master releng/EnrichPoms/SDK4Mvn.aggr \
-	| tar xv
-/bin/mv releng/EnrichPoms/SDK4Mvn.aggr ${WORKSPACE}/
-/bin/rmdir -p releng/EnrichPoms
 
 if [ ! -d ${LOCAL_TOOLS} ]
 then
@@ -282,6 +275,16 @@ cd ${WORKSPACE}
 
 
 echo "==== Enrich POMs ===="
+
+# build the jar:
+cd ${WORKSPACE}/work
+mkdir bin
+cd src
+javac -d ../bin/ `find * -name \*.java`
+cd ../bin
+jar cefv ${ENRICH_POMS_PACKAGE}.EnrichPoms ${ENRICH_POMS_JAR} `find * -name \*.class`
+cd ${WORKSPACE}
+/bin/ls -l ${ENRICH_POMS_JAR}
 
 cd ${Repo}
 

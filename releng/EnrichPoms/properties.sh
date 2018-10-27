@@ -30,7 +30,8 @@ AGGREGATOR=${LOCAL_TOOLS}/${DIR_AGGREGATOR}/cbiAggr
 ECLIPSE=${LOCAL_TOOLS}/eclipse/eclipse
 
 # ENRICH POMS tool:
-ENRICH_POMS_JAR=${WORKSPACE}/../../pomEnricher/workspace/EnrichPoms.jar
+ENRICH_POMS_JAR=${WORKSPACE}/work/EnrichPoms.jar
+ENRICH_POMS_PACKAGE=org.eclipse.platform.releng.maven.pom
 
 # AGGREGATION MODEL:
-FILE_SDK_AGGR=${WORKSPACE}/SDK4Mvn.aggr
+FILE_SDK_AGGR=${WORKSPACE}/work/SDK4Mvn.aggr

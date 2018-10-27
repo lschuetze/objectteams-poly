@@ -8,7 +8,7 @@
  * Contributors:
  *     Stephan Herrmann - initial implementation
  ********************************************************************************/
-package org.eclipse.cbi.p2repo.aggregator.maven.pom;
+package org.eclipse.platform.releng.maven.pom;
 
 import java.io.IOException;
 import java.io.OutputStreamWriter;

@@ -8,7 +8,10 @@
  * Contributors:
  *     Stephan Herrmann - initial implementation
  ********************************************************************************/
-package org.eclipse.cbi.p2repo.aggregator.maven.pom;
+package org.eclipse.platform.releng.maven.pom;
+
+import static org.eclipse.platform.releng.maven.pom.ArtifactInfo.element;
+import static org.eclipse.platform.releng.maven.pom.ArtifactInfo.subElement;
 
 import java.util.Arrays;
 import java.util.Collections;
@@ -16,9 +19,6 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
-
-import static org.eclipse.cbi.p2repo.aggregator.maven.pom.ArtifactInfo.element;
-import static org.eclipse.cbi.p2repo.aggregator.maven.pom.ArtifactInfo.subElement;
 
 public abstract class Developer {
 
