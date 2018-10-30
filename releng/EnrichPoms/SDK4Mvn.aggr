@@ -2,20 +2,20 @@
 <aggregator:Aggregation xmi:version="2.0" xmlns:xmi="http://www.omg.org/XMI" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:aggregator="http://www.eclipse.org/cbi/p2repo/2011/aggregator/1.1.0" label="SDK4Mvn" packedStrategy="UNPACK_AS_SIBLING" type="R" mavenResult="true" versionFormat="MavenRelease">
   <validationSets label="main">
     <contributions enabled="true" label="sdk">
-      <repositories location="/home/data/httpd/download.eclipse.org/eclipse/updates/4.9/R-4.9-201809060745/">
+      <repositories location="/home/data/httpd/download.eclipse.org/eclipse/updates/4.10-I-builds/I20181023-1200">
         <mapRules xsi:type="aggregator:ExclusionRule" name="org.eclipse.e4.core.tools.feature.feature.group"/>
         <mapRules xsi:type="aggregator:ExclusionRule" name="org.eclipse.e4.core.tools.feature.source.feature.group"/>
       </repositories>
-      <repositories location="/home/data/httpd/download.eclipse.org/eclipse/updates/4.9/R-4.9-201809060745/">
+      <repositories location="/home/data/httpd/download.eclipse.org/eclipse/updates/4.10-I-builds/I20181023-1200">
         <bundles name="org.eclipse.jdt.core.compiler.batch"/>
       </repositories>
     </contributions>
     <contributions enabled="false" label="sdk_http">
-      <repositories location="http://download.eclipse.org/eclipse/updates/4.9/R-4.9-201809060745/">
+      <repositories location="http://download.eclipse.org/eclipse/updates/4.10-I-builds/I20181023-1200">
         <mapRules xsi:type="aggregator:ExclusionRule" name="org.eclipse.e4.core.tools.feature.feature.group"/>
         <mapRules xsi:type="aggregator:ExclusionRule" name="org.eclipse.e4.core.tools.feature.source.feature.group"/>
       </repositories>
-      <repositories location="http://download.eclipse.org/eclipse/updates/4.9/R-4.9-201809060745/">
+      <repositories location="http://download.eclipse.org/eclipse/updates/4.10-I-builds/I20181023-1200">
         <bundles name="org.eclipse.jdt.core.compiler.batch"/>
       </repositories>
     </contributions>
@@ -31,7 +31,7 @@
   <configurations operatingSystem="win32" windowSystem="win32" architecture="x86"/>
   <configurations operatingSystem="win32" windowSystem="win32" architecture="x86_64"/>
   <configurations/>
-  <mavenMappings namePattern="(org\.eclipse\.jdt)\.core\.compiler\.batch" groupId="$1" artifactId="ecj"/>
+  <mavenMappings namePattern="(org\.eclipse\.jdt)\.core\.compiler\.batch" groupId="$1" artifactId="ecj" versionPattern=".*" versionTemplate="3.15.1"/>
   <mavenMappings namePattern="(org\.eclipse\.jdt)(.*)" groupId="$1" artifactId="$1$2"/>
   <mavenMappings namePattern="(org\.eclipse\.pde)(.*)" groupId="$1" artifactId="$1$2"/>
   <mavenMappings namePattern="(org.eclipse.jetty)(.*)" groupId="$1" artifactId="$1$2"/>
