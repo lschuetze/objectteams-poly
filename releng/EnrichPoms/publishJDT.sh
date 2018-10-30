@@ -68,8 +68,7 @@ function same_as_baseline() {
 	return 1
 }
 
-#for pomFile in org/eclipse/jdt/*/*/*.pom
-for pomFile in org/eclipse/jdt/ecj/*/*.pom
+for pomFile in org/eclipse/jdt/*/*/*.pom
 do
   if same_as_baseline $pomFile
   then
