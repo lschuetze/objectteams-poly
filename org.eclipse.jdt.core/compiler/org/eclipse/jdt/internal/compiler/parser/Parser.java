@@ -10994,6 +10994,9 @@ protected void consumeReferenceExpressionTypeForm(boolean isPrimitive) { // actu
 	} else {
 		referenceExpression.initialize(this.compilationUnit.compilationResult, getUnspecifiedReference(), typeArguments, selector, sourceEnd);
 	}
+	if (CharOperation.equals(selector, TypeConstants.INIT) && referenceExpression.lhs instanceof NameReference) {
+		referenceExpression.lhs.bits &= ~Binding.VARIABLE;
+	}
 	consumeReferenceExpression(referenceExpression);
 }
 protected void consumeReferenceExpressionPrimaryForm() {

@@ -992,7 +992,7 @@ private PackageBinding computePackageFrom(char[][] constantPoolName, boolean isM
 						}
 					}
 				} else {
-					packageBinding = this.module.getVisiblePackage(parent, constantPoolName[i]);
+					packageBinding = this.module.getVisiblePackage(parent, constantPoolName[i], true);
 				}
 			}
 			if (packageBinding == null || packageBinding == TheNotFoundPackage) {
