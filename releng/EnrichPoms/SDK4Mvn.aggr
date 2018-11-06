@@ -19,8 +19,8 @@
         <bundles name="org.eclipse.jdt.core.compiler.batch"/>
       </repositories>
     </contributions>
-    <validationRepositories enabled="true" location="/home/data/httpd/download.eclipse.org/modeling/emf/emf/builds/milestone/S201808030618"/>
-    <validationRepositories enabled="false" location="/home/data/httpd/download.eclipse.org/modeling/emf/emf/builds/milestone/S201808030618"/>
+    <validationRepositories enabled="true" location="/home/data/httpd/download.eclipse.org/modeling/emf/emf/builds/milestone/S201811020629"/>
+    <validationRepositories enabled="false" location="/home/data/httpd/download.eclipse.org/modeling/emf/emf/builds/milestone/S201811020629"/>
     <validationRepositories enabled="true" location="http://download.eclipse.org/tools/orbit/downloads/drops/S20180829155938/repository"/>
     <validationRepositories enabled="false" location="http://download.eclipse.org/tools/orbit/downloads/drops/S20180829155938/repository"/>
   </validationSets>
