@@ -21,7 +21,7 @@ ECJ_VERSION=3.16.0-SNAPSHOT-I20181031-1800
 
 # AGGREGATOR:
 IU_AGG_PRODUCT=org.eclipse.cbi.p2repo.cli.product
-URL_AGG_UPDATES=http://download.eclipse.org/cbi/updates/aggregator/headless/4.8/I20180518-0759
+URL_AGG_UPDATES=https://ci.eclipse.org/cbi/job/cbi.p2repo.aggregator_Gerrit/ws/org.eclipse.cbi.p2repo.aggregator/org.eclipse.cbi.p2repo.cli.product/target/repository/
 
 # LOCAL TOOLS:
 LOCAL_TOOLS=${WORKSPACE}/tools
