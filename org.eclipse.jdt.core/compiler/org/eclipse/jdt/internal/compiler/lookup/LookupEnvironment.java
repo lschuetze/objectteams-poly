@@ -368,6 +368,8 @@ ReferenceBinding askForType(PackageBinding packageBinding, char[] name, ModuleBi
 	ReferenceBinding candidate = null;
 	for (NameEnvironmentAnswer answer : answers) {
 		if (answer == null) continue;
+		if (candidate != null && candidate.problemId() == ProblemReasons.Ambiguous)
+			return candidate; // saw enough
 //{ObjectTeams: if we were looking specifically for a source type, and if this is satisfied now, reset to normal:
 		if (!answer.isBinaryType() && Config.hasConfig())
 			Config.setSourceTypeRequired(false);
@@ -430,8 +432,6 @@ ReferenceBinding askForType(PackageBinding packageBinding, char[] name, ModuleBi
 			continue;
 		}
 		candidate = combine(candidate, answerPackage.getType0(name), clientModule);
-		if (candidate != null && candidate.problemId() == ProblemReasons.Ambiguous)
-			return candidate; // saw enough
 	}
 	return candidate;
 }
@@ -959,7 +959,7 @@ private PackageBinding computePackageFrom(char[][] constantPoolName, boolean isM
 	if (packageBinding == null || packageBinding == TheNotFoundPackage) {
 		if (this.useModuleSystem) {
 			if (this.module.isUnnamed()) {
-				char[][] declaringModules = ((IModuleAwareNameEnvironment) this.nameEnvironment).getModulesDeclaringPackage(null, constantPoolName[0], ModuleBinding.ANY);
+				char[][] declaringModules = ((IModuleAwareNameEnvironment) this.nameEnvironment).getUniqueModulesDeclaringPackage(null, constantPoolName[0], ModuleBinding.ANY);
 				if (declaringModules != null) {
 					for (char[] mod : declaringModules) {
 						ModuleBinding declaringModule = this.root.getModule(mod);
