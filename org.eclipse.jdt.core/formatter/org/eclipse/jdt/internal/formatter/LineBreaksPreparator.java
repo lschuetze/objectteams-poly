@@ -705,8 +705,7 @@ public class LineBreaksPreparator extends ASTVisitor {
 			for (Object pMap : node.getParameterMappings())
 				breakLineBefore((ASTNode) pMap);
 			String bracePosition = this.options.brace_position_for_method_declaration;
-			handleBracedCode(node, null, bracePosition, this.options.indent_statements_compare_to_block,
-					this.options.insert_new_line_in_empty_block);
+			handleBracedCode(node, null, bracePosition, this.options.indent_statements_compare_to_block);
 		}
 		return true;
 	}
@@ -722,8 +721,7 @@ public class LineBreaksPreparator extends ASTVisitor {
 			for (Object pMap : node.getParameterMappings())
 				breakLineBefore((ASTNode) pMap);
 			String bracePosition = this.options.brace_position_for_method_declaration;
-			handleBracedCode(node, null, bracePosition, this.options.indent_statements_compare_to_block,
-					this.options.insert_new_line_in_empty_block);
+			handleBracedCode(node, null, bracePosition, this.options.indent_statements_compare_to_block);
 		}
 		return true;
 	}
