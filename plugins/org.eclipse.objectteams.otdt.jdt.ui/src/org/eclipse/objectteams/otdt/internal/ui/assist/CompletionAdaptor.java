@@ -86,6 +86,7 @@ import org.eclipse.objectteams.otdt.ui.ImageManager;
 import org.eclipse.osgi.util.NLS;
 
 import base org.eclipse.jdt.internal.corext.codemanipulation.StubUtility2;
+import base org.eclipse.jdt.internal.corext.codemanipulation.StubUtility2Core;
 import base org.eclipse.jdt.internal.corext.fix.LinkedProposalPositionGroup.JavaLinkedModeProposal;
 import base org.eclipse.jdt.internal.ui.text.java.JavaNoTypeCompletionProposalComputer;
 import base org.eclipse.jdt.internal.ui.text.java.LazyJavaTypeCompletionProposal;

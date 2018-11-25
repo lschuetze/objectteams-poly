@@ -46,6 +46,7 @@ import org.eclipse.osgi.util.NLS;
 import org.eclipse.pde.core.plugin.IPluginModelBase;
 import org.eclipse.pde.internal.core.builders.CompilerFlags;
 import org.eclipse.pde.internal.core.builders.IHeader;
+import org.eclipse.pde.internal.core.builders.IncrementalErrorReporter.VirtualMarker;
 import org.eclipse.pde.internal.core.builders.PDEMarkerFactory;
 import org.eclipse.pde.internal.core.ibundle.IManifestHeader;
 import org.eclipse.pde.internal.core.text.bundle.BundleActivationPolicyHeader;
@@ -149,8 +150,8 @@ public team class BundleValidation
 		State getState() -> get IPluginModelBase fModel
 			with { result <- fModel.getBundleDescription().getContainingState() }
 		
-		IMarker report(String message, int line, int severity, int fixId, String category)
-		-> IMarker report(String message, int line, int severity, int fixId, String category);
+		VirtualMarker report(String message, int line, int severity, int fixId, String category)
+		-> VirtualMarker report(String message, int line, int severity, int fixId, String category);
 
 		@SuppressWarnings("decapsulation")
 		int getLine(Element element) -> int getLine(Element element);
@@ -283,17 +284,16 @@ public team class BundleValidation
 			String packageName = teamName.substring(0, lastDot);
 			String actualPackage = getContainingPackage(context, packageName);
 			if (packageName != actualPackage) {
-				IMarker marker = report(NLS.bind(OTPDEUIMessages.Validation_NotAPackage_error, packageName),
+				VirtualMarker marker = report(NLS.bind(OTPDEUIMessages.Validation_NotAPackage_error, packageName),
 						   getLine(teamNode, CLASS), 
 						   CompilerFlags.ERROR,
 						   CHANGE_DOT_TO_DOLLAR,
 						   PDEMarkerFactory.CAT_FATAL);
-				if (marker != null)
-					try {
-						marker.setAttribute("package", actualPackage); //$NON-NLS-1$
-						marker.setAttribute("team", teamName); //$NON-NLS-1$
-						marker.setAttribute(PDEMarkerFactory.MPK_LOCATION_PATH, generateLocationPath(teamNode, CLASS));
-					} catch (CoreException e) { /* nop */ }
+				if (marker != null) {
+					marker.setAttribute("package", actualPackage); //$NON-NLS-1$
+					marker.setAttribute("team", teamName); //$NON-NLS-1$
+					marker.setAttribute(PDEMarkerFactory.MPK_LOCATION_PATH, generateLocationPath(teamNode, CLASS));
+				}
 			}
 			return actualPackage;
 		}
@@ -368,12 +368,12 @@ public team class BundleValidation
 			base when (BundleValidation.this.bundleContext.get().isAspectBundle)
 	{			
 		@SuppressWarnings("decapsulation")
-		void addMarkerAttribute(IMarker marker, String attr, String val)
-			-> void addMarkerAttribute(IMarker marker, String attr, String val);
+		void addMarkerAttribute(VirtualMarker marker, String attr, String val)
+			-> void addMarkerAttribute(VirtualMarker marker, String attr, String val);
 		@SuppressWarnings("decapsulation")
 		IHeader getHeader(String key) -> IHeader getHeader(String key);
-		IMarker report(String message, int line, int severity, int resolution, String category) 
-			-> IMarker report(String message, int line, int severity, int resolution, String category);
+		VirtualMarker report(String message, int line, int severity, int resolution, String category) 
+			-> VirtualMarker report(String message, int line, int severity, int resolution, String category);
 		
 		void validateBundleActivatorPolicy() <- after void validateBundleActivatorPolicy();
 		
@@ -406,7 +406,7 @@ public team class BundleValidation
 					needingExport.remove(elements[i].getValue());
 			}
 			for (String unmatched : needingExport) {
-				IMarker marker = report(NLS.bind(OTPDEUIMessages.Validation_MissingAspectPackageExport_error, unmatched), 
+				VirtualMarker marker = report(NLS.bind(OTPDEUIMessages.Validation_MissingAspectPackageExport_error, unmatched), 
 						   1, 
 						   CompilerFlags.ERROR, 	// can reduce severity when we have the option to add the export at runtime 
 						   ADD_PACKAGE_EXPORT, 

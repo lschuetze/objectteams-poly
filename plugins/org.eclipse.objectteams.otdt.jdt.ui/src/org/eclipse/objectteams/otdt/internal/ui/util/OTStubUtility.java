@@ -43,7 +43,7 @@ import org.eclipse.jdt.internal.corext.codemanipulation.CodeGenerationSettings;
 import org.eclipse.jdt.internal.core.manipulation.StubUtility;
 import org.eclipse.jdt.core.manipulation.CodeGeneration;
 
-import base org.eclipse.jdt.internal.corext.codemanipulation.StubUtility2;
+import base org.eclipse.jdt.internal.corext.codemanipulation.StubUtility2Core;
 
 /**
  * OT-Extension for {@link org.eclipse.jdt.internal.corext.codemanipulation.StubUtility2}.
@@ -55,7 +55,7 @@ public team class OTStubUtility {
 	private static OTStubUtility instance;
 
 	@SuppressWarnings("decapsulation")
-	protected class StubUtility2 playedBy StubUtility2 {
+	protected class StubUtility2 playedBy StubUtility2Core {
 
 		protected List createParameters(IJavaProject project, ImportRewrite imports,
 				ImportRewriteContext context, AST ast, IMethodBinding binding,

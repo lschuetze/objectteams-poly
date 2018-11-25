@@ -81,7 +81,7 @@ public team class OTEquinoxMigration
 
 		int getLine(Element element) -> int getLine(Element element);
 		
-		removeMarkers <- before validateContent;
+		removeMarkers <- before validate;
 		
 		void removeMarkers() {			
 			MigrationMarkers.removeMarkers(getFFile(), 

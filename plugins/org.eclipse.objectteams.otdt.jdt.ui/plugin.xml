@@ -133,11 +133,6 @@
               icon="platform:/plugin/org.eclipse.objectteams.otdt.ui/icons/ot/team_obj.gif">
         </team>
         <team
-              activation="NONE"
-              class="org.eclipse.objectteams.otdt.internal.ui.util.OTStubUtility"
-              icon="platform:/plugin/org.eclipse.objectteams.otdt.ui/icons/ot/team_obj.gif">
-        </team>
-        <team
               activation="ALL_THREADS"
               class="org.eclipse.objectteams.otdt.internal.ui.assist.CreateNewBaseCUProposal"
               icon="platform:/plugin/org.eclipse.objectteams.otdt.ui/icons/ot/team_obj.gif">
@@ -167,6 +162,10 @@
 	     <basePlugin 
               icon="platform:/plugin/org.eclipse.pde.ui/icons/obj16/plugin_obj.png"
               id="org.eclipse.jdt.core.manipulation" />
+		 <team
+               activation="NONE"
+               class="org.eclipse.objectteams.otdt.internal.ui.util.OTStubUtility"
+               icon="platform:/plugin/org.eclipse.objectteams.otdt.ui/icons/ot/team_obj.gif"/>
          <team
                activation="ALL_THREADS"
                class="org.eclipse.objectteams.otdt.internal.corext.BindingHierarchyAdaptor"
