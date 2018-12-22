@@ -34,7 +34,7 @@ public class Java8 extends AbstractOTJLDTest {
 // Static initializer to specify tests subset using TESTS_* static variables
 // All tests which do not belong to the subset are skipped...
 	static {
-//		TESTS_NAMES = new String[] { "testA11_lambdaExpression02"};
+		TESTS_NAMES = new String[] { "testBug541865"};
 //		TESTS_NUMBERS = new int[] { 1459 };
 //		TESTS_RANGE = new int[] { 1097, -1 };
 	}
@@ -456,5 +456,69 @@ public class Java8 extends AbstractOTJLDTest {
 			"  <no expression yet>;\n" + 
 			"}\' is not a constructor of a bound role (OTJLD 2.4.2).\n" + 
 			"----------\n");
+    }
+    
+    public void testBug541865() {
+    	runConformTest(
+			new String[] {
+				"Bug541865Main.java",
+				"public class Bug541865Main {\n" +
+				"	public static void main(String... args) throws Exception {\n" +
+				"		new Bug541865Team().activate();\n" +
+				"		new Bug541865().log(\"orgarg\");\n" +
+				"		Thread.sleep(100);\n" +
+				"	}\n" +
+				"}\n",
+				"Bug541865.java",
+				"public class Bug541865 {\n" +
+				"	public void log(String msg) { System.out.print(msg); }\n" +
+				"}\n",
+				"Bug541865Team.java",
+				"import java.util.concurrent.*;\n" +
+				"public team class Bug541865Team {\n" +
+				"	protected class R playedBy Bug541865 {\n" +
+				"		callin void logLater() {\n" +
+				"			CompletableFuture.runAsync(() -> base.logLater());\n" +
+				"		}\n" +
+				"		logLater <- replace log;\n" +
+				"	}\n" +
+				"}\n"
+			},
+			"orgarg");
+    }
+    public void testBug541865b() {
+    	runConformTest(
+			new String[] {
+				"Bug541865bMain.java",
+				"public class Bug541865bMain {\n" +
+				"	public static void main(String... args) {\n" +
+				"		org.objectteams.Team t = new Bug541865bTeam();\n" +
+				"		t.activate();\n" +
+				"		new Bug541865b().log(\"orgarg\");\n" +
+				"		t.deactivate();\n" +
+				"	}\n" +
+				"}\n",
+				"Bug541865b.java",
+				"public class Bug541865b {\n" +
+				"	public void log(String msg) { System.out.print(msg); }\n" +
+				"}\n",
+				"Bug541865bTeam.java",
+				"public team class Bug541865bTeam {\n" +
+				"	protected class R playedBy Bug541865b {\n" +
+				"		callin void logWrapped() {\n" +
+				"			System.out.print('(');\n" +
+				"			wrapped(() -> base.logWrapped());\n" +
+				"			System.out.print(')');\n" +
+				"		}\n" +
+				"		logWrapped <- replace log;\n" +
+				"	}\n" +
+				"	void wrapped(Runnable run) {\n" +
+				"		System.out.print('<');\n" +
+				"		run.run();\n" +
+				"		System.out.print('>');\n" +
+				"	}\n" +
+				"}\n"
+			},
+			"(<orgarg>)");
     }
 }
