@@ -364,7 +364,8 @@ public class OTDynCallinBindingsAttribute extends ListValueAttribute {
 		int lineOffset			= consumeShort();
 		int baseMethodCount 	= consumeShort();
 		int pos = CharOperation.lastIndexOf('.', callinName);
-		char[] declaringRoleName = CharOperation.subarray(callinName, pos+1, -1);
+		char[] declaringRoleName = CharOperation.subarray(callinName, 0, pos);
+		callinName = CharOperation.subarray(callinName, pos+1, -1);
 
 		Mapping result = new Mapping(roleClassName, declaringRoleName, callinName, roleSelector, roleSignature, callinModifer, flags, baseClassName, baseMethodCount, null); 
 		result.setSMAPInfo(fileName, lineNumber, lineOffset);

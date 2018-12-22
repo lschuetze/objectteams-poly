@@ -495,6 +495,66 @@ public class CallinMethodBinding extends AbstractOTJLDTest {
             null);
     }
 
+    // a role method is callin-bound as 'before' to a method in the base class of the explicit superrole
+    // sub role overrides the callin, super team read from binary
+    public void test411_beforeCallinBinding7() {
+       runConformTest(
+    		new String[] {
+				"Team411bcb7.java",
+			    "public team class Team411bcb7 {\n" +
+			    "\n" +
+			    "    public class Role411bcb7_1 playedBy T411bcb7 {\n" +
+			    "        void test() {\n" +
+			    "            System.out.print(\"NOK\");\n" +
+			    "        }\n" +
+			    "		 myCallin:\n" +
+			    "        void test() <- before String getValue(String arg);\n" +
+			    "    }\n" +
+			    "}\n" +
+			    "    \n",
+				"T411bcb7.java",
+			    "\n" +
+			    "public class T411bcb7 {\n" +
+			    "    public String getValue(String arg) {\n" +
+			    "        return arg;\n" +
+			    "    }\n" +
+			    "}\n"    				
+    		});
+       runConformTest(
+            new String[] {
+		"T411bcb7Main.java",
+			    "public class T411bcb7Main {\n" +
+			    "    public static void main(String[] args) {\n" +
+			    "        Team411bcb7 t = new Team411bcb7_2();\n" +
+			    "\n" +
+			    "        t.activate();\n" +
+			    "\n" +
+			    "        T411bcb7 o = new T411bcb7();\n" +
+			    "\n" +
+			    "        System.out.print(o.getValue(\"VAL\"));\n" +
+			    "    }\n" +
+			    "}\n" +
+			    "    \n",
+		"Team411bcb7_2.java",
+			    "public team class Team411bcb7_2 extends Team411bcb7 {\n" +
+			    "\n" +
+			    "    @Override\n" +
+			    "	 public class Role411bcb7_1 {\n" +
+			    "        void fixed() {\n" +
+			    "            System.out.print(\"OK|\");\n" +
+			    "        }\n" +
+			    "		 myCallin:\n" +
+			    "		 @Override\n" +
+			    "        void fixed() <- before String getValue(String arg);\n" +
+			    "    }\n" +
+			    "}\n"
+            },
+            "OK|VAL",
+            null,
+            false/*flush*/,
+            null);
+    }
+
     // a callin binding has a signature without parameter names
     // 4.1.2-otjld-callin-binding-without-parameter-names-1
     public void test412_callinBindingWithoutParameterNames1() {
