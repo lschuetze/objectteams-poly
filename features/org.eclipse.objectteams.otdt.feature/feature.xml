@@ -2,7 +2,7 @@
 <feature
       id="org.eclipse.objectteams.otdt"
       label="%featureName"
-      version="2.7.2.qualifier"
+      version="2.7.3.qualifier"
       provider-name="%providerName"
       plugin="org.eclipse.objectteams.otdt"
       image="OTDT-110.png">
@@ -59,13 +59,13 @@ Project Leader:
    </license>
 
    <url>
-      <update label="Object Teams Updates" url="http://download.eclipse.org/objectteams/updates/ot2.6"/>
+      <update label="Object Teams Updates" url="http://download.eclipse.org/objectteams/updates/ot2.7"/>
       <discovery label="Object Teams Contributions" url="http://download.eclipse.org/objectteams/updates/contrib"/>
    </url>
 
    <includes
          id="org.eclipse.objectteams.otdt.core.patch"
-         version="2.7.2.qualifier"/>
+         version="2.7.3.qualifier"/>
 
    <plugin
          id="org.eclipse.objectteams.otdt"
