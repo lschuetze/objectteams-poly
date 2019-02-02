@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2018 IBM Corporation and others.
+ * Copyright (c) 2000, 2019 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -379,7 +379,7 @@ public abstract class AbstractJavaModelTests extends SuiteOfTestCases {
 	 * @return a test suite ({@link Test})
 	 */
 	public static Test buildModelTestSuite(int minCompliance, Class evaluationTestClass) {
-		if ((AbstractCompilerTest.getPossibleComplianceLevels() & minCompliance) != 0)
+		if (AbstractCompilerTest.getPossibleComplianceLevels() >= minCompliance)
 			return buildModelTestSuite(evaluationTestClass, ORDERING);
 		return new Suite(evaluationTestClass.getName());
 	}
@@ -467,6 +467,15 @@ public abstract class AbstractJavaModelTests extends SuiteOfTestCases {
 		entries[length] = entry;
 		project.setRawClasspath(entries, null);
 	}
+	protected void addClasspathEntry(IJavaProject project, IClasspathEntry entry, int position) throws JavaModelException{
+		IClasspathEntry[] entries = project.getRawClasspath();
+		int length = entries.length;
+		IClasspathEntry[] newEntries = new IClasspathEntry[length + 1];
+		for (int srcIdx = 0, tgtIdx = 0; tgtIdx < length+1; tgtIdx++) {
+			newEntries[tgtIdx] = (tgtIdx == position) ? entry : entries[srcIdx++];
+		}
+		project.setRawClasspath(newEntries, null);
+	}
 	protected void addClassFolder(IJavaProject javaProject, String folderRelativePath, String[] pathAndContents, String compliance) throws CoreException, IOException {
 		IProject project = javaProject.getProject();
 		String projectLocation = project.getLocation().toOSString();
@@ -501,6 +510,20 @@ public abstract class AbstractJavaModelTests extends SuiteOfTestCases {
 	}
 	protected void addLibrary(IJavaProject javaProject, String jarName, String sourceZipName, String[] pathAndContents, String[] nonJavaResources, String compliance) throws CoreException, IOException {
 		addLibrary(javaProject, jarName, sourceZipName, pathAndContents, nonJavaResources, null, null, compliance, null);
+	}
+	protected IClasspathAttribute[] moduleAttribute() {
+		return new IClasspathAttribute[] { JavaCore.newClasspathAttribute(IClasspathAttribute.MODULE, "true") };
+	}
+	protected IClasspathEntry newModularLibraryEntry(IPath path, IPath sourceAttachmentPath, IPath sourceAttachmentRootPath) {
+		return JavaCore.newLibraryEntry(path, sourceAttachmentPath, sourceAttachmentRootPath, null, moduleAttribute(), false);
+	}
+	protected void addModularLibraryEntry(IJavaProject project, IPath libraryPath, IPath sourceAttachmentPath) throws JavaModelException {
+		addClasspathEntry(project, newModularLibraryEntry(libraryPath, sourceAttachmentPath, null));
+	}
+	protected void addModularLibrary(IJavaProject javaProject, String jarName, String sourceZipName, String[] pathAndContents, String compliance) throws CoreException, IOException {
+		createLibrary(javaProject, jarName, sourceZipName, pathAndContents, null, compliance);
+		IPath projectPath = javaProject.getPath();
+		addModularLibraryEntry(javaProject, projectPath.append(jarName), projectPath.append(sourceZipName));
 	}
 	protected void addLibrary(
 			IJavaProject javaProject,
@@ -1437,6 +1460,8 @@ public abstract class AbstractJavaModelTests extends SuiteOfTestCases {
 				throw new CoreException(new Status(IStatus.ERROR, JavaCore.PLUGIN_ID, e.getMessage(), e));
 			}
 		} else {
+			if (attributes == null)
+				attributes = new IClasspathAttribute[] { JavaCore.newClasspathAttribute(IClasspathAttribute.MODULE, "true") };
 			jrtEntry = JavaCore.newLibraryEntry(bootModPath, sourceAttachment, null, null, attributes, false);
 		}
 		IJavaProject project = this.createJavaProject(name, srcFolders, new String[0],

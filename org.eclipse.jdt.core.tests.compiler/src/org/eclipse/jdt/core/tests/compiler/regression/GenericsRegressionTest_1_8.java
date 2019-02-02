@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2013, 2018 GK Software AG, and others.
+ * Copyright (c) 2013, 2019 GK Software AG, and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -9453,6 +9453,36 @@ public void testBug508834_comment0() {
 				"\n" + 
 				"  interface Interface { }\n"
 			};
+		runner.runConformTest();
+	}
+	public void testBug543128() {
+		Runner runner = new Runner();
+		runner.testFiles = new String[] {
+			"Bug543128.java",
+			"public class Bug543128 {\n" +
+			"	static class A {}\n" + 
+			"	static class B<F, S extends A> extends A {}\n" + 
+			"	static class C<G extends A> {}\n" + 
+			"	\n" + 
+			"	public static <H extends A, T> void test(C<? super B<? super T, ? super H>> test)\n" + 
+			"	{\n" + 
+			"		test(test); // fails compilation (incorrect)\n" + 
+			"	}\n" +
+			"}\n"
+		};
+		runner.runConformTest();
+	}
+	public void testBug543820() {
+		Runner runner = new Runner();
+		runner.testFiles = new String[] {
+			"A.java",
+			"import java.util.concurrent.atomic.AtomicReference;\n" + 
+			"import java.util.Optional;\n" +
+			"public class A {\n" +
+			"	private final ThreadLocal<AtomicReference<Optional<Long>>> var =\n" + 
+			"		ThreadLocal.withInitial(() -> new AtomicReference<>(Optional.empty()));" +
+			"}\n"
+		};
 		runner.runConformTest();
 	}
 }

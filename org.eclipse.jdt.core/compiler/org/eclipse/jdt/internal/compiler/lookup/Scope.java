@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2018 IBM Corporation and others.
+ * Copyright (c) 2000, 2019 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -3308,16 +3308,16 @@ public abstract class Scope {
 				char[][] qName = new char[][] { compoundName[0] };
 				return new ProblemReferenceBinding(qName, null /* no closest match since search for pkg*/, ProblemReasons.NotFound);
 			}
-			return binding;
+			return problemType(compoundName, -1, binding);
 		}
 		if (!(binding instanceof PackageBinding)) return null; // compoundName does not start with a package
 
 		int currentIndex = 1, length = compoundName.length;
 		PackageBinding packageBinding = (PackageBinding) binding;
 		while (currentIndex < length) {
-			binding = packageBinding.getTypeOrPackage(compoundName[currentIndex++], module());
+			binding = packageBinding.getTypeOrPackage(compoundName[currentIndex++], module(), currentIndex<length);
 			if (binding == null) {
-				return new ProblemReferenceBinding(CharOperation.subarray(compoundName, 0, currentIndex), null /* no closest match since search for pkg*/, ProblemReasons.NotFound);
+				return problemType(compoundName, currentIndex, null);
 			}
 			if (!binding.isValidBinding() && binding.problemId() != ProblemReasons.Ambiguous)
 				return new ProblemReferenceBinding(
@@ -3329,6 +3329,29 @@ public abstract class Scope {
 			packageBinding = (PackageBinding) binding;
 		}
 		return new ProblemReferenceBinding(compoundName, null /* no closest match since search for pkg*/, ProblemReasons.NotFound);
+	}
+
+	/**
+	 * Return the most suitable ProblemReferenceBinding:
+	 * (1) previousProblem if provided and problem different from NotFound
+	 * (2) a new NotAccessible binding
+	 * (3) previousProblem if provided otherwise
+	 * (4) a new NotFound binding
+	 */
+	Binding problemType(char[][] compoundName, int currentIndex, Binding previousProblem) {
+		if (previousProblem != null && previousProblem.problemId() != ProblemReasons.NotFound)
+			return previousProblem;
+		
+		LookupEnvironment environment = environment();
+		if (environment.useModuleSystem && module() != environment.UnNamedModule) {
+			// try if the UnNamedModule can see the type:
+			ReferenceBinding notAccessibleType = environment.root.getType(compoundName, environment.UnNamedModule);
+			if (notAccessibleType != null && notAccessibleType.isValidBinding())
+				return new ProblemReferenceBinding(compoundName, notAccessibleType, ProblemReasons.NotAccessible);
+		}
+		return previousProblem != null 
+			? previousProblem
+			: new ProblemReferenceBinding(CharOperation.subarray(compoundName, 0, currentIndex), null, ProblemReasons.NotFound);
 	}
 
 	/* Answer the package from the compoundName or null if it begins with a type.
@@ -3390,7 +3413,7 @@ public abstract class Scope {
 		if (packageBinding == null)
 			return getType(name);
 
-		Binding binding = packageBinding.getTypeOrPackage(name, module());
+		Binding binding = packageBinding.getTypeOrPackage(name, module(), false);
 		if (binding == null) {
 			return new ProblemReferenceBinding(
 				CharOperation.arrayConcat(packageBinding.compoundName, name),
@@ -3465,7 +3488,7 @@ public abstract class Scope {
 		if (binding instanceof PackageBinding) {
 			PackageBinding packageBinding = (PackageBinding) binding;
 			while (currentIndex < typeNameLength) {
-				binding = packageBinding.getTypeOrPackage(compoundName[currentIndex++], module()); // does not check visibility
+				binding = packageBinding.getTypeOrPackage(compoundName[currentIndex++], module(), currentIndex<typeNameLength); // does not check visibility
 				if (binding == null) {
 					char[][] qName = CharOperation.subarray(compoundName, 0, currentIndex);
 					return new ProblemReferenceBinding(
@@ -3725,7 +3748,7 @@ public abstract class Scope {
 					return type; // type is always visible to its own package
 			}
 // SH}
-			Binding binding = currentPackage.getTypeOrPackage(name, module());
+			Binding binding = currentPackage.getTypeOrPackage(name, module(), false);
 			if (binding instanceof ReferenceBinding) {
 				ReferenceBinding referenceType = (ReferenceBinding) binding;
 				if ((referenceType.tagBits & TagBits.HasMissingType) == 0) {
@@ -3845,7 +3868,7 @@ public abstract class Scope {
 			PackageBinding packageBinding = (PackageBinding) binding;
 
 			while (currentIndex < nameLength) {
-				binding = packageBinding.getTypeOrPackage(compoundName[currentIndex++], module());
+				binding = packageBinding.getTypeOrPackage(compoundName[currentIndex++], module(), currentIndex<nameLength);
 				if (binding == null)
 					return new ProblemReferenceBinding(
 						CharOperation.subarray(compoundName, 0, currentIndex),

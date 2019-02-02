@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2018 IBM Corporation and others.
+ * Copyright (c) 2000, 2019 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -1420,6 +1420,16 @@ public void boundMustBeAnInterface(ASTNode location, TypeBinding type) {
 		new String[] {new String(type.shortReadableName())},
 		location.sourceStart,
 		location.sourceEnd);
+}
+public void bytecodeExceeds64KLimit(SwitchStatement switchStatement) {
+	TypeBinding enumType = switchStatement.expression.resolvedType;
+	this.handle(
+		IProblem.BytecodeExceeds64KLimitForSwitchTable,
+		new String[] {new String(enumType.readableName())},
+		new String[] {new String(enumType.shortReadableName())},
+		ProblemSeverities.Error | ProblemSeverities.Abort | ProblemSeverities.Fatal,
+		switchStatement.sourceStart(),
+		switchStatement.sourceEnd());
 }
 public void bytecodeExceeds64KLimit(MethodBinding method, int start, int end) {
 	this.handle(
@@ -3618,10 +3628,9 @@ public void importProblem(ImportReference importRef, Binding expectedImport) {
 	}
 	invalidType(importRef, (TypeBinding)expectedImport);
 }
-public void conflictingPackagesFromModules(SplitPackageBinding splitPackage, int sourceStart, int sourceEnd) {
-	ModuleBinding enclosingModule = splitPackage.enclosingModule;
+public void conflictingPackagesFromModules(SplitPackageBinding splitPackage, ModuleBinding focusModule, int sourceStart, int sourceEnd) {
 	String modules = splitPackage.incarnations.stream()
-						.filter(enclosingModule::canAccess)
+						.filter(focusModule::canAccess)
 						.map(p -> String.valueOf(p.enclosingModule.readableName()))
 						.sorted()
 						.collect(Collectors.joining(", ")); //$NON-NLS-1$

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2016, 2018 IBM Corporation and others.
+ * Copyright (c) 2016, 2019 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -61,13 +61,21 @@ public class ModuleBuilderTests extends ModifyingResourceTests {
 	}
 
 	static {
-//		 TESTS_NAMES = new String[] { "testBug527569c" };
+//		 TESTS_NAMES = new String[] { "testBug522330" };
 	}
 	private String sourceWorkspacePath = null;
 	protected ProblemRequestor problemRequestor;
 	public static Test suite() {
+		if (!isJRE9) {
+			// almost empty suite, since we need JRE9+
+			Suite suite = new Suite(ModuleBuilderTests.class.getName());
+			suite.addTest(new ModuleBuilderTests("thisSuiteRunsOnJRE9plus"));
+			return suite;
+		}
 		return buildModelTestSuite(ModuleBuilderTests.class, BYTECODE_DECLARATION_ORDER);
 	}
+	public void thisSuiteRunsOnJRE9plus() {}
+
 	public String getSourceWorkspacePath() {
 		return this.sourceWorkspacePath == null ? super.getSourceWorkspacePath() : this.sourceWorkspacePath;
 	}
@@ -95,19 +103,11 @@ public class ModuleBuilderTests extends ModifyingResourceTests {
 		deleteProject("P1");
 	}
 	
-	IClasspathAttribute[] moduleAttribute() {
-		return new IClasspathAttribute[] { JavaCore.newClasspathAttribute(IClasspathAttribute.MODULE, "true") };
-	}
 	void addModularProjectEntry(IJavaProject project, IJavaProject depProject) throws JavaModelException {
 		addClasspathEntry(project, JavaCore.newProjectEntry(depProject.getPath(), null, false, moduleAttribute(), false));
 	}
-	void addModularLibraryEntry(IJavaProject project, String libraryPath) throws JavaModelException {
-		addLibraryEntry(project, new Path(libraryPath), null, null, null, null, moduleAttribute(), false);	
-	}
-
 	// Test that the java.base found as a module package fragment root in the project 
 	public void test001() throws CoreException {
-		if (!isJRE9) return;
 		try {
 			IJavaProject project = createJava9Project("Test01", new String[]{"src"});
 			this.createFile("Test01/src/module-info.java", "");
@@ -133,7 +133,6 @@ public class ModuleBuilderTests extends ModifyingResourceTests {
 	}
 	// Test the project compiles without errors with a simple module-info.java
 	public void test002() throws CoreException {
-		if (!isJRE9) return;
 		try {
 			this.editFile("P1/src/module-info.java",
 							"module M1 {\n" +
@@ -149,7 +148,6 @@ public class ModuleBuilderTests extends ModifyingResourceTests {
 	// Test that types from java.base module are seen by the compiler
 	// even without an explicit 'requires java.base' declaration.
 	public void test003() throws CoreException {
-		if (!isJRE9) return;
 		try {
 			this.editFile("P1/src/module-info.java",
 					"module M1 {\n" +
@@ -171,7 +169,6 @@ public class ModuleBuilderTests extends ModifyingResourceTests {
 	// Test that a type that is present in the JDK, but not observable to the source module,
 	// is reported as a compilation error.
 	public void test004() throws CoreException {
-		if (!isJRE9) return;
 		try {
 			this.editFile("P1/src/module-info.java",
 					"module M1 {\n" +
@@ -189,7 +186,7 @@ public class ModuleBuilderTests extends ModifyingResourceTests {
 			IMarker[] markers = this.currentProject.getProject().findMarkers(null, true, IResource.DEPTH_INFINITE);
 			sortMarkers(markers);
 			assertMarkers("Unexpected markers", 
-					"The import java.sql cannot be resolved\n" + 
+					"The type java.sql.Connection is not accessible\n" + 
 					"Connection cannot be resolved to a type", markers);
 		} finally {
 		}
@@ -197,7 +194,6 @@ public class ModuleBuilderTests extends ModifyingResourceTests {
 	// Test that a type that is outside java.base module is available to the compiler
 	// when the module is specified as 'requires'.
 	public void test005() throws CoreException {
-		if (!isJRE9) return;
 		try {
 			this.editFile("P1/src/module-info.java",
 					"module M1 {\n" +
@@ -218,7 +214,6 @@ public class ModuleBuilderTests extends ModifyingResourceTests {
 	// Test that a module that doesn't exist but specified as requires in module-info
 	// doesn't affect rest of the compilation.
 	public void _test006() throws CoreException {
-		if (!isJRE9) return;
 		try {
 			this.editFile("P1/src/module-info.java",
 					"module M1 {\n" +
@@ -282,7 +277,6 @@ public class ModuleBuilderTests extends ModifyingResourceTests {
 	 *
 	 */
 	public void test007() throws Exception {
-		if (!isJRE9) return;
 		try {
 			IJavaProject project = setupP2();
 			this.editFile("P1/src/module-info.java",
@@ -299,7 +293,7 @@ public class ModuleBuilderTests extends ModifyingResourceTests {
 			IMarker[] markers = project.getProject().findMarkers(null, true, IResource.DEPTH_INFINITE);
 			sortMarkers(markers);
 			assertMarkers("Unexpected markers", 
-					"The import com.greetings cannot be resolved\n" + 
+					"The type com.greetings.Main is not accessible\n" + 
 					"Main cannot be resolved", 
 					markers);
 		} finally {
@@ -314,7 +308,6 @@ public class ModuleBuilderTests extends ModifyingResourceTests {
 	 *
 	 */
 	public void test008() throws Exception {
-		if (!isJRE9) return;
 		try {
 			IJavaProject project = setupP2();
 			this.editFile("P1/src/module-info.java",
@@ -344,7 +337,6 @@ public class ModuleBuilderTests extends ModifyingResourceTests {
 	 * are exported by M1. No errors expected. 
 	 */
 	public void test009() throws Exception {
-		if (!isJRE9) return;
 		try {
 			IJavaProject project = setupP2();
 			this.editFile("P1/src/module-info.java",
@@ -371,7 +363,6 @@ public class ModuleBuilderTests extends ModifyingResourceTests {
 	 * Usage of types from M1 in M2 should be reported.
 	 */
 	public void _test010() throws Exception {
-		if (!isJRE9) return;
 		try {
 			IJavaProject project = setupP2();
 			this.editFile("P1/src/module-info.java",
@@ -428,7 +419,6 @@ public class ModuleBuilderTests extends ModifyingResourceTests {
 	 * M1 in M3 should be reported as errors.
 	 */
 	public void test011() throws Exception {
-		if (!isJRE9) return;
 		try {
 			this.editFile("P1/src/module-info.java",
 					"module M1 {\n" +
@@ -455,7 +445,6 @@ public class ModuleBuilderTests extends ModifyingResourceTests {
 	 * M1 in M3 should not be allowed.
 	 */
 	public void test012() throws Exception {
-		if (!isJRE9) return;
 		try {
 			this.editFile("P1/src/module-info.java",
 					"module M1 {\n" +
@@ -489,7 +478,6 @@ public class ModuleBuilderTests extends ModifyingResourceTests {
 	 * M1 in M3 should be allowed.
 	 */
 	public void test013() throws Exception {
-		if (!isJRE9) return;
 		try {
 			IJavaProject p2 = setupP2();
 			IJavaProject p3 = setupP3();
@@ -513,7 +501,6 @@ public class ModuleBuilderTests extends ModifyingResourceTests {
 	 * M1 in M3 should be allowed. And no errors reported on M2.
 	 */
 	public void test014() throws Exception {
-		if (!isJRE9) return;
 		try {
 			this.editFile("P1/src/module-info.java",
 					"module M1 {\n" +
@@ -538,7 +525,6 @@ public class ModuleBuilderTests extends ModifyingResourceTests {
 		}
 	}
 	public void test015() throws CoreException, IOException {
-		if (!isJRE9) return;
 		try {
 			this.editFile("P1/src/module-info.java",
 					"module M1 {\n" +
@@ -579,7 +565,6 @@ public class ModuleBuilderTests extends ModifyingResourceTests {
 	 * report expected errors.
 	 */
 	public void test016() throws CoreException, IOException {
-		if (!isJRE9) return;
 		try {
 			IJavaProject p2 = setupP2();
 			this.editFile("P2/src/module-info.java",
@@ -601,7 +586,7 @@ public class ModuleBuilderTests extends ModifyingResourceTests {
 			markers = p2.getProject().findMarkers(null, true, IResource.DEPTH_INFINITE);
 			sortMarkers(markers);
 			assertMarkers("Unexpected markers",
-					"The import com.greetings cannot be resolved\n" + 
+					"The type com.greetings.Main is not accessible\n" + 
 					"Main cannot be resolved",  markers);
 		} finally {
 			deleteProject("P2");
@@ -612,7 +597,6 @@ public class ModuleBuilderTests extends ModifyingResourceTests {
 	 * report expected errors.
 	 */
 	public void test017() throws CoreException, IOException {
-		if (!isJRE9) return;
 		try {
 			IJavaProject p2 = setupP2();
 			this.editFile("P2/src/module-info.java",
@@ -650,7 +634,6 @@ public class ModuleBuilderTests extends ModifyingResourceTests {
 	 * report expected errors.
 	 */
 	public void test018() throws CoreException, IOException {
-		if (!isJRE9) return;
 		try {
 			String wkspEncoding = System.getProperty("file.encoding");
 			final String encoding = "UTF-8".equals(wkspEncoding) ? "Cp1252" : "UTF-8";
@@ -685,7 +668,6 @@ public class ModuleBuilderTests extends ModifyingResourceTests {
 	 * re-compilation of module.
 	 */
 	public void _test019() throws CoreException, IOException {
-		if (!isJRE9) return;
 		try {
 			this.editFile("P1/src/module-info.java",
 					"module M1 {\n" +
@@ -716,7 +698,6 @@ public class ModuleBuilderTests extends ModifyingResourceTests {
 		}
 	}
 	public void testConvertToModule() throws CoreException, IOException {
-		if (!isJRE9) return;
 		Hashtable<String, String> javaCoreOptions = JavaCore.getOptions();
 		try {
 			IJavaProject project = setUpJavaProject("ConvertToModule", "9");
@@ -739,7 +720,6 @@ public class ModuleBuilderTests extends ModifyingResourceTests {
 		}
 	}
 	public void test_services_abstractImpl() throws CoreException {
-		if (!isJRE9) return;
 		try {
 			String[] sources = new String[] { 
 					"src/module-info.java",
@@ -780,7 +760,6 @@ public class ModuleBuilderTests extends ModifyingResourceTests {
 		}
 	}
 	public void test_services_invalidImpl() throws CoreException {
-		if (!isJRE9) return;
 		try {
 			String[] sources = new String[] { 
 					"src/module-info.java",
@@ -820,7 +799,6 @@ public class ModuleBuilderTests extends ModifyingResourceTests {
 		}
 	}
 	public void test_services_NoDefaultConstructor() throws CoreException {
-		if (!isJRE9) return;
 		try {
 			String[] sources = new String[] {
 				"src/module-info.java",
@@ -866,7 +844,6 @@ public class ModuleBuilderTests extends ModifyingResourceTests {
 		}
 	}
 	public void test_services_DefaultConstructorNotVisible() throws CoreException {
-		if (!isJRE9) return;
 		try {
 			String[] sources = new String[] {
 				"src/module-info.java",
@@ -912,7 +889,6 @@ public class ModuleBuilderTests extends ModifyingResourceTests {
 		}
 	}
 	public void test_services_DuplicateEntries() throws CoreException {
-		if (!isJRE9) return;
 		try {
 			String[] sources = new String[] {
 				"src/module-info.java",
@@ -958,7 +934,6 @@ public class ModuleBuilderTests extends ModifyingResourceTests {
 		}
 	}
 	public void test_services_NestedClass() throws CoreException {
-		if (!isJRE9) return;
 		try {
 			String[] sources = new String[] {
 				"src/module-info.java",
@@ -1004,7 +979,6 @@ public class ModuleBuilderTests extends ModifyingResourceTests {
 		}
 	}
 	public void test_services_NonStatic_NestedClass() throws CoreException {
-		if (!isJRE9) return;
 		try {
 			String[] sources = new String[] {
 				"src/module-info.java",
@@ -1051,7 +1025,6 @@ public class ModuleBuilderTests extends ModifyingResourceTests {
 		}
 	}
 	public void test_services_ImplDefinedInAnotherModule() throws CoreException {
-		if (!isJRE9) return;
 		try {
 			String[] sources = new String[] {
 				"src/module-info.java",
@@ -1091,7 +1064,6 @@ public class ModuleBuilderTests extends ModifyingResourceTests {
 		}
 	}
 	public void test_services_ProviderMethod() throws CoreException {
-		if (!isJRE9) return;
 		try {
 			String[] sources = new String[] {
 				"src/module-info.java",
@@ -1143,7 +1115,6 @@ public class ModuleBuilderTests extends ModifyingResourceTests {
 		}
 	}
 	public void test_services_ProviderMethod_ReturnTypeFromAnotherModule() throws CoreException {
-		if (!isJRE9) return;
 		try {
 			String[] sources = new String[] {
 				"src/module-info.java",
@@ -1201,7 +1172,6 @@ public class ModuleBuilderTests extends ModifyingResourceTests {
 		}
 	}
 	public void test_services_ProviderMethod_ReturnTypeInvisible() throws CoreException {
-		if (!isJRE9) return;
 		try {
 			String[] sources = new String[] {
 				"src/module-info.java",
@@ -1258,7 +1228,6 @@ public class ModuleBuilderTests extends ModifyingResourceTests {
 		}
 	}
 	public void test_services_ProviderMethod_InvalidReturnType() throws CoreException {
-		if (!isJRE9) return;
 		try {
 			String[] sources = new String[] {
 				"src/module-info.java",
@@ -1309,7 +1278,6 @@ public class ModuleBuilderTests extends ModifyingResourceTests {
 		}
 	}
 	public void test_services_DuplicateImplEntries() throws CoreException {
-		if (!isJRE9) return;
 		try {
 			String[] sources = new String[] {
 				"src/module-info.java",
@@ -1354,7 +1322,6 @@ public class ModuleBuilderTests extends ModifyingResourceTests {
 		}
 	}
 	public void test_services_InvalidIntfType() throws CoreException {
-		if (!isJRE9) return;
 		try {
 			String[] src = new String[] {
 				"src/module-info.java",
@@ -1378,7 +1345,6 @@ public class ModuleBuilderTests extends ModifyingResourceTests {
 		}
 	}
 	public void test_services_InvalidImplType() throws CoreException {
-		if (!isJRE9) return;
 		try {
 			String[] sources = new String[] {
 				"src/module-info.java",
@@ -1418,7 +1384,6 @@ public class ModuleBuilderTests extends ModifyingResourceTests {
 		}
 	}
 	public void test_services_nonPublicImpl() throws CoreException {
-		if (!isJRE9) return;
 		try {
 			String[] sources = new String[] {
 				"src/module-info.java",
@@ -1463,7 +1428,6 @@ public class ModuleBuilderTests extends ModifyingResourceTests {
 		}
 	}
 	public void test_Exports_Error() throws CoreException {
-		if (!isJRE9) return;
 		try {
 			String[] src = new String[] {
 				"src/module-info.java",
@@ -1481,7 +1445,6 @@ public class ModuleBuilderTests extends ModifyingResourceTests {
 		}
 	}
 	public void test_DuplicateExports() throws CoreException {
-		if (!isJRE9) return;
 		try {
 			String[] sources = new String[] {
 				"src/module-info.java",
@@ -1505,7 +1468,6 @@ public class ModuleBuilderTests extends ModifyingResourceTests {
 		}
 	}
 	public void test_TargetedExports_Duplicates() throws CoreException {
-		if (!isJRE9) return;
 		try {
 			String[] sources = new String[] {
 				"src/module-info.java",
@@ -1548,7 +1510,6 @@ public class ModuleBuilderTests extends ModifyingResourceTests {
 	// Types from source module should be resolved in target module
 	// when package is exported specifically to the target module
 	public void test_TargetedExports() throws CoreException {
-		if (!isJRE9) return;
 		try {
 			String[] sources = new String[] {
 				"src/module-info.java",
@@ -1594,7 +1555,6 @@ public class ModuleBuilderTests extends ModifyingResourceTests {
 	// source module exports packages to a specific module which is not
 	// the same as the target module
 	public void test_TargetedExports_Error() throws CoreException {
-		if (!isJRE9) return;
 		try {
 			String[] sources = new String[] {
 				"src/module-info.java",
@@ -1649,7 +1609,6 @@ public class ModuleBuilderTests extends ModifyingResourceTests {
 	// It is permitted for the to clause of an exports or opens statement to 
 	// specify a module which is not observable
 	public void test_TargetedExports_Unresolved() throws CoreException {
-		if (!isJRE9) return;
 		try {
 			String[] sources = new String[] {
 				"src/module-info.java",
@@ -1673,7 +1632,6 @@ public class ModuleBuilderTests extends ModifyingResourceTests {
 	// Target module of an exports statement should be resolved without having an explicit
 	// dependency to the project that defines the module
 	public void test_TargetedExports_Resolution() throws CoreException {
-		if (!isJRE9) return;
 		try {
 			String[] sources = new String[] {
 				"src/module-info.java",
@@ -1704,7 +1662,6 @@ public class ModuleBuilderTests extends ModifyingResourceTests {
 	// Make sure modules in the workspace are resolved via the module source path container
 	// without needing to add a dependency to the project explicitly
 	public void test_ModuleSourcePathContainer() throws CoreException {
-		if (!isJRE9) return;
 		try {
 			String[] sources = new String[] {
 				"src/module-info.java",
@@ -1745,7 +1702,6 @@ public class ModuleBuilderTests extends ModifyingResourceTests {
 	}
 	// Make sure module path container picks up changes to module-info
 	public void _test_ModuleSourcePath_update() throws CoreException {
-		if (!isJRE9) return;
 		try {
 			String[] sources = new String[] {
 				"src/module-info.java",
@@ -1800,7 +1756,6 @@ public class ModuleBuilderTests extends ModifyingResourceTests {
 	// Implicit module dependencies via the 'requires transitive' directive should be
 	// resolved via the module path container
 	public void test_ModuleSourcePath_implicitdeps() throws CoreException {
-		if (!isJRE9) return;
 		try {
 			String[] sources = new String[] {
 				"src/module-info.java",
@@ -1850,7 +1805,6 @@ public class ModuleBuilderTests extends ModifyingResourceTests {
 	}
 	// Changes to implicit dependencies should be reflected // FIXME: container JavaCore.MODULE_PATH_CONTAINER_ID is unreliable
 	public void _test_ModuleSourcePath_implicitdeps2() throws CoreException {
-		if (!isJRE9) return;
 		try {
 			String[] sources = new String[] {
 				"src/module-info.java",
@@ -1908,7 +1862,6 @@ public class ModuleBuilderTests extends ModifyingResourceTests {
 	// Changes to implicit dependencies should be reflected
 	//TODO enable once we know how to update project cache
 	public void _test_ModuleSourcePath_implicitdeps3() throws CoreException {
-		if (!isJRE9) return;
 		try {
 			String[] sources = new String[] {
 				"src/module-info.java",
@@ -1961,7 +1914,6 @@ public class ModuleBuilderTests extends ModifyingResourceTests {
 		}
 	}
 	public void test_Cycle_In_Module_Dependency() throws CoreException {
-		if (!isJRE9) return;
 		try {
 			String[] sources = new String[] {
 				"src/module-info.java",
@@ -2007,7 +1959,6 @@ public class ModuleBuilderTests extends ModifyingResourceTests {
 		}
 	}
 	public void test_Cycle_In_Implicit_Module_Dependency() throws CoreException {
-		if (!isJRE9) return;
 		try {
 			String[] sources = new String[] {
 				"src/module-info.java",
@@ -2052,7 +2003,6 @@ public class ModuleBuilderTests extends ModifyingResourceTests {
 		}
 	}
 	public void test_bug506479() throws CoreException {
-		if (!isJRE9) return;
 		try {
 			String[] sources = new String[] {
 					"src/module-info.java",
@@ -2082,7 +2032,6 @@ public class ModuleBuilderTests extends ModifyingResourceTests {
 		}
 	}
 	public void test_Multiple_SourceFolders() throws CoreException {
-		if (!isJRE9) return;
 		try {
 			String[] sources = new String[] {
 				"src/module-info.java",
@@ -2138,7 +2087,6 @@ public class ModuleBuilderTests extends ModifyingResourceTests {
 		}
 	}
 	public void test_Multiple_SourceFolders_WithModuleInfo() throws CoreException {
-		if (!isJRE9) return;
 		try {
 			String[] sources = new String[] {
 				"src/module-info.java",
@@ -2202,7 +2150,6 @@ public class ModuleBuilderTests extends ModifyingResourceTests {
 		}
 	}
 	public void test_Multiple_SourceFolders_addModuleInfo() throws CoreException {
-		if (!isJRE9) return;
 		try {
 			String[] sources = new String[] {
 				"src/module-info.java",
@@ -2240,7 +2187,6 @@ public class ModuleBuilderTests extends ModifyingResourceTests {
 		}
 	}
 	public void test_Multiple_SourceFolders_removeModuleInfo() throws CoreException {
-		if (!isJRE9) return;
 		try {
 			String[] sources = new String[] {
 				"src/module-info.java",
@@ -2277,7 +2223,6 @@ public class ModuleBuilderTests extends ModifyingResourceTests {
 		}
 	}
 	public void test_services_multipleImpl() throws CoreException {
-		if (!isJRE9) return;
 		try {
 			String[] sources = new String[] { 
 					"src/module-info.java",
@@ -2331,7 +2276,6 @@ public class ModuleBuilderTests extends ModifyingResourceTests {
 		}
 	}
 	public void test_imports_in_moduleinfo() throws CoreException {
-		if (!isJRE9) return;
 		try {
 			String[] sources = new String[] { 
 					"src/module-info.java",
@@ -2377,7 +2321,6 @@ public class ModuleBuilderTests extends ModifyingResourceTests {
 	}
 
 	public void test_Opens_Nonexistent_Package() throws CoreException {
-		if (!isJRE9) return;
 		try {
 			String[] src = new String[] {
 				"src/module-info.java",
@@ -2393,7 +2336,6 @@ public class ModuleBuilderTests extends ModifyingResourceTests {
 		}
 	}
 	public void test_Opens_Alien_Package() throws CoreException {
-		if (!isJRE9) return;
 		try {
 			String[] src = new String[] {
 				"src/module-info.java",
@@ -2432,7 +2374,6 @@ public class ModuleBuilderTests extends ModifyingResourceTests {
 		}
 	}
 	public void test_DuplicateOpens() throws CoreException {
-		if (!isJRE9) return;
 		try {
 			String[] sources = new String[] {
 				"src/module-info.java",
@@ -2456,7 +2397,6 @@ public class ModuleBuilderTests extends ModifyingResourceTests {
 		}
 	}
 	public void test_TargetedOpens_Duplicates() throws CoreException {
-		if (!isJRE9) return;
 		try {
 			String[] sources = new String[] {
 				"src/module-info.java",
@@ -2499,7 +2439,6 @@ public class ModuleBuilderTests extends ModifyingResourceTests {
 	// It is permitted for the to clause of an exports or opens statement to 
 	// specify a module which is not observable
 	public void test_TargetedOpens_Unresolved() throws CoreException {
-		if (!isJRE9) return;
 		try {
 			String[] sources = new String[] {
 				"src/module-info.java",
@@ -2522,7 +2461,6 @@ public class ModuleBuilderTests extends ModifyingResourceTests {
 	}
 	// It is a compile-time error if an opens statement appears in the declaration of an open module. 
 	public void test_OpensStatment_in_OpenModule() throws CoreException {
-		if (!isJRE9) return;
 		try {
 			String[] sources = new String[] {
 				"src/module-info.java",
@@ -2545,7 +2483,6 @@ public class ModuleBuilderTests extends ModifyingResourceTests {
 		}
 	}
 	public void test_uses_DuplicateEntries() throws CoreException {
-		if (!isJRE9) return;
 		try {
 			String[] sources = new String[] {
 				"src/module-info.java",
@@ -2570,7 +2507,6 @@ public class ModuleBuilderTests extends ModifyingResourceTests {
 		}
 	}
 	public void test_uses_InvalidIntfType() throws CoreException {
-		if (!isJRE9) return;
 		try {
 			String[] src = new String[] {
 				"src/module-info.java",
@@ -2593,7 +2529,6 @@ public class ModuleBuilderTests extends ModifyingResourceTests {
 		}
 	}
 	public void test_ReconcilerModuleLookup1() throws CoreException {
-		if (!isJRE9) return;
 		try {
 			String[] src = new String[] {
 				"src/module-info.java",
@@ -2615,7 +2550,6 @@ public class ModuleBuilderTests extends ModifyingResourceTests {
 		}
 	}
 	public void test_ReconcilerModuleLookup2() throws CoreException {
-		if (!isJRE9) return;
 		try {
 			String[] src = new String[] {
 				"src/module-info.java",
@@ -2641,7 +2575,6 @@ public class ModuleBuilderTests extends ModifyingResourceTests {
 		}
 	}
 	public void testSystemLibAsJMod() throws CoreException {
-		if (!isJRE9) return;
 		try {
 			IJavaProject project = createJava9Project("Test01", new String[]{"src"});
 			IClasspathEntry[] rawClasspath = project.getRawClasspath();
@@ -2676,7 +2609,6 @@ public class ModuleBuilderTests extends ModifyingResourceTests {
 		}
 	}
 	public void testSystemLibAsJMod_2() throws CoreException {
-		if (!isJRE9) return;
 		try {
 			IJavaProject project = createJava9Project("Test01", new String[]{"src"});
 			IClasspathEntry[] rawClasspath = project.getRawClasspath();
@@ -2729,7 +2661,6 @@ public class ModuleBuilderTests extends ModifyingResourceTests {
 		}
 	}
 	public void testBug510617() throws CoreException {
-		if (!isJRE9) return;
 		try {
 			String[] src = new String[] {
 				"src/module-info.java",
@@ -2795,7 +2726,6 @@ public class ModuleBuilderTests extends ModifyingResourceTests {
 		}
 	}
 	public void test_annotations_in_moduleinfo() throws CoreException {
-		if (!isJRE9) return;
 		try {
 			String[] sources = new String[] { 
 					"src/module-info.java",
@@ -2845,7 +2775,6 @@ public class ModuleBuilderTests extends ModifyingResourceTests {
 		}
 	}
 	public void test_unresolved_annotations() throws CoreException {
-		if (!isJRE9) return;
 		try {
 			String[] sources = new String[] { 
 					"src/module-info.java",
@@ -2896,7 +2825,6 @@ public class ModuleBuilderTests extends ModifyingResourceTests {
 		}
 	}
 	public void test_illegal_modifiers() throws CoreException {
-		if (!isJRE9) return;
 		try {
 			String[] sources = new String[] { 
 					"src/module-info.java",
@@ -2947,7 +2875,6 @@ public class ModuleBuilderTests extends ModifyingResourceTests {
 		}
 	}
 	public void test_annotations_with_target() throws CoreException {
-		if (!isJRE9) return;
 		try {
 			String[] sources = new String[] { 
 					"src/module-info.java",
@@ -3000,7 +2927,6 @@ public class ModuleBuilderTests extends ModifyingResourceTests {
 		}
 	}
 	public void test_annotations_with_wrong_target() throws CoreException {
-		if (!isJRE9) return;
 		try {
 			String[] sources = new String[] { 
 					"src/module-info.java",
@@ -3054,7 +2980,6 @@ public class ModuleBuilderTests extends ModifyingResourceTests {
 		}
 	}
 	public void testBug518334() throws CoreException, IOException {
-		if (!isJRE9) return;
 		try {
 			String[] sources = new String[] { 
 					"src/module-info.java",
@@ -3079,7 +3004,6 @@ public class ModuleBuilderTests extends ModifyingResourceTests {
 		}
 	}
 	public void testBug518334a() throws CoreException {
-		if (!isJRE9) return;
 		try {
 			String[] sources = new String[] { 
 					"src/module-info.java",
@@ -3120,7 +3044,6 @@ public class ModuleBuilderTests extends ModifyingResourceTests {
 	}
 
 	public void test_api_leak_1() throws CoreException {
-		if (!isJRE9) return;
 		try {
 			String[] sources1 = {
 								"src/module-info.java", 
@@ -3182,7 +3105,6 @@ public class ModuleBuilderTests extends ModifyingResourceTests {
 	 * Still a sub class of the inaccessible class can be accessed and used for a method argument.
 	 */
 	public void test_api_leak_2() throws CoreException {
-		if (!isJRE9) return;
 		try {
 			String[] sources1 = {
 						"src/module-info.java", 
@@ -3250,7 +3172,6 @@ public class ModuleBuilderTests extends ModifyingResourceTests {
 	}
 	
 	public void testNonPublic1() throws CoreException {
-		if (!isJRE9) return;
 		try {
 			String[] sources1 = {
 					"src/module-info.java", 
@@ -3328,7 +3249,6 @@ public class ModuleBuilderTests extends ModifyingResourceTests {
 	// test that two packages with the same name result in conflict if they are both
 	// accessible to a module
 	public void test_conflicting_packages() throws CoreException {
-		if (!isJRE9) return;
 		try {
 			String[] sources = new String[] {
 				"src/module-info.java",
@@ -3378,7 +3298,8 @@ public class ModuleBuilderTests extends ModifyingResourceTests {
 					// reported against both 'requires' directives & against the import:
 					"The package org.astro is accessible from more than one module: org.astro, some.mod\n" +
 					"The package org.astro is accessible from more than one module: org.astro, some.mod\n" +
-					"The package org.astro is accessible from more than one module: org.astro, some.mod",
+					"The package org.astro is accessible from more than one module: org.astro, some.mod\n" +
+					"World cannot be resolved to a type",
 					markers);
 		} finally {
 			deleteProject("org.astro");
@@ -3389,7 +3310,6 @@ public class ModuleBuilderTests extends ModifyingResourceTests {
 	// test that a package declared in a module conflicts with an accessible package
 	// of the same name declared in another required module
 	public void test_conflicting_packages_declaredvsaccessible() throws CoreException {
-		if (!isJRE9) return;
 		try {
 			IClasspathEntry dep = JavaCore.newContainerEntry(new Path(JavaCore.MODULE_PATH_CONTAINER_ID));
 			String[] sources = new String[] {
@@ -3428,8 +3348,11 @@ public class ModuleBuilderTests extends ModifyingResourceTests {
 			IJavaProject p2 = setupModuleProject("com.greetings", src, new IClasspathEntry[] { dep });
 			p2.getProject().getWorkspace().build(IncrementalProjectBuilder.FULL_BUILD, null);
 			IMarker[] markers = p2.getProject().findMarkers(null, true, IResource.DEPTH_INFINITE);
+			sortMarkers(markers);
 			assertMarkers("Unexpected markers", 
-					"The package org.astro conflicts with a package accessible from another module: org.astro",  markers);
+					"The package org.astro conflicts with a package accessible from another module: org.astro\n" +
+					"The package org.astro is accessible from more than one module: com.greetings, org.astro",
+					markers);
 		} finally {
 			deleteProject("org.astro");
 			deleteProject("com.greetings");
@@ -3440,7 +3363,6 @@ public class ModuleBuilderTests extends ModifyingResourceTests {
 	// Type bundle.org.astro.World should not be resolved, because type
 	// bundle.org.astro trumps package bundle.org.astro
 	public void test_conflict_packagevstype() throws CoreException {
-		if (!isJRE9) return;
 		try {
 			IClasspathEntry dep = JavaCore.newContainerEntry(new Path(JavaCore.MODULE_PATH_CONTAINER_ID));
 			String[] sources = new String[] {
@@ -3497,7 +3419,6 @@ public class ModuleBuilderTests extends ModifyingResourceTests {
 	// cannot be seen
 	// TODO - to be confirmed with spec
 	public void test_noconflict_concealedtype_accessiblepackage() throws CoreException {
-		if (!isJRE9) return;
 		try {
 			IClasspathEntry dep = JavaCore.newContainerEntry(new Path(JavaCore.MODULE_PATH_CONTAINER_ID));
 			String[] sources = new String[] {
@@ -3549,7 +3470,6 @@ public class ModuleBuilderTests extends ModifyingResourceTests {
 	// test that two packages of the same name exported by two named modules result in
 	// a conflict in the context of a non-modular project
 	public void test_conflicting_packages_unnamed() throws CoreException {
-		if (!isJRE9) return;
 		try {
 			String[] sources = new String[] {
 				"src/module-info.java",
@@ -3596,7 +3516,8 @@ public class ModuleBuilderTests extends ModifyingResourceTests {
 			IMarker[] markers = p3.getProject().findMarkers(null, true, IResource.DEPTH_INFINITE);
 			sortMarkers(markers);
 			assertMarkers("Unexpected markers", 
-					"The package org.astro is accessible from more than one module: org.astro, some.mod",
+					"The package org.astro is accessible from more than one module: org.astro, some.mod\n" +
+					"World cannot be resolved to a type",
 					markers);
 		} finally {
 			deleteProject("org.astro");
@@ -3607,7 +3528,6 @@ public class ModuleBuilderTests extends ModifyingResourceTests {
 	// test that a package declared in a non-modular project conflicts with a package with the same name
 	// exported by a named module on it's build path
 	public void test_conflict_unnamed_declaredvsexported() throws CoreException {
-		if (!isJRE9) return;
 		try {
 			IClasspathEntry dep = JavaCore.newContainerEntry(new Path(JavaCore.MODULE_PATH_CONTAINER_ID));
 			String[] sources = new String[] {
@@ -3645,8 +3565,10 @@ public class ModuleBuilderTests extends ModifyingResourceTests {
 			IJavaProject p2 = setupModuleProject("com.greetings", src, new IClasspathEntry[] { dep1 });
 			p2.getProject().getWorkspace().build(IncrementalProjectBuilder.FULL_BUILD, null);
 			IMarker[] markers = p2.getProject().findMarkers(null, true, IResource.DEPTH_INFINITE);
+			sortMarkers(markers);
 			assertMarkers("Unexpected markers", 
-					"The package org.astro conflicts with a package accessible from another module: org.astro",
+					"The package org.astro conflicts with a package accessible from another module: org.astro\n" +
+					"The package org.astro is accessible from more than one module: <unnamed>, org.astro",
 					markers);
 		} finally {
 			deleteProject("org.astro");
@@ -3656,7 +3578,6 @@ public class ModuleBuilderTests extends ModifyingResourceTests {
 	// test that a type in an accessible package trumps an accessible package with the same name
 	// in the context of a non-modular project
 	public void test_conflict_packagevstype_unnamed() throws CoreException {
-		if (!isJRE9) return;
 		try {
 			IClasspathEntry dep = JavaCore.newContainerEntry(new Path(JavaCore.MODULE_PATH_CONTAINER_ID));
 			String[] sources = new String[] {
@@ -3711,7 +3632,6 @@ public class ModuleBuilderTests extends ModifyingResourceTests {
 	// test that a conflicting package does not cause an error when resolving a sub package name
 	// when the sub package is accessible in the context of a non-modular project
 	public void test_noconflict_subpkg_unnamed() throws CoreException {
-		if (!isJRE9) return;
 		try {
 			IClasspathEntry dep = JavaCore.newContainerEntry(new Path(JavaCore.MODULE_PATH_CONTAINER_ID));
 			String[] sources = new String[] {
@@ -3758,9 +3678,10 @@ public class ModuleBuilderTests extends ModifyingResourceTests {
 			IJavaProject p3 = setupModuleProject("com.greetings", src, new IClasspathEntry[] { dep1, dep2 });
 			getWorkspace().build(IncrementalProjectBuilder.FULL_BUILD, null);
 			IMarker[] markers = p3.getProject().findMarkers(null, true, IResource.DEPTH_INFINITE);
+			sortMarkers(markers);
 			assertMarkers("Unexpected markers", 
 					"The package bundle.org conflicts with a package accessible from another module: other.mod\n" + 
-					"bundle.org.astro.World cannot be resolved to a type",
+					"The package bundle.org is accessible from more than one module: <unnamed>, other.mod",
 					markers);
 		} finally {
 			deleteProject("org.astro");
@@ -3771,7 +3692,6 @@ public class ModuleBuilderTests extends ModifyingResourceTests {
 	// test that a type in a non-accessible package does not conflict with an accessible package
 	// in the context of a non-modular project
 	public void test_noconflict_concealedtype_accessiblepackage_unnamed() throws CoreException {
-		if (!isJRE9) return;
 		try {
 			IClasspathEntry dep = JavaCore.newContainerEntry(new Path(JavaCore.MODULE_PATH_CONTAINER_ID));
 			String[] sources = new String[] {
@@ -3822,7 +3742,6 @@ public class ModuleBuilderTests extends ModifyingResourceTests {
 		}
 	}
 	public void testBug512053() throws CoreException, IOException {
-		if (!isJRE9) return;
 		Hashtable<String, String> javaCoreOptions = JavaCore.getOptions();
 		this.sourceWorkspacePath = super.getSourceWorkspacePath() + java.io.File.separator + "bug512053"; 
 		try {
@@ -3846,7 +3765,6 @@ public class ModuleBuilderTests extends ModifyingResourceTests {
 	}
 	// basic test for automatic modules - external jars
 	public void testBug518280() throws CoreException, IOException {
-		if (!isJRE9) return;
 		try {
 			String libPath = "externalLib/test.jar";
 			Util.createJar(
@@ -3893,7 +3811,6 @@ public class ModuleBuilderTests extends ModifyingResourceTests {
 	}
 	// basic test for automatic modules - workspace jars
 	public void testBug518282() throws CoreException, IOException {
-		if (!isJRE9) return;
 		Hashtable<String, String> javaCoreOptions = JavaCore.getOptions();
 		try {
 			setUpJavaProject("test_automodules", "9");
@@ -3908,7 +3825,6 @@ public class ModuleBuilderTests extends ModifyingResourceTests {
 	// Only the project using a jar as an automatic module should be able to
 	// resolve one as such
 	public void testBug518282a() throws CoreException, IOException {
-		if (!isJRE9) return;
 		Hashtable<String, String> javaCoreOptions = JavaCore.getOptions();
 		try {
 			IJavaProject p1 = setUpJavaProject("test_automodules", "9");
@@ -3948,7 +3864,6 @@ public class ModuleBuilderTests extends ModifyingResourceTests {
 	// A modular jar on the module path of a project should behave as a regular module and not
 	// as an automatic module
 	public void testBug518282b() throws CoreException, IOException {
-		if (!isJRE9) return;
 		Hashtable<String, String> javaCoreOptions = JavaCore.getOptions();
 		String libPath = "externalLib/test.jar";
 		try {
@@ -4002,7 +3917,6 @@ public class ModuleBuilderTests extends ModifyingResourceTests {
 	// A modular jar on the class path of a module project - shouldn't be
 	// treated as a module and shouldn't be readable
 	public void testBug518282c() throws CoreException, IOException {
-		if (!isJRE9) return;
 		Hashtable<String, String> javaCoreOptions = JavaCore.getOptions();
 		String libPath = "externalLib/test.jar";
 		try {
@@ -4055,7 +3969,6 @@ public class ModuleBuilderTests extends ModifyingResourceTests {
 	}
 	// An automatic module grants implied readability to all other automatic modules
 	public void testBug518282d() throws CoreException, IOException {
-		if (!isJRE9) return;
 		Hashtable<String, String> javaCoreOptions = JavaCore.getOptions();
 		String libPath = "externalLib/test.jar";
 		try {
@@ -4122,7 +4035,6 @@ public class ModuleBuilderTests extends ModifyingResourceTests {
 	// Automatic module should not allow access to other explicit modules without
 	// requires
 	public void testBug518282e() throws CoreException, IOException {
-		if (!isJRE9) return;
 		Hashtable<String, String> javaCoreOptions = JavaCore.getOptions();
 		String libPath = "externalLib/test.jar";
 		try {
@@ -4196,7 +4108,6 @@ public class ModuleBuilderTests extends ModifyingResourceTests {
 	}
 	// An automatic module shouldn't allow access to classpath
 	public void testBug518282f() throws CoreException, IOException {
-		if (!isJRE9) return;
 		Hashtable<String, String> javaCoreOptions = JavaCore.getOptions();
 		String libPath = "externalLib/test.jar";
 		try {
@@ -4265,7 +4176,6 @@ public class ModuleBuilderTests extends ModifyingResourceTests {
 	}
 
 	public void testUnnamedModule_bug519674() throws CoreException {
-		if (!isJRE9) return;
 		try {
 			IJavaProject p1 = createJava9Project("Project1");
 			createFolder("/Project1/src/pack1");
@@ -4296,7 +4206,6 @@ public class ModuleBuilderTests extends ModifyingResourceTests {
 
 	}
 	public void testBug520246() throws CoreException {
-		if (!isJRE9) return;
 		try {
 			String[] src = new String[] { 
 				"src/module-info.java",
@@ -4320,7 +4229,6 @@ public class ModuleBuilderTests extends ModifyingResourceTests {
 
 	}	
 	public void testBug520147() throws CoreException, IOException {
-		if (!isJRE9) return;
 		Hashtable<String, String> javaCoreOptions = JavaCore.getOptions();
 		try {
 			String[] src = new String[] { 
@@ -4387,7 +4295,6 @@ public class ModuleBuilderTests extends ModifyingResourceTests {
 		}
 	}	
 	public void testBug520147a() throws CoreException, IOException {
-		if (!isJRE9) return;
 		Hashtable<String, String> javaCoreOptions = JavaCore.getOptions();
 		try {
 			String[] src = new String[] { 
@@ -4454,7 +4361,6 @@ public class ModuleBuilderTests extends ModifyingResourceTests {
 		}
 	}
 	public void testBug520147b() throws CoreException, IOException {
-		if (!isJRE9) return;
 		Hashtable<String, String> javaCoreOptions = JavaCore.getOptions();
 		try {
 			String[] src = new String[] { 
@@ -4522,7 +4428,6 @@ public class ModuleBuilderTests extends ModifyingResourceTests {
 		}
 	}
 	public void testSourceFolders_Bug519673() throws CoreException {
-		if (!isJRE9) return;
 		try {
 			// Setup project PSources1:
 			String[] src = new String[] { 
@@ -4598,7 +4503,6 @@ public class ModuleBuilderTests extends ModifyingResourceTests {
 		}
 	}
 	public void testPrivateMethod_Bug515985() throws CoreException {
-		if (!isJRE9) return;
 		try {
 			String[] src = new String[] {
 					"src/module-info.java", 
@@ -4645,7 +4549,6 @@ public class ModuleBuilderTests extends ModifyingResourceTests {
 		}
 	}
 	public void testAddExports() throws CoreException {
-		if (!isJRE9) return;
 		try {
 			String[] sources = new String[] {
 					"src/module-info.java",
@@ -4689,7 +4592,6 @@ public class ModuleBuilderTests extends ModifyingResourceTests {
 		}
 	}
 	public void testAddExports2() throws CoreException {
-		if (!isJRE9) return;
 		try {
 			String[] sources = new String[] {
 					"src/module-info.java",
@@ -4739,7 +4641,6 @@ public class ModuleBuilderTests extends ModifyingResourceTests {
 		}
 	}
 	public void testAddReads() throws CoreException, IOException {
-		if (!isJRE9) return;
 		try {
 			// org.astro defines the "real" org.astro.World:
 			String[] sources = new String[] {
@@ -4835,7 +4736,6 @@ public class ModuleBuilderTests extends ModifyingResourceTests {
 		}
 	}
 	public void testBug520147c() throws CoreException, IOException {
-		if (!isJRE9) return;
 		Hashtable<String, String> javaCoreOptions = JavaCore.getOptions();
 		try {
 			String[] src = new String[] { 
@@ -4897,7 +4797,6 @@ public class ModuleBuilderTests extends ModifyingResourceTests {
 	}
 	@Deprecated
 	public void testBug519935() throws CoreException, IOException {
-		if (!isJRE9) return;
 		Hashtable<String, String> javaCoreOptions = JavaCore.getOptions();
 		try {
 			String[] src = new String[] { 
@@ -4966,7 +4865,6 @@ public class ModuleBuilderTests extends ModifyingResourceTests {
 	}
 	@Deprecated
 	public void testBug520310() throws CoreException, IOException {
-		if (!isJRE9) return;
 		try {
 			String[] src = new String[] { 
 				"src/module-info.java",
@@ -5020,7 +4918,7 @@ public class ModuleBuilderTests extends ModifyingResourceTests {
 			markers = p2.getProject().findMarkers(null, true, IResource.DEPTH_INFINITE);
 			sortMarkers(markers);
 			assertMarkers("Unexpected markers in mod.two", 
-					"The import org cannot be resolved\n" + // cannot use cyclic requires 
+					"The type org.astro.World is not accessible\n" + // cannot use cyclic requires 
 					"Cycle exists in module dependencies, Module mod.two requires itself via mod.one\n" + 
 					"World cannot be resolved to a type",
 					markers);
@@ -5036,7 +4934,6 @@ public class ModuleBuilderTests extends ModifyingResourceTests {
 		}
 	}
 	public void testBug521346() throws CoreException, IOException {
-		if (!isJRE9) return;
 		IJavaProject javaProject = null;
 		try {
 			String src =
@@ -5063,7 +4960,6 @@ public class ModuleBuilderTests extends ModifyingResourceTests {
 		}
 	}
 	public void testAutoModule1() throws Exception {
-		if (!isJRE9) return;
 		IJavaProject javaProject = null;
 		try {
 			String[] sources = {
@@ -5120,7 +5016,6 @@ public class ModuleBuilderTests extends ModifyingResourceTests {
 		}
 	}
 	public void testAutoModule2() throws Exception {
-		if (!isJRE9) return;
 		IJavaProject javaProject = null;
 		try {
 			String[] sources = {
@@ -5178,7 +5073,6 @@ public class ModuleBuilderTests extends ModifyingResourceTests {
 		}
 	}
 	public void testAutoModule3() throws Exception {
-		if (!isJRE9) return;
 		IJavaProject javaProject = null, auto = null;
 		try {
 			auto = createJava9Project("auto", new String[] {"src"});
@@ -5235,7 +5129,6 @@ public class ModuleBuilderTests extends ModifyingResourceTests {
 	}
 
 	public void testAutoModule4() throws Exception {
-		if (!isJRE9) return;
 		IJavaProject javaProject = null;
 		IJavaProject javaProject2 = null;
 		try {
@@ -5330,7 +5223,6 @@ public class ModuleBuilderTests extends ModifyingResourceTests {
 	}
 	// like testAutoModule3 without name derived from project, not manifest - warning suppressed
 	public void testAutoModule5() throws Exception {
-		if (!isJRE9) return;
 		IJavaProject javaProject = null, auto = null;
 		try {
 			auto = createJava9Project("auto", new String[] {"src"});
@@ -5384,7 +5276,6 @@ public class ModuleBuilderTests extends ModifyingResourceTests {
 	}
 	// like testAutoModule5, warning configured as ERROR
 	public void testAutoModule6() throws Exception {
-		if (!isJRE9) return;
 		IJavaProject javaProject = null, auto = null;
 		try {
 			auto = createJava9Project("auto", new String[] {"src"});
@@ -5426,7 +5317,6 @@ public class ModuleBuilderTests extends ModifyingResourceTests {
 
 	// patch can see unexported type from host (and package accessible method), but not vice versa
 	public void testPatch1() throws CoreException, IOException {
-		if (!isJRE9) return;
 		try {
 			IJavaProject mainProject = createJava9Project("org.astro");
 			String[] sources = { 
@@ -5502,7 +5392,6 @@ public class ModuleBuilderTests extends ModifyingResourceTests {
 
 	// patch can see unexported type from host - JRE patched from two source folders
 	public void testPatch2() throws CoreException, IOException {
-		if (!isJRE9) return;
 		try {
 			IClasspathAttribute[] attributes = {
 					JavaCore.newClasspathAttribute(IClasspathAttribute.MODULE, "true"),
@@ -5545,7 +5434,6 @@ public class ModuleBuilderTests extends ModifyingResourceTests {
 
 	// patch can share a package with its host - jar
 	public void testPatch3() throws CoreException, IOException {
-		if (!isJRE9) return;
 		try {
 			String[] sources = {
 				"p/a/X.java",
@@ -5592,7 +5480,6 @@ public class ModuleBuilderTests extends ModifyingResourceTests {
 		}
 	}
 	public void testLimitModules1() throws CoreException, IOException {
-		if (!isJRE9) return;
 		try {
 			IClasspathAttribute[] attributes = {
 					JavaCore.newClasspathAttribute(IClasspathAttribute.MODULE, "true"),
@@ -5661,7 +5548,6 @@ public class ModuleBuilderTests extends ModifyingResourceTests {
 		}
 	}
 	public void testLimitModules2() throws CoreException, IOException {
-		if (!isJRE9) return;
 		try {
 			IClasspathAttribute[] attributes = {
 					JavaCore.newClasspathAttribute(IClasspathAttribute.MODULE, "true"),
@@ -5728,7 +5614,6 @@ public class ModuleBuilderTests extends ModifyingResourceTests {
 		}
 	}
 	public void testDefaultRootModules() throws CoreException, IOException {
-		if (!isJRE9) return;
 		try {
 
 			IJavaProject project = createJava9Project("org.astro", new String[]{"src"});
@@ -5770,7 +5655,6 @@ public class ModuleBuilderTests extends ModifyingResourceTests {
 		}
 	}
 	public void testBug522398() throws CoreException {
-		if (!isJRE9) return;
 		try {
 
 			String[] sources = new String[] {
@@ -5817,7 +5701,6 @@ public class ModuleBuilderTests extends ModifyingResourceTests {
 		}
 	}
 	public void testBug522330() throws CoreException, IOException {
-		if (!isJRE9) return;
 		try {
 			String[] sources = new String[] {
 				"src/javax/net/ServerSocketFactory1.java",
@@ -5847,7 +5730,12 @@ public class ModuleBuilderTests extends ModifyingResourceTests {
 			};
 			IJavaProject p2 = setupModuleProject("nonmodular2", src, new IClasspathEntry[] { dep });
 			p2.getProject().getWorkspace().build(IncrementalProjectBuilder.FULL_BUILD, null);
-			assertNoErrors();
+			IMarker[] markers = p2.getProject().findMarkers(null, true, IResource.DEPTH_INFINITE);
+			sortMarkers(markers);
+			assertMarkers("unexpected markers",
+					"The package javax.net is accessible from more than one module: <unnamed>, java.base\n" +
+					"ServerSocketFactory cannot be resolved",
+					markers);
 		} finally {
 			deleteProject("nonmodular1");
 			deleteProject("nonmodular2");
@@ -5855,7 +5743,6 @@ public class ModuleBuilderTests extends ModifyingResourceTests {
 	}
 
 	public void testBug522503() throws Exception {
-		if (!isJRE9) return;
 		try {
 			IJavaProject p1 = setupModuleProject("mod.one",
 				new String[] {
@@ -5899,7 +5786,6 @@ public class ModuleBuilderTests extends ModifyingResourceTests {
 		}
 	}
 	public void testBug522671() throws Exception {
-		if (!isJRE9) return;
 		try {
 		IJavaProject p1 = setupModuleProject("util",
 			new String[] {
@@ -5990,7 +5876,6 @@ public class ModuleBuilderTests extends ModifyingResourceTests {
 		}
 	}
 	public void testBug522671b() throws CoreException {
-		if (!isJRE9) return;
 		try {
 			String[] sources = new String[] {
 				"src/nonmodular1/HasConstructorWithProperties.java",
@@ -6073,7 +5958,6 @@ public class ModuleBuilderTests extends ModifyingResourceTests {
 	}
 
 	public void testBug525522() throws Exception {
-		if (!isJRE9) return;
 		try {
 			// non-modular substitute for java.jnlp:
 			IClasspathAttribute[] jreAttribs = { JavaCore.newClasspathAttribute(IClasspathAttribute.LIMIT_MODULES, "java.base,java.desktop,java.rmi,java.sql") };
@@ -6130,7 +6014,6 @@ public class ModuleBuilderTests extends ModifyingResourceTests {
 	}
 
 	public void testBug525603() throws Exception {
-		if (!isJRE9) return;
 		IJavaProject javaProject = null;
 		try {
 			String[] sources = {
@@ -6188,7 +6071,6 @@ public class ModuleBuilderTests extends ModifyingResourceTests {
 	}
 
 	public void testBug522670() throws Exception {
-		if (!isJRE9) return;
 		Hashtable<String, String> javaCoreOptions = JavaCore.getOptions();
 		try {
 			Hashtable<String, String> newOptions=new Hashtable<>(javaCoreOptions);
@@ -6287,7 +6169,6 @@ public class ModuleBuilderTests extends ModifyingResourceTests {
 	}
 
 	public void testBug526054() throws Exception {
-		if (!isJRE9) return;
 		ClasspathJrt.resetCaches();
 		try {
 			// jdk.rmic is not be visible to code in an unnamed module, but using requires we can see the module.
@@ -6337,7 +6218,6 @@ public class ModuleBuilderTests extends ModifyingResourceTests {
 	}
 
 	public void testBug526054b() throws Exception {
-		if (!isJRE9) return;
 		ClasspathJrt.resetCaches();
 		try {
 			// one project can see jdk.rmic/sun.rmi.rmic
@@ -6423,7 +6303,6 @@ public class ModuleBuilderTests extends ModifyingResourceTests {
 	}
 
 	public void testBug525918() throws CoreException {
-		if (!isJRE9) return;
 		try {
 			String[] sources = new String[] { 
 				"src/module-info.java",
@@ -6473,7 +6352,6 @@ public class ModuleBuilderTests extends ModifyingResourceTests {
 	}
 
 	public void testBug527576() throws Exception {
-		if (!isJRE9) return;
 		IJavaProject javaProject = null;
 		try {
 			
@@ -6516,8 +6394,8 @@ public class ModuleBuilderTests extends ModifyingResourceTests {
 					"----------\n" + 
 					"1. ERROR in /mod1/src/com/mod1/pack1/Dummy.java (at line 2)\n" + 
 					"	import org.junit.Assert;\n" + 
-					"	       ^^^\n" + 
-					"The import org cannot be resolved\n" + 
+					"	       ^^^^^^^^^^^^^^^^\n" + 
+					"The type org.junit.Assert is not accessible\n" + 
 					"----------\n" + 
 					"2. ERROR in /mod1/src/com/mod1/pack1/Dummy.java (at line 3)\n" + 
 					"	public class Dummy extends Assert {\n" + 
@@ -6530,7 +6408,7 @@ public class ModuleBuilderTests extends ModifyingResourceTests {
 			IMarker[] markers = javaProject.getProject().findMarkers(null, true, IResource.DEPTH_INFINITE);
 			sortMarkers(markers);
 			assertMarkers("Unexpected markers", 
-					"The import org cannot be resolved\n" + 
+					"The type org.junit.Assert is not accessible\n" + 
 					"Assert cannot be resolved to a type", 
 					markers);
 		} finally {
@@ -6539,7 +6417,6 @@ public class ModuleBuilderTests extends ModifyingResourceTests {
 		}
 	}
 	public void testBug528467a() throws CoreException {
-		if (!isJRE9) return;
 		IJavaProject p1 = createJava9Project("mod.one");
 		try {
 			IClasspathEntry[] rawClasspath = p1.getRawClasspath();
@@ -6586,7 +6463,6 @@ public class ModuleBuilderTests extends ModifyingResourceTests {
 		}
 	}
 	public void testBug528467b() throws CoreException {
-		if (!isJRE9) return;
 		IJavaProject p1 = createJava9Project("mod.one");
 		try {
 			IClasspathEntry[] rawClasspath = p1.getRawClasspath();
@@ -6639,7 +6515,6 @@ public class ModuleBuilderTests extends ModifyingResourceTests {
 		}
 	}
 	public void testBug528467c() throws CoreException {
-		if (!isJRE9) return;
 		IJavaProject p1 = createJava9Project("unnamed");
 		try {
 			IClasspathEntry[] rawClasspath = p1.getRawClasspath();
@@ -6682,7 +6557,6 @@ public class ModuleBuilderTests extends ModifyingResourceTests {
 	}
 	// Bug 520713: allow test code to access code on the classpath
 	public void testWithTestAttributeAndTestDependencyOnClassPath() throws CoreException, IOException {
-		if (!isJRE9) return;
 		String outputDirectory = Util.getOutputDirectory();
 		
 		String jarPath = outputDirectory + File.separator + "mytestlib.jar";
@@ -6822,7 +6696,6 @@ public class ModuleBuilderTests extends ModifyingResourceTests {
 	}
 
 	public void testBug531579() throws Exception {
-		if (!isJRE9) return;
 		String outputDirectory = Util.getOutputDirectory();
 
 		String jarPath = outputDirectory + File.separator + "jaxb-api.jar";
@@ -6877,7 +6750,6 @@ public class ModuleBuilderTests extends ModifyingResourceTests {
 		}
 	}
 	public void testBug527569a() throws CoreException {
-		if (!isJRE9) return;
 		IJavaProject p1 = createJava9Project("Bug527569", "9");
 		try {
 			createFolder("/Bug527569/src/p1");
@@ -6899,7 +6771,6 @@ public class ModuleBuilderTests extends ModifyingResourceTests {
 		}
 	}
 	public void testBug527569b() throws CoreException {
-		if (!isJRE9) return;
 		IJavaProject p1 = createJava9Project("Bug527569", "1.7");
 		try {
 			createFolder("/Bug527569/src/p1");
@@ -6921,7 +6792,6 @@ public class ModuleBuilderTests extends ModifyingResourceTests {
 		}
 	}
 	public void testBug527569c() throws CoreException {
-		if (!isJRE9) return;
 		IJavaProject p1 = createJava9Project("Bug527569", "1.7");
 		Map<String, String> options = new HashMap<>();
 		// Make sure the new options map doesn't reset.
@@ -6950,7 +6820,6 @@ public class ModuleBuilderTests extends ModifyingResourceTests {
 		}
 	}
 	public void testBug527569d() throws CoreException {
-		if (!isJRE9) return;
 		IJavaProject p1 = createJava9Project("Bug527569", "9");
 		try {
 			createFolder("/Bug527569/src/p1");
@@ -6972,7 +6841,6 @@ public class ModuleBuilderTests extends ModifyingResourceTests {
 		}
 	}
 	public void testBug527569e() throws CoreException {
-		if (!isJRE9) return;
 		IJavaProject p1 = createJava9Project("Bug527569", "1.8");
 		Map<String, String> options = new HashMap<>();
 		// Make sure the new options map doesn't reset.
@@ -7001,7 +6869,6 @@ public class ModuleBuilderTests extends ModifyingResourceTests {
 		}
 	}
 	public void testBug522601() throws CoreException {
-		if (!isJRE9) return;
 		IJavaProject p1 = createJava9Project("Bug522601", "9");
 		try {
 			IFile file = createFile("/Bug522601/test.txt", "not a jar");
@@ -7019,7 +6886,6 @@ public class ModuleBuilderTests extends ModifyingResourceTests {
 	}
 	// automatic modules export all their packages
 	public void testBug532724() throws CoreException, IOException {
-		if (!isJRE9) return;
 		try {
 			String libPath = "externalLib/test.jar";
 			Util.createJar(
@@ -7066,7 +6932,6 @@ public class ModuleBuilderTests extends ModifyingResourceTests {
 		}
 	}
 	public void testBug534624a() throws CoreException, IOException {
-		if (!isJRE9) return;
 		IJavaProject project = null;
 		Hashtable<String, String> options = JavaCore.getOptions();
 		try {
@@ -7091,7 +6956,6 @@ public class ModuleBuilderTests extends ModifyingResourceTests {
 		}
 	}
 	public void testBug534624b() throws CoreException, IOException {
-		if (!isJRE9) return;
 		IJavaProject project = null;
 		Hashtable<String, String> options = JavaCore.getOptions();
 		try {
@@ -7124,7 +6988,6 @@ public class ModuleBuilderTests extends ModifyingResourceTests {
 	}
 	// missing linked jar must not cause NPE
 	public void testBug540904() throws CoreException, IOException {
-		if (!isJRE9) return;
 		try {
 			String[] src = new String[] { 
 					"src/test/Test.java",
@@ -7144,7 +7007,6 @@ public class ModuleBuilderTests extends ModifyingResourceTests {
 		}
 	}
 	public void testBug540788() throws Exception {
-		if (!isJRE9) return;
 		try {
 			// project common:
 			IJavaProject common = createJava9Project("Bug540788.common", new String[] { "src/main/java" });
@@ -7157,7 +7019,8 @@ public class ModuleBuilderTests extends ModifyingResourceTests {
 						"}\n"
 					});
 			IFolder libs = createFolder("/Bug540788.common/libs");
-			String emfCommonPath = libs.getLocation()+"/org.eclipse.emf.common.jar";
+			String emfCommonLocation = libs.getLocation()+"/org.eclipse.emf.common.jar";
+			Path emfCommonPath = new Path(emfCommonLocation);
 			Util.createJar(
 					new String[] {
 							"src/org/eclipse/emf/common/Foo.java",
@@ -7168,9 +7031,11 @@ public class ModuleBuilderTests extends ModifyingResourceTests {
 					null,
 					new HashMap<>(),
 					null,
-					emfCommonPath);
-			addModularLibraryEntry(common, emfCommonPath);
-			String ecorePath = libs.getLocation()+"/org.eclipse.emf.ecore.jar";
+					emfCommonLocation);
+			addModularLibraryEntry(common, emfCommonPath, null);
+
+			String ecoreLocation = libs.getLocation()+"/org.eclipse.emf.ecore.jar";
+			Path ecorePath = new Path(ecoreLocation);
 			Util.createJar(
 					new String[] {
 						"src/org/eclipse/emf/ecore/EObject.java",
@@ -7181,8 +7046,8 @@ public class ModuleBuilderTests extends ModifyingResourceTests {
 					null,
 					new HashMap<>(),
 					null,
-					ecorePath);
-			addModularLibraryEntry(common, ecorePath);
+					ecoreLocation);
+			addModularLibraryEntry(common, ecorePath, null);
 			// project vulkan:
 			IJavaProject vulkan = createJava9Project("Bug540788.vulkan", new String[] { "src/main/java" });
 			createSourceFiles(vulkan,
@@ -7203,8 +7068,8 @@ public class ModuleBuilderTests extends ModifyingResourceTests {
 						"}\n",
 					});
 			addModularProjectEntry(vulkan, common);
-			addModularLibraryEntry(vulkan, emfCommonPath);
-			addModularLibraryEntry(vulkan, ecorePath);
+			addModularLibraryEntry(vulkan, emfCommonPath, null);
+			addModularLibraryEntry(vulkan, ecorePath, null);
 			// project vulkan.demo
 			IJavaProject vulkan_demo = createJava9Project("Bug540788.vulkan.demo", new String[] { "src/main/java" });
 			createSourceFiles(vulkan_demo,
@@ -7222,8 +7087,8 @@ public class ModuleBuilderTests extends ModifyingResourceTests {
 					});
 			addModularProjectEntry(vulkan_demo, vulkan);
 			addModularProjectEntry(vulkan_demo, common);
-			addModularLibraryEntry(vulkan_demo, emfCommonPath);
-			addModularLibraryEntry(vulkan_demo, ecorePath);
+			addModularLibraryEntry(vulkan_demo, emfCommonPath, null);
+			addModularLibraryEntry(vulkan_demo, ecorePath, null);
 			
 			getWorkspace().build(IncrementalProjectBuilder.FULL_BUILD, null);
 			IMarker[] markers = vulkan_demo.getProject().findMarkers(null, true, IResource.DEPTH_INFINITE);
@@ -7282,7 +7147,7 @@ public class ModuleBuilderTests extends ModifyingResourceTests {
 			IMarker[] markers = unnamed.getProject().findMarkers(null, true, IResource.DEPTH_INFINITE);
 			sortMarkers(markers);
 			assertMarkers("Unexpected markers",
-					"The import org.p1.T1 cannot be resolved\n" + 
+					"The package org.p1 is accessible from more than one module: m1, m2, m3\n" + 
 					"T1 cannot be resolved to a type",
 					markers);
 			
@@ -7294,8 +7159,8 @@ public class ModuleBuilderTests extends ModifyingResourceTests {
 					"----------\n" + 
 					"1. ERROR in /unnamed/src/test/Test.java (at line 2)\n" + 
 					"	import org.p1.T1;\n" + 
-					"	       ^^^^^^^^^\n" + 
-					"The import org.p1.T1 cannot be resolved\n" + 
+					"	       ^^^^^^\n" + 
+					"The package org.p1 is accessible from more than one module: m1, m2, m3\n" + 
 					"----------\n" + 
 					"2. ERROR in /unnamed/src/test/Test.java (at line 4)\n" + 
 					"	T1 t1;\n" + 
@@ -7310,6 +7175,646 @@ public class ModuleBuilderTests extends ModifyingResourceTests {
 			deleteProject("unnamed");
 		}
 	}
+	public void testBug536928_comment22() throws CoreException, IOException {
+		try {
+			IJavaProject project = createJava9Project("ztest", new String[] { "src" });
+			createFolder("/ztest/lib");
+			Util.createJar(new String[] {
+					"javax/xml/transform/Transformer.java",
+					"package javax.xml.transform;\n" +
+					"public class Transformer {}\n",
+					"javax/xml/transform/Result.java",
+					"package javax.xml.transform;\n" +
+					"public class Result {}\n"
+				},
+				project.getProject().getLocation().toString() + "/lib/xml-apis.jar",
+				"1.8");
+			project.getProject().refreshLocal(IResource.DEPTH_INFINITE, null);
+			IClasspathEntry libraryEntry = JavaCore.newLibraryEntry(new Path("/ztest/lib/xml-apis.jar"), null, null);
+			addClasspathEntry(project, libraryEntry, 1); // right after src and before jrt-fs.jar
+			
+			String testSource =
+					"package com.ztest;\n" + 
+					"import javax.xml.transform.Transformer;\n" + 
+					"\n" + 
+					"public class TestApp {\n" +
+					"	Transformer ts;\n" +
+					"	javax.xml.transform.Result result;\n" + 
+					"}\n";
+			createFolder("/ztest/src/com/ztest");
+			createFile("/ztest/src/com/ztest/TestApp.java", testSource);
+			String test2Source =
+					"package com.ztest;\n" +
+					"import javax.xml.transform.*;\n" +
+					"public class Test2 {\n" +
+					"	Transformer ts;\n" +
+					"}\n";
+			createFile("/ztest/src/com/ztest/Test2.java", test2Source);
+			getWorkspace().build(IncrementalProjectBuilder.FULL_BUILD, null);
+			IMarker[] markers = project.getProject().findMarkers(null, true, IResource.DEPTH_INFINITE);
+			sortMarkers(markers);
+			assertMarkers("Unexpected Markers",
+					"The package javax.xml.transform is accessible from more than one module: <unnamed>, java.xml\n" +
+					"The package javax.xml.transform is accessible from more than one module: <unnamed>, java.xml\n" +
+					"Transformer cannot be resolved to a type\n" +
+					"Transformer cannot be resolved to a type\n" +
+					"The package javax.xml.transform is accessible from more than one module: <unnamed>, java.xml",
+					markers);
+			
+			char[] sourceChars = testSource.toCharArray();
+			this.problemRequestor.initialize(sourceChars);
+			getCompilationUnit("/ztest/src/com/ztest/TestApp.java").getWorkingCopy(this.wcOwner, null);
+			assertProblems(
+					"Unexpected problems",
+					"----------\n" + 
+					"1. ERROR in /ztest/src/com/ztest/TestApp.java (at line 2)\n" + 
+					"	import javax.xml.transform.Transformer;\n" + 
+					"	       ^^^^^^^^^^^^^^^^^^^\n" + 
+					"The package javax.xml.transform is accessible from more than one module: <unnamed>, java.xml\n" + 
+					"----------\n" + 
+					"2. ERROR in /ztest/src/com/ztest/TestApp.java (at line 5)\n" + 
+					"	Transformer ts;\n" + 
+					"	^^^^^^^^^^^\n" + 
+					"Transformer cannot be resolved to a type\n" + 
+					"----------\n" + 
+					"3. ERROR in /ztest/src/com/ztest/TestApp.java (at line 6)\n" + 
+					"	javax.xml.transform.Result result;\n" + 
+					"	^^^^^^^^^^^^^^^^^^^\n" + 
+					"The package javax.xml.transform is accessible from more than one module: <unnamed>, java.xml\n" + 
+					"----------\n",
+					this.problemRequestor);
+
+			sourceChars = test2Source.toCharArray();
+			this.problemRequestor.initialize(sourceChars);
+			getCompilationUnit("/ztest/src/com/ztest/Test2.java").getWorkingCopy(this.wcOwner, null);
+			assertProblems(
+					"Unexpected problems",
+					"----------\n" + 
+					"1. ERROR in /ztest/src/com/ztest/Test2.java (at line 2)\n" + 
+					"	import javax.xml.transform.*;\n" + 
+					"	       ^^^^^^^^^^^^^^^^^^^\n" + 
+					"The package javax.xml.transform is accessible from more than one module: <unnamed>, java.xml\n" + 
+					"----------\n" + 
+					"2. ERROR in /ztest/src/com/ztest/Test2.java (at line 4)\n" + 
+					"	Transformer ts;\n" + 
+					"	^^^^^^^^^^^\n" + 
+					"Transformer cannot be resolved to a type\n" + 
+					"----------\n",
+					this.problemRequestor);
+		} finally {
+			deleteProject("ztest");
+		}
+	}
+	public void testBug536928_comment22b() throws CoreException, IOException {
+		try {
+			IJavaProject project = createJava9Project("ztest", new String[] { "src" });
+			createFolder("/ztest/lib");
+			Util.createJar(new String[] {
+					"javax/xml/transform/Transformer.java",
+					"package javax.xml.transform;\n" +
+					"public class Transformer {}\n",
+					"javax/xml/transform/Result.java",
+					"package javax.xml.transform;\n" +
+					"public class Result {}\n"
+				},
+				project.getProject().getLocation().toString() + "/lib/xml-apis.jar",
+				"1.8");
+			project.getProject().refreshLocal(IResource.DEPTH_INFINITE, null);
+			IClasspathEntry libraryEntry = JavaCore.newLibraryEntry(new Path("/ztest/lib/xml-apis.jar"), null, null);
+			addClasspathEntry(project, libraryEntry, 2); // DIFFERENCE HERE: place xml-apis.jar AFTER jrt-fs.jar
+			
+			String testSource =
+					"package com.ztest;\n" + 
+					"import javax.xml.transform.Transformer;\n" + 
+					"\n" + 
+					"public class TestApp {\n" +
+					"	Transformer ts;\n" +
+					"	javax.xml.transform.Result result;\n" + 
+					"}\n";
+			createFolder("/ztest/src/com/ztest");
+			createFile("/ztest/src/com/ztest/TestApp.java", testSource);
+			String test2Source =
+					"package com.ztest;\n" +
+					"import javax.xml.transform.*;\n" +
+					"public class Test2 {\n" +
+					"	Transformer ts;\n" +
+					"}\n";
+			createFile("/ztest/src/com/ztest/Test2.java", test2Source);
+			getWorkspace().build(IncrementalProjectBuilder.FULL_BUILD, null);
+			IMarker[] markers = project.getProject().findMarkers(null, true, IResource.DEPTH_INFINITE);
+			sortMarkers(markers);
+			assertMarkers("Unexpected Markers",
+					"The package javax.xml.transform is accessible from more than one module: <unnamed>, java.xml\n" +
+					"The package javax.xml.transform is accessible from more than one module: <unnamed>, java.xml\n" +
+					"Transformer cannot be resolved to a type\n" +
+					"Transformer cannot be resolved to a type\n" +
+					"The package javax.xml.transform is accessible from more than one module: <unnamed>, java.xml",
+					markers);
+			
+			char[] sourceChars = testSource.toCharArray();
+			this.problemRequestor.initialize(sourceChars);
+			getCompilationUnit("/ztest/src/com/ztest/TestApp.java").getWorkingCopy(this.wcOwner, null);
+			assertProblems(
+					"Unexpected problems",
+					"----------\n" + 
+					"1. ERROR in /ztest/src/com/ztest/TestApp.java (at line 2)\n" + 
+					"	import javax.xml.transform.Transformer;\n" + 
+					"	       ^^^^^^^^^^^^^^^^^^^\n" + 
+					"The package javax.xml.transform is accessible from more than one module: <unnamed>, java.xml\n" + 
+					"----------\n" + 
+					"2. ERROR in /ztest/src/com/ztest/TestApp.java (at line 5)\n" + 
+					"	Transformer ts;\n" + 
+					"	^^^^^^^^^^^\n" + 
+					"Transformer cannot be resolved to a type\n" + 
+					"----------\n" + 
+					"3. ERROR in /ztest/src/com/ztest/TestApp.java (at line 6)\n" + 
+					"	javax.xml.transform.Result result;\n" + 
+					"	^^^^^^^^^^^^^^^^^^^\n" + 
+					"The package javax.xml.transform is accessible from more than one module: <unnamed>, java.xml\n" + 
+					"----------\n",
+					this.problemRequestor);
+
+			sourceChars = test2Source.toCharArray();
+			this.problemRequestor.initialize(sourceChars);
+			getCompilationUnit("/ztest/src/com/ztest/Test2.java").getWorkingCopy(this.wcOwner, null);
+			assertProblems(
+					"Unexpected problems",
+					"----------\n" + 
+					"1. ERROR in /ztest/src/com/ztest/Test2.java (at line 2)\n" + 
+					"	import javax.xml.transform.*;\n" + 
+					"	       ^^^^^^^^^^^^^^^^^^^\n" + 
+					"The package javax.xml.transform is accessible from more than one module: <unnamed>, java.xml\n" + 
+					"----------\n" + 
+					"2. ERROR in /ztest/src/com/ztest/Test2.java (at line 4)\n" + 
+					"	Transformer ts;\n" + 
+					"	^^^^^^^^^^^\n" + 
+					"Transformer cannot be resolved to a type\n" + 
+					"----------\n",
+					this.problemRequestor);
+		} finally {
+			deleteProject("ztest");
+		}
+	}
+	public void testBug536928_comment22_limited() throws CoreException, IOException {
+		try {
+			IClasspathAttribute[] limitModules = {
+				JavaCore.newClasspathAttribute(IClasspathAttribute.LIMIT_MODULES, "java.base")	
+			};
+			IJavaProject project = createJava9ProjectWithJREAttributes("ztest", new String[] { "src" }, limitModules);
+			createFolder("/ztest/lib");
+			Util.createJar(new String[] {
+					"javax/xml/transform/Transformer.java",
+					"package javax.xml.transform;\n" +
+					"public class Transformer {}\n",
+					"javax/xml/transform/Result.java",
+					"package javax.xml.transform;\n" +
+					"public class Result {}\n"
+				},
+				project.getProject().getLocation().toString() + "/lib/xml-apis.jar",
+				"1.8");
+			project.getProject().refreshLocal(IResource.DEPTH_INFINITE, null);
+			IClasspathEntry libraryEntry = JavaCore.newLibraryEntry(new Path("/ztest/lib/xml-apis.jar"), null, null);
+			addClasspathEntry(project, libraryEntry, 1); // right after src and before jrt-fs.jar
+			
+			String testSource =
+					"package com.ztest;\n" + 
+					"import javax.xml.transform.Transformer;\n" + 
+					"\n" + 
+					"public class TestApp {\n" +
+					"	Transformer ts;\n" + 
+					"	javax.xml.transform.Result result;\n" + 
+					"}\n";
+			createFolder("/ztest/src/com/ztest");
+			createFile("/ztest/src/com/ztest/TestApp.java", testSource);
+			String test2Source =
+					"package com.ztest;\n" +
+					"import javax.xml.transform.*;\n" +
+					"public class Test2 {\n" +
+					"	Transformer ts;\n" +
+					"}\n";
+			createFile("/ztest/src/com/ztest/Test2.java", test2Source);
+			getWorkspace().build(IncrementalProjectBuilder.FULL_BUILD, null);
+			assertNoErrors();
+			
+			char[] sourceChars = testSource.toCharArray();
+			this.problemRequestor.initialize(sourceChars);
+			getCompilationUnit("/ztest/src/com/ztest/TestApp.java").getWorkingCopy(this.wcOwner, null);
+			assertProblems(
+					"Unexpected problems",
+					"----------\n" + 
+					"----------\n",
+					this.problemRequestor);
+			sourceChars = test2Source.toCharArray();
+			this.problemRequestor.initialize(sourceChars);
+			getCompilationUnit("/ztest/src/com/ztest/Test2.java").getWorkingCopy(this.wcOwner, null);
+			assertProblems(
+					"Unexpected problems",
+					"----------\n" + 
+					"----------\n",
+					this.problemRequestor);
+		} finally {
+			deleteProject("ztest");
+		}
+	}
+	public void testBug542896() throws CoreException {
+		IJavaProject java10Project = createJava10Project("bug", new String[] { "src" });
+		try {
+			createFolder("/bug/src/test/platform");
+			createFile("/bug/src/test/platform/Context.java",
+					"package test.platform;\n" + 
+					"\n" + 
+					"import java.net.URI;\n" + 
+					"\n" + 
+					"public interface Context {\n" + 
+					"	public URI getURI();\n" + 
+					"}\n");
+			createFile("/bug/src/test/platform/AbstractContext.java",
+					"package test.platform;\n" + 
+					"\n" + 
+					"import java.net.URI;\n" + 
+					"import java.util.*;\n" + 
+					"import test.*;\n" + 
+					"\n" + 
+					"public abstract class AbstractContext implements Context {\n" + 
+					"	Iterable<URI> uris = new ArrayList<URI>();\n" + 
+					"	Application application;\n" + 
+					"}\n");
+			String testSource =
+					"package test;\n" + 
+					"\n" + 
+					"import java.io.*;\n" + 
+					"import java.net.*;\n" + 
+					"import java.util.*;\n" + 
+					"\n" + 
+					"import test.platform.*;\n" + 
+					"\n" + 
+					"public interface Application // extends Foo\n" + 
+					"{\n" + 
+					"}\n";
+			String testPath = "/bug/src/test/Application.java";
+			createFile(testPath, testSource);
+			// first compile: no error:
+			getWorkspace().build(IncrementalProjectBuilder.FULL_BUILD, null);
+			assertNoErrors();
+			char[] sourceChars = testSource.toCharArray();
+			this.problemRequestor.initialize(sourceChars);
+			getCompilationUnit(testPath).getWorkingCopy(this.wcOwner, null);
+			assertProblems(
+					"Unexpected problems",
+					"----------\n" + 
+					"1. WARNING in /bug/src/test/Application.java (at line 3)\n" + 
+					"	import java.io.*;\n" + 
+					"	       ^^^^^^^\n" + 
+					"The import java.io is never used\n" + 
+					"----------\n" + 
+					"2. WARNING in /bug/src/test/Application.java (at line 4)\n" + 
+					"	import java.net.*;\n" + 
+					"	       ^^^^^^^^\n" + 
+					"The import java.net is never used\n" + 
+					"----------\n" + 
+					"3. WARNING in /bug/src/test/Application.java (at line 5)\n" + 
+					"	import java.util.*;\n" + 
+					"	       ^^^^^^^^^\n" + 
+					"The import java.util is never used\n" + 
+					"----------\n" + 
+					"4. WARNING in /bug/src/test/Application.java (at line 7)\n" + 
+					"	import test.platform.*;\n" + 
+					"	       ^^^^^^^^^^^^^\n" + 
+					"The import test.platform is never used\n" + 
+					"----------\n",
+					this.problemRequestor);
+			// introduce error:
+			String testSourceEdited =
+					"package test;\n" + 
+					"\n" + 
+					"import java.io.*;\n" + 
+					"import java.net.*;\n" + 
+					"import java.util.*;\n" + 
+					"\n" + 
+					"import test.platform.*;\n" + 
+					"\n" + 
+					"public interface Application extends Foo\n" + 
+					"{\n" + 
+					"}\n";
+			editFile(testPath, testSourceEdited);
+			java10Project.getProject().build(IncrementalProjectBuilder.INCREMENTAL_BUILD, null);
+			IMarker[] markers = java10Project.getProject().findMarkers(null, true, IResource.DEPTH_INFINITE);
+			assertMarkers("Unexpected markers", "Foo cannot be resolved to a type", markers);
+		} finally {
+			if (java10Project != null)
+				deleteProject(java10Project);
+		}
+	}
+	public void testBug543392a() throws Exception {
+		bug543392(null);
+	}
+	public void testBug543392b() throws Exception {
+		// put other on the *modulepath*:
+		IClasspathAttribute[] attrs = { JavaCore.newClasspathAttribute(IClasspathAttribute.MODULE, "true") };
+		bug543392(attrs);
+	}
+	void bug543392(IClasspathAttribute[] dependencyAttrs) throws Exception {
+		IJavaProject other = createJava9Project("other");
+		IJavaProject current = createJava9Project("current");
+		try {
+			createFile("other/src/module-info.java",
+					"module other {\n" +
+					"	exports other.p;\n" +
+					"}\n");
+			createFolder("other/src/other/p");
+			createFile("other/src/other/p/C.java",
+					"package other.p;\n" +
+					"public class C {}\n");
+
+			addClasspathEntry(current,
+					JavaCore.newProjectEntry(other.getProject().getFullPath(), null, false, dependencyAttrs, false)); // dependency, but ..
+			createFile("current/src/module-info.java", "module current {}\n"); // ... no 'requires'!
+			createFolder("current/src/current");
+
+			String test1path = "current/src/current/Test1.java";
+			String test1source =
+					"package current;\n" +
+					"import other.p.C;\n" +
+					"public class Test1 {\n" +
+					"}\n";
+			createFile(test1path, test1source);
+			String test2path = "current/src/current/Test2.java";
+			String test2source =
+					"package current;\n" +
+					"public class Test2 {\n" +
+					"	other.p.C c;\n" +
+					"}\n";
+			createFile(test2path, test2source);
+
+			getWorkspace().build(IncrementalProjectBuilder.INCREMENTAL_BUILD, null);
+			IMarker[] markers = current.getProject().findMarkers(null, true, IResource.DEPTH_INFINITE);
+			sortMarkers(markers);
+			assertMarkers("Unexpected markers",
+					"The type other.p.C is not accessible\n" +
+					"The type other.p.C is not accessible",
+					markers);
+
+			char[] sourceChars = test1source.toCharArray();
+			this.problemRequestor.initialize(sourceChars);
+			getCompilationUnit(test1path).getWorkingCopy(this.wcOwner, null);
+			assertProblems("unexpected problems",
+					"----------\n" + 
+					"1. ERROR in /current/src/current/Test1.java (at line 2)\n" + 
+					"	import other.p.C;\n" + 
+					"	       ^^^^^^^^^\n" + 
+					"The type other.p.C is not accessible\n" + 
+					"----------\n",
+					this.problemRequestor);
+			sourceChars = test2source.toCharArray();
+			this.problemRequestor.initialize(sourceChars);
+			getCompilationUnit(test2path).getWorkingCopy(this.wcOwner, null);
+			assertProblems("unexpected problems",
+					"----------\n" + 
+					"1. ERROR in /current/src/current/Test2.java (at line 3)\n" + 
+					"	other.p.C c;\n" + 
+					"	^^^^^^^^^\n" + 
+					"The type other.p.C is not accessible\n" + 
+					"----------\n",
+					this.problemRequestor);
+		} finally {
+			deleteProject(other);
+			deleteProject(current);
+		}
+	}
+	public void testBug541328() throws Exception {
+		IJavaProject pa = createJava9Project("m.a");
+		IJavaProject pb = createJava9Project("m.b");
+		IJavaProject test = createJava9Project("test");
+		try {
+			createFolder("m.a/src/a/foo");
+			createFile("m.a/src/a/foo/Bar.java", "package a.foo;\n public class Bar {}\n");
+			createFile("m.a/src/module-info.java",
+					"module m.a {\n" +
+					"	exports a.foo to m.b;\n" +
+					"}\n");
+			createFile("m.b/src/module-info.java",
+					"module m.b {\n" +
+					"	requires m.a;\n" +
+					"	exports b;\n" +
+					"}\n");
+			createFolder("m.b/src/b");
+			createFile("m.b/src/b/Boo.java",
+					"package b;\n" +
+					"import a.foo.Bar;\n" +
+					"public class Boo extends Bar {}\n");
+			addModularProjectEntry(pb, pa);
+
+			IClasspathAttribute[] forceExport = { 
+						JavaCore.newClasspathAttribute(IClasspathAttribute.MODULE, "true"),
+						JavaCore.newClasspathAttribute(IClasspathAttribute.ADD_EXPORTS, "m.a/a.foo=ALL-UNNAMED")
+					};
+			addClasspathEntry(test, JavaCore.newProjectEntry(pa.getPath(), null, false, forceExport, false));
+			addModularProjectEntry(test, pb);
+
+			String testSource =
+					"import a.foo.Bar;\n" +
+					"import b.Boo;\n" +
+					"public class Test {\n" +
+					"	Bar b = new Boo();\n" +
+					"}\n";
+			String testPath = "test/src/Test.java";
+			createFile(testPath, testSource);
+			getWorkspace().build(IncrementalProjectBuilder.INCREMENTAL_BUILD, null);
+			assertNoErrors();
+
+			this.problemRequestor.initialize(testSource.toCharArray());
+			getCompilationUnit(testPath).getWorkingCopy(this.wcOwner, null);
+			assertProblems("unexpected problems",
+					"----------\n" + 
+					"----------\n",
+					this.problemRequestor);
+		} finally {
+			deleteProject(pa);
+			deleteProject(pb);
+			deleteProject(test);
+		}
+	}
+	public void testBug543195() throws CoreException {
+		IJavaProject pj1 = createJava9Project("p1");
+		IJavaProject pj2 = createJava9Project("p2");
+		IJavaProject ptest = createJava9Project("ptest");
+		try {
+			addModularProjectEntry(pj2, pj1);
+			addModularProjectEntry(ptest, pj2);
+
+			createFolder("p1/src/p");
+			createFile("p1/src/p/Missing.java",
+					"package p;\n" +
+					"public class Missing {\n" +
+					"	public void miss() {}\n" +
+					"}\n");
+			createFile("p1/src/module-info.java",
+					"module p1 {\n" +
+					"	exports p;\n" +
+					"}\n");
+
+			createFolder("p2/src/q");
+			createFile("p2/src/q/API.java",
+					"package q;\n" +
+					"public class API extends p.Missing {}\n");
+			createFile("p2/src/q/API2.java",
+					"package q;\n" +
+					"public class API2 extends API {}\n");
+			createFile("p2/src/module-info.java",
+					"module p2 {\n" +
+					"	requires p1;\n" +
+					"	exports q;\n" +
+					"}\n");
+			getWorkspace().build(IncrementalProjectBuilder.INCREMENTAL_BUILD, null);
+
+			deleteFile("p1/bin/p/Missing.class");
+			pj1.getProject().close(null);
+
+			createFolder("ptest/src/p/r");
+			createFile("ptest/src/p/r/P.java", "package p.r;\n public class P {}\n");
+			createFolder("ptest/src/t");
+			createFile("ptest/src/t/Test1.java",
+					"package t;\n" +
+					"import q.API2;\n" +
+					"public class Test1 {\n" +
+					"	void m(API2 a) {\n" +
+					"		a.miss();\n" +
+					"	}\n" +
+					"}\n");
+			String test2Path = "ptest/src/t/Test2.java";
+			String test2Content =
+					"package t;\n" +
+					"import p.Missing;\n" +
+					"public class Test2 {}\n";
+			createFile(test2Path, test2Content);
+			ptest.getProject().build(IncrementalProjectBuilder.INCREMENTAL_BUILD, null);
+			IMarker[] markers = ptest.getProject().findMarkers(null, true, IResource.DEPTH_INFINITE);
+			sortMarkers(markers);
+			assertMarkers("unexpected markers",
+					"The import p.Missing cannot be resolved\n" + 
+					"The method miss() is undefined for the type API2",
+					markers);
+
+			this.problemRequestor.initialize(test2Content.toCharArray());
+			getCompilationUnit(test2Path).getWorkingCopy(this.wcOwner, null);
+			assertProblems("unexpected problems",
+					"----------\n" + 
+					"1. ERROR in /ptest/src/t/Test2.java (at line 2)\n" + 
+					"	import p.Missing;\n" + 
+					"	       ^^^^^^^^^\n" + 
+					"The import p.Missing cannot be resolved\n" +
+					"----------\n",
+					this.problemRequestor);
+		} finally {
+			deleteProject(pj1);
+			deleteProject(pj2);
+			deleteProject(ptest);
+		}
+	}
+
+	public void testBug543701() throws Exception {
+		IJavaProject p = createJava9Project("p");
+		String outputDirectory = Util.getOutputDirectory();
+		try {
+			String jar1Path = outputDirectory + File.separator + "lib1.jar";
+			Util.createJar(new String[] {
+						"javax/xml/transform/Result.java",
+						"package javax.xml.transform;\n" +
+						"public class Result {}\n"
+					}, new HashMap<>(), jar1Path);
+
+			String jar2Path = outputDirectory + File.separator + "lib2.jar";
+			Util.createJar(new String[] {
+						"p2/C2.java",
+						"package p2;\n" +
+						"import javax.xml.transform.Result;\n" +
+						"public class C2 {\n" +
+						"	public void m(Number n) {}\n" +
+						"	public void m(Result r) {}\n" + // Result will be ambiguous looking from project 'p', but should not break compilation 
+						"}\n"
+					}, new HashMap<>(), jar2Path);
+
+			addLibraryEntry(p, jar1Path, false);
+			addLibraryEntry(p, jar2Path, false);
+
+			createFolder("p/src/pp");
+			String testPath = "p/src/pp/Test.java";
+			String testSource =
+					"package pp;\n" +
+					"import p2.C2;\n" +
+					"public class Test {\n" +
+					"	void test(C2 c2) {\n" +
+					"		c2.m(Integer.valueOf(1));\n" +
+					"	}\n" +
+					"}\n";
+			createFile(testPath, testSource);
+
+			p.getProject().build(IncrementalProjectBuilder.INCREMENTAL_BUILD, null);
+			assertNoErrors();
+
+			this.problemRequestor.initialize(testSource.toCharArray());
+			getCompilationUnit(testPath).getWorkingCopy(this.wcOwner, null);
+			assertProblems("unexpected problems",
+					"----------\n" + 
+					"----------\n",
+					this.problemRequestor);
+		} finally {
+			deleteProject(p);
+			// clean up output dir
+			File outputDir = new File(outputDirectory);
+			if (outputDir.exists())
+				Util.flushDirectoryContent(outputDir);
+		}
+	}
+
+	public void testBug543441() throws Exception {
+		// unsuccessful attempt at triggering NPE on null required module
+		IJavaProject p = createJava9Project("p");
+		String outputDirectory = Util.getOutputDirectory();
+		try {
+			String jar1Path = outputDirectory + File.separator + "lib1.jar";
+			Util.createJar(new String[] {
+						"module-info.java",
+						"module lib1 {}\n"
+					}, jar1Path, "9");
+
+			String jar2Path = outputDirectory + File.separator + "lib2.jar";
+			Util.createJar(new String[] {
+						"module-info.java",
+						"module lib2 {\n" +
+						"	requires lib1;\n" + // will be messing when seen from project 'p'
+						"	exports p2;\n" +
+						"}\n",
+						"p2/C2.java",
+						"package p2;\n" +
+						"public class C2 {}\n"
+					},
+					null, jar2Path, new String[] { jar1Path }, "9");
+
+			File jar1File = new File(jar1Path);
+			jar1File.delete();
+
+			addModularLibraryEntry(p, new Path(jar2Path), null);
+			createFile("p/src/module-info.java",
+					"module p {\n" +
+					"	requires transitive lib2;\n" + // not lib1
+					"}\n");
+			createFolder("p/src/pkg");
+			createFile("p/src/pkg/Test.java",
+					"package pkg;\n" +
+					"import p2.C2;\n" +
+					"public class Test {\n" +
+					"	void test(C2 c) {}\n" +
+					"}\n");
+
+			p.getProject().build(IncrementalProjectBuilder.INCREMENTAL_BUILD, null);
+			assertNoErrors();
+
+		} finally {
+			deleteProject(p);
+		}
+	}
+
 	protected void assertNoErrors() throws CoreException {
 		for (IProject p : getWorkspace().getRoot().getProjects()) {
 			int maxSeverity = p.findMaxProblemSeverity(null, true, IResource.DEPTH_INFINITE);
