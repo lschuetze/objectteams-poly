@@ -45,27 +45,27 @@ plugin@org.eclipse.objectteams.otdt.pde.ui=GIT,repo=git://git.eclipse.org/gitroo
 plugin@org.eclipse.objectteams.otdt.samples=GIT,repo=git://git.eclipse.org/gitroot/objectteams/org.eclipse.objectteams.git,path=plugins/org.eclipse.objectteams.otdt.samples,tag=builds/201706061122
 
 !** Consume BCEL from Orbit: **!
-plugin@org.apache.bcel,5.2.0=p2IU,id=org.apache.bcel,version=5.2.0.v201005080400,repository=http://download.eclipse.org/tools/orbit/downloads/drops/R20180525155205/repository
+plugin@org.apache.bcel,5.2.0=p2IU,id=org.apache.bcel,version=5.2.0.v201005080400,repository=http://download.eclipse.org/tools/orbit/downloads/drops/S20190129210011/repository
 !** ASM from Orbit: **!
-plugin@org.objectweb.asm,6.1.1=p2IU,id=org.objectweb.asm,version=6.1.1.v20180414-0329,repository=http://download.eclipse.org/tools/orbit/downloads/drops2/R20180606145124/repository/
-plugin@org.objectweb.asm.tree,6.1.1=p2IU,id=org.objectweb.asm.tree,version=6.1.1.v20180414-0329,repository=http://download.eclipse.org/tools/orbit/downloads/drops2/R20180606145124/repository/
-plugin@org.objectweb.asm.commons,6.1.1=p2IU,id=org.objectweb.asm.commons,version=6.1.1.v20180414-0329,repository=http://download.eclipse.org/tools/orbit/downloads/drops2/R20180606145124/repository/
-plugin@org.objectweb.asm.util,6.1.1=p2IU,id=org.objectweb.asm.util,version=6.1.1.v20180414-0329,repository=http://download.eclipse.org/tools/orbit/downloads/drops2/R20180606145124/repository/
-plugin@org.objectweb.asm.analysis,6.1.1=p2IU,id=org.objectweb.asm.analysis,version=6.1.1.v20180414-0329,repository=http://download.eclipse.org/tools/orbit/downloads/drops2/R20180606145124/repository/
+plugin@org.objectweb.asm,6.1.1=p2IU,id=org.objectweb.asm,version=6.1.1.v20180414-0329,repository=http://download.eclipse.org/tools/orbit/downloads/drops/S20190129210011/repository/
+plugin@org.objectweb.asm.tree,6.1.1=p2IU,id=org.objectweb.asm.tree,version=6.1.1.v20180414-0329,repository=http://download.eclipse.org/tools/orbit/downloads/drops/S20190129210011/repository/
+plugin@org.objectweb.asm.commons,6.1.1=p2IU,id=org.objectweb.asm.commons,version=6.1.1.v20180414-0329,repository=http://download.eclipse.org/tools/orbit/downloads/drops/S20190129210011/repository/
+plugin@org.objectweb.asm.util,6.1.1=p2IU,id=org.objectweb.asm.util,version=6.1.1.v20180414-0329,repository=http://download.eclipse.org/tools/orbit/downloads/drops/S20190129210011/repository/
+plugin@org.objectweb.asm.analysis,6.1.1=p2IU,id=org.objectweb.asm.analysis,version=6.1.1.v20180414-0329,repository=http://download.eclipse.org/tools/orbit/downloads/drops/S20190129210011/repository/
 
-plugin@org.objectweb.asm,6.2.1=p2IU,id=org.objectweb.asm,version=6.2.1.v20181030-2244,repository=http://download.eclipse.org/tools/orbit/downloads/drops2/S20181120221132/repository/
-plugin@org.objectweb.asm.tree,6.2.1=p2IU,id=org.objectweb.asm.tree,version=6.2.1.v20181030-2244,repository=http://download.eclipse.org/tools/orbit/downloads/drops2/S20181120221132/repository/
-plugin@org.objectweb.asm.commons,6.2.1=p2IU,id=org.objectweb.asm.commons,version=6.2.1.v20181030-2244,repository=http://download.eclipse.org/tools/orbit/downloads/drops2/S20181120221132/repository/
-plugin@org.objectweb.asm.util,6.2.1=p2IU,id=org.objectweb.asm.util,version=6.2.1.v20181030-2244,repository=http://download.eclipse.org/tools/orbit/downloads/drops2/S20181120221132/repository/
-plugin@org.objectweb.asm.analysis,6.2.1=p2IU,id=org.objectweb.asm.analysis,version=6.2.1.v20181030-2244,repository=http://download.eclipse.org/tools/orbit/downloads/drops2/S20181120221132/repository/
+plugin@org.objectweb.asm,6.2.1=p2IU,id=org.objectweb.asm,version=6.2.1.v20181030-2244,repository=http://download.eclipse.org/tools/orbit/downloads/drops/S20190129210011/repository/
+plugin@org.objectweb.asm.tree,6.2.1=p2IU,id=org.objectweb.asm.tree,version=6.2.1.v20181030-2244,repository=http://download.eclipse.org/tools/orbit/downloads/drops/S20190129210011/repository/
+plugin@org.objectweb.asm.commons,6.2.1=p2IU,id=org.objectweb.asm.commons,version=6.2.1.v20181030-2244,repository=http://download.eclipse.org/tools/orbit/downloads/drops/S20190129210011/repository/
+plugin@org.objectweb.asm.util,6.2.1=p2IU,id=org.objectweb.asm.util,version=6.2.1.v20181030-2244,repository=http://download.eclipse.org/tools/orbit/downloads/drops/S20190129210011/repository/
+plugin@org.objectweb.asm.analysis,6.2.1=p2IU,id=org.objectweb.asm.analysis,version=6.2.1.v20181030-2244,repository=http://download.eclipse.org/tools/orbit/downloads/drops/S20190129210011/repository/
 
-!plugin@org.objectweb.asm,7.0.0=p2IU,id=org.objectweb.asm,version=7.0.0.v20181030-2244,repository=http://download.eclipse.org/tools/orbit/downloads/drops2/S20181120221132/repository/
-!plugin@org.objectweb.asm.tree,7.0.0=p2IU,id=org.objectweb.asm.tree,version=7.0.0.v20181030-2244,repository=http://download.eclipse.org/tools/orbit/downloads/drops2/S20181120221132/repository/
-!plugin@org.objectweb.asm.commons,7.0.0=p2IU,id=org.objectweb.asm.commons,version=7.0.0.v20181030-2244,repository=http://download.eclipse.org/tools/orbit/downloads/drops2/S20181120221132/repository/
-!plugin@org.objectweb.asm.util,7.0.0=p2IU,id=org.objectweb.asm.util,version=7.0.0.v20181030-2244,repository=http://download.eclipse.org/tools/orbit/downloads/drops2/S20181120221132/repository/
-!plugin@org.objectweb.asm.analysis,7.0.0=p2IU,id=org.objectweb.asm.analysis,version=7.0.0.v20181030-2244,repository=http://download.eclipse.org/tools/orbit/downloads/drops2/S20181120221132/repository/
+!plugin@org.objectweb.asm,7.0.0=p2IU,id=org.objectweb.asm,version=7.0.0.v20181030-2244,repository=http://download.eclipse.org/tools/orbit/downloads/drops/S20190129210011/repository/
+!plugin@org.objectweb.asm.tree,7.0.0=p2IU,id=org.objectweb.asm.tree,version=7.0.0.v20181030-2244,repository=http://download.eclipse.org/tools/orbit/downloads/drops/S20190129210011/repository/
+!plugin@org.objectweb.asm.commons,7.0.0=p2IU,id=org.objectweb.asm.commons,version=7.0.0.v20181030-2244,repository=http://download.eclipse.org/tools/orbit/downloads/drops/S20190129210011/repository/
+!plugin@org.objectweb.asm.util,7.0.0=p2IU,id=org.objectweb.asm.util,version=7.0.0.v20181030-2244,repository=http://download.eclipse.org/tools/orbit/downloads/drops/S20190129210011/repository/
+!plugin@org.objectweb.asm.analysis,7.0.0=p2IU,id=org.objectweb.asm.analysis,version=7.0.0.v20181030-2244,repository=http://download.eclipse.org/tools/orbit/downloads/drops/S20190129210011/repository/
 
-plugin@org.mockito,1.9.5=p2IU,id=org.mockito,version=1.9.5.v201605172210,repository=http://download.eclipse.org/tools/orbit/downloads/drops/R20180525155205/repository/
+plugin@org.mockito,1.9.5=p2IU,id=org.mockito,version=1.9.5.v201605172210,repository=http://download.eclipse.org/tools/orbit/downloads/drops/S20190129210011/repository/
 plugin@org.hamcrest.core,1.3.0=p2IU,id=org.hamcrest.core,version=1.3.0.v20180420-1519,repository=http://download.eclipse.org/tools/orbit/downloads/drops/S20180710163057/repository/
 plugin@org.hamcrest.library,1.3.0=p2IU,id=org.hamcrest.library,version=1.3.0.v20180524-2246,repository=http://download.eclipse.org/tools/orbit/downloads/drops/S20180710163057/repository/
 
