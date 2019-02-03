@@ -1,7 +1,7 @@
 /** 
  * This file is part of "Object Teams Development Tooling"-Software
  * 
- * Copyright 2009, 2014 Stephan Herrmann
+ * Copyright 2009, 2019 Stephan Herrmann
  * 
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -276,7 +276,8 @@ public class OTDynCallinBindingsAttribute extends ListValueAttribute {
 				baseFlags |= BaseMethod.PUBLIC;
 			mapping.addBaseMethod(i, baseSpec.codegenSeletor(), baseSpec.signature(WeavingScheme.OTDRE), 
 									baseSpec.resolvedMethod.declaringClass.constantPoolName(),
-									baseSpec.getCallinId(this.theTeam), baseFlags, baseSpec.getTranslationFlags());
+									baseSpec.getCallinId(this.theTeam, callinDecl.explicitName()),
+									baseFlags, baseSpec.getTranslationFlags());
 		}
 		mapping.setSMAPinfo(callinDecl);
 		this.mappings.add(mapping);
@@ -398,21 +399,21 @@ public class OTDynCallinBindingsAttribute extends ListValueAttribute {
     	if (state != ITranslationStates.STATE_FAULT_IN_TYPES)
     		return;
     	for (int i = 0; i < this.mappings.size(); i++)
-			createBinding(teamBinding, this.mappings.get(i));
+			createBinding(teamBinding, this.mappings.get(i), true);
     }
 
-	public void createBindings(TeamModel teamModel)
+	public void createBindings(TeamModel teamModel, boolean recordLabels)
 	{
 		ReferenceBinding teamBinding = teamModel.getBinding();
 		for (int i = 0; i < this.mappings.size(); i++)
-			createBinding(teamBinding, this.mappings.get(i));
+			createBinding(teamBinding, this.mappings.get(i), recordLabels);
 	}
     /**
 	 * @param teamBinding where to add created bindings
 	 * @param mapping the mapping to reconstruct
-	 * @throws InternalCompilerError
+     * @param recordLabels whether labelled callins should be recording in the team
 	 */
-	private static void createBinding(ReferenceBinding teamBinding, Mapping mapping)
+	private static void createBinding(ReferenceBinding teamBinding, Mapping mapping, boolean recordLabels)
 	{
 		ReferenceBinding roleBinding = teamBinding.getMemberType(mapping.roleClassName).getRealClass();
 		CallinCalloutBinding result = null;
@@ -471,6 +472,9 @@ public class OTDynCallinBindingsAttribute extends ListValueAttribute {
 					if (CharOperation.equals(bm.baseMethodSignature, methods[j].signature())) // TODO(SH): enhancing? / _isCallin?
 					{
 						baseMethods[i] = methods[j];
+						if (recordLabels && mapping.callinName != null && mapping.callinName[0] != '<') {
+							teamBinding._teamModel.recordLabelledCallin(new String(mapping.callinName), methods[j], bm.callinID);
+						}
 						continue mappingBaseMethods;
 					}
 				}

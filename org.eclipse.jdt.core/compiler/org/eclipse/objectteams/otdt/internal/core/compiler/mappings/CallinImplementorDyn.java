@@ -1,7 +1,7 @@
 /** 
  * This file is part of "Object Teams Development Tooling"-Software
  * 
- * Copyright 2009, 2015 Stephan Herrmann
+ * Copyright 2009, 2019 Stephan Herrmann
  * 
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -300,6 +300,7 @@ public class CallinImplementorDyn extends MethodMappingImplementor {
 				for (AbstractMethodMappingDeclaration mappingDecl : roleDecl.callinCallouts) {
 					if (mappingDecl.isCallin()) {
 						CallinMappingDeclaration callinDecl = (CallinMappingDeclaration) mappingDecl;
+						if (callinDecl.isOverriddenInTeam) continue;
 						switch (callinDecl.callinModifier) {
 							case TerminalTokens.TokenNamebefore: 	beforeMappings.add(callinDecl); 	break;
 							case TerminalTokens.TokenNameafter: 	afterMappings.add(callinDecl); 		break;
@@ -387,7 +388,7 @@ public class CallinImplementorDyn extends MethodMappingImplementor {
 				// count callins:
 				for (CallinMappingDeclaration callinDecl : callinDecls) 
 					for (MethodSpec baseSpec : callinDecl.baseMethodSpecs)
-						baseSpec.getCallinId(aTeam);
+						baseSpec.getCallinId(aTeam, callinDecl.explicitName());
 				int callinIdCount = teamDecl.getTeamModel().getCallinIdCount();
 				// callinIds not handled here will be handled using a super-call.
 				boolean[] handledCallinIds = new boolean[callinIdCount];
@@ -408,7 +409,7 @@ public class CallinImplementorDyn extends MethodMappingImplementor {
 
 					// one case label per bound base method:
 					for (MethodSpec baseSpec : callinDecl.baseMethodSpecs) {
-						int callinID = baseSpec.getCallinId(aTeam);
+						int callinID = baseSpec.getCallinId(aTeam, callinDecl.name);
 						statements.add(gen.caseStatement(gen.intLiteral(callinID)));				// case <baseMethod.callinId>: 
 						handledCallinIds[callinID] = true;
 
@@ -897,7 +898,8 @@ public class CallinImplementorDyn extends MethodMappingImplementor {
 			int nLabels = 0;
 			for (MethodSpec baseSpec : mapping.baseMethodSpecs) {
 				List<Statement> caseBlockStats = new ArrayList<Statement>();
-				caseBlockStats.add(gen.caseStatement(gen.intLiteral(baseSpec.getCallinId(aTeam))));					// case baseSpecCallinId:
+				int callinId = baseSpec.getCallinId(aTeam, mapping.explicitName());
+				caseBlockStats.add(gen.caseStatement(gen.intLiteral(callinId)));									// case baseSpecCallinId:
 				int nRoleArgs = mapping.getRoleMethod().getSourceParamLength();
 				TypeBinding[] roleParams = mapping.getRoleMethod().getSourceParameters();
 				for (int i=0; i<roleParams.length; i++)
@@ -1085,7 +1087,8 @@ public class CallinImplementorDyn extends MethodMappingImplementor {
 				MethodBinding baseMethod = baseSpec.resolvedMethod;
 				if (baseMethod.isStatic()) {
 					ReferenceBinding baseClass = mapping.scope.enclosingReceiverType().baseclass();
-					swStatements.add(gen.caseStatement(gen.intLiteral(baseSpec.getCallinId(aTeam))));		// case baseSpecCallinId:
+					int callinId = baseSpec.getCallinId(aTeam, mapping.explicitName());
+					swStatements.add(gen.caseStatement(gen.intLiteral( callinId)));							// case baseSpecCallinId:
 					Expression result = gen.fakeMessageSend(gen.baseTypeReference(baseClass),				// 		return BaseClass._OT$callOrigStatic(boundMethodId, args);
 															OT_CALL_ORIG_STATIC, 
 															passThroughArgs,

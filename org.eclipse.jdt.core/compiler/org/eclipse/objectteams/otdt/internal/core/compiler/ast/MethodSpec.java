@@ -1,7 +1,7 @@
 /**********************************************************************
  * This file is part of "Object Teams Development Tooling"-Software
  *
- * Copyright 2003, 2013 Fraunhofer Gesellschaft, Munich, Germany,
+ * Copyright 2003, 2019 Fraunhofer Gesellschaft, Munich, Germany,
  * for its Fraunhofer Institute for Computer Architecture and Software
  * Technology (FIRST), Berlin, Germany and Technical University Berlin,
  * Germany, and others.
@@ -749,9 +749,9 @@ public class MethodSpec extends ASTNode implements InvocationSite
 		return translations;
 	}
 //{OTDYN:
-	public int getCallinId(TeamModel theTeam) {
+	public int getCallinId(TeamModel theTeam, char[] label) {
 		if (this.callinID == -1)
-			this.callinID = theTeam.getNewCallinId(this);
+			this.callinID = theTeam.getNewCallinId(this, label);
 		return this.callinID;
 	}
 // SH}

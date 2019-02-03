@@ -450,6 +450,7 @@ public class CompilerOptions {
 	public static final int UnusedParammap= 				 OTJFlag | ASTNode.Bit20;
 	public static final int HiddenLiftingProblem=      		 OTJFlag | ASTNode.Bit21;
 	public static final int OTREintoJava8=					 OTJFlag | ASTNode.Bit22;
+	public static final int EffectlessCallinBinding=		 OTJFlag | ASTNode.Bit23; // currently not configurable, but suppressable
 // SH}
 
 	// Severity level for handlers
@@ -1321,6 +1322,8 @@ public class CompilerOptions {
 			case UnsafeRoleInstantiation :
 				return "roleinstantiation";  //$NON-NLS-1$
 //			case EffectlessFieldaccess : // no reason to suppress
+			case EffectlessCallinBinding:
+				return "unused"; //$NON-NLS-1$
 			case FragileCallin :
 				return "fragilecallin";  //$NON-NLS-1$
 //			case UnusedParammap : // no reason to suppress

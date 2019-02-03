@@ -732,6 +732,9 @@ public static int getIrritant(int problemID) {
 		case IProblem.UnusedParamMap:
 			return CompilerOptions.UnusedParammap;
 			
+		case IProblem.CallinOverriddenInTeam:
+			return CompilerOptions.EffectlessCallinBinding;
+
 		case IProblem.RoleBindingPotentiallyAmbiguous:
 			return CompilerOptions.PotentialAmbiguousPlayedBy;
 		case IProblem.AbstractPotentiallyRelevantRole:
@@ -963,6 +966,7 @@ public static int getProblemCategory(int severity, int problemID) {
 			case CompilerOptions.IgnoringRoleReturn:
 			case CompilerOptions.EffectlessFieldaccess:
 			case CompilerOptions.UnusedParammap:
+			case CompilerOptions.EffectlessCallinBinding:
 				return CategorizedProblem.CAT_POTENTIAL_PROGRAMMING_PROBLEM;
 			case CompilerOptions.AdaptingDeprecated :
 				return CategorizedProblem.CAT_DEPRECATION;
@@ -12849,6 +12853,15 @@ public void duplicateCallinName(CallinMappingDeclaration callinMapping) {
 	String[] args = { String.valueOf(callinMapping.name) };
 	this.handle(
 			IProblem.DuplicateCallinName,
+			args,
+			args,
+			callinMapping.sourceStart,
+			callinMapping.sourceStart+callinMapping.name.length-1);
+}
+public void callinOverriddenInTeam(CallinMappingDeclaration callinMapping, RoleModel subRole) {
+	String[] args = { String.valueOf(callinMapping.name), new String(subRole.getName()) };
+	this.handle(
+			IProblem.CallinOverriddenInTeam,
 			args,
 			args,
 			callinMapping.sourceStart,

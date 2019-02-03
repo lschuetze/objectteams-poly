@@ -1,7 +1,7 @@
 /**********************************************************************
  * This file is part of "Object Teams Development Tooling"-Software
  *
- * Copyright 2003, 2006 Fraunhofer Gesellschaft, Munich, Germany,
+ * Copyright 2003, 2019 Fraunhofer Gesellschaft, Munich, Germany,
  * for its Fraunhofer Institute for Computer Architecture and Software
  * Technology (FIRST), Berlin, Germany and Technical University Berlin,
  * Germany.
@@ -38,6 +38,7 @@ import org.eclipse.objectteams.otdt.internal.core.compiler.ast.CalloutMappingDec
 import org.eclipse.objectteams.otdt.internal.core.compiler.ast.FieldAccessSpec;
 import org.eclipse.objectteams.otdt.internal.core.compiler.ast.MethodSpec;
 import org.eclipse.objectteams.otdt.internal.core.compiler.model.RoleModel;
+import org.eclipse.objectteams.otdt.internal.core.compiler.model.TeamModel;
 
 
 /**
@@ -115,6 +116,7 @@ public class MethodMappingResolver
 			}
 			else // callin:
 			{
+				markOverriding((CallinMappingDeclaration) methodMapping);
 				result &= resolveCallinMapping((CallinMappingDeclaration) methodMapping);
 			}
 
@@ -129,6 +131,19 @@ public class MethodMappingResolver
 		}
 		
 		return result;
+	}
+
+	private void markOverriding(CallinMappingDeclaration mapping) {
+		if (!mapping.hasName())
+			return;
+		TeamModel currentTeam = this._role.getTeamModel();
+		RoleModel superRole = this._role.getExplicitSuperRole();
+		while (superRole != null) {
+			if (superRole.getTeamModel() != currentTeam)
+				break;
+			superRole.markCallinOverride(mapping.name, this._role);
+			superRole = superRole.getExplicitSuperRole();
+		}
 	}
 
 	/**

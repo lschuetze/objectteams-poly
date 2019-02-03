@@ -2309,6 +2309,8 @@ void setSourceStart(int sourceStart);
 	int CallinUndeclaredException                = CALLIN_RELATED + 1011; // 4.1(g)
 	/** @since 3.9 OTDT 2.2 */
 	int CallinToConstructorMustUseAfter			 = CALLIN_RELATED + 1012; // 4.1(h)
+	/** @since 3.17 OTDT 2.7.3 */
+	int CallinOverriddenInTeam					 = CALLIN_RELATED + 1013; // 4.1(e)
 
 	int CallinToDeprecated						 = CALLIN_RELATED + 1099; // no OTJLD
 	

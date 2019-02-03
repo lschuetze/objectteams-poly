@@ -1,7 +1,7 @@
 /**********************************************************************
  * This file is part of "Object Teams Development Tooling"-Software
  *
- * Copyright 2003, 2006 Fraunhofer Gesellschaft, Munich, Germany,
+ * Copyright 2003, 2019 Fraunhofer Gesellschaft, Munich, Germany,
  * for its Fraunhofer Institute for Computer Architecture and Software
  * Technology (FIRST), Berlin, Germany and Technical University Berlin,
  * Germany.
@@ -126,6 +126,8 @@ public class CallinMappingDeclaration extends AbstractMethodMappingDeclaration
      * should use for lifting
      */
     public MethodBinding liftMethod;
+
+    public boolean isOverriddenInTeam = false;
 
     /**
      * This method is only relevant for private inherited base methods.
@@ -956,6 +958,10 @@ public class CallinMappingDeclaration extends AbstractMethodMappingDeclaration
 
 	public boolean hasName() {
 		return this.name != null && this.name[0] != '<';
+	}
+
+	public char[] explicitName() {
+		return hasName() ? this.name : null;
 	}
 
 	/**

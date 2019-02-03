@@ -1,7 +1,7 @@
 /**********************************************************************
  * This file is part of "Object Teams Development Tooling"-Software
  *
- * Copyright 2004, 2018 Fraunhofer Gesellschaft, Munich, Germany,
+ * Copyright 2004, 2019 Fraunhofer Gesellschaft, Munich, Germany,
  * for its Fraunhofer Institute for Computer Architecture and Software
  * Technology (FIRST), Berlin, Germany and Technical University Berlin,
  * Germany.
@@ -59,6 +59,8 @@ import org.eclipse.jdt.internal.compiler.lookup.TypeBinding;
 import org.eclipse.jdt.internal.compiler.lookup.TypeVariableBinding;
 import org.eclipse.objectteams.otdt.core.compiler.IOTConstants;
 import org.eclipse.objectteams.otdt.core.exceptions.InternalCompilerError;
+import org.eclipse.objectteams.otdt.internal.core.compiler.ast.AbstractMethodMappingDeclaration;
+import org.eclipse.objectteams.otdt.internal.core.compiler.ast.CallinMappingDeclaration;
 import org.eclipse.objectteams.otdt.internal.core.compiler.bytecode.AbstractAttribute;
 import org.eclipse.objectteams.otdt.internal.core.compiler.bytecode.CPTypeAnchorAttribute;
 import org.eclipse.objectteams.otdt.internal.core.compiler.bytecode.CallinMethodMappingsAttribute;
@@ -1484,5 +1486,19 @@ public class RoleModel extends TypeModel
 			|| !(declaring2 instanceof ReferenceBinding))
 			return false;
 		return TypeBinding.equalsEquals(((ReferenceBinding)declaring1).getRealType(), ((ReferenceBinding)declaring2).getRealType());
+	}
+
+	public void markCallinOverride(char[] name, RoleModel subRole) {
+		if (this._ast == null || this._ast.callinCallouts == null)
+			return;
+		for (AbstractMethodMappingDeclaration mapping : this._ast.callinCallouts) {
+			if (mapping instanceof CallinMappingDeclaration) {
+				CallinMappingDeclaration callin = (CallinMappingDeclaration) mapping;
+				if (callin.hasName() && CharOperation.equals(name, callin.name)) {
+					callin.isOverriddenInTeam = true;
+					this._ast.scope.problemReporter().callinOverriddenInTeam(callin, subRole);
+				}
+			}
+		}
 	}
 }

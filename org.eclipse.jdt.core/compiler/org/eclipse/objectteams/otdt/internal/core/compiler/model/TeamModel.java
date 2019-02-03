@@ -20,10 +20,12 @@
 package org.eclipse.objectteams.otdt.internal.core.compiler.model;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 
 import org.eclipse.jdt.core.compiler.CharOperation;
 import org.eclipse.jdt.core.compiler.IProblem;
@@ -38,6 +40,7 @@ import org.eclipse.jdt.internal.compiler.impl.IntConstant;
 import org.eclipse.jdt.internal.compiler.lookup.Binding;
 import org.eclipse.jdt.internal.compiler.lookup.LookupEnvironment;
 import org.eclipse.jdt.internal.compiler.lookup.MethodBinding;
+import org.eclipse.jdt.internal.compiler.lookup.MethodVerifier;
 import org.eclipse.jdt.internal.compiler.lookup.PackageBinding;
 import org.eclipse.jdt.internal.compiler.lookup.ParameterizedTypeBinding;
 import org.eclipse.jdt.internal.compiler.lookup.ReferenceBinding;
@@ -108,6 +111,8 @@ public class TeamModel extends TypeModel {
 
     /* a synthetic class for storing known role files */
     private RoleFileCache knownRoleFiles = null;
+
+    private Map<String/*label*/,List<Pair<MethodBinding, Integer/*callinID*/>>> labelledCallinIds = null;
 
     /** Collection of various flags. */
     public int tagBits = 0;
@@ -920,12 +925,52 @@ public class TeamModel extends TypeModel {
 			return this._binding.enclosingType().getTeamModel().getOutermostTeam();
 		return this;
 	}
+	public void recordLabelledCallin(String label, MethodBinding baseMethod, int callinId) {
+		List<Pair<MethodBinding, Integer>> existing = getCallinsForLabel(label);
+		if (existing == null) {
+			existing = new ArrayList<>();
+			this.labelledCallinIds.put(label, existing);
+		}
+		existing.add(new Pair<>(baseMethod, callinId));
+	}
+	public List<Pair<MethodBinding,Integer>> getCallinsForLabel(String label) {
+		if (this.labelledCallinIds == null) {
+			this.labelledCallinIds = new HashMap<>();
+			TeamModel superTeam = getSuperTeam();
+			if (superTeam != null) {
+				// FIXME: Check if binary team has the (label,baseM->callinId) info.
+				List<Pair<MethodBinding, Integer>> inherited = superTeam.getCallinsForLabel(label);
+				if (inherited != null) {
+					this.labelledCallinIds.put(label, inherited);
+					int max = inherited.stream().map(p->p.second).max(Integer::compareTo).get();
+					this.nextCallinID = Math.max(this.nextCallinID, max+1);
+				}
+			}
+		}
+		return this.labelledCallinIds.get(label);
+	}
 	/** Assign a fresh callin ID for this method spec, and store it in the method spec. */
-	public int getNewCallinId(MethodSpec baseMethodSpec) {
+	public int getNewCallinId(MethodSpec baseMethodSpec, char[] label) {
 		TeamModel outermostTeam = getOutermostTeam();
-		int callinID = outermostTeam.nextCallinID++;
-		if (baseMethodSpec != null)
-			baseMethodSpec.callinID = callinID;
+		String labelString = null;
+		if (label != null) {
+			labelString = new String(label);
+			List<Pair<MethodBinding, Integer>> existing = outermostTeam.getCallinsForLabel(labelString);
+			if (existing != null) {
+				LookupEnvironment environment = this._ast.scope.environment();
+				for (Pair<MethodBinding, Integer> entry : existing) {
+					MethodBinding baseMethod = baseMethodSpec.resolvedMethod;
+					if (baseMethod == entry.first 
+							|| MethodVerifier.doesMethodOverride(baseMethodSpec.resolvedMethod, entry.first, environment)) {
+						return entry.second;
+					}
+				}
+			}
+		}
+		int callinID = baseMethodSpec.callinID = outermostTeam.nextCallinID++;
+		if (labelString != null) {
+			outermostTeam.recordLabelledCallin(labelString, baseMethodSpec.resolvedMethod, callinID);
+		}
 		return callinID;
 	}
 	/** Record the fact that the given callinID has been assigned in the context of this team. */
@@ -954,7 +999,7 @@ public class TeamModel extends TypeModel {
 			OTDynCallinBindingsAttribute filteredAttr = ((OTDynCallinBindingsAttribute)attr).filteredCopy(this._binding);
 			if (filteredAttr != null) {
 				super.addOrMergeAttribute(filteredAttr);
-				filteredAttr.createBindings(this);
+				filteredAttr.createBindings(this, false);
 			}
 			recordCallinId(((OTDynCallinBindingsAttribute)attr).getCallinIdMax());
 		} else {

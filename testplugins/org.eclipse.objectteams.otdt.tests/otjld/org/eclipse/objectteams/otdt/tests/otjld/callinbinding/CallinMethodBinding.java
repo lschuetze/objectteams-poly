@@ -5299,7 +5299,7 @@ public class CallinMethodBinding extends AbstractOTJLDTest {
     // 4.1.32-otjld-overriding-of-callin-binding-2
     public void test4132_overridingOfCallinBinding2() {
        
-       runConformTest(
+       runTestExpectingWarnings(
             new String[] {
 		"Team4132oocb2.java",
 			    "\n" +
@@ -5333,14 +5333,19 @@ public class CallinMethodBinding extends AbstractOTJLDTest {
 			    "}    \n" +
 			    "    \n"
             },
+            "----------\n" + 
+    		"1. WARNING in Team4132oocb2.java (at line 7)\n" + 
+    		"	b1: rm1 <- before bm;\n" + 
+    		"	^^\n" + 
+    		"Callin \'b1\' is overridden in role \'R2\' within the same team, will have no effect (OTJLD 4.1(e)).\n" + 
+    		"----------\n",
             "OK!");
     }
 
     // a named callin binding is overridden by an explicit sub role in the same team - inherited precedence declaration
     // 4.1.32-otjld-overriding-of-callin-binding-2a
     public void test4132_overridingOfCallinBinding2a() {
-       
-       runConformTest(
+       runTestExpectingWarnings(
             new String[] {
 		"Team4132oocb2a.java",
 			    "\n" +
@@ -5352,7 +5357,7 @@ public class CallinMethodBinding extends AbstractOTJLDTest {
 			    "        void rm2() {\n" +
 			    "            System.out.print(\"K\");\n" +
 			    "        }\n" +
-			    "        b1: rm1 <- before bm;\n" +
+			    "        b1: @SuppressWarnings(\"unused\") rm1 <- before bm;\n" +
 			    "        b2: rm2 <- before bm;\n" +
 			    "        precedence b1, b2;\n" +
 			    "    }\n" +
@@ -5379,6 +5384,7 @@ public class CallinMethodBinding extends AbstractOTJLDTest {
 			    "}    \n" +
 			    "    \n"
             },
+            "", // warning is suppressed
             "OK!");
     }
 
@@ -5811,6 +5817,119 @@ public class CallinMethodBinding extends AbstractOTJLDTest {
 			    "	\n"
             },
             "4.1(e)");
+    }
+
+    // a named callin binding is overridden by an explicit sub role in a sub team
+    // - more roles and callins
+    public void test4132_overridingOfCallinBinding10_source() {
+       
+       runConformTest(
+            new String[] {
+   		"Team4132oocb10_2.java",
+   			    "\n" +
+   			    "public team class Team4132oocb10_2 extends Team4132oocb10 {\n" +
+   			    "    public class R2 extends R1 playedBy T4132oocb10_2 {\n" +
+   			    "        void rm2() {\n" +
+   			    "            System.out.print(\"OK\");\n" +
+   			    "        }\n" +
+   			    "        b1: rm2 <- before bm;\n" +
+   			    "    }\n" +
+   			    "    public static void main(String[] args) {\n" +
+   			    "        Team4132oocb10_2 t = new Team4132oocb10_2();\n" +
+   			    "        t.activate();\n" +
+   			    "        T4132oocb10_2 b = new T4132oocb10_2();\n" +
+   			    "        b.bm();\n" +
+   			    "    }\n" +
+   			    "}\n",
+		"T4132oocb10_2.java",
+			    "\n" +
+			    "public class T4132oocb10_2 extends T4132oocb10 {\n" +
+			    "	 @Override\n" +
+			    "    void bm() { \n" +
+			    "        System.out.print(\"?\");\n" +
+			    "    }\n" +
+			    "}\n",
+		"T4132oocb10.java",
+			    "\n" +
+			    "public class T4132oocb10 {\n" +
+			    "    void bm() { \n" +
+			    "        System.out.print(\"!\");\n" +
+			    "    }\n" +
+			    "}\n",
+		"Team4132oocb10.java",
+			    "\n" +
+			    "public team class Team4132oocb10 {\n" +
+			    "    public class R1 playedBy T4132oocb10 {\n" +
+			    "        void rm1() { \n" +
+			    "            System.out.print(\"NOTOK\"); \n" +
+			    "        }\n" +
+			    "        b1: rm1 <- before bm;\n" +
+			    "    }\n" +
+			    "}\n",
+//            });
+//       runConformTest(
+//               new String[] {
+               },
+               "OK?",
+               null,
+               false,
+               null);
+    }
+
+    // a named callin binding is overridden by an explicit sub role in a sub team
+    // - more roles and callins
+    public void test4132_overridingOfCallinBinding10_binary() {
+       runConformTest(
+            new String[] {
+		"T4132oocb10_2.java",
+			    "\n" +
+			    "public class T4132oocb10_2 extends T4132oocb10 {\n" +
+			    "	 @Override\n" +
+			    "    void bm() { \n" +
+			    "        System.out.print(\"?\");\n" +
+			    "    }\n" +
+			    "}\n",
+		"T4132oocb10.java",
+			    "\n" +
+			    "public class T4132oocb10 {\n" +
+			    "    void bm() { \n" +
+			    "        System.out.print(\"!\");\n" +
+			    "    }\n" +
+			    "}\n",
+		"Team4132oocb10.java",
+			    "\n" +
+			    "public team class Team4132oocb10 {\n" +
+			    "    public class R1 playedBy T4132oocb10 {\n" +
+			    "        void rm1() { \n" +
+			    "            System.out.print(\"NOTOK\"); \n" +
+			    "        }\n" +
+			    "        b1: rm1 <- before bm;\n" +
+			    "    }\n" +
+			    "}\n",
+            });
+       runConformTest(
+           new String[] {
+   		"Team4132oocb10_2.java",
+   			    "\n" +
+   			    "public team class Team4132oocb10_2 extends Team4132oocb10 {\n" +
+   			    "    public class R2 extends R1 playedBy T4132oocb10_2 {\n" +
+   			    "        void rm2() {\n" +
+   			    "            System.out.print(\"OK\");\n" +
+   			    "        }\n" +
+   			    "        b1: rm2 <- before bm;\n" +
+   			    "    }\n" +
+   			    "    public static void main(String[] args) {\n" +
+   			    "        Team4132oocb10_2 t = new Team4132oocb10_2();\n" +
+   			    "        t.activate();\n" +
+   			    "        T4132oocb10_2 b = new T4132oocb10_2();\n" +
+   			    "        b.bm();\n" +
+   			    "    }\n" +
+   			    "}\n"
+               },
+               "OK?",
+               null,
+               false,
+               new String[] {"-Dforce.restart=1"});
     }
 
     // a callin method is marked private

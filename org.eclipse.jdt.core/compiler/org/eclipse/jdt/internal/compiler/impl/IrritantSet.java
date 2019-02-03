@@ -153,6 +153,7 @@ public class IrritantSet {
 				| CompilerOptions.EffectlessFieldaccess
 				| CompilerOptions.FragileCallin
 				| CompilerOptions.UnusedParammap
+				| CompilerOptions.EffectlessCallinBinding
 				| CompilerOptions.PotentialAmbiguousPlayedBy
 				| CompilerOptions.AbstractPotentialRelevantRole
 				| CompilerOptions.Decapsulation
