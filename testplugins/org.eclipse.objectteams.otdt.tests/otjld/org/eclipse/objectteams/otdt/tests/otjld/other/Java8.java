@@ -486,6 +486,36 @@ public class Java8 extends AbstractOTJLDTest {
 			},
 			"orgarg");
     }
+    public void testBug541865_static() {
+    	runConformTest(
+			new String[] {
+				"Bug541865sMain.java",
+				"import java.util.*;\n" +
+				"public class Bug541865sMain {\n" +
+				"	public static void main(String... args) throws Exception {\n" +
+				"		new Bug541865sTeam().activate();\n" +
+				"		Bug541865s.log(new ArrayList<String>(), \"orgarg\");\n" +
+				"		Thread.sleep(100);\n" +
+				"	}\n" +
+				"}\n",
+				"Bug541865s.java",
+				"import java.util.*;\n" +
+				"public class Bug541865s {\n" +
+				"	public static void log(List<?> dummy, String msg) { System.out.print(msg); }\n" +
+				"}\n",
+				"Bug541865sTeam.java",
+				"import java.util.concurrent.*;\n" +
+				"public team class Bug541865sTeam {\n" +
+				"	protected class R playedBy Bug541865s {\n" +
+				"		static callin void logLater() {\n" +
+				"			CompletableFuture.runAsync(() -> base.logLater());\n" +
+				"		}\n" +
+				"		logLater <- replace log;\n" +
+				"	}\n" +
+				"}\n"
+			},
+			"orgarg");
+    }
     public void testBug541865b() {
     	runConformTest(
 			new String[] {
@@ -513,6 +543,41 @@ public class Java8 extends AbstractOTJLDTest {
 				"		logWrapped <- replace log;\n" +
 				"	}\n" +
 				"	void wrapped(Runnable run) {\n" +
+				"		System.out.print('<');\n" +
+				"		run.run();\n" +
+				"		System.out.print('>');\n" +
+				"	}\n" +
+				"}\n"
+			},
+			"(<orgarg>)");
+    }
+    public void testBug541865b_static() {
+    	runConformTest(
+			new String[] {
+				"Bug541865bsbMain.java",
+				"public class Bug541865bsbMain {\n" +
+				"	public static void main(String... args) {\n" +
+				"		org.objectteams.Team t = new Bug541865bsbTeam();\n" +
+				"		t.activate();\n" +
+				"		Bug541865bsb.log(\"orgarg\");\n" +
+				"		t.deactivate();\n" +
+				"	}\n" +
+				"}\n",
+				"Bug541865bsb.java",
+				"public class Bug541865bsb {\n" +
+				"	public static void log(String msg) { System.out.print(msg); }\n" +
+				"}\n",
+				"Bug541865bsbTeam.java",
+				"public team class Bug541865bsbTeam {\n" +
+				"	protected class R playedBy Bug541865bsb {\n" +
+				"		static callin void logWrapped() {\n" +
+				"			System.out.print('(');\n" +
+				"			wrapped(() -> base.logWrapped());\n" +
+				"			System.out.print(')');\n" +
+				"		}\n" +
+				"		logWrapped <- replace log;\n" +
+				"	}\n" +
+				"	static void wrapped(Runnable run) {\n" +
 				"		System.out.print('<');\n" +
 				"		run.run();\n" +
 				"		System.out.print('>');\n" +
