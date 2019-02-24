@@ -24,6 +24,7 @@ import org.eclipse.jdt.core.compiler.IProblem;
 import org.eclipse.jdt.internal.compiler.ast.ASTNode;
 import org.eclipse.jdt.internal.compiler.env.AccessRestriction;
 import org.eclipse.jdt.internal.compiler.lookup.FieldBinding;
+import org.eclipse.jdt.internal.compiler.lookup.InvocationSite;
 import org.eclipse.jdt.internal.compiler.lookup.MethodBinding;
 import org.eclipse.jdt.internal.compiler.lookup.TypeBinding;
 
@@ -45,7 +46,7 @@ public team class PlainProjectWatcher extends CompilationThreadWatcher
 		void forbiddenReference(AccessRestriction restriction) 
 		<- replace void forbiddenReference(TypeBinding   type,   ASTNode location, byte entryType, AccessRestriction restriction),
 				   void forbiddenReference(FieldBinding  field,  ASTNode location, byte entryType, AccessRestriction restriction),
-				   void forbiddenReference(MethodBinding method, ASTNode location, byte entryType, AccessRestriction restriction)
+				   void forbiddenReference(MethodBinding method, InvocationSite location, byte entryType, AccessRestriction restriction)
 		   with { restriction <- restriction }
 
 		@SuppressWarnings("basecall")

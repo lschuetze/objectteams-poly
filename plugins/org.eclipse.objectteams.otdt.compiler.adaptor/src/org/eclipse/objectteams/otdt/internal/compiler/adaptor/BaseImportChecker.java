@@ -42,6 +42,7 @@ import org.eclipse.jdt.internal.compiler.env.AccessRule;
 import org.eclipse.jdt.internal.compiler.impl.ReferenceContext;
 import org.eclipse.jdt.internal.compiler.lookup.FieldBinding;
 import org.eclipse.jdt.internal.compiler.lookup.ImportBinding;
+import org.eclipse.jdt.internal.compiler.lookup.InvocationSite;
 import org.eclipse.jdt.internal.compiler.lookup.MethodBinding;
 import org.eclipse.jdt.internal.compiler.lookup.ReferenceBinding;
 import org.eclipse.jdt.internal.compiler.lookup.SourceTypeBinding;
@@ -202,8 +203,8 @@ public team class BaseImportChecker extends CompilationThreadWatcher
 		   with { type <- type, location <- location, restriction <- restriction }
 
 		void forbiddenReference(TypeBinding type, ASTNode location, AccessRestriction restriction) 
-		<- replace void forbiddenReference(MethodBinding method, ASTNode location, byte entryType, AccessRestriction restriction)
-		   with { type <- method.declaringClass, location <- location, restriction <- restriction }
+		<- replace void forbiddenReference(MethodBinding method, InvocationSite location, byte entryType, AccessRestriction restriction)
+		   with { type <- method.declaringClass, location <- (ASTNode)location, restriction <- restriction }
 
 		void forbiddenReference(TypeBinding type, ASTNode location, AccessRestriction restriction) 
 		<- replace void forbiddenReference(FieldBinding field, ASTNode location, byte entryType, AccessRestriction restriction)
