@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2018 IBM Corporation and others.
+ * Copyright (c) 2000, 2019 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -1313,12 +1313,12 @@ public TypeBinding resolveType(BlockScope scope) {
 	}
 //{ObjectTeams: use copy inheritance src if possible (scope analysis and error reporting):
 /* orig:
-	if (isMethodUseDeprecated(this.binding, scope, true))
+	if (isMethodUseDeprecated(this.binding, scope, true, this))
 		scope.problemReporter().deprecatedMethod(this.binding, this);
   :giro */
   {
 	MethodBinding origMethod = this.binding.copyInheritanceSrc != null ? this.binding.copyInheritanceSrc : this.binding;
-	if (isMethodUseDeprecated(origMethod, scope, true))
+	if (isMethodUseDeprecated(origMethod, scope, true, this))
 		scope.problemReporter().deprecatedMethod(origMethod, this);
   }
 // SH}
@@ -1787,5 +1787,13 @@ public InferenceContext18 freshInferenceContext(Scope scope) {
 @Override
 public boolean isQualifiedSuper() {
 	return this.receiver.isQualifiedSuper();
+}
+@Override
+public int nameSourceStart() {
+	return (int) (this.nameSourcePosition >>> 32);
+}
+@Override
+public int nameSourceEnd() {
+	return (int) this.nameSourcePosition;
 }
 }

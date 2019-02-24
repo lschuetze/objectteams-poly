@@ -9485,4 +9485,51 @@ public void testBug508834_comment0() {
 		};
 		runner.runConformTest();
 	}
+	public void testBug540846() {
+		Runner runner = new Runner();
+		runner.testFiles = new String[] {
+			"Test.java",
+			"import java.util.*;\n" + 
+			"import java.util.stream.*;\n" + 
+			"import java.math.*;\n" + 
+			"\n" + 
+			"public class Test {\n" + 
+			"    private List<Object> getRowValues(Map<String, BigDecimal> record, Stream<String> factors) {\n" + 
+			"        return Stream.concat(\n" + 
+			"            factors.map(f -> {\n" + 
+			"                if (f.equals(\"x\")) {\n" + 
+			"                    return record.get(f);\n" + 
+			"                } else {\n" + 
+			"                    return \"NM\";\n" + 
+			"                }\n" + 
+			"            }),\n" + 
+			"            Stream.of(BigDecimal.ONE)\n" + 
+			"        )\n" + 
+			"        .map(v -> (v instanceof BigDecimal) ? ((BigDecimal) v).setScale(10, BigDecimal.ROUND_HALF_UP) : v)\n" + 
+			"        .collect(Collectors.toList());\n" + 
+			"    }\n" + 
+			"}\n"
+		};
+		runner.runConformTest();
+	}
+	public void testBug538192() {
+		Runner runner = new Runner();
+		runner.testFiles = new String[] {
+			"Test.java",
+			"import java.util.*;\n" + 
+			"import java.util.function.Function;\n" +
+			"interface ListFunc<T> extends Function<List<String>, T> {}\n" + 
+			"interface MapFunc<T> extends Function<Map<String,String>, T> {}\n" + 
+			"class DTT {\n" + 
+			"	public <T> DTT(Class<T> c, ListFunc<T> f) {}\n" + 
+			"	public <T> DTT(Class<T> c, MapFunc<T> f) {} \n" + 
+			"}\n" +
+			"public class Test {\n" +
+			"	void test() {\n" +
+			"		new DTT(Integer.class, (Map<String, String> row) -> Integer.valueOf(0));\n" +
+			"	}\n" +
+			"}\n"
+		};
+		runner.runConformTest();
+	}
 }

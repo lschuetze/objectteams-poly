@@ -41,7 +41,6 @@ import org.eclipse.jdt.core.IModuleDescription;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.IProblemRequestor;
 import org.eclipse.jdt.core.JavaCore;
-import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.WorkingCopyOwner;
 import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.CompilationUnit;
@@ -103,9 +102,6 @@ public class ModuleBuilderTests extends ModifyingResourceTests {
 		deleteProject("P1");
 	}
 	
-	void addModularProjectEntry(IJavaProject project, IJavaProject depProject) throws JavaModelException {
-		addClasspathEntry(project, JavaCore.newProjectEntry(depProject.getPath(), null, false, moduleAttribute(), false));
-	}
 	// Test that the java.base found as a module package fragment root in the project 
 	public void test001() throws CoreException {
 		try {
@@ -4398,6 +4394,12 @@ public class ModuleBuilderTests extends ModifyingResourceTests {
 			IClasspathEntry dep = JavaCore.newProjectEntry(p1.getPath(), null, false, new IClasspathAttribute[] {modAttr}, false);
 			IJavaProject p2 = setupModuleProject("com.greetings", src, new IClasspathEntry[] {dep});
 			getWorkspace().build(IncrementalProjectBuilder.FULL_BUILD, null);
+			IMarker[] markers = p2.getProject().findMarkers(null, true, IResource.DEPTH_INFINITE);
+			sortMarkers(markers);
+			assertMarkers("markers on com.greetings", 
+					"The package bundle.org conflicts with a package accessible from another module: org.astro",
+					markers);
+
 			src = new String[] { 
 				"src/module-info.java",
 				"module test {\n" +
@@ -4417,8 +4419,8 @@ public class ModuleBuilderTests extends ModifyingResourceTests {
 			};
 			IClasspathEntry dep2 = JavaCore.newProjectEntry(p2.getPath(), null, false, new IClasspathAttribute[] {modAttr}, false);
 			IJavaProject p3 = setupModuleProject("test", src, new IClasspathEntry[] {dep, dep2});
-			getWorkspace().build(IncrementalProjectBuilder.FULL_BUILD, null);
-			IMarker[] markers = p3.getProject().findMarkers(null, true, IResource.DEPTH_INFINITE);
+			p3.getProject().build(IncrementalProjectBuilder.FULL_BUILD, null);
+			markers = p3.getProject().findMarkers(null, true, IResource.DEPTH_INFINITE);
 			assertMarkers("Unexpected markers", "", markers);
 		} finally {
 			this.deleteProject("test");
@@ -7812,6 +7814,229 @@ public class ModuleBuilderTests extends ModifyingResourceTests {
 
 		} finally {
 			deleteProject(p);
+			File outputDir = new File(outputDirectory);
+			if (outputDir.exists())
+				Util.flushDirectoryContent(outputDir);
+		}
+	}
+	
+	public void testBug543765() throws CoreException, IOException {
+		// failure never seen in this test
+		IJavaProject m = createJava9Project("M");
+		IJavaProject n = createJava9Project("N");
+		IJavaProject x = createJava9Project("X");
+		IJavaProject y = createJava9Project("Y");
+		String outputDirectory = Util.getOutputDirectory();
+		try {
+			// ------ W ------
+			String wJarLocation = outputDirectory + File.separator + "w-0.0.1-SNAPSHOT.jar";
+			IPath wJarPath = new Path(wJarLocation);
+			Util.createJar(new String[] {
+						"external/W.java",
+						"public class W {\n" +
+						"	public static void main(String... args) {}\n" +
+						"}\n"
+					}, wJarLocation, "9");
+			
+			// ------ X ------
+			addModularLibraryEntry(x, wJarPath, null);
+			createFolder("X/src/com/example/x");
+			createFile("X/src/com/example/x/X.java",
+					"package com.example.x;\n" + 
+					"public class X {\n" + 
+					"    public static void main(String[] args) { \n" + 
+					"        System.out.println(\"X\");\n" + 
+					"    }\n" + 
+					"}\n");
+			createFile("X/src/module-info.java",
+					"open module com.example.x {\n" + 
+					"    exports com.example.x;\n" + 
+					"    requires w;\n" + 
+					"}\n");
+			
+			// ------ Y ------
+			addModularLibraryEntry(y, wJarPath, null);
+			addModularProjectEntry(y, x);
+			createFolder("Y/src/com/example/y");
+			createFile("Y/src/com/example/y/Y.java",
+					"package com.example.y;\n" + 
+					"public class Y {\n" + 
+					"    public static void main(String[] args) { \n" + 
+					"        System.out.println(\"Y\");\n" + 
+					"    }\n" + 
+					"}\n");
+			createFile("Y/src/module-info.java",
+					"open module com.example.y {\n" + 
+					"    exports com.example.y;\n" + 
+					"    requires com.example.x;\n" + 
+					"}\n");
+
+			// ------ N ------
+			createFolder("N/src/com/example/n");
+			createFile("N/src/com/example/n/N.java",
+					"package com.example.n;\n" + 
+					"public class N {\n" + 
+					"    public static void main(String[] args) { \n" + 
+					"        System.out.println(\"N\");\n" + 
+					"    } \n" + 
+					"}\n");
+			createFile("N/src/module-info.java",
+					"open module n {\n" + 
+					"    exports com.example.n;\n" + 
+					"}\n");
+
+			// ------ M ------
+			// insert new entries before JRE:
+			IClasspathEntry[] entries = m.getRawClasspath();
+			int length = entries.length;
+			System.arraycopy(entries, 0, entries = new IClasspathEntry[length + 4], 4, length);
+			entries[0] = entries[4];
+			entries[1] = newModularLibraryEntry(wJarPath, null, null);
+			entries[2] = newModularProjectEntry(n);
+			entries[3] = newModularProjectEntry(x);
+			entries[4] = newModularProjectEntry(y);
+			m.setRawClasspath(entries, null);
+
+			createFolder("M/src/m");
+			String mSource =
+					"package m;\n" + 
+					"import com.example.n.N;\n" + 
+					"public class M {\n" + 
+					"    public static void main(String[] args) {\n" + 
+					"        System.out.println(\"M\");\n" + 
+					"        N.main(null);\n" + 
+					"    }\n" + 
+					"}\n";
+			String mPath = "M/src/m/M.java";
+			createFile(mPath, mSource);
+			createFile("M/src/module-info.java",
+					"open module m {\n" + 
+					"    requires n;\n" + 
+					"    requires w;\n" + 
+					"}\n");
+			
+			getWorkspace().build(IncrementalProjectBuilder.FULL_BUILD, null);
+			assertNoErrors();
+			
+			m.getProject().build(IncrementalProjectBuilder.FULL_BUILD, null);
+			assertNoErrors();
+
+			this.problemRequestor.initialize(mSource.toCharArray());
+			getCompilationUnit(mPath).getWorkingCopy(this.wcOwner, null);
+			assertProblems("unexpected problems",
+					"----------\n" + 
+					"----------\n",
+					this.problemRequestor);
+		} finally {
+			deleteProject(m);
+			deleteProject(n);
+			deleteProject(x);
+			deleteProject(y);
+			File outputDir = new File(outputDirectory);
+			if (outputDir.exists())
+				Util.flushDirectoryContent(outputDir);
+		}
+	}
+
+	public void testBug544126() throws CoreException, IOException {
+		String outputDirectory = Util.getOutputDirectory();
+		IJavaProject p = createJava9Project("p");
+		try {
+			String jar1Path = outputDirectory + File.separator + "auto1Lib.jar";
+			createJar(
+					new String[] {
+						"org/test/Root.java",
+						"package org.test;\n" +
+						"public class Root {}\n"
+					},
+					jar1Path);
+			String jar2Path = outputDirectory + File.separator + "auto2Lib.jar";
+			createJar(
+					new String[] {
+						"org/test/ext/Ext.java",
+						"package org.test.ext;\n" +
+						"public class Ext {}\n"
+					},
+					jar2Path);
+			addModularLibraryEntry(p, new Path(jar1Path), null);
+			addModularLibraryEntry(p, new Path(jar2Path), null);
+			createFolder("p/src/test");
+			String testPath = "p/src/test/Test.java";
+			String testSource =
+					"package test;\n" +
+					"import org.test.Root;\n" + 
+					"public class Test {\n" + 
+					"    public static void main(String[] args) { \n" + 
+					"        System.out.println(new Root());\n" + 
+					"    }\n" + 
+					"}\n";
+			createFile(testPath, testSource);
+			createFile("p/src/module-info.java",
+					"module test {\n" + 
+					"    requires auto1Lib;\n" + 
+					"    requires auto2Lib;\n" + 
+					"}\n");
+			getWorkspace().build(IncrementalProjectBuilder.FULL_BUILD, null);
+			assertNoErrors();
+
+			this.problemRequestor.initialize(testSource.toCharArray());
+			getCompilationUnit(testPath).getWorkingCopy(this.wcOwner, null);
+			assertProblems("unexpected problems",
+					"----------\n" + 
+					"----------\n",
+					this.problemRequestor);
+		} finally {
+			deleteProject(p);
+			File outputDir = new File(outputDirectory);
+			if (outputDir.exists())
+				Util.flushDirectoryContent(outputDir);
+		}
+	}
+	
+	public void testBug544432() throws CoreException {
+		IJavaProject prjA = createJava9Project("A");
+		IJavaProject prjB = createJava9Project("B");
+		try {
+			createFolder("A/src/com/a");
+			createFile("A/src/com/a/A.java",
+				"package com.a;\n" + 
+				"\n" + 
+				"public class A {}\n");
+			createFile("A/src/module-info.java",
+				"open module com.a {\n" + 
+				"	exports com.a;\n" + 
+				"}\n");
+
+			addModularProjectEntry(prjB, prjA);
+			createFolder("B/src/com/a/b");
+			String bPath = "B/src/com/a/b/B.java";
+			String bSource =
+				"package com.a.b;\n" + 
+				"import com.a.A;\n" + 
+				"public class B {\n" + 
+				"	\n" + 
+				"	public static void main(String[] args) {\n" + 
+				"		A a = new A();\n" + 
+				"		System.out.println(a);\n" + 
+				"	}\n" + 
+				"}\n";
+			createFile(bPath, bSource);
+			createFile("B/src/module-info.java",
+				"open module com.a.b {\n" + 
+				"	requires com.a;\n" + 
+				"}\n");
+			getWorkspace().build(IncrementalProjectBuilder.FULL_BUILD, null);
+			assertNoErrors();
+
+			this.problemRequestor.initialize(bSource.toCharArray());
+			getCompilationUnit(bPath).getWorkingCopy(this.wcOwner, null);
+			assertProblems("unexpected problems",
+					"----------\n" + 
+					"----------\n",
+					this.problemRequestor);
+		} finally {
+			deleteProject(prjA);
+			deleteProject(prjB);
 		}
 	}
 
