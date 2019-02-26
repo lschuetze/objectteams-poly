@@ -71,7 +71,7 @@ public class JavaQuickFixTests extends OTQuickFixTest {
 
 	void setupForNullAnnotations(boolean isPlainJava) throws IOException, JavaModelException {
 		if (this.ANNOTATION_JAR_PATH == null) {
-			String version= "[1.1.0,2.0.0)"; // tests run at 1.5, need the "old" null annotations
+			String version= "[2.0.0,3.0.0)"; 
 			Bundle[] bundles= Platform.getBundles("org.eclipse.jdt.annotation", version);
 			File bundleFile= FileLocator.getBundleFile(bundles[0]);
 			if (bundleFile.isDirectory())
@@ -234,6 +234,9 @@ public class JavaQuickFixTests extends OTQuickFixTest {
 		buf.append("public team class T2 extends T1 {\n");
 		buf.append("  protected class R {\n");
 		buf.append("\n");
+		buf.append("    /* (non-Javadoc)\n"); 
+		buf.append("     * @see test1.T1.R#foo()\n"); 
+		buf.append("     */\n");
 		buf.append("    @Override\n");
 		buf.append("    void foo() {\n");
 		buf.append("        // TODO Auto-generated method stub\n"); 
@@ -294,6 +297,9 @@ public class JavaQuickFixTests extends OTQuickFixTest {
 		buf.append("public team class T2 extends T1 {\n");
 		buf.append("  protected class R {\n");
 		buf.append("\n");
+		buf.append("    /* (non-Javadoc)\n"); 
+		buf.append("     * @see test1.T1.R#foo()\n"); 
+		buf.append("     */\n");
 		buf.append("    @Override\n");
 		buf.append("    static void foo() {\n");
 		buf.append("        // TODO Auto-generated method stub\n"); 

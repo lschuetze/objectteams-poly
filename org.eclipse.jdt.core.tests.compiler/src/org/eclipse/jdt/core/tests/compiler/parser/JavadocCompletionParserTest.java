@@ -174,7 +174,14 @@ protected void verifyAllTagsCompletion() {
 				// Block tags
 				TAG_AUTHOR, TAG_DEPRECATED, TAG_EXCEPTION, TAG_PARAM, TAG_RETURN, TAG_SEE, TAG_VERSION, TAG_CATEGORY,
 				TAG_SINCE,
+//{ObjectTeams: insert @role tag:
+/* orig:
 				TAG_SERIAL, TAG_SERIAL_DATA, TAG_SERIAL_FIELD , TAG_THROWS, TAG_USES, TAG_PROVIDES,
+  :giro */
+				TAG_SERIAL, TAG_SERIAL_DATA, TAG_SERIAL_FIELD , TAG_THROWS,
+/* OT: */		TAG_ROLE,
+				TAG_USES, TAG_PROVIDES,
+// SH}
 				// Inline tags
 				TAG_LINK,
 				TAG_DOC_ROOT

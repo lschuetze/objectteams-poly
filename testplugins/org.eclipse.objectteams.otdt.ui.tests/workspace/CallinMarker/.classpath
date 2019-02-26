@@ -2,7 +2,7 @@
 <classpath>
 	<classpathentry kind="src" path="src"/>
     <classpathentry kind="output" path="bin"/>
-	<classpathentry kind="var" path="JCL17_LIB" sourcepath="JCL17_SRC" rootpath="JCL_SRCROOT"/>
+	<classpathentry kind="var" path="JCL18_LIB" sourcepath="JCL18_SRC" rootpath="JCL_SRCROOT"/>
 	<classpathentry kind="con" path="OTRE"/>
 </classpath>
 
