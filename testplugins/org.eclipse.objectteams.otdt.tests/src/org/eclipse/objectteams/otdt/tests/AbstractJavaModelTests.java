@@ -2780,8 +2780,8 @@ public abstract class AbstractJavaModelTests extends SuiteOfTestCases {
 		}
 	}
 	protected IJavaProject setUpJavaProject(final String projectName) throws CoreException, IOException {
-//{ObjectTeams: OT/J needs at least 1.5 (was 1.4):
-		IJavaProject javaProject = setUpJavaProject(projectName, "1.7");
+//{ObjectTeams: OT/J needs at least 1.5 (was 1.4), but compliance below 1.8 is no longer consistently supported in tests
+		IJavaProject javaProject = setUpJavaProject(projectName, "1.8");
 
         // add OTJavaNature
 		IProjectDescription description = javaProject.getProject().getDescription();

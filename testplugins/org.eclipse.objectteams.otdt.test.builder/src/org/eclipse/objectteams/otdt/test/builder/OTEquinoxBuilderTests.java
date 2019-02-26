@@ -20,6 +20,7 @@
  **********************************************************************/
 package org.eclipse.objectteams.otdt.test.builder;
 
+import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -27,6 +28,7 @@ import java.io.IOException;
 import junit.framework.Test;
 
 import org.eclipse.core.resources.IFile;
+import org.eclipse.core.resources.IFolder;
 import org.eclipse.core.resources.IMarker;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IWorkspaceRunnable;
@@ -39,6 +41,8 @@ import org.eclipse.jdt.core.compiler.CategorizedProblem;
 import org.eclipse.jdt.core.tests.builder.Problem;
 import org.eclipse.jdt.internal.core.JavaCorePreferenceInitializer;
 import org.eclipse.jdt.internal.core.JavaModelManager;
+import org.eclipse.objectteams.otdt.core.ext.OTDTPlugin;
+import org.eclipse.objectteams.otdt.core.ext.WeavingScheme;
 import org.eclipse.objectteams.otdt.tests.FileBasedTest;
 
 @SuppressWarnings({ "nls", "restriction" })
@@ -56,7 +60,21 @@ public class OTEquinoxBuilderTests extends OTBuilderTests {
 		@Override // make available locally:
 		protected IJavaProject setUpJavaProject(String projectName) throws CoreException, IOException 
 		{
-			return super.setUpJavaProject(projectName);
+			IJavaProject jProject = super.setUpJavaProject(projectName);
+
+			// and adjust a few options:
+
+			// use OTDRE since our test projects now use 1.8:
+			jProject.setOption(OTDTPlugin.OT_COMPILER_WEAVING_SCHEME, WeavingScheme.OTDRE.name());
+
+			// suppress PDE warnings regarding missing package exports:
+			IFolder settings = jProject.getProject().getFolder(".settings");
+			if (!settings.exists())
+				settings.create(true, true, null);
+			String pdePrefs = "compilers.p.missing-packages=2\n";
+			settings.getFile("org.eclipse.pde.prefs").create(new ByteArrayInputStream(pdePrefs.getBytes()), true, null);
+
+			return jProject;
 		}
 		protected void replaceWorkspaceFile(String src, IJavaProject project, String dest)
 			throws IOException, CoreException 

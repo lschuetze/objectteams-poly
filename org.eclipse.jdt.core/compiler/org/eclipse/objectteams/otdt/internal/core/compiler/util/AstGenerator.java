@@ -564,7 +564,7 @@ public class AstGenerator extends AstFactory {
 	    		for (int i = 0; i < argumentTypes.length; i++) {
 					lastArgs[i] = typeReference(argumentTypes[i]);
 				}
-	    		long[] poss = new long[argumentTypes.length];
+	    		long[] poss = new long[compoundName.length];
 	    		Arrays.fill(poss, this.pos);
 	    		return new ParameterizedQualifiedTypeReference(compoundName, arguments, dims, poss);
     		}
