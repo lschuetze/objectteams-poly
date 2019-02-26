@@ -234,9 +234,6 @@ public class JavaQuickFixTests extends OTQuickFixTest {
 		buf.append("public team class T2 extends T1 {\n");
 		buf.append("  protected class R {\n");
 		buf.append("\n");
-		buf.append("    /* (non-Javadoc)\n"); 
-		buf.append("     * @see test1.T1.R#foo()\n"); 
-		buf.append("     */\n");
 		buf.append("    @Override\n");
 		buf.append("    void foo() {\n");
 		buf.append("        // TODO Auto-generated method stub\n"); 
@@ -297,9 +294,6 @@ public class JavaQuickFixTests extends OTQuickFixTest {
 		buf.append("public team class T2 extends T1 {\n");
 		buf.append("  protected class R {\n");
 		buf.append("\n");
-		buf.append("    /* (non-Javadoc)\n"); 
-		buf.append("     * @see test1.T1.R#foo()\n"); 
-		buf.append("     */\n");
 		buf.append("    @Override\n");
 		buf.append("    static void foo() {\n");
 		buf.append("        // TODO Auto-generated method stub\n"); 

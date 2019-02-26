@@ -128,7 +128,9 @@ public interface JavadocTagConstants {
 		TAG_LITERAL,				/* 19 */
 		TAG_DOC_ROOT,			/* 20 */
 //{ObjectTeams: role tag:
-		TAG_ROLE, 				/* 21 */
+		TAG_USES,				/* 21 */ // omission in JDT?
+		TAG_PROVIDES,			/* 22 */ // omission in JDT?
+		TAG_ROLE, 				/* 23 */
 // SH}
 	};
 
@@ -245,7 +247,9 @@ public interface JavadocTagConstants {
 		TAG_TYPE_INLINE		// TAG_DOC_ROOT_VALUE = 20;
 //{ObjectTeams: @role tag
 		,
-		TAG_TYPE_BLOCK,		// TAG_ROLE_VALUE = 21;
+		TAG_TYPE_BLOCK,		// TAG_USES_VALUE = 21;		// omission in JDT
+		TAG_TYPE_BLOCK,		// TAG_PROVIDES_VALUE = 22;	// omission in JDT
+		TAG_TYPE_BLOCK,		// TAG_ROLE_VALUE = 23;
 // SH}
 	};
 	/*
