@@ -2406,6 +2406,7 @@ public void test012_compiler_problems_tuning() {
         expectedProblemAttributes.put("ReplaceMappingToNonCallin", SKIP);
         expectedProblemAttributes.put("CallinMethodBoundNonReplace", SKIP);
         expectedProblemAttributes.put("CallinOverridesRegular", SKIP);
+        expectedProblemAttributes.put("CallinOverriddenInTeam", SKIP);
         expectedProblemAttributes.put("RegularOverridesCallin", SKIP);
         expectedProblemAttributes.put("ConflictingCallinAndRegular", SKIP);
         expectedProblemAttributes.put("BaseCallNotSameMethod", SKIP);
@@ -2669,6 +2670,7 @@ public void test012_compiler_problems_tuning() {
         expectedProblemAttributes.put("ReplaceMappingToNonCallin", SKIP);
         expectedProblemAttributes.put("CallinMethodBoundNonReplace", SKIP);
         expectedProblemAttributes.put("CallinOverridesRegular", SKIP);
+        expectedProblemAttributes.put("CallinOverriddenInTeam", SKIP);
         expectedProblemAttributes.put("RegularOverridesCallin", SKIP);
         expectedProblemAttributes.put("ConflictingCallinAndRegular", SKIP);
         expectedProblemAttributes.put("BaseCallNotSameMethod", SKIP);
