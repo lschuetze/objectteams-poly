@@ -1,10 +1,9 @@
 package p;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Set;
+import java.util.Map;
+import java.util.WeakHashMap;
 public class A {
-	public static Set set;
-	public static List m() {
-		return new ArrayList(set);
+	public static int size;
+	public static Map m() {
+		return new WeakHashMap(size);
 	}
 }

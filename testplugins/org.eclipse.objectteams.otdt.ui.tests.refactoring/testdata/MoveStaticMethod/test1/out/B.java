@@ -1,11 +1,11 @@
 package p;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.Map;
+import java.util.WeakHashMap;
 
 class B{
 
-	public static List m() {
-		return new ArrayList(A.set);
+	public static Map m() {
+		return new WeakHashMap(A.size);
 	}
 }
