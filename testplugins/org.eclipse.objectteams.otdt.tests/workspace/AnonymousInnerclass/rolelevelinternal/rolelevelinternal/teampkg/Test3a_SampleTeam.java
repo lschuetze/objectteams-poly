@@ -1,6 +1,6 @@
-import rolelevelinternal.basepkg.SampleBase;
-
 package rolelevelinternal.teampkg;
+
+import rolelevelinternal.basepkg.SampleBase;
 
 /**
  * $Id: Test3a_SampleTeam.java 5955 2005-06-21 16:04:55Z haebor $
@@ -12,7 +12,7 @@ package rolelevelinternal.teampkg;
  */
 public team class Test3a_SampleTeam
 {
-    public class Role1 playedBy SampleBase \n"
+    public class Role1 playedBy SampleBase
     {
 	    public void roleMethod() {}
 	}

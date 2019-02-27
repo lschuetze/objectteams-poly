@@ -103,72 +103,52 @@ public class OTModelManager
 	{
 		IJavaElement parent = elem.getParent();
 		IOTType result = null; 
-				
-		switch (parent.getElementType())
-		{
-		    case IJavaElement.COMPILATION_UNIT:
-		    case IJavaElement.CLASS_FILE:
-		    	if(isRoleFile)
-				{   //  could also be a teeam, which is handled inside the constructor
-		    		if (elem.isBinary())
-		    		{
-			        	MAPPING.addOTElement( result = new BinaryRoleType(elem, 
-								parent, 
-								typeDeclFlags, 
-								baseClassName,
-								baseClassAnchor));
-		    		}
-		    		else
-		    		{
-			        	MAPPING.addOTElement( result = new RoleFileType(elem, 
-								parent, 
-								typeDeclFlags, 
-								baseClassName,
-								baseClassAnchor));
-		    		}
-				} 
-		    	else if (TypeHelper.isTeam(typeDeclFlags))
-				{
-					MAPPING.addOTElement( result = new OTType(IOTJavaElement.TEAM, elem, null, typeDeclFlags) );
-				}
-				break;
-		    case IJavaElement.TYPE:
-				IType   encType   = (IType)parent;
-				IOTType otmParent = MAPPING.getOTElement(encType); 
-					
-				result = maybeAddRoleType(elem, otmParent, typeDeclFlags, baseClassName, baseClassAnchor);			
-	    		break;
-	    	//do nothing if anonymous type
-	    	case IJavaElement.METHOD:	    		
-	    		break;
-	    	case IJavaElement.INITIALIZER:
-	    		break;
-	    	case IJavaElement.FIELD:
-				break;
-//TODO (jwl) Wether anonymous types are roles or not will be discoverable with 
-//	    	 a future implementation (probably with the help of a newer version of the compiler)
-	    		
-//		    	case IJavaElement.METHOD:
-//	    	    IMethod encMethod   = (IMethod)parent;
-//	    	    otmParent = MAPPING.getOTElement(encMethod.getDeclaringType());
-//	    	    
-//	    	    addRoleType(elem, otmParent, typeDeclFlags, baseClassName);
-//	    	    break;
-//		    case IJavaElement.INITIALIZER:
-//	    	    IInitializer encInitializer   = (IInitializer)parent;
-//	    	    otmParent = MAPPING.getOTElement(encInitializer.getDeclaringType());
-//	    	    
-//	    	    addRoleType(elem, otmParent, typeDeclFlags, baseClassName);
-//	    	    break;
-//	    	case IJavaElement.FIELD:
-//	    	    IField encField   = (IField)parent;
-//	    	    otmParent = MAPPING.getOTElement(encField.getDeclaringType());
-//	    	    
-//	    	    addRoleType(elem, otmParent, typeDeclFlags, baseClassName);
-//	    	    break;
-		    default:
-		    	new Throwable("Warning: unexpected parent for OT element: " + parent).printStackTrace(); //$NON-NLS-1$
-		    	break;
+
+		while (parent != null) {
+			switch (parent.getElementType())
+			{
+			    case IJavaElement.COMPILATION_UNIT:
+			    case IJavaElement.CLASS_FILE:
+			    	if(isRoleFile)
+					{   //  could also be a teeam, which is handled inside the constructor
+			    		if (elem.isBinary())
+			    		{
+				        	MAPPING.addOTElement( result = new BinaryRoleType(elem, 
+									parent, 
+									typeDeclFlags, 
+									baseClassName,
+									baseClassAnchor));
+			    		}
+			    		else
+			    		{
+				        	MAPPING.addOTElement( result = new RoleFileType(elem, 
+									parent, 
+									typeDeclFlags, 
+									baseClassName,
+									baseClassAnchor));
+			    		}
+					} 
+			    	else if (TypeHelper.isTeam(typeDeclFlags))
+					{
+						MAPPING.addOTElement( result = new OTType(IOTJavaElement.TEAM, elem, null, typeDeclFlags) );
+					}
+					return result;
+			    case IJavaElement.TYPE:
+					IType   encType   = (IType)parent;
+					IOTType otmParent = MAPPING.getOTElement(encType); 
+						
+					return maybeAddRoleType(elem, otmParent, typeDeclFlags, baseClassName, baseClassAnchor);			
+		    	case IJavaElement.METHOD:
+		    		break;
+		    	case IJavaElement.INITIALIZER:
+		    		break;
+		    	case IJavaElement.FIELD:
+					break;
+			    default:
+			    	new Throwable("Warning: unexpected parent for OT element: " + parent).printStackTrace(); //$NON-NLS-1$
+			    	return result;
+			}
+			parent = parent.getParent();
 		}
 		return result;
 	}

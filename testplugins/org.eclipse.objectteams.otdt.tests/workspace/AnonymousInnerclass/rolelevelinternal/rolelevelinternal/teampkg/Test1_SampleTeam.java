@@ -1,6 +1,7 @@
+package rolelevelinternal.teampkg;
+
 import rolelevelinternal.ordinarypkg.OrdinaryClass;
 
-package rolelevelinternal.teampkg;
 
 /**
  * $Id: Test1_SampleTeam.java 5955 2005-06-21 16:04:55Z haebor $

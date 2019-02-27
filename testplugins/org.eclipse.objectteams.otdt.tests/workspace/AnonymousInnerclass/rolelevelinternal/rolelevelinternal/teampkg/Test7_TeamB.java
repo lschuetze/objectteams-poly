@@ -1,6 +1,6 @@
-import rolelevelinternal.basepkg.SampleBase;
-
 package rolelevelinternal.teampkg;
+
+import rolelevelinternal.basepkg.SampleBase;
 
 /**
  * $Id: Test7_TeamB.java 5955 2005-06-21 16:04:55Z haebor $

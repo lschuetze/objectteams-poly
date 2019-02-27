@@ -44,7 +44,7 @@ import org.eclipse.objectteams.otdt.core.OTModelManager;
 public class Test3a extends AttributeAssignmentTest
 {
 
-    private final String ANONYMOUS_MAPPING_NAME = "roleMethod() <- baseMethod()";
+    private final String ANONYMOUS_MAPPING_NAME = "roleMethod <- baseMethod";
     private final String SUPERROLE_NAME = "Role1"; 
     private final String MAPPED_ROLEMETHOD_NAME = "roleMethod";
     private final String BASE_PKG = SRC_FOLDER + "." + "basepkg";
@@ -188,7 +188,7 @@ public class Test3a extends AttributeAssignmentTest
         IMethodMapping[] mappings = role.getMethodMappings();
         assertNotNull(mappings);
         assertTrue(mappings.length == 1);
-        assertEquals(mappings[0].getElementName(), ANONYMOUS_MAPPING_NAME);
+        assertEquals(ANONYMOUS_MAPPING_NAME, mappings[0].getElementName());
         
         assertTrue(mappings[0] instanceof ICallinMapping);
         ICallinMapping callinMapping = (ICallinMapping) mappings[0];
