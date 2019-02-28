@@ -966,6 +966,22 @@ public Object[] getEmulationPath(ReferenceBinding targetEnclosingType, boolean o
 	{
 		SyntheticArgumentBinding syntheticArg;
 		if ((syntheticArg = ((NestedTypeBinding) sourceType).getSyntheticArgument(targetEnclosingType, onlyExactMatch, false)) != null) {
+			if (currentMethodScope.isLambdaScope()) {
+				// cf getEmulationPath(LocalVariableBinding):
+				LambdaExpression lambda = (LambdaExpression) currentMethodScope.referenceContext;
+				MethodScope roleMethodScope = currentMethodScope.enclosingMethodScope();
+				if (roleMethodScope != null && roleMethodScope.extraSyntheticArguments != null) {
+					// these need one more level of indirection, because this$0 is emulated by a synthArg
+					for (SyntheticArgumentBinding synthMethodArg : roleMethodScope.extraSyntheticArguments) {
+						if (CharOperation.equals(synthMethodArg.name, syntheticArg.name)
+								&& TypeBinding.equalsEquals(synthMethodArg.type, syntheticArg.type)) {
+							SyntheticArgumentBinding syntheticArgument = lambda.getSyntheticArgument(synthMethodArg);
+							if (syntheticArgument != null)
+								return new VariableBinding[] { syntheticArgument };
+						}
+					}
+				}
+			}
 			return new Object[] { syntheticArg };
 		}
 	}

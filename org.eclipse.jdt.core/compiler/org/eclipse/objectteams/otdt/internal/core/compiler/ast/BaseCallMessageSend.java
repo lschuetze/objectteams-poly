@@ -26,6 +26,7 @@ import org.eclipse.jdt.internal.compiler.ast.AbstractMethodDeclaration;
 import org.eclipse.jdt.internal.compiler.ast.Argument;
 import org.eclipse.jdt.internal.compiler.ast.Expression;
 import org.eclipse.jdt.internal.compiler.ast.IntLiteral;
+import org.eclipse.jdt.internal.compiler.ast.LambdaExpression;
 import org.eclipse.jdt.internal.compiler.ast.MessageSend;
 import org.eclipse.jdt.internal.compiler.ast.MethodDeclaration;
 import org.eclipse.jdt.internal.compiler.flow.FlowContext;
@@ -41,6 +42,7 @@ import org.eclipse.jdt.internal.compiler.lookup.MethodScope;
 import org.eclipse.jdt.internal.compiler.lookup.ReferenceBinding;
 import org.eclipse.jdt.internal.compiler.lookup.Scope;
 import org.eclipse.jdt.internal.compiler.lookup.SourceTypeBinding;
+import org.eclipse.jdt.internal.compiler.lookup.SyntheticArgumentBinding;
 import org.eclipse.jdt.internal.compiler.lookup.TypeBinding;
 import org.eclipse.jdt.internal.compiler.lookup.TypeConstants;
 import org.eclipse.jdt.internal.compiler.problem.ProblemReporter;
@@ -456,5 +458,36 @@ public class BaseCallMessageSend extends AbstractExpressionWrapper
 	@Override
 	public boolean statementExpression() {
 		return ((this.bits & ASTNode.ParenthesizedMASK) == 0);
+	}
+	/**
+	 * Under OTDRE detect this structure:
+	 * <ul>
+	 * <li>static callin method
+	 * <li>containing a lambda
+	 * <li>containing a base call
+	 * </ul> 
+	 * In this structure the base call (_OT$callNext()) needs to tunnel the call target
+	 * (team instance) through yet another synthetic argument. 
+	 */
+	public static void lambdaCapture(LambdaExpression lambda, BlockScope currentScope) {
+		if (currentScope.compilerOptions().weavingScheme != WeavingScheme.OTDRE)
+			return ;
+		MethodScope methodScope = currentScope.methodScope();
+		if (methodScope == null || methodScope.extraSyntheticArguments == null)
+			return;
+		SyntheticArgumentBinding[] extraSyntheticArguments = methodScope.extraSyntheticArguments;		
+		ASTVisitor findBaseCalls = new ASTVisitor() {
+			@Override
+			public boolean visit(BaseCallMessageSend messageSend, BlockScope scope) {
+				TypeBinding receiverType = messageSend._receiver.resolvedType;
+				if (receiverType != null && receiverType.isValidBinding()) {
+					for (SyntheticArgumentBinding synthArg : extraSyntheticArguments)
+						if (TypeBinding.equalsEquals(synthArg.type, receiverType))
+							lambda.addSyntheticArgument(synthArg);
+				}
+				return super.visit(messageSend, scope);
+			}
+		};
+		lambda.body.traverse(findBaseCalls, currentScope);
 	}
 }

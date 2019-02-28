@@ -34,7 +34,7 @@ public class Java8 extends AbstractOTJLDTest {
 // Static initializer to specify tests subset using TESTS_* static variables
 // All tests which do not belong to the subset are skipped...
 	static {
-		TESTS_NAMES = new String[] { "testBug541865"};
+//		TESTS_NAMES = new String[] { "testBug541865"};
 //		TESTS_NUMBERS = new int[] { 1459 };
 //		TESTS_RANGE = new int[] { 1097, -1 };
 	}

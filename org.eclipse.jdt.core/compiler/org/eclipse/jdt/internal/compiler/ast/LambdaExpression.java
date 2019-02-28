@@ -108,6 +108,7 @@ import org.eclipse.jdt.internal.compiler.problem.AbortMethod;
 import org.eclipse.jdt.internal.compiler.problem.AbortType;
 import org.eclipse.jdt.internal.compiler.problem.ProblemReporter;
 import org.eclipse.jdt.internal.compiler.problem.ProblemSeverities;
+import org.eclipse.objectteams.otdt.internal.core.compiler.ast.BaseCallMessageSend;
 
 @SuppressWarnings({"rawtypes", "unchecked"})
 public class LambdaExpression extends FunctionalExpression implements IPolyExpression, ReferenceContext, ProblemSeverities {
@@ -190,6 +191,11 @@ public class LambdaExpression extends FunctionalExpression implements IPolyExpre
 	
 	@Override
 	public void generateCode(BlockScope currentScope, CodeStream codeStream, boolean valueRequired) {
+//{ObjectTeams: this needs to happen after AbstractMethodDeclaration.generateCode() has started
+//  			(for scope.extraSyntheticArguments) and before this lambda computes its signature
+//				considering outerLocalVariables:
+		BaseCallMessageSend.lambdaCapture(this, currentScope);
+// SH}
 		if (this.shouldCaptureInstance) {
 			this.binding.modifiers &= ~ClassFileConstants.AccStatic;
 		} else {
