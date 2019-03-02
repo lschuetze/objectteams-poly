@@ -1,7 +1,7 @@
 /**********************************************************************
  * This file is part of "Object Teams Development Tooling"-Software
  *
- * Copyright 2005, 2017 Fraunhofer Gesellschaft, Munich, Germany,
+ * Copyright 2005, 2019 Fraunhofer Gesellschaft, Munich, Germany,
  * for its Fraunhofer Institute for Computer Architecture and Software
  * Technology (FIRST), Berlin, Germany and Technical University Berlin,
  * Germany.
@@ -24,6 +24,7 @@ import java.lang.ref.SoftReference;
 import java.lang.ref.WeakReference;
 import java.util.Map.Entry;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.Stack;
 import java.util.WeakHashMap;
 
@@ -329,14 +330,14 @@ public class Config implements ConfigHelper.IConfig, Comparable<Config> {
 		if (configsByClient.size() > UPPER_THRESHOLD) {
 			if (DEBUG) {
 				System.out.println("============ #clients: "+configsByClient.size()); //$NON-NLS-1$
-				for (Entry<Object, Config> entry : configsByClient.entrySet()) {
+				for (Entry<Object, Config> entry : Collections.synchronizedMap(configsByClient).entrySet()) {
 					Object key = entry.getKey();
 					if (key != null && !(key instanceof Compiler))
 						System.out.println("Client "+key.getClass()); //$NON-NLS-1$
 				}
 			}
 			synchronized (configsByClient) {				
-				Object[] keys = configsByClient.values().toArray();
+				Object[] keys = Collections.synchronizedMap(configsByClient).values().toArray();
 				Arrays.sort(keys);
 				int threshold = keys.length-LOWER_THRESHOLD;
 				for (int i=0; i<threshold; i++) {
@@ -352,7 +353,7 @@ public class Config implements ConfigHelper.IConfig, Comparable<Config> {
 			}
 			if (DEBUG) {
 				System.out.println("============ #clients: "+configsByClient.size()); //$NON-NLS-1$
-				for (Object client : configsByClient.keySet()) {
+				for (Object client : Collections.synchronizedMap(configsByClient).keySet()) {
 					if (client != null && !(client instanceof Compiler))
 						System.out.println("Client "+client.getClass()); //$NON-NLS-1$
 				}
