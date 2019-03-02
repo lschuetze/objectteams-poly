@@ -65,8 +65,8 @@ public team class PDELaunchingAdaptor {
 	static final String ENABLE_OTEQUINOX      = "-Dot.equinox=1"; //$NON-NLS-1$     // this also causes the WORKAROUND_REPOSITORY flag being set to true in OTRE.
 	static final String DISABLE_OTEQUINOX     = "-Dot.equinox=false"; //$NON-NLS-1$ // prevents OTWeavingHook installation
 	static final String OT_DEBUG_VMARG        = "-Dot.debug"; //$NON-NLS-1$
-	static final String OTE_AGENT_ARG		  = "-javaagent:" + TransformerPlugin.getOtequinoxAgentPath();
-	static final String OT_WEAVING			  = "-Dot.weaving="; // need to append either "otre" or "otdre"
+	static final String OTE_AGENT_ARG		  = "-javaagent:" + TransformerPlugin.getOtequinoxAgentPath(); //$NON-NLS-1$
+	static final String OT_WEAVING			  = "-Dot.weaving="; // need to append either "otre" or "otdre" //$NON-NLS-1$
 
 	static final String[] OT_VM_ARGS          = { ENABLE_OTEQUINOX, OT_WEAVING };
 	static final String[] OTDRE_VM_ARGS          = { ENABLE_OTEQUINOX, OTE_AGENT_ARG, OT_WEAVING };
@@ -273,11 +273,11 @@ public team class PDELaunchingAdaptor {
 
 		static void getMergedBundleMap(Map<IPluginModelBase, String> map, boolean enable) {
 			for (IPluginModelBase plugin: map.keySet())
-				if (plugin.getPluginBase().getId().equals("org.eclipse.objectteams.otequinox")) {
+				if (plugin.getPluginBase().getId().equals("org.eclipse.objectteams.otequinox")) { //$NON-NLS-1$
 					if (enable)
-						map.put(plugin, "1:true");
+						map.put(plugin, "1:true"); //$NON-NLS-1$
 					else
-						map.put(plugin,  "default:default");
+						map.put(plugin,  "default:default"); //$NON-NLS-1$
 					return;
 				}
 		}		

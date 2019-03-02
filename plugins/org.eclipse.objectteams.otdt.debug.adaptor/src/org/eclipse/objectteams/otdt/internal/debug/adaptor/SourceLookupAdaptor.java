@@ -57,7 +57,7 @@ public team class SourceLookupAdaptor {
 		IType resolveType(String qualifiedName, IJavaElement javaElement) <- replace IType resolveType(String qualifiedName, IJavaElement javaElement);
 
 		static callin IType resolveType(String qualifiedName, IJavaElement javaElement) {
-			qualifiedName = qualifiedName.replace("$__OT__", "$");
+			qualifiedName = qualifiedName.replace("$__OT__", "$"); //$NON-NLS-1$ //$NON-NLS-2$
     		IType result = base.resolveType(qualifiedName, javaElement);
     		if (result != null && result.exists())
     			return result;

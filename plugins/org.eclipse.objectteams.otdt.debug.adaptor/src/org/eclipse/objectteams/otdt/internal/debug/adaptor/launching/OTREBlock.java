@@ -115,7 +115,7 @@ public abstract class OTREBlock
 	boolean hasOTJProject(ILaunchConfiguration config) {
 		try {
 			String projectName = config.getAttribute(IJavaLaunchConfigurationConstants.ATTR_PROJECT_NAME, (String)null);
-			if (projectName != null && new Path("").isValidSegment(projectName)) {
+			if (projectName != null && new Path("").isValidSegment(projectName)) { //$NON-NLS-1$
 				IProject project = ResourcesPlugin.getWorkspace().getRoot().getProject(projectName);
 				if (project != null && project.hasNature(JavaCore.OTJ_NATURE_ID))
 					return true;

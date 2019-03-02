@@ -80,7 +80,6 @@ public team class DebugUIDialogAdaptor {
 	/** Gate to base-level information, here: whether current launch is ot-enabled. */
 	protected class LaunchConfigurationsDialog playedBy LaunchConfigurationsDialog 
 	{
-		@SuppressWarnings("decapsulation")
 		LaunchConfigurationTabGroupViewer getTabViewer() -> LaunchConfigurationTabGroupViewer getTabViewer();
 		
 		protected boolean isOTJlaunch() {

@@ -53,7 +53,10 @@ public team class PresentationAdaptor
 		INITIAL, CHAIN, ORIG, TEAM_WRAPPER, BASE_CALL, // callin related
 		LIFT,
 		WHEN, BASE_WHEN, // pedicates 
-		DECAPS, FIELD_ACCESS, METHOD_BRIDGE, CREATOR, INIT_FIELDS // various generated accesses
+		DECAPS, FIELD_ACCESS, METHOD_BRIDGE, CREATOR, INIT_FIELDS, // various generated accesses
+		// OTDRE:
+		T_CALL_BEFORE, T_CALL_REPLACE, T_CALL_AFTER, T_CALL_ALL_BINDINGS, T_CALL_NEXT, T_TERMINAL_CALL_NEXT, // team methods
+		CALL_ORIG, CALL_ALL_BINDINGS, // base method
 	}
 	
 	@SuppressWarnings("nls")
@@ -109,6 +112,10 @@ public team class PresentationAdaptor
 			case METHOD_BRIDGE:
 			case CREATOR:
 			case INIT_FIELDS:
+			case T_CALL_ALL_BINDINGS:
+			case T_CALL_NEXT:
+			case T_TERMINAL_CALL_NEXT:
+			case CALL_ALL_BINDINGS:
 				return true;
 			default:
 				return false;
@@ -120,6 +127,10 @@ public team class PresentationAdaptor
 			case BASE_CALL:
 			case WHEN:
 			case BASE_WHEN:
+			case T_CALL_BEFORE:
+			case T_CALL_REPLACE:
+			case T_CALL_AFTER:
+			case CALL_ORIG:
 				return true;
 			default:
 				return false;
@@ -158,6 +169,21 @@ public team class PresentationAdaptor
 					return "[access to constructor of role "+segments[2]+"]";
 				case INIT_FIELDS:
 					return "[initialize role fields]";
+				case T_CALL_ALL_BINDINGS:
+					return "[team dispatching callins]";
+				case T_CALL_BEFORE:
+					return "[dispatching before callins]";
+				case T_CALL_REPLACE:
+					return "[dispatching replace callins]";
+				case T_CALL_AFTER:
+					return "[dispatching after callins]";
+				case T_CALL_NEXT:
+				case T_TERMINAL_CALL_NEXT:
+					return "[dispatching to base or next team]";
+				case CALL_ALL_BINDINGS:
+					return "[base dispatching callins]";
+				case CALL_ORIG:
+					return "[executing base method]";
 				default:
 					return result;
 				}
@@ -184,6 +210,20 @@ public team class PresentationAdaptor
 						this.kind= MethodKind.BASE_WHEN;
 					else if (segments[1].equals("InitFields"))
 						this.kind= MethodKind.INIT_FIELDS;
+					else if (segments[1].equals("callAllBindings"))
+						this.kind= MethodKind.T_CALL_ALL_BINDINGS;
+					else if (segments[1].equals("callBefore"))
+						this.kind= MethodKind.T_CALL_BEFORE;
+					else if (segments[1].equals("callReplace"))
+						this.kind= MethodKind.T_CALL_REPLACE;
+					else if (segments[1].equals("callAfter"))
+						this.kind= MethodKind.T_CALL_AFTER;
+					else if (segments[1].equals("callNext"))
+						this.kind= MethodKind.T_CALL_NEXT;
+					else if (segments[1].equals("terminalCallNext"))
+						this.kind= MethodKind.T_TERMINAL_CALL_NEXT;
+					else if (segments[1].equals("callOrig"))
+						this.kind= MethodKind.CALL_ORIG;
 					break;
 				case 3:
 					if      (segments[2].equals("orig"))   // _OT$bm$orig
@@ -210,6 +250,9 @@ public team class PresentationAdaptor
 				if (segments.length > 1 && segments[1].equals("decaps")) // _OT$decaps$xy.. (even as prefix to other name patterns)
 					this.kind = MethodKind.DECAPS;					
 				return segments;
+			} else if (methodName.equals("callAllBindings")) { // in base class, without _OT$ prefix
+				this.kind = MethodKind.CALL_ALL_BINDINGS;
+				return new String[0];
 			}
 			return null;
 		}
