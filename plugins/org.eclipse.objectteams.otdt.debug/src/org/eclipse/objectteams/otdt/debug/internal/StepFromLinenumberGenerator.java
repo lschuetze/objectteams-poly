@@ -1,7 +1,7 @@
 /**********************************************************************
  * This file is part of "Object Teams Development Tooling"-Software
  * 
- * Copyright 2004, 2006 Fraunhofer Gesellschaft, Munich, Germany,
+ * Copyright 2004, 2019 Fraunhofer Gesellschaft, Munich, Germany,
  * for its Fraunhofer Institute for Computer Architecture and Software
  * Technology (FIRST), Berlin, Germany and Technical University Berlin,
  * Germany.
@@ -26,6 +26,7 @@ import org.eclipse.debug.core.DebugPlugin;
 import org.eclipse.debug.core.IDebugEventFilter;
 import org.eclipse.debug.core.model.IStackFrame;
 import org.eclipse.jdt.debug.core.IJavaDebugTarget;
+import org.eclipse.jdt.internal.debug.core.model.JDIStackFrame;
 import org.eclipse.jdt.internal.debug.core.model.JDIThread;
 import org.eclipse.objectteams.otdt.core.compiler.ISMAPConstants;
 
@@ -109,7 +110,14 @@ public class StepFromLinenumberGenerator implements IDebugEventFilter, ISMAPCons
     {
         if (topStackframe.getLineNumber() == STEP_OVER_LINENUMBER)
             return true;
-        
+        String currClass = ((JDIStackFrame)topStackframe).getDeclaringTypeName();
+		if (currClass.equals("org.objectteams.Team")) { //$NON-NLS-1$
+			String currMethod = ((JDIStackFrame)topStackframe).getMethodName();
+			if (currMethod.equals("_OT$callBefore") || currMethod.equals("_OT$callAfter")) { //$NON-NLS-1$ //$NON-NLS-2$
+				return true;
+			}
+		}
+
         return false;
     }
 
@@ -117,6 +125,17 @@ public class StepFromLinenumberGenerator implements IDebugEventFilter, ISMAPCons
     {
         if (topStackframe.getLineNumber() == STEP_INTO_LINENUMBER)
             return true;
+        String currClass = ((JDIStackFrame)topStackframe).getDeclaringTypeName();
+		if (currClass.equals("org.objectteams.Team")) { //$NON-NLS-1$
+			String currMethod = ((JDIStackFrame)topStackframe).getMethodName();
+			switch (currMethod) {
+			case "_OT$callAllBindings": //$NON-NLS-1$
+			case "_OT$callReplace": //$NON-NLS-1$
+			case "_OT$callNext": //$NON-NLS-1$
+			case "_OT$terminalCallNext": //$NON-NLS-1$
+				return true;
+			}
+		}
         
         return false;
     }

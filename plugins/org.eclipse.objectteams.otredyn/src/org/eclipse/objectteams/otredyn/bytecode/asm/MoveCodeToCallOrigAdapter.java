@@ -141,6 +141,7 @@ public class MoveCodeToCallOrigAdapter extends AbstractTransformableClassNode {
 		replaceReturn(orgInstructions, returnType);
 		
 		newInstructions.add(orgInstructions); // this wipes orgInstructions
+		addLineNumber(orgMethod.instructions, line);
 		addReturn(orgMethod.instructions,Type.getReturnType(orgMethod.desc)); // restores minimal code
 		if (orgMethod.tryCatchBlocks != null) {
 			addTryCatchBlocks(orgMethod, callOrig);

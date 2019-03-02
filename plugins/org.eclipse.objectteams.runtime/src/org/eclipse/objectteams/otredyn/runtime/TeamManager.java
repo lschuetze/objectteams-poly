@@ -247,6 +247,8 @@ public class TeamManager implements ITeamManager {
 	private static void handleDecapsulation(Class<? extends ITeam> teamClass) {
 		IClassIdentifierProvider provider = ClassIdentifierProviderFactory.getClassIdentifierProvider();
 		String teamId = provider.getClassIdentifier(teamClass);
+		if (classRepository == null)
+			return;
 		IBoundTeam teem = classRepository.getTeam(teamClass.getName(), teamId, teamClass.getClassLoader());
 
 		Set<IBoundClass> baseClasses = new HashSet<IBoundClass>();

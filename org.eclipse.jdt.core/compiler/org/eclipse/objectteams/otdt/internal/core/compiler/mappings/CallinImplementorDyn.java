@@ -15,6 +15,7 @@
 package org.eclipse.objectteams.otdt.internal.core.compiler.mappings;
 
 import static org.eclipse.jdt.internal.compiler.classfmt.ClassFileConstants.AccPublic;
+import static org.eclipse.objectteams.otdt.core.compiler.ISMAPConstants.*;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -372,7 +373,13 @@ public class CallinImplementorDyn extends MethodMappingImplementor {
 
 			@Override
 			protected boolean generateStatements(AbstractMethodDeclaration methodDecl) {
-				
+				teamDecl.getTeamModel().getLineNumberProvider().addLineInfo(teamDecl.binding, STEP_OVER_LINENUMBER, -1);
+				teamDecl.getTeamModel().getLineNumberProvider().addLineInfo(teamDecl.binding, STEP_INTO_LINENUMBER, -1);
+				AstGenerator stepOverGen = new AstGenerator(STEP_OVER_SOURCEPOSITION_START, STEP_OVER_SOURCEPOSITION_END);
+				AstGenerator stepIntoGen = new AstGenerator(STEP_INTO_SOURCEPOSITION_START, STEP_INTO_SOURCEPOSITION_END);
+				stepOverGen.replaceableEnclosingClass = teamDecl.binding;
+				stepIntoGen.replaceableEnclosingClass = teamDecl.binding;
+
 				// into head of tryStats we generate local vars to be shared by case statements:
 				List<Statement> tryStats = new ArrayList<Statement>();
 
@@ -405,12 +412,12 @@ public class CallinImplementorDyn extends MethodMappingImplementor {
 					if (!callinDecl.hasParsedParamMappings) // during reconcile we may not be interested in this level of detail (e.g., of a role file)
 						continue;
 
-					gen.retargetFrom(callinDecl);
+					AstGenerator callinGen = new AstGenerator(callinDecl);
 
 					// one case label per bound base method:
 					for (MethodSpec baseSpec : callinDecl.baseMethodSpecs) {
 						int callinID = baseSpec.getCallinId(aTeam, callinDecl.name);
-						statements.add(gen.caseStatement(gen.intLiteral(callinID)));				// case <baseMethod.callinId>: 
+						statements.add(callinGen.caseStatement(callinGen.intLiteral(callinID)));				// case <baseMethod.callinId>: 
 						handledCallinIds[callinID] = true;
 
 						PredicateGenerator predGen = new PredicateGenerator(
@@ -435,15 +442,15 @@ public class CallinImplementorDyn extends MethodMappingImplementor {
 								&& (callinDecl.mappings != null || callinDecl.predicate != null) 
 								&& baseReturn != TypeBinding.VOID) {
 							resultName = RESULT;
-							callinDecl.resultVar = gen.localBaseVariable(RESULT, baseReturn,							//   BaseReturnType result = (BaseReturnType)_OT$result; 
-									  				gen.createCastOrUnboxing(gen.singleNameReference(_OT_RESULT), baseReturn, true/*baseAccess*/));
+							callinDecl.resultVar = callinGen.localBaseVariable(RESULT, baseReturn,							//   BaseReturnType result = (BaseReturnType)_OT$result; 
+													callinGen.createCastOrUnboxing(callinGen.singleNameReference(_OT_RESULT), baseReturn, true/*baseAccess*/));
 							blockStatements.add(callinDecl.resultVar);
 						}
 						// expose casted _base$ as "base":
-						blockStatements.add(gen.localVariable(IOTConstants.BASE,
-													gen.alienScopeTypeReference(gen.baseTypeReference(roleType.baseclass()),callinDecl.scope), 
-													gen.castExpression(gen.baseNameReference(_BASE$), 
-															gen.alienScopeTypeReference(gen.baseTypeReference(roleType.baseclass()),callinDecl.scope), 
+						blockStatements.add(callinGen.localVariable(IOTConstants.BASE,
+												callinGen.alienScopeTypeReference(callinGen.baseTypeReference(roleType.baseclass()),callinDecl.scope),
+												callinGen.castExpression(callinGen.baseNameReference(_BASE$), 
+															callinGen.alienScopeTypeReference(callinGen.baseTypeReference(roleType.baseclass()),callinDecl.scope), 
 															CastExpression.RAW)));
 
 						// -------------- base predicate check -------
@@ -455,20 +462,20 @@ public class CallinImplementorDyn extends MethodMappingImplementor {
 				        	{
 								resultName2 = IOTConstants.RESULT;
 				        	}
-				        	// FIXME(SH): only call predidate for the current base method (from BoundMethodID?)
+				        	// FIXME(SH): only call predicate for the current base method (from BoundMethodID?)
 							Statement predicateCheck = predGen.createBasePredicateCheck(
-									callinDecl, baseMethodSpec, resultName2, gen);
+									callinDecl, baseMethodSpec, resultName2, stepIntoGen);
 							if (predicateCheck != null) {
 								blockStatements.add(predicateCheck);												//   if (!base$when(baseArg,...)) throw new LiftingVetoException();
 								hasBasePredicate = true;
 							}
 				        }
 				        // below this line we are "inside" the callin execution:
-				        blockStatements.add(gen.assignment(gen.singleNameReference(CallinImplementor.OLD_IS_EXECUTING), // _OT$oldIsExecutingCallin = _OT$setExecutingCallin(true); // local declared at top level
-				        								   gen.messageSend(
-			        												gen.thisReference(),
-			        												IOTConstants.SET_EXECUTING_CALLIN,
-			        												new Expression[]{ gen.booleanLiteral(true) })));
+				        blockStatements.add(callinGen.assignment(callinGen.singleNameReference(CallinImplementor.OLD_IS_EXECUTING), // _OT$oldIsExecutingCallin = _OT$setExecutingCallin(true); // local declared at top level
+				        										 stepOverGen.messageSend(
+				        												 stepOverGen.thisReference(),
+				        												 IOTConstants.SET_EXECUTING_CALLIN,
+				        												 new Expression[]{ stepOverGen.booleanLiteral(true) })));
 
 				        // ----------- receiver for role method call: -----------
 				        Expression receiver;
@@ -479,25 +486,25 @@ public class CallinImplementorDyn extends MethodMappingImplementor {
 								canLiftingFail |= checkLiftingProblem(teamDecl, callinDecl, roleType);
 	
 								roleVar = (LOCAL_ROLE+statements.size()).toCharArray();
-								TypeReference roleTypeReference = gen.roleTypeReference(teamDecl.getTeamModel().getTThis(), roleType, 0);
-								blockStatements.add(gen.localVariable(roleVar, 										//   RoleType local$n = this._OT$liftToRoleType((BaseType)base);
-														gen.alienScopeTypeReference(roleTypeReference, callinDecl.scope),
+								TypeReference roleTypeReference = callinGen.roleTypeReference(teamDecl.getTeamModel().getTThis(), roleType, 0);
+								blockStatements.add(callinGen.localVariable(roleVar, 										//   RoleType local$n = this._OT$liftToRoleType((BaseType)base);
+														callinGen.alienScopeTypeReference(roleTypeReference, callinDecl.scope),
 										ClassFileConstants.AccFinal,
 										Lifting.liftCall(callMethod.scope,
-														 gen.thisReference(),
-														 gen.baseNameReference(IOTConstants.BASE),
+														 callinGen.thisReference(),
+														 callinGen.baseNameReference(IOTConstants.BASE),
 														 callMethod.scope.getType(IOTConstants.ORG_OBJECTTEAMS_IBOUNDBASE2, 3),
 														 roleType,
 														 false,
-														 gen)));
-								receiver = gen.thislikeNameReference(roleVar);
+														 callinGen)));
+								receiver = callinGen.thislikeNameReference(roleVar);
 								// private receiver needs to be casted to the class.
 							} else {
 								// method is from role's enclosing team
-								receiver = gen.qualifiedThisReference(TeamModel.strengthenEnclosing(teamDecl.binding, roleMethodBinding.declaringClass));
+								receiver = callinGen.qualifiedThisReference(TeamModel.strengthenEnclosing(teamDecl.binding, roleMethodBinding.declaringClass));
 							}
 						} else {
-							receiver = gen.singleNameReference(callinDecl.getRoleMethod().declaringClass.sourceName());
+							receiver = callinGen.singleNameReference(callinDecl.getRoleMethod().declaringClass.sourceName());
 						}
 						
 						int baseArgOffset = 0;
@@ -509,12 +516,12 @@ public class CallinImplementorDyn extends MethodMappingImplementor {
 							TypeBinding[] baseParams = baseSpec.resolvedParameters();
 							for (int i=0; i<baseSpec.arguments.length; i++) {										//   BaseType baseArg = castAndOrUnbox(arguments[n]);
 								Argument baseArg = baseSpec.arguments[i];
-								Expression rawArg = gen.arrayReference(gen.singleNameReference(ARGUMENTS), i+baseArgOffset);
+								Expression rawArg = callinGen.arrayReference(callinGen.singleNameReference(ARGUMENTS), i+baseArgOffset);
 								Expression init = rawArg;
 								if (!baseParams[i].isTypeVariable())
-									init = gen.createCastOrUnboxing(rawArg, baseParams[i], callinDecl.scope);
-								LocalDeclaration baseArgLocal = gen.localVariable(baseArg.name,
-																	gen.alienScopeTypeReference(baseArg.type, callinDecl.scope),
+									init = callinGen.createCastOrUnboxing(rawArg, baseParams[i], callinDecl.scope);
+								LocalDeclaration baseArgLocal = callinGen.localVariable(baseArg.name,
+																	callinGen.alienScopeTypeReference(baseArg.type, callinDecl.scope),
 																	init);
 								baseArgLocal.modifiers |= (baseArg.modifiers & ClassFileConstants.AccFinal);
 								if (hasBasePredicate) {
@@ -525,7 +532,7 @@ public class CallinImplementorDyn extends MethodMappingImplementor {
 									baseArgLocal.initialization = new PotentialRoleReceiverExpression(
 																	  init,
 																	  roleVar,
-																	  gen.typeReference(roleType));
+																	  callinGen.typeReference(roleType));
 									blockStatements.add(baseArgLocal);
 								}
 							}
@@ -537,7 +544,7 @@ public class CallinImplementorDyn extends MethodMappingImplementor {
 						int idx = 0;
 						if (isReplace)
 							for (char[] argName : REPLACE_ARG_NAMES)
-								callArgs[idx++] = gen.singleNameReference(argName);									//    prepare: base, teams, boundMethodId, callinIds, index, arguments ...
+								callArgs[idx++] = callinGen.singleNameReference(argName);									//    prepare: base, teams, boundMethodId, callinIds, index, arguments ...
 						
 						// prepare parameter mappings:
 						callinDecl.traverse(new ReplaceResultReferenceVisitor(callinDecl), callinDecl.scope.classScope());
@@ -557,24 +564,24 @@ public class CallinImplementorDyn extends MethodMappingImplementor {
 							TypeReference localTypeRef = null;
 							if (callinDecl.mappings == null) {
 								// ------------ unmapped arguments --------------
-								arg = gen.arrayReference(gen.singleNameReference(ARGUMENTS), i+baseArgOffset);					//    prepare: somePreparation(arguments[i])
+								arg = callinGen.arrayReference(callinGen.singleNameReference(ARGUMENTS), i+baseArgOffset);					//    prepare: somePreparation(arguments[i])
 								TypeBinding baseArgType = baseSpec.resolvedParameters()[i];
 								if (roleParam.isBaseType()) {
 									// this includes intermediate cast to boxed type:
-									arg = gen.createUnboxing(arg, (BaseTypeBinding)roleParam);
+									arg = callinGen.createUnboxing(arg, (BaseTypeBinding)roleParam);
 								} else if (baseArgType.isBaseType()) {
 									// Object -> BoxingType
-									arg = gen.castExpression(arg,
-															 gen.qualifiedTypeReference(AstGenerator.boxTypeName((BaseTypeBinding) baseArgType)),
+									arg = callinGen.castExpression(arg,
+															 callinGen.qualifiedTypeReference(AstGenerator.boxTypeName((BaseTypeBinding) baseArgType)),
 															 CastExpression.RAW);
 								} else {
 									// Object -> MyBaseClass
 									ReferenceBinding baseclass = roleType.baseclass();
 									if (baseclass instanceof DependentTypeBinding && baseArgType instanceof ReferenceBinding)
 										baseArgType = RoleTypeCreator.maybeInstantiateFromPlayedBy(callinDecl.scope, (ReferenceBinding)baseArgType);
-									arg = gen.castExpression(arg,
-															 gen.alienScopeTypeReference(
-																	gen.typeReference(baseArgType),
+									arg = callinGen.castExpression(arg,
+															 callinGen.alienScopeTypeReference(
+																	callinGen.typeReference(baseArgType),
 																	callinDecl.scope),
 															 CastExpression.DO_WRAP);
 									if (!roleParam.leafComponentType().isBaseType()
@@ -582,20 +589,20 @@ public class CallinImplementorDyn extends MethodMappingImplementor {
 										// lift?(MyBaseClass)
 										Reference liftReceiver = null; // default: let gen find the team
 										if (roleType.isTeam() && TypeBinding.equalsEquals(roleParam.enclosingType(), roleType))
-											liftReceiver = gen.singleNameReference(roleVar); // lift to inner role
-										arg = gen.potentialLift(liftReceiver, arg, roleParam, isReplace/*reversible*/);
-										localTypeRef = gen.typeReference(roleParam);
+											liftReceiver = callinGen.singleNameReference(roleVar); // lift to inner role
+										arg = callinGen.potentialLift(liftReceiver, arg, roleParam, isReplace/*reversible*/);
+										localTypeRef = callinGen.typeReference(roleParam);
 										canLiftingFail |= checkLiftingProblem(teamDecl, callinDecl, (ReferenceBinding)roleParam.leafComponentType());
 									}
 								}
 								if (localTypeRef == null)
-									localTypeRef = gen.baseclassReference(baseArgType); // unless lifting was required above
+									localTypeRef = callinGen.baseclassReference(baseArgType); // unless lifting was required above
 							} else {
 								// ------------ mapped arguments --------------
 				 				if (roleParam.isTypeVariable() && ((TypeVariableBinding)roleParam).declaringElement instanceof CallinCalloutBinding)
-				 					localTypeRef = gen.typeReference(roleParam.erasure()); // cannot explicitly mention this TVB
+				 					localTypeRef = callinGen.typeReference(roleParam.erasure()); // cannot explicitly mention this TVB
 				 				else
-				 					localTypeRef = gen.typeReference(roleParam);
+				 					localTypeRef = callinGen.typeReference(roleParam);
 								
 				 				arg = getArgument(callinDecl, 														//    prepare:  <mappedArg<n>>
 												  (MethodDeclaration) methodDecl,
@@ -612,14 +619,14 @@ public class CallinImplementorDyn extends MethodMappingImplementor {
 								boolean isBaseReference = arg instanceof SingleNameReference 
 														  && CharOperation.equals(((SingleNameReference)arg).token, IOTConstants.BASE);
 								if (needLiftedRoleVar)
-									arg = new PotentialRoleReceiverExpression(arg, roleVar, gen.typeReference(roleType.getRealClass()));
+									arg = new PotentialRoleReceiverExpression(arg, roleVar, callinGen.typeReference(roleType.getRealClass()));
 								// mapped expression may require casting: "base" reference has static type IBoundBase2
 								if (isBaseReference)
-									arg = gen.castExpression(arg, gen.typeReference(roleParam), CastExpression.RAW);
+									arg = callinGen.castExpression(arg, callinGen.typeReference(roleParam), CastExpression.RAW);
 							}
 			 				char[] localName = (OT_LOCAL+i).toCharArray();											//    RoleParamType _OT$local$n = preparedArg<n>;
-							blockStatements.add(gen.localVariable(localName, gen.alienScopeTypeReference(localTypeRef, callinDecl.scope), arg));
-							callArgs[i+idx] = gen.singleNameReference(localName);									//    prepare: ... _OT$local$ ...
+							blockStatements.add(callinGen.localVariable(localName, callinGen.alienScopeTypeReference(localTypeRef, callinDecl.scope), arg));
+							callArgs[i+idx] = callinGen.singleNameReference(localName);									//    prepare: ... _OT$local$ ...
 	
 						}
 						if (hasArgError)
@@ -629,14 +636,14 @@ public class CallinImplementorDyn extends MethodMappingImplementor {
 						Expression[] predicateArgs = isReplace 
 								? MethodSignatureEnhancer.retrenchBasecallArguments(callArgs, true, WeavingScheme.OTDRE)
 								: callArgs;
-						predicateArgs = maybeAddResultReference(callinDecl, predicateArgs, resultName, gen);
+						predicateArgs = maybeAddResultReference(callinDecl, predicateArgs, resultName, callinGen);
 				        Statement rolePredicateCheck = predGen.createPredicateCheck(								//    if (!when(callArgs)) throw new LiftingVetoException();
 				        		callinDecl,
 				        		callinDecl.scope.referenceType(),
 								receiver,
 								predicateArgs,
 								callArgs,
-								gen);
+								stepIntoGen);
 						if (rolePredicateCheck != null)
 				        	// predicateCheck(_OT$role)
 				        	blockStatements.add(rolePredicateCheck);
@@ -645,8 +652,8 @@ public class CallinImplementorDyn extends MethodMappingImplementor {
 						boolean lhsResolvesToTeamMethod = TypeBinding.equalsEquals(callinDecl.getRoleMethod().declaringClass, roleType.enclosingType()); // TODO(SH): more levels
 						MessageSend roleMethodCall = (callinDecl.getRoleMethod().isPrivate() && !lhsResolvesToTeamMethod) 
 							? new PrivateRoleMethodCall(receiver, callinDecl.roleMethodSpec.selector, callArgs, false/*c-t-f*/, 
-													    callinDecl.scope, roleType, callinDecl.getRoleMethod(), gen)
-							: gen.messageSend(receiver, callinDecl.roleMethodSpec.selector, callArgs);
+													    callinDecl.scope, roleType, callinDecl.getRoleMethod(), stepIntoGen)
+							: stepIntoGen.messageSend(receiver, callinDecl.roleMethodSpec.selector, callArgs);
 						roleMethodCall.isGenerated = true; // for PrivateRoleMethodCall
 						roleMethodCall.isPushedOutRoleMethodCall = true;
 						
@@ -659,8 +666,8 @@ public class CallinImplementorDyn extends MethodMappingImplementor {
 								TypeBinding[]/*role,base*/ returnTypes = getReturnTypes(callinDecl, 0);
 								//   who is responsible for lowering: the team or the current role?
 								Expression lowerReceiver = (isRoleOfCurrentRole(roleType, returnTypes[0]))
-										? gen.singleNameReference(roleVar)
-										: genTeamThis(gen, returnTypes[0]);
+										? stepOverGen.singleNameReference(roleVar)
+										: genTeamThis(stepOverGen, returnTypes[0]);
 								result = new Lowering().lowerExpression(methodDecl.scope, result, returnTypes[0], returnTypes[1],
 										lowerReceiver, true/*needNullCheck*/, true/*delayedResolve*/);
 							}
@@ -671,25 +678,25 @@ public class CallinImplementorDyn extends MethodMappingImplementor {
 								&& callinDecl.isResultMapped)
 							{
 								if (isResultBoxed)
-									result = gen.createUnboxing(result, (BaseTypeBinding) baseReturn);
-								Expression mappedResult = callinDecl.getResultExpression(baseSpec, isResultBoxed, gen/*stepOverGen*/);
+									result = callinGen.createUnboxing(result, (BaseTypeBinding) baseReturn);
+								Expression mappedResult = callinDecl.getResultExpression(baseSpec, isResultBoxed, callinGen/*stepOverGen*/);
 								if (!isStaticRoleMethod) 
 									mappedResult = new PotentialRoleReceiverExpression(
 															mappedResult,
 															roleVar,
-															gen.typeReference(roleType.getRealClass()));
+															callinGen.typeReference(roleType.getRealClass()));
 								messageSendStatements = new Statement[] {
 									callinDecl.resultVar =
-										gen.localVariable(IOTConstants.RESULT, baseReturn, 							//   result = (Type)role.roleMethod(args);
-														  gen.castExpression(result, gen.typeReference(baseReturn), CastExpression.RAW)),
+										callinGen.localVariable(IOTConstants.RESULT, baseReturn, 							//   result = (Type)role.roleMethod(args);
+														  callinGen.castExpression(result, callinGen.typeReference(baseReturn), CastExpression.RAW)),
 														  // cast because role return might be generalized
-										gen.returnStatement(mappedResult) 											//   return mappedResult(result);
+										callinGen.returnStatement(mappedResult) 											//   return mappedResult(result);
 								};
 							} else {
 								if (isResultBoxed) {																// $if_need_result_unboxing$
 									messageSendStatements = new Statement[] {
-										gen.localVariable(IOTConstants.OT_RESULT, 									//   Object _OT$result = role.roleMethod(args);
-														  gen.qualifiedTypeReference(TypeConstants.JAVA_LANG_OBJECT), 
+										callinGen.localVariable(IOTConstants.OT_RESULT, 									//   Object _OT$result = role.roleMethod(args);
+														  callinGen.qualifiedTypeReference(TypeConstants.JAVA_LANG_OBJECT), 
 														  result),
 										CallinImplementor.genResultNotProvidedCheck(								//	 if (_OT$result == null)
 														  teamDecl.binding.readableName(), 							//		throw new ResultNotProvidedException(..)
@@ -697,34 +704,32 @@ public class CallinImplementorDyn extends MethodMappingImplementor {
 														  roleMethodBinding, 
 														  roleType.baseclass(), 
 														  baseSpec, 
-														  gen),
-										gen.returnStatement(gen.singleNameReference(IOTConstants.OT_RESULT))		//  return _OT$result;
+														  callinGen),
+										callinGen.returnStatement(callinGen.singleNameReference(IOTConstants.OT_RESULT))		//  return _OT$result;
 									};
 								} else {																			// $endif$
-									messageSendStatements = new Statement[] { gen.returnStatement(result) };		//   return role.roleMethod(args);
+									messageSendStatements = new Statement[] { callinGen.returnStatement(result) };		//   return role.roleMethod(args);
 								}
 							}
 						} else {
 							messageSendStatements = new Statement[] {
 									roleMethodCall,																	//   role.roleMethod(args);
-									gen.breakStatement()															//   break;
+									callinGen.breakStatement()															//   break;
 							};
 						}
 						// assemble:
 						//		try { roleMessageSend(); }
 						//		catch(Exception _OT$caughtException) { throw new SneakyException(_OT$caughtException); }
 						//		finally { _OT$setExecutingCallin(_OT$oldIsExecutingCallin); } 
-						blockStatements.add(protectRoleMethodCall(messageSendStatements, roleMethodBinding, gen));
-						statements.add(gen.block(blockStatements.toArray(new Statement[blockStatements.size()])));
+						blockStatements.add(protectRoleMethodCall(messageSendStatements, roleMethodBinding, stepIntoGen));
+						statements.add(callinGen.block(blockStatements.toArray(new Statement[blockStatements.size()])));
 						// collectively report the problem(s)
 						if (canLiftingFail && callinDecl.rolesWithLiftingProblem != null)
 							for (Map.Entry<ReferenceBinding, Integer> entry : callinDecl.rolesWithLiftingProblem.entrySet())
 								callinDecl.scope.problemReporter().callinDespiteLiftingProblem(entry.getKey(), entry.getValue(), callinDecl);
 					}
 				} // END for (CallinMappingDeclaration callinDecl : callinDecls) 
-				
-				gen.retargetFrom(teamDecl);
-				
+
 				boolean needSuperCall = false;
 				// do we have a relevant super team, which possibly defines more callins?
 				ReferenceBinding superTeam = aTeam.getBinding().superclass();
@@ -760,8 +765,8 @@ public class CallinImplementorDyn extends MethodMappingImplementor {
 						superCallArgs[idx] = gen.singleNameReference(argNames[idx]);
 					// if we have a tsuper team which a corresponding dispatch method that one takes precedence:
 					MessageSend superCall = aTeam.hasTSuperTeamMethod(selector)
-							? gen.tsuperMessageSend(gen.thisReference(), selector, superCallArgs)
-							: gen.messageSend(gen.superReference(), selector, superCallArgs);
+							? stepIntoGen.tsuperMessageSend(stepIntoGen.thisReference(), selector, superCallArgs)
+							: stepIntoGen.messageSend(stepIntoGen.superReference(), selector, superCallArgs);
 					if (isReplace)
 						statements.add(gen.returnStatement(superCall));											//    return super._OT$callReplace(..);
 					else
@@ -780,18 +785,18 @@ public class CallinImplementorDyn extends MethodMappingImplementor {
 					callArgs[callArgs.length-1] = gen.intLiteral(0); // not a base call  
 					statements.add(gen.caseStatement(null)); 													// default:
 					statements.add(gen.returnStatement(															//    return _OT$callNext(..);
-										gen.messageSend(
-											gen.qualifiedThisReference(aTeam.getBinding()), 
+										stepIntoGen.messageSend(
+											stepIntoGen.qualifiedThisReference(aTeam.getBinding()), 
 											OT_CALL_NEXT, 
 											callArgs)));
 					catchStatement1 = gen.returnStatement(
-										gen.messageSend(
-											gen.qualifiedThisReference(aTeam.getBinding()), 
+										stepIntoGen.messageSend(
+											stepIntoGen.qualifiedThisReference(aTeam.getBinding()), 
 											OT_CALL_NEXT, 
 											callArgs));
 					catchStatement2 = gen.returnStatement(
-										gen.messageSend(
-											gen.qualifiedThisReference(aTeam.getBinding()), 
+										stepIntoGen.messageSend(
+											stepIntoGen.qualifiedThisReference(aTeam.getBinding()), 
 											OT_CALL_NEXT, 
 											callArgs));
 				}
@@ -821,9 +826,9 @@ public class CallinImplementorDyn extends MethodMappingImplementor {
 														gen.qualifiedTypeReference(TypeConstants.JAVA_LANG_BOOLEAN),
 														gen.nullLiteral());
 				Statement resetFlag = gen.ifStatement(gen.nonNullCheck(gen.singleNameReference(CallinImplementor.OLD_IS_EXECUTING)),
-										gen.messageSend(gen.thisReference(),
+										stepOverGen.messageSend(stepOverGen.thisReference(),
 														IOTConstants.SET_EXECUTING_CALLIN,
-														new Expression[]{ gen.singleNameReference(CallinImplementor.OLD_IS_EXECUTING) }));
+														new Expression[]{ stepOverGen.singleNameReference(CallinImplementor.OLD_IS_EXECUTING) }));
 				methodDecl.statements = new Statement[] {
 							flagVariable,
 							gen.tryStatement(

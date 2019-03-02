@@ -1,7 +1,7 @@
 /**********************************************************************
  * This file is part of "Object Teams Dynamic Runtime Environment"
  * 
- * Copyright 2009, 2014 Oliver Frank and others.
+ * Copyright 2009, 2019 Oliver Frank and others.
  * 
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -73,7 +73,6 @@ public class CreateSwitchAdapter extends AbstractTransformableClassNode {
 		if (methodNode == null) return false; // doesn't exist, don't transform
 		methodNode.instructions.clear();
 		
-		addLineNumber(methodNode.instructions, 1);
 		addPreSwitchInstructions(methodNode);
 		
 		LabelNode def = new LabelNode();

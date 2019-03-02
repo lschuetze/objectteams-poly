@@ -1,7 +1,7 @@
 /**********************************************************************
  * This file is part of "Object Teams Dynamic Runtime Environment"
  * 
- * Copyright 2009, 2014 Oliver Frank and others.
+ * Copyright 2009, 2019 Oliver Frank and others.
  * 
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -19,6 +19,7 @@ package org.eclipse.objectteams.otredyn.bytecode.asm;
 import org.eclipse.objectteams.otredyn.bytecode.Method;
 import org.eclipse.objectteams.otredyn.transformer.names.ClassNames;
 import org.eclipse.objectteams.otredyn.transformer.names.ConstantMembers;
+import org.eclipse.objectteams.otredyn.util.SMAPConstants;
 import org.objectweb.asm.Opcodes;
 import org.objectweb.asm.Type;
 import org.objectweb.asm.tree.AbstractInsnNode;
@@ -81,7 +82,11 @@ public class CreateCallAllBindingsCallInOrgMethod extends
 				if (!hasGenerated)
 					throw new IllegalStateException("Insertion point for weaving into ctor not found!!!");
 			} else {
+				int startLine = peekFirstLineNumber(method.instructions);
+				if (startLine == -1)
+					startLine = 1;
 				method.instructions.clear();
+				addLineNumber(newInstructions, startLine);
 				generateInvocation(method, args, null, newInstructions);
 			}
 		}
@@ -117,13 +122,15 @@ public class CreateCallAllBindingsCallInOrgMethod extends
 		newInstructions.add(getBoxingInstructions(args, false));
 
 		// this.callAllBindings(boundMethodId, args);
+		addLineNumber(newInstructions, SMAPConstants.STEP_INTO_LINENUMBER);
 		newInstructions.add(new MethodInsnNode(Opcodes.INVOKEVIRTUAL,
 				this.name, ConstantMembers.callAllBindingsClient.getName(),
 				ConstantMembers.callAllBindingsClient.getSignature(), false));
 		Type returnType = Type.getReturnType(method.desc);
 		newInstructions
 				.add(getUnboxingInstructionsForReturnValue(returnType));
-		
+		addLineNumber(newInstructions, SMAPConstants.STEP_OVER_LINENUMBER);
+
 		if (insertBefore != null) {
 			method.instructions.insertBefore(insertBefore, newInstructions);
 			method.instructions.remove(insertBefore); // remove extra RETURN

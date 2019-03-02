@@ -293,7 +293,7 @@ public class Lifting extends SwitchOnBaseTypeGenerator
         if (needMethodBodies) {
         	boolean shouldCallTSuper = implicitSuperRole != null && implicitSuperRole.isBound() && !roleModel._refinesExtends;
         	if (existingConstructor != null)
-        		shouldCallTSuper &= existingConstructor.constructorCall.isImplicitSuper();
+        		shouldCallTSuper &= existingConstructor.constructorCall == null || existingConstructor.constructorCall.isImplicitSuper();
 	        if (instantiableBoundRootRoleNode == roleNode)
 				genLiftToConstructorStatements(
 	            		baseClassBinding,

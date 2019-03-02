@@ -1,7 +1,7 @@
 /**********************************************************************
  * This file is part of "Object Teams Dynamic Runtime Environment"
  * 
- * Copyright 2009, 2012 Oliver Frank and others.
+ * Copyright 2009, 2019 Oliver Frank and others.
  * 
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -18,6 +18,7 @@ package org.eclipse.objectteams.otredyn.bytecode.asm;
 
 import org.eclipse.objectteams.otredyn.transformer.names.ClassNames;
 import org.eclipse.objectteams.otredyn.transformer.names.ConstantMembers;
+import org.eclipse.objectteams.otredyn.util.SMAPConstants;
 import org.objectweb.asm.Label;
 import org.objectweb.asm.Opcodes;
 import org.objectweb.asm.Type;
@@ -71,6 +72,7 @@ public abstract class AbstractCreateDispatchCodeAdapter extends
 	protected InsnList getDispatchCode(MethodNode method, int joinPointId,
 			int boundMethodId) {
 		InsnList instructions = new InsnList();
+		addLineNumber(instructions, SMAPConstants.STEP_OVER_LINENUMBER);
 
 		// teamsAndCallinIds = TeamManager.getTeamsAndCallinIds(joinpointId);
 		instructions.add(createLoadIntConstant(joinPointId));
@@ -121,11 +123,14 @@ public abstract class AbstractCreateDispatchCodeAdapter extends
 		// box the arguments
 		instructions.add(getBoxedArguments(args));
 
+		addLineNumber(instructions, SMAPConstants.STEP_INTO_LINENUMBER);
 		instructions.add(new MethodInsnNode(Opcodes.INVOKEINTERFACE,
 						ClassNames.ITEAM_SLASH, 
 						ConstantMembers.callAllBindingsTeam.getName(),
 						ConstantMembers.callAllBindingsTeam.getSignature(),
 						true));
+
+		addLineNumber(instructions, SMAPConstants.STEP_OVER_LINENUMBER);
 
 		Type returnType = Type.getReturnType(method.desc);
 		instructions.add(getUnboxingInstructionsForReturnValue(returnType));
