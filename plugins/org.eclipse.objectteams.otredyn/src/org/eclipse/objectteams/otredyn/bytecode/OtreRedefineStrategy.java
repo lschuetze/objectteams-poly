@@ -20,6 +20,7 @@ import java.lang.instrument.ClassDefinition;
 import java.lang.instrument.UnmodifiableClassException;
 
 import org.eclipse.objectteams.otredyn.transformer.jplis.otreAgent;
+import org.eclipse.objectteams.runtime.DebugHooks;
 
 /**
  * This implementation of {@link IRedefineStrategy} uses the
@@ -32,6 +33,7 @@ public class OtreRedefineStrategy implements IRedefineStrategy {
 		ClassDefinition arr_cd[] = { new ClassDefinition(clazz, bytecode) };
 		try {
 			otreAgent.getInstrumentation().redefineClasses(arr_cd);
+			DebugHooks.afterRedefineClasses(clazz.getName());
 		} catch (ClassFormatError cfe) {
 			// error output during redefinition tends to swallow the stack, print it now:
 			System.err.println("OTDRE: Error redifining "+clazz.getName());
