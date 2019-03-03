@@ -413,6 +413,7 @@ public class CallinImplementorDyn extends MethodMappingImplementor {
 						continue;
 
 					AstGenerator callinGen = new AstGenerator(callinDecl);
+					callinGen.replaceableEnclosingClass = teamDecl.binding;
 
 					// one case label per bound base method:
 					for (MethodSpec baseSpec : callinDecl.baseMethodSpecs) {
@@ -650,10 +651,11 @@ public class CallinImplementorDyn extends MethodMappingImplementor {
 	
 						// -- assemble the method call:																//    local$n.roleMethod((ArgType0)args[0], .. (ArgTypeN)args[n]);
 						boolean lhsResolvesToTeamMethod = TypeBinding.equalsEquals(callinDecl.getRoleMethod().declaringClass, roleType.enclosingType()); // TODO(SH): more levels
-						MessageSend roleMethodCall = (callinDecl.getRoleMethod().isPrivate() && !lhsResolvesToTeamMethod) 
+						//  (callin positions for error reporting:)
+						MessageSend roleMethodCall = (callinDecl.getRoleMethod().isPrivate() && !lhsResolvesToTeamMethod)
 							? new PrivateRoleMethodCall(receiver, callinDecl.roleMethodSpec.selector, callArgs, false/*c-t-f*/, 
-													    callinDecl.scope, roleType, callinDecl.getRoleMethod(), stepIntoGen)
-							: stepIntoGen.messageSend(receiver, callinDecl.roleMethodSpec.selector, callArgs);
+													    callinDecl.scope, roleType, callinDecl.getRoleMethod(), callinGen)
+							: callinGen.messageSend(receiver, callinDecl.roleMethodSpec.selector, callArgs);
 						roleMethodCall.isGenerated = true; // for PrivateRoleMethodCall
 						roleMethodCall.isPushedOutRoleMethodCall = true;
 						
