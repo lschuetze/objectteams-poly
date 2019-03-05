@@ -186,10 +186,10 @@
                 <antcall target="otdt_dom_tests" />
                 <antcall target="otdt_tests" />
 		        <antcall target="otequinox_tests" />
+                <antcall target="otdt_builder_tests" />
        			<antcall target="jdt_builder_tests" />
                 <antcall target="jdtcore_compiler_tests" />
                 <antcall target="jdtcore_model_tests" />
-                <antcall target="otdt_builder_tests" />
                 <!-- antcall target="otdt_metrics_tests" / -->
 	  <!--/parallel-->
 	</target>
@@ -206,10 +206,11 @@
                 <antcall target="otdt_ref_tests" />
                 <antcall target="otdt_dom_tests" />
                 <antcall target="otdt_tests" />
-       		<antcall target="jdt_builder_tests" />
+		        <antcall target="otequinox_tests" />
+                <antcall target="otdt_builder_tests" />
+       			<antcall target="jdt_builder_tests" />
                 <antcall target="jdtcore_compiler_tests" />
                 <antcall target="jdtcore_model_tests" />
-                <antcall target="otdt_builder_tests" />
                 <!-- antcall target="otdt_metrics_tests" / -->
 	  <!--/parallel-->
 	</target>
