@@ -532,7 +532,7 @@ public class SourceMapper
 		}
 
 		@Override
-		public FileVisitResult visitModule(java.nio.file.Path mod) throws IOException {
+		public FileVisitResult visitModule(java.nio.file.Path path, String name) throws IOException {
 			return FileVisitResult.CONTINUE;
 		}
 	}

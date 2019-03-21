@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2013 IBM Corporation and others.
+ * Copyright (c) 2000, 2019 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -292,7 +292,8 @@ protected void consumeMethodDeclaration(boolean isNotAbstract, boolean isDefault
 	// support have to be defined at toplevel only
 	if (isTopLevelType()) {
 		int last = methodDecl.statements == null ? -1 : methodDecl.statements.length - 1;
-		if (last >= 0 && methodDecl.statements[last] instanceof Expression){
+		if (last >= 0 && methodDecl.statements[last] instanceof Expression &&
+				((Expression) methodDecl.statements[last]).isTrulyExpression()) {
 			Expression lastExpression = (Expression) methodDecl.statements[last];
 			methodDecl.statements[last] = new CodeSnippetReturnStatement(
 											lastExpression,
@@ -371,7 +372,6 @@ protected void consumeMethodDeclaration(boolean isNotAbstract, boolean isDefault
 		
 	}
 }
-
 @Override
 protected void consumeMethodInvocationName() {
 	// MethodInvocation ::= Name '(' ArgumentListopt ')'
@@ -776,7 +776,7 @@ protected void ignoreExpressionAssignment() {
  * Returns whether we are parsing a top level type or not.
  */
 private boolean isTopLevelType() {
-	return this.nestedType == (this.diet ? 0 : 1);
+	return (this.nestedType - this.switchNestingLevel) == (this.diet ? 0 : 1);
 }
 @Override
 protected MessageSend newMessageSend() {

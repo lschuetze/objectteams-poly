@@ -98,6 +98,7 @@ import org.eclipse.jdt.core.dom.SuperConstructorInvocation;
 import org.eclipse.jdt.core.dom.SuperFieldAccess;
 import org.eclipse.jdt.core.dom.SuperMethodInvocation;
 import org.eclipse.jdt.core.dom.SuperMethodReference;
+import org.eclipse.jdt.core.dom.SwitchExpression;
 import org.eclipse.jdt.core.dom.SwitchStatement;
 import org.eclipse.jdt.core.dom.ThisExpression;
 import org.eclipse.jdt.core.dom.TryStatement;
@@ -1087,6 +1088,14 @@ public class WrapPreparator extends ASTVisitor {
 
 	@Override
 	public boolean visit(SwitchStatement node) {
+		int lParen = this.tm.firstIndexIn(node, TokenNameLPAREN);
+		int rParen = this.tm.firstIndexAfter(node.getExpression(), TokenNameRPAREN);
+		handleParenthesesPositions(lParen, rParen, this.options.parenthesis_positions_in_switch_statement);
+		return true;
+	}
+
+	@Override
+	public boolean visit(SwitchExpression node) {
 		int lParen = this.tm.firstIndexIn(node, TokenNameLPAREN);
 		int rParen = this.tm.firstIndexAfter(node.getExpression(), TokenNameRPAREN);
 		handleParenthesesPositions(lParen, rParen, this.options.parenthesis_positions_in_switch_statement);
