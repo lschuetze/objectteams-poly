@@ -972,93 +972,93 @@ public abstract class ASTNode {
 	 * <code>MethodSpec</code>.
 	 * @see MethodSpec
 	 */
-	public static final int METHOD_SPEC = 100;
+	public static final int METHOD_SPEC = 101;
 
 	/**
 	 * Node type constant indicating a node of type
 	 * <code>CallinMappingDeclaration</code>.
 	 * @see CallinMappingDeclaration
 	 */
-	public static final int CALLIN_MAPPING_DECLARATION = 101;
+	public static final int CALLIN_MAPPING_DECLARATION = 102;
 
 	/**
 	 * Node type constant indicating a node of type
 	 * <code>CalloutMappingDeclaration</code>.
 	 * @see CalloutMappingDeclaration
 	 */
-	public static final int CALLOUT_MAPPING_DECLARATION = 102;
+	public static final int CALLOUT_MAPPING_DECLARATION = 103;
 
 	/**
 	 * Node type constant indicating a node of type
 	 * <code>LiftingType</code>.
 	 * @see LiftingType
 	 */
-	public static final int LIFTING_TYPE = 103;
+	public static final int LIFTING_TYPE = 104;
 
 	/**
 	 * Node type constant indicating a node of type
 	 * <code>WithinStatement</code>.
 	 * @see WithinStatement
 	 */
-	public static final int WITHIN_STATEMENT = 104;
+	public static final int WITHIN_STATEMENT = 105;
 
 	/**
 	 * Node type constant indicating a node of type
 	 * <code>BaseConstructorMessageSend</code>.
 	 * @see BaseConstructorInvocation
 	 */
-	public static final int BASE_CONSTRUCTOR_INVOCATION = 105;
+	public static final int BASE_CONSTRUCTOR_INVOCATION = 106;
 
     /**
      * Node type constant indicating a node of type
      * <code>ParameterMapping</code>.
      * @see ParameterMapping
      */
-    public static final int PARAMETER_MAPPING = 106;
+    public static final int PARAMETER_MAPPING = 107;
 
     /**
      * Node type constant indicating a node of type
      * <code>BaseCallMessageSend</code>.
      * @see BaseCallMessageSend
      */
-     public static final int BASE_CALL_MESSAGE_SEND = 107;
+     public static final int BASE_CALL_MESSAGE_SEND = 108;
 
      /**
  	 * Node type constant indicating a node of type
  	 * <code>FieldAccessSpec</code>.
  	 * @see FieldAccessSpec
  	 */
- 	public static final int FIELD_ACCESS_SPEC = 108;
+ 	public static final int FIELD_ACCESS_SPEC = 109;
 
     /**
      * Node type constant indicating a node of type
      * <code>RoleTypeDelaration</code>.
      * @see RoleTypeDeclaration
      */
-    public static final int ROLE_TYPE_DECLARATION = 109;
+    public static final int ROLE_TYPE_DECLARATION = 110;
 
     /**
      * Node type constant indicating a node of type
      * <code>TSuperMessageSend</code>.
      * @see TSuperMessageSend
      */
-     public static final int TSUPER_MESSAGE_SEND = 110;
+     public static final int TSUPER_MESSAGE_SEND = 111;
 
      /**
       * Node type constant indicating a node of type
       * <code>TSuperCallMessageSend</code>.
       * @see TSuperMessageSend
       */
-      public static final int TSUPER_CONSTRUCTOR_INVOCATION = 111;
+      public static final int TSUPER_CONSTRUCTOR_INVOCATION = 112;
 
-      public static final int TYPE_ANCHOR = 112;
+      public static final int TYPE_ANCHOR = 113;
 
-      public static final int PRECEDENCE_DECLARATION = 113;
+      public static final int PRECEDENCE_DECLARATION = 114;
 
-      public static final int GUARD_PREDICATE_DECLARATION = 114;
+      public static final int GUARD_PREDICATE_DECLARATION = 115;
 
       /** @since 1.3.1 */
-      public static final int METHOD_BINDING_OPERATOR = 115;
+      public static final int METHOD_BINDING_OPERATOR = 116;
 //gbr}
 
 	/**

@@ -185,7 +185,8 @@ public interface TerminalTokens {
       TokenNameCALLOUT_OVERRIDE = 92,
       TokenNameSYNTHBINDOUT = 72,
       TokenNameEOF = 64,
-      TokenNameERROR = 146;
+      TokenNameERROR = 146,
+	  TokenNameBeginCaseExpr = -1;
 
 
 	// This alias is statically inserted by generateOTParser.sh:
