@@ -63,6 +63,7 @@ path to map file (with substitutions):
 		<property name="build.root.dir" value="${user.dir}/build-root" />
 			<!-- These names are hard coded in pde-build: -->
 			<property name="buildDirectory"		value="${build.root.dir}/src" />
+			<property name="bootLocation"		value="${build.root.dir}/eclipse" />
 			<property name="baseLocation"   	value="${test.eclipseDir}" />
 
 		<!--	directories for update sites: -->
@@ -221,9 +222,9 @@ path to map file (with substitutions):
 		<untar compression="gzip" src="${eclipse-app.tgz}" dest="${test.root.dir}"/>
 	</target>
 	
-	<target name="AddPluginsToEclipse" description="Add git.pde.build plugins to the base Eclipse">
-		<mkdir dir="${baseLocation}/dropins/plugins"/>
-		<copy file="${OTScriptDir}/lib/${git.pde.build}" todir="${baseLocation}/dropins/plugins" />
+	<target name="AddPluginsToEclipse" description="Add git.pde.build plugins to the boot Eclipse">
+		<mkdir dir="${bootLocation}/dropins/plugins"/>
+		<copy file="${OTScriptDir}/lib/${git.pde.build}" todir="${bootLocation}/dropins/plugins" />
 	</target>
 
 	<!-- ==== BUILDING AND RUNNING: ==== -->
@@ -233,13 +234,13 @@ path to map file (with substitutions):
 	<target name="createOTCompilerEclipse" depends="setupForCompile" description="create the bootstrapping Eclipse with OT/J compiler">
 		<echo message="Invoke pdebuild for creating the OT-Compiler"/>
 <!-- Re-use the compiler from the previous published build: -->
-        <ant antfile="${OTScriptDir}/p2helper.xml" target="installFeatureFromUrl" dir="${baseLocation}">
+        <ant antfile="${OTScriptDir}/p2helper.xml" target="installFeatureFromUrl" dir="${bootLocation}">
             <property name="feature" value="org.eclipse.objectteams.otdt.core.patch.feature.group"/>
             <property name="sourceUpdatesUrl" value="${compilerUpdatesDir}"/>
-            <property name="targetEclipseDir" value="${baseLocation}"/>
+            <property name="targetEclipseDir" value="${bootLocation}"/>
         </ant>
 		<delete>
-		    <fileset dir="${baseLocation}/plugins/" includes="org.eclipse.jdt.core_*.v* org.eclipse.jdt.core.source_*.v*" />
+		    <fileset dir="${bootLocation}/plugins/" includes="org.eclipse.jdt.core_*.v* org.eclipse.jdt.core.source_*.v*" />
 		</delete>
     </target>
 
