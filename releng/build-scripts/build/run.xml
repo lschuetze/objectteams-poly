@@ -283,10 +283,10 @@ path to map file (with substitutions):
 		<echo message="Invoke pdebuild for creating a full OTDT"/>
 		<java
 			inputstring=""
-			dir="${baseLocation}" 
+			dir="${bootLocation}" 
 			fork="true" 
 			classname="org.eclipse.equinox.launcher.Main"
-			classpath="${baseLocation}/plugins/${org.eclipse.equinox.launcher_jar}">
+			classpath="${bootLocation}/plugins/${org.eclipse.equinox.launcher_jar}">
 				<arg value="-clean"/>
 				<arg value="-Dosgi.ws=${ws}"/>
 				<arg value="-Dosgi.os=${os}"/>
