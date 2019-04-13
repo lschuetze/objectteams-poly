@@ -159,7 +159,7 @@ public class OTClassScope extends ClassScope {
 				{
 					switch (foundInParent.kind()) {
 					case Binding.PACKAGE:
-						return new ProblemPackageBinding(compoundName, ProblemReasons.Ambiguous);
+						return new ProblemPackageBinding(compoundName, ProblemReasons.Ambiguous, environment());
 					case Binding.TYPE:
 						return problemTypeBinding(compoundName, (TypeBinding)foundInParent, ProblemReasons.Ambiguous);
 					}

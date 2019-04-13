@@ -101,7 +101,7 @@ public class ParameterizedTypeBinding extends ReferenceBinding implements Substi
 	public ParameterizedTypeBinding(ReferenceBinding type, TypeBinding[] arguments,  ITeamAnchor teamAnchor, ReferenceBinding enclosingType, LookupEnvironment environment){
 // orig:		
 		this.environment = environment;
-		this.enclosingType = enclosingType; // never unresolved, never lazy per construction
+		this.enclosingType = enclosingType; // never unresolved, but if type is an unresolved nested type, enclosingType is null here but set later in swapUnresolved.
 		if (!type.hasEnclosingInstanceContext() && arguments == null && !(this instanceof RawTypeBinding))
 // :giro
 		  if (teamAnchor == null)
@@ -493,6 +493,9 @@ public class ParameterizedTypeBinding extends ReferenceBinding implements Substi
 	 */
 	@Override
 	public ReferenceBinding enclosingType() {
+		if (this.type instanceof UnresolvedReferenceBinding && ((UnresolvedReferenceBinding) this.type).depth() > 0) {
+			((UnresolvedReferenceBinding) this.type).resolve(this.environment, false); // may set enclosingType as side effect
+		}
 	    return this.enclosingType;
 	}
 
@@ -835,21 +838,6 @@ public class ParameterizedTypeBinding extends ReferenceBinding implements Substi
 		return ReferenceBinding.binarySearch(fieldName, this.fields);
 	}
 	 
- 	/**
-	 * @see org.eclipse.jdt.internal.compiler.lookup.ReferenceBinding#getMemberType(char[])
-	 */
-	@Override
-	public ReferenceBinding getMemberType(char[] typeName) {
-		memberTypes(); // ensure memberTypes have been initialized... must create all at once unlike methods
-		int typeLength = typeName.length;
-		for (int i = this.memberTypes.length; --i >= 0;) {
-			ReferenceBinding memberType = this.memberTypes[i];
-			if (memberType.sourceName.length == typeLength && CharOperation.equals(memberType.sourceName, typeName))
-				return memberType;
-		}
-		return null;
-	}
-
 	/**
 	 * @see org.eclipse.jdt.internal.compiler.lookup.ReferenceBinding#getMethods(char[])
 	 */
@@ -1646,7 +1634,7 @@ public class ParameterizedTypeBinding extends ReferenceBinding implements Substi
 			update = true;
 			ReferenceBinding enclosing = resolvedType.enclosingType();
 			if (enclosing != null) {
-				this.enclosingType = (ReferenceBinding) env.convertUnresolvedBinaryToRawType(enclosing); // needed when binding unresolved member type
+				this.enclosingType = resolvedType.isStatic() ? enclosing : (ReferenceBinding) env.convertUnresolvedBinaryToRawType(enclosing); // needed when binding unresolved member type
 			}
 		}
 		if (this.arguments != null) {

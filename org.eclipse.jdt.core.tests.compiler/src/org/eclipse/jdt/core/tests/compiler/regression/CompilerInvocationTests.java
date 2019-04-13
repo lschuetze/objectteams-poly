@@ -1258,7 +1258,7 @@ public void _test011_problem_categories() {
         expectedProblemAttributes.put("ReadonlyNotYetSupported", new ProblemAttributes(CategorizedProblem.CAT_INTERNAL));
         expectedProblemAttributes.put("MissingImplementation", new ProblemAttributes(CategorizedProblem.CAT_INTERNAL));
         expectedProblemAttributes.put("TryingToWeaveIntoSystemClass", new ProblemAttributes(CategorizedProblem.CAT_INTERNAL));
-        expectedProblemAttributes.put("DangerousCallinBinding", new ProblemAttributes(CategorizedProblem.CAT_INTERNAL));
+        expectedProblemAttributes.put("DangerousCallinBinding", new ProblemAttributes(CategorizedProblem.CAT_POTENTIAL_PROGRAMMING_PROBLEM));
         expectedProblemAttributes.put("UnexpectedAnnotationStructure", new ProblemAttributes(CategorizedProblem.CAT_INTERNAL));
         expectedProblemAttributes.put("IncompatibleOTJByteCodeVersion", new ProblemAttributes(CategorizedProblem.CAT_INTERNAL));
         expectedProblemAttributes.put("AbstractStaticMethodCalled", new ProblemAttributes(CategorizedProblem.CAT_INTERNAL));

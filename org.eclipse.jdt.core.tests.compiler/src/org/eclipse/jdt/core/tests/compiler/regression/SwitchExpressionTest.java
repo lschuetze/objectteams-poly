@@ -2362,4 +2362,50 @@ public class SwitchExpressionTest extends AbstractRegressionTest {
 			new String[] { "--enable-preview"},
 			options);
 	}
+	public void _testBug545915_01() {
+		runConformTest(
+			new String[] {
+				"X.java",
+				"enum X {\n"+
+				"    A, B; \n"+
+				"    @SuppressWarnings(\"preview\")\n"+
+				"    public static void main(String[] args) {\n"+
+				"         X myEnum = X.A;\n"+
+				"         int o;\n"+
+				"         switch(myEnum) {\n"+
+				"             case A -> o = 5;\n"+
+				"             case B -> o = 10;\n"+
+				"             default -> o = 0;\n"+
+				"         }\n"+
+				"         System.out.println(o);\n"+
+				"     }\n"+
+				"}\n"
+		},
+		"5",
+		null,
+		new String[] {"--enable-preview"});
+	}
+	public void testBug545916_01() {
+		runConformTest(
+			new String[] {
+				"X.java",
+				"enum X {\n"+
+				"    A, B;\n"+
+				"     \n"+
+				"    @SuppressWarnings(\"preview\")\n"+
+				"    public static void main(String[] args) {\n"+
+				"         X myEnum = X.A;\n"+
+				"         int o;\n"+
+				"         var f = switch(myEnum) {\n"+
+				"             case A -> o = 5;\n"+
+				"             case B -> o = 10;\n"+
+				"         };\n"+
+				"         System.out.println(o);\n"+
+				"     }\n"+
+				"} \n"
+		},
+		"5",
+		null,
+		new String[] {"--enable-preview"});
+	}
 }

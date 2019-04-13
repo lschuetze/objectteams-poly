@@ -85,11 +85,14 @@ public PackageBinding(LookupEnvironment environment) {
 	this(CharOperation.NO_CHAR_CHAR, null, environment, environment.module);
 }
 protected void addNotFoundPackage(char[] simpleName) {
-	this.knownPackages.put(simpleName, LookupEnvironment.TheNotFoundPackage);
+	if (!this.environment.suppressImportErrors)
+		this.knownPackages.put(simpleName, LookupEnvironment.TheNotFoundPackage);
 }
 //{ObjectTeams: ROFI changed visibility, was private
 void addNotFoundType(char[] simpleName) {
 // SH}
+	if (this.environment.suppressImportErrors)
+		return;
 	if (this.knownTypes == null)
 		this.knownTypes = new HashtableOfType(25);
 	this.knownTypes.put(simpleName, LookupEnvironment.TheNotFoundType);

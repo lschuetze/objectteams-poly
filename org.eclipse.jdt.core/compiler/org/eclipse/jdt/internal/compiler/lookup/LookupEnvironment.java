@@ -188,6 +188,12 @@ public class LookupEnvironment implements ProblemReasons, TypeConstants {
 	/** Global access to the outermost active inference context as the universe for inference variable interning. */
 	InferenceContext18 currentInferenceContext;
 
+	/**
+	 * Flag that should be set during annotation traversal or similar runs
+	 * to prevent caching of failures regarding imports of yet to be generated classes.
+	 */
+	public boolean suppressImportErrors;			// per module
+
 	final static int BUILD_FIELDS_AND_METHODS = 4;
 	final static int BUILD_TYPE_HIERARCHY = 1;
 	final static int CHECK_AND_SET_IMPORTS = 2;
@@ -196,7 +202,7 @@ public class LookupEnvironment implements ProblemReasons, TypeConstants {
 	final static int ROLES_LINKED = 5;
 // SH}
 
-	static final ProblemPackageBinding TheNotFoundPackage = new ProblemPackageBinding(CharOperation.NO_CHAR, NotFound);
+	static final ProblemPackageBinding TheNotFoundPackage = new ProblemPackageBinding(CharOperation.NO_CHAR, NotFound, null/*not perfect*/);
 	static final ProblemReferenceBinding TheNotFoundType = new ProblemReferenceBinding(CharOperation.NO_CHAR_CHAR, null, NotFound);
 	static final ModuleBinding TheNotFoundModule = new ModuleBinding(CharOperation.NO_CHAR);
 
@@ -766,12 +772,13 @@ void internalCompleteTypeBindings(CompilationUnitDeclaration parsedUnit, int req
 // SH}
 	if (parsedUnit.scope == null) return; // parsing errors were too severe
 	LookupEnvironment rootEnv = this.root;
+	CompilationUnitDeclaration previousUnitBeingCompleted = rootEnv.unitBeingCompleted;
 	(rootEnv.unitBeingCompleted = parsedUnit).scope.checkAndSetImports();
 	parsedUnit.scope.connectTypeHierarchy();
 	parsedUnit.scope.checkParameterizedTypes();
 	if (buildFieldsAndMethods)
 		parsedUnit.scope.buildFieldsAndMethods();
-	rootEnv.unitBeingCompleted = null;
+	rootEnv.unitBeingCompleted = previousUnitBeingCompleted;
 }
 
 /*
@@ -2199,6 +2206,9 @@ TypeBinding getTypeFromSignature(char[] signature, int start, int end, boolean i
 }
 
 private TypeBinding annotateType(TypeBinding binding, ITypeAnnotationWalker walker, char[][][] missingTypeNames) {
+	if (walker == ITypeAnnotationWalker.EMPTY_ANNOTATION_WALKER) {
+		return binding;
+	}
 	int depth = binding.depth() + 1;
 	if (depth > 1) {
 		// need to count non-static nesting levels, resolved binding required for precision
@@ -2307,13 +2317,13 @@ public TypeBinding getTypeFromTypeSignature(SignatureWrapper wrapper, TypeVariab
 
 	// type must be a ReferenceBinding at this point, cannot be a BaseTypeBinding or ArrayTypeBinding
 	ReferenceBinding actualType = (ReferenceBinding) type;
-	if (actualType instanceof UnresolvedReferenceBinding)
+	if (walker != ITypeAnnotationWalker.EMPTY_ANNOTATION_WALKER && actualType instanceof UnresolvedReferenceBinding)
 		if (actualType.depth() > 0)
 			actualType = (ReferenceBinding) BinaryTypeBinding.resolveType(actualType, this, false /* no raw conversion */); // must resolve member types before asking for enclosingType
 	ReferenceBinding actualEnclosing = actualType.enclosingType();
 
 	ITypeAnnotationWalker savedWalker = walker;
-	if(actualType.depth() > 0) {
+	if(walker != ITypeAnnotationWalker.EMPTY_ANNOTATION_WALKER && actualType.depth() > 0) {
 		int nonStaticNestingLevels = countNonStaticNestingLevels(actualType);
 		for (int i = 0; i < nonStaticNestingLevels; i++) {
 			walker = walker.toNextNestedType();

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2018 IBM Corporation and others.
+ * Copyright (c) 2000, 2019 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -97,7 +97,6 @@ import org.eclipse.jdt.internal.compiler.util.Util;
  *     "&lt;" + FormalTypeParameterSignature+ + "&gt;"
  *   |
  * </pre>
- * </p>
  * <p>
  * Examples:
  * <ul>
@@ -107,10 +106,9 @@ import org.eclipse.jdt.internal.compiler.util.Util;
  *   <li><code>"Qjava.lang.String;"</code> denotes <code>java.lang.String</code> in source code</li>
  *   <li><code>"[QString;"</code> denotes <code>String[]</code> in source code</li>
  *   <li><code>"QMap&lt;QString;*&gt;;"</code> denotes <code>Map&lt;String,?&gt;</code> in source code</li>
- *   <li><code>"Qjava.util.List&ltTV;&gt;;"</code> denotes <code>java.util.List&lt;V&gt;</code> in source code</li>
- *   <li><code>"&ltE;&gt;Ljava.util.List;"</code> denotes <code>&lt;E&gt;java.util.List</code> in source code</li>
+ *   <li><code>"Qjava.util.List&lt;V&gt;;"</code> denotes <code>java.util.List&lt;V&gt;</code> in source code</li>
+ *   <li><code>"&lt;E&gt;Ljava.util.List;"</code> denotes <code>&lt;E&gt;java.util.List</code> in source code</li>
  * </ul>
- * </p>
  * <p>
  * The syntax for a method signature is:
  * <pre>
@@ -125,7 +123,6 @@ import org.eclipse.jdt.internal.compiler.util.Util;
  *   <li><code>"([Ljava.lang.String;)V"</code> denotes <code>void foo(java.lang.String[])</code> in compiled code</li>
  *   <li><code>"(QString;)QObject;"</code> denotes <code>Object foo(String)</code> in source code</li>
  * </ul>
- * </p>
  * <p>
  * The syntax for a formal type parameter signature is:
  * <pre>
@@ -145,7 +142,6 @@ import org.eclipse.jdt.internal.compiler.util.Util;
  *   <li><code>"X:QReader;"</code> denotes <code>X extends Reader</code> in source code</li>
  *   <li><code>"X:QReader;:QSerializable;"</code> denotes <code>X extends Reader & Serializable</code> in source code</li>
  * </ul>
- * </p>
  * <p>
  * This class provides static methods and constants only.
  * </p>
@@ -1342,7 +1338,6 @@ public static String createTypeSignature(char[] typeName, boolean isResolved) {
  * createTypeSignature("int []", false) -> "[I"
  * </code>
  * </pre>
- * </p>
  *
  * @param typeName the possibly qualified type name
  * @param isResolved <code>true</code> if the type name is to be considered
@@ -1603,7 +1598,6 @@ public static int getArrayCount(String typeSignature) throws IllegalArgumentExce
  * getElementType({'[', '[', 'I'}) --> {'I'}.
  * </code>
  * </pre>
- * </p>
  *
  * @param typeSignature the type signature
  * @return the type signature without arrays
@@ -1630,7 +1624,6 @@ public static char[] getElementType(char[] typeSignature) throws IllegalArgument
  * getElementType("[[I") --> "I".
  * </code>
  * </pre>
- * </p>
  *
  * @param typeSignature the type signature
  * @return the type signature without arrays
@@ -1842,7 +1835,6 @@ public static String[] getParameterTypes(String methodSignature) throws IllegalA
  * getQualifier({'j', 'a', 'v', 'a', '.', 'u', 't', 'i', 'l', '.', 'L', 'i', 's', 't', '<', 'j', 'a', 'v', 'a', '.', 'l', 'a', 'n', 'g', '.', 'S', 't', 'r', 'i', 'n', 'g', '>'}) -> {'j', 'a', 'v', 'a', '.', 'u', 't', 'i', 'l'}
  * </code>
  * </pre>
- * </p>
  *
  * @param name the name
  * @return the qualifier prefix, or the empty char array if the name contains no
@@ -1871,7 +1863,6 @@ public static char[] getQualifier(char[] name) {
  * getQualifier("java.util.List&lt;java.lang.String&gt;") -&gt; "java.util"
  * </code>
  * </pre>
- * </p>
  *
  * @param name the name
  * @return the qualifier prefix, or the empty string if the name contains no
@@ -1929,7 +1920,6 @@ public static String getReturnType(String methodSignature) throws IllegalArgumen
  * getSignatureQualifier({'L', 'j', 'a', 'v', 'a', '.', 'u', 't', 'i', 'l', '.', 'M', 'a', 'p', '$', 'E', 'n', 't', 'r', 'y', ';'}) -> {'j', 'a', 'v', 'a', '.', 'u', 't', 'i', 'l'}
  * </code>
  * </pre>
- * </p>
  *
  * @param typeSignature the type signature
  * @return the package fragment (separators are '.')
@@ -1975,7 +1965,6 @@ public static char[] getSignatureQualifier(char[] typeSignature) {
  * getSignatureQualifier("Ljava.util.Map$Entry") -> "java.util"
  * </code>
  * </pre>
- * </p>
  *
  * @param typeSignature the type signature
  * @return the package fragment (separators are '.')
@@ -1994,7 +1983,6 @@ public static String getSignatureQualifier(String typeSignature) {
  * getSignatureSimpleName({'L', 'j', 'a', 'v', 'a', '.', 'u', 't', 'i', 'l', '.', 'M', 'a', 'p', '$', 'E', 'n', 't', 'r', 'y', ';'}) -> {'M', 'a', 'p', '.', 'E', 'n', 't', 'r', 'y'}
  * </code>
  * </pre>
- * </p>
  *
  * @param typeSignature the type signature
  * @return the type fragment (separators are '.')
@@ -2049,7 +2037,6 @@ public static char[] getSignatureSimpleName(char[] typeSignature) {
  * getSignatureSimpleName("Ljava.util.Map$Entry") -> "Map.Entry"
  * </code>
  * </pre>
- * </p>
  *
  * @param typeSignature the type signature
  * @return the type fragment (separators are '.')
@@ -2068,7 +2055,6 @@ public static String getSignatureSimpleName(String typeSignature) {
  * getSimpleName({'j', 'a', 'v', 'a', '.', 'l', 'a', 'n', 'g', '.', 'O', 'b', 'j', 'e', 'c', 't'}) -> {'O', 'b', 'j', 'e', 'c', 't'}
  * </code>
  * </pre>
- * </p>
  *
  * @param name the name
  * @return the last segment of the qualified name
@@ -2126,7 +2112,6 @@ public static char[] getSimpleName(char[] name) {
  * getSimpleName("java.util.Map&lt;java.lang.String, java.lang.Object&gt;") -&gt; "Map&lt;String,Object&gt;"
  * </code>
  * </pre>
- * </p>
  *
  * @param name the name
  * @return the last segment of the qualified name
@@ -2715,7 +2700,6 @@ public static String getTypeVariable(String formalTypeParameterSignature) throws
  * will return: "LTest&lt;+Ljava.lang.Throwable;&gt;;"
  * </code>
  * </pre>
- * </p>
  *
  * @param methodOrTypeSignature the signature which may have been captured
  * @return a new signature without capture information or the signature itself
@@ -2740,7 +2724,6 @@ public static char[] removeCapture(char[] methodOrTypeSignature) {
  * will return: "LTest&lt;+Ljava.lang.Throwable;&gt;;"
  * </code>
  * </pre>
- * </p>
  *
  * @param methodOrTypeSignature the signature which may have been captured
  * @return a new signature without capture information or the signature itself
@@ -2768,7 +2751,6 @@ public static String removeCapture(String methodOrTypeSignature) {
  * toString({'+', 'L', 'O', 'b', 'j', 'e', 'c', 't', ';'}) -> {'?', ' ', 'e', 'x', 't', 'e', 'n', 'd', 's', ' ', 'O', 'b', 'j', 'e', 'c', 't'}
  * </code>
  * </pre>
- * </p>
  * <p>
  * Note: This method assumes that a type signature containing a <code>'$'</code>
  * is an inner type signature. While this is correct in most cases, someone could
@@ -2808,7 +2790,6 @@ public static char[] toCharArray(char[] signature) throws IllegalArgumentExcepti
  * toString("([Ljava.lang.String;)V", "main", new String[] {"args"}, false, true) -> "void main(String[] args)"
  * </code>
  * </pre>
- * </p>
  *
  * @param methodSignature the method signature to convert
  * @param methodName the name of the method to insert in the result, or
@@ -2838,7 +2819,6 @@ public static char[] toCharArray(char[] methodSignature, char[] methodName, char
  * toString("([Ljava.lang.String;)V", "main", new String[] {"args"}, false, true) -> "void main(String[] args)"
  * </code>
  * </pre>
- * </p>
  *
  * @param methodSignature the method signature to convert
  * @param methodName the name of the method to insert in the result, or
@@ -2921,7 +2901,6 @@ public static char[] toCharArray(char[] methodSignature, char[] methodName, char
  * toQualifiedName({{}}) -> {}
  * </code>
  * </pre>
- * </p>
  *
  * @param segments the list of name segments, possibly empty
  * @return the dot-separated qualified name, or the empty string
@@ -2963,7 +2942,6 @@ public static char[] toQualifiedName(char[][] segments) {
  * toQualifiedName(new String[0]) -> ""
  * </code>
  * </pre>
- * </p>
  *
  * @param segments the list of name segments, possibly empty
  * @return the dot-separated qualified name, or the empty string
@@ -2989,7 +2967,6 @@ public static String toQualifiedName(String[] segments) {
  * toString("+QObject;") -> "? extends Object"
  * </code>
  * </pre>
- * </p>
  * <p>
  * Note: This method assumes that a type signature containing a <code>'$'</code>
  * is an inner type signature. While this is correct in most cases, someone could

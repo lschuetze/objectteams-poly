@@ -86,12 +86,6 @@ public class CompilationUnitScope extends Scope {
 	private ImportBinding[] tempImports;	// to keep a record of resolved imports while traversing all in faultInImports()
 	
 	/**
-	 * Flag that should be set during annotation traversal or similar runs
-	 * to prevent caching of failures regarding imports of yet to be generated classes.
-	 */
-	public boolean suppressImportErrors;
-	
-	/**
 	 * Skips import caching if unresolved imports were
 	 * found last time.
 	 */
@@ -99,7 +93,7 @@ public class CompilationUnitScope extends Scope {
 
 	boolean connectingHierarchy;
 	private ArrayList<Invocation> inferredInvocations;
-	/** Cache of interned inference variables. Access only via {@link InferenceVariable#get(TypeBinding, int, InvocationSite, Scope, ReferenceBinding)}. */
+	/** Cache of interned inference variables. Access only via {@link InferenceVariable#get(TypeBinding, int, InvocationSite, Scope, ReferenceBinding, boolean)}. */
 	Map<InferenceVariable.InferenceVarKey, InferenceVariable> uniqueInferenceVariables = new HashMap<>();
 //{ObjectTeams: when used as a baseimport scope, remember the original scope during this current lookup
 	public Scope originalScope;
@@ -628,7 +622,7 @@ void faultInImports() {
 		return; // faultInImports already in progress
 	boolean unresolvedFound = false;
 	// should report unresolved only if we are not suppressing caching of failed resolutions
-	boolean reportUnresolved = !this.suppressImportErrors;
+	boolean reportUnresolved = !this.environment.suppressImportErrors;
 
 	if (this.typeOrPackageCache != null && !this.skipCachingImports)
 		return; // can be called when a field constant is resolved before static imports
@@ -792,7 +786,7 @@ void faultInImports() {
 		if (!binding.onDemand && binding.resolvedImport instanceof ReferenceBinding || binding instanceof ImportConflictBinding)
 			this.typeOrPackageCache.put(binding.compoundName[binding.compoundName.length - 1], binding);
 	}
-	this.skipCachingImports = this.suppressImportErrors && unresolvedFound;
+	this.skipCachingImports = this.environment.suppressImportErrors && unresolvedFound;
 }
 public void faultInTypes() {
 	faultInImports();
@@ -859,7 +853,7 @@ private Binding findImport(char[][] compoundName, int length, boolean allowDecap
 			packageBinding = (PackageBinding) binding;
 		}
 		if (packageBinding.isValidBinding() && !module.canAccess(packageBinding))
-			return new ProblemPackageBinding(compoundName, ProblemReasons.NotAccessible);
+			return new ProblemPackageBinding(compoundName, ProblemReasons.NotAccessible, this.environment);
 		return packageBinding;
 	}
 
