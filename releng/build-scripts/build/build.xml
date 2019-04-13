@@ -18,7 +18,8 @@
 		OTScriptDir:	where most build scripts are found (build)
 		
 		build.root.dir:	(testrun/build-root)
-		baseLocation:	from where eclipse is running (testrun/build-root/eclipse)
+		bootLocation:	from where eclipse is running (testrun/build-root/eclipse)
+		baseLocation:	the target eclipse pde will build against (testrun/test-root/eclipse)
 		run.eclipseScriptDir: relative location of pde.build's scripts
 		buildDirectory:	where sources shall be built (testrun/build-root/src)
 			
@@ -58,7 +59,7 @@
     		<property name="postingDirectory" value="${build.root.dir}/../ecj" />
 
             <!--run the pde-build for the specified ${builder} (OT-Compiler or OTDT-Build) -->
-            <ant antfile="build.xml" dir="${baseLocation}/${run.eclipseScriptDir}" />
+            <ant antfile="build.xml" dir="${bootLocation}/${run.eclipseScriptDir}" />
 
     </target>
 	

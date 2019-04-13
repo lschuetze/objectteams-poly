@@ -296,6 +296,7 @@ path to map file (with substitutions):
 				<arg value="-buildfile"/>
 				<arg value="${buildfile}"/>
 				<arg value="-Dbuild.root.dir=${build.root.dir}"/>
+				<arg value="-DbootLocation=${bootLocation}"/>
 				<arg value="-DbaseLocation=${baseLocation}"/>
 				<arg value="-Drun.eclipseScriptDir=${run.eclipseScriptDir}"/>
 				<arg value="-DOTScriptDir=${OTScriptDir}"/>
