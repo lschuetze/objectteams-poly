@@ -9,7 +9,7 @@ feature@org.eclipse.objectteams.otequinox.otre=GIT,repo=git://git.eclipse.org/gi
 feature@org.eclipse.objectteams.otequinox.turbo=GIT,repo=git://git.eclipse.org/gitroot/objectteams/org.eclipse.objectteams.git,path=features/org.eclipse.objectteams.otequinox.turbo.feature,tag=builds/201506091717
 
 !-- Also don't use version numbers for those plugins that hold the various otre jars: --
-plugin@org.eclipse.jdt.core,3.17.0.OTDT_r273_qualifier=GIT,repo=git://git.eclipse.org/gitroot/objectteams/org.eclipse.objectteams.git,path=org.eclipse.jdt.core
+plugin@org.eclipse.jdt.core,3.18.0.OTDT_r274_qualifier=GIT,repo=git://git.eclipse.org/gitroot/objectteams/org.eclipse.objectteams.git,path=org.eclipse.jdt.core
 
 !next plug-in don't specify version so that org.eclipse.objectteams.runtime/customBuildCallbacks.xml will find the plug-in directory:
 plugin@org.eclipse.objectteams.otdt=GIT,repo=git://git.eclipse.org/gitroot/objectteams/org.eclipse.objectteams.git,path=plugins/org.eclipse.objectteams.otdt
@@ -112,6 +112,6 @@ plugin@org.eclipse.text.tests=GIT,tag=@SDK_QUALIFIER@,repo=git://git.eclipse.org
 plugin@org.eclipse.core.filebuffers.tests=GIT,tag=@SDK_QUALIFIER@,repo=git://git.eclipse.org/gitroot/platform/eclipse.platform.text.git,path=org.eclipse.core.filebuffers.tests
 
 !-- jdt.annotation: --!
-plugin@org.eclipse.jdt.annotation,2.2.200=GIT,tag=@SDK_QUALIFIER@,repo=git://git.eclipse.org/gitroot/jdt/eclipse.jdt.core.git,path=org.eclipse.jdt.annotation
+plugin@org.eclipse.jdt.annotation,2.2.300=GIT,tag=@SDK_QUALIFIER@,repo=git://git.eclipse.org/gitroot/jdt/eclipse.jdt.core.git,path=org.eclipse.jdt.annotation
 plugin@org.eclipse.jdt.annotation,1.1.400=GIT,tag=@SDK_QUALIFIER@,repo=git://git.eclipse.org/gitroot/jdt/eclipse.jdt.core.git,path=org.eclipse.jdt.annotation_v1
 
