@@ -57,11 +57,11 @@ ARCH=`arch`
 # VERSIONS:
 # -- Boot:
 # used only locally (components of the ECLIPSE_BOOT_TGZ path):
-EVERSION="4.11"
-DROP=${DROPS4}/"R-4.11-201903070500"
+EVERSION_BOOT="4.11"
+DROP_BOOT=${DROPS4}/"R-4.11-201903070500"
 
 # EXPORT: archive file of the boot eclipse SDK build:
-ECLIPSE_BOOT_TGZ=${DROP}/eclipse-SDK-${EVERSION}-linux-gtk-${ARCH}.tar.gz
+ECLIPSE_BOOT_TGZ=${DROP_BOOT}/eclipse-SDK-${EVERSION_BOOT}-linux-gtk-${ARCH}.tar.gz
 
 # -- Base for testing: --
 # Eclipse SDK build identifier (used for substitution in otdt.map.in etc.):
