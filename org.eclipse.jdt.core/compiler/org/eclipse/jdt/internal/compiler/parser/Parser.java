@@ -11861,6 +11861,9 @@ protected void consumeSwitchLabelCaseLhs() {
 }
 protected void consumeCaseLabelExpr() {
 //	SwitchLabelExpr ::= SwitchLabelCaseLhs BeginCaseExpr '->'
+//{ObjectTeams: remove three unused ints pushed in consumeToken(->):
+	this.intPtr-=3;
+// SH}
 	consumeCaseLabel();
 	CaseStatement caseStatement = (CaseStatement) this.astStack[this.astPtr];
 	if (!this.parsingJava12Plus) {
@@ -11876,6 +11879,9 @@ protected void consumeCaseLabelExpr() {
 }
 protected void consumeDefaultLabelExpr() {
 //	SwitchLabelDefaultExpr ::= 'default' '->'
+//{ObjectTeams: remove three unused ints pushed in consumeToken(->):
+	this.intPtr-=3;
+// SH}
 	consumeDefaultLabel();
 	CaseStatement defaultStatement = (CaseStatement) this.astStack[this.astPtr];
 	if (!this.parsingJava12Plus) {
