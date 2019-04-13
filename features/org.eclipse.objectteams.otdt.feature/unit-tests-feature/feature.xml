@@ -81,13 +81,6 @@ This software is based on Eclipse and the Java Development Tooling
          install-size="0"
          version="0.0.0"/>
 
-   <!-- ensure we compile against latest from jdt.ui -->
-   <plugin
-         id="org.eclipse.jdt.ui"
-         download-size="0"
-         install-size="0"
-         version="0.0.0"/>
-
    <plugin
          id="org.eclipse.jdt.ui.tests"
          download-size="0"
