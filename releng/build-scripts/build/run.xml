@@ -15,7 +15,9 @@
 			description="Show values of all properties that should be passed from our caller.">
 		<echo>Properties passed into this script:
 ------------------------------------------------------------------------------
-path of eclipse SDK:
+path of boot eclipse SDK:
+		eclipse-boot.tgz  = ${eclipse-boot.tgz}
+path of base eclipse SDK:
 		eclipse-app.tgz  = ${eclipse-app.tgz}
 eclipse SDK build qualifier:
 		eclipse.sdk.qualifier = ${eclipse.sdk.qualifier}
@@ -212,9 +214,9 @@ path to map file (with substitutions):
 	</target>
 
 	<target name="UnzipEclipse">
-		<echo message="Extracting Eclipse (${eclipse-app.tgz}) in ${build.root.dir}..."/>
+		<echo message="Extracting Boot Eclipse (${eclipse-boot.tgz}) in ${build.root.dir}..."/>
 		<mkdir dir="${build.root.dir}"/>
-		<untar compression="gzip" src="${eclipse-app.tgz}" dest="${build.root.dir}"/>
+		<untar compression="gzip" src="${eclipse-boot.tgz}" dest="${build.root.dir}"/>
 	</target>
 	
 	<target name="AddPluginsToEclipse" description="Add git.pde.build plugins to the base Eclipse">

@@ -51,12 +51,21 @@ ANT_PROFILE="-verbose"
 # EXPORT: Nice-level for the Ant process:
 NICE="10"
 
-# VERSIONS:
-# Eclipse SDK build identifier (used for substitution in otdt.map.in etc.):
-SDK_QUALIFIER=${SDK_QUALIFIER:="I20190411-0625"}
-
 # Architecture (as used by OSGi):
 ARCH=`arch`
+
+# VERSIONS:
+# -- Boot:
+# used only locally (components of the ECLIPSE_BOOT_TGZ path):
+EVERSION="4.11"
+DROP="R-4.11-201903070500"
+
+# EXPORT: archive file of the boot eclipse SDK build:
+ECLIPSE_BOOT_TGZ=${DROP}/eclipse-SDK-${EVERSION}-linux-gtk-${ARCH}.tar.gz
+
+# -- Base for testing: --
+# Eclipse SDK build identifier (used for substitution in otdt.map.in etc.):
+SDK_QUALIFIER=${SDK_QUALIFIER:="I20190411-0625"}
 
 # used only locally (components of the ECLIPSE_SDK_TGZ path):
 EVERSION=${EVERSION:="4.12M1"}

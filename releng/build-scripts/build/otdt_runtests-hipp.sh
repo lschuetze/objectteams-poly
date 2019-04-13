@@ -122,6 +122,7 @@ trap "echo Aborting by SIGTERM; cleanup; exit 130" INT
 
 # Assemble the Ant call:
 ANT_OPTIONS="${ANT_PROFILE} \
+    -Declipse-boot.tgz=${ECLIPSE_BOOT_TGZ} \
     -Declipse-app.tgz=${ECLIPSE_SDK_TGZ} \
     -Declipse.tests.zip=${ECLIPSE_TESTLIB_ZIP} \
     -Declipse.sdk.qualifier=${SDK_QUALIFIER} \
