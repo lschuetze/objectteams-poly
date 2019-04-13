@@ -241,6 +241,7 @@ path to map file (with substitutions):
         </ant>
 		<delete>
 		    <fileset dir="${bootLocation}/plugins/" includes="org.eclipse.jdt.core_*.v* org.eclipse.jdt.core.source_*.v*" />
+		    <fileset dir="${baseLocation}/plugins/" includes="org.eclipse.jdt.core_*.v* org.eclipse.jdt.core.source_*.v*" />
 		</delete>
     </target>
 
