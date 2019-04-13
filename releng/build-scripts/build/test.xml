@@ -35,8 +35,6 @@
 		description="Creates the SUT by extracting a fresh Eclipse SDK and installing the OTDT into it"
 	>
 		<echo message="### Build Test Eclipse ###"/>
-		<echo message="Extracting Eclipse..."/>
-		<untar compression="gzip" src="${eclipse-app.tgz}" dest="${test.root.dir}"/>
 
 		<echo message="Installing OTDT..."/>
 		<ant antfile="${OTScriptDir}/p2helper.xml" target="installOTDT" dir="${test.eclipseDir}"/>

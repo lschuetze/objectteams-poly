@@ -53,17 +53,17 @@ path to map file (with substitutions):
 			<property name="buildfile"          value="${OTScriptDir}/build.xml" />
 			<property name="builder-otcompiler" value="${OTScriptDir}/OT-Compiler" />
 			<property name="builder-otdt"       value="${OTScriptDir}/OTDT-Build" />
+		
+		<!--	directories for testing: -->
+		<property name="test.root.dir" value="${user.dir}/test-root" />
+			<!-- This name is used in individual test.xml of test plugins: -->
+			<property name="test.eclipseDir" value="${test.root.dir}/eclipse" />
 			
 		<!--	directories for the build: -->
 		<property name="build.root.dir" value="${user.dir}/build-root" />
 			<!-- These names are hard coded in pde-build: -->
 			<property name="buildDirectory"		value="${build.root.dir}/src" />
-			<property name="baseLocation"   	value="${build.root.dir}/eclipse" />
-	
-		<!--	directories for testing: -->
-		<property name="test.root.dir" value="${user.dir}/test-root" />
-			<!-- This name is used in individual test.xml of test plugins: -->
-			<property name="test.eclipseDir" value="${test.root.dir}/eclipse" />
+			<property name="baseLocation"   	value="${test.eclipseDir}" />
 
 		<!--	directories for update sites: -->
 		<!-- TODO: extract compilerUpdatesDir to prerequisistes? -->
@@ -217,6 +217,7 @@ path to map file (with substitutions):
 		<echo message="Extracting Boot Eclipse (${eclipse-boot.tgz}) in ${build.root.dir}..."/>
 		<mkdir dir="${build.root.dir}"/>
 		<untar compression="gzip" src="${eclipse-boot.tgz}" dest="${build.root.dir}"/>
+		<untar compression="gzip" src="${eclipse-app.tgz}" dest="${test.eclipseDir}"/>
 	</target>
 	
 	<target name="AddPluginsToEclipse" description="Add git.pde.build plugins to the base Eclipse">
