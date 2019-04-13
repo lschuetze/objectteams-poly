@@ -217,7 +217,8 @@ path to map file (with substitutions):
 		<echo message="Extracting Boot Eclipse (${eclipse-boot.tgz}) in ${build.root.dir}..."/>
 		<mkdir dir="${build.root.dir}"/>
 		<untar compression="gzip" src="${eclipse-boot.tgz}" dest="${build.root.dir}"/>
-		<untar compression="gzip" src="${eclipse-app.tgz}" dest="${test.eclipseDir}"/>
+		<mkdir dir="${test.root.dir}"/>
+		<untar compression="gzip" src="${eclipse-app.tgz}" dest="${test.root.dir}"/>
 	</target>
 	
 	<target name="AddPluginsToEclipse" description="Add git.pde.build plugins to the base Eclipse">
