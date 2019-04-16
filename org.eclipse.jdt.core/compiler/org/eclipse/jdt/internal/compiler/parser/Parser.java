@@ -2483,14 +2483,17 @@ private void consumeCallinBindingLong()
 
 	// find callin decl produced by CallinBindingLeftLong:
 	int paramlength = 0;
-	if (this.currentElement == null)
+	if (this.currentElement == null) {
+		if (!this.diet)
+			concatNodeLists();
 		paramlength = this.astLengthStack[this.astLengthPtr--]; // no param mappings in recovery mode.
+	}
 	int callinPtr = this.astPtr - paramlength;
 	CallinMappingDeclaration callinBinding = (CallinMappingDeclaration) this.astStack[callinPtr];
 
 	// CallinParameterMappingsopt
 	boolean pendingParamMappings= this.intStack[this.intPtr--] == 1; // pushed in consumeNestedParamMappings/consumeParameterMappingsEmpty
-	if (pendingParamMappings)
+	if (pendingParamMappings && this.diet)
 		callinBinding.mappings= AbstractMethodMappingDeclaration.PENDING_MAPPINGS;
 	else
 		copyParamMappingsAndPositions(paramlength, callinBinding);
