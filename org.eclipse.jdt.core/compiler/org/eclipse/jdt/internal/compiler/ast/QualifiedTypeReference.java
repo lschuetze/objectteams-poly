@@ -162,6 +162,9 @@ public class QualifiedTypeReference extends TypeReference {
 			return this.resolvedType;
 		}
 		Binding binding = scope.getPackage(this.tokens);
+		if (this.resolvedType != null) { // recheck in case we had re-entrance
+			return this.resolvedType;
+		}
 //{ObjectTeams: give it a try as a team.R type:	FIXME(SH): redundant if invoked from resolveType()
 		if (binding == null || binding.problemId() == ProblemReasons.NotFound) {
 			// inheritance from anchored type is not allowed (OTJLD 1.2.2(g)).

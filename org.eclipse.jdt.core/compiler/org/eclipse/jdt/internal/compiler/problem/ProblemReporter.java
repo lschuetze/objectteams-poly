@@ -15525,6 +15525,14 @@ public void switchExpressionLastStatementCompletesNormally(Statement stmt) {
 		stmt.sourceStart,
 		stmt.sourceEnd);
 }
+public void switchExpressionIllegalLastStatement(Statement stmt) {
+	this.handle(
+		IProblem.SwitchExpressionIllegalLastStatement,
+		NoArgument,
+		NoArgument,
+		stmt.sourceStart,
+		stmt.sourceEnd);
+}
 public void switchExpressionTrailingSwitchLabels(Statement stmt) {
 	this.handle(
 		IProblem.SwitchExpressionTrailingSwitchLabels,
