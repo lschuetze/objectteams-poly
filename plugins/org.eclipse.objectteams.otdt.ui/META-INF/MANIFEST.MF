@@ -3,7 +3,7 @@ Bundle-ManifestVersion: 2
 Bundle-Name: %pluginName
 Bundle-SymbolicName: org.eclipse.objectteams.otdt.ui;singleton:=true
 Automatic-Module-Name: org.eclipse.objectteams.otdt.ui
-Bundle-Version: 2.7.2.qualifier
+Bundle-Version: 2.7.4.qualifier
 Bundle-Activator: org.eclipse.objectteams.otdt.ui.OTDTUIPlugin
 Bundle-Vendor: %providerName
 Bundle-Localization: plugin
@@ -29,7 +29,7 @@ Require-Bundle: org.eclipse.core.runtime;bundle-version="[3.7.0,4.0.0)",
  org.eclipse.compare;bundle-version="[3.5.200,4.0.0)",
  org.eclipse.team.core;bundle-version="[3.6.0,4.0.0)",
  org.eclipse.team.ui;bundle-version="[3.6.100,4.0.0)",
- org.eclipse.jdt.core;bundle-version="[3.9.1.v_OTDT_r230,4.0.0)",
+ org.eclipse.jdt.core;bundle-version="[3.18.0.OTDT_r274,4.0.0)",
  org.eclipse.objectteams.otdt.debug;bundle-version="[2.0.0,3.0.0)",
  org.eclipse.objectteams.otdt;bundle-version="[2.0.0,3.0.0)"
 Bundle-ActivationPolicy: lazy
