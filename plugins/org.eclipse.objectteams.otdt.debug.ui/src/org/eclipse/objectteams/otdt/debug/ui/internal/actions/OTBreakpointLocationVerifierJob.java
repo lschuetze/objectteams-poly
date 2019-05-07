@@ -117,7 +117,7 @@ public class OTBreakpointLocationVerifierJob extends Job {
 	}
 	
 	public IStatus run(IProgressMonitor monitor) {
-		ASTParser parser = ASTParser.newParser(AST.JLS8);
+		ASTParser parser = ASTParser.newParser(AST.JLS12);
 		char[] source = fDocument.get().toCharArray();
 		parser.setSource(source);
 		IJavaElement javaElement = JavaCore.create(fResource);
@@ -168,7 +168,7 @@ public class OTBreakpointLocationVerifierJob extends Job {
 					}
 				}
 				if (unitName != null) {
-					parser = ASTParser.newParser(AST.JLS8);
+					parser = ASTParser.newParser(AST.JLS12);
 					parser.setSource(source);
 					parser.setProject(project);
 					parser.setUnitName(unitName);

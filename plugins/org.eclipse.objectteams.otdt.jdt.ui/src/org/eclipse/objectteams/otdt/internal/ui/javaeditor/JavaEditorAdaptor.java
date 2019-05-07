@@ -23,8 +23,8 @@ package org.eclipse.objectteams.otdt.internal.ui.javaeditor;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.ITypeRoot;
 import org.eclipse.jdt.core.dom.CompilationUnit;
+import org.eclipse.jdt.core.manipulation.SharedASTProviderCore;
 import org.eclipse.jdt.ui.JavaUI;
-import org.eclipse.jdt.ui.SharedASTProvider;
 import org.eclipse.jface.text.rules.IToken;
 import org.eclipse.jface.text.source.IAnnotationModel;
 import org.eclipse.ui.IEditorInput;
@@ -94,7 +94,7 @@ public team class JavaEditorAdaptor {
 			fRoleOverrideIndicatorManager = new RoleOverrideIndicatorManager(model, inputElement, null);
 
 			if (provideAST) {
-				CompilationUnit ast = SharedASTProvider.getAST(inputElement, SharedASTProvider.WAIT_ACTIVE_ONLY, getProgressMonitor());
+				CompilationUnit ast = SharedASTProviderCore.getAST(inputElement, SharedASTProviderCore.WAIT_ACTIVE_ONLY, getProgressMonitor());
 				fRoleOverrideIndicatorManager.reconciled(ast, true, getProgressMonitor());
 			}
 			addReconcileListener(fRoleOverrideIndicatorManager);

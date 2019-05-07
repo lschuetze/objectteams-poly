@@ -44,6 +44,7 @@ import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IMember;
 import org.eclipse.jdt.core.IMethod;
+import org.eclipse.jdt.core.IOrdinaryClassFile;
 import org.eclipse.jdt.core.IPackageDeclaration;
 import org.eclipse.jdt.core.ISourceRange;
 import org.eclipse.jdt.core.IType;
@@ -78,7 +79,7 @@ import org.eclipse.jdt.internal.debug.ui.actions.ActionDelegateHelper;
 import org.eclipse.jdt.internal.debug.ui.actions.ActionMessages;
 import org.eclipse.jdt.ui.IWorkingCopyManager;
 import org.eclipse.jdt.ui.JavaUI;
-import org.eclipse.jdt.ui.SharedASTProvider;
+import org.eclipse.jdt.core.manipulation.SharedASTProviderCore;
 import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.dialogs.MessageDialogWithToggle;
 import org.eclipse.jface.text.BadLocationException;
@@ -1136,8 +1137,8 @@ public class OTToggleBreakpointAdapter implements IToggleBreakpointsTargetExtens
                     break;
                 }
             }
-        } else if (element instanceof IClassFile) {
-            type = ((IClassFile) element).getType();
+        } else if (element instanceof IOrdinaryClassFile) {
+            type = ((IOrdinaryClassFile) element).getType();
         }
         if (type != null) {
             String[] sigs = Signature.getParameterTypes(signature);
@@ -1208,7 +1209,7 @@ public class OTToggleBreakpointAdapter implements IToggleBreakpointsTargetExtens
      */
     CompilationUnit parseCompilationUnit(ITypeRoot root) {
         if(root != null) {
-    		return SharedASTProvider.getAST(root, SharedASTProvider.WAIT_YES, null);
+    		return SharedASTProviderCore.getAST(root, SharedASTProviderCore.WAIT_YES, null);
         }
         return null;
     }

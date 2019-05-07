@@ -320,7 +320,6 @@ public team class OTQuickFixes  {
 		ImportRewrite getImportRewrite()                           	-> ImportRewrite getImportRewrite();
 		ImportRewrite createImportRewrite(CompilationUnit astRoot) 	-> ImportRewrite createImportRewrite(CompilationUnit astRoot);
 
-		@SuppressWarnings("decapsulation")
 		LinkedProposalModel getLinkedProposalModel() 			   	-> LinkedProposalModel getLinkedProposalModel();
 
 		void addLinkedPosition(ITrackedNodePosition position, boolean isFirst, String groupID)
@@ -368,7 +367,6 @@ public team class OTQuickFixes  {
 				result |= Modifier.STATIC;
 			return result;
 		}
-		@SuppressWarnings("decapsulation")
 		int evaluateModifiers(ASTNode targetTypeDecl) 
 		<- replace int evaluateModifiers(ASTNode targetTypeDecl);
 		

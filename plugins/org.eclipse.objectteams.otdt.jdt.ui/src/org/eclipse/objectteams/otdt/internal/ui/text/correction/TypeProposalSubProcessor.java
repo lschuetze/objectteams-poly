@@ -228,7 +228,7 @@ public class TypeProposalSubProcessor {
 		}
 		
 		// get a fresh AST:
-		ASTParser p = ASTParser.newParser(AST.JLS8);
+		ASTParser p = ASTParser.newParser(AST.JLS12);
 		p.setSource(cu);
 		p.setResolveBindings(false);
 		CompilationUnit astCU = (CompilationUnit) p.createAST(null);

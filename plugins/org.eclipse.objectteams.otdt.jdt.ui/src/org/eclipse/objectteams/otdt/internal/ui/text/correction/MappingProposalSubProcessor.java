@@ -634,7 +634,7 @@ public class MappingProposalSubProcessor {
 	private static AbstractMethodMappingDeclaration getMethodMapping (ASTNode coveringNode) {
 		if (coveringNode instanceof AbstractMethodMappingDeclaration)
 			return (AbstractMethodMappingDeclaration) coveringNode;
-		return (AbstractMethodMappingDeclaration) ASTNodes.getParent(coveringNode, AbstractMethodMappingDeclaration.class);
+		return ASTNodes.getParent(coveringNode, AbstractMethodMappingDeclaration.class);
 	}
 
 	// helper: detect whether a guard predicate uses an argument of the corresponding method spec.

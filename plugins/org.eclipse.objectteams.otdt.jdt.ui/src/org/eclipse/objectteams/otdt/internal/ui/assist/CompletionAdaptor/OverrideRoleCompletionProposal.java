@@ -37,12 +37,12 @@ import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
 import org.eclipse.jdt.core.dom.rewrite.ITrackedNodePosition;
 import org.eclipse.jdt.core.dom.rewrite.ImportRewrite;
 import org.eclipse.jdt.core.formatter.IndentManipulation;
+import org.eclipse.jdt.core.manipulation.SharedASTProviderCore;
 import org.eclipse.jdt.internal.corext.codemanipulation.CodeGenerationSettings;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.preferences.JavaPreferencesSettings;
 import org.eclipse.jdt.internal.ui.text.java.JavaTypeCompletionProposal;
 import org.eclipse.jdt.internal.ui.text.java.TypeProposalInfo;
-import org.eclipse.jdt.ui.SharedASTProvider;
 import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.Document;
 import org.eclipse.jface.text.IDocument;
@@ -95,7 +95,7 @@ protected class OverrideRoleCompletionProposal extends JavaTypeCompletionProposa
 	}
 
 	private CompilationUnit getRecoveredAST(IDocument document, int offset, Document recoveredDocument) {
-		CompilationUnit ast= SharedASTProvider.getAST(fCompilationUnit, SharedASTProvider.WAIT_ACTIVE_ONLY, null);
+		CompilationUnit ast= SharedASTProviderCore.getAST(fCompilationUnit, SharedASTProviderCore.WAIT_ACTIVE_ONLY, null);
 		if (ast != null) {
 			recoveredDocument.set(document.get());
 			return ast;
@@ -112,7 +112,7 @@ protected class OverrideRoleCompletionProposal extends JavaTypeCompletionProposa
 
 		recoveredDocument.set(new String(content));
 
-		final ASTParser parser= ASTParser.newParser(AST.JLS8);
+		final ASTParser parser= ASTParser.newParser(AST.JLS12);
 		parser.setResolveBindings(true);
 		parser.setStatementsRecovery(true);
 		parser.setSource(content);
