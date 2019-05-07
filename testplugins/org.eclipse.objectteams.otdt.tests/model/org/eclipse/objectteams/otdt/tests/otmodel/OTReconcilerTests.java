@@ -2374,6 +2374,89 @@ public class OTReconcilerTests extends ReconcilerTests {
 			deleteProject("P");
 		}
 	}
+
+	public void testBug545316c() throws CoreException, InterruptedException {
+		try {
+			// Resources creation
+			IJavaProject p = createOTJavaProject("P", new String[] {"src"}, new String[] {"JCL15_LIB"}, "bin");
+			IProject project = p.getProject();
+			IProjectDescription prjDesc = project.getDescription();
+			//prjDesc.setNatureIds(OTDTPlugin.createProjectNatures(prjDesc));
+			prjDesc.setBuildSpec(OTDTPlugin.createProjectBuildCommands(prjDesc));
+			project.setDescription(prjDesc, null);
+
+			OTREContainer.initializeOTJProject(project);
+
+			createFolder("/P/src/pbase");
+			createFile(
+				"/P/src/pbase/Base.java",
+				"package pbase;\n" +
+				"public class Base {\n" +
+				"	public static void baseMethod1(int flag, String name) {}\n" +
+				"	public static void baseMethod(int flag, String name) {}\n" +
+				"}\n"
+			);
+			
+			String sourceFoo = 
+					"import base pbase.Base;\n" +
+					"public team class Foo {\n" +
+					"	@SuppressWarnings(\"unused\") private String v1;\n" +
+					"	@SuppressWarnings(\"unused\") private String v2;\n" +
+					"	@SuppressWarnings(\"unused\") private String v3;\n" +
+					"	@SuppressWarnings(\"unused\") private String v4;\n" +
+					"	@SuppressWarnings(\"unused\") private String v5;\n" +
+					"	@SuppressWarnings(\"unused\") private String v6;\n" +
+					"	@SuppressWarnings(\"unused\") private String v7;\n" +
+					"	@SuppressWarnings(\"unused\") private String v8;\n" +
+					"	@SuppressWarnings(\"unused\") private String v9;\n" +
+					"	@SuppressWarnings(\"unused\") private String v10;\n" +
+					"	@SuppressWarnings(\"unused\") private String v11;\n" +
+					"   protected class R playedBy Base {\n" +
+					"		static callin void roleMethod1(int f, String both) {\n" +
+					"			base.roleMethod1(f, both);\n" +
+					"		}\n" +
+					"		roleMethod1 <- replace baseMethod1;\n" +
+					"		void m2(int f, String both) <- replace void baseMethod(int flag, String name);\n" +
+					"		static callin void m2(int f, String both) {\n" +
+					"			base.m2(f, both);\n" +
+					"		}\n" +
+					"	}\n" +
+					"}\n";
+			this.createFile(
+					"/P/src/Foo.java",
+					sourceFoo
+			);
+
+			char[] sourceChars = sourceFoo.toCharArray();
+			this.problemRequestor.initialize(sourceChars);
+			
+			ICompilationUnit fooWC = getCompilationUnit("/P/src/Foo.java").getWorkingCopy(this.wcOwner, null);
+			IType foo =  fooWC.getType("Foo");
+			
+			CompilerOptions compilerOptions = new CompilerOptions(p.getOptions(true));
+			ProblemReporter problemReporter = new ProblemReporter(
+					DefaultErrorHandlingPolicies.proceedWithAllProblems(),
+					compilerOptions,
+					new DefaultProblemFactory());
+			
+			// force usage of type converter:
+			CompilationUnitDeclaration parsedUnit =
+				SourceTypeConverter.buildCompilationUnit(
+						new ISourceType[] {(ISourceType) ((SourceType)foo).getElementInfo()},
+						SourceTypeConverter.FIELD_AND_METHOD | SourceTypeConverter.MEMBER_TYPE | SourceTypeConverter.LOCAL_TYPE,
+						problemReporter,
+						new CompilationResult("Foo.java".toCharArray(), 1, 1, 90));
+			
+			// force resolving:
+			process(parsedUnit, p, compilerOptions, problemReporter, ITranslationStates.STATE_RESOLVED);
+			
+			// evaluate result:
+			CategorizedProblem[] problems = parsedUnit.compilationResult().problems;
+			assertNull(problems);
+		} finally {
+			deleteProject("P");
+		}
+	}
 	
 	private void createRuntimeStubs() throws CoreException {
 		createFolder("/P/org/objectteams");

@@ -2484,8 +2484,6 @@ private void consumeCallinBindingLong()
 	// find callin decl produced by CallinBindingLeftLong:
 	int paramlength = 0;
 	if (this.currentElement == null) {
-		if (!this.diet)
-			concatNodeLists();
 		paramlength = this.astLengthStack[this.astLengthPtr--]; // no param mappings in recovery mode.
 	}
 	int callinPtr = this.astPtr - paramlength;
@@ -7548,7 +7546,9 @@ protected void consumeParameterMappingsEmpty() {
 	this.scanner._insideParameterMapping = false;
 }
 protected void consumeParameterMappings() {
-	this.scanner._insideParameterMapping = false;	
+	this.scanner._insideParameterMapping = false;
+	if (!this.diet)
+		concatNodeLists();
 }
 protected void consumeParameterMappingList() {
 	// CallinParameterMappingList  ::= CallinParameterMappingList ',' ParameterMapping
