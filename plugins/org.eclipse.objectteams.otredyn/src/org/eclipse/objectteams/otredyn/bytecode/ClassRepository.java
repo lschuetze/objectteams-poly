@@ -20,6 +20,7 @@ import java.util.HashMap;
 import java.util.IdentityHashMap;
 import java.util.Map;
 
+import org.eclipse.objectteams.otredyn.bytecode.asm.AsmBoundClass;
 import org.eclipse.objectteams.otredyn.bytecode.asm.AsmClassRepository;
 import org.eclipse.objectteams.otredyn.runtime.IClassRepository;
 import org.eclipse.objectteams.otredyn.runtime.TeamManager;
@@ -127,10 +128,14 @@ public abstract class ClassRepository implements IClassRepository {
 	public void linkClassWithSuperclass(AbstractBoundClass clazz) {
 		// FIXME(SH): also link with tsuper classes??
 		AbstractBoundClass superclass = clazz.getSuperclass();
-		AbstractBoundClass anonymousSubclass = null;
-		if (superclass != null) {
-			anonymousSubclass = anonymousSubclassMap.get(superclass);
+		if (superclass == null) {
+			return;
 		}
+		if (superclass instanceof AsmBoundClass && !((AsmBoundClass) superclass).parsed) {
+			linkClassWithSuperclass(superclass); // reduce deadlock-prone need for on-demand parsing (with lock)
+		}
+
+		AbstractBoundClass anonymousSubclass = anonymousSubclassMap.get(superclass);
 		
 		//Is there an anonmous subclass, that corresponds with this class
 		if (anonymousSubclass != null) {

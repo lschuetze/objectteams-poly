@@ -1,7 +1,7 @@
 /**********************************************************************
  * This file is part of "Object Teams Dynamic Runtime Environment"
  * 
- * Copyright 2009, 2018 Oliver Frank and others.
+ * Copyright 2009, 2019 Oliver Frank and others.
  * 
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -400,16 +400,20 @@ public abstract class AbstractBoundClass implements IBoundClass {
 	 * @return an instance of AbstractBoundClass that represents 
 	 * the super class of this class
 	 */
-	public synchronized AbstractBoundClass getSuperclass() {
-		parseBytecode();
-		if (superClassName != null && superclass == null) {
-			String superclassId = ClassIdentifierProviderFactory.getClassIdentifierProvider().getSuperclassIdentifier(id, internalSuperClassName);
-			
-			//if superclassId is null the class could be "Object" or an interface
-			if (superclassId != null) {
-				superclass = ClassRepository.getInstance().getBoundClass(superClassName, superclassId, loader);
-				superclass.addSubclass(this);
-				// FIXME(SH): can we avoid adding all subclasses to j.l.Object?
+	public AbstractBoundClass getSuperclass() {
+		if (superclass == null) {
+			synchronized (this) {
+				parseBytecode();
+				if (superClassName != null && superclass == null) {
+					String superclassId = ClassIdentifierProviderFactory.getClassIdentifierProvider().getSuperclassIdentifier(id, internalSuperClassName);
+					
+					//if superclassId is null the class could be "Object" or an interface
+					if (superclassId != null) {
+						superclass = ClassRepository.getInstance().getBoundClass(superClassName, superclassId, loader);
+						superclass.addSubclass(this);
+						// FIXME(SH): can we avoid adding all subclasses to j.l.Object?
+					}
+				}
 			}
 		}
 		return superclass;
