@@ -31,6 +31,7 @@ import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.ISourceRange;
 import org.eclipse.jdt.core.ISourceReference;
 import org.eclipse.jdt.core.JavaModelException;
+import org.eclipse.objectteams.otdt.internal.ui.OTDTUIMessages;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.team.internal.ui.StorageTypedElement;
 import org.eclipse.ui.IEditorInput;
@@ -73,6 +74,8 @@ public class BaseMethodCompareElement extends StorageTypedElement
 			public InputStream getContents() throws CoreException {
 				String contents = getExtendedSource(BaseMethodCompareElement.this.method);
 				byte[] bytes;
+				if (contents == null)
+					contents = OTDTUIMessages.BaseMethodCompareElement_sourceNotFound_text;
 				try {
 					bytes= contents.getBytes(getCharset());
 				} catch (UnsupportedEncodingException e) {
