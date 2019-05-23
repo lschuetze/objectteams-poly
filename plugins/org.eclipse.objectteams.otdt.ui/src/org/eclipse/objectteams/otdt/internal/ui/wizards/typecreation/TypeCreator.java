@@ -65,6 +65,7 @@ import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.internal.corext.util.Strings;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.preferences.JavaPreferencesSettings;
+import org.eclipse.jdt.internal.ui.preferences.formatter.FormatterProfileManager;
 import org.eclipse.jdt.internal.ui.refactoring.contentassist.JavaTypeCompletionProcessor;
 import org.eclipse.jdt.internal.core.manipulation.ProjectTemplateStore;
 import org.eclipse.jdt.internal.ui.wizards.NewWizardMessages;
@@ -958,7 +959,8 @@ public abstract class TypeCreator
 				createImports(imports, operation.getCreatedImports());
 			}
 			if (_typeInfo.isCreateConstructor()) {
-				AddUnimplementedConstructorsOperation operation= new AddUnimplementedConstructorsOperation(unit, binding, null, -1, false, true, false);
+				AddUnimplementedConstructorsOperation operation= new AddUnimplementedConstructorsOperation(unit, binding, null, -1, false, true, false,
+						FormatterProfileManager.getProjectSettings(type.getJavaProject()));
 				operation.setCreateComments(this._addComments);
 				operation.run(monitor);
 				createImports(imports, operation.getCreatedImports());
