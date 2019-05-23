@@ -232,7 +232,7 @@ path to map file (with substitutions):
 	<!-- ==== BUILD STAGE 1: ==== -->
 	<!-- setting an empty inputstring is a workaround for http://issues.apache.org/bugzilla/show_bug.cgi?id=34461 -->
 	<target name="createOTCompilerEclipse" depends="setupForCompile" description="create the bootstrapping Eclipse with OT/J compiler">
-		<echo message="Invoke pdebuild for creating the OT-Compiler"/>
+		<echo message="Install the previous compiler into boot eclipse"/>
 <!-- Re-use the compiler from the previous published build: -->
         <ant antfile="${OTScriptDir}/p2helper.xml" target="installFeatureFromUrl" dir="${bootLocation}">
             <property name="feature" value="org.eclipse.objectteams.otdt.core.patch.feature.group"/>
@@ -242,6 +242,53 @@ path to map file (with substitutions):
         </ant>
 		<delete>
 		    <fileset dir="${bootLocation}/plugins/" includes="org.eclipse.jdt.core_*.v* org.eclipse.jdt.core.source_*.v*" />
+		</delete>
+
+		<echo message="Invoke pdebuild for creating the base new OT-Compiler"/>
+        <java
+	        inputstring=""
+	        dir="${baseLocation}" 
+	        fork="true" 
+	        classname="org.eclipse.equinox.launcher.Main"
+	        classpath="${bootLocation}/plugins/${boot.org.eclipse.equinox.launcher_jar}">
+	            <arg value="-Dosgi.ws=${ws}"/>
+	            <arg value="-Dosgi.os=${os}"/>
+	            <arg value="-Dosgi.arch=${arch}"/>
+	            <arg value="-application"/>
+	            <arg value="org.eclipse.ant.core.antRunner"/>
+	            <arg value="-buildfile"/>
+	            <arg value="${buildfile}"/>
+	            <arg value="-Dbuild.root.dir=${build.root.dir}"/>
+	            <arg value="-DbaseLocation=${baseLocation}"/>
+	            <arg value="-DOTScriptDir=${OTScriptDir}"/>
+	            <arg value="-Drun.eclipseScriptDir=${run.eclipseScriptDir}"/>
+	            <arg value="-Dbuilder=${builder-otcompiler}"/>
+	            <arg value="-D${installmode}=true"/> <!-- <- obsolete? -->
+		    	<arg value="-Dcomponent.short=OT-Compiler"/>
+				<arg value="-DotdtUpdatesDir=${otdtUpdatesDir}"/>
+	            <arg value="-Dconfigs=*,*,*"/>
+	            <arg value="-Dbaseos=${os}"/>
+	            <arg value="-Dbasews=${ws}"/>
+	            <arg value="-Dbasearch=${arch}"/>
+	            <arg value="-Dtest.root.dir=${test.root.dir}"/>
+	            <arg value="-Dtest.eclipseDir=${test.eclipseDir}"/>
+	            <arg value="-DmapVersionTag=${mapVersionTag}"/>
+		    	<arg value="-Dmap.file.path=${map.file.path}"/>
+				<arg value="-Declipse.sdk.qualifier=${eclipse.sdk.qualifier}"/>
+	            <arg value="-Declipse-app.tgz=${eclipse-app.tgz}"/>
+	            <arg value="-Declipse.tests.zip=${eclipse.tests.zip}"/>
+	            <!--arg value="-verbose" /-->
+	            <jvmarg value="${vm.args}"/>
+	            <jvmarg value="${vm.args2}"/>
+        </java>
+		<!-- Now we should have an update site with the patch feature, time to install it into base: -->
+        <ant antfile="${OTScriptDir}/p2helper.xml" target="installFeature" dir="${baseLocation}">
+            <property name="feature" value="org.eclipse.objectteams.otdt.core.patch.feature.group"/>
+            <property name="sourceUpdatesDir" value="${otdtUpdatesDir}"/>
+            <property name="targetEclipseDir" value="${baseLocation}"/>
+        </ant>
+		<delete>
+		    <fileset dir="${baseLocation}/plugins/" includes="org.eclipse.jdt.core_*.v* org.eclipse.jdt.core.source_*.v*" />
 		</delete>
     </target>
 
