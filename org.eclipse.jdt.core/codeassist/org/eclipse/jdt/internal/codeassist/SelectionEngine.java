@@ -130,6 +130,7 @@ import org.eclipse.jdt.internal.core.search.TypeNameMatchRequestorWrapper;
 import org.eclipse.jdt.internal.core.util.ASTNodeFinder;
 import org.eclipse.jdt.internal.core.util.HashSetOfCharArrayArray;
 import org.eclipse.jdt.internal.core.util.Util;
+import org.eclipse.objectteams.otdt.core.compiler.IOTConstants;
 import org.eclipse.objectteams.otdt.internal.codeassist.SelectionNodesFound;
 import org.eclipse.objectteams.otdt.internal.core.compiler.ast.AbstractMethodMappingDeclaration;
 import org.eclipse.objectteams.otdt.internal.core.compiler.ast.MethodSpec;
@@ -139,6 +140,7 @@ import org.eclipse.objectteams.otdt.internal.core.compiler.control.Dependencies;
 import org.eclipse.objectteams.otdt.internal.core.compiler.control.ITranslationStates;
 import org.eclipse.objectteams.otdt.internal.core.compiler.control.StateHelper;
 import org.eclipse.objectteams.otdt.internal.core.compiler.model.RoleModel;
+import org.eclipse.objectteams.otdt.internal.core.compiler.statemachine.transformer.ReflectionGenerator;
 
 /**
  * The selection engine is intended to infer the nature of a selected name in some
@@ -2121,6 +2123,21 @@ public final class SelectionEngine extends Engine implements ISearchRequestor {
 				}
 			}
 		}
+//{ObjectTeams: re-map some generated methods:
+        if (binding.declaringClass.isTeam() && ReflectionGenerator.isReflectionMethod(binding)) {
+        	ReferenceBinding declaringClass = binding.declaringClass;
+        	while (declaringClass.id != IOTConstants.T_OrgObjectTeamsTeam) {
+        		declaringClass = declaringClass.superclass();
+        		if (declaringClass == null)
+        			return binding;
+        	}
+        	int nParam = binding.parameters.length;
+        	for (MethodBinding teamMethod : declaringClass.getMethods(binding.selector)) {
+				if (teamMethod.getSourceParamLength() == nParam)
+					return teamMethod;
+			}
+        }
+// SH}
 		return binding;
 	}
 	
