@@ -235,10 +235,10 @@ path to map file (with substitutions):
 		<echo message="Invoke pdebuild for creating the OT-Compiler"/>
 <!-- Re-use the compiler from the previous published build: -->
         <ant antfile="${OTScriptDir}/p2helper.xml" target="installFeatureFromUrl" dir="${bootLocation}">
-       		<property name="directorLocation" value="${baseLocation}"/>
             <property name="feature" value="org.eclipse.objectteams.otdt.core.patch.feature.group"/>
             <property name="sourceUpdatesUrl" value="${compilerUpdatesDir}"/>
             <property name="targetEclipseDir" value="${bootLocation}"/>
+        	<property name="org.eclipse.equinox.launcher_jar" value="${boot.org.eclipse.equinox.launcher_jar}"/>
         </ant>
 		<delete>
 		    <fileset dir="${bootLocation}/plugins/" includes="org.eclipse.jdt.core_*.v* org.eclipse.jdt.core.source_*.v*" />
@@ -255,7 +255,6 @@ path to map file (with substitutions):
         <mkdir dir="${testsUpdatesDirBase}/eclipse"/>
         <unzip dest="${testsUpdatesDirBase}/eclipse" src="${eclipse.tests.zip}"/> 
         <ant antfile="${OTScriptDir}/p2helper.xml" target="installFeature" dir="${baseLocation}">
-       		<property name="directorLocation" value="${baseLocation}"/>
             <property name="feature" value="org.eclipse.test.feature.group"/>
             <property name="sourceUpdatesDir" value="${testsUpdatesDirBase}/eclipse"/>
             <property name="targetEclipseDir" value="${baseLocation}"/>
@@ -330,10 +329,8 @@ path to map file (with substitutions):
 		</java>
 		<!-- At this point a local update site exists, thanks to p2gathering=true -->
 		
-        <ant antfile="${OTScriptDir}/p2helper.xml" target="patchMetadata" dir="${otdtUpdatesDir}">
-       		<property name="directorLocation" value="${baseLocation}"/>
-		</ant>
-        	
+        <ant antfile="${OTScriptDir}/p2helper.xml" target="patchMetadata" dir="${otdtUpdatesDir}"/>
+		
 		<property name="_hasCreatedOTDTEclipse" value="true" />
 	</target>
 	

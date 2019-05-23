@@ -37,10 +37,8 @@
 		<echo message="### Build Test Eclipse ###"/>
 
 		<echo message="Installing OTDT..."/>
-		<ant antfile="${OTScriptDir}/p2helper.xml" target="installOTDT" dir="${test.eclipseDir}">
-       		<property name="directorLocation" value="${baseLocation}"/>
-		</ant>
-
+		<ant antfile="${OTScriptDir}/p2helper.xml" target="installOTDT" dir="${test.eclipseDir}"/>
+		
 		<property name="otdt-eclipse.is.setup" value="true"/>
 	</target>
 
@@ -49,9 +47,7 @@
 	>
 		<echo message="Setting up tests in ${test.eclipseDir}"/>
 		<!-- do install using p2: -->
-		<ant antfile="${OTScriptDir}/p2helper.xml" target="installTests" dir="${test.eclipseDir}">
-       		<property name="directorLocation" value="${baseLocation}"/>
-		</ant>
+		<ant antfile="${OTScriptDir}/p2helper.xml" target="installTests" dir="${test.eclipseDir}"/>
 
 		<echo message="get library.xml"/>
 		<get src="http://git.eclipse.org/c/platform/eclipse.platform.releng.aggregator.git/plain/eclipse.platform.releng.tychoeclipsebuilder/eclipse-junit-tests/src/main/scripts/library.xml"

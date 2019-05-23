@@ -35,7 +35,7 @@
                 dir="${targetEclipseDir}"
                 fork="true"
                 classname="org.eclipse.equinox.launcher.Main"
-                classpath="${directorLocation}/plugins/${org.eclipse.equinox.launcher_jar}">
+                classpath="${targetEclipseDir}/plugins/${org.eclipse.equinox.launcher_jar}">
             <jvmarg value="-Declipse.p2.MD5Check=false" />
             <arg value="-consoleLog"/>
             <arg value="-application"/>
@@ -56,7 +56,7 @@
                 dir="${targetEclipseDir}"
                 fork="true"
                 classname="org.eclipse.equinox.launcher.Main"
-                classpath="${directorLocation}/plugins/${org.eclipse.equinox.launcher_jar}">
+                classpath="${targetEclipseDir}/plugins/${org.eclipse.equinox.launcher_jar}">
             <jvmarg value="-Declipse.p2.MD5Check=false" />
             <arg value="-consoleLog"/>
             <arg value="-application"/>
