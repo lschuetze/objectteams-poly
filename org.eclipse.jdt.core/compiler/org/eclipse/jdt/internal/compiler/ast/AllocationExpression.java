@@ -578,7 +578,7 @@ public TypeBinding resolveType(BlockScope scope) {
 				return this.resolvedType = null;
 			}
 		}
-		resolvePolyExpressionArguments(this, this.binding, this.argumentTypes, scope);
+		this.binding = resolvePolyExpressionArguments(this, this.binding, this.argumentTypes, scope);
 	} else {
 //{ObjectTeams: may need to instantiate parameters of constructor
     	AnchorMapping anchorMapping = AnchorMapping.setupNewMapping(null, this.arguments, scope);

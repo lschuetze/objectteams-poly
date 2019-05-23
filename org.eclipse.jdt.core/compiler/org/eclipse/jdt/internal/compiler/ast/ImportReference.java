@@ -20,6 +20,7 @@ import java.util.Set;
 
 import org.eclipse.jdt.internal.compiler.ASTVisitor;
 import org.eclipse.jdt.internal.compiler.classfmt.ClassFileConstants;
+import org.eclipse.jdt.internal.compiler.impl.CompilerOptions;
 import org.eclipse.jdt.internal.compiler.lookup.*;
 
 /**
@@ -91,7 +92,11 @@ public class ImportReference extends ASTNode {
 					declaringMods.add(incarnation.enclosingModule);
 			}
 			if (!declaringMods.isEmpty()) {
-				scope.problemReporter().conflictingPackagesFromOtherModules(this, declaringMods);
+				CompilerOptions compilerOptions = scope.compilerOptions();
+				boolean inJdtDebugCompileMode = compilerOptions.enableJdtDebugCompileMode;
+				if (!inJdtDebugCompileMode) {
+					scope.problemReporter().conflictingPackagesFromOtherModules(this, declaringMods);
+				}
 			}
 		}
 	}

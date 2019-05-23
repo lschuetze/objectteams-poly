@@ -1834,8 +1834,7 @@ private void initializeUsesNullTypeAnnotation() {
 	this.mayTolerateMissingType = true;
 	try {
 		nullable = this.nullableAnnotation != null ? this.nullableAnnotation.getAnnotationType()
-				: getType(this.getNullableAnnotationName(), this.UnNamedModule); // FIXME(SHMOD) module for null
-																					// annotations??
+				: getType(this.getNullableAnnotationName(), this.UnNamedModule); // FIXME(SHMOD) module for null annotations??
 		nonNull = this.nonNullAnnotation != null ? this.nonNullAnnotation.getAnnotationType()
 				: getType(this.getNonNullAnnotationName(), this.UnNamedModule);
 	} finally {
@@ -2063,7 +2062,8 @@ public ReferenceBinding getTypeFromCompoundName(char[][] compoundName, boolean i
 			}
 			packageBinding.addType(binding);
 		}
-	} else if (binding == TheNotFoundType) {
+	}
+	if (binding == TheNotFoundType) {
 		// report the missing class file first
 		if (!wasMissingType) {
 			/* Since missing types have been already been complained against while producing binaries, there is no class path 
@@ -2455,6 +2455,7 @@ public void reset() {
 		this.root.reset();
 		return;
 	}
+	this.stepCompleted = 0;
 	this.knownModules = new HashtableOfModule();
 	this.UnNamedModule = new ModuleBinding.UnNamedModule(this);
 	this.module = this.UnNamedModule;

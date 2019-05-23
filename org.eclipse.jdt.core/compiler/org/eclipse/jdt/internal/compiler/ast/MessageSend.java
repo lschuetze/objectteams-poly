@@ -75,7 +75,6 @@ import static org.eclipse.objectteams.otdt.internal.core.compiler.lookup.Synthet
 import java.util.HashMap;
 
 import org.eclipse.jdt.core.compiler.CharOperation;
-import org.eclipse.jdt.core.compiler.IProblem;
 import org.eclipse.jdt.internal.compiler.ASTVisitor;
 import org.eclipse.jdt.internal.compiler.ast.AbstractMethodDeclaration.WrapperKind;
 import org.eclipse.jdt.internal.compiler.classfmt.ClassFileConstants;
@@ -900,8 +899,7 @@ public TypeBinding resolveType(BlockScope scope) {
 	  }
   // orig:
 		if (this.actualReceiverType instanceof InferenceVariable) {
-			scope.referenceContext().tagAsHavingIgnoredMandatoryErrors(IProblem.UndefinedMethod);
-			return null; // not yet ready for resolving
+				return null; // not yet ready for resolving
 		}
   /*
 		this.receiverIsType = this.receiver instanceof NameReference && (((NameReference) this.receiver).bits & Binding.TYPE) != 0;
@@ -1410,7 +1408,7 @@ protected TypeBinding findMethodBinding(BlockScope scope) {
 		    return new PolyTypeBinding(this);
 	    }
 	}
-	resolvePolyExpressionArguments(this, this.binding, this.argumentTypes, scope);
+	this.binding = resolvePolyExpressionArguments(this, this.binding, this.argumentTypes, scope);
 	return this.binding.returnType;
 }
 

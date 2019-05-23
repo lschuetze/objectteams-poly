@@ -752,7 +752,7 @@ public class QualifiedAllocationExpression extends AllocationExpression {
 					}
 				}
 			}
-			resolvePolyExpressionArguments(this, this.binding, this.argumentTypes, scope);
+			this.binding = resolvePolyExpressionArguments(this, this.binding, this.argumentTypes, scope);
 		} else {
 //{ObjectTeams: setup context for constructor lookup:
 			if (receiverType instanceof ReferenceBinding) // funny thing: receiver could be array..

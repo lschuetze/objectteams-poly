@@ -53,6 +53,7 @@ public interface ProblemReasons {
 	final int NoProperEnclosingInstance = 28;
 	final int InterfaceMethodInvocationNotBelow18 = 29;
 	final int NotAccessible = 30; // JLS 6.6.1 - module aspects
+	final int ErrorAlreadyReported = 31;
 //{ObjectTeams;
     final int NoTeamContext = 50;
     final int AnchorNotFinal = 51;

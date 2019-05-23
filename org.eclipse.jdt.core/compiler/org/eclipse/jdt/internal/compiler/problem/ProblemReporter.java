@@ -991,6 +991,7 @@ public static int getProblemCategory(int severity, int problemID) {
 	switch (problemID) {
 		case IProblem.IsClassPathCorrect :
 		case IProblem.CorruptedSignature :
+		case IProblem.UndefinedModuleAddReads :
 			return CategorizedProblem.CAT_BUILDPATH;
 //{ObjectTeams:
 		case IProblem.BaseImportFromSplitPackage :
@@ -1744,6 +1745,13 @@ public void lambdaExpressionCannotImplementGenericMethod(LambdaExpression lambda
 			IProblem.NoGenericLambda, 
 			new String[] { selector, new String(sam.declaringClass.readableName())},
 			new String[] { selector, new String(sam.declaringClass.shortReadableName())},
+			lambda.sourceStart,
+			lambda.diagnosticsSourceEnd());
+}
+public void missingValueFromLambda(LambdaExpression lambda, TypeBinding returnType) {
+	this.handle(IProblem.MissingValueFromLambda, 
+			new String[] {new String(returnType.readableName())},
+			new String[] {new String(returnType.shortReadableName())},
 			lambda.sourceStart,
 			lambda.diagnosticsSourceEnd());
 }
@@ -4781,6 +4789,8 @@ public void invalidMethod(MessageSend messageSend, MethodBinding method, Scope s
 	int id = IProblem.UndefinedMethod; //default...
     MethodBinding shownMethod = method;
 	switch (method.problemId()) {
+		case ProblemReasons.ErrorAlreadyReported:
+			return;
 		case ProblemReasons.NoSuchMethodOnArray :
 			return; // secondary error.
 		case ProblemReasons.NotFound :
@@ -15377,6 +15387,10 @@ public void invalidModule(ModuleReference ref) {
 	this.handle(IProblem.UndefinedModule, 
 		NoArgument, new String[] { CharOperation.charToString(ref.moduleName) },
 		ref.sourceStart, ref.sourceEnd);
+}
+public void missingModuleAddReads(char[] requiredModuleName) {
+	String[] args = new String[] { new String(requiredModuleName) };
+	this.handle(IProblem.UndefinedModuleAddReads, args, args, 0, 0);
 }
 public void invalidOpensStatement(OpensStatement statement, ModuleDeclaration module) {
 	this.handle(IProblem.InvalidOpensStatement,
