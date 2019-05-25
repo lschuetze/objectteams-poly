@@ -589,7 +589,7 @@ public class OTReconcilerTests extends ReconcilerTests {
 		
 			
 			ICompilationUnit wc = getCompilationUnit("/P/Foo/Role2.java").getWorkingCopy(this.wcOwner, null);
-			wc.reconcile(AST.JLS10, 
+			wc.reconcile(AST.JLS12, 
 						 ICompilationUnit.FORCE_PROBLEM_DETECTION|ICompilationUnit.ENABLE_STATEMENTS_RECOVERY|ICompilationUnit.ENABLE_BINDINGS_RECOVERY,
 						 wc.getOwner(), null);
 			
@@ -657,7 +657,7 @@ public class OTReconcilerTests extends ReconcilerTests {
 							"		String s1, s2, s3, s4, s5, s6;\n" +
 					"	}\n").length()), 
 					null);
-			wc.reconcile(AST.JLS10,
+			wc.reconcile(AST.JLS12,
 					ICompilationUnit.FORCE_PROBLEM_DETECTION|ICompilationUnit.ENABLE_STATEMENTS_RECOVERY|ICompilationUnit.ENABLE_BINDINGS_RECOVERY,
 					wc.getOwner(), null);
 			
@@ -2457,7 +2457,77 @@ public class OTReconcilerTests extends ReconcilerTests {
 			deleteProject("P");
 		}
 	}
-	
+
+	public void testBug547646() throws CoreException, InterruptedException {
+		try {
+			// Resources creation
+			IJavaProject p = createOTJavaProject("P", new String[] {"src"}, new String[] {"JCL18_LIB"}, "1.8", "bin");
+			IProject project = p.getProject();
+			IProjectDescription prjDesc = project.getDescription();
+			prjDesc.setBuildSpec(OTDTPlugin.createProjectBuildCommands(prjDesc));
+			project.setDescription(prjDesc, null);
+			p.setOption(JavaCore.COMPILER_PB_UNUSED_WARNING_TOKEN, JavaCore.ERROR);
+
+			OTREContainer.initializeOTJProject(project);
+
+			createFile(
+				"/P/src/Foo0.java",
+				"public team class Foo0 {\n" +
+				"	protected class R {\n" +
+				"		void m() {}\n" + // byte code of this method will not be available during reconcile of the sub-team
+				"	}\n" +
+				"}\n"
+			);
+
+			// trigger 110 suppressed warnings:
+			StringBuilder attributes = new StringBuilder();
+			for (int i=0; i<110; i++)
+				attributes.append("@SuppressWarnings(\"unused\") private int i"+i+";\n");
+			
+			String sourceFoo = 
+					"public team class Foo extends Foo0 {\n" +
+					attributes.toString() +
+					"   protected class R {\n" +
+					"	    @SuppressWarnings(\"basecall\")\n" +
+					"		callin void roleMethod(int f, String both) {\n" +
+					"			switch (f) {\n" +
+					"				case 1:\n" +
+					"					m();\n" +
+					"					break;\n" +
+					"				default:\n" +
+					"					base.roleMethod(f, both);\n" +
+					"			}\n" +
+					"		}\n" +
+					"	}\n" +
+					"}\n";
+			this.createFile(
+					"/P/src/Foo.java",
+					sourceFoo
+			);
+
+			char[] sourceChars = sourceFoo.toCharArray();
+			this.problemRequestor.initialize(sourceChars);
+
+			ICompilationUnit fooWC = getCompilationUnit("/P/src/Foo.java").getWorkingCopy(this.wcOwner, null);
+			assertProblems("Unexpected problems",
+					"----------\n" +
+					"----------\n");
+
+			this.problemRequestor.initialize(sourceChars);
+			fooWC.reconcile(AST.JLS12, 
+					 ICompilationUnit.FORCE_PROBLEM_DETECTION|ICompilationUnit.ENABLE_STATEMENTS_RECOVERY|ICompilationUnit.ENABLE_BINDINGS_RECOVERY,
+					 fooWC.getOwner(), null);
+
+			assertProblems(
+				"Unexpected problems",
+				"----------\n" +
+				"----------\n"
+			);
+		} finally {
+			deleteProject("P");
+		}
+	}
+
 	private void createRuntimeStubs() throws CoreException {
 		createFolder("/P/org/objectteams");
 		createFile("/P/org/objectteams/ITeam.java",

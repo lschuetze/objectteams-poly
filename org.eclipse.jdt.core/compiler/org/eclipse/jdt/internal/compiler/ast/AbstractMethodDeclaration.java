@@ -409,7 +409,7 @@ public abstract class AbstractMethodDeclaration
         {
         	if (!this.ignoreFurtherInvestigation)
         		new BytecodeTransformer().checkCopyMethodCode(classFile, this);
-	        if (this.binding.bytecodeMissing) { // copy did not succeed
+	        if (this.binding.bytecodeMissing && !Config.getConfig().ignoreMissingBytecode) { // copy did not succeed
 				int problemsLength;
 				CategorizedProblem[] problems =
 					this.scope.referenceCompilationUnit().compilationResult.getProblems();
