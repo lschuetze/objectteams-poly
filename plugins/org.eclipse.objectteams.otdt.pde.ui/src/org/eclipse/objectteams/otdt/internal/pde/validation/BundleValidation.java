@@ -342,8 +342,7 @@ public team class BundleValidation
 						for (IMethodMappingBinding mappingBinding : ((ITypeBinding) binding).getResolvedMethodMappings()) {
 							for (IMethodBinding basemethod : mappingBinding.getBaseMethods()) {
 								// find overridden
-								IMethodBinding overriddenMethod = Bindings.findOverriddenMethod(basemethod, true);
-								if (overriddenMethod != null) {
+								for (IMethodBinding overriddenMethod : Bindings.findOverriddenMethods(basemethod, true, false)) {									
 									// remember package of declaring class
 									String packageName = overriddenMethod.getDeclaringClass().getPackage().getName();
 									if (perTeamResult == null) {
