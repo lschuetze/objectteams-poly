@@ -1,7 +1,7 @@
 /**********************************************************************
  * This file is part of "Object Teams Development Tooling"-Software
  * 
- * Copyright 2004, 2010 Fraunhofer Gesellschaft, Munich, Germany,
+ * Copyright 2004, 2019 Fraunhofer Gesellschaft, Munich, Germany,
  * for its Fraunhofer Institute and Computer Architecture and Software
  * Technology (FIRST), Berlin, Germany and Technical University Berlin,
  * Germany.
@@ -48,6 +48,10 @@ import org.eclipse.objectteams.otdt.tests.FileBasedTest;
 @SuppressWarnings({ "nls", "restriction" })
 public class OTEquinoxBuilderTests extends OTBuilderTests {
 
+	static {
+//		TESTS_NAMES = new String[] { "testBug494254"};
+	}
+
 	MyFileBasedTest fileManager= new MyFileBasedTest("delegate");
 	class MyFileBasedTest extends FileBasedTest {
 		public MyFileBasedTest(String name) {
@@ -84,10 +88,7 @@ public class OTEquinoxBuilderTests extends OTBuilderTests {
 			destFile.setContents(new FileInputStream(srcFile), true, false, null);
 		}
 	};
-	
-	static {
-//		TESTS_NAMES = new String[] { "testBug419987"};
-	}
+
 	public OTEquinoxBuilderTests(String name) {
 		super(name);
 	}
@@ -427,6 +428,38 @@ public class OTEquinoxBuilderTests extends OTBuilderTests {
 	public void testBug495489() throws CoreException, IOException {
 		IJavaProject aspPrj= fileManager.setUpJavaProject("Bug495489"); 
 		env.addProject(aspPrj.getProject());
+		fullBuild();
+		expectingNoProblemsFor(aspPrj.getPath());
+	}
+
+	public void testBug494254() throws CoreException, IOException {
+		IJavaProject basePrj0= fileManager.setUpJavaProject("Bug494254base0"); 
+		env.addProject(basePrj0.getProject());
+		IJavaProject basePrj1= fileManager.setUpJavaProject("Bug494254base1"); 
+		env.addProject(basePrj1.getProject());
+		IJavaProject aspPrj= fileManager.setUpJavaProject("Bug494254aspect"); 
+		env.addProject(aspPrj.getProject());
+		fullBuild();
+		expectingNoProblemsFor(basePrj0.getPath());
+		expectingNoProblemsFor(basePrj1.getPath());
+		expectingOnlySpecificProblemsFor(aspPrj.getPath(), new Problem[] {
+			new Problem("", "Team 'bug494254aspect.Team1' lacks a superBase declaration for base class 'p0'",
+					aspPrj.getPath().append(new Path("plugin.xml")),
+						-1, -1, -1, IMarker.SEVERITY_ERROR),
+			new Problem("", "Plug-in 'Bug494254base0' does not provide package 'p1'",
+					aspPrj.getPath().append("plugin.xml"),
+						-1, -1, -1, IMarker.SEVERITY_ERROR),
+			new Problem("", "Unnecessary superBase declaration 'p0.C0'",
+					aspPrj.getPath().append("plugin.xml"),
+						-1, -1, -1, IMarker.SEVERITY_WARNING),
+			new Problem("", "Unnecessary superBase declaration 'p1.C1'",
+					aspPrj.getPath().append("plugin.xml"),
+						-1, -1, -1, IMarker.SEVERITY_WARNING)
+		});
+		// repair and check absence of problems:
+		IFile normal = (IFile) aspPrj.getProject().findMember("plugin.xml");
+		IFile ok = (IFile) aspPrj.getProject().findMember("plugin-ok.xml");
+		normal.setContents(ok.getContents(), 0, null);
 		fullBuild();
 		expectingNoProblemsFor(aspPrj.getPath());
 	}

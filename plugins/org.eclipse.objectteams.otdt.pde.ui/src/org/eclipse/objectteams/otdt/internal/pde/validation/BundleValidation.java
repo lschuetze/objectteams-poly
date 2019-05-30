@@ -1,7 +1,7 @@
 /**********************************************************************
  * This file is part of "Object Teams Development Tooling"-Software
  * 
- * Copyright 2009, 2014 Technical University Berlin, Germany.
+ * Copyright 2009, 2019 Technical University Berlin, Germany.
  * 
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -18,6 +18,8 @@ package org.eclipse.objectteams.otdt.internal.pde.validation;
 import static org.eclipse.objectteams.otequinox.Constants.*;
 
 import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -35,6 +37,14 @@ import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
+import org.eclipse.jdt.core.dom.AST;
+import org.eclipse.jdt.core.dom.ASTParser;
+import org.eclipse.jdt.core.dom.IBinding;
+import org.eclipse.jdt.core.dom.IMethodBinding;
+import org.eclipse.jdt.core.dom.IMethodMappingBinding;
+import org.eclipse.jdt.core.dom.ITypeBinding;
+import org.eclipse.jdt.internal.corext.dom.Bindings;
+import org.eclipse.objectteams.otdt.core.IMethodMapping;
 import org.eclipse.objectteams.otdt.core.IRoleType;
 import org.eclipse.objectteams.otdt.core.OTModelManager;
 import org.eclipse.objectteams.otdt.internal.pde.ui.OTPDEUIMessages;
@@ -159,6 +169,8 @@ public team class BundleValidation
 		@SuppressWarnings("decapsulation")
 		int getLine(Element element, String attrName) -> int getLine(Element element, String attrName);
 
+		VirtualMarker report(String message, int line, int severity, int fixId, Element element, String attrName, String category)
+		<- replace VirtualMarker report(String message, int line, int severity, int fixId, Element element, String attrName, String category);
 
 		void checkAspectBinding(Element element) <- after void validateExtension(Element element);
 
@@ -171,6 +183,8 @@ public team class BundleValidation
 				// it's an aspect bundle
 				context.isAspectBundle = true;
 				
+				IJavaProject jProject = JavaCore.create(context.getProject());
+
 				boolean hasSelfAdaptation = false;
 				NodeList baseNodes = element.getElementsByTagName(BASE_PLUGIN);
 				for (int b=0; b<baseNodes.getLength(); b++) {
@@ -180,15 +194,21 @@ public team class BundleValidation
 					}
 				}
 
-				// collect binding requirements by nested teams of all bound teams:
-				NodeList teamNodes = element.getElementsByTagName(TEAM);
-				for (int t=0; t<teamNodes.getLength(); t++) {
-					// record aspect packages:
-					Object teamClass = ((Element)teamNodes.item(t)).getAttribute(CLASS);
-					if (teamClass instanceof String)
-						checkNestedTeams((String) teamClass, context, hasSelfAdaptation);
+				Map<String,Set<String>> superBasePackagesByTeam;
+				{
+					List<IMethodMapping> mappings = new ArrayList<>();
+	
+					// collect binding requirements by nested teams of all bound teams:
+					NodeList teamNodes = element.getElementsByTagName(TEAM);
+					for (int t=0; t<teamNodes.getLength(); t++) {
+						// record aspect packages:
+						Object teamClass = ((Element)teamNodes.item(t)).getAttribute(CLASS);
+						if (teamClass instanceof String)
+							checkNestedTeams((String) teamClass, context, hasSelfAdaptation, mappings);
+					}
+					// collect packages with overridden base methods:
+					superBasePackagesByTeam = collectOverridden(mappings);
 				}
-
 				NodeList aspectBindings = element.getChildNodes();
 				int aspectCount = aspectBindings.getLength();
 				for (int i = 0; i < aspectCount; i++) {
@@ -219,22 +239,32 @@ public team class BundleValidation
 								// analyze aspect packages:
 								Element teamNode = childElement;
 								Object teamClass = teamNode.getAttribute(CLASS);
-								if (teamClass instanceof String) {
-									String teamName = (String) teamClass;
-									String actualPackage = checkActualPackage(context, teamNode, teamName);
-									if (actualPackage == null)
-										report(OTPDEUIMessages.Validation_MissingPackage_error, getLine(teamNode),
-												CompilerFlags.ERROR, PDEMarkerFactory.NO_RESOLUTION, PDEMarkerFactory.CAT_FATAL);
-									else
-										context.aspectPackages.add(actualPackage);
-									teamNames.add(teamName);
-								}
+								if (!(teamClass instanceof String))
+									continue;
+							
+								String teamName = (String) teamClass;
+								String actualPackage = checkActualPackage(context, teamNode, teamName);
+								if (actualPackage == null)
+									report(OTPDEUIMessages.Validation_MissingPackage_error, getLine(teamNode),
+											CompilerFlags.ERROR, PDEMarkerFactory.NO_RESOLUTION, PDEMarkerFactory.CAT_FATAL);
+								else
+									context.aspectPackages.add(actualPackage);
+								teamNames.add(teamName);
+
 								// team activation?
 								Object activation = teamNode.getAttribute(ACTIVATION);
 								if (ActivationKind.ALL_THREADS.toString().equals(activation)) {
 									hasActivation = true;
 								} else if (ActivationKind.THREAD.toString().equals(activation)) {
 									hasActivation = true;
+								}
+								NodeList superBases = teamNode.getElementsByTagName(SUPER_BASE);
+								for (int k=0; k<superBases.getLength(); k++) {
+									// report bad declarations & remove superBase requirements matching this declaration 
+									Node grandChild = superBases.item(k);
+									if (grandChild instanceof Element) {
+										checkSuperBaseClass((Element) grandChild, superBasePackagesByTeam.get(teamName), jProject, baseBundle);
+									}
 								}
 							}
 						}
@@ -262,21 +292,113 @@ public team class BundleValidation
 					}
 				}
 				// complain about remaining requiredBasePackages (i.e., those for which no binding was provided)
-				for (Entry<String, List<String>> entry : context.requiredBasePackagesPerTeam.entrySet()) {
-					List<String> requiredBasePackages = entry.getValue();
-					if (requiredBasePackages != null && !requiredBasePackages.isEmpty()) {
-						for (String requiredBasePackage : requiredBasePackages) {
-							report(NLS.bind(OTPDEUIMessages.Validation_MissingBindingForBasePackage_error, entry.getKey(), requiredBasePackage),
-									getLine(element), 
-									CompilerFlags.ERROR,
-									PDEMarkerFactory.NO_RESOLUTION,
-									PDEMarkerFactory.CAT_FATAL);
-						}
+				reportUnmatchedRequirements(element, context.requiredBasePackagesPerTeam,
+											OTPDEUIMessages.Validation_MissingBindingForBasePackage_error);
+				// complain about remaining undeclared super bases:
+				reportUnmatchedRequirements(element, superBasePackagesByTeam,
+											OTPDEUIMessages.Validation_MissingSuperBasePackageDecl_error);
+			}
+		}
 
+		private void reportUnmatchedRequirements(Element element,
+				Map<String, ? extends Collection<String>> packagesPerTeam,
+				String errorMessageTemplate)
+		{
+			for (Entry<String, ? extends Collection<String>> entry : packagesPerTeam.entrySet()) {
+				Collection<String> requiredBasePackages = entry.getValue();
+				if (requiredBasePackages != null && !requiredBasePackages.isEmpty()) {
+					for (String requiredBasePackage : requiredBasePackages) {
+						report(NLS.bind(errorMessageTemplate, entry.getKey(), requiredBasePackage),
+								getLine(element),
+								CompilerFlags.ERROR,
+								PDEMarkerFactory.NO_RESOLUTION,
+								PDEMarkerFactory.CAT_FATAL);
 					}
 				}
 			}
 		}
+
+		private Map<String, Set<String>> collectOverridden(List<IMethodMapping> mappings) {
+			Map<String,Set<String>> superBasePackagesByTeam = new HashMap<>();
+			try {
+				// collect role types from mappings (IType, then ITypeBinding):
+				Set<IType> roleTypes = new HashSet<IType>(); 
+				for (IMethodMapping mapping : mappings) {
+					IType type = mapping.getDeclaringType();
+					if (!"java.lang.Object".equals(type.getSuperclassName())) //$NON-NLS-1$
+						roleTypes.add(type);
+				}
+				if (roleTypes.isEmpty())
+					return Collections.emptyMap();
+				ASTParser parser = ASTParser.newParser(AST.JLS12);
+				parser.setProject(JavaCore.create(getFProject()));
+				IBinding[] bindings = parser.createBindings(roleTypes.toArray(new IType[roleTypes.size()]), null);
+
+				// from ITypeBinding descend into IMethodMappingBinding, then IMethodBinding (base):
+				for (IBinding binding : bindings) {
+					if (binding instanceof ITypeBinding) {
+						String teamName = ((ITypeBinding) binding).getDeclaringClass().getQualifiedName();
+						Set<String> perTeamResult = superBasePackagesByTeam.get(teamName);
+						for (IMethodMappingBinding mappingBinding : ((ITypeBinding) binding).getResolvedMethodMappings()) {
+							for (IMethodBinding basemethod : mappingBinding.getBaseMethods()) {
+								// find overridden
+								IMethodBinding overriddenMethod = Bindings.findOverriddenMethod(basemethod, true);
+								if (overriddenMethod != null) {
+									// remember package of declaring class
+									String packageName = overriddenMethod.getDeclaringClass().getPackage().getName();
+									if (perTeamResult == null) {
+										superBasePackagesByTeam.put(teamName, perTeamResult = new HashSet<>());
+									}
+									perTeamResult.add(packageName);
+								}
+							}
+						}
+					}
+				}
+			} catch (JavaModelException e) {
+				// cannot analyse
+			}
+			return superBasePackagesByTeam;
+		}
+
+		private void checkSuperBaseClass(Element elem, Set<String> collectedPackages, IJavaProject jProject, BundleDescription baseBundle) {
+			try {
+				String packageName = null;
+				String superBaseClass = elem.getAttribute(SUPER_BASE_CLASS);
+				if (superBaseClass != null) {
+					IType clazz = jProject.findType(superBaseClass);
+					if (clazz != null) { // otherwise assume standard validation already complained
+						packageName = clazz.getPackageFragment().getElementName();
+						if (collectedPackages == null || !collectedPackages.remove(packageName)) {
+							report(NLS.bind(OTPDEUIMessages.Validation_UnnecessarySuperBase_warning, superBaseClass),
+									getLine(elem), 
+									CompilerFlags.WARNING,
+									PDEMarkerFactory.NO_RESOLUTION,
+									PDEMarkerFactory.CAT_OTHER);
+						}
+					}
+				}
+				if (packageName != null) {
+					String bundleName = elem.getAttribute(SUPER_BASE_PLUGIN);
+					BundleDescription basePlugIn = (bundleName != null) ? checkBasePlugIn(bundleName, getLine(elem))
+													: baseBundle; // fall back if no explicit plugin
+					if (basePlugIn != null) {
+						for (Capability cap : basePlugIn.getCapabilities(PackageNamespace.PACKAGE_NAMESPACE)) {
+							if (packageName.equals(cap.getAttributes().get(PackageNamespace.PACKAGE_NAMESPACE)))
+								return;
+						}
+						report(NLS.bind(OTPDEUIMessages.Validation_PackageNotInSuperBase_error, bundleName, packageName),
+								getLine(elem), 
+								CompilerFlags.ERROR,
+								PDEMarkerFactory.NO_RESOLUTION,
+								PDEMarkerFactory.CAT_FATAL);						
+					}
+				}
+			} catch (JavaModelException e) {
+				// cannot analyse
+			}
+		}
+
 		String checkActualPackage(BundleCheckingContext context, Element teamNode, String teamName) {
 			int lastDot = teamName.lastIndexOf('.');
 			if (lastDot == -1)
@@ -333,7 +455,7 @@ public team class BundleValidation
 			return bundles[0];
 		}
 		
-		void checkNestedTeams(String teamName, BundleCheckingContext context, boolean hasSelfAdaptation) {
+		void checkNestedTeams(String teamName, BundleCheckingContext context, boolean hasSelfAdaptation, List<IMethodMapping> mappings) {
 			teamName = teamName.replace('$', '.');
 			IJavaProject jPrj = JavaCore.create(getFProject());
 			if (jPrj.exists()) {
@@ -349,7 +471,11 @@ public team class BundleValidation
 											&& !(hasSelfAdaptation && aBase.getJavaProject().equals(jPrj)))
 										context.addRequiredBasePackage(nestedTeamName, aBase.getPackageFragment().getElementName());
 								}
-								checkNestedTeams(nestedTeamName, context, hasSelfAdaptation);
+								checkNestedTeams(nestedTeamName, context, hasSelfAdaptation, mappings);
+							} else {
+								IRoleType role = (IRoleType) OTModelManager.getOTElement(member);
+								for (IMethodMapping mapping : role.getMethodMappings())
+									mappings.add(mapping);
 							}
 						}
 					}
@@ -357,6 +483,26 @@ public team class BundleValidation
 					// cannot analyse
 				}
 			}
+		}
+
+		@SuppressWarnings("basecall")
+		callin VirtualMarker report(String message, int line, int severity, int fixId, Element element, String attrName, String category) {
+			if (fixId == PDEMarkerFactory.M_DISCOURAGED_CLASS) {
+				if (matchElementPath(element, new String[] {ASPECT_BINDING, TEAM, SUPER_BASE}, 2))
+					return null; // don't report restriction inside aspectBinding/superBase
+			}
+			return base.report(message, line, severity, fixId, element, attrName, category);
+		}
+
+		private boolean matchElementPath(Element cur, String[] containerTags, int idx) {
+			if (idx < 0)
+				return true;
+			if (!containerTags[idx].equals(cur.getTagName()))
+				return false;
+			Node parentNode = cur.getParentNode();
+			if (parentNode instanceof Element)
+				return matchElementPath((Element) parentNode, containerTags, idx-1);
+			return false;
 		}
 	}
 	

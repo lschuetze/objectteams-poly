@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?eclipse version="3.4"?>
+<plugin>
+   <extension
+         point="org.eclipse.objectteams.otequinox.aspectBindings">
+      <aspectBinding
+            icon="platform:/plugin/org.eclipse.objectteams.otdt.ui/icons/ot/calloutbinding_obj.gif">
+         <basePlugin
+               icon="platform:/plugin/org.eclipse.pde.ui/icons/obj16/plugin_obj.png"
+               id="Bug494254base1">
+         </basePlugin>
+         <team
+               class="bug494254aspect.Team1"
+               icon="platform:/plugin/org.eclipse.objectteams.otdt.ui/icons/ot/team_obj.gif">
+         </team>
+         <team
+               class="bug494254aspect.Team2"
+               icon="platform:/plugin/org.eclipse.objectteams.otdt.ui/icons/ot/team_obj.gif">
+             <superBase class="p0.C0" plugin="Bug494254base0"/>
+             <superBase class="p1.C1" plugin="Bug494254base0"/>
+         </team>
+      </aspectBinding>
+   </extension>
+</plugin>

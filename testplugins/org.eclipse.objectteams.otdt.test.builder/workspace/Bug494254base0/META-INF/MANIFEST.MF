@@ -1,0 +1,8 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: Base0_494254
+Bundle-SymbolicName: Bug494254base0
+Bundle-Version: 1.0.0.qualifier
+Automatic-Module-Name: Base0_494254
+Bundle-RequiredExecutionEnvironment: JavaSE-1.8
+Export-Package: p0;x-friends:="Bug494254base1"

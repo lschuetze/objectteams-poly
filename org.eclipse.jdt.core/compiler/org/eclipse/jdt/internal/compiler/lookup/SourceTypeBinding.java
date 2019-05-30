@@ -2491,6 +2491,9 @@ public MethodBinding resolveTypesFor(MethodBinding method) {
 	return resolveTypesFor(method, false);
 }
 public MethodBinding resolveTypesFor(MethodBinding method, boolean fromSynthetic) {
+	// FIXME(SH): scope is null for types returned from ASTParser.createBindings() -- shouldn't JDT support this?
+	if (this.scope == null)
+		return resolveTypesWithSuspendedTempErrorHandlingPolicy(method, fromSynthetic);
 //orig:
 	ProblemReporter problemReporter = this.scope.problemReporter();
 	IErrorHandlingPolicy suspendedPolicy = problemReporter.suspendTempErrorHandlingPolicy();

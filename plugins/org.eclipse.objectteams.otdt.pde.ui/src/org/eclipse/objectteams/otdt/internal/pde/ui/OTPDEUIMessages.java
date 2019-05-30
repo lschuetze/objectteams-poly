@@ -47,6 +47,9 @@ public class OTPDEUIMessages extends NLS
 	public static String Validation_NotAPackage_error;
 	public static String Validation_MissingPackage_error;
 	public static String Validation_MissingBindingForBasePackage_error;
+	public static String Validation_MissingSuperBasePackageDecl_error;
+	public static String Validation_PackageNotInSuperBase_error;
+	public static String Validation_UnnecessarySuperBase_warning;
 
 	public static String Validation_MissingAspectPackageExport_error;
 	public static String Resolution_AddAspectPackageExport_label;
