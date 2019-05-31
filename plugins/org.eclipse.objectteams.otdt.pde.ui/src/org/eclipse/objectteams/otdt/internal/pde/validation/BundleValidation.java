@@ -27,11 +27,14 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 
 import org.eclipse.core.resources.IMarker;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.Path;
+import org.eclipse.jdt.core.Flags;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IType;
@@ -194,7 +197,7 @@ public team class BundleValidation
 					}
 				}
 
-				Map<String,Set<String>> superBasePackagesByTeam;
+				Map<String,Map<String,Set<String>>> superBasePackagesByTeam;
 				{
 					List<IMethodMapping> mappings = new ArrayList<>();
 	
@@ -292,23 +295,25 @@ public team class BundleValidation
 					}
 				}
 				// complain about remaining requiredBasePackages (i.e., those for which no binding was provided)
-				reportUnmatchedRequirements(element, context.requiredBasePackagesPerTeam,
+				reportUnmatchedRequirements(element, context.requiredBasePackagesPerTeam, e->e,
 											OTPDEUIMessages.Validation_MissingBindingForBasePackage_error);
 				// complain about remaining undeclared super bases:
 				reportUnmatchedRequirements(element, superBasePackagesByTeam,
+											e->e.values().stream().flatMap(Set::stream).collect(Collectors.toSet()),
 											OTPDEUIMessages.Validation_MissingSuperBasePackageDecl_error);
 			}
 		}
 
-		private void reportUnmatchedRequirements(Element element,
-				Map<String, ? extends Collection<String>> packagesPerTeam,
+		private <T> void reportUnmatchedRequirements(Element element,
+				Map<String, T> requirementsPerTeam,
+				Function<T,? extends Collection<String>> extractor,
 				String errorMessageTemplate)
 		{
-			for (Entry<String, ? extends Collection<String>> entry : packagesPerTeam.entrySet()) {
-				Collection<String> requiredBasePackages = entry.getValue();
-				if (requiredBasePackages != null && !requiredBasePackages.isEmpty()) {
-					for (String requiredBasePackage : requiredBasePackages) {
-						report(NLS.bind(errorMessageTemplate, entry.getKey(), requiredBasePackage),
+			for (Entry<String, T> entry : requirementsPerTeam.entrySet()) {
+				Collection<String> requireds = extractor.apply(entry.getValue());
+				if (requireds != null && !requireds.isEmpty()) {
+					for (String required : requireds) {
+						report(NLS.bind(errorMessageTemplate, entry.getKey(), required),
 								getLine(element),
 								CompilerFlags.ERROR,
 								PDEMarkerFactory.NO_RESOLUTION,
@@ -318,8 +323,8 @@ public team class BundleValidation
 			}
 		}
 
-		private Map<String, Set<String>> collectOverridden(List<IMethodMapping> mappings) {
-			Map<String,Set<String>> superBasePackagesByTeam = new HashMap<>();
+		private Map<String, Map<String,Set<String>>> collectOverridden(List<IMethodMapping> mappings) {
+			Map<String,Map<String,Set<String>>> superBasePackagesByTeam = new HashMap<>(); // inner map is package name -> class names
 			try {
 				// collect role types from mappings (IType, then ITypeBinding):
 				Set<IType> roleTypes = new HashSet<IType>(); 
@@ -338,17 +343,24 @@ public team class BundleValidation
 				for (IBinding binding : bindings) {
 					if (binding instanceof ITypeBinding) {
 						String teamName = ((ITypeBinding) binding).getDeclaringClass().getQualifiedName();
-						Set<String> perTeamResult = superBasePackagesByTeam.get(teamName);
+						Map<String,Set<String>> perTeamResult = superBasePackagesByTeam.get(teamName);
 						for (IMethodMappingBinding mappingBinding : ((ITypeBinding) binding).getResolvedMethodMappings()) {
 							for (IMethodBinding basemethod : mappingBinding.getBaseMethods()) {
+								if (!mappingBinding.isCallin() && Flags.isPublic(basemethod.getModifiers()))
+									continue; // no weaving required for callout to public
 								// find overridden
 								for (IMethodBinding overriddenMethod : Bindings.findOverriddenMethods(basemethod, true, false)) {									
 									// remember package of declaring class
-									String packageName = overriddenMethod.getDeclaringClass().getPackage().getName();
+									ITypeBinding declaringClass = overriddenMethod.getDeclaringClass();
+									String packageName = declaringClass.getPackage().getName();
 									if (perTeamResult == null) {
-										superBasePackagesByTeam.put(teamName, perTeamResult = new HashSet<>());
+										superBasePackagesByTeam.put(teamName, perTeamResult = new HashMap<>());
 									}
-									perTeamResult.add(packageName);
+									Set<String> classSet = perTeamResult.get(packageName);
+									if (classSet == null) {
+										perTeamResult.put(packageName, classSet = new HashSet<>());
+									}
+									classSet.add(declaringClass.getQualifiedName());
 								}
 							}
 						}
@@ -360,7 +372,7 @@ public team class BundleValidation
 			return superBasePackagesByTeam;
 		}
 
-		private void checkSuperBaseClass(Element elem, Set<String> collectedPackages, IJavaProject jProject, BundleDescription baseBundle) {
+		private void checkSuperBaseClass(Element elem, Map<String,Set<String>> collectedPackages, IJavaProject jProject, BundleDescription baseBundle) {
 			try {
 				String packageName = null;
 				String superBaseClass = elem.getAttribute(SUPER_BASE_CLASS);
@@ -368,7 +380,7 @@ public team class BundleValidation
 					IType clazz = jProject.findType(superBaseClass);
 					if (clazz != null) { // otherwise assume standard validation already complained
 						packageName = clazz.getPackageFragment().getElementName();
-						if (collectedPackages == null || !collectedPackages.remove(packageName)) {
+						if (collectedPackages == null || collectedPackages.remove(packageName) == null) {
 							report(NLS.bind(OTPDEUIMessages.Validation_UnnecessarySuperBase_warning, superBaseClass),
 									getLine(elem), 
 									CompilerFlags.WARNING,
@@ -379,7 +391,7 @@ public team class BundleValidation
 				}
 				if (packageName != null) {
 					String bundleName = elem.getAttribute(SUPER_BASE_PLUGIN);
-					BundleDescription basePlugIn = (bundleName != null) ? checkBasePlugIn(bundleName, getLine(elem))
+					BundleDescription basePlugIn = !bundleName.isEmpty() ? checkBasePlugIn(bundleName, getLine(elem))
 													: baseBundle; // fall back if no explicit plugin
 					if (basePlugIn != null) {
 						for (Capability cap : basePlugIn.getCapabilities(PackageNamespace.PACKAGE_NAMESPACE)) {

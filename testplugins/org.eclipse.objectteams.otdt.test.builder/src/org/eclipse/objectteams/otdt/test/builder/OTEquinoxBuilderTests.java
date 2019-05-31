@@ -443,7 +443,7 @@ public class OTEquinoxBuilderTests extends OTBuilderTests {
 		expectingNoProblemsFor(basePrj0.getPath());
 		expectingNoProblemsFor(basePrj1.getPath());
 		expectingOnlySpecificProblemsFor(aspPrj.getPath(), new Problem[] {
-			new Problem("", "Team 'bug494254aspect.Team1' lacks a superBase declaration for a base class in package 'p0'",
+			new Problem("", "Team 'bug494254aspect.Team1' lacks a superBase declaration for base class 'p0.C0'",
 					aspPrj.getPath().append(new Path("plugin.xml")),
 						-1, -1, -1, IMarker.SEVERITY_ERROR),
 			new Problem("", "Plug-in 'Bug494254base0' does not provide package 'p1'",

@@ -264,6 +264,10 @@ private void addDefaultAbstractMethods() {
 
 	this.tagBits |= TagBits.KnowsDefaultAbstractMethods;
 	if (isClass() && isAbstract()) {
+//{ObjectTeams: kludge for missing session support from ASTParser.createBindings:
+		if (this.scope == null)
+			return;
+// SH}
 		if (this.scope.compilerOptions().targetJDK >= ClassFileConstants.JDK1_2)
 			return; // no longer added for post 1.2 targets
 
