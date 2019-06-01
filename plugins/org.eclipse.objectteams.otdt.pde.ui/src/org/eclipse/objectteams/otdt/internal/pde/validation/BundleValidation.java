@@ -348,6 +348,8 @@ public team class BundleValidation
 							for (IMethodBinding basemethod : mappingBinding.getBaseMethods()) {
 								if (!mappingBinding.isCallin() && Flags.isPublic(basemethod.getModifiers()))
 									continue; // no weaving required for callout to public
+								if (Flags.isAbstract(basemethod.getModifiers()))
+									continue; // no code to weave
 								// find overridden
 								for (IMethodBinding overriddenMethod : Bindings.findOverriddenMethods(basemethod, true, false)) {									
 									// remember package of declaring class
