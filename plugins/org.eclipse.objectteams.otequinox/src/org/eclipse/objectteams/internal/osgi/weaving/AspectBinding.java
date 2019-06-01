@@ -1,7 +1,7 @@
 /**********************************************************************
  * This file is part of "Object Teams Development Tooling"-Software
  * 
- * Copyright 2009, 2015 Germany and Technical University Berlin, Germany and others.
+ * Copyright 2009, 2019 Germany and Technical University Berlin, Germany and others.
  * 
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -263,7 +263,6 @@ public class AspectBinding {
 		String bundleName;
 		/** Team classes indexed by base classes that should trigger activating the team. */
 		final HashMap<String, Set<TeamBinding>> teamsPerBase = new HashMap<>();
-		boolean otreAdded;		
 
 		public BaseBundle(String bundleName) {
 			this.bundleName = bundleName;

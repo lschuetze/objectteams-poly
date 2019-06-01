@@ -1,7 +1,7 @@
 /**********************************************************************
  * This file is part of "Object Teams Development Tooling"-Software
  * 
- * Copyright 2013, 2018 GK Software SE
+ * Copyright 2013, 2019 GK Software SE
  *  
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -278,8 +278,7 @@ public class OTWeavingHook implements WeavingHook, WovenClassListener {
 						log(IStatus.WARNING, "Not performing thread weaving for "+className+" (weaving scheme not yet knonw)");
 						return;
 					}
-					BaseBundle baseBundle = this.aspectBindingRegistry.getBaseBundle(bundleName);
-					BaseBundleLoadTrigger.addOTREImport(baseBundle, bundleName, wovenClass, DEFAULT_WEAVING_SCHEME == WeavingScheme.OTDRE);
+					BaseBundleLoadTrigger.addOTREImport(bundleName, wovenClass, DEFAULT_WEAVING_SCHEME == WeavingScheme.OTDRE);
 				} 
 
 				long time = 0;

@@ -1,7 +1,7 @@
 /**********************************************************************
  * This file is part of "Object Teams Development Tooling"-Software
  * 
- * Copyright 2013, 2015 GK Software AG
+ * Copyright 2013, 2019 GK Software AG
  *  
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -45,7 +45,6 @@ public class BaseBundleLoadTrigger {
 
 	private String baseBundleName;	
 	@Nullable private BaseBundle baseBundle; // null when representing an aspectBundle with SELF-adapting teams
-	private boolean otreAdded = false;
 	private List<AspectBinding> aspectBindings = new ArrayList<>();
 
 	public BaseBundleLoadTrigger(String bundleSymbolicName, @Nullable BaseBundle baseBundle, AspectBindingRegistry aspectBindingRegistry, 
@@ -85,11 +84,7 @@ public class BaseBundleLoadTrigger {
 		// (1) OTRE import added once per base bundle:
 		WeavingScheme weavingScheme = getWeavingScheme();
 		synchronized(this) {
-			final BaseBundle baseBundle2 = baseBundle;
-			if (!otreAdded) {
-				otreAdded = true;
-				addOTREImport(baseBundle2, baseBundleName, baseClass, weavingScheme == WeavingScheme.OTDRE);
-			}
+			addOTREImport(baseBundleName, baseClass, weavingScheme == WeavingScheme.OTDRE);
 		}
 		
 		// for each team in each aspect binding:
@@ -151,13 +146,8 @@ public class BaseBundleLoadTrigger {
 		}
 	}
 
-	static void addOTREImport(@Nullable BaseBundle baseBundle, String baseBundleName, WovenClass baseClass, boolean useDynamicWeaver) 
+	static void addOTREImport(String baseBundleName, WovenClass baseClass, boolean useDynamicWeaver) 
 	{
-		if (baseBundle != null) {
-			if (baseBundle.otreAdded)
-				return;
-			baseBundle.otreAdded = true;
-		}
 		log(IStatus.INFO, "Adding OTRE import to "+baseBundleName);
 		List<String> imports = baseClass.getDynamicImports();
 		imports.add("org.objectteams");
