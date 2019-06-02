@@ -79,6 +79,16 @@
                activation="ALL_THREADS"
                class="org.eclipse.objectteams.otdt.internal.pde.ui.PackageExplorerAdaptor"
                icon="platform:/plugin/org.eclipse.objectteams.otdt.ui/icons/ot/team_obj.gif">
+            <superBase
+                  class="org.eclipse.jdt.internal.ui.viewsupport.AppearanceAwareLabelProvider">
+            </superBase>
+            <superBase
+                  class="org.eclipse.jdt.ui.StandardJavaElementContentProvider">
+            </superBase>
+            <superBase
+                  class="org.eclipse.jface.viewers.ViewerComparator"
+                  plugin="org.eclipse.jface">
+            </superBase>
          </team>
       </aspectBinding>
       <aspectBinding

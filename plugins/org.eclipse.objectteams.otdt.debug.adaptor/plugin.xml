@@ -52,6 +52,9 @@
             <superBase
                   class="org.eclipse.jdt.debug.ui.launchConfigurations.JavaLaunchTab">
             </superBase>
+            <superBase
+                  class="org.eclipse.jdt.internal.debug.ui.launcher.AbstractJavaMainTab">
+            </superBase>
          </team>
          <team
                activation="NONE"

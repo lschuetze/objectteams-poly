@@ -98,11 +98,23 @@
          <team
                activation="ALL_THREADS"
                class="org.eclipse.objectteams.otdt.internal.ui.packageview.PackageExplorerAdaptor"
-               icon="platform:/plugin/org.eclipse.objectteams.otdt.ui/icons/ot/team_obj.gif"/>
+               icon="platform:/plugin/org.eclipse.objectteams.otdt.ui/icons/ot/team_obj.gif">
+            <superBase
+                  class="org.eclipse.jdt.internal.ui.viewsupport.JavaUILabelProvider">
+            </superBase>
+            <superBase
+                  class="org.eclipse.jface.viewers.StructuredViewer"
+                  plugin="org.eclipse.jface">
+            </superBase>
+         </team>
          <team
                activation="ALL_THREADS"
                class="org.eclipse.objectteams.otdt.internal.ui.javaeditor.JavaOutlinePageAdaptor"
                icon="platform:/plugin/org.eclipse.objectteams.otdt.ui/icons/ot/team_obj.gif">
+            <superBase
+                  class="org.eclipse.jface.viewers.StructuredViewer"
+                  plugin="org.eclipse.jface">
+            </superBase>
          </team>
          <team
                activation="ALL_THREADS"
@@ -113,6 +125,9 @@
                activation="ALL_THREADS"
                class="org.eclipse.objectteams.otdt.internal.ui.search.SearchAdaptor"
                icon="platform:/plugin/org.eclipse.objectteams.otdt.ui/icons/ot/team_obj.gif">
+            <superBase
+                  class="org.eclipse.jdt.ui.StandardJavaElementContentProvider">
+            </superBase>
          </team>
 		<team
               activation="ALL_THREADS"
@@ -213,7 +228,11 @@
         <team
               activation="ALL_THREADS"
               class="org.eclipse.objectteams.otdt.internal.ui.assist.BaseImportRewriting"
-              icon="platform:/plugin/org.eclipse.objectteams.otdt.ui/icons/ot/team_obj.gif"/>
+              icon="platform:/plugin/org.eclipse.objectteams.otdt.ui/icons/ot/team_obj.gif">
+           <superBase
+                 class="org.eclipse.jdt.internal.compiler.parser.Parser">
+           </superBase>
+        </team>
         <team
               activation="ALL_THREADS"
               class="org.eclipse.objectteams.otdt.internal.corext.CodeManipulationAdaptor"

@@ -16,6 +16,9 @@
                activation="ALL_THREADS"
                class="org.eclipse.objectteams.otdt.internal.apt.VisitorsAdaptor"
                icon="platform:/plugin/org.eclipse.objectteams.otdt.ui/icons/ot/team_obj.gif">
+            <superBase
+                  class="org.eclipse.jdt.internal.compiler.ASTVisitor">
+            </superBase>
          </team>
       </aspectBinding>
    </extension>
@@ -31,6 +34,10 @@
                activation="ALL_THREADS"
                class="org.eclipse.objectteams.otdt.internal.apt.VisitorsAdaptor"
                icon="platform:/plugin/org.eclipse.objectteams.otdt.ui/icons/ot/team_obj.gif">
+            <superBase
+            	  plugin="org.eclipse.jdt.core"
+                  class="org.eclipse.jdt.internal.compiler.ASTVisitor">
+            </superBase>
          </team>
       </aspectBinding>
    </extension>
