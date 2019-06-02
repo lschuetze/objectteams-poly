@@ -96,12 +96,13 @@ public class MoveCodeToCallOrigAdapter extends AbstractTransformableClassNode {
 			addLineNumber(newInstructions, line);
 		int boundMethodIdSlot = firstArgIndex;
 		
+		// move boundMethodId to a higher slot, to make lower slots available for original locals
+		newInstructions.add(new VarInsnNode(Opcodes.ILOAD, boundMethodIdSlot));
+		boundMethodIdSlot = orgMethod.maxLocals+1;
+		addLocal(callOrig, BOUND_METHOD_ID, "I", boundMethodIdSlot, start, end, false);
+		newInstructions.add(new VarInsnNode(Opcodes.ISTORE, boundMethodIdSlot));
+
 		if (args.length > 0) {
-			// move boundMethodId to a higher slot, to make lower slots available for original locals
-			newInstructions.add(new VarInsnNode(Opcodes.ILOAD, boundMethodIdSlot));
-			boundMethodIdSlot = orgMethod.maxLocals+1;
-			addLocal(callOrig, BOUND_METHOD_ID, "I", boundMethodIdSlot, start, end, false);
-			newInstructions.add(new VarInsnNode(Opcodes.ISTORE, boundMethodIdSlot));
 			
 			newInstructions.add(new VarInsnNode(Opcodes.ALOAD, firstArgIndex + argOffset + 1));
 			
@@ -128,8 +129,6 @@ public class MoveCodeToCallOrigAdapter extends AbstractTransformableClassNode {
 					addLocal(callOrig, origLocals.get(origLocalIdx).name, arg.getDescriptor(), slot, start, end, false);
 				slot += arg.getSize();
 			}
-		} else {
-			addLocal(callOrig, BOUND_METHOD_ID, "I", boundMethodIdSlot, start, end, false);
 		}
 
 		InsnList orgInstructions = orgMethod.instructions;

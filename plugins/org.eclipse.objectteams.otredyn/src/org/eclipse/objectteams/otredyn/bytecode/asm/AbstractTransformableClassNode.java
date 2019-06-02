@@ -1,7 +1,7 @@
 /**********************************************************************
  * This file is part of "Object Teams Dynamic Runtime Environment"
  * 
- * Copyright 2009, 2015 Oliver Frank and others.
+ * Copyright 2009, 2019 Oliver Frank and others.
  * 
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -420,15 +420,16 @@ public abstract class AbstractTransformableClassNode extends ClassNode {
 	 * Add a local variable to be visible from 'start' to 'end'.
 	 * Checks whether a local variable of that name already exists, in which case we don't change anything.
 	 * TODO: should check if ranges of both variables overlap!
-	 * @param fullRange TODO
+	 * @param fullRange if true we do not check ranges but avoid *any* duplication by name
 	 */
 	protected void addLocal(MethodNode method, String selector, String desc, int slot, LabelNode start, LabelNode end, boolean fullRange) {
 		if (!IS_DEBUG) return;
-		if (fullRange) {
-			for (Object lv : method.localVariables) {
-				if (((LocalVariableNode)lv).name.equals(selector)) {
+		for (Object lv : method.localVariables) {
+			LocalVariableNode lvNode = (LocalVariableNode)lv;
+			if (lvNode.name.equals(selector)) {
+				if (fullRange||
+						(lvNode.start.equals(start) && lvNode.end.equals(end)))
 					return;
-				}
 			}
 		}
         method.localVariables.add(new LocalVariableNode(selector, desc, null, start, end, slot));
