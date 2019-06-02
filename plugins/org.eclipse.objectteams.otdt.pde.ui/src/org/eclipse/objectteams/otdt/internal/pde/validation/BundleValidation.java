@@ -345,13 +345,14 @@ public team class BundleValidation
 						String teamName = ((ITypeBinding) binding).getDeclaringClass().getQualifiedName();
 						Map<String,Set<String>> perTeamResult = superBasePackagesByTeam.get(teamName);
 						for (IMethodMappingBinding mappingBinding : ((ITypeBinding) binding).getResolvedMethodMappings()) {
+							if (mappingBinding == null) continue;
 							for (IMethodBinding basemethod : mappingBinding.getBaseMethods()) {
 								if (!mappingBinding.isCallin() && Flags.isPublic(basemethod.getModifiers()))
 									continue; // no weaving required for callout to public
-								if (Flags.isAbstract(basemethod.getModifiers()))
-									continue; // no code to weave
 								// find overridden
 								for (IMethodBinding overriddenMethod : Bindings.findOverriddenMethods(basemethod, true, false)) {									
+									if (Flags.isAbstract(overriddenMethod.getModifiers()))
+										continue; // no code to weave
 									// remember package of declaring class
 									ITypeBinding declaringClass = overriddenMethod.getDeclaringClass();
 									String packageName = declaringClass.getPackage().getName();
