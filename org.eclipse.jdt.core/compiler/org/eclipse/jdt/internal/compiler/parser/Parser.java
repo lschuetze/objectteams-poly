@@ -2792,7 +2792,7 @@ private void consumeCalloutBindingLong() {
 
 	// CalloutParameterMappingsopt
 	boolean pendingParamMappings= this.intStack[this.intPtr--] == 1; // pushed in consumeNestedParamMappings/consumeParameterMappingsEmpty
-	if (pendingParamMappings)
+	if (pendingParamMappings && this.diet)
 		calloutBinding.mappings= AbstractMethodMappingDeclaration.PENDING_MAPPINGS;
 	else
 		copyParamMappingsAndPositions(paramlength, calloutBinding);

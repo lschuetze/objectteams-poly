@@ -64,6 +64,7 @@ import org.eclipse.jdt.internal.core.JavaProject;
 import org.eclipse.jdt.internal.core.SearchableEnvironment;
 import org.eclipse.jdt.internal.core.SourceType;
 import org.eclipse.jdt.internal.core.SourceTypeElementInfo;
+import org.eclipse.jdt.internal.core.nd.indexer.Indexer;
 import org.eclipse.objectteams.otdt.core.IOTType;
 import org.eclipse.objectteams.otdt.core.IRoleType;
 import org.eclipse.objectteams.otdt.core.OTModelManager;
@@ -2394,6 +2395,7 @@ public class OTReconcilerTests extends ReconcilerTests {
 				"public class Base {\n" +
 				"	public static void baseMethod1(int flag, String name) {}\n" +
 				"	public static void baseMethod(int flag, String name) {}\n" +
+				"	public String f;\n" +
 				"}\n"
 			);
 			
@@ -2420,6 +2422,9 @@ public class OTReconcilerTests extends ReconcilerTests {
 					"		static callin void m2(int f, String both) {\n" +
 					"			base.m2(f, both);\n" +
 					"		}\n" +
+					"		int getFLength() -> get String f with {\n" +
+					"			result <- f.length()\n" +
+					"		}\n" +
 					"	}\n" +
 					"}\n";
 			this.createFile(
@@ -2427,6 +2432,7 @@ public class OTReconcilerTests extends ReconcilerTests {
 					sourceFoo
 			);
 
+			Indexer.getInstance().waitForIndex(null);
 			char[] sourceChars = sourceFoo.toCharArray();
 			this.problemRequestor.initialize(sourceChars);
 			
