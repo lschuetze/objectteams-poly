@@ -660,18 +660,12 @@ public class ClassScope extends Scope {
 			char[][] className = CharOperation.deepCopy(enclosingType.compoundName);
 			className[className.length - 1] =
 				CharOperation.concat(className[className.length - 1], this.referenceContext.name, '$');
-			ReferenceBinding existingType = packageBinding.getType0(className[className.length - 1]);
-			if (existingType != null) {
-				if (existingType instanceof UnresolvedReferenceBinding) {
-					// its possible that a BinaryType referenced the member type before its enclosing source type was built
-					// so just replace the unresolved type with a new member type
-				} else {
+			if (packageBinding.hasType0Any(className[className.length - 1])) {
+				// report the error against the parent - its still safe to answer the member type
 //{ObjectTeams: role files are handled below:
-				  if (!isRoleFile)
-// SH}
-					// report the error against the parent - its still safe to answer the member type
-					this.parent.problemReporter().duplicateNestedType(this.referenceContext);
-				}
+			  if (!isRoleFile)
+//SH}
+				this.parent.problemReporter().duplicateNestedType(this.referenceContext);
 			}
 //{ObjectTeams: was assignment; use setter to allow additional setup:
 	/* @original

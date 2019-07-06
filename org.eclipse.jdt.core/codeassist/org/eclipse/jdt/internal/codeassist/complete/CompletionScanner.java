@@ -48,6 +48,11 @@ public class CompletionScanner extends Scanner {
 	public static final char[] EmptyCompletionIdentifier = {};
 
 public CompletionScanner(long sourceLevel) {
+	this(
+		sourceLevel,
+		false /* previewEnabled */);
+}
+public CompletionScanner(long sourceLevel, boolean previewEnabled) {
 	super(
 		false /*comment*/,
 		false /*whitespace*/,
@@ -55,7 +60,8 @@ public CompletionScanner(long sourceLevel) {
 		sourceLevel,
 		null /*taskTags*/,
 		null/*taskPriorities*/,
-		true/*taskCaseSensitive*/);
+		true/*taskCaseSensitive*/,
+		previewEnabled);
 }
 @Override
 protected boolean isAtAssistIdentifier() {

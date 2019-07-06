@@ -93,7 +93,7 @@ import org.eclipse.text.edits.TextEdit;
  * read-only AST.
  * </p>
  * <p>
- * Clients may create instances of this class using {@link #newAST(int)},
+ * Clients may create instances of this class using {@link #newAST(int, boolean)},
  * but this class is not intended to be subclassed.
  * </p>
  *
@@ -293,9 +293,9 @@ public final class AST {
 	 */
 	public static final int JLS12 = 12;
 	/**
-	 * Internal synonym for {@link #JLS11}. Use to alleviate
-	 * deprecation warnings once JLS11 is deprecated
-	 * @since 3.16 
+	 * Internal synonym for {@link #JLS12}. Use to alleviate
+	 * deprecation warnings once JLS12 is deprecated
+	 * @since 3.18 
 	 */
 	static final int JLS12_INTERNAL = JLS12;
 
@@ -363,7 +363,7 @@ public final class AST {
 		IProgressMonitor monitor) {
 
 		ASTConverter converter = new ASTConverter(options, isResolved, monitor);
-		AST ast = AST.newAST(level);
+		AST ast = AST.newAST(level, JavaCore.ENABLED.equals(options.get(JavaCore.COMPILER_PB_ENABLE_PREVIEW_FEATURES)));
 		String sourceModeSetting = (String) options.get(JavaCore.COMPILER_SOURCE);
 		long sourceLevel = CompilerOptions.versionToJdkLevel(sourceModeSetting);
 		if (sourceLevel == 0) {
@@ -378,6 +378,7 @@ public final class AST {
 			complianceLevel = sourceLevel;
 		}
 		ast.scanner.complianceLevel = complianceLevel;
+		ast.scanner.previewEnabled = JavaCore.ENABLED.equals(options.get(JavaCore.COMPILER_PB_ENABLE_PREVIEW_FEATURES));
 		int savedDefaultNodeFlag = ast.getDefaultNodeFlag();
 		ast.setDefaultNodeFlag(ASTNode.ORIGINAL);
 		BindingResolver resolver = null;
@@ -403,7 +404,7 @@ public final class AST {
 	 * Creates a new Java abstract syntax tree
      * (AST) following the specified set of API rules.
      * <p>
-     * Clients should use this method specifying {@link #JLS11} as the
+     * Clients should use this method specifying {@link #JLS12} as the
      * AST level in all cases, even when dealing with source of earlier JDK versions like 1.3 or 1.4.
      * </p>
      *
@@ -413,10 +414,33 @@ public final class AST {
 	 * <ul>
 	 * <li>the API level is not one of the <code>JLS*</code> level constants</li>
 	 * </ul>
+	 * @deprecated Clients should port their code to use the latest JLS* AST API and call
+	 *    {@link #newAST(int, boolean) AST.newAST(AST.JLS12, false)} instead of using this constructor.
      * @since 3.0
 	 */
 	public static AST newAST(int level) {
-		return new AST(level);
+		return new AST(level, false);
+	}
+	
+		/**
+	 * Creates a new Java abstract syntax tree
+     * (AST) following the specified set of API rules.
+     * <p>
+     * Clients should use this method specifying {@link #JLS12} as the
+     * AST level in all cases, even when dealing with source of earlier JDK versions like 1.3 or 1.4.
+     * </p>
+     *
+ 	 * @param level the API level; one of the <code>JLS*</code> level constants
+ 	 * @param previewEnabled <code>true</code> if preview feature is enabled else <code>false</code>
+	 * @return new AST instance following the specified set of API rules.
+	 * @exception IllegalArgumentException if:
+	 * <ul>
+	 * <li>the API level is not one of the <code>JLS*</code> level constants</li>
+	 * </ul>
+     * @since 3.19 BETA_JAVA13
+	 */
+	public static AST newAST(int level, boolean previewEnabled) {
+		return new AST(level, previewEnabled);
 	}
 
 	/**
@@ -706,6 +730,7 @@ public final class AST {
 	 */
 	int apiLevel;
 
+	private boolean previewEnabled;
 	/**
 	 * Tag bit value. This represents internal state of the tree.
 	 */
@@ -784,7 +809,7 @@ public final class AST {
 	 *
 	 * @see JavaCore#getDefaultOptions()
 	 * @deprecated Clients should port their code to use the latest JLS* AST API and call
-	 *    {@link #newAST(int) AST.newAST(AST.JLS9)} instead of using this constructor.
+	 *    {@link #newAST(int, boolean) AST.newAST(AST.JLS12, false)} instead of using this constructor.
 	 */
 	public AST() {
 		this(JavaCore.getDefaultOptions());
@@ -797,7 +822,8 @@ public final class AST {
  	 * @param level the API level; one of the <code>JLS*</code> level constants
      * @since 3.0
 	 */
-	private AST(int level) {
+	private AST(int level, boolean previewEnabled) {
+		this.previewEnabled = previewEnabled;
 		switch(level) {
 			case JLS2_INTERNAL :
 			case JLS3_INTERNAL :
@@ -811,7 +837,8 @@ public final class AST {
 						ClassFileConstants.JDK1_5 /*complianceLevel*/,
 						null/*taskTag*/,
 						null/*taskPriorities*/,
-						true/*taskCaseSensitive*/);
+						true/*taskCaseSensitive*/,
+						false/*isPreviewEnabled*/);
 				break;
 			case JLS4_INTERNAL :
 				this.apiLevel = level;
@@ -824,7 +851,8 @@ public final class AST {
 						ClassFileConstants.JDK1_7 /*complianceLevel*/,
 						null/*taskTag*/,
 						null/*taskPriorities*/,
-						true/*taskCaseSensitive*/);
+						true/*taskCaseSensitive*/,
+						false/*isPreviewEnabled*/);
 				break;
 			case JLS8_INTERNAL :
 				this.apiLevel = level;
@@ -837,7 +865,8 @@ public final class AST {
 						ClassFileConstants.JDK1_8 /*complianceLevel*/,
 						null/*taskTag*/,
 						null/*taskPriorities*/,
-						true/*taskCaseSensitive*/);
+						true/*taskCaseSensitive*/,
+						false/*isPreviewEnabled*/);
 				break;	
 			case JLS9_INTERNAL :
 				this.apiLevel = level;
@@ -850,7 +879,8 @@ public final class AST {
 						ClassFileConstants.JDK9 /*complianceLevel*/,
 						null/*taskTag*/,
 						null/*taskPriorities*/,
-						true/*taskCaseSensitive*/);
+						true/*taskCaseSensitive*/,
+						false/*isPreviewEnabled*/);
 				break;	
 			case JLS10_INTERNAL :
 				this.apiLevel = level;
@@ -863,7 +893,8 @@ public final class AST {
 						ClassFileConstants.JDK10 /*complianceLevel*/,
 						null/*taskTag*/,
 						null/*taskPriorities*/,
-						true/*taskCaseSensitive*/);
+						true/*taskCaseSensitive*/,
+						false/*isPreviewEnabled*/);
 				break;	
 			case JLS11_INTERNAL :
 				this.apiLevel = level;
@@ -877,7 +908,8 @@ public final class AST {
 						compliance /*complianceLevel*/,
 						null/*taskTag*/,
 						null/*taskPriorities*/,
-						true/*taskCaseSensitive*/);
+						true/*taskCaseSensitive*/,
+						false/*isPreviewEnabled*/);
 				break;
 			case JLS12_INTERNAL :
 				this.apiLevel = level;
@@ -891,7 +923,8 @@ public final class AST {
 						compliance /*complianceLevel*/,
 						null/*taskTag*/,
 						null/*taskPriorities*/,
-						true/*taskCaseSensitive*/);
+						true/*taskCaseSensitive*/,
+						previewEnabled);
 				break;
 			default:
 				throw new IllegalArgumentException("Unsupported JLS level"); //$NON-NLS-1$
@@ -921,10 +954,10 @@ public final class AST {
 	 *    value type: <code>String</code>)
 	 * @see JavaCore#getDefaultOptions()
 	 * @deprecated Clients should port their code to use the latest JLS* AST API and call
-	 *    {@link #newAST(int) AST.newAST(AST.JLS9)} instead of using this constructor.
+	 *    {@link #newAST(int, boolean) AST.newAST(AST.JLS12, false)} instead of using this constructor.
 	 */
 	public AST(Map options) {
-		this(JLS2);
+		this(JLS2, false);
 		Object sourceLevelOption = options.get(JavaCore.COMPILER_SOURCE);
 		long sourceLevel = ClassFileConstants.JDK1_3;
 		if (JavaCore.VERSION_1_4.equals(sourceLevelOption)) {
@@ -952,7 +985,8 @@ public final class AST {
 			complianceLevel /*complianceLevel*/,
 			null/*taskTag*/,
 			null/*taskPriorities*/,
-			true/*taskCaseSensitive*/);
+			true/*taskCaseSensitive*/,
+			JavaCore.ENABLED.equals(options.get(JavaCore.COMPILER_PB_ENABLE_PREVIEW_FEATURES)));
 	}
 
 	/**
@@ -986,15 +1020,7 @@ public final class AST {
 			Constructor c = nodeClass.getDeclaredConstructor(AST_CLASS);
 			Object result = c.newInstance(this.THIS_AST);
 			return (ASTNode) result;
-		} catch (NoSuchMethodException e) {
-			// all AST node classes have a Foo(AST) constructor
-			// therefore nodeClass is not legit
-			throw new IllegalArgumentException(e);
-		} catch (InstantiationException e) {
-			// all concrete AST node classes can be instantiated
-			// therefore nodeClass is not legit
-			throw new IllegalArgumentException(e);
-		} catch (IllegalAccessException e) {
+		} catch (NoSuchMethodException | InstantiationException | IllegalAccessException e) {
 			// all AST node classes have an accessible Foo(AST) constructor
 			// therefore nodeClass is not legit
 			throw new IllegalArgumentException(e);
@@ -3699,5 +3725,13 @@ public final class AST {
 	  	throw new UnsupportedOperationException("Operation not supported in JLS2 AST"); //$NON-NLS-1$
 	  }
 	}
-}
 
+	/**
+	 * 
+	 * @return previewEnabled
+	 * @since 3.19
+	 */
+	public boolean isPreviewEnabled() {
+		return this.previewEnabled;
+	}
+}

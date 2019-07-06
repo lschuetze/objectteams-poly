@@ -5656,7 +5656,7 @@ private void initializeForBlockStatements() {
 }
 @Override
 public void initializeScanner(){
-	this.scanner = new CompletionScanner(this.options.sourceLevel);
+	this.scanner = new CompletionScanner(this.options.sourceLevel, this.options.enablePreviewFeatures);
 //{ObjectTeams: allow to configure OT/J features:
 	this.scanner.setOTFlags(this.options);
 // SH}

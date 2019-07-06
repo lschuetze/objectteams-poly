@@ -443,9 +443,7 @@ public class Util {
 		try {
 			edit.apply(document, TextEdit.NONE);
 			return document.get();
-		} catch (MalformedTreeException e) {
-			e.printStackTrace();
-		} catch (BadLocationException e) {
+		} catch (MalformedTreeException | BadLocationException e) {
 			e.printStackTrace();
 		}
 		return original;
@@ -904,11 +902,7 @@ public class Util {
 			if (reader != null) {
 				return reader.getVersion();
 			}
-		} catch (CoreException e) {
-			// ignore
-		} catch(ClassFormatException e) {
-			// ignore
-		} catch(IOException e) {
+		} catch(CoreException | ClassFormatException | IOException e) {
 			// ignore
 		}
 		return 0;

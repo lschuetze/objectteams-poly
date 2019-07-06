@@ -3227,11 +3227,7 @@ public class JavaModelManager implements ISaveParticipant, IContentTypeChangeLis
 				} else {
 					throw new JavaModelException(e);
 				}
-			} catch (RuntimeException e) {
-				if (JavaModelManager.CP_RESOLVE_VERBOSE || CP_RESOLVE_VERBOSE_FAILURE)
-					e.printStackTrace();
-				throw e;
-			} catch (Error e) {
+			} catch (RuntimeException | Error e) {
 				if (JavaModelManager.CP_RESOLVE_VERBOSE || CP_RESOLVE_VERBOSE_FAILURE)
 					e.printStackTrace();
 				throw e;
@@ -3626,9 +3622,7 @@ public class JavaModelManager implements ISaveParticipant, IContentTypeChangeLis
 				try {
 					DocumentBuilder parser = DocumentBuilderFactory.newInstance().newDocumentBuilder();
 					cpElement = parser.parse(new InputSource(reader)).getDocumentElement();
-				} catch(SAXException e) {
-					return;
-				} catch(ParserConfigurationException e){
+				} catch(SAXException | ParserConfigurationException e){
 					return;
 				} finally {
 					reader.close();
@@ -4410,16 +4404,7 @@ public class JavaModelManager implements ISaveParticipant, IContentTypeChangeLis
 			} finally {
 				out.close();
 			}
-		} catch (RuntimeException e) {
-			try {
-				file.delete();
-			} catch(SecurityException se) {
-				// could not delete file: cannot do much more
-			}
-			throw new CoreException(
-				new Status(IStatus.ERROR, JavaCore.PLUGIN_ID, Platform.PLUGIN_ERROR,
-					Messages.bind(Messages.build_cannotSaveState, info.project.getName()), e));
-		} catch (IOException e) {
+		} catch (RuntimeException | IOException e) {
 			try {
 				file.delete();
 			} catch(SecurityException se) {

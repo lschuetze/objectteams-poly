@@ -593,7 +593,8 @@ public final class SelectionEngine extends Engine implements ISearchRequestor {
 				this.compilerOptions.complianceLevel,
 				null/*taskTag*/,
 				null/*taskPriorities*/,
-				true /*taskCaseSensitive*/);
+				true /*taskCaseSensitive*/,
+				this.compilerOptions.enablePreviewFeatures);
 //{ObjectTeams: configure scanner mode:
 		scanner.setOTFlags(this.compilerOptions);
 // SH}
@@ -1209,12 +1210,7 @@ public final class SelectionEngine extends Engine implements ISearchRequestor {
 			if(this.noProposal && this.problem != null) {
 				this.requestor.acceptError(this.problem);
 			}
-		} catch (IndexOutOfBoundsException e) { // work-around internal failure - 1GEMF6D
-			if(DEBUG) {
-				System.out.println("Exception caught by SelectionEngine:"); //$NON-NLS-1$
-				e.printStackTrace(System.out);
-			}
-		} catch (AbortCompilation e) { // ignore this exception for now since it typically means we cannot find java.lang.Object
+		} catch (IndexOutOfBoundsException | AbortCompilation e) { // ignore this exception for now since it typically means we cannot find java.lang.Object
 			if(DEBUG) {
 				System.out.println("Exception caught by SelectionEngine:"); //$NON-NLS-1$
 				e.printStackTrace(System.out);

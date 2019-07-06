@@ -396,11 +396,11 @@ public class ASTRewriteFlattener extends ASTVisitor {
 
 	@Override
 	public boolean visit(BreakStatement node) {
-		if (node.getAST().apiLevel() >= JLS12 && node.isImplicit()  && node.getExpression() == null) {
+		if (node.getAST().apiLevel() >= JLS12 && node.getAST().isPreviewEnabled() && node.isImplicit()  && node.getExpression() == null) {
 			return false;
 		}
 		
-		if (node.getAST().apiLevel() < JLS12 || (node.getAST().apiLevel() >= JLS12 && !node.isImplicit())) {
+		if (node.getAST().apiLevel() < JLS12 || (node.getAST().apiLevel() >= JLS12 && node.getAST().isPreviewEnabled() && !node.isImplicit())) {
 			this.result.append("break"); //$NON-NLS-1$
 		}
 		ASTNode label= getChildNode(node, BreakStatement.LABEL_PROPERTY);
@@ -408,7 +408,7 @@ public class ASTRewriteFlattener extends ASTVisitor {
 			this.result.append(' ');
 			label.accept(this);
 		}
-		if (node.getAST().apiLevel() >= JLS12) {
+		if (node.getAST().apiLevel() >= JLS12 && node.getAST().isPreviewEnabled()) {
 			ASTNode expression = getChildNode(node, BreakStatement.EXPRESSION_PROPERTY);
 			if (expression != null ) {
 				this.result.append(' ');
@@ -1032,7 +1032,7 @@ public class ASTRewriteFlattener extends ASTVisitor {
 
 	@Override
 	public boolean visit(SwitchCase node) {
-		if (node.getAST().apiLevel() >= JLS12) {
+		if (node.getAST().apiLevel() >= JLS12 && node.getAST().isPreviewEnabled()) {
 			if (node.isDefault()) {
 				this.result.append("default");//$NON-NLS-1$
 				this.result.append(getBooleanAttribute(node, SwitchCase.SWITCH_LABELED_RULE_PROPERTY) ? " ->" : ":");//$NON-NLS-1$ //$NON-NLS-2$

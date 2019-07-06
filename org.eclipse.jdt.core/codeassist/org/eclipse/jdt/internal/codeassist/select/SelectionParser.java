@@ -1614,7 +1614,7 @@ protected char[] getIdentifier() {
 // SH}
 @Override
 public void initializeScanner(){
-	this.scanner = new SelectionScanner(this.options.sourceLevel);
+	this.scanner = new SelectionScanner(this.options.sourceLevel, this.options.enablePreviewFeatures);
 //{ObjectTeams: allow to configure OT/J features:
 	this.scanner.setOTFlags(this.options);
 // SH}

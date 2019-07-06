@@ -673,10 +673,7 @@ public class Compiler implements ITypeRequestor, ProblemSeverities {
 				while (true) {
 					try {
 						unit = processingTask.removeNextUnit(); // waits if no units are in the processed queue
-					} catch (Error e) {
-						unit = processingTask.unitToProcess;
-						throw e;
-					} catch (RuntimeException e) {
+					} catch (Error | RuntimeException e) {
 						unit = processingTask.unitToProcess;
 						throw e;
 					}
@@ -708,10 +705,7 @@ public class Compiler implements ITypeRequestor, ProblemSeverities {
 			}
 		} catch (AbortCompilation e) {
 			this.handleInternalException(e, unit);
-		} catch (Error e) {
-			this.handleInternalException(e, unit, null);
-			throw e; // rethrow
-		} catch (RuntimeException e) {
+		} catch (Error | RuntimeException e) {
 			this.handleInternalException(e, unit, null);
 			throw e; // rethrow
 		} finally {
@@ -1174,10 +1168,7 @@ public class Compiler implements ITypeRequestor, ProblemSeverities {
 		} catch (AbortCompilation e) {
 			this.handleInternalException(e, unit);
 			return unit == null ? this.unitsToProcess[0] : unit;
-		} catch (Error e) {
-			this.handleInternalException(e, unit, null);
-			throw e; // rethrow
-		} catch (RuntimeException e) {
+		} catch (Error | RuntimeException e) {
 			this.handleInternalException(e, unit, null);
 			throw e; // rethrow
 		} finally {
