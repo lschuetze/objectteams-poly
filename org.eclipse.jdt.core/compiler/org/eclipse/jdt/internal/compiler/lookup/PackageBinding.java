@@ -433,7 +433,7 @@ public String toString() {
 	 * A team package may indeed contain nested types, which requires their names to
 	 * be stripped and one less check during retrieval.
 	 */
-	public static class TeamPackageBinding extends PackageBinding {
+	public static class TeamPackageBinding extends PlainPackageBinding {
 	
 		/**
 		 * @param compoundName
@@ -449,6 +449,7 @@ public String toString() {
 			super(adjustTeamPackageName(compoundName), parent, environment, enclosingModule);
 			if (parent != null && parent.isValidBinding())
 				parent.addPackage(this, enclosingModule);
+			enclosingModule.declaredPackages.put(CharOperation.concatWith(compoundName, '.'), this);
 		}
 	
 		/** For nested role files the compoundName may contain '$' and '__OT__' delimitors.

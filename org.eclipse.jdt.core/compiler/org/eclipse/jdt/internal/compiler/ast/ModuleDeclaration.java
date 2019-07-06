@@ -450,10 +450,12 @@ public class ModuleDeclaration extends ASTNode implements ReferenceContext {
 		// Nothing to do for this context;
 	}
 
+//{ObjectTeams: new method:
 	@Override
 	public void resetErrorFlag() {
 		this.ignoreFurtherInvestigation = false;
 	}
+// SH}
 
 	public String getModuleVersion() {
 		if (this.scope != null) {

@@ -272,6 +272,9 @@ void buildTypeBindings(AccessRestriction accessRestriction) {
 			throw new SourceTypeCollisionException(); // resolved a type ref before APT generated the type
 		recordSimpleReference(typeDecl.name); // needed to detect collision cases
 		if (this.fPackage.hasType0Any(typeDecl.name)) {
+//{ObjectTeams:
+		  if (!typeDecl.isRole() || !(this.fPackage.getType0(typeDecl.name) instanceof MissingTypeBinding)) {
+// orig:
 			// if its an unresolved binding - its fixed up whenever its needed, see UnresolvedReferenceBinding.resolve()
 			if (this.environment.root.isProcessingAnnotations)
 				throw new SourceTypeCollisionException(); // resolved a type ref before APT generated the type
@@ -280,6 +283,9 @@ void buildTypeBindings(AccessRestriction accessRestriction) {
 			// and it can be an unresolved type which is now being defined
 			problemReporter().duplicateTypes(this.referenceContext, typeDecl);
 			continue nextType;
+// :giro
+		  }
+// SH}
 		}
 
 //{ObjectTeams: role files: (a) classes never match the name of the unit: prepended __OT__!

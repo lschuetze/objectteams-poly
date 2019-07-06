@@ -218,7 +218,7 @@ public class TypeDeclaration extends Statement implements ProblemSeverities, Ref
 	 * Given that this is a role file, retreive the package from the enclosing team
 	 * (and check for consistency with this role file's team package).
 	 */
-	public PackageBinding getPackageOfTeam(ImportReference teamPackage, Scope aScope)
+	public PlainPackageBinding getPackageOfTeam(ImportReference teamPackage, Scope aScope)
 	{
 		TypeDeclaration teamDecl = this.enclosingType;
 		if (teamDecl == null)
@@ -246,7 +246,7 @@ public class TypeDeclaration extends Statement implements ProblemSeverities, Ref
 					teamPackage.sourceEnd);
 			return null;
 		}
-		return teamDecl.scope.getCurrentPackage();
+		return (PlainPackageBinding) teamDecl.scope.getCurrentPackage();
 	}
 
 	/** If this is a role file answer the number of nesting levels to the
