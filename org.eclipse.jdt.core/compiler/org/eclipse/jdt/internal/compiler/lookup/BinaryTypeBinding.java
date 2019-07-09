@@ -1672,7 +1672,10 @@ public ReferenceBinding getMemberType(char[] typeName) {
 
 	ReferenceBinding[] members = maybeSortedMemberTypes();
 	// do not try to binary search while we are still resolving and the array is not necessarily sorted
+//{ObjectTeams: always use old linear lookup:
+/* orig:
 	if (!this.memberTypesSorted) {
+  :giro */
 		for (int i = members.length; --i >= 0;) {
 		    ReferenceBinding memberType = members[i];
 		    if (memberType instanceof UnresolvedReferenceBinding) {
@@ -1685,12 +1688,14 @@ public ReferenceBinding getMemberType(char[] typeName) {
 		        return memberType;
 		    }
 		}
+/* orig:
 		return null;
 	}
 	int memberTypeIndex = ReferenceBinding.binarySearch(typeName, members);
 	if (memberTypeIndex >= 0) {
 		return members[memberTypeIndex];
 	}
+ SH} */
 
 //{ObjectTeams: ROFI: intermediate patch!
 	// FIXME(SH): check this whole discussion:

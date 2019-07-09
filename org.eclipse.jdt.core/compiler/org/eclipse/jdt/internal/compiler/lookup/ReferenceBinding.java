@@ -395,7 +395,9 @@ public static void sortMethods(MethodBinding[] sortedMethods, int left, int righ
  * Sort the member types using a quicksort
  */
 static void sortMemberTypes(ReferenceBinding[] sortedMemberTypes, int left, int right) {
+/*{ObjectTeams: completely disable name-based membertype sorting:
 	Arrays.sort(sortedMemberTypes, left, right, BASIC_MEMBER_TYPES_COMPARATOR);
+  SH}*/
 }
 
 static final Comparator<ReferenceBinding> BASIC_MEMBER_TYPES_COMPARATOR = (ReferenceBinding o1, ReferenceBinding o2) -> {
@@ -1265,10 +1267,17 @@ public char[] getFileName() {
  */
 public ReferenceBinding getMemberType(char[] typeName) {
 	ReferenceBinding[] memberTypes = memberTypes();
+//{ObjectTeams: restore old linear lookup:
+	for (int i = memberTypes.length; --i >= 0;)
+		if (CharOperation.equals(memberTypes[i].sourceName, typeName))
+			return memberTypes[i];
+/* orig: 4.13M1
 	int memberTypeIndex = binarySearch(typeName, memberTypes);
 	if (memberTypeIndex >= 0) {
 		return memberTypes[memberTypeIndex];
 	}
+  :giro */
+// SH}
 	return null;
 }
 //{ObjectTeams: new utility function
