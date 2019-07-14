@@ -243,6 +243,9 @@ path to map file (with substitutions):
 		<delete>
 		    <fileset dir="${bootLocation}/plugins/" includes="org.eclipse.jdt.core_*.v* org.eclipse.jdt.core.source_*.v*" />
 		</delete>
+		<delete>
+		    <fileset dir="${baseLocation}/plugins/" includes="org.eclipse.jdt.core_*.v* org.eclipse.jdt.core.source_*.v*" />
+		</delete>
 
 		<echo message="Invoke pdebuild for creating the base new OT-Compiler"/>
         <java
@@ -287,9 +290,6 @@ path to map file (with substitutions):
             <property name="sourceUpdatesDir" value="${otdtUpdatesDir}"/>
             <property name="targetEclipseDir" value="${baseLocation}"/>
         </ant>
-		<delete>
-		    <fileset dir="${baseLocation}/plugins/" includes="org.eclipse.jdt.core_*.v* org.eclipse.jdt.core.source_*.v*" />
-		</delete>
     </target>
 
 	<!-- ==== BUILD STAGE 2: ==== -->
