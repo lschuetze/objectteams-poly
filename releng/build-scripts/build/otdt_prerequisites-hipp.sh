@@ -65,11 +65,11 @@ ECLIPSE_BOOT_TGZ=${DROP_BOOT}/eclipse-SDK-${EVERSION_BOOT}-linux-gtk-${ARCH}.tar
 
 # -- Base for testing: --
 # Eclipse SDK build identifier (used for substitution in otdt.map.in etc.):
-SDK_QUALIFIER=${SDK_QUALIFIER:="I20190605-1800"}
+SDK_QUALIFIER=${SDK_QUALIFIER:="I20190711-1805"}
 
 # used only locally (components of the ECLIPSE_SDK_TGZ path):
-EVERSION=${EVERSION:="4.12RC2"}
-DROP=${DROPS4}/${DROP:="S-4.12RC2-201906051800"}
+EVERSION=${EVERSION:="S-4.13M1"}
+DROP=${DROPS4}/${DROP:="S-4.13M1-201907111805}
 
 # EXPORT: archive file of the base eclipse SDK build:
 ECLIPSE_SDK_TGZ=${DROP}/eclipse-SDK-${EVERSION}-linux-gtk-${ARCH}.tar.gz
