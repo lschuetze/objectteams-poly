@@ -70,8 +70,34 @@
         </java>
     </target>
 
+    <target name="uninstallFeature">
+        <echo message="Uninstalling ${feature}"/>
+        <java
+                inputstring=""
+                dir="${targetEclipseDir}"
+                fork="true"
+                classname="org.eclipse.equinox.launcher.Main"
+                classpath="${targetEclipseDir}/plugins/${org.eclipse.equinox.launcher_jar}">
+            <jvmarg value="-Declipse.p2.MD5Check=false" />
+            <arg value="-consoleLog"/>
+            <arg value="-application"/>
+            <arg value="org.eclipse.equinox.p2.director"/>
+            <arg value="-metadataRepository" />
+            <arg value="file:${sourceUpdatesDir}" />
+            <arg value="-artifactRepository" />
+            <arg value="file:${sourceUpdatesDir}" />
+            <arg value="-uninstallIU" />
+            <arg value="${feature}" />
+        </java>
+    </target>
+
     <target name="installOTDT">
     	<echo message="Installing the OTDT from ${otdtUpdatesDir} into ${test.eclipseDir}"/>
+        <antcall target="uninstallFeature">
+            <param name="feature" value="org.eclipse.objectteams.otdt.core.patch.feature.group"/>
+            <param name="sourceUpdatesDir" value="${otdtUpdatesDir}"/>
+            <param name="targetEclipseDir" value="${test.eclipseDir}"/>
+        </antcall>
         <antcall target="installFeature">
             <param name="feature" value="org.eclipse.objectteams.otequinox.feature.group"/>
             <param name="sourceUpdatesDir" value="${otdtUpdatesDir}"/>
