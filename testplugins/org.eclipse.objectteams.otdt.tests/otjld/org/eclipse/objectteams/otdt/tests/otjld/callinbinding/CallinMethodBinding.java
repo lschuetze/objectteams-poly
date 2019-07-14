@@ -8566,4 +8566,39 @@ public class CallinMethodBinding extends AbstractOTJLDTest {
     		"");
 
     }
+
+    public void testBug549250() {
+    	runConformTest(
+    		new String[] {
+    			"Main.java",
+    			"import b.B;\n" +
+    			"import t.T;\n" +
+    			"public class Main {\n" +
+    			"	public static void main(String... args) {\n" +
+    			"		new T().activate();\n" +
+    			"		new B().m(\"1\", \"2\");\n" +
+    			"	}\n" +
+    			"}\n",
+    			"t/T.java",
+    			"package t;\n" +
+    			"import base b.B;\n" +
+    			"public team class T {\n" +
+    			"	protected class R playedBy B {\n" +
+    			"		void rm() { System.out.print(\"rm\"); }\n" +
+    			"		void rm() <- after m(Object o1, Object o2);\n" +
+    			"	}\n" +
+    			"}\n",
+    			"b/B.java",
+    			"package b;\n" +
+    			"public class B {\n" +
+    			"	public void m(Object o1, Object o2) {\n" +
+    			"		System.out.print(\"NoVarArg\");\n" +
+    			"	}\n" +
+    			"	public void m(Object o1, Object... os) {\n" +
+    			"		System.out.print(\"VarArg\");\n" +
+    			"	}\n" +
+    			"}\n"
+    		},
+    		"NoVarArgrm");
+    }
 }

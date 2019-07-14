@@ -297,13 +297,18 @@ public class MethodSpec extends ASTNode implements InvocationSite
 			CheckPoint cp = compilationResult.getCheckPoint(scope.referenceContext());
 			
 			this.resolvedMethod = TypeAnalyzer.findMethod(scope, receiverClass, realSelector, enhancedParameters, isBaseSide, isBaseSide ? this : null);
-			if (   !this.resolvedMethod.isValidBinding()
-				&& this.resolvedMethod.problemId() == ProblemReasons.NotFound)
-			{
+			boolean notFound = false, isVarargs = false;
+			if (this.resolvedMethod.isValidBinding())
+				isVarargs = this.resolvedMethod.isVarargs();
+			else
+				notFound = this.resolvedMethod.problemId() == ProblemReasons.NotFound; 
+			if (notFound || (isVarargs && ((this.bits & IsVarArgs) == 0))) {
 				// second+ chance: try plain:
 				while (receiverClass != null) {
-					compilationResult.rollBack(cp);
 					MethodBinding plainMethod = TypeAnalyzer.findMethod(scope, receiverClass, realSelector, this.parameters, isBaseSide, isBaseSide ? this : null);
+					if (isVarargs && plainMethod != null && plainMethod.isValidBinding() && plainMethod.isVarargs())
+						continue; // not improved
+					compilationResult.rollBack(cp);
 					if (!callinExpected) {
 						this.resolvedMethod = plainMethod;
 					} else {
