@@ -68,7 +68,7 @@ ECLIPSE_BOOT_TGZ=${DROP_BOOT}/eclipse-SDK-${EVERSION_BOOT}-linux-gtk-${ARCH}.tar
 SDK_QUALIFIER=${SDK_QUALIFIER:="I20190711-1805"}
 
 # used only locally (components of the ECLIPSE_SDK_TGZ path):
-EVERSION=${EVERSION:="S-4.13M1"}
+EVERSION=${EVERSION:="4.13M1"}
 DROP=${DROPS4}/${DROP:="S-4.13M1-201907111805"}
 
 # EXPORT: archive file of the base eclipse SDK build:
