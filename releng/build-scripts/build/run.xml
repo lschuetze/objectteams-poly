@@ -279,7 +279,6 @@ path to map file (with substitutions):
 	            <arg value="-Declipse.tests.zip=${eclipse.tests.zip}"/>
 	            <!--arg value="-verbose" /-->
 	            <jvmarg value="${vm.args}"/>
-	            <jvmarg value="${vm.args2}"/>
         </java>
 		<!-- Now we should have an update site with the patch feature, time to install it into base: -->
         <ant antfile="${OTScriptDir}/p2helper.xml" target="installFeature" dir="${baseLocation}">
