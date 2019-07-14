@@ -285,6 +285,7 @@ path to map file (with substitutions):
 	            <jvmarg value="${vm.args}"/>
         </java>
 		<!-- Now we should have an update site with the patch feature, time to install it into base: -->
+<!--
         <ant antfile="${OTScriptDir}/p2helper.xml" target="tagState" dir="${baseLocation}">
             <property name="tagName" value="beforePatch"/>
             <property name="targetEclipseDir" value="${baseLocation}"/>
@@ -294,6 +295,7 @@ path to map file (with substitutions):
             <property name="sourceUpdatesDir" value="${otdtUpdatesDir}"/>
             <property name="targetEclipseDir" value="${baseLocation}"/>
         </ant>
+-->
     </target>
 
 	<!-- ==== BUILD STAGE 2: ==== -->
