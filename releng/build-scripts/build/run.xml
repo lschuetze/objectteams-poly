@@ -278,6 +278,7 @@ path to map file (with substitutions):
 	            <arg value="-Dtest.eclipseDir=${test.eclipseDir}"/>
 	            <arg value="-DmapVersionTag=${mapVersionTag}"/>
 		    	<arg value="-Dmap.file.path=${map.file.path}"/>
+		    	<arg value="-DfetchCacheLocation=${fetchCacheLocation}"/>
 				<arg value="-Declipse.sdk.qualifier=${eclipse.sdk.qualifier}"/>
 	            <arg value="-Declipse-app.tgz=${eclipse-app.tgz}"/>
 	            <arg value="-Declipse.tests.zip=${eclipse.tests.zip}"/>
