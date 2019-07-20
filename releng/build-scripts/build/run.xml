@@ -15,8 +15,6 @@
 			description="Show values of all properties that should be passed from our caller.">
 		<echo>Properties passed into this script:
 ------------------------------------------------------------------------------
-path of boot eclipse SDK:
-		eclipse-boot.tgz  = ${eclipse-boot.tgz}
 path of base eclipse SDK:
 		eclipse-app.tgz  = ${eclipse-app.tgz}
 eclipse SDK build qualifier:
@@ -67,8 +65,6 @@ path to map file (with substitutions):
 			<property name="baseLocation"   	value="${test.eclipseDir}" />
 
 		<!--	directories for update sites: -->
-		<!-- TODO: extract compilerUpdatesDir to prerequisistes? -->
-		<property name="compilerUpdatesDir"     value="http://download.eclipse.org/objectteams/updates/ot2.7/compiler"/>
 		<property name="otdtUpdatesDir" 		value="${user.dir}/updateSite"/>
 		<property name="testsUpdatesDirBase" 	value="${user.dir}/updateSiteTests"/>
 			<!-- will have sub directories "eclipse" and "otdt" -->
@@ -146,7 +142,6 @@ path to map file (with substitutions):
 	<target name="ot-junit-build" depends="setupProperties,checkOS" description="build everything without running tests">
 		<echo message="Starting BuildProcess in ${build.root.dir}"/>
 		<antcall target="verifyAntInstall"/>
-		<antcall target="createOTDTEclipse"/>
 		<antcall target="setupTests" />
 	</target>
 
@@ -215,11 +210,16 @@ path to map file (with substitutions):
 	</target>
 
 	<target name="UnzipEclipse">
-		<echo message="Extracting Boot Eclipse (${eclipse-boot.tgz}) in ${build.root.dir}..."/>
+		<echo message="Extracting Boot Eclipse (${eclipse-app.tgz}) in ${build.root.dir}..."/>
 		<mkdir dir="${build.root.dir}"/>
-		<untar compression="gzip" src="${eclipse-boot.tgz}" dest="${build.root.dir}"/>
+		<untar compression="gzip" src="${eclipse-app.tgz}" dest="${build.root.dir}"/>
+		<echo message="Extracting Base Eclipse (${eclipse-app.tgz}) in ${test.root.dir}..."/>
 		<mkdir dir="${test.root.dir}"/>
 		<untar compression="gzip" src="${eclipse-app.tgz}" dest="${test.root.dir}"/>
+		<!-- avoid conflict with OTDT-variant when resolving source plug-ins against baseLocation: -->
+		<delete>
+		    <fileset dir="${baseLocation}/plugins/" includes="org.eclipse.jdt.core_*.v* org.eclipse.jdt.core.source_*.v*" />
+		</delete>
 	</target>
 	
 	<target name="AddPluginsToEclipse" description="Add git.pde.build plugins to the boot Eclipse">
@@ -232,28 +232,13 @@ path to map file (with substitutions):
 	<!-- ==== BUILD STAGE 1: ==== -->
 	<!-- setting an empty inputstring is a workaround for http://issues.apache.org/bugzilla/show_bug.cgi?id=34461 -->
 	<target name="createOTCompilerEclipse" depends="setupForCompile" description="create the bootstrapping Eclipse with OT/J compiler">
-		<echo message="Install the previous compiler into boot eclipse"/>
-<!-- Re-use the compiler from the previous published build: -->
-        <ant antfile="${OTScriptDir}/p2helper.xml" target="installFeatureFromUrl" dir="${bootLocation}">
-            <property name="feature" value="org.eclipse.objectteams.otdt.core.patch.feature.group"/>
-            <property name="sourceUpdatesUrl" value="${compilerUpdatesDir}"/>
-            <property name="targetEclipseDir" value="${bootLocation}"/>
-        	<property name="org.eclipse.equinox.launcher_jar" value="${boot.org.eclipse.equinox.launcher_jar}"/>
-        </ant>
-		<delete>
-		    <fileset dir="${bootLocation}/plugins/" includes="org.eclipse.jdt.core_*.v* org.eclipse.jdt.core.source_*.v*" />
-		</delete>
-		<delete>
-		    <fileset dir="${baseLocation}/plugins/" includes="org.eclipse.jdt.core_*.v* org.eclipse.jdt.core.source_*.v*" />
-		</delete>
-
 		<echo message="Invoke pdebuild for creating the base new OT-Compiler"/>
         <java
 	        inputstring=""
 	        dir="${baseLocation}" 
 	        fork="true" 
 	        classname="org.eclipse.equinox.launcher.Main"
-	        classpath="${bootLocation}/plugins/${boot.org.eclipse.equinox.launcher_jar}">
+	        classpath="${bootLocation}/plugins/${org.eclipse.equinox.launcher_jar}">
 	            <arg value="-Dosgi.ws=${ws}"/>
 	            <arg value="-Dosgi.os=${os}"/>
 	            <arg value="-Dosgi.arch=${arch}"/>
@@ -285,18 +270,16 @@ path to map file (with substitutions):
 	            <!--arg value="-verbose" /-->
 	            <jvmarg value="${vm.args}"/>
         </java>
-		<!-- Now we should have an update site with the patch feature, time to install it into base: -->
-<!--
-        <ant antfile="${OTScriptDir}/p2helper.xml" target="tagState" dir="${baseLocation}">
-            <property name="tagName" value="beforePatch"/>
-            <property name="targetEclipseDir" value="${baseLocation}"/>
-        </ant>
-        <ant antfile="${OTScriptDir}/p2helper.xml" target="installFeature" dir="${baseLocation}">
+		<!-- Now we should have an update site with the patch feature, time to install it into the boot eclipse: -->
+        <ant antfile="${OTScriptDir}/p2helper.xml" target="installFeature" dir="${bootLocation}">
             <property name="feature" value="org.eclipse.objectteams.otdt.core.patch.feature.group"/>
             <property name="sourceUpdatesDir" value="${otdtUpdatesDir}"/>
-            <property name="targetEclipseDir" value="${baseLocation}"/>
+            <property name="targetEclipseDir" value="${bootLocation}"/>
         </ant>
--->
+		<!-- make space for next stage of building, avoid duplicate jdt.core plugins from stages 1 & 2 -->
+		<delete includeemptydirs="true">
+		    <fileset dir="${otdtUpdatesDir}" includes="**"/>
+		</delete>
     </target>
 
 	<!-- ==== BUILD STAGE 2: ==== -->
@@ -304,7 +287,7 @@ path to map file (with substitutions):
 	<target name="createOTDTEclipse" depends="createOTCompilerEclipse" unless="_hasCreatedOTDTEclipse">
 		
         <!-- Make org.eclipse.test.performance available while compiling test projects: -->
-        <echo message="Pre-installing Eclipse Test Framework into OTCompilerEclipse..."/>
+        <echo message="Pre-installing Eclipse Test Framework into base Eclipse..."/>
         <mkdir dir="${testsUpdatesDirBase}/eclipse"/>
         <unzip dest="${testsUpdatesDirBase}/eclipse" src="${eclipse.tests.zip}"/> 
         <ant antfile="${OTScriptDir}/p2helper.xml" target="installFeature" dir="${baseLocation}">
@@ -314,9 +297,9 @@ path to map file (with substitutions):
         </ant>
 		
 		<!-- pre-load updateSite with published releases: -->
+<!-- don't use previous artifacts during the transition to OTDRE:
         <mkdir dir="${otdtUpdatesDir}/plugins"/>
         <mkdir dir="${otdtUpdatesDir}/features"/>
-<!-- don't use previous artifacts during the transition to OTDRE:
         <exec executable="/bin/sh">
                 <arg value="-c"/>
                 <arg value="ln -s ${published.updates}/features/* ${otdtUpdatesDir}/features/"/>
@@ -341,7 +324,7 @@ path to map file (with substitutions):
 			dir="${bootLocation}" 
 			fork="true" 
 			classname="org.eclipse.equinox.launcher.Main"
-			classpath="${bootLocation}/plugins/${boot.org.eclipse.equinox.launcher_jar}">
+			classpath="${bootLocation}/plugins/${org.eclipse.equinox.launcher_jar}">
 				<arg value="-clean"/>
 				<arg value="-Dosgi.ws=${ws}"/>
 				<arg value="-Dosgi.os=${os}"/>

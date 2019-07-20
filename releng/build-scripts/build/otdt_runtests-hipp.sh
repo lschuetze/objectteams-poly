@@ -19,7 +19,6 @@
 # OT_TESTSUITE_DIR      root directory for building and testing
 # METADATA				directory for metadata from previous builds
 # SDK_QUALIFIER			build qualifier of the base eclipse SDK
-# ECLIPSE_BOOT_TGZ      archive file of the boot eclipse SDK build (full path)
 # ECLIPSE_SDK_TGZ       archive file of the base eclipse SDK build (full path)
 # ECLIPSE_TESTLIB_ZIP   archive file of the eclipse test framework (full path)
 # PUBLISHED_UPDATES 	directory of previously published plugins&features
@@ -35,7 +34,6 @@
 ## As Ant Arguments (from ANT_PROFILE):
 ##      -verbose                configure Ant
 ## As Java Properties:
-##      -Declipse-bot.tgz       path of boot eclipse SDK
 ##      -Declipse-app.tgz       path of eclipse SDK
 ##      -Declipse.tests.zip     path of eclipse test framework
 ##		-Dpublished.updates		path to previously published things
@@ -124,7 +122,6 @@ trap "echo Aborting by SIGTERM; cleanup; exit 130" INT
 
 # Assemble the Ant call:
 ANT_OPTIONS="${ANT_PROFILE} \
-    -Declipse-boot.tgz=${ECLIPSE_BOOT_TGZ} \
     -Declipse-app.tgz=${ECLIPSE_SDK_TGZ} \
     -Declipse.tests.zip=${ECLIPSE_TESTLIB_ZIP} \
     -Declipse.sdk.qualifier=${SDK_QUALIFIER} \
