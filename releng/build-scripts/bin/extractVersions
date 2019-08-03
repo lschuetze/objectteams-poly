@@ -33,8 +33,8 @@ do
 			;;
 		org.eclipse.jdt*)
 			JDT_VERSION_ALL=`echo $VERSION|grep jdt | sed -e 's/org.eclipse.jdt_\(.*\)/\1/'`
-			JDT_VERSIONA=`echo ${JDT_VERSION_ALL}| sed -e 's/\([0-9]\.[0-9]*\.[0-9]\.[^-]*-\)[0-9]\{4\}.*/\1/'`
-			JDT_VERSIONB=`echo ${JDT_VERSION_ALL}| sed -e   's/[0-9]\.[0-9]*\.[0-9]\.[^-]*-\([0-9]\{4\}\).*/\1/'`
+			JDT_VERSIONA=`echo ${JDT_VERSION_ALL}| sed -e 's/\([0-9]\+\.[0-9]\+\.[0-9]\+\.[^-]*-\)[0-9]\{4\}.*/\1/'`
+			JDT_VERSIONB=`echo ${JDT_VERSION_ALL}| sed -e   's/[0-9]\+\.[0-9]\+\.[0-9]\+\.[^-]*-\([0-9]\{4\}\).*/\1/'`
 			JDT_VERSIONB_NEXT=`expr $JDT_VERSIONB + 1`
 			;;
 		org.eclipse.equinox.launcher*)
