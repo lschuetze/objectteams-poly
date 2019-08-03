@@ -243,7 +243,7 @@ public SourceTypeBinding(SourceTypeBinding prototype) {
 	this.typeVariables = prototype.typeVariables;
 	this.environment = prototype.environment;
 
-	// this.scope = prototype.scope;  // Will defeat CompilationUnitDeclaration.cleanUp(TypeDeclaration) && CompilationUnitDeclaration.cleanUp(), so not copied, not an issue for JSR 308.
+	this.scope = prototype.scope; // compensated by TypeSystem.cleanUp(int)
 
 	this.synthetics = prototype.synthetics;
 	this.genericReferenceTypeSignature = prototype.genericReferenceTypeSignature;
@@ -3749,6 +3749,14 @@ public List<String> getNestMembers() {
 							.sorted()
 							.collect(Collectors.toList());
 	return list;
+}
+
+public void cleanUp() {
+	if (this.environment != null) {
+		// delegate so as to clean all variants of this prototype:
+		this.environment.typeSystem.cleanUp(this.id);
+	}
+	this.scope = null; // for types that are not registered in typeSystem.
 }
 
 }

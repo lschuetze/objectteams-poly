@@ -95,6 +95,7 @@ public class CastExpression extends Expression {
 	public Expression expression;
 	public TypeReference type;
 	public TypeBinding expectedType; // when assignment conversion to a given expected type: String s = (String) t;
+	public TypeBinding instanceofType; // set by InstanceofExpression to ensure we don't flag a necessary cast unnecessary
 
 //{ObjectTeams: the following flags are set depending on the kind parameter of the constructor
 	/*  Should role types be wrapped?  */
@@ -763,6 +764,10 @@ public TypeBinding resolveType(BlockScope scope) {
 			boolean nullAnnotationMismatch = scope.compilerOptions().isAnnotationBasedNullAnalysisEnabled
 					&& NullAnnotationMatching.analyse(castType, expressionType, -1).isAnyMismatch();
 
+			if (this.instanceofType != null && expressionType.isParameterizedType()
+					&& expressionType.isProvablyDistinct(this.instanceofType)) {
+				this.bits |= ASTNode.DisableUnnecessaryCastCheck;
+			}
 			boolean isLegal = checkCastTypesCompatibility(scope, castType, expressionType, this.expression);
 			if (isLegal) {
 				this.expression.computeConversion(scope, castType, expressionType);
@@ -858,6 +863,10 @@ public void tagAsNeedCheckCast() {
 @Override
 public void tagAsUnnecessaryCast(Scope scope, TypeBinding castType) {
 	this.bits |= ASTNode.UnnecessaryCast;
+}
+
+public void setInstanceofType(TypeBinding instanceofTypeBinding) {
+	this.instanceofType = instanceofTypeBinding;
 }
 
 @Override

@@ -398,9 +398,6 @@ public int getMode() {
 }
 @Override
 public IModule getModule() {
-	if (this.isAutoModule && this.module == null) {
-		return this.module = IModule.createAutomatic(this.path, false, null/*no manifest*/);
-	}
 	return this.module;
 }
 }
