@@ -3664,8 +3664,11 @@ class ASTConverter {
 		// Set javadoc
 		convert(compilationUnitDeclaration.javadoc, packageDeclaration);
 //{ObjectTeams:
-		if (importReference.isTeam())
-			packageDeclaration.modifiers().add(this.ast.newModifier(ModifierKeyword.TEAM_KEYWORD));
+		if (importReference.isTeam()) {
+			Modifier teamModifier = this.ast.newModifier(ModifierKeyword.TEAM_KEYWORD);
+			teamModifier.setSourceRange(importReference.declarationSourceStart, 4);
+			packageDeclaration.modifiers().add(teamModifier);
+		}
 // SH}
 		return packageDeclaration;
 	}

@@ -3523,6 +3523,8 @@ protected void consumeClassHeaderName1() {
 	}
 
 //{ObjectTeams: ROFI: is this a role file (may update modifiers, enclosingType etc.)
+	if ((typeDecl.modifiers & ExtraCompilerModifiers.AccTeam) != 0)
+		this.intPtr--; // position of team modifier
 	checkIsRoleFile(typeDecl);
 // SH}
 
@@ -7510,8 +7512,11 @@ protected void consumePackageDeclarationNameWithModifiers() {
 		}
 	}
 
-//{ObjectTeams: hide team modifier:
-	packageModifiers &= ~ExtraCompilerModifiers.AccTeam;
+//{ObjectTeams: hide team modifier & update position
+	if ((packageModifiers & ExtraCompilerModifiers.AccTeam) != 0) {
+		packageModifiers &= ~ExtraCompilerModifiers.AccTeam;
+		impt.declarationSourceStart = this.intStack[this.intPtr--];
+	}
 // SH}
 	if (packageModifiers != 0) {
 		problemReporter().illegalModifiers(packageModifiersSourceStart, packageModifiersSourceEnd);
@@ -11397,6 +11402,8 @@ protected void consumeNameContainingTeam() {
 	System.arraycopy(this.identifierStack, pos, this.identifierStack, pos+1, len1);
 	System.arraycopy(this.identifierPositionStack, pos, this.identifierPositionStack, pos+1, len1);
 	this.identifierStack[pos] = "team".toCharArray(); //$NON-NLS-1$
+	int start = this.intStack[this.intPtr--]; // position of 'team'
+	this.identifierPositionStack[pos] = start << 32 + (start + 3);
 	this.identifierPtr++;
 	this.modifiers &= ~ExtraCompilerModifiers.AccTeam;
 }
@@ -12130,6 +12137,7 @@ protected void consumeToken(int type) {
 			break;
 //{ObjectTeams: new modifiers:
 		case TokenNameteam :
+			pushOnIntStack(this.scanner.startPosition);
 			checkAndSetModifiers(ExtraCompilerModifiers.AccTeam);
 			pushOnExpressionStackLengthStack(0);
 			break;
