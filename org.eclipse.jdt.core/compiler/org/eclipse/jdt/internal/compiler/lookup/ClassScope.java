@@ -2095,7 +2095,7 @@ public class ClassScope extends Scope {
 				continue nextInterface;
 			}
 //{ObjectTeams: check special rules for "implements IXXXMigratable"
-			noProblems = RoleMigrationImplementor.checkMigratableInterfaces(sourceType, superInterfaceRef, superInterface, this);
+			noProblems &= RoleMigrationImplementor.checkMigratableInterfaces(sourceType, superInterfaceRef, superInterface, this);
 			if (!noProblems) {
 				sourceType.tagBits |= TagBits.HierarchyHasProblems;
 				continue nextInterface;
