@@ -125,6 +125,7 @@ $Terminals
 	AT308
 	AT308DOTDOTDOT
 	BeginCaseExpr
+	BreakPreviewMarker
 
 -- {ObjectTeams
 	ATOT
@@ -1846,9 +1847,18 @@ AssertStatement ::= 'assert' Expression ':' Expression ';'
 BreakStatement ::= 'break' ';'
 /.$putCase consumeStatementBreak() ; $break ./
 
-BreakStatement ::= 'break' Expression ';'
+BreakStatement ::= 'break' Identifier ';'
 /.$putCase consumeStatementBreakWithLabel() ; $break ./
 /:$readableName BreakStatement:/
+
+BreakStatement ::= 'break' BreakPreviewMarker ';'
+/.$putCase consumeStatementBreak() ; $break ./
+/:$compliance 12:/
+
+BreakStatement ::= 'break' BreakPreviewMarker Expression ';'
+/.$putCase consumeStatementBreakWithExpressionOrLabel() ; $break ./
+/:$readableName BreakStatement:/
+/:$compliance 12:/
 
 ContinueStatement ::= 'continue' ';'
 /.$putCase consumeStatementContinue() ; $break ./

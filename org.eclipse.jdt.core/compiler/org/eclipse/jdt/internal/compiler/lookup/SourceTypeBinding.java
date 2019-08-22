@@ -1381,6 +1381,19 @@ public long getAnnotationTagBits() {
 	if (!isPrototype())
 		return this.prototype.getAnnotationTagBits();
 	
+	if ((this.tagBits & TagBits.EndHierarchyCheck) == 0) {
+		CompilationUnitScope pkgCUS = this.scope.compilationUnitScope();
+		boolean current = pkgCUS.connectingHierarchy;
+		pkgCUS.connectingHierarchy = true;
+		try {
+			return internalGetAnnotationTagBits();
+		} finally {
+			pkgCUS.connectingHierarchy = current;
+		}
+	}
+	return internalGetAnnotationTagBits();
+}
+private long internalGetAnnotationTagBits() {
 	if ((this.tagBits & TagBits.AnnotationResolved) == 0 && this.scope != null) {
 		TypeDeclaration typeDecl = this.scope.referenceContext;
 		boolean old = typeDecl.staticInitializerScope.insideTypeAnnotation;
@@ -2969,19 +2982,7 @@ public void evaluateNullAnnotations() {
 				pkg.setDefaultNullness(NULL_UNSPECIFIED_BY_DEFAULT);
 			} else {
 				// if pkgInfo has no default annot. - complain
-				if (packageInfo instanceof SourceTypeBinding
-						&& (packageInfo.tagBits & TagBits.EndHierarchyCheck) == 0) {
-					CompilationUnitScope pkgCUS = ((SourceTypeBinding) packageInfo).scope.compilationUnitScope();
-					boolean current = pkgCUS.connectingHierarchy;
-					pkgCUS.connectingHierarchy = true;
-					try {
-						packageInfo.getAnnotationTagBits();
-					} finally {
-						pkgCUS.connectingHierarchy = current;
-					}
-				} else {
-					packageInfo.getAnnotationTagBits();
-				}
+				packageInfo.getAnnotationTagBits();
 			}
 		}
 	}

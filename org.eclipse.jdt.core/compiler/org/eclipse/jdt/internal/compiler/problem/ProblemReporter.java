@@ -177,6 +177,7 @@ import org.eclipse.jdt.internal.compiler.flow.FlowInfo;
 import org.eclipse.jdt.internal.compiler.impl.CompilerOptions;
 import org.eclipse.jdt.internal.compiler.impl.CompilerOptions.WeavingScheme;
 import org.eclipse.jdt.internal.compiler.impl.IrritantSet;
+import org.eclipse.jdt.internal.compiler.impl.Constant;
 import org.eclipse.jdt.internal.compiler.impl.ReferenceContext;
 import org.eclipse.jdt.internal.compiler.impl.StringConstant;
 import org.eclipse.jdt.internal.compiler.lookup.AnnotationBinding;
@@ -495,6 +496,7 @@ public static int getIrritant(int problemID) {
 		case IProblem.NonNullSpecdFieldComparisonYieldsFalse:
 		case IProblem.RedundantNullCheckAgainstNonNullType:
 		case IProblem.RedundantNullCheckOnField:
+		case IProblem.RedundantNullCheckOnConstNonNullField:
 		case IProblem.FieldComparisonYieldsFalse:
 			return CompilerOptions.RedundantNullCheck;
 
@@ -6651,6 +6653,11 @@ public boolean expressionNonNullComparison(Expression expr, boolean checkForNull
 			problemId = checkForNull
 					? IProblem.NonNullSpecdFieldComparisonYieldsFalse
 					: IProblem.RedundantNullCheckOnNonNullSpecdField;
+			char[][] nonNullName = this.options.nonNullAnnotationName;
+			arguments = new String[] { new String(field.name), 
+									   new String(nonNullName[nonNullName.length-1]) };
+		} else if (field.constant() != Constant.NotAConstant) {
+			problemId = IProblem.RedundantNullCheckOnConstNonNullField;
 			char[][] nonNullName = this.options.nonNullAnnotationName;
 			arguments = new String[] { new String(field.name), 
 									   new String(nonNullName[nonNullName.length-1]) };
@@ -15502,6 +15509,8 @@ public void autoModuleWithUnstableName(ModuleReference moduleReference) {
 			moduleReference.sourceEnd);
 }
 public void switchExpressionIncompatibleResultExpressions(SwitchExpression expression) {
+	if (!this.options.enablePreviewFeatures)
+		return;
 	TypeBinding type = expression.resultExpressions.get(0).resolvedType;
 	this.handle(
 		IProblem.SwitchExpressionsIncompatibleResultExpressionTypes,
@@ -15511,6 +15520,8 @@ public void switchExpressionIncompatibleResultExpressions(SwitchExpression expre
 		expression.sourceEnd);
 }
 public void switchExpressionEmptySwitchBlock(SwitchExpression expression) {
+	if (!this.options.enablePreviewFeatures)
+		return;
 	this.handle(
 		IProblem.SwitchExpressionsEmptySwitchBlock,
 		NoArgument,
@@ -15519,6 +15530,8 @@ public void switchExpressionEmptySwitchBlock(SwitchExpression expression) {
 		expression.sourceEnd);
 }
 public void switchExpressionNoResultExpressions(SwitchExpression expression) {
+	if (!this.options.enablePreviewFeatures)
+		return;
 	this.handle(
 		IProblem.SwitchExpressionsNoResultExpression,
 		NoArgument,
@@ -15527,6 +15540,8 @@ public void switchExpressionNoResultExpressions(SwitchExpression expression) {
 		expression.sourceEnd);
 }
 public void switchExpressionSwitchLabeledBlockCompletesNormally(Block block) {
+	if (!this.options.enablePreviewFeatures)
+		return;
 	this.handle(
 		IProblem.SwitchExpressionSwitchLabeledBlockCompletesNormally,
 		NoArgument,
@@ -15535,6 +15550,8 @@ public void switchExpressionSwitchLabeledBlockCompletesNormally(Block block) {
 		block.sourceEnd);
 }
 public void switchExpressionLastStatementCompletesNormally(Statement stmt) {
+	if (!this.options.enablePreviewFeatures)
+		return;
 	this.handle(
 		IProblem.SwitchExpressionSwitchLabeledBlockCompletesNormally,
 		NoArgument,
@@ -15543,6 +15560,8 @@ public void switchExpressionLastStatementCompletesNormally(Statement stmt) {
 		stmt.sourceEnd);
 }
 public void switchExpressionIllegalLastStatement(Statement stmt) {
+	if (!this.options.enablePreviewFeatures)
+		return;
 	this.handle(
 		IProblem.SwitchExpressionIllegalLastStatement,
 		NoArgument,
@@ -15551,6 +15570,8 @@ public void switchExpressionIllegalLastStatement(Statement stmt) {
 		stmt.sourceEnd);
 }
 public void switchExpressionTrailingSwitchLabels(Statement stmt) {
+	if (!this.options.enablePreviewFeatures)
+		return;
 	this.handle(
 		IProblem.SwitchExpressionTrailingSwitchLabels,
 		NoArgument,
@@ -15559,6 +15580,8 @@ public void switchExpressionTrailingSwitchLabels(Statement stmt) {
 		stmt.sourceEnd);
 }
 public void switchExpressionMixedCase(ASTNode statement) {
+	if (!this.options.enablePreviewFeatures)
+		return;
 	this.handle(
 		IProblem.switchMixedCase,
 		NoArgument,
@@ -15567,6 +15590,8 @@ public void switchExpressionMixedCase(ASTNode statement) {
 		statement.sourceEnd);
 }
 public void switchExpressionBreakMissingValue(ASTNode statement) {
+	if (!this.options.enablePreviewFeatures)
+		return;
 	this.handle(
 		IProblem.SwitchExpressionBreakMissingValue,
 		NoArgument,

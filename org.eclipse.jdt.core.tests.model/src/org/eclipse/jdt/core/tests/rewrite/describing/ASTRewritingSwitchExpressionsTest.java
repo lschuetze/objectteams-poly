@@ -57,9 +57,12 @@ public class ASTRewritingSwitchExpressionsTest extends ASTRewritingTest {
  	@Override
 	protected void setUp() throws Exception {
 		super.setUp();
-		if (this.apiLevel >= AST.JLS12 ) {
+		if (this.apiLevel == AST.JLS12 ) {
 			this.project1.setOption(JavaCore.COMPILER_PB_ENABLE_PREVIEW_FEATURES, JavaCore.ENABLED);
 			this.project1.setOption(JavaCore.COMPILER_PB_REPORT_PREVIEW_FEATURES, JavaCore.IGNORE);
+			this.project1.setOption(JavaCore.COMPILER_COMPLIANCE, JavaCore.VERSION_12);
+			this.project1.setOption(JavaCore.COMPILER_SOURCE, JavaCore.VERSION_12);
+			this.project1.setOption(JavaCore.COMPILER_CODEGEN_TARGET_PLATFORM, JavaCore.VERSION_12);
 		}
 	}
 	 	

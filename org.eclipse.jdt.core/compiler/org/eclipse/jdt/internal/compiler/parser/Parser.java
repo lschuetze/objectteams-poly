@@ -152,12 +152,7 @@ public class Parser implements TerminalTokens, ParserBasicInformation, Conflicte
 
 	public static final int RoundBracket = 0;
 
-//{ObjectTeams: changed byte to char to support larger grammar:
-/* orig:
-    public static byte scope_la[] = null;
-  :giro */
 	public static char scope_la[] = null;
-// SH}
     public static char scope_lhs[] = null;
 
 	public static char scope_prefix[] = null;
@@ -172,12 +167,7 @@ public class Parser implements TerminalTokens, ParserBasicInformation, Conflicte
 	protected final static int StackIncrement = 255;
 
 	public static char term_action[] = null;
-//{ObjectTeams: changed byte to char to support larger grammar:
-/* orig:
-	public static byte term_check[] = null;
-  :giro */
 	public static char term_check[] = null;
-// SH}
 
 	public static char terminal_index[] = null;
 
@@ -695,13 +685,11 @@ public class Parser implements TerminalTokens, ParserBasicInformation, Conflicte
 //{ObjectTeams: changed byte to char to support larger grammar:
 /* orig:
 		rhs = readByteTable(prefix + (++i) + ".rsc"); //$NON-NLS-1$
-		term_check = readByteTable(prefix + (++i) + ".rsc"); //$NON-NLS-1$
-		scope_la = readByteTable(prefix + (++i) + ".rsc"); //$NON-NLS-1$
   :giro */
 		rhs = readTable(prefix + (++i) + ".rsc"); //$NON-NLS-1$
+// SH}
 		term_check = readTable(prefix + (++i) + ".rsc"); //$NON-NLS-1$
 		scope_la = readTable(prefix + (++i) + ".rsc"); //$NON-NLS-1$
-// SH}
 	
 		name = readNameTable(prefix + (++i) + ".rsc"); //$NON-NLS-1$
 	
@@ -11431,21 +11419,29 @@ protected void consumeStatementBreakWithLabel() {
 	// BreakStatement ::= 'break' Identifier ';'
 	// break pushs a position on this.intStack in case there is no label
 
-	// add the compliance check
-		if (this.expressionLengthStack[this.expressionLengthPtr--] != 0) {
-			Expression expr = this.expressionStack[this.expressionPtr--];
-			char[] labelOrExpr = expr instanceof Literal ?
-					((Literal) expr).source() : expr instanceof SingleNameReference ? ((SingleNameReference) expr).token : null;
-			BreakStatement breakStatement = new BreakStatement(
-					labelOrExpr,
-					this.intStack[this.intPtr--],
-					this.endStatementPosition);
-			pushOnAstStack(breakStatement);
-			breakStatement.expression = expr; // need to figure out later whether this is a label or an expression.
-			if (expr instanceof SingleNameReference) {
-				((SingleNameReference) expr).isLabel = true;
-			}
+	pushOnAstStack(
+		new BreakStatement(
+			this.identifierStack[this.identifierPtr--],
+			this.intStack[this.intPtr--],
+			this.endStatementPosition));
+	this.identifierLengthPtr--;
+}
+protected void consumeStatementBreakWithExpressionOrLabel() {
+// add the compliance check
+	if (this.expressionLengthStack[this.expressionLengthPtr--] != 0) {
+		Expression expr = this.expressionStack[this.expressionPtr--];
+		char[] labelOrExpr = expr instanceof Literal ?
+				((Literal) expr).source() : expr instanceof SingleNameReference ? ((SingleNameReference) expr).token : null;
+		BreakStatement breakStatement = new BreakStatement(
+				labelOrExpr,
+				this.intStack[this.intPtr--],
+				this.endStatementPosition);
+		pushOnAstStack(breakStatement);
+		breakStatement.expression = expr; // need to figure out later whether this is a label or an expression.
+		if (expr instanceof SingleNameReference) {
+			((SingleNameReference) expr).isLabel = true;
 		}
+	}
 }
 protected void consumeStatementCatch() {
 	// CatchClause ::= 'catch' '(' FormalParameter ')'    Block
