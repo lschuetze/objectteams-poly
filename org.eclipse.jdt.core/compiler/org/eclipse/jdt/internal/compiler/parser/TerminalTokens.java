@@ -40,7 +40,7 @@ public interface TerminalTokens {
 		TokenNameCOMMENT_JAVADOC = 1003;
 
 	int
-      TokenNameIdentifier = 17,
+      TokenNameIdentifier = 16,
       TokenNameabstract = 55,
       TokenNameassert = 84,
       TokenNameboolean = 109,
@@ -51,7 +51,7 @@ public interface TerminalTokens {
       TokenNamechar = 113,
       TokenNameclass = 71,
       TokenNamecontinue = 86,
-      TokenNameconst = 145,
+      TokenNameconst = 146,
       TokenNamedefault = 80,
       TokenNamedo = 87,
       TokenNamedouble = 114,
@@ -63,7 +63,7 @@ public interface TerminalTokens {
       TokenNamefinally = 122,
       TokenNamefloat = 115,
       TokenNamefor = 88,
-      TokenNamegoto = 146,
+      TokenNamegoto = 147,
       TokenNameif = 89,
       TokenNameimplements = 141,
       TokenNameimport = 116,
@@ -132,7 +132,7 @@ public interface TerminalTokens {
       TokenNameNOT_EQUAL = 22,
       TokenNameLEFT_SHIFT = 19,
       TokenNameRIGHT_SHIFT = 13,
-      TokenNameUNSIGNED_RIGHT_SHIFT = 16,
+      TokenNameUNSIGNED_RIGHT_SHIFT = 17,
       TokenNamePLUS_EQUAL = 98,
       TokenNameMINUS_EQUAL = 99,
       TokenNameMULTIPLY_EQUAL = 100,
@@ -181,12 +181,13 @@ public interface TerminalTokens {
       TokenNameAT308 = 27,
       TokenNameAT308DOTDOTDOT = 144,
       TokenNameBeginCaseExpr = 73,
+      TokenNameBreakPreviewMarker = 145,
       TokenNameATOT = 121,
       TokenNameBINDIN = 78,
       TokenNameCALLOUT_OVERRIDE = 93,
       TokenNameSYNTHBINDOUT = 74,
       TokenNameEOF = 66,
-      TokenNameERROR = 147;
+      TokenNameERROR = 148;
 
 
 	// This alias is statically inserted by generateOTParser.sh:
