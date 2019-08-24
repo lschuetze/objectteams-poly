@@ -21,8 +21,11 @@ import java.io.File;
 import java.io.IOException;
 import java.net.URL;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
+import org.eclipse.core.internal.runtime.PlatformLogWriter;
 import org.eclipse.core.runtime.FileLocator;
 import org.eclipse.core.runtime.IExtensionRegistry;
 import org.eclipse.core.runtime.ILog;
@@ -52,7 +55,9 @@ import org.osgi.framework.ServiceRegistration;
 import org.osgi.framework.hooks.weaving.WeavingHook;
 import org.osgi.framework.hooks.weaving.WovenClassListener;
 import org.osgi.service.log.LogEntry;
+import org.osgi.service.log.LogLevel;
 import org.osgi.service.log.LogListener;
+import org.osgi.service.log.admin.LoggerAdmin;
 import org.osgi.util.tracker.ServiceTracker;
 
 @NonNullByDefault
@@ -192,6 +197,7 @@ public class TransformerPlugin implements BundleActivator, IAspectRegistry {
 
 	@SuppressWarnings("restriction")
 	private static ILog acquireLog(BundleContext bundleContext) {
+		setupLoggerContext(bundleContext);
 		ServiceTracker<ExtendedLogService,ExtendedLogService> tracker
 				= new ServiceTracker<ExtendedLogService,ExtendedLogService>(bundleContext, ExtendedLogService.class, null);
 		tracker.open();
@@ -223,6 +229,21 @@ public class TransformerPlugin implements BundleActivator, IAspectRegistry {
 			}
 		);
 		return result;
+	}
+
+	private static void setupLoggerContext(BundleContext bundleContext) {
+		String bundleSymbolicName = bundleContext.getBundle().getSymbolicName();
+		
+		Status dummyStatus = new Status(WARN_LEVEL, bundleSymbolicName, "no message");
+		@SuppressWarnings("restriction")
+		LogLevel logLevel = LogLevel.values()[PlatformLogWriter.getLevel(dummyStatus)];
+		Map<String,LogLevel> levels = new HashMap<>();
+		levels.put(OTEQUINOX_LOGGER_NAME, logLevel);
+
+		ServiceTracker<LoggerAdmin,LoggerAdmin> adminTracker
+					= new ServiceTracker<LoggerAdmin,LoggerAdmin>(bundleContext, LoggerAdmin.class, null);
+		adminTracker.open();
+		adminTracker.getService().getLoggerContext(bundleSymbolicName).setLogLevels(levels);
 	}
 
 	private void OTREInit() {
