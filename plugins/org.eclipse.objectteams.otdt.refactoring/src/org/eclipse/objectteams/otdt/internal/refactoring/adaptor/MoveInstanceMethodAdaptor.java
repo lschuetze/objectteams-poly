@@ -22,8 +22,16 @@ import base org.eclipse.jdt.internal.corext.refactoring.structure.MoveInstanceMe
 public team class MoveInstanceMethodAdaptor {
 
 	
+	public MoveInstanceMethodAdaptor() {
+		System.out.println("MoveInstanceMethodAdaptor.<init>");
+	}
+
 	@SuppressWarnings("decapsulation")
 	protected class MoveInstanceMethodProcessor playedBy MoveInstanceMethodProcessor {
+		
+		public MoveInstanceMethodProcessor(MoveInstanceMethodProcessor moveInstanceMethodProcessor) {
+			System.out.println("MoveInstanceMethodProcessor.<init>");
+		}
 		
 		// callouts
 		IMethod getFMethod() -> get IMethod fMethod;
@@ -32,6 +40,7 @@ public team class MoveInstanceMethodAdaptor {
 		IType getTargetType() -> IType getTargetType();
 
 		void checkFinalConditions(IProgressMonitor pm, RefactoringStatus result) throws CoreException {
+			System.out.println(">>> MoveInstanceMethodProcessor.checkFinalConditions()");
 			if(!result.hasFatalError())
 				result.merge(RefactoringUtil.checkForExistingRoles(RefactoringMessages.MoveInstanceMethodAdaptor_moveInstanceMethod_name, getFMethod().getJavaProject(), pm));
 			pm.beginTask(RefactoringMessages.MoveInstanceMethodAdaptor_checkOverloading_progress, 1);
@@ -39,6 +48,7 @@ public team class MoveInstanceMethodAdaptor {
 			result.merge(checkOverloadingAndAmbiguity(pm));
 			pm.worked(1);
 			pm.done();
+			System.out.println("<<< MoveInstanceMethodProcessor.checkFinalConditions()");
 		}
 
 		void checkFinalConditions(IProgressMonitor pm, RefactoringStatus status) <- after RefactoringStatus checkFinalConditions(IProgressMonitor pm,
