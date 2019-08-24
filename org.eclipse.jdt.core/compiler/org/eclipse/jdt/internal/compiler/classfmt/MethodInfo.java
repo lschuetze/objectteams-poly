@@ -547,10 +547,8 @@ private synchronized void readModifierRelatedAttributes() {
 		readOffset += (6 + u4At(readOffset + 2));
 	}
 //{ObjectTeams: combine sets of modifiers
-	if (otFlags != 0) {
-		if ((otFlags & HAVE_OT_MODIFIERS) != 0) {
-			flags &= ~ExtraCompilerModifiers.AccVisibilityMASK; // replace those bits
-		}
+	if ((otFlags & HAVE_OT_MODIFIERS) != 0) {
+		flags &= ~ExtraCompilerModifiers.AccVisibilityMASK; // replace those bits
 		flags |= (otFlags & 0xffffffff);
 	}
 // SH}
@@ -565,6 +563,7 @@ private synchronized void readModifierRelatedAttributes() {
      * @param readOffset
      * @param aStructOffset (subtract when indexing via constantPoolOffsets)
      * @param someConstantPoolOffsets
+     * @return (visibility modifiers | HAVE_OT_MODIFIERS) or 0 
      */
     long readOTAttribute(
             char[]     attributeName,
@@ -593,7 +592,6 @@ private synchronized void readModifierRelatedAttributes() {
         else if (CharOperation.equals(attributeName, CALLIN_FLAGS))
         {
             this.methodAttributes.add(WordValueAttribute.readCallinFlags(info, readOffset));
-            return ExtraCompilerModifiers.AccCallin;
         }
         else if (CharOperation.equals(attributeName, TYPE_ANCHOR_LIST))
         {

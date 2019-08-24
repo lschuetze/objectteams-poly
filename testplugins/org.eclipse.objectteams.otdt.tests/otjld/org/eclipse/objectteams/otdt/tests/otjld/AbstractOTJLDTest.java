@@ -32,7 +32,9 @@ import org.eclipse.jdt.core.tests.compiler.regression.Requestor;
 import org.eclipse.jdt.core.tests.util.CompilerTestSetup;
 import org.eclipse.jdt.core.tests.util.TestVerifier;
 import org.eclipse.jdt.core.tests.util.Util;
+import org.eclipse.jdt.internal.compiler.ASTVisitor;
 import org.eclipse.jdt.internal.compiler.Compiler;
+import org.eclipse.jdt.internal.compiler.ICompilerRequestor;
 import org.eclipse.jdt.internal.compiler.batch.FileSystem;
 import org.eclipse.jdt.internal.compiler.classfmt.ClassFileConstants;
 import org.eclipse.jdt.internal.compiler.env.INameEnvironment;
@@ -133,6 +135,115 @@ public class AbstractOTJLDTest extends AbstractComparableTest {
 	protected String spliteratorCallout() {
 		return (IS_JRE_8 && this.complianceLevel < ClassFileConstants.JDK1_8) ? "spliterator -> spliterator;\n" : "";
 	}
+	
+// copy from JDT-orig for visibility's sake
+	protected class Runner {
+		public boolean shouldFlushOutputDirectory = true;
+		// input:
+		public String[] testFiles;
+		public String[] dependantFiles;
+		public String[] classLibraries;
+		public boolean  libsOnModulePath;
+		// control compilation:
+		public Map<String,String> customOptions;
+		public boolean performStatementsRecovery;
+		public boolean generateOutput;
+		public ICompilerRequestor customRequestor;
+		// compiler result:
+		public String expectedCompilerLog;
+		public String[] alternateCompilerLogs;
+		public boolean showCategory;
+		public boolean showWarningToken;
+		// javac:
+		public boolean skipJavac;
+		public String expectedJavacOutputString;
+		public JavacTestOptions javacTestOptions;
+		// execution:
+		public boolean forceExecution;
+		public String[] vmArguments;
+		public String expectedOutputString;
+		public String expectedErrorString;
+
+		public ASTVisitor visitor;
+
+		public Runner() {}
+
+		public void runConformTest() {
+			runTest(this.shouldFlushOutputDirectory,
+					this.testFiles,
+					this.dependantFiles != null ? this.dependantFiles : new String[] {},
+					this.classLibraries,
+					this.libsOnModulePath,
+					this.customOptions,
+					this.performStatementsRecovery,
+					new Requestor(
+							this.generateOutput,
+							this.customRequestor,
+							this.showCategory,
+							this.showWarningToken),
+					false,
+					this.expectedCompilerLog,
+					this.alternateCompilerLogs,
+					this.forceExecution,
+					this.vmArguments,
+					this.expectedOutputString,
+					this.expectedErrorString,
+					this.visitor,
+					this.expectedJavacOutputString != null ? this.expectedJavacOutputString : this.expectedOutputString,
+					this.skipJavac ? JavacTestOptions.SKIP : this.javacTestOptions);
+		}
+
+		public void runNegativeTest() {
+			runTest(this.shouldFlushOutputDirectory,
+					this.testFiles,
+					this.dependantFiles != null ? this.dependantFiles : new String[] {},
+					this.classLibraries,
+					this.libsOnModulePath,
+					this.customOptions,
+					this.performStatementsRecovery,
+					new Requestor(
+							this.generateOutput,
+							this.customRequestor,
+							this.showCategory,
+							this.showWarningToken),
+					true,
+					this.expectedCompilerLog,
+					this.alternateCompilerLogs,
+					this.forceExecution,
+					this.vmArguments,
+					this.expectedOutputString,
+					this.expectedErrorString,
+					this.visitor,
+					this.expectedJavacOutputString != null ? this.expectedJavacOutputString : this.expectedOutputString,
+					this.skipJavac ? JavacTestOptions.SKIP : this.javacTestOptions);
+		}
+
+		public void runWarningTest() {
+			runTest(this.shouldFlushOutputDirectory,
+					this.testFiles,
+					this.dependantFiles != null ? this.dependantFiles : new String[] {},
+					this.classLibraries,
+					this.libsOnModulePath,
+					this.customOptions,
+					this.performStatementsRecovery,
+					new Requestor(
+							this.generateOutput,
+							this.customRequestor,
+							this.showCategory,
+							this.showWarningToken),
+					false,
+					this.expectedCompilerLog,
+					this.alternateCompilerLogs,
+					this.forceExecution,
+					this.vmArguments,
+					this.expectedOutputString,
+					this.expectedErrorString,
+					this.visitor,
+					this.expectedJavacOutputString != null ? this.expectedJavacOutputString : this.expectedOutputString,
+					this.skipJavac ? JavacTestOptions.SKIP : this.javacTestOptions);
+		}
+	}
+
 	// ===
 	
 	protected static final JavacTestOptions DEFAULT_TEST_OPTIONS = new JavacTestOptions();

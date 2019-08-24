@@ -544,6 +544,9 @@ static class JavaRuntime {
 }
 protected static class JavacTestOptions {
 	static final JavacTestOptions DEFAULT = new JavacTestOptions();
+//{ObjectTeams:
+	public
+// SH}
 	static final JavacTestOptions SKIP = new JavacTestOptions() {
 		boolean skip(JavacCompiler compiler) {
 			return true;
@@ -3090,7 +3093,12 @@ protected void runNegativeTest(boolean skipJavac, JavacTestOptions javacTestOpti
 // - check the callees statistics for wrapper methods and tune them accordingly
 //   (aka, suppress low profile ones).
 // WORK log test files in all failure cases (ez cut and paste)
+//{ObjectTeams: make available for our copy of Runner:
+/* orig:
 	private void runTest(
+  :giro */
+	public void runTest(
+// SH}
 			// test directory preparation
 			boolean shouldFlushOutputDirectory,
 			String[] testFiles,

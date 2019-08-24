@@ -182,4 +182,41 @@ public class CompilationOrder extends AbstractOTJLDTest {
     		},
     		"OK");
     }
+    public void testBug550408() {
+    	runConformTest(
+    		new String[] {
+		"Base550408.java",
+				"public class Base550408 {\n" +
+				"	public void bm() {}\n" +
+				"}\n",
+    	"Team550408_1.java",
+    			"public team class Team550408_1 {\n" +
+    			"	protected class R playedBy Base550408 {\n" +
+    			"		protected void test() {\n" +
+    			"			System.out.print(\"OK\");\n" +
+    			"		}\n" +
+    			"		test <- after bm;\n" +
+    			"	}\n" +
+    			"}\n",
+    		},
+    		"");
+    	Runner runner = new Runner();
+    	runner.shouldFlushOutputDirectory = false;
+    	runner.testFiles = new String[] {
+    		"Base550408_2.java",
+    			"public class Base550408_2 {\n" +
+    			"	public void bm2() {}\n" +
+    			"}\n",
+			"Team550408_2.java",
+    			"team class Team550408_2 {\n" +
+				"	protected team class Mid extends Team550408_1 playedBy Base550408_2 {\n" +
+    			"		protected void test2() {\n" +
+    			"			System.out.print(\"OK\");\n" +
+    			"		}\n" +
+    			"		test2 <- after bm2;\n" +
+				"	}\n" +
+				"}\n"    			
+    		};
+    	runner.runConformTest();
+    }
 }
