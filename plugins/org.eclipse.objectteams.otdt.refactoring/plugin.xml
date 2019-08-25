@@ -60,11 +60,6 @@
          </team>
          <team
                activation="ALL_THREADS"
-               class="org.eclipse.objectteams.otdt.internal.refactoring.adaptor.MoveInstanceMethodAdaptor"
-               icon="platform:/plugin/org.eclipse.objectteams.otdt.ui/icons/ot/team_obj.gif">
-         </team>
-         <team
-               activation="ALL_THREADS"
                class="org.eclipse.objectteams.otdt.internal.refactoring.adaptor.pushdown.PushDownAdaptor"
                icon="platform:/plugin/org.eclipse.objectteams.otdt.ui/icons/ot/team_obj.gif">
          </team>
@@ -137,6 +132,11 @@
          <team
                activation="ALL_THREADS"
                class="org.eclipse.objectteams.otdt.internal.refactoring.corext.rename.RolePartsUnifier"
+               icon="platform:/plugin/org.eclipse.objectteams.otdt.ui/icons/ot/team_obj.gif">
+         </team>
+         <team
+               activation="ALL_THREADS"
+               class="org.eclipse.objectteams.otdt.internal.refactoring.adaptor.MoveInstanceMethodAdaptor"
                icon="platform:/plugin/org.eclipse.objectteams.otdt.ui/icons/ot/team_obj.gif">
          </team>
       </aspectBinding>
