@@ -72,6 +72,8 @@ public class FieldData implements IFieldAccessSpec
     @Override
 	public String toString()
     {
+    	if ("".equals(this.fieldType)) //$NON-NLS-1$
+    		return "<missing type> "+this.selector; //$NON-NLS-1$
         return Signature.getSimpleName(Signature.toString(this.fieldType)) + " " + this.selector; //$NON-NLS-1$
     }
 }
