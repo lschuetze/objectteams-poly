@@ -139,6 +139,16 @@
                class="org.eclipse.objectteams.otdt.internal.refactoring.adaptor.MoveInstanceMethodAdaptor"
                icon="platform:/plugin/org.eclipse.objectteams.otdt.ui/icons/ot/team_obj.gif">
          </team>
+         <team
+               activation="ALL_THREADS"
+               class="org.eclipse.objectteams.otdt.internal.refactoring.adaptor.pullup.PullUpAdaptor"
+               icon="platform:/plugin/org.eclipse.objectteams.otdt.ui/icons/ot/team_obj.gif">
+         </team>
+         <team
+               activation="ALL_THREADS"
+               class="org.eclipse.objectteams.otdt.internal.refactoring.adaptor.MoveAdaptor"
+               icon="platform:/plugin/org.eclipse.objectteams.otdt.ui/icons/ot/team_obj.gif">
+         </team>
       </aspectBinding>
       <aspectBinding
             icon="platform:/plugin/org.eclipse.objectteams.otdt.ui/icons/ot/calloutbinding_obj.gif">
