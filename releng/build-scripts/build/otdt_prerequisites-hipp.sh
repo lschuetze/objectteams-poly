@@ -41,7 +41,7 @@ ANT_HOME=/shared/common/apache-ant-1.7.1/
 PATH=${ANT_HOME}/bin:${PATH}
 
 # Configure Java:
-JAVA_HOME=/shared/common/jdk-9_x64-latest
+JAVA_HOME=${JAVA_HOME:="/shared/common/jdk-9_x64-latest"}
 PATH=${JAVA_HOME}/bin:${PATH}
 
 # EXPORT: additional arguments to pass to Ant:
