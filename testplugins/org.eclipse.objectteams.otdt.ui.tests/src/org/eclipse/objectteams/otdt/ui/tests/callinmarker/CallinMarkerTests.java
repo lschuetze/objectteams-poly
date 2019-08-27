@@ -41,7 +41,6 @@ import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Path;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.IJobChangeEvent;
-import org.eclipse.core.runtime.jobs.IJobChangeListener;
 import org.eclipse.core.runtime.jobs.JobChangeAdapter;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaElement;
@@ -50,10 +49,6 @@ import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.ui.JavaUI;
 import org.eclipse.jface.action.IStatusLineManager;
-import org.eclipse.objectteams.otdt.core.IOTJavaElement;
-import org.eclipse.objectteams.otdt.core.IOTType;
-import org.eclipse.objectteams.otdt.core.IRoleType;
-import org.eclipse.objectteams.otdt.core.OTModelManager;
 import org.eclipse.objectteams.otdt.core.ext.MarkableFactory;
 import org.eclipse.objectteams.otdt.internal.ui.callinmarkers.AnnotationHelper;
 import org.eclipse.objectteams.otdt.internal.ui.callinmarkers.CallinMarker;
@@ -75,7 +70,6 @@ public class CallinMarkerTests extends FileBasedUITest
     
     private class MyCallinMarkerCreator extends CallinMarkerCreator2
     {
-        private IJobChangeListener _extraListener;
         private boolean _finished = false;
 
         public boolean isFinished()
@@ -85,7 +79,6 @@ public class CallinMarkerTests extends FileBasedUITest
         
 		public void reset() {
 			this._finished = false;
-			this._extraListener = null;
 		}
         public void initialize(IEditorPart targetEditor)
         {
@@ -94,11 +87,6 @@ public class CallinMarkerTests extends FileBasedUITest
 	            this.fActiveEditor = targetEditor;
 	    		this.annotationHelper = new AnnotationHelper(targetEditor, targetEditor.getEditorInput());
 	        }
-        }
-        
-        public void setJobListener(IJobChangeListener listener)
-        {
-            _extraListener = listener;
         }
         
         protected void schedule(final CallinMarkerJob job,
@@ -111,9 +99,6 @@ public class CallinMarkerTests extends FileBasedUITest
                 }
             });
 
-            if (_extraListener != null)
-                job.addJobChangeListener(_extraListener);
-            
             super.schedule(job, statusLine);
         }
 
@@ -210,24 +195,7 @@ public class CallinMarkerTests extends FileBasedUITest
         }
         return null;
     }    
-    
-    private IRoleType getRole(String srcFolderName, String pkgName, String teamName, String roleName) throws JavaModelException
-    {
-        IType teamJavaElem = getJavaType(getTestProjectDir(), srcFolderName, pkgName, teamName);
-        IOTJavaElement teamOTElem = OTModelManager.getOTElement(teamJavaElem);
-        assertNotNull(teamOTElem);
-        
-        IOTType teamType = (IOTType) teamOTElem;
-        IType roleJavaElem = teamType.getRoleType(roleName);
-//            IType roleJavaElem = teamJavaElem.getType(roleName); // IOTType.getType() does not return role files!
-        if ((roleJavaElem != null) && (roleJavaElem.exists()))
-        {
-            IRoleType roleOTElem = (IRoleType) OTModelManager.getOTElement(roleJavaElem);
-            return roleOTElem;
-        }
-        return null;
-    }
-    
+
     private void synchronousCreateMarkers(IResource resource) throws PartInitException, JavaModelException
     {
     	_creator.reset();
@@ -446,15 +414,11 @@ public class CallinMarkerTests extends FileBasedUITest
 	        while(this._creator.isCreatingMarkersFor(resource))
 	        	Thread.sleep(100);
 	        
-	        assertEquals("Unexpeted number of log entries", 2, myLogListener.status.size());
+	        assertEquals("Unexpeted number of log entries", 1, myLogListener.status.size());
 	        assertEquals("Unexpected Log[0]", 
-	        			 "Status ERROR: org.eclipse.core.runtime code=4 Unable to create part null",
+	        			 "Status ERROR: org.eclipse.ui code=4 Unable to create part " +
+	        			 "org.eclipse.ui.PartInitException: The class file is not on the classpath",
 	        			 myLogListener.status.get(0).toString());
-	        assertEquals("Unexpected Log[1]", 
-	        			 "Status ERROR: org.eclipse.jdt.ui code=995 " +
-	        			 "The class file is not on the classpath " +
-	        			 "org.eclipse.core.runtime.CoreException: The class file is not on the classpath", 
-	        			 myLogListener.status.get(1).toString());
 	
 	        IMarker[] markers = getCallinMarkers(resource);
 	        assertEquals("Should have no markers", markers.length, 0);
