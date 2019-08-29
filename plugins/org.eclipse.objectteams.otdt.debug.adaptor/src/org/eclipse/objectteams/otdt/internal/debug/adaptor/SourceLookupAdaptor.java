@@ -59,7 +59,7 @@ public team class SourceLookupAdaptor {
 		static callin IType resolveType(String qualifiedName, IJavaElement javaElement) {
 			qualifiedName = qualifiedName.replace("$__OT__", "$"); //$NON-NLS-1$ //$NON-NLS-2$
     		IType result = base.resolveType(qualifiedName, javaElement);
-    		if (result != null && result.exists())
+    		if (result != null && (result.exists() || isSyntheticName(qualifiedName)))
     			return result;
     		// the given compilation unit doesn't have a type `type.getName()`
     		try {
@@ -70,7 +70,20 @@ public team class SourceLookupAdaptor {
     		}
     		return null;
 		}
-		
+
+		private static boolean isSyntheticName(String qualifiedName) {
+			int lastDot = qualifiedName.lastIndexOf('.');
+			if (lastDot == -1)
+				return false;
+			String lastSegment = qualifiedName.substring(lastDot+1);
+			try {
+				Integer.parseInt(lastSegment);
+				return true;
+			} catch (NumberFormatException e) {
+				return false;
+			}
+		}
+
 		static IType findRoFiOrTSuper(String qualifiedName, ICompilationUnit resolvedCU) throws JavaModelException {
     		int lastDollar = qualifiedName.lastIndexOf('$');
     		if (lastDollar != -1) {
