@@ -54,6 +54,10 @@ public abstract class PackageBinding extends Binding implements TypeConstants {
 	/** Is this package exported from its module? NB: to query this property use {@link #isExported()} to ensure initialization. */
 	Boolean isExported;
 
+//{ObjectTeams: during a non-JLS lookup we may get a not-found-type but that should not be remembered!
+	boolean dontRememberNotFoundType;
+// SH}
+
 protected PackageBinding(char[][] compoundName, LookupEnvironment environment) {
 	// for creating problem package
 	this.compoundName = compoundName;
@@ -87,6 +91,7 @@ protected void addNotFoundPackage(char[] simpleName) {
 }
 //{ObjectTeams: ROFI changed visibility, was private
 void addNotFoundType(char[] simpleName) {
+	if (this.dontRememberNotFoundType) return;
 // SH}
 	if (this.environment.suppressImportErrors)
 		return;

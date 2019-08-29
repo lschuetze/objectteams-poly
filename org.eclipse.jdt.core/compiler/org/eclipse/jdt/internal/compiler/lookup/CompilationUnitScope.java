@@ -835,11 +835,17 @@ private Binding findImport(char[][] compoundName, int length, boolean allowDecap
 		while (i < length) {
 //{ObjectTeams: For a team with team package we need to give precedence to the type:
 			if (i == length -1 && module.canAccess(packageBinding)) {
-				ReferenceBinding type = packageBinding.getType(compoundName[i], module);
-				if (type != null && type.isValidBinding() && type.isTeam()) {
-					if (!type.canBeSeenBy(this.fPackage))
-						return new ProblemReferenceBinding(compoundName, type, ProblemReasons.NotVisible);
-					return type;
+				boolean save = packageBinding.dontRememberNotFoundType;
+				packageBinding.dontRememberNotFoundType = true;
+				try {
+					ReferenceBinding type = packageBinding.getType(compoundName[i], module);
+					if (type != null && type.isValidBinding() && type.isTeam()) {
+						if (!type.canBeSeenBy(this.fPackage))
+							return new ProblemReferenceBinding(compoundName, type, ProblemReasons.NotVisible);
+						return type;
+					}
+				} finally {
+					packageBinding.dontRememberNotFoundType = save;
 				}
 			}
 // SH}

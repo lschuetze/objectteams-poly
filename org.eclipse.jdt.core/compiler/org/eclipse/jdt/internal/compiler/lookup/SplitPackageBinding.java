@@ -235,6 +235,11 @@ public class SplitPackageBinding extends PackageBinding {
 		ReferenceBinding candidate = null;
 		boolean accessible = false;
 		for (PackageBinding incarnation : this.incarnations) {
+//{ObjectTeams:
+		  boolean save = incarnation.dontRememberNotFoundType;
+		  incarnation.dontRememberNotFoundType = this.dontRememberNotFoundType;
+		  try {
+// orig:
 			ReferenceBinding type = incarnation.getType(name, mod);
 			if (type != null) {
 				if (candidate == null || !accessible) {
@@ -244,6 +249,11 @@ public class SplitPackageBinding extends PackageBinding {
 					return new ProblemReferenceBinding(type.compoundName, candidate, ProblemReasons.Ambiguous); // TODO(SHMOD) add module information
 				}
 			}
+// :giro
+		  } finally {
+			  incarnation.dontRememberNotFoundType = save;
+		  }
+// SH}
 		}
 		if (candidate != null && !accessible)
 			return new ProblemReferenceBinding(candidate.compoundName, candidate, ProblemReasons.NotAccessible); // TODO(SHMOD) more info
