@@ -145,7 +145,8 @@ public class ObjectTeamsTransformer implements ClassFileTransformer {
 			break;
 		case 's':
 			// skip, I saw a mysterious deadlock involving sun.misc.Cleaner
-			if (className.startsWith("sun/misc"))
+			if (className.startsWith("sun/misc")
+				|| className.startsWith("sun/launcher"))
 				return false;
 			break;
 		case 'j':
@@ -154,6 +155,7 @@ public class ObjectTeamsTransformer implements ClassFileTransformer {
 				|| className.startsWith("java/lang")
 				|| className.startsWith("java/util")
 				|| className.startsWith("java/io")
+				|| className.startsWith("jdk/jfr")
 				) 
 				return false;
 			break;
