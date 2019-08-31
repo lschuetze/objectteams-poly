@@ -18,9 +18,11 @@ package org.eclipse.objectteams.otdt.tests.compiler;
 import java.io.File;
 import java.util.Map;
 
+import org.eclipse.core.runtime.OperationCanceledException;
 import org.eclipse.jdt.core.ToolFactory;
 import org.eclipse.jdt.core.tests.util.Util;
 import org.eclipse.jdt.core.util.ClassFileBytesDisassembler;
+import org.eclipse.jdt.internal.compiler.Compiler;
 import org.eclipse.jdt.internal.compiler.classfmt.ClassFileConstants;
 import org.eclipse.jdt.internal.compiler.impl.CompilerOptions;
 import org.eclipse.objectteams.otdt.tests.otjld.AbstractOTJLDTest;
@@ -40,9 +42,17 @@ public class AttributesTest extends AbstractOTJLDTest {
 	}
 	protected void setUp() throws Exception {
 		super.setUp();
-		this.versionString = (this.complianceLevel < ClassFileConstants.JDK9)
-				? "version 1.8 : 52.0"
-				: (this.complianceLevel < ClassFileConstants.JDK10 ? "version 9 : 53.0" : "version 10 : 54.0");
+		if (this.complianceLevel < ClassFileConstants.JDK9) {
+			this.versionString = "version 1.8 : 52.0";
+		} else if (this.complianceLevel == ClassFileConstants.JDK9) {
+			this.versionString = "version 9 : 53.0";
+		} else if (this.complianceLevel == ClassFileConstants.JDK10) {
+			this.versionString = "version 10 : 54.0";
+		} else if (this.complianceLevel == ClassFileConstants.JDK11) {
+			this.versionString = "version 11 : 55.0";
+		} else if (this.complianceLevel == ClassFileConstants.JDK12) {
+			this.versionString = "version 12 : 56.0";
+		}
 	}
 
 
@@ -68,11 +78,18 @@ public class AttributesTest extends AbstractOTJLDTest {
 		}
 	}
 	
+	@Override
+	protected void compileTestFiles(Compiler batchCompiler, String[] testFiles) {
+		super.compileTestFiles(batchCompiler, testFiles);
+		throw new OperationCanceledException("skip running");
+	}
+	
 	// https://bugs.eclipse.org/537772 - Attribute OTCompilerVersion should not be set for o.o.Team
 	public void testAttributesInOOTeam() throws Exception {
 		Map<String,String> customOptions = getCompilerOptions();
 		customOptions.put(CompilerOptions.OPTION_PureJavaOnly, CompilerOptions.ENABLED);
-		runConformTest(
+		try {
+			runConformTest(
 				new String[] {
 					"org/objectteams/Team.java",
 					"package org.objectteams;\n" +
@@ -80,6 +97,9 @@ public class AttributesTest extends AbstractOTJLDTest {
 					"}\n"
 				},
 				customOptions);
+		} catch (OperationCanceledException e) {
+			// expected
+		}
 		
 		ClassFileBytesDisassembler disassembler = ToolFactory.createDefaultClassFileBytesDisassembler();
 		String path = OUTPUT_DIR + File.separator + "org/objectteams/Team.class";
