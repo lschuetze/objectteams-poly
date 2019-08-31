@@ -42,6 +42,8 @@ import org.eclipse.core.runtime.Path;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.IJobChangeEvent;
 import org.eclipse.core.runtime.jobs.JobChangeAdapter;
+import org.eclipse.core.runtime.preferences.IEclipsePreferences;
+import org.eclipse.core.runtime.preferences.InstanceScope;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IType;
@@ -125,6 +127,7 @@ public class CallinMarkerTests extends FileBasedUITest
     
     public void setUpSuite() throws Exception
     {
+    	enableUiMonitoring(false);
         setTestProjectDir("CallinMarker");
         
         super.setUpSuite();
@@ -148,6 +151,18 @@ public class CallinMarkerTests extends FileBasedUITest
     	_baseType = null;
     	_baseResource = null;
     }
+
+    @Override
+    public void tearDownSuite() throws Exception {
+    	enableUiMonitoring(true);
+    	super.tearDownSuite();
+    }
+
+	private void enableUiMonitoring(boolean enable) {
+		IEclipsePreferences preferences = InstanceScope.INSTANCE.getNode("org.eclipse.ui.monitoring");
+    	if (preferences != null)
+    		preferences.putBoolean("monitoring_enabled", enable);
+	}
 
     class MyLogListener implements ILogListener {
 		List<IStatus> status = new ArrayList<IStatus>();
