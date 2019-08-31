@@ -74,7 +74,7 @@
             	--add-opens java.base/jdk.internal.ref=ALL-UNNAMED
             	--add-opens java.base/jdk.internal.math=ALL-UNNAMED
             	--add-opens java.base/jdk.internal.misc=ALL-UNNAMED
-            	-Djava.io.tmpdir=${test.tmpDir} -Dot.weaving=otdre -javaagent:${otequinox.agent.jar} -Dotequinox.debug=OK
+            	-Djava.io.tmpdir=${test.tmpDir} -Dot.weaving=otdre -javaagent:${otequinox.agent.jar}
             	-Dcompliance=1.4,1.7,1.8,9"/>
 		</ant>
 	</target>
