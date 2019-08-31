@@ -291,6 +291,7 @@ public class Scanner implements TerminalTokens {
 
 	public boolean fakeInModule = false;
 	boolean inCase = false;
+	boolean breakPreviewAllowed = false;
 	/**
 	 * The current context of the scanner w.r.t restricted keywords
 	 *
@@ -1368,8 +1369,10 @@ public void ungetToken(int unambiguousToken) {
 	this.nextToken = unambiguousToken;
 }
 private void updateCase(int token) {
-	if (token == TokenNamecase) 
+	if (token == TokenNamecase) {
 		this.inCase = true;
+		this.breakPreviewAllowed = true;
+	}
 	if (token == TokenNameCOLON || token == TokenNameARROW) 
 		this.inCase = false;
 }
@@ -5629,6 +5632,9 @@ private VanguardParser getVanguardParser() {
 	this.vanguardScanner.resetTo(this.startPosition, this.eofPosition - 1, isInModuleDeclaration(), this.scanContext);
 	return this.vanguardParser;
 }
+protected final boolean mayBeAtBreakPreview() {
+	return this.breakPreviewAllowed && this.lookBack[1] != TokenNameARROW;
+}
 
 protected final boolean maybeAtLambdaOrCast() { // Could the '(' we saw just now herald a lambda parameter list or a cast expression ? (the possible locations for both are identical.)
 
@@ -5782,7 +5788,8 @@ int disambiguatedRestrictedKeyword(int restrictedKeywordToken) {
 }
 int disambiguatedToken(int token) {
 	final VanguardParser parser = getVanguardParser();
-	if (token == TokenNamebreak  && this.sourceLevel == ClassFileConstants.JDK12 && this.previewEnabled) {
+	if (token == TokenNamebreak  && this.sourceLevel == ClassFileConstants.JDK12 &&
+			this.previewEnabled && mayBeAtBreakPreview()) {
 		this.nextToken = TokenNameBreakPreviewMarker;
 		return token;
 	} else if (token == TokenNameARROW  && this.inCase) {
