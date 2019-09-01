@@ -80,4 +80,11 @@ class MultiClassAdapter extends ClassVisitor {
 		}
 		return super.visitMethod(access, name, desc, signature, exceptions);
 	}
+
+	public void visitNestMemberExperimental(String nestMember) {
+		// ignore FIXME: remove when upgrading to ASM 7
+	}
+	public void visitNestHostExperimental(String nestHost) {
+		// ignore FIXME: remove when upgrading to ASM 7
+	}
 }
