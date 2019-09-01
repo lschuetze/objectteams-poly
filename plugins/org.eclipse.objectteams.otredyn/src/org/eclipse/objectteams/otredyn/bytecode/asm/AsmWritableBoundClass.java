@@ -30,6 +30,7 @@ import org.eclipse.objectteams.otredyn.bytecode.Method;
 import org.eclipse.objectteams.otredyn.bytecode.RedefineStrategyFactory;
 import org.eclipse.objectteams.otredyn.bytecode.asm.verify.OTCheckClassAdapter;
 import org.eclipse.objectteams.otredyn.runtime.TeamManager;
+import org.eclipse.objectteams.otredyn.transformer.jplis.ObjectTeamsTransformer;
 import org.eclipse.objectteams.otredyn.transformer.names.ClassNames;
 import org.eclipse.objectteams.otredyn.transformer.names.ConstantMembers;
 import org.eclipse.objectteams.runtime.IReweavingTask;
@@ -193,26 +194,16 @@ class AsmWritableBoundClass extends AsmBoundClass {
 					try {
 						redefine(definedClass);
 					} catch (ClassNotFoundException cnfe) {
-						throw new RuntimeException("OTDRE: Failed to redefine class: "+this.getName(), cnfe);
+						if (ObjectTeamsTransformer.initiatedByThrowAwayLoader.get() == Boolean.TRUE) {
+							scheduleRetry(definedClass);
+							return;
+						} else {
+							throw new RuntimeException("OTDRE: Failed to redefine class: "+this.getName(), cnfe);
+						}
 					} catch (Throwable t) {
 		//				t.printStackTrace(System.out);
 						// if redefinition failed (ClassCircularity?) install a runnable for deferred redefinition:
-						final Runnable previousTask = TeamManager.pendingTasks.get();
-						TeamManager.pendingTasks.set(new Runnable() {
-							public void run() {
-								if (previousTask != null)
-									previousTask.run();
-								try {
-									redefine(definedClass);
-								} catch (ClassNotFoundException e) {
-									e.printStackTrace(); // should never get here, since we expect CNFE already on the first attempt
-								}
-							}
-							@Override
-							public String toString() {
-								return "Retry "+AsmWritableBoundClass.this.toString();
-							}
-						});
+						scheduleRetry(definedClass);
 						return;
 					}
 				}
@@ -227,6 +218,25 @@ class AsmWritableBoundClass extends AsmBoundClass {
 			isTransformationActive = false;
 			isFirstTransformation = false;
 		}
+	}
+
+	private void scheduleRetry(final Class<?> definedClass) {
+		final Runnable previousTask = TeamManager.pendingTasks.get();
+		TeamManager.pendingTasks.set(new Runnable() {
+			public void run() {
+				if (previousTask != null)
+					previousTask.run();
+				try {
+					redefine(definedClass);
+				} catch (ClassNotFoundException e) {
+					e.printStackTrace(); // should never get here, since we expect CNFE already on the first attempt
+				}
+			}
+			@Override
+			public String toString() {
+				return "Retry "+AsmWritableBoundClass.this.toString();
+			}
+		});
 	}
 
 	protected void superTransformation(Class<?> definedClass) throws IllegalClassFormatException {		

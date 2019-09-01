@@ -32,6 +32,7 @@ import org.eclipse.objectteams.internal.osgi.weaving.AspectBinding.TeamBinding;
 import org.eclipse.objectteams.internal.osgi.weaving.Util.ProfileKind;
 import org.eclipse.objectteams.otequinox.ActivationKind;
 import org.eclipse.objectteams.otredyn.runtime.TeamManager;
+import org.eclipse.objectteams.otredyn.transformer.jplis.ObjectTeamsTransformer;
 import org.objectteams.Team;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.hooks.weaving.WovenClass;
@@ -276,12 +277,17 @@ public class TeamLoader {
 			// use a throw-away class loader so we have a fresh chance to load any failed classes later
 			// (only initiating class loader remembers the failure, if this is discarded, the slate is clean):
 			ClassLoader tryLoader = new ClassLoader(teamClass.getClassLoader()) {};
-			for (@SuppressWarnings("null")@NonNull String baseclass : team.baseClassNames)
+			for (@SuppressWarnings("null")@NonNull String baseclass : team.baseClassNames) { 
+				Boolean previous = ObjectTeamsTransformer.initiatedByThrowAwayLoader.get();
 				try {
+					ObjectTeamsTransformer.initiatedByThrowAwayLoader.set(Boolean.TRUE);
 					tryLoader.loadClass(baseclass);
 				} catch (Throwable t) {
 					return baseclass;
+				} finally {
+					ObjectTeamsTransformer.initiatedByThrowAwayLoader.set(previous);
 				}
+			}
 		}
 		return null;
 	}

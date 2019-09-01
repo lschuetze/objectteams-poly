@@ -38,6 +38,12 @@ import org.eclipse.objectteams.runtime.IReweavingTask;
  */
 public class ObjectTeamsTransformer implements ClassFileTransformer {
 
+	/**
+	 * API for OT/Equinox, to signal when class loading is initiaed by a throw-away loader,
+	 * which implies that ClassNotFoundException should not be regarded as fatal.
+	 */
+	public static final ThreadLocal<Boolean> initiatedByThrowAwayLoader = new ThreadLocal<Boolean>();
+
 	private IWeavingContext weavingContext;
 	
 	private Set<String> boundBaseClassNames = new HashSet<String>();
