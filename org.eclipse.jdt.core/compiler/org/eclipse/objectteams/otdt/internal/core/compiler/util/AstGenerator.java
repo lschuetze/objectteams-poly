@@ -1127,7 +1127,9 @@ public class AstGenerator extends AstFactory {
 		return new ThrowStatement(exception, this.sourceStart, this.sourceEnd);
 	}
 	public CaseStatement caseStatement(Expression constExpr) {
-		return new CaseStatement(constExpr, this.sourceStart, this.sourceEnd);
+		CaseStatement caseStatement = new CaseStatement(constExpr, this.sourceStart, this.sourceEnd);
+		caseStatement.constantExpressions = new Expression[] {constExpr};
+		return caseStatement;
 	}
 	public BreakStatement breakStatement() {
 		return new BreakStatement(null, this.sourceStart, this.sourceEnd);
