@@ -161,7 +161,9 @@ class AsmWritableBoundClass extends AsmBoundClass {
 				try {
 					reader.accept(multiAdapter, ClassReader.SKIP_FRAMES);
 				} catch (RuntimeException e) {
-					throw new IllegalClassFormatException("Cannot transform class "+this+":"+e.getMessage());
+					IllegalClassFormatException ex = new IllegalClassFormatException("Cannot transform class "+this+":"+e.getMessage());
+					try { ex.initCause(e); } catch (Throwable t) { /* ignore */ }
+					throw ex;
 				}
 				setBytecode(writer.toByteArray());
 				//Do all transformations with the Tree API of ASM
