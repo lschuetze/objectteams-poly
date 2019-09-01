@@ -161,8 +161,9 @@ class AsmWritableBoundClass extends AsmBoundClass {
 				try {
 					reader.accept(multiAdapter, ClassReader.SKIP_FRAMES);
 				} catch (RuntimeException e) {
+					e.printStackTrace();
 					IllegalClassFormatException ex = new IllegalClassFormatException("Cannot transform class "+this+":"+e.getMessage());
-					try { ex.initCause(e); } catch (Throwable t) { /* ignore */ }
+					try { ex.initCause(e); } catch (Throwable t) { t.printStackTrace(); }
 					throw ex;
 				}
 				setBytecode(writer.toByteArray());
