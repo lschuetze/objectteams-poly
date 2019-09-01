@@ -3,7 +3,7 @@ Bundle-ManifestVersion: 2
 Bundle-Name: %pluginName
 Bundle-SymbolicName: org.eclipse.objectteams.otdt.jdt.ui;singleton:=true
 Automatic-Module-Name: org.eclipse.objectteams.otdt.jdt.ui
-Bundle-Version: 2.7.4.qualifier
+Bundle-Version: 2.7.5.qualifier
 Require-Bundle: org.eclipse.jdt.ui;bundle-version="[3.17.0,4.0.0)",
  org.eclipse.core.runtime;bundle-version="[3.7.0,4.0.0)",
  org.eclipse.core.resources;bundle-version="[3.7.0,4.0.0)",
@@ -25,7 +25,7 @@ Require-Bundle: org.eclipse.jdt.ui;bundle-version="[3.17.0,4.0.0)",
  org.eclipse.objectteams.otdt;bundle-version="[2.5.0,3.0.0)",
  org.eclipse.jdt.launching;bundle-version="[3.7.100,4.0.0)",
  org.eclipse.ui.forms;bundle-version="3.7.0",
- org.eclipse.jdt.core.manipulation;bundle-version="1.9.100"
+ org.eclipse.jdt.core.manipulation;bundle-version="1.11.0"
 Bundle-Vendor: %providerName
 Bundle-RequiredExecutionEnvironment: JavaSE-1.7
 Bundle-ActivationPolicy: lazy
