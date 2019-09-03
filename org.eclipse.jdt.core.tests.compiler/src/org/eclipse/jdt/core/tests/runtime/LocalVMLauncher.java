@@ -141,7 +141,7 @@ protected Process execCommandLine() throws TargetException {
 		// Use Runtime.exec(String[]) with tokens because Runtime.exec(String) with commandLineString
 		// does not properly handle spaces in arguments on Unix/Linux platforms.
 		String[] commandLine = getCommandLine();
-System.out.println("commandline: "+commandLine);
+System.out.println("commandline: "+String.join(" ", commandLine));
 		vmProcess= Runtime.getRuntime().exec(commandLine, env);
 	} catch (IOException e) {
 		throw new TargetException("Error launching VM at " + this.vmPath);
