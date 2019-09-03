@@ -166,6 +166,7 @@ System.out.println("\tweave3");
 				|| className.startsWith("java/lang")
 				|| className.startsWith("java/util")
 				|| className.startsWith("java/net")
+				|| className.startsWith("java/security")
 				|| className.startsWith("java/io")
 				|| className.startsWith("jdk/jfr")
 				) 
