@@ -165,6 +165,7 @@ System.out.println("\tweave3");
 			if (   className.equals("java/util/LinkedHashMap$KeyIterator")
 				|| className.startsWith("java/lang")
 				|| className.startsWith("java/util")
+				|| className.startsWith("java/net")
 				|| className.startsWith("java/io")
 				|| className.startsWith("jdk/jfr")
 				) 
