@@ -57,6 +57,7 @@ import org.eclipse.objectteams.otdt.internal.ui.callinmarkers.CallinMarker;
 import org.eclipse.objectteams.otdt.internal.ui.callinmarkers.CallinMarkerCreator2;
 import org.eclipse.objectteams.otdt.internal.ui.callinmarkers.CallinMarkerJob;
 import org.eclipse.objectteams.otdt.ui.tests.FileBasedUITest;
+import org.eclipse.swt.widgets.Display;
 import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.PartInitException;
 import org.eclipse.ui.PlatformUI;
@@ -160,8 +161,17 @@ public class CallinMarkerTests extends FileBasedUITest
 
 	private void enableUiMonitoring(boolean enable) {
 		IEclipsePreferences preferences = InstanceScope.INSTANCE.getNode("org.eclipse.ui.monitoring");
-    	if (preferences != null)
+    	if (preferences != null) {
     		preferences.putBoolean("monitoring_enabled", enable);
+    		Display display = org.eclipse.swt.widgets.Display.getDefault();
+    		long start = System.currentTimeMillis();
+			while (display.readAndDispatch()) {
+				if (System.currentTimeMillis() > start + 5000) {
+					System.err.println("display did not get idle in 5 sec.");
+					break;
+				}
+			}
+    	}
 	}
 
     class MyLogListener implements ILogListener {
