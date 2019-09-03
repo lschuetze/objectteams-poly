@@ -158,7 +158,9 @@ if (PWR_DEBUG) System.out.println("\tweave3");
 		case 's':
 			// skip, I saw a mysterious deadlock involving sun.misc.Cleaner
 			if (className.startsWith("sun/misc")
-				|| className.startsWith("sun/launcher"))
+				|| className.startsWith("sun/launcher")
+				|| className.startsWith("sun/net")
+				)
 				return false;
 			break;
 		case 'j':
@@ -167,6 +169,7 @@ if (PWR_DEBUG) System.out.println("\tweave3");
 				|| className.startsWith("java/lang")
 				|| className.startsWith("java/util")
 				|| className.startsWith("java/net")
+				|| className.startsWith("jdk/net")
 				|| className.startsWith("java/security")
 				|| className.startsWith("java/io")
 				|| className.startsWith("jdk/jfr")
