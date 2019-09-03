@@ -102,14 +102,17 @@ public class ObjectTeamsTransformer implements ClassFileTransformer {
 			return null;
 		}
 
+System.out.println("weaving "+className);
 		if (clazz == null)
 			clazz = classRepo.getBoundClass(sourceClassName, classId, loader);
 
 		synchronized(clazz) { // all modifications done in this critical section
 			if (classBeingRedefined == null && !clazz.isFirstTransformation()) {
+System.out.println("\tweave1");
 				return clazz.getBytecode();
 			}
 			if (clazz.isTransformationActive()) {
+System.out.println("\tweave2");
 				return null;
 			}
 			try {
@@ -124,6 +127,7 @@ public class ObjectTeamsTransformer implements ClassFileTransformer {
 				
 				classfileBuffer = clazz.getBytecode();
 			} catch (IllegalClassFormatException e) {
+System.out.println("\tweave"+e);
 				throw e; // expected, propagate to caller (OT/Equinox?)
 			} catch(Throwable t) {
 				t.printStackTrace();
@@ -131,6 +135,7 @@ public class ObjectTeamsTransformer implements ClassFileTransformer {
 				clazz.commitTransaction(classBeingRedefined);
 			}
 		}
+System.out.println("\tweave3");
 		clazz.dump(classfileBuffer, "initial");
 		
 		Collection<String> boundBaseClasses = clazz.getBoundBaseClasses();

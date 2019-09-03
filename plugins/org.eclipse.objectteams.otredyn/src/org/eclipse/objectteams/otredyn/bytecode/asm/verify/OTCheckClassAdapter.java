@@ -86,17 +86,21 @@ public class OTCheckClassAdapter extends org.objectweb.asm.util.CheckClassAdapte
 		}
 
 		Class<?> findLoadedFromParent(String name) throws Exception {
+System.out.println("Shy load "+name);
 			if (findLoadedClass == null) {
 				findLoadedClass = ClassLoader.class.getDeclaredMethod("findLoadedClass", String.class);
 				findLoadedClass.setAccessible(true);
 			}
+System.out.println("\tshy1");
 			ClassLoader parent = getParent();
 			while (parent != null) {
 				Class<?> c = (Class<?>) findLoadedClass.invoke(parent, name);
+System.out.println("\tshy2 "+c);
 				if (c != null)
 					return c;
 				parent = parent.getParent();
 			}
+System.out.println("\tshy3");
 			return null;
 		}
 	}
