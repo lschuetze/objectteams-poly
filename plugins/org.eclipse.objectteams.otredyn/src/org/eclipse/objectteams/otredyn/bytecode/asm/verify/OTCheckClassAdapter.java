@@ -199,8 +199,7 @@ public class OTCheckClassAdapter extends org.objectweb.asm.util.CheckClassAdapte
                     (cn.access & Opcodes.ACC_INTERFACE) != 0,
                     loader);
 // SH}
-// src:     Analyzer<BasicValue> a = new Analyzer<BasicValue>(verifier);
-            Analyzer a = new Analyzer(verifier);
+            Analyzer<BasicValue> a = new Analyzer<BasicValue>(verifier);
             if (loader != null) {
                 verifier.setClassLoader(loader);
             }
@@ -218,8 +217,7 @@ public class OTCheckClassAdapter extends org.objectweb.asm.util.CheckClassAdapte
     }
     
 
-// src:    static void printAnalyzerResult(MethodNode method, Analyzer<BasicValue> a, final PrintWriter pw) {
-    static void printAnalyzerResult(MethodNode method, Analyzer a, final PrintWriter pw) {
+    static void printAnalyzerResult(MethodNode method, Analyzer<BasicValue> a, final PrintWriter pw) {
     	try {
     		printAnalyzerResult.invoke(null, method, a, pw);
     	} catch (IllegalAccessException | IllegalArgumentException | InvocationTargetException e) {
