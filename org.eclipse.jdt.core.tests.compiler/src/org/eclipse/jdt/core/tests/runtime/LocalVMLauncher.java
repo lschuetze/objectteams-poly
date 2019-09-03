@@ -404,6 +404,8 @@ public LocalVirtualMachine launch() throws TargetException {
 	// launch VM
 	LocalVirtualMachine vm;
 	Process p = execCommandLine();
+System.out.print("LVM.launch: "+p);
+if (p.isAlive()) System.out.println("alive"); else System.out.println("exited "+p.exitValue());
 	vm = new LocalVirtualMachine(p, this.debugPort, this.evalTargetPath);
 
 	// TBD: Start reading VM stdout and stderr right away otherwise this may prevent the connection
