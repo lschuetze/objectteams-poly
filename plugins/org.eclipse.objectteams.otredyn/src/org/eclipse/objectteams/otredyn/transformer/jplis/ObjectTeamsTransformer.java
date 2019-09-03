@@ -160,6 +160,7 @@ if (PWR_DEBUG) System.out.println("\tweave3");
 			if (className.startsWith("sun/misc")
 				|| className.startsWith("sun/launcher")
 				|| className.startsWith("sun/net")
+				|| className.startsWith("sun/nio")
 				)
 				return false;
 			break;
@@ -173,6 +174,7 @@ if (PWR_DEBUG) System.out.println("\tweave3");
 				|| className.startsWith("java/security")
 				|| className.startsWith("java/io")
 				|| className.startsWith("jdk/jfr")
+				|| className.startsWith("jdk/internal")
 				) 
 				return false;
 			break;
