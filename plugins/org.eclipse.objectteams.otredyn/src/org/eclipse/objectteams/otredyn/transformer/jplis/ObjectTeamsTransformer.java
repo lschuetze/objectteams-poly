@@ -38,6 +38,7 @@ import org.eclipse.objectteams.runtime.IReweavingTask;
  */
 public class ObjectTeamsTransformer implements ClassFileTransformer {
 
+	private static final boolean PWR_DEBUG = Boolean.getBoolean("ot.debug.pwr");
 	/**
 	 * API for OT/Equinox, to signal when class loading is initiaed by a throw-away loader,
 	 * which implies that ClassNotFoundException should not be regarded as fatal.
@@ -102,17 +103,17 @@ public class ObjectTeamsTransformer implements ClassFileTransformer {
 			return null;
 		}
 
-System.out.println("weaving "+className);
+if (PWR_DEBUG) System.out.println("weaving "+className);
 		if (clazz == null)
 			clazz = classRepo.getBoundClass(sourceClassName, classId, loader);
 
 		synchronized(clazz) { // all modifications done in this critical section
 			if (classBeingRedefined == null && !clazz.isFirstTransformation()) {
-System.out.println("\tweave1");
+if (PWR_DEBUG) System.out.println("\tweave1");
 				return clazz.getBytecode();
 			}
 			if (clazz.isTransformationActive()) {
-System.out.println("\tweave2");
+if (PWR_DEBUG) System.out.println("\tweave2");
 				return null;
 			}
 			try {
@@ -127,7 +128,7 @@ System.out.println("\tweave2");
 				
 				classfileBuffer = clazz.getBytecode();
 			} catch (IllegalClassFormatException e) {
-System.out.println("\tweave"+e);
+if (PWR_DEBUG) System.out.println("\tweave"+e);
 				throw e; // expected, propagate to caller (OT/Equinox?)
 			} catch(Throwable t) {
 				t.printStackTrace();
@@ -135,7 +136,7 @@ System.out.println("\tweave"+e);
 				clazz.commitTransaction(classBeingRedefined);
 			}
 		}
-System.out.println("\tweave3");
+if (PWR_DEBUG) System.out.println("\tweave3");
 		clazz.dump(classfileBuffer, "initial");
 		
 		Collection<String> boundBaseClasses = clazz.getBoundBaseClasses();

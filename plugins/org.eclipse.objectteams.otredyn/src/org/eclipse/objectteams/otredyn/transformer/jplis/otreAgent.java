@@ -32,26 +32,16 @@ public class otreAgent {
 	private static ObjectTeamsTransformer otTransformer;
 
 	public static void premain(String options, Instrumentation inst) {
-System.out.println(">>>premain");
-try {
 		instCopy = inst;
 		checkASM();
 		otTransformer = new ObjectTeamsTransformer();
 		instCopy.addTransformer(otTransformer);
-} catch (Throwable t) {
-	t.printStackTrace();
-}
-System.out.println("<<<premain");
 	}
 	
 	private static void checkASM() {
-System.out.println("checkASM 1");
 		ClassVisitor.class.getName(); // asm
-System.out.println("checkASM 2");
 		AdviceAdapter.class.getName(); // asm.commons
-System.out.println("checkASM 3");
 		InsnNode.class.getName(); // asm.tree
-System.out.println("checkASM 4");
 	}
 
 	public static Instrumentation getInstrumentation() {

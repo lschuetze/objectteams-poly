@@ -34,6 +34,8 @@ import org.eclipse.jdt.core.tests.util.Util;
 @SuppressWarnings({ "unchecked", "rawtypes" })
 public abstract class LocalVMLauncher implements RuntimeConstants {
 
+	private static final boolean PWR_DEBUG = Boolean.getBoolean("ot.debug.pwr");
+	
 	static final String[] env = System.getenv().entrySet().stream()
 		.filter(e -> !"JAVA_TOOL_OPTIONS".equals(e.getKey()))
 		.map(e -> e.getKey() + "=" + e.getValue())
@@ -141,7 +143,7 @@ protected Process execCommandLine() throws TargetException {
 		// Use Runtime.exec(String[]) with tokens because Runtime.exec(String) with commandLineString
 		// does not properly handle spaces in arguments on Unix/Linux platforms.
 		String[] commandLine = getCommandLine();
-System.out.println("commandline: "+String.join(" ", commandLine));
+if (PWR_DEBUG) System.out.println("commandline: "+String.join(" ", commandLine));
 		vmProcess= Runtime.getRuntime().exec(commandLine, env);
 	} catch (IOException e) {
 		throw new TargetException("Error launching VM at " + this.vmPath);
@@ -405,12 +407,6 @@ public LocalVirtualMachine launch() throws TargetException {
 	// launch VM
 	LocalVirtualMachine vm;
 	Process p = execCommandLine();
-System.out.print("LVM.launch: "+p);
-if (p == null) {
-	System.out.println();
-} else {
-	if (p.isAlive()) System.out.println("alive"); else System.out.println("exited "+p.exitValue());
-}
 	vm = new LocalVirtualMachine(p, this.debugPort, this.evalTargetPath);
 
 	// TBD: Start reading VM stdout and stderr right away otherwise this may prevent the connection

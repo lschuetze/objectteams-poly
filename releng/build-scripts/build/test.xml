@@ -198,11 +198,9 @@
       <antcall target="otdt_debug_tests" />
 	  <!--parallel threadCount="2"-->
                 <!-- "slow", ui tests come first -->
-<!--
                 <antcall target="otdt_ui_tests" />
                 <antcall target="otdt_ref_tests" />
                 <antcall target="otdt_dom_tests" />
--->
                 <antcall target="otdt_tests" />
 		        <antcall target="otequinox_tests" />
                 <antcall target="otdt_builder_tests" />
