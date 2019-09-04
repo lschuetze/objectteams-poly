@@ -159,8 +159,6 @@ if (PWR_DEBUG) System.out.println("\tweave3");
 			// skip, I saw a mysterious deadlock involving sun.misc.Cleaner
 			if (className.startsWith("sun/misc")
 				|| className.startsWith("sun/launcher")
-				|| className.startsWith("sun/net")
-				|| className.startsWith("sun/nio")
 				)
 				return false;
 			break;
@@ -169,12 +167,8 @@ if (PWR_DEBUG) System.out.println("\tweave3");
 			if (   className.equals("java/util/LinkedHashMap$KeyIterator")
 				|| className.startsWith("java/lang")
 				|| className.startsWith("java/util")
-				|| className.startsWith("java/net")
-				|| className.startsWith("jdk/net")
-				|| className.startsWith("java/security")
 				|| className.startsWith("java/io")
 				|| className.startsWith("jdk/jfr")
-				|| className.startsWith("jdk/internal")
 				) 
 				return false;
 			break;
