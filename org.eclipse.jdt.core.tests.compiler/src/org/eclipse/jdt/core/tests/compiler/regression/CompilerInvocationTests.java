@@ -8,6 +8,10 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  *
+ * This is an implementation of an early-draft specification developed under the Java
+ * Community Process (JCP) and is made available for testing and evaluation purposes
+ * only. The code is not compatible with any specification of the JCP.
+ *
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *     Benjamin Muskalla - Contribution for bug 239066
@@ -301,7 +305,7 @@ public class CompilerInvocationTests extends AbstractRegressionTest {
 // templates, which can occur downstream in the localization process (assuming
 // that we always release the English version right)
 	public void test009_missing_message_templates() {
-		assertEquals("Unable to retrieve the error message for problem id: 4194303. Check compiler resources.",
+		assertEquals("Unable to retrieve the error message for problem id: 2097151. Check compiler resources.",
 				new DefaultProblemFactory().getLocalizedMessage(Integer.MAX_VALUE, new String[] {}));
 	}
 
@@ -810,6 +814,7 @@ public void _test011_problem_categories() {
 		expectedProblemAttributes.put("MissingSynchronizedModifierInInheritedMethod", new ProblemAttributes(CategorizedProblem.CAT_POTENTIAL_PROGRAMMING_PROBLEM));
 		expectedProblemAttributes.put("MissingTypeInConstructor", new ProblemAttributes(CategorizedProblem.CAT_MEMBER));
 		expectedProblemAttributes.put("MissingTypeInLambda", new ProblemAttributes(CategorizedProblem.CAT_MEMBER));
+		expectedProblemAttributes.put("UnterminatedTextBlock", new ProblemAttributes(CategorizedProblem.CAT_PREVIEW_RELATED));
 		expectedProblemAttributes.put("MissingTypeInMethod", new ProblemAttributes(CategorizedProblem.CAT_MEMBER));
 		expectedProblemAttributes.put("MissingValueForAnnotationMember", new ProblemAttributes(CategorizedProblem.CAT_TYPE));
 		expectedProblemAttributes.put("MissingValueFromLambda", new ProblemAttributes(CategorizedProblem.CAT_INTERNAL));
@@ -1268,6 +1273,26 @@ public void _test011_problem_categories() {
         expectedProblemAttributes.put("AbstractStaticMethodCalled", new ProblemAttributes(CategorizedProblem.CAT_INTERNAL));
         expectedProblemAttributes.put("RoleFileMissingTeamDeclaration", new ProblemAttributes(CategorizedProblem.CAT_INTERNAL));
 //SH}
+	    expectedProblemAttributes.put("PreviewFeaturesNotAllowed", new ProblemAttributes(CategorizedProblem.CAT_PREVIEW_RELATED));
+	    expectedProblemAttributes.put("SwitchExpressionsYieldIncompatibleResultExpressionTypes", new ProblemAttributes(CategorizedProblem.CAT_PREVIEW_RELATED));
+	    expectedProblemAttributes.put("SwitchExpressionsYieldEmptySwitchBlock", new ProblemAttributes(CategorizedProblem.CAT_PREVIEW_RELATED));
+	    expectedProblemAttributes.put("SwitchExpressionsYieldNoResultExpression", new ProblemAttributes(CategorizedProblem.CAT_PREVIEW_RELATED));
+	    expectedProblemAttributes.put("SwitchExpressionaYieldSwitchLabeledBlockCompletesNormally", new ProblemAttributes(CategorizedProblem.CAT_PREVIEW_RELATED));
+	    expectedProblemAttributes.put("SwitchExpressionsYieldLastStatementCompletesNormally", new ProblemAttributes(CategorizedProblem.CAT_PREVIEW_RELATED));
+	    expectedProblemAttributes.put("SwitchExpressionsYieldTrailingSwitchLabels", new ProblemAttributes(CategorizedProblem.CAT_PREVIEW_RELATED));
+		expectedProblemAttributes.put("SwitchPreviewMixedCase", new ProblemAttributes(CategorizedProblem.CAT_PREVIEW_RELATED));
+	    expectedProblemAttributes.put("SwitchExpressionsYieldMissingDefaultCase", new ProblemAttributes(CategorizedProblem.CAT_PREVIEW_RELATED));
+	    expectedProblemAttributes.put("SwitchExpressionsYieldMissingValue", new ProblemAttributes(CategorizedProblem.CAT_PREVIEW_RELATED));
+	    expectedProblemAttributes.put("SwitchExpressionsYieldMissingEnumConstantCase", new ProblemAttributes(CategorizedProblem.CAT_PREVIEW_RELATED));
+	    expectedProblemAttributes.put("SwitchExpressionsYieldIllegalLastStatement", new ProblemAttributes(CategorizedProblem.CAT_PREVIEW_RELATED));
+	    expectedProblemAttributes.put("SwitchExpressionsYieldBreakNotAllowed", new ProblemAttributes(CategorizedProblem.CAT_PREVIEW_RELATED));
+	    expectedProblemAttributes.put("SwitchExpressionsYieldUnqualifiedMethodWarning", new ProblemAttributes(CategorizedProblem.CAT_PREVIEW_RELATED));
+	    expectedProblemAttributes.put("SwitchExpressionsYieldUnqualifiedMethodError", new ProblemAttributes(CategorizedProblem.CAT_PREVIEW_RELATED));
+	    expectedProblemAttributes.put("SwitchExpressionsYieldOutsideSwitchExpression", new ProblemAttributes(CategorizedProblem.CAT_PREVIEW_RELATED));
+	    expectedProblemAttributes.put("SwitchExpressionsYieldRestrictedGeneralWarning", new ProblemAttributes(CategorizedProblem.CAT_PREVIEW_RELATED));
+	    expectedProblemAttributes.put("SwitchExpressionsYieldIllegalStatement", new ProblemAttributes(CategorizedProblem.CAT_PREVIEW_RELATED));
+	    expectedProblemAttributes.put("SwitchExpressionsYieldTypeDeclarationWarning", new ProblemAttributes(CategorizedProblem.CAT_PREVIEW_RELATED));
+	    expectedProblemAttributes.put("SwitchExpressionsYieldTypeDeclarationError", new ProblemAttributes(CategorizedProblem.CAT_PREVIEW_RELATED));
 		StringBuffer failures = new StringBuffer();
 		StringBuffer correctResult = new StringBuffer(70000);
 		Field[] fields = (iProblemClass = IProblem.class).getFields();
@@ -1844,6 +1869,7 @@ public void test012_compiler_problems_tuning() {
 		expectedProblemAttributes.put("MissingSynchronizedModifierInInheritedMethod", new ProblemAttributes(JavaCore.COMPILER_PB_MISSING_SYNCHRONIZED_ON_INHERITED_METHOD));
 		expectedProblemAttributes.put("MissingTypeInConstructor", SKIP);
 		expectedProblemAttributes.put("MissingTypeInLambda", SKIP);
+		expectedProblemAttributes.put("UnterminatedTextBlock", SKIP);
 		expectedProblemAttributes.put("MissingTypeInMethod", SKIP);
 		expectedProblemAttributes.put("MissingValueForAnnotationMember", SKIP);
 		expectedProblemAttributes.put("MissingValueFromLambda", SKIP);
@@ -2837,7 +2863,27 @@ public void test012_compiler_problems_tuning() {
 	    expectedProblemAttributes.put("PreviewFeatureDisabled", SKIP);
 	    expectedProblemAttributes.put("PreviewFeatureUsed", SKIP);
 	    expectedProblemAttributes.put("PreviewFeatureNotSupported", SKIP);
-		Map constantNamesIndex = new HashMap();
+	    expectedProblemAttributes.put("PreviewFeaturesNotAllowed", SKIP);
+	    expectedProblemAttributes.put("SwitchExpressionsYieldIncompatibleResultExpressionTypes", SKIP);
+	    expectedProblemAttributes.put("SwitchExpressionsYieldEmptySwitchBlock", SKIP);
+	    expectedProblemAttributes.put("SwitchExpressionsYieldNoResultExpression", SKIP);
+	    expectedProblemAttributes.put("SwitchExpressionaYieldSwitchLabeledBlockCompletesNormally", SKIP);
+	    expectedProblemAttributes.put("SwitchExpressionsYieldLastStatementCompletesNormally", SKIP);
+	    expectedProblemAttributes.put("SwitchExpressionsYieldTrailingSwitchLabels", SKIP);
+	    expectedProblemAttributes.put("SwitchPreviewMixedCase", SKIP);
+	    expectedProblemAttributes.put("SwitchExpressionsYieldMissingDefaultCase", SKIP);
+	    expectedProblemAttributes.put("SwitchExpressionsYieldMissingValue", SKIP);
+	    expectedProblemAttributes.put("SwitchExpressionsYieldMissingEnumConstantCase", SKIP);
+	    expectedProblemAttributes.put("SwitchExpressionsYieldIllegalLastStatement", SKIP);
+	    expectedProblemAttributes.put("SwitchExpressionsYieldBreakNotAllowed", SKIP);
+	    expectedProblemAttributes.put("SwitchExpressionsYieldUnqualifiedMethodWarning", SKIP);
+	    expectedProblemAttributes.put("SwitchExpressionsYieldUnqualifiedMethodError", SKIP);
+	    expectedProblemAttributes.put("SwitchExpressionsYieldOutsideSwitchExpression", SKIP);
+	    expectedProblemAttributes.put("SwitchExpressionsYieldRestrictedGeneralWarning", SKIP);
+	    expectedProblemAttributes.put("SwitchExpressionsYieldIllegalStatement", SKIP);
+	    expectedProblemAttributes.put("SwitchExpressionsYieldTypeDeclarationWarning", SKIP);
+	    expectedProblemAttributes.put("SwitchExpressionsYieldTypeDeclarationError", SKIP);
+	    Map constantNamesIndex = new HashMap();
 		Field[] fields = JavaCore.class.getFields();
 		for (int i = 0, length = fields.length; i < length; i++) {
 			Field field = fields[i];

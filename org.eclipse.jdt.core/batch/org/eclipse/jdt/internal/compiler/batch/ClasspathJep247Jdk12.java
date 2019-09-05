@@ -43,7 +43,6 @@ import org.eclipse.jdt.internal.compiler.util.Util;
 public class ClasspathJep247Jdk12 extends ClasspathJep247 {
 
 	Map<String, IModule> modules;
-	static String MODULE_INFO = "module-info.sig"; //$NON-NLS-1$
 
 	public ClasspathJep247Jdk12(File jdkHome, String release, AccessRuleSet accessRuleSet) {
 		super(jdkHome, release, accessRuleSet);
@@ -174,8 +173,9 @@ public class ClasspathJep247Jdk12 extends ClasspathJep247 {
 						public FileVisitResult visitFile(java.nio.file.Path f, BasicFileAttributes attrs) throws IOException {
 							if (attrs.isDirectory() || f.getNameCount() < 3) 
 								return FileVisitResult.CONTINUE;
-							if (f.getFileName().toString().equals(MODULE_INFO) && Files.exists(f)) {
-								byte[] content = JRTUtil.safeReadBytes(f);
+							byte[] content = null;
+							if (Files.exists(f)) {
+								content = JRTUtil.safeReadBytes(f);
 								if (content == null)
 									return FileVisitResult.CONTINUE;
 								Path m = f.subpath(1, f.getNameCount() - 1);

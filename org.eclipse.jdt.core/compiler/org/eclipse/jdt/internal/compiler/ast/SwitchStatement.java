@@ -8,6 +8,10 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  *
+ * This is an implementation of an early-draft specification developed under the Java
+ * Community Process (JCP) and is made available for testing and evaluation purposes
+ * only. The code is not compatible with any specification of the JCP.
+ * 
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *     Stephan Herrmann - Contributions for 
@@ -92,7 +96,6 @@ public class SwitchStatement extends Expression {
 				}
 				// else add an implicit break
 				BreakStatement breakStatement = new BreakStatement(null, block.sourceEnd -1, block.sourceEnd);
-				breakStatement.isImplicit = true;
 
 				int l = block.statements == null ? 0 : block.statements.length;
 				if (l == 0) {
@@ -159,6 +162,19 @@ public class SwitchStatement extends Expression {
 						complaintLevel = initialComplaintLevel; // reset complaint
 						fallThroughState = CASE;
 					} else {
+						if (!(this instanceof SwitchExpression) &&
+							currentScope.compilerOptions().complianceLevel >= ClassFileConstants.JDK13 &&
+							statement instanceof YieldStatement &&
+							((YieldStatement) statement).isImplicit) {
+							YieldStatement y = (YieldStatement) statement;
+							Expression e = ((YieldStatement) statement).expression;
+							/* JLS 13 14.11.2
+									Switch labeled rules in switch statements differ from those in switch expressions (15.28).
+									In switch statements they must be switch labeled statement expressions, ... */
+							if (!y.expression.statementExpression()) {
+								this.scope.problemReporter().invalidExpressionAsStatement(e);
+							}
+						}
 						fallThroughState = getFallThroughState(statement, currentScope); // reset below if needed
 					}
 					if ((complaintLevel = statement.complainIfUnreachable(caseInits, this.scope, complaintLevel, true)) < Statement.COMPLAINED_UNREACHABLE) {

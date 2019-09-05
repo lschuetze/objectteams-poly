@@ -8,6 +8,10 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  *
+ * This is an implementation of an early-draft specification developed under the Java
+ * Community Process (JCP) and is made available for testing and evaluation purposes
+ * only. The code is not compatible with any specification of the JCP.
+ * 
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *     Fraunhofer FIRST - extended API and implementation
@@ -486,9 +490,7 @@ public class ASTMatcher {
 			return false;
 		}
 		BreakStatement o = (BreakStatement) other;
-		return ( node.getAST().apiLevel == AST.JLS12_INTERNAL && node.getAST().isPreviewEnabled() && node.getExpression() != null
-				? safeSubtreeMatch(node.getExpression(), o.getExpression()) && node.isImplicit() == o.isImplicit()
-						: safeSubtreeMatch(node.getLabel(), o.getLabel()));
+		return (safeSubtreeMatch(node.getLabel(), o.getLabel()));
 	}
 
 	/**
@@ -2274,7 +2276,7 @@ public class ASTMatcher {
 			return false;
 		}
 		SwitchCase o = (SwitchCase) other;
-		return ( node.getAST().apiLevel == AST.JLS12_INTERNAL && node.getAST().isPreviewEnabled()
+		return ( node.getAST().isPreviewEnabled()
 				? safeSubtreeListMatch(node.expressions(), o.expressions())
 						: compareDeprecatedSwitchExpression(node, o));
 	}
@@ -2386,6 +2388,31 @@ public class ASTMatcher {
 				&& safeSubtreeListMatch(node.fragments(), o.fragments()));
 	}
 
+	/**
+	 * Returns whether the given node and the other object match.
+	 * <p>
+	 * The default implementation provided by this class tests whether the
+	 * other object is a node of the same type with structurally isomorphic
+	 * child subtrees. Subclasses may override this method as needed.
+	 * </p>
+	 *
+	 * @param node the node
+	 * @param other the other object, or <code>null</code>
+	 * @return <code>true</code> if the subtree matches, or
+	 *   <code>false</code> if they do not match or the other object has a
+	 *   different node type or is <code>null</code>
+	 * @noreference This method is not intended to be referenced by clients as it is a part of Java preview feature.
+	 * @nooverride This method is not intended to be re-implemented or extended by clients as it is a part of Java preview feature.
+	 * @since 3.19 BETA_JAVA13
+	 */
+	public boolean match(TextBlock node, Object other) {
+		if (!(other instanceof TextBlock)) {
+			return false;
+		}
+		TextBlock o = (TextBlock) other;
+		return safeEquals(node.getEscapedValue(), o.getEscapedValue());
+	}
+	
 	/**
 	 * Returns whether the given node and the other object match.
 	 * <p>
@@ -2833,6 +2860,31 @@ public class ASTMatcher {
 		return (level >= AST.JLS8_INTERNAL ? safeSubtreeListMatch(node.annotations(), o.annotations()) : true)
 				&& node.isUpperBound() == o.isUpperBound()
 				&& safeSubtreeMatch(node.getBound(), o.getBound());
+	}
+	
+	/**
+	 * Returns whether the given node and the other object match.
+	 * <p>
+	 * The default implementation provided by this class tests whether the
+	 * other object is a node of the same type with structurally isomorphic
+	 * child subtrees. Subclasses may override this method as needed.
+	 * </p>
+	 *
+	 * @param node the node
+	 * @param other the other object, or <code>null</code>
+	 * @return <code>true</code> if the subtree matches, or
+	 *   <code>false</code> if they do not match or the other object has a
+	 *   different node type or is <code>null</code>
+	 * @noreference This method is not intended to be referenced by clients as it is a part of Java preview feature.
+	 * @nooverride This method is not intended to be re-implemented or extended by clients as it is a part of Java preview feature.
+	 * @since 3.19 BETA_JAVA13
+	 */
+	public boolean match(YieldStatement node, Object other) {
+		if (!(other instanceof YieldStatement)) {
+			return false;
+		}
+		YieldStatement o = (YieldStatement) other;
+		return	safeSubtreeMatch(node.getExpression(), o.getExpression());
 	}
 
 //{ObjectTeams: match methods for OT-specific types

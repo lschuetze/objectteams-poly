@@ -304,6 +304,8 @@ static class JavacCompiler {
 			return JavaCore.VERSION_11;
 		} else if(rawVersion.startsWith("12")) {
 			return JavaCore.VERSION_12;
+		} else if(rawVersion.startsWith("13")) {
+			return JavaCore.VERSION_13;
 		} else {
 			throw new RuntimeException("unknown javac version: " + rawVersion);
 		}
@@ -422,6 +424,20 @@ static class JavacCompiler {
 				return 0100;
 			}
 			if ("12.0.2".equals(rawVersion)) {
+				return 0200;
+			}
+		}
+		if (version == JavaCore.VERSION_13) {
+			if ("13-ea".equals(rawVersion)) {
+				return 0000;
+			}
+			if ("13".equals(rawVersion)) {
+				return 0000;
+			}
+			if ("13.0.1".equals(rawVersion)) {
+				return 0100;
+			}
+			if ("13.0.2".equals(rawVersion)) {
 				return 0200;
 			}
 		}
@@ -566,6 +582,20 @@ protected static class JavacTestOptions {
 		JavacTestOptions options = new JavacTestOptions(Long.parseLong(release));
 		if (isJRE9Plus)
 			options.setCompilerOptions("--release "+release+" --enable-preview -Xlint:-preview");
+		else
+			throw new IllegalArgumentException("preview not supported at release "+release);
+		return options;
+	}
+	@java.lang.SuppressWarnings("synthetic-access")
+	static JavacTestOptions forReleaseWithPreview(String release, String additionalOptions) {
+		JavacTestOptions options = new JavacTestOptions(Long.parseLong(release));
+		if (isJRE9Plus) {
+			String result = "--release "+release+" --enable-preview -Xlint:-preview";
+			if (additionalOptions != null)
+				result = result + " " + additionalOptions;
+			options.setCompilerOptions(result);
+			
+		}
 		else
 			throw new IllegalArgumentException("preview not supported at release "+release);
 		return options;
@@ -952,7 +982,7 @@ protected static class JavacTestOptions {
 			JavacBug8144832 = RUN_JAVAC ? // https://bugs.openjdk.java.net/browse/JDK-8144832
 					new JavacHasABug(MismatchType.JavacErrorsEclipseNone, ClassFileConstants.JDK9, 0000) : null,
 			JavacBug8179483_switchExpression = RUN_JAVAC ? // https://bugs.openjdk.java.net/browse/JDK-8179483
-					new JavacBug8179483(" --release 12 --enable-preview -Xlint:-preview") : null,
+					new JavacBug8179483(" --release 13 --enable-preview -Xlint:-preview") : null,
 			JavacBug8221413_switchExpression = RUN_JAVAC ? // https://bugs.openjdk.java.net/browse/JDK-8221413
 					new JavacBug8221413(" --release 12 --enable-preview -Xlint:-preview") : null,
 			JavacBug8226510_switchExpression = RUN_JAVAC ? // https://bugs.openjdk.java.net/browse/JDK-8226510
@@ -1767,7 +1797,7 @@ protected static class JavacTestOptions {
 			skipJavac ? JavacTestOptions.SKIP :
 				javacTestOptions != null ? javacTestOptions : JavacTestOptions.DEFAULT /* default javac test options */);
 	}
-	protected void runConformTest(String[] testFiles, Map customOptions) {
+	protected void runConformTest(String[] testFiles, Map<String, String> customOptions) {
 		runTest(
 			// test directory preparation
 			true /* flush output directory */,
@@ -1789,10 +1819,10 @@ protected static class JavacTestOptions {
 			// javac options
 			JavacTestOptions.DEFAULT /* default javac test options */);
 	}
-	protected void runConformTest(String[] testFiles, String expectedOutput, Map customOptions) {
+	protected void runConformTest(String[] testFiles, String expectedOutput, Map<String, String> customOptions) {
 		runConformTest(testFiles, expectedOutput, customOptions, null);
 	}
-	protected void runConformTest(String[] testFiles, String expectedOutput, Map customOptions, String[] vmArguments) {
+	protected void runConformTest(String[] testFiles, String expectedOutput, Map<String, String> customOptions, String[] vmArguments) {
 		runTest(
 			// test directory preparation
 			true /* flush output directory */,
@@ -1873,7 +1903,7 @@ protected static class JavacTestOptions {
 		String[] classLibraries,
 		boolean shouldFlushOutputDirectory,
 		String[] vmArguments,
-		Map customOptions,
+		Map<String, String> customOptions,
 		ICompilerRequestor customRequestor) {
 		runTest(
 	 		// test directory preparation
@@ -2961,7 +2991,7 @@ protected void runNegativeTest(boolean skipJavac, JavacTestOptions javacTestOpti
 			String[] testFiles,
 			// compiler options
 			String[] classLibraries,
-			Map customOptions,
+			Map<String, String> customOptions,
 			boolean performStatementsRecovery,
 			ICompilerRequestor customRequestor,
 			// compiler results
@@ -3106,7 +3136,7 @@ protected void runNegativeTest(boolean skipJavac, JavacTestOptions javacTestOpti
 			// compiler options
 			String[] classLibraries,
 			boolean libsOnModulePath,
-			Map customOptions,
+			Map<String, String> customOptions,
 			boolean performStatementsRecovery,
 			ICompilerRequestor customRequestor,
 			// compiler results
@@ -3146,7 +3176,7 @@ protected void runNegativeTest(boolean skipJavac, JavacTestOptions javacTestOpti
 		requestor.outputPath = OUTPUT_DIR.endsWith(File.separator) ? OUTPUT_DIR : OUTPUT_DIR + File.separator;
 				// WORK should not have to test a constant?
 
-		Map options = getCompilerOptions();
+		Map<String, String> options = getCompilerOptions();
 		if (customOptions != null) {
 			options.putAll(customOptions);
 		}

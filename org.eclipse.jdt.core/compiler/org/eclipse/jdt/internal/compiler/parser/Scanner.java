@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2018 IBM Corporation and others.
+ * Copyright (c) 2000, 2019 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -8,6 +8,10 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  *
+ * This is an implementation of an early-draft specification developed under the Java
+ * Community Process (JCP) and is made available for testing and evaluation purposes
+ * only. The code is not compatible with any specification of the JCP.
+ * 
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *     Fraunhofer FIRST - extended API and implementation
@@ -16,6 +20,9 @@
  *     Jesper S Moller  -. Contribution for bug 400830: [1.8][formatter] Code formatter for Java 8
  *******************************************************************************/
 package org.eclipse.jdt.internal.compiler.parser;
+
+import java.util.ArrayList;
+import java.util.List;
 
 import org.eclipse.jdt.core.compiler.CharOperation;
 import org.eclipse.jdt.core.compiler.InvalidInputException;
@@ -291,17 +298,22 @@ public class Scanner implements TerminalTokens {
 
 	public boolean fakeInModule = false;
 	boolean inCase = false;
-	boolean breakPreviewAllowed = false;
+	/* package */ int yieldColons = -1;
 	/**
 	 * The current context of the scanner w.r.t restricted keywords
 	 *
 	 */
 	enum ScanContext {
-		EXPECTING_KEYWORD, EXPECTING_IDENTIFIER, AFTER_REQUIRES, INACTIVE
+		EXPECTING_KEYWORD, EXPECTING_IDENTIFIER, AFTER_REQUIRES, EXPECTING_YIELD, INACTIVE
 	}
 	protected ScanContext scanContext = null;
 	protected boolean insideModuleInfo = false;
 
+	enum ScanYieldContext {
+		EXPECTING_YIELD, FLAGGED_YIELD, INACTIVE
+	}
+	protected ScanYieldContext scanYieldContext = null;
+	private int yieldStatementEnd = -1;
 	public static final String END_OF_SOURCE = "End_Of_Source"; //$NON-NLS-1$
 
 	public static final String INVALID_HEXA = "Invalid_Hexa_Literal"; //$NON-NLS-1$
@@ -309,6 +321,7 @@ public class Scanner implements TerminalTokens {
 	public static final String INVALID_CHARACTER_CONSTANT = "Invalid_Character_Constant";  //$NON-NLS-1$
 	public static final String INVALID_ESCAPE = "Invalid_Escape"; //$NON-NLS-1$
 	public static final String INVALID_INPUT = "Invalid_Input"; //$NON-NLS-1$
+	public static final String INVALID_TEXTBLOCK = "Invalid_Textblock"; //$NON-NLS-1$
 	public static final String INVALID_UNICODE_ESCAPE = "Invalid_Unicode_Escape"; //$NON-NLS-1$
 	public static final String INVALID_FLOAT = "Invalid_Float_Literal"; //$NON-NLS-1$
 	public static final String INVALID_LOW_SURROGATE = "Invalid_Low_Surrogate"; //$NON-NLS-1$
@@ -316,6 +329,7 @@ public class Scanner implements TerminalTokens {
 
 	public static final String NULL_SOURCE_STRING = "Null_Source_String"; //$NON-NLS-1$
 	public static final String UNTERMINATED_STRING = "Unterminated_String"; //$NON-NLS-1$
+	public static final String UNTERMINATED_TEXT_BLOCK = "Unterminated_Text_Block"; //$NON-NLS-1$
 	public static final String UNTERMINATED_COMMENT = "Unterminated_Comment"; //$NON-NLS-1$
 	public static final String INVALID_CHAR_IN_STRING = "Invalid_Char_In_String"; //$NON-NLS-1$
 	public static final String INVALID_DIGIT = "Invalid_Digit"; //$NON-NLS-1$
@@ -325,7 +339,7 @@ public class Scanner implements TerminalTokens {
 	public static final String BINARY_LITERAL_NOT_BELOW_17 = "Binary_Literal_Not_Below_17"; //$NON-NLS-1$
 	public static final String ILLEGAL_HEXA_LITERAL = "Illegal_Hexa_Literal"; //$NON-NLS-1$
 	public static final String INVALID_UNDERSCORE = "Invalid_Underscore"; //$NON-NLS-1$
-	public static final String UNDERSCORES_IN_LITERALS_NOT_BELOW_17 = "Underscores_In_Literals_Not_Below_17"; //$NON-NLS-1$`
+	public static final String UNDERSCORES_IN_LITERALS_NOT_BELOW_17 = "Underscores_In_Literals_Not_Below_17"; //$NON-NLS-1$
 
 	//----------------optimized identifier managment------------------
 	static final char[] charArray_a = new char[] {'a'},
@@ -426,6 +440,9 @@ public class Scanner implements TerminalTokens {
 	public static final int HIGH_SURROGATE_MIN_VALUE = 0xD800;
 	public static final int HIGH_SURROGATE_MAX_VALUE = 0xDBFF;
 	public static final int LOW_SURROGATE_MAX_VALUE = 0xDFFF;
+
+	// raw string support - 11
+	/* package */ int rawStart = -1;
 
 public Scanner() {
 	this(false /*comment*/, false /*whitespace*/, false /*nls*/, ClassFileConstants.JDK1_3 /*sourceLevel*/, null/*taskTag*/, null/*taskPriorities*/, true /*taskCaseSensitive*/);
@@ -767,6 +784,133 @@ public char[] getCurrentTokenSourceString() {
 			0,
 			length);
 	}
+	return result;
+}
+protected final boolean scanForTextBlockBeginning() {
+	if (!this.previewEnabled) {
+		return false;
+	}
+	try {
+		// Don't change the position and current character unless we are certain
+		// to be dealing with a text block. For producing all errors like before
+		// in case of a valid """ but missing \r or \n, just return false and not
+		// throw any error.
+		int temp = this.currentPosition;
+		if ((this.source[temp++] == '\"' && this.source[temp++] == '\"')) {
+			char c = this.source[temp++];
+			while (ScannerHelper.isWhitespace(c)) {
+				switch (c) {
+					case 10 : /* \ u000a: LINE FEED               */
+					case 13 : /* \ u000d: CARRIAGE RETURN         */
+						this.currentCharacter = c;
+						this.currentPosition = temp;
+						return true;
+					default:
+						break;
+				}
+				c = this.source[temp++];
+			}
+		}
+	} catch(IndexOutOfBoundsException e) {
+		//let it return false;
+	}
+	return false;
+}
+protected final boolean scanForTextBlockClose() throws InvalidInputException {
+	try {
+		if (this.source[this.currentPosition] == '\"' && this.source[this.currentPosition + 1] == '\"') {
+			return true;
+		}
+	} catch(IndexOutOfBoundsException e) {
+		//let it return false;
+	}
+	return false;
+}
+public char[] getCurrentTextBlock() {
+	// 1. Normalize, i.e. convert all CR CRLF to LF
+	char[] all;
+	if (this.withoutUnicodePtr != 0) {
+		all = CharOperation.subarray(this.withoutUnicodeBuffer, this.rawStart + 1, this.withoutUnicodePtr + 1 );
+	} else {
+		all = CharOperation.subarray(this.source, this.startPosition + this.rawStart, this.currentPosition - 3);
+		if (all == null) {
+			all = new char[0];
+		}
+	}
+	// 2. Split into lines. Consider both \n and \r as line separators
+	char[][] lines = CharOperation.splitOn('\n', all);
+	int size = lines.length;
+	List<char[]> list = new ArrayList<>(lines.length);
+	for(int i = 0; i < lines.length; i++) {
+		char[] line = lines[i];
+		char[][] sub = CharOperation.splitOn('\r', line);
+		for (char[] cs : sub) {
+			if (cs.length > 0) {
+				list.add(cs);
+			}
+		}
+	}
+	size = list.size();
+	lines = list.toArray(new char[size][]);
+
+	// 	3. Handle incidental white space
+	//  3.1. Split into lines and identify determining lines
+	int prefix = -1;
+	for(int i = 0; i < size; i++) {
+		char[] line = lines[i];
+		boolean blank = true;
+		int whitespaces = 0;
+ 		for (char c : line) {
+			if (blank) {
+				if (ScannerHelper.isWhitespace(c)) {
+					whitespaces++;
+				} else {
+					blank = false;
+				}
+			}
+		}
+		if (!blank) {
+			if (prefix < 0 || whitespaces < prefix) {
+ 				prefix = whitespaces;
+			}
+		}
+	}
+	// 3.2. Remove the common white space prefix
+	// 4. Handle escape sequences (already done while processing
+	if (prefix == -1)
+		prefix = 0;
+	char[] result = new char[0];
+	for(int i = 0; i < lines.length; i++) {
+		char[] l  = lines[i];
+		// Remove the common prefix from each line
+		// And remove all trailing whitespace
+		// Finally append the \n at the end of the line (except the last line)
+		int length = l.length;
+		int trail = length - 1;
+		for(int j = trail; j>0; j--) {
+			if (!ScannerHelper.isWhitespace(l[j])) {
+				trail = j;
+				break;
+			}
+		}
+		int newSize = (length == 0 || prefix > trail) ? 0 : (trail - prefix + 1);
+		char[] nl;
+		if (i >= (size - 1)) {
+			if (trail <= 0 || newSize == 0)
+				continue;
+			nl = new char[newSize];
+			System.arraycopy(l, prefix, nl, 0, newSize); 
+		} else {
+			newSize += 1;
+			nl = new char[newSize];
+			nl[newSize - 1] = '\n';
+			if (newSize > 1)
+				System.arraycopy(l, prefix, nl, 0, newSize - 1);
+		}
+		result = CharOperation.concat(result, nl);
+	}
+	//	get rid of all the cached values
+	this.rawStart = -1;
 	return result;
 }
 public final String getCurrentStringLiteral() {
@@ -1369,10 +1513,8 @@ public void ungetToken(int unambiguousToken) {
 	this.nextToken = unambiguousToken;
 }
 private void updateCase(int token) {
-	if (token == TokenNamecase) {
+	if (token == TokenNamecase) 
 		this.inCase = true;
-		this.breakPreviewAllowed = true;
-	}
 	if (token == TokenNameCOLON || token == TokenNameARROW) 
 		this.inCase = false;
 }
@@ -1405,8 +1547,7 @@ public int getNextToken() throws InvalidInputException {
 	if (this.activeParser == null) { // anybody interested in the grammatical structure of the program should have registered.
 		return token;
 	}
-	if (token == TokenNameLPAREN || token == TokenNameLESS || token == TokenNameAT || token == TokenNameARROW
-			|| token == TokenNamebreak) {
+	if (token == TokenNameLPAREN || token == TokenNameLESS || token == TokenNameAT || token == TokenNameARROW) {
 		token = disambiguatedToken(token);
 	} else if (token == TokenNameELLIPSIS) {
 		this.consumingEllipsisAnnotations = false;
@@ -1428,6 +1569,8 @@ protected int getNextToken0() throws InvalidInputException {
 		return this.currentPosition > this.eofPosition ? TokenNameEOF : TokenNameRBRACE;
 	}
 	int whiteStart = 0;
+	if (this.currentPosition > this.yieldStatementEnd)
+		this.yieldStatementEnd = -1;
 	try {
 		while (true) { //loop for jumping over comments
 			this.withoutUnicodePtr = 0;
@@ -1689,6 +1832,7 @@ protected int getNextToken0() throws InvalidInputException {
 				case ':' :
 					if (getNextChar(':'))
 						return TokenNameCOLON_COLON;
+					++this.yieldColons;
 					return TokenNameCOLON;
 				case '\'' :
 					{
@@ -1773,26 +1917,50 @@ protected int getNextToken0() throws InvalidInputException {
 					}
 					throw new InvalidInputException(INVALID_CHARACTER_CONSTANT);
 				case '"' :
+					boolean isTextBlock = false;
+					int lastQuotePos = 0;
 					try {
 						// consume next character
 						this.unicodeAsBackSlash = false;
 						boolean isUnicode = false;
-						if (((this.currentCharacter = this.source[this.currentPosition++]) == '\\')
-							&& (this.source[this.currentPosition] == 'u')) {
-							getNextUnicodeChar();
-							isUnicode = true;
-						} else {
-							if (this.withoutUnicodePtr != 0) {
-								unicodeStore();
+						isTextBlock = scanForTextBlockBeginning();
+						if (!isTextBlock) {
+							if (((this.currentCharacter = this.source[this.currentPosition++]) == '\\')
+									&& (this.source[this.currentPosition] == 'u')) {
+								getNextUnicodeChar();
+								isUnicode = true;
+							} else {
+								if (this.withoutUnicodePtr != 0) {
+									unicodeStore();
+								}
 							}
 						}
-
-						while (this.currentCharacter != '"') {
-							if (this.currentPosition >= this.eofPosition) {
-								throw new InvalidInputException(UNTERMINATED_STRING);
+						this.rawStart = this.currentPosition - this.startPosition;
+						int terminators = 0;
+						while (this.currentPosition <= this.eofPosition) {
+							if (this.currentCharacter == '"') {
+								if (!isTextBlock) {
+									return TerminalTokens.TokenNameStringLiteral;
+								}
+								lastQuotePos = this.currentPosition;
+								// look for text block delimiter
+								if (scanForTextBlockClose()) {
+									if (this.source[this.currentPosition + 2] == '"') {
+										terminators++;
+										if (terminators > 2)
+											throw new InvalidInputException(UNTERMINATED_TEXT_BLOCK);
+									} else {
+										this.currentPosition += 2;
+										return TerminalTokens.TokenNameTextBlock;
+									}
+								}
+								if (this.withoutUnicodePtr != 0) {
+									unicodeStore();
+								}
+							} else {
+								terminators = 0;
 							}
-							/**** \r and \n are not valid in string literals ****/
-							if ((this.currentCharacter == '\n') || (this.currentCharacter == '\r')) {
+							if (!isTextBlock && (this.currentCharacter == '\n' || this.currentCharacter == '\r')) {
 								// relocate if finding another quote fairly close: thus unicode '/u000D' will be fully consumed
 								if (isUnicode) {
 									int start = this.currentPosition;
@@ -1853,15 +2021,29 @@ protected int getNextToken0() throws InvalidInputException {
 								isUnicode = true;
 							} else {
 								isUnicode = false;
+								if (isTextBlock && this.currentCharacter == '"')
+									continue;
 								if (this.withoutUnicodePtr != 0) {
 									unicodeStore();
 								}
 							}
-
+						}
+						if (isTextBlock) {
+							if (lastQuotePos > 0)
+								this.currentPosition = lastQuotePos;
+							throw new InvalidInputException(UNTERMINATED_TEXT_BLOCK);
+						} else {
+							throw new InvalidInputException(UNTERMINATED_STRING);
 						}
 					} catch (IndexOutOfBoundsException e) {
-						this.currentPosition--;
-						throw new InvalidInputException(UNTERMINATED_STRING);
+						if (isTextBlock) {
+							if (lastQuotePos > 0)
+								this.currentPosition = lastQuotePos;
+							throw new InvalidInputException(UNTERMINATED_TEXT_BLOCK);
+						} else {
+							this.currentPosition--;
+							throw new InvalidInputException(UNTERMINATED_STRING);
+						}
 					} catch (InvalidInputException e) {
 						if (e.getMessage().equals(INVALID_ESCAPE)) {
 							// relocate if finding another quote fairly close: thus unicode '/u000D' will be fully consumed
@@ -1879,7 +2061,6 @@ protected int getNextToken0() throws InvalidInputException {
 						}
 						throw e; // rethrow
 					}
-					return TokenNameStringLiteral;
 				case '/' :
 					if (!this.skipComments) {
 						int test = getNextChar('/', '*');
@@ -4615,6 +4796,19 @@ private int internalScanIdentifierOrKeyword(int index, int length, char[] data) 
 					return TokenNameIdentifier;
 			}
 
+		case 'y' :
+			switch (length) {
+				case 5 :
+					if ((data[++index] == 'i')
+						&& (data[++index] == 'e')
+						&& (data[++index] == 'l')
+						&& (data[++index] == 'd'))
+						return disambiguatedRestrictedIdentifier(TokenNameRestrictedIdentifierYield);
+					//$FALL-THROUGH$
+				default :
+					return TokenNameIdentifier;
+			}
+
 		default :
 			return TokenNameIdentifier;
 	}
@@ -4958,6 +5152,9 @@ public final void setSource(char[] sourceString){
 	resetOTFlags();
 // SH}
 	this.scanContext = null;
+	this.scanYieldContext = null;
+	this.yieldStatementEnd = -1;
+	this.yieldColons = -1;
 	this.insideModuleInfo = false;
 }
 /*
@@ -5022,6 +5219,8 @@ public String toStringAction(int act) {
 	switch (act) {
 		case TokenNameIdentifier :
 			return "Identifier(" + new String(getCurrentTokenSource()) + ")"; //$NON-NLS-1$ //$NON-NLS-2$
+		case TokenNameRestrictedIdentifierYield :
+			return "yield"; //$NON-NLS-1$
 		case TokenNameabstract :
 			return "abstract"; //$NON-NLS-1$
 //{ObjectTeams: deal with OT-specific identifiers
@@ -5163,7 +5362,8 @@ public String toStringAction(int act) {
 			return "Char(" + new String(getCurrentTokenSource()) + ")"; //$NON-NLS-1$ //$NON-NLS-2$
 		case TokenNameStringLiteral :
 			return "String(" + new String(getCurrentTokenSource()) + ")"; //$NON-NLS-1$ //$NON-NLS-2$
-
+		case TokenNameTextBlock :
+			return "String(" + new String(getCurrentTokenSource()) + ")"; //$NON-NLS-1$ //$NON-NLS-2$
 		case TokenNamePLUS_PLUS :
 			return "++"; //$NON-NLS-1$
 		case TokenNameMINUS_MINUS :
@@ -5313,6 +5513,7 @@ public static boolean isLiteral(int token) {
 		case TerminalTokens.TokenNameFloatingPointLiteral:
 		case TerminalTokens.TokenNameDoubleLiteral:
 		case TerminalTokens.TokenNameStringLiteral:
+		case TerminalTokens.TokenNameTextBlock:
 		case TerminalTokens.TokenNameCharacterLiteral:
 			return true;
 		default:
@@ -5373,6 +5574,9 @@ public static boolean isKeyword(int token) {
 		case TerminalTokens.TokenNamevolatile:
 		case TerminalTokens.TokenNamewhile:
 			return true;
+		case TerminalTokens.TokenNameRestrictedIdentifierYield:
+			// making explicit - yield not a (restricted) keyword but restricted identifier.
+			//$FALL-THROUGH$
 		default:
 			return false;
 	}
@@ -5425,12 +5629,14 @@ private static class Goal {
 	static int ReferenceExpressionRule = 0;
 	static int VarargTypeAnnotationsRule  = 0;
 	static int BlockStatementoptRule = 0;
+	static int YieldStatementRule = 0;
 	
 	static Goal LambdaParameterListGoal;
 	static Goal IntersectionCastGoal;
 	static Goal VarargTypeAnnotationGoal;
 	static Goal ReferenceExpressionGoal;
 	static Goal BlockStatementoptGoal;
+	static Goal YieldStatementGoal;
 	
 	static {
 		
@@ -5449,6 +5655,9 @@ private static class Goal {
 			else
 			if ("BlockStatementopt".equals(Parser.name[Parser.non_terminal_index[Parser.lhs[i]]])) //$NON-NLS-1$
 				BlockStatementoptRule = i;
+			else
+			if ("YieldStatement".equals(Parser.name[Parser.non_terminal_index[Parser.lhs[i]]])) //$NON-NLS-1$
+				YieldStatementRule = i;
 					
 		}
 		
@@ -5457,6 +5666,7 @@ private static class Goal {
 		VarargTypeAnnotationGoal = new Goal(TokenNameAT, new int[] { TokenNameELLIPSIS }, VarargTypeAnnotationsRule);
 		ReferenceExpressionGoal =  new Goal(TokenNameLESS, new int[] { TokenNameCOLON_COLON }, ReferenceExpressionRule);
 		BlockStatementoptGoal =    new Goal(TokenNameLBRACE, new int [0], BlockStatementoptRule);
+		YieldStatementGoal =       new Goal(TokenNameARROW, new int [0], YieldStatementRule);
 	}
 
 
@@ -5485,7 +5695,7 @@ private static class Goal {
 	private static int [] followSetOfCast() {
 		return new int [] { TokenNameIdentifier, TokenNamenew, TokenNamesuper, TokenNamethis,
 				TokenNamefalse, TokenNametrue, TokenNamenull, 
-				TokenNameIntegerLiteral, TokenNameLongLiteral, TokenNameFloatingPointLiteral, TokenNameDoubleLiteral, TokenNameCharacterLiteral, TokenNameStringLiteral, 
+				TokenNameIntegerLiteral, TokenNameLongLiteral, TokenNameFloatingPointLiteral, TokenNameDoubleLiteral, TokenNameCharacterLiteral, TokenNameStringLiteral, TokenNameTextBlock,
 				TokenNameNOT, TokenNameTWIDDLE, TokenNameLPAREN
 		};
 	}
@@ -5600,6 +5810,7 @@ private class ScanContextDetector extends VanguardParser {
 		};
 		this.scanner.recordLineSeparator = false;
 		this.scanner.setActiveParser(this);
+		this.scanner.previewEnabled = this.options.enablePreviewFeatures;
 	}
 
 	@Override
@@ -5631,9 +5842,6 @@ private VanguardParser getVanguardParser() {
 	this.vanguardScanner.setSource(this.source);
 	this.vanguardScanner.resetTo(this.startPosition, this.eofPosition - 1, isInModuleDeclaration(), this.scanContext);
 	return this.vanguardParser;
-}
-protected final boolean mayBeAtBreakPreview() {
-	return this.breakPreviewAllowed && this.lookBack[1] != TokenNameARROW;
 }
 
 protected final boolean maybeAtLambdaOrCast() { // Could the '(' we saw just now herald a lambda parameter list or a cast expression ? (the possible locations for both are identical.)
@@ -5749,6 +5957,56 @@ public static boolean isRestrictedKeyword(int token) {
 			return false;
 	}
 }
+private boolean mayBeAtAnYieldStatement() {
+	// preceded by ;, {, }, ), or -> [Ref: http://mail.openjdk.java.net/pipermail/amber-spec-experts/2019-May/001401.html]
+	// above comment is super-seded by http://mail.openjdk.java.net/pipermail/amber-spec-experts/2019-May/001414.html
+	switch (this.lookBack[1]) {
+		case TokenNameLBRACE:
+		case TokenNameRBRACE:
+		case TokenNameRPAREN:
+		case TokenNameSEMICOLON:
+		case TokenNameelse:
+			return true;
+		case TokenNameCOLON:
+			return this.lookBack[0] == TokenNamedefault || this.yieldColons == 1;
+		case TokenNameDOT:
+		case TokenNameARROW:
+		default:
+			return false;
+	}
+}
+int disambiguatedRestrictedIdentifier(int restrictedKeywordToken) {
+	// and here's the kludge
+	if (restrictedKeywordToken != TokenNameRestrictedIdentifierYield)
+		return restrictedKeywordToken; // safety net - only yield processed here!
+	if (!this.previewEnabled)
+		return TokenNameIdentifier;
+	if (this.scanYieldContext == ScanYieldContext.FLAGGED_YIELD) // nested yield implies identifier.
+		return TokenNameIdentifier;		
+	if (this.scanYieldContext == ScanYieldContext.EXPECTING_YIELD) {
+		this.scanYieldContext = ScanYieldContext.FLAGGED_YIELD; // producer/consumer: vanguard scanner
+		return TokenNameRestrictedIdentifierYield;
+	}
+	if (this.currentPosition < this.yieldStatementEnd) //producer/consumer: current scanner [value from vanguard scanner]
+		return TokenNameIdentifier; // don't bother until yieldStatementEnd
+
+	if (this.sourceLevel < ClassFileConstants.JDK13)
+		return TokenNameIdentifier;
+
+	int token = TokenNameIdentifier;
+	
+	// not working - check intermittent parser rule definition possibility.
+	final VanguardParser parser = getVanguardParser();
+	if (restrictedKeywordToken == TokenNameRestrictedIdentifierYield  && mayBeAtAnYieldStatement()) {
+		parser.scanner.resetTo(this.startPosition, this.eofPosition - 1);
+		parser.scanner.scanYieldContext = ScanYieldContext.EXPECTING_YIELD;
+		if (parser.parse(Goal.YieldStatementGoal) == VanguardParser.SUCCESS) {
+			this.yieldStatementEnd = parser.scanner.currentPosition;
+			token = TokenNameRestrictedIdentifierYield;
+		}
+	}
+	return token;
+}
 int disambiguatedRestrictedKeyword(int restrictedKeywordToken) {
 	int token = restrictedKeywordToken;
 	if (this.scanContext == ScanContext.EXPECTING_IDENTIFIER)
@@ -5788,11 +6046,7 @@ int disambiguatedRestrictedKeyword(int restrictedKeywordToken) {
 }
 int disambiguatedToken(int token) {
 	final VanguardParser parser = getVanguardParser();
-	if (token == TokenNamebreak  && this.sourceLevel == ClassFileConstants.JDK12 &&
-			this.previewEnabled && mayBeAtBreakPreview()) {
-		this.nextToken = TokenNameBreakPreviewMarker;
-		return token;
-	} else if (token == TokenNameARROW  && this.inCase) {
+	if (token == TokenNameARROW  && this.inCase) {
 		this.nextToken = TokenNameARROW;
 		this.inCase = false;
 		return TokenNameBeginCaseExpr;
@@ -5903,6 +6157,7 @@ public int fastForward(Statement unused) {
 			case TokenNameDoubleLiteral:
 			case TokenNameCharacterLiteral:
 			case TokenNameStringLiteral:
+			case TokenNameTextBlock:
 			case TokenNamePLUS_PLUS:
 			case TokenNameMINUS_MINUS:
 			case TokenNameLESS:
@@ -5911,6 +6166,7 @@ public int fastForward(Statement unused) {
 			case TokenNameAT:
 			case TokenNameBeginLambda:
 			case TokenNameAT308:
+			case TokenNameRestrictedIdentifierYield: // can be in FOLLOW of Block
 				if(getVanguardParser().parse(Goal.BlockStatementoptGoal) == VanguardParser.SUCCESS)
 					return token;
 				break;

@@ -7,6 +7,10 @@
  * https://www.eclipse.org/legal/epl-2.0/
  *
  * SPDX-License-Identifier: EPL-2.0
+ * 
+ * This is an implementation of an early-draft specification developed under the Java
+ * Community Process (JCP) and is made available for testing and evaluation purposes
+ * only. The code is not compatible with any specification of the JCP.
  *
  * Contributors:
  *     IBM Corporation - initial API and implementation
@@ -963,6 +967,22 @@ public abstract class ASTNode {
 	 * @since 3.18
 	 */
 	public static final int SWITCH_EXPRESSION = 100;
+	
+	/**
+	 * Node type constant indicating a node of type
+	 * <code>YieldStatement</code>.
+	 * @see YieldStatement
+	 * @since 3.19 BETA_JAVA13
+	 */
+	public static final int YIELD_STATEMENT = 10;
+	
+	/**
+	 * Node type constant indicating a node of type
+	 * <code>TextBlock</code>.
+	 * @see TextBlock
+	 * @since 3.19 BETA_JAVA13
+	 */
+	public static final int TEXT_BLOCK = 101;
 
 //{ObjectTeams: required OT specific node type constants added
 
@@ -971,93 +991,93 @@ public abstract class ASTNode {
 	 * <code>MethodSpec</code>.
 	 * @see MethodSpec
 	 */
-	public static final int METHOD_SPEC = 101;
+	public static final int METHOD_SPEC = 102;
 
 	/**
 	 * Node type constant indicating a node of type
 	 * <code>CallinMappingDeclaration</code>.
 	 * @see CallinMappingDeclaration
 	 */
-	public static final int CALLIN_MAPPING_DECLARATION = 102;
+	public static final int CALLIN_MAPPING_DECLARATION = 103;
 
 	/**
 	 * Node type constant indicating a node of type
 	 * <code>CalloutMappingDeclaration</code>.
 	 * @see CalloutMappingDeclaration
 	 */
-	public static final int CALLOUT_MAPPING_DECLARATION = 103;
+	public static final int CALLOUT_MAPPING_DECLARATION = 104;
 
 	/**
 	 * Node type constant indicating a node of type
 	 * <code>LiftingType</code>.
 	 * @see LiftingType
 	 */
-	public static final int LIFTING_TYPE = 104;
+	public static final int LIFTING_TYPE = 105;
 
 	/**
 	 * Node type constant indicating a node of type
 	 * <code>WithinStatement</code>.
 	 * @see WithinStatement
 	 */
-	public static final int WITHIN_STATEMENT = 105;
+	public static final int WITHIN_STATEMENT = 106;
 
 	/**
 	 * Node type constant indicating a node of type
 	 * <code>BaseConstructorMessageSend</code>.
 	 * @see BaseConstructorInvocation
 	 */
-	public static final int BASE_CONSTRUCTOR_INVOCATION = 106;
+	public static final int BASE_CONSTRUCTOR_INVOCATION = 107;
 
     /**
      * Node type constant indicating a node of type
      * <code>ParameterMapping</code>.
      * @see ParameterMapping
      */
-    public static final int PARAMETER_MAPPING = 107;
+    public static final int PARAMETER_MAPPING = 108;
 
     /**
      * Node type constant indicating a node of type
      * <code>BaseCallMessageSend</code>.
      * @see BaseCallMessageSend
      */
-     public static final int BASE_CALL_MESSAGE_SEND = 108;
+     public static final int BASE_CALL_MESSAGE_SEND = 109;
 
      /**
  	 * Node type constant indicating a node of type
  	 * <code>FieldAccessSpec</code>.
  	 * @see FieldAccessSpec
  	 */
- 	public static final int FIELD_ACCESS_SPEC = 109;
+ 	public static final int FIELD_ACCESS_SPEC = 110;
 
     /**
      * Node type constant indicating a node of type
      * <code>RoleTypeDelaration</code>.
      * @see RoleTypeDeclaration
      */
-    public static final int ROLE_TYPE_DECLARATION = 110;
+    public static final int ROLE_TYPE_DECLARATION = 111;
 
     /**
      * Node type constant indicating a node of type
      * <code>TSuperMessageSend</code>.
      * @see TSuperMessageSend
      */
-     public static final int TSUPER_MESSAGE_SEND = 111;
+     public static final int TSUPER_MESSAGE_SEND = 112;
 
      /**
       * Node type constant indicating a node of type
       * <code>TSuperCallMessageSend</code>.
       * @see TSuperMessageSend
       */
-      public static final int TSUPER_CONSTRUCTOR_INVOCATION = 112;
+      public static final int TSUPER_CONSTRUCTOR_INVOCATION = 113;
 
-      public static final int TYPE_ANCHOR = 113;
+      public static final int TYPE_ANCHOR = 114;
 
-      public static final int PRECEDENCE_DECLARATION = 114;
+      public static final int PRECEDENCE_DECLARATION = 115;
 
-      public static final int GUARD_PREDICATE_DECLARATION = 115;
+      public static final int GUARD_PREDICATE_DECLARATION = 116;
 
       /** @since 1.3.1 */
-      public static final int METHOD_BINDING_OPERATOR = 116;
+      public static final int METHOD_BINDING_OPERATOR = 117;
 //gbr}
 
 	/**
@@ -1240,6 +1260,8 @@ public abstract class ASTNode {
 				return SynchronizedStatement.class;
 			case TAG_ELEMENT :
 				return TagElement.class;
+			case TEXT_BLOCK :
+				return TextBlock.class;
 			case TEXT_ELEMENT :
 				return TextElement.class;
 			case THIS_EXPRESSION :
@@ -2240,6 +2262,7 @@ public abstract class ASTNode {
      * </p>
      *
 	 * @exception UnsupportedOperationException if this operation is used below JLS12
+	 * @deprecated
 	 * @since 3.16 
 	 */
 	final void unsupportedBelow12() {
@@ -2298,6 +2321,38 @@ public abstract class ASTNode {
 	  }
 	}
 	
+	/**
+     * Checks that this AST operation is only used when
+     * building JLS12 level ASTs.
+     * <p>
+     * Use this method to prevent access to properties available only in JLS12.
+     * </p>
+     *
+	 * @exception UnsupportedOperationException if this operation is is not used in JLS12
+	 * @since 3.19 BETA_JAVA13
+     */
+	// In API Javadocs, add: * @deprecated In the JLS13 API, this method is replaced by {@link #replacement()}.
+	final void supportedOnlyIn12() {
+	  if (this.ast.apiLevel != AST.JLS12_INTERNAL) {
+	  	throw new UnsupportedOperationException("Operation only supported in JLS12 AST"); //$NON-NLS-1$
+	  }
+	}
+	
+	/**
+ 	 * Checks that this AST operation is only used when
+     * building JLS13 level ASTs.
+     * <p>
+     * Use this method to prevent access to new properties available only in JLS13.
+     * </p>
+     *
+	 * @exception UnsupportedOperationException if this operation is not used in JLS13
+	 * @since 3.19 BETA_JAVA13
+	 */
+	final void supportedOnlyIn13() {
+		if (this.ast.apiLevel != AST.JLS13_INTERNAL) {
+			throw new UnsupportedOperationException("Operation only supported in JLS13 AST"); //$NON-NLS-1$
+		}
+	}
 	/**
 	 * Sets or clears this node's parent node and location.
 	 * <p>
@@ -3274,11 +3329,4 @@ public abstract class ASTNode {
 	 * @return the size of this node in bytes
 	 */
 	abstract int memSize();
-	
-	boolean isPreviewEnabled() {
-		if (this.ast.apiLevel == AST.JLS12_INTERNAL && this.ast.isPreviewEnabled()) {
-			return true;
-		}
-		return false;
-	}
 }

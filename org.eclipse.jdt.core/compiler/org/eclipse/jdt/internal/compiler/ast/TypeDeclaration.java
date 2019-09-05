@@ -8,6 +8,10 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  * 
+ * This is an implementation of an early-draft specification developed under the Java
+ * Community Process (JCP) and is made available for testing and evaluation purposes
+ * only. The code is not compatible with any specification of the JCP.
+ *
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *     Fraunhofer FIRST - extended API and implementation
@@ -1215,6 +1219,7 @@ public boolean hasErrors() {
  *	Common flow analysis for all types
  */
 private void internalAnalyseCode(FlowContext flowContext, FlowInfo flowInfo) {
+	checkYieldUsage();
 //{ObjectTeams: postponed from resolve() to also catch import usage from late statement generators.
 	if (isRoleFile() && !this.binding.isSynthInterface())
 		if (!this.compilationResult.hasSyntaxError)
@@ -1420,6 +1425,18 @@ private void mergePrecedences() {
 		PrecedenceBinding.checkDuplicates(this);
 }
 // SH}
+
+private void checkYieldUsage() {
+	long sourceLevel = this.scope.compilerOptions().sourceLevel;
+	if (sourceLevel < ClassFileConstants.JDK13 || this.name == null ||
+			!("yield".equals(new String(this.name)))) //$NON-NLS-1$
+		return;
+	if (sourceLevel == ClassFileConstants.JDK13 && this.scope.compilerOptions().enablePreviewFeatures) {
+		this.scope.problemReporter().switchExpressionsYieldTypeDeclarationError(this);
+	} else {
+		this.scope.problemReporter().switchExpressionsYieldTypeDeclarationWarning(this);
+	}
+}
 
 private SimpleSetOfCharArray getJUnitMethodSourceValues() {
 	SimpleSetOfCharArray junitMethodSourceValues = new SimpleSetOfCharArray();

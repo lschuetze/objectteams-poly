@@ -6,12 +6,17 @@
  * which accompanies this distribution, and is available at
  * https://www.eclipse.org/legal/epl-2.0/
  *
+ * This is an implementation of an early-draft specification developed under the Java
+ * Community Process (JCP) and is made available for testing and evaluation purposes
+ * only. The code is not compatible with any specification of the JCP.
+ * 
  * SPDX-License-Identifier: EPL-2.0
  *
  * Contributors:
  *     Mateusz Matela <mateusz.matela@gmail.com> - [formatter] Formatter does not format Java code correctly, especially when max line width is set - https://bugs.eclipse.org/303519
  *     Mateusz Matela <mateusz.matela@gmail.com> - [formatter] IndexOutOfBoundsException in TokenManager - https://bugs.eclipse.org/462945
  *     Mateusz Matela <mateusz.matela@gmail.com> - [formatter] follow up bug for comments - https://bugs.eclipse.org/458208
+ *     IBM Corporation - DOM AST changes for JEP 354
  *******************************************************************************/
 package org.eclipse.jdt.internal.formatter;
 
@@ -82,6 +87,7 @@ import org.eclipse.jdt.core.dom.VariableDeclarationExpression;
 import org.eclipse.jdt.core.dom.VariableDeclarationStatement;
 import org.eclipse.jdt.core.dom.WhileStatement;
 import org.eclipse.jdt.core.dom.WithinStatement;
+import org.eclipse.jdt.core.dom.YieldStatement;
 import org.eclipse.jdt.core.formatter.DefaultCodeFormatterConstants;
 import org.eclipse.jdt.core.dom.AbstractMethodMappingDeclaration;
 
@@ -385,7 +391,8 @@ public class LineBreaksPreparator extends ASTVisitor {
 						this.tm.get(nonBreakStatementEnd + 1).indent();
 						this.tm.firstTokenIn(statement, -1).unindent();
 					}
-				} else if (!(statement instanceof BreakStatement || statement instanceof Block)) {
+				} else if (!(statement instanceof BreakStatement || statement instanceof YieldStatement
+						|| statement instanceof Block)) {
 					indent(statement);
 				}
 				nonBreakStatementEnd = isBreaking ? -1 : this.tm.lastIndexIn(statement, -1);
@@ -398,7 +405,7 @@ public class LineBreaksPreparator extends ASTVisitor {
 		}
 		if (this.options.indent_breaks_compare_to_cases) {
 			for (Statement statement : statements) {
-				if (statement instanceof BreakStatement)
+				if (statement instanceof BreakStatement || statement instanceof YieldStatement)
 					indent(statement);
 			}
 		}
@@ -424,7 +431,7 @@ public class LineBreaksPreparator extends ASTVisitor {
 	private boolean isSwitchBreakingStatement(Statement statement) {
 		return statement instanceof BreakStatement || statement instanceof ReturnStatement
 				|| statement instanceof ContinueStatement || statement instanceof ThrowStatement
-				|| statement instanceof Block;
+				|| statement instanceof YieldStatement || statement instanceof Block;
 	}
 
 	@Override

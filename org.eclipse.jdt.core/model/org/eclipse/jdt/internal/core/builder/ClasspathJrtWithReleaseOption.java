@@ -51,13 +51,10 @@ import org.eclipse.jdt.internal.core.util.Util;
 
 public class ClasspathJrtWithReleaseOption extends ClasspathJrt {
 
-	static String MODULE_INFO = "module-info.sig"; //$NON-NLS-1$
-
 	final String release;
 	String releaseInHex;
 	private String[] subReleases;
 	private java.nio.file.FileSystem fs;
-	protected Path releasePath;
 	protected Path modulePath;
 	private String modPathString;
 	private boolean isJRE12Plus;
@@ -137,15 +134,15 @@ public class ClasspathJrtWithReleaseOption extends ClasspathJrt {
 				return;
 			}
 		}
-		this.releasePath = this.fs.getPath("/"); //$NON-NLS-1$
-		this.isJRE12Plus = isJRE12Plus(this.releasePath);
+		Path releasePath = this.fs.getPath("/"); //$NON-NLS-1$
+		this.isJRE12Plus = isJRE12Plus(releasePath);
 		Path modPath = this.fs.getPath(this.releaseInHex + (this.isJRE12Plus ? "" : "-modules")); //$NON-NLS-1$ //$NON-NLS-2$
 		if (Files.exists(modPath)) {
 			this.modulePath = modPath;
 			this.modPathString = this.zipFilename + "|"+ modPath.toString(); //$NON-NLS-1$
 		}
 		
-		if (!Files.exists(this.releasePath.resolve(this.releaseInHex))) {
+		if (!Files.exists(releasePath.resolve(this.releaseInHex))) {
 			Exception e = new IllegalArgumentException("release " + this.release + " is not found in the system"); //$NON-NLS-1$//$NON-NLS-2$
 			throw new CoreException(new Status(IStatus.ERROR, JavaCore.PLUGIN_ID, e.getMessage(), e));
 		}
@@ -155,7 +152,7 @@ public class ClasspathJrtWithReleaseOption extends ClasspathJrt {
 		}
 		if (this.release != null) {
 			List<String> sub = new ArrayList<>();
-			try (DirectoryStream<java.nio.file.Path> stream = Files.newDirectoryStream(this.releasePath)) {
+			try (DirectoryStream<java.nio.file.Path> stream = Files.newDirectoryStream(releasePath)) {
 				for (final java.nio.file.Path subdir : stream) {
 					String rel = JRTUtil.sanitizedFileName(subdir);
 					if (rel.contains(this.releaseInHex)) {
@@ -229,12 +226,10 @@ public class ClasspathJrtWithReleaseOption extends ClasspathJrt {
 			return;
 		Set<IModule> cache = ModulesCache.get(jrt.modPathString);
 		if (cache == null) {
-			try (DirectoryStream<java.nio.file.Path> stream = Files.newDirectoryStream(jrt.releasePath)) {
+			try (DirectoryStream<java.nio.file.Path> stream = Files.newDirectoryStream(jrt.modulePath)) {
 				for (final java.nio.file.Path subdir : stream) {
-					if (!subdir.getFileName().toString().contains(jrt.releaseInHex)) {
-						continue;
-					}
-					Files.walkFileTree(subdir, Collections.EMPTY_SET, 2, new FileVisitor<java.nio.file.Path>() {
+
+					Files.walkFileTree(subdir, Collections.EMPTY_SET, 1, new FileVisitor<java.nio.file.Path>() {
 						@Override
 						public FileVisitResult preVisitDirectory(java.nio.file.Path dir, BasicFileAttributes attrs)
 								throws IOException {
@@ -244,16 +239,14 @@ public class ClasspathJrtWithReleaseOption extends ClasspathJrt {
 						@Override
 						public FileVisitResult visitFile(java.nio.file.Path f, BasicFileAttributes attrs)
 								throws IOException {
-							if (attrs.isDirectory() || f.getNameCount() < 3) {
-								return FileVisitResult.CONTINUE;
-							}
-							if (f.getFileName().toString().equals(MODULE_INFO)) {
-								byte[] content = JRTUtil.safeReadBytes(f);
+							byte[] content = null;
+							if (Files.exists(f)) {
+								content = JRTUtil.safeReadBytes(f);
 								if (content == null)
 									return FileVisitResult.CONTINUE;
 								jrt.acceptModule(content);
 							}
-							return FileVisitResult.SKIP_SIBLINGS;
+							return FileVisitResult.CONTINUE;
 						}
 
 						@Override
