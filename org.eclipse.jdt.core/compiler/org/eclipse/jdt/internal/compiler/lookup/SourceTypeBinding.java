@@ -3729,6 +3729,12 @@ public boolean isNestmateOf(SourceTypeBinding other) {
 	if (options.targetJDK < ClassFileConstants.JDK11 ||
 		options.complianceLevel < ClassFileConstants.JDK11)
 		return false; // default false if level less than 11
+//{ObjectTeams: in anticipation of copy-inheritance, role-to-team access cannot leverage JEP 181 access.
+	if (isRole() && TypeBinding.equalsEquals(enclosingType(), other))
+		return false;
+	if (other.isRole() && TypeBinding.equalsEquals(other.enclosingType(), this))
+		return false;
+// SH}
 
 	SourceTypeBinding otherHost = other.getNestHost();
 	return TypeBinding.equalsEquals(this, other) ||
