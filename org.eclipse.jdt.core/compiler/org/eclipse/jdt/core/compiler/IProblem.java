@@ -2083,8 +2083,8 @@ void setSourceStart(int sourceStart);
 	int UnlikelyEqualsArgumentType = 1201;
 
 //{ObjectTeams:
-	int OTJ_RELATED = 1000000;
-	int OTCHAP = 100000;
+	int OTJ_RELATED = 100000;
+	int OTCHAP = 10000;
 	int TeamCannotHaveSuperTypes                 = OTJ_RELATED +    1;
 	int IllegalModifierForTeam                   = OTJ_RELATED +    2;
 
@@ -2407,7 +2407,7 @@ void setSourceStart(int sourceStart);
 
 	int CovariantReturnRequiresTypeParameter     = CALLIN_RELATED + 9001; // 4.9.3(c)
 
-	int DuplicateUseOfTypeVariableInCallin		 = CALLIN_RELATED +10001; // 4.10(a)
+	int DuplicateUseOfTypeVariableInCallin		 = CALLIN_RELATED + 9501; // 4.10(a)
 
 //  ==== ACTIVATION/PREDICATES ====
 	int ACTIVATION_RELATED = OTJ_RELATED + 5*OTCHAP;
@@ -2476,7 +2476,7 @@ void setSourceStart(int sourceStart);
 
 	int ValueParamWrongPosition                  = SYNTAX_RELATED + 9001; // A.9(a)
 	
-	int SyntaxErrorSingleTypeReferenceExpected   = SYNTAX_RELATED +10001; // 1.2.4(c) NOTE(SH): don't yet have a section "Expression" in §A.
+	int SyntaxErrorSingleTypeReferenceExpected   = SYNTAX_RELATED + 9501; // 1.2.4(c) NOTE(SH): don't yet have a section "Expression" in §A.
 
 //  ==== LIMITATIONS: ====
 	int LIMITATIONS = OTJ_RELATED + 11*OTCHAP;
