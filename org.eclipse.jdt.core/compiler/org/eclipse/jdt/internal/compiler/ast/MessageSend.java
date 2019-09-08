@@ -746,6 +746,9 @@ public void manageSyntheticAccessIfNecessary(BlockScope currentScope, FlowInfo f
 	{
 		boolean useNesting = currentScope.enclosingSourceType().isNestmateOf(codegenBinding.declaringClass) &&
 				!(this.receiver instanceof QualifiedSuperReference);
+//{ObjectTeams: nesting a la JEP 181 doesn't help for private role methods
+		useNesting &= !this.actualReceiverType.isRole(); 
+// SH}
 		// depth is set for both implicit and explicit access (see MethodBinding#canBeSeenBy)
 		if (!useNesting &&
 				TypeBinding.notEquals(currentScope.enclosingSourceType(), codegenBinding.declaringClass)){
