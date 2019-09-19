@@ -1,3 +1,6 @@
+#############################################
+# NOT IN USE - SEE promote-other.sh INSTEAD #
+#############################################
 # MANDATORY VARIABLE:
 #   BUILDID
 # OPTIONAL VARIABLES TO BE SUPPLIED VIA ENV:
