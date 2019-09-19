@@ -7,10 +7,6 @@
  * https://www.eclipse.org/legal/epl-2.0/
  *
  * SPDX-License-Identifier: EPL-2.0
- * 
- * This is an implementation of an early-draft specification developed under the Java
- * Community Process (JCP) and is made available for testing and evaluation purposes
- * only. The code is not compatible with any specification of the JCP.
  *
  * Contributors:
  *     IBM Corporation - initial API and implementation
@@ -972,112 +968,112 @@ public abstract class ASTNode {
 	 * Node type constant indicating a node of type
 	 * <code>YieldStatement</code>.
 	 * @see YieldStatement
-	 * @since 3.19 BETA_JAVA13
+	 * @since 3.20
 	 */
-	public static final int YIELD_STATEMENT = 10;
+	public static final int YIELD_STATEMENT = 101;
 	
 	/**
 	 * Node type constant indicating a node of type
 	 * <code>TextBlock</code>.
 	 * @see TextBlock
-	 * @since 3.19 BETA_JAVA13
+	 * @since 3.20
 	 */
-	public static final int TEXT_BLOCK = 101;
+	public static final int TEXT_BLOCK = 102;
 
 //{ObjectTeams: required OT specific node type constants added
-
+	private static final int LAST_JDT = 102;
 	/**
 	 * Node type constant indicating a node of type
 	 * <code>MethodSpec</code>.
 	 * @see MethodSpec
 	 */
-	public static final int METHOD_SPEC = 102;
+	public static final int METHOD_SPEC = LAST_JDT + 1;
 
 	/**
 	 * Node type constant indicating a node of type
 	 * <code>CallinMappingDeclaration</code>.
 	 * @see CallinMappingDeclaration
 	 */
-	public static final int CALLIN_MAPPING_DECLARATION = 103;
+	public static final int CALLIN_MAPPING_DECLARATION = LAST_JDT + 2;
 
 	/**
 	 * Node type constant indicating a node of type
 	 * <code>CalloutMappingDeclaration</code>.
 	 * @see CalloutMappingDeclaration
 	 */
-	public static final int CALLOUT_MAPPING_DECLARATION = 104;
+	public static final int CALLOUT_MAPPING_DECLARATION = LAST_JDT + 3;
 
 	/**
 	 * Node type constant indicating a node of type
 	 * <code>LiftingType</code>.
 	 * @see LiftingType
 	 */
-	public static final int LIFTING_TYPE = 105;
+	public static final int LIFTING_TYPE = LAST_JDT + 4;
 
 	/**
 	 * Node type constant indicating a node of type
 	 * <code>WithinStatement</code>.
 	 * @see WithinStatement
 	 */
-	public static final int WITHIN_STATEMENT = 106;
+	public static final int WITHIN_STATEMENT = LAST_JDT + 5;
 
 	/**
 	 * Node type constant indicating a node of type
 	 * <code>BaseConstructorMessageSend</code>.
 	 * @see BaseConstructorInvocation
 	 */
-	public static final int BASE_CONSTRUCTOR_INVOCATION = 107;
+	public static final int BASE_CONSTRUCTOR_INVOCATION = LAST_JDT + 6;
 
     /**
      * Node type constant indicating a node of type
      * <code>ParameterMapping</code>.
      * @see ParameterMapping
      */
-    public static final int PARAMETER_MAPPING = 108;
+    public static final int PARAMETER_MAPPING = LAST_JDT + 7;
 
     /**
      * Node type constant indicating a node of type
      * <code>BaseCallMessageSend</code>.
      * @see BaseCallMessageSend
      */
-     public static final int BASE_CALL_MESSAGE_SEND = 109;
+     public static final int BASE_CALL_MESSAGE_SEND = LAST_JDT + 8;
 
      /**
  	 * Node type constant indicating a node of type
  	 * <code>FieldAccessSpec</code>.
  	 * @see FieldAccessSpec
  	 */
- 	public static final int FIELD_ACCESS_SPEC = 110;
+ 	public static final int FIELD_ACCESS_SPEC = LAST_JDT + 9;
 
     /**
      * Node type constant indicating a node of type
      * <code>RoleTypeDelaration</code>.
      * @see RoleTypeDeclaration
      */
-    public static final int ROLE_TYPE_DECLARATION = 111;
+    public static final int ROLE_TYPE_DECLARATION = LAST_JDT + 10;
 
     /**
      * Node type constant indicating a node of type
      * <code>TSuperMessageSend</code>.
      * @see TSuperMessageSend
      */
-     public static final int TSUPER_MESSAGE_SEND = 112;
+     public static final int TSUPER_MESSAGE_SEND = LAST_JDT + 11;
 
      /**
       * Node type constant indicating a node of type
       * <code>TSuperCallMessageSend</code>.
       * @see TSuperMessageSend
       */
-      public static final int TSUPER_CONSTRUCTOR_INVOCATION = 113;
+      public static final int TSUPER_CONSTRUCTOR_INVOCATION = LAST_JDT + 12;
 
-      public static final int TYPE_ANCHOR = 114;
+      public static final int TYPE_ANCHOR = LAST_JDT + 13;
 
-      public static final int PRECEDENCE_DECLARATION = 115;
+      public static final int PRECEDENCE_DECLARATION = LAST_JDT + 14;
 
-      public static final int GUARD_PREDICATE_DECLARATION = 116;
+      public static final int GUARD_PREDICATE_DECLARATION = LAST_JDT + 15;
 
       /** @since 1.3.1 */
-      public static final int METHOD_BINDING_OPERATOR = 117;
+      public static final int METHOD_BINDING_OPERATOR = LAST_JDT + 16;
 //gbr}
 
 	/**
@@ -1294,6 +1290,8 @@ public abstract class ASTNode {
 				return WhileStatement.class;
 			case WILDCARD_TYPE :
 				return WildcardType.class;
+			case YIELD_STATEMENT :
+				return YieldStatement.class;
 //{ObjectTeams: entries for OT specific node types added
 			case METHOD_SPEC :
 			    return MethodSpec.class;
@@ -2329,7 +2327,7 @@ public abstract class ASTNode {
      * </p>
      *
 	 * @exception UnsupportedOperationException if this operation is is not used in JLS12
-	 * @since 3.19 BETA_JAVA13
+	 * @since 3.20
      */
 	// In API Javadocs, add: * @deprecated In the JLS13 API, this method is replaced by {@link #replacement()}.
 	final void supportedOnlyIn12() {
@@ -2346,7 +2344,7 @@ public abstract class ASTNode {
      * </p>
      *
 	 * @exception UnsupportedOperationException if this operation is not used in JLS13
-	 * @since 3.19 BETA_JAVA13
+	 * @since 3.20
 	 */
 	final void supportedOnlyIn13() {
 		if (this.ast.apiLevel != AST.JLS13_INTERNAL) {

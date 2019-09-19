@@ -8,10 +8,6 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  *
- * This is an implementation of an early-draft specification developed under the Java
- * Community Process (JCP) and is made available for testing and evaluation purposes
- * only. The code is not compatible with any specification of the JCP.
- * 
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
@@ -94,7 +90,7 @@ public class SwitchExpression extends Expression {
 	 * @return a list of property descriptors (element type:
 	 * {@link StructuralPropertyDescriptor})
 	 * @noreference This method is not intended to be referenced by clients.
-	 * @since 3.19
+	 * @since 3.20
 	 */
 	public static List propertyDescriptors(int apiLevel, boolean previewEnabled) {
 		if (apiLevel == AST.JLS13_INTERNAL && previewEnabled) {

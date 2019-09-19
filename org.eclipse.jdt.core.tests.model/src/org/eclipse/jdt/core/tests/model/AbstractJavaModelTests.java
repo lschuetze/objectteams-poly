@@ -6,10 +6,6 @@
  * which accompanies this distribution, and is available at
  * https://www.eclipse.org/legal/epl-2.0/
  *
- * This is an implementation of an early-draft specification developed under the Java
- * Community Process (JCP) and is made available for testing and evaluation purposes
- * only. The code is not compatible with any specification of the JCP.
- * 
  * SPDX-License-Identifier: EPL-2.0
  *
  * Contributors:
@@ -39,6 +35,7 @@ import org.eclipse.jdt.core.tests.junit.extension.TestCase;
 import org.eclipse.jdt.core.tests.util.AbstractCompilerTest;
 import org.eclipse.jdt.internal.compiler.classfmt.ClassFileConstants;
 import org.eclipse.jdt.internal.compiler.impl.CompilerOptions;
+import org.eclipse.jdt.internal.core.ClasspathAttribute;
 import org.eclipse.jdt.internal.core.ClasspathEntry;
 import org.eclipse.jdt.internal.core.JavaCorePreferenceInitializer;
 import org.eclipse.jdt.internal.core.JavaElement;
@@ -617,6 +614,33 @@ public abstract class AbstractJavaModelTests extends SuiteOfTestCases {
 		project.refreshLocal(IResource.DEPTH_INFINITE, null);
 		return project;
 	}
+
+	static IClasspathAttribute[] externalAnnotationExtraAttributes(String path) {
+		return new IClasspathAttribute[] {
+				new ClasspathAttribute(IClasspathAttribute.EXTERNAL_ANNOTATION_PATH, path)	
+		};
+	}
+
+	protected void addLibraryWithExternalAnnotations(
+			IJavaProject javaProject,
+			String compliance,
+			String jarName,
+			String externalAnnotationPath,
+			String[] pathAndContents,
+			Map options) throws CoreException, IOException
+	{
+		createLibrary(javaProject, jarName, "src.zip", pathAndContents, null, compliance, options);
+		String jarPath = '/' + javaProject.getProject().getName() + '/' + jarName;
+		IClasspathEntry entry = JavaCore.newLibraryEntry(
+				new Path(jarPath),
+				new Path('/'+javaProject.getProject().getName()+"/src.zip"),
+				null/*src attach root*/,
+				null/*access rules*/,
+				externalAnnotationExtraAttributes(externalAnnotationPath),
+				false/*exported*/);
+		addClasspathEntry(javaProject, entry);
+	}
+
 	protected void addLibraryEntry(String path, boolean exported) throws JavaModelException {
 		addLibraryEntry(this.currentProject, new Path(path), null, null, null, null, exported);
 	}
@@ -3173,8 +3197,13 @@ public abstract class AbstractJavaModelTests extends SuiteOfTestCases {
 		String newJclLibString;
 		String newJclSrcString;
 		if (useFullJCL) {
-			newJclLibString = "JCL18_FULL";
-			newJclSrcString = "JCL18_SRC"; // Use the same source
+			if (compliance.equals("10")) {
+				newJclLibString = "JCL10_LIB"; // TODO: have no full variant yet
+				newJclSrcString = "JCL10_SRC";
+			} else {
+				newJclLibString = "JCL18_FULL";
+				newJclSrcString = "JCL18_SRC"; // Use the same source
+			}
 		} else {
 			if (compliance.equals("13")) {
 				newJclLibString = "JCL13_LIB";
@@ -3297,7 +3326,7 @@ public abstract class AbstractJavaModelTests extends SuiteOfTestCases {
 				setupExternalJCL("jclMin10");
 				JavaCore.setClasspathVariables(
 					new String[] {"JCL10_LIB", "JCL10_SRC", "JCL_SRCROOT"},
-					new IPath[] {getExternalJCLPath("9"), getExternalJCLSourcePath("9"), getExternalJCLRootSourcePath()},
+					new IPath[] {getExternalJCLPath("10"), getExternalJCLSourcePath("10"), getExternalJCLRootSourcePath()},
 					null);
 			}
 		} else if ("11".equals(compliance)) {

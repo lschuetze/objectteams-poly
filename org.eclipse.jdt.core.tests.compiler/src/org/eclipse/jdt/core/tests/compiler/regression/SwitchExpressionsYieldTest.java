@@ -7,10 +7,6 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  *
- * This is an implementation of an early-draft specification developed under the Java
- * Community Process (JCP) and is made available for testing and evaluation purposes
- * only. The code is not compatible with any specification of the JCP.
- * 
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
@@ -29,7 +25,7 @@ public class SwitchExpressionsYieldTest extends AbstractRegressionTest {
 	static {
 //		TESTS_NUMBERS = new int [] { 40 };
 //		TESTS_RANGE = new int[] { 1, -1 };
-//		TESTS_NAMES = new String[] { "testBug550354_01" };
+//		TESTS_NAMES = new String[] { "testBug550861_01" };
 	}
 	
 	public static Class<?> testClass() {
@@ -91,7 +87,7 @@ public class SwitchExpressionsYieldTest extends AbstractRegressionTest {
 			JavacTestOptions.forReleaseWithPreview("13", javacAdditionalTestOptions);
 		runner.runWarningTest();
 	}
-	public void testBug544073_00() {
+	public void testBug544073_000() {
 		runConformTest(
 				new String[] {
 						"X.java",
@@ -3371,5 +3367,117 @@ public class SwitchExpressionsYieldTest extends AbstractRegressionTest {
 				"}"
 			},
 			"1");
+	}
+	public void testBug548418_01() {
+		runConformTest(
+			new String[] {
+				"X.java",
+				"public class X {\n"+
+				"  @SuppressWarnings({ \"preview\", \"unused\" })\n"+
+				"  public static void main(String[] args) {\n"+
+				"	int day =10;\n"+
+				"    int i = switch (day) {\n"+
+				"      default -> {\n"+
+				"        for(int j = 0; j < 3; j++) {\n"+
+				"        	yield 99;\n"+
+				"        }\n"+
+				"        yield 0;\n"+
+				"      }\n"+
+				"    };\n"+
+				"    System.out.println(i);\n"+
+				"  }\n"+
+				"}\n"
+			},
+			"99");
+	}
+	public void testBug550853_01() {
+		runConformTest(
+			new String[] {
+				"X.java",
+				"public class X {\n"+
+				"  @SuppressWarnings({ \"preview\" })\n"+
+				"  public static int foo(int i) throws Exception {\n"+
+				"    int v = switch (i) {\n"+
+				"        default : {yield switch (i) {\n"+
+				"        		default -> { yield 0; } \n"+
+				"        		};\n"+
+				"        	}\n"+
+				"    };\n"+
+				"    return v;\n"+
+				"  }\n"+
+				"  public static void main(String argv[]) throws Exception {\n"+
+				"    System.out.println(X.foo(1));\n"+
+				"  }\n"+
+				"}\n"
+			},
+			"0");
+	}
+	public void testBug550861_01() {
+		runConformTest(
+			new String[] {
+				"X.java",
+				"public class X {\n"+
+				"  @SuppressWarnings({ \"preview\" })\n"+
+				"  public static void foo(int i) throws Exception {\n"+
+				"	  System.out.println(switch(0) {\n"+
+				"	  default -> {\n"+
+				"	    do yield 1; while(false);\n"+
+				"	  }\n"+
+				"	  });\n"+
+				"  }\n"+
+				"  public static void main(String argv[]) throws Exception {\n"+
+				"	  X.foo(1);\n"+
+				"  }\n"+
+				"}\n"
+			},
+			"1");
+	}
+	public void testBug551030a() {
+		this.runNegativeTest(
+			new String[] {
+				"X.java",
+				"public class X {\n" + 
+				"	@SuppressWarnings(\"nls\")\n" + 
+				"	static final String MONDAY = \"MONDAY\";\n" + 
+				"	public static void main(String[] args) {\n" + 
+				"		int num = switch (day) {\n" + 
+				"		case MONDAY: \n" + 
+				"			// Nothing\n" + 
+				"		default:\n" + 
+				"			yield \";     \n" + 
+				"		}; \n" + 
+				"	}\n" + 
+				"}",
+			},
+			"----------\n" + 
+			"1. ERROR in X.java (at line 9)\n" + 
+			"	yield \";     \n" + 
+			"	      ^^^^^^^\n" + 
+			"String literal is not properly closed by a double-quote\n" + 
+			"----------\n");
+	}
+	public void testBug551030b() {
+		this.runNegativeTest(
+			new String[] {
+				"X.java",
+				"public class X {\n" + 
+				"	@SuppressWarnings(\"nls\")\n" + 
+				"	static final String MONDAY = \"MONDAY\";\n" + 
+				"	public static void main(String[] args) {\n" + 
+				"		int num = switch (day) {\n" + 
+				"		case MONDAY: \n" + 
+				"			// Nothing\n" + 
+				"		default:\n" + 
+				"			yield \"\"\";     \n" + 
+				"		}; \n" + 
+				"	}\n" + 
+				"}",
+			},
+			"----------\n" + 
+			"1. ERROR in X.java (at line 9)\n" + 
+			"	yield \"\"\";     \n" + 
+			"	        ^^^^^^^\n" + 
+			"String literal is not properly closed by a double-quote\n" + 
+			"----------\n");
 	}
 }

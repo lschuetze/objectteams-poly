@@ -8,10 +8,6 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  *
- * This is an implementation of an early-draft specification developed under the Java
- * Community Process (JCP) and is made available for testing and evaluation purposes
- * only. The code is not compatible with any specification of the JCP.
- * 
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *     Benjamin Muskalla - Contribution for bug 239066
@@ -501,6 +497,7 @@ public static int getIrritant(int problemID) {
 		case IProblem.RedundantNullCheckAgainstNonNullType:
 		case IProblem.RedundantNullCheckOnField:
 		case IProblem.RedundantNullCheckOnConstNonNullField:
+		case IProblem.ConstNonNullFieldComparisonYieldsFalse:
 		case IProblem.FieldComparisonYieldsFalse:
 			return CompilerOptions.RedundantNullCheck;
 
@@ -836,6 +833,9 @@ public static int getIrritant(int problemID) {
 			return CompilerOptions.UnstableAutoModuleName;
 		case IProblem.PreviewFeatureUsed:
 			return CompilerOptions.PreviewFeatureUsed;
+
+		case IProblem.ProblemNotAnalysed:
+			return CompilerOptions.SuppressWarningsNotAnalysed;
 }
 	return 0;
 }
@@ -1836,13 +1836,12 @@ public int computeSeverity(int problemID){
 
 	switch (problemID) {
 		case IProblem.VarargsConflict :
-			return ProblemSeverities.Warning;
- 		case IProblem.TypeCollidesWithPackage :
-			return ProblemSeverities.Warning;
  		case IProblem.SwitchExpressionsYieldUnqualifiedMethodWarning:
  		case IProblem.SwitchExpressionsYieldRestrictedGeneralWarning:
  		case IProblem.SwitchExpressionsYieldTypeDeclarationWarning:
  			return ProblemSeverities.Warning;
+ 		case IProblem.TypeCollidesWithPackage :
+			return ProblemSeverities.Error;
 
 		/*
 		 * Javadoc tags resolved references errors
@@ -1929,8 +1928,6 @@ public int computeSeverity(int problemID){
 			return ProblemSeverities.Warning;
 		case IProblem.IllegalUseOfUnderscoreAsAnIdentifier:
 			return this.underScoreIsError ? ProblemSeverities.Error : ProblemSeverities.Warning;
-		case IProblem.ProblemNotAnalysed:
-			return ProblemSeverities.Info; // Not configurable
 	}
 	int irritant = getIrritant(problemID);
 	if (irritant != 0) {
@@ -6680,7 +6677,7 @@ public boolean expressionNonNullComparison(Expression expr, boolean checkForNull
 			arguments = new String[] { new String(field.name), 
 									   new String(nonNullName[nonNullName.length-1]) };
 		} else if (field.constant() != Constant.NotAConstant) {
-			problemId = IProblem.RedundantNullCheckOnConstNonNullField;
+			problemId = checkForNull ? IProblem.ConstNonNullFieldComparisonYieldsFalse : IProblem.RedundantNullCheckOnConstNonNullField; 
 			char[][] nonNullName = this.options.nonNullAnnotationName;
 			arguments = new String[] { new String(field.name), 
 									   new String(nonNullName[nonNullName.length-1]) };

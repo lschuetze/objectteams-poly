@@ -8,10 +8,6 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  *
- * This is an implementation of an early-draft specification developed under the Java
- * Community Process (JCP) and is made available for testing and evaluation purposes
- * only. The code is not compatible with any specification of the JCP.
- * 
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *     Fraunhofer FIRST - extended API and implementation
@@ -3243,6 +3239,9 @@ class ASTConverter {
 	}
 
 	public Expression convert(org.eclipse.jdt.internal.compiler.ast.TextBlock expression) {
+		if (!this.ast.isPreviewEnabled()) {
+			return createFakeNullLiteral(expression);		
+		}
 		int length = expression.sourceEnd - expression.sourceStart + 1;
 		int sourceStart = expression.sourceStart;
 		TextBlock literal = new TextBlock(this.ast);

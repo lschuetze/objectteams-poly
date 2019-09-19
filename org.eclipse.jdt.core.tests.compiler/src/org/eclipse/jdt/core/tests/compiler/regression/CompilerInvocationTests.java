@@ -8,10 +8,6 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  *
- * This is an implementation of an early-draft specification developed under the Java
- * Community Process (JCP) and is made available for testing and evaluation purposes
- * only. The code is not compatible with any specification of the JCP.
- *
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *     Benjamin Muskalla - Contribution for bug 239066
@@ -420,6 +416,7 @@ public void _test011_problem_categories() {
 		expectedProblemAttributes.put("CodeCannotBeReached", new ProblemAttributes(CategorizedProblem.CAT_INTERNAL));
 		expectedProblemAttributes.put("CodeSnippetMissingClass", new ProblemAttributes(CategorizedProblem.CAT_INTERNAL));
 		expectedProblemAttributes.put("CodeSnippetMissingMethod", new ProblemAttributes(CategorizedProblem.CAT_INTERNAL));
+		expectedProblemAttributes.put("ConstNonNullFieldComparisonYieldsFalse", new ProblemAttributes(CategorizedProblem.CAT_POTENTIAL_PROGRAMMING_PROBLEM));
 		expectedProblemAttributes.put("ContainerAnnotationTypeHasNonDefaultMembers", new ProblemAttributes(CategorizedProblem.CAT_TYPE));
 		expectedProblemAttributes.put("ContainerAnnotationTypeHasShorterRetention", new ProblemAttributes(CategorizedProblem.CAT_TYPE));
 		expectedProblemAttributes.put("ContainerAnnotationTypeHasWrongValueType", new ProblemAttributes(CategorizedProblem.CAT_TYPE));
@@ -1476,6 +1473,7 @@ public void test012_compiler_problems_tuning() {
 		expectedProblemAttributes.put("CodeSnippetMissingClass", SKIP);
 		expectedProblemAttributes.put("CodeSnippetMissingMethod", SKIP);
 		expectedProblemAttributes.put("ComparingIdentical", new ProblemAttributes(JavaCore.COMPILER_PB_COMPARING_IDENTICAL));
+		expectedProblemAttributes.put("ConstNonNullFieldComparisonYieldsFalse", new ProblemAttributes(JavaCore.COMPILER_PB_REDUNDANT_NULL_CHECK));
 		expectedProblemAttributes.put("ConflictingImport", SKIP);
 		expectedProblemAttributes.put("ConflictingNullAnnotations", new ProblemAttributes(JavaCore.COMPILER_PB_NULL_SPECIFICATION_VIOLATION));
 		expectedProblemAttributes.put("ConstructedArrayIncompatible", SKIP);
@@ -1992,6 +1990,7 @@ public void test012_compiler_problems_tuning() {
 		expectedProblemAttributes.put("PotentialNullLocalVariableReference", new ProblemAttributes(JavaCore.COMPILER_PB_POTENTIAL_NULL_REFERENCE));
 		expectedProblemAttributes.put("PotentialNullUnboxing", new ProblemAttributes(JavaCore.COMPILER_PB_POTENTIAL_NULL_REFERENCE));
 		expectedProblemAttributes.put("PotentialNullMessageSendReference", new ProblemAttributes(JavaCore.COMPILER_PB_POTENTIAL_NULL_REFERENCE));
+		expectedProblemAttributes.put("ProblemNotAnalysed", new ProblemAttributes(JavaCore.COMPILER_PB_SUPPRESS_WARNINGS_NOT_FULLY_ANALYSED));
 		expectedProblemAttributes.put("ProviderMethodOrConstructorRequiredForServiceImpl", SKIP);
 		expectedProblemAttributes.put("PublicClassMustMatchFileName", SKIP);
 		expectedProblemAttributes.put("RawMemberTypeCannotBeParameterized", SKIP);
@@ -2210,7 +2209,6 @@ public void test012_compiler_problems_tuning() {
 		expectedProblemAttributes.put("DisallowedExplicitThisParameter", SKIP);
 		expectedProblemAttributes.put("IllegalArrayOfUnionType", SKIP);
 		expectedProblemAttributes.put("IllegalArrayTypeInIntersectionCast", SKIP);
-		expectedProblemAttributes.put("ProblemNotAnalysed", SKIP);
 //{ObjectTeams: new constants:
         expectedProblemAttributes.put("OTJ_RELATED", SKIP);
         expectedProblemAttributes.put("OTCHAP", SKIP);

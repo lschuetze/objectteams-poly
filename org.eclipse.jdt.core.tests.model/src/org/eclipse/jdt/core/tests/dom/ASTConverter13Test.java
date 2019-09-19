@@ -6,10 +6,6 @@
  * which accompanies this distribution, and is available at
  * https://www.eclipse.org/legal/epl-2.0/
  *
- * This is an implementation of an early-draft specification developed under the Java
- * Community Process (JCP) and is made available for testing and evaluation purposes
- * only. The code is not compatible with any specification of the JCP.
- * 
  * SPDX-License-Identifier: EPL-2.0
  * Contributors:
  *     IBM Corporation - initial API and implementation
@@ -32,6 +28,7 @@ import org.eclipse.jdt.core.dom.BreakStatement;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.Expression;
 import org.eclipse.jdt.core.dom.IBinding;
+import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.MethodDeclaration;
 import org.eclipse.jdt.core.dom.SimpleName;
 import org.eclipse.jdt.core.dom.Statement;
@@ -44,6 +41,7 @@ import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 import org.eclipse.jdt.core.dom.VariableDeclarationStatement;
 import org.eclipse.jdt.core.dom.YieldStatement;
 
+import junit.framework.AssertionFailedError;
 import junit.framework.Test;
 
 @SuppressWarnings("rawtypes")
@@ -525,11 +523,127 @@ public class ASTConverter13Test extends ConverterTestSetup {
 			Expression initializer = fragment.getInitializer();
 			assertTrue("Initializer is not a TextBlock", initializer instanceof TextBlock);
 			String escapedValue = ((TextBlock) initializer).getEscapedValue();
-			System.out.println(escapedValue);
 
 			assertTrue("String should not be empty", escapedValue.length() != 0);
 			assertTrue("String should start with \"\"\"", escapedValue.startsWith("\"\"\""));
 
+		} finally {
+			javaProject.setOption(JavaCore.COMPILER_PB_ENABLE_PREVIEW_FEATURES, old);
+		}
+	}
+	public void test0008() throws JavaModelException {
+		String contents =
+				"public class X {\n" +
+						"	public String test001() {\n" + 
+						"		String s = \"\"\"\n" + 
+						"      	<html>\n" + 
+						"        <body>\n" + 
+						"            <p>Hello, world</p>\n" + 
+						"        </body>\n" + 
+						"    	</html>\n" + 
+						"    	\"\"\";\n" + 
+						"    	System.out.println(s);" +
+						"		return s;\n" + 
+						"	}" +
+						"}" ;
+		this.workingCopy = getWorkingCopy("/Converter13/src/X.java", true/*resolve*/);
+		IJavaProject javaProject = this.workingCopy.getJavaProject();
+		String old = javaProject.getOption(JavaCore.COMPILER_PB_ENABLE_PREVIEW_FEATURES, true);
+		try {
+			javaProject.setOption(JavaCore.COMPILER_PB_ENABLE_PREVIEW_FEATURES, JavaCore.DISABLED);
+			javaProject.setOption(JavaCore.COMPILER_PB_REPORT_PREVIEW_FEATURES, JavaCore.IGNORE);
+			try {
+			buildAST(
+					contents,
+					this.workingCopy);
+			} catch(UnsupportedOperationException e) {
+				fail("Should not throw UnsupportedOperationException");
+			} catch(AssertionFailedError e) {
+				e.printStackTrace();
+				return;
+			}
+			fail("Compilation should not succeed");
+
+		} finally {
+			javaProject.setOption(JavaCore.COMPILER_PB_ENABLE_PREVIEW_FEATURES, old);
+		}
+	}
+	public void test0009() throws JavaModelException {
+		String contents =
+				"public class X {\n" +
+						"	public String test001() {\n" + 
+						"		String s = \"\"\"\n" + 
+						"      	<html>\n" + 
+						"        <body>\n" + 
+						"            <p>Hello, world</p>\n" + 
+						"        </body>\n" + 
+						"    	</html>\n" + 
+						"    	\"\"\";\n" + 
+						"    	System.out.println(s);" +
+						"		return s;\n" + 
+						"	}" +
+						"}" ;
+		this.workingCopy = getWorkingCopy("/Converter13/src/X.java", true/*resolve*/);
+		IJavaProject javaProject = this.workingCopy.getJavaProject();
+		String old = javaProject.getOption(JavaCore.COMPILER_PB_ENABLE_PREVIEW_FEATURES, true);
+		try {
+			javaProject.setOption(JavaCore.COMPILER_PB_ENABLE_PREVIEW_FEATURES, JavaCore.ENABLED);
+			javaProject.setOption(JavaCore.COMPILER_PB_REPORT_PREVIEW_FEATURES, JavaCore.IGNORE);
+			ASTNode node = buildAST(
+					contents,
+					this.workingCopy);
+			assertEquals("Not a compilation unit", ASTNode.COMPILATION_UNIT, node.getNodeType());
+			CompilationUnit compilationUnit = (CompilationUnit) node;
+			assertProblemsSize(compilationUnit, 0);
+			node = getASTNode(compilationUnit, 0, 0, 0);
+			assertEquals("Text block statement", node.getNodeType(), ASTNode.VARIABLE_DECLARATION_STATEMENT);
+			List fragments = ((VariableDeclarationStatement) node).fragments();
+			assertEquals("Incorrect no of fragments", 1, fragments.size());
+			node = (ASTNode) fragments.get(0);
+			assertEquals("Switch statement", node.getNodeType(), ASTNode.VARIABLE_DECLARATION_FRAGMENT);
+			VariableDeclarationFragment fragment = (VariableDeclarationFragment) node;
+			Expression initializer = fragment.getInitializer();
+			assertTrue("Initializer is not a TextBlock", initializer instanceof TextBlock);
+			ITypeBinding binding = initializer.resolveTypeBinding();
+			assertNotNull("No binding", binding);
+			assertEquals("Wrong qualified name", "java.lang.String", binding.getQualifiedName());
+		} finally {
+			javaProject.setOption(JavaCore.COMPILER_PB_ENABLE_PREVIEW_FEATURES, old);
+		}
+	}
+	public void test0010() throws JavaModelException {
+		String contents =
+				"public class test13 {\n" + 
+				"	public static void main(String[] args) {\n" + 
+				"		String s = \"\"\"\n" + 
+				"				nadknaks vgvh \n" + 
+				"				\"\"\";\n" + 
+				"\n" + 
+				"		int m = 10;\n" + 
+				"		m = m* 6;\n" + 
+				"		System.out.println(s);\n" + 
+				"	}\n" + 
+				"}" ;
+		this.workingCopy = getWorkingCopy("/Converter13/src/test13.java", true/*resolve*/);
+		IJavaProject javaProject = this.workingCopy.getJavaProject();
+		String old = javaProject.getOption(JavaCore.COMPILER_PB_ENABLE_PREVIEW_FEATURES, true);
+		try {
+			javaProject.setOption(JavaCore.COMPILER_PB_ENABLE_PREVIEW_FEATURES, JavaCore.ENABLED);
+			javaProject.setOption(JavaCore.COMPILER_PB_REPORT_PREVIEW_FEATURES, JavaCore.IGNORE);
+			ASTNode node = buildAST(
+					contents,
+					this.workingCopy);
+			assertEquals("Not a compilation unit", ASTNode.COMPILATION_UNIT, node.getNodeType());
+			CompilationUnit compilationUnit = (CompilationUnit) node;
+			assertProblemsSize(compilationUnit, 0);
+			node = getASTNode(compilationUnit, 0, 0, 0);
+			assertEquals("wrong line number", 3, compilationUnit.getLineNumber(node.getStartPosition()));
+			node = getASTNode(compilationUnit, 0, 0, 1);
+			assertEquals("wrong line number", 7, compilationUnit.getLineNumber(node.getStartPosition()));
+			node = getASTNode(compilationUnit, 0, 0, 2);
+			assertEquals("wrong line number", 8, compilationUnit.getLineNumber(node.getStartPosition()));
+			node = getASTNode(compilationUnit, 0, 0, 3);
+			assertEquals("wrong line number", 9, compilationUnit.getLineNumber(node.getStartPosition()));
 		} finally {
 			javaProject.setOption(JavaCore.COMPILER_PB_ENABLE_PREVIEW_FEATURES, old);
 		}

@@ -8,10 +8,6 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  *
- * This is an implementation of an early-draft specification developed under the Java
- * Community Process (JCP) and is made available for testing and evaluation purposes
- * only. The code is not compatible with any specification of the JCP.
- *
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
@@ -100,7 +96,7 @@ public class BreakStatement extends Statement {
 	 * {@link StructuralPropertyDescriptor})
 	 * @noreference This method is not intended to be referenced by clients as it is a part of Java preview feature.
 	 * @deprecated
-	 * @since 3.19
+	 * @since 3.20
 	 */
 	public static List propertyDescriptors(int apiLevel, boolean previewEnabled) {
 		return PROPERTY_DESCRIPTORS;
@@ -135,11 +131,6 @@ public class BreakStatement extends Statement {
 	}
 	
 	@Override
-	final List internalStructuralPropertiesForType(int apiLevel, boolean isPreviewEnabled) {
-		return propertyDescriptors(apiLevel, isPreviewEnabled);
-	}
-
-	@Override
 	final ASTNode internalGetSetChildProperty(ChildPropertyDescriptor property, boolean get, ASTNode child) {
 		if (property == LABEL_PROPERTY) {
 			if (get) {
@@ -172,9 +163,6 @@ public class BreakStatement extends Statement {
 		result.setSourceRange(getStartPosition(), getLength());
 		result.copyLeadingComment(this);
 		result.setLabel((SimpleName) ASTNode.copySubtree(target, getLabel()));
-		if (this.ast.apiLevel == AST.JLS12_INTERNAL) {
-			result.setExpression((Expression) ASTNode.copySubtree(target, getExpression()));
-		}
 		return result;
 	}
 
@@ -188,9 +176,6 @@ public class BreakStatement extends Statement {
 	void accept0(ASTVisitor visitor) {
 		boolean visitChildren = visitor.visit(this);
 		if (visitChildren) {
-			if (this.ast.apiLevel == AST.JLS12_INTERNAL) {
-				acceptChild(visitor, getExpression());
-			} 
 			acceptChild(visitor, getLabel());
 		}
 		visitor.endVisit(this);

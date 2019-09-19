@@ -8,10 +8,6 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  *
- * This is an implementation of an early-draft specification developed under the Java
- * Community Process (JCP) and is made available for testing and evaluation purposes
- * only. The code is not compatible with any specification of the JCP.
- * 
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
@@ -306,9 +302,7 @@ public class ASTRewritingSwitchExpressionsTest extends ASTRewritingTest {
 		buf.append(" 				int z = 100;\n");
 		buf.append(" 				break z;\n");
 		buf.append("			}\n");
-		buf.append("			case 100, 200 -> {\n");
-		buf.append("    break 2048;\n");
-		buf.append("}\n");
+		buf.append("			case 100, 200 -> {break 2048;}\n");
 		buf.append("            default -> {\n");
 		buf.append("				break 12;\n");
 		buf.append("			}\n");

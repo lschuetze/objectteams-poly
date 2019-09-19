@@ -8,10 +8,6 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  *
- * This is an implementation of an early-draft specification developed under the Java
- * Community Process (JCP) and is made available for testing and evaluation purposes
- * only. The code is not compatible with any specification of the JCP.
- * 
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *     Fraunhofer FIRST - extended API and implementation
@@ -299,21 +295,16 @@ public class Scanner implements TerminalTokens {
 	public boolean fakeInModule = false;
 	boolean inCase = false;
 	/* package */ int yieldColons = -1;
+	boolean breakPreviewAllowed = false;
 	/**
 	 * The current context of the scanner w.r.t restricted keywords
 	 *
 	 */
 	enum ScanContext {
-		EXPECTING_KEYWORD, EXPECTING_IDENTIFIER, AFTER_REQUIRES, EXPECTING_YIELD, INACTIVE
+		EXPECTING_KEYWORD, EXPECTING_IDENTIFIER, AFTER_REQUIRES, INACTIVE
 	}
 	protected ScanContext scanContext = null;
 	protected boolean insideModuleInfo = false;
-
-	enum ScanYieldContext {
-		EXPECTING_YIELD, FLAGGED_YIELD, INACTIVE
-	}
-	protected ScanYieldContext scanYieldContext = null;
-	private int yieldStatementEnd = -1;
 	public static final String END_OF_SOURCE = "End_Of_Source"; //$NON-NLS-1$
 
 	public static final String INVALID_HEXA = "Invalid_Hexa_Literal"; //$NON-NLS-1$
@@ -787,7 +778,7 @@ public char[] getCurrentTokenSourceString() {
 	return result;
 }
 protected final boolean scanForTextBlockBeginning() {
-	if (!this.previewEnabled) {
+	if (this.activeParser != null && !this.activeParser.isParsingJava13()) {
 		return false;
 	}
 	try {
@@ -1513,8 +1504,10 @@ public void ungetToken(int unambiguousToken) {
 	this.nextToken = unambiguousToken;
 }
 private void updateCase(int token) {
-	if (token == TokenNamecase) 
+	if (token == TokenNamecase) {
 		this.inCase = true;
+		this.breakPreviewAllowed = true;
+	}
 	if (token == TokenNameCOLON || token == TokenNameARROW) 
 		this.inCase = false;
 }
@@ -1569,8 +1562,6 @@ protected int getNextToken0() throws InvalidInputException {
 		return this.currentPosition > this.eofPosition ? TokenNameEOF : TokenNameRBRACE;
 	}
 	int whiteStart = 0;
-	if (this.currentPosition > this.yieldStatementEnd)
-		this.yieldStatementEnd = -1;
 	try {
 		while (true) { //loop for jumping over comments
 			this.withoutUnicodePtr = 0;
@@ -2490,10 +2481,13 @@ public final void jumpOverMethodBody(int found) {
 								return;
 							}
 							if (this.currentCharacter == '\r'){
-								if (this.source[this.currentPosition] == '\n') this.currentPosition++;
+								// For text block, we don't want to overlook \n. Hence, don't advance past \n
+								//if (this.source[this.currentPosition] == '\n') this.currentPosition++;
 								break NextToken; // the string cannot go further that the line
 							}
 							if (this.currentCharacter == '\n'){
+								// For text block, we don't want to overlook \n. Hence, go back one char
+								this.currentPosition--;
 								break; // the string cannot go further that the line
 							}
 							if (this.currentCharacter == '\\') {
@@ -4803,7 +4797,7 @@ private int internalScanIdentifierOrKeyword(int index, int length, char[] data) 
 						&& (data[++index] == 'e')
 						&& (data[++index] == 'l')
 						&& (data[++index] == 'd'))
-						return disambiguatedRestrictedIdentifier(TokenNameRestrictedIdentifierYield);
+						return disambiguatedRestrictedIdentifierYield(TokenNameRestrictedIdentifierYield);
 					//$FALL-THROUGH$
 				default :
 					return TokenNameIdentifier;
@@ -5152,8 +5146,6 @@ public final void setSource(char[] sourceString){
 	resetOTFlags();
 // SH}
 	this.scanContext = null;
-	this.scanYieldContext = null;
-	this.yieldStatementEnd = -1;
 	this.yieldColons = -1;
 	this.insideModuleInfo = false;
 }
@@ -5843,6 +5835,9 @@ private VanguardParser getVanguardParser() {
 	this.vanguardScanner.resetTo(this.startPosition, this.eofPosition - 1, isInModuleDeclaration(), this.scanContext);
 	return this.vanguardParser;
 }
+protected final boolean mayBeAtBreakPreview() {
+	return this.breakPreviewAllowed && this.lookBack[1] != TokenNameARROW;
+}
 
 protected final boolean maybeAtLambdaOrCast() { // Could the '(' we saw just now herald a lambda parameter list or a cast expression ? (the possible locations for both are identical.)
 
@@ -5966,6 +5961,7 @@ private boolean mayBeAtAnYieldStatement() {
 		case TokenNameRPAREN:
 		case TokenNameSEMICOLON:
 		case TokenNameelse:
+		case TokenNamedo:
 			return true;
 		case TokenNameCOLON:
 			return this.lookBack[0] == TokenNamedefault || this.yieldColons == 1;
@@ -5975,37 +5971,81 @@ private boolean mayBeAtAnYieldStatement() {
 			return false;
 	}
 }
-int disambiguatedRestrictedIdentifier(int restrictedKeywordToken) {
-	// and here's the kludge
-	if (restrictedKeywordToken != TokenNameRestrictedIdentifierYield)
-		return restrictedKeywordToken; // safety net - only yield processed here!
-	if (!this.previewEnabled)
-		return TokenNameIdentifier;
-	if (this.scanYieldContext == ScanYieldContext.FLAGGED_YIELD) // nested yield implies identifier.
-		return TokenNameIdentifier;		
-	if (this.scanYieldContext == ScanYieldContext.EXPECTING_YIELD) {
-		this.scanYieldContext = ScanYieldContext.FLAGGED_YIELD; // producer/consumer: vanguard scanner
-		return TokenNameRestrictedIdentifierYield;
-	}
-	if (this.currentPosition < this.yieldStatementEnd) //producer/consumer: current scanner [value from vanguard scanner]
-		return TokenNameIdentifier; // don't bother until yieldStatementEnd
-
-	if (this.sourceLevel < ClassFileConstants.JDK13)
-		return TokenNameIdentifier;
-
-	int token = TokenNameIdentifier;
-	
-	// not working - check intermittent parser rule definition possibility.
-	final VanguardParser parser = getVanguardParser();
-	if (restrictedKeywordToken == TokenNameRestrictedIdentifierYield  && mayBeAtAnYieldStatement()) {
-		parser.scanner.resetTo(this.startPosition, this.eofPosition - 1);
-		parser.scanner.scanYieldContext = ScanYieldContext.EXPECTING_YIELD;
-		if (parser.parse(Goal.YieldStatementGoal) == VanguardParser.SUCCESS) {
-			this.yieldStatementEnd = parser.scanner.currentPosition;
-			token = TokenNameRestrictedIdentifierYield;
+private boolean disambiguateYieldWithLookAhead() {
+	getVanguardParser();
+	this.vanguardScanner.resetTo(this.currentPosition, this.eofPosition - 1);
+	try {
+		int lookAhead1 = this.vanguardScanner.getNextToken();
+		switch (lookAhead1) {
+			case TokenNameEQUAL_EQUAL :
+			case TokenNameLESS_EQUAL :
+			case TokenNameGREATER_EQUAL :
+			case TokenNameNOT_EQUAL :
+			case TokenNameLEFT_SHIFT :
+			case TokenNameRIGHT_SHIFT :
+			case TokenNameUNSIGNED_RIGHT_SHIFT :
+			case TokenNamePLUS_EQUAL :
+			case TokenNameMINUS_EQUAL :
+			case TokenNameMULTIPLY_EQUAL :
+			case TokenNameDIVIDE_EQUAL :
+			case TokenNameAND_EQUAL :
+			case TokenNameOR_EQUAL :
+			case TokenNameXOR_EQUAL :
+			case TokenNameREMAINDER_EQUAL :
+			case TokenNameLEFT_SHIFT_EQUAL :
+			case TokenNameRIGHT_SHIFT_EQUAL :
+			case TokenNameUNSIGNED_RIGHT_SHIFT_EQUAL :
+			case TokenNameOR_OR :
+			case TokenNameAND_AND :
+			case TokenNameREMAINDER :
+			case TokenNameXOR :
+			case TokenNameAND :
+			case TokenNameMULTIPLY :
+			case TokenNameOR :
+			case TokenNameTWIDDLE :
+			case TokenNameDIVIDE :
+			case TokenNameGREATER :
+			case TokenNameLESS :
+			case TokenNameLBRACE :
+			case TokenNameRBRACE :
+			case TokenNameLBRACKET :
+			case TokenNameRBRACKET :
+			case TokenNameSEMICOLON :
+			case TokenNameQUESTION :
+			case TokenNameCOLON :
+			case TokenNameCOMMA :
+			case TokenNameDOT :
+			case TokenNameEQUAL :
+			case TokenNameAT :
+			case TokenNameELLIPSIS :
+			case TokenNameARROW :
+			case TokenNameCOLON_COLON :
+				return false;
+			case TokenNameMINUS_MINUS :
+			case TokenNamePLUS_PLUS :
+				int lookAhead2 = this.vanguardScanner.getNextToken();
+				return lookAhead2 == TokenNameIdentifier;
+			default : return true;
+		}
+	} catch (InvalidInputException e) {
+		if (e.getMessage().equals(INVALID_CHAR_IN_STRING)) {
+			//Ignore
+		} else {
+			// Shouldn't happen, but log the error
+			e.printStackTrace();
 		}
 	}
-	return token;
+	return false; // IIE event;
+}
+int disambiguatedRestrictedIdentifierYield(int restrictedIdentifierToken) {
+	// and here's the kludge
+	if (restrictedIdentifierToken != TokenNameRestrictedIdentifierYield)
+		return restrictedIdentifierToken;
+	if (this.sourceLevel < ClassFileConstants.JDK13 || !this.previewEnabled)
+		return TokenNameIdentifier;
+
+	return mayBeAtAnYieldStatement() && disambiguateYieldWithLookAhead() ?
+			restrictedIdentifierToken : TokenNameIdentifier;
 }
 int disambiguatedRestrictedKeyword(int restrictedKeywordToken) {
 	int token = restrictedKeywordToken;

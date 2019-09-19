@@ -8,10 +8,6 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  *
- * This is an implementation of an early-draft specification developed under the Java
- * Community Process (JCP) and is made available for testing and evaluation purposes
- * only. The code is not compatible with any specification of the JCP.
- * 
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *     Tom Tromey - patch for readTable(String) as described in http://bugs.eclipse.org/bugs/show_bug.cgi?id=32196
@@ -11638,7 +11634,7 @@ private SwitchStatement createSwitchStatementOrExpression(boolean isStmt) {
 	//if some declaration occurs.
 	this.nestedType--;
 	this.switchNestingLevel--;
-
+	this.scanner.breakPreviewAllowed = this.switchNestingLevel > 0;
 	int length;
 	SwitchStatement switchStatement = isStmt ? new SwitchStatement() : new SwitchExpression();
 	this.expressionLengthPtr--;
@@ -11860,12 +11856,12 @@ protected void consumeStaticOnly() {
 }
 protected void consumeTextBlock() {
 	if (!this.parsingJava13Plus) {
-		problemReporter().previewFeatureNotSupported(this.scanner.rawStart, this.scanner.currentPosition - 1, "Text Blocks", CompilerOptions.VERSION_13); //$NON-NLS-1$
+		problemReporter().previewFeatureNotSupported(this.scanner.startPosition, this.scanner.currentPosition - 1, "Text Blocks", CompilerOptions.VERSION_13); //$NON-NLS-1$
 	} else if (!this.options.enablePreviewFeatures){
-		problemReporter().previewFeatureNotEnabled(this.scanner.rawStart, this.scanner.currentPosition - 1, "Text Blocks"); //$NON-NLS-1$
+		problemReporter().previewFeatureNotEnabled(this.scanner.startPosition, this.scanner.currentPosition - 1, "Text Blocks"); //$NON-NLS-1$
 	} else {
 		if (this.options.isAnyEnabled(IrritantSet.PREVIEW)) {
-			problemReporter().previewFeatureUsed(this.scanner.rawStart, this.scanner.currentPosition - 1);
+			problemReporter().previewFeatureUsed(this.scanner.startPosition, this.scanner.currentPosition - 1);
 		}
 	}
 	char[] textBlock2 = this.scanner.getCurrentTextBlock();
@@ -11985,32 +11981,12 @@ protected void consumeDefaultLabelExpr() {
 			return true;
 		}
 		@Override
-		public boolean visit(DoStatement stmt, BlockScope blockScope) {
-			return false;
-		}
-		@Override
-		public boolean visit(ForStatement stmt, BlockScope blockScope) {
-			return false;
-		}
-		@Override
-		public boolean visit(ForeachStatement stmt, BlockScope blockScope) {
-			return false;
-		}
-		@Override
 		public boolean visit(SwitchStatement stmt, BlockScope blockScope) {
 			return false;
 		}
 		@Override
 		public boolean visit(TypeDeclaration stmt, BlockScope blockScope) {
 			return false;
-		}
-		@Override
-		public boolean visit(WhileStatement stmt, BlockScope blockScope) {
-			return false;
-		}
-		@Override
-		public boolean visit(CaseStatement caseStatement, BlockScope blockScope) {
-			return true; // do nothing by default, keep traversing
 		}
 	}
 	s.resultExpressions = new ArrayList<>(0); // indicates processed
@@ -16845,6 +16821,10 @@ public boolean automatonWillShift(int token, int lastAction) {
 		// Error => false, Shift, Shift/Reduce => true, Accept => impossible. 
 		return lastAction != ERROR_ACTION;
 	}
+}
+@Override
+public boolean isParsingJava13() {
+	return this.parsingJava13Plus;
 }
 @Override
 public boolean isParsingModuleDeclaration() {

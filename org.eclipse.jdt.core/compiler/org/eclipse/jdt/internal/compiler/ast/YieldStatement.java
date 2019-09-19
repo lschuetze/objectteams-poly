@@ -8,10 +8,6 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  *
- * This is an implementation of an early-draft specification developed under the Java
- * Community Process (JCP) and is made available for testing and evaluation purposes
- * only. The code is not compatible with any specification of the JCP.
- * 
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
@@ -44,8 +40,12 @@ public FlowInfo analyseCode(BlockScope currentScope, FlowContext flowContext, Fl
 	// to each of the traversed try statements, so that execution will terminate properly.
 
 
-	// lookup the null label, this should answer the returnContext
-	FlowContext targetContext = flowContext.getTargetContextForDefaultBreak();
+	// lookup the null label, this should answer the returnContext - for implicit yields, the nesting
+	// doesn't occur since it immediately follow '->' and hence identical to default break - ie the 
+	// immediate breakable context is guaranteed to be the one intended;
+	// while explicit yield should move up the parent to the switch expression.
+	FlowContext targetContext = this.isImplicit ? flowContext.getTargetContextForDefaultBreak() :
+		flowContext.getTargetContextForDefaultYield();
 
 	flowInfo = this.expression.analyseCode(currentScope, flowContext, flowInfo);
 	this.expression.checkNPEbyUnboxing(currentScope, flowContext, flowInfo);

@@ -8,10 +8,6 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  *
- * This is an implementation of an early-draft specification developed under the Java
- * Community Process (JCP) and is made available for testing and evaluation purposes
- * only. The code is not compatible with any specification of the JCP.
- *
  * Contributors:
  *     Stephan Herrmann - initial API and implementation
  *     Till Brychcy <register.eclipse@brychcy.de> - Contribution for
@@ -29,6 +25,7 @@ import java.util.Map;
 import junit.framework.Test;
 
 import org.eclipse.jdt.core.JavaCore;
+import org.eclipse.jdt.core.tests.compiler.regression.AbstractRegressionTest.JavacTestOptions.Excuse;
 import org.eclipse.jdt.internal.compiler.classfmt.ClassFileConstants;
 import org.eclipse.jdt.internal.compiler.impl.CompilerOptions;
 
@@ -10973,6 +10970,7 @@ public void testBug481931_binary() {
 			"	                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n" + 
 			"Dead code\n" + 
 			"----------\n";
+	runner.javacTestOptions = Excuse.EclipseWarningConfiguredAsError;
 	runner.runNegativeTest();
 }
 }

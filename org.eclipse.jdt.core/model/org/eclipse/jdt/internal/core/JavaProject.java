@@ -718,7 +718,7 @@ public class JavaProject
 
 				if (target instanceof IResource){
 					// internal target
-					root = getPackageFragmentRoot((IResource) target, entryPath);
+					root = getPackageFragmentRoot((IResource) target, entryPath, resolvedEntry.getExtraAttributes());
 				} else if (target instanceof File) {
 					// external target
 					if (JavaModel.isFile(target)) {
@@ -747,10 +747,10 @@ public class JavaProject
 							}
 							accumulatedRoots.addAll(imageRoots);
 						} else if (JavaModel.isJmod((File) target)) {
-							root = new JModPackageFragmentRoot(entryPath, this);
+							root = new JModPackageFragmentRoot(entryPath, this, resolvedEntry.getExtraAttributes());
 						}
 						else {
-							root = new JarPackageFragmentRoot(entryPath, this);
+							root = new JarPackageFragmentRoot(null, entryPath, this, resolvedEntry.getExtraAttributes());
 						}
 					} else if (((File) target).isDirectory()) {
 						root = new ExternalPackageFragmentRoot(entryPath, this);
@@ -900,8 +900,8 @@ public class JavaProject
 	 */
 	class JImageModuleFragmentBridge extends JarPackageFragmentRoot {
 
-		protected JImageModuleFragmentBridge(IPath externalJarPath) {
-			super(externalJarPath, JavaProject.this);
+		protected JImageModuleFragmentBridge(IPath externalJarPath, IClasspathAttribute[] extraAttributes) {
+			super(null, externalJarPath, JavaProject.this, extraAttributes);
 		}
 		@Override
 		public PackageFragment getPackageFragment(String[] pkgName) {
@@ -911,7 +911,8 @@ public class JavaProject
 		public PackageFragment getPackageFragment(String[] pkgName, String mod) {
 			PackageFragmentRoot realRoot = new JrtPackageFragmentRoot(this.jarPath,
 												mod == null ?  JRTUtil.JAVA_BASE : mod,
-														JavaProject.this);
+												JavaProject.this,
+												this.extraAttributes);
 			return new JarPackageFragment(realRoot, pkgName);
 		}
 		@Override
@@ -941,7 +942,7 @@ public class JavaProject
 
 				@Override
 				public FileVisitResult visitModule(java.nio.file.Path path, String name) throws IOException {
-					JrtPackageFragmentRoot root = new JrtPackageFragmentRoot(imagePath, name, JavaProject.this);
+					JrtPackageFragmentRoot root = new JrtPackageFragmentRoot(imagePath, name, JavaProject.this, resolvedEntry.getExtraAttributes());
 					roots.add(root);
 					if (rootToResolvedEntries != null) 
 						rootToResolvedEntries.put(root, ((ClasspathEntry)resolvedEntry).combineWith((ClasspathEntry) referringEntry));
@@ -2028,6 +2029,7 @@ public class JavaProject
 			case JEM_PACKAGEFRAGMENTROOT:
 				String rootPath = IPackageFragmentRoot.DEFAULT_PACKAGEROOT_PATH;
 				token = null;
+				List<IClasspathAttribute> attributes = new ArrayList<>();
 				while (memento.hasMoreTokens()) {
 					token = memento.nextToken();
 					// https://bugs.eclipse.org/bugs/show_bug.cgi?id=331821
@@ -2042,12 +2044,23 @@ public class JavaProject
 							}
 						}
 						continue;
+					} else if (token == MementoTokenizer.CLASSPATH_ATTRIBUTE) {
+						// PFR memento is optionally trailed by all extra classpath attributes ("=/name=/value"):
+						String name = memento.nextToken();
+						String separator = memento.nextToken();
+						assert separator == MementoTokenizer.CLASSPATH_ATTRIBUTE;
+						String value = memento.nextToken();
+						attributes.add(new ClasspathAttribute(name, value));
+						continue;
 					}
 					rootPath += token;
 				}
+				IClasspathAttribute[] attributesArray = null;
+				if (!attributes.isEmpty()) 
+					attributesArray = attributes.toArray(new IClasspathAttribute[attributes.size()]);
 				JavaElement root = (mod == null) ?
-						(JavaElement)getPackageFragmentRoot(new Path(rootPath)) :
-							new JrtPackageFragmentRoot(new Path(rootPath), mod, this);
+						(JavaElement)getPackageFragmentRoot(new Path(rootPath), attributesArray) :
+							new JrtPackageFragmentRoot(new Path(rootPath), mod, this, attributesArray);
 				if (token != null && (token.charAt(0) == JEM_PACKAGEFRAGMENT)) {
 					return root.getHandleFromMemento(token, memento, owner);
 				} else {
@@ -2220,7 +2233,7 @@ public class JavaProject
 	 * an absolute path that has less than 1 segment. The path may be relative or
 	 * absolute.
 	 */
-	public IPackageFragmentRoot getPackageFragmentRoot(IPath path) {
+	public IPackageFragmentRoot getPackageFragmentRoot(IPath path, IClasspathAttribute[] extraAttributes) {
 		if (!path.isAbsolute()) {
 			path = getPath().append(path);
 		}
@@ -2230,7 +2243,7 @@ public class JavaProject
 		}
 		if (path.getDevice() != null || JavaModel.getExternalTarget(path, true/*check existence*/) != null) {
 			// external path
-			return getPackageFragmentRoot0(path);
+			return getPackageFragmentRoot0(path, extraAttributes);
 		}
 		IWorkspaceRoot workspaceRoot = this.project.getWorkspace().getRoot();
 		IResource resource = workspaceRoot.findMember(path);
@@ -2239,7 +2252,7 @@ public class JavaProject
 			if (path.getFileExtension() != null) {
 				if (!workspaceRoot.getProject(path.segment(0)).exists()) {
 					// assume it is an external ZIP archive
-					return getPackageFragmentRoot0(path);
+					return getPackageFragmentRoot0(path, extraAttributes);
 				} else {
 					// assume it is an internal ZIP archive
 					resource = workspaceRoot.getFile(path);
@@ -2259,7 +2272,7 @@ public class JavaProject
 				resource = workspaceRoot.getFolder(path);
 			}
 		}
-		return getPackageFragmentRoot(resource);
+		return getPackageFragmentRoot(resource, null, extraAttributes);
 	}
 
 	/**
@@ -2267,13 +2280,13 @@ public class JavaProject
 	 */
 	@Override
 	public IPackageFragmentRoot getPackageFragmentRoot(IResource resource) {
-		return getPackageFragmentRoot(resource, null/*no entry path*/);
+		return getPackageFragmentRoot(resource, null/*no entry path*/, null/*no extra attributes*/);
 	}
 
-	IPackageFragmentRoot getPackageFragmentRoot(IResource resource, IPath entryPath) {
+	public IPackageFragmentRoot getPackageFragmentRoot(IResource resource, IPath entryPath, IClasspathAttribute[] extraAttributes) {
 		switch (resource.getType()) {
 			case IResource.FILE:
-				return new JarPackageFragmentRoot(resource, this);
+				return new JarPackageFragmentRoot(resource, resource.getFullPath(), this, extraAttributes);
 			case IResource.FOLDER:
 				if (ExternalFoldersManager.isInternalPathForExternalFolder(resource.getFullPath()))
 					return new ExternalPackageFragmentRoot(resource, entryPath, this);
@@ -2290,26 +2303,26 @@ public class JavaProject
 	 */
 	@Override
 	public IPackageFragmentRoot getPackageFragmentRoot(String externalLibraryPath) {
-		return getPackageFragmentRoot0(JavaProject.canonicalizedPath(new Path(externalLibraryPath)));
+		return getPackageFragmentRoot0(JavaProject.canonicalizedPath(new Path(externalLibraryPath)), null);
 	}
 
 	/*
 	 * no path canonicalization
 	 */
-	public IPackageFragmentRoot getPackageFragmentRoot0(IPath externalLibraryPath) {
+	public IPackageFragmentRoot getPackageFragmentRoot0(IPath externalLibraryPath, IClasspathAttribute[] extraAttributes) {
 		IFolder linkedFolder = JavaModelManager.getExternalManager().getFolder(externalLibraryPath);
 		if (linkedFolder != null)
 			return new ExternalPackageFragmentRoot(linkedFolder, externalLibraryPath, this);
 		if (JavaModelManager.isJrt(externalLibraryPath)) {
-			return this.new JImageModuleFragmentBridge(externalLibraryPath);
+			return this.new JImageModuleFragmentBridge(externalLibraryPath, extraAttributes);
 		}
 		Object target = JavaModel.getTarget(externalLibraryPath, true/*check existency*/);
 		if (target instanceof File && JavaModel.isFile(target)) {
 			if (JavaModel.isJmod((File) target)) {
-				return new JModPackageFragmentRoot(externalLibraryPath, this);
+				return new JModPackageFragmentRoot(externalLibraryPath, this, extraAttributes);
 			}
 		}
-		return new JarPackageFragmentRoot(externalLibraryPath, this);
+		return new JarPackageFragmentRoot(null, externalLibraryPath, this, extraAttributes);
 	}
 
 	/**

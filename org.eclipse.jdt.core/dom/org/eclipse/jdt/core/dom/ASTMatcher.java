@@ -8,10 +8,6 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  *
- * This is an implementation of an early-draft specification developed under the Java
- * Community Process (JCP) and is made available for testing and evaluation purposes
- * only. The code is not compatible with any specification of the JCP.
- * 
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *     Fraunhofer FIRST - extended API and implementation
@@ -2403,7 +2399,7 @@ public class ASTMatcher {
 	 *   different node type or is <code>null</code>
 	 * @noreference This method is not intended to be referenced by clients as it is a part of Java preview feature.
 	 * @nooverride This method is not intended to be re-implemented or extended by clients as it is a part of Java preview feature.
-	 * @since 3.19 BETA_JAVA13
+	 * @since 3.20
 	 */
 	public boolean match(TextBlock node, Object other) {
 		if (!(other instanceof TextBlock)) {
@@ -2877,7 +2873,7 @@ public class ASTMatcher {
 	 *   different node type or is <code>null</code>
 	 * @noreference This method is not intended to be referenced by clients as it is a part of Java preview feature.
 	 * @nooverride This method is not intended to be re-implemented or extended by clients as it is a part of Java preview feature.
-	 * @since 3.19 BETA_JAVA13
+	 * @since 3.20
 	 */
 	public boolean match(YieldStatement node, Object other) {
 		if (!(other instanceof YieldStatement)) {

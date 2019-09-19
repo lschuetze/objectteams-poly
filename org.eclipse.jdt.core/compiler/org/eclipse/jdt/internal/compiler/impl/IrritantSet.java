@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2018 IBM Corporation and others.
+ * Copyright (c) 2000, 2019 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -91,7 +91,7 @@ public class IrritantSet {
 	public static final IrritantSet PREVIEW = new IrritantSet(CompilerOptions.PreviewFeatureUsed);
 	public static final IrritantSet COMPILER_DEFAULT_ERRORS = new IrritantSet(0); // no optional error by default	
 	public static final IrritantSet COMPILER_DEFAULT_WARNINGS = new IrritantSet(0); // see static initializer below
-	public static final IrritantSet COMPILER_DEFAULT_INFOS = new IrritantSet(0); // As of now, no default values
+	public static final IrritantSet COMPILER_DEFAULT_INFOS = new IrritantSet(0); // see static initializer below
 //{ObjectTeams: new irritants:
 	public static final IrritantSet NOT_EXACTLY_ONE_BASECALL = new IrritantSet(
             CompilerOptions.NotExactlyOneBasecall);
@@ -142,7 +142,8 @@ public class IrritantSet {
 		COMPILER_DEFAULT_INFOS
 		// group-2 infos enabled by default
 		.set(
-			CompilerOptions.UnlikelyEqualsArgumentType);
+			CompilerOptions.UnlikelyEqualsArgumentType
+			| CompilerOptions.SuppressWarningsNotAnalysed);
 		
 		COMPILER_DEFAULT_WARNINGS
 //{ObjectTeams: default to warning (group 3):
