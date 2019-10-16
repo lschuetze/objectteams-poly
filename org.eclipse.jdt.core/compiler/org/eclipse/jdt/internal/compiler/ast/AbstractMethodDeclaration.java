@@ -581,7 +581,7 @@ public abstract class AbstractMethodDeclaration
 				syntheticArgumentBinding.recordInitializationEndPC(classFile.codeStream.position);
 // SH}
 			try {
-				classFile.completeCodeAttribute(codeAttributeOffset);
+				classFile.completeCodeAttribute(codeAttributeOffset,this.scope);
 			} catch(NegativeArraySizeException e) {
 				throw new AbortMethod(this.scope.referenceCompilationUnit().compilationResult, null);
 			}

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2017 IBM Corporation and others.
+ * Copyright (c) 2000, 2019 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -32,6 +32,7 @@ import org.eclipse.jdt.internal.compiler.lookup.ArrayBinding;
 import org.eclipse.jdt.internal.compiler.lookup.BaseTypeBinding;
 import org.eclipse.jdt.internal.compiler.lookup.Binding;
 import org.eclipse.jdt.internal.compiler.lookup.CaptureBinding;
+import org.eclipse.jdt.internal.compiler.lookup.CaptureBinding18;
 import org.eclipse.jdt.internal.compiler.lookup.FieldBinding;
 import org.eclipse.jdt.internal.compiler.lookup.IntersectionTypeBinding18;
 import org.eclipse.jdt.internal.compiler.lookup.MethodBinding;
@@ -596,7 +597,7 @@ class TypeBinding implements ITypeBinding {
 		if (length != 0) {
 //{ObjectTeams: make synth role ifc transparent by transitively fetching it's super interfaces:
 //          accumulate into list not array because we may exceed length:
-			List/*<ITypeBinding>*/ interfacesList = new ArrayList(length);
+			List<ITypeBinding> interfacesList = new ArrayList<>(length);
 /* orig:
 			ITypeBinding[] newInterfaces = new ITypeBinding[length];
 			int interfacesCounter = 0;
@@ -631,7 +632,7 @@ class TypeBinding implements ITypeBinding {
 //  OT: collect into list instead of array:
 				interfacesList.add(typeBinding);
 			}
-			ITypeBinding[] newInterfaces = (ITypeBinding[]) interfacesList.toArray(new ITypeBinding[interfacesList.size()]);
+			ITypeBinding[] newInterfaces = interfacesList.toArray(new ITypeBinding[interfacesList.size()]);
 /*    orig:
 				newInterfaces[interfacesCounter++] = typeBinding;
 			}
@@ -1210,7 +1211,7 @@ class TypeBinding implements ITypeBinding {
 
 	@Override
 	public boolean isCapture() {
-		return this.binding.isCapture();
+		return this.binding.isCapture() && !(this.binding instanceof CaptureBinding18);
 	}
 
 	@Override
@@ -1551,13 +1552,22 @@ class TypeBinding implements ITypeBinding {
 				return ((WildcardBinding) this.binding).boundKind == Wildcard.EXTENDS;
 			case Binding.INTERSECTION_TYPE :
 				return true;
+			case Binding.TYPE_PARAMETER:
+				if (this.binding instanceof CaptureBinding18) {
+					CaptureBinding18 captureBinding18 = (CaptureBinding18) this.binding;
+					org.eclipse.jdt.internal.compiler.lookup.TypeBinding upperBound = captureBinding18.upperBound();
+					if (upperBound != null && upperBound.id != TypeIds.T_JavaLangObject) {
+						return true;
+					}
+				}
+				return false;
 		}
 		return false;
 	}
 
 	@Override
 	public boolean isWildcardType() {
-		return this.binding.isWildcard();
+		return this.binding.isWildcard() || this.binding instanceof CaptureBinding18;
 	}
 
 //{ObjectTeams: additional queries based on this.binding:

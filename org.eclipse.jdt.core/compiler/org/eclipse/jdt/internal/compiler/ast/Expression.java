@@ -1512,4 +1512,8 @@ public Expression [] getPolyExpressions() {
 public boolean isPotentiallyCompatibleWith(TypeBinding targetType, Scope scope) {
 	return isCompatibleWith(targetType, scope); // for all but functional expressions, potential compatibility is the same as compatibility.
 }
+
+protected Constant optimizedNullComparisonConstant() {
+	return Constant.NotAConstant;
+}
 }

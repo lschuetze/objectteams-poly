@@ -212,6 +212,7 @@ public class Clinit extends AbstractMethodDeclaration {
 		if (this.assertionSyntheticFieldBinding != null) {
 			// generate code related to the activation of assertion for this class
 			codeStream.generateClassLiteralAccessForType(
+					classScope,
 					classScope.outerMostClassScope().enclosingSourceType(),
 					this.classLiteralSyntheticField);
 			codeStream.invokeJavaLangClassDesiredAssertionStatus();
@@ -385,7 +386,7 @@ public class Clinit extends AbstractMethodDeclaration {
 			}
 			// Record the end of the clinit: point to the declaration of the class
 			codeStream.recordPositionsFrom(0, declaringType.sourceStart);
-			classFile.completeCodeAttributeForClinit(codeAttributeOffset);
+			classFile.completeCodeAttributeForClinit(codeAttributeOffset, classScope);
 		}
 	}
 
