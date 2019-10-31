@@ -135,6 +135,10 @@ public class AspectBindingRegistry {
 			IConfigurationElement[] teams = currentBindingConfig.getChildren(TEAM);
 			int teamCount = teams.length;
 			for (int j = 0; j < teams.length; j++) if (teams[j].getAttribute(CLASS) == null) teamCount --;
+			if (teamCount == 0) {
+				log(IStatus.WARNING, "aspectbinding of "+aspectBundleId+" for base "+baseBundleId+" defines no team class");
+				continue;
+			}
 			AspectBinding binding = new AspectBinding(aspectBundleId,
 														aspectBundle,
 														baseBundle,
