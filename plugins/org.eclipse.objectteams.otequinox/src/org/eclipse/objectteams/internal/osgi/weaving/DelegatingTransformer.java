@@ -27,6 +27,7 @@ import java.util.Collection;
 import java.util.EnumSet;
 
 import org.eclipse.jdt.annotation.NonNull;
+import org.eclipse.objectteams.internal.osgi.weaving.ASMByteCodeAnalyzer.ClassInformation;
 import org.eclipse.objectteams.internal.osgi.weaving.OTWeavingHook.WeavingReason;
 import org.eclipse.objectteams.internal.osgi.weaving.OTWeavingHook.WeavingScheme;
 import org.eclipse.objectteams.internal.osgi.weaving.Util.ProfileKind;
@@ -125,6 +126,12 @@ public abstract class DelegatingTransformer {
 				// error output during redefinition tends to swallow the stack, print it now:
 				System.err.println("Error redefining "+clazz.getName());
 				e.printStackTrace();
+				ClassInformation classInformation = new ASMByteCodeAnalyzer().getClassInformation(bytecode, clazz.getName());
+				if (!classInformation.getName().equals(clazz.getName())) {
+					System.err.println("Name mismatch "+clazz.getName()+" vs "+classInformation.getName());
+				} else if (!classInformation.getSuperClassName().equals(clazz.getSuperclass().getName())) {
+					System.err.println("Superclass mismatch "+clazz.getSuperclass().getName()+" vs "+classInformation.getSuperClassName());
+				}
 				throw e;
 			}
 		}

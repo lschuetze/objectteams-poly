@@ -906,7 +906,7 @@ public abstract class AbstractBoundClass implements IBoundClass {
 		if (this.hierarchyIsCallinAffected)
 			return true;
 		AbstractBoundClass zuper = getSuperclass();
-		if (!zuper.isJavaLangObject()) {
+		if (zuper != null && !zuper.isJavaLangObject()) {
 			if (zuper.hierarchyIsCallinAffected())
 				return this.hierarchyIsCallinAffected = true;
 		}

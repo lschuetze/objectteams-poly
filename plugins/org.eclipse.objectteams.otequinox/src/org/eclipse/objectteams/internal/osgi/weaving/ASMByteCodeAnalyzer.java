@@ -1,7 +1,7 @@
 /**********************************************************************
  * This file is part of "Object Teams Development Tooling"-Software
  * 
- * Copyright 2008, 2014 Oliver Frank and others.
+ * Copyright 2008, 2019 Oliver Frank and others.
  * 
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -42,11 +42,13 @@ public class ASMByteCodeAnalyzer {
 
 	public static class ClassInformation {
 		private int modifiers;
+		private String name;
 		private String superClassName;
 		private String[] superInterfaceNames;
 
 		ClassInformation(ClassReader classReader) {
 			this.modifiers = classReader.getAccess();
+			this.name = classReader.getClassName();
 			this.superClassName = classReader.getSuperName();
 			this.superInterfaceNames = classReader.getInterfaces();
 		}
@@ -71,6 +73,12 @@ public class ASMByteCodeAnalyzer {
 					superInterfaceNames[i] = superInterfaceNames[i].replace('/', '.');
 				}
 			return superInterfaceNames;
+		}
+
+		public String getName() {
+			if (this.name != null)
+				return this.name.replace('/', '.');
+			return "<no name>";
 		}
 	}
 
