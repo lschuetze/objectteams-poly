@@ -432,7 +432,7 @@ public class Scanner implements TerminalTokens {
 	public static final int HIGH_SURROGATE_MAX_VALUE = 0xDBFF;
 	public static final int LOW_SURROGATE_MAX_VALUE = 0xDFFF;
 
-	// raw string support - 11
+	// text block support - 13
 	/* package */ int rawStart = -1;
 
 public Scanner() {
@@ -834,6 +834,10 @@ public char[] getCurrentTextBlock() {
 	List<char[]> list = new ArrayList<>(lines.length);
 	for(int i = 0; i < lines.length; i++) {
 		char[] line = lines[i];
+		if (i + 1 == size && line.length == 0) {
+			list.add(line);
+			break;
+		}
 		char[][] sub = CharOperation.splitOn('\r', line);
 		for (char[] cs : sub) {
 			if (cs.length > 0) {
@@ -860,7 +864,7 @@ public char[] getCurrentTextBlock() {
 				}
 			}
 		}
-		if (!blank) {
+		if (!blank || (i+1 == size)) {
 			if (prefix < 0 || whitespaces < prefix) {
  				prefix = whitespaces;
 			}
@@ -1936,7 +1940,9 @@ protected int getNextToken0() throws InvalidInputException {
 								lastQuotePos = this.currentPosition;
 								// look for text block delimiter
 								if (scanForTextBlockClose()) {
-									if (this.source[this.currentPosition + 2] == '"') {
+									// Account for just the snippet being passed around
+									// If already at the EOF, bail out.
+									if (this.currentPosition + 2 < this.source.length && this.source[this.currentPosition + 2] == '"') {
 										terminators++;
 										if (terminators > 2)
 											throw new InvalidInputException(UNTERMINATED_TEXT_BLOCK);
@@ -2005,6 +2011,9 @@ protected int getNextToken0() throws InvalidInputException {
 								}
 							}
 							// consume next character
+							if (this.currentPosition >= this.eofPosition) {
+								break;
+							}
 							this.unicodeAsBackSlash = false;
 							if (((this.currentCharacter = this.source[this.currentPosition++]) == '\\')
 								&& (this.source[this.currentPosition] == 'u')) {
@@ -2505,7 +2514,10 @@ public final void jumpOverMethodBody(int found) {
 									case '\n' :
 										pushLineSeparator();
 										//$FALL-THROUGH$
-									default: 
+									default:
+										if (this.currentCharacter == '\\' && this.source[this.currentPosition++] == '"') {
+											this.currentPosition++;
+										}
 										this.currentCharacter = this.source[this.currentPosition++];
 										continue Inner;
 								}
