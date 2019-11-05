@@ -2,7 +2,7 @@
 <xsl:stylesheet version="1.0" xmlns:xsl="http://www.w3.org/1999/XSL/Transform" xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns:fn="http://www.w3.org/2004/07/xpath-functions" xmlns:xdt="http://www.w3.org/2004/07/xpath-datatypes" exclude-result-prefixes="xs fn xdt">
    <xsl:param name="version"/>
    <xsl:param name="versionnext" />
-   <xsl:template match="lifeCycle/required[@name='org.eclipse.jdt.core' and @greedy='false']">
+   <xsl:template match="lifeCycle/required[@name='org.eclipse.jdt.feature.group' and @greedy='false']">
         <xsl:copy>
                 <xsl:attribute name="namespace"><xsl:value-of select="@namespace" /></xsl:attribute>
                 <xsl:attribute name="name">org.eclipse.jdt.core</xsl:attribute>
