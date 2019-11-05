@@ -25,7 +25,7 @@
         		<param name="versionnext" expression="${jdt.feature.version.next}"/>
                 <mapper type="glob" from="${content.origFile}" to="${content.transFile}"/>
         </xslt>
-        <move file="${otdtUpdatesDir}/${content.transFile}" tofile="${otdtUpdatesDir}/${content.origFile}" overwrite="yes"/>	
+        <copy file="${otdtUpdatesDir}/${content.transFile}" tofile="${otdtUpdatesDir}/${content.origFile}" overwrite="yes"/>	
     </target>
 
     <target name="installFeature">
