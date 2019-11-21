@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2018 IBM Corporation and others.
+ * Copyright (c) 2000, 2019 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -32,7 +32,7 @@ import org.eclipse.jdt.internal.compiler.lookup.TypeBinding;
 import org.eclipse.objectteams.otdt.internal.core.compiler.lookup.OTClassScope;
 
 
-public class JavadocSingleTypeReference extends SingleTypeReference {
+public class JavadocSingleTypeReference extends SingleTypeReference implements IJavadocTypeReference {
 
 	public int tagSourceStart, tagSourceEnd;
 	public PackageBinding packageBinding;
@@ -153,5 +153,15 @@ public class JavadocSingleTypeReference extends SingleTypeReference {
 	public void traverse(ASTVisitor visitor, ClassScope scope) {
 		visitor.visit(this, scope);
 		visitor.endVisit(this, scope);
+	}
+
+	@Override
+	public int getTagSourceStart() {
+		return this.tagSourceStart;
+	}
+
+	@Override
+	public int getTagSourceEnd() {
+		return this.tagSourceEnd;
 	}
 }

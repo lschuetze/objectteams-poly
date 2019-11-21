@@ -1381,37 +1381,38 @@ public long getAnnotationTagBits() {
 	if (!isPrototype())
 		return this.prototype.getAnnotationTagBits();
 	
-	if ((this.tagBits & TagBits.EndHierarchyCheck) == 0) {
-		CompilationUnitScope pkgCUS = this.scope.compilationUnitScope();
-		boolean current = pkgCUS.connectingHierarchy;
-		pkgCUS.connectingHierarchy = true;
-		try {
-			return internalGetAnnotationTagBits();
-		} finally {
-			pkgCUS.connectingHierarchy = current;
+	if ((this.tagBits & TagBits.AnnotationResolved) == 0 && this.scope != null) {
+		if ((this.tagBits & TagBits.EndHierarchyCheck) == 0) {
+			CompilationUnitScope pkgCUS = this.scope.compilationUnitScope();
+			boolean current = pkgCUS.connectingHierarchy;
+			pkgCUS.connectingHierarchy = true;
+			try {
+				initAnnotationTagBits();
+			} finally {
+				pkgCUS.connectingHierarchy = current;
+			}
+		} else {
+			initAnnotationTagBits();
 		}
 	}
-	return internalGetAnnotationTagBits();
+	return this.tagBits;
 }
-private long internalGetAnnotationTagBits() {
-	if ((this.tagBits & TagBits.AnnotationResolved) == 0 && this.scope != null) {
-		TypeDeclaration typeDecl = this.scope.referenceContext;
-		boolean old = typeDecl.staticInitializerScope.insideTypeAnnotation;
-		try {
-			typeDecl.staticInitializerScope.insideTypeAnnotation = true;
-			ASTNode.resolveAnnotations(typeDecl.staticInitializerScope, typeDecl.annotations, this);
-		} finally {
-			typeDecl.staticInitializerScope.insideTypeAnnotation = old;
-		}
-		if ((this.tagBits & TagBits.AnnotationDeprecated) != 0)
-			this.modifiers |= ClassFileConstants.AccDeprecated;
+private void initAnnotationTagBits() {
+	TypeDeclaration typeDecl = this.scope.referenceContext;
+	boolean old = typeDecl.staticInitializerScope.insideTypeAnnotation;
+	try {
+		typeDecl.staticInitializerScope.insideTypeAnnotation = true;
+		ASTNode.resolveAnnotations(typeDecl.staticInitializerScope, typeDecl.annotations, this);
+	} finally {
+		typeDecl.staticInitializerScope.insideTypeAnnotation = old;
 //{ObjectTeams: @Instantation can only be applied to role classes		
 		if (   (this.tagBits & TagBits.AnnotationInstantiation) != 0
 			&& (!isRole() || isInterface()))
 			this.scope.problemReporter().instantiationAnnotationInNonRole(typeDecl);
 // SH}
 	}
-	return this.tagBits;
+	if ((this.tagBits & TagBits.AnnotationDeprecated) != 0)
+		this.modifiers |= ClassFileConstants.AccDeprecated;
 }
 public MethodBinding[] getDefaultAbstractMethods() {
 	if (!isPrototype())
