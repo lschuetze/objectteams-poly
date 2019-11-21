@@ -9,6 +9,6 @@ Require-Bundle: org.eclipse.core.runtime,
  org.eclipse.objectteams.otequinox,
  Trac304b;bundle-version="1.0.0"
 Bundle-ActivationPolicy: lazy
-Bundle-RequiredExecutionEnvironment: J2SE-1.5
+Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Import-Package: trac304b
 Export-Package: trac304ot;ot-aspect-host=Trac304ot
