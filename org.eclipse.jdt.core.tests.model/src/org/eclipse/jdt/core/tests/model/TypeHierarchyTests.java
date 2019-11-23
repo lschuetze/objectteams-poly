@@ -17,6 +17,8 @@ package org.eclipse.jdt.core.tests.model;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.Arrays;
+import java.util.Comparator;
 import java.util.HashMap;
 
 import junit.framework.Test;
@@ -914,6 +916,9 @@ public void testGeneric06() throws CoreException {
 	IType type = getClassFile("TypeHierarchy15","lib15.jar", "util", "AbstractList.class").getType();
 	ITypeHierarchy hierarchy = type.newTypeHierarchy(null);
 	IType[] subtypes = hierarchy.getSubtypes(type);
+//{ObjectTeams: protect against unstable/undefined order:
+	Arrays.sort(subtypes, Comparator.comparing(IType::getKey));
+// SH}
 	assertEquals("Unexpected key", "Lutil/Map<TK;TV;>;", subtypes.length < 2 ? null : subtypes[1].getKey());
 }
 /*
