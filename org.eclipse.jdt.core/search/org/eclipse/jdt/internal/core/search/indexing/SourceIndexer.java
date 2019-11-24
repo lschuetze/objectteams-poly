@@ -180,7 +180,7 @@ public class SourceIndexer extends AbstractIndexer implements ITypeRequestor, Su
 			this.lookupEnvironment = new LookupEnvironment(this, this.options, problemReporter, nameEnvironment);
 			reduceParseTree(this.cud);
 //{ObjectTeams: need Dependencies configured:
-		  try (Config config = Dependencies.setup(this, this.basicParser, this.lookupEnvironment, true, false))
+		  try (Config config = Dependencies.setup(this, this.basicParser, this.lookupEnvironment, true, true))
 		  {
 // orig:
 			this.lookupEnvironment.buildTypeBindings(this.cud, null);
