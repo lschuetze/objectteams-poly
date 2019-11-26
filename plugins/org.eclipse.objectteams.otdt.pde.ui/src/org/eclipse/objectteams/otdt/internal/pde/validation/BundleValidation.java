@@ -579,10 +579,10 @@ public team class BundleValidation
 					int semi = bundleSymbolicName.indexOf(';');
 					if (semi != -1)
 						bundleSymbolicName = bundleSymbolicName.substring(0, semi); // strip of attributes/directives like ;singleton:=true
-					addMarkerAttribute(marker, "export", unmatched+";ot-aspect-host=\""+bundleSymbolicName+"\""); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+					addMarkerAttribute(marker, "packages", unmatched+";ot-aspect-host=\""+bundleSymbolicName+"\""); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 				}
 				else {
-					addMarkerAttribute(marker, "export", unmatched); //$NON-NLS-1$
+					addMarkerAttribute(marker, "packages", unmatched); //$NON-NLS-1$
 				}
 			}
 		}
@@ -615,9 +615,9 @@ public team class BundleValidation
 		String packageName;
 		String export; // extended version with ot-aspect-host attribute
 		public ExportAspectPackageResolution(IMarker marker) {
-			super(marker, AbstractPDEMarkerResolution.CREATE_TYPE, marker.getAttribute("export", null)); //$NON-NLS-1$
+			super(marker, AbstractPDEMarkerResolution.CREATE_TYPE, marker.getAttribute("packages", null)); //$NON-NLS-1$
 			this.packageName = marker.getAttribute("package", null); //$NON-NLS-1$
-			this.export = marker.getAttribute("export", null); //$NON-NLS-1$
+			this.export = marker.getAttribute("packages", null); //$NON-NLS-1$
 		}
 		@Override
 		public String getLabel() {
