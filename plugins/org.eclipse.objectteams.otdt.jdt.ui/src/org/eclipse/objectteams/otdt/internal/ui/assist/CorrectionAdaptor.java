@@ -28,6 +28,7 @@ import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.ClassInstanceCreation;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.ConstructorInvocation;
+import org.eclipse.jdt.core.dom.EnumConstantDeclaration;
 import org.eclipse.jdt.core.dom.Expression;
 import org.eclipse.jdt.core.dom.IBinding;
 import org.eclipse.jdt.core.dom.IMethodBinding;
@@ -202,18 +203,23 @@ public team class CorrectionAdaptor {
 					arguments= ((ConstructorInvocation) selectedNode).arguments();
 					recursiveConstructor= ASTResolving.findParentMethodDeclaration(selectedNode).resolveBinding();
 				}
+//{ObjectTeams: similar to above but with different super class computation:
 			} else if (type == ASTNode.TSUPER_CONSTRUCTOR_INVOCATION) {
 				ITypeBinding typeBinding= Bindings.getBindingOfParentType(selectedNode);
 				if (typeBinding != null && !typeBinding.isAnonymous()) {
-//{ObjectTeams: different super class computation:
-/* orig:
-					targetBinding= typeBinding.getSuperclass();
-  :giro */
 					targetBinding= getTSuperClass(typeBinding);
-// SH}
 					arguments= ((TSuperConstructorInvocation) selectedNode).getArguments();
 				}
-// other cases already handled in the base method				
+// SH}
+			}
+
+			if (selectedNode.getParent() instanceof EnumConstantDeclaration) {
+				EnumConstantDeclaration enumNode= (EnumConstantDeclaration) selectedNode.getParent();
+				ITypeBinding typeBinding= Bindings.getBindingOfParentType(selectedNode);
+				if (typeBinding != null && !typeBinding.isAnonymous()) {
+					targetBinding= typeBinding;
+					arguments= enumNode.arguments();
+				}
 			}
 			if (targetBinding == null) {
 				return;
@@ -222,10 +228,8 @@ public team class CorrectionAdaptor {
 			if (targetBinding.isRole() && targetBinding.isInterface())
 				targetBinding = targetBinding.getClassPart();
 // SH}
-			IMethodBinding[] methods= targetBinding.getDeclaredMethods();
-			ArrayList<IMethodBinding> similarElements= new ArrayList<IMethodBinding>();
-			for (int i= 0; i < methods.length; i++) {
-				IMethodBinding curr= methods[i];
+			ArrayList<IMethodBinding> similarElements= new ArrayList<>();
+			for (IMethodBinding curr : targetBinding.getDeclaredMethods()) {
 				if (curr.isConstructor() && recursiveConstructor != curr) {
 					similarElements.add(curr); // similar elements can contain a implicit default constructor
 				}
@@ -238,7 +242,7 @@ public team class CorrectionAdaptor {
 	
 				ICompilationUnit targetCU= ASTResolving.findCompilationUnitForBinding(cu, astRoot, targetDecl);
 				if (targetCU != null) {
-					String[] args= new String[] { ASTResolving.getMethodSignature( ASTResolving.getTypeSignature(targetDecl), getParameterTypes(arguments), false) };
+					String[] args= new String[] { org.eclipse.jdt.internal.ui.text.correction.ASTResolving.getMethodSignature( org.eclipse.jdt.internal.ui.text.correction.ASTResolving.getTypeSignature(targetDecl), getParameterTypes(arguments), false) };
 					String label= Messages.format(CorrectionMessages.UnresolvedElementsSubProcessor_createconstructor_description, args);
 					Image image= JavaElementImageProvider.getDecoratedImage(JavaPluginImages.DESC_MISC_PUBLIC, JavaElementImageDescriptor.CONSTRUCTOR, JavaElementImageProvider.SMALL_SIZE);
 					proposals.add(new NewMethodCorrectionProposal(label, targetCU, selectedNode, arguments, targetDecl, IProposalRelevance.CREATE_CONSTRUCTOR, image));
