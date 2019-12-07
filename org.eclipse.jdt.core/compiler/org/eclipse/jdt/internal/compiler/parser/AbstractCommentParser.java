@@ -469,7 +469,6 @@ public abstract class AbstractCommentParser implements JavadocTagConstants {
 			}
 			updateDocComment();
 		} catch (Exception ex) {
-			ex.printStackTrace();
 			validComment = false;
 		}
 		return validComment;
