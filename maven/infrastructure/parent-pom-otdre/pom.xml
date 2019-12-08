@@ -4,7 +4,7 @@
   	<parent>
 		<groupId>org.eclipse.objectteams</groupId>
 		<artifactId>objectteams-parent-pom</artifactId>
-		<version>2.7.3</version>
+		<version>2.7.6</version>
   	</parent>
   
 	<artifactId>objectteams-otdre-parent-pom</artifactId>
@@ -74,7 +74,7 @@
 		<objectteams-otre.version>${otdre.version}</objectteams-otre.version>
 		
 		<!-- Select ASM: -->
-		<asm.version>6.1.1</asm.version>
+		<asm.version>7.1</asm.version>
 		<otj.bytecode.lib.groupId>org.ow2.asm</otj.bytecode.lib.groupId>
 		<otj.bytecode.lib.artifactId>asm</otj.bytecode.lib.artifactId>
 		<otj.bytecode.lib.version>${asm.version}</otj.bytecode.lib.version>
