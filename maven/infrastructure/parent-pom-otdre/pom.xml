@@ -5,6 +5,7 @@
 		<groupId>org.eclipse.objectteams</groupId>
 		<artifactId>objectteams-parent-pom</artifactId>
 		<version>2.7.6</version>
+		<relativePath>../parent-pom</relativePath>
   	</parent>
   
 	<artifactId>objectteams-otdre-parent-pom</artifactId>
