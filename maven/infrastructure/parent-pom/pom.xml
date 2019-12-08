@@ -94,8 +94,7 @@
 
 		<!-- Versions of dependencies: -->
 		<bcel.version>5.2</bcel.version>
-		<tycho.version>1.2.0</tycho.version>
-		<apt.version>1.3.700</apt.version> <!-- pulled from maven central to be compatible with latest JDT -->
+		<tycho.version>1.5.0</tycho.version>
 		
 		<!-- **** Main switch for OTRE vs. OTDRE (here we default to OTRE): **** -->
 		<otj.weaving.scheme>otre</otj.weaving.scheme>
@@ -142,7 +141,7 @@
 			<plugin>
         		<groupId>org.apache.maven.plugins</groupId>
         		<artifactId>maven-project-info-reports-plugin</artifactId>
-        		<version>2.9</version>
+        		<version>3.0.0</version>
       		</plugin>
 		</plugins>
 	</reporting>
@@ -157,7 +156,7 @@
 						Using java 1.8 language level is recommended, default is 1.3, OT/J needs 1.5 minimum
 					-->
 					<artifactId>maven-compiler-plugin</artifactId>
-					<version>3.5.1</version>
+					<version>3.8.1</version>
 					<configuration>
 						<source>1.8</source>
 						<target>1.8</target>
@@ -175,11 +174,7 @@
 								<!-- Exclude the original JDT/Core to be replaced by the OT/J variant: -->
 								<exclusion>
 									<groupId>org.eclipse.jdt</groupId>
-									<artifactId>org.eclipse.jdt.core</artifactId>
-								</exclusion>
-								<exclusion>
-									<groupId>org.eclipse.jdt</groupId>
-									<artifactId>org.eclipse.jdt.compiler.apt</artifactId>
+									<artifactId>ecj</artifactId>
 								</exclusion>
 							</exclusions>
 						</dependency>
@@ -188,18 +183,6 @@
 							<groupId>org.eclipse.objectteams</groupId>
 							<artifactId>objectteams-otj-compiler</artifactId>
 							<version>${otj.version}</version>
-						</dependency>
-						<dependency>
-							<groupId>org.eclipse.jdt</groupId>
-							<artifactId>org.eclipse.jdt.compiler.apt</artifactId>
-							<version>${apt.version}</version>
-							<exclusions>
-								<!-- Exclude the original JDT/Core to be replaced by the OT/J variant: -->
-								<exclusion>
-									<groupId>org.eclipse.jdt</groupId>
-									<artifactId>org.eclipse.jdt.core</artifactId>
-								</exclusion>
-							</exclusions>
 						</dependency>
 					</dependencies>
 				</plugin>
@@ -218,11 +201,7 @@
 								<!-- Exclude the original JDT/Core to be replaced by the OT/J variant: -->
 								<exclusion>
 									<groupId>org.eclipse.jdt</groupId>
-									<artifactId>org.eclipse.jdt.core</artifactId>
-								</exclusion>
-								<exclusion>
-									<groupId>org.eclipse.jdt</groupId>
-									<artifactId>org.eclipse.jdt.compiler.apt</artifactId>
+									<artifactId>ecj</artifactId>
 								</exclusion>
 							</exclusions>
 						</dependency>
@@ -231,11 +210,6 @@
 							<groupId>org.eclipse.objectteams</groupId>
 							<artifactId>objectteams-otj-compiler</artifactId>
 							<version>${otj.version}</version>
-						</dependency>
-						<dependency>
-							<groupId>org.eclipse.jdt</groupId>
-							<artifactId>org.eclipse.jdt.compiler.apt</artifactId>
-							<version>${apt.version}</version>
 						</dependency>
 					</dependencies>
 				</plugin>
@@ -264,7 +238,7 @@
 				<plugin>
 					<groupId>org.apache.maven.plugins</groupId>
 					<artifactId>maven-site-plugin</artifactId>
-					<version>3.7</version>
+					<version>3.8.2</version>
 				</plugin>
 			</plugins>
 		</pluginManagement>
@@ -272,7 +246,7 @@
 			<extension>
 				<groupId>org.apache.maven.wagon</groupId>
 				<artifactId>wagon-ssh-external</artifactId>
-				<version>3.0.0</version>
+				<version>3.3.4</version>
 			</extension>
 		</extensions>
 	</build>

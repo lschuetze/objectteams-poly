@@ -56,7 +56,7 @@
 
 		<!-- Object Teams versions, update manually: 					-->
 		<!--   version of the signed ecotj jar file:	 				-->
-		<ecotj.version>R-2.7.6-201912070820-signed</ecotj.version>
+		<ecotj.version>R-2.7.6-201912070821-signed</ecotj.version>
 		<export.version>2.7.6.201912070827</export.version>
 		<!--   version of the org.eclipse.objectteams.runtime plugin:	-->
 		<otre.version>2.7.0.201806120901</otre.version>
@@ -97,7 +97,7 @@
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-deploy-plugin</artifactId>
-				<version>2.4</version>
+				<version>3.0.0-M1</version>
 				<executions>
 					<execution>
 						<id>deploy-ot-runtime-as-maven-artifact</id>
@@ -217,7 +217,7 @@
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-install-plugin</artifactId>
-				<version>2.3</version>
+				<version>3.0.0-M1</version>
 				<executions>
 					<execution>
 						<id>install-ot-runtime-as-maven-artifact</id>
