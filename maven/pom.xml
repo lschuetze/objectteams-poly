@@ -3,16 +3,17 @@
 	<modelVersion>4.0.0</modelVersion>
 	
 	<groupId>org.eclipse.objectteams</groupId>
-	<artifactId>infrastructure-parent</artifactId>
+	<artifactId>release-parent</artifactId>
 	<version>2.7.6</version>
 	<packaging>pom</packaging>
 	
-	<name>Object Teams infrastructure parent pom</name>
+	<name>Object Teams parent pom for releasing to maven</name>
 
 	<url>http://download.eclipse.org/objectteams/maven/3/sites/${project.artifactId}</url>
 
 	<description>
-		This is the parent pom for releasing Object Teams artifacts for use in Maven3.
+		This is the parent pom for releasing Object Teams artifacts for use in Maven3,
+		along with an example test project.
 	</description>
 
 	<licenses>
@@ -67,8 +68,7 @@
 	
 
 	<modules>
-		<module>parent-pom/pom.xml</module>
-		<module>parent-pom-otdre/pom.xml</module>
-		<module>artifact-deployer/pom.xml</module>
+		<module>infrastructure/pom.xml</module>
+		<module>testproject/pom.xml</module>
 	</modules>
 </project>

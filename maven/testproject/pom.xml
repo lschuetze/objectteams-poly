@@ -6,6 +6,7 @@
 		<groupId>org.eclipse.objectteams</groupId>
 		<artifactId>objectteams-otdre-parent-pom</artifactId>
 		<version>2.7.6</version>
+		<relativePath>../infrastructure/parent-pom-otdre/pom.xml</relativePath>
 	</parent>
 
 	<packaging>jar</packaging>
