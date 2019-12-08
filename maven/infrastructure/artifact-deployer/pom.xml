@@ -328,7 +328,7 @@
 		<profile>
 			<id>jipp.eclipse.org</id>
 			<properties>
-				<otre.export.dir>/jobs/genie.objectteams/release-for-maven/ws/otre-export</otre.export.dir>
+				<otre.export.dir>/home/hudson/genie.objectteams/.jenkins/jobs/release-for-maven/workspace/otre-export</otre.export.dir>
 				<ecj.export.dir>/home/data/httpd/download.eclipse.org/objectteams/ecotj</ecj.export.dir>
 			</properties>
 			
