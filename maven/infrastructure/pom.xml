@@ -53,6 +53,19 @@
 		<url>http://bugs.eclipse.org/bugs</url>
 	</issueManagement>
 
+	<distributionManagement>
+		<repository>
+			<id>otRepo</id>
+			<name>Object Teams repository for Maven 3</name>
+			<url>${protocol}://${ot.host}:${ot.maven.repository.basepath}/repository/${project.artifactId}</url>
+		</repository>
+		<site>
+			<id>otSiteRepo</id>
+			<name>Object Teams sites repository for Maven 3</name>
+			<url>${protocol}://${ot.host}:${ot.maven.repository.basepath}/sites/${project.artifactId}</url>
+		</site>
+	</distributionManagement>
+
 	<repositories>
 		<repository>
 			<id>ObjectTeamsRepository</id>
