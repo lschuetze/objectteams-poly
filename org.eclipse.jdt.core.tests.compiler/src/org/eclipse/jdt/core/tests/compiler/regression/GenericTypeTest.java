@@ -52829,7 +52829,7 @@ protected static class Duration implements Comparable<Duration> {
 
 	@Override
 	public String toString() {
-		return "#"+index + " " + durationMs + "ms" + (isExcluded?" (excluded)":"");
+		return "#"+this.index + " " + this.durationMs + "ms" + (this.isExcluded?" (excluded)":"");
 	}
 }
 

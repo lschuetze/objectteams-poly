@@ -1321,7 +1321,7 @@ public class WrapPreparator extends ASTVisitor {
 	public void finishUp(ASTNode astRoot, List<IRegion> regions) {
 		preserveExistingLineBreaks();
 		applyBreaksOutsideRegions(regions);
-		new WrapExecutor(this.tm, this.options).executeWraps();
+		new WrapExecutor(this.tm, this.options, regions).executeWraps();
 		this.aligner.alignComments();
 		wrapComments();
 		fixEnumConstantIndents(astRoot);

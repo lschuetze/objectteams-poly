@@ -3046,6 +3046,28 @@ private boolean isFirstRoleCtorArg(AbstractMethodDeclaration methodDecl, MethodB
 	    && method.declaringClass.isRole();
 }
 // SH}
+
+@Override
+protected boolean hasMethodWithNumArgs(char[] selector, int numArgs) {
+	if ((this.tagBits & TagBits.AreMethodsComplete) != 0)
+		return super.hasMethodWithNumArgs(selector, numArgs);
+	// otherwise don't trigger unResolvedMethods() which would actually resolve!
+	if (this.scope != null) {
+		for (AbstractMethodDeclaration method : this.scope.referenceContext.methods) {
+			if (CharOperation.equals(method.selector, TypeConstants.CLOSE)) {
+				if (numArgs == 0) {
+					if (method.arguments == null)
+						return true;
+				} else {
+					if (method.arguments != null && method.arguments.length == numArgs)
+						return true;
+				}
+			}
+		}
+	}
+	return false;
+}
+
 @Override
 public AnnotationHolder retrieveAnnotationHolder(Binding binding, boolean forceInitialization) {
 	if (!isPrototype())
