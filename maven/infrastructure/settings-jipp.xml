@@ -10,7 +10,7 @@
 				<ecj.export.dir>/home/data/httpd/download.eclipse.org/objectteams/ecotj</ecj.export.dir>
 				<protocol>file</protocol>
 				<ot.host>localhost</ot.host>
-				<ot.maven.repository.basepath>/home/data/httpd/download.eclipse.org/objectteams/maven/tmp</ot.maven.repository.basepath>
+				<ot.maven.repository.basepath>/home/data/httpd/download.eclipse.org/objectteams/maven/3</ot.maven.repository.basepath>
 			</properties>
 		</profile>
 	</profiles>
