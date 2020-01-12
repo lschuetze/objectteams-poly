@@ -62,7 +62,7 @@
 		<otre.version>2.7.0.201806120901</otre.version>
 		<otruntime.version>2.7.3.201903120955</otruntime.version>
 		<!--   version of the org.eclipse.objectteams.otredyn plugin:	-->
-		<otredyn.version>1.3.7.201912117141</otredyn.version>
+		<otredyn.version>1.3.7.201912111741</otredyn.version>
 		
 		<!-- locate the jar files to install/deploy: -->
 		<ecotj.jar.file>${ecj.export.dir}/ecotj-${ecotj.version}.jar</ecotj.jar.file>
