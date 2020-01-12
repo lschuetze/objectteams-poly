@@ -44,6 +44,7 @@ import org.eclipse.jdt.internal.compiler.lookup.TypeConstants;
 import org.eclipse.jdt.internal.compiler.lookup.TypeIds;
 import org.eclipse.jdt.internal.compiler.problem.ProblemReporter;
 import org.eclipse.jdt.internal.compiler.util.Util;
+import org.eclipse.objectteams.otdt.internal.core.compiler.statemachine.copyinheritance.CopyInheritance.RoleConstructorCall;
 
 /**
  * A faked local variable declaration used for keeping track of data flows of a
@@ -404,6 +405,12 @@ public class FakedTrackingVariable extends LocalDeclaration {
 	 * Bug 463320 - [compiler][resource] potential "resource leak" problem disappears when local variable inlined
 	 */
 	public static FlowInfo analyseCloseableAcquisition(BlockScope scope, FlowInfo flowInfo, MessageSend acquisition) {
+//{ObjectTeams: role creation is analysed via the original AllocationExpression
+		if (acquisition instanceof RoleConstructorCall)
+			return flowInfo;
+		if (scope.methodScope().referenceMethod().isGenerated)
+			return flowInfo;
+// SH}
 		if (isFluentMethod(acquisition.binding)) {
 			// share the existing close tracker of the receiver (if any):
 			acquisition.closeTracker = findCloseTracker(scope, flowInfo, acquisition.receiver);
