@@ -330,19 +330,5 @@
 				</configuration>
 			</plugin>
 		</plugins>
-	</build>
-	
-	<profiles>
-		<profile>
-			<id>jipp.eclipse.org</id>
-			<properties>
-				<otre.export.dir>/home/hudson/genie.objectteams/.jenkins/jobs/release-for-maven/workspace/otre-export</otre.export.dir>
-				<ecj.export.dir>/home/data/httpd/download.eclipse.org/objectteams/ecotj</ecj.export.dir>
-				<protocol>file</protocol>
-				<ot.host>localhost</ot.host>
-				<ot.maven.repository.basepath>/home/data/httpd/download.eclipse.org/objectteams/maven/tmp</ot.maven.repository.basepath>
-			</properties>
-			
-		</profile>
-	</profiles>
+	</build>	
 </project>
