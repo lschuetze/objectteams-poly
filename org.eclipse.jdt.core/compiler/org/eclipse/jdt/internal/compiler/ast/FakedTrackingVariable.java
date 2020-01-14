@@ -408,7 +408,8 @@ public class FakedTrackingVariable extends LocalDeclaration {
 //{ObjectTeams: role creation is analysed via the original AllocationExpression
 		if (acquisition instanceof RoleConstructorCall)
 			return flowInfo;
-		if (scope.methodScope().referenceMethod().isGenerated)
+		AbstractMethodDeclaration referenceMethod = scope.methodScope().referenceMethod();
+		if (referenceMethod != null && referenceMethod.isGenerated)
 			return flowInfo;
 // SH}
 		if (isFluentMethod(acquisition.binding)) {
