@@ -1,7 +1,7 @@
 /**********************************************************************
  * This file is part of "Object Teams Development Tooling"-Software
  * 
- * Copyright 2013, 2015 GK Software AG
+ * Copyright 2013, 2020 GK Software SE
  *  
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -25,22 +25,22 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.eclipse.core.internal.runtime.PlatformLogWriter;
 import org.eclipse.core.runtime.FileLocator;
 import org.eclipse.core.runtime.IExtensionRegistry;
-import org.eclipse.core.runtime.ILog;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.equinox.log.ExtendedLogReaderService;
 import org.eclipse.equinox.log.ExtendedLogService;
 import org.eclipse.equinox.log.LogFilter;
 import org.eclipse.equinox.log.Logger;
+import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
 import org.eclipse.objectteams.internal.osgi.weaving.AspectBinding;
 import org.eclipse.objectteams.internal.osgi.weaving.AspectBindingRegistry;
 import org.eclipse.objectteams.internal.osgi.weaving.AspectPermissionManager;
 import org.eclipse.objectteams.internal.osgi.weaving.DelegatingTransformer.OTAgentNotInstalled;
+import org.eclipse.objectteams.internal.osgi.weaving.LoggerBridge;
 import org.eclipse.objectteams.internal.osgi.weaving.OTWeavingHook;
 import org.eclipse.objectteams.otre.ClassLoaderAccess;
 import org.objectteams.Team;
@@ -74,10 +74,10 @@ public class TransformerPlugin implements BundleActivator, IAspectRegistry {
 
 		AspectBindingRegistry aspectBindingRegistry;
 		@Nullable AspectPermissionManager aspectPermissionManager;
-		ILog log;
+		Logger log;
 		List<Team> teamInstances = new ArrayList<>();
 		
-		public InitializedPlugin(AspectBindingRegistry aspectBindingRegistry, @Nullable AspectPermissionManager permissionManager, ILog log) {
+		public InitializedPlugin(AspectBindingRegistry aspectBindingRegistry, @Nullable AspectPermissionManager permissionManager, Logger log) {
 			this.aspectBindingRegistry = aspectBindingRegistry;
 			this.aspectPermissionManager = permissionManager;
 			this.log = log;
@@ -116,7 +116,12 @@ public class TransformerPlugin implements BundleActivator, IAspectRegistry {
 				result[i] = aspectBindings.get(i).aspectPlugin;
 			return result;
 		}
+
+		public void log(IStatus status) {
+			LoggerBridge.log(this.log, status);
+		}
 	}
+
 	private static @Nullable InitializedPlugin plugin;
 	/**
 	 * Single point of access: either we get a fully initialized instance, or ISE is thrown.
@@ -188,15 +193,14 @@ public class TransformerPlugin implements BundleActivator, IAspectRegistry {
 			otWeavingHook.activate(bundleContext, extensionService);
 		} catch (OTAgentNotInstalled e) {
 			registration.unregister();
-			ILog log = acquireLog(bundleContext);
-			log.log(new Status(IStatus.ERROR,
+			Logger log = acquireLog(bundleContext);
+			LoggerBridge.log(log, new Status(IStatus.ERROR,
 					bundleContext.getBundle().getSymbolicName(), 
 					"Error activating OT/Equinox: "+e.getMessage()));
 		}
 	}
 
-	@SuppressWarnings("restriction")
-	private static ILog acquireLog(BundleContext bundleContext) {
+	private static Logger acquireLog(BundleContext bundleContext) {
 		setupLoggerContext(bundleContext);
 		ServiceTracker<ExtendedLogService,ExtendedLogService> tracker
 				= new ServiceTracker<ExtendedLogService,ExtendedLogService>(bundleContext, ExtendedLogService.class, null);
@@ -204,14 +208,13 @@ public class TransformerPlugin implements BundleActivator, IAspectRegistry {
 		ExtendedLogService logService = tracker.getService();
 		Bundle bundle = bundleContext.getBundle();
 		Logger logger = logService.getLogger(bundle, OTEQUINOX_LOGGER_NAME);
-		org.eclipse.core.internal.runtime.Log result = new org.eclipse.core.internal.runtime.Log(bundle, logger);
 
 		ServiceTracker<ExtendedLogReaderService, ExtendedLogReaderService> logReaderTracker 
 				= new ServiceTracker<ExtendedLogReaderService,ExtendedLogReaderService>(bundleContext, ExtendedLogReaderService.class.getName(), null);
 		logReaderTracker.open();
 		ExtendedLogReaderService logReader = logReaderTracker.getService();
 
-		final Logger equinoxLogger = logService.getLogger(bundle, org.eclipse.core.internal.runtime.PlatformLogWriter.EQUINOX_LOGGER_NAME);
+		final Logger equinoxLogger = logService.getLogger(bundle, LoggerBridge.EQUINOX_LOGGER_NAME);
 
 		// listen to log events from our logger and asynchronously dispatch them to the equinox logger
 		logReader.addLogListener(
@@ -228,15 +231,14 @@ public class TransformerPlugin implements BundleActivator, IAspectRegistry {
 				}
 			}
 		);
-		return result;
+		return logger;
 	}
 
 	private static void setupLoggerContext(BundleContext bundleContext) {
 		String bundleSymbolicName = bundleContext.getBundle().getSymbolicName();
 		
 		Status dummyStatus = new Status(WARN_LEVEL, bundleSymbolicName, "no message");
-		@SuppressWarnings("restriction")
-		LogLevel logLevel = LogLevel.values()[PlatformLogWriter.getLevel(dummyStatus)];
+		LogLevel logLevel = LogLevel.values()[LoggerBridge.getLevel(dummyStatus)];
 		Map<String,LogLevel> levels = new HashMap<>();
 		levels.put(OTEQUINOX_LOGGER_NAME, logLevel);
 
@@ -289,7 +291,7 @@ public class TransformerPlugin implements BundleActivator, IAspectRegistry {
 		Status status = new Status(IStatus.ERROR, TRANSFORMER_PLUGIN_ID, msg, ex);
 		final InitializedPlugin plugin = TransformerPlugin.plugin;
 		if (plugin != null) {
-			plugin.log.log(status);
+			plugin.log(status);
 		} else {
 			System.err.println(msg);
 			ex.printStackTrace();
@@ -309,7 +311,7 @@ public class TransformerPlugin implements BundleActivator, IAspectRegistry {
 			Status status = new Status(level, TRANSFORMER_PLUGIN_ID, "OT/Equinox: "+msg);
 			final InitializedPlugin plugin = TransformerPlugin.plugin;
 			if (plugin != null) {
-				plugin.log.log(status);
+				plugin.log(status);
 			} else {
 				synchronized(TransformerPlugin.class) {
 					pendingLogEntries.add(status);
@@ -327,10 +329,10 @@ public class TransformerPlugin implements BundleActivator, IAspectRegistry {
 			copy = pendingLogEntries;
 			pendingLogEntries = new ArrayList<>();
 		}
-		for (IStatus status : copy) {
+		for (@NonNull IStatus status : copy) { // TODO: declare copy as List<@NonNull IStatus>
 			final InitializedPlugin plugin = TransformerPlugin.plugin;
 			if (plugin != null) {
-				plugin.log.log(status);
+				plugin.log(status);
 			} else {
 				if (status.getCode() == IStatus.ERROR)
 					System.err.println(status.getMessage());

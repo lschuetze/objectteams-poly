@@ -3,7 +3,7 @@ Bundle-ManifestVersion: 2
 Bundle-Name: %pluginName
 Bundle-SymbolicName: org.eclipse.objectteams.otequinox;singleton:=true
 Automatic-Module-Name: org.eclipse.objectteams.otequinox
-Bundle-Version: 2.7.6.qualifier
+Bundle-Version: 2.7.7.qualifier
 Bundle-Activator: org.eclipse.objectteams.otequinox.TransformerPlugin
 Bundle-Vendor: %providerName
 Bundle-Localization: plugin
