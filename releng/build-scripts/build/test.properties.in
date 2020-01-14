@@ -1,11 +1,11 @@
 # versions of test plugins:
 
 # ---- versions of test bundles compiled from an existing GIT tag: ----
-#org.eclipse.jdt.core.tests.builder=3.10.700.@SDK_QUALIFIER@
-org.eclipse.jdt.debug.tests=3.11.700.@SDK_QUALIFIER@
-org.eclipse.jdt.ui.tests=3.13.800.@SDK_QUALIFIER@
-org.eclipse.jdt.ui.tests.refactoring=3.13.700.@SDK_QUALIFIER@
-org.eclipse.test.performance=3.14.0.@SDK_QUALIFIER@
+#org.eclipse.jdt.core.tests.builder=3.10.750.@SDK_QUALIFIER@
+org.eclipse.jdt.debug.tests=3.11.800.@SDK_QUALIFIER@
+org.eclipse.jdt.ui.tests=3.13.900.@SDK_QUALIFIER@
+org.eclipse.jdt.ui.tests.refactoring=3.13.800.@SDK_QUALIFIER@
+org.eclipse.test.performance=3.14.100.@SDK_QUALIFIER@
 # ----
 
 # versions for test bundles not listed here are taken from build-root/src/finalPluginsVersions.properties 
