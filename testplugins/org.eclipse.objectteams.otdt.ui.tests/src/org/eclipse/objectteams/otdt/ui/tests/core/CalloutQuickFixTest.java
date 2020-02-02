@@ -19,46 +19,35 @@
  **********************************************************************/
 package org.eclipse.objectteams.otdt.ui.tests.core;
 
+import static org.junit.Assert.assertEquals;
+
 import java.util.ArrayList;
 import java.util.Hashtable;
 import java.util.List;
-
-import junit.framework.Test;
-import junit.framework.TestSuite;
 
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.internal.ui.text.correction.AssistContext;
+import org.eclipse.jdt.ui.tests.core.rules.ProjectTestSetup;
 import org.eclipse.jdt.ui.text.java.IJavaCompletionProposal;
 import org.eclipse.objectteams.otdt.core.ext.OTDTPlugin;
+import org.junit.Rule;
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.junit.runners.JUnit4;
 
 /**
  * Test OT-specific quickfixes and quick assists (here: callout related issues).
  * @author stephan
  * @since 1.2.8
  */
+@RunWith(JUnit4.class)
 public class CalloutQuickFixTest extends OTQuickFixTest {
 
-
-	private static final Class THIS= CalloutQuickFixTest.class;
-	
-	public CalloutQuickFixTest(String name) {
-		super(name);
-	}
-
-	public static Test allTests() {
-		return setUpTest(new TestSuite(THIS));
-	}
-	
-	public static Test setUpTest(Test test) {
-		return new ProjectTestSetup(test);
-	}
-	
-	public static Test suite() {
-		return allTests();
-	}
+	@Rule
+    public ProjectTestSetup projectsetup = new ProjectTestSetup();
 
 	@Override
 	protected void addOptions(Hashtable options) {
@@ -67,6 +56,7 @@ public class CalloutQuickFixTest extends OTQuickFixTest {
 	}
 	
 	/* Converting a field read to explicitly use a callout-to-field. */
+	@Test
 	public void testConvertFieldAccessToCalloutCall1() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 		StringBuffer buf= new StringBuffer();
@@ -125,6 +115,7 @@ public class CalloutQuickFixTest extends OTQuickFixTest {
 
 		
 	/* Converting a field read (this-qualified) to explicitly use a callout-to-field. */
+	@Test
 	public void testConvertFieldAccessToCalloutCall2() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 		StringBuffer buf= new StringBuffer();
@@ -184,6 +175,7 @@ public class CalloutQuickFixTest extends OTQuickFixTest {
 	}
 	
 	/* Converting a field assignment to explicitly use a callout-to-field. */
+	@Test
 	public void testConvertFieldAccessToCalloutCall3() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 		StringBuffer buf= new StringBuffer();
@@ -243,6 +235,7 @@ public class CalloutQuickFixTest extends OTQuickFixTest {
 	}
 	
 	/* Converting a field assignment (this-qualified) to explicitly use a callout-to-field. */
+	@Test
 	public void testConvertFieldAccessToCalloutCall4() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 		StringBuffer buf= new StringBuffer();
@@ -303,6 +296,7 @@ public class CalloutQuickFixTest extends OTQuickFixTest {
 	
 	
 	/* Convert field access to call to existing callout-to-field. */
+	@Test
 	public void testConvertFieldAccessToCalloutCall5() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 		StringBuffer buf= new StringBuffer();
@@ -366,6 +360,7 @@ public class CalloutQuickFixTest extends OTQuickFixTest {
 	}
 
 	/* Convert field assignment to call to existing callout-to-field. */
+	@Test
 	public void testConvertFieldAccessToCalloutCall6() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 		StringBuffer buf= new StringBuffer();
@@ -430,6 +425,7 @@ public class CalloutQuickFixTest extends OTQuickFixTest {
 	
 
 	/* Remove signatures from a callout to field. */
+	@Test
 	public void testRemoveSignatures1() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 		StringBuffer buf= new StringBuffer();
@@ -471,6 +467,7 @@ public class CalloutQuickFixTest extends OTQuickFixTest {
 	}
 
 	/* Add signatures to a callout. */
+	@Test
 	public void testAddSignatures1() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 		StringBuffer buf= new StringBuffer();
@@ -512,6 +509,7 @@ public class CalloutQuickFixTest extends OTQuickFixTest {
 	}
 
 	/* Add signatures to a callout to field. */
+	@Test
 	public void testAddSignatures2() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 		StringBuffer buf= new StringBuffer();

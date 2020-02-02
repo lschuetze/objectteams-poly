@@ -20,11 +20,10 @@
  **********************************************************************/
 package org.eclipse.objectteams.otdt.ui.tests.core;
 
-import java.util.Hashtable;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
 
-import junit.framework.Test;
-import junit.framework.TestCase;
-import junit.framework.TestSuite;
+import java.util.Hashtable;
 
 import org.eclipse.core.resources.ProjectScope;
 import org.eclipse.core.runtime.CoreException;
@@ -36,14 +35,20 @@ import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.ISourceRange;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.formatter.DefaultCodeFormatterConstants;
-import org.eclipse.jdt.core.search.TypeNameMatch;
 import org.eclipse.jdt.core.manipulation.OrganizeImportsOperation;
 import org.eclipse.jdt.core.manipulation.OrganizeImportsOperation.IChooseImportQuery;
+import org.eclipse.jdt.core.search.TypeNameMatch;
 import org.eclipse.jdt.ui.JavaUI;
 import org.eclipse.jdt.ui.PreferenceConstants;
 import org.eclipse.objectteams.otdt.core.ext.OTREContainer;
+import org.eclipse.objectteams.otdt.ui.tests.core.rule.ProjectTestSetup;
 import org.eclipse.objectteams.otdt.ui.tests.util.JavaProjectHelper;
 import org.eclipse.objectteams.otdt.ui.tests.util.TestOptions;
+import org.junit.Before;
+import org.junit.Rule;
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.junit.runners.JUnit4;
 import org.osgi.service.prefs.BackingStoreException;
 
 /**
@@ -54,40 +59,21 @@ import org.osgi.service.prefs.BackingStoreException;
  * 
  * @author brcan
  */
-public class OrganizeImportsTest extends TestCase
+@RunWith(JUnit4.class)
+public class OrganizeImportsTest
 {
-    private IJavaProject _project;
+	@Rule
+    public ProjectTestSetup projectsetup = new ProjectTestSetup();
 
-    public OrganizeImportsTest(String name)
-    {
-        super(name);
-    }
+	private IJavaProject _project;
 
-    public static Test allTests()
-    {
-        return new ProjectTestSetup(new TestSuite(OrganizeImportsTest.class));
-    }
 
-    public static Test suite()
-    {
-        if (true)
-        {
-            return allTests();
-        }
-        else
-        {
-            TestSuite suite = new TestSuite();
-            suite.addTest(new OrganizeImportsTest("testVisibility_bug56704"));
-            return new ProjectTestSetup(suite);
-        }
-    }
-
-    @SuppressWarnings("unchecked")
-	protected void setUp() throws Exception
+    @Before
+    public void setUp() throws Exception
     {
         _project = ProjectTestSetup.getProject();
 
-        Hashtable options = TestOptions.getFormatterOptions();
+        Hashtable<String,String> options = TestOptions.getFormatterOptions();
         options.put(DefaultCodeFormatterConstants.FORMATTER_NUMBER_OF_EMPTY_LINES_TO_PRESERVE,
                 String.valueOf(99));
         JavaCore.setOptions(options);
@@ -150,6 +136,7 @@ public class OrganizeImportsTest extends TestCase
     }
 
     //OT-specific tests
+    @Test
     public void testTypeReferenceInRoleclass1() throws Exception
     {
         IPackageFragmentRoot sourceFolder = JavaProjectHelper
@@ -200,6 +187,7 @@ public class OrganizeImportsTest extends TestCase
         assertEqualString(cu.getSource(), buf.toString());
     }
 
+    @Test
     public void testTypeReferenceInRoleclass2() throws Exception
     {
         IPackageFragmentRoot sourceFolder = JavaProjectHelper
@@ -261,6 +249,7 @@ public class OrganizeImportsTest extends TestCase
         assertEqualString(cu.getSource(), buf.toString());
     }
 
+    @Test
     public void testTypeReferenceInRoleclass3() throws Exception
     {
         IPackageFragmentRoot sourceFolder = JavaProjectHelper
@@ -317,6 +306,7 @@ public class OrganizeImportsTest extends TestCase
         assertEqualString(cu.getSource(), buf.toString());
     }
 
+    @Test
     public void testTypeReferenceInRoleclass4() throws Exception
     {
         IPackageFragmentRoot sourceFolder = JavaProjectHelper
@@ -371,6 +361,7 @@ public class OrganizeImportsTest extends TestCase
         assertEqualString(cu.getSource(), buf.toString());
     }
 
+    @Test
     public void testTypeReferenceInRoleclass5() throws Exception
     {
         IPackageFragmentRoot sourceFolder = JavaProjectHelper
@@ -421,6 +412,7 @@ public class OrganizeImportsTest extends TestCase
         assertEqualString(cu.getSource(), buf.toString());
     }
     /** playedBy inner base class - role and base have same name. */
+    @Test
     public void testTypeReferenceInRoleclass6() throws Exception
     {
         IPackageFragmentRoot sourceFolder = JavaProjectHelper
@@ -481,6 +473,7 @@ public class OrganizeImportsTest extends TestCase
     }
     
     // base import for role file
+    @Test
     public void testTypeReferenceInRoleclass7() throws Exception
     {
         IPackageFragmentRoot sourceFolder = JavaProjectHelper
@@ -539,6 +532,7 @@ public class OrganizeImportsTest extends TestCase
     }
 
     // Bug 355302 - organize import deletes required base import
+    @Test
     public void testTypeReferenceInRoleclass8() throws Exception
     {
         IPackageFragmentRoot sourceFolder = JavaProjectHelper
@@ -600,6 +594,7 @@ public class OrganizeImportsTest extends TestCase
         assertEqualString(cu.getSource(), buf.toString());
     }
 
+    @Test
     public void testCalloutToStatic() throws Exception
     {
         IPackageFragmentRoot sourceFolder = JavaProjectHelper
@@ -661,6 +656,7 @@ public class OrganizeImportsTest extends TestCase
         assertEqualString(cu.getSource(), buf.toString());
     }
 
+    @Test
     public void testStaticImportInGuard1() throws CoreException, BackingStoreException {
         IPackageFragmentRoot sourceFolder = JavaProjectHelper
                 .addSourceContainer(_project, "src");
@@ -712,6 +708,7 @@ public class OrganizeImportsTest extends TestCase
         assertEqualString(cu.getSource(), buf.toString());
     }
 
+    @Test
     public void testStaticImportInGuard2() throws CoreException, BackingStoreException {
         IPackageFragmentRoot sourceFolder = JavaProjectHelper
                 .addSourceContainer(_project, "src");
@@ -772,6 +769,7 @@ public class OrganizeImportsTest extends TestCase
     // Trac 19: organize imports must preserve a base import,
     // even if role and base have the same name and the role
     // is also referenced from a sibling role.
+    @Test
     public void testRoleHidesBase1() throws CoreException, BackingStoreException {
         IPackageFragmentRoot sourceFolder = JavaProjectHelper
                 .addSourceContainer(_project, "src");
@@ -826,6 +824,7 @@ public class OrganizeImportsTest extends TestCase
         assertEqualString(cu.getSource(), buf.toString());
     }
 
+    @Test
     public void testImportRole() throws CoreException, BackingStoreException {
         IPackageFragmentRoot sourceFolder = JavaProjectHelper.addSourceContainer(_project, "src");
 
@@ -876,6 +875,7 @@ public class OrganizeImportsTest extends TestCase
     }
 
     // Bug 311432 -  Inferred callouts to private static fields make OrganizeImports to import private fields
+    @Test
     public void testDontImportStaticField() throws CoreException, BackingStoreException {
         IPackageFragmentRoot sourceFolder = JavaProjectHelper.addSourceContainer(_project, "src");
 

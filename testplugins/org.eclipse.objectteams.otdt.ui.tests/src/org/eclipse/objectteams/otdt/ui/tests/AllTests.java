@@ -20,29 +20,24 @@
  **********************************************************************/
 package org.eclipse.objectteams.otdt.ui.tests;
 
-import junit.framework.Test;
-import junit.framework.TestSuite;
+import org.junit.runner.RunWith;
+import org.junit.runners.Suite;
 
 /**
  * @author anklam
  *
  * @version $Id: AllTests.java 23495 2010-02-05 23:15:16Z stephan $
  */
-public class AllTests
-{
-    public static Test suite()
-    {
-        TestSuite suite = new TestSuite(
-                "All UI Tests");
-        //$JUnit-BEGIN$
-        suite.addTest(org.eclipse.objectteams.otdt.ui.tests.contentprovider.AllTests.suite());
-        suite.addTest(org.eclipse.objectteams.otdt.ui.tests.typecreator.AllTests.suite());
-        suite.addTest(org.eclipse.objectteams.otdt.ui.tests.hierarchy.contentprovider.AllTests.suite());
-        suite.addTest(org.eclipse.objectteams.otdt.ui.tests.callinmarker.CallinMarkerTests.suite());
-        suite.addTest(org.eclipse.objectteams.otdt.ui.tests.core.OrganizeImportsTest.suite());
-        suite.addTest(org.eclipse.objectteams.otdt.ui.tests.core.CodeCompletionTest.suite());
-        suite.addTest(org.eclipse.objectteams.otdt.ui.tests.core.OTQuickFixTest.suite());
-        //$JUnit-END$
-        return suite;
-    }
+@RunWith(Suite.class)
+@Suite.SuiteClasses({
+	org.eclipse.objectteams.otdt.ui.tests.contentprovider.AllTests.class,
+    org.eclipse.objectteams.otdt.ui.tests.typecreator.AllTests.class,
+    org.eclipse.objectteams.otdt.ui.tests.hierarchy.contentprovider.AllTests.class,
+    org.eclipse.objectteams.otdt.ui.tests.callinmarker.CallinMarkerTests.class,
+    org.eclipse.objectteams.otdt.ui.tests.core.OrganizeImportsTest.class,
+    org.eclipse.objectteams.otdt.ui.tests.core.CodeCompletionTest.class,
+    org.eclipse.objectteams.otdt.ui.tests.core.OTQuickFixTest.class,
+})
+public class AllTests {
+
 }

@@ -21,33 +21,23 @@ import java.util.ArrayList;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.dom.CompilationUnit;
+import org.eclipse.jdt.ui.text.java.IJavaCompletionProposal;
+import org.eclipse.objectteams.otdt.ui.tests.core.rule.ProjectTestSetup;
+import org.junit.Rule;
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.junit.runners.JUnit4;
 
-import junit.framework.Test;
-import junit.framework.TestSuite;
-
+@RunWith(JUnit4.class)
 public class StatementQuickFixTest extends OTQuickFixTest {
 	
-	private static final Class THIS= StatementQuickFixTest.class;
-
-	public StatementQuickFixTest(String name) {
-		super(name);
-	}
-
-	public static Test allTests() {
-		return setUpTest(new TestSuite(THIS));
-	}
-	
-	public static Test setUpTest(Test test) {
-		return new ProjectTestSetup(test);
-	}
-	
-	public static Test suite() {
-		return allTests();
-	}
+	@Rule
+    public ProjectTestSetup projectsetup = new ProjectTestSetup();
 	
 	/* add a return statement to a role method (callin).
 	 * See https://bugs.eclipse.org/311339
 	 */
+	@Test
 	public void testAddReturnInCallinMethod() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 		StringBuffer buf= new StringBuffer();
@@ -70,7 +60,7 @@ public class StatementQuickFixTest extends OTQuickFixTest {
 		ICompilationUnit cuteam = pack1.createCompilationUnit("T1.java", buf.toString(), false, null);
 		
 		CompilationUnit astRoot= getASTRoot(cuteam);
-		ArrayList proposals= collectCorrections(cuteam, astRoot);
+		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cuteam, astRoot);
 		assertNumberOfProposals(proposals, 2);
 		assertCorrectLabels(proposals);
 

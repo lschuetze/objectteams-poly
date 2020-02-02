@@ -24,43 +24,31 @@ import java.util.ArrayList;
 import java.util.Hashtable;
 import java.util.List;
 
-import junit.framework.Test;
-import junit.framework.TestSuite;
-
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.internal.ui.text.correction.AssistContext;
+import org.eclipse.jdt.ui.tests.core.rules.ProjectTestSetup;
 import org.eclipse.jdt.ui.text.java.IJavaCompletionProposal;
 import org.eclipse.jface.text.contentassist.ICompletionProposal;
 import org.eclipse.objectteams.otdt.core.ext.OTDTPlugin;
+import org.junit.Rule;
+import org.junit.runner.RunWith;
+import org.junit.runners.JUnit4;
+import org.junit.Test;
 
 /**
  * Test OT-specific quickfixes and quick assist (here: callin related issues).
  * @author stephan
  * @since 1.2.8
  */
+@RunWith(JUnit4.class)
 public class CallinQuickFixTest extends OTQuickFixTest {
 	
-	private static final Class THIS= CallinQuickFixTest.class;
+	@Rule
+    public ProjectTestSetup projectsetup = new ProjectTestSetup();
 
-	public CallinQuickFixTest(String name) {
-		super(name);
-	}
-
-	public static Test allTests() {
-		return setUpTest(new TestSuite(THIS));
-	}
-	
-	public static Test setUpTest(Test test) {
-		return new ProjectTestSetup(test);
-	}
-	
-	public static Test suite() {
-		return allTests();
-	}
-	
 	@Override
 	protected void addOptions(Hashtable options) {
 		super.addOptions(options);
@@ -69,6 +57,7 @@ public class CallinQuickFixTest extends OTQuickFixTest {
 	}
 
 	/* Suppressing a warning re exception thrown from guard predicate. */
+	@Test
 	public void testSuppressWarning1() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 		StringBuffer buf= new StringBuffer();
@@ -120,6 +109,7 @@ public class CallinQuickFixTest extends OTQuickFixTest {
 	}
 
 	/* Adjust a callin modifier to the bound role method (after -> replace). */
+	@Test
 	public void testChangeCallinModifier1() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 		StringBuffer buf= new StringBuffer();
@@ -177,6 +167,7 @@ public class CallinQuickFixTest extends OTQuickFixTest {
 	}
 
 	/* Remove signatures from a callin binding. */
+	@Test
 	public void testRemoveSignatures1() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 		StringBuffer buf= new StringBuffer();
@@ -223,6 +214,7 @@ public class CallinQuickFixTest extends OTQuickFixTest {
 
 
     /* Do not propose to remove signatures from a callin binding, where argument is used in a predicate. */
+	@Test
     public void testRemoveSignatures2() throws Exception {
             IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
             StringBuffer buf= new StringBuffer();
@@ -254,6 +246,7 @@ public class CallinQuickFixTest extends OTQuickFixTest {
 
 
     /* Remove signatures from a callin binding despite guard predicate (no arg used). */
+	@Test
     public void testRemoveSignatures3() throws Exception {
             IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
             StringBuffer buf= new StringBuffer();
@@ -301,6 +294,7 @@ public class CallinQuickFixTest extends OTQuickFixTest {
     }
 
 	/* Remove signatures with type parameters from a callin binding. */
+	@Test
 	public void testRemoveSignatures4() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 		StringBuffer buf= new StringBuffer();
@@ -347,6 +341,7 @@ public class CallinQuickFixTest extends OTQuickFixTest {
 
 	// Remove signatures from a callin binding, comment present.
 	// see Bug 370656 - [assist] remove signatures from method binding chokes on inline comment
+	@Test
 	public void testRemoveSignatures5() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 		StringBuffer buf= new StringBuffer();
@@ -397,6 +392,7 @@ public class CallinQuickFixTest extends OTQuickFixTest {
 	}
 
 	/* Add signatures to a callin binding. */
+	@Test
 	public void testAddSignatures1() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 		StringBuffer buf= new StringBuffer();
@@ -442,6 +438,7 @@ public class CallinQuickFixTest extends OTQuickFixTest {
 	}
 
 	/* Add signatures to a callin binding, w/ type arguments. */
+	@Test
 	public void testAddSignatures2() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 		StringBuffer buf= new StringBuffer();
@@ -487,6 +484,7 @@ public class CallinQuickFixTest extends OTQuickFixTest {
 	}
 
 	// Bug 355274 -  [assist] make the add signatures assist smarter vis-a-vis ambiguous method bindings
+	@Test
 	public void testAddSignatures3() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 		StringBuffer buf= new StringBuffer();
@@ -538,6 +536,7 @@ public class CallinQuickFixTest extends OTQuickFixTest {
 
 	// Bug 355274 -  [assist] make the add signatures assist smarter vis-a-vis ambiguous method bindings
 	// type conversions involved
+	@Test
 	public void testAddSignatures4() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 		StringBuffer buf= new StringBuffer();

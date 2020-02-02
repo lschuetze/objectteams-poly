@@ -13,14 +13,16 @@ package org.eclipse.objectteams.otdt.ui.tests.core;
 
 import java.util.ArrayList;
 
-import junit.framework.Test;
-import junit.framework.TestSuite;
-
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.dom.CompilationUnit;
+import org.eclipse.jdt.ui.tests.core.rules.ProjectTestSetup;
 import org.eclipse.jdt.ui.text.java.IJavaCompletionProposal;
 import org.eclipse.jdt.ui.text.java.correction.CUCorrectionProposal;
+import org.junit.Rule;
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.junit.runners.JUnit4;
 
 /**
  * Test OT-specific quickfixes (here: modifier corrections).
@@ -28,30 +30,14 @@ import org.eclipse.jdt.ui.text.java.correction.CUCorrectionProposal;
  * @since 1.2.1
  */
 // structure OT_COPY_PASTE from {@link org.eclipse.jdt.ui.tests.quickfix.ModifierCorrectionsQuickFixTest}
+@RunWith(JUnit4.class)
 public class ModifierCorrectionsQuickFixTest extends OTQuickFixTest {
 	
-
-	private static final Class<ModifierCorrectionsQuickFixTest> THIS= ModifierCorrectionsQuickFixTest.class;
-
-
-	public ModifierCorrectionsQuickFixTest(String name) {
-		super(name);
-	}
-
-	public static Test allTests() {
-		return setUpTest(new TestSuite(THIS));
-	}
-	
-	public static Test setUpTest(Test test) {
-		return new ProjectTestSetup(test);
-	}
-	
-	public static Test suite() {
-		return allTests();
-	}
-
+	@Rule
+    public ProjectTestSetup projectsetup = new ProjectTestSetup();
 
 	/* calling a non-public role constructor from the team. */
+	@Test
 	public void testRoleCtorCalled1() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 		StringBuffer buf= new StringBuffer();
@@ -89,6 +75,7 @@ public class ModifierCorrectionsQuickFixTest extends OTQuickFixTest {
 	}
 
 	/* calling a non-public role constructor from a sibling role. */
+	@Test
 	public void testRoleCtorCalled2() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 		StringBuffer buf= new StringBuffer();
@@ -130,6 +117,7 @@ public class ModifierCorrectionsQuickFixTest extends OTQuickFixTest {
 	}
 	
 	/* calling a non-public role constructor from a sibling role file. */
+	@Test
 	public void testRoleCtorCalled3() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 		IPackageFragment pack1T= fSourceFolder.createPackageFragment("test1.T", false, null);
@@ -171,6 +159,7 @@ public class ModifierCorrectionsQuickFixTest extends OTQuickFixTest {
 	}
 
 	/* a non-public constructor of a role file is called from a sibling role. */
+	@Test
 	public void testRoleCtorCalled4() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 		IPackageFragment pack1T= fSourceFolder.createPackageFragment("test1.T", false, null);
@@ -210,6 +199,7 @@ public class ModifierCorrectionsQuickFixTest extends OTQuickFixTest {
 	}
 	
 	/* calling a non-public role constructor as externalized. */
+	@Test
 	public void testRoleCtorCalled5() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 		StringBuffer buf= new StringBuffer();
@@ -250,6 +240,7 @@ public class ModifierCorrectionsQuickFixTest extends OTQuickFixTest {
 	}
 	
 	/* calling a non-public role method on externalized. */
+	@Test
 	public void testRoleMethodCalled() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 		StringBuffer buf= new StringBuffer();
@@ -289,6 +280,7 @@ public class ModifierCorrectionsQuickFixTest extends OTQuickFixTest {
 		assertEqualString(preview, buf.toString());
 	}
 	
+	@Test
 	public void testCalloutToPrivate() throws Exception {
 		IPackageFragment pack1 = fSourceFolder.createPackageFragment("test1", false, null);
 		StringBuffer buf = new StringBuffer();
@@ -336,6 +328,7 @@ public class ModifierCorrectionsQuickFixTest extends OTQuickFixTest {
 	}
 	
 	
+	@Test
 	public void testCalloutViaExternalized() throws Exception {
 		IPackageFragment pack1 = fSourceFolder.createPackageFragment("test1", false, null);
 		StringBuffer buf = new StringBuffer();
@@ -380,6 +373,7 @@ public class ModifierCorrectionsQuickFixTest extends OTQuickFixTest {
 	}
 	
 	/** @SuppressWarnings("bindingconventions") was added a wrong location. */
+	@Test
 	public void testSuppressWarnings1() throws Exception {
 		IPackageFragment pack1 = fSourceFolder.createPackageFragment("test1", false, null);
 		StringBuffer buf = new StringBuffer();

@@ -20,10 +20,10 @@
  **********************************************************************/
 package org.eclipse.objectteams.otdt.ui.tests.core;
 
-import java.util.ArrayList;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
 
-import junit.framework.Test;
-import junit.framework.TestSuite;
+import java.util.ArrayList;
 
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.jdt.core.ICompilationUnit;
@@ -33,36 +33,25 @@ import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.internal.compiler.lookup.ExtraCompilerModifiers;
 import org.eclipse.jdt.ui.JavaUI;
-import org.eclipse.jdt.ui.tests.core.ProjectTestSetup;
+import org.eclipse.jdt.ui.tests.core.rules.ProjectTestSetup;
 import org.eclipse.jdt.ui.text.java.IJavaCompletionProposal;
 import org.eclipse.jdt.ui.text.java.correction.CUCorrectionProposal;
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.objectteams.otdt.ui.tests.util.JavaProjectHelper;
 import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.internal.Workbench;
+import org.junit.Rule;
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.junit.runners.JUnit4;
 
+@RunWith(JUnit4.class)
 public class AddImportQuickFixTest extends OTQuickFixTest {
 	
+	@Rule
+    public ProjectTestSetup projectsetup = new ProjectTestSetup();
 
-	private static final Class THIS= AddImportQuickFixTest.class;
-
-
-	public AddImportQuickFixTest(String name) {
-		super(name);
-	}
-
-	public static Test allTests() {
-		return setUpTest(new TestSuite(THIS));
-	}
-	
-	public static Test setUpTest(Test test) {
-		return new ProjectTestSetup(test);
-	}
-	
-	public static Test suite() {
-		return allTests();
-	}
-
+	@Test
 	public void testChangeFQNToBaseImport1() throws Exception {
 		// base:
 		IPackageFragment pack1base= fSourceFolder.createPackageFragment("test.base1", false, null);
@@ -110,6 +99,7 @@ public class AddImportQuickFixTest extends OTQuickFixTest {
 	}
 		
 	// ROFI variant:
+	@Test
 	public void testChangeFQNToBaseImport2() throws Exception {
 		// base:
 		IPackageFragment pack1base= fSourceFolder.createPackageFragment("test.base1", false, null);
@@ -173,6 +163,7 @@ public class AddImportQuickFixTest extends OTQuickFixTest {
 	}
 
     // Bug 348076 - [assist][rewrite] changing import to import base not working when package name contains "base"
+	@Test
     public void testChangeImportToBaseImport1() throws Exception
     {
         IPackageFragmentRoot sourceFolder = JavaProjectHelper
@@ -222,6 +213,7 @@ public class AddImportQuickFixTest extends OTQuickFixTest {
     }
 
 	/* Adding a base import to a team on behalf of a role file. */
+	@Test
 	public void testAddBaseImportForRofi1() throws Exception {
 		// base:
 		IPackageFragment pack1base= fSourceFolder.createPackageFragment("test.base", false, null);
@@ -268,6 +260,7 @@ public class AddImportQuickFixTest extends OTQuickFixTest {
 	}
 	
 	// this time files already have content
+	@Test
 	public void testAddBaseImportForRofi2() throws Exception {
 		StringBuffer buf;
 		// base:
@@ -331,6 +324,7 @@ public class AddImportQuickFixTest extends OTQuickFixTest {
 	}
 
 	// for role types rather than proposing an import change type to anchored:
+	@Test
 	public void testChangeTypeToAnchored1() throws CoreException {
 		StringBuffer buf;
 		// team:
@@ -381,6 +375,7 @@ public class AddImportQuickFixTest extends OTQuickFixTest {
 	}
 
 	// for role types rather than proposing an import change type to anchored (role file):
+	@Test
 	public void testChangeTypeToAnchored2() throws CoreException {
 		StringBuffer buf;
 		// team:

@@ -15,6 +15,9 @@
  **********************************************************************/
 package org.eclipse.objectteams.otdt.ui.tests.core;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.fail;
+
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -33,14 +36,16 @@ import org.eclipse.jdt.core.formatter.DefaultCodeFormatterConstants;
 import org.eclipse.jdt.internal.ui.text.correction.proposals.NewCUUsingWizardProposal;
 import org.eclipse.jdt.testplugin.JavaProjectHelper;
 import org.eclipse.jdt.testplugin.TestOptions;
+import org.eclipse.jdt.ui.tests.core.rules.ProjectTestSetup;
 import org.eclipse.jdt.ui.text.java.IJavaCompletionProposal;
 import org.eclipse.jdt.ui.text.java.correction.CUCorrectionProposal;
 import org.eclipse.jdt.ui.text.java.correction.ChangeCorrectionProposal;
 import org.eclipse.objectteams.otdt.core.ext.OTDTPlugin;
+import org.junit.Rule;
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.junit.runners.JUnit4;
 import org.osgi.framework.Bundle;
-
-import junit.framework.Test;
-import junit.framework.TestSuite;
 
 /**
  * Testing whether standard Java quickfixes work in OT/J code, too.
@@ -48,25 +53,12 @@ import junit.framework.TestSuite;
  * @author stephan
  * @since 0.7.0
  */
+@RunWith(JUnit4.class)
 public class JavaQuickFixTests extends OTQuickFixTest {
-	private static final Class THIS= JavaQuickFixTests.class;
 
-	public JavaQuickFixTests(String name) {
-		super(name);
-	}
+	@Rule
+    public ProjectTestSetup projectsetup = new ProjectTestSetup();
 
-	public static Test allTests() {
-		return setUpTest(new TestSuite(THIS));
-	}
-	
-	public static Test suite() {
-		return allTests();
-	}
-
-	public static Test setUpTest(Test test) {
-		return new ProjectTestSetup(test);
-	}
-	
 	private String ANNOTATION_JAR_PATH;
 
 	void setupForNullAnnotations(boolean isPlainJava) throws IOException, JavaModelException {
@@ -106,6 +98,7 @@ public class JavaQuickFixTests extends OTQuickFixTest {
 	// the following three test try to reproduce Bug 311890 -  [assist] support "create class" quickfix for OT/J references
 	
 	// create a class for an unresolved playedBy declaration
+	@Test
 	public void testCreateClass1() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 		StringBuffer buf= new StringBuffer();
@@ -136,6 +129,7 @@ public class JavaQuickFixTests extends OTQuickFixTest {
 	}
 	
 	// create a class for an unresolved playedBy declaration in a nested role
+	@Test
 	public void testCreateClass2() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 		StringBuffer buf= new StringBuffer();
@@ -169,6 +163,7 @@ public class JavaQuickFixTests extends OTQuickFixTest {
 
 
 	// create a class for an unresolved playedBy declaration
+	@Test
 	public void testCreateClass3() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 		StringBuffer buf= new StringBuffer();
@@ -200,6 +195,7 @@ public class JavaQuickFixTests extends OTQuickFixTest {
 	}
 	
 	// Bug 348574 - [quickfix] implement abstract methods from tsuper
+	@Test
 	public void testAddAbstractMethods1() throws CoreException {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 		StringBuffer buf= new StringBuffer();
@@ -260,6 +256,7 @@ public class JavaQuickFixTests extends OTQuickFixTest {
 
 	// Bug 348574 - [quickfix] implement abstract methods from tsuper
 	// abstract static method
+	@Test
 	public void testAddAbstractMethods2() throws CoreException {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 		StringBuffer buf= new StringBuffer();
@@ -318,6 +315,7 @@ public class JavaQuickFixTests extends OTQuickFixTest {
 		assertEqualStringsIgnoreOrder(new String[] { preview1, preview2 }, new String[] { expected1, expected2 });		
 	}
 
+	@Test
 	public void testExtractPotentiallyNullField1() throws Exception {
 		setupForNullAnnotations(true/*plainJava*/);
 		

@@ -19,12 +19,15 @@
  **********************************************************************/
 package org.eclipse.objectteams.otdt.ui.tests.core;
 
-import static org.eclipse.jdt.internal.codeassist.RelevanceConstants.*;
+import static org.eclipse.jdt.internal.codeassist.RelevanceConstants.R_CASE;
+import static org.eclipse.jdt.internal.codeassist.RelevanceConstants.R_DEFAULT;
+import static org.eclipse.jdt.internal.codeassist.RelevanceConstants.R_EXPECTED_TYPE;
+import static org.eclipse.jdt.internal.codeassist.RelevanceConstants.R_INTERESTING;
+import static org.eclipse.jdt.internal.codeassist.RelevanceConstants.R_METHOD_OVERIDE;
+import static org.eclipse.jdt.internal.codeassist.RelevanceConstants.R_NON_RESTRICTED;
+import static org.eclipse.jdt.internal.codeassist.RelevanceConstants.R_RESOLVED;
 
 import java.util.Hashtable;
-
-import junit.framework.Test;
-import junit.framework.TestSuite;
 
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.jdt.core.ICompilationUnit;
@@ -34,8 +37,8 @@ import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.formatter.DefaultCodeFormatterConstants;
-import org.eclipse.jdt.internal.core.manipulation.StubUtility;
 import org.eclipse.jdt.internal.core.manipulation.CodeTemplateContextType;
+import org.eclipse.jdt.internal.core.manipulation.StubUtility;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.javaeditor.EditorUtility;
 import org.eclipse.jdt.internal.ui.javaeditor.JavaEditor;
@@ -77,6 +80,9 @@ import org.eclipse.ui.IWorkbenchWindow;
 import org.eclipse.ui.PartInitException;
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.texteditor.ITextEditor;
+
+import junit.framework.Test;
+import junit.framework.TestSuite;
 
 /**
  * Tests for code completion including the UI part 

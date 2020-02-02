@@ -18,13 +18,16 @@ package org.eclipse.objectteams.otdt.ui.tests.core;
 
 import java.util.ArrayList;
 
-import junit.framework.Test;
-import junit.framework.TestSuite;
-
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.dom.CompilationUnit;
+import org.eclipse.jdt.ui.tests.core.rules.ProjectTestSetup;
+import org.eclipse.jdt.ui.text.java.IJavaCompletionProposal;
 import org.eclipse.jdt.ui.text.java.correction.CUCorrectionProposal;
+import org.junit.Rule;
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.junit.runners.JUnit4;
 
 
 /**
@@ -32,27 +35,15 @@ import org.eclipse.jdt.ui.text.java.correction.CUCorrectionProposal;
  * @author stephan
  * @since 0.7.0
  */
+@RunWith(JUnit4.class)
 public class PrecedenceQuickFixTest extends OTQuickFixTest {
-	private static final Class THIS= PrecedenceQuickFixTest.class;
 
-	public PrecedenceQuickFixTest(String name) {
-		super(name);
-	}
-
-	public static Test allTests() {
-		return setUpTest(new TestSuite(THIS));
-	}
-	
-	public static Test suite() {
-		return allTests();
-	}
-
-	public static Test setUpTest(Test test) {
-		return new ProjectTestSetup(test);
-	}
+	@Rule
+    public ProjectTestSetup projectsetup = new ProjectTestSetup();
 
 	// QuickFix adds a binding-level precedence declaration,
 	// one callin label already exists, other label is generated.
+	@Test
 	public void testAddPlainBindingPrecedence() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 		StringBuffer buf= new StringBuffer();
@@ -76,7 +67,7 @@ public class PrecedenceQuickFixTest extends OTQuickFixTest {
 		ICompilationUnit cu= pack1.createCompilationUnit("T1.java", buf.toString(), false, null);
 		
 		CompilationUnit astRoot= getASTRoot(cu);
-		ArrayList proposals= collectCorrections(cu, astRoot);
+		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot);
 		assertNumberOfProposals(proposals, 1);
 		assertCorrectLabels(proposals);
 
@@ -99,6 +90,7 @@ public class PrecedenceQuickFixTest extends OTQuickFixTest {
 	}
 	
 	// QuickFix adds a binding-level "precedence after" declaration
+	@Test
 	public void testAddAfterBindingPrecedence() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 		StringBuffer buf= new StringBuffer();
@@ -122,7 +114,7 @@ public class PrecedenceQuickFixTest extends OTQuickFixTest {
 		ICompilationUnit cu= pack1.createCompilationUnit("T1.java", buf.toString(), false, null);
 		
 		CompilationUnit astRoot= getASTRoot(cu);
-		ArrayList proposals= collectCorrections(cu, astRoot);
+		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot);
 		assertNumberOfProposals(proposals, 1);
 		assertCorrectLabels(proposals);
 
@@ -145,6 +137,7 @@ public class PrecedenceQuickFixTest extends OTQuickFixTest {
 	}
 	
 	// QuickFix adds a role-level precedence declaration
+	@Test
 	public void testAddAfterRolePrecedence() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 		StringBuffer buf= new StringBuffer();
@@ -170,7 +163,7 @@ public class PrecedenceQuickFixTest extends OTQuickFixTest {
 		ICompilationUnit cu= pack1.createCompilationUnit("T1.java", buf.toString(), false, null);
 		
 		CompilationUnit astRoot= getASTRoot(cu);
-		ArrayList proposals= collectCorrections(cu, astRoot);
+		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot);
 		assertNumberOfProposals(proposals, 1);
 		assertCorrectLabels(proposals);
 

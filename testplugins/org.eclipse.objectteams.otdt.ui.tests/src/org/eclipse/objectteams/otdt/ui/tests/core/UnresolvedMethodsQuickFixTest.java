@@ -20,11 +20,11 @@
  **********************************************************************/
 package org.eclipse.objectteams.otdt.ui.tests.core;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+
 import java.util.ArrayList;
 import java.util.Hashtable;
-
-import junit.framework.Test;
-import junit.framework.TestSuite;
 
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IPackageFragment;
@@ -37,34 +37,25 @@ import org.eclipse.jdt.internal.core.manipulation.CodeTemplateContextType;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.text.correction.proposals.LinkedCorrectionProposal;
 import org.eclipse.jdt.ui.PreferenceConstants;
+import org.eclipse.jdt.ui.tests.core.rules.ProjectTestSetup;
 import org.eclipse.jdt.ui.text.java.correction.CUCorrectionProposal;
 import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.jface.text.contentassist.ICompletionProposal;
-
+import org.junit.Rule;
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.junit.runners.JUnit4;
 
 /**
  * Testing corrections for unresolved methods in OT specific contexts.
  * @author stephan
  * @since 1.2.1
  */
+@RunWith(JUnit4.class)
 public class UnresolvedMethodsQuickFixTest extends OTQuickFixTest {
-	private static final Class<UnresolvedMethodsQuickFixTest> THIS= UnresolvedMethodsQuickFixTest.class;
-
-	public UnresolvedMethodsQuickFixTest(String name) {
-		super(name);
-	}
-
-	public static Test allTests() {
-		return setUpTest(new TestSuite(THIS));
-	}
 	
-	public static Test suite() {
-		return allTests();
-	}
-
-	public static Test setUpTest(Test test) {
-		return new ProjectTestSetup(test);
-	}
+	@Rule
+    public ProjectTestSetup projectsetup = new ProjectTestSetup();
 
 	@Override
 	protected void addOptions(Hashtable options) {
@@ -76,6 +67,7 @@ public class UnresolvedMethodsQuickFixTest extends OTQuickFixTest {
 		StubUtility.setCodeTemplate(CodeTemplateContextType.CONSTRUCTORSTUB_ID, "", null);
 	}
 
+	@Test
 	public void testMethodInSameType() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 		StringBuffer buf= new StringBuffer();
@@ -134,6 +126,7 @@ public class UnresolvedMethodsQuickFixTest extends OTQuickFixTest {
 		assertEqualString(preview, buf.toString());
 	}
 
+	@Test
 	public void testMethodInDifferentClass1() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 		StringBuffer buf= new StringBuffer();
@@ -178,6 +171,7 @@ public class UnresolvedMethodsQuickFixTest extends OTQuickFixTest {
 	}
 	
 	/* See Trac #12 */
+	@Test
 	public void testMethodInDifferentClass2() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 		StringBuffer buf= new StringBuffer();
@@ -224,6 +218,7 @@ public class UnresolvedMethodsQuickFixTest extends OTQuickFixTest {
 		assertEqualString(preview, buf.toString());
 	}
 	
+	@Test
 	public void testTSuperConstructor() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 		StringBuffer buf= new StringBuffer();
@@ -283,6 +278,7 @@ public class UnresolvedMethodsQuickFixTest extends OTQuickFixTest {
 	}
 	
 	// static callin method created
+	@Test
 	public void testCallinMethod1() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 		StringBuffer buf= new StringBuffer();
@@ -339,6 +335,7 @@ public class UnresolvedMethodsQuickFixTest extends OTQuickFixTest {
 		assertEqualStringsIgnoreOrder(new String[] { preview1, preview2 }, new String[] { expected1, expected2 });		
 	}
 	// non-static callin method created
+	@Test
 	public void testCallinMethod2() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 		StringBuffer buf= new StringBuffer();
@@ -398,6 +395,7 @@ public class UnresolvedMethodsQuickFixTest extends OTQuickFixTest {
 
 	// non-static non-callin method created (base side)
 	// Bug 316665 -  [quickfix] create method from unresolved replace callin RHS adds "callin" modifier
+	@Test
 	public void testCallinMethod3() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 		StringBuffer buf= new StringBuffer();
@@ -457,6 +455,7 @@ public class UnresolvedMethodsQuickFixTest extends OTQuickFixTest {
 	}
 	// Bug 329988 - Quickfix method generation on missing replace callin method generates wrong method
 	// callin method created from short callin binding -> need to infer method signature
+	@Test
 	public void testUnresolvedCallinMapping1() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 		StringBuffer buf= new StringBuffer();
@@ -500,6 +499,7 @@ public class UnresolvedMethodsQuickFixTest extends OTQuickFixTest {
 
 	// Bug 329988 - Quickfix method generation on missing replace callin method generates wrong method
 	// missing base method created (short callin binding)
+	@Test
 	public void testUnresolvedCallinMapping2() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 		StringBuffer buf= new StringBuffer();
@@ -542,6 +542,7 @@ public class UnresolvedMethodsQuickFixTest extends OTQuickFixTest {
 
 	// Bug 329988 - Quickfix method generation on missing replace callin method generates wrong method
 	// non-static callin method created (short callin binding) - lifting/lowering involved
+	@Test
 	public void testUnresolvedCallinMapping3() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 		StringBuffer buf= new StringBuffer();
@@ -602,6 +603,7 @@ public class UnresolvedMethodsQuickFixTest extends OTQuickFixTest {
 
 	// Bug 329988 - Quickfix method generation on missing replace callin method generates wrong method
 	// missing base method created (short callout binding)
+	@Test
 	public void testUnresolvedCallout1() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 		StringBuffer buf= new StringBuffer();
@@ -643,6 +645,7 @@ public class UnresolvedMethodsQuickFixTest extends OTQuickFixTest {
 
 	// Bug 329988 - Quickfix method generation on missing replace callin method generates wrong method
 	// missing base method created (short callout binding) - translation involved
+	@Test
 	public void testUnresolvedCallout2() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 		StringBuffer buf= new StringBuffer();
@@ -682,6 +685,7 @@ public class UnresolvedMethodsQuickFixTest extends OTQuickFixTest {
 	}
 
 	// Bug 339520 - [quickfix] creating a role constructor via quickfix creates ';' instead of body
+	@Test
 	public void testRoleInstanceCreation1() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 		StringBuffer buf= new StringBuffer();
@@ -737,6 +741,7 @@ public class UnresolvedMethodsQuickFixTest extends OTQuickFixTest {
 /* some orig tests for use in OT-variants:
  * 	
 	
+	@Test
 	public void testConstructorInvocation() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 		StringBuffer buf= new StringBuffer();
@@ -772,6 +777,7 @@ public class UnresolvedMethodsQuickFixTest extends OTQuickFixTest {
 	}
 	
 	
+	@Test
 	public void testSuperMethodInvocation() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 		StringBuffer buf= new StringBuffer();

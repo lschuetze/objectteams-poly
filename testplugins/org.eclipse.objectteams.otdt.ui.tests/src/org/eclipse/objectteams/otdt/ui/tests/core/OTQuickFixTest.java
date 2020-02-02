@@ -20,11 +20,11 @@
  **********************************************************************/
 package org.eclipse.objectteams.otdt.ui.tests.core;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
+
 import java.io.File;
 import java.util.Hashtable;
-
-import junit.framework.Test;
-import junit.framework.TestSuite;
 
 import org.eclipse.core.resources.IProjectDescription;
 import org.eclipse.jdt.core.IJavaProject;
@@ -42,30 +42,29 @@ import org.eclipse.jface.text.contentassist.ICompletionProposal;
 import org.eclipse.objectteams.otdt.core.ext.OTDTPlugin;
 import org.eclipse.objectteams.otdt.core.ext.OTJavaNature;
 import org.eclipse.objectteams.otdt.core.ext.OTREContainer;
+import org.eclipse.objectteams.otdt.ui.tests.core.rule.ProjectTestSetup;
+import org.junit.After;
+import org.junit.Before;
+import org.junit.runner.RunWith;
+import org.junit.runners.Suite;
 
+@RunWith(Suite.class)
+@Suite.SuiteClasses({
+	ModifierCorrectionsQuickFixTest.class,
+	CalloutQuickFixTest.class,
+	CallinQuickFixTest.class,
+	UnresolvedMethodsQuickFixTest.class,
+	OTJavadocQuickFixTest.class,
+	AddImportQuickFixTest.class,
+	JavaQuickFixTests.class,
+	PrecedenceQuickFixTest.class,
+	StatementQuickFixTest.class,
+})
 public class OTQuickFixTest extends QuickFixTest {
 
 	protected IJavaProject fJProject1;
 	
 	protected IPackageFragmentRoot fSourceFolder;
-	
-	public OTQuickFixTest(String name) {
-		super(name);
-	}
-
-	public static Test suite() {
-		TestSuite suite= new TestSuite();
-		suite.addTest(ModifierCorrectionsQuickFixTest.suite());
-		suite.addTest(CalloutQuickFixTest.suite());
-		suite.addTest(CallinQuickFixTest.suite());
-		suite.addTest(UnresolvedMethodsQuickFixTest.suite());
-		suite.addTest(OTJavadocQuickFixTest.suite());
-		suite.addTest(AddImportQuickFixTest.suite());
-		suite.addTest(JavaQuickFixTests.suite());
-		suite.addTest(PrecedenceQuickFixTest.suite());
-		suite.addTest(StatementQuickFixTest.suite());
-		return suite;
-	}
 
 	public static final String OT_RUNTIME_PATH;
 	public static final String OTRE_JAR_PATH;
@@ -85,8 +84,9 @@ public class OTQuickFixTest extends QuickFixTest {
 		options.put(JavaCore.COMPILER_PB_STATIC_ACCESS_RECEIVER, JavaCore.ERROR);		
 	}
 
-	protected void setUp() throws Exception {
-		Hashtable options= TestOptions.getDefaultOptions();
+	@Before
+	public void setUp() throws Exception {
+		Hashtable<String,String> options= TestOptions.getDefaultOptions();
 		addOptions(options);
 		
 		JavaCore.setOptions(options);			
@@ -101,8 +101,9 @@ public class OTQuickFixTest extends QuickFixTest {
 		
 		fSourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
 	}
-	
-	protected void tearDown() throws Exception {
+
+	@After
+	public void tearDown() throws Exception {
 		JavaProjectHelper.clear(fJProject1, ProjectTestSetup.getDefaultClasspath());
 	}
 	

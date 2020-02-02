@@ -23,51 +23,40 @@ package org.eclipse.objectteams.otdt.ui.tests.core;
 import java.util.ArrayList;
 import java.util.Hashtable;
 
-import junit.framework.Test;
-import junit.framework.TestSuite;
-
 import org.eclipse.core.runtime.Path;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.formatter.DefaultCodeFormatterConstants;
-import org.eclipse.jdt.internal.core.manipulation.StubUtility;
 import org.eclipse.jdt.internal.core.manipulation.CodeTemplateContextType;
+import org.eclipse.jdt.internal.core.manipulation.StubUtility;
 import org.eclipse.jdt.testplugin.TestOptions;
 import org.eclipse.jdt.ui.text.java.IJavaCompletionProposal;
 import org.eclipse.jdt.ui.text.java.correction.CUCorrectionProposal;
+import org.eclipse.objectteams.otdt.ui.tests.core.rule.ProjectTestSetup;
 import org.eclipse.objectteams.otdt.ui.tests.util.JavaProjectHelper;
+import org.junit.Before;
+import org.junit.Rule;
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.junit.runners.JUnit4;
 
 /**
  * largely inspired by org.eclipse.jdt.ui.tests.quickfix.JavadocQuickFixTest.
  * @author stephan
  * @since 1.2.5
  */
+@RunWith(JUnit4.class)
 public class OTJavadocQuickFixTest extends OTQuickFixTest {
 
-	private static final Class THIS= OTJavadocQuickFixTest.class;
-	
-	public OTJavadocQuickFixTest(String name) {
-		super(name);
-	}
+	@Rule
+    public ProjectTestSetup projectsetup = new ProjectTestSetup();
 
-	public static Test allTests() {
-		return setUpTest(new TestSuite(THIS));
-	}
-	
-	public static Test setUpTest(Test test) {
-		return new ProjectTestSetup(test);
-	}
-	
-	public static Test suite() {
-		return allTests();
-	}
-
-	@SuppressWarnings("unchecked")
+	@Before
 	@Override
-	protected void setUp() throws Exception {
-		Hashtable options= TestOptions.getDefaultOptions();
+	public void setUp() throws Exception {
+		Hashtable<String,String> options= TestOptions.getDefaultOptions();
 		options.put(DefaultCodeFormatterConstants.FORMATTER_TAB_CHAR, JavaCore.SPACE);
 		options.put(DefaultCodeFormatterConstants.FORMATTER_TAB_SIZE, "4");
 		options.put(JavaCore.COMPILER_PB_INVALID_JAVADOC, JavaCore.ERROR);
@@ -116,6 +105,7 @@ public class OTJavadocQuickFixTest extends OTQuickFixTest {
 // SH}
 	}
 	
+	@Test
 	public void testMissingRoleTag1() throws Exception {
 		IPackageFragment teamPkg = fSourceFolder.createPackageFragment("test1.MyTeam", false, null);
 		teamPkg.createCompilationUnit("MyRole.java", 
