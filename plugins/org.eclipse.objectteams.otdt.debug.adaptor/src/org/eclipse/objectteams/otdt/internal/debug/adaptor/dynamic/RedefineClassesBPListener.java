@@ -139,12 +139,13 @@ public team class RedefineClassesBPListener implements IJavaBreakpointListener {
 			if (breakpoint instanceof IJavaLineBreakpoint) {
 				IJavaLineBreakpoint lineBreakpoint = (IJavaLineBreakpoint) breakpoint;
 				try {
-					if (lineBreakpoint.getTypeName().equals(className)) {
+					String typeName = lineBreakpoint.getTypeName();
+					if (typeName != null && typeName.equals(className)) {
 						debugTarget.breakpointRemoved(lineBreakpoint, null);
 						debugTarget.breakpointAdded(lineBreakpoint);
 					}
 				} catch (CoreException e) {
-					OTDebugAdaptorPlugin.logException("Failed to update breakpoint", e);
+					OTDebugAdaptorPlugin.logException("Failed to update breakpoint", e); //$NON-NLS-1$
 				}
 			}
 		}
