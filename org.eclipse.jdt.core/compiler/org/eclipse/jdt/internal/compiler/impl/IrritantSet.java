@@ -143,7 +143,8 @@ public class IrritantSet {
 		// group-2 infos enabled by default
 		.set(
 			CompilerOptions.UnlikelyEqualsArgumentType
-			| CompilerOptions.SuppressWarningsNotAnalysed);
+			| CompilerOptions.SuppressWarningsNotAnalysed
+			| CompilerOptions.AnnotatedTypeArgumentToUnannotated);
 		
 		COMPILER_DEFAULT_WARNINGS
 //{ObjectTeams: default to warning (group 3):
@@ -235,7 +236,8 @@ public class IrritantSet {
 			.set(CompilerOptions.NonnullParameterAnnotationDropped)
 			.set(CompilerOptions.MissingNonNullByDefaultAnnotation)
 			.set(CompilerOptions.PessimisticNullAnalysisForFreeTypeVariables)
-			.set(CompilerOptions.NonNullTypeVariableFromLegacyInvocation);
+			.set(CompilerOptions.NonNullTypeVariableFromLegacyInvocation)
+			.set(CompilerOptions.AnnotatedTypeArgumentToUnannotated);
 
 		RESTRICTION.set(CompilerOptions.DiscouragedReference);
 		STATIC_ACCESS.set(CompilerOptions.NonStaticAccessToStatic);

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2017 IBM Corporation and others.
+ * Copyright (c) 2000, 2020 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -41,6 +41,7 @@ import org.eclipse.jdt.internal.compiler.ast.TypeReference.AnnotationCollector;
 import org.eclipse.jdt.internal.compiler.classfmt.ClassFileConstants;
 import org.eclipse.jdt.internal.compiler.codegen.*;
 import org.eclipse.jdt.internal.compiler.flow.*;
+import org.eclipse.jdt.internal.compiler.impl.CompilerOptions;
 import org.eclipse.jdt.internal.compiler.lookup.*;
 import org.eclipse.jdt.internal.compiler.parser.*;
 import org.eclipse.jdt.internal.compiler.problem.*;
@@ -299,7 +300,8 @@ public void analyseCode(ClassScope classScope, InitializationFlowContext initial
 
 		// propagate to statements
 		if (this.statements != null) {
-			boolean enableSyntacticNullAnalysisForFields = this.scope.compilerOptions().enableSyntacticNullAnalysisForFields;
+			CompilerOptions compilerOptions = this.scope.compilerOptions();
+			boolean enableSyntacticNullAnalysisForFields = compilerOptions.enableSyntacticNullAnalysisForFields;
 			int complaintLevel = (nonStaticFieldInfoReachMode & FlowInfo.UNREACHABLE) == 0 ? Statement.NOT_COMPLAINED : Statement.COMPLAINED_FAKE_REACHABLE;
 			for (int i = 0, count = this.statements.length; i < count; i++) {
 				Statement stat = this.statements[i];
@@ -308,6 +310,9 @@ public void analyseCode(ClassScope classScope, InitializationFlowContext initial
 				}
 				if (enableSyntacticNullAnalysisForFields) {
 					constructorContext.expireNullCheckedFieldInfo();
+				}
+				if (compilerOptions.analyseResourceLeaks) {
+					FakedTrackingVariable.cleanUpUnassigned(this.scope, stat, flowInfo);
 				}
 			}
 		}

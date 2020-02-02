@@ -8290,7 +8290,7 @@ public void testBug459967_Enum_values() {
 		?
 		"	@NonNull MyEnum[] getValues() {\n"
 		:
-		"	MyEnum @NonNull[] getValues() {\n"
+		"	@NonNull MyEnum @NonNull[] getValues() {\n"
 		)+
 		"		return MyEnum.values();\n" +
 		"	}\n" +
@@ -8326,7 +8326,7 @@ public void testBug459967_Enum_values_binary() {
 		?
 		"	@NonNull MyEnum[] getValues() {\n"
 		:
-		"	MyEnum @NonNull[] getValues() {\n"
+		"	@NonNull MyEnum @NonNull[] getValues() {\n"
 		)+
 		"		return MyEnum.values();\n" +
 		"	}\n" +
