@@ -25,6 +25,8 @@ import static org.eclipse.jdt.internal.compiler.lookup.ExtraCompilerModifiers.Ac
 import static org.eclipse.objectteams.otdt.core.compiler.IOTConstants.GET_CLASS_PREFIX;
 
 import org.eclipse.jdt.core.compiler.CharOperation;
+import org.eclipse.jdt.internal.compiler.ast.ASTNode;
+import org.eclipse.jdt.internal.compiler.ast.Annotation;
 import org.eclipse.jdt.internal.compiler.ast.ClassLiteralAccess;
 import org.eclipse.jdt.internal.compiler.ast.Expression;
 import org.eclipse.jdt.internal.compiler.ast.MessageSend;
@@ -43,6 +45,7 @@ import org.eclipse.jdt.internal.compiler.impl.Constant;
 import org.eclipse.jdt.internal.compiler.lookup.Binding;
 import org.eclipse.jdt.internal.compiler.lookup.BlockScope;
 import org.eclipse.jdt.internal.compiler.lookup.ExtraCompilerModifiers;
+import org.eclipse.jdt.internal.compiler.lookup.LookupEnvironment;
 import org.eclipse.jdt.internal.compiler.lookup.MethodBinding;
 import org.eclipse.jdt.internal.compiler.lookup.ReferenceBinding;
 import org.eclipse.jdt.internal.compiler.lookup.TypeBinding;
@@ -219,6 +222,12 @@ public class RoleClassLiteralAccess extends ClassLiteralAccess {
 		} else {
 			roleTypeRef = gen.singleTypeReference(roleBinding.sourceName());
 		}
+		LookupEnvironment environment = teamDecl.scope.environment();
+		boolean hasTypeAnnotation = false;
+		if (environment.usesNullTypeAnnotations()) {
+			roleTypeRef.annotations = new Annotation[][] { new Annotation[] {gen.markerAnnotation(environment.getNonNullAnnotationName())} };
+			hasTypeAnnotation = true;
+		}
 		TypeReference[] typeArguments = new TypeReference[] {roleTypeRef};
 
 		MethodDeclaration method = gen.method(teamDecl.compilationResult,
@@ -230,6 +239,11 @@ public class RoleClassLiteralAccess extends ClassLiteralAccess {
 							typeArguments),
 				selector,
 				null);
+		if (hasTypeAnnotation) {
+			method.bits |= ASTNode.HasTypeAnnotations;
+			method.returnType.bits |= ASTNode.HasTypeAnnotations;
+		}
+
 		if (teamBinding.isInterface())
 			method.modifiers |= ClassFileConstants.AccAbstract|ExtraCompilerModifiers.AccSemicolonBody;
 		else

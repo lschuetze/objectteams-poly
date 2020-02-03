@@ -1623,7 +1623,7 @@ public ParameterizedTypeBinding createParameterizedType(ReferenceBinding generic
 		if (genericType.isParameterizedType())
 			genericType = (ReferenceBinding) genericType.erasure();
 	}
-	return this.typeSystem.getParameterizedType(genericType, typeArguments, teamAnchor, valueParamPosition, enclosingType, annotations);
+	return this.typeSystem.getParameterizedType((ReferenceBinding) genericType.prototype(), typeArguments, teamAnchor, valueParamPosition, enclosingType, annotations);
 }
 // SH}
 
