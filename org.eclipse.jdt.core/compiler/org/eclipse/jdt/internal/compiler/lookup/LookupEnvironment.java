@@ -1620,10 +1620,18 @@ public ParameterizedTypeBinding createParameterizedType(ReferenceBinding generic
 								ITeamAnchor teamAnchor, int valueParamPosition, ReferenceBinding enclosingType, AnnotationBinding[] annotations) {
 	if (teamAnchor != null) {
 		genericType = genericType.getRealType();
-		if (genericType.isParameterizedType())
-			genericType = (ReferenceBinding) genericType.erasure();
 	}
-	return this.typeSystem.getParameterizedType((ReferenceBinding) genericType.prototype(), typeArguments, teamAnchor, valueParamPosition, enclosingType, annotations);
+	switch (genericType.kind()) {
+		case Binding.TYPE_PARAMETER:
+			break;
+		case Binding.PARAMETERIZED_TYPE:
+		case Binding.RAW_TYPE:
+			genericType = genericType.actualType();
+			//$FALL-THROUGH$
+		case Binding.GENERIC_TYPE:
+			genericType = (ReferenceBinding) genericType.prototype();
+	}
+	return this.typeSystem.getParameterizedType(genericType, typeArguments, teamAnchor, valueParamPosition, enclosingType, annotations);
 }
 // SH}
 
