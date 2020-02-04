@@ -25,6 +25,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.jdt.annotation.NonNull;
@@ -50,10 +51,10 @@ public class ClassScanner
 	// collect class names recorded by readOTAttributes:
 	
 	//   * this version used by the MasterTeamLoader.loadTeams:
-	HashMap<String,ArrayList<String>> baseClassNamesByTeam = new HashMap<String, ArrayList<String>>();
+	Map<String,ArrayList<String>> baseClassNamesByTeam = new HashMap<String, ArrayList<String>>();
 	//   * these fields used by TransformerHook.processClass (collected over multiple readOTAttributes):
-	ArrayList<String> allBaseClassNames = new ArrayList<String>();
-	ArrayList<String> roleClassNames = new ArrayList<String>();
+	List<String> allBaseClassNames = new ArrayList<String>();
+	List<String> roleClassNames = new ArrayList<String>();
 
 
 	/** 
@@ -134,7 +135,7 @@ public class ClassScanner
 	{
 		List<String> roles = CallinBindingManager.getRolePerTeam(className);
 		if (roles != null) {
-			for (@SuppressWarnings("null")@NonNull String roleName: roles) {
+			for (@NonNull String roleName: roles) {
 				log(IStatus.OK, "scanning role "+roleName);
 				try {
 					this.roleClassNames.add(roleName);

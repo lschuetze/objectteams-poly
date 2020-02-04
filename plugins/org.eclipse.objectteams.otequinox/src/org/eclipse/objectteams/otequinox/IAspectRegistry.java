@@ -49,7 +49,7 @@ public interface IAspectRegistry {
 	 *  @param aspectBundle potential aspect plugin
 	 *  @return array of base plugin IDs or null.
 	 */
-	public @Nullable String[] getAdaptedBasePlugins(Bundle aspectBundle);
+	public String @Nullable[] getAdaptedBasePlugins(Bundle aspectBundle);
 
 	/**
 	 * Does `bundle' have internal teams, i.e., teams that adapt classes from their

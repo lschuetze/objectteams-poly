@@ -1,6 +1,17 @@
 class org/osgi/framework/hooks/weaving/WovenClass
 
+getBundleWiring
+ ()Lorg/osgi/framework/wiring/BundleWiring;
+ ()L1org/osgi/framework/wiring/BundleWiring;
+
+getBytes
+ ()[B
+ ()[1B
+
 getClassName
  ()Ljava/lang/String;
  ()L1java/lang/String;
  
+getDynamicImports
+ ()Ljava/util/List<Ljava/lang/String;>;
+ ()Ljava/util/List<L1java/lang/String;>;

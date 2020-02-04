@@ -4,6 +4,9 @@ getBundle
  ()Lorg/osgi/framework/Bundle;
  ()L1org/osgi/framework/Bundle;
 
+getService
+ <S:Ljava/lang/Object;>(Lorg/osgi/framework/ServiceReference<TS;>;)TS;
+ <S:Ljava/lang/Object;>(Lorg/osgi/framework/ServiceReference<TS;>;)T0S;
 registerService
  ([Ljava/lang/String;Ljava/lang/Object;Ljava/util/Dictionary<Ljava/lang/String;*>;)Lorg/osgi/framework/ServiceRegistration<*>;
  ([Ljava/lang/String;Ljava/lang/Object;Ljava/util/Dictionary<Ljava/lang/String;*>;)L1org/osgi/framework/ServiceRegistration<*>;

@@ -4,3 +4,6 @@ emptyList
  <T:Ljava/lang/Object;>()Ljava/util/List<TT;>;
  <T:Ljava/lang/Object;>()L1java/util/List<TT;>;
  
+singleton
+ <T:Ljava/lang/Object;>(TT;)Ljava/util/Set<TT;>;
+ <1T:Ljava/lang/Object;>(TT;)L1java/util/Set<TT;>;

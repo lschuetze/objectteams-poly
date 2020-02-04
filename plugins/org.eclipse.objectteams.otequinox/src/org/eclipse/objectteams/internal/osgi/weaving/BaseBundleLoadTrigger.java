@@ -41,14 +41,14 @@ public class BaseBundleLoadTrigger {
 
 	private AspectBindingRegistry aspectBindingRegistry;
 	@SuppressWarnings("deprecation")
-	private @Nullable org.osgi.service.packageadmin.PackageAdmin admin;
+	private org.osgi.service.packageadmin.@Nullable PackageAdmin admin;
 
 	private String baseBundleName;	
 	@Nullable private BaseBundle baseBundle; // null when representing an aspectBundle with SELF-adapting teams
 	private List<AspectBinding> aspectBindings = new ArrayList<>();
 
 	public BaseBundleLoadTrigger(String bundleSymbolicName, @Nullable BaseBundle baseBundle, AspectBindingRegistry aspectBindingRegistry, 
-			@SuppressWarnings("deprecation") @Nullable org.osgi.service.packageadmin.PackageAdmin admin) 
+			@SuppressWarnings("deprecation") org.osgi.service.packageadmin.@Nullable PackageAdmin admin) 
 	{
 		this.baseBundleName = bundleSymbolicName;
 		this.baseBundle = baseBundle;

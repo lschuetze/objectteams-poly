@@ -28,6 +28,8 @@ import java.util.Map;
 import org.eclipse.osgi.framework.log.FrameworkLog;
 import org.eclipse.osgi.framework.log.FrameworkLogEntry;
 
+import org.eclipse.jdt.annotation.NonNull;
+
 /**
  * Reads forced exports from various locations (granted/denied).
  * 
@@ -237,7 +239,7 @@ public class ForcedExportsRegistry {
 	 * @param the permission we are asking for
 	 * @return list of pairs (baseBundleId x packageName)
 	 */ 
-	public static /*@NonNull*/ List<String[]> getForcedExportsByAspect(String aspectBundleId, int perm) 
+	public static @NonNull List<@NonNull String[]> getForcedExportsByAspect(String aspectBundleId, int perm) 
 	{
 		// can be queried before we had a chance to initialize our data structures
 		synchronized (OTStorageHook.class) {

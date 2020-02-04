@@ -164,7 +164,7 @@ public class AspectBinding {
 				checkExported: {
 					List<String> imports = baseClass.getDynamicImports();
 					Bundle aspectBundle = AspectBinding.this.aspectBundle;
-					BundleRevision bundleRevision = aspectBundle != null ? aspectBundle.adapt(BundleRevision.class) : null;
+					@Nullable BundleRevision bundleRevision = aspectBundle != null ? aspectBundle.adapt(BundleRevision.class) : null;
 					if (bundleRevision != null) { // catch uninstalled state
 						for (Capability capability : bundleRevision.getCapabilities(PackageNamespace.PACKAGE_NAMESPACE)) {
 							Object exported = capability.getAttributes().get(PackageNamespace.PACKAGE_NAMESPACE);
@@ -262,7 +262,7 @@ public class AspectBinding {
 	static class BaseBundle {
 		String bundleName;
 		/** Team classes indexed by base classes that should trigger activating the team. */
-		final HashMap<String, Set<TeamBinding>> teamsPerBase = new HashMap<>();
+		final Map<String, Set<TeamBinding>> teamsPerBase = new HashMap<>();
 
 		public BaseBundle(String bundleName) {
 			this.bundleName = bundleName;
@@ -314,8 +314,11 @@ public class AspectBinding {
 		Bundle bundle = this.aspectBundle;
 		if (bundle == null)
 			return;
-		BundleWiring wiring = bundle.adapt(BundleWiring.class);
-		try (InputStream classStream = wiring.getClassLoader().getResourceAsStream(className.replace('.', '/')+".class")) {
+		@Nullable BundleWiring wiring = bundle.adapt(BundleWiring.class);
+		ClassLoader classLoader = wiring.getClassLoader();
+		if (classLoader == null)
+			return;
+		try (InputStream classStream = classLoader.getResourceAsStream(className.replace('.', '/')+".class")) {
 			this.weavingScheme = ASMByteCodeAnalyzer.determineWeavingScheme(classStream, className);
 			if (OTWeavingHook.DEFAULT_WEAVING_SCHEME == WeavingScheme.Unknown) {
 				OTWeavingHook.DEFAULT_WEAVING_SCHEME = this.weavingScheme;
@@ -379,7 +382,7 @@ public class AspectBinding {
 		long time = 0;
 		if (Util.PROFILE) time= System.nanoTime();
 		ClassScanner scanner = new ClassScanner();
-		for (@SuppressWarnings("null")@NonNull TeamBinding team : getAllTeamBindings()) {
+		for (TeamBinding team : getAllTeamBindings()) {
 			if (team.hasScannedBases) { // not a surprise for members of equivalentSet or classes already processed by weave()
 				if (!team.hasScannedRoles) { // weave() only scans bases, not roles!
 					team.hasScannedRoles = true;
@@ -408,10 +411,13 @@ public class AspectBinding {
 
 	private List<TeamBinding> getAllTeamBindings() {
 		List<TeamBinding> all = new ArrayList<>();
-		for (TeamBinding team : teams) all.add(team);
+		for (TeamBinding team : teams)
+			if (team != null)
+				all.add(team);
 		for (int i = 0; i < teams.length; i++) {
-			if (teams[i].superTeam != null)
-				all.add(teams[i].superTeam);
+			TeamBinding superTeam = teams[i].superTeam;
+			if (superTeam != null)
+				all.add(superTeam);
 			all.addAll(teams[i].subTeams);
 		}
 		return all;

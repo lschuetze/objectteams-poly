@@ -22,6 +22,7 @@ import java.util.Collections;
 import java.util.List;
 
 import org.eclipse.jdt.annotation.NonNull;
+import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.objectteams.otequinox.AspectPermission;
 import org.eclipse.objectteams.otequinox.TransformerPlugin;
 
@@ -46,11 +47,12 @@ public class ForcedExportsDelegate {
 		return registryClass != null;
 	}
 
-	public @NonNull List<String[]> getForcedExportsByAspect(String aspectBundleId, AspectPermission perm) {
+	@NonNullByDefault
+	public List<@NonNull String[]> getForcedExportsByAspect(String aspectBundleId, AspectPermission perm) {
 		if (getForcedExportsByAspect != null) {
 			try {
 				@SuppressWarnings({ "unchecked", "null" })@NonNull // reflection knows nothing about nullness, nor generics
-				List<String[]> result = (List<String[]>) getForcedExportsByAspect.invoke(null, new Object[] {aspectBundleId, perm.ordinal()});
+				List<@NonNull String[]> result = (List<String[]>) getForcedExportsByAspect.invoke(null, new Object[] {aspectBundleId, perm.ordinal()});
 				return result;
 			} catch (SecurityException | IllegalAccessException | IllegalArgumentException | InvocationTargetException e) {
 				TransformerPlugin.log(e, "Failed to access forced exports");

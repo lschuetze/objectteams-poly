@@ -1,0 +1,4 @@
+class org/osgi/framework/wiring/BundleWiring
+getClassLoader
+ ()Ljava/lang/ClassLoader;
+ ()L0java/lang/ClassLoader;

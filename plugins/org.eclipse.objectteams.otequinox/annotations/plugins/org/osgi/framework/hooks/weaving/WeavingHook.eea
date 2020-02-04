@@ -1,0 +1,4 @@
+class org/osgi/framework/hooks/weaving/WeavingHook
+weave
+ (Lorg/osgi/framework/hooks/weaving/WovenClass;)V
+ (L1org/osgi/framework/hooks/weaving/WovenClass;)V

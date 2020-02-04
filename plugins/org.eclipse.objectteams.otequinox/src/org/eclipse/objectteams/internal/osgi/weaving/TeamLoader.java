@@ -267,7 +267,7 @@ public class TeamLoader {
 	
 	private @Nullable String findUnloadableBaseClass(TeamBinding team) {
 		// easy tests first:
-		for (@SuppressWarnings("null")@NonNull String baseclass : team.baseClassNames) {
+		for (String baseclass : team.baseClassNames) {
 			if (this.beingDefined.contains(baseclass))
 				return baseclass;
 		}
@@ -277,7 +277,7 @@ public class TeamLoader {
 			// use a throw-away class loader so we have a fresh chance to load any failed classes later
 			// (only initiating class loader remembers the failure, if this is discarded, the slate is clean):
 			ClassLoader tryLoader = new ClassLoader(teamClass.getClassLoader()) {};
-			for (@SuppressWarnings("null")@NonNull String baseclass : team.baseClassNames) { 
+			for (String baseclass : team.baseClassNames) { 
 				Boolean previous = ObjectTeamsTransformer.initiatedByThrowAwayLoader.get();
 				try {
 					ObjectTeamsTransformer.initiatedByThrowAwayLoader.set(Boolean.TRUE);

@@ -70,10 +70,10 @@ public class AspectBindingRegistry {
 		KNOWN_OTDT_ASPECTS.add("org.eclipse.objectteams.otdt.samples");
 	}
 	/** main internal registry of aspect bindings. */
-	private static HashMap<String, ArrayList<AspectBinding>> aspectBindingsByBasePlugin = 
-			   new HashMap<String, ArrayList<AspectBinding>>();
-	private static HashMap<String, ArrayList<AspectBinding>> aspectBindingsByAspectPlugin = 
-		       new HashMap<String, ArrayList<AspectBinding>>();
+	private static Map<String, ArrayList<AspectBinding>> aspectBindingsByBasePlugin = 
+		   new HashMap<String, ArrayList<AspectBinding>>();
+	private static Map<String, ArrayList<AspectBinding>> aspectBindingsByAspectPlugin = 
+		   new HashMap<String, ArrayList<AspectBinding>>();
 	private Map<String, BaseBundle> baseBundleLookup = new HashMap<>();
 
 	private Set<String> selfAdaptingAspects= new HashSet<String>(); // TODO, never read / evaluated
@@ -89,7 +89,7 @@ public class AspectBindingRegistry {
 	/* Load extensions for org.eclipse.objectteams.otequinox.aspectBindings and check aspect permissions. */
 	public void loadAspectBindings(
 			IExtensionRegistry extensionRegistry,
-			@SuppressWarnings("deprecation") @Nullable org.osgi.service.packageadmin.PackageAdmin packageAdmin,
+			@SuppressWarnings("deprecation") org.osgi.service.packageadmin.@Nullable PackageAdmin packageAdmin,
 			OTWeavingHook hook) throws OTAgentNotInstalled 
 	{
 		IConfigurationElement[] aspectBindingConfigs = extensionRegistry
@@ -162,7 +162,9 @@ public class AspectBindingRegistry {
 					for (@NonNull IConfigurationElement superBase : teams[j].getChildren(SUPER_BASE)) {
 						AspectBinding superBaseBinding = addSuperBase(superBase, aspectBundleId, aspectBundle, baseBundle, team, packageAdmin, hook);
 						bindings.add(superBaseBinding);
-						teamSet.add(superBaseBinding.teams[0]);
+						@SuppressWarnings("null") // addSuperBase ensures a valid teams[0]
+						@NonNull TeamBinding superBaseTeam = superBaseBinding.teams[0];
+						teamSet.add(superBaseTeam);
 					}
 				}
 				
@@ -183,7 +185,8 @@ public class AspectBindingRegistry {
 				if (baseBundles == null || baseBundles.length == 0 || (baseBundles[0].getState() < Bundle.RESOLVED)) {
 					log(IStatus.ERROR, "base bundle "+baseBundleId+" is not resolved - weaving may be incomplete.");
 				} else {
-					BundleWiring baseBundleWiring = baseBundles[0].adapt(BundleWiring.class);
+					@Nullable BundleWiring baseBundleWiring = baseBundles[0].adapt(BundleWiring.class);
+					assert baseBundleWiring != null : "Bundle should adapt to BundleWiring";
 					Collection<String> boundBases = binding.scanTeamClasses(aspectBundle, DelegatingTransformer.newTransformer(binding.weavingScheme, hook, baseBundleWiring));
 					addBoundBaseClasses(boundBases);
 				}
@@ -197,11 +200,12 @@ public class AspectBindingRegistry {
 
 	private AspectBinding addSuperBase(IConfigurationElement superBase, String aspectBundleId, @Nullable Bundle aspectBundle,
 			BaseBundle baseBundle, TeamBinding teamBinding,
-			@SuppressWarnings("deprecation") @Nullable org.osgi.service.packageadmin.PackageAdmin packageAdmin,
+			@SuppressWarnings("deprecation") org.osgi.service.packageadmin.@Nullable PackageAdmin packageAdmin,
 			OTWeavingHook hook) throws OTAgentNotInstalled
 	{
 		String superBaseClass = superBase.getAttribute(SUPER_BASE_CLASS);
 		String superBasePlugin = superBase.getAttribute(SUPER_BASE_PLUGIN);
+		if (superBaseClass == null) throw new IllegalArgumentException("superBase element must define 'class'");
 		BaseBundle superBaseBundle;
 		if (superBasePlugin == null) {
 			superBasePlugin = baseBundle.bundleName;
@@ -224,7 +228,7 @@ public class AspectBindingRegistry {
 
 	@SuppressWarnings("deprecation") // multiple uses of deprecated but still recommended class PackageAdmin
 	private boolean checkRequiredFragments(String aspectBundleId, String baseBundleId, IConfigurationElement[] fragments, 
-			@Nullable org.osgi.service.packageadmin.PackageAdmin packageAdmin) 
+			org.osgi.service.packageadmin.@Nullable PackageAdmin packageAdmin) 
 	{
 		// checking only, no real action needed.
 		boolean hasError = false;
@@ -297,8 +301,8 @@ public class AspectBindingRegistry {
 	 * Given a potential aspect bundle, answer the symbolic names of all base bundles
 	 * adapted by the aspect bundle.
 	 */
-	public @Nullable String[] getAdaptedBasePlugins(Bundle aspectBundle) {
-		ArrayList<AspectBinding> bindings = aspectBindingsByAspectPlugin.get(aspectBundle.getSymbolicName());
+	public String @Nullable[] getAdaptedBasePlugins(Bundle aspectBundle) {
+		List<AspectBinding> bindings = aspectBindingsByAspectPlugin.get(aspectBundle.getSymbolicName());
 		if (bindings == null) return null;
 		String[] basePlugins = new String[bindings.size()];
 		for (int i=0; i<basePlugins.length; i++) {

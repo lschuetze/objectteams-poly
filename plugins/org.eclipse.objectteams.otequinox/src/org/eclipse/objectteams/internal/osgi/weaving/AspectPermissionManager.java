@@ -100,12 +100,12 @@ public class AspectPermissionManager {
 	
 	// collect all forced exports (denied/granted), granted should balance to an empty structure.
 	// structure is: aspect-id -> (base bundle x base package)*
-	private HashMap<String, List<String[]>> deniedForcedExportsByAspect= new HashMap<String, List<String[]>>();
-	private HashMap<String, List<String[]>> grantedForcedExportsByAspect= new HashMap<String, List<String[]>>();
+	private Map<String, List<@NonNull String[]>> deniedForcedExportsByAspect= new HashMap<>();
+	private Map<String, List<@NonNull String[]>> grantedForcedExportsByAspect= new HashMap<>();
 	
 	// key is aspectId+"->"+baseId, value is array of team names
-	private HashMap<String, Set<String>> deniedTeamsByAspectBinding = new HashMap<String, Set<String>>();
-	private HashMap<String, Set<String>> grantedTeamsByAspectBinding = new HashMap<String, Set<String>>();
+	private Map<String, Set<String>> deniedTeamsByAspectBinding = new HashMap<String, Set<String>>();
+	private Map<String, Set<String>> grantedTeamsByAspectBinding = new HashMap<String, Set<String>>();
 
 	// the workspace directory for storing the state of this plugin
 	@Nullable private IPath otequinoxState;
@@ -113,12 +113,12 @@ public class AspectPermissionManager {
 	private Bundle transformerBundle;
 	// helper instance needed to stop bundles by name
 	@SuppressWarnings("deprecation")
-	@Nullable private org.osgi.service.packageadmin.PackageAdmin packageAdmin;
+	private org.osgi.service.packageadmin.@Nullable PackageAdmin packageAdmin;
 	
 	private ForcedExportsDelegate forcedExportsDelegate;
 	
 	public AspectPermissionManager(Bundle bundle, 
-			@SuppressWarnings("deprecation") @Nullable org.osgi.service.packageadmin.PackageAdmin packageAdmin)
+			@SuppressWarnings("deprecation") org.osgi.service.packageadmin.@Nullable PackageAdmin packageAdmin)
 	{
 		this.transformerBundle = bundle;
 		this.packageAdmin = packageAdmin;
@@ -226,7 +226,7 @@ public class AspectPermissionManager {
 			String forcedExportsRequest = forcedExport.getValue();
 			if (forcedExportsRequest == null)
 				continue;
-			for (@SuppressWarnings("null")@NonNull String singleForcedExportRequest : forcedExportsRequest.split(","))
+			for (@NonNull String singleForcedExportRequest : forcedExportsRequest.split(","))
 			{
 				singleForcedExportRequest = singleForcedExportRequest.trim();
 
@@ -312,11 +312,11 @@ public class AspectPermissionManager {
 	 * @param map		in/out param for storing results from OTStorageHook
 	 * @return		 	list of pairs (base bundle x base package)
 	 */
-	private List<String[]> getConfiguredForcedExports( String                          aspectId, 
+	private List<@NonNull String[]> getConfiguredForcedExports( String                          aspectId, 
 														AspectPermission 				perm, 
-														HashMap<String, List<String[]>> map)
+														Map<String, List<@NonNull String[]>> map)
     {
-		List<String[]> forcedExports= map.get(aspectId);
+		List<@NonNull String[]> forcedExports= map.get(aspectId);
 		if (forcedExports == null) {
 			// fetch declarations from config.ini or other locations.
 			forcedExports= forcedExportsDelegate.getForcedExportsByAspect(aspectId, perm);
@@ -325,7 +325,7 @@ public class AspectPermissionManager {
 		return forcedExports;
 	}
 
-	private @Nullable String[] findRequestInList(String baseBundleId, String basePackage, List<String[]> list) {
+	private String @Nullable[] findRequestInList(String baseBundleId, String basePackage, List<String[]> list) {
 		for (String[] singleExport : list)
 			if (   singleExport[0].equals(baseBundleId)
 				&& singleExport[1].equals(basePackage))
@@ -540,7 +540,9 @@ public class AspectPermissionManager {
 									teamInstance.deactivate(Team.ALL_THREADS);
 							// could also check if roles are present already ...
 						}
-						bundlesToStop.add(teamClass.getAspectBinding().aspectBundle);
+						Bundle aspectBundle = teamClass.getAspectBinding().aspectBundle;
+						if (aspectBundle != null)
+							bundlesToStop.add(aspectBundle);
 					}
 					for (Bundle bundle : bundlesToStop) {
 						if ((bundle.getState() & (Bundle.STARTING|Bundle.ACTIVE)) != 0) {
@@ -662,12 +664,12 @@ public class AspectPermissionManager {
 		log(IStatus.INFO, "Created aspect binding defaults file "+configFile.getCanonicalPath());
 	}
 
-	private void parseTeamPermissionFile(HashMap<String, Set<String>> teamsByAspectBinding, File configFile) {
+	private void parseTeamPermissionFile(Map<String, Set<String>> teamsByAspectBinding, File configFile) {
 		try (BufferedReader reader = new BufferedReader(new FileReader(configFile))) {
 			String line;
 			while ((line = reader.readLine()) != null) {
 				if (line.length() > 0 && line.charAt(0) == '#') continue;
-				String[] parts = line.split("=");
+				@NonNull String[] parts = line.split("=");
 				if (parts.length == 2) {
 					Set<String> teams = new HashSet<String>();
 					StringTokenizer teamToks = new StringTokenizer(parts[1], ",");
@@ -685,7 +687,7 @@ public class AspectPermissionManager {
 	{
 		IPath state = this.otequinoxState;
 		if (state != null) {
-			HashMap<String, Set<String>> teamsByAspect = null;
+			Map<String, Set<String>> teamsByAspect = null;
 			IPath configFilePath = null;
 			switch (negotiatedPermission) {
 			case GRANT:

@@ -102,7 +102,7 @@ public class TransformerPlugin implements BundleActivator, IAspectRegistry {
 		}
 
 		@Override
-		public @Nullable String[] getAdaptedBasePlugins(Bundle aspectBundle) {
+		public String @Nullable[] getAdaptedBasePlugins(Bundle aspectBundle) {
 			return this.aspectBindingRegistry.getAdaptedBasePlugins(aspectBundle);
 		}
 
@@ -206,6 +206,7 @@ public class TransformerPlugin implements BundleActivator, IAspectRegistry {
 				= new ServiceTracker<ExtendedLogService,ExtendedLogService>(bundleContext, ExtendedLogService.class, null);
 		tracker.open();
 		ExtendedLogService logService = tracker.getService();
+		if (logService == null) throw new IllegalStateException("no log service available"); // give up :(
 		Bundle bundle = bundleContext.getBundle();
 		Logger logger = logService.getLogger(bundle, OTEQUINOX_LOGGER_NAME);
 
@@ -213,19 +214,20 @@ public class TransformerPlugin implements BundleActivator, IAspectRegistry {
 				= new ServiceTracker<ExtendedLogReaderService,ExtendedLogReaderService>(bundleContext, ExtendedLogReaderService.class.getName(), null);
 		logReaderTracker.open();
 		ExtendedLogReaderService logReader = logReaderTracker.getService();
+		if (logReader == null) throw new IllegalStateException("no log reader available"); // give up :(
 
 		final Logger equinoxLogger = logService.getLogger(bundle, LoggerBridge.EQUINOX_LOGGER_NAME);
 
 		// listen to log events from our logger and asynchronously dispatch them to the equinox logger
 		logReader.addLogListener(
 			new LogListener() {
-				@Override @NonNullByDefault(false)
+				@Override @NonNullByDefault({})
 				public void logged(LogEntry entry) {
 					equinoxLogger.log(entry.getLevel(), entry.getMessage(), entry.getException());
 				}
 			},
 			new LogFilter() {
-				@Override @NonNullByDefault(false)
+				@Override @NonNullByDefault({})
 				public boolean isLoggable(Bundle bundle, String loggerName, int logLevel) {
 					return OTEQUINOX_LOGGER_NAME.equals(loggerName);
 				}
@@ -245,7 +247,9 @@ public class TransformerPlugin implements BundleActivator, IAspectRegistry {
 		ServiceTracker<LoggerAdmin,LoggerAdmin> adminTracker
 					= new ServiceTracker<LoggerAdmin,LoggerAdmin>(bundleContext, LoggerAdmin.class, null);
 		adminTracker.open();
-		adminTracker.getService().getLoggerContext(bundleSymbolicName).setLogLevels(levels);
+		LoggerAdmin service = adminTracker.getService();
+		if (service != null)
+			service.getLoggerContext(bundleSymbolicName).setLogLevels(levels);
 	}
 
 	private void OTREInit() {
@@ -394,7 +398,7 @@ public class TransformerPlugin implements BundleActivator, IAspectRegistry {
 	}
 
 	@Override
-	public @Nullable String[] getAdaptedBasePlugins(Bundle aspectBundle) {
+	public String @Nullable[] getAdaptedBasePlugins(Bundle aspectBundle) {
 		throw notInitialized();
 	}
 

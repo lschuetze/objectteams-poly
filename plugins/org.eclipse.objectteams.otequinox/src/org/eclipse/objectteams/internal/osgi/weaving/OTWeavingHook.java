@@ -39,6 +39,7 @@ import org.eclipse.core.runtime.IConfigurationElement;
 import org.eclipse.core.runtime.IExtensionRegistry;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.jdt.annotation.NonNull;
+import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
 import org.eclipse.objectteams.internal.osgi.weaving.ASMByteCodeAnalyzer.ClassInformation;
 import org.eclipse.objectteams.internal.osgi.weaving.AspectBinding.BaseBundle;
@@ -74,9 +75,10 @@ import org.osgi.resource.Wire;
  * re-attempt instantiating the dependent team(s).</li>
  * </ul>
  */
+@NonNullByDefault
 public class OTWeavingHook implements WeavingHook, WovenClassListener {
 
-	static @NonNull WeavingScheme DEFAULT_WEAVING_SCHEME = WeavingScheme.Unknown;
+	static WeavingScheme DEFAULT_WEAVING_SCHEME = WeavingScheme.Unknown;
 	enum WeavingScheme { Unknown, OTRE, OTDRE };
 
 	static final ThreadWeaving WEAVE_THREAD_NOTIFICATION;
@@ -122,30 +124,30 @@ public class OTWeavingHook implements WeavingHook, WovenClassListener {
 	enum WeavingReason { None, Aspect, Base, Thread }
 	
 	/** Interface to data about aspectBinding extensions. */
-	private @NonNull AspectBindingRegistry aspectBindingRegistry = new AspectBindingRegistry();
+	private AspectBindingRegistry aspectBindingRegistry = new AspectBindingRegistry();
 	
 	/** Map of trip wires to be fired when a particular base bundle is loaded. */
-	private @NonNull HashMap<String, BaseBundleLoadTrigger> baseTripWires = new HashMap<>();
+	private Map<String, BaseBundleLoadTrigger> baseTripWires = new HashMap<>();
 
 	/** Set of classes for which processing has started but which are not yet defined in the class loader. */
-	private @NonNull Set<String> beingDefined = new HashSet<>();
+	private Set<String> beingDefined = new HashSet<>();
 
 	/** Map of tasks per qualified class name: reweaving requested during defineClass(). */
-	private @NonNull Map<String, IReweavingTask> pendingReweavingTasks = new HashMap<>();
+	private Map<String, IReweavingTask> pendingReweavingTasks = new HashMap<>();
 
 	/** Records of teams that have been deferred due to unresolved class dependencies: */
-	private @NonNull List<WaitingTeamRecord> deferredTeams = new ArrayList<>();
+	private List<WaitingTeamRecord> deferredTeams = new ArrayList<>();
 
-	private @NonNull ASMByteCodeAnalyzer byteCodeAnalyzer = new ASMByteCodeAnalyzer();
+	private ASMByteCodeAnalyzer byteCodeAnalyzer = new ASMByteCodeAnalyzer();
 
-	private AspectPermissionManager permissionManager;
+	private @Nullable AspectPermissionManager permissionManager;
 
 	/** A registered lifting participant is directly handled by us. */
 	private @Nullable IConfigurationElement liftingParticipantConfig;
 	private @Nullable Class<?> ooTeam;
 
 	/** Call-back once the extension registry is up and running. */
-	public void activate(@NonNull BundleContext bundleContext, ServiceReference<IExtensionRegistry> serviceReference) throws OTAgentNotInstalled {
+	public void activate(BundleContext bundleContext, @Nullable ServiceReference<IExtensionRegistry> serviceReference) throws OTAgentNotInstalled {
 		loadAspectBindingRegistry(bundleContext, serviceReference);
 		TransformerPlugin.initialize(bundleContext, this.aspectBindingRegistry, this.permissionManager);
 	}
@@ -153,7 +155,7 @@ public class OTWeavingHook implements WeavingHook, WovenClassListener {
 	// ====== Aspect Bindings & Permissions: ======
 
 	@SuppressWarnings("deprecation")
-	private void loadAspectBindingRegistry(BundleContext context, ServiceReference<IExtensionRegistry> serviceReference) throws OTAgentNotInstalled {
+	private void loadAspectBindingRegistry(BundleContext context, @Nullable ServiceReference<IExtensionRegistry> serviceReference) throws OTAgentNotInstalled {
 		org.osgi.service.packageadmin.PackageAdmin packageAdmin = null;
 		
 		ServiceReference<?> ref= context.getServiceReference(org.osgi.service.packageadmin.PackageAdmin.class.getName());
@@ -167,8 +169,9 @@ public class OTWeavingHook implements WeavingHook, WovenClassListener {
 		if (extensionRegistry == null) {
 			log(IStatus.ERROR, "Failed to acquire ExtensionRegistry service, cannot load aspect bindings.");
 		} else {
-			permissionManager = new AspectPermissionManager(context.getBundle(), packageAdmin);
-			permissionManager.loadAspectBindingNegotiators(extensionRegistry);
+			AspectPermissionManager manager = new AspectPermissionManager(context.getBundle(), packageAdmin);
+			manager.loadAspectBindingNegotiators(extensionRegistry);
+			permissionManager = manager;
 
 			aspectBindingRegistry.loadAspectBindings(extensionRegistry, packageAdmin, this);
 
@@ -176,7 +179,7 @@ public class OTWeavingHook implements WeavingHook, WovenClassListener {
 		}
 	}
 
-	public @NonNull AspectPermissionManager getAspectPermissionManager() {
+	public AspectPermissionManager getAspectPermissionManager() {
 		AspectPermissionManager manager = this.permissionManager;
 		if (manager == null)
 			throw new NullPointerException("Missing AspectPermissionManager");
@@ -218,8 +221,8 @@ public class OTWeavingHook implements WeavingHook, WovenClassListener {
 	 * Callback during AspectBindingRegistry#loadAspectBindings():
 	 * Set-up a trip wire to fire when the mentioned base bundle is loaded.
 	 */
-	void setBaseTripWire(@SuppressWarnings("deprecation") @Nullable org.osgi.service.packageadmin.PackageAdmin packageAdmin,
-			@NonNull String baseBundleId, BaseBundle baseBundle) 
+	void setBaseTripWire(@SuppressWarnings("deprecation") org.osgi.service.packageadmin.@Nullable PackageAdmin packageAdmin,
+			String baseBundleId, BaseBundle baseBundle) 
 	{
 		if (!baseTripWires.containsKey(baseBundleId))
 			baseTripWires.put(baseBundleId, new BaseBundleLoadTrigger(baseBundleId, baseBundle, aspectBindingRegistry, packageAdmin));
@@ -229,7 +232,7 @@ public class OTWeavingHook implements WeavingHook, WovenClassListener {
 	 * Check if the given base bundle / base class mandate any loading/instantiation/activation of teams.
 	 * @return true if all involved aspect bindings have been denied (permissions).
 	 */
-	boolean triggerBaseTripWires(@Nullable String bundleName, @NonNull WovenClass baseClass) {
+	boolean triggerBaseTripWires(@Nullable String bundleName, WovenClass baseClass) {
 		BaseBundleLoadTrigger activation = baseTripWires.get(bundleName);
 		if (activation != null) {
 			activation.fire(baseClass, beingDefined, this);
@@ -336,7 +339,7 @@ public class OTWeavingHook implements WeavingHook, WovenClassListener {
 		return false;
 	}
 
-	WeavingReason requiresWeaving(BundleWiring bundleWiring, @NonNull String className, byte[] bytes,
+	WeavingReason requiresWeaving(BundleWiring bundleWiring, String className, byte @Nullable[] bytes,
 			boolean considerSupers, EnumSet<WeavingReason> considerReasons) {
 		
 		// 1. consult the aspect binding registry (for per-bundle info):
@@ -393,7 +396,7 @@ public class OTWeavingHook implements WeavingHook, WovenClassListener {
 	/** check need for weaving by finding an aspect binding affecting this exact base class or one of its supers. 
 	 * @param searchSupers controls whether super classes should be considered, too.
 	 */
-	boolean isAdaptedBaseClass(List<AspectBinding> aspectBindings, String className, boolean searchSupers, byte[] bytes, ClassLoader resourceLoader) {
+	boolean isAdaptedBaseClass(List<AspectBinding> aspectBindings, String className, boolean searchSupers, byte @Nullable[] bytes, @Nullable ClassLoader resourceLoader) {
 		if (skipBaseClassCheck) return true; // have aspect bindings, flag requests to transform *all* classes in this base bundle
 		
 		if ("java.lang.Object".equals(className))
@@ -412,6 +415,8 @@ public class OTWeavingHook implements WeavingHook, WovenClassListener {
 			if (bytes != null) {
 				classInfo = this.byteCodeAnalyzer.getClassInformation(bytes, className);
 			} else {
+				if (resourceLoader == null)
+					return false; // no chance to analyse (happens with fragments)
 				try (InputStream is = resourceLoader.getResourceAsStream(className.replace('.', '/')+".class")) {
 					if (is != null)
 						classInfo = this.byteCodeAnalyzer.getClassInformation(is, className);
@@ -433,7 +438,7 @@ public class OTWeavingHook implements WeavingHook, WovenClassListener {
 		}
 	}
 
-	private void recordBaseClasses(DelegatingTransformer transformer, @NonNull String aspectBundle, String className) {
+	private void recordBaseClasses(DelegatingTransformer transformer, String aspectBundle, String className) {
 		Collection<String> adaptedBases = transformer.fetchAdaptedBases();
 		if (adaptedBases == null || adaptedBases.isEmpty()) return;
 		aspectBindingRegistry.addBoundBaseClasses(adaptedBases);
@@ -536,7 +541,7 @@ public class OTWeavingHook implements WeavingHook, WovenClassListener {
 	
 	}
 
-	private boolean needsThreadNotificationCode(String className, byte[] bytes, ClassLoader resourceLoader, boolean isBaseBundle) {
+	private boolean needsThreadNotificationCode(String className, byte @Nullable[] bytes, @Nullable ClassLoader resourceLoader, boolean isBaseBundle) {
 
 		if ("java.lang.Object".equals(className))
 			return false; // shortcut, have no super
@@ -553,6 +558,8 @@ public class OTWeavingHook implements WeavingHook, WovenClassListener {
 			if (bytes != null) {
 				classInfo = this.byteCodeAnalyzer.getClassInformation(bytes, className);
 			} else {
+				if (resourceLoader == null)
+					return false; // happens for fragments
 				try (InputStream is = resourceLoader.getResourceAsStream(className.replace('.', '/')+".class")) {
 					if (is != null) {
 						classInfo = this.byteCodeAnalyzer.getClassInformation(is, className);

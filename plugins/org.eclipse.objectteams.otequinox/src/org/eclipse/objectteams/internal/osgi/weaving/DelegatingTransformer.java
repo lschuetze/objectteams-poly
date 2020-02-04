@@ -27,6 +27,7 @@ import java.util.Collection;
 import java.util.EnumSet;
 
 import org.eclipse.jdt.annotation.NonNull;
+import org.eclipse.jdt.annotation.Nullable;
 import org.eclipse.objectteams.internal.osgi.weaving.ASMByteCodeAnalyzer.ClassInformation;
 import org.eclipse.objectteams.internal.osgi.weaving.OTWeavingHook.WeavingReason;
 import org.eclipse.objectteams.internal.osgi.weaving.OTWeavingHook.WeavingScheme;
@@ -65,7 +66,7 @@ public abstract class DelegatingTransformer {
 	}
 
 	/** Factory method for a fresh transformer. */
-	static @NonNull DelegatingTransformer newTransformer(WeavingScheme weavingScheme, OTWeavingHook hook, BundleWiring wiring) {
+	static @NonNull DelegatingTransformer newTransformer(WeavingScheme weavingScheme, @NonNull OTWeavingHook hook, @NonNull BundleWiring wiring) {
 		switch (weavingScheme) {
 			case OTDRE:
 				return new OTDRETransformer(getWeavingContext(hook, wiring));
@@ -79,10 +80,10 @@ public abstract class DelegatingTransformer {
 	private static class OTRETransformer extends DelegatingTransformer {
 		org.eclipse.objectteams.otre.jplis.ObjectTeamsTransformer transformer = new org.eclipse.objectteams.otre.jplis.ObjectTeamsTransformer();
 		@Override
-		public void readOTAttributes(String className, InputStream inputStream, String fileName, Bundle bundle) throws ClassFormatError, IOException {
+		public void readOTAttributes(@NonNull String className, @NonNull InputStream inputStream, @NonNull String fileName, Bundle bundle) throws ClassFormatError, IOException {
 			this.transformer.readOTAttributes(inputStream, fileName, bundle);
 		}
-		public Collection<String> fetchAdaptedBases() {
+		public Collection<@NonNull String> fetchAdaptedBases() {
 			return this.transformer.fetchAdaptedBases();
 		}
 		public byte[] transform(Bundle bundle, String className, Class<?> classBeingRedefined, ProtectionDomain protectionDomain, byte[] bytes)
@@ -99,11 +100,11 @@ public abstract class DelegatingTransformer {
 			transformer = new org.eclipse.objectteams.otredyn.transformer.jplis.ObjectTeamsTransformer(weavingContext);
 		}
 		@Override
-		public void readOTAttributes(String className, InputStream inputStream, String fileName, Bundle bundle) throws ClassFormatError, IOException {
+		public void readOTAttributes(@NonNull String className, @NonNull InputStream inputStream, @NonNull String fileName, Bundle bundle) throws ClassFormatError, IOException {
 			// TODO provide classID
 			this.transformer.readOTAttributes(className, className.replace('.', '/'), inputStream, getBundleLoader(bundle));
 		}
-		public Collection<String> fetchAdaptedBases() {
+		public Collection<@NonNull String> fetchAdaptedBases() {
 			return transformer.fetchAdaptedBases();
 		}
 		public byte[] transform(final Bundle bundle, String className, Class<?> classBeingRedefined, ProtectionDomain protectionDomain, byte[] bytes) throws IllegalClassFormatException {
@@ -156,7 +157,8 @@ public abstract class DelegatingTransformer {
 		}
 	}
 
-	static ClassLoader getBundleLoader(final Bundle bundle) {
+	static @Nullable ClassLoader getBundleLoader(final @Nullable Bundle bundle) {
+		if (bundle == null) return null;
 		return new ClassLoader() {
 			@Override
 			public Class<?> loadClass(String name) throws ClassNotFoundException {
@@ -169,29 +171,30 @@ public abstract class DelegatingTransformer {
 		};
 	}
 
-	static IWeavingContext getWeavingContext(final OTWeavingHook hook, final BundleWiring bundleWiring) {
+	static IWeavingContext getWeavingContext(final @NonNull OTWeavingHook hook, final @NonNull BundleWiring bundleWiring) {
 		return new IWeavingContext() {
 			@Override
 			public boolean isWeavable(String className, boolean considerSupers, boolean allWeavingReasons) {
 				if (className == null)
 					return false;
 				// boolean allWeavingReasons is used in the signature, because IWeavingContext cannot see WeavingReaons:
-				EnumSet<WeavingReason> reasons = allWeavingReasons ? EnumSet.allOf(WeavingReason.class) : EnumSet.of(WeavingReason.Base);
+				EnumSet<@NonNull WeavingReason> reasons = allWeavingReasons ? EnumSet.allOf(WeavingReason.class) : EnumSet.of(WeavingReason.Base);
 				WeavingReason reason = hook.requiresWeaving(bundleWiring, className, null, considerSupers, reasons);
 				return reason != WeavingReason.None;
 			}
 			
 			@Override
-			public boolean scheduleReweaving(String className, IReweavingTask task) {
+			public boolean scheduleReweaving(String className, /*@NonNull*/ IReweavingTask task) {
 				return hook.scheduleReweaving(className, task);
 			}
 		};
 	}
 	
-	public abstract void readOTAttributes(String className, InputStream inputStream, String fileName, Bundle bundle) throws ClassFormatError, IOException;
+	// FIXME: it's unclear if we can tollerate @Nullable Bundle
+	public abstract void readOTAttributes(@NonNull String className, @NonNull InputStream inputStream, @NonNull String fileName, Bundle bundle) throws ClassFormatError, IOException;
 	
 	public abstract byte[] transform(Bundle bundle, String className, Class<?> classBeingRedefined, ProtectionDomain protectionDomain, byte[] bytes)
 			throws IllegalClassFormatException;
 
-	public abstract Collection<String> fetchAdaptedBases();
+	public abstract Collection<@NonNull String> fetchAdaptedBases();
 }

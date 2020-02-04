@@ -20,8 +20,6 @@
  **********************************************************************/
 package org.eclipse.objectteams.internal.osgi.weaving;
 
-import static org.eclipse.objectteams.otequinox.TransformerPlugin.doLog;
-
 import static org.eclipse.core.runtime.IStatus.*;
 
 public class Util 
