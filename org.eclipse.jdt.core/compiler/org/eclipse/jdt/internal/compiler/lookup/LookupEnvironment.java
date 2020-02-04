@@ -1628,6 +1628,7 @@ public ParameterizedTypeBinding createParameterizedType(ReferenceBinding generic
 		case Binding.RAW_TYPE:
 			genericType = genericType.actualType();
 			//$FALL-THROUGH$
+		case Binding.TYPE:
 		case Binding.GENERIC_TYPE:
 			genericType = (ReferenceBinding) genericType.prototype();
 	}
