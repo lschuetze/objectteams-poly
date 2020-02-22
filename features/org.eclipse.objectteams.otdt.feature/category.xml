@@ -124,4 +124,21 @@
    <iu id="org.eclipse.objectteams.otequinox.turbo.feature.group" range="[2.7.0,2.8.0)">
       <category name="org.eclipse.objectteams.otdt_2.7"/>
    </iu>
+   <category-def name="org.eclipse.objectteams.otdt_2.8" label="OTDT 2.8 (Eclipse 2020-03)">
+      <description>
+         The Object Teams Development Tooling versions 2.8.x based on Eclipse 4.15.x
+      </description>
+   </category-def>
+   <iu id="org.eclipse.objectteams.otdt.feature.group" range="[2.8.0,2.9.0)">
+      <category name="org.eclipse.objectteams.otdt_2.8"/>
+   </iu>
+   <iu id="org.eclipse.objectteams.otdt.source.feature.feature.group" range="[2.8.0,2.9.0)">
+      <category name="org.eclipse.objectteams.otdt_2.8"/>
+   </iu>
+   <iu id="org.eclipse.objectteams.otequinox.feature.group" range="[2.8.0,2.9.0)">
+      <category name="org.eclipse.objectteams.otdt_2.8"/>
+   </iu>
+   <iu id="org.eclipse.objectteams.otequinox.turbo.feature.group" range="[2.8.0,2.9.0)">
+      <category name="org.eclipse.objectteams.otdt_2.8"/>
+   </iu>
 </site>
