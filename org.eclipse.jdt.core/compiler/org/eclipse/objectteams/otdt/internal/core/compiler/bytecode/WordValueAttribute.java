@@ -1,7 +1,7 @@
 /**********************************************************************
  * This file is part of "Object Teams Development Tooling"-Software
  *
- * Copyright 2004, 2018 Fraunhofer Gesellschaft, Munich, Germany,
+ * Copyright 2004, 2020 Fraunhofer Gesellschaft, Munich, Germany,
  * for its Fraunhofer Institute for Computer Architecture and Software
  * Technology (FIRST), Berlin, Germany and Technical University Berlin,
  * Germany.
@@ -377,6 +377,7 @@ public class WordValueAttribute
     	if (this._methodInfo != info) return false;
     	// MODIFIERS and ROLECLASS_METHOD_MODIFIERS_NAME and CALLS_BASE_CTOR are already evaluated at the MethodInfo level.
     	if (CharOperation.equals(this._name, IOTConstants.CALLIN_FLAGS)) {
+    		method.modifiers |= ExtraCompilerModifiers.AccCallin;
 	        MethodModel.getModel(method).callinFlags = this._value & 0xFF;
 	        int typeCode = this._value & IOTConstants.CALLIN_RETURN_MASK;
 	    	if (typeCode != 0) {

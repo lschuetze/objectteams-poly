@@ -1,7 +1,7 @@
 /**********************************************************************
  * This file is part of "Object Teams Development Tooling"-Software
  * 
- * Copyright 2004, 2015 IT Service Omikron GmbH and others.
+ * Copyright 2004, 2020 IT Service Omikron GmbH and others.
  * 
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -8600,5 +8600,41 @@ public class CallinMethodBinding extends AbstractOTJLDTest {
     			"}\n"
     		},
     		"NoVarArgrm");
+    }
+    public void testBug560435() {
+    	Runner runner = new Runner();
+    	runner.testFiles =
+    		new String[] {
+    			"b560435/b/B.java",
+    			"package b560435.b;\n" +
+    			"public class B {\n" +
+    			"	public void bm(String s) {}\n" +
+    			"}\n",
+    			"b560435/t/T0.java",
+    			"package b560435.t;\n" +
+    			"import base b560435.b.B;\n" +
+    			"public team class T0 {\n" +
+    			"	protected class R playedBy B {\n" +
+    			"		callin void ci(String s) {}\n" +
+    			"	}\n" +
+    			"}\n"
+    		};
+    	runner.runConformTest();
+    	runner.shouldFlushOutputDirectory = false;
+    	runner.testFiles =
+    		new String[] {
+    			"b560435/t/T1.java",
+    			"package b560435.t;\n" +
+    			"import base b560435.b.B;\n" +
+    			"public team class T1 extends T0 {\n" +
+    			"	protected class R1 extends R {\n" +
+    			"		@Override\n" +
+    			"		callin void ci(String s) {\n" +
+    			"			base.ci(s);\n" +
+    			"		}\n" +
+    			"	}\n" +
+    			"}\n"
+    		};
+    	runner.runConformTest();
     }
 }
