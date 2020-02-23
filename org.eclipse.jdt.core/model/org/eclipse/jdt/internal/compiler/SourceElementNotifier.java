@@ -445,6 +445,10 @@ private char[] returnTypeName(MethodSpec spec) {
 	return (!spec.hasSignature || spec.returnType == null) ?
 			null : CharOperation.concatWith(spec.returnType.getParameterizedTypeName(), '.');
 }
+private char[] firstParameterTypeName(MethodSpec spec) {
+	return (!spec.hasSignature || spec.arguments == null || spec.arguments.length < 1) ?
+			null : CharOperation.concatWith(spec.arguments[0].type.getParameterizedTypeName(), '.');
+}
 
   public void notifySourceElementRequestor(AbstractMethodMappingDeclaration mapping)
   {
@@ -492,7 +496,7 @@ private char[] returnTypeName(MethodSpec spec) {
 
     				// base field spec:
     				info.rightSelector= baseSelector;
-    				info.rightReturnType= baseReturnTypeName;
+    				info.fieldType= info.isSetter ? firstParameterTypeName(callout.baseMethodSpec) : baseReturnTypeName;
 
     				info.annotations = mapping.annotations;
 

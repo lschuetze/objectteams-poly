@@ -1165,8 +1165,8 @@ public void enterCalloutToFieldMapping(ISourceElementRequestor.CalloutToFieldInf
     if (calloutInfo.rightSelector != null) {
 	    IFieldAccessSpec baseField = new FieldData(
 	            new String(calloutInfo.rightSelector),
-	            calloutInfo.rightReturnType != null
-	            	? Signature.createTypeSignature(calloutInfo.rightReturnType, false)
+	            calloutInfo.fieldType != null
+	            	? Signature.createTypeSignature(calloutInfo.fieldType, false)
 	                : new String(),
 	            calloutInfo.isSetter);
 	    info.setBaseField(baseField);
