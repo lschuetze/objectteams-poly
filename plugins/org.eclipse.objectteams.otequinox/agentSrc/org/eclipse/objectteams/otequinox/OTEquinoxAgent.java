@@ -51,9 +51,10 @@ public class OTEquinoxAgent {
 			if (bytesBeingRedefined.containsKey(classBeingRedefined))
 				return null; // our own transformer triggered the redefine, don' process again
 			try {
-				if (isDefaultClassLoader(loader)) {
+				if (isEquinoxClassLoader(loader)) {
 					String classNameDot = className.replace('/', '.'); // transformer expects dot-based names!
 					boolean modified = false;
+					registerClassBeingDefined(classBeingRedefined, loader);
 					for (Object hook : getClassLoadingHooks(loader)) {
 						// TODO(SH): fetch remaining arguments?
 						byte[] newBytes = processClass(hook, classNameDot, classfileBuffer, null/*classpathEntry*/, null/*entry*/, getClasspathManager(loader));
@@ -88,22 +89,37 @@ public class OTEquinoxAgent {
 		// ===== The following members provide reflection based access to otherwise inaccessible classes from org.eclipse.osgi =====
 		
 		// cached reflection members:
-		private Class<?> dclClass;
+		private Class<?> eclClass;
 		private Method getConfiguration;
 		private Method getHookRegistry;
 		private Method getClassLoaderHooks;
 		private Method getClasspathManager;
 		private Method processClass;
 		
-		private boolean isDefaultClassLoader(ClassLoader loader) {
+		private Method registerClassBeingDefined; // method of classRepoClass
+
+		// make the classBeingRedefined known to org.eclipse.objectteams.otredyn.bytecode.ClassRepository:
+		private void registerClassBeingDefined(Class<?> classBeingRedefined, ClassLoader loader) throws IllegalAccessException, IllegalArgumentException, InvocationTargetException, ClassNotFoundException, NoSuchMethodException, SecurityException {
+			Class<?> classRepo = OTEquinoxAgent.classRepoClass;
+			if (classRepo == null) {
+				System.err.println("ClassRepo has not been registered");
+				return;
+			}
+			Method meth = this.registerClassBeingDefined;
+			if (meth == null)
+				this.registerClassBeingDefined = meth = classRepo.getDeclaredMethod("registerClassBeingRedefined", Class.class);
+			meth.invoke(null, classBeingRedefined);
+		}
+
+		private boolean isEquinoxClassLoader(ClassLoader loader) {
 			/* Emulates:
 			 *   return loader instanceof EquinoxClassLoader;
 			 */
 			Class<?> clazz = loader.getClass();
-			if (this.dclClass != null) {
-				return this.dclClass == clazz;
+			if (this.eclClass != null) {
+				return this.eclClass == clazz;
 			} else if (clazz.getName().equals("org.eclipse.osgi.internal.loader.EquinoxClassLoader")) {
-				this.dclClass = clazz;
+				this.eclClass = clazz;
 				return true;
 			}
 			return false;
@@ -117,7 +133,7 @@ public class OTEquinoxAgent {
 			 *  return conf.getHookRegistry().getClassLoaderHooks();
 			 */
 			if (this.getConfiguration == null) {
-				this.getConfiguration = this.dclClass.getDeclaredMethod("getConfiguration", (Class[])null);
+				this.getConfiguration = this.eclClass.getDeclaredMethod("getConfiguration", (Class[])null);
 				this.getConfiguration.setAccessible(true);
 			}
 			Object conf = this.getConfiguration.invoke(loader, (Object[])null);
@@ -136,7 +152,7 @@ public class OTEquinoxAgent {
 			 *   return ((DefaultClassLoader)loader).getClasspathManager(); 
 			 */
 			if (this.getClasspathManager == null)
-				this.getClasspathManager = this.dclClass.getMethod("getClasspathManager", (Class[]) null);
+				this.getClasspathManager = this.eclClass.getMethod("getClasspathManager", (Class[]) null);
 			return this.getClasspathManager.invoke(loader, (Object[]) null);
 		}
 
@@ -163,6 +179,15 @@ public class OTEquinoxAgent {
 		}
 	}
 
+	static Class<?> classRepoClass;
+	/**
+	 * Reflectively accessed by org.eclipse.objectteams.internal.osgi.weaving.DelegatingTransformer:
+	 * Here OTDRE makes its ClassRepository class known to us (for reflective call-back):
+	 */
+	public static void wireClassRepo(Class<?> classRepoClass) {
+		OTEquinoxAgent.classRepoClass = classRepoClass;
+	}
+
 	private static Instrumentation instrumentation;
 	private static Map<Class<?>,byte[]> bytesBeingRedefined = new HashMap<>(); // to avoid reentrant transform requests, if our transformer triggers a redefine 
 
@@ -171,7 +196,8 @@ public class OTEquinoxAgent {
 		inst.addTransformer(new OTEquinoxTransformerDelegate());
 		OTEquinoxAgent.instrumentation = inst;
 	}
-	
+
+	/** Reflectively accessed by org.eclipse.objectteams.internal.osgi.weaving.DelegatingTransformer. */
 	public static void redefine(ClassDefinition[] definitions) throws ClassNotFoundException, UnmodifiableClassException {
 		if (instrumentation == null)
 			throw new UnmodifiableClassException("Can't redefine classes, no instrumentation set.");

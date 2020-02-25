@@ -112,4 +112,6 @@ public abstract class AbstractTeam extends AbstractBoundClass implements IBoundT
 			tsubBases.add(classRepository.getBoundClass(tsubRoleName.replace('/', '.'), tsubRoleName.replace('.', '/'), this.loader));
 		return tsubBases;
 	}
+
+	protected abstract void setBytecode(byte[] classBytes);
 }

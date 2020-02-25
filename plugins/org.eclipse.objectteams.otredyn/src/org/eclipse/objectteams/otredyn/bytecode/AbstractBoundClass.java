@@ -1260,7 +1260,10 @@ public abstract class AbstractBoundClass implements IBoundClass {
 	protected abstract void prepareForFirstStaticTransformation();
 
 	public abstract boolean isFirstTransformation();
-	
+
+	/** During HCR we need to start with a fresh set of bytes and re-perform all transformations. */
+	public abstract void restartTransformation();
+
 	public boolean isLoaded() { return isLoaded; }
 
 	protected abstract void createDispatchCodeInOrgMethod(Method boundMethod,

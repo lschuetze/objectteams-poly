@@ -107,6 +107,12 @@ if (PWR_DEBUG) System.out.println("weaving "+className);
 		if (clazz == null)
 			clazz = classRepo.getBoundClass(sourceClassName, classId, loader);
 
+		boolean isHCR = false;
+		if (classBeingRedefined == null) {
+			classBeingRedefined = ClassRepository.popClassBeingRedefined(sourceClassName);
+			if (classBeingRedefined != null)
+				isHCR = true;
+		}
 		synchronized(clazz) { // all modifications done in this critical section
 			if (classBeingRedefined == null && !clazz.isFirstTransformation()) {
 if (PWR_DEBUG) System.out.println("\tweave1");
@@ -119,7 +125,7 @@ if (PWR_DEBUG) System.out.println("\tweave2");
 			try {
 				clazz.startTransaction();
 				clazz = classRepo.getBoundClass(
-						className, classId, classfileBuffer, loader);
+						className, classId, classfileBuffer, loader, isHCR);
 				clazz.setWeavingContext(this.weavingContext);
 				if (!clazz.isInterface())
 					classRepo.linkClassWithSuperclass(clazz);
@@ -201,7 +207,7 @@ if (PWR_DEBUG) System.out.println("\tweave3");
 			byte[] bytes = new byte[available];
 			new DataInputStream(inputStream).readFully(bytes);
 			clazz = ClassRepository.getInstance().getBoundClass(
-					className, classId, bytes, loader);
+					className, classId, bytes, loader, false);
 			if (!clazz.isInterface())
 				ClassRepository.getInstance().linkClassWithSuperclass(clazz);
 			if (!clazz.isInterface() || clazz.isRole())

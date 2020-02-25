@@ -32,6 +32,7 @@ import org.eclipse.objectteams.internal.osgi.weaving.ASMByteCodeAnalyzer.ClassIn
 import org.eclipse.objectteams.internal.osgi.weaving.OTWeavingHook.WeavingReason;
 import org.eclipse.objectteams.internal.osgi.weaving.OTWeavingHook.WeavingScheme;
 import org.eclipse.objectteams.internal.osgi.weaving.Util.ProfileKind;
+import org.eclipse.objectteams.otredyn.bytecode.ClassRepository;
 import org.eclipse.objectteams.otredyn.bytecode.IRedefineStrategy;
 import org.eclipse.objectteams.otredyn.bytecode.RedefineStrategyFactory;
 import org.eclipse.objectteams.otredyn.transformer.IWeavingContext;
@@ -98,6 +99,7 @@ public abstract class DelegatingTransformer {
 		public OTDRETransformer(IWeavingContext weavingContext) {
 			RedefineStrategyFactory.setRedefineStrategy(new OTEquinoxRedefineStrategy());
 			transformer = new org.eclipse.objectteams.otredyn.transformer.jplis.ObjectTeamsTransformer(weavingContext);
+			reflectivelyWireClassRepo();
 		}
 		@Override
 		public void readOTAttributes(@NonNull String className, @NonNull InputStream inputStream, @NonNull String fileName, Bundle bundle) throws ClassFormatError, IOException {
@@ -154,6 +156,17 @@ public abstract class DelegatingTransformer {
 			} catch (Throwable t) {
 				throw new UnmodifiableClassException(t.getClass().getName()+": "+t.getMessage());
 			}
+		}
+	}
+
+	public void reflectivelyWireClassRepo() {
+		// make ClassRepository.class known to the debug agent, so we can communicate for HCR
+		try {
+			Class<?> agentClass = ClassLoader.getSystemClassLoader().loadClass(OT_EQUINOX_DEBUG_AGENT);
+			java.lang.reflect.Method wire = agentClass.getDeclaredMethod("wireClassRepo", Class.class);
+			wire.invoke(null, new Object[]{ ClassRepository.class });
+		} catch (Throwable t) {
+			t.printStackTrace(); // FIXME
 		}
 	}
 

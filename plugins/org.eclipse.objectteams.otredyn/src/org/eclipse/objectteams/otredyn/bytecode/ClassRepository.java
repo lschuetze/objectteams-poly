@@ -35,6 +35,23 @@ import org.eclipse.objectteams.otredyn.runtime.TeamManager;
  */
 public abstract class ClassRepository implements IClassRepository {
 	private static ClassRepository instance;
+
+	private static ThreadLocal<Class<?>> classBeingRedefined = new ThreadLocal<>();
+
+	/**
+	 * Reflectively invoked by org.eclipse.objectteams.otequinox.OTEquinoxAgent:
+	 * During HCR the agent informs as about a class about to be hot-swapped.
+	 */
+	public static void registerClassBeingRedefined(Class<?> clazz) {
+		classBeingRedefined.set(clazz);
+	}
+	public static Class<?> popClassBeingRedefined(String className) {
+		Class<?> clazz = classBeingRedefined.get();
+		classBeingRedefined.set(null);
+		if (clazz != null && clazz.getName().equals(className))
+			return clazz;
+		return null;
+	}
 	
 	protected ClassRepository() {
 		
@@ -99,9 +116,12 @@ public abstract class ClassRepository implements IClassRepository {
 	 * if id1.equals(id2) then getBoundClass(..., id1) == getBoundClass(..., id2) 
 	 * @param className the name of the class
 	 * @param id a globally unique identifier for the class 
+	 * @param classBytes bytecode before weaving, possibly for hotswapping
+	 * @param loader class loader for this class
+	 * @param isHCR true if invoked during hot code replace, in which case transformation must restart using the new bytes
 	 * @return
 	 */
-	public synchronized AbstractBoundClass getBoundClass(String className, String id, byte[] classBytes, ClassLoader loader) 
+	public synchronized AbstractBoundClass getBoundClass(String className, String id, byte[] classBytes, ClassLoader loader, boolean isHCR) 
 	{
 		AbstractTeam clazz = boundClassMap.get(id);
 		// set the bytecode in the BytecodeProvider
@@ -109,7 +129,10 @@ public abstract class ClassRepository implements IClassRepository {
 		bytecodeProvider.setBytecode(id, classBytes);
 		if (clazz == null) {
 			clazz = createClass(className, id, bytecodeProvider, loader);
-		} 
+		} else if (isHCR) {
+			clazz.setBytecode(classBytes);
+			clazz.restartTransformation();
+		}
 		
 		boundClassMap.put(id, clazz);
 

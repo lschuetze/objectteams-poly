@@ -567,6 +567,10 @@ class AsmWritableBoundClass extends AsmBoundClass {
 		return isFirstTransformation;
 	}
 
+	public void restartTransformation() {
+		this.isFirstTransformation = true;
+	}
+
 	@Override
 	protected boolean isSuperWeavable(boolean considerSupers) {
 		if (this.superIsWeavable == null)

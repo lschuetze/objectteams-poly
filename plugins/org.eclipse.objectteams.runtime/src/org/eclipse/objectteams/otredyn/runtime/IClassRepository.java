@@ -46,10 +46,13 @@ public interface IClassRepository {
 	 * instance for the same id. More formally:
 	 * if id1.equals(id2) then getBoundClass(..., id1) == getBoundClass(..., id2) 
 	 * @param className the name of the class
-	 * @param id a globally unique identifier for the class 
+	 * @param id a globally unique identifier for the class
+	 * @param classBytes bytecode before weaving, possibly for hotswapping
+	 * @param loader class loader for this class
+	 * @param isHCR true if invoked during hot code replace, in which case transformation must restart using the new bytes
 	 * @return
 	 */
-	public IBoundClass getBoundClass(String className, String id, byte[] classBytes, ClassLoader loader);
+	public IBoundClass getBoundClass(String className, String id, byte[] classBytes, ClassLoader loader, boolean isHCR);
 
 	/**
 	 * Returns a instance of AbstractTeam for the
