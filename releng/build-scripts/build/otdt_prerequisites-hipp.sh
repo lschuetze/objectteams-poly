@@ -59,7 +59,7 @@ ARCH=`arch`
 SDK_QUALIFIER=${SDK_QUALIFIER:="I20200226-1800"}
 
 # used only locally (components of the ECLIPSE_SDK_TGZ path):
-EVERSION=${EVERSION:="S-4.15RC1"}
+EVERSION=${EVERSION:="4.15RC1"}
 DROP=${DROPS4}/${DROP:="S-4.15RC1-202002261800"}
 
 # EXPORT: archive file of the base eclipse SDK build:
