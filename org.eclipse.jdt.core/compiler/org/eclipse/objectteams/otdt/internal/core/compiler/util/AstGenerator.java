@@ -304,6 +304,7 @@ public class AstGenerator extends AstFactory {
 	public NullLiteral nullLiteral() {
 		NullLiteral result = new NullLiteral(this.sourceStart, this.sourceEnd);
 		result.constant = Constant.NotAConstant;
+		result.resolvedType = TypeBinding.NULL;
 		return result;
 	}
 	public Expression nullCheck(Expression value) {

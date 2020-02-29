@@ -789,7 +789,14 @@ public FlowInfo analyseCode(BlockScope currentScope, FlowContext flowContext,
 		// clause around generic method's return type prior to instantiation needs double check. 
 		return this.isPolyExpression = true;
 	}
-	
+
+//{ObjectTeams:
+	@Override
+	public boolean isGenerated() {
+		return this.valueIfTrue.isGenerated() || this.valueIfFalse.isGenerated();
+	}
+// SH}
+
 	@Override
 	public boolean isCompatibleWith(TypeBinding left, Scope scope) {
 		return isPolyExpression() ? this.valueIfTrue.isCompatibleWith(left, scope) && this.valueIfFalse.isCompatibleWith(left, scope) :

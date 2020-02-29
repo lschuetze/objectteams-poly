@@ -243,6 +243,11 @@ public class Lowering implements IOTConstants {
 		}
 
 		@Override
+		public boolean isGenerated() {
+			return true;
+		}
+
+		@Override
 		public DecapsulationState getBaseclassDecapsulation() {
 			return DecapsulationState.REPORTED;
 		}
