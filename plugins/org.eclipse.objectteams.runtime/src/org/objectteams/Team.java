@@ -26,9 +26,7 @@ import java.util.WeakHashMap;
 
 /**
  *  This is the root class of all team definitions.
- *  Any class with the <tt>team</tt> modifier implicitly
- *  inherits from this class.
- *
+ *  Any class with the <tt>team</tt> modifier implicitly inherits from this class.
  */
 public /* team */ class Team implements ITeam {
 	// Technical note: comments starting with //$Debug are intended
