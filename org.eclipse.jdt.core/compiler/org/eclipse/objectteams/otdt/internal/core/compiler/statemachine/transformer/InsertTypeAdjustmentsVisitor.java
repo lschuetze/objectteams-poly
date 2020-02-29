@@ -322,7 +322,7 @@ public class InsertTypeAdjustmentsVisitor extends ASTVisitor {
             TypeBinding expectedType)
     {
         Expression newExpr=null;
-        if (expr != null) {
+        if (expr != null && expr.resolvedType != null) {
         	Config oldConfig = Config.createOrResetConfig(this);
             try {
 	            expr.resolvedType.isCompatibleWith(expectedType); // just recheck.
