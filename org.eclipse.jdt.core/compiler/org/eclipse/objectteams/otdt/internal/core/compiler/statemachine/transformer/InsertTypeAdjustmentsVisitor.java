@@ -1,7 +1,7 @@
 /**********************************************************************
  * This file is part of "Object Teams Development Tooling"-Software
  *
- * Copyright 2004, 2006 Fraunhofer Gesellschaft, Munich, Germany,
+ * Copyright 2004, 2020 Fraunhofer Gesellschaft, Munich, Germany,
  * for its Fraunhofer Institute for Computer Architecture and Software
  * Technology (FIRST), Berlin, Germany and Technical University Berlin,
  * Germany.
@@ -30,6 +30,7 @@ import org.eclipse.jdt.internal.compiler.ast.AllocationExpression;
 import org.eclipse.jdt.internal.compiler.ast.ArrayInitializer;
 import org.eclipse.jdt.internal.compiler.ast.Assignment;
 import org.eclipse.jdt.internal.compiler.ast.CastExpression;
+import org.eclipse.jdt.internal.compiler.ast.ConditionalExpression;
 import org.eclipse.jdt.internal.compiler.ast.EqualExpression;
 import org.eclipse.jdt.internal.compiler.ast.Expression;
 import org.eclipse.jdt.internal.compiler.ast.FieldDeclaration;
@@ -40,6 +41,7 @@ import org.eclipse.jdt.internal.compiler.ast.MessageSend;
 import org.eclipse.jdt.internal.compiler.ast.QualifiedAllocationExpression;
 import org.eclipse.jdt.internal.compiler.ast.ReturnStatement;
 import org.eclipse.jdt.internal.compiler.ast.ThrowStatement;
+import org.eclipse.jdt.internal.compiler.classfmt.ClassFileConstants;
 import org.eclipse.jdt.internal.compiler.lookup.BlockScope;
 import org.eclipse.jdt.internal.compiler.lookup.MethodBinding;
 import org.eclipse.jdt.internal.compiler.lookup.MethodScope;
@@ -279,6 +281,19 @@ public class InsertTypeAdjustmentsVisitor extends ASTVisitor {
         } finally {
         	Config.removeOrRestore(oldConfig, this);
         }
+    }
+
+    @Override
+    public void endVisit(ConditionalExpression conditionalExpression, BlockScope scope) {
+    	if (conditionalExpression.isGenerated())
+    		return; // don't adjust again
+    	if (scope.compilerOptions().complianceLevel < ClassFileConstants.JDK1_8)
+    		return; // additional adjustment needed only for Java 8+
+    	TypeBinding targetType = conditionalExpression.resolvedType;
+		conditionalExpression.valueIfTrue = maybeWrap(
+				scope, conditionalExpression.valueIfTrue, targetType);
+		conditionalExpression.valueIfFalse = maybeWrap(
+				scope, conditionalExpression.valueIfFalse, targetType);
     }
 
     @Override

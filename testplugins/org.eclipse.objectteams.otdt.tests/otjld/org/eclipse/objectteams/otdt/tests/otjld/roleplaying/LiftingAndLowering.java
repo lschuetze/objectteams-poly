@@ -1,7 +1,7 @@
 /**********************************************************************
  * This file is part of "Object Teams Development Tooling"-Software
  * 
- * Copyright 2004, 2010 IT Service Omikron GmbH and others.
+ * Copyright 2004, 2020 IT Service Omikron GmbH and others.
  * 
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -2517,6 +2517,33 @@ public class LiftingAndLowering extends AbstractOTJLDTest {
     			"}\n"
     		},
     		"T2214altb9");
+    }
+    
+    public void test2212_arrayLowering_inConditionalExpression1() {
+    	runConformTest(
+    		new String[] {
+    			"Team2214alice1.java",
+    			"import java.util.*;\n" +
+    			"public team class Team2214alice1 {\n" +
+    			"	protected class R playedBy T2214alice1 { protected R() { base(); } }\n" +
+    			"	T2214alice1[] toBaseArray(List<R> roles) {\n" +
+    			"		return roles != null ? roles.toArray(new R[roles.size()]) : new R[0];\n" +
+    			"	}\n" +
+    			"	void test() {\n" +
+    			"		List<R> roles = new ArrayList<R>();\n" +
+    			"		roles.add(new R());\n" +
+    			"		T2214alice1[] bases = toBaseArray(roles);\n" +
+    			"		System.out.println(bases[0].getClass().getName());\n" +
+    			"	}\n" +
+    			"	public static void main(String[] args) {\n" +
+    			"		new Team2214alice1().test();\n" +
+    			"	}\n" +
+    			"}\n",
+    			"T2214alice1.java",
+    			"public class T2214alice1 {\n" +
+    			"}\n"
+    		},
+    		"T2214alice1");
     }
     
     // lowering of a role object array for the same base objects produces the an equal object array
