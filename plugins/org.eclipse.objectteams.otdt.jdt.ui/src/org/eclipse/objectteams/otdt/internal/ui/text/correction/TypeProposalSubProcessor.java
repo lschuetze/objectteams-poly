@@ -3,11 +3,12 @@
  * 
  * Copyright 2007 Technical University Berlin, Germany.
  * 
- * All rights reserved. This program and the accompanying materials
- * are made available under the terms of the Eclipse Public License v1.0
+ * This program and the accompanying materials
+ * are made available under the terms of the Eclipse Public License 2.0
  * which accompanies this distribution, and is available at
- * http://www.eclipse.org/legal/epl-v10.html
- * $Id: TypeProposalSubProcessor.java 23438 2010-02-04 20:05:24Z stephan $
+ * https://www.eclipse.org/legal/epl-2.0/
+ *
+ * SPDX-License-Identifier: EPL-2.0
  * 
  * Please visit http://www.eclipse.org/objectteams for updates and contact.
  * 
