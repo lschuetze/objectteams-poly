@@ -4,7 +4,7 @@ Bundle-Name: %pluginName
 Bundle-Vendor: %providerName
 Bundle-SymbolicName: org.eclipse.objectteams.otdt.pde.ui;singleton:=true
 Automatic-Module-Name: org.eclipse.objectteams.otdt.pde.ui
-Bundle-Version: 2.7.6.qualifier
+Bundle-Version: 2.8.0.qualifier
 Bundle-Activator: org.eclipse.objectteams.otdt.internal.pde.ui.OTPDEUIPlugin
 Require-Bundle: org.eclipse.ui;bundle-version="[3.9.0,4.0.0)",
  org.eclipse.core.runtime;bundle-version="[3.7.0,4.0.0)",
@@ -17,7 +17,7 @@ Require-Bundle: org.eclipse.ui;bundle-version="[3.9.0,4.0.0)",
  org.eclipse.jdt.ui;bundle-version="[3.10.0,4.0.0)",
  org.eclipse.search;bundle-version="[3.9.0,4.0.0)",
  org.eclipse.pde.api.tools.ui;bundle-version="[1.0.300,4.0.0)",
- org.eclipse.jdt.core;bundle-version="[3.20.0.OTDT_r276,4.0.0)",
+ org.eclipse.jdt.core;bundle-version="[3.21.0.OTDT_r280,4.0.0)",
  org.eclipse.objectteams.otdt;bundle-version="[2.5.0,3.0.0)",
  org.eclipse.objectteams.otdt.debug;bundle-version="[2.3.0,3.0.0)",
  org.eclipse.objectteams.otequinox;bundle-version="[2.5.0,3.0.0)",

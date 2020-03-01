@@ -1,7 +1,7 @@
 /**********************************************************************
  * This file is part of "Object Teams Development Tooling"-Software
  * 
- * Copyright 2004, 2006 Fraunhofer Gesellschaft, Munich, Germany,
+ * Copyright 2004, 2020 Fraunhofer Gesellschaft, Munich, Germany,
  * for its Fraunhofer Institute for Computer Architecture and Software
  * Technology (FIRST), Berlin, Germany and Technical University Berlin,
  * Germany.
@@ -10,7 +10,6 @@
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
- * $Id: OTPluginProject.java 23470 2010-02-05 19:13:24Z stephan $
  * 
  * Please visit http://www.eclipse.org/objectteams for updates and contact.
  * 
@@ -28,6 +27,8 @@ import org.eclipse.core.resources.IProjectDescription;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.JavaCore;
+import org.eclipse.jdt.internal.compiler.impl.CompilerOptions.WeavingScheme;
+import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.objectteams.otdt.core.ext.OTDTPlugin;
 import org.eclipse.objectteams.otdt.core.ext.OTREContainer;
 import org.eclipse.pde.core.plugin.IPluginBase;
@@ -66,6 +67,8 @@ public class OTPluginProject
 		String value = javaProject.getOption(OTDTPlugin.OT_COMPILER_BINDING_CONVENTIONS, true);
 		if (!value.equals(JavaCore.ERROR))
 			javaProject.setOption(OTDTPlugin.OT_COMPILER_BINDING_CONVENTIONS, JavaCore.ERROR);
+		if (JavaModelUtil.is18OrHigher(javaProject))
+			javaProject.setOption(OTDTPlugin.OT_COMPILER_WEAVING_SCHEME, WeavingScheme.OTDRE.name());
 	}
 
 	public static void addOTNatureAndBuilder(IProject project) throws CoreException

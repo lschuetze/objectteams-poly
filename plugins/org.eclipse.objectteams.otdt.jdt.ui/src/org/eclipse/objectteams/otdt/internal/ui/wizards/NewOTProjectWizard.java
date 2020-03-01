@@ -1,7 +1,7 @@
 /**********************************************************************
  * This file is part of "Object Teams Development Tooling"-Software
  * 
- * Copyright 2014, GK Software AG, Germany.
+ * Copyright 2014, 2020 GK Software SE, Germany.
  * 
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -110,7 +110,7 @@ public team class NewOTProjectWizard extends JavaProjectWizard {
 	}
 	
 	/** Value of the new widget (combo). */
-	WeavingScheme weavingScheme = WeavingScheme.OTRE;
+	WeavingScheme weavingScheme = WeavingScheme.OTDRE;
 	
 	/**
 	 * Second level adaptation: during {@link #createPageControls()} we activate this inner team,
@@ -169,7 +169,7 @@ public team class NewOTProjectWizard extends JavaProjectWizard {
 				for (WeavingScheme scheme : WeavingScheme.values())
 					labels[i++] = scheme.toString();
 				weavingControl.setItems(labels);
-				weavingControl.selectItem(0);
+				weavingControl.selectItem(weavingScheme.ordinal());
 			}
 			
 			void dialogFieldChanged(DialogField field) {
