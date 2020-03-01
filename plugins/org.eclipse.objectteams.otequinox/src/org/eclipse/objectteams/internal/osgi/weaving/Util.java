@@ -54,7 +54,6 @@ public class Util
 	private static long[] profileTimes= new long[ProfileKind.values().length];
 	private static long systemStartTime= System.nanoTime();
 
-	@SuppressWarnings("nls")
 	public static void profile(long startTime, ProfileKind kind, String msg) 
 	{
 		long now= System.nanoTime();

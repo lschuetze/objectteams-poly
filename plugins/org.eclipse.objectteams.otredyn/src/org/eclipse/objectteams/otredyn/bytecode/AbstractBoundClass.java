@@ -40,6 +40,8 @@ import org.eclipse.objectteams.otredyn.transformer.IWeavingContext;
 import org.eclipse.objectteams.runtime.IReweavingTask;
 import org.objectweb.asm.Opcodes;
 
+import org.eclipse.jdt.annotation.*;
+
 /**
  * This class represents a java class.
  * It stores the information about a class parsed from the bytecode and
@@ -189,7 +191,7 @@ public abstract class AbstractBoundClass implements IBoundClass {
 	protected boolean parsed;
 
 	//FQN (e.g. "foo.bar.MyClass")
-	private String name;
+	private @NonNull String name;
 	
 	//internal FQN (e.g. "foo/bar/MyClass.class")
 	private String internalName;
@@ -233,7 +235,7 @@ public abstract class AbstractBoundClass implements IBoundClass {
 	 * @param id unique identifier, able to differentiate same-named classes from different classloaders
 	 * @param loader classloader responsible for loading this class
 	 */
-	protected AbstractBoundClass(String name, String id, ClassLoader loader) {
+	protected AbstractBoundClass(@NonNull String name, String id, ClassLoader loader) {
 //		if (name.indexOf('/')!= -1)
 //			new RuntimeException(name).printStackTrace(System.out);
 		this.name = name;
@@ -260,7 +262,7 @@ public abstract class AbstractBoundClass implements IBoundClass {
 	 * Returns the name of the Class
 	 * @return
 	 */
-	public String getName() {
+	public @NonNull String getName() {
 		return name;
 	}
 
@@ -406,12 +408,13 @@ public abstract class AbstractBoundClass implements IBoundClass {
 		if (superclass == null) {
 			synchronized (this) {
 				parseBytecode();
-				if (superClassName != null && superclass == null) {
+				String checkedSuperClassName = superClassName;
+				if (checkedSuperClassName != null && superclass == null) {
 					String superclassId = ClassIdentifierProviderFactory.getClassIdentifierProvider().getSuperclassIdentifier(id, internalSuperClassName);
 					
 					//if superclassId is null the class could be "Object" or an interface
 					if (superclassId != null) {
-						superclass = ClassRepository.getInstance().getBoundClass(superClassName, superclassId, loader);
+						superclass = ClassRepository.getInstance().getBoundClass(checkedSuperClassName, superclassId, loader);
 						superclass.addSubclass(this);
 						// FIXME(SH): can we avoid adding all subclasses to j.l.Object?
 					}
@@ -672,7 +675,7 @@ public abstract class AbstractBoundClass implements IBoundClass {
 	 * @param definedClass previously defined class if available
 	 * @throws IllegalClassFormatException various bytecode problems, e.g., unexpected RET instruction etc.
 	 */
-	public void handleTaskList(Class<?> definedClass) throws IllegalClassFormatException {
+	public void handleTaskList(@Nullable Class<?> definedClass) throws IllegalClassFormatException {
 		if (isTransformationActive()) return;
 
 		if (this.isUnweavable)
@@ -883,7 +886,7 @@ public abstract class AbstractBoundClass implements IBoundClass {
 				for (final AbstractBoundClass affected : affectedClasses)
 					if (affected.isLoaded) {
 						IReweavingTask task = new IReweavingTask() {
-							@Override public void reweave(Class<?> definedClass) throws IllegalClassFormatException {
+							@Override public void reweave(@Nullable Class<?> definedClass) throws IllegalClassFormatException {
 								affected.handleTaskList(definedClass);
 							}
 						};
@@ -969,7 +972,7 @@ public abstract class AbstractBoundClass implements IBoundClass {
 	}
 
 	@Override
-	public synchronized void commitTransaction(Class<?> definedClass) {
+	public synchronized void commitTransaction(@Nullable Class<?> definedClass) {
 		--this.transactionCount;
 		if (this.transactionCount == 0 && this.isLoaded) {
 			try {
@@ -1027,6 +1030,7 @@ public abstract class AbstractBoundClass implements IBoundClass {
 				openAccessTasks.put(null, task);
 				return true;
 			}
+			if (member == null) return false;
 			
 			synchronized (member) {
 				WeavingTask prevTask = completedAccessTasks.get(member);
@@ -1283,7 +1287,7 @@ public abstract class AbstractBoundClass implements IBoundClass {
 
 	public void dump(byte[] classfileBuffer, String postfix) {}
 
-	public Collection<String> getBoundBaseClasses() { return null; }
+	public Collection<@NonNull String> getBoundBaseClasses() { return null; }
 
 	public abstract int compare(String callinLabel1, String callinLabel2);
 

@@ -22,6 +22,8 @@ import java.lang.instrument.IllegalClassFormatException;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.eclipse.jdt.annotation.NonNull;
+import org.eclipse.jdt.annotation.Nullable;
 import org.eclipse.objectteams.otredyn.bytecode.AbstractBoundClass;
 import org.eclipse.objectteams.otredyn.bytecode.AbstractTeam;
 import org.eclipse.objectteams.otredyn.bytecode.Field;
@@ -67,7 +69,7 @@ class AsmWritableBoundClass extends AsmBoundClass {
 	private boolean isTransformationActive;
 	private Boolean superIsWeavable;
 
-	protected AsmWritableBoundClass(String name, String id, IBytecodeProvider bytecodeProvider, ClassLoader loader) {
+	protected AsmWritableBoundClass(@NonNull String name, String id, IBytecodeProvider bytecodeProvider, ClassLoader loader) {
 		super(name, id, bytecodeProvider, loader);
 	}
 	
@@ -523,7 +525,7 @@ class AsmWritableBoundClass extends AsmBoundClass {
 			// are created by visitors of the multiAdapter, see prepareAsPossibleBaseClass().
 		} else if (this.weavingContext != null) {
 			IReweavingTask task = new IReweavingTask() {
-				@Override public void reweave(Class<?> definedClass) throws IllegalClassFormatException {
+				@Override public void reweave(@Nullable Class<?> definedClass) throws IllegalClassFormatException {
 					startTransaction();
 					if (!isTransformationActive) {
 						startTransformation();

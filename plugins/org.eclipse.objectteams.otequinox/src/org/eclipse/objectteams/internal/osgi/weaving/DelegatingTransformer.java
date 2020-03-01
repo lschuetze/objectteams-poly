@@ -199,7 +199,7 @@ public abstract class DelegatingTransformer {
 			}
 			
 			@Override
-			public boolean scheduleReweaving(String className, /*@NonNull*/ IReweavingTask task) {
+			public boolean scheduleReweaving(@NonNull String className, @NonNull IReweavingTask task) {
 				return hook.scheduleReweaving(className, task);
 			}
 		};

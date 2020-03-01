@@ -43,7 +43,6 @@ import org.osgi.framework.Bundle;
  * @author stephan
  * @since 1.2.0
  */
-@SuppressWarnings("nls")
 @NonNullByDefault
 public class ClassScanner 
 {

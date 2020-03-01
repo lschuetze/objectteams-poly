@@ -19,6 +19,7 @@ package org.eclipse.objectteams.otredyn.bytecode.asm;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.objectteams.otredyn.bytecode.AbstractBoundClass;
 import org.eclipse.objectteams.otredyn.bytecode.Binding;
 import org.eclipse.objectteams.otredyn.bytecode.ClassRepository;
@@ -292,9 +293,9 @@ public abstract class Attributes {
 		class DecapsField {
 			String accessMode;
 			boolean isStatic;
-			String baseclass, name, desc;
+			@NonNull String baseclass, name, desc;
 			public int perTeamAccessId;
-			public DecapsField(String baseclass, String name, String desc, int accessId, String accessMode, boolean isStatic) {
+			public DecapsField(@NonNull String baseclass, @NonNull String name, @NonNull String desc, int accessId, String accessMode, boolean isStatic) {
 				this.baseclass = baseclass;
 				this.name = name;
 				this.desc = desc;
@@ -304,11 +305,11 @@ public abstract class Attributes {
 			}
 		}
 		class DecapsMethod {
-			String[] weaveIntoClasses;
-			String declaringClass, name, desc;
+			@NonNull String[] weaveIntoClasses;
+			@NonNull String declaringClass, name, desc;
 			int perTeamAccessId;
 			boolean isStatic;
-			DecapsMethod(String weaveIntoClasses, String declaringClass, String name, String desc, int id, boolean isStatic) {
+			DecapsMethod(@NonNull String weaveIntoClasses, @NonNull String declaringClass, @NonNull String name, @NonNull String desc, int id, boolean isStatic) {
 				this.weaveIntoClasses = weaveIntoClasses.split(":");
 				this.declaringClass = declaringClass;
 				this.name = name;
@@ -377,7 +378,11 @@ public abstract class Attributes {
 				declaringClass = encodedName.substring(0, pos);
 				methodName = encodedName.substring(pos+1);
 			}
-			this.methods.add(new DecapsMethod(className, declaringClass, methodName, methodDesc, accessId, isStatic));
+			if (className != null && declaringClass != null && methodName != null && methodDesc != null) {
+				this.methods.add(new DecapsMethod(className, declaringClass, methodName, methodDesc, accessId, isStatic));
+			} else {
+				System.err.println("Class attribute has unexpected null value: "+className+":"+declaringClass+":"+methodName+":"+methodDesc);
+			}
 		}
 		private void readFieldAccess(ClassReader cr, int off, char[] buf) {
 			int accessId = cr.readUnsignedShort(off);
@@ -387,7 +392,12 @@ public abstract class Attributes {
 			String fieldDesc  = cr.readUTF8(off+7, buf);
 			boolean isStatic = (flags & 2) != 0;
 			String accessMode = (flags & 1) == 1 ? "set" : "get";
-			this.fields.add(new DecapsField(className, fieldName, fieldDesc, accessId, accessMode, isStatic));
+			if (className != null && fieldName != null && fieldDesc != null) {
+				this.fields.add(new DecapsField(className, fieldName, fieldDesc, accessId, accessMode, isStatic));
+			} else {
+				System.err.println("Class attribute has unexpected null value: "+className+":"+fieldName+":"+fieldDesc);
+			}
+
 		}
 		public void registerAt(AsmBoundClass clazz) {
 			ClassRepository repo = ClassRepository.getInstance();

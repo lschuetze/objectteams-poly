@@ -17,6 +17,7 @@
  */
 package org.eclipse.objectteams.otredyn.transformer;
 
+import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.objectteams.runtime.IReweavingTask;
 
 /**
@@ -60,5 +61,5 @@ public interface IWeavingContext {
 	 * @param task
 	 * @return <code>true</code> indicates the task has been scheduled for later.
 	 */
-	boolean scheduleReweaving(String className, IReweavingTask task);
+	boolean scheduleReweaving(@NonNull String className, @NonNull IReweavingTask task);
 }

@@ -30,6 +30,8 @@ import org.eclipse.objectteams.otredyn.bytecode.IBytecodeProvider;
 import org.objectweb.asm.ClassReader;
 import org.objectweb.asm.Opcodes;
 
+import org.eclipse.jdt.annotation.*;
+
 /**
  * This class implements the bytecode parsing for {@link AbstractBoundClass}.
  * It parses the bytecode with ASM.
@@ -58,9 +60,9 @@ public abstract class AsmBoundClass extends AbstractTeam {
 	 * Set of base classes to which the current class or one of its roles as playedBy bindings.
 	 * Qualified class names are '.' separated.
 	 */
-	public Set<String> boundBaseClasses;
+	public Set<@NonNull String> boundBaseClasses;
 
-	protected AsmBoundClass(String name, String id, IBytecodeProvider bytecodeProvider, ClassLoader loader) {
+	protected AsmBoundClass(@NonNull String name, String id, IBytecodeProvider bytecodeProvider, ClassLoader loader) {
 		super(name, id, loader);
 		this.bytecodeProvider = bytecodeProvider;
 	}
@@ -129,7 +131,7 @@ public abstract class AsmBoundClass extends AbstractTeam {
     }
 
 	@Override
-	public Collection<String> getBoundBaseClasses() {
+	public Collection<@NonNull String> getBoundBaseClasses() {
 		return this.boundBaseClasses;
 	}
 

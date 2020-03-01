@@ -104,7 +104,7 @@ class AsmClassVisitor extends ClassVisitor {
 			System.err.println(attribute);
 		}
 		if (clazz.boundBaseClasses == null)
-			clazz.boundBaseClasses = new HashSet<String>();
+			clazz.boundBaseClasses = new HashSet<>();
 		if (attribute.type == null) {
 			System.err.println("OTDRE: bytecode attribute in class "+this.clazz.getName()+" has no type "+attribute.getClass().getName());
 			return;

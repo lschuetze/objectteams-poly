@@ -17,6 +17,8 @@
  **********************************************************************/
 package org.eclipse.objectteams.otredyn.runtime;
 
+import org.eclipse.jdt.annotation.NonNull;
+
 /**
  * Interface through which the {@link TeamManager} reaches into the OTREDyn.
  * Representation of a repository of {@link IBoundClass}es.
@@ -37,7 +39,7 @@ public interface IClassRepository {
 	 * @param id a globally unique identifier for the class 
 	 * @return
 	 */
-	public IBoundClass getBoundClass(String className, String id, ClassLoader loader);
+	public IBoundClass getBoundClass(@NonNull String className, String id, ClassLoader loader);
 
 	/**
 	 * Returns a instance of AbstractBoundClass for the
@@ -54,7 +56,7 @@ public interface IClassRepository {
 	 * @param isHCR true if invoked during hot code replace, in which case transformation must restart using the new bytes
 	 * @return
 	 */
-	public IBoundClass getBoundClass(String className, String id, byte[] classBytes, ClassLoader loader, boolean isHCR);
+	public IBoundClass getBoundClass(@NonNull String className, String id, byte[] classBytes, ClassLoader loader, boolean isHCR);
 
 	/**
 	 * Returns a instance of AbstractTeam for the
@@ -70,6 +72,6 @@ public interface IClassRepository {
 	 * @param id a globally unique identifier for the team 
 	 * @return
 	 */
-	public IBoundTeam getTeam(String teamName, String id, ClassLoader loader);
+	public IBoundTeam getTeam(@NonNull String teamName, String id, ClassLoader loader);
 
 }

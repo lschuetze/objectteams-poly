@@ -22,6 +22,7 @@ import java.util.HashMap;
 import java.util.IdentityHashMap;
 import java.util.Map;
 
+import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.objectteams.otredyn.bytecode.asm.AsmBoundClass;
 import org.eclipse.objectteams.otredyn.bytecode.asm.AsmClassRepository;
 import org.eclipse.objectteams.otredyn.runtime.IClassRepository;
@@ -89,7 +90,7 @@ public abstract class ClassRepository implements IClassRepository {
 	 * @param id a globally unique identifier for the class 
 	 * @return
 	 */
-	public synchronized AbstractBoundClass getBoundClass(String className, String id, ClassLoader loader) {
+	public synchronized AbstractBoundClass getBoundClass(@NonNull String className, String id, ClassLoader loader) {
 		AbstractTeam clazz = boundClassMap.get(id);
 		if (clazz == null) {
 			clazz = createClass(className, id, BytecodeProviderFactory.getBytecodeProvider(), loader);
@@ -123,7 +124,7 @@ public abstract class ClassRepository implements IClassRepository {
 	 * @param isHCR true if invoked during hot code replace, in which case transformation must restart using the new bytes
 	 * @return
 	 */
-	public synchronized AbstractBoundClass getBoundClass(String className, String id, byte[] classBytes, ClassLoader loader, boolean isHCR) 
+	public synchronized AbstractBoundClass getBoundClass(@NonNull String className, String id, byte[] classBytes, ClassLoader loader, boolean isHCR) 
 	{
 		AbstractTeam clazz = boundClassMap.get(id);
 		// set the bytecode in the BytecodeProvider
@@ -193,7 +194,7 @@ public abstract class ClassRepository implements IClassRepository {
 	 * @param id a globally unique identifier for the team 
 	 * @return
 	 */
-	public AbstractTeam getTeam(String teamName, String id, ClassLoader loader) {
+	public AbstractTeam getTeam(@NonNull String teamName, String id, ClassLoader loader) {
 		return (AbstractTeam) getBoundClass(teamName, id, loader);
 	}
 	
@@ -228,5 +229,5 @@ public abstract class ClassRepository implements IClassRepository {
 	 * @param bytecodeProvider
 	 * @return
 	 */
-	protected abstract AbstractTeam createClass(String name, String id, IBytecodeProvider bytecodeProvider, ClassLoader loader);
+	protected abstract AbstractTeam createClass(@NonNull String name, String id, IBytecodeProvider bytecodeProvider, ClassLoader loader);
 }

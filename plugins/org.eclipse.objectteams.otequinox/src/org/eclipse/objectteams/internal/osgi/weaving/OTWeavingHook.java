@@ -47,7 +47,6 @@ import org.eclipse.objectteams.internal.osgi.weaving.ASMByteCodeAnalyzer.ClassIn
 import org.eclipse.objectteams.internal.osgi.weaving.AspectBinding.BaseBundle;
 import org.eclipse.objectteams.internal.osgi.weaving.AspectBinding.TeamBinding;
 import org.eclipse.objectteams.internal.osgi.weaving.Util.ProfileKind;
-import org.eclipse.objectteams.internal.osgi.weaving.AspectPermissionManager;
 import org.eclipse.objectteams.internal.osgi.weaving.DelegatingTransformer.OTAgentNotInstalled;
 import org.eclipse.objectteams.otequinox.Constants;
 import org.eclipse.objectteams.otequinox.TransformerPlugin;

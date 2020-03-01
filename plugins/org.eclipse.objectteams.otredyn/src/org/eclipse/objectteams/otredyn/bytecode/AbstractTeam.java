@@ -23,6 +23,7 @@ import java.util.List;
 import java.util.Set;
 import java.util.TreeSet;
 
+import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.objectteams.otredyn.runtime.IBinding;
 import org.eclipse.objectteams.otredyn.runtime.IBoundClass;
 import org.eclipse.objectteams.otredyn.runtime.IBoundTeam;
@@ -44,7 +45,7 @@ public abstract class AbstractTeam extends AbstractBoundClass implements IBoundT
 	 */
 	private int highestAccessId;
 
-	protected AbstractTeam(String name, String id, ClassLoader loader) {
+	protected AbstractTeam(@NonNull String name, String id, ClassLoader loader) {
 		super(name, id, loader);
 		bindings = new TreeSet<IBinding>();
 	}

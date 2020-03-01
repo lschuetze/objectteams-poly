@@ -33,6 +33,7 @@ import org.eclipse.objectteams.otredyn.bytecode.asm.WeavableRegionReader;
 import org.eclipse.objectteams.otredyn.transformer.IWeavingContext;
 import org.eclipse.objectteams.runtime.IReweavingTask;
 
+import org.eclipse.jdt.annotation.*;
 
 /**
  * This class does all needed transformations at load time.
@@ -49,7 +50,7 @@ public class ObjectTeamsTransformer implements ClassFileTransformer {
 
 	private IWeavingContext weavingContext;
 	
-	private Set<String> boundBaseClassNames = new HashSet<String>();
+	private Set<@NonNull String> boundBaseClassNames = new HashSet<>();
 
 	public ObjectTeamsTransformer() {
 		this.weavingContext = new IWeavingContext() {
@@ -57,7 +58,7 @@ public class ObjectTeamsTransformer implements ClassFileTransformer {
 				return ObjectTeamsTransformer.isWeavable(className.replace('.', '/'))
 						&& WeavableRegionReader.isWeavable(className);
 			}
-			@Override public boolean scheduleReweaving(String className, IReweavingTask task) {
+			@Override public boolean scheduleReweaving(@NonNull String className, @NonNull IReweavingTask task) {
 				return false; // default is to let the transformer work immediately
 			}
 		};
@@ -147,7 +148,7 @@ if (PWR_DEBUG) System.out.println("\tweave"+e);
 if (PWR_DEBUG) System.out.println("\tweave3");
 		clazz.dump(classfileBuffer, "initial");
 		
-		Collection<String> boundBaseClasses = clazz.getBoundBaseClasses();
+		Collection<@NonNull String> boundBaseClasses = clazz.getBoundBaseClasses();
 		if (boundBaseClasses != null)
 			this.boundBaseClassNames.addAll(boundBaseClasses);
 
@@ -218,7 +219,7 @@ if (PWR_DEBUG) System.out.println("\tweave3");
 			t.printStackTrace();
 		}
 		
-		Collection<String> boundBaseClasses = clazz.getBoundBaseClasses();
+		Collection<@NonNull String> boundBaseClasses = clazz.getBoundBaseClasses();
 		if (boundBaseClasses != null)
 			this.boundBaseClassNames.addAll(boundBaseClasses);
 	}
@@ -227,11 +228,11 @@ if (PWR_DEBUG) System.out.println("\tweave3");
 	 * After {@link #transform(ClassLoader, String, Class, ProtectionDomain, byte[])} or {@link #readOTAttributes(String, String, InputStream, ClassLoader)}
 	 * this method will answer the qualified names (dot-separated) of all base classes adapated by the current team and its roles.
 	 */
-	public Collection<String> fetchAdaptedBases() {
+	public Collection<@NonNull String> fetchAdaptedBases() {
 		try {
 			return this.boundBaseClassNames;
 		} finally {
-			this.boundBaseClassNames = new HashSet<String>();
+			this.boundBaseClassNames = new HashSet<>();
 		}
 	}
 }

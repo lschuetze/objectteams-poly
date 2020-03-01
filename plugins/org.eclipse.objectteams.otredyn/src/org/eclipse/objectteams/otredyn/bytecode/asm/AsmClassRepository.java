@@ -16,6 +16,7 @@
  **********************************************************************/
 package org.eclipse.objectteams.otredyn.bytecode.asm;
 
+import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.objectteams.otredyn.bytecode.AbstractTeam;
 import org.eclipse.objectteams.otredyn.bytecode.ClassRepository;
 import org.eclipse.objectteams.otredyn.bytecode.IBytecodeProvider;
@@ -29,7 +30,7 @@ public class AsmClassRepository extends ClassRepository {
 
 	
 	@Override
-	protected AbstractTeam createClass(String name, String id, IBytecodeProvider bytecodeProvider, ClassLoader loader) {
+	protected AbstractTeam createClass(@NonNull String name, String id, IBytecodeProvider bytecodeProvider, ClassLoader loader) {
 		return new AsmWritableBoundClass(name, id, bytecodeProvider, loader);
 	}
 }

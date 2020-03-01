@@ -213,10 +213,10 @@ public /* team */ class Team implements ITeam {
 	}
 
 	private void _OT$activateForAllThreads() {
-		HashSet threads = TeamThreadManager.getExistingThreads();
-		Iterator it = threads.iterator();
+		HashSet<Thread> threads = TeamThreadManager.getExistingThreads();
+		Iterator<Thread> it = threads.iterator();
 		while (it.hasNext()) {
-			Thread a_thread = (Thread) it.next();
+			Thread a_thread = it.next();
 			activate(a_thread); // use smaller activate version (no ALL_THREADS, no registerAtBases,...
 		}
 	}

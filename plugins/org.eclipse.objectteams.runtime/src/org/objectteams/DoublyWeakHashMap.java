@@ -24,6 +24,8 @@ import java.util.Map;
 import java.util.Set;
 import java.util.WeakHashMap;
 
+import org.eclipse.jdt.annotation.Nullable;
+
 /**
  * This class defines hash maps where both key and value are weak references.
  * It is implemented by delegating to a WeakHashMap and additionally
@@ -60,7 +62,7 @@ public class DoublyWeakHashMap<K,V> implements Map<K,V> {
 	}
 
 	// used from getRole()
-	public V get(Object key) {
+	public @Nullable V get(Object key) {
 		WeakReference<V> valRef = this.map.get(key);
 		return valRef == null ? null : valRef.get();
 	}
@@ -72,7 +74,7 @@ public class DoublyWeakHashMap<K,V> implements Map<K,V> {
 	}
 
 	// used from unregisterRole(), migrateToBase()
-	public synchronized V remove(Object key) {
+	public synchronized @Nullable V remove(Object key) {
 		WeakReference<V> value = this.map.remove(key);
 		return (value == null) ? null : value.get();
 	}
