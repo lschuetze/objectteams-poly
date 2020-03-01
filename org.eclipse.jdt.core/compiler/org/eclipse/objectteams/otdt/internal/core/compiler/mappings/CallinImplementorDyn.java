@@ -937,7 +937,8 @@ public class CallinImplementorDyn extends MethodMappingImplementor {
 								roleSideArgument = gen.resolvedCastExpression(roleSideArgument, roleSideParameter, CastExpression.RAW);
 							TypeBinding roleSideLeaf = roleSideParameter.leafComponentType();
 							TypeBinding baseSideLeaf = baseSideParameter.leafComponentType();
-							if (   roleSideLeaf.isRole() 
+							if (   roleSideLeaf.isRole()
+								&& ((ReferenceBinding)roleSideLeaf).baseclass() != null
 								&& ((ReferenceBinding)roleSideLeaf).baseclass().isCompatibleWith(baseSideLeaf))
 								roleSideArgument = new PotentialLowerExpression(roleSideArgument, baseSideParameter, gen.thisReference());
 							repackingStats.add(gen.assignment(gen.arrayReference(gen.singleNameReference(ARGUMENTS), 	//   arguments[p] = baseCallArguments[i];
