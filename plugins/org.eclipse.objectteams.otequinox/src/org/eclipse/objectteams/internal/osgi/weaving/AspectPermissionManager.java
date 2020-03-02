@@ -220,8 +220,8 @@ public class AspectPermissionManager {
 		
 		String aspectId = aspectBinding.aspectPlugin;
 		String baseBundleId = aspectBinding.basePluginName; 
-		List<String[]> deniedForcedExports = getConfiguredForcedExports(aspectId, DENY,  deniedForcedExportsByAspect);
-		List<String[]> grantedForcedExports= getConfiguredForcedExports(aspectId, GRANT, grantedForcedExportsByAspect);
+		List<@NonNull String[]> deniedForcedExports = getConfiguredForcedExports(aspectId, DENY,  deniedForcedExportsByAspect);
+		List<@NonNull String[]> grantedForcedExports= getConfiguredForcedExports(aspectId, GRANT, grantedForcedExportsByAspect);
 
 		// iterate all requested forcedExports to search for a matching permission:
 		for (IConfigurationElement forcedExport : forcedExports) { // [0..1] (as defined in the schema)
@@ -341,7 +341,7 @@ public class AspectPermissionManager {
 	 * If the structure of grantedForcedExports is not empty we have mismatches between forced-export declarations.
 	 * Report these mismatches as warnings.
 	 */
-	void reportUnmatchForcedExports(String aspectId, List<String[]> unmatchedForcedExports) 
+	void reportUnmatchForcedExports(String aspectId, List<@NonNull String[]> unmatchedForcedExports)
 	{
 		for (String[] export: unmatchedForcedExports) {
 			String baseId = export[0];
@@ -387,7 +387,7 @@ public class AspectPermissionManager {
 	 * @param teamsForBase the teams to check
 	 * @return the set of denied teams
 	 */
-	Set<TeamBinding> checkAspectPermissionDenial(Collection<TeamBinding> teamsForBase)
+	Set<@NonNull TeamBinding> checkAspectPermissionDenial(Collection<TeamBinding> teamsForBase)
 	{
 		Set<TeamBinding> deniedTeams = new HashSet<TeamBinding>();
 		for (TeamBinding teamForBase : teamsForBase) {

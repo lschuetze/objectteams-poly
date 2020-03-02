@@ -243,7 +243,7 @@ public class TransformerPlugin implements BundleActivator, IAspectRegistry {
 		
 		Status dummyStatus = new Status(WARN_LEVEL, bundleSymbolicName, "no message");
 		LogLevel logLevel = LogLevel.values()[LoggerBridge.getLevel(dummyStatus)];
-		Map<String,LogLevel> levels = new HashMap<>();
+		Map<@Nullable String,@Nullable LogLevel> levels = new HashMap<>();
 		levels.put(OTEQUINOX_LOGGER_NAME, logLevel);
 
 		ServiceTracker<LoggerAdmin,LoggerAdmin> adminTracker

@@ -275,7 +275,7 @@ public class AspectBinding {
 	public @Nullable Bundle aspectBundle; // null if we don't have a PackageAdmin for bundle lookup
 	public String basePluginName;
 	public BaseBundle baseBundle;
-	public IConfigurationElement[] forcedExports;
+	public @NonNull IConfigurationElement[] forcedExports;
 	public TeamBinding[]   teams;
 	public Set<String> allBaseClassNames = new HashSet<>();
 
@@ -286,7 +286,7 @@ public class AspectBinding {
 	
 	Set<TeamBinding> teamsInProgress = new HashSet<>(); // TODO cleanup teams that are done
 	
-	public AspectBinding(String aspectId, @Nullable Bundle aspectBundle, BaseBundle baseBundle, IConfigurationElement[] forcedExportsConfs, int count) 
+	public AspectBinding(String aspectId, @Nullable Bundle aspectBundle, BaseBundle baseBundle, @NonNull IConfigurationElement[] forcedExportsConfs, int count) 
 	{
 		this.aspectPlugin= aspectId;
 		this.aspectBundle= aspectBundle;
