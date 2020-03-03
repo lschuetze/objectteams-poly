@@ -6,11 +6,12 @@
  * Technology (FIRST), Berlin, Germany and Technical University Berlin,
  * Germany.
  * 
- * All rights reserved. This program and the accompanying materials
- * are made available under the terms of the Eclipse Public License v1.0
+ * This program and the accompanying materials
+ * are made available under the terms of the Eclipse Public License 2.0
  * which accompanies this distribution, and is available at
- * http://www.eclipse.org/legal/epl-v10.html
- * $Id: SortTeamAction.java 23432 2010-02-03 23:13:42Z stephan $
+ * https://www.eclipse.org/legal/epl-2.0/
+ *
+ * SPDX-License-Identifier: EPL-2.0
  * 
  * Please visit http://www.objectteams.org for updates and contact.
  * 
@@ -31,7 +32,6 @@ import org.eclipse.objectteams.otdt.debug.ui.views.TeamViewMessages;
  * @author ike
  * This Action sorts the teams in TeamMonitor.
  * 
- * $Id: SortTeamAction.java 23432 2010-02-03 23:13:42Z stephan $
  */
 public class SortTeamAction extends Action
 {

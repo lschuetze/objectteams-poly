@@ -12,7 +12,6 @@
  * https://www.eclipse.org/legal/epl-2.0/
  *
  * SPDX-License-Identifier: EPL-2.0
- * $Id: InheritedMethodsRequestor.java 23416 2010-02-03 19:59:31Z stephan $
  * 
  * Please visit http://www.eclipse.org/objectteams for updates and contact.
  * 

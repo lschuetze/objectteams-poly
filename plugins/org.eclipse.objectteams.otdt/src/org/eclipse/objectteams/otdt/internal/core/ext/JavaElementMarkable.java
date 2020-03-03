@@ -9,7 +9,6 @@
  * https://www.eclipse.org/legal/epl-2.0/
  *
  * SPDX-License-Identifier: EPL-2.0
- * $Id: JavaElementMarkable.java 23435 2010-02-04 00:14:38Z stephan $
  * 
  * Please visit http://www.eclipse.org/objectteams for updates and contact.
  * 

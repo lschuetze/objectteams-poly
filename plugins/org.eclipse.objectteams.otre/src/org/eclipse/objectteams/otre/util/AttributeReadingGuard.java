@@ -3,11 +3,12 @@
  *
  * Copyright 2002-2009 Berlin Institute of Technology, Germany.
  *
- * All rights reserved. This program and the accompanying materials
- * are made available under the terms of the Eclipse Public License v1.0
+ * This program and the accompanying materials
+ * are made available under the terms of the Eclipse Public License 2.0
  * which accompanies this distribution, and is available at
- * http://www.eclipse.org/legal/epl-v10.html
- * $Id: AttributeReadingGuard.java 23408 2010-02-03 18:07:35Z stephan $
+ * https://www.eclipse.org/legal/epl-2.0/
+ *
+ * SPDX-License-Identifier: EPL-2.0
  *
  * Please visit http://www.objectteams.org for updates and contact.
  *

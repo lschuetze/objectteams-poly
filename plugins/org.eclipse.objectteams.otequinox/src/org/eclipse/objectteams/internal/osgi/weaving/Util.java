@@ -12,7 +12,6 @@
  * https://www.eclipse.org/legal/epl-2.0/
  *
  * SPDX-License-Identifier: EPL-2.0
- * $Id: Util.java 23461 2010-02-04 22:10:39Z stephan $
  * 
  * Please visit http://www.eclipse.org/objectteams for updates and contact.
  * 
