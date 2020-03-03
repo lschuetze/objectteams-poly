@@ -24,6 +24,10 @@ The project maintains the following source code repositories
 
 * https://git.eclipse.org/r/plugins/gitiles/objectteams/org.eclipse.objectteams
 
+Production builds are documented in the wiki (irrelevant during development):
+
+* https://wiki.eclipse.org/OTBuilding
+
 This project uses Bugzilla to track ongoing development and issues.
 
 * Search for issues:
