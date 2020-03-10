@@ -58,11 +58,11 @@ ARCH=`arch`
 
 # VERSIONS:
 # Eclipse SDK build identifier (used for substitution in otdt.map.in etc.):
-SDK_QUALIFIER=${SDK_QUALIFIER:="I20200226-1800"}
+SDK_QUALIFIER=${SDK_QUALIFIER:="I20200305-0155"}
 
 # used only locally (components of the ECLIPSE_SDK_TGZ path):
-EVERSION=${EVERSION:="4.15RC1"}
-DROP=${DROPS4}/${DROP:="S-4.15RC1-202002261800"}
+EVERSION=${EVERSION:="4.15RC2"}
+DROP=${DROPS4}/${DROP:="S-4.15RC2-202003050155"}
 
 # EXPORT: archive file of the base eclipse SDK build:
 ECLIPSE_SDK_TGZ=${DROP}/eclipse-SDK-${EVERSION}-linux-gtk-${ARCH}.tar.gz
