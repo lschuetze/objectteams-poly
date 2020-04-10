@@ -584,7 +584,7 @@ public abstract class TypeCreator
 	{	
 		StringBuffer buf= new StringBuffer();
 			
-		buf.append(Flags.toString(_typeInfo.getModifiers()));
+		buf.append(Flags.typeFlagsToString(_typeInfo.getModifiers()));
 		
 		if (_typeInfo.getModifiers() != 0) 
 		{

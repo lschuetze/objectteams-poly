@@ -66,9 +66,9 @@ public interface ExtraCompilerModifiers { // modifier constant
 //{ObjectTeams: modifiers/flags not written to class files:
 	/**
  	 * Purely internal flag, never seen in source code nor byte code.
-     * also: AccSemicolonBody (no conflict, class flag vs. method flag).
+     * also: AccDefaultMethod, for disambiguation avoid Flags.toString() in favor of Flags.typeFlagsToString()
      */
- 	int AccRole = 0x1000000; // bit 25
+ 	int AccRole = ASTNode.Bit17;
  	
  	/**
  	 * Encoding for the "team" class modifier.
@@ -76,13 +76,13 @@ public interface ExtraCompilerModifiers { // modifier constant
  	int AccTeam = ASTNode.Bit27;
 
  	/** Flag for base imports. */
- 	int AccBase = 0x1000000; // bit 25
+ 	int AccBase = ASTNode.Bit25;
 
 	/**
 	 * Encoding for the "callin" method modifier.
      * Never seen in class files, but restored using the CallinFlags attribute
 	 */
-	int AccCallin = 0x80000000; // bit 32
+	int AccCallin = ASTNode.Bit32;
 
 
 	final int AccOTTypeJustFlag = AccJustFlag | AccRole | AccTeam | AccOverriding;

@@ -541,6 +541,20 @@ public final class Flags {
 	 * @return the standard string representation of the given flags
 	 */
 	public static String toString(int flags) {
+//{ObjectTeams: need to distinguish caller's expectation to disambiguate overloaded bits
+		return internalToString(flags, false);
+	}
+	/**
+	 * Like {@link #toString(int)} but in case of conflicting bits, favor type flags.
+	 * @param flags the flags
+	 * @return the standard string representation of the given flags
+	 * @since 3.22
+	 */
+	public static String typeFlagsToString(int flags) {
+		return internalToString(flags, true);
+	}
+	private static String internalToString(int flags, boolean onlyTypeFlags) {
+// SH}
 		StringBuffer sb = new StringBuffer();
 
 		if (isPublic(flags))
@@ -551,6 +565,9 @@ public final class Flags {
 			sb.append("private "); //$NON-NLS-1$
 		if (isAbstract(flags))
 			sb.append("abstract "); //$NON-NLS-1$
+//{ObjectTeams: AccDefaultMethod & AccRole share the same bit:
+	  if (!onlyTypeFlags)
+// SH}
 		if (isDefaultMethod(flags))
 			sb.append("default "); //$NON-NLS-1$
 		if (isStatic(flags))
