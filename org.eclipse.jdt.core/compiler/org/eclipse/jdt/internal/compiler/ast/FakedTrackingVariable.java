@@ -275,16 +275,19 @@ public class FakedTrackingVariable extends LocalDeclaration {
 		return false;
 	}
 	private static boolean containsAllocation(ASTNode location) {
-		if (location instanceof AllocationExpression)
+		if (location instanceof AllocationExpression) {
 			return true;
-		if (location instanceof ConditionalExpression) {
+		} else if (location instanceof ConditionalExpression) {
 			ConditionalExpression conditional = (ConditionalExpression) location;
 			return containsAllocation(conditional.valueIfTrue) || containsAllocation(conditional.valueIfFalse);
 		} else if (location instanceof SwitchExpression) {
 			return containsAllocation((SwitchExpression) location);
-		}
-		if (location instanceof CastExpression)
+		} else if (location instanceof CastExpression) {
 			return containsAllocation(((CastExpression) location).expression);
+		} else if (location instanceof MessageSend) {
+			if (isFluentMethod(((MessageSend) location).binding))
+				return containsAllocation(((MessageSend) location).receiver);
+		}
 		return false;
 	}
 
@@ -298,6 +301,9 @@ public class FakedTrackingVariable extends LocalDeclaration {
 			preConnectTrackerAcrossAssignment(location, local, flowInfo, (SwitchExpression) expression, closeTracker);
 		} else if (expression instanceof CastExpression) {
 			preConnectTrackerAcrossAssignment(location, local, ((CastExpression) expression).expression, flowInfo);
+		} else if (expression instanceof MessageSend) {
+			if (isFluentMethod(((MessageSend) expression).binding))
+				preConnectTrackerAcrossAssignment(location, local, ((MessageSend) expression).receiver, flowInfo);
 		}
 	}
 
@@ -361,7 +367,7 @@ public class FakedTrackingVariable extends LocalDeclaration {
 								newStatus = finallyStatus;
 						}
 					}
-					if (allocation.closeTracker.innerTracker != null) {
+					if (allocation.closeTracker.innerTracker != null && allocation.closeTracker.innerTracker != innerTracker) {
 						innerTracker = pickMoreUnsafe(allocation.closeTracker.innerTracker, innerTracker, scope, flowInfo);
 					}
 					allocation.closeTracker.innerTracker = innerTracker;

@@ -1894,7 +1894,7 @@ public class BasicSearchEngine {
 								kind = TypeDeclaration.ENUM_DECL;
 							} else if (type.isAnnotation()) {
 								kind = TypeDeclaration.ANNOTATION_TYPE_DECL;
-							}	else if (type.isClass()) {
+							}	else if (type.isClass() || type.isRecord()) {
 								kind = TypeDeclaration.CLASS_DECL;
 							} else /*if (type.isInterface())*/ {
 								kind = TypeDeclaration.INTERFACE_DECL;

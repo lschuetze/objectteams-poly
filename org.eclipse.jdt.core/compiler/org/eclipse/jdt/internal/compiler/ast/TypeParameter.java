@@ -142,6 +142,7 @@ public class TypeParameter extends AbstractVariableDeclaration {
 				scope.problemReporter().varIsNotAllowedHere(this);
 			}
 		}
+		RecordDeclaration.checkAndFlagRecordNameErrors(this.name, this, scope);
 	}
 
 	@Override

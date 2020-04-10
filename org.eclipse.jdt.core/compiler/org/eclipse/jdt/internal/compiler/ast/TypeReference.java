@@ -384,10 +384,10 @@ private void checkYieldUsage(Scope currentScope) {
 	char [][] qName = getTypeName();
 	String name = qName != null && qName[0] != null ? new String(qName[0]) : null;
 	long sourceLevel = currentScope.compilerOptions().sourceLevel;
-	if (sourceLevel < ClassFileConstants.JDK13 || name == null ||
+	if (sourceLevel < ClassFileConstants.JDK14 || name == null ||
 			!("yield".equals(new String(name)))) //$NON-NLS-1$
 		return;
-	if (sourceLevel == ClassFileConstants.JDK13 && currentScope.compilerOptions().enablePreviewFeatures) {
+	if (sourceLevel >= ClassFileConstants.JDK14) {
 		currentScope.problemReporter().switchExpressionsYieldTypeDeclarationError(this);
 	} else {
 		currentScope.problemReporter().switchExpressionsYieldTypeDeclarationWarning(this);
@@ -640,6 +640,7 @@ protected TypeBinding internalResolveType(Scope scope, int location) {
 		} else {
 			reportInvalidType(scope);
 		}
+		RecordDeclaration.checkAndFlagRecordNameErrors(getTypeName(0), this, scope);
 		switch (type.problemId()) {
 			case ProblemReasons.NotFound :
 			case ProblemReasons.NotVisible :
@@ -956,6 +957,11 @@ public TypeReference[] getTypeReferences() {
 public boolean isBaseTypeReference() {
 	return false;
 }
+private char[] getTypeName(int index) {
+	char[][] typeName = this.getTypeName();
+	return typeName != null && typeName.length > index ? typeName[index] :
+		CharOperation.NO_CHAR;
+}
 /**
  * Checks to see if the declaration uses 'var' as type name 
  * @param scope Relevant scope, for error reporting
@@ -966,7 +972,6 @@ public boolean isTypeNameVar(Scope scope) {
 	if (compilerOptions != null && compilerOptions.sourceLevel < ClassFileConstants.JDK10) {
 		return false;
 	}
-	char[][] typeName = this.getTypeName();
-	return typeName.length == 1 && CharOperation.equals(typeName[0], TypeConstants.VAR);
+	return CharOperation.equals(getTypeName(0), TypeConstants.VAR);
 }
 }

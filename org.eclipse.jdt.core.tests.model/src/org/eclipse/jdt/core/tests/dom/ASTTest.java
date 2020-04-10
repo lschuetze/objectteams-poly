@@ -30,6 +30,7 @@ import junit.framework.Test;
 
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.dom.*;
+import org.eclipse.jdt.internal.core.dom.util.DOMASTUtil;
 
 // testing
 
@@ -1327,6 +1328,7 @@ public class ASTTest extends org.eclipse.jdt.core.tests.junit.extension.TestCase
         case JavaCore.VERSION_11: return AST.JLS11;
         case JavaCore.VERSION_12: return AST.JLS12;
         case JavaCore.VERSION_13: return AST.JLS13;
+        case JavaCore.VERSION_14: return AST.JLS14;
         default:  return AST.JLS2;
 		}
 	}
@@ -8903,6 +8905,7 @@ public class ASTTest extends org.eclipse.jdt.core.tests.junit.extension.TestCase
 			ASTNode.SWITCH_EXPRESSION,
 			ASTNode.YIELD_STATEMENT,
 			ASTNode.TEXT_BLOCK,
+			ASTNode.RECORD_DECLARATION,
 //{ObjectTeams:
 			ASTNode.METHOD_SPEC,
 			ASTNode.CALLIN_MAPPING_DECLARATION,
@@ -8968,6 +8971,20 @@ public class ASTTest extends org.eclipse.jdt.core.tests.junit.extension.TestCase
 			assertEquals("node type " + nodeType + " missing in ASTNode", -1, nodeType);
 		}
 		assertEquals("node types missing in test", Collections.EMPTY_SET, declaredNodeTypes);
+	}
+	
+	@SuppressWarnings("deprecation")
+	public void testASTLevels() throws Exception {
+		int[] apilLevels = {AST.JLS2, AST.JLS3, AST.JLS4, AST.JLS8, AST.JLS9, AST.JLS10, AST.JLS11, AST.JLS12, AST.JLS13, AST.JLS14};
+		for (int level : apilLevels) {
+			try {
+				DOMASTUtil.checkASTLevel(level);
+			} catch (IllegalArgumentException e) {
+				throw new AssertionFailedError("missing support for AST level: " + level);
+			}
+		}
+		
+		
 	}
 }
 

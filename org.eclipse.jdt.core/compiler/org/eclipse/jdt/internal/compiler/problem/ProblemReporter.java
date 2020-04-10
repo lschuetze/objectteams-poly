@@ -155,6 +155,7 @@ import org.eclipse.jdt.internal.compiler.ast.QualifiedNameReference;
 import org.eclipse.jdt.internal.compiler.ast.QualifiedSuperReference;
 import org.eclipse.jdt.internal.compiler.ast.QualifiedTypeReference;
 import org.eclipse.jdt.internal.compiler.ast.Receiver;
+import org.eclipse.jdt.internal.compiler.ast.RecordDeclaration;
 import org.eclipse.jdt.internal.compiler.ast.Reference;
 import org.eclipse.jdt.internal.compiler.ast.ReferenceExpression;
 import org.eclipse.jdt.internal.compiler.ast.ReturnStatement;
@@ -2171,13 +2172,6 @@ public void disallowedTargetForAnnotation(Annotation annotation) {
 		annotation.sourceStart,
 		annotation.sourceEnd);
 }
-public void explitAnnotationTargetRequired(Annotation annotation) {
-	this.handle(IProblem.ExplicitAnnotationTargetRequired,
-			NoArgument,
-			NoArgument,
-			annotation.sourceStart,
-			annotation.sourceEnd);
-}
 public void polymorphicMethodNotBelow17(ASTNode node) {
 	this.handle(
 			IProblem.PolymorphicMethodNotBelow17,
@@ -2329,12 +2323,20 @@ public void duplicateInitializationOfBlankFinalField(FieldBinding field, Referen
 }
 public void duplicateInitializationOfFinalLocal(LocalVariableBinding local, ASTNode location) {
 	String[] arguments = new String[] { new String(local.readableName())};
-	this.handle(
-		IProblem.DuplicateFinalLocalInitialization,
-		arguments,
-		arguments,
-		nodeSourceStart(local, location),
-		nodeSourceEnd(local, location));
+	if ((local.modifiers & ExtraCompilerModifiers.AccPatternVariable) == 0) {
+		this.handle(
+			IProblem.DuplicateFinalLocalInitialization,
+			arguments,
+			arguments,
+			nodeSourceStart(local, location),
+			nodeSourceEnd(local, location));
+	} else {
+		this.handle(IProblem.PatternVariableNotInScope,
+			arguments,
+			arguments,
+			nodeSourceStart(local, location),
+			nodeSourceEnd(local, location));
+	}
 }
 public void duplicateMethodInType(AbstractMethodDeclaration methodDecl, boolean equalParameters, int severity) {
     MethodBinding method = methodDecl.binding;
@@ -5724,7 +5726,8 @@ private boolean isKeyword(int token) {
 		case TerminalTokens.TokenNamewhile:
 			return true;
 		case TerminalTokens.TokenNameRestrictedIdentifierYield:
-			// making explicit - yield not a (restricted) keyword but restricted identifier.
+		case TerminalTokens.TokenNameRestrictedIdentifierrecord:
+			// making explicit - not a (restricted) keyword but restricted identifier.
 			//$FALL-THROUGH$
 		default:
 			return false;
@@ -8924,6 +8927,8 @@ private String replaceIfSynthetic(String token) {
 		return "("; //$NON-NLS-1$
 	if (token.equals("RestrictedIdentifierYield")) //$NON-NLS-1$
 		return "yield"; //$NON-NLS-1$
+	if (token.equals("RestrictedIdentifierrecord")) //$NON-NLS-1$
+		return "record"; //$NON-NLS-1$
 	return token;
 }
 public void task(String tag, String message, String priority, int start, int end){
@@ -9456,14 +9461,25 @@ public void uninitializedNonNullField(FieldBinding field, ASTNode location) {
 		nodeSourceEnd(field, location));
 }
 public void uninitializedLocalVariable(LocalVariableBinding binding, ASTNode location, Scope scope) {
-	binding.markAsUninitializedIn(scope);
-	String[] arguments = new String[] {new String(binding.readableName())};
-	this.handle(
-		methodHasMissingSwitchDefault() ? IProblem.UninitializedLocalVariableHintMissingDefault : IProblem.UninitializedLocalVariable,
-		arguments,
-		arguments,
-		nodeSourceStart(binding, location),
-		nodeSourceEnd(binding, location));
+	if ((binding.modifiers & ExtraCompilerModifiers.AccPatternVariable) == 0) {
+		binding.markAsUninitializedIn(scope);
+		String[] arguments = new String[] {new String(binding.readableName())};
+		this.handle(
+				methodHasMissingSwitchDefault() ? IProblem.UninitializedLocalVariableHintMissingDefault : IProblem.UninitializedLocalVariable,
+						arguments,
+						arguments,
+						nodeSourceStart(binding, location),
+						nodeSourceEnd(binding, location));
+	} else {
+		String[] arguments = new String[] {new String(binding.readableName())};
+		this.handle(
+				IProblem.PatternVariableNotInScope,
+						arguments,
+						arguments,
+						nodeSourceStart(binding, location),
+						nodeSourceEnd(binding, location));
+		
+	}
 }
 private boolean methodHasMissingSwitchDefault() {
 	MethodScope methodScope = null;
@@ -15684,8 +15700,6 @@ public void autoModuleWithUnstableName(ModuleReference moduleReference) {
 			moduleReference.sourceEnd);
 }
 public void switchExpressionIncompatibleResultExpressions(SwitchExpression expression) {
-	if (!this.options.enablePreviewFeatures)
-		return;
 	TypeBinding type = expression.resultExpressions.get(0).resolvedType;
 	this.handle(
 		IProblem.SwitchExpressionsYieldIncompatibleResultExpressionTypes,
@@ -15695,8 +15709,6 @@ public void switchExpressionIncompatibleResultExpressions(SwitchExpression expre
 		expression.sourceEnd);
 }
 public void switchExpressionEmptySwitchBlock(SwitchExpression expression) {
-	if (!this.options.enablePreviewFeatures)
-		return;
 	this.handle(
 		IProblem.SwitchExpressionsYieldEmptySwitchBlock,
 		NoArgument,
@@ -15705,8 +15717,6 @@ public void switchExpressionEmptySwitchBlock(SwitchExpression expression) {
 		expression.sourceEnd);
 }
 public void switchExpressionNoResultExpressions(SwitchExpression expression) {
-	if (!this.options.enablePreviewFeatures)
-		return;
 	this.handle(
 		IProblem.SwitchExpressionsYieldNoResultExpression,
 		NoArgument,
@@ -15715,8 +15725,6 @@ public void switchExpressionNoResultExpressions(SwitchExpression expression) {
 		expression.sourceEnd);
 }
 public void switchExpressionSwitchLabeledBlockCompletesNormally(Block block) {
-	if (!this.options.enablePreviewFeatures)
-		return;
 	this.handle(
 		IProblem.SwitchExpressionaYieldSwitchLabeledBlockCompletesNormally,
 		NoArgument,
@@ -15725,8 +15733,6 @@ public void switchExpressionSwitchLabeledBlockCompletesNormally(Block block) {
 		block.sourceEnd);
 }
 public void switchExpressionLastStatementCompletesNormally(Statement stmt) {
-	if (!this.options.enablePreviewFeatures)
-		return;
 	this.handle(
 		IProblem.SwitchExpressionaYieldSwitchLabeledBlockCompletesNormally,
 		NoArgument,
@@ -15735,8 +15741,6 @@ public void switchExpressionLastStatementCompletesNormally(Statement stmt) {
 		stmt.sourceEnd);
 }
 public void switchExpressionIllegalLastStatement(Statement stmt) {
-	if (!this.options.enablePreviewFeatures)
-		return;
 	this.handle(
 		IProblem.SwitchExpressionsYieldIllegalLastStatement,
 		NoArgument,
@@ -15745,8 +15749,6 @@ public void switchExpressionIllegalLastStatement(Statement stmt) {
 		stmt.sourceEnd);
 }
 public void switchExpressionTrailingSwitchLabels(Statement stmt) {
-	if (!this.options.enablePreviewFeatures)
-		return;
 	this.handle(
 		IProblem.SwitchExpressionsYieldTrailingSwitchLabels,
 		NoArgument,
@@ -15755,8 +15757,6 @@ public void switchExpressionTrailingSwitchLabels(Statement stmt) {
 		stmt.sourceEnd);
 }
 public void switchExpressionMixedCase(ASTNode statement) {
-	if (!this.options.enablePreviewFeatures)
-		return;
 	this.handle(
 		IProblem.SwitchPreviewMixedCase,
 		NoArgument,
@@ -15765,8 +15765,6 @@ public void switchExpressionMixedCase(ASTNode statement) {
 		statement.sourceEnd);
 }
 public void switchExpressionBreakNotAllowed(ASTNode statement) {
-	if (!this.options.enablePreviewFeatures)
-		return;
 	this.handle(
 		IProblem.SwitchExpressionsYieldBreakNotAllowed,
 		NoArgument,
@@ -15783,8 +15781,6 @@ public void switchExpressionsYieldUnqualifiedMethodWarning(ASTNode statement) {
 		statement.sourceEnd);
 }
 public void switchExpressionsYieldUnqualifiedMethodError(ASTNode statement) {
-	if (!this.options.enablePreviewFeatures)
-		return;
 	this.handle(
 		IProblem.SwitchExpressionsYieldUnqualifiedMethodError,
 		NoArgument,
@@ -15793,8 +15789,6 @@ public void switchExpressionsYieldUnqualifiedMethodError(ASTNode statement) {
 		statement.sourceEnd);
 }
 public void switchExpressionsYieldOutsideSwitchExpression(ASTNode statement) {
-	if (!this.options.enablePreviewFeatures)
-		return;
 	this.handle(
 		IProblem.SwitchExpressionsYieldOutsideSwitchExpression,
 		NoArgument,
@@ -15803,8 +15797,6 @@ public void switchExpressionsYieldOutsideSwitchExpression(ASTNode statement) {
 		statement.sourceEnd);
 }
 public void switchExpressionsYieldRestrictedGeneralWarning(ASTNode statement) {
-	if (!this.options.enablePreviewFeatures)
-		return;
 	this.handle(
 		IProblem.SwitchExpressionsYieldRestrictedGeneralWarning,
 		NoArgument,
@@ -15813,8 +15805,6 @@ public void switchExpressionsYieldRestrictedGeneralWarning(ASTNode statement) {
 		statement.sourceEnd);
 }
 public void switchExpressionsYieldIllegalStatement(ASTNode statement) {
-	if (!this.options.enablePreviewFeatures)
-		return;
 	this.handle(
 		IProblem.SwitchExpressionsYieldIllegalStatement,
 		NoArgument,
@@ -15831,13 +15821,324 @@ public void switchExpressionsYieldTypeDeclarationWarning(ASTNode statement) {
 		statement.sourceEnd);
 }
 public void switchExpressionsYieldTypeDeclarationError(ASTNode statement) {
-	if (!this.options.enablePreviewFeatures)
-		return;
 	this.handle(
 		IProblem.SwitchExpressionsYieldTypeDeclarationError,
 		NoArgument,
 		NoArgument,
 		statement.sourceStart,
 		statement.sourceEnd);
+}
+public void multiConstantCaseLabelsNotSupported(ASTNode statement) {
+	this.handle(
+		IProblem.MultiConstantCaseLabelsNotSupported,
+		NoArgument,
+		NoArgument,
+		statement.sourceStart,
+		statement.sourceEnd);
+}
+public void arrowInCaseStatementsNotSupported(ASTNode statement) {
+	this.handle(
+		IProblem.ArrowInCaseStatementsNotSupported,
+		NoArgument,
+		NoArgument,
+		statement.sourceStart,
+		statement.sourceEnd);
+}
+public void switchExpressionsNotSupported(ASTNode statement) {
+	this.handle(
+		IProblem.SwitchExpressionsNotSupported,
+		NoArgument,
+		NoArgument,
+		statement.sourceStart,
+		statement.sourceEnd);
+}
+public void switchExpressionsBreakOutOfSwitchExpression(ASTNode statement) {
+	this.handle(
+		IProblem.SwitchExpressionsBreakOutOfSwitchExpression,
+		NoArgument,
+		NoArgument,
+		statement.sourceStart,
+		statement.sourceEnd);
+}
+public void switchExpressionsContinueOutOfSwitchExpression(ASTNode statement) {
+	this.handle(
+		IProblem.SwitchExpressionsContinueOutOfSwitchExpression,
+		NoArgument,
+		NoArgument,
+		statement.sourceStart,
+		statement.sourceEnd);
+}
+public void illegalModifierForInnerRecord(SourceTypeBinding type) {
+	if (!this.options.enablePreviewFeatures)
+		return;
+	String[] arguments = new String[] {new String(type.sourceName())};
+	this.handle(
+		IProblem.RecordIllegalModifierForInnerRecord,
+		arguments,
+		arguments,
+		type.sourceStart(),
+		type.sourceEnd());
+}
+public void illegalModifierForRecord(SourceTypeBinding type) {
+	if (!this.options.enablePreviewFeatures)
+		return;
+	String[] arguments = new String[] {new String(type.sourceName())};
+	this.handle(
+		IProblem.RecordIllegalModifierForRecord,
+		arguments,
+		arguments,
+		type.sourceStart(),
+		type.sourceEnd());
+}
+public void recordNonStaticFieldDeclarationInRecord(FieldDeclaration field) {
+	if (!this.options.enablePreviewFeatures)
+		return;
+	this.handle(
+		IProblem.RecordNonStaticFieldDeclarationInRecord,
+		new String[] { new String(field.name) },
+		new String[] { new String(field.name) },
+		field.sourceStart,
+		field.sourceEnd);
+}
+public void recordAccessorMethodHasThrowsClause(ASTNode methodDeclaration) {
+	if (!this.options.enablePreviewFeatures)
+		return;
+	this.handle(
+		IProblem.RecordAccessorMethodHasThrowsClause,
+		NoArgument,
+		NoArgument,
+		methodDeclaration.sourceStart,
+		methodDeclaration.sourceEnd);
+}
+public void recordCanonicalConstructorNotPublic(AbstractMethodDeclaration methodDecl) {
+	if (!this.options.enablePreviewFeatures)
+		return;
+	this.handle(
+		IProblem.RecordCanonicalConstructorShouldBePublic,
+		new String[] {
+				new String(methodDecl.selector)
+			},
+			new String[] {
+				new String(methodDecl.selector)
+			},
+		methodDecl.sourceStart,
+		methodDecl.sourceEnd);
+}
+public void recordCompactConstructorHasReturnStatement(ReturnStatement stmt) {
+	if (!this.options.enablePreviewFeatures)
+		return;
+	this.handle(
+		IProblem.RecordCompactConstructorHasReturnStatement,
+		NoArgument,
+		NoArgument,
+		stmt.sourceStart,
+		stmt.sourceEnd);
+}
+public void recordIllegalComponentNameInRecord(Argument arg, RecordDeclaration rd) {
+	if (!this.options.enablePreviewFeatures)
+		return;
+	this.handle(
+		IProblem.RecordIllegalComponentNameInRecord,
+		new String[] {
+				new String(arg.name), new String(rd.name)
+			},
+			new String[] {
+					new String(arg.name), new String(rd.name)
+			},
+		arg.sourceStart,
+		arg.sourceEnd);
+}
+public void recordDuplicateComponent(Argument arg) {
+	if (!this.options.enablePreviewFeatures)
+		return;
+	this.handle(
+		IProblem.RecordDuplicateComponent,
+		new String[] { new String(arg.name)},
+		new String[] { new String(arg.name)},
+		arg.sourceStart,
+		arg.sourceEnd);
+}
+public void recordIllegalNativeModifierInRecord(AbstractMethodDeclaration method) {
+	if (!this.options.enablePreviewFeatures)
+		return;
+	this.handle(
+		IProblem.RecordIllegalNativeModifierInRecord,
+		new String[] { new String(method.selector)},
+		new String[] { new String(method.selector)},
+		method.sourceStart,
+		method.sourceEnd);
+}
+public void recordInstanceInitializerBlockInRecord(Initializer initializer) {
+	if (!this.options.enablePreviewFeatures)
+		return;
+	this.handle(
+		IProblem.RecordInstanceInitializerBlockInRecord,
+		NoArgument,
+		NoArgument,
+		initializer.sourceStart,
+		initializer.sourceEnd);
+}
+public void recordIsAReservedTypeName(ASTNode decl) {
+	if (!this.options.enablePreviewFeatures)
+		return;
+	this.handle(
+		IProblem.RecordIsAReservedTypeName,
+		NoArgument,
+		NoArgument,
+		decl.sourceStart,
+		decl.sourceEnd);
+}
+public void recordIllegalAccessorReturnType(ASTNode returnType, TypeBinding type) {
+	if (!this.options.enablePreviewFeatures)
+		return;
+	this.handle(
+		IProblem.RecordIllegalAccessorReturnType,
+		new String[] {new String(type.readableName())},
+		new String[] {new String(type.shortReadableName())},
+		returnType.sourceStart,
+		returnType.sourceEnd);
+}
+public void recordAccessorMethodShouldNotBeGeneric(ASTNode methodDecl) {
+	if (!this.options.enablePreviewFeatures)
+		return;
+	this.handle(
+		IProblem.RecordAccessorMethodShouldNotBeGeneric,
+		NoArgument,
+		NoArgument,
+		methodDecl.sourceStart,
+		methodDecl.sourceEnd);
+}
+public void recordAccessorMethodShouldBePublic(ASTNode methodDecl) {
+	if (!this.options.enablePreviewFeatures)
+		return;
+	this.handle(
+		IProblem.RecordAccessorMethodShouldBePublic,
+		NoArgument,
+		NoArgument,
+		methodDecl.sourceStart,
+		methodDecl.sourceEnd);
+}
+public void recordCanonicalConstructorShouldNotBeGeneric(AbstractMethodDeclaration methodDecl) {
+	if (!this.options.enablePreviewFeatures)
+		return;
+	this.handle(
+		IProblem.RecordCanonicalConstructorShouldNotBeGeneric,
+		new String[] { new String(methodDecl.selector)},
+		new String[] { new String(methodDecl.selector)},
+		methodDecl.sourceStart,
+		methodDecl.sourceEnd);
+}
+public void recordCanonicalConstructorShouldBePublic(MethodDeclaration methodDecl) {
+	if (!this.options.enablePreviewFeatures)
+		return;
+	this.handle(
+		IProblem.RecordCanonicalConstructorShouldBePublic,
+		new String[] { new String(methodDecl.selector)},
+		new String[] { new String(methodDecl.selector)},
+		methodDecl.sourceStart,
+		methodDecl.sourceEnd);
+}
+public void recordCanonicalConstructorHasThrowsClause(AbstractMethodDeclaration methodDecl) {
+	if (!this.options.enablePreviewFeatures)
+		return;
+	this.handle(
+		IProblem.RecordCanonicalConstructorHasThrowsClause,
+		new String[] { new String(methodDecl.selector)},
+		new String[] { new String(methodDecl.selector)},
+		methodDecl.sourceStart,
+		methodDecl.sourceEnd);
+}
+public void recordCanonicalConstructorHasReturnStatement(ASTNode methodDecl) {
+	if (!this.options.enablePreviewFeatures)
+		return;
+	this.handle(
+		IProblem.RecordCanonicalConstructorHasReturnStatement,
+		NoArgument,
+		NoArgument,
+		methodDecl.sourceStart,
+		methodDecl.sourceEnd);
+}
+public void recordCanonicalConstructorHasExplicitConstructorCall(ASTNode methodDecl) {
+	if (!this.options.enablePreviewFeatures)
+		return;
+	this.handle(
+		IProblem.RecordCanonicalConstructorHasExplicitConstructorCall,
+		NoArgument,
+		NoArgument,
+		methodDecl.sourceStart,
+		methodDecl.sourceEnd);
+}
+public void recordCompactConstructorHasExplicitConstructorCall(ASTNode methodDecl) {
+	if (!this.options.enablePreviewFeatures)
+		return;
+	this.handle(
+		IProblem.RecordCompactConstructorHasExplicitConstructorCall,
+		NoArgument,
+		NoArgument,
+		methodDecl.sourceStart,
+		methodDecl.sourceEnd);
+}
+public void recordNestedRecordInherentlyStatic(SourceTypeBinding type) {
+	if (!this.options.enablePreviewFeatures)
+		return;
+	this.handle(
+		IProblem.RecordNestedRecordInherentlyStatic,
+		NoArgument,
+		NoArgument,
+		type.sourceStart(),
+		type.sourceEnd());
+}
+public void recordAccessorMethodShouldNotBeStatic(ASTNode methodDecl) {
+	if (!this.options.enablePreviewFeatures)
+		return;
+	this.handle(
+		IProblem.RecordAccessorMethodShouldNotBeStatic,
+		NoArgument,
+		NoArgument,
+		methodDecl.sourceStart,
+		methodDecl.sourceEnd);
+}
+public void recordCannotExtendRecord(SourceTypeBinding type, TypeReference superclass, TypeBinding superTypeBinding) {
+	if (!this.options.enablePreviewFeatures)
+		return;
+	String name = new String(type.sourceName());
+	String superTypeFullName = new String(superTypeBinding.readableName());
+	String superTypeShortName = new String(superTypeBinding.shortReadableName());
+	if (superTypeShortName.equals(name)) superTypeShortName = superTypeFullName;
+	this.handle(
+		IProblem.RecordCannotExtendRecord,
+		new String[] {superTypeFullName, name},
+		new String[] {superTypeShortName, name},
+		superclass.sourceStart,
+		superclass.sourceEnd);
+}
+public void recordComponentCannotBeVoid(ASTNode recordDecl, Argument arg) {
+	if (!this.options.enablePreviewFeatures)
+		return;
+	String[] arguments = new String[] { new String(arg.name) };
+	this.handle(
+		IProblem.RecordComponentCannotBeVoid,
+		arguments,
+		arguments,
+		recordDecl.sourceStart,
+		recordDecl.sourceEnd);
+}
+public void recordIllegalVararg(Argument argType, RecordDeclaration recordDecl) {
+	String[] arguments = new String[] {CharOperation.toString(argType.type.getTypeName()), new String(recordDecl.name)};
+	this.handle(
+		IProblem.RecordIllegalVararg,
+		arguments,
+		arguments,
+		argType.sourceStart,
+		argType.sourceEnd);
+}
+public void recordStaticReferenceToOuterLocalVariable(LocalVariableBinding local, ASTNode node) {
+	String[] arguments = new String[] {new String(local.readableName())};
+	this.handle(
+		IProblem.RecordStaticReferenceToOuterLocalVariable,
+		arguments,
+		arguments,
+		node.sourceStart,
+		node.sourceEnd);
 }
 }

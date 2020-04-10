@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2005, 2018 IBM Corporation and others.
+ * Copyright (c) 2005, 2020 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -918,6 +918,11 @@ public class ParameterizedTypeBinding extends ReferenceBinding implements Substi
 		return false;
 	}
 
+	@Override
+	protected boolean hasMethodWithNumArgs(char[] selector, int numArgs) {
+		return this.type.hasMethodWithNumArgs(selector, numArgs);
+	}
+
 	/**
 	 * @see org.eclipse.jdt.internal.compiler.lookup.ReferenceBinding#implementsMethod(MethodBinding)
 	 */
@@ -1702,7 +1707,8 @@ public class ParameterizedTypeBinding extends ReferenceBinding implements Substi
 			if (isStatic() && isNestedType()) buffer.append("static "); //$NON-NLS-1$
 			if (isFinal()) buffer.append("final "); //$NON-NLS-1$
 
-			if (isEnum()) buffer.append("enum "); //$NON-NLS-1$
+			if (isRecord()) buffer.append("record "); //$NON-NLS-1$
+			else if (isEnum()) buffer.append("enum "); //$NON-NLS-1$
 			else if (isAnnotationType()) buffer.append("@interface "); //$NON-NLS-1$
 			else if (isClass()) buffer.append("class "); //$NON-NLS-1$
 			else buffer.append("interface "); //$NON-NLS-1$

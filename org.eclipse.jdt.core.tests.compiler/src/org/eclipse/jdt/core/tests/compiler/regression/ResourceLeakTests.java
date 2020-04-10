@@ -5564,7 +5564,7 @@ public void testBug541705b() {
 	runner.runConformTest();
 }
 public void testBug542707_001() {
-	if (this.complianceLevel < ClassFileConstants.JDK13) return; // uses switch expression
+	if (!checkPreviewAllowed()) return; // uses switch expression
 	Map options = getCompilerOptions();
 	options.put(JavaCore.COMPILER_PB_UNCLOSED_CLOSEABLE, CompilerOptions.ERROR);
 	options.put(JavaCore.COMPILER_PB_POTENTIALLY_UNCLOSED_CLOSEABLE, CompilerOptions.ERROR);
@@ -5616,7 +5616,7 @@ public void testBug542707_001() {
 		options);
 }
 public void testBug542707_002() {
-	if (this.complianceLevel < ClassFileConstants.JDK13) return; // uses switch expression
+	if (this.complianceLevel < ClassFileConstants.JDK14) return; // uses switch expression
 	Map options = getCompilerOptions();
 	options.put(JavaCore.COMPILER_PB_UNCLOSED_CLOSEABLE, CompilerOptions.ERROR);
 	options.put(JavaCore.COMPILER_PB_POTENTIALLY_UNCLOSED_CLOSEABLE, CompilerOptions.ERROR);
@@ -5674,7 +5674,7 @@ public void testBug542707_002() {
 		options);
 }
 public void testBug542707_003() {
-	if (this.complianceLevel < ClassFileConstants.JDK13) return; // uses switch expression
+	if (!checkPreviewAllowed()) return; // uses switch expression
 	Map options = getCompilerOptions();
 	options.put(JavaCore.COMPILER_PB_UNCLOSED_CLOSEABLE, CompilerOptions.ERROR);
 	options.put(JavaCore.COMPILER_PB_POTENTIALLY_UNCLOSED_CLOSEABLE, CompilerOptions.ERROR);
@@ -6452,6 +6452,99 @@ public void testBug559119() {
 		"	                                                     ^^^^^^^^^^^^^^\n" + 
 		"Potential resource leak: \'<unassigned Closeable value>\' may not be closed\n" + 
 		"----------\n",
+		options);
+}
+public void testBug560610() {
+	if (this.complianceLevel < ClassFileConstants.JDK1_5) return; // uses enum
+	Map options = getCompilerOptions(); 
+	options.put(CompilerOptions.OPTION_ReportUnclosedCloseable, CompilerOptions.ERROR);
+	options.put(CompilerOptions.OPTION_ReportPotentiallyUnclosedCloseable, CompilerOptions.WARNING);
+	runConformTest(
+		new String[] {
+			"A.java",
+			"import java.util.EnumSet;\n" +
+			"public abstract class A<T> extends B<T> implements C<D> {\n" +
+			"	void m(EnumSet<EN> en) {}\n" + // unResolvedMethods() when a is seen as a PTB causes bogus resolving of this method
+			"}\n",
+			"B.java",
+			"public abstract class B<U> implements AutoCloseable {}\n", // this causes A to be seen as a resource requiring closer inspection
+			"C.java",
+			"public interface C<T> {}\n", // just so we can read D as a type argument during hierarchy connecting for A
+			"D.java",
+			"public abstract class D extends A<String> {}\n", // extends A causes searching A for a close method, A seen as a PTB
+			"EN.java",
+			"public enum EN {\n" + // when we find this via ahead-of-time resolveTypesFor("m()") we don't yet have a superclass
+			"	One, Two;\n" + 
+			"}\n"
+		},
+		"",
+		options);
+}
+public void testBug560671() {
+	if (this.complianceLevel < ClassFileConstants.JDK1_7) return; // uses t-w-r
+	Map options = getCompilerOptions(); 
+	options.put(CompilerOptions.OPTION_ReportUnclosedCloseable, CompilerOptions.ERROR);
+	options.put(CompilerOptions.OPTION_ReportPotentiallyUnclosedCloseable, CompilerOptions.WARNING);
+	runConformTest(
+		new String[] {
+			"X.java",
+			"import java.util.Scanner;\n" +
+			"public class X {\n" +
+			"	void m(String source) {\n" + 
+			"		try (Scanner s = new Scanner(source).useDelimiter(\"foobar\")) {\n" + 
+			"			System.out.println(s.next());\n" + 
+			"		}\n" + 
+			"	}\n" +
+			"}\n"
+		},
+		options);
+}
+public void testBug560671b() {
+	Map options = getCompilerOptions(); 
+	options.put(CompilerOptions.OPTION_ReportUnclosedCloseable, CompilerOptions.ERROR);
+	options.put(CompilerOptions.OPTION_ReportPotentiallyUnclosedCloseable, CompilerOptions.WARNING);
+	runConformTest(
+		new String[] {
+			"X.java",
+			"import java.util.Scanner;\n" +
+			"public class X {\n" +
+			"	void m(String source) throws java.io.IOException {\n" +
+			"		Scanner s = null;" + 
+			"		try {\n" +
+			"			s = new Scanner(source).useDelimiter(\"foobar\");\n" + 
+			"			System.out.println(s.next());\n" + 
+			"		} finally {\n" +
+			"			if (s != null) s.close();\n" +
+			"		}\n" + 
+			"	}\n" +
+			"}\n"
+		},
+		options);
+}
+public void testBug561259() {
+	Map options = getCompilerOptions(); 
+	options.put(CompilerOptions.OPTION_ReportUnclosedCloseable, CompilerOptions.ERROR);
+	options.put(CompilerOptions.OPTION_ReportPotentiallyUnclosedCloseable, CompilerOptions.WARNING);
+	runConformTest(
+		new String[] {
+			"X.java",
+			"import java.io.*;\n" +
+			"public class X {\n" +
+			"	  protected String m(String charset) throws IOException\n" + 
+			"	  {\n" + 
+			"		InputStream contents = new FileInputStream(\"/tmp/f\");\n" + 
+			"	    BufferedReader reader = new BufferedReader(new InputStreamReader(contents, charset));\n" + 
+			"	    CharArrayWriter writer = new CharArrayWriter();\n" + 
+			"	    int c;\n" + 
+			"	    while ((c = reader.read()) != -1)\n" + 
+			"	    {\n" + 
+			"	      writer.write(c);\n" + 
+			"	    }\n" + 
+			"	    contents.close();\n" + 
+			"	    return writer.toString();\n" + 
+			"	  }\n" + 
+			"}\n"
+		},
 		options);
 }
 }

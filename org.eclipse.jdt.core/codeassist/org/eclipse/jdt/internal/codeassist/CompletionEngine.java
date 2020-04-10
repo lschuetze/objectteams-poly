@@ -1450,6 +1450,7 @@ public final class CompletionEngine
 		
 		if (this.options.checkDeprecation && (modifiers & ClassFileConstants.AccDeprecated) != 0) return;
 		if (this.assistNodeIsExtendedType && (modifiers & ClassFileConstants.AccFinal) != 0) return;
+		if (this.assistNodeIsExtendedType && (modifiers & ExtraCompilerModifiers.AccRecord) != 0) return;
 
 		if (this.options.checkVisibility) {
 			if((modifiers & ClassFileConstants.AccPublic) == 0) {
@@ -1704,13 +1705,22 @@ public final class CompletionEngine
 	}
 	
 	private char[] appendUnlessNextToken(char[] completionName, char[] suffix, int nextToken) {
-		this.parser.scanner.resetTo(this.endPosition, Integer.MAX_VALUE);
+		if (this.source == null)
+			return CharOperation.concat(completionName, suffix);
+
+		AssistParser assistParser = getParser();
+		Object parserState = assistParser.becomeSimpleParser();
+
+		assistParser.scanner.setSource(this.source);
+		assistParser.scanner.resetTo(this.endPosition, Integer.MAX_VALUE);
 		try {
-			if (this.parser.scanner.getNextToken() != nextToken) {
+			if (assistParser.scanner.getNextToken() != nextToken) {
 				return CharOperation.concat(completionName, suffix);
 			}
 		} catch (InvalidInputException e) {
 			// ignore
+		} finally {
+			assistParser.restoreAssistParser(parserState);
 		}
 		return completionName;
 	}
@@ -2119,7 +2129,8 @@ public final class CompletionEngine
 			this.actualCompletionPosition = completionPosition - 1;
 			this.offset = pos;
 			this.typeRoot = root;
-			
+			this.source = sourceUnit.getContents();
+
 			this.checkCancel();
 			
 			// for now until we can change the UI.
@@ -2331,7 +2342,6 @@ public final class CompletionEngine
 						this.lookupEnvironment.buildTypeBindings(parsedUnit, null /*no access restriction*/);
 
 						if ((this.unitScope = parsedUnit.scope) != null) {
-							this.source = sourceUnit.getContents();
 							this.lookupEnvironment.completeTypeBindings(parsedUnit, true);
 /*
 							parsedUnit.scope.faultInTypes();
@@ -11956,6 +11966,7 @@ public final class CompletionEngine
 				typesFound.add(sourceType);
 
 				if (this.assistNodeIsExtendedType && sourceType.isFinal()) continue next;
+				if (this.assistNodeIsExtendedType && sourceType.isRecord()) continue next;
 				if (this.assistNodeIsInterfaceExcludingAnnotation && sourceType.isAnnotationType()) continue next;
 				if(this.assistNodeIsClass) {
 					if(!sourceType.isClass()) continue next;

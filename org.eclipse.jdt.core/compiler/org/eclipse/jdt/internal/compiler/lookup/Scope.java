@@ -3128,6 +3128,11 @@ public abstract class Scope {
 		return unitScope.environment.getResolvedJavaBaseType(TypeConstants.JAVA_LANG_ENUM, this);
 	}
 
+	public final ReferenceBinding getJavaLangRuntimeObjectMethods() {
+		CompilationUnitScope unitScope = compilationUnitScope();
+		unitScope.recordQualifiedReference(TypeConstants.JAVA_LANG_RUNTIME_OBJECTMETHODS);
+		return unitScope.environment.getResolvedJavaBaseType(TypeConstants.JAVA_LANG_RUNTIME_OBJECTMETHODS, this);
+	}
 	public final ReferenceBinding getJavaLangInvokeLambdaMetafactory() {
 		CompilationUnitScope unitScope = compilationUnitScope();
 		unitScope.recordQualifiedReference(TypeConstants.JAVA_LANG_INVOKE_LAMBDAMETAFACTORY);
@@ -3156,6 +3161,12 @@ public abstract class Scope {
 		CompilationUnitScope unitScope = compilationUnitScope();
 		unitScope.recordQualifiedReference(TypeConstants.JAVA_LANG_OBJECT);
 		return unitScope.environment.getResolvedJavaBaseType(TypeConstants.JAVA_LANG_OBJECT, this);
+	}
+
+	public final ReferenceBinding getJavaLangRecord() {
+		CompilationUnitScope unitScope = compilationUnitScope();
+		unitScope.recordQualifiedReference(TypeConstants.JAVA_LANG_RECORD);
+		return unitScope.environment.getResolvedJavaBaseType(TypeConstants.JAVA_LANG_RECORD, this);
 	}
 
 	public final ReferenceBinding getJavaLangString() {

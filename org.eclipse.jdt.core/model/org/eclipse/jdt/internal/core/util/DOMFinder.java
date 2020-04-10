@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2005, 2017 IBM Corporation and others.
+ * Copyright (c) 2005, 2020 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -46,6 +46,7 @@ import org.eclipse.jdt.core.dom.NormalAnnotation;
 import org.eclipse.jdt.core.dom.PackageDeclaration;
 import org.eclipse.jdt.core.dom.ParameterizedType;
 import org.eclipse.jdt.core.dom.SimpleName;
+import org.eclipse.jdt.core.dom.RecordDeclaration;
 import org.eclipse.jdt.core.dom.SingleMemberAnnotation;
 import org.eclipse.jdt.core.dom.SingleVariableDeclaration;
 import org.eclipse.jdt.core.dom.RoleTypeDeclaration;
@@ -202,6 +203,13 @@ public class DOMFinder extends ASTVisitor {
 
 	@Override
 	public boolean visit(TypeDeclaration node) {
+		if (found(node, node.getName()) && this.resolveBinding)
+			this.foundBinding = node.resolveBinding();
+		return true;
+	}
+
+	@Override
+	public boolean visit(RecordDeclaration node) {
 		if (found(node, node.getName()) && this.resolveBinding)
 			this.foundBinding = node.resolveBinding();
 		return true;

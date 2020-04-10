@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2019 IBM Corporation and others.
+ * Copyright (c) 2000, 2020 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -979,9 +979,18 @@ public abstract class ASTNode {
 	 * @since 3.20
 	 */
 	public static final int TEXT_BLOCK = 102;
+	
+	/**
+	 * Node type constant indicating a node of type
+	 * <code>RecordDeclaration</code>.
+	 * @see RecordDeclaration
+	 * @since 3.22
+	 */
+	public static final int RECORD_DECLARATION = 103;
+	
 
 //{ObjectTeams: required OT specific node type constants added
-	private static final int LAST_JDT = 102;
+	private static final int LAST_JDT = 103;
 	/**
 	 * Node type constant indicating a node of type
 	 * <code>MethodSpec</code>.
@@ -1224,6 +1233,8 @@ public abstract class ASTNode {
 				return QualifiedName.class;
 			case QUALIFIED_TYPE :
 				return QualifiedType.class;
+			case RECORD_DECLARATION :
+				return RecordDeclaration.class;
 			case REQUIRES_DIRECTIVE :
 				return RequiresDirective.class;
 			case RETURN_STATEMENT :
@@ -2271,6 +2282,23 @@ public abstract class ASTNode {
 	
 	/**
      * Checks that this AST operation is not used when
+     * building JLS2, JLS3, JLS4, JLS8, JLS9, JLS10, JLS11, JLS12 or JSL13 level ASTs.
+     * <p>
+     * Use this method to prevent access to new properties that have been added in JLS14
+     * </p>
+     *
+	 * @exception UnsupportedOperationException if this operation is used below JLS14
+	 * @since 3.22
+	 */
+	final void unsupportedBelow14() {
+		if (this.ast.apiLevel < AST.JLS14_INTERNAL) {
+			throw new UnsupportedOperationException("Operation only supported in ASTs with level JLS14 and above"); //$NON-NLS-1$
+		}
+	}
+	
+	
+	/**
+     * Checks that this AST operation is not used when
      * building ASTs without previewEnabled flag.
      * <p>
      * Use this method to prevent access to new properties that have been added with preview feature
@@ -2349,6 +2377,22 @@ public abstract class ASTNode {
 	final void supportedOnlyIn13() {
 		if (this.ast.apiLevel != AST.JLS13_INTERNAL) {
 			throw new UnsupportedOperationException("Operation only supported in JLS13 AST"); //$NON-NLS-1$
+		}
+	}
+	
+	/**
+ 	 * Checks that this AST operation is only used when
+     * building JLS13 level ASTs.
+     * <p>
+     * Use this method to prevent access to new properties available only in JLS14.
+     * </p>
+     *
+	 * @exception UnsupportedOperationException if this operation is not used in JLS14
+	 * @since 3.20
+	 */
+	final void supportedOnlyIn14() {
+		if (this.ast.apiLevel != AST.JLS14_INTERNAL) {
+			throw new UnsupportedOperationException("Operation only supported in JLS14 AST"); //$NON-NLS-1$
 		}
 	}
 	/**

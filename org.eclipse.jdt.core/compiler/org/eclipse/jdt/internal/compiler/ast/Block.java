@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2014 IBM Corporation and others.
+ * Copyright (c) 2000, 2020 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -96,8 +96,8 @@ public void generateCode(BlockScope currentScope, CodeStream codeStream) {
 	}
 	int pc = codeStream.position;
 	if (this.statements != null) {
-		for (int i = 0, max = this.statements.length; i < max; i++) {
-			this.statements[i].generateCode(this.scope, codeStream);
+		for (Statement stmt : this.statements) {
+			stmt.generateCode(this.scope, codeStream);
 		}
 	} // for local variable debug attributes
 	if (this.scope != currentScope) { // was really associated with its own scope
@@ -175,7 +175,8 @@ public void resolveUsing(BlockScope givenScope) {
 	  try {
 //SH}
 		for (int i = 0, length = this.statements.length; i < length; i++) {
-			this.statements[i].resolve(this.scope);
+			final Statement stmt = this.statements[i];
+			stmt.resolve(this.scope);
 //{ObjectTeams: resolving statements might have detected some ast nodes that need adjustment
             if (   Config.requireTypeAdjustment()
                	&& !this.scope.problemReporter().referenceContext.hasErrors())

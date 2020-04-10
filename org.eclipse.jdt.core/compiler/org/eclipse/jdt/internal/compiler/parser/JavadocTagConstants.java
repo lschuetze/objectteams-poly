@@ -218,7 +218,9 @@ public interface JavadocTagConstants {
 		{},
 		//since 12
 		{},
-		//since 12
+		//since 13
+		{},
+		//since 14
 		{}
 	};
 	public static final char[][][] INLINE_TAGS = {
@@ -248,7 +250,9 @@ public interface JavadocTagConstants {
 		{},
 		//since 12
 		{TAG_SYSTEM_PROPERTY},
-		//since 12
+		//since 13
+		{},
+		//since 14
 		{}
 	};
 	public final static int INLINE_TAGS_LENGTH = INLINE_TAGS.length;
