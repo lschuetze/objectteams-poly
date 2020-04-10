@@ -56,7 +56,6 @@
 package org.eclipse.jdt.internal.compiler.lookup;
 
 import java.util.ArrayList;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;

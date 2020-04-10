@@ -3163,7 +3163,12 @@ protected void runNegativeTest(boolean skipJavac, JavacTestOptions javacTestOpti
 			JavacTestOptions.DEFAULT,
 			Charset.defaultCharset());
 	}
+//{ObjectTeams: make accessible to subclasses:
+/* orig:
 	private void runTest(
+  :giro */
+	protected void runTest(
+// SH}
 			// test directory preparation
 			boolean shouldFlushOutputDirectory,
 			String[] testFiles,

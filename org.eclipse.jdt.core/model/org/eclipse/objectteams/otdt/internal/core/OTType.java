@@ -545,6 +545,11 @@ public class OTType extends OTJavaElement implements IOTType
         return getIType().isEnum();
     }
 
+	@Override
+	public boolean isRecord() throws JavaModelException {
+		return getIType().isRecord();
+	}
+
     @Override
 	public boolean isInterface() throws JavaModelException
     {

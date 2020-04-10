@@ -468,6 +468,12 @@ public class PhantomType implements IPhantomType
         return this._realType.isEnum();
     }
 
+    @Override
+	public boolean isRecord() throws JavaModelException
+	{
+    	return this._realType.isRecord();
+	}
+
     /* (non-Javadoc)
      * @see org.eclipse.jdt.core.IType#isInterface()
      */

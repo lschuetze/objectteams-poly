@@ -739,7 +739,12 @@ public class BinaryIndexer extends AbstractIndexer implements SuffixConstants {
 					break;
 				case TypeDeclaration.RECORD_DECL :
 					superclass = replace('/', '.', reader.getSuperclassName());
+//{ObjectTeams: baseclass added:
+/* orig:
 					addClassDeclaration(modifiers, packageName, name, enclosingTypeNames, superclass, superinterfaces, typeParameterSignatures, false);
+  :giro */
+					addClassDeclaration(modifiers, packageName, name, enclosingTypeNames, superclass, superinterfaces, null, typeParameterSignatures, false);
+// SH}
 					break;
 			}			
 
