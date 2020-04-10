@@ -30,6 +30,8 @@ import junit.framework.Test;
 @SuppressWarnings("unchecked")
 public class Java5 extends AbstractOTJLDTest {
 	
+	private String VALUE_IS;
+
 	public Java5(String name) {
 		super(name);
 	}
@@ -49,7 +51,14 @@ public class Java5 extends AbstractOTJLDTest {
 	public static Class testClass() {
 		return Java5.class;
 	}
-    // a base field has a generic type and is bound via callout
+
+	@Override
+	protected void setUp() throws Exception {
+		super.setUp();
+		VALUE_IS = isJRE14Plus ? "" : "value=";
+	}
+
+	// a base field has a generic type and is bound via callout
     // A.1.1-otjld-generic-feature-in-base-1
     public void testA11_genericFeatureInBase1() {
        
@@ -4184,7 +4193,7 @@ public class Java5 extends AbstractOTJLDTest {
             },
 		    (this.weavingScheme == WeavingScheme.OTRE
 		    ? ""
-		    : (isJRE9Plus ? "@IA117cfa5_2(left=\"one\", right=@IA117cfa5_1(value=\"two\"))": "@IA117cfa5_2(left=one, right=@IA117cfa5_1(value=two))")));
+		    : (isJRE9Plus ? "@IA117cfa5_2(left=\"one\", right=@IA117cfa5_1("+VALUE_IS+"\"two\"))": "@IA117cfa5_2(left=one, right=@IA117cfa5_1("+VALUE_IS+"two))")));
     }
 
     // a role method has a custom annotation with enum values, annotation was in conflict with implicit activation annotation
@@ -4349,7 +4358,7 @@ public class Java5 extends AbstractOTJLDTest {
             },
 		    (this.weavingScheme == WeavingScheme.OTRE && IS_JRE_8
 		    ? ""
-		    : isJRE9Plus ? "@IA117cfa7(value={\"one\", \"two\"})" : "@IA117cfa7(value=[one, two])"));
+		    : isJRE9Plus ? "@IA117cfa7("+VALUE_IS+"{\"one\", \"two\"})" : "@IA117cfa7("+VALUE_IS+"[one, two])"));
     }
 
     // a role field has a custom annotation (scalar arg), so should its tsub  -  testing at runtime via reflection
@@ -4404,7 +4413,7 @@ public class Java5 extends AbstractOTJLDTest {
             },
 		    (this.weavingScheme == WeavingScheme.OTRE && IS_JRE_8
 		    ? ""
-    		: isJRE9Plus ? "@IA117cfa8(value=\"val\")" : "@IA117cfa8(value=val)"));
+    		: isJRE9Plus ? "@IA117cfa8("+VALUE_IS+"\"val\")" : "@IA117cfa8("+VALUE_IS+"val)"));
     }
 
     // a role field has a custom annotation (enum typed arg), so should its tsub  -  testing at runtime via reflection
@@ -4515,7 +4524,7 @@ public class Java5 extends AbstractOTJLDTest {
             },
 		    (this.weavingScheme == WeavingScheme.OTRE && IS_JRE_8
 		    ? ""
-    		: isJRE9Plus ? "@IA117cfa9(value={1, 2})" : "@IA117cfa9(value=[1, 2])"));
+    		: isJRE9Plus ? "@IA117cfa9("+VALUE_IS+"{1, 2})" : "@IA117cfa9("+VALUE_IS+"[1, 2])"));
     }
 
     // a role class extends a generic class providing type parameters

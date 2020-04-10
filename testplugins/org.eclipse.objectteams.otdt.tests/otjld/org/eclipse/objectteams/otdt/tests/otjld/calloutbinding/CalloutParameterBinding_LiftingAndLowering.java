@@ -317,6 +317,7 @@ public class CalloutParameterBinding_LiftingAndLowering extends AbstractOTJLDTes
     // a callout binding has a syntax error (hang reported by Philippe Gerard)
     // 3.2.1-otjld-callout-invocation-with-mapped-parameter-6
     public void test321_calloutInvocationWithMappedParameter6() {
+    	boolean isJ14plus = this.complianceLevel >= ClassFileConstants.JDK14;
         runNegativeTest(
             new String[] {
 		"Team321ciwmp6.java",
@@ -442,13 +443,18 @@ public class CalloutParameterBinding_LiftingAndLowering extends AbstractOTJLDTes
         		"7. ERROR in Team321ciwmp6.java (at line 11)\n" + 
         		"	int doCalloutGetSomeFieldDoubled() -> get int someField\n" + 
         		"	^^^\n" + 
-        		"Syntax error on token \"int\", @ expected\n" + 
+	    		(isJ14plus
+	    		? "Syntax error on token \"int\", record expected\n"
+	    		: "Syntax error on token \"int\", @ expected\n") + 
         		"----------\n" + 
         		"8. ERROR in Team321ciwmp6.java (at line 11)\n" + 
         		"	int doCalloutGetSomeFieldDoubled() -> get int someField\n" + 
         		"                        with {\n" + 
-        		"	^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n" + 
-        		"Syntax error on tokens, ClassHeader expected instead\n" + 
+	    		(isJ14plus
+				? "	                                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n" +
+				  "Syntax error on tokens, delete these tokens\n"
+	    		: "	^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n" + 
+        		"Syntax error on tokens, ClassHeader expected instead\n") + 
         		"----------\n" + 
         		"9. ERROR in Team321ciwmp6.java (at line 12)\n" + 
         		"	with {\n" + 
@@ -475,12 +481,17 @@ public class CalloutParameterBinding_LiftingAndLowering extends AbstractOTJLDTes
         		"	result <- 2 * base.someField\n" + 
         		"	                  ^\n" + 
         		"Syntax error, insert \"EnumBody\" to complete ClassBodyDeclarations\n" + 
-        		"----------\n" + 
-        		"14. ERROR in Team321ciwmp6.java (at line 15)\n" + 
+        		"----------\n" +
+        		(isJ14plus
+				? "14. ERROR in Team321ciwmp6.java (at line 14)\n" + 
+				  "	};\n" + 
+				  "	^\n" + 
+				  "Syntax error on token \"}\", { expected\n"
+        		: "14. ERROR in Team321ciwmp6.java (at line 15)\n" + 
         		"	}\n" + 
         		"}\n" + 
         		"	^^^\n" + 
-        		"Syntax error on tokens, delete these tokens\n" + 
+        		"Syntax error on tokens, delete these tokens\n") + 
         		"----------\n"
     		));
     }

@@ -33,7 +33,6 @@ import org.objectweb.asm.Opcodes;
  * @since 1.2.3
  */
 public class ASMByteCodeAnalyzer {
-	private static final int ACC_TEAM = 0x8000;
 
 	boolean useExternalForm = false; // true: use '.', false: use '/'
 	
@@ -47,10 +46,6 @@ public class ASMByteCodeAnalyzer {
 			this.modifiers = classReader.getAccess();
 			this.superClassName = classReader.getSuperName();
 			this.superInterfaceNames = classReader.getInterfaces();
-		}
-
-		public boolean isTeam() {
-			return (modifiers & ACC_TEAM) != 0;
 		}
 
 		public boolean isInterface() {
