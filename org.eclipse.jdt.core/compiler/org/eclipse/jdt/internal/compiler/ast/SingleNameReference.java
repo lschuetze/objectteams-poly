@@ -248,7 +248,7 @@ public TypeBinding checkFieldAccess(BlockScope scope) {
 	if (fieldBinding.isStatic()) {
 		// check if accessing enum static field in initializer
 		ReferenceBinding declaringClass = fieldBinding.declaringClass;
-		if (declaringClass.isEnum() && !scope.isModuleScope()) {
+		if (declaringClass.isEnum() && scope.kind != Scope.MODULE_SCOPE) {
 			SourceTypeBinding sourceType = scope.enclosingSourceType();
 			if (this.constant == Constant.NotAConstant
 					&& !methodScope.isStatic
@@ -433,6 +433,9 @@ public void generateAssignment(BlockScope currentScope, CodeStream codeStream, A
 
 			// normal local assignment (since cannot store in outer local which are final locations)
 			codeStream.store(localBinding, valueRequired);
+			if ((this.bits & ASTNode.IsSecretYieldValueUsage) != 0) {
+				localBinding.recordInitializationStartPC(codeStream.position);
+			}
 			if ((this.bits & ASTNode.FirstAssignmentToLocal) != 0) { // for local variable debug attributes
 				localBinding.recordInitializationStartPC(codeStream.position);
 			}

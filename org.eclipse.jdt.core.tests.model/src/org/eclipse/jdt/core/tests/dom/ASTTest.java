@@ -1122,6 +1122,7 @@ public class ASTTest extends org.eclipse.jdt.core.tests.junit.extension.TestCase
 			throw new RuntimeException("get(" + value + ") not implemented"); //$NON-NLS-1$ //$NON-NLS-2$
 		}
 
+		@Override
 		public String toString() {
 			return "Property(" + this.propertyName + ", " + this.compulsory + ", " + this.nodeType + ")"; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
 		}
@@ -1587,6 +1588,7 @@ public class ASTTest extends org.eclipse.jdt.core.tests.junit.extension.TestCase
 		assertTrue(this.ast.modificationCount() == previousCount);
 
 		genericPropertyTest(x, new Property("Qualifier", true, Name.class) { //$NON-NLS-1$
+			@Override
 			public ASTNode sample(AST targetAst, boolean parented) {
 				QualifiedName result = targetAst.newQualifiedName(
 					targetAst.newSimpleName("a"), //$NON-NLS-1$
@@ -1596,23 +1598,28 @@ public class ASTTest extends org.eclipse.jdt.core.tests.junit.extension.TestCase
 				}
 				return result;
 			}
+			@Override
 			public ASTNode wrap() {
 				QualifiedName s1 = ASTTest.this.ast.newQualifiedName(x, ASTTest.this.ast.newSimpleName("z")); //$NON-NLS-1$
 				return s1;
 			}
+			@Override
 			public void unwrap() {
 				QualifiedName s1 = (QualifiedName) x.getParent();
 				s1.setQualifier(ASTTest.this.ast.newSimpleName("z")); //$NON-NLS-1$
 			}
+			@Override
 			public ASTNode get() {
 				return x.getQualifier();
 			}
+			@Override
 			public void set(ASTNode value) {
 				x.setQualifier((Name) value);
 			}
 		});
 
 		genericPropertyTest(x, new Property("Name", true, SimpleName.class) { //$NON-NLS-1$
+			@Override
 			public ASTNode sample(AST targetAst, boolean parented) {
 				SimpleName result = targetAst.newSimpleName("foo"); //$NON-NLS-1$
 				if (parented) {
@@ -1620,9 +1627,11 @@ public class ASTTest extends org.eclipse.jdt.core.tests.junit.extension.TestCase
 				}
 				return result;
 			}
+			@Override
 			public ASTNode get() {
 				return x.getName();
 			}
+			@Override
 			public void set(ASTNode value) {
 				x.setName((SimpleName) value);
 			}
@@ -2024,6 +2033,7 @@ public class ASTTest extends org.eclipse.jdt.core.tests.junit.extension.TestCase
 		assertTrue(this.ast.modificationCount() == previousCount);
 
 		genericPropertyTest(x, new Property("Name", true, Name.class) { //$NON-NLS-1$
+			@Override
 			public ASTNode sample(AST targetAst, boolean parented) {
 				SimpleName result = targetAst.newSimpleName("a"); //$NON-NLS-1$
 				if (parented) {
@@ -2031,9 +2041,11 @@ public class ASTTest extends org.eclipse.jdt.core.tests.junit.extension.TestCase
 				}
 				return result;
 			}
+			@Override
 			public ASTNode get() {
 				return x.getName();
 			}
+			@Override
 			public void set(ASTNode value) {
 				x.setName((Name) value);
 			}
@@ -2155,6 +2167,7 @@ public class ASTTest extends org.eclipse.jdt.core.tests.junit.extension.TestCase
 
 		if (this.ast.apiLevel() < getJLS8()) {
 			genericPropertyTest(x, new Property("ComponentType", true, Type.class) { //$NON-NLS-1$
+				@Override
 				public ASTNode sample(AST targetAst, boolean parented) {
 					SimpleType result = targetAst.newSimpleType(
 						targetAst.newSimpleName("a")); //$NON-NLS-1$
@@ -2163,17 +2176,21 @@ public class ASTTest extends org.eclipse.jdt.core.tests.junit.extension.TestCase
 					}
 					return result;
 				}
+				@Override
 				public ASTNode wrap() {
 					ArrayType result = ASTTest.this.ast.newArrayType(x);
 					return result;
 				}
+				@Override
 				public void unwrap() {
 					ArrayType a = (ArrayType) x.getParent();
 					setArrayComponentType(a, ASTTest.this.ast.newPrimitiveType(PrimitiveType.INT));
 				}
+				@Override
 				public ASTNode get() {
 					return getArrayComponentType(x);
 				}
+				@Override
 				public void set(ASTNode value) {
 					setArrayComponentType(x, (Type) value);
 				}
@@ -2187,6 +2204,7 @@ public class ASTTest extends org.eclipse.jdt.core.tests.junit.extension.TestCase
 			assertTrue(x3.getDimensions() == 7);
 		} else {
 			genericPropertyTest(x, new Property("ElementType", true, Type.class) { //$NON-NLS-1$
+				@Override
 				public ASTNode sample(AST targetAst, boolean parented) {
 					SimpleType result = targetAst.newSimpleType(
 						targetAst.newSimpleName("a")); //$NON-NLS-1$
@@ -2195,17 +2213,21 @@ public class ASTTest extends org.eclipse.jdt.core.tests.junit.extension.TestCase
 					}
 					return result;
 				}
+				@Override
 				public ASTNode wrap() {
 					ArrayType result = ASTTest.this.ast.newArrayType(x, 5);
 					return result;
 				}
+				@Override
 				public void unwrap() {
 					ArrayType a = (ArrayType) x.getParent();
 					a.setElementType(ASTTest.this.ast.newPrimitiveType(PrimitiveType.INT));
 				}
+				@Override
 				public ASTNode get() {
 					return x.getElementType();
 				}
+				@Override
 				public void set(ASTNode value) {
 					x.setElementType((Type) value);
 				}
@@ -2267,6 +2289,7 @@ public class ASTTest extends org.eclipse.jdt.core.tests.junit.extension.TestCase
 		assertTrue(this.ast.modificationCount() == previousCount);
 
 		genericPropertyTest(x, new Property("Type", true, Type.class) { //$NON-NLS-1$
+			@Override
 			public ASTNode sample(AST targetAst, boolean parented) {
 				SimpleType result =
 				targetAst.newSimpleType(
@@ -2276,23 +2299,28 @@ public class ASTTest extends org.eclipse.jdt.core.tests.junit.extension.TestCase
 				}
 				return result;
 			}
+			@Override
 			public ASTNode wrap() {
 				ParameterizedType s1 = ASTTest.this.ast.newParameterizedType(x); //$NON-NLS-1$
 				return s1;
 			}
+			@Override
 			public void unwrap() {
 				ParameterizedType s1 = (ParameterizedType) x.getParent();
 				s1.setType(ASTTest.this.ast.newSimpleType(ASTTest.this.ast.newSimpleName("z"))); //$NON-NLS-1$
 			}
+			@Override
 			public ASTNode get() {
 				return x.getType();
 			}
+			@Override
 			public void set(ASTNode value) {
 				x.setType((Type) value);
 			}
 		});
 		genericPropertyListTest(x, x.typeArguments(),
 		  new Property("Arguments", true, Type.class) { //$NON-NLS-1$
+			@Override
 			public ASTNode sample(AST targetAst, boolean parented) {
 				PrimitiveType result = targetAst.newPrimitiveType(PrimitiveType.INT);
 				if (parented) {
@@ -2300,12 +2328,14 @@ public class ASTTest extends org.eclipse.jdt.core.tests.junit.extension.TestCase
 				}
 				return result;
 			}
+			@Override
 			public ASTNode wrap() {
 				// return Type that embeds x
 				ParameterizedType s1 = ASTTest.this.ast.newParameterizedType(ASTTest.this.ast.newSimpleType(ASTTest.this.ast.newSimpleName("foo"))); //$NON-NLS-1$
 				s1.typeArguments().add(x);
 				return s1;
 			}
+			@Override
 			public void unwrap() {
 				ParameterizedType s1 = (ParameterizedType) x.getParent();
 				s1.typeArguments().remove(x);
@@ -2350,6 +2380,7 @@ public class ASTTest extends org.eclipse.jdt.core.tests.junit.extension.TestCase
 		assertTrue(this.ast.modificationCount() == previousCount);
 
 		genericPropertyTest(x, new Property("Qualifier", true, Type.class) { //$NON-NLS-1$
+			@Override
 			public ASTNode sample(AST targetAst, boolean parented) {
 				SimpleType result =
 				targetAst.newSimpleType(
@@ -2359,23 +2390,28 @@ public class ASTTest extends org.eclipse.jdt.core.tests.junit.extension.TestCase
 				}
 				return result;
 			}
+			@Override
 			public ASTNode wrap() {
 				QualifiedType s1 = ASTTest.this.ast.newQualifiedType(x, ASTTest.this.ast.newSimpleName("z")); //$NON-NLS-1$
 				return s1;
 			}
+			@Override
 			public void unwrap() {
 				QualifiedType s1 = (QualifiedType) x.getParent();
 				s1.setQualifier(ASTTest.this.ast.newSimpleType(ASTTest.this.ast.newSimpleName("z"))); //$NON-NLS-1$
 			}
+			@Override
 			public ASTNode get() {
 				return x.getQualifier();
 			}
+			@Override
 			public void set(ASTNode value) {
 				x.setQualifier((Type) value);
 			}
 		});
 
 		genericPropertyTest(x, new Property("Name", true, SimpleName.class) { //$NON-NLS-1$
+			@Override
 			public ASTNode sample(AST targetAst, boolean parented) {
 				SimpleName result = targetAst.newSimpleName("foo"); //$NON-NLS-1$
 				if (parented) {
@@ -2383,9 +2419,11 @@ public class ASTTest extends org.eclipse.jdt.core.tests.junit.extension.TestCase
 				}
 				return result;
 			}
+			@Override
 			public ASTNode get() {
 				return x.getName();
 			}
+			@Override
 			public void set(ASTNode value) {
 				x.setName((SimpleName) value);
 			}
@@ -2451,6 +2489,7 @@ public class ASTTest extends org.eclipse.jdt.core.tests.junit.extension.TestCase
 		assertTrue(x.isUpperBound() == false);
 
 		genericPropertyTest(x, new Property("Bound", false, Type.class) { //$NON-NLS-1$
+			@Override
 			public ASTNode sample(AST targetAst, boolean parented) {
 				SimpleType result =
 				targetAst.newSimpleType(
@@ -2460,18 +2499,22 @@ public class ASTTest extends org.eclipse.jdt.core.tests.junit.extension.TestCase
 				}
 				return result;
 			}
+			@Override
 			public ASTNode wrap() {
 				WildcardType s1 = ASTTest.this.ast.newWildcardType();
 				s1.setBound(x);
 				return s1;
 			}
+			@Override
 			public void unwrap() {
 				WildcardType s1 = (WildcardType) x.getParent();
 				s1.setBound(null);
 			}
+			@Override
 			public ASTNode get() {
 				return x.getBound();
 			}
+			@Override
 			public void set(ASTNode value) {
 				x.setBound((Type) value);
 			}
@@ -2498,6 +2541,7 @@ public class ASTTest extends org.eclipse.jdt.core.tests.junit.extension.TestCase
 
 		if (this.ast.apiLevel() >= JLS3_INTERNAL) {
 			genericPropertyTest(x, new Property("Javadoc", false, Javadoc.class) { //$NON-NLS-1$
+				@Override
 				public ASTNode sample(AST targetAst, boolean parented) {
 					Javadoc result = targetAst.newJavadoc();
 					if (parented) {
@@ -2505,15 +2549,18 @@ public class ASTTest extends org.eclipse.jdt.core.tests.junit.extension.TestCase
 					}
 					return result;
 				}
+				@Override
 				public ASTNode get() {
 					return x.getJavadoc();
 				}
+				@Override
 				public void set(ASTNode value) {
 					x.setJavadoc((Javadoc) value);
 				}
 			});
 
 			genericPropertyListTest(x, x.annotations(), new Property("Annotations", true, Annotation.class) { //$NON-NLS-1$
+				@Override
 				public ASTNode sample(AST targetAst, boolean parented) {
 					MarkerAnnotation result = targetAst.newMarkerAnnotation();
 					if (parented) {
@@ -2526,6 +2573,7 @@ public class ASTTest extends org.eclipse.jdt.core.tests.junit.extension.TestCase
 		}
 
 		genericPropertyTest(x, new Property("Name", true, Name.class) { //$NON-NLS-1$
+			@Override
 			public ASTNode sample(AST targetAst, boolean parented) {
 				SimpleName result = targetAst.newSimpleName("a"); //$NON-NLS-1$
 				if (parented) {
@@ -2533,9 +2581,11 @@ public class ASTTest extends org.eclipse.jdt.core.tests.junit.extension.TestCase
 				}
 				return result;
 			}
+			@Override
 			public ASTNode get() {
 				return x.getName();
 			}
+			@Override
 			public void set(ASTNode value) {
 				x.setName((Name) value);
 			}
@@ -2560,6 +2610,7 @@ public class ASTTest extends org.eclipse.jdt.core.tests.junit.extension.TestCase
 		assertTrue(this.ast.modificationCount() == previousCount);
 
 		genericPropertyTest(x, new Property("Name", true, Name.class) { //$NON-NLS-1$
+			@Override
 			public ASTNode sample(AST targetAst, boolean parented) {
 				SimpleName result = targetAst.newSimpleName("a"); //$NON-NLS-1$
 				if (parented) {
@@ -2567,9 +2618,11 @@ public class ASTTest extends org.eclipse.jdt.core.tests.junit.extension.TestCase
 				}
 				return result;
 			}
+			@Override
 			public ASTNode get() {
 				return x.getName();
 			}
+			@Override
 			public void set(ASTNode value) {
 				x.setName((Name) value);
 			}
@@ -2609,6 +2662,7 @@ public class ASTTest extends org.eclipse.jdt.core.tests.junit.extension.TestCase
 		tClientProperties(x);
 
 		genericPropertyTest(x, new Property("Package", false, PackageDeclaration.class) { //$NON-NLS-1$
+			@Override
 			public ASTNode sample(AST targetAst, boolean parented) {
 				PackageDeclaration result = targetAst.newPackageDeclaration();
 				if (parented) {
@@ -2617,15 +2671,18 @@ public class ASTTest extends org.eclipse.jdt.core.tests.junit.extension.TestCase
 				}
 				return result;
 			}
+			@Override
 			public ASTNode get() {
 				return x.getPackage();
 			}
+			@Override
 			public void set(ASTNode value) {
 				x.setPackage((PackageDeclaration) value);
 			}
 		});
 
 		genericPropertyListTest(x, x.imports(), new Property("Imports", true, ImportDeclaration.class) { //$NON-NLS-1$
+			@Override
 			public ASTNode sample(AST targetAst, boolean parented) {
 				ImportDeclaration result = targetAst.newImportDeclaration();
 				if (parented) {
@@ -2637,6 +2694,7 @@ public class ASTTest extends org.eclipse.jdt.core.tests.junit.extension.TestCase
 		});
 
 		genericPropertyListTest(x, x.types(), new Property("Types", true, AbstractTypeDeclaration.class) { //$NON-NLS-1$
+			@Override
 			public ASTNode sample(AST targetAst, boolean parented) {
 				TypeDeclaration result = targetAst.newTypeDeclaration();
 				if (parented) {
@@ -2765,6 +2823,7 @@ public class ASTTest extends org.eclipse.jdt.core.tests.junit.extension.TestCase
 		tModifiers(x);
 
 		genericPropertyTest(x, new Property("Name", true, SimpleName.class) { //$NON-NLS-1$
+			@Override
 			public ASTNode sample(AST targetAst, boolean parented) {
 				SimpleName result = targetAst.newSimpleName("foo"); //$NON-NLS-1$
 				if (parented) {
@@ -2772,9 +2831,11 @@ public class ASTTest extends org.eclipse.jdt.core.tests.junit.extension.TestCase
 				}
 				return result;
 			}
+			@Override
 			public ASTNode get() {
 				return x.getName();
 			}
+			@Override
 			public void set(ASTNode value) {
 				x.setName((SimpleName) value);
 			}
@@ -2783,6 +2844,7 @@ public class ASTTest extends org.eclipse.jdt.core.tests.junit.extension.TestCase
 		if (this.ast.apiLevel() >= JLS3_INTERNAL) {
 			genericPropertyListTest(x, x.typeParameters(),
 			  new Property("TypeParameters", true, TypeParameter.class) { //$NON-NLS-1$
+				@Override
 				public ASTNode sample(AST targetAst, boolean parented) {
 					TypeParameter result = targetAst.newTypeParameter();
 					if (parented) {
@@ -2795,6 +2857,7 @@ public class ASTTest extends org.eclipse.jdt.core.tests.junit.extension.TestCase
 
 		if (this.ast.apiLevel() == AST.JLS2) {
 			genericPropertyTest(x, new Property("Superclass", false, Name.class) { //$NON-NLS-1$
+				@Override
 				public ASTNode sample(AST targetAst, boolean parented) {
 					SimpleName result = targetAst.newSimpleName("foo"); //$NON-NLS-1$
 					if (parented) {
@@ -2802,9 +2865,11 @@ public class ASTTest extends org.eclipse.jdt.core.tests.junit.extension.TestCase
 					}
 					return result;
 				}
+				@Override
 				public ASTNode get() {
 					return x.getSuperclass();
 				}
+				@Override
 				public void set(ASTNode value) {
 					x.setSuperclass((Name) value);
 				}
@@ -2814,6 +2879,7 @@ public class ASTTest extends org.eclipse.jdt.core.tests.junit.extension.TestCase
 		if (this.ast.apiLevel() == AST.JLS2) {
 			genericPropertyListTest(x, x.superInterfaces(),
 			  new Property("SuperInterfaces", true, Name.class) { //$NON-NLS-1$
+				@Override
 				public ASTNode sample(AST targetAst, boolean parented) {
 					SimpleName result = targetAst.newSimpleName("foo"); //$NON-NLS-1$
 					if (parented) {
@@ -2826,6 +2892,7 @@ public class ASTTest extends org.eclipse.jdt.core.tests.junit.extension.TestCase
 
 		if (this.ast.apiLevel() >= JLS3_INTERNAL) {
 			genericPropertyTest(x, new Property("SuperclassType", false, Type.class) { //$NON-NLS-1$
+				@Override
 				public ASTNode sample(AST targetAst, boolean parented) {
 					SimpleType result = targetAst.newSimpleType(targetAst.newSimpleName("foo")); //$NON-NLS-1$
 					if (parented) {
@@ -2833,9 +2900,11 @@ public class ASTTest extends org.eclipse.jdt.core.tests.junit.extension.TestCase
 					}
 					return result;
 				}
+				@Override
 				public ASTNode get() {
 					return x.getSuperclassType();
 				}
+				@Override
 				public void set(ASTNode value) {
 					x.setSuperclassType((Type) value);
 				}
@@ -2845,6 +2914,7 @@ public class ASTTest extends org.eclipse.jdt.core.tests.junit.extension.TestCase
 		if (this.ast.apiLevel() >= JLS3_INTERNAL) {
 			genericPropertyListTest(x, x.superInterfaceTypes(),
 			  new Property("SuperInterfaceTypes", true, Type.class) { //$NON-NLS-1$
+				@Override
 				public ASTNode sample(AST targetAst, boolean parented) {
 					SimpleType result = targetAst.newSimpleType(targetAst.newSimpleName("foo")); //$NON-NLS-1$
 					if (parented) {
@@ -2858,6 +2928,7 @@ public class ASTTest extends org.eclipse.jdt.core.tests.junit.extension.TestCase
 
 		genericPropertyListTest(x, x.bodyDeclarations(),
 		  new Property("BodyDeclarations", true, BodyDeclaration.class) { //$NON-NLS-1$
+			@Override
 			public ASTNode sample(AST targetAst, boolean parented) {
 				TypeDeclaration result = targetAst.newTypeDeclaration();
 				if (parented) {
@@ -2866,11 +2937,13 @@ public class ASTTest extends org.eclipse.jdt.core.tests.junit.extension.TestCase
 				}
 				return result;
 			}
+			@Override
 			public ASTNode wrap() {
 				TypeDeclaration s1 = x.getAST().newTypeDeclaration();
 				s1.bodyDeclarations().add(x);
 				return s1;
 			}
+			@Override
 			public void unwrap() {
 				TypeDeclaration s1 = (TypeDeclaration) x.getParent();
 				s1.bodyDeclarations().remove(x);
@@ -2967,6 +3040,7 @@ public class ASTTest extends org.eclipse.jdt.core.tests.junit.extension.TestCase
 		tModifiers(x);
 
 		genericPropertyTest(x, new Property("Name", true, SimpleName.class) { //$NON-NLS-1$
+			@Override
 			public ASTNode sample(AST targetAst, boolean parented) {
 				SimpleName result = targetAst.newSimpleName("foo"); //$NON-NLS-1$
 				if (parented) {
@@ -2974,9 +3048,11 @@ public class ASTTest extends org.eclipse.jdt.core.tests.junit.extension.TestCase
 				}
 				return result;
 			}
+			@Override
 			public ASTNode get() {
 				return x.getName();
 			}
+			@Override
 			public void set(ASTNode value) {
 				x.setName((SimpleName) value);
 			}
@@ -2984,6 +3060,7 @@ public class ASTTest extends org.eclipse.jdt.core.tests.junit.extension.TestCase
 
 		genericPropertyListTest(x, x.superInterfaceTypes(),
 		  new Property("SuperInterfaceTypes", true, Type.class) { //$NON-NLS-1$
+			@Override
 			public ASTNode sample(AST targetAst, boolean parented) {
 				SimpleType result = targetAst.newSimpleType(targetAst.newSimpleName("foo")); //$NON-NLS-1$
 				if (parented) {
@@ -2995,6 +3072,7 @@ public class ASTTest extends org.eclipse.jdt.core.tests.junit.extension.TestCase
 
 		genericPropertyListTest(x, x.enumConstants(),
 				  new Property("EnumConstants", true, EnumConstantDeclaration.class) { //$NON-NLS-1$
+					@Override
 					public ASTNode sample(AST targetAst, boolean parented) {
 						EnumConstantDeclaration result = targetAst.newEnumConstantDeclaration();
 						if (parented) {
@@ -3004,6 +3082,7 @@ public class ASTTest extends org.eclipse.jdt.core.tests.junit.extension.TestCase
 						}
 						return result;
 					}
+					@Override
 					public ASTNode wrap() {
 						EnumConstantDeclaration s1 = x.getAST().newEnumConstantDeclaration();
 						AnonymousClassDeclaration anonymousClassDeclaration = x.getAST().newAnonymousClassDeclaration();
@@ -3011,6 +3090,7 @@ public class ASTTest extends org.eclipse.jdt.core.tests.junit.extension.TestCase
 						anonymousClassDeclaration.bodyDeclarations().add(x);
 						return s1;
 					}
+					@Override
 					public void unwrap() {
 						AnonymousClassDeclaration anonymousClassDeclaration = (AnonymousClassDeclaration) x.getParent();
 						if (anonymousClassDeclaration != null) {
@@ -3021,6 +3101,7 @@ public class ASTTest extends org.eclipse.jdt.core.tests.junit.extension.TestCase
 
 		genericPropertyListTest(x, x.bodyDeclarations(),
 		  new Property("BodyDeclarations", true, BodyDeclaration.class) { //$NON-NLS-1$
+			@Override
 			public ASTNode sample(AST targetAst, boolean parented) {
 				TypeDeclaration result = targetAst.newTypeDeclaration();
 				if (parented) {
@@ -3029,11 +3110,13 @@ public class ASTTest extends org.eclipse.jdt.core.tests.junit.extension.TestCase
 				}
 				return result;
 			}
+			@Override
 			public ASTNode wrap() {
 				TypeDeclaration s1 = x.getAST().newTypeDeclaration();
 				s1.bodyDeclarations().add(x);
 				return s1;
 			}
+			@Override
 			public void unwrap() {
 				TypeDeclaration s1 = (TypeDeclaration) x.getParent();
 				s1.bodyDeclarations().remove(x);
@@ -3100,6 +3183,7 @@ public class ASTTest extends org.eclipse.jdt.core.tests.junit.extension.TestCase
 		tModifiers(x);
 
 		genericPropertyTest(x, new Property("Name", true, SimpleName.class) { //$NON-NLS-1$
+			@Override
 			public ASTNode sample(AST targetAst, boolean parented) {
 				SimpleName result = targetAst.newSimpleName("foo"); //$NON-NLS-1$
 				if (parented) {
@@ -3107,9 +3191,11 @@ public class ASTTest extends org.eclipse.jdt.core.tests.junit.extension.TestCase
 				}
 				return result;
 			}
+			@Override
 			public ASTNode get() {
 				return x.getName();
 			}
+			@Override
 			public void set(ASTNode value) {
 				x.setName((SimpleName) value);
 			}
@@ -3117,6 +3203,7 @@ public class ASTTest extends org.eclipse.jdt.core.tests.junit.extension.TestCase
 
 		genericPropertyListTest(x, x.arguments(),
 		  new Property("Arguments", true, Expression.class) { //$NON-NLS-1$
+			@Override
 			public ASTNode sample(AST targetAst, boolean parented) {
 				SimpleName result = targetAst.newSimpleName("foo"); //$NON-NLS-1$
 				if (parented) {
@@ -3124,11 +3211,13 @@ public class ASTTest extends org.eclipse.jdt.core.tests.junit.extension.TestCase
 				}
 				return result;
 			}
+			@Override
 			public ASTNode wrap() {
 				AnonymousClassDeclaration s1 = x.getAST().newAnonymousClassDeclaration();
 				s1.bodyDeclarations().add(x);
 				return s1;
 			}
+			@Override
 			public void unwrap() {
 				AnonymousClassDeclaration s1 = (AnonymousClassDeclaration) x.getParent();
 				s1.bodyDeclarations().remove(x);
@@ -3136,6 +3225,7 @@ public class ASTTest extends org.eclipse.jdt.core.tests.junit.extension.TestCase
 		});
 
 		genericPropertyTest(x, new Property("AnonymousClassDeclaration", false, AnonymousClassDeclaration.class) { //$NON-NLS-1$
+			@Override
 			public ASTNode sample(AST targetAst, boolean parented) {
 				AnonymousClassDeclaration result = targetAst.newAnonymousClassDeclaration();
 				if (parented) {
@@ -3143,6 +3233,7 @@ public class ASTTest extends org.eclipse.jdt.core.tests.junit.extension.TestCase
 				}
 				return result;
 			}
+			@Override
 			public ASTNode wrap() {
 				// return AnonymousClassDeclaration that embeds x
 				AnonymousClassDeclaration s0 = x.getAST().newAnonymousClassDeclaration();
@@ -3151,13 +3242,16 @@ public class ASTTest extends org.eclipse.jdt.core.tests.junit.extension.TestCase
 				s1.bodyDeclarations().add(x);
 				return s0;
 			}
+			@Override
 			public void unwrap() {
 				EnumDeclaration s1 = (EnumDeclaration) x.getParent();
 				s1.bodyDeclarations().remove(x);
 			}
+			@Override
 			public ASTNode get() {
 				return x.getAnonymousClassDeclaration();
 			}
+			@Override
 			public void set(ASTNode value) {
 				x.setAnonymousClassDeclaration((AnonymousClassDeclaration) value);
 			}
@@ -3202,6 +3296,7 @@ public class ASTTest extends org.eclipse.jdt.core.tests.junit.extension.TestCase
 		assertTrue(this.ast.modificationCount() == previousCount);
 
 		genericPropertyTest(x, new Property("Name", true, SimpleName.class) { //$NON-NLS-1$
+			@Override
 			public ASTNode sample(AST targetAst, boolean parented) {
 				SimpleName result = targetAst.newSimpleName("a"); //$NON-NLS-1$
 				if (parented) {
@@ -3209,15 +3304,18 @@ public class ASTTest extends org.eclipse.jdt.core.tests.junit.extension.TestCase
 				}
 				return result;
 			}
+			@Override
 			public ASTNode get() {
 				return x.getName();
 			}
+			@Override
 			public void set(ASTNode value) {
 				x.setName((SimpleName) value);
 			}
 		});
 		genericPropertyListTest(x, x.typeBounds(),
 		  new Property("TypeBounds", true, Type.class) { //$NON-NLS-1$
+			@Override
 			public ASTNode sample(AST targetAst, boolean parented) {
 				Type result = targetAst.newSimpleType(targetAst.newSimpleName("foo"));
 				if (parented) {
@@ -3299,6 +3397,7 @@ public class ASTTest extends org.eclipse.jdt.core.tests.junit.extension.TestCase
 
 		if (this.ast.apiLevel() >= JLS3_INTERNAL) {
 			genericPropertyListTest(x, x.modifiers(), new Property("Modifiers", true, IExtendedModifier.class) { //$NON-NLS-1$
+				@Override
 				public ASTNode sample(AST targetAst, boolean parented) {
 					Modifier result = targetAst.newModifier(Modifier.ModifierKeyword.PUBLIC_KEYWORD);
 					if (parented) {
@@ -3307,6 +3406,7 @@ public class ASTTest extends org.eclipse.jdt.core.tests.junit.extension.TestCase
 					}
 					return result;
 				}
+				@Override
 				public ASTNode wrap() {
 					SingleMemberAnnotation s1 = x.getAST().newSingleMemberAnnotation();
 					ClassInstanceCreation s2 = x.getAST().newClassInstanceCreation();
@@ -3320,6 +3420,7 @@ public class ASTTest extends org.eclipse.jdt.core.tests.junit.extension.TestCase
 					s5.modifiers().add(x);
 					return s1;
 				}
+				@Override
 				public void unwrap() {
 					SingleVariableDeclaration s5 = (SingleVariableDeclaration) x.getParent();
 					s5.modifiers().remove(x);
@@ -3348,6 +3449,7 @@ public class ASTTest extends org.eclipse.jdt.core.tests.junit.extension.TestCase
 		}
 
 		genericPropertyTest(x, new Property("Name", true, SimpleName.class) { //$NON-NLS-1$
+			@Override
 			public ASTNode sample(AST targetAst, boolean parented) {
 				SimpleName result = targetAst.newSimpleName("foo"); //$NON-NLS-1$
 				if (parented) {
@@ -3355,15 +3457,18 @@ public class ASTTest extends org.eclipse.jdt.core.tests.junit.extension.TestCase
 				}
 				return result;
 			}
+			@Override
 			public ASTNode get() {
 				return x.getName();
 			}
+			@Override
 			public void set(ASTNode value) {
 				x.setName((SimpleName) value);
 			}
 		});
 
 		genericPropertyTest(x, new Property("Type", true, Type.class) { //$NON-NLS-1$
+			@Override
 			public ASTNode sample(AST targetAst, boolean parented) {
 				SimpleType result = targetAst.newSimpleType(
 					targetAst.newSimpleName("foo")); //$NON-NLS-1$
@@ -3372,9 +3477,11 @@ public class ASTTest extends org.eclipse.jdt.core.tests.junit.extension.TestCase
 				}
 				return result;
 			}
+			@Override
 			public ASTNode get() {
 				return x.getType();
 			}
+			@Override
 			public void set(ASTNode value) {
 				x.setType((Type) value);
 			}
@@ -3383,6 +3490,7 @@ public class ASTTest extends org.eclipse.jdt.core.tests.junit.extension.TestCase
 		if (this.ast.apiLevel() >= getJLS8()) {
 			genericPropertyListTest(x, x.extraDimensions(),
 					new Property("ExtraDimensions", true, Dimension.class) { //$NON-NLS-1$
+						@Override
 						public ASTNode sample(AST targetAst, boolean parented) {
 							Dimension result = targetAst.newDimension();
 							if (parented) {
@@ -3394,6 +3502,7 @@ public class ASTTest extends org.eclipse.jdt.core.tests.junit.extension.TestCase
 		}
 
 		genericPropertyTest(x, new Property("Initializer", false, Expression.class) { //$NON-NLS-1$
+			@Override
 			public ASTNode sample(AST targetAst, boolean parented) {
 				SimpleName result = targetAst.newSimpleName("foo"); //$NON-NLS-1$
 				if (parented) {
@@ -3401,19 +3510,23 @@ public class ASTTest extends org.eclipse.jdt.core.tests.junit.extension.TestCase
 				}
 				return result;
 			}
+			@Override
 			public ASTNode wrap() {
 				// return an Expression that embeds x
 				CatchClause s1 = ASTTest.this.ast.newCatchClause();
 				s1.setException(x);
 				return s1;
 			}
+			@Override
 			public void unwrap() {
 				CatchClause s1 = (CatchClause) x.getParent();
 				s1.setException(ASTTest.this.ast.newSingleVariableDeclaration());
 			}
+			@Override
 			public ASTNode get() {
 				return x.getInitializer();
 			}
+			@Override
 			public void set(ASTNode value) {
 				x.setInitializer((Expression) value);
 			}
@@ -3466,6 +3579,7 @@ public class ASTTest extends org.eclipse.jdt.core.tests.junit.extension.TestCase
 		}
 
 		genericPropertyTest(x, new Property("Name", true, SimpleName.class) { //$NON-NLS-1$
+			@Override
 			public ASTNode sample(AST targetAst, boolean parented) {
 				SimpleName result = targetAst.newSimpleName("foo"); //$NON-NLS-1$
 				if (parented) {
@@ -3473,9 +3587,11 @@ public class ASTTest extends org.eclipse.jdt.core.tests.junit.extension.TestCase
 				}
 				return result;
 			}
+			@Override
 			public ASTNode get() {
 				return x.getName();
 			}
+			@Override
 			public void set(ASTNode value) {
 				x.setName((SimpleName) value);
 			}
@@ -3484,6 +3600,7 @@ public class ASTTest extends org.eclipse.jdt.core.tests.junit.extension.TestCase
 		if (this.ast.apiLevel() >= getJLS8()) {
 			genericPropertyListTest(x, x.extraDimensions(),
 					new Property("ExtraDimensions", true, Dimension.class) { //$NON-NLS-1$
+						@Override
 						public ASTNode sample(AST targetAst, boolean parented) {
 							Dimension result = targetAst.newDimension();
 							if (parented) {
@@ -3495,6 +3612,7 @@ public class ASTTest extends org.eclipse.jdt.core.tests.junit.extension.TestCase
 		}
 
 		genericPropertyTest(x, new Property("Initializer", false, Expression.class) { //$NON-NLS-1$
+			@Override
 			public ASTNode sample(AST targetAst, boolean parented) {
 				SimpleName result = targetAst.newSimpleName("foo"); //$NON-NLS-1$
 				if (parented) {
@@ -3502,20 +3620,24 @@ public class ASTTest extends org.eclipse.jdt.core.tests.junit.extension.TestCase
 				}
 				return result;
 			}
+			@Override
 			public ASTNode wrap() {
 				// return an Expression that embeds x
 				VariableDeclarationExpression s1 =
 					ASTTest.this.ast.newVariableDeclarationExpression(x);
 				return s1;
 			}
+			@Override
 			public void unwrap() {
 				VariableDeclarationExpression s1 =
 					(VariableDeclarationExpression) x.getParent();
 				s1.fragments().remove(x);
 			}
+			@Override
 			public ASTNode get() {
 				return x.getInitializer();
 			}
+			@Override
 			public void set(ASTNode value) {
 				x.setInitializer((Expression) value);
 			}
@@ -3623,6 +3745,7 @@ public class ASTTest extends org.eclipse.jdt.core.tests.junit.extension.TestCase
 		if (this.ast.apiLevel() >= JLS3_INTERNAL) {
 			genericPropertyListTest(x, x.typeParameters(),
 			  new Property("TypeParameters", true, TypeParameter.class) { //$NON-NLS-1$
+				@Override
 				public ASTNode sample(AST targetAst, boolean parented) {
 					TypeParameter result = targetAst.newTypeParameter();
 					if (parented) {
@@ -3634,6 +3757,7 @@ public class ASTTest extends org.eclipse.jdt.core.tests.junit.extension.TestCase
 		}
 
 		genericPropertyTest(x, new Property("Name", true, SimpleName.class) { //$NON-NLS-1$
+			@Override
 			public ASTNode sample(AST targetAst, boolean parented) {
 				SimpleName result = targetAst.newSimpleName("foo"); //$NON-NLS-1$
 				if (parented) {
@@ -3641,9 +3765,11 @@ public class ASTTest extends org.eclipse.jdt.core.tests.junit.extension.TestCase
 				}
 				return result;
 			}
+			@Override
 			public ASTNode get() {
 				return x.getName();
 			}
+			@Override
 			public void set(ASTNode value) {
 				x.setName((SimpleName) value);
 			}
@@ -3651,6 +3777,7 @@ public class ASTTest extends org.eclipse.jdt.core.tests.junit.extension.TestCase
 
 		if (this.ast.apiLevel() == AST.JLS2) {
 			genericPropertyTest(x, new Property("ReturnType", true, Type.class) { //$NON-NLS-1$
+				@Override
 				public ASTNode sample(AST targetAst, boolean parented) {
 					SimpleType result = targetAst.newSimpleType(
 						targetAst.newSimpleName("foo")); //$NON-NLS-1$
@@ -3659,9 +3786,11 @@ public class ASTTest extends org.eclipse.jdt.core.tests.junit.extension.TestCase
 					}
 					return result;
 				}
+				@Override
 				public ASTNode get() {
 					return x.getReturnType();
 				}
+				@Override
 				public void set(ASTNode value) {
 					x.setReturnType((Type) value);
 				}
@@ -3670,6 +3799,7 @@ public class ASTTest extends org.eclipse.jdt.core.tests.junit.extension.TestCase
 
 		if (this.ast.apiLevel() >= JLS3_INTERNAL) {
 			genericPropertyTest(x, new Property("ReturnType2", false, Type.class) { //$NON-NLS-1$
+				@Override
 				public ASTNode sample(AST targetAst, boolean parented) {
 					SimpleType result = targetAst.newSimpleType(
 						targetAst.newSimpleName("foo")); //$NON-NLS-1$
@@ -3678,9 +3808,11 @@ public class ASTTest extends org.eclipse.jdt.core.tests.junit.extension.TestCase
 					}
 					return result;
 				}
+				@Override
 				public ASTNode get() {
 					return x.getReturnType2();
 				}
+				@Override
 				public void set(ASTNode value) {
 					x.setReturnType2((Type) value);
 				}
@@ -3690,6 +3822,7 @@ public class ASTTest extends org.eclipse.jdt.core.tests.junit.extension.TestCase
 		if (this.ast.apiLevel() >= getJLS8()) {
 			genericPropertyListTest(x, x.extraDimensions(),
 					new Property("ExtraDimensions", true, Dimension.class) { //$NON-NLS-1$
+						@Override
 						public ASTNode sample(AST targetAst, boolean parented) {
 							Dimension result = targetAst.newDimension();
 							if (parented) {
@@ -3702,6 +3835,7 @@ public class ASTTest extends org.eclipse.jdt.core.tests.junit.extension.TestCase
 
 		genericPropertyListTest(x, x.parameters(),
 		  new Property("Parameters", true, SingleVariableDeclaration.class) { //$NON-NLS-1$
+			@Override
 			public ASTNode sample(AST targetAst, boolean parented) {
 				SingleVariableDeclaration result = targetAst.newSingleVariableDeclaration();
 				if (parented) {
@@ -3709,6 +3843,7 @@ public class ASTTest extends org.eclipse.jdt.core.tests.junit.extension.TestCase
 				}
 				return result;
 			}
+			@Override
 			public ASTNode wrap() {
 				// return a SingleVariableDeclaration that embeds x
 				SingleVariableDeclaration s1 = ASTTest.this.ast.newSingleVariableDeclaration();
@@ -3719,6 +3854,7 @@ public class ASTTest extends org.eclipse.jdt.core.tests.junit.extension.TestCase
 				a1.bodyDeclarations().add(x);
 				return s1;
 			}
+			@Override
 			public void unwrap() {
 				AnonymousClassDeclaration a1 = (AnonymousClassDeclaration) x.getParent();
 				a1.bodyDeclarations().remove(x);
@@ -3728,6 +3864,7 @@ public class ASTTest extends org.eclipse.jdt.core.tests.junit.extension.TestCase
 		if (this.ast.apiLevel() < getJLS8()) {
 			genericPropertyListTest(x, x.thrownExceptions(),
 					  new Property("ThrownExceptions", true, Name.class) { //$NON-NLS-1$
+						@Override
 						public ASTNode sample(AST targetAst, boolean parented) {
 							SimpleName result = targetAst.newSimpleName("foo"); //$NON-NLS-1$
 							if (parented) {
@@ -3739,6 +3876,7 @@ public class ASTTest extends org.eclipse.jdt.core.tests.junit.extension.TestCase
 		} else {
 			genericPropertyListTest(x, x.thrownExceptionTypes(),
 					  new Property("ThrownExceptionTypes", true, Type.class) { //$NON-NLS-1$
+						@Override
 						public ASTNode sample(AST targetAst, boolean parented) {
 							Type result = targetAst.newSimpleType(targetAst.newSimpleName("foo")); //$NON-NLS-1$
 							if (parented) {
@@ -3750,6 +3888,7 @@ public class ASTTest extends org.eclipse.jdt.core.tests.junit.extension.TestCase
 		}
 
 		genericPropertyTest(x, new Property("Body", false, Block.class) { //$NON-NLS-1$
+			@Override
 			public ASTNode sample(AST targetAst, boolean parented) {
 				Block result = targetAst.newBlock();
 				if (parented) {
@@ -3758,6 +3897,7 @@ public class ASTTest extends org.eclipse.jdt.core.tests.junit.extension.TestCase
 				}
 				return result;
 			}
+			@Override
 			public ASTNode wrap() {
 				// return a Block that embeds x
 				Block s1 = ASTTest.this.ast.newBlock();
@@ -3766,13 +3906,16 @@ public class ASTTest extends org.eclipse.jdt.core.tests.junit.extension.TestCase
 				s2.bodyDeclarations().add(x);
 				return s1;
 			}
+			@Override
 			public void unwrap() {
 				TypeDeclaration s2 = (TypeDeclaration) x.getParent();
 				s2.bodyDeclarations().remove(x);
 			}
+			@Override
 			public ASTNode get() {
 				return x.getBody();
 			}
+			@Override
 			public void set(ASTNode value) {
 				x.setBody((Block) value);
 			}
@@ -3841,6 +3984,7 @@ public class ASTTest extends org.eclipse.jdt.core.tests.junit.extension.TestCase
 		}
 
 		genericPropertyTest(x, new Property("Body", true, Block.class) { //$NON-NLS-1$
+			@Override
 			public ASTNode sample(AST targetAst, boolean parented) {
 				Block result = targetAst.newBlock();
 				if (parented) {
@@ -3849,6 +3993,7 @@ public class ASTTest extends org.eclipse.jdt.core.tests.junit.extension.TestCase
 				}
 				return result;
 			}
+			@Override
 			public ASTNode wrap() {
 				// return Block that embeds x
 				Block s1 = ASTTest.this.ast.newBlock();
@@ -3857,13 +4002,16 @@ public class ASTTest extends org.eclipse.jdt.core.tests.junit.extension.TestCase
 				s2.bodyDeclarations().add(x);
 				return s1;
 			}
+			@Override
 			public void unwrap() {
 				TypeDeclaration s2 = (TypeDeclaration) x.getParent();
 				s2.bodyDeclarations().remove(x);
 			}
+			@Override
 			public ASTNode get() {
 				return x.getBody();
 			}
+			@Override
 			public void set(ASTNode value) {
 				x.setBody((Block) value);
 			}
@@ -3953,6 +4101,7 @@ public class ASTTest extends org.eclipse.jdt.core.tests.junit.extension.TestCase
 
 		genericPropertyListTest(x, x.tags(),
 		  new Property("Tags", true, TagElement.class) { //$NON-NLS-1$
+			@Override
 			public ASTNode sample(AST targetAst, boolean parented) {
 				TagElement result = targetAst.newTagElement();
 				if (parented) {
@@ -3961,6 +4110,7 @@ public class ASTTest extends org.eclipse.jdt.core.tests.junit.extension.TestCase
 				}
 				return result;
 			}
+			@Override
 			public ASTNode[] counterExamples(AST targetAst) {
 				return new ASTNode[] {
 					targetAst.newEmptyStatement(),
@@ -4047,6 +4197,7 @@ public class ASTTest extends org.eclipse.jdt.core.tests.junit.extension.TestCase
 		// check that fragments() can handle TagElement
 		genericPropertyListTest(x, x.fragments(),
 		  new Property("Fragments", true, TagElement.class) { //$NON-NLS-1$
+			@Override
 			public ASTNode sample(AST targetAst, boolean parented) {
 				TagElement result = targetAst.newTagElement();
 				if (parented) {
@@ -4055,16 +4206,19 @@ public class ASTTest extends org.eclipse.jdt.core.tests.junit.extension.TestCase
 				}
 				return result;
 			}
+			@Override
 			public ASTNode wrap() {
 				// return TagElement that embeds x
 				TagElement tagElement = ASTTest.this.ast.newTagElement();
 				tagElement.fragments().add(x);
 				return tagElement;
 			}
+			@Override
 			public void unwrap() {
 				TagElement tagElement = (TagElement) x.getParent();
 				tagElement.fragments().remove(x);
 			}
+			@Override
 			public ASTNode[] counterExamples(AST targetAst) {
 				return new ASTNode[] {
 					targetAst.newEmptyStatement(),
@@ -4077,6 +4231,7 @@ public class ASTTest extends org.eclipse.jdt.core.tests.junit.extension.TestCase
 		// check that fragments() can handle Name
 		genericPropertyListTest(x, x.fragments(),
 		  new Property("Fragments", true, Name.class) { //$NON-NLS-1$
+			@Override
 			public ASTNode sample(AST targetAst, boolean parented) {
 				SimpleName result = targetAst.newSimpleName("foo"); //$NON-NLS-1$
 				if (parented) {
@@ -4088,6 +4243,7 @@ public class ASTTest extends org.eclipse.jdt.core.tests.junit.extension.TestCase
 		// check that fragments() can handle TextElement
 		genericPropertyListTest(x, x.fragments(),
 		  new Property("Fragments", true, TextElement.class) { //$NON-NLS-1$
+			@Override
 			public ASTNode sample(AST targetAst, boolean parented) {
 				TextElement result = targetAst.newTextElement();
 				if (parented) {
@@ -4100,6 +4256,7 @@ public class ASTTest extends org.eclipse.jdt.core.tests.junit.extension.TestCase
 		// check that fragments() can handle MethodRef
 		genericPropertyListTest(x, x.fragments(),
 		  new Property("Fragments", true, MethodRef.class) { //$NON-NLS-1$
+			@Override
 			public ASTNode sample(AST targetAst, boolean parented) {
 				MethodRef result = targetAst.newMethodRef();
 				if (parented) {
@@ -4112,6 +4269,7 @@ public class ASTTest extends org.eclipse.jdt.core.tests.junit.extension.TestCase
 		// check that fragments() can handle MemberRef
 		genericPropertyListTest(x, x.fragments(),
 		  new Property("Fragments", true, MemberRef.class) { //$NON-NLS-1$
+			@Override
 			public ASTNode sample(AST targetAst, boolean parented) {
 				MemberRef result = targetAst.newMemberRef();
 				if (parented) {
@@ -4184,6 +4342,7 @@ public class ASTTest extends org.eclipse.jdt.core.tests.junit.extension.TestCase
 		assertTrue(this.ast.modificationCount() == previousCount);
 
 		genericPropertyTest(x, new Property("Qualifier", false, Name.class) { //$NON-NLS-1$
+			@Override
 			public ASTNode sample(AST targetAst, boolean parented) {
 				QualifiedName result = targetAst.newQualifiedName(
 					targetAst.newSimpleName("a"), //$NON-NLS-1$
@@ -4193,15 +4352,18 @@ public class ASTTest extends org.eclipse.jdt.core.tests.junit.extension.TestCase
 				}
 				return result;
 			}
+			@Override
 			public ASTNode get() {
 				return x.getQualifier();
 			}
+			@Override
 			public void set(ASTNode value) {
 				x.setQualifier((Name) value);
 			}
 		});
 
 		genericPropertyTest(x, new Property("Name", true, SimpleName.class) { //$NON-NLS-1$
+			@Override
 			public ASTNode sample(AST targetAst, boolean parented) {
 				SimpleName result = targetAst.newSimpleName("foo"); //$NON-NLS-1$
 				if (parented) {
@@ -4209,9 +4371,11 @@ public class ASTTest extends org.eclipse.jdt.core.tests.junit.extension.TestCase
 				}
 				return result;
 			}
+			@Override
 			public ASTNode get() {
 				return x.getName();
 			}
+			@Override
 			public void set(ASTNode value) {
 				x.setName((SimpleName) value);
 			}
@@ -4235,6 +4399,7 @@ public class ASTTest extends org.eclipse.jdt.core.tests.junit.extension.TestCase
 		assertTrue(this.ast.modificationCount() == previousCount);
 
 		genericPropertyTest(x, new Property("Qualifier", false, Name.class) { //$NON-NLS-1$
+			@Override
 			public ASTNode sample(AST targetAst, boolean parented) {
 				QualifiedName result = targetAst.newQualifiedName(
 					targetAst.newSimpleName("a"), //$NON-NLS-1$
@@ -4244,15 +4409,18 @@ public class ASTTest extends org.eclipse.jdt.core.tests.junit.extension.TestCase
 				}
 				return result;
 			}
+			@Override
 			public ASTNode get() {
 				return x.getQualifier();
 			}
+			@Override
 			public void set(ASTNode value) {
 				x.setQualifier((Name) value);
 			}
 		});
 
 		genericPropertyTest(x, new Property("Name", true, SimpleName.class) { //$NON-NLS-1$
+			@Override
 			public ASTNode sample(AST targetAst, boolean parented) {
 				SimpleName result = targetAst.newSimpleName("foo"); //$NON-NLS-1$
 				if (parented) {
@@ -4260,9 +4428,11 @@ public class ASTTest extends org.eclipse.jdt.core.tests.junit.extension.TestCase
 				}
 				return result;
 			}
+			@Override
 			public ASTNode get() {
 				return x.getName();
 			}
+			@Override
 			public void set(ASTNode value) {
 				x.setName((SimpleName) value);
 			}
@@ -4270,6 +4440,7 @@ public class ASTTest extends org.eclipse.jdt.core.tests.junit.extension.TestCase
 
 		genericPropertyListTest(x, x.parameters(),
 		  new Property("Parameters", true, MethodRefParameter.class) { //$NON-NLS-1$
+			@Override
 			public ASTNode sample(AST targetAst, boolean parented) {
 				MethodRefParameter result = targetAst.newMethodRefParameter();
 				if (parented) {
@@ -4312,6 +4483,7 @@ public class ASTTest extends org.eclipse.jdt.core.tests.junit.extension.TestCase
 		}
 
 		genericPropertyTest(x, new Property("Type", true, Type.class) { //$NON-NLS-1$
+			@Override
 			public ASTNode sample(AST targetAst, boolean parented) {
 				SimpleType result = targetAst.newSimpleType(
 					targetAst.newSimpleName("foo")); //$NON-NLS-1$
@@ -4320,15 +4492,18 @@ public class ASTTest extends org.eclipse.jdt.core.tests.junit.extension.TestCase
 				}
 				return result;
 			}
+			@Override
 			public ASTNode get() {
 				return x.getType();
 			}
+			@Override
 			public void set(ASTNode value) {
 				x.setType((Type) value);
 			}
 		});
 
 		genericPropertyTest(x, new Property("Name", false, SimpleName.class) { //$NON-NLS-1$
+			@Override
 			public ASTNode sample(AST targetAst, boolean parented) {
 				SimpleName result = targetAst.newSimpleName("foo"); //$NON-NLS-1$
 				if (parented) {
@@ -4336,9 +4511,11 @@ public class ASTTest extends org.eclipse.jdt.core.tests.junit.extension.TestCase
 				}
 				return result;
 			}
+			@Override
 			public ASTNode get() {
 				return x.getName();
 			}
+			@Override
 			public void set(ASTNode value) {
 				x.setName((SimpleName) value);
 			}
@@ -4363,6 +4540,7 @@ public class ASTTest extends org.eclipse.jdt.core.tests.junit.extension.TestCase
 
 		genericPropertyListTest(x, x.statements(),
 		  new Property("Statements", true, Statement.class) { //$NON-NLS-1$
+			@Override
 			public ASTNode sample(AST targetAst, boolean parented) {
 				Block result = targetAst.newBlock();
 				if (parented) {
@@ -4371,12 +4549,14 @@ public class ASTTest extends org.eclipse.jdt.core.tests.junit.extension.TestCase
 				}
 				return result;
 			}
+			@Override
 			public ASTNode wrap() {
 				// return a Statement that embeds x
 				Block s1 = ASTTest.this.ast.newBlock();
 				s1.statements().add(x);
 				return s1;
 			}
+			@Override
 			public void unwrap() {
 				Block s2 = (Block) x.getParent();
 				s2.statements().remove(x);
@@ -4404,6 +4584,7 @@ public class ASTTest extends org.eclipse.jdt.core.tests.junit.extension.TestCase
 		assertTrue(this.ast.modificationCount() == previousCount);
 
 		genericPropertyTest(x, new Property("Expression", false, Expression.class) { //$NON-NLS-1$
+			@Override
 			public ASTNode sample(AST targetAst, boolean parented) {
 				SimpleName result = targetAst.newSimpleName("foo"); //$NON-NLS-1$
 				if (parented) {
@@ -4411,19 +4592,23 @@ public class ASTTest extends org.eclipse.jdt.core.tests.junit.extension.TestCase
 				}
 				return result;
 			}
+			@Override
 			public ASTNode wrap() {
 				// return Expression that embeds x
 				ParenthesizedExpression s1 = ASTTest.this.ast.newParenthesizedExpression();
 				s1.setExpression(x);
 				return s1;
 			}
+			@Override
 			public void unwrap() {
 				ParenthesizedExpression s1 = (ParenthesizedExpression) x.getParent();
 				s1.setExpression(ASTTest.this.ast.newSimpleName("x")); //$NON-NLS-1$
 			}
+			@Override
 			public ASTNode get() {
 				return x.getExpression();
 			}
+			@Override
 			public void set(ASTNode value) {
 				x.setExpression((Expression) value);
 			}
@@ -4432,6 +4617,7 @@ public class ASTTest extends org.eclipse.jdt.core.tests.junit.extension.TestCase
 		if (this.ast.apiLevel() >= JLS3_INTERNAL) {
 			genericPropertyListTest(x, x.typeArguments(),
 			  new Property("TypeArguments", true, Type.class) { //$NON-NLS-1$
+				@Override
 				public ASTNode sample(AST targetAst, boolean parented) {
 					Type result = targetAst.newSimpleType(targetAst.newSimpleName("X")); //$NON-NLS-1$
 					if (parented) {
@@ -4443,6 +4629,7 @@ public class ASTTest extends org.eclipse.jdt.core.tests.junit.extension.TestCase
 		}
 
 		genericPropertyTest(x, new Property("Name", true, SimpleName.class) { //$NON-NLS-1$
+			@Override
 			public ASTNode sample(AST targetAst, boolean parented) {
 				SimpleName result = targetAst.newSimpleName("foo"); //$NON-NLS-1$
 				if (parented) {
@@ -4450,9 +4637,11 @@ public class ASTTest extends org.eclipse.jdt.core.tests.junit.extension.TestCase
 				}
 				return result;
 			}
+			@Override
 			public ASTNode get() {
 				return x.getName();
 			}
+			@Override
 			public void set(ASTNode value) {
 				x.setName((SimpleName) value);
 			}
@@ -4460,6 +4649,7 @@ public class ASTTest extends org.eclipse.jdt.core.tests.junit.extension.TestCase
 
 		genericPropertyListTest(x, x.arguments(),
 		  new Property("Arguments", true, Expression.class) { //$NON-NLS-1$
+			@Override
 			public ASTNode sample(AST targetAst, boolean parented) {
 				SimpleName result = targetAst.newSimpleName("foo"); //$NON-NLS-1$
 				if (parented) {
@@ -4467,12 +4657,14 @@ public class ASTTest extends org.eclipse.jdt.core.tests.junit.extension.TestCase
 				}
 				return result;
 			}
+			@Override
 			public ASTNode wrap() {
 				// return Expression that embeds x
 				ParenthesizedExpression s1 = ASTTest.this.ast.newParenthesizedExpression();
 				s1.setExpression(x);
 				return s1;
 			}
+			@Override
 			public void unwrap() {
 				ParenthesizedExpression s1 = (ParenthesizedExpression) x.getParent();
 				s1.setExpression(ASTTest.this.ast.newSimpleName("x")); //$NON-NLS-1$
@@ -4499,6 +4691,7 @@ public class ASTTest extends org.eclipse.jdt.core.tests.junit.extension.TestCase
 		tLeadingComment(x);
 
 		genericPropertyTest(x, new Property("Expression", true, Expression.class) { //$NON-NLS-1$
+			@Override
 			public ASTNode sample(AST targetAst, boolean parented) {
 				SimpleName result = targetAst.newSimpleName("foo"); //$NON-NLS-1$
 				if (parented) {
@@ -4506,6 +4699,7 @@ public class ASTTest extends org.eclipse.jdt.core.tests.junit.extension.TestCase
 				}
 				return result;
 			}
+			@Override
 			public ASTNode wrap() {
 				// return Expression that embeds x
 				ClassInstanceCreation s1 = ASTTest.this.ast.newClassInstanceCreation();
@@ -4518,13 +4712,16 @@ public class ASTTest extends org.eclipse.jdt.core.tests.junit.extension.TestCase
 				s3.statements().add(x);
 				return s1;
 			}
+			@Override
 			public void unwrap() {
 				Block s3 = (Block) x.getParent();
 				s3.statements().remove(x);
 			}
+			@Override
 			public ASTNode get() {
 				return x.getExpression();
 			}
+			@Override
 			public void set(ASTNode value) {
 				x.setExpression((Expression) value);
 			}
@@ -4575,6 +4772,7 @@ public class ASTTest extends org.eclipse.jdt.core.tests.junit.extension.TestCase
 
 		if (this.ast.apiLevel() >= JLS3_INTERNAL) {
 			genericPropertyListTest(x, x.modifiers(), new Property("Modifiers", true, IExtendedModifier.class) { //$NON-NLS-1$
+				@Override
 				public ASTNode sample(AST targetAst, boolean parented) {
 					Modifier result = targetAst.newModifier(Modifier.ModifierKeyword.PUBLIC_KEYWORD);
 					if (parented) {
@@ -4583,6 +4781,7 @@ public class ASTTest extends org.eclipse.jdt.core.tests.junit.extension.TestCase
 					}
 					return result;
 				}
+				@Override
 				public ASTNode wrap() {
 					SingleMemberAnnotation s1 = x.getAST().newSingleMemberAnnotation();
 					ClassInstanceCreation s2 = x.getAST().newClassInstanceCreation();
@@ -4599,6 +4798,7 @@ public class ASTTest extends org.eclipse.jdt.core.tests.junit.extension.TestCase
 					s7.modifiers().add(x);
 					return s1;
 				}
+				@Override
 				public void unwrap() {
 					VariableDeclarationStatement s7 = (VariableDeclarationStatement) x.getParent();
 					s7.modifiers().remove(x);
@@ -4627,6 +4827,7 @@ public class ASTTest extends org.eclipse.jdt.core.tests.junit.extension.TestCase
 		}
 
 		genericPropertyTest(x, new Property("Type", true, Type.class) { //$NON-NLS-1$
+			@Override
 			public ASTNode sample(AST targetAst, boolean parented) {
 				SimpleType result = targetAst.newSimpleType(
 					targetAst.newSimpleName("foo")); //$NON-NLS-1$
@@ -4635,9 +4836,11 @@ public class ASTTest extends org.eclipse.jdt.core.tests.junit.extension.TestCase
 				}
 				return result;
 			}
+			@Override
 			public ASTNode get() {
 				return x.getType();
 			}
+			@Override
 			public void set(ASTNode value) {
 				x.setType((Type) value);
 			}
@@ -4645,6 +4848,7 @@ public class ASTTest extends org.eclipse.jdt.core.tests.junit.extension.TestCase
 
 		genericPropertyListTest(x, x.fragments(),
 		  new Property("VariableSpecifiers", true, VariableDeclarationFragment.class) { //$NON-NLS-1$
+			@Override
 			public ASTNode sample(AST targetAst, boolean parented) {
 				VariableDeclarationFragment result = targetAst.newVariableDeclarationFragment();
 				if (parented) {
@@ -4652,6 +4856,7 @@ public class ASTTest extends org.eclipse.jdt.core.tests.junit.extension.TestCase
 				}
 				return result;
 			}
+			@Override
 			public ASTNode wrap() {
 				// return VariableDeclarationFragment that embeds x
 				VariableDeclarationFragment s1 = ASTTest.this.ast.newVariableDeclarationFragment();
@@ -4664,6 +4869,7 @@ public class ASTTest extends org.eclipse.jdt.core.tests.junit.extension.TestCase
 				s2.getBody().statements().add(x);
 				return s1;
 			}
+			@Override
 			public void unwrap() {
 				Block s3 = (Block) x.getParent();
 				s3.statements().remove(x);
@@ -4702,6 +4908,7 @@ public class ASTTest extends org.eclipse.jdt.core.tests.junit.extension.TestCase
 
 		if (this.ast.apiLevel() == AST.JLS2) {
 			genericPropertyTest(x, new Property("TypeDeclaration", true, TypeDeclaration.class) { //$NON-NLS-1$
+				@Override
 				public ASTNode sample(AST targetAst, boolean parented) {
 					TypeDeclaration result = targetAst.newTypeDeclaration();
 					if (parented) {
@@ -4709,6 +4916,7 @@ public class ASTTest extends org.eclipse.jdt.core.tests.junit.extension.TestCase
 					}
 					return result;
 				}
+				@Override
 				public ASTNode wrap() {
 					// return TypeDeclaration that embeds x
 					TypeDeclaration s1 = ASTTest.this.ast.newTypeDeclaration();
@@ -4719,13 +4927,16 @@ public class ASTTest extends org.eclipse.jdt.core.tests.junit.extension.TestCase
 					s3.statements().add(x);
 					return s1;
 				}
+				@Override
 				public void unwrap() {
 					Block s3 = (Block) x.getParent();
 					s3.statements().remove(x);
 				}
+				@Override
 				public ASTNode get() {
 					return x.getTypeDeclaration();
 				}
+				@Override
 				public void set(ASTNode value) {
 					x.setTypeDeclaration((TypeDeclaration) value);
 				}
@@ -4734,6 +4945,7 @@ public class ASTTest extends org.eclipse.jdt.core.tests.junit.extension.TestCase
 
 		if (this.ast.apiLevel() >= JLS3_INTERNAL) {
 			genericPropertyTest(x, new Property("Declaration", true, AbstractTypeDeclaration.class) { //$NON-NLS-1$
+				@Override
 				public ASTNode sample(AST targetAst, boolean parented) {
 					AbstractTypeDeclaration result = targetAst.newTypeDeclaration();
 					if (parented) {
@@ -4741,6 +4953,7 @@ public class ASTTest extends org.eclipse.jdt.core.tests.junit.extension.TestCase
 					}
 					return result;
 				}
+				@Override
 				public ASTNode wrap() {
 					// return TypeDeclaration that embeds x
 					TypeDeclaration s1 = ASTTest.this.ast.newTypeDeclaration();
@@ -4751,13 +4964,16 @@ public class ASTTest extends org.eclipse.jdt.core.tests.junit.extension.TestCase
 					s3.statements().add(x);
 					return s1;
 				}
+				@Override
 				public void unwrap() {
 					Block s3 = (Block) x.getParent();
 					s3.statements().remove(x);
 				}
+				@Override
 				public ASTNode get() {
 					return x.getDeclaration();
 				}
+				@Override
 				public void set(ASTNode value) {
 					x.setDeclaration((AbstractTypeDeclaration) value);
 				}
@@ -4806,6 +5022,7 @@ public class ASTTest extends org.eclipse.jdt.core.tests.junit.extension.TestCase
 
 		if (this.ast.apiLevel() >= JLS3_INTERNAL) {
 			genericPropertyListTest(x, x.modifiers(), new Property("Modifiers", true, IExtendedModifier.class) { //$NON-NLS-1$
+				@Override
 				public ASTNode sample(AST targetAst, boolean parented) {
 					Modifier result = targetAst.newModifier(Modifier.ModifierKeyword.PUBLIC_KEYWORD);
 					if (parented) {
@@ -4814,11 +5031,13 @@ public class ASTTest extends org.eclipse.jdt.core.tests.junit.extension.TestCase
 					}
 					return result;
 				}
+				@Override
 				public ASTNode wrap() {
 					SingleMemberAnnotation s1 = x.getAST().newSingleMemberAnnotation();
 					s1.setValue(x);
 					return s1;
 				}
+				@Override
 				public void unwrap() {
 					SingleMemberAnnotation s1 = (SingleMemberAnnotation) x.getParent();
 					s1.setValue(x.getAST().newNullLiteral());
@@ -4847,6 +5066,7 @@ public class ASTTest extends org.eclipse.jdt.core.tests.junit.extension.TestCase
 		}
 
 		genericPropertyTest(x, new Property("Type", true, Type.class) { //$NON-NLS-1$
+			@Override
 			public ASTNode sample(AST targetAst, boolean parented) {
 				SimpleType result = targetAst.newSimpleType(
 					targetAst.newSimpleName("foo")); //$NON-NLS-1$
@@ -4855,9 +5075,11 @@ public class ASTTest extends org.eclipse.jdt.core.tests.junit.extension.TestCase
 				}
 				return result;
 			}
+			@Override
 			public ASTNode get() {
 				return x.getType();
 			}
+			@Override
 			public void set(ASTNode value) {
 				x.setType((Type) value);
 			}
@@ -4865,6 +5087,7 @@ public class ASTTest extends org.eclipse.jdt.core.tests.junit.extension.TestCase
 
 		genericPropertyListTest(x, x.fragments(),
 		  new Property("VariableSpecifiers", true, VariableDeclarationFragment.class) { //$NON-NLS-1$
+			@Override
 			public ASTNode sample(AST targetAst, boolean parented) {
 				VariableDeclarationFragment result = targetAst.newVariableDeclarationFragment();
 				if (parented) {
@@ -4872,6 +5095,7 @@ public class ASTTest extends org.eclipse.jdt.core.tests.junit.extension.TestCase
 				}
 				return result;
 			}
+			@Override
 			public ASTNode wrap() {
 				// return VariableDeclarationFragment that embeds x
 				VariableDeclarationFragment s1 = ASTTest.this.ast.newVariableDeclarationFragment();
@@ -4886,6 +5110,7 @@ public class ASTTest extends org.eclipse.jdt.core.tests.junit.extension.TestCase
 				s3.getBody().statements().add(s2);
 				return s1;
 			}
+			@Override
 			public void unwrap() {
 				ForStatement s2 = (ForStatement) x.getParent();
 				s2.initializers().remove(x);
@@ -4938,6 +5163,7 @@ public class ASTTest extends org.eclipse.jdt.core.tests.junit.extension.TestCase
 		tModifiers(x);
 
 		genericPropertyTest(x, new Property("Type", true, Type.class) { //$NON-NLS-1$
+			@Override
 			public ASTNode sample(AST targetAst, boolean parented) {
 				SimpleType result = targetAst.newSimpleType(
 					targetAst.newSimpleName("foo")); //$NON-NLS-1$
@@ -4946,9 +5172,11 @@ public class ASTTest extends org.eclipse.jdt.core.tests.junit.extension.TestCase
 				}
 				return result;
 			}
+			@Override
 			public ASTNode get() {
 				return x.getType();
 			}
+			@Override
 			public void set(ASTNode value) {
 				x.setType((Type) value);
 			}
@@ -4956,6 +5184,7 @@ public class ASTTest extends org.eclipse.jdt.core.tests.junit.extension.TestCase
 
 		genericPropertyListTest(x, x.fragments(),
 		  new Property("VariableSpecifiers", true, VariableDeclarationFragment.class) { //$NON-NLS-1$
+			@Override
 			public ASTNode sample(AST targetAst, boolean parented) {
 				VariableDeclarationFragment result = targetAst.newVariableDeclarationFragment();
 				if (parented) {
@@ -4963,6 +5192,7 @@ public class ASTTest extends org.eclipse.jdt.core.tests.junit.extension.TestCase
 				}
 				return result;
 			}
+			@Override
 			public ASTNode wrap() {
 				// return VariableDeclarationFragment that embeds x
 				VariableDeclarationFragment s1 = ASTTest.this.ast.newVariableDeclarationFragment();
@@ -4973,6 +5203,7 @@ public class ASTTest extends org.eclipse.jdt.core.tests.junit.extension.TestCase
 				a1.bodyDeclarations().add(x);
 				return s1;
 			}
+			@Override
 			public void unwrap() {
 				AnonymousClassDeclaration a1 = (AnonymousClassDeclaration) x.getParent();
 				a1.bodyDeclarations().remove(x);
@@ -5063,6 +5294,7 @@ public class ASTTest extends org.eclipse.jdt.core.tests.junit.extension.TestCase
 		assertTrue(Assignment.Operator.toOperator("not-an-op") == null); //$NON-NLS-1$
 
 		genericPropertyTest(x, new Property("LeftHandSide", true, Expression.class) { //$NON-NLS-1$
+			@Override
 			public ASTNode sample(AST targetAst, boolean parented) {
 				SimpleName result = targetAst.newSimpleName("foo"); //$NON-NLS-1$
 				if (parented) {
@@ -5070,25 +5302,30 @@ public class ASTTest extends org.eclipse.jdt.core.tests.junit.extension.TestCase
 				}
 				return result;
 			}
+			@Override
 			public ASTNode wrap() {
 				// return Expression that embeds x
 				ParenthesizedExpression s1 = ASTTest.this.ast.newParenthesizedExpression();
 				s1.setExpression(x);
 				return s1;
 			}
+			@Override
 			public void unwrap() {
 				ParenthesizedExpression s1 = (ParenthesizedExpression) x.getParent();
 				s1.setExpression(ASTTest.this.ast.newSimpleName("x")); //$NON-NLS-1$
 			}
+			@Override
 			public ASTNode get() {
 				return x.getLeftHandSide();
 			}
+			@Override
 			public void set(ASTNode value) {
 				x.setLeftHandSide((Expression) value);
 			}
 		});
 
 		genericPropertyTest(x, new Property("RightHandSide", true, Expression.class) { //$NON-NLS-1$
+			@Override
 			public ASTNode sample(AST targetAst, boolean parented) {
 				SimpleName result = targetAst.newSimpleName("foo"); //$NON-NLS-1$
 				if (parented) {
@@ -5096,19 +5333,23 @@ public class ASTTest extends org.eclipse.jdt.core.tests.junit.extension.TestCase
 				}
 				return result;
 			}
+			@Override
 			public ASTNode wrap() {
 				// return Expression that embeds x
 				ParenthesizedExpression s1 = ASTTest.this.ast.newParenthesizedExpression();
 				s1.setExpression(x);
 				return s1;
 			}
+			@Override
 			public void unwrap() {
 				ParenthesizedExpression s1 = (ParenthesizedExpression) x.getParent();
 				s1.setExpression(ASTTest.this.ast.newSimpleName("x")); //$NON-NLS-1$
 			}
+			@Override
 			public ASTNode get() {
 				return x.getRightHandSide();
 			}
+			@Override
 			public void set(ASTNode value) {
 				x.setRightHandSide((Expression) value);
 			}
@@ -5136,6 +5377,7 @@ public class ASTTest extends org.eclipse.jdt.core.tests.junit.extension.TestCase
 		tLeadingComment(x);
 
 		genericPropertyTest(x, new Property("Label", false, SimpleName.class) { //$NON-NLS-1$
+			@Override
 			public ASTNode sample(AST targetAst, boolean parented) {
 				SimpleName result = targetAst.newSimpleName("foo"); //$NON-NLS-1$
 				if (parented) {
@@ -5143,9 +5385,11 @@ public class ASTTest extends org.eclipse.jdt.core.tests.junit.extension.TestCase
 				}
 				return result;
 			}
+			@Override
 			public ASTNode get() {
 				return x.getLabel();
 			}
+			@Override
 			public void set(ASTNode value) {
 				x.setLabel((SimpleName) value);
 			}
@@ -5173,6 +5417,7 @@ public class ASTTest extends org.eclipse.jdt.core.tests.junit.extension.TestCase
 		tLeadingComment(x);
 
 		genericPropertyTest(x, new Property("Label", false, SimpleName.class) { //$NON-NLS-1$
+			@Override
 			public ASTNode sample(AST targetAst, boolean parented) {
 				SimpleName result = targetAst.newSimpleName("foo"); //$NON-NLS-1$
 				if (parented) {
@@ -5180,9 +5425,11 @@ public class ASTTest extends org.eclipse.jdt.core.tests.junit.extension.TestCase
 				}
 				return result;
 			}
+			@Override
 			public ASTNode get() {
 				return x.getLabel();
 			}
+			@Override
 			public void set(ASTNode value) {
 				x.setLabel((SimpleName) value);
 			}
@@ -5214,6 +5461,7 @@ public class ASTTest extends org.eclipse.jdt.core.tests.junit.extension.TestCase
 		tLeadingComment(x);
 
 		genericPropertyTest(x, new Property("Expression", true, Expression.class) { //$NON-NLS-1$
+			@Override
 			public ASTNode sample(AST localAst, boolean parented) {
 				Expression result = localAst.newSimpleName("foo"); //$NON-NLS-1$
 				if (parented) {
@@ -5221,6 +5469,7 @@ public class ASTTest extends org.eclipse.jdt.core.tests.junit.extension.TestCase
 				}
 				return result;
 			}
+			@Override
 			public ASTNode wrap() {
 				// return Expression that embeds x
 				ClassInstanceCreation s1 = ASTTest.this.ast.newClassInstanceCreation();
@@ -5233,19 +5482,23 @@ public class ASTTest extends org.eclipse.jdt.core.tests.junit.extension.TestCase
 				s3.statements().add(x);
 				return s1;
 			}
+			@Override
 			public void unwrap() {
 				Block s3 = (Block) x.getParent();
 				s3.statements().remove(x);
 			}
+			@Override
 			public ASTNode get() {
 				return x.getExpression();
 			}
+			@Override
 			public void set(ASTNode value) {
 				x.setExpression((Expression) value);
 			}
 		});
 
 		genericPropertyTest(x, new Property("ThenStatement", true, Statement.class) { //$NON-NLS-1$
+			@Override
 			public ASTNode sample(AST targetAst, boolean parented) {
 				Block result = targetAst.newBlock();
 				if (parented) {
@@ -5254,25 +5507,30 @@ public class ASTTest extends org.eclipse.jdt.core.tests.junit.extension.TestCase
 				}
 				return result;
 			}
+			@Override
 			public ASTNode wrap() {
 				// return a Statement that embeds x
 				Block s1 = ASTTest.this.ast.newBlock();
 				s1.statements().add(x);
 				return s1;
 			}
+			@Override
 			public void unwrap() {
 				Block s2 = (Block) x.getParent();
 				s2.statements().remove(x);
 			}
+			@Override
 			public ASTNode get() {
 				return x.getThenStatement();
 			}
+			@Override
 			public void set(ASTNode value) {
 				x.setThenStatement((Statement) value);
 			}
 		});
 
 		genericPropertyTest(x, new Property("ElseStatement", false, Statement.class) { //$NON-NLS-1$
+			@Override
 			public ASTNode sample(AST targetAst, boolean parented) {
 				Block result = targetAst.newBlock();
 				if (parented) {
@@ -5281,19 +5539,23 @@ public class ASTTest extends org.eclipse.jdt.core.tests.junit.extension.TestCase
 				}
 				return result;
 			}
+			@Override
 			public ASTNode wrap() {
 				// return a Statement that embeds x
 				Block s1 = ASTTest.this.ast.newBlock();
 				s1.statements().add(x);
 				return s1;
 			}
+			@Override
 			public void unwrap() {
 				Block s2 = (Block) x.getParent();
 				s2.statements().remove(x);
 			}
+			@Override
 			public ASTNode get() {
 				return x.getElseStatement();
 			}
+			@Override
 			public void set(ASTNode value) {
 				x.setElseStatement((Statement) value);
 			}
@@ -5324,6 +5586,7 @@ public class ASTTest extends org.eclipse.jdt.core.tests.junit.extension.TestCase
 		tLeadingComment(x);
 
 		genericPropertyTest(x, new Property("Expression", true, Expression.class) { //$NON-NLS-1$
+			@Override
 			public ASTNode sample(AST localAst, boolean parented) {
 				Expression result = localAst.newSimpleName("foo"); //$NON-NLS-1$
 				if (parented) {
@@ -5331,6 +5594,7 @@ public class ASTTest extends org.eclipse.jdt.core.tests.junit.extension.TestCase
 				}
 				return result;
 			}
+			@Override
 			public ASTNode wrap() {
 				// return Expression that embeds x
 				ClassInstanceCreation s1 = ASTTest.this.ast.newClassInstanceCreation();
@@ -5343,19 +5607,23 @@ public class ASTTest extends org.eclipse.jdt.core.tests.junit.extension.TestCase
 				s3.statements().add(x);
 				return s1;
 			}
+			@Override
 			public void unwrap() {
 				Block s3 = (Block) x.getParent();
 				s3.statements().remove(x);
 			}
+			@Override
 			public ASTNode get() {
 				return x.getExpression();
 			}
+			@Override
 			public void set(ASTNode value) {
 				x.setExpression((Expression) value);
 			}
 		});
 
 		genericPropertyTest(x, new Property("Body", true, Statement.class) { //$NON-NLS-1$
+			@Override
 			public ASTNode sample(AST targetAst, boolean parented) {
 				Block result = targetAst.newBlock();
 				if (parented) {
@@ -5364,19 +5632,23 @@ public class ASTTest extends org.eclipse.jdt.core.tests.junit.extension.TestCase
 				}
 				return result;
 			}
+			@Override
 			public ASTNode wrap() {
 				// return a Statement that embeds x
 				Block s1 = ASTTest.this.ast.newBlock();
 				s1.statements().add(x);
 				return s1;
 			}
+			@Override
 			public void unwrap() {
 				Block s2 = (Block) x.getParent();
 				s2.statements().remove(x);
 			}
+			@Override
 			public ASTNode get() {
 				return x.getBody();
 			}
+			@Override
 			public void set(ASTNode value) {
 				x.setBody((Statement) value);
 			}
@@ -5407,6 +5679,7 @@ public class ASTTest extends org.eclipse.jdt.core.tests.junit.extension.TestCase
 		tLeadingComment(x);
 
 		genericPropertyTest(x, new Property("Expression", true, Expression.class) { //$NON-NLS-1$
+			@Override
 			public ASTNode sample(AST localAst, boolean parented) {
 				Expression result = localAst.newSimpleName("foo"); //$NON-NLS-1$
 				if (parented) {
@@ -5414,6 +5687,7 @@ public class ASTTest extends org.eclipse.jdt.core.tests.junit.extension.TestCase
 				}
 				return result;
 			}
+			@Override
 			public ASTNode wrap() {
 				// return Expression that embeds x
 				ClassInstanceCreation s1 = ASTTest.this.ast.newClassInstanceCreation();
@@ -5426,19 +5700,23 @@ public class ASTTest extends org.eclipse.jdt.core.tests.junit.extension.TestCase
 				s3.statements().add(x);
 				return s1;
 			}
+			@Override
 			public void unwrap() {
 				Block s3 = (Block) x.getParent();
 				s3.statements().remove(x);
 			}
+			@Override
 			public ASTNode get() {
 				return x.getExpression();
 			}
+			@Override
 			public void set(ASTNode value) {
 				x.setExpression((Expression) value);
 			}
 		});
 
 		genericPropertyTest(x, new Property("Body", true, Statement.class) { //$NON-NLS-1$
+			@Override
 			public ASTNode sample(AST targetAst, boolean parented) {
 				Block result = targetAst.newBlock();
 				if (parented) {
@@ -5447,19 +5725,23 @@ public class ASTTest extends org.eclipse.jdt.core.tests.junit.extension.TestCase
 				}
 				return result;
 			}
+			@Override
 			public ASTNode wrap() {
 				// return a Statement that embeds x
 				Block s1 = ASTTest.this.ast.newBlock();
 				s1.statements().add(x);
 				return s1;
 			}
+			@Override
 			public void unwrap() {
 				Block s2 = (Block) x.getParent();
 				s2.statements().remove(x);
 			}
+			@Override
 			public ASTNode get() {
 				return x.getBody();
 			}
+			@Override
 			public void set(ASTNode value) {
 				x.setBody((Statement) value);
 			}
@@ -5500,6 +5782,7 @@ public class ASTTest extends org.eclipse.jdt.core.tests.junit.extension.TestCase
 		tLeadingComment(x);
 
 		genericPropertyTest(x, new Property("Body", true, Block.class) { //$NON-NLS-1$
+			@Override
 			public ASTNode sample(AST targetAst, boolean parented) {
 				Block result = targetAst.newBlock();
 				if (parented) {
@@ -5508,19 +5791,23 @@ public class ASTTest extends org.eclipse.jdt.core.tests.junit.extension.TestCase
 				}
 				return result;
 			}
+			@Override
 			public ASTNode wrap() {
 				// return a Block that embeds x
 				Block s1 = ASTTest.this.ast.newBlock();
 				s1.statements().add(x);
 				return s1;
 			}
+			@Override
 			public void unwrap() {
 				Block s2 = (Block) x.getParent();
 				s2.statements().remove(x);
 			}
+			@Override
 			public ASTNode get() {
 				return x.getBody();
 			}
+			@Override
 			public void set(ASTNode value) {
 				x.setBody((Block) value);
 			}
@@ -5528,6 +5815,7 @@ public class ASTTest extends org.eclipse.jdt.core.tests.junit.extension.TestCase
 
 		genericPropertyListTest(x, x.catchClauses(),
 		  new Property("CatchClauses", true, CatchClause.class) { //$NON-NLS-1$
+			@Override
 			public ASTNode sample(AST targetAst, boolean parented) {
 				CatchClause result = targetAst.newCatchClause();
 				if (parented) {
@@ -5536,6 +5824,7 @@ public class ASTTest extends org.eclipse.jdt.core.tests.junit.extension.TestCase
 				}
 				return result;
 			}
+			@Override
 			public ASTNode wrap() {
 				// return CatchClause that embeds x
 				CatchClause s1 = ASTTest.this.ast.newCatchClause();
@@ -5544,6 +5833,7 @@ public class ASTTest extends org.eclipse.jdt.core.tests.junit.extension.TestCase
 				s2.statements().add(x);
 				return s1;
 			}
+			@Override
 			public void unwrap() {
 				Block s2 = (Block) x.getParent();
 				s2.statements().remove(x);
@@ -5551,6 +5841,7 @@ public class ASTTest extends org.eclipse.jdt.core.tests.junit.extension.TestCase
 		});
 
 		genericPropertyTest(x, new Property("Finally", false, Block.class) { //$NON-NLS-1$
+			@Override
 			public ASTNode sample(AST targetAst, boolean parented) {
 				Block result = targetAst.newBlock();
 				if (parented) {
@@ -5559,19 +5850,23 @@ public class ASTTest extends org.eclipse.jdt.core.tests.junit.extension.TestCase
 				}
 				return result;
 			}
+			@Override
 			public ASTNode wrap() {
 				// return a Block that embeds x
 				Block s1 = ASTTest.this.ast.newBlock();
 				s1.statements().add(x);
 				return s1;
 			}
+			@Override
 			public void unwrap() {
 				Block s2 = (Block) x.getParent();
 				s2.statements().remove(x);
 			}
+			@Override
 			public ASTNode get() {
 				return x.getFinally();
 			}
+			@Override
 			public void set(ASTNode value) {
 				x.setFinally((Block) value);
 			}
@@ -5595,6 +5890,7 @@ public class ASTTest extends org.eclipse.jdt.core.tests.junit.extension.TestCase
 		assertTrue(this.ast.modificationCount() == previousCount);
 
 		genericPropertyTest(x, new Property("Exception", true, SingleVariableDeclaration.class) { //$NON-NLS-1$
+			@Override
 			public ASTNode sample(AST targetAst, boolean parented) {
 				SingleVariableDeclaration result = targetAst.newSingleVariableDeclaration();
 				if (parented) {
@@ -5603,6 +5899,7 @@ public class ASTTest extends org.eclipse.jdt.core.tests.junit.extension.TestCase
 				}
 				return result;
 			}
+			@Override
 			public ASTNode wrap() {
 				// return SingleVariableDeclaration that embeds x
 				SingleVariableDeclaration s1 = ASTTest.this.ast.newSingleVariableDeclaration();
@@ -5619,19 +5916,23 @@ public class ASTTest extends org.eclipse.jdt.core.tests.junit.extension.TestCase
 				s5.catchClauses().add(x);
 				return s1;
 			}
+			@Override
 			public void unwrap() {
 				TryStatement s5 = (TryStatement) x.getParent();
 				s5.catchClauses().remove(x);
 			}
+			@Override
 			public ASTNode get() {
 				return x.getException();
 			}
+			@Override
 			public void set(ASTNode value) {
 				x.setException((SingleVariableDeclaration) value);
 			}
 		});
 
 		genericPropertyTest(x, new Property("Body", true, Block.class) { //$NON-NLS-1$
+			@Override
 			public ASTNode sample(AST targetAst, boolean parented) {
 				Block result = targetAst.newBlock();
 				if (parented) {
@@ -5640,6 +5941,7 @@ public class ASTTest extends org.eclipse.jdt.core.tests.junit.extension.TestCase
 				}
 				return result;
 			}
+			@Override
 			public ASTNode wrap() {
 				// return a Block that embeds x
 				Block s1 = ASTTest.this.ast.newBlock();
@@ -5648,13 +5950,16 @@ public class ASTTest extends org.eclipse.jdt.core.tests.junit.extension.TestCase
 				s2.catchClauses().add(x);
 				return s1;
 			}
+			@Override
 			public void unwrap() {
 				TryStatement s2 = (TryStatement) x.getParent();
 				s2.catchClauses().remove(x);
 			}
+			@Override
 			public ASTNode get() {
 				return x.getBody();
 			}
+			@Override
 			public void set(ASTNode value) {
 				x.setBody((Block) value);
 			}
@@ -5737,6 +6042,7 @@ public class ASTTest extends org.eclipse.jdt.core.tests.junit.extension.TestCase
 	 */
 	void tJavadocComment(final BodyDeclaration x) {
 		genericPropertyTest(x, new Property("Javadoc", false, Javadoc.class) { //$NON-NLS-1$
+			@Override
 			public ASTNode sample(AST targetAst, boolean parented) {
 				Javadoc result = targetAst.newJavadoc();
 				if (parented) {
@@ -5744,9 +6050,11 @@ public class ASTTest extends org.eclipse.jdt.core.tests.junit.extension.TestCase
 				}
 				return result;
 			}
+			@Override
 			public ASTNode get() {
 				return x.getJavadoc();
 			}
+			@Override
 			public void set(ASTNode value) {
 				x.setJavadoc((Javadoc) value);
 			}
@@ -5785,6 +6093,7 @@ public class ASTTest extends org.eclipse.jdt.core.tests.junit.extension.TestCase
 			return;
 		}
 		genericPropertyListTest(x, x.modifiers(), new Property("Modifiers", true, IExtendedModifier.class) { //$NON-NLS-1$
+			@Override
 			public ASTNode sample(AST targetAst, boolean parented) {
 				Modifier result = targetAst.newModifier(Modifier.ModifierKeyword.PUBLIC_KEYWORD);
 				if (parented) {
@@ -5793,6 +6102,7 @@ public class ASTTest extends org.eclipse.jdt.core.tests.junit.extension.TestCase
 				}
 				return result;
 			}
+			@Override
 			public ASTNode wrap() {
 				SingleMemberAnnotation s1 = x.getAST().newSingleMemberAnnotation();
 				ClassInstanceCreation s2 = x.getAST().newClassInstanceCreation();
@@ -5804,6 +6114,7 @@ public class ASTTest extends org.eclipse.jdt.core.tests.junit.extension.TestCase
 				s4.modifiers().add(x);
 				return s1;
 			}
+			@Override
 			public void unwrap() {
 				MethodDeclaration s4 = (MethodDeclaration) x.getParent();
 				s4.modifiers().remove(x);
@@ -5948,6 +6259,7 @@ public class ASTTest extends org.eclipse.jdt.core.tests.junit.extension.TestCase
 		tLeadingComment(x);
 
 		genericPropertyTest(x, new Property("Expression", false, Expression.class) { //$NON-NLS-1$
+			@Override
 			public ASTNode sample(AST localAst, boolean parented) {
 				Expression result = localAst.newSimpleName("foo"); //$NON-NLS-1$
 				if (parented) {
@@ -5955,6 +6267,7 @@ public class ASTTest extends org.eclipse.jdt.core.tests.junit.extension.TestCase
 				}
 				return result;
 			}
+			@Override
 			public ASTNode wrap() {
 				// return Expression that embeds x
 				ClassInstanceCreation s1 = ASTTest.this.ast.newClassInstanceCreation();
@@ -5967,13 +6280,16 @@ public class ASTTest extends org.eclipse.jdt.core.tests.junit.extension.TestCase
 				s3.statements().add(x);
 				return s1;
 			}
+			@Override
 			public void unwrap() {
 				Block s3 = (Block) x.getParent();
 				s3.statements().remove(x);
 			}
+			@Override
 			public ASTNode get() {
 				return x.getExpression();
 			}
+			@Override
 			public void set(ASTNode value) {
 				x.setExpression((Expression) value);
 			}
@@ -6001,6 +6317,7 @@ public class ASTTest extends org.eclipse.jdt.core.tests.junit.extension.TestCase
 		tLeadingComment(x);
 
 		genericPropertyTest(x, new Property("Expression", true, Expression.class) { //$NON-NLS-1$
+			@Override
 			public ASTNode sample(AST localAst, boolean parented) {
 				Expression result = localAst.newSimpleName("foo"); //$NON-NLS-1$
 				if (parented) {
@@ -6008,6 +6325,7 @@ public class ASTTest extends org.eclipse.jdt.core.tests.junit.extension.TestCase
 				}
 				return result;
 			}
+			@Override
 			public ASTNode wrap() {
 				// return Expression that embeds x
 				ClassInstanceCreation s1 = ASTTest.this.ast.newClassInstanceCreation();
@@ -6020,13 +6338,16 @@ public class ASTTest extends org.eclipse.jdt.core.tests.junit.extension.TestCase
 				s3.statements().add(x);
 				return s1;
 			}
+			@Override
 			public void unwrap() {
 				Block s3 = (Block) x.getParent();
 				s3.statements().remove(x);
 			}
+			@Override
 			public ASTNode get() {
 				return x.getExpression();
 			}
+			@Override
 			public void set(ASTNode value) {
 				x.setExpression((Expression) value);
 			}
@@ -6055,6 +6376,7 @@ public class ASTTest extends org.eclipse.jdt.core.tests.junit.extension.TestCase
 		tLeadingComment(x);
 
 		genericPropertyTest(x, new Property("Expression", true, Expression.class) { //$NON-NLS-1$
+			@Override
 			public ASTNode sample(AST localAst, boolean parented) {
 				Expression result = localAst.newSimpleName("foo"); //$NON-NLS-1$
 				if (parented) {
@@ -6062,6 +6384,7 @@ public class ASTTest extends org.eclipse.jdt.core.tests.junit.extension.TestCase
 				}
 				return result;
 			}
+			@Override
 			public ASTNode wrap() {
 				// return Expression that embeds x
 				ClassInstanceCreation s1 = ASTTest.this.ast.newClassInstanceCreation();
@@ -6074,19 +6397,23 @@ public class ASTTest extends org.eclipse.jdt.core.tests.junit.extension.TestCase
 				s3.statements().add(x);
 				return s1;
 			}
+			@Override
 			public void unwrap() {
 				Block s3 = (Block) x.getParent();
 				s3.statements().remove(x);
 			}
+			@Override
 			public ASTNode get() {
 				return x.getExpression();
 			}
+			@Override
 			public void set(ASTNode value) {
 				x.setExpression((Expression) value);
 			}
 		});
 
 		genericPropertyTest(x, new Property("Message", false, Expression.class) { //$NON-NLS-1$
+			@Override
 			public ASTNode sample(AST localAst, boolean parented) {
 				Expression result = localAst.newSimpleName("foo"); //$NON-NLS-1$
 				if (parented) {
@@ -6094,6 +6421,7 @@ public class ASTTest extends org.eclipse.jdt.core.tests.junit.extension.TestCase
 				}
 				return result;
 			}
+			@Override
 			public ASTNode wrap() {
 				// return Expression that embeds x
 				ClassInstanceCreation s1 = ASTTest.this.ast.newClassInstanceCreation();
@@ -6106,13 +6434,16 @@ public class ASTTest extends org.eclipse.jdt.core.tests.junit.extension.TestCase
 				s3.statements().add(x);
 				return s1;
 			}
+			@Override
 			public void unwrap() {
 				Block s3 = (Block) x.getParent();
 				s3.statements().remove(x);
 			}
+			@Override
 			public ASTNode get() {
 				return x.getMessage();
 			}
+			@Override
 			public void set(ASTNode value) {
 				x.setMessage((Expression) value);
 			}
@@ -6141,6 +6472,7 @@ public class ASTTest extends org.eclipse.jdt.core.tests.junit.extension.TestCase
 		tLeadingComment(x);
 
 		genericPropertyTest(x, new Property("Expression", true, Expression.class) { //$NON-NLS-1$
+			@Override
 			public ASTNode sample(AST localAst, boolean parented) {
 				Expression result = localAst.newSimpleName("foo"); //$NON-NLS-1$
 				if (parented) {
@@ -6148,6 +6480,7 @@ public class ASTTest extends org.eclipse.jdt.core.tests.junit.extension.TestCase
 				}
 				return result;
 			}
+			@Override
 			public ASTNode wrap() {
 				// return Expression that embeds x
 				ClassInstanceCreation s1 = ASTTest.this.ast.newClassInstanceCreation();
@@ -6160,13 +6493,16 @@ public class ASTTest extends org.eclipse.jdt.core.tests.junit.extension.TestCase
 				s3.statements().add(x);
 				return s1;
 			}
+			@Override
 			public void unwrap() {
 				Block s3 = (Block) x.getParent();
 				s3.statements().remove(x);
 			}
+			@Override
 			public ASTNode get() {
 				return x.getExpression();
 			}
+			@Override
 			public void set(ASTNode value) {
 				x.setExpression((Expression) value);
 			}
@@ -6174,6 +6510,7 @@ public class ASTTest extends org.eclipse.jdt.core.tests.junit.extension.TestCase
 
 		genericPropertyListTest(x, x.statements(),
 		  new Property("Statements", true, Statement.class) { //$NON-NLS-1$
+			@Override
 			public ASTNode sample(AST targetAst, boolean parented) {
 				Block result = targetAst.newBlock();
 				if (parented) {
@@ -6182,12 +6519,14 @@ public class ASTTest extends org.eclipse.jdt.core.tests.junit.extension.TestCase
 				}
 				return result;
 			}
+			@Override
 			public ASTNode wrap() {
 				// return a Statement that embeds x
 				Block s1 = ASTTest.this.ast.newBlock();
 				s1.statements().add(x);
 				return s1;
 			}
+			@Override
 			public void unwrap() {
 				Block s2 = (Block) x.getParent();
 				s2.statements().remove(x);
@@ -6215,6 +6554,7 @@ public class ASTTest extends org.eclipse.jdt.core.tests.junit.extension.TestCase
 		assertTrue(this.ast.modificationCount() == previousCount);
 
 		genericPropertyTest(x, new Property("Expression", false, Expression.class) { //$NON-NLS-1$
+			@Override
 			public ASTNode sample(AST localAst, boolean parented) {
 				Expression result = localAst.newSimpleName("foo"); //$NON-NLS-1$
 				if (parented) {
@@ -6222,6 +6562,7 @@ public class ASTTest extends org.eclipse.jdt.core.tests.junit.extension.TestCase
 				}
 				return result;
 			}
+			@Override
 			public ASTNode wrap() {
 				// return Expression that embeds x
 				ClassInstanceCreation s1 = ASTTest.this.ast.newClassInstanceCreation();
@@ -6236,13 +6577,16 @@ public class ASTTest extends org.eclipse.jdt.core.tests.junit.extension.TestCase
 				s4.statements().add(x);
 				return s1;
 			}
+			@Override
 			public void unwrap() {
 				SwitchStatement s4 = (SwitchStatement) x.getParent();
 				s4.statements().remove(x);
 			}
+			@Override
 			public ASTNode get() {
 				return x.getExpression();
 			}
+			@Override
 			public void set(ASTNode value) {
 				x.setExpression((Expression) value);
 			}
@@ -6271,6 +6615,7 @@ public class ASTTest extends org.eclipse.jdt.core.tests.junit.extension.TestCase
 		tLeadingComment(x);
 
 		genericPropertyTest(x, new Property("Expression", true, Expression.class) { //$NON-NLS-1$
+			@Override
 			public ASTNode sample(AST localAst, boolean parented) {
 				Expression result = localAst.newSimpleName("foo"); //$NON-NLS-1$
 				if (parented) {
@@ -6278,6 +6623,7 @@ public class ASTTest extends org.eclipse.jdt.core.tests.junit.extension.TestCase
 				}
 				return result;
 			}
+			@Override
 			public ASTNode wrap() {
 				// return Expression that embeds x
 				ClassInstanceCreation s1 = ASTTest.this.ast.newClassInstanceCreation();
@@ -6290,19 +6636,23 @@ public class ASTTest extends org.eclipse.jdt.core.tests.junit.extension.TestCase
 				s3.statements().add(x);
 				return s1;
 			}
+			@Override
 			public void unwrap() {
 				Block s3 = (Block) x.getParent();
 				s3.statements().remove(x);
 			}
+			@Override
 			public ASTNode get() {
 				return x.getExpression();
 			}
+			@Override
 			public void set(ASTNode value) {
 				x.setExpression((Expression) value);
 			}
 		});
 
 		genericPropertyTest(x, new Property("Body", true, Block.class) { //$NON-NLS-1$
+			@Override
 			public ASTNode sample(AST targetAst, boolean parented) {
 				Block result = targetAst.newBlock();
 				if (parented) {
@@ -6311,19 +6661,23 @@ public class ASTTest extends org.eclipse.jdt.core.tests.junit.extension.TestCase
 				}
 				return result;
 			}
+			@Override
 			public ASTNode wrap() {
 				// return a Block that embeds x
 				Block s1 = ASTTest.this.ast.newBlock();
 				s1.statements().add(x);
 				return s1;
 			}
+			@Override
 			public void unwrap() {
 				Block s2 = (Block) x.getParent();
 				s2.statements().remove(x);
 			}
+			@Override
 			public ASTNode get() {
 				return x.getBody();
 			}
+			@Override
 			public void set(ASTNode value) {
 				x.setBody((Block) value);
 			}
@@ -6352,6 +6706,7 @@ public class ASTTest extends org.eclipse.jdt.core.tests.junit.extension.TestCase
 		tLeadingComment(x);
 
 		genericPropertyTest(x, new Property("Label", true, SimpleName.class) { //$NON-NLS-1$
+			@Override
 			public ASTNode sample(AST targetAst, boolean parented) {
 				SimpleName result = targetAst.newSimpleName("foo"); //$NON-NLS-1$
 				if (parented) {
@@ -6359,15 +6714,18 @@ public class ASTTest extends org.eclipse.jdt.core.tests.junit.extension.TestCase
 				}
 				return result;
 			}
+			@Override
 			public ASTNode get() {
 				return x.getLabel();
 			}
+			@Override
 			public void set(ASTNode value) {
 				x.setLabel((SimpleName) value);
 			}
 		});
 
 		genericPropertyTest(x, new Property("Body", true, Statement.class) { //$NON-NLS-1$
+			@Override
 			public ASTNode sample(AST targetAst, boolean parented) {
 				Block result = targetAst.newBlock();
 				if (parented) {
@@ -6376,19 +6734,23 @@ public class ASTTest extends org.eclipse.jdt.core.tests.junit.extension.TestCase
 				}
 				return result;
 			}
+			@Override
 			public ASTNode wrap() {
 				// return a Statement that embeds x
 				Block s1 = ASTTest.this.ast.newBlock();
 				s1.statements().add(x);
 				return s1;
 			}
+			@Override
 			public void unwrap() {
 				Block s2 = (Block) x.getParent();
 				s2.statements().remove(x);
 			}
+			@Override
 			public ASTNode get() {
 				return x.getBody();
 			}
+			@Override
 			public void set(ASTNode value) {
 				x.setBody((Statement) value);
 			}
@@ -6576,6 +6938,7 @@ public class ASTTest extends org.eclipse.jdt.core.tests.junit.extension.TestCase
 
 		genericPropertyListTest(x, x.initializers(),
 		  new Property("Initializers", true, Expression.class) { //$NON-NLS-1$
+			@Override
 			public ASTNode sample(AST targetAst, boolean parented) {
 				SimpleName result = targetAst.newSimpleName("foo"); //$NON-NLS-1$
 				if (parented) {
@@ -6583,6 +6946,7 @@ public class ASTTest extends org.eclipse.jdt.core.tests.junit.extension.TestCase
 				}
 				return result;
 			}
+			@Override
 			public ASTNode wrap() {
 				// return Expression that embeds x
 				ClassInstanceCreation s1 = ASTTest.this.ast.newClassInstanceCreation();
@@ -6595,6 +6959,7 @@ public class ASTTest extends org.eclipse.jdt.core.tests.junit.extension.TestCase
 				s3.statements().add(x);
 				return s1;
 			}
+			@Override
 			public void unwrap() {
 				Block s3 = (Block) x.getParent();
 				s3.statements().remove(x);
@@ -6602,6 +6967,7 @@ public class ASTTest extends org.eclipse.jdt.core.tests.junit.extension.TestCase
 		});
 
 		genericPropertyTest(x, new Property("Expression", false, Expression.class) { //$NON-NLS-1$
+			@Override
 			public ASTNode sample(AST localAst, boolean parented) {
 				Expression result = localAst.newSimpleName("foo"); //$NON-NLS-1$
 				if (parented) {
@@ -6609,6 +6975,7 @@ public class ASTTest extends org.eclipse.jdt.core.tests.junit.extension.TestCase
 				}
 				return result;
 			}
+			@Override
 			public ASTNode wrap() {
 				// return Expression that embeds x
 				ClassInstanceCreation s1 = ASTTest.this.ast.newClassInstanceCreation();
@@ -6621,13 +6988,16 @@ public class ASTTest extends org.eclipse.jdt.core.tests.junit.extension.TestCase
 				s3.statements().add(x);
 				return s1;
 			}
+			@Override
 			public void unwrap() {
 				Block s3 = (Block) x.getParent();
 				s3.statements().remove(x);
 			}
+			@Override
 			public ASTNode get() {
 				return x.getExpression();
 			}
+			@Override
 			public void set(ASTNode value) {
 				x.setExpression((Expression) value);
 			}
@@ -6635,6 +7005,7 @@ public class ASTTest extends org.eclipse.jdt.core.tests.junit.extension.TestCase
 
 		genericPropertyListTest(x, x.updaters(),
 		  new Property("Updaters", true, Expression.class) { //$NON-NLS-1$
+			@Override
 			public ASTNode sample(AST targetAst, boolean parented) {
 				SimpleName result = targetAst.newSimpleName("foo"); //$NON-NLS-1$
 				if (parented) {
@@ -6642,6 +7013,7 @@ public class ASTTest extends org.eclipse.jdt.core.tests.junit.extension.TestCase
 				}
 				return result;
 			}
+			@Override
 			public ASTNode wrap() {
 				// return Expression that embeds x
 				ClassInstanceCreation s1 = ASTTest.this.ast.newClassInstanceCreation();
@@ -6654,6 +7026,7 @@ public class ASTTest extends org.eclipse.jdt.core.tests.junit.extension.TestCase
 				s3.statements().add(x);
 				return s1;
 			}
+			@Override
 			public void unwrap() {
 				Block s3 = (Block) x.getParent();
 				s3.statements().remove(x);
@@ -6661,6 +7034,7 @@ public class ASTTest extends org.eclipse.jdt.core.tests.junit.extension.TestCase
 		});
 
 		genericPropertyTest(x, new Property("Body", true, Statement.class) { //$NON-NLS-1$
+			@Override
 			public ASTNode sample(AST targetAst, boolean parented) {
 				Block result = targetAst.newBlock();
 				if (parented) {
@@ -6669,19 +7043,23 @@ public class ASTTest extends org.eclipse.jdt.core.tests.junit.extension.TestCase
 				}
 				return result;
 			}
+			@Override
 			public ASTNode wrap() {
 				// return a Statement that embeds x
 				Block s1 = ASTTest.this.ast.newBlock();
 				s1.statements().add(x);
 				return s1;
 			}
+			@Override
 			public void unwrap() {
 				Block s2 = (Block) x.getParent();
 				s2.statements().remove(x);
 			}
+			@Override
 			public ASTNode get() {
 				return x.getBody();
 			}
+			@Override
 			public void set(ASTNode value) {
 				x.setBody((Statement) value);
 			}
@@ -6725,6 +7103,7 @@ public class ASTTest extends org.eclipse.jdt.core.tests.junit.extension.TestCase
 		tLeadingComment(x);
 
 		genericPropertyTest(x, new Property("Parameter", true, SingleVariableDeclaration.class) { //$NON-NLS-1$
+			@Override
 			public ASTNode sample(AST targetAst, boolean parented) {
 				SingleVariableDeclaration result = targetAst.newSingleVariableDeclaration();
 				if (parented) {
@@ -6733,15 +7112,18 @@ public class ASTTest extends org.eclipse.jdt.core.tests.junit.extension.TestCase
 				}
 				return result;
 			}
+			@Override
 			public ASTNode get() {
 				return x.getParameter();
 			}
+			@Override
 			public void set(ASTNode value) {
 				x.setParameter((SingleVariableDeclaration) value);
 			}
 		});
 
 		genericPropertyTest(x, new Property("Expression", true, Expression.class) { //$NON-NLS-1$
+			@Override
 			public ASTNode sample(AST target, boolean parented) {
 				Expression result = target.newSimpleName("foo"); //$NON-NLS-1$
 				if (parented) {
@@ -6749,6 +7131,7 @@ public class ASTTest extends org.eclipse.jdt.core.tests.junit.extension.TestCase
 				}
 				return result;
 			}
+			@Override
 			public ASTNode wrap() {
 				// return Expression that embeds x
 				ClassInstanceCreation s1 = ASTTest.this.ast.newClassInstanceCreation();
@@ -6761,13 +7144,16 @@ public class ASTTest extends org.eclipse.jdt.core.tests.junit.extension.TestCase
 				s3.statements().add(x);
 				return s1;
 			}
+			@Override
 			public void unwrap() {
 				Block s3 = (Block) x.getParent();
 				s3.statements().remove(x);
 			}
+			@Override
 			public ASTNode get() {
 				return x.getExpression();
 			}
+			@Override
 			public void set(ASTNode value) {
 				x.setExpression((Expression) value);
  			}
@@ -6794,6 +7180,7 @@ public class ASTTest extends org.eclipse.jdt.core.tests.junit.extension.TestCase
 		if (this.ast.apiLevel() >= JLS3_INTERNAL) {
 			genericPropertyListTest(x, x.typeArguments(),
 			  new Property("TypeArguments", true, Type.class) { //$NON-NLS-1$
+				@Override
 				public ASTNode sample(AST targetAst, boolean parented) {
 					Type result = targetAst.newSimpleType(targetAst.newSimpleName("X")); //$NON-NLS-1$
 					if (parented) {
@@ -6806,6 +7193,7 @@ public class ASTTest extends org.eclipse.jdt.core.tests.junit.extension.TestCase
 
 		genericPropertyListTest(x, x.arguments(),
 		  new Property("Arguments", true, Expression.class) { //$NON-NLS-1$
+			@Override
 			public ASTNode sample(AST targetAst, boolean parented) {
 				SimpleName result = targetAst.newSimpleName("foo"); //$NON-NLS-1$
 				if (parented) {
@@ -6813,6 +7201,7 @@ public class ASTTest extends org.eclipse.jdt.core.tests.junit.extension.TestCase
 				}
 				return result;
 			}
+			@Override
 			public ASTNode wrap() {
 				// return Expression that embeds x
 				ClassInstanceCreation s1 = ASTTest.this.ast.newClassInstanceCreation();
@@ -6825,6 +7214,7 @@ public class ASTTest extends org.eclipse.jdt.core.tests.junit.extension.TestCase
 				s3.statements().add(x);
 				return s1;
 			}
+			@Override
 			public void unwrap() {
 				Block s3 = (Block) x.getParent();
 				s3.statements().remove(x);
@@ -6851,6 +7241,7 @@ public class ASTTest extends org.eclipse.jdt.core.tests.junit.extension.TestCase
 		assertTrue(this.ast.modificationCount() == previousCount);
 
 		genericPropertyTest(x, new Property("Expression", false, Expression.class) { //$NON-NLS-1$
+			@Override
 			public ASTNode sample(AST targetAst, boolean parented) {
 				SimpleName result = targetAst.newSimpleName("foo"); //$NON-NLS-1$
 				if (parented) {
@@ -6858,6 +7249,7 @@ public class ASTTest extends org.eclipse.jdt.core.tests.junit.extension.TestCase
 				}
 				return result;
 			}
+			@Override
 			public ASTNode wrap() {
 				// return Expression that embeds x
 				ClassInstanceCreation s1 = ASTTest.this.ast.newClassInstanceCreation();
@@ -6870,13 +7262,16 @@ public class ASTTest extends org.eclipse.jdt.core.tests.junit.extension.TestCase
 				s3.statements().add(x);
 				return s1;
 			}
+			@Override
 			public void unwrap() {
 				Block s3 = (Block) x.getParent();
 				s3.statements().remove(x);
 			}
+			@Override
 			public ASTNode get() {
 				return x.getExpression();
 			}
+			@Override
 			public void set(ASTNode value) {
 				x.setExpression((Expression) value);
 			}
@@ -6885,6 +7280,7 @@ public class ASTTest extends org.eclipse.jdt.core.tests.junit.extension.TestCase
 		if (this.ast.apiLevel() >= JLS3_INTERNAL) {
 			genericPropertyListTest(x, x.typeArguments(),
 			  new Property("TypeArguments", true, Type.class) { //$NON-NLS-1$
+				@Override
 				public ASTNode sample(AST targetAst, boolean parented) {
 					Type result = targetAst.newSimpleType(targetAst.newSimpleName("X")); //$NON-NLS-1$
 					if (parented) {
@@ -6897,6 +7293,7 @@ public class ASTTest extends org.eclipse.jdt.core.tests.junit.extension.TestCase
 
 		genericPropertyListTest(x, x.arguments(),
 		  new Property("Arguments", true, Expression.class) { //$NON-NLS-1$
+			@Override
 			public ASTNode sample(AST targetAst, boolean parented) {
 				SimpleName result = targetAst.newSimpleName("foo"); //$NON-NLS-1$
 				if (parented) {
@@ -6904,6 +7301,7 @@ public class ASTTest extends org.eclipse.jdt.core.tests.junit.extension.TestCase
 				}
 				return result;
 			}
+			@Override
 			public ASTNode wrap() {
 				// return Expression that embeds x
 				ClassInstanceCreation s1 = ASTTest.this.ast.newClassInstanceCreation();
@@ -6916,6 +7314,7 @@ public class ASTTest extends org.eclipse.jdt.core.tests.junit.extension.TestCase
 				s3.statements().add(x);
 				return s1;
 			}
+			@Override
 			public void unwrap() {
 				Block s3 = (Block) x.getParent();
 				s3.statements().remove(x);
@@ -6938,6 +7337,7 @@ public class ASTTest extends org.eclipse.jdt.core.tests.junit.extension.TestCase
 		assertTrue(this.ast.modificationCount() == previousCount);
 
 		genericPropertyTest(x, new Property("Qualifier", false, Name.class) { //$NON-NLS-1$
+			@Override
 			public ASTNode sample(AST targetAst, boolean parented) {
 				QualifiedName result = targetAst.newQualifiedName(
 					targetAst.newSimpleName("a"), //$NON-NLS-1$
@@ -6947,9 +7347,11 @@ public class ASTTest extends org.eclipse.jdt.core.tests.junit.extension.TestCase
 				}
 				return result;
 			}
+			@Override
 			public ASTNode get() {
 				return x.getQualifier();
 			}
+			@Override
 			public void set(ASTNode value) {
 				x.setQualifier((Name) value);
 			}
@@ -6972,6 +7374,7 @@ public class ASTTest extends org.eclipse.jdt.core.tests.junit.extension.TestCase
 		assertTrue(this.ast.modificationCount() == previousCount);
 
 		genericPropertyTest(x, new Property("Expression", true, Expression.class) { //$NON-NLS-1$
+			@Override
 			public ASTNode sample(AST localAst, boolean parented) {
 				Expression result = localAst.newSimpleName("foo"); //$NON-NLS-1$
 				if (parented) {
@@ -6979,24 +7382,29 @@ public class ASTTest extends org.eclipse.jdt.core.tests.junit.extension.TestCase
 				}
 				return result;
 			}
+			@Override
 			public ASTNode wrap() {
 				ParenthesizedExpression s1 = ASTTest.this.ast.newParenthesizedExpression();
 				s1.setExpression(x);
 				return s1;
 			}
+			@Override
 			public void unwrap() {
 				ParenthesizedExpression s1 = (ParenthesizedExpression) x.getParent();
 				s1.setExpression(ASTTest.this.ast.newSimpleName("fie")); //$NON-NLS-1$
 			}
+			@Override
 			public ASTNode get() {
 				return x.getExpression();
 			}
+			@Override
 			public void set(ASTNode value) {
 				x.setExpression((Expression) value);
 			}
 		});
 
 		genericPropertyTest(x, new Property("Name", true, SimpleName.class) { //$NON-NLS-1$
+			@Override
 			public ASTNode sample(AST targetAst, boolean parented) {
 				SimpleName result = targetAst.newSimpleName("foo"); //$NON-NLS-1$
 				if (parented) {
@@ -7004,9 +7412,11 @@ public class ASTTest extends org.eclipse.jdt.core.tests.junit.extension.TestCase
 				}
 				return result;
 			}
+			@Override
 			public ASTNode get() {
 				return x.getName();
 			}
+			@Override
 			public void set(ASTNode value) {
 				x.setName((SimpleName) value);
 			}
@@ -7030,6 +7440,7 @@ public class ASTTest extends org.eclipse.jdt.core.tests.junit.extension.TestCase
 		assertTrue(this.ast.modificationCount() == previousCount);
 
 		genericPropertyTest(x, new Property("Qualifier", false, Name.class) { //$NON-NLS-1$
+			@Override
 			public ASTNode sample(AST targetAst, boolean parented) {
 				QualifiedName result = targetAst.newQualifiedName(
 					targetAst.newSimpleName("a"), //$NON-NLS-1$
@@ -7039,15 +7450,18 @@ public class ASTTest extends org.eclipse.jdt.core.tests.junit.extension.TestCase
 				}
 				return result;
 			}
+			@Override
 			public ASTNode get() {
 				return x.getQualifier();
 			}
+			@Override
 			public void set(ASTNode value) {
 				x.setQualifier((Name) value);
 			}
 		});
 
 		genericPropertyTest(x, new Property("Name", true, SimpleName.class) { //$NON-NLS-1$
+			@Override
 			public ASTNode sample(AST targetAst, boolean parented) {
 				SimpleName result = targetAst.newSimpleName("foo"); //$NON-NLS-1$
 				if (parented) {
@@ -7055,9 +7469,11 @@ public class ASTTest extends org.eclipse.jdt.core.tests.junit.extension.TestCase
 				}
 				return result;
 			}
+			@Override
 			public ASTNode get() {
 				return x.getName();
 			}
+			@Override
 			public void set(ASTNode value) {
 				x.setName((SimpleName) value);
 			}
@@ -7084,6 +7500,7 @@ public class ASTTest extends org.eclipse.jdt.core.tests.junit.extension.TestCase
 		assertTrue(this.ast.modificationCount() == previousCount);
 
 		genericPropertyTest(x, new Property("Qualifier", false, Name.class) { //$NON-NLS-1$
+			@Override
 			public ASTNode sample(AST targetAst, boolean parented) {
 				QualifiedName result = targetAst.newQualifiedName(
 					targetAst.newSimpleName("a"), //$NON-NLS-1$
@@ -7093,9 +7510,11 @@ public class ASTTest extends org.eclipse.jdt.core.tests.junit.extension.TestCase
 				}
 				return result;
 			}
+			@Override
 			public ASTNode get() {
 				return x.getQualifier();
 			}
+			@Override
 			public void set(ASTNode value) {
 				x.setQualifier((Name) value);
 			}
@@ -7104,6 +7523,7 @@ public class ASTTest extends org.eclipse.jdt.core.tests.junit.extension.TestCase
 		if (this.ast.apiLevel() >= JLS3_INTERNAL) {
 			genericPropertyListTest(x, x.typeArguments(),
 			  new Property("TypeArguments", true, Type.class) { //$NON-NLS-1$
+				@Override
 				public ASTNode sample(AST targetAst, boolean parented) {
 					Type result = targetAst.newSimpleType(targetAst.newSimpleName("X")); //$NON-NLS-1$
 					if (parented) {
@@ -7115,6 +7535,7 @@ public class ASTTest extends org.eclipse.jdt.core.tests.junit.extension.TestCase
 		}
 
 		genericPropertyTest(x, new Property("Name", true, SimpleName.class) { //$NON-NLS-1$
+			@Override
 			public ASTNode sample(AST targetAst, boolean parented) {
 				SimpleName result = targetAst.newSimpleName("foo"); //$NON-NLS-1$
 				if (parented) {
@@ -7122,9 +7543,11 @@ public class ASTTest extends org.eclipse.jdt.core.tests.junit.extension.TestCase
 				}
 				return result;
 			}
+			@Override
 			public ASTNode get() {
 				return x.getName();
 			}
+			@Override
 			public void set(ASTNode value) {
 				x.setName((SimpleName) value);
 			}
@@ -7132,6 +7555,7 @@ public class ASTTest extends org.eclipse.jdt.core.tests.junit.extension.TestCase
 
 		genericPropertyListTest(x, x.arguments(),
 		  new Property("Arguments", true, Expression.class) { //$NON-NLS-1$
+			@Override
 			public ASTNode sample(AST targetAst, boolean parented) {
 				SimpleName result = targetAst.newSimpleName("foo"); //$NON-NLS-1$
 				if (parented) {
@@ -7139,12 +7563,14 @@ public class ASTTest extends org.eclipse.jdt.core.tests.junit.extension.TestCase
 				}
 				return result;
 			}
+			@Override
 			public ASTNode wrap() {
 				// return Expression that embeds x
 				ParenthesizedExpression s1 = ASTTest.this.ast.newParenthesizedExpression();
 				s1.setExpression(x);
 				return s1;
 			}
+			@Override
 			public void unwrap() {
 				ParenthesizedExpression s1 = (ParenthesizedExpression) x.getParent();
 				s1.setExpression(ASTTest.this.ast.newSimpleName("x")); //$NON-NLS-1$
@@ -7167,6 +7593,7 @@ public class ASTTest extends org.eclipse.jdt.core.tests.junit.extension.TestCase
 		assertTrue(this.ast.modificationCount() == previousCount);
 
 		genericPropertyTest(x, new Property("Type", true, Type.class) { //$NON-NLS-1$
+			@Override
 			public ASTNode sample(AST targetAst, boolean parented) {
 				SimpleType result = targetAst.newSimpleType(
 					targetAst.newSimpleName("a")); //$NON-NLS-1$
@@ -7175,9 +7602,11 @@ public class ASTTest extends org.eclipse.jdt.core.tests.junit.extension.TestCase
 				}
 				return result;
 			}
+			@Override
 			public ASTNode get() {
 				return x.getType();
 			}
+			@Override
 			public void set(ASTNode value) {
 				x.setType((Type) value);
 			}
@@ -7200,6 +7629,7 @@ public class ASTTest extends org.eclipse.jdt.core.tests.junit.extension.TestCase
 		assertTrue(this.ast.modificationCount() == previousCount);
 
 		genericPropertyTest(x, new Property("Type", true, Type.class) { //$NON-NLS-1$
+			@Override
 			public ASTNode sample(AST targetAst, boolean parented) {
 				SimpleType result = targetAst.newSimpleType(
 					targetAst.newSimpleName("a")); //$NON-NLS-1$
@@ -7208,15 +7638,18 @@ public class ASTTest extends org.eclipse.jdt.core.tests.junit.extension.TestCase
 				}
 				return result;
 			}
+			@Override
 			public ASTNode get() {
 				return x.getType();
 			}
+			@Override
 			public void set(ASTNode value) {
 				x.setType((Type) value);
 			}
 		});
 
 		genericPropertyTest(x, new Property("Expression", true, Expression.class) { //$NON-NLS-1$
+			@Override
 			public ASTNode sample(AST localAst, boolean parented) {
 				Expression result = localAst.newSimpleName("foo"); //$NON-NLS-1$
 				if (parented) {
@@ -7224,18 +7657,22 @@ public class ASTTest extends org.eclipse.jdt.core.tests.junit.extension.TestCase
 				}
 				return result;
 			}
+			@Override
 			public ASTNode wrap() {
 				ParenthesizedExpression s1 = ASTTest.this.ast.newParenthesizedExpression();
 				s1.setExpression(x);
 				return s1;
 			}
+			@Override
 			public void unwrap() {
 				ParenthesizedExpression s1 = (ParenthesizedExpression) x.getParent();
 				s1.setExpression(ASTTest.this.ast.newSimpleName("fie")); //$NON-NLS-1$
 			}
+			@Override
 			public ASTNode get() {
 				return x.getExpression();
 			}
+			@Override
 			public void set(ASTNode value) {
 				x.setExpression((Expression) value);
 			}
@@ -7305,6 +7742,7 @@ public class ASTTest extends org.eclipse.jdt.core.tests.junit.extension.TestCase
 		assertTrue(PrefixExpression.Operator.toOperator("huh") == null); //$NON-NLS-1$
 
 		genericPropertyTest(x, new Property("Operand", true, Expression.class) { //$NON-NLS-1$
+			@Override
 			public ASTNode sample(AST localAst, boolean parented) {
 				Expression result = localAst.newSimpleName("foo"); //$NON-NLS-1$
 				if (parented) {
@@ -7312,18 +7750,22 @@ public class ASTTest extends org.eclipse.jdt.core.tests.junit.extension.TestCase
 				}
 				return result;
 			}
+			@Override
 			public ASTNode wrap() {
 				ParenthesizedExpression s1 = ASTTest.this.ast.newParenthesizedExpression();
 				s1.setExpression(x);
 				return s1;
 			}
+			@Override
 			public void unwrap() {
 				ParenthesizedExpression s1 = (ParenthesizedExpression) x.getParent();
 				s1.setExpression(ASTTest.this.ast.newSimpleName("fie")); //$NON-NLS-1$
 			}
+			@Override
 			public ASTNode get() {
 				return x.getOperand();
 			}
+			@Override
 			public void set(ASTNode value) {
 				x.setOperand((Expression) value);
 			}
@@ -7385,6 +7827,7 @@ public class ASTTest extends org.eclipse.jdt.core.tests.junit.extension.TestCase
 		assertTrue(PostfixExpression.Operator.toOperator("huh") == null); //$NON-NLS-1$
 
 		genericPropertyTest(x, new Property("Operand", true, Expression.class) { //$NON-NLS-1$
+			@Override
 			public ASTNode sample(AST localAst, boolean parented) {
 				Expression result = localAst.newSimpleName("foo"); //$NON-NLS-1$
 				if (parented) {
@@ -7392,18 +7835,22 @@ public class ASTTest extends org.eclipse.jdt.core.tests.junit.extension.TestCase
 				}
 				return result;
 			}
+			@Override
 			public ASTNode wrap() {
 				ParenthesizedExpression s1 = ASTTest.this.ast.newParenthesizedExpression();
 				s1.setExpression(x);
 				return s1;
 			}
+			@Override
 			public void unwrap() {
 				ParenthesizedExpression s1 = (ParenthesizedExpression) x.getParent();
 				s1.setExpression(ASTTest.this.ast.newSimpleName("fie")); //$NON-NLS-1$
 			}
+			@Override
 			public ASTNode get() {
 				return x.getOperand();
 			}
+			@Override
 			public void set(ASTNode value) {
 				x.setOperand((Expression) value);
 			}
@@ -7501,6 +7948,7 @@ public class ASTTest extends org.eclipse.jdt.core.tests.junit.extension.TestCase
 		assertTrue(InfixExpression.Operator.toOperator("huh") == null); //$NON-NLS-1$
 
 		genericPropertyTest(x, new Property("LeftOperand", true, Expression.class) { //$NON-NLS-1$
+			@Override
 			public ASTNode sample(AST localAst, boolean parented) {
 				Expression result = localAst.newSimpleName("foo"); //$NON-NLS-1$
 				if (parented) {
@@ -7508,24 +7956,29 @@ public class ASTTest extends org.eclipse.jdt.core.tests.junit.extension.TestCase
 				}
 				return result;
 			}
+			@Override
 			public ASTNode wrap() {
 				ParenthesizedExpression s1 = ASTTest.this.ast.newParenthesizedExpression();
 				s1.setExpression(x);
 				return s1;
 			}
+			@Override
 			public void unwrap() {
 				ParenthesizedExpression s1 = (ParenthesizedExpression) x.getParent();
 				s1.setExpression(ASTTest.this.ast.newSimpleName("fie")); //$NON-NLS-1$
 			}
+			@Override
 			public ASTNode get() {
 				return x.getLeftOperand();
 			}
+			@Override
 			public void set(ASTNode value) {
 				x.setLeftOperand((Expression) value);
 			}
 		});
 
 		genericPropertyTest(x, new Property("RightOperand", true, Expression.class) { //$NON-NLS-1$
+			@Override
 			public ASTNode sample(AST localAst, boolean parented) {
 				Expression result = localAst.newSimpleName("foo"); //$NON-NLS-1$
 				if (parented) {
@@ -7533,18 +7986,22 @@ public class ASTTest extends org.eclipse.jdt.core.tests.junit.extension.TestCase
 				}
 				return result;
 			}
+			@Override
 			public ASTNode wrap() {
 				ParenthesizedExpression s1 = ASTTest.this.ast.newParenthesizedExpression();
 				s1.setExpression(x);
 				return s1;
 			}
+			@Override
 			public void unwrap() {
 				ParenthesizedExpression s1 = (ParenthesizedExpression) x.getParent();
 				s1.setExpression(ASTTest.this.ast.newSimpleName("fie")); //$NON-NLS-1$
 			}
+			@Override
 			public ASTNode get() {
 				return x.getRightOperand();
 			}
+			@Override
 			public void set(ASTNode value) {
 				x.setRightOperand((Expression) value);
 			}
@@ -7552,6 +8009,7 @@ public class ASTTest extends org.eclipse.jdt.core.tests.junit.extension.TestCase
 
 		genericPropertyListTest(x, x.extendedOperands(),
 		  new Property("ExtendedOperands", true, Expression.class) { //$NON-NLS-1$
+			@Override
 			public ASTNode sample(AST targetAst, boolean parented) {
 				SimpleName result = targetAst.newSimpleName("foo"); //$NON-NLS-1$
 				if (parented) {
@@ -7559,12 +8017,14 @@ public class ASTTest extends org.eclipse.jdt.core.tests.junit.extension.TestCase
 				}
 				return result;
 			}
+			@Override
 			public ASTNode wrap() {
 				// return Expression that embeds x
 				ParenthesizedExpression s1 = ASTTest.this.ast.newParenthesizedExpression();
 				s1.setExpression(x);
 				return s1;
 			}
+			@Override
 			public void unwrap() {
 				ParenthesizedExpression s1 = (ParenthesizedExpression) x.getParent();
 				s1.setExpression(ASTTest.this.ast.newSimpleName("x")); //$NON-NLS-1$
@@ -7588,6 +8048,7 @@ public class ASTTest extends org.eclipse.jdt.core.tests.junit.extension.TestCase
 		assertTrue(this.ast.modificationCount() == previousCount);
 
 		genericPropertyTest(x, new Property("LeftOperand", true, Expression.class) { //$NON-NLS-1$
+			@Override
 			public ASTNode sample(AST localAst, boolean parented) {
 				Expression result = localAst.newSimpleName("foo"); //$NON-NLS-1$
 				if (parented) {
@@ -7595,24 +8056,29 @@ public class ASTTest extends org.eclipse.jdt.core.tests.junit.extension.TestCase
 				}
 				return result;
 			}
+			@Override
 			public ASTNode wrap() {
 				ParenthesizedExpression s1 = ASTTest.this.ast.newParenthesizedExpression();
 				s1.setExpression(x);
 				return s1;
 			}
+			@Override
 			public void unwrap() {
 				ParenthesizedExpression s1 = (ParenthesizedExpression) x.getParent();
 				s1.setExpression(ASTTest.this.ast.newSimpleName("fie")); //$NON-NLS-1$
 			}
+			@Override
 			public ASTNode get() {
 				return x.getLeftOperand();
 			}
+			@Override
 			public void set(ASTNode value) {
 				x.setLeftOperand((Expression) value);
 			}
 		});
 
 		genericPropertyTest(x, new Property("RightOperand", true, Type.class) { //$NON-NLS-1$
+			@Override
 			public ASTNode sample(AST localAst, boolean parented) {
 				Type result = localAst.newSimpleType(localAst.newSimpleName("Object")); //$NON-NLS-1$
 				if (parented) {
@@ -7620,18 +8086,22 @@ public class ASTTest extends org.eclipse.jdt.core.tests.junit.extension.TestCase
 				}
 				return result;
 			}
+			@Override
 			public ASTNode wrap() {
 				ParenthesizedExpression s1 = ASTTest.this.ast.newParenthesizedExpression();
 				s1.setExpression(x);
 				return s1;
 			}
+			@Override
 			public void unwrap() {
 				ParenthesizedExpression s1 = (ParenthesizedExpression) x.getParent();
 				s1.setExpression(ASTTest.this.ast.newSimpleName("fie")); //$NON-NLS-1$
 			}
+			@Override
 			public ASTNode get() {
 				return x.getRightOperand();
 			}
+			@Override
 			public void set(ASTNode value) {
 				x.setRightOperand((Type) value);
 			}
@@ -7655,6 +8125,7 @@ public class ASTTest extends org.eclipse.jdt.core.tests.junit.extension.TestCase
 		assertTrue(this.ast.modificationCount() == previousCount);
 
 		genericPropertyTest(x, new Property("Expression", true, Expression.class) { //$NON-NLS-1$
+			@Override
 			public ASTNode sample(AST localAst, boolean parented) {
 				Expression result = localAst.newSimpleName("foo"); //$NON-NLS-1$
 				if (parented) {
@@ -7662,24 +8133,29 @@ public class ASTTest extends org.eclipse.jdt.core.tests.junit.extension.TestCase
 				}
 				return result;
 			}
+			@Override
 			public ASTNode wrap() {
 				ParenthesizedExpression s1 = ASTTest.this.ast.newParenthesizedExpression();
 				s1.setExpression(x);
 				return s1;
 			}
+			@Override
 			public void unwrap() {
 				ParenthesizedExpression s1 = (ParenthesizedExpression) x.getParent();
 				s1.setExpression(ASTTest.this.ast.newSimpleName("fie")); //$NON-NLS-1$
 			}
+			@Override
 			public ASTNode get() {
 				return x.getExpression();
 			}
+			@Override
 			public void set(ASTNode value) {
 				x.setExpression((Expression) value);
 			}
 		});
 
 		genericPropertyTest(x, new Property("ThenExpression", true, Expression.class) { //$NON-NLS-1$
+			@Override
 			public ASTNode sample(AST localAst, boolean parented) {
 				Expression result = localAst.newSimpleName("foo"); //$NON-NLS-1$
 				if (parented) {
@@ -7687,24 +8163,29 @@ public class ASTTest extends org.eclipse.jdt.core.tests.junit.extension.TestCase
 				}
 				return result;
 			}
+			@Override
 			public ASTNode wrap() {
 				ParenthesizedExpression s1 = ASTTest.this.ast.newParenthesizedExpression();
 				s1.setExpression(x);
 				return s1;
 			}
+			@Override
 			public void unwrap() {
 				ParenthesizedExpression s1 = (ParenthesizedExpression) x.getParent();
 				s1.setExpression(ASTTest.this.ast.newSimpleName("fie")); //$NON-NLS-1$
 			}
+			@Override
 			public ASTNode get() {
 				return x.getThenExpression();
 			}
+			@Override
 			public void set(ASTNode value) {
 				x.setThenExpression((Expression) value);
 			}
 		});
 
 		genericPropertyTest(x, new Property("ElseExpression", true, Expression.class) { //$NON-NLS-1$
+			@Override
 			public ASTNode sample(AST localAst, boolean parented) {
 				Expression result = localAst.newSimpleName("foo"); //$NON-NLS-1$
 				if (parented) {
@@ -7712,18 +8193,22 @@ public class ASTTest extends org.eclipse.jdt.core.tests.junit.extension.TestCase
 				}
 				return result;
 			}
+			@Override
 			public ASTNode wrap() {
 				ParenthesizedExpression s1 = ASTTest.this.ast.newParenthesizedExpression();
 				s1.setExpression(x);
 				return s1;
 			}
+			@Override
 			public void unwrap() {
 				ParenthesizedExpression s1 = (ParenthesizedExpression) x.getParent();
 				s1.setExpression(ASTTest.this.ast.newSimpleName("fie")); //$NON-NLS-1$
 			}
+			@Override
 			public ASTNode get() {
 				return x.getElseExpression();
 			}
+			@Override
 			public void set(ASTNode value) {
 				x.setElseExpression((Expression) value);
 			}
@@ -7746,6 +8231,7 @@ public class ASTTest extends org.eclipse.jdt.core.tests.junit.extension.TestCase
 		assertTrue(this.ast.modificationCount() == previousCount);
 
 		genericPropertyTest(x, new Property("Array", true, Expression.class) { //$NON-NLS-1$
+			@Override
 			public ASTNode sample(AST localAst, boolean parented) {
 				Expression result = localAst.newSimpleName("foo"); //$NON-NLS-1$
 				if (parented) {
@@ -7753,24 +8239,29 @@ public class ASTTest extends org.eclipse.jdt.core.tests.junit.extension.TestCase
 				}
 				return result;
 			}
+			@Override
 			public ASTNode wrap() {
 				ParenthesizedExpression s1 = ASTTest.this.ast.newParenthesizedExpression();
 				s1.setExpression(x);
 				return s1;
 			}
+			@Override
 			public void unwrap() {
 				ParenthesizedExpression s1 = (ParenthesizedExpression) x.getParent();
 				s1.setExpression(ASTTest.this.ast.newSimpleName("fie")); //$NON-NLS-1$
 			}
+			@Override
 			public ASTNode get() {
 				return x.getArray();
 			}
+			@Override
 			public void set(ASTNode value) {
 				x.setArray((Expression) value);
 			}
 		});
 
 		genericPropertyTest(x, new Property("Index", true, Expression.class) { //$NON-NLS-1$
+			@Override
 			public ASTNode sample(AST localAst, boolean parented) {
 				Expression result = localAst.newSimpleName("foo"); //$NON-NLS-1$
 				if (parented) {
@@ -7778,18 +8269,22 @@ public class ASTTest extends org.eclipse.jdt.core.tests.junit.extension.TestCase
 				}
 				return result;
 			}
+			@Override
 			public ASTNode wrap() {
 				ParenthesizedExpression s1 = ASTTest.this.ast.newParenthesizedExpression();
 				s1.setExpression(x);
 				return s1;
 			}
+			@Override
 			public void unwrap() {
 				ParenthesizedExpression s1 = (ParenthesizedExpression) x.getParent();
 				s1.setExpression(ASTTest.this.ast.newSimpleName("fie")); //$NON-NLS-1$
 			}
+			@Override
 			public ASTNode get() {
 				return x.getIndex();
 			}
+			@Override
 			public void set(ASTNode value) {
 				x.setIndex((Expression) value);
 			}
@@ -7812,6 +8307,7 @@ public class ASTTest extends org.eclipse.jdt.core.tests.junit.extension.TestCase
 
 		genericPropertyListTest(x, x.expressions(),
 		  new Property("Expressions", true, Expression.class) { //$NON-NLS-1$
+			@Override
 			public ASTNode sample(AST targetAst, boolean parented) {
 				SimpleName result = targetAst.newSimpleName("foo"); //$NON-NLS-1$
 				if (parented) {
@@ -7819,12 +8315,14 @@ public class ASTTest extends org.eclipse.jdt.core.tests.junit.extension.TestCase
 				}
 				return result;
 			}
+			@Override
 			public ASTNode wrap() {
 				// return Expression that embeds x
 				ParenthesizedExpression s1 = ASTTest.this.ast.newParenthesizedExpression();
 				s1.setExpression(x);
 				return s1;
 			}
+			@Override
 			public void unwrap() {
 				ParenthesizedExpression s1 = (ParenthesizedExpression) x.getParent();
 				s1.setExpression(ASTTest.this.ast.newSimpleName("x")); //$NON-NLS-1$
@@ -7856,6 +8354,7 @@ public class ASTTest extends org.eclipse.jdt.core.tests.junit.extension.TestCase
 		assertTrue(this.ast.modificationCount() == previousCount);
 
 		genericPropertyTest(x, new Property("Expression", false, Expression.class) { //$NON-NLS-1$
+			@Override
 			public ASTNode sample(AST targetAst, boolean parented) {
 				SimpleName result = targetAst.newSimpleName("foo"); //$NON-NLS-1$
 				if (parented) {
@@ -7863,19 +8362,23 @@ public class ASTTest extends org.eclipse.jdt.core.tests.junit.extension.TestCase
 				}
 				return result;
 			}
+			@Override
 			public ASTNode wrap() {
 				// return Expression that embeds x
 				ParenthesizedExpression s1 = ASTTest.this.ast.newParenthesizedExpression();
 				s1.setExpression(x);
 				return s1;
 			}
+			@Override
 			public void unwrap() {
 				ParenthesizedExpression s1 = (ParenthesizedExpression) x.getParent();
 				s1.setExpression(ASTTest.this.ast.newSimpleName("x")); //$NON-NLS-1$
 			}
+			@Override
 			public ASTNode get() {
 				return x.getExpression();
 			}
+			@Override
 			public void set(ASTNode value) {
 				x.setExpression((Expression) value);
 			}
@@ -7884,6 +8387,7 @@ public class ASTTest extends org.eclipse.jdt.core.tests.junit.extension.TestCase
 		if (this.ast.apiLevel() >= JLS3_INTERNAL) {
 			genericPropertyListTest(x, x.typeArguments(),
 			  new Property("TypeArguments", true, Type.class) { //$NON-NLS-1$
+				@Override
 				public ASTNode sample(AST targetAst, boolean parented) {
 					Type result = targetAst.newSimpleType(targetAst.newSimpleName("X")); //$NON-NLS-1$
 					if (parented) {
@@ -7896,6 +8400,7 @@ public class ASTTest extends org.eclipse.jdt.core.tests.junit.extension.TestCase
 
 		if (this.ast.apiLevel() == AST.JLS2) {
 			genericPropertyTest(x, new Property("Name", true, Name.class) { //$NON-NLS-1$
+				@Override
 				public ASTNode sample(AST targetAst, boolean parented) {
 					SimpleName result = targetAst.newSimpleName("a"); //$NON-NLS-1$
 					if (parented) {
@@ -7903,9 +8408,11 @@ public class ASTTest extends org.eclipse.jdt.core.tests.junit.extension.TestCase
 					}
 					return result;
 				}
+				@Override
 				public ASTNode get() {
 					return x.getName();
 				}
+				@Override
 				public void set(ASTNode value) {
 					x.setName((Name) value);
 				}
@@ -7914,6 +8421,7 @@ public class ASTTest extends org.eclipse.jdt.core.tests.junit.extension.TestCase
 
 		if (this.ast.apiLevel() >= JLS3_INTERNAL) {
 			genericPropertyTest(x, new Property("Type", true, Type.class) { //$NON-NLS-1$
+				@Override
 				public ASTNode sample(AST targetAst, boolean parented) {
 					SimpleType result = targetAst.newSimpleType(targetAst.newSimpleName("foo")); //$NON-NLS-1$
 					if (parented) {
@@ -7921,9 +8429,11 @@ public class ASTTest extends org.eclipse.jdt.core.tests.junit.extension.TestCase
 					}
 					return result;
 				}
+				@Override
 				public ASTNode get() {
 					return x.getType();
 				}
+				@Override
 				public void set(ASTNode value) {
 					x.setType((Type) value);
 				}
@@ -7932,6 +8442,7 @@ public class ASTTest extends org.eclipse.jdt.core.tests.junit.extension.TestCase
 
 		genericPropertyListTest(x, x.arguments(),
 		  new Property("Arguments", true, Expression.class) { //$NON-NLS-1$
+			@Override
 			public ASTNode sample(AST targetAst, boolean parented) {
 				SimpleName result = targetAst.newSimpleName("foo"); //$NON-NLS-1$
 				if (parented) {
@@ -7939,12 +8450,14 @@ public class ASTTest extends org.eclipse.jdt.core.tests.junit.extension.TestCase
 				}
 				return result;
 			}
+			@Override
 			public ASTNode wrap() {
 				// return Expression that embeds x
 				ParenthesizedExpression s1 = ASTTest.this.ast.newParenthesizedExpression();
 				s1.setExpression(x);
 				return s1;
 			}
+			@Override
 			public void unwrap() {
 				ParenthesizedExpression s1 = (ParenthesizedExpression) x.getParent();
 				s1.setExpression(ASTTest.this.ast.newSimpleName("x")); //$NON-NLS-1$
@@ -7952,6 +8465,7 @@ public class ASTTest extends org.eclipse.jdt.core.tests.junit.extension.TestCase
 		});
 
 		genericPropertyTest(x, new Property("AnonymousClassDeclaration", false, AnonymousClassDeclaration.class) { //$NON-NLS-1$
+			@Override
 			public ASTNode sample(AST targetAst, boolean parented) {
 				AnonymousClassDeclaration result = targetAst.newAnonymousClassDeclaration();
 				if (parented) {
@@ -7959,6 +8473,7 @@ public class ASTTest extends org.eclipse.jdt.core.tests.junit.extension.TestCase
 				}
 				return result;
 			}
+			@Override
 			public ASTNode wrap() {
 				// return AnonymousClassDeclaration that embeds x
 				AnonymousClassDeclaration s0 = x.getAST().newAnonymousClassDeclaration();
@@ -7968,13 +8483,16 @@ public class ASTTest extends org.eclipse.jdt.core.tests.junit.extension.TestCase
 				s1.setInitializer(x);
 				return s0;
 			}
+			@Override
 			public void unwrap() {
 				VariableDeclarationFragment s1 = (VariableDeclarationFragment) x.getParent();
 				s1.setInitializer(null);
 			}
+			@Override
 			public ASTNode get() {
 				return x.getAnonymousClassDeclaration();
 			}
+			@Override
 			public void set(ASTNode value) {
 				x.setAnonymousClassDeclaration((AnonymousClassDeclaration) value);
 			}
@@ -7998,6 +8516,7 @@ public class ASTTest extends org.eclipse.jdt.core.tests.junit.extension.TestCase
 
 		genericPropertyListTest(x, x.bodyDeclarations(),
 		  new Property("BodyDeclarations", true, BodyDeclaration.class) { //$NON-NLS-1$
+			@Override
 			public ASTNode sample(AST targetAst, boolean parented) {
 				TypeDeclaration result = targetAst.newTypeDeclaration();
 				if (parented) {
@@ -8006,6 +8525,7 @@ public class ASTTest extends org.eclipse.jdt.core.tests.junit.extension.TestCase
 				}
 				return result;
 			}
+			@Override
 			public ASTNode wrap() {
 				// return BodyDeclaration that embeds x
 				VariableDeclarationFragment s0 = x.getAST().newVariableDeclarationFragment();
@@ -8015,6 +8535,7 @@ public class ASTTest extends org.eclipse.jdt.core.tests.junit.extension.TestCase
 				s2.setAnonymousClassDeclaration(x);
 				return s1;
 			}
+			@Override
 			public void unwrap() {
 				ClassInstanceCreation s2 = (ClassInstanceCreation) x.getParent();
 				s2.setAnonymousClassDeclaration(null);
@@ -8046,6 +8567,7 @@ public class ASTTest extends org.eclipse.jdt.core.tests.junit.extension.TestCase
 		assertTrue(this.ast.modificationCount() == previousCount);
 
 		genericPropertyTest(x, new Property("Type", true, ArrayType.class) { //$NON-NLS-1$
+			@Override
 			public ASTNode sample(AST targetAst, boolean parented) {
 				ArrayType result = targetAst.newArrayType(
 					targetAst.newSimpleType(targetAst.newSimpleName("a"))); //$NON-NLS-1$
@@ -8054,9 +8576,11 @@ public class ASTTest extends org.eclipse.jdt.core.tests.junit.extension.TestCase
 				}
 				return result;
 			}
+			@Override
 			public ASTNode get() {
 				return x.getType();
 			}
+			@Override
 			public void set(ASTNode value) {
 				x.setType((ArrayType) value);
 			}
@@ -8064,6 +8588,7 @@ public class ASTTest extends org.eclipse.jdt.core.tests.junit.extension.TestCase
 
 		genericPropertyListTest(x, x.dimensions(),
 		  new Property("Dimensions", true, Expression.class) { //$NON-NLS-1$
+			@Override
 			public ASTNode sample(AST targetAst, boolean parented) {
 				SimpleName result = targetAst.newSimpleName("foo"); //$NON-NLS-1$
 				if (parented) {
@@ -8071,12 +8596,14 @@ public class ASTTest extends org.eclipse.jdt.core.tests.junit.extension.TestCase
 				}
 				return result;
 			}
+			@Override
 			public ASTNode wrap() {
 				// return Expression that embeds x
 				ParenthesizedExpression s1 = ASTTest.this.ast.newParenthesizedExpression();
 				s1.setExpression(x);
 				return s1;
 			}
+			@Override
 			public void unwrap() {
 				ParenthesizedExpression s1 = (ParenthesizedExpression) x.getParent();
 				s1.setExpression(ASTTest.this.ast.newSimpleName("x")); //$NON-NLS-1$
@@ -8084,6 +8611,7 @@ public class ASTTest extends org.eclipse.jdt.core.tests.junit.extension.TestCase
 		});
 
 		genericPropertyTest(x, new Property("Initializer", false, ArrayInitializer.class) { //$NON-NLS-1$
+			@Override
 			public ASTNode sample(AST targetAst, boolean parented) {
 				ArrayInitializer result = targetAst.newArrayInitializer();
 				if (parented) {
@@ -8091,19 +8619,23 @@ public class ASTTest extends org.eclipse.jdt.core.tests.junit.extension.TestCase
 				}
 				return result;
 			}
+			@Override
 			public ASTNode wrap() {
 				// return ArrayInitializer that embeds x
 				ArrayInitializer s1 = ASTTest.this.ast.newArrayInitializer();
 				s1.expressions().add(x);
 				return s1;
 			}
+			@Override
 			public void unwrap() {
 				ArrayInitializer s1 = (ArrayInitializer) x.getParent();
 				s1.expressions().remove(x);
 			}
+			@Override
 			public ASTNode get() {
 				return x.getInitializer();
 			}
+			@Override
 			public void set(ASTNode value) {
 				x.setInitializer((ArrayInitializer) value);
 			}
@@ -8125,6 +8657,7 @@ public class ASTTest extends org.eclipse.jdt.core.tests.junit.extension.TestCase
 		assertTrue(this.ast.modificationCount() == previousCount);
 
 		genericPropertyTest(x, new Property("Expression", true, Expression.class) { //$NON-NLS-1$
+			@Override
 			public ASTNode sample(AST localAst, boolean parented) {
 				Expression result = localAst.newSimpleName("foo"); //$NON-NLS-1$
 				if (parented) {
@@ -8132,18 +8665,22 @@ public class ASTTest extends org.eclipse.jdt.core.tests.junit.extension.TestCase
 				}
 				return result;
 			}
+			@Override
 			public ASTNode wrap() {
 				ParenthesizedExpression s1 = ASTTest.this.ast.newParenthesizedExpression();
 				s1.setExpression(x);
 				return s1;
 			}
+			@Override
 			public void unwrap() {
 				ParenthesizedExpression s1 = (ParenthesizedExpression) x.getParent();
 				s1.setExpression(ASTTest.this.ast.newSimpleName("fie")); //$NON-NLS-1$
 			}
+			@Override
 			public ASTNode get() {
 				return x.getExpression();
 			}
+			@Override
 			public void set(ASTNode value) {
 				x.setExpression((Expression) value);
 			}
@@ -8185,6 +8722,7 @@ public class ASTTest extends org.eclipse.jdt.core.tests.junit.extension.TestCase
 		tModifiers(x);
 
 		genericPropertyTest(x, new Property("Name", true, SimpleName.class) { //$NON-NLS-1$
+			@Override
 			public ASTNode sample(AST targetAst, boolean parented) {
 				SimpleName result = targetAst.newSimpleName("foo"); //$NON-NLS-1$
 				if (parented) {
@@ -8192,9 +8730,11 @@ public class ASTTest extends org.eclipse.jdt.core.tests.junit.extension.TestCase
 				}
 				return result;
 			}
+			@Override
 			public ASTNode get() {
 				return x.getName();
 			}
+			@Override
 			public void set(ASTNode value) {
 				x.setName((SimpleName) value);
 			}
@@ -8202,6 +8742,7 @@ public class ASTTest extends org.eclipse.jdt.core.tests.junit.extension.TestCase
 
 		genericPropertyListTest(x, x.bodyDeclarations(),
 		  new Property("BodyDeclarations", true, BodyDeclaration.class) { //$NON-NLS-1$
+			@Override
 			public ASTNode sample(AST targetAst, boolean parented) {
 				AnnotationTypeMemberDeclaration result = targetAst.newAnnotationTypeMemberDeclaration();
 				if (parented) {
@@ -8210,6 +8751,7 @@ public class ASTTest extends org.eclipse.jdt.core.tests.junit.extension.TestCase
 				}
 				return result;
 			}
+			@Override
 			public ASTNode wrap() {
 				// return AnnotationTypeMemberDeclaration that embeds x
 				AnnotationTypeMemberDeclaration s1 = x.getAST().newAnnotationTypeMemberDeclaration();
@@ -8220,6 +8762,7 @@ public class ASTTest extends org.eclipse.jdt.core.tests.junit.extension.TestCase
 				s3.bodyDeclarations().add(x);
 				return s1;
 			}
+			@Override
 			public void unwrap() {
 				AnonymousClassDeclaration s3 = (AnonymousClassDeclaration) x.getParent();
 				s3.bodyDeclarations().remove(x);
@@ -8281,6 +8824,7 @@ public class ASTTest extends org.eclipse.jdt.core.tests.junit.extension.TestCase
 		tModifiers(x);
 
 		genericPropertyTest(x, new Property("Name", true, SimpleName.class) { //$NON-NLS-1$
+			@Override
 			public ASTNode sample(AST targetAst, boolean parented) {
 				SimpleName result = targetAst.newSimpleName("foo"); //$NON-NLS-1$
 				if (parented) {
@@ -8288,15 +8832,18 @@ public class ASTTest extends org.eclipse.jdt.core.tests.junit.extension.TestCase
 				}
 				return result;
 			}
+			@Override
 			public ASTNode get() {
 				return x.getName();
 			}
+			@Override
 			public void set(ASTNode value) {
 				x.setName((SimpleName) value);
 			}
 		});
 
 		genericPropertyTest(x, new Property("Type", true, Type.class) { //$NON-NLS-1$
+			@Override
 			public ASTNode sample(AST targetAst, boolean parented) {
 				SimpleType result = targetAst.newSimpleType(
 					targetAst.newSimpleName("foo")); //$NON-NLS-1$
@@ -8305,15 +8852,18 @@ public class ASTTest extends org.eclipse.jdt.core.tests.junit.extension.TestCase
 				}
 				return result;
 			}
+			@Override
 			public ASTNode get() {
 				return x.getType();
 			}
+			@Override
 			public void set(ASTNode value) {
 				x.setType((Type) value);
 			}
 		});
 
 		genericPropertyTest(x, new Property("Default", false, Expression.class) { //$NON-NLS-1$
+			@Override
 			public ASTNode sample(AST localAst, boolean parented) {
 				Expression result = localAst.newSimpleName("foo"); //$NON-NLS-1$
 				if (parented) {
@@ -8321,6 +8871,7 @@ public class ASTTest extends org.eclipse.jdt.core.tests.junit.extension.TestCase
 				}
 				return result;
 			}
+			@Override
 			public ASTNode wrap() {
 				// return Expression that embeds x
 				ClassInstanceCreation s1 = x.getAST().newClassInstanceCreation();
@@ -8329,13 +8880,16 @@ public class ASTTest extends org.eclipse.jdt.core.tests.junit.extension.TestCase
 				s2.bodyDeclarations().add(x);
 				return s1;
 			}
+			@Override
 			public void unwrap() {
 				AnonymousClassDeclaration s2 = (AnonymousClassDeclaration) x.getParent();
 				s2.bodyDeclarations().remove(x);
 			}
+			@Override
 			public ASTNode get() {
 				return x.getDefault();
 			}
+			@Override
 			public void set(ASTNode value) {
 				x.setDefault((Expression) value);
 			}
@@ -8376,6 +8930,7 @@ public class ASTTest extends org.eclipse.jdt.core.tests.junit.extension.TestCase
 		tAnnotationName(x);
 
 		genericPropertyListTest(x, x.values(), new Property("Values", true, MemberValuePair.class) { //$NON-NLS-1$
+			@Override
 			public ASTNode sample(AST targetAst, boolean parented) {
 				MemberValuePair result = targetAst.newMemberValuePair();
 				if (parented) {
@@ -8384,6 +8939,7 @@ public class ASTTest extends org.eclipse.jdt.core.tests.junit.extension.TestCase
 				}
 				return result;
 			}
+			@Override
 			public ASTNode wrap() {
 				// return MemberValuePair that embeds x
 				MemberValuePair s1 = x.getAST().newMemberValuePair();
@@ -8396,6 +8952,7 @@ public class ASTTest extends org.eclipse.jdt.core.tests.junit.extension.TestCase
 				s4.modifiers().add(x);
 				return s1;
 			}
+			@Override
 			public void unwrap() {
 				MethodDeclaration s4 = (MethodDeclaration) x.getParent();
 				s4.modifiers().remove(x);
@@ -8467,6 +9024,7 @@ public class ASTTest extends org.eclipse.jdt.core.tests.junit.extension.TestCase
 		tAnnotationName(x);
 
 		genericPropertyTest(x, new Property("Value", true, Expression.class) { //$NON-NLS-1$
+			@Override
 			public ASTNode sample(AST localAst, boolean parented) {
 				Expression result = localAst.newSimpleName("foo"); //$NON-NLS-1$
 				if (parented) {
@@ -8474,6 +9032,7 @@ public class ASTTest extends org.eclipse.jdt.core.tests.junit.extension.TestCase
 				}
 				return result;
 			}
+			@Override
 			public ASTNode wrap() {
 				// return Expression that embeds x
 				ClassInstanceCreation s1 = x.getAST().newClassInstanceCreation();
@@ -8484,13 +9043,16 @@ public class ASTTest extends org.eclipse.jdt.core.tests.junit.extension.TestCase
 				s3.modifiers().add(x);
 				return s1;
 			}
+			@Override
 			public void unwrap() {
 				MethodDeclaration s3 = (MethodDeclaration) x.getParent();
 				s3.modifiers().remove(x);
 			}
+			@Override
 			public ASTNode get() {
 				return x.getValue();
 			}
+			@Override
 			public void set(ASTNode value) {
 				x.setValue((Expression) value);
 			}
@@ -8524,6 +9086,7 @@ public class ASTTest extends org.eclipse.jdt.core.tests.junit.extension.TestCase
 		assertTrue(this.ast.modificationCount() == previousCount);
 
 		genericPropertyTest(x, new Property("Name", true, SimpleName.class) { //$NON-NLS-1$
+			@Override
 			public ASTNode sample(AST targetAst, boolean parented) {
 				SimpleName result = targetAst.newSimpleName("a"); //$NON-NLS-1$
 				if (parented) {
@@ -8531,15 +9094,18 @@ public class ASTTest extends org.eclipse.jdt.core.tests.junit.extension.TestCase
 				}
 				return result;
 			}
+			@Override
 			public ASTNode get() {
 				return x.getName();
 			}
+			@Override
 			public void set(ASTNode value) {
 				x.setName((SimpleName) value);
 			}
 		});
 
 		genericPropertyTest(x, new Property("Value", true, Expression.class) { //$NON-NLS-1$
+			@Override
 			public ASTNode sample(AST localAst, boolean parented) {
 				Expression result = localAst.newSimpleName("foo"); //$NON-NLS-1$
 				if (parented) {
@@ -8547,6 +9113,7 @@ public class ASTTest extends org.eclipse.jdt.core.tests.junit.extension.TestCase
 				}
 				return result;
 			}
+			@Override
 			public ASTNode wrap() {
 				// return Expression that embeds x
 				ClassInstanceCreation s1 = x.getAST().newClassInstanceCreation();
@@ -8559,13 +9126,16 @@ public class ASTTest extends org.eclipse.jdt.core.tests.junit.extension.TestCase
 				s4.values().add(x);
 				return s1;
 			}
+			@Override
 			public void unwrap() {
 				NormalAnnotation s4 = (NormalAnnotation) x.getParent();
 				s4.values().remove(x);
 			}
+			@Override
 			public ASTNode get() {
 				return x.getValue();
 			}
+			@Override
 			public void set(ASTNode value) {
 				x.setValue((Expression) value);
 			}
@@ -8580,6 +9150,7 @@ public class ASTTest extends org.eclipse.jdt.core.tests.junit.extension.TestCase
 	 */
 	void tAnnotationName(final Annotation x) {
 		genericPropertyTest(x, new Property("TypeName", true, Name.class) { //$NON-NLS-1$
+			@Override
 			public ASTNode sample(AST targetAst, boolean parented) {
 				SimpleName result = targetAst.newSimpleName("a"); //$NON-NLS-1$
 				if (parented) {
@@ -8587,9 +9158,11 @@ public class ASTTest extends org.eclipse.jdt.core.tests.junit.extension.TestCase
 				}
 				return result;
 			}
+			@Override
 			public ASTNode get() {
 				return x.getTypeName();
 			}
+			@Override
 			public void set(ASTNode value) {
 				x.setTypeName((Name) value);
 			}

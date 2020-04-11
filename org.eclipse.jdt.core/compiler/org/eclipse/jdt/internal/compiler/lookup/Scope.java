@@ -67,11 +67,13 @@ package org.eclipse.jdt.internal.compiler.lookup;
 
 import java.util.*;
 import java.util.function.Function;
+import java.util.function.Supplier;
 
 import org.eclipse.jdt.core.compiler.CharOperation;
 import org.eclipse.jdt.internal.compiler.ast.*;
 import org.eclipse.jdt.internal.compiler.ast.AbstractMethodDeclaration.WrapperKind;
 import org.eclipse.jdt.internal.compiler.classfmt.ClassFileConstants;
+import org.eclipse.jdt.internal.compiler.codegen.ConstantPool;
 import org.eclipse.jdt.internal.compiler.impl.CompilerOptions;
 import org.eclipse.jdt.internal.compiler.impl.ReferenceContext;
 import org.eclipse.jdt.internal.compiler.problem.AbortCompilation;
@@ -157,8 +159,9 @@ public abstract class Scope {
 	public final static int CLASS_SCOPE = 3;
 	public final static int COMPILATION_UNIT_SCOPE = 4;
 	public final static int METHOD_SCOPE = 2;
+	public final static int MODULE_SCOPE = 5;
 //{ObjectTeams
-	public final static int BINDING_SCOPE = 5;
+	public final static int BINDING_SCOPE = 6;
 //Markus Witte}
 
 	/* Argument Compatibilities */
@@ -174,6 +177,7 @@ public abstract class Scope {
 
 	public int kind;
 	public Scope parent;
+	private Map<String, Supplier<ReferenceBinding>> commonTypeBindings = null;
 
 	private static class NullDefaultRange {
 		final int start, end;
@@ -211,6 +215,7 @@ public abstract class Scope {
 	protected Scope(int kind, Scope parent) {
 		this.kind = kind;
 		this.parent = parent;
+		this.commonTypeBindings = null;
 	}
 
 	/* Answer an int describing the relationship between the given types.
@@ -847,10 +852,6 @@ public abstract class Scope {
 		return false;
 	}
 
-	public boolean isModuleScope() {
-		return false;
-	}
-
 	/**
 	 * Finds the most specific compiler options
 	 */
@@ -1299,6 +1300,8 @@ public abstract class Scope {
 					return ((MethodScope) current).referenceContext;
 				case CLASS_SCOPE :
 					return ((ClassScope) current).referenceContext;
+				case MODULE_SCOPE :
+					return ((ModuleScope) current).referenceContext;
 				case COMPILATION_UNIT_SCOPE :
 					return ((CompilationUnitScope) current).referenceContext;
 			}
@@ -2396,6 +2399,7 @@ public abstract class Scope {
 							insideConstructorCall = enclosingMethodScope == null ? false : enclosingMethodScope.isConstructorCall;
 							break;
 						case COMPILATION_UNIT_SCOPE :
+						case MODULE_SCOPE :
 							break done;
 					}
 					if (scope.isLambdaScope()) // Not in Kansas anymore ...
@@ -2743,17 +2747,13 @@ public abstract class Scope {
 	 * Returns the modifiers of the innermost enclosing declaration.
 	 * @return modifiers
 	 */
-	public int getDeclarationModifiers(){
+	public int getDeclarationModifiers() {
 		switch(this.kind){
 			case Scope.BLOCK_SCOPE :
 			case Scope.METHOD_SCOPE :
 				MethodScope methodScope = methodScope();
 				if (!methodScope.isInsideInitializer()){
 					// check method modifiers to see if deprecated
-					ReferenceContext ref = methodScope.referenceContext();
-					if (ref instanceof ModuleDeclaration) {
-						return ((ModuleDeclaration)ref).modifiers;
-					}
 					MethodBinding context = ((AbstractMethodDeclaration)methodScope.referenceContext).binding;
 					if (context != null)
 						return context.modifiers;
@@ -2767,6 +2767,8 @@ public abstract class Scope {
 						return type.modifiers;
 				}
 				break;
+			case Scope.MODULE_SCOPE :
+				return ((ModuleScope)this).referenceContext.modifiers;
 			case Scope.CLASS_SCOPE :
 				ReferenceBinding context = ((ClassScope)this).referenceType().binding;
 				if (context != null)
@@ -3101,6 +3103,21 @@ public abstract class Scope {
 		return unitScope.environment.getResolvedJavaBaseType(TypeConstants.JAVA_LANG_ASSERTIONERROR, this);
 	}
 
+	public final ReferenceBinding getJavaLangBoolean() {
+		CompilationUnitScope unitScope = compilationUnitScope();
+		unitScope.recordQualifiedReference(TypeConstants.JAVA_LANG_BOOLEAN);
+		return unitScope.environment.getResolvedJavaBaseType(TypeConstants.JAVA_LANG_BOOLEAN, this);
+	}
+	public final ReferenceBinding getJavaLangByte() {
+		CompilationUnitScope unitScope = compilationUnitScope();
+		unitScope.recordQualifiedReference(TypeConstants.JAVA_LANG_BYTE);
+		return unitScope.environment.getResolvedJavaBaseType(TypeConstants.JAVA_LANG_BYTE, this);
+	}
+	public final ReferenceBinding getJavaLangCharacter() {
+		CompilationUnitScope unitScope = compilationUnitScope();
+		unitScope.recordQualifiedReference(TypeConstants.JAVA_LANG_CHARACTER);
+		return unitScope.environment.getResolvedJavaBaseType(TypeConstants.JAVA_LANG_CHARACTER, this);
+	}
 	public final ReferenceBinding getJavaLangClass() {
 		CompilationUnitScope unitScope = compilationUnitScope();
 		unitScope.recordQualifiedReference(TypeConstants.JAVA_LANG_CLASS);
@@ -3117,6 +3134,26 @@ public abstract class Scope {
 		unitScope.recordQualifiedReference(TypeConstants.JAVA_LANG_CLASSNOTFOUNDEXCEPTION);
 		return unitScope.environment.getResolvedJavaBaseType(TypeConstants.JAVA_LANG_CLASSNOTFOUNDEXCEPTION, this);
 	}
+	public final ReferenceBinding getJavaLangDouble() {
+		CompilationUnitScope unitScope = compilationUnitScope();
+		unitScope.recordQualifiedReference(TypeConstants.JAVA_LANG_DOUBLE);
+		return unitScope.environment.getResolvedJavaBaseType(TypeConstants.JAVA_LANG_DOUBLE, this);
+	}
+	public final ReferenceBinding getJavaLangFloat() {
+		CompilationUnitScope unitScope = compilationUnitScope();
+		unitScope.recordQualifiedReference(TypeConstants.JAVA_LANG_FLOAT);
+		return unitScope.environment.getResolvedJavaBaseType(TypeConstants.JAVA_LANG_FLOAT, this);
+	}
+	public final ReferenceBinding getJavaLangIncompatibleClassChangeError() {
+		CompilationUnitScope unitScope = compilationUnitScope();
+		unitScope.recordQualifiedReference(TypeConstants.JAVA_LANG_INCOMPATIBLECLASSCHANGEERROR);
+		return unitScope.environment.getResolvedJavaBaseType(TypeConstants.JAVA_LANG_INCOMPATIBLECLASSCHANGEERROR, this);
+	}
+	public final ReferenceBinding getJavaLangNoClassDefFoundError() {
+		CompilationUnitScope unitScope = compilationUnitScope();
+		unitScope.recordQualifiedReference(TypeConstants.JAVA_LANG_NOCLASSDEFERROR);
+		return unitScope.environment.getResolvedJavaBaseType(TypeConstants.JAVA_LANG_NOCLASSDEFERROR, this);
+	}
 	public final ReferenceBinding getJavaLangNoSuchFieldError() {
 		CompilationUnitScope unitScope = compilationUnitScope();
 		unitScope.recordQualifiedReference(TypeConstants.JAVA_LANG_NOSUCHFIELDERROR);
@@ -3126,6 +3163,23 @@ public abstract class Scope {
 		CompilationUnitScope unitScope = compilationUnitScope();
 		unitScope.recordQualifiedReference(TypeConstants.JAVA_LANG_ENUM);
 		return unitScope.environment.getResolvedJavaBaseType(TypeConstants.JAVA_LANG_ENUM, this);
+	}
+	public final ReferenceBinding getJavaLangError() {
+		CompilationUnitScope unitScope = compilationUnitScope();
+		unitScope.recordQualifiedReference(TypeConstants.JAVA_LANG_ERROR);
+		return unitScope.environment.getResolvedJavaBaseType(TypeConstants.JAVA_LANG_ERROR, this);
+	}
+
+	public final ReferenceBinding getJavaLangReflectField() {
+		CompilationUnitScope unitScope = compilationUnitScope();
+		unitScope.recordQualifiedReference(TypeConstants.JAVA_LANG_REFLECT_FIELD);
+		return unitScope.environment.getResolvedJavaBaseType(TypeConstants.JAVA_LANG_REFLECT_FIELD, this);
+	}
+
+	public final ReferenceBinding getJavaLangReflectMethod() {
+		CompilationUnitScope unitScope = compilationUnitScope();
+		unitScope.recordQualifiedReference(TypeConstants.JAVA_LANG_REFLECT_METHOD);
+		return unitScope.environment.getResolvedJavaBaseType(TypeConstants.JAVA_LANG_REFLECT_METHOD, this);
 	}
 
 	public final ReferenceBinding getJavaLangRuntimeObjectMethods() {
@@ -3152,10 +3206,20 @@ public abstract class Scope {
 		return findDirectMemberType("Lookup".toCharArray(), outerType); //$NON-NLS-1$
 	}
 
+	public final ReferenceBinding getJavaLangInteger() {
+		CompilationUnitScope unitScope = compilationUnitScope();
+		unitScope.recordQualifiedReference(TypeConstants.JAVA_LANG_INTEGER);
+		return unitScope.environment.getResolvedJavaBaseType(TypeConstants.JAVA_LANG_INTEGER, this);
+	}
 	public final ReferenceBinding getJavaLangIterable() {
 		CompilationUnitScope unitScope = compilationUnitScope();
 		unitScope.recordQualifiedReference(TypeConstants.JAVA_LANG_ITERABLE);
 		return unitScope.environment.getResolvedJavaBaseType(TypeConstants.JAVA_LANG_ITERABLE, this);
+	}
+	public final ReferenceBinding getJavaLangLong() {
+		CompilationUnitScope unitScope = compilationUnitScope();
+		unitScope.recordQualifiedReference(TypeConstants.JAVA_LANG_LONG);
+		return unitScope.environment.getResolvedJavaBaseType(TypeConstants.JAVA_LANG_LONG, this);
 	}
 	public final ReferenceBinding getJavaLangObject() {
 		CompilationUnitScope unitScope = compilationUnitScope();
@@ -3169,18 +3233,38 @@ public abstract class Scope {
 		return unitScope.environment.getResolvedJavaBaseType(TypeConstants.JAVA_LANG_RECORD, this);
 	}
 
+	public final ReferenceBinding getJavaLangShort() {
+		CompilationUnitScope unitScope = compilationUnitScope();
+		unitScope.recordQualifiedReference(TypeConstants.JAVA_LANG_SHORT);
+		return unitScope.environment.getResolvedJavaBaseType(TypeConstants.JAVA_LANG_SHORT, this);
+	}
 	public final ReferenceBinding getJavaLangString() {
 		CompilationUnitScope unitScope = compilationUnitScope();
 		unitScope.recordQualifiedReference(TypeConstants.JAVA_LANG_STRING);
 		return unitScope.environment.getResolvedJavaBaseType(TypeConstants.JAVA_LANG_STRING, this);
 	}
+	public final ReferenceBinding getJavaLangStringBuffer() {
+		CompilationUnitScope unitScope = compilationUnitScope();
+		unitScope.recordQualifiedReference(TypeConstants.JAVA_LANG_STRINGBUFFER);
+		return unitScope.environment.getResolvedJavaBaseType(TypeConstants.JAVA_LANG_STRINGBUFFER, this);
+	}
 
+	public final ReferenceBinding getJavaLangStringBuilder() {
+		CompilationUnitScope unitScope = compilationUnitScope();
+		unitScope.recordQualifiedReference(TypeConstants.JAVA_LANG_STRINGBUILDER);
+		return unitScope.environment.getResolvedJavaBaseType(TypeConstants.JAVA_LANG_STRINGBUILDER, this);
+	}
 	public final ReferenceBinding getJavaLangThrowable() {
 		CompilationUnitScope unitScope = compilationUnitScope();
 		unitScope.recordQualifiedReference(TypeConstants.JAVA_LANG_THROWABLE);
 		return unitScope.environment.getResolvedJavaBaseType(TypeConstants.JAVA_LANG_THROWABLE, this);
 	}
 
+	public final ReferenceBinding getJavaLangVoid() {
+		CompilationUnitScope unitScope = compilationUnitScope();
+		unitScope.recordQualifiedReference(TypeConstants.JAVA_LANG_VOID);
+		return unitScope.environment.getResolvedJavaBaseType(TypeConstants.JAVA_LANG_VOID, this);
+	}
 	public final ReferenceBinding getJavaLangIllegalArgumentException() {
 		CompilationUnitScope unitScope = compilationUnitScope();
 		unitScope.recordQualifiedReference(TypeConstants.JAVA_LANG_ILLEGALARGUMENTEXCEPTION);
@@ -5547,6 +5631,8 @@ public abstract class Scope {
 					return ((ClassScope) current).referenceContext;
 				case COMPILATION_UNIT_SCOPE :
 					return ((CompilationUnitScope) current).referenceContext;
+				case MODULE_SCOPE :
+					return ((ModuleScope) current).referenceContext;
 			}
 		} while ((current = current.parent) != null);
 		return null;
@@ -5924,5 +6010,41 @@ public abstract class Scope {
 				break;
 			}
 		}
+	}
+
+	public Supplier<ReferenceBinding> getCommonReferenceBinding(char[] typeName) {
+		assert typeName != null && typeName.length > 0;
+		initializeCommonTypeBindings();
+		Supplier<ReferenceBinding> typeSupplier = this.commonTypeBindings.get(new String(typeName));
+		return typeSupplier;
+	}
+
+	private Map<String, Supplier<ReferenceBinding>> initializeCommonTypeBindings() {
+		if (this.commonTypeBindings != null)
+			return this.commonTypeBindings;
+		Map<String, Supplier<ReferenceBinding>> t = new HashMap<>();
+		t.put(new String(ConstantPool.JavaLangAssertionErrorConstantPoolName), this :: getJavaLangAssertionError);
+		t.put(new String(ConstantPool.JavaLangErrorConstantPoolName), this :: getJavaLangError);
+		t.put(new String(ConstantPool.JavaLangIncompatibleClassChangeErrorConstantPoolName), this :: getJavaLangIncompatibleClassChangeError);
+		t.put(new String(ConstantPool.JavaLangNoClassDefFoundErrorConstantPoolName), this :: getJavaLangNoClassDefFoundError);
+		t.put(new String(ConstantPool.JavaLangStringBufferConstantPoolName), this :: getJavaLangStringBuffer);
+		t.put(new String(ConstantPool.JavaLangIntegerConstantPoolName), this :: getJavaLangInteger);
+		t.put(new String(ConstantPool.JavaLangBooleanConstantPoolName), this :: getJavaLangBoolean);
+		t.put(new String(ConstantPool.JavaLangByteConstantPoolName), this :: getJavaLangByte);
+		t.put(new String(ConstantPool.JavaLangCharacterConstantPoolName), this :: getJavaLangCharacter);
+		t.put(new String(ConstantPool.JavaLangFloatConstantPoolName), this :: getJavaLangFloat);
+		t.put(new String(ConstantPool.JavaLangDoubleConstantPoolName), this :: getJavaLangDouble);
+		t.put(new String(ConstantPool.JavaLangShortConstantPoolName), this :: getJavaLangShort);
+		t.put(new String(ConstantPool.JavaLangLongConstantPoolName), this :: getJavaLangLong);
+		t.put(new String(ConstantPool.JavaLangVoidConstantPoolName), this :: getJavaLangVoid);
+		t.put(new String(ConstantPool.JavaLangStringConstantPoolName), this :: getJavaLangString);
+		t.put(new String(ConstantPool.JavaLangStringBuilderConstantPoolName), this :: getJavaLangStringBuilder);
+		t.put(new String(ConstantPool.JavaLangClassConstantPoolName), this :: getJavaLangClass);
+		t.put(new String(ConstantPool.JAVALANGREFLECTFIELD_CONSTANTPOOLNAME), this :: getJavaLangReflectField);
+		t.put(new String(ConstantPool.JAVALANGREFLECTMETHOD_CONSTANTPOOLNAME), this :: getJavaLangReflectMethod);
+		t.put(new String(ConstantPool.JavaUtilIteratorConstantPoolName), this :: getJavaUtilIterator);
+		t.put(new String(ConstantPool.JavaLangEnumConstantPoolName), this :: getJavaLangEnum);
+		t.put(new String(ConstantPool.JavaLangObjectConstantPoolName), this :: getJavaLangObject);
+		return this.commonTypeBindings = t;
 	}
 }

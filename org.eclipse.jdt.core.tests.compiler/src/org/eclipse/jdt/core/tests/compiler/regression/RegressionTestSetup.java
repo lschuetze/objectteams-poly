@@ -31,6 +31,7 @@ public class RegressionTestSetup extends CompilerTestSetup {
 		super(complianceLevel);
 	}
 
+	@Override
 	protected void setUp() {
 		if (this.javaClassLib == null) {
 			// Create name environment
@@ -38,6 +39,7 @@ public class RegressionTestSetup extends CompilerTestSetup {
 		}
 		super.setUp();
 	}
+	@Override
 	protected void tearDown() {
 		this.verifier.shutDown();
 	}

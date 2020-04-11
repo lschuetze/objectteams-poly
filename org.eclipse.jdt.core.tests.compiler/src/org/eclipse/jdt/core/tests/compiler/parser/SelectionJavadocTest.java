@@ -126,6 +126,7 @@ public class SelectionJavadocTest extends AbstractSelectionTest {
 			assertEquals("Invalid selection node", expected, actual);
 		}
 	}
+	@Override
 	protected void setUp() throws Exception {
 		super.setUp();
 		this.unit = null;
@@ -176,6 +177,7 @@ public class SelectionJavadocTest extends AbstractSelectionTest {
 		return unitDecl.compilationResult();
 	}
 
+	@Override
 	protected Map getCompilerOptions() {
 	    Map optionsMap = super.getCompilerOptions();
 		optionsMap.put(CompilerOptions.OPTION_DocCommentSupport, CompilerOptions.ENABLED);

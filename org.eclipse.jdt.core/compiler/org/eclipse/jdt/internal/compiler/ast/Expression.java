@@ -378,11 +378,21 @@ public FlowInfo analyseCode(BlockScope currentScope, FlowContext flowContext, Fl
 }
 
 /**
+ * Back-propagation of flow info: before analysing a branch where a given condition is known to hold true/false respectively,
+ * ask the condition to contribute its information to the given flowInfo.
+ * @param flowInfo the info to be used for analysing the branch
+ * @param result condition result that would cause entering the branch
+ */
+protected void updateFlowOnBooleanResult(FlowInfo flowInfo, boolean result) {
+	// nop
+}
+
+/**
  * Returns false if cast is not legal.
  */
-public final boolean checkCastTypesCompatibility(Scope scope, TypeBinding castType, TypeBinding expressionType, Expression expression) {
+public final boolean checkCastTypesCompatibility(Scope scope, TypeBinding castType, TypeBinding expressionType, Expression expression, boolean useAutoBoxing) {
 //{ObjectTeams: implement as wrapper delegating to version with new signature:
-	return checkCastTypesCompatibility(scope, castType, expressionType, expression, false);
+	return checkCastTypesCompatibility(scope, castType, expressionType, expression, useAutoBoxing, false);
 }
 
 public final boolean checkCastTypesCompatibility(
@@ -390,6 +400,7 @@ public final boolean checkCastTypesCompatibility(
 	TypeBinding castType,
 	TypeBinding expressionType,
 	Expression  expression,
+	boolean     useAutoBoxing,
 	boolean     inArrayRecursion) // new parameter
 {
 // SH}
@@ -412,6 +423,7 @@ public final boolean checkCastTypesCompatibility(
 	// like constant propagation
 	boolean use15specifics = scope.compilerOptions().sourceLevel >= ClassFileConstants.JDK1_5;
 	boolean use17specifics = scope.compilerOptions().sourceLevel >= ClassFileConstants.JDK1_7;
+	useAutoBoxing &= use15specifics;
 	if (castType.isBaseType()) {
 		if (expressionType.isBaseType()) {
 			if (TypeBinding.equalsEquals(expressionType, castType)) {
@@ -434,18 +446,18 @@ public final boolean checkCastTypesCompatibility(
 				return true;
 
 			}
-		} else if (use17specifics && castType.isPrimitiveType() && expressionType instanceof ReferenceBinding &&
-				!expressionType.isBoxedPrimitiveType() && checkCastTypesCompatibility(scope, scope.boxing(castType), expressionType, expression)) {
+		} else if (useAutoBoxing && use17specifics && castType.isPrimitiveType() && expressionType instanceof ReferenceBinding &&
+				!expressionType.isBoxedPrimitiveType() && checkCastTypesCompatibility(scope, scope.boxing(castType), expressionType, expression, useAutoBoxing)) {
 			// cast from any reference type (other than boxing types) to base type allowed from 1.7, see JLS $5.5
 			// by our own interpretation (in accordance with javac) we reject arays, though.
 			return true;
-		} else if (use15specifics
+		} else if (useAutoBoxing
 							&& scope.environment().computeBoxingType(expressionType).isCompatibleWith(castType)) { // unboxing - only widening match is allowed
 			tagAsUnnecessaryCast(scope, castType);
 			return true;
 		}
 		return false;
-	} else if (use15specifics
+	} else if (useAutoBoxing
 						&& expressionType.isBaseType()
 						&& scope.environment().computeBoxingType(expressionType).isCompatibleWith(castType)) { // boxing - only widening match is allowed
 		tagAsUnnecessaryCast(scope, castType);
@@ -455,7 +467,7 @@ public final boolean checkCastTypesCompatibility(
 	if (castType.isIntersectionType18()) {
 		ReferenceBinding [] intersectingTypes = castType.getIntersectingTypes();
 		for (int i = 0, length = intersectingTypes.length; i < length; i++) {
-			if (!checkCastTypesCompatibility(scope, intersectingTypes[i], expressionType, expression))
+			if (!checkCastTypesCompatibility(scope, intersectingTypes[i], expressionType, expression, useAutoBoxing))
 				return false;
 		}
 		return true;
@@ -488,7 +500,7 @@ public final boolean checkCastTypesCompatibility(
 						return false;
 					}
 					// recurse on array type elements
-					return checkCastTypesCompatibility(scope, castElementType, exprElementType, expression
+					return checkCastTypesCompatibility(scope, castElementType, exprElementType, expression, useAutoBoxing
 //{ObjectTeams: new parameter
 							, true/*inArrayRecursion*/);
 // SH}
@@ -500,7 +512,7 @@ public final boolean checkCastTypesCompatibility(
 						checkUnsafeCast(scope, castType, expressionType, null /*no match*/, true);
 					}
 					for (TypeBinding bound : ((TypeVariableBinding) castType).allUpperBounds()) {
-						if (!checkCastTypesCompatibility(scope, bound, expressionType, expression))
+						if (!checkCastTypesCompatibility(scope, bound, expressionType, expression, useAutoBoxing))
 							return false;
 					}
 					return true;
@@ -527,12 +539,12 @@ public final boolean checkCastTypesCompatibility(
 				if (castType instanceof TypeVariableBinding) {
 					// prefer iterating over required types, not provides
 					for (TypeBinding bound : ((TypeVariableBinding)castType).allUpperBounds()) {
-						if (!checkCastTypesCompatibility(scope, bound, expressionType, expression))
+						if (!checkCastTypesCompatibility(scope, bound, expressionType, expression, useAutoBoxing))
 							return false;
 					}
 				} else {
 					for (TypeBinding bound : ((TypeVariableBinding)expressionType).allUpperBounds()) {
-						if (!checkCastTypesCompatibility(scope, castType, bound, expression))
+						if (!checkCastTypesCompatibility(scope, castType, bound, expression, useAutoBoxing))
 							return false;
 					}
 				}
@@ -549,11 +561,11 @@ public final boolean checkCastTypesCompatibility(
 			TypeBinding bound = ((WildcardBinding)expressionType).bound;
 			if (bound == null) bound = scope.getJavaLangObject();
 			// recursively on the type variable upper bound
-			return checkCastTypesCompatibility(scope, castType, bound, expression);
+			return checkCastTypesCompatibility(scope, castType, bound, expression, useAutoBoxing);
 		case Binding.INTERSECTION_TYPE18:
 			ReferenceBinding [] intersectingTypes = expressionType.getIntersectingTypes();
 			for (int i = 0, length = intersectingTypes.length; i < length; i++) {
-				if (checkCastTypesCompatibility(scope, castType, intersectingTypes[i], expression))
+				if (checkCastTypesCompatibility(scope, castType, intersectingTypes[i], expression, useAutoBoxing))
 					return true;
 			}
 			return false;
@@ -579,7 +591,7 @@ public final boolean checkCastTypesCompatibility(
 						}
 						// recursively on the type variable upper bounds
 						for (TypeBinding upperBound : ((TypeVariableBinding)castType).allUpperBounds()) {
-							if (!checkCastTypesCompatibility(scope, upperBound, expressionType, expression))
+							if (!checkCastTypesCompatibility(scope, upperBound, expressionType, expression, useAutoBoxing))
 								return false;
 						}
 						return true;
@@ -691,7 +703,7 @@ public final boolean checkCastTypesCompatibility(
 						}
 						// recursively on the type variable upper bounds
 						for (TypeBinding upperBound : ((TypeVariableBinding)castType).allUpperBounds()) {
-							if (!checkCastTypesCompatibility(scope, upperBound, expressionType, expression))
+							if (!checkCastTypesCompatibility(scope, upperBound, expressionType, expression, useAutoBoxing))
 								return false;
 						}
 						return true;

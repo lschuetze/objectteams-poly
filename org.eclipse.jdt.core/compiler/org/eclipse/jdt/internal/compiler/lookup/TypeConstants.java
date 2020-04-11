@@ -158,6 +158,7 @@ public interface TypeConstants {
 	char[][] JAVA_LANG_EXCEPTION = {JAVA, LANG, "Exception".toCharArray()}; //$NON-NLS-1$
 	char[][] JAVA_LANG_ERROR = {JAVA, LANG, "Error".toCharArray()}; //$NON-NLS-1$
 	char[][] JAVA_LANG_ILLEGALARGUMENTEXCEPTION = {JAVA, LANG, "IllegalArgumentException".toCharArray()}; //$NON-NLS-1$
+	char[][] JAVA_LANG_INCOMPATIBLECLASSCHANGEERROR = {JAVA, LANG, "IncompatibleClassChangeError".toCharArray()}; //$NON-NLS-1$
 	char[][] JAVA_LANG_ITERABLE = {JAVA, LANG, "Iterable".toCharArray()}; //$NON-NLS-1$
 	char[][] JAVA_LANG_NOCLASSDEFERROR = {JAVA, LANG, "NoClassDefError".toCharArray()}; //$NON-NLS-1$
 	char[][] JAVA_LANG_OBJECT = {JAVA, LANG, OBJECT};
@@ -392,6 +393,13 @@ public interface TypeConstants {
 	char[][] COM_GOOGLE_INJECT_INJECT = new char[][] {COM, GOOGLE, INJECT_PACKAGE, INJECT_TYPE };
 	//    detail for the above:
 	char[] OPTIONAL = "optional".toCharArray(); //$NON-NLS-1$
+
+	// utils that ensure argument is nonnull if result is true
+	// java.lang.Class:
+	char[] IS_INSTANCE = "isInstance".toCharArray(); //$NON-NLS-1$
+	// java.lang.Objects:
+	char[] NON_NULL = "nonNull".toCharArray();   //$NON-NLS-1$
+	char[] IS_NULL = "isNull".toCharArray();   //$NON-NLS-1$
 
 	// well-known methods with "dangerous" signatures:
 	char[][] JAVA_UTIL_MAP = new char[][] { JAVA, UTIL, "Map".toCharArray() }; //$NON-NLS-1$

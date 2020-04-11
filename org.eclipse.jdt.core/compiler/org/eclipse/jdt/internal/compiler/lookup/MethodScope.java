@@ -1,5 +1,5 @@
 /*******************************************************************************
- *  * Copyright (c) 2000, 2019 IBM Corporation and others.
+ *  * Copyright (c) 2000, 2020 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -76,7 +76,9 @@ public class MethodScope extends BlockScope {
 	// note that #initializedField can be null AND lastVisibleFieldID >= 0, when processing instance field initializers.
 
 	// flow analysis
-	public int analysisIndex; // for setting flow-analysis id
+	/* By specifying {@code -Djdt.flow.test.extra=true} tests can push all flow analysis into the extra bits of UnconditionalFlowInfo. */
+	private static int baseAnalysisIndex = 0;
+	public int analysisIndex = baseAnalysisIndex; // for setting flow-analysis id
 	public boolean isPropagatingInnerClassEmulation;
 
 	// for local variables table attributes
@@ -89,6 +91,13 @@ public class MethodScope extends BlockScope {
 
 	// remember suppressed warning re missing 'default:' to give hints on possibly related flow problems
 	public boolean hasMissingSwitchDefault; // TODO(stephan): combine flags to a bitset?
+
+	static {
+		if (Boolean.getBoolean("jdt.flow.test.extra")) { //$NON-NLS-1$
+			baseAnalysisIndex = 64;
+			System.out.println("JDT/Core testing with -Djdt.flow.test.extra=true"); //$NON-NLS-1$
+		}
+	}
 
 public MethodScope(Scope parent, ReferenceContext context, boolean isStatic) {
 	super(METHOD_SCOPE, parent);

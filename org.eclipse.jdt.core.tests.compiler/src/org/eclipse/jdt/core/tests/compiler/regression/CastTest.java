@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2003, 2019 IBM Corporation and others.
+ * Copyright (c) 2003, 2020 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -33,6 +33,7 @@ public class CastTest extends AbstractRegressionTest {
 public CastTest(String name) {
 	super(name);
 }
+@Override
 protected Map getCompilerOptions() {
 	Map defaultOptions = super.getCompilerOptions();
 	defaultOptions.put(CompilerOptions.OPTION_ReportUnnecessaryTypeCheck, CompilerOptions.WARNING);
@@ -1796,6 +1797,79 @@ public void test047() {
 		"----------\n"
 	);
 }
+public void testBug418795() {
+	if (this.complianceLevel < ClassFileConstants.JDK1_5) return; // uses autoboxing
+	Map options = getCompilerOptions();
+	options.put(CompilerOptions.OPTION_ReportUnnecessaryTypeCheck, CompilerOptions.ERROR);
+	runConformTest(
+		new String[] {
+			"X.java",
+			"public class X {\n" +
+			"	void foo() {\n" +
+			"		 Integer smallNumber = 42;\n" +
+			"        Integer largeNumber = 500;\n" +
+			"\n" +
+			"        // this prints:\n" +
+			"        if (smallNumber == 42)\n" +
+			"            System.out.println(\"42\");\n" +
+			"\n" +
+			"        // this prints:\n" +
+			"        if (largeNumber == 500)\n" +
+			"            System.out.println(\"500\");\n" +
+			"\n" +
+			"        // this prints:\n" +
+			"        if (smallNumber == (Object) 42)\n" +
+			"            System.out.println(\"42\");\n" +
+			"\n" +
+			"        // this doesn't print:\n" +
+			"        if (largeNumber == (Object) 500)\n" +
+			"            System.out.println(\"500\");\n" +
+			"" +
+			"	}\n" +
+			"}\n"
+		},
+		options);
+}
+public void testBug329437() {
+	if (this.complianceLevel < ClassFileConstants.JDK1_5) return; // uses autoboxing
+	Map options = getCompilerOptions();
+	options.put(CompilerOptions.OPTION_ReportUnnecessaryTypeCheck, CompilerOptions.ERROR);
+	runConformTest(
+		new String[] {
+			"X.java",
+			"public class X {\n" +
+			"	public static void main(String... args) {\n" +
+			"		Integer a = Integer.valueOf(10);\n" +
+			"		Integer b = Integer.valueOf(10);\n" +
+			"		boolean abEqual = (int)a == (int)b;\n" +
+			"		System.out.println(abEqual);\n" +
+			"	}\n" +
+			"}\n"
+		},
+		options);
+}
+public void testBug521778() {
+	Map options = getCompilerOptions();
+	options.put(CompilerOptions.OPTION_ReportUnnecessaryTypeCheck, CompilerOptions.ERROR);
+	runConformTest(
+		new String[] {
+			"X.java",
+			"public class X {\n" +
+			"	static int intThruFloat(int x) { return (int)(float)x; }\n" +
+			"	static long longThruFloat(long x) { return (long)(float)x; }\n" +
+			"	static long longThruDouble(long x) { return (long)(double)x; }\n" +
+			"	public static void main(String[] args) {\n" +
+			"		System.out.println(intThruFloat(2147483646));\n" +
+			"		System.out.println(longThruFloat(-9223372036854775806L));\n" +
+			"		System.out.print(longThruDouble(-9223372036854775807L));\n" +
+			"	}\n" +
+			"}\n"
+		},
+		"2147483647\n" + 			// not the
+		"-9223372036854775808\n" +  // same as
+		"-9223372036854775808",		// the input
+		options);
+}
 // https://bugs.eclipse.org/bugs/show_bug.cgi?id=302919
 public void test048() {
 	CompilerOptions options = new CompilerOptions(getCompilerOptions());
@@ -3418,6 +3492,42 @@ public void test548647a() {
 			"	if ((Number) getK() instanceof Integer) return;\n" +
 			"	    ^^^^^^^^^^^^^^^\n" +
 			"Unnecessary cast from Number to Number\n" +
+			"----------\n";
+	runner.runWarningTest();
+}
+//https://bugs.eclipse.org/bugs/show_bug.cgi?id=472466 [compiler] bogus warning "unnecessary cast"
+public void test472466() {
+	if (this.complianceLevel < ClassFileConstants.JDK1_5)
+		return;
+	Runner runner = new Runner();
+	runner.customOptions = getCompilerOptions();
+	runner.customOptions.put(CompilerOptions.OPTION_ReportUnnecessaryTypeCheck, CompilerOptions.WARNING);
+	runner.testFiles =
+		new String[] {
+			"X.java",
+			"public class X {\n" +
+			"	public int foo() {\n" +
+			"		Object x = 4;\n" +
+			"		Integer y = 5;\n" +
+			"		if (x == (Object)50) return -1;\n" +
+			"		if (x == (Integer)50) return -2;\n" +
+			"		if ((Integer)x == (Integer)50) return -3;\n" +
+			"		if (y == 7) return -4;\n" +
+			"		if ((Integer)y == 9) return -5;\n" +
+			"		if ((Object)50 == x) return -6;\n" +
+			"		if ((Integer)50 == x) return -7;\n" +
+			"		if ((Integer)50 == (Integer)x) return -8;\n" +
+			"		if (7 == y) return -9;\n" +
+			"		return 0;\n" +
+			"	}\n" +
+			"}\n"
+		};
+	runner.expectedCompilerLog =
+			"----------\n" +
+			"1. WARNING in X.java (at line 9)\n" +
+			"	if ((Integer)y == 9) return -5;\n" +
+			"	    ^^^^^^^^^^\n" +
+			"Unnecessary cast from Integer to Integer\n" +
 			"----------\n";
 	runner.runWarningTest();
 }

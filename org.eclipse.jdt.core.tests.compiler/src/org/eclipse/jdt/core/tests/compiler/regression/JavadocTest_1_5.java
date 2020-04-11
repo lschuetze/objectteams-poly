@@ -51,6 +51,7 @@ public class JavadocTest_1_5 extends JavadocTest {
 		return buildMinimalComplianceTestSuite(testClass(), F_1_5);
 	}
 
+	@Override
 	protected Map getCompilerOptions() {
 		Map options = super.getCompilerOptions();
 		options.put(CompilerOptions.OPTION_DocCommentSupport, this.docCommentSupport);
@@ -83,6 +84,7 @@ public class JavadocTest_1_5 extends JavadocTest {
 	/* (non-Javadoc)
 	 * @see junit.framework.TestCase#setUp()
 	 */
+	@Override
 	protected void setUp() throws Exception {
 		super.setUp();
 		this.docCommentSupport = CompilerOptions.ENABLED;

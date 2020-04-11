@@ -95,6 +95,7 @@ public class BatchCompilerTest extends AbstractBatchCompilerTest {
 			this.expected = expected;
 			this.normalizer = normalizer;
 		}
+		@Override
 		boolean match(String effective) {
 			if (this.expected == null) {
 				return effective == null;
@@ -104,6 +105,7 @@ public class BatchCompilerTest extends AbstractBatchCompilerTest {
 			}
 			return this.expected.equals(this.normalizer.normalized(effective));
 		}
+		@Override
 		String expected() {
 			return this.expected;
 		}
@@ -113,18 +115,22 @@ public class BatchCompilerTest extends AbstractBatchCompilerTest {
 		SubstringMatcher(String substring) {
 			this.substring = substring;
 		}
+		@Override
 		boolean match(String effective) {
 			effective = outputDirNormalizer.normalized(effective);
 			return effective.indexOf(this.substring) != -1;
 		}
+		@Override
 		String expected() {
 			return "*" + this.substring + "*";
 		}
 	}
 	static final Matcher EMPTY_STRING_MATCHER = new Matcher() {
+		@Override
 		String expected() {
 			return org.eclipse.jdt.internal.compiler.util.Util.EMPTY_STRING;
 		}
+		@Override
 		boolean match(String effective) {
 			return effective != null && effective.length() == 0;
 		}
@@ -143,6 +149,7 @@ public class BatchCompilerTest extends AbstractBatchCompilerTest {
 		XMLClasspathsSectionNormalizer(Normalizer nextInChain) {
 			super(nextInChain);
 		}
+		@Override
 		String normalized(String originalValue) {
 			String result;
 			StringBuffer normalizedValueBuffer = new StringBuffer(originalValue);
@@ -195,6 +202,7 @@ public class BatchCompilerTest extends AbstractBatchCompilerTest {
 			this.number = linesNumber >= 0 ? linesNumber : 0;
 		}
 
+		@Override
 		String normalized(String originalValue) {
 			String result;
 			if (this.number == 0 || originalValue.length() == 0)
@@ -9479,6 +9487,7 @@ public void test254_progress() {
 // compiler progress test (cancellation)
 public void test255_progress() {
 	TestCompilationProgress progress = new TestCompilationProgress() {
+		@Override
 		public void worked(int workIncrement, int remainingWork) {
 			if (remainingWork == 1)
 				this.isCanceled = true;

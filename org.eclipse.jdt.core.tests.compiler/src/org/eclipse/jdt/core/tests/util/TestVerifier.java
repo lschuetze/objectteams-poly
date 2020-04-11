@@ -130,6 +130,7 @@ public void execute(String className, String[] classpaths) {
 
 	launchAndRun(className, classpaths, null, null);
 }
+@Override
 protected void finalize() throws Throwable {
 	shutDown();
 }
@@ -430,6 +431,7 @@ private void launchAndRun(String className, String[] classpaths, String[] progra
 		this.vm = launcher.launch();
 		final InputStream input = this.vm.getInputStream();
 		outputThread = new Thread(new Runnable() {
+			@Override
 			public void run() {
 				try {
 					int c = input.read();
@@ -443,6 +445,7 @@ private void launchAndRun(String className, String[] classpaths, String[] progra
 		});
 		final InputStream errorStream = this.vm.getErrorStream();
 		errorThread = new Thread(new Runnable() {
+			@Override
 			public void run() {
 				try {
 					int c = errorStream.read();
@@ -521,6 +524,7 @@ private void launchVerifyTestsIfNeeded(String[] classpaths, String[] vmArguments
 			this.vm = launcher.launch();
 			final InputStream input = this.vm.getInputStream();
 			Thread outputThread = new Thread(new Runnable() {
+				@Override
 				public void run() {
 					try {
 						int c = input.read();
@@ -534,6 +538,7 @@ private void launchVerifyTestsIfNeeded(String[] classpaths, String[] vmArguments
 			});
 			final InputStream errorStream = this.vm.getErrorStream();
 			Thread errorThread = new Thread(new Runnable() {
+				@Override
 				public void run() {
 					try {
 						int c = errorStream.read();

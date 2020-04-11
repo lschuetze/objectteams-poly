@@ -16,6 +16,7 @@ package org.eclipse.jdt.core.tests.compiler.regression;
 import java.io.File;
 import java.util.Map;
 
+import org.eclipse.jdt.core.tests.compiler.regression.AbstractRegressionTest.JavacTestOptions.EclipseJustification;
 import org.eclipse.jdt.core.util.ClassFileBytesDisassembler;
 import org.eclipse.jdt.internal.compiler.impl.CompilerOptions;
 
@@ -685,19 +686,20 @@ public class NegativeTypeAnnotationTest extends AbstractRegressionTest {
 				"----------\n");
 	}
 	public void test032() throws Exception {
-		// was negative prior to https://bugs.openjdk.java.net/browse/JDK-8231435
-		this.runConformTest(
+		Runner runner = new Runner();
+		runner.testFiles =
 				new String[] {
 					"Marker.java",
 					"@interface Marker {}",
 					"X.java",
 					"public class X<@Marker T> {}",
-				},
-				"");
+				};
+		runner.javacTestOptions = JavacTestOptions.JavacHasABug.JavacBug8231436;
+		runner.runConformTest();
 	}
 	public void test033() throws Exception {
-		// was negative prior to https://bugs.openjdk.java.net/browse/JDK-8231435
-		this.runConformTest(
+		Runner runner = new Runner();
+		runner.testFiles =
 				new String[] {
 					"Marker.java",
 					"@interface Marker {}",
@@ -705,8 +707,9 @@ public class NegativeTypeAnnotationTest extends AbstractRegressionTest {
 					"public class Y {}",
 					"X.java",
 					"public class X extends @Marker Y {}",
-				},
-				"");
+				};
+		runner.javacTestOptions = JavacTestOptions.JavacHasABug.JavacBug8231436;
+		runner.runConformTest();
 	}
 	// check locations
 	public void test034() throws Exception {
@@ -877,8 +880,8 @@ public class NegativeTypeAnnotationTest extends AbstractRegressionTest {
 			"----------\n");
 	}
 	public void test037() {
-		// was negative prior to https://bugs.openjdk.java.net/browse/JDK-8231435
-		this.runConformTest(
+		Runner runner = new Runner();
+		runner.testFiles =
 				new String[] {
 					"X.java",
 					"@interface Marker {}\n" +
@@ -888,8 +891,9 @@ public class NegativeTypeAnnotationTest extends AbstractRegressionTest {
 					"		return null;\n" +
 					"	}\n" +
 					"}\n",
-				},
-				"");
+				};
+		runner.javacTestOptions = JavacTestOptions.JavacHasABug.JavacBug8231436;
+		runner.runConformTest();
 	}
 	// https://bugs.eclipse.org/bugs/show_bug.cgi?id=383950
 	// [1.8][compiler] Type annotations must have target type meta annotation TYPE_USE
@@ -2149,8 +2153,8 @@ public class NegativeTypeAnnotationTest extends AbstractRegressionTest {
 				"----------\n");
 	}
 	public void test065() throws Exception {
-		// was negative prior to https://bugs.openjdk.java.net/browse/JDK-8231435
-		this.runConformTest(
+		Runner runner = new Runner();
+		runner.testFiles =
 				new String[] {
 					"X.java",
 					"public class X {\n" +
@@ -2158,8 +2162,9 @@ public class NegativeTypeAnnotationTest extends AbstractRegressionTest {
 					"}\n" +
 					"@interface Marker {\n" +
 					"}\n"
-				},
-				"");
+				};
+		runner.javacTestOptions = JavacTestOptions.JavacHasABug.JavacBug8231436;
+		runner.runConformTest();
 	}
 	public void test066() throws Exception {
 		this.runNegativeTest(
@@ -2197,8 +2202,8 @@ public class NegativeTypeAnnotationTest extends AbstractRegressionTest {
 				"----------\n");
 	}
 	public void test068() throws Exception {
-		// was negative prior to https://bugs.openjdk.java.net/browse/JDK-8231435
-		this.runConformTest(
+		Runner runner = new Runner();
+		runner.testFiles =
 				new String[] {
 					"X.java",
 					"public class X {\n" +
@@ -2206,8 +2211,9 @@ public class NegativeTypeAnnotationTest extends AbstractRegressionTest {
 					"}\n" +
 					"@interface Marker {\n" +
 					"}\n"
-				},
-				"");
+				};
+		runner.javacTestOptions = JavacTestOptions.JavacHasABug.JavacBug8231436;
+		runner.runConformTest();
 	}
 	// https://bugs.eclipse.org/bugs/show_bug.cgi?id=385293
 	public void test069() throws Exception {
@@ -3559,7 +3565,8 @@ public class NegativeTypeAnnotationTest extends AbstractRegressionTest {
 	// This test case is similar to test415308a. SimpleTypes on which annotations are applied are modified to array
 	// types.
 	public void test415308b2() {
-		this.runNegativeTest(
+		Runner runner = new Runner();
+		runner.testFiles =
 				new String[] {
 						"X.java",
 						"import java.lang.annotation.ElementType;\n" +
@@ -3589,13 +3596,16 @@ public class NegativeTypeAnnotationTest extends AbstractRegressionTest {
 						"		return z;\n" +
 						"	}\n" +
 						"}\n"
-				},
+				};
+		runner.expectedCompilerLog =
 				"----------\n" +
 				"1. ERROR in X.java (at line 16)\n" +
 				"	@Illegal Y.YY.Z[] z = null;\n" +
 				"	^^^^^^^^\n" +
 				"Type annotations are not allowed on type names used to access static members\n" +
-				"----------\n");
+				"----------\n";
+		runner.javacTestOptions = EclipseJustification.EclipseBug561549;
+		runner.runNegativeTest();
 	}
 	// [1.8][compiler] Illegal type annotations not rejected (https://bugs.eclipse.org/bugs/show_bug.cgi?id=415308)
 	// The test case is to validate that we report errors for only type annotations and nothing else in case of
@@ -3768,7 +3778,8 @@ public class NegativeTypeAnnotationTest extends AbstractRegressionTest {
 	// [1.8][compiler] Illegal type annotations not rejected (https://bugs.eclipse.org/bugs/show_bug.cgi?id=415308)
 	// The test case is a array version of test415308f.
 	public void test415308f2() {
-		this.runNegativeTest(
+		Runner runner = new Runner();
+		runner.testFiles =
 				new String[] {
 						"X.java",
 						"import java.lang.annotation.ElementType;\n" +
@@ -3785,13 +3796,16 @@ public class NegativeTypeAnnotationTest extends AbstractRegressionTest {
 						"class X {\n" +
 						"   public @Illegal Y.Z[] foo() { return null;}\n" +
 						"}\n"
-				},
+				};
+		runner.expectedCompilerLog =
 				"----------\n" +
 				"1. ERROR in X.java (at line 13)\n" +
 				"	public @Illegal Y.Z[] foo() { return null;}\n" +
 				"	       ^^^^^^^^\n" +
 				"Type annotations are not allowed on type names used to access static members\n" +
-				"----------\n");
+				"----------\n";
+		runner.javacTestOptions = EclipseJustification.EclipseBug561549;
+		runner.runNegativeTest();
 	}
 	// [1.8][compiler] Illegal type annotations not rejected (https://bugs.eclipse.org/bugs/show_bug.cgi?id=415308)
 	// The test case is used to test enums with type annotations.

@@ -1342,6 +1342,7 @@ public void _test011_problem_categories() {
 		StringBuffer correctResult = new StringBuffer(70000);
 		Field[] fields = (iProblemClass = IProblem.class).getFields();
 		Arrays.sort(fields, new Comparator() {
+			@Override
 			public int compare(Object o1, Object o2) {
 				Field field1 = (Field) o1;
 				Field field2 = (Field) o2;
@@ -2991,6 +2992,7 @@ public void test012_compiler_problems_tuning() {
 			StringBuffer failures = new StringBuffer();
 			StringBuffer correctResult = new StringBuffer(70000);
 			Arrays.sort(fields, new Comparator() {
+				@Override
 				public int compare(Object o1, Object o2) {
 					Field field1 = (Field) o1;
 					Field field2 = (Field) o2;

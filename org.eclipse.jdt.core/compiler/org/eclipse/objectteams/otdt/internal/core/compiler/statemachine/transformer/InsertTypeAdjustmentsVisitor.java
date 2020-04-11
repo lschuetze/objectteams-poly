@@ -238,8 +238,8 @@ public class InsertTypeAdjustmentsVisitor extends ASTVisitor {
 
         Config oldConfig = Config.createOrResetConfig(this);
         try {
-	        if ((   eqExpr.checkCastTypesCompatibility(scope, leftType, rightType, null)
-	             || eqExpr.checkCastTypesCompatibility(scope, rightType, leftType, null)) // just recheck.
+	        if ((   eqExpr.checkCastTypesCompatibility(scope, leftType, rightType, null, true)
+	             || eqExpr.checkCastTypesCompatibility(scope, rightType, leftType, null, true)) // just recheck.
 	            && Config.getLoweringRequired())
 	            scope.problemReporter().illegalImplicitLower(
 	                    eqExpr, leftType, rightType);
@@ -255,7 +255,7 @@ public class InsertTypeAdjustmentsVisitor extends ASTVisitor {
 
         Config oldConfig = Config.createOrResetConfig(this);
         try {
-	        ioExpr.checkCastTypesCompatibility(scope, leftType, rightType, ioExpr.expression);
+	        ioExpr.checkCastTypesCompatibility(scope, leftType, rightType, ioExpr.expression, true);
 	        if (Config.getLoweringRequired())
 	            scope.problemReporter().illegalImplicitLower(
 	                    ioExpr, leftType, rightType);
@@ -274,7 +274,7 @@ public class InsertTypeAdjustmentsVisitor extends ASTVisitor {
 
         Config oldConfig = Config.createOrResetConfig(this);
         try {
-	        castExpr.checkCastTypesCompatibility(scope, leftType, rightType, castExpr.expression); // just recheck.
+	        castExpr.checkCastTypesCompatibility(scope, leftType, rightType, castExpr.expression, true); // just recheck.
 	        if (Config.getLoweringRequired())
 	            scope.problemReporter().illegalImplicitLower(
 	                    castExpr, leftType, rightType);

@@ -68,6 +68,7 @@ public static Test suite() {
 /* (non-Javadoc)
  * @see org.eclipse.test.performance.PerformanceTestCase#setUp()
  */
+@Override
 protected void setUp() throws Exception {
 	super.setUp();
 	this.sourceLevel = null;
@@ -92,6 +93,7 @@ protected void assertCompletionNodeResult(String source, String expected) {
 		actual
 	);
 }
+@Override
 protected Map getCompilerOptions() {
 	Map options = super.getCompilerOptions();
 	if (this.sourceLevel == null) {

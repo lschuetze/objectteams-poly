@@ -141,6 +141,11 @@ public class FakedTrackingVariable extends LocalDeclaration {
 			flowInfo.markNullStatus(this.binding, nullStatus); // mark that this flow has seen the resource
 	}
 
+	private void attachTo(LocalVariableBinding local) {
+		local.closeTracker = this;
+		this.originalBinding = local;
+	}
+
 	@Override
 	public void generateCode(BlockScope currentScope, CodeStream codeStream)
 	{ /* NOP - this variable is completely dummy, ie. for analysis only. */ }
@@ -582,7 +587,7 @@ public class FakedTrackingVariable extends LocalDeclaration {
 							break rhsAnalyis;
 						}
 					}
-					local.closeTracker = rhsTrackVar;				//		d.: conflicting LHS and RHS, proceed with recordErrorLocation below
+					rhsTrackVar.attachTo(local);					//		d.: conflicting LHS and RHS, proceed with recordErrorLocation below
 				}
 				// keep close-status of RHS unchanged across this assignment
 			} else if (previousTracker != null) {					// 2. re-use tracking variable from the LHS?
@@ -608,7 +613,7 @@ public class FakedTrackingVariable extends LocalDeclaration {
 			} else {												// 3. no re-use, create a fresh tracking variable:
 				rhsTrackVar = analyseCloseableExpression(flowInfo, flowContext, local, location, rhs, null);
 				if (rhsTrackVar != null) {
-					local.closeTracker = rhsTrackVar;
+					rhsTrackVar.attachTo(local);
 					// a fresh resource, mark as not-closed:
 					if ((rhsTrackVar.globalClosingState & (SHARED_WITH_OUTSIDE|OWNED_BY_OUTSIDE|FOREACH_ELEMENT_VAR)) == 0)
 						flowInfo.markAsDefinitelyNull(rhsTrackVar.binding);

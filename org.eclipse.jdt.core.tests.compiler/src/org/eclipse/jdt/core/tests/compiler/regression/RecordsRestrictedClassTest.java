@@ -2373,4 +2373,133 @@ public void testBug560893_007() {
 		"Cannot make a static reference to the non-static field nsi\n" +
 		"----------\n");
 }
+@SuppressWarnings({ "unchecked", "rawtypes" })
+public void testBug558718_001() {
+	Map options = getCompilerOptions();
+	options.put(CompilerOptions.OPTION_EnablePreviews, CompilerOptions.DISABLED);
+	this.runNegativeTest(
+	new String[] {
+			"X.java",
+			"record R() {}\n",
+		},
+		"----------\n" +
+		"1. ERROR in X.java (at line 1)\n" +
+		"	record R() {}\n" +
+		"	^^^^^^\n" +
+		"record is a preview feature and disabled by default. Use --enable-preview to enable\n" +
+		"----------\n",
+		null,
+		true,
+		options
+	);
+}
+@SuppressWarnings({ "unchecked", "rawtypes" })
+public void testBug558718_002() {
+	Map options = getCompilerOptions();
+	options.put(CompilerOptions.OPTION_Source, CompilerOptions.VERSION_13);
+	options.put(CompilerOptions.OPTION_EnablePreviews, CompilerOptions.DISABLED);
+	this.runNegativeTest(
+	new String[] {
+			"X.java",
+			"record R() {}\n",
+		},
+		"----------\n" + 
+		"1. ERROR in X.java (at line 1)\n" + 
+		"	record R() {}\n" + 
+		"	^^^^^^\n" + 
+		"The preview feature record is only available with source level 14 and above\n" +
+		"----------\n",
+		null,
+		true,
+		options
+	);
+}
+public void testBug561528_001() {
+	runConformTest(
+			new String[] {
+					"X.java",
+					"class X {\n"+
+					"  public static void main(String[] args){\n"+
+					"     System.out.println(0);\n" +
+					"  }\n"+
+					"}\n"+
+					"interface Node<N> {}\n\n"+
+					"record R <N extends Node<?>> (N value){\n"+
+					"}\n"
+			},
+		"0");
+}
+public void testBug561528_002() {
+	runConformTest(
+			new String[] {
+					"X.java",
+					"class X {\n"+
+					"  public static void main(String[] args){\n"+
+					"     System.out.println(0);\n" +
+					"  }\n"+
+					"}\n"+
+					"interface Node<N> {}\n\n"+
+					"record R <N extends Node<N>> (R<N> parent, N element){\n"+
+					"}\n"
+			},
+		"0");
+}
+public void testBug561528_003() {
+	runConformTest(
+			new String[] {
+					"X.java",
+					"class X {\n"+
+					"  public static void main(String[] args){\n"+
+					"     System.out.println(0);\n" +
+					"  }\n"+
+					"}\n"+
+					"interface Node<N> {}\n\n"+
+					"interface AB<N> {}\n\n"+
+					"record R <N extends Node<AB<N>>> (N value){\n"+
+					"}\n"
+			},
+		"0");
+}
+public void testBug561528_004() {
+	runConformTest(
+			new String[] {
+					"X.java",
+					"class X {\n"+
+					"  public static void main(String[] args){\n"+
+					"     System.out.println(0);\n" +
+					"  }\n"+
+					"}\n"+
+					"interface Node<N> {}\n\n"+
+					"interface AB<N> {}\n\n"+
+					"interface CD<N> {}\n\n"+
+					"record R <N extends Node<AB<CD<N>>>> (N value){\n"+
+					"}\n"
+			},
+		"0");
+}
+public void testBug561528_005() {
+	this.runNegativeTest(
+			new String[] {
+					"X.java",
+					"class X {\n"+
+					"  public static void main(String[] args){\n"+
+					"     System.out.println(0);\n" +
+					"  }\n"+
+					"}\n"+
+					"interface Node<N> {}\n\n"+
+					"interface AB<N> {}\n\n"+
+					"interface CD<N> {}\n\n"+
+					"record R <N extends Node<AB<CD<N>>>>> (N value){\n"+
+					"}\n"
+			},
+		"----------\n" +
+		"1. ERROR in X.java (at line 12)\n" +
+		"	record R <N extends Node<AB<CD<N>>>>> (N value){\n" +
+		"	                                ^^^\n" +
+		"Syntax error on token \">>>\", >> expected\n" +
+		"----------\n",
+		null,
+		true
+	);
+}
 }

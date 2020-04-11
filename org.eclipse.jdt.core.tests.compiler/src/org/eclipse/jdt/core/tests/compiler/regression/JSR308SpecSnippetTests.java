@@ -48,6 +48,7 @@ public class JSR308SpecSnippetTests extends AbstractRegressionTest {
 	}
 
 	// Enables the tests to run individually
+	@Override
 	protected Map getCompilerOptions() {
 		Map defaultOptions = super.getCompilerOptions();
 		defaultOptions.put(CompilerOptions.OPTION_Compliance, CompilerOptions.VERSION_1_8);
@@ -888,8 +889,8 @@ public class JSR308SpecSnippetTests extends AbstractRegressionTest {
 		checkDisassembledClassFile(OUTPUT_DIR + File.separator + "X$Y.class", "Y", expectedOutput, ClassFileBytesDisassembler.SYSTEM);
 	}
 	public void test018() throws Exception {
-		// was negative prior to https://bugs.openjdk.java.net/browse/JDK-8231435
-		this.runConformTest(
+		Runner runner = new Runner();
+		runner.testFiles =
 			new String[] {
 				"X.java",
 				"@interface Receiver {}\n" +
@@ -903,8 +904,9 @@ public class JSR308SpecSnippetTests extends AbstractRegressionTest {
 				"		 Y(@Receiver X X.this, boolean b) { }\n" +
 				"	}\n" +
 				"}\n",
-		},
-		"");
+			};
+		runner.javacTestOptions = JavacTestOptions.JavacHasABug.JavacBug8231436;
+		runner.runConformTest();
 	}
 	public void test019() throws Exception {
 		this.runConformTest(

@@ -1589,4 +1589,34 @@ public void testSubword_backtrackStartAndFail() {
 	int[] regions = SearchPattern.getMatchingRegions("listener", name, SearchPattern.R_SUBWORD_MATCH);
 	assertEquals("Unexpected matching regions", null, printRegions(name, regions));
 }
+public void testSubword_fieldPrefix() {
+	String name = "_field";
+	int[] regions = SearchPattern.getMatchingRegions("field", name, SearchPattern.R_SUBWORD_MATCH);
+	assertEquals("Unexpected matching regions", "_[field]", printRegions(name, regions));
+}
+public void testSubword_contentAssistFilter() {
+	String name = "substring(int beginIndex)";
+	int[] regions = SearchPattern.getMatchingRegions("index", name, SearchPattern.R_SUBWORD_MATCH);
+	assertEquals("Unexpected matching regions", null, printRegions(name, regions));
+}
+public void testSubword_caps_boundaries1() {
+	String name = "CASE_INSENSITIVE_ORDER";
+	int[] regions = SearchPattern.getMatchingRegions("ind", name, SearchPattern.R_SUBWORD_MATCH);
+	assertEquals("Unexpected matching regions", null, printRegions(name, regions));
+}
+public void testSubword_caps_boundaries2() {
+	String name = "CASE_INSENSITIVE_ORDER";
+	int[] regions = SearchPattern.getMatchingRegions("ini", name, SearchPattern.R_SUBWORD_MATCH);
+	assertEquals("Unexpected matching regions", null, printRegions(name, regions));
+}
+public void testSubword_caps_backtracking() {
+	String name = "LIST_LISTENER";
+	int[] regions = SearchPattern.getMatchingRegions("listener", name, SearchPattern.R_SUBWORD_MATCH);
+	assertEquals("Unexpected matching regions", "LIST_[LISTENER]", printRegions(name, regions));
+}
+public void testSubword_snakeCase() {
+	String name = "add_list_listener";
+	int[] regions = SearchPattern.getMatchingRegions("addlistener", name, SearchPattern.R_SUBWORD_MATCH);
+	assertEquals("Unexpected matching regions", "[add]_list_[listener]", printRegions(name, regions));
+}
 }

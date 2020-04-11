@@ -69,6 +69,7 @@ public TypeHierarchyTests(String name) {
 /* (non-Javadoc)
  * @see org.eclipse.jdt.core.tests.model.AbstractJavaModelTests#setUpSuite()
  */
+@Override
 public void setUpSuite() throws Exception {
 	super.setUpSuite();
 
@@ -188,6 +189,7 @@ public void setUpSuite() throws Exception {
 /* (non-Javadoc)
  * @see org.eclipse.jdt.core.tests.model.SuiteOfTestCases#tearDownSuite()
  */
+@Override
 public void tearDownSuite() throws Exception {
 	this.typeHierarchy = null;
 	deleteProject("TypeHierarchy");
@@ -680,6 +682,7 @@ public void testEfficiencyMultipleProjects() throws CoreException {
 		IType type = getCompilationUnit("/P1/X.java").getType("X");
 		class ProgressCounter extends TestProgressMonitor {
 			int count = 0;
+			@Override
 			public boolean isCanceled() {
 				this.count++;
 				return false;
@@ -1838,10 +1841,12 @@ public void testProgressWhileIndexing() throws CoreException, TimeOutException {
 		IType type = getCompilationUnit("/P/X210094.java").getType("X210094");
 		class ProgressCounter extends TestProgressMonitor {
 			int count = 0;
+			@Override
 			public void subTask(String name) {
 				if (this.count++ == 0)
 					job.resume();
 			}
+			@Override
 			public boolean isCanceled() {
 				return false;
 			}
@@ -2344,9 +2349,11 @@ public void testBug215841() throws JavaModelException, CoreException, Interrupte
 	final String linkedPath = "/TypeHierarchy/linked.jar";
 	class LocalProgressMonitor extends TestProgressMonitor {
 		int count = 0;
+		@Override
 		public boolean isCanceled() {
 	        return false;
         }
+		@Override
 		public void subTask(String name) {
 			if (name.indexOf("files to index") > 0 && name.indexOf(linkedPath) > 0) {
 	        	this.count++;

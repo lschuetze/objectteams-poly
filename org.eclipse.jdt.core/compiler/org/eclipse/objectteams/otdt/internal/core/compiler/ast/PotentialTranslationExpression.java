@@ -121,7 +121,8 @@ public abstract class PotentialTranslationExpression extends Expression  impleme
 		                            scope,
 		                            this.expectedType,
 		                            rawType,
-		                            this.expression);
+		                            this.expression,
+		                            true);
 		                    this.operator = "(convert to "+new String(this.expectedType.readableName())+")"; //$NON-NLS-1$ //$NON-NLS-2$
 		                    resultType = this.expectedType;
 		                }
